@@ -2,8 +2,8 @@
 
 void CEventHitByWaterCannon::InjectHooks()
 {
-    Install("CEventHitByWaterCannon", "Constructor", 0x4B1290, &CEventHitByWaterCannon::Constructor);
-    Install("CEventHitByWaterCannon", "AffectsPed_Reversed", 0x4B1330, &CEventHitByWaterCannon::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B1290);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1330);
 }
 
 CEventHitByWaterCannon::CEventHitByWaterCannon(CVector const& point, CVector const& moveSpeed)

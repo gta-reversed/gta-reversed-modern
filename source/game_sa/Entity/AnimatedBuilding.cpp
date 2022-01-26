@@ -2,9 +2,9 @@
 
 void CAnimatedBuilding::InjectHooks()
 {
-    Install("CAnimatedBuilding", "ProcessControl", 0x537A30, &CAnimatedBuilding::ProcessControl_Reversed);
-    Install("CAnimatedBuilding", "ProcessCollision", 0x537A40, &CAnimatedBuilding::ProcessCollision_Reversed);
-    Install("CAnimatedBuilding", "PreRender", 0x403F00, &CAnimatedBuilding::PreRender_Reversed);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x537A30);
+    RH_ScopedInstall(ProcessCollision_Reversed, 0x537A40);
+    RH_ScopedInstall(PreRender_Reversed, 0x403F00);
 }
 
 void CAnimatedBuilding::ProcessControl()

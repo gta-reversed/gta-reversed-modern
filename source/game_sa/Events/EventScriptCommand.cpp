@@ -6,14 +6,14 @@
 
 void CEventScriptCommand::InjectHooks()
 {
-    Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
-    Install("CEventScriptCommand", "GetEventType", 0x4B0A30, &CEventScriptCommand::GetEventType);
-    Install("CEventScriptCommand", "GetEventPriority", 0x4B0B20, &CEventScriptCommand::GetEventPriority);
-    Install("CEventScriptCommand", "Clone", 0x4B6490, &CEventScriptCommand::Clone);
-    Install("CEventScriptCommand", "AffectsPed", 0x4B0AF0, &CEventScriptCommand::AffectsPed);
-    Install("CEventScriptCommand", "TakesPriorityOver", 0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
-    Install("CEventScriptCommand", "IsValid", 0x4B0AB0, &CEventScriptCommand::IsValid);
-    Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
+    RH_ScopedInstall(Constructor, 0x4B0A00);
+    RH_ScopedInstall(GetEventType, 0x4B0A30);
+    RH_ScopedInstall(GetEventPriority, 0x4B0B20);
+    RH_ScopedInstall(Clone, 0x4B6490);
+    RH_ScopedInstall(AffectsPed, 0x4B0AF0);
+    RH_ScopedInstall(TakesPriorityOver, 0x4B0BA0);
+    RH_ScopedInstall(IsValid, 0x4B0AB0);
+    RH_ScopedInstall(CloneScriptTask, 0x4B0AA0);
 }
 
 CEventScriptCommand::CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)

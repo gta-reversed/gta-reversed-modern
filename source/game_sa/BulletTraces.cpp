@@ -6,11 +6,11 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 
 void CBulletTraces::InjectHooks()
 {
-    Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
+    RH_ScopedInstall(Init, 0x721D50);
     RH_ScopedOverloadedInstall(AddTrace, "", 0x723750, void(*)(CVector*, CVector*, float, uint32, uint8));
     RH_ScopedOverloadedInstall(AddTrace, "Wrapper", 0x726AF0, void(*)(CVector*, CVector*, eWeaponType, CEntity*));
-    Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
-    Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
+    RH_ScopedInstall(Render, 0x723C10);
+    RH_ScopedInstall(Update, 0x723FB0);
 }
 
 // 0x721D50

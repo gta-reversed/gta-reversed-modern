@@ -2,9 +2,9 @@
 
 void CEventVehicleDied::InjectHooks()
 {
-    Install("CEventVehicleDied", "Constructor", 0x4B0D10, &CEventVehicleDied::Constructor);
-    Install("CEventVehicleDied", "Clone_Reversed", 0x4B76D0, &CEventVehicleDied::Clone_Reversed);
-    Install("CEventVehicleDied", "AffectsPed_Reversed", 0x4B0E00, &CEventVehicleDied::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B0D10);
+    RH_ScopedInstall(Clone_Reversed, 0x4B76D0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B0E00);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)

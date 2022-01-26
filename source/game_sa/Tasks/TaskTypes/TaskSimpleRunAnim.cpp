@@ -4,12 +4,12 @@
 
 void CTaskSimpleRunAnim::InjectHooks()
 {
-    Install("CTaskSimpleRunAnim", "Constructor", 0x61A8B0, &CTaskSimpleRunAnim::Constructor);
-    Install("CTaskSimpleRunAnim", "Constructor2", 0x61A900, &CTaskSimpleRunAnim::Constructor2);
-    Install("CTaskSimpleRunAnim", "StartAnim", 0x61A950, &CTaskSimpleRunAnim::StartAnim);
+    RH_ScopedInstall(Constructor, 0x61A8B0);
+    RH_ScopedInstall(Constructor2, 0x61A900);
+    RH_ScopedInstall(StartAnim, 0x61A950);
     //VTABLE
-    Install("CTaskSimpleRunAnim", "Clone", 0x61B6D0, &CTaskSimpleRunAnim::Clone_Reversed);
-    Install("CTaskSimpleRunAnim", "ProcessPed", 0x61BAC0, &CTaskSimpleRunAnim::ProcessPed_Reversed);
+    RH_ScopedInstall(Clone_Reversed, 0x61B6D0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x61BAC0);
 }
 
 CTaskSimpleRunAnim* CTaskSimpleRunAnim::Constructor(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame)

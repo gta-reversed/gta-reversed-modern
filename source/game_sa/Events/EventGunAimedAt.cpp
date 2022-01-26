@@ -6,11 +6,11 @@
 
 void CEventGunAimedAt::InjectHooks()
 {
-    Install("CEventGunAimedAt", "Constructor", 0x4B0700, &CEventGunAimedAt::Constructor);
-    Install("CEventGunAimedAt", "AffectsPed_Reversed", 0x4B4EE0, &CEventGunAimedAt::AffectsPed_Reversed);
-    Install("CEventGunAimedAt", "ReportCriminalEvent_Reversed", 0x4B09E0, &CEventGunAimedAt::ReportCriminalEvent_Reversed);
-    Install("CEventGunAimedAt", "TakesPriorityOver_Reversed", 0x4B0810, &CEventGunAimedAt::TakesPriorityOver_Reversed);
-    Install("CEventGunAimedAt", "CloneEditable_Reversed", 0x4B7630, &CEventGunAimedAt::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B0700);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4EE0);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B09E0);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B0810);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7630);
 }
 
 CEventGunAimedAt::CEventGunAimedAt(CPed* ped)

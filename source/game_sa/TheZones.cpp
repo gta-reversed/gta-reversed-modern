@@ -25,14 +25,14 @@ int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
-    Install("CTheZones", "ResetZonesRevealed", 0x572110, &CTheZones::ResetZonesRevealed);
-    Install("CTheZones", "GetCurrentZoneLockedOrUnlocked", 0x572130, &CTheZones::GetCurrentZoneLockedOrUnlocked);
-    Install("CTheZones", "PointLiesWithinZone", 0x572270, &CTheZones::PointLiesWithinZone);
-    Install("CTheZones", "GetNavigationZone", 0x572590, &CTheZones::GetNavigationZone);
-    Install("CTheZones", "GetMapZone", 0x5725A0, &CTheZones::GetMapZone);
-    Install("CTheZones", "Save", 0x5D2E60, &CTheZones::Save);
-    Install("CTheZones", "Load", 0x5D2F40, &CTheZones::Load);
-    Install("CTheZones", "PostZoneCreation", 0x572B70, &CTheZones::PostZoneCreation);
+    RH_ScopedInstall(ResetZonesRevealed, 0x572110);
+    RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
+    RH_ScopedInstall(PointLiesWithinZone, 0x572270);
+    RH_ScopedInstall(GetNavigationZone, 0x572590);
+    RH_ScopedInstall(GetMapZone, 0x5725A0);
+    RH_ScopedInstall(Save, 0x5D2E60);
+    RH_ScopedInstall(Load, 0x5D2F40);
+    RH_ScopedInstall(PostZoneCreation, 0x572B70);
 }
 
 // 0x5720D0

@@ -3,12 +3,12 @@
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
-    Install("CTaskComplexGoToPointAndStandStillTimed", "CTaskComplexGoToPointAndStandStillTimed", 0x6685E0, &CTaskComplexGoToPointAndStandStillTimed::Constructor);
-    Install("CTaskComplexGoToPointAndStandStillTimed", "Clone", 0x66CF30, &CTaskComplexGoToPointAndStandStillTimed::Clone_Reversed);
-    Install("CTaskComplexGoToPointAndStandStillTimed", "StopTimer", 0x6686A0, &CTaskComplexGoToPointAndStandStillTimed::StopTimer_Reversed);
-    Install("CTaskComplexGoToPointAndStandStillTimed", "MakeAbortable", 0x668640, &CTaskComplexGoToPointAndStandStillTimed::MakeAbortable_Reversed);
-    Install("CTaskComplexGoToPointAndStandStillTimed", "CreateFirstSubTask", 0x66DC90, &CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexGoToPointAndStandStillTimed", "ControlSubTask", 0x66DCE0, &CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed);
+    RH_ScopedInstall(Constructor, 0x6685E0);
+    RH_ScopedInstall(Clone_Reversed, 0x66CF30);
+    RH_ScopedInstall(StopTimer_Reversed, 0x6686A0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x668640);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x66DC90);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x66DCE0);
 }
 
 CTaskComplexGoToPointAndStandStillTimed::CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time)

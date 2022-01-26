@@ -6,42 +6,42 @@
 #include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
-    Install("CEventEditableResponse", "Constructor", 0x4AC450, &CEventEditableResponse::Constructor);
-    Install("CEventEditableResponse", "Clone_Reversed", 0x420ED0, &CEventEditableResponse::Clone_Reversed);
-    Install("CEventEditableResponse", "HasEditableResponse_Reversed", 0x420EF0, &CEventEditableResponse::HasEditableResponse_Reversed);
-    Install("CEventEditableResponse", "WillRespond", 0x4AC490, &CEventEditableResponse::WillRespond);
-    Install("CEventEditableResponse", "InformVehicleOccupants", 0x4AC4A0, &CEventEditableResponse::InformVehicleOccupants);
-    Install("CEventEditableResponse", "InformRespectedFriends", 0x4B2B00, &CEventEditableResponse::InformRespectedFriends);
-    Install("CEventEditableResponse", "InformGroup", 0x4B7DF0, &CEventEditableResponse::InformGroup);
-    Install("CEventEditableResponse", "TriggerLookAt", 0x4AC5A0, &CEventEditableResponse::TriggerLookAt);
+    RH_ScopedInstall(Constructor, 0x4AC450);
+    RH_ScopedInstall(Clone_Reversed, 0x420ED0);
+    RH_ScopedInstall(HasEditableResponse_Reversed, 0x420EF0);
+    RH_ScopedInstall(WillRespond, 0x4AC490);
+    RH_ScopedInstall(InformVehicleOccupants, 0x4AC4A0);
+    RH_ScopedInstall(InformRespectedFriends, 0x4B2B00);
+    RH_ScopedInstall(InformGroup, 0x4B7DF0);
+    RH_ScopedInstall(TriggerLookAt, 0x4AC5A0);
     RH_ScopedOverloadedInstall(ComputeResponseTaskType, "ped", 0x4B56C0, void (CEventEditableResponse::*)(CPed * ped, bool));
     RH_ScopedOverloadedInstall(ComputeResponseTaskType, "group", 0x4B57A0, void (CEventEditableResponse::*)(CPedGroup*));
-    Install("CEventEditableResponse", "ComputeResponseTaskOfType", 0x4B5730, &CEventEditableResponse::ComputeResponseTaskOfType);
+    RH_ScopedInstall(ComputeResponseTaskOfType, 0x4B5730);
 }
 
 void CEventSpecial::InjectHooks()
 {
-    Install("CEventSpecial", "CEventSpecial", 0x4B1AE0, &CEventSpecial::Constructor);
+    RH_ScopedInstall(Constructor, 0x4B1AE0);
 }
 
 void CEventFireNearby::InjectHooks()
 {
-    Install("CEventFireNearby", "CEventFireNearby", 0x4B1F10, &CEventFireNearby::Constructor);
-    Install("CEventFireNearby", "AffectsPed", 0x4B1F90, &CEventFireNearby::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B1F10);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1F90);
 }
 
 void CEventDanger::InjectHooks()
 {
-    Install("CEventDanger", "CEventDanger", 0x4B2600, &CEventDanger::Constructor);
-    Install("CEventDanger", "AffectsPed", 0x4B5470, &CEventDanger::AffectsPed_Reversed);
-    Install("CEventDanger", "AffectsPedGroup", 0x4B54E0, &CEventDanger::AffectsPedGroup_Reversed);
-    Install("CEventDanger", "GetSourceEntity", 0x4B2700, &CEventDanger::GetSourceEntity_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B2600);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5470);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B54E0);
+    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4B2700);
 }
 
 void CEventSeenPanickedPed::InjectHooks()
 {
-    Install("CEventSeenPanickedPed", "CEventSeenPanickedPed", 0x4B2080, &CEventSeenPanickedPed::Constructor);
-    Install("CEventSeenPanickedPed", "AffectsPed", 0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B2080);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B53C0);
 }
 
 CEventEditableResponse::CEventEditableResponse() {

@@ -3,9 +3,9 @@
 #include "PtrListSingleLink.h"
 
 void CPtrListSingleLink::InjectHooks() {
-    Install("CPtrListSingleLink", "Flush", 0x552400, &CPtrListSingleLink::Flush);
-    Install("CPtrListSingleLink", "AddItem", 0x5335E0, &CPtrListSingleLink::AddItem);
-    Install("CPtrListSingleLink", "DeleteItem", 0x533610, &CPtrListSingleLink::DeleteItem);
+    RH_ScopedInstall(Flush, 0x552400);
+    RH_ScopedInstall(AddItem, 0x5335E0);
+    RH_ScopedInstall(DeleteItem, 0x533610);
 }
 
 void CPtrListSingleLink::Flush() {

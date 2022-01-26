@@ -2,9 +2,9 @@
 
 void CWeaponModelInfo::InjectHooks()
 {
-    Install("CWeaponModelInfo", "GetModelType", 0x4C5780, &CWeaponModelInfo::GetModelType_Reversed);
-    Install("CWeaponModelInfo", "Init", 0x4C98F0, &CWeaponModelInfo::Init_Reversed);
-    Install("CWeaponModelInfo", "SetClump", 0x4C9910, &CWeaponModelInfo::SetClump_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5780);
+    RH_ScopedInstall(Init_Reversed, 0x4C98F0);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C9910);
 }
 
 ModelInfoType CWeaponModelInfo::GetModelType()

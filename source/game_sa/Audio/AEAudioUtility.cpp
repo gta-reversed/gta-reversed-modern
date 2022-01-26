@@ -10,13 +10,13 @@ float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50]
 void CAEAudioUtility::InjectHooks() {
     RH_ScopedOverloadedInstall(GetRandomNumberInRange, "int", 0x4d9c10, int32(*)(const int32, const int32));
     RH_ScopedOverloadedInstall(GetRandomNumberInRange, "float", 0x4d9c50, float(*)(float, float));
-    Install("CAEAudioUtility", "ResolveProbability", 0x4d9c80, &CAEAudioUtility::ResolveProbability);
-    Install("CAEAudioUtility", "GetPiecewiseLinear", 0x4d9d90, &CAEAudioUtility::GetPiecewiseLinear);
-    Install("CAEAudioUtility", "AudioLog10", 0x4d9e50, &CAEAudioUtility::AudioLog10);
-    Install("CAEAudioUtility", "ConvertFromBytesToMS", 0x4d9ef0, &CAEAudioUtility::ConvertFromBytesToMS);
-    Install("CAEAudioUtility", "ConvertFromMSToBytes", 0x4d9f40, &CAEAudioUtility::ConvertFromMSToBytes);
-    // Install("CAEAudioUtility", "GetBankAndSoundFromScriptSlotAudioEvent", 0x4D9CC0, GetBankAndSoundFromScriptSlotAudioEvent);
-    // Install("CAEAudioUtility", "FindVehicleOfPlayer", 0x4D9E10, FindVehicleOfPlayer);
+    RH_ScopedInstall(ResolveProbability, 0x4d9c80);
+    RH_ScopedInstall(GetPiecewiseLinear, 0x4d9d90);
+    RH_ScopedInstall(AudioLog10, 0x4d9e50);
+    RH_ScopedInstall(ConvertFromBytesToMS, 0x4d9ef0);
+    RH_ScopedInstall(ConvertFromMSToBytes, 0x4d9f40);
+    // RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0);
+    // RH_ScopedInstall(FindVehicleOfPlayer, 0x4D9E10);
 
     // Those 2 change logic of the functions, and shouldn't be toggled on/off
     HookInstall(0x4d9e80, &CAEAudioUtility::GetCurrentTimeInMilliseconds);

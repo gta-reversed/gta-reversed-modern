@@ -6,11 +6,11 @@
 #include "PointLights.h"
 
 void CMovingThings::InjectHooks() {
-    Install("CMovingThings", "Init", 0x717D00, &CMovingThings::Init);
-    Install("CMovingThings", "Shutdown", 0x717C20, &CMovingThings::Shutdown);
-    Install("CMovingThings", "Update", 0x7185B0, &CMovingThings::Update);
-    Install("CMovingThings", "Render", 0x717150, &CMovingThings::Render);
-    Install("CMovingThings", "Render_BeforeClouds", 0x7178F0, &CMovingThings::Render_BeforeClouds);
+    RH_ScopedInstall(Init, 0x717D00);
+    RH_ScopedInstall(Shutdown, 0x717C20);
+    RH_ScopedInstall(Update, 0x7185B0);
+    RH_ScopedInstall(Render, 0x717150);
+    RH_ScopedInstall(Render_BeforeClouds, 0x7178F0);
 }
 
 // 0x717D00

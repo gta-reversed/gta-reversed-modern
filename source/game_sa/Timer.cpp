@@ -45,19 +45,19 @@ uint32& CTimer::m_snPreviousTimeInMilliseconds = *(uint32*)0xB7CB78;
 
 void CTimer::InjectHooks()
 {
-    Install("CTimer", "Initialise", 0x5617E0, &CTimer::Initialise);
-    Install("CTimer", "Shutdown", 0x5618C0, &CTimer::Shutdown);
-    Install("CTimer", "Suspend", 0x5619D0, &CTimer::Suspend);
-    Install("CTimer", "Resume", 0x561A00, &CTimer::Resume);
-    Install("CTimer", "Stop", 0x561AA0, &CTimer::Stop);
-    Install("CTimer", "StartUserPause", 0x561AF0, &CTimer::StartUserPause);
-    Install("CTimer", "EndUserPause", 0x561B00, &CTimer::EndUserPause);
-    Install("CTimer", "GetCyclesPerMillisecond", 0x561A40, &CTimer::GetCyclesPerMillisecond);
-    Install("CTimer", "GetCyclesPerFrame", 0x561A50, &CTimer::GetCyclesPerFrame);
-    Install("CTimer", "GetCurrentTimeInCycles", 0x561A80, &CTimer::GetCurrentTimeInCycles);
-    Install("CTimer", "GetIsSlowMotionActive", 0x561AD0, &CTimer::GetIsSlowMotionActive);
-    Install("CTimer", "UpdateVariables", 0x5618D0, &CTimer::UpdateVariables);
-    Install("CTimer", "Update", 0x561B10, &CTimer::Update);
+    RH_ScopedInstall(Initialise, 0x5617E0);
+    RH_ScopedInstall(Shutdown, 0x5618C0);
+    RH_ScopedInstall(Suspend, 0x5619D0);
+    RH_ScopedInstall(Resume, 0x561A00);
+    RH_ScopedInstall(Stop, 0x561AA0);
+    RH_ScopedInstall(StartUserPause, 0x561AF0);
+    RH_ScopedInstall(EndUserPause, 0x561B00);
+    RH_ScopedInstall(GetCyclesPerMillisecond, 0x561A40);
+    RH_ScopedInstall(GetCyclesPerFrame, 0x561A50);
+    RH_ScopedInstall(GetCurrentTimeInCycles, 0x561A80);
+    RH_ScopedInstall(GetIsSlowMotionActive, 0x561AD0);
+    RH_ScopedInstall(UpdateVariables, 0x5618D0);
+    RH_ScopedInstall(Update, 0x561B10);
 }
 
 // 64-bit RsTimer wrapper

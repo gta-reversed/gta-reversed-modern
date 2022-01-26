@@ -3,12 +3,12 @@
 CLoadMonitor& g_LoadMonitor = *reinterpret_cast<CLoadMonitor*> (0xB72978);
 
 void CLoadMonitor::InjectHooks() {
-//    Install("CLoadMonitor", "Constructor", 0x53CFA0, &CLoadMonitor::Constructor);
-//    Install("CLoadMonitor", "Destructor", 0x856430, &CLoadMonitor::Destructor);
-//    Install("CLoadMonitor", "BeginFrame", 0x53D030, &CLoadMonitor::BeginFrame);
-//    Install("CLoadMonitor", "EndFrame", 0x53D0B0, &CLoadMonitor::EndFrame);
-//    Install("CLoadMonitor", "StartTimer", 0x53D050, &CLoadMonitor::StartTimer);
-//    Install("CLoadMonitor", "EndTimer", 0x53D070, &CLoadMonitor::EndTimer);
+//    RH_ScopedInstall(Constructor, 0x53CFA0);
+//    RH_ScopedInstall(Destructor, 0x856430);
+//    RH_ScopedInstall(BeginFrame, 0x53D030);
+//    RH_ScopedInstall(EndFrame, 0x53D0B0);
+//    RH_ScopedInstall(StartTimer, 0x53D050);
+//    RH_ScopedInstall(EndTimer, 0x53D070);
 }
 
 // 0x53CFA0

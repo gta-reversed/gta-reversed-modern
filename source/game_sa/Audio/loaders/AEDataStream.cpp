@@ -206,26 +206,26 @@ bool CAEDataStream::Initialise() {
 }
 
 void CAEDataStream::InjectHooks() {
-    Install("CAEDataStream", "CAEDataStream", 0x4dc620, &CAEDataStream::Constructor);
+    RH_ScopedInstall(Constructor, 0x4dc620);
     Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::Destructor);
-    Install("CAEDataStream", "Initialise", 0x4dc2b0, &CAEDataStream::Initialise);
-    Install("CAEDataStream", "FillBuffer", 0x4dc1c0, &CAEDataStream::FillBuffer);
-    Install("CAEDataStream", "GetCurrentPosition", 0x4dc230, &CAEDataStream::GetCurrentPosition);
+    RH_ScopedInstall(Initialise, 0x4dc2b0);
+    RH_ScopedInstall(FillBuffer, 0x4dc1c0);
+    RH_ScopedInstall(GetCurrentPosition, 0x4dc230);
     RH_ScopedOverloadedInstall(Seek, "uint32", 0x4dc250, uint32(CAEDataStream::*)(long offset, int32 whence));
     RH_ScopedOverloadedInstall(Seek, "", 0x4dc340, HRESULT(__stdcall CAEDataStream::*)(LARGE_INTEGER, DWORD, ULARGE_INTEGER*));
-    Install("CAEDataStream", "Read", 0x4dc320, &CAEDataStream::Read);
-    Install("CAEDataStream", "Stat", 0x4dc3a0, &CAEDataStream::Stat);
-    Install("CAEDataStream", "QueryInterface", 0x4dc410, &CAEDataStream::QueryInterface);
-    Install("CAEDataStream", "AddRef", 0x4dc460, &CAEDataStream::AddRef);
-    Install("CAEDataStream", "Write", 0x4dc4d0, &CAEDataStream::Write);
-    Install("CAEDataStream", "SetSize", 0x4dc4e0, &CAEDataStream::SetSize);
-    Install("CAEDataStream", "CopyTo", 0x4dc4f0, &CAEDataStream::CopyTo);
-    Install("CAEDataStream", "Commit", 0x4dc500, &CAEDataStream::Commit);
-    Install("CAEDataStream", "Revert", 0x4dc510, &CAEDataStream::Revert);
-    Install("CAEDataStream", "LockRegion", 0x4dc520, &CAEDataStream::LockRegion);
-    Install("CAEDataStream", "UnlockRegion", 0x4dc530, &CAEDataStream::UnlockRegion);
-    Install("CAEDataStream", "Clone", 0x4dc540, &CAEDataStream::Clone);
-    Install("CAEDataStream", "Release", 0x4dc5b0, &CAEDataStream::Release);
+    RH_ScopedInstall(Read, 0x4dc320);
+    RH_ScopedInstall(Stat, 0x4dc3a0);
+    RH_ScopedInstall(QueryInterface, 0x4dc410);
+    RH_ScopedInstall(AddRef, 0x4dc460);
+    RH_ScopedInstall(Write, 0x4dc4d0);
+    RH_ScopedInstall(SetSize, 0x4dc4e0);
+    RH_ScopedInstall(CopyTo, 0x4dc4f0);
+    RH_ScopedInstall(Commit, 0x4dc500);
+    RH_ScopedInstall(Revert, 0x4dc510);
+    RH_ScopedInstall(LockRegion, 0x4dc520);
+    RH_ScopedInstall(UnlockRegion, 0x4dc530);
+    RH_ScopedInstall(Clone, 0x4dc540);
+    RH_ScopedInstall(Release, 0x4dc5b0);
 
     CAEStreamTransformer::InjectHooks();
 }

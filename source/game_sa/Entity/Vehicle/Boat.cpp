@@ -20,30 +20,30 @@ RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 void CBoat::InjectHooks()
 {
     //Virtual
-    Install("CBoat", "SetModelIndex", 0x6F1140, &CBoat::SetModelIndex_Reversed);
-    Install("CBoat", "ProcessControl", 0x6F1770, &CBoat::ProcessControl_Reversed);
-    Install("CBoat", "Teleport", 0x6F20E0, &CBoat::Teleport_Reversed);
-    Install("CBoat", "PreRender", 0x6F1180, &CBoat::PreRender_Reversed);
-    Install("CBoat", "Render", 0x6F0210, &CBoat::Render_Reversed);
-    Install("CBoat", "ProcessControlInputs", 0x6F0A10, &CBoat::ProcessControlInputs_Reversed);
-    Install("CBoat", "GetComponentWorldPosition", 0x6F01D0, &CBoat::GetComponentWorldPosition_Reversed);
-    Install("CBoat", "ProcessOpenDoor", 0x6F0190, &CBoat::ProcessOpenDoor_Reversed);
-    Install("CBoat", "BlowUpCar", 0x6F21B0, &CBoat::BlowUpCar_Reversed);
+    RH_ScopedInstall(SetModelIndex_Reversed, 0x6F1140);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6F1770);
+    RH_ScopedInstall(Teleport_Reversed, 0x6F20E0);
+    RH_ScopedInstall(PreRender_Reversed, 0x6F1180);
+    RH_ScopedInstall(Render_Reversed, 0x6F0210);
+    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6F0A10);
+    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6F01D0);
+    RH_ScopedInstall(ProcessOpenDoor_Reversed, 0x6F0190);
+    RH_ScopedInstall(BlowUpCar_Reversed, 0x6F21B0);
 
     //Class methods
-    Install("CBoat", "PruneWakeTrail", 0x6F0E20, &CBoat::PruneWakeTrail);
-    Install("CBoat", "AddWakePoint", 0x6F2550, &CBoat::AddWakePoint);
-    Install("CBoat", "SetupModelNodes", 0x6F01A0, &CBoat::SetupModelNodes);
-    Install("CBoat", "DebugCode", 0x6F0D00, &CBoat::DebugCode);
-    Install("CBoat", "ModifyHandlingValue", 0x6F0DE0, &CBoat::ModifyHandlingValue);
-    Install("CBoat", "PrintThrustAndRudderInfo", 0x6F0D90, &CBoat::PrintThrustAndRudderInfo);
+    RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
+    RH_ScopedInstall(AddWakePoint, 0x6F2550);
+    RH_ScopedInstall(SetupModelNodes, 0x6F01A0);
+    RH_ScopedInstall(DebugCode, 0x6F0D00);
+    RH_ScopedInstall(ModifyHandlingValue, 0x6F0DE0);
+    RH_ScopedInstall(PrintThrustAndRudderInfo, 0x6F0D90);
 
     //Other
-    Install("CBoat", "FillBoatList", 0x6F2710, &CBoat::FillBoatList);
-    Install("CBoat", "IsSectorAffectedByWake", 0x6F0E80, &CBoat::IsSectorAffectedByWake);
-    Install("CBoat", "IsVertexAffectedByWake", 0x6F0F50, &CBoat::IsVertexAffectedByWake);
-    Install("CBoat", "CheckForSkippingCalculations", 0x6F10C0, &CBoat::CheckForSkippingCalculations);
-    Install("CBoat", "GetBoatAtomicObjectCB", 0x6F00D0, &GetBoatAtomicObjectCB);
+    RH_ScopedInstall(FillBoatList, 0x6F2710);
+    RH_ScopedInstall(IsSectorAffectedByWake, 0x6F0E80);
+    RH_ScopedInstall(IsVertexAffectedByWake, 0x6F0F50);
+    RH_ScopedInstall(CheckForSkippingCalculations, 0x6F10C0);
+    RH_ScopedInstall(GetBoatAtomicObjectCB, 0x6F00D0);
 }
 
 CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)

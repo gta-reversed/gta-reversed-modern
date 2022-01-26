@@ -34,14 +34,14 @@ CVector Screens8Track[2][4] = { // 0x8D5DD8
 
 void CMirrors::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
-    Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
-    Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
-    Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
-    Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
-    Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
-    Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
-    Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
+    RH_ScopedInstall(Init, 0x723000);
+    RH_ScopedInstall(ShutDown, 0x723050);
+    RH_ScopedInstall(CreateBuffer, 0x7230A0);
+    RH_ScopedInstall(BuildCamMatrix, 0x723150);
+    RH_ScopedInstall(RenderMirrorBuffer, 0x726090);
+    RH_ScopedInstall(BuildCameraMatrixForScreens, 0x7266B0);
+    RH_ScopedInstall(BeforeConstructRenderList, 0x726DF0);
+    RH_ScopedInstall(BeforeMainRender, 0x727140);
 }
 
 // 0x723000

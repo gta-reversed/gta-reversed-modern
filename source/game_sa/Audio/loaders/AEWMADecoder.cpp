@@ -284,17 +284,17 @@ HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile* profile) {
 }
 
 void CAEWMADecoder::InjectHooks() {
-    Install("CAEWMADecoder", "CAEWMADecoder", 0x502720, &CAEWMADecoder::Constructor);
+    RH_ScopedInstall(Constructor, 0x502720);
     Install("CAEWMADecoder", "~CAEWMADecoder", 0x502760, &CAEWMADecoder::Destructor);
-    Install("CAEWMADecoder", "Initialise", 0x502c60, &CAEWMADecoder::Initialise);
-    Install("CAEWMADecoder", "InitLibrary", 0x502b80, &CAEWMADecoder::InitLibrary);
-    Install("CAEWMADecoder", "FillBuffer", 0x5027d0, &CAEWMADecoder::FillBuffer);
-    Install("CAEWMADecoder", "GetStreamLengthMs", 0x502ad0, &CAEWMADecoder::GetStreamLengthMs);
-    Install("CAEWMADecoder", "GetStreamPlayTimeMs", 0x502af0, &CAEWMADecoder::GetStreamPlayTimeMs);
-    Install("CAEWMADecoder", "SetCursor", 0x502b50, &CAEWMADecoder::SetCursor);
-    Install("CAEWMADecoder", "GetSampleRate", 0x502ab0, &CAEWMADecoder::GetSampleRate);
-    Install("CAEWMADecoder", "GetStreamID", 0x502750, &CAEWMADecoder::GetStreamID);
-    Install("CAEWMADecoder", "SelectStreamIndex", 0x502990, &CAEWMADecoder::SelectStreamIndex);
+    RH_ScopedInstall(Initialise, 0x502c60);
+    RH_ScopedInstall(InitLibrary, 0x502b80);
+    RH_ScopedInstall(FillBuffer, 0x5027d0);
+    RH_ScopedInstall(GetStreamLengthMs, 0x502ad0);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x502af0);
+    RH_ScopedInstall(SetCursor, 0x502b50);
+    RH_ScopedInstall(GetSampleRate, 0x502ab0);
+    RH_ScopedInstall(GetStreamID, 0x502750);
+    RH_ScopedInstall(SelectStreamIndex, 0x502990);
 }
 
 CAEWMADecoder* CAEWMADecoder::Constructor(CAEDataStream* dataStream) {

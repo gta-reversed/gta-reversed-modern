@@ -2,16 +2,16 @@
 
 void CTaskComplexSequence::InjectHooks()
 {
-    Install("CTaskComplexSequence", "CTaskComplexSequence", 0x632BD0, &CTaskComplexSequence::Constructor);
-    Install("CTaskComplexSequence", "Clone", 0x5F6710, &CTaskComplexSequence::Clone_Reversed);
-    Install("CTaskComplexSequence", "GetTaskType", 0x632C60, &CTaskComplexSequence::GetId_Reversed);
-    Install("CTaskComplexSequence", "MakeAbortable", 0x632C00, &CTaskComplexSequence::MakeAbortable_Reversed);
-    Install("CTaskComplexSequence", "CreateNextSubTask", 0x638A40, &CTaskComplexSequence::CreateNextSubTask_Reversed);
+    RH_ScopedInstall(Constructor, 0x632BD0);
+    RH_ScopedInstall(Clone_Reversed, 0x5F6710);
+    RH_ScopedInstall(GetId_Reversed, 0x632C60);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x632C00);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x638A40);
     RH_ScopedOverloadedInstall(CreateNextSubTask, "ped", 0x632C70, CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&));
-    Install("CTaskComplexSequence", "CreateFirstSubTask", 0x638A60, &CTaskComplexSequence::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexSequence", "ControlSubTask", 0x632D00, &CTaskComplexSequence::ControlSubTask_Reversed);
-    Install("CTaskComplexSequence", "AddTask", 0x632D10, &CTaskComplexSequence::AddTask);
-    Install("CTaskComplexSequence", "Flush", 0x632C10, &CTaskComplexSequence::Flush);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x638A60);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x632D00);
+    RH_ScopedInstall(AddTask, 0x632D10);
+    RH_ScopedInstall(Flush, 0x632C10);
 }
 
 // 0x632BD0

@@ -37,42 +37,42 @@ bool& CStats::bShowUpdateStats = *(bool*)0x8CDE56;
 
 void CStats::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CStats", "Init", 0x55C0C0, &CStats::Init);
-    Install("CStats", "GetStatValue", 0x558E40, &CStats::GetStatValue);
-    Install("CStats", "SetStatValue", 0x55A070, &CStats::SetStatValue);
-    Install("CStats", "GetStatType", 0x558E30, &CStats::GetStatType);
-    Install("CStats", "GetFullFavoriteRadioStationList", 0x558F90, &CStats::GetFullFavoriteRadioStationList);
-    Install("CStats", "FindCriminalRatingNumber", 0x559080, &CStats::FindCriminalRatingNumber);
-    Install("CStats", "GetPercentageProgress", 0x5591E0, &CStats::GetPercentageProgress);
-    Install("CStats", "ConvertToMins", 0x559540, &CStats::ConvertToMins);
-    Install("CStats", "ConvertToSecs", 0x559560, &CStats::ConvertToSecs);
-    Install("CStats", "SafeToShowThisStat", 0x559590, &CStats::SafeToShowThisStat);
-    Install("CStats", "CheckForThreshold", 0x5595F0, &CStats::CheckForThreshold);
-    Install("CStats", "IsStatCapped", 0x559630, &CStats::IsStatCapped);
-    Install("CStats", "LoadActionReactionStats", 0x5599B0, &CStats::LoadActionReactionStats);
-    Install("CStats", "FindMaxNumberOfGroupMembers", 0x559A50, &CStats::FindMaxNumberOfGroupMembers);
-    Install("CStats", "ProcessReactionStatsOnDecrement", 0x559730, &CStats::ProcessReactionStatsOnDecrement);
-    Install("CStats", "DecrementStat", 0x559FA0, &CStats::DecrementStat);
-    Install("CStats", "SetNewRecordStat", 0x55C410, &CStats::SetNewRecordStat);
-    Install("CStats", "RegisterFastestTime", 0x55A0B0, &CStats::RegisterFastestTime);
-    Install("CStats", "RegisterBestPosition", 0x55A160, &CStats::RegisterBestPosition);
-    Install("CStats", "ProcessReactionStatsOnIncrement", 0x55B900, &CStats::ProcessReactionStatsOnIncrement);
-    Install("CStats", "DisplayScriptStatUpdateMessage", 0x55B980, &CStats::DisplayScriptStatUpdateMessage);
-    Install("CStats", "IncrementStat", 0x55C180, &CStats::IncrementStat);
-    Install("CStats", "UpdateStatsWhenSprinting", 0x55C660, &CStats::UpdateStatsWhenSprinting);
-    Install("CStats", "UpdateStatsWhenRunning", 0x55C6F0, &CStats::UpdateStatsWhenRunning);
-    Install("CStats", "UpdateStatsWhenOnMotorBike", 0x55CD60, &CStats::UpdateStatsWhenOnMotorBike);
-    Install("CStats", "UpdateStatsWhenFighting", 0x55CFA0, &CStats::UpdateStatsWhenFighting);
-    Install("CStats", "ModifyStat", 0x55D090, &CStats::ModifyStat);
+    RH_ScopedInstall(Init, 0x55C0C0);
+    RH_ScopedInstall(GetStatValue, 0x558E40);
+    RH_ScopedInstall(SetStatValue, 0x55A070);
+    RH_ScopedInstall(GetStatType, 0x558E30);
+    RH_ScopedInstall(GetFullFavoriteRadioStationList, 0x558F90);
+    RH_ScopedInstall(FindCriminalRatingNumber, 0x559080);
+    RH_ScopedInstall(GetPercentageProgress, 0x5591E0);
+    RH_ScopedInstall(ConvertToMins, 0x559540);
+    RH_ScopedInstall(ConvertToSecs, 0x559560);
+    RH_ScopedInstall(SafeToShowThisStat, 0x559590);
+    RH_ScopedInstall(CheckForThreshold, 0x5595F0);
+    RH_ScopedInstall(IsStatCapped, 0x559630);
+    RH_ScopedInstall(LoadActionReactionStats, 0x5599B0);
+    RH_ScopedInstall(FindMaxNumberOfGroupMembers, 0x559A50);
+    RH_ScopedInstall(ProcessReactionStatsOnDecrement, 0x559730);
+    RH_ScopedInstall(DecrementStat, 0x559FA0);
+    RH_ScopedInstall(SetNewRecordStat, 0x55C410);
+    RH_ScopedInstall(RegisterFastestTime, 0x55A0B0);
+    RH_ScopedInstall(RegisterBestPosition, 0x55A160);
+    RH_ScopedInstall(ProcessReactionStatsOnIncrement, 0x55B900);
+    RH_ScopedInstall(DisplayScriptStatUpdateMessage, 0x55B980);
+    RH_ScopedInstall(IncrementStat, 0x55C180);
+    RH_ScopedInstall(UpdateStatsWhenSprinting, 0x55C660);
+    RH_ScopedInstall(UpdateStatsWhenRunning, 0x55C6F0);
+    RH_ScopedInstall(UpdateStatsWhenOnMotorBike, 0x55CD60);
+    RH_ScopedInstall(UpdateStatsWhenFighting, 0x55CFA0);
+    RH_ScopedInstall(ModifyStat, 0x55D090);
 
     // unused
-    Install("CStats", "GetStatID", 0x558DE0, &CStats::GetStatID);
-    Install("CStats", "GetTimesMissionAttempted", 0x558E70, &CStats::GetTimesMissionAttempted);
-    Install("CStats", "RegisterMissionAttempted", 0x558E80, &CStats::RegisterMissionAttempted);
-    Install("CStats", "RegisterMissionPassed", 0x558EA0, &CStats::RegisterMissionPassed);
+    RH_ScopedInstall(GetStatID, 0x558DE0);
+    RH_ScopedInstall(GetTimesMissionAttempted, 0x558E70);
+    RH_ScopedInstall(RegisterMissionAttempted, 0x558E80);
+    RH_ScopedInstall(RegisterMissionPassed, 0x558EA0);
 
-    Install("CStats", "Load", 0x5D3BF0, &CStats::Load);
-    Install("CStats", "Save", 0x5D3B40, &CStats::Save);
+    RH_ScopedInstall(Load, 0x5D3BF0);
+    RH_ScopedInstall(Save, 0x5D3B40);
 }
 
 // 0x55C0C0

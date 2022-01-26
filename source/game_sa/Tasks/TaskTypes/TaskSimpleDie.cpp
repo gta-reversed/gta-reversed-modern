@@ -140,12 +140,12 @@ void CTaskSimpleDie::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x62FAF0, CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float));
     Install("CTaskSimpleDie", "~CTaskSimpleDie", 0x62FB40, &CTaskSimpleDie::Destructor);
-    Install("CTaskSimpleDie", "FinishAnimDieCB", 0x62FC10, &CTaskSimpleDie::FinishAnimDieCB);
-    Install("CTaskSimpleDie", "StartAnim", 0x637520, &CTaskSimpleDie::StartAnim);
+    RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
+    RH_ScopedInstall(StartAnim, 0x637520);
     RH_ScopedOverloadedInstall(Clone_Reversed, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
-    Install("CTaskSimpleDie", "GetTaskType", 0x62FA50, &CTaskSimpleDie::GetTaskType_Reversed);
-    Install("CTaskSimpleDie", "MakeAbortable", 0x62FBA0, &CTaskSimpleDie::MakeAbortable_Reversed);
-    Install("CTaskSimpleDie", "ProcessPed", 0x6397E0, &CTaskSimpleDie::ProcessPed_Reversed);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x62FA50);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x62FBA0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x6397E0);
 }
 
 // 0x62FA00

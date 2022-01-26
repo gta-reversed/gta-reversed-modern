@@ -4,13 +4,13 @@
 
 void CTaskSimpleGiveCPR::InjectHooks()
 {
-    Install("CTaskSimpleGiveCPR", "Constructor", 0x658860, &CTaskSimpleGiveCPR::Constructor);
-    Install("CTaskSimpleGiveCPR", "ReviveDeadPed", 0x658900, &CTaskSimpleGiveCPR::ReviveDeadPed);
-    Install("CTaskSimpleGiveCPR", "FinishGiveCPRAnimCB", 0x658910, &CTaskSimpleGiveCPR::FinishGiveCPRAnimCB);
+    RH_ScopedInstall(Constructor, 0x658860);
+    RH_ScopedInstall(ReviveDeadPed, 0x658900);
+    RH_ScopedInstall(FinishGiveCPRAnimCB, 0x658910);
     //VTABLE
-    Install("CTaskSimpleGiveCPR", "Clone", 0x659A10, &CTaskSimpleGiveCPR::Clone_Reversed);
-    Install("CTaskSimpleGiveCPR", "ProcessPed", 0x65A7C0, &CTaskSimpleGiveCPR::ProcessPed_Reversed);
-    Install("CTaskSimpleGiveCPR", "MakeAbortable", 0x6589B0, &CTaskSimpleGiveCPR::MakeAbortable_Reversed);
+    RH_ScopedInstall(Clone_Reversed, 0x659A10);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x65A7C0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6589B0);
 }
 
 CTaskSimpleGiveCPR* CTaskSimpleGiveCPR::Constructor(CAccident* pAccident)

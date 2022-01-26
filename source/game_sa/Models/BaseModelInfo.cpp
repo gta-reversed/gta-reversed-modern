@@ -9,48 +9,48 @@ Do not delete this comment block. Respect others' work!
 void CBaseModelInfo::InjectHooks()
 {
 // Vtable
-    Install("CBaseModelInfo", "AsAtomicModelInfoPtr", 0x4C4A80, &CBaseModelInfo::AsAtomicModelInfoPtr_Reversed);
-    Install("CBaseModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C4A90, &CBaseModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
-    Install("CBaseModelInfo", "AsLodAtomicModelInfoPtr", 0x4C4AA0, &CBaseModelInfo::AsLodAtomicModelInfoPtr_Reversed);
-    Install("CBaseModelInfo", "GetTimeInfo", 0x4C4AB0, &CBaseModelInfo::GetTimeInfo_Reversed);
-    Install("CBaseModelInfo", "Init", 0x4C4B10, &CBaseModelInfo::Init_Reversed);
-    Install("CBaseModelInfo", "Shutdown", 0x4C4D50, &CBaseModelInfo::Shutdown_Reversed);
-    Install("CBaseModelInfo", "SetAnimFile", 0x4C4AC0, &CBaseModelInfo::SetAnimFile_Reversed);
-    Install("CBaseModelInfo", "ConvertAnimFileIndex", 0x4C4AD0, &CBaseModelInfo::ConvertAnimFileIndex_Reversed);
-    Install("CBaseModelInfo", "GetAnimFileIndex", 0x4C4AE0, &CBaseModelInfo::GetAnimFileIndex_Reversed);
+    RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C4A80);
+    RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C4A90);
+    RH_ScopedInstall(AsLodAtomicModelInfoPtr_Reversed, 0x4C4AA0);
+    RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C4AB0);
+    RH_ScopedInstall(Init_Reversed, 0x4C4B10);
+    RH_ScopedInstall(Shutdown_Reversed, 0x4C4D50);
+    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C4AC0);
+    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C4AD0);
+    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C4AE0);
 
 // Class methods
-    Install("CBaseModelInfo", "SetTexDictionary", 0x4C4B40, &CBaseModelInfo::SetTexDictionary);
-    Install("CBaseModelInfo", "ClearTexDictionary", 0x4C4B70, &CBaseModelInfo::ClearTexDictionary);
-    Install("CBaseModelInfo", "AddTexDictionaryRef", 0x4C4B80, &CBaseModelInfo::AddTexDictionaryRef);
-    Install("CBaseModelInfo", "RemoveTexDictionaryRef", 0x4C4B90, &CBaseModelInfo::RemoveTexDictionaryRef);
-    Install("CBaseModelInfo", "AddRef", 0x4C4BA0, &CBaseModelInfo::AddRef);
-    Install("CBaseModelInfo", "RemoveRef", 0x4C4BB0, &CBaseModelInfo::RemoveRef);
-    Install("CBaseModelInfo", "SetColModel", 0x4C4BC0, &CBaseModelInfo::SetColModel);
-    Install("CBaseModelInfo", "Init2dEffects", 0x4C4C20, &CBaseModelInfo::Init2dEffects);
-    Install("CBaseModelInfo", "DeleteCollisionModel", 0x4C4C40, &CBaseModelInfo::DeleteCollisionModel);
-    Install("CBaseModelInfo", "Get2dEffect", 0x4C4C70, &CBaseModelInfo::Get2dEffect);
-    Install("CBaseModelInfo", "Add2dEffect", 0x4C4D20, &CBaseModelInfo::Add2dEffect);
+    RH_ScopedInstall(SetTexDictionary, 0x4C4B40);
+    RH_ScopedInstall(ClearTexDictionary, 0x4C4B70);
+    RH_ScopedInstall(AddTexDictionaryRef, 0x4C4B80);
+    RH_ScopedInstall(RemoveTexDictionaryRef, 0x4C4B90);
+    RH_ScopedInstall(AddRef, 0x4C4BA0);
+    RH_ScopedInstall(RemoveRef, 0x4C4BB0);
+    RH_ScopedInstall(SetColModel, 0x4C4BC0);
+    RH_ScopedInstall(Init2dEffects, 0x4C4C20);
+    RH_ScopedInstall(DeleteCollisionModel, 0x4C4C40);
+    RH_ScopedInstall(Get2dEffect, 0x4C4C70);
+    RH_ScopedInstall(Add2dEffect, 0x4C4D20);
 
 // Helpers
-    Install("CBaseModelInfo", "GetIsDrawLast", 0x5328C0, &CBaseModelInfo::GetIsDrawLast);
-    Install("CBaseModelInfo", "HasBeenPreRendered", 0x5328B0, &CBaseModelInfo::HasBeenPreRendered);
-    Install("CBaseModelInfo", "HasComplexHierarchy", 0x4C4E00, &CBaseModelInfo::HasComplexHierarchy);
-    Install("CBaseModelInfo", "IsBackfaceCulled", 0x5328F0, &CBaseModelInfo::IsBackfaceCulled);
-    Install("CBaseModelInfo", "IsLod", 0x4C4A00, &CBaseModelInfo::IsLod);
-    Install("CBaseModelInfo", "IsRoad", 0x4C4DF0, &CBaseModelInfo::IsRoad);
-    Install("CBaseModelInfo", "SetHasBeenPreRendered", 0x4C42F0, &CBaseModelInfo::SetHasBeenPreRendered);
-    Install("CBaseModelInfo", "SetIsLod", 0x4C4A10, &CBaseModelInfo::SetIsLod);
-    Install("CBaseModelInfo", "SetOwnsColModel", 0x5328D0, &CBaseModelInfo::SetOwnsColModel);
-    Install("CBaseModelInfo", "IncreaseAlpha", 0x532900, &CBaseModelInfo::IncreaseAlpha);
+    RH_ScopedInstall(GetIsDrawLast, 0x5328C0);
+    RH_ScopedInstall(HasBeenPreRendered, 0x5328B0);
+    RH_ScopedInstall(HasComplexHierarchy, 0x4C4E00);
+    RH_ScopedInstall(IsBackfaceCulled, 0x5328F0);
+    RH_ScopedInstall(IsLod, 0x4C4A00);
+    RH_ScopedInstall(IsRoad, 0x4C4DF0);
+    RH_ScopedInstall(SetHasBeenPreRendered, 0x4C42F0);
+    RH_ScopedInstall(SetIsLod, 0x4C4A10);
+    RH_ScopedInstall(SetOwnsColModel, 0x5328D0);
+    RH_ScopedInstall(IncreaseAlpha, 0x532900);
 
-    Install("CBaseModelInfo", "IsBreakableStatuePart", 0x59F090, &CBaseModelInfo::IsBreakableStatuePart);
-    Install("CBaseModelInfo", "IsTagModel", 0x49CC20, &CBaseModelInfo::IsTagModel);
+    RH_ScopedInstall(IsBreakableStatuePart, 0x59F090);
+    RH_ScopedInstall(IsTagModel, 0x49CC20);
     // Hooking SwaysInWind function causes side effects
-    //Install("CBaseModelInfo", "SwaysInWind", 0x4212C0, &CBaseModelInfo::SwaysInWind);
+    //RH_ScopedInstall(SwaysInWind, 0x4212C0);
 
 // Other
-    Install("CBaseModelInfo", "SetBaseModelInfoFlags", 0x5B3AD0, &SetBaseModelInfoFlags);
+    RH_ScopedInstall(SetBaseModelInfoFlags, 0x5B3AD0);
 }
 
 //0x4C4A80

@@ -7,10 +7,10 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
-    Install("CTaskComplexInAirAndLand", "CTaskComplexInAirAndLand", 0x678C80, &CTaskComplexInAirAndLand::Constructor);
-    Install("CTaskComplexInAirAndLand", "CreateFirstSubTask", 0x67CC30, &CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexInAirAndLand", "CreateNextSubTask", 0x67CCB0, &CTaskComplexInAirAndLand::CreateNextSubTask_Reversed);
-    Install("CTaskComplexInAirAndLand", "ControlSubTask", 0x67D230, &CTaskComplexInAirAndLand::ControlSubTask_Reversed);
+    RH_ScopedInstall(Constructor, 0x678C80);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67CC30);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CCB0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {

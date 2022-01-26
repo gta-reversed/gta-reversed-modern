@@ -3,33 +3,33 @@
 CControllerConfigManager& ControlsManager = *(CControllerConfigManager *) 0xB70198;
 
 void CControllerConfigManager::InjectHooks() {
-//    Install("CControllerConfigManager", "CControllerConfigManager", 0x531EE0, &CControllerConfigManager::Constructor);
-//    Install("CControllerConfigManager", "SaveSettings", 0x52D200, &CControllerConfigManager::SaveSettings);
-//    Install("CControllerConfigManager", "InitDefaultControlConfiguration", 0x530640, &CControllerConfigManager::InitDefaultControlConfiguration);
-//    Install("CControllerConfigManager", "InitialiseControllerActionNameArray", 0x52D260, &CControllerConfigManager::InitialiseControllerActionNameArray);
-//    Install("CControllerConfigManager", "ReInitControls", 0x531F20, &CControllerConfigManager::ReInitControls);
-//    Install("CControllerConfigManager", "StoreMouseButtonState", 0x52DA30, &CControllerConfigManager::StoreMouseButtonState);
-//    Install("CControllerConfigManager", "UpdateJoyInConfigMenus_ButtonDown", 0x52DAB0, &CControllerConfigManager::UpdateJoyInConfigMenus_ButtonDown);
-//    Install("CControllerConfigManager", "AffectControllerStateOn_ButtonDown_DebugStuff", 0x52DC10, &CControllerConfigManager::AffectControllerStateOn_ButtonDown_DebugStuff);
-//    Install("CControllerConfigManager", "UpdateJoyInConfigMenus_ButtonUp", 0x52DC20, &CControllerConfigManager::UpdateJoyInConfigMenus_ButtonUp);
-//    Install("CControllerConfigManager", "AffectControllerStateOn_ButtonUp_DebugStuff", 0x52DD80, &CControllerConfigManager::AffectControllerStateOn_ButtonUp_DebugStuff);
-//    Install("CControllerConfigManager", "ClearSimButtonPressCheckers", 0x52DD90, &CControllerConfigManager::ClearSimButtonPressCheckers);
-//    Install("CControllerConfigManager", "GetJoyButtonJustUp", 0x52D1C0, &CControllerConfigManager::GetJoyButtonJustUp);
-//    Install("CControllerConfigManager", "GetJoyButtonJustDown", 0x52D1E0, &CControllerConfigManager::GetJoyButtonJustDown);
-//    Install("CControllerConfigManager", "GetIsKeyboardKeyDown", 0x52DDB0, &CControllerConfigManager::GetIsKeyboardKeyDown);
-//    Install("CControllerConfigManager", "GetIsKeyboardKeyJustDown", 0x52E450, &CControllerConfigManager::GetIsKeyboardKeyJustDown);
-//    Install("CControllerConfigManager", "GetIsMouseButtonDown", 0x52EF30, &CControllerConfigManager::GetIsMouseButtonDown);
-//    Install("CControllerConfigManager", "GetIsMouseButtonUp", 0x52F020, &CControllerConfigManager::GetIsMouseButtonUp);
-//    Install("CControllerConfigManager", "GetIsMouseButtonJustUp", 0x52F110, &CControllerConfigManager::GetIsMouseButtonJustUp);
-//    Install("CControllerConfigManager", "GetIsKeyBlank", 0x52F2A0, &CControllerConfigManager::GetIsKeyBlank);
-//    Install("CControllerConfigManager", "GetActionType", 0x52F2F0, &CControllerConfigManager::GetActionType);
-//    Install("CControllerConfigManager", "GetControllerSettingTextMouse", 0x52F390, &CControllerConfigManager::GetControllerSettingTextMouse);
-//    Install("CControllerConfigManager", "GetControllerSettingTextJoystick", 0x52F450, &CControllerConfigManager::GetControllerSettingTextJoystick);
-//    Install("CControllerConfigManager", "ClearSettingsAssociatedWithAction", 0x52FD70, &CControllerConfigManager::ClearSettingsAssociatedWithAction);
-//    Install("CControllerConfigManager", "MakeControllerActionsBlank", 0x530500, &CControllerConfigManager::MakeControllerActionsBlank);
-//    Install("CControllerConfigManager", "AffectPadFromKeyBoard", 0x531140, &CControllerConfigManager::AffectPadFromKeyBoard);
-//    Install("CControllerConfigManager", "AffectPadFromMouse", 0x5314A0, &CControllerConfigManager::AffectPadFromMouse);
-//    Install("CControllerConfigManager", "DeleteMatchingActionInitiators", 0x531C90, &CControllerConfigManager::DeleteMatchingActionInitiators);
+//    RH_ScopedInstall(Constructor, 0x531EE0);
+//    RH_ScopedInstall(SaveSettings, 0x52D200);
+//    RH_ScopedInstall(InitDefaultControlConfiguration, 0x530640);
+//    RH_ScopedInstall(InitialiseControllerActionNameArray, 0x52D260);
+//    RH_ScopedInstall(ReInitControls, 0x531F20);
+//    RH_ScopedInstall(StoreMouseButtonState, 0x52DA30);
+//    RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonDown, 0x52DAB0);
+//    RH_ScopedInstall(AffectControllerStateOn_ButtonDown_DebugStuff, 0x52DC10);
+//    RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonUp, 0x52DC20);
+//    RH_ScopedInstall(AffectControllerStateOn_ButtonUp_DebugStuff, 0x52DD80);
+//    RH_ScopedInstall(ClearSimButtonPressCheckers, 0x52DD90);
+//    RH_ScopedInstall(GetJoyButtonJustUp, 0x52D1C0);
+//    RH_ScopedInstall(GetJoyButtonJustDown, 0x52D1E0);
+//    RH_ScopedInstall(GetIsKeyboardKeyDown, 0x52DDB0);
+//    RH_ScopedInstall(GetIsKeyboardKeyJustDown, 0x52E450);
+//    RH_ScopedInstall(GetIsMouseButtonDown, 0x52EF30);
+//    RH_ScopedInstall(GetIsMouseButtonUp, 0x52F020);
+//    RH_ScopedInstall(GetIsMouseButtonJustUp, 0x52F110);
+//    RH_ScopedInstall(GetIsKeyBlank, 0x52F2A0);
+//    RH_ScopedInstall(GetActionType, 0x52F2F0);
+//    RH_ScopedInstall(GetControllerSettingTextMouse, 0x52F390);
+//    RH_ScopedInstall(GetControllerSettingTextJoystick, 0x52F450);
+//    RH_ScopedInstall(ClearSettingsAssociatedWithAction, 0x52FD70);
+//    RH_ScopedInstall(MakeControllerActionsBlank, 0x530500);
+//    RH_ScopedInstall(AffectPadFromKeyBoard, 0x531140);
+//    RH_ScopedInstall(AffectPadFromMouse, 0x5314A0);
+//    RH_ScopedInstall(DeleteMatchingActionInitiators, 0x531C90);
 }
 
 // 0x531EE0

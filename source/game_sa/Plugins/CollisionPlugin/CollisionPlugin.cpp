@@ -5,8 +5,8 @@
 CClumpModelInfo*& CCollisionPlugin::ms_currentModel = *(CClumpModelInfo**)0x9689E0;
 
 void CCollisionPlugin::InjectHooks() {
-    Install("CCollisionPlugin", "PluginAttach", 0x41B310, &CCollisionPlugin::PluginAttach);
-    Install("CCollisionPlugin", "SetModelInfo", 0x41B350, &CCollisionPlugin::SetModelInfo);
+    RH_ScopedInstall(PluginAttach, 0x41B310);
+    RH_ScopedInstall(SetModelInfo, 0x41B350);
 }
 
 // internal

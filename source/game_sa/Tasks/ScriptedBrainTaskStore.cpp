@@ -4,14 +4,14 @@ CScriptedBrainTaskEntry(&CScriptedBrainTaskStore::ms_entries)[TOTAL_SCRIPTED_BRA
 
 void CScriptedBrainTaskEntry::InjectHooks()
 {
-    Install("CScriptedBrainTaskEntry", "CScriptedBrainTaskEntry", 0x62EC40, &CScriptedBrainTaskEntry::Constructor);
+    RH_ScopedInstall(Constructor, 0x62EC40);
 }
 
 void CScriptedBrainTaskStore::InjectHooks()
 {
     CScriptedBrainTaskEntry::InjectHooks();
-    Install("CScriptedBrainTaskStore", "SetTask", 0x635720, &CScriptedBrainTaskStore::SetTask);
-    Install("CScriptedBrainTaskStore", "GetTask", 0x6357C0, &CScriptedBrainTaskStore::GetTask);
+    RH_ScopedInstall(SetTask, 0x635720);
+    RH_ScopedInstall(GetTask, 0x6357C0);
     RH_ScopedOverloadedInstall(Clear, "ped", 0x635850, void(*)(CPed*));
     RH_ScopedOverloadedInstall(Clear, "task", 0x6357F0, void(*)(CTask*));
 }

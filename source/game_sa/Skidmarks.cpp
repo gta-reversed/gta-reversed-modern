@@ -8,11 +8,11 @@ CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkid
 
 void CSkidmarks::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
-    Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
-    Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
-    Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
-    Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
+    RH_ScopedInstall(Init, 0x7204E0);
+    RH_ScopedInstall(Shutdown, 0x720570);
+    RH_ScopedInstall(Clear, 0x720590);
+    RH_ScopedInstall(Update, 0x7205C0);
+    RH_ScopedInstall(Render, 0x720640);
     RH_ScopedOverloadedInstall(RegisterOne, "EC0", 0x720EC0, void (*)(uint32, const CVector&, float, float, bool*, bool*, float));
     RH_ScopedOverloadedInstall(RegisterOne, "", 0x720930, void (*)(uint32, const CVector&, float, float, eSkidMarkType, bool*, float));
 }

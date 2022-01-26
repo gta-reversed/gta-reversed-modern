@@ -3,12 +3,12 @@
 CHudColours& HudColour = *reinterpret_cast<CHudColours*>(0xBAB22C);
 
 void CHudColours::InjectHooks() {
-    Install("CHudColours", "Constructor", 0x58FDA0, &CHudColours::Constructor);
-    Install("CHudColours", "Destructor", 0x58FD90, &CHudColours::Destructor);
-    Install("CHudColours", "SetRGBAValue", 0x58FD20, &CHudColours::SetRGBAValue);
-    Install("CHudColours", "GetIntColour", 0x58FD50, &CHudColours::GetIntColour);
-    Install("CHudColours", "GetRGB", 0x58FEA0, &CHudColours::GetRGB);
-    Install("CHudColours", "GetRGBA", 0x58FEE0, &CHudColours::GetRGBA);
+    RH_ScopedInstall(Constructor, 0x58FDA0);
+    RH_ScopedInstall(Destructor, 0x58FD90);
+    RH_ScopedInstall(SetRGBAValue, 0x58FD20);
+    RH_ScopedInstall(GetIntColour, 0x58FD50);
+    RH_ScopedInstall(GetRGB, 0x58FEA0);
+    RH_ScopedInstall(GetRGBA, 0x58FEE0);
 }
 
 // 0x58FDA0

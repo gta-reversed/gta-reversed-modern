@@ -4,7 +4,7 @@ float* CMaths::ms_SinTable = (float*)0xBB3DFC;
 
 void CMaths::InjectHooks()
 {
-    Install("CMaths", "InitMathsTables", 0x59AC90, &CMaths::InitMathsTables);
+    RH_ScopedInstall(InitMathsTables, 0x59AC90);
 }
 
 void CMaths::InitMathsTables()

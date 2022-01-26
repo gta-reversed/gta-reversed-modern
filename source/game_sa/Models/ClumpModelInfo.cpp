@@ -10,36 +10,36 @@
 void CClumpModelInfo::InjectHooks()
 {
 // VTABLE
-    Install("CClumpModelInfo", "GetModelType", 0x4C5720, &CClumpModelInfo::GetModelType_Reversed);
-    Install("CClumpModelInfo", "Init", 0x4C4E40, &CClumpModelInfo::Init_Reversed);
-    Install("CClumpModelInfo", "Shutdown", 0x4C4E60, &CClumpModelInfo::Shutdown_Reversed);
-    Install("CClumpModelInfo", "DeleteRwObject", 0x4C4E70, &CClumpModelInfo::DeleteRwObject_Reversed);
-    Install("CClumpModelInfo", "GetRwModelType", 0x4C5730, &CClumpModelInfo::GetRwModelType_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5720);
+    RH_ScopedInstall(Init_Reversed, 0x4C4E40);
+    RH_ScopedInstall(Shutdown_Reversed, 0x4C4E60);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4E70);
+    RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5730);
     Install("CClumpModelInfo", "CreateInstance_void", 0x4C5140, (RwObject * (CClumpModelInfo::*)())(&CClumpModelInfo::CreateInstance_Reversed));
     RH_ScopedOverloadedInstall(CreateInstance_Reversed, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
-    Install("CClumpModelInfo", "SetAnimFile", 0x4C5200, &CClumpModelInfo::SetAnimFile_Reversed);
-    Install("CClumpModelInfo", "ConvertAnimFileIndex", 0x4C5250, &CClumpModelInfo::ConvertAnimFileIndex_Reversed);
-    Install("CClumpModelInfo", "GetAnimFileIndex", 0x4C5740, &CClumpModelInfo::GetAnimFileIndex_Reversed);
-    Install("CClumpModelInfo", "GetBoundingBox", 0x4C5710, &CClumpModelInfo::GetBoundingBox_Reversed);
-    Install("CClumpModelInfo", "SetClump", 0x4C4F70, &CClumpModelInfo::SetClump_Reversed);
+    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C5200);
+    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C5250);
+    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C5740);
+    RH_ScopedInstall(GetBoundingBox_Reversed, 0x4C5710);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C4F70);
 
 // CLASS FUNCTIONS
-    Install("CClumpModelInfo", "SetFrameIds", 0x4C5460, &CClumpModelInfo::SetFrameIds);
+    RH_ScopedInstall(SetFrameIds, 0x4C5460);
 
 // STATICS
-    Install("CClumpModelInfo", "SetHierarchyForSkinAtomic", 0x4C4EF0, &CClumpModelInfo::SetHierarchyForSkinAtomic);
-    Install("CClumpModelInfo", "AtomicSetupLightingCB", 0x4C4F30, &CClumpModelInfo::AtomicSetupLightingCB);
-    Install("CClumpModelInfo", "SetAtomicRendererCB", 0x4C5280, &CClumpModelInfo::SetAtomicRendererCB);
-    Install("CClumpModelInfo", "FindFrameFromNameCB", 0x4C52A0, &CClumpModelInfo::FindFrameFromNameCB);
-    Install("CClumpModelInfo", "FindFrameFromNameWithoutIdCB", 0x4C52F0, &CClumpModelInfo::FindFrameFromNameWithoutIdCB);
-    Install("CClumpModelInfo", "FindFrameFromIdCB", 0x4C5350, &CClumpModelInfo::FindFrameFromIdCB);
-    Install("CClumpModelInfo", "FillFrameArrayCB", 0x4C5390, &CClumpModelInfo::FillFrameArrayCB);
-    Install("CClumpModelInfo", "GetFrameFromId", 0x4C53C0, &CClumpModelInfo::GetFrameFromId);
-    Install("CClumpModelInfo", "GetFrameFromName", 0x4C5400, &CClumpModelInfo::GetFrameFromName);
-    Install("CClumpModelInfo", "FillFrameArray", 0x4C5440, &CClumpModelInfo::FillFrameArray);
+    RH_ScopedInstall(SetHierarchyForSkinAtomic, 0x4C4EF0);
+    RH_ScopedInstall(AtomicSetupLightingCB, 0x4C4F30);
+    RH_ScopedInstall(SetAtomicRendererCB, 0x4C5280);
+    RH_ScopedInstall(FindFrameFromNameCB, 0x4C52A0);
+    RH_ScopedInstall(FindFrameFromNameWithoutIdCB, 0x4C52F0);
+    RH_ScopedInstall(FindFrameFromIdCB, 0x4C5350);
+    RH_ScopedInstall(FillFrameArrayCB, 0x4C5390);
+    RH_ScopedInstall(GetFrameFromId, 0x4C53C0);
+    RH_ScopedInstall(GetFrameFromName, 0x4C5400);
+    RH_ScopedInstall(FillFrameArray, 0x4C5440);
 
 // Other
-    Install("CBaseModelInfo", "SetClumpModelInfoFlags", 0x5B3C30, &SetClumpModelInfoFlags);
+    RH_ScopedInstall(SetClumpModelInfoFlags, 0x5B3C30);
 }
 
 ModelInfoType CClumpModelInfo::GetModelType()

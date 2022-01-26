@@ -13,15 +13,15 @@ float(*cBuoyancy::afBoatVolumeDistributionCat)[3] = (float(*)[3])0x8D3314; // Ca
 
 void cBuoyancy::InjectHooks()
 {
-    Install("cBuoyancy", "ProcessBuoyancy", 0x6C3EF0, &cBuoyancy::ProcessBuoyancy);
-    Install("cBuoyancy", "ProcessBuoyancyBoat", 0x6C3030, &cBuoyancy::ProcessBuoyancyBoat);
-    Install("cBuoyancy", "CalcBuoyancyForce", 0x6C2750, &cBuoyancy::CalcBuoyancyForce);
-    Install("cBuoyancy", "PreCalcSetup", 0x6C2B90, &cBuoyancy::PreCalcSetup);
-    Install("cBuoyancy", "AddSplashParticles", 0x6C34E0, &cBuoyancy::AddSplashParticles);
-    Install("cBuoyancy", "SimpleCalcBuoyancy", 0x6C3B00, &cBuoyancy::SimpleCalcBuoyancy);
-    Install("cBuoyancy", "SimpleSumBuoyancyData", 0x6C2970, &cBuoyancy::SimpleSumBuoyancyData);
-    Install("cBuoyancy", "FindWaterLevel", 0x6C2810, &cBuoyancy::FindWaterLevel);
-    Install("cBuoyancy", "FindWaterLevelNorm", 0x6C28C0, &cBuoyancy::FindWaterLevelNorm);
+    RH_ScopedInstall(ProcessBuoyancy, 0x6C3EF0);
+    RH_ScopedInstall(ProcessBuoyancyBoat, 0x6C3030);
+    RH_ScopedInstall(CalcBuoyancyForce, 0x6C2750);
+    RH_ScopedInstall(PreCalcSetup, 0x6C2B90);
+    RH_ScopedInstall(AddSplashParticles, 0x6C34E0);
+    RH_ScopedInstall(SimpleCalcBuoyancy, 0x6C3B00);
+    RH_ScopedInstall(SimpleSumBuoyancyData, 0x6C2970);
+    RH_ScopedInstall(FindWaterLevel, 0x6C2810);
+    RH_ScopedInstall(FindWaterLevelNorm, 0x6C28C0);
 }
 
 bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce)

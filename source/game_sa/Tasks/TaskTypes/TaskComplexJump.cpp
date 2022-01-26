@@ -8,12 +8,12 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexJump::InjectHooks() {
-    Install("CTaskComplexJump", "Constructor", 0x67A030, &CTaskComplexJump::Constructor);
-    Install("CTaskComplexJump", "CreateSubTask", 0x67D980, &CTaskComplexJump::CreateSubTask);
-    Install("CTaskComplexJump", "CreateFirstSubTask", 0x67FD10, &CTaskComplexJump::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexJump", "CreateNextSubTask", 0x67FC00, &CTaskComplexJump::CreateNextSubTask_Reversed);
-    Install("CTaskComplexJump", "Clone", 0x67C5A0, &CTaskComplexJump::Clone_Reversed);
-    Install("CTaskComplexJump", "MakeAbortable", 0x67A070, &CTaskComplexJump::MakeAbortable_Reversed);
+    RH_ScopedInstall(Constructor, 0x67A030);
+    RH_ScopedInstall(CreateSubTask, 0x67D980);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67FD10);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67FC00);
+    RH_ScopedInstall(Clone_Reversed, 0x67C5A0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x67A070);
 }
 
 CTaskComplexJump* CTaskComplexJump::Constructor(eComplexJumpType jumpType) {

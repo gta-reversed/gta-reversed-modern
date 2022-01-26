@@ -5,8 +5,8 @@
 void CTaskSimplePickUpEntity::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "1", 0x691870, CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x6917B0, CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, float));
-    Install("CTaskSimplePickUpEntity", "Clone", 0x692A90, &CTaskSimplePickUpEntity::Clone_Reversed);
-    Install("CTaskSimplePickUpEntity", "GetTaskType", 0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
+    RH_ScopedInstall(Clone_Reversed, 0x692A90);
+    RH_ScopedInstall(GetId_Reversed, 0x691810);
 }
 
 CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress)

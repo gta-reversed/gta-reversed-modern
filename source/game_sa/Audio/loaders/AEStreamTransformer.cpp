@@ -21,6 +21,6 @@ void CAEStreamTransformer::TransformBuffer(void* buffer, size_t size, uint32 pos
 }
 
 void CAEStreamTransformer::InjectHooks() {
-    Install("CAEStreamTransformer", "Initialise", 0x4f1750, &CAEStreamTransformer::Initialise);
-    Install("CAEStreamTransformer", "TransformBuffer", 0x4f17d0, &CAEStreamTransformer::TransformBuffer);
+    RH_ScopedInstall(Initialise, 0x4f1750);
+    RH_ScopedInstall(TransformBuffer, 0x4f17d0);
 }

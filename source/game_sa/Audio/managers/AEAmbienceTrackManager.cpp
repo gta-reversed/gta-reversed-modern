@@ -8,12 +8,12 @@ CAEAmbienceTrackManager& AEAmbienceTrackManager = *(CAEAmbienceTrackManager*)0x8
 
 void CAEAmbienceTrackManager::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CAEAmbienceTrackManager", "Reset", 0x4D6CA0, &CAEAmbienceTrackManager::Reset);
-    Install("CAEAmbienceTrackManager", "IsAmbienceTrackActive", 0x4D6CF0, &CAEAmbienceTrackManager::IsAmbienceTrackActive);
-    Install("CAEAmbienceTrackManager", "IsAmbienceRadioActive", 0x4D6D40, &CAEAmbienceTrackManager::IsAmbienceRadioActive);
-    Install("CAEAmbienceTrackManager", "StopSpecialMissionAmbienceTrack", 0x4D6D60, &CAEAmbienceTrackManager::StopSpecialMissionAmbienceTrack);
-    // Install("CAEAmbienceTrackManager", "UpdateAmbienceTrackAndVolume", 0x4D6E60, &CAEAmbienceTrackManager::UpdateAmbienceTrackAndVolume);
-    Install("CAEAmbienceTrackManager", "Service", 0x4D76C0, &CAEAmbienceTrackManager::Service);
+    RH_ScopedInstall(Reset, 0x4D6CA0);
+    RH_ScopedInstall(IsAmbienceTrackActive, 0x4D6CF0);
+    RH_ScopedInstall(IsAmbienceRadioActive, 0x4D6D40);
+    RH_ScopedInstall(StopSpecialMissionAmbienceTrack, 0x4D6D60);
+    // RH_ScopedInstall(UpdateAmbienceTrackAndVolume, 0x4D6E60);
+    RH_ScopedInstall(Service, 0x4D76C0);
 }
 
 // 0x5B9660

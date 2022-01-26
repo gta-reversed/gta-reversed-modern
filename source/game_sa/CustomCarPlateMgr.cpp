@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
 void CCustomCarPlateMgr::InjectHooks() {
-//    Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
-//    Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
+//    RH_ScopedInstall(Initialise, 0x6FD500);
+//    RH_ScopedInstall(Shutdown, 0x6FD720);
 }
 
 // 0x6FD500

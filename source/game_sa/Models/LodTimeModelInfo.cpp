@@ -2,8 +2,8 @@
 
 void CLodTimeModelInfo::InjectHooks()
 {
-    Install("CLodTimeModelInfo", "GetModelType", 0x4C5660, &CLodTimeModelInfo::GetModelType_Reversed);
-    Install("CLodTimeModelInfo", "GetTimeInfo", 0x4C5670, &CLodTimeModelInfo::GetTimeInfo_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5660);
+    RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C5670);
 }
 
 ModelInfoType CLodTimeModelInfo::GetModelType()

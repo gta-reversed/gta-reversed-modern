@@ -5,8 +5,8 @@
 CGamma& gamma = *(CGamma*)0xC92134;
 
 void CGamma::InjectHooks() {
-    // Install("CGamma", "Init", 0x747180, &CGamma::Init);
-    // Install("CGamma", "SetGamma", 0x747200, &CGamma::SetGamma);
+    // RH_ScopedInstall(Init, 0x747180);
+    // RH_ScopedInstall(SetGamma, 0x747200);
 }
 
 // 0x747180

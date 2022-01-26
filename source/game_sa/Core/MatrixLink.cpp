@@ -2,8 +2,8 @@
 
 void CMatrixLink::InjectHooks()
 {
-    Install("CMatrixLink", "Insert", 0x54E8F0, &CMatrixLink::Insert);
-    Install("CMatrixLink", "Remove", 0x54E910, &CMatrixLink::Remove);
+    RH_ScopedInstall(Insert, 0x54E8F0);
+    RH_ScopedInstall(Remove, 0x54E910);
 }
 
 void CMatrixLink::Insert(CMatrixLink* pWhere)

@@ -2,7 +2,7 @@
 #include "PedTaskPair.h"
 
 void CPedTaskPair::InjectHooks() {
-    Install("CPedTaskPair", "Flush", 0x5E95B0, &CPedTaskPair::Flush);
+    RH_ScopedInstall(Flush, 0x5E95B0);
 }
 
 // 0x5E95B0

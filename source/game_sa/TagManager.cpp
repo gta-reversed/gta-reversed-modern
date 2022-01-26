@@ -9,25 +9,25 @@ RxPipeline* &CTagManager::ms_pPipeline = *(RxPipeline**)0xA9AD78;
 
 void CTagManager::InjectHooks()
 {
-    Install("CTagManager", "Init", 0x49CC50, &CTagManager::Init);
-    Install("CTagManager", "ShutdownForRestart", 0x49CC60, &CTagManager::ShutdownForRestart);
-    Install("CTagManager", "GetTagPos", 0x49CEA0, &CTagManager::GetTagPos);
-    Install("CTagManager", "AddTag", 0x49CC90, &CTagManager::AddTag);
-    Install("CTagManager", "FindTagDesc", 0x49CCB0, &CTagManager::FindTagDesc);
-    Install("CTagManager", "IsTag", 0x49CCE0, &CTagManager::IsTag);
+    RH_ScopedInstall(Init, 0x49CC50);
+    RH_ScopedInstall(ShutdownForRestart, 0x49CC60);
+    RH_ScopedInstall(GetTagPos, 0x49CEA0);
+    RH_ScopedInstall(AddTag, 0x49CC90);
+    RH_ScopedInstall(FindTagDesc, 0x49CCB0);
+    RH_ScopedInstall(IsTag, 0x49CCE0);
     RH_ScopedOverloadedInstall(SetAlpha, "RpAtomic", 0x49CD30, void(*)(RpAtomic*, uint8));
     RH_ScopedOverloadedInstall(GetAlpha, "RpAtomic", 0x49CD40, uint8(*)(RpAtomic*));
     RH_ScopedOverloadedInstall(GetAlpha, "Entity", 0x49CF90, uint8(*)(CEntity*));
-    Install("CTagManager", "GetPercentageTagged", 0x49CDA0, &CTagManager::GetPercentageTagged);
-    Install("CTagManager", "GetPercentageTaggedInArea", 0x49D0B0, &CTagManager::GetPercentageTaggedInArea);
-    Install("CTagManager", "UpdateNumTagged", 0x49CDE0, &CTagManager::UpdateNumTagged);
-    Install("CTagManager", "SetAlphaInArea", 0x49CFE0, &CTagManager::SetAlphaInArea);
+    RH_ScopedInstall(GetPercentageTagged, 0x49CDA0);
+    RH_ScopedInstall(GetPercentageTaggedInArea, 0x49D0B0);
+    RH_ScopedInstall(UpdateNumTagged, 0x49CDE0);
+    RH_ScopedInstall(SetAlphaInArea, 0x49CFE0);
     RH_ScopedOverloadedInstall(SetAlpha, "Entity", 0x49CEC0, void(*)(CEntity*, uint8));
-    Install("CTagManager", "GetNearestTag", 0x49D160, &CTagManager::GetNearestTag);
-    Install("CTagManager", "SetupAtomic", 0x49CE10, &CTagManager::SetupAtomic);
-    Install("CTagManager", "RenderTagForPC", 0x49CE40, &CTagManager::RenderTagForPC);
-    Install("CTagManager", "Save", 0x5D3D60, &CTagManager::Save);
-    Install("CTagManager", "Load", 0x5D3DA0, &CTagManager::Load);
+    RH_ScopedInstall(GetNearestTag, 0x49D160);
+    RH_ScopedInstall(SetupAtomic, 0x49CE10);
+    RH_ScopedInstall(RenderTagForPC, 0x49CE40);
+    RH_ScopedInstall(Save, 0x5D3D60);
+    RH_ScopedInstall(Load, 0x5D3DA0);
 }
 
 void CTagManager::Init()

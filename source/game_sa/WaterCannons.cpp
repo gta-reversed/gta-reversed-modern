@@ -6,10 +6,10 @@
 CWaterCannon (&CWaterCannons::aCannons)[3] = *(CWaterCannon (*)[3])0xC80740;
 
 void CWaterCannons::InjectHooks() {
-    Install("CWaterCannons", "Init", 0x728C80, &CWaterCannons::Init);
-    Install("CWaterCannons", "UpdateOne", 0x728CB0, &CWaterCannons::UpdateOne);
-    Install("CWaterCannons", "Update", 0x72A3C0, &CWaterCannons::Update);
-    Install("CWaterCannons", "Render", 0x729B30, &CWaterCannons::Render);
+    RH_ScopedInstall(Init, 0x728C80);
+    RH_ScopedInstall(UpdateOne, 0x728CB0);
+    RH_ScopedInstall(Update, 0x72A3C0);
+    RH_ScopedInstall(Render, 0x729B30);
 }
 
 // 0x728C80

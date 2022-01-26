@@ -25,37 +25,37 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>& CModelInfo::ms_2dFXInfoStore = *(
 
 void CModelInfo::InjectHooks()
 {
-    Install("CModelInfo", "Initialise", 0x4C6810, &CModelInfo::Initialise);
-    Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
-    Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
+    RH_ScopedInstall(Initialise, 0x4C6810);
+    RH_ScopedInstall(ShutDown, 0x4C63E0);
+    RH_ScopedInstall(ReInit2dEffects, 0x4C63B0);
 
-    Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
-    Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
+    RH_ScopedInstall(GetModelInfoUInt16, 0x4C59F0);
+    RH_ScopedInstall(GetModelInfoFromHashKey, 0x4C59B0);
     RH_ScopedOverloadedInstall(GetModelInfo, "full", 0x4C5940, CBaseModelInfo * (*)(char const*, int32*));
     RH_ScopedOverloadedInstall(GetModelInfo, "minmax", 0x4C5A20, CBaseModelInfo*(*)(char const*, int32, int32));
 
-    Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
-    Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
-    Install("CModelInfo", "AddLodAtomicModel", 0x4C6680, &CModelInfo::AddLodAtomicModel);
-    Install("CModelInfo", "AddTimeModel", 0x4C66B0, &CModelInfo::AddTimeModel);
-    Install("CModelInfo", "AddLodTimeModel", 0x4C66E0, &CModelInfo::AddLodTimeModel);
-    Install("CModelInfo", "AddWeaponModel", 0x4C6710, &CModelInfo::AddWeaponModel);
-    Install("CModelInfo", "AddClumpModel", 0x4C6740, &CModelInfo::AddClumpModel);
-    Install("CModelInfo", "AddVehicleModel", 0x4C6770, &CModelInfo::AddVehicleModel);
-    Install("CModelInfo", "AddPedModel", 0x4C67A0, &CModelInfo::AddPedModel);
+    RH_ScopedInstall(AddAtomicModel, 0x4C6620);
+    RH_ScopedInstall(AddDamageAtomicModel, 0x4C6650);
+    RH_ScopedInstall(AddLodAtomicModel, 0x4C6680);
+    RH_ScopedInstall(AddTimeModel, 0x4C66B0);
+    RH_ScopedInstall(AddLodTimeModel, 0x4C66E0);
+    RH_ScopedInstall(AddWeaponModel, 0x4C6710);
+    RH_ScopedInstall(AddClumpModel, 0x4C6740);
+    RH_ScopedInstall(AddVehicleModel, 0x4C6770);
+    RH_ScopedInstall(AddPedModel, 0x4C67A0);
 
-    Install("CModelInfo", "IsBoatModel", 0x4C5A70, &CModelInfo::IsBoatModel);
-    Install("CModelInfo", "IsCarModel", 0x4C5AA0, &CModelInfo::IsCarModel);
-    Install("CModelInfo", "IsTrainModel", 0x4C5AD0, &CModelInfo::IsTrainModel);
-    Install("CModelInfo", "IsHeliModel", 0x4C5B00, &CModelInfo::IsHeliModel);
-    Install("CModelInfo", "IsPlaneModel", 0x4C5B30, &CModelInfo::IsPlaneModel);
-    Install("CModelInfo", "IsBikeModel", 0x4C5B60, &CModelInfo::IsBikeModel);
-    Install("CModelInfo", "IsFakePlaneModel", 0x4C5B90, &CModelInfo::IsFakePlaneModel);
-    Install("CModelInfo", "IsMonsterTruckModel", 0x4C5BC0, &CModelInfo::IsMonsterTruckModel);
-    Install("CModelInfo", "IsQuadBikeModel", 0x4C5BF0, &CModelInfo::IsQuadBikeModel);
-    Install("CModelInfo", "IsBmxModel", 0x4C5C20, &CModelInfo::IsBmxModel);
-    Install("CModelInfo", "IsTrailerModel", 0x4C5C50, &CModelInfo::IsTrailerModel);
-    Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
+    RH_ScopedInstall(IsBoatModel, 0x4C5A70);
+    RH_ScopedInstall(IsCarModel, 0x4C5AA0);
+    RH_ScopedInstall(IsTrainModel, 0x4C5AD0);
+    RH_ScopedInstall(IsHeliModel, 0x4C5B00);
+    RH_ScopedInstall(IsPlaneModel, 0x4C5B30);
+    RH_ScopedInstall(IsBikeModel, 0x4C5B60);
+    RH_ScopedInstall(IsFakePlaneModel, 0x4C5B90);
+    RH_ScopedInstall(IsMonsterTruckModel, 0x4C5BC0);
+    RH_ScopedInstall(IsQuadBikeModel, 0x4C5BF0);
+    RH_ScopedInstall(IsBmxModel, 0x4C5C20);
+    RH_ScopedInstall(IsTrailerModel, 0x4C5C50);
+    RH_ScopedInstall(IsVehicleModelType, 0x4C5C80);
 }
 
 // 0x4C63B0

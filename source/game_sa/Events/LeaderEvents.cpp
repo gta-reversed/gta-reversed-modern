@@ -12,32 +12,32 @@
 
 void CEventLeaderEnteredCarAsDriver::InjectHooks()
 {
-    Install("CEventLeaderEnteredCarAsDriver", "CEventLeaderEnteredCarAsDriver", 0x48E1C0, &CEventLeaderEnteredCarAsDriver::Constructor);
-    Install("CEventLeaderEnteredCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0EF0, &CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed);
+    RH_ScopedInstall(Constructor, 0x48E1C0);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0EF0);
 }
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
 {
-    Install("CEventLeaderExitedCarAsDriver", "CEventLeaderExitedCarAsDriver", 0x4B8300, &CEventLeaderExitedCarAsDriver::Constructor);
-    Install("CEventLeaderExitedCarAsDriver", "AffectsPedGroup_Reversed", 0x4B0F80, &CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B8300);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0F80);
 }
 
 void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
 {
-    Install("CEventLeaderQuitEnteringCarAsDriver", "CEventLeaderQuitEnteringCarAsDriver", 0x63A110, &CEventLeaderQuitEnteringCarAsDriver::Constructor);
-    Install("CEventLeaderQuitEnteringCarAsDriver", "AffectsPedGroup_Reversed", 0x4B1010, &CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed);
+    RH_ScopedInstall(Constructor, 0x63A110);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B1010);
 }
 
 void CEventAreaCodes::InjectHooks()
 {
-    Install("CEventAreaCodes", "CEventAreaCodes", 0x4B2190, &CEventAreaCodes::Constructor);
-    Install("CEventAreaCodes", "AffectsPed_Reversed", 0x4B2270, &CEventAreaCodes::AffectsPed_Reversed);
-    Install("CEventAreaCodes", "TakesPriorityOver_Reversed", 0x4B2350, &CEventAreaCodes::TakesPriorityOver_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B2190);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2270);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B2350);
 }
 
 void CEventLeaderEntryExit::InjectHooks()
 {
-    Install("CEventLeaderEntryExit", "CEventLeaderEntryExit", 0x43E1C0, &CEventLeaderEntryExit::Constructor);
+    RH_ScopedInstall(Constructor, 0x43E1C0);
 }
 
 CEventLeaderEnteredCarAsDriver::CEventLeaderEnteredCarAsDriver(CVehicle* vehicle)

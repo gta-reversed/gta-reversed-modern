@@ -2,9 +2,9 @@
 
 void CEventGlobalGroup::InjectHooks()
 {
-    Install("CEventGlobalGroup", "GetSoundLevel", 0x4AB900, &CEventGlobalGroup::GetSoundLevel);
-    Install("CEventGlobalGroup", "AddEventsToPed", 0x4AB9C0, &CEventGlobalGroup::AddEventsToPed);
-    Install("CEventGlobalGroup", "AddEventsToGroup", 0x4AB8A0, &CEventGlobalGroup::AddEventsToGroup);
+    RH_ScopedInstall(GetSoundLevel, 0x4AB900);
+    RH_ScopedInstall(AddEventsToPed, 0x4AB9C0);
+    RH_ScopedInstall(AddEventsToGroup, 0x4AB8A0);
 }
 
 float CEventGlobalGroup::GetSoundLevel(CEntity* entity, CVector& position)

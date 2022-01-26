@@ -59,17 +59,17 @@ void CTaskComplexPolicePursuit::SetWeapon(CPed* ped) {
 
 void CTaskComplexPolicePursuit::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("CTaskComplexPolicePursuit", "CTaskComplexPolicePursuit", 0x68BA70, &CTaskComplexPolicePursuit::Constructor);
-    // Install("CTaskComplexPolicePursuit", "SetWeapon", 0x68BAD0, &CTaskComplexPolicePursuit::SetWeapon);
-    // Install("CTaskComplexPolicePursuit", "ClearPursuit", 0x68BD90, &CTaskComplexPolicePursuit::ClearPursuit);
-    // Install("CTaskComplexPolicePursuit", "SetPursuit", 0x68BBD0, &CTaskComplexPolicePursuit::SetPursuit);
-    // Install("CTaskComplexPolicePursuit", "PersistPursuit", 0x68BDC0, &CTaskComplexPolicePursuit::PersistPursuit);
-    // Install("CTaskComplexPolicePursuit", "CreateSubTask", 0x68D910, &CTaskComplexPolicePursuit::CreateSubTask);
-    // Install("CTaskComplexPolicePursuit", "Clone", 0x68CDD0, &CTaskComplexPolicePursuit::Clone_Reversed);
-    // Install("CTaskComplexPolicePursuit", "MakeAbortable", 0x68BAB0, &CTaskComplexPolicePursuit::MakeAbortable_Reversed);
-    // Install("CTaskComplexPolicePursuit", "CreateNextSubTask", 0x68BAC0, &CTaskComplexPolicePursuit::CreateNextSubTask_Reversed);
-    // Install("CTaskComplexPolicePursuit", "CreateFirstSubTask", 0x6908E0, &CTaskComplexPolicePursuit::CreateFirstSubTask_Reversed);
-    // Install("CTaskComplexPolicePursuit", "ControlSubTask", 0x690920, &CTaskComplexPolicePursuit::ControlSubTask_Reversed);
+    // RH_ScopedInstall(Constructor, 0x68BA70);
+    // RH_ScopedInstall(SetWeapon, 0x68BAD0);
+    // RH_ScopedInstall(ClearPursuit, 0x68BD90);
+    // RH_ScopedInstall(SetPursuit, 0x68BBD0);
+    // RH_ScopedInstall(PersistPursuit, 0x68BDC0);
+    // RH_ScopedInstall(CreateSubTask, 0x68D910);
+    // RH_ScopedInstall(Clone_Reversed, 0x68CDD0);
+    // RH_ScopedInstall(MakeAbortable_Reversed, 0x68BAB0);
+    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68BAC0);
+    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6908E0);
+    // RH_ScopedInstall(ControlSubTask_Reversed, 0x690920);
 }
 
 CTaskComplexPolicePursuit* CTaskComplexPolicePursuit::Constructor() {

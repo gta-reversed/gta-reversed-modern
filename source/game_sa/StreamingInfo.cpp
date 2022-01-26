@@ -3,13 +3,13 @@
 CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4); // Just a pointer to `CStreaming::ms_aInfoForModel`
 
 void CStreamingInfo::InjectHooks() {
-    Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
-    Install("CStreamingInfo", "AddToList", 0x407480, &CStreamingInfo::AddToList);
-    Install("CStreamingInfo", "GetCdPosn", 0x407570, &CStreamingInfo::GetCdPosn);
-    Install("CStreamingInfo", "SetCdPosnAndSize", 0x4075E0, &CStreamingInfo::SetCdPosnAndSize);
-    Install("CStreamingInfo", "GetCdPosnAndSize", 0x4075A0, &CStreamingInfo::GetCdPosnAndSize);
-    Install("CStreamingInfo", "InList", 0x407560, &CStreamingInfo::InList);
-    Install("CStreamingInfo", "RemoveFromList", 0x4074E0, &CStreamingInfo::RemoveFromList);
+    RH_ScopedInstall(Init, 0x407460);
+    RH_ScopedInstall(AddToList, 0x407480);
+    RH_ScopedInstall(GetCdPosn, 0x407570);
+    RH_ScopedInstall(SetCdPosnAndSize, 0x4075E0);
+    RH_ScopedInstall(GetCdPosnAndSize, 0x4075A0);
+    RH_ScopedInstall(InList, 0x407560);
+    RH_ScopedInstall(RemoveFromList, 0x4074E0);
 }
 
 // 0x407460

@@ -4,7 +4,7 @@
 
 void CTaskComplexPartnerShove::InjectHooks()
 {
-    Install("CTaskComplexPartnerShove", "CTaskComplexPartnerShove", 0x6846F0, &CTaskComplexPartnerShove::Constructor);
+    RH_ScopedInstall(Constructor, 0x6846F0);
 }
 
 CTaskComplexPartnerShove::CTaskComplexPartnerShove(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int8 updateDirectionCount, CVector point) :

@@ -4,7 +4,7 @@
 
 void CTaskSimpleAnim::InjectHooks()
 {
-    Install("CTaskSimpleAnim", "MakeAbortable", 0x61A790, &CTaskSimpleAnim::MakeAbortable_Reversed);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
 }
 
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple()

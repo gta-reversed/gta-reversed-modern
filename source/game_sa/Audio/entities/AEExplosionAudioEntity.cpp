@@ -73,9 +73,9 @@ void CAEExplosionAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos
 
 void CAEExplosionAudioEntity::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CAEExplosionAudioEntity", "StaticInitialise", 0x5B9A60, &CAEExplosionAudioEntity::StaticInitialise);
-    Install("CAEExplosionAudioEntity", "AddAudioEvent", 0x4DCBE0, &CAEExplosionAudioEntity::AddAudioEvent);
-    Install("CAEExplosionAudioEntity", "UpdateParameters", 0x4DCB90, &CAEExplosionAudioEntity::UpdateParameters_Reversed);
+    RH_ScopedInstall(StaticInitialise, 0x5B9A60);
+    RH_ScopedInstall(AddAudioEvent, 0x4DCBE0);
+    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCB90);
 }
 
 void CAEExplosionAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

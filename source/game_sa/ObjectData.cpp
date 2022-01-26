@@ -4,8 +4,8 @@ CObjectData(&CObjectData::ms_aObjectInfo)[NUM_OBJECT_INFOS] = *(CObjectData(*)[N
 
 void CObjectData::InjectHooks()
 {
-    Install("CObjectData", "Initialise", 0x5B5360, &CObjectData::Initialise);
-    Install("CObjectData", "SetObjectData", 0x5A2D00, &CObjectData::SetObjectData);
+    RH_ScopedInstall(Initialise, 0x5B5360);
+    RH_ScopedInstall(SetObjectData, 0x5A2D00);
 }
 
 // 0x5B5360

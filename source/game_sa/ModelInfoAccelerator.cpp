@@ -2,15 +2,15 @@
 
 void CModelInfoAccelerator::InjectHooks()
 {
-    Install("CModelInfoAccelerator", "Init", 0x4C6A80, &CModelInfoAccelerator::Init);
-    Install("CModelInfoAccelerator", "AddModelInfoId", 0x4C6AA0, &CModelInfoAccelerator::AddModelInfoId);
-    Install("CModelInfoAccelerator", "GetNextModelInfoId", 0x4C6AC0, &CModelInfoAccelerator::GetNextModelInfoId);
-    Install("CModelInfoAccelerator", "AllocModelInfoIds", 0x4C6AE0, &CModelInfoAccelerator::AllocModelInfoIds);
-    Install("CModelInfoAccelerator", "FreeModelInfoIds", 0x4C6B10, &CModelInfoAccelerator::FreeModelInfoIds);
-    Install("CModelInfoAccelerator", "GetEntry", 0x4C6B30, &CModelInfoAccelerator::GetEntry);
-    Install("CModelInfoAccelerator", "End", 0x4C6B40, &CModelInfoAccelerator::End);
-    Install("CModelInfoAccelerator", "GetModelInfoIdFile", 0x4C6B70, &CModelInfoAccelerator::GetModelInfoIdFile);
-    Install("CModelInfoAccelerator", "EndOfLoadPhase", 0x4C6BD0, &CModelInfoAccelerator::EndOfLoadPhase);
+    RH_ScopedInstall(Init, 0x4C6A80);
+    RH_ScopedInstall(AddModelInfoId, 0x4C6AA0);
+    RH_ScopedInstall(GetNextModelInfoId, 0x4C6AC0);
+    RH_ScopedInstall(AllocModelInfoIds, 0x4C6AE0);
+    RH_ScopedInstall(FreeModelInfoIds, 0x4C6B10);
+    RH_ScopedInstall(GetEntry, 0x4C6B30);
+    RH_ScopedInstall(End, 0x4C6B40);
+    RH_ScopedInstall(GetModelInfoIdFile, 0x4C6B70);
+    RH_ScopedInstall(EndOfLoadPhase, 0x4C6BD0);
 }
 
 void CModelInfoAccelerator::Init()

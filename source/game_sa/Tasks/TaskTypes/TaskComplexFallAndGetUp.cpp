@@ -5,16 +5,16 @@
 #include "TaskSimpleGetUp.h"
 
 void CTaskComplexFallAndGetUp::InjectHooks() {
-    Install("CTaskComplexFallAndGetUp", "Constructor", 0x6786C0, &CTaskComplexFallAndGetUp::Constructor);
-    Install("CTaskComplexFallAndGetUp", "Constructor2", 0x678700, &CTaskComplexFallAndGetUp::Constructor2);
-    Install("CTaskComplexFallAndGetUp", "CreateSubTask", 0x678900, &CTaskComplexFallAndGetUp::CreateSubTask);
-    Install("CTaskComplexFallAndGetUp", "IsFalling", 0x6787D0, &CTaskComplexFallAndGetUp::IsFalling);
-    Install("CTaskComplexFallAndGetUp", "SetDownTime", 0x6787A0, &CTaskComplexFallAndGetUp::SetDownTime);
+    RH_ScopedInstall(Constructor, 0x6786C0);
+    RH_ScopedInstall(Constructor2, 0x678700);
+    RH_ScopedInstall(CreateSubTask, 0x678900);
+    RH_ScopedInstall(IsFalling, 0x6787D0);
+    RH_ScopedInstall(SetDownTime, 0x6787A0);
     // VTABLE
-    Install("CTaskComplexFallAndGetUp", "CreateFirstSubTask", 0x678870, &CTaskComplexFallAndGetUp::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexFallAndGetUp", "CreateNextSubTask", 0x67CB70, &CTaskComplexFallAndGetUp::CreateNextSubTask_Reversed);
-    Install("CTaskComplexFallAndGetUp", "ControlSubTask", 0x6788F0, &CTaskComplexFallAndGetUp::ControlSubTask_Reversed);
-    Install("CTaskComplexFallAndGetUp", "MakeAbortable", 0x6787F0, &CTaskComplexFallAndGetUp::MakeAbortable_Reversed);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x678870);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CB70);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x6788F0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6787F0);
 }
 
 CTaskComplexFallAndGetUp* CTaskComplexFallAndGetUp::Constructor(AnimationId nFallAnimId, AssocGroupId nFallAnimGroup, int32 nFallDownTime) {

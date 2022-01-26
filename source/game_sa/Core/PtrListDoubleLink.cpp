@@ -3,9 +3,9 @@
 #include "PtrListDoubleLink.h"
 
 void CPtrListDoubleLink::InjectHooks() {
-    Install("CPtrListDoubleLink", "Flush", 0x552470, &CPtrListDoubleLink::Flush);
-    Install("CPtrListDoubleLink", "AddItem", 0x533670, &CPtrListDoubleLink::AddItem);
-    Install("CPtrListDoubleLink", "DeleteItem", 0x5336B0, &CPtrListDoubleLink::DeleteItem);
+    RH_ScopedInstall(Flush, 0x552470);
+    RH_ScopedInstall(AddItem, 0x533670);
+    RH_ScopedInstall(DeleteItem, 0x5336B0);
 }
 
 void CPtrListDoubleLink::Flush() {

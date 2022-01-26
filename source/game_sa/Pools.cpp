@@ -7,8 +7,8 @@
 
 void CPools::InjectHooks()
 {
-    Install("CPools", "LoadObjectPool", 0x5D4A40, &CPools::LoadObjectPool);
-    Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
+    RH_ScopedInstall(LoadObjectPool, 0x5D4A40);
+    RH_ScopedInstall(MakeSureSlotInObjectPoolIsEmpty, 0x550080);
 }
 
 int32 CPools::CheckBuildingAtomics() {

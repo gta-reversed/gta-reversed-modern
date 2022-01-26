@@ -1,9 +1,9 @@
 #include "StdInc.h"
 
 void CMouseControllerState::InjectHooks() {
-    Install("CMouseControllerState", "CMouseControllerState", 0x53F220, &CMouseControllerState::Constructor);
-    Install("CMouseControllerState", "Clear", 0x53F250, &CMouseControllerState::Clear);
-    Install("CMouseControllerState", "CheckForInput", 0x53F270, &CMouseControllerState::CheckForInput);
+    RH_ScopedInstall(Constructor, 0x53F220);
+    RH_ScopedInstall(Clear, 0x53F250);
+    RH_ScopedInstall(CheckForInput, 0x53F270);
 }
 
 // 0x53F220

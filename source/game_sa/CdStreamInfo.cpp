@@ -49,15 +49,15 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
-    Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
-    Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
-    Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
-    Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
-    Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
-    Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
-    Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
-    Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
+    RH_ScopedInstall(CdStreamOpen, 0x4067B0);
+    RH_ScopedInstall(CdStreamSync, 0x406460);
+    RH_ScopedInstall(CdStreamGetStatus, 0x4063E0);
+    RH_ScopedInstall(CdStreamRead, 0x406A20);
+    RH_ScopedInstall(CdStreamThread, 0x406560);
+    RH_ScopedInstall(CdStreamInitThread, 0x4068F0);
+    RH_ScopedInstall(CdStreamInit, 0x406B70);
+    RH_ScopedInstall(CdStreamRemoveImages, 0x406690);
+    RH_ScopedInstall(CdStreamShutdown, 0x406370);
 }
 
 // 0x4067B0

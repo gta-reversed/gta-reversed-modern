@@ -4,8 +4,8 @@ int32& gBuildings = *(int32*)0xB71804;
 
 void CBuilding::InjectHooks()
 {
-    Install("CBuilding", "ReplaceWithNewModel", 0x403EC0, &CBuilding::ReplaceWithNewModel);
-    Install("CBuilding", "IsBuildingPointerValid", 0x4040E0, &IsBuildingPointerValid);
+    RH_ScopedInstall(ReplaceWithNewModel, 0x403EC0);
+    RH_ScopedInstall(IsBuildingPointerValid, 0x4040E0);
 }
 
 CBuilding::CBuilding() : CEntity()

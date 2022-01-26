@@ -2,8 +2,8 @@
 
 void CEventVehicleDamageCollision::InjectHooks()
 {
-    Install("CEventVehicleDamageCollision", "Constructor", 0x6A0620, &CEventVehicleDamageCollision::Constructor);
-    Install("CEventVehicleDamageCollision", "CloneEditable_Reversed", 0x6A0670, &CEventVehicleDamageCollision::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x6A0620);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x6A0670);
 }
 
 CEventVehicleDamageCollision::CEventVehicleDamageCollision(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType) :

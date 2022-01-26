@@ -2,8 +2,8 @@
 #include "OnscreenCounterEntry.h"
 
 void COnscreenCounterEntry::InjectHooks() {
-    Install("COnscreenCounterEntry", "ProcessForDisplayCounter", 0x44CA90, &COnscreenCounterEntry::ProcessForDisplayCounter);
-    Install("COnscreenCounterEntry", "SetColourID", 0x44CB00, &COnscreenCounterEntry::SetColourID);
+    RH_ScopedInstall(ProcessForDisplayCounter, 0x44CA90);
+    RH_ScopedInstall(SetColourID, 0x44CB00);
 }
 
 // 0x44CA90

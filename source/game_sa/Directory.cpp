@@ -7,10 +7,10 @@ void CDirectory::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "Empty", 0x532290, CDirectory*(CDirectory::*)());
     RH_ScopedOverloadedInstall(Constructor, "Capacity", 0x5322A0, CDirectory*(CDirectory::*)(size_t));
     Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
-    Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
-    Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
-    Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
-    Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
+    RH_ScopedInstall(Init, 0x5322F0); 
+    RH_ScopedInstall(AddItem, 0x532310); 
+    RH_ScopedInstall(ReadDirFile, 0x532350); 
+    RH_ScopedInstall(WriteDirFile, 0x532410); 
     RH_ScopedOverloadedInstall(FindItem, "", 0x532450, DirectoryInfo*(CDirectory::*)(const char*)); 
     RH_ScopedOverloadedInstall(FindItem, "ByName", 0x5324A0, bool(CDirectory::*)(const char*, uint32&, uint32&));
     RH_ScopedOverloadedInstall(FindItem, "ByHash", 0x5324D0, bool(CDirectory::*)(uint32, uint32&, uint32&));

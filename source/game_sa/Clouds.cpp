@@ -28,27 +28,27 @@ float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::Volumet
 int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::VolumetricCloudsRender
 
 void CClouds::InjectHooks() {
-    Install("CClouds", "Init", 0x7138D0, &CClouds::Init);
-    Install("CClouds", "Update", 0x712FF0, &CClouds::Update);
-    Install("CClouds", "Shutdown", 0x712FA0, &CClouds::Shutdown);
-    Install("CClouds", "SetUpOneSkyPoly", 0x713060, &CClouds::SetUpOneSkyPoly);
-    Install("CClouds", "MovingFogInit", 0x713660, &CClouds::MovingFogInit);
-    Install("CClouds", "MovingFog_Create", 0x713760, &CClouds::MovingFog_Create);
-    Install("CClouds", "MovingFog_Delete", 0x713730, &CClouds::MovingFog_Delete);
-    Install("CClouds", "MovingFog_Update", 0x716B10, &CClouds::MovingFog_Update);
-    Install("CClouds", "MovingFog_GetFXIntensity", 0x7136D0, &CClouds::MovingFog_GetFXIntensity);
-    Install("CClouds", "MovingFog_GetWind", 0x7136E0, &CClouds::MovingFog_GetWind);
-    Install("CClouds", "MovingFog_GetFirstFreeSlot", 0x713710, &CClouds::MovingFog_GetFirstFreeSlot);
+    RH_ScopedInstall(Init, 0x7138D0);
+    RH_ScopedInstall(Update, 0x712FF0);
+    RH_ScopedInstall(Shutdown, 0x712FA0);
+    RH_ScopedInstall(SetUpOneSkyPoly, 0x713060);
+    RH_ScopedInstall(MovingFogInit, 0x713660);
+    RH_ScopedInstall(MovingFog_Create, 0x713760);
+    RH_ScopedInstall(MovingFog_Delete, 0x713730);
+    RH_ScopedInstall(MovingFog_Update, 0x716B10);
+    RH_ScopedInstall(MovingFog_GetFXIntensity, 0x7136D0);
+    RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
+    RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
     Install("CClouds", "MovingFogRender", 0x716C90, &CClouds::MovingFogRender, true);
-    //    Install("CClouds", "Render", 0x713950, &CClouds::Render);
-    Install("CClouds", "RenderSkyPolys", 0x714650, &CClouds::RenderSkyPolys);
-    //    Install("CClouds", "RenderBottomFromHeight", 0x7154B0, &CClouds::RenderBottomFromHeight);
-    Install("CClouds", "VolumetricCloudsInit", 0x7131C0, &CClouds::VolumetricCloudsInit);
-    //    Install("CClouds", "VolumetricClouds_Create", 0x715F40, &CClouds::VolumetricClouds_Create);
-    Install("CClouds", "VolumetricClouds_Delete", 0x7135F0, &CClouds::VolumetricClouds_Delete);
-    Install("CClouds", "VolumetricClouds_GetFirstFreeSlot", 0x7135C0, &CClouds::VolumetricClouds_GetFirstFreeSlot);
-    Install("CClouds", "VolumetricCloudsGetMaxDistance", 0x713630, &CClouds::VolumetricCloudsGetMaxDistance);
-    //    Install("CClouds", "VolumetricCloudsRender", 0x716380, &CClouds::VolumetricCloudsRender);
+    //    RH_ScopedInstall(Render, 0x713950);
+    RH_ScopedInstall(RenderSkyPolys, 0x714650);
+    //    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
+    RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
+    //    RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
+    RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
+    RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
+    RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
+    //    RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
 }
 
 // 0x7138D0

@@ -4,12 +4,12 @@ void CColModel::InjectHooks()
 {
     Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
     Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
-    Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
+    RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
     RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
     RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
-    Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
-    Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
-    Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F9E0);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40FA30);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40FA40);
 }
 
 CColModel::CColModel() : m_boundBox()

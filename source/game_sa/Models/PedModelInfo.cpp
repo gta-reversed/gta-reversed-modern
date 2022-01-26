@@ -6,17 +6,17 @@ tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPe
 void CPedModelInfo::InjectHooks()
 {
     // VTABLE
-    Install("CPedModelInfo", "GetModelType", 0x4C57C0, &CPedModelInfo::GetModelType_Reversed);
-    Install("CPedModelInfo", "DeleteRwObject", 0x4C6C50, &CPedModelInfo::DeleteRwObject_Reversed);
-    Install("CPedModelInfo", "SetClump", 0x4C7340, &CPedModelInfo::SetClump_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C7340);
 
     // CLASS
-    Install("CPedModelInfo", "AddXtraAtomics", 0x4C6D40, &CPedModelInfo::AddXtraAtomics);
-    Install("CPedModelInfo", "SetFaceTexture", 0x4C6D50, &CPedModelInfo::SetFaceTexture);
-    Install("CPedModelInfo", "CreateHitColModelSkinned", 0x4C6D90, &CPedModelInfo::CreateHitColModelSkinned);
-    Install("CPedModelInfo", "AnimatePedColModelSkinned", 0x4C6F70, &CPedModelInfo::AnimatePedColModelSkinned);
-    Install("CPedModelInfo", "AnimatePedColModelSkinnedWorld", 0x4C7170, &CPedModelInfo::AnimatePedColModelSkinnedWorld);
-    Install("CPedModelInfo", "IncrementVoice", 0x4C7300, &CPedModelInfo::IncrementVoice);
+    RH_ScopedInstall(AddXtraAtomics, 0x4C6D40);
+    RH_ScopedInstall(SetFaceTexture, 0x4C6D50);
+    RH_ScopedInstall(CreateHitColModelSkinned, 0x4C6D90);
+    RH_ScopedInstall(AnimatePedColModelSkinned, 0x4C6F70);
+    RH_ScopedInstall(AnimatePedColModelSkinnedWorld, 0x4C7170);
+    RH_ScopedInstall(IncrementVoice, 0x4C7300);
 }
 
 ModelInfoType CPedModelInfo::GetModelType()

@@ -3,7 +3,7 @@
 #include "TaskComplexFollowPedFootsteps.h"
 
 void CTaskComplexFollowPedFootsteps::InjectHooks() {
-    Install("CTaskComplexFollowPedFootsteps", "CTaskComplexFollowPedFootsteps", 0x694E20, &CTaskComplexFollowPedFootsteps::Constructor);
+    RH_ScopedInstall(Constructor, 0x694E20);
 }
 
 CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTaskComplex() {

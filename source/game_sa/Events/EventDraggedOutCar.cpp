@@ -2,8 +2,8 @@
 
 void CEventDraggedOutCar::InjectHooks()
 {
-    Install("CEventDraggedOutCar", "Constructor", 0x4AD250, &CEventDraggedOutCar::Constructor);
-    Install("CEventDraggedOutCar", "CloneEditable_Reversed", 0x4B6DC0, &CEventDraggedOutCar::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AD250);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
 }
 
 CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat)

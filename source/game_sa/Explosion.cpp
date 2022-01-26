@@ -9,18 +9,18 @@ CExplosion (&CExplosion::aExplosions)[16] = *(CExplosion(*)[16])0xC88950;
 
 void CExplosion::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CExplosion", "ClearAllExplosions", 0x736840, &CExplosion::ClearAllExplosions);
-    Install("CExplosion", "Shutdown", 0x7368F0, &CExplosion::Shutdown);
-    Install("CExplosion", "GetExplosionActiveCounter", 0x736900, &CExplosion::GetExplosionActiveCounter);
-    Install("CExplosion", "ResetExplosionActiveCounter", 0x736910, &CExplosion::ResetExplosionActiveCounter);
-    Install("CExplosion", "DoesExplosionMakeSound", 0x736920, &CExplosion::DoesExplosionMakeSound);
-    Install("CExplosion", "GetExplosionType", 0x736930, &CExplosion::GetExplosionType);
-    Install("CExplosion", "GetExplosionPosition", 0x736940, &CExplosion::GetExplosionPosition);
-    Install("CExplosion", "TestForExplosionInArea", 0x736950, &CExplosion::TestForExplosionInArea);
-    Install("CExplosion", "RemoveAllExplosionsInArea", 0x7369E0, &CExplosion::RemoveAllExplosionsInArea);
-    Install("CExplosion", "Initialise", 0x736A40, &CExplosion::Initialise);
-    Install("CExplosion", "AddExplosion", 0x736A50, &CExplosion::AddExplosion);
-    Install("CExplosion", "Update", 0x737620, &CExplosion::Update);
+    RH_ScopedInstall(ClearAllExplosions, 0x736840);
+    RH_ScopedInstall(Shutdown, 0x7368F0);
+    RH_ScopedInstall(GetExplosionActiveCounter, 0x736900);
+    RH_ScopedInstall(ResetExplosionActiveCounter, 0x736910);
+    RH_ScopedInstall(DoesExplosionMakeSound, 0x736920);
+    RH_ScopedInstall(GetExplosionType, 0x736930);
+    RH_ScopedInstall(GetExplosionPosition, 0x736940);
+    RH_ScopedInstall(TestForExplosionInArea, 0x736950);
+    RH_ScopedInstall(RemoveAllExplosionsInArea, 0x7369E0);
+    RH_ScopedInstall(Initialise, 0x736A40);
+    RH_ScopedInstall(AddExplosion, 0x736A50);
+    RH_ScopedInstall(Update, 0x737620);
 }
 
 // 0x736A40

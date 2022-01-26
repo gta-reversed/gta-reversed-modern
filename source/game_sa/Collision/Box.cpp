@@ -2,8 +2,8 @@
 
 void CBox::InjectHooks()
 {
-    Install("CBox", "Set", 0x40EDE0, &CBox::Set);
-    Install("CBox", "Recalc", 0x40EE20, &CBox::Recalc);
+    RH_ScopedInstall(Set, 0x40EDE0);
+    RH_ScopedInstall(Recalc, 0x40EE20);
 }
 
 void CBox::Set(CVector const& vecMin, CVector const& vecMax)

@@ -170,8 +170,8 @@ namespace ModelIndices {
 }
 
 void ModelIndices::InjectHooks() {
-    Install("ModelIndices", "InitModelIndices", 0x5BCA10, &InitModelIndices);
-    Install("ModelIndices", "MatchAllModelStrings", 0x5B57C0, &MatchAllModelStrings);
+    RH_ScopedInstall(InitModelIndices, 0x5BCA10);
+    RH_ScopedInstall(MatchAllModelStrings, 0x5B57C0);
 }
 
 // 0x5BCA10

@@ -2,8 +2,8 @@
 
 void CDummyObject::InjectHooks()
 {
-    Install("CDummyObject", "CreateObject", 0x59EAC0, &CDummyObject::CreateObject);
-    Install("CDummyObject", "UpdateFromObject", 0x59EB70, &CDummyObject::UpdateFromObject);
+    RH_ScopedInstall(CreateObject, 0x59EAC0);
+    RH_ScopedInstall(UpdateFromObject, 0x59EB70);
 }
 
 CDummyObject::CDummyObject(CObject* pObj) : CDummy()

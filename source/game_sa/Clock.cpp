@@ -20,15 +20,15 @@ uint32& CClock::ms_nLastClockTick = *reinterpret_cast<uint32*>(0xB70158);
 uint32& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32*>(0xB7015C);
 
 void CClock::InjectHooks() {
-    Install("CClock", "Initialise", 0x52CD90, &CClock::Initialise);
-    Install("CClock", "Update", 0x52CF10, &CClock::Update);
-    Install("CClock", "GetGameClockMinutesUntil", 0x52CEB0, &CClock::GetGameClockMinutesUntil);
-    Install("CClock", "GetIsTimeInRange", 0x52CEE0, &CClock::GetIsTimeInRange);
-    Install("CClock", "NormaliseGameClock", 0x52CDE0, &CClock::NormaliseGameClock);
-    Install("CClock", "OffsetClockByADay", 0x52D0B0, &CClock::OffsetClockByADay);
-    Install("CClock", "SetGameClock", 0x52D150, &CClock::SetGameClock);
-    Install("CClock", "StoreClock", 0x52D020, &CClock::StoreClock);
-    Install("CClock", "RestoreClock", 0x52D070, &CClock::RestoreClock);
+    RH_ScopedInstall(Initialise, 0x52CD90);
+    RH_ScopedInstall(Update, 0x52CF10);
+    RH_ScopedInstall(GetGameClockMinutesUntil, 0x52CEB0);
+    RH_ScopedInstall(GetIsTimeInRange, 0x52CEE0);
+    RH_ScopedInstall(NormaliseGameClock, 0x52CDE0);
+    RH_ScopedInstall(OffsetClockByADay, 0x52D0B0);
+    RH_ScopedInstall(SetGameClock, 0x52D150);
+    RH_ScopedInstall(StoreClock, 0x52D020);
+    RH_ScopedInstall(RestoreClock, 0x52D070);
 }
 
 /*

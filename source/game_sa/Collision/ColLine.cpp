@@ -3,7 +3,7 @@
 #include "ColLine.h"
 
 void CColLine::InjectHooks() {
-    Install("CColLine", "Set", 0x40EF10, &CColLine::Set);
+    RH_ScopedInstall(Set, 0x40EF10);
 }
 
 // 0x40EF50

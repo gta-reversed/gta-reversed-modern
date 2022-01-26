@@ -4,7 +4,7 @@
 
 void CTaskSimpleUninterruptable::InjectHooks()
 {
-    Install("CTaskSimpleUninterruptable", "Constructor", 0x43E2E0, &CTaskSimpleUninterruptable::Constructor);
+    RH_ScopedInstall(Constructor, 0x43E2E0);
 }
 
 CTaskSimpleUninterruptable* CTaskSimpleUninterruptable::Constructor()

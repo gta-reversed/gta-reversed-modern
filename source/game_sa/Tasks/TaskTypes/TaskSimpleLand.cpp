@@ -4,13 +4,13 @@
 
 void CTaskSimpleLand::InjectHooks()
 {
-    Install("CTaskSimpleLand", "Constructor", 0x678E90, &CTaskSimpleLand::Constructor);
-    Install("CTaskSimpleLand", "LeftFootLanded", 0x679010, &CTaskSimpleLand::LeftFootLanded);
-    Install("CTaskSimpleLand", "RightFootLanded", 0x678FE0, &CTaskSimpleLand::RightFootLanded);
-    Install("CTaskSimpleLand", "FinishAnimCB", 0x678FA0, &CTaskSimpleLand::FinishAnimCB);
+    RH_ScopedInstall(Constructor, 0x678E90);
+    RH_ScopedInstall(LeftFootLanded, 0x679010);
+    RH_ScopedInstall(RightFootLanded, 0x678FE0);
+    RH_ScopedInstall(FinishAnimCB, 0x678FA0);
     //VTABLE
-    Install("CTaskSimpleLand", "MakeAbortable", 0x678F40, &CTaskSimpleLand::MakeAbortable_Reversed);
-    Install("CTaskSimpleLand", "ProcessPed", 0x67D380, &CTaskSimpleLand::ProcessPed_Reversed);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x678F40);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x67D380);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)

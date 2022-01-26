@@ -7,13 +7,13 @@
 
 void CCustomBuildingRenderer::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CCustomBuildingRenderer", "Initialise", 0x5D7EC0, &CCustomBuildingRenderer::Initialise);
-    Install("CCustomBuildingRenderer", "Shutdown", 0x5D7EE0, &CCustomBuildingRenderer::Shutdown);
-    Install("CCustomBuildingRenderer", "PluginAttach", 0x5D7EF0, &CCustomBuildingRenderer::PluginAttach);
-    // Install("CCustomBuildingRenderer", "AtomicSetup", 0x5D7F00, &CCustomBuildingRenderer::AtomicSetup);
-    // Install("CCustomBuildingRenderer", "IsCBPCPipelineAttached", 0x5D7F40, &CCustomBuildingRenderer::IsCBPCPipelineAttached);
-    // Install("CCustomBuildingRenderer", "UpdateDayNightBalanceParam", 0x5D7F80, &CCustomBuildingRenderer::UpdateDayNightBalanceParam);
-    // Install("CCustomBuildingRenderer", "Update", 0x5D8050, &CCustomBuildingRenderer::Update);
+    RH_ScopedInstall(Initialise, 0x5D7EC0);
+    RH_ScopedInstall(Shutdown, 0x5D7EE0);
+    RH_ScopedInstall(PluginAttach, 0x5D7EF0);
+    // RH_ScopedInstall(AtomicSetup, 0x5D7F00);
+    // RH_ScopedInstall(IsCBPCPipelineAttached, 0x5D7F40);
+    // RH_ScopedInstall(UpdateDayNightBalanceParam, 0x5D7F80);
+    // RH_ScopedInstall(Update, 0x5D8050);
 }
 
 // 0x5D7EC0

@@ -5,9 +5,9 @@
 
 void COccluder::InjectHooks()
 {
-    Install("COccluder", "ProcessOneOccluder", 0x71E5D0, &COccluder::ProcessOneOccluder);
-    Install("COccluder", "ProcessLineSegment", 0x71E130, &COccluder::ProcessLineSegment);
-    Install("COccluder", "NearCamera", 0x71F960, &COccluder::NearCamera);
+    RH_ScopedInstall(ProcessOneOccluder, 0x71E5D0);
+    RH_ScopedInstall(ProcessLineSegment, 0x71E130);
+    RH_ScopedInstall(NearCamera, 0x71F960);
 }
 
 // 0x71E5D0

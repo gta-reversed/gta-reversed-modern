@@ -3,7 +3,7 @@
 #include "PtrNodeSingleLink.h"
 
 void CPtrNodeSingleLink::InjectHooks() {
-    Install("CPtrNodeSingleLink", "AddToList", 0x532960, &CPtrNodeSingleLink::AddToList);
+    RH_ScopedInstall(AddToList, 0x532960);
 }
 
 void CPtrNodeSingleLink::AddToList(CPtrListSingleLink* list) {

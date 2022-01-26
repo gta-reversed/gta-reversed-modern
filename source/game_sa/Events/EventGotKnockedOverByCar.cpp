@@ -2,9 +2,9 @@
 
 void CEventGotKnockedOverByCar::InjectHooks()
 {
-    Install("CEventGotKnockedOverByCar", "Constructor", 0x4B1B60, &CEventGotKnockedOverByCar::Constructor);
-    Install("CEventGotKnockedOverByCar", "AffectsPed_Reversed", 0x4B1C70, &CEventGotKnockedOverByCar::AffectsPed_Reversed);
-    Install("CEventGotKnockedOverByCar", "CloneEditable_Reversed", 0x4B7960, &CEventGotKnockedOverByCar::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B1B60);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1C70);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7960);
 }
 
 CEventGotKnockedOverByCar::CEventGotKnockedOverByCar(CVehicle* vehicle)

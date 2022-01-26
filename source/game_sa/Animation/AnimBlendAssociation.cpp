@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 void CAnimBlendAssociation::InjectHooks() {
-    Install("CAnimBlendAssociation", "CAnimBlendAssociation", 0x4CEFC0, &CAnimBlendAssociation::Constructor);
+    RH_ScopedInstall(Constructor, 0x4CEFC0);
 }
 
 void* CAnimBlendAssociation::operator new(uint32 size) {

@@ -9,13 +9,13 @@
 
 void CTaskComplexTreatAccident::InjectHooks()
 {
-    Install("CTaskComplexTreatAccident", "Constructor", 0x658AB0, &CTaskComplexTreatAccident::Constructor);
-    Install("CTaskComplexTreatAccident", "CreateSubTask", 0x659E90, &CTaskComplexTreatAccident::CreateSubTask);
-    Install("CTaskComplexTreatAccident", "ComputeHeading", 0x658AF0, &CTaskComplexTreatAccident::ComputeHeading);
-    Install("CTaskComplexTreatAccident", "Clone", 0x659A90, &CTaskComplexTreatAccident::Clone_Reversed);
-    Install("CTaskComplexTreatAccident", "CreateFirstSubTask", 0x65A8F0, &CTaskComplexTreatAccident::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexTreatAccident", "CreateNextSubTask", 0x65A830, &CTaskComplexTreatAccident::CreateNextSubTask_Reversed);
-    Install("CTaskComplexTreatAccident", "ControlSubTask", 0x658B90, &CTaskComplexTreatAccident::ControlSubTask_Reversed);
+    RH_ScopedInstall(Constructor, 0x658AB0);
+    RH_ScopedInstall(CreateSubTask, 0x659E90);
+    RH_ScopedInstall(ComputeHeading, 0x658AF0);
+    RH_ScopedInstall(Clone_Reversed, 0x659A90);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65A8F0);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65A830);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x658B90);
 }
 
 // 0x658AB0

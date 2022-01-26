@@ -5,10 +5,10 @@ constexpr uint16 PED_STATS_COUNT = 43;
 CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;
 
 void CPedStats::InjectHooks() {
-    Install("CPedStats", "Initialise", 0x5BF9D0, &CPedStats::Initialise);
-    Install("CPedStats", "Shutdown", 0x608850, &CPedStats::Shutdown);
-    Install("CPedStats", "LoadPedStats", 0x5BB890, &CPedStats::LoadPedStats);
-    Install("CPedStats", "GetPedStatType", 0x6088D0, &CPedStats::GetPedStatType);
+    RH_ScopedInstall(Initialise, 0x5BF9D0);
+    RH_ScopedInstall(Shutdown, 0x608850);
+    RH_ScopedInstall(LoadPedStats, 0x5BB890);
+    RH_ScopedInstall(GetPedStatType, 0x6088D0);
 }
 
 // 0x5BF9D0

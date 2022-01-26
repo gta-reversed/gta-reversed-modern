@@ -4,23 +4,23 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
-    Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
-    Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
-    Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
+    RH_ScopedInstall(Constructor, 0x608330);
+    RH_ScopedInstall(AssociateWithTask, 0x608520);
+    RH_ScopedInstall(AssociateWithEvent, 0x608500);
     RH_ScopedOverloadedInstall(Set, "CEventScriptCommand", 0x608390, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*));
     RH_ScopedOverloadedInstall(Set, "CTask", 0x6083E0, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*));
-    Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
-    Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
-    Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
+    RH_ScopedInstall(SetAsGroupTask, 0x6084A0);
+    RH_ScopedInstall(SetAsAttractorScriptTask, 0x608440);
+    RH_ScopedInstall(Flush, 0x608350);
 }
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-    Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
+    RH_ScopedInstall(GetRecordAssociatedWithEvent, 0x608580);
     RH_ScopedOverloadedInstall(GetStatus, "", 0x608750, eScriptedTaskStatus(*)(CPed*));
     RH_ScopedOverloadedInstall(GetStatus, "opcode", 0x608710, eScriptedTaskStatus(*)(CPed*, int32));
-    Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
-    Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
+    RH_ScopedInstall(GetVacantSlot, 0x608540);
+    RH_ScopedInstall(Process, 0x6085E0);
 }
 
 CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()

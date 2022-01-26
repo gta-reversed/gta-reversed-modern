@@ -4,13 +4,13 @@ bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
 void CDamageAtomicModelInfo::InjectHooks()
 {
-    Install("CDamageAtomicModelInfo", "Init", 0x4C48B0, &CDamageAtomicModelInfo::Init_Reversed);
-    Install("CDamageAtomicModelInfo", "AsDamageAtomicModelInfoPtr", 0x4C55C0, &CDamageAtomicModelInfo::AsDamageAtomicModelInfoPtr_Reversed);
-    Install("CDamageAtomicModelInfo", "DeleteRwObject", 0x4C49D0, &CDamageAtomicModelInfo::DeleteRwObject_Reversed);
+    RH_ScopedInstall(Init_Reversed, 0x4C48B0);
+    RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C55C0);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C49D0);
     Install("CDamageAtomicModelInfo", "CreateInstance_void", 0x4C4960, (RwObject * (CDamageAtomicModelInfo::*)())(&CDamageAtomicModelInfo::CreateInstance_Reversed));
     RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
 
-    Install("CDamageAtomicModelInfo", "SetDamagedAtomic", 0x4C48D0, &CDamageAtomicModelInfo::SetDamagedAtomic);
+    RH_ScopedInstall(SetDamagedAtomic, 0x4C48D0);
 }
 
 CDamageAtomicModelInfo* CDamageAtomicModelInfo::AsDamageAtomicModelInfoPtr()

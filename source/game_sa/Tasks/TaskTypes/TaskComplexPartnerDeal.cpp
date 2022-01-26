@@ -4,7 +4,7 @@
 
 void CTaskComplexPartnerDeal::InjectHooks()
 {
-    Install("CTaskComplexPartnerDeal", "CTaskComplexPartnerDeal", 0x684190, &CTaskComplexPartnerDeal::Constructor);
+    RH_ScopedInstall(Constructor, 0x684190);
 }
 
 CTaskComplexPartnerDeal::CTaskComplexPartnerDeal(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, CVector point) :

@@ -9,24 +9,24 @@ void CEventDamage::InjectHooks() {
     using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "", 0x4B33B0, CEventDamage*(CEventDamage::*)(const CEventDamage&));
     RH_ScopedOverloadedInstall(Constructor, "1", 0x4AD830, CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool));
-    Install("CEventDamage", "GetEventType_Reversed", 0x4AD910, &CEventDamage::GetEventType_Reversed);
-    Install("CEventDamage", "GetEventPriority_Reversed", 0x4AD950, &CEventDamage::GetEventPriority_Reversed);
-    Install("CEventDamage", "GetLifeTime_Reversed", 0x4AD920, &CEventDamage::GetLifeTime_Reversed);
-    Install("CEventDamage", "AffectsPed_Reversed", 0x4B35A0, &CEventDamage::AffectsPed_Reversed);
-    Install("CEventDamage", "AffectsPedGroup_Reversed", 0x4B38D0, &CEventDamage::AffectsPedGroup_Reversed);
-    Install("CEventDamage", "IsCriminalEvent_Reversed", 0x4ADA90, &CEventDamage::IsCriminalEvent_Reversed);
-    Install("CEventDamage", "ReportCriminalEvent_Reversed", 0x4B3440, &CEventDamage::ReportCriminalEvent_Reversed);
-    Install("CEventDamage", "GetSourceEntity_Reversed", 0x4ADA70, &CEventDamage::GetSourceEntity_Reversed);
-    Install("CEventDamage", "TakesPriorityOver_Reversed", 0x4ADB00, &CEventDamage::TakesPriorityOver_Reversed);
-    Install("CEventDamage", "GetLocalSoundLevel_Reversed", 0x4AD930, &CEventDamage::GetLocalSoundLevel_Reversed);
-    Install("CEventDamage", "DoInformVehicleOccupants_Reversed", 0x4ADAE0, &CEventDamage::DoInformVehicleOccupants_Reversed);
-    Install("CEventDamage", "CanBeInterruptedBySameEvent_Reversed", 0x4AD940, &CEventDamage::CanBeInterruptedBySameEvent_Reversed);
-    Install("CEventDamage", "CloneEditable_Reversed", 0x4B5D40, &CEventDamage::CloneEditable_Reversed);
-    Install("CEventDamage", "From", 0x4AD9C0, &CEventDamage::From);
-    Install("CEventDamage", "ProcessDamage", 0x4B3A20, &CEventDamage::ProcessDamage);
-    Install("CEventDamage", "ComputeBodyPartToRemove", 0x4ADC10, &CEventDamage::ComputeBodyPartToRemove);
-    Install("CEventDamage", "ComputeDeathAnim", 0x4B3A60, &CEventDamage::ComputeDeathAnim);
-    Install("CEventDamage", "ComputeDamageAnim", 0x4B3FC0, &CEventDamage::ComputeDamageAnim);
+    RH_ScopedInstall(GetEventType_Reversed, 0x4AD910);
+    RH_ScopedInstall(GetEventPriority_Reversed, 0x4AD950);
+    RH_ScopedInstall(GetLifeTime_Reversed, 0x4AD920);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B35A0);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B38D0);
+    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4ADA90);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B3440);
+    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4ADA70);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ADB00);
+    RH_ScopedInstall(GetLocalSoundLevel_Reversed, 0x4AD930);
+    RH_ScopedInstall(DoInformVehicleOccupants_Reversed, 0x4ADAE0);
+    RH_ScopedInstall(CanBeInterruptedBySameEvent_Reversed, 0x4AD940);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B5D40);
+    RH_ScopedInstall(From, 0x4AD9C0);
+    RH_ScopedInstall(ProcessDamage, 0x4B3A20);
+    RH_ScopedInstall(ComputeBodyPartToRemove, 0x4ADC10);
+    RH_ScopedInstall(ComputeDeathAnim, 0x4B3A60);
+    RH_ScopedInstall(ComputeDamageAnim, 0x4B3FC0);
 }
 
 // 0x4B33B0

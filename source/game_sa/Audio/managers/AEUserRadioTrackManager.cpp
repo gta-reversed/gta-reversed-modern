@@ -417,19 +417,19 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
 }
 
 void CAEUserRadioTrackManager::InjectHooks() {
-    Install("CAEUserRadioTrackManager", "Initialise", 0x4f35b0, &CAEUserRadioTrackManager::Initialise);
-    Install("CAEUserRadioTrackManager", "Shutdown", 0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
-    Install("CAEUserRadioTrackManager", "ReadUserTracks", 0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
-    Install("CAEUserRadioTrackManager", "GetTrackPath", 0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
+    RH_ScopedInstall(Initialise, 0x4f35b0);
+    RH_ScopedInstall(Shutdown, 0x4f2fb0);
+    RH_ScopedInstall(ReadUserTracks, 0x4f2fd0);
+    RH_ScopedInstall(GetTrackPath, 0x4f3050);
     RH_ScopedOverloadedInstall(ResolveShortcut, "", 0x4f30f0, char* (CAEUserRadioTrackManager::*)(const char*));
-    Install("CAEUserRadioTrackManager", "GetAudioFileType", 0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
-    Install("CAEUserRadioTrackManager", "SelectUserTrackIndex", 0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
-    Install("CAEUserRadioTrackManager", "DeleteUserTracksInfo", 0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);
-    Install("CAEUserRadioTrackManager", "IsShortcut", 0x4f32c0, &CAEUserRadioTrackManager::IsShortcut);
-    Install("CAEUserRadioTrackManager", "LoadUserTrack", 0x4f35f0, &CAEUserRadioTrackManager::LoadUserTrack);
-    Install("CAEUserRadioTrackManager", "GetUserTrackPlayMode", 0x4f3330, &CAEUserRadioTrackManager::GetUserTrackPlayMode);
-    Install("CAEUserRadioTrackManager", "SetUserTrackIndex", 0x4f3340, &CAEUserRadioTrackManager::SetUserTrackIndex);
+    RH_ScopedInstall(GetAudioFileType, 0x4f31f0);
+    RH_ScopedInstall(SelectUserTrackIndex, 0x4f3250);
+    RH_ScopedInstall(DeleteUserTracksInfo, 0x4f32f0);
+    RH_ScopedInstall(IsShortcut, 0x4f32c0);
+    RH_ScopedInstall(LoadUserTrack, 0x4f35f0);
+    RH_ScopedInstall(GetUserTrackPlayMode, 0x4f3330);
+    RH_ScopedInstall(SetUserTrackIndex, 0x4f3340);
     Install("CAEUserRadioTrackManager", "WriteUserTracksFile", 0x4f4690, (int32(CAEUserRadioTrackManager::*)(const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int32)) & CAEUserRadioTrackManager::WriteUserTracksFile);
-    Install("CAEUserRadioTrackManager", "WriteUserTracksThread", 0x4f4a20, &CAEUserRadioTrackManager::WriteUserTracksThread);
-    Install("CAEUserRadioTrackManager", "ScanUserTracks", 0x4f4ba0, &CAEUserRadioTrackManager::ScanUserTracks);
+    RH_ScopedInstall(WriteUserTracksThread, 0x4f4a20);
+    RH_ScopedInstall(ScanUserTracks, 0x4f4ba0);
 }

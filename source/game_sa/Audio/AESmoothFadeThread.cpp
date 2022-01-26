@@ -7,16 +7,16 @@
 CAESmoothFadeThread& AESmoothFadeThread = *(CAESmoothFadeThread*)0xB608D0;
 
 void CAESmoothFadeThread::InjectHooks() {
-    Install("CAESmoothFadeThread", "Start", 0x4EEA10, &CAESmoothFadeThread::Start);
-    Install("CAESmoothFadeThread", "Stop", 0x4EEA30, &CAESmoothFadeThread::Stop);
-    Install("CAESmoothFadeThread", "WaitForExit", 0x4EEA40, &CAESmoothFadeThread::WaitForExit);
-    Install("CAESmoothFadeThread", "Initialise", 0x4EEEC0, &CAESmoothFadeThread::Initialise);
-    Install("CAESmoothFadeThread", "InitialiseRequestSlots", 0x4EE9F0, &CAESmoothFadeThread::InitialiseRequestSlots);
-    Install("CAESmoothFadeThread", "CancelFade", 0x4EEA50, &CAESmoothFadeThread::CancelFade);
-    Install("CAESmoothFadeThread", "SetBufferVolume", 0x4EEC80, &CAESmoothFadeThread::SetBufferVolume);
-    Install("CAESmoothFadeThread", "SmoothFadeProc", 0x4EEE90, &CAESmoothFadeThread::SmoothFadeProc);
-    Install("CAESmoothFadeThread", "RequestFade", 0x4EEAA0, &CAESmoothFadeThread::RequestFade);
-    Install("CAESmoothFadeThread", "Service", 0x4EED10, &CAESmoothFadeThread::Service);
+    RH_ScopedInstall(Start, 0x4EEA10);
+    RH_ScopedInstall(Stop, 0x4EEA30);
+    RH_ScopedInstall(WaitForExit, 0x4EEA40);
+    RH_ScopedInstall(Initialise, 0x4EEEC0);
+    RH_ScopedInstall(InitialiseRequestSlots, 0x4EE9F0);
+    RH_ScopedInstall(CancelFade, 0x4EEA50);
+    RH_ScopedInstall(SetBufferVolume, 0x4EEC80);
+    RH_ScopedInstall(SmoothFadeProc, 0x4EEE90);
+    RH_ScopedInstall(RequestFade, 0x4EEAA0);
+    RH_ScopedInstall(Service, 0x4EED10);
 }
 
 CAESmoothFadeThread::CAESmoothFadeThread() {

@@ -5,34 +5,34 @@
 
 void CPlayerInfo::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("CPlayerInfo", "Constructor", 0x571920, &CPlayerInfo::Constructor); hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
-    Install("CPlayerInfo", "CancelPlayerEnteringCars", 0x56E860, &CPlayerInfo::CancelPlayerEnteringCars);
-    // Install("CPlayerInfo", "FindObjectToSteal", 0x56DBD0, &CPlayerInfo::FindObjectToSteal);
-    Install("CPlayerInfo", "EvaluateCarPosition", 0x56DAD0, &CPlayerInfo::EvaluateCarPosition);
-    // Install("CPlayerInfo", "Process", 0x56F8D0, &CPlayerInfo::Process);
-    // Install("CPlayerInfo", "FindClosestCarSectorList", 0x56F4E0, &CPlayerInfo::FindClosestCarSectorList);
-    Install("CPlayerInfo", "Clear", 0x56F330, &CPlayerInfo::Clear);
-    Install("CPlayerInfo", "StreamParachuteWeapon", 0x56EB30, &CPlayerInfo::StreamParachuteWeapon);
-    Install("CPlayerInfo", "AddHealth", 0x56EAB0, &CPlayerInfo::AddHealth);
-    Install("CPlayerInfo", "ArrestPlayer", 0x56E5D0, &CPlayerInfo::ArrestPlayer);
-    Install("CPlayerInfo", "SetPlayerSkin", 0x5717F0, &CPlayerInfo::SetPlayerSkin);
-    Install("CPlayerInfo", "LoadPlayerSkin", 0x56F7D0, &CPlayerInfo::LoadPlayerSkin);
-    Install("CPlayerInfo", "DeletePlayerSkin", 0x56EA80, &CPlayerInfo::DeletePlayerSkin);
-    Install("CPlayerInfo", "BlowUpRCBuggy", 0x56EA30, &CPlayerInfo::BlowUpRCBuggy);
-    Install("CPlayerInfo", "MakePlayerSafe", 0x56E870, &CPlayerInfo::MakePlayerSafe);
-    Install("CPlayerInfo", "PlayerFailedCriticalMission", 0x56E830, &CPlayerInfo::PlayerFailedCriticalMission);
-    Install("CPlayerInfo", "WorkOutEnergyFromHunger", 0x56E610, &CPlayerInfo::WorkOutEnergyFromHunger);
-    Install("CPlayerInfo", "KillPlayer", 0x56E580, &CPlayerInfo::KillPlayer);
-    Install("CPlayerInfo", "IsRestartingAfterMissionFailed", 0x56E570, &CPlayerInfo::IsRestartingAfterMissionFailed);
-    Install("CPlayerInfo", "IsRestartingAfterArrest", 0x56E560, &CPlayerInfo::IsRestartingAfterArrest);
-    Install("CPlayerInfo", "IsRestartingAfterDeath", 0x56E550, &CPlayerInfo::IsRestartingAfterDeath);
-    Install("CPlayerInfo", "IsPlayerInRemoteMode", 0x56DAB0, &CPlayerInfo::IsPlayerInRemoteMode);
-    Install("CPlayerInfo", "GetPos", 0x56DFB0, &CPlayerInfo::GetPos_Hook);
-    Install("CPlayerInfo", "GetSpeed", 0x56DF50, &CPlayerInfo::GetSpeed_Hook);
-    Install("CPlayerInfo", "GivePlayerParachute", 0x56EC40, &CPlayerInfo::GivePlayerParachute);
-    Install("CPlayerInfo", "SetLastTargetVehicle", 0x56DA80, &CPlayerInfo::SetLastTargetVehicle);
-    Install("CPlayerInfo", "Load", 0x5D3B00, &CPlayerInfo::Load);
-    Install("CPlayerInfo", "Save", 0x5D3AC0, &CPlayerInfo::Save);
+    // RH_ScopedInstall(Constructor, 0x571920); hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
+    RH_ScopedInstall(CancelPlayerEnteringCars, 0x56E860);
+    // RH_ScopedInstall(FindObjectToSteal, 0x56DBD0);
+    RH_ScopedInstall(EvaluateCarPosition, 0x56DAD0);
+    // RH_ScopedInstall(Process, 0x56F8D0);
+    // RH_ScopedInstall(FindClosestCarSectorList, 0x56F4E0);
+    RH_ScopedInstall(Clear, 0x56F330);
+    RH_ScopedInstall(StreamParachuteWeapon, 0x56EB30);
+    RH_ScopedInstall(AddHealth, 0x56EAB0);
+    RH_ScopedInstall(ArrestPlayer, 0x56E5D0);
+    RH_ScopedInstall(SetPlayerSkin, 0x5717F0);
+    RH_ScopedInstall(LoadPlayerSkin, 0x56F7D0);
+    RH_ScopedInstall(DeletePlayerSkin, 0x56EA80);
+    RH_ScopedInstall(BlowUpRCBuggy, 0x56EA30);
+    RH_ScopedInstall(MakePlayerSafe, 0x56E870);
+    RH_ScopedInstall(PlayerFailedCriticalMission, 0x56E830);
+    RH_ScopedInstall(WorkOutEnergyFromHunger, 0x56E610);
+    RH_ScopedInstall(KillPlayer, 0x56E580);
+    RH_ScopedInstall(IsRestartingAfterMissionFailed, 0x56E570);
+    RH_ScopedInstall(IsRestartingAfterArrest, 0x56E560);
+    RH_ScopedInstall(IsRestartingAfterDeath, 0x56E550);
+    RH_ScopedInstall(IsPlayerInRemoteMode, 0x56DAB0);
+    RH_ScopedInstall(GetPos_Hook, 0x56DFB0);
+    RH_ScopedInstall(GetSpeed_Hook, 0x56DF50);
+    RH_ScopedInstall(GivePlayerParachute, 0x56EC40);
+    RH_ScopedInstall(SetLastTargetVehicle, 0x56DA80);
+    RH_ScopedInstall(Load, 0x5D3B00);
+    RH_ScopedInstall(Save, 0x5D3AC0);
 }
 
 // 0x571920

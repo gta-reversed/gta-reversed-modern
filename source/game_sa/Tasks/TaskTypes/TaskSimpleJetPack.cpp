@@ -3,7 +3,7 @@
 #include "TaskSimpleJetPack.h"
 
 void CTaskSimpleJetPack::InjectHooks() {
-    Install("CTaskSimpleJetPack", "CTaskSimpleJetPack", 0x67B4E0, &CTaskSimpleJetPack::Constructor);
+    RH_ScopedInstall(Constructor, 0x67B4E0);
 }
 
 // 0x67B4E0

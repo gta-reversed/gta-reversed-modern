@@ -40,25 +40,25 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     };
 
 void CText::InjectHooks() {
-    //    Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    //    RH_ScopedInstall(Load, 0x69F670);
 
-    Install("CData", "Unload", 0x69F640, &CData::Unload);
-    //    Install("CData", "Load", 0x69F5D0, &CData::Load);
+    RH_ScopedInstall(Unload, 0x69F640);
+    //    RH_ScopedInstall(Load, 0x69F5D0);
 
-    Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    //    Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    RH_ScopedInstall(Unload, 0x69F510);
+    //    RH_ScopedInstall(Load, 0x69F490);
+    RH_ScopedInstall(BinarySearch, 0x69F570);
+    RH_ScopedInstall(Search, 0x6A0000);
 
-    Install("CText", "CText", 0x6A00F0, &CText::Constructor);
+    RH_ScopedInstall(Constructor, 0x6A00F0);
     Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    Install("CText", "Get", 0x6A0050, &CText::Get);
-    Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    //    Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    //    Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    //    Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    Install("CText", "Load", 0x6A01A0, &CText::Load);
-    Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    RH_ScopedInstall(Get, 0x6A0050);
+    RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
+    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
+    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
+    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(Load, 0x6A01A0);
+    RH_ScopedInstall(Unload, 0x69FF20);
 }
 
 // 0x6A00F0

@@ -3,7 +3,7 @@
 #include "TaskComplexPartner.h"
 
 void CTaskComplexPartner::InjectHooks() {
-    Install("CTaskComplexPartner", "CTaskComplexPartner", 0x681E70, &CTaskComplexPartner::Constructor);
+    RH_ScopedInstall(Constructor, 0x681E70);
 }
 
 // 0x681E70

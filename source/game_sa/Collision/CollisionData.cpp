@@ -2,14 +2,14 @@
 
 void CCollisionData::InjectHooks()
 {
-    Install("CCollisionData", "RemoveCollisionVolumes", 0x40F070, &CCollisionData::RemoveCollisionVolumes);
-    Install("CCollisionData", "RemoveTrianglePlanes", 0x40F6A0, &CCollisionData::RemoveTrianglePlanes);
-    Install("CCollisionData", "Copy", 0x40F120, &CCollisionData::Copy);
-    Install("CCollisionData", "GetTrianglePoint", 0x40F5E0, &CCollisionData::GetTrianglePoint);
-    Install("CCollisionData", "GetShadTrianglePoint", 0x40F640, &CCollisionData::GetShadTrianglePoint);
-    Install("CCollisionData", "CalculateTrianglePlanes", 0x40F590, &CCollisionData::CalculateTrianglePlanes);
-    Install("CCollisionData", "SetLinkPtr", 0x40F6C0, &CCollisionData::SetLinkPtr);
-    Install("CCollisionData", "GetLinkPtr", 0x40F6E0, &CCollisionData::GetLinkPtr);
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F070);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40F6A0);
+    RH_ScopedInstall(Copy, 0x40F120);
+    RH_ScopedInstall(GetTrianglePoint, 0x40F5E0);
+    RH_ScopedInstall(GetShadTrianglePoint, 0x40F640);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40F590);
+    RH_ScopedInstall(SetLinkPtr, 0x40F6C0);
+    RH_ScopedInstall(GetLinkPtr, 0x40F6E0);
 }
 
 CCollisionData::CCollisionData()

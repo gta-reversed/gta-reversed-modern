@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
 void CPlayerPedData::InjectHooks() {
-    Install("CPlayerPedData", "Constructor", 0x56F810, &CPlayerPedData::Constructor);
-    Install("CPlayerPedData", "Destructor", 0x571840, &CPlayerPedData::Destructor);
-    Install("CPlayerPedData", "AllocateData", 0x571880, &CPlayerPedData::AllocateData);
-    Install("CPlayerPedData", "DeAllocateData", 0x56F890, &CPlayerPedData::DeAllocateData);
-    Install("CPlayerPedData", "SetInitialState", 0x56F210, &CPlayerPedData::SetInitialState);
+    RH_ScopedInstall(Constructor, 0x56F810);
+    RH_ScopedInstall(Destructor, 0x571840);
+    RH_ScopedInstall(AllocateData, 0x571880);
+    RH_ScopedInstall(DeAllocateData, 0x56F890);
+    RH_ScopedInstall(SetInitialState, 0x56F210);
 }
 
 // 0x56F810

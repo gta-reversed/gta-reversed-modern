@@ -7,20 +7,20 @@ IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
 void IKChainManager_c::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("IKChainManager_c", "IsArmPointing", 0x6182B0, &IKChainManager_c::IsArmPointing);
-    // Install("IKChainManager_c", "AbortPointArm", 0x6182F0, &IKChainManager_c::AbortPointArm);
-    // Install("IKChainManager_c", "CanAccept", 0x618800, &IKChainManager_c::CanAccept);
-    // Install("IKChainManager_c", "Init", 0x6180A0, &IKChainManager_c::Init);
-    // Install("IKChainManager_c", "Exit", 0x6180D0, &IKChainManager_c::Exit);
-    // Install("IKChainManager_c", "Reset", 0x618140, &IKChainManager_c::Reset);
-    // Install("IKChainManager_c", "RemoveIKChain", 0x618170, &IKChainManager_c::RemoveIKChain);
-    // Install("IKChainManager_c", "IsLooking", 0x6181A0, &IKChainManager_c::IsLooking);
-    // Install("IKChainManager_c", "GetLookAtEntity", 0x6181D0, &IKChainManager_c::GetLookAtEntity);
-    // Install("IKChainManager_c", "AbortLookAt", 0x618280, &IKChainManager_c::AbortLookAt);
-    // Install("IKChainManager_c", "Update", 0x6186D0, &IKChainManager_c::Update);
-    // Install("IKChainManager_c", "AddIKChain", 0x618750, &IKChainManager_c::AddIKChain);
-    // Install("IKChainManager_c", "CanAcceptLookAt", 0x6188B0, &IKChainManager_c::CanAcceptLookAt);
-    // Install("IKChainManager_c", "LookAt", 0x618970, &IKChainManager_c::LookAt);
+    // RH_ScopedInstall(IsArmPointing, 0x6182B0);
+    // RH_ScopedInstall(AbortPointArm, 0x6182F0);
+    // RH_ScopedInstall(CanAccept, 0x618800);
+    // RH_ScopedInstall(Init, 0x6180A0);
+    // RH_ScopedInstall(Exit, 0x6180D0);
+    // RH_ScopedInstall(Reset, 0x618140);
+    // RH_ScopedInstall(RemoveIKChain, 0x618170);
+    // RH_ScopedInstall(IsLooking, 0x6181A0);
+    // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
+    // RH_ScopedInstall(AbortLookAt, 0x618280);
+    // RH_ScopedInstall(Update, 0x6186D0);
+    // RH_ScopedInstall(AddIKChain, 0x618750);
+    // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
+    // RH_ScopedInstall(LookAt, 0x618970);
 }
 
 // 0x6180A0

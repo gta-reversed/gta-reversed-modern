@@ -2,7 +2,7 @@
 
 void CEntryInfoList::InjectHooks()
 {
-    Install("CEntryInfoList", "Flush", 0x536E10, &CEntryInfoList::Flush);
+    RH_ScopedInstall(Flush, 0x536E10);
 }
 
 void CEntryInfoList::Flush()

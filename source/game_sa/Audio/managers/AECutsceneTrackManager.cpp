@@ -8,14 +8,14 @@ CAECutsceneTrackManager& AECutsceneTrackManager = *(CAECutsceneTrackManager*)0x8
 
 void CAECutsceneTrackManager::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CAECutsceneTrackManager", "Initialise", 0x5B9630, &CAECutsceneTrackManager::Initialise);
-    Install("CAECutsceneTrackManager", "PlayPreloadedCutsceneTrack", 0x4DBE70, &CAECutsceneTrackManager::PlayPreloadedCutsceneTrack);
-    Install("CAECutsceneTrackManager", "StopCutsceneTrack", 0x4DBE80, &CAECutsceneTrackManager::StopCutsceneTrack);
-    Install("CAECutsceneTrackManager", "IsCutsceneTrackActive", 0x4DBEB0, &CAECutsceneTrackManager::IsCutsceneTrackActive);
-    Install("CAECutsceneTrackManager", "GetCutsceneTrackStatus", 0x4DBEC0, &CAECutsceneTrackManager::GetCutsceneTrackStatus);
-    Install("CAECutsceneTrackManager", "PauseTrack", 0x4DBF00, &CAECutsceneTrackManager::PauseTrack);
-    Install("CAECutsceneTrackManager", "PreloadBeatTrack", 0x4DC130, &CAECutsceneTrackManager::PreloadBeatTrack);
-    Install("CAECutsceneTrackManager", "Service", 0x4DBFB0, &CAECutsceneTrackManager::Service);
+    RH_ScopedInstall(Initialise, 0x5B9630);
+    RH_ScopedInstall(PlayPreloadedCutsceneTrack, 0x4DBE70);
+    RH_ScopedInstall(StopCutsceneTrack, 0x4DBE80);
+    RH_ScopedInstall(IsCutsceneTrackActive, 0x4DBEB0);
+    RH_ScopedInstall(GetCutsceneTrackStatus, 0x4DBEC0);
+    RH_ScopedInstall(PauseTrack, 0x4DBF00);
+    RH_ScopedInstall(PreloadBeatTrack, 0x4DC130);
+    RH_ScopedInstall(Service, 0x4DBFB0);
 }
 
 // 0x5B9630

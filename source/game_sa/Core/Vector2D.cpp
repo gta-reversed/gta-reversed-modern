@@ -9,8 +9,8 @@ Do not delete this comment block. Respect others' work!
 
 void CVector2D::InjectHooks()
 {
-    Install("CVector2D", "Magnitude", 0x420860, &CVector2D::Magnitude);
-    Install("CVector2D", "Normalise", 0x44E480, &CVector2D::Normalise);
+    RH_ScopedInstall(Magnitude, 0x420860);
+    RH_ScopedInstall(Normalise, 0x44E480);
 
     Install("CVector2D", "operator=", 0x43E110, &CVector2D::operator=);
 }

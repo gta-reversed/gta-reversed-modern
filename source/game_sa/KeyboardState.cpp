@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 void CKeyboardState::InjectHooks() {
-    Install("CKeyboardState", "Clear", 0x53F090, &CKeyboardState::Clear);
+    RH_ScopedInstall(Clear, 0x53F090);
 }
 
 // 0x53F090

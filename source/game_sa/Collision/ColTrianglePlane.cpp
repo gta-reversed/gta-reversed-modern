@@ -2,8 +2,8 @@
 
 void CColTrianglePlane::InjectHooks()
 {
-    Install("CColTrianglePlane", "GetNormal", 0x411610, &CColTrianglePlane::GetNormal);
-    Install("CColTrianglePlane", "Set", 0x411660, &CColTrianglePlane::Set);
+    RH_ScopedInstall(GetNormal, 0x411610);
+    RH_ScopedInstall(Set, 0x411660);
 }
 
 void CColTrianglePlane::GetNormal(CVector& out)

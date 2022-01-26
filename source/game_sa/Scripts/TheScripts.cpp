@@ -95,8 +95,8 @@ CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
 
 void CTheScripts::InjectHooks() {
-    Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);
-    Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
+    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
+    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
 
 // 0x468D50

@@ -5,10 +5,10 @@ CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[
 
 void CShinyTexts::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CShinyTexts", "Init", 0x7221B0, &CShinyTexts::Init);
-    Install("CShinyTexts", "RenderOutGeometryBuffer", 0x7221C0, &CShinyTexts::RenderOutGeometryBuffer);
-    Install("CShinyTexts", "Render", 0x724890, &CShinyTexts::Render);
-    Install("CShinyTexts", "RegisterOne", 0x724B60, &CShinyTexts::RegisterOne);
+    RH_ScopedInstall(Init, 0x7221B0);
+    RH_ScopedInstall(RenderOutGeometryBuffer, 0x7221C0);
+    RH_ScopedInstall(Render, 0x724890);
+    RH_ScopedInstall(RegisterOne, 0x724B60);
 }
 
 // 0x7221B0

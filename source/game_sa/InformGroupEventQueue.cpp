@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
 void CInformGroupEventQueue::InjectHooks() {
-    Install("CInformGroupEventQueue", "Init", 0x4B2AD0, &CInformGroupEventQueue::Init);
-//    Install("CInformGroupEventQueue", "Add", 0x4B7CD0, &CInformGroupEventQueue::Add);
-//    Install("CInformGroupEventQueue", "Flush", 0x4AC410, &CInformGroupEventQueue::Flush);
-//    Install("CInformGroupEventQueue", "Process", 0x4B2AE0, &CInformGroupEventQueue::Process);
+    RH_ScopedInstall(Init, 0x4B2AD0);
+//    RH_ScopedInstall(Add, 0x4B7CD0);
+//    RH_ScopedInstall(Flush, 0x4AC410);
+//    RH_ScopedInstall(Process, 0x4B2AE0);
 }
 
 // 0x4B2AD0

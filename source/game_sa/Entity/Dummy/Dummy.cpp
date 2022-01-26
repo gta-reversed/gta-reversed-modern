@@ -2,7 +2,7 @@
 
 void CDummy::InjectHooks()
 {
-    Install("CDummy", "IsDummyPointerValid", 0x532730, &IsDummyPointerValid);
+    RH_ScopedInstall(IsDummyPointerValid, 0x532730);
 }
 
 void* CDummy::operator new(unsigned size)

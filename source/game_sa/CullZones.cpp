@@ -11,21 +11,21 @@ int32& CCullZones::NumAttributeZones = *(int32*)0xC87AC8;
 bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
-    Install("CCullZones", "Init", 0x72D6B0, &CCullZones::Init);
-    Install("CCullZones", "AddCullZone", 0x72DF70, &CCullZones::AddCullZone);
-    Install("CCullZones", "AddTunnelAttributeZone", 0x72DB50, &CCullZones::AddTunnelAttributeZone);
-    Install("CCullZones", "AddMirrorAttributeZone", 0x72DC10, &CCullZones::AddMirrorAttributeZone);
-    Install("CCullZones", "InRoomForAudio", 0x72DD70, &CCullZones::InRoomForAudio);
-    Install("CCullZones", "CamNoRain", 0x72DDB0, &CCullZones::CamNoRain);
-    Install("CCullZones", "PlayerNoRain", 0x72DDC0, &CCullZones::PlayerNoRain);
-    Install("CCullZones", "FewerPeds", 0x72DD90, &CCullZones::FewerPeds);
-    Install("CCullZones", "NoPolice", 0x72DD50, &CCullZones::NoPolice);
-    Install("CCullZones", "DoExtraAirResistanceForPlayer", 0x72DDD0, &CCullZones::DoExtraAirResistanceForPlayer);
-    Install("CCullZones", "FindTunnelAttributesForCoors", 0x72D9F0, &CCullZones::FindTunnelAttributesForCoors);
-    Install("CCullZones", "FindMirrorAttributesForCoors", 0x72DA70, &CCullZones::FindMirrorAttributesForCoors);
-    Install("CCullZones", "FindZoneWithStairsAttributeForPlayer", 0x72DAD0, &CCullZones::FindZoneWithStairsAttributeForPlayer);
-    Install("CCullZones", "FindAttributesForCoors", 0x72D970, &CCullZones::FindAttributesForCoors);
-    Install("CCullZones", "Update", 0x72DEC0, &CCullZones::Update);
+    RH_ScopedInstall(Init, 0x72D6B0);
+    RH_ScopedInstall(AddCullZone, 0x72DF70);
+    RH_ScopedInstall(AddTunnelAttributeZone, 0x72DB50);
+    RH_ScopedInstall(AddMirrorAttributeZone, 0x72DC10);
+    RH_ScopedInstall(InRoomForAudio, 0x72DD70);
+    RH_ScopedInstall(CamNoRain, 0x72DDB0);
+    RH_ScopedInstall(PlayerNoRain, 0x72DDC0);
+    RH_ScopedInstall(FewerPeds, 0x72DD90);
+    RH_ScopedInstall(NoPolice, 0x72DD50);
+    RH_ScopedInstall(DoExtraAirResistanceForPlayer, 0x72DDD0);
+    RH_ScopedInstall(FindTunnelAttributesForCoors, 0x72D9F0);
+    RH_ScopedInstall(FindMirrorAttributesForCoors, 0x72DA70);
+    RH_ScopedInstall(FindZoneWithStairsAttributeForPlayer, 0x72DAD0);
+    RH_ScopedInstall(FindAttributesForCoors, 0x72D970);
+    RH_ScopedInstall(Update, 0x72DEC0);
 }
 
 // 0x72D6B0

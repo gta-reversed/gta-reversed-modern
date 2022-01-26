@@ -13,19 +13,19 @@ bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
-    Install("CWanted", "UpdateWantedLevel", 0x561C90, &CWanted::UpdateWantedLevel);
-    Install("CWanted", "AreSwatRequired", 0x561F40, &CWanted::AreSwatRequired);
-    Install("CWanted", "AreFbiRequired", 0x561F60, &CWanted::AreFbiRequired);
-    Install("CWanted", "AreArmyRequired", 0x561F80, &CWanted::AreArmyRequired);
-    Install("CWanted", "InitialiseStaticVariables", 0x561C70, &CWanted::InitialiseStaticVariables);
-    Install("CWanted", "SetMaximumWantedLevel", 0x561E70, &CWanted::SetMaximumWantedLevel);
-    Install("CWanted", "Initialise", 0x562390, &CWanted::Initialise);
-    Install("CWanted", "ClearQdCrimes", 0x561FE0, &CWanted::ClearQdCrimes);
-    Install("CWanted", "IsInPursuit", 0x562330, &CWanted::IsInPursuit);
-    Install("CWanted", "SetWantedLevel", 0x562470, &CWanted::SetWantedLevel);
-    Install("CWanted", "CheatWantedLevel", 0x562540, &CWanted::CheatWantedLevel);
-    Install("CWanted", "SetWantedLevelNoDrop", 0x562570, &CWanted::SetWantedLevelNoDrop);
-    Install("CWanted", "ClearWantedLevelAndGoOnParole", 0x5625A0, &CWanted::ClearWantedLevelAndGoOnParole);
+    RH_ScopedInstall(UpdateWantedLevel, 0x561C90);
+    RH_ScopedInstall(AreSwatRequired, 0x561F40);
+    RH_ScopedInstall(AreFbiRequired, 0x561F60);
+    RH_ScopedInstall(AreArmyRequired, 0x561F80);
+    RH_ScopedInstall(InitialiseStaticVariables, 0x561C70);
+    RH_ScopedInstall(SetMaximumWantedLevel, 0x561E70);
+    RH_ScopedInstall(Initialise, 0x562390);
+    RH_ScopedInstall(ClearQdCrimes, 0x561FE0);
+    RH_ScopedInstall(IsInPursuit, 0x562330);
+    RH_ScopedInstall(SetWantedLevel, 0x562470);
+    RH_ScopedInstall(CheatWantedLevel, 0x562540);
+    RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
+    RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
     // RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
 }

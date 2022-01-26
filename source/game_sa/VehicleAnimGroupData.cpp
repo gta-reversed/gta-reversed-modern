@@ -4,11 +4,11 @@ CVehicleAnimGroup(&CVehicleAnimGroupData::m_vehicleAnimGroups)[NUM_VEH_ANIM_GROU
 
 void CVehicleAnimGroup::InjectHooks()
 {
-    Install("CVehicleAnimGroup", "InitAnimGroup", 0x5B9EB0, &CVehicleAnimGroup::InitAnimGroup);
-    Install("CVehicleAnimGroup", "CopyAnimGroup", 0x5B9E40, &CVehicleAnimGroup::CopyAnimGroup);
-    Install("CVehicleAnimGroup", "GetGroup", 0x6E3B00, &CVehicleAnimGroup::GetGroup);
-    Install("CVehicleAnimGroup", "ComputeCriticalBlendTime", 0x6E3C80, &CVehicleAnimGroup::ComputeCriticalBlendTime);
-    Install("CVehicleAnimGroup", "ComputeAnimDoorOffsets", 0x6E3D10, &CVehicleAnimGroup::ComputeAnimDoorOffsets);
+    RH_ScopedInstall(InitAnimGroup, 0x5B9EB0);
+    RH_ScopedInstall(CopyAnimGroup, 0x5B9E40);
+    RH_ScopedInstall(GetGroup, 0x6E3B00);
+    RH_ScopedInstall(ComputeCriticalBlendTime, 0x6E3C80);
+    RH_ScopedInstall(ComputeAnimDoorOffsets, 0x6E3D10);
 }
 
 CVehicleAnimGroup::CVehicleAnimGroup() : m_animFlags(), m_specialFlags(), m_generalTiming(), m_aInOutTiming()
@@ -228,11 +228,11 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
 
 void CVehicleAnimGroupData::InjectHooks()
 {
-    Install("CVehicleAnimGroupData", "GetInOutTimings", 0x645630, &CVehicleAnimGroupData::GetInOutTimings);
-    Install("CVehicleAnimGroupData", "GetGroupForAnim", 0x639FC0, &CVehicleAnimGroupData::GetGroupForAnim);
-    Install("CVehicleAnimGroupData", "GetAnimDoorOffset", 0x645600, &CVehicleAnimGroupData::GetAnimDoorOffset);
-    Install("CVehicleAnimGroupData", "UsesTruckDrivingAnims", 0x639FE0, &CVehicleAnimGroupData::UsesTruckDrivingAnims);
-    Install("CVehicleAnimGroupData", "UsesKartDrivingAnims", 0x6D09E0, &CVehicleAnimGroupData::UsesKartDrivingAnims);
+    RH_ScopedInstall(GetInOutTimings, 0x645630);
+    RH_ScopedInstall(GetGroupForAnim, 0x639FC0);
+    RH_ScopedInstall(GetAnimDoorOffset, 0x645600);
+    RH_ScopedInstall(UsesTruckDrivingAnims, 0x639FE0);
+    RH_ScopedInstall(UsesKartDrivingAnims, 0x6D09E0);
 }
 
 // 0x645630

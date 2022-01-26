@@ -135,14 +135,14 @@ void CAEWaveDecoder::Destructor() {
 
 void CAEWaveDecoder::InjectHooks() {
 #ifndef USE_DEFAULT_FUNCTIONS
-    Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
+    RH_ScopedInstall(Constructor, 0x503250);
     Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
-    Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
-    Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
-    Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);
-    Install("CAEWaveDecoder", "GetStreamPlayTimeMs", 0x503360, &CAEWaveDecoder::GetStreamPlayTimeMs);
-    Install("CAEWaveDecoder", "SetCursor", 0x5033c0, &CAEWaveDecoder::SetCursor);
-    Install("CAEWaveDecoder", "GetSampleRate", 0x503300, &CAEWaveDecoder::GetSampleRate);
-    Install("CAEWaveDecoder", "GetStreamID", 0x503280, &CAEWaveDecoder::GetStreamID);
+    RH_ScopedInstall(Initialise, 0x5032b0);
+    RH_ScopedInstall(FillBuffer, 0x502470);
+    RH_ScopedInstall(GetStreamLengthMs, 0x503310);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x503360);
+    RH_ScopedInstall(SetCursor, 0x5033c0);
+    RH_ScopedInstall(GetSampleRate, 0x503300);
+    RH_ScopedInstall(GetStreamID, 0x503280);
 #endif
 }

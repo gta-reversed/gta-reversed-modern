@@ -9,24 +9,24 @@ uint32& CDarkel::TimeOfFrenzyStart = *reinterpret_cast<uint32*>(0x96A6E0);
 eWeaponType& CDarkel::WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
 
 void CDarkel::InjectHooks() {
-    Install("CDarkel", "FrenzyOnGoing", 0x43D1F0, &CDarkel::FrenzyOnGoing);
-    Install("CDarkel", "Init", 0x43CEB0, &CDarkel::Init);
-//    Install("CDarkel", "DrawMessages", 0x43CEC0, &CDarkel::DrawMessages);
-    Install("CDarkel", "ReadStatus", 0x43D1E0, &CDarkel::ReadStatus);
-//    Install("CDarkel", "RegisterKillNotByPlayer", 0x43D210, &CDarkel::RegisterKillNotByPlayer);
-//    Install("CDarkel", "ThisPedShouldBeKilledForFrenzy", 0x43D2F0, &CDarkel::ThisPedShouldBeKilledForFrenzy);
-//    Install("CDarkel", "ThisVehicleShouldBeKilledForFrenzy", 0x0, &CDarkel::ThisVehicleShouldBeKilledForFrenzy);
-//    Install("CDarkel", "StartFrenzy", 0x43D3B0, &CDarkel::StartFrenzy);
-//    Install("CDarkel", "ResetModelsKilledByPlayer", 0x43D6A0, &CDarkel::ResetModelsKilledByPlayer);
-//    Install("CDarkel", "QueryModelsKilledByPlayer", 0x0, &CDarkel::QueryModelsKilledByPlayer);
-//    Install("CDarkel", "FindTotalPedsKilledByPlayer", 0x0, &CDarkel::FindTotalPedsKilledByPlayer);
-//    Install("CDarkel", "DealWithWeaponChangeAtEndOfFrenzy", 0x43D7A0, &CDarkel::DealWithWeaponChangeAtEndOfFrenzy);
-    Install("CDarkel", "CheckDamagedWeaponType", 0x43D9E0, &CDarkel::CheckDamagedWeaponType);
-//    Install("CDarkel", "Update", 0x43DAC0, &CDarkel::Update);
-    Install("CDarkel", "ResetOnPlayerDeath", 0x43DC10, &CDarkel::ResetOnPlayerDeath);
-    Install("CDarkel", "FailKillFrenzy", 0x43DC60, &CDarkel::FailKillFrenzy);
-//    Install("CDarkel", "RegisterKillByPlayer", 0x43DCD0, &CDarkel::RegisterKillByPlayer);
-//    Install("CDarkel", "RegisterCarBlownUpByPlayer", 0x43DF20, &CDarkel::RegisterCarBlownUpByPlayer);
+    RH_ScopedInstall(FrenzyOnGoing, 0x43D1F0);
+    RH_ScopedInstall(Init, 0x43CEB0);
+//    RH_ScopedInstall(DrawMessages, 0x43CEC0);
+    RH_ScopedInstall(ReadStatus, 0x43D1E0);
+//    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210);
+//    RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
+//    RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x0);
+//    RH_ScopedInstall(StartFrenzy, 0x43D3B0);
+//    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
+//    RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0);
+//    RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0);
+//    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
+    RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
+//    RH_ScopedInstall(Update, 0x43DAC0);
+    RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
+    RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
+//    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0);
+//    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
 }
 
 // 0x43D1F0

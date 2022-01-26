@@ -81,10 +81,10 @@ const uint32 CKeyGen::keyTable[256] = {
 };
 
 void CKeyGen::InjectHooks() {
-    Install("CKeyGen", "AppendStringToKey", 0x53CF70, &CKeyGen::AppendStringToKey);
+    RH_ScopedInstall(AppendStringToKey, 0x53CF70);
     RH_ScopedOverloadedInstall(GetKey, "", 0x53CF00, uint32(*)(const char*));
     RH_ScopedOverloadedInstall(GetKey, "size", 0x53CED0, uint32(*)(const char*, int32));
-    Install("CKeyGen", "GetUppercaseKey", 0x53CF30, &CKeyGen::GetUppercaseKey);
+    RH_ScopedInstall(GetUppercaseKey, 0x53CF30);
 }
 
 // 0x53CF70

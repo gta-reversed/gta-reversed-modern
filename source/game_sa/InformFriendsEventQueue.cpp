@@ -1,12 +1,12 @@
 #include "StdInc.h"
 
 void CInformFriendsEventQueue::InjectHooks() {
-//    Install("CInformFriendsEventQueue", "Constructor", 0x0, &CInformFriendsEventQueue::Constructor);
-//    Install("CInformFriendsEventQueue", "Destructor", 0x0, &CInformFriendsEventQueue::Destructor);
-//    Install("CInformFriendsEventQueue", "Init", 0x4B2990, &CInformFriendsEventQueue::Init);
-//    Install("CInformFriendsEventQueue", "Flush", 0x4AC2A0, &CInformFriendsEventQueue::Flush);
-//    Install("CInformFriendsEventQueue", "Add", 0x4AC1E0, &CInformFriendsEventQueue::Add);
-//    Install("CInformFriendsEventQueue", "Process", 0x4AC2E0, &CInformFriendsEventQueue::Process);
+//    RH_ScopedInstall(Constructor, 0x0);
+//    RH_ScopedInstall(Destructor, 0x0);
+//    RH_ScopedInstall(Init, 0x4B2990);
+//    RH_ScopedInstall(Flush, 0x4AC2A0);
+//    RH_ScopedInstall(Add, 0x4AC1E0);
+//    RH_ScopedInstall(Process, 0x4AC2E0);
 }
 
 // 0x

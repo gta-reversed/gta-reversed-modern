@@ -26,7 +26,7 @@ float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
 }
 
 // 0x6F6030

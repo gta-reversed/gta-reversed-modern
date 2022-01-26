@@ -3,7 +3,7 @@
 char (&CGridRef::GridRefList)[3200] = *reinterpret_cast<char (*)[3200]>(0xC72FB0);
 
 void CGridRef::InjectHooks() {
-//    Install("CGridRef", "Init", 0x71D4E0, &CGridRef::Init);
+//    RH_ScopedInstall(Init, 0x71D4E0);
 }
 
 // 0x71D4E0

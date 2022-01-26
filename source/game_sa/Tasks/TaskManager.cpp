@@ -10,26 +10,26 @@
 #include "TaskManager.h"
 
 void CTaskManager::InjectHooks() {
-    Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
+    RH_ScopedInstall(Constructor, 0x6816A0);
     Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
-    Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
-    Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
-    Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
-    Install("CTaskManager", "GetTaskSecondary", 0x681810, &CTaskManager::GetTaskSecondary);
-    Install("CTaskManager", "HasTaskSecondary", 0x681820, &CTaskManager::HasTaskSecondary);
-    Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
-    Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
-    Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
+    RH_ScopedInstall(GetActiveTask, 0x681720);
+    RH_ScopedInstall(FindActiveTaskByType, 0x681740);
+    RH_ScopedInstall(FindTaskByType, 0x6817D0);
+    RH_ScopedInstall(GetTaskSecondary, 0x681810);
+    RH_ScopedInstall(HasTaskSecondary, 0x681820);
+    RH_ScopedInstall(Flush, 0x681850);
+    RH_ScopedInstall(FlushImmediately, 0x6818A0);
+    RH_ScopedInstall(SetNextSubTask, 0x681920);
     RH_ScopedOverloadedInstall(GetSimplestTask, "task", 0x681970, CTaskSimple * (*)(CTask*));
     RH_ScopedOverloadedInstall(GetSimplestTask, "index", 0x681A00, CTaskSimple * (CTaskManager::*)(int32));
-    Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
-    Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
-    Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
-    Install("CTaskManager", "ParentsControlChildren", 0x681A80, &CTaskManager::ParentsControlChildren);
-    Install("CTaskManager", "SetTask", 0x681AF0, &CTaskManager::SetTask);
-    Install("CTaskManager", "SetTaskSecondary", 0x681B60, &CTaskManager::SetTaskSecondary);
-    Install("CTaskManager", "ClearTaskEventResponse", 0x681BD0, &CTaskManager::ClearTaskEventResponse);
-    Install("CTaskManager", "ManageTasks", 0x681C10, &CTaskManager::ManageTasks);
+    RH_ScopedInstall(StopTimers, 0x6819A0);
+    RH_ScopedInstall(GetSimplestActiveTask, 0x6819D0);
+    RH_ScopedInstall(AddSubTasks, 0x681A30);
+    RH_ScopedInstall(ParentsControlChildren, 0x681A80);
+    RH_ScopedInstall(SetTask, 0x681AF0);
+    RH_ScopedInstall(SetTaskSecondary, 0x681B60);
+    RH_ScopedInstall(ClearTaskEventResponse, 0x681BD0);
+    RH_ScopedInstall(ManageTasks, 0x681C10);
 }
 
 // 0x6816A0

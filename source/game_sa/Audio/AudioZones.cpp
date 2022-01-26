@@ -15,11 +15,11 @@ tAudioZoneSphere (&CAudioZones::m_aSpheres)[NUM_AUDIO_SPHERES] = *(tAudioZoneSph
 
 void CAudioZones::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("CAudioZones", "Init", 0x5081A0, &CAudioZones::Init);
-    // Install("CAudioZones", "RegisterAudioSphere", 0x5081C0, &CAudioZones::RegisterAudioSphere);
-    // Install("CAudioZones", "RegisterAudioBox", 0x508240, &CAudioZones::RegisterAudioBox);
-    // Install("CAudioZones", "SwitchAudioZone", 0x508320, &CAudioZones::SwitchAudioZone);
-    // Install("CAudioZones", "Update", 0x5083C0, &CAudioZones::Update);
+    // RH_ScopedInstall(Init, 0x5081A0);
+    // RH_ScopedInstall(RegisterAudioSphere, 0x5081C0);
+    // RH_ScopedInstall(RegisterAudioBox, 0x508240);
+    // RH_ScopedInstall(SwitchAudioZone, 0x508320);
+    // RH_ScopedInstall(Update, 0x5083C0);
 }
 
 // 0x5081A0

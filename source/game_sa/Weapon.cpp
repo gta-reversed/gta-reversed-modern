@@ -26,24 +26,24 @@ float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
-    Install("CWeapon", "CWeapon", 0x73B430, &CWeapon::Constructor);
-    Install("CWeapon", "Shutdown", 0x73A380, &CWeapon::Shutdown);
-    Install("CWeapon", "Reload", 0x73AEB0, &CWeapon::Reload);
-    Install("CWeapon", "IsTypeMelee", 0x73B1C0, &CWeapon::IsTypeMelee);
-    Install("CWeapon", "IsType2Handed", 0x73B1E0, &CWeapon::IsType2Handed);
-    Install("CWeapon", "IsTypeProjectile", 0x73B210, &CWeapon::IsTypeProjectile);
-    Install("CWeapon", "HasWeaponAmmoToBeUsed", 0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
+    RH_ScopedInstall(Constructor, 0x73B430);
+    RH_ScopedInstall(Shutdown, 0x73A380);
+    RH_ScopedInstall(Reload, 0x73AEB0);
+    RH_ScopedInstall(IsTypeMelee, 0x73B1C0);
+    RH_ScopedInstall(IsType2Handed, 0x73B1E0);
+    RH_ScopedInstall(IsTypeProjectile, 0x73B210);
+    RH_ScopedInstall(HasWeaponAmmoToBeUsed, 0x73B2A0);
     RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "", 0x73B240, bool (*)(eWeaponType weaponType));
-    Install("CWeapon", "InitialiseWeapons", 0x73A300, &CWeapon::InitialiseWeapons);
-    Install("CWeapon", "ShutdownWeapons", 0x73A330, &CWeapon::ShutdownWeapons);
-    Install("CWeapon", "UpdateWeapons", 0x73A360, &CWeapon::UpdateWeapons);
-    Install("CWeapon", "AddGunshell", 0x73A3E0, &CWeapon::AddGunshell);
-    Install("CWeapon", "ProcessLineOfSight", 0x73B300, &CWeapon::ProcessLineOfSight);
-    Install("CWeapon", "StopWeaponEffect", 0x73B360, &CWeapon::StopWeaponEffect);
-    Install("CWeapon", "TargetWeaponRangeMultiplier", 0x73B380, &CWeapon::TargetWeaponRangeMultiplier);
-    Install("CWeapon", "Initialise", 0x73B4A0, &CWeapon::Initialise);
-    Install("CWeapon", "DoWeaponEffect", 0x73E690, &CWeapon::DoWeaponEffect);
-    Install("CWeapon", "FireSniper", 0x73AAC0, &CWeapon::FireSniper);
+    RH_ScopedInstall(InitialiseWeapons, 0x73A300);
+    RH_ScopedInstall(ShutdownWeapons, 0x73A330);
+    RH_ScopedInstall(UpdateWeapons, 0x73A360);
+    RH_ScopedInstall(AddGunshell, 0x73A3E0);
+    RH_ScopedInstall(ProcessLineOfSight, 0x73B300);
+    RH_ScopedInstall(StopWeaponEffect, 0x73B360);
+    RH_ScopedInstall(TargetWeaponRangeMultiplier, 0x73B380);
+    RH_ScopedInstall(Initialise, 0x73B4A0);
+    RH_ScopedInstall(DoWeaponEffect, 0x73E690);
+    RH_ScopedInstall(FireSniper, 0x73AAC0);
 }
 
 // 0x73B430

@@ -4,11 +4,11 @@ float& CEventGunShot::ms_fGunShotSenseRangeForRiot2 = *(float*)0x8A625C;
 
 void CEventGunShot::InjectHooks()
 {
-    Install("CEventGunShot", "Constructor", 0x4AC610, &CEventGunShot::Constructor);
-    Install("CEventGunShot", "AffectsPed_Reversed", 0x4B2CD0, &CEventGunShot::AffectsPed_Reversed);
-    Install("CEventGunShot", "IsCriminalEvent_Reversed", 0x4AC810, &CEventGunShot::IsCriminalEvent_Reversed);
-    Install("CEventGunShot", "TakesPriorityOver_Reversed", 0x4AC780, &CEventGunShot::TakesPriorityOver_Reversed);
-    Install("CEventGunShot", "CloneEditable_Reversed", 0x4B6B20, &CEventGunShot::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AC610);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2CD0);
+    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4AC810);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AC780);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6B20);
 }
 
 // 0x4AC610

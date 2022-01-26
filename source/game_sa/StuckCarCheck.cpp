@@ -1,14 +1,14 @@
 #include "StdInc.h"
 
 void CStuckCarCheck::InjectHooks() {
-//    Install("CStuckCarCheck", "Init", 0x4639E0, &CStuckCarCheck::Init);
-//    Install("CStuckCarCheck", "AddCarToCheck", 0x465970, &CStuckCarCheck::AddCarToCheck);
-//    Install("CStuckCarCheck", "AttemptToWarpVehicle", 0x463A60, &CStuckCarCheck::AttemptToWarpVehicle);
-//    Install("CStuckCarCheck", "ClearStuckFlagForCar", 0x463C40, &CStuckCarCheck::ClearStuckFlagForCar);
-//    Install("CStuckCarCheck", "HasCarBeenStuckForAWhile", 0x463C00, &CStuckCarCheck::HasCarBeenStuckForAWhile);
-//    Install("CStuckCarCheck", "IsCarInStuckCarArray", 0x463C70, &CStuckCarCheck::IsCarInStuckCarArray);
-//    Install("CStuckCarCheck", "Process", 0x465680, &CStuckCarCheck::Process);
-//    Install("CStuckCarCheck", "RemoveCarFromCheck", 0x463B80, &CStuckCarCheck::RemoveCarFromCheck);
+//    RH_ScopedInstall(Init, 0x4639E0);
+//    RH_ScopedInstall(AddCarToCheck, 0x465970);
+//    RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60);
+//    RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
+//    RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00);
+//    RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70);
+//    RH_ScopedInstall(Process, 0x465680);
+//    RH_ScopedInstall(RemoveCarFromCheck, 0x463B80);
 }
 
 // 0x4639E0

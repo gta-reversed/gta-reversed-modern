@@ -108,12 +108,12 @@ std::vector<Cheat> cheats = {
 };
 
 void CCheat::InjectHooks() {
-    Install("CCheat", "AddToCheatString", 0x438480, &CCheat::AddToCheatString);
-    Install("CCheat", "HandleSpecialCheats", 0x439A10, &CCheat::HandleSpecialCheats);
-    Install("CCheat", "DoCheats", 0x439AF0, &CCheat::DoCheats);
-    Install("CCheat", "ResetCheats", 0x438450, &CCheat::ResetCheats);
-    Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
-    Install("CCheat", "EnableLegimateCheat", 0x438370, &CCheat::EnableLegitimateCheat);
+    RH_ScopedInstall(AddToCheatString, 0x438480);
+    RH_ScopedInstall(HandleSpecialCheats, 0x439A10);
+    RH_ScopedInstall(DoCheats, 0x439AF0);
+    RH_ScopedInstall(ResetCheats, 0x438450);
+    RH_ScopedInstall(IsZoneStreamingAllowed, 0x407410);
+    RH_ScopedInstall(EnableLegitimateCheat, 0x438370);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {

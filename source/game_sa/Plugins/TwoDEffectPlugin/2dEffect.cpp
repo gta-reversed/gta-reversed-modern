@@ -6,26 +6,26 @@ uint32& C2dEffect::ms_nTxdSlot = *(uint32*)0x8D4948;
 void C2dEffect::InjectHooks()
 {
 // Class methods
-    Install("C2dEffect", "Shutdown", 0x4C57D0, &C2dEffect::Shutdown);
+    RH_ScopedInstall(Shutdown, 0x4C57D0);
 
 // Statics
-    Install("C2dEffect", "Roadsign_GetNumLinesFromFlags", 0x6FA640, &C2dEffect::Roadsign_GetNumLinesFromFlags);
-    Install("C2dEffect", "Roadsign_GetNumLettersFromFlags", 0x6FA670, &C2dEffect::Roadsign_GetNumLettersFromFlags);
-    Install("C2dEffect", "Roadsign_GetPaletteIDFromFlags", 0x6FA6A0, &C2dEffect::Roadsign_GetPaletteIDFromFlags);
-    Install("C2dEffect", "PluginAttach", 0x6FA970, &C2dEffect::PluginAttach);
-    Install("C2dEffect", "DestroyAtomic", 0x4C54E0, &C2dEffect::DestroyAtomic);
+    RH_ScopedInstall(Roadsign_GetNumLinesFromFlags, 0x6FA640);
+    RH_ScopedInstall(Roadsign_GetNumLettersFromFlags, 0x6FA670);
+    RH_ScopedInstall(Roadsign_GetPaletteIDFromFlags, 0x6FA6A0);
+    RH_ScopedInstall(PluginAttach, 0x6FA970);
+    RH_ScopedInstall(DestroyAtomic, 0x4C54E0);
 
 // RW PLUGIN
-    Install("C2dEffect", "RpGeometryGet2dFxCount", 0x4C4340, &RpGeometryGet2dFxCount);
-    Install("C2dEffect", "RpGeometryGet2dFxAtIndex", 0x4C4A40, &RpGeometryGet2dFxAtIndex);
+    RH_ScopedInstall(RpGeometryGet2dFxCount, 0x4C4340);
+    RH_ScopedInstall(RpGeometryGet2dFxAtIndex, 0x4C4A40);
 
-    Install("C2dEffect", "t2dEffectPluginConstructor", 0x6F9F90, &t2dEffectPluginConstructor);
-    Install("C2dEffect", "t2dEffectPluginDestructor", 0x6FA880, &t2dEffectPluginDestructor);
-    Install("C2dEffect", "t2dEffectPluginCopyConstructor", 0x6F9FB0, &t2dEffectPluginCopyConstructor);
+    RH_ScopedInstall(t2dEffectPluginConstructor, 0x6F9F90);
+    RH_ScopedInstall(t2dEffectPluginDestructor, 0x6FA880);
+    RH_ScopedInstall(t2dEffectPluginCopyConstructor, 0x6F9FB0);
 
-    //Install("C2dEffect", "Rwt2dEffectPluginDataChunkReadCallBack", 0x6F9FD0, &Rwt2dEffectPluginDataChunkReadCallBack);
-    Install("C2dEffect", "Rwt2dEffectPluginDataChunkWriteCallBack", 0x6FA620, &Rwt2dEffectPluginDataChunkWriteCallBack);
-    Install("C2dEffect", "Rwt2dEffectPluginDataChunkGetSizeCallBack", 0x6FA630, &Rwt2dEffectPluginDataChunkGetSizeCallBack);
+    //RH_ScopedInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0);
+    RH_ScopedInstall(Rwt2dEffectPluginDataChunkWriteCallBack, 0x6FA620);
+    RH_ScopedInstall(Rwt2dEffectPluginDataChunkGetSizeCallBack, 0x6FA630);
 }
 
 void C2dEffect::Shutdown()

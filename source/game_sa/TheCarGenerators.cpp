@@ -10,13 +10,13 @@ CCarGenerator(&CTheCarGenerators::CarGeneratorArray)[NUM_CAR_GENERATORS] = *rein
 
 void CTheCarGenerators::InjectHooks()
 {
-    Install("CTheCarGenerators", "CreateCarGenerator", 0x6F31A0, &CTheCarGenerators::CreateCarGenerator);
-    Install("CTheCarGenerators", "Init", 0x6F3270, &CTheCarGenerators::Init);
-    Install("CTheCarGenerators", "Load", 0x5D39B0, &CTheCarGenerators::Load);
-    Install("CTheCarGenerators", "Process", 0x6F3F40, &CTheCarGenerators::Process);
-    Install("CTheCarGenerators", "RemoveCarGenerators", 0x6F3240, &CTheCarGenerators::RemoveCarGenerators);
-    Install("CTheCarGenerators", "Save", 0x5D38C0, &CTheCarGenerators::Save);
-    Install("CTheCarGenerators", "Get", 0x479D60, &CTheCarGenerators::Get);
+    RH_ScopedInstall(CreateCarGenerator, 0x6F31A0);
+    RH_ScopedInstall(Init, 0x6F3270);
+    RH_ScopedInstall(Load, 0x5D39B0);
+    RH_ScopedInstall(Process, 0x6F3F40);
+    RH_ScopedInstall(RemoveCarGenerators, 0x6F3240);
+    RH_ScopedInstall(Save, 0x5D38C0);
+    RH_ScopedInstall(Get, 0x479D60);
 }
 
 // return index of CarGenerator in CTheCarGenerators::CarGeneratorArray

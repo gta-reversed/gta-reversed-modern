@@ -4,15 +4,15 @@ void CEventAcquaintancePed::InjectHooks()
 {
     CEventAcquaintancePedHate::InjectHooks();
     CEventAcquaintancePedHateBadlyLit::InjectHooks();
-    Install("CEventAcquaintancePed", "Constructor", 0x4AF820, &CEventAcquaintancePed::Constructor);
-    Install("CEventAcquaintancePed", "AffectsPed_Reversed", 0x4AFA30, &CEventAcquaintancePed::AffectsPed_Reversed);
-    Install("CEventAcquaintancePed", "AffectsPedGroup_Reversed", 0x4AF970, &CEventAcquaintancePed::AffectsPedGroup_Reversed);
-    Install("CEventAcquaintancePed", "TakesPriorityOver_Reversed", 0x4AF8F0, &CEventAcquaintancePed::TakesPriorityOver_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AF820);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA30);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4AF970);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AF8F0);
 }
 
 void CEventSeenCop::InjectHooks()
 {
-    Install("CEventSeenCop", "CEventSeenCop", 0x5FF380, &CEventSeenCop::Constructor);
+    RH_ScopedInstall(Constructor, 0x5FF380);
 }
 
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
@@ -91,7 +91,7 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
-    Install("CEventAcquaintancePedHate", "CEventAcquaintancePedHate", 0x420E70, &CEventAcquaintancePedHate::Constructor);
+    RH_ScopedInstall(Constructor, 0x420E70);
 }
 
 CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
@@ -103,8 +103,8 @@ CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
-    Install("CEventAcquaintancePedHateBadlyLit", "CEventAcquaintancePedHateBadlyLit", 0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
-    Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x5FF250);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA90);
 }
 
 CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)

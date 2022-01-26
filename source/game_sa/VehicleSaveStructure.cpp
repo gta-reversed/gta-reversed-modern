@@ -2,8 +2,8 @@
 
 void CVehicleSaveStructure::InjectHooks()
 {
-    Install("CVehicleSaveStructure", "Construct", 0x5D2330, &CVehicleSaveStructure::Construct);
-    Install("CVehicleSaveStructure", "Extract", 0x5D23B0, &CVehicleSaveStructure::Extract);
+    RH_ScopedInstall(Construct, 0x5D2330);
+    RH_ScopedInstall(Extract, 0x5D23B0);
 }
 
 void CVehicleSaveStructure::Construct(CVehicle* pVeh)

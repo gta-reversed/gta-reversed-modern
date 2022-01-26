@@ -5,14 +5,14 @@ CPool<CQuadTreeNode>*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CPool<CQuadTreeNo
 void CQuadTreeNode::InjectHooks()
 {
     using namespace ReversibleHooks;
-    Install("CQuadTreeNode", "InitPool", 0x552C00, &CQuadTreeNode::InitPool);
+    RH_ScopedInstall(InitPool, 0x552C00);
     RH_ScopedOverloadedInstall(FindSector, "rect", 0x5525A0, int32(CQuadTreeNode::*)(const CRect&));
     RH_ScopedOverloadedInstall(FindSector, "vec", 0x552640, int32(CQuadTreeNode::*)(const CVector2D&));
-    Install("CQuadTreeNode", "InSector", 0x5526A0, &CQuadTreeNode::InSector);
+    RH_ScopedInstall(InSector, 0x5526A0);
     RH_ScopedOverloadedInstall(DeleteItem, "", 0x552A40, void(CQuadTreeNode::*)(void*));
     RH_ScopedOverloadedInstall(DeleteItem, "rect", 0x552A90, void(CQuadTreeNode::*)(void*, const CRect&));
-    Install("CQuadTreeNode", "AddItem", 0x552CD0, &CQuadTreeNode::AddItem);
-    Install("CQuadTreeNode", "GetAll", 0x552870, &CQuadTreeNode::GetAll);
+    RH_ScopedInstall(AddItem, 0x552CD0);
+    RH_ScopedInstall(GetAll, 0x552870);
     RH_ScopedOverloadedInstall(GetAllMatching, "rect", 0x5528C0, void(CQuadTreeNode::*)(const CRect&, CPtrListSingleLink&));
     RH_ScopedOverloadedInstall(GetAllMatching, "vec", 0x552930, void(CQuadTreeNode::*)(const CVector2D&, CPtrListSingleLink&));
     RH_ScopedOverloadedInstall(ForAllMatching, "rect", 0x552980, void(CQuadTreeNode::*)(const CRect&, CQuadTreeNodeRectCallBack));

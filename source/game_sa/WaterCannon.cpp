@@ -5,13 +5,13 @@
 #include <ranges>
 
 void CWaterCannon::InjectHooks() {
-    Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);
-    Install("CWaterCannon", "Destructor", 0x728B30, &CWaterCannon::Destructor);
-    Install("CWaterCannon", "Init", 0x728B40, &CWaterCannon::Init);
-    Install("CWaterCannon", "Update_OncePerFrame", 0x72A280, &CWaterCannon::Update_OncePerFrame);
-    Install("CWaterCannon", "Update_NewInput", 0x728C20, &CWaterCannon::Update_NewInput);
-    Install("CWaterCannon", "PushPeds", 0x7295E0, &CWaterCannon::PushPeds);
-    Install("CWaterCannon", "Render", 0x728DA0, &CWaterCannon::Render);
+    RH_ScopedInstall(Constructor, 0x728B10);
+    RH_ScopedInstall(Destructor, 0x728B30);
+    RH_ScopedInstall(Init, 0x728B40);
+    RH_ScopedInstall(Update_OncePerFrame, 0x72A280);
+    RH_ScopedInstall(Update_NewInput, 0x728C20);
+    RH_ScopedInstall(PushPeds, 0x7295E0);
+    RH_ScopedInstall(Render, 0x728DA0);
 }
 
 // 0x728B10

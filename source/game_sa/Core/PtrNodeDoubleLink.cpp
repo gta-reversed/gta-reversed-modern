@@ -11,7 +11,7 @@
 void CPtrNodeDoubleLink::InjectHooks() {
     Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
     Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
-    Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
+    RH_ScopedInstall(AddToList, 0x5329A0);
 }
 
 void* CPtrNodeDoubleLink::operator new(uint32 size) {

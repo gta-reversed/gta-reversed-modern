@@ -4,7 +4,7 @@
 
 void CTaskComplexPartnerGreet::InjectHooks()
 {
-    Install("CTaskComplexPartnerGreet", "CTaskComplexPartnerGreet", 0x684210, &CTaskComplexPartnerGreet::Constructor);
+    RH_ScopedInstall(Constructor, 0x684210);
 }
 
 CTaskComplexPartnerGreet::CTaskComplexPartnerGreet(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int32 handShakeType, CVector point) :

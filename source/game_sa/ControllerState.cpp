@@ -1,8 +1,8 @@
 #include "StdInc.h"
 
 void CControllerState::InjectHooks() {
-    Install("CControllerState", "Clear", 0x53EF80, &CControllerState::Clear);
-    Install("CControllerState", "CheckForInput", 0x53EFF0, &CControllerState::CheckForInput);
+    RH_ScopedInstall(Clear, 0x53EF80);
+    RH_ScopedInstall(CheckForInput, 0x53EFF0);
 }
 
 // 0x53EF80

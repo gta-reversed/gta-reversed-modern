@@ -2,9 +2,9 @@
 
 void CEventVehicleOnFire::InjectHooks()
 {
-    Install("CEventVehicleOnFire", "Constructor", 0x4B10C0, &CEventVehicleOnFire::Constructor);
-    Install("CEventVehicleOnFire", "AffectsPed_Reversed", 0x4B4FD0, &CEventVehicleOnFire::AffectsPed_Reversed);
-    Install("CEventVehicleOnFire", "CloneEditable_Reversed", 0x4B7740, &CEventVehicleOnFire::CloneEditable_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B10C0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4FD0);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7740);
 }
 
 CEventVehicleOnFire::CEventVehicleOnFire(CVehicle* vehicle)

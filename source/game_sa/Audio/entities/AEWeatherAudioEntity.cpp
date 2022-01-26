@@ -53,13 +53,13 @@ void CAEWeatherAudioEntity::Service() {
 
 void CAEWeatherAudioEntity::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CAEWeatherAudioEntity", "CAEWeatherAudioEntity", 0x72A620, &CAEWeatherAudioEntity::Constructor);
+    RH_ScopedInstall(Constructor, 0x72A620);
     Install("CAEWeatherAudioEntity", "~CAEWeatherAudioEntity", 0x72A400, &CAEWeatherAudioEntity::Destructor);
-    Install("CAEWeatherAudioEntity", "StaticInitialise", 0x5B9A70, &CAEWeatherAudioEntity::StaticInitialise);
-    Install("CAEWeatherAudioEntity", "StaticReset", 0x5052B0, &CAEWeatherAudioEntity::StaticReset);
-    // Install("CAEWeatherAudioEntity", "AddAudioEvent", 0x506800, &CAEWeatherAudioEntity::AddAudioEvent);
-    // Install("CAEWeatherAudioEntity", "UpdateParameters", 0x505A00, &CAEWeatherAudioEntity::UpdateParameters_Reversed);
-    // Install("CAEWeatherAudioEntity", "Service", 0x5052F0, &CAEWeatherAudioEntity::Service);
+    RH_ScopedInstall(StaticInitialise, 0x5B9A70);
+    RH_ScopedInstall(StaticReset, 0x5052B0);
+    // RH_ScopedInstall(AddAudioEvent, 0x506800);
+    // RH_ScopedInstall(UpdateParameters_Reversed, 0x505A00);
+    // RH_ScopedInstall(Service, 0x5052F0);
 }
 
 CAEWeatherAudioEntity* CAEWeatherAudioEntity::Constructor() {

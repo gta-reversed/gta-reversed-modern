@@ -105,12 +105,12 @@ void CAEFrontendAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos)
 
 void CAEFrontendAudioEntity::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CAEFrontendAudioEntity", "Initialise", 0x5B9AB0, &CAEFrontendAudioEntity::Initialise);
-    Install("CAEFrontendAudioEntity", "Reset", 0x4DD440, &CAEFrontendAudioEntity::Reset);
-    // Install("CAEFrontendAudioEntity", "AddAudioEvent", 0x4DD4A0, &CAEFrontendAudioEntity::AddAudioEvent);
-    Install("CAEFrontendAudioEntity", "IsRadioTuneSoundActive", 0x4DD480, &CAEFrontendAudioEntity::IsRadioTuneSoundActive);
-    Install("CAEFrontendAudioEntity", "IsLoadingTuneActive", 0x4DD470, &CAEFrontendAudioEntity::IsLoadingTuneActive);
-    Install("CAEFrontendAudioEntity", "UpdateParameters", 0x4DEDA0, &CAEFrontendAudioEntity::UpdateParameters_Reversed);
+    RH_ScopedInstall(Initialise, 0x5B9AB0);
+    RH_ScopedInstall(Reset, 0x4DD440);
+    // RH_ScopedInstall(AddAudioEvent, 0x4DD4A0);
+    RH_ScopedInstall(IsRadioTuneSoundActive, 0x4DD480);
+    RH_ScopedInstall(IsLoadingTuneActive, 0x4DD470);
+    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DEDA0);
 }
 
 void CAEFrontendAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

@@ -5,15 +5,15 @@
 void FxSystemBP_c::InjectHooks() {
     using namespace ReversibleHooks;
     // Install("FxSystemBP_c", "operator new", 0x4AA100, &FxSystemBP_c::operator new);
-    // Install("FxSystemBP_c", "FxSystemBP_c", 0x4AA0D0, &FxSystemBP_c::Constructor);
+    // RH_ScopedInstall(Constructor, 0x4AA0D0);
     // Install("FxSystemBP_c", "~FxSystemBP_c", 0x4AA0F0, &FxSystemBP_c::Destructor);
-    // Install("FxSystemBP_c", "Load", 0x5C05F0, &FxSystemBP_c::Load);
-    // Install("FxSystemBP_c", "Unload", 0x4AA120, &FxSystemBP_c::Unload);
-    // Install("FxSystemBP_c", "Update", 0x4AA130, &FxSystemBP_c::Update);
-    // Install("FxSystemBP_c", "Render", 0x4AA160, &FxSystemBP_c::Render);
-    // Install("FxSystemBP_c", "FreePrtFromSystem", 0x4AA1B0, &FxSystemBP_c::FreePrtFromSystem);
-    // Install("FxSystemBP_c", "GetBoundingSphere", 0x4AA1F0, &FxSystemBP_c::GetBoundingSphere);
-    // Install("FxSystemBP_c", "SetBoundingSphere", 0x4AA200, &FxSystemBP_c::SetBoundingSphere);
+    // RH_ScopedInstall(Load, 0x5C05F0);
+    // RH_ScopedInstall(Unload, 0x4AA120);
+    // RH_ScopedInstall(Update, 0x4AA130);
+    // RH_ScopedInstall(Render, 0x4AA160);
+    // RH_ScopedInstall(FreePrtFromSystem, 0x4AA1B0);
+    // RH_ScopedInstall(GetBoundingSphere, 0x4AA1F0);
+    // RH_ScopedInstall(SetBoundingSphere, 0x4AA200);
 }
 
 // 0x4AA100

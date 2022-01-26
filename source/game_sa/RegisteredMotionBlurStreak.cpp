@@ -6,8 +6,8 @@
 
 void CRegisteredMotionBlurStreak::InjectHooks()
 {
-    Install("CRegisteredMotionBlurStreak", "Update", 0x721EE0, &CRegisteredMotionBlurStreak::Update);
-    Install("CRegisteredMotionBlurStreak", "Render", 0x721F70, &CRegisteredMotionBlurStreak::Render);
+    RH_ScopedInstall(Update, 0x721EE0);
+    RH_ScopedInstall(Render, 0x721F70);
 }
 
 void CRegisteredMotionBlurStreak::Update()

@@ -4,16 +4,16 @@ CMatrixLinkList& gMatrixList = *(CMatrixLinkList*)0xB74288;
 
 void CMatrixLinkList::InjectHooks()
 {
-    Install("CMatrixLinkList", "Init", 0x54F0D0, &CMatrixLinkList::Init);
-    Install("CMatrixLinkList", "Shutdown", 0x54E990, &CMatrixLinkList::Shutdown);
-    Install("CMatrixLinkList", "AddToList1", 0x54E9D0, &CMatrixLinkList::AddToList1);
-    Install("CMatrixLinkList", "AddToList2", 0x54EA10, &CMatrixLinkList::AddToList2);
-    Install("CMatrixLinkList", "MoveToList1", 0x54EA60, &CMatrixLinkList::MoveToList1);
-    Install("CMatrixLinkList", "MoveToList2", 0x54EA90, &CMatrixLinkList::MoveToList2);
-    Install("CMatrixLinkList", "MoveToFreeList", 0x54EAD0, &CMatrixLinkList::MoveToFreeList);
-    Install("CMatrixLinkList", "GetNumFree", 0x54EB10, &CMatrixLinkList::GetNumFree);
-    Install("CMatrixLinkList", "GetNumUsed1", 0x54EB30, &CMatrixLinkList::GetNumUsed1);
-    Install("CMatrixLinkList", "GetNumUsed2", 0x54EB50, &CMatrixLinkList::GetNumUsed2);
+    RH_ScopedInstall(Init, 0x54F0D0);
+    RH_ScopedInstall(Shutdown, 0x54E990);
+    RH_ScopedInstall(AddToList1, 0x54E9D0);
+    RH_ScopedInstall(AddToList2, 0x54EA10);
+    RH_ScopedInstall(MoveToList1, 0x54EA60);
+    RH_ScopedInstall(MoveToList2, 0x54EA90);
+    RH_ScopedInstall(MoveToFreeList, 0x54EAD0);
+    RH_ScopedInstall(GetNumFree, 0x54EB10);
+    RH_ScopedInstall(GetNumUsed1, 0x54EB30);
+    RH_ScopedInstall(GetNumUsed2, 0x54EB50);
 }
 
 CMatrixLinkList::CMatrixLinkList() : m_head(), m_tail(), m_allocatedListHead(), m_allocatedListTail(), m_freeListHead(), m_freeListTail()

@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
 void CSpecialPlateHandler::InjectHooks() {
-    Install("CSpecialPlateHandler", "Init", 0x6F2D10, &CSpecialPlateHandler::Init);
-    Install("CSpecialPlateHandler", "Find", 0x6F2D30, &CSpecialPlateHandler::Find);
-    Install("CSpecialPlateHandler", "Add", 0x6F2D90, &CSpecialPlateHandler::Add);
-    Install("CSpecialPlateHandler", "Remove", 0x6F2DD0, &CSpecialPlateHandler::Remove);
+    RH_ScopedInstall(Init, 0x6F2D10);
+    RH_ScopedInstall(Find, 0x6F2D30);
+    RH_ScopedInstall(Add, 0x6F2D90);
+    RH_ScopedInstall(Remove, 0x6F2DD0);
 }
 
 // unused

@@ -10,9 +10,9 @@
 #include "TaskSimple.h"
 
 void CTaskSimple::InjectHooks() {
-    Install("CTaskSimple", "GetSubTask", 0x43E300, &CTaskSimple::GetSubTask_Reversed);
-    Install("CTaskSimple", "IsSimple", 0x43E310, &CTaskSimple::IsSimple_Reversed);
-    Install("CTaskSimple", "SetPedPosition", 0x43E320, &CTaskSimple::SetPedPosition_Reversed);
+    RH_ScopedInstall(GetSubTask_Reversed, 0x43E300);
+    RH_ScopedInstall(IsSimple_Reversed, 0x43E310);
+    RH_ScopedInstall(SetPedPosition_Reversed, 0x43E320);
 }
 
 // 0x61A390

@@ -16,7 +16,7 @@ void CCollision::InjectHooks()
 {
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void(*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void(*)(CCollisionData*));
-    Install("CCollision", "ProcessLineOfSight", 0x417950, &CCollision::ProcessLineOfSight);
+    RH_ScopedInstall(ProcessLineOfSight, 0x417950);
 }
 
 // 0x411E20

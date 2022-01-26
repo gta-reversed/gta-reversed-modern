@@ -19,56 +19,56 @@ bool& CObject::bArea51SamSiteDisabled = *(bool*)0xBB4A72;
 void CObject::InjectHooks()
 {
 // VIRTUAL
-    Install("CObject", "SetIsStatic", 0x5A0760, &CObject::SetIsStatic_Reversed);
-    Install("CObject", "CreateRwObject", 0x59F110, &CObject::CreateRwObject_Reversed);
-    Install("CObject", "ProcessControl", 0x5A2130, &CObject::ProcessControl_Reversed);
-    Install("CObject", "Teleport", 0x5A17B0, &CObject::Teleport_Reversed);
-    Install("CObject", "PreRender", 0x59FD50, &CObject::PreRender_Reversed);
-    Install("CObject", "Render", 0x59F180, &CObject::Render_Reversed);
-    Install("CObject", "SetupLighting", 0x554FA0, &CObject::SetupLighting_Reversed);
-    Install("CObject", "RemoveLighting", 0x553E10, &CObject::RemoveLighting_Reversed);
-    Install("CObject", "SpecialEntityPreCollisionStuff", 0x59FEE0, &CObject::SpecialEntityPreCollisionStuff_Reversed);
-    Install("CObject", "SpecialEntityCalcCollisionSteps", 0x5A02E0, &CObject::SpecialEntityCalcCollisionSteps_Reversed);
+    RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
+    RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x5A2130);
+    RH_ScopedInstall(Teleport_Reversed, 0x5A17B0);
+    RH_ScopedInstall(PreRender_Reversed, 0x59FD50);
+    RH_ScopedInstall(Render_Reversed, 0x59F180);
+    RH_ScopedInstall(SetupLighting_Reversed, 0x554FA0);
+    RH_ScopedInstall(RemoveLighting_Reversed, 0x553E10);
+    RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x59FEE0);
+    RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5A02E0);
 
 // CLASS
-    Install("CObject", "Init", 0x59F840, &CObject::Init);
-    Install("CObject", "ProcessGarageDoorBehaviour", 0x44A4D0, &CObject::ProcessGarageDoorBehaviour);
-    Install("CObject", "CanBeDeleted", 0x59F120, &CObject::CanBeDeleted);
-    Install("CObject", "SetRelatedDummy", 0x59F160, &CObject::SetRelatedDummy);
-    Install("CObject", "TryToExplode", 0x59F2D0, &CObject::TryToExplode);
-    Install("CObject", "SetObjectTargettable", 0x59F300, &CObject::SetObjectTargettable);
-    Install("CObject", "CanBeTargetted", 0x59F320, &CObject::CanBeTargetted);
-    Install("CObject", "RefModelInfo", 0x59F330, &CObject::RefModelInfo);
-    Install("CObject", "SetRemapTexture", 0x59F350, &CObject::SetRemapTexture);
-    Install("CObject", "GetRopeHeight", 0x59F380, &CObject::GetRopeHeight);
-    Install("CObject", "SetRopeHeight", 0x59F3A0, &CObject::SetRopeHeight);
-    Install("CObject", "GetObjectCarriedWithRope", 0x59F3C0, &CObject::GetObjectCarriedWithRope);
-    Install("CObject", "ReleaseObjectCarriedWithRope", 0x59F3E0, &CObject::ReleaseObjectCarriedWithRope);
-    Install("CObject", "AddToControlCodeList", 0x59F400, &CObject::AddToControlCodeList);
-    Install("CObject", "RemoveFromControlCodeList", 0x59F450, &CObject::RemoveFromControlCodeList);
-    Install("CObject", "ResetDoorAngle", 0x59F4B0, &CObject::ResetDoorAngle);
-    Install("CObject", "LockDoor", 0x59F5C0, &CObject::LockDoor);
-    Install("CObject", "DoBurnEffect", 0x59FB50, &CObject::DoBurnEffect);
-    Install("CObject", "GetLightingFromCollisionBelow", 0x59FD00, &CObject::GetLightingFromCollisionBelow);
-    Install("CObject", "ProcessSamSiteBehaviour", 0x5A07D0, &CObject::ProcessSamSiteBehaviour);
-    Install("CObject", "ProcessTrainCrossingBehaviour", 0x5A0B50, &CObject::ProcessTrainCrossingBehaviour);
-    Install("CObject", "ObjectDamage", 0x5A0D90, &CObject::ObjectDamage);
-    Install("CObject", "Explode", 0x5A1340, &CObject::Explode);
-    Install("CObject", "ObjectFireDamage", 0x5A1580, &CObject::ObjectFireDamage);
-    Install("CObject", "GrabObjectToCarryWithRope", 0x5A1AB0, &CObject::GrabObjectToCarryWithRope);
-    Install("CObject", "CanBeUsedToTakeCoverBehind", 0x5A1B60, &CObject::CanBeUsedToTakeCoverBehind);
-    Install("CObject", "ProcessControlLogic", 0x5A29A0, &CObject::ProcessControlLogic);
+    RH_ScopedInstall(Init, 0x59F840);
+    RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
+    RH_ScopedInstall(CanBeDeleted, 0x59F120);
+    RH_ScopedInstall(SetRelatedDummy, 0x59F160);
+    RH_ScopedInstall(TryToExplode, 0x59F2D0);
+    RH_ScopedInstall(SetObjectTargettable, 0x59F300);
+    RH_ScopedInstall(CanBeTargetted, 0x59F320);
+    RH_ScopedInstall(RefModelInfo, 0x59F330);
+    RH_ScopedInstall(SetRemapTexture, 0x59F350);
+    RH_ScopedInstall(GetRopeHeight, 0x59F380);
+    RH_ScopedInstall(SetRopeHeight, 0x59F3A0);
+    RH_ScopedInstall(GetObjectCarriedWithRope, 0x59F3C0);
+    RH_ScopedInstall(ReleaseObjectCarriedWithRope, 0x59F3E0);
+    RH_ScopedInstall(AddToControlCodeList, 0x59F400);
+    RH_ScopedInstall(RemoveFromControlCodeList, 0x59F450);
+    RH_ScopedInstall(ResetDoorAngle, 0x59F4B0);
+    RH_ScopedInstall(LockDoor, 0x59F5C0);
+    RH_ScopedInstall(DoBurnEffect, 0x59FB50);
+    RH_ScopedInstall(GetLightingFromCollisionBelow, 0x59FD00);
+    RH_ScopedInstall(ProcessSamSiteBehaviour, 0x5A07D0);
+    RH_ScopedInstall(ProcessTrainCrossingBehaviour, 0x5A0B50);
+    RH_ScopedInstall(ObjectDamage, 0x5A0D90);
+    RH_ScopedInstall(Explode, 0x5A1340);
+    RH_ScopedInstall(ObjectFireDamage, 0x5A1580);
+    RH_ScopedInstall(GrabObjectToCarryWithRope, 0x5A1AB0);
+    RH_ScopedInstall(CanBeUsedToTakeCoverBehind, 0x5A1B60);
+    RH_ScopedInstall(ProcessControlLogic, 0x5A29A0);
 
 // STATIC
     RH_ScopedOverloadedInstall(Create, "intbool", 0x5A1F60, CObject*(*)(int32, bool));
     RH_ScopedOverloadedInstall(Create, "dummy", 0x5A2070, CObject*(*)(CDummyObject*));
-    Install("CObject", "SetMatrixForTrainCrossing", 0x59F200, &CObject::SetMatrixForTrainCrossing);
-    Install("CObject", "TryToFreeUpTempObjects", 0x5A1840, &CObject::TryToFreeUpTempObjects);
-    Install("CObject", "DeleteAllTempObjects", 0x5A18B0, &CObject::DeleteAllTempObjects);
-    Install("CObject", "DeleteAllMissionObjects", 0x5A1910, &CObject::DeleteAllMissionObjects);
-    Install("CObject", "DeleteAllTempObjectsInArea", 0x5A1980, &CObject::DeleteAllTempObjectsInArea);
-    Install("CObject", "IsObjectPointerValid_NotInWorld", 0x5A2B90, &IsObjectPointerValid_NotInWorld);
-    Install("CObject", "IsObjectPointerValid", 0x5A2C20, &IsObjectPointerValid);
+    RH_ScopedInstall(SetMatrixForTrainCrossing, 0x59F200);
+    RH_ScopedInstall(TryToFreeUpTempObjects, 0x5A1840);
+    RH_ScopedInstall(DeleteAllTempObjects, 0x5A18B0);
+    RH_ScopedInstall(DeleteAllMissionObjects, 0x5A1910);
+    RH_ScopedInstall(DeleteAllTempObjectsInArea, 0x5A1980);
+    RH_ScopedInstall(IsObjectPointerValid_NotInWorld, 0x5A2B90);
+    RH_ScopedInstall(IsObjectPointerValid, 0x5A2C20);
 }
 
 CObject::CObject() : CPhysical()

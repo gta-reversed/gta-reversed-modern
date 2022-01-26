@@ -12,7 +12,7 @@
 
 void CBike::InjectHooks()
 {
-    Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
+    RH_ScopedInstall(ProcessBuoyancy, 0x6B5FB0);
 }
 
 // 0x6BF430

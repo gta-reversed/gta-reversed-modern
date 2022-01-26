@@ -6,9 +6,9 @@
 uint8 (&CCreepingFire::m_aFireStatus)[32][32] = *(uint8(*)[32][32])0xB71B68;
 
 void CCreepingFire::InjectHooks() {
-    Install("CCreepingFire", "SetReadyToBurn", 0x539CC0, &CCreepingFire::SetReadyToBurn);
-    Install("CCreepingFire", "Update", 0x539CE0, &CCreepingFire::Update);
-    Install("CCreepingFire", "TryToStartFireAtCoors", 0x53A450, &CCreepingFire::TryToStartFireAtCoors);
+    RH_ScopedInstall(SetReadyToBurn, 0x539CC0);
+    RH_ScopedInstall(Update, 0x539CE0);
+    RH_ScopedInstall(TryToStartFireAtCoors, 0x53A450);
 }
 
 // 0x539CC0

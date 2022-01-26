@@ -8,18 +8,18 @@ CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } //
 
 void CQuadBike::InjectHooks() {
     using namespace ReversibleHooks;
-    // todo: Install("CQuadBike", "CQuadBike", 0x6CE370, &CQuadBike::Constructor);
-    Install("CQuadBike", "Fix", 0x6CE2B0, &CQuadBike::Fix_Reversed);
-    Install("CQuadBike", "GetRideAnimData", 0x6CDC90, &CQuadBike::GetRideAnimData_Reversed);
-    Install("CQuadBike", "PreRender", 0x6CEAD0, &CQuadBike::PreRender_Reversed);
-    Install("CQuadBike", "ProcessAI", 0x6CE460, &CQuadBike::ProcessAI_Reversed);
-    Install("CQuadBike", "ProcessControl", 0x6CDCC0, &CQuadBike::ProcessControl_Reversed);
-    Install("CQuadBike", "ProcessControlInputs", 0x6CE020, &CQuadBike::ProcessControlInputs_Reversed);
-    Install("CQuadBike", "ProcessDrivingAnims", 0x6CE280, &CQuadBike::ProcessDrivingAnims_Reversed);
-    Install("CQuadBike", "ProcessSuspension", 0x6CE270, &CQuadBike::ProcessSuspension_Reversed);
-    Install("CQuadBike", "ResetSuspension", 0x6CDCB0, &CQuadBike::ResetSuspension_Reversed);
-    Install("CQuadBike", "SetupDamageAfterLoad", 0x6CE340, &CQuadBike::SetupDamageAfterLoad_Reversed);
-    Install("CQuadBike", "SetupSuspensionLines", 0x6CDCA0, &CQuadBike::SetupSuspensionLines_Reversed);
+    // todo: RH_ScopedInstall(Constructor, 0x6CE370);
+    RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
+    RH_ScopedInstall(GetRideAnimData_Reversed, 0x6CDC90);
+    RH_ScopedInstall(PreRender_Reversed, 0x6CEAD0);
+    RH_ScopedInstall(ProcessAI_Reversed, 0x6CE460);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6CDCC0);
+    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6CE020);
+    RH_ScopedInstall(ProcessDrivingAnims_Reversed, 0x6CE280);
+    RH_ScopedInstall(ProcessSuspension_Reversed, 0x6CE270);
+    RH_ScopedInstall(ResetSuspension_Reversed, 0x6CDCB0);
+    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6CE340);
+    RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6CDCA0);
 }
 
 // 0x6CE370

@@ -21,7 +21,7 @@ uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
 CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
 
 void CIplStore::InjectHooks() {
-    Install("CIplStore", "GetIplEntityIndexArray", 0x4047B0, &CIplStore::GetIplEntityIndexArray);
+    RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
 }
 
 // 0x405EC0

@@ -3,9 +3,9 @@
 #include "Gangs.h"
 
 void CGangs::InjectHooks() {
-    // Install("CGangs", "Initialise", 0x5DE680, &CGangs::Initialise);
-    // Install("CGangs", "Load", 0x5D3A90, &CGangs::Load);
-    // Install("CGangs", "Save", 0x5D3A60, &CGangs::Save);
+    // RH_ScopedInstall(Initialise, 0x5DE680);
+    // RH_ScopedInstall(Load, 0x5D3A90);
+    // RH_ScopedInstall(Save, 0x5D3A60);
 }
 
 // 0x5DE680

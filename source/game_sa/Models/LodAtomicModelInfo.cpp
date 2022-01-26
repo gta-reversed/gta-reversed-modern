@@ -3,9 +3,9 @@
 
 void CLodAtomicModelInfo::InjectHooks()
 {
-    Install("CLodAtomicModelInfo", "AsLodAtomicModelInfoPtr", 0x4C5610, &CLodAtomicModelInfo::AsLodAtomicModelInfoPtr_Reversed);
-    Install("CLodAtomicModelInfo", "GetModelType", 0x4C5600, &CLodAtomicModelInfo::GetModelType_Reversed);
-    Install("CLodAtomicModelInfo", "Init", 0x4C54D0, &CLodAtomicModelInfo::Init_Reversed);
+    RH_ScopedInstall(AsLodAtomicModelInfoPtr_Reversed, 0x4C5610);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5600);
+    RH_ScopedInstall(Init_Reversed, 0x4C54D0);
 }
 
 CLodAtomicModelInfo::CLodAtomicModelInfo() : CAtomicModelInfo()

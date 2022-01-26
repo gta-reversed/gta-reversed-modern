@@ -16,7 +16,7 @@ void CGenericGameStorage::InjectHooks() {
     // until we reverse everything.
 
     using namespace ReversibleHooks;
-    Install("CGenericGameStorage", "ReportError", 0x5D08C0, &CGenericGameStorage::ReportError);
+    RH_ScopedInstall(ReportError, 0x5D08C0);
     Install("CGenericGameStorage", "DoGameSpecificStuffBeforeSave", 0x618F50, &CGenericGameStorage::DoGameSpecificStuffBeforeSave, true);
     Install("CGenericGameStorage", "DoGameSpecificStuffAfterSucessLoad", 0x618E90, &CGenericGameStorage::DoGameSpecificStuffAfterSucessLoad, true);
     Install("CGenericGameStorage", "InitRadioStationPositionList", 0x618E70, &CGenericGameStorage::InitRadioStationPositionList, true);

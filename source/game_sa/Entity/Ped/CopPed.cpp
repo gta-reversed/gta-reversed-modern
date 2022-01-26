@@ -4,13 +4,13 @@
 
 void CCopPed::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("CCopPed", "CCopPed", 0x5DDC60, &CCopPed::Constructor); todo: unhook and test when core components of Ped will be reversed
+    // RH_ScopedInstall(Constructor, 0x5DDC60); todo: unhook and test when core components of Ped will be reversed
     Install("CCopPed", "~CCopPed", 0x5DE0D0, &CCopPed::Destructor);
-    Install("CCopPed", "SetPartner", 0x5DDE80, &CCopPed::SetPartner);
-    Install("CCopPed", "AddCriminalToKill", 0x5DDEB0, &CCopPed::AddCriminalToKill);
-    Install("CCopPed", "RemoveCriminalToKill", 0x5DE040, &CCopPed::RemoveCriminalToKill);
-    Install("CCopPed", "ClearCriminalsToKill", 0x5DE070, &CCopPed::ClearCriminalsToKill);
-    Install("CCopPed", "ProcessControl", 0x5DE160, &CCopPed::ProcessControl_Reversed);
+    RH_ScopedInstall(SetPartner, 0x5DDE80);
+    RH_ScopedInstall(AddCriminalToKill, 0x5DDEB0);
+    RH_ScopedInstall(RemoveCriminalToKill, 0x5DE040);
+    RH_ScopedInstall(ClearCriminalsToKill, 0x5DE070);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x5DE160);
 }
 
 /* Horrible design, but R* also allowed to pass in a ModelID */

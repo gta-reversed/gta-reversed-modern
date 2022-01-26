@@ -4,9 +4,9 @@
 
 void CPlaneTrail::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CPlaneTrail", "Init", 0x717160, &CPlaneTrail::Init);
-    Install("CPlaneTrail", "Render", 0x717180, &CPlaneTrail::Render);
-    Install("CPlaneTrail", "RegisterPoint", 0x7172D0, &CPlaneTrail::RegisterPoint);
+    RH_ScopedInstall(Init, 0x717160);
+    RH_ScopedInstall(Render, 0x717180);
+    RH_ScopedInstall(RegisterPoint, 0x7172D0);
 }
 
 // 0x717160

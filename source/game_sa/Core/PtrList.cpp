@@ -3,8 +3,8 @@
 #include "PtrList.h"
 
 void CPtrList::InjectHooks() {
-    Install("CPtrList", "CountElements", 0x5521B0, &CPtrList::CountElements);
-    Install("CPtrList", "IsMemberOfList", 0x5521D0, &CPtrList::IsMemberOfList);
+    RH_ScopedInstall(CountElements, 0x5521B0);
+    RH_ScopedInstall(IsMemberOfList, 0x5521D0);
 }
 
 CPtrList::CPtrList() {

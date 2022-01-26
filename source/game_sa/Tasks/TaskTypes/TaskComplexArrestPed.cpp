@@ -4,7 +4,7 @@
 
 void CTaskComplexArrestPed::InjectHooks() {
     using namespace ReversibleHooks;
-    Install("CTaskComplexArrestPed", "CTaskComplexArrestPed", 0x68B990, &CTaskComplexArrestPed::Constructor);
+    RH_ScopedInstall(Constructor, 0x68B990);
 }
 
 // 0x68B990

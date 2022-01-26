@@ -5,10 +5,10 @@ CReference* (&CReferences::pEmptyList) = *(CReference**)0xBA1768;
 
 void CReferences::InjectHooks()
 {
-    Install("CReferences", "Init", 0x5719B0, &CReferences::Init);
-    Install("CReferences", "ListSize", 0x5719E0, &CReferences::ListSize);
-    Install("CReferences", "RemoveReferencesToPlayer", 0x571AD0, &CReferences::RemoveReferencesToPlayer);
-    Install("CReferences", "PruneAllReferencesInWorld", 0x571CC0, &CReferences::PruneAllReferencesInWorld);
+    RH_ScopedInstall(Init, 0x5719B0);
+    RH_ScopedInstall(ListSize, 0x5719E0);
+    RH_ScopedInstall(RemoveReferencesToPlayer, 0x571AD0);
+    RH_ScopedInstall(PruneAllReferencesInWorld, 0x571CC0);
 }
 
 void CReferences::Init()

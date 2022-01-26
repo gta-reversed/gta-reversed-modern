@@ -11,27 +11,27 @@
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
-    Install("CEventPotentialWalkIntoVehicle", "CEventPotentialWalkIntoVehicle", 0x4AE320, &CEventPotentialWalkIntoVehicle::Constructor);
-    Install("CEventPotentialWalkIntoVehicle", "AffectsPed", 0x4AE420, &CEventPotentialWalkIntoVehicle::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AE320);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE420);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
 {
-    Install("CEventPotentialWalkIntoObject", "CEventPotentialWalkIntoObject", 0x4AE5D0, &CEventPotentialWalkIntoObject::Constructor);
-    Install("CEventPotentialWalkIntoObject", "AffectsPed", 0x4B4950, &CEventPotentialWalkIntoObject::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AE5D0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4950);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
 {
-    Install("CEventPotentialWalkIntoFire", "CEventPotentialWalkIntoFire", 0x4B1E20, &CEventPotentialWalkIntoFire::Constructor);
-    Install("CEventPotentialWalkIntoFire", "AffectsPed", 0x4B6890, &CEventPotentialWalkIntoFire::AffectsPed_Reversed);
+    RH_ScopedInstall(Constructor, 0x4B1E20);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B6890);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
 {
-    Install("CEventPotentialWalkIntoPed", "CEventPotentialWalkIntoPed", 0x4AE6E0, &CEventPotentialWalkIntoPed::Constructor);
-    Install("CEventPotentialWalkIntoPed", "AffectsPed", 0x4AE800, &CEventPotentialWalkIntoPed::AffectsPed_Reversed);
-    Install("CEventPotentialWalkIntoPed", "TakesPriorityOver", 0x4AE950, &CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AE6E0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE800);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AE950);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState)

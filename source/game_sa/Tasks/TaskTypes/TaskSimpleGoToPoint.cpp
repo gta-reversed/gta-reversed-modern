@@ -7,11 +7,11 @@
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    RH_ScopedInstall(Constructor, 0x667CD0);
+    RH_ScopedInstall(Clone_Reversed, 0x66CC60);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x66D710);
+    RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :

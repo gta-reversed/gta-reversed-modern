@@ -4,8 +4,8 @@
 
 void CActiveOccluder::InjectHooks()
 {
-    Install("CActiveOccluder", "IsPointWithinOcclusionArea", 0x71E580, &CActiveOccluder::IsPointWithinOcclusionArea);
-    Install("CActiveOccluder", "IsPointBehindOccluder", 0x71FA40, &CActiveOccluder::IsPointBehindOccluder);
+    RH_ScopedInstall(IsPointWithinOcclusionArea, 0x71E580);
+    RH_ScopedInstall(IsPointBehindOccluder, 0x71FA40);
 }
 
 // 0x71E580

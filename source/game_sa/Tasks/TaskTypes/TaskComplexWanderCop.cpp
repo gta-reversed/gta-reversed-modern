@@ -7,16 +7,16 @@
 
 void CTaskComplexWanderCop::InjectHooks()
 {
-    Install("CTaskComplexWanderCop", "CTaskComplexWanderCop", 0x460C80, &CTaskComplexWanderCop::Constructor);
-    Install("CTaskComplexWanderCop", "Clone", 0x460CE0, &CTaskComplexWanderCop::Clone_Reversed);
-    Install("CTaskComplexWanderCop", "CreateNextSubTask", 0x674860, &CTaskComplexWanderCop::CreateNextSubTask_Reversed);
-    Install("CTaskComplexWanderCop", "CreateFirstSubTask", 0x674750, &CTaskComplexWanderCop::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexWanderCop", "ControlSubTask", 0x674D80, &CTaskComplexWanderCop::ControlSubTask_Reversed);
-    Install("CTaskComplexWanderCop", "ScanForStuff", 0x6702B0, &CTaskComplexWanderCop::ScanForStuff_Reversed);
-    Install("CTaskComplexWanderCop", "LookForCarAlarms", 0x66B1B0, &CTaskComplexWanderCop::LookForCarAlarms);
-    Install("CTaskComplexWanderCop", "LookForStolenCopCars", 0x66B290, &CTaskComplexWanderCop::LookForStolenCopCars);
-    Install("CTaskComplexWanderCop", "LookForCriminals", 0x66B300, &CTaskComplexWanderCop::LookForCriminals);
-    Install("CTaskComplexWanderCop", "ShouldPursuePlayer", 0x66B160, &CTaskComplexWanderCop::ShouldPursuePlayer);
+    RH_ScopedInstall(Constructor, 0x460C80);
+    RH_ScopedInstall(Clone_Reversed, 0x460CE0);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674860);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x674750);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x674D80);
+    RH_ScopedInstall(ScanForStuff_Reversed, 0x6702B0);
+    RH_ScopedInstall(LookForCarAlarms, 0x66B1B0);
+    RH_ScopedInstall(LookForStolenCopCars, 0x66B290);
+    RH_ScopedInstall(LookForCriminals, 0x66B300);
+    RH_ScopedInstall(ShouldPursuePlayer, 0x66B160);
 }
 
 // todo: 0x460C80, time ctor

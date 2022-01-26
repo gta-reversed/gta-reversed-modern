@@ -2,14 +2,14 @@
 
 void CRoadBlocks::InjectHooks() {
     using namespace ReversibleHooks;
-    // Install("CRoadBlocks", "Init", 0x461100, &CRoadBlocks::Init);
-    // Install("CRoadBlocks", "ClearScriptRoadBlocks", 0x460EC0, &CRoadBlocks::ClearScriptRoadBlocks);
-    // Install("CRoadBlocks", "ClearSpaceForRoadBlockObject", 0x461020, &CRoadBlocks::ClearSpaceForRoadBlockObject);
-    // Install("CRoadBlocks", "CreateRoadBlockBetween2Points", 0x4619C0, &CRoadBlocks::CreateRoadBlockBetween2Points);
-    // Install("CRoadBlocks", "GenerateRoadBlockCopsForCar", 0x461170, &CRoadBlocks::GenerateRoadBlockCopsForCar);
-    // Install("CRoadBlocks", "GenerateRoadBlocks", 0x4629E0, &CRoadBlocks::GenerateRoadBlocks);
-    // Install("CRoadBlocks", "GetRoadBlockNodeInfo", 0x460EE0, &CRoadBlocks::GetRoadBlockNodeInfo);
-    // Install("CRoadBlocks", "RegisterScriptRoadBlock", 0x460DF0, &CRoadBlocks::RegisterScriptRoadBlock);
+    // RH_ScopedInstall(Init, 0x461100);
+    // RH_ScopedInstall(ClearScriptRoadBlocks, 0x460EC0);
+    // RH_ScopedInstall(ClearSpaceForRoadBlockObject, 0x461020);
+    // RH_ScopedInstall(CreateRoadBlockBetween2Points, 0x4619C0);
+    // RH_ScopedInstall(GenerateRoadBlockCopsForCar, 0x461170);
+    // RH_ScopedInstall(GenerateRoadBlocks, 0x4629E0);
+    // RH_ScopedInstall(GetRoadBlockNodeInfo, 0x460EE0);
+    // RH_ScopedInstall(RegisterScriptRoadBlock, 0x460DF0);
 }
 
 // 0x461100

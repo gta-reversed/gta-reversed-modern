@@ -366,16 +366,16 @@ void CAEMFDecoder::Shutdown() {
 }
 
 void CAEMFDecoder::InjectHooks() {
-    Install("CAEMFDecoder", "CAEMFDecoder", 0x4e7770, &CAEMFDecoder::Constructor);
+    RH_ScopedInstall(Constructor, 0x4e7770);
     Install("CAEMFDecoder", "~CAEMFDecoder", 0x4e77c0, &CAEMFDecoder::Destructor);
-    Install("CAEMFDecoder", "InitLibrary", 0x4e7c70, &CAEMFDecoder::InitLibrary);
-    Install("CAEMFDecoder", "Initialise", 0x4e7cb0, &CAEMFDecoder::Initialise);
-    Install("CAEMFDecoder", "FillBuffer", 0x4e7860, &CAEMFDecoder::FillBuffer);
-    Install("CAEMFDecoder", "GetStreamLengthMs", 0x4e7920, &CAEMFDecoder::GetStreamLengthMs);
-    Install("CAEMFDecoder", "GetStreamPlayTimeMs", 0x4e7940, &CAEMFDecoder::GetStreamPlayTimeMs);
-    Install("CAEMFDecoder", "SetCursor", 0x4e78e0, &CAEMFDecoder::SetCursor);
-    Install("CAEMFDecoder", "GetSampleRate", 0x4e78c0, &CAEMFDecoder::GetSampleRate);
-    Install("CAEMFDecoder", "GetStreamID", 0x4e77b0, &CAEMFDecoder::GetStreamID);
+    RH_ScopedInstall(InitLibrary, 0x4e7c70);
+    RH_ScopedInstall(Initialise, 0x4e7cb0);
+    RH_ScopedInstall(FillBuffer, 0x4e7860);
+    RH_ScopedInstall(GetStreamLengthMs, 0x4e7920);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x4e7940);
+    RH_ScopedInstall(SetCursor, 0x4e78e0);
+    RH_ScopedInstall(GetSampleRate, 0x4e78c0);
+    RH_ScopedInstall(GetStreamID, 0x4e77b0);
 }
 
 CAEMFDecoder* CAEMFDecoder::Constructor(char* filename, int32 trackID) {

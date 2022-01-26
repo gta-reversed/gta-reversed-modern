@@ -2,8 +2,8 @@
 
 void CAnimBlendSequence::InjectHooks()
 {
-    Install("CAnimBlendSequence", "GetUncompressedFrame", 0x4CF1F0, &CAnimBlendSequence::GetUncompressedFrame);
-    Install("CAnimBlendSequence", "GetCompressedFrame", 0x4CF220, &CAnimBlendSequence::GetCompressedFrame);
+    RH_ScopedInstall(GetUncompressedFrame, 0x4CF1F0);
+    RH_ScopedInstall(GetCompressedFrame, 0x4CF220);
 }
 
 CAnimSequenceRootFrameUncompressed* CAnimBlendSequence::GetUncompressedFrame(int32 iFrame)
