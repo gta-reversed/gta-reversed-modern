@@ -5,6 +5,9 @@ uint32& C2dEffect::ms_nTxdSlot = *(uint32*)0x8D4948;
 
 void C2dEffect::InjectHooks()
 {
+    RH_ScopedClass(C2dEffect);
+    RH_ScopedCategory("Plugins");
+
 // Class methods
     RH_ScopedInstall(Shutdown, 0x4C57D0);
 

@@ -3,6 +3,9 @@
 // depends on libjpeg
 
 void JPegPlugin::InjectHooks() {
+    RH_ScopedClass(JPegPlugin);
+    RH_ScopedCategory("Plugins");
+
 
 }
 

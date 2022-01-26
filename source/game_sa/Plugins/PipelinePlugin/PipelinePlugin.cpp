@@ -5,6 +5,9 @@
 #include <rpworld.h>
 
 void PipelinePlugin::InjectHooks() {
+    RH_ScopedClass(PipelinePlugin);
+    RH_ScopedCategory("Plugins");
+
     RH_ScopedInstall(PipelinePluginAttach, 0x72FBD0);
     RH_ScopedInstall(GetPipelineID, 0x72FC40);
     RH_ScopedInstall(SetPipelineID, 0x72FC50);
