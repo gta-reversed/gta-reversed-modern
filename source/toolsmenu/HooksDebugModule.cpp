@@ -100,7 +100,7 @@ void ProcessImGui() {
                 {
                     PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
                     AlignTextToFramePadding();
-                    Text(hook->m_eHookType == SReversibleHook::Type::Simple ? "S" : "V");
+                    Text(hook->m_type == SReversibleHook::Type::Simple ? "S" : "V");
                     PopStyleVar();
                 }
 
