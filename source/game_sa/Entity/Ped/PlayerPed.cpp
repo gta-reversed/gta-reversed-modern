@@ -14,6 +14,9 @@ int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
 void CPlayerPed::InjectHooks() {
+    RH_ScopedClass(CPlayerPed);
+    RH_ScopedCategory("Entity/Ped");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(ResetSprintEnergy, 0x60A530);
     RH_ScopedInstall(ResetPlayerBreath, 0x60A8A0);

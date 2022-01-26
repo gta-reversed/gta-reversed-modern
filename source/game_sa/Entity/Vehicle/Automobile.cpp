@@ -30,6 +30,9 @@ static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
 void CAutomobile::InjectHooks()
 {
+    RH_ScopedClass(CAutomobile);
+    RH_ScopedCategory("Vehicle/Ped");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(ProcessControl_Reversed, 0x6B1880);
     RH_ScopedInstall(AddMovingCollisionSpeed_Reversed, 0x6A1ED0);

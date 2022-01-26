@@ -2,6 +2,9 @@
 
 void CDummyObject::InjectHooks()
 {
+    RH_ScopedClass(CDummyObject);
+    RH_ScopedCategory("Entity/Dummy");
+
     RH_ScopedInstall(CreateObject, 0x59EAC0);
     RH_ScopedInstall(UpdateFromObject, 0x59EB70);
 }

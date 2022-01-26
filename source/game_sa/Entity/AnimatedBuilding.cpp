@@ -2,6 +2,9 @@
 
 void CAnimatedBuilding::InjectHooks()
 {
+    RH_ScopedClass(CAnimatedBuilding);
+    RH_ScopedCategory("Entity");
+
     RH_ScopedInstall(ProcessControl_Reversed, 0x537A30);
     RH_ScopedInstall(ProcessCollision_Reversed, 0x537A40);
     RH_ScopedInstall(PreRender_Reversed, 0x403F00);

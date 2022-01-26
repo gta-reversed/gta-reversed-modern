@@ -23,6 +23,9 @@ CVector& CPhysical::fxDirection = *(CVector*)0xB73720;
 
 void CPhysical::InjectHooks()
 {
+    RH_ScopedClass(CPhysical);
+    RH_ScopedCategory("Entity");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(RemoveAndAdd, 0x542560);
     RH_ScopedInstall(ApplyTurnForce, 0x542A50);

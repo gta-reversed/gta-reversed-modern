@@ -6,6 +6,9 @@ float& CPlayerSkin::m_Angle = *(float*) 0xC3F048;
 uint32& CPlayerSkin::m_C3F04C = *(uint32*) 0xC3F04C; // todo: Rename CPlayerSkin:m_C3F04C
 
 void CPlayerSkin::InjectHooks() {
+    RH_ScopedClass(CPlayerSkin);
+    RH_ScopedCategory("Entity/Ped");
+
     RH_ScopedInstall(Initialise, 0x6FF8A0);
     RH_ScopedInstall(Shutdown, 0x6FF8D0);
     RH_ScopedInstall(RenderFrontendSkinEdit, 0x6FF900);

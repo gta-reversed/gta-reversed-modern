@@ -12,6 +12,9 @@
 #include "Buoyancy.h"
 
 void CPed::InjectHooks() {
+    RH_ScopedClass(CPed);
+    RH_ScopedCategory("Entity/Ped");
+
     // Constructors
     // RH_ScopedInstall(Constructor, 0x5E8030);
 

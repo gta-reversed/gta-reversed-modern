@@ -17,6 +17,9 @@
 
 void CEntity::InjectHooks()
 {
+    RH_ScopedClass(CEntity);
+    RH_ScopedCategory("Entity");
+
 //Virtual
     Install("CEntity", "Add", 0x533020, (void(CEntity::*)())(&CEntity::Add_Reversed));
     RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));

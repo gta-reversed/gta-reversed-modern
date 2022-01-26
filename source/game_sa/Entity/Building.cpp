@@ -4,6 +4,9 @@ int32& gBuildings = *(int32*)0xB71804;
 
 void CBuilding::InjectHooks()
 {
+    RH_ScopedClass(CBuilding);
+    RH_ScopedCategory("Entity");
+
     RH_ScopedInstall(ReplaceWithNewModel, 0x403EC0);
     RH_ScopedInstall(IsBuildingPointerValid, 0x4040E0);
 }

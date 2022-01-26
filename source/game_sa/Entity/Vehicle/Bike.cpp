@@ -12,6 +12,9 @@
 
 void CBike::InjectHooks()
 {
+    RH_ScopedClass(CBike);
+    RH_ScopedCategory("Vehicle/Ped");
+
     RH_ScopedInstall(ProcessBuoyancy, 0x6B5FB0);
 }
 

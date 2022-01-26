@@ -7,6 +7,9 @@ float& QUAD_HBSTEER_ANIM_MULT = *(float*)0x8D3454; // -0.4f 0x8D3454
 CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } // 0x8D3458
 
 void CQuadBike::InjectHooks() {
+    RH_ScopedClass(CQuadBike);
+    RH_ScopedCategory("Vehicle/Ped");
+
     using namespace ReversibleHooks;
     // todo: RH_ScopedInstall(Constructor, 0x6CE370);
     RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);

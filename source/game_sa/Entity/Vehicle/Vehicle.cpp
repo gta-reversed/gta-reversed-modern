@@ -57,6 +57,9 @@ char(*VehicleNames)[14] = (char(*)[14])0x8D3978;
 
 void CVehicle::InjectHooks()
 {
+    RH_ScopedClass(CVehicle);
+    RH_ScopedCategory("Vehicle/Ped");
+
 // VTABLE
     RH_ScopedInstall(SetModelIndex_Reversed, 0x6D6A40);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x6D6410);

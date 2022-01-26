@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CTrailer::InjectHooks() {
+    RH_ScopedClass(CTrailer);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

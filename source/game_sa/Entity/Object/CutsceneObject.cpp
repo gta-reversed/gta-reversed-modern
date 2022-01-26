@@ -4,6 +4,9 @@ char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[
 
 void CCutsceneObject::InjectHooks()
 {
+    RH_ScopedClass(CCutsceneObject);
+    RH_ScopedCategory("Entity/Object");
+
 // VIRTUAL
     RH_ScopedInstall(SetModelIndex_Reversed, 0x5B1B20);
     RH_ScopedInstall(SetupLighting_Reversed, 0x553F40);

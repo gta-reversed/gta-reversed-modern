@@ -18,6 +18,9 @@ bool& CObject::bArea51SamSiteDisabled = *(bool*)0xBB4A72;
 
 void CObject::InjectHooks()
 {
+    RH_ScopedClass(CObject);
+    RH_ScopedCategory("Entity/Object");
+
 // VIRTUAL
     RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
     RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);

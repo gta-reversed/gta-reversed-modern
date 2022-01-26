@@ -2,6 +2,9 @@
 
 void CHandObject::InjectHooks()
 {
+    RH_ScopedClass(CHandObject);
+    RH_ScopedCategory("Entity/Object");
+
 // VIRTUAL
     RH_ScopedInstall(ProcessControl_Reversed, 0x59EC40);
     RH_ScopedInstall(PreRender_Reversed, 0x59ECD0);
