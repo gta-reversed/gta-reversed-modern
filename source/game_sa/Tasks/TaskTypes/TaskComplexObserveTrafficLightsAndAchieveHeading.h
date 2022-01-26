@@ -30,7 +30,7 @@ private:
         RH_ScopedInstall(ControlSubTask_Reversed, 0x631AD0);
         RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x631AC0);
         RH_ScopedInstall(CreateNextSubTask_Reversed, 0x631A70);
-        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950, true);
+        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950);
     }
 
     CTaskComplexObserveTrafficLightsAndAchieveHeading* Constructor(int32 durationInMs, float fTargetHeading) {
