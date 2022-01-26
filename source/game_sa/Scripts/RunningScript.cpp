@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CRunningScript::InjectHooks() {
+    RH_ScopedClass(CRunningScript);
+    RH_ScopedCategory("Scripts");
+
     RH_ScopedInstall(Init, 0x4648E0);
 //    RH_ScopedInstall(LocateCarCommand, 0x487A20);
 //    RH_ScopedInstall(LocateObjectCommand, 0x487D10);

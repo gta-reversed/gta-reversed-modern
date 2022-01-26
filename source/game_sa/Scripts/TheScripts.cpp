@@ -95,6 +95,9 @@ CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
 
 void CTheScripts::InjectHooks() {
+    RH_ScopedClass(CTheScripts);
+    RH_ScopedCategory("Scripts");
+
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
