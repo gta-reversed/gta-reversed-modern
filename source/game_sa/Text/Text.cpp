@@ -40,6 +40,9 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     };
 
 void CText::InjectHooks() {
+    RH_ScopedClass(CText);
+    RH_ScopedCategory("Text");
+
     //    RH_ScopedInstall(Load, 0x69F670);
 
     RH_ScopedInstall(Unload, 0x69F640);
