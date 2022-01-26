@@ -20,7 +20,7 @@ bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, cons
 
 void CTaskSimpleCarDrive::InjectHooks() {
     RH_ScopedClass(CTaskSimpleCarDrive);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     
 }
 

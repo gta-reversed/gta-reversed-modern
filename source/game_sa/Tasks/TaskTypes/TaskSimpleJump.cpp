@@ -5,7 +5,7 @@
 void CTaskSimpleJump::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleJump);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x679AA0);
     RH_ScopedInstall(CheckIfJumpBlocked, 0x67D590);
     RH_ScopedInstall(Launch, 0x679B80);

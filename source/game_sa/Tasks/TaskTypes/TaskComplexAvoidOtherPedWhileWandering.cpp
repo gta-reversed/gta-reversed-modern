@@ -4,7 +4,7 @@
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
     RH_ScopedClass(CTaskComplexAvoidOtherPedWhileWandering);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x66A100);
 }

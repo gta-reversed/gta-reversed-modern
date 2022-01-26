@@ -4,7 +4,7 @@
 
 void CTaskComplexWalkRoundObject::InjectHooks() {
     RH_ScopedClass(CTaskComplexWalkRoundObject);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x655020);
 }
 

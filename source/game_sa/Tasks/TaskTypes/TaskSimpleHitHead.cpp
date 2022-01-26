@@ -5,7 +5,7 @@
 void CTaskSimpleHitHead::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleHitHead);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x653060);
     RH_ScopedInstall(FinishAnimCB, 0x653150);
     //VTABLE

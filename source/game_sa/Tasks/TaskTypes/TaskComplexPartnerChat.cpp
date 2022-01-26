@@ -5,7 +5,7 @@
 void CTaskComplexPartnerChat::InjectHooks()
 {
     RH_ScopedClass(CTaskComplexPartnerChat);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x684290);
 }
 

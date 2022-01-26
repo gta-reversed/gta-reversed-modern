@@ -10,7 +10,7 @@
 void CTaskComplexTreatAccident::InjectHooks()
 {
     RH_ScopedClass(CTaskComplexTreatAccident);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x658AB0);
     RH_ScopedInstall(CreateSubTask, 0x659E90);
     RH_ScopedInstall(ComputeHeading, 0x658AF0);

@@ -8,7 +8,7 @@
 
 void CTaskComplexUseSwatRope::InjectHooks() {
     RH_ScopedClass(CTaskComplexUseSwatRope);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659470);
     RH_ScopedInstall(CreateSubTask, 0x659620);
     RH_ScopedInstall(Clone_Reversed, 0x659C30);

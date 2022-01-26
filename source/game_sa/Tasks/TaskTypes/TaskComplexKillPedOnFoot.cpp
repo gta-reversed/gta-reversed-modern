@@ -4,7 +4,7 @@
 
 void CTaskComplexKillPedOnFoot::InjectHooks() {
     RH_ScopedClass(CTaskComplexKillPedOnFoot);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x620E30);
 }
 

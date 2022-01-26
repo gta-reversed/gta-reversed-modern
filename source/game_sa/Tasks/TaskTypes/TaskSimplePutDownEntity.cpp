@@ -4,7 +4,7 @@
 
 void CTaskSimplePutDownEntity::InjectHooks() {
     RH_ScopedClass(CTaskSimplePutDownEntity);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x691990);
     RH_ScopedInstall(Clone_Reversed, 0x692B70);
     RH_ScopedInstall(GetId_Reversed, 0x691900);

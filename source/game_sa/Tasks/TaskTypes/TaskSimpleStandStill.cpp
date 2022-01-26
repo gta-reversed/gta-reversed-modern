@@ -5,7 +5,7 @@
 void CTaskSimpleStandStill::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleStandStill);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x62F310);
     RH_ScopedInstall(Clone_Reversed, 0x635CF0);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x4B8690);

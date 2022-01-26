@@ -5,7 +5,7 @@
 void CTaskSimplePause::InjectHooks()
 {
     RH_ScopedClass(CTaskSimplePause);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x48E750);
     RH_ScopedInstall(ProcessPed_Reversed, 0x48E830);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x48E810);

@@ -8,7 +8,7 @@
 void CTaskSimpleGoToPoint::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleGoToPoint);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x667CD0);
     RH_ScopedInstall(Clone_Reversed, 0x66CC60);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);

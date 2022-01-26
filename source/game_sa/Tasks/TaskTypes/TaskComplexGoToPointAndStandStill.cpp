@@ -9,7 +9,7 @@
 
 void CTaskComplexGoToPointAndStandStill::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToPointAndStandStill);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x668120);
     RH_ScopedInstall(Clone_Reversed, 0x66CEA0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66DBA0);

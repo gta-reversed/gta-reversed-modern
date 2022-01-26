@@ -5,7 +5,7 @@
 void CTaskSimpleGiveCPR::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleGiveCPR);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x658860);
     RH_ScopedInstall(ReviveDeadPed, 0x658900);
     RH_ScopedInstall(FinishGiveCPRAnimCB, 0x658910);

@@ -5,7 +5,7 @@
 void CTaskSimpleAnim::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleAnim);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
 }
 

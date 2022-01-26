@@ -16,7 +16,7 @@
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     RH_ScopedClass(CTaskComplexMedicTreatInjuredPed);
-    RH_ScopedCategory("Task/TaskTypes");
+    RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x658BA0);
     RH_ScopedInstall(CreateSubTask, 0x658DB0);
     RH_ScopedInstall(CreateDealWithNextAccidentTask, 0x65A020);
