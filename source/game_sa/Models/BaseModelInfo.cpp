@@ -8,6 +8,9 @@ Do not delete this comment block. Respect others' work!
 
 void CBaseModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CBaseModelInfo);
+    RH_ScopedCategory("Models");
+
 // Vtable
     RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C4A80);
     RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C4A90);

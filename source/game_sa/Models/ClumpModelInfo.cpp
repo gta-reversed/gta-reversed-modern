@@ -9,6 +9,9 @@
 
 void CClumpModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CClumpModelInfo);
+    RH_ScopedCategory("Models");
+
 // VTABLE
     RH_ScopedInstall(GetModelType_Reversed, 0x4C5720);
     RH_ScopedInstall(Init_Reversed, 0x4C4E40);

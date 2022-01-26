@@ -5,6 +5,9 @@ tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPe
 
 void CPedModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CPedModelInfo);
+    RH_ScopedCategory("Models");
+
     // VTABLE
     RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);

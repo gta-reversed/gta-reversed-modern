@@ -25,6 +25,9 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>& CModelInfo::ms_2dFXInfoStore = *(
 
 void CModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CModelInfo);
+    RH_ScopedCategory("Models");
+
     RH_ScopedInstall(Initialise, 0x4C6810);
     RH_ScopedInstall(ShutDown, 0x4C63E0);
     RH_ScopedInstall(ReInit2dEffects, 0x4C63B0);

@@ -4,6 +4,9 @@ bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
 void CDamageAtomicModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CDamageAtomicModelInfo);
+    RH_ScopedCategory("Models");
+
     RH_ScopedInstall(Init_Reversed, 0x4C48B0);
     RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C55C0);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C49D0);

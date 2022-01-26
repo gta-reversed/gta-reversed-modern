@@ -34,6 +34,9 @@ CPool<CVehicleModelInfo::CVehicleStructure>*& CVehicleModelInfo::CVehicleStructu
 
 void CVehicleModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CVehicleModelInfo);
+    RH_ScopedCategory("Models");
+
 // ClinkedUpgradeList
     RH_ScopedInstall(AddUpgradeLink, 0x4C74B0);
     RH_ScopedInstall(FindOtherUpgrade, 0x4C74D0);

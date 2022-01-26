@@ -2,6 +2,9 @@
 
 void CLodTimeModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CLodTimeModelInfo);
+    RH_ScopedCategory("Models");
+
     RH_ScopedInstall(GetModelType_Reversed, 0x4C5660);
     RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C5670);
 }

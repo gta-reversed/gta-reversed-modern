@@ -2,6 +2,9 @@
 
 void CWeaponModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CWeaponModelInfo);
+    RH_ScopedCategory("Models");
+
     RH_ScopedInstall(GetModelType_Reversed, 0x4C5780);
     RH_ScopedInstall(Init_Reversed, 0x4C98F0);
     RH_ScopedInstall(SetClump_Reversed, 0x4C9910);

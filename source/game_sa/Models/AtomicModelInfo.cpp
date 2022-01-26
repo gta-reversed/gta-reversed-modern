@@ -12,6 +12,9 @@
 
 void CAtomicModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CAtomicModelInfo);
+    RH_ScopedCategory("Models");
+
 // VTABLE
     RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C5560);
     RH_ScopedInstall(GetModelType_Reversed, 0x4C5570);

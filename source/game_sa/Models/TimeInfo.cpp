@@ -2,6 +2,9 @@
 #include "TimeInfo.h"
 
 void CTimeInfo::InjectHooks() {
+    RH_ScopedClass(CTimeInfo);
+    RH_ScopedCategory("Models");
+
     RH_ScopedInstall(FindOtherTimeModel, 0x4C47E0);
     RH_ScopedInstall(GetOtherTimeModel, 0x4C4A30);
     RH_ScopedInstall(GetTimeOff, 0x407330);
