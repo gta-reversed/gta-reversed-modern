@@ -23,7 +23,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gta_reversed-debug
-          path: build/Debug
+          path: bin/Debug
 
       - name: Build Release
         run: cmake --build build --config Release
@@ -32,4 +32,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gta_reversed-release
-          path: build/Release
+          path: bin/Release
