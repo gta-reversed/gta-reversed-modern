@@ -2,6 +2,9 @@
 
 void CAnimBlendSequence::InjectHooks()
 {
+    RH_ScopedClass(CAnimBlendSequence);
+    RH_ScopedCategory("Animation");
+
     RH_ScopedInstall(GetUncompressedFrame, 0x4CF1F0);
     RH_ScopedInstall(GetCompressedFrame, 0x4CF220);
 }
