@@ -16,7 +16,7 @@ typedef struct tNodeNamePlugin {
 } NodeNamePluginInstance;
 
 void NodeNamePlugin::InjectHooks() {
-    RH_ScopedClass(NodeNamePlugin);
+    RH_ScopedNamespace(NodeNamePlugin);
     RH_ScopedCategory("Plugins");
 
     RH_ScopedInstall(NodeNamePluginAttach, 0x72FAB0);
