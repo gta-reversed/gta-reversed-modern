@@ -9,6 +9,8 @@ uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleInAir);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678CD0);
     RH_ScopedInstall(DeleteAnimCB, 0x678E60);
     //VTABLE

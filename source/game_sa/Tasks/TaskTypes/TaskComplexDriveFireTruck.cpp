@@ -9,6 +9,8 @@
 #include "FireManager.h"
 
 void CTaskComplexDriveFireTruck::InjectHooks() {
+    RH_ScopedClass(CTaskComplexDriveFireTruck);
+    RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x659310);
     RH_ScopedInstall(CreateSubTask, 0x65A240);

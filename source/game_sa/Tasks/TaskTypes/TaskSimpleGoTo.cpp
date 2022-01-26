@@ -7,6 +7,8 @@
 float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 
 void CTaskSimpleGoTo::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleGoTo);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x6679C0);
     RH_ScopedInstall(HasCircledTarget, 0x667A10);
     RH_ScopedInstall(SetUpIK, 0x667AD0);

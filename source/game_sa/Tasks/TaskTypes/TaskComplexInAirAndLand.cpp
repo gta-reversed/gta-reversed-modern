@@ -7,6 +7,8 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
+    RH_ScopedClass(CTaskComplexInAirAndLand);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678C80);
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67CC30);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CCB0);

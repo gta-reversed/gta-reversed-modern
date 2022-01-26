@@ -6,6 +6,8 @@ float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2F
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleSwim);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x688930);
     RH_ScopedInstall(Clone_Reversed, 0x68B050);
     RH_ScopedInstall(GetId_Reversed, 0x6889F0);

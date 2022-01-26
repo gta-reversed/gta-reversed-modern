@@ -3,6 +3,8 @@
 #include "TaskComplexArrestPed.h"
 
 void CTaskComplexArrestPed::InjectHooks() {
+    RH_ScopedClass(CTaskComplexArrestPed);
+    RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x68B990);
 }

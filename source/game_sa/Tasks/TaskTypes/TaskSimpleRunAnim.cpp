@@ -4,6 +4,8 @@
 
 void CTaskSimpleRunAnim::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleRunAnim);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x61A8B0);
     RH_ScopedInstall(Constructor2, 0x61A900);
     RH_ScopedInstall(StartAnim, 0x61A950);

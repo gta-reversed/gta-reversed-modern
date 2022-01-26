@@ -4,6 +4,8 @@
 
 void CTaskSimpleStealthKill::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleStealthKill);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(ProcessPed_Reversed, 0x62E540);
     RH_ScopedInstall(Constructor, 0x6225F0);
     RH_ScopedInstall(Clone_Reversed, 0x623830);

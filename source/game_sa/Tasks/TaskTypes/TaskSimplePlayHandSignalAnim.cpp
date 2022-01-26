@@ -6,6 +6,8 @@
 
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
+    RH_ScopedCategory("Task/TaskTypes");
 // VIRTUAL
     RH_ScopedInstall(Clone_Reversed, 0x61B980);
     RH_ScopedInstall(GetId_Reversed, 0x61AEA0);

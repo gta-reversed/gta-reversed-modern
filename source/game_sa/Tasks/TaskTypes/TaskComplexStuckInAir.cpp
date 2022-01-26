@@ -23,6 +23,8 @@ CTask* CTaskComplexStuckInAir::CreateSubTask(eTaskType taskType, CPed* ped) {
 }
 
 void CTaskComplexStuckInAir::InjectHooks() {
+    RH_ScopedClass(CTaskComplexStuckInAir);
+    RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x67BE50);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67BE20);

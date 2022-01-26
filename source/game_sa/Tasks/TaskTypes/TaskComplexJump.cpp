@@ -8,6 +8,8 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexJump::InjectHooks() {
+    RH_ScopedClass(CTaskComplexJump);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x67A030);
     RH_ScopedInstall(CreateSubTask, 0x67D980);
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67FD10);

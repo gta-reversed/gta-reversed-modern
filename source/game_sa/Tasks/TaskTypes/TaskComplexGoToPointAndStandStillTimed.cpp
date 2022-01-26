@@ -3,6 +3,8 @@
 #include "TaskComplexGoToPointAndStandStillTimed.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
+    RH_ScopedClass(CTaskComplexGoToPointAndStandStillTimed);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x6685E0);
     RH_ScopedInstall(Clone_Reversed, 0x66CF30);
     RH_ScopedInstall(StopTimer_Reversed, 0x6686A0);

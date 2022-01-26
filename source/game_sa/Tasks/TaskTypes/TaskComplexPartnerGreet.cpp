@@ -4,6 +4,8 @@
 
 void CTaskComplexPartnerGreet::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexPartnerGreet);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x684210);
 }
 

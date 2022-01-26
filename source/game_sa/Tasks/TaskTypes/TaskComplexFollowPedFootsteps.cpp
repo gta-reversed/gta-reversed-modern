@@ -3,6 +3,8 @@
 #include "TaskComplexFollowPedFootsteps.h"
 
 void CTaskComplexFollowPedFootsteps::InjectHooks() {
+    RH_ScopedClass(CTaskComplexFollowPedFootsteps);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x694E20);
 }
 

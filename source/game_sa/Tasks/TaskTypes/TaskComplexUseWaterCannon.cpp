@@ -7,6 +7,8 @@
 
 void CTaskComplexUseWaterCannon::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexUseWaterCannon);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659780);
     //VTABLE
     RH_ScopedInstall(Clone_Reversed, 0x659D10);

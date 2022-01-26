@@ -3,6 +3,8 @@
 #include "TaskComplexPartner.h"
 
 void CTaskComplexPartner::InjectHooks() {
+    RH_ScopedClass(CTaskComplexPartner);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x681E70);
 }
 

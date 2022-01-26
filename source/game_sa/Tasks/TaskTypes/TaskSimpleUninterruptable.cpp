@@ -4,6 +4,8 @@
 
 void CTaskSimpleUninterruptable::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleUninterruptable);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x43E2E0);
 }
 

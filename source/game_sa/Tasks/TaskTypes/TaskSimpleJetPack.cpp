@@ -3,6 +3,8 @@
 #include "TaskSimpleJetPack.h"
 
 void CTaskSimpleJetPack::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleJetPack);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x67B4E0);
 }
 

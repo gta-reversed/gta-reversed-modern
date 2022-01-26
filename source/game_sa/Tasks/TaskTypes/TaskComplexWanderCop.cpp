@@ -7,6 +7,8 @@
 
 void CTaskComplexWanderCop::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexWanderCop);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x460C80);
     RH_ScopedInstall(Clone_Reversed, 0x460CE0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674860);

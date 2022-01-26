@@ -4,6 +4,8 @@
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleGoToPointFine);
+    RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x65EEB0);
     RH_ScopedInstall(Clone_Reversed, 0x662040);

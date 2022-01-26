@@ -4,6 +4,8 @@
 
 void CTaskSimpleSetStayInSamePlace::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleSetStayInSamePlace);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x62F590);
     //VTABLE
     RH_ScopedInstall(ProcessPed_Reversed, 0x62F5E0);

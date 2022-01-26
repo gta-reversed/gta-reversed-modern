@@ -6,6 +6,8 @@ CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[
 
 void CTaskSimpleGetUp::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleGetUp);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);

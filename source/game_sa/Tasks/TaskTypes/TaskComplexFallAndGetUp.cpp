@@ -5,6 +5,8 @@
 #include "TaskSimpleGetUp.h"
 
 void CTaskComplexFallAndGetUp::InjectHooks() {
+    RH_ScopedClass(CTaskComplexFallAndGetUp);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x6786C0);
     RH_ScopedInstall(Constructor2, 0x678700);
     RH_ScopedInstall(CreateSubTask, 0x678900);

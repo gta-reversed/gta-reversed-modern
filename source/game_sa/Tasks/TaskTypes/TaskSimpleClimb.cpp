@@ -26,6 +26,8 @@ float& CTaskSimpleClimb::ms_fMinForStretchGrab = *reinterpret_cast<float*>(0x8D2
 
 void CTaskSimpleClimb::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleClimb);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(ScanToGrabSectorList, 0x67DE10);
     RH_ScopedInstall(ScanToGrab, 0x67FD30);
     RH_ScopedInstall(CreateColModel, 0x67A890);

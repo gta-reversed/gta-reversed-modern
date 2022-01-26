@@ -19,6 +19,8 @@
 
 void CTaskComplexWander::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexWander);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x66F450);
     RH_ScopedInstall(GetId_Reversed, 0x460CD0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140);

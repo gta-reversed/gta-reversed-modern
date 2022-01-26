@@ -135,6 +135,8 @@ void CTaskSimpleDie::FinishAnimDieCB(CAnimBlendAssociation* association, void* d
 }
 
 void CTaskSimpleDie::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleDie);
+    RH_ScopedCategory("Task/TaskTypes");
     using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));

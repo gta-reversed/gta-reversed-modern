@@ -4,6 +4,8 @@
 
 void CTaskComplexPartnerDeal::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexPartnerDeal);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x684190);
 }
 

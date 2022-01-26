@@ -4,6 +4,8 @@
 
 void CTaskSimpleLand::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimpleLand);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678E90);
     RH_ScopedInstall(LeftFootLanded, 0x679010);
     RH_ScopedInstall(RightFootLanded, 0x678FE0);

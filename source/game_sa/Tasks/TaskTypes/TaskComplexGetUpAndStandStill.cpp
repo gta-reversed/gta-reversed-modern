@@ -6,6 +6,8 @@
 #include "TaskSimpleGetUp.h"
 
 void CTaskComplexGetUpAndStandStill::InjectHooks() {
+    RH_ScopedClass(CTaskComplexGetUpAndStandStill);
+    RH_ScopedCategory("Task/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678130);
     RH_ScopedInstall(CreateSubTask, 0x678170);
     // VTABLE
