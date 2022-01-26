@@ -2,6 +2,9 @@
 
 void CColTrianglePlane::InjectHooks()
 {
+    RH_ScopedClass(CColTrianglePlane);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(GetNormal, 0x411610);
     RH_ScopedInstall(Set, 0x411660);
 }

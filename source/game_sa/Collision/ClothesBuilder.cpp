@@ -6,6 +6,9 @@ CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 
 void CClothesBuilder::InjectHooks() {
+    RH_ScopedClass(CClothesBuilder);
+    RH_ScopedCategory("Collision");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
     // RH_ScopedInstall(RequestGeometry, 0x5A41C0);

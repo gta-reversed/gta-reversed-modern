@@ -11,6 +11,9 @@ CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
 
 void CColStore::InjectHooks()
 {
+    RH_ScopedClass(CColStore);
+    RH_ScopedCategory("Collision");
+
 // CLASS
     RH_ScopedInstall(Initialise, 0x4113F0);
     RH_ScopedInstall(Shutdown, 0x4114D0);

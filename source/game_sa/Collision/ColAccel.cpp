@@ -15,6 +15,9 @@ char const* CColAccel::mp_cCacheName = *(char const**)0x8D0F84; // MODELS\CINFO.
 
 void CColAccel::InjectHooks()
 {
+    RH_ScopedClass(CColAccel);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(isCacheLoading, 0x5B2AC0);
     RH_ScopedInstall(endCache, 0x5B2AD0);
     RH_ScopedInstall(addCacheCol, 0x5B2C20);

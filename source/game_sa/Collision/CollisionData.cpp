@@ -2,6 +2,9 @@
 
 void CCollisionData::InjectHooks()
 {
+    RH_ScopedClass(CCollisionData);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(RemoveCollisionVolumes, 0x40F070);
     RH_ScopedInstall(RemoveTrianglePlanes, 0x40F6A0);
     RH_ScopedInstall(Copy, 0x40F120);

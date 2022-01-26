@@ -2,6 +2,9 @@
 
 void CBox::InjectHooks()
 {
+    RH_ScopedClass(CBox);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(Set, 0x40EDE0);
     RH_ScopedInstall(Recalc, 0x40EE20);
 }

@@ -4,6 +4,9 @@
 
 void CColSphere::InjectHooks()
 {
+    RH_ScopedClass(CColSphere);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(Set, 0x40FD10);
     RH_ScopedInstall(IntersectRay, 0x40FF20);
     RH_ScopedInstall(IntersectEdge, 0x4100E0);

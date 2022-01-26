@@ -2,6 +2,9 @@
 
 void CColModel::InjectHooks()
 {
+    RH_ScopedClass(CColModel);
+    RH_ScopedCategory("Collision");
+
     Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
     Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
     RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);

@@ -3,6 +3,9 @@
 #include "ColLine.h"
 
 void CColLine::InjectHooks() {
+    RH_ScopedClass(CColLine);
+    RH_ScopedCategory("Collision");
+
     RH_ScopedInstall(Set, 0x40EF10);
 }
 
