@@ -45,6 +45,9 @@ uint32& CTimer::m_snPreviousTimeInMilliseconds = *(uint32*)0xB7CB78;
 
 void CTimer::InjectHooks()
 {
+    RH_ScopedClass(CTimer);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Initialise, 0x5617E0);
     RH_ScopedInstall(Shutdown, 0x5618C0);
     RH_ScopedInstall(Suspend, 0x5619D0);

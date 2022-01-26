@@ -5,6 +5,9 @@ CReference* (&CReferences::pEmptyList) = *(CReference**)0xBA1768;
 
 void CReferences::InjectHooks()
 {
+    RH_ScopedClass(CReferences);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x5719B0);
     RH_ScopedInstall(ListSize, 0x5719E0);
     RH_ScopedInstall(RemoveReferencesToPlayer, 0x571AD0);

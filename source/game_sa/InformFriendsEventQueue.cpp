@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CInformFriendsEventQueue::InjectHooks() {
+    RH_ScopedClass(CInformFriendsEventQueue);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Constructor, 0x0);
 //    RH_ScopedInstall(Destructor, 0x0);
 //    RH_ScopedInstall(Init, 0x4B2990);

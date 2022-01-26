@@ -12,6 +12,9 @@ CVector& CBulletInfo::PlayerSniperBulletStart = *(CVector*)0xC888A0;
 CVector& CBulletInfo::PlayerSniperBulletEnd = *(CVector*)0xC888AC;
 
 void CBulletInfo::InjectHooks() {
+    RH_ScopedClass(CBulletInfo);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Initialise, 0x735FD0);
     RH_ScopedInstall(Shutdown, 0x736000);
     RH_ScopedInstall(AddBullet, 0x736010);

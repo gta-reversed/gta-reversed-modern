@@ -45,6 +45,9 @@ uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
 tFontData* gFontData = (tFontData*)0xC718B0;
 
 void CFont::InjectHooks() {
+    RH_ScopedClass(CFont);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5BA690);
     RH_ScopedInstall(Shutdown, 0x7189B0);

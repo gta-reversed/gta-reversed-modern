@@ -31,6 +31,9 @@ float& CVisibilityPlugins::gVehicleDistanceFromCamera = *(float*)0xC88024;
 float& CVisibilityPlugins::gVehicleAngleToCamera = *(float*)0xC88020;
 
 void CVisibilityPlugins::InjectHooks() {
+    RH_ScopedClass(CVisibilityPlugins);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x733A20);
     RH_ScopedInstall(Shutdown, 0x732EB0);

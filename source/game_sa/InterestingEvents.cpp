@@ -3,6 +3,9 @@
 CInterestingEvents& g_InterestingEvents = *(CInterestingEvents*)0xC0B058;
 
 void CInterestingEvents::InjectHooks() {
+    RH_ScopedClass(CInterestingEvents);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Constructor, 0x6023A0);
 //    RH_ScopedInstall(Destructor, 0x856880);
 //    RH_ScopedInstall(Add, 0x602590);

@@ -5,6 +5,9 @@ CStencilShadowObject* CStencilShadows::pFirstAvailableStencilShadowObject = rein
 CStencilShadowObject* CStencilShadows::pFirstActiveStencilShadowObject = reinterpret_cast<CStencilShadowObject *>(0xC6A16C);
 
 void CStencilShadows::InjectHooks() {
+    RH_ScopedClass(CStencilShadows);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Init, 0x70F9E0);
 //    RH_ScopedInstall(Process, 0x711D90);
 }

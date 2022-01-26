@@ -39,6 +39,9 @@ CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity***)0xB76854;
 
 void CRenderer::InjectHooks()
 {
+    RH_ScopedClass(CRenderer);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(RenderFadingInEntities, 0x5531E0);
     RH_ScopedInstall(RenderFadingInUnderwaterEntities, 0x553220);
     RH_ScopedInstall(RenderOneRoad, 0x553230);

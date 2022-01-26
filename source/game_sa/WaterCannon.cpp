@@ -5,6 +5,9 @@
 #include <ranges>
 
 void CWaterCannon::InjectHooks() {
+    RH_ScopedClass(CWaterCannon);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Constructor, 0x728B10);
     RH_ScopedInstall(Destructor, 0x728B30);
     RH_ScopedInstall(Init, 0x728B40);

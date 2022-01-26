@@ -5,6 +5,9 @@
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
 void CFireManager::InjectHooks() {
+    RH_ScopedClass(CFireManager);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x539DA0);
     Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);

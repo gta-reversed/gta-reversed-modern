@@ -20,6 +20,9 @@ uint32& CClock::ms_nLastClockTick = *reinterpret_cast<uint32*>(0xB70158);
 uint32& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32*>(0xB7015C);
 
 void CClock::InjectHooks() {
+    RH_ScopedClass(CClock);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Initialise, 0x52CD90);
     RH_ScopedInstall(Update, 0x52CF10);
     RH_ScopedInstall(GetGameClockMinutesUntil, 0x52CEB0);

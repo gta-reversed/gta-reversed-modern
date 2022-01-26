@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CEntityScanner::InjectHooks() {
+    RH_ScopedClass(CEntityScanner);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Clear, 0x5FF9D0);
 //    RH_ScopedInstall(ScanForEntitiesInRange, 0x5FFA20);
     RH_ScopedInstall(GetClosestPedInRange, 0x5FFF20);

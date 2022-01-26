@@ -3,6 +3,9 @@
 char (&CGridRef::GridRefList)[3200] = *reinterpret_cast<char (*)[3200]>(0xC72FB0);
 
 void CGridRef::InjectHooks() {
+    RH_ScopedClass(CGridRef);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Init, 0x71D4E0);
 }
 

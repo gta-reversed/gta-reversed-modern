@@ -36,6 +36,9 @@ uint32& CStats::m_LastWeaponTypeFired = *(uint32*)0xB79514;
 bool& CStats::bShowUpdateStats = *(bool*)0x8CDE56;
 
 void CStats::InjectHooks() {
+    RH_ScopedClass(CStats);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x55C0C0);
     RH_ScopedInstall(GetStatValue, 0x558E40);

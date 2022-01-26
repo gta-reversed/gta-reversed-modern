@@ -3,6 +3,9 @@
 #include "PedClothesDesc.h"
 
 void CPedClothesDesc::InjectHooks() {
+    RH_ScopedClass(CPedClothesDesc);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x5A8020);
     RH_ScopedInstall(Initialise, 0x5A78F0);

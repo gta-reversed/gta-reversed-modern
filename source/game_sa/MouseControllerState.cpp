@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CMouseControllerState::InjectHooks() {
+    RH_ScopedClass(CMouseControllerState);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Constructor, 0x53F220);
     RH_ScopedInstall(Clear, 0x53F250);
     RH_ScopedInstall(CheckForInput, 0x53F270);

@@ -16,6 +16,9 @@ CCam& CCamera::GetActiveCamera() {
 }
 
 void CCamera::InjectHooks() {
+    RH_ScopedClass(CCamera);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(GetArrPosForVehicleType, 0x50AF00);
     RH_ScopedInstall(GetPositionAlongSpline, 0x50AF80);
     RH_ScopedInstall(InitialiseCameraForDebugMode, 0x50AF90);

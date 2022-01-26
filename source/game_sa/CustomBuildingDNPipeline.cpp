@@ -6,6 +6,9 @@ float& CCustomBuildingDNPipeline::m_fDNBalanceParam = *(float*)0x8D12C0;
 RxPipeline*& CCustomBuildingDNPipeline::ObjPipeline = *(RxPipeline**)0xC02C1C;
 
 void CCustomBuildingDNPipeline::InjectHooks() {
+    RH_ScopedClass(CCustomBuildingDNPipeline);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // Install("CCustomBuildingDNPipeline", "", 0x5D7D90, &CCustomBuildingDNPipeline::);
 }

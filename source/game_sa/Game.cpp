@@ -37,6 +37,9 @@ bool& gbLARiots = *(bool*)0xB72958;
 bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
 
 void CGame::InjectHooks() {
+    RH_ScopedClass(CGame);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(CanSeeOutSideFromCurrArea, 0x53C4A0);
     // RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);

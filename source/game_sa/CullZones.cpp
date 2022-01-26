@@ -11,6 +11,9 @@ int32& CCullZones::NumAttributeZones = *(int32*)0xC87AC8;
 bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
+    RH_ScopedClass(CCullZones);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x72D6B0);
     RH_ScopedInstall(AddCullZone, 0x72DF70);
     RH_ScopedInstall(AddTunnelAttributeZone, 0x72DB50);

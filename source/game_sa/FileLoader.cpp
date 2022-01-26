@@ -17,6 +17,9 @@ char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
 void CFileLoader::InjectHooks() {
+    RH_ScopedClass(CFileLoader);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(AddTexDictionaries, 0x5B3910);
     RH_ScopedInstall(LoadTexDictionary, 0x5B3860);

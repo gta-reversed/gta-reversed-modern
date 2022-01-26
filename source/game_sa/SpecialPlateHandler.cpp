@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CSpecialPlateHandler::InjectHooks() {
+    RH_ScopedClass(CSpecialPlateHandler);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x6F2D10);
     RH_ScopedInstall(Find, 0x6F2D30);
     RH_ScopedInstall(Add, 0x6F2D90);

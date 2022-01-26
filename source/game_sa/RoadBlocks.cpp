@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CRoadBlocks::InjectHooks() {
+    RH_ScopedClass(CRoadBlocks);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Init, 0x461100);
     // RH_ScopedInstall(ClearScriptRoadBlocks, 0x460EC0);

@@ -21,6 +21,9 @@ uint32 CStuntJumpManager::m_iNumCompleted;
 
 
 void CStuntJumpManager::InjectHooks() {
+    RH_ScopedClass(CStuntJumpManager);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x49CA50);
     RH_ScopedInstall(Shutdown, 0x49CBC0);
     RH_ScopedInstall(ShutdownForRestart, 0x49CB10);

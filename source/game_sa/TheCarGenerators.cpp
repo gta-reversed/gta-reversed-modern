@@ -10,6 +10,9 @@ CCarGenerator(&CTheCarGenerators::CarGeneratorArray)[NUM_CAR_GENERATORS] = *rein
 
 void CTheCarGenerators::InjectHooks()
 {
+    RH_ScopedClass(CTheCarGenerators);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(CreateCarGenerator, 0x6F31A0);
     RH_ScopedInstall(Init, 0x6F3270);
     RH_ScopedInstall(Load, 0x5D39B0);

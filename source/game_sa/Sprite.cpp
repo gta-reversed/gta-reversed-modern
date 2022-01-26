@@ -7,6 +7,9 @@ float& CSprite::m_f2DFarScreenZ = *(float*)0xC4B8D4;
 float& CSprite::m_fRecipNearClipPlane = *(float*)0xC4B8D0;
 
 void CSprite::InjectHooks() {
+    RH_ScopedClass(CSprite);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x70CE10);
     RH_ScopedInstall(InitSpriteBuffer, 0x70CFB0);

@@ -5,6 +5,9 @@
 #include "CreepingFire.h"
 
 void CFire::InjectHooks() {
+    RH_ScopedClass(CFire);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x539D90);
     RH_ScopedInstall(Initialise, 0x538B30);

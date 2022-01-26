@@ -11,6 +11,9 @@ CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector
 
 void CCarGenerator::InjectHooks()
 {
+    RH_ScopedClass(CCarGenerator);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(CheckForBlockage, 0x6F32E0);
     RH_ScopedInstall(CheckIfWithinRangeOfAnyPlayers, 0x6F2F40);
     RH_ScopedInstall(DoInternalProcessing, 0x6F34D0);

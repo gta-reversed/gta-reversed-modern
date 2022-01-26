@@ -7,6 +7,9 @@ RwTexture*& CSkidmarks::m_pTexture = *reinterpret_cast<RwTexture**>(0xC79A88);
 CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkidmark (*)[SKIDMARKS_COUNT]>(0xC79AA8);
 
 void CSkidmarks::InjectHooks() {
+    RH_ScopedClass(CSkidmarks);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x7204E0);
     RH_ScopedInstall(Shutdown, 0x720570);

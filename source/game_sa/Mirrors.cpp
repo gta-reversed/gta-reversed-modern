@@ -33,6 +33,9 @@ CVector Screens8Track[2][4] = { // 0x8D5DD8
 };
 
 void CMirrors::InjectHooks() {
+    RH_ScopedClass(CMirrors);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x723000);
     RH_ScopedInstall(ShutDown, 0x723050);

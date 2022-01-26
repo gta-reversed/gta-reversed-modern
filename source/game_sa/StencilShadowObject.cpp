@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CStencilShadowObject::InjectHooks() {
+    RH_ScopedClass(CStencilShadowObject);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Shutdown, 0x711390);
 //    RH_ScopedInstall(Render, 0x710D50);
 //    RH_ScopedInstall(RenderForVehicle, 0x70FAE0);

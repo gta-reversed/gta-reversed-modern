@@ -4,6 +4,9 @@ float* CMaths::ms_SinTable = (float*)0xBB3DFC;
 
 void CMaths::InjectHooks()
 {
+    RH_ScopedClass(CMaths);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(InitMathsTables, 0x59AC90);
 }
 

@@ -3,6 +3,9 @@
 #include "3dMarkers.h"
 
 void C3dMarkers::InjectHooks() {
+    RH_ScopedClass(C3dMarkers);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Init, 0x724E40);
     // RH_ScopedInstall(Update, 0x7227B0);

@@ -2,6 +2,9 @@
 
 void CCompressedMatrixNotAligned::InjectHooks()
 {
+    RH_ScopedClass(CCompressedMatrixNotAligned);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(DecompressIntoFullMatrix, 0x59B9F0);
     RH_ScopedInstall(CompressFromFullMatrix, 0x59BAD0);
 }

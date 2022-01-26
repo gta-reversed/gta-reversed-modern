@@ -19,6 +19,9 @@ int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
+    RH_ScopedClass(CTxdStore);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(PushCurrentTxd, 0x7316A0);
     RH_ScopedInstall(PopCurrentTxd, 0x7316B0);
     RH_ScopedOverloadedInstall(FindTxdSlot, "name", 0x731850, int32 (*)(const char*));

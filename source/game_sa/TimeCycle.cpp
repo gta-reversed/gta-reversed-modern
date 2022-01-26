@@ -106,6 +106,9 @@ RwRGBA& CTimeCycle::m_BelowHorizonGrey{ *(RwRGBA*)0xB7CB10 };
 RwV3d& CTimeCycle::m_vecDirnLightToSun{ *(RwV3d*)0xB7CB14 };
 
 void CTimeCycle::InjectHooks() {
+    RH_ScopedClass(CTimeCycle);
+    RH_ScopedCategoryRoot();
+
 
 }
 

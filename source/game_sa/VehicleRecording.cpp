@@ -7,6 +7,9 @@ CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTA
 bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
 void CVehicleRecording::InjectHooks() {
+    RH_ScopedClass(CVehicleRecording);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Render, 0x459F70);
 }
 

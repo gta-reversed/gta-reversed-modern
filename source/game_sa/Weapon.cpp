@@ -26,6 +26,9 @@ float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
+    RH_ScopedClass(CWeapon);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Constructor, 0x73B430);
     RH_ScopedInstall(Shutdown, 0x73A380);
     RH_ScopedInstall(Reload, 0x73AEB0);

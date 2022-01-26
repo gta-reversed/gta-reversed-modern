@@ -10,6 +10,9 @@
 #include "GxtChar.h"
 
 void C_PcSave::InjectHooks() {
+    RH_ScopedClass(C_PcSave);
+    RH_ScopedCategoryRoot();
+
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
     using namespace ReversibleHooks;

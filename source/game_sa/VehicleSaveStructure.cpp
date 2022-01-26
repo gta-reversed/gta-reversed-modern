@@ -2,6 +2,9 @@
 
 void CVehicleSaveStructure::InjectHooks()
 {
+    RH_ScopedClass(CVehicleSaveStructure);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Construct, 0x5D2330);
     RH_ScopedInstall(Extract, 0x5D23B0);
 }

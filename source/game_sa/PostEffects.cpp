@@ -134,6 +134,9 @@ float (&dword_C3FB38_Y)[180] = *(float (*)[180])0xC3FE08;
 float (&dword_C3F868_SPEED)[180] = *(float (*)[180])0xC3FE08;
 
 void CPostEffects::InjectHooks() {
+    RH_ScopedClass(CPostEffects);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Initialise, 0x704630);
     RH_ScopedInstall(Close, 0x7010C0);

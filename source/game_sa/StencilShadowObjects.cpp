@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CStencilShadowObjects::InjectHooks() {
+    RH_ScopedClass(CStencilShadowObjects);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(UpdateHierarchy, 0x710BC0);
 //    RH_ScopedInstall(RegisterStencilShadows, 0x711760);
 //    RH_ScopedInstall(ScalarConstructor, 0x854B60);

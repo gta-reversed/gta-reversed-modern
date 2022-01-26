@@ -21,6 +21,9 @@ uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
 CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
 
 void CIplStore::InjectHooks() {
+    RH_ScopedClass(CIplStore);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
 }
 

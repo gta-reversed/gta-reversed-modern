@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CPedGeometryAnalyser::InjectHooks() {
+    RH_ScopedClass(CPedGeometryAnalyser);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
 //    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
 //    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);

@@ -6,6 +6,9 @@ uint32& CBrightLights::NumBrightLights = *(uint32*)0xC7C6FC;
 tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLight(*)[MAX_NUM_BRIGHTLIGHTS])0xC7CB58;
 
 void CBrightLights::InjectHooks() {
+    RH_ScopedClass(CBrightLights);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x722140);
     RH_ScopedInstall(RenderOutGeometryBuffer, 0x722150);
     RH_ScopedInstall(Render, 0x7241C0);

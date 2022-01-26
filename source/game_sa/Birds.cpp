@@ -15,6 +15,9 @@ uint32* CBirds::auRenderIndices = (uint32*)0x8D52F8; // Size: 30
 
 void CBirds::InjectHooks()
 {
+    RH_ScopedClass(CBirds);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x711EC0);
     RH_ScopedInstall(Shutdown, 0x712300);
     RH_ScopedInstall(HandleGunShot, 0x712E40);

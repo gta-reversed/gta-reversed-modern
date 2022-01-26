@@ -3,6 +3,9 @@
 CLoadMonitor& g_LoadMonitor = *reinterpret_cast<CLoadMonitor*> (0xB72978);
 
 void CLoadMonitor::InjectHooks() {
+    RH_ScopedClass(CLoadMonitor);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Constructor, 0x53CFA0);
 //    RH_ScopedInstall(Destructor, 0x856430);
 //    RH_ScopedInstall(BeginFrame, 0x53D030);

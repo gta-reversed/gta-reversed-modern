@@ -118,6 +118,9 @@ bool& CRadar::mapYouAreHereDisplay = *(bool*)0x8D0930;
 
 void CRadar::InjectHooks()
 {
+    RH_ScopedClass(CRadar);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(LoadTextures, 0x5827D0);
     RH_ScopedInstall(DrawLegend, 0x5828A0);
     RH_ScopedInstall(LimitRadarPoint, 0x5832F0);

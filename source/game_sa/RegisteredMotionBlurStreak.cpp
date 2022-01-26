@@ -6,6 +6,9 @@
 
 void CRegisteredMotionBlurStreak::InjectHooks()
 {
+    RH_ScopedClass(CRegisteredMotionBlurStreak);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Update, 0x721EE0);
     RH_ScopedInstall(Render, 0x721F70);
 }

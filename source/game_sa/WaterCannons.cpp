@@ -6,6 +6,9 @@
 CWaterCannon (&CWaterCannons::aCannons)[3] = *(CWaterCannon (*)[3])0xC80740;
 
 void CWaterCannons::InjectHooks() {
+    RH_ScopedClass(CWaterCannons);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x728C80);
     RH_ScopedInstall(UpdateOne, 0x728CB0);
     RH_ScopedInstall(Update, 0x72A3C0);

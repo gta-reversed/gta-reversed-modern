@@ -5,6 +5,9 @@ constexpr uint16 PED_STATS_COUNT = 43;
 CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;
 
 void CPedStats::InjectHooks() {
+    RH_ScopedClass(CPedStats);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Initialise, 0x5BF9D0);
     RH_ScopedInstall(Shutdown, 0x608850);
     RH_ScopedInstall(LoadPedStats, 0x5BB890);

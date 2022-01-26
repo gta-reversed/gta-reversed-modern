@@ -2,6 +2,9 @@
 #include "ProjectileInfo.h"
 
 void CProjectileInfo::InjectHooks() {
+    RH_ScopedClass(CProjectileInfo);
+    RH_ScopedCategoryRoot();
+
 
     // Destructors
     // Install("CProjectileInfo", "", , &CProjectileInfo::);

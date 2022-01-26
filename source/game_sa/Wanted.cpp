@@ -13,6 +13,9 @@ bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
+    RH_ScopedClass(CWanted);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(UpdateWantedLevel, 0x561C90);
     RH_ScopedInstall(AreSwatRequired, 0x561F40);
     RH_ScopedInstall(AreFbiRequired, 0x561F60);

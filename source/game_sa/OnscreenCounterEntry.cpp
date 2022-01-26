@@ -2,6 +2,9 @@
 #include "OnscreenCounterEntry.h"
 
 void COnscreenCounterEntry::InjectHooks() {
+    RH_ScopedClass(COnscreenCounterEntry);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(ProcessForDisplayCounter, 0x44CA90);
     RH_ScopedInstall(SetColourID, 0x44CB00);
 }

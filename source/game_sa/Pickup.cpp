@@ -3,6 +3,9 @@
 #include "Pickup.h"
 
 void CPickup::InjectHooks() {
+    RH_ScopedClass(CPickup);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(ExtractAmmoFromPickup, 0x454BE0);
     RH_ScopedInstall(FindStringForTextIndex, 0x455540);

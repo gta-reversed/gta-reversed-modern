@@ -18,6 +18,9 @@ float& CSprite2d::RecipNearClip = *(float*)0xC80464;
 RwIm2DVertex* CSprite2d::maVertices = (RwIm2DVertex*)0xC80468;
 
 void CSprite2d::InjectHooks() {
+    RH_ScopedClass(CSprite2d);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x727230);
     Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);

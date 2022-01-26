@@ -15,6 +15,9 @@ uint16(&CCoronas::ms_aEntityLightsOffsets)[8] = *(uint16(*)[8])0x8D5028;
 char (&coronaTexturesAlphaMasks)[260] = *(char (*)[260])0x8D4A58;
 
 void CCoronas::InjectHooks() {
+    RH_ScopedClass(CCoronas);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Init, 0x6FAA70);
 //    RH_ScopedInstall(Shutdown, 0x6FAB00);
 //    RH_ScopedInstall(Update, 0x6FADF0);

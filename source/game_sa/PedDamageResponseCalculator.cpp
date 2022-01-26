@@ -4,6 +4,9 @@ float& CPedDamageResponseCalculator::ms_damageFactor = *(float*)0x8A6260; // 555
 
 void CPedDamageResponseCalculator::InjectHooks()
 {
+    RH_ScopedClass(CPedDamageResponseCalculator);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Constructor, 0x4AD3F0);
 }
 

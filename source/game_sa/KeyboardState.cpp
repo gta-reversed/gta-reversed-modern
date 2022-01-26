@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CKeyboardState::InjectHooks() {
+    RH_ScopedClass(CKeyboardState);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Clear, 0x53F090);
 }
 

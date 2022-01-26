@@ -3,6 +3,9 @@
 #include "DamageManager.h"
 
 void CDamageManager::InjectHooks() {
+    RH_ScopedClass(CDamageManager);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x6A0520);
     RH_ScopedInstall(ResetDamageStatusAndWheelDamage, 0x6A04E0);

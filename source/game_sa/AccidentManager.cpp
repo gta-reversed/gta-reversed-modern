@@ -4,6 +4,9 @@ CAccidentManager*& CAccidentManager::gAccidentManager = *(CAccidentManager * *)0
 
 void CAccidentManager::InjectHooks()
 {
+    RH_ScopedClass(CAccidentManager);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(GetInstance, 0x56CF20);
     RH_ScopedInstall(ReportAccident, 0x56CE80);
     RH_ScopedInstall(GetNumberOfFreeAccidents, 0x56CEE0);

@@ -17,6 +17,9 @@ int32* (&grassModelsPtr)[4] = *(int32 * (*)[4])0xC03A30;
 RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;
 
 void CPlantMgr::InjectHooks() {
+    RH_ScopedClass(CPlantMgr);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // Install("CPlantMgr", "", 0x0, &CPlantMgr::);
 }

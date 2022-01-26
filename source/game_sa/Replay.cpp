@@ -4,6 +4,9 @@ eReplayMode &CReplay::Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
 bool& CReplay::bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
 
 void CReplay::InjectHooks() {
+    RH_ScopedClass(CReplay);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);
 //    RH_ScopedInstall(StorePedAnimation, 0x0);

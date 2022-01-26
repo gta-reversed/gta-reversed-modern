@@ -5,6 +5,9 @@
 
 void COccluder::InjectHooks()
 {
+    RH_ScopedClass(COccluder);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(ProcessOneOccluder, 0x71E5D0);
     RH_ScopedInstall(ProcessLineSegment, 0x71E130);
     RH_ScopedInstall(NearCamera, 0x71F960);

@@ -34,6 +34,9 @@ uint32 (&aCarsToKeepTime)[2] = *(uint32(*)[2])0x96907C;
 
 void CCarCtrl::InjectHooks()
 {
+    RH_ScopedClass(CCarCtrl);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x4212E0);
     RH_ScopedInstall(ReInit, 0x4213B0);

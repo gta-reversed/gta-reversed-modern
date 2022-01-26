@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CUpsideDownCarCheck::InjectHooks() {
+    RH_ScopedClass(CUpsideDownCarCheck);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Init, 0x46A8C0);
 //    RH_ScopedInstall(IsCarUpsideDown, 0x463830);
 //    RH_ScopedInstall(UpdateTimers, 0x4655E0);

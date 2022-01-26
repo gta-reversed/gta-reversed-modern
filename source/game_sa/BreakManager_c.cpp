@@ -5,6 +5,9 @@
 BreakManager_c& g_breakMan = *(BreakManager_c*)0xBB4240;
 
 void BreakManager_c::InjectHooks() {
+    RH_ScopedClass(BreakManager_c);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x59E650);
     RH_ScopedInstall(Exit, 0x59E660);

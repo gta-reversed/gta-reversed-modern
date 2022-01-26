@@ -6,6 +6,9 @@
 #include "PointLights.h"
 
 void CMovingThings::InjectHooks() {
+    RH_ScopedClass(CMovingThings);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x717D00);
     RH_ScopedInstall(Shutdown, 0x717C20);
     RH_ScopedInstall(Update, 0x7185B0);

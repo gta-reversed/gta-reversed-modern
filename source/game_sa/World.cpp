@@ -39,6 +39,9 @@ int16& TAG_SPRAYING_INCREMENT_VAL = *(int16*)0x8CDEF0;
 int8& gCurCamColVars = *(int8*)0x8CCB80;
 
 void CWorld::InjectHooks() {
+    RH_ScopedClass(CWorld);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5631E0);
     RH_ScopedInstall(ShutDown, 0x564050);

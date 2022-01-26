@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CMessages::InjectHooks() {
+    RH_ScopedClass(CMessages);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(GetStringLength, 0x69DB50);
 //    RH_ScopedInstall(StringCopy, 0x69DB70);
 //    RH_ScopedInstall(StringCompare, 0x69DBD0);

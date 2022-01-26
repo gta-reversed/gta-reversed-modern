@@ -3,6 +3,9 @@
 #include "Cranes.h"
 
 void CCranes::InjectHooks() {
+    RH_ScopedClass(CCranes);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(InitCranes, 0x6F3FC0);
     RH_ScopedInstall(UpdateCranes, 0x6F3FE0);
     RH_ScopedInstall(IsThisCarBeingCarriedByAnyCrane, 0x6F3FF0);

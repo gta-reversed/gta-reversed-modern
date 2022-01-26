@@ -7,6 +7,9 @@
 
 void CPools::InjectHooks()
 {
+    RH_ScopedClass(CPools);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(LoadObjectPool, 0x5D4A40);
     RH_ScopedInstall(MakeSureSlotInObjectPoolIsEmpty, 0x550080);
 }

@@ -3,6 +3,9 @@
 CControllerConfigManager& ControlsManager = *(CControllerConfigManager *) 0xB70198;
 
 void CControllerConfigManager::InjectHooks() {
+    RH_ScopedClass(CControllerConfigManager);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(Constructor, 0x531EE0);
 //    RH_ScopedInstall(SaveSettings, 0x52D200);
 //    RH_ScopedInstall(InitDefaultControlConfiguration, 0x530640);

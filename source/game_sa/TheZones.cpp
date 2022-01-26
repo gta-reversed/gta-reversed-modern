@@ -25,6 +25,9 @@ int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
+    RH_ScopedClass(CTheZones);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(ResetZonesRevealed, 0x572110);
     RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
     RH_ScopedInstall(PointLiesWithinZone, 0x572270);

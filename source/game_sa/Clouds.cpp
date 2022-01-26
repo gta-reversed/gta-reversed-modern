@@ -28,6 +28,9 @@ float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::Volumet
 int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::VolumetricCloudsRender
 
 void CClouds::InjectHooks() {
+    RH_ScopedClass(CClouds);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x7138D0);
     RH_ScopedInstall(Update, 0x712FF0);
     RH_ScopedInstall(Shutdown, 0x712FA0);

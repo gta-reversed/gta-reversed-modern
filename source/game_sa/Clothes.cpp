@@ -17,6 +17,9 @@ int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
 void CClothes::InjectHooks() {
+    RH_ScopedClass(CClothes);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x5A80D0);
     // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);

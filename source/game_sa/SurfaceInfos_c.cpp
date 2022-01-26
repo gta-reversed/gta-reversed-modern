@@ -5,6 +5,9 @@ char* SurfaceInfos_c::cDefaultName = reinterpret_cast<char*>(0x85C658); // "DEFA
 
 void SurfaceInfos_c::InjectHooks()
 {
+    RH_ScopedClass(SurfaceInfos_c);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(GetSurfaceIdFromName, 0x55D220);
     RH_ScopedInstall(Init, 0x55F420);
 

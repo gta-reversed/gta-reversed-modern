@@ -4,6 +4,9 @@ int32& CWindModifiers::Number = *(int32*)0xC81450;
 CWindModifier (&CWindModifiers::Array)[MAX_NUM_MODIFIERS] = *(CWindModifier(*)[MAX_NUM_MODIFIERS])0xC81458;
 
 void CWindModifiers::InjectHooks() {
+    RH_ScopedClass(CWindModifiers);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(FindWindModifier, 0x0);
 //    RH_ScopedInstall(RegisterOne, 0x0);
 }

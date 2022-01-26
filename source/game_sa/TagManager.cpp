@@ -9,6 +9,9 @@ RxPipeline* &CTagManager::ms_pPipeline = *(RxPipeline**)0xA9AD78;
 
 void CTagManager::InjectHooks()
 {
+    RH_ScopedClass(CTagManager);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x49CC50);
     RH_ScopedInstall(ShutdownForRestart, 0x49CC60);
     RH_ScopedInstall(GetTagPos, 0x49CEA0);

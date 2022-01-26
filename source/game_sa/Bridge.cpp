@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CBridge::InjectHooks() {
+    RH_ScopedClass(CBridge);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x41BC70);
     RH_ScopedInstall(Update, 0x41BC80);

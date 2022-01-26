@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CShopping::InjectHooks() {
+    RH_ScopedClass(CShopping);
+    RH_ScopedCategoryRoot();
+
 //    RH_ScopedInstall(AddPriceModifier, 0x0);
 //    RH_ScopedInstall(AddPriceModifier, 0x0);
 //    RH_ScopedInstall(Buy, 0x49BF70);

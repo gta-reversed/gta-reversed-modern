@@ -8,6 +8,9 @@ CAEExplosionAudioEntity& CExplosion::m_ExplosionAudioEntity = *(CAEExplosionAudi
 CExplosion (&CExplosion::aExplosions)[16] = *(CExplosion(*)[16])0xC88950;
 
 void CExplosion::InjectHooks() {
+    RH_ScopedClass(CExplosion);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(ClearAllExplosions, 0x736840);
     RH_ScopedInstall(Shutdown, 0x7368F0);

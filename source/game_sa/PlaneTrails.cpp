@@ -5,6 +5,9 @@
 CPlaneTrail (&CPlaneTrails::aArray)[NUM_PLANE_TRAILS] = *(CPlaneTrail(*)[NUM_PLANE_TRAILS])0xC713A8;
 
 void CPlaneTrails::InjectHooks() {
+    RH_ScopedClass(CPlaneTrails);
+    RH_ScopedCategoryRoot();
+
     // using namespace ReversibleHooks;
     // RH_ScopedInstall(Init, 0x717370);
     // RH_ScopedInstall(Render, 0x7173A0);

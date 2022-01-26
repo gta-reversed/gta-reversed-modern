@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CInformGroupEventQueue::InjectHooks() {
+    RH_ScopedClass(CInformGroupEventQueue);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x4B2AD0);
 //    RH_ScopedInstall(Add, 0x4B7CD0);
 //    RH_ScopedInstall(Flush, 0x4AC410);

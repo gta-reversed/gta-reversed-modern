@@ -6,6 +6,9 @@ uint32& CCredits::CreditsStartTime = *(uint32*)0xC6E978;
 bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;
 
 void CCredits::InjectHooks() {
+    RH_ScopedClass(CCredits);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Render, 0x53D5B0);
     RH_ScopedInstall(PrintCreditText, 0x5A8660);
     RH_ScopedInstall(PrintCreditSpace, 0x5A87C0);

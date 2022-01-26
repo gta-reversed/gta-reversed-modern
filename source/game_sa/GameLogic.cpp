@@ -31,6 +31,9 @@ float& CGameLogic::MaxPlayerDistance = *reinterpret_cast<float*>(0x8A5E4C); // d
 int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // default 2
 
 void CGameLogic::InjectHooks() {
+    RH_ScopedClass(CGameLogic);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
     // RH_ScopedInstall(ClearSkip, 0x441560);

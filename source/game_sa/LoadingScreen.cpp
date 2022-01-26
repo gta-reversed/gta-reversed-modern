@@ -31,6 +31,9 @@ float& CLoadingScreen::m_timeSinceLastScreen = *(float*)0xBAB340;
 CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLoadingScreen::m_aSplashes[7]
 
 void CLoadingScreen::InjectHooks() {
+    RH_ScopedClass(CLoadingScreen);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(LoadingScreen, 0x53DED0);
 }
 

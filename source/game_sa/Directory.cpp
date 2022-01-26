@@ -4,6 +4,9 @@
 
 
 void CDirectory::InjectHooks() {
+    RH_ScopedClass(CDirectory);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedOverloadedInstall(Constructor, "Empty", 0x532290, CDirectory*(CDirectory::*)());
     RH_ScopedOverloadedInstall(Constructor, "Capacity", 0x5322A0, CDirectory*(CDirectory::*)(size_t));
     Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 

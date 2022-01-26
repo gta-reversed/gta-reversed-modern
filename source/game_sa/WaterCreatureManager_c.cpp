@@ -5,6 +5,9 @@ WaterCreatureInfo(&WaterCreatureManager_c::ms_waterCreatureInfos)[NUM_WATER_CREA
 
 void WaterCreatureManager_c::InjectHooks()
 {
+    RH_ScopedClass(WaterCreatureManager_c);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(Init, 0x6E3F90);
     RH_ScopedInstall(Exit, 0x6E3FD0);
     RH_ScopedInstall(Update, 0x6E4F10);

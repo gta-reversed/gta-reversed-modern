@@ -13,6 +13,9 @@ static std::random_device randomDevice;
 static std::mt19937 randomEngine(randomDevice());
 
 void CGeneral::InjectHooks() {
+    RH_ScopedClass(CGeneral);
+    RH_ScopedCategoryRoot();
+
     RH_ScopedInstall(LimitAngle, 0x53CB00);
     RH_ScopedInstall(LimitRadianAngle, 0x53CB50);
     RH_ScopedInstall(GetRadianAngleBetweenPoints, 0x53CBE0);
