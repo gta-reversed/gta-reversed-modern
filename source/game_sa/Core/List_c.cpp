@@ -2,6 +2,9 @@
 
 void List_c::InjectHooks()
 {
+    RH_ScopedClass(List_c);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(AddItem, 0x4A8DF0);
     RH_ScopedInstall(RemoveItem, 0x4A8E30);
     RH_ScopedInstall(RemoveHead, 0x4A8E70);

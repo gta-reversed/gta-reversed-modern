@@ -9,6 +9,9 @@ Do not delete this comment block. Respect others' work!
 
 void CVector2D::InjectHooks()
 {
+    RH_ScopedClass(CVector2D);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(Magnitude, 0x420860);
     RH_ScopedInstall(Normalise, 0x44E480);
 

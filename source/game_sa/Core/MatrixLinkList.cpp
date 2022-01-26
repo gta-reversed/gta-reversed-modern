@@ -4,6 +4,9 @@ CMatrixLinkList& gMatrixList = *(CMatrixLinkList*)0xB74288;
 
 void CMatrixLinkList::InjectHooks()
 {
+    RH_ScopedClass(CMatrixLinkList);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(Init, 0x54F0D0);
     RH_ScopedInstall(Shutdown, 0x54E990);
     RH_ScopedInstall(AddToList1, 0x54E9D0);

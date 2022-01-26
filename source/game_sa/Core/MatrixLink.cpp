@@ -2,6 +2,9 @@
 
 void CMatrixLink::InjectHooks()
 {
+    RH_ScopedClass(CMatrixLink);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(Insert, 0x54E8F0);
     RH_ScopedInstall(Remove, 0x54E910);
 }

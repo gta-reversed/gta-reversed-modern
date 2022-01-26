@@ -15,6 +15,9 @@ CMatrix& gDummyMatrix = *(CMatrix*)0xB74240;
 
 void CMatrix::InjectHooks()
 {
+    RH_ScopedClass(CMatrix);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(Attach, 0x59BD10);
     RH_ScopedInstall(Detach, 0x59ACF0);
     RH_ScopedInstall(CopyOnlyMatrix, 0x59ADD0);

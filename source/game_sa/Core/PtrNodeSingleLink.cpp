@@ -3,6 +3,9 @@
 #include "PtrNodeSingleLink.h"
 
 void CPtrNodeSingleLink::InjectHooks() {
+    RH_ScopedClass(CPtrNodeSingleLink);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(AddToList, 0x532960);
 }
 

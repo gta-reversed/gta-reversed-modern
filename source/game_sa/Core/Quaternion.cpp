@@ -14,6 +14,9 @@ CQuaternion::CQuaternion()
 
 void CQuaternion::InjectHooks()
 {
+    RH_ScopedClass(CQuaternion);
+    RH_ScopedCategory("Core");
+
     RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrixTag*));
 }
 

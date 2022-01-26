@@ -3,6 +3,9 @@
 #include "PtrList.h"
 
 void CPtrList::InjectHooks() {
+    RH_ScopedClass(CPtrList);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(CountElements, 0x5521B0);
     RH_ScopedInstall(IsMemberOfList, 0x5521D0);
 }

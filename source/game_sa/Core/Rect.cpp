@@ -8,6 +8,9 @@
 
 void CRect::InjectHooks()
 {
+    RH_ScopedClass(CRect);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(IsFlipped, 0x404190);
     RH_ScopedInstall(Restrict, 0x404200);
     RH_ScopedInstall(Resize, 0x404260);

@@ -2,6 +2,9 @@
 
 void CEntryInfoList::InjectHooks()
 {
+    RH_ScopedClass(CEntryInfoList);
+    RH_ScopedCategory("Core");
+
     RH_ScopedInstall(Flush, 0x536E10);
 }
 

@@ -4,6 +4,9 @@ CPool<CQuadTreeNode>*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CPool<CQuadTreeNo
 
 void CQuadTreeNode::InjectHooks()
 {
+    RH_ScopedClass(CQuadTreeNode);
+    RH_ScopedCategory("Core");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(InitPool, 0x552C00);
     RH_ScopedOverloadedInstall(FindSector, "rect", 0x5525A0, int32(CQuadTreeNode::*)(const CRect&));

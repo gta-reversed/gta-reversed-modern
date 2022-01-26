@@ -2,6 +2,9 @@
 
 void CEntryInfoNode::InjectHooks()
 {
+    RH_ScopedClass(CEntryInfoNode);
+    RH_ScopedCategory("Core");
+
     Install("CEntryInfoNode", "operator new", 0x536DC0, &CEntryInfoNode::operator new);
     Install("CEntryInfoNode", "operator delete", 0x536DD0, &CEntryInfoNode::operator delete);
 }
