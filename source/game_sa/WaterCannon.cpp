@@ -2,7 +2,6 @@
 
 #include "WaterCannon.h"
 #include "FireManager.h"
-#include <ranges>
 
 void CWaterCannon::InjectHooks() {
     ReversibleHooks::Install("CWaterCannon", "Constructor", 0x728B10, &CWaterCannon::Constructor);

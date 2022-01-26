@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "Birds.h"
+#include "Clouds.h"
+
 bool& CBirds::bHasBirdBeenShot = *(bool*)0xC6A8A0;
 uint32& CBirds::uiNumberOfBirds = *(uint32*)0xC6A8A4;
 CBird* CBirds::aBirds = (CBird*)0xC6A8B0;
@@ -393,7 +396,7 @@ void CBirds::Render()
         RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
         RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(gpCloudTex[1]->raster));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(gpCloudMaskTex->raster));
         CBrightLights::RenderOutGeometryBuffer();
     }
 }

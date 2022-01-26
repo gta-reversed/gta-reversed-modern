@@ -21,15 +21,12 @@ constexpr auto SKYP_BELOW_HORIZON_Z = -0.3f;
 
 struct tMovingFog {
     bool    m_bFogSlots[MAX_MOVING_FOG];
-    char    _pad15E[2];
     CVector m_vecPosn[MAX_MOVING_FOG];
     float   m_fSize[MAX_MOVING_FOG];
     float   m_fIntensity[MAX_MOVING_FOG];
     float   m_fMaxIntensity[MAX_MOVING_FOG];
     CVector m_vecWind;
     float   m_fSpeed[MAX_MOVING_FOG];
-    int32   field_27B4[12];
-    uint32  m_nPrimIndices[6];
 };
 
 struct tVolumetricClouds {
@@ -103,8 +100,8 @@ extern float* STARS_Z_POSITIONS;                 // STARS_Z_POSITIONS[9] = { 0.0
 extern float* STARS_SIZES;                       // STARS_SIZES[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f }
 extern float& CurrentFogIntensity;               // default 1.0f
 extern RwTexture*& gpMoonMask;
-extern RwTexture* (&gpCloudTex)[2]; // RwTexture *gpCloudTex[2]
-
+extern RwTexture*& gpCloudTex;
+extern RwTexture*& gpCloudMaskTex;
 extern float& flt_C6E954;
 extern float& flt_C6E970;
 

@@ -1,10 +1,10 @@
 #include "StdInc.h"
+
 #include "HooksDebugModule.h"
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <TristateCheckbox.h>
 #include <string>
-#include <ranges>
 
 namespace rng = std::ranges;
 using namespace ImGui;

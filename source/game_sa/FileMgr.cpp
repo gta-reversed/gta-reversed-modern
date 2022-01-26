@@ -1,7 +1,5 @@
 #include "StdInc.h" // TODO remove
 
-#include <array>
-
 #include <cerrno>
 #include <cstring>
 #include <direct.h>
