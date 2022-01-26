@@ -95,7 +95,7 @@ void CFont::LoadFontValues() {
     CFileMgr::SetDir(gta_empty_string);
     auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
-    char* attrib[26];
+    char attrib[32];
 
     uint32 totalFonts = 0;
     uint32 fontId = 0;

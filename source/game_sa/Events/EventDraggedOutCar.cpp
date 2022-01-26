@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventDraggedOutCar.h"
+
 void CEventDraggedOutCar::InjectHooks()
 {
     RH_ScopedClass(CEventDraggedOutCar);
@@ -9,6 +11,7 @@ void CEventDraggedOutCar::InjectHooks()
     RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
 }
 
+// // 0x4AD250
 CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat)
 {
     m_carjacker = carjacker;
@@ -30,21 +33,14 @@ CEventDraggedOutCar::~CEventDraggedOutCar()
 
 CEventDraggedOutCar* CEventDraggedOutCar::Constructor(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventDraggedOutCar*, 0x4AD250, CEvent*, CVehicle*, CPed*, bool>(this, vehicle, carjacker, IsDriverSeat);
-#else
     this->CEventDraggedOutCar::CEventDraggedOutCar(vehicle, carjacker, IsDriverSeat);
     return this;
-#endif
 }
 
+// 0x4B6DC0
 CEventEditableResponse* CEventDraggedOutCar::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B6DC0, CEvent*>(this);
-#else
     return CEventDraggedOutCar::CloneEditable_Reversed();
-#endif
 }
 
 CEventEditableResponse* CEventDraggedOutCar::CloneEditable_Reversed()

@@ -5,7 +5,7 @@
 #include "MovingThings.h"
 #include "BreakManager_c.h"
 #include "PlantMgr.h"
-
+#include "Clouds.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;

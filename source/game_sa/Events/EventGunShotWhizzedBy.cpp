@@ -9,6 +9,7 @@ void CEventGunShotWhizzedBy::InjectHooks()
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B5120);
 }
 
+// 0x4B1FD0
 CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(CEntity* entity, CVector const& startPoint, CVector const& endPoint, bool bHasNoSound) :
     CEventGunShot(entity, startPoint, endPoint, bHasNoSound)
 {
@@ -16,21 +17,14 @@ CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(CEntity* entity, CVector const& s
 
 CEventGunShotWhizzedBy* CEventGunShotWhizzedBy::Constructor(CEntity* entity, CVector const& startPoint, CVector const& endPoint, bool bHasNoSound)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventGunShotWhizzedBy*, 0x4B1FD0, CEvent*, CEntity*, CVector const&, CVector const&, bool>(this, entity, startPoint, endPoint, bHasNoSound);
-#else
     this->CEventGunShotWhizzedBy::CEventGunShotWhizzedBy(entity, startPoint, endPoint, bHasNoSound);
     return this;
-#endif
 }
 
+// 0x4B5120
 bool CEventGunShotWhizzedBy::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B5120, CEvent*, CPed*>(this, ped);
-#else
     return CEventGunShotWhizzedBy::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventGunShotWhizzedBy::AffectsPed_Reversed(CPed* ped)
@@ -42,8 +36,7 @@ bool CEventGunShotWhizzedBy::AffectsPed_Reversed(CPed* ped)
         float squaredMagnitude = (distance * direction).SquaredMagnitude();
         if (squaredMagnitude > 0.0f) {
             CVector2D point = (direction * squaredMagnitude) + m_startPoint;
-            CVector2D distance = ped->GetPosition() - point;
-            return 2.0f * 2.0f > distance.SquaredMagnitude();
+            return 2.0f * 2.0f > (ped->GetPosition() - point).SquaredMagnitude();
         }
     }
     return false;

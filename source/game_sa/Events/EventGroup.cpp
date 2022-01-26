@@ -19,13 +19,12 @@ void CEventGroup::InjectHooks()
     //RH_ScopedInstall(GetEventOfType, 0x4AB650);
 }
 
+// 0x4AB340
 CEventGroup::CEventGroup(CPed* ped)
 {
     m_pPed = ped;
     m_count = 0;
-    for (int32 i = 0; i < TOTAL_EVENTS_PER_EVENTGROUP; i++) {
-        m_events[i] = nullptr;
-    }
+    std::ranges::fill(m_events, nullptr);
 }
 
 CEventGroup::~CEventGroup()
@@ -35,19 +34,13 @@ CEventGroup::~CEventGroup()
 
 CEventGroup* CEventGroup::Constructor(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventGroup*, 0x4AB340, CEventGroup*, CPed*>(this, ped);
-#else
     this->CEventGroup::CEventGroup(ped);
     return this;
-#endif
 }
 
+// 0x4AB420
 CEvent* CEventGroup::Add(CEvent* event, bool bValid)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4AB420, CEventGroup*, CEvent*, bool>(this, event, bValid);
-#else
     if (m_pPed) {
         bool bAddToEventGroup = false;
         bool bInformGroup = false;
@@ -87,6 +80,7 @@ CEvent* CEventGroup::Add(CEvent* event, bool bValid)
         if (!bAddToEventGroup)
             return nullptr;
     }
+
     if (m_count < TOTAL_EVENTS_PER_EVENTGROUP) {
         CEvent* clonedEvent = event->Clone();
         clonedEvent->m_bValid = bValid;
@@ -97,14 +91,11 @@ CEvent* CEventGroup::Add(CEvent* event, bool bValid)
         return clonedEvent;
     }
     return nullptr;
-#endif
 }
 
+// 0x4AB840
 bool CEventGroup::HasScriptCommandOfTaskType(eTaskType taskId)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AB840, CEventGroup*, int32>(this, taskId);
-#else
     if (m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
@@ -117,14 +108,11 @@ bool CEventGroup::HasScriptCommandOfTaskType(eTaskType taskId)
         }
     }
     return false;
-#endif
 }
 
+// 0x4AB5E0
 bool CEventGroup::HasEventOfType(CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AB5E0, CEventGroup*, CEvent*>(this, event);
-#else
     if (m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             if (event->GetEventType() == m_events[i]->GetEventType())
@@ -132,14 +120,11 @@ bool CEventGroup::HasEventOfType(CEvent* event)
         }
     }
     return false;
-#endif
 }
 
+// 0x4AB7C0
 CEvent* CEventGroup::GetHighestPriorityEvent()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4AB7C0, CEventGroup*>(this);
-#else
     CEvent* theEvent = nullptr;
     if (m_count > 0) {
         int32 highestPriority = -1;
@@ -162,27 +147,21 @@ CEvent* CEventGroup::GetHighestPriorityEvent()
         }
     }
     return theEvent;
-#endif
 }
 
+// 0x4AB6D0
 void CEventGroup::TickEvents()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AB6D0, CEventGroup*>(this);
-#else
     if (m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             m_events[i]->m_nTimeActive++;
         }
     }
-#endif
 }
 
+// 0x4AB6A0
 bool CEventGroup::HasEvent(CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AB6A0, CEventGroup*, CEvent*>(this, event);
-#else
     if (m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             if (event == m_events[i])
@@ -190,14 +169,11 @@ bool CEventGroup::HasEvent(CEvent* event)
         }
     }
     return false;
-#endif
 }
 
+// 0x4AB5A0
 void CEventGroup::Remove(CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AB5A0, CEventGroup*, CEvent*>(this, event);
-#else
     if (event && m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             if (event == m_events[i]) {
@@ -207,14 +183,11 @@ void CEventGroup::Remove(CEvent* event)
             }
         }
     }
-#endif
 }
 
+// 0x4AB760
 void CEventGroup::RemoveInvalidEvents(bool bRemoveNonScriptCommandEvents)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AB760, CEventGroup*, bool>(this, bRemoveNonScriptCommandEvents);
-#else
     if (m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
             CEvent* event = m_events[i];
@@ -226,14 +199,11 @@ void CEventGroup::RemoveInvalidEvents(bool bRemoveNonScriptCommandEvents)
             }
         }
     }
-#endif
 }
 
+// 0x4AB700
 void CEventGroup::Reorganise()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AB700, CEventGroup*>(this);
-#else
     CEvent* theEvents[TOTAL_EVENTS_PER_EVENTGROUP];
     int32 eventCount = 0;
     if (m_count > 0) {
@@ -251,14 +221,11 @@ void CEventGroup::Reorganise()
             m_events[i] = theEvents[i];
         }
     }
-#endif
 }
 
+// 0x4AB370
 void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AB370, CEventGroup*, bool>(this, bAvoidFlushingTaskComplexBeInGroup);
-#else
     CEvent* eventScriptcommand = nullptr;
     if (bAvoidFlushingTaskComplexBeInGroup && m_count > 0) {
         for (int32 i = 0; i < m_count; i++) {
@@ -287,7 +254,6 @@ void CEventGroup::Flush(bool bAvoidFlushingTaskComplexBeInGroup)
         m_events[0] = eventScriptcommand;
         m_count = 1;
     }
-#endif
 }
 
 // 0x4AB650

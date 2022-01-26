@@ -227,13 +227,10 @@ void CTrain::AddNearbyPedAsRandomPassenger() {
     ((void(__thiscall*)(CTrain*))0x6F8170)(this);
 }
 
+// 0x6F86A0
 void CTrain::ProcessControl()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6F86A0, CTrain*>(this);
-#else
-    ProcessControl_Reversed();
-#endif
+    CTrain::ProcessControl_Reversed();
 }
 
 void CTrain::ProcessControl_Reversed()

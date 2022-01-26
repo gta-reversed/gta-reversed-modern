@@ -2,7 +2,6 @@
 
 #include "WaterCannon.h"
 #include "FireManager.h"
-#include <ranges>
 
 void CWaterCannon::InjectHooks() {
     RH_ScopedClass(CWaterCannon);

@@ -2296,7 +2296,7 @@ void CPhysical::PositionAttachedEntity()
             }
             else if (m_fDamageIntensity > 0.0f) {
                 if (m_pDamageEntity) {
-                    if (m_pDamageEntity->m_nType  == ENTITY_TYPE_BUILDING)
+                    if (m_pDamageEntity->IsBuilding())
                         bDettachEntity = true;
                 }
             }

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Clouds.h"
+
 // float& CClouds::m_fVolumetricCloudDensity; // unused
 // bool& CClouds::m_bVolumetricCloudHeightSwitch; // unused
 // float& CClouds::m_fVolumetricCloudWindMoveFactor; // unused
@@ -12,6 +14,8 @@ int32& CClouds::IndividualRotation = *reinterpret_cast<int32*>(0xC6AA6C);
 float& CClouds::CloudRotation = *reinterpret_cast<float*>(0xC6AA70);
 
 tVolumetricClouds& CClouds::ms_vc = *reinterpret_cast<tVolumetricClouds*>(0xC6AAB0);
+static inline std::array<uint32, 6>& m_nPrimIndices = *reinterpret_cast<std::array<uint32, 6>*>(0xC6E93C);
+
 tMovingFog& CClouds::ms_mf = *reinterpret_cast<tMovingFog*>(0xC6C158);
 
 CVector& CClouds::PlayerCoords = *reinterpret_cast<CVector*>(0xC6E958); // gVecPlayerCoors
@@ -20,7 +24,8 @@ CVector& CClouds::CameraCoors = *reinterpret_cast<CVector*>(0xC6E964);  // gVecC
 float& CurrentFogIntensity = *reinterpret_cast<float*>(0x8D5798);
 
 RwTexture*& gpMoonMask = *reinterpret_cast<RwTexture**>(0xC6AA74);
-RwTexture* (&gpCloudTex)[2] = *reinterpret_cast<RwTexture* (*)[2]>(0xC6AA78);
+RwTexture*& gpCloudTex = *reinterpret_cast<RwTexture**>(0xC6AA78);
+RwTexture*& gpCloudMaskTex = *reinterpret_cast<RwTexture**>(0xC6AA78 + 0x4);
 
 float& flt_C6E954 = *reinterpret_cast<float*>(0xC6E954); // see CClouds::RenderBottomFromHeight, CClouds::MovingFogRender
 float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::VolumetricCloudsRender
@@ -43,24 +48,23 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
     RH_ScopedInstall(MovingFogRender, 0x716C90, true);
-    //    RH_ScopedInstall(Render, 0x713950);
+    // RH_ScopedInstall(Render, 0x713950);
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
-    //    RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
+    // RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
     RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
-    //    RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
+    // RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
     RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
     RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
     RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
-    //    RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
+    // RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
 }
 
 // 0x7138D0
 void CClouds::Init() {
     CTxdStore::PushCurrentTxd();
-    auto txd = CTxdStore::FindTxdSlot("particle");
-    CTxdStore::SetCurrentTxd(txd);
-    gpCloudTex[0] = RwTextureRead("cloud1", nullptr);
-    gpCloudTex[1] = RwTextureRead("cloudmasked", nullptr);
+    CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("particle"));
+    gpCloudTex = RwTextureRead("cloud1", nullptr);
+    gpCloudMaskTex = RwTextureRead("cloudmasked", nullptr);
     gpMoonMask = RwTextureRead("lunar", "lunarm");
     ms_vc.m_pTex = RwTextureRead("cloudhigh", "cloudhighm");
     CTxdStore::PopCurrentTxd();
@@ -77,14 +81,14 @@ void CClouds::Update() {
 
 // 0x712FA0
 void CClouds::Shutdown() {
-    RwTextureDestroy(gpCloudTex[0]);
-    gpCloudTex[0] = nullptr;
+    RwTextureDestroy(gpCloudTex);
+    gpCloudTex = nullptr;
 
-    RwTextureDestroy(gpCloudTex[1]);
-    gpCloudTex[1] = nullptr;
+    RwTextureDestroy(gpCloudMaskTex);
+    gpCloudMaskTex = nullptr;
 
-    RwTextureDestroy(CClouds::ms_vc.m_pTex);
-    CClouds::ms_vc.m_pTex = nullptr;
+    RwTextureDestroy(ms_vc.m_pTex);
+    ms_vc.m_pTex = nullptr;
 }
 
 // 0x713060
@@ -127,13 +131,8 @@ void CClouds::SetUpOneSkyPoly(CVector vert1pos, CVector vert2pos, CVector vert3p
 // 0x713660
 void CClouds::MovingFogInit() {
     ms_mf = {};
-    ms_mf.m_nPrimIndices[0] = 0;
-    ms_mf.m_nPrimIndices[1] = 1;
-    ms_mf.m_nPrimIndices[2] = 2;
-    ms_mf.m_nPrimIndices[3] = 0;
-    ms_mf.m_nPrimIndices[4] = 2;
-    ms_mf.m_nPrimIndices[5] = 3;
     ms_mf.m_vecWind = CVector(0.06f, 0.06f, 0.0f);
+    m_nPrimIndices = { 0, 1, 2, 0, 2, 3 };
 }
 
 // 0x713760
@@ -142,26 +141,17 @@ void CClouds::MovingFog_Create(CVector* posn) {
     if (slotId == -1)
         return;
 
-    ms_mf.m_vecPosn[slotId].x = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->x;
-    ms_mf.m_vecPosn[slotId].y = rand() * RAND_MAX_FLOAT_RECIPROCAL * 116.0f - 58.0f + posn->y;
-    ms_mf.m_vecPosn[slotId].z = rand() * RAND_MAX_FLOAT_RECIPROCAL * 10.0f - 5.0f + posn->z;
-    ms_mf.m_fSize[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 6.0f + 4.0f;
-    ms_mf.m_fIntensity[slotId] = 1.0f;
-    ms_mf.m_fMaxIntensity[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 12.0f + 8.0f;
-    ms_mf.m_fSpeed[slotId] = rand() * RAND_MAX_FLOAT_RECIPROCAL * 0.7f + 0.5f;
-    ms_mf.m_bFogSlots[slotId] = true;
-    /* todo:
     ms_mf.m_vecPosn[slotId] = CVector{
-        CGeneral::GetRandomNumberInRange(58.0f, 116.0f) + posn->x,
-        CGeneral::GetRandomNumberInRange(58.0f, 116.0f) + posn->y,
-        CGeneral::GetRandomNumberInRange(5.0f,  10.0f)  + posn->z
+        CGeneral::GetRandomNumberInRange(-58.0f, 58.0f),
+        CGeneral::GetRandomNumberInRange(-58.0f, 58.0f),
+        CGeneral::GetRandomNumberInRange(-5.0f,  5.0f)
     };
-    ms_mf.m_fSize[slotId] = CGeneral::GetRandomNumberInRange(4.0f, 6.0f);
+    ms_mf.m_vecPosn[slotId] += posn;
+    ms_mf.m_fSize[slotId] = CGeneral::GetRandomNumberInRange(4.0f, 10.0f);
     ms_mf.m_fIntensity[slotId] = 1.0f;
-    ms_mf.m_fMaxIntensity[slotId] = CGeneral::GetRandomNumberInRange(8.0f, 12.0f);
-    ms_mf.m_fSpeed[slotId] = CGeneral::GetRandomNumberInRange(0.5f, 0.7f);
+    ms_mf.m_fMaxIntensity[slotId] = CGeneral::GetRandomNumberInRange(8.0f, 20.0f);
+    ms_mf.m_fSpeed[slotId] = CGeneral::GetRandomNumberInRange(0.5f, 1.2f);
     ms_mf.m_bFogSlots[slotId] = true;
-    */
 }
 
 // 0x713730
@@ -212,7 +202,6 @@ CVector CClouds::MovingFog_GetWind() {
     return ms_mf.m_vecWind;
 }
 
-// unused
 // 0x713710
 int32 CClouds::MovingFog_GetFirstFreeSlot() {
     int32 result = 0;
@@ -248,7 +237,7 @@ void CClouds::MovingFogRender() {
     CPostEffects::ImmediateModeRenderStatesSet();
 
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(gpCloudTex[1]->raster));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(gpCloudMaskTex->raster));
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
 
     int32 red   = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255);
@@ -261,39 +250,38 @@ void CClouds::MovingFogRender() {
             continue;
 
         float halfSize = ms_mf.m_fSize[i] * 0.5f;
-        CVector up1 = up * halfSize, right1 = right * halfSize;
+        CVector up1    = up * halfSize;
+        CVector right1 = right * halfSize;
 
-        int32 alpha = static_cast<int32>(MovingFog_GetFXIntensity() * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
-        for (auto ind = 0u; ind < std::size(ms_mf.m_nPrimIndices); ind++) {
+        auto alpha = static_cast<int32>(MovingFog_GetFXIntensity() * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
+
+        for (const auto& ind : m_nPrimIndices) {
             float u = 0.f, v = 0.f;
             CVector pos = ms_mf.m_vecPosn[i];
 
-            switch (ms_mf.m_nPrimIndices[ind]) {
+            switch (ind) {
             case 0:
                 u = 0.f;
                 v = 0.f;
-                pos += right1 + up1;
+                pos = right1 + up1 + pos;
                 break;
 
             case 1:
                 u = 1.f;
                 v = 0.f;
-                pos += right1 - up1;
+                pos = right1 + pos - up1;
                 break;
 
             case 2:
                 u = 1.f;
                 v = 1.f;
-                pos -= right1 - up1;
+                pos = pos - right1 - up1;
                 break;
 
             case 3:
                 u = 0.f;
                 v = 1.f;
-                pos -= right1 + up1;
-                break;
-
-            default:
+                pos =  pos - right1 + up1;
                 break;
             }
 
@@ -301,7 +289,7 @@ void CClouds::MovingFogRender() {
             RwIm3DVertexSetRGBA(&aTempBufferVertices[numVerts], red, green, blue, alpha);
             RwIm3DVertexSetU(&aTempBufferVertices[numVerts], u);
             RwIm3DVertexSetV(&aTempBufferVertices[numVerts], v);
-            numVerts++;
+            ++numVerts;
 
             if (numVerts == TOTAL_TEMP_BUFFER_VERTICES - 2) {
                 if (RwIm3DTransform(aTempBufferVertices, numVerts, 0, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
@@ -467,7 +455,7 @@ void CClouds::RenderSkyPolys() {
     aVertices[2].z = aPosZ[5];
     aVertices[3].z = aPosZ[5];
 
-    CClouds::SetUpOneSkyPoly(
+    SetUpOneSkyPoly(
         aVertices[0], aVertices[1], aVertices[2], aVertices[3],
         belowHorizonGrey.red,
         belowHorizonGrey.green,

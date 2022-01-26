@@ -74,13 +74,10 @@ CEventLeaderEnteredCarAsDriver* CEventLeaderEnteredCarAsDriver::Constructor(CVeh
     return this;
 }
 
+// 0x4B0EF0
 bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0EF0, CEventLeaderEnteredCarAsDriver*, CPedGroup*>(this, pedGroup);
-#else
     return CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
@@ -88,13 +85,14 @@ bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGrou
     if (m_vehicle && pedGroup->m_bMembersEnterLeadersVehicle) {
         for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
             CPed* member = pedGroup->GetMembership().GetMember(i);
-            if (member) {
-                if (!member->bInVehicle
-                    || member->m_pVehicle != m_vehicle
-                    || member->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
-                {
-                    return true;
-                }
+            if (!member)
+                continue;
+
+            if (!member->bInVehicle
+                || member->m_pVehicle != m_vehicle
+                || member->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
+            {
+                return true;
             }
         }
     }
@@ -107,13 +105,10 @@ CEventLeaderExitedCarAsDriver* CEventLeaderExitedCarAsDriver::Constructor()
     return this;
 }
 
+// 0x4B0F80
 bool CEventLeaderExitedCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0F80, CEventLeaderExitedCarAsDriver*, CPedGroup*>(this, pedGroup);
-#else
     return CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
@@ -121,14 +116,16 @@ bool CEventLeaderExitedCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup
     for (int32 i = 0; i < TOTAL_PED_GROUP_FOLLOWERS; i++) {
         CPedGroupMembership& memberShip = pedGroup->GetMembership();
         CPed* member = memberShip.GetMember(i);
-        if (member) {
-            if (member->m_pVehicle && member->bInVehicle && member->m_pVehicle == memberShip.GetLeader()->m_pVehicle)
-                return true;
-            if (member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)
-                || member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT))
-            {
-                return true;
-            }
+        if (!member)
+            continue;
+
+        if (member->m_pVehicle && member->bInVehicle && member->m_pVehicle == memberShip.GetLeader()->m_pVehicle)
+            return true;
+
+        if (member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)
+            || member->GetIntelligence()->FindTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER_WAIT))
+        {
+            return true;
         }
     }
     return false;
@@ -140,13 +137,10 @@ CEventLeaderQuitEnteringCarAsDriver* CEventLeaderQuitEnteringCarAsDriver::Constr
     return this;
 }
 
+// 0x4B1010
 bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1010, CEventLeaderQuitEnteringCarAsDriver*, CPedGroup*>(this, pedGroup);
-#else
     return CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
@@ -176,51 +170,47 @@ CEventAreaCodes* CEventAreaCodes::Constructor(CPed* ped)
     return this;
 }
 
+// 0x4B2270
 bool CEventAreaCodes::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2270, CEventAreaCodes*, CPed*>(this, ped);
-#else
     return CEventAreaCodes::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B2350
 bool CEventAreaCodes::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2350, CEventAreaCodes*, CEvent*>(this, refEvent);
-#else
     return CEventAreaCodes::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
 bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
 {
-    if (m_ped) {
-        CPed* targetPed = nullptr;
-        auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-        if (killPedOnFootTask) {
-            targetPed = killPedOnFootTask->m_target;
-            if (targetPed != m_ped) {
-                auto arrestPedTask = reinterpret_cast<CTaskComplexArrestPed*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ARREST_PED));
-                if (arrestPedTask)
-                    targetPed = arrestPedTask->m_pedToArrest;
-            }
+    if (!m_ped)
+        return false;
+
+    CPed* targetPed = nullptr;
+    auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
+    if (killPedOnFootTask) {
+        targetPed = killPedOnFootTask->m_target;
+        if (targetPed != m_ped) {
+            auto arrestPedTask = reinterpret_cast<CTaskComplexArrestPed*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ARREST_PED));
+            if (arrestPedTask)
+                targetPed = arrestPedTask->m_pedToArrest;
         }
-        if (targetPed == m_ped) {
-            if (m_ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_GOTO_DOOR_AND_OPEN))
-                return true;
-            if (ped->m_pContactEntity && m_ped->m_pContactEntity) {
-                if (ped->m_pContactEntity->m_nAreaCode == m_ped->m_pContactEntity->m_nAreaCode)
-                    return false;
-            }
-            if (m_ped->IsAlive()
-                && ped->IsAlive()
-                && (!ped->m_pContactEntity || ped->m_pContactEntity->m_nAreaCode != AREA_CODE_13)
-                && (!m_ped->m_pContactEntity || m_ped->m_pContactEntity->m_nAreaCode != AREA_CODE_13))
-            {
-                return true;
-            }
+    }
+
+    if (targetPed == m_ped) {
+        if (m_ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_GOTO_DOOR_AND_OPEN))
+            return true;
+        if (ped->m_pContactEntity && m_ped->m_pContactEntity) {
+            if (ped->m_pContactEntity->m_nAreaCode == m_ped->m_pContactEntity->m_nAreaCode)
+                return false;
+        }
+        if (m_ped->IsAlive()
+            && ped->IsAlive()
+            && (!ped->m_pContactEntity || ped->m_pContactEntity->m_nAreaCode != AREA_CODE_13)
+            && (!m_ped->m_pContactEntity || m_ped->m_pContactEntity->m_nAreaCode != AREA_CODE_13))
+        {
+            return true;
         }
     }
     return false;

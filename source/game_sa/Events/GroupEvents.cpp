@@ -62,13 +62,10 @@ CEventPlayerCommandToGroup* CEventPlayerCommandToGroup::Constructor(ePlayerGroup
     return this;
 }
 
+// 0x4B24D0
 bool CEventPlayerCommandToGroup::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B24D0, CEventPlayerCommandToGroup*, CPedGroup*>(this, pedGroup);
-#else
     return CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
@@ -90,13 +87,10 @@ CEventPlayerCommandToGroupAttack* CEventPlayerCommandToGroupAttack::Constructor(
     return this;
 }
 
+// 0x4B2530
 bool CEventPlayerCommandToGroupAttack::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2530, CEventPlayerCommandToGroupAttack*, CPedGroup*>(this, pedGroup);
-#else
     return CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
