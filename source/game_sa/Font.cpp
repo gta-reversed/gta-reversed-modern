@@ -640,16 +640,13 @@ void CFont::RenderFontBuffer()
 float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 {
     size_t len = CMessages::GetStringLength(string);
-
     char data[400] = {0};
 
     strncpy(data, string, len);
-
     CMessages::InsertPlayerControlKeysInString(data);
 
     float width = 0.0f;
-    bool bLastWasTag = false, bLastWasLetter = false;
-
+    bool lastWasTag = false, lastWasLetter = false;
     char* pStr = data;
 
     while (true) {
@@ -659,7 +656,7 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             break;
 
         if (*pStr == '~') {
-            if (!full && (bLastWasTag || bLastWasLetter))
+            if (!full && (lastWasTag || lastWasLetter))
                 return width;
 
             char* next = pStr + 1;
@@ -670,11 +667,11 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 
             pStr = next + 1;
 
-            if (bLastWasLetter || *pStr == '~')
-                bLastWasTag = true;
+            if (lastWasLetter || *pStr == '~')
+                lastWasTag = true;
         }
         else {
-            if (!full && *pStr == ' ' && bLastWasTag)
+            if (!full && *pStr == ' ' && lastWasTag)
                 return width;
 
             char upper = *pStr - 0x20;
@@ -686,6 +683,8 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             else {
                 width += GetCharacterSize(upper);
             }
+
+            lastWasLetter = true;
         }
     }
 
