@@ -12,14 +12,14 @@ void CEventKnockOffBike::InjectHooks()
     RH_ScopedCategory("Events");
 
     using namespace ReversibleHooks;
-    Install("CEventKnockOffBike", "CEventKnockOffBike", 0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
-    Install("CEventKnockOffBike", "CEventKnockOffBike_1", 0x4AFC70, (CEventKnockOffBike * (CEventKnockOffBike::*)()) & CEventKnockOffBike::Constructor);
-    Install("CEventKnockOffBike", "AffectsPed", 0x4AFEE0, &CEventKnockOffBike::AffectsPed_Reversed);
-    Install("CEventKnockOffBike", "ReportCriminalEvent", 0x4B4E80, &CEventKnockOffBike::ReportCriminalEvent_Reversed);
-    Install("CEventKnockOffBike", "From", 0x4AFDD0, &CEventKnockOffBike::From);
-    Install("CEventKnockOffBike", "SetPedOutCar", 0x4AFF60, &CEventKnockOffBike::SetPedOutCar);
-    Install("CEventKnockOffBike", "CalcForcesAndAnims", 0x4B0020, &CEventKnockOffBike::CalcForcesAndAnims);
-    Install("CEventKnockOffBike", "SetPedSafePosition", 0x4B4AC0, &CEventKnockOffBike::SetPedSafePosition);
+    RH_ScopedOverloadedInstall(Constructor, "first", 0x4AFCF0, CEventKnockOffBike*(CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool));
+    RH_ScopedOverloadedInstall(Constructor, "second", 0x4AFC70, CEventKnockOffBike*(CEventKnockOffBike::*)());
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFEE0);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B4E80);
+    RH_ScopedInstall(From, 0x4AFDD0);
+    RH_ScopedInstall(SetPedOutCar, 0x4AFF60);
+    RH_ScopedInstall(CalcForcesAndAnims, 0x4B0020);
+    RH_ScopedInstall(SetPedSafePosition, 0x4B4AC0);
 }
 
 CEventKnockOffBike::CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOffDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff)
