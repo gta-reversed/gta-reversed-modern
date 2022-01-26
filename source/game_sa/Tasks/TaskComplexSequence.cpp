@@ -2,6 +2,9 @@
 
 void CTaskComplexSequence::InjectHooks()
 {
+    RH_ScopedClass(CTaskComplexSequence);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(Constructor, 0x632BD0);
     RH_ScopedInstall(Clone_Reversed, 0x5F6710);
     RH_ScopedInstall(GetId_Reversed, 0x632C60);

@@ -7,6 +7,9 @@
 #include "StdInc.h"
 
 void CTaskTimer::InjectHooks() {
+    RH_ScopedClass(CTaskTimer);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(IsOutOfTime, 0x420E30);
 }
 

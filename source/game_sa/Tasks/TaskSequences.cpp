@@ -5,6 +5,9 @@ CTaskComplexSequence (&CTaskSequences::ms_taskSequence)[NUM_SEQUENCES] = *(CTask
 bool (&CTaskSequences::ms_bIsOpened)[NUM_SEQUENCES] = *(bool(*)[64])0xC17898;
 
 void CTaskSequences::InjectHooks() {
+    RH_ScopedClass(CTaskSequences);
+    RH_ScopedCategory("Tasks");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x632D90);
     RH_ScopedInstall(CleanUpForShutdown, 0x632DD0);

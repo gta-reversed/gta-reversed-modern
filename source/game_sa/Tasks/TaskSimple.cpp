@@ -10,6 +10,9 @@
 #include "TaskSimple.h"
 
 void CTaskSimple::InjectHooks() {
+    RH_ScopedClass(CTaskSimple);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(GetSubTask_Reversed, 0x43E300);
     RH_ScopedInstall(IsSimple_Reversed, 0x43E310);
     RH_ScopedInstall(SetPedPosition_Reversed, 0x43E320);

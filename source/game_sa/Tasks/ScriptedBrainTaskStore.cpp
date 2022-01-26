@@ -4,11 +4,17 @@ CScriptedBrainTaskEntry(&CScriptedBrainTaskStore::ms_entries)[TOTAL_SCRIPTED_BRA
 
 void CScriptedBrainTaskEntry::InjectHooks()
 {
+    RH_ScopedClass(CScriptedBrainTaskEntry);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(Constructor, 0x62EC40);
 }
 
 void CScriptedBrainTaskStore::InjectHooks()
 {
+    RH_ScopedClass(CScriptedBrainTaskStore);
+    RH_ScopedCategory("Tasks");
+
     CScriptedBrainTaskEntry::InjectHooks();
     RH_ScopedInstall(SetTask, 0x635720);
     RH_ScopedInstall(GetTask, 0x6357C0);

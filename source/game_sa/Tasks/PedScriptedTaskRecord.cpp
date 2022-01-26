@@ -4,6 +4,9 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
+    RH_ScopedClass(CPedScriptedTaskRecordData);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(Constructor, 0x608330);
     RH_ScopedInstall(AssociateWithTask, 0x608520);
     RH_ScopedInstall(AssociateWithEvent, 0x608500);
@@ -16,6 +19,9 @@ void CPedScriptedTaskRecordData::InjectHooks()
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
+    RH_ScopedClass(CPedScriptedTaskRecord);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(GetRecordAssociatedWithEvent, 0x608580);
     RH_ScopedOverloadedInstall(GetStatus, "", 0x608750, eScriptedTaskStatus(*)(CPed*));
     RH_ScopedOverloadedInstall(GetStatus, "opcode", 0x608710, eScriptedTaskStatus(*)(CPed*, int32));

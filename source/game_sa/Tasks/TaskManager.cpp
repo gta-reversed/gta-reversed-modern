@@ -10,6 +10,9 @@
 #include "TaskManager.h"
 
 void CTaskManager::InjectHooks() {
+    RH_ScopedClass(CTaskManager);
+    RH_ScopedCategory("Tasks");
+
     RH_ScopedInstall(Constructor, 0x6816A0);
     Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
     RH_ScopedInstall(GetActiveTask, 0x681720);
