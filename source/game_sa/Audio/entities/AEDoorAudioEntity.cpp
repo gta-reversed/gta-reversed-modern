@@ -173,6 +173,9 @@ void CAEDoorAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 }
 
 void CAEDoorAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEDoorAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     RH_ScopedInstall(StaticInitialise, 0x5B9A80);
     RH_ScopedInstall(Reset, 0x4DC6B0);
     RH_ScopedOverloadedInstall(AddAudioEvent, "1", 0x4DC9F0, void (CAEDoorAudioEntity::*)(eAudioEvents, CPhysical*));

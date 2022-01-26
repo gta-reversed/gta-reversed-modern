@@ -3,6 +3,9 @@
 #include "PedAttractor.h"
 
 void CPedAttractor::InjectHooks() {
+    RH_ScopedClass(CPedAttractor);
+    RH_ScopedCategory("Attractors");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5EDFB0);
     // Install("CPedAttractor", "~CPedAttractor", 0x5EC410, &CPedAttractor::Destructor);

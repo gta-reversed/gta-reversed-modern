@@ -8,6 +8,9 @@
 CAESoundManager& AESoundManager = *(CAESoundManager*)0xB62CB0;
 
 void CAESoundManager::InjectHooks() {
+    RH_ScopedClass(CAESoundManager);
+    RH_ScopedCategory("Audio/Managers");
+
     RH_ScopedInstall(Service, 0x4F0000);
     RH_ScopedInstall(Initialise, 0x5B9690);
     RH_ScopedInstall(Terminate, 0x4EFAA0);

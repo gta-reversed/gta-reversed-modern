@@ -64,6 +64,9 @@ void CAEWaterCannonAudioEntity::Service() {
 }
 
 void CAEWaterCannonAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEWaterCannonAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     RH_ScopedInstall(Constructor, 0x728A90);
     // RH_ScopedInstall(Initialise, 0x503060);
     // Install("CAEWaterCannonAudioEntity", "Terminate", 0x, &CAEWaterCannonAudioEntity::Terminate);

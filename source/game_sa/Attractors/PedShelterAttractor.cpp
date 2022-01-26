@@ -28,6 +28,9 @@ void CPedShelterAttractor::BroadcastDeparture(CPed* ped) {
 }
 
 void CPedShelterAttractor::InjectHooks() {
+    RH_ScopedClass(CPedShelterAttractor);
+    RH_ScopedCategory("Attractors");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(GetDisplacement, 0x5EF420);
     RH_ScopedInstall(ComputeAttractPos_Reversed, 0x5EFC40);

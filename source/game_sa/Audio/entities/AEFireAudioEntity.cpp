@@ -171,6 +171,9 @@ void CAEFireAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 }
 
 void CAEFireAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEFireAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x4DCF20);
     RH_ScopedInstall(StaticInitialise, 0x5B9A90);

@@ -284,6 +284,9 @@ HRESULT CAEWMADecoder::SelectStreamIndex(IWMProfile* profile) {
 }
 
 void CAEWMADecoder::InjectHooks() {
+    RH_ScopedClass(CAEWMADecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Constructor, 0x502720);
     Install("CAEWMADecoder", "~CAEWMADecoder", 0x502760, &CAEWMADecoder::Destructor);
     RH_ScopedInstall(Initialise, 0x502c60);

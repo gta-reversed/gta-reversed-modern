@@ -14,6 +14,9 @@ Do not delete this comment block. Respect others' work!
 #include "AEAudioUtility.h"
 
 void CAESound::InjectHooks() {
+    RH_ScopedClass(CAESound);
+    RH_ScopedCategory("Audio");
+
     Install("CAESound", "operator=", 0x4EF680, &CAESound::operator=);
     RH_ScopedInstall(UnregisterWithPhysicalEntity, 0x4EF1A0);
     RH_ScopedInstall(StopSound, 0x4EF1C0);

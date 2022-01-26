@@ -7,6 +7,9 @@
 CAESmoothFadeThread& AESmoothFadeThread = *(CAESmoothFadeThread*)0xB608D0;
 
 void CAESmoothFadeThread::InjectHooks() {
+    RH_ScopedClass(CAESmoothFadeThread);
+    RH_ScopedCategory("Audio");
+
     RH_ScopedInstall(Start, 0x4EEA10);
     RH_ScopedInstall(Stop, 0x4EEA30);
     RH_ScopedInstall(WaitForExit, 0x4EEA40);

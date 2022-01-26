@@ -8,6 +8,9 @@
 uint32& g_numSoundChannelsUsed = *(uint32*)0xB5F898;
 
 void CAEAudioChannel::InjectHooks() {
+    RH_ScopedClass(CAEAudioChannel);
+    RH_ScopedCategory("Audio/Hardware");
+
     RH_ScopedInstall(SetPosition, 0x4D7950);
     RH_ScopedInstall(UpdateStatus, 0x4D7BD0);
     RH_ScopedInstall(Lost, 0x4D7A10);

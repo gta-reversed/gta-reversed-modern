@@ -14,6 +14,9 @@ tAudioZoneBox (&CAudioZones::m_aBoxes)[NUM_AUDIO_BOXES] = *(tAudioZoneBox(*)[NUM
 tAudioZoneSphere (&CAudioZones::m_aSpheres)[NUM_AUDIO_SPHERES] = *(tAudioZoneSphere(*)[NUM_AUDIO_SPHERES])0xB6EBA8;
 
 void CAudioZones::InjectHooks() {
+    RH_ScopedClass(CAudioZones);
+    RH_ScopedCategory("Audio");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Init, 0x5081A0);
     // RH_ScopedInstall(RegisterAudioSphere, 0x5081C0);

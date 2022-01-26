@@ -21,6 +21,9 @@ void CAEStreamTransformer::TransformBuffer(void* buffer, size_t size, uint32 pos
 }
 
 void CAEStreamTransformer::InjectHooks() {
+    RH_ScopedClass(CAEStreamTransformer);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Initialise, 0x4f1750);
     RH_ScopedInstall(TransformBuffer, 0x4f17d0);
 }

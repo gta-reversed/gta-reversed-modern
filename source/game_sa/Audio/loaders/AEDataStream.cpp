@@ -206,6 +206,9 @@ bool CAEDataStream::Initialise() {
 }
 
 void CAEDataStream::InjectHooks() {
+    RH_ScopedClass(CAEDataStream);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Constructor, 0x4dc620);
     Install("CAEDataStream", "~CAEDataStream", 0x4dc490, &CAEDataStream::Destructor);
     RH_ScopedInstall(Initialise, 0x4dc2b0);

@@ -14,6 +14,9 @@ tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_S
 tVehicleAudioSettings const (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<tVehicleAudioSettings const (*)[232]>(0x860AF0);
 
 void CAEVehicleAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEVehicleAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     // VIRTUAL
     RH_ScopedInstall(UpdateParameters_Reversed, 0x4FB6C0);
 

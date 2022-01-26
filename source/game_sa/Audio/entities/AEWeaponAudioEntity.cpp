@@ -254,6 +254,9 @@ void CAEWeaponAudioEntity::UpdateParameters(CAESound *sound, int16 curPlayPos) {
 }
 
 void CAEWeaponAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEWeaponAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5DE990);
     // Install("CAEWeaponAudioEntity", "~CAEWeaponAudioEntity", 0x507560, &CAEWeaponAudioEntity::Destructor);

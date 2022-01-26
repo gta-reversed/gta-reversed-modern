@@ -8,6 +8,9 @@ int64& CAEAudioUtility::startTimeMs = *reinterpret_cast<int64*>(0xb610f8);
 float (&CAEAudioUtility::m_sfLogLookup)[50][2] = *reinterpret_cast<float (*)[50][2]>(0xb61100);
 
 void CAEAudioUtility::InjectHooks() {
+    RH_ScopedClass(CAEAudioUtility);
+    RH_ScopedCategory("Audio");
+
     RH_ScopedOverloadedInstall(GetRandomNumberInRange, "int", 0x4d9c10, int32(*)(const int32, const int32));
     RH_ScopedOverloadedInstall(GetRandomNumberInRange, "float", 0x4d9c50, float(*)(float, float));
     RH_ScopedInstall(ResolveProbability, 0x4d9c80);

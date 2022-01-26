@@ -417,6 +417,9 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
 }
 
 void CAEUserRadioTrackManager::InjectHooks() {
+    RH_ScopedClass(CAEUserRadioTrackManager);
+    RH_ScopedCategory("Audio/Managers");
+
     RH_ScopedInstall(Initialise, 0x4f35b0);
     RH_ScopedInstall(Shutdown, 0x4f2fb0);
     RH_ScopedInstall(ReadUserTracks, 0x4f2fd0);

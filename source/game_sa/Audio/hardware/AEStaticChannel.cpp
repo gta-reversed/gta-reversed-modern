@@ -5,6 +5,9 @@
 #include "AESmoothFadeThread.h"
 
 void CAEStaticChannel::InjectHooks() {
+    RH_ScopedClass(CAEStaticChannel);
+    RH_ScopedCategory("Audio/Hardware");
+
     RH_ScopedInstall(IsSoundPlaying_Reversed, 0x4F0F40);
     RH_ScopedInstall(GetPlayTime_Reversed, 0x4F0F70);
     RH_ScopedInstall(GetLength_Reversed, 0x4F0FA0);

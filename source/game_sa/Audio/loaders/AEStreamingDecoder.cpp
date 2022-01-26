@@ -24,6 +24,9 @@ CAEStreamingDecoder::~CAEStreamingDecoder() {
 }
 
 void CAEStreamingDecoder::InjectHooks() {
+    RH_ScopedClass(CAEStreamingDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Constructor, 0x4f2810);
     Install("CAEStreamingDecoder", "~CAEStreamingDecoder", 0x4f2830, &CAEStreamingDecoder::Destructor);
 }

@@ -118,6 +118,9 @@ void CAEStreamingChannel::Service() {
 }
 
 void CAEStreamingChannel::InjectHooks() {
+    RH_ScopedClass(CAEStreamingChannel);
+    RH_ScopedCategory("Audio/Hardware");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4F1800);
     // Install("CAEStreamingChannel", "~CAEStreamingChannel", 0x4F2200, static_cast<CAEStreamingChannel*(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Destructor));

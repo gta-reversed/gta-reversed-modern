@@ -5,6 +5,9 @@
 CAEAudioHardware& AEAudioHardware = *reinterpret_cast<CAEAudioHardware*>(0xB5F8B8);
 
 void CAEAudioHardware::InjectHooks() {
+    RH_ScopedClass(CAEAudioHardware);
+    RH_ScopedCategory("Audio/Hardware");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4D83E0);
     // Install("CAEAudioHardware", "~CAEAudioHardware", 0x4D83A0, &CAEAudioHardware::Destructor);

@@ -74,6 +74,9 @@ bool CAEPedlessSpeechAudioEntity::IsPedFemaleForAudio() {
 }
 
 void CAEPedlessSpeechAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEPedlessSpeechAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4E6070);
     RH_ScopedInstall(GetPedType, 0x4E60B0);

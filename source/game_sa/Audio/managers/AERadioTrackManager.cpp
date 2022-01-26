@@ -45,6 +45,9 @@ uint8& CAERadioTrackManager::m_nSpecialDJBanterIndex = *(uint8*)0xB62C72;
 uint8& CAERadioTrackManager::m_nSpecialDJBanterPending = *(uint8*)0xB62C73;
 
 void CAERadioTrackManager::InjectHooks() {
+    RH_ScopedClass(CAERadioTrackManager);
+    RH_ScopedCategory("Audio/Managers");
+
     using namespace ReversibleHooks;
     // RH_ScopedInstall(Load, 0x5D40E0);
     // RH_ScopedInstall(Save, 0x5D3EE0);

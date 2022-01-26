@@ -134,6 +134,9 @@ void CAEWaveDecoder::Destructor() {
 }
 
 void CAEWaveDecoder::InjectHooks() {
+    RH_ScopedClass(CAEWaveDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
 #ifndef USE_DEFAULT_FUNCTIONS
     RH_ScopedInstall(Constructor, 0x503250);
     Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);

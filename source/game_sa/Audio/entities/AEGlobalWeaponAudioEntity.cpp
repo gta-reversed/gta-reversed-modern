@@ -113,6 +113,9 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
 }
 
 void CAEGlobalWeaponAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEGlobalWeaponAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x5075B0);
     RH_ScopedInstall(UpdateParameters, 0x4DEF90);

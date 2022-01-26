@@ -5,6 +5,9 @@ sReverbEnvironment (&gAudioZoneToReverbEnvironmentMap)[NUM_AUDIO_ENVIRONMENTS] =
 float (&gSoundDistAttenuationTable)[NUM_SOUND_DIST_ATTENUATION_ENTRIES] = *(float(*)[NUM_SOUND_DIST_ATTENUATION_ENTRIES])0x8AC270;
 
 void CAEAudioEnvironment::InjectHooks() {
+    RH_ScopedClass(CAEAudioEnvironment);
+    RH_ScopedCategory("Audio");
+
     RH_ScopedInstall(GetDopplerRelativeFrequency, 0x4D7E40);
     RH_ScopedInstall(GetDistanceAttenuation, 0x4D7F20);
     RH_ScopedInstall(GetDirectionalMikeAttenuation, 0x4D7F60);

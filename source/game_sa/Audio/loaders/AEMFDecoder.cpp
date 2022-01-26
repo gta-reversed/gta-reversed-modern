@@ -366,6 +366,9 @@ void CAEMFDecoder::Shutdown() {
 }
 
 void CAEMFDecoder::InjectHooks() {
+    RH_ScopedClass(CAEMFDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Constructor, 0x4e7770);
     Install("CAEMFDecoder", "~CAEMFDecoder", 0x4e77c0, &CAEMFDecoder::Destructor);
     RH_ScopedInstall(InitLibrary, 0x4e7c70);

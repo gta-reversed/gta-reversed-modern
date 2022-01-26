@@ -160,6 +160,9 @@ long CAEVorbisDecoder::TellCallback(void* opaque) {
 }
 
 void CAEVorbisDecoder::InjectHooks() {
+    RH_ScopedClass(CAEVorbisDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
     RH_ScopedInstall(Constructor, 0x5026b0);
     Install("CAEVorbisDecoder", "~CAEVorbisDecoder", 0x5023f0, &CAEVorbisDecoder::Destructor);
     RH_ScopedInstall(Initialise, 0x5024d0);
