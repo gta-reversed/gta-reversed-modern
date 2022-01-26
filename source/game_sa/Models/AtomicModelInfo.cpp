@@ -21,14 +21,14 @@ void CAtomicModelInfo::InjectHooks()
     RH_ScopedInstall(Init_Reversed, 0x4C4430);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4440);
     RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5580);
-    Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
     RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
     RH_ScopedInstall(SetAtomic_Reversed, 0x4C4360);
 
 // OTHER
     RH_ScopedInstall(GetAtomicFromDistance, 0x4C44B0);
     RH_ScopedInstall(SetupVehicleUpgradeFlags, 0x4C4570);
-    RH_ScopedInstall(SetAtomicModelInfoFlags, 0x5B3B20);
+    RH_ScopedGlobalInstall(SetAtomicModelInfoFlags, 0x5B3B20);
 }
 
 CAtomicModelInfo* CAtomicModelInfo::AsAtomicModelInfoPtr()

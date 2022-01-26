@@ -26,7 +26,9 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks() {
-        using namespace ReversibleHooks;
+        RH_ScopedClass(CTaskComplexUseGoggles);
+        RH_ScopedCategory("Tasks/TaskTypes");
+
         RH_ScopedInstall(Clone_Reversed, 0x637060);
         RH_ScopedInstall(GetTaskType_Reversed, 0x634F10);
         RH_ScopedInstall(CreateNextSubTask_Reversed, 0x634F40);

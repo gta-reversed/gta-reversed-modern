@@ -19,16 +19,16 @@ void C2dEffect::InjectHooks()
     RH_ScopedInstall(DestroyAtomic, 0x4C54E0);
 
 // RW PLUGIN
-    RH_ScopedInstall(RpGeometryGet2dFxCount, 0x4C4340);
-    RH_ScopedInstall(RpGeometryGet2dFxAtIndex, 0x4C4A40);
+    RH_ScopedGlobalInstall(RpGeometryGet2dFxCount, 0x4C4340);
+    RH_ScopedGlobalInstall(RpGeometryGet2dFxAtIndex, 0x4C4A40);
 
-    RH_ScopedInstall(t2dEffectPluginConstructor, 0x6F9F90);
-    RH_ScopedInstall(t2dEffectPluginDestructor, 0x6FA880);
-    RH_ScopedInstall(t2dEffectPluginCopyConstructor, 0x6F9FB0);
+    RH_ScopedGlobalInstall(t2dEffectPluginConstructor, 0x6F9F90);
+    RH_ScopedGlobalInstall(t2dEffectPluginDestructor, 0x6FA880);
+    RH_ScopedGlobalInstall(t2dEffectPluginCopyConstructor, 0x6F9FB0);
 
-    //RH_ScopedInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0);
-    RH_ScopedInstall(Rwt2dEffectPluginDataChunkWriteCallBack, 0x6FA620);
-    RH_ScopedInstall(Rwt2dEffectPluginDataChunkGetSizeCallBack, 0x6FA630);
+    //RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0);
+    RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkWriteCallBack, 0x6FA620);
+    RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkGetSizeCallBack, 0x6FA630);
 }
 
 void C2dEffect::Shutdown()

@@ -88,7 +88,7 @@ void CFont::InjectHooks() {
     RH_ScopedInstall(LoadFontValues, 0x7187C0);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
     // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    RH_ScopedInstall(GetLetterIdPropValue, 0x718770);
+    RH_ScopedGlobalInstall(GetLetterIdPropValue, 0x718770);
 }
 
 // 0x7187C0

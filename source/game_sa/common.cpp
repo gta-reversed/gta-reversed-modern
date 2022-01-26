@@ -52,84 +52,87 @@ float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
 
 void InjectCommonHooks()
 {
+    RH_ScopedNamespaceName("Common");
+    RH_ScopedCategory("Common");
+
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
-    RH_ScopedInstall(FindPlayerCoors, 0x56E010);
-    RH_ScopedInstall(FindPlayerSpeed, 0x56E090);
-    RH_ScopedInstall(FindPlayerEntity, 0x56E120);
-    RH_ScopedInstall(FindPlayerTrain, 0x56E160);
-    RH_ScopedInstall(FindPlayerCentreOfWorld, 0x56E250);
-//    RH_ScopedInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
-//    RH_ScopedInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
-    RH_ScopedInstall(FindPlayerHeading, 0x56E450);
-    RH_ScopedInstall(FindPlayerPed, 0x56E210);
-    RH_ScopedInstall(FindPlayerVehicle, 0x56E0D0);
-    RH_ScopedInstall(FindPlayerWanted, 0x56E230);
+    RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
+    RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
+    RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
+    RH_ScopedGlobalInstall(FindPlayerTrain, 0x56E160);
+    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld, 0x56E250);
+//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
+//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
+    RH_ScopedGlobalInstall(FindPlayerHeading, 0x56E450);
+    RH_ScopedGlobalInstall(FindPlayerPed, 0x56E210);
+    RH_ScopedGlobalInstall(FindPlayerVehicle, 0x56E0D0);
+    RH_ScopedGlobalInstall(FindPlayerWanted, 0x56E230);
 
-    RH_ScopedInstall(MakeUpperCase, 0x7186E0);
-    RH_ScopedInstall(GetEventGlobalGroup, 0x4ABA50);
-    RH_ScopedInstall(DefinedState, 0x734650);
-    RH_ScopedInstall(DefinedState2d, 0x734750);
+    RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
+    RH_ScopedGlobalInstall(GetEventGlobalGroup, 0x4ABA50);
+    RH_ScopedGlobalInstall(DefinedState, 0x734650);
+    RH_ScopedGlobalInstall(DefinedState2d, 0x734750);
 
-    RH_ScopedInstall(GetNameAndDamage, 0x5370A0);
-    RH_ScopedInstall(GetFirstAtomicCallback, 0x734810);
-    RH_ScopedInstall(GetFirstAtomic, 0x734820);
-//    RH_ScopedInstall(Get2DEffectAtomicCallback, 0x734850);
-    RH_ScopedInstall(Get2DEffectAtomic, 0x734880);
-    RH_ScopedInstall(GetFirstObjectCallback, 0x7348B0);
-    RH_ScopedInstall(GetFirstObject, 0x7348C0);
-    RH_ScopedInstall(GetFirstFrameCallback, 0x7348F0);
-    RH_ScopedInstall(GetFirstChild, 0x734900);
-//    RH_ScopedInstall(GetFirstTextureCallback, 0x734930);
-//    RH_ScopedInstall(GetFirstTexture, 0x734940);
-    RH_ScopedInstall(SkinAtomicGetHAnimHierarchCB, 0x734A20);
-    RH_ScopedInstall(GetAnimHierarchyFromSkinClump, 0x734A40);
-//    RH_ScopedInstall(GetAnimHierarchyFromFrame, 0x734AB0);
-    RH_ScopedInstall(GetAnimHierarchyFromClump, 0x734B10);
-    RH_ScopedInstall(AtomicRemoveAnimFromSkinCB, 0x734B90);
-    RH_ScopedInstall(RpAtomicConvertGeometryToTL, 0x734BE0);
-    RH_ScopedInstall(RpAtomicConvertGeometryToTS, 0x734C20);
+    RH_ScopedGlobalInstall(GetNameAndDamage, 0x5370A0);
+    RH_ScopedGlobalInstall(GetFirstAtomicCallback, 0x734810);
+    RH_ScopedGlobalInstall(GetFirstAtomic, 0x734820);
+//    RH_ScopedGlobalInstall(Get2DEffectAtomicCallback, 0x734850);
+    RH_ScopedGlobalInstall(Get2DEffectAtomic, 0x734880);
+    RH_ScopedGlobalInstall(GetFirstObjectCallback, 0x7348B0);
+    RH_ScopedGlobalInstall(GetFirstObject, 0x7348C0);
+    RH_ScopedGlobalInstall(GetFirstFrameCallback, 0x7348F0);
+    RH_ScopedGlobalInstall(GetFirstChild, 0x734900);
+//    RH_ScopedGlobalInstall(GetFirstTextureCallback, 0x734930);
+//    RH_ScopedGlobalInstall(GetFirstTexture, 0x734940);
+    RH_ScopedGlobalInstall(SkinAtomicGetHAnimHierarchCB, 0x734A20);
+    RH_ScopedGlobalInstall(GetAnimHierarchyFromSkinClump, 0x734A40);
+//    RH_ScopedGlobalInstall(GetAnimHierarchyFromFrame, 0x734AB0);
+    RH_ScopedGlobalInstall(GetAnimHierarchyFromClump, 0x734B10);
+    RH_ScopedGlobalInstall(AtomicRemoveAnimFromSkinCB, 0x734B90);
+    RH_ScopedGlobalInstall(RpAtomicConvertGeometryToTL, 0x734BE0);
+    RH_ScopedGlobalInstall(RpAtomicConvertGeometryToTS, 0x734C20);
 
-    RH_ScopedInstall(atomicConvertGeometryToTL, 0x734C60);
-    RH_ScopedInstall(RpClumpConvertGeometryToTL, 0x734CB0);
+    RH_ScopedGlobalInstall(atomicConvertGeometryToTL, 0x734C60);
+    RH_ScopedGlobalInstall(RpClumpConvertGeometryToTL, 0x734CB0);
 
-    RH_ScopedInstall(atomicConvertGeometryToTS, 0x734CE0);
-    RH_ScopedInstall(RpClumpConvertGeometryToTS, 0x734D30);
+    RH_ScopedGlobalInstall(atomicConvertGeometryToTS, 0x734CE0);
+    RH_ScopedGlobalInstall(RpClumpConvertGeometryToTS, 0x734D30);
 
-    RH_ScopedInstall(forceLinearFilteringAtomicsCB, 0x734DA0);
-    RH_ScopedInstall(SetFilterModeOnClumpsTextures, 0x734DC0);
+    RH_ScopedGlobalInstall(forceLinearFilteringAtomicsCB, 0x734DA0);
+    RH_ScopedGlobalInstall(SetFilterModeOnClumpsTextures, 0x734DC0);
 
 
-    RH_ScopedInstall(forceLinearFilteringMatTexturesCB, 0x734D60);
-    RH_ScopedInstall(SetFilterModeOnAtomicsTextures, 0x734D80);
+    RH_ScopedGlobalInstall(forceLinearFilteringMatTexturesCB, 0x734D60);
+    RH_ScopedGlobalInstall(SetFilterModeOnAtomicsTextures, 0x734D80);
 
-    RH_ScopedInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
-    RH_ScopedInstall(LightsDestroy, 0x735730);
-    RH_ScopedInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
-//    RH_ScopedInstall(AddAnExtraDirectionalLight, 0x735840);
-    RH_ScopedInstall(RemoveExtraDirectionalLights, 0x7359E0);
-    RH_ScopedInstall(SetBrightMarkerColours, 0x735BD0);
-    RH_ScopedInstall(ReSetAmbientAndDirectionalColours, 0x735C40);
-    RH_ScopedInstall(DeActivateDirectional, 0x735C70);
-    RH_ScopedInstall(ActivateDirectional, 0x735C80);
-    RH_ScopedOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
-    RH_ScopedOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
-    RH_ScopedInstall(SetDirectionalColours, 0x735D70);
-    RH_ScopedInstall(SetLightColoursForPedsCarsAndObjects, 0x735D90);
-    RH_ScopedInstall(SetLightsForInfraredVisionHeatObjects, 0x735E40);
-    RH_ScopedInstall(StoreAndSetLightsForInfraredVisionHeatObjects, 0x735E70);
-    RH_ScopedInstall(RestoreLightsForInfraredVisionHeatObjects, 0x735EF0);
-    RH_ScopedInstall(SetLightsForInfraredVisionDefaultObjects, 0x735F20);
-    RH_ScopedInstall(SetLightsForNightVision, 0x735F70);
-    RH_ScopedInstall(GetDayNightBalance, 0x6FAB30);
-    RH_ScopedInstall(AsciiToGxtChar, 0x718600);
-    RH_ScopedInstall(WriteRaster, 0x005A4150);
+    RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
+    RH_ScopedGlobalInstall(LightsDestroy, 0x735730);
+    RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
+//    RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
+    RH_ScopedGlobalInstall(RemoveExtraDirectionalLights, 0x7359E0);
+    RH_ScopedGlobalInstall(SetBrightMarkerColours, 0x735BD0);
+    RH_ScopedGlobalInstall(ReSetAmbientAndDirectionalColours, 0x735C40);
+    RH_ScopedGlobalInstall(DeActivateDirectional, 0x735C70);
+    RH_ScopedGlobalInstall(ActivateDirectional, 0x735C80);
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
+    RH_ScopedGlobalInstall(SetDirectionalColours, 0x735D70);
+    RH_ScopedGlobalInstall(SetLightColoursForPedsCarsAndObjects, 0x735D90);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionHeatObjects, 0x735E40);
+    RH_ScopedGlobalInstall(StoreAndSetLightsForInfraredVisionHeatObjects, 0x735E70);
+    RH_ScopedGlobalInstall(RestoreLightsForInfraredVisionHeatObjects, 0x735EF0);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionDefaultObjects, 0x735F20);
+    RH_ScopedGlobalInstall(SetLightsForNightVision, 0x735F70);
+    RH_ScopedGlobalInstall(GetDayNightBalance, 0x6FAB30);
+    RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
+    RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
 //    RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(CVector const&, CVector*, float*, float*));
 //    RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(CVector const&, CVector*));
-    RH_ScopedInstall(LittleTest, 0x541330);
+    RH_ScopedGlobalInstall(LittleTest, 0x541330);
 
-    RH_ScopedInstall(RemoveRefsCB, 0x7226D0);
-    RH_ScopedInstall(IsGlassModel, 0x46A760);
+    RH_ScopedGlobalInstall(RemoveRefsCB, 0x7226D0);
+    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
 // 0x56E010

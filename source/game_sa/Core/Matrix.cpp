@@ -49,14 +49,14 @@ void CMatrix::InjectHooks()
     RH_ScopedInstall(ForceUpVector, 0x59B7E0);
     RH_ScopedInstall(ConvertToEulerAngles, 0x59A840);
     RH_ScopedInstall(ConvertFromEulerAngles, 0x59AA40);
-    Install("CMatrix", "operator=", 0x59BBC0, &CMatrix::operator=);
-    Install("CMatrix", "operator+=", 0x59ADF0, &CMatrix::operator+=);
-    Install("CMatrix", "operator*=", 0x411A80, &CMatrix::operator*=);
-    Install("CMatrix", "operator*_Mat", 0x59BE30, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator*));
-    Install("CMatrix", "operator*_Vec", 0x59C890, (CVector(*)(CMatrix const&, CVector const&))(&::operator*));
-    Install("CMatrix", "operator+", 0x59BFA0, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator+));
-    RH_ScopedOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
-    RH_ScopedOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(CMatrix&));
+    RH_ScopedInstall(operator=, 0x59BBC0);
+    RH_ScopedInstall(operator+=, 0x59ADF0);
+    RH_ScopedInstall(operator*=, 0x411A80);
+    RH_ScopedGlobalOverloadedInstall(operator*, "Mat", 0x59BE30, CMatrix(*)(CMatrix const&, CMatrix const&));
+    RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(CMatrix const&, CVector const&));
+    RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(CMatrix const&, CMatrix const&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(CMatrix&));
 }
 
 CMatrix::CMatrix(CMatrix const& matrix)

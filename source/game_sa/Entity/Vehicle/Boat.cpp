@@ -46,7 +46,7 @@ void CBoat::InjectHooks()
     RH_ScopedInstall(IsSectorAffectedByWake, 0x6F0E80);
     RH_ScopedInstall(IsVertexAffectedByWake, 0x6F0F50);
     RH_ScopedInstall(CheckForSkippingCalculations, 0x6F10C0);
-    RH_ScopedInstall(GetBoatAtomicObjectCB, 0x6F00D0);
+    RH_ScopedGlobalInstall(GetBoatAtomicObjectCB, 0x6F00D0);
 }
 
 CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy)

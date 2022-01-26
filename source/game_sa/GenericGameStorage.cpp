@@ -23,7 +23,7 @@ void CGenericGameStorage::InjectHooks() {
     RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, true);
     RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, true);
     RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, true);
-    RH_ScopedInstall(GetSavedGameDateAndTime, 0x618D00, true);
+    RH_ScopedGlobalInstall(GetSavedGameDateAndTime, 0x618D00, true);
     RH_ScopedInstall(GenericLoad, 0x5D17B0, true);
     RH_ScopedInstall(GenericSave, 0x5D13E0, true);
     RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, true);

@@ -12,8 +12,8 @@ void CPtrNodeDoubleLink::InjectHooks() {
     RH_ScopedClass(CPtrNodeDoubleLink);
     RH_ScopedCategory("Core");
 
-    Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
-    Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
+    RH_ScopedInstall(operator new, 0x5523C0);
+    RH_ScopedInstall(operator delete, 0x5523D0);
     RH_ScopedInstall(AddToList, 0x5329A0);
 }
 

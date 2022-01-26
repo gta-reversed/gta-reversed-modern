@@ -17,7 +17,7 @@ void CCustomRoadsignMgr::InjectHooks()
     RH_ScopedInstall(RenderRoadsignAtomic, 0x6FF350);
     RH_ScopedInstall(SetupRoadsignAtomic, 0x6FED60);
     RH_ScopedInstall(SetAtomicAlpha, 0x6FE240);
-    RH_ScopedInstall(RoadsignGenerateTextRaster, 0x6FEB70);
+    RH_ScopedGlobalInstall(RoadsignGenerateTextRaster, 0x6FEB70);
 }
 
 bool CCustomRoadsignMgr::Initialise()

@@ -14,10 +14,10 @@ void CRect::InjectHooks()
     RH_ScopedInstall(IsFlipped, 0x404190);
     RH_ScopedInstall(Restrict, 0x404200);
     RH_ScopedInstall(Resize, 0x404260);
-    Install("CRect", "IsPointInside", 0x404290, (bool(CRect::*)(CVector2D const&) const)&CRect::IsPointInside);
-    Install("CRect", "IsPointInside_tolerance", 0x4042D0, (bool(CRect::*)(CVector2D const&, float) const)&CRect::IsPointInside);
+    RH_ScopedOverloadedInstall(IsPointInside, "", 0x404290, bool(CRect::*)(CVector2D const&) const);
+    RH_ScopedOverloadedInstall(IsPointInside, "Tolerance", 0x4042D0, bool(CRect::*)(CVector2D const&, float) const);
     RH_ScopedInstall(SetFromCenter, 0x43E020);
-    Install("CRect", "GetCenter", 0x43E050, (void(CRect::*)(float*, float*) const)&CRect::GetCenter);
+    RH_ScopedOverloadedInstall(GetCenter, "", 0x43E050, void(CRect::*)(float*, float*) const);
     RH_ScopedInstall(StretchToPoint, 0x5327F0);
 }
 

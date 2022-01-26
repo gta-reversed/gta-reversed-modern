@@ -170,11 +170,12 @@ namespace ModelIndices {
 }
 
 void ModelIndices::InjectHooks() {
-    RH_ScopedClass(ModelIndices);
+    RH_ScopedNamespace(ModelIndices);
     RH_ScopedCategoryRoot();
 
-    RH_ScopedInstall(InitModelIndices, 0x5BCA10);
-    RH_ScopedInstall(MatchAllModelStrings, 0x5B57C0);
+    // TODO: Move functions into ModelIndices namespace
+    RH_ScopedGlobalInstall(InitModelIndices, 0x5BCA10);
+    RH_ScopedGlobalInstall(MatchAllModelStrings, 0x5B57C0);
 }
 
 // 0x5BCA10

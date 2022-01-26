@@ -5,7 +5,7 @@ void CDummy::InjectHooks()
     RH_ScopedClass(CDummy);
     RH_ScopedCategory("Entity/Dummy");
 
-    RH_ScopedInstall(IsDummyPointerValid, 0x532730);
+    RH_ScopedGlobalInstall(IsDummyPointerValid, 0x532730);
 }
 
 void* CDummy::operator new(unsigned size)

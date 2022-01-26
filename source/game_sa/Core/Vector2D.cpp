@@ -14,8 +14,7 @@ void CVector2D::InjectHooks()
 
     RH_ScopedInstall(Magnitude, 0x420860);
     RH_ScopedInstall(Normalise, 0x44E480);
-
-    Install("CVector2D", "operator=", 0x43E110, &CVector2D::operator=);
+    RH_ScopedInstall(operator=, 0x43E110);
 }
 
 CVector2D::CVector2D(const CVector& vec3d) {

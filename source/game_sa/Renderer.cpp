@@ -64,7 +64,7 @@ void CRenderer::InjectHooks()
     RH_ScopedInstall(SetupBigBuildingVisibility, 0x554650);
     RH_ScopedInstall(SetupScanLists, 0x553540);
     RH_ScopedInstall(ScanSectorList_ListModels, 0x5535D0);
-    Install("CRenderer", "ScanSectorList_ListModelsVisible);", 0x553650, &CRenderer::ScanSectorList_ListModelsVisible);
+    RH_ScopedInstall(ScanSectorList_ListModelsVisible, 0x553650);
     RH_ScopedInstall(ScanSectorList, 0x554840);
     RH_ScopedInstall(ScanBigBuildingList, 0x554B10, true);
     RH_ScopedInstall(ShouldModelBeStreamed, 0x554EB0);

@@ -57,7 +57,7 @@ void CPlayerPed::InjectHooks() {
     // RH_ScopedInstall(GetButtonSprintResults, 0x60A820);
     RH_ScopedInstall(HandlePlayerBreath, 0x60A8D0);
     RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
-    RH_ScopedInstall(LOSBlockedBetweenPeds, 0x60B550);
+    RH_ScopedGlobalInstall(LOSBlockedBetweenPeds, 0x60B550);
     RH_ScopedInstall(DoesTargetHaveToBeBroken, 0x60C0C0);
     RH_ScopedInstall(SetPlayerMoveBlendRatio, 0x60C520);
     RH_ScopedInstall(FindPedToAttack, 0x60C5F0);

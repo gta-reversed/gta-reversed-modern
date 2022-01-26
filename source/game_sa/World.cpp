@@ -108,9 +108,9 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(GetIsLineOfSightClear, 0x56A490);
     RH_ScopedInstall(GetIsLineOfSightSectorClear, 0x568AD0);
     RH_ScopedInstall(GetIsLineOfSightSectorListClear, 0x564970);
-    RH_ScopedInstall(GetCurrentScanCode, 0x407250);
-    RH_ScopedInstall(GetSector, 0x407260);
-    RH_ScopedInstall(GetRepeatSector, 0x4072A0);
+    RH_ScopedGlobalInstall(GetCurrentScanCode, 0x407250);
+    RH_ScopedGlobalInstall(GetSector, 0x407260);
+    RH_ScopedGlobalInstall(GetRepeatSector, 0x4072A0);
     RH_ScopedInstall(GetLodPtrList, 0x4072C0);
 
     RH_ScopedInstall(SetCarsOnFire, 0x5659F0);

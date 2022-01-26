@@ -8,9 +8,10 @@ void PipelinePlugin::InjectHooks() {
     RH_ScopedNamespace(PipelinePlugin);
     RH_ScopedCategory("Plugins");
 
-    RH_ScopedInstall(PipelinePluginAttach, 0x72FBD0);
-    RH_ScopedInstall(GetPipelineID, 0x72FC40);
-    RH_ScopedInstall(SetPipelineID, 0x72FC50);
+    // TODO: Move this into the namespace PipelinePlugin
+    RH_ScopedGlobalInstall(PipelinePluginAttach, 0x72FBD0);
+    RH_ScopedGlobalInstall(GetPipelineID, 0x72FC40);
+    RH_ScopedGlobalInstall(SetPipelineID, 0x72FC50);
 }
 
 // internal

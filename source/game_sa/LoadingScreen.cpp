@@ -34,7 +34,7 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
     RH_ScopedCategoryRoot();
 
-    RH_ScopedInstall(LoadingScreen, 0x53DED0);
+    RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
 
 // 0x5902B0

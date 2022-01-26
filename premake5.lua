@@ -43,7 +43,7 @@ solution "gta_reversed"
     configuration "vs*"
          flags {"MultiProcessorCompile"}
          linkoptions   { "/ignore:4099" }      
-         buildoptions {"/EHsc"}
+         buildoptions {"/EHsc", "/Zc:preprocessor"}
 
     flags {
         characterset ("MBCS"), --fix strings

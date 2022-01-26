@@ -18,7 +18,7 @@ void CClumpModelInfo::InjectHooks()
     RH_ScopedInstall(Shutdown_Reversed, 0x4C4E60);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4E70);
     RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5730);
-    Install("CClumpModelInfo", "CreateInstance_void", 0x4C5140, (RwObject * (CClumpModelInfo::*)())(&CClumpModelInfo::CreateInstance_Reversed));
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
     RH_ScopedOverloadedInstall(CreateInstance_Reversed, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
     RH_ScopedInstall(SetAnimFile_Reversed, 0x4C5200);
     RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C5250);

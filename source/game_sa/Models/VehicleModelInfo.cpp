@@ -38,9 +38,12 @@ void CVehicleModelInfo::InjectHooks()
     RH_ScopedCategory("Models");
 
 // ClinkedUpgradeList
-    RH_ScopedInstall(AddUpgradeLink, 0x4C74B0);
-    RH_ScopedInstall(FindOtherUpgrade, 0x4C74D0);
+    {
+        RH_ScopedClass(CLinkedUpgradeList);
 
+        RH_ScopedInstall(AddUpgradeLink, 0x4C74B0);
+        RH_ScopedInstall(FindOtherUpgrade, 0x4C74D0);
+    }
 // VTable
     RH_ScopedInstall(GetModelType_Reversed, 0x4C7650);
     RH_ScopedInstall(Init_Reversed, 0x4C7630);
@@ -119,13 +122,13 @@ void CVehicleModelInfo::InjectHooks()
     RH_ScopedInstall(LoadEnvironmentMaps, 0x4C8780);
 
 // Other
-    RH_ScopedInstall(IsValidCompRule, 0x4C7E10);
-    Install("CVehicleModelInfo", "HELP_ChooseComponent", 0x4C7FB0, &::ChooseComponent);
-    RH_ScopedInstall(CountCompsInRule, 0x4C7F80);
-    RH_ScopedInstall(GetListOfComponentsNotUsedByRules, 0x4C7E50);
-    RH_ScopedInstall(RemoveWindowAlphaCB, 0x4C83B0);
-    RH_ScopedInstall(GetOkAndDamagedAtomicCB, 0x4C7BD0);
-    RH_ScopedInstall(atomicDefaultRenderCB, 0x7323C0);
+    RH_ScopedGlobalInstall(IsValidCompRule, 0x4C7E10);
+    RH_ScopedNamedGlobalInstall(::ChooseComponent, "ChooseComponent-Global", 0x4C7FB0);  // There's a global `ChooseComponent` and `CVehicleModelInfo::ChooseComponent`.. Why?
+    RH_ScopedGlobalInstall(CountCompsInRule, 0x4C7F80);
+    RH_ScopedGlobalInstall(GetListOfComponentsNotUsedByRules, 0x4C7E50);
+    RH_ScopedGlobalInstall(RemoveWindowAlphaCB, 0x4C83B0);
+    RH_ScopedGlobalInstall(GetOkAndDamagedAtomicCB, 0x4C7BD0);
+    RH_ScopedGlobalInstall(atomicDefaultRenderCB, 0x7323C0);
 }
 
 CVehicleModelInfo::CVehicleModelInfo() : CClumpModelInfo()

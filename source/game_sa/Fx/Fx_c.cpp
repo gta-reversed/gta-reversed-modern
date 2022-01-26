@@ -57,9 +57,9 @@ void Fx_c::InjectHooks() {
     // RH_ScopedInstall(TriggerBulletSplash, 0x4A10E0);
     // RH_ScopedInstall(TriggerFootSplash, 0x4A1150);
 
-    RH_ScopedInstall(RenderAddTri_, 0x4A1410);
-    RH_ScopedInstall(RenderEnd, 0x4A1600);
-    RH_ScopedInstall(RenderBegin, 0x4A13B0);
+    RH_ScopedGlobalInstall(RenderAddTri_, 0x4A1410);
+    RH_ScopedGlobalInstall(RenderEnd, 0x4A1600);
+    RH_ScopedGlobalInstall(RenderBegin, 0x4A13B0);
 }
 
 // 0x49E620

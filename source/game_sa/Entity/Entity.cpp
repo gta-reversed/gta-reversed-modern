@@ -21,7 +21,7 @@ void CEntity::InjectHooks()
     RH_ScopedCategory("Entity");
 
 //Virtual
-    Install("CEntity", "Add", 0x533020, (void(CEntity::*)())(&CEntity::Add_Reversed));
+    RH_ScopedOverloadedInstall(Add_Reversed, "void", 0x533020, void(CEntity::*)());
     RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedInstall(Remove_Reversed, 0x534AE0);
     RH_ScopedInstall(SetIsStatic_Reversed, 0x403E20);
@@ -55,17 +55,17 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetRwObjectAlpha, 0x5332C0);
     RH_ScopedInstall(FindTriggerPointCoors, 0x533380);
     RH_ScopedInstall(GetRandom2dEffect, 0x533410);
-    Install("CEntity", "TransformFromObjectSpace_ref", 0x5334F0, (CVector(CEntity::*)(CVector const&)) (&CEntity::TransformFromObjectSpace));
-    Install("CEntity", "TransformFromObjectSpace_ptr", 0x533560, (CVector*(CEntity::*)(CVector&, CVector const&)) (&CEntity::TransformFromObjectSpace));
+    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ref", 0x5334F0, CVector(CEntity::*)(CVector const&));
+    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ptr", 0x533560, CVector*(CEntity::*)(CVector&, CVector const&));
     RH_ScopedInstall(CreateEffects, 0x533790);
     RH_ScopedInstall(DestroyEffects, 0x533BF0);
     RH_ScopedInstall(AttachToRwObject, 0x533ED0);
     RH_ScopedInstall(DetachFromRwObject, 0x533FB0);
-    Install("CEntity", "GetBoundCentre_ptr", 0x534250, (CVector*(CEntity::*)(CVector*)) (&CEntity::GetBoundCentre));
-    Install("CEntity", "GetBoundCentre_ref", 0x534290, (void(CEntity::*)(CVector&)) (&CEntity::GetBoundCentre));
+    RH_ScopedOverloadedInstall(GetBoundCentre, "ptr", 0x534250, CVector*(CEntity::*)(CVector*));
+    RH_ScopedOverloadedInstall(GetBoundCentre, "ref", 0x534290, void(CEntity::*)(CVector&));
     RH_ScopedInstall(RenderEffects, 0x5342B0);
-    Install("CEntity", "GetIsTouching_ent", 0x5343F0, (bool(CEntity::*)(CEntity*)) (&CEntity::GetIsTouching));
-    Install("CEntity", "GetIsTouching_vec", 0x5344B0, (bool(CEntity::*)(CVector const&, float)) (&CEntity::GetIsTouching));
+    RH_ScopedOverloadedInstall(GetIsTouching, "ent", 0x5343F0, bool(CEntity::*)(CEntity*));
+    RH_ScopedOverloadedInstall(GetIsTouching, "vec", 0x5344B0, bool(CEntity::*)(CVector const&, float));
     RH_ScopedInstall(GetIsOnScreen, 0x534540);
     RH_ScopedInstall(GetIsBoundingBoxOnScreen, 0x5345D0);
     RH_ScopedInstall(ModifyMatrixForTreeInWind, 0x534E90);
@@ -88,8 +88,8 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
 
 //Statics
-    RH_ScopedInstall(MaterialUpdateUVAnimCB, 0x532D70);
-    RH_ScopedInstall(IsEntityPointerValid, 0x533310);
+    RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
+    RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
 }
 
 CEntity::CEntity() : CPlaceable()

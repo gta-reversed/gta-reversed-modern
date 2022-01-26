@@ -19,9 +19,10 @@ void NodeNamePlugin::InjectHooks() {
     RH_ScopedNamespace(NodeNamePlugin);
     RH_ScopedCategory("Plugins");
 
-    RH_ScopedInstall(NodeNamePluginAttach, 0x72FAB0);
-    RH_ScopedInstall(GetFrameNodeName, 0x72FB30);
-    RH_ScopedInstall(SetFrameNodeName, 0x72FB00);
+    // TODO: These should be moved into the namespace instead of being global...
+    RH_ScopedGlobalInstall(NodeNamePluginAttach, 0x72FAB0);
+    RH_ScopedGlobalInstall(GetFrameNodeName, 0x72FB30);
+    RH_ScopedGlobalInstall(SetFrameNodeName, 0x72FB00);
 }
 
 // internal

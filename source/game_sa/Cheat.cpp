@@ -123,7 +123,7 @@ void CCheat::InjectHooks() {
             continue;
         }
 
-        Install("CCheat", cheat.methodName, cheat.installAddress, &cheat.method);
+        RH_ScopedNamedGlobalInstall(cheat.method, cheat.methodName, cheat.installAddress);
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {

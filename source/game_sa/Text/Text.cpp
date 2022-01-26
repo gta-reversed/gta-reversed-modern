@@ -43,15 +43,6 @@ void CText::InjectHooks() {
     RH_ScopedClass(CText);
     RH_ScopedCategory("Text");
 
-    //    RH_ScopedInstall(Load, 0x69F670);
-
-    RH_ScopedInstall(Unload, 0x69F640);
-    //    RH_ScopedInstall(Load, 0x69F5D0);
-
-    RH_ScopedInstall(Unload, 0x69F510);
-    //    RH_ScopedInstall(Load, 0x69F490);
-    RH_ScopedInstall(BinarySearch, 0x69F570);
-    RH_ScopedInstall(Search, 0x6A0000);
 
     RH_ScopedInstall(Constructor, 0x6A00F0);
     RH_ScopedInstall(Destructor, 0x6A0140);
@@ -62,6 +53,34 @@ void CText::InjectHooks() {
     //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
     RH_ScopedInstall(Load, 0x6A01A0);
     RH_ScopedInstall(Unload, 0x69FF20);
+
+    //
+    // TODO: These should be moved to their respective files...
+    //
+
+    {
+        RH_ScopedClass(CMissionTextOffsets);
+        //    RH_ScopedInstall(Load, 0x69F670);
+    }
+
+    {
+        RH_ScopedClass(CData);
+        RH_ScopedInstall(Unload, 0x69F640);
+        //    RH_ScopedInstall(Load, 0x69F5D0);
+
+
+    }
+
+    {
+        RH_ScopedClass(CKeyArray);
+
+        RH_ScopedCategory("Text");
+        RH_ScopedInstall(Unload, 0x69F510);
+
+        RH_ScopedInstall(BinarySearch, 0x69F570);
+        RH_ScopedInstall(Search, 0x6A0000);
+        //    RH_ScopedInstall(Load, 0x69F490);
+    }
 }
 
 // 0x6A00F0

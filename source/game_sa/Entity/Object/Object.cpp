@@ -70,8 +70,8 @@ void CObject::InjectHooks()
     RH_ScopedInstall(DeleteAllTempObjects, 0x5A18B0);
     RH_ScopedInstall(DeleteAllMissionObjects, 0x5A1910);
     RH_ScopedInstall(DeleteAllTempObjectsInArea, 0x5A1980);
-    RH_ScopedInstall(IsObjectPointerValid_NotInWorld, 0x5A2B90);
-    RH_ScopedInstall(IsObjectPointerValid, 0x5A2C20);
+    RH_ScopedGlobalInstall(IsObjectPointerValid_NotInWorld, 0x5A2B90);
+    RH_ScopedGlobalInstall(IsObjectPointerValid, 0x5A2C20);
 }
 
 CObject::CObject() : CPhysical()

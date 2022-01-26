@@ -160,8 +160,8 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
 
-    RH_ScopedInstall(IsPointInsideRadar, 0x584D40);
-    RH_ScopedInstall(GetTextureCorners, 0x584D90);
+    RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
+    RH_ScopedGlobalInstall(GetTextureCorners, 0x584D90);
 }
 
 // 0x587FB0

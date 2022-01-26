@@ -8,7 +8,7 @@ void CBuilding::InjectHooks()
     RH_ScopedCategory("Entity");
 
     RH_ScopedInstall(ReplaceWithNewModel, 0x403EC0);
-    RH_ScopedInstall(IsBuildingPointerValid, 0x4040E0);
+    RH_ScopedGlobalInstall(IsBuildingPointerValid, 0x4040E0);
 }
 
 CBuilding::CBuilding() : CEntity()

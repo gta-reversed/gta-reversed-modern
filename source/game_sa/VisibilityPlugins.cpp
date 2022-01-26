@@ -40,8 +40,12 @@ void CVisibilityPlugins::InjectHooks() {
     RH_ScopedInstall(AtomicCopyConstructor, 0x732170);
     RH_ScopedInstall(AtomicDestructor, 0x7321A0);
     RH_ScopedInstall(CalculateFadingAtomicAlpha, 0x732500);
-    RH_ScopedInstall(ClearAtomicFlag, 0x732310);
-    RH_ScopedInstall(ClearAtomicFlag, 0x732330);
+
+    HookInstall(0x732310, ClearAtomicFlag); // Same function in 2 different places.. I don't want to deal with this, so let's static hook it..
+    HookInstall(0x732330, ClearAtomicFlag);
+    HookInstall(0x7322D0, SetAtomicFlag); // Same story..
+    HookInstall(0x7322B0, SetAtomicFlag);
+
     RH_ScopedInstall(ClearClumpForAllAtomicsFlag, 0x732350);
     RH_ScopedInstall(ClumpConstructor, 0x732E10);
     RH_ScopedInstall(ClumpCopyConstructor, 0x732200);
@@ -100,8 +104,6 @@ void CVisibilityPlugins::InjectHooks() {
     RH_ScopedInstall(RenderVehicleReallyLowDetailCB_BigVehicle, 0x732820);
     RH_ScopedInstall(RenderWeaponCB, 0x733670);
     RH_ScopedInstall(RenderWeaponPedsForPC, 0x732F30);
-    RH_ScopedInstall(SetAtomicFlag, 0x7322D0);
-    RH_ScopedInstall(SetAtomicFlag, 0x7322B0);
     RH_ScopedInstall(SetClumpForAllAtomicsFlag, 0x732307);
     RH_ScopedInstall(SetAtomicId, 0x732230);
     RH_ScopedInstall(SetAtomicRenderCallback, 0x7328A0);

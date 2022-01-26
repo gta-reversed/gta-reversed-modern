@@ -5,8 +5,8 @@ void CColModel::InjectHooks()
     RH_ScopedClass(CColModel);
     RH_ScopedCategory("Collision");
 
-    Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
-    Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
+    RH_ScopedInstall(operator new, 0x40FC30);
+    RH_ScopedInstall(operator delete, 0x40FC40);
     RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
     RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
     RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));

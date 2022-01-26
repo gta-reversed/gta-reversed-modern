@@ -38,8 +38,8 @@ void CColStore::InjectHooks()
     RH_ScopedInstall(LoadCollision, 0x410860);
 
 // OTHER
-    RH_ScopedInstall(SetIfCollisionIsRequired, 0x4103D0);
-    RH_ScopedInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
+    RH_ScopedGlobalInstall(SetIfCollisionIsRequired, 0x4103D0);
+    RH_ScopedGlobalInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
 }
 
 void* ColDef::operator new(uint32 size)

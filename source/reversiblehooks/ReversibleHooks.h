@@ -33,21 +33,46 @@
 #define RH_ScopedCategoryRoot() \
     ReversibleHooks::ScopeCategory  RhCurrentCat{ RH_RootCategoryName };
 
+//// Helpers to deal with optional arguments for Install()
+//#define RH_ScopedInstall_WithoutDisableByDefault(scopeName, fnName, installAddr, fnAddr, disableByDefault) \
+//    ReversibleHooks::Install(scopeName, fnName, installAddr, fnAddr, disableByDefault)
+//
+//#define RH_ScopedInstall_WithDisableByDefault(scopeName, fnName, installAddr, fnAddr) \
+//    ReversibleHooks::Install(scopeName, fnName, installAddr, fnAddr)
+//
+//#define NO_ARG_EXPANDER() ,,,,
+//#define FUNC_CHOOSER(_f1, _f2, _f3, _f4, _f5, _f6, ...) _f6
+//#define FUNC_RECOMPOSER(argsWithParentheses) FUNC_CHOOSER argsWithParentheses
+//#define CHOOSE_FROM_ARG_COUNT(...) FUNC_RECOMPOSER((__VA_ARGS__, RH_ScopedInstall_WithDisableByDefault, RH_ScopedInstall_WithoutDisableByDefault,,,, ))
+//#define MACRO_CHOOSER(...) CHOOSE_FROM_ARG_COUNT(NO_ARG_EXPANDER __VA_ARGS__ ())
+//
+//#define RH_Helper_ScopedInstall(...) \
+//    MACRO_CHOOSER(__VA__ARGS__)(__VA__ARGS__)
+
+//#undef NO_ARG_EXPANDER
+//#undef FUNC_CHOOSER
+//#undef CHOOSE_FROM_ARG_COUNT
+//#undef MACRO_CHOOSER
+
 // Install a hook living in the current scoped class/namespace
-#define RH_ScopedInstall(fn, fnAddr, ...); \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn, __VA_ARGS__)
+#define RH_ScopedInstall(fn, fnAddr, ...) \
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a global function
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &fn, __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
 // Tip: If a member function is const just add the `const` keyword after the function arg list;
 // Eg.: `void(CRect::*)(float*, float*) const` (Notice the const at the end) (See function `CRect::GetCenter`)
 #define RH_ScopedOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn), __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn) __VA_OPT__(,) __VA_ARGS__)
 
 #define RH_ScopedGlobalOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn), __VA_ARGS__)
+    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn) __VA_OPT__(,) __VA_ARGS__)
+
+// Used in CCheat only - Install global `fn` as name `fnName`
+#define RH_ScopedNamedGlobalInstall(fn, fnName, fnAddr, ...) \
+    ReversibleHooks::Install(RHCurrentScopeName.name, fnName, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
 enum class eReversibleHookType {
     Simple,

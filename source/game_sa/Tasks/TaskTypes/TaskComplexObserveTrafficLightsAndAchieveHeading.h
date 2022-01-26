@@ -23,12 +23,14 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks() {
-        using namespace ReversibleHooks;
+        RH_ScopedClass(CTaskComplexObserveTrafficLightsAndAchieveHeading);
+        RH_ScopedCategory("Tasks/TaskTypes");
+
         RH_ScopedInstall(Clone_Reversed, 0x636490);
         RH_ScopedInstall(ControlSubTask_Reversed, 0x631AD0);
         RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x631AC0);
         RH_ScopedInstall(CreateNextSubTask_Reversed, 0x631A70);
-        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950);
+        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950, true);
     }
 
     CTaskComplexObserveTrafficLightsAndAchieveHeading* Constructor(int32 durationInMs, float fTargetHeading) {

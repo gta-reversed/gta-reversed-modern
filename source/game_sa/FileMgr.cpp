@@ -370,5 +370,5 @@ void CFileMgr::InjectHooks()
     RH_ScopedInstall(GetFileLength, 0x5389e0);
     RH_ScopedInstall(Tell, 0x538a20);
     RH_ScopedInstall(GetErrorReadWrite, 0x538a50);
-    RH_ScopedInstall(InitUserDirectories, 0x744fb0);
+    RH_ScopedGlobalInstall(InitUserDirectories, 0x744fb0);
 }

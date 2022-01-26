@@ -49,7 +49,7 @@ void CTxdStore::InjectHooks() {
     RH_ScopedInstall(SetupTxdParent, 0x731D50);
 
     // global
-    RH_ScopedInstall(RemoveIfRefCountIsGreaterThanOne, 0x731680);
+    RH_ScopedGlobalInstall(RemoveIfRefCountIsGreaterThanOne, 0x731680);
 }
 
 // initialise txd store

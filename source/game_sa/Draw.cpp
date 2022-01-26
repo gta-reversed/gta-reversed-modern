@@ -19,7 +19,7 @@ void CDraw::InjectHooks() {
 
     RH_ScopedInstall(SetFOV, 0x6FF410);
     RH_ScopedInstall(CalculateAspectRatio, 0x6FF420);
-    RH_ScopedInstall(DoFade, 0x53E600);
+    RH_ScopedGlobalInstall(DoFade, 0x53E600);
 }
 
 // 0x6FF410
