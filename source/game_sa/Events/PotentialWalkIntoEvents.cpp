@@ -11,24 +11,36 @@
 
 void CEventPotentialWalkIntoVehicle::InjectHooks()
 {
+    RH_ScopedClass(CEventPotentialWalkIntoVehicle);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AE320);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AE420);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
 {
+    RH_ScopedClass(CEventPotentialWalkIntoObject);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AE5D0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B4950);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
 {
+    RH_ScopedClass(CEventPotentialWalkIntoFire);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1E20);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B6890);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
 {
+    RH_ScopedClass(CEventPotentialWalkIntoPed);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AE6E0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AE800);
     RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AE950);

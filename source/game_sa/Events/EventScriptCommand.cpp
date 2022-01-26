@@ -6,6 +6,9 @@
 
 void CEventScriptCommand::InjectHooks()
 {
+    RH_ScopedClass(CEventScriptCommand);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B0A00);
     RH_ScopedInstall(GetEventType, 0x4B0A30);
     RH_ScopedInstall(GetEventPriority, 0x4B0B20);

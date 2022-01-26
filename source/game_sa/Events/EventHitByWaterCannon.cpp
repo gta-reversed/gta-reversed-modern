@@ -2,6 +2,9 @@
 
 void CEventHitByWaterCannon::InjectHooks()
 {
+    RH_ScopedClass(CEventHitByWaterCannon);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1290);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1330);
 }

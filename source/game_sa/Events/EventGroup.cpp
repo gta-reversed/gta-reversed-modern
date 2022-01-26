@@ -2,6 +2,9 @@
 
 void CEventGroup::InjectHooks()
 {
+    RH_ScopedClass(CEventGroup);
+    RH_ScopedCategory("Events");
+
     using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x4AB340);
     RH_ScopedInstall(Add, 0x4AB420);

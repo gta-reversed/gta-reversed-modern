@@ -2,6 +2,9 @@
 
 void CEventSoundQuiet::InjectHooks()
 {
+    RH_ScopedClass(CEventSoundQuiet);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5E05B0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B5240);
     RH_ScopedInstall(CloneEditable_Reversed, 0x5E0670);

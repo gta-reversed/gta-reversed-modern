@@ -2,6 +2,9 @@
 
 void CEventCreatePartnerTask::InjectHooks()
 {
+    RH_ScopedClass(CEventCreatePartnerTask);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5F6190);
 }
 

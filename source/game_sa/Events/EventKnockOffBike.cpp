@@ -8,6 +8,9 @@
 
 void CEventKnockOffBike::InjectHooks()
 {
+    RH_ScopedClass(CEventKnockOffBike);
+    RH_ScopedCategory("Events");
+
     HookInstall(0x4AFCF0, (CEventKnockOffBike * (CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool)) & CEventKnockOffBike::Constructor);
     HookInstall(0x4AFC70, (CEventKnockOffBike * (CEventKnockOffBike::*)()) & CEventKnockOffBike::Constructor);
     HookInstall(0x4AFEE0, &CEventKnockOffBike::AffectsPed_Reversed);

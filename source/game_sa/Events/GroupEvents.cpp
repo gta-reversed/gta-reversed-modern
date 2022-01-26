@@ -2,28 +2,43 @@
 
 void CEventPlayerCommandToGroup::InjectHooks()
 {
+    RH_ScopedClass(CEventPlayerCommandToGroup);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B23D0);
     RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B24D0);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
 {
+    RH_ScopedClass(CEventPlayerCommandToGroupAttack);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5F6340);
     RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B2530);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
 {
+    RH_ScopedClass(CEventPlayerCommandToGroupGather);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x609250);
 }
 
 void CEventDontJoinPlayerGroup::InjectHooks()
 {
+    RH_ScopedClass(CEventDontJoinPlayerGroup);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x6090E0);
 }
 
 void CEventNewGangMember::InjectHooks()
 {
+    RH_ScopedClass(CEventNewGangMember);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x608F70);
 }
 

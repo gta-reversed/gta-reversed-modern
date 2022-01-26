@@ -2,6 +2,9 @@
 
 void CEventGroupEvent::InjectHooks()
 {
+    RH_ScopedClass(CEventGroupEvent);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4ADFD0);
     RH_ScopedInstall(Clone_Reversed, 0x4B6EE0);
     RH_ScopedInstall(BaseEventTakesPriorityOverBaseEvent, 0x4AE100);

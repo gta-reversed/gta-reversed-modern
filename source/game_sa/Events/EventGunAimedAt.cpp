@@ -6,6 +6,9 @@
 
 void CEventGunAimedAt::InjectHooks()
 {
+    RH_ScopedClass(CEventGunAimedAt);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B0700);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B4EE0);
     RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B09E0);

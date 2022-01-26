@@ -2,6 +2,9 @@
 
 void CEventGunShotWhizzedBy::InjectHooks()
 {
+    RH_ScopedClass(CEventGunShotWhizzedBy);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1FD0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B5120);
 }

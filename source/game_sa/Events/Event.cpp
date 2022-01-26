@@ -2,6 +2,9 @@
 
 void CEvent::InjectHooks()
 {
+    RH_ScopedClass(CEvent);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4ABFC0);
     RH_ScopedInstall(CalcSoundLevelIncrement, 0x4AC050);
     RH_ScopedInstall(GetSoundLevel, 0x4B2850);
@@ -9,52 +12,79 @@ void CEvent::InjectHooks()
 
 void CEventRevived::InjectHooks()
 {
+    RH_ScopedClass(CEventRevived);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AEC50);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AECB0);
 }
 
 void CEventEscalator::InjectHooks()
 {
+    RH_ScopedClass(CEventEscalator);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FF820);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B2580);
 }
 
 void CEventSexyVehicle::InjectHooks()
 {
+    RH_ScopedClass(CEventSexyVehicle);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AF010);
 }
 
 void CEventChatPartner::InjectHooks()
 {
+    RH_ScopedClass(CEventChatPartner);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AECD0);
 }
 
 void CEventCopCarBeingStolen::InjectHooks()
 {
+    RH_ScopedClass(CEventCopCarBeingStolen);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1740);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1860);
 }
 
 void CEventCarUpsideDown::InjectHooks()
 {
+    RH_ScopedClass(CEventCarUpsideDown);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1CC0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1DB0);
 }
 
 void CEventPassObject::InjectHooks()
 {
+    RH_ScopedClass(CEventPassObject);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x65DC70);
     RH_ScopedInstall(IsValid_Reversed, 0x4B1700);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
 {
+    RH_ScopedClass(CEventLeanOnVehicle);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x65DAF0);
     RH_ScopedInstall(IsValid_Reversed, 0x4B16C0);
 }
 
 void CEventOnFire::InjectHooks()
 {
+    RH_ScopedClass(CEventOnFire);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FF740);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1050);
 }

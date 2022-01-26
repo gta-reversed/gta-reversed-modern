@@ -6,6 +6,9 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 void CEventDamage::InjectHooks() {
+    RH_ScopedClass(CEventDamage);
+    RH_ScopedCategory("Events");
+
     using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "", 0x4B33B0, CEventDamage*(CEventDamage::*)(const CEventDamage&));
     RH_ScopedOverloadedInstall(Constructor, "1", 0x4AD830, CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool));

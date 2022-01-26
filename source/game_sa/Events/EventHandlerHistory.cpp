@@ -2,6 +2,9 @@
 
 void CEventHandlerHistory::InjectHooks()
 {
+    RH_ScopedClass(CEventHandlerHistory);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(ClearAllEvents, 0x4BC550);
     RH_ScopedInstall(ClearNonTempEvent, 0x4B8C60);
     RH_ScopedInstall(ClearTempEvent, 0x4B8C40);

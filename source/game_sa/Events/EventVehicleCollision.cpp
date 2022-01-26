@@ -8,6 +8,9 @@
 
 void CEventVehicleCollision::InjectHooks()
 {
+    RH_ScopedClass(CEventVehicleCollision);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AC840);
     RH_ScopedInstall(Clone_Reversed, 0x4B6BC0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B2EE0);

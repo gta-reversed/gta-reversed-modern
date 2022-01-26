@@ -2,6 +2,9 @@
 
 void CEventInAir::InjectHooks()
 {
+    RH_ScopedClass(CEventInAir);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B0CB0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B0C00);
 }
@@ -43,6 +46,9 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 
 void CEventStuckInAir::InjectHooks()
 {
+    RH_ScopedClass(CEventStuckInAir);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1490);
     RH_ScopedInstall(GetEventPriority_Reversed, 0x4B1600);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1580);

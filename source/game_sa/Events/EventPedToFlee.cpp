@@ -2,6 +2,9 @@
 
 void CEventPedToFlee::InjectHooks()
 {
+    RH_ScopedClass(CEventPedToFlee);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AF240);
     RH_ScopedInstall(Clone_Reversed, 0x4B73D0);
 }

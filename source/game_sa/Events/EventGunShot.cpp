@@ -4,6 +4,9 @@ float& CEventGunShot::ms_fGunShotSenseRangeForRiot2 = *(float*)0x8A625C;
 
 void CEventGunShot::InjectHooks()
 {
+    RH_ScopedClass(CEventGunShot);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AC610);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B2CD0);
     RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4AC810);

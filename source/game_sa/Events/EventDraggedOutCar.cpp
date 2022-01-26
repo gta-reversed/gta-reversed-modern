@@ -2,6 +2,9 @@
 
 void CEventDraggedOutCar::InjectHooks()
 {
+    RH_ScopedClass(CEventDraggedOutCar);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AD250);
     RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
 }

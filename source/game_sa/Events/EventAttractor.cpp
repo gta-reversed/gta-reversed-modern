@@ -6,6 +6,9 @@
 
 void CEventAttractor::InjectHooks()
 {
+    RH_ScopedClass(CEventAttractor);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AF350);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AF4B0);
     RH_ScopedInstall(CloneEditable_Reversed, 0x4B7440);
@@ -14,6 +17,9 @@ void CEventAttractor::InjectHooks()
 
 void CEventScriptedAttractor::InjectHooks()
 {
+    RH_ScopedClass(CEventScriptedAttractor);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FEF40);
 }
 

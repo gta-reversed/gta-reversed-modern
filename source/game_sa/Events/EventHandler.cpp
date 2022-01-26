@@ -7,6 +7,9 @@
 #include "TaskComplexStuckInAir.h"
 
 void CEventHandler::InjectHooks() {
+    RH_ScopedClass(CEventHandler);
+    RH_ScopedCategory("Events");
+
     using namespace ReversibleHooks;
 
     RH_ScopedInstall(Flush, 0x4C3790);

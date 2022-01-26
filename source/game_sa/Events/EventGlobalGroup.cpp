@@ -2,6 +2,9 @@
 
 void CEventGlobalGroup::InjectHooks()
 {
+    RH_ScopedClass(CEventGlobalGroup);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(GetSoundLevel, 0x4AB900);
     RH_ScopedInstall(AddEventsToPed, 0x4AB9C0);
     RH_ScopedInstall(AddEventsToGroup, 0x4AB8A0);

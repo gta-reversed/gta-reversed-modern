@@ -8,6 +8,9 @@
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
+    RH_ScopedClass(CEventPedCollisionWithPed);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AC990);
     RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ACAD0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4ACB10);
@@ -15,22 +18,34 @@ void CEventPedCollisionWithPed::InjectHooks()
 
 void CEventPedCollisionWithPlayer::InjectHooks()
 {
+    RH_ScopedClass(CEventPedCollisionWithPlayer);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FED40);
 }
 
 void CEventPlayerCollisionWithPed::InjectHooks()
 {
+    RH_ScopedClass(CEventPlayerCollisionWithPed);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FEE40);
 }
 
 void CEventObjectCollision::InjectHooks()
 {
+    RH_ScopedClass(CEventObjectCollision);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4ACCF0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4ACE30);
 }
 
 void CEventBuildingCollision::InjectHooks()
 {
+    RH_ScopedClass(CEventBuildingCollision);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4ACF00);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AD070);
     RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);

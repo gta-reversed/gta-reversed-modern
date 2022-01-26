@@ -2,6 +2,9 @@
 
 void CEventAcquaintancePed::InjectHooks()
 {
+    RH_ScopedClass(CEventAcquaintancePed);
+    RH_ScopedCategory("Events");
+
     CEventAcquaintancePedHate::InjectHooks();
     CEventAcquaintancePedHateBadlyLit::InjectHooks();
     RH_ScopedInstall(Constructor, 0x4AF820);
@@ -12,6 +15,9 @@ void CEventAcquaintancePed::InjectHooks()
 
 void CEventSeenCop::InjectHooks()
 {
+    RH_ScopedClass(CEventSeenCop);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FF380);
 }
 
@@ -91,6 +97,9 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
+    RH_ScopedClass(CEventAcquaintancePedHate);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x420E70);
 }
 
@@ -103,6 +112,9 @@ CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
+    RH_ScopedClass(CEventAcquaintancePedHateBadlyLit);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x5FF250);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA90);
 }

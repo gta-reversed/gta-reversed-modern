@@ -6,6 +6,9 @@
 
 void CEventVehicleDamage::InjectHooks()
 {
+    RH_ScopedClass(CEventVehicleDamage);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B18D0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1A00);
     RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4B1A90);

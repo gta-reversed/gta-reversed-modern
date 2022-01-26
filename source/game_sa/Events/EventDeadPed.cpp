@@ -6,6 +6,9 @@
 
 void CEventDeadPed::InjectHooks()
 {
+    RH_ScopedClass(CEventDeadPed);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4ADEA0);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B4830);
     RH_ScopedInstall(CloneEditable_Reversed, 0x4B6E70);

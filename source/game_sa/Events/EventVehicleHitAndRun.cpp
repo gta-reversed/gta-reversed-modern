@@ -2,6 +2,9 @@
 
 void CEventVehicleHitAndRun::InjectHooks()
 {
+    RH_ScopedClass(CEventVehicleHitAndRun);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AE990);
     RH_ScopedInstall(Clone_Reversed, 0x4B7100);
     RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B27D0);

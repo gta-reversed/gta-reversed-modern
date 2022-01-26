@@ -6,6 +6,9 @@
 #include "IKChainManager_c.h"
 
 void CEventEditableResponse::InjectHooks() {
+    RH_ScopedClass(CEventEditableResponse);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4AC450);
     RH_ScopedInstall(Clone_Reversed, 0x420ED0);
     RH_ScopedInstall(HasEditableResponse_Reversed, 0x420EF0);
@@ -21,17 +24,26 @@ void CEventEditableResponse::InjectHooks() {
 
 void CEventSpecial::InjectHooks()
 {
+    RH_ScopedClass(CEventSpecial);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1AE0);
 }
 
 void CEventFireNearby::InjectHooks()
 {
+    RH_ScopedClass(CEventFireNearby);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B1F10);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B1F90);
 }
 
 void CEventDanger::InjectHooks()
 {
+    RH_ScopedClass(CEventDanger);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B2600);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B5470);
     RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B54E0);
@@ -40,6 +52,9 @@ void CEventDanger::InjectHooks()
 
 void CEventSeenPanickedPed::InjectHooks()
 {
+    RH_ScopedClass(CEventSeenPanickedPed);
+    RH_ScopedCategory("Events");
+
     RH_ScopedInstall(Constructor, 0x4B2080);
     RH_ScopedInstall(AffectsPed_Reversed, 0x4B53C0);
 }
