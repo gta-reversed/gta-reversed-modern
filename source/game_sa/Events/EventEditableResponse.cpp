@@ -44,6 +44,7 @@ void CEventSeenPanickedPed::InjectHooks()
     ReversibleHooks::Install("CEventSeenPanickedPed", "AffectsPed", 0x4B53C0, &CEventSeenPanickedPed::AffectsPed_Reversed);
 }
 
+// 0x4AC450
 CEventEditableResponse::CEventEditableResponse() {
     m_bAddToEventGroup = true;
     m_taskId = TASK_NONE;
@@ -55,20 +56,13 @@ CEventEditableResponse::~CEventEditableResponse() {
 }
 
 CEventEditableResponse* CEventEditableResponse::Constructor() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4AC450>(this);
-#else
     this->CEventEditableResponse::CEventEditableResponse();
     return this;
-#endif
 }
 
+// 0x420ED0
 CEvent* CEventEditableResponse::Clone() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((CEvent * (__thiscall*)(CEvent*))0x420ED0)(this);
-#else
     return CEventEditableResponse::Clone_Reversed();
-#endif
 }
 
 // 0x420EF0
@@ -85,18 +79,13 @@ CEvent* CEventEditableResponse::Clone_Reversed() {
 }
 
 
+// 0x4AC490
 bool CEventEditableResponse::WillRespond() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AC490, CEventEditableResponse*>(this);
-#else
     return m_taskId != TASK_NONE;
-#endif
 }
 
+// 0x4AC4A0
 void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
-#ifdef USE_DEFAULT_FUNCTIONS
-   plugin::CallMethod<0x4AC4A0, CEventEditableResponse*, CPed*>(this, ped);
-#else
     CVehicle* pVehicle = ped->m_pVehicle;
     if (ped->bInVehicle && DoInformVehicleOccupants(ped) && m_bAddToEventGroup) {
         CPed* pDriver = pVehicle->m_pDriver;
@@ -118,13 +107,13 @@ void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
             }
         }
     }
-#endif
 }
 
 // 0x4B2B00
 void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
     if (!m_bAddToEventGroup)
         return;
+
     uint32 numPedsToScan = ped->m_pIntelligence->m_nDmNumPedsToScan;
     if (!numPedsToScan)
         return;
@@ -164,25 +153,21 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
     }
 }
 
+// 0x4B7DF0
 void CEventEditableResponse::InformGroup(CPed* ped) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4B7DF0, CEventEditableResponse*, CPed*>(this, ped);
-#else
     CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(ped);
     if (!pPedGroup)
         return;
+
     auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
     pClonedEvent->m_taskId = TASK_NONE;
     pClonedEvent->m_bAddToEventGroup = false;
     if (!CInformGroupEventQueue::Add(ped, pPedGroup, pClonedEvent))
         delete pClonedEvent;
-#endif
 }
 
+// 0x4AC5A0
 void CEventEditableResponse::TriggerLookAt(CPed* ped) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4AC5A0, CEventEditableResponse*, CPed*>(this, ped);
-#else
     CEntity* pSourceEntity = GetSourceEntity();
     if (pSourceEntity) {
         if (pSourceEntity->m_nType == ENTITY_TYPE_PED) {
@@ -192,13 +177,10 @@ void CEventEditableResponse::TriggerLookAt(CPed* ped) {
         }
         g_ikChainMan.LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
     }
-#endif
 }
 
+// 0x4B56C0
 void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMakerTypeInGroup) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4B56C0, CEventEditableResponse*, CPed*, bool>(this, ped, bDecisionMakerTypeInGroup);
-#else
     if (m_taskId == TASK_NONE) {
         int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
         CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
@@ -208,13 +190,10 @@ void CEventEditableResponse::ComputeResponseTaskType(CPed* ped, bool bDecisionMa
             -1,
             bDecisionMakerTypeInGroup, &m_taskId, &field_10);
     }
-#endif
 }
 
+// 0x4B57A0
 void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x4B57A0, CEventEditableResponse*, CPedGroup*>(this, pedGroup);
-#else
     if (m_taskId == TASK_NONE) {
         CPed* pGroupLeader = pedGroup->m_groupMembership.GetLeader();
         CPed* pMember = pGroupLeader;
@@ -250,20 +229,16 @@ void CEventEditableResponse::ComputeResponseTaskType(CPedGroup* pedGroup) {
             }
         }
     }
-#endif
 }
 
+// 0x4B5730
 bool CEventEditableResponse::ComputeResponseTaskOfType(CPed* ped, int32 taskId) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B5730, CEventEditableResponse*, CPed*, int32>(this, ped, taskId);
-#else
     int16 outTaskId = -1;
     int16 unknownId = -1;
     int32 eventSourceType = CEventSource::ComputeEventSourceType(*this, *ped);
     CDecisionMakerTypes::GetInstance()->MakeDecision(ped, GetEventType(), eventSourceType, ped->bInVehicle,
         -1, -1, -1, taskId, false, &outTaskId, &unknownId);
     return taskId == outTaskId;
-#endif
 }
 
 CEventSpecial* CEventSpecial::Constructor()
@@ -283,13 +258,10 @@ CEventFireNearby* CEventFireNearby::Constructor(CVector const& position)
     return this;
 }
 
+// 0x4B1F90
 bool CEventFireNearby::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1F90, CEventFireNearby*, CPed*>(this, ped);
-#else
     return CEventFireNearby::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventFireNearby::AffectsPed_Reversed(CPed* ped)
@@ -320,13 +292,10 @@ CEventDanger* CEventDanger::Constructor(CEntity* dangerFrom, float dangerRadius)
     return this;
 }
 
+// 0x4B5470
 bool CEventDanger::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B5470, CEventDanger*, CPed*>(this, ped);
-#else
     return CEventDanger::AffectsPed_Reversed(ped);
-#endif
 }
 
 // 0x4B54E0

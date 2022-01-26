@@ -16,6 +16,7 @@ void CScriptedBrainTaskStore::InjectHooks()
     ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_task", 0x6357F0, (void(*)(CTask*)) & CScriptedBrainTaskStore::Clear);
 }
 
+// 0x62EC40
 CScriptedBrainTaskEntry::CScriptedBrainTaskEntry()
 {
     m_ped = nullptr;
@@ -24,19 +25,13 @@ CScriptedBrainTaskEntry::CScriptedBrainTaskEntry()
 
 CScriptedBrainTaskEntry* CScriptedBrainTaskEntry::Constructor()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CScriptedBrainTaskEntry*, 0x62EC40, CScriptedBrainTaskEntry*>(this);
-#else
     this->CScriptedBrainTaskEntry::CScriptedBrainTaskEntry();
     return this;
-#endif
 }
 
+// 0x635720
 CTask* CScriptedBrainTaskStore::SetTask(CPed* ped, CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<CTask*, 0x635720, CPed*, CTask*>(ped, task);
-#else
     int32 freeEntryIndex = -1;
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
@@ -61,28 +56,22 @@ CTask* CScriptedBrainTaskStore::SetTask(CPed* ped, CTask* task)
         delete entry.m_task;
     entry.m_task = task;
     return task;
-#endif
 }
 
+// 0x6357C0
 CTask* CScriptedBrainTaskStore::GetTask(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<CTask*, 0x6357C0, CPed*>(ped);
-#else
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
         if (entry.m_ped == ped)
             return entry.m_task;
     }
     return nullptr;
-#endif
 }
 
+// 0x635850
 void CScriptedBrainTaskStore::Clear(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x635850, CPed*>(ped);
-#else
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
         if (entry.m_ped == ped) {
@@ -95,14 +84,11 @@ void CScriptedBrainTaskStore::Clear(CPed* ped)
             return;
         }
     }
-#endif
 }
 
+// 0x6357F0
 void CScriptedBrainTaskStore::Clear(CTask* task)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::Call<0x6357F0, CTask*>(task);
-#else
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
         if (entry.m_task == task) {
@@ -115,5 +101,4 @@ void CScriptedBrainTaskStore::Clear(CTask* task)
             return;
         }
     }
-#endif
 }

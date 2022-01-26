@@ -13,6 +13,7 @@ void CEventVehicleDamage::InjectHooks()
     ReversibleHooks::Install("CEventVehicleDamage", "GetSourceEntity_Reversed", 0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
 }
 
+// 0x4B18D0
 CEventVehicleDamage::CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)
 {
     m_attacker = attacker;
@@ -34,31 +35,20 @@ CEventVehicleDamage::~CEventVehicleDamage()
 
 CEventVehicleDamage* CEventVehicleDamage::Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleDamage*, 0x4B18D0, CEvent*, CVehicle*, CEntity*, eWeaponType> (this, vehicle, attacker, weaponType);
-#else
-
     this->CEventVehicleDamage::CEventVehicleDamage(vehicle, attacker, weaponType);
     return this;
-#endif
 }
 
+// 0x4B1A00
 bool CEventVehicleDamage::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1A00, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleDamage::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B1A90
 bool CEventVehicleDamage::IsCriminalEvent()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1A90, CEvent*>(this);
-#else
     return CEventVehicleDamage::IsCriminalEvent_Reversed();
-#endif
 }
 
 // 0x4B50B0
