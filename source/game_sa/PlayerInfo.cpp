@@ -7,7 +7,6 @@ void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x571920); hooking ctor will produce bugs with weapons, you will never give weapon through cheat or something
     RH_ScopedInstall(CancelPlayerEnteringCars, 0x56E860);
     // RH_ScopedInstall(FindObjectToSteal, 0x56DBD0);

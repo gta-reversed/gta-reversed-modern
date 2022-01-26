@@ -1105,7 +1105,6 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedClass(CTaskSimplePlayerOnFoot);
     RH_ScopedCategory("Tasks/TaskTypes");
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x685750);
     RH_ScopedInstall(Destructor, 0x6857D0);
     RH_ScopedInstall(ProcessPed_Reversed, 0x688810);

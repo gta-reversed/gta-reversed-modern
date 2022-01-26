@@ -8,7 +8,6 @@ void BreakManager_c::InjectHooks() {
     RH_ScopedClass(BreakManager_c);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x59E650);
     RH_ScopedInstall(Exit, 0x59E660);
     RH_ScopedInstall(ResetAll, 0x59E720);

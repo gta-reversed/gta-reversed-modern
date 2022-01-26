@@ -9,14 +9,13 @@ void CClothesBuilder::InjectHooks() {
     RH_ScopedClass(CClothesBuilder);
     RH_ScopedCategory("Collision");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
     // RH_ScopedInstall(RequestGeometry, 0x5A41C0);
     // RH_ScopedInstall(RequestTexture, 0x5A4220); 
     // todo: RH_ScopedInstall(nullptr, 0x5A42B0); 
-    // todo: RH_ScopedInstall(nullptr, 0x5A4380);
+    // todo: RH_ScopedInstall(nullptr, 0x5A4380); AtomicInstanceCB
     // todo: RH_ScopedInstall(nullptr, 0x5A43A0);
-    // todo: RH_ScopedInstall(nullptr, 0x5A44A0);
+    // todo: RH_ScopedInstall(nullptr, 0x5A44A0); DestroyTextureCB
     // RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0);
     // RH_ScopedInstall(ReleaseGeometry, 0x5A47B0);
     // RH_ScopedInstall(FindAtomicFromNameCB, 0x5A47E0);

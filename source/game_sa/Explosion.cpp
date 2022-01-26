@@ -11,7 +11,6 @@ void CExplosion::InjectHooks() {
     RH_ScopedClass(CExplosion);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(ClearAllExplosions, 0x736840);
     RH_ScopedInstall(Shutdown, 0x7368F0);
     RH_ScopedInstall(GetExplosionActiveCounter, 0x736900);

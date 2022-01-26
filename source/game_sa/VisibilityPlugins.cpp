@@ -34,7 +34,6 @@ void CVisibilityPlugins::InjectHooks() {
     RH_ScopedClass(CVisibilityPlugins);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x733A20);
     RH_ScopedInstall(Shutdown, 0x732EB0);
     RH_ScopedInstall(AtomicCopyConstructor, 0x732170);

@@ -6,7 +6,6 @@ void CGroupEventHandler::InjectHooks() {
     RH_ScopedClass(CGroupEventHandler);
     RH_ScopedCategory("Events");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(IsKillTaskAppropriate, 0x5F7A60);
     // RH_ScopedInstall(ComputeWalkAlongsideResponse, 0x5FA910);
     // RH_ScopedInstall(ComputeStareResponse, 0x5F9BD0);

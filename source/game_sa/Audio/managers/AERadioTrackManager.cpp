@@ -48,7 +48,6 @@ void CAERadioTrackManager::InjectHooks() {
     RH_ScopedClass(CAERadioTrackManager);
     RH_ScopedCategory("Audio/Managers");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Load, 0x5D40E0);
     // RH_ScopedInstall(Save, 0x5D3EE0);
     // RH_ScopedInstall(Initialise, 0x5B9390);

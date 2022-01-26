@@ -137,7 +137,6 @@ void CPostEffects::InjectHooks() {
     RH_ScopedClass(CPostEffects);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Initialise, 0x704630);
     RH_ScopedInstall(Close, 0x7010C0);
     // RH_ScopedInstall(DoScreenModeDependentInitializations, 0x7046D0);

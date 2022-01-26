@@ -9,8 +9,7 @@ void CCustomBuildingDNPipeline::InjectHooks() {
     RH_ScopedClass(CCustomBuildingDNPipeline);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
-    // Install("CCustomBuildingDNPipeline", "", 0x5D7D90, &CCustomBuildingDNPipeline::);
+// Install("CCustomBuildingDNPipeline", "", 0x5D7D90, &CCustomBuildingDNPipeline::);
 }
 
 // 0x5D7200

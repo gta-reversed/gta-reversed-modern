@@ -10,7 +10,6 @@ void CAEAmbienceTrackManager::InjectHooks() {
     RH_ScopedClass(CAEAmbienceTrackManager);
     RH_ScopedCategory("Audio/Managers");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Reset, 0x4D6CA0);
     RH_ScopedInstall(IsAmbienceTrackActive, 0x4D6CF0);
     RH_ScopedInstall(IsAmbienceRadioActive, 0x4D6D40);

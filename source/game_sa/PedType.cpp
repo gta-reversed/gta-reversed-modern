@@ -17,7 +17,6 @@ void CPedType::InjectHooks() {
     RH_ScopedClass(CPedType);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x608E40);
     RH_ScopedInstall(Shutdown, 0x608B00);
     RH_ScopedInstall(Save, 0x5D3CD0);

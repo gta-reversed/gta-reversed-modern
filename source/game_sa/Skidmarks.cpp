@@ -10,7 +10,6 @@ void CSkidmarks::InjectHooks() {
     RH_ScopedClass(CSkidmarks);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x7204E0);
     RH_ScopedInstall(Shutdown, 0x720570);
     RH_ScopedInstall(Clear, 0x720590);

@@ -21,7 +21,6 @@ void CSprite2d::InjectHooks() {
     RH_ScopedClass(CSprite2d);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x727230);
     RH_ScopedInstall(Destructor, 0x7281E0);
 

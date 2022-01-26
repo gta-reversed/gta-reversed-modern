@@ -8,7 +8,6 @@ void CAEAudioHardware::InjectHooks() {
     RH_ScopedClass(CAEAudioHardware);
     RH_ScopedCategory("Audio/Hardware");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4D83E0);
     // RH_ScopedInstall(Destructor, 0x4D83A0);
     RH_ScopedInstall(AllocateChannels, 0x5B9340);

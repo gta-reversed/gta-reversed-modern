@@ -6,7 +6,6 @@ void CPlaneTrail::InjectHooks() {
     RH_ScopedClass(CPlaneTrail);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x717160);
     RH_ScopedInstall(Render, 0x717180);
     RH_ScopedInstall(RegisterPoint, 0x7172D0);

@@ -7,7 +7,6 @@ void CShinyTexts::InjectHooks() {
     RH_ScopedClass(CShinyTexts);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x7221B0);
     RH_ScopedInstall(RenderOutGeometryBuffer, 0x7221C0);
     RH_ScopedInstall(Render, 0x724890);

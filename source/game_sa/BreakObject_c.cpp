@@ -6,7 +6,6 @@ void BreakObject_c::InjectHooks() {
     RH_ScopedClass(BreakObject_c);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(CalcGroupCenter, 0x59D190);
     RH_ScopedInstall(SetGroupData, 0x59D570);
     RH_ScopedInstall(SetBreakInfo, 0x59D7F0);

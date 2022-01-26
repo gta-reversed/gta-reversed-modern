@@ -6,7 +6,6 @@ void CPedAttractor::InjectHooks() {
     RH_ScopedClass(CPedAttractor);
     RH_ScopedCategory("Attractors");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5EDFB0);
     // RH_ScopedInstall(Destructor, 0x5EC410);
     // RH_ScopedInstall(SetTaskForPed, 0x5EECA0);

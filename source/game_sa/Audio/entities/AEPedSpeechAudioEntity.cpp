@@ -413,7 +413,6 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     RH_ScopedClass(CAEPedSpeechAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x4E4F10);
     // RH_ScopedInstall(IsGlobalContextImportantForInterupting, 0x4E4600);
     // RH_ScopedInstall(IsGlobalContextUberImportant, 0x4E46F0);

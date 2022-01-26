@@ -10,7 +10,6 @@ void CAECutsceneTrackManager::InjectHooks() {
     RH_ScopedClass(CAECutsceneTrackManager);
     RH_ScopedCategory("Audio/Managers");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5B9630);
     RH_ScopedInstall(PlayPreloadedCutsceneTrack, 0x4DBE70);
     RH_ScopedInstall(StopCutsceneTrack, 0x4DBE80);

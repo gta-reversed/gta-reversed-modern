@@ -48,7 +48,6 @@ void CFont::InjectHooks() {
     RH_ScopedClass(CFont);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5BA690);
     RH_ScopedInstall(Shutdown, 0x7189B0);
     // RH_ScopedInstall(PrintChar, 0x718A10);

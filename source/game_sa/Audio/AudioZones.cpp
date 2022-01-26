@@ -17,7 +17,6 @@ void CAudioZones::InjectHooks() {
     RH_ScopedClass(CAudioZones);
     RH_ScopedCategory("Audio");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Init, 0x5081A0);
     // RH_ScopedInstall(RegisterAudioSphere, 0x5081C0);
     // RH_ScopedInstall(RegisterAudioBox, 0x508240);

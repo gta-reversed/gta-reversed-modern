@@ -39,7 +39,6 @@ void CRestart::InjectHooks() {
     RH_ScopedClass(CRestart);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x460630);
     RH_ScopedInstall(AddHospitalRestartPoint, 0x460730);
     RH_ScopedInstall(AddPoliceRestartPoint, 0x460780);

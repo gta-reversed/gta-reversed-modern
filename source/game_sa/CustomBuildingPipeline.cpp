@@ -8,7 +8,6 @@ void CCustomBuildingPipeline::InjectHooks() {
     RH_ScopedClass(CCustomBuildingPipeline);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(CreatePipe, 0x5D7D90);
     // RH_ScopedInstall(DestroyPipe, 0x5D7380);
     // RH_ScopedInstall(CustomPipeAtomicSetup, 0x5D7E50);

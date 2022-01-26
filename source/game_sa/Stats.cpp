@@ -39,7 +39,6 @@ void CStats::InjectHooks() {
     RH_ScopedClass(CStats);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x55C0C0);
     RH_ScopedInstall(GetStatValue, 0x558E40);
     RH_ScopedInstall(SetStatValue, 0x55A070);

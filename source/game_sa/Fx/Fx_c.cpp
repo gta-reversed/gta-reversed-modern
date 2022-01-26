@@ -19,7 +19,6 @@ void Fx_c::InjectHooks() {
     RH_ScopedClass(Fx_c);
     RH_ScopedCategory("Fx");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x49E620);
     // RH_ScopedInstall(Destructor, 0x49E630);
     RH_ScopedInstall(InitStaticSystems, 0x49E660);

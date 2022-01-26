@@ -18,7 +18,6 @@ void CGenericGameStorage::InjectHooks() {
     // which is non-standard, so.. yeah, not really possible to reverse this garbage
     // until we reverse everything.
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(ReportError, 0x5D08C0);
     RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, true);
     RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, true);

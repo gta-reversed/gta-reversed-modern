@@ -8,7 +8,6 @@ void CTaskSequences::InjectHooks() {
     RH_ScopedClass(CTaskSequences);
     RH_ScopedCategory("Tasks");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x632D90);
     RH_ScopedInstall(CleanUpForShutdown, 0x632DD0);
 }

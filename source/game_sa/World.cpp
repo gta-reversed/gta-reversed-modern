@@ -42,7 +42,6 @@ void CWorld::InjectHooks() {
     RH_ScopedClass(CWorld);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5631E0);
     RH_ScopedInstall(ShutDown, 0x564050);
     RH_ScopedInstall(Add, 0x563220);

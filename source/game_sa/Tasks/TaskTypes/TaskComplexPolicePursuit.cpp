@@ -60,7 +60,6 @@ void CTaskComplexPolicePursuit::SetWeapon(CPed* ped) {
 void CTaskComplexPolicePursuit::InjectHooks() {
     RH_ScopedClass(CTaskComplexPolicePursuit);
     RH_ScopedCategory("Tasks/TaskTypes");
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x68BA70);
     // RH_ScopedInstall(SetWeapon, 0x68BAD0);
     // RH_ScopedInstall(ClearPursuit, 0x68BD90);

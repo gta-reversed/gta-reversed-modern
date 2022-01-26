@@ -114,7 +114,6 @@ void CAEScriptAudioEntity::InjectHooks() {
     RH_ScopedClass(CAEScriptAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5074D0);
     RH_ScopedInstall(Initialise, 0x5B9B60);
     // RH_ScopedInstall(Reset, 0x4EC150);

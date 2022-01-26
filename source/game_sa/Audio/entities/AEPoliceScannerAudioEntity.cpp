@@ -298,7 +298,6 @@ void CAEPoliceScannerAudioEntity::InjectHooks() {
     RH_ScopedClass(CAEPoliceScannerAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x56DA00);
     RH_ScopedInstall(Destructor, 0x4E6E00);
     RH_ScopedInstall(StaticInitialise, 0x5B9C30);

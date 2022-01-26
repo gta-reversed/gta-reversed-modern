@@ -10,8 +10,7 @@ void CQuadBike::InjectHooks() {
     RH_ScopedClass(CQuadBike);
     RH_ScopedCategory("Vehicle/Ped");
 
-    using namespace ReversibleHooks;
-    // todo: RH_ScopedInstall(Constructor, 0x6CE370);
+// todo: RH_ScopedInstall(Constructor, 0x6CE370);
     RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
     RH_ScopedInstall(GetRideAnimData_Reversed, 0x6CDC90);
     RH_ScopedInstall(PreRender_Reversed, 0x6CEAD0);

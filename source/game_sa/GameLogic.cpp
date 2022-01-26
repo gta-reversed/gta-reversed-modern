@@ -34,7 +34,6 @@ void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
     // RH_ScopedInstall(ClearSkip, 0x441560);
     // RH_ScopedInstall(DoWeaponStuffAtStartOf2PlayerGame, 0x4428B0);

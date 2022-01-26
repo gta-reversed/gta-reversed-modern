@@ -8,7 +8,6 @@ void CFireManager::InjectHooks() {
     RH_ScopedClass(CFireManager);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Constructor, 0x539DA0);
     RH_ScopedInstall(Destructor, 0x538BB0);
     RH_ScopedInstall(Init, 0x538BC0);

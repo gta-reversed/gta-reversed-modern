@@ -7,7 +7,6 @@ void CQuadTreeNode::InjectHooks()
     RH_ScopedClass(CQuadTreeNode);
     RH_ScopedCategory("Core");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(InitPool, 0x552C00);
     RH_ScopedOverloadedInstall(FindSector, "rect", 0x5525A0, int32(CQuadTreeNode::*)(const CRect&));
     RH_ScopedOverloadedInstall(FindSector, "vec", 0x552640, int32(CQuadTreeNode::*)(const CVector2D&));

@@ -8,7 +8,6 @@ void CHandShaker::InjectHooks() {
     RH_ScopedClass(CHandShaker);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(SetDefaults, 0x517330);
     RH_ScopedInstall(Reset, 0x50D860);
     // RH_ScopedInstall(Process, 0x50D930);

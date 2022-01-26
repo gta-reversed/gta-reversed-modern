@@ -5,7 +5,6 @@ void CGarage::InjectHooks()
     RH_ScopedClass(CGarage);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(BuildRotatedDoorMatrix, 0x4479F0);
     RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
 }

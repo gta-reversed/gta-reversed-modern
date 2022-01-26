@@ -20,8 +20,7 @@ void CPlantMgr::InjectHooks() {
     RH_ScopedClass(CPlantMgr);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
-    // Install("CPlantMgr", "", 0x0, &CPlantMgr::);
+// Install("CPlantMgr", "", 0x0, &CPlantMgr::);
 }
 
 // 0x5DD910

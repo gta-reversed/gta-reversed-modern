@@ -9,7 +9,6 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedClass(IKChainManager_c);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
     // RH_ScopedInstall(AbortPointArm, 0x6182F0);
     // RH_ScopedInstall(CanAccept, 0x618800);

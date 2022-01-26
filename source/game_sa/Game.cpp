@@ -40,7 +40,6 @@ void CGame::InjectHooks() {
     RH_ScopedClass(CGame);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(CanSeeOutSideFromCurrArea, 0x53C4A0);
     // RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);
     RH_ScopedInstall(Init1, 0x5BF840);

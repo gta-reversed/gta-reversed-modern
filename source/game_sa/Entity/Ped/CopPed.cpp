@@ -6,7 +6,6 @@ void CCopPed::InjectHooks() {
     RH_ScopedClass(CCopPed);
     RH_ScopedCategory("Entity/Ped");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x5DDC60); todo: unhook and test when core components of Ped will be reversed
     RH_ScopedInstall(Destructor, 0x5DE0D0);
     RH_ScopedInstall(SetPartner, 0x5DDE80);

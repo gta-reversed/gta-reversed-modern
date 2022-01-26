@@ -29,7 +29,6 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedClass(CPedIntelligence);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(GetPedEntities, 0x4893E0);
     RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
     RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0);

@@ -36,7 +36,6 @@ void CMirrors::InjectHooks() {
     RH_ScopedClass(CMirrors);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x723000);
     RH_ScopedInstall(ShutDown, 0x723050);
     RH_ScopedInstall(CreateBuffer, 0x7230A0);

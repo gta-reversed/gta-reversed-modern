@@ -9,7 +9,6 @@ void CAECollisionAudioEntity::InjectHooks() {
     RH_ScopedClass(CAECollisionAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Initialise, 0x5B9BD0);
     RH_ScopedInstall(InitialisePostLoading, 0x4DA050);
     // RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0);

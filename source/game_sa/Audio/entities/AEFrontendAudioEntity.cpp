@@ -107,7 +107,6 @@ void CAEFrontendAudioEntity::InjectHooks() {
     RH_ScopedClass(CAEFrontendAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5B9AB0);
     RH_ScopedInstall(Reset, 0x4DD440);
     // RH_ScopedInstall(AddAudioEvent, 0x4DD4A0);

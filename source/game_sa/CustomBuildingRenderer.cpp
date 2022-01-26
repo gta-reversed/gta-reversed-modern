@@ -9,7 +9,6 @@ void CCustomBuildingRenderer::InjectHooks() {
     RH_ScopedClass(CCustomBuildingRenderer);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x5D7EC0);
     RH_ScopedInstall(Shutdown, 0x5D7EE0);
     RH_ScopedInstall(PluginAttach, 0x5D7EF0);

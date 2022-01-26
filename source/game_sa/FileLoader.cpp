@@ -20,7 +20,6 @@ void CFileLoader::InjectHooks() {
     RH_ScopedClass(CFileLoader);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(AddTexDictionaries, 0x5B3910);
     RH_ScopedInstall(LoadTexDictionary, 0x5B3860);
     RH_ScopedOverloadedInstall(LoadAtomicFile, "stream", 0x5371F0, bool(*)(RwStream*, unsigned));

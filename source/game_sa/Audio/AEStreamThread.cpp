@@ -12,7 +12,6 @@ void CAEStreamThread::InjectHooks() {
     RH_ScopedClass(CAEStreamThread);
     RH_ScopedCategory("Audio");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Initialise, 0x4F1680);
     RH_ScopedInstall(Start, 0x4F11F0);
     RH_ScopedInstall(Pause, 0x4F1200);

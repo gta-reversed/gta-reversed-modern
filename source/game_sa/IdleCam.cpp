@@ -9,7 +9,6 @@ void CIdleCam::InjectHooks() {
     RH_ScopedClass(CIdleCam);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0);
     // RH_ScopedInstall(Init, 0x50E6D0);
     // RH_ScopedInstall(Reset, 0x50A160);

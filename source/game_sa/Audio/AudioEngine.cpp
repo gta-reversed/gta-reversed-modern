@@ -15,7 +15,6 @@ void CAudioEngine::InjectHooks() {
     RH_ScopedClass(CAudioEngine);
     RH_ScopedCategory("Audio");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(CAudioEngine, 0x507670);   default
     // Install("CAudioEngine", "~CAudioEngine", 0x506CD0, &CAudioEngine::~CAudioEngine); default
     RH_ScopedInstall(Initialise, 0x5B9C60);

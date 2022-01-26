@@ -15,7 +15,6 @@ void C_PcSave::InjectHooks() {
 
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(SetSaveDirectory, 0x619040, true);
     RH_ScopedInstall(GenerateGameFilename, 0x6190A0, true);
     RH_ScopedInstall(PopulateSlotInfo, 0x619140, true);

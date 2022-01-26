@@ -45,7 +45,6 @@ void CPopulation::InjectHooks() {
     RH_ScopedClass(CPopulation);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(ConvertToRealObject, 0x614580);
     RH_ScopedInstall(ConvertToDummyObject, 0x614670);
     RH_ScopedInstall(RemovePed, 0x610F20);

@@ -6,7 +6,6 @@ void FxMemoryPool_c::InjectHooks() {
     RH_ScopedClass(FxMemoryPool_c);
     RH_ScopedCategory("Fx");
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Init, 0x4A9C30);
     RH_ScopedInstall(Exit, 0x4A9C80);
     RH_ScopedInstall(Reset, 0x4A9C90);

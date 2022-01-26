@@ -10,7 +10,6 @@ void CSprite::InjectHooks() {
     RH_ScopedClass(CSprite);
     RH_ScopedCategoryRoot();
 
-    using namespace ReversibleHooks;
     RH_ScopedInstall(Initialise, 0x70CE10);
     RH_ScopedInstall(InitSpriteBuffer, 0x70CFB0);
     // RH_ScopedInstall(FlushSpriteBuffer, 0x70CF20);

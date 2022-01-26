@@ -7,7 +7,6 @@ CAEPedlessSpeechAudioEntity::CAEPedlessSpeechAudioEntity() : CAEPedSpeechAudioEn
     // NOP
 }
 
-
 // 0x4E4E10
 void CAEPedlessSpeechAudioEntity::Initialise() {
     m_pEntity                  = nullptr;
@@ -77,7 +76,6 @@ void CAEPedlessSpeechAudioEntity::InjectHooks() {
     RH_ScopedClass(CAEPedlessSpeechAudioEntity);
     RH_ScopedCategory("Audio/Entities");
 
-    using namespace ReversibleHooks;
     // RH_ScopedInstall(Constructor, 0x4E6070);
     RH_ScopedInstall(GetPedType, 0x4E60B0);
     RH_ScopedInstall(IsPedFemaleForAudio, 0x4E60C0);
