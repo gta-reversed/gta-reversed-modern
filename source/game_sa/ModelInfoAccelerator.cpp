@@ -2,15 +2,18 @@
 
 void CModelInfoAccelerator::InjectHooks()
 {
-    ReversibleHooks::Install("CModelInfoAccelerator", "Init", 0x4C6A80, &CModelInfoAccelerator::Init);
-    ReversibleHooks::Install("CModelInfoAccelerator", "AddModelInfoId", 0x4C6AA0, &CModelInfoAccelerator::AddModelInfoId);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetNextModelInfoId", 0x4C6AC0, &CModelInfoAccelerator::GetNextModelInfoId);
-    ReversibleHooks::Install("CModelInfoAccelerator", "AllocModelInfoIds", 0x4C6AE0, &CModelInfoAccelerator::AllocModelInfoIds);
-    ReversibleHooks::Install("CModelInfoAccelerator", "FreeModelInfoIds", 0x4C6B10, &CModelInfoAccelerator::FreeModelInfoIds);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetEntry", 0x4C6B30, &CModelInfoAccelerator::GetEntry);
-    ReversibleHooks::Install("CModelInfoAccelerator", "End", 0x4C6B40, &CModelInfoAccelerator::End);
-    ReversibleHooks::Install("CModelInfoAccelerator", "GetModelInfoIdFile", 0x4C6B70, &CModelInfoAccelerator::GetModelInfoIdFile);
-    ReversibleHooks::Install("CModelInfoAccelerator", "EndOfLoadPhase", 0x4C6BD0, &CModelInfoAccelerator::EndOfLoadPhase);
+    RH_ScopedClass(CModelInfoAccelerator);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x4C6A80);
+    RH_ScopedInstall(AddModelInfoId, 0x4C6AA0);
+    RH_ScopedInstall(GetNextModelInfoId, 0x4C6AC0);
+    RH_ScopedInstall(AllocModelInfoIds, 0x4C6AE0);
+    RH_ScopedInstall(FreeModelInfoIds, 0x4C6B10);
+    RH_ScopedInstall(GetEntry, 0x4C6B30);
+    RH_ScopedInstall(End, 0x4C6B40);
+    RH_ScopedInstall(GetModelInfoIdFile, 0x4C6B70);
+    RH_ScopedInstall(EndOfLoadPhase, 0x4C6BD0);
 }
 
 void CModelInfoAccelerator::Init()

@@ -42,10 +42,12 @@ uint32& CPopulation::NumMiamiViceCops = *(uint32*)0xC0FCB8;
 uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 
 void CPopulation::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
-    Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
-    Install("CPopulation", "RemovePed", 0x610F20, &CPopulation::RemovePed);
+    RH_ScopedClass(CPopulation);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(ConvertToRealObject, 0x614580);
+    RH_ScopedInstall(ConvertToDummyObject, 0x614670);
+    RH_ScopedInstall(RemovePed, 0x610F20);
 }
 
 // 0x5B6D40

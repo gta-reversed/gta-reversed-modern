@@ -6,11 +6,14 @@
 
 void CEventVehicleDamage::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleDamage", "Constructor", 0x4B18D0, &CEventVehicleDamage::Constructor);
-    ReversibleHooks::Install("CEventVehicleDamage", "AffectsPed_Reversed", 0x4B1A00, &CEventVehicleDamage::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventVehicleDamage", "IsCriminalEvent_Reversed", 0x4B1A90, &CEventVehicleDamage::IsCriminalEvent_Reversed);
-    ReversibleHooks::Install("CEventVehicleDamage", "ReportCriminalEvent_Reversed", 0x4B50B0, &CEventVehicleDamage::ReportCriminalEvent_Reversed);
-    ReversibleHooks::Install("CEventVehicleDamage", "GetSourceEntity_Reversed", 0x4B1A70, &CEventVehicleDamage::GetSourceEntity_Reversed);
+    RH_ScopedClass(CEventVehicleDamage);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B18D0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1A00);
+    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4B1A90);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B50B0);
+    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4B1A70);
 }
 
 // 0x4B18D0

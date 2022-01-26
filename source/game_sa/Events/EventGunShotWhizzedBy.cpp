@@ -2,8 +2,11 @@
 
 void CEventGunShotWhizzedBy::InjectHooks()
 {
-    ReversibleHooks::Install("CEventGunShotWhizzedBy", "Constructor", 0x4B1FD0, &CEventGunShotWhizzedBy::Constructor);
-    ReversibleHooks::Install("CEventGunShotWhizzedBy", "AffectsPed_Reversed", 0x4B5120, &CEventGunShotWhizzedBy::AffectsPed_Reversed);
+    RH_ScopedClass(CEventGunShotWhizzedBy);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1FD0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5120);
 }
 
 // 0x4B1FD0

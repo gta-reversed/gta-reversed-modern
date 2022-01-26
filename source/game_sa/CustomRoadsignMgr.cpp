@@ -6,15 +6,18 @@ RwUInt8*& CCustomRoadsignMgr::pCharsetLockedPallete = *(RwUInt8**)0xC3EF8C;
 
 void CCustomRoadsignMgr::InjectHooks()
 {
-    ReversibleHooks::Install("CCustomRoadsignMgr", "Initialise", 0x6FE120, &CCustomRoadsignMgr::Initialise);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "Shutdown", 0x6FE180, &CCustomRoadsignMgr::Shutdown);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "CreateRoadsignTexture", 0x6FECA0, &CCustomRoadsignMgr::CreateRoadsignTexture);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "CreateRoadsignAtomicA", 0x6FEDA0, &CCustomRoadsignMgr::CreateRoadsignAtomicA);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "CreateRoadsignAtomic", 0x6FF2D0, &CCustomRoadsignMgr::CreateRoadsignAtomic);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "RenderRoadsignAtomic", 0x6FF350, &CCustomRoadsignMgr::RenderRoadsignAtomic);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "SetupRoadsignAtomic", 0x6FED60, &CCustomRoadsignMgr::SetupRoadsignAtomic);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "SetAtomicAlpha", 0x6FE240, &CCustomRoadsignMgr::SetAtomicAlpha);
-    ReversibleHooks::Install("CCustomRoadsignMgr", "RoadsignGenerateTextRaster", 0x6FEB70, &RoadsignGenerateTextRaster);
+    RH_ScopedClass(CCustomRoadsignMgr);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Initialise, 0x6FE120);
+    RH_ScopedInstall(Shutdown, 0x6FE180);
+    RH_ScopedInstall(CreateRoadsignTexture, 0x6FECA0);
+    RH_ScopedInstall(CreateRoadsignAtomicA, 0x6FEDA0);
+    RH_ScopedInstall(CreateRoadsignAtomic, 0x6FF2D0);
+    RH_ScopedInstall(RenderRoadsignAtomic, 0x6FF350);
+    RH_ScopedInstall(SetupRoadsignAtomic, 0x6FED60);
+    RH_ScopedInstall(SetAtomicAlpha, 0x6FE240);
+    RH_ScopedGlobalInstall(RoadsignGenerateTextRaster, 0x6FEB70);
 }
 
 bool CCustomRoadsignMgr::Initialise()

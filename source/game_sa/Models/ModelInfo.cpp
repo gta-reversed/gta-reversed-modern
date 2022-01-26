@@ -25,37 +25,40 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>& CModelInfo::ms_2dFXInfoStore = *(
 
 void CModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CModelInfo", "Initialise", 0x4C6810, &CModelInfo::Initialise);
-    ReversibleHooks::Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
-    ReversibleHooks::Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
+    RH_ScopedClass(CModelInfo);
+    RH_ScopedCategory("Models");
 
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int32*)) & CModelInfo::GetModelInfo);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int32, int32))&CModelInfo::GetModelInfo);
+    RH_ScopedInstall(Initialise, 0x4C6810);
+    RH_ScopedInstall(ShutDown, 0x4C63E0);
+    RH_ScopedInstall(ReInit2dEffects, 0x4C63B0);
 
-    ReversibleHooks::Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodAtomicModel", 0x4C6680, &CModelInfo::AddLodAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddTimeModel", 0x4C66B0, &CModelInfo::AddTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodTimeModel", 0x4C66E0, &CModelInfo::AddLodTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddWeaponModel", 0x4C6710, &CModelInfo::AddWeaponModel);
-    ReversibleHooks::Install("CModelInfo", "AddClumpModel", 0x4C6740, &CModelInfo::AddClumpModel);
-    ReversibleHooks::Install("CModelInfo", "AddVehicleModel", 0x4C6770, &CModelInfo::AddVehicleModel);
-    ReversibleHooks::Install("CModelInfo", "AddPedModel", 0x4C67A0, &CModelInfo::AddPedModel);
+    RH_ScopedInstall(GetModelInfoUInt16, 0x4C59F0);
+    RH_ScopedInstall(GetModelInfoFromHashKey, 0x4C59B0);
+    RH_ScopedOverloadedInstall(GetModelInfo, "full", 0x4C5940, CBaseModelInfo * (*)(char const*, int32*));
+    RH_ScopedOverloadedInstall(GetModelInfo, "minmax", 0x4C5A20, CBaseModelInfo*(*)(char const*, int32, int32));
 
-    ReversibleHooks::Install("CModelInfo", "IsBoatModel", 0x4C5A70, &CModelInfo::IsBoatModel);
-    ReversibleHooks::Install("CModelInfo", "IsCarModel", 0x4C5AA0, &CModelInfo::IsCarModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrainModel", 0x4C5AD0, &CModelInfo::IsTrainModel);
-    ReversibleHooks::Install("CModelInfo", "IsHeliModel", 0x4C5B00, &CModelInfo::IsHeliModel);
-    ReversibleHooks::Install("CModelInfo", "IsPlaneModel", 0x4C5B30, &CModelInfo::IsPlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsBikeModel", 0x4C5B60, &CModelInfo::IsBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsFakePlaneModel", 0x4C5B90, &CModelInfo::IsFakePlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsMonsterTruckModel", 0x4C5BC0, &CModelInfo::IsMonsterTruckModel);
-    ReversibleHooks::Install("CModelInfo", "IsQuadBikeModel", 0x4C5BF0, &CModelInfo::IsQuadBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsBmxModel", 0x4C5C20, &CModelInfo::IsBmxModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrailerModel", 0x4C5C50, &CModelInfo::IsTrailerModel);
-    ReversibleHooks::Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
+    RH_ScopedInstall(AddAtomicModel, 0x4C6620);
+    RH_ScopedInstall(AddDamageAtomicModel, 0x4C6650);
+    RH_ScopedInstall(AddLodAtomicModel, 0x4C6680);
+    RH_ScopedInstall(AddTimeModel, 0x4C66B0);
+    RH_ScopedInstall(AddLodTimeModel, 0x4C66E0);
+    RH_ScopedInstall(AddWeaponModel, 0x4C6710);
+    RH_ScopedInstall(AddClumpModel, 0x4C6740);
+    RH_ScopedInstall(AddVehicleModel, 0x4C6770);
+    RH_ScopedInstall(AddPedModel, 0x4C67A0);
+
+    RH_ScopedInstall(IsBoatModel, 0x4C5A70);
+    RH_ScopedInstall(IsCarModel, 0x4C5AA0);
+    RH_ScopedInstall(IsTrainModel, 0x4C5AD0);
+    RH_ScopedInstall(IsHeliModel, 0x4C5B00);
+    RH_ScopedInstall(IsPlaneModel, 0x4C5B30);
+    RH_ScopedInstall(IsBikeModel, 0x4C5B60);
+    RH_ScopedInstall(IsFakePlaneModel, 0x4C5B90);
+    RH_ScopedInstall(IsMonsterTruckModel, 0x4C5BC0);
+    RH_ScopedInstall(IsQuadBikeModel, 0x4C5BF0);
+    RH_ScopedInstall(IsBmxModel, 0x4C5C20);
+    RH_ScopedInstall(IsTrailerModel, 0x4C5C50);
+    RH_ScopedInstall(IsVehicleModelType, 0x4C5C80);
 }
 
 // 0x4C63B0

@@ -6,20 +6,22 @@ CIdleCam& gIdleCam = *(CIdleCam*)0xB6FDA0;
 uint32& gbCineyCamProcessedOnFrame = *(uint32*)0xB6EC40;
 
 void CIdleCam::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CIdleCam", "GetLookAtPositionOnTarget", 0x50EAE0, &CIdleCam::GetLookAtPositionOnTarget);
-    // Install("CIdleCam", "Init", 0x50E6D0, &CIdleCam::Init);
-    // Install("CIdleCam", "Reset", 0x50A160, &CIdleCam::Reset);
-    // Install("CIdleCam", "ProcessIdleCamTicker", 0x50A200, &CIdleCam::ProcessIdleCamTicker);
-    // Install("CIdleCam", "SetTarget", 0x50A280, &CIdleCam::SetTarget);
-    // Install("CIdleCam", "FinaliseIdleCamera", 0x50E760, &CIdleCam::FinaliseIdleCamera);
-    // Install("CIdleCam", "SetTargetPlayer", 0x50EB50, &CIdleCam::SetTargetPlayer);
-    // Install("CIdleCam", "IsTargetValid", 0x517770, &CIdleCam::IsTargetValid);
-    // Install("CIdleCam", "ProcessTargetSelection", 0x517870, &CIdleCam::ProcessTargetSelection);
-    // Install("CIdleCam", "ProcessSlerp", 0x5179E0, &CIdleCam::ProcessSlerp);
-    // Install("CIdleCam", "ProcessFOVZoom", 0x517BF0, &CIdleCam::ProcessFOVZoom);
-    // Install("CIdleCam", "Run", 0x51D3E0, &CIdleCam::Run);
-    // Install("CIdleCam", "Process", 0x522C80, &CIdleCam::Process);
+    RH_ScopedClass(CIdleCam);
+    RH_ScopedCategoryRoot();
+
+    // RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0);
+    // RH_ScopedInstall(Init, 0x50E6D0);
+    // RH_ScopedInstall(Reset, 0x50A160);
+    // RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
+    // RH_ScopedInstall(SetTarget, 0x50A280);
+    // RH_ScopedInstall(FinaliseIdleCamera, 0x50E760);
+    // RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
+    // RH_ScopedInstall(IsTargetValid, 0x517770);
+    // RH_ScopedInstall(ProcessTargetSelection, 0x517870);
+    // RH_ScopedInstall(ProcessSlerp, 0x5179E0);
+    // RH_ScopedInstall(ProcessFOVZoom, 0x517BF0);
+    // RH_ScopedInstall(Run, 0x51D3E0);
+    // RH_ScopedInstall(Process, 0x522C80);
 }
 
 // 0x517760

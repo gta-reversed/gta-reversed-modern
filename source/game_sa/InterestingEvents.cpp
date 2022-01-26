@@ -3,13 +3,16 @@
 CInterestingEvents& g_InterestingEvents = *(CInterestingEvents*)0xC0B058;
 
 void CInterestingEvents::InjectHooks() {
-//    ReversibleHooks::Install("CInterestingEvents", "Constructor", 0x6023A0, &CInterestingEvents::Constructor);
-//    ReversibleHooks::Install("CInterestingEvents", "Destructor", 0x856880, &CInterestingEvents::Destructor);
-//    ReversibleHooks::Install("CInterestingEvents", "Add", 0x602590, &CInterestingEvents::Add);
-//    ReversibleHooks::Install("CInterestingEvents", "ScanForNearbyEntities", 0x605A30, &CInterestingEvents::ScanForNearbyEntities);
-//    ReversibleHooks::Install("CInterestingEvents", "GetInterestingEvent", 0x6028A0, &CInterestingEvents::GetInterestingEvent);
-//    ReversibleHooks::Install("CInterestingEvents", "InvalidateEvent", 0x602960, &CInterestingEvents::InvalidateEvent);
-//    ReversibleHooks::Install("CInterestingEvents", "InvalidateNonVisibleEvents", 0x6029C0, &CInterestingEvents::InvalidateNonVisibleEvents);
+    RH_ScopedClass(CInterestingEvents);
+    RH_ScopedCategoryRoot();
+
+//    RH_ScopedInstall(Constructor, 0x6023A0);
+//    RH_ScopedInstall(Destructor, 0x856880);
+//    RH_ScopedInstall(Add, 0x602590);
+//    RH_ScopedInstall(ScanForNearbyEntities, 0x605A30);
+//    RH_ScopedInstall(GetInterestingEvent, 0x6028A0);
+//    RH_ScopedInstall(InvalidateEvent, 0x602960);
+//    RH_ScopedInstall(InvalidateNonVisibleEvents, 0x6029C0);
 }
 
 // 0x6023A0

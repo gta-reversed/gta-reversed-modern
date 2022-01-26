@@ -2,8 +2,11 @@
 
 void CVehicleSaveStructure::InjectHooks()
 {
-    ReversibleHooks::Install("CVehicleSaveStructure", "Construct", 0x5D2330, &CVehicleSaveStructure::Construct);
-    ReversibleHooks::Install("CVehicleSaveStructure", "Extract", 0x5D23B0, &CVehicleSaveStructure::Extract);
+    RH_ScopedClass(CVehicleSaveStructure);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Construct, 0x5D2330);
+    RH_ScopedInstall(Extract, 0x5D23B0);
 }
 
 void CVehicleSaveStructure::Construct(CVehicle* pVeh)

@@ -5,9 +5,12 @@
 
 void COccluder::InjectHooks()
 {
-    ReversibleHooks::Install("COccluder", "ProcessOneOccluder", 0x71E5D0, &COccluder::ProcessOneOccluder);
-    ReversibleHooks::Install("COccluder", "ProcessLineSegment", 0x71E130, &COccluder::ProcessLineSegment);
-    ReversibleHooks::Install("COccluder", "NearCamera", 0x71F960, &COccluder::NearCamera);
+    RH_ScopedClass(COccluder);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(ProcessOneOccluder, 0x71E5D0);
+    RH_ScopedInstall(ProcessLineSegment, 0x71E130);
+    RH_ScopedInstall(NearCamera, 0x71F960);
 }
 
 // 0x71E5D0

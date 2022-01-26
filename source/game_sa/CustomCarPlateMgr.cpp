@@ -1,8 +1,11 @@
 #include "StdInc.h"
 
 void CCustomCarPlateMgr::InjectHooks() {
-//    ReversibleHooks::Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
-//    ReversibleHooks::Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
+    RH_ScopedClass(CCustomCarPlateMgr);
+    RH_ScopedCategoryRoot();
+
+//    RH_ScopedInstall(Initialise, 0x6FD500);
+//    RH_ScopedInstall(Shutdown, 0x6FD720);
 }
 
 // 0x6FD500

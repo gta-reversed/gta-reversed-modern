@@ -13,15 +13,18 @@ static std::random_device randomDevice;
 static std::mt19937 randomEngine(randomDevice());
 
 void CGeneral::InjectHooks() {
-    ReversibleHooks::Install("CGeneral", "LimitAngle", 0x53CB00, &CGeneral::LimitAngle);
-    ReversibleHooks::Install("CGeneral", "LimitRadianAngle", 0x53CB50, &CGeneral::LimitRadianAngle);
-    ReversibleHooks::Install("CGeneral", "GetRadianAngleBetweenPoints", 0x53CBE0, &CGeneral::GetRadianAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetATanOfXY", 0x53CC70, &CGeneral::GetATanOfXY);
-    ReversibleHooks::Install("CGeneral", "GetNodeHeadingFromVector", 0x53CDC0, &CGeneral::GetNodeHeadingFromVector);
-    ReversibleHooks::Install("CGeneral", "SolveQuadratic", 0x53CE30, &CGeneral::SolveQuadratic);
-    ReversibleHooks::Install("CGeneral", "GetAngleBetweenPoints", 0x53CEA0, &CGeneral::GetAngleBetweenPoints);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_int", 0x407180, (int32 (*)(const int32, const int32)) & CGeneral::GetRandomNumberInRange);
-    ReversibleHooks::Install("CGeneral", "GetRandomNumberInRange_float", 0x41BD90, (float (*)(const float, const float)) & CGeneral::GetRandomNumberInRange);
+    RH_ScopedClass(CGeneral);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(LimitAngle, 0x53CB00);
+    RH_ScopedInstall(LimitRadianAngle, 0x53CB50);
+    RH_ScopedInstall(GetRadianAngleBetweenPoints, 0x53CBE0);
+    RH_ScopedInstall(GetATanOfXY, 0x53CC70);
+    RH_ScopedInstall(GetNodeHeadingFromVector, 0x53CDC0);
+    RH_ScopedInstall(SolveQuadratic, 0x53CE30);
+    RH_ScopedInstall(GetAngleBetweenPoints, 0x53CEA0);
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "int", 0x407180, int32 (*)(const int32, const int32));
+    RH_ScopedOverloadedInstall(GetRandomNumberInRange, "float", 0x41BD90, float (*)(const float, const float));
 }
 
 // 0x53CB00

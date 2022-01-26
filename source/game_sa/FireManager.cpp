@@ -5,31 +5,33 @@
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
 void CFireManager::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFireManager", "CFireManager", 0x539DA0, &CFireManager::Constructor);
-    Install("CFireManager", "~CFireManager", 0x538BB0, &CFireManager::Destructor);
-    Install("CFireManager", "Init", 0x538BC0, &CFireManager::Init);
-    Install("CFireManager", "Shutdown", 0x539DD0, &CFireManager::Shutdown);
-    Install("CFireManager", "GetNumOfNonScriptFires", 0x538F10, &CFireManager::GetNumOfNonScriptFires);
-    Install("CFireManager", "FindNearestFire", 0x538F40, &CFireManager::FindNearestFire);
-    Install("CFireManager", "PlentyFiresAvailable", 0x539340, &CFireManager::PlentyFiresAvailable);
-    Install("CFireManager", "ExtinguishPoint", 0x539450, &CFireManager::ExtinguishPoint);
-    Install("CFireManager", "ExtinguishPointWithWater", 0x5394C0, &CFireManager::ExtinguishPointWithWater);
-    Install("CFireManager", "IsScriptFireExtinguished", 0x5396E0, &CFireManager::IsScriptFireExtinguished);
-    Install("CFireManager", "RemoveScriptFire", 0x539700, &CFireManager::RemoveScriptFire);
-    Install("CFireManager", "RemoveAllScriptFires", 0x539720, &CFireManager::RemoveAllScriptFires);
-    Install("CFireManager", "ClearAllScriptFireFlags", 0x5397A0, &CFireManager::ClearAllScriptFireFlags);
-    Install("CFireManager", "SetScriptFireAudio", 0x5397B0, &CFireManager::SetScriptFireAudio);
-    Install("CFireManager", "GetScriptFireCoords", 0x5397E0, &CFireManager::GetScriptFireCoords);
-    Install("CFireManager", "GetNumFiresInRange", 0x5397F0, &CFireManager::GetNumFiresInRange);
-    Install("CFireManager", "GetNumFiresInArea", 0x539860, &CFireManager::GetNumFiresInArea);
-    Install("CFireManager", "DestroyAllFxSystems", 0x539D10, &CFireManager::DestroyAllFxSystems);
-    Install("CFireManager", "CreateAllFxSystems", 0x539D50, &CFireManager::CreateAllFxSystems);
-    Install("CFireManager", "GetNextFreeFire", 0x539E50, &CFireManager::GetNextFreeFire);
-    Install("CFireManager", "StartFire_NoTarget", 0x539F00, static_cast<CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8)>(&CFireManager::StartFire));
-    Install("CFireManager", "StartFire", 0x53A050, static_cast<CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8)>(&CFireManager::StartFire));
-    Install("CFireManager", "StartScriptFire", 0x53A270, &CFireManager::StartScriptFire);
-    Install("CFireManager", "Update", 0x53AF00, &CFireManager::Update);
+    RH_ScopedClass(CFireManager);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Constructor, 0x539DA0);
+    RH_ScopedInstall(Destructor, 0x538BB0);
+    RH_ScopedInstall(Init, 0x538BC0);
+    RH_ScopedInstall(Shutdown, 0x539DD0);
+    RH_ScopedInstall(GetNumOfNonScriptFires, 0x538F10);
+    RH_ScopedInstall(FindNearestFire, 0x538F40);
+    RH_ScopedInstall(PlentyFiresAvailable, 0x539340);
+    RH_ScopedInstall(ExtinguishPoint, 0x539450);
+    RH_ScopedInstall(ExtinguishPointWithWater, 0x5394C0);
+    RH_ScopedInstall(IsScriptFireExtinguished, 0x5396E0);
+    RH_ScopedInstall(RemoveScriptFire, 0x539700);
+    RH_ScopedInstall(RemoveAllScriptFires, 0x539720);
+    RH_ScopedInstall(ClearAllScriptFireFlags, 0x5397A0);
+    RH_ScopedInstall(SetScriptFireAudio, 0x5397B0);
+    RH_ScopedInstall(GetScriptFireCoords, 0x5397E0);
+    RH_ScopedInstall(GetNumFiresInRange, 0x5397F0);
+    RH_ScopedInstall(GetNumFiresInArea, 0x539860);
+    RH_ScopedInstall(DestroyAllFxSystems, 0x539D10);
+    RH_ScopedInstall(CreateAllFxSystems, 0x539D50);
+    RH_ScopedInstall(GetNextFreeFire, 0x539E50);
+    RH_ScopedOverloadedInstall(StartFire, "NoTarget", 0x539F00, CFire*(CFireManager::*)(CVector, float, uint8, CEntity*, uint32, int8, uint8));
+    RH_ScopedOverloadedInstall(StartFire, "", 0x53A050, CFire *(CFireManager::*)(CEntity*, CEntity*, float, uint8, uint32, int8));
+    RH_ScopedInstall(StartScriptFire, 0x53A270);
+    RH_ScopedInstall(Update, 0x53AF00);
 }
 
 // 0x539DA0

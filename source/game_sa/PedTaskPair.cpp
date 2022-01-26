@@ -2,7 +2,10 @@
 #include "PedTaskPair.h"
 
 void CPedTaskPair::InjectHooks() {
-    ReversibleHooks::Install("CPedTaskPair", "Flush", 0x5E95B0, &CPedTaskPair::Flush);
+    RH_ScopedClass(CPedTaskPair);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Flush, 0x5E95B0);
 }
 
 // 0x5E95B0

@@ -9,6 +9,9 @@ uint32& CPedGroups::ms_iNoOfPlayerKills = *reinterpret_cast<uint32*>(0xC098EC);
 CPedGroup (&CPedGroups::ms_groups)[8] = *reinterpret_cast<CPedGroup (*)[8]>(0xC09920);
 
 void CPedGroups::InjectHooks() {
+    RH_ScopedClass(CPedGroups);
+    RH_ScopedCategoryRoot();
+
 
 }
 

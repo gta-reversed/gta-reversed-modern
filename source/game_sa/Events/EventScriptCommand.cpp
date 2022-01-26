@@ -6,14 +6,17 @@
 
 void CEventScriptCommand::InjectHooks()
 {
-    ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
-    ReversibleHooks::Install("CEventScriptCommand", "GetEventType", 0x4B0A30, &CEventScriptCommand::GetEventType);
-    ReversibleHooks::Install("CEventScriptCommand", "GetEventPriority", 0x4B0B20, &CEventScriptCommand::GetEventPriority);
-    ReversibleHooks::Install("CEventScriptCommand", "Clone", 0x4B6490, &CEventScriptCommand::Clone);
-    ReversibleHooks::Install("CEventScriptCommand", "AffectsPed", 0x4B0AF0, &CEventScriptCommand::AffectsPed);
-    ReversibleHooks::Install("CEventScriptCommand", "TakesPriorityOver", 0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
-    ReversibleHooks::Install("CEventScriptCommand", "IsValid", 0x4B0AB0, &CEventScriptCommand::IsValid);
-    ReversibleHooks::Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
+    RH_ScopedClass(CEventScriptCommand);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0A00);
+    RH_ScopedInstall(GetEventType, 0x4B0A30);
+    RH_ScopedInstall(GetEventPriority, 0x4B0B20);
+    RH_ScopedInstall(Clone, 0x4B6490);
+    RH_ScopedInstall(AffectsPed, 0x4B0AF0);
+    RH_ScopedInstall(TakesPriorityOver, 0x4B0BA0);
+    RH_ScopedInstall(IsValid, 0x4B0AB0);
+    RH_ScopedInstall(CloneScriptTask, 0x4B0AA0);
 }
 
 // 0x4B0A00

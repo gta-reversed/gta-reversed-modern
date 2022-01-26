@@ -5,12 +5,14 @@
 #include "CreepingFire.h"
 
 void CFire::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFire", "Constructor", 0x539D90, &CFire::Constructor);
-    Install("CFire", "Initialise", 0x538B30, &CFire::Initialise);
-    Install("CFire", "CreateFxSysForStrength", 0x539360, &CFire::CreateFxSysForStrength);
-    Install("CFire", "Extinguish", 0x5393F0, &CFire::Extinguish);
-    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire);
+    RH_ScopedClass(CFire);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Constructor, 0x539D90);
+    RH_ScopedInstall(Initialise, 0x538B30);
+    RH_ScopedInstall(CreateFxSysForStrength, 0x539360);
+    RH_ScopedInstall(Extinguish, 0x5393F0);
+    RH_ScopedInstall(ProcessFire, 0x53A570);
 }
 
 // 0x539D90

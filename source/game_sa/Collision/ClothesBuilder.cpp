@@ -6,42 +6,44 @@ CDirectory& playerImg = *(CDirectory*)0xBC12C0;
 CDirectory::DirectoryInfo& playerImgEntries = *(CDirectory::DirectoryInfo*)0xBBCDC8;
 
 void CClothesBuilder::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CClothesBuilder", "LoadCdDirectory", 0x5A4190, &CClothesBuilder::LoadCdDirectory);
-    // Install("CClothesBuilder", "RequestGeometry", 0x5A41C0, &CClothesBuilder::RequestGeometry);
-    // Install("CClothesBuilder", "RequestTexture", 0x5A4220, &CClothesBuilder::RequestTexture); 
-    // todo: Install("CClothesBuilder", "f5A42B0", 0x5A42B0, &nullptr); 
-    // todo: Install("CClothesBuilder", "_AtomicInstanceCB", 0x5A4380, &nullptr);
-    // todo: Install("CClothesBuilder", "f5A43A0", 0x5A43A0, &nullptr);
-    // todo: Install("CClothesBuilder", "DestroyTextureCB", 0x5A44A0, &nullptr);
-    // Install("CClothesBuilder", "PreprocessClothesDesc", 0x5A44C0, &CClothesBuilder::PreprocessClothesDesc);
-    // Install("CClothesBuilder", "ReleaseGeometry", 0x5A47B0, &CClothesBuilder::ReleaseGeometry);
-    // Install("CClothesBuilder", "FindAtomicFromNameCB", 0x5A47E0, &FindAtomicFromNameCB);
-    // Install("CClothesBuilder", "GetAtomicWithName", 0x5A4810, &GetAtomicWithName);
-    // Install("CClothesBuilder", "f5A4840", 0x5A4840, &CClothesBuilder::sub_5A4840);
-    // Install("CClothesBuilder", "StoreBoneArray", 0x5A48B0, &CClothesBuilder::StoreBoneArray);
-    // Install("CClothesBuilder", "BlendGeometry", 0x5A4940, static_cast<RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float)>(&CClothesBuilder::BlendGeometry));
-    // Install("CClothesBuilder", "BlendGeometry", 0x5A4F10, static_cast<RpGeometry* (*)(RpClump*, const char*, const char*, float, float)>(&CClothesBuilder::BlendGeometry));
-    // Install("CClothesBuilder", "CopyGeometry", 0x5A5340, &CClothesBuilder::CopyGeometry);
-    // Install("CClothesBuilder", "ConstructGeometryArray", 0x5A55A0, &CClothesBuilder::ConstructGeometryArray);
-    // Install("CClothesBuilder", "DestroySkinArrays", 0x5A56C0, &CClothesBuilder::DestroySkinArrays);
-    // Install("CClothesBuilder", "BuildBoneIndexConversionTable", 0x5A56E0, &CClothesBuilder::BuildBoneIndexConversionTable);
-    // Install("CClothesBuilder", "CopyTexture", 0x5A5730, &CClothesBuilder::CopyTexture);
-    // Install("CClothesBuilder", "PlaceTextureOnTopOfTexture", 0x5A57B0, &CClothesBuilder::PlaceTextureOnTopOfTexture);
-    // Install("CClothesBuilder", "BlendTextures", 0x5A5820, static_cast<void (*)(RwTexture*, RwTexture*, float, float, int32)>(&CClothesBuilder::BlendTextures));
-    // Install("CClothesBuilder", "BlendTextures", 0x5A59C0, static_cast<void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32)>(&CClothesBuilder::BlendTextures));
-    // Install("CClothesBuilder", "BlendTextures", 0x5A5BC0, static_cast<void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*)>(&CClothesBuilder::BlendTextures));
-    // Install("CClothesBuilder", "InitPaletteOctTree", 0x5A5EB0, &CClothesBuilder::InitPaletteOctTree);
-    // Install("CClothesBuilder", "ShutdownPaletteOctTree", 0x5A5EE0, &CClothesBuilder::ShutdownPaletteOctTree);
-    // Install("CClothesBuilder", "ReducePaletteOctTree", 0x5A5EF0, &CClothesBuilder::ReducePaletteOctTree);
-    // Install("CClothesBuilder", "AddColour", 0x5A5F00, &CClothesBuilder::AddColour);
-    // Install("CClothesBuilder", "FillPalette", 0x5A5F30, &CClothesBuilder::FillPalette);
-    // Install("CClothesBuilder", "FindNearestColour", 0x5A5F40, &CClothesBuilder::FindNearestColour);
-    // Install("CClothesBuilder", "GetTextureFromTxdAndLoadNextTxd", 0x5A5F70, &GetTextureFromTxdAndLoadNextTxd);
-    // Install("CClothesBuilder", "ConstructTextures", 0x5A6040, &CClothesBuilder::ConstructTextures);
-    // Install("CClothesBuilder", "ConstructGeometryAndSkinArrays", 0x5A6530, &CClothesBuilder::ConstructGeometryAndSkinArrays);
-    // Install("CClothesBuilder", "ReducePaletteSize", 0x5A6870, &CClothesBuilder::ReducePaletteSize);
-    // Install("CClothesBuilder", "CreateSkinnedClump", 0x5A69D0, &CClothesBuilder::CreateSkinnedClump);
+    RH_ScopedClass(CClothesBuilder);
+    RH_ScopedCategory("Collision");
+
+    // RH_ScopedInstall(LoadCdDirectory, 0x5A4190);
+    // RH_ScopedInstall(RequestGeometry, 0x5A41C0);
+    // RH_ScopedInstall(RequestTexture, 0x5A4220); 
+    // todo: RH_ScopedInstall(nullptr, 0x5A42B0); 
+    // todo: RH_ScopedInstall(nullptr, 0x5A4380); AtomicInstanceCB
+    // todo: RH_ScopedInstall(nullptr, 0x5A43A0);
+    // todo: RH_ScopedInstall(nullptr, 0x5A44A0); DestroyTextureCB
+    // RH_ScopedInstall(PreprocessClothesDesc, 0x5A44C0);
+    // RH_ScopedInstall(ReleaseGeometry, 0x5A47B0);
+    // RH_ScopedInstall(FindAtomicFromNameCB, 0x5A47E0);
+    // RH_ScopedInstall(GetAtomicWithName, 0x5A4810);
+    // RH_ScopedInstall(sub_5A4840, 0x5A4840);
+    // RH_ScopedInstall(StoreBoneArray, 0x5A48B0);
+    // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4940, RpGeometry* (*)(RpClump*, const char*, const char*, const char*, float, float, float));
+    // RH_ScopedOverloadedInstall(BlendGeometry, "", 0x5A4F10, RpGeometry* (*)(RpClump*, const char*, const char*, float, float));
+    // RH_ScopedInstall(CopyGeometry, 0x5A5340);
+    // RH_ScopedInstall(ConstructGeometryArray, 0x5A55A0);
+    // RH_ScopedInstall(DestroySkinArrays, 0x5A56C0);
+    // RH_ScopedInstall(BuildBoneIndexConversionTable, 0x5A56E0);
+    // RH_ScopedInstall(CopyTexture, 0x5A5730);
+    // RH_ScopedInstall(PlaceTextureOnTopOfTexture, 0x5A57B0);
+    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5820, void (*)(RwTexture*, RwTexture*, float, float, int32));
+    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A59C0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32));
+    // RH_ScopedOverloadedInstall(BlendTextures, "", 0x5A5BC0, void (*)(RwTexture*, RwTexture*, RwTexture*, float, float, float, int32, RwTexture*));
+    // RH_ScopedInstall(InitPaletteOctTree, 0x5A5EB0);
+    // RH_ScopedInstall(ShutdownPaletteOctTree, 0x5A5EE0);
+    // RH_ScopedInstall(ReducePaletteOctTree, 0x5A5EF0);
+    // RH_ScopedInstall(AddColour, 0x5A5F00);
+    // RH_ScopedInstall(FillPalette, 0x5A5F30);
+    // RH_ScopedInstall(FindNearestColour, 0x5A5F40);
+    // RH_ScopedInstall(GetTextureFromTxdAndLoadNextTxd, 0x5A5F70);
+    // RH_ScopedInstall(ConstructTextures, 0x5A6040);
+    // RH_ScopedInstall(ConstructGeometryAndSkinArrays, 0x5A6530);
+    // RH_ScopedInstall(ReducePaletteSize, 0x5A6870);
+    // RH_ScopedInstall(CreateSkinnedClump, 0x5A69D0);
 }
 
 // inlined

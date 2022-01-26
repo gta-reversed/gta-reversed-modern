@@ -34,27 +34,30 @@ uint32 (&aCarsToKeepTime)[2] = *(uint32(*)[2])0x96907C;
 
 void CCarCtrl::InjectHooks()
 {
+    RH_ScopedClass(CCarCtrl);
+    RH_ScopedCategoryRoot();
+
     using namespace ReversibleHooks;
-    Install("CCarCtrl", "Init", 0x4212E0, &CCarCtrl::Init);
-    Install("CCarCtrl", "ReInit", 0x4213B0, &CCarCtrl::ReInit);
-    Install("CCarCtrl", "InitSequence", 0x421740, &CCarCtrl::InitSequence);
+    RH_ScopedInstall(Init, 0x4212E0);
+    RH_ScopedInstall(ReInit, 0x4213B0);
+    RH_ScopedInstall(InitSequence, 0x421740);
     Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
     Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
-    Install("CCarCtrl", "CreateCarForScript", 0x431F80, &CCarCtrl::CreateCarForScript);
-    Install("CCarCtrl", "ChooseBoatModel", 0x421970, &CCarCtrl::ChooseBoatModel);
-    Install("CCarCtrl", "ChooseCarModelToLoad", 0x421900, &CCarCtrl::ChooseCarModelToLoad);
-    // Install("CCarCtrl", "GetNewVehicleDependingOnCarModel", 0x421440, &CCarCtrl::GetNewVehicleDependingOnCarModel);
-    Install("CCarCtrl", "IsAnyoneParking", 0x42C250, &CCarCtrl::IsAnyoneParking);
-    Install("CCarCtrl", "IsThisVehicleInteresting", 0x423EA0, &CCarCtrl::IsThisVehicleInteresting);
-    Install("CCarCtrl", "JoinCarWithRoadAccordingToMission", 0x432CB0, &CCarCtrl::JoinCarWithRoadAccordingToMission);
-    Install("CCarCtrl", "PossiblyFireHSMissile", 0x429600, &CCarCtrl::PossiblyFireHSMissile);
-    Install("CCarCtrl", "PruneVehiclesOfInterest", 0x423F10, &CCarCtrl::PruneVehiclesOfInterest);
-    Install("CCarCtrl", "RemoveCarsIfThePoolGetsFull", 0x4322B0, &CCarCtrl::RemoveCarsIfThePoolGetsFull);
-    Install("CCarCtrl", "RemoveDistantCars", 0x42CD10, &CCarCtrl::RemoveDistantCars);
-    Install("CCarCtrl", "RemoveFromInterestingVehicleList", 0x423ED0, &CCarCtrl::RemoveFromInterestingVehicleList);
-    Install("CCarCtrl", "ScriptGenerateOneEmergencyServicesCar", 0x42FBC0, &CCarCtrl::ScriptGenerateOneEmergencyServicesCar);
-    Install("CCarCtrl", "SlowCarDownForObject", 0x426220, &CCarCtrl::SlowCarDownForObject);
-    Install("CCarCtrl", "SlowCarOnRailsDownForTrafficAndLights", 0x434790, &CCarCtrl::SlowCarOnRailsDownForTrafficAndLights);
+    RH_ScopedInstall(CreateCarForScript, 0x431F80);
+    RH_ScopedInstall(ChooseBoatModel, 0x421970);
+    RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
+    // RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440);
+    RH_ScopedInstall(IsAnyoneParking, 0x42C250);
+    RH_ScopedInstall(IsThisVehicleInteresting, 0x423EA0);
+    RH_ScopedInstall(JoinCarWithRoadAccordingToMission, 0x432CB0);
+    RH_ScopedInstall(PossiblyFireHSMissile, 0x429600);
+    RH_ScopedInstall(PruneVehiclesOfInterest, 0x423F10);
+    RH_ScopedInstall(RemoveCarsIfThePoolGetsFull, 0x4322B0);
+    RH_ScopedInstall(RemoveDistantCars, 0x42CD10);
+    RH_ScopedInstall(RemoveFromInterestingVehicleList, 0x423ED0);
+    RH_ScopedInstall(ScriptGenerateOneEmergencyServicesCar, 0x42FBC0);
+    RH_ScopedInstall(SlowCarDownForObject, 0x426220);
+    RH_ScopedInstall(SlowCarOnRailsDownForTrafficAndLights, 0x434790);
 }
 
 // 0x4212E0

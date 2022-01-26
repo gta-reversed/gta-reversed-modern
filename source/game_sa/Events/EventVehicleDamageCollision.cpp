@@ -2,8 +2,11 @@
 
 void CEventVehicleDamageCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleDamageCollision", "Constructor", 0x6A0620, &CEventVehicleDamageCollision::Constructor);
-    ReversibleHooks::Install("CEventVehicleDamageCollision", "CloneEditable_Reversed", 0x6A0670, &CEventVehicleDamageCollision::CloneEditable_Reversed);
+    RH_ScopedClass(CEventVehicleDamageCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x6A0620);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x6A0670);
 }
 
 // 0x6A0620

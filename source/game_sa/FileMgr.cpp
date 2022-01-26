@@ -349,21 +349,24 @@ bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
 
 void CFileMgr::InjectHooks()
 {
-    ReversibleHooks::Install("CFileMgr", "Initialise", 0x5386f0, &CFileMgr::Initialise);
-    ReversibleHooks::Install("CFileMgr", "ChangeDir", 0x538730, &CFileMgr::ChangeDir);
-    ReversibleHooks::Install("CFileMgr", "SetDir", 0x5387D0, &CFileMgr::SetDir);
-    ReversibleHooks::Install("CFileMgr", "SetDirMyDocuments", 0x538860, &CFileMgr::SetDirMyDocuments);
-    ReversibleHooks::Install("CFileMgr", "LoadFile", 0x538890, &CFileMgr::LoadFile);
-    ReversibleHooks::Install("CFileMgr", "OpenFile", 0x538900, &CFileMgr::OpenFile);
-    ReversibleHooks::Install("CFileMgr", "OpenFileForWriting", 0x538910, &CFileMgr::OpenFileForWriting);
-    ReversibleHooks::Install("CFileMgr", "OpenFileForAppending", 0x538930, &CFileMgr::OpenFileForAppending);
-    ReversibleHooks::Install("CFileMgr", "Read", 0x538950, &CFileMgr::Read);
-    ReversibleHooks::Install("CFileMgr", "Write", 0x538970, &CFileMgr::Write);
-    ReversibleHooks::Install("CFileMgr", "Seek", 0x538990, &CFileMgr::Seek);
-    ReversibleHooks::Install("CFileMgr", "ReadLine", 0x5389b0, &CFileMgr::ReadLine);
-    ReversibleHooks::Install("CFileMgr", "CloseFile", 0x5389d0, &CFileMgr::CloseFile);
-    ReversibleHooks::Install("CFileMgr", "GetFileLength", 0x5389e0, &CFileMgr::GetFileLength);
-    ReversibleHooks::Install("CFileMgr", "Tell", 0x538a20, &CFileMgr::Tell);
-    ReversibleHooks::Install("CFileMgr", "GetErrorReadWrite", 0x538a50, &CFileMgr::GetErrorReadWrite);
-    ReversibleHooks::Install("CFileMgr", "InitUserDirectories", 0x744fb0, &InitUserDirectories);
+    RH_ScopedClass(CFileMgr);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Initialise, 0x5386f0);
+    RH_ScopedInstall(ChangeDir, 0x538730);
+    RH_ScopedInstall(SetDir, 0x5387D0);
+    RH_ScopedInstall(SetDirMyDocuments, 0x538860);
+    RH_ScopedInstall(LoadFile, 0x538890);
+    RH_ScopedInstall(OpenFile, 0x538900);
+    RH_ScopedInstall(OpenFileForWriting, 0x538910);
+    RH_ScopedInstall(OpenFileForAppending, 0x538930);
+    RH_ScopedInstall(Read, 0x538950);
+    RH_ScopedInstall(Write, 0x538970);
+    RH_ScopedInstall(Seek, 0x538990);
+    RH_ScopedInstall(ReadLine, 0x5389b0);
+    RH_ScopedInstall(CloseFile, 0x5389d0);
+    RH_ScopedInstall(GetFileLength, 0x5389e0);
+    RH_ScopedInstall(Tell, 0x538a20);
+    RH_ScopedInstall(GetErrorReadWrite, 0x538a50);
+    RH_ScopedGlobalInstall(InitUserDirectories, 0x744fb0);
 }

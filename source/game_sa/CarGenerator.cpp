@@ -11,14 +11,17 @@ CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector
 
 void CCarGenerator::InjectHooks()
 {
-    ReversibleHooks::Install("CCarGenerator", "CheckForBlockage", 0x6F32E0, &CCarGenerator::CheckForBlockage);
-    ReversibleHooks::Install("CCarGenerator", "CheckIfWithinRangeOfAnyPlayers", 0x6F2F40, &CCarGenerator::CheckIfWithinRangeOfAnyPlayers);
-    ReversibleHooks::Install("CCarGenerator", "DoInternalProcessing", 0x6F34D0, &CCarGenerator::DoInternalProcessing);
-    ReversibleHooks::Install("CCarGenerator", "Process", 0x6F3E90, &CCarGenerator::Process);
-    ReversibleHooks::Install("CCarGenerator", "Setup", 0x6F2E50, &CCarGenerator::Setup);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOff", 0x6F2E30, &CCarGenerator::SwitchOff);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOn", 0x6F32C0, &CCarGenerator::SwitchOn);
-    ReversibleHooks::Install("CCarGenerator", "CalcNextGen", 0x6F2E40, &CCarGenerator::CalcNextGen);
+    RH_ScopedClass(CCarGenerator);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(CheckForBlockage, 0x6F32E0);
+    RH_ScopedInstall(CheckIfWithinRangeOfAnyPlayers, 0x6F2F40);
+    RH_ScopedInstall(DoInternalProcessing, 0x6F34D0);
+    RH_ScopedInstall(Process, 0x6F3E90);
+    RH_ScopedInstall(Setup, 0x6F2E50);
+    RH_ScopedInstall(SwitchOff, 0x6F2E30);
+    RH_ScopedInstall(SwitchOn, 0x6F32C0);
+    RH_ScopedInstall(CalcNextGen, 0x6F2E40);
 }
 
 // 0x6F32E0

@@ -14,9 +14,12 @@ uint32& FadeTimer = *(uint32*)0xC16EE0;
 uint32& FadeOutTime = *(uint32*)0x8D2BD4;
 
 void CDraw::InjectHooks() {
-    ReversibleHooks::Install("CDraw", "SetFOV", 0x6FF410, &CDraw::SetFOV);
-    ReversibleHooks::Install("CDraw", "CalculateAspectRatio", 0x6FF420, &CDraw::CalculateAspectRatio);
-    ReversibleHooks::Install("common", "DoFade", 0x53E600, &DoFade);
+    RH_ScopedClass(CDraw);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(SetFOV, 0x6FF410);
+    RH_ScopedInstall(CalculateAspectRatio, 0x6FF420);
+    RH_ScopedGlobalInstall(DoFade, 0x53E600);
 }
 
 // 0x6FF410

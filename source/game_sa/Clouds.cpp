@@ -33,27 +33,30 @@ float& flt_C6E970 = *reinterpret_cast<float*>(0xC6E970); // see CClouds::Volumet
 int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::VolumetricCloudsRender
 
 void CClouds::InjectHooks() {
-    ReversibleHooks::Install("CClouds", "Init", 0x7138D0, &CClouds::Init);
-    ReversibleHooks::Install("CClouds", "Update", 0x712FF0, &CClouds::Update);
-    ReversibleHooks::Install("CClouds", "Shutdown", 0x712FA0, &CClouds::Shutdown);
-    ReversibleHooks::Install("CClouds", "SetUpOneSkyPoly", 0x713060, &CClouds::SetUpOneSkyPoly);
-    ReversibleHooks::Install("CClouds", "MovingFogInit", 0x713660, &CClouds::MovingFogInit);
-    ReversibleHooks::Install("CClouds", "MovingFog_Create", 0x713760, &CClouds::MovingFog_Create);
-    ReversibleHooks::Install("CClouds", "MovingFog_Delete", 0x713730, &CClouds::MovingFog_Delete);
-    ReversibleHooks::Install("CClouds", "MovingFog_Update", 0x716B10, &CClouds::MovingFog_Update);
-    ReversibleHooks::Install("CClouds", "MovingFog_GetFXIntensity", 0x7136D0, &CClouds::MovingFog_GetFXIntensity);
-    ReversibleHooks::Install("CClouds", "MovingFog_GetWind", 0x7136E0, &CClouds::MovingFog_GetWind);
-    ReversibleHooks::Install("CClouds", "MovingFog_GetFirstFreeSlot", 0x713710, &CClouds::MovingFog_GetFirstFreeSlot);
-    ReversibleHooks::Install("CClouds", "MovingFogRender", 0x716C90, &CClouds::MovingFogRender, true);
-    // ReversibleHooks::Install("CClouds", "Render", 0x713950, &CClouds::Render);
-    ReversibleHooks::Install("CClouds", "RenderSkyPolys", 0x714650, &CClouds::RenderSkyPolys);
-    // ReversibleHooks::Install("CClouds", "RenderBottomFromHeight", 0x7154B0, &CClouds::RenderBottomFromHeight);
-    ReversibleHooks::Install("CClouds", "VolumetricCloudsInit", 0x7131C0, &CClouds::VolumetricCloudsInit);
-    // ReversibleHooks::Install("CClouds", "VolumetricClouds_Create", 0x715F40, &CClouds::VolumetricClouds_Create);
-    ReversibleHooks::Install("CClouds", "VolumetricClouds_Delete", 0x7135F0, &CClouds::VolumetricClouds_Delete);
-    ReversibleHooks::Install("CClouds", "VolumetricClouds_GetFirstFreeSlot", 0x7135C0, &CClouds::VolumetricClouds_GetFirstFreeSlot);
-    ReversibleHooks::Install("CClouds", "VolumetricCloudsGetMaxDistance", 0x713630, &CClouds::VolumetricCloudsGetMaxDistance);
-    // ReversibleHooks::Install("CClouds", "VolumetricCloudsRender", 0x716380, &CClouds::VolumetricCloudsRender);
+    RH_ScopedClass(CClouds);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x7138D0);
+    RH_ScopedInstall(Update, 0x712FF0);
+    RH_ScopedInstall(Shutdown, 0x712FA0);
+    RH_ScopedInstall(SetUpOneSkyPoly, 0x713060);
+    RH_ScopedInstall(MovingFogInit, 0x713660);
+    RH_ScopedInstall(MovingFog_Create, 0x713760);
+    RH_ScopedInstall(MovingFog_Delete, 0x713730);
+    RH_ScopedInstall(MovingFog_Update, 0x716B10);
+    RH_ScopedInstall(MovingFog_GetFXIntensity, 0x7136D0);
+    RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
+    RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
+    RH_ScopedInstall(MovingFogRender, 0x716C90, true);
+    // RH_ScopedInstall(Render, 0x713950);
+    RH_ScopedInstall(RenderSkyPolys, 0x714650);
+    // RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
+    RH_ScopedInstall(VolumetricCloudsInit, 0x7131C0);
+    // RH_ScopedInstall(VolumetricClouds_Create, 0x715F40);
+    RH_ScopedInstall(VolumetricClouds_Delete, 0x7135F0);
+    RH_ScopedInstall(VolumetricClouds_GetFirstFreeSlot, 0x7135C0);
+    RH_ScopedInstall(VolumetricCloudsGetMaxDistance, 0x713630);
+    // RH_ScopedInstall(VolumetricCloudsRender, 0x716380);
 }
 
 // 0x7138D0

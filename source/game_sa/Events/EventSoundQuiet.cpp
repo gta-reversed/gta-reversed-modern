@@ -2,9 +2,12 @@
 
 void CEventSoundQuiet::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSoundQuiet", "Constructor", 0x5E05B0, &CEventSoundQuiet::Constructor);
-    ReversibleHooks::Install("CEventSoundQuiet", "AffectsPed_Reversed", 0x4B5240, &CEventSoundQuiet::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventSoundQuiet", "CloneEditable_Reversed", 0x5E0670, &CEventSoundQuiet::CloneEditable_Reversed);
+    RH_ScopedClass(CEventSoundQuiet);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5E05B0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5240);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x5E0670);
 }
 
 // 0x5E05B0

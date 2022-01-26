@@ -2,19 +2,21 @@
 
 void CEventGroup::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CEventGroup", "Constructor", 0x4AB340, &CEventGroup::Constructor);
-    Install("CEventGroup", "Add", 0x4AB420, &CEventGroup::Add);
-    Install("CEventGroup", "HasScriptCommandOfTaskType", 0x4AB840, &CEventGroup::HasScriptCommandOfTaskType);
-    Install("CEventGroup", "HasEventOfType", 0x4AB5E0, &CEventGroup::HasEventOfType);
-    Install("CEventGroup", "HasEvent", 0x4AB6A0, &CEventGroup::HasEvent);
-    Install("CEventGroup", "GetHighestPriorityEvent", 0x4AB7C0, &CEventGroup::GetHighestPriorityEvent);
-    Install("CEventGroup", "TickEvents", 0x4AB6D0, &CEventGroup::TickEvents);
-    Install("CEventGroup", "Remove", 0x4AB5A0, &CEventGroup::Remove);
-    Install("CEventGroup", "RemoveInvalidEvents", 0x4AB760, &CEventGroup::RemoveInvalidEvents);
-    Install("CEventGroup", "Reorganise", 0x4AB700, &CEventGroup::Reorganise);
-    Install("CEventGroup", "Flush", 0x4AB370, &CEventGroup::Flush);
-    //Install("CEventGroup", "GetEventOfType", 0x4AB650, &CEventGroup::GetEventOfType);
+    RH_ScopedClass(CEventGroup);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AB340);
+    RH_ScopedInstall(Add, 0x4AB420);
+    RH_ScopedInstall(HasScriptCommandOfTaskType, 0x4AB840);
+    RH_ScopedInstall(HasEventOfType, 0x4AB5E0);
+    RH_ScopedInstall(HasEvent, 0x4AB6A0);
+    RH_ScopedInstall(GetHighestPriorityEvent, 0x4AB7C0);
+    RH_ScopedInstall(TickEvents, 0x4AB6D0);
+    RH_ScopedInstall(Remove, 0x4AB5A0);
+    RH_ScopedInstall(RemoveInvalidEvents, 0x4AB760);
+    RH_ScopedInstall(Reorganise, 0x4AB700);
+    RH_ScopedInstall(Flush, 0x4AB370);
+    //RH_ScopedInstall(GetEventOfType, 0x4AB650);
 }
 
 // 0x4AB340

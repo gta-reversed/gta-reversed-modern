@@ -4,9 +4,11 @@
 
 void CTaskSimplePause::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimplePause", "CTaskSimplePause", 0x48E750, &CTaskSimplePause::Constructor);
-    ReversibleHooks::Install("CTaskSimplePause", "ProcessPed", 0x48E830, &CTaskSimplePause::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimplePause", "MakeAbortable", 0x48E810, &CTaskSimplePause::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskSimplePause);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x48E750);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x48E830);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x48E810);
 }
 
 // 0x48E750

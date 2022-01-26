@@ -3,11 +3,14 @@
 #include "Cranes.h"
 
 void CCranes::InjectHooks() {
-    ReversibleHooks::Install("CCranes", "InitCranes", 0x6F3FC0, &CCranes::InitCranes);
-    ReversibleHooks::Install("CCranes", "UpdateCranes", 0x6F3FE0, &CCranes::UpdateCranes);
-    ReversibleHooks::Install("CCranes", "IsThisCarBeingCarriedByAnyCrane", 0x6F3FF0, &CCranes::IsThisCarBeingCarriedByAnyCrane);
-    ReversibleHooks::Install("CCranes", "IsThisCarBeingTargettedByAnyCrane", 0x6F4000, &CCranes::IsThisCarBeingTargettedByAnyCrane);
-    ReversibleHooks::Install("CCranes", "IsThisCarPickedUp", 0x6F3FD0, &CCranes::IsThisCarPickedUp);
+    RH_ScopedClass(CCranes);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(InitCranes, 0x6F3FC0);
+    RH_ScopedInstall(UpdateCranes, 0x6F3FE0);
+    RH_ScopedInstall(IsThisCarBeingCarriedByAnyCrane, 0x6F3FF0);
+    RH_ScopedInstall(IsThisCarBeingTargettedByAnyCrane, 0x6F4000);
+    RH_ScopedInstall(IsThisCarPickedUp, 0x6F3FD0);
 }
 
 // 0x6F3FC0

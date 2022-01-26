@@ -55,20 +55,23 @@ float(&CWeather::saBannerWindOffsets)[32] = *(float(*)[32])0x8CCF70;
 
 
 void CWeather::InjectHooks() {
-    ReversibleHooks::Install("CWeather", "Init", 0x72A480, &CWeather::Init);
-    // ReversibleHooks::Install("CWeather", "AddRain", 0x72A9A0, &CWeather::AddRain);
-    // ReversibleHooks::Install("CWeather", "AddSandStormParticles", 0x72A820, &CWeather::AddSandStormParticles);
-    // ReversibleHooks::Install("CWeather", "FindWeatherTypesList", 0x72A520, &CWeather::FindWeatherTypesList, true); // bad
-    ReversibleHooks::Install("CWeather", "ForceWeather", 0x72A4E0, &CWeather::ForceWeather);
-    ReversibleHooks::Install("CWeather", "ForceWeatherNow", 0x72A4F0, &CWeather::ForceWeatherNow);
-    // ReversibleHooks::Install("CWeather", "ForecastWeather", 0x72A590, &CWeather::ForecastWeather);
-    ReversibleHooks::Install("CWeather", "ReleaseWeather", 0x72A510, &CWeather::ReleaseWeather);
-    ReversibleHooks::Install("CWeather", "RenderRainStreaks", 0x72AF70, &CWeather::RenderRainStreaks);
-    ReversibleHooks::Install("CWeather", "SetWeatherToAppropriateTypeNow", 0x72A790, &CWeather::SetWeatherToAppropriateTypeNow);
-    // ReversibleHooks::Install("CWeather", "Update", 0x72B850, &CWeather::Update);
-    // ReversibleHooks::Install("CWeather", "UpdateInTunnelness", 0x72B630, &CWeather::UpdateInTunnelness);
-    // ReversibleHooks::Install("CWeather", "UpdateWeatherRegion", 0x72A640, &CWeather::UpdateWeatherRegion, true); // bad
-    ReversibleHooks::Install("CWeather", "IsRainy", 0x4ABF50, &CWeather::IsRainy);
+    RH_ScopedClass(CWeather);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x72A480);
+    // RH_ScopedInstall(AddRain, 0x72A9A0);
+    // RH_ScopedInstall(AddSandStormParticles, 0x72A820);
+    // RH_ScopedInstall(FindWeatherTypesList, 0x72A520, true); // bad
+    RH_ScopedInstall(ForceWeather, 0x72A4E0);
+    RH_ScopedInstall(ForceWeatherNow, 0x72A4F0);
+    // RH_ScopedInstall(ForecastWeather, 0x72A590);
+    RH_ScopedInstall(ReleaseWeather, 0x72A510);
+    RH_ScopedInstall(RenderRainStreaks, 0x72AF70);
+    RH_ScopedInstall(SetWeatherToAppropriateTypeNow, 0x72A790);
+    // RH_ScopedInstall(Update, 0x72B850);
+    // RH_ScopedInstall(UpdateInTunnelness, 0x72B630);
+    // RH_ScopedInstall(UpdateWeatherRegion, 0x72A640, true); // bad
+    RH_ScopedInstall(IsRainy, 0x4ABF50);
 }
 
 // 0x72A480

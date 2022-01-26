@@ -4,16 +4,22 @@ CScriptedBrainTaskEntry(&CScriptedBrainTaskStore::ms_entries)[TOTAL_SCRIPTED_BRA
 
 void CScriptedBrainTaskEntry::InjectHooks()
 {
-    ReversibleHooks::Install("CScriptedBrainTaskEntry", "CScriptedBrainTaskEntry", 0x62EC40, &CScriptedBrainTaskEntry::Constructor);
+    RH_ScopedClass(CScriptedBrainTaskEntry);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(Constructor, 0x62EC40);
 }
 
 void CScriptedBrainTaskStore::InjectHooks()
 {
+    RH_ScopedClass(CScriptedBrainTaskStore);
+    RH_ScopedCategory("Tasks");
+
     CScriptedBrainTaskEntry::InjectHooks();
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "SetTask", 0x635720, &CScriptedBrainTaskStore::SetTask);
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "GetTask", 0x6357C0, &CScriptedBrainTaskStore::GetTask);
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_ped", 0x635850, (void(*)(CPed*)) & CScriptedBrainTaskStore::Clear);
-    ReversibleHooks::Install("CScriptedBrainTaskStore", "Clear_task", 0x6357F0, (void(*)(CTask*)) & CScriptedBrainTaskStore::Clear);
+    RH_ScopedInstall(SetTask, 0x635720);
+    RH_ScopedInstall(GetTask, 0x6357C0);
+    RH_ScopedOverloadedInstall(Clear, "ped", 0x635850, void(*)(CPed*));
+    RH_ScopedOverloadedInstall(Clear, "task", 0x6357F0, void(*)(CTask*));
 }
 
 // 0x62EC40

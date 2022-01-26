@@ -51,6 +51,8 @@ void CheckAll() {
 namespace detail {
 void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
 {
+    if (GetHook(sIdentifier, sFuncName))
+        std::cout << "[HookInstall]: Duplicate: " << sIdentifier << "::" << sFuncName;
     assert(!GetHook(sIdentifier, sFuncName));
 
     auto& usedVector = m_HooksMap[sIdentifier];

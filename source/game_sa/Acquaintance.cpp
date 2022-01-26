@@ -11,12 +11,14 @@ enum {
 };
 
 void CAcquaintance::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAcquaintance", "GetAcquaintances", 0x608970, &CAcquaintance::GetAcquaintances);
-    // Install("CAcquaintance", "SetAcquaintances", 0x608960, &CAcquaintance::SetAcquaintances);
-    // Install("CAcquaintance", "ClearAcquaintances", 0x6089A0, &CAcquaintance::ClearAcquaintances);
-    // Install("CAcquaintance", "SetAsAcquaintance", 0x608DA0, &CAcquaintance::SetAsAcquaintance);
-    // Install("CAcquaintance", "ClearAsAcquaintance", 0x608980, &CAcquaintance::ClearAsAcquaintance);
+    RH_ScopedClass(CAcquaintance);
+    RH_ScopedCategoryRoot();
+
+    // RH_ScopedInstall(GetAcquaintances, 0x608970);
+    // RH_ScopedInstall(SetAcquaintances, 0x608960);
+    // RH_ScopedInstall(ClearAcquaintances, 0x6089A0);
+    // RH_ScopedInstall(SetAsAcquaintance, 0x608DA0);
+    // RH_ScopedInstall(ClearAsAcquaintance, 0x608980);
 }
 
 // 0x608AE0

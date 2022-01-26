@@ -2,8 +2,11 @@
 
 void CEventHitByWaterCannon::InjectHooks()
 {
-    ReversibleHooks::Install("CEventHitByWaterCannon", "Constructor", 0x4B1290, &CEventHitByWaterCannon::Constructor);
-    ReversibleHooks::Install("CEventHitByWaterCannon", "AffectsPed_Reversed", 0x4B1330, &CEventHitByWaterCannon::AffectsPed_Reversed);
+    RH_ScopedClass(CEventHitByWaterCannon);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1290);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1330);
 }
 
 // 0x4B1290

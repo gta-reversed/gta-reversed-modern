@@ -5,13 +5,15 @@
 BreakManager_c& g_breakMan = *(BreakManager_c*)0xBB4240;
 
 void BreakManager_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("BreakManager_c", "Init", 0x59E650, &BreakManager_c::Init);
-    Install("BreakManager_c", "Exit", 0x59E660, &BreakManager_c::Exit);
-    Install("BreakManager_c", "ResetAll", 0x59E720, &BreakManager_c::ResetAll);
-    Install("BreakManager_c", "Add", 0x59E9B0, &BreakManager_c::Add);
-    Install("BreakManager_c", "Update", 0x59E670, &BreakManager_c::Update);
-    Install("BreakManager_c", "Render", 0x59E6A0, &BreakManager_c::Render);
+    RH_ScopedClass(BreakManager_c);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x59E650);
+    RH_ScopedInstall(Exit, 0x59E660);
+    RH_ScopedInstall(ResetAll, 0x59E720);
+    RH_ScopedInstall(Add, 0x59E9B0);
+    RH_ScopedInstall(Update, 0x59E670);
+    RH_ScopedInstall(Render, 0x59E6A0);
 }
 
 // 0x59E650

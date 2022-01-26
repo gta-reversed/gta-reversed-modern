@@ -7,8 +7,11 @@
 
 void CPools::InjectHooks()
 {
-    ReversibleHooks::Install("CPools", "LoadObjectPool", 0x5D4A40, &CPools::LoadObjectPool);
-    ReversibleHooks::Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
+    RH_ScopedClass(CPools);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(LoadObjectPool, 0x5D4A40);
+    RH_ScopedInstall(MakeSureSlotInObjectPoolIsEmpty, 0x550080);
 }
 
 int32 CPools::CheckBuildingAtomics() {

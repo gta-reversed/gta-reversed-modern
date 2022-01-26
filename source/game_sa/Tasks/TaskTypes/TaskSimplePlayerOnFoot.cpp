@@ -1103,16 +1103,17 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 }
 
 void CTaskSimplePlayerOnFoot::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskSimplePlayerOnFoot", "CTaskSimplePlayerOnFoot", 0x685750, &CTaskSimplePlayerOnFoot::Constructor);
-    Install("CTaskSimplePlayerOnFoot", "~CTaskSimplePlayerOnFoot", 0x6857D0, &CTaskSimplePlayerOnFoot::Destructor);
-    Install("CTaskSimplePlayerOnFoot", "ProcessPed_Reversed", 0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed);
-    Install("CTaskSimplePlayerOnFoot", "MakeAbortable_Reversed", 0x6857E0, &CTaskSimplePlayerOnFoot::MakeAbortable_Reversed);
-    // Install("CTaskSimplePlayerOnFoot", "ProcessPlayerWeapon", 0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon);
-    Install("CTaskSimplePlayerOnFoot", "PlayIdleAnimations", 0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlZeldaWeapon", 0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlDucked", 0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlZelda", 0x6883D0, &CTaskSimplePlayerOnFoot::PlayerControlZelda);
+    RH_ScopedClass(CTaskSimplePlayerOnFoot);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x685750);
+    RH_ScopedInstall(Destructor, 0x6857D0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x688810);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6857E0);
+    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
+    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
+    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);
+    RH_ScopedInstall(PlayerControlDucked, 0x687F30);
+    RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
 }
 
 // 0x685750

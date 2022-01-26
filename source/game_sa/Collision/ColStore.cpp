@@ -11,32 +11,35 @@ CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
 
 void CColStore::InjectHooks()
 {
+    RH_ScopedClass(CColStore);
+    RH_ScopedCategory("Collision");
+
 // CLASS
-    ReversibleHooks::Install("CColStore", "Initialise", 0x4113F0, &CColStore::Initialise);
-    ReversibleHooks::Install("CColStore", "Shutdown", 0x4114D0, &CColStore::Shutdown);
-    ReversibleHooks::Install("CColStore", "AddCollisionNeededAtPosn", 0x4103A0, &CColStore::AddCollisionNeededAtPosn);
-    ReversibleHooks::Install("CColStore", "AddColSlot", 0x411140, &CColStore::AddColSlot);
-    ReversibleHooks::Install("CColStore", "AddRef", 0x4107A0, &CColStore::AddRef);
-    ReversibleHooks::Install("CColStore", "RemoveRef", 0x4107D0, &CColStore::RemoveRef);
-    ReversibleHooks::Install("CColStore", "EnsureCollisionIsInMemory", 0x410AD0, &CColStore::EnsureCollisionIsInMemory);
-    ReversibleHooks::Install("CColStore", "SetCollisionRequired", 0x4104E0, &CColStore::SetCollisionRequired);
-    ReversibleHooks::Install("CColStore", "RequestCollision", 0x410C00, &CColStore::RequestCollision);
-    ReversibleHooks::Install("CColStore", "RemoveColSlot", 0x411330, &CColStore::RemoveColSlot);
-    ReversibleHooks::Install("CColStore", "RemoveCol", 0x410730, &CColStore::RemoveCol);
-    ReversibleHooks::Install("CColStore", "LoadCol", 0x410690, (void(*)(int32, char const*))&CColStore::LoadCol);
-    ReversibleHooks::Install("CColStore", "LoadCol_2", 0x4106D0, (bool(*)(int32, uint8*, int32))&CColStore::LoadCol);
-    ReversibleHooks::Install("CColStore", "IncludeModelIndex", 0x410820, &CColStore::IncludeModelIndex);
-    ReversibleHooks::Install("CColStore", "RemoveAllCollision", 0x410E00, &CColStore::RemoveAllCollision);
-    ReversibleHooks::Install("CColStore", "LoadAllCollision", 0x410E60, &CColStore::LoadAllCollision);
-    ReversibleHooks::Install("CColStore", "LoadAllBoundingBoxes", 0x4113D0, &CColStore::LoadAllBoundingBoxes);
-    ReversibleHooks::Install("CColStore", "BoundingBoxesPostProcess", 0x410EC0, &CColStore::BoundingBoxesPostProcess);
-    ReversibleHooks::Install("CColStore", "GetBoundingBox", 0x410800, &CColStore::GetBoundingBox);
-    ReversibleHooks::Install("CColStore", "HasCollisionLoaded", 0x410CE0, &CColStore::HasCollisionLoaded);
-    ReversibleHooks::Install("CColStore", "LoadCollision", 0x410860, &CColStore::LoadCollision);
+    RH_ScopedInstall(Initialise, 0x4113F0);
+    RH_ScopedInstall(Shutdown, 0x4114D0);
+    RH_ScopedInstall(AddCollisionNeededAtPosn, 0x4103A0);
+    RH_ScopedInstall(AddColSlot, 0x411140);
+    RH_ScopedInstall(AddRef, 0x4107A0);
+    RH_ScopedInstall(RemoveRef, 0x4107D0);
+    RH_ScopedInstall(EnsureCollisionIsInMemory, 0x410AD0);
+    RH_ScopedInstall(SetCollisionRequired, 0x4104E0);
+    RH_ScopedInstall(RequestCollision, 0x410C00);
+    RH_ScopedInstall(RemoveColSlot, 0x411330);
+    RH_ScopedInstall(RemoveCol, 0x410730);
+    RH_ScopedOverloadedInstall(LoadCol, "", 0x410690, void(*)(int32, char const*));
+    RH_ScopedOverloadedInstall(LoadCol, "2", 0x4106D0, bool(*)(int32, uint8*, int32));
+    RH_ScopedInstall(IncludeModelIndex, 0x410820);
+    RH_ScopedInstall(RemoveAllCollision, 0x410E00);
+    RH_ScopedInstall(LoadAllCollision, 0x410E60);
+    RH_ScopedInstall(LoadAllBoundingBoxes, 0x4113D0);
+    RH_ScopedInstall(BoundingBoxesPostProcess, 0x410EC0);
+    RH_ScopedInstall(GetBoundingBox, 0x410800);
+    RH_ScopedInstall(HasCollisionLoaded, 0x410CE0);
+    RH_ScopedInstall(LoadCollision, 0x410860);
 
 // OTHER
-    ReversibleHooks::Install("CColStore", "SetIfCollisionIsRequired", 0x4103D0, &SetIfCollisionIsRequired);
-    ReversibleHooks::Install("CColStore", "SetIfCollisionIsRequiredReducedBB", 0x410470, &SetIfCollisionIsRequiredReducedBB);
+    RH_ScopedGlobalInstall(SetIfCollisionIsRequired, 0x4103D0);
+    RH_ScopedGlobalInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
 }
 
 void* ColDef::operator new(uint32 size)

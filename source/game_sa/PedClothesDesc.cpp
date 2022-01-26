@@ -3,12 +3,14 @@
 #include "PedClothesDesc.h"
 
 void CPedClothesDesc::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPedClothesDesc", "CPedClothesDesc", 0x5A8020, &CPedClothesDesc::Constructor);
-    Install("CPedClothesDesc", "Initialise", 0x5A78F0, &CPedClothesDesc::Initialise);
-    Install("CPedClothesDesc", "GetIsWearingBalaclava", 0x5A7950, &CPedClothesDesc::GetIsWearingBalaclava);
-    // Install("CPedClothesDesc", "HasVisibleNewHairCut", 0x5A7970, &CPedClothesDesc::HasVisibleNewHairCut);
-    // Install("CPedClothesDesc", "HasVisibleTattoo", 0x5A79D0, &CPedClothesDesc::HasVisibleTattoo);
+    RH_ScopedClass(CPedClothesDesc);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Constructor, 0x5A8020);
+    RH_ScopedInstall(Initialise, 0x5A78F0);
+    RH_ScopedInstall(GetIsWearingBalaclava, 0x5A7950);
+    // RH_ScopedInstall(HasVisibleNewHairCut, 0x5A7970);
+    // RH_ScopedInstall(HasVisibleTattoo, 0x5A79D0);
 }
 
 CPedClothesDesc::CPedClothesDesc() {

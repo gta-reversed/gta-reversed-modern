@@ -4,11 +4,13 @@ uint32& CShinyTexts::NumShinyTexts = *(uint32*)0xC7C6F8;
 CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[32])0xC7D258;
 
 void CShinyTexts::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CShinyTexts", "Init", 0x7221B0, &CShinyTexts::Init);
-    Install("CShinyTexts", "RenderOutGeometryBuffer", 0x7221C0, &CShinyTexts::RenderOutGeometryBuffer);
-    Install("CShinyTexts", "Render", 0x724890, &CShinyTexts::Render);
-    Install("CShinyTexts", "RegisterOne", 0x724B60, &CShinyTexts::RegisterOne);
+    RH_ScopedClass(CShinyTexts);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x7221B0);
+    RH_ScopedInstall(RenderOutGeometryBuffer, 0x7221C0);
+    RH_ScopedInstall(Render, 0x724890);
+    RH_ScopedInstall(RegisterOne, 0x724B60);
 }
 
 // 0x7221B0

@@ -26,24 +26,27 @@ float& PELLET_COL_SCALE_RATIO_MULT = *(float*)0x8D6128;
 float* fReloadAnimSampleFraction = (float*)0x8D612C;
 
 void CWeapon::InjectHooks() {
-    ReversibleHooks::Install("CWeapon", "CWeapon", 0x73B430, &CWeapon::Constructor);
-    ReversibleHooks::Install("CWeapon", "Shutdown", 0x73A380, &CWeapon::Shutdown);
-    ReversibleHooks::Install("CWeapon", "Reload", 0x73AEB0, &CWeapon::Reload);
-    ReversibleHooks::Install("CWeapon", "IsTypeMelee", 0x73B1C0, &CWeapon::IsTypeMelee);
-    ReversibleHooks::Install("CWeapon", "IsType2Handed", 0x73B1E0, &CWeapon::IsType2Handed);
-    ReversibleHooks::Install("CWeapon", "IsTypeProjectile", 0x73B210, &CWeapon::IsTypeProjectile);
-    ReversibleHooks::Install("CWeapon", "HasWeaponAmmoToBeUsed", 0x73B2A0, &CWeapon::HasWeaponAmmoToBeUsed);
-    ReversibleHooks::Install("CWeapon", "CanBeUsedFor2Player", 0x73B240, (bool (*)(eWeaponType weaponType))&CWeapon::CanBeUsedFor2Player);
-    ReversibleHooks::Install("CWeapon", "InitialiseWeapons", 0x73A300, &CWeapon::InitialiseWeapons);
-    ReversibleHooks::Install("CWeapon", "ShutdownWeapons", 0x73A330, &CWeapon::ShutdownWeapons);
-    ReversibleHooks::Install("CWeapon", "UpdateWeapons", 0x73A360, &CWeapon::UpdateWeapons);
-    ReversibleHooks::Install("CWeapon", "AddGunshell", 0x73A3E0, &CWeapon::AddGunshell);
-    ReversibleHooks::Install("CWeapon", "ProcessLineOfSight", 0x73B300, &CWeapon::ProcessLineOfSight);
-    ReversibleHooks::Install("CWeapon", "StopWeaponEffect", 0x73B360, &CWeapon::StopWeaponEffect);
-    ReversibleHooks::Install("CWeapon", "TargetWeaponRangeMultiplier", 0x73B380, &CWeapon::TargetWeaponRangeMultiplier);
-    ReversibleHooks::Install("CWeapon", "Initialise", 0x73B4A0, &CWeapon::Initialise);
-    ReversibleHooks::Install("CWeapon", "DoWeaponEffect", 0x73E690, &CWeapon::DoWeaponEffect);
-    ReversibleHooks::Install("CWeapon", "FireSniper", 0x73AAC0, &CWeapon::FireSniper);
+    RH_ScopedClass(CWeapon);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Constructor, 0x73B430);
+    RH_ScopedInstall(Shutdown, 0x73A380);
+    RH_ScopedInstall(Reload, 0x73AEB0);
+    RH_ScopedInstall(IsTypeMelee, 0x73B1C0);
+    RH_ScopedInstall(IsType2Handed, 0x73B1E0);
+    RH_ScopedInstall(IsTypeProjectile, 0x73B210);
+    RH_ScopedInstall(HasWeaponAmmoToBeUsed, 0x73B2A0);
+    RH_ScopedOverloadedInstall(CanBeUsedFor2Player, "", 0x73B240, bool (*)(eWeaponType weaponType));
+    RH_ScopedInstall(InitialiseWeapons, 0x73A300);
+    RH_ScopedInstall(ShutdownWeapons, 0x73A330);
+    RH_ScopedInstall(UpdateWeapons, 0x73A360);
+    RH_ScopedInstall(AddGunshell, 0x73A3E0);
+    RH_ScopedInstall(ProcessLineOfSight, 0x73B300);
+    RH_ScopedInstall(StopWeaponEffect, 0x73B360);
+    RH_ScopedInstall(TargetWeaponRangeMultiplier, 0x73B380);
+    RH_ScopedInstall(Initialise, 0x73B4A0);
+    RH_ScopedInstall(DoWeaponEffect, 0x73E690);
+    RH_ScopedInstall(FireSniper, 0x73AAC0);
 }
 
 // 0x73B430

@@ -19,21 +19,23 @@
 
 void CTaskComplexWander::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexWander", "CTaskComplexWander", 0x66F450, &CTaskComplexWander::Constructor);
-    ReversibleHooks::Install("CTaskComplexWander", "GetTaskType", 0x460CD0, &CTaskComplexWander::GetId_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "CreateNextSubTask", 0x674140, &CTaskComplexWander::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "CreateFirstSubTask", 0x6740E0, &CTaskComplexWander::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "ControlSubTask", 0x674C30, &CTaskComplexWander::ControlSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "UpdateDir", 0x669DA0, &CTaskComplexWander::UpdateDir_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "UpdatePathNodes", 0x669ED0, &CTaskComplexWander::UpdatePathNodes_Reversed);
-    ReversibleHooks::Install("CTaskComplexWander", "CreateSubTask", 0x671CB0, &CTaskComplexWander::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexWander", "ComputeTargetPos", 0x669F60, &CTaskComplexWander::ComputeTargetPos);
-    ReversibleHooks::Install("CTaskComplexWander", "ComputeTargetHeading", 0x66F530, &CTaskComplexWander::ComputeTargetHeading);
-    ReversibleHooks::Install("CTaskComplexWander", "ValidNodes", 0x669F30, &CTaskComplexWander::ValidNodes);
-    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNodes", 0x674560, &CTaskComplexWander::ScanForBlockedNodes);
-    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode", 0x671EF0, (bool(CTaskComplexWander::*)(CPed*, CNodeAddress*))&CTaskComplexWander::ScanForBlockedNode);
-    ReversibleHooks::Install("CTaskComplexWander", "ScanForBlockedNode_1", 0x66F4C0, (bool(CTaskComplexWander::*)(CVector*, CEntity*))&CTaskComplexWander::ScanForBlockedNode);
-    ReversibleHooks::Install("CTaskComplexWander", "GetWanderTaskByPedType", 0x673D00, CTaskComplexWander::GetWanderTaskByPedType);
+    RH_ScopedClass(CTaskComplexWander);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x66F450);
+    RH_ScopedInstall(GetId_Reversed, 0x460CD0);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6740E0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x674C30);
+    RH_ScopedInstall(UpdateDir_Reversed, 0x669DA0);
+    RH_ScopedInstall(UpdatePathNodes_Reversed, 0x669ED0);
+    RH_ScopedInstall(CreateSubTask, 0x671CB0);
+    RH_ScopedInstall(ComputeTargetPos, 0x669F60);
+    RH_ScopedInstall(ComputeTargetHeading, 0x66F530);
+    RH_ScopedInstall(ValidNodes, 0x669F30);
+    RH_ScopedInstall(ScanForBlockedNodes, 0x674560);
+    RH_ScopedOverloadedInstall(ScanForBlockedNode, "", 0x671EF0, bool(CTaskComplexWander::*)(CPed*, CNodeAddress*));
+    RH_ScopedOverloadedInstall(ScanForBlockedNode, "1", 0x66F4C0, bool(CTaskComplexWander::*)(CVector*, CEntity*));
+    RH_ScopedInstall(GetWanderTaskByPedType, 0x673D00);
 }
 
 CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly, float fTargetRadius) {

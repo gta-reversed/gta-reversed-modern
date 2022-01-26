@@ -10,14 +10,16 @@
 #include "GxtChar.h"
 
 void C_PcSave::InjectHooks() {
+    RH_ScopedClass(C_PcSave);
+    RH_ScopedCategoryRoot();
+
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
-    using namespace ReversibleHooks;
-    Install("C_PcSave", "SetSaveDirectory", 0x619040, &C_PcSave::SetSaveDirectory, true);
-    Install("C_PcSave", "GenerateGameFilename", 0x6190A0, &C_PcSave::GenerateGameFilename, true);
-    Install("C_PcSave", "PopulateSlotInfo", 0x619140, &C_PcSave::PopulateSlotInfo, true);
-    Install("C_PcSave", "SaveSlot", 0x619060, &C_PcSave::SaveSlot, true);
-    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot, true);
+    RH_ScopedInstall(SetSaveDirectory, 0x619040, true);
+    RH_ScopedInstall(GenerateGameFilename, 0x6190A0, true);
+    RH_ScopedInstall(PopulateSlotInfo, 0x619140, true);
+    RH_ScopedInstall(SaveSlot, 0x619060, true);
+    RH_ScopedInstall(DeleteSlot, 0x6190D0, true);
 }
 
 // 0x619040

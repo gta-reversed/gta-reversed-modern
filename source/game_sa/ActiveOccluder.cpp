@@ -4,8 +4,11 @@
 
 void CActiveOccluder::InjectHooks()
 {
-    ReversibleHooks::Install("CActiveOccluder", "IsPointWithinOcclusionArea", 0x71E580, &CActiveOccluder::IsPointWithinOcclusionArea);
-    ReversibleHooks::Install("CActiveOccluder", "IsPointBehindOccluder", 0x71FA40, &CActiveOccluder::IsPointBehindOccluder);
+    RH_ScopedClass(CActiveOccluder);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(IsPointWithinOcclusionArea, 0x71E580);
+    RH_ScopedInstall(IsPointBehindOccluder, 0x71FA40);
 }
 
 // 0x71E580

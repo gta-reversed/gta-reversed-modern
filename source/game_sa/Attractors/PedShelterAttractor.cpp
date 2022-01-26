@@ -28,11 +28,13 @@ void CPedShelterAttractor::BroadcastDeparture(CPed* ped) {
 }
 
 void CPedShelterAttractor::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CPedShelterAttractor", "GetDisplacement", 0x5EF420, &CPedShelterAttractor::GetDisplacement);
-    Install("CPedShelterAttractor", "ComputeAttractPos", 0x5EFC40, &CPedShelterAttractor::ComputeAttractPos_Reversed);
-    Install("CPedShelterAttractor", "ComputeAttractHeading", 0x5E9690, &CPedShelterAttractor::ComputeAttractHeading_Reversed);
-    // Install("CPedShelterAttractor", "BroadcastDeparture", 0x5EF570, &CPedShelterAttractor::BroadcastDeparture_Reversed);
+    RH_ScopedClass(CPedShelterAttractor);
+    RH_ScopedCategory("Attractors");
+
+    // RH_ScopedInstall(GetDisplacement, 0x5EF420);
+    RH_ScopedInstall(ComputeAttractPos_Reversed, 0x5EFC40);
+    RH_ScopedInstall(ComputeAttractHeading_Reversed, 0x5E9690);
+    // RH_ScopedInstall(BroadcastDeparture_Reversed, 0x5EF570);
 }
 
 void CPedShelterAttractor::ComputeAttractPos_Reversed(int32 pedId, CVector& posn) {

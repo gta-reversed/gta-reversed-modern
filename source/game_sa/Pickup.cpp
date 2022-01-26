@@ -3,19 +3,21 @@
 #include "Pickup.h"
 
 void CPickup::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CPickup", "ExtractAmmoFromPickup", 0x454BE0, &CPickup::ExtractAmmoFromPickup);
-    Install("CPickup", "FindStringForTextIndex", 0x455540, &CPickup::FindStringForTextIndex);
-    Install("CPickup", "FindTextIndexForString", 0x455500, &CPickup::FindTextIndexForString);
-    Install("CPickup", "GetPosn", 0x4549A0, &CPickup::GetPosn);
-    Install("CPickup", "GetRidOfObjects", 0x454CF0, &CPickup::GetRidOfObjects);
-    // Install("CPickup", "GiveUsAPickUpObject", 0x4567E0, &CPickup::GiveUsAPickUpObject);
-    // Install("CPickup", "IsVisible", 0x454C70, &CPickup::IsVisible);
-    // Install("CPickup", "PickUpShouldBeInvisible", 0x454D20, &CPickup::PickUpShouldBeInvisible);
-    Install("CPickup", "ProcessGunShot", 0x4588B0, &CPickup::ProcessGunShot);
-    // Install("CPickup", "Remove", 0x4556C0, &CPickup::Remove);
-    Install("CPickup", "SetPosn", 0x454960, &CPickup::SetPosn);
-    // Install("CPickup", "Update", 0x457410, &CPickup::Update);
+    RH_ScopedClass(CPickup);
+    RH_ScopedCategoryRoot();
+
+    // RH_ScopedInstall(ExtractAmmoFromPickup, 0x454BE0);
+    RH_ScopedInstall(FindStringForTextIndex, 0x455540);
+    RH_ScopedInstall(FindTextIndexForString, 0x455500);
+    RH_ScopedInstall(GetPosn, 0x4549A0);
+    RH_ScopedInstall(GetRidOfObjects, 0x454CF0);
+    // RH_ScopedInstall(GiveUsAPickUpObject, 0x4567E0);
+    // RH_ScopedInstall(IsVisible, 0x454C70);
+    // RH_ScopedInstall(PickUpShouldBeInvisible, 0x454D20);
+    RH_ScopedInstall(ProcessGunShot, 0x4588B0);
+    // RH_ScopedInstall(Remove, 0x4556C0);
+    RH_ScopedInstall(SetPosn, 0x454960);
+    // RH_ScopedInstall(Update, 0x457410);
 }
 
 // 0x454BE0

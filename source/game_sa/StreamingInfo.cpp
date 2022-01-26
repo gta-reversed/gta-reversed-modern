@@ -3,13 +3,16 @@
 CStreamingInfo*& CStreamingInfo::ms_pArrayBase = *reinterpret_cast<CStreamingInfo**>(0x9654B4); // Just a pointer to `CStreaming::ms_aInfoForModel`
 
 void CStreamingInfo::InjectHooks() {
-    ReversibleHooks::Install("CStreamingInfo", "Init", 0x407460, &CStreamingInfo::Init);
-    ReversibleHooks::Install("CStreamingInfo", "AddToList", 0x407480, &CStreamingInfo::AddToList);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosn", 0x407570, &CStreamingInfo::GetCdPosn);
-    ReversibleHooks::Install("CStreamingInfo", "SetCdPosnAndSize", 0x4075E0, &CStreamingInfo::SetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "GetCdPosnAndSize", 0x4075A0, &CStreamingInfo::GetCdPosnAndSize);
-    ReversibleHooks::Install("CStreamingInfo", "InList", 0x407560, &CStreamingInfo::InList);
-    ReversibleHooks::Install("CStreamingInfo", "RemoveFromList", 0x4074E0, &CStreamingInfo::RemoveFromList);
+    RH_ScopedClass(CStreamingInfo);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x407460);
+    RH_ScopedInstall(AddToList, 0x407480);
+    RH_ScopedInstall(GetCdPosn, 0x407570);
+    RH_ScopedInstall(SetCdPosnAndSize, 0x4075E0);
+    RH_ScopedInstall(GetCdPosnAndSize, 0x4075A0);
+    RH_ScopedInstall(InList, 0x407560);
+    RH_ScopedInstall(RemoveFromList, 0x4074E0);
 }
 
 // 0x407460

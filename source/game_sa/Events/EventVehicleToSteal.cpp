@@ -6,8 +6,11 @@
 
 void CEventVehicleToSteal::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleToSteal", "Constructor", 0x4AF670, &CEventVehicleToSteal::Constructor);
-    ReversibleHooks::Install("CEventVehicleToSteal", "AffectsPed_Reversed", 0x4AF760, &CEventVehicleToSteal::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleToSteal);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF670);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF760);
 }
 
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)

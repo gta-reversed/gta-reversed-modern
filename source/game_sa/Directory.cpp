@@ -4,16 +4,19 @@
 
 
 void CDirectory::InjectHooks() {
-    ReversibleHooks::Install("CDirectory", "CDirectory_Empty", 0x532290, static_cast<CDirectory*(CDirectory::*)()>(&CDirectory::Constructor));
-    ReversibleHooks::Install("CDirectory", "CDirectory_Capacity", 0x5322A0, static_cast<CDirectory*(CDirectory::*)(size_t)>(&CDirectory::Constructor));
-    ReversibleHooks::Install("CDirectory", "~CDirectory", 0x5322D0, &CDirectory::Destructor); 
-    ReversibleHooks::Install("CDirectory", "Init", 0x5322F0, &CDirectory::Init); 
-    ReversibleHooks::Install("CDirectory", "AddItem", 0x532310, &CDirectory::AddItem); 
-    ReversibleHooks::Install("CDirectory", "ReadDirFile", 0x532350, &CDirectory::ReadDirFile); 
-    ReversibleHooks::Install("CDirectory", "WriteDirFile", 0x532410, &CDirectory::WriteDirFile); 
-    ReversibleHooks::Install("CDirectory", "FindItem", 0x532450, static_cast<DirectoryInfo*(CDirectory::*)(const char*)>(&CDirectory::FindItem)); 
-    ReversibleHooks::Install("CDirectory", "FindItem_ByName", 0x5324A0, static_cast<bool(CDirectory::*)(const char*, uint32&, uint32&)>(&CDirectory::FindItem));
-    ReversibleHooks::Install("CDirectory", "FindItem_ByHash", 0x5324D0, static_cast<bool(CDirectory::*)(uint32, uint32&, uint32&)>(&CDirectory::FindItem));
+    RH_ScopedClass(CDirectory);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedOverloadedInstall(Constructor, "Empty", 0x532290, CDirectory*(CDirectory::*)());
+    RH_ScopedOverloadedInstall(Constructor, "Capacity", 0x5322A0, CDirectory*(CDirectory::*)(size_t));
+    RH_ScopedInstall(Destructor, 0x5322D0); 
+    RH_ScopedInstall(Init, 0x5322F0); 
+    RH_ScopedInstall(AddItem, 0x532310); 
+    RH_ScopedInstall(ReadDirFile, 0x532350); 
+    RH_ScopedInstall(WriteDirFile, 0x532410); 
+    RH_ScopedOverloadedInstall(FindItem, "", 0x532450, DirectoryInfo*(CDirectory::*)(const char*)); 
+    RH_ScopedOverloadedInstall(FindItem, "ByName", 0x5324A0, bool(CDirectory::*)(const char*, uint32&, uint32&));
+    RH_ScopedOverloadedInstall(FindItem, "ByHash", 0x5324D0, bool(CDirectory::*)(uint32, uint32&, uint32&));
 }
 
 // 0x532290

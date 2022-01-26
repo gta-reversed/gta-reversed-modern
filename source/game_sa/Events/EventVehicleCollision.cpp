@@ -8,9 +8,12 @@
 
 void CEventVehicleCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleCollision", "Constructor",0x4AC840, &CEventVehicleCollision::Constructor);
-    ReversibleHooks::Install("CEventVehicleCollision", "Clone",0x4B6BC0, &CEventVehicleCollision::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleCollision", "AffectsPed",0x4B2EE0, &CEventVehicleCollision::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AC840);
+    RH_ScopedInstall(Clone_Reversed, 0x4B6BC0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2EE0);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)

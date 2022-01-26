@@ -2,9 +2,12 @@
 
 void CEventGlobalGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CEventGlobalGroup", "GetSoundLevel", 0x4AB900, &CEventGlobalGroup::GetSoundLevel);
-    ReversibleHooks::Install("CEventGlobalGroup", "AddEventsToPed", 0x4AB9C0, &CEventGlobalGroup::AddEventsToPed);
-    ReversibleHooks::Install("CEventGlobalGroup", "AddEventsToGroup", 0x4AB8A0, &CEventGlobalGroup::AddEventsToGroup);
+    RH_ScopedClass(CEventGlobalGroup);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(GetSoundLevel, 0x4AB900);
+    RH_ScopedInstall(AddEventsToPed, 0x4AB9C0);
+    RH_ScopedInstall(AddEventsToGroup, 0x4AB8A0);
 }
 
 // 0x4AB900

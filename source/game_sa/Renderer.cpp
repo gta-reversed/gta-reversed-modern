@@ -39,39 +39,42 @@ CEntity**& gpOutEntitiesForGetObjectsInFrustum = *(CEntity***)0xB76854;
 
 void CRenderer::InjectHooks()
 {
-    ReversibleHooks::Install("CRenderer", "RenderFadingInEntities", 0x5531E0, &CRenderer::RenderFadingInEntities);
-    ReversibleHooks::Install("CRenderer", "RenderFadingInUnderwaterEntities", 0x553220, &CRenderer::RenderFadingInUnderwaterEntities);
-    ReversibleHooks::Install("CRenderer", "RenderOneRoad", 0x553230, &CRenderer::RenderOneRoad);
-    ReversibleHooks::Install("CRenderer", "RenderOneNonRoad", 0x553260, &CRenderer::RenderOneNonRoad);
-    ReversibleHooks::Install("CRenderer", "RemoveVehiclePedLights", 0x553390, &CRenderer::RemoveVehiclePedLights);
-    ReversibleHooks::Install("CRenderer", "AddEntityToRenderList", 0x5534B0, &CRenderer::AddEntityToRenderList);
-    ReversibleHooks::Install("CRenderer", "GetLodRenderListBase", 0x5536D0, &CRenderer::GetLodRenderListBase);
-    ReversibleHooks::Install("CRenderer", "GetLodDontRenderListBase", 0x5536E0, &CRenderer::GetLodDontRenderListBase);
-    ReversibleHooks::Install("CRenderer", "ResetLodRenderLists", 0x5536F0, &CRenderer::ResetLodRenderLists);
-    ReversibleHooks::Install("CRenderer", "AddToLodRenderList", 0x553710, &CRenderer::AddToLodRenderList);
-    ReversibleHooks::Install("CRenderer", "AddToLodDontRenderList", 0x553740, &CRenderer::AddToLodDontRenderList);
-    ReversibleHooks::Install("CRenderer", "ProcessLodRenderLists", 0x553770, &CRenderer::ProcessLodRenderLists);
-    ReversibleHooks::Install("CRenderer", "PreRender", 0x553910, &CRenderer::PreRender);
-    ReversibleHooks::Install("CRenderer", "RenderRoads", 0x553A10, &CRenderer::RenderRoads);
-    ReversibleHooks::Install("CRenderer", "RenderEverythingBarRoads", 0x553AA0, &CRenderer::RenderEverythingBarRoads);
-    ReversibleHooks::Install("CRenderer", "RenderFirstPersonVehicle", 0x553D00, &CRenderer::RenderFirstPersonVehicle);
-    ReversibleHooks::Install("CRenderer", "SetupLightingForEntity", 0x553E40, &CRenderer::SetupLightingForEntity);
-    ReversibleHooks::Install("CRenderer", "SetupEntityVisibility", 0x554230, &CRenderer::SetupEntityVisibility);
-    ReversibleHooks::Install("CRenderer", "SetupMapEntityVisibility", 0x553F60, &CRenderer::SetupMapEntityVisibility);
-    ReversibleHooks::Install("CRenderer", "SetupBigBuildingVisibility", 0x554650, &CRenderer::SetupBigBuildingVisibility);
-    ReversibleHooks::Install("CRenderer", "SetuscanLists", 0x553540, &CRenderer::SetupScanLists);
-    ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModels", 0x5535D0, &CRenderer::ScanSectorList_ListModels);
-    ReversibleHooks::Install("CRenderer", "ScanSectorList_ListModelsVisible);", 0x553650, &CRenderer::ScanSectorList_ListModelsVisible);
-    ReversibleHooks::Install("CRenderer", "ScanSectorList", 0x554840, &CRenderer::ScanSectorList);
-    ReversibleHooks::Install("CRenderer", "ScanBigBuildingList", 0x554B10, &CRenderer::ScanBigBuildingList, true);
-    ReversibleHooks::Install("CRenderer", "ShouldModelBeStreamed", 0x554EB0, &CRenderer::ShouldModelBeStreamed);
-    ReversibleHooks::Install("CRenderer", "ScanPtrList_RequestModels", 0x555680, &CRenderer::ScanPtrList_RequestModels);
-    ReversibleHooks::Install("CRenderer", "ConstructRenderList", 0x5556E0, &CRenderer::ConstructRenderList);
-    ReversibleHooks::Install("CRenderer", "ScanSectorList_RequestModels", 0x555900, &CRenderer::ScanSectorList_RequestModels);
-    ReversibleHooks::Install("CRenderer", "ScanWorld", 0x554FE0, &CRenderer::ScanWorld);
-    ReversibleHooks::Install("CRenderer", "GetObjectsInFrustum", 0x554C60, &CRenderer::GetObjectsInFrustum);
-    ReversibleHooks::Install("CRenderer", "RequestObjectsInFrustum", 0x555960, &CRenderer::RequestObjectsInFrustum);
-    ReversibleHooks::Install("CRenderer", "RequestObjectsInDirection", 0x555CB0, &CRenderer::RequestObjectsInDirection);
+    RH_ScopedClass(CRenderer);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(RenderFadingInEntities, 0x5531E0);
+    RH_ScopedInstall(RenderFadingInUnderwaterEntities, 0x553220);
+    RH_ScopedInstall(RenderOneRoad, 0x553230);
+    RH_ScopedInstall(RenderOneNonRoad, 0x553260);
+    RH_ScopedInstall(RemoveVehiclePedLights, 0x553390);
+    RH_ScopedInstall(AddEntityToRenderList, 0x5534B0);
+    RH_ScopedInstall(GetLodRenderListBase, 0x5536D0);
+    RH_ScopedInstall(GetLodDontRenderListBase, 0x5536E0);
+    RH_ScopedInstall(ResetLodRenderLists, 0x5536F0);
+    RH_ScopedInstall(AddToLodRenderList, 0x553710);
+    RH_ScopedInstall(AddToLodDontRenderList, 0x553740);
+    RH_ScopedInstall(ProcessLodRenderLists, 0x553770);
+    RH_ScopedInstall(PreRender, 0x553910);
+    RH_ScopedInstall(RenderRoads, 0x553A10);
+    RH_ScopedInstall(RenderEverythingBarRoads, 0x553AA0);
+    RH_ScopedInstall(RenderFirstPersonVehicle, 0x553D00);
+    RH_ScopedInstall(SetupLightingForEntity, 0x553E40);
+    RH_ScopedInstall(SetupEntityVisibility, 0x554230);
+    RH_ScopedInstall(SetupMapEntityVisibility, 0x553F60);
+    RH_ScopedInstall(SetupBigBuildingVisibility, 0x554650);
+    RH_ScopedInstall(SetupScanLists, 0x553540);
+    RH_ScopedInstall(ScanSectorList_ListModels, 0x5535D0);
+    RH_ScopedInstall(ScanSectorList_ListModelsVisible, 0x553650);
+    RH_ScopedInstall(ScanSectorList, 0x554840);
+    RH_ScopedInstall(ScanBigBuildingList, 0x554B10, true);
+    RH_ScopedInstall(ShouldModelBeStreamed, 0x554EB0);
+    RH_ScopedInstall(ScanPtrList_RequestModels, 0x555680);
+    RH_ScopedInstall(ConstructRenderList, 0x5556E0);
+    RH_ScopedInstall(ScanSectorList_RequestModels, 0x555900);
+    RH_ScopedInstall(ScanWorld, 0x554FE0);
+    RH_ScopedInstall(GetObjectsInFrustum, 0x554C60);
+    RH_ScopedInstall(RequestObjectsInFrustum, 0x555960);
+    RH_ScopedInstall(RequestObjectsInDirection, 0x555CB0);
 
 }
 

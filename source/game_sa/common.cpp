@@ -52,84 +52,87 @@ float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
 
 void InjectCommonHooks()
 {
+    RH_ScopedNamespaceName("Common");
+    RH_ScopedCategory("Common");
+
     HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
-    ReversibleHooks::Install("common", "FindPlayerCoors", 0x56E010, &FindPlayerCoors);
-    ReversibleHooks::Install("common", "FindPlayerSpeed", 0x56E090, &FindPlayerSpeed);
-    ReversibleHooks::Install("common", "FindPlayerEntity", 0x56E120, &FindPlayerEntity);
-    ReversibleHooks::Install("common", "FindPlayerTrain", 0x56E160, &FindPlayerTrain);
-    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld", 0x56E250, &FindPlayerCentreOfWorld);
-//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoSniperShift", 0x56E320, &FindPlayerCentreOfWorld_NoSniperShift);
-//    ReversibleHooks::Install("common", "FindPlayerCentreOfWorld_NoInteriorShift", 0x56E400, &FindPlayerCentreOfWorld_NoInteriorShift);
-    ReversibleHooks::Install("common", "FindPlayerHeading", 0x56E450, &FindPlayerHeading);
-    ReversibleHooks::Install("common", "FindPlayerPed", 0x56E210, &FindPlayerPed);
-    ReversibleHooks::Install("common", "FindPlayerVehicle", 0x56E0D0, &FindPlayerVehicle);
-    ReversibleHooks::Install("common", "FindPlayerWanted", 0x56E230, &FindPlayerWanted);
+    RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
+    RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
+    RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
+    RH_ScopedGlobalInstall(FindPlayerTrain, 0x56E160);
+    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld, 0x56E250);
+//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
+//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
+    RH_ScopedGlobalInstall(FindPlayerHeading, 0x56E450);
+    RH_ScopedGlobalInstall(FindPlayerPed, 0x56E210);
+    RH_ScopedGlobalInstall(FindPlayerVehicle, 0x56E0D0);
+    RH_ScopedGlobalInstall(FindPlayerWanted, 0x56E230);
 
-    ReversibleHooks::Install("common", "MakeUpperCase", 0x7186E0, &MakeUpperCase);
-    ReversibleHooks::Install("common", "GetEventGlobalGroup", 0x4ABA50, &GetEventGlobalGroup);
-    ReversibleHooks::Install("common", "DefinedState", 0x734650, &DefinedState);
-    ReversibleHooks::Install("common", "DefinedState2d", 0x734750, &DefinedState2d);
+    RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
+    RH_ScopedGlobalInstall(GetEventGlobalGroup, 0x4ABA50);
+    RH_ScopedGlobalInstall(DefinedState, 0x734650);
+    RH_ScopedGlobalInstall(DefinedState2d, 0x734750);
 
-    ReversibleHooks::Install("common", "GetNameAndDamage", 0x5370A0, &GetNameAndDamage);
-    ReversibleHooks::Install("common", "GetFirstAtomicCallback", 0x734810, &GetFirstAtomicCallback);
-    ReversibleHooks::Install("common", "GetFirstAtomic", 0x734820, &GetFirstAtomic);
-//    ReversibleHooks::Install("common", "Get2DEffectAtomicCallback", 0x734850, &Get2DEffectAtomicCallback);
-    ReversibleHooks::Install("common", "Get2DEffectAtomic", 0x734880, &Get2DEffectAtomic);
-    ReversibleHooks::Install("common", "GetFirstObjectCallback", 0x7348B0, &GetFirstObjectCallback);
-    ReversibleHooks::Install("common", "GetFirstObject", 0x7348C0, &GetFirstObject);
-    ReversibleHooks::Install("common", "GetFirstFrameCallback", 0x7348F0, &GetFirstFrameCallback);
-    ReversibleHooks::Install("common", "GetFirstChild", 0x734900, &GetFirstChild);
-//    ReversibleHooks::Install("common", "GetFirstTextureCallback", 0x734930, &GetFirstTextureCallback);
-//    ReversibleHooks::Install("common", "GetFirstTexture", 0x734940, &GetFirstTexture);
-    ReversibleHooks::Install("common", "SkinAtomicGetHAnimHierarchCB", 0x734A20, &SkinAtomicGetHAnimHierarchCB);
-    ReversibleHooks::Install("common", "GetAnimHierarchyFromSkinClump", 0x734A40, &GetAnimHierarchyFromSkinClump);
-//    ReversibleHooks::Install("common", "GetAnimHierarchyFromFrame", 0x734AB0, &GetAnimHierarchyFromFrame);
-    ReversibleHooks::Install("common", "GetAnimHierarchyFromClump", 0x734B10, &GetAnimHierarchyFromClump);
-    ReversibleHooks::Install("common", "AtomicRemoveAnimFromSkinCB", 0x734B90, &AtomicRemoveAnimFromSkinCB);
-    ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTL", 0x734BE0, &RpAtomicConvertGeometryToTL);
-    ReversibleHooks::Install("common", "RpAtomicConvertGeometryToTS", 0x734C20, &RpAtomicConvertGeometryToTS);
+    RH_ScopedGlobalInstall(GetNameAndDamage, 0x5370A0);
+    RH_ScopedGlobalInstall(GetFirstAtomicCallback, 0x734810);
+    RH_ScopedGlobalInstall(GetFirstAtomic, 0x734820);
+//    RH_ScopedGlobalInstall(Get2DEffectAtomicCallback, 0x734850);
+    RH_ScopedGlobalInstall(Get2DEffectAtomic, 0x734880);
+    RH_ScopedGlobalInstall(GetFirstObjectCallback, 0x7348B0);
+    RH_ScopedGlobalInstall(GetFirstObject, 0x7348C0);
+    RH_ScopedGlobalInstall(GetFirstFrameCallback, 0x7348F0);
+    RH_ScopedGlobalInstall(GetFirstChild, 0x734900);
+//    RH_ScopedGlobalInstall(GetFirstTextureCallback, 0x734930);
+//    RH_ScopedGlobalInstall(GetFirstTexture, 0x734940);
+    RH_ScopedGlobalInstall(SkinAtomicGetHAnimHierarchCB, 0x734A20);
+    RH_ScopedGlobalInstall(GetAnimHierarchyFromSkinClump, 0x734A40);
+//    RH_ScopedGlobalInstall(GetAnimHierarchyFromFrame, 0x734AB0);
+    RH_ScopedGlobalInstall(GetAnimHierarchyFromClump, 0x734B10);
+    RH_ScopedGlobalInstall(AtomicRemoveAnimFromSkinCB, 0x734B90);
+    RH_ScopedGlobalInstall(RpAtomicConvertGeometryToTL, 0x734BE0);
+    RH_ScopedGlobalInstall(RpAtomicConvertGeometryToTS, 0x734C20);
 
-    ReversibleHooks::Install("common", "atomicConvertGeometryToTL", 0x734C60, &atomicConvertGeometryToTL);
-    ReversibleHooks::Install("common", "RpClumpConvertGeometryToTL", 0x734CB0, &RpClumpConvertGeometryToTL);
+    RH_ScopedGlobalInstall(atomicConvertGeometryToTL, 0x734C60);
+    RH_ScopedGlobalInstall(RpClumpConvertGeometryToTL, 0x734CB0);
 
-    ReversibleHooks::Install("common", "atomicConvertGeometryToTS", 0x734CE0, &atomicConvertGeometryToTS);
-    ReversibleHooks::Install("common", "RpClumpConvertGeometryToTS", 0x734D30, &RpClumpConvertGeometryToTS);
+    RH_ScopedGlobalInstall(atomicConvertGeometryToTS, 0x734CE0);
+    RH_ScopedGlobalInstall(RpClumpConvertGeometryToTS, 0x734D30);
 
-    ReversibleHooks::Install("common", "forceLinearFilteringAtomicsCB", 0x734DA0, &forceLinearFilteringAtomicsCB);
-    ReversibleHooks::Install("common", "SetFilterModeOnClumpsTextures", 0x734DC0, &SetFilterModeOnClumpsTextures);
+    RH_ScopedGlobalInstall(forceLinearFilteringAtomicsCB, 0x734DA0);
+    RH_ScopedGlobalInstall(SetFilterModeOnClumpsTextures, 0x734DC0);
 
 
-    ReversibleHooks::Install("common", "forceLinearFilteringMatTexturesCB", 0x734D60, &forceLinearFilteringMatTexturesCB);
-    ReversibleHooks::Install("common", "SetFilterModeOnAtomicsTextures", 0x734D80, &SetFilterModeOnAtomicsTextures);
+    RH_ScopedGlobalInstall(forceLinearFilteringMatTexturesCB, 0x734D60);
+    RH_ScopedGlobalInstall(SetFilterModeOnAtomicsTextures, 0x734D80);
 
-    ReversibleHooks::Install("common", "SetLightsWithTimeOfDayColour", 0x7354E0, &SetLightsWithTimeOfDayColour);
-    ReversibleHooks::Install("common", "LightsDestroy", 0x735730, &LightsDestroy);
-    ReversibleHooks::Install("common", "WorldReplaceNormalLightsWithScorched", 0x7357E0, &WorldReplaceNormalLightsWithScorched);
-//    ReversibleHooks::Install("common", "AddAnExtraDirectionalLight", 0x735840, &AddAnExtraDirectionalLight);
-    ReversibleHooks::Install("common", "RemoveExtraDirectionalLights", 0x7359E0, &RemoveExtraDirectionalLights);
-    ReversibleHooks::Install("common", "SetBrightMarkerColours", 0x735BD0, &SetBrightMarkerColours);
-    ReversibleHooks::Install("common", "ReSetAmbientAndDirectionalColours", 0x735C40, &ReSetAmbientAndDirectionalColours);
-    ReversibleHooks::Install("common", "DeActivateDirectional", 0x735C70, &DeActivateDirectional);
-    ReversibleHooks::Install("common", "ActivateDirectional", 0x735C80, &ActivateDirectional);
-    ReversibleHooks::Install("common", "SetAmbientColours_void", 0x735D30, static_cast<void(*)()>(&SetAmbientColours));
-    ReversibleHooks::Install("common", "SetAmbientColours_color", 0x735D50, static_cast<void(*)(RwRGBAReal* color)>(&SetAmbientColours));
-    ReversibleHooks::Install("common", "SetDirectionalColours", 0x735D70, &SetDirectionalColours);
-    ReversibleHooks::Install("common", "SetLightColoursForPedsCarsAndObjects", 0x735D90, &SetLightColoursForPedsCarsAndObjects);
-    ReversibleHooks::Install("common", "SetLightsForInfraredVisionHeatObjects", 0x735E40, &SetLightsForInfraredVisionHeatObjects);
-    ReversibleHooks::Install("common", "StoreAndSetLightsForInfraredVisionHeatObjects", 0x735E70, &StoreAndSetLightsForInfraredVisionHeatObjects);
-    ReversibleHooks::Install("common", "RestoreLightsForInfraredVisionHeatObjects", 0x735EF0, &RestoreLightsForInfraredVisionHeatObjects);
-    ReversibleHooks::Install("common", "SetLightsForInfraredVisionDefaultObjects", 0x735F20, &SetLightsForInfraredVisionDefaultObjects);
-    ReversibleHooks::Install("common", "SetLightsForNightVision", 0x735F70, &SetLightsForNightVision);
-    ReversibleHooks::Install("common", "GetDayNightBalance", 0x6FAB30, &GetDayNightBalance);
-    ReversibleHooks::Install("common", "AsciiToGxtChar", 0x718600, &AsciiToGxtChar);
-    ReversibleHooks::Install("common", "WriteRaster", 0x005A4150, &WriteRaster);
-//    ReversibleHooks::Install("common", "CalcScreenCoors_VVff", 0x71DA00, static_cast<bool(*)(CVector const&, CVector*, float*, float*)>(&CalcScreenCoors));
-//    ReversibleHooks::Install("common", "CalcScreenCoors_VV", 0x71DAB0, static_cast<bool(*)(CVector const&, CVector*)>(&CalcScreenCoors));
-    ReversibleHooks::Install("common", "LittleTest", 0x541330, &LittleTest);
+    RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
+    RH_ScopedGlobalInstall(LightsDestroy, 0x735730);
+    RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
+//    RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
+    RH_ScopedGlobalInstall(RemoveExtraDirectionalLights, 0x7359E0);
+    RH_ScopedGlobalInstall(SetBrightMarkerColours, 0x735BD0);
+    RH_ScopedGlobalInstall(ReSetAmbientAndDirectionalColours, 0x735C40);
+    RH_ScopedGlobalInstall(DeActivateDirectional, 0x735C70);
+    RH_ScopedGlobalInstall(ActivateDirectional, 0x735C80);
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
+    RH_ScopedGlobalInstall(SetDirectionalColours, 0x735D70);
+    RH_ScopedGlobalInstall(SetLightColoursForPedsCarsAndObjects, 0x735D90);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionHeatObjects, 0x735E40);
+    RH_ScopedGlobalInstall(StoreAndSetLightsForInfraredVisionHeatObjects, 0x735E70);
+    RH_ScopedGlobalInstall(RestoreLightsForInfraredVisionHeatObjects, 0x735EF0);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionDefaultObjects, 0x735F20);
+    RH_ScopedGlobalInstall(SetLightsForNightVision, 0x735F70);
+    RH_ScopedGlobalInstall(GetDayNightBalance, 0x6FAB30);
+    RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
+    RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
+//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(CVector const&, CVector*, float*, float*));
+//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(CVector const&, CVector*));
+    RH_ScopedGlobalInstall(LittleTest, 0x541330);
 
-    ReversibleHooks::Install("common", "RemoveRefsCB", 0x7226D0, &RemoveRefsCB);
-    ReversibleHooks::Install("common", "IsGlassModel", 0x46A760, &IsGlassModel);
+    RH_ScopedGlobalInstall(RemoveRefsCB, 0x7226D0);
+    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
 // 0x56E010

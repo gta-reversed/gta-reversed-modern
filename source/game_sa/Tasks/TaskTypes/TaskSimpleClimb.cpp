@@ -26,22 +26,24 @@ float& CTaskSimpleClimb::ms_fMinForStretchGrab = *reinterpret_cast<float*>(0x8D2
 
 void CTaskSimpleClimb::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleClimb", "ScanToGrabSectorList", 0x67DE10, &CTaskSimpleClimb::ScanToGrabSectorList);
-    ReversibleHooks::Install("CTaskSimpleClimb", "ScanToGrab", 0x67FD30, &CTaskSimpleClimb::ScanToGrab);
-    ReversibleHooks::Install("CTaskSimpleClimb", "CreateColModel", 0x67A890, &CTaskSimpleClimb::CreateColModel);
-    ReversibleHooks::Install("CTaskSimpleClimb", "TestForStandUp", 0x680570, &CTaskSimpleClimb::TestForStandUp);
-    ReversibleHooks::Install("CTaskSimpleClimb", "TestForVault", 0x6804D0, &CTaskSimpleClimb::TestForVault);
-    ReversibleHooks::Install("CTaskSimpleClimb", "TestForClimb", 0x6803A0, &CTaskSimpleClimb::TestForClimb);
-    //ReversibleHooks::Install("CTaskSimpleClimb", "StartAnim", 0x67DBE0, &CTaskSimpleClimb::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleClimb", "StartSpeech", 0x67A320, &CTaskSimpleClimb::StartSpeech);
-    ReversibleHooks::Install("CTaskSimpleClimb", "DeleteAnimCB", 0x67A380, &CTaskSimpleClimb::DeleteAnimCB);
-    ReversibleHooks::Install("CTaskSimpleClimb", "Shutdown", 0x67A250, &CTaskSimpleClimb::Shutdown);
-    ReversibleHooks::Install("CTaskSimpleClimb", "Constructor", 0x67A110, &CTaskSimpleClimb::Constructor);
-    ReversibleHooks::Install("CTaskSimpleClimb", "GetCameraStickModifier", 0x67A5D0, &CTaskSimpleClimb::GetCameraStickModifier);
-    ReversibleHooks::Install("CTaskSimpleClimb", "GetCameraTargetPos", 0x67A390, &CTaskSimpleClimb::GetCameraTargetPos);
+    RH_ScopedClass(CTaskSimpleClimb);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(ScanToGrabSectorList, 0x67DE10);
+    RH_ScopedInstall(ScanToGrab, 0x67FD30);
+    RH_ScopedInstall(CreateColModel, 0x67A890);
+    RH_ScopedInstall(TestForStandUp, 0x680570);
+    RH_ScopedInstall(TestForVault, 0x6804D0);
+    RH_ScopedInstall(TestForClimb, 0x6803A0);
+    //RH_ScopedInstall(StartAnim, 0x67DBE0);
+    RH_ScopedInstall(StartSpeech, 0x67A320);
+    RH_ScopedInstall(DeleteAnimCB, 0x67A380);
+    RH_ScopedInstall(Shutdown, 0x67A250);
+    RH_ScopedInstall(Constructor, 0x67A110);
+    RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
+    RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
     //VTABLE
-    //ReversibleHooks::Install("CTaskSimpleClimb", "ProcessPed", 0x680DC0, &CTaskSimpleClimb::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleClimb", "MakeAbortable", 0x67A280, &CTaskSimpleClimb::MakeAbortable_Reversed);
+    //RH_ScopedInstall(ProcessPed_Reversed, 0x680DC0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x67A280);
 }
 
 CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb)

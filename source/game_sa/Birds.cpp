@@ -18,12 +18,15 @@ uint32* CBirds::auRenderIndices = (uint32*)0x8D52F8; // Size: 30
 
 void CBirds::InjectHooks()
 {
-    ReversibleHooks::Install("CBirds", "Init", 0x711EC0, &CBirds::Init);
-    ReversibleHooks::Install("CBirds", "Shutdown", 0x712300, &CBirds::Shutdown);
-    ReversibleHooks::Install("CBirds", "HandleGunShot", 0x712E40, &CBirds::HandleGunShot);
-    ReversibleHooks::Install("CBirds", "Update", 0x712330, &CBirds::Update);
-    ReversibleHooks::Install("CBirds", "CreateNumberOfBirds", 0x711EF0, &CBirds::CreateNumberOfBirds);
-    ReversibleHooks::Install("CBirds", "Render", 0x712810, &CBirds::Render);
+    RH_ScopedClass(CBirds);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x711EC0);
+    RH_ScopedInstall(Shutdown, 0x712300);
+    RH_ScopedInstall(HandleGunShot, 0x712E40);
+    RH_ScopedInstall(Update, 0x712330);
+    RH_ScopedInstall(CreateNumberOfBirds, 0x711EF0);
+    RH_ScopedInstall(Render, 0x712810);
 }
 
 // 0x711EC0

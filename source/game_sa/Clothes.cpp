@@ -17,20 +17,22 @@ int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
 void CClothes::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CClothes", "Init", 0x5A80D0, &CClothes::Init);
-    // Install("CClothes", "LoadClothesFile", 0x5A7B30, &CClothes::LoadClothesFile);
-    Install("CClothes", "ConstructPedModel", 0x5A81E0, &CClothes::ConstructPedModel);
-    Install("CClothes", "RequestMotionGroupAnims", 0x5A8120, &CClothes::RequestMotionGroupAnims);
-    Install("CClothes", "RebuildPlayerIfNeeded", 0x5A8390, &CClothes::RebuildPlayerIfNeeded);
-    Install("CClothes", "RebuildPlayer", 0x5A82C0, &CClothes::RebuildPlayer);
-    Install("CClothes", "RebuildCutscenePlayer", 0x5A8270, &CClothes::RebuildCutscenePlayer);
+    RH_ScopedClass(CClothes);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x5A80D0);
+    // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
+    RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
+    RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
+    RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);
+    RH_ScopedInstall(RebuildPlayer, 0x5A82C0);
+    RH_ScopedInstall(RebuildCutscenePlayer, 0x5A8270);
     /* crashes, incompatible registers?
-    Install("CClothes", "GetTextureDependency", 0x5A7EA0, &CClothes::GetTextureDependency);
-    Install("CClothes", "GetDependentTexture", 0x5A7F30, &CClothes::GetDependentTexture);
+    RH_ScopedInstall(GetTextureDependency, 0x5A7EA0);
+    RH_ScopedInstall(GetDependentTexture, 0x5A7F30);
     */
-    Install("CClothes", "GetPlayerMotionGroupToLoad", 0x5A7FB0, &CClothes::GetPlayerMotionGroupToLoad);
-    Install("CClothes", "GetDefaultPlayerMotionGroup", 0x5A81B0, &CClothes::GetDefaultPlayerMotionGroup);
+    RH_ScopedInstall(GetPlayerMotionGroupToLoad, 0x5A7FB0);
+    RH_ScopedInstall(GetDefaultPlayerMotionGroup, 0x5A81B0);
 }
 
 // 0x5A80D0

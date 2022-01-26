@@ -2,8 +2,11 @@
 
 void CEventPedToChase::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedToChase", "Constructor", 0x4AF130, &CEventPedToChase::Constructor);
-    ReversibleHooks::Install("CEventPedToChase", "Clone_Reversed", 0x4B7360, &CEventPedToChase::Clone_Reversed);
+    RH_ScopedClass(CEventPedToChase);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF130);
+    RH_ScopedInstall(Clone_Reversed, 0x4B7360);
 }
 
 // 0x4AF130

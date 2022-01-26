@@ -13,6 +13,9 @@ CColModel& CTempColModels::ms_colModelBBox = *(CColModel*)0x968A00;
 
 void CTempColModels::InjectHooks()
 {
+    RH_ScopedClass(CTempColModels);
+    RH_ScopedCategory("Collision");
+
 }
 
 void CTempColModels::Initialise()

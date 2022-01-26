@@ -4,8 +4,11 @@
 
 void CEventDraggedOutCar::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDraggedOutCar", "Constructor", 0x4AD250, &CEventDraggedOutCar::Constructor);
-    ReversibleHooks::Install("CEventDraggedOutCar", "CloneEditable_Reversed", 0x4B6DC0, &CEventDraggedOutCar::CloneEditable_Reversed);
+    RH_ScopedClass(CEventDraggedOutCar);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AD250);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
 }
 
 // // 0x4AD250

@@ -7,7 +7,10 @@
 #include "StdInc.h"
 
 void CTaskTimer::InjectHooks() {
-    ReversibleHooks::Install("CTaskTimer", "IsOutOfTime", 0x420E30, &CTaskTimer::IsOutOfTime);
+    RH_ScopedClass(CTaskTimer);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(IsOutOfTime, 0x420E30);
 }
 
 // 0x420E30

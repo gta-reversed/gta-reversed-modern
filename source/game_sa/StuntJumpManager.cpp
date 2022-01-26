@@ -21,13 +21,16 @@ uint32 CStuntJumpManager::m_iNumCompleted;
 
 
 void CStuntJumpManager::InjectHooks() {
-    ReversibleHooks::Install("CStuntJumpManager", "Init", 0x49CA50, &CStuntJumpManager::Init);
-    ReversibleHooks::Install("CStuntJumpManager", "Shutdown", 0x49CBC0, &CStuntJumpManager::Shutdown);
-    ReversibleHooks::Install("CStuntJumpManager", "ShutdownForRestart", 0x49CB10, &CStuntJumpManager::ShutdownForRestart);
-    ReversibleHooks::Install("CStuntJumpManager", "Save", 0x5D5570, &CStuntJumpManager::Save);
-    ReversibleHooks::Install("CStuntJumpManager", "Load", 0x5D5920, &CStuntJumpManager::Load);
-    ReversibleHooks::Install("CStuntJumpManager", "AddOne", 0x49CB40, &CStuntJumpManager::AddOne);
-    ReversibleHooks::Install("CStuntJumpManager", "Update", 0x49C490, &CStuntJumpManager::Update);
+    RH_ScopedClass(CStuntJumpManager);
+    RH_ScopedCategoryRoot();
+
+    RH_ScopedInstall(Init, 0x49CA50);
+    RH_ScopedInstall(Shutdown, 0x49CBC0);
+    RH_ScopedInstall(ShutdownForRestart, 0x49CB10);
+    RH_ScopedInstall(Save, 0x5D5570);
+    RH_ScopedInstall(Load, 0x5D5920);
+    RH_ScopedInstall(AddOne, 0x49CB40);
+    RH_ScopedInstall(Update, 0x49C490);
 }
 
 // 0x49CA50
