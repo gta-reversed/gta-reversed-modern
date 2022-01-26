@@ -13,7 +13,7 @@
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
 #define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 // Use when `name` is a class
 #define RH_ScopedClass(name) \
