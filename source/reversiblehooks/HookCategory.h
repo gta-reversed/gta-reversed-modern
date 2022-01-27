@@ -42,6 +42,8 @@ public:
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
+        assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
+
         auto& emplaced = m_items.emplace_back(std::move(item));
         OnItemStateChange(); // Deal with possible state change introduced by item
     }
