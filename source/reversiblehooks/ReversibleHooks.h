@@ -30,8 +30,9 @@
     ReversibleHooks::ScopeCategory  RhCurrentCat{name};
 
 #define RH_RootCategoryName "Root"
-#define RH_ScopedCategoryRoot() \
-    ReversibleHooks::ScopeCategory  RhCurrentCat{ RH_RootCategoryName };
+#define RH_GlobalCategoryName "Global"
+#define RH_ScopedCategoryGlobal() \
+    ReversibleHooks::ScopeCategory  RhCurrentCat{ RH_GlobalCategoryName };
 
 // Install a hook living in the current scoped class/namespace
 #define RH_ScopedInstall(fn, fnAddr, ...) \
