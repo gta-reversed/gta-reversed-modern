@@ -39,6 +39,7 @@ struct Base {
     const auto& Name()   const { return m_fnName; }
     const auto  Type()   const { return m_type; }
     const auto  Hooked() const { return m_bIsHooked; }
+    const char* Symbol() const { return Type() == HookType::Simple ? "S" : "V"; } // Symbol in ImGui
     
     bool m_bImguiHooked = false;   // Workaround for imgui - Maybe somehow get rid of it in the future..
 protected:

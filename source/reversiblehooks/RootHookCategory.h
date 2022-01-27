@@ -10,7 +10,7 @@ namespace ReversibleHooks {
 class RootHookCategory : public HookCategory {
 public:
     RootHookCategory() :
-        HookCategory{ RH_RootCategoryName }
+        HookCategory{ RH_RootCategoryName, nullptr } // Root has no parent
     {
     }
 
@@ -25,7 +25,7 @@ public:
         for (const auto& catName : category | rng::views::split('/')) {
             cat = &cat->FindOrCreateSubcategory(catName); // Find/create all sub-categories
         }
-        assert(cat == this); // Make sure item doesn't get added into us (As the root category should have no items)
+        assert(cat != this); // Make sure item doesn't get added into us (As the root category should have no items)
         cat->AddItem(std::move(hook)); // The last category is where we add the item to
     }
 };

@@ -35,23 +35,23 @@
 
 // Install a hook living in the current scoped class/namespace
 #define RH_ScopedInstall(fn, fnAddr, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a global function
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
 // Tip: If a member function is const just add the `const` keyword after the function arg list;
 // Eg.: `void(CRect::*)(float*, float*) const` (Notice the const at the end) (See function `CRect::GetCenter`)
 #define RH_ScopedOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn) __VA_OPT__(,) __VA_ARGS__)
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&RHCurrentNS::fn) __VA_OPT__(,) __VA_ARGS__)
 
 #define RH_ScopedGlobalOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn) __VA_OPT__(,) __VA_ARGS__)
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn) __VA_OPT__(,) __VA_ARGS__)
 
 // Used in CCheat only - Install global `fn` as name `fnName`
 #define RH_ScopedNamedGlobalInstall(fn, fnName, fnAddr, ...) \
-    ReversibleHooks::Install(RHCurrentScopeName.name, fnName, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
 namespace ReversibleHooks {
     class RootHookCategory;
@@ -61,10 +61,10 @@ namespace ReversibleHooks {
     };
     
     struct ScopeCategory {
-        std::string m_name{};
+        std::string name{};
     };
 
-    const RootHookCategory& GetRootCategory();
+    RootHookCategory& GetRootCategory();
 
     namespace detail {
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
@@ -82,7 +82,7 @@ namespace ReversibleHooks {
     }
 
     template <typename T>
-    static void InstallVirtual(std::string category, std::string fnName, T libVTableAddress, std::vector<uint32> vecAddressesToHook) {
+    static void InstallVirtual(std::string_view category, std::string fnName, T libVTableAddress, std::vector<uint32> vecAddressesToHook) {
         auto ptr = FunctionPointerToVoidP(libVTableAddress);
         detail::HookInstallVirtual(category, std::move(fnName), ptr, std::move(vecAddressesToHook));
     }
@@ -90,8 +90,6 @@ namespace ReversibleHooks {
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
     }*/
-
-    void UnHook(std::string_view category, std::string_view fnName);
 
     void CheckAll();
 };

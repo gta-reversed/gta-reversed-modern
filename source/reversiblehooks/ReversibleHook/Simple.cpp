@@ -1,10 +1,10 @@
 #include "StdInc.h"
 
-#include "SSimpleReversibleHook.h"
+#include "Simple.h"
 
 namespace ReversibleHooks{
 namespace ReversibleHook{
-Simple::Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5) :
+Simple::Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize) :
     Base{ std::move(fnName), HookType::Simple },
     m_iLibFunctionAddress((uint32)addressToJumpTo),
     m_iRealHookedAddress(installAddress),
