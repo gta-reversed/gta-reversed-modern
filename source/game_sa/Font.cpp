@@ -46,7 +46,7 @@ tFontData* gFontData = (tFontData*)0xC718B0;
 
 void CFont::InjectHooks() {
     RH_ScopedClass(CFont);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x5BA690);
     RH_ScopedInstall(Shutdown, 0x7189B0);

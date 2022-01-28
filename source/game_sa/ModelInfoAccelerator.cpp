@@ -3,7 +3,7 @@
 void CModelInfoAccelerator::InjectHooks()
 {
     RH_ScopedClass(CModelInfoAccelerator);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x4C6A80);
     RH_ScopedInstall(AddModelInfoId, 0x4C6AA0);

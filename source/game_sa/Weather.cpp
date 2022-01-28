@@ -56,7 +56,7 @@ float(&CWeather::saBannerWindOffsets)[32] = *(float(*)[32])0x8CCF70;
 
 void CWeather::InjectHooks() {
     RH_ScopedClass(CWeather);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x72A480);
     // RH_ScopedInstall(AddRain, 0x72A9A0);

@@ -21,7 +21,7 @@ uint32& CClock::ms_nMillisecondsPerGameMinute = *reinterpret_cast<uint32*>(0xB70
 
 void CClock::InjectHooks() {
     RH_ScopedClass(CClock);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x52CD90);
     RH_ScopedInstall(Update, 0x52CF10);

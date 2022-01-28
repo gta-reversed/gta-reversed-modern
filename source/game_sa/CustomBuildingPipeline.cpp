@@ -6,7 +6,7 @@ RxPipeline*& CCustomBuildingPipeline::ObjPipeline = *(RxPipeline**)0xC02C68;
 
 void CCustomBuildingPipeline::InjectHooks() {
     RH_ScopedClass(CCustomBuildingPipeline);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(CreatePipe, 0x5D7D90);
     // RH_ScopedInstall(DestroyPipe, 0x5D7380);

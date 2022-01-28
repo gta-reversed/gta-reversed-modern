@@ -7,7 +7,7 @@ RxPipeline*& CCustomBuildingDNPipeline::ObjPipeline = *(RxPipeline**)0xC02C1C;
 
 void CCustomBuildingDNPipeline::InjectHooks() {
     RH_ScopedClass(CCustomBuildingDNPipeline);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 // Install("CCustomBuildingDNPipeline", "", 0x5D7D90, &CCustomBuildingDNPipeline::);
 }

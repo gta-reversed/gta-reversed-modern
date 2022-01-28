@@ -4,7 +4,7 @@
 
 void BreakObject_c::InjectHooks() {
     RH_ScopedClass(BreakObject_c);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(CalcGroupCenter, 0x59D190);
     RH_ScopedInstall(SetGroupData, 0x59D570);

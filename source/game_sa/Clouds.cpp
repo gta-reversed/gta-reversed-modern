@@ -34,7 +34,7 @@ int32& dword_C6E974 = *reinterpret_cast<int32*>(0xC6E974); // see CClouds::Volum
 
 void CClouds::InjectHooks() {
     RH_ScopedClass(CClouds);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x7138D0);
     RH_ScopedInstall(Update, 0x712FF0);

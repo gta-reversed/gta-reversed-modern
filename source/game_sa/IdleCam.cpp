@@ -7,7 +7,7 @@ uint32& gbCineyCamProcessedOnFrame = *(uint32*)0xB6EC40;
 
 void CIdleCam::InjectHooks() {
     RH_ScopedClass(CIdleCam);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0);
     // RH_ScopedInstall(Init, 0x50E6D0);

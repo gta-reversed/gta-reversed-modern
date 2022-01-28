@@ -12,7 +12,7 @@ enum {
 
 void CAcquaintance::InjectHooks() {
     RH_ScopedClass(CAcquaintance);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(GetAcquaintances, 0x608970);
     // RH_ScopedInstall(SetAcquaintances, 0x608960);

@@ -37,7 +37,7 @@ float& CRestart::ExtraPoliceStationRestartHeading = *(float*)0xA4324C;
 
 void CRestart::InjectHooks() {
     RH_ScopedClass(CRestart);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x460630);
     RH_ScopedInstall(AddHospitalRestartPoint, 0x460730);

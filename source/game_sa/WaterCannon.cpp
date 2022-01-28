@@ -5,7 +5,7 @@
 
 void CWaterCannon::InjectHooks() {
     RH_ScopedClass(CWaterCannon);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x728B10);
     RH_ScopedInstall(Destructor, 0x728B30);

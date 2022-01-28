@@ -12,7 +12,7 @@ bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
     RH_ScopedClass(CCullZones);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x72D6B0);
     RH_ScopedInstall(AddCullZone, 0x72DF70);

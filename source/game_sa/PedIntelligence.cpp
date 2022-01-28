@@ -27,7 +27,7 @@ float& CPedIntelligence::flt_8D2388 = *reinterpret_cast<float*>(0x8D2388); // 50
 void CPedIntelligence::InjectHooks()
 {
     RH_ScopedClass(CPedIntelligence);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetPedEntities, 0x4893E0);
     RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);

@@ -350,7 +350,7 @@ bool CFileMgr::GetErrorReadWrite(FILESTREAM file)
 void CFileMgr::InjectHooks()
 {
     RH_ScopedClass(CFileMgr);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x5386f0);
     RH_ScopedInstall(ChangeDir, 0x538730);

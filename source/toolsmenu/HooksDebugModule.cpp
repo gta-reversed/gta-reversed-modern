@@ -1,124 +1,149 @@
 #include "StdInc.h"
 
+#include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
+#include "Utility.h"
+
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <TristateCheckbox.h>
 #include <string>
+#include <ranges>
 
+namespace RH = ReversibleHooks;
 namespace rng = std::ranges;
 using namespace ImGui;
 
-// https://stackoverflow.com/a/19839371
-// TODO: When #85 is merged remove this
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
-    auto it = std::search(
-        strHaystack.begin(), strHaystack.end(),
-        strNeedle.begin(), strNeedle.end(),
-        [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end());
+
+static std::string HooksFilterContent;
+
+// Applies current filter on the given category (first call should always be the root)
+// Returns if the given category is visible or not
+// A category is visible if either:
+// - Any of it's subcategories is visible
+// - It's matches the search criteria
+bool ApplyFilterToCategory(RH::HookCategory& cat) {
+    bool anySubCatsVisible{};
+    for (auto& v : cat.SubCategories()) {
+        if (ApplyFilterToCategory(v)) {
+            anySubCatsVisible = true;
+        }
+    }
+    cat.m_isVisible = anySubCatsVisible || HooksFilterContent.empty() || findStringCaseInsensitive(cat.Name(), HooksFilterContent);
+    return cat.m_isVisible;
+}
+
+// Draw category (First call should always be the root)
+void ProcessCategory(RH::HookCategory& cat) {
+    if (!cat.m_isVisible) {
+        return;
+    }
+
+    PushID(&cat); // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
+
+    const auto& name = cat.Name();
+
+    const auto TreeNodeWithCheckbox = [](auto label, ImTristate triState, bool& cbStateOut, bool& cbClicked, bool& open) {
+        // TODO/NOTE: The Tree's label is a workaround for when the label is shorter than the visual checkbox (otherwise the checkbox can't be clicked)
+        open = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
+
+        SameLine();
+
+        // Checkbox + it's label will be the tree name
+        cbClicked = CheckboxTristate(label, triState, cbStateOut);
+    };
+
+    bool categoryOpen{};
+
+    // Disable all hooks in category at once
+    {
+        bool cbClicked{};
+        bool cbState{};
+        TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, categoryOpen);
+        if (cbClicked) {
+            cat.SetAllItemsEnabled(cbState);
+        }
+    }
+
+    // Draw hooks, and subcategories
+    if (categoryOpen) {
+        // Draw hooks (if any)
+        if (!cat.Items().empty()) {
+            const auto DrawItems = [&] {
+                for (auto& item : cat.Items()) {
+                    PushID(item.get()); // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
+
+                    // Draw hook symbol (`S` or `V`)
+                    {
+                        PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
+                        AlignTextToFramePadding();
+                        Text(item->Symbol());
+                        PopStyleVar();
+                    }
+
+                    // State checkbox
+                    {
+                        PushID("state");
+                        bool hooked{ item->Hooked() };
+                        if (SameLine(); Checkbox(item->Name().c_str(), &hooked)) {
+                            cat.SetItemEnabled(item, hooked);
+                        }
+                        PopID(); // State checkbox
+                    }
+
+                    PopID(); // This hook
+                }
+            };
+
+            if (cat.SubCategories().empty()) { // If there are no subcategories we can draw all items directly
+                DrawItems();
+            } else { // Otherwise use a tree node + checkbox
+                bool hooksNodeOpen{};
+                bool cbState{};
+                bool cbClicked{};
+                TreeNodeWithCheckbox("Hooks", cat.ItemsState(), cbState, cbClicked, hooksNodeOpen);
+                if (cbClicked) {
+                    cat.SetOurItemsEnabled(cbState);
+                }
+                if (hooksNodeOpen) {
+                    DrawItems();
+                    TreePop();
+                }
+            }
+        }
+
+        // Draw subcategories
+        for (auto& v : cat.SubCategories()) {
+            ProcessCategory(v);
+        }
+
+        TreePop();
+    }
+
+    PopID();
 }
 
 namespace HooksDebugModule {
 void ProcessImGui() {
-    static std::string HooksFilterContent;
-
-    PushItemWidth(GetWindowContentRegionMax().x - 10.f);
-    const bool reclaimFocus = InputText(" ", &HooksFilterContent, ImGuiInputTextFlags_EnterReturnsTrue);
-    PopItemWidth();
-
-    // Auto-focus on window apparition
-    SetItemDefaultFocus();
-    if (reclaimFocus)
-        SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-    if (!BeginChild("##hookstool")) {
-        EndChild();
-        return;
-    }
-
-    AlignTextToFramePadding();
-    
-    const auto& allHooks = ReversibleHooks::GetAllHooks();
-
-    // Buttons for disabling/enabling all hooks at once
+    // Search tool input
     {
+        PushItemWidth(GetWindowContentRegionMax().x - 10.f);
+        if (InputText(" ", &HooksFilterContent)) {
+            // Auto-focus on window apparition
+            //SetItemDefaultFocus();
+            //if (filterChanged)
+            //    SetKeyboardFocusHere(-1); // Auto focus previous widget
 
-        const auto SwitchAllButton = [&](auto toState, auto btnText, auto tooltipTxt) {
-            PushID(btnText); // Should be fine
-
-            if (SameLine(); Button(btnText)) {
-                for (auto& [clsName, clsHooks] : allHooks) {
-                    for (auto& hook : clsHooks) {
-                        hook->SetState(toState);
-                    }
-                }
-            }
-
-            if (IsItemHovered())
-                SetTooltip(tooltipTxt);
-
-            PopID();
-        };
-
-        SwitchAllButton(true, "Enable all", "Enable all hooks matching search criteria");
-        SwitchAllButton(false, "Disable all", "Disable all hooks matching search criteria");
+            // Re-apply filter 
+            ApplyFilterToCategory(RH::GetRootCategory());
+        }
+        PopItemWidth();
     }
 
-    // Draw all hooks matching filter requirements
-    for (auto& [clsName, clsHooks] : allHooks) {
-        if (!HooksFilterContent.empty() && !findStringCaseInsensitive(clsName, HooksFilterContent))
-            continue;
-
-        PushID(clsName.c_str());
-
-        // TODO: Cache this value somewhere, for now we have to do it this way
-        ImTristate state{};
-        const auto IsHookEnabled = [](auto& h) { return h->m_bIsHooked; };
-        if (rng::any_of(clsHooks, IsHookEnabled)) {
-            state = rng::all_of(clsHooks, IsHookEnabled) ? ImTristate::ENABLED : ImTristate::MIXED;
-        } else {
-            state = ImTristate::DISABLED;
-        }
-
-        // TODO/NOTE: The Tree's label is a workaround for a class's name being shorter than the visual checkbox (otherwise the checkbox can't be clicked)
-        const bool treeOpen = TreeNodeEx("##         ", ImGuiTreeNodeFlags_AllowItemOverlap | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth);
-        
-        // Draw tree name + checkbox for it
-        if (SameLine(); CheckboxTristate(clsName.c_str(), state)) {
-            for (auto& hook : clsHooks) {
-                hook->SetState(state == ImTristate::ENABLED); // Change state of all hooks to new state (which at this point is either ENABLED or DISABLED)
-            }
-        }
-
-        if (treeOpen) {
-            for (auto& hook : clsHooks) {
-                PushID(hook.get()); // Use hook's address as unique ID - Hooks aren't dynamically created, so this should really be unique
-
-                // Draw hook type (`S` - simple or `V` - virtual)
-                {
-                    PushStyleVar(ImGuiStyleVar_Alpha, GetStyle().Alpha * 0.5f);
-                    AlignTextToFramePadding();
-                    Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
-                    PopStyleVar();
-                }
-
-                // State checkbox
-                {
-                    PushID("State");
-                    if (SameLine(); Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked)) {
-                        hook->SetState(hook->m_bImguiHooked); // Checkbox pressed, so switch hook to new state
-                    }
-                    PopID(); // State checkbox
-                }
-                PopID(); // This hook
-            }
-            TreePop();
-        }
-        PopID(); // ClassName
+    if (BeginChild("##hookstool")) {
+        ProcessCategory(RH::GetRootCategory());
+        EndChild();
     }
-    EndChild();
 }
 
 void ProcessRender() {

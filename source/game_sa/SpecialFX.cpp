@@ -9,7 +9,7 @@ RwTexture*& gpFinishFlagTex = *reinterpret_cast<RwTexture**>(0xC7C718);
 
 void CSpecialFX::InjectHooks() {
     RH_ScopedClass(CSpecialFX);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Init, 0x7268F0);
 //    RH_ScopedInstall(Update, 0x726AA0);

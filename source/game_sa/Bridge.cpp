@@ -2,7 +2,7 @@
 
 void CBridge::InjectHooks() {
     RH_ScopedClass(CBridge);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x41BC70);
     RH_ScopedInstall(Update, 0x41BC80);

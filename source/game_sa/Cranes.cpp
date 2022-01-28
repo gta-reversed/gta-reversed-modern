@@ -4,7 +4,7 @@
 
 void CCranes::InjectHooks() {
     RH_ScopedClass(CCranes);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(InitCranes, 0x6F3FC0);
     RH_ScopedInstall(UpdateCranes, 0x6F3FE0);

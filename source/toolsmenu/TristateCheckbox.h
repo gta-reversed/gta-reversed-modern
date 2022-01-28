@@ -9,32 +9,26 @@
 
 namespace ImGui {
     enum class ImTristate {
-        ENABLED  = 1,
-        DISABLED = 0,
-        MIXED    = -1
+        ALL  = 1,
+        NONE = 0,
+        SOME    = -1
     };
 
-    // If `v_tristate` is `MIXED` and checkbox clicked: ENABLED
-    // otherwise value is toggled (`ENABLED` -> `DISABLED` and `DISABLED` -> `ENABLED`)
-    bool CheckboxTristate(const char* label, ImTristate& v_tristate)
+    static bool CheckboxTristate(const char* label, ImTristate v_tristate, bool& state)
     {
-        bool ret;
-        if (v_tristate == ImTristate::MIXED)
+        state = v_tristate == ImTristate::ALL;
+
+        bool clicked;
+        if (v_tristate == ImTristate::SOME)
         {
             PushItemFlag(ImGuiItemFlags_MixedValue, true);
-            bool b = false;
-            ret = Checkbox(label, &b);
-            if (ret)
-                v_tristate = ImTristate::ENABLED;
+            clicked = Checkbox(label, &state);
             PopItemFlag();
         }
         else
         {
-            bool b = (v_tristate != ImTristate::DISABLED);
-            ret = Checkbox(label, &b);
-            if (ret)
-                v_tristate = b ? ImTristate::ENABLED : ImTristate::DISABLED;
+            clicked = Checkbox(label, &state);
         }
-        return ret;
+        return clicked;
     }
 };

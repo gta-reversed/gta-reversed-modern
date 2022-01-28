@@ -3,7 +3,7 @@
 void CObjectSaveStructure::InjectHooks()
 {
     RH_ScopedClass(CObjectSaveStructure);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Construct, 0x5D2160);
     RH_ScopedInstall(Extract, 0x5D2220);

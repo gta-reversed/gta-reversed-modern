@@ -6,7 +6,7 @@ CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;
 
 void CPedStats::InjectHooks() {
     RH_ScopedClass(CPedStats);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Initialise, 0x5BF9D0);
     RH_ScopedInstall(Shutdown, 0x608850);

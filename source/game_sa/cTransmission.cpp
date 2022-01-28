@@ -3,7 +3,7 @@
 void cTransmission::InjectHooks()
 {
     RH_ScopedClass(cTransmission);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(DisplayGearRatios, 0x6D0590);
     RH_ScopedInstall(InitGearRatios, 0x6D0460);

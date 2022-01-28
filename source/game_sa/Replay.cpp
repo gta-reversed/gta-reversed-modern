@@ -5,7 +5,7 @@ bool& CReplay::bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
 
 void CReplay::InjectHooks() {
     RH_ScopedClass(CReplay);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(DisableReplays, 0x45B150);
     RH_ScopedInstall(EnableReplays, 0x45B160);

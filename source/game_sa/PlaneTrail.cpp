@@ -4,7 +4,7 @@
 
 void CPlaneTrail::InjectHooks() {
     RH_ScopedClass(CPlaneTrail);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x717160);
     RH_ScopedInstall(Render, 0x717180);

@@ -4,7 +4,7 @@
 
 void C3dMarkers::InjectHooks() {
     RH_ScopedClass(C3dMarkers);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(Init, 0x724E40);
     // RH_ScopedInstall(Update, 0x7227B0);

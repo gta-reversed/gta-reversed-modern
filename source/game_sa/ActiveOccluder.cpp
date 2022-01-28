@@ -5,7 +5,7 @@
 void CActiveOccluder::InjectHooks()
 {
     RH_ScopedClass(CActiveOccluder);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(IsPointWithinOcclusionArea, 0x71E580);
     RH_ScopedInstall(IsPointBehindOccluder, 0x71FA40);

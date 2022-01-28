@@ -2,7 +2,7 @@
 
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(AddPriceModifier, 0x0);
 //    RH_ScopedInstall(AddPriceModifier, 0x0);

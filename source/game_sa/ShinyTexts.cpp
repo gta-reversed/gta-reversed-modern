@@ -5,7 +5,7 @@ CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[
 
 void CShinyTexts::InjectHooks() {
     RH_ScopedClass(CShinyTexts);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x7221B0);
     RH_ScopedInstall(RenderOutGeometryBuffer, 0x7221C0);

@@ -7,7 +7,7 @@ tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLi
 
 void CBrightLights::InjectHooks() {
     RH_ScopedClass(CBrightLights);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x722140);
     RH_ScopedInstall(RenderOutGeometryBuffer, 0x722150);

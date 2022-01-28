@@ -22,7 +22,7 @@ CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
 
 void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
 }

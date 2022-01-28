@@ -69,7 +69,7 @@ static int32& CurrentGangMemberToLoad = *(int32*)0x9654D4;
 void CStreaming::InjectHooks()
 {
     RH_ScopedClass(CStreaming);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     using namespace ReversibleHooks;
     RH_ScopedInstall(AddEntity, 0x409650);

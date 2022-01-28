@@ -15,7 +15,7 @@ uint32& CEntryExitManager::ms_numVisibleEntities = *reinterpret_cast<uint32*>(0x
 
 void CEntryExitManager::InjectHooks() {
     RH_ScopedClass(CEntryExitManager);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Init, 0x43F880);
 //    RH_ScopedInstall(Load, 0x5D55C0);

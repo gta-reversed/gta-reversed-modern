@@ -14,7 +14,7 @@ float(*cBuoyancy::afBoatVolumeDistributionCat)[3] = (float(*)[3])0x8D3314; // Ca
 void cBuoyancy::InjectHooks()
 {
     RH_ScopedClass(cBuoyancy);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(ProcessBuoyancy, 0x6C3EF0);
     RH_ScopedInstall(ProcessBuoyancyBoat, 0x6C3030);

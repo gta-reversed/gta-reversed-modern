@@ -11,7 +11,7 @@ constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
 
 void CGenericGameStorage::InjectHooks() {
     RH_ScopedClass(CGenericGameStorage);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // Can't really test these yet. All mods I have interfere with it (WindowedMode and IMFast)
     // Also, these functions originally had the file pointer passed to them @ `ebp`

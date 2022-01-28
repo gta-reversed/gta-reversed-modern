@@ -6,7 +6,7 @@ CGamma& gamma = *(CGamma*)0xC92134;
 
 void CGamma::InjectHooks() {
     RH_ScopedClass(CGamma);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(Init, 0x747180);
     // RH_ScopedInstall(SetGamma, 0x747200);

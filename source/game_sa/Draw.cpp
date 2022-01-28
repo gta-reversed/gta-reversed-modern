@@ -15,7 +15,7 @@ uint32& FadeOutTime = *(uint32*)0x8D2BD4;
 
 void CDraw::InjectHooks() {
     RH_ScopedClass(CDraw);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(SetFOV, 0x6FF410);
     RH_ScopedInstall(CalculateAspectRatio, 0x6FF420);

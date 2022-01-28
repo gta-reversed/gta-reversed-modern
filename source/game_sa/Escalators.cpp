@@ -7,7 +7,7 @@ CEscalator(&CEscalators::aEscalators)[NUM_ESCALATORS] = *(CEscalator(*)[NUM_ESCA
 
 void CEscalators::InjectHooks() {
     RH_ScopedClass(CEscalators);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x717C50);
     RH_ScopedInstall(Shutdown, 0x717940);

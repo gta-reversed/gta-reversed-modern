@@ -32,7 +32,7 @@ int32& CGameLogic::n2PlayerPedInFocus = *reinterpret_cast<int32*>(0x8A5E50); // 
 
 void CGameLogic::InjectHooks() {
     RH_ScopedClass(CGameLogic);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     // RH_ScopedInstall(CalcDistanceToForbiddenTrainCrossing, 0x4418E0);
     // RH_ScopedInstall(ClearSkip, 0x441560);

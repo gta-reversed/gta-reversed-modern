@@ -27,7 +27,7 @@ CVector& COcclusion::gCenterOnScreen = *(CVector*)0xC79940;
 void COcclusion::InjectHooks()
 {
     RH_ScopedClass(COcclusion);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x71DCA0);
     RH_ScopedInstall(AddOne, 0x71DCD0);

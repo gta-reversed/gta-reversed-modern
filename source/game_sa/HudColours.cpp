@@ -4,7 +4,7 @@ CHudColours& HudColour = *reinterpret_cast<CHudColours*>(0xBAB22C);
 
 void CHudColours::InjectHooks() {
     RH_ScopedClass(CHudColours);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x58FDA0);
     RH_ScopedInstall(Destructor, 0x58FD90);

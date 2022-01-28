@@ -7,7 +7,7 @@ bool& CCredits::bCreditsGoing = *(bool*)0xC6E97C;
 
 void CCredits::InjectHooks() {
     RH_ScopedClass(CCredits);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Render, 0x53D5B0);
     RH_ScopedInstall(PrintCreditText, 0x5A8660);

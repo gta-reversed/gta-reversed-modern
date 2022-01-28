@@ -5,7 +5,7 @@ CWindModifier (&CWindModifiers::Array)[MAX_NUM_MODIFIERS] = *(CWindModifier(*)[M
 
 void CWindModifiers::InjectHooks() {
     RH_ScopedClass(CWindModifiers);
-    RH_ScopedCategoryRoot();
+    RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(FindWindModifier, 0x0);
 //    RH_ScopedInstall(RegisterOne, 0x0);
