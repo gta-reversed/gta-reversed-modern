@@ -29,16 +29,20 @@ public:
     {
     }
 
+    // Accessors
     auto OverallState()           const { return m_overallState; }
+
     auto ItemsState()             const { return m_itemsState; }
+
     auto SubcategoriesState()     const { return m_subcatsState; }
 
-    const auto& SubCategories()   const { return m_subCategories; }
-    auto& SubCategories()               { return m_subCategories; }
-
     const auto& Name()            const { return m_name; }
+
+    const auto& SubCategories()   const { return m_subCategories; }
+    auto&       SubCategories()         { return m_subCategories; }
+
     const auto& Items()           const { return m_items; }
-    auto& Items()                       { return m_items; }
+    auto&       Items()                 { return m_items; }
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
@@ -105,8 +109,9 @@ public:
     }
 
 private:
-    // `dontNotify` - Since we modify all subcategories ourselves it's not needed that all our children to notify us.
-    void SetAllItemsEnabled_Internal(bool enabled, bool dontNotify = false) {
+    // Set all our and subcategories' items to the specified state.
+    // `dontNotify` - Useful to avoid unnecessary parent notifications (Only the level 1 caller should notify it's parents)
+    void SetAllItemsEnabled_Internal(bool enabled, bool notifyParent = true) {
         for (auto& item : m_items) {
             item->State(enabled);
         }
@@ -118,15 +123,13 @@ private:
         const auto state = enabled ? HooksState::ALL : HooksState::NONE;
         m_itemsState = state;
         m_subcatsState = state;
-        ReCalculateOverallStateAndMaybeNotify(!dontNotify);
+        ReCalculateOverallStateAndMaybeNotify(notifyParent);
     }
 
-    // Recalculates overall state, and if changed, notifies parent
-    // Should be called after either `m_subcatsState` or `m_itemsState` changes
-    // Returns true if state has changed
-    bool ReCalculateOverallStateAndMaybeNotify(bool notify = true) {
+    // Recalculates overall state, and if changed, notifies parent.
+    // Returns true if state changed
+    bool ReCalculateOverallStateAndMaybeNotify(bool notifyParent = true) {
         const auto Calculate = [this] {
-            using enum HooksState;
             if (m_items.empty()) {
                 return m_subcatsState;
             }
@@ -135,10 +138,11 @@ private:
                 return m_itemsState;
             }
 
-            if (m_subcatsState == m_itemsState)
+            if (m_subcatsState == m_itemsState) {
                 return m_subcatsState; // Both equal, we can return either - Either both NONE or ALL
+            }
 
-            return SOME; // They differ 
+            return HooksState::SOME; // They differ 
         };
 
         const auto prev = m_overallState;
@@ -146,7 +150,7 @@ private:
 
         const bool changed = prev != m_overallState;
 
-        if (notify && changed) {
+        if (notifyParent && changed) {
             if (m_parent) { // Now, notify parent (so they can update their state)
                 m_parent->OnSubcategoryStateChanged(*this);
             }
@@ -155,7 +159,8 @@ private:
         return changed;
     }
 
-    // Called when a sub-category's state changes - Will propagate to parent if this affected our overall state
+    // Called when a sub-category's overall state changes
+    // (Will propagate to parent if it affected this category's overall state)
     void OnSubcategoryStateChanged(HookCategory& cat) {
         using enum HooksState;
 
@@ -167,7 +172,9 @@ private:
         ReCalculateOverallStateAndMaybeNotify();
     }
 
-    // Not always called - Only when an individual item's s
+    // Not always called - Only when an individual item's state changes
+    // Also not called if item is modified from the outside
+    // (Currently only called by `AddItem` and `SetItemEnabled`, but not from `SetAllItemsEnabled`)
     void OnOneItemStateChange() {
         using enum HooksState;
 
@@ -182,16 +189,16 @@ private:
 
 public:
     // Stuff required for the Hooks tool
-    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items (Ignored if `m_items.empty()`)
-    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Ignored if `m_subCategories.empty()`)
-    HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 
+    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
+    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
+    HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
     bool                      m_isVisible{true};                  // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
 private:
 
     HookCategory*             m_parent{};        // Category we belong to - In case of `RootHookCategory` this is always `nullptr`.
-    std::string               m_name{};          // Name of this category (Eg.: `Root`, `Global`, `Entity`)
+    std::string               m_name{};          // Name of this category (Eg.: `Root`, `Global`, `Entity`, etc...)
     std::list<HookCategory>   m_subCategories{}; // Subcategories - It has to be a list, because we have links between categories
-    std::vector<Item>         m_items{};         // Hooks in this category (`RootCategory` should have none)
+    std::vector<Item>         m_items{};         // Hooks in this category (`RootCategory` should have none) - TODO: IMHO we don't really need to use smart pointers - could just store the hooks as objects instead
 };
 
 }; // namespace ReversibleHooks 
