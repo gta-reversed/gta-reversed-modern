@@ -45,7 +45,7 @@ public:
         assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
 
         auto& emplaced = m_items.emplace_back(std::move(item));
-        OnItemStateChange(); // Deal with possible state change introduced by item
+        OnOneItemStateChange(); // Deal with possible state change introduced by item
     }
 
     // Enable/disable all items at once (subcategories' items included)
@@ -56,7 +56,7 @@ public:
     // Enable/disable all items at once (subcategories' items excluded)
     void SetOurItemsEnabled(bool enabled) {
         for (auto& v : m_items) {
-            v->SetState(enabled);
+            v->State(enabled);
         }
 
         m_itemsState = enabled ? HooksState::ALL : HooksState::NONE;
@@ -66,8 +66,8 @@ public:
     // Set one item's state - Calling `item->SetState` isn't advised as the category's state won't be updated.
     void SetItemEnabled(Item& item, bool enabled) {
         if (enabled != item->Hooked()) {
-            item->SetState(enabled);
-            OnItemStateChange();
+            item->State(enabled);
+            OnOneItemStateChange();
         }
     }
 
@@ -108,7 +108,7 @@ private:
     // `dontNotify` - Since we modify all subcategories ourselves it's not needed that all our children to notify us.
     void SetAllItemsEnabled_Internal(bool enabled, bool dontNotify = false) {
         for (auto& item : m_items) {
-            item->SetState(enabled);
+            item->State(enabled);
         }
 
         for (auto& cat : m_subCategories) {
@@ -161,20 +161,20 @@ private:
 
         const auto fullyHookedCount = rng::count_if(m_subCategories, [](const auto& v) -> bool { return v.OverallState() == HooksState::ALL; });
         m_subcatsState =
-            fullyHookedCount == m_subCategories.size() ? ALL  : // Has to be before the the `NONE` case (in case `m_subCategories.empty()`)
             fullyHookedCount == 0                      ? NONE :
+            fullyHookedCount == m_subCategories.size() ? ALL  :
                                                          SOME;
         ReCalculateOverallStateAndMaybeNotify();
     }
 
-    // Only called from `SetItemEnabled` and `AddItem`
-    void OnItemStateChange() {
+    // Not always called - Only when an individual item's s
+    void OnOneItemStateChange() {
         using enum HooksState;
 
         const auto hookedCount = rng::count_if(m_items, [](const auto& v) -> bool { return v->Hooked(); });
         m_itemsState =
-            hookedCount == m_items.size() ? HooksState::ALL : // Has to be before the the `NONE` case (in case `m_items.empty()`)
             hookedCount == 0              ? HooksState::NONE :
+            hookedCount == m_items.size() ? HooksState::ALL :
                                             HooksState::SOME;
 
         ReCalculateOverallStateAndMaybeNotify();
@@ -182,8 +182,8 @@ private:
 
 public:
     // Stuff required for the Hooks tool
-    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items
-    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories
+    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items (Ignored if `m_items.empty()`)
+    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Ignored if `m_subCategories.empty()`)
     HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 
     bool                      m_isVisible{true};                  // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
 private:

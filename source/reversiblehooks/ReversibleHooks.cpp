@@ -1,9 +1,9 @@
 #include "StdInc.h"
+
 #include "ReversibleHooks.h"
 #include "ReversibleHook/Simple.h"
 #include "ReversibleHook/Virtual.h"
 #include "RootHookCategory.h"
-
 
 namespace ReversibleHooks {
 
@@ -22,7 +22,7 @@ void CheckAll() {
 namespace detail {
 void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault) {
     auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize);
-    item->SetState(!bDisableByDefault);
+    item->State(!bDisableByDefault);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
