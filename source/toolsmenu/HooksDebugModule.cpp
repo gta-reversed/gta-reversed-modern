@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "reversiblehooks/RootHookCategory.h"
+#include <RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
 
