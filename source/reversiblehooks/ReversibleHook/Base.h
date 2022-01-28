@@ -30,7 +30,7 @@ struct Base {
     virtual void Switch() = 0;
     virtual void Check() = 0;
 
-    void SetState(bool hooked) {
+    void State(bool hooked) {
         if (m_bIsHooked != hooked) {
             Switch();
         }
