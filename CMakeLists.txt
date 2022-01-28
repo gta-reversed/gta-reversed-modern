@@ -6,6 +6,10 @@ project(GTASA C CXX)
 ############# create the gta_reversed project
 #############################################################################################
 
+if(MSVC_TOOLSET_VERSION)
+    message("MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
+endif()
+
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 set(BUILD_SHARED_LIBS 1)
