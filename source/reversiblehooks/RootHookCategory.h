@@ -1,6 +1,7 @@
 #pragma once
 
 #include "HookCategory.h"
+#include <string_view>
 
 namespace ReversibleHooks {
 
@@ -23,7 +24,7 @@ public:
 
         HookCategory* cat = this; // Start with us (the root category)
         for (const auto& catName : category | rng::views::split('/')) {
-            cat = &cat->FindOrCreateSubcategory(std::string_view{ catName.begin(), catName.end() }); // Find/create all sub-categories - TODO: C++23 - Use string_view range constructor here
+            cat = &cat->FindOrCreateSubcategory(std::string_view(catName.begin(), catName.end())); // Find/create all sub-categories - TODO: C++23 - Use string_view range constructor here
         }
         assert(cat != this); // Make sure item doesn't get added into us (As the root category should have no items)
         cat->AddItem(std::move(hook)); // The last category is where we add the item to
