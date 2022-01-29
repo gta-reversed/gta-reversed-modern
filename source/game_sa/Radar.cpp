@@ -578,6 +578,7 @@ uint8 CRadar::CalculateBlipAlpha(float distance)
 }
 
 // 0x583480
+// NOTE: Unhooked by default for now. Causes `DrawRadarSection` to crash.
 void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in)
 {
     if (FrontEndMenuManager.m_bDrawRadarOrMap) {

@@ -201,7 +201,7 @@ public:
     static void Shutdown();
 
     static void LoadTextures();
-
+    
     static int32 GetNewUniqueBlipIndex(int32 blipIndex);
     static int32 GetActualBlipArrayIndex(int32 blipIndex);
 
