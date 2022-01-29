@@ -48,6 +48,7 @@ void CDebugMenu::ImguiInitialise() {
     io->WantSetMousePos = true;
     io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
     io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    io->MousePos = {};
 
     ImGui_ImplWin32_Init(*(HWND*)0xC97C1C);
     ImGui_ImplDX9_Init(GetD3DDevice());
