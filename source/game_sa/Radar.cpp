@@ -154,7 +154,6 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(SetCoordBlip, 0x583820);
 
-    // unused
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
     RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
@@ -219,11 +218,15 @@ void CRadar::LoadTextures()
     CTxdStore::PopCurrentTxd();
 }
 
-// unused
-// 0x582820
-int32 CRadar::GetNewUniqueBlipIndex(int32 blipIndex)
+// 0x582820 - Seemingly unused but actually just inlined
+int32 CRadar::GetNewUniqueBlipIndex(int32 idx)
 {
-    return ((int32(__cdecl*)(int32))0x582820)(blipIndex);
+    auto& t = ms_RadarTrace[idx];
+    if (t.m_nCounter >= USHRT_MAX - 1)
+        t.m_nCounter = 1; // Wrap back to 1
+    else
+        t.m_nCounter++; // Increment
+    return idx | (t.m_nCounter << 16);
 }
 
 // 0x582870
@@ -695,13 +698,7 @@ int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ eBlipColour c
         t.m_bTrackingBlip    = true;
         t.m_pEntryExit       = nullptr;
 
-        if (t.m_nCounter >= 0xFFFF) {
-            t.m_nCounter = 1;
-            return idx + 0xFFFF + 1;
-        } else {
-            t.m_nCounter++;
-            return idx | (t.m_nCounter << 16);
-        }
+        return GetNewUniqueBlipIndex(idx);
     }
     return -1;
 }
