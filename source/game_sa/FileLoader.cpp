@@ -277,7 +277,7 @@ void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
 // IPL -> CARS
 // 0x5B4740
 void CFileLoader::LoadCarGenerator(const char* line, int32 iplId) {
-    CFileCarGenerator carGen;
+    CFileCarGenerator carGen{};
     if (sscanf(
         line,
         "%f %f %f %f %d %d %d %d %d %d %d %d",
@@ -396,7 +396,7 @@ bool CFileLoader::LoadClumpFile(RwStream* stream, uint32 modelIndex) {
     mi->SetClump(clump);
 
     if (modelIndex == MODEL_JOURNEY)
-        static_cast<CVehicleModelInfo*>(mi)->m_nNumDoors = 2;
+        mi->AsVehicleModelInfoPtr()->m_nNumDoors = 2;
 
     return true;
 }
@@ -496,7 +496,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
-        if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) {
+        if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }
@@ -545,7 +545,7 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
     assert(buffSize >= sizeof(FileHeader) && "LoadCollisionFileFirstTime called with not enough data"); // Buffer should be big enough to have at least 1 col header in it
 
     auto fileTotalSize{0u};
-    for (auto buffPos = 0; buffPos < buffSize; buffPos += fileTotalSize) {
+    for (auto buffPos = 0u; buffPos < buffSize; buffPos += fileTotalSize) {
         const auto buffRemainingSize = buffSize - buffPos;
         const auto buffIt            = &buff[buffPos];
 
@@ -606,7 +606,8 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     cm.m_pColData = cd;
 
     // Spheres
-    if (cd->m_nNumSpheres = *reinterpret_cast<uint32*&>(bufferIt)++) {
+    cd->m_nNumSpheres = *reinterpret_cast<uint32*&>(bufferIt)++;
+    if (cd->m_nNumSpheres) {
         cd->m_pSpheres = (CColSphere*)CMemoryMgr::Malloc(cd->m_nNumSpheres * sizeof(CColSphere));
         for (auto i = 0u; i < cd->m_nNumSpheres; i++) {
             cd->m_pSpheres[i] = *reinterpret_cast<TSphere*&>(bufferIt)++;
@@ -616,12 +617,14 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     }
 
     // Lines (Unused, so just skip)
-    if (cd->m_nNumLines = *reinterpret_cast<uint32*&>(bufferIt)++)
+    cd->m_nNumLines = *reinterpret_cast<uint32*&>(bufferIt)++;
+    if (cd->m_nNumLines)
         bufferIt += cd->m_nNumLines * 24;
     cd->m_pLines = nullptr;
 
     // Boxes
-    if (cd->m_nNumBoxes = *reinterpret_cast<uint32*&>(bufferIt)++) {
+    cd->m_nNumBoxes = *reinterpret_cast<uint32*&>(bufferIt)++;
+    if (cd->m_nNumBoxes) {
         cd->m_pBoxes = (CColBox*)CMemoryMgr::Malloc(cd->m_nNumBoxes * sizeof(CColBox));
         for (auto i = 0u; i < cd->m_nNumBoxes; i++) {
             cd->m_pBoxes[i] = *reinterpret_cast<TBox*&>(bufferIt)++;
@@ -644,7 +647,8 @@ void CFileLoader::LoadCollisionModel(uint8* buffer, CColModel& cm) {
     }
 
     // Triangles
-    if (cd->m_nNumTriangles = *reinterpret_cast<uint32*&>(bufferIt)++) {
+    cd->m_nNumTriangles = *reinterpret_cast<uint32*&>(bufferIt)++;
+    if (cd->m_nNumTriangles) {
         cd->m_pTriangles = (CColTriangle*)CMemoryMgr::Malloc(cd->m_nNumTriangles * sizeof(CColTriangle));
         for (auto i = 0; i < cd->m_nNumTriangles; i++) {
             cd->m_pTriangles[i] = *reinterpret_cast<TFace*&>(bufferIt)++;
@@ -1794,7 +1798,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
         &wheelUpgradeCls
     );
 
-    uint16 nTxdSlot = CTxdStore::FindTxdSlot("vehicle");
+    auto nTxdSlot = CTxdStore::FindTxdSlot("vehicle");
     if (nTxdSlot == -1)
         nTxdSlot = CTxdStore::AddTxdSlot("vehicle");
 
@@ -2092,6 +2096,7 @@ void CFileLoader::LoadScene(const char* filename) {
     CIplStore::RemoveRelatedIpls(newIPLIndex); // I mean this totally makes sense, doesn't it?
 }
 
+// todo: add original min/max check
 // 0x5B8400
 void CFileLoader::LoadObjectTypes(const char* filename) {
     /* Unused
