@@ -9,11 +9,12 @@
 #include "Radar.h"
 #include "EntryExitManager.h"
 
-static float& cachedCos = *(float*)0xBA8308;
-static float& cachedSin = *(float*)0xBA830c;
+static inline float& cachedCos = *(float*)0xBA8308;
+static inline float& cachedSin = *(float*)0xBA830c;
 
-static uint8& airstrip_location = *(uint8*)0xBA8300;      // current airstrip index in airstrip_table
-static int32& airstrip_blip = *(int32*)0xBA8304;          // blip handle
+static inline uint8& airstrip_location = *(uint8*)0xBA8300; // current airstrip index in airstrip_table
+static inline int32& airstrip_blip = *(int32*)0xBA8304;     // blip handle
+
 constexpr std::array<airstrip_info, 4> airstrip_table = { // 0x8D06E0
     airstrip_info{ 1750.0f,  -2494.0f, 180.0f, 1000.0f },
     airstrip_info{ -1373.0f,  120.0f,  315.0f, 1500.0f },
@@ -108,7 +109,7 @@ void CRadar::InjectHooks()
     RH_ScopedClass(CRadar);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Initialise, 0x587FB0, { .reversed = false });
+    RH_ScopedInstall(Initialise, 0x587FB0);
     RH_ScopedInstall(LoadTextures, 0x5827D0);
     RH_ScopedInstall(DrawLegend, 0x5828A0);
     RH_ScopedInstall(LimitRadarPoint, 0x5832F0);
@@ -936,9 +937,9 @@ void CRadar::DrawYouAreHereSprite(float x, float y)
 void CRadar::SetupRadarRect(int32 x, int32 y)
 {
     m_radarRect.left   = 500.0f * (x - 6) - 500.0f;
-    m_radarRect.bottom    = 500.0f * (5 - y) - 500.0f;
+    m_radarRect.bottom = 500.0f * (5 - y) - 500.0f;
     m_radarRect.right  = 500.0f * (x - 4);
-    m_radarRect.top = 500.0f * (7 - y);
+    m_radarRect.top    = 500.0f * (7 - y);
 }
 
 // unused
@@ -954,7 +955,7 @@ void CRadar::RequestMapSection(int32 x, int32 y)
     if (x < 0 || x > 11 || y < 0 || y > 11)
         return;
 
-    int32 tex = gRadarTextures[x + 12 * y];
+    int32 tex = GetRadarTexture(x, y);
     if (tex == -1)
         return;
 
@@ -964,10 +965,10 @@ void CRadar::RequestMapSection(int32 x, int32 y)
 // 0x584BB0
 void CRadar::RemoveMapSection(int32 x, int32 y)
 {
-    if (x < 0 || x > 11 || y < 0 || y > 11)
+    if (x < 0 || x > MAX_RADAR_WIDTH_TILES || y < 0 || y > MAX_RADAR_HEIGHT_TILES)
         return;
 
-    int32 tex = gRadarTextures[x + 12 * y];
+    int32 tex = GetRadarTexture(x, y);
     if (tex == -1)
         return;
 
@@ -977,9 +978,7 @@ void CRadar::RemoveMapSection(int32 x, int32 y)
 // 0x584BF0
 void CRadar::RemoveRadarSections()
 {
-    for (auto& texture : gRadarTextures) {
-        CStreaming::RemoveTxdModel(texture);
-    }
+    rng::for_each(gRadarTextures, CStreaming::RemoveTxdModel);
 }
 
 // 0x584D40

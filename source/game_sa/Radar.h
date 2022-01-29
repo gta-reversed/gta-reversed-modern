@@ -178,23 +178,22 @@ public:
     static inline float& m_fRadarOrientation = *(float*)0xBA8310;
 
     // original name unknown
-    static uint32& legendTraceTimer;
-    static eRadarTraceHeight& legendTraceHeight;
+    static inline eRadarTraceHeight& legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
+    static inline uint32& legendTraceTimer = *(uint32*)0xBAA354;
 
-    static uint32& mapYouAreHereTimer;
-    static bool& mapYouAreHereDisplay;
+    static inline uint32& mapYouAreHereTimer = *(uint32*)0xBAA358;
+    static inline bool& mapYouAreHereDisplay = *(bool*)0x8D0930;
 
     static const char* RadarBlipFileNames[][2];
 
-    static inline float&                                     m_radarRange = *(float*)0xBA8314; // 2990.0 by default
-    static inline std::array<uint16, MAX_RADAR_TRACES>&      MapLegendList = *(std::array<uint16, MAX_RADAR_TRACES>*)0xBA8318;
-    static inline uint16&                                    MapLegendCounter = *(uint16*)0xBA86B8; // num icons in legend
-    static inline std::array<CRGBA, 6>&                      ArrowBlipColour = *(std::array<CRGBA, 6>*)0xBA86D4;
+    static inline float& m_radarRange = *(float*)0xBA8314; // 2990.0 by default
+    static inline std::array<uint16, MAX_RADAR_TRACES>& MapLegendList = *(std::array<uint16, MAX_RADAR_TRACES>*)0xBA8318;
+    static inline uint16& MapLegendCounter = *(uint16*)0xBA86B8; // num icons in legend
+    static inline std::array<CRGBA, 6>& ArrowBlipColour = *(std::array<CRGBA, 6>*)0xBA86D4;
     static inline std::array<tRadarTrace, MAX_RADAR_TRACES>& ms_RadarTrace = *(std::array<tRadarTrace, MAX_RADAR_TRACES>*)0xBA86F0;
-    static inline CVector2D&                                 vec2DRadarOrigin = *(CVector2D*)0xBAA248;
-    static inline std::array<CSprite2d, MAX_RADAR_SPRITES>&  RadarBlipSprites = *(std::array<CSprite2d, MAX_RADAR_SPRITES>*)0xBAA250;
-    static inline CRect&                                     m_radarRect = *(CRect*)0x8D0920; // { 1000000.0f, -1000000.0f, -1000000.0f, 1000000.0f }
-
+    static inline CVector2D& vec2DRadarOrigin = *(CVector2D*)0xBAA248;
+    static inline std::array<CSprite2d, MAX_RADAR_SPRITES>& RadarBlipSprites = *(std::array<CSprite2d, MAX_RADAR_SPRITES>*)0xBAA250;
+    static inline CRect& m_radarRect = *(CRect*)0x8D0920; // { 1000000.0f, -1000000.0f, -1000000.0f, 1000000.0f }
 public:
     static void InjectHooks();
 
@@ -267,6 +266,9 @@ public:
 
     static bool Load();
     static bool Save();
+
+    // NOTSA
+    static int32& GetRadarTexture(uint32 x, uint32 y) { return gRadarTextures[MAX_RADAR_WIDTH_TILES * y + x]; }
 };
 
 bool ClipRadarTileCoords(int32& x, int32& y);
