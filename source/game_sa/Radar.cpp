@@ -154,6 +154,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(SetCoordBlip, 0x583820);
     RH_ScopedInstall(SetEntityBlip, 0x5839A0);
+    RH_ScopedInstall(DisplayThisBlip, 0x583B40);
     
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
@@ -762,9 +763,96 @@ bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex)
 }
 
 // 0x583B40
-bool CRadar::DisplayThisBlip(int32 spriteId, char priority)
+bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority)
 {
-    return ((bool(__cdecl*)(int32, signed))0x583B40)(spriteId, priority);
+    if (CGame::CanSeeOutSideFromCurrArea() || FindPlayerPed()->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
+        switch (spriteId)
+        {
+        case RADAR_SPRITE_NONE:
+        case RADAR_SPRITE_WHITE:
+        case RADAR_SPRITE_CENTRE:
+        case RADAR_SPRITE_MAP_HERE:
+        case RADAR_SPRITE_NORTH:
+        case RADAR_SPRITE_MAFIACASINO:
+        case RADAR_SPRITE_SCHOOL:
+        case RADAR_SPRITE_WAYPOINT:
+        case RADAR_SPRITE_TRIADSCASINO:
+        case RADAR_SPRITE_CASH:
+            return true;
+
+        default:
+            return false;
+        }
+    } else {
+        switch (spriteId)
+        {
+        case RADAR_SPRITE_NONE:
+        case RADAR_SPRITE_WHITE:
+        case RADAR_SPRITE_CENTRE:
+        case RADAR_SPRITE_MAP_HERE:
+        case RADAR_SPRITE_NORTH:
+            return true;
+
+        case RADAR_SPRITE_AIRYARD:
+        case RADAR_SPRITE_AMMUGUN:
+        case RADAR_SPRITE_BARBERS:
+        case RADAR_SPRITE_BOATYARD:
+        case RADAR_SPRITE_BURGERSHOT:
+        case RADAR_SPRITE_BULLDOZER:
+        case RADAR_SPRITE_CHICKEN:
+        case RADAR_SPRITE_DINER:
+        case RADAR_SPRITE_HOSTPITAL:
+        case RADAR_SPRITE_MODGARAGE:
+        case RADAR_SPRITE_PIZZA:
+        case RADAR_SPRITE_POLICE:
+        case RADAR_SPRITE_RACE:
+        case RADAR_SPRITE_SAVEGAME:
+        case RADAR_SPRITE_SCHOOL:
+        case RADAR_SPRITE_TATTOO:
+        case RADAR_SPRITE_TSHIRT:
+        case RADAR_SPRITE_DATEDISCO:
+        case RADAR_SPRITE_DATEDRINK:
+        case RADAR_SPRITE_DATEFOOD:
+        case RADAR_SPRITE_TRUCK:
+        case RADAR_SPRITE_CASH:
+        case RADAR_SPRITE_FLAG:
+        case RADAR_SPRITE_GYM:
+        case RADAR_SPRITE_IMPOUND:
+        case RADAR_SPRITE_SPRAY:
+            return (FrontEndMenuManager.field_45[0] && priority < 0) || priority == 1;
+
+        case RADAR_SPRITE_BIGSMOKE:
+        case RADAR_SPRITE_CATALINAPINK:
+        case RADAR_SPRITE_CESARVIAPANDO:
+        case RADAR_SPRITE_CJ:
+        case RADAR_SPRITE_CRASH1:
+        case RADAR_SPRITE_EMMETGUN:
+        case RADAR_SPRITE_GIRLFRIEND:
+        case RADAR_SPRITE_LOGOSYNDICATE:
+        case RADAR_SPRITE_MADDOG:
+        case RADAR_SPRITE_MAFIACASINO:
+        case RADAR_SPRITE_MCSTRAP:
+        case RADAR_SPRITE_OGLOC:
+        case RADAR_SPRITE_RYDER:
+        case RADAR_SPRITE_QMARK:
+        case RADAR_SPRITE_SWEET:
+        case RADAR_SPRITE_THETRUTH:
+        case RADAR_SPRITE_TORENORANCH:
+        case RADAR_SPRITE_TRIADS:
+        case RADAR_SPRITE_TRIADSCASINO:
+        case RADAR_SPRITE_WOOZIE:
+        case RADAR_SPRITE_ZERO:
+        case RADAR_SPRITE_GANGB:
+        case RADAR_SPRITE_GANGP:
+        case RADAR_SPRITE_GANGY:
+        case RADAR_SPRITE_GANGN:
+        case RADAR_SPRITE_GANGG:
+            return (FrontEndMenuManager.field_45[1] && priority < 0) || priority == 3;
+
+        default:
+            return (FrontEndMenuManager.field_45[3] && priority < 0) || priority == 2;
+        }
+    }
 }
 
 // unused

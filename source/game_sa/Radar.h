@@ -219,7 +219,7 @@ public:
     static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
     static void ChangeBlipColour(int32 blipIndex, uint32 color);
     static bool HasThisBlipBeenRevealed(int32 blipIndex);
-    static bool DisplayThisBlip(int32 spriteId, char priority);
+    static bool DisplayThisBlip(eRadarSprite spriteId, char priority);
     static void ChangeBlipBrightness(int32 blipIndex, int32 brightness);
     static void ChangeBlipScale(int32 blipIndex, int32 size);
     static void ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay);
