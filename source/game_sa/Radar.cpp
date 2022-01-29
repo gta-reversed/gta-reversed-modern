@@ -861,7 +861,7 @@ uint32 CRadar::GetRadarTraceColour(eBlipColour color, bool bright, bool friendly
 }
 
 // 0x584850
-void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, const CRGBA& color)
+void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color)
 {
     CVector2D verts[4];
 
