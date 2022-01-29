@@ -329,8 +329,6 @@
 #include "game_sa\Core\Matrix.h"
 #include "game_sa\Core\MatrixLink.h"
 #include "game_sa\Core\MatrixLinkList.h"
-#include "game_sa\Core\OctTree.h"
-#include "game_sa\Core\OctTreeBase.h"
 #include "game_sa\Core\Pool.h"
 #include "game_sa\Core\PtrList.h"
 #include "game_sa\Core\PtrListDoubleLink.h"

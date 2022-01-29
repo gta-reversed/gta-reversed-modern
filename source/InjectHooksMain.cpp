@@ -65,6 +65,8 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "OctTree.h"
+#include "OctTreeBase.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
