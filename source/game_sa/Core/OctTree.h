@@ -12,7 +12,7 @@ class COctTree {
 public:
     uint32 m_nLevel;
     bool   m_bLastStep;       // no children
-    int16  m_aChildrens[8];   // pool slot IDs,  -1 - empty
+    int32  m_aChildrens[4];   // pool slot IDs,  -1 - empty
     uint32 m_nRedComponent;
     uint32 m_nGreenComponent;
     uint32 m_nBlueComponent;

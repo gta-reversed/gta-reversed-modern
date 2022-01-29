@@ -34,7 +34,11 @@ void COctTree::operator delete(void* data) {
 
 // 0x5A7460
 void COctTree::InitPool(void* data, int32 dataSize) {
-    ms_octTreePool.Init(dataSize / sizeof(COctTree) + 1, data, (char*)data + sizeof(COctTree) * (dataSize / sizeof(COctTree)) + 1);
+    ms_octTreePool.Init(
+        dataSize / sizeof(COctTree) + 1,
+        data,
+        (char*)data + sizeof(COctTree) * (dataSize / sizeof(COctTree)) + 1
+    );
     ms_octTreePool.m_bIsLocked = true;
 }
 
@@ -79,7 +83,7 @@ bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
 
 #ifdef FIX_BUGS
     if (!treeElement)
-        return 0;
+        return false;
 #endif
 
     bool bTreeInserted = treeElement->InsertTree(colorRed, colorGreen, colorBlue);
@@ -96,7 +100,7 @@ bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
 
 // 0x5A70F0
 void COctTree::FillPalette(uint8* colors) {
-    if (m_bLastStep == 1) {
+    if (m_bLastStep) {
         colors[ms_level + 0] = m_nRedComponent / m_nLevel;
         colors[ms_level + 1] = m_nGreenComponent / m_nLevel;
         colors[ms_level + 2] = m_nBlueComponent / m_nLevel;
@@ -118,7 +122,7 @@ void COctTree::FillPalette(uint8* colors) {
 
 // 0x5A71E0
 uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    if (m_bLastStep != 0)
+    if (m_bLastStep)
         return m_nLevel;
 
     COctTree* treeElement = this;
@@ -147,7 +151,7 @@ uint32 COctTree::NoOfChildren() {
 
 // 0x5A7040
 void COctTree::ReduceTree() {
-    if (m_bLastStep == 1)
+    if (m_bLastStep)
         return;
 
     ms_level++;
@@ -180,7 +184,7 @@ void COctTree::ReduceTree() {
 // 0x5A74F0
 void COctTree::RemoveChildren() {
     for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
-        int16& poolIndex = m_aChildrens[i];
+        auto& poolIndex = m_aChildrens[i];
 
         if (poolIndex < 0)
             continue;
@@ -205,7 +209,7 @@ void COctTree::empty() {
     m_nBlueComponent = 0;
 
     for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
-        int16& poolIndex = m_aChildrens[i];
+        auto& poolIndex = m_aChildrens[i];
 
         if (poolIndex < 0)
             continue;
