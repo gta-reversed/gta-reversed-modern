@@ -156,6 +156,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetEntityBlip, 0x5839A0);
     RH_ScopedInstall(DisplayThisBlip, 0x583B40);
     RH_ScopedInstall(ChangeBlipBrightness, 0x583C70);
+    RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
@@ -922,12 +923,12 @@ void CRadar::SetBlipFade(int32 blipIndex, bool fade)
 // 0x583E50
 void CRadar::SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_nBlipDisplayFlag == (BLIP_DISPLAY_BLIPONLY | BLIP_DISPLAY_BOTH) && appearance <= 2)
-        ms_RadarTrace[index].m_nCoordBlipAppearance = appearance;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        auto& t = ms_RadarTrace[idx];
+        if (t.m_nBlipType == eBlipType::BLIP_CAR && appearance < eBlipAppearance::BLIP_FLAG_NUM) { // Seems like there's a 3rd appereance type?
+            t.m_appearance = (uint8)appearance;
+        }
+    }
 }
 
 // 0x583EB0

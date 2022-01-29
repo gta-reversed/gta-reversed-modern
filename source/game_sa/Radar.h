@@ -15,7 +15,9 @@ class CSprite2d;
 // Thanks to Wesser for radar-related things
 enum eBlipAppearance : uint8 {
     BLIP_FLAG_FRIEND, // It selects BLIP_COLOUR_BLUE. If unset together with BLIP_FLAG_THREAT, any color.
-    BLIP_FLAG_THREAT  // It selects BLIP_COLOUR_RED. If unset together with BLIP_FLAG_FRIEND, any color.
+    BLIP_FLAG_THREAT,  // It selects BLIP_COLOUR_RED. If unset together with BLIP_FLAG_FRIEND, any color.
+
+    BLIP_FLAG_NUM // Add above this
 };
 
 enum eBlipType : uint8 {
@@ -161,8 +163,9 @@ struct tRadarTrace {
     uint8        m_bBlipFade : 1;            // Possibly a leftover. Always unset (unused).
     uint8        m_nCoordBlipAppearance : 2; // see eBlipAppearance
 
-    eBlipDisplay m_nBlipDisplayFlag : 2;
-    eBlipType    m_nBlipType : 4;
+    uint8 m_nBlipDisplayFlag : 2; // see eBlipDisplay
+    uint8 m_nBlipType : 4;        // see eBlipType
+    uint8 m_appearance : 2;       // See eBlipAppearance
 };
 
 VALIDATE_SIZE(tRadarTrace, 0x28);
