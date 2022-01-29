@@ -178,6 +178,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    COctTree::InjectHooks();
+    COctTreeBase::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CFileLoader::InjectHooks();
