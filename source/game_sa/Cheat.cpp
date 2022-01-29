@@ -99,7 +99,7 @@ std::vector<Cheat> cheats = {
         { 0x4399d0,  CCheat::VehicleSkillsCheat, "VehicleSkillsCheat", 0xf01286e9, CHEAT_MAX_DRIVING_SKILLS },
         { 0x43a550,  CCheat::ApacheCheat, "ApacheCheat", 0xa841cc0a, CHEAT_SPAWN_HUNTER },
         { 0x43a560,  CCheat::QuadCheat, "QuadCheat", 0x31ea09cf, CHEAT_SPAWN_QUAD },
-        //{ 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
+        { 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
         { 0x43a660,  CCheat::DozerCheat, "DozerCheat", 0x02c83a7c, CHEAT_SPAWN_DOZER },
         { 0x43a670,  CCheat::StuntPlaneCheat, "StuntPlaneCheat", 0xe49c3ed4, CHEAT_SPAWN_STUNT_PLANE },
         { 0x43a680,  CCheat::MonsterTruckCheat, "MonsterTruckCheat", 0x171ba8cc, CHEAT_SPAWN_MONSTER },
@@ -829,9 +829,6 @@ void CCheat::TankCheat() {
 
 // 0x43a570
 void CCheat::TankerCheat() {
-    return plugin::Call<0x43A570>();
-
-    // incomplete
     CVehicle* vehicle = VehicleCheat(MODEL_PETRO);
     if (!vehicle)
         return;
@@ -843,12 +840,11 @@ void CCheat::TankerCheat() {
         return;
 
     CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
-    CVector posn = vehicle->GetPosition();
-    trailer->SetPosn(posn);
-    trailer->SetOrientation(0.0f, 0.0f, 3.4906585f); // DegreesToRadians() ?
-    trailer->m_nStatus = STATUS_TRAIN_MOVING;
-    trailer->SetTowLink(vehicle, true);
+    trailer->SetPosn(vehicle->GetPosition());
+    trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
+    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
     CWorld::Add(trailer);
+    trailer->SetTowLink(vehicle, true);
 }
 
 // 0x43a510
