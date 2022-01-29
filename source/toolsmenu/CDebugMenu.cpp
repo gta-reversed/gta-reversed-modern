@@ -309,7 +309,7 @@ static void DebugCode() {
     }
     if (pad->IsStandardKeyJustDown('2')) {
         printf("");
-        CCheat::MoneyArmourHealthCheat();
+        CCheat::TankerCheat();
     }
 }
 
