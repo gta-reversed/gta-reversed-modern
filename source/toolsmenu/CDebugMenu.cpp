@@ -23,6 +23,7 @@
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
 #include "toolsmenu\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
+#include "toolsmenu\DebugModules\FXDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -60,6 +61,7 @@ void CDebugMenu::ImguiInitialise() {
     VehicleDebugModule::Initialise();
     PedDebugModule::Initialise();
     MissionDebugModule::Initialise();
+    FXDebugModule::Initialise();
     m_imguiInitialised = true;
 }
 
@@ -196,26 +198,9 @@ void CDebugMenu::ShowPlayerInfo() {
     }
 }
 
-void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
-    ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
-    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
-}
-
 void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
-        PostFxTool();
+        FXDebugModule::ProcessImgui();
     }
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
@@ -348,6 +333,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
+    FXDebugModule::ProcessRender();
 
     ImGui::EndFrame();
     ImGui::Render();
