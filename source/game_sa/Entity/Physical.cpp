@@ -2265,8 +2265,7 @@ void CPhysical::PositionAttachedEntity()
             attachedEntityMatrix = attachedToEntityMatrix;
             attachedEntityMatrix *= attachedEntityRotationMatrix;
         }
-        auto offset = Multiply3x3(attachedToEntityMatrix, m_vecAttachOffset);
-        attachedEntityMatrix.GetPosition() = attachedToEntityMatrix.GetPosition() + offset;
+        attachedEntityMatrix.GetPosition() = MultiplyMatrixWithVector(attachedToEntityMatrix, m_vecAttachOffset);
     }
     SetMatrix(attachedEntityMatrix);
 
