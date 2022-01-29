@@ -202,6 +202,14 @@ CRect* CPhysical::GetBoundRect_Reversed(CRect* rect)
     CEntity::GetBoundCentre(&boundCentre);
     float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
     *rect = CRect(boundCentre.x - fRadius, boundCentre.y - fRadius, boundCentre.x + fRadius, boundCentre.y + fRadius);
+
+    // NOTSA - Not sure how sane this is, but realistically, no bounding box should extend like 3000 units outside the map
+    // If this asserts most likely somehow, somewhere a matrix was assigned to m_matrix but wasn't properly inited.
+    // See issue #122 for details
+    // (Division by 2 is to make sure that even some big collision model son the side of the map won't assert here.)
+    assert(CWorld::IsInWorldBounds({ rect->left / 2.f, rect->top / 2.f }));
+    assert(CWorld::IsInWorldBounds({ rect->right / 2.f, rect->bottom / 2.f }));
+    
     return rect;
 }
 
