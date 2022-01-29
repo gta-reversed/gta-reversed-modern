@@ -157,6 +157,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(DisplayThisBlip, 0x583B40);
     RH_ScopedInstall(ChangeBlipBrightness, 0x583C70);
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
+    RH_ScopedInstall(ShowRadarTrace, 0x583F40);
     
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
@@ -955,8 +956,30 @@ void CRadar::SetBlipEntryExit(int32 blipIndex, CEntryExit* enex)
 // 0x583F40
 void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha)
 {
-    // unused
-    ((void(__cdecl*)(float, float, uint32, uint8, uint8, uint8, uint8))0x583F40)(x, y, size, red, green, blue, alpha);
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) { // This code piece seems fairly common.. Perhaps its inlined?
+        x *= SCREEN_WIDTH_UNIT;
+        y *= SCREEN_HEIGHT_UNIT;
+
+        LimitToMap(&x, &y);
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+
+    // Draw background rect - Since it's 1px bigger on each side when we draw the next rect on top of it will act as a border
+    CSprite2d::DrawRect({
+        x - size - 1.f,
+        y - size - 1.f,
+        x + size + 1.f,
+        y + size + 1.f
+    }, { 0, 0, 0, alpha });
+
+    // Now draw actual rect on top of it
+    CSprite2d::DrawRect({
+        x - size,
+        y - size,
+        x + size,
+        y + size
+    }, { red, blue, green, alpha });
 }
 
 // 0x584070
