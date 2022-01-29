@@ -153,7 +153,8 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetBlipFade, 0x583E00); // unused
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(SetCoordBlip, 0x583820);
-
+    RH_ScopedInstall(SetEntityBlip, 0x5839A0);
+    
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
     RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
@@ -718,7 +719,24 @@ int32 CRadar::SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour c
 // 0x5839A0
 int32 CRadar::SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay)
 {
-    return ((int32(__cdecl*)(eBlipType, int32, uint32, eBlipDisplay))0x5839A0)(type, entityHandle, arg2, blipDisplay);
+    if (auto idx = FindTraceNotTrackingBlipIndex(); idx != -1) {
+        auto& t = ms_RadarTrace[idx];
+
+        t.m_nBlipDisplayFlag = blipDisplay;
+        t.m_nColour          = (type == BLIP_CHAR || type == BLIP_CAR) ? BLIP_COLOUR_THREAT : BLIP_COLOUR_GREEN;
+        t.m_nEntityHandle    = entityHandle;
+        t.m_fSphereRadius    = 1.f;
+        t.m_nBlipSize        = 1;
+        t.m_nBlipDisplayFlag = blipDisplay;
+        t.m_nBlipType        = type;
+        t.m_nBlipSprite      = eRadarSprite::RADAR_SPRITE_NONE;
+        t.m_bBright          = true;
+        t.m_bTrackingBlip    = true;
+        t.m_pEntryExit       = nullptr;
+
+        return GetNewUniqueBlipIndex(idx);
+    }
+    return -1;
 }
 
 // 0x583AB0
