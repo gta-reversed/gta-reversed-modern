@@ -2,6 +2,7 @@
 
 #include "CollisionPlugin.h"
 
+RwInt32& gCollisionPluginOffset = *(RwInt32*)0x9689DC;
 CClumpModelInfo*& CCollisionPlugin::ms_currentModel = *(CClumpModelInfo**)0x9689E0;
 
 void CCollisionPlugin::InjectHooks() {
@@ -74,7 +75,7 @@ static RwInt32 ClumpCollisionGetSize(const void* object, RwInt32 offsetInObject,
 // 0x41B310
 bool CCollisionPlugin::PluginAttach() {
     // 0x9689DC unused
-    static RwInt32 CollisionPlugin = RpClumpRegisterPlugin(
+    gCollisionPluginOffset = RpClumpRegisterPlugin(
         0,
         rwID_COLLISIONPLUGIN,
         ClumpCollisionConstructor,
