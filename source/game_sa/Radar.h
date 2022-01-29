@@ -214,8 +214,8 @@ public:
     static void TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in);
     static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y);
     static void CalculateCachedSinCos();
-    static int32 SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ uint32 color, eBlipDisplay blipDisplay, Const char* scriptName);
-    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, uint32 color, eBlipDisplay blipDisplay, char* scriptName);
+    static int32 SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ eBlipColour color, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName);
+    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, char* scriptName);
     static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
     static void ChangeBlipColour(int32 blipIndex, uint32 color);
     static bool HasThisBlipBeenRevealed(int32 blipIndex);
@@ -268,6 +268,7 @@ public:
     static bool Save();
 
     // NOTSA
+    static int32 FindTraceTrackingBlipIndex();
     static int32& GetRadarTexture(uint32 x, uint32 y) { return gRadarTextures[MAX_RADAR_WIDTH_TILES * y + x]; }
 };
 
