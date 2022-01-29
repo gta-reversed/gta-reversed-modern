@@ -23,6 +23,8 @@
 #include "CreepingFire.h"
 #include "Skidmarks.h"
 #include "CarCtrl.h"
+#include "TagManager.h"
+#include "Clouds.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
@@ -36,27 +38,29 @@ bool& gbLARiots = *(bool*)0xB72958;
 bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
 
 void CGame::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CGame", "CanSeeOutSideFromCurrArea", 0x53C4A0, &CGame::CanSeeOutSideFromCurrArea);
-    // Install("CGame", "CanSeeWaterFromCurrArea", 0x53C4B0, &CGame::CanSeeWaterFromCurrArea);
-    Install("CGame", "Init1", 0x5BF840, &CGame::Init1);
-    Install("CGame", "Init2", 0x5BA1A0, &CGame::Init2);
-    // Install("CGame", "Init3", 0x5BA400, &CGame::Init3);
-    Install("CGame", "Initialise", 0x53BC80, &CGame::Initialise);
-    // Install("CGame", "InitialiseCoreDataAfterRW", 0x5BFA90, &CGame::InitialiseCoreDataAfterRW);
-    // Install("CGame", "InitialiseEssentialsAfterRW", 0x5BA160, &CGame::InitialiseEssentialsAfterRW);
-    Install("CGame", "InitialiseOnceBeforeRW", 0x53BB50, &CGame::InitialiseOnceBeforeRW);
-    // Install("CGame", "InitialiseRenderWare", 0x5BD600, &CGame::InitialiseRenderWare);
-    // Install("CGame", "InitialiseWhenRestarting", 0x53C680, &CGame::InitialiseWhenRestarting);
-    // Install("CGame", "Process", 0x53BEE0, &CGame::Process);
-    // Install("CGame", "ReInitGameObjectVariables", 0x53BCF0, &CGame::ReInitGameObjectVariables);
-    // Install("CGame", "ReloadIPLs", 0x53BED0, &CGame::ReloadIPLs);
-    // Install("CGame", "ShutDownForRestart", 0x53C550, &CGame::ShutDownForRestart);
-    // Install("CGame", "Shutdown", 0x53C900, &CGame::Shutdown);
-    Install("CGame", "ShutdownRenderWare", 0x53BB80, &CGame::ShutdownRenderWare);
-    // Install("CGame", "DrasticTidyUpMemory", 0x53C810, &CGame::DrasticTidyUpMemory);
-    // Install("CGame", "FinalShutdown", 0x53BC30, &CGame::FinalShutdown);
-    // Install("CGame", "TidyUpMemory", 0x53C500, &CGame::TidyUpMemory);
+    RH_ScopedClass(CGame);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(CanSeeOutSideFromCurrArea, 0x53C4A0);
+    // RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);
+    RH_ScopedInstall(Init1, 0x5BF840);
+    RH_ScopedInstall(Init2, 0x5BA1A0);
+    // RH_ScopedInstall(Init3, 0x5BA400);
+    RH_ScopedInstall(Initialise, 0x53BC80);
+    // RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90);
+    // RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
+    RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
+    // RH_ScopedInstall(InitialiseRenderWare, 0x5BD600);
+    // RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
+    // RH_ScopedInstall(Process, 0x53BEE0);
+    // RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
+    // RH_ScopedInstall(ReloadIPLs, 0x53BED0);
+    // RH_ScopedInstall(ShutDownForRestart, 0x53C550);
+    // RH_ScopedInstall(Shutdown, 0x53C900);
+    RH_ScopedInstall(ShutdownRenderWare, 0x53BB80);
+    // RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
+    // RH_ScopedInstall(FinalShutdown, 0x53BC30);
+    // RH_ScopedInstall(TidyUpMemory, 0x53C500);
 }
 
 // 0x72FD90

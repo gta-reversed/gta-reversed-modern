@@ -1,9 +1,12 @@
 #include "StdInc.h"
 
 void CMouseControllerState::InjectHooks() {
-    ReversibleHooks::Install("CMouseControllerState", "CMouseControllerState", 0x53F220, &CMouseControllerState::Constructor);
-    ReversibleHooks::Install("CMouseControllerState", "Clear", 0x53F250, &CMouseControllerState::Clear);
-    ReversibleHooks::Install("CMouseControllerState", "CheckForInput", 0x53F270, &CMouseControllerState::CheckForInput);
+    RH_ScopedClass(CMouseControllerState);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x53F220);
+    RH_ScopedInstall(Clear, 0x53F250);
+    RH_ScopedInstall(CheckForInput, 0x53F270);
 }
 
 // 0x53F220

@@ -4,11 +4,14 @@
 
 void CColSphere::InjectHooks()
 {
-    ReversibleHooks::Install("CColSphere", "Set", 0x40FD10, &CColSphere::Set);
-    ReversibleHooks::Install("CColSphere", "IntersectRay", 0x40FF20, &CColSphere::IntersectRay);
-    ReversibleHooks::Install("CColSphere", "IntersectEdge", 0x4100E0, &CColSphere::IntersectEdge);
-    ReversibleHooks::Install("CColSphere", "IntersectPoint", 0x410040, &CColSphere::IntersectPoint);
-    ReversibleHooks::Install("CColSphere", "IntersectSphere", 0x410090, &CColSphere::IntersectSphere);
+    RH_ScopedClass(CColSphere);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(Set, 0x40FD10);
+    RH_ScopedInstall(IntersectRay, 0x40FF20);
+    RH_ScopedInstall(IntersectEdge, 0x4100E0);
+    RH_ScopedInstall(IntersectPoint, 0x410040);
+    RH_ScopedInstall(IntersectSphere, 0x410090);
 }
 
 // 0x40FD10

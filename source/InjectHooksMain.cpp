@@ -63,6 +63,8 @@
 #include "FireManager.h"
 #include "Skidmarks.h"
 #include "CarCtrl.h"
+#include "TagManager.h"
+#include "Clouds.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

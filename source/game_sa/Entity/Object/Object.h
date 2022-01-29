@@ -20,6 +20,7 @@ enum eObjectType {
 };
 
 class CDummyObject;
+class CFire;
 
 class CObject : public CPhysical {
 public:
@@ -89,12 +90,12 @@ public:
     float         m_fDoorStartAngle; // this is used for door objects
     float         m_fScale;
     CObjectData*  m_pObjectInfo;
-    class CFire*  m_pFire; // CFire *
+    CFire*        m_pFire; // CFire *
     int16         m_wScriptTriggerIndex;
     int16         m_wRemapTxd;     // this is used for detached car parts
     RwTexture*    m_pRemapTexture; // this is used for detached car parts
     CDummyObject* m_pDummyObject;  // used for dynamic objects like garage doors, train crossings etc.
-    uint32      m_dwBurnTime;    // time when particles must be stopped
+    uint32        m_nBurnTime;     // time when particles must be stopped
     float         m_fBurnDamage;
 
     static uint16& nNoTempObjects;
@@ -185,7 +186,7 @@ public:
     }
     inline bool IsFallenLampPost() const { return objectFlags.bIsLampPost && m_matrix->GetUp().z < 0.66F; }
     inline bool IsExploded() const { return objectFlags.bIsExploded; }
-    inline bool CanBeSmashed() const { return m_nColDamageEffect >= eObjectColDamageEffect::COL_DAMAGE_EFFECT_SMASH_COMPLETELY; }
+    inline bool CanBeSmashed() const { return m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY; }
 };
 VALIDATE_SIZE(CObject, 0x17C);
 

@@ -2,14 +2,17 @@
 
 void CColModel::InjectHooks()
 {
-    ReversibleHooks::Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
-    ReversibleHooks::Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
-    ReversibleHooks::Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
-    ReversibleHooks::Install("CColModel", "AllocateData_void", 0x40F810, static_cast<void(CColModel::*)()>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int32, int32, int32, int32, int32, bool)>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
-    ReversibleHooks::Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
-    ReversibleHooks::Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);
+    RH_ScopedClass(CColModel);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(operator new, 0x40FC30);
+    RH_ScopedInstall(operator delete, 0x40FC40);
+    RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
+    RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
+    RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F9E0);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40FA30);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40FA40);
 }
 
 CColModel::CColModel() : m_boundBox()

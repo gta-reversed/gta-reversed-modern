@@ -6,6 +6,10 @@ project(GTASA C CXX)
 ############# create the gta_reversed project
 #############################################################################################
 
+if(MSVC_TOOLSET_VERSION)
+    message("MSVC_TOOLSET_VERSION: ${MSVC_TOOLSET_VERSION}")
+endif()
+
 set(CMAKE_POLICY_DEFAULT_CMP0077 NEW)
 
 set(BUILD_SHARED_LIBS 1)
@@ -47,7 +51,9 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release" CACHE STRING "" FORCE)
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gta_reversed)
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
-add_compile_options($<$<CXX_COMPILER_ID:MSVC>:/MP>)
+if (MSVC)
+    target_compile_options(gta_reversed PRIVATE "/MP" "/Zc:preprocessor")
+endif()
 set_target_properties(gta_reversed
     PROPERTIES
     SUFFIX ".asi"

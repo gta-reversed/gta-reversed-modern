@@ -21,6 +21,9 @@ extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD = *(float*)0x8D33EC; // 5000.0
 extern CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0, 0.45, 0.0>
 
 void CPlane::InjectHooks() {
+    RH_ScopedClass(CPlane);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

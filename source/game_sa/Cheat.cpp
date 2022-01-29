@@ -108,19 +108,22 @@ std::vector<Cheat> cheats = {
 };
 
 void CCheat::InjectHooks() {
-    ReversibleHooks::Install("CCheat", "AddToCheatString", 0x438480, &CCheat::AddToCheatString);
-    ReversibleHooks::Install("CCheat", "HandleSpecialCheats", 0x439A10, &CCheat::HandleSpecialCheats);
-    ReversibleHooks::Install("CCheat", "DoCheats", 0x439AF0, &CCheat::DoCheats);
-    ReversibleHooks::Install("CCheat", "ResetCheats", 0x438450, &CCheat::ResetCheats);
-    ReversibleHooks::Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
-    ReversibleHooks::Install("CCheat", "EnableLegimateCheat", 0x438370, &CCheat::EnableLegitimateCheat);
+    RH_ScopedClass(CCheat);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(AddToCheatString, 0x438480);
+    RH_ScopedInstall(HandleSpecialCheats, 0x439A10);
+    RH_ScopedInstall(DoCheats, 0x439AF0);
+    RH_ScopedInstall(ResetCheats, 0x438450);
+    RH_ScopedInstall(IsZoneStreamingAllowed, 0x407410);
+    RH_ScopedInstall(EnableLegitimateCheat, 0x438370);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {
             continue;
         }
 
-        ReversibleHooks::Install("CCheat", cheat.methodName, cheat.installAddress, &cheat.method);
+        RH_ScopedNamedGlobalInstall(cheat.method, cheat.methodName, cheat.installAddress);
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {
@@ -541,8 +544,8 @@ void CCheat::HealthCheat() {
     }
 
     vehicle->m_fHealth = 1000.0f;
-    if (vehicle->m_vehicleType == VEHICLE_BIKE) {
-        auto* bike = static_cast<CBike*>(vehicle);
+    if (vehicle->IsBike()) {
+        CBike* bike = vehicle->AsBike();
         bike->field_7BC = 0;
         bike->Fix();
         bike->m_apCollidedEntities[5] = nullptr;

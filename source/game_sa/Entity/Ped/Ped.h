@@ -26,6 +26,8 @@
 #include "ePedState.h"
 #include "ePedStats.h"
 
+class CPedGroup;
+
 enum ePedType : uint32 {
     PED_TYPE_PLAYER1 = 0,
     PED_TYPE_PLAYER2,
@@ -575,5 +577,7 @@ public:
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
     inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
     inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+
+    bool IsFollowerOfGroup(const CPedGroup& group);
 };
 bool IsPedPointerValid(CPed* ped);

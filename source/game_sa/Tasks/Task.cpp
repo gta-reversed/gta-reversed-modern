@@ -30,6 +30,9 @@ bool CTask::IsGoToTask(CTask* task) {
 }
 
 void CTask::InjectHooks() {
+    RH_ScopedClass(CTask);
+    RH_ScopedCategory("Tasks");
+
     using namespace ReversibleHooks;
     Install("CTask", "operator new", 0x61A5A0, &CTask::operator new);
     Install("CTask", "operator delete", 0x61A5B0, &CTask::operator delete);

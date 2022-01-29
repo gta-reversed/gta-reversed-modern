@@ -17,11 +17,14 @@ bool& CWaterLevel::m_bWaterFogScript = *(bool*)0x8D37D5;
 
 void CWaterLevel::InjectHooks()
 {
-    ReversibleHooks::Install("CWaterLevel", "GetWaterLevel", 0x6EB690, &CWaterLevel::GetWaterLevel);
-    ReversibleHooks::Install("CWaterLevel", "SyncWater", 0x6E76E0, &CWaterLevel::SyncWater);
-    ReversibleHooks::Install("CWaterLevel", "CalculateWavesOnlyForCoordinate", 0x6E7210, &CWaterLevel::CalculateWavesOnlyForCoordinate);
-    //ReversibleHooks::Install("CWaterLevel", "AddWaveToResult", 0x6E81E0, &CWaterLevel::AddWaveToResult);
-    //ReversibleHooks::Install("CWaterLevel", "GetWaterLevelNoWaves", 0x6E8580, &CWaterLevel::GetWaterLevelNoWaves);
+    RH_ScopedClass(CWaterLevel);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetWaterLevel, 0x6EB690);
+    RH_ScopedInstall(SyncWater, 0x6E76E0);
+    RH_ScopedInstall(CalculateWavesOnlyForCoordinate, 0x6E7210);
+    //RH_ScopedInstall(AddWaveToResult, 0x6E81E0);
+    //RH_ScopedInstall(GetWaterLevelNoWaves, 0x6E8580);
 }
 
 void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal)

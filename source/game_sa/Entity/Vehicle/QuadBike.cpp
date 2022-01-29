@@ -7,19 +7,21 @@ float& QUAD_HBSTEER_ANIM_MULT = *(float*)0x8D3454; // -0.4f 0x8D3454
 CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } // 0x8D3458
 
 void CQuadBike::InjectHooks() {
-    using namespace ReversibleHooks;
-    // todo: Install("CQuadBike", "CQuadBike", 0x6CE370, &CQuadBike::Constructor);
-    Install("CQuadBike", "Fix", 0x6CE2B0, &CQuadBike::Fix_Reversed);
-    Install("CQuadBike", "GetRideAnimData", 0x6CDC90, &CQuadBike::GetRideAnimData_Reversed);
-    Install("CQuadBike", "PreRender", 0x6CEAD0, &CQuadBike::PreRender_Reversed);
-    Install("CQuadBike", "ProcessAI", 0x6CE460, &CQuadBike::ProcessAI_Reversed);
-    Install("CQuadBike", "ProcessControl", 0x6CDCC0, &CQuadBike::ProcessControl_Reversed);
-    Install("CQuadBike", "ProcessControlInputs", 0x6CE020, &CQuadBike::ProcessControlInputs_Reversed);
-    Install("CQuadBike", "ProcessDrivingAnims", 0x6CE280, &CQuadBike::ProcessDrivingAnims_Reversed);
-    Install("CQuadBike", "ProcessSuspension", 0x6CE270, &CQuadBike::ProcessSuspension_Reversed);
-    Install("CQuadBike", "ResetSuspension", 0x6CDCB0, &CQuadBike::ResetSuspension_Reversed);
-    Install("CQuadBike", "SetupDamageAfterLoad", 0x6CE340, &CQuadBike::SetupDamageAfterLoad_Reversed);
-    Install("CQuadBike", "SetupSuspensionLines", 0x6CDCA0, &CQuadBike::SetupSuspensionLines_Reversed);
+    RH_ScopedClass(CQuadBike);
+    RH_ScopedCategory("Vehicle/Ped");
+
+// todo: RH_ScopedInstall(Constructor, 0x6CE370);
+    RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
+    RH_ScopedInstall(GetRideAnimData_Reversed, 0x6CDC90);
+    RH_ScopedInstall(PreRender_Reversed, 0x6CEAD0);
+    RH_ScopedInstall(ProcessAI_Reversed, 0x6CE460);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6CDCC0);
+    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6CE020);
+    RH_ScopedInstall(ProcessDrivingAnims_Reversed, 0x6CE280);
+    RH_ScopedInstall(ProcessSuspension_Reversed, 0x6CE270);
+    RH_ScopedInstall(ResetSuspension_Reversed, 0x6CDCB0);
+    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6CE340);
+    RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6CDCA0);
 }
 
 // 0x6CE370
@@ -30,7 +32,7 @@ CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobil
 
     m_sRideAnimData.m_nAnimGroup = ANIM_GROUP_QUAD;
     m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId);
-    m_vehicleSubType = VEHICLE_QUAD;
+    m_nVehicleSubType = VEHICLE_TYPE_QUAD;
 
     field_9AC = 0; // unused
     field_9B0 = 0; // unused
@@ -268,10 +270,10 @@ void CQuadBike::ProcessControlInputs(uint8 playerNum) {
         } else {
             m_nLastControlInput = eControllerType::CONTROLLER_MOUSE;
             if (!pad->NewState.m_bVehicleMouseLook) {
-                m_sRideAnimData.dword10 += CPad::NewMouseControllerState.Y * -0.035;
+                m_sRideAnimData.dword10 += CPad::NewMouseControllerState.Y * -0.035f;
             }
             if (pad->NewState.m_bVehicleMouseLook || fabs(m_sRideAnimData.dword10) < 0.35f) {
-                m_sRideAnimData.dword10 *= pow(0.98, CTimer::GetTimeStep());
+                m_sRideAnimData.dword10 *= pow(0.98f, CTimer::GetTimeStep());
             }
         }
     }

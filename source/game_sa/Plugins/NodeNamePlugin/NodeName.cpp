@@ -16,9 +16,13 @@ typedef struct tNodeNamePlugin {
 } NodeNamePluginInstance;
 
 void NodeNamePlugin::InjectHooks() {
-    ReversibleHooks::Install("NodeNamePlugin", "NodeNamePluginAttach", 0x72FAB0, &NodeNamePluginAttach);
-    ReversibleHooks::Install("NodeNamePlugin", "GetFrameNodeName", 0x72FB30, &GetFrameNodeName);
-    ReversibleHooks::Install("NodeNamePlugin", "SetFrameNodeName", 0x72FB00, &SetFrameNodeName);
+    RH_ScopedNamespace(NodeNamePlugin);
+    RH_ScopedCategory("Plugins");
+
+    // TODO: These should be moved into the namespace instead of being global...
+    RH_ScopedGlobalInstall(NodeNamePluginAttach, 0x72FAB0);
+    RH_ScopedGlobalInstall(GetFrameNodeName, 0x72FB30);
+    RH_ScopedGlobalInstall(SetFrameNodeName, 0x72FB00);
 }
 
 // internal

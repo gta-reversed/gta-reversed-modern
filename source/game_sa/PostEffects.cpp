@@ -134,44 +134,46 @@ float (&dword_C3FB38_Y)[180] = *(float (*)[180])0xC3FE08;
 float (&dword_C3F868_SPEED)[180] = *(float (*)[180])0xC3FE08;
 
 void CPostEffects::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CPostEffects", "Initialise", 0x704630, &CPostEffects::Initialise);
-    Install("CPostEffects", "Close", 0x7010C0, &CPostEffects::Close);
-    // Install("CPostEffects", "DoScreenModeDependentInitializations", 0x7046D0, &CPostEffects::DoScreenModeDependentInitializations);
-    // Install("CPostEffects", "SetupBackBufferVertex", 0x7043D0, &CPostEffects::SetupBackBufferVertex);
-    Install("CPostEffects", "Update", 0x7046A0, &CPostEffects::Update);
-    Install("CPostEffects", "DrawQuad", 0x700EC0, &CPostEffects::DrawQuad);
-    // Install("CPostEffects", "FilterFX_StoreAndSetDayNightBalance", 0x7034B0, &CPostEffects::FilterFX_StoreAndSetDayNightBalance);
-    // Install("CPostEffects", "FilterFX_RestoreDayNightBalance", 0x7034D0, &CPostEffects::FilterFX_RestoreDayNightBalance);
-    // Install("CPostEffects", "ImmediateModeFilterStuffInitialize", 0x703CC0, &CPostEffects::ImmediateModeFilterStuffInitialize);
-    Install("CPostEffects", "ImmediateModeRenderStatesSet", 0x700D70, &CPostEffects::ImmediateModeRenderStatesSet);
-    Install("CPostEffects", "ImmediateModeRenderStatesStore", 0x700CC0, &CPostEffects::ImmediateModeRenderStatesStore);
-    Install("CPostEffects", "ImmediateModeRenderStatesReStore", 0x700E00, &CPostEffects::ImmediateModeRenderStatesReStore);
-    Install("CPostEffects", "ScriptCCTVSwitch", 0x7011B0, &CPostEffects::ScriptCCTVSwitch);
-    Install("CPostEffects", "ScriptDarknessFilterSwitch", 0x701170, &CPostEffects::ScriptDarknessFilterSwitch);
-    Install("CPostEffects", "ScriptHeatHazeFXSwitch", 0x701160, &CPostEffects::ScriptHeatHazeFXSwitch);
-    Install("CPostEffects", "ScriptInfraredVisionSwitch", 0x701140, &CPostEffects::ScriptInfraredVisionSwitch);
-    Install("CPostEffects", "ScriptNightVisionSwitch", 0x701120, &CPostEffects::ScriptNightVisionSwitch);
-    Install("CPostEffects", "ScriptResetForEffects", 0x7010F0, &CPostEffects::ScriptResetForEffects);
-    // Install("CPostEffects", "UnderWaterRipple", 0x7039C0, &CPostEffects::UnderWaterRipple);
-    // Install("CPostEffects", "HeatHazeFXInit", 0x701450, &CPostEffects::HeatHazeFXInit);
-    // Install("CPostEffects", "HeatHazeFX", 0x701780, &CPostEffects::HeatHazeFX);
-    Install("CPostEffects", "IsVisionFXActive", 0x7034F0, &CPostEffects::IsVisionFXActive);
-    // Install("CPostEffects", "NightVision", 0x7011C0, &CPostEffects::NightVision);
-    Install("CPostEffects", "NightVisionSetLights", 0x7012E0, &CPostEffects::NightVisionSetLights);
-    Install("CPostEffects", "SetFilterMainColour", 0x703520, &CPostEffects::SetFilterMainColour);
-    Install("CPostEffects", "InfraredVision", 0x703F80, &CPostEffects::InfraredVision);
-    Install("CPostEffects", "InfraredVisionSetLightsForDefaultObjects", 0x701430, &CPostEffects::InfraredVisionSetLightsForDefaultObjects);
-    Install("CPostEffects", "InfraredVisionStoreAndSetLightsForHeatObjects", 0x701320, &CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects);
-    Install("CPostEffects", "InfraredVisionRestoreLightsForHeatObjects", 0x701410, &CPostEffects::InfraredVisionRestoreLightsForHeatObjects);
-    // Install("CPostEffects", "Fog", 0x704150, &CPostEffects::Fog);
-    // Install("CPostEffects", "CCTV", 0x702F40, &CPostEffects::CCTV);
-    // Install("CPostEffects", "Grain", 0x7037C0, &CPostEffects::Grain);
-    // Install("CPostEffects", "SpeedFX", 0x7030A0, &CPostEffects::SpeedFX);
-    // Install("CPostEffects", "DarknessFilter", 0x702F00, &CPostEffects::DarknessFilter);
-    Install("CPostEffects", "ColourFilter", 0x703650, &CPostEffects::ColourFilter);
-    // Install("CPostEffects", "Radiosity", 0x702080, &CPostEffects::Radiosity);
-    // Install("CPostEffects", "Render", 0x7046E0, &CPostEffects::Render);
+    RH_ScopedClass(CPostEffects);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(Initialise, 0x704630);
+    RH_ScopedInstall(Close, 0x7010C0);
+    // RH_ScopedInstall(DoScreenModeDependentInitializations, 0x7046D0);
+    // RH_ScopedInstall(SetupBackBufferVertex, 0x7043D0);
+    RH_ScopedInstall(Update, 0x7046A0);
+    RH_ScopedInstall(DrawQuad, 0x700EC0);
+    // RH_ScopedInstall(FilterFX_StoreAndSetDayNightBalance, 0x7034B0);
+    // RH_ScopedInstall(FilterFX_RestoreDayNightBalance, 0x7034D0);
+    // RH_ScopedInstall(ImmediateModeFilterStuffInitialize, 0x703CC0);
+    RH_ScopedInstall(ImmediateModeRenderStatesSet, 0x700D70);
+    RH_ScopedInstall(ImmediateModeRenderStatesStore, 0x700CC0);
+    RH_ScopedInstall(ImmediateModeRenderStatesReStore, 0x700E00);
+    RH_ScopedInstall(ScriptCCTVSwitch, 0x7011B0);
+    RH_ScopedInstall(ScriptDarknessFilterSwitch, 0x701170);
+    RH_ScopedInstall(ScriptHeatHazeFXSwitch, 0x701160);
+    RH_ScopedInstall(ScriptInfraredVisionSwitch, 0x701140);
+    RH_ScopedInstall(ScriptNightVisionSwitch, 0x701120);
+    RH_ScopedInstall(ScriptResetForEffects, 0x7010F0);
+    // RH_ScopedInstall(UnderWaterRipple, 0x7039C0);
+    // RH_ScopedInstall(HeatHazeFXInit, 0x701450);
+    // RH_ScopedInstall(HeatHazeFX, 0x701780);
+    RH_ScopedInstall(IsVisionFXActive, 0x7034F0);
+    // RH_ScopedInstall(NightVision, 0x7011C0);
+    RH_ScopedInstall(NightVisionSetLights, 0x7012E0);
+    RH_ScopedInstall(SetFilterMainColour, 0x703520);
+    RH_ScopedInstall(InfraredVision, 0x703F80);
+    RH_ScopedInstall(InfraredVisionSetLightsForDefaultObjects, 0x701430);
+    RH_ScopedInstall(InfraredVisionStoreAndSetLightsForHeatObjects, 0x701320);
+    RH_ScopedInstall(InfraredVisionRestoreLightsForHeatObjects, 0x701410);
+    // RH_ScopedInstall(Fog, 0x704150);
+    // RH_ScopedInstall(CCTV, 0x702F40);
+    // RH_ScopedInstall(Grain, 0x7037C0);
+    // RH_ScopedInstall(SpeedFX, 0x7030A0);
+    // RH_ScopedInstall(DarknessFilter, 0x702F00);
+    RH_ScopedInstall(ColourFilter, 0x703650);
+    // RH_ScopedInstall(Radiosity, 0x702080);
+    // RH_ScopedInstall(Render, 0x7046E0);
 }
 
 // 0x704630
@@ -350,16 +352,16 @@ void CPostEffects::ImmediateModeFilterStuffInitialize() {
 
 // 0x700D70
 void CPostEffects::ImmediateModeRenderStatesSet() {
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,         (void*)rwSHADEMODEGOURAUD);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void*)rwTEXTUREADDRESSCLAMP);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERNEAREST);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,         RWRSTATE(rwSHADEMODEGOURAUD));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERNEAREST));
 }
 
 // 0x700CC0
@@ -378,16 +380,16 @@ void CPostEffects::ImmediateModeRenderStatesStore() {
 
 // 0x700E00
 void CPostEffects::ImmediateModeRenderStatesReStore() {
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,           (void*)gStoredRenderStateSrcBlend);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,          (void*)gStoredRenderStateDestBlend);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,          (void*)gStoredRenderStateFogEnable);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,           (void*)gStoredRenderStateCullMode);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,        (void*)gStoredRenderStateZTestEnable);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,       (void*)gStoredRenderStateZWriteEnable);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,          (void*)gStoredRenderStateShadeMode);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,  (void*)gStoredRenderStateVertexAlphaEnable);
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,     (void*)gStoredRenderStateTextureAddress);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,      (void*)gStoredRenderStateTextureFilter);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,           RWRSTATE(gStoredRenderStateSrcBlend));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,          RWRSTATE(gStoredRenderStateDestBlend));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,          RWRSTATE(gStoredRenderStateFogEnable));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,           RWRSTATE(gStoredRenderStateCullMode));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,        RWRSTATE(gStoredRenderStateZTestEnable));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,       RWRSTATE(gStoredRenderStateZWriteEnable));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,          RWRSTATE(gStoredRenderStateShadeMode));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,  RWRSTATE(gStoredRenderStateVertexAlphaEnable));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,     RWRSTATE(gStoredRenderStateTextureAddress));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,      RWRSTATE(gStoredRenderStateTextureFilter));
 }
 
 // 0x700C90
@@ -548,8 +550,8 @@ void CPostEffects::NightVision() {
 
         ImmediateModeRenderStatesStore();
         ImmediateModeRenderStatesSet();
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,  (void*)rwBLENDONE);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDONE));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
 
         if (m_fNightVisionSwitchOnFXCount > 0) {
             float counter = m_fNightVisionSwitchOnFXCount;
@@ -564,8 +566,8 @@ void CPostEffects::NightVision() {
 
     ImmediateModeRenderStatesStore();
     ImmediateModeRenderStatesSet();
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,  (void*)rwBLENDZERO);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDSRCCOLOR);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDZERO));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDSRCCOLOR));
     DrawQuad(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 255, 32, 255, nullptr);
     ImmediateModeRenderStatesReStore();
 }
@@ -579,29 +581,29 @@ void CPostEffects::NightVisionSetLights() {
 
 // 0x703520
 void CPostEffects::SetFilterMainColour(RwRaster* raster, RwRGBA color) {
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERNEAREST);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)pRasterFrontBuffer);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERNEAREST));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(pRasterFrontBuffer));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     RwIm2DVertexSetRealRGBA(&cc_vertices[0], color.red, color.green, color.blue, color.alpha);
     RwIm2DVertexSetRealRGBA(&cc_vertices[1], color.red, color.green, color.blue, color.alpha);
     RwIm2DVertexSetRealRGBA(&cc_vertices[2], color.red, color.green, color.blue, color.alpha);
     RwIm2DVertexSetRealRGBA(&cc_vertices[3], color.red, color.green, color.blue, color.alpha);
 
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,  (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDDESTALPHA);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDDESTALPHA));
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, cc_vertices, 4, cc_indices, 6);
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // 0x703F80
@@ -609,8 +611,8 @@ void CPostEffects::InfraredVision(RwRGBA color, RwRGBA colorMain) {
     ImmediateModeRenderStatesStore();
     ImmediateModeRenderStatesSet();
 
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
 
     float radius = m_fInfraredVisionFilterRadius * 100.0f;
     int32 i = 0, j; // todo: use loop?
@@ -641,8 +643,8 @@ void CPostEffects::InfraredVision(RwRGBA color, RwRGBA colorMain) {
 
     DrawQuadSetDefaultUVs();
 
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,  (void*)rwBLENDZERO);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDSRCCOLOR);
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,  RWRSTATE(rwBLENDZERO));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDSRCCOLOR));
 
     DrawQuad(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT, 255, 64, 255, 255, nullptr);
     ImmediateModeRenderStatesReStore();
@@ -734,14 +736,14 @@ void CPostEffects::DarknessFilter(int32 a1) {
 
 // 0x703650
 void CPostEffects::ColourFilter(RwRGBA pass1, RwRGBA pass2) {
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERNEAREST);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)pRasterFrontBuffer);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERNEAREST));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(pRasterFrontBuffer));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDONE));
 
     RwIm2DVertexSetRealRGBA(&cc_vertices[0], pass1.red, pass1.green, pass1.blue, pass1.alpha);
     RwIm2DVertexSetRealRGBA(&cc_vertices[1], pass1.red, pass1.green, pass1.blue, pass1.alpha);
@@ -755,12 +757,12 @@ void CPostEffects::ColourFilter(RwRGBA pass1, RwRGBA pass2) {
     RwIm2DVertexSetRealRGBA(&cc_vertices[3], pass2.red, pass2.green, pass2.blue, pass2.alpha);
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, cc_vertices, 4, cc_indices, 6);
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,      (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // 0x702080

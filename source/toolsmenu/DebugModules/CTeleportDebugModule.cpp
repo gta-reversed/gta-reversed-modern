@@ -10,8 +10,6 @@
 #include <iterator>
 #include <string>
 #include <string_view>
-#include <Vector.h>
-#include <ranges>
 #include <chrono>
 
 namespace rng = std::ranges;
@@ -240,6 +238,7 @@ void Initialise(ImGuiContext& ctx) {
     ini_handler.ClearAllFn = SettingsHandler::ClearAll;
     ini_handler.ReadOpenFn = SettingsHandler::ReadOpen;
     ini_handler.ReadLineFn = SettingsHandler::ReadLine;
+    ini_handler.ApplyAllFn = SettingsHandler::ApplyAll;
     ini_handler.WriteAllFn = SettingsHandler::WriteAll;
     ctx.SettingsHandlers.push_back(ini_handler);
 }

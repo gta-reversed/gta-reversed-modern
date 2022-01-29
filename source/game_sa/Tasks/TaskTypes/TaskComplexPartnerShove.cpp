@@ -4,7 +4,9 @@
 
 void CTaskComplexPartnerShove::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexPartnerShove", "CTaskComplexPartnerShove", 0x6846F0, &CTaskComplexPartnerShove::Constructor);
+    RH_ScopedClass(CTaskComplexPartnerShove);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x6846F0);
 }
 
 CTaskComplexPartnerShove::CTaskComplexPartnerShove(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, int8 updateDirectionCount, CVector point) :

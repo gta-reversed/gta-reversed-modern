@@ -105,7 +105,7 @@ public:
     static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static void SetPedsChoking(float x, float y, float z, float radius, CEntity* gasCreator);
     static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
-    static bool SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
+    static int32 SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
     static void UseDetonator(CPed* creator);

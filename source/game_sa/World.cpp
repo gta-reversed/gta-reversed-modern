@@ -12,6 +12,7 @@
 #include "IKChainManager_c.h"
 #include "FireManager.h"
 #include "CarCtrl.h"
+#include "TagManager.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
@@ -38,96 +39,98 @@ int16& TAG_SPRAYING_INCREMENT_VAL = *(int16*)0x8CDEF0;
 int8& gCurCamColVars = *(int8*)0x8CCB80;
 
 void CWorld::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CWorld", "Initialise", 0x5631E0, &CWorld::Initialise);
-    Install("CWorld", "ShutDown", 0x564050, &CWorld::ShutDown);
-    Install("CWorld", "Add", 0x563220, &CWorld::Add);
-    Install("CWorld", "Remove", 0x563280, &CWorld::Remove);
+    RH_ScopedClass(CWorld);
+    RH_ScopedCategoryGlobal();
 
-    // Install("CWorld", "hasCollisionBeenLoaded", 0x410CE0, &CWorld::hasCollisionBeenLoaded);
-    Install("CWorld", "StopAllLawEnforcersInTheirTracks", 0x566C10, &CWorld::StopAllLawEnforcersInTheirTracks);
-    Install("CWorld", "CallOffChaseForArea", 0x566A60, &CWorld::CallOffChaseForArea);
-    Install("CWorld", "ExtinguishAllCarFiresInArea", 0x566950, &CWorld::ExtinguishAllCarFiresInArea);
-    Install("CWorld", "ClearPedsFromArea", 0x5667F0, &CWorld::ClearPedsFromArea);
-    Install("CWorld", "TestForUnusedModels", 0x566510, static_cast<void(*)()>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther_Void", 0x5664A0, static_cast<void(*)()>(&CWorld::TestForBuildingsOnTopOfEachOther));
-    Install("CWorld", "PrintCarChanges", 0x566420, &CWorld::PrintCarChanges);
-    Install("CWorld", "TestSphereAgainstSectorList", 0x566140, &CWorld::TestSphereAgainstSectorList);
-    Install("CWorld", "UseDetonator", 0x5660B0, &CWorld::UseDetonator);
-    Install("CWorld", "RemoveFallenCars", 0x565E80, &CWorld::RemoveFallenCars);
-    Install("CWorld", "RemoveFallenPeds", 0x565CB0, &CWorld::RemoveFallenPeds);
-    Install("CWorld", "ClearCarsFromArea", 0x566610, &CWorld::ClearCarsFromArea);
-    Install("CWorld", "TriggerExplosionSectorList", 0x567750, &CWorld::TriggerExplosionSectorList);
-    Install("CWorld", "Process", 0x5684A0, &CWorld::Process);
-    Install("CWorld", "ProcessLineOfSight", 0x56BA00, &CWorld::ProcessLineOfSight);
-    Install("CWorld", "ProcessLineOfSightSector", 0x56B5E0, &CWorld::ProcessLineOfSightSector);
-    Install("CWorld", "ProcessLineOfSightSectorList", 0x566EE0, &CWorld::ProcessLineOfSightSectorList);
-    Install("CWorld", "ProcessVerticalLine", 0x5674E0, &CWorld::ProcessVerticalLine);
-    Install("CWorld", "ProcessVerticalLine_FillGlobeColPoints", 0x567620, &CWorld::ProcessVerticalLine_FillGlobeColPoints);
-    Install("CWorld", "ProcessVerticalLineSector", 0x564500, &CWorld::ProcessVerticalLineSector);
-    Install("CWorld", "ProcessVerticalLineSector_FillGlobeColPoints", 0x564420, &CWorld::ProcessVerticalLineSector_FillGlobeColPoints);
-    Install("CWorld", "ProcessVerticalLineSectorList", 0x5632B0, &CWorld::ProcessVerticalLineSectorList);
-    Install("CWorld", "ProcessVerticalLineSectorList_FillGlobeColPoints", 0x5636A0, &CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints);
-    Install("CWorld", "ProcessForAnimViewer", 0x5633D0, &CWorld::ProcessForAnimViewer);
-    Install("CWorld", "ProcessPedsAfterPreRender", 0x563430, &CWorld::ProcessPedsAfterPreRender);
-    Install("CWorld", "ProcessAttachedEntities", 0x5647F0, &CWorld::ProcessAttachedEntities);
-    Install("CWorld", "TriggerExplosion", 0x56B790, &CWorld::TriggerExplosion);
-    Install("CWorld", "ClearExcitingStuffFromArea", 0x56A0D0, &CWorld::ClearExcitingStuffFromArea);
-    Install("CWorld", "TestSphereAgainstWorld", 0x569E20, &CWorld::TestSphereAgainstWorld);
-    Install("CWorld", "RepositionOneObject", 0x569850, &CWorld::RepositionOneObject);
-    Install("CWorld", "FindUnsuspectingTargetPed", 0x566DA0, &CWorld::FindUnsuspectingTargetPed);
-    Install("CWorld", "FindUnsuspectingTargetCar", 0x566C90, &CWorld::FindUnsuspectingTargetCar);
-    Install("CWorld", "FindLowestZForCoord", 0x5697F0, &CWorld::FindLowestZForCoord);
-    Install("CWorld", "FindRoofZFor3DCoord", 0x569750, &CWorld::FindRoofZFor3DCoord);
-    Install("CWorld", "FindGroundZFor3DCoord", 0x5696C0, &CWorld::FindGroundZFor3DCoord);
-    Install("CWorld", "FindGroundZForCoord", 0x569660, &CWorld::FindGroundZForCoord);
-    Install("CWorld", "FindNearestObjectOfType", 0x5693F0, &CWorld::FindNearestObjectOfType);
-    Install("CWorld", "FindMissionEntitiesIntersectingCube", 0x569240, &CWorld::FindMissionEntitiesIntersectingCube);
-    Install("CWorld", "FindObjectsIntersectingAngledCollisionBox", 0x568FF0, &CWorld::FindObjectsIntersectingAngledCollisionBox);
-    Install("CWorld", "FindObjectsIntersectingCube", 0x568DD0, &CWorld::FindObjectsIntersectingCube);
-    Install("CWorld", "FindObjectsKindaColliding", 0x568B80, &CWorld::FindObjectsKindaColliding); // bad
-    Install("CWorld", "FindObjectsOfTypeInRangeSectorList", 0x5635C0, &CWorld::FindObjectsOfTypeInRangeSectorList);
-    Install("CWorld", "FindObjectsInRangeSectorList", 0x563500, &CWorld::FindObjectsInRangeSectorList);
-    Install("CWorld", "FindPlayerSlotWithVehiclePointer", 0x563FD0, &CWorld::FindPlayerSlotWithVehiclePointer);
-    Install("CWorld", "FindNearestObjectOfTypeSectorList", 0x565450, &CWorld::FindNearestObjectOfTypeSectorList);
-    Install("CWorld", "FindMissionEntitiesIntersectingCubeSectorList", 0x565300, &CWorld::FindMissionEntitiesIntersectingCubeSectorList);
-    Install("CWorld", "FindObjectsIntersectingAngledCollisionBoxSectorList", 0x565200, &CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList);
-    Install("CWorld", "FindObjectsIntersectingCubeSectorList", 0x5650E0, &CWorld::FindObjectsIntersectingCubeSectorList);
-    Install("CWorld", "FindObjectsKindaCollidingSectorList", 0x565000, &CWorld::FindObjectsKindaCollidingSectorList);
-    Install("CWorld", "FindObjectsOfTypeInRange", 0x564C70, &CWorld::FindObjectsOfTypeInRange);
-    Install("CWorld", "FindObjectsInRange", 0x564A20, &CWorld::FindObjectsInRange);
-    Install("CWorld", "FindPlayerSlotWithPedPointer", 0x563FA0, &CWorld::FindPlayerSlotWithPedPointer);
-    Install("CWorld", "FindLodOfTypeInRange", 0x564ED0, &CWorld::FindLodOfTypeInRange);
+    RH_ScopedInstall(Initialise, 0x5631E0);
+    RH_ScopedInstall(ShutDown, 0x564050);
+    RH_ScopedInstall(Add, 0x563220);
+    RH_ScopedInstall(Remove, 0x563280);
 
-    Install("CWorld", "SprayPaintWorld", 0x565B70, &CWorld::SprayPaintWorld);
+    // RH_ScopedInstall(hasCollisionBeenLoaded, 0x410CE0);
+    RH_ScopedInstall(StopAllLawEnforcersInTheirTracks, 0x566C10);
+    RH_ScopedInstall(CallOffChaseForArea, 0x566A60);
+    RH_ScopedInstall(ExtinguishAllCarFiresInArea, 0x566950);
+    RH_ScopedInstall(ClearPedsFromArea, 0x5667F0);
+    RH_ScopedOverloadedInstall(TestForUnusedModels, "", 0x566510, void(*)());
+    RH_ScopedOverloadedInstall(TestForBuildingsOnTopOfEachOther, "Void", 0x5664A0, void(*)());
+    RH_ScopedInstall(PrintCarChanges, 0x566420);
+    RH_ScopedInstall(TestSphereAgainstSectorList, 0x566140);
+    RH_ScopedInstall(UseDetonator, 0x5660B0);
+    RH_ScopedInstall(RemoveFallenCars, 0x565E80);
+    RH_ScopedInstall(RemoveFallenPeds, 0x565CB0);
+    RH_ScopedInstall(ClearCarsFromArea, 0x566610);
+    RH_ScopedInstall(TriggerExplosionSectorList, 0x567750);
+    RH_ScopedInstall(Process, 0x5684A0);
+    RH_ScopedInstall(ProcessLineOfSight, 0x56BA00);
+    RH_ScopedInstall(ProcessLineOfSightSector, 0x56B5E0);
+    RH_ScopedInstall(ProcessLineOfSightSectorList, 0x566EE0);
+    RH_ScopedInstall(ProcessVerticalLine, 0x5674E0);
+    RH_ScopedInstall(ProcessVerticalLine_FillGlobeColPoints, 0x567620);
+    RH_ScopedInstall(ProcessVerticalLineSector, 0x564500);
+    RH_ScopedInstall(ProcessVerticalLineSector_FillGlobeColPoints, 0x564420);
+    RH_ScopedInstall(ProcessVerticalLineSectorList, 0x5632B0);
+    RH_ScopedInstall(ProcessVerticalLineSectorList_FillGlobeColPoints, 0x5636A0);
+    RH_ScopedInstall(ProcessForAnimViewer, 0x5633D0);
+    RH_ScopedInstall(ProcessPedsAfterPreRender, 0x563430);
+    RH_ScopedInstall(ProcessAttachedEntities, 0x5647F0);
+    RH_ScopedInstall(TriggerExplosion, 0x56B790);
+    RH_ScopedInstall(ClearExcitingStuffFromArea, 0x56A0D0);
+    RH_ScopedInstall(TestSphereAgainstWorld, 0x569E20);
+    RH_ScopedInstall(RepositionOneObject, 0x569850);
+    RH_ScopedInstall(FindUnsuspectingTargetPed, 0x566DA0);
+    RH_ScopedInstall(FindUnsuspectingTargetCar, 0x566C90);
+    RH_ScopedInstall(FindLowestZForCoord, 0x5697F0);
+    RH_ScopedInstall(FindRoofZFor3DCoord, 0x569750);
+    RH_ScopedInstall(FindGroundZFor3DCoord, 0x5696C0);
+    RH_ScopedInstall(FindGroundZForCoord, 0x569660);
+    RH_ScopedInstall(FindNearestObjectOfType, 0x5693F0);
+    RH_ScopedInstall(FindMissionEntitiesIntersectingCube, 0x569240);
+    RH_ScopedInstall(FindObjectsIntersectingAngledCollisionBox, 0x568FF0);
+    RH_ScopedInstall(FindObjectsIntersectingCube, 0x568DD0);
+    RH_ScopedInstall(FindObjectsKindaColliding, 0x568B80); // bad
+    RH_ScopedInstall(FindObjectsOfTypeInRangeSectorList, 0x5635C0);
+    RH_ScopedInstall(FindObjectsInRangeSectorList, 0x563500);
+    RH_ScopedInstall(FindPlayerSlotWithVehiclePointer, 0x563FD0);
+    RH_ScopedInstall(FindNearestObjectOfTypeSectorList, 0x565450);
+    RH_ScopedInstall(FindMissionEntitiesIntersectingCubeSectorList, 0x565300);
+    RH_ScopedInstall(FindObjectsIntersectingAngledCollisionBoxSectorList, 0x565200);
+    RH_ScopedInstall(FindObjectsIntersectingCubeSectorList, 0x5650E0);
+    RH_ScopedInstall(FindObjectsKindaCollidingSectorList, 0x565000);
+    RH_ScopedInstall(FindObjectsOfTypeInRange, 0x564C70);
+    RH_ScopedInstall(FindObjectsInRange, 0x564A20);
+    RH_ScopedInstall(FindPlayerSlotWithPedPointer, 0x563FA0);
+    RH_ScopedInstall(FindLodOfTypeInRange, 0x564ED0);
 
-    Install("CWorld", "GetIsLineOfSightClear", 0x56A490, &CWorld::GetIsLineOfSightClear);
-    Install("CWorld", "GetIsLineOfSightSectorClear", 0x568AD0, &CWorld::GetIsLineOfSightSectorClear);
-    Install("CWorld", "GetIsLineOfSightSectorListClear", 0x564970, &CWorld::GetIsLineOfSightSectorListClear);
-    Install("CWorld", "GetCurrentScanCode", 0x407250, &GetCurrentScanCode);
-    Install("CWorld", "GetSector", 0x407260, &GetSector);
-    Install("CWorld", "GetRepeatSector", 0x4072A0, &GetRepeatSector);
-    Install("CWorld", "GetLodPtrList", 0x4072C0, &CWorld::GetLodPtrList);
+    RH_ScopedInstall(SprayPaintWorld, 0x565B70);
 
-    Install("CWorld", "SetCarsOnFire", 0x5659F0, &CWorld::SetCarsOnFire);
-    Install("CWorld", "SetPedsChoking", 0x565800, &CWorld::SetPedsChoking);
-    Install("CWorld", "SetPedsOnFire", 0x565610, &CWorld::SetPedsOnFire);
-    Install("CWorld", "SetWorldOnFire", 0x56B910, &CWorld::SetWorldOnFire);
-    Install("CWorld", "SetAllCarsCanBeDamaged", 0x5668F0, &CWorld::SetAllCarsCanBeDamaged);
+    RH_ScopedInstall(GetIsLineOfSightClear, 0x56A490);
+    RH_ScopedInstall(GetIsLineOfSightSectorClear, 0x568AD0);
+    RH_ScopedInstall(GetIsLineOfSightSectorListClear, 0x564970);
+    RH_ScopedGlobalInstall(GetCurrentScanCode, 0x407250);
+    RH_ScopedGlobalInstall(GetSector, 0x407260);
+    RH_ScopedGlobalInstall(GetRepeatSector, 0x4072A0);
+    RH_ScopedInstall(GetLodPtrList, 0x4072C0);
 
-    Install("CWorld", "CallOffChaseForAreaSectorListVehicles", 0x563A80, &CWorld::CallOffChaseForAreaSectorListVehicles);
-    Install("CWorld", "RemoveEntityInsteadOfProcessingIt", 0x563A10, &CWorld::RemoveEntityInsteadOfProcessingIt);
-    Install("CWorld", "TestForUnusedModels_InputArray", 0x5639D0, static_cast<void(*)(CPtrList&, int32*)>(&CWorld::TestForUnusedModels));
-    Install("CWorld", "TestForBuildingsOnTopOfEachOther", 0x563950, static_cast<void(*)(CPtrList&)>(&CWorld::TestForBuildingsOnTopOfEachOther));
-    Install("CWorld", "RemoveStaticObjects", 0x563840, &CWorld::RemoveStaticObjects);
-    Install("CWorld", "ClearScanCodes", 0x563470, &CWorld::ClearScanCodes);
-    Install("CWorld", "CastShadowSectorList", 0x563390, &CWorld::CastShadowSectorList);
-    Install("CWorld", "ResetLineTestOptions", 0x5631C0, &CWorld::ResetLineTestOptions);
-    Install("CWorld", "CallOffChaseForAreaSectorListPeds", 0x563D00, &CWorld::CallOffChaseForAreaSectorListPeds);
-    Install("CWorld", "RepositionCertainDynamicObjects", 0x56B9C0, &CWorld::RepositionCertainDynamicObjects);
-    Install("CWorld", "CameraToIgnoreThisObject", 0x563F40, &CWorld::CameraToIgnoreThisObject);
-    Install("CWorld", "RemoveReferencesToDeletedObject", 0x565510, &CWorld::RemoveReferencesToDeletedObject);
-    Install("CWorld", "ClearForRestart", 0x564360, &CWorld::ClearForRestart);
+    RH_ScopedInstall(SetCarsOnFire, 0x5659F0);
+    RH_ScopedInstall(SetPedsChoking, 0x565800);
+    RH_ScopedInstall(SetPedsOnFire, 0x565610);
+    RH_ScopedInstall(SetWorldOnFire, 0x56B910);
+    RH_ScopedInstall(SetAllCarsCanBeDamaged, 0x5668F0);
+
+    // RH_ScopedInstall(CallOffChaseForAreaSectorListVehicles, 0x563A80);
+    RH_ScopedInstall(RemoveEntityInsteadOfProcessingIt, 0x563A10);
+    RH_ScopedOverloadedInstall(TestForUnusedModels, "InputArray", 0x5639D0, void(*)(CPtrList&, int32*));
+    RH_ScopedOverloadedInstall(TestForBuildingsOnTopOfEachOther, "", 0x563950, void(*)(CPtrList&));
+    RH_ScopedInstall(RemoveStaticObjects, 0x563840);
+    RH_ScopedInstall(ClearScanCodes, 0x563470);
+    RH_ScopedInstall(CastShadowSectorList, 0x563390);
+    RH_ScopedInstall(ResetLineTestOptions, 0x5631C0);
+    RH_ScopedInstall(CallOffChaseForAreaSectorListPeds, 0x563D00);
+    RH_ScopedInstall(RepositionCertainDynamicObjects, 0x56B9C0);
+    RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
+    RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
+    RH_ScopedInstall(ClearForRestart, 0x564360);
 }
 
 // 0x5631C0
@@ -1118,7 +1121,7 @@ void CWorld::SetCarsOnFire(float x, float y, float z, float radius, CEntity* fir
 }
 
 // 0x565B70
-bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
+int32 CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState) {
     CEntity* objects[15]{};
     int16 count{};
     FindObjectsInRange(posn, radius, false, &count, (uint16)std::size(objects), objects, true, false, false, false, false);
@@ -1133,13 +1136,14 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
 
         hasFoundTag = true;
 
-        outDir = entity->GetForward();
+        outDir = entity->GetMatrix().GetForward(); // Must use GetMatrix to make sure the matrix is allocated
 
         // Note: Original code has U.B. if `processTagAlphaState` is false, because `newAlpha` isn't assigned a meaningful value
         // But the only place this function is called has set `processTagAlphaState` to true, so..
-        uint8 currAlpha = CTagManager::GetAlpha(entity), newAlpha{};
+        uint8 newAlpha{0};
+        uint8 currAlpha = CTagManager::GetAlpha(entity);
         if (processTagAlphaState) {
-            newAlpha = std::min<uint8>(255u, currAlpha + (uint8)TAG_SPRAYING_INCREMENT_VAL);
+            newAlpha = (uint8)std::min((size_t)(currAlpha + TAG_SPRAYING_INCREMENT_VAL), 255u) ;
         }
 
         if (currAlpha != 255 && newAlpha == 255)
@@ -1148,8 +1152,10 @@ bool CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool 
         CTagManager::SetAlpha(entity, newAlpha);
     }
 
-    return hasChangedAlphaTo255 ? 2 :
-           hasFoundTag ? 1 : 0;
+    if (hasChangedAlphaTo255)
+        return 2;
+
+    return hasFoundTag ? 1 : 0;
 }
 
 // 0x565CB0
@@ -1443,7 +1449,7 @@ CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
         if (!veh)
             continue;
 
-        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->m_vehicleSubType == VEHICLE_AUTOMOBILE)
+        if (!veh->IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE) || !veh->IsSubAutomobile())
             continue;
 
         switch (veh->m_nStatus) {
@@ -1779,7 +1785,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
         case eEntityType::ENTITY_TYPE_VEHICLE: {
             const auto veh = entity->AsVehicle();
 
-            if (auto driver = veh->m_pDriver;  veh->m_vehicleSubType == eVehicleType::VEHICLE_BMX && driver) {
+            if (auto driver = veh->m_pDriver;  veh->IsSubBMX() && driver) {
                 CEventKnockOffBike event{ veh, &veh->m_vecMoveSpeed, &impactVelocity, 0.f, 0.f, KNOCK_OFF_TYPE_EXPLOSION, 0, 0, nullptr, true, false };
                 driver->GetIntelligence()->m_eventGroup.Add(&event, false);
 
@@ -1840,7 +1846,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                     veh->ApplyTurnForce(colNormal * forceFactor, colPointPos);
             }
 
-            if (veh->IsPlane()) {
+            if (veh->IsSubPlane()) {
                 auto normalBackwards = cp.m_vecNormal;
                 auto colPos = colPointPos + veh->GetPosition();
                 veh->VehicleDamage(1000.f, 0, creator, &colPos, &normalBackwards, WEAPON_EXPLOSION);
@@ -2491,19 +2497,36 @@ CEntity* CWorld::TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius
 }
 
 // 0x56A0D0
+// Remove all peds/vehicles not related to the player's group in the area + projectiles, explosions, pickups, etc..
 void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows) {
-    const auto vehPool = CPools::ms_pVehiclePool;
     const auto playerPed = FindPlayerPed();
     const auto playerGroup = CPedGroups::GetPedsGroup(playerPed);
+
+    // Remove all peds in radius who aren't followers of the player's group
+    const auto pedPool = CPools::GetPedPool();
+    for (auto i = 0; i < pedPool->GetSize(); i++) {
+        if (auto ped = pedPool->GetAt(i)) {
+            if (!ped->IsPlayer() && ped->CanBeDeleted()) {
+                if (DistanceBetweenPointsSquared2D(point, ped->GetPosition()) < radius * radius) {
+                    if (!playerGroup || !ped->IsFollowerOfGroup(*playerGroup)) {
+                        CPopulation::RemovePed(ped);
+                    }
+                }
+            }
+        }
+    }
+
+    // Remove all vehicles in radius in which there are no peds who're follower's of the player's group
+    const auto vehPool = CPools::ms_pVehiclePool;
     for (auto i = 0; i < vehPool->GetSize(); i++) {
         if (const auto veh = vehPool->GetAt(i)) {
-            if (playerGroup && veh->IsAnyOfPassengersFollowerOfGroup(*playerGroup))
+            if (playerGroup && veh->AreAnyOfPassengersFollowerOfGroup(*playerGroup))
                 continue;
 
-            if (playerPed->m_pContactEntity == veh && !veh->IsBoat())
+            if (playerPed->m_pContactEntity == veh && veh->IsBoat())
                 continue;
 
-            if (radius * radius <= DistanceBetweenPointsSquared2D(point, veh->GetPosition()))
+            if (DistanceBetweenPointsSquared2D(point, veh->GetPosition()) >= radius * radius)
                 continue;
 
             if (veh->vehicleFlags.bIsLocked || !veh->CanBeDeleted())
@@ -2516,7 +2539,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
 
             if (auto& driver = veh->m_pDriver) { 
                 CPopulation::RemovePed(driver);
-                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
+                if (driver) // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
+                    driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
                 driver = nullptr;
             }
 
@@ -2536,6 +2560,16 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             delete veh;
         }
     }
+
+    CObject::DeleteAllTempObjectsInArea(point, radius);
+    gFireManager.ExtinguishPoint(point, radius);
+    ExtinguishAllCarFiresInArea(point, radius);
+    CExplosion::RemoveAllExplosionsInArea(point, radius);
+    if (bRemoveProjectilesAndShadows) {
+        CProjectileInfo::RemoveAllProjectiles();
+        CShadows::TidyUpShadows();
+    }
+    CPickups::RemoveUnnecessaryPickups(point, radius);
 }
 
 // 0x56A490

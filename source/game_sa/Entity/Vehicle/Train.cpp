@@ -26,7 +26,10 @@ float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    ReversibleHooks::Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
+    RH_ScopedClass(CTrain);
+    RH_ScopedCategory("Vehicle/Ped");
+
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
 }
 
 // 0x6F6030
@@ -224,13 +227,10 @@ void CTrain::AddNearbyPedAsRandomPassenger() {
     ((void(__thiscall*)(CTrain*))0x6F8170)(this);
 }
 
+// 0x6F86A0
 void CTrain::ProcessControl()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6F86A0, CTrain*>(this);
-#else
-    ProcessControl_Reversed();
-#endif
+    CTrain::ProcessControl_Reversed();
 }
 
 void CTrain::ProcessControl_Reversed()

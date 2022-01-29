@@ -4,11 +4,13 @@ uint32& CShinyTexts::NumShinyTexts = *(uint32*)0xC7C6F8;
 CRegisteredShinyText(&CShinyTexts::aShinyTexts)[32] = *(CRegisteredShinyText(*)[32])0xC7D258;
 
 void CShinyTexts::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CShinyTexts", "Init", 0x7221B0, &CShinyTexts::Init);
-    Install("CShinyTexts", "RenderOutGeometryBuffer", 0x7221C0, &CShinyTexts::RenderOutGeometryBuffer);
-    Install("CShinyTexts", "Render", 0x724890, &CShinyTexts::Render);
-    Install("CShinyTexts", "RegisterOne", 0x724B60, &CShinyTexts::RegisterOne);
+    RH_ScopedClass(CShinyTexts);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x7221B0);
+    RH_ScopedInstall(RenderOutGeometryBuffer, 0x7221C0);
+    RH_ScopedInstall(Render, 0x724890);
+    RH_ScopedInstall(RegisterOne, 0x724B60);
 }
 
 // 0x7221B0
@@ -35,10 +37,10 @@ void CShinyTexts::Render() {
     if (NumShinyTexts == 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)rwBLENDONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     RWRSTATE(rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDONE));
 
     uiTempBufferIndicesStored  = 0;
     uiTempBufferVerticesStored = 0;
@@ -57,7 +59,7 @@ void CShinyTexts::Render() {
 
         if (texture != gpHandManTex) {
             RenderOutGeometryBuffer();
-            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)RwTextureGetRaster(gpHandManTex));
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpHandManTex)));
             texture = gpHandManTex;
         }
             
@@ -88,10 +90,10 @@ void CShinyTexts::Render() {
     RenderOutGeometryBuffer();
     NumShinyTexts = 0;
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // Must be called each frame to re-draw

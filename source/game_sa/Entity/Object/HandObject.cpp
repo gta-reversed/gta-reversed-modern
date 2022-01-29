@@ -2,10 +2,13 @@
 
 void CHandObject::InjectHooks()
 {
+    RH_ScopedClass(CHandObject);
+    RH_ScopedCategory("Entity/Object");
+
 // VIRTUAL
-    ReversibleHooks::Install("CHandObject", "ProcessControl", 0x59EC40, &CHandObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CHandObject", "PreRender", 0x59ECD0, &CHandObject::PreRender_Reversed);
-    ReversibleHooks::Install("CHandObject", "Render", 0x59EE80, &CHandObject::Render_Reversed);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x59EC40);
+    RH_ScopedInstall(PreRender_Reversed, 0x59ECD0);
+    RH_ScopedInstall(Render_Reversed, 0x59EE80);
 }
 
 CHandObject::CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand) : CObject()

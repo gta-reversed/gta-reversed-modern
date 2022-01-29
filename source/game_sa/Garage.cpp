@@ -4,24 +4,26 @@
 
 void CGarage::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CGarage", "BuildRotatedDoorMatrix", 0x4479F0, &CGarage::BuildRotatedDoorMatrix);
-    // Install("CGarage", "TidyUpGarageClose", 0x449D10, &CGarage::TidyUpGarageClose);
-    // Install("CGarage", "TidyUpGarage", 0x449C50, &CGarage::TidyUpGarage);
-    Install("CGarage", "StoreAndRemoveCarsForThisHideOut", 0x449900, &CGarage::StoreAndRemoveCarsForThisHideOut);
-    Install("CGarage", "EntityHasASphereWayOutsideGarage", 0x449050, &CGarage::EntityHasASphereWayOutsideGarage);
-    // Install("CGarage", "RemoveCarsBlockingDoorNotInside", 0x449690, &CGarage::RemoveCarsBlockingDoorNotInside);
-    // Install("CGarage", "IsEntityTouching3D", 0x448EE0, &CGarage::IsEntityTouching3D);
-    // Install("CGarage", "IsEntityEntirelyOutside", 0x448D30, &CGarage::IsEntityEntirelyOutside);
-    // Install("CGarage", "IsStaticPlayerCarEntirelyInside", 0x44A830, &CGarage::IsStaticPlayerCarEntirelyInside);
-    // Install("CGarage", "IsEntityEntirelyInside3D", 0x448BE0, &CGarage::IsEntityEntirelyInside3D);
-    // Install("CGarage", "IsPointInsideGarage", 0x448740, static_cast<bool(CGarage::*)(CVector)>(&CGarage::IsPointInsideGarage));
-    // Install("CGarage", "PlayerArrestedOrDied", 0x4486C0, &CGarage::PlayerArrestedOrDied);
-    Install("CGarage", "OpenThisGarage", 0x447D50, &CGarage::OpenThisGarage);
-    Install("CGarage", "CloseThisGarage", 0x447D70, &CGarage::CloseThisGarage);
-    // Install("CGarage", "InitDoorsAtStart", 0x447600, &CGarage::InitDoorsAtStart);
-    // Install("CGarage", "IsPointInsideGarage", 0x4487D0, static_cast<bool(CGarage::*)(CVector, float)>(&CGarage::IsPointInsideGarage));
-    // Install("CGarage", "Update", 0x44AA50, &CGarage::Update);
+    RH_ScopedClass(CGarage);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(BuildRotatedDoorMatrix, 0x4479F0);
+    // RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
+    // RH_ScopedInstall(TidyUpGarage, 0x449C50);
+    RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
+    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
+    // RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
+    // RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
+    // RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
+    // RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
+    // RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
+    // RH_ScopedInstall(IsPointInsideGarage, 0x448740);
+    // RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);
+    RH_ScopedInstall(OpenThisGarage, 0x447D50);
+    RH_ScopedInstall(CloseThisGarage, 0x447D70);
+    // RH_ScopedInstall(InitDoorsAtStart, 0x447600);
+    // RH_ScopedInstall(IsPointInsideGarage, 0x4487D0);
+    // RH_ScopedInstall(Update, 0x44AA50);
 }
 
 // 0x4479F0

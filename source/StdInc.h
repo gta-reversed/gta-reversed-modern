@@ -13,6 +13,8 @@
 #include <functional>
 #include <iostream>
 #include <cassert>
+#include <array>
+#include <ranges>
 
 // DirectX
 #include <d3d9.h>
@@ -123,7 +125,6 @@
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\Clouds.h"
 #include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
@@ -287,7 +288,6 @@
 #include "game_sa\TxdDef.h"
 #include "game_sa\GameLogic.h"
 #include "game_sa\Maths.h"
-#include "game_sa\TagManager.h"
 #include "game_sa\Remote.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"

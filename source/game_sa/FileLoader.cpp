@@ -17,56 +17,58 @@ char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
 
 void CFileLoader::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFileLoader", "AddTexDictionaries", 0x5B3910, &CFileLoader::AddTexDictionaries);
-    Install("CFileLoader", "LoadTexDictionary", 0x5B3860, &CFileLoader::LoadTexDictionary);
-    Install("CFileLoader", "LoadAtomicFile_stream", 0x5371F0, static_cast<bool(*)(RwStream*, unsigned)>(&CFileLoader::LoadAtomicFile));
-    Install("CFileLoader", "LoadAtomicFile", 0x5B39D0, static_cast<void(*)(const char*)>(&CFileLoader::LoadAtomicFile));
-    Install("CFileLoader", "LoadAudioZone", 0x5B4D70, &CFileLoader::LoadAudioZone);
-    Install("CFileLoader", "LoadCarGenerator_0", 0x537990, static_cast<void(*)(CFileCarGenerator*, int32)>(&CFileLoader::LoadCarGenerator));
-    Install("CFileLoader", "LoadCarGenerator_1", 0x5B4740, static_cast<void(*)(const char*, int32)>(&CFileLoader::LoadCarGenerator));
-    Install("CFileLoader", "StartLoadClumpFile", 0x5373F0, &CFileLoader::StartLoadClumpFile);
-    Install("CFileLoader", "FinishLoadClumpFile", 0x537450, &CFileLoader::FinishLoadClumpFile);
-    Install("CFileLoader", "LoadClumpFile", 0x5B3A30, static_cast<void (*)(const char*)>(&CFileLoader::LoadClumpFile));
-    Install("CFileLoader", "LoadClumpFile_1", 0x5372D0, static_cast<bool (*)(RwStream*, uint32)>(&CFileLoader::LoadClumpFile));
-    Install("CFileLoader", "LoadClumpObject", 0x5B4040, &CFileLoader::LoadClumpObject);
-    Install("CFileLoader", "LoadCullZone", 0x5B4B40, &CFileLoader::LoadCullZone);
-    Install("CFileLoader", "LoadObject", 0x5B3C60, &CFileLoader::LoadObject);
-    Install("CFileLoader", "LoadObjectInstance_inst", 0x538090, static_cast<CEntity * (*)(CFileObjectInstance*, const char*)>(&CFileLoader::LoadObjectInstance));
-    Install("CFileLoader", "LoadObjectInstance_file", 0x538690, static_cast<CEntity * (*)(const char*)>(&CFileLoader::LoadObjectInstance));
-    Install("CFileLoader", "LoadOcclusionVolume", 0x5B4C80, &CFileLoader::LoadOcclusionVolume);
-    Install("CFileLoader", "LoadPathHeader", 0x5B41C0, &CFileLoader::LoadPathHeader);
-    Install("CFileLoader", "LoadStuntJump", 0x5B45D0, &CFileLoader::LoadStuntJump);
-    Install("CFileLoader", "LoadTXDParent", 0x5B75E0, &CFileLoader::LoadTXDParent);
-    Install("CFileLoader", "LoadTimeCyclesModifier", 0x5B81D0, &CFileLoader::LoadTimeCyclesModifier);
-    Install("CFileLoader", "LoadTimeObject", 0x5B3DE0, &CFileLoader::LoadTimeObject);
-    Install("CFileLoader", "LoadWeaponObject", 0x5B3FB0, &CFileLoader::LoadWeaponObject);
-    Install("CFileLoader", "LoadZone", 0x5B4AB0, &CFileLoader::LoadZone);
-    Install("CFileLoader", "FindRelatedModelInfoCB", 0x5B3930, &CFileLoader::FindRelatedModelInfoCB);
-    Install("CFileLoader", "SetRelatedModelInfoCB", 0x537150, &CFileLoader::SetRelatedModelInfoCB);
+    RH_ScopedClass(CFileLoader);
+    RH_ScopedCategoryGlobal();
 
-    Install("CFileLoader", "LoadCollisionFile_Buffer", 0x538440, static_cast<bool(*)(uint8*, uint32, uint8)>(&CFileLoader::LoadCollisionFile));
-    Install("CFileLoader", "LoadCollisionFile_File", 0x5B4E60, static_cast<void(*)(const char*, uint8)>(&CFileLoader::LoadCollisionFile));
-    Install("CFileLoader", "LoadCollisionFileFirstTime", 0x5B5000, &CFileLoader::LoadCollisionFileFirstTime); 
-    Install("CFileLoader", "LoadCollisionModel", 0x537580, &CFileLoader::LoadCollisionModel);
-    Install("CFileLoader", "LoadCollisionModelVer2", 0x537EE0, &CFileLoader::LoadCollisionModelVer2);
-    Install("CFileLoader", "LoadCollisionModelVer3", 0x537CE0, &CFileLoader::LoadCollisionModelVer3);
-    Install("CFileLoader", "LoadCollisionModelVer4", 0x537AE0, &CFileLoader::LoadCollisionModelVer4);
+    RH_ScopedInstall(AddTexDictionaries, 0x5B3910);
+    RH_ScopedInstall(LoadTexDictionary, 0x5B3860);
+    RH_ScopedOverloadedInstall(LoadAtomicFile, "stream", 0x5371F0, bool(*)(RwStream*, unsigned));
+    RH_ScopedOverloadedInstall(LoadAtomicFile, "", 0x5B39D0, void(*)(const char*));
+    RH_ScopedInstall(LoadAudioZone, 0x5B4D70);
+    RH_ScopedOverloadedInstall(LoadCarGenerator, "0", 0x537990, void(*)(CFileCarGenerator*, int32));
+    RH_ScopedOverloadedInstall(LoadCarGenerator, "1", 0x5B4740, void(*)(const char*, int32));
+    RH_ScopedInstall(StartLoadClumpFile, 0x5373F0);
+    RH_ScopedInstall(FinishLoadClumpFile, 0x537450);
+    RH_ScopedOverloadedInstall(LoadClumpFile, "", 0x5B3A30, void (*)(const char*));
+    RH_ScopedOverloadedInstall(LoadClumpFile, "1", 0x5372D0, bool (*)(RwStream*, uint32));
+    RH_ScopedInstall(LoadClumpObject, 0x5B4040);
+    RH_ScopedInstall(LoadCullZone, 0x5B4B40);
+    RH_ScopedInstall(LoadObject, 0x5B3C60);
+    RH_ScopedOverloadedInstall(LoadObjectInstance, "inst", 0x538090, CEntity * (*)(CFileObjectInstance*, const char*));
+    RH_ScopedOverloadedInstall(LoadObjectInstance, "file", 0x538690, CEntity * (*)(const char*));
+    RH_ScopedInstall(LoadOcclusionVolume, 0x5B4C80);
+    RH_ScopedInstall(LoadPathHeader, 0x5B41C0);
+    RH_ScopedInstall(LoadStuntJump, 0x5B45D0);
+    RH_ScopedInstall(LoadTXDParent, 0x5B75E0);
+    RH_ScopedInstall(LoadTimeCyclesModifier, 0x5B81D0);
+    RH_ScopedInstall(LoadTimeObject, 0x5B3DE0);
+    RH_ScopedInstall(LoadWeaponObject, 0x5B3FB0);
+    RH_ScopedInstall(LoadZone, 0x5B4AB0);
+    RH_ScopedInstall(FindRelatedModelInfoCB, 0x5B3930);
+    RH_ScopedInstall(SetRelatedModelInfoCB, 0x537150);
 
-    Install("CFileLoader", "LoadAnimatedClumpObject", 0x5B40C0, &CFileLoader::LoadAnimatedClumpObject); 
-    Install("CFileLoader", "LoadLine_File", 0x536F80, static_cast<char* (*)(FILESTREAM)>(&CFileLoader::LoadLine));
-    Install("CFileLoader", "LoadLine_Bufer", 0x536FE0, static_cast<char* (*)(char*&, int32&)>(&CFileLoader::LoadLine));
-    Install("CFileLoader", "LoadCarPathNode", 0x5B4380, &CFileLoader::LoadCarPathNode);
-    Install("CFileLoader", "LoadPedPathNode", 0x5B41F0, &CFileLoader::LoadPedPathNode);
-    Install("CFileLoader", "LoadVehicleObject", 0x5B6F30, &CFileLoader::LoadVehicleObject);
-    Install("CFileLoader", "LoadPedObject", 0x5B7420, &CFileLoader::LoadPedObject);
-    Install("CFileLoader", "LoadPickup", 0x5B47B0, &CFileLoader::LoadPickup);
-    Install("CFileLoader", "LoadEntryExit", 0x5B8030, &CFileLoader::LoadEntryExit);
-    Install("CFileLoader", "LoadGarage", 0x5B4530, &CFileLoader::LoadGarage);
-    Install("CFileLoader", "LoadLevel", 0x5B9030, &CFileLoader::LoadLevel);
-    Install("CFileLoader", "LoadScene", 0x5B8700, &CFileLoader::LoadScene);
-    Install("CFileLoader", "LoadObjectTypes", 0x5B8400, &CFileLoader::LoadObjectTypes);
-    // Install("CFileLoader", "LinkLods", 0x5B51E0, &LinkLods);
+    RH_ScopedOverloadedInstall(LoadCollisionFile, "Buffer", 0x538440, bool(*)(uint8*, uint32, uint8));
+    RH_ScopedOverloadedInstall(LoadCollisionFile, "File", 0x5B4E60, void(*)(const char*, uint8));
+    RH_ScopedInstall(LoadCollisionFileFirstTime, 0x5B5000); 
+    RH_ScopedInstall(LoadCollisionModel, 0x537580);
+    RH_ScopedInstall(LoadCollisionModelVer2, 0x537EE0);
+    RH_ScopedInstall(LoadCollisionModelVer3, 0x537CE0);
+    RH_ScopedInstall(LoadCollisionModelVer4, 0x537AE0);
+
+    RH_ScopedInstall(LoadAnimatedClumpObject, 0x5B40C0); 
+    RH_ScopedOverloadedInstall(LoadLine, "File", 0x536F80, char* (*)(FILESTREAM));
+    RH_ScopedOverloadedInstall(LoadLine, "Bufer", 0x536FE0, char* (*)(char*&, int32&));
+    RH_ScopedInstall(LoadCarPathNode, 0x5B4380);
+    RH_ScopedInstall(LoadPedPathNode, 0x5B41F0);
+    RH_ScopedInstall(LoadVehicleObject, 0x5B6F30);
+    RH_ScopedInstall(LoadPedObject, 0x5B7420);
+    RH_ScopedInstall(LoadPickup, 0x5B47B0);
+    RH_ScopedInstall(LoadEntryExit, 0x5B8030);
+    RH_ScopedInstall(LoadGarage, 0x5B4530);
+    RH_ScopedInstall(LoadLevel, 0x5B9030);
+    RH_ScopedInstall(LoadScene, 0x5B8700);
+    RH_ScopedInstall(LoadObjectTypes, 0x5B8400);
+    // RH_ScopedInstall(LinkLods, 0x5B51E0);
 }
 
 // copy textures from dictionary to baseDictionary
@@ -1815,18 +1817,18 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleType = [&] {
         constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
-            { "car",     eVehicleType::VEHICLE_AUTOMOBILE },
-            { "mtruck",  eVehicleType::VEHICLE_MTRUCK     },
-            { "quad",    eVehicleType::VEHICLE_QUAD       },
-            { "heli",    eVehicleType::VEHICLE_HELI       },
-            { "plane",   eVehicleType::VEHICLE_PLANE      },
-            { "boat",    eVehicleType::VEHICLE_BOAT       },
-            { "train",   eVehicleType::VEHICLE_TRAIN      },
-            { "f_heli",  eVehicleType::VEHICLE_FHELI      }, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
-            { "f_plane", eVehicleType::VEHICLE_FPLANE     },
-            { "bike",    eVehicleType::VEHICLE_BIKE       },
-            { "bmx",     eVehicleType::VEHICLE_BMX        },
-            { "trailer", eVehicleType::VEHICLE_TRAILER    },
+            { "car",     VEHICLE_TYPE_AUTOMOBILE },
+            { "mtruck",  VEHICLE_TYPE_MTRUCK     },
+            { "quad",    VEHICLE_TYPE_QUAD       },
+            { "heli",    VEHICLE_TYPE_HELI       },
+            { "plane",   VEHICLE_TYPE_PLANE      },
+            { "boat",    VEHICLE_TYPE_BOAT       },
+            { "train",   VEHICLE_TYPE_TRAIN      },
+            { "f_heli",  VEHICLE_TYPE_FHELI      }, // NOTE: Originally this mapped to HELI, but since f_heli isn't used anywhere in the data files we've corrected the typo.
+            { "f_plane", VEHICLE_TYPE_FPLANE     },
+            { "bike",    VEHICLE_TYPE_BIKE       },
+            { "bmx",     VEHICLE_TYPE_BMX        },
+            { "trailer", VEHICLE_TYPE_TRAILER    },
         };
 
         for (const auto& pair : mapping) {
@@ -1836,28 +1838,28 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
         }
 
         assert(0);             // NOTSA - Something went really wrong
-        return VEHICLE_IGNORE; // fix warning
+        return VEHICLE_TYPE_IGNORE; // fix warning
     };
 
     mi->m_nVehicleType = GetVehicleType();
     switch (mi->m_nVehicleType) {
-    case eVehicleType::VEHICLE_AUTOMOBILE:
-    case eVehicleType::VEHICLE_MTRUCK:
-    case eVehicleType::VEHICLE_QUAD:
-    case eVehicleType::VEHICLE_HELI:
-    case eVehicleType::VEHICLE_PLANE:
-    case eVehicleType::VEHICLE_TRAILER: {
+    case VEHICLE_TYPE_AUTOMOBILE:
+    case VEHICLE_TYPE_MTRUCK:
+    case VEHICLE_TYPE_QUAD:
+    case VEHICLE_TYPE_HELI:
+    case VEHICLE_TYPE_PLANE:
+    case VEHICLE_TYPE_TRAILER: {
         mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
         mi->m_nWheelModelIndex = misc;
         break;
     }
-    case eVehicleType::VEHICLE_FPLANE: {
+    case VEHICLE_TYPE_FPLANE: {
         mi->SetWheelSizes(1.0f, 1.0f);
         mi->m_nWheelModelIndex = misc;
         break;
     }
-    case eVehicleType::VEHICLE_BIKE:
-    case eVehicleType::VEHICLE_BMX: {
+    case VEHICLE_TYPE_BIKE:
+    case VEHICLE_TYPE_BMX: {
         mi->SetWheelSizes(wheelSizeFront, wheelSizeRear);
         mi->m_fBikeSteerAngle = (float)misc;
         break;
@@ -1869,19 +1871,19 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
     const auto GetVehicleClass = [&]{
         constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
-            { "normal",      eVehicleClass::VEHICLE_CLASS_NORMAL      },
-            { "poorfamily",  eVehicleClass::VEHICLE_CLASS_POORFAMILY  },
-            { "richfamily",  eVehicleClass::VEHICLE_CLASS_RICHFAMILY  },
-            { "executive",   eVehicleClass::VEHICLE_CLASS_EXECUTIVE   },
-            { "worker",      eVehicleClass::VEHICLE_CLASS_WORKER      },
-            { "big",         eVehicleClass::VEHICLE_CLASS_BIG         },
-            { "taxi",        eVehicleClass::VEHICLE_CLASS_TAXI        },
-            { "moped",       eVehicleClass::VEHICLE_CLASS_MOPED       },
-            { "motorbike",   eVehicleClass::VEHICLE_CLASS_MOTORBIKE   },
-            { "leisureboat", eVehicleClass::VEHICLE_CLASS_LEISUREBOAT },
-            { "workerboat",  eVehicleClass::VEHICLE_CLASS_WORKERBOAT  },
-            { "bicycle",     eVehicleClass::VEHICLE_CLASS_BICYCLE     },
-            { "ignore",      eVehicleClass::VEHICLE_CLASS_IGNORE      },
+            { "normal",      VEHICLE_CLASS_NORMAL      },
+            { "poorfamily",  VEHICLE_CLASS_POORFAMILY  },
+            { "richfamily",  VEHICLE_CLASS_RICHFAMILY  },
+            { "executive",   VEHICLE_CLASS_EXECUTIVE   },
+            { "worker",      VEHICLE_CLASS_WORKER      },
+            { "big",         VEHICLE_CLASS_BIG         },
+            { "taxi",        VEHICLE_CLASS_TAXI        },
+            { "moped",       VEHICLE_CLASS_MOPED       },
+            { "motorbike",   VEHICLE_CLASS_MOTORBIKE   },
+            { "leisureboat", VEHICLE_CLASS_LEISUREBOAT },
+            { "workerboat",  VEHICLE_CLASS_WORKERBOAT  },
+            { "bicycle",     VEHICLE_CLASS_BICYCLE     },
+            { "ignore",      VEHICLE_CLASS_IGNORE      },
         };
 
         for (const auto& pair : mapping) {

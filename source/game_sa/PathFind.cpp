@@ -13,6 +13,9 @@ CPathFind &ThePaths = *(CPathFind *)(0x96F050);
 
 void CPathFind::InjectHooks()
 {
+    RH_ScopedClass(CPathFind);
+    RH_ScopedCategoryGlobal();
+
 
 }
 

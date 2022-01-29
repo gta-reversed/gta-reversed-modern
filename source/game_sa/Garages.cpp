@@ -5,31 +5,33 @@
 static uint32& LastUpdatedGarageId = *(uint32*)0x96EA78;
 
 void CGarages::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CGarages", "Init", 0x447120, &CGarages::Init);
-    Install("CGarages", "Init_AfterRestart", 0x448B60, &CGarages::Init_AfterRestart);
-    Install("CGarages", "Shutdown", 0x4471B0, &CGarages::Shutdown);
-    // Install("CGarages", "AddOne", 0x4471E0, &CGarages::AddOne);
-    Install("CGarages", "CloseHideOutGaragesBeforeSave", 0x44A170, &CGarages::CloseHideOutGaragesBeforeSave);
-    Install("CGarages", "PlayerArrestedOrDied", 0x449E60, &CGarages::PlayerArrestedOrDied);
-    Install("CGarages", "AllRespraysCloseOrOpen", 0x448B30, &CGarages::AllRespraysCloseOrOpen);
-    Install("CGarages", "IsModelIndexADoor", 0x448AF0, &CGarages::IsModelIndexADoor);
-    Install("CGarages", "FindSafeHouseIndexForGarageType", 0x4489F0, &CGarages::FindSafeHouseIndexForGarageType);
-    Install("CGarages", "FindGarageForObject", 0x4489F0, &CGarages::FindGarageForObject);
-    Install("CGarages", "IsPointWithinHideOutGarage", 0x448900, &CGarages::IsPointWithinHideOutGarage);
-    Install("CGarages", "IsGarageOpen", 0x447D00, &CGarages::IsGarageOpen);
-    Install("CGarages", "IsGarageClosed", 0x447D30, &CGarages::IsGarageClosed);
-    Install("CGarages", "IsCarSprayable", 0x4479A0, &CGarages::IsCarSprayable);
-    Install("CGarages", "Update", 0x44C8C0, &CGarages::Update);
-    Install("CGarages", "ActivateGarage", 0x447CD0, &CGarages::ActivateGarage);
-    Install("CGarages", "DeactivateGarage", 0x447CB0, &CGarages::DeactivateGarage);
-    Install("CGarages", "SetTargetCar", 0x447C40, &CGarages::SetTargetCar);
-    Install("CGarages", "TriggerMessage", 0x447B80, &CGarages::TriggerMessage);
-    Install("CGarages", "PrintMessages", 0x447790, &CGarages::PrintMessages);
-    Install("CGarages", "SetGarageType", 0x4476D0, &CGarages::SetGarageType);
-    Install("CGarages", "GetGarageNumberByName", 0x447680, &CGarages::GetGarageNumberByName);
-    Install("CGarages", "Load", 0x5D3270, &CGarages::Load);
-    Install("CGarages", "Save", 0x5D3160, &CGarages::Save);
+    RH_ScopedClass(CGarages);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x447120);
+    RH_ScopedInstall(Init_AfterRestart, 0x448B60);
+    RH_ScopedInstall(Shutdown, 0x4471B0);
+    // RH_ScopedInstall(AddOne, 0x4471E0);
+    RH_ScopedInstall(CloseHideOutGaragesBeforeSave, 0x44A170);
+    RH_ScopedInstall(PlayerArrestedOrDied, 0x449E60);
+    RH_ScopedInstall(AllRespraysCloseOrOpen, 0x448B30);
+    RH_ScopedInstall(IsModelIndexADoor, 0x448AF0);
+    RH_ScopedInstall(FindSafeHouseIndexForGarageType, 0x4489F0);
+    RH_ScopedInstall(FindGarageForObject, 0x4489F0);
+    RH_ScopedInstall(IsPointWithinHideOutGarage, 0x448900);
+    RH_ScopedInstall(IsGarageOpen, 0x447D00);
+    RH_ScopedInstall(IsGarageClosed, 0x447D30);
+    RH_ScopedInstall(IsCarSprayable, 0x4479A0);
+    RH_ScopedInstall(Update, 0x44C8C0);
+    RH_ScopedInstall(ActivateGarage, 0x447CD0);
+    RH_ScopedInstall(DeactivateGarage, 0x447CB0);
+    RH_ScopedInstall(SetTargetCar, 0x447C40);
+    RH_ScopedInstall(TriggerMessage, 0x447B80);
+    RH_ScopedInstall(PrintMessages, 0x447790);
+    RH_ScopedInstall(SetGarageType, 0x4476D0);
+    RH_ScopedInstall(GetGarageNumberByName, 0x447680);
+    RH_ScopedInstall(Load, 0x5D3270);
+    RH_ScopedInstall(Save, 0x5D3160);
 }
 
 // 0x447120
@@ -263,7 +265,7 @@ bool CGarages::IsGarageClosed(int16 garageId) {
 
 // 0x4479A0
 bool CGarages::IsCarSprayable(CVehicle* vehicle) {
-    if (vehicle->IsLawEnforcementVehicle() || vehicle->IsSubclassBMX())
+    if (vehicle->IsLawEnforcementVehicle() || vehicle->IsSubBMX())
         return false;
 
     switch (vehicle->m_nModelIndex) {

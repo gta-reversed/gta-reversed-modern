@@ -134,15 +134,18 @@ void CAEWaveDecoder::Destructor() {
 }
 
 void CAEWaveDecoder::InjectHooks() {
+    RH_ScopedClass(CAEWaveDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
 #ifndef USE_DEFAULT_FUNCTIONS
-    ReversibleHooks::Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
-    ReversibleHooks::Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamPlayTimeMs", 0x503360, &CAEWaveDecoder::GetStreamPlayTimeMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "SetCursor", 0x5033c0, &CAEWaveDecoder::SetCursor);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetSampleRate", 0x503300, &CAEWaveDecoder::GetSampleRate);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamID", 0x503280, &CAEWaveDecoder::GetStreamID);
+    RH_ScopedInstall(Constructor, 0x503250);
+    RH_ScopedInstall(Destructor, 0x503290);
+    RH_ScopedInstall(Initialise, 0x5032b0);
+    RH_ScopedInstall(FillBuffer, 0x502470);
+    RH_ScopedInstall(GetStreamLengthMs, 0x503310);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x503360);
+    RH_ScopedInstall(SetCursor, 0x5033c0);
+    RH_ScopedInstall(GetSampleRate, 0x503300);
+    RH_ScopedInstall(GetStreamID, 0x503280);
 #endif
 }

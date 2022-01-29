@@ -5,9 +5,13 @@
 #include <rpworld.h>
 
 void PipelinePlugin::InjectHooks() {
-    ReversibleHooks::Install("PipelinePlugin", "PipelinePluginAttach", 0x72FBD0, &PipelinePluginAttach);
-    ReversibleHooks::Install("PipelinePlugin", "GetPipelineID", 0x72FC40, &GetPipelineID);
-    ReversibleHooks::Install("PipelinePlugin", "SetPipelineID", 0x72FC50, &SetPipelineID);
+    RH_ScopedNamespace(PipelinePlugin);
+    RH_ScopedCategory("Plugins");
+
+    // TODO: Move this into the namespace PipelinePlugin
+    RH_ScopedGlobalInstall(PipelinePluginAttach, 0x72FBD0);
+    RH_ScopedGlobalInstall(GetPipelineID, 0x72FC40);
+    RH_ScopedGlobalInstall(SetPipelineID, 0x72FC50);
 }
 
 // internal

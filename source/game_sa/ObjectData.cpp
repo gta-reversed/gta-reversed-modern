@@ -4,8 +4,11 @@ CObjectData(&CObjectData::ms_aObjectInfo)[NUM_OBJECT_INFOS] = *(CObjectData(*)[N
 
 void CObjectData::InjectHooks()
 {
-    ReversibleHooks::Install("CObjectData", "Initialise", 0x5B5360, &CObjectData::Initialise);
-    ReversibleHooks::Install("CObjectData", "SetObjectData", 0x5A2D00, &CObjectData::SetObjectData);
+    RH_ScopedClass(CObjectData);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x5B5360);
+    RH_ScopedInstall(SetObjectData, 0x5A2D00);
 }
 
 // 0x5B5360

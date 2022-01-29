@@ -3,7 +3,9 @@
 #include "TaskSimpleJetPack.h"
 
 void CTaskSimpleJetPack::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimpleJetPack", "CTaskSimpleJetPack", 0x67B4E0, &CTaskSimpleJetPack::Constructor);
+    RH_ScopedClass(CTaskSimpleJetPack);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x67B4E0);
 }
 
 // 0x67B4E0

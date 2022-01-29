@@ -3,7 +3,10 @@
 #include "ColLine.h"
 
 void CColLine::InjectHooks() {
-    ReversibleHooks::Install("CColLine", "Set", 0x40EF10, &CColLine::Set);
+    RH_ScopedClass(CColLine);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(Set, 0x40EF10);
 }
 
 // 0x40EF50

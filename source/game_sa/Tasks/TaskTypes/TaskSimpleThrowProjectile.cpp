@@ -54,6 +54,8 @@ bool CTaskSimpleThrowProjectile::ProcessPed(CPed* ped) {
 }
 
 void CTaskSimpleThrowProjectile::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleThrowProjectile);
+    RH_ScopedCategory("Tasks/TaskTypes");
     using namespace ReversibleHooks;
 }
 
