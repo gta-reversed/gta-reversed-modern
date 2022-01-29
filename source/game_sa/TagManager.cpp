@@ -19,13 +19,13 @@ void CTagManager::InjectHooks()
     RH_ScopedInstall(FindTagDesc, 0x49CCB0);
     RH_ScopedInstall(IsTag, 0x49CCE0);
     RH_ScopedOverloadedInstall(SetAlpha, "RpAtomic", 0x49CD30, void(*)(RpAtomic*, uint8));
+    RH_ScopedOverloadedInstall(SetAlpha, "Entity", 0x49CEC0, void (*)(CEntity*, uint8));
     RH_ScopedOverloadedInstall(GetAlpha, "RpAtomic", 0x49CD40, uint8(*)(RpAtomic*));
     RH_ScopedOverloadedInstall(GetAlpha, "Entity", 0x49CF90, uint8(*)(CEntity*));
     RH_ScopedInstall(GetPercentageTagged, 0x49CDA0);
     RH_ScopedInstall(GetPercentageTaggedInArea, 0x49D0B0);
     RH_ScopedInstall(UpdateNumTagged, 0x49CDE0);
     RH_ScopedInstall(SetAlphaInArea, 0x49CFE0);
-    RH_ScopedOverloadedInstall(SetAlpha, "Entity", 0x49CEC0, void(*)(CEntity*, uint8));
     RH_ScopedInstall(GetNearestTag, 0x49D160);
     RH_ScopedInstall(SetupAtomic, 0x49CE10);
     RH_ScopedInstall(RenderTagForPC, 0x49CE40);
@@ -33,12 +33,14 @@ void CTagManager::InjectHooks()
     RH_ScopedInstall(Load, 0x5D3DA0);
 }
 
+// 0x49CC50
 void CTagManager::Init()
 {
     ms_numTags = 0;
     ms_numTagged = 0;
 }
 
+// 0x49CC60
 void CTagManager::ShutdownForRestart()
 {
     for (int32 i = ms_numTags; i > 0; --i)
@@ -47,11 +49,13 @@ void CTagManager::ShutdownForRestart()
     ms_numTagged = 0;
 }
 
+// 0x49CEA0
 CVector& CTagManager::GetTagPos(int32 iTag)
 {
     return ms_tagDesc[iTag].m_pEntity->GetPosition();
 }
 
+// 0x49CC90
 void CTagManager::AddTag(CEntity* entity)
 {
     auto& tag = ms_tagDesc[ms_numTags];
@@ -61,6 +65,7 @@ void CTagManager::AddTag(CEntity* entity)
     ms_numTags++;
 }
 
+// 0x49CCB0
 tTagDesc* CTagManager::FindTagDesc(CEntity* entity)
 {
     if (!ms_numTags)
@@ -75,6 +80,7 @@ tTagDesc* CTagManager::FindTagDesc(CEntity* entity)
     return nullptr;
 }
 
+// 0x49CCE0
 bool CTagManager::IsTag(const CEntity* entity)
 {
     auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
@@ -84,42 +90,14 @@ bool CTagManager::IsTag(const CEntity* entity)
     return mi->IsTagModel() && !mi->AsAtomicModelInfoPtr()->bTagDisabled;
 }
 
-void CTagManager::SetAlpha(RpAtomic* atomic, uint8 ucAlpha)
+// 0x49CDA0
+int32 CTagManager::GetPercentageTagged()
 {
-    CVisibilityPlugins::SetUserValue(atomic, ucAlpha);
+    return static_cast<int32>(static_cast<float>(ms_numTagged) / static_cast<float>(ms_numTags) * 100.0F);
 }
 
-uint8 CTagManager::GetAlpha(RpAtomic* atomic)
-{
-    return CVisibilityPlugins::GetUserValue(atomic);
-}
-
-uint8 CTagManager::GetAlpha(CEntity* entity)
-{
-    if (entity->m_pRwAtomic)
-        return CVisibilityPlugins::GetUserValue(entity->m_pRwAtomic);
-
-    auto tag = FindTagDesc(entity);
-    assert(tag); // Originally the function would access unitialized memory, by clearing EAX and dereferencing pointer to [EAX + 0x4] right after that
-
-    return tag->m_nAlpha;
-}
-
-void CTagManager::ResetAlpha(CEntity* entity)
-{
-    if (!entity->m_pRwAtomic)
-        return;
-
-    auto tagDesc = FindTagDesc(entity);
-    SetAlpha(entity->m_pRwAtomic, tagDesc->m_nAlpha);
-}
-
-int64 CTagManager::GetPercentageTagged()
-{
-    return static_cast<int64>(static_cast<float>(ms_numTagged) / static_cast<float>(ms_numTags) * 100.0F);
-}
-
-int64_t CTagManager::GetPercentageTaggedInArea(CRect* area)
+// 0x49D0B0
+int32 CTagManager::GetPercentageTaggedInArea(CRect* area)
 {
     int32 iTotalTags = 0;
     int32 iTagged = 0;
@@ -133,9 +111,10 @@ int64_t CTagManager::GetPercentageTaggedInArea(CRect* area)
         }
     }
 
-    return static_cast<int64>(static_cast<double>(iTagged) / static_cast<double>(iTotalTags) * 100.0F);
+    return static_cast<int32>(static_cast<float>(iTagged) / static_cast<float>(iTotalTags) * 100.0F);
 }
 
+// 0x49CDE0
 void CTagManager::UpdateNumTagged()
 {
     ms_numTagged = 0;
@@ -149,6 +128,60 @@ void CTagManager::UpdateNumTagged()
     }
 }
 
+uint8 CTagManager::GetAlpha(RpAtomic* atomic)
+{
+    return CVisibilityPlugins::GetUserValue(atomic);
+}
+
+uint8 CTagManager::GetAlpha(CEntity* entity)
+{
+    if (entity->m_pRwAtomic)
+        return CVisibilityPlugins::GetUserValue(entity->m_pRwAtomic);
+
+    auto tag = FindTagDesc(entity);
+    assert(tag); // Originally the function would access uninitialized memory, by clearing EAX and dereferencing pointer to [EAX + 0x4] right after that
+
+    return tag->m_nAlpha;
+}
+
+// 0x49CD30
+void CTagManager::SetAlpha(RpAtomic* atomic, uint8 ucAlpha)
+{
+    CVisibilityPlugins::SetUserValue(atomic, ucAlpha);
+}
+
+// 0x49CEC0
+void CTagManager::SetAlpha(CEntity* entity, uint8 ucAlpha)
+{
+    if (entity->m_pRwAtomic)
+        SetAlpha(entity->m_pRwAtomic, ucAlpha);
+
+    auto tagDesc = FindTagDesc(entity);
+    auto bChangedState = false;
+    if (ucAlpha > ALPHA_TAGGED && tagDesc->m_nAlpha <= ALPHA_TAGGED)
+        bChangedState = true;
+
+    tagDesc->m_nAlpha = ucAlpha;
+    UpdateNumTagged();
+
+    if (bChangedState && !TheCamera.m_bWideScreenOn) {
+        if (ms_numTagged == ms_numTags)
+            CGarages::TriggerMessage("TAG_ALL", -1, 5000u, -1);
+        else
+            CGarages::TriggerMessage("TAG_ONE", ms_numTagged, 5000u, ms_numTags);
+    }
+}
+
+void CTagManager::ResetAlpha(CEntity* entity)
+{
+    if (!entity->m_pRwAtomic)
+        return;
+
+    auto tagDesc = FindTagDesc(entity);
+    SetAlpha(entity->m_pRwAtomic, tagDesc->m_nAlpha);
+}
+
+// 0x49CFE0
 void CTagManager::SetAlphaInArea(CRect* area, uint8 ucAlpha)
 {
     for (int32 i = ms_numTags - 1; i >= 0; --i) {
@@ -163,28 +196,8 @@ void CTagManager::SetAlphaInArea(CRect* area, uint8 ucAlpha)
     UpdateNumTagged();
 }
 
-void CTagManager::SetAlpha(CEntity* entity, uint8 ucAlpha)
-{
-    if (entity->m_pRwAtomic)
-        CVisibilityPlugins::SetUserValue(entity->m_pRwAtomic, ucAlpha);
-
-    auto tagDesc = FindTagDesc(entity);
-    auto bChangedState = false;
-    if (ucAlpha > ALPHA_TAGGED && tagDesc->m_nAlpha <= ALPHA_TAGGED)
-        bChangedState = true;
-
-    tagDesc->m_nAlpha = ucAlpha;
-    UpdateNumTagged();
-
-    if (bChangedState && !TheCamera.m_bWideScreenOn) {
-        if (ms_numTagged == ms_numTags)
-            CGarages::TriggerMessage("TAG_ALL", -1, 5000, -1);
-        else
-            CGarages::TriggerMessage("TAG_ONE", ms_numTagged, 5000, ms_numTags);
-    }
-}
-
-CEntity* CTagManager::GetNearestTag(const CVector & vecPos)
+// 0x49D160
+CEntity* CTagManager::GetNearestTag(const CVector& vecPos)
 {
     auto vecPosUsed = CVector2D(vecPos.x, vecPos.y);
     int32 iClosestInd = -1;
@@ -203,6 +216,7 @@ CEntity* CTagManager::GetNearestTag(const CVector & vecPos)
     return ms_tagDesc[iClosestInd].m_pEntity;
 }
 
+// 0x49CE10
 void CTagManager::SetupAtomic(RpAtomic* atomic)
 {
     auto geometry = RpAtomicGetGeometry(atomic);
@@ -212,14 +226,16 @@ void CTagManager::SetupAtomic(RpAtomic* atomic)
     SetAlpha(atomic, 0);
 }
 
-void CTagManager::RenderTagForPC(RpAtomic* pAtomic)
+// 0x49CE40
+void CTagManager::RenderTagForPC(RpAtomic* atomic)
 {
-    auto geometry = RpAtomicGetGeometry(pAtomic);
+    auto geometry = RpAtomicGetGeometry(atomic);
     auto material = RpGeometryGetMaterial(geometry, 1);
-    material->color.alpha = GetAlpha(pAtomic);
-    RpAtomicRender(pAtomic);
+    material->color.alpha = GetAlpha(atomic);
+    RpAtomicRender(atomic);
 }
 
+// 0x5D3D60
 void CTagManager::Save()
 {
     CGenericGameStorage::SaveDataToWorkBuffer(&ms_numTags, 4);
@@ -231,6 +247,7 @@ void CTagManager::Save()
     }
 }
 
+// 0x5D3DA0
 void CTagManager::Load()
 {
     CGenericGameStorage::SaveDataToWorkBuffer(&ms_numTags, 4); // Yeah, original also saves into buffer instead of loading

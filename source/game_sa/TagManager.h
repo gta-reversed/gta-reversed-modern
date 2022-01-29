@@ -3,7 +3,6 @@
 struct tTagDesc {
     CEntity* m_pEntity;
     uint8    m_nAlpha;
-    uint8    _pad[3];
 };
 
 class CTagManager {
@@ -25,13 +24,13 @@ public:
     static CVector& GetTagPos(int32 iTag);
     static void     AddTag(CEntity* entity);
     static bool     IsTag(const CEntity* entity);
-    static uint8    GetAlpha(CEntity* entity);
-    static void     ResetAlpha(CEntity* entity);
-    static int64_t  GetPercentageTaggedInArea(CRect* area);
-    static int64_t  GetPercentageTagged();
+    static int32    GetPercentageTaggedInArea(CRect* area);
+    static int32    GetPercentageTagged();
     static void     UpdateNumTagged();
-    static void     SetAlphaInArea(CRect* area, uint8 ucAlpha);
+    static uint8    GetAlpha(CEntity* entity);
     static void     SetAlpha(CEntity* entity, uint8 ucAlpha);
+    static void     SetAlphaInArea(CRect* area, uint8 ucAlpha);
+    static void     ResetAlpha(CEntity* entity);
     static CEntity* GetNearestTag(const CVector& vecPos);
     static void     SetupAtomic(RpAtomic* atomic);
     static void     RenderTagForPC(RpAtomic* atomic);

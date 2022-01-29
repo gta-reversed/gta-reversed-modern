@@ -1140,9 +1140,10 @@ int32 CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool
 
         // Note: Original code has U.B. if `processTagAlphaState` is false, because `newAlpha` isn't assigned a meaningful value
         // But the only place this function is called has set `processTagAlphaState` to true, so..
-        uint8 currAlpha = CTagManager::GetAlpha(entity), newAlpha{};
+        uint8 newAlpha{0};
+        uint8 currAlpha = CTagManager::GetAlpha(entity);
         if (processTagAlphaState) {
-            newAlpha = std::min<uint8>(255u, currAlpha + (uint8)TAG_SPRAYING_INCREMENT_VAL);
+            newAlpha = (uint8)std::min((size_t)(currAlpha + TAG_SPRAYING_INCREMENT_VAL), 255u) ;
         }
 
         if (currAlpha != 255 && newAlpha == 255)
@@ -1151,8 +1152,10 @@ int32 CWorld::SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool
         CTagManager::SetAlpha(entity, newAlpha);
     }
 
-    return hasChangedAlphaTo255 ? 2 :
-           hasFoundTag ? 1 : 0;
+    if (hasChangedAlphaTo255)
+        return 2;
+
+    return hasFoundTag ? 1 : 0;
 }
 
 // 0x565CB0
