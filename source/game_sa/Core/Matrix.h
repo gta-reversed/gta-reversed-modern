@@ -37,7 +37,21 @@ public:
     }
 
 private:
-    // RwV3d-like:
+#ifdef FIX_BUGS
+    // There's a bug in `PositionAttachedEntity`: `attachedEntityRotationMatrix`s position isn't set to 0
+    // which causes a crash in ProcessCollision (as the position is way outside the world)
+    // We'd like to avoid having to track down bugs like that so here we initialize all vectors to 0.
+
+    // RWMatrix-like:
+    CVector m_right{};
+    uint32  flags{};
+    CVector m_forward{};
+    uint32  pad1;
+    CVector m_up{};
+    uint32  pad2;
+    CVector m_pos{};
+    uint32  pad3;
+#else
     CVector m_right;
     uint32  flags;
     CVector m_forward;
@@ -46,7 +60,7 @@ private:
     uint32  pad2;
     CVector m_pos;
     uint32  pad3;
-
+#endif
 public:
     RwMatrix* m_pAttachMatrix;
     bool      m_bOwnsAttachedMatrix; // do we need to delete attaching matrix at detaching
