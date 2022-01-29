@@ -174,6 +174,8 @@
 
 
 void InjectHooksMain() {
+    ReversibleHooks::OnInjectionBegin();
+
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
@@ -626,4 +628,6 @@ void InjectHooksMain() {
     Tasks();
     Events();
     Fx();
+
+    ReversibleHooks::OnInjectionEnd();
 }
