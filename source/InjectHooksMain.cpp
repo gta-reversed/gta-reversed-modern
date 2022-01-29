@@ -349,6 +349,7 @@ void InjectHooksMain() {
     CCustomCarPlateMgr::InjectHooks();
     CDraw::InjectHooks();
     CEntryExitManager::InjectHooks();
+    CEntryExit::InjectHooks();
     CInformGroupEventQueue::InjectHooks();
     CGangs::InjectHooks();
     CPlayerInfo::InjectHooks();
