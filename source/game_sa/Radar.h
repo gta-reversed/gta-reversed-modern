@@ -246,7 +246,7 @@ public:
     static void ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, eRadarTraceHeight height);
     static void ShowRadarMarker(CVector posn, uint32 color, float radius);
     static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
-    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, const CRGBA& color);
+    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color);
     static void DrawYouAreHereSprite(float x, float y);
     static void SetupRadarRect(int32 x, int32 y);
     static void RequestMapSection(int32 x, int32 y);

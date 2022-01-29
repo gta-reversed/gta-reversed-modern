@@ -93,4 +93,9 @@ namespace ReversibleHooks {
     }*/
 
     void CheckAll();
+
+    // Stuff called from InjectHooksMain()
+
+    void OnInjectionBegin();
+    void OnInjectionEnd();
 };
