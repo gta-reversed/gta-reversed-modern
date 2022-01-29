@@ -691,29 +691,28 @@ void CObject::ProcessGarageDoorBehaviour() {
         return;
 
     auto& vecDummyPos = m_pDummyObject->GetPosition();
-    auto* pModelInfo = CModelInfo::GetModelInfo(m_nModelIndex);
-    const auto fHeight = pModelInfo->GetColModel()->GetBoundingBox().GetHeight();
-    auto& pGarage = CGarages::GetGarage(m_nGarageDoorGarageIndex);
-    if (pGarage.m_bDoorOpensUp)
+    auto fHeight = CGarages::FindDoorHeightForMI(m_nModelIndex);
+    auto& garage = CGarages::GetGarage(m_nGarageDoorGarageIndex);
+    if (garage.m_bDoorOpensUp)
     {
-        m_matrix->GetPosition().z = vecDummyPos.z + fHeight * pGarage.m_fDoorPosition * 0.48F;
-        float fDoorPos = pGarage.m_fDoorPosition;
-        if (pGarage.m_bDoorGoesIn)
+        m_matrix->GetPosition().z = vecDummyPos.z + fHeight * garage.m_fDoorPosition * 0.48F;
+        float fDoorPos = garage.m_fDoorPosition;
+        if (garage.m_bDoorGoesIn)
             fDoorPos = -fDoorPos;
 
         CGarage::BuildRotatedDoorMatrix(this, fDoorPos);
     }
     else
     {
-        if (pGarage.m_nType == eGarageType::HANGAR_AT400)
-            m_matrix->GetPosition().z = vecDummyPos.z - fHeight * pGarage.m_fDoorPosition;
-        else if (pGarage.m_nType == eGarageType::HANGAR_ABANDONED_AIRPORT)
-            m_matrix->GetPosition().x = vecDummyPos.x - pGarage.m_fDoorPosition * m_matrix->GetRight().x * 14.0F;
+        if (garage.m_nType == eGarageType::HANGAR_AT400)
+            m_matrix->GetPosition().z = vecDummyPos.z - fHeight * garage.m_fDoorPosition;
+        else if (garage.m_nType == eGarageType::HANGAR_ABANDONED_AIRPORT)
+            m_matrix->GetPosition().x = vecDummyPos.x - garage.m_fDoorPosition * m_matrix->GetRight().x * 14.0F;
         else
-            m_matrix->GetPosition().z = vecDummyPos.z + fHeight * pGarage.m_fDoorPosition / 1.1F;
+            m_matrix->GetPosition().z = vecDummyPos.z + fHeight * garage.m_fDoorPosition / 1.1F;
     }
 
-    m_bUsesCollision = pGarage.m_bDoorClosed;
+    m_bUsesCollision = garage.m_bDoorClosed;
     CEntity::UpdateRW();
     CEntity::UpdateRwFrame();
 }

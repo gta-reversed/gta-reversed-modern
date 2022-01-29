@@ -63,7 +63,7 @@ enum eGarageDoorState : uint8 {
 
 struct CStoredCar {
     CVector m_vPosn;
-    uint32  m_dwHandlingFlags;
+    uint32  m_nHandlingFlags;
     uint8   m_nStoredCarFlags;
     uint8   _pad0;
     uint16  m_wModelIndex;
@@ -72,10 +72,10 @@ struct CStoredCar {
     uint8   m_nSecondaryColor;
     uint8   m_nTertiaryColor;
     uint8   m_nQuaternaryColor;
-    uint8   m_nRadiostation;
+    uint8   m_nRadioStation;
     uint8   m_anCompsToUse[2];
     uint8   m_nBombType;
-    uint8   m_nPaintjob;
+    uint8   m_nPaintJob;
     uint8   m_nNitroBoosts;
     uint8   m_nPackedForwardX;
     uint8   m_nPackedForwardY;
@@ -83,35 +83,33 @@ struct CStoredCar {
     uint8   _pad1;
 
 public:
-    static void InjectHooks();
-
     void      StoreCar(CVehicle* vehicle); // 0x449760
     CVehicle* RestoreCar();                // 0x447E40
 
-    // NOTSA
+    // NOTSA/Inlined
     void Init() { m_wModelIndex = 0; }
     void Clear() { m_wModelIndex = 0; }
-    bool HasCar() { return m_wModelIndex != 0; }
+    bool HasCar() const { return m_wModelIndex != 0; }
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
 class CGarage {
 public:
-    CVector     m_vPosn;
-    CVector2D   m_vDirectionA;
-    CVector2D   m_vDirectionB;
-    float       m_fTopZ;
-    float       m_fWidth;
-    float       m_fHeight;
-    float       m_fLeftCoord;
-    float       m_fRightCoord;
-    float       m_fFrontCoord;
-    float       m_fBackCoord;
-    float       m_fDoorPosition;
-    uint32      m_nTimeToOpen;
-    CVehicle*   m_pTargetCar;
-    char        m_anName[8];
-    eGarageType m_nType;
+    CVector          m_vPosn;
+    CVector2D        m_vDirectionA;
+    CVector2D        m_vDirectionB;
+    float            m_fTopZ;
+    float            m_fWidth;
+    float            m_fHeight;
+    float            m_fLeftCoord;
+    float            m_fRightCoord;
+    float            m_fFrontCoord;
+    float            m_fBackCoord;
+    float            m_fDoorPosition;
+    uint32           m_nTimeToOpen;
+    CVehicle*        m_pTargetCar;
+    char             m_anName[8];
+    eGarageType      m_nType;
     eGarageDoorState m_nDoorState;
     union {
         uint8 m_nFlags;
@@ -174,30 +172,36 @@ public:
     bool SlideDoorClosed();
     bool IsGarageEmpty();
 
-public:
     static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
+
+    [[nodiscard]] bool IsHideOut() const; // NOTSA
+    [[nodiscard]] bool IsOpen()   const { return m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
+    [[nodiscard]] bool IsClosed() const { return m_nDoorState == GARAGE_DOOR_CLOSED; }
+    void SetOpened() { m_nDoorState = GARAGE_DOOR_OPEN; }
+    void SetClosed() { m_nDoorState = GARAGE_DOOR_CLOSED; }
+    void ResetDoorPosition() { m_fDoorPosition = 0.0f; } // todo: not good name
 };
 
 VALIDATE_SIZE(CGarage, 0xD8);
 
 struct CSaveGarage {
-    eGarageType      type{};
-    eGarageDoorState doorState{};
-    uint16           flags{};
-    CVector          pos{};
-    CVector2D        dirA, dirB{};
-    float            topZ{};
-    float            width, height{};
-    float            leftCoord{};
-    float            rightCoord{};
-    float            frontCoord{};
-    float            backCoord{};
-    float            doorPos{};
-    uint32           timeToOpen{};
-    char             name[8]{};
-    eGarageType      originalType{};
+    eGarageType      m_nType;
+    eGarageDoorState m_nDoorState;
+    uint8            m_nFlags;
+    CVector          m_vPosn;
+    CVector2D        m_vDirectionA, m_vDirectionB;
+    float            m_fTopZ;
+    float            m_fWidth, m_fHeight;
+    float            m_fLeftCoord;
+    float            m_fRightCoord;
+    float            m_fFrontCoord;
+    float            m_fBackCoord;
+    float            m_fDoorPosition;
+    uint32           m_nTimeToOpen;
+    char             m_anName[8];
+    eGarageType      m_nOriginalType;
 
-    void CopyGarageIntoSaveGarage(const CGarage& garage);
+    void CopyGarageIntoSaveGarage(Const CGarage& garage);
     void CopyGarageOutOfSaveGarage(CGarage& garage) const;
 };
 

@@ -2,8 +2,7 @@
 
 #include "Garage.h"
 
-void CGarage::InjectHooks()
-{
+void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
     RH_ScopedCategoryGlobal();
 
@@ -27,8 +26,7 @@ void CGarage::InjectHooks()
 }
 
 // 0x4479F0
-void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
-{
+void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition) {
     const auto fAngle = fDoorPosition * -HALF_PI;
     const auto fSin = sin(fAngle);
     const auto fCos = cos(fAngle);
@@ -39,8 +37,6 @@ void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
     matrix.GetRight() = CrossProduct(vecForward, matrix.GetUp());
 }
 
-
-// Methods
 // 0x449D10
 void CGarage::TidyUpGarageClose() {
     plugin::CallMethod<0x449D10, CGarage*>(this);
@@ -150,44 +146,128 @@ void CGarage::Update(int32 garageId) {
     plugin::CallMethod<0x44AA50, CGarage*>(this, garageId);
 }
 
-void CSaveGarage::CopyGarageIntoSaveGarage(const CGarage& g) {
-    type         = g.m_nType;
-    doorState    = g.m_nDoorState;
-    flags        = g.m_nFlags;
-    pos          = g.m_vPosn;
-    dirA         = g.m_vDirectionA;
-    dirB         = g.m_vDirectionB;
-    topZ         = g.m_fTopZ;
-    width        = g.m_fWidth;
-    height       = g.m_fHeight;
-    leftCoord    = g.m_fLeftCoord;
-    rightCoord   = g.m_fRightCoord;
-    frontCoord   = g.m_fFrontCoord;
-    backCoord    = g.m_fBackCoord;
-    doorPos      = g.m_fDoorPosition;
-    timeToOpen   = g.m_nTimeToOpen;
-    originalType = g.m_nOriginalType;
-    strcpy_s(name, g.m_anName);
+bool CGarage::IsHideOut() const {
+    switch (m_nType) {
+    case eGarageType::SAFEHOUSE_GANTON:
+    case eGarageType::SAFEHOUSE_SANTAMARIA:
+    case eGarageType::SAGEHOUSE_ROCKSHORE:
+    case eGarageType::SAFEHOUSE_FORTCARSON:
+    case eGarageType::SAFEHOUSE_VERDANTMEADOWS:
+    case eGarageType::SAFEHOUSE_DILLIMORE:
+    case eGarageType::SAFEHOUSE_PRICKLEPINE:
+    case eGarageType::SAFEHOUSE_WHITEWOOD:
+    case eGarageType::SAFEHOUSE_PALOMINOCREEK:
+    case eGarageType::SAFEHOUSE_REDSANDSWEST:
+    case eGarageType::SAFEHOUSE_ELCORONA:
+    case eGarageType::SAFEHOUSE_MULHOLLAND:
+    case eGarageType::SAFEHOUSE_CALTONHEIGHTS:
+    case eGarageType::SAFEHOUSE_PARADISO:
+    case eGarageType::SAFEHOUSE_DOHERTY:
+    case eGarageType::SAFEHOUSE_HASHBURY:
+    case eGarageType::HANGAR_ABANDONED_AIRPORT:
+        return true;
+    default:
+        return false;
+    }
 }
 
+// 0x44A9C0
+bool CGarage::IsGarageEmpty() {
+    return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
+
+    CVector cornerA = { m_fLeftCoord, m_fFrontCoord, m_vPosn.z };
+    CVector cornerB = { m_fRightCoord, m_fBackCoord, m_fTopZ   };
+
+    int16 outCount[2];
+    CEntity* outEntities[16];
+    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, 16, outEntities, false, true, true, false, false);
+    if (outCount[0] <= 0)
+        return true;
+
+    int16 entityIndex = 0;
+
+    while (!IsEntityTouching3D(outEntities[entityIndex])) {
+        if (++entityIndex >= outCount[0])
+            return true;
+    }
+    return false;
+}
+
+/*
+void CGarage::CenterCarInGarage(CEntity* entity) {
+    auto vehicle = FindPlayerVehicle();
+    if (IsAnyOtherCarTouchingGarage(vehicle))
+        return;
+
+    auto player = FindPlayerPed();
+    if (IsAnyOtherPedTouchingGarage(player))
+        return;
+
+    auto pos = entity->GetPosition();
+
+    const auto halfX = (m_fRightCoord + m_fLeftCoord) * 0.5f;
+    const auto halfY = (m_fBackCoord + m_fFrontCoord) * 0.5f;
+    CVector p1{
+        halfX - pos.x,
+        halfY - pos.y,
+        pos.z - pos.z
+    };
+
+    auto dist = p1.Magnitude();
+    if (dist >= 0.4f) {
+        auto x = halfX - pos.x * 0.4f / dist + pos.x;
+        auto y = 0.4f / dist * halfY - pos.y + pos.y;
+    } else {
+        auto x = halfX;
+        auto y = halfY;
+    }
+
+    if (!IsEntityEntirelyInside3D(entity, 0.3f))
+        entity->SetPosn(entity->GetPosition());
+}
+*/
+
+// 0x5D3020
+void CSaveGarage::CopyGarageIntoSaveGarage(Const CGarage& g) {
+    m_nType         = g.m_nType;
+    m_nDoorState    = g.m_nDoorState;
+    m_nFlags        = g.m_nFlags;
+    m_vPosn         = g.m_vPosn;
+    m_vDirectionA   = g.m_vDirectionA;
+    m_vDirectionB   = g.m_vDirectionB;
+    m_fTopZ         = g.m_fTopZ;
+    m_fWidth        = g.m_fWidth;
+    m_fHeight       = g.m_fHeight;
+    m_fLeftCoord    = g.m_fLeftCoord;
+    m_fRightCoord   = g.m_fRightCoord;
+    m_fFrontCoord   = g.m_fFrontCoord;
+    m_fBackCoord    = g.m_fBackCoord;
+    m_fDoorPosition = g.m_fDoorPosition;
+    m_nTimeToOpen   = g.m_nTimeToOpen;
+    m_nOriginalType = g.m_nOriginalType;
+    strcpy_s(m_anName, g.m_anName);
+}
+
+// 0x5D30C0
 void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
-    g.m_nType         = type;
-    g.m_nDoorState    = doorState;
-    g.m_nFlags        = flags;
-    g.m_vPosn         = pos;
-    g.m_vDirectionA   = dirA;
-    g.m_vDirectionB   = dirB;
-    g.m_fTopZ         = topZ;
-    g.m_fWidth        = width;
-    g.m_fHeight       = height;
-    g.m_fLeftCoord    = leftCoord;
-    g.m_fRightCoord   = rightCoord;
-    g.m_fFrontCoord   = frontCoord;
-    g.m_fBackCoord    = backCoord;
-    g.m_fDoorPosition = doorPos;
-    g.m_nTimeToOpen  = timeToOpen;
-    g.m_nOriginalType = originalType;
-    strcpy_s(g.m_anName, name);
+    g.m_nType         = m_nType;
+    g.m_nDoorState    = m_nDoorState;
+    g.m_nFlags        = m_nFlags;
+    g.m_vPosn         = m_vPosn;
+    g.m_vDirectionA   = m_vDirectionA;
+    g.m_vDirectionB   = m_vDirectionB;
+    g.m_fTopZ         = m_fTopZ;
+    g.m_fWidth        = m_fWidth;
+    g.m_fHeight       = m_fHeight;
+    g.m_fLeftCoord    = m_fLeftCoord;
+    g.m_fRightCoord   = m_fRightCoord;
+    g.m_fFrontCoord   = m_fFrontCoord;
+    g.m_fBackCoord    = m_fBackCoord;
+    g.m_fDoorPosition = m_fDoorPosition;
+    g.m_nTimeToOpen   = m_nTimeToOpen;
+    g.m_nOriginalType = m_nOriginalType;
+    g.m_pTargetCar    = nullptr;
+    strcpy_s(g.m_anName, m_anName);
 }
 
 // todo move
@@ -196,3 +276,7 @@ void CStoredCar::StoreCar(CVehicle* vehicle) {
     plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, vehicle);
 }
 
+// 0x447E40
+CVehicle* CStoredCar::RestoreCar() {
+    return plugin::CallMethodAndReturn<CVehicle*, 0x447E40, CStoredCar*>(this);
+}
