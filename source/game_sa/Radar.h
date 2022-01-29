@@ -268,7 +268,7 @@ public:
     static bool Save();
 
     // NOTSA
-    static int32 FindTraceTrackingBlipIndex();
+    static int32 FindTraceNotTrackingBlipIndex(); // Return the index of the first trace with the `TrackingBlip` flag NOT set
     static int32& GetRadarTexture(uint32 x, uint32 y) { return gRadarTextures[MAX_RADAR_WIDTH_TILES * y + x]; }
 };
 

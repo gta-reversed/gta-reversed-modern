@@ -683,7 +683,7 @@ void CRadar::CalculateCachedSinCos()
 // 0x583820
 int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ eBlipColour color, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName)
 {
-    if (auto idx = FindTraceTrackingBlipIndex(); idx != -1) {
+    if (auto idx = FindTraceNotTrackingBlipIndex(); idx != -1) {
         auto& t = ms_RadarTrace[idx];
 
         t.m_vPosition        = posn;
@@ -1467,9 +1467,9 @@ bool CRadar::Save()
 
 }
 
-int32 CRadar::FindTraceTrackingBlipIndex() {
+int32 CRadar::FindTraceNotTrackingBlipIndex() {
     for (auto&& [i, v] : notsa::enumerate(ms_RadarTrace)) {
-        if (v.m_bTrackingBlip) {
+        if (!v.m_bTrackingBlip) {
             return (int32)i;
         }
     }
