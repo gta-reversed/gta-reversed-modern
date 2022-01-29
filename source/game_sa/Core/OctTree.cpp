@@ -7,7 +7,7 @@ uint32& COctTree::ms_level = *(uint32*)0xBC12E0;
 CPool<COctTree>& COctTree::ms_octTreePool = *(CPool<COctTree>*)0xBC12E4;
 COctTree*& gpTmpOctTree = *(COctTree**)0xBC12D8;
 
-//  0x5A6DB0
+// 0x5A6DB0
 COctTree::COctTree() {
     m_nLevel = 0;
     m_nRedComponent = 0;
@@ -17,12 +17,12 @@ COctTree::COctTree() {
     m_bLastStep = false;
 }
 
-//  0x5A7490
+// 0x5A7490
 COctTree::~COctTree() {
     empty();
 }
 
-//  0x5A7410
+// 0x5A7410
 void* COctTree::operator new(uint32 size) {
     return ms_octTreePool.New();
 }
@@ -32,18 +32,18 @@ void COctTree::operator delete(void* data) {
     ms_octTreePool.Delete(static_cast<COctTree*>(data));
 }
 
-//  0x5A7460
+// 0x5A7460
 void COctTree::InitPool(void* data, int32 dataSize) {
     ms_octTreePool.Init(dataSize / sizeof(COctTree) + 1, data, (char*)data + sizeof(COctTree) * (dataSize / sizeof(COctTree)) + 1);
     ms_octTreePool.m_bIsLocked = true;
 }
 
-//  0x5A6F70
+// 0x5A6F70
 void COctTree::ShutdownPool() {
     ms_octTreePool.Flush();
 }
 
-//  0x5A75B0
+// 0x5A75B0
 bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
     const uint16 poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
     ms_level++;
@@ -94,7 +94,7 @@ bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
     return bTreeInserted;
 }
 
-//  0x5A70F0
+// 0x5A70F0
 void COctTree::FillPalette(uint8* colors) {
     if (m_bLastStep == 1) {
         colors[ms_level + 0] = m_nRedComponent / m_nLevel;
@@ -116,7 +116,7 @@ void COctTree::FillPalette(uint8* colors) {
     }
 }
 
-//  0x5A71E0
+// 0x5A71E0
 uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
     if (m_bLastStep != 0)
         return m_nLevel;
@@ -135,7 +135,7 @@ uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 color
     return treeElement->m_nLevel;
 }
 
-//  0x5A6DE0
+// 0x5A6DE0
 uint32 COctTree::NoOfChildren() {
     uint32 numOfChildren = 0;
     for (auto& m_aChildren : m_aChildrens)
@@ -145,7 +145,7 @@ uint32 COctTree::NoOfChildren() {
     return numOfChildren;
 }
 
-//  0x5A7040
+// 0x5A7040
 void COctTree::ReduceTree() {
     if (m_bLastStep == 1)
         return;
@@ -177,7 +177,7 @@ void COctTree::ReduceTree() {
     ms_level--;
 }
 
-//  0x5A74F0
+// 0x5A74F0
 void COctTree::RemoveChildren() {
     for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
         int16& poolIndex = m_aChildrens[i];
@@ -197,7 +197,7 @@ void COctTree::RemoveChildren() {
     }
 }
 
-//  0x5A6FC0
+// 0x5A6FC0
 void COctTree::empty() {
     m_nLevel = 0;
     m_nRedComponent = 0;
