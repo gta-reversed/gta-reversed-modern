@@ -46,7 +46,7 @@ CPlaceable::~CPlaceable()
 CVector CPlaceable::GetRightVector()
 {
     if (m_matrix)
-        m_matrix->GetRight();
+        return m_matrix->GetRight();
     return CVector(cos(m_placement.m_fHeading), sin(m_placement.m_fHeading), 0.0f);
 }
 
@@ -60,7 +60,7 @@ CVector CPlaceable::GetForwardVector()
 CVector CPlaceable::GetUpVector()
 {
     if (m_matrix)
-        m_matrix->GetUp();
+        return m_matrix->GetUp();
     return CVector(0.0f, 0.0f, 1.0f);
 }
 
