@@ -27,10 +27,11 @@ public:
     CObject();
     CObject(int32 modelId, bool bCreate);
     CObject(CDummyObject* pDummyObj);
-    ~CObject();
+    ~CObject() override;
+
     static void* operator new(uint32 size);
     static void* operator new(uint32 size, int32 iPoolRef);
-    static void  operator delete(void* pObj);
+    static void  operator delete(void* obj);
 
 public:
     CPtrNodeDoubleLink* m_pControlCodeList;
