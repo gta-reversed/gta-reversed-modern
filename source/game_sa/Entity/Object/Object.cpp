@@ -572,7 +572,7 @@ void CObject::PreRender_Reversed()
     if (objectFlags.bAffectedByColBrightness)
         CObject::GetLightingFromCollisionBelow();
 
-    if (m_dwBurnTime > CTimer::GetTimeInMS())
+    if (m_nBurnTime > CTimer::GetTimeInMS())
         CObject::DoBurnEffect();
 
     if (!m_pAttachedTo)
@@ -934,7 +934,7 @@ void CObject::Init() {
         CObject::AddToControlCodeList();
     }
 
-    m_dwBurnTime = 0;
+    m_nBurnTime = 0;
     m_fScale = 1.0F;
 
     m_nColLighting.day = 0x8;
@@ -1293,43 +1293,22 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
     m_fHealth -= damage;
     m_fHealth = std::max(0.0F, m_fHealth);
 
-    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed(-1) && damager != FindPlayerVehicle(-1, false))
+    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle())
         return;
 
     if (m_nModelIndex == ModelIndices::MI_GRASSPLANT)
     {
         m_fBurnDamage = 1.0F - (m_fHealth / 2000.0F);
-        m_dwBurnTime = CTimer::GetTimeInMS() + 3000;
+        m_nBurnTime = CTimer::GetTimeInMS() + 3000;
     }
 
     if (m_fHealth != 0.0F)
         return;
 
-    if (m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_SMASH_COMPLETELY
-        || m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_CHANGE_THEN_SMASH)
-    {
-        if (!m_bRenderDamaged)
-        {
-            m_bRenderDamaged = true;
-            this->DeleteRwObject();
-            CShadows::AddPermanentShadow(eShadowType::SHADOW_DEFAULT,
-                                         gpShadowHeliTex,
-                                         &GetPosition(),
-                                         3.0F,
-                                         0.0F,
-                                         0.0F,
-                                         -3.0F,
-                                         200,
-                                         0,
-                                         0,
-                                         0,
-                                         10.0F,
-                                         30000,
-                                         1.0F);
-        }
-    }
-    else if (m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_BREAKABLE
-        || m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_BREAKABLE_REMOVED)
+    m_nBurnTime = 0;
+
+    if (m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE
+     || m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE_REMOVED)
     {
         if (!objectFlags.bIsBroken)
             AudioEngine.ReportObjectDestruction(this);
@@ -1346,7 +1325,26 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
         m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
         m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
         objectFlags.bIsBroken = true;
-        this->DeleteRwObject();
+        DeleteRwObject();
+    } else if (m_nColDamageEffect == COL_DAMAGE_EFFECT_CHANGE_MODEL && !m_bRenderDamaged) {
+            m_bRenderDamaged = true;
+            DeleteRwObject();
+            CShadows::AddPermanentShadow(
+                eShadowType::SHADOW_DEFAULT,
+                gpShadowHeliTex,
+                &GetPosition(),
+                3.0F,
+                0.0F,
+                0.0F,
+                -3.0F,
+                200,
+                0,
+                0,
+                0,
+                10.0F,
+                30000,
+                1.0F
+            );
     }
 }
 
