@@ -1938,7 +1938,7 @@ void CStreaming::PurgeRequestList() {
     auto info = ms_pEndRequestedList->GetPrev();
     while (info != ms_pStartRequestedList) {
         auto prev = info->GetPrev();
-        if (!info->DoKeepInMemory() && !info->IsPriorityRequest())
+        if (!info->IsRequiredToBeKept() && !info->IsPriorityRequest())
             RemoveModel(GetModelFromInfo(info));
         info = prev;
     }

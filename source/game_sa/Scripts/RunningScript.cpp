@@ -5,6 +5,7 @@ void CRunningScript::InjectHooks() {
     RH_ScopedCategory("Scripts");
 
     RH_ScopedInstall(Init, 0x4648E0);
+    RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
 //    RH_ScopedInstall(LocateCarCommand, 0x487A20);
 //    RH_ScopedInstall(LocateObjectCommand, 0x487D10);
 //    RH_ScopedInstall(PlayAnimScriptCommand, 0x470150);
@@ -235,7 +236,38 @@ void CRunningScript::FlameInAngledAreaCheckCommand(int32 commandId) {
 
 // 0x464F50
 void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId) {
-    plugin::CallMethod<0x464F50, CRunningScript*, ePedType, int32*>(this, pedType, pModelId);
+    switch (*pModelId) {
+    case MODEL_LAPD1:
+    case MODEL_SFPD1:
+    case MODEL_LVPD1:
+    case MODEL_LAPDM1:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_CITYCOP;
+        }
+        break;
+    case MODEL_CSHER:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_CSHER;
+        }
+        break;
+    case MODEL_SWAT:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_SWAT1;
+        }
+        break;
+    case MODEL_FBI:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_FBI;
+        }
+        break;
+    case MODEL_ARMY:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_ARMY;
+        }
+        break;
+    default:
+        return;
+    }
 }
 
 // Returns offset of global variable
