@@ -155,7 +155,7 @@ public:
     void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
 
     uint8 GetEngineStatus();
-    void SetEngineStatus(uint8 status);
+    void SetEngineStatus(uint32 status);
 
     // There are 2 door function, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
