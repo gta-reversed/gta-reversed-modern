@@ -40,7 +40,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(Render_Reversed, 0x534310);
     RH_ScopedInstall(SetupLighting_Reversed, 0x553DC0);
     RH_ScopedInstall(RemoveLighting_Reversed, 0x553370);
-    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x533240);
+    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x403EB0);
 
 //Class
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
@@ -51,7 +51,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(LivesInThisNonOverlapSector, 0x533050);
     RH_ScopedInstall(SetupBigBuilding, 0x533150);
     RH_ScopedInstall(ModifyMatrixForCrane, 0x533170);
-    RH_ScopedInstall(PreRenderForGlassWindow, 0x533170);
+    RH_ScopedInstall(PreRenderForGlassWindow, 0x533240);
     RH_ScopedInstall(SetRwObjectAlpha, 0x5332C0);
     RH_ScopedInstall(FindTriggerPointCoors, 0x533380);
     RH_ScopedInstall(GetRandom2dEffect, 0x533410);

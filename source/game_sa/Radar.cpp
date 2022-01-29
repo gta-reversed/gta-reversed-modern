@@ -148,7 +148,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetupRadarRect, 0x584A80);
     RH_ScopedInstall(GetActualBlipArrayIndex, 0x582870);
     RH_ScopedInstall(LimitToMap, 0x583350);
-    RH_ScopedInstall(DrawRotatingRadarSprite, 0x5835A0);
+    RH_ScopedInstall(DrawRotatingRadarSprite, 0x584850);
     RH_ScopedInstall(SetBlipFriendly, 0x583EB0);
     RH_ScopedInstall(ChangeBlipDisplay, 0x583D20);
     RH_ScopedInstall(SetBlipEntryExit, 0x583F00); // OK
