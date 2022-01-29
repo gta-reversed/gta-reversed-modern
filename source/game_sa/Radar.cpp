@@ -155,6 +155,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetCoordBlip, 0x583820);
     RH_ScopedInstall(SetEntityBlip, 0x5839A0);
     RH_ScopedInstall(DisplayThisBlip, 0x583B40);
+    RH_ScopedInstall(ChangeBlipBrightness, 0x583C70);
     
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
@@ -819,7 +820,7 @@ bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority)
         case RADAR_SPRITE_GYM:
         case RADAR_SPRITE_IMPOUND:
         case RADAR_SPRITE_SPRAY:
-            return (FrontEndMenuManager.field_45[0] && priority < 0) || priority == 1;
+            return (FrontEndMenuManager.m_ShowLocationsBlips && priority < 0) || priority == 1;
 
         case RADAR_SPRITE_BIGSMOKE:
         case RADAR_SPRITE_CATALINAPINK:
@@ -847,10 +848,10 @@ bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority)
         case RADAR_SPRITE_GANGY:
         case RADAR_SPRITE_GANGN:
         case RADAR_SPRITE_GANGG:
-            return (FrontEndMenuManager.field_45[1] && priority < 0) || priority == 3;
+            return (FrontEndMenuManager.m_ShowContactsBlips && priority < 0) || priority == 3;
 
         default:
-            return (FrontEndMenuManager.field_45[3] && priority < 0) || priority == 2;
+            return (FrontEndMenuManager.m_ShowOtherBlips && priority < 0) || priority == 2;
         }
     }
 }
@@ -859,11 +860,9 @@ bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority)
 // 0x583C70
 void CRadar::ChangeBlipBrightness(int32 blipIndex, int32 brightness)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_bBright = brightness == 1 ? true : false;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ms_RadarTrace[idx].m_bBright = brightness != 1;
+    }
 }
 
 // 0x583CC0
@@ -1303,8 +1302,8 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
     float width = std::floor(SCREEN_WIDTH_UNIT * 8.f);   // uint32 width  = 8 * SCREEN_WIDTH_UNIT;  original math with warnings, NOTSA
     float height = std::floor(SCREEN_HEIGHT_UNIT * 8.f); // uint32 height = 8 * SCREEN_HEIGHT_UNIT;
 
-    auto sprite16 = (uint16)spriteId;
-    if (!DisplayThisBlip(sprite16, -99))
+    auto sprite = (eRadarSprite)spriteId;
+    if (!DisplayThisBlip(sprite, -99))
         return;
 
     CRect rt{
@@ -1314,8 +1313,8 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
         y + height,
     };
     CRGBA white(255, 255, 255, alpha);
-    RadarBlipSprites[sprite16].Draw(rt, white);
-    AddBlipToLegendList(0, sprite16);
+    RadarBlipSprites[sprite].Draw(rt, white);
+    AddBlipToLegendList(0, sprite);
 }
 
 // 0x586110
