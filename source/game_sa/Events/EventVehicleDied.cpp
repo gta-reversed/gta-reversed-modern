@@ -2,9 +2,12 @@
 
 void CEventVehicleDied::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleDied", "Constructor", 0x4B0D10, &CEventVehicleDied::Constructor);
-    ReversibleHooks::Install("CEventVehicleDied", "Clone_Reversed", 0x4B76D0, &CEventVehicleDied::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleDied", "AffectsPed_Reversed", 0x4B0E00, &CEventVehicleDied::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleDied);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0D10);
+    RH_ScopedInstall(Clone_Reversed, 0x4B76D0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B0E00);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)
@@ -20,32 +23,23 @@ CEventVehicleDied::~CEventVehicleDied ()
         m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
 }
 
+// 0x4B0D10
 CEventVehicleDied* CEventVehicleDied::Constructor(CVehicle* vehicle)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleDied*, 0x4B0D10, CEvent*, CVehicle*>(this, vehicle);
-#else
     this->CEventVehicleDied::CEventVehicleDied(vehicle);
     return this;
-#endif
 }
 
+// 0x4B76D0
 CEvent* CEventVehicleDied::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B76D0, CEvent*>(this);
-#else
     return CEventVehicleDied::Clone_Reversed();
-#endif
 }
 
+// 0x4B0E00
 bool CEventVehicleDied::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0E00, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleDied::AffectsPed_Reversed(ped);
-#endif
 }
 
 CEvent* CEventVehicleDied::Clone_Reversed()

@@ -36,6 +36,7 @@ enum eModelInfoSpecialType : uint8 {
 };
 
 class CVehicleModelInfo;
+class CPedModelInfo;
 class CTimeInfo;
 
 // originally an abstract class
@@ -146,38 +147,44 @@ public:
     void Add2dEffect(C2dEffect* effect);
 
     // Those further ones are completely inlined in final version, not present at all in android version;
-    inline CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
-    inline CColModel* GetColModel() { return m_pColModel; }
+    CVehicleModelInfo* AsVehicleModelInfoPtr() { return reinterpret_cast<CVehicleModelInfo*>(this); }
+    CPedModelInfo* AsPedModelInfoPtr() { return reinterpret_cast<CPedModelInfo*>(this); }
+    CColModel* GetColModel() const { return m_pColModel; }
 
-    inline bool GetIsDrawLast() { return bDrawLast; }
-    inline bool HasBeenPreRendered() { return bHasBeenPreRendered; }
-    inline bool HasComplexHierarchy() { return bHasComplexHierarchy; }
-    inline bool IsBackfaceCulled() { return bIsBackfaceCulled; }
-    inline bool IsLod() { return bIsLod; }
-    inline bool IsRoad() { return bIsRoad; }
-    inline void SetHasBeenPreRendered(int32 bPreRendered) { bHasBeenPreRendered = bPreRendered; }
-    inline void SetIsLod(bool bLod) { bIsLod = bLod; }
-    inline void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
-    inline void IncreaseAlpha() {
+    bool GetIsDrawLast() const { return bDrawLast; }
+    bool HasBeenPreRendered() const { return bHasBeenPreRendered; }
+    bool HasComplexHierarchy() const { return bHasComplexHierarchy; }
+    bool IsBackfaceCulled() const { return bIsBackfaceCulled; }
+    bool IsLod() const { return bIsLod; }
+    bool IsRoad() const { return bIsRoad; }
+    void SetHasBeenPreRendered(int32 bPreRendered) { bHasBeenPreRendered = bPreRendered; }
+    void SetIsLod(bool bLod) { bIsLod = bLod; }
+    void SetOwnsColModel(bool bOwns) { bDoWeOwnTheColModel = bOwns; }
+    void IncreaseAlpha() {
         if (m_nAlpha >= 239)
             m_nAlpha = 255;
         else
             m_nAlpha += 16;
     };
-    inline void SetModelName(const char* modelName) {
+    auto GetModelName() const noexcept {
+        return m_nKey;
+    }
+    void SetModelName(const char* modelName) {
         m_nKey = CKeyGen::GetUppercaseKey(modelName);
     }
 
-    inline bool IsSwayInWind1() { return nSpecialType == eModelInfoSpecialType::TREE; }        // 0x0800
-    inline bool IsSwayInWind2() { return nSpecialType == eModelInfoSpecialType::PALM; }        // 0x1000
-    inline bool SwaysInWind() { return IsSwayInWind1() || IsSwayInWind2(); }
-    inline bool IsGlassType1() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_1; } // 0x2000
-    inline bool IsGlassType2() { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_2; } // 0x2800
-    inline bool IsGlass() { return IsGlassType1() || IsGlassType2(); }
-    inline bool IsTagModel() { return nSpecialType == eModelInfoSpecialType::TAG; }            // 0x3000
-    inline bool IsGarageDoor() { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; }  // 0x3800
-    inline bool IsBreakableStatuePart() { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
-    inline bool IsCrane() { return nSpecialType == eModelInfoSpecialType::CRANE; } // 0x4800
+    bool IsSwayInWind1()         const { return nSpecialType == eModelInfoSpecialType::TREE; }               // 0x0800
+    bool IsSwayInWind2()         const { return nSpecialType == eModelInfoSpecialType::PALM; }               // 0x1000
+    bool SwaysInWind()           const { return IsSwayInWind1() || IsSwayInWind2(); }
+    bool IsGlassType1()          const { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_1; }       // 0x2000
+    bool IsGlassType2()          const { return nSpecialType == eModelInfoSpecialType::GLASS_TYPE_2; }       // 0x2800
+    bool IsGlass()               const { return IsGlassType1() || IsGlassType2(); }
+    bool IsTagModel()            const { return nSpecialType == eModelInfoSpecialType::TAG; }                // 0x3000
+    bool IsGarageDoor()          const { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; }        // 0x3800
+    bool IsBreakableStatuePart() const { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
+    bool IsCrane()               const { return nSpecialType == eModelInfoSpecialType::CRANE; }              // 0x4800
+
+    void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 

@@ -245,7 +245,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void Init(char const* datFile);
+    static void Init();
     static void InitialiseAllConnectLodObjects();
     static void InitialiseConnectLodObjects(uint16 a1);
     static void InitialiseSpecialAnimGroup(uint16 a1);
@@ -292,8 +292,8 @@ public:
     static bool IsPointWithinSearchLight(CVector* pointPosn, int32 index);
     static bool IsVehicleStopped(CVehicle* pVehicle);
 
-    static void Load();
-    static void Save();
+    static bool Load();
+    static bool Save();
 
     static void MoveSearchLightBetweenTwoPoints(int32 index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
     static void MoveSearchLightToEntity(int32 index, CEntity* pEntity, float pathSpeed);

@@ -14,10 +14,10 @@ struct RpAtomic;
 struct RpClump;
 
 struct tCompSearchStructByName {
-    char*    m_pName;
-    RwFrame* m_pFrame;
+    const char* m_pName;
+    RwFrame*    m_pFrame;
 
-    inline tCompSearchStructByName(char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
+    inline tCompSearchStructByName(const char* name, RwFrame* frame) : m_pName(name), m_pFrame(frame) {}
 };
 
 struct tCompSearchStructById {
@@ -72,6 +72,8 @@ public:
     // Class functions
     void SetFrameIds(RwObjectNameIdAssocation* data);
 
+    void SetClumpModelInfoFlags(uint32 flags); // Also calls SetBaseModelInfoFlags
+
     // static functions
     static RpAtomic* SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc);
     static RpAtomic* AtomicSetupLightingCB(RpAtomic* atomic, void* data);
@@ -83,7 +85,7 @@ public:
     static RwFrame* FindFrameFromIdCB(RwFrame* frame, void* searchData);
     static RwFrame* FillFrameArrayCB(RwFrame* frame, void* data);
     static RwFrame* GetFrameFromId(RpClump* clump, int32 id);
-    static RwFrame* GetFrameFromName(RpClump* clump, char* name);
+    static RwFrame* GetFrameFromName(RpClump* clump, const char* name);
     static void FillFrameArray(RpClump* clump, RwFrame** frames);
 };
 

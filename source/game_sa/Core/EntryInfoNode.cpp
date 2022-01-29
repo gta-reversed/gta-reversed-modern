@@ -2,8 +2,11 @@
 
 void CEntryInfoNode::InjectHooks()
 {
-    ReversibleHooks::Install("CEntryInfoNode", "operator new", 0x536DC0, &CEntryInfoNode::operator new);
-    ReversibleHooks::Install("CEntryInfoNode", "operator delete", 0x536DD0, &CEntryInfoNode::operator delete);
+    RH_ScopedClass(CEntryInfoNode);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(operator new, 0x536DC0);
+    RH_ScopedInstall(operator delete, 0x536DD0);
 }
 
 void* CEntryInfoNode::operator new(uint32 size)
@@ -16,11 +19,11 @@ void CEntryInfoNode::operator delete(void* ptr, size_t sz)
     CPools::ms_pEntryInfoNodePool->Delete(reinterpret_cast<CEntryInfoNode*>(ptr));
 }
 
-void CEntryInfoNode::AddToList(CEntryInfoNode* pNext)
+void CEntryInfoNode::AddToList(CEntryInfoNode* next)
 {
-    m_pPrevious = nullptr;
-    m_pNext = pNext;
-    if (pNext) {
-        pNext->m_pPrevious = this;
+    m_previous = nullptr;
+    m_next = next;
+    if (next) {
+        next->m_previous = this;
     }
 }

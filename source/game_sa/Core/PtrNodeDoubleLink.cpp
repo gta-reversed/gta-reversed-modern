@@ -6,31 +6,32 @@
 */
 #include "StdInc.h"
 
-void CPtrNodeDoubleLink::InjectHooks()
-{
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
+#include "PtrNodeDoubleLink.h"
+
+void CPtrNodeDoubleLink::InjectHooks() {
+    RH_ScopedClass(CPtrNodeDoubleLink);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(operator new, 0x5523C0);
+    RH_ScopedInstall(operator delete, 0x5523D0);
+    RH_ScopedInstall(AddToList, 0x5329A0);
 }
 
-void* CPtrNodeDoubleLink::operator new(uint32 size)
-{
+void* CPtrNodeDoubleLink::operator new(uint32 size) {
     return CPools::ms_pPtrNodeDoubleLinkPool->New();
 }
 
-void CPtrNodeDoubleLink::operator delete(void* ptr, size_t sz)
-{
+void CPtrNodeDoubleLink::operator delete(void* ptr, size_t sz) {
     CPools::ms_pPtrNodeDoubleLinkPool->Delete(static_cast<CPtrNodeDoubleLink*>(ptr));
 }
 
-void CPtrNodeDoubleLink::AddToList(CPtrListDoubleLink* list)
-{
-    pPrev = nullptr;
-    auto pNode = list->GetNode();
-    pNext = pNode;
+// 0x5329A0
+void CPtrNodeDoubleLink::AddToList(CPtrListDoubleLink* list) {
+    m_prev = nullptr;
+    m_next = list->GetNode();
 
-    if (pNode)
-        pNode->pPrev = this;
+    if (m_next)
+        m_next->m_prev = this;
 
-    list->pNode = reinterpret_cast<CPtrNode*>(this);
+    list->m_node = reinterpret_cast<CPtrNode*>(this);
 }

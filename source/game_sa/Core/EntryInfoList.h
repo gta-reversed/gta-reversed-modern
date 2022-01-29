@@ -4,12 +4,14 @@
 
 class CEntryInfoList {
 public:
-    CEntryInfoNode* m_pNode;
+    CEntryInfoNode* m_node;
 
 public:
     static void InjectHooks();
 
-    void Flush();                           // 0x536E10
-    void DeleteNode(CEntryInfoNode* pNode); // Most likely inlined in final exe
+    void Flush();                          // 0x536E10
+    void DeleteNode(CEntryInfoNode* node); // Most likely inlined in final exe
+    bool IsEmpty() const noexcept { return !m_node; }
 };
+
 VALIDATE_SIZE(CEntryInfoList, 0x4);

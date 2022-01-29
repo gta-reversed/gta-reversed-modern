@@ -12,7 +12,7 @@ VALIDATE_SIZE(CActiveOccluderLine, 0x14);
 
 struct CActiveOccluder {
     CActiveOccluderLine m_aLines[6];
-    int16               m_wDepth;
+    uint16              m_wDepth;
     uint8               m_cLinesCount;
     uint8               m_cNumVectors;
     CVector             m_aVectors[3];

@@ -53,7 +53,7 @@ public:
     CTask* FindTaskByType(int32 taskIndex, int32 taskType);
     CTask* GetTaskSecondary(int32 taskIndex);
 
-    bool HasPrimaryTask(const CTask* task);
+    bool HasTaskPrimary(const CTask* task);
     bool HasTaskSecondary(const CTask* task);
 
     void Flush();
@@ -61,10 +61,10 @@ public:
 
     void SetNextSubTask(CTaskComplex* task);
 
-    static CTaskSimple* GetSimplestTask(CTask* task);
     void StopTimers(const CEvent* event);
     CTask* GetSimplestActiveTask();
     CTaskSimple* GetSimplestTask(int32 taskIndex);
+    static CTaskSimple* GetSimplestTask(CTask* task);
 
     void AddSubTasks(CTaskComplex* task);
     void ParentsControlChildren(CTaskComplex* task);
@@ -73,9 +73,16 @@ public:
     void ClearTaskEventResponse();
     void ManageTasks();
 
-    // GetTaskPrimary. Why they doesn't have version for *primary tasks*? :thinking
-    CTask* GetPrimaryTask(int32 taskIndex) {
+    // Why they doesn't have version for *primary tasks*? :thinking
+    CTask* GetTaskPrimary(int32 taskIndex) noexcept {
         return m_aPrimaryTasks[taskIndex];
+    }
+
+    // NOTSA - Check if any of the given tasks is active
+    bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
+        return std::any_of(types.begin(), types.end(), [this](auto type) {
+            return FindActiveTaskByType(type);
+        });
     }
 };
 

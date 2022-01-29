@@ -3,14 +3,17 @@
 #include "TaskSimpleGoToPoint.h"
 
 #include "TaskSimpleStandStill.h"
+#include "IKChainManager_c.h"
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    RH_ScopedClass(CTaskSimpleGoToPoint);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x667CD0);
+    RH_ScopedInstall(Clone_Reversed, 0x66CC60);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x66D710);
+    RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
@@ -26,55 +29,47 @@ CTaskSimpleGoToPoint::~CTaskSimpleGoToPoint()
     // nothing here
 }
 
+// 0x667CD0
 CTaskSimpleGoToPoint* CTaskSimpleGoToPoint::Constructor(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleGoToPoint*, 0x667CD0, CTaskSimpleGoToPoint*, int32, const CVector&, float, bool, bool>
-        (this, moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
-#else
     this->CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(moveState, targetPoint, fRadius, bMoveTowardsTargetPoint, a6);
     return this;
-#endif
 }
 
+// 0x66CC60
 CTask* CTaskSimpleGoToPoint::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x66CC60, CTask*>(this);
-#else
     return CTaskSimpleGoToPoint::Clone_Reversed();
-#endif
 }
 
+// 0x667D60
 bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x667D60, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
-#else
     return CTaskSimpleGoToPoint::MakeAbortable_Reversed(ped, priority, event);
-#endif
 }
 
+// 0x66D710
 bool CTaskSimpleGoToPoint::ProcessPed(class CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x66D710, CTask*, CPed*>(this, ped);
-#else
     return CTaskSimpleGoToPoint::ProcessPed_Reversed(ped);
-#endif
 }
 
 CTask* CTaskSimpleGoToPoint::Clone_Reversed()
 {
-    return new CTaskSimpleGoToPoint(m_moveState, m_vecTargetPoint, m_fRadius,
-        gotoPointFlags.m_bMoveTowardsTargetPoint, gotoPointFlags.m_b04);
+    return new CTaskSimpleGoToPoint(
+        m_moveState,
+        m_vecTargetPoint,
+        m_fRadius,
+        gotoPointFlags.m_bMoveTowardsTargetPoint,
+        gotoPointFlags.m_b04
+    );
 }
 
 bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
     if (gotoFlags.m_bIsIKChainSet) {
-        if (g_ikChainMan->IsLooking(ped))
-            g_ikChainMan->AbortLookAt(ped, 250);
+        if (g_ikChainMan.IsLooking(ped))
+            g_ikChainMan.AbortLookAt(ped, 250);
     }
     if (priority != ABORT_PRIORITY_URGENT) {
         if (priority != ABORT_PRIORITY_IMMEDIATE) {
@@ -95,8 +90,8 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
         if (!gotoPointFlags.m_b05) {
             gotoPointFlags.m_b03 = true;
             if (gotoFlags.m_bIsIKChainSet) {
-                if (g_ikChainMan->IsLooking(ped))
-                    g_ikChainMan->AbortLookAt(ped, 250);
+                if (g_ikChainMan.IsLooking(ped))
+                    g_ikChainMan.AbortLookAt(ped, 250);
             }
             return true;
         }
@@ -132,8 +127,8 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                         if (!pTask || !pTask->m_pAnimBlendAssociation) {
                             CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
                             if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
-                                auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(1);
-                                auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(2);
+                                auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(ANIM_ID_RUN);
+                                auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(ANIM_ID_SPRINT);
                                 if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
                                     pPlayer->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
                                     ped->SetMoveState(PEDMOVE_SPRINT);
@@ -184,8 +179,8 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
         }
     }
     if (gotoFlags.m_bTargetPointUpdated) {
-        if (gotoFlags.m_bIsIKChainSet && g_ikChainMan->IsLooking(ped))
-            g_ikChainMan->AbortLookAt(ped, 250);
+        if (gotoFlags.m_bIsIKChainSet && g_ikChainMan.IsLooking(ped))
+            g_ikChainMan.AbortLookAt(ped, 250);
         gotoFlags.m_bTargetPointUpdated = false;
     }
     SetUpIK(ped);
@@ -193,11 +188,9 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
     return false;
 }
 
+// 0x645700
 void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRadius, bool bDontCheckRadius)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethod<0x645700, CTaskSimpleGoToPoint*, const CVector&, float, bool>(this, targetPosition, fRadius, bDontCheckRadius);
-#else
     if (bDontCheckRadius || m_vecTargetPoint != targetPosition || m_fRadius != fRadius)
     {
         m_vecTargetPoint = targetPosition;
@@ -207,5 +200,4 @@ void CTaskSimpleGoToPoint::UpdatePoint(const CVector& targetPosition, float fRad
         gotoFlags.m_b04 = false;
         gotoFlags.m_bTargetPointUpdated = true;
     }
-#endif
 }

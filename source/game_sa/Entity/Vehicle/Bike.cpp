@@ -5,11 +5,17 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
 #include "Bike.h"
+
+#include "Buoyancy.h"
 
 void CBike::InjectHooks()
 {
-    ReversibleHooks::Install("CBike", "ProcessBuoyancy", 0x6B5FB0, &CBike::ProcessBuoyancy);
+    RH_ScopedClass(CBike);
+    RH_ScopedCategory("Vehicle/Ped");
+
+    RH_ScopedInstall(ProcessBuoyancy, 0x6B5FB0);
 }
 
 // 0x6BF430

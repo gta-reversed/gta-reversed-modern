@@ -12,13 +12,9 @@ public:
     CVehicle* m_vehicle;
 
 public:
-    static void InjectHooks();
-
     CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle);
-    ~CEventVehicleHitAndRun();
-private:
-    CEventVehicleHitAndRun* Constructor(CPed* victim, CVehicle* vehicle);
-public:
+    ~CEventVehicleHitAndRun() override;
+
     eEventType GetEventType() const override { return EVENT_VEHICLE_HIT_AND_RUN; }
     int32 GetEventPriority() const override { return 14; }
     int32 GetLifeTime() override { return 0; }
@@ -27,6 +23,12 @@ public:
     bool IsCriminalEvent() override { return m_vehicle->m_pDriver && m_vehicle->m_pDriver->IsPlayer(); }
     void ReportCriminalEvent(CPed* ped) override;
     float GetLocalSoundLevel() override { return 100.0f; }
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CEventVehicleHitAndRun* Constructor(CPed* victim, CVehicle* vehicle);
 
     CEvent* Clone_Reversed();
     void ReportCriminalEvent_Reversed(CPed* ped);

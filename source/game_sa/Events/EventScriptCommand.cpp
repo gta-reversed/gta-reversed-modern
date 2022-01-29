@@ -6,16 +6,20 @@
 
 void CEventScriptCommand::InjectHooks()
 {
-    ReversibleHooks::Install("CEventScriptCommand", "Constructor", 0x4B0A00, &CEventScriptCommand::Constructor);
-    ReversibleHooks::Install("CEventScriptCommand", "GetEventType", 0x4B0A30, &CEventScriptCommand::GetEventType);
-    ReversibleHooks::Install("CEventScriptCommand", "GetEventPriority", 0x4B0B20, &CEventScriptCommand::GetEventPriority);
-    ReversibleHooks::Install("CEventScriptCommand", "Clone", 0x4B6490, &CEventScriptCommand::Clone);
-    ReversibleHooks::Install("CEventScriptCommand", "AffectsPed", 0x4B0AF0, &CEventScriptCommand::AffectsPed);
-    ReversibleHooks::Install("CEventScriptCommand", "TakesPriorityOver", 0x4B0BA0, &CEventScriptCommand::TakesPriorityOver);
-    ReversibleHooks::Install("CEventScriptCommand", "IsValid", 0x4B0AB0, &CEventScriptCommand::IsValid);
-    ReversibleHooks::Install("CEventScriptCommand", "CloneScriptTask", 0x4B0AA0, &CEventScriptCommand::CloneScriptTask);
+    RH_ScopedClass(CEventScriptCommand);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0A00);
+    RH_ScopedInstall(GetEventType, 0x4B0A30);
+    RH_ScopedInstall(GetEventPriority, 0x4B0B20);
+    RH_ScopedInstall(Clone, 0x4B6490);
+    RH_ScopedInstall(AffectsPed, 0x4B0AF0);
+    RH_ScopedInstall(TakesPriorityOver, 0x4B0BA0);
+    RH_ScopedInstall(IsValid, 0x4B0AB0);
+    RH_ScopedInstall(CloneScriptTask, 0x4B0AA0);
 }
 
+// 0x4B0A00
 CEventScriptCommand::CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
     m_primaryTaskIndex = primaryTaskIndex;
@@ -30,12 +34,8 @@ CEventScriptCommand::~CEventScriptCommand()
 
 CEventScriptCommand* CEventScriptCommand::Constructor(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn< CEventScriptCommand*, 0x4B0A00, CEventScriptCommand*, int32, CTask*, char>(this, primaryTaskIndex, task, affectsDeadPeds);
-#else
     this->CEventScriptCommand::CEventScriptCommand(primaryTaskIndex, task, affectsDeadPeds);
     return this;
-#endif
 }
 
 // 0x4B0B20
@@ -44,40 +44,28 @@ int32 CEventScriptCommand::GetEventPriority() const
     return CEventScriptCommand::GetEventPriority_Reversed();
 }
 
+// 0x4B6490
 CEvent* CEventScriptCommand::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B6490, CEvent*>(this);
-#else
     return CEventScriptCommand::Clone_Reversed();
-#endif
 }
 
+// 0x4B0AF0
 bool CEventScriptCommand::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0AF0, CEvent*, CPed*>(this, ped);
-#else
     return CEventScriptCommand::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B0BA0
 bool CEventScriptCommand::TakesPriorityOver(const CEvent& refEvent)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0BA0, CEvent*, CEvent*>(this, refEvent);
-#else
     return CEventScriptCommand::TakesPriorityOver_Reversed(refEvent);
-#endif
 }
 
+// 0x4B0AB0
 bool CEventScriptCommand::IsValid(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B0AB0, CEvent*, CPed*>(this, ped);
-#else
     return CEventScriptCommand::IsValid_Reversed(ped);
-#endif
 }
 
 // 0x4B0AA0

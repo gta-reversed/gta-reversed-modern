@@ -41,26 +41,26 @@ public:
     // VTABLE
     virtual void   Service() = 0;
     virtual bool   IsSoundPlaying() = 0;
-    virtual uint16 GetPlayTime() = 0;
+    virtual int16  GetPlayTime() = 0;
     virtual uint16 GetLength() = 0;
     virtual void   Play(int16, int8, float) = 0;
     virtual void   SynchPlayback() = 0;
     virtual void   Stop() = 0;
     virtual void   SetFrequencyScalingFactor(float factor);
 
-    void   SetPosition(CVector* vecPos);
+    void   SetPosition(CVector* vecPos) const;
     float  GetVolume() const { return m_fVolume; };
     void   SetVolume(float volume);
     bool   IsBufferPlaying() const { return m_nBufferStatus & DSBSTATUS_PLAYING; };
-    int32  GetCurrentPlaybackPosition();
-    uint32 ConvertFromBytesToMS(uint32 bytes);
-    uint32 ConvertFromMsToBytes(uint32 ms);
+    int32  GetCurrentPlaybackPosition() const;
+    uint32 ConvertFromBytesToMS(uint32 bytes) const;
+    uint32 ConvertFromMsToBytes(uint32 ms) const;
     void   SetFrequency(uint32 freq);
     void   SetOriginalFrequency(uint32 freq);
     void   UpdateStatus();
 
     // Methods not in android IDB
-    bool Lost();
+    bool Lost() const;
 
     // Those 2 require DirectSound EAX 4.0 extensions or some alternative to be available in project
     bool SetReverbAndDepth(uint32 reverb, uint32 depth);

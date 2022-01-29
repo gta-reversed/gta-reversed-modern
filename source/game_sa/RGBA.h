@@ -36,6 +36,7 @@ public:
 
     void FromRwRGBA(RwRGBA const& rwcolor);
     void FromARGB(uint32 intValue);
+    CRGBA FromInt32(int32 red, int32 green, int32 blue, int32 alpha);
 
     void  Invert();
     CRGBA Inverted() const;
@@ -44,6 +45,15 @@ public:
     CRGBA& operator=(CRGBA const& rhs);
 
     CRGBA operator*(float mult) {
+        return {
+            (uint8)((float)r * mult),
+            (uint8)((float)g * mult),
+            (uint8)((float)b * mult),
+            (uint8)((float)a * mult)
+        };
+    }
+
+    CRGBA operator*(float mult) const {
         return {
             (uint8)((float)r * mult),
             (uint8)((float)g * mult),

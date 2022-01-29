@@ -17,7 +17,30 @@
 #include "Directory.h"
 #include "constants.h"
 
-enum eResourceFirstID {
+enum class eChannelState
+{
+    // Doing nothing
+    IDLE = 0,
+
+    // Currently reading model(s)
+    READING = 1,
+
+    // A big model (also called a large file) is loaded in steps:
+    // First, the variable `ms_bLoadingBigModel` is set to `true` in `RequestModelStream`.
+    // When the first half is finished loading, and `ProcessLoadingChannel` is called
+    // `ConvertBufferToObject` will be called by it, which will set the model's load state to
+    // `LOADSTATE_FINISHING`. When the latter function returns the former checks if
+    // the model's loadstate is `FINISHING`, if it is the channel's state is set to
+    // `STARTED` to indicate a large model's loading has started and is yet to be finished.
+    // Loading a large model is finished when `ProcessLoadingChannel`.
+    // (In which case it's state still should be `STARTED`)
+    STARTED = 2,
+
+    // Also called ERROR, but that's a `windgi.h` macro
+    ERR = 3,
+};
+
+enum eResourceFirstID : uint32 {
     // First ID of the resource
     RESOURCE_ID_DFF = 0,                                            // default: 0
     RESOURCE_ID_TXD = RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS,        // default: 20000
@@ -34,6 +57,85 @@ enum eResourceFirstID {
     RESOURCE_ID_TOTAL                                               // default: 26316
 };
 
+enum class eModelType {
+    DFF,
+    TXD,
+    COL,
+    IPL,
+    DAT,
+    IFP,
+    RRR,
+    SCM,
+
+    INTERNAL_1,
+    INTERNAL_2,
+    INTERNAL_3,
+    INTERNAL_4
+};
+
+// Helper functions to deal with modelID's
+
+
+inline bool IsModelDFF(uint32 model) { return eResourceFirstID::RESOURCE_ID_DFF <= model && model < eResourceFirstID::RESOURCE_ID_TXD; }
+inline bool IsModelTXD(uint32 model) { return eResourceFirstID::RESOURCE_ID_TXD <= model && model < eResourceFirstID::RESOURCE_ID_COL; }
+inline bool IsModelCOL(uint32 model) { return eResourceFirstID::RESOURCE_ID_COL <= model && model < eResourceFirstID::RESOURCE_ID_IPL; }
+inline bool IsModelIPL(uint32 model) { return eResourceFirstID::RESOURCE_ID_IPL <= model && model < eResourceFirstID::RESOURCE_ID_DAT; }
+inline bool IsModelDAT(uint32 model) { return eResourceFirstID::RESOURCE_ID_DAT <= model && model < eResourceFirstID::RESOURCE_ID_IFP; }
+inline bool IsModelIFP(uint32 model) { return eResourceFirstID::RESOURCE_ID_IFP <= model && model < eResourceFirstID::RESOURCE_ID_RRR; }
+inline bool IsModelRRR(uint32 model) { return eResourceFirstID::RESOURCE_ID_RRR <= model && model < eResourceFirstID::RESOURCE_ID_SCM; }
+inline bool IsModelSCM(uint32 model) { return eResourceFirstID::RESOURCE_ID_SCM <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
+
+inline eModelType GetModelType(uint32 model) {
+    if (IsModelDFF(model))
+        return eModelType::DFF;
+
+    else if (IsModelTXD(model))
+        return eModelType::TXD;
+
+    else if (IsModelCOL(model))
+        return eModelType::COL;
+
+    else if (IsModelIPL(model))
+        return eModelType::IPL;
+
+    else if (IsModelDAT(model))
+        return eModelType::DAT;
+
+    else if (IsModelIFP(model))
+        return eModelType::IFP;
+
+    else if (IsModelRRR(model))
+        return eModelType::RRR;
+
+    else if (IsModelSCM(model))
+        return eModelType::SCM;
+
+    else {
+        assert(0); // NOTSA
+        return (eModelType)-1;
+    }
+}
+
+// Turn relative IDs into absolute ones.
+inline uint32 DFFToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DFF + relativeId; }
+inline uint32 TXDToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_TXD + relativeId; }
+inline uint32 COLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_COL + relativeId; }
+inline uint32 IPLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IPL + relativeId; }
+inline uint32 DATToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DAT + relativeId; }
+inline uint32 IFPToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IFP + relativeId; }
+inline uint32 RRRToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_RRR + relativeId; }
+inline uint32 SCMToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_SCM + relativeId; }
+
+// Turn absolute IDs into relative ones
+inline uint32 ModelIdToDFF(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DFF; }
+inline uint32 ModelIdToTXD(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_TXD; }
+inline uint32 ModelIdToCOL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_COL; }
+inline uint32 ModelIdToIPL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IPL; }
+inline uint32 ModelIdToDAT(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DAT; }
+inline uint32 ModelIdToIFP(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IFP; }
+inline uint32 ModelIdToRRR(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_RRR; }
+inline uint32 ModelIdToSCM(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_SCM; }
+
 struct tRwStreamInitializeData {
     uint8* m_pBuffer;
     uint32 m_uiBufferSize;
@@ -42,10 +144,22 @@ struct tRwStreamInitializeData {
 VALIDATE_SIZE(tRwStreamInitializeData, 0x8);
 
 struct tStreamingFileDesc {
-    char  m_szName[40];
-    bool  m_bNotPlayerImg;
-    char  __pad[3];
-    int32 m_StreamHandle;
+    tStreamingFileDesc() = default;
+
+    tStreamingFileDesc(const char* name, bool bNotPlayerImg) :
+          m_bNotPlayerImg(bNotPlayerImg),
+          m_StreamHandle(CdStreamOpen(name))
+    {
+        strncpy_s(m_szName, name, std::size(m_szName));
+    }
+
+    bool IsInUse() const noexcept {
+        return m_szName[0];
+    }
+
+    char  m_szName[40]{}; // If this string is empty (eg.: first elem in array is NULL) the entry isnt in use
+    bool  m_bNotPlayerImg{};
+    int32 m_StreamHandle{-1};
 };
 
 VALIDATE_SIZE(tStreamingFileDesc, 0x30);
@@ -53,15 +167,27 @@ VALIDATE_SIZE(tStreamingFileDesc, 0x30);
 struct tStreamingChannel {
     int32               modelIds[16];
     int32               modelStreamingBufferOffsets[16];
-    eStreamingLoadState LoadStatus;
+    eChannelState       LoadStatus;
     int32               iLoadingLevel; // the value gets modified, but it's not used
     int32               offsetAndHandle;
     int32               sectorCount;
     int32               totalTries;
     eCdStreamStatus     m_nCdStreamStatus;
+
+    bool IsReading() const noexcept {
+        return LoadStatus == eChannelState::READING;
+    }
+    bool IsStarted() const noexcept {
+        return LoadStatus == eChannelState::STARTED;
+    }
+
 };
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
+
+static bool IsModelDFF(int32 model) {
+    return (uint32)model < RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS;
+}
 
 class CStreaming {
 public:
@@ -74,20 +200,20 @@ public:
     static uint32& ms_memoryAvailable;
     static int32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
-    static int32* ms_aDefaultCopCarModel; // static int32 ms_aDefaultCopCarModel[4]
+    static int32(&ms_aDefaultCopCarModel)[4];
     static int32& ms_DefaultCopBikeModel;
-    static int32* ms_aDefaultCopModel; // static int32 ms_aDefaultCopModel[4]
+    static int32(&ms_aDefaultCopModel)[4];
     static int32& ms_DefaultCopBikerModel;
     static uint32& ms_nTimePassedSinceLastCopBikeStreamedIn;
-    static signed int* ms_aDefaultAmbulanceModel;  // static signed int ms_aDefaultAmbulanceModel[4]
-    static signed int* ms_aDefaultMedicModel;      // static signed int ms_aDefaultMedicModel[4]
-    static signed int* ms_aDefaultFireEngineModel; // static signed int ms_aDefaultFireEngineModel[4]
-    static signed int* ms_aDefaultFiremanModel;    // static signed int ms_aDefaultFiremanModel[4]
+    static int32(&ms_aDefaultAmbulanceModel)[4];
+    static int32(&ms_aDefaultMedicModel)[4];
+    static int32(&ms_aDefaultFireEngineModel)[4];
+    static int32(&ms_aDefaultFiremanModel)[4];
     static CDirectory*& ms_pExtraObjectsDir;
-    static tStreamingFileDesc* ms_files; // static tStreamingFileDesc ms_files[8]
+    static tStreamingFileDesc (&ms_files)[TOTAL_IMG_ARCHIVES];
     static bool& ms_bLoadingBigModel;
     // There are only two channels within CStreaming::ms_channel
-    static tStreamingChannel* ms_channel; // static tStreamingChannel ms_channel[2]
+    static tStreamingChannel(&ms_channel)[2];
     static signed int& ms_channelError;
     static bool& m_bHarvesterModelsRequested;
     static bool& m_bStreamHarvesterModelsThisFrame;
@@ -97,7 +223,7 @@ public:
     static uint16& ms_loadedGangCars;
     static uint16& ms_loadedGangs;
     static int32& ms_numPedsLoaded;
-    static int32* ms_pedsLoaded; // static uint32* ms_pedsLoaded[8]
+    static int32(&ms_pedsLoaded)[8];
     static int32* ms_NextPedToLoadFromGroup;
     static int32& ms_currentZoneType;
     static CLoadedCarGroup& ms_vehiclesLoaded;
@@ -108,13 +234,13 @@ public:
     //! initialized but not used?
     static int32& ms_lastImageRead;
     //! initialized but never used?
-    static signed int* ms_imageOffsets; // static signed int ms_imageOffsets[6]
+    static int32(&ms_imageOffsets)[6];
     static bool& ms_bEnableRequestListPurge;
     static uint32& ms_streamingBufferSize;
     static uint8** ms_pStreamingBuffer;
     static uint32& ms_memoryUsed;
     static int32& ms_numModelsRequested;
-    static CStreamingInfo* ms_aInfoForModel; // static CStreamingInfo ms_aInfoForModel[26316]
+    static CStreamingInfo(&ms_aInfoForModel)[26316];
     static bool& ms_disableStreaming;
     static int32& ms_bIsInitialised;
     static bool& m_bBoatsNeeded;
@@ -129,9 +255,11 @@ public:
 public:
     static void InjectHooks();
 
+    static CStreamingInfo& GetInfo(uint32 modelId);
+    static bool IsRequestListEmpty();
     static CLink<CEntity*>* AddEntity(CEntity* pEntity);
     //! return StreamingFile Index in CStreaming::ms_files
-    static int32 AddImageToList(char const* pFileName, bool bNotPlayerImg);
+    static uint32 AddImageToList(char const* pFileName, bool bNotPlayerImg);
     static void AddLodsToRequestList(CVector const& point, uint32 streamingFlags);
     static void AddModelsToRequestList(CVector const& point, uint32 streamingFlags);
     static bool AddToLoadedVehiclesList(int32 modelId);
@@ -145,7 +273,7 @@ public:
     static void DeleteRwObjectsAfterDeath(CVector const& point);
     static void DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes);
     static bool DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
-    static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY);
+    static void DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX = -1, int32 sectorY = -1);
     static bool DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes);
     static bool RemoveReferencedTxds(int32 memoryToCleanInBytes);
     static void DisableCopBikes(bool bDisable);
@@ -205,7 +333,7 @@ public:
     static void ReclassifyLoadedCars();
     static void RemoveAllUnusedModels();
     static void RemoveBigBuildings();
-    static void RemoveBuildingsNotInArea(int32 areaCode);
+    static void RemoveBuildingsNotInArea(eAreaCodes areaCode);
     static void RemoveCarModel(int32 modelId);
     static void RemoveCurrentZonesModels();
     static void RemoveDodgyPedsFromRandomSlots();
@@ -222,7 +350,7 @@ public:
     static void RemoveUnusedModelsInLoadedList();
     static void RenderEntity(CLink<CEntity*>* streamingLink);
     static void RequestBigBuildings(CVector const& point);
-    static void RequestFile(int32 modelId, int32 posn, int32 size, int32 imgId, int32 streamingFlags);
+    static void RequestFile(uint32 modelId, int32 posn, uint32 size, int32 imgId, uint32 streamingFlags);
     //! unused
     static void RequestFilesInChannel(int32 channelId);
     static void RequestModel(int32 dwModelId, uint32 streamingFlags); // see eStreamingFlags
@@ -241,17 +369,18 @@ public:
     static void SetMissionDoesntRequireSpecialChar(int32 slot);
     static void SetModelIsDeletable(int32 modelId);
     static void SetModelTxdIsDeletable(int32 modelId);
+    static void SetModelAndItsTxdDeletable(int32 modelId);
     //! unused
     static void SetSpecialCharIsDeletable(int32 slot);
     static void Shutdown();
     static void StartRenderEntities();
     static bool StreamAmbulanceAndMedic(bool bStreamForAccident);
-    static void StreamCopModels(int32 level);
+    static void StreamCopModels(eLevelName level);
     static bool StreamFireEngineAndFireman(bool bStreamForFire);
     static void StreamOneNewCar();
     //! interiorType : 0 - house , 1 - shop , 2 - office
     static void StreamPedsForInterior(int32 interiorType);
-    static void StreamPedsIntoRandomSlots(int32* modelArray);
+    static void StreamPedsIntoRandomSlots(int32 modelArray[TOTAL_LOADED_PEDS]);
     static void StreamVehiclesAndPeds();
     static void StreamVehiclesAndPeds_Always(CVector const& unused);
     static void StreamZoneModels(CVector const& unused);
@@ -261,12 +390,8 @@ public:
     static void UpdateForAnimViewer();
     static bool WeAreTryingToPhaseVehicleOut(int32 modelId);
 
-public:
-    // NOTSA functions
-    static eStreamingLoadState GetLoadState(eModelID modelId) {
-        assert(modelId >= 0);
-        return ms_aInfoForModel[modelId].m_nLoadState;
-    }
+    // Inlined or NOTSA
+    static bool IsModelLoaded(int32 model) { return ms_aInfoForModel[model].m_nLoadState == eStreamingLoadState::LOADSTATE_LOADED; }
 };
 
 extern RwStream& gRwStream;

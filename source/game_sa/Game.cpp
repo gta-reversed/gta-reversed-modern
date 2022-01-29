@@ -9,6 +9,22 @@
 #include "MovingThings.h"
 #include "PlantMgr.h"
 #include "Occlusion.h"
+// todo: #include "InteriorManager_c.h"
+// todo: #include "ProcObjectMan_c.h"
+#include "WaterCreatureManager_c.h"
+#include "MenuManager.h"
+#include "FireManager.h"
+#include "Fx_c.h"
+#include "BreakManager_c.h"
+// todo: #include "BoneNodeManager_c.h"
+// todo: #include "ShadowManager.h"
+#include "PedType.h"
+#include "IKChainManager_c.h"
+#include "CreepingFire.h"
+#include "Skidmarks.h"
+#include "CarCtrl.h"
+#include "TagManager.h"
+#include "Clouds.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
@@ -22,26 +38,29 @@ bool& gbLARiots = *(bool*)0xB72958;
 bool& gbLARiots_NoPoliceCars = *(bool*)0xB72959;
 
 void CGame::InjectHooks() {
-//    ReversibleHooks::Install("CGame", "CanSeeOutSideFromCurrArea", 0x53C4A0, &CGame::CanSeeOutSideFromCurrArea);
-//    ReversibleHooks::Install("CGame", "CanSeeWaterFromCurrArea", 0x53C4B0, &CGame::CanSeeWaterFromCurrArea);
-    ReversibleHooks::Install("CGame", "Init1", 0x5BF840, &CGame::Init1);
-    ReversibleHooks::Install("CGame", "Init2", 0x5BA1A0, &CGame::Init2);
-//    ReversibleHooks::Install("CGame", "Init3", 0x5BA400, &CGame::Init3);
-    ReversibleHooks::Install("CGame", "Initialise", 0x53BC80, &CGame::Initialise);
-//    ReversibleHooks::Install("CGame", "InitialiseCoreDataAfterRW", 0x5BFA90, &CGame::InitialiseCoreDataAfterRW);
-//    ReversibleHooks::Install("CGame", "InitialiseEssentialsAfterRW", 0x5BA160, &CGame::InitialiseEssentialsAfterRW);
-    ReversibleHooks::Install("CGame", "InitialiseOnceBeforeRW", 0x53BB50, &CGame::InitialiseOnceBeforeRW);
-//    ReversibleHooks::Install("CGame", "InitialiseRenderWare", 0x5BD600, &CGame::InitialiseRenderWare);
-//    ReversibleHooks::Install("CGame", "InitialiseWhenRestarting", 0x53C680, &CGame::InitialiseWhenRestarting);
-//    ReversibleHooks::Install("CGame", "Process", 0x53BEE0, &CGame::Process);
-//    ReversibleHooks::Install("CGame", "ReInitGameObjectVariables", 0x53BCF0, &CGame::ReInitGameObjectVariables);
-//    ReversibleHooks::Install("CGame", "ReloadIPLs", 0x53BED0, &CGame::ReloadIPLs);
-//    ReversibleHooks::Install("CGame", "ShutDownForRestart", 0x53C550, &CGame::ShutDownForRestart);
-//    ReversibleHooks::Install("CGame", "Shutdown", 0x53C900, &CGame::Shutdown);
-    ReversibleHooks::Install("CGame", "ShutdownRenderWare", 0x53BB80, &CGame::ShutdownRenderWare);
-//    ReversibleHooks::Install("CGame", "DrasticTidyUpMemory", 0x53C810, &CGame::DrasticTidyUpMemory);
-//    ReversibleHooks::Install("CGame", "FinalShutdown", 0x53BC30, &CGame::FinalShutdown);
-//    ReversibleHooks::Install("CGame", "TidyUpMemory", 0x53C500, &CGame::TidyUpMemory);
+    RH_ScopedClass(CGame);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(CanSeeOutSideFromCurrArea, 0x53C4A0);
+    // RH_ScopedInstall(CanSeeWaterFromCurrArea, 0x53C4B0);
+    RH_ScopedInstall(Init1, 0x5BF840);
+    RH_ScopedInstall(Init2, 0x5BA1A0);
+    // RH_ScopedInstall(Init3, 0x5BA400);
+    RH_ScopedInstall(Initialise, 0x53BC80);
+    // RH_ScopedInstall(InitialiseCoreDataAfterRW, 0x5BFA90);
+    // RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
+    RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
+    // RH_ScopedInstall(InitialiseRenderWare, 0x5BD600);
+    // RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
+    // RH_ScopedInstall(Process, 0x53BEE0);
+    // RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
+    // RH_ScopedInstall(ReloadIPLs, 0x53BED0);
+    // RH_ScopedInstall(ShutDownForRestart, 0x53C550);
+    // RH_ScopedInstall(Shutdown, 0x53C900);
+    RH_ScopedInstall(ShutdownRenderWare, 0x53BB80);
+    // RH_ScopedInstall(DrasticTidyUpMemory, 0x53C810);
+    // RH_ScopedInstall(FinalShutdown, 0x53BC30);
+    // RH_ScopedInstall(TidyUpMemory, 0x53C500);
 }
 
 // 0x72FD90
@@ -75,7 +94,7 @@ void CGame::ShutdownRenderWare() {
 
 // 0x53C4A0
 bool CGame::CanSeeOutSideFromCurrArea() {
-    return plugin::CallAndReturn<bool, 0x53C4A0>();
+    return currArea == AREA_CODE_NORMAL_WORLD;
 }
 
 // 0x53C4B0
@@ -85,12 +104,18 @@ bool CGame::CanSeeWaterFromCurrArea() {
 
 // 0x53C500
 void CGame::TidyUpMemory(bool a1, bool clearD3Dmem) {
-    plugin::Call<0x53C500, bool, bool>(a1, clearD3Dmem);
+    if (FindPlayerPed(0)) {
+        if (clearD3Dmem) {
+            D3DResourceSystem::TidyUpD3DTextures(100);
+            D3DResourceSystem::TidyUpD3DIndexBuffers(200);
+        }
+    }
 }
 
 // 0x53C810
 void CGame::DrasticTidyUpMemory(bool a1) {
-    plugin::Call<0x53C810, bool>(a1);
+    D3DResourceSystem::TidyUpD3DTextures(100);
+    D3DResourceSystem::TidyUpD3DIndexBuffers(200);
 }
 
 // 0x53C900
@@ -100,12 +125,59 @@ bool CGame::Shutdown() {
 
 // 0x53C550
 void CGame::ShutDownForRestart() {
-    plugin::Call<0x53C550>();
+    return plugin::Call<0x53C550>();
+
+    D3DResourceSystem::SetUseD3DResourceBuffering(false);
+    // todo: CVehicleRecording::ShutDown();
+    CReplay::FinishPlayback();
+    CReplay::EmptyReplayBuffer();
+    CMovingThings::Shutdown();
+
+    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
+        CWorld::Players[i].Clear();
+    }
+    
+    memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
+    CTheScripts::UndoBuildingSwaps();
+    CTheScripts::UndoEntityInvisibilitySettings();
+    // todo: g_interiorMan.Exit();
+    // todo: g_procObjMan.Exit();
+    g_waterCreatureMan.Exit();
+    CRopes::Shutdown();
+    CWorld::ClearForRestart();
+    CGameLogic::ClearSkip(false);
+    CTimer::Shutdown();
+    CStreaming::ReInit();
+    CRadar::RemoveRadarSections();
+    FrontEndMenuManager.UnloadTextures();
+    CSetPieces::Init();
+    CConversations::Clear();
+    CPedToPlayerConversations::Clear();
+    CPedType::Shutdown();
+    CSpecialFX::Shutdown();
+    gFireManager.Shutdown();
+    g_fx.Reset();
+    g_breakMan.ResetAll();
+    // todo: g_boneNodeMan.Reset();
+    g_ikChainMan.Reset();
+    // todo: g_realTimeShadowMan.Shutdown();
+    CTheZones::ResetZonesRevealed();
+    CEntryExitManager::ShutdownForRestart();
+    CShopping::ShutdownForRestart();
+    CTagManager::ShutdownForRestart();
+    CStuntJumpManager::ShutdownForRestart();
+    FindPlayerPed(0);
+    CVehicle::ms_forceVehicleLightsOff = false;
 }
 
 // 0x53BC30
 void CGame::FinalShutdown() {
-    plugin::Call<0x53BC30>();
+    ThePaths.Shutdown();
+    CTempColModels::Shutdown();
+    CTxdStore::Shutdown();
+    CPedStats::Shutdown();
+    TheText.Unload(false);
+    CdStreamShutdown();
 }
 
 // dummy function
@@ -181,11 +253,11 @@ bool CGame::Init1(char const *datFile) {
 
 // 0x5BA1A0
 void CGame::Init2(char const* datFile) {
-    LoadingScreen((char*)"Loading the Game", (char*)"Add Particles");
+    LoadingScreen("Loading the Game", "Add Particles");
     CTheZones::PostZoneCreation();
     CEntryExitManager::PostEntryExitsCreation();
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup paths");
+    LoadingScreen("Loading the Game", "Setup paths");
     CPathFind::PreparePathData();
 
     for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
@@ -194,7 +266,7 @@ void CGame::Init2(char const* datFile) {
     }
 
     TestModelIndices();
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup water");
+    LoadingScreen("Loading the Game", "Setup water");
     CClothes::Init();
     CWaterLevel::WaterLevelInitialise();
     CDraw::SetFOV(120.0f);
@@ -204,29 +276,29 @@ void CGame::Init2(char const* datFile) {
         return;
     }
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup streaming");
+    LoadingScreen("Loading the Game", "Setup streaming");
     CStreaming::LoadInitialVehicles();
     CStreaming::LoadInitialPeds();
     CStreaming::LoadAllRequestedModels(false);
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Load animations");
+    LoadingScreen("Loading the Game", "Load animations");
     CAnimManager::LoadAnimFiles();
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup streaming");
+    LoadingScreen("Loading the Game", "Setup streaming");
     CStreaming::LoadInitialWeapons();
     CStreaming::LoadAllRequestedModels(false);
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Ped Init");
+    LoadingScreen("Loading the Game", "Ped Init");
     CPed::Initialise();
     CRenderer::Init();
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup game variables");
+    LoadingScreen("Loading the Game", "Setup game variables");
     CRadar::Initialise();
     CRadar::LoadTextures();
 
     LoadingScreen(nullptr, nullptr);
     CWeapon::InitialiseWeapons();
-    CRoadBlocks::Init(datFile);
+    CRoadBlocks::Init();
 
     LoadingScreen(nullptr, nullptr);
     CPopulation::Initialise();
@@ -242,11 +314,11 @@ void CGame::Init2(char const* datFile) {
     CGlass::Init();
     CGarages::Init_AfterRestart();
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Load scripts");
-    CTheScripts::Init(datFile);
+    LoadingScreen("Loading the Game", "Load scripts");
+    CTheScripts::Init();
     CGangs::Initialise();
 
-    LoadingScreen((char*)"Loading the Game", (char*)"Setup game variables");
+    LoadingScreen("Loading the Game", "Setup game variables");
     CClock::Initialise(1000);
     CHeli::InitHelis();
     CCranes::InitCranes();
@@ -342,7 +414,78 @@ void CGame::Process() {
 
 // 0x53BCF0
 void CGame::ReInitGameObjectVariables() {
-    plugin::Call<0x53BCF0>();
+    return plugin::Call<0x53BCF0>();
+
+    TheCamera.Init();
+    CGameLogic::InitAtStartOfGame();
+    CGangWars::InitAtStartOfGame();
+    CWanted::InitialiseStaticVariables();
+    TheCamera.Init();
+    TheCamera.SetRwCamera(Scene.m_pRwCamera);
+    CSkidmarks::Clear();
+    CWeather::Init();
+    CCover::Init();
+    CUserDisplay::Init();
+    CMessages::Init();
+    CRestart::Initialise();
+    CPostEffects::ScriptResetForEffects();
+    CWorld::bDoingCarCollisions = false;
+    CHud::ReInitialise();
+    CRadar::Initialise();
+    CCarCtrl::ReInit();
+    // todo: ThePaths.ReInit();
+    CTimeCycle::Initialise();
+    CPopCycle::Initialise();
+    CDraw::SetFOV(120.0f);
+    CDraw::ms_fLODDistance = 500.0f;
+    CGame::currArea = AREA_CODE_NORMAL_WORLD;
+    CPed::Initialise();
+    CWeapon::InitialiseWeapons();
+    CPopulation::Initialise();
+
+    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
+        CWorld::Players[i].Clear();
+    }
+
+    CWorld::PlayerInFocus = 0;
+    CGlass::Init();
+    gbLARiots_NoPoliceCars = false;
+    gbLARiots = false;
+    CTheScripts::Init();
+    CMenuSystem::Initialise();
+    CGangs::Initialise();
+    CTimer::Initialise();
+    CClock::Initialise(1000u);
+    CTheCarGenerators::Init();
+    CHeli::InitHelis();
+    CMovingThings::Init();
+    CDarkel::Init();
+    CStats::Init();
+    CGarages::Init_AfterRestart();
+    CRoadBlocks::Init();
+    CStreaming::DisableCopBikes(false);
+    CSpecialFX::Init();
+    CRopes::Init();
+    CWaterCannons::Init();
+    // todo: CDecisionMakerTypesFileLoader::ReStart();
+    CVehicleRecording::Init();
+    gFireManager.Init();
+    // todo: g_interiorMan.Init();
+    // todo: g_procObjMan.Init();
+    g_waterCreatureMan.Init();
+    g_realTimeShadowMan.Init();
+    CStreaming::RemoveInappropriatePedModels();
+    AudioEngine.ResetStatistics();
+    if ( !FrontEndMenuManager.m_bLoadingData )
+    {
+        CCranes::InitCranes();
+        CTheScripts::StartTestScript();
+        CTheScripts::Process();
+        TheCamera.Process();
+        CTrain::InitTrains();
+    }
+    CPad::GetPad(0)->Clear(true, true);
+    CPad::GetPad(1)->Clear(true, true);
 }
 
 // dummy function

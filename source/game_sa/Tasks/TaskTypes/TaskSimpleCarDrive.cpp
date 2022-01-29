@@ -2,27 +2,29 @@
 
 #include "TaskSimpleCarDrive.h"
 
-CTaskSimpleCarDrive* CTaskSimpleCarDrive::Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, bool bUpdateCurrentVehicle)
-{
-    return plugin::CallMethodAndReturn<CTaskSimpleCarDrive*, 0x63C340, CTaskSimpleCarDrive*, CVehicle*, CTaskUtilityLineUpPedWithCar*, bool>(this, pVehicle, pUtilityTask, bUpdateCurrentVehicle);
+CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle) {
+    plugin::CallMethodAndReturn<CTaskSimpleCarDrive*, 0x63C340, CTaskSimpleCarDrive*, CVehicle*, CTaskUtilityLineUpPedWithCar*, bool>(this, vehicle, utilityTask, updateCurrentVehicle);
 }
 
-CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, bool bUpdateCurrentVehicle)
-{
-    plugin::CallMethodAndReturn<CTaskSimpleCarDrive*, 0x63C340, CTaskSimpleCarDrive*, CVehicle*, CTaskUtilityLineUpPedWithCar*, bool>(this, pVehicle, pUtilityTask, bUpdateCurrentVehicle);
-}
-
-bool CTaskSimpleCarDrive::ProcessPed(CPed* ped)
-{
+bool CTaskSimpleCarDrive::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x644470, CTaskSimpleCarDrive*, CPed*>(this, ped);
 }
 
-CTask* CTaskSimpleCarDrive::Clone()
-{
+CTask* CTaskSimpleCarDrive::Clone() {
     return plugin::CallMethodAndReturn<CTask*, 0x63DC20, CTaskSimpleCarDrive*>(this);
 }
 
-bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x63DC20, CTaskSimpleCarDrive*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+}
+
+void CTaskSimpleCarDrive::InjectHooks() {
+    RH_ScopedClass(CTaskSimpleCarDrive);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    
+}
+
+CTaskSimpleCarDrive* CTaskSimpleCarDrive::Constructor(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle) {
+    this->CTaskSimpleCarDrive::CTaskSimpleCarDrive(vehicle, utilityTask, updateCurrentVehicle);
+    return this;
 }

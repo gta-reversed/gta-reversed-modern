@@ -2,61 +2,91 @@
 
 void CEvent::InjectHooks()
 {
-    ReversibleHooks::Install("CEvent", "CEvent", 0x4ABFC0, &CEvent::Constructor);
-    ReversibleHooks::Install("CEvent", "CalcSoundLevelIncrement", 0x4AC050, &CEvent::CalcSoundLevelIncrement);
-    ReversibleHooks::Install("CEvent", "GetSoundLevel", 0x4B2850, &CEvent::GetSoundLevel);
+    RH_ScopedClass(CEvent);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ABFC0);
+    RH_ScopedInstall(CalcSoundLevelIncrement, 0x4AC050);
+    RH_ScopedInstall(GetSoundLevel, 0x4B2850);
 }
 
 void CEventRevived::InjectHooks()
 {
-    ReversibleHooks::Install("CEventRevived", "CEventRevived", 0x4AEC50, &CEventRevived::Constructor);
-    ReversibleHooks::Install("CEventRevived", "AffectsPed_Reversed", 0x4AECB0, &CEventRevived::AffectsPed_Reversed);
+    RH_ScopedClass(CEventRevived);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AEC50);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AECB0);
 }
 
 void CEventEscalator::InjectHooks()
 {
-    ReversibleHooks::Install("CEventEscalator", "CEventEscalator", 0x5FF820, &CEventEscalator::Constructor);
-    ReversibleHooks::Install("CEventEscalator", "AffectsPed_Reversed", 0x4B2580, &CEventEscalator::AffectsPed_Reversed);
+    RH_ScopedClass(CEventEscalator);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF820);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2580);
 }
 
 void CEventSexyVehicle::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSexyVehicle", "CEventSexyVehicle", 0x4AF010, &CEventSexyVehicle::Constructor);
+    RH_ScopedClass(CEventSexyVehicle);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF010);
 }
 
 void CEventChatPartner::InjectHooks()
 {
-    ReversibleHooks::Install("CEventChatPartner", "CEventChatPartner", 0x4AECD0, &CEventChatPartner::Constructor);
+    RH_ScopedClass(CEventChatPartner);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AECD0);
 }
 
 void CEventCopCarBeingStolen::InjectHooks()
 {
-    ReversibleHooks::Install("CEventCopCarBeingStolen", "CEventCopCarBeingStolen", 0x4B1740, &CEventCopCarBeingStolen::Constructor);
-    ReversibleHooks::Install("CEventCopCarBeingStolen", "AffectsPed_Reversed", 0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
+    RH_ScopedClass(CEventCopCarBeingStolen);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1740);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1860);
 }
 
 void CEventCarUpsideDown::InjectHooks()
 {
-    ReversibleHooks::Install("CEventCarUpsideDown", "CEventCarUpsideDown", 0x4B1CC0, &CEventCarUpsideDown::Constructor);
-    ReversibleHooks::Install("CEventCarUpsideDown", "AffectsPed_Reversed", 0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
+    RH_ScopedClass(CEventCarUpsideDown);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1CC0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1DB0);
 }
 
 void CEventPassObject::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPassObject", "CEventPassObject", 0x65DC70, &CEventPassObject::Constructor);
-    ReversibleHooks::Install("CEventPassObject", "IsValid_Reversed", 0x4B1700, &CEventPassObject::IsValid_Reversed);
+    RH_ScopedClass(CEventPassObject);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x65DC70);
+    RH_ScopedInstall(IsValid_Reversed, 0x4B1700);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeanOnVehicle", "CEventLeanOnVehicle", 0x65DAF0, &CEventLeanOnVehicle::Constructor);
-    ReversibleHooks::Install("CEventLeanOnVehicle", "IsValid_Reversed", 0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
+    RH_ScopedClass(CEventLeanOnVehicle);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x65DAF0);
+    RH_ScopedInstall(IsValid_Reversed, 0x4B16C0);
 }
 
 void CEventOnFire::InjectHooks()
 {
-    ReversibleHooks::Install("CEventOnFire", "CEventOnFire", 0x5FF740, &CEventOnFire::Constructor);
-    ReversibleHooks::Install("CEventOnFire", "AffectsPed_Reversed", 0x4B1050, &CEventOnFire::AffectsPed_Reversed);
+    RH_ScopedClass(CEventOnFire);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF740);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1050);
 }
 
 CEvent::CEvent() {
@@ -74,11 +104,9 @@ CEvent* CEvent::Constructor()
     return this;
 }
 
+// 0x4B2850
 float CEvent::GetSoundLevel(CEntity* entity, CVector& position)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<float, 0x4B2850, CEvent*, CEntity*, CVector&>(this, entity, position);
-#else
     if ((entity && entity != GetSourceEntity()) || GetLocalSoundLevel() == 0.0f)
         return 0.0f;
 
@@ -92,22 +120,20 @@ float CEvent::GetSoundLevel(CEntity* entity, CVector& position)
         level = std::min((position - sourcePos).Magnitude(), 1.0f);
     }
     return (GetLocalSoundLevel() - (log10f(level * level) * 10.0f)) - (level / 100.0f);
-#endif
 }
 
+// 0x4AC050
 float CEvent::CalcSoundLevelIncrement(float level1, float level2)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<float, 0x4AC050, float, float>(level1, level2);
-#else
     if (level2 == 0.0f)
         return 0.0f;
+
     if (level1 == 0.0f)
         return level2;
+
     level1 = powf(10.0f, level1 * 0.1f);
     level2 = powf(10.0f, level2 * 0.1f);
     return log10f((level1 + level2) / level1) * 10.0f;
-#endif
 }
 
 CEventRevived* CEventRevived::Constructor()
@@ -116,13 +142,10 @@ CEventRevived* CEventRevived::Constructor()
     return this;
 }
 
+// 0x4AECB0
 bool CEventRevived::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AECB0, CEventRevived*, CPed*>(this, ped);
-#else
     return CEventRevived::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventRevived::AffectsPed_Reversed(CPed* ped)
@@ -138,13 +161,10 @@ CEventEscalator* CEventEscalator::Constructor()
     return this;
 }
 
+// 0x4B2580
 bool CEventEscalator::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2580, CEventEscalator*, CPed*>(this, ped);
-#else
     return CEventEscalator::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventEscalator::AffectsPed_Reversed(CPed* ped)
@@ -220,13 +240,10 @@ CEventCopCarBeingStolen* CEventCopCarBeingStolen::Constructor(CPed* hijacker, CV
     return this;
 }
 
+// 0x4B1860
 bool CEventCopCarBeingStolen::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1860, CEventCopCarBeingStolen*, CPed*>(this, ped);
-#else
     return CEventCopCarBeingStolen::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventCopCarBeingStolen::AffectsPed_Reversed(CPed* ped)
@@ -257,13 +274,10 @@ CEventCarUpsideDown* CEventCarUpsideDown::Constructor(CVehicle* vehicle)
     return this;
 }
 
+// 0x4B1DB0
 bool CEventCarUpsideDown::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1DB0, CEventCarUpsideDown*, CPed*>(this, ped);
-#else
     return CEventCarUpsideDown::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventCarUpsideDown::AffectsPed_Reversed(CPed* ped)
@@ -299,21 +313,20 @@ CEventPassObject* CEventPassObject::Constructor(CEntity* giver, bool dontPassObj
     return this;
 }
 
+// 0x4B1700
 bool CEventPassObject::IsValid(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1700, CEventPassObject*, CPed*>(this, ped);
-#else
     return CEventPassObject::IsValid_Reversed(ped);
-#endif
 }
 
 bool CEventPassObject::IsValid_Reversed(CPed* ped)
 {
     if (ped)
         return ped->IsAlive();
+
     if (CEvent::IsValid(ped))
         return true;
+
     return false;
 }
 
@@ -337,21 +350,20 @@ CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, int32 l
     return this;
 }
 
+// 0x4B16C0
 bool CEventLeanOnVehicle::IsValid(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B16C0, CEventLeanOnVehicle*, CPed*>(this, ped);
-#else
     return CEventLeanOnVehicle::IsValid_Reversed(ped);
-#endif
 }
 
 bool CEventLeanOnVehicle::IsValid_Reversed(CPed* ped)
 {
     if (ped)
         return ped->IsAlive();
+
     if (CEvent::IsValid(ped))
         return true;
+
     return false;
 }
 
@@ -361,13 +373,10 @@ CEventOnFire* CEventOnFire::Constructor()
     return this;
 }
 
+// 0x4B1050
 bool CEventOnFire::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B1050, CEventOnFire*, CPed*>(this, ped);
-#else
     return CEventOnFire::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventOnFire::AffectsPed_Reversed(CPed* ped)
@@ -376,9 +385,11 @@ bool CEventOnFire::AffectsPed_Reversed(CPed* ped)
         CTask* activeTask = ped->GetTaskManager().GetActiveTask();
         if (activeTask && activeTask->GetTaskType() == TASK_COMPLEX_ON_FIRE)
             return false;
+
         CTask* partialAnimTask = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
         if (partialAnimTask && partialAnimTask->GetTaskType() == TASK_SIMPLE_PLAYER_ON_FIRE)
             return false;
+
         return ped->IsAlive(); 
     }
     return false;

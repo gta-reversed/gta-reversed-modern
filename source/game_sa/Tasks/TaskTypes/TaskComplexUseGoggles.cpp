@@ -51,7 +51,7 @@ CTask* CTaskComplexUseGoggles::ControlSubTask(CPed* ped) {
 
         auto* task = ped->m_pIntelligence->FindTaskByType(TASK_SIMPLE_PLAYER_ON_FOOT);
         if (task)
-            static_cast<CTaskSimplePlayerOnFoot*>(task)->PlayerControlZelda(ped, true);
+            static_cast<CTaskSimplePlayerOnFoot*>(task)->PlayerControlZelda(static_cast<CPlayerPed*>(ped), true);
 
         ped->m_pPlayerData->m_bPlayerSprintDisabled = false;
     }

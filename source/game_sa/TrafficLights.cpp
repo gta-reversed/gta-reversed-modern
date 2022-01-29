@@ -13,18 +13,21 @@ uint32& CTrafficLights::uiPedLightFlags = *(uint32*)0xA9ADE0;
 
 void CTrafficLights::InjectHooks()
 {
-    ReversibleHooks::Install("CTrafficLights", "ShouldCarStopForLight", 0x49D610, &CTrafficLights::ShouldCarStopForLight);
-    ReversibleHooks::Install("CTrafficLights", "ShouldCarStopForBridge", 0x49D420, &CTrafficLights::ShouldCarStopForBridge);
-    ReversibleHooks::Install("CTrafficLights", "IsMITrafficLight", 0x49D5A0, &CTrafficLights::IsMITrafficLight);
-    ReversibleHooks::Install("CTrafficLights", "DisplayActualLight", 0x49DAB0, &CTrafficLights::DisplayActualLight);
-    ReversibleHooks::Install("CTrafficLights", "FindTrafficLightType", 0x49D580, &CTrafficLights::FindTrafficLightType);
-    ReversibleHooks::Install("CTrafficLights", "FindTrafficLightTypeFromOrientation", 0x49D4D0, &CTrafficLights::FindTrafficLightTypeFromOrientation);
-    ReversibleHooks::Install("CTrafficLights", "FindOrientationForTrafficLightType", 0x49D520, &CTrafficLights::FindOrientationForTrafficLightType);
-    ReversibleHooks::Install("CTrafficLights", "LightForPeds", 0x49D400, &CTrafficLights::LightForPeds);
-    ReversibleHooks::Install("CTrafficLights", "LightForCars1", 0x49D2D0, &CTrafficLights::LightForCars1);
-    ReversibleHooks::Install("CTrafficLights", "LightForCars2", 0x49D310, &CTrafficLights::LightForCars2);
-    ReversibleHooks::Install("CTrafficLights", "LightForCars1_Visual", 0x49D350, &CTrafficLights::LightForCars1_Visual);
-    ReversibleHooks::Install("CTrafficLights", "LightForCars2_Visual", 0x49D3A0, &CTrafficLights::LightForCars2_Visual);
+    RH_ScopedClass(CTrafficLights);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ShouldCarStopForLight, 0x49D610);
+    RH_ScopedInstall(ShouldCarStopForBridge, 0x49D420);
+    RH_ScopedInstall(IsMITrafficLight, 0x49D5A0);
+    RH_ScopedInstall(DisplayActualLight, 0x49DAB0);
+    RH_ScopedInstall(FindTrafficLightType, 0x49D580);
+    RH_ScopedInstall(FindTrafficLightTypeFromOrientation, 0x49D4D0);
+    RH_ScopedInstall(FindOrientationForTrafficLightType, 0x49D520);
+    RH_ScopedInstall(LightForPeds, 0x49D400);
+    RH_ScopedInstall(LightForCars1, 0x49D2D0);
+    RH_ScopedInstall(LightForCars2, 0x49D310);
+    RH_ScopedInstall(LightForCars1_Visual, 0x49D350);
+    RH_ScopedInstall(LightForCars2_Visual, 0x49D3A0);
 }
 
 bool CTrafficLights::ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn)

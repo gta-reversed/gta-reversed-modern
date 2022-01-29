@@ -89,9 +89,9 @@ CEntity * FindPlayerEntity(int32 playerId = -1);
 // returns player train
 CTrain* FindPlayerTrain(int32 playerId = -1);
 // gets player coords
-CVector const& FindPlayerCentreOfWorld(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
 // gets player coords with skipping sniper shift
-CVector const& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
+const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
 // returns player coords with skipping interior shift
 CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
 // returns player angle in radians
@@ -106,12 +106,23 @@ CWanted * FindPlayerWanted(int32 playerId = -1);
 
 CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
-CVector Multiply3x3(CMatrix& m, CVector& v);
-CVector Multiply3x3(CVector& v, CMatrix& m);
+CVector Multiply3x3(const CMatrix& m, const CVector& v);
+CVector Multiply3x3(const CVector& v, const CMatrix& m);
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);
 
 void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+
+// Check point is within 2D rectangle
+static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
+    return point.x >= min.x && point.x <= max.x &&
+           point.y >= min.y && point.y <= max.y;
+}
+
+static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
+    return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+}
 
 // Converts degrees to radians
 // keywords: 0.017453292 flt_8595EC
@@ -174,7 +185,7 @@ AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
-class CEventGroup* GetEventGlobalGroup();
+class CEventGlobalGroup* GetEventGlobalGroup();
 // dummy function
 void CreateDebugFont();
 // dummy function
@@ -290,6 +301,8 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
 CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* association, uint32 flags);
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
 bool RpAnimBlendPluginAttach();
+
+bool GraphicsLowQuality();
 
 /**
  * Writes given raster to PNG file using RtPNGImageWrite

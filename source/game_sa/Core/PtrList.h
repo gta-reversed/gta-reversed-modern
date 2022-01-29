@@ -10,43 +10,18 @@
 
 class CPtrList {
 public:
-    CPtrNode* pNode;
-    inline CPtrNode *GetNode() {
-        return pNode;
-    }
+    CPtrNode* m_node;
 
-    inline CPtrList() {
-        pNode = nullptr;
-    }
+public:
+    static void InjectHooks();
 
-    // get elements count
-    uint32 CountElements();
-    
-    /*
-    uint32 CountElements() {
-        uint32 counter;
-        CPtrNode *currNode = GetNode();
-        for (counter = 0; currNode; ++counter)
-            currNode = currNode->pNext;
-        return counter;
-    }
-    */
+    CPtrList();
 
-    // check if data is a member of list
-    bool IsMemberOfList(void* data);
+    uint32 CountElements() const;
+    bool IsMemberOfList(void* data) const;
 
-    /*
-    bool IsMemberOfList(void* data) {
-        CPtrNode *currNode = GetNode();
-        while (currNode) {
-            if (currNode->pData == data)
-                return true;
-            currNode = currNode->pNext;
-        }
-        return false;
-    }
-    */
-
+    CPtrNode* GetNode() const { return m_node; }
+    bool IsEmpty() const { return !m_node; }
 };
 
-VALIDATE_SIZE(CPtrList, 4);
+VALIDATE_SIZE(CPtrList, 0x4);

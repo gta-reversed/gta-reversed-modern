@@ -6,11 +6,14 @@ CBulletTrace (&CBulletTraces::aTraces)[16] = *(CBulletTrace(*)[16])0xC7C748;
 
 void CBulletTraces::InjectHooks()
 {
-    ReversibleHooks::Install("CBulletTraces", "Init", 0x721D50, &CBulletTraces::Init);
-    ReversibleHooks::Install("CBulletTraces", "AddTrace", 0x723750, static_cast<void(*)(CVector*, CVector*, float, uint32, uint8)>(&CBulletTraces::AddTrace));
-    ReversibleHooks::Install("CBulletTraces", "AddTrace_Wrapper", 0x726AF0, static_cast<void(*)(CVector*, CVector*, eWeaponType, CEntity*)>(&CBulletTraces::AddTrace));
-    ReversibleHooks::Install("CBulletTraces", "Render", 0x723C10, &CBulletTraces::Render);
-    ReversibleHooks::Install("CBulletTraces", "Update", 0x723FB0, &CBulletTraces::Update);
+    RH_ScopedClass(CBulletTraces);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x721D50);
+    RH_ScopedOverloadedInstall(AddTrace, "", 0x723750, void(*)(CVector*, CVector*, float, uint32, uint8));
+    RH_ScopedOverloadedInstall(AddTrace, "Wrapper", 0x726AF0, void(*)(CVector*, CVector*, eWeaponType, CEntity*));
+    RH_ScopedInstall(Render, 0x723C10);
+    RH_ScopedInstall(Update, 0x723FB0);
 }
 
 // 0x721D50
@@ -147,12 +150,12 @@ void CBulletTraces::AddTrace(CVector* posMuzzle, CVector* posBulletHit, eWeaponT
 // 0x723C10
 void CBulletTraces::Render()
 {
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)RwCullMode::rwCULLMODECULLNONE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(RwCullMode::rwCULLMODECULLNONE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
     RxObjSpace3DVertex verts[6];
     for (CBulletTrace& trace : aTraces) {
@@ -195,7 +198,7 @@ void CBulletTraces::Render()
             trace.m_vecEnd - pointOnSurfaceOfRadiusSphere,
         };
 
-        for (auto i = 0; i < std::size(verts); i++) {
+        for (auto i = 0u; i < std::size(verts); i++) {
             const CVector& pos = vertPositions[i];
             RwIm3DVertexSetPos(&verts[i], pos.x, pos.y, pos.z);
         }
@@ -218,8 +221,8 @@ void CBulletTraces::Render()
         }
     }
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,     (void*)RwBlendFunction::rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    (void*)RwBlendFunction::rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,     (void*)RwCullMode::rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,     RWRSTATE(RwCullMode::rwCULLMODECULLBACK));
 }

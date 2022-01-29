@@ -1,74 +1,78 @@
 #include "StdInc.h"
 
 void CRunningScript::InjectHooks() {
-    ReversibleHooks::Install("CRunningScript", "Init", 0x4648E0, &CRunningScript::Init);
-//    ReversibleHooks::Install("CRunningScript", "LocateCarCommand", 0x487A20, &CRunningScript::LocateCarCommand);
-//    ReversibleHooks::Install("CRunningScript", "LocateObjectCommand", 0x487D10, &CRunningScript::LocateObjectCommand);
-//    ReversibleHooks::Install("CRunningScript", "PlayAnimScriptCommand", 0x470150, &CRunningScript::PlayAnimScriptCommand);
-//    ReversibleHooks::Install("CRunningScript", "LocateCharCommand", 0x486D80, &CRunningScript::LocateCharCommand);
-//    ReversibleHooks::Install("CRunningScript", "LocateCharCarCommand", 0x487420, &CRunningScript::LocateCharCarCommand);
-//    ReversibleHooks::Install("CRunningScript", "LocateCharCharCommand", 0x4870F0, &CRunningScript::LocateCharCharCommand);
-//    ReversibleHooks::Install("CRunningScript", "LocateCharObjectCommand", 0x487720, &CRunningScript::LocateCharObjectCommand);
-//    ReversibleHooks::Install("CRunningScript", "CarInAreaCheckCommand", 0x488EC0, &CRunningScript::CarInAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "CharInAreaCheckCommand", 0x488B50, &CRunningScript::CharInAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "ObjectInAreaCheckCommand", 0x489150, &CRunningScript::ObjectInAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "CharInAngledAreaCheckCommand", 0x487F60, &CRunningScript::CharInAngledAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "FlameInAngledAreaCheckCommand", 0x488780, &CRunningScript::FlameInAngledAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "ObjectInAngledAreaCheckCommand", 0x4883F0, &CRunningScript::ObjectInAngledAreaCheckCommand);
-//    ReversibleHooks::Install("CRunningScript", "CollectParameters", 0x464080, &CRunningScript::CollectParameters);
-//    ReversibleHooks::Install("CRunningScript", "CollectNextParameterWithoutIncreasingPC", 0x464250, &CRunningScript::CollectNextParameterWithoutIncreasingPC);
-//    ReversibleHooks::Install("CRunningScript", "StoreParameters", 0x464370, &CRunningScript::StoreParameters);
-//    ReversibleHooks::Install("CRunningScript", "ReadArrayInformation", 0x463CF0, &CRunningScript::ReadArrayInformation);
-//    ReversibleHooks::Install("CRunningScript", "ReadParametersForNewlyStartedScript", 0x464500, &CRunningScript::ReadParametersForNewlyStartedScript);
-//    ReversibleHooks::Install("CRunningScript", "ReadTextLabelFromScript", 0x463D50, &CRunningScript::ReadTextLabelFromScript);
-//    ReversibleHooks::Install("CRunningScript", "GetCorrectPedModelIndexForEmergencyServiceType", 0x464F50, &CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType);
-//    ReversibleHooks::Install("CRunningScript", "GetIndexOfGlobalVariable", 0x464700, &CRunningScript::GetIndexOfGlobalVariable);
-//    ReversibleHooks::Install("CRunningScript", "GetPadState", 0x485B10, &CRunningScript::GetPadState);
-//    ReversibleHooks::Install("CRunningScript", "GetPointerToLocalVariable", 0x, &CRunningScript::GetPointerToLocalVariable);
-//    ReversibleHooks::Install("CRunningScript", "GetPointerToLocalArrayElement", 0x463CC0, &CRunningScript::GetPointerToLocalArrayElement);
-//    ReversibleHooks::Install("CRunningScript", "GetPointerToScriptVariable", 0x464790, &CRunningScript::GetPointerToScriptVariable);
-//    ReversibleHooks::Install("CRunningScript", "DoDeathArrestCheck", 0x485A50, &CRunningScript::DoDeathArrestCheck);
-//    ReversibleHooks::Install("CRunningScript", "SetCharCoordinates", 0x464DC0, &CRunningScript::SetCharCoordinates);
-//    ReversibleHooks::Install("CRunningScript", "GivePedScriptedTask", 0x465C20, &CRunningScript::GivePedScriptedTask);
-//    ReversibleHooks::Install("CRunningScript", "AddScriptToList", 0x, &CRunningScript::AddScriptToList);
-//    ReversibleHooks::Install("CRunningScript", "RemoveScriptFromList", 0x464BD0, &CRunningScript::RemoveScriptFromList);
-//    ReversibleHooks::Install("CRunningScript", "ShutdownThisScript", 0x465AA0, &CRunningScript::ShutdownThisScript);
-    ReversibleHooks::Install("CRunningScript", "IsPedDead", 0x464D70, &CRunningScript::IsPedDead);
-//    ReversibleHooks::Install("CRunningScript", "ThisIsAValidRandomPed", 0x489490, &CRunningScript::ThisIsAValidRandomPed);
-//    ReversibleHooks::Install("CRunningScript", "ScriptTaskPickUpObject", 0x46AF50, &CRunningScript::ScriptTaskPickUpObject);
-//    ReversibleHooks::Install("CRunningScript", "UpdateCompareFlag", 0x4859D0, &CRunningScript::UpdateCompareFlag);
-//    ReversibleHooks::Install("CRunningScript", "UpdatePC", 0x464DA0, &CRunningScript::UpdatePC);
-//    ReversibleHooks::Install("CRunningScript", "ProcessOneCommand", 0x469EB0, &CRunningScript::ProcessOneCommand);
+    RH_ScopedClass(CRunningScript);
+    RH_ScopedCategory("Scripts");
 
-//    ReversibleHooks::Install("CRunningScript", "Process", 0x469F00, &CRunningScript::Process);
+    RH_ScopedInstall(Init, 0x4648E0);
+    RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
+//    RH_ScopedInstall(LocateCarCommand, 0x487A20);
+//    RH_ScopedInstall(LocateObjectCommand, 0x487D10);
+//    RH_ScopedInstall(PlayAnimScriptCommand, 0x470150);
+//    RH_ScopedInstall(LocateCharCommand, 0x486D80);
+//    RH_ScopedInstall(LocateCharCarCommand, 0x487420);
+//    RH_ScopedInstall(LocateCharCharCommand, 0x4870F0);
+//    RH_ScopedInstall(LocateCharObjectCommand, 0x487720);
+//    RH_ScopedInstall(CarInAreaCheckCommand, 0x488EC0);
+//    RH_ScopedInstall(CharInAreaCheckCommand, 0x488B50);
+//    RH_ScopedInstall(ObjectInAreaCheckCommand, 0x489150);
+//    RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
+//    RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
+//    RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
+//    RH_ScopedInstall(CollectParameters, 0x464080);
+//    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250);
+//    RH_ScopedInstall(StoreParameters, 0x464370);
+//    RH_ScopedInstall(ReadArrayInformation, 0x463CF0);
+//    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500);
+//    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50);
+//    RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
+//    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700);
+//    RH_ScopedInstall(GetPadState, 0x485B10);
+//    Install("CRunningScript", "GetPointerToLocalVariable", 0x, &CRunningScript::GetPointerToLocalVariable);
+//    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0);
+//    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790);
+//    RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
+//    RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
+//    RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
+//    Install("CRunningScript", "AddScriptToList", 0x, &CRunningScript::AddScriptToList);
+//    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0);
+//    RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
+    RH_ScopedInstall(IsPedDead, 0x464D70);
+//    RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
+//    RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
+//    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0);
+//    RH_ScopedInstall(UpdatePC, 0x464DA0);
+//    RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
 
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands0To99", 0x465E60, &CRunningScript::ProcessCommands0To99);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands100To199", 0x466DE0, &CRunningScript::ProcessCommands100To199);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands200To299", 0x469390, &CRunningScript::ProcessCommands200To299);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands300To399", 0x47C100, &CRunningScript::ProcessCommands300To399);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands400To499", 0x47D210, &CRunningScript::ProcessCommands400To499);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands500To599", 0x47E090, &CRunningScript::ProcessCommands500To599);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands600To699", 0x47F370, &CRunningScript::ProcessCommands600To699);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands700To799", 0x47FA30, &CRunningScript::ProcessCommands700To799);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands800To899", 0x481300, &CRunningScript::ProcessCommands800To899);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands900To999", 0x483BD0, &CRunningScript::ProcessCommands900To999);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1000To1099", 0x489500, &CRunningScript::ProcessCommands1000To1099);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1100To1199", 0x48A320, &CRunningScript::ProcessCommands1100To1199);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1200To1299", 0x48B590, &CRunningScript::ProcessCommands1200To1299);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1300To1399", 0x48CDD0, &CRunningScript::ProcessCommands1300To1399);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1400To1499", 0x48EAA0, &CRunningScript::ProcessCommands1400To1499);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1500To1599", 0x490DB0, &CRunningScript::ProcessCommands1500To1599);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1600To1699", 0x493FE0, &CRunningScript::ProcessCommands1600To1699);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1700To1799", 0x496E00, &CRunningScript::ProcessCommands1700To1799);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1800To1899", 0x46D050, &CRunningScript::ProcessCommands1800To1899);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands1900To1999", 0x46B460, &CRunningScript::ProcessCommands1900To1999);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2000To2099", 0x472310, &CRunningScript::ProcessCommands2000To2099);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2100To2199", 0x470A90, &CRunningScript::ProcessCommands2100To2199);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2200To2299", 0x474900, &CRunningScript::ProcessCommands2200To2299);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2300To2399", 0x4762D0, &CRunningScript::ProcessCommands2300To2399);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2400To2499", 0x478000, &CRunningScript::ProcessCommands2400To2499);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2500To2599", 0x47A760, &CRunningScript::ProcessCommands2500To2599);
-//    ReversibleHooks::Install("CRunningScript", "ProcessCommands2600To2699", 0x479DA0, &CRunningScript::ProcessCommands2600To2699);
+//    RH_ScopedInstall(Process, 0x469F00);
+
+//    RH_ScopedInstall(ProcessCommands0To99, 0x465E60);
+//    RH_ScopedInstall(ProcessCommands100To199, 0x466DE0);
+//    RH_ScopedInstall(ProcessCommands200To299, 0x469390);
+//    RH_ScopedInstall(ProcessCommands300To399, 0x47C100);
+//    RH_ScopedInstall(ProcessCommands400To499, 0x47D210);
+//    RH_ScopedInstall(ProcessCommands500To599, 0x47E090);
+//    RH_ScopedInstall(ProcessCommands600To699, 0x47F370);
+//    RH_ScopedInstall(ProcessCommands700To799, 0x47FA30);
+//    RH_ScopedInstall(ProcessCommands800To899, 0x481300);
+//    RH_ScopedInstall(ProcessCommands900To999, 0x483BD0);
+//    RH_ScopedInstall(ProcessCommands1000To1099, 0x489500);
+//    RH_ScopedInstall(ProcessCommands1100To1199, 0x48A320);
+//    RH_ScopedInstall(ProcessCommands1200To1299, 0x48B590);
+//    RH_ScopedInstall(ProcessCommands1300To1399, 0x48CDD0);
+//    RH_ScopedInstall(ProcessCommands1400To1499, 0x48EAA0);
+//    RH_ScopedInstall(ProcessCommands1500To1599, 0x490DB0);
+//    RH_ScopedInstall(ProcessCommands1600To1699, 0x493FE0);
+//    RH_ScopedInstall(ProcessCommands1700To1799, 0x496E00);
+//    RH_ScopedInstall(ProcessCommands1800To1899, 0x46D050);
+//    RH_ScopedInstall(ProcessCommands1900To1999, 0x46B460);
+//    RH_ScopedInstall(ProcessCommands2000To2099, 0x472310);
+//    RH_ScopedInstall(ProcessCommands2100To2199, 0x470A90);
+//    RH_ScopedInstall(ProcessCommands2200To2299, 0x474900);
+//    RH_ScopedInstall(ProcessCommands2300To2399, 0x4762D0);
+//    RH_ScopedInstall(ProcessCommands2400To2499, 0x478000);
+//    RH_ScopedInstall(ProcessCommands2500To2599, 0x47A760);
+//    RH_ScopedInstall(ProcessCommands2600To2699, 0x479DA0);
 }
 
 // 0x4648E0
@@ -232,7 +236,38 @@ void CRunningScript::FlameInAngledAreaCheckCommand(int32 commandId) {
 
 // 0x464F50
 void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId) {
-    plugin::CallMethod<0x464F50, ePedType, int32*>(pedType, pModelId);
+    switch (*pModelId) {
+    case MODEL_LAPD1:
+    case MODEL_SFPD1:
+    case MODEL_LVPD1:
+    case MODEL_LAPDM1:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_CITYCOP;
+        }
+        break;
+    case MODEL_CSHER:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_CSHER;
+        }
+        break;
+    case MODEL_SWAT:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_SWAT1;
+        }
+        break;
+    case MODEL_FBI:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_FBI;
+        }
+        break;
+    case MODEL_ARMY:
+        if (pedType == PED_TYPE_COP) {
+            *pModelId = eCopType::COP_TYPE_ARMY;
+        }
+        break;
+    default:
+        return;
+    }
 }
 
 // Returns offset of global variable

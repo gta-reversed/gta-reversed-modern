@@ -1,11 +1,13 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "ModelInfo.h"
 
 CBaseModelInfo *(&CModelInfo::ms_modelInfoPtrs)[NUM_MODEL_INFOS] = *(CBaseModelInfo*(*)[NUM_MODEL_INFOS])0xA9B0C8;
 int32& CModelInfo::ms_lastPositionSearched = *(int32*)0xAAE948;
@@ -23,37 +25,40 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>& CModelInfo::ms_2dFXInfoStore = *(
 
 void CModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CModelInfo", "Initialise", 0x4C6810, &CModelInfo::Initialise);
-    ReversibleHooks::Install("CModelInfo", "ShutDown", 0x4C63E0, &CModelInfo::ShutDown);
-    ReversibleHooks::Install("CModelInfo", "ReInit2dEffects", 0x4C63B0, &CModelInfo::ReInit2dEffects);
+    RH_ScopedClass(CModelInfo);
+    RH_ScopedCategory("Models");
 
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoUInt16", 0x4C59F0, &CModelInfo::GetModelInfoUInt16);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfoFromHashKey", 0x4C59B0, &CModelInfo::GetModelInfoFromHashKey);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_full", 0x4C5940, (CBaseModelInfo * (*)(char const*, int32*)) & CModelInfo::GetModelInfo);
-    ReversibleHooks::Install("CModelInfo", "GetModelInfo_minmax", 0x4C5A20, (CBaseModelInfo*(*)(char const*, int32, int32))&CModelInfo::GetModelInfo);
+    RH_ScopedInstall(Initialise, 0x4C6810);
+    RH_ScopedInstall(ShutDown, 0x4C63E0);
+    RH_ScopedInstall(ReInit2dEffects, 0x4C63B0);
 
-    ReversibleHooks::Install("CModelInfo", "AddAtomicModel", 0x4C6620, &CModelInfo::AddAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddDamageAtomicModel", 0x4C6650, &CModelInfo::AddDamageAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodAtomicModel", 0x4C6680, &CModelInfo::AddLodAtomicModel);
-    ReversibleHooks::Install("CModelInfo", "AddTimeModel", 0x4C66B0, &CModelInfo::AddTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddLodTimeModel", 0x4C66E0, &CModelInfo::AddLodTimeModel);
-    ReversibleHooks::Install("CModelInfo", "AddWeaponModel", 0x4C6710, &CModelInfo::AddWeaponModel);
-    ReversibleHooks::Install("CModelInfo", "AddClumpModel", 0x4C6740, &CModelInfo::AddClumpModel);
-    ReversibleHooks::Install("CModelInfo", "AddVehicleModel", 0x4C6770, &CModelInfo::AddVehicleModel);
-    ReversibleHooks::Install("CModelInfo", "AddPedModel", 0x4C67A0, &CModelInfo::AddPedModel);
+    RH_ScopedInstall(GetModelInfoUInt16, 0x4C59F0);
+    RH_ScopedInstall(GetModelInfoFromHashKey, 0x4C59B0);
+    RH_ScopedOverloadedInstall(GetModelInfo, "full", 0x4C5940, CBaseModelInfo * (*)(char const*, int32*));
+    RH_ScopedOverloadedInstall(GetModelInfo, "minmax", 0x4C5A20, CBaseModelInfo*(*)(char const*, int32, int32));
 
-    ReversibleHooks::Install("CModelInfo", "IsBoatModel", 0x4C5A70, &CModelInfo::IsBoatModel);
-    ReversibleHooks::Install("CModelInfo", "IsCarModel", 0x4C5AA0, &CModelInfo::IsCarModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrainModel", 0x4C5AD0, &CModelInfo::IsTrainModel);
-    ReversibleHooks::Install("CModelInfo", "IsHeliModel", 0x4C5B00, &CModelInfo::IsHeliModel);
-    ReversibleHooks::Install("CModelInfo", "IsPlaneModel", 0x4C5B30, &CModelInfo::IsPlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsBikeModel", 0x4C5B60, &CModelInfo::IsBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsFakePlaneModel", 0x4C5B90, &CModelInfo::IsFakePlaneModel);
-    ReversibleHooks::Install("CModelInfo", "IsMonsterTruckModel", 0x4C5BC0, &CModelInfo::IsMonsterTruckModel);
-    ReversibleHooks::Install("CModelInfo", "IsQuadBikeModel", 0x4C5BF0, &CModelInfo::IsQuadBikeModel);
-    ReversibleHooks::Install("CModelInfo", "IsBmxModel", 0x4C5C20, &CModelInfo::IsBmxModel);
-    ReversibleHooks::Install("CModelInfo", "IsTrailerModel", 0x4C5C50, &CModelInfo::IsTrailerModel);
-    ReversibleHooks::Install("CModelInfo", "IsVehicleModelType", 0x4C5C80, &CModelInfo::IsVehicleModelType);
+    RH_ScopedInstall(AddAtomicModel, 0x4C6620);
+    RH_ScopedInstall(AddDamageAtomicModel, 0x4C6650);
+    RH_ScopedInstall(AddLodAtomicModel, 0x4C6680);
+    RH_ScopedInstall(AddTimeModel, 0x4C66B0);
+    RH_ScopedInstall(AddLodTimeModel, 0x4C66E0);
+    RH_ScopedInstall(AddWeaponModel, 0x4C6710);
+    RH_ScopedInstall(AddClumpModel, 0x4C6740);
+    RH_ScopedInstall(AddVehicleModel, 0x4C6770);
+    RH_ScopedInstall(AddPedModel, 0x4C67A0);
+
+    RH_ScopedInstall(IsBoatModel, 0x4C5A70);
+    RH_ScopedInstall(IsCarModel, 0x4C5AA0);
+    RH_ScopedInstall(IsTrainModel, 0x4C5AD0);
+    RH_ScopedInstall(IsHeliModel, 0x4C5B00);
+    RH_ScopedInstall(IsPlaneModel, 0x4C5B30);
+    RH_ScopedInstall(IsBikeModel, 0x4C5B60);
+    RH_ScopedInstall(IsFakePlaneModel, 0x4C5B90);
+    RH_ScopedInstall(IsMonsterTruckModel, 0x4C5BC0);
+    RH_ScopedInstall(IsQuadBikeModel, 0x4C5BF0);
+    RH_ScopedInstall(IsBmxModel, 0x4C5C20);
+    RH_ScopedInstall(IsTrailerModel, 0x4C5C50);
+    RH_ScopedInstall(IsVehicleModelType, 0x4C5C80);
 }
 
 // 0x4C63B0
@@ -114,82 +119,82 @@ void CModelInfo::ShutDown()
 // 0x4C6620
 CAtomicModelInfo* CModelInfo::AddAtomicModel(int32 index)
 {
-    auto& pInfo = ms_atomicModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_atomicModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6650
 CDamageAtomicModelInfo* CModelInfo::AddDamageAtomicModel(int32 index)
 {
-    auto& pInfo = ms_damageAtomicModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_damageAtomicModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6680
 CLodAtomicModelInfo* CModelInfo::AddLodAtomicModel(int32 index)
 {
-    auto& pInfo =  ms_lodAtomicModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi =  ms_lodAtomicModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C66B0
 CTimeModelInfo* CModelInfo::AddTimeModel(int32 index)
 {
-    auto& pInfo = ms_timeModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_timeModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C66E0
 CLodTimeModelInfo* CModelInfo::AddLodTimeModel(int32 index)
 {
-    auto& pInfo = ms_lodTimeModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_lodTimeModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6710
 CWeaponModelInfo* CModelInfo::AddWeaponModel(int32 index)
 {
-    auto& pInfo = ms_weaponModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_weaponModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6740
 CClumpModelInfo* CModelInfo::AddClumpModel(int32 index)
 {
-    auto& pInfo = ms_clumpModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_clumpModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6770
 CVehicleModelInfo* CModelInfo::AddVehicleModel(int32 index)
 {
-    auto& pInfo = ms_vehicleModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_vehicleModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C67A0
 CPedModelInfo* CModelInfo::AddPedModel(int32 index)
 {
-    auto& pInfo = ms_pedModelInfoStore.AddItem();
-    pInfo.Init();
-    CModelInfo::SetModelInfo(index, &pInfo);
-    return &pInfo;
+    auto& mi = ms_pedModelInfoStore.AddItem();
+    mi.Init();
+    CModelInfo::SetModelInfo(index, &mi);
+    return &mi;
 }
 
 // 0x4C6810
@@ -207,45 +212,45 @@ void CModelInfo::Initialise()
     ms_2dFXInfoStore.m_nCount = 0;
     ms_atomicModelInfoStore.m_nCount = 0;
 
-    auto pDoor1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_DOOR1);
-    pDoor1->SetColModel(&CTempColModels::ms_colModelDoor1, false);
-    pDoor1->SetTexDictionary("generic");
-    pDoor1->m_fDrawDistance = 80.0F;
+    auto door1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_DOOR1);
+    door1->SetColModel(&CTempColModels::ms_colModelDoor1, false);
+    door1->SetTexDictionary("generic");
+    door1->m_fDrawDistance = 80.0F;
 
-    auto pBumper1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BUMPER1);
-    pBumper1->SetColModel(&CTempColModels::ms_colModelBumper1, false);
-    pBumper1->SetTexDictionary("generic");
-    pBumper1->m_fDrawDistance = 80.0F;
+    auto bumper1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BUMPER1);
+    bumper1->SetColModel(&CTempColModels::ms_colModelBumper1, false);
+    bumper1->SetTexDictionary("generic");
+    bumper1->m_fDrawDistance = 80.0F;
 
-    auto pModelPanel1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_PANEL1);
-    pModelPanel1->SetColModel(&CTempColModels::ms_colModelPanel1, false);
-    pModelPanel1->SetTexDictionary("generic");
-    pModelPanel1->m_fDrawDistance = 80.0F;
+    auto modelPanel1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_PANEL1);
+    modelPanel1->SetColModel(&CTempColModels::ms_colModelPanel1, false);
+    modelPanel1->SetTexDictionary("generic");
+    modelPanel1->m_fDrawDistance = 80.0F;
 
-    auto pBonnet1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BONNET1);
-    pBonnet1->SetColModel(&CTempColModels::ms_colModelBonnet1, false);
-    pBonnet1->SetTexDictionary("generic");
-    pBonnet1->m_fDrawDistance = 80.0F;
+    auto bonnet1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BONNET1);
+    bonnet1->SetColModel(&CTempColModels::ms_colModelBonnet1, false);
+    bonnet1->SetTexDictionary("generic");
+    bonnet1->m_fDrawDistance = 80.0F;
 
-    auto pBoot1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BOOT1);
-    pBoot1->SetColModel(&CTempColModels::ms_colModelBoot1, false);
-    pBoot1->SetTexDictionary("generic");
-    pBoot1->m_fDrawDistance = 80.0F;
+    auto boot1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BOOT1);
+    boot1->SetColModel(&CTempColModels::ms_colModelBoot1, false);
+    boot1->SetTexDictionary("generic");
+    boot1->m_fDrawDistance = 80.0F;
 
-    auto pWheel1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_WHEEL1);
-    pWheel1->SetColModel(&CTempColModels::ms_colModelWheel1, false);
-    pWheel1->SetTexDictionary("generic");
-    pWheel1->m_fDrawDistance = 80.0F;
+    auto wheel1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_WHEEL1);
+    wheel1->SetColModel(&CTempColModels::ms_colModelWheel1, false);
+    wheel1->SetTexDictionary("generic");
+    wheel1->m_fDrawDistance = 80.0F;
 
-    auto pBodyPart1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BODYPART1);
-    pBodyPart1->SetColModel(&CTempColModels::ms_colModelBodyPart1, false);
-    pBodyPart1->SetTexDictionary("generic");
-    pBodyPart1->m_fDrawDistance = 80.0F;
+    auto bodyPart1 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BODYPART1);
+    bodyPart1->SetColModel(&CTempColModels::ms_colModelBodyPart1, false);
+    bodyPart1->SetTexDictionary("generic");
+    bodyPart1->m_fDrawDistance = 80.0F;
 
-    auto pBodyPart2 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BODYPART2);
-    pBodyPart2->SetColModel(&CTempColModels::ms_colModelBodyPart2, false);
-    pBodyPart2->SetTexDictionary("generic");
-    pBodyPart2->m_fDrawDistance = 80.0F;
+    auto bodyPart2 = CModelInfo::AddAtomicModel(eModelID::MODEL_TEMPCOL_BODYPART2);
+    bodyPart2->SetColModel(&CTempColModels::ms_colModelBodyPart2, false);
+    bodyPart2->SetTexDictionary("generic");
+    bodyPart2->m_fDrawDistance = 80.0F;
 }
 
 // 0x4C5940
@@ -255,13 +260,13 @@ CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int32* index)
     auto iCurInd = CModelInfo::ms_lastPositionSearched;
 
     while (iCurInd < NUM_MODEL_INFOS) {
-        auto pInfo = CModelInfo::GetModelInfo(iCurInd);
-        if (pInfo && pInfo->m_nKey == iKey) {
+        auto mi = CModelInfo::GetModelInfo(iCurInd);
+        if (mi && mi->m_nKey == iKey) {
             CModelInfo::ms_lastPositionSearched = iCurInd;
             if (index)
                 *index = iCurInd;
 
-            return pInfo;
+            return mi;
         }
 
         ++iCurInd;
@@ -272,13 +277,13 @@ CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int32* index)
         return nullptr;
 
     while (iCurInd >= 0) {
-        auto pInfo = CModelInfo::GetModelInfo(iCurInd);
-        if (pInfo && pInfo->m_nKey == iKey) {
+        auto mi = CModelInfo::GetModelInfo(iCurInd);
+        if (mi && mi->m_nKey == iKey) {
             CModelInfo::ms_lastPositionSearched = iCurInd;
             if (index)
                 *index = iCurInd;
 
-            return pInfo;
+            return mi;
         }
 
         --iCurInd;
@@ -291,12 +296,12 @@ CBaseModelInfo* CModelInfo::GetModelInfo(const char* name, int32* index)
 CBaseModelInfo* CModelInfo::GetModelInfoFromHashKey(uint32 uiHash, int32* index)
 {
     for (int32 i = 0; i < NUM_MODEL_INFOS; ++i) {
-        auto pInfo = CModelInfo::GetModelInfo(i);
-        if (pInfo && pInfo->m_nKey == uiHash) {
+        auto mi = CModelInfo::GetModelInfo(i);
+        if (mi && mi->m_nKey == uiHash) {
             if (index)
                 *index = i;
 
-            return pInfo;
+            return mi;
         }
     }
 
@@ -322,9 +327,9 @@ CBaseModelInfo* CModelInfo::GetModelInfo(char const* name, int32 minIndex, int32
         return nullptr;
 
     for (int32 i = minIndex; i <= maxIndex; ++i) {
-        auto pInfo = CModelInfo::GetModelInfo(i);
-        if (pInfo && pInfo->m_nKey == iKey)
-            return pInfo;
+        auto mi = CModelInfo::GetModelInfo(i);
+        if (mi && mi->m_nKey == iKey)
+            return mi;
     }
 
     return nullptr;
@@ -339,144 +344,144 @@ CStore<C2dEffect, CModelInfo::NUM_2DFX_INFOS>* CModelInfo::Get2dEffectStore()
 // 0x4C5A70
 bool CModelInfo::IsBoatModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BOAT;
+    return mi->AsVehicleModelInfoPtr()->IsBoat();
 }
 
 // 0x4C5AA0
 bool CModelInfo::IsCarModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_AUTOMOBILE;
+    return mi->AsVehicleModelInfoPtr()->IsAutomobile();
 }
 
 // 0x4C5AD0
 bool CModelInfo::IsTrainModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_TRAIN;
+    return mi->AsVehicleModelInfoPtr()->IsTrain();
 }
 
 // 0x4C5B00
 bool CModelInfo::IsHeliModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_HELI;
+    return mi->AsVehicleModelInfoPtr()->IsHeli();
 }
 
 // 0x4C5B30
 bool CModelInfo::IsPlaneModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_PLANE;
+    return mi->AsVehicleModelInfoPtr()->IsPlane();
 }
 
 // 0x4C5B60
 bool CModelInfo::IsBikeModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BIKE;
+    return mi->AsVehicleModelInfoPtr()->IsBike();
 }
 
 // 0x4C5B90
 bool CModelInfo::IsFakePlaneModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_FPLANE;
+    return mi->AsVehicleModelInfoPtr()->m_nVehicleType == VEHICLE_TYPE_FPLANE;
 }
 
 // 0x4C5BC0
 bool CModelInfo::IsMonsterTruckModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_MTRUCK;
+    return mi->AsVehicleModelInfoPtr()->IsMonsterTruck();
 }
 
 // 0x4C5BF0
 bool CModelInfo::IsQuadBikeModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_QUAD;
+    return mi->AsVehicleModelInfoPtr()->IsQuad();
 }
 
 // 0x4C5C20
 bool CModelInfo::IsBmxModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_BMX;
+    return mi->AsVehicleModelInfoPtr()->IsBMX();
 }
 
 // 0x4C5C50
 bool CModelInfo::IsTrailerModel(int32 index)
 {
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return false;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return false;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType == eVehicleType::VEHICLE_TRAILER;
+    return mi->AsVehicleModelInfoPtr()->IsTrailer();
 }
 
 // 0x4C5C80
@@ -485,12 +490,12 @@ int32 CModelInfo::IsVehicleModelType(int32 index)
     if (index >= NUM_MODEL_INFOS)
         return -1;
 
-    auto pInfo = CModelInfo::GetModelInfo(index);
-    if (!pInfo)
+    auto mi = CModelInfo::GetModelInfo(index);
+    if (!mi)
         return -1;
 
-    if (pInfo->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
+    if (mi->GetModelType() != ModelInfoType::MODEL_INFO_VEHICLE)
         return -1;
 
-    return pInfo->AsVehicleModelInfoPtr()->m_nVehicleType;
+    return mi->AsVehicleModelInfoPtr()->m_nVehicleType;
 }

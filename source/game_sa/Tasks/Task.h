@@ -24,8 +24,8 @@ public:
     void* operator new(uint32 size);
     void operator delete(void* object);
 
-    CTask();
-    virtual ~CTask();
+    CTask() { m_pParentTask = nullptr; } // 0x61A340
+    virtual ~CTask() = default;          // 0x61A660
 
     virtual class CTask* Clone() = 0;
     virtual class CTask* GetSubTask() = 0;
@@ -35,6 +35,13 @@ public:
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    void* New(uint32);
+    void  Delete(void* object);
 };
 
 VALIDATE_SIZE(CTask, 0x8);

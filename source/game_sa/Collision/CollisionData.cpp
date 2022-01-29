@@ -2,14 +2,17 @@
 
 void CCollisionData::InjectHooks()
 {
-    ReversibleHooks::Install("CCollisionData", "RemoveCollisionVolumes", 0x40F070, &CCollisionData::RemoveCollisionVolumes);
-    ReversibleHooks::Install("CCollisionData", "RemoveTrianglePlanes", 0x40F6A0, &CCollisionData::RemoveTrianglePlanes);
-    ReversibleHooks::Install("CCollisionData", "Copy", 0x40F120, &CCollisionData::Copy);
-    ReversibleHooks::Install("CCollisionData", "GetTrianglePoint", 0x40F5E0, &CCollisionData::GetTrianglePoint);
-    ReversibleHooks::Install("CCollisionData", "GetShadTrianglePoint", 0x40F640, &CCollisionData::GetShadTrianglePoint);
-    ReversibleHooks::Install("CCollisionData", "CalculateTrianglePlanes", 0x40F590, &CCollisionData::CalculateTrianglePlanes);
-    ReversibleHooks::Install("CCollisionData", "SetLinkPtr", 0x40F6C0, &CCollisionData::SetLinkPtr);
-    ReversibleHooks::Install("CCollisionData", "GetLinkPtr", 0x40F6E0, &CCollisionData::GetLinkPtr);
+    RH_ScopedClass(CCollisionData);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F070);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40F6A0);
+    RH_ScopedInstall(Copy, 0x40F120);
+    RH_ScopedInstall(GetTrianglePoint, 0x40F5E0);
+    RH_ScopedInstall(GetShadTrianglePoint, 0x40F640);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40F590);
+    RH_ScopedInstall(SetLinkPtr, 0x40F6C0);
+    RH_ScopedInstall(GetLinkPtr, 0x40F6E0);
 }
 
 CCollisionData::CCollisionData()
