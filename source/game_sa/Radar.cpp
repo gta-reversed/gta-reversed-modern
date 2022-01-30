@@ -703,14 +703,9 @@ void CRadar::ChangeBlipBrightness(int32 blipIndex, int32 brightness)
 // 0x583CC0
 void CRadar::ChangeBlipScale(int32 blipIndex, int32 size)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (FrontEndMenuManager.m_bDrawRadarOrMap)
-        size = 1;
-
-    ms_RadarTrace[index].m_nBlipSize = size;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ms_RadarTrace[idx].m_nBlipSize = FrontEndMenuManager.m_bDrawRadarOrMap ? 1 : size;
+    }
 }
 
 // 0x583D20
