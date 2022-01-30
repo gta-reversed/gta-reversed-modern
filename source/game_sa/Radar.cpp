@@ -1424,7 +1424,7 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite)
 
     const auto& t = ms_RadarTrace[blipIndex];
 
-    if (!t.m_nBlipType == eBlipType::BLIP_CONTACT_POINT) {
+    if (t.m_nBlipType != eBlipType::BLIP_CONTACT_POINT) {
         return;
     }
 
