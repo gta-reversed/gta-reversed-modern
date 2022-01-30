@@ -35,7 +35,7 @@ public:
     void  From(CPedGroupMembership const* obj);
     CPed* GetLeader();
     CPed* GetMember(int32 memberId);
-    bool  IsFollower(CPed const* ped);
+    bool  IsFollower(CPed const* ped) const;
     bool  IsLeader(CPed const* ped);
     bool  IsMember(CPed const* ped);
     void  Process();

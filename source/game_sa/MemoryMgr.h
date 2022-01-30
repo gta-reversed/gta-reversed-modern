@@ -2,6 +2,8 @@
 
 #include <cstddef>
 
+static inline char(&s_MemoryHeapBuffer)[16384] = *(char(*)[16384])0xC8E0C8;
+
 class CMemoryMgr {
 public:
     static void   Init(){}; // NOP

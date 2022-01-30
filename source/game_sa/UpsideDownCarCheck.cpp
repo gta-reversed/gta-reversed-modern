@@ -1,12 +1,15 @@
 #include "StdInc.h"
 
 void CUpsideDownCarCheck::InjectHooks() {
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "Init", 0x46A8C0, &CUpsideDownCarCheck::Init);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "IsCarUpsideDown", 0x463830, &CUpsideDownCarCheck::IsCarUpsideDown);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "UpdateTimers", 0x4655E0, &CUpsideDownCarCheck::UpdateTimers);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "AddCarToCheck", 0x4638D0, &CUpsideDownCarCheck::AddCarToCheck);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "RemoveCarFromCheck", 0x463910, &CUpsideDownCarCheck::RemoveCarFromCheck);
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "HasCarBeenUpsideDownForAWhile", 0x463940, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile);
+    RH_ScopedClass(CUpsideDownCarCheck);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(Init, 0x46A8C0);
+//    RH_ScopedInstall(IsCarUpsideDown, 0x463830);
+//    RH_ScopedInstall(UpdateTimers, 0x4655E0);
+//    RH_ScopedInstall(AddCarToCheck, 0x4638D0);
+//    RH_ScopedInstall(RemoveCarFromCheck, 0x463910);
+//    RH_ScopedInstall(HasCarBeenUpsideDownForAWhile, 0x463940);
 }
 
 // 0x46A8C0
@@ -32,12 +35,12 @@ bool CUpsideDownCarCheck::AreAnyCarsUpsideDown() {
 
 // 0x4638D0
 void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
-    plugin::CallMethod<0x4638D0, int32>(carHandle);
+    plugin::CallMethod<0x4638D0, CUpsideDownCarCheck*, int32>(this, carHandle);
 }
 
 // 0x463910
 void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
-    plugin::CallMethod<0x463910, int32>(carHandle);
+    plugin::CallMethod<0x463910, CUpsideDownCarCheck*, int32>(this, carHandle);
 }
 
 // 0x463940

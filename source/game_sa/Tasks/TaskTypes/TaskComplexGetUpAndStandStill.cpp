@@ -6,12 +6,14 @@
 #include "TaskSimpleGetUp.h"
 
 void CTaskComplexGetUpAndStandStill::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "Constructor", 0x678130, &CTaskComplexGetUpAndStandStill::Constructor);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateSubTask", 0x678170, &CTaskComplexGetUpAndStandStill::CreateSubTask);
+    RH_ScopedClass(CTaskComplexGetUpAndStandStill);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x678130);
+    RH_ScopedInstall(CreateSubTask, 0x678170);
     // VTABLE
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateFirstSubTask", 0x6782A0, &CTaskComplexGetUpAndStandStill::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "CreateNextSubTask", 0x678240, &CTaskComplexGetUpAndStandStill::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGetUpAndStandStill", "ControlSubTask", 0x6782B0, &CTaskComplexGetUpAndStandStill::ControlSubTask_Reversed);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6782A0);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x678240);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x6782B0);
 }
 
 // 0x678130

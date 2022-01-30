@@ -14,6 +14,9 @@ bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
 tHeliLight* CHeli::HeliSearchLights = (tHeliLight*)0xC1C990;
 
 void CHeli::InjectHooks() {
+    RH_ScopedClass(CHeli);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

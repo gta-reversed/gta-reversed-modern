@@ -72,6 +72,8 @@ public:
     // Class functions
     void SetFrameIds(RwObjectNameIdAssocation* data);
 
+    void SetClumpModelInfoFlags(uint32 flags); // Also calls SetBaseModelInfoFlags
+
     // static functions
     static RpAtomic* SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc);
     static RpAtomic* AtomicSetupLightingCB(RpAtomic* atomic, void* data);

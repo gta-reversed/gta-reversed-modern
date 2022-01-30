@@ -26,12 +26,14 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks() {
-        using namespace ReversibleHooks;
-        Install("CTaskSimpleHoldEntity", "Clone_Reversed", 0x637060, &CTaskComplexUseGoggles::Clone_Reversed);
-        Install("CTaskSimpleHoldEntity", "GetTaskType_Reversed", 0x634F10, &CTaskComplexUseGoggles::GetTaskType_Reversed);
-        Install("CTaskSimpleHoldEntity", "CreateNextSubTask_Reversed", 0x634F40, &CTaskComplexUseGoggles::CreateNextSubTask_Reversed);
-        Install("CTaskSimpleHoldEntity", "CreateFirstSubTask_Reversed", 0x634F90, &CTaskComplexUseGoggles::CreateFirstSubTask_Reversed);
-        Install("CTaskSimpleHoldEntity", "ControlSubTask_Reversed", 0x635050, &CTaskComplexUseGoggles::ControlSubTask_Reversed);
+        RH_ScopedClass(CTaskComplexUseGoggles);
+        RH_ScopedCategory("Tasks/TaskTypes");
+
+        RH_ScopedInstall(Clone_Reversed, 0x637060);
+        RH_ScopedInstall(GetTaskType_Reversed, 0x634F10);
+        RH_ScopedInstall(CreateNextSubTask_Reversed, 0x634F40);
+        RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x634F90);
+        RH_ScopedInstall(ControlSubTask_Reversed, 0x635050);
     };
 
     CTaskComplexUseGoggles* Constructor() {

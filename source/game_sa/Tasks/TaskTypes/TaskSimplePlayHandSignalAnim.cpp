@@ -6,13 +6,15 @@
 
 void CTaskSimplePlayHandSignalAnim::InjectHooks()
 {
+    RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
+    RH_ScopedCategory("Tasks/TaskTypes");
 // VIRTUAL
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "Clone", 0x61B980, &CTaskSimplePlayHandSignalAnim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "GetTaskType", 0x61AEA0, &CTaskSimplePlayHandSignalAnim::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "MakeAbortable", 0x61AF50, &CTaskSimplePlayHandSignalAnim::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "ProcessPed", 0x61BDA0, &CTaskSimplePlayHandSignalAnim::ProcessPed_Reversed);
+    RH_ScopedInstall(Clone_Reversed, 0x61B980);
+    RH_ScopedInstall(GetId_Reversed, 0x61AEA0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x61AF50);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x61BDA0);
 // CLASS
-    ReversibleHooks::Install("CTaskSimplePlayHandSignalAnim", "StartAnim", 0x61AF60, &CTaskSimplePlayHandSignalAnim::StartAnim);
+    RH_ScopedInstall(StartAnim, 0x61AF60);
 }
 
 CTaskSimplePlayHandSignalAnim::CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame) : CTaskSimpleAnim(bHoldLastFrame)

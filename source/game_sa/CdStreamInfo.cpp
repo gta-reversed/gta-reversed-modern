@@ -49,15 +49,18 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
+    RH_ScopedNamespaceName("CdStream");
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(CdStreamOpen, 0x4067B0);
+    RH_ScopedGlobalInstall(CdStreamSync, 0x406460);
+    RH_ScopedGlobalInstall(CdStreamGetStatus, 0x4063E0);
+    RH_ScopedGlobalInstall(CdStreamRead, 0x406A20);
+    RH_ScopedGlobalInstall(CdStreamThread, 0x406560);
+    RH_ScopedGlobalInstall(CdStreamInitThread, 0x4068F0);
+    RH_ScopedGlobalInstall(CdStreamInit, 0x406B70);
+    RH_ScopedGlobalInstall(CdStreamRemoveImages, 0x406690);
+    RH_ScopedGlobalInstall(CdStreamShutdown, 0x406370);
 }
 
 // 0x4067B0
@@ -128,15 +131,16 @@ eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
     if (gStreamingInitialized) {
         if (stream.bInUse)
             return eCdStreamStatus::READING;
+
         if (stream.nSectorsToRead)
             return eCdStreamStatus::WAITING_TO_READ;
+
         if (stream.status != eCdStreamStatus::READING_SUCCESS) {
             const eCdStreamStatus status = stream.status;
             stream.status = eCdStreamStatus::READING_SUCCESS;
             return status;
         }
-    }
-    else if (gOverlappedIO) {
+    } else if (gOverlappedIO) {
         if (WaitForSingleObjectEx(stream.hFile, 0, 1) != WAIT_OBJECT_0)
             return eCdStreamStatus::READING;
     }
@@ -144,7 +148,7 @@ eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
 }
 
 // When CdStreamRead is called, it will update CdStream information for the channel and
-// signal gStreamSemaphore, so the secondary thread `CdStreamThread` can start reading the model
+// signal gStreamSemaphore, so the secondary thread `CdStreamThread` can start reading the models.
 // If this function is called with the same channelId/streamId whilst CdStreamThread is still reading the previous model
 // for the channel, then it will return false.
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,

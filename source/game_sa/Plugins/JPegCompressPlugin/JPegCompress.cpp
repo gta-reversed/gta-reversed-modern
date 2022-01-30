@@ -3,7 +3,8 @@
 // depends on libjpeg
 
 void JPegPlugin::InjectHooks() {
-
+    RH_ScopedNamespace(JPegPlugin);
+    RH_ScopedCategory("Plugins");
 }
 
 void JPegCompressScreenToFile(RwCamera* camera, const char* path) {

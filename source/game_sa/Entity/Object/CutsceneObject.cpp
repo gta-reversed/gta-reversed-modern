@@ -4,15 +4,18 @@ char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[
 
 void CCutsceneObject::InjectHooks()
 {
+    RH_ScopedClass(CCutsceneObject);
+    RH_ScopedCategory("Entity/Object");
+
 // VIRTUAL
-    ReversibleHooks::Install("CCutsceneObject", "SetModelIndex", 0x5B1B20, &CCutsceneObject::SetModelIndex_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "SetupLighting", 0x553F40, &CCutsceneObject::SetupLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "RemoveLighting", 0x5533F0, &CCutsceneObject::RemoveLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "ProcessControl", 0x5B1B90, &CCutsceneObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "PreRender", 0x5B1E00, &CCutsceneObject::PreRender_Reversed);
+    RH_ScopedInstall(SetModelIndex_Reversed, 0x5B1B20);
+    RH_ScopedInstall(SetupLighting_Reversed, 0x553F40);
+    RH_ScopedInstall(RemoveLighting_Reversed, 0x5533F0);
+    RH_ScopedInstall(ProcessControl_Reversed, 0x5B1B90);
+    RH_ScopedInstall(PreRender_Reversed, 0x5B1E00);
 
 // HELPER
-    ReversibleHooks::Install("CCutsceneObject", "SetupCarPipeAtomicsForClump", 0x5B1AB0, &CCutsceneObject::SetupCarPipeAtomicsForClump);
+    RH_ScopedInstall(SetupCarPipeAtomicsForClump, 0x5B1AB0);
 }
 
 CCutsceneObject::CCutsceneObject() : CObject()

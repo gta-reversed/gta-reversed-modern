@@ -4,8 +4,11 @@ int32& CWindModifiers::Number = *(int32*)0xC81450;
 CWindModifier (&CWindModifiers::Array)[MAX_NUM_MODIFIERS] = *(CWindModifier(*)[MAX_NUM_MODIFIERS])0xC81458;
 
 void CWindModifiers::InjectHooks() {
-//    ReversibleHooks::Install("CWindModifiers", "FindWindModifier", 0x0, &CWindModifiers::FindWindModifier);
-//    ReversibleHooks::Install("CWindModifiers", "RegisterOne", 0x0, &CWindModifiers::RegisterOne);
+    RH_ScopedClass(CWindModifiers);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(FindWindModifier, 0x0);
+//    RH_ScopedInstall(RegisterOne, 0x0);
 }
 
 void CWindModifiers::FindWindModifier(CVector vecPos, float* pOutX, float* pOutY) {

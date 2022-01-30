@@ -79,7 +79,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void Initialise(const char* fileName, bool bUnused);
+    static void Initialise(const char* fileName);
     static void SetObjectData(int32 dwModelIndex, CObject& pObject);
 
     bool operator==(CObjectData const& right) const;

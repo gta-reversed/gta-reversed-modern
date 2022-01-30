@@ -85,6 +85,7 @@ public:
     void RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void SetWantedLevel(uint32 level);
+    uint32 GetWantedLevel() const { return m_nWantedLevel; }
     void CheatWantedLevel(uint32 level);
     void SetWantedLevelNoDrop(uint32 level);
     void ClearWantedLevelAndGoOnParole();

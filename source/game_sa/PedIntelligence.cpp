@@ -26,57 +26,59 @@ float& CPedIntelligence::flt_8D2388 = *reinterpret_cast<float*>(0x8D2388); // 50
 
 void CPedIntelligence::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CPedIntelligence", "GetPedEntities",0x4893E0, &CPedIntelligence::GetPedEntities);
-    Install("CPedIntelligence", "SetPedDecisionMakerType",0x600B50, &CPedIntelligence::SetPedDecisionMakerType);
-    Install("CPedIntelligence", "SetPedDecisionMakerTypeInGroup",0x600BB0, &CPedIntelligence::SetPedDecisionMakerTypeInGroup);
-    Install("CPedIntelligence", "RestorePedDecisionMakerType",0x600BC0, &CPedIntelligence::RestorePedDecisionMakerType);
-    Install("CPedIntelligence", "SetHearingRange",0x600BE0, &CPedIntelligence::SetHearingRange);
-    Install("CPedIntelligence", "SetSeeingRange",0x600BF0, &CPedIntelligence::SetSeeingRange);
-    Install("CPedIntelligence", "IsInSeeingRange",0x600C60, &CPedIntelligence::IsInSeeingRange);
-    Install("CPedIntelligence", "FindRespectedFriendInInformRange",0x600CF0, &CPedIntelligence::FindRespectedFriendInInformRange);
-    Install("CPedIntelligence", "IsRespondingToEvent",0x600DB0, &CPedIntelligence::IsRespondingToEvent);
-    Install("CPedIntelligence", "AddTaskPhysResponse",0x600DC0, &CPedIntelligence::AddTaskPhysResponse);
-    Install("CPedIntelligence", "AddTaskEventResponseTemp",0x600DE0, &CPedIntelligence::AddTaskEventResponseTemp);
-    Install("CPedIntelligence", "AddTaskEventResponseNonTemp",0x600E00, &CPedIntelligence::AddTaskEventResponseNonTemp);;
-    Install("CPedIntelligence", "AddTaskPrimaryMaybeInGroup",0x600E20, &CPedIntelligence::AddTaskPrimaryMaybeInGroup);
-    Install("CPedIntelligence", "FindTaskByType",0x600EE0, &CPedIntelligence::FindTaskByType);
-    Install("CPedIntelligence", "GetTaskFighting",0x600F30, &CPedIntelligence::GetTaskFighting);
-    Install("CPedIntelligence", "GetTaskUseGun",0x600F70, &CPedIntelligence::GetTaskUseGun);
-    Install("CPedIntelligence", "GetTaskThrow",0x600FB0, &CPedIntelligence::GetTaskThrow);
-    Install("CPedIntelligence", "GetTaskHold",0x600FF0, &CPedIntelligence::GetTaskHold);
-    Install("CPedIntelligence", "GetTaskSwim",0x601070, &CPedIntelligence::GetTaskSwim);
-    Install("CPedIntelligence", "GetTaskDuck",0x6010A0, &CPedIntelligence::GetTaskDuck);
-    Install("CPedIntelligence", "GetTaskJetPack",0x601110, &CPedIntelligence::GetTaskJetPack);
-    Install("CPedIntelligence", "GetTaskInAir",0x601150, &CPedIntelligence::GetTaskInAir);
-    Install("CPedIntelligence", "GetTaskClimb",0x601180, &CPedIntelligence::GetTaskClimb);
-    Install("CPedIntelligence", "GetUsingParachute",0x6011B0, &CPedIntelligence::GetUsingParachute);
-    Install("CPedIntelligence", "SetTaskDuckSecondary",0x601230, &CPedIntelligence::SetTaskDuckSecondary);
-    Install("CPedIntelligence", "ClearTaskDuckSecondary",0x601390, &CPedIntelligence::ClearTaskDuckSecondary);
-    Install("CPedIntelligence", "ClearTasks",0x601420, &CPedIntelligence::ClearTasks);
-    Install("CPedIntelligence", "FlushImmediately",0x601640, &CPedIntelligence::FlushImmediately);
-    Install("CPedIntelligence", "GetEffectInUse",0x6018D0, &CPedIntelligence::GetEffectInUse);
-    Install("CPedIntelligence", "SetEffectInUse",0x6018E0, &CPedIntelligence::SetEffectInUse);
-    Install("CPedIntelligence", "ProcessAfterProcCol",0x6018F0, &CPedIntelligence::ProcessAfterProcCol);
-    Install("CPedIntelligence", "ProcessAfterPreRender",0x6019B0, &CPedIntelligence::ProcessAfterPreRender);
-    Install("CPedIntelligence", "ProcessEventHandler",0x601BB0, &CPedIntelligence::ProcessEventHandler);
-    Install("CPedIntelligence", "IsFriendlyWith",0x601BC0, &CPedIntelligence::IsFriendlyWith);
-    Install("CPedIntelligence", "IsThreatenedBy",0x601C30, &CPedIntelligence::IsThreatenedBy);
-    Install("CPedIntelligence", "Respects",0x601C90, &CPedIntelligence::Respects);
-    Install("CPedIntelligence", "IsInACarOrEnteringOne",0x601CC0, &CPedIntelligence::IsInACarOrEnteringOne);
-    Install("CPedIntelligence", "AreFriends",0x601D10, &CPedIntelligence::AreFriends);
-    Install("CPedIntelligence", "GetMoveStateFromGoToTask",0x601D70, &CPedIntelligence::GetMoveStateFromGoToTask);
-    Install("CPedIntelligence", "FlushIntelligence",0x601DA0, &CPedIntelligence::FlushIntelligence);
-    Install("CPedIntelligence", "TestForStealthKill",0x601E00, &CPedIntelligence::TestForStealthKill);
-    Install("CPedIntelligence", "RecordEventForScript",0x602050, &CPedIntelligence::RecordEventForScript);
-    Install("CPedIntelligence", "IsInterestingEntity",0x6020A0, &CPedIntelligence::IsInterestingEntity);
-    Install("CPedIntelligence", "LookAtInterestingEntities",0x6020D0, &CPedIntelligence::LookAtInterestingEntities);
-    Install("CPedIntelligence", "IsPedGoingForCarDoor",0x602350, &CPedIntelligence::IsPedGoingForCarDoor);
-    Install("CPedIntelligence", "CanSeeEntityWithLights",0x605550, &CPedIntelligence::CanSeeEntityWithLights);
-    Install("CPedIntelligence", "ProcessStaticCounter",0x605650, &CPedIntelligence::ProcessStaticCounter);
-    Install("CPedIntelligence", "ProcessFirst",0x6073A0, &CPedIntelligence::ProcessFirst);
-    Install("CPedIntelligence", "Process",0x608260, &CPedIntelligence::Process);
-    Install("CPedIntelligence", "GetActivePrimaryTask",0x4B85B0, &CPedIntelligence::GetActivePrimaryTask);
+    RH_ScopedClass(CPedIntelligence);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetPedEntities, 0x4893E0);
+    RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
+    RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0);
+    RH_ScopedInstall(RestorePedDecisionMakerType, 0x600BC0);
+    RH_ScopedInstall(SetHearingRange, 0x600BE0);
+    RH_ScopedInstall(SetSeeingRange, 0x600BF0);
+    RH_ScopedInstall(IsInSeeingRange, 0x600C60);
+    RH_ScopedInstall(FindRespectedFriendInInformRange, 0x600CF0);
+    RH_ScopedInstall(IsRespondingToEvent, 0x600DB0);
+    RH_ScopedInstall(AddTaskPhysResponse, 0x600DC0);
+    RH_ScopedInstall(AddTaskEventResponseTemp, 0x600DE0);
+    RH_ScopedInstall(AddTaskEventResponseNonTemp, 0x600E00);;
+    RH_ScopedInstall(AddTaskPrimaryMaybeInGroup, 0x600E20);
+    RH_ScopedInstall(FindTaskByType, 0x600EE0);
+    RH_ScopedInstall(GetTaskFighting, 0x600F30);
+    RH_ScopedInstall(GetTaskUseGun, 0x600F70);
+    RH_ScopedInstall(GetTaskThrow, 0x600FB0);
+    RH_ScopedInstall(GetTaskHold, 0x600FF0);
+    RH_ScopedInstall(GetTaskSwim, 0x601070);
+    RH_ScopedInstall(GetTaskDuck, 0x6010A0);
+    RH_ScopedInstall(GetTaskJetPack, 0x601110);
+    RH_ScopedInstall(GetTaskInAir, 0x601150);
+    RH_ScopedInstall(GetTaskClimb, 0x601180);
+    RH_ScopedInstall(GetUsingParachute, 0x6011B0);
+    RH_ScopedInstall(SetTaskDuckSecondary, 0x601230);
+    RH_ScopedInstall(ClearTaskDuckSecondary, 0x601390);
+    RH_ScopedInstall(ClearTasks, 0x601420);
+    RH_ScopedInstall(FlushImmediately, 0x601640);
+    RH_ScopedInstall(GetEffectInUse, 0x6018D0);
+    RH_ScopedInstall(SetEffectInUse, 0x6018E0);
+    RH_ScopedInstall(ProcessAfterProcCol, 0x6018F0);
+    RH_ScopedInstall(ProcessAfterPreRender, 0x6019B0);
+    RH_ScopedInstall(ProcessEventHandler, 0x601BB0);
+    RH_ScopedInstall(IsFriendlyWith, 0x601BC0);
+    RH_ScopedInstall(IsThreatenedBy, 0x601C30);
+    RH_ScopedInstall(Respects, 0x601C90);
+    RH_ScopedInstall(IsInACarOrEnteringOne, 0x601CC0);
+    RH_ScopedInstall(AreFriends, 0x601D10);
+    RH_ScopedInstall(GetMoveStateFromGoToTask, 0x601D70);
+    RH_ScopedInstall(FlushIntelligence, 0x601DA0);
+    RH_ScopedInstall(TestForStealthKill, 0x601E00);
+    RH_ScopedInstall(RecordEventForScript, 0x602050);
+    RH_ScopedInstall(IsInterestingEntity, 0x6020A0);
+    RH_ScopedInstall(LookAtInterestingEntities, 0x6020D0);
+    RH_ScopedInstall(IsPedGoingForCarDoor, 0x602350);
+    RH_ScopedInstall(CanSeeEntityWithLights, 0x605550);
+    RH_ScopedInstall(ProcessStaticCounter, 0x605650);
+    RH_ScopedInstall(ProcessFirst, 0x6073A0);
+    RH_ScopedInstall(Process, 0x608260);
+    RH_ScopedInstall(GetActivePrimaryTask, 0x4B85B0);
 }
 
 // 0x4893E0
@@ -622,31 +624,29 @@ void CPedIntelligence::ProcessAfterPreRender() {
         taskUseGun->SetPedPosition(m_pPed);
     }
 
-    CWeapon* pActiveWeapon = &m_pPed->m_aWeapons[m_pPed->m_nActiveWeaponSlot];
-    if (pActiveWeapon->m_nType == WEAPON_MOLOTOV && pActiveWeapon->m_pFxSystem)
+    CWeapon* activeWeapon = &m_pPed->GetActiveWeapon();
+    if (activeWeapon->m_nType == WEAPON_MOLOTOV && activeWeapon->m_pFxSystem)
     {
-        RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-        int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, 24); // 24 = BONE_R_HAND?
-        RwMatrix* pMatrixArray = RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy);
+        RpHAnimHierarchy* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+        int32 animIDIndex = RpHAnimIDGetIndex(animHierarchy, 24); // 24 = BONE_R_HAND?
+        RwMatrix* matrixArray = RpHAnimHierarchyGetMatrixArray(animHierarchy);
 
         RwV3d pointIn = { 0.05f, 0.05f,  0.14f };
         RwV3d pointOut;
-        RwV3dTransformPoint(&pointOut, &pointIn, &pMatrixArray[animIDIndex]);
+        RwV3dTransformPoint(&pointOut, &pointIn, &matrixArray[animIDIndex]);
 
-        RwMatrix* pRwMatrix = m_pPed->GetModellingMatrix();
         RwMatrix matrix;
-        memcpy(&matrix, pRwMatrix, sizeof(matrix));
+        memcpy(&matrix, m_pPed->GetModellingMatrix(), sizeof(matrix));
         matrix.pos = pointOut;
         RwMatrixUpdate(&matrix);
-        pActiveWeapon->m_pFxSystem->SetMatrix(&matrix);
+        activeWeapon->m_pFxSystem->SetMatrix(&matrix);
     }
 
     if (m_pPed->bInVehicle)
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
-            auto* bike = (CBike*)vehicle;
-            bike->FixHandsToBars(m_pPed);
+            vehicle->AsBike()->FixHandsToBars(m_pPed);
         }
     }
 
@@ -1033,7 +1033,7 @@ void CPedIntelligence::ProcessFirst() {
     {
         CVehicle* vehicle = m_pPed->m_pVehicle;
         if (vehicle && vehicle->IsBike()) {
-            auto* bike = static_cast<CBike*>(vehicle);
+            auto* bike = vehicle->AsBike();
             bike->m_bPedLeftHandFixed = false;
             bike->m_bPedRightHandFixed = false;
         }

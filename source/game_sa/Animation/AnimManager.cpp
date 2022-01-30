@@ -19,6 +19,9 @@ int32& CAnimManager::ms_numAnimBlocks = *(int32*)0xB4EA30;
 int32& CAnimManager::ms_numAnimations = *(int32*)0xB4EA2C;
 
 void CAnimManager::InjectHooks() {
+    RH_ScopedClass(CAnimManager);
+    RH_ScopedCategory("Animation");
+
     CAnimBlendAssociation::InjectHooks();
 }
 

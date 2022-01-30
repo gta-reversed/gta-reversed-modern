@@ -2,8 +2,11 @@
 
 void CMatrixLink::InjectHooks()
 {
-    ReversibleHooks::Install("CMatrixLink", "Insert", 0x54E8F0, &CMatrixLink::Insert);
-    ReversibleHooks::Install("CMatrixLink", "Remove", 0x54E910, &CMatrixLink::Remove);
+    RH_ScopedClass(CMatrixLink);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Insert, 0x54E8F0);
+    RH_ScopedInstall(Remove, 0x54E910);
 }
 
 void CMatrixLink::Insert(CMatrixLink* pWhere)

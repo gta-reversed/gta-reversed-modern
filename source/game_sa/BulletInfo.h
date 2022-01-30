@@ -14,26 +14,30 @@ class CBulletInfo {
 public:
     eWeaponType m_nWeaponType;
     CEntity*    m_pCreator;
-    int32       m_nDestroyTime;
+    float       m_nDestroyTime;
     bool        m_bExists;
-    char        _pad0D[3];
     CVector     m_vecPosition;
     CVector     m_vecVelocity;
     int16       m_nDamage;
-    char        _pad2A[2];
+
+    static constexpr auto MAX_BULLET_INFOS{8u};
+
+    static CBulletInfo(&aBulletInfos)[MAX_BULLET_INFOS];
+    static CVector& PlayerSniperBulletStart;
+    static CVector& PlayerSniperBulletEnd;
 
 public:
     static void InjectHooks();
 
     static void Initialise();
     static void Shutdown();
-    static bool AddBullet(CEntity* creator, eWeaponType weaponType, CVector position, CVector velocity);
+    static void AddBullet(CEntity* creator, eWeaponType weaponType, CVector position, CVector velocity);
     static void Update();
+
+private:
+    // NOTSA funcs
+    static CBulletInfo* GetFree();
+    bool IsTimeToBeDestroyed() const noexcept { return (float)CTimer::GetTimeInMS() > m_nDestroyTime; }
 };
 
 VALIDATE_SIZE(CBulletInfo, 0x2C);
-
-extern uint32 MAX_BULLET_INFOS; // default 8
-extern CBulletInfo *aBulletInfos; // CBulletInfo aBulletInfos[MAX_BULLET_INFOS]
-extern CVector &PlayerSniperBulletStart;
-extern CVector &PlayerSniperBulletEnd;

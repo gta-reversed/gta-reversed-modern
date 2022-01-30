@@ -4,15 +4,17 @@
 
 void CTaskSimpleJump::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleJump", "Constructor", 0x679AA0, &CTaskSimpleJump::Constructor);
-    ReversibleHooks::Install("CTaskSimpleJump", "CheckIfJumpBlocked", 0x67D590, &CTaskSimpleJump::CheckIfJumpBlocked);
-    ReversibleHooks::Install("CTaskSimpleJump", "Launch", 0x679B80, &CTaskSimpleJump::Launch);
-    ReversibleHooks::Install("CTaskSimpleJump", "StartLaunchAnim", 0x67D7A0, &CTaskSimpleJump::StartLaunchAnim);
-    ReversibleHooks::Install("CTaskSimpleJump", "JumpAnimFinishCB", 0x67A020, &CTaskSimpleJump::JumpAnimFinishCB);
+    RH_ScopedClass(CTaskSimpleJump);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x679AA0);
+    RH_ScopedInstall(CheckIfJumpBlocked, 0x67D590);
+    RH_ScopedInstall(Launch, 0x679B80);
+    RH_ScopedInstall(StartLaunchAnim, 0x67D7A0);
+    RH_ScopedInstall(JumpAnimFinishCB, 0x67A020);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleJump", "Clone", 0x67C510, &CTaskSimpleJump::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleJump", "MakeAbortable", 0x679B60, &CTaskSimpleJump::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleJump", "ProcessPed", 0x680C60, &CTaskSimpleJump::ProcessPed_Reversed);
+    RH_ScopedInstall(Clone_Reversed, 0x67C510);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x679B60);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x680C60);
 }
 
 CTaskSimpleJump* CTaskSimpleJump::Constructor(bool bCanClimb)
@@ -96,7 +98,7 @@ bool CTaskSimpleJump::ProcessPed_Reversed(CPed* ped)
         return this->m_bIsFinished;
     }
 
-    if ((ped->IsPlayer() || m_bCanClimb) && CGame::currArea == AREA_CODE_NORMAL_WORLD)
+    if ((ped->IsPlayer() || m_bCanClimb) && CGame::CanSeeOutSideFromCurrArea())
         m_pClimbEntity = CTaskSimpleClimb::TestForClimb(ped, m_vecClimbPos, m_fClimbAngle, m_nClimbSurfaceType, true);
 
     if (!m_pClimbEntity)

@@ -1,9 +1,12 @@
 #include "StdInc.h"
 
 void CEntityScanner::InjectHooks() {
-//    ReversibleHooks::Install("CEntityScanner", "Clear", 0x5FF9D0, &CEntityScanner::Clear);
-//    ReversibleHooks::Install("CEntityScanner", "ScanForEntitiesInRange", 0x5FFA20, &CEntityScanner::ScanForEntitiesInRange);
-    ReversibleHooks::Install("CEntityScanner", "GetClosestPedInRange", 0x5FFF20, &CEntityScanner::GetClosestPedInRange);
+    RH_ScopedClass(CEntityScanner);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(Clear, 0x5FF9D0);
+//    RH_ScopedInstall(ScanForEntitiesInRange, 0x5FFA20);
+    RH_ScopedInstall(GetClosestPedInRange, 0x5FFF20);
 }
 
 // 0x5FF9D0

@@ -1,7 +1,10 @@
 #include "StdInc.h"
 
 void CKeyboardState::InjectHooks() {
-    ReversibleHooks::Install("CKeyboardState", "Clear", 0x53F090, &CKeyboardState::Clear);
+    RH_ScopedClass(CKeyboardState);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Clear, 0x53F090);
 }
 
 // 0x53F090

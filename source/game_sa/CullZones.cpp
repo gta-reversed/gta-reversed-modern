@@ -11,21 +11,24 @@ int32& CCullZones::NumAttributeZones = *(int32*)0xC87AC8;
 bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
-    ReversibleHooks::Install("CCullZones", "Init", 0x72D6B0, &CCullZones::Init);
-    ReversibleHooks::Install("CCullZones", "AddCullZone", 0x72DF70, &CCullZones::AddCullZone);
-    ReversibleHooks::Install("CCullZones", "AddTunnelAttributeZone", 0x72DB50, &CCullZones::AddTunnelAttributeZone);
-    ReversibleHooks::Install("CCullZones", "AddMirrorAttributeZone", 0x72DC10, &CCullZones::AddMirrorAttributeZone);
-    ReversibleHooks::Install("CCullZones", "InRoomForAudio", 0x72DD70, &CCullZones::InRoomForAudio);
-    ReversibleHooks::Install("CCullZones", "CamNoRain", 0x72DDB0, &CCullZones::CamNoRain);
-    ReversibleHooks::Install("CCullZones", "PlayerNoRain", 0x72DDC0, &CCullZones::PlayerNoRain);
-    ReversibleHooks::Install("CCullZones", "FewerPeds", 0x72DD90, &CCullZones::FewerPeds);
-    ReversibleHooks::Install("CCullZones", "NoPolice", 0x72DD50, &CCullZones::NoPolice);
-    ReversibleHooks::Install("CCullZones", "DoExtraAirResistanceForPlayer", 0x72DDD0, &CCullZones::DoExtraAirResistanceForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindTunnelAttributesForCoors", 0x72D9F0, &CCullZones::FindTunnelAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindMirrorAttributesForCoors", 0x72DA70, &CCullZones::FindMirrorAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindZoneWithStairsAttributeForPlayer", 0x72DAD0, &CCullZones::FindZoneWithStairsAttributeForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindAttributesForCoors", 0x72D970, &CCullZones::FindAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "Update", 0x72DEC0, &CCullZones::Update);
+    RH_ScopedClass(CCullZones);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x72D6B0);
+    RH_ScopedInstall(AddCullZone, 0x72DF70);
+    RH_ScopedInstall(AddTunnelAttributeZone, 0x72DB50);
+    RH_ScopedInstall(AddMirrorAttributeZone, 0x72DC10);
+    RH_ScopedInstall(InRoomForAudio, 0x72DD70);
+    RH_ScopedInstall(CamNoRain, 0x72DDB0);
+    RH_ScopedInstall(PlayerNoRain, 0x72DDC0);
+    RH_ScopedInstall(FewerPeds, 0x72DD90);
+    RH_ScopedInstall(NoPolice, 0x72DD50);
+    RH_ScopedInstall(DoExtraAirResistanceForPlayer, 0x72DDD0);
+    RH_ScopedInstall(FindTunnelAttributesForCoors, 0x72D9F0);
+    RH_ScopedInstall(FindMirrorAttributesForCoors, 0x72DA70);
+    RH_ScopedInstall(FindZoneWithStairsAttributeForPlayer, 0x72DAD0);
+    RH_ScopedInstall(FindAttributesForCoors, 0x72D970);
+    RH_ScopedInstall(Update, 0x72DEC0);
 }
 
 // 0x72D6B0
@@ -64,41 +67,39 @@ void CCullZones::AddCullZone(const CVector& center, float zero1, float fWidthY, 
 // flags: see eZoneAttributes
 // 0x72DB50
 void CCullZones::AddTunnelAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, uint16 flags) {
-    int32 i = NumTunnelAttributeZones;
-    auto& attribute = aTunnelAttributeZones[i];
+    auto& attribute = aTunnelAttributeZones[NumTunnelAttributeZones];
 
-    attribute.zoneDef.x = (int16)(center.x - unk1 - fWidthX);
-    attribute.zoneDef.y = (int16)(center.y - fWidthY - unk2);
+    attribute.zoneDef.x       = (int16)(center.x - unk1 - fWidthX);
+    attribute.zoneDef.y       = (int16)(center.y - fWidthY - unk2);
     attribute.zoneDef.field_4 = (int16)(2 * unk1);
-    attribute.zoneDef.widthY = (int16)(2 * fWidthY);
+    attribute.zoneDef.widthY  = (int16)(2 * fWidthY);
     attribute.zoneDef.bottomZ = (int16)(fBottomZ);
-    attribute.zoneDef.widthX = (int16)(2 * fWidthX);
+    attribute.zoneDef.widthX  = (int16)(2 * fWidthX);
     attribute.zoneDef.field_A = (int16)(2 * unk2);
-    attribute.zoneDef.topZ = (int16)(fTopZ);
-    attribute.flags = static_cast<eZoneAttributes>(flags);
+    attribute.zoneDef.topZ    = (int16)(fTopZ);
+    attribute.flags           = static_cast<eZoneAttributes>(flags);
 
     NumTunnelAttributeZones += 1;
 }
 
 // 0x72DC10
 void CCullZones::AddMirrorAttributeZone(const CVector& center, float unk1, float fWidthY, float fBottomZ, float fWidthX, float unk2, float fTopZ, eZoneAttributes flags, float cm, float vX, float vY, float vZ) {
-    int32 i = NumMirrorAttributeZones;
-    auto& attribute = aMirrorAttributeZones[i];
+    auto& attribute = aMirrorAttributeZones[NumMirrorAttributeZones];
 
-    attribute.zoneDef.x = (int16)(center.x - unk1 - fWidthX);
-    attribute.zoneDef.y = (int16)(center.y - fWidthY - unk2);
+    attribute.zoneDef.x       = (int16)(center.x - unk1 - fWidthX);
+    attribute.zoneDef.y       = (int16)(center.y - fWidthY - unk2);
     attribute.zoneDef.field_4 = (int16)(2 * unk1);
-    attribute.zoneDef.widthY = (int16)(2 * fWidthY);
+    attribute.zoneDef.widthY  = (int16)(2 * fWidthY);
     attribute.zoneDef.bottomZ = (int16)(fBottomZ);
-    attribute.zoneDef.widthX = (int16)(2 * fWidthX);
+    attribute.zoneDef.widthX  = (int16)(2 * fWidthX);
     attribute.zoneDef.field_A = (int16)(2 * unk2);
-    attribute.zoneDef.topZ = (int16)(fTopZ);
-    attribute.flags = (int16)(static_cast<eZoneAttributes>(flags));
-    attribute.cm = (int16)(cm);
+    attribute.zoneDef.topZ    = (int16)(fTopZ);
+    attribute.flags           = (uint16)(static_cast<eZoneAttributes>(flags));
+    attribute.cm              = cm;
 
-    attribute.vx = (char)(vX * 100.0f);
-    attribute.vy = (char)(vY * 100.0f);
-    attribute.vz = (char)(vZ * 100.0f);
+    attribute.vx = (int8)(vX * 100.0f);
+    attribute.vy = (int8)(vY * 100.0f);
+    attribute.vz = (int8)(vZ * 100.0f);
 
     NumMirrorAttributeZones += 1;
 }

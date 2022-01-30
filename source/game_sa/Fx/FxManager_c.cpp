@@ -11,32 +11,34 @@
 FxManager_c& g_fxMan = *(FxManager_c*)0xA9AE80;
 
 void FxManager_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("FxSystem_c", "FxSystem_c", 0x4A9470, &FxManager_c::Constructor);
-    // Install("FxSystem_c", "~FxSystem_c", 0x4A90A0, &FxManager_c::Destructor);
-    // Install("FxSystem_c", "Init", 0x4A98E0, &FxManager_c::Init);
-    // Install("FxSystem_c", "Exit", 0x4A9A10, &FxManager_c::Exit);
-    // Install("FxSystem_c", "DestroyFxSystem", 0x4A9810, &FxManager_c::DestroyFxSystem);
-    // Install("FxSystem_c", "DestroyAllFxSystems", 0x4A98B0, &FxManager_c::DestroyAllFxSystems);
-    // Install("FxSystem_c", "Update", 0x4A9A80, &FxManager_c::Update);
-    // Install("FxSystem_c", "LoadFxProject", 0x5C2420, &FxManager_c::LoadFxProject);
-    // Install("FxSystem_c", "UnloadFxProject", 0x4A9AE0, &FxManager_c::UnloadFxProject);
-    // Install("FxSystem_c", "LoadFxSystemBP", 0x5C1F50, &FxManager_c::LoadFxSystemBP);
-    // Install("FxSystem_c", "FindFxSystemBP", 0x4A9360, &FxManager_c::FindFxSystemBP);
-    Install("FxSystem_c", "GetFrustumInfo", 0x4A9130, &FxManager_c::GetFrustumInfo);
-    // Install("FxSystem_c", "CalcFrustumInfo", 0x4A9140, &FxManager_c::CalcFrustumInfo);
-    // Install("FxSystem_c", "Render", 0x4A92A0, &FxManager_c::Render);
-    // Install("FxSystem_c", "ReturnParticle", 0x4A93B0, &FxManager_c::ReturnParticle);
-    // Install("FxSystem_c", "GetParticle", 0x4A93C0, &FxManager_c::GetParticle);
-    // Install("FxSystem_c", "FreeUpParticle", 0x4A9400, &FxManager_c::FreeUpParticle);
-    Install("FxSystem_c", "SetWindData", 0x4A93E0, &FxManager_c::SetWindData);
-    // Install("FxSystem_c", "FxRwMatrixCreate", 0x4A9440, &FxManager_c::FxRwMatrixCreate);
-    Install("FxSystem_c", "FxRwMatrixDestroy", 0x4A9460, &FxManager_c::FxRwMatrixDestroy);
-    // Install("FxSystem_c", "ShouldCreate", 0x4A9500, &FxManager_c::ShouldCreate);
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A95C0, static_cast<FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A9BB0, static_cast<FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A96B0, static_cast<FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwV3d*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
-    // Install("FxSystem_c", "CreateFxSystem", 0x4A9BE0, static_cast<FxSystem_c* (FxManager_c::*)(const char*, RwV3d*, RwMatrix*, bool)>(&FxManager_c::CreateFxSystem));
+    RH_ScopedClass(FxManager_c);
+    RH_ScopedCategory("Fx");
+
+    // RH_ScopedInstall(Constructor, 0x4A9470);
+    // RH_ScopedInstall(Destructor, 0x4A90A0);
+    // RH_ScopedInstall(Init, 0x4A98E0);
+    // RH_ScopedInstall(Exit, 0x4A9A10);
+    // RH_ScopedInstall(DestroyFxSystem, 0x4A9810);
+    // RH_ScopedInstall(DestroyAllFxSystems, 0x4A98B0);
+    // RH_ScopedInstall(Update, 0x4A9A80);
+    // RH_ScopedInstall(LoadFxProject, 0x5C2420);
+    // RH_ScopedInstall(UnloadFxProject, 0x4A9AE0);
+    // RH_ScopedInstall(LoadFxSystemBP, 0x5C1F50);
+    // RH_ScopedInstall(FindFxSystemBP, 0x4A9360);
+    RH_ScopedInstall(GetFrustumInfo, 0x4A9130);
+    // RH_ScopedInstall(CalcFrustumInfo, 0x4A9140);
+    // RH_ScopedInstall(Render, 0x4A92A0);
+    // RH_ScopedInstall(ReturnParticle, 0x4A93B0);
+    // RH_ScopedInstall(GetParticle, 0x4A93C0);
+    // RH_ScopedInstall(FreeUpParticle, 0x4A9400);
+    RH_ScopedInstall(SetWindData, 0x4A93E0);
+    // RH_ScopedInstall(FxRwMatrixCreate, 0x4A9440);
+    RH_ScopedInstall(FxRwMatrixDestroy, 0x4A9460);
+    // RH_ScopedInstall(ShouldCreate, 0x4A9500);
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A95C0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwMatrix*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A9BB0, FxSystem_c* (FxManager_c::*)(const char*, RwMatrix*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A96B0, FxSystem_c* (FxManager_c::*)(FxSystemBP_c*, RwV3d*, RwMatrix*, bool));
+    // RH_ScopedOverloadedInstall(CreateFxSystem, "", 0x4A9BE0, FxSystem_c* (FxManager_c::*)(const char*, RwV3d*, RwMatrix*, bool));
 }
 
 // 0x4A9470

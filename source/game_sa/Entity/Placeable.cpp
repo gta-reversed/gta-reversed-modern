@@ -8,21 +8,24 @@
 
 void CPlaceable::InjectHooks()
 {
-    ReversibleHooks::Install("CPlaceable", "SetPosn_xyz", 0x420B80, (void(CPlaceable::*)(float, float, float))(&CPlaceable::SetPosn));
-    ReversibleHooks::Install("CPlaceable", "SetPosn_vector", 0x4241C0, (void(CPlaceable::*)(CVector const&))(&CPlaceable::SetPosn));
-    ReversibleHooks::Install("CPlaceable", "SetOrientation", 0x439A80, &CPlaceable::SetOrientation);
-    ReversibleHooks::Install("CPlaceable", "SetHeading", 0x43E0C0, &CPlaceable::SetHeading);
-    ReversibleHooks::Install("CPlaceable", "GetHeading", 0x441DB0, &CPlaceable::GetHeading);
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xy", 0x54F200, (bool(CPlaceable::*)(float, float, float, float))(&CPlaceable::IsWithinArea));
-    ReversibleHooks::Install("CPlaceable", "IsWithinArea_xyz", 0x54F2B0, (bool(CPlaceable::*)(float, float, float, float, float, float))(&CPlaceable::IsWithinArea));
-    ReversibleHooks::Install("CPlaceable", "RemoveMatrix", 0x54F3B0, &CPlaceable::RemoveMatrix);
-    ReversibleHooks::Install("CPlaceable", "AllocateStaticMatrix", 0x54F4C0, &CPlaceable::AllocateStaticMatrix);
-    ReversibleHooks::Install("CPlaceable", "AllocateMatrix", 0x54F560, &CPlaceable::AllocateMatrix);
-    ReversibleHooks::Install("CPlaceable", "SetMatrix", 0x54F610, &CPlaceable::SetMatrix);
-    ReversibleHooks::Install("CPlaceable", "GetMatrix", 0x411990, &CPlaceable::GetMatrix);
-    ReversibleHooks::Install("CPlaceable", "ShutdownMatrixArray", 0x54EFD0, &CPlaceable::ShutdownMatrixArray);
-    ReversibleHooks::Install("CPlaceable", "InitMatrixArray", 0x54F3A0, &CPlaceable::InitMatrixArray);
-    ReversibleHooks::Install("CPlaceable", "FreeStaticMatrix", 0x54F010, &CPlaceable::FreeStaticMatrix);
+    RH_ScopedClass(CPlaceable);
+    RH_ScopedCategory("Entity");
+
+    RH_ScopedOverloadedInstall(SetPosn, "xyz", 0x420B80, void(CPlaceable::*)(float, float, float));
+    RH_ScopedOverloadedInstall(SetPosn, "vector", 0x4241C0, void(CPlaceable::*)(CVector const&));
+    RH_ScopedInstall(SetOrientation, 0x439A80);
+    RH_ScopedInstall(SetHeading, 0x43E0C0);
+    RH_ScopedInstall(GetHeading, 0x441DB0);
+    RH_ScopedOverloadedInstall(IsWithinArea, "xy", 0x54F200, bool(CPlaceable::*)(float, float, float, float));
+    RH_ScopedOverloadedInstall(IsWithinArea, "xyz", 0x54F2B0, bool(CPlaceable::*)(float, float, float, float, float, float));
+    RH_ScopedInstall(RemoveMatrix, 0x54F3B0);
+    RH_ScopedInstall(AllocateStaticMatrix, 0x54F4C0);
+    RH_ScopedInstall(AllocateMatrix, 0x54F560);
+    RH_ScopedInstall(SetMatrix, 0x54F610);
+    RH_ScopedInstall(GetMatrix, 0x411990);
+    RH_ScopedInstall(ShutdownMatrixArray, 0x54EFD0);
+    RH_ScopedInstall(InitMatrixArray, 0x54F3A0);
+    RH_ScopedInstall(FreeStaticMatrix, 0x54F010);
 }
 
 CPlaceable::CPlaceable() : m_placement()
@@ -43,7 +46,7 @@ CPlaceable::~CPlaceable()
 CVector CPlaceable::GetRightVector()
 {
     if (m_matrix)
-        m_matrix->GetRight();
+        return m_matrix->GetRight();
     return CVector(cos(m_placement.m_fHeading), sin(m_placement.m_fHeading), 0.0f);
 }
 
@@ -57,7 +60,7 @@ CVector CPlaceable::GetForwardVector()
 CVector CPlaceable::GetUpVector()
 {
     if (m_matrix)
-        m_matrix->GetUp();
+        return m_matrix->GetUp();
     return CVector(0.0f, 0.0f, 1.0f);
 }
 
