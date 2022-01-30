@@ -71,7 +71,8 @@ group "Dependencies"
         includedirs { "libs/vorbis/include", "libs/ogg/include", "libs/ogg/include" }
         language "C++"
         kind "StaticLib"
-        targetname "ogg"       
+        targetname "ogg"
+        warnings "Off"
         files {
             "libs/ogg/**.h",
             "libs/ogg/**.c"
