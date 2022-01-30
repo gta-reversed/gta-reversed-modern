@@ -581,11 +581,9 @@ int32 CRadar::SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBl
 // 0x583AB0
 void CRadar::ChangeBlipColour(int32 blipIndex, uint32 color)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_nColour = static_cast<eBlipColour>(color);
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ms_RadarTrace[idx].m_nColour = static_cast<eBlipColour>(color);
+    }
 }
 
 // 0x583AF0
