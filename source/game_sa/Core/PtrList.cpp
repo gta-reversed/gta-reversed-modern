@@ -3,8 +3,11 @@
 #include "PtrList.h"
 
 void CPtrList::InjectHooks() {
-    ReversibleHooks::Install("CPtrList", "CountElements", 0x5521B0, &CPtrList::CountElements);
-    ReversibleHooks::Install("CPtrList", "IsMemberOfList", 0x5521D0, &CPtrList::IsMemberOfList);
+    RH_ScopedClass(CPtrList);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(CountElements, 0x5521B0);
+    RH_ScopedInstall(IsMemberOfList, 0x5521D0);
 }
 
 CPtrList::CPtrList() {

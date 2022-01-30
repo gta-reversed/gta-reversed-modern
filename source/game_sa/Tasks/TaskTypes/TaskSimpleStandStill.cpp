@@ -4,12 +4,15 @@
 
 void CTaskSimpleStandStill::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleStandStill", "CTaskSimpleStandStill", 0x62F310, &CTaskSimpleStandStill::Constructor);
-    ReversibleHooks::Install("CTaskSimpleStandStill", "Clone", 0x635CF0, &CTaskSimpleStandStill::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStandStill", "MakeAbortable", 0x4B8690, &CTaskSimpleStandStill::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStandStill", "ProcessPed", 0x62F370, &CTaskSimpleStandStill::ProcessPed_Reversed);
+    RH_ScopedClass(CTaskSimpleStandStill);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x62F310);
+    RH_ScopedInstall(Clone_Reversed, 0x635CF0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x4B8690);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x62F370);
 }
 
+// 0x62F310
 CTaskSimpleStandStill::CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData)
 {
     m_nTime = nTime;
@@ -25,40 +28,26 @@ CTaskSimpleStandStill::~CTaskSimpleStandStill()
 
 CTaskSimpleStandStill* CTaskSimpleStandStill::Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTaskSimpleStandStill*,0x62F310, CTaskSimpleStandStill*, int32, bool, bool, float>
-        (this, nTime, Looped, bUseAnimIdleStance, fBlendData);
-#else
     this->CTaskSimpleStandStill::CTaskSimpleStandStill(nTime, Looped, bUseAnimIdleStance, fBlendData);
     return this;
-#endif
 }
 
+// 0x635CF0
 CTask* CTaskSimpleStandStill::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<CTask*, 0x635CF0, CTask*>(this);
-#else
     return CTaskSimpleStandStill::Clone_Reversed();
-#endif
 }
 
+// 0x4B8690
 bool CTaskSimpleStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x4B8690, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
-#else
     return CTaskSimpleStandStill::MakeAbortable_Reversed(ped, priority, event);
-#endif
 }
 
+// 0x62F370
 bool CTaskSimpleStandStill::ProcessPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS 
-    return plugin::CallMethodAndReturn<bool, 0x62F370, CTask*, CPed*>(this, ped);
-#else
     return CTaskSimpleStandStill::ProcessPed_Reversed(ped);
-#endif
 }
 
 

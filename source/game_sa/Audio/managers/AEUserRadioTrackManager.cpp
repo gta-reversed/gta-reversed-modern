@@ -417,19 +417,22 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
 }
 
 void CAEUserRadioTrackManager::InjectHooks() {
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "Initialise", 0x4f35b0, &CAEUserRadioTrackManager::Initialise);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "Shutdown", 0x4f2fb0, &CAEUserRadioTrackManager::Shutdown);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "ReadUserTracks", 0x4f2fd0, &CAEUserRadioTrackManager::ReadUserTracks);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetTrackPath", 0x4f3050, &CAEUserRadioTrackManager::GetTrackPath);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "ResolveShortcut", 0x4f30f0, (char* (CAEUserRadioTrackManager::*)(const char*)) & CAEUserRadioTrackManager::ResolveShortcut);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetAudioFileType", 0x4f31f0, &CAEUserRadioTrackManager::GetAudioFileType);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "SelectUserTrackIndex", 0x4f3250, &CAEUserRadioTrackManager::SelectUserTrackIndex);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "DeleteUserTracksInfo", 0x4f32f0, &CAEUserRadioTrackManager::DeleteUserTracksInfo);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "IsShortcut", 0x4f32c0, &CAEUserRadioTrackManager::IsShortcut);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "LoadUserTrack", 0x4f35f0, &CAEUserRadioTrackManager::LoadUserTrack);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "GetUserTrackPlayMode", 0x4f3330, &CAEUserRadioTrackManager::GetUserTrackPlayMode);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "SetUserTrackIndex", 0x4f3340, &CAEUserRadioTrackManager::SetUserTrackIndex);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "WriteUserTracksFile", 0x4f4690, (int32(CAEUserRadioTrackManager::*)(const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int32)) & CAEUserRadioTrackManager::WriteUserTracksFile);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "WriteUserTracksThread", 0x4f4a20, &CAEUserRadioTrackManager::WriteUserTracksThread);
-    ReversibleHooks::Install("CAEUserRadioTrackManager", "ScanUserTracks", 0x4f4ba0, &CAEUserRadioTrackManager::ScanUserTracks);
+    RH_ScopedClass(CAEUserRadioTrackManager);
+    RH_ScopedCategory("Audio/Managers");
+
+    RH_ScopedInstall(Initialise, 0x4f35b0);
+    RH_ScopedInstall(Shutdown, 0x4f2fb0);
+    RH_ScopedInstall(ReadUserTracks, 0x4f2fd0);
+    RH_ScopedInstall(GetTrackPath, 0x4f3050);
+    RH_ScopedOverloadedInstall(ResolveShortcut, "", 0x4f30f0, char* (CAEUserRadioTrackManager::*)(const char*));
+    RH_ScopedInstall(GetAudioFileType, 0x4f31f0);
+    RH_ScopedInstall(SelectUserTrackIndex, 0x4f3250);
+    RH_ScopedInstall(DeleteUserTracksInfo, 0x4f32f0);
+    RH_ScopedInstall(IsShortcut, 0x4f32c0);
+    RH_ScopedInstall(LoadUserTrack, 0x4f35f0);
+    RH_ScopedInstall(GetUserTrackPlayMode, 0x4f3330);
+    RH_ScopedInstall(SetUserTrackIndex, 0x4f3340);
+    RH_ScopedOverloadedInstall(WriteUserTracksFile, "", 0x4f4690, int32(CAEUserRadioTrackManager::*)(const char*, size_t&, FILE*, std::vector<tUserTracksInfo>&, int32));
+    RH_ScopedInstall(WriteUserTracksThread, 0x4f4a20);
+    RH_ScopedInstall(ScanUserTracks, 0x4f4ba0);
 }

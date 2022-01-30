@@ -16,16 +16,18 @@ int16& CRestart::NumberOfPoliceRestarts = *(int16*)0xA43268;
 int16& CRestart::NumberOfHospitalRestarts = *(int16*)0xA4326C;
 
 void CRestart::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CRestart", "Initialise", 0x460630, &CRestart::Initialise);
-    Install("CRestart", "AddHospitalRestartPoint", 0x460730, &CRestart::AddHospitalRestartPoint);
-    Install("CRestart", "AddPoliceRestartPoint", 0x460780, &CRestart::AddPoliceRestartPoint);
-    Install("CRestart", "OverrideNextRestart", 0x4607D0, &CRestart::OverrideNextRestart);
-    Install("CRestart", "CancelOverrideRestart", 0x460800, &CRestart::CancelOverrideRestart);
-    Install("CRestart", "ClearRespawnPointForDurationOfMission", 0x460840, &CRestart::ClearRespawnPointForDurationOfMission);
-    Install("CRestart", "FindClosestHospitalRestartPoint", 0x460850, &CRestart::FindClosestHospitalRestartPoint);
-    Install("CRestart", "FindClosestPoliceRestartPoint", 0x460A50, &CRestart::FindClosestPoliceRestartPoint);
-    Install("CRestart", "Save", 0x5D3620, &CRestart::Save);
+    RH_ScopedClass(CRestart);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x460630);
+    RH_ScopedInstall(AddHospitalRestartPoint, 0x460730);
+    RH_ScopedInstall(AddPoliceRestartPoint, 0x460780);
+    RH_ScopedInstall(OverrideNextRestart, 0x4607D0);
+    RH_ScopedInstall(CancelOverrideRestart, 0x460800);
+    RH_ScopedInstall(ClearRespawnPointForDurationOfMission, 0x460840);
+    RH_ScopedInstall(FindClosestHospitalRestartPoint, 0x460850);
+    RH_ScopedInstall(FindClosestPoliceRestartPoint, 0x460A50);
+    RH_ScopedInstall(Save, 0x5D3620);
 }
 
 void CRestart::AddHospitalRestartPoint(CVector const& point, float angle, int32 townId)

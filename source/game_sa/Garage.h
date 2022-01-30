@@ -28,6 +28,11 @@ public:
 
     CVehicle* RestoreCar();
     void      StoreCar(CVehicle* pVehicle);
+
+    // NOTSA
+    void Init() { m_wModelIndex = 0; }
+    void Clear() { m_wModelIndex = 0; }
+    bool HasCar() { return m_wModelIndex != 0; }
 };
 VALIDATE_SIZE(CStoredCar, 0x40);
 
@@ -48,11 +53,11 @@ public:
     float     m_fFrontCoord;
     float     m_fBackCoord;
     float     m_fDoorPosition;
-    uint32  m_dwTimeToOpen;
+    uint32    m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
     char      m_anName[8];
-    uint8   m_nType;      // see eGarageType
-    uint8   m_nDoorState; // see eGarageDoorState
+    uint8     m_nType;      // see eGarageType
+    uint8     m_nDoorState; // see eGarageDoorState
     union {
         uint8 m_nFlags;
         struct {
@@ -66,10 +71,12 @@ public:
             uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    uint8            m_nOriginalType;
+    uint8              m_nOriginalType;
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
+    static constexpr size_t NUM_GARAGE_STORED_CARS = 4;
+
     static void InjectHooks();
 
     void Update();
@@ -90,7 +97,7 @@ public:
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
     bool IsEntityTouching3D(CEntity* pEntity);
-    bool EntityHasASpehereWayOutsideGarage(CEntity* pEntity, float fRadius);
+    bool EntityHasASphereWayOutsideGarage(CEntity* pEntity, float fRadius);
     bool IsAnyOtherCarTouchingGarage(CVehicle* pIgnoredVehicle);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* pIgnoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* pIgnoredPed);

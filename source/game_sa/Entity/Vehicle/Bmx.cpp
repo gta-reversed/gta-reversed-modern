@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 void CBmx::InjectHooks() {
+    RH_ScopedClass(CBmx);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

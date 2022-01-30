@@ -6,15 +6,21 @@
 
 void CEventAttractor::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAttractor", "Constructor", 0x4AF350, &CEventAttractor::Constructor);
-    ReversibleHooks::Install("CEventAttractor", "AffectsPed_Reversed", 0x4AF4B0, &CEventAttractor::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventAttractor", "CloneEditable_Reversed", 0x4B7440, &CEventAttractor::CloneEditable_Reversed);
-    ReversibleHooks::Install("CEventAttractor", "IsEffectActive", 0x4AF460, &CEventAttractor::IsEffectActive);
+    RH_ScopedClass(CEventAttractor);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF350);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF4B0);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7440);
+    RH_ScopedInstall(IsEffectActive, 0x4AF460);
 }
 
 void CEventScriptedAttractor::InjectHooks()
 {
-    ReversibleHooks::Install("CEventScriptedAttractor", "CEventScriptedAttractor", 0x5FEF40, &CEventScriptedAttractor::Constructor);
+    RH_ScopedClass(CEventScriptedAttractor);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FEF40);
 }
 
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)

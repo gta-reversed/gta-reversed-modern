@@ -166,6 +166,9 @@ public:
         else
             m_nAlpha += 16;
     };
+    auto GetModelName() const noexcept {
+        return m_nKey;
+    }
     void SetModelName(const char* modelName) {
         m_nKey = CKeyGen::GetUppercaseKey(modelName);
     }
@@ -180,6 +183,8 @@ public:
     bool IsGarageDoor()          const { return nSpecialType == eModelInfoSpecialType::GARAGE_DOOR; }        // 0x3800
     bool IsBreakableStatuePart() const { return nSpecialType == eModelInfoSpecialType::BREAKABLE_STATUE; }
     bool IsCrane()               const { return nSpecialType == eModelInfoSpecialType::CRANE; }              // 0x4800
+
+    void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
 };
 VALIDATE_SIZE(CBaseModelInfo, 0x20);
 

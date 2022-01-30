@@ -1,10 +1,13 @@
 #include "StdInc.h"
 
 void CStencilShadowObjects::InjectHooks() {
-//    ReversibleHooks::Install("CStencilShadowObjects", "UpdateHierarchy", 0x710BC0, &CStencilShadowObjects::UpdateHierarchy);
-//    ReversibleHooks::Install("CStencilShadowObjects", "RegisterStencilShadows", 0x711760, &CStencilShadowObjects::RegisterStencilShadows);
-//    ReversibleHooks::Install("CStencilShadowObjects", "ScalarConstructor", 0x854B60, &CStencilShadowObjects::ScalarConstructor);
-//    ReversibleHooks::Install("CStencilShadowObjects", "ScalarDestructor", 0x856AE0, &CStencilShadowObjects::ScalarDestructor);
+    RH_ScopedClass(CStencilShadowObjects);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(UpdateHierarchy, 0x710BC0);
+//    RH_ScopedInstall(RegisterStencilShadows, 0x711760);
+//    RH_ScopedInstall(ScalarConstructor, 0x854B60);
+//    RH_ScopedInstall(ScalarDestructor, 0x856AE0);
 }
 
 // 0x710BC0

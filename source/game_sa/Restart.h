@@ -1,51 +1,44 @@
-/*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "Vector.h"
 
 class CRestart {
 public:
-    static bool&    bOverrideRespawnBasePointForMission;
-    static CVector& OverrideRespawnBasePointForMission;
-    static float&   OverrideHeading;
+    static int16&   NumberOfHospitalRestarts;
+    static CVector  (&HospitalRestartPoints)[10];
+    static float    (&HospitalRestartHeadings)[10];
+    static int32    (&HospitalRestartWhenToUse)[10];
+
+    static uint16&  NumberOfPoliceRestarts;
+    static CVector  (&PoliceRestartPoints)[10];
+    static float    (&PoliceRestartHeadings)[10];
+    static int32    (&PoliceRestartWhenToUse)[10];
+
     static bool&    bOverrideRestart;
     static CVector& OverridePosition;
+    static float&   OverrideHeading;
+    static bool&    bOverrideRespawnBasePointForMission;
+    static CVector& OverrideRespawnBasePointForMission;
 
-    static constexpr uint32 MAX_RESTART_POINTS{ 10u };
-    
-    static inline bool& byte_A4325C = *(bool*)0xA4325C;
-    static inline bool& bFadeInAfterNextDeath = *(bool*)0xA4325D;
+    static bool&    bFadeInAfterNextDeath;
+    static bool&    bFadeInAfterNextArrest;
 
-    static int16& NumberOfPoliceRestarts;
-    static inline int32(&PoliceRestartWhenToUse)[MAX_RESTART_POINTS] = *(int32(*)[MAX_RESTART_POINTS])0xA43270;
-    static inline float(&PoliceRestartHeadings)[MAX_RESTART_POINTS] = *(float(*)[MAX_RESTART_POINTS])0xA43298;
-    static inline CVector(&PoliceRestartPoints)[MAX_RESTART_POINTS] = *(CVector(*)[MAX_RESTART_POINTS])0xA43390;
+    static CVector& ExtraHospitalRestartCoors;
+    static float&   ExtraHospitalRestartRadius;
+    static float&   ExtraHospitalRestartHeading;
 
-    static int16& NumberOfHospitalRestarts;
-    static inline int32(&HospitalRestartWhenToUse)[MAX_RESTART_POINTS] = *(int32(*)[MAX_RESTART_POINTS])0xA432C0;
-    static inline float(&HospitalRestartHeadings)[MAX_RESTART_POINTS] = *(float(*)[MAX_RESTART_POINTS])0xA432E8;
-    static inline CVector(&HospitalRestartPoints)[MAX_RESTART_POINTS] = *(CVector(*)[MAX_RESTART_POINTS])0xA43318;
+    static CVector& ExtraPoliceStationRestartCoors;
+    static float&   ExtraPoliceStationRestartRadius;
+    static float&   ExtraPoliceStationRestartHeading;
 
-    // Script command 2271 (COMMAND_SET_EXTRA_HOSPITAL_RESTART_POINT) arguments
-    static inline float& ScriptExtraHospitalRestartPoint_Angle = *(float*)0xA43254;
-    static inline float& ScriptExtraHospitalRestartPoint_Radius = *(float*)0xA43258;
-    static inline CVector& ScriptExtraHospitalRestartPoint_Pos = *(CVector*)0xA43414;
-
-    // Script command 2272 (COMMAND_SET_EXTRA_POLICE_RESTART_POINT) arguments
-    static inline float& ScriptExtraPoliceRestartPoint_Radius = *(float*)0xA43250;
-    static inline float& ScriptExtraPoliceRestartPoint_Angle = *(float*)0xA4324C;
-    static inline CVector& ScriptExtraPoliceRestartPoint_Pos = *(CVector*)0xA43420;
-
+public:
     static void InjectHooks();
 
-    static void AddHospitalRestartPoint(CVector const& point, float angle, int32 townId);
-    static void AddPoliceRestartPoint(CVector const& point, float angle, int32 townId);
+    static void Initialise();
+    static void AddHospitalRestartPoint(const CVector& point, float angle, int32 townId);
+    static void AddPoliceRestartPoint(const CVector& point, float angle, int32 townId);
     static void CancelOverrideRestart();
+    static void SetRespawnPointForDurationOfMission(CVector point);
     static void ClearRespawnPointForDurationOfMission();
     static void FindClosestHospitalRestartPoint(CVector point, CVector& outPos, float& outAngle);
     static void FindClosestPoliceRestartPoint(CVector point, CVector& storedPoint, float& outAngle);
@@ -53,6 +46,4 @@ public:
     static void Load();
     static void Save();
     static void OverrideNextRestart(CVector const& point, float angle);
-    // static void Save();
-    // static void SetRespawnPointForDurationOfMission(CVector point);
 };

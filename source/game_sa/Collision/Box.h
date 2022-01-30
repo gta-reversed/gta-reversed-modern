@@ -25,6 +25,7 @@ public:
     inline float GetWidth() const { return m_vecMax.x - m_vecMin.x; }
     inline float GetLength() const { return m_vecMax.y - m_vecMin.y; }
     inline float GetHeight() const { return m_vecMax.z - m_vecMin.z; }
+    inline CVector GetCenter() { return (m_vecMax + m_vecMin) / 2.f; }
 };
 
 VALIDATE_SIZE(CBox, 0x18);

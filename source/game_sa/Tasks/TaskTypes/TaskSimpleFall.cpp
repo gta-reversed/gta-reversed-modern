@@ -6,13 +6,15 @@ uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2
 
 void CTaskSimpleFall::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleFall","Constructor", 0x6782C0, &CTaskSimpleFall::Constructor);
-    ReversibleHooks::Install("CTaskSimpleFall", "StartAnim", 0x67CA40, &CTaskSimpleFall::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleFall", "ProcessFall", 0x6784C0, &CTaskSimpleFall::ProcessFall);
-    ReversibleHooks::Install("CTaskSimpleFall", "FinishFallAnimCB", 0x6786B0, &CTaskSimpleFall::FinishFallAnimCB);
+    RH_ScopedClass(CTaskSimpleFall);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x6782C0);
+    RH_ScopedInstall(StartAnim, 0x67CA40);
+    RH_ScopedInstall(ProcessFall, 0x6784C0);
+    RH_ScopedInstall(FinishFallAnimCB, 0x6786B0);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleFall", "ProcessPed", 0x67FAF0, &CTaskSimpleFall::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleFall", "MakeAbortable", 0x678370, &CTaskSimpleFall::MakeAbortable_Reversed);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x67FAF0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x678370);
 }
 
 CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)

@@ -78,9 +78,9 @@ public:
     static CVehicleModelInfo* AddVehicleModel(int32 index);
     static class CPedModelInfo* AddPedModel(int32 index);
     static void Initialise();
-    static CBaseModelInfo* GetModelInfo(const char* name, int32* index);
-    static CBaseModelInfo* GetModelInfoFromHashKey(uint32 uiHash, int32* index);
-    static CBaseModelInfo* GetModelInfoUInt16(const char* name, uint16* pOutIndex);
+    static CBaseModelInfo* GetModelInfo(const char* name, int32* index = nullptr);
+    static CBaseModelInfo* GetModelInfoFromHashKey(uint32 uiHash, int32* index = nullptr);
+    static CBaseModelInfo* GetModelInfoUInt16(const char* name, uint16* pOutIndex = nullptr);
     // get model in range (search for model only in range (min;max))
     static CBaseModelInfo* GetModelInfo(const char* name, int32 minIndex, int32 maxIndex);
     static CStore<C2dEffect, NUM_2DFX_INFOS>* Get2dEffectStore();

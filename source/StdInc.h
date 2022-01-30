@@ -13,6 +13,8 @@
 #include <functional>
 #include <iostream>
 #include <cassert>
+#include <array>
+#include <ranges>
 
 // DirectX
 #include <d3d9.h>
@@ -110,14 +112,12 @@
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
-#include "game_sa\BulletInfo.h"
 #include "game_sa\BulletTrace.h"
 #include "game_sa\BulletTraces.h"
 #include "game_sa\Cam.h"
 #include "game_sa\Camera.h"
 #include "game_sa\CamPathSplines.h"
 #include "game_sa\CarAI.h"
-#include "game_sa\CarCtrl.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
 #include "game_sa\Checkpoint.h"
@@ -125,18 +125,15 @@
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\Clouds.h"
 #include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
 #include "game_sa\CoverPoint.h"
 #include "game_sa\Cranes.h"
-#include "game_sa\CreepingFire.h"
 #include "game_sa\CrimeBeingQd.h"
 #include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CustomCarPlateMgr.h"
 #include "game_sa\CutsceneMgr.h"
-#include "game_sa\DamageManager.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
 #include "game_sa\Decision.h"
@@ -152,8 +149,6 @@
 #include "game_sa\FileLoader.h"
 #include "game_sa\FileMgr.h"
 #include "game_sa\FileObjectInstance.h"
-#include "game_sa\Fire.h"
-#include "game_sa\FireManager.h"
 #include "game_sa\Font.h"
 #include "game_sa\Formation.h"
 #include "game_sa\Game.h"
@@ -195,7 +190,6 @@
 #include "game_sa\ControllerState.h"
 #include "game_sa\Pad.h"
 #include "game_sa\PathFind.h"
-#include "game_sa\PedClothesDesc.h"
 #include "game_sa\PedGroup.h"
 #include "game_sa\PedGroupIntelligence.h"
 #include "game_sa\PedGroupMembership.h"
@@ -247,7 +241,6 @@
 #include "game_sa\Shopping.h"
 #include "game_sa\ShotInfo.h"
 #include "game_sa\SimpleTransform.h"
-#include "game_sa\Skidmarks.h"
 #include "game_sa\SpecialFX.h"
 #include "game_sa\SpecialPlateHandler.h"
 #include "game_sa\Sprite.h"
@@ -295,7 +288,6 @@
 #include "game_sa\TxdDef.h"
 #include "game_sa\GameLogic.h"
 #include "game_sa\Maths.h"
-#include "game_sa\TagManager.h"
 #include "game_sa\Remote.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"
