@@ -728,14 +728,14 @@ void CRadar::SetBlipSprite(int32 blipIndex, eRadarSprite spriteId)
 }
 
 // 0x583DB0
-void CRadar::SetBlipAlwaysDisplayInZoom(int32 blipIndex, uint8 display)
+void CRadar::SetBlipAlwaysDisplayInZoom(int32 blipIndex, bool display)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_bTrackingBlip)
-        ms_RadarTrace[index].m_bBlipRemain = display;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        auto& t = ms_RadarTrace[idx];
+        if (t.m_bTrackingBlip) {
+            t.m_bBlipRemain = display;
+        }
+    }
 }
 
 // unused?

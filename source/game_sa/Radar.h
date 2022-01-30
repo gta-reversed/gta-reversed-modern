@@ -234,7 +234,7 @@ public:
     static void ChangeBlipScale(int32 blipIndex, int32 size);
     static void ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay);
     static void SetBlipSprite(int32 blipIndex, eRadarSprite spriteId);
-    static void SetBlipAlwaysDisplayInZoom(int32 blipIndex, uint8 display);
+    static void SetBlipAlwaysDisplayInZoom(int32 blipIndex, bool display);
     static void SetBlipFade(int32 blipIndex, bool fade);
     static void SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance);
     static void SetBlipFriendly(int32 blipIndex, bool friendly);
