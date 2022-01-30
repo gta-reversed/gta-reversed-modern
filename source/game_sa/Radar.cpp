@@ -769,12 +769,12 @@ void CRadar::SetBlipFriendly(int32 blipIndex, bool friendly)
 // 0x583F00
 void CRadar::SetBlipEntryExit(int32 blipIndex, CEntryExit* enex)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_bTrackingBlip)
-        ms_RadarTrace[index].m_pEntryExit = enex;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        auto& t = ms_RadarTrace[idx];
+        if (t.m_bTrackingBlip) {
+            t.m_pEntryExit = enex;
+        }
+    }
 }
 
 // 0x583F40
