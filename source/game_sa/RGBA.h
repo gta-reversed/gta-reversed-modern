@@ -15,12 +15,14 @@ public:
     uint8 b;
     uint8 a;
 
-    CRGBA(uint8 red, uint8 green, uint8 blue);
-    CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha);
-    CRGBA(const CRGBA& rhs);
-    CRGBA(uint32 intValue);
-    CRGBA(const RwRGBA& rhs);
     CRGBA() = default;
+    CRGBA(const CRGBA& rhs) = default;
+
+    CRGBA(uint8 red, uint8 green, uint8 blue) { Set(red, green, blue); }
+    CRGBA(uint8 red, uint8 green, uint8 blue, uint8 alpha){ Set(red, green, blue, alpha); }
+    CRGBA(uint32 intValue) { Set(intValue); }
+    CRGBA(const RwRGBA& rhs) { Set(rhs); }
+    CRGBA(const CRGBA& rhs, float alpha) { Set(rhs, alpha); };
 
     void Set(uint8 red, uint8 green, uint8 blue);
     void Set(uint8 red, uint8 green, uint8 blue, uint8 alpha);
