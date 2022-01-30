@@ -53,6 +53,14 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT g
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
 if (MSVC)
     target_compile_options(gta_reversed PRIVATE "/MP" "/Zc:preprocessor" "/wd26812" "/wd26495")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+    target_compile_options(ogg PRIVATE "-w")
+    target_compile_options(imgui PRIVATE "-w")
+    target_compile_options(vorbisfile PRIVATE "-w")
+elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+    target_compile_options(ogg PRIVATE "-Wno-everything")
+    target_compile_options(imgui PRIVATE "-Wno-everything")
+    target_compile_options(vorbisfile PRIVATE "-Wno-everything")
 endif()
 set_target_properties(gta_reversed
     PROPERTIES
