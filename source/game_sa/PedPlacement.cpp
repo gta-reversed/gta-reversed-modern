@@ -7,11 +7,14 @@
 #include "StdInc.h"
 
 void CPedPlacement::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPedPlacement", "IsPositionClearForPed", 0x616860, &CPedPlacement::IsPositionClearForPed);
-    Install("CPedPlacement", "IsPositionClearOfCars_Pos", 0x6168E0, static_cast<CVehicle*(*)(CVector const*)>(&CPedPlacement::IsPositionClearOfCars));
-    Install("CPedPlacement", "FindZCoorForPed", 0x616920, &CPedPlacement::FindZCoorForPed);
-    Install("CPedPlacement", "IsPositionClearOfCars_Ped", 0x616A40, static_cast<CVehicle *(*)(CPed const*)>(&CPedPlacement::IsPositionClearOfCars));
+    RH_ScopedClass(CPedPlacement);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(IsPositionClearForPed, 0x616860);
+    RH_ScopedInstall(FindZCoorForPed, 0x616920);
+
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Pos", 0x6168E0, CVehicle * (*)(CVector const*));
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Ped", 0x616A40, CVehicle * (*)(CPed const*));
 }
 
 bool CPedPlacement::FindZCoorForPed(CVector& inoutPos) {
