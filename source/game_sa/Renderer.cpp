@@ -66,7 +66,7 @@ void CRenderer::InjectHooks()
     RH_ScopedInstall(ScanSectorList_ListModels, 0x5535D0);
     RH_ScopedInstall(ScanSectorList_ListModelsVisible, 0x553650);
     RH_ScopedInstall(ScanSectorList, 0x554840);
-    RH_ScopedInstall(ScanBigBuildingList, 0x554B10, true);
+    RH_ScopedInstall(ScanBigBuildingList, 0x554B10);
     RH_ScopedInstall(ShouldModelBeStreamed, 0x554EB0);
     RH_ScopedInstall(ScanPtrList_RequestModels, 0x555680);
     RH_ScopedInstall(ConstructRenderList, 0x5556E0);
@@ -294,6 +294,7 @@ void CRenderer::ProcessLodRenderLists() {
 
 // 0x553910
 void CRenderer::PreRender() {
+    assert(ms_nNoOfVisibleLods <= MAX_VISIBLE_LOD_PTRS);
     for (int32 i = 0; i < ms_nNoOfVisibleLods; ++i) {
         ms_aVisibleLodPtrs[i]->PreRender();
     }
@@ -302,26 +303,35 @@ void CRenderer::PreRender() {
     for (int32 i = 0; i < ms_nNoOfVisibleEntities; ++i) {
         ms_aVisibleEntityPtrs[i]->PreRender();
     }
+
+    assert(ms_nNoOfVisibleSuperLods <= MAX_VISIBLE_SUPERLOD_PTRS);
     for (int32 i = 0; i < ms_nNoOfVisibleSuperLods; ++i) {
         ms_aVisibleSuperLodPtrs[i]->PreRender();
     }
+
+    assert(ms_nNoOfInVisibleEntities <= MAX_INVISIBLE_ENTITY_PTRS);
     for (int32 i = 0; i < ms_nNoOfInVisibleEntities; ++i) {
         ms_aInVisibleEntityPtrs[i]->PreRender();
     }
-    for (auto link = CVisibilityPlugins::m_alphaEntityList.usedListHead.next;
+
+    for (auto* link = CVisibilityPlugins::m_alphaEntityList.usedListHead.next;
         link != &CVisibilityPlugins::m_alphaEntityList.usedListTail;
         link = link->next)
     {
-        if (link->data.m_pCallback == CVisibilityPlugins::RenderEntity) {
+        // NOTSA: HACK: We compare function pointers, and want it to work with reversible hooks,
+        // we need to check for both original function and our one
+        if (link->data.m_pCallback == CVisibilityPlugins::RenderEntity || link->data.m_pCallback == (void*)0x732B40) {
             link->data.m_entity->m_bOffscreen = false;
             link->data.m_entity->PreRender();
         }
     }
-    for (auto link = CVisibilityPlugins::m_alphaUnderwaterEntityList.usedListHead.next;
+    for (auto* link = CVisibilityPlugins::m_alphaUnderwaterEntityList.usedListHead.next;
         link != &CVisibilityPlugins::m_alphaUnderwaterEntityList.usedListTail;
         link = link->next)
     {
-        if (link->data.m_pCallback == CVisibilityPlugins::RenderEntity) {
+        // NOTSA: HACK: We compare function pointers, and want it to work with reversible hooks,
+        // we need to check for both original function and our one
+        if (link->data.m_pCallback == CVisibilityPlugins::RenderEntity || link->data.m_pCallback == (void*)0x732B40) {
             link->data.m_entity->m_bOffscreen = false;
             link->data.m_entity->PreRender();
         }
@@ -791,7 +801,6 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
         bRequestModel = true;
     }
 
-    float fDistance = 0.0f;
     SetupScanLists(sectorX, sectorY);
     auto* scanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);
     for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
@@ -809,6 +818,7 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
             entity->m_nScanCode = GetCurrentScanCode();
             entity->m_bOffscreen = false;
             bool bInvisibleEntity = false;
+            float fDistance = 0.0f;
             switch (SetupEntityVisibility(entity, fDistance)) {
             case RENDERER_INVISIBLE: {
                 if (entity->IsObject()) {
@@ -880,41 +890,44 @@ void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
     if (sectorX < 0 && sectorY < 0 && sectorX > MAX_LOD_PTR_LISTS_X && sectorY > MAX_LOD_PTR_LISTS_Y)
         return;
 
-    CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
     bool bRequestModel = false;
     float fDistanceX = CWorld::GetLodSectorPosX(sectorX) - ms_vecCameraPosition.x;
     float fDistanceY = CWorld::GetLodSectorPosY(sectorY) - ms_vecCameraPosition.y;
     float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
-    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS ||
-        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= DegreesToRadians(BIGBUILDING_STREAMING_ANGLE_THRESHOLD))
+    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_BIGBUILDING_STREAMING_RADIUS_SQUARED ||
+        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) <= BIGBUILDING_STREAMING_ANGLE_THRESHOLD_RAD)
     {
         bRequestModel = true;
     }
 
-    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
-        next = node->m_next;
-
+    CPtrList& list = CWorld::GetLodPtrList(sectorX, sectorY);
+    auto* node = list.GetNode();
+    while (node) {
         auto* entity = reinterpret_cast<CEntity*>(node->m_item);
-        if (entity->m_nScanCode != GetCurrentScanCode()) {
-            entity->m_nScanCode = GetCurrentScanCode();
+        node = node->GetNext();
 
-            float fDistance = 0.0f;
-            auto visibility = SetupBigBuildingVisibility(entity, fDistance) - 1;
+        if (entity->m_nScanCode == GetCurrentScanCode())
+            continue;
 
-            switch (visibility) {
-            case RENDERER_VISIBLE:
-            case RENDERER_STREAMME:
-                break;
-            case RENDERER_CULLED:
-                if (!CStreaming::ms_disableStreaming && bRequestModel) {
-                    CStreaming::RequestModel(entity->m_nModelIndex, 0);
-                }
-                break;
-            default: // RENDERER_INVISIBLE
-                AddEntityToRenderList(entity, fDistance + 0.01f);
-                entity->m_bOffscreen = false;
-                break;
+        entity->m_nScanCode = GetCurrentScanCode();
+
+        float fDistance = 0.0f;
+        switch (SetupBigBuildingVisibility(entity, fDistance)) {
+        case RENDERER_CULLED:
+        case RENDERER_INVISIBLE:
+            break;
+        case RENDERER_STREAMME:
+            if (!CStreaming::ms_disableStreaming && bRequestModel) {
+                CStreaming::RequestModel(entity->m_nModelIndex, 0);
             }
+            break;
+        case RENDERER_VISIBLE:
+            AddEntityToRenderList(entity, fDistance + 0.01f);
+            entity->m_bOffscreen = false;
+            break;
+        default:
+            assert(false);
+            break;
         }
     }
 }
@@ -1020,8 +1033,8 @@ void CRenderer::ScanWorld() {
     CVisibilityPlugins::InitAlphaEntityList();
 
     CWorld::IncrementCurrentScanCode();
-    static CVector lastCameraPosition;
-    static CVector lastCameraForward;
+    static CVector& lastCameraPosition = *(CVector*)0xB76888; //TODO | STATICREF
+    static CVector& lastCameraForward = *(CVector*)0xB7687C; //TODO | STATICREF
     CVector distance = TheCamera.GetPosition() - lastCameraPosition;
     static bool bUnusedBool = false;
     if (DotProduct(distance, lastCameraForward) >= 16.0f || DotProduct(TheCamera.m_mCameraMatrix.GetForward(), lastCameraForward) <= 0.98f)

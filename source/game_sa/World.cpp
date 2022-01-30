@@ -2991,10 +2991,10 @@ CRepeatSector* GetRepeatSector(int32 x, int32 y) {
 
 // 0x4072C0
 CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
-    /* todo: add assert/guard?
-    const auto x1 = x % MAX_LOD_PTR_LISTS_X;
-    const auto y1 = y % MAX_LOD_PTR_LISTS_Y;
-    */
+    // Commented out because those happen weirdly frequently, for now replaced with check of total array bound
+    //assert(x < MAX_LOD_PTR_LISTS_X);
+    //assert(y < MAX_LOD_PTR_LISTS_Y);
+    assert(&ms_aLodPtrLists[y][x] <= &ms_aLodPtrLists[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X]);
     return ms_aLodPtrLists[y][x];
 }
 

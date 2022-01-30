@@ -24,7 +24,7 @@ struct tScanLists {
     CPtrListDoubleLink* pedsList;
     CPtrListDoubleLink* dummiesList;
 
-    CPtrListDoubleLink* GetList(uint32 index) const {
+    inline CPtrListDoubleLink* GetList(uint32 index) const {
         switch (index) {
             case 0:
                 return buildingsList;
