@@ -35,7 +35,7 @@ struct tRadioSettings {
     int8  m_iPrevTrackIndex;
 
     void Reset() {
-        for (int32 i = 0; i < std::size(m_aTrackQueue); i++) {
+        for (auto i = 0u; i < std::size(m_aTrackQueue); i++) {
             m_aTrackQueue[i]   = -1;
             m_aTrackTypes[i]   = TYPE_NONE;
             m_aTrackIndexes[i] = -1;

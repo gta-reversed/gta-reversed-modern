@@ -66,6 +66,7 @@ public:
     static uint32& m_MaxHealthCounter;
     static uint32& m_AddToHealthCounter;
     static uint32& m_LastWeaponTypeFired;
+    static bool& bShowUpdateStats;
 
     static void InjectHooks();
 

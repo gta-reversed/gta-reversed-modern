@@ -1,12 +1,17 @@
 #include "StdInc.h"
 
+namespace rng = std::ranges;
+
 void CUpsideDownCarCheck::InjectHooks() {
-//    ReversibleHooks::Install("CUpsideDownCarCheck", "Init", 0x46A8C0, &CUpsideDownCarCheck::Init);
-    ReversibleHooks::Install("CUpsideDownCarCheck", "IsCarUpsideDown", 0x463830, &CUpsideDownCarCheck::IsCarUpsideDown);
-    ReversibleHooks::Install("CUpsideDownCarCheck", "UpdateTimers", 0x4655E0, &CUpsideDownCarCheck::UpdateTimers);
-    ReversibleHooks::Install("CUpsideDownCarCheck", "AddCarToCheck", 0x4638D0, &CUpsideDownCarCheck::AddCarToCheck);
-    ReversibleHooks::Install("CUpsideDownCarCheck", "RemoveCarFromCheck", 0x463910, &CUpsideDownCarCheck::RemoveCarFromCheck);
-    ReversibleHooks::Install("CUpsideDownCarCheck", "HasCarBeenUpsideDownForAWhile", 0x463940, &CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile);
+    RH_ScopedClass(CUpsideDownCarCheck);
+    RH_ScopedCategoryGlobal();
+
+    //RH_ScopedInstall(Init, 0x46A8C0);
+    RH_ScopedInstall(IsCarUpsideDown, 0x463830);
+    RH_ScopedInstall(UpdateTimers, 0x4655E0);
+    RH_ScopedInstall(AddCarToCheck, 0x4638D0);
+    RH_ScopedInstall(RemoveCarFromCheck, 0x463910);
+    RH_ScopedInstall(HasCarBeenUpsideDownForAWhile, 0x463940);
 }
 
 // 0x46A8C0
@@ -29,8 +34,12 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(CVehicle* vehicle) {
             return 0u;
         }
     };
-    const auto up = vehicle->GetUp();
-    return ((up.z < 0.3f && GetNumContactWheels() < 4) || (up.z < 0.f)) && vehicle->CanPedStepOutCar(false);
+    if (!vehicle->CanPedStepOutCar(false)) {
+        const auto up = vehicle->GetUp();
+        return up.z < 0.3f && GetNumContactWheels() < 4  // Not totally up-side down
+            || up.z < 0.f;                               // Literally up-side down
+    }
+    return false;
 }
 
 // Process
@@ -60,7 +69,7 @@ bool CUpsideDownCarCheck::AreAnyCarsUpsideDown() {
 
 // 0x4638D0
 void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
-    const auto it = std::ranges::find_if(m_aUpsideDownCars, [](const auto& en) {return en.m_nCarHandle < 0; });
+    const auto it = rng::find_if(m_aUpsideDownCars, [](auto&& v) { return v.m_nCarHandle < 0; });
     if (it != std::end(m_aUpsideDownCars)) {
         it->m_nCarHandle = carHandle;
         it->m_nTime = 0;
@@ -79,8 +88,6 @@ void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
 
 // 0x463940
 bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 carHandle) {
-    const auto it = std::ranges::find_if(m_aUpsideDownCars, [=](const auto& en) {return en.m_nCarHandle == carHandle; });
-    if (it != std::end(m_aUpsideDownCars))
-        return it->m_nTime > 2000u;
-    return false;
+    const auto it = rng::find_if(m_aUpsideDownCars, [=](auto&& v) { return v.m_nCarHandle == carHandle; });
+    return it != std::end(m_aUpsideDownCars) ? it->m_nTime > 2000u : false;
 }

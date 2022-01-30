@@ -4,20 +4,24 @@
 
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
+#include "CarCtrl.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
 
 void CCarGenerator::InjectHooks()
 {
-    ReversibleHooks::Install("CCarGenerator", "CheckForBlockage", 0x6F32E0, &CCarGenerator::CheckForBlockage);
-    ReversibleHooks::Install("CCarGenerator", "CheckIfWithinRangeOfAnyPlayers", 0x6F2F40, &CCarGenerator::CheckIfWithinRangeOfAnyPlayers);
-    ReversibleHooks::Install("CCarGenerator", "DoInternalProcessing", 0x6F34D0, &CCarGenerator::DoInternalProcessing);
-    ReversibleHooks::Install("CCarGenerator", "Process", 0x6F3E90, &CCarGenerator::Process);
-    ReversibleHooks::Install("CCarGenerator", "Setup", 0x6F2E50, &CCarGenerator::Setup);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOff", 0x6F2E30, &CCarGenerator::SwitchOff);
-    ReversibleHooks::Install("CCarGenerator", "SwitchOn", 0x6F32C0, &CCarGenerator::SwitchOn);
-    ReversibleHooks::Install("CCarGenerator", "CalcNextGen", 0x6F2E40, &CCarGenerator::CalcNextGen);
+    RH_ScopedClass(CCarGenerator);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(CheckForBlockage, 0x6F32E0);
+    RH_ScopedInstall(CheckIfWithinRangeOfAnyPlayers, 0x6F2F40);
+    RH_ScopedInstall(DoInternalProcessing, 0x6F34D0);
+    RH_ScopedInstall(Process, 0x6F3E90);
+    RH_ScopedInstall(Setup, 0x6F2E50);
+    RH_ScopedInstall(SwitchOff, 0x6F2E30);
+    RH_ScopedInstall(SwitchOn, 0x6F32C0);
+    RH_ScopedInstall(CalcNextGen, 0x6F2E40);
 }
 
 // 0x6F32E0
@@ -91,7 +95,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
         return false;
 
     float posnZ = UncompressLargeVector(m_vecPosn).z;
-    if ((CGame::currArea == AREA_CODE_NORMAL_WORLD && posnZ < 950.0f || CGame::currArea != AREA_CODE_NORMAL_WORLD && posnZ >= 950.0f)
+    if ((CGame::CanSeeOutSideFromCurrArea() && posnZ < 950.0f || !CGame::CanSeeOutSideFromCurrArea() && posnZ >= 950.0f)
         && (relPosn.Magnitude2D() >= TheCamera.m_fGenerationDistMultiplier * 160.0f - 20.0f || bHighPriority)
         && DotProduct2D(FindPlayerSpeed(-1), relPosn) <= 0.0f
     ) {
@@ -105,7 +109,7 @@ bool CCarGenerator::CheckIfWithinRangeOfAnyPlayers()
 void CCarGenerator::DoInternalProcessing()
 {
     int32 actualModelId;
-    CVehicle* pVeh;
+    CVehicle* vehicle;
     float baseZ;
     CColPoint colPoint;
     CEntity* pEntity;
@@ -133,7 +137,7 @@ void CCarGenerator::DoInternalProcessing()
     }
     else
     {
-        if (m_nModelId == MODEL_INVALID || CStreaming::ms_aInfoForModel[-m_nModelId].m_nLoadState != LOADSTATE_LOADED)
+        if (m_nModelId == MODEL_INVALID || !CStreaming::ms_aInfoForModel[-m_nModelId].IsLoaded()) // todo: Figure out what they wanted with negative indexing
         {
             CTheZones::GetZoneInfo(FindPlayerCoors(-1), nullptr);
             actualModelId = CPopulation::m_AppropriateLoadedCars.PickRandomCar(true, true);
@@ -141,11 +145,11 @@ void CCarGenerator::DoInternalProcessing()
             if (actualModelId < 0)
                 return;
 
-            auto pModelInfo = CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr();
-            if (pModelInfo->IsBoat())
+            auto mi = CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr();
+            if (mi->IsBoat())
                 return;
 
-            if (pModelInfo->GetBoundingBox()->GetLength() > 8.0f)
+            if (mi->GetBoundingBox()->GetLength() > 8.0f)
                 return;
 
             m_nModelId = -actualModelId;
@@ -164,10 +168,10 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    if (CStreaming::ms_aInfoForModel[actualModelId].m_nLoadState != LOADSTATE_LOADED ||
+    if (!CStreaming::GetInfo(actualModelId).IsLoaded() ||
         actualModelId == MODEL_HOTDOG &&
         m_nModelId == MODEL_HOTDOG &&
-        CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState != LOADSTATE_LOADED
+        !CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded()
     )
         return;
 
@@ -178,14 +182,14 @@ void CCarGenerator::DoInternalProcessing()
     {
         switch (CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr()->m_nVehicleType)
         {
-        case VEHICLE_HELI:
-            pVeh = new CHeli(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_HELI:
+            vehicle = new CHeli(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_PLANE:
-            pVeh = new CPlane(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_PLANE:
+            vehicle = new CPlane(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_BOAT:
-            pVeh = new CBoat(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_BOAT:
+            vehicle = new CBoat(actualModelId, PARKED_VEHICLE);
             break;
         }
 
@@ -193,7 +197,7 @@ void CCarGenerator::DoInternalProcessing()
         baseZ = posn.z;
         if (baseZ <= -100.0f)
             baseZ = CWorld::FindGroundZForCoord(posn.x, posn.y);
-        pVeh->m_nExtendedRemovalRange = 255;
+        vehicle->m_nExtendedRemovalRange = 255;
     }
     else
     {
@@ -218,58 +222,58 @@ void CCarGenerator::DoInternalProcessing()
 
         switch (CModelInfo::GetModelInfo(actualModelId)->AsVehicleModelInfoPtr()->m_nVehicleType)
         {
-        case VEHICLE_MTRUCK:
-            pVeh = new CMonsterTruck(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_MTRUCK:
+            vehicle = new CMonsterTruck(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_QUAD:
-            pVeh = new CQuadBike(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_QUAD:
+            vehicle = new CQuadBike(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_HELI:
-            pVeh = new CHeli(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_HELI:
+            vehicle = new CHeli(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_PLANE:
-            pVeh = new CPlane(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_PLANE:
+            vehicle = new CPlane(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_TRAIN:
-            pVeh = new CTrain(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_TRAIN:
+            vehicle = new CTrain(actualModelId, PARKED_VEHICLE);
             break;
-        case VEHICLE_BIKE:
-            pVeh = new CBike(actualModelId, PARKED_VEHICLE);
-            pVeh->AsBike()->damageFlags.bDamageFlag4 = true;
+        case VEHICLE_TYPE_BIKE:
+            vehicle = new CBike(actualModelId, PARKED_VEHICLE);
+            vehicle->AsBike()->damageFlags.bDamageFlag4 = true;
             break;
-        case VEHICLE_BMX:
-            pVeh = new CBmx(actualModelId, PARKED_VEHICLE);
-            pVeh->AsBike()->damageFlags.bDamageFlag4 = true;
+        case VEHICLE_TYPE_BMX:
+            vehicle = new CBmx(actualModelId, PARKED_VEHICLE);
+            vehicle->AsBike()->damageFlags.bDamageFlag4 = true;
             break;
-        case VEHICLE_TRAILER:
-            pVeh = new CTrailer(actualModelId, PARKED_VEHICLE);
+        case VEHICLE_TYPE_TRAILER:
+            vehicle = new CTrailer(actualModelId, PARKED_VEHICLE);
             break;
         default:
-            pVeh = new CAutomobile(actualModelId, PARKED_VEHICLE, true);
+            vehicle = new CAutomobile(actualModelId, PARKED_VEHICLE, true);
             break;
         }
 
-        pVeh->GetDistanceFromCentreOfMassToBaseOfModel();
-        pVeh->vehicleFlags.bLightsOn = false;
-        pVeh->m_nOverrideLights = NO_CAR_LIGHT_OVERRIDE;
-        pVeh->SetCollisionLighting(colPoint.m_nLightingB);
+        vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
+        vehicle->vehicleFlags.bLightsOn = false;
+        vehicle->m_nOverrideLights = NO_CAR_LIGHT_OVERRIDE;
+        vehicle->SetCollisionLighting(colPoint.m_nLightingB);
     }
 
-    pVeh->SetIsStatic(false);
-    pVeh->vehicleFlags.bEngineOn = false;
+    vehicle->SetIsStatic(false);
+    vehicle->vehicleFlags.bEngineOn = false;
     CVector posn = UncompressLargeVector(m_vecPosn);
-    posn.z = pVeh->GetDistanceFromCentreOfMassToBaseOfModel() + baseZ;
-    pVeh->SetPosn(posn);
-    pVeh->SetOrientation(0.0f, 0.0f, m_nAngle * (TWO_PI / 256));
-    pVeh->m_nStatus = eEntityStatus::STATUS_ABANDONED;
-    pVeh->m_nDoorLock = eCarLock::CARLOCK_UNLOCKED;
-    pVeh->vehicleFlags.bHasBeenOwnedByPlayer = bPlayerHasAlreadyOwnedCar;
+    posn.z = vehicle->GetDistanceFromCentreOfMassToBaseOfModel() + baseZ;
+    vehicle->SetPosn(posn);
+    vehicle->SetOrientation(0.0f, 0.0f, m_nAngle * (TWO_PI / 256));
+    vehicle->m_nStatus = eEntityStatus::STATUS_ABANDONED;
+    vehicle->m_nDoorLock = eCarLock::CARLOCK_UNLOCKED;
+    vehicle->vehicleFlags.bHasBeenOwnedByPlayer = bPlayerHasAlreadyOwnedCar;
     tractorDriverPedType = -1;
 
     if (!nightTime &&
-        (pVeh->m_nModelIndex == MODEL_TRACTOR || pVeh->m_nModelIndex == MODEL_COMBINE))
+        (vehicle->m_nModelIndex == MODEL_TRACTOR || vehicle->m_nModelIndex == MODEL_COMBINE))
     {
-        CVector vehPosn = pVeh->GetPosition();
+        CVector vehPosn = vehicle->GetPosition();
         CNodeAddress pathLink;
         ThePaths.FindNodeClosestToCoors(&pathLink, vehPosn.x, vehPosn.y, vehPosn.z, 0, 20.0F, 0, 0, 0, 0, 1);
         if (pathLink.m_wAreaId != -1 || pathLink.m_wNodeId != -1)
@@ -280,13 +284,13 @@ void CCarGenerator::DoInternalProcessing()
                 CNodeAddress baseLink = ThePaths.m_pNodeLinks[pathLink.m_wAreaId][pathNode.m_wBaseLinkId];
                 if (ThePaths.m_pPathNodes[baseLink.m_wAreaId])
                 {
-                    pVeh->SetVehicleCreatedBy(RANDOM_VEHICLE);
-                    pVeh->m_autoPilot.m_currentAddress = pathLink;
-                    pVeh->m_autoPilot.m_nCruiseSpeed = 7;
-                    pVeh->m_autoPilot.m_nCarMission = eCarMission::MISSION_CRUISE;
-                    pVeh->m_autoPilot.m_startingRouteNode = baseLink;
-                    pVeh->m_nStatus = eEntityStatus::STATUS_PHYSICS;
-                    pVeh->vehicleFlags.bNeverUseSmallerRemovalRange = true;
+                    vehicle->SetVehicleCreatedBy(RANDOM_VEHICLE);
+                    vehicle->m_autoPilot.m_currentAddress = pathLink;
+                    vehicle->m_autoPilot.m_nCruiseSpeed = 7;
+                    vehicle->m_autoPilot.m_nCarMission = eCarMission::MISSION_CRUISE;
+                    vehicle->m_autoPilot.m_startingRouteNode = baseLink;
+                    vehicle->m_nStatus = eEntityStatus::STATUS_PHYSICS;
+                    vehicle->vehicleFlags.bNeverUseSmallerRemovalRange = true;
                     bWaitUntilFarFromPlayer = true;
                     tractorDriverPedType = PED_TYPE_CIVMALE;
                 }
@@ -294,13 +298,13 @@ void CCarGenerator::DoInternalProcessing()
         }
     }
 
-    CWorld::Add(pVeh);
+    CWorld::Add(vehicle);
     if (tractorDriverPedType != -1)
-        CCarCtrl::SetUpDriverAndPassengersForVehicle(pVeh, tractorDriverPedType, 0, false, false, 99);
+        CCarCtrl::SetUpDriverAndPassengersForVehicle(vehicle, tractorDriverPedType, 0, false, false, 99);
 
-    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::ms_aInfoForModel[MODEL_BMOCHIL].m_nLoadState == LOADSTATE_LOADED)
+    if (actualModelId == MODEL_HOTDOG && m_nModelId == MODEL_HOTDOG && CStreaming::GetInfo(MODEL_BMOCHIL).IsLoaded())
     {
-        CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, pVeh->GetPosition() - pVeh->GetRight() * 3.0f, false);
+        CPed* ped = CPopulation::AddPed(ePedType::PED_TYPE_CIVMALE, MODEL_BMOCHIL, vehicle->GetPosition() - vehicle->GetRight() * 3.0f, false);
         if (ped)
         {
             if (!m_bHotdogVendorPositionOffsetInitialized)
@@ -308,29 +312,29 @@ void CCarGenerator::DoInternalProcessing()
                 m_bHotdogVendorPositionOffsetInitialized = true;
                 m_HotdogVendorPositionOffset.Set(0.0f, 0.0f, 0.6f);
             }
-            ped->AttachPedToEntity(pVeh, m_HotdogVendorPositionOffset, 3, 0.0f, eWeaponType::WEAPON_UNARMED);
+            ped->AttachPedToEntity(vehicle, m_HotdogVendorPositionOffset, 3, 0.0f, eWeaponType::WEAPON_UNARMED);
             CTheScripts::ScriptsForBrains.CheckIfNewEntityNeedsScript(ped, 0, nullptr);
         }
     }
 
     if (CGeneral::GetRandomNumberInRange(0, 100) < m_nAlarmChance)
-        pVeh->m_nAlarmState = -1;
+        vehicle->m_nAlarmState = -1;
 
     if (CGeneral::GetRandomNumberInRange(0, 100) < m_nDoorLockChance)
-        pVeh->m_nDoorLock = eCarLock::CARLOCK_LOCKED;
+        vehicle->m_nDoorLock = eCarLock::CARLOCK_LOCKED;
 
     if (m_nPrimaryColor != -1 && m_nSecondaryColor != -1)
     {
-        pVeh->m_nPrimaryColor = m_nPrimaryColor;
-        pVeh->m_nSecondaryColor = m_nSecondaryColor;
+        vehicle->m_nPrimaryColor = m_nPrimaryColor;
+        vehicle->m_nSecondaryColor = m_nSecondaryColor;
     }
     else if (m_nModelId < -1)
     {
-        m_nPrimaryColor = pVeh->m_nPrimaryColor;
-        m_nSecondaryColor = pVeh->m_nSecondaryColor;
+        m_nPrimaryColor = vehicle->m_nPrimaryColor;
+        m_nSecondaryColor = vehicle->m_nSecondaryColor;
     }
-    CVisibilityPlugins::SetClumpAlpha(pVeh->m_pRwClump, 0);
-    m_nVehicleHandle = CPools::ms_pVehiclePool->GetRef(pVeh);
+    CVisibilityPlugins::SetClumpAlpha(vehicle->m_pRwClump, 0);
+    m_nVehicleHandle = CPools::ms_pVehiclePool->GetRef(vehicle);
     m_nNextGenTime = CalcNextGen();
 }
 

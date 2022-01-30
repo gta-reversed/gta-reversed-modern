@@ -62,9 +62,10 @@ void FxSystem_c::SetMatrix(RwMatrixTag* matrix) {
     ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*))0x4AA630)(this, matrix);
 }
 
+// (RwV3d*)
 // 0x4AA660
-void FxSystem_c::SetOffsetPos(RwV3d* pos) {
-    ((void(__thiscall *)(FxSystem_c*, RwV3d*))0x4AA660)(this, pos);
+void FxSystem_c::SetOffsetPos(const CVector& pos) {
+    ((void(__thiscall *)(FxSystem_c*, const CVector&))0x4AA660)(this, pos);
 }
 
 // 0x4AA690

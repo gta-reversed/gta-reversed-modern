@@ -36,8 +36,8 @@ CPed* CPedGroupMembership::GetMember(int32 memberId) {
     return plugin::CallMethodAndReturn<CPed*, 0x5F69B0, CPedGroupMembership*, int32>(this, memberId);
 }
 
-bool CPedGroupMembership::IsFollower(CPed const* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x5F69E0, CPedGroupMembership*, CPed const*>(this, ped);
+bool CPedGroupMembership::IsFollower(CPed const* ped) const {
+    return plugin::CallMethodAndReturn<bool, 0x5F69E0, CPedGroupMembership const*, CPed const*>(this, ped);
 }
 
 bool CPedGroupMembership::IsLeader(CPed const* ped) {

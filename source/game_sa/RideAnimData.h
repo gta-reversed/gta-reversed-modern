@@ -15,6 +15,12 @@ public:
     float  dword10;
     float  m_fHandlebarsAngle;
     float  m_fAnimPercentageState;
+
+    CRideAnimData(uint32 animGroup) :
+        m_nAnimGroup(animGroup)
+    {}
+
+    CRideAnimData() = default;
 };
 
 VALIDATE_SIZE(CRideAnimData, 0x1C);

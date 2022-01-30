@@ -9,13 +9,14 @@
 #include "FireManager.h"
 
 void CTaskComplexDriveFireTruck::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskComplexDriveFireTruck", "Constructor", 0x659310, &CTaskComplexDriveFireTruck::Constructor);
-    Install("CTaskComplexDriveFireTruck", "CreateSubTask", 0x65A240, &CTaskComplexDriveFireTruck::CreateSubTask);
-    Install("CTaskComplexDriveFireTruck", "Clone", 0x659BC0, &CTaskComplexDriveFireTruck::Clone_Reversed);
-    Install("CTaskComplexDriveFireTruck", "CreateFirstSubTask", 0x65B140, &CTaskComplexDriveFireTruck::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexDriveFireTruck", "CreateNextSubTask", 0x65B090, &CTaskComplexDriveFireTruck::CreateNextSubTask_Reversed);
-    Install("CTaskComplexDriveFireTruck", "ControlSubTask", 0x65B1E0, &CTaskComplexDriveFireTruck::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexDriveFireTruck);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x659310);
+    RH_ScopedInstall(CreateSubTask, 0x65A240);
+    RH_ScopedInstall(Clone_Reversed, 0x659BC0);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65B140);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65B090);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x65B1E0);
 }
 
 CTaskComplexDriveFireTruck* CTaskComplexDriveFireTruck::Constructor(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver) {
