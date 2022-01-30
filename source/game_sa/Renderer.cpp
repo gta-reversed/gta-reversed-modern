@@ -786,15 +786,16 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
     float fDistanceX = CWorld::GetSectorPosX(sectorX) - ms_vecCameraPosition.x;
     float fDistanceY = CWorld::GetSectorPosY(sectorY) - ms_vecCameraPosition.y;
     float fAngleInRadians = atan2(-fDistanceX, fDistanceY) - ms_fCameraHeading;
-    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_STREAMING_RADIUS ||
-        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) < DegreesToRadians(STREAMING_ANGLE_THRESHOLD)) {
+    if (CVector2D(fDistanceX, fDistanceY).SquaredMagnitude() < MAX_STREAMING_RADIUS_SQUARED ||
+        fabs(CGeneral::LimitRadianAngle(fAngleInRadians)) < STREAMING_ANGLE_THRESHOLD_RAD) {
         bRequestModel = true;
     }
 
+    float fDistance = 0.0f;
     SetupScanLists(sectorX, sectorY);
-    auto** scanLists = reinterpret_cast<CPtrListDoubleLink**>(&PC_Scratch);
+    auto* scanLists = reinterpret_cast<tScanLists*>(&PC_Scratch);
     for (int32 scanListIndex = 0; scanListIndex < TOTAL_ENTITY_SCAN_LISTS; scanListIndex++) {
-        CPtrListDoubleLink* doubleLinkList = scanLists[scanListIndex];
+        CPtrListDoubleLink* doubleLinkList = scanLists->GetList(scanListIndex);
         if (!doubleLinkList)
             continue;
 
@@ -808,16 +809,12 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
             entity->m_nScanCode = GetCurrentScanCode();
             entity->m_bOffscreen = false;
             bool bInvisibleEntity = false;
-            float fDistance = 0.0f;
             switch (SetupEntityVisibility(entity, fDistance)) {
             case RENDERER_INVISIBLE: {
-                if (entity->m_nType == ENTITY_TYPE_OBJECT) {
-                    CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr();
-                    if (baseModelInfo) {
-                        if (baseModelInfo->IsGlass()) {
-                            bInvisibleEntity = true;
-                            break;
-                        }
+                if (entity->IsObject()) {
+                    auto* atomicModelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr();
+                    if (atomicModelInfo && atomicModelInfo->IsGlass()) {
+                        bInvisibleEntity = true;
                     }
                 }
                 break;
@@ -833,21 +830,21 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
             case RENDERER_STREAMME: {
                 if (CStreaming::ms_disableStreaming || !entity->GetIsOnScreen() || ms_bInTheSky)
                     break;
+
                 if (bRequestModel) {
-                    if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()){
+                    if (CStreaming::GetInfo(entity->m_nModelIndex).IsLoaded()) {
                         CStreaming::RequestModel(entity->m_nModelIndex, 0);
                         break;
-                    } else {
-                        if (!entity->IsEntityOccluded())
-                        {
-                            SetLoadingPriority(1);
-                            CStreaming::RequestModel(entity->m_nModelIndex, 0);
-                            break;
-                        }
+                    } else if (!entity->IsEntityOccluded()) {
+                        SetLoadingPriority(1);
+                        CStreaming::RequestModel(entity->m_nModelIndex, 0);
+                        break;
                     }
                 }
+
                 if (!m_loadingPriority || CStreaming::ms_numModelsRequested < 1)
                     CStreaming::RequestModel(entity->m_nModelIndex, 0);
+
                 break;
             }
             default:
@@ -861,12 +858,13 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
             if (entity->m_bHasPreRenderEffects) {
                 float fDrawDistance = MAX_INVISIBLE_ENTITY_DISTANCE;
                 CVector2D distance = ms_vecCameraPosition - entity->GetPosition();
-                if (entity->m_nType == ENTITY_TYPE_VEHICLE) {
-                    auto* vehicle = static_cast<CVehicle*>(entity);
+                if (entity->IsVehicle()) {
+                    auto* vehicle = entity->AsVehicle();
                     if (vehicle->vehicleFlags.bAlwaysSkidMarks)
                         fDrawDistance = MAX_INVISIBLE_VEHICLE_DISTANCE;
                 }
-                if (distance.x > -fDrawDistance && distance.x < fDrawDistance && distance.y > -fDrawDistance && distance.y < fDrawDistance) {
+                if (distance.x > -fDrawDistance && distance.x < fDrawDistance
+                    && distance.y > -fDrawDistance && distance.y < fDrawDistance) {
                     if (ms_nNoOfInVisibleEntities < MAX_INVISIBLE_ENTITY_PTRS - 1) {
                         ms_aInVisibleEntityPtrs[ms_nNoOfInVisibleEntities] = entity;
                         ms_nNoOfInVisibleEntities++;

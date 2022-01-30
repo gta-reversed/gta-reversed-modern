@@ -2973,7 +2973,7 @@ void CWorld::IncrementCurrentScanCode() {
 }
 
 // 0x407250
-int16 GetCurrentScanCode() {
+uint16 GetCurrentScanCode() {
     return CWorld::ms_nCurrentScanCode;
 }
 

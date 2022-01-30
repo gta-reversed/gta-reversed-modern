@@ -23,6 +23,23 @@ struct tScanLists {
     CPtrListDoubleLink* vehiclesList;
     CPtrListDoubleLink* pedsList;
     CPtrListDoubleLink* dummiesList;
+
+    CPtrListDoubleLink* GetList(uint32 index) const {
+        switch (index) {
+            case 0:
+                return buildingsList;
+            case 1:
+                return objectsList;
+            case 2:
+                return vehiclesList;
+            case 3:
+                return pedsList;
+            case 4:
+                return dummiesList;
+            default:
+                assert(false); // Shouldn't ever happen
+        }
+    }
 };
 
 VALIDATE_SIZE(tScanLists, 0x14);
