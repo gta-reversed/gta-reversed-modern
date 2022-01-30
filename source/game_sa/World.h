@@ -210,7 +210,7 @@ extern uint32 &FilledColPointIndex;
 static inline CColPoint (&gaTempSphereColPoints)[32] = *(CColPoint(*)[32])0xB9B250;
 extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
-int16 GetCurrentScanCode();
+uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
 
