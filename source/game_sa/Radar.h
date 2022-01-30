@@ -16,6 +16,7 @@ class CSprite2d;
 enum eBlipAppearance : uint8 {
     BLIP_FLAG_FRIEND, // It selects BLIP_COLOUR_BLUE. If unset together with BLIP_FLAG_THREAT, any color.
     BLIP_FLAG_THREAT,  // It selects BLIP_COLOUR_RED. If unset together with BLIP_FLAG_FRIEND, any color.
+    BLIP_FLAH_UNK,
 
     BLIP_FLAG_NUM // Add above this
 };
@@ -252,7 +253,7 @@ public:
     static void SetMapCentreToPlayerCoords();
     static void Draw3dMarkers();
     static void SetRadarMarkerState(int32 counter, bool flag);
-    static void DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha);
+    static void DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alpha);
     static void DrawRadarSection(int32 x, int32 y);
     static void DrawRadarSectionMap(int32 x, int32 y, CRect rect);
     static void DrawRadarGangOverlay(bool inMenu);

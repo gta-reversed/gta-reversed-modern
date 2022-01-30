@@ -163,11 +163,8 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
     RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
-<<<<<<< HEAD
-=======
     RH_ScopedGlobalInstall(GetTextureCorners, 0x584D90);
     RH_ScopedGlobalInstall(ClipRadarTileCoords, 0x584B00);    
->>>>>>> 3f2ca6dc (ClipRadarTileCoords)
 }
 
 // 0x587FB0
@@ -1421,7 +1418,7 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 }
 
 // 0x585FF0
-void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
+void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alpha)
 {
     if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         x *= SCREEN_WIDTH_UNIT;
@@ -1433,19 +1430,13 @@ void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
     float width = std::floor(SCREEN_WIDTH_UNIT * 8.f);   // uint32 width  = 8 * SCREEN_WIDTH_UNIT;  original math with warnings, NOTSA
     float height = std::floor(SCREEN_HEIGHT_UNIT * 8.f); // uint32 height = 8 * SCREEN_HEIGHT_UNIT;
 
-    auto sprite = (eRadarSprite)spriteId;
-    if (!DisplayThisBlip(sprite, -99))
-        return;
-
-    CRect rt{
-        x - width,
-        y - height,
-        x + width,
-        y + height,
-    };
-    CRGBA white(255, 255, 255, alpha);
-    RadarBlipSprites[sprite].Draw(rt, white);
-    AddBlipToLegendList(0, sprite);
+    if (DisplayThisBlip(spriteId, -99)) {
+        RadarBlipSprites[(size_t)spriteId].Draw(
+            { x - width, y - height, x + width, y + height },
+            { 255, 255, 255, alpha }
+        );
+        AddBlipToLegendList(0, spriteId);
+    }
 }
 
 // 0x586110
