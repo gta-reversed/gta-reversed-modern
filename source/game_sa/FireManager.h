@@ -51,6 +51,10 @@ public:
 
     void Update();
 
+    // NOTSA funcs
+    uint32 GetNumOfFires();
+    CFire& GetRandomFire();
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -61,7 +65,6 @@ private:
     // NOTSA
     CFire& Get(size_t idx) { return m_aFires[idx]; }
     auto GetIndexOf(const CFire* fire) const { return std::distance(std::begin(m_aFires), fire); }
-    uint32 GetNumOfFires();
 };
 
 VALIDATE_SIZE(CFireManager, 0x964);

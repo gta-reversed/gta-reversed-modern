@@ -39,6 +39,7 @@
 #include "Escalators.h"
 #include "MovingThings.h"
 #include "MovingThings.h"
+#include "PlaneTrail.h"
 #include "PlaneTrails.h"
 #include "Gamma.h"
 #include "CustomBuildingPipeline.h"
@@ -54,6 +55,16 @@
 #include "IKChainManager_c.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
+#include "CreepingFire.h"
+#include "Restart.h"
+#include "BulletInfo.h"
+#include "Explosion.h"
+#include "C_PcSave.h"
+#include "FireManager.h"
+#include "Skidmarks.h"
+#include "CarCtrl.h"
+#include "TagManager.h"
+#include "Clouds.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -161,19 +172,32 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-void WaitForDebugger() {
-    while (!::IsDebuggerPresent()) {
-        printf("Debugger not present\n");
-        ::Sleep(100);
-    }
-}
 
-void InjectHooksMain()
-{
-    // WaitForDebugger();
+void InjectHooksMain() {
+    ReversibleHooks::OnInjectionBegin();
+
     InjectCommonHooks();
     CPad::InjectHooks();
-    CFallingGlassPane::InjectHooks();
+    CFileMgr::InjectHooks();
+
+    CGenericGameStorage::InjectHooks();
+    C_PcSave::InjectHooks();
+    CFileLoader::InjectHooks();
+    CWorld::InjectHooks();
+    CStreamingInfo::InjectHooks();
+    CStreaming::InjectHooks();
+    InjectCdStreamHooks();
+    CMirrors::InjectHooks();
+    CFire::InjectHooks();
+    CExplosion::InjectHooks();
+    CClothesBuilder::InjectHooks();
+    CClothes::InjectHooks();
+    CBulletInfo::InjectHooks();
+    CRestart::InjectHooks();
+    CPlaneTrail::InjectHooks();
+    CCopPed::InjectHooks();
+    CDamageManager::InjectHooks();
+    CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
     IKChainManager_c::InjectHooks();
@@ -208,9 +232,6 @@ void InjectHooksMain()
     List_c::InjectHooks();
     CRunningScript::InjectHooks();
     CTheScripts::InjectHooks();
-    CStreamingInfo::InjectHooks();
-    CStreaming::InjectHooks();
-    InjectCdStreamHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -226,8 +247,6 @@ void InjectHooksMain()
     CPedModelInfo::InjectHooks();
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
-    CFileLoader::InjectHooks();
-    CFileMgr::InjectHooks();
     CPlaceable::InjectHooks();
     CEntity::InjectHooks();;
     CPhysical::InjectHooks();
@@ -276,7 +295,6 @@ void InjectHooksMain()
     CWanted::InjectHooks();
     CEscalators::InjectHooks();
     CWeapon::InjectHooks();
-    CWorld::InjectHooks();
     cTransmission::InjectHooks();
     CVehicle::InjectHooks();
     CAutomobile::InjectHooks();
@@ -323,6 +341,7 @@ void InjectHooksMain()
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
     CSpecialFX::InjectHooks();
+    CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
     CPedGroups::InjectHooks();
     CClock::InjectHooks();
@@ -377,6 +396,7 @@ void InjectHooksMain()
     CText::InjectHooks();
     ModelIndices::InjectHooks();
     CWaterCannons::InjectHooks();
+    CWaterCannon::InjectHooks();
     CSprite::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();
@@ -609,4 +629,6 @@ void InjectHooksMain()
     Tasks();
     Events();
     Fx();
+
+    ReversibleHooks::OnInjectionEnd();
 }

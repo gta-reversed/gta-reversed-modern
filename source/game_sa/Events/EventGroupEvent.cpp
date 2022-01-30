@@ -2,9 +2,12 @@
 
 void CEventGroupEvent::InjectHooks()
 {
-    ReversibleHooks::Install("CEventGroupEvent", "Constructor", 0x4ADFD0, &CEventGroupEvent::Constructor);
-    ReversibleHooks::Install("CEventGroupEvent", "Clone_Reversed", 0x4B6EE0, &CEventGroupEvent::Clone_Reversed);
-    ReversibleHooks::Install("CEventGroupEvent", "BaseEventTakesPriorityOverBaseEvent", 0x4AE100, &CEventGroupEvent::BaseEventTakesPriorityOverBaseEvent);
+    RH_ScopedClass(CEventGroupEvent);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ADFD0);
+    RH_ScopedInstall(Clone_Reversed, 0x4B6EE0);
+    RH_ScopedInstall(BaseEventTakesPriorityOverBaseEvent, 0x4AE100);
 }
 
 CEventGroupEvent::CEventGroupEvent(CPed* ped, CEvent* event)

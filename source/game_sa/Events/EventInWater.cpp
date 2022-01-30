@@ -2,9 +2,12 @@
 
 void CEventInWater::InjectHooks()
 {
-    ReversibleHooks::Install("CEventInWater", "Constructor", 0x4B1370, &CEventInWater::Constructor);
-    ReversibleHooks::Install("CEventInWater", "AffectsPed_Reversed", 0x4B13D0, &CEventInWater::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventInWater", "TakesPriorityOver_Reversed", 0x4B1420, &CEventInWater::TakesPriorityOver_Reversed);
+    RH_ScopedClass(CEventInWater);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1370);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B13D0);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B1420);
 }
 
 CEventInWater::CEventInWater(float acceleration)

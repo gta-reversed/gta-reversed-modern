@@ -22,9 +22,14 @@ void InjectHooks();
 }
 
 /**
- * NodePlugin unique rwID
+ * NodeNamePlugin unique rwID
  */
 #define rwID_NODENAMEPLUGIN MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xFE)
+
+/*
+* NodeName plugin static offset
+*/
+extern RwInt32& gNodeNamePluginOffset;
 
 /**
  * Attach NodeName plugin

@@ -15,7 +15,7 @@ tPedGroupTranslationData* CPopulation::m_TranslationArray = (tPedGroupTranslatio
 CLoadedCarGroup& CPopulation::m_LoadedBoats = *(CLoadedCarGroup*)0xC0E998;
 CLoadedCarGroup& CPopulation::m_InAppropriateLoadedCars = *(CLoadedCarGroup*)0xC0E9C8;
 CLoadedCarGroup& CPopulation::m_AppropriateLoadedCars = *(CLoadedCarGroup*)0xC0E9F8;
-CLoadedCarGroup* CPopulation::m_LoadedGangCars = (CLoadedCarGroup*)0xC0EA28;
+CLoadedCarGroup (&CPopulation::m_LoadedGangCars)[10] = *(CLoadedCarGroup(*)[10])0xC0EA28;
 bool& CPopulation::bZoneChangeHasHappened = *(bool*)0xC0EC22;
 uint8& CPopulation::m_CountDownToPedsAtStart = *(uint8*)0xC0EC23;
 uint32& CPopulation::ms_nTotalMissionPeds = *(uint32*)0xC0EC24;
@@ -41,10 +41,13 @@ bool& CPopulation::bInPoliceStation = *(bool*)0xC0FCB6;
 uint32& CPopulation::NumMiamiViceCops = *(uint32*)0xC0FCB8;
 uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 
-void CPopulation::InjectHooks()
-{
-    ReversibleHooks::Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
-    ReversibleHooks::Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
+void CPopulation::InjectHooks() {
+    RH_ScopedClass(CPopulation);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ConvertToRealObject, 0x614580);
+    RH_ScopedInstall(ConvertToDummyObject, 0x614670);
+    RH_ScopedInstall(RemovePed, 0x610F20);
 }
 
 // 0x5B6D40
@@ -84,7 +87,8 @@ float CPopulation::FindPedDensityMultiplierCullZone() {
 
 // 0x610F20
 void CPopulation::RemovePed(CPed* ped) {
-    ((void(__cdecl*)(CPed*))0x610F20)(ped);
+    CWorld::Remove(ped);
+    delete ped;
 }
 
 // 0x610F40

@@ -20,7 +20,16 @@ public:
 
 public:
     CBoundingBox m_boundBox;
-    CColSphere m_boundSphere;
+    CSphere m_boundSphere;
+    uint8 m_nColSlot;
+    union {
+        struct {
+            uint8 m_bNotEmpty : 1;
+            uint8 m_bIsSingleColDataAlloc : 1;
+            uint8 m_bIsActive : 1;
+        };
+        uint8 m_nFlags{};
+    };
     CCollisionData *m_pColData;
 
 public:

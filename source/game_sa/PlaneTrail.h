@@ -8,10 +8,17 @@
 
 #include "Vector.h"
 
+#define PLANE_TRAIL_BUFSZ 16
+
 class CPlaneTrail {
 public:
-    CVector m_avecPosn[16];
-    uint32 m_anTime[16];
+    // Shifting buffers, with 2000ms intervals
+    // first element being the most recent
+    CVector m_positions[PLANE_TRAIL_BUFSZ];
+    uint32  m_timepoints[PLANE_TRAIL_BUFSZ];
+
+public:
+    static void InjectHooks();
 
     void Init();
     void Render(float intensity);

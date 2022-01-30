@@ -5,18 +5,21 @@ tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPe
 
 void CPedModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CPedModelInfo);
+    RH_ScopedCategory("Models");
+
     // VTABLE
-    ReversibleHooks::Install("CPedModelInfo", "GetModelType", 0x4C57C0, &CPedModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CPedModelInfo", "DeleteRwObject", 0x4C6C50, &CPedModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CPedModelInfo", "SetClump", 0x4C7340, &CPedModelInfo::SetClump_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C7340);
 
     // CLASS
-    ReversibleHooks::Install("CPedModelInfo", "AddXtraAtomics", 0x4C6D40, &CPedModelInfo::AddXtraAtomics);
-    ReversibleHooks::Install("CPedModelInfo", "SetFaceTexture", 0x4C6D50, &CPedModelInfo::SetFaceTexture);
-    ReversibleHooks::Install("CPedModelInfo", "CreateHitColModelSkinned", 0x4C6D90, &CPedModelInfo::CreateHitColModelSkinned);
-    ReversibleHooks::Install("CPedModelInfo", "AnimatePedColModelSkinned", 0x4C6F70, &CPedModelInfo::AnimatePedColModelSkinned);
-    ReversibleHooks::Install("CPedModelInfo", "AnimatePedColModelSkinnedWorld", 0x4C7170, &CPedModelInfo::AnimatePedColModelSkinnedWorld);
-    ReversibleHooks::Install("CPedModelInfo", "IncrementVoice", 0x4C7300, &CPedModelInfo::IncrementVoice);
+    RH_ScopedInstall(AddXtraAtomics, 0x4C6D40);
+    RH_ScopedInstall(SetFaceTexture, 0x4C6D50);
+    RH_ScopedInstall(CreateHitColModelSkinned, 0x4C6D90);
+    RH_ScopedInstall(AnimatePedColModelSkinned, 0x4C6F70);
+    RH_ScopedInstall(AnimatePedColModelSkinnedWorld, 0x4C7170);
+    RH_ScopedInstall(IncrementVoice, 0x4C7300);
 }
 
 ModelInfoType CPedModelInfo::GetModelType()
@@ -89,7 +92,7 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* pClump)
 
     pColModel->m_boundSphere.Set(1.5F, CVector(0.0F, 0.0F, 0.0F));
     pColModel->m_boundBox.Set(CVector(-0.5F, -0.5F, -1.2F), CVector(0.5F, 0.5F, 1.2F));
-    pColModel->m_boundSphere.m_nMaterial = eSurfaceType::SURFACE_DEFAULT;
+    pColModel->m_nColSlot = 0;
 
     m_pHitColModel = pColModel;
 }

@@ -14,12 +14,15 @@ uint32& CEntryExitManager::ms_numVisibleEntities = *reinterpret_cast<uint32*>(0x
 // ms_entryExitStack? 0x96A718 = a * 10.0f; float a = 1.0f / (50.0f * 50.0f);
 
 void CEntryExitManager::InjectHooks() {
-//    ReversibleHooks::Install("CEntryExitManager", "Init", 0x43F880, &CEntryExitManager::Init);
-//    ReversibleHooks::Install("CEntryExitManager", "Load", 0x5D55C0, &CEntryExitManager::Load);
-//    ReversibleHooks::Install("CEntryExitManager", "Save", 0x5D5970, &CEntryExitManager::Save);
-//    ReversibleHooks::Install("CEntryExitManager", "Update", 0x440D10, &CEntryExitManager::Update);
-//    ReversibleHooks::Install("CEntryExitManager", "Shutdown", 0x440B90, &CEntryExitManager::Shutdown);
-//    ReversibleHooks::Install("CEntryExitManager", "ShutdownForRestart", 0x440C40, &CEntryExitManager::ShutdownForRestart);
+    RH_ScopedClass(CEntryExitManager);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(Init, 0x43F880);
+//    RH_ScopedInstall(Load, 0x5D55C0);
+//    RH_ScopedInstall(Save, 0x5D5970);
+//    RH_ScopedInstall(Update, 0x440D10);
+//    RH_ScopedInstall(Shutdown, 0x440B90);
+//    RH_ScopedInstall(ShutdownForRestart, 0x440C40);
 }
 
 // 0x43F880
