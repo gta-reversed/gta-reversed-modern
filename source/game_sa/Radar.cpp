@@ -717,14 +717,14 @@ void CRadar::ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay)
 }
 
 // 0x583D70
-void CRadar::SetBlipSprite(int32 blipIndex, int32 spriteId)
+void CRadar::SetBlipSprite(int32 blipIndex, eRadarSprite spriteId)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    if (ms_RadarTrace[index].m_bTrackingBlip)
-        ms_RadarTrace[index].m_nBlipSprite = static_cast<eRadarSprite>(spriteId);
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        auto& t = ms_RadarTrace[idx];
+        if (t.m_bTrackingBlip) {
+            t.m_nBlipSprite = spriteId;
+        }
+    }
 }
 
 // 0x583DB0
