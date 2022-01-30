@@ -1493,6 +1493,7 @@ void CRadar::DrawRadarMap()
 
     CVehicle* vehicle = FindPlayerVehicle();
 
+    // Draw green rectangle when in plane
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(0);
 
@@ -1501,15 +1502,20 @@ void CRadar::DrawRadarMap()
         cachedSin = SIN_PI;
         cachedCos = COS_PI;
 
-        float angle = std::atan2(-vehicle->m_matrix->GetForward().z, vehicle->m_matrix->GetUp().z);
-        CRect rt;
-        rt.left   = playerPos.x - 1000.0f;
-        rt.bottom    = playerPos.y - (2 * RadiansToDegrees(angle));
-        rt.right  = playerPos.x + 1000.0f;
-        rt.top = playerPos.y + 2000.0f;
+        // Pitch and roll combined
+        const float angle = std::atan2(-vehicle->m_matrix->GetForward().z, vehicle->m_matrix->GetUp().z);
+        
+        DrawAreaOnRadar(
+            {
+                playerPos.x - 1000.0f,
+                playerPos.y - (2 * RWRAD2DEG(angle)),
+                playerPos.x + 1000.0f,
+                playerPos.y + 2000.0f
+            },
+            { 20, 175, 20, 200 },
+            false
+        );
 
-        CRGBA color(20, 175, 20, 200); // light green with some transparency
-        DrawAreaOnRadar(rt, color, false);
         cachedSin = cSin;
         cachedCos = cCos;
     }
