@@ -38,6 +38,7 @@ struct tScanLists {
                 return dummiesList;
             default:
                 assert(false); // Shouldn't ever happen
+                return nullptr;
         }
     }
 };
