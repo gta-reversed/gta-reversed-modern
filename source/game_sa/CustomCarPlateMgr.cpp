@@ -6,7 +6,6 @@ void CCustomCarPlateMgr::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
 
-    const bool allDisabled = false;
 
     RH_ScopedInstall(Initialise, 0x6FD500, false);
     RH_ScopedInstall(GeneratePlateText, 0x6FD5B0, false);
