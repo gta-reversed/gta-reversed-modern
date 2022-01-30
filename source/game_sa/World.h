@@ -166,8 +166,8 @@ public:
 
     static float GetSectorPosX(int32 sector)
     {
-        constexpr auto HalfOfTotalSectorsX = MAX_SECTORS_Y / 2;
-        constexpr auto fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_Y;
+        constexpr auto HalfOfTotalSectorsX = MAX_SECTORS_X / 2;
+        constexpr auto fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_X;
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
 

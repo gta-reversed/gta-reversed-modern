@@ -139,7 +139,7 @@ public:
     static void RenderAlphaAtomics();
     static RpAtomic* RenderAtomicWithAlphaCB(RpAtomic* atomic, void* data);
     static void RenderBoatAlphaAtomics();
-    static void RenderEntity(CEntity* entity, int32 unused, float distance);
+    static void RenderEntity(CEntity* entity, float distance);
     static void RenderFadingAtomic(CBaseModelInfo* modelInfo, RpAtomic* atomic, int32 alpha);
     static void RenderFadingClump(CBaseModelInfo* modelInfo, RpClump* clump, int32 alpha);
     static RpAtomic* RenderFadingClumpCB(RpAtomic* atomic);
