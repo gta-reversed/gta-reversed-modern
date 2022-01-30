@@ -771,7 +771,7 @@ bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex)
 // 0x583B40
 bool CRadar::DisplayThisBlip(eRadarSprite spriteId, char priority)
 {
-    if (CGame::CanSeeOutSideFromCurrArea() || FindPlayerPed()->m_nAreaCode == AREA_CODE_NORMAL_WORLD) {
+    if (!CGame::CanSeeOutSideFromCurrArea() || FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD) {
         switch (spriteId)
         {
         case RADAR_SPRITE_NONE:
