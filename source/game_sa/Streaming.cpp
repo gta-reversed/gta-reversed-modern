@@ -686,11 +686,10 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
 void CStreaming::DeleteAllRwObjects() {
     //NOTSA: Helper function, to remove code duplication inside real logic
     auto DeleteRwObjectsInList = [](CPtrListDoubleLink& list) {
-        auto* node = list.GetNode();
-        while (node) {
-            CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
-            node = node->m_next;
+        for (CPtrNode *it = list.m_node, *next{}; it; it = next) {
+            next = it->GetNext();
 
+            CEntity* entity = reinterpret_cast<CEntity*>(it->m_item);\
             if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
                 entity->DeleteRwObject();
         }
