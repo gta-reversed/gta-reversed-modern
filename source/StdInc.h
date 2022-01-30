@@ -24,7 +24,6 @@
 #include "Base.h"
 #include "game_sa\constants.h"
 #include "game_sa\Conversations.h"
-#include "game_sa\StuntJumpManager.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\PedGeometryAnalyser.h"
 #include "game_sa\Debug.h"

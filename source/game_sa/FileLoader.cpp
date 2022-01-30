@@ -12,6 +12,7 @@
 #include "PedType.h"
 #include "ColHelpers.h"
 #include "PlantMgr.h"
+#include "StuntJumpManager.h"
 
 char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
