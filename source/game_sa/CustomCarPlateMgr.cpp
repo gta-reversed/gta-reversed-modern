@@ -342,10 +342,10 @@ RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8_t plat
 
 RpMaterial* CCustomCarPlateMgr::MaterialUpgradeSetCarplateTextureCB(RpMaterial* material, void* geometry) {
     if (const auto tex = RpMaterialGetTexture(material)) {
-        const auto name = RwTextureGetName(tex);
-        if (strcmp(name, "careplate") == 0) {
+        const std::string_view name{ RwTextureGetName(tex) };
+        if (name == "carplate") {
             RpGeometryReplaceOldMaterialWithNewMaterial((RpGeometry*)geometry, material, CurrentLicensePlateMaterial);
-        } else if (strcmp(name, "carpback") == 0) {
+        } else if (name == "carpback") {
             SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
         }
     }
@@ -381,11 +381,11 @@ void CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, const c
 
 RpMaterial* CCustomCarPlateMgr::MaterialSetCarplateTextureCB(RpMaterial * material, void* plateText) {
     if (const auto tex = RpMaterialGetTexture(material)) {
-        const auto name = RwTextureGetName(tex);
-        if (strcmp(name, "careplate") == 0) {
+        const std::string_view name{ RwTextureGetName(tex) };
+        if (name == "careplate") {
             CurrentLicensePlateMaterial = material;
             SetupMaterialPlateTexture(material, (const char*)plateText, CurrentLicensePlateType);
-        } else if (strcmp(name, "carpback") == 0) {
+        } else if (name == "carpback") {
             SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
         }
     }
