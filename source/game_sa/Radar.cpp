@@ -1642,11 +1642,9 @@ void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle)
 // 0x587CE0
 void CRadar::ClearBlip(int32 blipIndex)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ClearActualBlip(index);
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ClearActualBlip(idx);
+    }
 }
 
 // 0x587D20
