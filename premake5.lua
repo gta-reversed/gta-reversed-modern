@@ -34,16 +34,21 @@ solution "gta_reversed"
     
     configuration "Debug*"
         flags { symbols ("On") }
-        buildoptions {"/MDd"}          
+        -- buildoptions {"/MDd"}
+        staticruntime "off"
+        runtime "Debug"
     configuration "Release*"
         defines { "NDEBUG" }
         flags { symbols ("On") }
-        buildoptions {"/MD"}
+        -- buildoptions {"/MD"}
+        staticruntime "off"
+        runtime "Release"
         optimize "Full"
     configuration "vs*"
          flags {"MultiProcessorCompile"}
-         linkoptions   { "/ignore:4099" }      
+         linkoptions   { "/ignore:4099" }
          buildoptions {"/EHsc", "/Zc:preprocessor"}
+         disablewarnings { 26812, 26495 }
 
     flags {
         characterset ("MBCS"), --fix strings
