@@ -1242,8 +1242,7 @@ void CRadar::RemoveRadarSections()
 // 0x584D40
 bool IsPointInsideRadar(const CVector2D& point)
 {
-    return std::abs(point.x) < 1.0f
-        && std::abs(point.y) < 1.0f;
+    return std::abs(point.x) <= 1.0f && std::abs(point.y) <= 1.0f;
 }
 
 // 0x584D90
