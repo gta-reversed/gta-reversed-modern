@@ -2,17 +2,19 @@
 #include <format>
 
 void CCustomCarPlateMgr::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CCustomCarPlateMgr", "Initialise", 0x6FD500, &CCustomCarPlateMgr::Initialise);
-    Install("CCustomCarPlateMgr", "GeneratePlateText", 0x6FD5B0, &CCustomCarPlateMgr::GeneratePlateText);
-    Install("CCustomCarPlateMgr", "Shutdown", 0x6FD720, &CCustomCarPlateMgr::Shutdown);
-    Install("CCustomCarPlateMgr", "GetMapRegionPlateDesign", 0x6FD7A0, &CCustomCarPlateMgr::GetMapRegionPlateDesign);
-    Install("CCustomCarPlateMgr", "LoadPlatecharsetDat", 0x6FDC00, &CCustomCarPlateMgr::LoadPlatecharsetDat);
-    Install("CCustomCarPlateMgr", "SetupMaterialPlatebackTexture", 0x6FDE50, &CCustomCarPlateMgr::SetupMaterialPlatebackTexture);
-    Install("CCustomCarPlateMgr", "CreatePlateTexture", 0x6FDEA0, &CCustomCarPlateMgr::CreatePlateTexture);
-    Install("CCustomCarPlateMgr", "SetupClumpAfterVehicleUpgrade", 0x6FDFE0, &CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade);
-    Install("CCustomCarPlateMgr", "SetupMaterialPlateTexture", 0x6FE020, &CCustomCarPlateMgr::SetupMaterialPlateTexture);
-    Install("CCustomCarPlateMgr", "SetupClump", 0x6FE0F0, &CCustomCarPlateMgr::SetupClump);
+    RH_ScopedClass(CCustomCarPlateMgr);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x6FD500);
+    RH_ScopedInstall(GeneratePlateText, 0x6FD5B0);
+    RH_ScopedInstall(Shutdown, 0x6FD720);
+    RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0);
+    RH_ScopedInstall(LoadPlatecharsetDat, 0x6FDC00);
+    RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50);
+    RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0);
+    RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0);
+    RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020);
+    RH_ScopedInstall(SetupClump, 0x6FE0F0);
 }
 
 // 0x6FD500
