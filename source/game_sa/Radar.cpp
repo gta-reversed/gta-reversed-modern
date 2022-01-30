@@ -1147,13 +1147,12 @@ void CRadar::DrawRadarMask()
 // 0x5858D0
 void CRadar::StreamRadarSections(const CVector& worldPosn)
 {
-    auto x = (int32)std::floor((worldPosn.x + 3000.0f) / 500.0f); // todo: World constant
-    auto y = (int32)std::ceil(11.0f - (worldPosn.y + 3000.0f) / 500.0f);
-
-    if (CStreaming::ms_disableStreaming)
-        return;
-
-    StreamRadarSections(x, y);
+    if (!CStreaming::ms_disableStreaming) {
+        StreamRadarSections(
+            (int32)std::floor((worldPosn.x + 3000.0f) / 500.0f),
+            (int32)std::ceil(11.0f - (worldPosn.y + 3000.0f) / 500.0f)
+        );
+    }
 }
 
 // 0x584C50
