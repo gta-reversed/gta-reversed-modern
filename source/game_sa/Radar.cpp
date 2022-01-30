@@ -1210,7 +1210,7 @@ bool ClipRadarTileCoords(int32& x, int32& y)
 // 0x584B50
 void CRadar::RequestMapSection(int32 x, int32 y)
 {
-    if (x < 0 || x > 11 || y < 0 || y > 11)
+    if (x < 0 || x > MAX_RADAR_WIDTH_TILES - 1 || y < 0 || y > MAX_RADAR_HEIGHT_TILES - 1)
         return;
 
     int32 tex = GetRadarTexture(x, y);
@@ -1223,7 +1223,7 @@ void CRadar::RequestMapSection(int32 x, int32 y)
 // 0x584BB0
 void CRadar::RemoveMapSection(int32 x, int32 y)
 {
-    if (x < 0 || x > MAX_RADAR_WIDTH_TILES || y < 0 || y > MAX_RADAR_HEIGHT_TILES)
+    if (x < 0 || x > MAX_RADAR_WIDTH_TILES - 1 || y < 0 || y > MAX_RADAR_HEIGHT_TILES - 1)
         return;
 
     int32 tex = GetRadarTexture(x, y);
