@@ -163,6 +163,11 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
     RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
+<<<<<<< HEAD
+=======
+    RH_ScopedGlobalInstall(GetTextureCorners, 0x584D90);
+    RH_ScopedGlobalInstall(ClipRadarTileCoords, 0x584B00);    
+>>>>>>> 3f2ca6dc (ClipRadarTileCoords)
 }
 
 // 0x587FB0
@@ -1189,9 +1194,17 @@ void CRadar::SetupRadarRect(int32 x, int32 y)
 
 // unused
 // 0x584B00
+// Returns true if either coords had to be clipped 
 bool ClipRadarTileCoords(int32& x, int32& y)
 {
-    return ((bool(__cdecl*)(int32&, int32&))0x584B00)(x, y);
+    // Not quite the way they've done it, but nicer.
+
+    const auto ox = x, oy = y;
+
+    x = std::clamp(x, 0, (int32)MAX_RADAR_WIDTH_TILES - 1);
+    y = std::clamp(y, 0, (int32)MAX_RADAR_HEIGHT_TILES - 1);
+
+    return ox != x || oy != y;
 }
 
 // 0x584B50
