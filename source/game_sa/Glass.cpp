@@ -44,6 +44,7 @@ void CGlass::InjectHooks() {
     RH_ScopedInstall(FindFreePane, 0x71ACA0);
     RH_ScopedInstall(WindowRespondsToSoftCollision, 0x71AF70);
     RH_ScopedInstall(BreakGlassPhysically, 0x71CF50);
+    RH_ScopedInstall(WindowRespondsToExplosion, 0x71C1A0);
 }
 
 // Static functions
@@ -529,7 +530,7 @@ void CGlass::WindowRespondsToSoftCollision(CObject* object, float fDamageIntensi
 
 // 0x71CF50
 void CGlass::BreakGlassPhysically(CVector point, float radius) {
-    if (!CTimer::GetTimeInMS() < LastColCheckMS + 1000 || CTimer::GetTimeInMS() >= LastColCheckMS)
+    if (CTimer::GetTimeInMS() < LastColCheckMS + 1000 && CTimer::GetTimeInMS() >= LastColCheckMS)
         return;
 
     for (auto objIdx = 0; objIdx < CPools::ms_pObjectPool->GetSize(); objIdx++) {
@@ -607,4 +608,9 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
             }
         }
     }
+}
+
+// 0x71C1A0
+void CGlass::WindowRespondsToExplosion(CEntity* entity, const CVector& pos) {
+    plugin::Call<0x71C1A0, CEntity*, CVector>(entity, pos);
 }

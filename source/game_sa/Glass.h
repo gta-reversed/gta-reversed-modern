@@ -47,4 +47,5 @@ public:
     static CFallingGlassPane* FindFreePane();
     static void WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity);
     static void BreakGlassPhysically(CVector pos, float radius);
+    static void WindowRespondsToExplosion(CEntity* entity, const CVector& pos);
 };
