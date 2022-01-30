@@ -256,230 +256,29 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    const char* blipName{};
+    if (blipType == eRadarSprite::RADAR_SPRITE_NONE) // None => Player position
+        blipType = eRadarSprite::RADAR_SPRITE_MAP_HERE;
 
-    switch (blipType) {
-    case (eRadarSprite)-5:
-        blipName = TheText.Get("LG_56"); // Player interest
-        break;
-    case (eRadarSprite)-4:
-        blipName = TheText.Get("LG_55"); // Threat
-        break;
-    case (eRadarSprite)-3:
-        blipName = TheText.Get("LG_54"); // Friend
-        break;
-    case (eRadarSprite)-2:
-        blipName = TheText.Get("LG_50"); // Object
-        break;
-    case (eRadarSprite)-1:
-        blipName = TheText.Get("LG_49"); // Destination
-        break;
-    // NOTSA
-    case RADAR_SPRITE_NONE:
-        // blipType = 0 for player position
-        blipType = RADAR_SPRITE_MAP_HERE;
-        /* fallthrough */
-    case RADAR_SPRITE_MAP_HERE:
-        blipName = TheText.Get("LG_01");
-        break;
-    case RADAR_SPRITE_AIRYARD:
-        blipName = TheText.Get("LG_02");
-        break;
-    case RADAR_SPRITE_AMMUGUN:
-        blipName = TheText.Get("LG_03");
-        break;
-    case RADAR_SPRITE_BARBERS:
-        blipName = TheText.Get("LG_04");
-        break;
-    case RADAR_SPRITE_BIGSMOKE:
-        blipName = TheText.Get("LG_05");
-        break;
-    case RADAR_SPRITE_BOATYARD:
-        blipName = TheText.Get("LG_06");
-        break;
-    case RADAR_SPRITE_BURGERSHOT:
-        blipName = TheText.Get("LG_07");
-        break;
-    case RADAR_SPRITE_BULLDOZER:
-        blipName = TheText.Get("LG_66");
-        break;
-    case RADAR_SPRITE_CATALINAPINK:
-        blipName = TheText.Get("LG_09");
-        break;
-    case RADAR_SPRITE_CESARVIAPANDO:
-        blipName = TheText.Get("LG_10");
-        break;
-    case RADAR_SPRITE_CHICKEN:
-        blipName = TheText.Get("LG_11");
-        break;
-    case RADAR_SPRITE_CJ:
-        blipName = TheText.Get("LG_12");
-        break;
-    case RADAR_SPRITE_CRASH1:
-        blipName = TheText.Get("LG_13");
-        break;
-    case RADAR_SPRITE_DINER:
-        blipName = TheText.Get("LG_67");
-        break;
-    case RADAR_SPRITE_EMMETGUN:
-        blipName = TheText.Get("LG_15");
-        break;
-    case RADAR_SPRITE_ENEMYATTACK:
-        blipName = TheText.Get("LG_16");
-        break;
-    case RADAR_SPRITE_FIRE:
-        blipName = TheText.Get("LG_17");
-        break;
-    case RADAR_SPRITE_GIRLFRIEND:
-        blipName = TheText.Get("LG_18");
-        break;
-    case RADAR_SPRITE_HOSTPITAL:
-        blipName = TheText.Get("LG_19");
-        break;
-    case RADAR_SPRITE_LOGOSYNDICATE:
-        blipName = TheText.Get("LG_20");
-        break;
-    case RADAR_SPRITE_MADDOG:
-        blipName = TheText.Get("LG_21");
-        break;
-    case RADAR_SPRITE_MAFIACASINO:
-        blipName = TheText.Get("LG_22");
-        break;
-    case RADAR_SPRITE_MCSTRAP:
-        blipName = TheText.Get("LG_23");
-        break;
-    case RADAR_SPRITE_MODGARAGE:
-        blipName = TheText.Get("LG_24");
-        break;
-    case RADAR_SPRITE_OGLOC:
-        blipName = TheText.Get("LG_25");
-        break;
-    case RADAR_SPRITE_PIZZA:
-        blipName = TheText.Get("LG_26");
-        break;
-    case RADAR_SPRITE_POLICE:
-        blipName = TheText.Get("LG_27");
-        break;
-    case RADAR_SPRITE_PROPERTYG:
-        blipName = TheText.Get("LG_28");
-        break;
-    case RADAR_SPRITE_PROPERTYR:
-        blipName = TheText.Get("LG_29");
-        break;
-    case RADAR_SPRITE_RACE:
-        blipName = TheText.Get("LG_30");
-        break;
-    case RADAR_SPRITE_RYDER:
-        blipName = TheText.Get("LG_31");
-        break;
-    case RADAR_SPRITE_SAVEGAME:
-        blipName = TheText.Get("LG_32");
-        break;
-    case RADAR_SPRITE_SCHOOL:
-        blipName = TheText.Get("LG_33");
-        break;
-    case RADAR_SPRITE_QMARK:
-        blipName = TheText.Get("LG_63");
-        break;
-    case RADAR_SPRITE_SWEET:
-        blipName = TheText.Get("LG_35");
-        break;
-    case RADAR_SPRITE_TATTOO:
-        blipName = TheText.Get("LG_36");
-        break;
-    case RADAR_SPRITE_THETRUTH:
-        blipName = TheText.Get("LG_37");
-        break;
-    case RADAR_SPRITE_WAYPOINT:
-        blipName = TheText.Get("LG_64");
-        break;
-    case RADAR_SPRITE_TORENORANCH:
-        blipName = TheText.Get("LG_39");
-        break;
-    case RADAR_SPRITE_TRIADS:
-        blipName = TheText.Get("LG_40");
-        break;
-    case RADAR_SPRITE_TRIADSCASINO:
-        blipName = TheText.Get("LG_41");
-        break;
-    case RADAR_SPRITE_TSHIRT:
-        blipName = TheText.Get("LG_42");
-        break;
-    case RADAR_SPRITE_WOOZIE:
-        blipName = TheText.Get("LG_43");
-        break;
-    case RADAR_SPRITE_ZERO:
-        blipName = TheText.Get("LG_44");
-        break;
-    case RADAR_SPRITE_DATEDISCO:
-        blipName = TheText.Get("LG_45");
-        break;
-    case RADAR_SPRITE_DATEDRINK:
-        blipName = TheText.Get("LG_46");
-        break;
-    case RADAR_SPRITE_DATEFOOD:
-        blipName = TheText.Get("LG_47");
-        break;
-    case RADAR_SPRITE_TRUCK:
-        blipName = TheText.Get("LG_48");
-        break;
-    case RADAR_SPRITE_CASH:
-        blipName = TheText.Get("LG_51");
-        break;
-    case RADAR_SPRITE_FLAG:
-        blipName = TheText.Get("LG_52");
-        break;
-    case RADAR_SPRITE_GYM:
-        blipName = TheText.Get("LG_53");
-        break;
-    case RADAR_SPRITE_IMPOUND:
-        blipName = TheText.Get("LG_57");
-        break;
-    case RADAR_SPRITE_RUNWAY:
-        blipName = TheText.Get("LG_65");
-        break;
-    case RADAR_SPRITE_GANGB:
-        blipName = TheText.Get("LG_58");
-        break;
-    case RADAR_SPRITE_GANGP:
-        blipName = TheText.Get("LG_59");
-        break;
-    case RADAR_SPRITE_GANGY:
-        blipName = TheText.Get("LG_60");
-        break;
-    case RADAR_SPRITE_GANGN:
-        blipName = TheText.Get("LG_61");
-        break;
-    case RADAR_SPRITE_GANGG:
-        blipName = TheText.Get("LG_62");
-        break;
-    case RADAR_SPRITE_SPRAY:
-        blipName = TheText.Get("LG_34");
-        break;
-    }
-
-    CRect rt;
-    rt.left = (float)x;
-    rt.bottom = (float)y;
-
-    CFont::PrintString(SCREEN_WIDTH_UNIT * 20.0f + rt.left, SCREEN_HEIGHT_UNIT * 3.0f + rt.bottom, blipName);
+    CFont::PrintString(SCREEN_WIDTH_UNIT * 20.0f + x, SCREEN_HEIGHT_UNIT * 3.0f + y, GetBlipName(blipType));
 
     auto blipId = (int32)blipType;
 
-    if (blipId > -1) {
-        // the blip is a sprite
-        CRGBA color(255, 255, 255, 255);
-
-        rt.right = rt.left + SCREEN_WIDTH_UNIT * 16.0f;
-        rt.top = rt.bottom + SCREEN_WIDTH_UNIT * 16.0f;
-
-        RadarBlipSprites[blipId].Draw(rt, color);
-
+    if (blipId > -1) { // The blip is a sprite, so just draw it.
+        RadarBlipSprites[blipId].Draw(
+            {
+                x,
+                y,
+                x + SCREEN_WIDTH_UNIT * 16.0f,
+                y + SCREEN_HEIGHT_UNIT * 16.0f
+            },
+            { 255, 255, 255, 255 }
+        );
         return;
     }
 
-    // arrow blips have negative type ids
-    CRGBA arrowColor = ArrowBlipColour[-blipId];
+    // Blip a special type (see `GetBlipName` for more info)
+
+    CRGBA arrowColor = ArrowBlipColour[std::abs(blipId)]; // Make blipId positive 
 
     if (CTimer::GetTimeInMSPauseMode() - legendTraceTimer > 600) {
         legendTraceTimer = CTimer::GetTimeInMSPauseMode();
@@ -487,66 +286,98 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
         legendTraceHeight = static_cast<eRadarTraceHeight>((legendTraceHeight + 1) % 3);
     }
 
-    CRGBA black(0, 0, 0, 255);
-
     float posX = std::round(SCREEN_WIDTH_UNIT * 8.0f + (float)x);
     float posY = std::round(SCREEN_HEIGHT_UNIT * 8.0f + (float)y);
 
     switch (legendTraceHeight) {
     case RADAR_TRACE_LOW: {
-        float x0 = posX + SCREEN_HEIGHT_UNIT * 7.0f;
-        float y0 = posY + SCREEN_HEIGHT_UNIT * 7.0f;
-        float x1 = posX - SCREEN_HEIGHT_UNIT * 7.0f;
-        float y1 = posY + SCREEN_HEIGHT_UNIT * 7.0f;
-        float x2 = posX;
-        float y2 = posY - SCREEN_WIDTH_UNIT * 7.0f;
+        CSprite2d::Draw2DPolygon(
+            posX - SCREEN_WIDTH_UNIT * 7.0f,
+            posY + SCREEN_HEIGHT_UNIT * 7.0f,
 
-        CSprite2d::Draw2DPolygon(x0, y0, x1, y1, x2, y2, x2, y2, black);
+            posX + SCREEN_WIDTH_UNIT * 7.0f,
+            posY + SCREEN_HEIGHT_UNIT * 7.0f,
 
-        x0 = posX + SCREEN_HEIGHT_UNIT * 5.0f;
-        y0 = posY + SCREEN_HEIGHT_UNIT * 5.0f;
-        x1 = posX - SCREEN_HEIGHT_UNIT * 5.0f;
-        y1 = posY + SCREEN_HEIGHT_UNIT * 5.0f;
-        x2 = posX;
-        y2 = posY - SCREEN_WIDTH_UNIT * 5.0f;
+            posX,
+            posY - SCREEN_WIDTH_UNIT * 7.0f,
 
-        CSprite2d::Draw2DPolygon(x0, y0, x1, y1, x2, y2, x2, y2, arrowColor);
+            posX,
+            posY - SCREEN_WIDTH_UNIT * 7.0f,
+
+            { 0, 0, 0, 255 }
+        );
+
+        CSprite2d::Draw2DPolygon(
+            posX + SCREEN_WIDTH_UNIT * 5.0f,
+            posY + SCREEN_HEIGHT_UNIT * 5.0f,
+
+            posX - SCREEN_WIDTH_UNIT * 5.0f,
+            posY + SCREEN_HEIGHT_UNIT * 5.0f,
+
+            posX,
+            posY - SCREEN_WIDTH_UNIT * 5.0f,
+
+            posX,
+            posY - SCREEN_WIDTH_UNIT * 5.0f,
+
+            arrowColor
+        );
         break;
     }
     case RADAR_TRACE_HIGH: {
-        float x0 = posX + SCREEN_HEIGHT_UNIT * 7.0f;
-        float y0 = posY - SCREEN_WIDTH_UNIT * 7.0f;
-        float x1 = posX - SCREEN_HEIGHT_UNIT * 7.0f;
-        float y1 = posY - SCREEN_WIDTH_UNIT * 7.0f;
-        float x2 = posX;
-        float y2 = SCREEN_HEIGHT_UNIT * 7.0f + posY;
+        CSprite2d::Draw2DPolygon(
+            posX + SCREEN_WIDTH_UNIT * 7.0f,
+            posY - SCREEN_HEIGHT_UNIT * 7.0f,
 
-        CSprite2d::Draw2DPolygon(x0, y0, x1, y1, x2, y2, x2, y2, black);
+            posX - SCREEN_WIDTH_UNIT * 7.0f,
+            posY - SCREEN_HEIGHT_UNIT * 7.0f,
 
-        x0 = posX + SCREEN_HEIGHT_UNIT * 5.0f;
-        y0 = posY - SCREEN_WIDTH_UNIT * 5.0f;
-        x1 = posX - SCREEN_HEIGHT_UNIT * 5.0f;
-        y1 = posY - SCREEN_WIDTH_UNIT * 5.0f;
-        x2 = posX;
-        y2 = SCREEN_HEIGHT_UNIT * 5.0f + posY;
+            posX,
+            posY + SCREEN_HEIGHT_UNIT * 7.0f,
 
-        CSprite2d::Draw2DPolygon(x0, y0, x1, y1, x2, y2, x2, y2, arrowColor);
+            posX,
+            posY + SCREEN_HEIGHT_UNIT * 7.0f,
+
+            { 0, 0, 0, 255 }
+        );
+
+        CSprite2d::Draw2DPolygon(
+            posX + SCREEN_WIDTH_UNIT * 5.0f,
+            posY - SCREEN_HEIGHT_UNIT * 5.0f,
+
+            posX - SCREEN_WIDTH_UNIT * 5.0f,
+            posY - SCREEN_HEIGHT_UNIT * 5.0f,
+
+            posX,
+            posY + SCREEN_HEIGHT_UNIT * 5.0f,
+
+            posX,
+            posY + SCREEN_HEIGHT_UNIT * 5.0f,
+
+            arrowColor
+        );
         break;
     }
     case RADAR_TRACE_NORMAL: {
-        rt.bottom    = posY - SCREEN_HEIGHT_UNIT * 5.0f;
-        rt.top = posY + SCREEN_HEIGHT_UNIT * 5.0f;
-        rt.left   = posX - SCREEN_WIDTH_UNIT * 5.0f;
-        rt.right  = posX + SCREEN_WIDTH_UNIT * 5.0f;
+        CSprite2d::DrawRect(
+            {
+                posX - SCREEN_WIDTH_UNIT * 5.0f,
+                posY - SCREEN_HEIGHT_UNIT * 5.0f,
+                posX + SCREEN_WIDTH_UNIT * 5.0f,
+                posY + SCREEN_HEIGHT_UNIT * 5.0f
+            },
+            { 0, 0, 0, 255 }
+        );
 
-        CSprite2d::DrawRect(rt, black);
-
-        rt.bottom    = posY - SCREEN_HEIGHT_UNIT * 4.0f;
-        rt.top = posY + SCREEN_HEIGHT_UNIT * 4.0f;
-        rt.left   = posX - SCREEN_WIDTH_UNIT * 4.0f;
-        rt.right  = posX + SCREEN_WIDTH_UNIT * 4.0f;
-
-        CSprite2d::DrawRect(rt, arrowColor);
+        CSprite2d::DrawRect(
+            {
+                posX - SCREEN_WIDTH_UNIT * 4.0f,
+                posY - SCREEN_HEIGHT_UNIT * 4.0f,
+                posX + SCREEN_WIDTH_UNIT * 4.0f,
+                posY + SCREEN_HEIGHT_UNIT * 4.0f
+            },
+            arrowColor
+        );
         break;
     }
     }
@@ -1620,13 +1451,13 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite)
 
     if (isSprite) {
         if (   t.HasSprite()
-            && (!t.m_bShortRange || zoomedDist <= 1.f || FrontEndMenuManager.drawRadarOrMap)
+            && (!t.m_bShortRange || zoomedDist <= 1.f || FrontEndMenuManager.m_bDrawRadarOrMap)
             && HasThisBlipBeenRevealed(blipIndex)
         ) {
             DrawRadarSprite(t.m_nBlipSprite, screenPos.x, screenPos.y, 0xFF);
         }
     } else {
-        if (FrontEndMenuManager.drawRadarOrMap && !FrontEndMenuManager.field_45[2]) {
+        if (FrontEndMenuManager.m_bDrawRadarOrMap && !FrontEndMenuManager.m_ShowMissionBlips) {
             return;
         }
 
@@ -1751,6 +1582,139 @@ bool CRadar::Save()
 
     return true;
 
+}
+
+auto CRadar::GetBlipName(eRadarSprite blipType) {
+    switch (blipType) {
+    case (eRadarSprite)-5:
+        return TheText.Get("LG_56"); // Player interest
+    case (eRadarSprite)-4:
+        return TheText.Get("LG_55"); // Threat
+    case (eRadarSprite)-3:
+        return TheText.Get("LG_54"); // Friend
+    case (eRadarSprite)-2:
+        return TheText.Get("LG_50"); // Object
+    case (eRadarSprite)-1:
+        return TheText.Get("LG_49"); // Destination
+    case RADAR_SPRITE_MAP_HERE:
+        return TheText.Get("LG_01");
+    case RADAR_SPRITE_AIRYARD:
+        return TheText.Get("LG_02");
+    case RADAR_SPRITE_AMMUGUN:
+        return TheText.Get("LG_03");
+    case RADAR_SPRITE_BARBERS:
+        return TheText.Get("LG_04");
+    case RADAR_SPRITE_BIGSMOKE:
+        return TheText.Get("LG_05");
+    case RADAR_SPRITE_BOATYARD:
+        return TheText.Get("LG_06");
+    case RADAR_SPRITE_BURGERSHOT:
+        return TheText.Get("LG_07");
+    case RADAR_SPRITE_BULLDOZER:
+        return TheText.Get("LG_66");
+    case RADAR_SPRITE_CATALINAPINK:
+        return TheText.Get("LG_09");
+    case RADAR_SPRITE_CESARVIAPANDO:
+        return TheText.Get("LG_10");
+    case RADAR_SPRITE_CHICKEN:
+        return TheText.Get("LG_11");
+    case RADAR_SPRITE_CJ:
+        return TheText.Get("LG_12");
+    case RADAR_SPRITE_CRASH1:
+        return TheText.Get("LG_13");
+    case RADAR_SPRITE_DINER:
+        return TheText.Get("LG_67");
+    case RADAR_SPRITE_EMMETGUN:
+        return TheText.Get("LG_15");
+    case RADAR_SPRITE_ENEMYATTACK:
+        return TheText.Get("LG_16");
+    case RADAR_SPRITE_FIRE:
+        return TheText.Get("LG_17");
+    case RADAR_SPRITE_GIRLFRIEND:
+        return TheText.Get("LG_18");
+    case RADAR_SPRITE_HOSTPITAL:
+        return TheText.Get("LG_19");
+    case RADAR_SPRITE_LOGOSYNDICATE:
+        return TheText.Get("LG_20");
+    case RADAR_SPRITE_MADDOG:
+        return TheText.Get("LG_21");
+    case RADAR_SPRITE_MAFIACASINO:
+        return TheText.Get("LG_22");
+    case RADAR_SPRITE_MCSTRAP:
+        return TheText.Get("LG_23");
+    case RADAR_SPRITE_MODGARAGE:
+        return TheText.Get("LG_24");
+    case RADAR_SPRITE_OGLOC:
+        return TheText.Get("LG_25");
+    case RADAR_SPRITE_PIZZA:
+        return TheText.Get("LG_26");
+    case RADAR_SPRITE_POLICE:
+        return TheText.Get("LG_27");
+    case RADAR_SPRITE_PROPERTYG:
+        return TheText.Get("LG_28");
+    case RADAR_SPRITE_PROPERTYR:
+        return TheText.Get("LG_29");
+    case RADAR_SPRITE_RACE:
+        return TheText.Get("LG_30");
+    case RADAR_SPRITE_RYDER:
+        return TheText.Get("LG_31");
+    case RADAR_SPRITE_SAVEGAME:
+        return TheText.Get("LG_32");
+    case RADAR_SPRITE_SCHOOL:
+        return TheText.Get("LG_33");
+    case RADAR_SPRITE_QMARK:
+        return TheText.Get("LG_63");
+    case RADAR_SPRITE_SWEET:
+        return TheText.Get("LG_35");
+    case RADAR_SPRITE_TATTOO:
+        return TheText.Get("LG_36");
+    case RADAR_SPRITE_THETRUTH:
+        return TheText.Get("LG_37");
+    case RADAR_SPRITE_WAYPOINT:
+        return TheText.Get("LG_64");
+    case RADAR_SPRITE_TORENORANCH:
+        return TheText.Get("LG_39");
+    case RADAR_SPRITE_TRIADS:
+        return TheText.Get("LG_40");
+    case RADAR_SPRITE_TRIADSCASINO:
+        return TheText.Get("LG_41");
+    case RADAR_SPRITE_TSHIRT:
+        return TheText.Get("LG_42");
+    case RADAR_SPRITE_WOOZIE:
+        return TheText.Get("LG_43");
+    case RADAR_SPRITE_ZERO:
+        return TheText.Get("LG_44");
+    case RADAR_SPRITE_DATEDISCO:
+        return TheText.Get("LG_45");
+    case RADAR_SPRITE_DATEDRINK:
+        return TheText.Get("LG_46");
+    case RADAR_SPRITE_DATEFOOD:
+        return TheText.Get("LG_47");
+    case RADAR_SPRITE_TRUCK:
+        return TheText.Get("LG_48");
+    case RADAR_SPRITE_CASH:
+        return TheText.Get("LG_51");
+    case RADAR_SPRITE_FLAG:
+        return TheText.Get("LG_52");
+    case RADAR_SPRITE_GYM:
+        return TheText.Get("LG_53");
+    case RADAR_SPRITE_IMPOUND:
+        return TheText.Get("LG_57");
+    case RADAR_SPRITE_RUNWAY:
+        return TheText.Get("LG_65");
+    case RADAR_SPRITE_GANGB:
+        return TheText.Get("LG_58");
+    case RADAR_SPRITE_GANGP:
+        return TheText.Get("LG_59");
+    case RADAR_SPRITE_GANGY:
+        return TheText.Get("LG_60");
+    case RADAR_SPRITE_GANGN:
+        return TheText.Get("LG_61");
+    case RADAR_SPRITE_GANGG:
+        return TheText.Get("LG_62");
+    case RADAR_SPRITE_SPRAY:
+        return TheText.Get("LG_34");
+    }
 }
 
 int32 CRadar::FindTraceNotTrackingBlipIndex() {
