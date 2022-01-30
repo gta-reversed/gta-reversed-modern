@@ -711,11 +711,9 @@ void CRadar::ChangeBlipScale(int32 blipIndex, int32 size)
 // 0x583D20
 void CRadar::ChangeBlipDisplay(int32 blipIndex, eBlipDisplay blipDisplay)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_nBlipDisplayFlag = blipDisplay;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ms_RadarTrace[idx].m_nBlipDisplayFlag = blipDisplay;
+    }
 }
 
 // 0x583D70
