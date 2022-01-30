@@ -360,166 +360,166 @@ void CVehicle::DeleteRwObject_Reversed()
 }
 
 // 0x6D6640
-void CVehicle::SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled,
-    bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
+void CVehicle::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
+    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
-    CVehicle::SpecialEntityPreCollisionStuff_Reversed(colEntity, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
+    CVehicle::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
 }
-void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled,
-    bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
+void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
+    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
-    if (colEntity->IsPed()
-        && colEntity->AsPed()->bKnockedOffBike
-        && colEntity->AsPed()->m_pVehicle == this)
+    if (colPhysical->IsPed()
+        && colPhysical->AsPed()->bKnockedOffBike
+        && colPhysical->AsPed()->m_pVehicle == this)
     {
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
         return;
     }
 
     if (physicalFlags.bSubmergedInWater
         && m_nStatus != eEntityStatus::STATUS_PLAYER
-        && (m_nStatus != eEntityStatus::STATUS_HELI && colEntity->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
+        && (m_nStatus != eEntityStatus::STATUS_HELI && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
     {
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
         return;
     }
 
-    if (m_pEntityIgnoredCollision == colEntity || colEntity->AsPhysical()->m_pEntityIgnoredCollision == this)
+    if (m_pEntityIgnoredCollision == colPhysical || colPhysical->m_pEntityIgnoredCollision == this)
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (m_pAttachedTo == colEntity)
+    if (m_pAttachedTo == colPhysical)
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         return;
     }
 
-    if (colEntity->AsPhysical()->m_pAttachedTo == this)
+    if (colPhysical->m_pAttachedTo == this)
     {
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (physicalFlags.bDisableCollisionForce && colEntity->AsPhysical()->physicalFlags.bDisableCollisionForce)
+    if (physicalFlags.bDisableCollisionForce && colPhysical->physicalFlags.bDisableCollisionForce)
     {
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
         return;
     }
 
     if (m_bIsStuck
-        && colEntity->IsVehicle()
-        && (colEntity->AsVehicle()->physicalFlags.bDisableCollisionForce && !colEntity->AsVehicle()->physicalFlags.bCollidable))
+        && colPhysical->IsVehicle()
+        && (colPhysical->AsVehicle()->physicalFlags.bDisableCollisionForce && !colPhysical->AsVehicle()->physicalFlags.bCollidable))
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (colEntity->AsPhysical()->IsImmovable())
+    if (colPhysical->IsImmovable())
     {
         if (bIgnoreStuckCheck)
-            *bCollidedEntityCollisionIgnored = true;
-        else if (m_bIsStuck || colEntity->m_bIsStuck)
-            *bThisOrCollidedEntityStuck = true;
+            bCollidedEntityCollisionIgnored = true;
+        else if (m_bIsStuck || colPhysical->m_bIsStuck)
+            bThisOrCollidedEntityStuck = true;
 
         return;
     }
 
-    if (colEntity->IsObject())
+    if (colPhysical->IsObject())
     {
-        if (colEntity->AsObject()->IsFallenLampPost())
+        if (colPhysical->AsObject()->IsFallenLampPost())
         {
-            *bCollisionDisabled = true;
-            colEntity->AsObject()->m_pEntityIgnoredCollision = this;
+            bCollisionDisabled = true;
+            colPhysical->AsObject()->m_pEntityIgnoredCollision = this;
         }
         else
         {
-            if (colEntity->IsModelTempCollision())
+            if (colPhysical->IsModelTempCollision())
             {
-                *bCollisionDisabled = true;
+                bCollisionDisabled = true;
                 return;
             }
 
-            if (colEntity->AsObject()->IsTemporary()
-                || colEntity->AsObject()->IsExploded()
-                || !colEntity->IsStatic())
+            if (colPhysical->AsObject()->IsTemporary()
+                || colPhysical->AsObject()->IsExploded()
+                || !colPhysical->IsStatic())
             {
                 if (IsConstructionVehicle())
                 {
-                    if (m_bIsStuck || colEntity->m_bIsStuck)
-                        *bThisOrCollidedEntityStuck = true;
+                    if (m_bIsStuck || colPhysical->m_bIsStuck)
+                        bThisOrCollidedEntityStuck = true;
                 }
-                else if (!colEntity->AsObject()->CanBeSmashed() && !IsBike())
+                else if (!colPhysical->AsObject()->CanBeSmashed() && !IsBike())
                 {
                     auto tempMat = CMatrix();
-                    auto* cm = colEntity->GetColModel();
+                    auto* cm = colPhysical->GetColModel();
                     auto& vecMax = cm->GetBoundingBox().m_vecMax;
                     if (vecMax.x < 1.0F && vecMax.y < 1.0F && vecMax.z < 1.0F)
                     {
                         const auto vecSize = cm->GetBoundingBox().GetSize();
-                        const auto vecTransformed = *colEntity->m_matrix * vecSize;
+                        const auto vecTransformed = *colPhysical->m_matrix * vecSize;
 
                         if (GetPosition().z > vecTransformed.z)
-                            *bCollidedEntityCollisionIgnored = true;
+                            bCollidedEntityCollisionIgnored = true;
                         else
                         {
                             Invert(*m_matrix, tempMat);
                             if ((tempMat * vecTransformed).z < 0.0F)
-                                *bCollidedEntityCollisionIgnored = true;
+                                bCollidedEntityCollisionIgnored = true;
                         }
                     }
                 }
             }
 
-            if (!*bCollidedEntityCollisionIgnored
-                && !*bCollisionDisabled
-                && !*bThisOrCollidedEntityStuck
-                && colEntity->m_bIsStuck)
+            if (!bCollidedEntityCollisionIgnored
+                && !bCollisionDisabled
+                && !bThisOrCollidedEntityStuck
+                && colPhysical->m_bIsStuck)
             {
-                *bCollidedEntityUnableToMove = true;
+                bCollidedEntityUnableToMove = true;
             }
             return;
         }
     }
 
-    if (colEntity->IsRCCar())
+    if (colPhysical->IsRCCar())
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (IsRCCar() && (colEntity->IsVehicle() || colEntity->IsPed()))
+    if (IsRCCar() && (colPhysical->IsVehicle() || colPhysical->IsPed()))
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (colEntity == m_pTractor || colEntity == m_pTrailer)
+    if (colPhysical == m_pTractor || colPhysical == m_pTrailer)
     {
-        *bThisOrCollidedEntityStuck = true;
+        bThisOrCollidedEntityStuck = true;
         physicalFlags.b13 = true;
         return;
     }
 
-    if (colEntity->m_bIsStuck)
+    if (colPhysical->m_bIsStuck)
     {
-        *bCollidedEntityUnableToMove = true;
+        bCollidedEntityUnableToMove = true;
         return;
     }
 }
 
 // 0x6D0E90
-uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CVehicle::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     return CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
 }
-uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     if (physicalFlags.bDisableCollisionForce)
         return 1;
@@ -541,18 +541,18 @@ uint8 CVehicle::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollision
     else
         fMove *= (10.0F / 2.0F);
 
-    auto& pBnd = CEntity::GetColModel()->GetBoundingBox();
-    auto fLongestDir = fabs(DotProduct(m_vecMoveSpeed, GetForward()) * CTimer::GetTimeStep() / pBnd.GetLength());
-    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetRight()) * CTimer::GetTimeStep() / pBnd.GetWidth()));
-    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetUp()) * CTimer::GetTimeStep() / pBnd.GetHeight()));
+    auto& bbox = CEntity::GetColModel()->GetBoundingBox();
+    auto fLongestDir = fabs(DotProduct(m_vecMoveSpeed, GetForward()) * CTimer::GetTimeStep() / bbox.GetLength());
+    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetRight()) * CTimer::GetTimeStep() / bbox.GetWidth()));
+    fLongestDir = std::max(fLongestDir, fabs(DotProduct(m_vecMoveSpeed, GetUp()) * CTimer::GetTimeStep() / bbox.GetHeight()));
 
     if (IsBike())
         fLongestDir *= 1.5F;
 
     if (fLongestDir < 1.0F)
-        *bProcessCollisionBeforeSettingTimeStep = true;
+        bProcessCollisionBeforeSettingTimeStep = true;
     else if (fLongestDir < 2.0F)
-        *unk2 = true;
+        unk2 = true;
 
     return static_cast<uint8>(ceil(fMove));
 }

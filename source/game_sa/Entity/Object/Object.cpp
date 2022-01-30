@@ -374,61 +374,60 @@ void CObject::Teleport_Reversed(CVector destination, bool resetRotation)
 }
 
 // 0x59FEE0
-void CObject::SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled,
-    bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
+void CObject::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
+    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
-    CObject::SpecialEntityPreCollisionStuff_Reversed(colEntity, bIgnoreStuckCheck, bCollisionDisabled,
+    CObject::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled,
         bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
 }
-void CObject::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled,
-    bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck)
+void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled,
+    bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
-    auto* const colPhysical = colEntity->AsPhysical();
-    if (m_pEntityIgnoredCollision == colEntity || colPhysical->m_pEntityIgnoredCollision == this)
+    if (m_pEntityIgnoredCollision == colPhysical || colPhysical->m_pEntityIgnoredCollision == this)
     {
-        *bCollidedEntityCollisionIgnored = true;
+        bCollidedEntityCollisionIgnored = true;
         return;
     }
 
-    if (m_pAttachedTo == colEntity)
-        *bCollisionDisabled = true;
+    if (m_pAttachedTo == colPhysical)
+        bCollisionDisabled = true;
     else if (colPhysical->m_pAttachedTo == this || m_pAttachedTo && m_pAttachedTo == colPhysical->m_pAttachedTo)
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
     else if (physicalFlags.bDisableZ && !physicalFlags.bApplyGravity && colPhysical->physicalFlags.bDisableZ)
-        *bCollisionDisabled = true;
+        bCollisionDisabled = true;
     else
     {
         if (!physicalFlags.bDisableZ) {
             if (physicalFlags.bDisableMoveForce || physicalFlags.bInfiniteMass)
             {
                 if (bIgnoreStuckCheck || m_bIsStuck)
-                    *bCollisionDisabled = true;
+                    bCollisionDisabled = true;
                 else if (!colPhysical->m_bIsStuck) { /* Do nothing pretty much, and skip further calc */ }
                 else if (!colPhysical->m_bHasHitWall)
-                    *bThisOrCollidedEntityStuck = true;
+                    bThisOrCollidedEntityStuck = true;
                 else
-                    *bCollidedEntityUnableToMove = true;
+                    bCollidedEntityUnableToMove = true;
             }
             else if (objectFlags.bIsLampPost && (GetUp().z < 0.66F || m_bIsStuck))
             {
-                if (colEntity->IsVehicle() || colEntity->IsPed()) {
-                    *bCollidedEntityCollisionIgnored = true;
-                    if (colEntity->IsVehicle())
+                if (colPhysical->IsVehicle() || colPhysical->IsPed()) {
+                    bCollidedEntityCollisionIgnored = true;
+                    if (colPhysical->IsVehicle())
                         return;
 
-                    m_pEntityIgnoredCollision = colEntity;
+                    m_pEntityIgnoredCollision = colPhysical;
                 }
             }
-            else if ( colEntity->IsVehicle())
+            else if ( colPhysical->IsVehicle())
             {
                 if (IsModelTempCollision())
-                    *bCollisionDisabled = true;
+                    bCollisionDisabled = true;
                 else if (IsTemporary() || IsExploded() || !CEntity::IsStatic())
                 {
-                    if (colEntity->AsVehicle()->IsConstructionVehicle())
+                    if (colPhysical->AsVehicle()->IsConstructionVehicle())
                     {
-                        if (m_bIsStuck || colEntity->m_bIsStuck)
-                            *bThisOrCollidedEntityStuck = true;
+                        if (m_bIsStuck || colPhysical->m_bIsStuck)
+                            bThisOrCollidedEntityStuck = true;
                     }
                     else if (!CanBeSmashed())
                     {
@@ -437,34 +436,34 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool b
                         auto vecSize = pColModel->GetBoundingBox().GetSize();
                         auto vecTransformed = *m_matrix * vecSize;
 
-                        auto& vecCollidedPos = colEntity->GetPosition();
+                        auto& vecCollidedPos = colPhysical->GetPosition();
                         if (vecTransformed.z < vecCollidedPos.z)
                         {
-                            *bCollidedEntityCollisionIgnored = true;
-                            m_pEntityIgnoredCollision = colEntity;
+                            bCollidedEntityCollisionIgnored = true;
+                            m_pEntityIgnoredCollision = colPhysical;
                         }
                         else
                         {
-                            Invert(colEntity->GetMatrix(), tempMat);
+                            Invert(colPhysical->GetMatrix(), tempMat);
                             if ((tempMat * vecTransformed).z < 0.0F)
                             {
-                                *bCollidedEntityCollisionIgnored = true;
-                                m_pEntityIgnoredCollision = colEntity;
+                                bCollidedEntityCollisionIgnored = true;
+                                m_pEntityIgnoredCollision = colPhysical;
                             }
                         }
                     }
                 }
             }
             else if(m_nModelIndex != eModelID::MODEL_GRENADE
-                || !colEntity->IsPed()
-                || GetPosition().z > colEntity->GetPosition().z)
+                || !colPhysical->IsPed()
+                || GetPosition().z > colPhysical->GetPosition().z)
             {
-                if (colEntity->IsObject() && colEntity->AsObject()->m_pObjectInfo->m_fUprootLimit > 0.0F && !colPhysical->m_pAttachedTo)
+                if (colPhysical->IsObject() && colPhysical->AsObject()->m_pObjectInfo->m_fUprootLimit > 0.0F && !colPhysical->m_pAttachedTo)
                 {
                     if ((!colPhysical->physicalFlags.bDisableCollisionForce || colPhysical->physicalFlags.bCollidable)
                         && colPhysical->m_fMass * 10.0F > m_fMass)
                     {
-                        *bCollidedEntityUnableToMove = true;
+                        bCollidedEntityUnableToMove = true;
                     }
                 }
             }
@@ -472,23 +471,23 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool b
         else
         {
             if (bIgnoreStuckCheck)
-                *bCollisionDisabled = true;
-            else if (m_bIsStuck || colEntity->m_bIsStuck)
-                *bThisOrCollidedEntityStuck = true;
+                bCollisionDisabled = true;
+            else if (m_bIsStuck || colPhysical->m_bIsStuck)
+                bThisOrCollidedEntityStuck = true;
         }
     }
 
-    if (!*bCollidedEntityCollisionIgnored && (bIgnoreStuckCheck || m_bIsStuck))
-        *bThisOrCollidedEntityStuck = true;
+    if (!bCollidedEntityCollisionIgnored && (bIgnoreStuckCheck || m_bIsStuck))
+        bThisOrCollidedEntityStuck = true;
 
 }
 
 // 0x5A02E0
-uint8 CObject::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CObject::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     return CObject::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
 }
-uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CObject::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     if (physicalFlags.bDisableZ
         || m_pObjectInfo->m_nSpecialColResponseCase == COL_SPECIAL_RESPONSE_GRENADE)

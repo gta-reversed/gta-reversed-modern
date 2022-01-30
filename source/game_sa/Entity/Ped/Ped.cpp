@@ -1302,20 +1302,20 @@ void CPed::Teleport(CVector destination, bool resetRotation)
 }
 
 // 0x5E3C30
-void CPed::SpecialEntityPreCollisionStuff(CEntity* colEntity,
+void CPed::SpecialEntityPreCollisionStuff(CPhysical* colPhysical,
                                           bool  bIgnoreStuckCheck,
-                                          bool* bCollisionDisabled,
-                                          bool* bCollidedEntityCollisionIgnored,
-                                          bool* bCollidedEntityUnableToMove,
-                                          bool* bThisOrCollidedEntityStuck)
+                                          bool& bCollisionDisabled,
+                                          bool& bCollidedEntityCollisionIgnored,
+                                          bool& bCollidedEntityUnableToMove,
+                                          bool& bThisOrCollidedEntityStuck)
 {
-    plugin::CallMethod<0x5E3C30, CPed*, CEntity*, bool, bool*, bool*, bool*, bool*>(this, colEntity, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
+    plugin::CallMethod<0x5E3C30, CPed*, CPhysical*, bool, bool&, bool&, bool&, bool&>(this, colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
 }
 
 // 0x5E3E90
-uint8 CPed::SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2)
+uint8 CPed::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
-    return plugin::CallMethodAndReturn<uint8, 0x5E3E90, CPed*, bool*, bool*>(this, bProcessCollisionBeforeSettingTimeStep, unk2);
+    return plugin::CallMethodAndReturn<uint8, 0x5E3E90, CPed*, bool&, bool&>(this, bProcessCollisionBeforeSettingTimeStep, unk2);
 }
 
 // 0x5E8A20
