@@ -259,17 +259,29 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     if (blipType == eRadarSprite::RADAR_SPRITE_NONE) // None => Player position
         blipType = eRadarSprite::RADAR_SPRITE_MAP_HERE;
 
-    CFont::PrintString(SCREEN_WIDTH_UNIT * 20.0f + x, SCREEN_HEIGHT_UNIT * 3.0f + y, GetBlipName(blipType));
+    CFont::PrintString(
+        x + SCREEN_WIDTH_UNIT * 20.0f,
+        y + SCREEN_HEIGHT_UNIT * 3.0f,
+        GetBlipName(blipType)
+    );
 
     auto blipId = (int32)blipType;
 
     if (blipId > -1) { // The blip is a sprite, so just draw it.
         RadarBlipSprites[blipId].Draw(
             {
+<<<<<<< HEAD
                 x,
                 y,
                 x + SCREEN_WIDTH_UNIT * 16.0f,
                 y + SCREEN_HEIGHT_UNIT * 16.0f
+=======
+                (float)x,
+                (float)y,
+
+                (float)x + SCREEN_WIDTH_UNIT * 16.0f,
+                (float)y + SCREEN_HEIGHT_UNIT * 16.0f
+>>>>>>> fe12bad4 (Fix build errors and warnings)
             },
             { 255, 255, 255, 255 }
         );
@@ -1403,13 +1415,7 @@ void CRadar::DrawMap()
         return;
     }
 
-    CVector pos0 = FindPlayerCentreOfWorld_NoInteriorShift(0);
-    CVector pos1 = FindPlayerCentreOfWorld_NoInteriorShift(1);
-
-    CVector2D posAvg = (pos0 + pos1) / 2.0f;
-
-    vec2DRadarOrigin.x = posAvg.x;
-    vec2DRadarOrigin.y = posAvg.y;
+    vec2DRadarOrigin = (FindPlayerCentreOfWorld_NoInteriorShift(0) + FindPlayerCentreOfWorld_NoInteriorShift(1)) / 2.f; // Halfway between the two player's positions
 
     if (mapShouldDrawn)
         DrawRadarMap();
@@ -1572,7 +1578,7 @@ bool CRadar::Save()
 
 }
 
-auto CRadar::GetBlipName(eRadarSprite blipType) {
+const char* CRadar::GetBlipName(eRadarSprite blipType) {
     switch (blipType) {
     case (eRadarSprite)-5:
         return TheText.Get("LG_56"); // Player interest
@@ -1703,6 +1709,9 @@ auto CRadar::GetBlipName(eRadarSprite blipType) {
     case RADAR_SPRITE_SPRAY:
         return TheText.Get("LG_34");
     }
+
+    assert(0);
+    return "Bug in GetBlipName";
 }
 
 int32 CRadar::FindTraceNotTrackingBlipIndex() {
@@ -1714,7 +1723,7 @@ int32 CRadar::FindTraceNotTrackingBlipIndex() {
     return -1;
 }
 
-auto tRadarTrace::GetStaticColour() const {
+uint32 tRadarTrace::GetStaticColour() const {
     switch (m_appearance) {
     case eBlipAppearance::BLIP_FLAG_FRIEND:
         return CRadar::GetRadarTraceColour(m_nColour, m_bBright, false);
@@ -1722,10 +1731,13 @@ auto tRadarTrace::GetStaticColour() const {
         return HudColour.GetIntColour(HUD_COLOUR_BLUE);
     case eBlipAppearance::BLIP_FLAH_UNK:
         return HudColour.GetIntColour(HUD_COLOUR_RED);
-    }  
+    }
+
+    assert(0);
+    return 0;
 }
 
-auto tRadarTrace::GetWorldPos() const {
+CVector tRadarTrace::GetWorldPos() const {
     if (m_pEntryExit) {
         CVector pos{};
         m_pEntryExit->GetPositionRelativeToOutsideWorld(pos);
@@ -1735,7 +1747,7 @@ auto tRadarTrace::GetWorldPos() const {
     }
 }
 
-auto tRadarTrace::GetRadarAndScreenPos(float* radarPointDist) const {
+std::pair<CVector2D, CVector2D> tRadarTrace::GetRadarAndScreenPos(float* radarPointDist) const {
     const auto world = GetWorldPos();
 
     CVector2D radar;
