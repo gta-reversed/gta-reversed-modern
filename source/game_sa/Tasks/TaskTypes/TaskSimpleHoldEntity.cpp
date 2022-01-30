@@ -6,22 +6,23 @@
 #include "TaskSimplePutDownEntity.h"
 
 void CTaskSimpleHoldEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskSimpleHoldEntity", "Constructor_1", 0x6913A0, (CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool)) & CTaskSimpleHoldEntity::Constructor);
-    Install("CTaskSimpleHoldEntity", "Constructor_2", 0x691470, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags)) & CTaskSimpleHoldEntity::Constructor);
-    Install("CTaskSimpleHoldEntity", "Constructor_3", 0x691550, (CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags)) & CTaskSimpleHoldEntity::Constructor);
-    Install("CTaskSimpleHoldEntity", "Clone", 0x6929B0, &CTaskSimpleHoldEntity::Clone_Reversed);
-    Install("CTaskSimpleHoldEntity", "GetTaskType", 0x691460, &CTaskSimpleHoldEntity::GetId_Reversed);
-    Install("CTaskSimpleHoldEntity", "MakeAbortable", 0x693BD0, &CTaskSimpleHoldEntity::MakeAbortable_Reversed);
-    Install("CTaskSimpleHoldEntity", "ProcessPed", 0x693C40, &CTaskSimpleHoldEntity::ProcessPed_Reversed);
-    Install("CTaskSimpleHoldEntity", "SetPedPosition", 0x6940A0, &CTaskSimpleHoldEntity::SetPedPosition_Reversed);
-    Install("CTaskSimpleHoldEntity", "ReleaseEntity", 0x6916E0, &CTaskSimpleHoldEntity::ReleaseEntity);
-    Install("CTaskSimpleHoldEntity", "CanThrowEntity", 0x691700, &CTaskSimpleHoldEntity::CanThrowEntity);
-    Install("CTaskSimpleHoldEntity", "PlayAnim", 0x691720, &CTaskSimpleHoldEntity::PlayAnim);
-    Install("CTaskSimpleHoldEntity", "FinishAnimHoldEntityCB", 0x691740, &CTaskSimpleHoldEntity::FinishAnimHoldEntityCB);
-    Install("CTaskSimpleHoldEntity", "StartAnim", 0x692FF0, &CTaskSimpleHoldEntity::StartAnim);
-    Install("CTaskSimpleHoldEntity", "DropEntity", 0x6930F0, &CTaskSimpleHoldEntity::DropEntity);
-    Install("CTaskSimpleHoldEntity", "ChoosePutDownHeight", 0x693440, &CTaskSimpleHoldEntity::ChoosePutDownHeight);
+    RH_ScopedClass(CTaskSimpleHoldEntity);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedOverloadedInstall(Constructor, "1", 0x6913A0, CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool));
+    RH_ScopedOverloadedInstall(Constructor, "2", 0x691470, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags));
+    RH_ScopedOverloadedInstall(Constructor, "3", 0x691550, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags));
+    RH_ScopedInstall(Clone_Reversed, 0x6929B0);
+    RH_ScopedInstall(GetId_Reversed, 0x691460);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x693BD0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x693C40);
+    RH_ScopedInstall(SetPedPosition_Reversed, 0x6940A0);
+    RH_ScopedInstall(ReleaseEntity, 0x6916E0);
+    RH_ScopedInstall(CanThrowEntity, 0x691700);
+    RH_ScopedInstall(PlayAnim, 0x691720);
+    RH_ScopedInstall(FinishAnimHoldEntityCB, 0x691740);
+    RH_ScopedInstall(StartAnim, 0x692FF0);
+    RH_ScopedInstall(DropEntity, 0x6930F0);
+    RH_ScopedInstall(ChoosePutDownHeight, 0x693440);
 }
 
 // 0x6913A0
@@ -399,7 +400,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
             if (!animBlock)
                 animBlock = CAnimManager::GetAnimationBlock(CAnimManager::GetAnimBlockName(m_nAnimGroupId));
             if (!animBlock->bLoaded) {
-                CStreaming::RequestModel(animBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+                CStreaming::RequestModel(IFPToModelId(animBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
                 return;
             }
             CAnimManager::AddAnimBlockRef(animBlock - CAnimManager::ms_aAnimBlocks);

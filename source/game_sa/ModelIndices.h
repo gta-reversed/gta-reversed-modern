@@ -201,7 +201,7 @@ namespace ModelIndices {
             || modelId == MODEL_ANDROM
             || modelId == MODEL_FORKLIFT;
     }
-
+    inline bool IsFence1Or2(int32 mi) { return mi == MI_FENCE || mi == MI_FENCE2; }
     void InjectHooks();
 }
 

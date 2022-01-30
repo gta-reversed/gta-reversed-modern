@@ -2,28 +2,31 @@
 
 void CColModel::InjectHooks()
 {
-    ReversibleHooks::Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
-    ReversibleHooks::Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
-    ReversibleHooks::Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
-    ReversibleHooks::Install("CColModel", "AllocateData_void", 0x40F810, static_cast<void(CColModel::*)()>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int32, int32, int32, int32, int32, bool)>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
-    ReversibleHooks::Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
-    ReversibleHooks::Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);
+    RH_ScopedClass(CColModel);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(operator new, 0x40FC30);
+    RH_ScopedInstall(operator delete, 0x40FC40);
+    RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
+    RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
+    RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F9E0);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40FA30);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40FA40);
 }
 
 CColModel::CColModel() : m_boundBox()
 {
-    m_boundSphere.m_nMaterial = 0;
+    m_nColSlot = 0;
     m_pColData = nullptr;
-    m_boundSphere.m_bFlag0x01 = false;
-    m_boundSphere.m_bIsSingleColDataAlloc = false;
-    m_boundSphere.m_bIsActive = true;
+    m_bNotEmpty = false;
+    m_bIsSingleColDataAlloc = false;
+    m_bIsActive = true;
 }
 
 CColModel::~CColModel()
 {
-    if (!m_boundSphere.m_bIsActive)
+    if (!m_bIsActive)
         return;
 
     CColModel::RemoveCollisionVolumes();
@@ -43,20 +46,20 @@ CColModel& CColModel::operator=(CColModel const& colModel)
 
 void CColModel::MakeMultipleAlloc()
 {
-    if (!m_boundSphere.m_bIsSingleColDataAlloc)
+    if (!m_bIsSingleColDataAlloc)
         return;
 
     auto* colData = new CCollisionData();
     colData->Copy(*m_pColData);
     delete m_pColData;
 
-    m_boundSphere.m_bIsSingleColDataAlloc = false;
+    m_bIsSingleColDataAlloc = false;
     m_pColData = colData;
 }
 
 void CColModel::AllocateData()
 {
-    m_boundSphere.m_bIsSingleColDataAlloc = false;
+    m_bIsSingleColDataAlloc = false;
     m_pColData = new CCollisionData();
 }
 
@@ -107,7 +110,7 @@ void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, i
 
 void CColModel::AllocateData(int32 size)
 {
-    m_boundSphere.m_bIsSingleColDataAlloc = true;
+    m_bIsSingleColDataAlloc = true;
     m_pColData = static_cast<CCollisionData*>(CMemoryMgr::Malloc(size));
 }
 
@@ -116,7 +119,7 @@ void CColModel::RemoveCollisionVolumes()
     if (!m_pColData)
         return;
 
-    if (m_boundSphere.m_bIsSingleColDataAlloc) {
+    if (m_bIsSingleColDataAlloc) {
         CCollision::RemoveTrianglePlanes(m_pColData);
         CMemoryMgr::Free(m_pColData);
     }

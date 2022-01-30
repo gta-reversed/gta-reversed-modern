@@ -28,13 +28,13 @@ int32 CLoadedCarGroup::PickLeastUsedModel(int32 minRefs) {
 }
 
 // Converted from thiscall int32 CLoadedCarGroup::GetMember(int32 count)	0x611C20
-int32 CLoadedCarGroup::GetMember(int32 count) {
-    return plugin::CallMethodAndReturn<int32, 0x611C20, CLoadedCarGroup *, int32>(this, count);
+int32 CLoadedCarGroup::GetMember(int32 count) const {
+    return plugin::CallMethodAndReturn<int32, 0x611C20, const CLoadedCarGroup *, int32>(this, count);
 }
 
 // Converted from thiscall int32 CLoadedCarGroup::CountMembers()	0x611C30
-int32 CLoadedCarGroup::CountMembers() {
-    return plugin::CallMethodAndReturn<int32, 0x611C30, CLoadedCarGroup *>(this);
+int32 CLoadedCarGroup::CountMembers() const {
+    return plugin::CallMethodAndReturn<int32, 0x611C30, const CLoadedCarGroup *>(this);
 }
 
 // Converted from thiscall void CLoadedCarGroup::Clear()	0x611B90

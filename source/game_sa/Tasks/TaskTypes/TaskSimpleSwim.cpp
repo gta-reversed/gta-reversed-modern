@@ -6,19 +6,21 @@ float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2F
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
 
 void CTaskSimpleSwim::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimpleSwim", "CTaskSimpleSwim", 0x688930, &CTaskSimpleSwim::Constructor);
-    ReversibleHooks::Install("CTaskSimpleSwim", "Clone", 0x68B050, &CTaskSimpleSwim::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "GetTaskType", 0x6889F0, &CTaskSimpleSwim::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessPed", 0x68B1C0, &CTaskSimpleSwim::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "MakeAbortable", 0x68B100, &CTaskSimpleSwim::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ApplyRollAndPitch", 0x68A8E0, &CTaskSimpleSwim::ApplyRollAndPitch);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimAnims", 0x6899F0, &CTaskSimpleSwim::ProcessSwimAnims);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessSwimmingResistance", 0x68A1D0, &CTaskSimpleSwim::ProcessSwimmingResistance);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessEffects", 0x68AA70, &CTaskSimpleSwim::ProcessEffects);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlAI", 0x689640, &CTaskSimpleSwim::ProcessControlAI);
-    ReversibleHooks::Install("CTaskSimpleSwim", "ProcessControlInput", 0x688A90, &CTaskSimpleSwim::ProcessControlInput);
-    ReversibleHooks::Install("CTaskSimpleSwim", "CreateFxSystem", 0x68A9F0, &CTaskSimpleSwim::CreateFxSystem);
-    ReversibleHooks::Install("CTaskSimpleSwim", "DestroyFxSystem", 0x68AA50, &CTaskSimpleSwim::DestroyFxSystem);
+    RH_ScopedClass(CTaskSimpleSwim);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x688930);
+    RH_ScopedInstall(Clone_Reversed, 0x68B050);
+    RH_ScopedInstall(GetId_Reversed, 0x6889F0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x68B1C0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x68B100);
+    RH_ScopedInstall(ApplyRollAndPitch, 0x68A8E0);
+    RH_ScopedInstall(ProcessSwimAnims, 0x6899F0);
+    RH_ScopedInstall(ProcessSwimmingResistance, 0x68A1D0);
+    RH_ScopedInstall(ProcessEffects, 0x68AA70);
+    RH_ScopedInstall(ProcessControlAI, 0x689640);
+    RH_ScopedInstall(ProcessControlInput, 0x688A90);
+    RH_ScopedInstall(CreateFxSystem, 0x68A9F0);
+    RH_ScopedInstall(DestroyFxSystem, 0x68AA50);
 }
 
 CTaskSimpleSwim::CTaskSimpleSwim(CVector* pPosition, CPed* pPed) : CTaskSimple() {
@@ -333,7 +335,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* pPed)
             m_bAnimBlockRefAdded = true;
         }
         else {
-            CStreaming::RequestModel(pAnimBlock - CAnimManager::ms_aAnimBlocks + RESOURCE_ID_IFP, STREAMING_KEEP_IN_MEMORY);
+            CStreaming::RequestModel(IFPToModelId(pAnimBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
         }
     }
 

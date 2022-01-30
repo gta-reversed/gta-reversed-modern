@@ -2,29 +2,44 @@
 
 void CEventPlayerCommandToGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroup", "CEventPlayerCommandToGroup", 0x4B23D0, &CEventPlayerCommandToGroup::Constructor);
-    ReversibleHooks::Install("CEventPlayerCommandToGroup", "AffectsPedGroup_Reversed", 0x4B24D0, &CEventPlayerCommandToGroup::AffectsPedGroup_Reversed);
+    RH_ScopedClass(CEventPlayerCommandToGroup);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B23D0);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B24D0);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroupAttack", "CEventPlayerCommandToGroupAttack", 0x5F6340, &CEventPlayerCommandToGroupAttack::Constructor);
-    ReversibleHooks::Install("CEventPlayerCommandToGroupAttack", "AffectsPedGroup_Reversed", 0x4B2530, &CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed);
+    RH_ScopedClass(CEventPlayerCommandToGroupAttack);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5F6340);
+    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B2530);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCommandToGroupGather", "CEventPlayerCommandToGroupGather", 0x609250, &CEventPlayerCommandToGroupGather::Constructor);
+    RH_ScopedClass(CEventPlayerCommandToGroupGather);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x609250);
 }
 
 void CEventDontJoinPlayerGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDontJoinPlayerGroup", "CEventDontJoinPlayerGroup", 0x6090E0, &CEventDontJoinPlayerGroup::Constructor);
+    RH_ScopedClass(CEventDontJoinPlayerGroup);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x6090E0);
 }
 
 void CEventNewGangMember::InjectHooks()
 {
-    ReversibleHooks::Install("CEventNewGangMember", "CEventNewGangMember", 0x608F70, &CEventNewGangMember::Constructor);
+    RH_ScopedClass(CEventNewGangMember);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x608F70);
 }
 
 CEventPlayerCommandToGroup::CEventPlayerCommandToGroup(ePlayerGroupCommand command, CPed* target)
@@ -47,13 +62,10 @@ CEventPlayerCommandToGroup* CEventPlayerCommandToGroup::Constructor(ePlayerGroup
     return this;
 }
 
+// 0x4B24D0
 bool CEventPlayerCommandToGroup::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B24D0, CEventPlayerCommandToGroup*, CPedGroup*>(this, pedGroup);
-#else
     return CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventPlayerCommandToGroup::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
@@ -75,13 +87,10 @@ CEventPlayerCommandToGroupAttack* CEventPlayerCommandToGroupAttack::Constructor(
     return this;
 }
 
+// 0x4B2530
 bool CEventPlayerCommandToGroupAttack::AffectsPedGroup(CPedGroup* pedGroup)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B2530, CEventPlayerCommandToGroupAttack*, CPedGroup*>(this, pedGroup);
-#else
     return CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed(pedGroup);
-#endif
 }
 
 bool CEventPlayerCommandToGroupAttack::AffectsPedGroup_Reversed(CPedGroup* pedGroup)

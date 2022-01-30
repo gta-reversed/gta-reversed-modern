@@ -13,15 +13,18 @@ float(*cBuoyancy::afBoatVolumeDistributionCat)[3] = (float(*)[3])0x8D3314; // Ca
 
 void cBuoyancy::InjectHooks()
 {
-    ReversibleHooks::Install("cBuoyancy", "ProcessBuoyancy", 0x6C3EF0, &cBuoyancy::ProcessBuoyancy);
-    ReversibleHooks::Install("cBuoyancy", "ProcessBuoyancyBoat", 0x6C3030, &cBuoyancy::ProcessBuoyancyBoat);
-    ReversibleHooks::Install("cBuoyancy", "CalcBuoyancyForce", 0x6C2750, &cBuoyancy::CalcBuoyancyForce);
-    ReversibleHooks::Install("cBuoyancy", "PreCalcSetup", 0x6C2B90, &cBuoyancy::PreCalcSetup);
-    ReversibleHooks::Install("cBuoyancy", "AddSplashParticles", 0x6C34E0, &cBuoyancy::AddSplashParticles);
-    ReversibleHooks::Install("cBuoyancy", "SimpleCalcBuoyancy", 0x6C3B00, &cBuoyancy::SimpleCalcBuoyancy);
-    ReversibleHooks::Install("cBuoyancy", "SimpleSumBuoyancyData", 0x6C2970, &cBuoyancy::SimpleSumBuoyancyData);
-    ReversibleHooks::Install("cBuoyancy", "FindWaterLevel", 0x6C2810, &cBuoyancy::FindWaterLevel);
-    ReversibleHooks::Install("cBuoyancy", "FindWaterLevelNorm", 0x6C28C0, &cBuoyancy::FindWaterLevelNorm);
+    RH_ScopedClass(cBuoyancy);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ProcessBuoyancy, 0x6C3EF0);
+    RH_ScopedInstall(ProcessBuoyancyBoat, 0x6C3030);
+    RH_ScopedInstall(CalcBuoyancyForce, 0x6C2750);
+    RH_ScopedInstall(PreCalcSetup, 0x6C2B90);
+    RH_ScopedInstall(AddSplashParticles, 0x6C34E0);
+    RH_ScopedInstall(SimpleCalcBuoyancy, 0x6C3B00);
+    RH_ScopedInstall(SimpleSumBuoyancyData, 0x6C2970);
+    RH_ScopedInstall(FindWaterLevel, 0x6C2810);
+    RH_ScopedInstall(FindWaterLevelNorm, 0x6C28C0);
 }
 
 bool cBuoyancy::ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce)
@@ -173,16 +176,17 @@ bool cBuoyancy::CalcBuoyancyForce(CPhysical* pEntity, CVector* vecBuoyancyTurnPo
     return true;
 }
 
-void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
+// 0x6C2B90
+void cBuoyancy::PreCalcSetup(CPhysical* entity, float fBuoyancy)
 {
-    auto pVehicleEntity = static_cast<CVehicle*>(pEntity);
-    m_bProcessingBoat = pEntity->IsVehicle() && pVehicleEntity->IsBoat();
-    auto pColModel = pEntity->GetColModel();
+    CVehicle* vehicle = entity->AsVehicle();
+    m_bProcessingBoat = entity->IsVehicle() && vehicle->IsBoat();
+    auto pColModel = entity->GetColModel();
     m_vecBoundingMin = pColModel->m_boundBox.m_vecMin;
     m_vecBoundingMax = pColModel->m_boundBox.m_vecMax;
 
     if (!m_bProcessingBoat) {
-        switch (pEntity->m_nModelIndex) {
+        switch (entity->m_nModelIndex) {
         case eModelID::MODEL_LEVIATHN: //417
             m_vecBoundingMin.y *= 0.4F;
             m_vecBoundingMax.y *= 1.15F;
@@ -195,7 +199,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
             m_vecBoundingMax.y *= 1.4F;
             break;
         default:
-            if (pEntity->IsVehicle() && pVehicleEntity->IsHeli()) {
+            if (entity->IsVehicle() && vehicle->IsSubHeli()) {
                 m_vecBoundingMin.y = -m_vecBoundingMax.y;
                 m_vecBoundingMax.z = m_vecBoundingMin.z * -1.1F;
                 m_vecBoundingMin.z *= 0.85F;
@@ -204,7 +208,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
         }
     }
     else {
-        switch (pEntity->m_nModelIndex) {
+        switch (entity->m_nModelIndex) {
         case eModelID::MODEL_SQUALO: //446
             m_vecBoundingMax.y *= 0.9F;
             m_vecBoundingMin.y *= 0.9F;
@@ -265,7 +269,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* pEntity, float fBuoyancy)
     m_vecTurnPoint.Set(0.0F, 0.0F, 0.0F);
     m_bInWater = false;
     m_fEntityWaterImmersion = 0.0F;
-    m_vecPos = pEntity->GetPosition();
+    m_vecPos = entity->GetPosition();
     m_fWaterLevel += m_fUnkn2;
     m_vecInitialZPos.Set(0.0F, 0.0F, m_vecPos.z);
     m_fBuoyancy = fBuoyancy;

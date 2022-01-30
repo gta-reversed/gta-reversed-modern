@@ -10,6 +10,8 @@
 
 #include "WaterCannons.h"
 #include "Buoyancy.h"
+#include "Skidmarks.h"
+#include "CarCtrl.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
@@ -28,42 +30,63 @@ static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
 void CAutomobile::InjectHooks()
 {
-    ReversibleHooks::Install("CAutomobile", "ProcessControl", 0x6B1880, &CAutomobile::ProcessControl_Reversed);
-    ReversibleHooks::Install("CAutomobile", "AddMovingCollisionSpeed", 0x6A1ED0, &CAutomobile::AddMovingCollisionSpeed_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessAI", 0x6B4800, &CAutomobile::ProcessAI_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ResetSuspension", 0x6A2AE0, &CAutomobile::ResetSuspension_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessFlyingCarStuff", 0x6A8500, &CAutomobile::ProcessFlyingCarStuff_Reversed);
-    ReversibleHooks::Install("CAutomobile", "DoHoverSuspensionRatios", 0x6A45C0, &CAutomobile::DoHoverSuspensionRatios_Reversed);
-    ReversibleHooks::Install("CAutomobile", "ProcessSuspension", 0x6AFB10, &CAutomobile::ProcessSuspension_Reversed);
-    ReversibleHooks::Install("CAutomobile", "SetupModelNodes", 0x6A0770, &CAutomobile::SetupModelNodes);
-    ReversibleHooks::Install("CAutomobile", "HydraulicControl", 0x6A07A0, &CAutomobile::HydraulicControl);
-    ReversibleHooks::Install("CAutomobile", "UpdateMovingCollision", 0x6A1460, &CAutomobile::UpdateMovingCollision);
-    ReversibleHooks::Install("CAutomobile", "ProcessBuoyancy", 0x6A8C00, &CAutomobile::ProcessBuoyancy);
-    ReversibleHooks::Install("CAutomobile", "ProcessHarvester", 0x6A9680, &CAutomobile::ProcessHarvester);
-    ReversibleHooks::Install("CAutomobile", "TankControl", 0x6AE850, &CAutomobile::TankControl);
-    ReversibleHooks::Install("CAutomobile", "DoSoftGroundResistance", 0x6A4AF0, &CAutomobile::DoSoftGroundResistance);
-    ReversibleHooks::Install("CAutomobile", "ProcessCarWheelPair", 0x6A4EC0, &CAutomobile::ProcessCarWheelPair);
-    ReversibleHooks::Install("CAutomobile", "PlaceOnRoadProperly", 0x6AF420, &CAutomobile::PlaceOnRoadProperly);
-    ReversibleHooks::Install("CAutomobile", "RcbanditCheck1CarWheels", 0x6B3F70, &CAutomobile::RcbanditCheck1CarWheels);
-    ReversibleHooks::Install("CAutomobile", "RcbanditCheckHitWheels", 0x6B45E0, &CAutomobile::RcbanditCheckHitWheels);
-    ReversibleHooks::Install("CAutomobile", "FireTruckControl", 0x729B60, &CAutomobile::FireTruckControl);
-    ReversibleHooks::Install("CAutomobile", "SetHeliOrientation", 0x6A2450, &CAutomobile::SetHeliOrientation);
-    ReversibleHooks::Install("CAutomobile", "ClearHeliOrientation", 0x6A2460, &CAutomobile::ClearHeliOrientation);
+    RH_ScopedClass(CAutomobile);
+    RH_ScopedCategory("Vehicle/Ped");
+
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6B1880);
+    RH_ScopedInstall(AddMovingCollisionSpeed_Reversed, 0x6A1ED0);
+    RH_ScopedInstall(ProcessAI_Reversed, 0x6B4800);
+    RH_ScopedInstall(ResetSuspension_Reversed, 0x6A2AE0);
+    RH_ScopedInstall(ProcessFlyingCarStuff_Reversed, 0x6A8500);
+    RH_ScopedInstall(DoHoverSuspensionRatios_Reversed, 0x6A45C0);
+    RH_ScopedInstall(ProcessSuspension_Reversed, 0x6AFB10);
+    RH_ScopedInstall(SetupModelNodes, 0x6A0770);
+    RH_ScopedInstall(HydraulicControl, 0x6A07A0);
+    RH_ScopedInstall(UpdateMovingCollision, 0x6A1460);
+    RH_ScopedInstall(ProcessBuoyancy, 0x6A8C00);
+    RH_ScopedInstall(ProcessHarvester, 0x6A9680);
+    RH_ScopedInstall(TankControl, 0x6AE850);
+    RH_ScopedInstall(DoSoftGroundResistance, 0x6A4AF0);
+    RH_ScopedInstall(ProcessCarWheelPair, 0x6A4EC0);
+    RH_ScopedInstall(PlaceOnRoadProperly, 0x6AF420);
+    RH_ScopedInstall(RcbanditCheck1CarWheels, 0x6B3F70);
+    RH_ScopedInstall(RcbanditCheckHitWheels, 0x6B45E0);
+    RH_ScopedInstall(FireTruckControl, 0x729B60);
+    RH_ScopedInstall(SetHeliOrientation, 0x6A2450);
+    RH_ScopedInstall(ClearHeliOrientation, 0x6A2460);
+
+    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6A2210); 
+    RH_ScopedInstall(IsComponentPresent_Reversed, 0x6A2250); 
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "enum", 0x6A2270, float (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "uint", 0x6A62C0, float (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "uint", 0x6A6350, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors)); 
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "uint", 0x6A6500, bool (CAutomobile::*)(uint32)); 
+    RH_ScopedInstall(IsOpenTopCar_Reversed, 0x6A2350); 
+    RH_ScopedInstall(IsRoomForPedToLeaveCar_Reversed, 0x6A3850); 
+    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B3E90); 
+    RH_ScopedInstall(GetHeightAboveRoad_Reversed, 0x6A62B0); 
+    RH_ScopedInstall(GetNumContactWheels_Reversed, 0x6A62A0); 
+    // Install("CAutomobile", "GetTowHitchPos, 0x6AF1D0, &CAutomobile::GetTowHitchPos);
+    RH_ScopedInstall(Save_Reversed, 0x5D47E0);
+    RH_ScopedInstall(Load_Reversed, 0x5D2980);
+    RH_ScopedInstall(ReduceHornCounter, 0x6A29A0);
+    RH_ScopedInstall(FixTyre, 0x6A3580);
+    RH_ScopedInstall(SetTaxiLight, 0x6A3740);
+    RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
 }
 
-CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy) {
+CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
+{
     plugin::CallMethod<0x6B0A90, CAutomobile*, int32, eVehicleCreatedBy, bool>(this, modelIndex, createdBy, setupSuspensionLines);
 }
 
-// 0x6B4410
-bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1) {
-    return SetTowLink_Reversed(targetVehicle, arg1);
-}
-
-bool CAutomobile::SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
-}
-
+// 0x6B1880
 void CAutomobile::ProcessControl()
 {
     uint32 extraHandlingFlags = 0;
@@ -76,7 +99,7 @@ void CAutomobile::ProcessControl()
     vehicleFlags.bRestingOnPhysical = false;
     m_vehicleAudio.Service();
     bool bExplodeImmediately = false;
-    if (IsPlane() || IsHeli()) {
+    if (IsSubPlane() || IsSubHeli()) {
         eCarMission carMission = m_autoPilot.m_nCarMission;
         if ((carMission == MISSION_CRASH_PLANE_AND_BURN
             || carMission == MISSION_CRASH_HELI_AND_BURN
@@ -141,7 +164,7 @@ void CAutomobile::ProcessControl()
         float forceLimitRadius = 0.003f;
         float torqueLimitRadius = 0.0009f;
         float movingSpeedLimit = 0.005f;
-        if (IsPlane()) {
+        if (IsSubPlane()) {
             if (m_fDamageIntensity > 0.0f && m_pDamageEntity && m_pDamageEntity->IsVehicle())
                 forceLimitRadius = 0.003f;
             else
@@ -335,7 +358,7 @@ void CAutomobile::ProcessControl()
             else {
                 m_wheelSkidmarkMuddy[i] = false;
                 m_wheelSkidmarkType[i] = g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB);
-                if (m_wheelSkidmarkType[i] == SKIDMARK_MUDDY)
+                if ((eSkidMarkType)m_wheelSkidmarkType[i] == eSkidMarkType::MUDDY)
                     m_wheelSkidmarkMuddy[i] = true;
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
             }
@@ -717,8 +740,8 @@ void CAutomobile::ProcessControl()
         && fabs(m_vecMoveSpeed.z) < 0.0045f)
     {
         if (m_fDamageIntensity <= 0.0f || m_pDamageEntity != FindPlayerPed(-1)) {
-            if ((!IsPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
-                (!IsHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
+            if ((!IsSubPlane() || static_cast<CPlane*>(this)->m_fAccelerationBreakStatus == 0.0f) &&
+                (!IsSubHeli() || static_cast<CHeli*>(this)->m_fAccelerationBreakStatus == 0.0f))
             {
                 if ((m_wMiscComponentAngle == 0.0f || m_wMiscComponentAngle == m_wMiscComponentAnglePrev)
                     && !physicalFlags.bSubmergedInWater)
@@ -804,6 +827,7 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
     return CVector();
 }
 
+// 0x6B4800
 bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
 {
     CColModel* colModel = CEntity::GetColModel();
@@ -944,7 +968,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             }
         }
 
-        if (IsHeli() || IsPlane() && m_vecMoveSpeed.SquaredMagnitude() < 0.1f)
+        if (IsSubHeli() || IsSubPlane() && m_vecMoveSpeed.SquaredMagnitude() < 0.1f)
             m_fBreakPedal = 1.0f;
         if (vehicleFlags.bRestingOnPhysical) 
             m_fBreakPedal = 0.5f;
@@ -1049,8 +1073,8 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         ProcessControlInputs(static_cast<uint8>(m_pDriver->m_nPedType));
 
     if (m_nStatus == STATUS_PLAYER) {
-        if (!IsHeli()) {
-            if ((m_nModelIndex == MODEL_VORTEX || !IsPlane())
+        if (!IsSubHeli()) {
+            if ((m_nModelIndex == MODEL_VORTEX || !IsSubPlane())
                 && m_nModelIndex != MODEL_SWATVAN
                 && m_nModelIndex != MODEL_RHINO)
                 DoDriveByShootings();
@@ -1059,7 +1083,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
 
     uint32 carLess3WheelCounter = CWorld::GetFocusedPlayerInfo().m_nCarLess3WheelCounter;
     m_vecCentreOfMass.z = m_pHandlingData->m_vecCentreOfMass.z;
-    if (carLess3WheelCounter > 500 && !IsHeli() && !IsPlane()) {
+    if (carLess3WheelCounter > 500 && !IsSubHeli() && !IsSubPlane()) {
         carLess3WheelCounter = std::min(carLess3WheelCounter - 500u, 1000u);
         float fCarLess3WheelCounter = static_cast<float>(carLess3WheelCounter) * 0.002f;
         const float boundMaxZ = colModel->m_boundBox.m_vecMax.z;
@@ -1075,13 +1099,13 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         }
     }
 
-    if (!pad || m_nNumContactWheels != 0 || IsHeli() || IsPlane()) {
+    if (!pad || m_nNumContactWheels != 0 || IsSubHeli() || IsSubPlane()) {
         DoSoftGroundResistance(extraHandlingFlags);
         return false;
     }
 
     float carWeightMult = 0.0007f;
-    if (IsMonsterTruck())
+    if (IsSubMonsterTruck())
         carWeightMult = 0.0025f;
     else
         carWeightMult *= CStats::GetFatAndMuscleModifier(STAT_MOD_DRIVING_SKILL);
@@ -1344,39 +1368,332 @@ void CAutomobile::ProcessSuspension()
     }
 }
 
-void CAutomobile::ProcessControl_Reversed()
+// 0x6A29C0
+void CAutomobile::ProcessControlCollisionCheck(bool applySpeed)
 {
-    return CAutomobile::ProcessControl();
+    plugin::CallMethod<0x6A29C0, CAutomobile*, bool>(this, applySpeed);
 }
 
-CVector CAutomobile::AddMovingCollisionSpeed_Reversed(CVector& point)
+// 0x6AD690
+void CAutomobile::ProcessControlInputs(uint8 playerNum)
 {
-    return CAutomobile::AddMovingCollisionSpeed(point);
+    plugin::CallMethod<0x6AD690, CAutomobile*, uint8>(this, playerNum);
 }
 
-bool CAutomobile::ProcessAI_Reversed(uint32& extraHandlingFlags)
+// 0x6A2210
+void CAutomobile::GetComponentWorldPosition(int32 componentId, CVector& posnOut)
 {
-    return CAutomobile::ProcessAI(extraHandlingFlags);
+    if (m_aCarNodes[componentId])
+        posnOut = RwFrameGetLTM(m_aCarNodes[componentId])->pos;
 }
 
-void CAutomobile::ResetSuspension_Reversed()
+// 0x6A2250
+bool CAutomobile::IsComponentPresent(int32 componentId)
 {
-    return CAutomobile::ResetSuspension();
+    return m_aCarNodes[componentId] != 0;
 }
 
-void CAutomobile::ProcessFlyingCarStuff_Reversed()
+// 0x6A6AE0
+void CAutomobile::OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound)
 {
-    return CAutomobile::ProcessFlyingCarStuff();
+    plugin::CallMethod<0x6A6AE0, CAutomobile*, CPed*, int32, eDoors, float, bool>(this, ped, componentId, door, doorOpenRatio, playSound);
 }
 
-void CAutomobile::DoHoverSuspensionRatios_Reversed()
+// 0x6A2270
+float CAutomobile::GetDooorAngleOpenRatio(eDoors door)
 {
-    return CAutomobile::DoHoverSuspensionRatios();
+    const auto doorId = (int32)door;
+    return m_doors[doorId].GetAngleOpenRatio();
 }
 
-void CAutomobile::ProcessSuspension_Reversed()
+// 0x6A62C0
+float CAutomobile::GetDooorAngleOpenRatio(uint32 door)
 {
-    return CAutomobile::ProcessSuspension();
+    switch (door) {
+    case 8:
+        return GetDooorAngleOpenRatio(DOOR_RIGHT_FRONT);
+    case 9:
+        return GetDooorAngleOpenRatio(DOOR_RIGHT_REAR);
+    case 10:
+        return GetDooorAngleOpenRatio(DOOR_LEFT_FRONT);
+    case 11:
+        return GetDooorAngleOpenRatio(DOOR_LEFT_REAR);
+    case 18:
+        return 0.0f;
+    default:
+        return 0.0f;
+    }
+}
+
+// 0x6A2290
+bool CAutomobile::IsDoorReady(eDoors door)
+{
+    if (m_doors[door].IsClosed())
+        return true;
+
+    if (IsDoorMissing(door))
+        return true;
+
+    return false;
+}
+
+// 0x6A6350
+bool CAutomobile::IsDoorReady(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorReady(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorReady(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorReady(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorReady(DOOR_LEFT_REAR);
+    case 18:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// 0x6A22D0
+bool CAutomobile::IsDoorFullyOpen(eDoors door)
+{
+    if (m_doors[door].IsFullyOpen())
+        return true;
+
+    if (IsDoorMissing(door))
+        return true;
+
+    return false;
+}
+
+// 0x6A63E0
+bool CAutomobile::IsDoorFullyOpen(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorFullyOpen(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorFullyOpen(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorFullyOpen(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorFullyOpen(DOOR_LEFT_REAR);
+    case 18:
+        return false;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2310
+bool CAutomobile::IsDoorClosed(eDoors door)
+{
+    return m_doors[door].IsClosed();
+}
+
+// 0x6A6470
+bool CAutomobile::IsDoorClosed(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorClosed(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorClosed(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorClosed(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorClosed(DOOR_LEFT_REAR);
+    case 18:
+        return false;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2330
+bool CAutomobile::IsDoorMissing(eDoors door)
+{
+    return m_damageManager.GetDoorStatus(door) == 4;
+}
+
+// 0x6A6500
+bool CAutomobile::IsDoorMissing(uint32 door)
+{
+    switch (door) {
+    case 8:
+        return IsDoorMissing(DOOR_RIGHT_FRONT);
+    case 9:
+        return IsDoorMissing(DOOR_RIGHT_REAR);
+    case 10:
+        return IsDoorMissing(DOOR_LEFT_FRONT);
+    case 11:
+        return IsDoorMissing(DOOR_LEFT_REAR);
+    case 18:
+        return true;
+    default:
+        return false;
+    }
+}
+
+// 0x6A2350
+bool CAutomobile::IsOpenTopCar()
+{
+    return m_nModelIndex == MODEL_COMET && m_anExtras[0] && m_anExtras[1]
+        || m_nModelIndex == MODEL_STALLION && m_anExtras[0] && m_anExtras[1];
+}
+
+// 0x6A3030
+void CAutomobile::RemoveRefsToVehicle(CEntity* entity)
+{
+    plugin::CallMethod<0x6A3030, CAutomobile*, CEntity*>(this, entity);
+}
+
+// todo: uint8 bHideExplosion -> bool
+// 0x6B3780
+void CAutomobile::BlowUpCar(CEntity* damager, uint8 bHideExplosion)
+{
+    plugin::CallMethod<0x6B3780, CAutomobile*, CEntity*, uint8>(this, damager, bHideExplosion);
+}
+
+// 0x6B3BB0
+void CAutomobile::BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound)
+{
+    plugin::CallMethod<0x6B3BB0, CAutomobile*, bool, bool, bool, bool>(this, bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound);
+}
+
+// 0x6A3060
+bool CAutomobile::SetUpWheelColModel(CColModel* wheelCol)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A3060, CAutomobile*, CColModel*>(this, wheelCol);
+}
+
+// 0x6A32B0
+bool CAutomobile::BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A32B0, CAutomobile*, uint8, bool>(this, tyreComponentId, bPhysicalEffect);
+}
+
+// 0x6A3850
+bool CAutomobile::IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1)
+{
+    return true;
+}
+
+// 0x6A65D0
+void CAutomobile::SetupSuspensionLines()
+{
+    plugin::CallMethod<0x6A65D0, CAutomobile*>(this);
+}
+
+// 0x6A3440
+void CAutomobile::Fix()
+{
+    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
+}
+
+// 0x6B3E90
+void CAutomobile::SetupDamageAfterLoad()
+{
+    if (m_aCarNodes[CAR_BUMP_FRONT]) SetBumperDamage(FRONT_BUMPER, false);
+    if (m_aCarNodes[CAR_BUMP_REAR])  SetBumperDamage(REAR_BUMPER, false);
+
+    if (m_aCarNodes[CAR_BONNET])  SetDoorDamage(DOOR_BONNET, false);
+    if (m_aCarNodes[CAR_BOOT])    SetDoorDamage(DOOR_BOOT, false);
+    if (m_aCarNodes[CAR_DOOR_LF]) SetDoorDamage(DOOR_LEFT_FRONT, false);
+    if (m_aCarNodes[CAR_DOOR_RF]) SetDoorDamage(DOOR_RIGHT_FRONT, false);
+    if (m_aCarNodes[CAR_DOOR_LR]) SetDoorDamage(DOOR_LEFT_REAR, false);
+    if (m_aCarNodes[CAR_DOOR_RR]) SetDoorDamage(DOOR_RIGHT_REAR, false);
+
+    if (m_aCarNodes[CAR_WING_LF]) SetPanelDamage(FRONT_LEFT_PANEL, false);
+    if (m_aCarNodes[CAR_WING_RF]) SetPanelDamage(FRONT_RIGHT_PANEL, false);
+}
+
+// 0x6A47F0
+void CAutomobile::DoBurstAndSoftGroundRatios()
+{
+    plugin::CallMethod<0x6A47F0, CAutomobile*>(this);
+}
+
+// 0x6A3770
+void CAutomobile::PlayCarHorn()
+{
+    plugin::CallMethod<0x6A3770, CAutomobile*>(this);
+}
+
+// 0x6A62B0
+float CAutomobile::GetHeightAboveRoad()
+{
+    return m_fFrontHeightAboveRoad;
+}
+
+// 0x6A62A0
+int32 CAutomobile::GetNumContactWheels()
+{
+    return m_nNumContactWheels;
+}
+
+// 0x6A7650
+void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
+{
+    plugin::CallMethod<0x6A7650, CAutomobile*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+}
+
+//0x6AF1D0
+bool CAutomobile::GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6AF1D0, CAutomobile*, CVector&, bool, CVehicle*>(this, posnOut, bCheckModelInfo, veh);
+
+    if (!bCheckModelInfo)
+        return false;
+
+    posnOut.x = 0.0f;
+    posnOut.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y - 0.5f;
+    posnOut.z = 0.5f - this->m_fFrontHeightAboveRoad;
+    // todo: MultiplyMatrixWithVector(&posnOut, m_matrix, posnOut);
+
+    return true;
+}
+
+// 0x6AF250
+bool CAutomobile::GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6AF250, CAutomobile*, CVector&, bool, CVehicle*>(this, posnOut, bCheckModelInfo, veh);
+}
+
+// 0x6B4410
+bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1)
+{
+    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
+}
+
+// 0x6A4400
+bool CAutomobile::BreakTowLink()
+{
+    return plugin::CallMethodAndReturn<bool, 0x6A4400, CAutomobile*>(this);
+}
+
+// 0x6A6090
+float CAutomobile::FindWheelWidth(bool bRear)
+{
+    return plugin::CallMethodAndReturn<float, 0x6A6090, CAutomobile*>(this);
+}
+
+// 0x5D47E0
+bool CAutomobile::Save()
+{
+  CVehicle::Save();
+  CGenericGameStorage::SaveDataToWorkBuffer(&m_damageManager, sizeof(m_damageManager));
+  return true;
+}
+
+// 0x5D2980
+bool CAutomobile::Load()
+{
+  CVehicle::Load();
+  CGenericGameStorage::LoadDataFromWorkBuffer(&m_damageManager, sizeof(m_damageManager));
+  return true;
 }
 
 void CAutomobile::SetupModelNodes()
@@ -1646,6 +1963,7 @@ void CAutomobile::HydraulicControl()
 
 const int16 DEFAULT_COLLISION_EXTENDLIMIT = 2500;
 
+// 0x6A1460
 bool CAutomobile::UpdateMovingCollision(float angle)
 {
     if (ModelIndices::HasMiscComponent(m_nModelIndex))
@@ -1700,7 +2018,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
             if (carNodeMisc)
                 rotMatrix.SetRotateX(m_wMiscComponentAngle * DOZER_COL_ANGLE_MULT);
         }
-        else if (ModelIndices::IsDumper(m_nModelIndex) && IsMonsterTruck()) {
+        else if (ModelIndices::IsDumper(m_nModelIndex) && IsSubMonsterTruck()) {
             carNodeMisc = m_aCarNodes[CAR_MISC_C];
             if (carNodeMisc)
                 rotMatrix.SetRotateX(m_wMiscComponentAngle * CMonsterTruck::DUMPER_COL_ANGLEMULT);
@@ -1847,16 +2165,18 @@ void CAutomobile::SetTotalDamage(bool arg0)
     ((void(__thiscall*)(CAutomobile*, bool))0x6A27F0)(this, arg0);
 }
 
+// unused?
 // 0x6A2980
 RpMaterial* DisableMatFx(RpMaterial* material, void* data)
 {
-    return ((RpMaterial * (__cdecl*)(RpMaterial*, void*))0x6A2980)(material, data);
+  RpMatFXMaterialSetEffects(material, rpMATFXEFFECTNULL);
+  return material;
 }
 
 // 0x6A29A0
 void CAutomobile::ReduceHornCounter()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A29A0)(this);
+    if (m_nHornCounter) m_nHornCounter--;
 }
 
 // 0x6A2F00
@@ -1884,9 +2204,9 @@ void CAutomobile::DebugCode()
 }
 
 // 0x6A3580
-void CAutomobile::FixTyre(eWheelStatus wheel)
+void CAutomobile::FixTyre(eWheels wheel)
 {
-    ((void(__thiscall*)(CAutomobile*, eWheelStatus))0x6A3580)(this, wheel);
+    m_damageManager.SetWheelStatus(wheel, WHEEL_STATUS_OK);
 }
 
 // 0x6A35A0
@@ -1904,13 +2224,13 @@ void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel)
 // 0x6A3740
 void CAutomobile::SetTaxiLight(bool enable)
 {
-    ((void(__thiscall*)(CAutomobile*, bool))0x6A3740)(this, enable);
+    npcFlags.bTaxiLightOn = enable;
 }
 
 // 0x6A3760
-void CAutomobile::SetAllTaxiLights(bool arg0)
+void CAutomobile::SetAllTaxiLights(bool enable)
 {
-    ((void(__cdecl*)(bool))0x6A3760)(arg0);
+    m_sAllTaxiLights = enable;
 }
 
 // 0x6A3820
@@ -1937,11 +2257,9 @@ void CAutomobile::BoostJumpControl()
     ((void(__thiscall*)(CAutomobile*))0x6A3A60)(this);
 }
 
+// 0x6A3BD0
 void CAutomobile::DoNitroEffect(float power)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    ((void(__thiscall*)(CAutomobile*, float))0x6A3BD0)(this, power);
-#else
     auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     CVector exhaustPosition = modelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
     bool firstExhaustSubmergedInWater = false;
@@ -2004,7 +2322,6 @@ void CAutomobile::DoNitroEffect(float power)
             }
         }
     }
-#endif
 }
 
 // 0x6A3E60
@@ -2075,7 +2392,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
     }
 }
 
-void CAutomobile::ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
+void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel, float steerAngle, CVector* contactSpeeds, CVector* contactPoints, float traction, float acceleration, float brake, bool bFront)
 {
     bool driveWheels = false;
     if (bFront && gHandlingDataMgr.HasFrontWheelDrive(m_pHandlingData->m_nVehicleId))
@@ -2110,7 +2427,6 @@ void CAutomobile::ProcessCarWheelPair(int32 leftWheel, int32 rightWheel, float s
     {
         CVector wheelFwd;
         CVector wheelRight;
-        CVector tmp;
 
         float sinSteerAngle = 0.0f;
         float cosSteerAngle = 0.0f;
@@ -2357,7 +2673,7 @@ void CAutomobile::ProcessBuoyancy()
         return; // The loop above is pretty much an overcomplicated NOP.
     }
 
-    if (IsPlane() && m_vecMoveSpeed.z < -1.0F) {
+    if (IsSubPlane() && m_vecMoveSpeed.z < -1.0F) {
         BlowUpCar(this, false);
     }
 
@@ -2455,27 +2771,27 @@ void CAutomobile::ProcessBuoyancy()
     }
 }
 
-inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
+inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
 {
-    if (!pPed)
+    if (!ped)
         return;
 
-    pPed->physicalFlags.bTouchingWater = true;
-    if (!pPed->IsPlayer() && npcFlags.bIgnoreWater)
+    ped->physicalFlags.bTouchingWater = true;
+    if (!ped->IsPlayer() && npcFlags.bIgnoreWater)
         return;
 
-    if (!IsSubclassQuad() || IsAnyWheelMakingContactWithGround()) {
-        if (pPed->IsPlayer())
-            static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+    if (!IsSubQuad() || IsAnyWheelMakingContactWithGround()) {
+        if (ped->IsPlayer())
+            static_cast<CPlayerPed*>(ped)->HandlePlayerBreath(true, 1.0F);
         else {
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
             auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
-            if (damageEvent.AffectsPed(pPed))
-                pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
+            if (damageEvent.AffectsPed(ped))
+                pedDamageResponseCalc.ComputeDamageResponse(ped, &damageEvent.m_damageResponse, true);
             else
                 damageEvent.m_damageResponse.m_bDamageCalculated = true;
 
-            pPed->GetEventGroup().Add(&damageEvent, false);
+            ped->GetEventGroup().Add(&damageEvent, false);
         }
     }
     else {
@@ -2486,10 +2802,10 @@ inline void CAutomobile::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
         auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &vecCollisionImpact, fDamageIntensity,
             0.0F, eKnockOffType::KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, false, false);
 
-        pPed->GetEventGroup().Add(&knockOffBikeEvent, false);
+        ped->GetEventGroup().Add(&knockOffBikeEvent, false);
 
-        if (pPed->IsPlayer())
-            static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+        if (ped->IsPlayer())
+            static_cast<CPlayerPed*>(ped)->HandlePlayerBreath(true, 1.0F);
 
         if (bIsDriver)
             vehicleFlags.bEngineOn = false;
@@ -2795,9 +3111,9 @@ void CAutomobile::BlowUpCarsInPath()
 // 0x6AF420
 void CAutomobile::PlaceOnRoadProperly()
 {
-    auto pColModel = CEntity::GetColModel();
-    auto fStartY = pColModel->m_pColData->m_pLines[0].m_vecStart.y;
-    auto fEndY = -pColModel->m_pColData->m_pLines[3].m_vecStart.y;
+    auto cm = CEntity::GetColModel();
+    auto fStartY = cm->m_pColData->m_pLines[0].m_vecStart.y;
+    auto fEndY = -cm->m_pColData->m_pLines[3].m_vecStart.y;
 
     const auto& vecPos = GetPosition();
 
@@ -2890,7 +3206,7 @@ void CAutomobile::PlaceOnRoadProperly()
     CVector vecNewPos = (vecFrontCheck * fEndY + vecRearCheck * fStartY) / fLength;
     SetPosn(vecNewPos);
 
-    if (IsPlane())
+    if (IsSubPlane())
         static_cast<CPlane*>(this)->m_planeCreationHeading = CGeneral::GetATanOfXY(GetForward().x, GetForward().y);
 }
 
@@ -2930,6 +3246,7 @@ void CAutomobile::SetDoorDamage(eDoors door, bool withoutVisualEffect)
     ((void(__thiscall*)(CAutomobile*, eDoors, bool))0x6B1600)(this, door, withoutVisualEffect);
 }
 
+// 0x6B3F70
 bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
 {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
@@ -2939,8 +3256,9 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrlist)
         next = node->m_next;
         CAutomobile* vehicle = (CAutomobile*)node->m_item;
         if (node->m_item != this && vehicle->IsAutomobile()) {
-            if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != CWorld::ms_nCurrentScanCode)
+            if (!ModelIndices::IsRCBandit(vehicle->m_nModelIndex) && vehicle->m_nScanCode != GetCurrentScanCode())
                 continue;
+
             CVector distance = GetPosition() - vehicle->GetPosition();
             if (distance.x < 10.0f && distance.y < 10.0f) {
                 auto modelInfo = CModelInfo::GetModelInfo(vehicle->m_nModelIndex)->AsVehicleModelInfoPtr();
@@ -2980,7 +3298,7 @@ bool CAutomobile::RcbanditCheckHitWheels()
     for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
         for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
             CRepeatSector* repeatSector = GetRepeatSector(sectorX, sectorY);
-            if (RcbanditCheck1CarWheels(repeatSector->m_lists[REPEATSECTOR_VEHICLES]))
+            if (RcbanditCheck1CarWheels(repeatSector->GetList(REPEATSECTOR_VEHICLES)))
                 break;
         }
     }
@@ -3105,15 +3423,6 @@ void CAutomobile::FireTruckControl(CFire* fire)
 bool CAutomobile::HasCarStoppedBecauseOfLight()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
-}
-
-// 0x6A3440
-void CAutomobile::Fix() {
-    Fix_Reversed();
-}
-
-void CAutomobile::Fix_Reversed() {
-    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
 }
 
 // 0x6A0750

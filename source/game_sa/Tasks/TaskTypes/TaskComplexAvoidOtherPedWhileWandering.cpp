@@ -3,8 +3,9 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 
 void CTaskComplexAvoidOtherPedWhileWandering::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskComplexAvoidOtherPedWhileWandering", "CTaskComplexAvoidOtherPedWhileWandering", 0x66A100, &CTaskComplexAvoidOtherPedWhileWandering::Constructor);
+    RH_ScopedClass(CTaskComplexAvoidOtherPedWhileWandering);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x66A100);
 }
 
 // 0x66A100

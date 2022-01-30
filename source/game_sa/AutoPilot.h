@@ -93,11 +93,12 @@ public:
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
-    void SetCarMission(eCarMission carMission)
-    {
+    void SetCarMission(eCarMission carMission) {
         if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN)
             m_nCarMission = carMission;
     }
+
+    void ModifySpeed(float target);
 };
 
 VALIDATE_SIZE(CAutoPilot, 0x98);

@@ -72,7 +72,7 @@ public:
     static void DisableEffectsLoading();
 
     void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
-    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float a5);
+    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* entity);
     void ReportGlassCollisionEvent(eAudioEvents, CVector&);
     void ReportWaterSplash(CVector posn, float volume);

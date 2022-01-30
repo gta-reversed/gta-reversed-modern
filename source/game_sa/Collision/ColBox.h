@@ -17,6 +17,22 @@ public:
     uint8        m_nBrightness;
 
 public:
+    CColBox() = default;
+    
+    CColBox(const CBox& box) :
+        CBox(box)
+    {
+    }
+
+    CColBox(const CBox& box, uint8 material, uint8 flags, uint8 lightning) :
+        CBox(box),
+        m_nMaterial(material),
+        m_nFlags(flags),
+        m_nLighting(lightning)
+    {
+
+    }
+
     void     Set(CVector const& sup, CVector const& inf, uint8 material, uint8 flags, uint8 lighting);
     CColBox& operator=(CColBox const& right);
 };

@@ -2,7 +2,10 @@
 
 void CDummy::InjectHooks()
 {
-    ReversibleHooks::Install("CDummy", "IsDummyPointerValid", 0x532730, &IsDummyPointerValid);
+    RH_ScopedClass(CDummy);
+    RH_ScopedCategory("Entity/Dummy");
+
+    RH_ScopedGlobalInstall(IsDummyPointerValid, 0x532730);
 }
 
 void* CDummy::operator new(unsigned size)

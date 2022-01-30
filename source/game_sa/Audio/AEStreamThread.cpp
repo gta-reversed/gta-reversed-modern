@@ -9,19 +9,21 @@ bool IsForeground() {
 }
 
 void CAEStreamThread::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAEStreamThread", "Initialise", 0x4F1680, &CAEStreamThread::Initialise);
-    Install("CAEStreamThread", "Start", 0x4F11F0, &CAEStreamThread::Start);
-    Install("CAEStreamThread", "Pause", 0x4F1200, &CAEStreamThread::Pause);
-    Install("CAEStreamThread", "Resume", 0x4F1210, &CAEStreamThread::Resume);
-    Install("CAEStreamThread", "WaitForExit", 0x4F1220, &CAEStreamThread::WaitForExit);
-    Install("CAEStreamThread", "PlayTrack", 0x4F1230, &CAEStreamThread::PlayTrack);
-    Install("CAEStreamThread", "GetTrackPlayTime", 0x4F1530, &CAEStreamThread::GetTrackPlayTime);
-    Install("CAEStreamThread", "GetTrackLengthMs", 0x4F1550, &CAEStreamThread::GetTrackLengthMs);
-    Install("CAEStreamThread", "GetActiveTrackID", 0x4F1560, &CAEStreamThread::GetActiveTrackID);
-    Install("CAEStreamThread", "GetPlayingTrackID", 0x4F1570, &CAEStreamThread::GetPlayingTrackID);
-    Install("CAEStreamThread", "StopTrack", 0x4F1580, &CAEStreamThread::StopTrack);
-    Install("CAEStreamThread", "MainLoop", 0x4F15C0, &CAEStreamThread::MainLoop);
+    RH_ScopedClass(CAEStreamThread);
+    RH_ScopedCategory("Audio");
+
+    // RH_ScopedInstall(Initialise, 0x4F1680);
+    RH_ScopedInstall(Start, 0x4F11F0);
+    RH_ScopedInstall(Pause, 0x4F1200);
+    RH_ScopedInstall(Resume, 0x4F1210);
+    RH_ScopedInstall(WaitForExit, 0x4F1220);
+    RH_ScopedInstall(PlayTrack, 0x4F1230);
+    RH_ScopedInstall(GetTrackPlayTime, 0x4F1530);
+    RH_ScopedInstall(GetTrackLengthMs, 0x4F1550);
+    RH_ScopedInstall(GetActiveTrackID, 0x4F1560);
+    RH_ScopedInstall(GetPlayingTrackID, 0x4F1570);
+    RH_ScopedInstall(StopTrack, 0x4F1580);
+    RH_ScopedInstall(MainLoop, 0x4F15C0);
 }
 
 // 0x4F11E0

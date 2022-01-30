@@ -7,10 +7,8 @@
 
 // 0x503250
 CAEWaveDecoder::CAEWaveDecoder(CAEDataStream* dataStream) : CAEStreamingDecoder(dataStream), m_bInitialized(false), _dataStreamCopy(dataStream) {
-
+    // NOP
 }
-
-CAEWaveDecoder::~CAEWaveDecoder() {}
 
 // 0x5032b0
 bool CAEWaveDecoder::Initialise() {
@@ -52,8 +50,8 @@ size_t CAEWaveDecoder::FillBuffer(void* dest, size_t size) {
     switch (channelCount) {
     case 1: {
         // Read half of it
-        size_t        readed = m_dataStream->FillBuffer(dest, size / 2);
-        int16* byteStream = reinterpret_cast<int16*>(dest);
+        size_t  readed = m_dataStream->FillBuffer(dest, size / 2);
+        int16*  byteStream = reinterpret_cast<int16*>(dest);
 
         // Duplicate channel data
         for (int32 i = static_cast<int32>(readed / sizeof(int16)) - 1; i >= 0; i--)
@@ -80,10 +78,8 @@ long CAEWaveDecoder::GetStreamLengthMs() {
     return -1;
 }
 
+// 0x503360
 long CAEWaveDecoder::GetStreamPlayTimeMs() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((long(__thiscall*)(CAEWaveDecoder*))0x503360)(this);
-#else
     if (m_bInitialized) {
         uint32 posByte = m_dataStream->GetCurrentPosition() - dataPosition;
         uint32 posSamples = posByte / blockAlign;
@@ -92,36 +88,25 @@ long CAEWaveDecoder::GetStreamPlayTimeMs() {
     }
 
     return -1;
-#endif
 }
 
+// 0x5033c0
 void CAEWaveDecoder::SetCursor(unsigned long pos) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    using SeekFunc = void(__thiscall*)(CAEWaveDecoder*, unsigned long);
-    ((SeekFunc)0x5033c0)(this, pos);
-#else
     if (m_bInitialized) {
         // The calculation is exactly in this order!
         uint32 posByte = pos * sampleRate / 1000 * blockAlign;
         m_dataStream->Seek(static_cast<long>(posByte + dataPosition), SEEK_SET);
     }
-#endif
 }
 
+// 0x503300
 int32 CAEWaveDecoder::GetSampleRate() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int32(__thiscall*)(CAEWaveDecoder*))0x503300)(this);
-#else
     return m_bInitialized ? static_cast<int32>(sampleRate) : -1;
-#endif
 }
 
+// 0x503280
 int32 CAEWaveDecoder::GetStreamID() {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return ((int32(__thiscall*)(CAEWaveDecoder*))0x503280)(this);
-#else
     return m_dataStream->m_nTrackId;
-#endif
 }
 
 CAEWaveDecoder* CAEWaveDecoder::Constructor(CAEDataStream* dataStream) {
@@ -134,15 +119,16 @@ void CAEWaveDecoder::Destructor() {
 }
 
 void CAEWaveDecoder::InjectHooks() {
-#ifndef USE_DEFAULT_FUNCTIONS
-    ReversibleHooks::Install("CAEWaveDecoder", "CAEWaveDecoder", 0x503250, &CAEWaveDecoder::Constructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "~CAEWaveDecoder", 0x503290, &CAEWaveDecoder::Destructor);
-    ReversibleHooks::Install("CAEWaveDecoder", "Initialise", 0x5032b0, &CAEWaveDecoder::Initialise);
-    ReversibleHooks::Install("CAEWaveDecoder", "FillBuffer", 0x502470, &CAEWaveDecoder::FillBuffer);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamLengthMs", 0x503310, &CAEWaveDecoder::GetStreamLengthMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamPlayTimeMs", 0x503360, &CAEWaveDecoder::GetStreamPlayTimeMs);
-    ReversibleHooks::Install("CAEWaveDecoder", "SetCursor", 0x5033c0, &CAEWaveDecoder::SetCursor);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetSampleRate", 0x503300, &CAEWaveDecoder::GetSampleRate);
-    ReversibleHooks::Install("CAEWaveDecoder", "GetStreamID", 0x503280, &CAEWaveDecoder::GetStreamID);
-#endif
+    RH_ScopedClass(CAEWaveDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
+    RH_ScopedInstall(Constructor, 0x503250);
+    RH_ScopedInstall(Destructor, 0x503290);
+    RH_ScopedInstall(Initialise, 0x5032b0);
+    RH_ScopedInstall(FillBuffer, 0x5032A0);
+    RH_ScopedInstall(GetStreamLengthMs, 0x503310);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x503360);
+    RH_ScopedInstall(SetCursor, 0x5033c0);
+    RH_ScopedInstall(GetSampleRate, 0x503300);
+    RH_ScopedInstall(GetStreamID, 0x503280);
 }

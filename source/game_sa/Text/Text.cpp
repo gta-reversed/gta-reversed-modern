@@ -40,25 +40,47 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     };
 
 void CText::InjectHooks() {
-    //    ReversibleHooks::Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    RH_ScopedClass(CText);
+    RH_ScopedCategory("Text");
 
-    ReversibleHooks::Install("CData", "Unload", 0x69F640, &CData::Unload);
-    //    ReversibleHooks::Install("CData", "Load", 0x69F5D0, &CData::Load);
 
-    ReversibleHooks::Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    //    ReversibleHooks::Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    ReversibleHooks::Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    ReversibleHooks::Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    RH_ScopedInstall(Constructor, 0x6A00F0);
+    RH_ScopedInstall(Destructor, 0x6A0140);
+    RH_ScopedInstall(Get, 0x6A0050);
+    RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
+    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
+    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
+    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(Load, 0x6A01A0);
+    RH_ScopedInstall(Unload, 0x69FF20);
 
-    ReversibleHooks::Install("CText", "CText", 0x6A00F0, &CText::Constructor);
-    ReversibleHooks::Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    ReversibleHooks::Install("CText", "Get", 0x6A0050, &CText::Get);
-    ReversibleHooks::Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    //    ReversibleHooks::Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    //    ReversibleHooks::Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    //    ReversibleHooks::Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    ReversibleHooks::Install("CText", "Load", 0x6A01A0, &CText::Load);
-    ReversibleHooks::Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    //
+    // TODO: These should be moved to their respective files...
+    //
+
+    {
+        RH_ScopedClass(CMissionTextOffsets);
+        //    RH_ScopedInstall(Load, 0x69F670);
+    }
+
+    {
+        RH_ScopedClass(CData);
+        RH_ScopedInstall(Unload, 0x69F640);
+        //    RH_ScopedInstall(Load, 0x69F5D0);
+
+
+    }
+
+    {
+        RH_ScopedClass(CKeyArray);
+
+        RH_ScopedCategory("Text");
+        RH_ScopedInstall(Unload, 0x69F510);
+
+        RH_ScopedInstall(BinarySearch, 0x69F570);
+        RH_ScopedInstall(Search, 0x6A0000);
+        //    RH_ScopedInstall(Load, 0x69F490);
+    }
 }
 
 // 0x6A00F0

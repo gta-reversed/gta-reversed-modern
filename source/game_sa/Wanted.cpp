@@ -13,21 +13,24 @@ bool& CWanted::bUseNewsHeliInAdditionToPolice = *(bool*)0xB7CB8C;
 
 void CWanted::InjectHooks()
 {
-    ReversibleHooks::Install("CWanted", "UpdateWantedLevel", 0x561C90, &CWanted::UpdateWantedLevel);
-    ReversibleHooks::Install("CWanted", "AreSwatRequired", 0x561F40, &CWanted::AreSwatRequired);
-    ReversibleHooks::Install("CWanted", "AreFbiRequired", 0x561F60, &CWanted::AreFbiRequired);
-    ReversibleHooks::Install("CWanted", "AreArmyRequired", 0x561F80, &CWanted::AreArmyRequired);
-    ReversibleHooks::Install("CWanted", "InitialiseStaticVariables", 0x561C70, &CWanted::InitialiseStaticVariables);
-    ReversibleHooks::Install("CWanted", "SetMaximumWantedLevel", 0x561E70, &CWanted::SetMaximumWantedLevel);
-    ReversibleHooks::Install("CWanted", "Initialise", 0x562390, &CWanted::Initialise);
-    ReversibleHooks::Install("CWanted", "ClearQdCrimes", 0x561FE0, &CWanted::ClearQdCrimes);
-    ReversibleHooks::Install("CWanted", "IsInPursuit", 0x562330, &CWanted::IsInPursuit);
-    ReversibleHooks::Install("CWanted", "SetWantedLevel", 0x562470, &CWanted::SetWantedLevel);
-    ReversibleHooks::Install("CWanted", "CheatWantedLevel", 0x562540, &CWanted::CheatWantedLevel);
-    ReversibleHooks::Install("CWanted", "SetWantedLevelNoDrop", 0x562570, &CWanted::SetWantedLevelNoDrop);
-    ReversibleHooks::Install("CWanted", "ClearWantedLevelAndGoOnParole", 0x5625A0, &CWanted::ClearWantedLevelAndGoOnParole);
-    ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_func", 0x562F60, static_cast<bool (*)(CCopPed*, uint8, CCopPed**, uint8&)>(CWanted::CanCopJoinPursuit));
-    // ReversibleHooks::Install("CWanted", "CanCopJoinPursuit_method", 0x562FB0, static_cast<bool (CWanted::*)(CCopPed*)>(&CWanted::CanCopJoinPursuit));
+    RH_ScopedClass(CWanted);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(UpdateWantedLevel, 0x561C90);
+    RH_ScopedInstall(AreSwatRequired, 0x561F40);
+    RH_ScopedInstall(AreFbiRequired, 0x561F60);
+    RH_ScopedInstall(AreArmyRequired, 0x561F80);
+    RH_ScopedInstall(InitialiseStaticVariables, 0x561C70);
+    RH_ScopedInstall(SetMaximumWantedLevel, 0x561E70);
+    RH_ScopedInstall(Initialise, 0x562390);
+    RH_ScopedInstall(ClearQdCrimes, 0x561FE0);
+    RH_ScopedInstall(IsInPursuit, 0x562330);
+    RH_ScopedInstall(SetWantedLevel, 0x562470);
+    RH_ScopedInstall(CheatWantedLevel, 0x562540);
+    RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
+    RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
+    RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
+    // RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
 }
 
 // 0x562390

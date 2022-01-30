@@ -2,7 +2,10 @@
 
 void CEntryInfoList::InjectHooks()
 {
-    ReversibleHooks::Install("CEntryInfoList", "Flush", 0x536E10, &CEntryInfoList::Flush);
+    RH_ScopedClass(CEntryInfoList);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Flush, 0x536E10);
 }
 
 void CEntryInfoList::Flush()

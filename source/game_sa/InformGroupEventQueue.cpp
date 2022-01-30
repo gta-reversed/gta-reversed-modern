@@ -1,10 +1,13 @@
 #include "StdInc.h"
 
 void CInformGroupEventQueue::InjectHooks() {
-    ReversibleHooks::Install("CInformGroupEventQueue", "Init", 0x4B2AD0, &CInformGroupEventQueue::Init);
-//    ReversibleHooks::Install("CInformGroupEventQueue", "Add", 0x4B7CD0, &CInformGroupEventQueue::Add);
-//    ReversibleHooks::Install("CInformGroupEventQueue", "Flush", 0x4AC410, &CInformGroupEventQueue::Flush);
-//    ReversibleHooks::Install("CInformGroupEventQueue", "Process", 0x4B2AE0, &CInformGroupEventQueue::Process);
+    RH_ScopedClass(CInformGroupEventQueue);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x4B2AD0);
+//    RH_ScopedInstall(Add, 0x4B7CD0);
+//    RH_ScopedInstall(Flush, 0x4AC410);
+//    RH_ScopedInstall(Process, 0x4B2AE0);
 }
 
 // 0x4B2AD0

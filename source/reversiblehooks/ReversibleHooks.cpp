@@ -1,92 +1,60 @@
 #include "StdInc.h"
+#include <unordered_set>
 
-static std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>> m_HooksMap;
+#include "ReversibleHooks.h"
+#include "ReversibleHook/Simple.h"
+#include "ReversibleHook/Virtual.h"
+#include "RootHookCategory.h"
 
-namespace ReversibleHooks{
+namespace ReversibleHooks {
 
-std::map<std::string, std::vector<std::shared_ptr<SReversibleHook>>>& GetAllHooks() {
-    return m_HooksMap;
-}
+RootHookCategory           s_RootCategory{};
 
-void UnHook(const std::string& className, const char* functionName)
-{
-    if (className.empty())
-        return;
+#ifndef NDEBUG
+// Not particularly memmory efficient, but it should be fine
+std::unordered_set<uint32> s_HookedAddresses{};  // Original GTA addresses to which we've installed hooks
+#endif
 
-    const auto& allHooks = GetAllHooks();
-    if (functionName) {
-        for (auto& classHooks : allHooks) {
-            if (classHooks.first == className) {
-                for (auto& hook : classHooks.second) {
-                    if (hook->m_bIsHooked && strcmp(hook->m_sFunctionName.c_str(), functionName) == 0) {
-                        hook->Switch();
-                        printf("UnHooked %s::%s\n", className.c_str(), functionName);
-                        return;
-                    }
-                }
-            }
-        }
-    } else {
-        for (auto& classHooks : allHooks) {
-            if (classHooks.first == className) {
-                for (auto& hook : classHooks.second) {
-                    if (hook->m_bIsHooked)
-                        hook->Switch();
-                }
-                printf("UnHooked class %s\n", className.c_str());
-                return;
-            }
-        }
-    }
+RootHookCategory& GetRootCategory() {
+    return s_RootCategory;
 }
 
 void CheckAll() {
-    for (auto& pair : m_HooksMap) {
-        for (auto& hook : pair.second) {
-            hook->Check();
-        }
-    }
+    s_RootCategory.ForEachItem([](auto& item) {
+        item->Check();
+    });
+}
+
+void OnInjectionBegin() {
+#ifndef NDEBUG 
+    s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
+#endif
+}
+
+void OnInjectionEnd() {
+#ifndef NDEBUG
+    // Hopefully these deallocates all memory
+    s_HookedAddresses.clear();
+    s_HookedAddresses = {};
+#endif
 }
 
 namespace detail {
-void HookInstall(const std::string& sIdentifier, const std::string& sFuncName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault)
-{
-    assert(!GetHook(sIdentifier, sFuncName));
+void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault) {
+    // Functions with the same name are asserted in `HookCategory::AddItem()`
+    assert(s_HookedAddresses.insert(installAddress).second); // If this asserts that means the address was hooked once already - Thats bad!
 
-    auto& usedVector = m_HooksMap[sIdentifier];
-    usedVector.emplace_back(std::make_shared<SSimpleReversibleHook>(sIdentifier, sFuncName, installAddress, addressToJumpTo, iJmpCodeSize));
-    if (bDisableByDefault)
-        usedVector.back()->Switch();
+    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize);
+    item->State(!bDisableByDefault);
+    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
-void HookInstallVirtual(const std::string& sIdentifier, const std::string& sFuncName, void* libVTableAddress, const std::vector<uint32>& vecAddressesToHook)
-{
-    assert(!GetHook(sIdentifier, sFuncName));
-    m_HooksMap[sIdentifier].emplace_back(std::make_shared<SVirtualReversibleHook>(sIdentifier, sFuncName, libVTableAddress, vecAddressesToHook));
-}
+void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook) {
+    // TODO: Duplicate hooked function detection - Currently VHooks aren't used AFAIK, so it's fine not to add them.
 
-void HookSwitch(std::shared_ptr<SReversibleHook> pHook)
-{
-    pHook->Switch();
-}
-
-bool IsFunctionHooked(const std::string& sIdentifier, const std::string& sFuncName)
-{
-    auto hook = GetHook(sIdentifier, sFuncName);
-    if (!hook)
-        return false;
-
-    return hook->m_bIsHooked;
-}
-
-std::shared_ptr<SReversibleHook> GetHook(const std::string& sIdentifier, const std::string& sFuncName)
-{
-    auto hooks = m_HooksMap.find(sIdentifier);
-    if (hooks != m_HooksMap.end())
-        for (auto& hook : hooks->second)
-            if (hook->m_sFunctionName == sFuncName)
-                return hook;
-    return nullptr;
+    auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), libVTableAddress, std::move(vecAddressesToHook));
+    //item->SetState(!bDisableByDefault);
+    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
 void VirtualCopy(void* dst, void* src, size_t nbytes) {
@@ -98,10 +66,3 @@ void VirtualCopy(void* dst, void* src, size_t nbytes) {
 
 }; // namespace detail
 }; // namespace ReversibleHooks
-
-SReversibleHook::SReversibleHook(std::string id, std::string name, eReversibleHookType type) :
-    m_sIdentifier(std::move(id)),
-    m_sFunctionName(std::move(name)),
-    m_eHookType(type)
-{
-}
