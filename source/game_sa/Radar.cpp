@@ -1248,6 +1248,8 @@ bool IsPointInsideRadar(const CVector2D& point)
 // 0x584D90
 void GetTextureCorners(int32 x, int32 y, CVector2D* corners)
 {
+    // Magic numbers probably come from `MAX_RADAR_WIDTH_TILES` and `MAX_RADAR_HEIGHT_TILES`
+
     corners[0].x = 500.0f * (x - 6);
     corners[0].y = 500.0f * (5 - y);
 
