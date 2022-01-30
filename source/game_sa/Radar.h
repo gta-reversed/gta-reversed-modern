@@ -145,6 +145,7 @@ struct airstrip_info {
 VALIDATE_SIZE(airstrip_info, 0x10);
 
 class CEntryExit;
+struct tRadarTrace;
 
 struct tRadarTrace {
     eBlipColour  m_nColour;
@@ -167,6 +168,11 @@ struct tRadarTrace {
     uint8 m_nBlipDisplayFlag : 2; // see eBlipDisplay
     uint8 m_nBlipType : 4;        // see eBlipType
     uint8 m_appearance : 2;       // See eBlipAppearance
+
+    auto HasSprite() const { return m_nBlipSprite != eRadarSprite::RADAR_SPRITE_NONE; }
+    auto GetStaticColour() const; // Color with the alpha set to 0xFF
+    auto GetWorldPos() const;
+    auto GetRadarAndScreenPos(float* radarPointDist) const;
 };
 
 VALIDATE_SIZE(tRadarTrace, 0x28);

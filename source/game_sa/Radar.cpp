@@ -159,7 +159,8 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(ShowRadarTrace, 0x583F40);
     RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
-    
+    RH_ScopedInstall(DrawCoordBlip, 0x586D60);
+        
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
     RH_ScopedGlobalInstall(IsPointInsideRadar, 0x584D40);
@@ -1598,7 +1599,64 @@ void CRadar::DrawMap()
 // 0x586D60
 void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite)
 {
-    ((void(__cdecl*)(int32, uint8))0x586D60)(blipIndex, isSprite);
+    if (CTheScripts::IsPlayerOnAMission()) {
+        return;
+    }
+
+    const auto& t = ms_RadarTrace[blipIndex];
+
+    if (!t.m_nBlipType == eBlipType::BLIP_CONTACT_POINT) {
+        return;
+    }
+
+    if (isSprite != t.HasSprite()) {
+        return; // If `isSprite` is set the blip should have no sprite, otherwise it should.
+    }
+
+    float realDist{};
+    const auto [radarPos, screenPos] = t.GetRadarAndScreenPos(&realDist);
+    
+    const auto zoomedDist = CTheScripts::RadarZoomValue ? 255.f : realDist;
+
+    if (isSprite) {
+        if (   t.HasSprite()
+            && (!t.m_bShortRange || zoomedDist <= 1.f || FrontEndMenuManager.drawRadarOrMap)
+            && HasThisBlipBeenRevealed(blipIndex)
+        ) {
+            DrawRadarSprite(t.m_nBlipSprite, screenPos.x, screenPos.y, 0xFF);
+        }
+    } else {
+        if (FrontEndMenuManager.drawRadarOrMap && !FrontEndMenuManager.field_45[2]) {
+            return;
+        }
+
+        const auto rgb = t.GetStaticColour();
+
+        // `color & 0xFF` is always going to be 0xFF as all HUD colors have 0xFF alpha. Also `m_bBlipFade` is never set.
+        const auto alpha = t.m_bBlipFade ? rgb & 0xFF : CalculateBlipAlpha(realDist);
+
+        const auto worldPos = t.GetWorldPos();
+        const auto playerCentre = FindPlayerCentreOfWorld_NoInteriorShift(0);
+        const auto GetHeight = [&] {
+            if (worldPos.z - 2.f <= playerCentre.z) {
+                return worldPos.z + 4.f >= playerCentre.z ? RADAR_TRACE_NORMAL : RADAR_TRACE_HIGH;
+            }
+            return RADAR_TRACE_LOW;
+        };
+
+        CRadar::ShowRadarTraceWithHeight(
+            screenPos.x,
+            screenPos.y,
+            t.m_nBlipSize,
+            (uint8)(rgb >> 24),
+            (uint8)(rgb >> 16),
+            (uint8)(rgb >> 8),
+            alpha,
+            GetHeight()
+        );
+
+        AddBlipToLegendList(1, blipIndex);
+    }
 }
 
 // 0x587000
@@ -1702,4 +1760,41 @@ int32 CRadar::FindTraceNotTrackingBlipIndex() {
         }
     }
     return -1;
+}
+
+auto tRadarTrace::GetStaticColour() const {
+    switch (m_appearance) {
+    case eBlipAppearance::BLIP_FLAG_FRIEND:
+        return CRadar::GetRadarTraceColour(m_nColour, m_bBright, false);
+    case eBlipAppearance::BLIP_FLAG_THREAT:
+        return HudColour.GetIntColour(HUD_COLOUR_BLUE);
+    case eBlipAppearance::BLIP_FLAH_UNK:
+        return HudColour.GetIntColour(HUD_COLOUR_RED);
+    }  
+}
+
+auto tRadarTrace::GetWorldPos() const {
+    if (m_pEntryExit) {
+        CVector pos{};
+        m_pEntryExit->GetPositionRelativeToOutsideWorld(pos);
+        return pos;
+    } else {
+        return m_vPosition;
+    }
+}
+
+auto tRadarTrace::GetRadarAndScreenPos(float* radarPointDist) const {
+    const auto world = GetWorldPos();
+
+    CVector2D radar;
+    CRadar::TransformRealWorldPointToRadarSpace(radar, world);
+
+    const auto dist = CRadar::LimitRadarPoint(radar); // Normalises vector `radar`
+    if (radarPointDist)
+        *radarPointDist = dist;
+
+    CVector2D screen;
+    CRadar::TransformRadarPointToScreenSpace(screen, radar);
+
+    return std::make_pair(radar, screen);
 }
