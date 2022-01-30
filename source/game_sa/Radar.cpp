@@ -158,6 +158,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(ChangeBlipBrightness, 0x583C70);
     RH_ScopedInstall(SetCoordBlipAppearance, 0x583E50);
     RH_ScopedInstall(ShowRadarTrace, 0x583F40);
+    RH_ScopedInstall(ShowRadarTraceWithHeight, 0x584070);
     
     RH_ScopedInstall(GetNewUniqueBlipIndex, 0x582820);
     RH_ScopedInstall(TransformRadarPointToRealWorldSpace, 0x5835A0);
@@ -985,7 +986,101 @@ void CRadar::ShowRadarTrace(float x, float y, uint32 size, uint8 red, uint8 gree
 // 0x584070
 void CRadar::ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, eRadarTraceHeight height)
 {
-    ((void(__cdecl*)(float, float, uint32, uint8, uint8, uint8, uint8, eRadarTraceHeight))0x584070)(x, y, size, red, green, blue, alpha, height);
+    switch (height) {
+    case eRadarTraceHeight::RADAR_TRACE_HIGH: {
+        CSprite2d::Draw2DPolygon(
+            x,
+            y + (size + 3.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y + (size + 3.f) * SCREEN_HEIGHT_UNIT,
+
+            x + (size + 3.f) * SCREEN_WIDTH_UNIT,
+            y - (size + 2.f) * SCREEN_HEIGHT_UNIT,
+
+            x - (size + 3.f) * SCREEN_WIDTH_UNIT,
+            y - (size + 2.f) * SCREEN_HEIGHT_UNIT,
+
+            {0, 0, 0, alpha}
+        );
+
+        CSprite2d::Draw2DPolygon(
+            x,
+            y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x + (size + 1.f) * SCREEN_WIDTH_UNIT,
+            y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x - (size + 1.f) * SCREEN_WIDTH_UNIT,
+            y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            { red, green, blue, alpha }
+        );
+
+        break;
+    }
+    case eRadarTraceHeight::RADAR_TRACE_NORMAL: {
+        CSprite2d::DrawRect(
+            {
+                x - (size + 1.f) * SCREEN_WIDTH_UNIT,
+                y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+                x + (size + 1.f) * SCREEN_WIDTH_UNIT,
+                y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+            },
+            {0, 0, 0, alpha}
+        );
+
+        CSprite2d::DrawRect(
+            {
+                x - (size + 1.f) * SCREEN_WIDTH_UNIT,
+                y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+                x + (size + 1.f) * SCREEN_WIDTH_UNIT,
+                y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+            },
+            { red, green, blue, alpha }
+        );
+        break;
+    }
+    case eRadarTraceHeight::RADAR_TRACE_LOW: {
+        CSprite2d::Draw2DPolygon(
+            x + (size + 3.f) * SCREEN_WIDTH_UNIT,
+            y + (size + 2.f) * SCREEN_HEIGHT_UNIT,
+
+            x - (size + 3.f) * SCREEN_WIDTH_UNIT,
+            y + (size + 2.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y - (size + 3.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y - (size + 3.f) * SCREEN_HEIGHT_UNIT,
+
+            { 0, 0, 0, alpha }
+        );
+
+        CSprite2d::Draw2DPolygon(
+            x + (size + 1.f) * SCREEN_WIDTH_UNIT,
+            y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x - (size + 1.f) * SCREEN_WIDTH_UNIT,
+            y + (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            x,
+            y - (size + 1.f) * SCREEN_HEIGHT_UNIT,
+
+            { red, green, blue, alpha }
+        );
+        break;
+    }
+    }
 }
 
 // show debug line at this position
