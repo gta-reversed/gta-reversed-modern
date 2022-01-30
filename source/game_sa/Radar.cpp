@@ -9,6 +9,7 @@
 #include "Radar.h"
 #include "EntryExitManager.h"
 #include <extensions/enumerate.hpp>
+namespace rng = std::ranges;
 
 static inline float& cachedCos = *(float*)0xBA8308;
 static inline float& cachedSin = *(float*)0xBA830c;
@@ -270,18 +271,11 @@ void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
     if (blipId > -1) { // The blip is a sprite, so just draw it.
         RadarBlipSprites[blipId].Draw(
             {
-<<<<<<< HEAD
-                x,
-                y,
-                x + SCREEN_WIDTH_UNIT * 16.0f,
-                y + SCREEN_HEIGHT_UNIT * 16.0f
-=======
                 (float)x,
                 (float)y,
 
                 (float)x + SCREEN_WIDTH_UNIT * 16.0f,
                 (float)y + SCREEN_HEIGHT_UNIT * 16.0f
->>>>>>> fe12bad4 (Fix build errors and warnings)
             },
             { 255, 255, 255, 255 }
         );
@@ -1109,7 +1103,39 @@ int32 CRadar::ClipRadarPoly(CVector2D* out, const CVector2D* in)
 // 0x5853D0
 void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA&  color, bool inMenu)
 {
-    ((void(__cdecl*)(const CRect&, const CRGBA&, bool))0x5853D0)(rect, color, inMenu);
+    //if (!m_radarRect.IsRectInside(rect)) {
+    //    return;
+    //}
+
+    //// Corner positions - Not transformed
+    //const CVector2D rectCorners[]{
+    //    {rect.right, rect.top},     // Top right
+    //    {rect.right, rect.bottom},  // Bottom right
+
+    //    {rect.left,  rect.bottom},  // Bottom left
+    //    {rect.left,  rect.top}      // Top left
+    //};
+
+    //// Corner positions - Transformed, not yet clipped
+    //CVector2D polyUnclippedVertices[4];
+    //rng::transform(rectCorners, polyUnclippedVertices, [](auto&& v) {
+    //    CVector2D transformed;
+    //    TransformRealWorldPointToRadarSpace(transformed, v);
+    //    return transformed;
+    //});
+
+    //// Now clip all corners to be within the radar area
+    //CVector2D polyVertices[4];
+    //const auto nVerticesInsideRadar = ClipRadarPoly(polyVertices, polyUnclippedVertices);
+
+    //RwTexCoords texCoords[4];
+    //if (nVerticesInsideRadar) {
+    //    for (auto i = 0; i < nVerticesInsideRadar; i++) {
+
+    //    }
+    //}
+
+    plugin::Call<0x5853D0, CRect const&, CRGBA const&, bool>(rect, color, inMenu);
 }
 
 // 0x585700
