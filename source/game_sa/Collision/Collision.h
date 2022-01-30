@@ -21,7 +21,6 @@ public:
 
 public:
     static void InjectHooks();
-    static void Tests();
 
     static void Init();
     static void Shutdown();

@@ -73,7 +73,7 @@ public:
         x = rwvec.x; y = rwvec.y; z = rwvec.z;
     }
 
-    inline float SquaredMagnitude() const
+    inline float SquaredMagnitude()
     {
         return x*x + y*y + z*z;
     }
