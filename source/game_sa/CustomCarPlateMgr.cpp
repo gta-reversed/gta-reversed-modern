@@ -5,16 +5,30 @@ void CCustomCarPlateMgr::InjectHooks() {
     RH_ScopedClass(CCustomCarPlateMgr);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Initialise, 0x6FD500);
-    RH_ScopedInstall(GeneratePlateText, 0x6FD5B0);
-    RH_ScopedInstall(Shutdown, 0x6FD720);
-    RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0);
-    RH_ScopedInstall(LoadPlatecharsetDat, 0x6FDC00);
-    RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50);
-    RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0);
-    RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0);
-    RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020);
-    RH_ScopedInstall(SetupClump, 0x6FE0F0);
+
+    const bool allDisabled = false;
+
+    RH_ScopedInstall(Initialise, 0x6FD500, false);
+    RH_ScopedInstall(GeneratePlateText, 0x6FD5B0, false);
+    RH_ScopedInstall(Shutdown, 0x6FD720, false);
+    RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0, false);
+    //RH_ScopedInstall(LoadPlatecharsetDat, 0x6FDC00, allDisabled);
+    RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50, false);
+    RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0, false);
+
+    RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0, false);
+    RH_ScopedInstall(MaterialUpgradeSetCarplateTextureCB, 0x6FDF50, false);
+    RH_ScopedInstall(AtomicUpgradeSetCarplateTextureCB, 0x6FDFC0, false);
+
+    RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020, false);
+
+    // RH_ScopedInstall(GetCharacterPositionInCharSet, 0x6FD7C0, true); // Incompatible with original function (As it uses __usercall and passes the first arg in `al`)
+
+    RH_ScopedInstall(MaterialSetCarplateTextureCB, 0x6FE060, false);
+    RH_ScopedInstall(AtomicSetCarplateTextureCB, 0x6FE0D0, false);
+    RH_ScopedInstall(SetupClump, 0x6FE0F0, false);
+
+    RH_ScopedInstall(RenderLicenseplateTextToRaster, 0x6FDD70, false);
 }
 
 // 0x6FD500
@@ -94,190 +108,126 @@ auto ResolvePlateType(uint8 plateType) {
 
 // 0x6FDE50
 void CCustomCarPlateMgr::SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType) {
+    assert(material);
+
     RpMaterialSetTexture(material, pPlatebackTexTab[ResolvePlateType(plateType)]);
 }
 
-void CCustomCarPlateMgr::GetCharacterPositionInCharSet(char c, uint32& outColumn, uint32& outRow) {
+// 0x6FD7C0 - Can't be hooked - Calling conventions differ - So we're allowed to use `std::pair` :D
+// Returns <col, row> of character in the charset
+std::pair<uint32, uint32> GetCharacterPositionInCharSet(char c) {
     switch (c)
     {
     case '0':
-        outColumn = 2;
-        outRow = 6;
-        break;
+        return { 2, 6 };
     case '1':
-        outColumn = 3;
-        outRow = 6;
-        break;
+        return { 3, 6 };
     case '2':
-        outColumn = 0;
-        outRow = 7;
-        break;
+        return { 0, 7 };
     case '3':
-        outColumn = 1;
-        outRow = 7;
-        break;
+        return { 1, 7 };
     case '4':
-        outColumn = 2;
-        outRow = 7;
-        break;
+        return { 2, 7 };
     case '5':
-        outColumn = 3;
-        outRow = 7;
-        break;
+        return { 3, 7 };
     case '6':
-        outColumn = 0;
-        outRow = 8;
-        break;
+        return { 0, 8 };
     case '7':
-        outColumn = 1;
-        outRow = 8;
-        break;
+        return { 1, 8 };
     case '8':
-        outColumn = 2;
-        outRow = 8;
-        break;
+        return { 2, 8 };
     case '9':
-        outColumn = 3;
-        outRow = 8;
-        break;
+        return { 3, 8 };
     case 'A':
     case 'a':
-        outColumn = 0;
-        outRow = 0;
-        break;
+        return { 0, 0 };
     case 'B':
     case 'b':
-        outColumn = 1;
-        outRow = 0;
-        break;
+        return { 1, 0 };
     case 'C':
     case 'c':
-        outColumn = 2;
-        outRow = 0;
-        break;
+        return { 2, 0 };
     case 'D':
     case 'd':
-        outColumn = 3;
-        outRow = 0;
-        break;
+        return { 3, 0 };
     case 'E':
     case 'e':
-        outColumn = 0;
-        outRow = 1;
-        break;
+        return { 0, 1 };
     case 'F':
     case 'f':
-        outColumn = 1;
-        outRow = 1;
-        break;
+        return { 1, 1 };
     case 'G':
     case 'g':
-        outColumn = 2;
-        outRow = 1;
-        break;
+        return { 2, 1 };
     case 'H':
     case 'h':
-        outColumn = 3;
-        outRow = 1;
-        break;
+        return { 3, 1 };
     case 'I':
     case 'i':
-        outColumn = 0;
-        outRow = 2;
-        break;
+        return { 0, 2 };
     case 'J':
     case 'j':
-        outColumn = 1;
-        outRow = 2;
-        break;
+        return { 1, 2 };
     case 'K':
     case 'k':
-        outColumn = 2;
-        outRow = 2;
-        break;
+        return { 2, 2 };
     case 'L':
     case 'l':
-        outColumn = 3;
-        outRow = 2;
-        break;
+        return { 3, 2 };
     case 'M':
     case 'm':
-        outColumn = 0;
-        outRow = 3;
-        break;
+        return { 0, 3 };
     case 'N':
     case 'n':
-        outColumn = 1;
-        outRow = 3;
-        break;
+        return { 1, 3 };
     case 'O':
     case 'o':
-        outColumn = 2;
-        outRow = 3;
-        break;
+        return { 2, 3 };
     case 'P':
     case 'p':
-        outColumn = 3;
-        outRow = 3;
-        break;
+        return { 3, 3 };
     case 'Q':
     case 'q':
-        outColumn = 0;
-        outRow = 4;
-        break;
+        return { 0, 4 };
     case 'R':
     case 'r':
-        outColumn = 1;
-        outRow = 4;
-        break;
+        return { 1, 4 };
     case 'S':
     case 's':
-        outColumn = 2;
-        outRow = 4;
-        break;
+        return { 2, 4 };
     case 'T':
     case 't':
-        outColumn = 3;
-        outRow = 4;
-        break;
+        return { 3, 4 };
     case 'U':
     case 'u':
-        outColumn = 0;
-        outRow = 5;
-        break;
+        return { 0, 5 };
     case 'V':
     case 'v':
-        outColumn = 1;
-        outRow = 5;
-        break;
+        return { 1, 5 };
     case 'W':
     case 'w':
-        outColumn = 2;
-        outRow = 5;
-        break;
+        return { 2, 5 };
     case 'X':
     case 'x':
-        outColumn = 3;
-        outRow = 5;
-        break;
+        return { 3, 5 };
     case 'Y':
     case 'y':
-        outColumn = 0;
-        outRow = 6;
-        break;
+        return { 0, 6 };
     case 'Z':
     case 'z':
-        outColumn = 1;
-        outRow = 6;
-        break;
+        return { 1, 6 };
     default:
-        outColumn = 0;
-        outRow = 9;
-        break;
+        return { 0, 9 };
     }
 }
 
+// 0x6FDD70
+// FIX ME
 bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRaster * charsRaster, _IGNORED_ void* unusedPlaette, RwRaster * plateRaster) {
+    assert(text);
+    assert(charsRaster);
+    assert(plateRaster);
+
     const auto lockedPlateRaster = RwRasterLock(plateRaster, 0, rwRASTERLOCKNOFETCH | rwRASTERLOCKWRITE);
     if (!lockedPlateRaster)
         return false;
@@ -294,29 +244,45 @@ bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRast
         return false;
 
     // Copy each character from charset raster to plate raster
-    auto plateRasterCharIter = lockedPlateRaster;
+    // Going from left to right
+
+    auto plateRasterCharIter = lockedPlateRaster; // Always points to the top left corner of each character
     for (auto letter = 0; letter < MAX_TEXT_LENGTH; letter++) {
-        uint32 charRow{1}, charCol{1};
-        GetCharacterPositionInCharSet(text[letter], charCol, charRow);
+        const auto [charCol, charRow] = GetCharacterPositionInCharSet(text[letter]);
 
         // Copy specific character from charset raster to plate raster
-        auto charRasterIt = &pCharsetLockedData[(CHARSET_COL_WIDTH * CHARSET_ROW_HEIGHT * charCol + CHARSET_CHAR_WIDTH * charRow) * 4 /*32bit format BGRA*/];
+
+        // Size of a pixel (texel) in `pCharsetLockedData`. It's in 32 bit BGRA format
+        constexpr auto texelSize = 4;
+
+        // Character's top left corner in charset raster
+        auto charRasterIt = &pCharsetLockedData[(CHARSET_COL_WIDTH * CHARSET_ROW_HEIGHT * charRow + CHARSET_CHAR_WIDTH * charCol) * texelSize];
+
+        // Character's top left corner in target (plate) raster
         auto plateRasterIt = plateRasterCharIter;
-        for (auto r = 0u; r < CHARSET_CHAR_HEIGHT; r++) { // Copy character row by row
-            memcpy(plateRasterIt, charRasterIt, CHARSET_CHAR_WIDTH * 4);
+
+        // Copy character row by row (going from top to bottom) to target (plate) raster
+        for (auto r = 0u; r < CHARSET_CHAR_HEIGHT; r++) {
+            memcpy(plateRasterIt, charRasterIt, CHARSET_CHAR_WIDTH * texelSize); // Copy row
+
+            // Advance to next row
             plateRasterIt += plateRasterStride;
             charRasterIt += charsRasterStride;
         }
 
-        plateRasterCharIter += CHARSET_ROW_HEIGHT * 4;
+        // Advance to next character's column
+        plateRasterCharIter += CHARSET_CHAR_WIDTH * texelSize;
     }
 
     RwRasterUnlock(plateRaster);
+
     return true;
 }
 
 // 0x6FDEA0
 RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8_t plateType) {
+    assert(text);
+
     const auto plateRaster = RwRasterCreate(64, 16, 32, 0x604); // TODO: Figure out flags
     if (!plateRaster)
         return nullptr;
@@ -340,27 +306,43 @@ RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8_t plat
     return nullptr;
 }
 
+// 0x6FDF50
 RpMaterial* CCustomCarPlateMgr::MaterialUpgradeSetCarplateTextureCB(RpMaterial* material, void* geometry) {
+    //printf("[Debug - Trace]: MaterialUpgradeSetCarplateTextureCB");
+
+    assert(material);
+    assert(geometry);
+
     if (const auto tex = RpMaterialGetTexture(material)) {
-        const std::string_view name{ RwTextureGetName(tex) };
-        if (name == "carplate") {
-            RpGeometryReplaceOldMaterialWithNewMaterial((RpGeometry*)geometry, material, CurrentLicensePlateMaterial);
-        } else if (name == "carpback") {
-            SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
+        if (const auto name{ RwTextureGetName(tex) }) { // Can this ever be null?
+            if (_stricmp(name, "careplate") == 0) {
+                RpGeometryReplaceOldMaterialWithNewMaterial((RpGeometry*)geometry, material, CurrentLicensePlateMaterial);
+            } else if (_stricmp(name, "carpback") == 0) {
+                SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
+            }
         }
     }
     return material;
 }
 
+// 0x6FDFC0
 RpAtomic* CCustomCarPlateMgr::AtomicUpgradeSetCarplateTextureCB(RpAtomic* atomic, _IGNORED_ void* data) {
+    printf("[Debug - Trace]: AtomicUpgradeSetCarplateTextureCB\n");
+    assert(atomic);
+
     RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), MaterialUpgradeSetCarplateTextureCB, RpAtomicGetGeometry(atomic));
     return atomic;
 }
 
 // 0x6FDFE0
 int8_t CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType) {
+    assert(plateMaterial); // NOTSA: Don't think this should happen?
+    assert(clump);
+
     if (!plateMaterial)
         return false;
+
+    printf("[Debug - Trace]: SetupClumpAfterVehicleUpgrade\n");
 
     CurrentLicensePlateType = plateType;
     CurrentLicensePlateMaterial = plateMaterial;
@@ -371,6 +353,9 @@ int8_t CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMater
 
 // 0x6FE020
 void CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, const char* plateText, uint8_t plateType) {
+    assert(material);
+    assert(plateText);
+
     if (material) {
         if (const auto plateTex = CreatePlateTexture(plateText, plateType)) {
             RpMaterialSetTexture(material, plateTex);
@@ -379,20 +364,29 @@ void CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, const c
     }
 }
 
+// 0x6FE060
 RpMaterial* CCustomCarPlateMgr::MaterialSetCarplateTextureCB(RpMaterial * material, void* plateText) {
+    assert(material);
+    assert(plateText);
+
     if (const auto tex = RpMaterialGetTexture(material)) {
-        const std::string_view name{ RwTextureGetName(tex) };
-        if (name == "careplate") {
-            CurrentLicensePlateMaterial = material;
-            SetupMaterialPlateTexture(material, (const char*)plateText, CurrentLicensePlateType);
-        } else if (name == "carpback") {
-            SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
+        if (const auto name{ RwTextureGetName(tex) }) { // Can this ever be null?
+            if (_stricmp(name, "carplate") == 0) {
+                CurrentLicensePlateMaterial = material;
+                SetupMaterialPlateTexture(material, (const char*)plateText, CurrentLicensePlateType);
+            } else if (_stricmp(name, "carpback") == 0) {
+                SetupMaterialPlatebackTexture(material, CurrentLicensePlateType);
+            }
         }
     }
     return material;
 }
 
+// 0x6FE0D0
 RpAtomic* CCustomCarPlateMgr::AtomicSetCarplateTextureCB(RpAtomic* atomic, void* plateText) {
+    assert(atomic);
+    assert(plateText);
+
     RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), MaterialSetCarplateTextureCB, plateText);
     return atomic;
 }
@@ -401,7 +395,7 @@ RpAtomic* CCustomCarPlateMgr::AtomicSetCarplateTextureCB(RpAtomic* atomic, void*
 RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8_t plateType) {
     CurrentLicensePlateType = plateType;
     CurrentLicensePlateMaterial = nullptr;
-    RpClumpForAllAtomics(clump, AtomicUpgradeSetCarplateTextureCB, plateText);
+    RpClumpForAllAtomics(clump, AtomicSetCarplateTextureCB, plateText);
     return CurrentLicensePlateMaterial;
 }
 

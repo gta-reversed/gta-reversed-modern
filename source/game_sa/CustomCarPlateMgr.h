@@ -26,11 +26,11 @@ private:
     static constexpr uint32 CHARSET_ROW_HEIGHT{ 16u };
     
     static inline RwTexture*& pCharsetTex = *(RwTexture**)0xC3EF5C;
-    static inline RpMaterial*& CurrentLicensePlateMaterial = *(RpMaterial**)0xC3EF5C;
-    static inline uint8& CurrentLicensePlateType = *(uint8*)0xC3EF5C;
+    static inline RpMaterial*& CurrentLicensePlateMaterial = *(RpMaterial**)0xC3EF7C;
+    static inline uint8& CurrentLicensePlateType = *(uint8*)0xC3EF80;
     static inline RwTexture* (&pPlatebackTexTab)[3] = *(RwTexture * (*)[3])0xC3EF60;
     static inline void* (&pPalette1555Tab)[3] = *(void*(*)[3])0xC3EF6C;
-    static inline RwUInt8*& pCharsetLockedData = *(RwUInt8**)0x6FD597;
+    static inline RwUInt8*& pCharsetLockedData = *(RwUInt8**)0xC3EF78; 
 public:
     static void InjectHooks();
 
@@ -46,8 +46,6 @@ public:
     static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8_t plateType);
 
 private:
-    static void GetCharacterPositionInCharSet(char c, uint32& outColumn, uint32& outRow);
-
     static bool RenderLicenseplateTextToRaster(const char* text, RwRaster* charsetRaster, void* palette, RwRaster* plateRaster);
     // 'data' is a pointer to RpGeometry
     static RpMaterial* MaterialUpgradeSetCarplateTextureCB(RpMaterial* material, void* data);
