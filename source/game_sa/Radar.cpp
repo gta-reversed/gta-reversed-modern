@@ -761,11 +761,9 @@ void CRadar::SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance)
 // 0x583EB0
 void CRadar::SetBlipFriendly(int32 blipIndex, bool friendly)
 {
-    auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
-        return;
-
-    ms_RadarTrace[index].m_bFriendly = friendly;
+    if (const auto idx = GetActualBlipArrayIndex(blipIndex); idx != -1) {
+        ms_RadarTrace[idx].m_bFriendly = friendly;
+    }
 }
 
 // 0x583F00
