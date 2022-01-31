@@ -271,7 +271,6 @@
 #include "game_sa\WeaponEffects.h"
 #include "game_sa\WeaponInfo.h"
 #include "game_sa\Weather.h"
-#include "game_sa\WindModifiers.h"
 #include "game_sa\World.h"
 #include "game_sa\Zone.h"
 #include "game_sa\ZoneInfo.h"

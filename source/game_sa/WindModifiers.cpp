@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WindModifiers.h"
+
 int32& CWindModifiers::Number = *(int32*)0xC81450;
 CWindModifier (&CWindModifiers::Array)[MAX_NUM_MODIFIERS] = *(CWindModifier(*)[MAX_NUM_MODIFIERS])0xC81458;
 
@@ -7,12 +9,27 @@ void CWindModifiers::InjectHooks() {
     RH_ScopedClass(CWindModifiers);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(FindWindModifier, 0x72C950);
     RH_ScopedInstall(RegisterOne, 0x72C8B0);
+    RH_ScopedInstall(FindWindModifier, 0x72C950);
 }
 
-bool CWindModifiers::FindWindModifier(CVector vecPos, float* pOutX, float* pOutY) {
-    if (!Number)
+// 0x72C8B0
+void CWindModifiers::RegisterOne(CVector vecPos, int32 iActive, float fPower) {
+    if (Number < MAX_NUM_MODIFIERS) {
+        if (DistanceBetweenPoints(vecPos, TheCamera.GetPosition()) < 200.0f) {
+            Array[Number] = {
+                .m_vecPos = vecPos,
+                .m_iActive = iActive,
+                .m_fPower = fPower
+            };
+            Number++;
+        }
+    }
+}
+
+// 0x72C950
+bool CWindModifiers::FindWindModifier(CVector vecPos, float* outX, float* outY) {
+    if (Number <= 0)
         return false;
 
     float posX{}, posY{};
@@ -47,21 +64,8 @@ bool CWindModifiers::FindWindModifier(CVector vecPos, float* pOutX, float* pOutY
         return false;
 
     const float rnd = 1.0f + (float)(rand() % 32 - 16) / 2000.f;
-    *pOutX += posX * rnd;
-    *pOutY += posY * rnd;
+    *outX += posX * rnd;
+    *outY += posY * rnd;
 
     return true;
-}
-
-void CWindModifiers::RegisterOne(CVector vecPos, int32 iActive, float fPower) {
-    if (Number < MAX_NUM_MODIFIERS) {
-        if (DistanceBetweenPoints(vecPos, TheCamera.GetPosition()) < 200.0f) {
-            Array[Number] = {
-                .m_vecPos = vecPos,
-                .m_iActive = iActive,
-                .m_fPower = fPower
-            };
-            Number++;
-        }
-    }
 }

@@ -16,6 +16,6 @@ public:
 public:
     static void InjectHooks();
 
-    static bool FindWindModifier(CVector vecPos, float* pOutX, float* pOutY);
     static void RegisterOne(CVector vecPos, int32 iActive, float fPower);
+    static bool FindWindModifier(CVector vecPos, float* outX, float* outY);
 };
