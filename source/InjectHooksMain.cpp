@@ -66,6 +66,7 @@
 #include "TagManager.h"
 #include "Clouds.h"
 #include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

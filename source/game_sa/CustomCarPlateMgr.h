@@ -37,13 +37,13 @@ public:
     static bool Initialise();
     static bool GeneratePlateText(char* buf, uint32 len);
     static void Shutdown();
-    static int8_t GetMapRegionPlateDesign();
-    static int8_t LoadPlatecharsetDat(char const* filename, uint8_t* data);
-    static void SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType);
-    static RwTexture* CreatePlateTexture(const char* text, uint8_t plateType);
-    static int8_t SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType);
-    static void SetupMaterialPlateTexture(RpMaterial* material, const char* plateText, uint8_t plateType);
-    static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8_t plateType);
+    static int8 GetMapRegionPlateDesign();
+    static int8 LoadPlatecharsetDat(char const* filename, uint8* data);
+    static void SetupMaterialPlatebackTexture(RpMaterial* material, uint8 plateType);
+    static RwTexture* CreatePlateTexture(const char* text, uint8 plateType);
+    static int8 SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8 plateType);
+    static void SetupMaterialPlateTexture(RpMaterial* material, const char* plateText, uint8 plateType);
+    static RpMaterial* SetupClump(RpClump* clump, char* plateText, uint8 plateType);
 
 private:
     static bool RenderLicenseplateTextToRaster(const char* text, RwRaster* charsetRaster, void* palette, RwRaster* plateRaster);

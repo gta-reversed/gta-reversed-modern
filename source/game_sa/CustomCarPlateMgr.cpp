@@ -1,32 +1,25 @@
 #include "StdInc.h"
-#include <format>
+
+#include "CustomCarPlateMgr.h"
 
 void CCustomCarPlateMgr::InjectHooks() {
     RH_ScopedClass(CCustomCarPlateMgr);
     RH_ScopedCategoryGlobal();
 
-
-
     RH_ScopedInstall(Initialise, 0x6FD500, false);
     RH_ScopedInstall(GeneratePlateText, 0x6FD5B0, false);
     RH_ScopedInstall(Shutdown, 0x6FD720, false);
     RH_ScopedInstall(GetMapRegionPlateDesign, 0x6FD7A0, false);
-    //RH_ScopedInstall(LoadPlatecharsetDat, 0x6FDC00, allDisabled);
     RH_ScopedInstall(SetupMaterialPlatebackTexture, 0x6FDE50, false);
     RH_ScopedInstall(CreatePlateTexture, 0x6FDEA0, false);
-
     RH_ScopedInstall(SetupClumpAfterVehicleUpgrade, 0x6FDFE0, false);
     RH_ScopedInstall(MaterialUpgradeSetCarplateTextureCB, 0x6FDF50, false);
     RH_ScopedInstall(AtomicUpgradeSetCarplateTextureCB, 0x6FDFC0, false);
-
     RH_ScopedInstall(SetupMaterialPlateTexture, 0x6FE020, false);
-
     // RH_ScopedInstall(GetCharacterPositionInCharSet, 0x6FD7C0, true); // Incompatible with original function (As it uses __usercall and passes the first arg in `al`)
-
     RH_ScopedInstall(MaterialSetCarplateTextureCB, 0x6FE060, false);
     RH_ScopedInstall(AtomicSetCarplateTextureCB, 0x6FE0D0, false);
     RH_ScopedInstall(SetupClump, 0x6FE0F0, false);
-
     RH_ScopedInstall(RenderLicenseplateTextToRaster, 0x6FDD70, false);
 }
 
@@ -48,7 +41,7 @@ bool CCustomCarPlateMgr::Initialise() {
 
     pCharsetTex = FindTXDAndSetFlags("platecharset", RwTextureFilterMode::rwFILTERNEAREST);
 
-    const char* texNames[] = {"plateback1", "plateback2", "plateback3"};
+    const char* texNames[] = { "plateback1", "plateback2", "plateback3" };
     for (uint32 i = 0; i < std::size(texNames); i++) {
         pPlatebackTexTab[i] = FindTXDAndSetFlags(texNames[i], RwTextureFilterMode::rwFILTERLINEAR);
     }
@@ -56,8 +49,7 @@ bool CCustomCarPlateMgr::Initialise() {
     CTxdStore::PopCurrentTxd();
 
     pCharsetLockedData = RwRasterLock(RwTextureGetRaster(pCharsetTex), 0, rwRASTERLOCKREAD);
-
-    return !!pCharsetLockedData;
+    return pCharsetLockedData != nullptr;
 }
 
 // 0x6FD720
@@ -81,8 +73,9 @@ void CCustomCarPlateMgr::Shutdown() {
         CTxdStore::RemoveTxd(slot);
 }
 
+// Returns texture index in pPlatebackTexTab. See texture names in ::Initialise.
 // 0x6FD7A0
-int8_t CCustomCarPlateMgr::GetMapRegionPlateDesign() {
+int8 CCustomCarPlateMgr::GetMapRegionPlateDesign() {
     switch (CWeather::WeatherRegion) {
     case eWeatherRegion::WEATHER_REGION_LA:
         return 2;
@@ -92,21 +85,25 @@ int8_t CCustomCarPlateMgr::GetMapRegionPlateDesign() {
     case eWeatherRegion::WEATHER_REGION_DEFAULT:
     case eWeatherRegion::WEATHER_REGION_SF:
         return 0;
+    default:
+        assert(false);
+        return -1;
     }
 }
 
 // 0x6FDC00
-// Unused
-int8_t CCustomCarPlateMgr::LoadPlatecharsetDat(char const* filename, uint8_t* data) {
-    return plugin::CallAndReturn<int8_t, 0x6FDC00, char const*, uint8_t*>(filename, data);
+// unused
+int8 CCustomCarPlateMgr::LoadPlatecharsetDat(const char* filename, uint8* data) {
+    return plugin::CallAndReturn<int8, 0x6FDC00, const char*, uint8*>(filename, data);
 }
 
 auto ResolvePlateType(uint8 plateType) {
+    // todo: Result of comparison of constant -1 with expression of type 'uint8' (aka 'unsigned char') is always false
     return plateType == -1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
 }
 
 // 0x6FDE50
-void CCustomCarPlateMgr::SetupMaterialPlatebackTexture(RpMaterial* material, uint8_t plateType) {
+void CCustomCarPlateMgr::SetupMaterialPlatebackTexture(RpMaterial* material, uint8 plateType) {
     assert(material);
 
     RpMaterialSetTexture(material, pPlatebackTexTab[ResolvePlateType(plateType)]);
@@ -222,7 +219,7 @@ std::pair<uint32, uint32> GetCharacterPositionInCharSet(char c) {
 
 // 0x6FDD70
 // FIX ME
-bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRaster * charsRaster, _IGNORED_ void* unusedPlaette, RwRaster * plateRaster) {
+bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRaster * charsRaster, _IGNORED_ void* palette, RwRaster* plateRaster) {
     assert(text);
     assert(charsRaster);
     assert(plateRaster);
@@ -279,7 +276,7 @@ bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRast
 }
 
 // 0x6FDEA0
-RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8_t plateType) {
+RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8 plateType) {
     assert(text);
 
     const auto plateRaster = RwRasterCreate(64, 16, 32, 0x604); // TODO: Figure out flags
@@ -334,7 +331,7 @@ RpAtomic* CCustomCarPlateMgr::AtomicUpgradeSetCarplateTextureCB(RpAtomic* atomic
 }
 
 // 0x6FDFE0
-int8_t CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8_t plateType) {
+int8 CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8 plateType) {
     assert(plateMaterial); // NOTSA: Don't think this should happen?
     assert(clump);
 
@@ -351,7 +348,7 @@ int8_t CCustomCarPlateMgr::SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMater
 }
 
 // 0x6FE020
-void CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, const char* plateText, uint8_t plateType) {
+void CCustomCarPlateMgr::SetupMaterialPlateTexture(RpMaterial* material, const char* plateText, uint8 plateType) {
     assert(material);
     assert(plateText);
 
@@ -391,7 +388,7 @@ RpAtomic* CCustomCarPlateMgr::AtomicSetCarplateTextureCB(RpAtomic* atomic, void*
 }
 
 // 0x6FE0F0
-RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8_t plateType) {
+RpMaterial* CCustomCarPlateMgr::SetupClump(RpClump* clump, char* plateText, uint8 plateType) {
     CurrentLicensePlateType = plateType;
     CurrentLicensePlateMaterial = nullptr;
     RpClumpForAllAtomics(clump, AtomicSetCarplateTextureCB, plateText);

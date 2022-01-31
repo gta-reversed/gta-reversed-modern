@@ -131,7 +131,6 @@
 #include "game_sa\Cranes.h"
 #include "game_sa\CrimeBeingQd.h"
 #include "game_sa\CustomCarEnvMapPipeline.h"
-#include "game_sa\CustomCarPlateMgr.h"
 #include "game_sa\CutsceneMgr.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
