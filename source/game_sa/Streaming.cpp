@@ -684,15 +684,33 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
 
 // 0x4090A0
 void CStreaming::DeleteAllRwObjects() {
+    //NOTSA: Helper function, to remove code duplication inside real logic
+    auto DeleteRwObjectsInList = [](CPtrListDoubleLink& list) {
+        for (CPtrNode *it = list.m_node, *next{}; it; it = next) {
+            next = it->GetNext();
+
+            CEntity* entity = reinterpret_cast<CEntity*>(it->m_item);\
+            if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
+                entity->DeleteRwObject();
+        }
+    };
+
+    //UNUSED: Was in original code, but isn't used anywhere later on
+    //auto& camPos = TheCamera.GetPosition();
+    //CWorld::GetSectorX(camPos.x);
+    //CWorld::GetSectorY(camPos.y);
+
     for (int32 sx = 0; sx < MAX_SECTORS_X; ++sx) {
         for (int32 sy = 0; sy < MAX_SECTORS_Y; ++sy) {
             CRepeatSector* repeatSector = GetRepeatSector(sx, sy);
             CSector* sector = GetSector(sx, sy);
-            DeleteRwObjectsInSectorList(sector->m_buildings);
-            DeleteRwObjectsInSectorList(repeatSector->GetList(REPEATSECTOR_OBJECTS));
-            DeleteRwObjectsInSectorList(sector->m_dummies);
+            DeleteRwObjectsInList(sector->m_buildings);
+            DeleteRwObjectsInList(repeatSector->GetList(REPEATSECTOR_OBJECTS));
+            DeleteRwObjectsInList(sector->m_dummies);
         }
     }
+
+    
 }
 
 // 0x409760
@@ -1938,7 +1956,7 @@ void CStreaming::PurgeRequestList() {
     auto info = ms_pEndRequestedList->GetPrev();
     while (info != ms_pStartRequestedList) {
         auto prev = info->GetPrev();
-        if (!info->DoKeepInMemory() && !info->IsPriorityRequest())
+        if (!info->IsRequiredToBeKept() && !info->IsPriorityRequest())
             RemoveModel(GetModelFromInfo(info));
         info = prev;
     }

@@ -468,7 +468,7 @@ void CVisibilityPlugins::RenderBoatAlphaAtomics() {
 }
 
 // 0x732B40
-void CVisibilityPlugins::RenderEntity(CEntity* entity, int32 unused, float distance) {
+void CVisibilityPlugins::RenderEntity(CEntity* entity, float distance) {
     if (!entity->m_pRwObject)
         return;
     

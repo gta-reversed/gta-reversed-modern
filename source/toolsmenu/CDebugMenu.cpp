@@ -21,7 +21,7 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
-#include "toolsmenu\HooksDebugModule.h"
+#include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 #include "toolsmenu\DebugModules\FXDebugModule.h"
 

@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "TheScripts.h"
+#include "UpsideDownCarCheck.h"
 
 bool& CTheScripts::DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
 tScriptParam* CTheScripts::ScriptParams = reinterpret_cast<tScriptParam*>(0xA43C78);

@@ -37,7 +37,7 @@ enum class eChannelState
     STARTED = 2,
 
     // Also called ERROR, but that's a `windgi.h` macro
-    ERR = 3, 
+    ERR = 3,
 };
 
 enum eResourceFirstID : uint32 {
@@ -147,8 +147,8 @@ struct tStreamingFileDesc {
     tStreamingFileDesc() = default;
 
     tStreamingFileDesc(const char* name, bool bNotPlayerImg) :
-        m_bNotPlayerImg(bNotPlayerImg),
-        m_StreamHandle(CdStreamOpen(name))
+          m_bNotPlayerImg(bNotPlayerImg),
+          m_StreamHandle(CdStreamOpen(name))
     {
         strncpy_s(m_szName, name, std::size(m_szName));
     }

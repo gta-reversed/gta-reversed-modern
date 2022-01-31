@@ -1,24 +1,8 @@
 #include "StdInc.h"
 
+#include "StuntJumpManager.h"
+
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
-
-// 0xA9A888
-CPool<CStuntJump>* CStuntJumpManager::mp_poolStuntJumps{};
-// 0xA9A88C
-CStuntJump* CStuntJumpManager::mp_Active = nullptr;
-// 0xA9A890
-bool CStuntJumpManager::m_bActive;
-// 0xA9A891
-bool CStuntJumpManager::m_bHitReward;
-// 0xA9A894
-uint32 CStuntJumpManager::m_iTimer;
-// 0xA9A898 int32
-eJumpState CStuntJumpManager::m_jumpState;
-// 0xA9A89C
-int32 CStuntJumpManager::m_iNumJumps;
-// 0xA9A8A0
-uint32 CStuntJumpManager::m_iNumCompleted;
-
 
 void CStuntJumpManager::InjectHooks() {
     RH_ScopedClass(CStuntJumpManager);

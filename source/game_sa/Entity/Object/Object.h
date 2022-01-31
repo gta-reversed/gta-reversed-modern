@@ -27,10 +27,11 @@ public:
     CObject();
     CObject(int32 modelId, bool bCreate);
     CObject(CDummyObject* pDummyObj);
-    ~CObject();
+    ~CObject() override;
+
     static void* operator new(uint32 size);
     static void* operator new(uint32 size, int32 iPoolRef);
-    static void  operator delete(void* pObj);
+    static void  operator delete(void* obj);
 
 public:
     CPtrNodeDoubleLink* m_pControlCodeList;
@@ -111,8 +112,8 @@ public:
     void  CreateRwObject() override;
     void  ProcessControl() override;
     void  Teleport(CVector destination, bool resetRotation) override;
-    void  SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void  SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) override;
     void  PreRender() override;
     void  Render() override;
     bool  SetupLighting() override;
@@ -124,8 +125,8 @@ private:
     void  CreateRwObject_Reversed();
     void  ProcessControl_Reversed();
     void  Teleport_Reversed(CVector destination, bool resetRotation);
-    void  SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
+    void  SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
     void  PreRender_Reversed();
     void  Render_Reversed();
     bool  SetupLighting_Reversed();

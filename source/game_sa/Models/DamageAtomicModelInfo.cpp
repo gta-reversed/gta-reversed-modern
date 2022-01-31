@@ -10,7 +10,7 @@ void CDamageAtomicModelInfo::InjectHooks()
     RH_ScopedInstall(Init_Reversed, 0x4C48B0);
     RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C55C0);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C49D0);
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)());
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4960, RwObject * (CDamageAtomicModelInfo::*)());
     RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
 
     RH_ScopedInstall(SetDamagedAtomic, 0x4C48D0);

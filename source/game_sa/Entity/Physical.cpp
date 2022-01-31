@@ -345,7 +345,7 @@ void CPhysical::ProcessCollision_Reversed()
         CMatrix oldEntityMatrix(*m_matrix);
         bool bProcessCollisionBeforeSettingTimeStep = false;
         bool bUnknown = false;
-        uint8 collisionSteps = SpecialEntityCalcCollisionSteps(&bProcessCollisionBeforeSettingTimeStep, &bUnknown);
+        uint8 collisionSteps = SpecialEntityCalcCollisionSteps(bProcessCollisionBeforeSettingTimeStep, bUnknown);
         float fStep = fOldTimeStep / collisionSteps;
         if (bProcessCollisionBeforeSettingTimeStep)
         {
@@ -2114,8 +2114,14 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                         }
                         else
                         {
-                            SpecialEntityPreCollisionStuff(entity, true, &bCollisionDisabled, &bCollidedEntityCollisionIgnored, 
-                                &bCollidedEntityUnableToMove, &bThisOrCollidedEntityStuck);
+                            SpecialEntityPreCollisionStuff(
+                                entity,
+                                true,
+                                bCollisionDisabled,
+                                bCollidedEntityCollisionIgnored,
+                                bCollidedEntityUnableToMove,
+                                bThisOrCollidedEntityStuck
+                            );
                         }
 
                         if (m_nType == ENTITY_TYPE_PED)
@@ -4128,7 +4134,14 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         }
                     }
                 } else {
-                    SpecialEntityPreCollisionStuff(entity, false, &bCollisionDisabled, &bCollidedEntityCollisionIgnored, &bCollidedEntityUnableToMove, &bThisOrCollidedEntityStuck);
+                    SpecialEntityPreCollisionStuff(
+                        entity->AsPhysical(),
+                        false,
+                        bCollisionDisabled,
+                        bCollidedEntityCollisionIgnored,
+                        bCollidedEntityUnableToMove,
+                        bThisOrCollidedEntityStuck
+                    );
                 }
 
                 if (!m_bUsesCollision || bCollidedEntityCollisionIgnored || bCollisionDisabled) {

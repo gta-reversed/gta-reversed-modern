@@ -49,7 +49,7 @@ void COctTree::ShutdownPool() {
 
 // 0x5A75B0
 bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    const uint16 poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
+    const auto poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
     ms_level++;
 
     m_nRedComponent += colorRed;
@@ -108,8 +108,8 @@ void COctTree::FillPalette(uint8* colors) {
 
         m_nLevel = ms_level++;
     } else {
-        for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
-            const int16 poolIndex = m_aChildrens[i];
+        for (auto i = std::size(m_aChildrens) - 1; i; --i) {
+            const auto poolIndex = m_aChildrens[i];
 
             if (poolIndex < 0)
                 continue;
@@ -159,7 +159,7 @@ void COctTree::ReduceTree() {
     uint32 currentLevel = 0;
     uint32 totalLevels = 0;
     static uint32 lastLevel;
-    for (uint32 i = std::size(m_aChildrens) - 1; i; --i) {
+    for (auto i = std::size(m_aChildrens) - 1; i; --i) {
         if (m_aChildrens[i] < 0)
             continue;
 
