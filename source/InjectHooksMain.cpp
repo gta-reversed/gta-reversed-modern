@@ -69,6 +69,7 @@
 #include "CustomCarPlateMgr.h"
 #include "WindModifiers.h"
 #include "PedPlacement.h"
+#include "UpsideDownCarCheck.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
