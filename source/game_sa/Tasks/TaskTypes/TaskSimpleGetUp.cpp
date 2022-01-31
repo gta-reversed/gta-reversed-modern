@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGetUp.h"
+#include "PedPlacement.h"
 
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 

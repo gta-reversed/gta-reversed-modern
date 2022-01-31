@@ -68,6 +68,7 @@
 #include "StuntJumpManager.h"
 #include "CustomCarPlateMgr.h"
 #include "WindModifiers.h"
+#include "PedPlacement.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -183,6 +184,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CPedPlacement::InjectHooks();
     CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
