@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CollisionData.h"
+
 void CCollisionData::InjectHooks()
 {
     RH_ScopedClass(CCollisionData);
@@ -15,6 +17,7 @@ void CCollisionData::InjectHooks()
     RH_ScopedInstall(GetLinkPtr, 0x40F6E0);
 }
 
+// 0x40F030
 CCollisionData::CCollisionData()
 {
     bUsesDisks = false;
@@ -37,8 +40,12 @@ CCollisionData::CCollisionData()
     m_nNumShadowVertices = 0;
     m_pShadowTriangles = nullptr;
     m_pShadowVertices = nullptr;
+    /*
+     * todo: initialize bHasFaceGroups, bHasShadow, m_pDisks as NOTSA or something
+     * */
 }
 
+// 0x40F070
 void CCollisionData::RemoveCollisionVolumes()
 {
     CMemoryMgr::Free(m_pSpheres);
@@ -64,6 +71,7 @@ void CCollisionData::RemoveCollisionVolumes()
     m_pShadowVertices = nullptr;
 }
 
+// 0x40F120
 void CCollisionData::Copy(CCollisionData const& src)
 {
 // ----- SPHERES -----
@@ -187,6 +195,7 @@ void CCollisionData::Copy(CCollisionData const& src)
 }
 
 // Memory layout: | CColTrianglePlane[] | (4 Byte aligned)CLink<CCollisionData*>* |
+// 0x40F590
 void CCollisionData::CalculateTrianglePlanes()
 {
     m_pTrianglePlanes = static_cast<CColTrianglePlane*>(CMemoryMgr::Malloc((m_nNumTriangles + 1) * sizeof(CColTrianglePlane)));
@@ -194,40 +203,45 @@ void CCollisionData::CalculateTrianglePlanes()
         m_pTrianglePlanes[i].Set(m_pVertices, m_pTriangles[i]);
 }
 
+// 0x40F6A0
 void CCollisionData::RemoveTrianglePlanes()
 {
     CMemoryMgr::Free(m_pTrianglePlanes);
     m_pTrianglePlanes = nullptr;
 }
 
+// 0x40F5E0
 void CCollisionData::GetTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pVertices[vertId]);
 }
 
+// 0x40F640
 void CCollisionData::GetShadTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pShadowVertices[vertId]);
 }
 
+// 0x40F6C0
 void CCollisionData::SetLinkPtr(CLink<CCollisionData*>* link)
 {
     // Original calculation method:
     // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
-    auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
+    auto* linkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);
-    auto* pAlignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), pLinkPtr, space);// 4 bytes aligned address
-    *static_cast<CLink<CCollisionData*>**>(pAlignedAddress) = link;
+    auto* alignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), linkPtr, space);// 4 bytes aligned address
+    *static_cast<CLink<CCollisionData*>**>(alignedAddress) = link;
 }
 
+// 0x40F6E0
 CLink<CCollisionData*>* CCollisionData::GetLinkPtr()
 {
     // Original calculation method:
     // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
-    auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
+    auto* linkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);
-    auto* pAlignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), pLinkPtr, space);// 4 bytes aligned address
-    return *static_cast<CLink<CCollisionData*>**>(pAlignedAddress);
+    auto* alignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), linkPtr, space);// 4 bytes aligned address
+    return *static_cast<CLink<CCollisionData*>**>(alignedAddress);
 }
