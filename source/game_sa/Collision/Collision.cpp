@@ -11,25 +11,44 @@
 
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
 int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
+uint32& CCollision::ms_collisionInMemory = *(uint32*)0x9655D4;
 
 void CCollision::InjectHooks()
 {
     RH_ScopedClass(CCollision);
     RH_ScopedCategory("Collision");
 
+    RH_ScopedInstall(Init, 0x416260);
+    // RH_ScopedInstall(Shutdown, 0x4162E0);
+    RH_ScopedInstall(Update, 0x411E20);
+    RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
+
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void(*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void(*)(CCollisionData*));
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
 }
 
+// 0x416260
+void CCollision::Init() {
+    ms_colModelCache.Init(50);
+    ms_collisionInMemory = 0;
+    CColStore::Initialise();
+}
+
+// 0x4162E0
+void CCollision::Shutdown() {
+    plugin::Call<0x4162E0>();
+}
+
 // 0x411E20
 void CCollision::Update() {
-    plugin::Call<0x411E20>();
+    // NOP
 }
 
 // 0x411E30
 void CCollision::SortOutCollisionAfterLoad() {
-    plugin::Call<0x411E30>();
+    CColStore::LoadCollision(TheCamera.m_mCameraMatrix.GetPosition(), false);
+    CStreaming::LoadAllRequestedModels(false);
 }
 
 // 0x411E70
@@ -192,16 +211,6 @@ bool CCollision::SphereCastVersusVsPoly(CColSphere* sphere1, CColSphere* sphere2
     return plugin::CallAndReturn<bool, 0x415CF0, CColSphere*, CColSphere*, CColTriangle*, CColTrianglePlane*, CompressedVector*>(sphere1, sphere2, tri, triPlane, verts);
 }
 
-// 0x416260
-void CCollision::Init() {
-    plugin::Call<0x416260>();
-}
-
-// 0x4162E0
-void CCollision::Shutdown() {
-    plugin::Call<0x4162E0>();
-}
-
 // 0x416330
 void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
     if (!colData->m_nNumTriangles)
@@ -209,23 +218,23 @@ void CCollision::CalculateTrianglePlanes(CCollisionData* colData) {
 
     if (colData->m_pTrianglePlanes)
     {
-        auto* pLink = colData->GetLinkPtr();
-        pLink->Remove();
-        CCollision::ms_colModelCache.usedListHead.Insert(pLink);
+        auto* link = colData->GetLinkPtr();
+        link->Remove();
+        ms_colModelCache.usedListHead.Insert(link);
     }
     else
     {
-        auto* pLink = CCollision::ms_colModelCache.Insert(colData);
-        if (!pLink)
+        auto* link = ms_colModelCache.Insert(colData);
+        if (!link)
         {
-            auto* pToRemove = CCollision::ms_colModelCache.usedListTail.prev;
-            pToRemove->data->RemoveTrianglePlanes();
-            CCollision::ms_colModelCache.Remove(pToRemove);
-            pLink = CCollision::ms_colModelCache.Insert(colData);
+            auto* toRemove = ms_colModelCache.usedListTail.prev;
+            toRemove->data->RemoveTrianglePlanes();
+            ms_colModelCache.Remove(toRemove);
+            link = ms_colModelCache.Insert(colData);
         }
 
         colData->CalculateTrianglePlanes();
-        colData->SetLinkPtr(pLink);
+        colData->SetLinkPtr(link);
     }
 }
 
@@ -234,8 +243,8 @@ void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
     if (!colData->m_pTrianglePlanes)
         return;
 
-    auto* pLink = colData->GetLinkPtr();
-    CCollision::ms_colModelCache.Remove(pLink);
+    auto* link = colData->GetLinkPtr();
+    ms_colModelCache.Remove(link);
     colData->RemoveTrianglePlanes();
 }
 

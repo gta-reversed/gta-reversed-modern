@@ -65,6 +65,8 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
 #include "WindModifiers.h"
 
 // Tasks
