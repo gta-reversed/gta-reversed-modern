@@ -24,7 +24,7 @@ struct UpsideDownCar {
 
 class CUpsideDownCarCheck {
 public:
-    static constexpr auto UPSIDE_DOWN_CAR_MIN_TIME{ 200u };
+    static constexpr auto UPSIDE_DOWN_CAR_MIN_TIME{ 2000u };
     UpsideDownCar m_aUpsideDownCars[6];
 
 public:
