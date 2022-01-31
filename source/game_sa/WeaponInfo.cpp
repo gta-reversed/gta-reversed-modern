@@ -9,6 +9,7 @@
 
 CWeaponInfo* aWeaponInfo = (CWeaponInfo*)0xC8AAB8;
 
+
 void CWeaponInfo::InjectHooks() {
     RH_ScopedClass(CWeaponInfo);
     RH_ScopedCategoryGlobal();
@@ -37,6 +38,7 @@ AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
 }
 
 char** CWeaponInfo::ms_aWeaponNames = (char**)0x8D6150;
+CGunAimingOffset* CWeaponInfo::ms_aWeaponAimOffsets = (CGunAimingOffset*)0xC8A8A8;
 
 void CWeaponInfo::LoadWeaponData() {
     ((void(__cdecl*)())0x5BE670)();

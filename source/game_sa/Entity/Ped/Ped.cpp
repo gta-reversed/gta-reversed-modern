@@ -1355,3 +1355,7 @@ int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
 {
     return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
 }
+
+bool CPed::IsDyingOrDead() {
+    return m_nPedState == PEDSTATE_DIE || m_nPedState == PEDSTATE_DEAD;
+}

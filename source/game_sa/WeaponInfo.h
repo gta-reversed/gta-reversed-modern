@@ -26,6 +26,17 @@ enum class eWeaponSkill : uint8 {
     WEAPSKILL_COP
 };
 
+struct CGunAimingOffset {
+    float AimX;
+    float AimZ;
+    float DuckX;
+    float DuckZ;
+    int16 RLoadA;
+    int16 RLoadB;
+    int16 CrouchRLoadA;
+    int16 CrouchRLoadB;
+};
+
 class CWeaponInfo {
 public:
     /* some info here https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CWeaponInfoSA.h */
@@ -95,6 +106,7 @@ public:
 
     // weapon names array. Count: MAX_WEAPON_NAMES(50)
     static char **ms_aWeaponNames;
+    static CGunAimingOffset* ms_aWeaponAimOffsets; // 20
 
     AnimationId GetCrouchReloadAnimationID();
 

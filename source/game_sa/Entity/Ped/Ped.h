@@ -580,5 +580,6 @@ public:
     inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
 
     bool IsFollowerOfGroup(const CPedGroup& group);
+    bool IsDyingOrDead();
 };
 bool IsPedPointerValid(CPed* ped);

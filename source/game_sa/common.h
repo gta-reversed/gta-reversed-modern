@@ -70,12 +70,14 @@ extern uint32 &ClumpOffset;
 
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
-constexpr float TWO_PI = 6.28318530718f;
 constexpr float PI = 3.14159265358979323846f;
+constexpr float TWO_PI = PI * 2.0f;
 constexpr float HALF_PI = PI / 2.0f;
+constexpr float QUARTER_PI = PI / 4.0f;
+constexpr float PI_6 = PI / 6.0f;
 constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
 constexpr float SQRT_2 = 1.41421356237309504880f;
-constexpr float SIN_PI = 0.0f; // std::sin(PI);
+constexpr float SIN_PI = 0.0f;  // std::sin(PI);
 constexpr float COS_PI = -1.0f; // std::cos(PI);
 
 void InjectCommonHooks();
