@@ -11,27 +11,26 @@ enum class eJumpState : uint8 {
 };
 
 struct CStuntJump {
-    CBoundingBox start;  // 0x00
-    CBoundingBox end;    // 0x24
-    CVector      camera; // 0x30
-    int32        reward; // 0x3C
-    bool         done;   // 0x40
-    bool         found;  // 0x41
-    // char         _pad[2];   // 0x42
+    CBoundingBox start;
+    CBoundingBox end;
+    CVector      camera;
+    int32        reward;
+    bool         done;
+    bool         found;
 };
 
-// VALIDATE_SIZE(CStuntJump, 0x44);
+VALIDATE_SIZE(CStuntJump, 0x44);
 
 class CStuntJumpManager {
 public:
-    static CPool<CStuntJump>* mp_poolStuntJumps;
-    static CStuntJump*        mp_Active;
-    static bool               m_bActive;
-    static bool               m_bHitReward;
-    static uint32             m_iTimer;
-    static eJumpState         m_jumpState;
-    static int32              m_iNumJumps;
-    static uint32             m_iNumCompleted;
+    static inline CPool<CStuntJump>*& mp_poolStuntJumps = *(CPool<CStuntJump>**)0xA9A888;
+    static inline CStuntJump*&        mp_Active = *(CStuntJump**)0xA9A88C; // nullptr
+    static inline bool&               m_bActive = *(bool*)0xA9A890;
+    static inline bool&               m_bHitReward = *(bool*)0xA9A891;
+    static inline uint32&             m_iTimer = *(uint32*)0xA9A894;
+    static inline eJumpState&         m_jumpState = *(eJumpState*)0xA9A898;
+    static inline int32&              m_iNumJumps = *(int32*)0xA9A89C;
+    static inline uint32&             m_iNumCompleted = *(uint32*)0xA9A8A0;
 
 public:
     static void InjectHooks();
