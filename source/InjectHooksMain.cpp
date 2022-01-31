@@ -65,6 +65,7 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "UpsideDownCarCheck.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

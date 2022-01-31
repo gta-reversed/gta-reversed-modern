@@ -263,7 +263,6 @@
 #include "game_sa\cTransmission.h"
 #include "game_sa\TrafficLights.h"
 #include "game_sa\TxdStore.h"
-#include "game_sa\UpsideDownCarCheck.h"
 #include "game_sa\UserDisplay.h"
 #include "game_sa\VisibilityPlugins.h"
 #include "game_sa\Wanted.h"
