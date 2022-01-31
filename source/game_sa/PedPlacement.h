@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 #include "Vector.h"
 #include "Entity.h"
 #include "Vehicle.h"
@@ -15,8 +14,9 @@
 class CPedPlacement {
 public:
     static void InjectHooks();
+
     static bool FindZCoorForPed(CVector& inoutPos);
-    static bool IsPositionClearForPed(CVector const& pos, float radius, int32 maxHitEntities, CEntity **outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects);
-    static CVehicle *IsPositionClearOfCars(CVector const *pos);
-    static CVehicle *IsPositionClearOfCars(CPed const *ped);
+    static bool IsPositionClearForPed(const CVector& pos, float radius, int32 maxHitEntities, CEntity** outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects);
+    static CVehicle* IsPositionClearOfCars(const CVector* pos);
+    static CVehicle* IsPositionClearOfCars(const CPed* ped);
 };

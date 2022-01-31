@@ -5,6 +5,7 @@
 #include "TaskSimpleAbseil.h"
 #include "TaskSimplePause.h"
 #include "TaskSimpleNone.h"
+#include "PedPlacement.h"
 
 void CTaskComplexUseSwatRope::InjectHooks() {
     RH_ScopedClass(CTaskComplexUseSwatRope);

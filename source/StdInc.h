@@ -198,7 +198,6 @@
 #include "game_sa\PedIK.h"
 #include "game_sa\PedIntelligence.h"
 #include "game_sa\PedList.h"
-#include "game_sa\PedPlacement.h"
 #include "game_sa\PedTaskPair.h"
 #include "game_sa\PedAttractorManager.h"
 #include "game_sa\Pickup.h"

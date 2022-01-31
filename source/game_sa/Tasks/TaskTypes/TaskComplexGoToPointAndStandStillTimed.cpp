@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskComplexGoToPointAndStandStillTimed.h"
+#include "PedPlacement.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToPointAndStandStillTimed);

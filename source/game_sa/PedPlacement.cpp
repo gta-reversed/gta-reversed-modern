@@ -6,17 +6,19 @@
 */
 #include "StdInc.h"
 
+#include "PedPlacement.h"
+
 void CPedPlacement::InjectHooks() {
     RH_ScopedClass(CPedPlacement);
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(IsPositionClearForPed, 0x616860);
     RH_ScopedInstall(FindZCoorForPed, 0x616920);
-
     RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Pos", 0x6168E0, CVehicle * (*)(CVector const*));
     RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Ped", 0x616A40, CVehicle * (*)(CPed const*));
 }
 
+// 0x616920
 bool CPedPlacement::FindZCoorForPed(CVector& inoutPos) {
     CEntity* hitEntity{};
 
@@ -36,7 +38,8 @@ bool CPedPlacement::FindZCoorForPed(CVector& inoutPos) {
     return true;
 }
 
-bool CPedPlacement::IsPositionClearForPed(CVector const& pos, float radius, int32 maxHitEntities, CEntity** outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects) {
+// 0x616860
+bool CPedPlacement::IsPositionClearForPed(const CVector& pos, float radius, int32 maxHitEntities, CEntity** outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects) {
     int16 hitCount{};
     CWorld::FindObjectsKindaColliding(
         pos,
@@ -54,26 +57,31 @@ bool CPedPlacement::IsPositionClearForPed(CVector const& pos, float radius, int3
     return hitCount == 0;
 }
 
-CVehicle* CPedPlacement::IsPositionClearOfCars(CVector const* pos) {
-    return static_cast<CVehicle*>(CWorld::TestSphereAgainstWorld(*pos, 0.25, nullptr, false, true, false, false, false, false));
+// 0x6168E0
+CVehicle* CPedPlacement::IsPositionClearOfCars(const CVector* pos) {
+    return CWorld::TestSphereAgainstWorld(*pos, 0.25, nullptr, false, true, false, false, false, false)->AsVehicle();
 }
 
-CVehicle* CPedPlacement::IsPositionClearOfCars(CPed const* ped) {
+// 0x616A40
+CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
     const auto pedPos = ped->GetPosition();
-    if (const auto vehHit = IsPositionClearOfCars(&pedPos)) {
-        if (vehHit->IsAutomobile() || vehHit->vehicleFlags.bIsBig) {
-            static CColPoint unusedColPoint{};
-            if (CCollision::ProcessColModels(
-                *ped->m_matrix,
-                *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
+    const auto vehHit = IsPositionClearOfCars(&pedPos);
 
-                *vehHit->m_matrix,
-                *CModelInfo::GetModelInfo(vehHit->m_nModelIndex)->GetColModel(),
+    if (!vehHit)
+        return nullptr;
 
-                &unusedColPoint, nullptr, nullptr, false
-            )) {
-                return vehHit;
-            }
+    if (vehHit->IsAutomobile() || vehHit->vehicleFlags.bIsBig) {
+        static CColPoint unusedColPoint{}; // 0xC102A0
+        if (CCollision::ProcessColModels(
+            *ped->m_matrix,
+            *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
+
+            *vehHit->m_matrix,
+            *CModelInfo::GetModelInfo(vehHit->m_nModelIndex)->GetColModel(),
+
+            &unusedColPoint, nullptr, nullptr, false
+        )) {
+            return vehHit;
         }
     }
     return nullptr;
