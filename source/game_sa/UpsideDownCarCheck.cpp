@@ -101,7 +101,7 @@ void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
 bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 carHandle) {
     for (auto& car : m_aUpsideDownCars) {
         if (car.m_nHandle == carHandle) {
-            return car.m_nTime >= UPSIDE_DOWN_CAR_MIN_TIME;
+            return car.m_nTime > UPSIDE_DOWN_CAR_MIN_TIME;
         }
     }
     return false;
