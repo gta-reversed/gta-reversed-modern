@@ -65,6 +65,9 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
+#include "WindModifiers.h"
 #include "PedPlacement.h"
 
 // Tasks
@@ -182,6 +185,7 @@ void InjectHooksMain() {
     CFileMgr::InjectHooks();
 
     CPedPlacement::InjectHooks();
+    CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CFileLoader::InjectHooks();
