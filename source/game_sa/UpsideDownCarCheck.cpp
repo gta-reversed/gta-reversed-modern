@@ -9,7 +9,7 @@ void CUpsideDownCarCheck::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     // RH_ScopedOverloadedInstall(IsCarUpsideDown, "handle", 0x0);
-    RH_ScopedOverloadedInstall(IsCarUpsideDown, "vehicle", 0x463830, bool(*)(CVehicle*));
+    RH_ScopedOverloadedInstall(IsCarUpsideDown, "vehicle", 0x463830, bool(CUpsideDownCarCheck::*)(CVehicle*));
     RH_ScopedInstall(UpdateTimers, 0x4655E0);
     RH_ScopedInstall(AddCarToCheck, 0x4638D0);
     RH_ScopedInstall(RemoveCarFromCheck, 0x463910);
