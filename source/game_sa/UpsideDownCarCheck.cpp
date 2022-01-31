@@ -8,20 +8,22 @@ void CUpsideDownCarCheck::InjectHooks() {
     RH_ScopedClass(CUpsideDownCarCheck);
     RH_ScopedCategoryGlobal();
 
-    //RH_ScopedInstall(Init, 0x46A8C0);
-    RH_ScopedInstall(IsCarUpsideDown, 0x463830);
+    // RH_ScopedOverloadedInstall(IsCarUpsideDown, "handle", 0x0);
+    RH_ScopedOverloadedInstall(IsCarUpsideDown, "vehicle", 0x463830, bool(*)(CVehicle*));
     RH_ScopedInstall(UpdateTimers, 0x4655E0);
     RH_ScopedInstall(AddCarToCheck, 0x4638D0);
     RH_ScopedInstall(RemoveCarFromCheck, 0x463910);
     RH_ScopedInstall(HasCarBeenUpsideDownForAWhile, 0x463940);
 }
 
-// 0x46A8C0
-// NOTE: Seems like it has a `CScriptTrigger*` argument?
-//       Something's really off with this one..
-//       It can't belong to this class, because the loop in it does 70 iterations... (and the array is only 6 in size)
+// completely inlined, no addr, see 0x468DCB
 void CUpsideDownCarCheck::Init() {
-    plugin::CallMethod<0x46A8C0>(this);
+    std::ranges::fill(m_aUpsideDownCars, UpsideDownCar());
+}
+
+bool CUpsideDownCarCheck::IsCarUpsideDown(int32 carHandle) {
+    const auto vehicle = CPools::GetVehicle(carHandle);
+    return IsCarUpsideDown(vehicle);
 }
 
 // 0x463830
@@ -52,8 +54,8 @@ void CUpsideDownCarCheck::UpdateTimers() {
         if (!car.m_nHandle)
             continue;
 
-        if (const auto veh = CPools::GetVehicle(car.m_nHandle)) {
-            if (IsCarUpsideDown(veh)) {
+        if (const auto vehicle = CPools::GetVehicle(car.m_nHandle)) {
+            if (IsCarUpsideDown(vehicle)) {
                 car.m_nTime += delta;
             } else {
                 car.m_nTime = 0;
@@ -64,18 +66,24 @@ void CUpsideDownCarCheck::UpdateTimers() {
     }
 }
 
-// 0x4638A0, todo:: add code
+// 0x4638A0
 // never used
 bool CUpsideDownCarCheck::AreAnyCarsUpsideDown() {
+    for (auto& car : m_aUpsideDownCars) {
+        if (car.m_nHandle >= 0 && car.m_nTime >= UPSIDE_DOWN_CAR_MIN_TIME) {
+            return true;
+        }
+    }
     return false;
 }
 
 // 0x4638D0
 void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
-    const auto it = rng::find_if(m_aUpsideDownCars, [](auto&& car) { return car.m_nHandle < 0; });
-    if (it != std::end(m_aUpsideDownCars)) {
-        it->m_nHandle = carHandle;
-        it->m_nTime = 0;
+    for (auto& car : m_aUpsideDownCars) {
+        if (car.m_nHandle < 0) {
+            car.m_nHandle = carHandle;
+            car.m_nTime = 0;
+        }
     }
 }
 
@@ -91,6 +99,10 @@ void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
 
 // 0x463940
 bool CUpsideDownCarCheck::HasCarBeenUpsideDownForAWhile(int32 carHandle) {
-    const auto it = rng::find_if(m_aUpsideDownCars, [=](auto&& car) { return car.m_nHandle == carHandle; });
-    return it != std::end(m_aUpsideDownCars) ? it->m_nTime > 2000u : false;
+    for (auto& car : m_aUpsideDownCars) {
+        if (car.m_nHandle == carHandle) {
+            return car.m_nTime >= UPSIDE_DOWN_CAR_MIN_TIME;
+        }
+    }
+    return false;
 }

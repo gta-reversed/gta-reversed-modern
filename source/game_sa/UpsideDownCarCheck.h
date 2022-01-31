@@ -9,19 +9,29 @@
 #include "Vehicle.h"
 
 struct UpsideDownCar {
-    int32 m_nHandle;
+    int32  m_nHandle;
     uint32 m_nTime;
+
+    UpsideDownCar() {
+        Clear();
+    };
+
+    void Clear() {
+        m_nHandle = -1;
+        m_nTime   = 0;
+    }
 };
 
 class CUpsideDownCarCheck {
 public:
-    static constexpr auto UPSIDE_DOWN_CAR_CHECK_SIZE{ 6u };
-    UpsideDownCar m_aUpsideDownCars[UPSIDE_DOWN_CAR_CHECK_SIZE];
+    static constexpr auto UPSIDE_DOWN_CAR_MIN_TIME{ 200u };
+    UpsideDownCar m_aUpsideDownCars[6];
 
 public:
     static void InjectHooks();
 
     void        Init();
+    static bool IsCarUpsideDown(int32 carHandle);
     static bool IsCarUpsideDown(CVehicle* vehicle);
     bool        AreAnyCarsUpsideDown();
     void        UpdateTimers();
