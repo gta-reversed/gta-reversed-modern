@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Base.h>
+
 #include "Accident.h"
 
 const int32 NUM_ACCIDENTS = 16;

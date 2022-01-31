@@ -8,9 +8,10 @@
 
 #include "PedGroupMembership.h"
 #include "PedGroupIntelligence.h"
-#include "Vector.h"
-#include "Ped.h"
-#include "Vehicle.h"
+
+class CVector;
+class CPed;
+class CVehicle;
 
 class CPedGroup {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroup)

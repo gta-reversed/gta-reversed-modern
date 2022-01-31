@@ -7,10 +7,12 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "PlayerPedData.h"
 #include "Vector.h"
-#include "PlayerPed.h"
 
+class CPed;
+class CVehicle;
+class CPlayerPedData;
+class CPlayerPed;
 class CPlayerInfoSaveStructure;
 
 enum ePlayerState : uint8 {
@@ -20,10 +22,6 @@ enum ePlayerState : uint8 {
     PLAYERSTATE_FAILED_MISSION,
     PLAYERSTATE_LEFT_GAME
 };
-
-class CPed;
-class CVehicle;
-struct RwTexture;
 
 class CPlayerInfo {
 public:

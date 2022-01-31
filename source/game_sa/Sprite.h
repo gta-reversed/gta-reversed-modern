@@ -7,6 +7,7 @@
 #pragma once
 
 #include "RenderWare.h"
+#include "RGBA.h"
 
 class CSprite {
 public:

@@ -6,11 +6,13 @@
 */
 #pragma once
 
-#include "LoadedCarGroup.h"
-#include "Ped.h"
-#include "Dummy.h"
-#include "DummyObject.h"
-#include "Zone.h"
+#include "eLevelName.h"
+
+class CLoadedCarGroup;
+class CPed;
+class CDummy;
+class CDummyObject;
+class CZone;
 
 enum ePedRace {
     RACE_DEFAULT = 0,

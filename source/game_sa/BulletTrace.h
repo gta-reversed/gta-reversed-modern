@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Base.h>
+
 #include "Vector.h"
 
 class CBulletTrace {

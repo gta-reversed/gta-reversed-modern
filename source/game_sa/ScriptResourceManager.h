@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "RunningScript.h"
+class CRunningScript;
 
 enum eScriptResourceType {
     RESOURCETYPE_ANIMATION = 1,

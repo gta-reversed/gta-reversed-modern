@@ -7,6 +7,11 @@
 #pragma once
 
 #include "3dMarker.h"
+#include "RGBA.h"
+#include <Vector.h>
+
+struct RpClump;
+struct RpAtomic;
 
 struct tUser3dMarker {
     bool    m_bIsUsed;

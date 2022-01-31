@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <Base.h>
+
 typedef int32 AcquaintanceId;
 
 // This structure stores information about how a ped of given pedtype (each entry in PedRelationship[32]

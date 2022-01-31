@@ -6,11 +6,10 @@
 */
 #pragma once
 
-
-#include "Vector.h"
-#include "Entity.h"
-#include "Vehicle.h"
-#include "Ped.h"
+class CVector;
+class CEntity;
+class CVehicle;
+class CPed;
 
 class CPedPlacement {
 public:

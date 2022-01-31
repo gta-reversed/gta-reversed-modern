@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Pool.h"
+
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
 
 // 0xA9A888

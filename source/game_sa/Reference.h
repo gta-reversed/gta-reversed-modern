@@ -6,6 +6,8 @@
 */
 #pragma once
 
+class CEntity;
+
 class CReference {
 public:
     class CReference* m_pNext;

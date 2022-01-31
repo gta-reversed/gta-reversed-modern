@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "ActiveOccluder.h"
 #include "Occluder.h"
 #include "Occlusion.h"
 

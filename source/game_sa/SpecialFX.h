@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "RenderWare.h"
+#include "eWeaponType.h"
 
 class CSpecialFX {
 public:
@@ -26,5 +26,3 @@ public:
     static void Render2DFXs();
     static void ReplayStarted();
 };
-
-extern RwTexture*& gpFinishFlagTex;

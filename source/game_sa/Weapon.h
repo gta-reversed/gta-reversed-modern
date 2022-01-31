@@ -7,9 +7,10 @@
 #pragma once
 
 #include "eWeaponType.h"
-#include "FxSystem_c.h"
 #include "Vector2D.h"
-#include "ColPoint.h"
+
+class FxSystem_c;
+class CColPoint;
 
 enum ePedPieceTypes;
 
@@ -24,6 +25,7 @@ enum eWeaponState : uint32 {
 class CPed;
 class CVehicle;
 class CColModel;
+class CWeaponInfo;
 
 class CWeapon {
 public:

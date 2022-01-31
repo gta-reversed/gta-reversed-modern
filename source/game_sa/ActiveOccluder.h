@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Base.h>
 #include "Vector2D.h"
 #include "Vector.h"
 
@@ -10,7 +11,8 @@ struct CActiveOccluderLine {
 };
 VALIDATE_SIZE(CActiveOccluderLine, 0x14);
 
-struct CActiveOccluder {
+class CActiveOccluder {
+public:
     CActiveOccluderLine m_aLines[6];
     uint16              m_wDepth;
     uint8               m_cLinesCount;

@@ -6,13 +6,13 @@
 */
 #pragma once
 
-#include "Entity.h"
 #include "Vector.h"
-#include "ColTriangle.h"
-#include "CoverPoint.h"
-#include "Building.h"
-#include "PtrListDoubleLink.h"
 
+class CEntity;
+class CPtrListDoubleLink;
+class CCoverPoint;
+class CColTriangle;
+class CBuilding;
 class CPed;
 
 class CCover {

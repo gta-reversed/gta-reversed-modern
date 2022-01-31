@@ -6,6 +6,12 @@
 */
 #pragma once
 
+#include "StoredCar.h"
+
+class CVehicle;
+class CAutomobile;
+class CGarge;
+
 // Based on https://gtamods.com/wiki/Garage
 enum eGarageType : uint8 {
     ONLY_TARGET_VEH = 1,

@@ -6,8 +6,7 @@
 */
 #pragma once
 
-
-#include "SetPiece.h"
+class CSetPiece;
 
 extern uint32 MAX_SET_PIECES; // default 210
 

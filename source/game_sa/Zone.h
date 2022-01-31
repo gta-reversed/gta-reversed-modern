@@ -7,17 +7,11 @@
 #pragma once
 
 #include "rw/rwplcore.h" // for RwRGBA struct
+#include "eLevelName.h"
 
 enum eZoneType : uint8 {
     ZONE_TYPE_NAVI = 0, // controls text s
     ZONE_TYPE_MAP = 3
-};
-
-enum eLevelName : uint8 {
-    LEVEL_NAME_COUNTRY_SIDE,
-    LEVEL_NAME_LOS_SANTOS,
-    LEVEL_NAME_SAN_FIERRO,
-    LEVEL_NAME_LAS_VENTURAS
 };
 
 struct CZoneExtraInfo {

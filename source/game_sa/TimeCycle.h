@@ -6,10 +6,9 @@
 */
 #pragma once
 
-#include "ColourSet.h"
-#include "Box.h"
-
+class CColourSet;
 class CTimeCycleBox;
+class CBox;
 
 class CTimeCycle {
 public:
@@ -131,9 +130,7 @@ public:
     static void Update();
 
     // helpers
-    static CRGBA GetCurrentSkyBottomColor() {
-        return m_CurrentColours.GetSkyBottom();
-    }
+    static CRGBA GetCurrentSkyBottomColor();
 
     static float SumOfCurrentRGB1() {
         return m_fCurrentRGB1Blue + m_fCurrentRGB1Green + m_fCurrentRGB1Red;

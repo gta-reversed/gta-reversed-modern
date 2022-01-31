@@ -1,7 +1,5 @@
 #pragma once
 
-#include "StencilShadowObjects.h"
-
 class CStencilShadowObject {
 public:
     CEntity*              owner;

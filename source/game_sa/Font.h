@@ -7,8 +7,10 @@
 #pragma once
 
 #include "RGBA.h"
-#include "Rect.h"
-#include "Sprite2d.h"
+#include "eFontAlignment.h"
+
+class CSprite2d;
+
 
 // todo: move
 struct CFontChar {
@@ -71,12 +73,6 @@ enum eExtraFontSymbol : uint8 {
     EXSYMBOL_R1         = 12,
     EXSYMBOL_R2         = 13,
     EXSYMBOL_R3         = 14
-};
-
-enum class eFontAlignment : uint8 {
-    ALIGN_CENTER,
-    ALIGN_LEFT,
-    ALIGN_RIGHT
 };
 
 enum class eFontStyle : uint8 {

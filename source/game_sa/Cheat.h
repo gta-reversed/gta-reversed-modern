@@ -6,17 +6,10 @@
 */
 #pragma once
 
-#include "Vehicle.h"
 #include "eCheats.h"
+#include "eModelID.h"
 
-// NOTSA
-struct Cheat {
-    DWORD installAddress;
-    void* method;
-    const std::string methodName;
-    uint32 hash;
-    eCheats type;
-};
+class CVehicle;
 
 class CCheat {
 public:

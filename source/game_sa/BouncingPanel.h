@@ -6,9 +6,12 @@
 */
 #pragma once
 
+#include <Base.h>
+
 #include "Vector.h"
 
 class CVehicle;
+struct RwFrame;
 
 class CBouncingPanel {
 public:

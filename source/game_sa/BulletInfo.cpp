@@ -45,6 +45,10 @@ CBulletInfo* CBulletInfo::GetFree() {
     return nullptr;
 }
 
+bool CBulletInfo::IsTimeToBeDestroyed() const noexcept {
+    return (float)CTimer::GetTimeInMS() > m_nDestroyTime;
+}
+
 // 0x736010
 void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector posn, CVector velocity) {
     if (auto info = GetFree()) {

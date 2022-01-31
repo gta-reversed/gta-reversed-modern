@@ -6,8 +6,9 @@
 */
 #pragma once
 
-#include "Entity.h"
-#include "FxSystem_c.h"
+class CEntity;
+class CFire;
+class FxSystem_c;
 
 class CFire {
 public:

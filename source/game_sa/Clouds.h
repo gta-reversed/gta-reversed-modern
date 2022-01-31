@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Vector.h"
+#include <rwplcore.h>
 
 constexpr auto MAX_MOVING_FOG = 350;
 constexpr auto MAX_VOLUMETRIC_CLOUDS = 180;

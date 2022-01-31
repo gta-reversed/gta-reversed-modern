@@ -11,6 +11,7 @@
 #include "PointLights.h"
 #include "Escalators.h"
 #include "CustomBuildingDNPipeline.h"
+#include "ActiveOccluder.h"
 #include "Occlusion.h"
 #include "MotionBlurStreaks.h"
 #include "TagManager.h"

@@ -7,7 +7,8 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "RunningScript.h"
+
+class CRunningScript;
 
 class CStreamedScripts {
 public:

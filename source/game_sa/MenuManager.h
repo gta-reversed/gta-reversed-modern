@@ -6,9 +6,12 @@
 */
 #pragma once
 
-#include "Vector2D.h"
+#include "RGBA.h"
 #include "Sprite2d.h"
+#include "Vector2D.h"
 #include "eLanguage.h"
+
+class CRect;
 
 // Menu entries action to perform
 enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88

@@ -6,7 +6,9 @@
 */
 #pragma once
 
-#include "Vehicle.h"
+#include "eWeaponType.h"
+
+class CVehicle;
 
 enum eDarkelStatus {
     DARKEL_STATUS_0,

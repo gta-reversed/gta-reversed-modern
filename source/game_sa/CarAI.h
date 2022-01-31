@@ -6,8 +6,7 @@ Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
-
+class CVehicle;
 
 class CCarAI
 {

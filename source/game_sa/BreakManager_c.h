@@ -1,6 +1,11 @@
 #pragma once
 
+#include <Base.h>
+
 #include "BreakObject_c.h"
+
+class CObject;
+class CVector;
 
 class BreakManager_c {
 public:

@@ -7,9 +7,9 @@
 #pragma once
 
 #include "PedTaskPair.h"
-#include "Ped.h"
-#include "Task.h"
 
+class CPed;
+class CTask;
 class CGroupEventHandler;
 class CPedGroupDefaultTaskAllocator;
 class CTaskAllocator;

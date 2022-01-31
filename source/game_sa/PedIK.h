@@ -6,9 +6,10 @@
 */
 #pragma once
 
-#include "AnimBlendFrameData.h"
+#include <renderware.h>
 #include "Vector.h"
 
+class AnimBlendFrameData;
 class CPed;
 
 // Return flags from MoveLimb() function

@@ -9,6 +9,10 @@
 #include "CompressedVector.h"
 #include "Vector.h"
 
+class CObject;
+class CVehicle;
+class CPlayerPed;
+
 enum ePickupType : uint8 {
     PICKUP_NONE = 0,
     PICKUP_IN_SHOP = 1,
@@ -40,10 +44,6 @@ enum ePickupPropertyText {
     PICKUP_PROPERTYTEXT_CANT_BUY = 1, // "You can't by..."
     PICKUP_PROPERTYTEXT_CAN_BUY = 2   // "Press TAB to buy ..."
 };
-
-class CObject;
-class CVehicle;
-class CPlayerPed;
 
 class CPickup {
 public:

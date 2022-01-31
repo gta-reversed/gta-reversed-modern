@@ -8,6 +8,8 @@
 
 #include "Fire.h"
 
+class CEntity;
+
 #define MAX_NUM_FIRES 60
 
 class CFireManager {

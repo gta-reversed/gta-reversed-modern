@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "Vehicle.h"
+class CVehicle;
 
 #define UPSIDE_DOWN_CAR_CHECK_SIZE 6
 

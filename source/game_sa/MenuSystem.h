@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Font.h"
+#include "eFontAlignment.h"
 
 enum eMenuType : uint8 {
     MENU_TYPE_DEFAULT,

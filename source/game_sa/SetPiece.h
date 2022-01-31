@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "CopPed.h"
-#include "Vehicle.h"
+class CCopPed;
+class CVehicle;
 
 enum eSetPieceType {
     /* http://gtaforums.com/topic/194990-gtasa-opcodes/?p=1057374595 */

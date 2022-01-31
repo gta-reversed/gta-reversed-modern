@@ -8,6 +8,8 @@
 
 #include "RenderWare.h"
 
+#include "ePadButton.h"
+
 enum eMouseButtons {
     MOUSE_BUTTON_NONE = 0,
     MOUSE_BUTTON_LEFT,

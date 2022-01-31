@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "Ped.h"
-#include "PedGroup.h"
+class CPed;
+class CPedGroup;
 
 class CPedGroups {
 public:
@@ -41,5 +41,5 @@ public:
     static bool IsInPlayersGroup(CPed* ped);
 
     // inlined
-    static CPedGroup& GetGroup(int32 groupId) { return ms_groups[groupId]; }
+    static CPedGroup& GetGroup(int32 groupId);
 };

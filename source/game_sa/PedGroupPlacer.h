@@ -7,8 +7,7 @@
 #pragma once
 
 #include "Vector.h"
-
-enum ePedType : uint32;
+#include "ePedType.h"
 
 enum ePedGroupPlacerType {
     GROUP_PLACER_FORMATION1 = 0,

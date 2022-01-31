@@ -11,6 +11,7 @@
 #include "AnimationEnums.h"
 #include "eWeaponFlags.h"
 #include "eWeaponType.h"
+#include "eWeaponSkill.h"
 #include "eWeaponFire.h"
 
 #define MAX_WEAPON_INFOS 80
@@ -18,13 +19,6 @@
 
 #define WEAPONINFO_NUM_WEAPONS_WITH_SKILLS 11
 #define WEAPONINFO_NUM_WEAPONS 46
-
-enum class eWeaponSkill : uint8 {
-    WEAPSKILL_POOR,
-    WEAPSKILL_STD,
-    WEAPSKILL_PRO,
-    WEAPSKILL_COP
-};
 
 class CWeaponInfo {
 public:

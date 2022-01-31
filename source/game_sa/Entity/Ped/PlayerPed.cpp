@@ -8,6 +8,7 @@
 
 #include "PlayerPed.h"
 #include "TagManager.h"
+#include "PedClothesDesc.h"
 
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;

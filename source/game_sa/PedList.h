@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "Ped.h"
-#include "PedGroupMembership.h"
+class CPed;
+class CPedGroupMembership;
 
 class CPedList {
 public:

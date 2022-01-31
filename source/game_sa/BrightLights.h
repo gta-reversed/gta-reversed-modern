@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Vector.h"
+#include "RGBA.h"
 
 enum eBrightLightColor : uint8 {
     BRIGHTLIGHT_NONE         = 0,

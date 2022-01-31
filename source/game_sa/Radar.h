@@ -9,7 +9,8 @@ Do not delete this comment block. Respect others' work!
 #include "Vector.h"
 #include "RGBA.h"
 #include "Vector2D.h"
-#include "Sprite2d.h"
+
+class CSprite2d;
 
 // Thanks to Wesser for radar-related things
 enum eBlipAppearance {

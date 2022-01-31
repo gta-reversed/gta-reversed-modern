@@ -1,6 +1,7 @@
 #pragma once
 
 #include "eAudioEvents.h"
+#include "AEExplosionAudioEntity.h"
 
 class CEntity;
 class CVector;

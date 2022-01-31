@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "OnscreenTimer.h"
+class COnscreenTimer;
 
 class CUserDisplay {
 public:

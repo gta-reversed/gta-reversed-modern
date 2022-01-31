@@ -7,7 +7,8 @@
 #pragma once
 
 #include "Vector.h"
-#include "FxSystem_c.h"
+
+class FxSystem_c;
 
 enum eObjectColDamageEffect : uint8 {
     COL_DAMAGE_EFFECT_NONE = 0,

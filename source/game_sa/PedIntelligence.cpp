@@ -18,6 +18,10 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexWander.h"
+#include "TaskSimpleUseGun.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleDuck.h"
+#include "TaskSimpleClimb.h"
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f

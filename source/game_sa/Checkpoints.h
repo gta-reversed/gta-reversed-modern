@@ -6,9 +6,9 @@
 */
 #pragma once
 
-#include "Checkpoint.h"
+class Checkpoint;
 
-extern uint32 MAX_NUM_CHECKPOINTS; // default 32
+constexpr auto MAX_NUM_CHECKPOINTS{ 32u };
 
 class CCheckpoints {
 public:

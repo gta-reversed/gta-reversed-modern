@@ -8,15 +8,13 @@
 
 class CNodeAddress {
 public:
-    int16 m_wAreaId;
-    int16 m_wNodeId;
+    int16 m_wAreaId{-1};
+    int16 m_wNodeId{-1};
 
-    CNodeAddress() : m_wAreaId(-1), m_wNodeId(-1) {}
+    constexpr CNodeAddress() = default;
 
-    bool operatorEqual(CNodeAddress* rhs);
-
-    bool operator==(CNodeAddress const& rhs) const;
-    bool operator!=(CNodeAddress const& rhs) const;
+    bool operator==(CNodeAddress const&) const = default;
+    bool operator!=(CNodeAddress const&) const = default;
 };
 
 VALIDATE_SIZE(CNodeAddress, 0x4);

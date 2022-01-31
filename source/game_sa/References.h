@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "Reference.h"
+class CReference;
 
 #define MAX_NUM_REFERENCES 3000
 

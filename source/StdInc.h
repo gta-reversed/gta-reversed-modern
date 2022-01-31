@@ -22,6 +22,10 @@
 #include <dinput.h>
 
 #include "Base.h"
+#include <Vector.h>
+#include <Vector2D.h>
+#include <Matrix.h>
+
 #include "game_sa\constants.h"
 #include "game_sa\Conversations.h"
 #include "game_sa\StuntJumpManager.h"

@@ -7,7 +7,8 @@
 #pragma once
 
 #include "TaskTimer.h"
-#include "Plugins\TwoDEffectPlugin\2dEffect.h"
+
+class C2dEffect;
 
 class CAttractorScanner {
 public:

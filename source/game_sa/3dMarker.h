@@ -6,9 +6,14 @@
 */
 #pragma once
 
+#include <Base.h>
+
 #include "RGBA.h"
 #include "Vector.h"
 #include "Matrix.h"
+
+struct RpAtomic;
+struct RpMaterial;
 
 enum e3dMarkerType {
     MARKER3D_ARROW = 0,

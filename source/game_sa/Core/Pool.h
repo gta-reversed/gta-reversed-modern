@@ -34,7 +34,7 @@ VALIDATE_SIZE(tPoolObjectFlags, 1);
 
 template <class A, class B = A> class CPool {
 public:
-    B*                m_pObjects;
+    B* m_pObjects;
     tPoolObjectFlags* m_byteMap;
     int32             m_nSize;
     int32             m_nFirstFree;
@@ -186,7 +186,7 @@ public:
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
         int32 nSlotIndex = ref >> 8;
-        return nSlotIndex >= 0 && nSlotIndex < m_nSize && m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
+        return nSlotIndex >= 0 && nSlotIndex < m_nSize&& m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
     }
 
     A* GetAtRefNoChecks(int32 ref) {

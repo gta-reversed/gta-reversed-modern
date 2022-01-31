@@ -6,9 +6,15 @@
 */
 #pragma once
 
-#include "Vector.h"
+#include <Base.h>
+
 #include "PathFind.h"
-#include "eCarMission.h"
+#include "NodeAddress.h"
+#include "Vector.h"
+#include "Enums/eCarMission.h"
+
+class CVehicle;
+class CEntity;
 
 enum eCarDrivingStyle : int8
 {
@@ -87,8 +93,8 @@ public:
     CNodeAddress    m_aPathFindNodesInfo[8];
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
-    class CVehicle* m_pTargetCar;
-    class CEntity*  m_pCarWeMakingSlowDownFor;
+    CVehicle*       m_pTargetCar;
+    CEntity*        m_pCarWeMakingSlowDownFor;
     int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;
     int16           field_96;

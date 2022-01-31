@@ -6,12 +6,12 @@
 */
 #pragma once
 
-#include "PlayerPed.h"
-#include "PedClothesDesc.h"
-
 #include "AnimationEnums.h"
 #include "eClothesModelPart.h"
 #include "eClothesTexturePart.h"
+
+class CPedClothesDesc;
+class CPlayerPed;
 
 class CClothes {
 public:

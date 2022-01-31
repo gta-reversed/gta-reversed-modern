@@ -7,14 +7,14 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "Wanted.h"
-#include "PedClothesDesc.h"
 #include "Vector.h"
 #include "Vector2D.h"
 
 class CEntity;
 class CPed;
 class CCopPed;
+class CPedClothesDesc;
+class CWanted;
 
 class CPlayerPedData {
 public:

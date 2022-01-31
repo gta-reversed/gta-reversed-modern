@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedClothesDesc.h"
+
 void CPlayerPedData::InjectHooks() {
     RH_ScopedClass(CPlayerPedData);
     RH_ScopedCategoryGlobal();

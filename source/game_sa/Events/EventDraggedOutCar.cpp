@@ -37,6 +37,14 @@ CEventDraggedOutCar* CEventDraggedOutCar::Constructor(CVehicle* vehicle, CPed* c
     return this;
 }
 
+bool CEventDraggedOutCar::AffectsPed(CPed* ped) {
+    return ped->IsAlive() && m_carjacker;
+}
+
+bool CEventDraggedOutCar::AffectsPedGroup(CPedGroup* pedGroup) {
+    return FindPlayerPed(-1) == pedGroup->m_groupMembership.GetLeader();
+}
+
 // 0x4B6DC0
 CEventEditableResponse* CEventDraggedOutCar::CloneEditable()
 {

@@ -8,11 +8,14 @@
 
 #include "Vector.h"
 #include "eBirdsBiome.h"
+#include <rwplcore.h>
 
 /*
     researched by LINK/2012
     for 'The Birds Update' mod
 */
+
+class CBirds;
 
 #pragma pack(push, 1)
 struct CBirdColor {

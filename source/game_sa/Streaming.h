@@ -10,12 +10,13 @@
 #include "Vector.h"
 #include "StreamingInfo.h"
 #include "RenderWare.h"
-#include "Entity.h"
-#include "PtrList.h"
 #include "LinkList.h"
-#include "LoadedCarGroup.h"
-#include "Directory.h"
 #include "constants.h"
+
+class CPtrList;
+class CEntity;
+class CLoadedCarGroup;
+class CDirectory;
 
 enum class eChannelState
 {

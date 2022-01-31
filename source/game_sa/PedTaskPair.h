@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "Ped.h"
-#include "Task.h"
+class CPed;
+class CTask;
 
 class CPedTaskPair {
 public:

@@ -6,9 +6,12 @@
 */
 #pragma once
 
+#include <Base.h>
+
 #include "Vector.h"
 #include "eWeaponType.h"
-#include "Entity.h"
+
+class CEntity;
 
 class CBulletInfo {
 public:
@@ -34,10 +37,12 @@ public:
     static void AddBullet(CEntity* creator, eWeaponType weaponType, CVector position, CVector velocity);
     static void Update();
 
+    // NOTSA funcs:
 private:
-    // NOTSA funcs
     static CBulletInfo* GetFree();
-    bool IsTimeToBeDestroyed() const noexcept { return (float)CTimer::GetTimeInMS() > m_nDestroyTime; }
+
+private:
+    bool IsTimeToBeDestroyed() const noexcept;
 };
 
 VALIDATE_SIZE(CBulletInfo, 0x2C);

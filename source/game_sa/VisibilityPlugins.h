@@ -7,10 +7,11 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "Entity.h"
-#include "ClumpModelInfo.h"
-#include "AtomicModelInfo.h"
 #include "LinkList.h"
+
+class CEntity;
+class CClumpModelInfo;
+class CAtomicModelInfo;
 
 enum eAtomicComponentFlag {
     ATOMIC_IS_OK_STATE = 0x1,

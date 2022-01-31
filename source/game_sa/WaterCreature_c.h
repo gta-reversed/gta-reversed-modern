@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ListItem_c.h"
-#include "Object.h"
+
+class CObject;
 
 #ifdef GetObject
 #undef GetObject

@@ -8,7 +8,6 @@
 
 #include <cstdlib> // RAND_MAX
 
-
 class CGeneral {
 public:
     static void InjectHooks();

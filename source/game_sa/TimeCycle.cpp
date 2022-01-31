@@ -211,3 +211,7 @@ void CTimeCycle::StopExtraColour(bool bNoExtraColorInterior) {
 void CTimeCycle::Update() {
     plugin::Call<0x561760>();
 }
+
+CRGBA CTimeCycle::GetCurrentSkyBottomColor() {
+    return m_CurrentColours.GetSkyBottom();
+}

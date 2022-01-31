@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Base.h>
+
 class CBridge {
 public:
     static void InjectHooks();

@@ -8,9 +8,10 @@
 
 #include "Rect.h"
 #include "Vector.h"
-#include "Object.h"
 
+class CObject;
 class CPed;
+class CEntryExit;
 
 // Each area code can have one or more interiors.
 // For more info, check https://wiki.mtasa.com/wiki/Interior_IDs

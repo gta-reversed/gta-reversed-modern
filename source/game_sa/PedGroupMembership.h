@@ -6,8 +6,7 @@
 */
 #pragma once
 
-#include "Ped.h"
-
+class CPed;
 class CPedGroup;
 
 const int32 TOTAL_PED_GROUP_MEMBERS = 8;

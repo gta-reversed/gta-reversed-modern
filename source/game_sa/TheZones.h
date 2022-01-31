@@ -7,7 +7,11 @@
 #pragma once
 
 #include "Vector.h"
+#include "eLevelName.h"
 #include "Zone.h"
+
+class CZoneInfo;
+class CZoneExtraInfo;
 
 class CTheZones {
 public:

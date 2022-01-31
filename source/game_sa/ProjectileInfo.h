@@ -7,8 +7,9 @@
 #pragma once
 
 #include "eWeaponType.h"
-#include "Projectile.h"
-#include "FxSystem_c.h"
+
+class CProjectile;
+class FxSystem_c;
 
 extern uint32 MAX_PROJECTILES; // default 32
 

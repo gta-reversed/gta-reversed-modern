@@ -10,6 +10,7 @@
 
 #include "PedType.h"
 #include "Buoyancy.h"
+#include "TaskSimpleSwim.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);

@@ -9,6 +9,8 @@
 #include "Physical.h"
 #include "CarCtrl.h"
 
+#include "TaskSimpleClimb.h"
+
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
 float& CPhysical::DAMPING_LIMIT_OF_SPRING_FORCE = *(float*)0x8CD7A4;
 float& CPhysical::PHYSICAL_SHIFT_SPEED_DAMP = *(float*)0x8CD788;

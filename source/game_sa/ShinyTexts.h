@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "RenderWare.h"
+
 #include "Vector.h"
 
 constexpr auto MAX_SHINYTEXTS{32u};

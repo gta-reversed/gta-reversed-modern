@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "Occlusion.h"
+#include "Occluder.h"
+#include "ActiveOccluder.h"
 
 COccluder(&COcclusion::aInteriorOccluders)[MAX_INTERIOR_OCCLUDERS] = *(COccluder(*)[MAX_INTERIOR_OCCLUDERS])0xC73CC8;
 COccluder(&COcclusion::aOccluders)[MAX_MAP_OCCLUDERS] = *(COccluder(*)[MAX_MAP_OCCLUDERS])0xC73FA0;

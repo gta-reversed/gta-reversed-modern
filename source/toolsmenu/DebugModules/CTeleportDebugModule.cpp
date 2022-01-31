@@ -11,6 +11,7 @@
 #include <string>
 #include <string_view>
 #include <chrono>
+#include "Radar.h"
 
 namespace rng = std::ranges;
 using namespace ImGui;

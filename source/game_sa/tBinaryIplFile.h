@@ -6,9 +6,6 @@
 */
 #pragma once
 
-
-#include "FileObjectInstance.h"
-
 struct tBinaryIplFile {
     char   fourcc[4]; // "bnry"
     uint16 numInstances;

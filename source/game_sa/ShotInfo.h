@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 #include "Vector.h"
 #include "eWeaponType.h"
 

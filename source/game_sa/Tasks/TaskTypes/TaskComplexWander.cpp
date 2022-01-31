@@ -470,7 +470,7 @@ void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
 
             int8 outDir = 0;
             UpdatePathNodes(pPed, m_nDir, &m_LastNode, &m_NextNode, &outDir);
-            if (ScanForBlockedNode(pPed, &m_NextNode) || m_NextNode.operatorEqual(&m_LastNode))
+            if (ScanForBlockedNode(pPed, &m_NextNode) || &m_NextNode == &m_LastNode)
             {
                 m_bAllNodesBlocked = 1;
             }

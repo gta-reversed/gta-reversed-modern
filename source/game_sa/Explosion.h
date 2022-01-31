@@ -7,7 +7,8 @@
 #pragma once
 
 #include "Vector.h"
-#include "AEExplosionAudioEntity.h"
+
+class CAEExplosionAudioEntity;
 
 enum eExplosionType : uint32 {
     EXPLOSION_GRENADE,
@@ -69,29 +70,13 @@ public:
     static void AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 isVisible);
     static void Update();
 
-private:
     // NOTSA functions:
+private:
     static CExplosion* GetFree();
 
-    void SetCreator(CEntity* newCreator) noexcept {
-        if (m_pCreator)
-            m_pCreator->CleanUpOldReference(&m_pCreator);
-
-        if (newCreator)
-            newCreator->RegisterReference(&m_pCreator);
-
-        m_pCreator = newCreator;
-    }
-
-    void SetVictim(CEntity* newVictim) noexcept {
-        if (m_pVictim)
-            m_pVictim->CleanUpOldReference(&m_pVictim);
-
-        if (newVictim)
-            newVictim->RegisterReference(&m_pVictim);
-
-        m_pVictim = newVictim;
-    }
+private:
+    void SetCreator(CEntity* newCreator) noexcept;
+    void SetVictim(CEntity* newVictim) noexcept;
 };
 
 VALIDATE_SIZE(CExplosion, 0x7C);
