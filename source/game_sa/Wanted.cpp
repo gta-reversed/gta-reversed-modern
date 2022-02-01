@@ -30,7 +30,17 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
     RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
-    // RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
+    RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
+
+    RH_ScopedInstall(SetPursuitCop, 0x563060);
+
+    RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
+    RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void (CWanted::*)(CCopPed*));
+
+    RH_ScopedInstall(NumOfHelisRequired, 0x561FA0);
+    RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
+
+    RH_ScopedInstall(Update, 0x562C90);
 }
 
 // 0x562390
@@ -52,8 +62,8 @@ void CWanted::Initialise() {
     m_nWantedLevelBeforeParole = 0;
     m_nCopsBeatingSuspect = 0;
 
-    for (auto& cop : m_pCopsInPursuit) {
-        cop  = nullptr;
+    for (auto& copInPursuit : m_pCopsInPursuit) {
+        copInPursuit = nullptr;
     }
 
     ClearQdCrimes();
@@ -66,7 +76,7 @@ void CWanted::Reset() {
 
 // Initialize Static Variables
 // 0x561C70
-void CWanted::InitialiseStaticVariables() 
+void CWanted::InitialiseStaticVariables()
 {
     MaximumWantedLevel = 6;
     MaximumChaosLevel = 9200;
@@ -75,9 +85,7 @@ void CWanted::InitialiseStaticVariables()
 
 // 0x561C90
 void CWanted::UpdateWantedLevel() {
-    //plugin::CallMethod<0x561C90, CWanted*>(this);
     m_nChaosLevel = std::min(m_nChaosLevel, MaximumChaosLevel);
-
     uint32 wantedLevel = m_nWantedLevel;
 
     if (m_nChaosLevel > 4800) {
@@ -124,7 +132,7 @@ void CWanted::UpdateWantedLevel() {
     }
     else {
         if (m_nWantedLevel == 1)
-            CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, 1.0);
+            CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, 1.0f);
 
         m_nWantedLevel = 0;
         m_nMaxCopCarsInPursuit = 0;
@@ -135,7 +143,7 @@ void CWanted::UpdateWantedLevel() {
     if (wantedLevel != m_nWantedLevel)
         m_nLastTimeWantedLevelChanged = CTimer::GetTimeInMS();
 
-    if (m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage) {
+    if (BackOff()) {
         m_nMaxCopCarsInPursuit = 0;
         m_nMaxCopsInPursuit = 0;
         m_nChanceOnRoadBlock = 0;
@@ -181,9 +189,9 @@ void CWanted::SetMaximumWantedLevel(int32 level)
     }
 }
 
-// 0x561F30
-bool CWanted::AreMiamiViceRequired() {
-    return plugin::CallMethodAndReturn<bool, 0x561F30, CWanted*>(this);
+// 0x561F30, unused
+bool CWanted::AreMiamiViceRequired() const {
+    return m_nWantedLevel >= 3;
 }
 
 // Checks if SWAT is needed after four wanted level stars
@@ -209,12 +217,18 @@ bool CWanted::AreArmyRequired() const
 
 // 0x561FA0
 int32 CWanted::NumOfHelisRequired() {
-    return plugin::CallMethodAndReturn<int32, 0x561FA0, CWanted*>(this);
+    if (BackOff() || m_nWantedLevel <= 3 || m_nWantedLevel > 6)
+        return 0;
+
+    if (m_nWantedLevel == 3)
+        return 1;
+
+    return 2;
 }
 
 // 0x561FD0
 void CWanted::ResetPolicePursuit() {
-    plugin::Call<0x561FD0>();
+    /* NOP */
 }
 
 // 0x562760
@@ -241,15 +255,21 @@ void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPo
 
 // 0x562300
 void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, uint8& copsCounter) {
-    plugin::Call<0x562300, CCopPed*, CCopPed**, uint8&>(cop, copsArray, copsCounter);
+    for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
+        if (copsArray[i] != cop)
+            continue;
+
+        copsArray[i] = nullptr;
+        copsCounter--;
+        break;
+    }
 }
 
 // 0x562330
 bool CWanted::IsInPursuit(CCopPed* cop) {
-    for (auto& elem : m_pCopsInPursuit) {
-        if (elem == cop) {
+    for (auto& copInPursuit : m_pCopsInPursuit) {
+        if (copInPursuit == cop)
             return true;
-        }
     }
 
     return false;
@@ -276,7 +296,6 @@ void CWanted::SetWantedLevel(uint32 level) {
         return;
 
     uint32 newLevel = std::min(level, MaximumWantedLevel);
-
     ClearQdCrimes();
 
     switch (newLevel) {
@@ -307,9 +326,8 @@ void CWanted::SetWantedLevel(uint32 level) {
 
 // 0x562540
 void CWanted::CheatWantedLevel(uint32 level) {
-    if (level > MaximumWantedLevel) {
+    if (level > MaximumWantedLevel)
         SetMaximumWantedLevel(level);
-    }
 
     SetWantedLevel(level);
     UpdateWantedLevel();
@@ -326,8 +344,9 @@ void CWanted::SetWantedLevelNoDrop(uint32 level) {
 
 // 0x5625A0
 void CWanted::ClearWantedLevelAndGoOnParole() {
-    CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, m_nWantedLevel);
-    auto playerWanted = FindPlayerWanted(-1);
+    CStats::IncrementStat(STAT_TOTAL_NUMBER_OF_WANTED_STARS_EVADED, static_cast<float>(m_nWantedLevel));
+
+    auto playerWanted = FindPlayerWanted();
     m_nChaosLevelBeforeParole = playerWanted->m_nChaosLevel;
     m_nWantedLevelBeforeParole = playerWanted->m_nWantedLevel;
     m_nTimeOfParole = CTimer::GetTimeInMS();
@@ -352,17 +371,135 @@ CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray)
 
 // 0x562C10
 void CWanted::RemovePursuitCop(CCopPed* cop) {
-    plugin::CallMethod<0x562C10, CWanted*, CCopPed*>(this, cop);
+    for (auto& copInPursuit : m_pCopsInPursuit) {
+        if (copInPursuit != cop)
+            continue;
+
+        copInPursuit = nullptr;
+        m_nCopsInPursuit--;
+        break;
+    }
 }
 
 // 0x562C40
 void CWanted::RemoveExcessPursuitCops() {
-    plugin::CallMethod<0x562C40, CWanted*>(this);
+    if (m_nCopsInPursuit <= m_nMaxCopsInPursuit)
+        return;
+
+    do {
+        auto excessCop = ComputePursuitCopToDisplace(nullptr, m_pCopsInPursuit);
+
+        RemovePursuitCop(excessCop);
+    } while (m_nCopsInPursuit > m_nMaxCopsInPursuit);
 }
 
 // 0x562C90
 void CWanted::Update() {
-    plugin::CallMethod<0x562C90, CWanted*>(this);
+    if (m_nWantedLevel < 5) {
+        if (m_nTimeCounting) {
+            auto newStatValue = m_nCurrentChaseTime;
+            CStats::SetNewRecordStat(STAT_LONGEST_CHASE_TIME_WITH_5_OR_MORE_STARS, static_cast<float>(newStatValue));
+            CStats::SetStatValue(STAT_LONGEST_CHASE_TIME_WITH_5_OR_MORE_STARS, static_cast<float>(newStatValue));
+            m_nTimeCounting = 0;
+        }
+    }
+    else {
+        if (!m_nTimeCounting) {
+            m_nCurrentChaseTime = 0;
+            m_nCurrentChaseTimeCounter = CTimer::GetTimeInMS();
+            m_nTimeCounting = 1;
+        }
+        if (m_nTimeCounting && CTimer::GetTimeInMS() - m_nCurrentChaseTimeCounter > 1000) {
+            m_nCurrentChaseTime++;
+            m_nCurrentChaseTimeCounter = CTimer::GetTimeInMS();
+        }
+    }
+
+    if (CTimer::GetTimeInMS() - m_nTimeOfParole > 20000) {
+        m_nChaosLevelBeforeParole = 0;
+        m_nWantedLevelBeforeParole = 0;
+    }
+
+    if (CTimer::GetTimeInMS() - m_nLastTimeWantedDecreased > 1000) {
+        bool inElusiveZone = CWeather::WeatherRegion == WEATHER_REGION_DEFAULT
+            || CWeather::WeatherRegion == WEATHER_REGION_DESERT || !CGame::CanSeeOutSideFromCurrArea();
+
+        auto vehicle = FindPlayerVehicle();
+        bool hasElusiveVehicle = vehicle && (vehicle->IsLawEnforcementVehicle() || vehicle->IsSubHeli() || vehicle->IsSubPlane());
+
+        if (m_nWantedLevel > 1 && inElusiveZone && hasElusiveVehicle) {
+            m_nLastTimeWantedDecreased = CTimer::GetTimeInMS();
+        }
+        else {
+            auto playerCoors = FindPlayerCoors();
+
+            if (!WorkOutPolicePresence(playerCoors, 18.0f)) {
+                int chaosLevel = m_nChaosLevel;
+                m_nLastTimeWantedDecreased = CTimer::GetTimeInMS();
+
+                chaosLevel -= (inElusiveZone) ? 2 : 1;
+                m_nChaosLevel = std::max(chaosLevel, 0);
+
+                UpdateWantedLevel();
+                CGameLogic::SetPlayerWantedLevelForForbiddenTerritories(1);
+            }
+        }
+
+        UpdateCrimesQ();
+
+        int cops = 0;
+        bool nilEncountered = false;
+        bool listMessedUp = false;
+
+        for (auto& copInPursuit : m_pCopsInPursuit) {
+            if (copInPursuit != nullptr) {
+                ++cops;
+
+                if (nilEncountered)
+                    listMessedUp = true;
+            }
+            else {
+                nilEncountered = true;
+            }
+        }
+
+        if (cops != m_nCopsInPursuit) {
+#if !defined(NDEBUG) || !defined(FIX_BUGS)
+            // leftover debug shit
+            printf("CopPursuit total messed up: re-setting\n");
+#endif
+            m_nCopsInPursuit = cops;
+        }
+        if (listMessedUp) {
+#if !defined(NDEBUG) || !defined(FIX_BUGS)
+            // leftover debug shit
+            printf("CopPursuit pointer list messed up: re-sorting\n");
+#endif
+            bool notFixed = true;
+
+            for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
+                auto& cop = m_pCopsInPursuit[i];
+
+                if (!cop) {
+                    for (auto j = i; j < MAX_COPS_IN_PURSUIT; j++) {
+                        if (m_pCopsInPursuit[j]) {
+                            cop = m_pCopsInPursuit[j];
+                            m_pCopsInPursuit[j] = nullptr;
+                            notFixed = false;
+
+                            break;
+                        }
+                    }
+                    if (notFixed) break;
+                }
+            }
+        }
+    }
+
+    if (m_bLeavePlayerAlone != BackOff()) {
+        UpdateWantedLevel();
+        m_bLeavePlayerAlone = BackOff();
+    }
 }
 
 // 0x562F60
@@ -374,7 +511,7 @@ bool CWanted::CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** c
         if (copsCounter < maxCopsCount)
             return true;
 
-        CCopPed* cop = ComputePursuitCopToDisplace(target, copsArray);
+        auto cop = ComputePursuitCopToDisplace(target, copsArray);
         if (!cop)
             break;
 
@@ -385,10 +522,37 @@ bool CWanted::CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** c
 
 // 0x562FB0
 bool CWanted::CanCopJoinPursuit(CCopPed* cop) {
-    return plugin::CallMethodAndReturn<bool, 0x562FB0, CWanted*, CCopPed*>(this, cop);
+    if (BackOff())
+        return false;
+
+    CCopPed* cops[MAX_COPS_IN_PURSUIT]{ 0 };
+    memcpy(cops, m_pCopsInPursuit, sizeof(cops));
+
+    uint8 copsCount = m_nCopsInPursuit;
+    return CanCopJoinPursuit(cop, m_nMaxCopsInPursuit, cops, copsCount);
 }
 
 // 0x563060
 bool CWanted::SetPursuitCop(CCopPed* cop) {
-    return plugin::CallMethodAndReturn<bool, 0x563060, CWanted*, CCopPed*>(this, cop);
+    if (!CanCopJoinPursuit(cop))
+        return false;
+
+    if (m_nCopsInPursuit >= m_nMaxCopsInPursuit) {
+        do {
+            auto displacedCop = ComputePursuitCopToDisplace(cop, m_pCopsInPursuit);
+
+            RemovePursuitCop(displacedCop);
+        } while (m_nCopsInPursuit >= m_nMaxCopsInPursuit);
+    }
+
+    for (auto& copInPursuit : m_pCopsInPursuit) {
+        if (copInPursuit != nullptr)
+            continue;
+
+        copInPursuit = cop;
+        m_nCopsInPursuit++;
+        break;
+    }
+
+    return true;
 }

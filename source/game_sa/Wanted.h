@@ -16,6 +16,8 @@ class CCopPed;
 
 class CWanted {
 public:
+    static constexpr size_t MAX_COPS_IN_PURSUIT = 10;
+
     uint32 m_nChaosLevel;
     uint32 m_nChaosLevelBeforeParole;
     uint32 m_nLastTimeWantedDecreased;
@@ -69,7 +71,7 @@ public:
 
     void UpdateWantedLevel();
     static void SetMaximumWantedLevel(int32 level);
-    bool AreMiamiViceRequired();
+    bool AreMiamiViceRequired() const;
     bool AreSwatRequired() const;
     bool AreFbiRequired() const;
     bool AreArmyRequired() const;
@@ -99,6 +101,10 @@ public:
     static bool CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** copsArray, uint8& copsCounter);
     bool CanCopJoinPursuit(CCopPed* cop);
     bool SetPursuitCop(CCopPed* cop);
+
+    // NOTSA
+    // Same with ((this->m_nFlags & 7) != 0)
+    bool BackOff() const { return m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage; }
 };
 
 VALIDATE_SIZE(CWanted, 0x29C);
