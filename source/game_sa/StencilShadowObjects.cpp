@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "StencilShadowObjects.h"
+
 void CStencilShadowObjects::InjectHooks() {
     RH_ScopedClass(CStencilShadowObjects);
     RH_ScopedCategoryGlobal();

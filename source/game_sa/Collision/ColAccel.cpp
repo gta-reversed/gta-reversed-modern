@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ColAccel.h"
+
 CColAccelColBound*& CColAccel::m_colBounds = *(CColAccelColBound**)0xBC4090;
 IplDef*& CColAccel::m_iplDefs = *(IplDef**)0xBC4094;
 int32*& CColAccel::m_iSectionSize = *(int32**)0xBC4098;

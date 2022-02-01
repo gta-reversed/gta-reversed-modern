@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventPedToFlee.h"
+
 void CEventPedToFlee::InjectHooks()
 {
     RH_ScopedClass(CEventPedToFlee);

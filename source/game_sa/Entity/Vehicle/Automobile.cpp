@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -630,7 +630,7 @@ void CAutomobile::ProcessControl()
     else
         wheelSpinRate *= 0.5f;
 
-    float riseFallWheelSpinRate = CVehicle::WHEELSPIN_FALL_RATE;;
+    float riseFallWheelSpinRate = CVehicle::WHEELSPIN_FALL_RATE;
     if (wheelSpinRate >= m_fWheelSpinForAudio)
         riseFallWheelSpinRate = CVehicle::WHEELSPIN_RISE_RATE;
 
@@ -1120,7 +1120,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
     }
 
     if (pad->GetHandBrake()) {
-        float dotTurnUp = DotProduct(m_vecTurnSpeed, GetUp());;
+        float dotTurnUp = DotProduct(m_vecTurnSpeed, GetUp());
         if (dotTurnUp < 0.02f && steerLeftRight < 0.0f || dotTurnUp > -0.02f && steerLeftRight > 0.0f) {
             CVector point = m_vecCentreOfMass + GetForward();
             CVector force = GetRight() * steerLeftRight * carWeightMult * CTimer::GetTimeStep();
@@ -2075,7 +2075,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
                 CVector distance = colSphere.m_vecCenter - componentPos;
                 specialColSphere.m_vecCenter = (rotMatrix * distance) + componentPos;
                 const float newMaxZ = specialColSphere.m_fRadius + specialColSphere.m_vecCenter.z;
-                const float newMinZ = specialColSphere.m_vecCenter.z - specialColSphere.m_fRadius;;
+                const float newMinZ = specialColSphere.m_vecCenter.z - specialColSphere.m_fRadius;
                 if (maxZ < newMaxZ)
                     maxZ = newMaxZ;
                 else if (minZ > newMinZ)

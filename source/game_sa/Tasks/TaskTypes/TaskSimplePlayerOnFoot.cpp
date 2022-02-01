@@ -9,6 +9,9 @@
 #include "TaskComplexUseGoggles.h"
 #include "TaskSimpleStealthKill.h"
 #include "IKChainManager_c.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleFight.h"
+#include "TaskSimpleDuck.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);

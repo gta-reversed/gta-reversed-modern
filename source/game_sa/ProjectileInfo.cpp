@@ -1,15 +1,12 @@
 #include "StdInc.h"
+
 #include "ProjectileInfo.h"
 
 void CProjectileInfo::InjectHooks() {
     RH_ScopedClass(CProjectileInfo);
     RH_ScopedCategoryGlobal();
 
-
-    // Destructors
     // Install("CProjectileInfo", "", , &CProjectileInfo::);
-
-    // Static functions
     // RH_ScopedInstall(Initialise, 0x737B40);
     // RH_ScopedInstall(Shutdown, 0x737BC0);
     // RH_ScopedInstall(GetProjectileInfo, 0x737BF0);
@@ -21,12 +18,9 @@ void CProjectileInfo::InjectHooks() {
     // RH_ScopedInstall(IsProjectileInRange, 0x739860);
     // RH_ScopedInstall(RemoveAllProjectiles, 0x7399B0);
     // RH_ScopedInstall(RemoveIfThisIsAProjectile, 0x739A40);
-
-    // Methods
     // RH_ScopedInstall(RemoveFXSystem, 0x737B80);
 }
 
-// Static functions
 // 0x737B40
 void CProjectileInfo::Initialise() {
     plugin::Call<0x737B40>();

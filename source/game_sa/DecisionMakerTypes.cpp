@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "DecisionMakerTypes.h"
+
 void CDecisionMakerTypesFileLoader::InjectHooks() {
     RH_ScopedClass(CDecisionMakerTypesFileLoader);
     RH_ScopedCategoryGlobal();

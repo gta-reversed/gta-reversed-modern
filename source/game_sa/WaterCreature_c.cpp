@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WaterCreature_c.h"
+
 void WaterCreature_c::InjectHooks()
 {
     RH_ScopedClass(WaterCreature_c);

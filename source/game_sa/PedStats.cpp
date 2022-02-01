@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedStats.h"
+
 constexpr uint16 PED_STATS_COUNT = 43;
 
 CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;

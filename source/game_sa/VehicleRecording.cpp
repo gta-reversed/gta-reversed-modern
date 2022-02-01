@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "VehicleRecording.h"
+
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 
 int32& CVehicleRecording::NumPlayBackFiles = *(int32*)0x97F630;

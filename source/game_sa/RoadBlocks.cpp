@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "RoadBlocks.h"
+
 void CRoadBlocks::InjectHooks() {
     RH_ScopedClass(CRoadBlocks);
     RH_ScopedCategoryGlobal();

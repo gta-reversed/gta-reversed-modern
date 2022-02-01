@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdio> // FILE*
+
 class CShopping {
 public:
     static void InjectHooks();

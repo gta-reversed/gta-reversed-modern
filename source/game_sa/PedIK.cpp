@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -27,8 +27,8 @@ void CPedIK::PointGunAtPosition(CVector const& posn, float arg2) {
 }
 
 // 0x5FD8F0 
-RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat) {
-    return plugin::CallAndReturn<RwMatrixTag*, 0x5FD8F0, RwFrame*, RwMatrixTag*>(frame, transformMat);
+RwMatrix* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat) {
+    return plugin::CallAndReturn<RwMatrix*, 0x5FD8F0, RwFrame*, RwMatrix*>(frame, transformMat);
 }
 
 MoveLimbResult CPedIK::MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo)

@@ -2,7 +2,6 @@
 
 #include "Directory.h"
 
-
 void CDirectory::InjectHooks() {
     RH_ScopedClass(CDirectory);
     RH_ScopedCategoryGlobal();

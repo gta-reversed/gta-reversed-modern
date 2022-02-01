@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Coronas.h"
+
 float& CCoronas::SunScreenX = *(float*)0xC3E028;
 float& CCoronas::SunScreenY = *(float*)0xC3E02C;
 //bool& CCoronas::SunBlockedByClouds = *(bool*)0x0;

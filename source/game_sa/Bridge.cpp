@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Bridge.h"
+
 void CBridge::InjectHooks() {
     RH_ScopedClass(CBridge);
     RH_ScopedCategoryGlobal();

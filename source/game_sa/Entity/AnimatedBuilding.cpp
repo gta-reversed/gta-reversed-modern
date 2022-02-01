@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AnimatedBuilding.h"
+
 void CAnimatedBuilding::InjectHooks()
 {
     RH_ScopedClass(CAnimatedBuilding);

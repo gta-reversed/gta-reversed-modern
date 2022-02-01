@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ColTrianglePlane.h"
+
 void CColTrianglePlane::InjectHooks()
 {
     RH_ScopedClass(CColTrianglePlane);

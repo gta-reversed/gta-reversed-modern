@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "SpecialPlateHandler.h"
+
 void CSpecialPlateHandler::InjectHooks() {
     RH_ScopedClass(CSpecialPlateHandler);
     RH_ScopedCategoryGlobal();

@@ -1,6 +1,6 @@
 // Working?
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,12 +10,13 @@
 #include "Vector.h"
 #include "StreamingInfo.h"
 #include "RenderWare.h"
-#include "Entity.h"
-#include "PtrList.h"
 #include "LinkList.h"
-#include "LoadedCarGroup.h"
-#include "Directory.h"
 #include "constants.h"
+
+class CPtrList;
+class CEntity;
+class CLoadedCarGroup;
+class CDirectory;
 
 enum class eChannelState
 {

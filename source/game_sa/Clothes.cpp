@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,6 +9,7 @@
 
 #include "Clothes.h"
 #include "ClothesBuilder.h"
+#include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
 int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;

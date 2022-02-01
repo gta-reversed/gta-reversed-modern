@@ -1,16 +1,19 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "EntryExit.h"
 #include "Vector.h"
 #include "Vector2D.h"
-#include "Entity.h"
-#include "QuadTreeNode.h"
+
+#include "Pool.h"
+
+class QuadTreeNode;
+class CEntryExit;
+class CEntity;
 
 class CEntryExitManager {
 public:

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,8 +7,7 @@
 #pragma once
 
 #include "Vector.h"
-
-enum ePedType : uint32;
+#include "ePedType.h"
 
 enum ePedGroupPlacerType {
     GROUP_PLACER_FORMATION1 = 0,

@@ -1,22 +1,26 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Placeable.h"
-#include "Cam.h"
+#include <RenderWare.h>
+
 #include "QueuedMode.h"
-#include "Vector.h"
-#include "RenderWare.h"
 #include "CamPathSplines.h"
-#include "Matrix.h"
-#include "Vehicle.h"
-#include "Rect.h"
-#include "Ped.h"
-#include "Garage.h"
+#include "eCamMode.h"
+#include "eVehicleType.h"
+#include "ePedType.h"
+
+class CEntity;
+class CVector;
+class CVehicle;
+class CMatrix;
+class CPed;
+class CSphere;
+class CGarage;
 
 enum class eFadeFlag : uint16 {
     FADE_IN,
@@ -401,7 +405,7 @@ public:
     void InitialiseCameraForDebugMode();
     bool IsExtraEntityToIgnore(CEntity *entity);
     bool IsItTimeForNewCamera(int32 camSequence, int32 startTime);
-    bool IsSphereVisible(const CVector& origin, float radius, RwMatrixTag *transformMatrix);
+    bool IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix);
     bool IsSphereVisible(const CVector& origin, float radius);
     bool IsSphereVisible(const CSphere& sphere) { return IsSphereVisible(sphere.m_vecCenter, sphere.m_fRadius); }
     void LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase);

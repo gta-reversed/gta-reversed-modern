@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "SurfaceInfos_c.h"
+
 SurfaceInfos_c* g_surfaceInfos = reinterpret_cast<SurfaceInfos_c*>(0xB79538);
 char* SurfaceInfos_c::cDefaultName = reinterpret_cast<char*>(0x85C658); // "DEFAULT/0"
 
