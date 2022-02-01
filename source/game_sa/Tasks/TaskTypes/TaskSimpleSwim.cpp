@@ -987,7 +987,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         bool bPlayerUse2PlayerControls = false;
         if (CGameLogic::IsPlayerUse2PlayerControls(pPed))
         {
-            bPlayerUse2PlayerControls = true;;
+            bPlayerUse2PlayerControls = true;
             pedWalkX = vecPedWalk.x;
             if (fWalkMagnitude > 0)
             {
@@ -1214,7 +1214,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         float fUpperTorsoRotationX = 0.0f;
         if (CCamera::m_bUseMouse3rdPerson)
         {
-            CVector vecActiveCamFront = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront;;
+            CVector vecActiveCamFront = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront;
             if (TheCamera.GetLookDirection() != 3)
             {
                 vecActiveCamFront.x *= -1.0f;

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "SpecialFX.h"
+
 extern RwTexture*& gpFinishFlagTex;
 
 bool& CSpecialFX::bVideoCam = *(bool*)0xC7C70C;

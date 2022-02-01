@@ -2,15 +2,14 @@
 
 class CStencilShadowObject {
 public:
-    CEntity*              owner;
+    CEntity*              m_pOwner;
     int16                 m_NumShadowFaces;
     char                  m_Type;
-    char                  pad;
     uint32                m_FaceID;
     uint32                m_SizeOfShadowFacesData;
     uint32                m_ShadowFacesData;
-    CStencilShadowObject* next;
-    CStencilShadowObject* prev;
+    CStencilShadowObject* m_pNext;
+    CStencilShadowObject* m_pPrev;
 
 public:
     static void InjectHooks();
@@ -26,4 +25,4 @@ public:
 
 VALIDATE_SIZE(CStencilShadowObject, 0x1C);
 
-void gRenderStencil();
+bool gRenderStencil();

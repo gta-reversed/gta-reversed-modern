@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "VisibilityPlugins.h"
 
 int32& CVisibilityPlugins::ms_atomicPluginOffset = *(int32*)0x8D608C;
 int32& CVisibilityPlugins::ms_clumpPluginOffset = *(int32*)0x8D6094;

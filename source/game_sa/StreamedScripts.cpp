@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "StreamedScripts.h"
+
 void CStreamedScripts::Initialise() {
     plugin::CallMethod<0x470660, CStreamedScripts*>(this);
 }

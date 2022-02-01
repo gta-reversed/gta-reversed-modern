@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventCreatePartnerTask.h"
+
 void CEventCreatePartnerTask::InjectHooks()
 {
     RH_ScopedClass(CEventCreatePartnerTask);

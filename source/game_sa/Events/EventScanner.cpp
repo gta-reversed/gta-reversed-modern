@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventScanner.h"
+
 float& CPedAcquaintanceScanner::ms_fThresholdDotProduct = *(float*)0xC0B034;
 
 void CEventScanner::ScanForEvents(CPed* pPed)

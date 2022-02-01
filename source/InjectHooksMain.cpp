@@ -73,6 +73,7 @@
 #include "PedClothesDesc.h"
 #include "WaterCannon.h"
 #include "EntryExitManager.h"
+#include "ObjectSaveStructure.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -258,7 +259,7 @@ void InjectHooksMain() {
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CPlaceable::InjectHooks();
-    CEntity::InjectHooks();;
+    CEntity::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CDummy::InjectHooks();

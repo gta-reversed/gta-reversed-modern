@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "LodTimeModelInfo.h"
+
 void CLodTimeModelInfo::InjectHooks()
 {
     RH_ScopedClass(CLodTimeModelInfo);

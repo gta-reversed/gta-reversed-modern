@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Camera.h"
+
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);

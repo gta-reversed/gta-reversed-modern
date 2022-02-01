@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventInWater.h"
+
 void CEventInWater::InjectHooks()
 {
     RH_ScopedClass(CEventInWater);

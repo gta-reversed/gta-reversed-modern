@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedModelInfo.h"
+
 RwObjectNameIdAssocation(&CPedModelInfo::m_pPedIds)[NUM_PED_NAME_ID_ASSOC] = *(RwObjectNameIdAssocation(*)[NUM_PED_NAME_ID_ASSOC])0x8A6268;
 tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPedColNodeInfo(*)[NUM_PED_COL_NODE_INFOS])0x8A6308;
 

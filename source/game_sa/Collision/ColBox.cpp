@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ColBox.h"
+
 CColBox& CColBox::operator=(CColBox const& right)
 {
     m_vecMin = right.m_vecMin;

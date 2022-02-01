@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
-void CVehicleScanner::ScanForVehiclesInRange(CPed* pPed)
+#include "VehicleScanner.h"
+
+void CVehicleScanner::ScanForVehiclesInRange(CPed* ped)
 {
-    plugin::CallMethod<0x5FFE60, CVehicleScanner*, CPed*>(this, pPed);
+    plugin::CallMethod<0x5FFE60, CVehicleScanner*, CPed*>(this, ped);
 }

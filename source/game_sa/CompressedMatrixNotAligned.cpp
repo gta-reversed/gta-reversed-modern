@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CompressedMatrixNotAligned.h"
+
 void CCompressedMatrixNotAligned::InjectHooks()
 {
     RH_ScopedClass(CCompressedMatrixNotAligned);

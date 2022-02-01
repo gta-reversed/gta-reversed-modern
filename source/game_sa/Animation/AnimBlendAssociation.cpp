@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AnimBlendAssociation.h"
+
 void CAnimBlendAssociation::InjectHooks() {
     RH_ScopedClass(CAnimBlendAssociation);
     RH_ScopedCategory("Animation");

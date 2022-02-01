@@ -2,8 +2,6 @@
 
 #include "UpsideDownCarCheck.h"
 
-namespace rng = std::ranges;
-
 void CUpsideDownCarCheck::InjectHooks() {
     RH_ScopedClass(CUpsideDownCarCheck);
     RH_ScopedCategoryGlobal();
@@ -39,7 +37,7 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(/* const */ CVehicle* vehicle) {
         }
     };
     if (!vehicle->CanPedStepOutCar(false)) {
-        const auto up = vehicle->GetUp();
+        const auto& up = vehicle->GetUp();
         return up.z < 0.3f && GetNumContactWheels() < 4  // Not totally up-side down
             || up.z < 0.f;                               // Literally up-side down
     }

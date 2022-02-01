@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "LodAtomicModelInfo.h"
 
 void CLodAtomicModelInfo::InjectHooks()
 {

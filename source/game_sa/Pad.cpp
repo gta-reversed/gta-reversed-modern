@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -485,7 +485,7 @@ bool CPad::isEnterJustPressed() {
 
 // 0x4D59B0
 bool CPad::isStandardKeyJustPressed(uint8 key) {
-    return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key];;
+    return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key];
 }
 
 // 0x744D50

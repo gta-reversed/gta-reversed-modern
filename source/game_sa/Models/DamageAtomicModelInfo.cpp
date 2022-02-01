@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "DamageAtomicModelInfo.h"
+
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
 void CDamageAtomicModelInfo::InjectHooks()

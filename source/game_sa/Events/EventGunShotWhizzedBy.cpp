@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventGunShotWhizzedBy.h"
+
 void CEventGunShotWhizzedBy::InjectHooks()
 {
     RH_ScopedClass(CEventGunShotWhizzedBy);

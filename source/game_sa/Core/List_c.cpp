@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "List_c.h"
+
 void List_c::InjectHooks()
 {
     RH_ScopedClass(List_c);
@@ -18,8 +20,7 @@ void List_c::InjectHooks()
     RH_ScopedInstall(GetItemOffset, 0x4A9010);
 }
 
-// US-1.00 @ 0x004A8DF0
-// EU-1.00 @ 0x004A8DF0
+// 0x4A8DF0
 void List_c::AddItem(ListItem_c * pItem) {
     assert(pItem);
     auto* pOldHead = m_pHead;
@@ -35,8 +36,7 @@ void List_c::AddItem(ListItem_c * pItem) {
     ++m_nCount;
 }
 
-// US-1.00 @ 0x004A8E30
-// EU-1.00 @ 0x004A8E30
+// 0x4A8E30
 void List_c::RemoveItem(ListItem_c * pItem) {
     assert(pItem);
 
@@ -62,8 +62,7 @@ ListItem_c* List_c::GetTail()
     return m_pTail;
 }
 
-
-// EU-1.00 @ 0x004A8E70
+// 0x4A8E70
 ListItem_c * List_c::RemoveHead() {
     //return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
     if (!m_pHead)
@@ -175,15 +174,13 @@ ListItem_c * List_c::GetNext(ListItem_c * pItem) {
     return pItem->m_pNext;
 }
 
-// US-1.00 @ 0x004A9000
-// EU-1.00 @ 0x004A9000
+// 0x4A9000
 ListItem_c * List_c::GetPrev(ListItem_c * pItem) {
     assert(pItem);
     return pItem->m_pPrev;
 }
 
-// US-1.00 @ 0x004A9010
-// EU-1.00 @ 0x004A9010
+// 0x4A9010
 ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
     if (bFromHead)
     {
