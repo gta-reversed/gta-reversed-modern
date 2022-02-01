@@ -185,6 +185,9 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CPlaceName::InjectHooks();
+    return;
+
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();

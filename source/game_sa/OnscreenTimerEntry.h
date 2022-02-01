@@ -18,6 +18,7 @@ public:
     uint32          m_nClockBeepCountdownSecs;
 
 public:
+    void Init(); // NOTSA
     void Process();
     void ProcessForDisplayClock();
 };

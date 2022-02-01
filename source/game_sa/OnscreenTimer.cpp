@@ -4,13 +4,15 @@
 #include "OnscreenTimerEntry.h"
 
 void COnscreenTimer::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("COnscreenTimer", "AddClock", 0x44CD50, &COnscreenTimer::AddClock);
-    Install("COnscreenTimer", "ClearClock", 0x44CE60, &COnscreenTimer::ClearClock);
-    Install("COnscreenTimer", "SetClockBeepCountdownSecs", 0x44CEE0, &COnscreenTimer::SetClockBeepCountdownSecs);
-    Install("COnscreenTimer", "AddCounter", 0x44CDA0, &COnscreenTimer::AddCounter);
-    Install("COnscreenTimer", "ClearCounter", 0x44CE80, &COnscreenTimer::ClearCounter);
-    Install("COnscreenTimer", "SetCounterFlashWhenFirstDisplayed", 0x44CEB0, &COnscreenTimer::SetCounterFlashWhenFirstDisplayed);
+    RH_ScopedClass(COnscreenTimer);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(AddClock, 0x44CD50);
+    RH_ScopedInstall(ClearClock, 0x44CE60);
+    RH_ScopedInstall(SetClockBeepCountdownSecs, 0x44CEE0);
+    RH_ScopedInstall(AddCounter, 0x44CDA0);
+    RH_ScopedInstall(ClearCounter, 0x44CE80);
+    RH_ScopedInstall(SetCounterFlashWhenFirstDisplayed, 0x44CEB0);
 }
 
 // 0x44CBC0
@@ -18,17 +20,8 @@ void COnscreenTimer::Init() {
     for (COnscreenCounterEntry& counter : m_aCounters) {
         counter.Init();
     }
-
+    m_Clock.Init();
     m_bPaused = false;
-    m_Clock.m_nVarId = 0;
-
-    m_Clock.m_szDescriptionTextKey[0] = '\0';
-    m_Clock.m_szDescriptionTextKey[4] = '\0';
-    m_Clock.m_szDescriptionTextKey[8] = '\0';
-
-    m_Clock.m_bEnabled = false;
-    m_Clock.m_nTimerDirection = eTimerDirection::INCREASE; // 1;
-    m_Clock.m_nClockBeepCountdownSecs = 12;
 }
 
 #if ANDROID

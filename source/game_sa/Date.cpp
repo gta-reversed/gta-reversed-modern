@@ -2,6 +2,18 @@
 
 #include "OnscreenTimerEntry.h"
 
+void COnscreenTimerEntry::Init() {
+    m_nVarId = 0;
+
+    m_szDescriptionTextKey[0] = '\0';
+    m_szDescriptionTextKey[4] = '\0';
+    m_szDescriptionTextKey[8] = '\0';
+
+    m_bEnabled = false;
+    m_nTimerDirection = eTimerDirection::INCREASE; // 1;
+    m_nClockBeepCountdownSecs = 12;
+}
+
 // 0x44CB10
 void COnscreenTimerEntry::Process() {
     if (m_nVarId == 0)
@@ -28,7 +40,10 @@ void COnscreenTimerEntry::Process() {
             m_bEnabled = false;
         }
     }
-    printf("%d\n", timerPtr);
+
+#ifndef NDEBUG
+    printf("[COnscreenTimerEntry::Process] timerPtr: %d\n", timerPtr);
+#endif
 }
 
 // 0x44CA40

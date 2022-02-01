@@ -17,17 +17,7 @@ public:
     void Process();
     inline void Display() const;
     void ProcessAfterFrontEndShutDown();
-
-    static CVector CalcPosition() {
-        auto player = FindPlayerPed();
-        if (player->bInVehicle) {
-            return player->m_pVehicle->GetPosition();
-        } else {
-            auto& posn = player->GetPosition();
-            CEntryExitManager::GetPositionRelativeToOutsideWorld(posn);
-            return posn;
-        }
-    }
+    inline static CVector CalcPosition(); // NOTSA, inlined
 };
 
 VALIDATE_SIZE(CPlaceName, 0x8);

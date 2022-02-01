@@ -6,8 +6,11 @@
 #include "Hud.h"
 
 void CPlaceName::InjectHooks() {
-    ReversibleHooks::Install("CPlaceName", "GetForMap", 0x571D90, &CPlaceName::GetForMap);
-    ReversibleHooks::Install("CPlaceName", "Process", 0x571F20, &CPlaceName::Process);
+    RH_ScopedClass(CPlaceName);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetForMap, 0x571D90);
+    RH_ScopedInstall(Process, 0x571F20);
 }
 
 CPlaceName::CPlaceName() {
@@ -41,11 +44,11 @@ void CPlaceName::Process() {
         Init();
     }
 
-    if ((smallestZone == m_pZone || CGame::currArea == AREA_CODE_1) &&
+    if ((smallestZone == m_pZone || CGame::currArea == AREA_CODE_1) && // todo: !CGame::CanSeeOutSideFromCurrArea() ?
             m_pZone ||
             smallestZone &&
             m_pZone &&
-            strcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey) == 0
+            memcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey, sizeof(smallestZone->m_szTextKey))
     ) {
         if (m_nAdditionalTimer) {
             m_nAdditionalTimer -= 1;
@@ -64,5 +67,16 @@ void CPlaceName::Display() const {
         CHud::SetZoneName(const_cast<char*>(m_pZone->GetTranslatedName()), false);
     } else {
         CHud::SetZoneName(nullptr, false);
+    }
+}
+
+CVector CPlaceName::CalcPosition() {
+    auto player = FindPlayerPed();
+    if (player->bInVehicle) {
+        return player->m_pVehicle->GetPosition();
+    } else {
+        auto& posn = player->GetPosition();
+        CEntryExitManager::GetPositionRelativeToOutsideWorld(posn);
+        return posn;
     }
 }

@@ -3,9 +3,11 @@
 #include "CurrentVehicle.h"
 
 void CCurrentVehicle::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CCurrentVehicle", "Display", 0x571EA0, &CCurrentVehicle::Display);
-    Install("CCurrentVehicle", "Process", 0x572040, &CCurrentVehicle::Process);
+    RH_ScopedClass(CCurrentVehicle);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Display, 0x571EA0);
+    RH_ScopedInstall(Process, 0x572040);
 }
 
 CCurrentVehicle::CCurrentVehicle() {
@@ -20,8 +22,8 @@ void CCurrentVehicle::Init() {
 // 0x571EA0
 void CCurrentVehicle::Display() const {
     if (m_pVehicle) {
-        auto modelInfo = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_pVehicle->m_nModelIndex));
-        CHud::SetVehicleName(TheText.Get(modelInfo->m_szGameName));
+        auto mi = CModelInfo::GetModelInfo(m_pVehicle->m_nModelIndex)->AsVehicleModelInfoPtr();
+        CHud::SetVehicleName(TheText.Get(mi->m_szGameName));
     } else {
         CHud::SetVehicleName(nullptr);
     }
@@ -29,6 +31,6 @@ void CCurrentVehicle::Display() const {
 
 // 0x572040
 void CCurrentVehicle::Process() {
-    m_pVehicle = FindPlayerVehicle(-1, false);
+    m_pVehicle = FindPlayerVehicle();
     Display();
 }
