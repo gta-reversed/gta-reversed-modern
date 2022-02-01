@@ -378,7 +378,7 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 
 // 0x4185C0
 int32 CCollision::ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7) {
-    return plugin::CallAndReturn<int32, 0x4185C0, CMatrix const&, CColModel&, CMatrix const&, CColModel&, CColPoint*, CColPoint*, float*, bool>(transform1, colModel1, transform2, colModel2, colPoint1, colPoint2, maxTouchDistance, arg7);
+    
 }
 
 // 0x419F00

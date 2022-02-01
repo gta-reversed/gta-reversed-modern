@@ -21,7 +21,7 @@ void CCollisionData::InjectHooks()
 CCollisionData::CCollisionData()
 {
     bUsesDisks = false;
-    bNotEmpty = false;
+    bHasFaceGroups = false;
     bHasShadowInfo = false;
 
     m_nNumSpheres = 0;
@@ -74,6 +74,8 @@ void CCollisionData::RemoveCollisionVolumes()
 // 0x40F120
 void CCollisionData::Copy(CCollisionData const& src)
 {
+    assert(bHasFaceGroups); // See header file for an explanation about this.
+
 // ----- SPHERES -----
     if (m_nNumSpheres != src.m_nNumSpheres || !src.m_nNumSpheres)
     {
