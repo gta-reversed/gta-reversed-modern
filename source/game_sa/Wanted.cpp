@@ -31,15 +31,11 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
-
     RH_ScopedInstall(SetPursuitCop, 0x563060);
-
     RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
     RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void (CWanted::*)(CCopPed*));
-
     RH_ScopedInstall(NumOfHelisRequired, 0x561FA0);
     RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
-
     RH_ScopedInstall(Update, 0x562C90);
 }
 
@@ -217,7 +213,7 @@ bool CWanted::AreArmyRequired() const
 
 // 0x561FA0
 int32 CWanted::NumOfHelisRequired() {
-    if (BackOff() || m_nWantedLevel <= 3 || m_nWantedLevel > 6)
+    if (BackOff() || m_nWantedLevel < 3 || m_nWantedLevel > 6)
         return 0;
 
     if (m_nWantedLevel == 3)
