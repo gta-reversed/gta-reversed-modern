@@ -43,6 +43,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
     RH_ScopedInstall(ReportCrimeNow, 0x562120);
     RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
+    RH_ScopedInstall(UpdateEachFrame, 0x562360);
 }
 
 // 0x562390
@@ -374,7 +375,11 @@ bool CWanted::IsInPursuit(CCopPed* cop) {
 
 // 0x562360
 void CWanted::UpdateEachFrame() {
-    plugin::Call<0x562360>();
+    auto playerWanted = FindPlayerWanted();
+    auto wantedLevel = playerWanted->GetWantedLevel();
+
+    if (playerWanted->BackOff() || (wantedLevel != 3) && (wantedLevel <= 3 || wantedLevel > 6))
+        bUseNewsHeliInAdditionToPolice = true;
 }
 
 // 0x562410
