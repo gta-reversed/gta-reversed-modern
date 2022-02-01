@@ -213,11 +213,14 @@ bool CWanted::AreArmyRequired() const
 
 // 0x561FA0
 int32 CWanted::NumOfHelisRequired() {
-    if (BackOff() || m_nWantedLevel < 3 || m_nWantedLevel > 6)
+    if(BackOff())
         return 0;
 
     if (m_nWantedLevel == 3)
         return 1;
+
+    if (m_nWantedLevel <= 3 || m_nWantedLevel > 6)
+        return 0;
 
     return 2;
 }
