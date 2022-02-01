@@ -36,8 +36,7 @@ const char* CPlaceName::GetForMap(float x, float y) {
 
 // 0x571F20
 void CPlaceName::Process() {
-    CVector posn = CalcPosition();
-    CZone* smallestZone = CTheZones::FindSmallestZoneForPosition(posn, false);
+    CZone* smallestZone = CTheZones::FindSmallestZoneForPosition(CalcPosition(), false);
     if (!smallestZone) {
         Init();
     }
@@ -46,7 +45,7 @@ void CPlaceName::Process() {
             m_pZone ||
             smallestZone &&
             m_pZone &&
-            strcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey) == 0 // :thinking
+            strcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey) == 0
     ) {
         if (m_nAdditionalTimer) {
             m_nAdditionalTimer -= 1;
