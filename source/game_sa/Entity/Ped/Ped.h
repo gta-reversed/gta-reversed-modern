@@ -535,6 +535,7 @@ public:
     inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
     inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    inline CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
     inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }

@@ -65,6 +65,11 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
+#include "WindModifiers.h"
+#include "PedPlacement.h"
+#include "UpsideDownCarCheck.h"
 #include "PedClothesDesc.h"
 #include "WaterCannon.h"
 
@@ -182,6 +187,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CPedPlacement::InjectHooks();
+    CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CFileLoader::InjectHooks();
@@ -351,6 +358,7 @@ void InjectHooksMain() {
     CCustomCarPlateMgr::InjectHooks();
     CDraw::InjectHooks();
     CEntryExitManager::InjectHooks();
+    CEntryExit::InjectHooks();
     CInformGroupEventQueue::InjectHooks();
     CGangs::InjectHooks();
     CPlayerInfo::InjectHooks();

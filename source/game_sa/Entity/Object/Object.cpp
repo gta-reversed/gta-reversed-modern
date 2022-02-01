@@ -393,7 +393,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
         bCollisionDisabled = true;
     else if (colPhysical->m_pAttachedTo == this || m_pAttachedTo && m_pAttachedTo == colPhysical->m_pAttachedTo)
         bCollisionDisabled = true;
-    else if (physicalFlags.bDisableZ && !physicalFlags.bApplyGravity && colPhysical->physicalFlags.bDisableZ)
+    else if (physicalFlags.bDisableZ && !physicalFlags.bApplyGravity && !colPhysical->physicalFlags.bDisableZ)
         bCollisionDisabled = true;
     else
     {
@@ -456,7 +456,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
             }
             else if(m_nModelIndex != eModelID::MODEL_GRENADE
                 || !colPhysical->IsPed()
-                || GetPosition().z > colPhysical->GetPosition().z)
+                || m_matrix->GetPosition().z >= colPhysical->m_matrix->GetPosition().z)
             {
                 if (colPhysical->IsObject() && colPhysical->AsObject()->m_pObjectInfo->m_fUprootLimit > 0.0F && !colPhysical->m_pAttachedTo)
                 {

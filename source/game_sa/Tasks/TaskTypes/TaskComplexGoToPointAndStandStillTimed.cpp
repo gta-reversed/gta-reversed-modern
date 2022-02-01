@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskComplexGoToPointAndStandStillTimed.h"
+#include "PedPlacement.h"
 
 void CTaskComplexGoToPointAndStandStillTimed::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToPointAndStandStillTimed);
@@ -82,7 +83,7 @@ CTask* CTaskComplexGoToPointAndStandStillTimed::CreateFirstSubTask_Reversed(CPed
 
 CTask* CTaskComplexGoToPointAndStandStillTimed::ControlSubTask_Reversed(CPed* ped) {
     if (m_timer.Reset()) {
-        if (m_timer.IsOutOfTime() && m_pSubTask->GetTaskType() != TASK_SIMPLE_STAND_STILL && CPedPlacement::FindZCoorForPed(&m_vecTargetPoint)) {
+        if (m_timer.IsOutOfTime() && m_pSubTask->GetTaskType() != TASK_SIMPLE_STAND_STILL && CPedPlacement::FindZCoorForPed(m_vecTargetPoint)) {
             ped->SetPosn(m_vecTargetPoint);
         }
     }

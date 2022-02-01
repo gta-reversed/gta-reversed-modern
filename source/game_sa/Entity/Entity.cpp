@@ -15,6 +15,7 @@
 #include "Occlusion.h"
 #include "MotionBlurStreaks.h"
 #include "TagManager.h"
+#include "WindModifiers.h"
 
 void CEntity::InjectHooks()
 {
