@@ -40,6 +40,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
     RH_ScopedInstall(UpdateCrimesQ, 0x562760);
     RH_ScopedInstall(RegisterCrime, 0x562410);
+    RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
 }
 
 // 0x562390
@@ -296,12 +297,13 @@ void CWanted::UpdateEachFrame() {
 
 // 0x562410
 void CWanted::RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
-    AddCrimeToQ(crimeType, (int)ped, posn, false, bPoliceDontReallyCare);
+    AddCrimeToQ(crimeType, (int32)ped, posn, false, bPoliceDontReallyCare);
 }
 
 // 0x562430
 void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
-    plugin::CallMethod<0x562430, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);
+    if (!AddCrimeToQ(crimeType, (int32)ped, posn, true, bPoliceDontReallyCare))
+        ReportCrimeNow(crimeType, posn, bPoliceDontReallyCare);
 }
 
 // 0x562470
