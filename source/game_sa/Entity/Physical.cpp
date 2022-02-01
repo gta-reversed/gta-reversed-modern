@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,8 @@
 
 #include "Physical.h"
 #include "CarCtrl.h"
+
+#include "TaskSimpleClimb.h"
 
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
 float& CPhysical::DAMPING_LIMIT_OF_SPRING_FORCE = *(float*)0x8CD7A4;
@@ -833,7 +835,7 @@ void CPhysical::ApplyTurnSpeed()
         if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) {
             CVector vecNegativeCentreOfMass = m_vecCentreOfMass * -1.0f;
             CVector vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), vecNegativeCentreOfMass);
-            GetPosition() += CrossProduct(vecTurnSpeedTimeStep, vecCentreOfMassMultiplied);;
+            GetPosition() += CrossProduct(vecTurnSpeedTimeStep, vecCentreOfMassMultiplied);
         }
     }
 }

@@ -1,10 +1,15 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
+
+// Sadly none of these can be forward declared simply.
+// One possible way to do it would be to put each pool type into a different header
+// And include only the necessary types there.
+// Either way: The Pool's object type has to be included.
 
 #include "Pool.h"
 #include "CopPed.h"

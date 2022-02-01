@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Maths.h"
+
 float* CMaths::ms_SinTable = (float*)0xBB3DFC;
 
 void CMaths::InjectHooks()

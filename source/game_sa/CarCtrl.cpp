@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "CarCtrl.h"
+#include "TrafficLights.h"
 
 uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
 uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;

@@ -1,9 +1,10 @@
 #include "StdInc.h"
 
 #include "Cheat.h"
+#include "PedType.h"
+#include "PedClothesDesc.h"
 
 #include "TaskSimpleJetPack.h"
-#include "PedType.h"
 
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
@@ -12,7 +13,15 @@ bool (&CCheat::m_aCheatsActive)[TOTAL_CHEATS] = *reinterpret_cast<bool (*)[TOTAL
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 
 // NOTSA
-std::vector<Cheat> cheats = {
+struct Cheat {
+    DWORD   installAddress;
+    void*   method;
+    const   std::string methodName;
+    uint32  hash;
+    eCheats type;
+};
+
+const auto cheats = std::to_array<Cheat>({
         { 0x4385b0,  CCheat::WeaponCheat1, "WeaponCheat1", 0xde4b237d, CHEAT_WEAPON_SET1 },
         { 0x438890,  CCheat::WeaponCheat2, "WeaponCheat2", 0xb22a28d1, CHEAT_WEAPON_SET2 },
         { 0x438b30,  CCheat::WeaponCheat3, "WeaponCheat3", 0x5a783fae, CHEAT_WEAPON_SET3 },
@@ -105,7 +114,7 @@ std::vector<Cheat> cheats = {
         { 0x43a680,  CCheat::MonsterTruckCheat, "MonsterTruckCheat", 0x171ba8cc, CHEAT_SPAWN_MONSTER },
         { 0x0, nullptr, "", 0x86988dae, CHEAT_PROSTITUTES_PAY_YOU },
         { 0x0, nullptr, "", 0x2bdd2fa1, CHEAT_ALL_TAXIS_NITRO },
-};
+});
 
 void CCheat::InjectHooks() {
     RH_ScopedClass(CCheat);

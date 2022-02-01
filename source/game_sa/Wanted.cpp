@@ -1,10 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "Wanted.h"
 
 uint32& CWanted::MaximumWantedLevel = *(uint32*)0x8CDEE4;
 // 0x8CDEE8
@@ -260,6 +262,7 @@ void CWanted::UpdateEachFrame() {
     plugin::Call<0x562360>();
 }
 
+// CWanted::RegisterCrime(eCrimeType, CVector const&, uint, bool)
 // 0x562410
 void CWanted::RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
     plugin::CallMethod<0x562410, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);

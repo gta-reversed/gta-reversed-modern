@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Debug.h"
+
 std::vector<CDebug::tDebugText> CDebug::m_debugStrings;
 
 void CDebug::InjectHooks()

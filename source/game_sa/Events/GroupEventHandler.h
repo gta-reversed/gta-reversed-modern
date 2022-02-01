@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Event.h"
+class CPed;
+class CEvent;
+class CEventGroupEvent;
 
 class CGroupEventHandler {
 public:

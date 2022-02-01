@@ -9,8 +9,8 @@ static float& m_fTrailerSuspensionForce = *(float*)0x8D3464;    // 1.5f
 static float& m_fTrailerDampingForce = *(float*)0x8D3468;       // 0.1f
 
 // 0x6D03A0
-CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
-    plugin::CallMethod<0x6D03A0, CTrailer*>(this);
+CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
+    plugin::CallMethod<0x6D03A0, CTrailer*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
     /*
     m_fTrailerColPointValue1 = 1.0f;
     m_fTrailerColPointValue2 = 1.0f;

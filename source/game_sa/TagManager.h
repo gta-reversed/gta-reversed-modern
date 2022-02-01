@@ -1,5 +1,10 @@
 #pragma once
 
+#include "RenderWare.h"
+
+class CEntity;
+class CRect;
+
 struct tTagDesc {
     CEntity* m_pEntity;
     uint8    m_nAlpha;

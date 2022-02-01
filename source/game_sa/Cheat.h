@@ -1,22 +1,15 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
 #include "eCheats.h"
+#include "eModelID.h"
 
-// NOTSA
-struct Cheat {
-    DWORD installAddress;
-    void* method;
-    const std::string methodName;
-    uint32 hash;
-    eCheats type;
-};
+class CVehicle;
 
 class CCheat {
 public:

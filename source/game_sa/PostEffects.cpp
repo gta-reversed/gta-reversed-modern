@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PostEffects.h"
+
 float& CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = *(float*)0x8D5168; // 0.0005f;
 float& CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = *(float*)0x8D516C;    // 0.35f;
 float& CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = *(float*)0x8D5170;   // 1.0f;

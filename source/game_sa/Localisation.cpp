@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Localisation.h"
 
 bool& CLocalisation::nastyGame = *(bool*)0xB9B7EC;
 bool& CLocalisation::germanGame = *(bool*)0xB9B7ED;

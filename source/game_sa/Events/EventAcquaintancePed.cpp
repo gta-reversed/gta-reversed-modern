@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventAcquaintancePed.h"
+
 void CEventAcquaintancePed::InjectHooks()
 {
     RH_ScopedClass(CEventAcquaintancePed);

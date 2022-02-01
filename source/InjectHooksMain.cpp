@@ -70,6 +70,12 @@
 #include "WindModifiers.h"
 #include "PedPlacement.h"
 #include "UpsideDownCarCheck.h"
+#include "PedClothesDesc.h"
+#include "WaterCannon.h"
+#include "EntryExitManager.h"
+#include "ObjectSaveStructure.h"
+#include "PedStats.h"
+#include "TrafficLights.h"
 #include "CurrentVehicle.h"
 #include "PlaceName.h"
 #include "UserDisplay.h"
@@ -264,7 +270,7 @@ void InjectHooksMain() {
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CPlaceable::InjectHooks();
-    CEntity::InjectHooks();;
+    CEntity::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CDummy::InjectHooks();

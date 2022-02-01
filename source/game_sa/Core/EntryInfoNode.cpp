@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EntryInfoNode.h"
+
 void CEntryInfoNode::InjectHooks()
 {
     RH_ScopedClass(CEntryInfoNode);

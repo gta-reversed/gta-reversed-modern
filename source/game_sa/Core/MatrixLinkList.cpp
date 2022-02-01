@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "MatrixLinkList.h"
+
 CMatrixLinkList& gMatrixList = *(CMatrixLinkList*)0xB74288;
 
 void CMatrixLinkList::InjectHooks()

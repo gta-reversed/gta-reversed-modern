@@ -1,17 +1,20 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "RenderWare.h"
-#include "BoundingBox.h"
-#include "ColModel.h"
-#include "Entity.h"
-#include "FileObjectInstance.h"
+#include "renderware.h"
+
 #include "FileMgr.h"
+
+class CColModel;
+class CBoundingBox;
+class CFileCarGenerator;
+class CEntity;
+class CFileObjectInstance;
 
 enum eSection : uint8 {
     UNDEFINED             = 0,
@@ -81,7 +84,7 @@ public:
 
     static void LoadAudioZone(const char* line);
     static void LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox);
-    static void LoadCarGenerator(struct CFileCarGenerator* carGen, int32 iplId);
+    static void LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId);
     static void LoadCarGenerator(const char* line, int32 iplId);
     static void LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4);
 

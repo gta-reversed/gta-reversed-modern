@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,10 +7,11 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "Entity.h"
-#include "ClumpModelInfo.h"
-#include "AtomicModelInfo.h"
 #include "LinkList.h"
+
+class CEntity;
+class CClumpModelInfo;
+class CAtomicModelInfo;
 
 enum eAtomicComponentFlag {
     ATOMIC_IS_OK_STATE = 0x1,
@@ -129,7 +130,7 @@ public:
     static CClumpModelInfo* GetClumpModelInfo(RpClump* clump);
     static float GetDistanceSquaredFromCamera(RwFrame* frame);
     static float GetDistanceSquaredFromCamera(CVector* pPos);
-    static float GetDotProductWithCameraVector(RwMatrixTag* atomicMatrix, RwMatrixTag* clumpMatrix, uint16 flags);
+    static float GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags);
     static int32 GetFrameHierarchyId(RwFrame* frame);
     static int16 GetModelInfoIndex(RpAtomic* atomic);
     static int16 GetUserValue(RpAtomic* atomic);

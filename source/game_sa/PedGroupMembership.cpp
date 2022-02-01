@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedGroupMembership.h"
+
 void CPedGroupMembership::AddFollower(CPed* ped) {
     plugin::CallMethod<0x5F8020, CPedGroupMembership*, CPed*>(this, ped);
 }

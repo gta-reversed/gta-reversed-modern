@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "QuadTreeNode.h"
+
 CPool<CQuadTreeNode>*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CPool<CQuadTreeNode>**)0xB745BC;
 
 void CQuadTreeNode::InjectHooks()

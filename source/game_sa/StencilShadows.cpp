@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "StencilShadowObject.h"
+
 // CStencilShadowObject* CStencilShadows::m_StencilShadowObjects = reinterpret_cast<CStencilShadowObject(*)[64]>(0xC6A198);
 CStencilShadowObject* CStencilShadows::pFirstAvailableStencilShadowObject = reinterpret_cast<CStencilShadowObject *>(0xC6A168);
 CStencilShadowObject* CStencilShadows::pFirstActiveStencilShadowObject = reinterpret_cast<CStencilShadowObject *>(0xC6A16C);

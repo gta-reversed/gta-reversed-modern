@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "ModelInfo.h"
 
 void CTimeModelInfo::InjectHooks() {

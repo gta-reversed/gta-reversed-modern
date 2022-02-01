@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,17 +11,19 @@
 #include "PointLights.h"
 #include "Escalators.h"
 #include "CustomBuildingDNPipeline.h"
+#include "ActiveOccluder.h"
 #include "Occlusion.h"
 #include "MotionBlurStreaks.h"
 #include "TagManager.h"
 #include "WindModifiers.h"
+#include "EntryExitManager.h"
+#include "TrafficLights.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-//Virtual
     RH_ScopedOverloadedInstall(Add_Reversed, "void", 0x533020, void(CEntity::*)());
     RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedInstall(Remove_Reversed, 0x534AE0);
@@ -42,8 +44,6 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetupLighting_Reversed, 0x553DC0);
     RH_ScopedInstall(RemoveLighting_Reversed, 0x553370);
     RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x403EB0);
-
-//Class
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
     RH_ScopedInstall(UpdateRpHAnim, 0x532B20);
     RH_ScopedInstall(HasPreRenderEffects, 0x532B70);
@@ -87,8 +87,6 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateRW, 0x446F90);
     RH_ScopedInstall(SetAtomicAlphaCB, 0x533290);
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
-
-//Statics
     RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
 }
@@ -1461,11 +1459,11 @@ bool CEntity::GetIsOnScreen()
     GetBoundCentre(thisVec);
     auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
 
-    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatInverse)))
+    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatInverse)))
         return true;
 
     if (TheCamera.m_bMirrorActive)
-        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatMirrorInverse));
+        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatMirrorInverse));
 
     return false;
 }

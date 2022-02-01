@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,6 +15,9 @@
 #include "Pool.h"
 
 #include "eVehicleClass.h"
+#include "eVehicleType.h"
+
+class CAnimBlock;
 
 // enum by forkerer (https://github.com/forkerer/)
 enum eVehicleDummies {
@@ -32,22 +35,6 @@ enum eVehicleDummies {
     DUMMY_EXHAUST_SECONDARY     = 11,
     DUMMY_WING_AIRTRAIL         = 12,
     DUMMY_VEH_GUN               = 13,
-};
-
-enum eVehicleType : int32 {
-    VEHICLE_TYPE_IGNORE      = -1,
-    VEHICLE_TYPE_AUTOMOBILE  = 0,
-    VEHICLE_TYPE_MTRUCK      = 1,  // MONSTER TRUCK
-    VEHICLE_TYPE_QUAD        = 2,
-    VEHICLE_TYPE_HELI        = 3,
-    VEHICLE_TYPE_PLANE       = 4,
-    VEHICLE_TYPE_BOAT        = 5,
-    VEHICLE_TYPE_TRAIN       = 6,
-    VEHICLE_TYPE_FHELI       = 7,
-    VEHICLE_TYPE_FPLANE      = 8,
-    VEHICLE_TYPE_BIKE        = 9,
-    VEHICLE_TYPE_BMX         = 10,
-    VEHICLE_TYPE_TRAILER     = 11
 };
 
 enum eVehicleUpgradePosn {

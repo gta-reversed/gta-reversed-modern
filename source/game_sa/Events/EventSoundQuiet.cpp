@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventSoundQuiet.h"
+
 void CEventSoundQuiet::InjectHooks()
 {
     RH_ScopedClass(CEventSoundQuiet);

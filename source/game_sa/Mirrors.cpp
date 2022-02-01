@@ -368,7 +368,7 @@ void CMirrors::BeforeMainRender() {
 
 // 0x53DF40
 void RenderScene() {
-    bool underWater = CWeather::UnderWaterness <= 0.0f;;
+    bool underWater = CWeather::UnderWaterness <= 0.0f;
 
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));

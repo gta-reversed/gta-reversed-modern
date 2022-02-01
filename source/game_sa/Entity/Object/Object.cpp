@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,6 +10,7 @@
 #include "Radar.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
+#include "ObjectSaveStructure.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -21,7 +22,6 @@ void CObject::InjectHooks()
     RH_ScopedClass(CObject);
     RH_ScopedCategory("Entity/Object");
 
-// VIRTUAL
     RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
     RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);
     RH_ScopedInstall(ProcessControl_Reversed, 0x5A2130);
@@ -32,8 +32,6 @@ void CObject::InjectHooks()
     RH_ScopedInstall(RemoveLighting_Reversed, 0x553E10);
     RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x59FEE0);
     RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5A02E0);
-
-// CLASS
     RH_ScopedInstall(Init, 0x59F840);
     RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
     RH_ScopedInstall(CanBeDeleted, 0x59F120);
@@ -61,8 +59,6 @@ void CObject::InjectHooks()
     RH_ScopedInstall(GrabObjectToCarryWithRope, 0x5A1AB0);
     RH_ScopedInstall(CanBeUsedToTakeCoverBehind, 0x5A1B60);
     RH_ScopedInstall(ProcessControlLogic, 0x5A29A0);
-
-// STATIC
     RH_ScopedOverloadedInstall(Create, "intbool", 0x5A1F60, CObject*(*)(int32, bool));
     RH_ScopedOverloadedInstall(Create, "dummy", 0x5A2070, CObject*(*)(CDummyObject*));
     RH_ScopedInstall(SetMatrixForTrainCrossing, 0x59F200);

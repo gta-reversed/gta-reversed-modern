@@ -1,15 +1,17 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vector.h"
 #include "RenderWare.h"
+
+#include "Vector.h"
 #include "RGBA.h"
-#include "Entity.h"
+
+class CEntity;
 
 enum eCoronaType {
     CORONATYPE_SHINYSTAR,

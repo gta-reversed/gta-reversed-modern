@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedGroupIntelligence.h"
+
 bool CPedGroupIntelligence::AddEvent(CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x5F7470, CPedGroupIntelligence*, CEvent*>(this, event);
 }

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "MouseControllerState.h"
+
 void CMouseControllerState::InjectHooks() {
     RH_ScopedClass(CMouseControllerState);
     RH_ScopedCategoryGlobal();

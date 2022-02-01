@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "InformGroupEventQueue.h"
+
 void CInformGroupEventQueue::InjectHooks() {
     RH_ScopedClass(CInformGroupEventQueue);
     RH_ScopedCategoryGlobal();

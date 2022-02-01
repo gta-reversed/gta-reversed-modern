@@ -1,20 +1,19 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-
-#include "PlayerInfo.h"
-#include "ColPoint.h"
-#include "StoredCollPoly.h"
-#include "Sector.h"
-#include "RepeatSector.h"
-#include "PtrListSingleLink.h"
-#include "Ped.h"
-#include "Vehicle.h"
+class CPlayerInfo;
+class CColPoint;
+class CStoredCollPoly;
+class CSector;
+class CRepeatSector;
+class CPtrListSingleLink;
+class CPed;
+class CVehicle;
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;

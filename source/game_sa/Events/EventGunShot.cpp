@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventGunShot.h"
+
 float& CEventGunShot::ms_fGunShotSenseRangeForRiot2 = *(float*)0x8A625C;
 
 void CEventGunShot::InjectHooks()

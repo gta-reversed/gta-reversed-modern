@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventVehicleOnFire.h"
+
 void CEventVehicleOnFire::InjectHooks()
 {
     RH_ScopedClass(CEventVehicleOnFire);

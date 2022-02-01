@@ -2375,7 +2375,7 @@ bool CStreaming::RemoveLoadedZoneModel() {
 // 0x4089A0
 void CStreaming::RemoveModel(int32 modelId)
 {
-    CStreamingInfo& streamingInfo = GetInfo(modelId);;
+    CStreamingInfo& streamingInfo = GetInfo(modelId);
     if (streamingInfo.m_nLoadState == LOADSTATE_NOT_LOADED)
         return;
 
