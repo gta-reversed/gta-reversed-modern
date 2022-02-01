@@ -86,7 +86,7 @@ public:
     bool operator==(CObjectData const& right) const;
 
 public:
-    inline static CObjectData& GetAtIndex(int32 dwIndex) { return ms_aObjectInfo[dwIndex]; }
+    inline static CObjectData& GetAtIndex(int32 index) { return ms_aObjectInfo[index]; }
     inline static constexpr CObjectData& GetDefault() { return ms_aObjectInfo[0]; }
 };
 

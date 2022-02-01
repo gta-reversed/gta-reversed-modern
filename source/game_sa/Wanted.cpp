@@ -262,6 +262,7 @@ void CWanted::UpdateEachFrame() {
     plugin::Call<0x562360>();
 }
 
+// CWanted::RegisterCrime(eCrimeType, CVector const&, uint, bool)
 // 0x562410
 void CWanted::RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare) {
     plugin::CallMethod<0x562410, CWanted*, eCrimeType, CVector const&, CPed*, bool>(this, crimeType, posn, ped, bPoliceDontReallyCare);

@@ -74,6 +74,8 @@
 #include "WaterCannon.h"
 #include "EntryExitManager.h"
 #include "ObjectSaveStructure.h"
+#include "PedStats.h"
+#include "TrafficLights.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

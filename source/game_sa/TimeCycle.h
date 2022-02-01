@@ -6,18 +6,19 @@
 */
 #pragma once
 
-class CColourSet;
+#include "ColourSet.h";
+
 class CTimeCycleBox;
 class CBox;
 
 class CTimeCycleBox {
 public:
-    CBox  box;
-    int16 farclip;
-    uint8 lodDistMult;
-    int32 extraColor;
-    float strength;
-    float falloff;
+    CBox  m_Box;
+    int16 m_FarClip;
+    uint8 m_LodDistMult;
+    int32 m_ExtraColor;
+    float m_Strength;
+    float m_Falloff;
 };
 
 VALIDATE_SIZE(CTimeCycleBox, 0x28);

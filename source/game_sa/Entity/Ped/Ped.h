@@ -111,7 +111,7 @@ enum eFightingStyle : int8 {
 
 class CObject;
 class CVehicle;
-struct CPedStat;
+class CPedStat;
 class CPedStats;
 
 class CPed : public CPhysical {

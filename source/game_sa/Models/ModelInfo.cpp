@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "ModelInfo.h"
+#include "TempColModels.h"
 
 CBaseModelInfo *(&CModelInfo::ms_modelInfoPtrs)[NUM_MODEL_INFOS] = *(CBaseModelInfo*(*)[NUM_MODEL_INFOS])0xA9B0C8;
 int32& CModelInfo::ms_lastPositionSearched = *(int32*)0xAAE948;
