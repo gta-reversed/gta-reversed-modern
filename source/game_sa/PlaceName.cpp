@@ -13,8 +13,9 @@ void CPlaceName::InjectHooks() {
     RH_ScopedInstall(Process, 0x571F20);
 }
 
+// 0x571E90
 CPlaceName::CPlaceName() {
-    Init();
+    m_pZone = nullptr;
 }
 
 // 0x571F10

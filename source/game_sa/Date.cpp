@@ -5,9 +5,7 @@
 void COnscreenTimerEntry::Init() {
     m_nVarId = 0;
 
-    m_szDescriptionTextKey[0] = '\0';
-    m_szDescriptionTextKey[4] = '\0';
-    m_szDescriptionTextKey[8] = '\0';
+    memset(&m_szDescriptionTextKey, 0, sizeof(m_szDescriptionTextKey)); // original initialization
 
     m_bEnabled = false;
     m_nTimerDirection = eTimerDirection::INCREASE; // 1;
@@ -20,7 +18,7 @@ void COnscreenTimerEntry::Process() {
         return;
 
     int32& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    auto   deltaTime = (int32)CTimer::GetTimeStepInMS();
+    auto   deltaTime = CTimer::GetTimeStepInMS();
 
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:
@@ -29,7 +27,7 @@ void COnscreenTimerEntry::Process() {
         timerPtr -= deltaTime;
 
         if (timerPtr >= 0) {
-            auto seconds = timerPtr / 1000;
+            uint32 seconds = timerPtr / 1000;
             if (seconds < m_nClockBeepCountdownSecs && !TheCamera.m_bWideScreenOn) {
                 AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_TIMER_COUNT, 0.0f, 1.0f);
             }

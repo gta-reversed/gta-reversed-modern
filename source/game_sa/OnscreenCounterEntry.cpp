@@ -12,17 +12,17 @@ void COnscreenCounterEntry::InjectHooks() {
 void COnscreenCounterEntry::Init() {
     Clear();
 
-    m_szDisplayedText[0]       = '\0';
     m_bFlashWhenFirstDisplayed = false;
     m_nColourId                = HUD_COLOUR_RED;
+    memset(&m_szDisplayedText, 0, sizeof(m_szDisplayedText));           // original initialization
 }
 
 void COnscreenCounterEntry::Clear() {
     m_nVarId                  = 0;
     m_nMaxVarValue            = 0;
-    m_szDescriptionTextKey[0] = '\0';
     m_nType                   = eOnscreenCounter::SIMPLE;
     m_bEnabled                = false;
+    memset(&m_szDescriptionTextKey, 0, sizeof(m_szDescriptionTextKey)); // original initialization
 }
 
 // 0x44CA90

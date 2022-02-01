@@ -70,6 +70,11 @@
 #include "WindModifiers.h"
 #include "PedPlacement.h"
 #include "UpsideDownCarCheck.h"
+#include "CurrentVehicle.h"
+#include "PlaceName.h"
+#include "UserDisplay.h"
+#include "OnscreenTimer.h"
+#include "OnscreenCounterEntry.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -189,6 +194,7 @@ void InjectHooksMain() {
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();
     COnscreenTimer::InjectHooks();
+    COnscreenCounterEntry::InjectHooks();
     CPedPlacement::InjectHooks();
     CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
@@ -218,7 +224,6 @@ void InjectHooksMain() {
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
-    COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDirectory::InjectHooks();
     CBulletTraces::InjectHooks();
