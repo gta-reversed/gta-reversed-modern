@@ -78,7 +78,7 @@ void COnscreenTimer::AddCounter(uint32 varId, eOnscreenCounter type, char* gxt, 
 
     counter->m_nVarId = varId;
     if (gxt)
-        strncpy(counter->m_szDescriptionTextKey, gxt, 10);
+        strncpy(counter->m_szDescriptionTextKey, gxt, sizeof(counter->m_szDescriptionTextKey));
     else
         counter->m_szDescriptionTextKey[0] = '\0';
 

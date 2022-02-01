@@ -9,9 +9,11 @@ COnscreenTimer& CUserDisplay::OnscnTimer = *(COnscreenTimer*)0xBA1788;
 CCurrentVehicle& CUserDisplay::CurrentVehicle = *(CCurrentVehicle*)0xBA18FC;
 
 void CUserDisplay::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CUserDisplay", "Init", 0x571EE0, &CUserDisplay::Init);
-    Install("CUserDisplay", "Process", 0x5720A0, &CUserDisplay::Process);
+    RH_ScopedClass(CUserDisplay);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x571EE0);
+    RH_ScopedInstall(Process, 0x5720A0);
 }
 
 // 0x571EE0
