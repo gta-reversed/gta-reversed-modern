@@ -79,6 +79,11 @@ struct TBox : CBox {
     }
 };
 
+struct TFaceGroup {
+    CBoundingBox bb{};           // Bounding box of all these vertices (TODO: All vertices or all triangles these vertices form? Not sure. Most likely all vertices.)
+    uint16       start{}, end{}; // First and last vertex index
+};
+
 namespace V1 {
     using TVector = CVector;
     using TVertex = TVector;
@@ -130,11 +135,6 @@ namespace V2 {
     struct TBounds {
         CBoundingBox box{};
         CSphere      sphere{};
-    };
-
-    struct TFaceGroup {
-        CBoundingBox bb{};
-        uint16       start{}, end{}; // First and last vertex index
     };
 
     struct TFace {
