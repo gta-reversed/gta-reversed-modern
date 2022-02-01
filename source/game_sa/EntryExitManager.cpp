@@ -98,6 +98,11 @@ int32 CEntryExitManager::GetEntryExitIndex(const char* name, uint16 enabledFlags
     return plugin::CallAndReturn<int32, 0x43EFD0, const char*, uint16, uint16>(name, enabledFlags, disabledFlags);
 }
 
+// 0x43F150
+void CEntryExitManager::GetPositionRelativeToOutsideWorld(CVector& positionInOut) {
+    plugin::Call<0x43F150, CVector&>(positionInOut);
+}
+
 // 0x43F180
 void CEntryExitManager::EnableBurglaryHouses(bool a1) {
     plugin::Call<0x43F180, bool>(a1);

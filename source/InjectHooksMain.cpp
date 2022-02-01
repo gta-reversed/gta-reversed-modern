@@ -76,6 +76,11 @@
 #include "ObjectSaveStructure.h"
 #include "PedStats.h"
 #include "TrafficLights.h"
+#include "CurrentVehicle.h"
+#include "PlaceName.h"
+#include "UserDisplay.h"
+#include "OnscreenTimer.h"
+#include "OnscreenCounterEntry.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -191,6 +196,11 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCurrentVehicle::InjectHooks();
+    CPlaceName::InjectHooks();
+    CUserDisplay::InjectHooks();
+    COnscreenTimer::InjectHooks();
+    COnscreenCounterEntry::InjectHooks();
     CPedPlacement::InjectHooks();
     CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
@@ -220,7 +230,6 @@ void InjectHooksMain() {
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
-    COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDirectory::InjectHooks();
     CBulletTraces::InjectHooks();

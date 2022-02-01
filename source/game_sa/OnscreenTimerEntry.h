@@ -6,17 +6,21 @@
 */
 #pragma once
 
+#include "eOnscreenCounter.h"
+
 class COnscreenTimerEntry {
 public:
-    uint32 m_nVarId;
-    char   m_szDescriptionTextKey[10];
-    char   m_szDisplayedText[42]; // possibly 2b padding?
-    bool   m_bEnabled;
-    uint8  m_nTimerDirection;
-    uint32 m_nClockBeepCountdownSecs;
+    uint32          m_nVarId;
+    char            m_szDescriptionTextKey[10];
+    char            m_szDisplayedText[42]; // possibly 2b padding?
+    bool            m_bEnabled;
+    eTimerDirection m_nTimerDirection;
+    uint32          m_nClockBeepCountdownSecs;
 
+public:
+    void Init(); // NOTSA
     void Process();
-    //! unused
     void ProcessForDisplayClock();
 };
+
 VALIDATE_SIZE(COnscreenTimerEntry, 0x40);
