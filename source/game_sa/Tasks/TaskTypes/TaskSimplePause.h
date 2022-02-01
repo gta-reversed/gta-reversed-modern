@@ -6,11 +6,11 @@
 class CTaskSimplePause : public CTaskSimple {
 public:
     CTaskTimer m_timer;
-    int32 m_nTime;
+    int32      m_nTime;
 
 public:
     CTaskSimplePause(int32 time);
-    ~CTaskSimplePause();
+    ~CTaskSimplePause() = default;
 
     CTask* Clone() override;
     eTaskType GetTaskType() override {

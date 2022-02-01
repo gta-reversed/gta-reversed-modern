@@ -40,7 +40,7 @@ public:
     uint8          m_nActiveCounter;
     bool           m_bMakeSound;
     float          m_nCreatedTime;
-    int32          m_nParticlesExpireTime;
+    uint32         m_nParticlesExpireTime;
     float          m_fVisibleDistance;
     float          m_fGroundZ;
     int32          m_nFuelTimer;
@@ -66,7 +66,7 @@ public:
 
     static bool TestForExplosionInArea(eExplosionType type, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     static void RemoveAllExplosionsInArea(CVector pos, float r);
-    static void AddExplosion(CEntity* pNewVictim, CEntity* pNewCreator, eExplosionType type, CVector pos, uint32 lifetimea, uint8 usesSound, float cameraShake, uint8 isVisible);
+    static void AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 isVisible);
     static void Update();
 
 private:

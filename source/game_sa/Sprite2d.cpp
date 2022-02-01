@@ -18,42 +18,44 @@ float& CSprite2d::RecipNearClip = *(float*)0xC80464;
 RwIm2DVertex* CSprite2d::maVertices = (RwIm2DVertex*)0xC80468;
 
 void CSprite2d::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CSprite2d", "CSprite2d", 0x727230, &CSprite2d::Constructor);
-    Install("CSprite2d", "~CSprite2d", 0x7281E0, &CSprite2d::Destructor);
+    RH_ScopedClass(CSprite2d);
+    RH_ScopedCategoryGlobal();
 
-    Install("CSprite2d", "Delete", 0x727240, &CSprite2d::Delete);
-    Install("CSprite2d", "SetTexture", 0x727270, static_cast<void(CSprite2d::*)(const char*)>(&CSprite2d::SetTexture));
-    Install("CSprite2d", "SetTexture_mask", 0x7272B0, static_cast<void(CSprite2d::*)(const char*, const char*)>(&CSprite2d::SetTexture));
-    Install("CSprite2d", "SetAddressingUV", 0x7272E0, &CSprite2d::SetAddressingUV);
-    Install("CSprite2d", "SetAddressing", 0x727320, &CSprite2d::SetAddressing);
-    Install("CSprite2d", "SetRenderState", 0x727B30, &CSprite2d::SetRenderState);
-    Install("CSprite2d", "Draw_ffffCRGBA", 0x7282C0, static_cast<void(CSprite2d::*)(float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
-    Install("CSprite2d", "Draw_CRectCRGBA", 0x728350, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&)>(&CSprite2d::Draw));
-    Install("CSprite2d", "DrawWithBilinearOffset", 0x7283B0, &CSprite2d::DrawWithBilinearOffset);
-    Install("CSprite2d", "Draw_CRectCRGBA4", 0x7284B0, static_cast<void(CSprite2d::*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::Draw));
-    Install("CSprite2d", "Draw_ffffffffCRGBA", 0x728520, static_cast<void(CSprite2d::*)(float, float, float, float, float, float, float, float, const CRGBA&)>(&CSprite2d::Draw));
+    RH_ScopedInstall(Constructor, 0x727230);
+    RH_ScopedInstall(Destructor, 0x7281E0);
 
-    Install("CSprite2d", "SetRecipNearClip", 0x727260, &CSprite2d::SetRecipNearClip);
-    Install("CSprite2d", "InitPerFrame", 0x727350, &CSprite2d::InitPerFrame);
-    Install("CSprite2d", "IsVertexBufferEmpty", 0x727390, &CSprite2d::IsVertexBufferEmpty);
-    Install("CSprite2d", "IsVertexBufferFull", 0x7273A0, &CSprite2d::IsVertexBufferFull);
-    Install("CSprite2d", "RenderVertexBuffer", 0x7273D0, &CSprite2d::RenderVertexBuffer);
-    Install("CSprite2d", "SetVertices_CRectCRGBA4", 0x727420, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "SetVertices_ffffffffCRGBA", 0x727590, static_cast<void(*)(float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "SetVertices_CRectCRGBA4ffffffff", 0x727710, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "SetVertices_iffCRGBA", 0x727890, static_cast<void(*)(int32, float*, float*, const CRGBA&)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "SetVertices_ifCRGBA", 0x727920, static_cast<void(*)(int32, float*, CRGBA*)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "SetMaskVertices", 0x7279B0, &CSprite2d::SetMaskVertices);
-    Install("CSprite2d", "SetVertices_RwD3D9Vertex", 0x727A00, static_cast<void(*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float)>(&CSprite2d::SetVertices));
-    Install("CSprite2d", "DrawRect_CRect_CRGBA", 0x727B60, static_cast<void(*)(const CRect&, const CRGBA&)>(&CSprite2d::DrawRect));
-    Install("CSprite2d", "DrawTxRect", 0x727BE0, &CSprite2d::DrawTxRect);
-    Install("CSprite2d", "DrawRect_CRect_CRGBA4", 0x727C10, static_cast<void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(&CSprite2d::DrawRect));
-    Install("CSprite2d", "DrawRectXLU", 0x727C50, &CSprite2d::DrawRectXLU);
-    Install("CSprite2d", "DrawAnyRect", 0x727CC0, &CSprite2d::DrawAnyRect);
-    Install("CSprite2d", "Draw2DPolygon", 0x7285B0, &CSprite2d::Draw2DPolygon);
-    Install("CSprite2d", "DrawBarChart", 0x728640, &CSprite2d::DrawBarChart);
-    // Install("CSprite2d", "DrawCircleAtNearClip", 0x727D60, &CSprite2d::DrawCircleAtNearClip);
+    RH_ScopedInstall(Delete, 0x727240);
+    RH_ScopedOverloadedInstall(SetTexture, "", 0x727270, void(CSprite2d::*)(const char*));
+    RH_ScopedOverloadedInstall(SetTexture, "mask", 0x7272B0, void(CSprite2d::*)(const char*, const char*));
+    RH_ScopedInstall(SetAddressingUV, 0x7272E0);
+    RH_ScopedInstall(SetAddressing, 0x727320);
+    RH_ScopedInstall(SetRenderState, 0x727B30);
+    RH_ScopedOverloadedInstall(Draw, "ffffCRGBA", 0x7282C0, void(CSprite2d::*)(float, float, float, float, const CRGBA&));
+    RH_ScopedOverloadedInstall(Draw, "CRectCRGBA", 0x728350, void(CSprite2d::*)(const CRect&, const CRGBA&));
+    RH_ScopedInstall(DrawWithBilinearOffset, 0x7283B0);
+    RH_ScopedOverloadedInstall(Draw, "CRectCRGBA4", 0x7284B0, void(CSprite2d::*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    RH_ScopedOverloadedInstall(Draw, "ffffffffCRGBA", 0x728520, void(CSprite2d::*)(float, float, float, float, float, float, float, float, const CRGBA&));
+
+    RH_ScopedInstall(SetRecipNearClip, 0x727260);
+    RH_ScopedInstall(InitPerFrame, 0x727350);
+    RH_ScopedInstall(IsVertexBufferEmpty, 0x727390);
+    RH_ScopedInstall(IsVertexBufferFull, 0x7273A0);
+    RH_ScopedInstall(RenderVertexBuffer, 0x7273D0);
+    RH_ScopedOverloadedInstall(SetVertices, "CRectCRGBA4", 0x727420, void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    RH_ScopedOverloadedInstall(SetVertices, "ffffffffCRGBA", 0x727590, void(*)(float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    RH_ScopedOverloadedInstall(SetVertices, "CRectCRGBA4ffffffff", 0x727710, void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float));
+    RH_ScopedOverloadedInstall(SetVertices, "iffCRGBA", 0x727890, void(*)(int32, float*, float*, const CRGBA&));
+    RH_ScopedOverloadedInstall(SetVertices, "ifCRGBA", 0x727920, void(*)(int32, float*, CRGBA*));
+    RH_ScopedInstall(SetMaskVertices, 0x7279B0);
+    RH_ScopedOverloadedInstall(SetVertices, "RwD3D9Vertex", 0x727A00, void(*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&, float, float, float, float, float, float, float, float));
+    RH_ScopedOverloadedInstall(DrawRect, "CRGBA", 0x727B60, void(*)(const CRect&, const CRGBA&));
+    RH_ScopedInstall(DrawTxRect, 0x727BE0);
+    RH_ScopedOverloadedInstall(DrawRect, "CRGBA4", 0x727C10, void(*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    RH_ScopedInstall(DrawRectXLU, 0x727C50);
+    RH_ScopedInstall(DrawAnyRect, 0x727CC0);
+    RH_ScopedInstall(Draw2DPolygon, 0x7285B0);
+    RH_ScopedInstall(DrawBarChart, 0x728640);
+    // RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60);
 }
 
 CSprite2d::CSprite2d()
@@ -123,9 +125,9 @@ void CSprite2d::SetAddressing(RwTextureAddressMode modeUV)
 void CSprite2d::SetRenderState()
 {
     if (m_pTexture)
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RwTextureGetRaster(m_pTexture));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(m_pTexture)));
     else
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 // Draw this sprite
@@ -154,7 +156,7 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color, float u1, float v1, 
     SetVertices(posn, color, color, color, color, u1, v1, u2, v2, u3, v3, u4, v4);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 void CSprite2d::Draw(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
@@ -162,7 +164,7 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color1, const CRGBA& color2
     SetVertices(posn, color1, color2, color3, color4);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color)
@@ -170,7 +172,7 @@ void CSprite2d::Draw(float x1, float y1, float x2, float y2, float x3, float y3,
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
     SetRenderState();
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 }
 
 // 0x727260
@@ -202,7 +204,7 @@ void CSprite2d::RenderVertexBuffer()
     if (nextBufferVertex <= 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, reinterpret_cast<void*>(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aRadiosityVertexBuffer, nextBufferVertex, aTempBufferIndices, nextBufferIndex);
     nextBufferVertex = 0;
     nextBufferIndex = 0;
@@ -339,14 +341,14 @@ void CSprite2d::SetVertices(RwIm2DVertex* vertices, const CRect& posn, const CRG
 
 // draws non-textured rectangle
 void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color) {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     SetVertices(posn, color, color, color, color);
     if (color.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 }
 
 // this could be used for drawing textured rectangle (use SetRenderState() before this)
@@ -357,16 +359,16 @@ void CSprite2d::DrawTxRect(const CRect& posn, const CRGBA& color) {
 
 // draw non-textured rectangle, with setupable corners' colors.
 void CSprite2d::DrawRect(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     SetVertices(posn, color1, color2, color3, color4);
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 // draws non-textured rectangle with default blending states
 void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     DrawRect(posn, color1, color2, color3, color4);
 }
 
@@ -374,9 +376,9 @@ void CSprite2d::DrawRectXLU(const CRect& posn, const CRGBA& color1, const CRGBA&
 void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4) {
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color1, color2, color3, color4);
     if (color1.a == 255 && color2.a == 255 && color3.a == 255 && color4.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
@@ -394,8 +396,8 @@ void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CR
     RwIm2DVertexSetV(&maVertices[0], 0.5f, RecipNearClip);
     RwIm2DVertexSetIntRGBA(&maVertices[0], color.r, color.g, color.b, color.a);
 
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, nullptr);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, reinterpret_cast<void*>(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     float posna = 360.f / static_cast<float>(angle);
     float step = posna * DegreesToRadians(1.f) * (256.f / DegreesToRadians(360.f)); // posna * 35 / 45
@@ -437,13 +439,13 @@ void CSprite2d::AddToBuffer(CRect  const& posn, CRGBA  const& color, float u1, f
 void CSprite2d::Draw2DPolygon(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4, const CRGBA& color)
 {
     SetVertices(x1, y1, x2, y2, x3, y3, x4, y4, color, color, color, color);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,     (void*)rwSHADEMODENASHADEMODE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODENASHADEMODE));
 
     if (color.a == 255)
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
     else
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
@@ -457,8 +459,8 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     int8 progressAdd, uint8 drawPercentage, uint8 drawBlackBorder,
     CRGBA color, CRGBA addColor)
 {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE, (void*)rwSHADEMODEFLAT);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODEFLAT));
 
     progress = std::max(0.0f, progress);
 

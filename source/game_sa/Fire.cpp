@@ -5,12 +5,14 @@
 #include "CreepingFire.h"
 
 void CFire::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFire", "Constructor", 0x539D90, &CFire::Constructor);
-    Install("CFire", "Initialise", 0x538B30, &CFire::Initialise);
-    Install("CFire", "CreateFxSysForStrength", 0x539360, &CFire::CreateFxSysForStrength);
-    Install("CFire", "Extinguish", 0x5393F0, &CFire::Extinguish);
-    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire);
+    RH_ScopedClass(CFire);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x539D90);
+    RH_ScopedInstall(Initialise, 0x538B30);
+    RH_ScopedInstall(CreateFxSysForStrength, 0x539360);
+    RH_ScopedInstall(Extinguish, 0x5393F0);
+    RH_ScopedInstall(ProcessFire, 0x53A570);
 }
 
 // 0x539D90
@@ -76,6 +78,7 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
     }
 }
 
+// see 0x539F00 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens) {
     active = true;
     createdByScript = false;
@@ -95,6 +98,7 @@ void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A050 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens) {
     switch (target->m_nType) {
     case eEntityType::ENTITY_TYPE_PED: {
@@ -146,6 +150,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 n
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A270 CFireManager::StartScriptFire
 void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
     SetTarget(target);
     SetCreator(nullptr);
@@ -171,7 +176,7 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
         }
     }
 
-    CreateFxSysForStrength(target ? pos : target->GetPosition(), nullptr);
+    CreateFxSysForStrength(target ? target->GetPosition() : pos, nullptr);
 }
 
 void CFire::SetTarget(CEntity* target) {
@@ -331,7 +336,7 @@ void CFire::ProcessFire() {
             if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
                 continue;
 
-            if (vehicle->IsBMX()) {
+            if (vehicle->IsSubBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
                 vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?

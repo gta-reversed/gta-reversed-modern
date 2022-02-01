@@ -26,6 +26,8 @@
 #include "ePedState.h"
 #include "ePedStats.h"
 
+class CPedGroup;
+
 enum ePedType : uint32 {
     PED_TYPE_PLAYER1 = 0,
     PED_TYPE_PLAYER2,
@@ -395,8 +397,8 @@ public:
     void DeleteRwObject() override;
     void ProcessControl() override;
     void Teleport(CVector destination, bool resetRotation) override;
-    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) override;
     void PreRender() override;
     void Render() override;
     bool SetupLighting() override;
@@ -566,6 +568,7 @@ public:
     inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
     inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    inline CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
     inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
@@ -573,8 +576,9 @@ public:
     inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-  
-    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+
+    bool IsFollowerOfGroup(const CPedGroup& group);
 };
-RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);

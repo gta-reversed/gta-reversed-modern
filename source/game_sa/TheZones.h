@@ -54,4 +54,7 @@ public:
     static void Save();
     static void Load();
     static void PostZoneCreation();
+
+    // NOTSA
+    static const char* GetZoneName(const CVector& point);
 };

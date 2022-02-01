@@ -12,10 +12,13 @@ CVector& CBulletInfo::PlayerSniperBulletStart = *(CVector*)0xC888A0;
 CVector& CBulletInfo::PlayerSniperBulletEnd = *(CVector*)0xC888AC;
 
 void CBulletInfo::InjectHooks() {
-    ReversibleHooks::Install("CBulletInfo", "Initialise", 0x735FD0, &CBulletInfo::Initialise);
-    ReversibleHooks::Install("CBulletInfo", "Shutdown", 0x736000, &CBulletInfo::Shutdown);
-    ReversibleHooks::Install("CBulletInfo", "AddBullet", 0x736010, &CBulletInfo::AddBullet);
-    ReversibleHooks::Install("CBulletInfo", "Update", 0x7360D0, &CBulletInfo::Update);
+    RH_ScopedClass(CBulletInfo);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x735FD0);
+    RH_ScopedInstall(Shutdown, 0x736000);
+    RH_ScopedInstall(AddBullet, 0x736010);
+    RH_ScopedInstall(Update, 0x7360D0);
 }
 
 // 0x735FD0

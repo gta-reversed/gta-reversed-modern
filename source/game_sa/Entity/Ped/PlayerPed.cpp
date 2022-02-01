@@ -6,61 +6,66 @@
 */
 #include "StdInc.h"
 
+#include "PlayerPed.h"
+#include "TagManager.h"
+
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
 bool& CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText = *(bool*)0xC0BC15;
 
 void CPlayerPed::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPlayerPed", "ResetSprintEnergy", 0x60A530, &CPlayerPed::ResetSprintEnergy);
-    Install("CPlayerPed", "ResetPlayerBreath", 0x60A8A0, &CPlayerPed::ResetPlayerBreath);
-    Install("CPlayerPed", "RemovePlayerPed", 0x6094A0, &CPlayerPed::RemovePlayerPed);
-    Install("CPlayerPed", "Busted", 0x609EF0, &CPlayerPed::Busted);
-    Install("CPlayerPed", "GetWantedLevel", 0x41BE60, &CPlayerPed::GetWantedLevel);
-    Install("CPlayerPed", "SetWantedLevel", 0x609F10, &CPlayerPed::SetWantedLevel);
-    Install("CPlayerPed", "SetWantedLevelNoDrop", 0x609F30, &CPlayerPed::SetWantedLevelNoDrop);
-    Install("CPlayerPed", "CheatWantedLevel", 0x609F50, &CPlayerPed::CheatWantedLevel);
-    Install("CPlayerPed", "DoStuffToGoOnFire", 0x60A020, &CPlayerPed::DoStuffToGoOnFire);
-    // Install("CPlayerPed", "Load", 0x5D46E0, &CPlayerPed::Load_Reversed);
-    // Install("CPlayerPed", "Save", 0x5D57E0, &CPlayerPed::Save_Reversed);
-    Install("CPlayerPed", "DeactivatePlayerPed", 0x609520, &CPlayerPed::DeactivatePlayerPed);
-    Install("CPlayerPed", "ReactivatePlayerPed", 0x609540, &CPlayerPed::ReactivatePlayerPed);
-    Install("CPlayerPed", "GetPadFromPlayer", 0x609560, &CPlayerPed::GetPadFromPlayer);
-    Install("CPlayerPed", "CanPlayerStartMission", 0x609590, &CPlayerPed::CanPlayerStartMission);
-    Install("CPlayerPed", "IsHidden", 0x609620, &CPlayerPed::IsHidden);
-    Install("CPlayerPed", "ReApplyMoveAnims", 0x609650, &CPlayerPed::ReApplyMoveAnims);
-    Install("CPlayerPed", "DoesPlayerWantNewWeapon", 0x609710, &CPlayerPed::DoesPlayerWantNewWeapon);
-    Install("CPlayerPed", "ProcessPlayerWeapon", 0x6097F0, &CPlayerPed::ProcessPlayerWeapon);
-    Install("CPlayerPed", "PickWeaponAllowedFor2Player", 0x609800, &CPlayerPed::PickWeaponAllowedFor2Player);
-    Install("CPlayerPed", "UpdateCameraWeaponModes", 0x609830, &CPlayerPed::UpdateCameraWeaponModes);
-    Install("CPlayerPed", "ClearWeaponTarget", 0x609c80, &CPlayerPed::ClearWeaponTarget);
-    Install("CPlayerPed", "GetWeaponRadiusOnScreen", 0x609CD0, &CPlayerPed::GetWeaponRadiusOnScreen);
-    Install("CPlayerPed", "PedCanBeTargettedVehicleWise", 0x609D90, &CPlayerPed::PedCanBeTargettedVehicleWise);
-    Install("CPlayerPed", "FindTargetPriority", 0x609DE0, &CPlayerPed::FindTargetPriority);
-    Install("CPlayerPed", "Clear3rdPersonMouseTarget", 0x609ED0, &CPlayerPed::Clear3rdPersonMouseTarget);
-    Install("CPlayerPed", "CanIKReachThisTarget", 0x609F80, &CPlayerPed::CanIKReachThisTarget);
-    Install("CPlayerPed", "GetPlayerInfoForThisPlayerPed", 0x609FF0, &CPlayerPed::GetPlayerInfoForThisPlayerPed);
-    Install("CPlayerPed", "AnnoyPlayerPed", 0x60A040, &CPlayerPed::AnnoyPlayerPed);
-    Install("CPlayerPed", "ClearAdrenaline", 0x60A070, &CPlayerPed::ClearAdrenaline);
-    Install("CPlayerPed", "DisbandPlayerGroup", 0x60A0A0, &CPlayerPed::DisbandPlayerGroup);
-    Install("CPlayerPed", "MakeGroupRespondToPlayerTakingDamage", 0x60A110, &CPlayerPed::MakeGroupRespondToPlayerTakingDamage);
-    Install("CPlayerPed", "TellGroupToStartFollowingPlayer", 0x60A1D0, &CPlayerPed::TellGroupToStartFollowingPlayer);
-    Install("CPlayerPed", "MakePlayerGroupDisappear", 0x60A440, &CPlayerPed::MakePlayerGroupDisappear);
-    Install("CPlayerPed", "MakePlayerGroupReappear", 0x60A4B0, &CPlayerPed::MakePlayerGroupReappear);
-    Install("CPlayerPed", "HandleSprintEnergy", 0x60A550, &CPlayerPed::HandleSprintEnergy);
-    // Install("CPlayerPed", "GetButtonSprintResults", 0x60A820, &CPlayerPed::GetButtonSprintResults);
-    Install("CPlayerPed", "HandlePlayerBreath", 0x60A8D0, &CPlayerPed::HandlePlayerBreath);
-    Install("CPlayerPed", "MakeChangesForNewWeapon", 0x60B460, static_cast<void(CPlayerPed::*)(eWeaponType)>(&CPlayerPed::MakeChangesForNewWeapon));
-    Install("CPlayerPed", "LOSBlockedBetweenPeds", 0x60B550, &LOSBlockedBetweenPeds);
-    Install("CPlayerPed", "DoesTargetHaveToBeBroken", 0x60C0C0, &CPlayerPed::DoesTargetHaveToBeBroken);
-    Install("CPlayerPed", "SetPlayerMoveBlendRatio", 0x60C520, &CPlayerPed::SetPlayerMoveBlendRatio);
-    Install("CPlayerPed", "FindPedToAttack", 0x60C5F0, &CPlayerPed::FindPedToAttack);
-    Install("CPlayerPed", "ForceGroupToAlwaysFollow", 0x60C7C0, &CPlayerPed::ForceGroupToAlwaysFollow);
-    Install("CPlayerPed", "ForceGroupToNeverFollow", 0x60C800, &CPlayerPed::ForceGroupToNeverFollow);
-    Install("CPlayerPed", "MakeChangesForNewWeapon_BySlot", 0x60D000, static_cast<void(CPlayerPed::*)(uint32)>(&CPlayerPed::MakeChangesForNewWeapon));
-    Install("CPlayerPed", "EvaluateTarget", 0x60D020, &CPlayerPed::EvaluateTarget);
-    Install("CPlayerPed", "PlayerHasJustAttackedSomeone", 0x60D5A0, &CPlayerPed::PlayerHasJustAttackedSomeone);
-    Install("CPlayerPed", "SetupPlayerPed", 0x60D790, &CPlayerPed::SetupPlayerPed);
+    RH_ScopedClass(CPlayerPed);
+    RH_ScopedCategory("Entity/Ped");
+
+    RH_ScopedInstall(ResetSprintEnergy, 0x60A530);
+    RH_ScopedInstall(ResetPlayerBreath, 0x60A8A0);
+    RH_ScopedInstall(RemovePlayerPed, 0x6094A0);
+    RH_ScopedInstall(Busted, 0x609EF0);
+    RH_ScopedInstall(GetWantedLevel, 0x41BE60);
+    RH_ScopedInstall(SetWantedLevel, 0x609F10);
+    RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
+    RH_ScopedInstall(CheatWantedLevel, 0x609F50);
+    RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
+    // RH_ScopedInstall(Load_Reversed, 0x5D46E0);
+    // RH_ScopedInstall(Save_Reversed, 0x5D57E0);
+    RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
+    RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
+    RH_ScopedInstall(GetPadFromPlayer, 0x609560);
+    RH_ScopedInstall(CanPlayerStartMission, 0x609590);
+    RH_ScopedInstall(IsHidden, 0x609620);
+    RH_ScopedInstall(ReApplyMoveAnims, 0x609650);
+    RH_ScopedInstall(DoesPlayerWantNewWeapon, 0x609710);
+    RH_ScopedInstall(ProcessPlayerWeapon, 0x6097F0);
+    RH_ScopedInstall(PickWeaponAllowedFor2Player, 0x609800);
+    RH_ScopedInstall(UpdateCameraWeaponModes, 0x609830);
+    RH_ScopedInstall(ClearWeaponTarget, 0x609c80);
+    RH_ScopedInstall(GetWeaponRadiusOnScreen, 0x609CD0);
+    RH_ScopedInstall(PedCanBeTargettedVehicleWise, 0x609D90);
+    RH_ScopedInstall(FindTargetPriority, 0x609DE0);
+    RH_ScopedInstall(Clear3rdPersonMouseTarget, 0x609ED0);
+    RH_ScopedInstall(CanIKReachThisTarget, 0x609F80);
+    RH_ScopedInstall(GetPlayerInfoForThisPlayerPed, 0x609FF0);
+    RH_ScopedInstall(AnnoyPlayerPed, 0x60A040);
+    RH_ScopedInstall(ClearAdrenaline, 0x60A070);
+    RH_ScopedInstall(DisbandPlayerGroup, 0x60A0A0);
+    RH_ScopedInstall(MakeGroupRespondToPlayerTakingDamage, 0x60A110);
+    RH_ScopedInstall(TellGroupToStartFollowingPlayer, 0x60A1D0);
+    RH_ScopedInstall(MakePlayerGroupDisappear, 0x60A440);
+    RH_ScopedInstall(MakePlayerGroupReappear, 0x60A4B0);
+    RH_ScopedInstall(HandleSprintEnergy, 0x60A550);
+    // RH_ScopedInstall(GetButtonSprintResults, 0x60A820);
+    RH_ScopedInstall(HandlePlayerBreath, 0x60A8D0);
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "", 0x60B460, void(CPlayerPed::*)(eWeaponType));
+    RH_ScopedGlobalInstall(LOSBlockedBetweenPeds, 0x60B550);
+    RH_ScopedInstall(DoesTargetHaveToBeBroken, 0x60C0C0);
+    RH_ScopedInstall(SetPlayerMoveBlendRatio, 0x60C520);
+    RH_ScopedInstall(FindPedToAttack, 0x60C5F0);
+    RH_ScopedInstall(ForceGroupToAlwaysFollow, 0x60C7C0);
+    RH_ScopedInstall(ForceGroupToNeverFollow, 0x60C800);
+    RH_ScopedOverloadedInstall(MakeChangesForNewWeapon, "BySlot", 0x60D000, void(CPlayerPed::*)(uint32));
+    RH_ScopedInstall(EvaluateTarget, 0x60D020);
+    RH_ScopedInstall(PlayerHasJustAttackedSomeone, 0x60D5A0);
+    RH_ScopedInstall(SetupPlayerPed, 0x60D790);
 
 }
 

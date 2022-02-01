@@ -43,8 +43,8 @@ VALIDATE_SIZE(tMenuPanel, 0x418);
 class CMenuSystem {
 public:
     static bool* MenuInUse;
-    static uint16& CurrentMenuInUse;
-    static uint16& num_menus_in_use; // name from Android PDB
+    static uint16& CurrentMenuInUse; // uint8?
+    static uint8& num_menus_in_use; // name from Android PDB
 
 public:
     static void Initialise();

@@ -6,13 +6,17 @@
 
 void CEventGunAimedAt::InjectHooks()
 {
-    ReversibleHooks::Install("CEventGunAimedAt", "Constructor", 0x4B0700, &CEventGunAimedAt::Constructor);
-    ReversibleHooks::Install("CEventGunAimedAt", "AffectsPed_Reversed", 0x4B4EE0, &CEventGunAimedAt::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventGunAimedAt", "ReportCriminalEvent_Reversed", 0x4B09E0, &CEventGunAimedAt::ReportCriminalEvent_Reversed);
-    ReversibleHooks::Install("CEventGunAimedAt", "TakesPriorityOver_Reversed", 0x4B0810, &CEventGunAimedAt::TakesPriorityOver_Reversed);
-    ReversibleHooks::Install("CEventGunAimedAt", "CloneEditable_Reversed", 0x4B7630, &CEventGunAimedAt::CloneEditable_Reversed);
+    RH_ScopedClass(CEventGunAimedAt);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0700);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4EE0);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B09E0);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B0810);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7630);
 }
 
+// 0x4B0700
 CEventGunAimedAt::CEventGunAimedAt(CPed* ped)
 {
     m_ped = ped;
@@ -29,30 +33,20 @@ CEventGunAimedAt::~CEventGunAimedAt()
 
 CEventGunAimedAt* CEventGunAimedAt::Constructor(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventGunAimedAt*, 0x4B0700, CEventGunAimedAt*, CPed*>(this, ped);
-#else
     this->CEventGunAimedAt::CEventGunAimedAt(ped);
     return this;
-#endif
 }
 
+// 0x4B4EE0
 bool CEventGunAimedAt::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B4EE0, CEvent*, CPed*>(this, ped);
-#else
     return CEventGunAimedAt::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B09E0
 void CEventGunAimedAt::ReportCriminalEvent(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethod<0x4B09E0, CEvent*, CPed*>(this, ped);
-#else
     return CEventGunAimedAt::ReportCriminalEvent_Reversed(ped);
-#endif
 }
 
 // 0x4B0810
@@ -61,19 +55,17 @@ bool CEventGunAimedAt::TakesPriorityOver(const CEvent& refEvent)
     return CEventGunAimedAt::TakesPriorityOver_Reversed(refEvent);
 }
 
+// 0x4B7630
 CEventEditableResponse* CEventGunAimedAt::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B7630, CEvent*>(this);
-#else
     return CEventGunAimedAt::CloneEditable_Reversed();
-#endif
 }
 
 bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsPlayer())
         return false;
+
     CTask* activeTask = ped->GetTaskManager().GetActiveTask();
     if (activeTask && activeTask->GetTaskType() == TASK_COMPLEX_REACT_TO_GUN_AIMED_AT)
         return false;

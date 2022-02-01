@@ -1,11 +1,13 @@
 #include "StdInc.h"
 
 void CBridge::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CBridge", "Init", 0x41BC70, &CBridge::Init);
-    Install("CBridge", "Update", 0x41BC80, &CBridge::Update);
-    Install("CBridge", "FindBridgeEntities", 0x41BCA0, &CBridge::FindBridgeEntities);
-    Install("CBridge", "ShouldLightsBeFlashing", 0x41BC90, &CBridge::ShouldLightsBeFlashing);
+    RH_ScopedClass(CBridge);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x41BC70);
+    RH_ScopedInstall(Update, 0x41BC80);
+    RH_ScopedInstall(FindBridgeEntities, 0x41BCA0);
+    RH_ScopedInstall(ShouldLightsBeFlashing, 0x41BC90);
 }
 
 // 0x41BC70

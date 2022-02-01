@@ -6,10 +6,13 @@
 CEscalator(&CEscalators::aEscalators)[NUM_ESCALATORS] = *(CEscalator(*)[NUM_ESCALATORS])0xC6E9A8;
 
 void CEscalators::InjectHooks() {
-    ReversibleHooks::Install("CEscalators", "Init", 0x717C50, &CEscalators::Init);
-    ReversibleHooks::Install("CEscalators", "Shutdown", 0x717940, &CEscalators::Shutdown);
-    ReversibleHooks::Install("CEscalators", "AddOne", 0x717C90, &CEscalators::AddOne);
-    ReversibleHooks::Install("CEscalators", "Update", 0x718580, &CEscalators::Update);
+    RH_ScopedClass(CEscalators);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x717C50);
+    RH_ScopedInstall(Shutdown, 0x717940);
+    RH_ScopedInstall(AddOne, 0x717C90);
+    RH_ScopedInstall(Update, 0x718580);
 }
 
 // 0x717940

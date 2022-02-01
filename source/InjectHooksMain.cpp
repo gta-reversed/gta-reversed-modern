@@ -59,7 +59,17 @@
 #include "Restart.h"
 #include "BulletInfo.h"
 #include "Explosion.h"
+#include "C_PcSave.h"
 #include "FireManager.h"
+#include "Skidmarks.h"
+#include "CarCtrl.h"
+#include "TagManager.h"
+#include "Clouds.h"
+#include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
+#include "WindModifiers.h"
+#include "PedPlacement.h"
+#include "UpsideDownCarCheck.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -167,14 +177,28 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
+
 void InjectHooksMain() {
+    ReversibleHooks::OnInjectionBegin();
+
     InjectCommonHooks();
     CPad::InjectHooks();
+    CFileMgr::InjectHooks();
 
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();
     COnscreenTimer::InjectHooks();
+    CPedPlacement::InjectHooks();
+    CWindModifiers::InjectHooks();
+    CGenericGameStorage::InjectHooks();
+    C_PcSave::InjectHooks();
+    CFileLoader::InjectHooks();
+    CWorld::InjectHooks();
+    CStreamingInfo::InjectHooks();
+    CStreaming::InjectHooks();
+    InjectCdStreamHooks();
+    CMirrors::InjectHooks();
     CFire::InjectHooks();
     CExplosion::InjectHooks();
     CClothesBuilder::InjectHooks();
@@ -219,9 +243,6 @@ void InjectHooksMain() {
     List_c::InjectHooks();
     CRunningScript::InjectHooks();
     CTheScripts::InjectHooks();
-    CStreamingInfo::InjectHooks();
-    CStreaming::InjectHooks();
-    InjectCdStreamHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -237,8 +258,6 @@ void InjectHooksMain() {
     CPedModelInfo::InjectHooks();
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
-    CFileLoader::InjectHooks();
-    CFileMgr::InjectHooks();
     CPlaceable::InjectHooks();
     CEntity::InjectHooks();;
     CPhysical::InjectHooks();
@@ -287,7 +306,6 @@ void InjectHooksMain() {
     CWanted::InjectHooks();
     CEscalators::InjectHooks();
     CWeapon::InjectHooks();
-    CWorld::InjectHooks();
     cTransmission::InjectHooks();
     CVehicle::InjectHooks();
     CAutomobile::InjectHooks();
@@ -342,6 +360,7 @@ void InjectHooksMain() {
     CCustomCarPlateMgr::InjectHooks();
     CDraw::InjectHooks();
     CEntryExitManager::InjectHooks();
+    CEntryExit::InjectHooks();
     CInformGroupEventQueue::InjectHooks();
     CGangs::InjectHooks();
     CPlayerInfo::InjectHooks();
@@ -621,4 +640,6 @@ void InjectHooksMain() {
     Tasks();
     Events();
     Fx();
+
+    ReversibleHooks::OnInjectionEnd();
 }

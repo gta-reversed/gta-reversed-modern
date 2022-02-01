@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "TheScripts.h"
+#include "UpsideDownCarCheck.h"
 
 bool& CTheScripts::DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
 tScriptParam* CTheScripts::ScriptParams = reinterpret_cast<tScriptParam*>(0xA43C78);
@@ -95,8 +96,11 @@ CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
 
 void CTheScripts::InjectHooks() {
-    ReversibleHooks::Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);
-    ReversibleHooks::Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
+    RH_ScopedClass(CTheScripts);
+    RH_ScopedCategory("Scripts");
+
+    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
+    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
 
 // 0x468D50
@@ -139,6 +143,10 @@ void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
 // 0x486B00
 void CTheScripts::ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity) {
     plugin::Call<0x486B00, CVector const&, CEntity*>(pos, pEntity);
+}
+
+void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
+    plugin::Call<0x5D3390>();
 }
 
 // 0x4839A0
@@ -190,6 +198,16 @@ bool CTheScripts::IsPlayerOnAMission() {
 // 0x4861F0
 bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
     return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(pVehicle);
+}
+
+// 0x5D4FD0
+bool CTheScripts::Load() {
+    return plugin::CallAndReturn<bool, 0x5D4FD0>();
+}
+
+// 0x5D4C40
+bool CTheScripts::Save() {
+    return plugin::CallAndReturn<bool, 0x5D4C40>();
 }
 
 // 0x464BB0

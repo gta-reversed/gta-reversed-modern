@@ -7,7 +7,10 @@ CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTA
 bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
 void CVehicleRecording::InjectHooks() {
-    ReversibleHooks::Install("CVehicleRecording", "Render", 0x459F70, &CVehicleRecording::Render);
+    RH_ScopedClass(CVehicleRecording);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Render, 0x459F70);
 }
 
 void CVehicleRecording::Init()
@@ -68,4 +71,8 @@ void CVehicleRecording::RenderLineSegment(int32& numVertices) {
         }
     }
     numVertices = 0;
+}
+
+void CVehicleRecording::SaveOrRetrieveDataForThisFrame() {
+    plugin::Call<0x45A610>();
 }

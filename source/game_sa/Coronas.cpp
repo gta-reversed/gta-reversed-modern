@@ -15,16 +15,19 @@ uint16(&CCoronas::ms_aEntityLightsOffsets)[8] = *(uint16(*)[8])0x8D5028;
 char (&coronaTexturesAlphaMasks)[260] = *(char (*)[260])0x8D4A58;
 
 void CCoronas::InjectHooks() {
-//    ReversibleHooks::Install("CCoronas", "Init", 0x6FAA70, &CCoronas::Init);
-//    ReversibleHooks::Install("CCoronas", "Shutdown", 0x6FAB00, &CCoronas::Shutdown);
-//    ReversibleHooks::Install("CCoronas", "Update", 0x6FADF0, &CCoronas::Update);
-//    ReversibleHooks::Install("CCoronas", "Render", 0x6FAEC0, &CCoronas::Render);
-//    ReversibleHooks::Install("CCoronas", "RenderReflections", 0x6FB630, &CCoronas::RenderReflections);
-//    ReversibleHooks::Install("CCoronas", "RenderSunReflection", 0x6FBAA0, &CCoronas::RenderSunReflection);
-//    ReversibleHooks::Install("CCoronas", "RegisterCorona_texture", 0x6FC180, &CCoronas::RegisterCorona);
-//    ReversibleHooks::Install("CCoronas", "RegisterCorona_type", 0x6FC580, &CCoronas::RegisterCorona);
-//    ReversibleHooks::Install("CCoronas", "UpdateCoronaCoors", 0x6FC4D0, &CCoronas::UpdateCoronaCoors);
-//    ReversibleHooks::Install("CCoronas", "DoSunAndMoon", 0x6FC5A0, &CCoronas::DoSunAndMoon);
+    RH_ScopedClass(CCoronas);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(Init, 0x6FAA70);
+//    RH_ScopedInstall(Shutdown, 0x6FAB00);
+//    RH_ScopedInstall(Update, 0x6FADF0);
+//    RH_ScopedInstall(Render, 0x6FAEC0);
+//    RH_ScopedInstall(RenderReflections, 0x6FB630);
+//    RH_ScopedInstall(RenderSunReflection, 0x6FBAA0);
+//    RH_ScopedInstall(RegisterCorona, 0x6FC180);
+//    RH_ScopedInstall(RegisterCorona, 0x6FC580);
+//    RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0);
+//    RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0);
 }
 
 // Initialises coronas

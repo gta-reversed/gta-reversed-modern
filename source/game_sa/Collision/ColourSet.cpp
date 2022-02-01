@@ -3,6 +3,9 @@
 #include "ColourSet.h"
 
 void CColourSet::InjectHooks() {
+    RH_ScopedClass(CColourSet);
+    RH_ScopedCategory("Collision");
+
 
 }
     // 0x55F4B0

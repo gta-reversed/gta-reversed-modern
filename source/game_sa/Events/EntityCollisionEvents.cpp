@@ -8,33 +8,48 @@
 
 void CEventPedCollisionWithPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "CEventPedCollisionWithPed", 0x4AC990, &CEventPedCollisionWithPed::Constructor);
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "TakesPriorityOver_Reversed", 0x4ACAD0, &CEventPedCollisionWithPed::TakesPriorityOver_Reversed);
-    ReversibleHooks::Install("CEventPedCollisionWithPed", "AffectsPed_Reversed", 0x4ACB10, &CEventPedCollisionWithPed::AffectsPed_Reversed);
+    RH_ScopedClass(CEventPedCollisionWithPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AC990);
+    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ACAD0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACB10);
 }
 
 void CEventPedCollisionWithPlayer::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedCollisionWithPlayer", "CEventPedCollisionWithPlayer", 0x5FED40, &CEventPedCollisionWithPlayer::Constructor);
+    RH_ScopedClass(CEventPedCollisionWithPlayer);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FED40);
 }
 
 void CEventPlayerCollisionWithPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPlayerCollisionWithPed", "CEventPlayerCollisionWithPed", 0x5FEE40, &CEventPlayerCollisionWithPed::Constructor);
+    RH_ScopedClass(CEventPlayerCollisionWithPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FEE40);
 }
 
 void CEventObjectCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventObjectCollision", "CEventObjectCollision", 0x4ACCF0, &CEventObjectCollision::Constructor);
-    ReversibleHooks::Install("CEventObjectCollision", "AffectsPed_Reversed", 0x4ACE30, &CEventObjectCollision::AffectsPed_Reversed);
+    RH_ScopedClass(CEventObjectCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ACCF0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACE30);
 }
 
 void CEventBuildingCollision::InjectHooks()
 {
-    ReversibleHooks::Install("CEventBuildingCollision", "CEventBuildingCollision", 0x4ACF00, &CEventBuildingCollision::Constructor);
-    ReversibleHooks::Install("CEventBuildingCollision", "AffectsPed_Reversed", 0x4AD070, &CEventBuildingCollision::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventBuildingCollision", "IsHeadOnCollision", 0x4AD1E0, &CEventBuildingCollision::IsHeadOnCollision);
-    ReversibleHooks::Install("CEventBuildingCollision", "CanTreatBuildingAsObject", 0x4B3120, &CEventBuildingCollision::CanTreatBuildingAsObject);
+    RH_ScopedClass(CEventBuildingCollision);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ACF00);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AD070);
+    RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);
+    RH_ScopedInstall(CanTreatBuildingAsObject, 0x4B3120);
 }
 
 CEventPedCollisionWithPed::CEventPedCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
@@ -168,13 +183,10 @@ CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float
     return this;
 }
 
+// 0x4ACE30
 bool CEventObjectCollision::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4ACE30, CEventObjectCollision*, CPed*>(this, ped);
-#else
     return CEventObjectCollision::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventObjectCollision::AffectsPed_Reversed(CPed* ped)
@@ -212,13 +224,10 @@ CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, f
     return this;
 }
 
+// 0x4AD070
 bool CEventBuildingCollision::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AD070, CEventBuildingCollision*, CPed*>(this, ped);
-#else
     return CEventBuildingCollision::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
@@ -247,25 +256,21 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
+// 0x4AD1E0
 bool CEventBuildingCollision::IsHeadOnCollision(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AD1E0, CEventBuildingCollision*, CPed*>(this, ped);
-#else
     CVector velocity = m_collisionImpactVelocity;
     velocity.z = 0.0f;
     velocity.Normalise();
     return -DotProduct(velocity, ped->GetForward()) > 0.866f;
-#endif
 }
 
+// 0x4B3120
 bool CEventBuildingCollision::CanTreatBuildingAsObject(CBuilding* building)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallAndReturn<bool, 0x4B3120, CBuilding*>(building);
-#else
     if (building->m_bIsTempBuilding)
         return true;
+
     CColModel* colModel = CModelInfo::GetModelInfo(building->m_nModelIndex)->GetColModel();
     CVector& boundMax = colModel->m_boundBox.m_vecMax;
     CVector& boundMin = colModel->m_boundBox.m_vecMin;
@@ -278,5 +283,4 @@ bool CEventBuildingCollision::CanTreatBuildingAsObject(CBuilding* building)
         return true;
     }
     return false;
-#endif
 }

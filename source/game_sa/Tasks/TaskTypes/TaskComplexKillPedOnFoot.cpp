@@ -3,7 +3,9 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 void CTaskComplexKillPedOnFoot::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexKillPedOnFoot", "CTaskComplexKillPedOnFoot", 0x620E30, &CTaskComplexKillPedOnFoot::Constructor);
+    RH_ScopedClass(CTaskComplexKillPedOnFoot);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x620E30);
 }
 
 CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) : CTaskComplex() {

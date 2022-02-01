@@ -13,6 +13,8 @@
 #include <functional>
 #include <iostream>
 #include <cassert>
+#include <array>
+#include <ranges>
 
 // DirectX
 #include <d3d9.h>
@@ -22,7 +24,6 @@
 #include "Base.h"
 #include "game_sa\constants.h"
 #include "game_sa\Conversations.h"
-#include "game_sa\StuntJumpManager.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\PedGeometryAnalyser.h"
 #include "game_sa\Debug.h"
@@ -116,7 +117,6 @@
 #include "game_sa\Camera.h"
 #include "game_sa\CamPathSplines.h"
 #include "game_sa\CarAI.h"
-#include "game_sa\CarCtrl.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
 #include "game_sa\Checkpoint.h"
@@ -124,7 +124,6 @@
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\Clouds.h"
 #include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
@@ -132,7 +131,6 @@
 #include "game_sa\Cranes.h"
 #include "game_sa\CrimeBeingQd.h"
 #include "game_sa\CustomCarEnvMapPipeline.h"
-#include "game_sa\CustomCarPlateMgr.h"
 #include "game_sa\CutsceneMgr.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
@@ -198,7 +196,6 @@
 #include "game_sa\PedIK.h"
 #include "game_sa\PedIntelligence.h"
 #include "game_sa\PedList.h"
-#include "game_sa\PedPlacement.h"
 #include "game_sa\PedTaskPair.h"
 #include "game_sa\PedAttractorManager.h"
 #include "game_sa\Pickup.h"
@@ -241,7 +238,6 @@
 #include "game_sa\Shopping.h"
 #include "game_sa\ShotInfo.h"
 #include "game_sa\SimpleTransform.h"
-#include "game_sa\Skidmarks.h"
 #include "game_sa\SpecialFX.h"
 #include "game_sa\SpecialPlateHandler.h"
 #include "game_sa\Sprite.h"
@@ -264,7 +260,6 @@
 #include "game_sa\cTransmission.h"
 #include "game_sa\TrafficLights.h"
 #include "game_sa\TxdStore.h"
-#include "game_sa\UpsideDownCarCheck.h"
 #include "game_sa\UserDisplay.h"
 #include "game_sa\VisibilityPlugins.h"
 #include "game_sa\Wanted.h"
@@ -272,7 +267,6 @@
 #include "game_sa\WeaponEffects.h"
 #include "game_sa\WeaponInfo.h"
 #include "game_sa\Weather.h"
-#include "game_sa\WindModifiers.h"
 #include "game_sa\World.h"
 #include "game_sa\Zone.h"
 #include "game_sa\ZoneInfo.h"
@@ -289,7 +283,6 @@
 #include "game_sa\TxdDef.h"
 #include "game_sa\GameLogic.h"
 #include "game_sa\Maths.h"
-#include "game_sa\TagManager.h"
 #include "game_sa\Remote.h"
 #include "game_sa\Animation\AnimAssociationData.h"
 #include "game_sa\Animation\AnimBlendFrameData.h"

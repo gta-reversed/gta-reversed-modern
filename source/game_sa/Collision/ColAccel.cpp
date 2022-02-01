@@ -15,17 +15,20 @@ char const* CColAccel::mp_cCacheName = *(char const**)0x8D0F84; // MODELS\CINFO.
 
 void CColAccel::InjectHooks()
 {
-    ReversibleHooks::Install("CColAccel", "isCacheLoading", 0x5B2AC0, &CColAccel::isCacheLoading);
-    ReversibleHooks::Install("CColAccel", "endCache", 0x5B2AD0, &CColAccel::endCache);
-    ReversibleHooks::Install("CColAccel", "addCacheCol", 0x5B2C20, &CColAccel::addCacheCol);
-    ReversibleHooks::Install("CColAccel", "cacheLoadCol", 0x5B2CC0, &CColAccel::cacheLoadCol);
-    ReversibleHooks::Install("CColAccel", "addColDef", 0x5B2DD0, &CColAccel::addColDef);
-    ReversibleHooks::Install("CColAccel", "getColDef", 0x5B2E60, &CColAccel::getColDef);
-    ReversibleHooks::Install("CColAccel", "setIplDef", 0x5B2ED0, &CColAccel::setIplDef);
-    ReversibleHooks::Install("CColAccel", "getIplDef", 0x5B2EF0, &CColAccel::getIplDef);
-    ReversibleHooks::Install("CColAccel", "cacheIPLSection", 0x5B2F10, &CColAccel::cacheIPLSection);
-    ReversibleHooks::Install("CColAccel", "addIPLEntity", 0x5B3040, &CColAccel::addIPLEntity);
-    ReversibleHooks::Install("CColAccel", "startCache", 0x5B31A0, &CColAccel::startCache);
+    RH_ScopedClass(CColAccel);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(isCacheLoading, 0x5B2AC0);
+    RH_ScopedInstall(endCache, 0x5B2AD0);
+    RH_ScopedInstall(addCacheCol, 0x5B2C20);
+    RH_ScopedInstall(cacheLoadCol, 0x5B2CC0);
+    RH_ScopedInstall(addColDef, 0x5B2DD0);
+    RH_ScopedInstall(getColDef, 0x5B2E60);
+    RH_ScopedInstall(setIplDef, 0x5B2ED0);
+    RH_ScopedInstall(getIplDef, 0x5B2EF0);
+    RH_ScopedInstall(cacheIPLSection, 0x5B2F10);
+    RH_ScopedInstall(addIPLEntity, 0x5B3040);
+    RH_ScopedInstall(startCache, 0x5B31A0);
 }
 
 bool CColAccel::isCacheLoading()
@@ -77,8 +80,8 @@ void CColAccel::addCacheCol(PackedModelStartEnd startEnd, CColModel const& colMo
     colEntry.m_wModelEnd = startEnd.wModelEnd;
     colEntry.m_boundBox = colModel.m_boundBox;
     colEntry.m_boundSphere = colModel.m_boundSphere;
-    colEntry.m_nColSlot = colModel.m_boundSphere.m_nColSlot;
-    colEntry.m_bUnkn = colModel.m_boundSphere.m_bFlag0x01;
+    colEntry.m_nColSlot = colModel.m_nColSlot;
+    colEntry.m_bColModelNotEmpty = colModel.m_bNotEmpty;
 
     ++CColAccel::m_iNumColItems;
 }
@@ -94,9 +97,9 @@ void CColAccel::cacheLoadCol()
 
         auto pColModel = new CColModel();
         pColModel->m_boundBox = colEntry.m_boundBox;
-        *static_cast<CSphere*>(&pColModel->m_boundSphere) = colEntry.m_boundSphere;
-        pColModel->m_boundSphere.m_nColSlot = colEntry.m_nColSlot;
-        pColModel->m_boundSphere.m_bFlag0x01 = colEntry.m_bUnkn;
+        pColModel->m_boundSphere = colEntry.m_boundSphere;
+        pColModel->m_nColSlot = colEntry.m_nColSlot;
+        pColModel->m_bNotEmpty = colEntry.m_bColModelNotEmpty;
 
         pModelInfo->SetColModel(pColModel, true);
         CColStore::IncludeModelIndex(colEntry.m_nColSlot, colEntry.m_wModelStart);

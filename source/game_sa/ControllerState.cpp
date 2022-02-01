@@ -1,8 +1,11 @@
 #include "StdInc.h"
 
 void CControllerState::InjectHooks() {
-    ReversibleHooks::Install("CControllerState", "Clear", 0x53EF80, &CControllerState::Clear);
-    ReversibleHooks::Install("CControllerState", "CheckForInput", 0x53EFF0, &CControllerState::CheckForInput);
+    RH_ScopedClass(CControllerState);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Clear, 0x53EF80);
+    RH_ScopedInstall(CheckForInput, 0x53EFF0);
 }
 
 // 0x53EF80

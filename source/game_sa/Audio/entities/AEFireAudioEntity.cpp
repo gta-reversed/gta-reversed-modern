@@ -171,14 +171,16 @@ void CAEFireAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 }
 
 void CAEFireAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CAEFireAudioEntity", "Initialise", 0x4DCF20, &CAEFireAudioEntity::Initialise);
-    Install("CAEFireAudioEntity", "StaticInitialise", 0x5B9A90, &CAEFireAudioEntity::StaticInitialise);
-    Install("CAEFireAudioEntity", "Terminate", 0x4DCF40, &CAEFireAudioEntity::Terminate);
-    Install("CAEFireAudioEntity", "AddAudioEvent", 0x4DD3C0, &CAEFireAudioEntity::AddAudioEvent);
-    Install("CAEFireAudioEntity", "PlayFireSounds", 0x4DD0D0, &CAEFireAudioEntity::PlayFireSounds);
-    Install("CAEFireAudioEntity", "PlayWaterSounds", 0x4DD270, &CAEFireAudioEntity::PlayWaterSounds);
-    Install("CAEFireAudioEntity", "UpdateParameters", 0x4DCF60, &CAEFireAudioEntity::UpdateParameters_Reversed);
+    RH_ScopedClass(CAEFireAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Initialise, 0x4DCF20);
+    RH_ScopedInstall(StaticInitialise, 0x5B9A90);
+    RH_ScopedInstall(Terminate, 0x4DCF40);
+    RH_ScopedInstall(AddAudioEvent, 0x4DD3C0);
+    RH_ScopedInstall(PlayFireSounds, 0x4DD0D0);
+    RH_ScopedInstall(PlayWaterSounds, 0x4DD270);
+    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCF60);
 }
 
 void CAEFireAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
