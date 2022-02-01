@@ -174,7 +174,7 @@ void CPedIK::PitchForSlope() {
         float offset;
         if (abs(m_fSlopePitch) > 0.01f) {
             offset = 0.1f;
-            if (m_pPed->m_nMoveState == 4) { // TODO: find enum
+            if (m_pPed->m_nMoveState == PEDMOVE_WALK) {
                 offset = 0.085f;
             }
 
