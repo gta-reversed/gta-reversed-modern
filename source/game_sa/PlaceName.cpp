@@ -48,7 +48,7 @@ void CPlaceName::Process() {
             m_pZone ||
             smallestZone &&
             m_pZone &&
-            memcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey, sizeof(smallestZone->m_szTextKey))
+            memcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey, sizeof(smallestZone->m_szTextKey)) == 0
     ) {
         if (m_nAdditionalTimer) {
             m_nAdditionalTimer -= 1;
