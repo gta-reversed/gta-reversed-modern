@@ -8,7 +8,7 @@ void COnscreenTimerEntry::Init() {
     memset(&m_szDescriptionTextKey, 0, sizeof(m_szDescriptionTextKey)); // original initialization
 
     m_bEnabled = false;
-    m_nTimerDirection = eTimerDirection::INCREASE; // 1;
+    m_nTimerDirection = eTimerDirection::INCREASE;
     m_nClockBeepCountdownSecs = 12;
 }
 
@@ -38,10 +38,11 @@ void COnscreenTimerEntry::Process() {
             m_bEnabled = false;
         }
     }
-
+/*
 #ifndef NDEBUG
     printf("[COnscreenTimerEntry::Process] timerPtr: %d\n", timerPtr);
 #endif
+*/
 }
 
 // 0x44CA40

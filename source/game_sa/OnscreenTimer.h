@@ -14,7 +14,7 @@
 
 class COnscreenTimer {
 public:
-    static constexpr uint16 NUM_COUNTERS = 4;
+    static constexpr auto NUM_COUNTERS{ 4u };
 
     COnscreenTimerEntry   m_Clock;
     COnscreenCounterEntry m_aCounters[NUM_COUNTERS];
