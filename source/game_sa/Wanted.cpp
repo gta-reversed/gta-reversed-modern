@@ -16,34 +16,39 @@ void CWanted::InjectHooks()
     RH_ScopedClass(CWanted);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Initialise, 0x562390);
+    RH_ScopedInstall(Reset, 0x562400);
+    RH_ScopedInstall(InitialiseStaticVariables, 0x561C70);
     RH_ScopedInstall(UpdateWantedLevel, 0x561C90);
+    RH_ScopedInstall(SetMaximumWantedLevel, 0x561E70);
+    RH_ScopedInstall(AreMiamiViceRequired, 0x561F30);
     RH_ScopedInstall(AreSwatRequired, 0x561F40);
     RH_ScopedInstall(AreFbiRequired, 0x561F60);
     RH_ScopedInstall(AreArmyRequired, 0x561F80);
-    RH_ScopedInstall(InitialiseStaticVariables, 0x561C70);
-    RH_ScopedInstall(SetMaximumWantedLevel, 0x561E70);
-    RH_ScopedInstall(Initialise, 0x562390);
+    RH_ScopedInstall(NumOfHelisRequired, 0x561FA0);
+    RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
+    RH_ScopedInstall(UpdateCrimesQ, 0x562760);
     RH_ScopedInstall(ClearQdCrimes, 0x561FE0);
+    // RH_ScopedInstall(AddCrimesToQ, 0x562000);
+    RH_ScopedInstall(ReportCrimeNow, 0x562120);
     RH_ScopedInstall(IsInPursuit, 0x562330);
+    RH_ScopedInstall(UpdateEachFrame, 0x562360);
+    RH_ScopedInstall(RegisterCrime, 0x562410);
+    RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
     RH_ScopedInstall(SetWantedLevel, 0x562470);
     RH_ScopedInstall(CheatWantedLevel, 0x562540);
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x562570);
     RH_ScopedInstall(ClearWantedLevelAndGoOnParole, 0x5625A0);
+    RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
+    // RH_ScopedInstall(IsClosestCop, 0x5627D0);
+    RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
+    RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
+    RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void (CWanted::*)(CCopPed*));
+    RH_ScopedInstall(RemoveExcessPursuitCops, 0x562C40);
+    RH_ScopedInstall(Update, 0x562C90);
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "func", 0x562F60, bool (*)(CCopPed*, uint8, CCopPed**, uint8&));
     RH_ScopedOverloadedInstall(CanCopJoinPursuit, "method", 0x562FB0, bool (CWanted::*)(CCopPed*));
     RH_ScopedInstall(SetPursuitCop, 0x563060);
-    RH_ScopedOverloadedInstall(RemovePursuitCop, "func", 0x562300, void (*)(CCopPed*, CCopPed**, uint8&));
-    RH_ScopedOverloadedInstall(RemovePursuitCop, "method", 0x562C10, void (CWanted::*)(CCopPed*));
-    RH_ScopedInstall(NumOfHelisRequired, 0x561FA0);
-    RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
-    RH_ScopedInstall(Update, 0x562C90);
-    RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
-    RH_ScopedInstall(UpdateCrimesQ, 0x562760);
-    RH_ScopedInstall(RegisterCrime, 0x562410);
-    RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
-    RH_ScopedInstall(ReportCrimeNow, 0x562120);
-    RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
-    RH_ScopedInstall(UpdateEachFrame, 0x562360);
 }
 
 // 0x562390
@@ -351,18 +356,6 @@ void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPo
         m_PoliceScannerAudio.AddAudioEvent(eAudioEvents::AE_CRIME_COMMITTED, crimeType, posn);
 }
 
-// 0x562300
-void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, uint8& copsCounter) {
-    for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
-        if (copsArray[i] != cop)
-            continue;
-
-        copsArray[i] = nullptr;
-        copsCounter--;
-        break;
-    }
-}
-
 // 0x562330
 bool CWanted::IsInPursuit(CCopPed* cop) {
     for (auto& copInPursuit : m_pCopsInPursuit) {
@@ -523,6 +516,18 @@ CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray)
     }
 
     return displacedCop;
+}
+
+// 0x562300
+void CWanted::RemovePursuitCop(CCopPed* cop, CCopPed** copsArray, uint8& copsCounter) {
+    for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
+        if (copsArray[i] != cop)
+            continue;
+
+        copsArray[i] = nullptr;
+        copsCounter--;
+        break;
+    }
 }
 
 // 0x562C10
