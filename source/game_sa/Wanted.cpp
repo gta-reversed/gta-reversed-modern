@@ -38,6 +38,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
     RH_ScopedInstall(Update, 0x562C90);
     RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
+    RH_ScopedInstall(UpdateCrimesQ, 0x562760);
 }
 
 // 0x562390
@@ -233,7 +234,19 @@ void CWanted::ResetPolicePursuit() {
 
 // 0x562760
 void CWanted::UpdateCrimesQ() {
-    plugin::CallMethod<0x562760, CWanted*>(this);
+    for (auto& crime : m_CrimesBeingQd) {
+        if (crime.m_nCrimeType == CRIME_NONE)
+            continue;
+
+        if (CTimer::GetTimeInMS() - crime.m_nTimeOfQing > 500 && !crime.m_bAlreadyReported) {
+            ReportCrimeNow(crime.m_nCrimeType, crime.m_vecCoors, crime.m_bPoliceDontReallyCare);
+
+            crime.m_bAlreadyReported = true;
+        }
+
+        if (CTimer::GetTimeInMS() - crime.m_nTimeOfQing > 10000)
+            crime.m_nCrimeType = CRIME_NONE;
+    }
 }
 
 // 0x561FE0
