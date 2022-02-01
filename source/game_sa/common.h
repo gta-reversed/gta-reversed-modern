@@ -7,7 +7,7 @@ Do not delete this comment block. Respect others' work!
 #pragma once
 
 #include <string>
-#include <renderware.h>
+#include <RenderWare.h>
 
 #include "Vector.h"
 #include "Vector2D.h"

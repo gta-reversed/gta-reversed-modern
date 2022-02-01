@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include <Base.h>
+#include "Base.h"
 
 #include "Vector.h"
 #include "eWeaponType.h"
@@ -40,8 +40,6 @@ public:
     // NOTSA funcs:
 private:
     static CBulletInfo* GetFree();
-
-private:
     bool IsTimeToBeDestroyed() const noexcept;
 };
 

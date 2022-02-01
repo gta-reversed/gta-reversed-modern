@@ -67,7 +67,7 @@ public:
     void ProcessEffects(CPed*pPed);
     void ProcessControlAI(CPed*pPed);
     void ProcessControlInput(CPlayerPed* pPed);
-    void CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix);
+    void CreateFxSystem(CPed* pPed, RwMatrix* pRwMatrix);
     void DestroyFxSystem();
 
 private:

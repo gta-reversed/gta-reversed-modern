@@ -12,7 +12,6 @@
 
 class CFileCarGenerator {
 public:
-
     CVector m_vecPosn;
     float   m_fAngle;
     int32   m_nModelId;

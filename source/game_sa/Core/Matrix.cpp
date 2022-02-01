@@ -129,7 +129,7 @@ void CMatrix::UpdateRwMatrix(RwMatrix* matrix)
     RwMatrixUpdate(matrix);
 }
 
-void CMatrix::UpdateMatrix(RwMatrixTag* rwMatrix)
+void CMatrix::UpdateMatrix(RwMatrix* rwMatrix)
 {
     m_right = *RwMatrixGetRight(rwMatrix);
     m_forward = *RwMatrixGetUp(rwMatrix);

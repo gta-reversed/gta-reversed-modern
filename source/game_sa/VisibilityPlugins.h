@@ -130,7 +130,7 @@ public:
     static CClumpModelInfo* GetClumpModelInfo(RpClump* clump);
     static float GetDistanceSquaredFromCamera(RwFrame* frame);
     static float GetDistanceSquaredFromCamera(CVector* pPos);
-    static float GetDotProductWithCameraVector(RwMatrixTag* atomicMatrix, RwMatrixTag* clumpMatrix, uint16 flags);
+    static float GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags);
     static int32 GetFrameHierarchyId(RwFrame* frame);
     static int16 GetModelInfoIndex(RpAtomic* atomic);
     static int16 GetUserValue(RpAtomic* atomic);

@@ -8,7 +8,7 @@
 
 #include "3dMarker.h"
 #include "RGBA.h"
-#include <Vector.h>
+#include "Vector.h"
 
 struct RpClump;
 struct RpAtomic;

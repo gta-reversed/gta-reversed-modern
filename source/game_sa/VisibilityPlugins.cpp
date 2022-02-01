@@ -333,7 +333,7 @@ bool CVisibilityPlugins::FrustumSphereCB(RpClump* clump) {
     CBaseModelInfo* modelInfo = FRAMEPLG(frame, m_modelInfo);
     sphere.radius = modelInfo->GetColModel()->GetBoundRadius();
     sphere.center = modelInfo->GetColModel()->GetBoundCenter();
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     RwV3dTransformPoints(&sphere.center, &sphere.center, 1, transformMatrix);
     return RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
 }
@@ -359,7 +359,7 @@ CClumpModelInfo* CVisibilityPlugins::GetClumpModelInfo(RpClump* clump) {
 }
 
 float CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame* frame) {
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     CVector distance;
     RwV3dSub(&distance, &transformMatrix->pos, ms_pCameraPosn);
     return distance.SquaredMagnitude();
@@ -371,7 +371,7 @@ float CVisibilityPlugins::GetDistanceSquaredFromCamera(CVector* pPos) {
     return distance.SquaredMagnitude();
 }
 
-float CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrixTag* atomicMatrix, RwMatrixTag* clumpMatrix, uint16 flags) {
+float CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags) {
     float dotProduct1 = 0.0f;
     float dotProduct2 = *(float*)&atomicMatrix; // really?
     RwV3d distance;
@@ -419,7 +419,7 @@ bool CVisibilityPlugins::IsAtomicVisible(RpAtomic* atomic) {
     if (atomic->interpolator.flags & rpINTERPOLATORDIRTYSPHERE)
         _rpAtomicResyncInterpolatedSphere(atomic);
     RwSphere sphere = atomic->boundingSphere;
-    RwMatrixTag* transformMatrix = RwFrameGetMatrix(RpAtomicGetFrame(atomic));
+    RwMatrix* transformMatrix = RwFrameGetMatrix(RpAtomicGetFrame(atomic));
     RwV3d point;
     RwV3dTransformPoints(&point, &sphere.center, 1, transformMatrix);
     return RwCameraFrustumTestSphere(CVisibilityPlugins::ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
@@ -541,8 +541,8 @@ RpAtomic* CVisibilityPlugins::RenderHeliRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
     
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float dotProduct = RwV3dDotProduct(&clumpMatrix->at, &distance);
@@ -559,8 +559,8 @@ RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
     
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float dotProduct1 = RwV3dDotProduct(&clumpMatrix->right, &distance);
@@ -576,7 +576,7 @@ RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
 
 // Unused
 RpAtomic* CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic* atomic) {
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float length = RwV3dLength(&distance);
@@ -644,9 +644,9 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -680,8 +680,8 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic* atomic) {
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f && ((atomicFlags & ATOMIC_CULL) || gVehicleDistanceFromCamera * 0.1f < dot * dot))
                 return atomic;
@@ -701,8 +701,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic* atomic) {
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -734,8 +734,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* 
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullBigCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -790,8 +790,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic* atomic) {
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f && ((atomicFlags & ATOMIC_CULL) || gVehicleDistanceFromCamera * 0.1f < dot * dot))
                 return atomic;
@@ -812,8 +812,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic* atomi
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullBigCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f)
                 return atomic;
@@ -895,11 +895,11 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
             const int32 boneID = activeWeapon.m_nType != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
-            RwMatrixTag* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
+            RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
             if (boneID == BONE_NORMAL)
                 pRightHandMatrix = ped->GetModellingMatrix();
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
-            RwMatrixTag* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
+            RwMatrix* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
             memcpy(weaponRwMatrix, pRightHandMatrix, sizeof(RwMatrixTag));
             if (activeWeapon.m_nType == WEAPON_PARACHUTE) {
                 static RwV3d rightWeaponTranslate = { 0.1f, -0.15f, 0.0f };
@@ -912,7 +912,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             eWeaponSkill weaponSkill = ped->GetWeaponSkill();
             if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_nType, weaponSkill)->flags.bTwinPistol) {
                 int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, BONE_L_HAND);
-                RwMatrixTag* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
+                RwMatrix* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
                 memcpy(weaponRwMatrix, pLeftHandMatrix, sizeof(RwMatrixTag));
                 RwMatrixRotate(weaponRwMatrix, &CPedIK::XaxisIK, 180.0f, rwCOMBINEPRECONCAT);
                 static RwV3d leftWeaponTranslate = { 0.04f, -0.05f, 0.0f };
@@ -1000,7 +1000,7 @@ void CVisibilityPlugins::SetupVehicleVariables(RpClump* clump) {
         return;
 
     RwFrame* frame = RpClumpGetFrame(clump);
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     CVector distance1;
     RwV3dSub(&distance1, &transformMatrix->pos, ms_pCameraPosn);
     gVehicleDistanceFromCamera = distance1.SquaredMagnitude();

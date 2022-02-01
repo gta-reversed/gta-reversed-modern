@@ -1396,7 +1396,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
 }
 
 // 0x68A9F0
-void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix)
+void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrix* pRwMatrix)
 {
     RwV3d point = { 0.0f, 0.0f, 0.0f };
     m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, pRwMatrix, false);

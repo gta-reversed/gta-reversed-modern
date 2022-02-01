@@ -17,11 +17,11 @@ void CQuaternion::InjectHooks()
     RH_ScopedClass(CQuaternion);
     RH_ScopedCategory("Core");
 
-    RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrixTag*));
+    RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrix*));
 }
 
 // Quat to matrix
-void CQuaternion::Get(RwMatrixTag* out)
+void CQuaternion::Get(RwMatrix* out)
 {
     auto vecImag2 = imag + imag;
     auto x2x = vecImag2.x * imag.x;

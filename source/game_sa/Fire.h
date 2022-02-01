@@ -44,7 +44,7 @@ public:
     void Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens);
     void Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens);
     void Start(CVector pos, float fStrength, CEntity* target, uint8 nGens); /* For script */
-    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
+    void CreateFxSysForStrength(const CVector& point, RwMatrix* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();

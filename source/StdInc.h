@@ -9,7 +9,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <vector>
 #include <functional>
 #include <iostream>
 #include <cassert>
@@ -22,9 +21,9 @@
 #include <dinput.h>
 
 #include "Base.h"
-#include <Vector.h>
-#include <Vector2D.h>
-#include <Matrix.h>
+#include "Vector.h"
+#include "Vector2D.h"
+#include "Matrix.h"
 
 #include "game_sa\constants.h"
 #include "game_sa\Conversations.h"

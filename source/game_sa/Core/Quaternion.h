@@ -20,7 +20,7 @@ public:
     CQuaternion();
 
     // Quat to matrix
-    void Get(RwMatrixTag* out);
+    void Get(RwMatrix* out);
 
     // Quat to euler angles
     void Get(float *x, float *y, float *z);

@@ -70,11 +70,9 @@ public:
     static void AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 isVisible);
     static void Update();
 
+private:
     // NOTSA functions:
-private:
     static CExplosion* GetFree();
-
-private:
     void SetCreator(CEntity* newCreator) noexcept;
     void SetVictim(CEntity* newVictim) noexcept;
 };

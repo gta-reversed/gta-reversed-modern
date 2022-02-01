@@ -34,7 +34,7 @@ VALIDATE_SIZE(tPoolObjectFlags, 1);
 
 template <class A, class B = A> class CPool {
 public:
-    B* m_pObjects;
+    B*                m_pObjects;
     tPoolObjectFlags* m_byteMap;
     int32             m_nSize;
     int32             m_nFirstFree;

@@ -610,8 +610,8 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
 }
 
 // 0x420C40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrixTag* transformMatrix) {
-    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrixTag*>(this, origin, radius, transformMatrix);
+bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrix* transformMatrix) {
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
 // 0x420D40

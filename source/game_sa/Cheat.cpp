@@ -6,7 +6,6 @@
 
 #include "TaskSimpleJetPack.h"
 
-
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
 char (&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char (*)[CHEAT_STRING_SIZE]>(0x969110);
@@ -15,10 +14,10 @@ bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 
 // NOTSA
 struct Cheat {
-    DWORD installAddress;
-    void* method;
-    const std::string methodName;
-    uint32 hash;
+    DWORD   installAddress;
+    void*   method;
+    const   std::string methodName;
+    uint32  hash;
     eCheats type;
 };
 
