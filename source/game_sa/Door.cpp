@@ -7,6 +7,8 @@
 
 #include "StdInc.h"
 
+#include "Door.h"
+
 float& CDoor::DOOR_SPEED_MAX_CAPPED = *(float*)0x8D3950;
 
 // 0x6F4040

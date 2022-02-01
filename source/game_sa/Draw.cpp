@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Draw.h"
+
 float& CDraw::ms_fFOV = *(float *)0x8D5038;
 float& CDraw::ms_fLODDistance = *(float *)0xC3EF98;
 float& CDraw::ms_fFarClipZ = *(float *)0xC3EF9C;
@@ -24,17 +26,17 @@ void CDraw::InjectHooks() {
 
 // 0x6FF410
 void CDraw::SetFOV(float fovValue) {
-    CDraw::ms_fFOV = fovValue;
+    ms_fFOV = fovValue;
 }
 
 // 0x6FF420
 void CDraw::CalculateAspectRatio() {
     if (FrontEndMenuManager.m_bWidescreenOn)
-        CDraw::ms_fAspectRatio = 16.f / 9.f;
+        ms_fAspectRatio = 16.f / 9.f;
     else if (TheCamera.m_bWideScreenOn)
-        CDraw::ms_fAspectRatio = 5.f / 4.f;
+        ms_fAspectRatio = 5.f / 4.f;
     else
-        CDraw::ms_fAspectRatio = 4.f / 3.f;
+        ms_fAspectRatio = 4.f / 3.f;
 }
 
 // 0x53E600

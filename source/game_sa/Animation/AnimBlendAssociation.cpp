@@ -51,6 +51,13 @@ CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* pClump, CAnim
     return this;
 }
 
+inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
+{
+    const DWORD clumpOffset = (*(DWORD*)0xB5F878);
+    //return reinterpret_cast <CAnimBlendClumpData *> (*(&pClump->object.type + clumpOffset));
+    return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int32)pClump)  ));
+}
+
 // 0x4CED50
 void CAnimBlendAssociation::Init(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
     return plugin::CallMethod<0x4CED50, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);

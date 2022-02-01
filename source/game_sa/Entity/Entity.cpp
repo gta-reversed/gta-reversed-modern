@@ -16,6 +16,7 @@
 #include "MotionBlurStreaks.h"
 #include "TagManager.h"
 #include "WindModifiers.h"
+#include "EntryExitManager.h"
 
 void CEntity::InjectHooks()
 {

@@ -10,6 +10,18 @@ class CColourSet;
 class CTimeCycleBox;
 class CBox;
 
+class CTimeCycleBox {
+public:
+    CBox  box;
+    int16 farclip;
+    uint8 lodDistMult;
+    int32 extraColor;
+    float strength;
+    float falloff;
+};
+
+VALIDATE_SIZE(CTimeCycleBox, 0x28);
+
 class CTimeCycle {
 public:
     static float& m_BrightnessAddedToAmbientBlue;

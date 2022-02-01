@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "HudColours.h"
+
 CHudColours& HudColour = *reinterpret_cast<CHudColours*>(0xBAB22C);
 
 void CHudColours::InjectHooks() {
@@ -7,7 +9,6 @@ void CHudColours::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x58FDA0);
-    RH_ScopedInstall(Destructor, 0x58FD90);
     RH_ScopedInstall(SetRGBAValue, 0x58FD20);
     RH_ScopedInstall(GetIntColour, 0x58FD50);
     RH_ScopedInstall(GetRGB, 0x58FEA0);
@@ -35,16 +36,6 @@ CHudColours::CHudColours() {
 
 CHudColours* CHudColours::Constructor() {
     this->CHudColours::CHudColours();
-    return this;
-}
-
-// 0x58FD90
-CHudColours::~CHudColours() {
-    // m_aColours[15] created on stack and should not be free.
-}
-
-CHudColours* CHudColours::Destructor() {
-    this->CHudColours::~CHudColours();
     return this;
 }
 

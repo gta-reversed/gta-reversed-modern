@@ -72,6 +72,7 @@
 #include "UpsideDownCarCheck.h"
 #include "PedClothesDesc.h"
 #include "WaterCannon.h"
+#include "EntryExitManager.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

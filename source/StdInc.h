@@ -15,18 +15,21 @@
 #include <array>
 #include <ranges>
 
+#include "Base.h"
+
+#include "HookSystem.h"
+#include "reversiblehooks\ReversibleHooks.h"
+
 // DirectX
 #include <d3d9.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
-#include "Base.h"
 #include "Vector.h"
 #include "Vector2D.h"
 #include "Matrix.h"
 
 #include "game_sa\constants.h"
-#include "game_sa\Conversations.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\PedGeometryAnalyser.h"
 #include "game_sa\Debug.h"
@@ -99,9 +102,6 @@
 #include "game_sa\WaterLevel.h"
 #include "game_sa\WaterCreature_c.h"
 #include "game_sa\WaterCreatureManager_c.h"
-#include "game_sa\InlineFunctions.h"
-#include "HookSystem.h"
-#include "reversiblehooks\ReversibleHooks.h"
 #include "game_sa\CdStreamInfo.h"
 #include "game_sa\Plugins\TwoDEffectPlugin\2dEffect.h"
 #include "game_sa\3dMarker.h"
@@ -141,11 +141,9 @@
 #include "game_sa\DecisionMaker.h"
 #include "game_sa\DecisionSimple.h"
 #include "game_sa\Directory.h"
-#include "game_sa\Door.h"
 #include "game_sa\Draw.h"
 #include "game_sa\EntityScanner.h"
 #include "game_sa\EntryExit.h"
-#include "game_sa\EntryExitManager.h"
 #include "game_sa\Explosion.h"
 #include "game_sa\FileLoader.h"
 #include "game_sa\FileMgr.h"
@@ -257,7 +255,6 @@
 #include "game_sa\Text\Text.h"
 #include "game_sa\TheZones.h"
 #include "game_sa\TimeCycle.h"
-#include "game_sa\TimeCycleBox.h"
 #include "game_sa\Timer.h"
 #include "game_sa\TrainNode.h"
 #include "game_sa\cTransmission.h"
@@ -319,6 +316,7 @@
 #include "game_sa\Collision\ColTrianglePlane.h"
 #include "game_sa\Collision\Sphere.h"
 #include "game_sa\Collision\TempColModels.h"
+
 #include "game_sa\Core\EntryInfoNode.h"
 #include "game_sa\Core\EntryInfoList.h"
 #include "game_sa\Core\KeyGen.h"
@@ -345,6 +343,7 @@
 #include "game_sa\Core\ListItem_c.h"
 #include "game_sa\Core\List_c.h"
 #include "game_sa\Core\SArray.h"
+
 #include "game_sa\PedStats.h"
 #include "game_sa\Entity\AnimatedBuilding.h"
 #include "game_sa\Entity\Building.h"

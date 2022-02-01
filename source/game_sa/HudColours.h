@@ -36,10 +36,8 @@ public:
     static void InjectHooks();
 
     CHudColours();
+    ~CHudColours() = default; // 0x58FD90
     CHudColours* Constructor();
-
-    ~CHudColours();
-    CHudColours* Destructor();
 
     void SetRGBAValue(eHudColours colorIndex, uint8 red, uint8 green, uint8 blue, uint8 alpha);
     uint32 GetIntColour(eHudColours colorIndex);
