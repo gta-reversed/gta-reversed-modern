@@ -6,11 +6,19 @@
 */
 #pragma once
 
-class COnscreenTimer;
+class CPlaceName;
+#include "OnscreenTimer.h"
+class CCurrentVehicle;
 
 class CUserDisplay {
 public:
-    static COnscreenTimer& OnscnTimer;
+    static CPlaceName&      PlaceName;
+    static COnscreenTimer&  OnscnTimer;
+    static CCurrentVehicle& CurrentVehicle;
+
+public:
+    static void InjectHooks();
 
     static void Init();
+    static void Process();
 };

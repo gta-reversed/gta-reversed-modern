@@ -756,6 +756,7 @@ void CFont::PrintString(float x, float y, const char* text)
         } else {
             CSprite2d::DrawRect(rt, m_FontBackgroundColor);
         }
+        m_bFontBackground = false;
     }
 
     ProcessStringToDisplay(x, y, text);

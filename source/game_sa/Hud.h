@@ -12,6 +12,14 @@ enum DRAW_FADE_STATE {
 
 };
 
+enum eNameState {
+    NAME_DONT_SHOW = 0,
+    NAME_SHOW      = 1,
+    NAME_FADE_IN   = 2,
+    NAME_FADE_OUT  = 3,
+    NAME_SWITCH    = 4,
+};
+
 enum eHudSprites {
     HUDSPRITE_FIST,
     HUDSPRITE_SITEM16,
@@ -69,7 +77,7 @@ public:
     static char *m_pHelpMessageToPrint; // static char m_pHelpMessageToPrint[400]
     static char *m_pLastHelpMessage; // static char m_pLastHelpMessage[400]
     static char *m_pHelpMessage; // static char m_pHelpMessage[400]
-    static int32 &m_ZoneState;
+    static int32 &m_ZoneState; // see eNameState
     static int32 &m_ZoneFadeTimer;
     static int32 &m_ZoneNameTimer;
     static char *m_Message; // static char m_Message[400]
