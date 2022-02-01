@@ -37,6 +37,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(NumOfHelisRequired, 0x561FA0);
     RH_ScopedInstall(ResetPolicePursuit, 0x561FD0);
     RH_ScopedInstall(Update, 0x562C90);
+    RH_ScopedInstall(WorkOutPolicePresence, 0x5625F0);
 }
 
 // 0x562390
@@ -355,7 +356,36 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
 
 // 0x5625F0
 int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
-    return plugin::CallAndReturn<int32, 0x5625F0, CVector, float>(posn, radius);
+    auto numCops = 0;
+
+    auto pedPool = CPools::GetPedPool();
+    for (auto i = pedPool->GetSize(); i; i--) {
+        if (auto ped = pedPool->GetAt(i - 1)) {
+            if (ped->m_nPedType != PED_TYPE_COP || !ped->IsAlive())
+                continue;
+
+            if (DistanceBetweenPoints(posn, ped->GetPosition()) < radius)
+                numCops++;
+        }
+    }
+
+    auto vehPool = CPools::GetVehiclePool();
+    for (auto i = vehPool->GetSize(); i; i--) {
+        if (auto veh = vehPool->GetAt(i - 1)) {
+            bool isCopVehicle = veh->vehicleFlags.bIsLawEnforcer || veh->m_nModelIndex == MODEL_POLMAV;
+
+            if (!isCopVehicle || veh == FindPlayerVehicle())
+                continue;
+
+            if (veh->m_nStatus == STATUS_ABANDONED || veh->m_nStatus == STATUS_WRECKED)
+                continue;
+
+            if (DistanceBetweenPoints(posn, veh->GetPosition()) < radius)
+                numCops++;
+        }
+    }
+
+    return numCops;
 }
 
 // 0x5627D0

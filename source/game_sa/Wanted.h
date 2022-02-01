@@ -52,8 +52,8 @@ public:
     uint32                      m_nTimeCounting;
     uint32                      m_nWantedLevel;
     uint32                      m_nWantedLevelBeforeParole;
-    CCrimeBeingQd               m_CrimesBeingQd[MAX_COPS_IN_PURSUIT];
-    CCopPed*                    m_pCopsInPursuit[10];
+    CCrimeBeingQd               m_CrimesBeingQd[16];
+    CCopPed*                    m_pCopsInPursuit[MAX_COPS_IN_PURSUIT];
     CAEPoliceScannerAudioEntity m_PoliceScannerAudio;
     bool                        m_bLeavePlayerAlone;
     char                        _pad299[3];
