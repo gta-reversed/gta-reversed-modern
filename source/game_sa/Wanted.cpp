@@ -96,7 +96,7 @@ void CWanted::UpdateWantedLevel() {
     m_nChaosLevel = std::min(m_nChaosLevel, MaximumChaosLevel);
     uint32 wantedLevel = m_nWantedLevel;
 
-    if (m_nChaosLevel > 4800) {
+    if (m_nChaosLevel > 4600) {
         CStats::IncrementStat(eStats::STAT_TOTAL_NUMBER_OF_WANTED_STARS_ATTAINED, (float)(6 - wantedLevel));
         m_nWantedLevel = 6;
         m_nMaxCopCarsInPursuit = 3;
