@@ -42,6 +42,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(RegisterCrime, 0x562410);
     RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
     RH_ScopedInstall(ReportCrimeNow, 0x562120);
+    RH_ScopedInstall(ComputePursuitCopToDisplace, 0x562B00);
 }
 
 // 0x562390
@@ -492,7 +493,31 @@ bool CWanted::IsClosestCop(CPed* ped, int32 numCopsToCheck) {
 
 // 0x562B00
 CCopPed* CWanted::ComputePursuitCopToDisplace(CCopPed* cop, CCopPed** copsArray) {
-    return plugin::CallAndReturn<CCopPed*, 0x562B00, CCopPed*, CCopPed**>(cop, copsArray);
+    CCopPed* displacedCop = nullptr;
+    auto distTargetCop = 1.0f;
+    auto playerPos = FindPlayerPed()->GetPosition();
+
+    if (cop)
+        distTargetCop = std::max(DistanceBetweenPointsSquared(playerPos, cop->GetPosition()), 1.0f);
+
+    for (auto i = 0u; i < MAX_COPS_IN_PURSUIT; i++) {
+        auto& copInPursuit = copsArray[i];
+
+        if (!copInPursuit)
+            continue;
+
+        if (!copInPursuit->IsAlive())
+            return copInPursuit;
+
+        auto distPursuitCop = DistanceBetweenPointsSquared(playerPos, copInPursuit->GetPosition());
+
+        if (distPursuitCop > distTargetCop) {
+            displacedCop = copInPursuit;
+            distTargetCop = distPursuitCop;
+        }
+    }
+
+    return displacedCop;
 }
 
 // 0x562C10
