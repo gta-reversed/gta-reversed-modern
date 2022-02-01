@@ -41,6 +41,7 @@ void CWanted::InjectHooks()
     RH_ScopedInstall(UpdateCrimesQ, 0x562760);
     RH_ScopedInstall(RegisterCrime, 0x562410);
     RH_ScopedInstall(RegisterCrime_Immediately, 0x562430);
+    RH_ScopedInstall(ReportCrimeNow, 0x562120);
 }
 
 // 0x562390
@@ -265,7 +266,87 @@ bool CWanted::AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& po
 
 // 0x562120
 void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
-    plugin::CallMethod<0x562120, CWanted*, eCrimeType, const CVector&, bool>(this, crimeType, posn, bPoliceDontReallyCare);
+    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+        return;
+
+    auto wantedLevel = m_nWantedLevel;
+    auto mul = m_fMultiplier;
+
+    if (CDarkel::Status == DARKEL_STATUS_1)
+        mul *= 0.3f;
+
+    mul = std::max(mul, 0.0f);
+
+    if (CGangWars::GangWarFightingGoingOn())
+        mul = 0.0f;
+
+    if (bPoliceDontReallyCare)
+        mul /= 3.0f;
+
+    if (CGangWars::GangWarFightingGoingOn())
+        mul = 0.0f;
+
+    switch (crimeType) {
+    case CRIME_DAMAGED_PED:
+    case CRIME_VEHICLE_DAMAGE:
+    case CRIME_TYPE_9:
+        mul *= 5.0f;
+        break;
+    case CRIME_DAMAGED_COP:
+        mul *= 45.0f;
+        break;
+    case CRIME_DAMAGE_CAR:
+        mul *= 30.0f;
+        break;
+    case CRIME_DAMAGE_COP_CAR:
+    case CRIME_KILL_COP_PED_WITH_CAR:
+    case CRIME_SET_COP_PED_ON_FIRE:
+        mul *= 80.0f;
+        break;
+    case CRIME_CAR_STEAL:
+        mul *= 15.0f;
+        break;
+    case CRIME_TYPE_7:
+        mul *= 10.0f;
+        break;
+    case CRIME_KILL_PED_WITH_CAR:
+        mul *= 18.0f;
+        break;
+    case CRIME_TYPE_12:
+    case CRIME_TYPE_16:
+        mul *= 400.0f;
+        break;
+    case CRIME_SET_PED_ON_FIRE:
+    case CRIME_SET_CAR_ON_FIRE:
+        mul *= 20.0f;
+        break;
+    case CRIME_EXPLOSION:
+        mul *= 25.0f;
+        break;
+    case CRIME_SEALTH_KILL_PED_WITH_KNIFE:
+        mul *= 35.0f;
+        break;
+    case CRIME_TYPE_19:
+        mul *= 100.0f;
+        break;
+    case CRIME_TYPE_20:
+        mul *= 70.0f;
+        break;
+    case CRIME_HIT_CAR:
+    case CRIME_AIM_GUN:
+        mul *= 2.0f;
+        break;
+    default:
+        break;
+    }
+
+    if (crimeType != CRIME_NONE && crimeType != CRIME_FIRE_WEAPON)
+        m_nChaosLevel += static_cast<uint32>(mul);
+
+    m_nChaosLevel = std::max(m_nChaosLevel, m_nChaosLevelBeforeParole);
+    UpdateWantedLevel();
+    if (m_nWantedLevel > wantedLevel)
+        m_PoliceScannerAudio.AddAudioEvent(eAudioEvents::AE_CRIME_COMMITTED, crimeType, posn);
 }
 
 // 0x562300
