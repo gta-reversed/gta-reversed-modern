@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Vector.h"
+
 #define SIGN_CHAR_WIDTH 8
 #define SIGN_CHAR_HEIGHT 16
 #define SIGN_PIXEL_BYTES 4

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "RunningScript.h"
+
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
     RH_ScopedCategory("Scripts");

@@ -2,6 +2,8 @@
 
 // Helper class for CGenericGameStorage
 
+#include "Base.h"
+
 class C_PcSave {
 public:
     // TODO: Seems like this is a bit-field, not an enum actually

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "GroupEvents.h"
+
 void CEventPlayerCommandToGroup::InjectHooks()
 {
     RH_ScopedClass(CEventPlayerCommandToGroup);

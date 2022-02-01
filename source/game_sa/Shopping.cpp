@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Shopping.h"
+
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();

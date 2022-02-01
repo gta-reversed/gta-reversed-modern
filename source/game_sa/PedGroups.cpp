@@ -82,6 +82,10 @@ bool CPedGroups::IsInPlayersGroup(CPed* ped) {
     return plugin::CallAndReturn<bool, 0x5F7F10, CPed*>(ped);
 }
 
+CPedGroup& CPedGroups::GetGroup(int32 groupId) {
+    return ms_groups[groupId];
+}
+
 // 0x5F7F40
 bool CPedGroups::AreInSameGroup(const CPed* ped1, const CPed* ped2) {
     return plugin::CallAndReturn<bool, 0x5F7F40, const CPed*, const CPed*>(ped1, ped2);

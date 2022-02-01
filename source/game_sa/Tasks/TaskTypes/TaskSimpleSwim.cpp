@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskSimpleSwim.h"
+#include "TaskSimpleClimb.h"
 
 float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2FC4);
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);
@@ -986,7 +987,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         bool bPlayerUse2PlayerControls = false;
         if (CGameLogic::IsPlayerUse2PlayerControls(pPed))
         {
-            bPlayerUse2PlayerControls = true;;
+            bPlayerUse2PlayerControls = true;
             pedWalkX = vecPedWalk.x;
             if (fWalkMagnitude > 0)
             {
@@ -1213,7 +1214,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
         float fUpperTorsoRotationX = 0.0f;
         if (CCamera::m_bUseMouse3rdPerson)
         {
-            CVector vecActiveCamFront = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront;;
+            CVector vecActiveCamFront = TheCamera.m_aCams[TheCamera.m_nActiveCam].m_vecFront;
             if (TheCamera.GetLookDirection() != 3)
             {
                 vecActiveCamFront.x *= -1.0f;
@@ -1395,7 +1396,7 @@ void CTaskSimpleSwim::ProcessControlInput(CPlayerPed* pPed)
 }
 
 // 0x68A9F0
-void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrixTag* pRwMatrix)
+void CTaskSimpleSwim::CreateFxSystem(CPed* pPed, RwMatrix* pRwMatrix)
 {
     RwV3d point = { 0.0f, 0.0f, 0.0f };
     m_pFxSystem = g_fxMan.CreateFxSystem("water_ripples", &point, pRwMatrix, false);

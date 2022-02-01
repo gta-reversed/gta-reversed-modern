@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -745,7 +745,7 @@ void CTrain::ProcessControl_Reversed()
 
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
+        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();
         uint8 trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
 
         float fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));

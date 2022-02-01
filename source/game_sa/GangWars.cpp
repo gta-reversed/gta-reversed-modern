@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -165,7 +165,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
 // inlined
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
-    return plugin::CallAndReturn<bool, 0x443AE0, CZoneInfo*>(zoneInfo);;
+    return plugin::CallAndReturn<bool, 0x443AE0, CZoneInfo*>(zoneInfo);
 }
 
 // 0x4439C0

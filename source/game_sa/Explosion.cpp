@@ -121,6 +121,26 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+void CExplosion::SetCreator(CEntity* newCreator) noexcept {
+    if (m_pCreator)
+        m_pCreator->CleanUpOldReference(&m_pCreator);
+
+    if (newCreator)
+        newCreator->RegisterReference(&m_pCreator);
+
+    m_pCreator = newCreator;
+}
+
+void CExplosion::SetVictim(CEntity* newVictim) noexcept {
+    if (m_pVictim)
+        m_pVictim->CleanUpOldReference(&m_pVictim);
+
+    if (newVictim)
+        newVictim->RegisterReference(&m_pVictim);
+
+    m_pVictim = newVictim;
+}
+
 bool DoesNeedToVehProcessBombTimer(eExplosionType type) {
     switch (type) {
     case eExplosionType::EXPLOSION_ROCKET:

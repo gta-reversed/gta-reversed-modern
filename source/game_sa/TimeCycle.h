@@ -1,15 +1,27 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "ColourSet.h"
-#include "Box.h"
+#include "ColourSet.h";
 
 class CTimeCycleBox;
+class CBox;
+
+class CTimeCycleBox {
+public:
+    CBox  m_Box;
+    int16 m_FarClip;
+    uint8 m_LodDistMult;
+    int32 m_ExtraColor;
+    float m_Strength;
+    float m_Falloff;
+};
+
+VALIDATE_SIZE(CTimeCycleBox, 0x28);
 
 class CTimeCycle {
 public:
@@ -131,9 +143,7 @@ public:
     static void Update();
 
     // helpers
-    static CRGBA GetCurrentSkyBottomColor() {
-        return m_CurrentColours.GetSkyBottom();
-    }
+    static CRGBA GetCurrentSkyBottomColor();
 
     static float SumOfCurrentRGB1() {
         return m_fCurrentRGB1Blue + m_fCurrentRGB1Green + m_fCurrentRGB1Red;

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,6 +18,11 @@
 #include "TaskComplexKillPedOnFoot.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "TaskComplexWander.h"
+#include "TaskSimpleUseGun.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleDuck.h"
+#include "TaskSimpleClimb.h"
+#include "CollisionEventScanner.h"
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f
@@ -40,7 +45,7 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedInstall(IsRespondingToEvent, 0x600DB0);
     RH_ScopedInstall(AddTaskPhysResponse, 0x600DC0);
     RH_ScopedInstall(AddTaskEventResponseTemp, 0x600DE0);
-    RH_ScopedInstall(AddTaskEventResponseNonTemp, 0x600E00);;
+    RH_ScopedInstall(AddTaskEventResponseNonTemp, 0x600E00);
     RH_ScopedInstall(AddTaskPrimaryMaybeInGroup, 0x600E20);
     RH_ScopedInstall(FindTaskByType, 0x600EE0);
     RH_ScopedInstall(GetTaskFighting, 0x600F30);

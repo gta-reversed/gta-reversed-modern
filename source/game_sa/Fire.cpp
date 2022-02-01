@@ -212,7 +212,7 @@ auto CFire::GetFireParticleNameForStrength() const {
 };
 
 // 0x539360
-void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix) {
+void CFire::CreateFxSysForStrength(const CVector& point, RwMatrix* matrix) {
     DestroyFx();
     m_pFxSystem = g_fxMan.CreateFxSystem(GetFireParticleNameForStrength(), const_cast<CVector*>(&point), matrix, true); // TODO: Make CreateFxSys take const CVector&
     if (m_pFxSystem)

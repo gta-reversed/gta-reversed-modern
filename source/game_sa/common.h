@@ -1,20 +1,32 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
 #include <string>
+#include <RenderWare.h>
 
 #include "Vector.h"
-#include "Entity.h"
-#include "PlayerPed.h"
-#include "Vehicle.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "AnimBlendClumpData.h"
+#include "Vector2D.h"
+#include "Matrix.h"
+#include "Draw.h"
+
+class CAnimBlendClumpData;
+class CEntity;
+class CPlayerPed;
+class CWanted;
+class CPlayerInfo;
+class CVehicle;
+class CTrain;
+class CSimpleTransform;
+class AnimBlendFrameData;
+class CAnimBlendAssociation;
+class CAnimBlendHierarchy;
+class CEventGlobalGroup;
+struct RtAnimAnimation;
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 

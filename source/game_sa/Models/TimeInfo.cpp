@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TimeInfo.h"
 
 void CTimeInfo::InjectHooks() {

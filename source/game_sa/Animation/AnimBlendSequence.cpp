@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AnimBlendSequence.h"
+
 void CAnimBlendSequence::InjectHooks()
 {
     RH_ScopedClass(CAnimBlendSequence);
@@ -14,8 +16,8 @@ CAnimSequenceRootFrameUncompressed* CAnimBlendSequence::GetUncompressedFrame(int
     if (m_isRoot)
         return &static_cast<CAnimSequenceRootFrameUncompressed*>(m_pFrames)[iFrame];
 
-    auto* pData = static_cast<CAnimSequenceChildFrameUncompressed*>(m_pFrames);
-    return reinterpret_cast<CAnimSequenceRootFrameUncompressed*>(&pData[iFrame]);
+    auto* data = static_cast<CAnimSequenceChildFrameUncompressed*>(m_pFrames);
+    return reinterpret_cast<CAnimSequenceRootFrameUncompressed*>(&data[iFrame]);
 }
 
 CAnimSequenceRootFrameCompressed* CAnimBlendSequence::GetCompressedFrame(int32 iFrame)
@@ -23,6 +25,6 @@ CAnimSequenceRootFrameCompressed* CAnimBlendSequence::GetCompressedFrame(int32 i
     if (m_isRoot)
         return &static_cast<CAnimSequenceRootFrameCompressed*>(m_pFrames)[iFrame];
 
-    auto* pData = static_cast<CAnimSequenceChildFrameCompressed*>(m_pFrames);
-    return reinterpret_cast<CAnimSequenceRootFrameCompressed*>(&pData[iFrame]);
+    auto* data = static_cast<CAnimSequenceChildFrameCompressed*>(m_pFrames);
+    return reinterpret_cast<CAnimSequenceRootFrameCompressed*>(&data[iFrame]);
 }

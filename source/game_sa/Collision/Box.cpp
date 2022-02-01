@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Box.h"
+
 void CBox::InjectHooks()
 {
     RH_ScopedClass(CBox);

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "TrafficLights.h"
+
 uint8(&CTrafficLights::aTrafficLightColoursR)[3] = *(uint8(*)[3])0x8A6214;
 uint8(&CTrafficLights::aTrafficLightColoursG)[3] = *(uint8(*)[3])0x8A6218;
 uint8(&CTrafficLights::aTrafficLightColoursB)[3] = *(uint8(*)[3])0xA9AD94;
@@ -33,7 +35,7 @@ void CTrafficLights::InjectHooks()
 bool CTrafficLights::ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn)
 {
     auto iAppeareance = pVehicle->GetVehicleAppearance();
-    if (iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_HELI || iAppeareance == eVehicleAppearance::VEHICLE_APPEARANCE_PLANE)
+    if (iAppeareance == VEHICLE_APPEARANCE_HELI || iAppeareance == VEHICLE_APPEARANCE_PLANE)
         return false;
 
     auto& pCurrentNodeInfo = pVehicle->m_autoPilot.m_nCurrentPathNodeInfo;

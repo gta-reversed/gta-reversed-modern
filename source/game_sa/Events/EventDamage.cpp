@@ -5,6 +5,9 @@
 #include "PedType.h"
 #include "TaskComplexKillPedOnFoot.h"
 
+#include "TaskSimpleFight.h"
+#include "TaskSimpleUseGun.h"
+
 void CEventDamage::InjectHooks() {
     RH_ScopedClass(CEventDamage);
     RH_ScopedCategory("Events");

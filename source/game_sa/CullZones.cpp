@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CullZones.h"
+
 CCullZoneReflection (&CCullZones::aMirrorAttributeZones)[72] = *(CCullZoneReflection(*)[72])0xC815C0;
 CCullZone (&CCullZones::aTunnelAttributeZones)[40] = *(CCullZone(*)[40])0xC81C80;
 CCullZone (&CCullZones::aAttributeZones)[1300] = *(CCullZone(*)[1300])0xC81F50;

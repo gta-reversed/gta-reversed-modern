@@ -1,5 +1,5 @@
 /*
-	Plugin-SDK (Grand Theft Auto San Andreas) source file
+	Plugin-SDK (Grand Theft Auto San Andreas) file
 	Authors: GTA Community. See more here
 	https://github.com/DK22Pac/plugin-sdk
 	Do not delete this comment block. Respect others' work!
@@ -17,11 +17,11 @@ void CQuaternion::InjectHooks()
     RH_ScopedClass(CQuaternion);
     RH_ScopedCategory("Core");
 
-    RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrixTag*));
+    RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrix*));
 }
 
 // Quat to matrix
-void CQuaternion::Get(RwMatrixTag* out)
+void CQuaternion::Get(RwMatrix* out)
 {
     auto vecImag2 = imag + imag;
     auto x2x = vecImag2.x * imag.x;

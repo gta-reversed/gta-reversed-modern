@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "RealTimeShadowManager.h"
+
 CRealTimeShadowManager& g_realTimeShadowMan = *(CRealTimeShadowManager*)0xC40350;
 
 void CRealTimeShadowManager::Init()
