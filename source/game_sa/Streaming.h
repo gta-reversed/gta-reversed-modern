@@ -201,9 +201,9 @@ public:
     static uint32& ms_memoryAvailable;
     static int32& desiredNumVehiclesLoaded;
     static bool& ms_bLoadVehiclesInLoadScene;
-    static int32(&ms_aDefaultCopCarModel)[4];
+    static int32(&ms_aDefaultCopCarModel)[5];
     static int32& ms_DefaultCopBikeModel;
-    static int32(&ms_aDefaultCopModel)[4];
+    static int32(&ms_aDefaultCopModel)[5];
     static int32& ms_DefaultCopBikerModel;
     static uint32& ms_nTimePassedSinceLastCopBikeStreamedIn;
     static int32(&ms_aDefaultAmbulanceModel)[4];

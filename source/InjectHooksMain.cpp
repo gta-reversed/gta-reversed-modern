@@ -476,7 +476,7 @@ void InjectHooksMain() {
         CTaskComplexObserveTrafficLightsAndAchieveHeading::InjectHooks();
         CTaskSimpleInAir::InjectHooks();
         // CTaskComplexHitPedWithCar::InjectHooks();
-        // CTaskSimplePlayerOnFoot::InjectHooks();
+        CTaskSimplePlayerOnFoot::InjectHooks();
         CTaskComplexFollowPedFootsteps::InjectHooks();
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();

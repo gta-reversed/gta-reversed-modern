@@ -9,16 +9,16 @@ int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84
 bool& CStreaming::ms_bLoadVehiclesInLoadScene = *reinterpret_cast<bool*>(0x8A5A88);
 
 // Default models for each level (see eLevelNames)
-int32(&CStreaming::ms_aDefaultCopCarModel)[4] = *(int32(*)[4])0x8A5A8C;
-int32(&CStreaming::ms_aDefaultCopModel)[4] = *(int32(*)[4])0x8A5AA0;
+int32(&CStreaming::ms_aDefaultCopCarModel)[5] = *(int32(*)[5])0x8A5A8C; // Last one is bike cop, not matching any level name
+int32(&CStreaming::ms_aDefaultCopModel)[5] = *(int32(*)[5])0x8A5AA0; // Last one is bike cop, not matching any level name
 int32(&CStreaming::ms_aDefaultAmbulanceModel)[4] = *(int32(*)[4])0x8A5AB4;
 int32(&CStreaming::ms_aDefaultMedicModel)[4] = *(int32(*)[4])0x8A5AC4;
 int32(&CStreaming::ms_aDefaultFireEngineModel)[4] = *(int32(*)[4])0x8A5AD4;
 int32(&CStreaming::ms_aDefaultFiremanModel)[4] = *(int32(*)[4])0x8A5AE4;
 
 // Default models for current level
-int32& CStreaming::ms_DefaultCopBikeModel = *reinterpret_cast<int32*>(0x8A5A9C);
-int32& CStreaming::ms_DefaultCopBikerModel = *reinterpret_cast<int32*>(0x8A5AB0);
+int32& CStreaming::ms_DefaultCopBikeModel = *(&ms_aDefaultCopCarModel[4]); // reinterpret_cast<int32*>(0x8A5A9C);
+int32& CStreaming::ms_DefaultCopBikerModel = *(&ms_aDefaultCopModel[4]);
 
 uint32& CStreaming::ms_nTimePassedSinceLastCopBikeStreamedIn = *reinterpret_cast<uint32*>(0x9654C0);
 CDirectory*& CStreaming::ms_pExtraObjectsDir = *reinterpret_cast<CDirectory**>(0x8E48D0);
@@ -2632,7 +2632,7 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
 // 0x40E3A0
 void CStreaming::LoadRequestedModels()
 {
-    static int32 currentChannel = 0;
+    static int32& currentChannel = *(int32*)0x965534; // TODO | STATICREF // 0; = 0;
     if (ms_bLoadingBigModel)
         currentChannel = 0;
 
@@ -2708,7 +2708,7 @@ bool CStreaming::AddToLoadedVehiclesList(int32 modelId)
 // 0x407D50
 int32 CStreaming::GetDefaultCabDriverModel()
 {
-    static int32 randomIndex = 0;
+    static int32& randomIndex = *(int32*)0x965524; // TODO | STATICREF // 0; = 0;
     const int32 defaultCabDriverModels[7] = {
         MODEL_BMOCD,
         MODEL_WMYCD1,
@@ -3139,7 +3139,7 @@ void CStreaming::StreamCopModels(eLevelName level) {
         }
 
         if (m_bCopBikeLoaded)
-            level = (eLevelName)4; // Not sure, dont ask..
+            level = (eLevelName)4; // Bike cop is placed at index [4] in model arrays, so this is a hack for that
     } else {
         m_bCopBikeLoaded = false;
     }
@@ -3155,6 +3155,7 @@ void CStreaming::StreamCopModels(eLevelName level) {
         }
     }
 
+    assert(level <= 4);
     RequestModel(ms_aDefaultCopModel[level], STREAMING_GAME_REQUIRED);
     RequestModel(ms_aDefaultCopCarModel[level], STREAMING_GAME_REQUIRED);
 }
@@ -3253,15 +3254,13 @@ void CStreaming::StreamOneNewCar() {
     if (!GetInfo(MODEL_TAXI).IsLoaded()
         && !GetInfo(MODEL_CABBIE).IsLoaded()
     ) {
-        static int32 lastCarModelStreamedIn = MODEL_TAXI;
+        static int32& lastCarModelStreamedIn = *(int32*)0x965528; // TODO | STATICREF // = 0;
         if (lastCarModelStreamedIn == MODEL_TAXI) {
             if (!IsCarModelNeededInCurrentZone(MODEL_CABBIE) && IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
                 carModelId = MODEL_TAXI;
                 lastCarModelStreamedIn = MODEL_TAXI;
             }
         } else {
-            // Possibly dead code? Once `lastCarModelStreamedIn` is set as `MODEL_TAXI` it wont change.
-            // Maybe default value for `lastCarModelStreamedIn` isn't `MODEL_TAXI`?
             if (IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
                 carModelId = MODEL_TAXI;
                 lastCarModelStreamedIn = MODEL_TAXI;
@@ -3449,7 +3448,7 @@ void CStreaming::StreamVehiclesAndPeds() {
         dealerGroupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_DEALERS, 0);
     }
 
-    static int32 framesBeforeStreamingNextNewCar = 0;
+    static int32& framesBeforeStreamingNextNewCar = *(int32*)0x965530; // TODO | STATICREF // 0; = 0;
     if (framesBeforeStreamingNextNewCar >= 0) {
         --framesBeforeStreamingNextNewCar;
     }
@@ -3497,7 +3496,7 @@ void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
     StreamZoneModels_Gangs({});
 
     if (CPopCycle::m_pCurrZoneInfo) {
-        static int32 lastZonePopulationType = 0;
+        static int32& lastZonePopulationType = *(int32*)0x96552C; // TODO | STATICREF // 0; = 0;
         if (CPopCycle::m_pCurrZoneInfo->zonePopulationType != lastZonePopulationType) {
             ReclassifyLoadedCars();
             lastZonePopulationType = CPopCycle::m_pCurrZoneInfo->zonePopulationType;
@@ -3510,7 +3509,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
     if (!CPopCycle::m_pCurrZoneInfo || CCheat::IsZoneStreamingAllowed())
         return;
 
-    static int32 timeBeforeNextLoad = 0;
+    static int32& timeBeforeNextLoad = *(int32*)0x9654CC; // TODO | STATICREF // 0; = 0;
     if (CPopCycle::m_pCurrZoneInfo->zonePopulationType == ms_currentZoneType) {
         if (timeBeforeNextLoad >= 0) {
             timeBeforeNextLoad--;
@@ -3569,7 +3568,7 @@ void CStreaming::StreamZoneModels(CVector const& unused) {
         timeBeforeNextLoad = 300;
     }
 
-    static int32 timeBeforeNextGangLoad = 0;
+    static int32& timeBeforeNextGangLoad = *(int32*)0x9654D0; // TODO | STATICREF // 0; = 0;
     if (timeBeforeNextGangLoad >= 0) {
         timeBeforeNextGangLoad--;
     } else /*if (timeBeforeNextGangLoad < 0) - unnecessary*/ {

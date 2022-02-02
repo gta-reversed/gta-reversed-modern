@@ -1039,10 +1039,12 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - playerData->m_fMoveBlendRatio)
                 playerData->m_fMoveBlendRatio = pedMoveBlendRatio;
             else
-                playerData->m_fMoveBlendRatio = playerData->m_fMoveBlendRatio - fMaximumMoveBlendRatio;
+                playerData->m_fMoveBlendRatio -= fMaximumMoveBlendRatio;
         } else {
             playerData->m_fMoveBlendRatio = fMaximumMoveBlendRatio + playerData->m_fMoveBlendRatio;
         }
+    } else {
+        player->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
     }
 
 DONT_MODIFY_MOVE_BLEND_RATIO:
