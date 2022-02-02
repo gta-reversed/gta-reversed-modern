@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,8 @@
 #pragma once
 
 #include "Vector.h"
-#include "AEExplosionAudioEntity.h"
+
+class CAEExplosionAudioEntity;
 
 enum eExplosionType : uint32 {
     EXPLOSION_GRENADE,
@@ -40,7 +41,7 @@ public:
     uint8          m_nActiveCounter;
     bool           m_bMakeSound;
     float          m_nCreatedTime;
-    int32          m_nParticlesExpireTime;
+    uint32         m_nParticlesExpireTime;
     float          m_fVisibleDistance;
     float          m_fGroundZ;
     int32          m_nFuelTimer;
@@ -66,32 +67,14 @@ public:
 
     static bool TestForExplosionInArea(eExplosionType type, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     static void RemoveAllExplosionsInArea(CVector pos, float r);
-    static void AddExplosion(CEntity* pNewVictim, CEntity* pNewCreator, eExplosionType type, CVector pos, uint32 lifetimea, uint8 usesSound, float cameraShake, uint8 isVisible);
+    static void AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 isVisible);
     static void Update();
 
 private:
     // NOTSA functions:
     static CExplosion* GetFree();
-
-    void SetCreator(CEntity* newCreator) noexcept {
-        if (m_pCreator)
-            m_pCreator->CleanUpOldReference(&m_pCreator);
-
-        if (newCreator)
-            newCreator->RegisterReference(&m_pCreator);
-
-        m_pCreator = newCreator;
-    }
-
-    void SetVictim(CEntity* newVictim) noexcept {
-        if (m_pVictim)
-            m_pVictim->CleanUpOldReference(&m_pVictim);
-
-        if (newVictim)
-            newVictim->RegisterReference(&m_pVictim);
-
-        m_pVictim = newVictim;
-    }
+    void SetCreator(CEntity* newCreator) noexcept;
+    void SetVictim(CEntity* newVictim) noexcept;
 };
 
 VALIDATE_SIZE(CExplosion, 0x7C);

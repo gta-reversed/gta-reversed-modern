@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,7 +31,10 @@ float& CLoadingScreen::m_timeSinceLastScreen = *(float*)0xBAB340;
 CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLoadingScreen::m_aSplashes[7]
 
 void CLoadingScreen::InjectHooks() {
-    ReversibleHooks::Install("CLoadingScreen", "LoadingScreen", 0x53DED0, LoadingScreen);
+    RH_ScopedClass(CLoadingScreen);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
 
 // 0x5902B0

@@ -1,14 +1,17 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vector2D.h"
+#include "RGBA.h"
 #include "Sprite2d.h"
+#include "Vector2D.h"
 #include "eLanguage.h"
+
+class CRect;
 
 // Menu entries action to perform
 enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88

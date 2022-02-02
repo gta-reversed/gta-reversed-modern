@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,13 +18,14 @@ class CCollision {
 public:
     static CLinkList<CCollisionData*> &ms_colModelCache;
     static int32& ms_iProcessLineNumCrossings;
+    static uint32& ms_collisionInMemory;
 
 public:
     static void InjectHooks();
+    static void Tests();
 
     static void Init();
     static void Shutdown();
-    // dummy function
     static void Update();
     static void SortOutCollisionAfterLoad();
     static bool TestSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2);

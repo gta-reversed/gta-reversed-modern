@@ -1,24 +1,27 @@
 #include "StdInc.h"
 
 void CGlass::InjectHooks() {
-//    ReversibleHooks::Install("CGlass", "Init", 0x71A8D0, &CGlass::Init);
-//    ReversibleHooks::Install("CGlass", "Update", 0x71B0D0, &CGlass::Update);
-//    ReversibleHooks::Install("CGlass", "AskForObjectToBeRenderedInGlass", 0x71ACD0, &CGlass::AskForObjectToBeRenderedInGlass);
-//    ReversibleHooks::Install("CGlass", "BreakGlassPhysically", 0x71CF50, &CGlass::BreakGlassPhysically);
-//    ReversibleHooks::Install("CGlass", "CalcAlphaWithNormal", 0x71ACF0, &CGlass::CalcAlphaWithNormal);
-//    ReversibleHooks::Install("CGlass", "CarWindscreenShatters", 0x71C2B0, &CGlass::CarWindscreenShatters);
-//    ReversibleHooks::Install("CGlass", "FindFreePane", 0x71ACA0, &CGlass::FindFreePane);
-//    ReversibleHooks::Install("CGlass", "FindWindowSectorList", 0x71AFC0, &CGlass::FindWindowSectorList);
-//    ReversibleHooks::Install("CGlass", "GeneratePanesForWindow", 0x71B620, &CGlass::GeneratePanesForWindow);
-//    ReversibleHooks::Install("CGlass", "HasGlassBeenShatteredAtCoors", 0x71CB70, &CGlass::HasGlassBeenShatteredAtCoors);
-//    ReversibleHooks::Install("CGlass", "Render", 0x71CE20, &CGlass::Render);
-//    ReversibleHooks::Install("CGlass", "RenderHiLightPolys", 0x71ADA0, &CGlass::RenderHiLightPolys);
-//    ReversibleHooks::Install("CGlass", "RenderReflectionPolys", 0x71AED0, &CGlass::RenderReflectionPolys);
-//    ReversibleHooks::Install("CGlass", "RenderShatteredPolys", 0x71AE30, &CGlass::RenderShatteredPolys);
-//    ReversibleHooks::Install("CGlass", "WasGlassHitByBullet", 0x71C0D0, &CGlass::WasGlassHitByBullet);
-//    ReversibleHooks::Install("CGlass", "WindowRespondsToCollision", 0x71BC40, &CGlass::WindowRespondsToCollision);
-//    ReversibleHooks::Install("CGlass", "WindowRespondsToExplosion", 0x71C1A0, &CGlass::WindowRespondsToExplosion);
-//    ReversibleHooks::Install("CGlass", "WindowRespondsToSoftCollision", 0x71AF70, &CGlass::WindowRespondsToSoftCollision);
+    RH_ScopedClass(CGlass);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(Init, 0x71A8D0);
+//    RH_ScopedInstall(Update, 0x71B0D0);
+//    RH_ScopedInstall(AskForObjectToBeRenderedInGlass, 0x71ACD0);
+//    RH_ScopedInstall(BreakGlassPhysically, 0x71CF50);
+//    RH_ScopedInstall(CalcAlphaWithNormal, 0x71ACF0);
+//    RH_ScopedInstall(CarWindscreenShatters, 0x71C2B0);
+//    RH_ScopedInstall(FindFreePane, 0x71ACA0);
+//    RH_ScopedInstall(FindWindowSectorList, 0x71AFC0);
+//    RH_ScopedInstall(GeneratePanesForWindow, 0x71B620);
+//    RH_ScopedInstall(HasGlassBeenShatteredAtCoors, 0x71CB70);
+//    RH_ScopedInstall(Render, 0x71CE20);
+//    RH_ScopedInstall(RenderHiLightPolys, 0x71ADA0);
+//    RH_ScopedInstall(RenderReflectionPolys, 0x71AED0);
+//    RH_ScopedInstall(RenderShatteredPolys, 0x71AE30);
+//    RH_ScopedInstall(WasGlassHitByBullet, 0x71C0D0);
+//    RH_ScopedInstall(WindowRespondsToCollision, 0x71BC40);
+//    RH_ScopedInstall(WindowRespondsToExplosion, 0x71C1A0);
+//    RH_ScopedInstall(WindowRespondsToSoftCollision, 0x71AF70);
 }
 
 // 0x71A8D0

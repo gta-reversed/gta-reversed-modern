@@ -5,7 +5,7 @@
 #include "MovingThings.h"
 #include "BreakManager_c.h"
 #include "PlantMgr.h"
-
+#include "Clouds.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;
@@ -33,15 +33,17 @@ CVector Screens8Track[2][4] = { // 0x8D5DD8
 };
 
 void CMirrors::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CMirrors", "Init", 0x723000, &CMirrors::Init);
-    Install("CMirrors", "ShutDown", 0x723050, &CMirrors::ShutDown);
-    Install("CMirrors", "CreateBuffer", 0x7230A0, &CMirrors::CreateBuffer);
-    Install("CMirrors", "BuildCamMatrix", 0x723150, &CMirrors::BuildCamMatrix);
-    Install("CMirrors", "RenderMirrorBuffer", 0x726090, &CMirrors::RenderMirrorBuffer);
-    Install("CMirrors", "BuildCameraMatrixForScreens", 0x7266B0, &CMirrors::BuildCameraMatrixForScreens);
-    Install("CMirrors", "BeforeConstructRenderList", 0x726DF0, &CMirrors::BeforeConstructRenderList);
-    Install("CMirrors", "BeforeMainRender", 0x727140, &CMirrors::BeforeMainRender);
+    RH_ScopedClass(CMirrors);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x723000);
+    RH_ScopedInstall(ShutDown, 0x723050);
+    RH_ScopedInstall(CreateBuffer, 0x7230A0);
+    RH_ScopedInstall(BuildCamMatrix, 0x723150);
+    RH_ScopedInstall(RenderMirrorBuffer, 0x726090);
+    RH_ScopedInstall(BuildCameraMatrixForScreens, 0x7266B0);
+    RH_ScopedInstall(BeforeConstructRenderList, 0x726DF0);
+    RH_ScopedInstall(BeforeMainRender, 0x727140);
 }
 
 // 0x723000
@@ -102,22 +104,22 @@ void CMirrors::RenderMirrorBuffer() {
 
     DefinedState();
 
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)pBuffer);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDZERO);
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(pBuffer));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDZERO));
 
     RwImVertexIndex indices[] = { 0, 1, 2, 0, 2, 3 };
 
     if (MirrorFlags & CAM_STAIRS_FOR_PLAYER || bFudgeNow) {
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
 
         for (int x = 0; x < 2; x++) {
             constexpr CVector2D uvs[4]{
@@ -202,13 +204,13 @@ void CMirrors::RenderMirrorBuffer() {
         }
     }
 
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 // ANDROID 1.0 0x5078B8
@@ -288,7 +290,7 @@ void CMirrors::BeforeConstructRenderList() {
     const auto TryUpdate = [] {
         // Check player is in heli/plane
         if (CVehicle* veh = FindPlayerVehicle()) {
-            if (veh->IsHeli() || veh->IsPlane())
+            if (veh->IsSubHeli() || veh->IsSubPlane())
                 return false;
         }
 
@@ -366,21 +368,21 @@ void CMirrors::BeforeMainRender() {
 
 // 0x53DF40
 void RenderScene() {
-    bool underWater = CWeather::UnderWaterness <= 0.0f;;
+    bool underWater = CWeather::UnderWaterness <= 0.0f;
 
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 
     if (CMirrors::TypeOfMirror == 0) {
         CMovingThings::Render_BeforeClouds();
         CClouds::Render();
     }
 
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESHADEMODE,    (void*)rwSHADEMODEGOURAUD);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE,    RWRSTATE(rwSHADEMODEGOURAUD));
 
     CCarFXRenderer::PreRenderUpdate();
     CRenderer::RenderRoads();
@@ -390,9 +392,9 @@ void RenderScene() {
 
     CRenderer::RenderFadingInUnderwaterEntities();
     if (underWater) {
-        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)1);
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         CWaterLevel::RenderWater();
-        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)2);
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
 
     CRenderer::RenderFadingInEntities();
@@ -426,7 +428,7 @@ void RenderScene() {
     g_breakMan.Render(true);
     CPlantMgr::Render();
 
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
 
     if (CMirrors::TypeOfMirror == 0) {
         CClouds::RenderBottomFromHeight();
@@ -435,9 +437,9 @@ void RenderScene() {
     }
 
     if (underWater) {
-        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         CWaterLevel::RenderWater();
-        RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+        RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
 
     gRenderStencil();

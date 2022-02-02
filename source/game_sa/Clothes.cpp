@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,6 +9,7 @@
 
 #include "Clothes.h"
 #include "ClothesBuilder.h"
+#include "PedClothesDesc.h"
 
 int32& CClothes::ms_clothesImageId = *(int32*)0xBC12F8;
 int32& CClothes::ms_numRuleTags = *(int32*)0xBC12FC;
@@ -17,20 +18,22 @@ int32 (&CClothes::ms_clothesRules)[600] = *(int32(*)[600])0xBC1300;
 CPedClothesDesc& PlayerClothes = *(CPedClothesDesc*)0xBC1C78;
 
 void CClothes::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CClothes", "Init", 0x5A80D0, &CClothes::Init);
-    // Install("CClothes", "LoadClothesFile", 0x5A7B30, &CClothes::LoadClothesFile);
-    Install("CClothes", "ConstructPedModel", 0x5A81E0, &CClothes::ConstructPedModel);
-    Install("CClothes", "RequestMotionGroupAnims", 0x5A8120, &CClothes::RequestMotionGroupAnims);
-    Install("CClothes", "RebuildPlayerIfNeeded", 0x5A8390, &CClothes::RebuildPlayerIfNeeded);
-    Install("CClothes", "RebuildPlayer", 0x5A82C0, &CClothes::RebuildPlayer);
-    Install("CClothes", "RebuildCutscenePlayer", 0x5A8270, &CClothes::RebuildCutscenePlayer);
+    RH_ScopedClass(CClothes);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x5A80D0);
+    // RH_ScopedInstall(LoadClothesFile, 0x5A7B30);
+    RH_ScopedInstall(ConstructPedModel, 0x5A81E0);
+    RH_ScopedInstall(RequestMotionGroupAnims, 0x5A8120);
+    RH_ScopedInstall(RebuildPlayerIfNeeded, 0x5A8390);
+    RH_ScopedInstall(RebuildPlayer, 0x5A82C0);
+    RH_ScopedInstall(RebuildCutscenePlayer, 0x5A8270);
     /* crashes, incompatible registers?
-    Install("CClothes", "GetTextureDependency", 0x5A7EA0, &CClothes::GetTextureDependency);
-    Install("CClothes", "GetDependentTexture", 0x5A7F30, &CClothes::GetDependentTexture);
+    RH_ScopedInstall(GetTextureDependency, 0x5A7EA0);
+    RH_ScopedInstall(GetDependentTexture, 0x5A7F30);
     */
-    Install("CClothes", "GetPlayerMotionGroupToLoad", 0x5A7FB0, &CClothes::GetPlayerMotionGroupToLoad);
-    Install("CClothes", "GetDefaultPlayerMotionGroup", 0x5A81B0, &CClothes::GetDefaultPlayerMotionGroup);
+    RH_ScopedInstall(GetPlayerMotionGroupToLoad, 0x5A7FB0);
+    RH_ScopedInstall(GetDefaultPlayerMotionGroup, 0x5A81B0);
 }
 
 // 0x5A80D0
@@ -75,7 +78,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
     auto txd = CTxdStore::ms_pTxdPool->GetAt(modelInfo->m_nTxdIndex);
     auto skinnedClump = CClothesBuilder::CreateSkinnedClump(modelInfo->m_pRwClump, txd->m_pRwDictionary, newClothes, oldClothes, bCutscenePlayer);
     if (skinnedClump) {
-        CClothes::RequestMotionGroupAnims();
+        RequestMotionGroupAnims();
         modelInfo->AddTexDictionaryRef();
         modelInfo->DeleteRwObject();
         modelInfo->SetClump(skinnedClump);
@@ -88,7 +91,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
 
 // 0x5A8120
 void CClothes::RequestMotionGroupAnims() {
-    const auto group = CClothes::GetPlayerMotionGroupToLoad();
+    const auto group = GetPlayerMotionGroupToLoad();
     const auto fatIndex = CAnimManager::GetAnimationBlockIndex("fat");
     const auto muscularIndex = CAnimManager::GetAnimationBlockIndex("muscular");
 
@@ -112,7 +115,7 @@ void CClothes::RebuildPlayerIfNeeded(CPlayerPed* player) {
     const auto muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
 
     if (CStats::GetStatValue(STAT_FAT) != fat || CStats::GetStatValue(STAT_MUSCLE) != muscle) {
-        CClothes::RebuildPlayer(player, 0);
+        RebuildPlayer(player, 0);
     }
 }
 
@@ -129,7 +132,8 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
         player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat = CStats::GetStatValue(STAT_FAT);
         player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat = CStats::GetStatValue(STAT_MUSCLE);
     }
-    CClothes::ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, &PlayerClothes, 0);
+
+    ConstructPedModel(player->m_nModelIndex, *player->m_pPlayerData->m_pPedClothesDesc, &PlayerClothes, 0);
     player->Dress();
     RpAnimBlendClumpGiveAssociations(player->m_pRwClump, assoc);
     PlayerClothes = player->m_pPlayerData->m_pPedClothesDesc;
@@ -137,10 +141,10 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
 
 // 0x5A8270
 void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelId) {
-    auto clothesDesc = player->m_pPlayerData->m_pPedClothesDesc;
-    clothesDesc->m_fFatStat = CStats::GetStatValue(STAT_FAT);
+    const auto& clothesDesc    = player->m_pPlayerData->m_pPedClothesDesc;
+    clothesDesc->m_fFatStat    = CStats::GetStatValue(STAT_FAT);
     clothesDesc->m_fMuscleStat = CStats::GetStatValue(STAT_MUSCLE);
-    ConstructPedModel(modelId, (CPedClothesDesc&)clothesDesc, nullptr, true);
+    ConstructPedModel(modelId, *clothesDesc, nullptr, true);
 }
 
 // 0x5A7EA0
@@ -229,7 +233,7 @@ AssocGroupId CClothes::GetPlayerMotionGroupToLoad() {
 
 // 0x5A81B0
 AssocGroupId CClothes::GetDefaultPlayerMotionGroup() {
-    AssocGroupId group = CClothes::GetPlayerMotionGroupToLoad();
+    AssocGroupId group = GetPlayerMotionGroupToLoad();
     if (group == ANIM_GROUP_PLAYER)
         return ANIM_GROUP_PLAYER;
 

@@ -1,17 +1,20 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGetUp.h"
+#include "PedPlacement.h"
 
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 
 void CTaskSimpleGetUp::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGetUp", "Constructor", 0x677F50, &CTaskSimpleGetUp::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "StartAnim", 0x67C770, &CTaskSimpleGetUp::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "FinishGetUpAnimCB", 0x678110, &CTaskSimpleGetUp::FinishGetUpAnimCB);
+    RH_ScopedClass(CTaskSimpleGetUp);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x677F50);
+    RH_ScopedInstall(StartAnim, 0x67C770);
+    RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleGetUp", "ProcessPed", 0x67FA80, &CTaskSimpleGetUp::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "MakeAbortable", 0x677FE0, &CTaskSimpleGetUp::MakeAbortable_Reversed);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()
@@ -118,8 +121,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     auto pVeh = CPedPlacement::IsPositionClearOfCars(ped);
 
     if (!pVeh
-        || pVeh->m_vehicleType == VEHICLE_BIKE
-        || pVeh->m_vehicleSubType == VEHICLE_QUAD
+        || pVeh->IsBike()
+        || pVeh->IsSubQuad()
         || pVeh == ped->m_pAttachedTo
         || pVeh == ped->m_standingOnEntity
         )
@@ -128,8 +131,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 
         if (!pEntity
             || pEntity->m_nType != ENTITY_TYPE_VEHICLE
-            || pEntity->AsVehicle()->m_vehicleType == VEHICLE_BIKE
-            || pEntity->AsVehicle()->m_vehicleSubType == VEHICLE_QUAD
+            || pEntity->AsVehicle()->IsBike()
+            || pEntity->AsVehicle()->IsSubQuad()
             || !IsVehiclePointerValid(pEntity->AsVehicle())
             || (ped->m_nRandomSeed + CTimer::GetFrameCounter() - 3) % 8 == 0
             || CCollision::ProcessColModels(

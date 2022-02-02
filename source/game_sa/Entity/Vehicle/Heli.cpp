@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,6 +14,9 @@ bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
 tHeliLight* CHeli::HeliSearchLights = (tHeliLight*)0xC1C990;
 
 void CHeli::InjectHooks() {
+    RH_ScopedClass(CHeli);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

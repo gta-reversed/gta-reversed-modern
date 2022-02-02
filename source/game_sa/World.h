@@ -1,20 +1,19 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-
-#include "PlayerInfo.h"
-#include "ColPoint.h"
-#include "StoredCollPoly.h"
-#include "Sector.h"
-#include "RepeatSector.h"
-#include "PtrListSingleLink.h"
-#include "Ped.h"
-#include "Vehicle.h"
+class CPlayerInfo;
+class CColPoint;
+class CStoredCollPoly;
+class CSector;
+class CRepeatSector;
+class CPtrListSingleLink;
+class CPed;
+class CVehicle;
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;
@@ -105,7 +104,7 @@ public:
     static void SetPedsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
     static void SetPedsChoking(float x, float y, float z, float radius, CEntity* gasCreator);
     static void SetCarsOnFire(float x, float y, float z, float radius, CEntity* fireCreator);
-    static bool SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
+    static int32 SprayPaintWorld(CVector& posn, CVector& outDir, float radius, bool processTagAlphaState);
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
     static void UseDetonator(CPed* creator);
@@ -166,8 +165,8 @@ public:
 
     static float GetSectorPosX(int32 sector)
     {
-        constexpr auto HalfOfTotalSectorsX = MAX_SECTORS_Y / 2;
-        constexpr auto fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_Y;
+        constexpr auto HalfOfTotalSectorsX = MAX_SECTORS_X / 2;
+        constexpr auto fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_SECTORS_X;
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
 
@@ -210,7 +209,7 @@ extern uint32 &FilledColPointIndex;
 static inline CColPoint (&gaTempSphereColPoints)[32] = *(CColPoint(*)[32])0xB9B250;
 extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 
-int16 GetCurrentScanCode();
+uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
 

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "TheScripts.h"
+#include "UpsideDownCarCheck.h"
 
 bool& CTheScripts::DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
 tScriptParam* CTheScripts::ScriptParams = reinterpret_cast<tScriptParam*>(0xA43C78);
@@ -95,8 +96,11 @@ CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
 
 void CTheScripts::InjectHooks() {
-    ReversibleHooks::Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);
-    ReversibleHooks::Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
+    RH_ScopedClass(CTheScripts);
+    RH_ScopedCategory("Scripts");
+
+    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
+    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
 
 // 0x468D50

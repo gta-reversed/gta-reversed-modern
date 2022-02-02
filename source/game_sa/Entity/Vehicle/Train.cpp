@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,6 +10,7 @@
 #include "Train.h"
 
 #include "Buoyancy.h"
+#include "CarCtrl.h"
 
 uint32& CTrain::GenTrain_Track = *(uint32*)0xC37FFC;
 uint32& CTrain::GenTrain_TrainConfig = *(uint32*)0xC38000;
@@ -25,7 +26,10 @@ float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
 {
-    ReversibleHooks::Install("CTrain", "ProcessControl", 0x6F86A0, &CTrain::ProcessControl_Reversed);
+    RH_ScopedClass(CTrain);
+    RH_ScopedCategory("Vehicle/Ped");
+
+    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
 }
 
 // 0x6F6030
@@ -223,13 +227,10 @@ void CTrain::AddNearbyPedAsRandomPassenger() {
     ((void(__thiscall*)(CTrain*))0x6F8170)(this);
 }
 
+// 0x6F86A0
 void CTrain::ProcessControl()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    plugin::CallMethod<0x6F86A0, CTrain*>(this);
-#else
-    ProcessControl_Reversed();
-#endif
+    CTrain::ProcessControl_Reversed();
 }
 
 void CTrain::ProcessControl_Reversed()
@@ -744,7 +745,7 @@ void CTrain::ProcessControl_Reversed()
 
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
+        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();
         uint8 trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
 
         float fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));

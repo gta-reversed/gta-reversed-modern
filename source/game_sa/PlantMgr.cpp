@@ -17,8 +17,10 @@ int32* (&grassModelsPtr)[4] = *(int32 * (*)[4])0xC03A30;
 RwTexture*& tex_gras07Si = *(RwTexture**)0xC09174;
 
 void CPlantMgr::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CPlantMgr", "", 0x0, &CPlantMgr::);
+    RH_ScopedClass(CPlantMgr);
+    RH_ScopedCategoryGlobal();
+
+// Install("CPlantMgr", "", 0x0, &CPlantMgr::);
 }
 
 // 0x5DD910
@@ -26,8 +28,8 @@ bool CPlantMgr::Initialise() {
     return plugin::CallAndReturn<bool, 0x5DD910>();
 }
 
-void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo*) {
-    plugin::Call<0x5DB650>();
+void CPlantMgr::SetPlantFriendlyFlagInAtomicMI(CAtomicModelInfo* ami) {
+    plugin::Call<0x5DB650, CAtomicModelInfo*>(ami);
 }
 
 // 0x5DCFA0

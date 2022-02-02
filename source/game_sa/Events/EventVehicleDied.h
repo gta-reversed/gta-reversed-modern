@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Event.h"
 
 class CVehicle;
@@ -6,7 +8,6 @@ class CEventVehicleDied : public CEvent {
 public:
     CVehicle* m_vehicle;
     bool      m_IsOccupantLeavingCar;
-    char      _pad[3];
 
 public:
     CEventVehicleDied (CVehicle* vehicle);
@@ -22,7 +23,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventVehicleDied * Constructor(CVehicle* vehicle);
+    CEventVehicleDied* Constructor(CVehicle* vehicle);
 
     CEvent* Clone_Reversed();
     bool AffectsPed_Reversed(CPed* ped);

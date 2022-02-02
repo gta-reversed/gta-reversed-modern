@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,6 +9,8 @@
 /*
     https://gtamods.com/wiki/Decision_Maker
 */
+
+enum eTaskType;
 
 enum eDecisionTypes {
     DECISION_ON_FOOT = 0,
@@ -24,14 +26,16 @@ enum eDecisionRelationship {
 
 class CDecision {
 public:
-    int32 m_anTaskTypes[6];                    // see eTaskType
-    uint8 m_anResponseChances[6][4]; // 4 different relationships : see eDecisionRelationship
-    uint8 m_anTypeFlags[2][6];       // 2 different types : see eDecisionTypes
+    eTaskType m_anTaskTypes[6];
+    uint8     m_anResponseChances[6][4]; // 4 different relationships : see eDecisionRelationship
+    uint8     m_anTypeFlags[2][6];       // 2 different types : see eDecisionTypes
 
-    // 0x6040C0
-    inline CDecision() {
-        // SetDefault();
-    }
+public:
+    static void InjectHooks();
+
+    CDecision();
+
+    void SetDefault();
 };
 
 VALIDATE_SIZE(CDecision, 0x3C);

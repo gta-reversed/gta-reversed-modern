@@ -1,14 +1,19 @@
 #include "StdInc.h"
 
+#include "VehicleAnimGroupData.h"
+
 CVehicleAnimGroup(&CVehicleAnimGroupData::m_vehicleAnimGroups)[NUM_VEH_ANIM_GROUPS] = *(CVehicleAnimGroup(*)[NUM_VEH_ANIM_GROUPS])0xC1CDC0;
 
 void CVehicleAnimGroup::InjectHooks()
 {
-    ReversibleHooks::Install("CVehicleAnimGroup", "InitAnimGroup", 0x5B9EB0, &CVehicleAnimGroup::InitAnimGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "CopyAnimGroup", 0x5B9E40, &CVehicleAnimGroup::CopyAnimGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "GetGroup", 0x6E3B00, &CVehicleAnimGroup::GetGroup);
-    ReversibleHooks::Install("CVehicleAnimGroup", "ComputeCriticalBlendTime", 0x6E3C80, &CVehicleAnimGroup::ComputeCriticalBlendTime);
-    ReversibleHooks::Install("CVehicleAnimGroup", "ComputeAnimDoorOffsets", 0x6E3D10, &CVehicleAnimGroup::ComputeAnimDoorOffsets);
+    RH_ScopedClass(CVehicleAnimGroup);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(InitAnimGroup, 0x5B9EB0);
+    RH_ScopedInstall(CopyAnimGroup, 0x5B9E40);
+    RH_ScopedInstall(GetGroup, 0x6E3B00);
+    RH_ScopedInstall(ComputeCriticalBlendTime, 0x6E3C80);
+    RH_ScopedInstall(ComputeAnimDoorOffsets, 0x6E3D10);
 }
 
 CVehicleAnimGroup::CVehicleAnimGroup() : m_animFlags(), m_specialFlags(), m_generalTiming(), m_aInOutTiming()
@@ -228,11 +233,14 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
 
 void CVehicleAnimGroupData::InjectHooks()
 {
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetInOutTimings", 0x645630, &CVehicleAnimGroupData::GetInOutTimings);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetGroupForAnim", 0x639FC0, &CVehicleAnimGroupData::GetGroupForAnim);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "GetAnimDoorOffset", 0x645600, &CVehicleAnimGroupData::GetAnimDoorOffset);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "UsesTruckDrivingAnims", 0x639FE0, &CVehicleAnimGroupData::UsesTruckDrivingAnims);
-    ReversibleHooks::Install("CVehicleAnimGroupData", "UsesKartDrivingAnims", 0x6D09E0, &CVehicleAnimGroupData::UsesKartDrivingAnims);
+    RH_ScopedClass(CVehicleAnimGroupData);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetInOutTimings, 0x645630);
+    RH_ScopedInstall(GetGroupForAnim, 0x639FC0);
+    RH_ScopedInstall(GetAnimDoorOffset, 0x645600);
+    RH_ScopedInstall(UsesTruckDrivingAnims, 0x639FE0);
+    RH_ScopedInstall(UsesKartDrivingAnims, 0x6D09E0);
 }
 
 // 0x645630

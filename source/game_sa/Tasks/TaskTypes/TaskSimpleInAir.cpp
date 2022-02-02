@@ -3,17 +3,20 @@
 #include "TaskSimpleInAir.h"
 
 #include "TaskComplexInAirAndLand.h"
+#include "TaskSimpleClimb.h"
 
 float CTaskSimpleInAir::ms_fSlowFallThreshold = -0.05F;
 uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleInAir", "Constructor", 0x678CD0, &CTaskSimpleInAir::Constructor);
-    ReversibleHooks::Install("CTaskSimpleInAir", "DeleteAnimCB", 0x678E60, &CTaskSimpleInAir::DeleteAnimCB);
+    RH_ScopedClass(CTaskSimpleInAir);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x678CD0);
+    RH_ScopedInstall(DeleteAnimCB, 0x678E60);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleInAir", "ProcessPed", 0x680600, &CTaskSimpleInAir::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleInAir", "MakeAbortable", 0x678DC0, &CTaskSimpleInAir::MakeAbortable_Reversed);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x680600);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)

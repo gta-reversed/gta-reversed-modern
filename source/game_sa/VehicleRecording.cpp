@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "VehicleRecording.h"
+
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 
 int32& CVehicleRecording::NumPlayBackFiles = *(int32*)0x97F630;
@@ -7,7 +9,10 @@ CPath(&CVehicleRecording::StreamingArray)[TOTAL_RRR_MODEL_IDS] = *(CPath(*)[TOTA
 bool(&CVehicleRecording::bUseCarAI)[TOTAL_VEHICLE_RECORDS] = *(bool(*)[TOTAL_VEHICLE_RECORDS])0x97D6C0;
 
 void CVehicleRecording::InjectHooks() {
-    ReversibleHooks::Install("CVehicleRecording", "Render", 0x459F70, &CVehicleRecording::Render);
+    RH_ScopedClass(CVehicleRecording);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Render, 0x459F70);
 }
 
 void CVehicleRecording::Init()

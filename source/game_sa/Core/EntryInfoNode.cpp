@@ -1,9 +1,14 @@
 #include "StdInc.h"
 
+#include "EntryInfoNode.h"
+
 void CEntryInfoNode::InjectHooks()
 {
-    ReversibleHooks::Install("CEntryInfoNode", "operator new", 0x536DC0, &CEntryInfoNode::operator new);
-    ReversibleHooks::Install("CEntryInfoNode", "operator delete", 0x536DD0, &CEntryInfoNode::operator delete);
+    RH_ScopedClass(CEntryInfoNode);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(operator new, 0x536DC0);
+    RH_ScopedInstall(operator delete, 0x536DD0);
 }
 
 void* CEntryInfoNode::operator new(uint32 size)

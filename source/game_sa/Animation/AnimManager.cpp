@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -19,6 +19,9 @@ int32& CAnimManager::ms_numAnimBlocks = *(int32*)0xB4EA30;
 int32& CAnimManager::ms_numAnimations = *(int32*)0xB4EA2C;
 
 void CAnimManager::InjectHooks() {
+    RH_ScopedClass(CAnimManager);
+    RH_ScopedCategory("Animation");
+
     CAnimBlendAssociation::InjectHooks();
 }
 

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WaterLevel.h"
+
 uint32& CWaterLevel::m_nWaterConfiguration = *(uint32*)0xC228A0;
 uint32& CWaterLevel::m_nWaterTimeOffset = *(uint32*)0xC228A4;
 float* CWaterLevel::faWaveMultipliersX = (float*)0x8D38C8;
@@ -17,11 +19,14 @@ bool& CWaterLevel::m_bWaterFogScript = *(bool*)0x8D37D5;
 
 void CWaterLevel::InjectHooks()
 {
-    ReversibleHooks::Install("CWaterLevel", "GetWaterLevel", 0x6EB690, &CWaterLevel::GetWaterLevel);
-    ReversibleHooks::Install("CWaterLevel", "SyncWater", 0x6E76E0, &CWaterLevel::SyncWater);
-    ReversibleHooks::Install("CWaterLevel", "CalculateWavesOnlyForCoordinate", 0x6E7210, &CWaterLevel::CalculateWavesOnlyForCoordinate);
-    //ReversibleHooks::Install("CWaterLevel", "AddWaveToResult", 0x6E81E0, &CWaterLevel::AddWaveToResult);
-    //ReversibleHooks::Install("CWaterLevel", "GetWaterLevelNoWaves", 0x6E8580, &CWaterLevel::GetWaterLevelNoWaves);
+    RH_ScopedClass(CWaterLevel);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetWaterLevel, 0x6EB690);
+    RH_ScopedInstall(SyncWater, 0x6E76E0);
+    RH_ScopedInstall(CalculateWavesOnlyForCoordinate, 0x6E7210);
+    //RH_ScopedInstall(AddWaveToResult, 0x6E81E0);
+    //RH_ScopedInstall(GetWaterLevelNoWaves, 0x6E8580);
 }
 
 void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal)
@@ -46,11 +51,11 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1
     auto xInd = (x / 2) & 0x7;
     auto yInd = (y / 2) & 0x7;
 
-    auto fWaveMultiplier = CWeather::Wavyness * CWaterLevel::faWaveMultipliersX[xInd] * CWaterLevel::faWaveMultipliersY[yInd];
+    auto fWaveMultiplier = CWeather::Wavyness * faWaveMultipliersX[xInd] * faWaveMultipliersY[yInd];
     auto fX = static_cast<float>(x);
     auto fY = static_cast<float>(y);
 
-    auto iTimeOffset = CTimer::GetTimeInMS() - CWaterLevel::m_nWaterTimeOffset;
+    auto iTimeOffset = CTimer::GetTimeInMS() - m_nWaterTimeOffset;
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
     const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
@@ -85,7 +90,7 @@ bool CWaterLevel::GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, fl
 bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals)
 {
     float fUnkn1, fUnkn2;
-    if (!CWaterLevel::GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
+    if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
         return false;
 
     if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
@@ -93,7 +98,7 @@ bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel
         return false;
     }
 
-    CWaterLevel::AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
+    AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
     return true;
 }
 
@@ -103,7 +108,7 @@ bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float* pOutWat
 
 void CWaterLevel::SyncWater()
 {
-    CWaterLevel::m_nWaterTimeOffset = CTimer::GetTimeInMS();
+    m_nWaterTimeOffset = CTimer::GetTimeInMS();
 }
 
 // 0x6EAE80
@@ -113,7 +118,7 @@ void CWaterLevel::WaterLevelInitialise() {
 
 bool CWaterLevel::IsPointUnderwaterNoWaves(CVector point) {
     float level{};
-    if (CWaterLevel::GetWaterLevelNoWaves(point.x, point.y, point.z, &level, nullptr, nullptr))
+    if (GetWaterLevelNoWaves(point.x, point.y, point.z, &level, nullptr, nullptr))
         return level > point.z;
     return false;
 }

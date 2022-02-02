@@ -1,10 +1,12 @@
 #pragma once
-#include "PedDamageResponse.h"
-#include "eWeaponType.h"
-#include "Ped.h"
 
-class CPedDamageResponseCalculator
-{
+#include "eWeaponType.h"
+
+class CEntity;
+class CPed;
+class CPedDamageResponse;
+
+class CPedDamageResponseCalculator {
 public:
     CEntity *      m_pDamager;
     float          m_fDamageFactor;
@@ -14,15 +16,17 @@ public:
 
     static float& ms_damageFactor;
 
-    static void InjectHooks();
-    CPedDamageResponseCalculator(CEntity* pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
-    ~CPedDamageResponseCalculator();
-private:
-    CPedDamageResponseCalculator* Constructor(CEntity * pEntity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
 public:
+    CPedDamageResponseCalculator(CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
+    ~CPedDamageResponseCalculator();
 
-    void ComputeDamageResponse(CPed * pPed, CPedDamageResponse * pDamageResponse, bool bSpeak);
-    
+    void ComputeDamageResponse(CPed* ped, CPedDamageResponse* damageResponse, bool bSpeak);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CPedDamageResponseCalculator* Constructor(CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
 };
 
 VALIDATE_SIZE(CPedDamageResponseCalculator, 0x14);

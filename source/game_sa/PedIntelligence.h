@@ -1,33 +1,34 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
+#include "eEventType.h"
 #include "TaskManager.h"
 #include "EventHandler.h"
 #include "EventGroup.h"
 #include "EntityScanner.h"
 #include "TaskTimer.h"
 #include "EventScanner.h"
-#include "TaskSimpleUseGun.h"
-#include "TaskSimpleFight.h"
-#include "TaskSimpleHoldEntity.h"
-#include "TaskSimpleThrowProjectile.h"
-#include "TaskSimpleSwim.h"
-#include "TaskSimpleDuck.h"
-#include "TaskSimpleClimb.h"
-#include "TaskSimpleJetPack.h"
-#include "TaskSimpleInAir.h"
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
 
-enum eEventType;
-
 class CPed;
 class CEntity;
+class CPlayerPed;
+
+class CTaskSimpleUseGun;
+class CTaskSimpleFight;
+class CTaskSimpleHoldEntity;
+class CTaskSimpleThrowProjectile;
+class CTaskSimpleSwim;
+class CTaskSimpleDuck;
+class CTaskSimpleClimb;
+class CTaskSimpleJetPack;
+class CTaskSimpleInAir;
 
 class CPedIntelligence {
 public:

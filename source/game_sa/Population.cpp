@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Population.h"
 
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
 int32& CPopulation::m_AllRandomPedsThisType = *(int32*)0x8D2534;
@@ -42,10 +44,12 @@ uint32& CPopulation::NumMiamiViceCops = *(uint32*)0xC0FCB8;
 uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 
 void CPopulation::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
-    Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
-    Install("CPopulation", "RemovePed", 0x610F20, &CPopulation::RemovePed);
+    RH_ScopedClass(CPopulation);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ConvertToRealObject, 0x614580);
+    RH_ScopedInstall(ConvertToDummyObject, 0x614670);
+    RH_ScopedInstall(RemovePed, 0x610F20);
 }
 
 // 0x5B6D40

@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -14,24 +14,27 @@ Do not delete this comment block. Respect others' work!
 #include "AEAudioUtility.h"
 
 void CAESound::InjectHooks() {
-    ReversibleHooks::Install("CAESound", "operator=", 0x4EF680, &CAESound::operator=);
-    ReversibleHooks::Install("CAESound", "UnregisterWithPhysicalEntity", 0x4EF1A0, &CAESound::UnregisterWithPhysicalEntity);
-    ReversibleHooks::Install("CAESound", "StopSound", 0x4EF1C0, &CAESound::StopSound);
-    ReversibleHooks::Install("CAESound", "SetIndividualEnvironment", 0x4EF2B0, &CAESound::SetIndividualEnvironment);
-    ReversibleHooks::Install("CAESound", "UpdatePlayTime", 0x4EF2E0, &CAESound::UpdatePlayTime);
-    ReversibleHooks::Install("CAESound", "GetRelativePosition", 0x4EF350, &CAESound::GetRelativePosition);
-    ReversibleHooks::Install("CAESound", "CalculateFrequency", 0x4EF390, &CAESound::CalculateFrequency);
-    ReversibleHooks::Install("CAESound", "UpdateFrequency", 0x4EF3E0, &CAESound::UpdateFrequency);
-    ReversibleHooks::Install("CAESound", "GetRelativePlaybackFrequencyWithDoppler", 0x4EF400, &CAESound::GetRelativePlaybackFrequencyWithDoppler);
-    ReversibleHooks::Install("CAESound", "GetSlowMoFrequencyScalingFactor", 0x4EF440, &CAESound::GetSlowMoFrequencyScalingFactor);
-    ReversibleHooks::Install("CAESound", "NewVPSLentry", 0x4EF7A0, &CAESound::NewVPSLentry);
-    ReversibleHooks::Install("CAESound", "RegisterWithPhysicalEntity", 0x4EF820, &CAESound::RegisterWithPhysicalEntity);
-    ReversibleHooks::Install("CAESound", "StopSoundAndForget", 0x4EF850, &CAESound::StopSoundAndForget);
-    ReversibleHooks::Install("CAESound", "SetPosition", 0x4EF880, &CAESound::SetPosition);
-    ReversibleHooks::Install("CAESound", "CalculateVolume", 0x4EFA10, &CAESound::CalculateVolume);
-    ReversibleHooks::Install("CAESound", "Initialise", 0x4EFE50, &CAESound::Initialise);
-    ReversibleHooks::Install("CAESound", "UpdateParameters", 0x4EFF50, &CAESound::UpdateParameters);
-    ReversibleHooks::Install("CAESound", "SoundHasFinished", 0x4EFFD0, &CAESound::SoundHasFinished);
+    RH_ScopedClass(CAESound);
+    RH_ScopedCategory("Audio");
+    
+    RH_ScopedInstall(operator=, 0x4EF680);
+    RH_ScopedInstall(UnregisterWithPhysicalEntity, 0x4EF1A0);
+    RH_ScopedInstall(StopSound, 0x4EF1C0);
+    RH_ScopedInstall(SetIndividualEnvironment, 0x4EF2B0);
+    RH_ScopedInstall(UpdatePlayTime, 0x4EF2E0);
+    RH_ScopedInstall(GetRelativePosition, 0x4EF350);
+    RH_ScopedInstall(CalculateFrequency, 0x4EF390);
+    RH_ScopedInstall(UpdateFrequency, 0x4EF3E0);
+    RH_ScopedInstall(GetRelativePlaybackFrequencyWithDoppler, 0x4EF400);
+    RH_ScopedInstall(GetSlowMoFrequencyScalingFactor, 0x4EF440);
+    RH_ScopedInstall(NewVPSLentry, 0x4EF7A0);
+    RH_ScopedInstall(RegisterWithPhysicalEntity, 0x4EF820);
+    RH_ScopedInstall(StopSoundAndForget, 0x4EF850);
+    RH_ScopedInstall(SetPosition, 0x4EF880);
+    RH_ScopedInstall(CalculateVolume, 0x4EFA10);
+    RH_ScopedInstall(Initialise, 0x4EFE50);
+    RH_ScopedInstall(UpdateParameters, 0x4EFF50);
+    RH_ScopedInstall(SoundHasFinished, 0x4EFFD0);
 }
 
 CAESound::CAESound(CAESound& sound) {

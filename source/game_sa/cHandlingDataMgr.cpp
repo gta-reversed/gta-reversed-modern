@@ -5,8 +5,11 @@
 cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;
 
 void cHandlingDataMgr::InjectHooks(){
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToWorldUnits", 0x6F5240, &cHandlingDataMgr::ConvertBikeDataToWorldUnits);
-    ReversibleHooks::Install("cHandlingDataMgr", "ConvertBikeDataToGameUnits", 0x6F5290, &cHandlingDataMgr::ConvertBikeDataToGameUnits);
+    RH_ScopedClass(cHandlingDataMgr);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ConvertBikeDataToWorldUnits, 0x6F5240);
+    RH_ScopedInstall(ConvertBikeDataToGameUnits, 0x6F5290);
 };
 
 tFlyingHandlingData* cHandlingDataMgr::GetFlyingPointer(uint8 handlingId)

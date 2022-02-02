@@ -1,22 +1,26 @@
 #include "StdInc.h"
 
+#include "List_c.h"
+
 void List_c::InjectHooks()
 {
-    ReversibleHooks::Install("List_c", "AddItem", 0x4A8DF0, &List_c::AddItem);
-    ReversibleHooks::Install("List_c", "RemoveItem", 0x4A8E30, &List_c::RemoveItem);
-    ReversibleHooks::Install("List_c", "RemoveHead", 0x4A8E70, &List_c::RemoveHead);
-    ReversibleHooks::Install("List_c", "RemoveTail", 0x4A8FD0, &List_c::RemoveTail);
-    ReversibleHooks::Install("List_c", "RemoveAll", 0x4A8EB0, &List_c::RemoveAll);
-    ReversibleHooks::Install("List_c", "InsertAfterItem", 0x4A8F10, &List_c::InsertAfterItem);
-    ReversibleHooks::Install("List_c", "InsertBeforeItem", 0x4A8F70, &List_c::InsertBeforeItem);
-    ReversibleHooks::Install("List_c", "GetNext", 0x4A8FF0, &List_c::GetNext);
-    ReversibleHooks::Install("List_c", "GetPrev", 0x4A9000, &List_c::GetPrev);
-    ReversibleHooks::Install("List_c", "GetNumItems", 0x4A8EC0, &List_c::GetNumItems);
-    ReversibleHooks::Install("List_c", "GetItemOffset", 0x4A9010, &List_c::GetItemOffset);
+    RH_ScopedClass(List_c);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(AddItem, 0x4A8DF0);
+    RH_ScopedInstall(RemoveItem, 0x4A8E30);
+    RH_ScopedInstall(RemoveHead, 0x4A8E70);
+    RH_ScopedInstall(RemoveTail, 0x4A8FD0);
+    RH_ScopedInstall(RemoveAll, 0x4A8EB0);
+    RH_ScopedInstall(InsertAfterItem, 0x4A8F10);
+    RH_ScopedInstall(InsertBeforeItem, 0x4A8F70);
+    RH_ScopedInstall(GetNext, 0x4A8FF0);
+    RH_ScopedInstall(GetPrev, 0x4A9000);
+    RH_ScopedInstall(GetNumItems, 0x4A8EC0);
+    RH_ScopedInstall(GetItemOffset, 0x4A9010);
 }
 
-// US-1.00 @ 0x004A8DF0
-// EU-1.00 @ 0x004A8DF0
+// 0x4A8DF0
 void List_c::AddItem(ListItem_c * pItem) {
     assert(pItem);
     auto* pOldHead = m_pHead;
@@ -32,8 +36,7 @@ void List_c::AddItem(ListItem_c * pItem) {
     ++m_nCount;
 }
 
-// US-1.00 @ 0x004A8E30
-// EU-1.00 @ 0x004A8E30
+// 0x4A8E30
 void List_c::RemoveItem(ListItem_c * pItem) {
     assert(pItem);
 
@@ -59,8 +62,7 @@ ListItem_c* List_c::GetTail()
     return m_pTail;
 }
 
-
-// EU-1.00 @ 0x004A8E70
+// 0x4A8E70
 ListItem_c * List_c::RemoveHead() {
     //return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
     if (!m_pHead)
@@ -172,15 +174,13 @@ ListItem_c * List_c::GetNext(ListItem_c * pItem) {
     return pItem->m_pNext;
 }
 
-// US-1.00 @ 0x004A9000
-// EU-1.00 @ 0x004A9000
+// 0x4A9000
 ListItem_c * List_c::GetPrev(ListItem_c * pItem) {
     assert(pItem);
     return pItem->m_pPrev;
 }
 
-// US-1.00 @ 0x004A9010
-// EU-1.00 @ 0x004A9010
+// 0x4A9010
 ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
     if (bFromHead)
     {

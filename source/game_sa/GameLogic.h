@@ -2,7 +2,11 @@
 
 #include "Vector.h"
 
-enum eGameState {
+class CEntity;
+class CPed;
+class CVehicle;
+
+enum eGameState : uint8 {
     GAME_STATE_INITIAL = 0,
     GAME_STATE_LOGO = 1,
     GAME_STATE_PLAYING_LOGO = 2,

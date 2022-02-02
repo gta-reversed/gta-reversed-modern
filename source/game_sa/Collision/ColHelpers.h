@@ -13,7 +13,7 @@
 
 namespace ColHelpers {
 enum class ColModelVersion {
-    COLL,
+    COLL = 1, // NOTSA - But we want COLX => X, instead of X - 1
     COL2,
     COL3,
     COL4,
@@ -26,6 +26,25 @@ struct FileHeader {
     struct FileInfo {
         char fourcc[4]{}; // Not null terminated. Either: COLL, COL2, COL3, COL4
         uint32 size{};
+
+        // Get version based on fourcc
+        auto GetVersion() const {
+            switch (make_fourcc4(fourcc)) {
+            case make_fourcc4("COLL"):
+                return ColModelVersion::COLL;
+            case make_fourcc4("COL2"):
+                return ColModelVersion::COL2;
+            case make_fourcc4("COL3"):
+                return ColModelVersion::COL3;
+            case make_fourcc4("COL4"):
+                return ColModelVersion::COL4;
+            default:
+                // It's ok if this happens - Since the buffer it was read from might not contain more col data, and we've just read padding.
+                return ColModelVersion::NONE;
+            }
+        }
+
+         auto IsValid() const { return GetVersion() != ColModelVersion::NONE; }
     } info;
 
     char modelName[22]{};
@@ -42,25 +61,8 @@ struct FileHeader {
     }
 
     // Get version based on fourcc
-    auto GetVersion() const {
-        switch (make_fourcc4(info.fourcc)) {
-        case make_fourcc4("COLL"):
-            return ColModelVersion::COLL;
-        case make_fourcc4("COL2"):
-            return ColModelVersion::COL2;
-        case make_fourcc4("COL3"):
-            return ColModelVersion::COL3;
-        case make_fourcc4("COL4"):
-            return ColModelVersion::COL4;
-        default:
-            // It's ok if this happens - Since the buffer it was read from might not contain more col data, and we've just read padding.
-            return ColModelVersion::NONE;
-        }
-    }
+    auto GetVersion() const { return info.GetVersion(); }
 
-    auto IsValid() {
-        return GetVersion() != ColModelVersion::NONE;
-    }
 };
 VALIDATE_SIZE(FileHeader::FileInfo, 0x8);
 VALIDATE_SIZE(FileHeader, 0x20);

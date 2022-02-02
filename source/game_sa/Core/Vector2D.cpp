@@ -1,18 +1,22 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
 
+#include "Vector2D.h"
+
 void CVector2D::InjectHooks()
 {
-    ReversibleHooks::Install("CVector2D", "Magnitude", 0x420860, &CVector2D::Magnitude);
-    ReversibleHooks::Install("CVector2D", "Normalise", 0x44E480, &CVector2D::Normalise);
+    RH_ScopedClass(CVector2D);
+    RH_ScopedCategory("Core");
 
-    ReversibleHooks::Install("CVector2D", "operator=", 0x43E110, &CVector2D::operator=);
+    RH_ScopedInstall(Magnitude, 0x420860);
+    RH_ScopedInstall(Normalise, 0x44E480);
+    RH_ScopedInstall(operator=, 0x43E110);
 }
 
 CVector2D::CVector2D(const CVector& vec3d) {

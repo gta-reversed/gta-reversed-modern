@@ -5,11 +5,13 @@
 RxPipeline*& CCustomBuildingPipeline::ObjPipeline = *(RxPipeline**)0xC02C68;
 
 void CCustomBuildingPipeline::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CCustomBuildingPipeline", "CreatePipe", 0x5D7D90, &CCustomBuildingPipeline::CreatePipe);
-    // Install("CCustomBuildingPipeline", "DestroyPipe", 0x5D7380, &CCustomBuildingPipeline::DestroyPipe);
-    // Install("CCustomBuildingPipeline", "CustomPipeAtomicSetup", 0x5D7E50, &CCustomBuildingPipeline::CustomPipeAtomicSetup);
-    // Install("CCustomBuildingPipeline", "CreateCustomObjPipe", 0x5D7AA0, &CCustomBuildingPipeline::CreateCustomObjPipe);
+    RH_ScopedClass(CCustomBuildingPipeline);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(CreatePipe, 0x5D7D90);
+    // RH_ScopedInstall(DestroyPipe, 0x5D7380);
+    // RH_ScopedInstall(CustomPipeAtomicSetup, 0x5D7E50);
+    // RH_ScopedInstall(CreateCustomObjPipe, 0x5D7AA0);
 }
 
 // 0x5D7D90

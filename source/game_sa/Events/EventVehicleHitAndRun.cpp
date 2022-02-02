@@ -1,10 +1,15 @@
 #include "StdInc.h"
 
+#include "EventVehicleHitAndRun.h"
+
 void CEventVehicleHitAndRun::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Constructor", 0x4AE990, &CEventVehicleHitAndRun::Constructor);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Clone_Reversed", 0x4B7100, &CEventVehicleHitAndRun::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "ReportCriminalEvent_Reversed", 0x4B27D0, &CEventVehicleHitAndRun::ReportCriminalEvent_Reversed);
+    RH_ScopedClass(CEventVehicleHitAndRun);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AE990);
+    RH_ScopedInstall(Clone_Reversed, 0x4B7100);
+    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B27D0);
 }
 
 CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
