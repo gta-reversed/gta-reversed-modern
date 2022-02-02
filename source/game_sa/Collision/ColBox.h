@@ -12,7 +12,7 @@
 class CColBox : public CBox {
 public:
     uint8        m_nMaterial;
-    uint8        m_nFlags;
+    uint8        m_nFlags; // TODO: This aren't actually `flags`, it's `piece` (as in CColPoint::piceType)
     tColLighting m_nLighting;
     uint8        m_nBrightness;
 

@@ -12,7 +12,8 @@ class CColSphere : public CSphere {
 public:
     uint8 m_nMaterial;
     union {
-        uint8 m_nFlags;
+        // TODO: This aren't actually `flags`, it's `piece` (as in CColPoint::piceType)
+        uint8 m_nFlags; // There's some weird check in CCollision::ProcessColModels: Checks if `m_nFlags <= 2`
         struct {
             uint8 m_bFlag0x01 : 1;
             uint8 m_bFlag0x02 : 1;
