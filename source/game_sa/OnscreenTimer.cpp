@@ -54,7 +54,7 @@ void COnscreenTimer::ClearClock(uint32 varId) {
         m_Clock.m_nVarId = 0;
         m_Clock.m_szDescriptionTextKey[m_Clock.m_nVarId] = '\0';
         m_Clock.m_bEnabled = false;
-        m_Clock.m_nTimerDirection = eTimerDirection::INCREASE;
+        m_Clock.m_nTimerDirection = eTimerDirection::DECREASE;
     }
 }
 

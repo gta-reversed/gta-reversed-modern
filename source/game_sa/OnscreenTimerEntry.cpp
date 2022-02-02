@@ -8,7 +8,7 @@ void COnscreenTimerEntry::Init() {
     memset(&m_szDescriptionTextKey, 0, sizeof(m_szDescriptionTextKey)); // original initialization
 
     m_bEnabled = false;
-    m_nTimerDirection = eTimerDirection::INCREASE;
+    m_nTimerDirection = eTimerDirection::DECREASE;
     m_nClockBeepCountdownSecs = 12;
 }
 
@@ -17,8 +17,8 @@ void COnscreenTimerEntry::Process() {
     if (m_nVarId == 0)
         return;
 
-    int32& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    auto   deltaTime = CTimer::GetTimeStepInMS();
+    auto& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
+    auto  deltaTime = CTimer::GetTimeStepInMS();
 
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:
@@ -47,7 +47,7 @@ void COnscreenTimerEntry::Process() {
 
 // 0x44CA40
 void COnscreenTimerEntry::ProcessForDisplayClock() {
-    uint32 time = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
+    auto time = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
     sprintf(
         m_szDisplayedText,
         "%02d:%02d",
