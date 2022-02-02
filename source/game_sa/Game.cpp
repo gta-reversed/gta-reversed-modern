@@ -33,6 +33,8 @@
 #include "TempColModels.h"
 #include "PedStats.h"
 #include "UserDisplay.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);

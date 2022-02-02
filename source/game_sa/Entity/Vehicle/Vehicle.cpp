@@ -12,6 +12,8 @@
 #include "CarCtrl.h"
 #include "Radar.h"
 #include "VehicleSaveStructure.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;

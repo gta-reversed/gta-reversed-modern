@@ -18,7 +18,7 @@ void CRope::ReleasePickedUpObject() {
     if (m_pRopeAttachObject) {
         m_pRopeAttachObject->physicalFlags.bAttachedToEntity = false;
         m_pRopeAttachObject->physicalFlags.b32 = false;
-        m_pRopeAttachObject = 0;
+        m_pRopeAttachObject = nullptr;
     }
     m_pAttachedEntity->m_bUsesCollision = true;
     m_nFlags1 = 60; // 6th, 7th bits set
@@ -30,7 +30,7 @@ void CRope::CreateHookObjectForRope() {
         return;
 
     using namespace ModelIndices;
-    ModelIndex modelIndex{-1};
+    ModelIndex modelIndex;
     switch (m_nType) {
     case eRopeType::CRANE_MAGNET1:
     case eRopeType::CRANE_MAGNET2:
@@ -53,12 +53,12 @@ void CRope::CreateHookObjectForRope() {
     }
     }
 
-    CObject* obj = new CObject(modelIndex, true);
+    auto* obj = new CObject(modelIndex, true);
     m_pAttachedEntity = obj;
 
     obj->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedEntity));
     obj->SetPosn(m_aSegments[NUM_ROPE_SEGMENTS - 1]);
-    obj->m_nObjectType = eObjectType::OBJECT_TYPE_DECORATION;
+    obj->m_nObjectType = OBJECT_TYPE_DECORATION;
     obj->SetIsStatic(false);
     obj->physicalFlags.bAttachedToEntity = true;
 

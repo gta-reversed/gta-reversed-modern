@@ -11,6 +11,8 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "ObjectSaveStructure.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -1522,11 +1524,11 @@ void CObject::ProcessControlLogic() {
         {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, 4, vecRopePoint, false, nSegments, 1u, this, 20000u);
+            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::CRANE_MAGNET2), vecRopePoint, false, nSegments, 1u, this, 20000u);
         }
         else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY)
         {
-            const auto nRopeType = GetPosition().x >= 0 ? 7 : 5;
+            const uint32 nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_MAGNET4 : eRopeType::WRECKING_BALL);
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope(this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20000u);
@@ -1535,7 +1537,7 @@ void CObject::ProcessControlLogic() {
         {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, 6, vecRopePoint, false, nSegments, 1u, this, 20000u);
+            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::CRANE_MAGNET3), vecRopePoint, false, nSegments, 1u, this, 20000u);
         }
     }
 

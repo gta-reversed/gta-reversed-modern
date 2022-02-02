@@ -7,23 +7,28 @@
 
 #include "StdInc.h"
 
+#include "Rope.h"
+#include "Ropes.h"
+
 CRope (&CRopes::aRopes)[MAX_NUM_ROPES] = *(CRope(*)[MAX_NUM_ROPES])0xB768B8;
 uint8& CRopes::m_nNumRopes = *(uint8*)0xB7851D;
 int32& CRopes::PlayerControlsCrane = *(int32*)0xB76898;
 uint32& CRopes::m_nRopeIdCreationCounter = *(uint32*)0xB781F8;
 
 void CRopes::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CRopes", "Init", 0x555DC0, &CRopes::Init);
-    Install("CRopes", "Shutdown", 0x556B10, &CRopes::Shutdown);
-    Install("CRopes", "CreateRopeForSwatPed", 0x556B10, &CRopes::CreateRopeForSwatPed);
-    Install("CRopes", "FindPickupHeight", 0x556760, &CRopes::FindPickupHeight);
-    Install("CRopes", "FindRope", 0x556000, &CRopes::FindRope);
-    Install("CRopes", "IsCarriedByRope", 0x555F80, &CRopes::IsCarriedByRope);
-    // Install("CRopes", "RegisterRope", 0x556B40, &CRopes::RegisterRope);
-    Install("CRopes", "Render", 0x556AE0, &CRopes::Render);
-    Install("CRopes", "SetSpeedOfTopNode", 0x555DF0, &CRopes::SetSpeedOfTopNode);
-    Install("CRopes", "Update", 0x558D70, &CRopes::Update);
+    RH_ScopedClass(CRopes);
+    RH_ScopedCategoryGlobal()
+
+    RH_ScopedInstall(Init, 0x555DC0);
+    RH_ScopedInstall(Shutdown, 0x556B10);
+    RH_ScopedInstall(CreateRopeForSwatPed, 0x556B10);
+    RH_ScopedInstall(FindPickupHeight, 0x556760);
+    RH_ScopedInstall(FindRope, 0x556000);
+    RH_ScopedInstall(IsCarriedByRope, 0x555F80);
+    // RH_ScopedInstall(RegisterRope, 0x556B40);
+    RH_ScopedInstall(Render, 0x556AE0);
+    RH_ScopedInstall(SetSpeedOfTopNode, 0x555DF0);
+    RH_ScopedInstall(Update, 0x558D70);
 }
 
 // 0x555DC0
@@ -47,8 +52,7 @@ void CRopes::Shutdown() {
 // 0x558D10
 int32 CRopes::CreateRopeForSwatPed(const CVector& startPos) {
     int32 newRopeId = m_nRopeIdCreationCounter + 100;
-    bool ropeCreated = RegisterRope(reinterpret_cast<CEntity*>(newRopeId), 8, startPos, true, 0, 0, nullptr, 4000);
-    if (ropeCreated < 0) {
+    if (RegisterRope(reinterpret_cast<CEntity*>(newRopeId), static_cast<uint32>(eRopeType::SWAT), startPos, true, 0, 0, nullptr, 4000)) {
         return -1;
     }
 
@@ -58,7 +62,7 @@ int32 CRopes::CreateRopeForSwatPed(const CVector& startPos) {
 
 //0x556760
 float CRopes::FindPickupHeight(CEntity* entity) {
-    return CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->m_boundBox.m_vecMax.z;
+    return CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.z;
 }
 
 // Returns id to array

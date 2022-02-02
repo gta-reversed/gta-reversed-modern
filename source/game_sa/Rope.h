@@ -20,7 +20,8 @@ enum class eRopeType : uint8 {
     CRANE_MAGNET2,
     WRECKING_BALL,
     CRANE_MAGNET3,
-    CRANE_MAGNET4
+    CRANE_MAGNET4,
+    SWAT
 };
 
 constexpr auto NUM_ROPE_SEGMENTS{ 32u };
