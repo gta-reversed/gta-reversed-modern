@@ -8,16 +8,16 @@ enum ePedType : uint32 {
     PED_TYPE_CIVMALE,
     PED_TYPE_CIVFEMALE,
     PED_TYPE_COP,
-    PED_TYPE_GANG1,
-    PED_TYPE_GANG2,
-    PED_TYPE_GANG3,
-    PED_TYPE_GANG4,
-    PED_TYPE_GANG5,
-    PED_TYPE_GANG6,
-    PED_TYPE_GANG7,
-    PED_TYPE_GANG8,
-    PED_TYPE_GANG9,
-    PED_TYPE_GANG10,
+    PED_TYPE_GANG1,         // Ballas
+    PED_TYPE_GANG2,         // Grove Street Families
+    PED_TYPE_GANG3,         // Los Santos Vagos
+    PED_TYPE_GANG4,         // San Fierro Rifa
+    PED_TYPE_GANG5,         // Da Nang Boys
+    PED_TYPE_GANG6,         // Mafia
+    PED_TYPE_GANG7,         // Mountain Cloud Triad
+    PED_TYPE_GANG8,         // Varrio Los Aztecas
+    PED_TYPE_GANG9,         // Unused
+    PED_TYPE_GANG10,        // Unused
     PED_TYPE_DEALER,
     PED_TYPE_MEDIC,
     PED_TYPE_FIREMAN,
