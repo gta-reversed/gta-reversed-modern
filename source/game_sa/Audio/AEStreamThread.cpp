@@ -79,7 +79,7 @@ void CAEStreamThread::WaitForExit() const {
 }
 
 // 0x4F1530
-int32 CAEStreamThread::GetTrackPlayTime() const {
+int16 CAEStreamThread::GetTrackPlayTime() const {
     if (m_bPreparingStream)
         return -8;
     else
