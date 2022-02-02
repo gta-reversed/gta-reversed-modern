@@ -80,10 +80,8 @@ bool CRopes::IsCarriedByRope(CEntity* entity) {
         return false;
 
     for (auto& rope : aRopes) {
-        if (rope.m_nType == eRopeType::NONE || rope.m_pAttachedEntity != entity)
-            continue;
-
-        return true;
+        if (rope.m_nType != eRopeType::NONE && rope.m_pAttachedEntity == entity)
+            return true;
     }
     return false;
 }
@@ -105,11 +103,10 @@ void CRopes::Render() {
 // 0x555DF0
 void CRopes::SetSpeedOfTopNode(uint32 ropeId, CVector dirSpeed) {
   for (auto& rope : aRopes) {
-      if (rope.m_nType == eRopeType::NONE || rope.m_nId != ropeId)
-          continue;
-
-      rope.m_aSegmentsReleased[0] = dirSpeed;
-      return;
+      if (rope.m_nType != eRopeType::NONE && rope.m_nId == ropeId) {
+          rope.m_aSegmentsReleased[0] = dirSpeed;
+          return;
+      }
   }
 }
 

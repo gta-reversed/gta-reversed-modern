@@ -100,11 +100,15 @@ void CRope::Render() {
 
     DefinedState();
 
-    const RwRGBA color = { 128, 0, 0, 0 };
-
     const auto GetVertex = [](unsigned i) {
         return &aTempBufferVertices[i];
     };
+
+    const RwRGBA color = { 0, 0, 0, 128 };
+    for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++) {
+        RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
+        RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
+    }
 
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
@@ -112,11 +116,6 @@ void CRope::Render() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERLINEAR));
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(FALSE));
-
-    for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++) {
-        RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
-        RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
-    }
 
     if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, nullptr, 0)) {
         RxVertexIndex indices[] = {
