@@ -184,13 +184,13 @@ CCullZone* CCullZones::FindZoneWithStairsAttributeForPlayer() {
 }
 
 // 0x72D970
-eZoneAttributes CCullZones::FindAttributesForCoors(float x, float y) {
+eZoneAttributes CCullZones::FindAttributesForCoors(CVector pos) {
     if (NumAttributeZones <= 0)
         return eZoneAttributes::NONE;
 
     int32 out = eZoneAttributes::NONE;
     for (auto& attributeZone : aAttributeZones) {
-        if (attributeZone.IsPointWithin({x, y, 0})) {
+        if (attributeZone.IsPointWithin(pos)) {
             out |= attributeZone.flags;
         }
     }
@@ -202,11 +202,11 @@ eZoneAttributes CCullZones::FindAttributesForCoors(float x, float y) {
 void CCullZones::Update() {
     if ((CTimer::GetFrameCounter() & 7) == 2) {
         auto cameraPosition = TheCamera.GetGameCamPosition();
-        CurrentFlags_Camera = FindAttributesForCoors(cameraPosition->x, cameraPosition->y);
+        CurrentFlags_Camera = FindAttributesForCoors(cameraPosition);
     }
     else if ((CTimer::GetFrameCounter() & 7) == 6) {
         CVector posn = FindPlayerCoors();
-        CurrentFlags_Player = FindAttributesForCoors(posn.x, posn.y);
+        CurrentFlags_Player = FindAttributesForCoors(posn);
         if (!bMilitaryZonesDisabled && (CurrentFlags_Player & eZoneAttributes::MILITARY_ZONE) != 0) {
             auto player = FindPlayerPed();
             if (player->IsAlive()) {
