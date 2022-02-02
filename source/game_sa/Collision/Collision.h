@@ -63,7 +63,7 @@ public:
     static bool ProcessSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance);
     static bool TestLineSphere(const CColLine& line, const CColSphere& sphere);
     static float DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point);
-    static bool TestLineOfSight(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint(&lineCPs)[32], CColPoint(&sphereCPs)[32], float* maxTouchDistance, bool arg7);
+    static bool TestLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, bool doSeeThroughCheck, bool doShootThroughCheck);
     static bool ProcessLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck);
     static bool ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck, CStoredCollPoly* collPoly);
     static bool SphereCastVsSphere(CColSphere* arg0, CColSphere* arg1, CColSphere* arg2);
