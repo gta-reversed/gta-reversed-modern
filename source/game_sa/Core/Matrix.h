@@ -118,7 +118,7 @@ CVector operator*(CMatrix const& a, CVector const& b);
 CMatrix operator+(CMatrix const& a, CMatrix const& b);
 
 CMatrix& Invert(CMatrix& in, CMatrix& out);
-CMatrix  Invert(CMatrix& in);
+CMatrix  Invert(const CMatrix& in);
 
 VALIDATE_SIZE(CMatrix, 0x48);
 

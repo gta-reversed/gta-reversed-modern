@@ -565,9 +565,9 @@ CMatrix& Invert(CMatrix& in, CMatrix& out)
     return out;
 }
 
-CMatrix Invert(CMatrix& in)
+CMatrix Invert(const CMatrix& in)
 {
     CMatrix result;
-    Invert(in, result);
+    Invert(const_cast<CMatrix&>(in), result); // const cast necessary because it's fucked - but it wont be modified.
     return result;
 }
