@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "cTransmission.h"
+
 void cTransmission::InjectHooks()
 {
     RH_ScopedClass(cTransmission);

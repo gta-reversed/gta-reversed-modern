@@ -380,7 +380,7 @@ void CCarGenerator::Setup(const CVector& posn, float angle, int32 modelId, int16
     m_nAngle = (char)(angle * magic);
     m_nModelId = modelId;
     m_nPrimaryColor = (uint8)(color1);
-    m_nSecondaryColor = (uint8)(color2);;
+    m_nSecondaryColor = (uint8)(color2);
 
     bWaitUntilFarFromPlayer = false;
     bIgnorePopulationLimit = ignorePopulationLimit;

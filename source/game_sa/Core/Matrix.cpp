@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Matrix.h"
 
 uint8* CMatrix::EulerIndices1 = (uint8*)0x866D9C;
 uint8* CMatrix::EulerIndices2 = (uint8*)0x866D94;
@@ -129,7 +131,7 @@ void CMatrix::UpdateRwMatrix(RwMatrix* matrix)
     RwMatrixUpdate(matrix);
 }
 
-void CMatrix::UpdateMatrix(RwMatrixTag* rwMatrix)
+void CMatrix::UpdateMatrix(RwMatrix* rwMatrix)
 {
     m_right = *RwMatrixGetRight(rwMatrix);
     m_forward = *RwMatrixGetUp(rwMatrix);

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WeaponModelInfo.h"
+
 void CWeaponModelInfo::InjectHooks()
 {
     RH_ScopedClass(CWeaponModelInfo);

@@ -1,5 +1,10 @@
 #pragma once
 
+#include "renderware.h"
+
+#include "Vector.h"
+#include "Matrix.h"
+
 class CEscalator {
 public:
     CVector  m_vStart;

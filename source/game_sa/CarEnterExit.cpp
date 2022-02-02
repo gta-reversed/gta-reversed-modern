@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CarEnterExit.h"
+
 /*
 const float& CCarEnterExit::ms_fMaxSpeed_CanDragPedOut = *(float*)0x0;
 const float& CCarEnterExit::ms_fMaxSpeed_PlayerCanDragPedOut = *(float*)0x0;

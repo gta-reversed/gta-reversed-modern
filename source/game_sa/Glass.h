@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Vector.h"
-#include "PtrList.h"
 
 class CEntity;
 class CVehicle;
 class CObject;
+class CPtrList;
 
 class CGlass {
 public:

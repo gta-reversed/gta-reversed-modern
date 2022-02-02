@@ -2,7 +2,8 @@
 
 #include "Vector.h"
 
-#include "Occluder.h"
+class COccluder;
+class CActiveOccluder;
 
 class COcclusion {
 public:

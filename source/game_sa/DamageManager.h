@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -157,7 +157,7 @@ public:
     uint8 GetEngineStatus();
     void SetEngineStatus(uint8 status);
 
-    // There are 2 door function, one takes `tComponent` the other `eDoors`.
+    // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
     // And chose accordingly.
     eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx);

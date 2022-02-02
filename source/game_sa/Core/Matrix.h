@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -66,7 +66,7 @@ public:
                                                 // Using UpdateRW() is more safe since it perform this check.
     void UpdateRW();                            // update RwMatrix with attaching matrix.
     void UpdateRwMatrix(RwMatrix* matrix);      // update RwMatrix with this matrix
-    void UpdateMatrix(RwMatrixTag* rwMatrix);
+    void UpdateMatrix(RwMatrix* rwMatrix);
     void SetUnity();
     void ResetOrientation();
     void SetScale(float scale);                 // set (scaled)

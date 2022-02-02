@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Camera.h"
+
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
@@ -610,8 +612,8 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
 }
 
 // 0x420C40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrixTag* transformMatrix) {
-    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrixTag*>(this, origin, radius, transformMatrix);
+bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrix* transformMatrix) {
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
 // 0x420D40

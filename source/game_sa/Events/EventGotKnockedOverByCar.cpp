@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventGotKnockedOverByCar.h"
+
 void CEventGotKnockedOverByCar::InjectHooks()
 {
     RH_ScopedClass(CEventGotKnockedOverByCar);

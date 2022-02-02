@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -186,7 +186,7 @@ public:
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
         int32 nSlotIndex = ref >> 8;
-        return nSlotIndex >= 0 && nSlotIndex < m_nSize && m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
+        return nSlotIndex >= 0 && nSlotIndex < m_nSize&& m_byteMap[nSlotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[nSlotIndex]) : nullptr;
     }
 
     A* GetAtRefNoChecks(int32 ref) {

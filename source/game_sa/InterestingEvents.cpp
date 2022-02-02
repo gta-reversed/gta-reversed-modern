@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "InterestingEvents.h"
+
 CInterestingEvents& g_InterestingEvents = *(CInterestingEvents*)0xC0B058;
 
 void CInterestingEvents::InjectHooks() {

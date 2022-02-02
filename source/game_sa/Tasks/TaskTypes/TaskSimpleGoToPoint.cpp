@@ -4,6 +4,8 @@
 
 #include "TaskSimpleStandStill.h"
 #include "IKChainManager_c.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {

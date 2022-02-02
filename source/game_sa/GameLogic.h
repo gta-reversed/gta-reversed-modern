@@ -2,6 +2,10 @@
 
 #include "Vector.h"
 
+class CEntity;
+class CPed;
+class CVehicle;
+
 enum eGameState : uint8 {
     GAME_STATE_INITIAL = 0,
     GAME_STATE_LOGO = 1,

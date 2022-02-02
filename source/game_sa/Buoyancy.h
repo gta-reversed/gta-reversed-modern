@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Matrix.h"
+#include "Vector.h"
 
 class CEntity;
 class CPhysical;

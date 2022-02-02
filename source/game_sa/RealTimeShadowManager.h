@@ -1,6 +1,8 @@
 #pragma once
 
-#include "RealTimeShadow.h"
+#include "ShadowCamera.h"
+
+class CRealTimeShadow;
 
 class CRealTimeShadowManager {
 public:

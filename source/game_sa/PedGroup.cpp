@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedGroup.h"
+
 float CPedGroup::FindDistanceToFurthestMember() {
     return plugin::CallMethodAndReturn<float, 0x5FB010, CPedGroup*>(this);
 }

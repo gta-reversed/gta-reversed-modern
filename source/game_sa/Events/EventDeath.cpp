@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventDeath.h"
+
 void CEventDeath::InjectHooks()
 {
     RH_ScopedClass(CEventDeath);
