@@ -83,7 +83,7 @@ int16 CAEStreamThread::GetTrackPlayTime() const {
     if (m_bPreparingStream)
         return -8;
     else
-        return (uint32)(m_pStreamingChannel->GetPlayTime());
+        return m_pStreamingChannel->GetPlayTime();
 }
 
 // 0x4F1550
