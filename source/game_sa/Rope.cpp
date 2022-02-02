@@ -16,6 +16,19 @@ void CRope::InjectHooks() {
     // RH_ScopedInstall(Update, 0x557530);
 }
 
+// inlined see 0x557959
+// use switch like in Android?
+// 0x555FB0
+bool CRope::DoControlsApply() {
+    return    m_nType == eRopeType::CRANE_MAGNET2 && CRopes::PlayerControlsCrane == 1
+           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
+           || m_nType == eRopeType::CRANE_MAGNET4 && CRopes::PlayerControlsCrane == 3
+           || m_nType == eRopeType::CRANE_MAGNET3 && CRopes::PlayerControlsCrane == 4
+           || m_nType == eRopeType::CRANE_MAGNET1
+           || m_nType == eRopeType::MAGNET
+           || m_nType == eRopeType::CRANE_HARNESS;
+}
+
 // 0x556030
 void CRope::ReleasePickedUpObject() {
     if (m_pRopeAttachObject) {
@@ -118,26 +131,27 @@ void CRope::Render() {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(FALSE));
 
     if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, nullptr, 0)) {
-        RxVertexIndex indices[] = {
-            0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6,
-            6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11,
-            12, 12, 13, 13, 14, 14, 15, 15, 16,
-            16, 17, 17, 18, 18, 19, 19, 20, 20,
-            21, 21, 22, 22, 23, 23, 24, 24, 25,
-            25, 26, 26, 27, 27, 28, 28, 29, 29,
-            30, 30, 31
+        RxVertexIndex indices[] = { // *(RxVertexIndex(*)[64])0x8CD818
+            0,  1,  1,  2,  2,  3,  3,  4,
+            4,  5,  5,  6,  6,  7,  7,  8,
+            8,  9,  9,  10, 10, 11, 11, 12,
+            12, 13, 13, 14, 14, 15, 15, 16,
+            16, 17, 17, 18, 18, 19, 19, 20,
+            20, 21, 21, 22, 22, 23, 23, 24,
+            24, 25, 25, 26, 26, 27, 27, 28,
+            28, 29, 29, 30, 30, 31, 31, 32
         };
-        RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices));
+        RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices) - 2); // the last two indexes are not used
         RwIm3DEnd();
     }
 
     if (m_nType == eRopeType::CRANE_MAGNET3) {
-        const CVector pos[] = { m_aSegments[0], { 709.32f, 916.20f, 53.0f } };
-        for (auto i = 0u; i < 2; i++) {
+        const CVector pos[] = { m_aSegments[0], { 709.32f, 916.20f, 53.0f } }; // Hunter Quarry
+        for (auto i = 0u; i < std::size(pos); i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
             RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
         }
-        if (RwIm3DTransform(aTempBufferVertices, 2, nullptr, 0)) {
+        if (RwIm3DTransform(aTempBufferVertices, std::size(pos), nullptr, 0)) {
             RxVertexIndex indices[] = { 0, 1 };
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices));
             RwIm3DEnd();
@@ -162,7 +176,7 @@ void CRope::PickUpObject(CEntity* obj) {
     m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3(obj->GetMatrix(), height));
     m_pAttachedEntity->m_bUsesCollision = false;
 
-    obj->AsObject()->physicalFlags.bAttachedToEntity = true;
+    obj->AsPhysical()->physicalFlags.bAttachedToEntity = true;
     if (obj->IsVehicle()) {
         if (obj->m_nStatus == eEntityStatus::STATUS_SIMPLE)
         {
@@ -175,19 +189,6 @@ void CRope::PickUpObject(CEntity* obj) {
             obj->AsObject()->m_nFakePhysics = 0;
         }
     }
-}
-
-// inlined see 0x557959
-// use switch like in Android?
-// 0x555FB0
-bool CRope::DoControlsApply() {
-    return    m_nType == eRopeType::CRANE_MAGNET2 && CRopes::PlayerControlsCrane == 1
-           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
-           || m_nType == eRopeType::CRANE_MAGNET4 && CRopes::PlayerControlsCrane == 3
-           || m_nType == eRopeType::CRANE_MAGNET3 && CRopes::PlayerControlsCrane == 4
-           || m_nType == eRopeType::CRANE_MAGNET1
-           || m_nType == eRopeType::MAGNET
-           || m_nType == eRopeType::CRANE_HARNESS;
 }
 
 // 0x557530
