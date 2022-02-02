@@ -255,9 +255,9 @@ bool CCollision::ProcessSphereSphere(const CColSphere& sphere1, const CColSphere
     return plugin::CallAndReturn<bool, 0x416450, CColSphere const&, CColSphere const&, CColPoint&, float&>(sphere1, sphere2, colPoint, maxTouchDistance);
 }
 
-// 0x4165B0
+// 0x4165B0 - Original function took a CColSphere, but a `CSphere` should be just fine.
 bool CCollision::TestSphereTriangle(const CSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, CColTrianglePlane const& triPlane) {
-    return plugin::CallAndReturn<bool, 0x4165B0, CColSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
+    return plugin::CallAndReturn<bool, 0x4165B0, CSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
 }
 
 // 0x416BA0
