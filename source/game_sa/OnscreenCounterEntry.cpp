@@ -27,14 +27,17 @@ void COnscreenCounterEntry::Clear() {
 
 // 0x44CA90
 void COnscreenCounterEntry::ProcessForDisplayCounter(eOnscreenCounter type) {
-    const auto left = std::max<int32>(0, *(int32*)&CTheScripts::ScriptSpace[m_nVarId]);
+    const auto t2 = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
+    const auto t1 = std::max<int32>(0, t2);
 
-    if (type == eOnscreenCounter::SIMPLE || type == eOnscreenCounter::LINE) {
-        sprintf(m_szDisplayedText, "%d", left);
-    } else if (type == eOnscreenCounter::DOUBLE) {
-        const auto right = *(int32*)&CTheScripts::ScriptSpace[m_nMaxVarValue];
-
-        sprintf(m_szDisplayedText, "%d / %d", left, right);
+    switch (type) {
+    case eOnscreenCounter::SIMPLE:
+    case eOnscreenCounter::LINE:
+        sprintf(m_szDisplayedText, "%d", t1);
+        break;
+    case eOnscreenCounter::DOUBLE:
+        sprintf(m_szDisplayedText, "%d / %d", t1, t2);
+        break;
     }
 }
 
