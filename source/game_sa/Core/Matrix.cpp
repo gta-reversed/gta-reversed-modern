@@ -56,7 +56,7 @@ void CMatrix::InjectHooks()
     RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(CMatrix const&, CVector const&));
     RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(CMatrix const&, CMatrix const&));
     RH_ScopedGlobalOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
-    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(const CMatrix&));
 }
 
 CMatrix::CMatrix(CMatrix const& matrix)
