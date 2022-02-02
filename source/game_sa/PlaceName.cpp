@@ -40,16 +40,17 @@ const char* CPlaceName::GetForMap(float x, float y) {
 
 // 0x571F20
 void CPlaceName::Process() {
-    CZone* smallestZone = CTheZones::FindSmallestZoneForPosition(CalcPosition(), false);
+    CVector pos = CalcPosition();
+    CZone* smallestZone = CTheZones::FindSmallestZoneForPosition(pos, false);
     if (!smallestZone) {
         Init();
     }
 
-    if ((smallestZone == m_pZone || CGame::currArea == AREA_CODE_1) && // todo: !CGame::CanSeeOutSideFromCurrArea() ?
-            m_pZone ||
-            smallestZone &&
-            m_pZone &&
-            memcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey, sizeof(smallestZone->m_szTextKey)) == 0
+    if ((smallestZone == m_pZone || CGame::currArea == AREA_CODE_1) // todo: !CGame::CanSeeOutSideFromCurrArea() ?
+            && m_pZone
+            || smallestZone
+            && m_pZone // yep, checked twice
+            && memcmp(smallestZone->m_szTextKey, m_pZone->m_szTextKey, sizeof(smallestZone->m_szTextKey)) == 0
     ) {
         if (m_nAdditionalTimer) {
             m_nAdditionalTimer -= 1;
@@ -76,7 +77,7 @@ CVector CPlaceName::CalcPosition() {
     if (player->bInVehicle) {
         return player->m_pVehicle->GetPosition();
     } else {
-        auto& posn = player->GetPosition();
+        auto posn = player->GetPosition();
         CEntryExitManager::GetPositionRelativeToOutsideWorld(posn);
         return posn;
     }
