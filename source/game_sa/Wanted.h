@@ -16,6 +16,8 @@ class CCopPed;
 
 class CWanted {
 public:
+    static constexpr auto MAX_COPS_IN_PURSUIT{ 10u };
+
     uint32 m_nChaosLevel;
     uint32 m_nChaosLevelBeforeParole;
     uint32 m_nLastTimeWantedDecreased;
@@ -36,27 +38,20 @@ public:
             uint8 m_bSwatRequired : 1;        // These three booleans are needed so that the
             uint8 m_bFbiRequired : 1;         // streaming required vehicle stuff can be overrided
             uint8 m_bArmyRequired : 1;
-            // uint8 m_b6 : 1;
-            // uint8 m_b7 : 1;
-            // uint8 m_b8 : 1;
         };
         uint8 m_nFlags;
     };
-
-    char _pad1F;
-
     uint32                      m_nCurrentChaseTime;
     uint32                      m_nCurrentChaseTimeCounter;
-    uint32                      m_nTimeCounting;
+    bool                        m_bTimeCounting; // todo: good name
     uint32                      m_nWantedLevel;
     uint32                      m_nWantedLevelBeforeParole;
     CCrimeBeingQd               m_CrimesBeingQd[16];
-    CCopPed*                    m_pCopsInPursuit[10];
+    CCopPed*                    m_pCopsInPursuit[MAX_COPS_IN_PURSUIT];
     CAEPoliceScannerAudioEntity m_PoliceScannerAudio;
     bool                        m_bLeavePlayerAlone;
-    char                        _pad299[3];
 
-    static uint32 &MaximumWantedLevel; // default 6
+    static uint32 &MaximumWantedLevel;
     static uint32 MaximumChaosLevel;
     static bool &bUseNewsHeliInAdditionToPolice;
 
@@ -69,12 +64,11 @@ public:
 
     void UpdateWantedLevel();
     static void SetMaximumWantedLevel(int32 level);
-    bool AreMiamiViceRequired();
-    bool AreSwatRequired() const;
-    bool AreFbiRequired() const;
-    bool AreArmyRequired() const;
-    int32 NumOfHelisRequired();
-    // dummy function
+    [[nodiscard]] bool AreMiamiViceRequired() const;
+    [[nodiscard]] bool AreSwatRequired() const;
+    [[nodiscard]] bool AreFbiRequired() const;
+    [[nodiscard]] bool AreArmyRequired() const;
+    [[nodiscard]] int32 NumOfHelisRequired() const;
     static void ResetPolicePursuit();
     void ClearQdCrimes();
     bool AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& posn, bool bAlreadyReported, bool bPoliceDontReallyCare);
@@ -85,7 +79,7 @@ public:
     void RegisterCrime(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void RegisterCrime_Immediately(eCrimeType crimeType, const CVector& posn, CPed* ped, bool bPoliceDontReallyCare);
     void SetWantedLevel(uint32 level);
-    uint32 GetWantedLevel() const { return m_nWantedLevel; }
+    [[nodiscard]] uint32 GetWantedLevel() const { return m_nWantedLevel; }
     void CheatWantedLevel(uint32 level);
     void SetWantedLevelNoDrop(uint32 level);
     void ClearWantedLevelAndGoOnParole();
@@ -99,6 +93,10 @@ public:
     static bool CanCopJoinPursuit(CCopPed* target, uint8 maxCopsCount, CCopPed** copsArray, uint8& copsCounter);
     bool CanCopJoinPursuit(CCopPed* cop);
     bool SetPursuitCop(CCopPed* cop);
+
+    // NOTSA
+    // Same with ((this->m_nFlags & 7) != 0)
+    [[nodiscard]] bool BackOff() const { return m_bEverybodyBackOff || m_bPoliceBackOff || m_bPoliceBackOffGarage; }
 };
 
 VALIDATE_SIZE(CWanted, 0x29C);

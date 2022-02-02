@@ -13,8 +13,8 @@
 class CCrimeBeingQd {
 public:
     eCrimeType m_nCrimeType;
-    uint32     m_nCrimeID;
-    uint32     m_nTimeOfQing;
+    uint32     m_nCrimeId;
+    uint32     m_nStartTime;
     CVector    m_vecCoors;
     bool       m_bAlreadyReported;
     bool       m_bPoliceDontReallyCare;
