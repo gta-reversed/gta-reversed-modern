@@ -107,7 +107,7 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (NumSpecificZones == 0)
         Provocation += 1.0f;
 
-   for (int i = 0; i < NumSpecificZones; i++) {
+   for (auto i = 0u; i < NumSpecificZones; i++) {
        uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
 
        if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
@@ -134,7 +134,7 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
         return true;
 
     // inline?
-    for (int i = 0; i < NumSpecificZones; i++) {
+    for (auto i = 0u; i < NumSpecificZones; i++) {
         uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
 
         if (zoneInfo == &CTheZones::ZoneInfoArray[zoneInfIdx])
@@ -195,9 +195,9 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     State = NOT_IN_WAR;
     CMessages::AddMessage(TheText.Get("GW_YRS"), 4500, 1, true);
     CMessages::AddToPreviousBriefArray(TheText.Get("GW_YRS"), -1, -1, -1, -1, -1, -1, nullptr);
-    Provocation = 0.0;
+    Provocation = 0.0f;
     TellGangMembersTo(true);
-    CStats::IncrementStat(STAT_RESPECT, 45.0);
+    CStats::IncrementStat(STAT_RESPECT, 45.0f);
     CTheZones::FillZonesWithGangColours(false);
 
     TimeTillNextAttack = std::min(TimeTillNextAttack - 240000.0f, 30000.0f);
@@ -206,7 +206,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
 // inlined
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
-    uint8 enemyDensity = zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS];
+    auto enemyDensity = zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS];
 
     return zoneInfo->GangDensity[GANG_GROVE] > enemyDensity;
 }
@@ -324,7 +324,7 @@ uint32 CGangWars::ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsA
 // 0x446570
 void CGangWars::SetGangWarsActive(bool active) {
     if (active != bGangWarsActive) {
-        CTheZones::FillZonesWithGangColours(active == false);
+        CTheZones::FillZonesWithGangColours(!active);
         TimeTillNextAttack = CalculateTimeTillNextAttack();
 
         if (!active)
