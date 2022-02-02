@@ -294,20 +294,19 @@ bool CGangWars::PickZoneToAttack() {
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
-    //plugin::Call<0x445E20>();
     auto size = CPools::ms_pVehiclePool->GetSize();
 
     if (!size)
         return;
 
-    for (auto i = 0u; i < size; i++) {
-        auto id = CPools::ms_pVehiclePool->m_byteMap[size - i].IntValue();
+    auto vehPool = CPools::GetVehiclePool();
+    for (auto i = vehPool->GetSize(); i; i--) {
+        auto id = vehPool->GetIdAt(i - 1);
 
         if (id < 0)
             continue;
 
-        //CPools::GetVehicle?
-        CVehicle* vehicle = static_cast<CVehicle*>(&CPools::ms_pVehiclePool->m_pObjects[size - i]);
+        auto vehicle = vehPool->GetAt(i - 1);
 
         if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
             vehicle->vehicleFlags.bPartOfAttackWave = false;
