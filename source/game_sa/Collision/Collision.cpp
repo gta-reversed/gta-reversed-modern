@@ -8,6 +8,8 @@
 #include "StdInc.h"
 
 #include "Collision.h"
+#include "ColHelpers.h"
+#include "extensions/enumerate.hpp"
 
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
 int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
@@ -254,7 +256,7 @@ bool CCollision::ProcessSphereSphere(const CColSphere& sphere1, const CColSphere
 }
 
 // 0x4165B0
-bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, CColTrianglePlane const& triPlane) {
+bool CCollision::TestSphereTriangle(const CSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, CColTrianglePlane const& triPlane) {
     return plugin::CallAndReturn<bool, 0x4165B0, CColSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
 }
 
@@ -376,9 +378,404 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
     plugin::Call<0x4185A0, CColModel*>(colModel);
 }
 
-// 0x4185C0
-int32 CCollision::ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7) {
-    
+// TODO: This function could be refactored to use ranges instead of these ugly static variables :D
+/*!
+* @brief 0x4185C0 - Test all of B's and A's spheres against each other's spheres, boxes, and triangles:
+* 
+*  A\B  Tri Sp  Box
+* Tri       +
+* Sp    +   +   +
+* Box       +
+*
+* (Note: The game here originally processed lines and disks, but given that SA doesn't use lines and/or disks I didn't bother to do it)
+*
+* @param         transformA       Transformation matrix of model A - Usually owning entity's matrix.
+* @param         cmA              Col model A
+* @param         transformB       Transformation matrix of model B - Usually owning entity's matrix.
+* @param         cmA              Col model B
+* @param[out]    lineCPs          The first 32 collision points with lines - SA doesn't use lines or disks, so this is always empty. (can be null)
+* @param[out]    sphereCPs        The first 32 collision points with spheres
+* @param[in,out] maxTouchDistance It was only used for lines/disks - Again, SA doesn't have that, so this value isn't used (can be null)
+* @param         arg7             Not 100% sure what this does. TODO.
+* 
+* @returns Number of sphere collision points found (At most 32)
+*/
+int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint(&sphereCPs)[32], CColPoint* _IGNORED_ lineCPs, float* _IGNORED_ maxTouchDistance, bool arg7) {
+
+    UNUSED(lineCPs);
+    UNUSED(maxTouchDistance);
+
+    // Dont these this should ever happen, but okay?
+    if (!cmA.m_pColData) {
+        return;
+    }
+
+    if (!cmB.m_pColData) {
+        return;
+    }
+
+    const auto cdA = *cmA.m_pColData;
+    const auto cdB = *cmB.m_pColData;
+
+    // Transform matrix from A's space to B's
+    const auto transformAtoB = Invert(transformB) * transformA; 
+
+    // A's bounding box in B's space
+    const CSphere colABoundSphereSpaceB{
+        MultiplyMatrixWithVector(transformAtoB, cmA.m_boundSphere.m_vecCenter),
+        cmA.m_boundSphere.m_fRadius
+    };
+
+    if (!TestSphereBox(colABoundSphereSpaceB, cmB.m_boundBox)) {
+        return 0;
+    }
+
+    // Transform matrix from B's space to A's
+    const auto transformBtoA = Invert(transformA) * transformB;
+
+    // Now, transform each cm's spheres and test them against each other's bounding box
+
+    // TODO: Should probably move these out somewhere..
+    constexpr auto MAX_SPHERES{ 128u }; // Max no. of spheres colliding with other model's bounding sphere. - If more - Possible crash
+    constexpr auto MAX_BOXES{ 64u };    // Same, but for boxes      - If more, all following are ignored.
+    constexpr auto MAX_TRIS{ 600u };    // Same, but for triangles  - If more, all following are ignored.
+
+    // Transform `spheres` center position using `transform` and store them in `outSpheres`
+    const auto TransformSpheres = []<size_t N>(const auto& spheres, const CMatrix& transform, CColSphere (&outSpheres)[N]) {
+        std::ranges::transform(spheres, outSpheres, [&](const auto& sp) {
+            CColSphere transformed = sp; // Copy sphere
+            transformed.m_vecCenter = MultiplyMatrixWithVector(transform, sp.m_vecCenter); // Set copy's center as the transformed point
+            return transformed;
+        });
+    };
+
+    // Test `spheres` against bounding box `bb` and store all colliding sphere's indices in `collidedIdxs`
+    const auto TestSpheresAgainstBB = []<size_t N>(const auto& spheres, const auto& bb, uint32& numCollided, uint32 (&collidedIdxs)[N]) {
+        for (auto&& [i, sp] : enumerate(spheres)) {
+            if (TestSphereBox(sp, bb)) {
+                collidedIdxs[numCollided++] = i;
+                assert(numCollided <= N); // Avoid out-of-bounds (Game originally didn't check)
+            }
+        }
+    };
+
+    // Process A's spheres and test them against B's
+
+    // 0x418722 
+    static CColSphere colASpheresSpaceB[MAX_SPHERES]; // A's spheres in B's space
+    TransformSpheres(cdA.GetSpheres(), transformAtoB, colASpheresSpaceB);
+
+    // 0x4187A1
+    static uint32 colACollSpheres[MAX_SPHERES]; // Index of A's spheres that collided with B's BB
+    uint32 colANumCollidingSpheres{};                     // No. of spheres that collided
+    TestSpheresAgainstBB(colASpheresSpaceB, cmB.GetBoundingBox(), colANumCollidingSpheres, colACollSpheres);
+
+    // Now do the same for B
+
+    // 0x4187ED
+    static CColSphere colBSpheresSpaceA[MAX_SPHERES]; // B's spheres in A's space
+    TransformSpheres(cdA.GetSpheres(), transformBtoA, colBSpheresSpaceA);
+
+    // 0x418862
+    static uint32 colBCollSpheres[MAX_SPHERES]; // Index of B's spheres that collided with A's BB
+    uint32 colBNumCollidingSpheres{};           // No. of spheres that collided
+    TestSpheresAgainstBB(colBSpheresSpaceA, cmA.GetBoundingBox(), colBNumCollidingSpheres, colBCollSpheres);
+
+    if (!colANumCollidingSpheres && !cdA.m_nNumLines && !colBNumCollidingSpheres) {
+        return 0; // Early out if no collisions
+    }
+
+    // 0x418902 
+    // Here the game tests collision of disks, but SA doesn't use disks, so I won't bother with it.
+    assert(!cdB.bUsesDisks); // If this asserts then I was wrong and this part has to be reversed as well :D
+
+    // 0x418A4E
+    // Test B's boxes against A's bounding sphere
+    static uint32 colBCollABoxes[MAX_BOXES]; // Indices of B's boxes colliding with A's bounding sphere
+    uint32 numColBCollABoxes{};
+    for (auto&& [i, box] : enumerate(cdB.GetBoxes())) {
+        if (TestSphereBox(colABoundSphereSpaceB, box)) {
+            colBCollABoxes[numColBCollABoxes++] = i;
+            if (numColBCollABoxes >= MAX_BOXES) {
+                break;
+            }
+        }
+    }
+
+    // Test B's triangles against A's bounding sphere
+    static uint32 colBCollATris[MAX_TRIS]; // Indices of B's triangles
+    uint32 colANumCollidingTris{};
+    {
+        CalculateTrianglePlanes(&cmB);
+
+        // Process a single triangle
+        const auto ProcessOneTri = [&](uint32 triIdx) {
+            if (TestSphereTriangle(
+                colABoundSphereSpaceB,
+                cdB.m_pVertices,
+                cdB.m_pTriangles[triIdx],
+                cdB.m_pTrianglePlanes[triIdx]
+            )) {
+                colBCollATris[colANumCollidingTris++] = triIdx;
+            }
+        };
+
+        if (cdB.m_nNumTriangles) {
+            if (cdB.bHasFaceGroups) { // Test by using face groups - Thanks to those who helped me figure this out :)
+                // 0x418B23
+                for (auto&& group : cdB.GetFaceGroups()) {
+                    if (TestSphereBox(colABoundSphereSpaceB, group.bb)) { // Quick BB check
+                        for (auto i{ group.first }; i < group.last; i++) { // Check all triangles in this group
+                            ProcessOneTri(i);
+                        }
+                    }
+                }
+            } else { // Game checked here if B.m_nNumTriangles > 0, but that is a redudant check.
+                // 0x418C40
+                for (auto i = 0u; i < cdB.m_nNumTriangles; i++) {
+                    ProcessOneTri(i);
+                }
+            }
+        }
+    }
+
+    if (!colANumCollidingSpheres && !colANumCollidingTris && !colBNumCollidingSpheres) {
+        return 0;
+    }
+
+    // 0x418CAD
+    // Process all of A's colliding spheres against all of B's colliding spheres, boxes and triangles
+    sphereCPs->m_fDepth = -1.f;
+    uint32 nNumSphereCPs{};
+    if (colANumCollidingSpheres) { 
+        float minTouchDist{ 1e24f };
+        for (auto sphereAIdx : std::span{ colACollSpheres, colANumCollidingSpheres }) {
+            const auto& sphereA{ cdA.m_pSpheres[sphereAIdx] };
+
+            bool advanceColPointIdx{};
+
+            // 0x418CF9
+            // Spheres
+            for (auto sphereBIdx : std::span{ colBCollSpheres , colBNumCollidingSpheres }) {
+                const auto& sphereB{ cdB.m_pSpheres[sphereBIdx] };
+
+                if (ProcessSphereSphere(
+                    sphereA,
+                    sphereB,
+                    sphereCPs[nNumSphereCPs],
+                    minTouchDist)
+                ) {
+                    advanceColPointIdx = true;
+                    // These tests are cheap, so continue procesing
+                }
+
+                // Original code also processed disk's spheres here (which were added to `colBCollSpheres` above (I skipped that part as well :D))
+                // But since the game doesn't use disks we skip this part.
+            }
+
+            // 0x418D86
+            // Boxes
+            for (auto boxIdx : std::span{ colBCollABoxes , numColBCollABoxes }) {
+                const auto& box{ cdB.m_pBoxes[boxIdx] };
+                
+                if (auto& cp = sphereCPs[nNumSphereCPs]; ProcessSphereBox(
+                    sphereA,
+                    box,
+                    cp,
+                    minTouchDist)
+                ) {
+                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nPieceTypeA = box.m_nFlags;
+                    cp.m_nLightingA = box.m_nLighting;
+
+                    if (arg7 && sphereA.m_nFlags <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                        advanceColPointIdx = false;
+                        minTouchDist = 1e24f;
+                        sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
+                        nNumSphereCPs++;
+                    } else {
+                        advanceColPointIdx = true;
+                    }
+                }
+            }
+
+            // Triangles
+            // 0x418E44
+            for (auto triIdx : std::span{ colBCollATris, colANumCollidingTris }) {
+                const auto& tri{ cdB.m_pTriangles[triIdx] };
+
+                if (auto& cp = sphereCPs[nNumSphereCPs]; ProcessSphereTriangle(
+                    sphereA,
+                    cdB.m_pVertices,
+                    cdB.m_pTriangles[triIdx],
+                    cdB.m_pTrianglePlanes[triIdx],
+                    cp,
+                    minTouchDist)
+                ) {
+                    // Same code as above in boxes
+                    if (arg7 && sphereA.m_nFlags <= 2 && nNumSphereCPs < std::size(sphereCPs)) {
+                        advanceColPointIdx = false;
+                        minTouchDist = 1e24f;
+                        sphereCPs[nNumSphereCPs + 1].m_fDepth = -1.f;
+                        nNumSphereCPs++;
+                    } else {
+                        advanceColPointIdx = true;
+                    }
+                }
+            }
+
+            // 0x418EFC
+            if (advanceColPointIdx) {
+                nNumSphereCPs++;
+                if (nNumSphereCPs >= std::size(sphereCPs)) { 
+                    break; 
+                }
+                sphereCPs[nNumSphereCPs].m_fDepth = -1.f;
+            }
+        }
+
+        // Transform all colpoints into world space
+        for (auto&& cp : std::span{ sphereCPs, nNumSphereCPs }) {
+            cp.m_vecPoint = MultiplyMatrixWithVector(transformB, cp.m_vecPoint);
+            cp.m_vecNormal = Multiply3x3(transformB, cp.m_vecNormal);
+        }
+    }
+
+    // 0x418F4C
+    assert(!cdA.bUsesDisks); // Again, game does something with disks
+
+    // 0x418F55
+    assert(!cdA.m_nNumLines); // .. and lines so skip that.
+
+    // 0x4185C0
+    // Originally game transformed all sphereCPs to world space here, but I've moved that into the above `if` stuff
+
+    // 0x4199E5
+    // Find all A's triangles and boxes intersecting B's b.sphere
+    // Then process them all against B's colliding spheres
+    if (colBCollSpheres && cdA.m_nNumTriangles && cdA.m_nNumSpheres) {
+        const CSphere colBSphereInASpace{
+            MultiplyMatrixWithVector(transformBtoA, cmB.m_boundSphere.m_vecCenter),
+            cmB.m_boundSphere.m_fRadius
+        };
+
+        const auto numCPsPrev{ nNumSphereCPs };
+
+        // Process all of A's triangles against B's b.sphere
+        static uint32 colACollTri[MAX_TRIS];
+        uint32 colANumCollTri{};
+        if (cdA.m_nNumTriangles) {
+            CalculateTrianglePlanes(&cmA);
+
+            // NOTE/TODO: Weird how they didn't use the facegroup stuff here as well.
+            //            Should probably implement it here some day too, as it speeds up the process quite a bit.
+
+            for (auto i = 0; i < cdA.m_nNumTriangles; i++) {
+                if (TestSphereTriangle(
+                    colBSphereInASpace,
+                    cdA.m_pVertices,
+                    cdA.m_pTriangles[i],
+                    cdA.m_pTrianglePlanes[i])
+                ) {
+                    colACollTri[colANumCollTri++] = i;
+                }
+            }
+        }
+
+        // 0x419AB6
+        // Process all of A's boxes against B's b.sphere
+        static uint32 colACollBox[MAX_TRIS];
+        uint32 colANumCollBox{};
+        for (auto i = 0; i < cdA.m_nNumBoxes; i++) {
+            if (TestSphereBox(colBSphereInASpace, cdA.m_pBoxes[i])) {
+                colACollBox[colANumCollBox++] = i;
+            }
+        }
+
+        // 0x419B76
+        // Process all of B's colliding spheres against all of A's colliding triangles
+        for (auto sphereIdx : std::span{ colBCollSpheres, colBNumCollidingSpheres }) {
+            const auto& sphere{ cdB.m_pSpheres[sphereIdx] };
+
+            auto minTouchDist{ 1e24f };
+            bool anyCollided{};
+            for (auto triIdx : std::span{ colACollBox , colANumCollBox }) {
+                if (ProcessSphereTriangle(
+                    sphere,
+                    cdA.m_pVertices,
+                    cdA.m_pTriangles[triIdx],
+                    cdA.m_pTrianglePlanes[triIdx],
+                    sphereCPs[nNumSphereCPs],
+                    minTouchDist
+                )) {
+                    anyCollided = true;
+                }
+            }
+
+            if (anyCollided) {
+                sphereCPs[nNumSphereCPs].m_vecNormal *= -1.f;
+
+                nNumSphereCPs++;
+                if (nNumSphereCPs >= std::size(sphereCPs)) {
+                    break;
+                }
+                sphereCPs[nNumSphereCPs].m_fDepth = -1.f; // Next col point
+            }
+        }
+
+        // 0x419CC4
+        // Process all of B's colliding spheres against all of A's colliding boxes
+        for (auto sphereIdx : std::span{ colBCollSpheres, colBNumCollidingSpheres }) {
+            const auto& sphere{ cdB.m_pSpheres[sphereIdx] };
+
+            float minTouchDist{ 1e24f };
+            for (auto boxIdx : std::span{ colACollBox, colANumCollBox }) {
+                const auto& box{ cdA.m_pBoxes[boxIdx] };
+                auto& cp = sphereCPs[nNumSphereCPs];
+                if (ProcessSphereBox(
+                    sphere,
+                    box,
+                    cp,
+                    minTouchDist)
+                ) {
+                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nPieceTypeA = box.m_nFlags; // Presumeably box.m_nFlags aren't actually flags.
+                    cp.m_nLightingA = box.m_nLighting;
+
+                    cp.m_nSurfaceTypeB = sphere.m_nMaterial;
+                    cp.m_nPieceTypeB = sphere.m_nFlags;
+                    cp.m_nLightingB = sphere.m_nLighting;
+
+                    cp.m_vecNormal *= -1.f; // Invert direction
+
+                    nNumSphereCPs++;
+                    if (nNumSphereCPs >= std::size(sphereCPs)) {
+                        break;
+                    }
+                    sphereCPs[nNumSphereCPs].m_fDepth = -1.f; // Next col point
+                }
+            }
+        }
+
+        // 0x419E56
+        // Transform added colpoints into world space
+        if (numCPsPrev != nNumSphereCPs) { // If we've processed any items..
+            for (auto& cp : std::span{ sphereCPs, numCPsPrev }) {
+                cp.m_vecPoint = MultiplyMatrixWithVector(transformA, cp.m_vecPoint);
+                cp.m_vecNormal = Multiply3x3(transformA, cp.m_vecNormal);
+
+                // Weird stuff, idk why they do this
+                cp.m_nSurfaceTypeB = cp.m_nSurfaceTypeA;
+                cp.m_nPieceTypeB =cp.m_nPieceTypeA;
+                cp.m_nLightingB =cp.m_nLightingA;
+            }
+        }
+    }
+
+    // Originally here there was a loop to transform all CPs that were added in the above section
+    // I moved it into the above section to keep things clear.
+
+    return (int32)nNumSphereCPs;
 }
 
 // 0x419F00
