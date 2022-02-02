@@ -15,6 +15,10 @@
 #include "ColDisk.h"
 #include "Link.h"
 
+namespace ColHelpers {
+    struct TFaceGroup;
+};
+
 //
 // https://gtamods.com/wiki/Collision_File
 //
@@ -86,6 +90,16 @@ public:
     void GetShadTrianglePoint(CVector& outVec, int32 vertId);
     void SetLinkPtr(CLink<CCollisionData*>* link);
     CLink<CCollisionData*>* GetLinkPtr();
+
+    // NOTSA
+    auto GetNumFaceGroups() const -> uint32;
+
+
+    auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
+    auto GetBoxes() const { return std::span{ m_pBoxes, m_nNumBoxes }; }
+    auto GetTris() const { return std::span{ m_pTriangles, m_nNumTriangles }; }
+
+    auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
 
 private:
     // HELPERS

@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CollisionData.h"
+#include "ColHelpers.h"
 
 void CCollisionData::InjectHooks()
 {
@@ -246,4 +247,22 @@ CLink<CCollisionData*>* CCollisionData::GetLinkPtr()
     auto space = sizeof(CColTrianglePlane);
     auto* alignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), linkPtr, space);// 4 bytes aligned address
     return *static_cast<CLink<CCollisionData*>**>(alignedAddress);
+}
+
+auto CCollisionData::GetNumFaceGroups() const -> uint32 {
+    // See `CCollisionData` header for explanation :)
+    return bHasFaceGroups ? *(uint32*)((char*)m_pTriangles - sizeof(uint32)) : 0u;
+}
+
+auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> {
+    using namespace ColHelpers;
+
+    if (bHasFaceGroups) {
+        // See `CCollisionData` header for explanation :)
+        return std::span{
+            (TFaceGroup*)((char*)m_pTriangles - sizeof(uint32) - sizeof(TFaceGroup) * GetNumFaceGroups()),
+            GetNumFaceGroups()
+        };
+    }
+    return {};
 }
