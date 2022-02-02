@@ -553,10 +553,9 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
                 return;
             }
 
-            if (auto taskSimpleStandStill = new CTaskSimpleStandStill(0, true, false, 8.0f)) {
-                m_TaskMgr.SetTask(taskSimpleStandStill, TASK_PRIMARY_DEFAULT, false);
-                return;
-            }
+            auto taskSimpleStandStill = new CTaskSimpleStandStill(0, true, false, 8.0f);
+            m_TaskMgr.SetTask(taskSimpleStandStill, TASK_PRIMARY_DEFAULT, false);
+            return;
         }
         m_TaskMgr.SetTask(nullptr, TASK_PRIMARY_DEFAULT, false);
         return;
