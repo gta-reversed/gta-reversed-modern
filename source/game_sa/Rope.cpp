@@ -1,23 +1,26 @@
 #include "StdInc.h"
 
 #include "Rope.h"
+#include "Ropes.h"
 
 void CRope::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CRope", "ReleasePickedUpObject", 0x556030, &CRope::ReleasePickedUpObject);
-    Install("CRope", "CreateHookObjectForRope", 0x556070, &CRope::CreateHookObjectForRope);
-    // Install("CRope", "UpdateWeightInRope", 0x5561B0, &CRope::UpdateWeightInRope);
-    Install("CRope", "Remove", 0x556780, &CRope::Remove);
-    Install("CRope", "Render", 0x556800, &CRope::Render);
-    Install("CRope", "PickUpObject", 0x5569C0, &CRope::PickUpObject);
-    // Install("CRope", "Update", 0x557530, &CRope::Update);
+    RH_ScopedClass(CRope);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ReleasePickedUpObject, 0x556030);
+    RH_ScopedInstall(CreateHookObjectForRope, 0x556070);
+    // RH_ScopedInstall(UpdateWeightInRope, 0x5561B0);
+    RH_ScopedInstall(Remove, 0x556780);
+    RH_ScopedInstall(Render, 0x556800);
+    RH_ScopedInstall(PickUpObject, 0x5569C0);
+    // RH_ScopedInstall(Update, 0x557530);
 }
 
 // 0x556030
 void CRope::ReleasePickedUpObject() {
     if (m_pRopeAttachObject) {
-        m_pRopeAttachObject->physicalFlags.bAttachedToEntity = false;
-        m_pRopeAttachObject->physicalFlags.b32 = false;
+        m_pRopeAttachObject->AsPhysical()->physicalFlags.bAttachedToEntity = false;
+        m_pRopeAttachObject->AsPhysical()->physicalFlags.b32 = false;
         m_pRopeAttachObject = nullptr;
     }
     m_pAttachedEntity->m_bUsesCollision = true;
@@ -30,23 +33,23 @@ void CRope::CreateHookObjectForRope() {
         return;
 
     using namespace ModelIndices;
-    ModelIndex modelIndex;
+    ModelIndex modelIndex = -1;
     switch (m_nType) {
     case eRopeType::CRANE_MAGNET1:
     case eRopeType::CRANE_MAGNET2:
     case eRopeType::CRANE_MAGNET3:
     case eRopeType::CRANE_MAGNET4:
         modelIndex = MI_CRANE_MAGNET;
-
+        break;
     case eRopeType::CRANE_HARNESS:
         modelIndex = MI_CRANE_HARNESS;
-
+        break;
     case eRopeType::MAGNET:
         modelIndex = MI_MINI_MAGNET;
-
+        break;
     case eRopeType::WRECKING_BALL:
         modelIndex = MI_WRECKING_BALL;
-
+        break;
     default: {
         assert(0); // NOTSA
         return;
@@ -62,7 +65,7 @@ void CRope::CreateHookObjectForRope() {
     obj->SetIsStatic(false);
     obj->physicalFlags.bAttachedToEntity = true;
 
-    CWorld::Add(m_pRopeAttachObject);
+    CWorld::Add(m_pAttachedEntity);
 
     m_pRopeAttachObject = nullptr;
     m_nFlags1 = 0;
@@ -103,19 +106,19 @@ void CRope::Render() {
         return &aTempBufferVertices[i];
     };
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(FALSE));
 
     for (auto i = 0u; i < NUM_ROPE_SEGMENTS; i++) {
         RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
         RxObjSpace3DVertexSetPos(GetVertex(i), &m_aSegments[i]);
     }
 
-    if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, 0, 0)) {
+    if (RwIm3DTransform(aTempBufferVertices, NUM_ROPE_SEGMENTS, nullptr, 0)) {
         RxVertexIndex indices[] = {
             0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6,
             6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11,
@@ -130,12 +133,12 @@ void CRope::Render() {
     }
 
     if (m_nType == eRopeType::CRANE_MAGNET3) {
-        const CVector pos[] = { m_aSegments[0], {709.32f, 916.20f, 53.0f} };
+        const CVector pos[] = { m_aSegments[0], { 709.32f, 916.20f, 53.0f } };
         for (auto i = 0u; i < 2; i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
             RxObjSpace3DVertexSetPos(GetVertex(i), &pos[i]);
         }
-        if (RwIm3DTransform(aTempBufferVertices, 2, 0, 0)) {
+        if (RwIm3DTransform(aTempBufferVertices, 2, nullptr, 0)) {
             RxVertexIndex indices[] = { 0, 1 };
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, std::size(indices));
             RwIm3DEnd();
@@ -144,7 +147,7 @@ void CRope::Render() {
 }
 
 // 0x5569C0
-void CRope::PickUpObject(CPhysical* obj) {
+void CRope::PickUpObject(CEntity* obj) {
     if (m_pRopeAttachObject == obj)
         return;
 
@@ -156,11 +159,11 @@ void CRope::PickUpObject(CPhysical* obj) {
 
     // TODO: Move model => world space translation into CEntity
     // MultiplyMatrixWithVector should be used here
-    CVector height = { {}, {}, obj->GetColModel()->GetBoundingBox().m_vecMax.z };
+    CVector height = { {}, {}, CRopes::FindPickupHeight(obj) };
     m_pAttachedEntity->SetPosn(obj->GetPosition() + Multiply3x3(obj->GetMatrix(), height));
     m_pAttachedEntity->m_bUsesCollision = false;
 
-    obj->physicalFlags.bAttachedToEntity = true; 
+    obj->AsObject()->physicalFlags.bAttachedToEntity = true;
     if (obj->IsVehicle()) {
         if (obj->m_nStatus == eEntityStatus::STATUS_SIMPLE)
         {
@@ -168,11 +171,24 @@ void CRope::PickUpObject(CPhysical* obj) {
         }
     } else if (obj->IsObject()) {
         if (obj->m_bIsStatic || obj->m_bIsStaticWaitingForCollision) {
-            obj->SetIsStatic(false);
-            obj->AddToMovingList();
-            obj->m_nFakePhysics = 0;
+            obj->AsObject()->SetIsStatic(false);
+            obj->AsObject()->AddToMovingList();
+            obj->AsObject()->m_nFakePhysics = 0;
         }
     }
+}
+
+// inlined see 0x557959
+// use switch like in Android?
+// 0x555FB0
+bool CRope::DoControlsApply() {
+    return    m_nType == eRopeType::CRANE_MAGNET2 && CRopes::PlayerControlsCrane == 1
+           || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
+           || m_nType == eRopeType::CRANE_MAGNET4 && CRopes::PlayerControlsCrane == 3
+           || m_nType == eRopeType::CRANE_MAGNET3 && CRopes::PlayerControlsCrane == 4
+           || m_nType == eRopeType::CRANE_MAGNET1
+           || m_nType == eRopeType::MAGNET
+           || m_nType == eRopeType::CRANE_HARNESS;
 }
 
 // 0x557530

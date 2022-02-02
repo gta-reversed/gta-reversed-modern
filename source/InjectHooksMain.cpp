@@ -82,6 +82,7 @@
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
 #include "Rope.h"
+#include "Ropes.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -197,6 +198,7 @@ void InjectHooksMain() {
     CFileMgr::InjectHooks();
 
     CRope::InjectHooks();
+    CRopes::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();

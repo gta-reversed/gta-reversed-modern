@@ -13,15 +13,15 @@ class CObject;
 
 // TODO: Find out what CRANE_MAGNET1/2/3/4 is exactly..
 enum class eRopeType : uint8 {
-    NONE,
-    CRANE_MAGNET1,
-    CRANE_HARNESS,
-    MAGNET,
-    CRANE_MAGNET2,
-    WRECKING_BALL,
-    CRANE_MAGNET3,
-    CRANE_MAGNET4,
-    SWAT
+    NONE          = 0,
+    CRANE_MAGNET1 = 1,
+    CRANE_HARNESS = 2,
+    MAGNET        = 3,
+    CRANE_MAGNET2 = 4,
+    WRECKING_BALL = 5,
+    CRANE_MAGNET3 = 6,
+    CRANE_MAGNET4 = 7,
+    SWAT          = 8
 };
 
 constexpr auto NUM_ROPE_SEGMENTS{ 32u };
@@ -36,24 +36,36 @@ public:
     float      m_fTotalLength;
     CEntity*   m_pRopeHolder;
     CEntity*   m_pAttachedEntity; // CPhysical?
-    CPhysical* m_pRopeAttachObject;
+    CEntity*   m_pRopeAttachObject;
     float      m_fSegmentLength;
     uint32     m_nTime;
     uint8      m_nSegments;
     eRopeType  m_nType;
-    uint8      m_nFlags1;
+    union {
+        struct {
+            uint8 m_b1 : 1;
+            uint8 m_b2 : 1;
+            uint8 m_b3 : 1;
+            uint8 m_b4 : 1;
+            uint8 m_b5 : 1;
+            uint8 m_b6 : 1;
+            uint8 m_b7 : 1;
+            uint8 m_b8 : 1;
+        };
+        uint8  m_nFlags1;
+    };
     uint8      m_nFlags2;
 
 public:
     static void InjectHooks();
 
     void ReleasePickedUpObject();
-    ModelIndex GetModelForType() const;
+    bool DoControlsApply();
     void CreateHookObjectForRope();
     int8 UpdateWeightInRope(float a2, float a3, float a4, int32 a5, float* a6);
     void Remove();
     void Render();
-    void PickUpObject(CPhysical* obj);
+    void PickUpObject(CEntity* obj);
     void Update();
 };
 

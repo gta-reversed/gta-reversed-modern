@@ -10,10 +10,9 @@ class CRope;
 
 class CRopes {
 public:
-    static constexpr uint8 MAX_NUM_ROPES = 255;
+    static constexpr auto MAX_NUM_ROPES{ 8u };
 
     static CRope (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
-    static uint8& m_nNumRopes;
     static int32& PlayerControlsCrane;
     static uint32& m_nRopeIdCreationCounter;
 
@@ -35,5 +34,5 @@ public:
     static bool FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* posn, CVector* arg4);
 
 public:
-    static inline CRope& GetRope(int32 index) { return aRopes[index]; }
+    static inline CRope& GetRope(int32 index) { assert(index >= 0); return aRopes[index]; }
 };

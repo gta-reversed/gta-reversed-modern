@@ -1528,7 +1528,7 @@ void CObject::ProcessControlLogic() {
         }
         else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY)
         {
-            const uint32 nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_MAGNET4 : eRopeType::WRECKING_BALL);
+            const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_MAGNET4 : eRopeType::WRECKING_BALL);
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope(this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20000u);
