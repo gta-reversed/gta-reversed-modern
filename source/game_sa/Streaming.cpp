@@ -3261,8 +3261,6 @@ void CStreaming::StreamOneNewCar() {
                 lastCarModelStreamedIn = MODEL_TAXI;
             }
         } else {
-            // Possibly dead code? Once `lastCarModelStreamedIn` is set as `MODEL_TAXI` it wont change.
-            // Maybe default value for `lastCarModelStreamedIn` isn't `MODEL_TAXI`?
             if (IsCarModelNeededInCurrentZone(MODEL_TAXI)) {
                 carModelId = MODEL_TAXI;
                 lastCarModelStreamedIn = MODEL_TAXI;
