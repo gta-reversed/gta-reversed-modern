@@ -6,8 +6,11 @@
 
 void CEventVehicleToSteal::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleToSteal", "Constructor", 0x4AF670, &CEventVehicleToSteal::Constructor);
-    ReversibleHooks::Install("CEventVehicleToSteal", "AffectsPed_Reversed", 0x4AF760, &CEventVehicleToSteal::AffectsPed_Reversed);
+    RH_ScopedClass(CEventVehicleToSteal);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF670);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF760);
 }
 
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)
@@ -23,24 +26,17 @@ CEventVehicleToSteal::~CEventVehicleToSteal()
         m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
 }
 
+// 0x4AF670
 CEventVehicleToSteal* CEventVehicleToSteal::Constructor(CVehicle* vehicle)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleToSteal*, 0x4AF670, CEvent*, CVehicle*>(this, vehicle);
-#else
     this->CEventVehicleToSteal::CEventVehicleToSteal(vehicle);
     return this;
-#endif
 }
 
-
+// 0x4AF760
 bool CEventVehicleToSteal::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4AF760, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleToSteal::AffectsPed_Reversed(ped);
-#endif
 }
 
 bool CEventVehicleToSteal::AffectsPed_Reversed(CPed* ped)

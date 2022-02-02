@@ -1,7 +1,8 @@
 #include "StdInc.h"
 
+#include "Streaming.h"
 #include "Radar.h"
-#include <ranges>
+#include "CarCtrl.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -67,100 +68,103 @@ static int32& CurrentGangMemberToLoad = *(int32*)0x9654D4;
 
 void CStreaming::InjectHooks()
 {
+    RH_ScopedClass(CStreaming);
+    RH_ScopedCategoryGlobal();
+
     using namespace ReversibleHooks;
-    Install("CStreaming", "AddEntity",0x409650, &CStreaming::AddEntity);
-    Install("CStreaming", "AddImageToList",0x407610, &CStreaming::AddImageToList);
-    Install("CStreaming", "AddLodsToRequestList",0x40C520, &CStreaming::AddLodsToRequestList);
-    Install("CStreaming", "AddModelsToRequestList",0x40D3F0, &CStreaming::AddModelsToRequestList);
-    Install("CStreaming", "AreAnimsUsedByRequestedModels",0x407AD0, &CStreaming::AreAnimsUsedByRequestedModels);
-    Install("CStreaming", "AreTexturesUsedByRequestedModels",0x409A90, &CStreaming::AreTexturesUsedByRequestedModels);
-    Install("CStreaming", "ClearFlagForAll",0x407A40, &CStreaming::ClearFlagForAll);
-    Install("CStreaming", "ClearSlots",0x40BAA0, &CStreaming::ClearSlots);
-    Install("CStreaming", "GetNextFileOnCd",0x408E20, &CStreaming::GetNextFileOnCd);
-    Install("CStreaming", "HasSpecialCharLoaded",0x407F00, &CStreaming::HasSpecialCharLoaded);
-    Install("CStreaming", "HasVehicleUpgradeLoaded",0x407820, &CStreaming::HasVehicleUpgradeLoaded);
-    Install("CStreaming", "ConvertBufferToObject",0x40C6B0, &CStreaming::ConvertBufferToObject);
-    Install("CStreaming", "DeleteAllRwObjects",0x4090A0, &CStreaming::DeleteAllRwObjects);
-    Install("CStreaming", "DeleteLeastUsedEntityRwObject",0x409760, &CStreaming::DeleteLeastUsedEntityRwObject);
-    Install("CStreaming", "DeleteRwObjectsAfterDeath",0x409210, &CStreaming::DeleteRwObjectsAfterDeath);
-    Install("CStreaming", "DeleteRwObjectsBehindCamera",0x40D7C0, &CStreaming::DeleteRwObjectsBehindCamera);
-    Install("CStreaming", "DeleteRwObjectsBehindCameraInSectorList",0x409940, &CStreaming::DeleteRwObjectsBehindCameraInSectorList);
-    Install("CStreaming", "DeleteRwObjectsInSectorList",0x407A70, &CStreaming::DeleteRwObjectsInSectorList);
-    Install("CStreaming", "DeleteRwObjectsNotInFrustumInSectorList",0x4099E0, &CStreaming::DeleteRwObjectsNotInFrustumInSectorList);
-    Install("CStreaming", "RemoveReferencedTxds",0x40D2F0, &CStreaming::RemoveReferencedTxds);
-    Install("CStreaming", "DisableCopBikes",0x407D10, &CStreaming::DisableCopBikes);
-    Install("CStreaming", "IsVeryBusy",0x4076A0, &CStreaming::IsVeryBusy);
-    Install("CStreaming", "Load",0x5D29E0, &CStreaming::Load);
-    Install("CStreaming", "LoadAllRequestedModels",0x40EA10, &CStreaming::LoadAllRequestedModels);
-    Install("CStreaming", "LoadCdDirectory_char", 0x5B6170, (void(*)(const char*, int32)) & CStreaming::LoadCdDirectory);
+    RH_ScopedInstall(AddEntity, 0x409650);
+    RH_ScopedInstall(AddImageToList, 0x407610);
+    RH_ScopedInstall(AddLodsToRequestList, 0x40C520);
+    RH_ScopedInstall(AddModelsToRequestList, 0x40D3F0);
+    RH_ScopedInstall(AreAnimsUsedByRequestedModels, 0x407AD0);
+    RH_ScopedInstall(AreTexturesUsedByRequestedModels, 0x409A90);
+    RH_ScopedInstall(ClearFlagForAll, 0x407A40);
+    RH_ScopedInstall(ClearSlots, 0x40BAA0);
+    RH_ScopedInstall(GetNextFileOnCd, 0x408E20);
+    RH_ScopedInstall(HasSpecialCharLoaded, 0x407F00);
+    RH_ScopedInstall(HasVehicleUpgradeLoaded, 0x407820);
+    RH_ScopedInstall(ConvertBufferToObject, 0x40C6B0);
+    RH_ScopedInstall(DeleteAllRwObjects, 0x4090A0);
+    RH_ScopedInstall(DeleteLeastUsedEntityRwObject, 0x409760);
+    RH_ScopedInstall(DeleteRwObjectsAfterDeath, 0x409210);
+    RH_ScopedInstall(DeleteRwObjectsBehindCamera, 0x40D7C0);
+    RH_ScopedInstall(DeleteRwObjectsBehindCameraInSectorList, 0x409940);
+    RH_ScopedInstall(DeleteRwObjectsInSectorList, 0x407A70);
+    RH_ScopedInstall(DeleteRwObjectsNotInFrustumInSectorList, 0x4099E0);
+    RH_ScopedInstall(RemoveReferencedTxds, 0x40D2F0);
+    RH_ScopedInstall(DisableCopBikes, 0x407D10);
+    RH_ScopedInstall(IsVeryBusy, 0x4076A0);
+    RH_ScopedInstall(Load, 0x5D29E0);
+    RH_ScopedInstall(LoadAllRequestedModels, 0x40EA10);
+    RH_ScopedOverloadedInstall(LoadCdDirectory, "char", 0x5B6170, void(*)(const char*, int32));
     Install("CStreaming", "LoadCdDirectory_void", 0x5B82C0, (void(*)()) & CStreaming::LoadCdDirectory);
-    Install("CStreaming", "LoadInitialPeds",0x40D3D0, &CStreaming::LoadInitialPeds);
-    Install("CStreaming", "LoadInitialWeapons",0x40A120, &CStreaming::LoadInitialWeapons);
-    Install("CStreaming", "LoadScene",0x40EB70, &CStreaming::LoadScene);
-    Install("CStreaming", "LoadSceneCollision",0x40ED80, &CStreaming::LoadSceneCollision);
-    Install("CStreaming", "LoadZoneVehicle",0x40B4B0, &CStreaming::LoadZoneVehicle);
-    Install("CStreaming", "PossiblyStreamCarOutAfterCreation",0x40BA70, &CStreaming::PossiblyStreamCarOutAfterCreation);
-    Install("CStreaming", "RenderEntity",0x4096D0, &CStreaming::RenderEntity);
-    Install("CStreaming", "RequestBigBuildings",0x409430, &CStreaming::RequestBigBuildings);
-    Install("CStreaming", "RequestFile",0x40A080, &CStreaming::RequestFile);
-    Install("CStreaming", "RequestFilesInChannel",0x409050, &CStreaming::RequestFilesInChannel);
-    Install("CStreaming", "RequestModel",0x4087E0, &CStreaming::RequestModel);
-    Install("CStreaming", "RequestTxdModel",0x407100, &CStreaming::RequestTxdModel);
-    Install("CStreaming", "RequestVehicleUpgrade",0x408C70, &CStreaming::RequestVehicleUpgrade);
-    Install("CStreaming", "FindMIPedSlotForInterior",0x407FB0, &CStreaming::FindMIPedSlotForInterior);
-    Install("CStreaming", "FinishLoadingLargeFile",0x408CB0, &CStreaming::FinishLoadingLargeFile);
-    Install("CStreaming", "FlushChannels",0x40E460, &CStreaming::FlushChannels);
-    Install("CStreaming", "RequestModelStream",0x40CBA0, &CStreaming::RequestModelStream);
-    Install("CStreaming", "RequestSpecialChar",0x40B450, &CStreaming::RequestSpecialChar);
-    Install("CStreaming", "RequestSpecialModel",0x409D10, &CStreaming::RequestSpecialModel);
-    Install("CStreaming", "ProcessLoadingChannel",0x40E170, &CStreaming::ProcessLoadingChannel);
-    Install("CStreaming", "PurgeRequestList",0x40C1E0, &CStreaming::PurgeRequestList);
-    Install("CStreaming", "ReInit",0x40E560, &CStreaming::ReInit);
-    Install("CStreaming", "ReadIniFile",0x5BCCD0, &CStreaming::ReadIniFile);
-    Install("CStreaming", "ReclassifyLoadedCars",0x40AFA0, &CStreaming::ReclassifyLoadedCars);
-    Install("CStreaming", "RemoveAllUnusedModels",0x40CF80, &CStreaming::RemoveAllUnusedModels);
-    Install("CStreaming", "RemoveBigBuildings",0x4093B0, &CStreaming::RemoveBigBuildings);
-    Install("CStreaming", "RemoveBuildingsNotInArea",0x4094B0, &CStreaming::RemoveBuildingsNotInArea);
-    Install("CStreaming", "RemoveCarModel",0x4080F0, &CStreaming::RemoveCarModel);
-    Install("CStreaming", "RemoveCurrentZonesModels",0x40B080, &CStreaming::RemoveCurrentZonesModels);
-    Install("CStreaming", "RemoveDodgyPedsFromRandomSlots",0x40BE60, &CStreaming::RemoveDodgyPedsFromRandomSlots);
-    Install("CStreaming", "RemoveEntity",0x409710, &CStreaming::RemoveEntity);
-    Install("CStreaming", "RemoveInappropriatePedModels",0x40B3A0, &CStreaming::RemoveInappropriatePedModels);
-    Install("CStreaming", "RemoveLeastUsedModel",0x40CFD0, &CStreaming::RemoveLeastUsedModel);
-    Install("CStreaming", "RemoveLoadedVehicle",0x40C020, &CStreaming::RemoveLoadedVehicle);
-    Install("CStreaming", "RemoveLoadedZoneModel",0x40B340, &CStreaming::RemoveLoadedZoneModel);
-    Install("CStreaming", "RemoveModel",0x4089A0, &CStreaming::RemoveModel);
-    Install("CStreaming", "RemoveTxdModel",0x40C180, &CStreaming::RemoveTxdModel);
-    Install("CStreaming", "MakeSpaceFor",0x40E120, &CStreaming::MakeSpaceFor);
-    Install("CStreaming", "ProcessEntitiesInSectorList", 0x40C270, (void(*)(CPtrList&, float, float, float, float, float, float, float, int32)) & CStreaming::ProcessEntitiesInSectorList);
-    Install("CStreaming", "RetryLoadFile",0x4076C0, &CStreaming::RetryLoadFile);
-    Install("CStreaming", "LoadRequestedModels",0x40E3A0, &CStreaming::LoadRequestedModels);
-    Install("CStreaming", "FlushRequestList",0x40E4E0, &CStreaming::FlushRequestList);
-    Install("CStreaming", "AddToLoadedVehiclesList",0x408000, &CStreaming::AddToLoadedVehiclesList);
-    Install("CStreaming", "GetDefaultCabDriverModel",0x407D50, &CStreaming::GetDefaultCabDriverModel);
-    Install("CStreaming", "GetDefaultFiremanModel",0x407D40, &CStreaming::GetDefaultFiremanModel);
-    Install("CStreaming", "GetDefaultMedicModel",0x407D20, &CStreaming::GetDefaultMedicModel);
-    Install("CStreaming", "GetDefaultCopCarModel",0x407C50, &CStreaming::GetDefaultCopCarModel);
-    Install("CStreaming", "GetDefaultCopModel",0x407C00, &CStreaming::GetDefaultCopModel);
-    Install("CStreaming", "Init2",0x5B8AD0, &CStreaming::Init2);
-    Install("CStreaming", "InitImageList",0x4083C0, &CStreaming::InitImageList);
-    Install("CStreaming", "InstanceLoadedModels",0x4084F0, &CStreaming::InstanceLoadedModels);
-    Install("CStreaming", "IsCarModelNeededInCurrentZone",0x407DD0, &CStreaming::IsCarModelNeededInCurrentZone);
-    Install("CStreaming", "SetMissionDoesntRequireModel",0x409C90, &CStreaming::SetMissionDoesntRequireModel);
-    Install("CStreaming", "SetModelIsDeletable",0x409C10, &CStreaming::SetModelIsDeletable);
-    Install("CStreaming", "Shutdown",0x4084B0, &CStreaming::Shutdown);
-    Install("CStreaming", "StreamAmbulanceAndMedic",0x40A2A0, &CStreaming::StreamAmbulanceAndMedic);
-    Install("CStreaming", "StreamCopModels",0x40A150, &CStreaming::StreamCopModels);
-    Install("CStreaming", "StreamFireEngineAndFireman",0x40A400, &CStreaming::StreamFireEngineAndFireman);
-    Install("CStreaming", "StreamOneNewCar",0x40B4F0, &CStreaming::StreamOneNewCar);
-    Install("CStreaming", "StreamPedsForInterior",0x40BBB0, &CStreaming::StreamPedsForInterior);
-    Install("CStreaming", "StreamPedsIntoRandomSlots",0x40BDA0, &CStreaming::StreamPedsIntoRandomSlots);
-    Install("CStreaming", "StreamVehiclesAndPeds",0x40B700, &CStreaming::StreamVehiclesAndPeds);
-    Install("CStreaming", "StreamVehiclesAndPeds_Always",0x40B650, &CStreaming::StreamVehiclesAndPeds_Always);
-    Install("CStreaming", "StreamZoneModels",0x40A560, &CStreaming::StreamZoneModels);
-    Install("CStreaming", "StreamZoneModels_Gangs",0x40AA10, &CStreaming::StreamZoneModels_Gangs);
-    Install("CStreaming", "Update",0x40E670, &CStreaming::Update);
-    Install("CStreaming", "WeAreTryingToPhaseVehicleOut",0x407F80, &CStreaming::WeAreTryingToPhaseVehicleOut);
+    RH_ScopedInstall(LoadInitialPeds, 0x40D3D0);
+    RH_ScopedInstall(LoadInitialWeapons, 0x40A120);
+    RH_ScopedInstall(LoadScene, 0x40EB70);
+    RH_ScopedInstall(LoadSceneCollision, 0x40ED80);
+    RH_ScopedInstall(LoadZoneVehicle, 0x40B4B0);
+    RH_ScopedInstall(PossiblyStreamCarOutAfterCreation, 0x40BA70);
+    RH_ScopedInstall(RenderEntity, 0x4096D0);
+    RH_ScopedInstall(RequestBigBuildings, 0x409430);
+    RH_ScopedInstall(RequestFile, 0x40A080);
+    RH_ScopedInstall(RequestFilesInChannel, 0x409050);
+    RH_ScopedInstall(RequestModel, 0x4087E0);
+    RH_ScopedInstall(RequestTxdModel, 0x407100);
+    RH_ScopedInstall(RequestVehicleUpgrade, 0x408C70);
+    RH_ScopedInstall(FindMIPedSlotForInterior, 0x407FB0);
+    RH_ScopedInstall(FinishLoadingLargeFile, 0x408CB0);
+    RH_ScopedInstall(FlushChannels, 0x40E460);
+    RH_ScopedInstall(RequestModelStream, 0x40CBA0);
+    RH_ScopedInstall(RequestSpecialChar, 0x40B450);
+    RH_ScopedInstall(RequestSpecialModel, 0x409D10);
+    RH_ScopedInstall(ProcessLoadingChannel, 0x40E170);
+    RH_ScopedInstall(PurgeRequestList, 0x40C1E0);
+    RH_ScopedInstall(ReInit, 0x40E560);
+    RH_ScopedInstall(ReadIniFile, 0x5BCCD0);
+    RH_ScopedInstall(ReclassifyLoadedCars, 0x40AFA0);
+    RH_ScopedInstall(RemoveAllUnusedModels, 0x40CF80);
+    RH_ScopedInstall(RemoveBigBuildings, 0x4093B0);
+    RH_ScopedInstall(RemoveBuildingsNotInArea, 0x4094B0);
+    RH_ScopedInstall(RemoveCarModel, 0x4080F0);
+    RH_ScopedInstall(RemoveCurrentZonesModels, 0x40B080);
+    RH_ScopedInstall(RemoveDodgyPedsFromRandomSlots, 0x40BE60);
+    RH_ScopedInstall(RemoveEntity, 0x409710);
+    RH_ScopedInstall(RemoveInappropriatePedModels, 0x40B3A0);
+    RH_ScopedInstall(RemoveLeastUsedModel, 0x40CFD0);
+    RH_ScopedInstall(RemoveLoadedVehicle, 0x40C020);
+    RH_ScopedInstall(RemoveLoadedZoneModel, 0x40B340);
+    RH_ScopedInstall(RemoveModel, 0x4089A0);
+    RH_ScopedInstall(RemoveTxdModel, 0x40C180);
+    RH_ScopedInstall(MakeSpaceFor, 0x40E120);
+    RH_ScopedOverloadedInstall(ProcessEntitiesInSectorList, "", 0x40C270, void(*)(CPtrList&, float, float, float, float, float, float, float, int32));
+    RH_ScopedInstall(RetryLoadFile, 0x4076C0);
+    RH_ScopedInstall(LoadRequestedModels, 0x40E3A0);
+    RH_ScopedInstall(FlushRequestList, 0x40E4E0);
+    RH_ScopedInstall(AddToLoadedVehiclesList, 0x408000);
+    RH_ScopedInstall(GetDefaultCabDriverModel, 0x407D50);
+    RH_ScopedInstall(GetDefaultFiremanModel, 0x407D40);
+    RH_ScopedInstall(GetDefaultMedicModel, 0x407D20);
+    RH_ScopedInstall(GetDefaultCopCarModel, 0x407C50);
+    RH_ScopedInstall(GetDefaultCopModel, 0x407C00);
+    RH_ScopedInstall(Init2, 0x5B8AD0);
+    RH_ScopedInstall(InitImageList, 0x4083C0);
+    RH_ScopedInstall(InstanceLoadedModels, 0x4084F0);
+    RH_ScopedInstall(IsCarModelNeededInCurrentZone, 0x407DD0);
+    RH_ScopedInstall(SetMissionDoesntRequireModel, 0x409C90);
+    RH_ScopedInstall(SetModelIsDeletable, 0x409C10);
+    RH_ScopedInstall(Shutdown, 0x4084B0);
+    RH_ScopedInstall(StreamAmbulanceAndMedic, 0x40A2A0);
+    RH_ScopedInstall(StreamCopModels, 0x40A150);
+    RH_ScopedInstall(StreamFireEngineAndFireman, 0x40A400);
+    RH_ScopedInstall(StreamOneNewCar, 0x40B4F0);
+    RH_ScopedInstall(StreamPedsForInterior, 0x40BBB0);
+    RH_ScopedInstall(StreamPedsIntoRandomSlots, 0x40BDA0);
+    RH_ScopedInstall(StreamVehiclesAndPeds, 0x40B700);
+    RH_ScopedInstall(StreamVehiclesAndPeds_Always, 0x40B650);
+    RH_ScopedInstall(StreamZoneModels, 0x40A560);
+    RH_ScopedInstall(StreamZoneModels_Gangs, 0x40AA10);
+    RH_ScopedInstall(Update, 0x40E670);
+    RH_ScopedInstall(WeAreTryingToPhaseVehicleOut, 0x407F80);
 }
 
 uint32 GetModelFromInfo(CStreamingInfo* info) {
@@ -680,15 +684,33 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
 
 // 0x4090A0
 void CStreaming::DeleteAllRwObjects() {
+    //NOTSA: Helper function, to remove code duplication inside real logic
+    auto DeleteRwObjectsInList = [](CPtrListDoubleLink& list) {
+        for (CPtrNode *it = list.m_node, *next{}; it; it = next) {
+            next = it->GetNext();
+
+            CEntity* entity = reinterpret_cast<CEntity*>(it->m_item);\
+            if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
+                entity->DeleteRwObject();
+        }
+    };
+
+    //UNUSED: Was in original code, but isn't used anywhere later on
+    //auto& camPos = TheCamera.GetPosition();
+    //CWorld::GetSectorX(camPos.x);
+    //CWorld::GetSectorY(camPos.y);
+
     for (int32 sx = 0; sx < MAX_SECTORS_X; ++sx) {
         for (int32 sy = 0; sy < MAX_SECTORS_Y; ++sy) {
             CRepeatSector* repeatSector = GetRepeatSector(sx, sy);
             CSector* sector = GetSector(sx, sy);
-            DeleteRwObjectsInSectorList(sector->m_buildings);
-            DeleteRwObjectsInSectorList(repeatSector->GetList(REPEATSECTOR_OBJECTS));
-            DeleteRwObjectsInSectorList(sector->m_dummies);
+            DeleteRwObjectsInList(sector->m_buildings);
+            DeleteRwObjectsInList(repeatSector->GetList(REPEATSECTOR_OBJECTS));
+            DeleteRwObjectsInList(sector->m_dummies);
         }
     }
+
+    
 }
 
 // 0x409760
@@ -896,7 +918,7 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
                 CSector* sector = GetSector(sectorX, sectorY);
                 if (DeleteRwObjectsBehindCameraInSectorList(sector->m_buildings, memoryToCleanInBytes) ||
                     DeleteRwObjectsBehindCameraInSectorList(sector->m_dummies, memoryToCleanInBytes) ||
-                    DeleteRwObjectsBehindCameraInSectorList(repeatSector->m_lists[REPEATSECTOR_OBJECTS], memoryToCleanInBytes))
+                    DeleteRwObjectsBehindCameraInSectorList(repeatSector->GetList(REPEATSECTOR_OBJECTS), memoryToCleanInBytes))
                 {
                     return;
                 }
@@ -912,7 +934,9 @@ void CStreaming::DeleteRwObjectsBehindCamera(int32 memoryToCleanInBytes) {
 
 // 0x409940
 bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = static_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -938,7 +962,9 @@ bool CStreaming::DeleteRwObjectsBehindCameraInSectorList(CPtrList& list, int32 m
 
 // 0x407A70
 void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int32 sectorY) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (sectorX < 0 || entity->LivesInThisNonOverlapSector(sectorX, sectorY)) {
             if (!entity->m_bImBeingRendered && !entity->m_bStreamingDontDelete)
@@ -949,7 +975,9 @@ void CStreaming::DeleteRwObjectsInSectorList(CPtrList& list, int32 sectorX, int3
 
 // 0x4099E0
 bool CStreaming::DeleteRwObjectsNotInFrustumInSectorList(CPtrList& list, int32 memoryToCleanInBytes) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -1928,7 +1956,7 @@ void CStreaming::PurgeRequestList() {
     auto info = ms_pEndRequestedList->GetPrev();
     while (info != ms_pStartRequestedList) {
         auto prev = info->GetPrev();
-        if (!info->DoKeepInMemory() && !info->IsPriorityRequest())
+        if (!info->IsRequiredToBeKept() && !info->IsPriorityRequest())
             RemoveModel(GetModelFromInfo(info));
         info = prev;
     }
@@ -2347,7 +2375,7 @@ bool CStreaming::RemoveLoadedZoneModel() {
 // 0x4089A0
 void CStreaming::RemoveModel(int32 modelId)
 {
-    CStreamingInfo& streamingInfo = GetInfo(modelId);;
+    CStreamingInfo& streamingInfo = GetInfo(modelId);
     if (streamingInfo.m_nLoadState == LOADSTATE_NOT_LOADED)
         return;
 
@@ -2474,7 +2502,9 @@ void CStreaming::MakeSpaceFor(int32 memoryToCleanInBytes)
 // - In the radius of min(radius, <model draw distance> * <cam lod dist multiplier>)
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float posY, float minX, float minY, float maxX, float maxY, float radius, int32 streamingflags) {
     CVector2D position(posX, posY);
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
 
         if (entity->m_nScanCode == GetCurrentScanCode())
@@ -2517,7 +2547,9 @@ void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, float posX, float p
 // unlike the above function (other overload) this one doesn't do radius checks
 // just requests all models necessary (if they meet the conditions).
 void CStreaming::ProcessEntitiesInSectorList(CPtrList& list, int32 streamingFlags) {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->m_nScanCode == GetCurrentScanCode())
             continue;
@@ -2897,7 +2929,9 @@ void CStreaming::InstanceLoadedModels(CVector const& point) {
 
 void CStreaming::InstanceLoadedModelsInSectorList(CPtrList& list)
 {
-    for (CPtrNode* node = list.GetNode(); node; node = node->m_next) {
+    for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+
         CEntity* entity = reinterpret_cast<CEntity*>(node->m_item);
         if (entity->IsInCurrentAreaOrBarberShopInterior() && !entity->m_pRwObject)
             entity->CreateRwObject();
@@ -3446,11 +3480,11 @@ void CStreaming::StreamVehiclesAndPeds() {
 // 0x40B650
 void CStreaming::StreamVehiclesAndPeds_Always(CVector const& unused) {
     if (CVehicle* vehicle = FindPlayerVehicle(-1, false)) {
-        switch (vehicle->m_vehicleSubType) {
-        case VEHICLE_PLANE:
+        switch (vehicle->m_nVehicleSubType) {
+        case VEHICLE_TYPE_PLANE:
             return;
 
-        case VEHICLE_HELI: {
+        case VEHICLE_TYPE_HELI: {
             if (vehicle->m_vecMoveSpeed.Magnitude2D() > 0.1f)
                 return;
         }

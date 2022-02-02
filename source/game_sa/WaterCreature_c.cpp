@@ -1,10 +1,15 @@
 #include "StdInc.h"
 
+#include "WaterCreature_c.h"
+
 void WaterCreature_c::InjectHooks()
 {
-    ReversibleHooks::Install("WaterCreature_c", "Init", 0x6E4160, &WaterCreature_c::Init);
-    ReversibleHooks::Install("WaterCreature_c", "Exit", 0x6E3E60, &WaterCreature_c::Exit);
-    ReversibleHooks::Install("WaterCreature_c", "Update", 0x6E4670, &WaterCreature_c::Update);
+    RH_ScopedClass(WaterCreature_c);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x6E4160);
+    RH_ScopedInstall(Exit, 0x6E3E60);
+    RH_ScopedInstall(Update, 0x6E4670);
 }
 
 bool WaterCreature_c::Init(int32 nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth)

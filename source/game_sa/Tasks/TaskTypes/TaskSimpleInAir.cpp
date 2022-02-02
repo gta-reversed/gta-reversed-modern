@@ -3,17 +3,20 @@
 #include "TaskSimpleInAir.h"
 
 #include "TaskComplexInAirAndLand.h"
+#include "TaskSimpleClimb.h"
 
 float CTaskSimpleInAir::ms_fSlowFallThreshold = -0.05F;
 uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleInAir", "Constructor", 0x678CD0, &CTaskSimpleInAir::Constructor);
-    ReversibleHooks::Install("CTaskSimpleInAir", "DeleteAnimCB", 0x678E60, &CTaskSimpleInAir::DeleteAnimCB);
+    RH_ScopedClass(CTaskSimpleInAir);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x678CD0);
+    RH_ScopedInstall(DeleteAnimCB, 0x678E60);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleInAir", "ProcessPed", 0x680600, &CTaskSimpleInAir::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleInAir", "MakeAbortable", 0x678DC0, &CTaskSimpleInAir::MakeAbortable_Reversed);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x680600);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)
@@ -61,8 +64,8 @@ bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const C
 
 bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 {
-    CColPoint colPoint;
-    CEntity* pColEntity;
+    CColPoint colPoint{}; // default initialization is NOTSA
+    CEntity* colEntity;
 
     CVector originalPosn = ped->m_matrix->GetPosition();
     float fColDistance = originalPosn.z - 4.0F;
@@ -140,7 +143,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 
         bool bStopFalling = ped->bIsStanding;
         if (!bStopFalling)
-            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, pColEntity, true, true, false, true, false, false, 0);
+            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, colEntity, true, true, false, true, false, false, 0);
 
         if (bUsingFallGlide)
         {
@@ -168,6 +171,10 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 }
             }
         }
+        /*
+        * Run-Time Check Failure #3 - The variable 'colPoint' is being used without being initialized.
+        * Until *colPoint* will not be initialized in CWorld::ProcessVerticalLine we will be drop here
+        */
         else if (ped->m_matrix->GetPosition().z - colPoint.m_vecPoint.z < 1.3F
             || ped->bIsStanding
             || ped->m_pAttachedTo

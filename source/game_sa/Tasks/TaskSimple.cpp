@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,9 +10,12 @@
 #include "TaskSimple.h"
 
 void CTaskSimple::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimple", "GetSubTask", 0x43E300, &CTaskSimple::GetSubTask_Reversed);
-    ReversibleHooks::Install("CTaskSimple", "IsSimple", 0x43E310, &CTaskSimple::IsSimple_Reversed);
-    ReversibleHooks::Install("CTaskSimple", "SetPedPosition", 0x43E320, &CTaskSimple::SetPedPosition_Reversed);
+    RH_ScopedClass(CTaskSimple);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(GetSubTask_Reversed, 0x43E300);
+    RH_ScopedInstall(IsSimple_Reversed, 0x43E310);
+    RH_ScopedInstall(SetPedPosition_Reversed, 0x43E320);
 }
 
 // 0x61A390

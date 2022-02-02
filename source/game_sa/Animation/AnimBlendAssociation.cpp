@@ -1,7 +1,12 @@
 #include "StdInc.h"
 
+#include "AnimBlendAssociation.h"
+
 void CAnimBlendAssociation::InjectHooks() {
-    ReversibleHooks::Install("CAnimBlendAssociation", "CAnimBlendAssociation", 0x4CEFC0, &CAnimBlendAssociation::Constructor);
+    RH_ScopedClass(CAnimBlendAssociation);
+    RH_ScopedCategory("Animation");
+
+    RH_ScopedInstall(Constructor, 0x4CEFC0);
 }
 
 void* CAnimBlendAssociation::operator new(uint32 size) {
@@ -12,6 +17,7 @@ void CAnimBlendAssociation::operator delete(void* object) {
     ((void(__cdecl*)(void*))0x8214BD)(object);
 }
 
+// 0x4CEFC0
 CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
     m_fBlendAmount = 1.0f;
     m_fSpeed = 1.0f;
@@ -41,18 +47,23 @@ CAnimBlendAssociation::~CAnimBlendAssociation() {
         CAnimManager::RemoveAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
 }
 
+
 CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CAnimBlendAssociation*, 0x4CEFC0, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);
-#else
     this->CAnimBlendAssociation::CAnimBlendAssociation(pClump, pAnimHierarchy);
     return this;
-#endif
 }
 
+inline CAnimBlendClumpData * GetAnimClumpData(RpClump * pClump)
+{
+    const DWORD clumpOffset = (*(DWORD*)0xB5F878);
+    //return reinterpret_cast <CAnimBlendClumpData *> (*(&pClump->object.type + clumpOffset));
+    return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int32)pClump)  ));
+}
+
+// 0x4CED50
 void CAnimBlendAssociation::Init(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
-    //#ifdef USE_DEFAULT_FUNCTIONS
     return plugin::CallMethod<0x4CED50, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);
+
 #if 0
     std::printf("\nCAnimBlendAssociation::Init1: called! pClump: %p | m_nSeqCount: %d\n\n", pClump, pAnimHierarchy->m_nSeqCount);
     CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(pClump); 

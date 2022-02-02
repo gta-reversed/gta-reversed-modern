@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,6 +18,16 @@ public:
     };
     uint8 m_nMaterial;
     uint8 m_nLight;
+
+    CColTriangle() = default;
+    CColTriangle(uint16 a, uint16 b, uint16 c, uint8 material, uint8 light) :
+        m_nVertA(a),
+        m_nVertB(b),
+        m_nVertC(c),
+        m_nMaterial(material),
+        m_nLight(light)
+    {
+    }
 };
 
 VALIDATE_SIZE(CColTriangle, 8);

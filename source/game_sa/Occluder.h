@@ -2,9 +2,11 @@
 
 #include "Vector2D.h"
 #include "Vector.h"
-#include "ActiveOccluder.h"
 
-struct COccluder {
+class CActiveOccluder;
+
+class COccluder {
+public:
     int16 m_wMidX;
     int16 m_wMidY;
     int16 m_wMidZ;

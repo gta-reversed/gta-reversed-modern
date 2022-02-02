@@ -1,20 +1,20 @@
 #include "StdInc.h"
 
+#include "ColSphere.h"
+
 void CColSphere::InjectHooks()
 {
-    ReversibleHooks::Install("CColSphere", "Set_1", 0x40FCF0, (void(CColSphere::*)(float, CVector const&))(&CColSphere::Set));
-    ReversibleHooks::Install("CColSphere", "Set_2", 0x40FD10, (void(CColSphere::*)(float, CVector const&, uint8, uint8, uint8))(&CColSphere::Set));
-    ReversibleHooks::Install("CColSphere", "IntersectRay", 0x40FF20, &CColSphere::IntersectRay);
-    ReversibleHooks::Install("CColSphere", "IntersectEdge", 0x4100E0, &CColSphere::IntersectEdge);
-    ReversibleHooks::Install("CColSphere", "IntersectPoint", 0x410040, &CColSphere::IntersectPoint);
+    RH_ScopedClass(CColSphere);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(Set, 0x40FD10);
+    RH_ScopedInstall(IntersectRay, 0x40FF20);
+    RH_ScopedInstall(IntersectEdge, 0x4100E0);
+    RH_ScopedInstall(IntersectPoint, 0x410040);
+    RH_ScopedInstall(IntersectSphere, 0x410090);
 }
 
-void CColSphere::Set(float radius, CVector const& center)
-{
-    m_fRadius = radius;
-    m_vecCenter = center;
-}
-
+// 0x40FD10
 void CColSphere::Set(float radius, CVector const& center, uint8 material, uint8 flags, uint8 lighting)
 {
     m_fRadius = radius;
@@ -24,6 +24,7 @@ void CColSphere::Set(float radius, CVector const& center, uint8 material, uint8 
     m_nLighting = lighting;
 }
 
+// 0x40FF20
 bool CColSphere::IntersectRay(CVector const& rayOrigin, CVector const& direction, CVector& intersectPoint1, CVector& intersectPoint2)
 {
     CVector distance = rayOrigin - m_vecCenter;
@@ -38,6 +39,7 @@ bool CColSphere::IntersectRay(CVector const& rayOrigin, CVector const& direction
     return false;
 }
 
+// 0x4100E0
 bool CColSphere::IntersectEdge(CVector const& startPoint, CVector const& endPoint, CVector& intersectPoint1, CVector& intersectPoint2)
 {
     CVector originCenterDistance = startPoint - m_vecCenter;
@@ -66,16 +68,15 @@ bool CColSphere::IntersectEdge(CVector const& startPoint, CVector const& endPoin
     return true;
 }
 
-// used in CTaskComplexAvoidOtherPedWhileWandering::NearbyPedsInSphere
-bool CColSphere::IntersectSphere(CColSphere const& right)
-{
-    CVector distance = m_vecCenter - right.m_vecCenter;
-    return std::powf(m_fRadius + right.m_fRadius, 2.0f) > distance.SquaredMagnitude();
-}
-
+// 0x410040
 bool CColSphere::IntersectPoint(CVector const& point)
 {
     CVector distance = m_vecCenter - point;
     return m_fRadius * m_fRadius > distance.SquaredMagnitude();
 }
 
+// 0x410090
+bool CColSphere::IntersectSphere(CColSphere const& right) {
+    CVector distance = m_vecCenter - right.m_vecCenter;
+    return std::powf(m_fRadius + right.m_fRadius, 2.0f) > distance.SquaredMagnitude();
+}

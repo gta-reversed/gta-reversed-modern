@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Population.h"
 
 float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
 int32& CPopulation::m_AllRandomPedsThisType = *(int32*)0x8D2534;
@@ -41,10 +43,13 @@ bool& CPopulation::bInPoliceStation = *(bool*)0xC0FCB6;
 uint32& CPopulation::NumMiamiViceCops = *(uint32*)0xC0FCB8;
 uint32& CPopulation::CurrentWorldZone = *(uint32*)0xC0FCBC;
 
-void CPopulation::InjectHooks()
-{
-    ReversibleHooks::Install("CPopulation", "ConvertToRealObject", 0x614580, &CPopulation::ConvertToRealObject);
-    ReversibleHooks::Install("CPopulation", "ConvertToDummyObject", 0x614670, &CPopulation::ConvertToDummyObject);
+void CPopulation::InjectHooks() {
+    RH_ScopedClass(CPopulation);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ConvertToRealObject, 0x614580);
+    RH_ScopedInstall(ConvertToDummyObject, 0x614670);
+    RH_ScopedInstall(RemovePed, 0x610F20);
 }
 
 // 0x5B6D40
@@ -84,7 +89,8 @@ float CPopulation::FindPedDensityMultiplierCullZone() {
 
 // 0x610F20
 void CPopulation::RemovePed(CPed* ped) {
-    ((void(__cdecl*)(CPed*))0x610F20)(ped);
+    CWorld::Remove(ped);
+    delete ped;
 }
 
 // 0x610F40

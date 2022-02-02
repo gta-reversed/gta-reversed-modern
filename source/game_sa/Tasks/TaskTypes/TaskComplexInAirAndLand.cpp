@@ -5,12 +5,18 @@
 #include "TaskSimpleFall.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleClimb.h"
+#include "TaskSimpleInAir.h"
+
+#include "PedClothesDesc.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CTaskComplexInAirAndLand", 0x678C80, &CTaskComplexInAirAndLand::Constructor);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateFirstSubTask", 0x67CC30, &CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateNextSubTask", 0x67CCB0, &CTaskComplexInAirAndLand::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "ControlSubTask", 0x67D230, &CTaskComplexInAirAndLand::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexInAirAndLand);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x678C80);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67CC30);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CCB0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {

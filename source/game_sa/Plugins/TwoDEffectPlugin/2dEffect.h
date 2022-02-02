@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,16 +10,17 @@
 #include "RGBA.h"
 
 enum e2dEffectType : uint8 {
-    EFFECT_LIGHT,
-    EFFECT_PARTICLE,
-    EFFECT_ATTRACTOR = 3,
-    EFFECT_SUN_GLARE,
-    EFFECT_FURNITUR,
-    EFFECT_ENEX,
-    EFFECT_ROADSIGN,
-    EFFECT_SLOTMACHINE_WHEEL,
-    EFFECT_COVER_POINT,
-    EFFECT_ESCALATOR,
+    EFFECT_LIGHT         = 0,
+    EFFECT_PARTICLE      = 1,
+    EFFECT_MISSING_OR_UNK= 2,
+    EFFECT_ATTRACTOR     = 3,
+    EFFECT_SUN_GLARE     = 4,
+    EFFECT_FURNITURE     = 5,
+    EFFECT_ENEX          = 6,
+    EFFECT_ROADSIGN      = 7,
+    EFFECT_TRIGGER_POINT = 8, // todo: EFFECT_SLOTMACHINE_WHEEL?
+    EFFECT_COVER_POINT   = 9,
+    EFFECT_ESCALATOR     = 10,
 };
 
 // description from https://gtamods.com/wiki/2d_Effect_(RW_Section)#Entry_Type_3_-_Ped_attractor

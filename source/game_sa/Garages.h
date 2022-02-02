@@ -1,10 +1,16 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
+
+#include "StoredCar.h"
+
+class CVehicle;
+class CAutomobile;
+class CGarge;
 
 // Based on https://gtamods.com/wiki/Garage
 enum eGarageType : uint8 {
@@ -101,8 +107,8 @@ public:
     static void Update();
     static void Shutdown();
 
-    static void Save();
-    static void Load();
+    static bool Load();
+    static bool Save();
     static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax);
     static void PrintMessages();
     static int32 FindGarageIndex(char*);
@@ -126,11 +132,11 @@ public:
     static bool IsPointInAGarageCameraZone(CVector vecPos);
     static bool IsThisCarWithingGarageArea(int16, CEntity* pEntity);
     static void StopCarFromBlowingUp(CAutomobile* pCar);
-    static bool IsPointWithinHideOutGarage(CVector& vecPos);
+    static bool IsPointWithinHideOutGarage(CVector& pos);
     static bool IsPointWithinAnyGarage(CVector& vecPos);
     static int32 CountCarsInHideoutGarage(uint16);
     static void CloseHideOutGaragesBeforeSave();
-    static void StoreCarInNearestImpoundingGarage(CVehicle* pVehicle);
+    static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
     static void AllRespraysCloseOrOpen(bool);
 
 public:

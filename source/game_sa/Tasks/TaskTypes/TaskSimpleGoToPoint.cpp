@@ -4,14 +4,18 @@
 
 #include "TaskSimpleStandStill.h"
 #include "IKChainManager_c.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    RH_ScopedClass(CTaskSimpleGoToPoint);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x667CD0);
+    RH_ScopedInstall(Clone_Reversed, 0x66CC60);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x66D710);
+    RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :

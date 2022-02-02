@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -23,43 +23,12 @@
 
 #include "AnimationEnums.h"
 #include "eWeaponType.h"
+#include "eWeaponSkill.h"
 #include "ePedState.h"
 #include "ePedStats.h"
+#include "ePedType.h"
 
-enum ePedType : uint32 {
-    PED_TYPE_PLAYER1 = 0,
-    PED_TYPE_PLAYER2,
-    PED_TYPE_PLAYER_NETWORK,
-    PED_TYPE_PLAYER_UNUSED,
-    PED_TYPE_CIVMALE,
-    PED_TYPE_CIVFEMALE,
-    PED_TYPE_COP,
-    PED_TYPE_GANG1,
-    PED_TYPE_GANG2,
-    PED_TYPE_GANG3,
-    PED_TYPE_GANG4,
-    PED_TYPE_GANG5,
-    PED_TYPE_GANG6,
-    PED_TYPE_GANG7,
-    PED_TYPE_GANG8,
-    PED_TYPE_GANG9,
-    PED_TYPE_GANG10,
-    PED_TYPE_DEALER,
-    PED_TYPE_MEDIC,
-    PED_TYPE_FIREMAN,
-    PED_TYPE_CRIMINAL,
-    PED_TYPE_BUM,
-    PED_TYPE_PROSTITUTE,
-    PED_TYPE_SPECIAL,
-    PED_TYPE_MISSION1,
-    PED_TYPE_MISSION2,
-    PED_TYPE_MISSION3,
-    PED_TYPE_MISSION4,
-    PED_TYPE_MISSION5,
-    PED_TYPE_MISSION6,
-    PED_TYPE_MISSION7,
-    PED_TYPE_MISSION8
-};
+class CPedGroup;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
@@ -142,7 +111,7 @@ enum eFightingStyle : int8 {
 
 class CObject;
 class CVehicle;
-struct CPedStat;
+class CPedStat;
 class CPedStats;
 
 class CPed : public CPhysical {
@@ -395,8 +364,8 @@ public:
     void DeleteRwObject() override;
     void ProcessControl() override;
     void Teleport(CVector destination, bool resetRotation) override;
-    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) override;
     void PreRender() override;
     void Render() override;
     bool SetupLighting() override;
@@ -566,6 +535,7 @@ public:
     inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
     inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    inline CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
     inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
@@ -573,8 +543,9 @@ public:
     inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-  
-    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+
+    bool IsFollowerOfGroup(const CPedGroup& group);
 };
-RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);

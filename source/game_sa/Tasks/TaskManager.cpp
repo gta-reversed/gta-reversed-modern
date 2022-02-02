@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,26 +10,29 @@
 #include "TaskManager.h"
 
 void CTaskManager::InjectHooks() {
-    ReversibleHooks::Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
-    ReversibleHooks::Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
-    ReversibleHooks::Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
-    ReversibleHooks::Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
-    ReversibleHooks::Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
-    ReversibleHooks::Install("CTaskManager", "GetTaskSecondary", 0x681810, &CTaskManager::GetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "HasTaskSecondary", 0x681820, &CTaskManager::HasTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
-    ReversibleHooks::Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
-    ReversibleHooks::Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_task", 0x681970, (CTaskSimple * (*)(CTask*)) & CTaskManager::GetSimplestTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, (CTaskSimple * (CTaskManager::*)(int32)) & CTaskManager::GetSimplestTask);
-    ReversibleHooks::Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
-    ReversibleHooks::Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
-    ReversibleHooks::Install("CTaskManager", "ParentsControlChildren", 0x681A80, &CTaskManager::ParentsControlChildren);
-    ReversibleHooks::Install("CTaskManager", "SetTask", 0x681AF0, &CTaskManager::SetTask);
-    ReversibleHooks::Install("CTaskManager", "SetTaskSecondary", 0x681B60, &CTaskManager::SetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "ClearTaskEventResponse", 0x681BD0, &CTaskManager::ClearTaskEventResponse);
-    ReversibleHooks::Install("CTaskManager", "ManageTasks", 0x681C10, &CTaskManager::ManageTasks);
+    RH_ScopedClass(CTaskManager);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(Constructor, 0x6816A0);
+    RH_ScopedInstall(Destructor, 0x6816D0);
+    RH_ScopedInstall(GetActiveTask, 0x681720);
+    RH_ScopedInstall(FindActiveTaskByType, 0x681740);
+    RH_ScopedInstall(FindTaskByType, 0x6817D0);
+    RH_ScopedInstall(GetTaskSecondary, 0x681810);
+    RH_ScopedInstall(HasTaskSecondary, 0x681820);
+    RH_ScopedInstall(Flush, 0x681850);
+    RH_ScopedInstall(FlushImmediately, 0x6818A0);
+    RH_ScopedInstall(SetNextSubTask, 0x681920);
+    RH_ScopedOverloadedInstall(GetSimplestTask, "task", 0x681970, CTaskSimple * (*)(CTask*));
+    RH_ScopedOverloadedInstall(GetSimplestTask, "index", 0x681A00, CTaskSimple * (CTaskManager::*)(int32));
+    RH_ScopedInstall(StopTimers, 0x6819A0);
+    RH_ScopedInstall(GetSimplestActiveTask, 0x6819D0);
+    RH_ScopedInstall(AddSubTasks, 0x681A30);
+    RH_ScopedInstall(ParentsControlChildren, 0x681A80);
+    RH_ScopedInstall(SetTask, 0x681AF0);
+    RH_ScopedInstall(SetTaskSecondary, 0x681B60);
+    RH_ScopedInstall(ClearTaskEventResponse, 0x681BD0);
+    RH_ScopedInstall(ManageTasks, 0x681C10);
 }
 
 // 0x6816A0

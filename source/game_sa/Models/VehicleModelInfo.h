@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,39 +15,26 @@
 #include "Pool.h"
 
 #include "eVehicleClass.h"
+#include "eVehicleType.h"
+
+class CAnimBlock;
 
 // enum by forkerer (https://github.com/forkerer/)
 enum eVehicleDummies {
-    DUMMY_LIGHT_FRONT_MAIN = 0x0,
-    DUMMY_LIGHT_REAR_MAIN = 0x1,
-    DUMMY_LIGHT_FRONT_SECONDARY = 0x2,
-    DUMMY_LIGHT_REAR_SECONDARY = 0x3,
-    DUMMY_SEAT_FRONT = 0x4,
-    DUMMY_SEAT_REAR = 0x5,
-    DUMMY_EXHAUST = 0x6,
-    DUMMY_ENGINE = 0x7,
-    DUMMY_GAS_CAP = 0x8,
-    DUMMY_TRAILER_ATTACH = 0x9,
-    DUMMY_HAND_REST = 0xA,
-    DUMMY_EXHAUST_SECONDARY = 0xB,
-    DUMMY_WING_AIRTRAIL = 0xC,
-    DUMMY_VEH_GUN = 0xD,
-};
-
-enum eVehicleType {
-    VEHICLE_IGNORE = -1,
-    VEHICLE_AUTOMOBILE = 0,
-    VEHICLE_MTRUCK, // MONSTER TRUCK
-    VEHICLE_QUAD,
-    VEHICLE_HELI,
-    VEHICLE_PLANE,
-    VEHICLE_BOAT,
-    VEHICLE_TRAIN,
-    VEHICLE_FHELI,
-    VEHICLE_FPLANE,
-    VEHICLE_BIKE,
-    VEHICLE_BMX,
-    VEHICLE_TRAILER
+    DUMMY_LIGHT_FRONT_MAIN      = 0,
+    DUMMY_LIGHT_REAR_MAIN       = 1,
+    DUMMY_LIGHT_FRONT_SECONDARY = 2,
+    DUMMY_LIGHT_REAR_SECONDARY  = 3,
+    DUMMY_SEAT_FRONT            = 4,
+    DUMMY_SEAT_REAR             = 5,
+    DUMMY_EXHAUST               = 6,
+    DUMMY_ENGINE                = 7,
+    DUMMY_GAS_CAP               = 8,
+    DUMMY_TRAILER_ATTACH        = 9,
+    DUMMY_HAND_REST             = 10,
+    DUMMY_EXHAUST_SECONDARY     = 11,
+    DUMMY_WING_AIRTRAIL         = 12,
+    DUMMY_VEH_GUN               = 13,
 };
 
 enum eVehicleUpgradePosn {
@@ -144,7 +131,7 @@ public:
     uint8              m_nPlateType;
     char               m_szGameName[8];
     char               _pad3A[2];
-    uint32             m_nVehicleType;
+    eVehicleType       m_nVehicleType;
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
     int16              m_nWheelModelIndex;
@@ -424,13 +411,29 @@ public:
     static void LoadEnvironmentMaps();
 
     // Helpers
-    inline bool IsBoat() { return m_nVehicleType == eVehicleType::VEHICLE_BOAT; }
-    inline bool IsTrailer() { return m_nVehicleType == eVehicleType::VEHICLE_TRAILER; }
-    inline bool IsBike() {
-        return m_nVehicleType == eVehicleType::VEHICLE_BMX
-            || m_nVehicleType == eVehicleType::VEHICLE_BIKE
-            || m_nVehicleType == eVehicleType::VEHICLE_QUAD;
+    // ctrl+c, ctrl+v from CVehicle
+    bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
+    bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
+    bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
+    bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
+    bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
+    bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
+    bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
+    bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
+    bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
+    bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
+    bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
+    bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
+
+    // These were probably inlined:
+    void SetWheelSizes(float front, float rear) {
+        m_fWheelSizeFront = front;
+        m_fWheelSizeRear = rear;
     }
+    void SetGameName(const char* name) {
+        strcpy_s(m_szGameName, name);
+    }
+    void SetHandlingId(const char* handlingName);
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

@@ -1,15 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "ZoneInfo.h"
-#include "Zone.h"
-#include "Radar.h"
-#include "Vector.h"
+class CZone;
+class CZoneInfo;
+class CRadar;
 
 enum eGangAttackState {
     NO_ATTACK          = 0,
@@ -51,7 +50,7 @@ public:
     static bool& bPlayerIsCloseby;
     static bool& bCanTriggerGangWarWhenOnAMission;
     static int32& NumSpecificZones;
-    static CRadar*& RadarBlip;
+    static CRadar*& RadarBlip; // TODO/BUG: No way this is correct
     static float& TerritoryUnderControlPercentage;
     static bool& bIsPlayerOnAMission;
     static CVector& CoorsOfPlayerAtStartOfWar;

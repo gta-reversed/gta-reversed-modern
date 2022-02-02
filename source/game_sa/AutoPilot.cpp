@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AutoPilot.h"
+
 CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
 {
     _smthNext = 1;

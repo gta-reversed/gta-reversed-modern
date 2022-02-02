@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "Occlusion.h"
+#include "Occluder.h"
+#include "ActiveOccluder.h"
 
 COccluder(&COcclusion::aInteriorOccluders)[MAX_INTERIOR_OCCLUDERS] = *(COccluder(*)[MAX_INTERIOR_OCCLUDERS])0xC73CC8;
 COccluder(&COcclusion::aOccluders)[MAX_MAP_OCCLUDERS] = *(COccluder(*)[MAX_MAP_OCCLUDERS])0xC73FA0;
@@ -26,11 +28,14 @@ CVector& COcclusion::gCenterOnScreen = *(CVector*)0xC79940;
 
 void COcclusion::InjectHooks()
 {
-    ReversibleHooks::Install("COcclusion", "Init", 0x71DCA0, &COcclusion::Init);
-    ReversibleHooks::Install("COcclusion", "AddOne", 0x71DCD0, &COcclusion::AddOne);
-    ReversibleHooks::Install("COcclusion", "IsPositionOccluded", 0x7200B0, &COcclusion::IsPositionOccluded);
-    ReversibleHooks::Install("COcclusion", "OccluderHidesBehind", 0x71E080 , &COcclusion::OccluderHidesBehind);
-    // ReversibleHooks::Install("COcclusion", "ProcessBeforeRendering", 0x7201C0, &COcclusion::ProcessBeforeRendering);
+    RH_ScopedClass(COcclusion);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x71DCA0);
+    RH_ScopedInstall(AddOne, 0x71DCD0);
+    RH_ScopedInstall(IsPositionOccluded, 0x7200B0);
+    RH_ScopedInstall(OccluderHidesBehind, 0x71E080);
+    // RH_ScopedInstall(ProcessBeforeRendering, 0x7201C0);
 }
 
 // 0x71DCA0

@@ -1,21 +1,26 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
+#include "Rect.h"
+
 void CRect::InjectHooks()
 {
-    ReversibleHooks::Install("CRect", "IsFlipped", 0x404190, &CRect::IsFlipped);
-    ReversibleHooks::Install("CRect", "Restrict", 0x404200, &CRect::Restrict);
-    ReversibleHooks::Install("CRect", "Resize", 0x404260, &CRect::Resize);
-    ReversibleHooks::Install("CRect", "IsPointInside", 0x404290, (bool(CRect::*)(CVector2D const&) const)&CRect::IsPointInside);
-    ReversibleHooks::Install("CRect", "IsPointInside_tolerance", 0x4042D0, (bool(CRect::*)(CVector2D const&, float) const)&CRect::IsPointInside);
-    ReversibleHooks::Install("CRect", "SetFromCenter", 0x43E020, &CRect::SetFromCenter);
-    ReversibleHooks::Install("CRect", "GetCenter", 0x43E050, (void(CRect::*)(float*, float*) const)&CRect::GetCenter);
-    ReversibleHooks::Install("CRect", "StretchToPoint", 0x5327F0, &CRect::StretchToPoint);
+    RH_ScopedClass(CRect);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(IsFlipped, 0x404190);
+    RH_ScopedInstall(Restrict, 0x404200);
+    RH_ScopedInstall(Resize, 0x404260);
+    RH_ScopedOverloadedInstall(IsPointInside, "", 0x404290, bool(CRect::*)(CVector2D const&) const);
+    RH_ScopedOverloadedInstall(IsPointInside, "Tolerance", 0x4042D0, bool(CRect::*)(CVector2D const&, float) const);
+    RH_ScopedInstall(SetFromCenter, 0x43E020);
+    RH_ScopedOverloadedInstall(GetCenter, "", 0x43E050, void(CRect::*)(float*, float*) const);
+    RH_ScopedInstall(StretchToPoint, 0x5327F0);
 }
 
 CRect::CRect(float fLeft, float fTop, float fRight, float fBottom)

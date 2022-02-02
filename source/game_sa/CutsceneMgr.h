@@ -1,15 +1,18 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "CutsceneObject.h"
-#include "Directory.h"
-#include "FxSystem_c.h"
-#include "AnimBlendAssocGroup.h"
+#include "renderware.h"
+
+class CEntity;
+class CObject;
+class CDirectory;
+class CCutsceneObject;
+class CAnimBlendAssocGroup;
 
 struct tCutsceneParticleEffect {
     char        m_szEffectName[32];
@@ -76,7 +79,7 @@ public:
     static char (*ms_cLoadObjectName)[32]; // static char ms_cLoadObjectName[50][32]
     static float &ms_cutsceneTimer;
     static char *ms_cutsceneName; // static char ms_cutsceneName[8]
-    static CCutsceneObject **ms_pCutsceneObjects; // static CCutsceneObject *ms_pCutsceneObject[50]
+    static inline CCutsceneObject* (&ms_pCutsceneObjects)[50] = *(CCutsceneObject * (*)[50])0xBC3F18;
     static uint32 &ms_cutscenePlayStatus;
     static uint32 &ms_numCutsceneObjs;
     static uint32 &ms_numLoadObjectNames;

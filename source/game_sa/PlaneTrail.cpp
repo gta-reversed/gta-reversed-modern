@@ -3,10 +3,12 @@
 #include "PlaneTrail.h"
 
 void CPlaneTrail::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPlaneTrail", "Init", 0x717160, &CPlaneTrail::Init);
-    Install("CPlaneTrail", "Render", 0x717180, &CPlaneTrail::Render);
-    Install("CPlaneTrail", "RegisterPoint", 0x7172D0, &CPlaneTrail::RegisterPoint);
+    RH_ScopedClass(CPlaneTrail);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x717160);
+    RH_ScopedInstall(Render, 0x717180);
+    RH_ScopedInstall(RegisterPoint, 0x7172D0);
 }
 
 // 0x717160
@@ -39,10 +41,10 @@ void CPlaneTrail::Render(float intensity) {
     }
 
     if (nVertices > 1) {
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
         if (RwIm3DTransform(vertBuff, nVertices, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
             static RwImVertexIndex indices[] = { // From 0x8D5B98, size 30
                 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15

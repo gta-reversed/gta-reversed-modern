@@ -16,7 +16,7 @@ public:
     uint32        size;
 
 public:
-    CMissionTextOffsets();;
+    CMissionTextOffsets();
 
     void Load(uint32 length, FILE* file, uint32* offset, uint32 nSkipBytes);
 };

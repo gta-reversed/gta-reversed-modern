@@ -2,34 +2,11 @@
 
 #include "AEDoorAudioEntity.h"
 
-struct CStoredCar {
-    CVector  m_vPosn;
-    uint32 m_dwHandlingFlags;
-    uint8  m_nStoredCarFlags;
-    uint8  _pad0;
-    uint16 m_wModelIndex;
-    int16  m_awCarMods[15];
-    uint8  m_nPrimaryColor;
-    uint8  m_nSecondaryColor;
-    uint8  m_nTertiaryColor;
-    uint8  m_nQuaternaryColor;
-    uint8  m_nRadiostation;
-    uint8  m_anCompsToUse[2];
-    uint8  m_nBombType;
-    uint8  m_nPaintjob;
-    uint8  m_nNitroBoosts;
-    uint8  m_nPackedForwardX;
-    uint8  m_nPackedForwardY;
-    uint8  m_nPackedForwardZ;
-    uint8  _pad1;
-
-public:
-    static void InjectHooks();
-
-    CVehicle* RestoreCar();
-    void      StoreCar(CVehicle* pVehicle);
-};
-VALIDATE_SIZE(CStoredCar, 0x40);
+class CStoredCar;
+class CEntity;
+class CPed;
+class CObject;
+class CVehicle;
 
 class CGarage {
 public:
@@ -48,11 +25,11 @@ public:
     float     m_fFrontCoord;
     float     m_fBackCoord;
     float     m_fDoorPosition;
-    uint32  m_dwTimeToOpen;
+    uint32    m_dwTimeToOpen;
     CVehicle* m_pTargetCar;
     char      m_anName[8];
-    uint8   m_nType;      // see eGarageType
-    uint8   m_nDoorState; // see eGarageDoorState
+    uint8     m_nType;      // see eGarageType
+    uint8     m_nDoorState; // see eGarageDoorState
     union {
         uint8 m_nFlags;
         struct {
@@ -66,10 +43,12 @@ public:
             uint8 m_bRespraysAlwaysFree : 1;
         };
     };
-    uint8            m_nOriginalType;
+    uint8              m_nOriginalType;
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
+    static constexpr size_t NUM_GARAGE_STORED_CARS = 4;
+
     static void InjectHooks();
 
     void Update();
@@ -90,7 +69,7 @@ public:
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
     bool IsEntityTouching3D(CEntity* pEntity);
-    bool EntityHasASpehereWayOutsideGarage(CEntity* pEntity, float fRadius);
+    bool EntityHasASphereWayOutsideGarage(CEntity* pEntity, float fRadius);
     bool IsAnyOtherCarTouchingGarage(CVehicle* pIgnoredVehicle);
     void ThrowCarsNearDoorOutOfGarage(CVehicle* pIgnoredVehicle);
     bool IsAnyOtherPedTouchingGarage(CPed* pIgnoredPed);

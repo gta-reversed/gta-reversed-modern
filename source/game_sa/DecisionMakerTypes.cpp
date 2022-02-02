@@ -1,6 +1,11 @@
 #include "StdInc.h"
 
+#include "DecisionMakerTypes.h"
+
 void CDecisionMakerTypesFileLoader::InjectHooks() {
+    RH_ScopedClass(CDecisionMakerTypesFileLoader);
+    RH_ScopedCategoryGlobal();
+
 
 }
 
@@ -36,6 +41,9 @@ void CDecisionMakerTypesFileLoader::LoadDecisionMaker(const char *filepath, CDec
 }
 
 void CDecisionMakerTypes::InjectHooks() {
+    RH_ScopedClass(CDecisionMakerTypes);
+    RH_ScopedCategoryGlobal();
+
 
 }
 

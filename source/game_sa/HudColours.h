@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -36,10 +36,8 @@ public:
     static void InjectHooks();
 
     CHudColours();
+    ~CHudColours() = default; // 0x58FD90
     CHudColours* Constructor();
-
-    ~CHudColours();
-    CHudColours* Destructor();
 
     void SetRGBAValue(eHudColours colorIndex, uint8 red, uint8 green, uint8 blue, uint8 alpha);
     uint32 GetIntColour(eHudColours colorIndex);

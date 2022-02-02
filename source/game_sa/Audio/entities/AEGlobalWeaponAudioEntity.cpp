@@ -113,12 +113,14 @@ void CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire() {
 }
 
 void CAEGlobalWeaponAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CAEGlobalWeaponAudioEntity", "CAEGlobalWeaponAudioEntity", 0x5075B0, &CAEGlobalWeaponAudioEntity::Constructor);
-    Install("CAEGlobalWeaponAudioEntity", "UpdateParameters", 0x4DEF90, &CAEGlobalWeaponAudioEntity::UpdateParameters);
-    Install("CAEGlobalWeaponAudioEntity", "AddAudioEvent", 0x4DFAA0, &CAEGlobalWeaponAudioEntity::AddAudioEvent);
-    // Install("CAEGlobalWeaponAudioEntity", "ProjectileFire", 0x4DF060, &CAEGlobalWeaponAudioEntity::ProjectileFire);
-    // Install("CAEGlobalWeaponAudioEntity", "ServiceAmbientGunFire", 0x4DF210, &CAEGlobalWeaponAudioEntity::ServiceAmbientGunFire);
+    RH_ScopedClass(CAEGlobalWeaponAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Constructor, 0x5075B0);
+    RH_ScopedInstall(UpdateParameters, 0x4DEF90);
+    RH_ScopedInstall(AddAudioEvent, 0x4DFAA0);
+    // RH_ScopedInstall(ProjectileFire, 0x4DF060);
+    // RH_ScopedInstall(ServiceAmbientGunFire, 0x4DF210);
 }
 
 CAEGlobalWeaponAudioEntity* CAEGlobalWeaponAudioEntity::Constructor() {

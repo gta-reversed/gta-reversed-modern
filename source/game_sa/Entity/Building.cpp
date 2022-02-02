@@ -1,11 +1,16 @@
 #include "StdInc.h"
 
+#include "Building.h"
+
 int32& gBuildings = *(int32*)0xB71804;
 
 void CBuilding::InjectHooks()
 {
-    ReversibleHooks::Install("CBuilding", "ReplaceWithNewModel", 0x403EC0, &CBuilding::ReplaceWithNewModel);
-    ReversibleHooks::Install("CBuilding", "IsBuildingPointerValid", 0x4040E0, &IsBuildingPointerValid);
+    RH_ScopedClass(CBuilding);
+    RH_ScopedCategory("Entity");
+
+    RH_ScopedInstall(ReplaceWithNewModel, 0x403EC0);
+    RH_ScopedGlobalInstall(IsBuildingPointerValid, 0x4040E0);
 }
 
 CBuilding::CBuilding() : CEntity()

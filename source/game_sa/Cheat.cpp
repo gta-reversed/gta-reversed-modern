@@ -1,9 +1,10 @@
 #include "StdInc.h"
 
 #include "Cheat.h"
+#include "PedType.h"
+#include "PedClothesDesc.h"
 
 #include "TaskSimpleJetPack.h"
-#include "PedType.h"
 
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
@@ -12,7 +13,15 @@ bool (&CCheat::m_aCheatsActive)[TOTAL_CHEATS] = *reinterpret_cast<bool (*)[TOTAL
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 
 // NOTSA
-std::vector<Cheat> cheats = {
+struct Cheat {
+    DWORD   installAddress;
+    void*   method;
+    const   std::string methodName;
+    uint32  hash;
+    eCheats type;
+};
+
+const auto cheats = std::to_array<Cheat>({
         { 0x4385b0,  CCheat::WeaponCheat1, "WeaponCheat1", 0xde4b237d, CHEAT_WEAPON_SET1 },
         { 0x438890,  CCheat::WeaponCheat2, "WeaponCheat2", 0xb22a28d1, CHEAT_WEAPON_SET2 },
         { 0x438b30,  CCheat::WeaponCheat3, "WeaponCheat3", 0x5a783fae, CHEAT_WEAPON_SET3 },
@@ -99,28 +108,31 @@ std::vector<Cheat> cheats = {
         { 0x4399d0,  CCheat::VehicleSkillsCheat, "VehicleSkillsCheat", 0xf01286e9, CHEAT_MAX_DRIVING_SKILLS },
         { 0x43a550,  CCheat::ApacheCheat, "ApacheCheat", 0xa841cc0a, CHEAT_SPAWN_HUNTER },
         { 0x43a560,  CCheat::QuadCheat, "QuadCheat", 0x31ea09cf, CHEAT_SPAWN_QUAD },
-        //{ 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
+        { 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
         { 0x43a660,  CCheat::DozerCheat, "DozerCheat", 0x02c83a7c, CHEAT_SPAWN_DOZER },
         { 0x43a670,  CCheat::StuntPlaneCheat, "StuntPlaneCheat", 0xe49c3ed4, CHEAT_SPAWN_STUNT_PLANE },
         { 0x43a680,  CCheat::MonsterTruckCheat, "MonsterTruckCheat", 0x171ba8cc, CHEAT_SPAWN_MONSTER },
         { 0x0, nullptr, "", 0x86988dae, CHEAT_PROSTITUTES_PAY_YOU },
         { 0x0, nullptr, "", 0x2bdd2fa1, CHEAT_ALL_TAXIS_NITRO },
-};
+});
 
 void CCheat::InjectHooks() {
-    ReversibleHooks::Install("CCheat", "AddToCheatString", 0x438480, &CCheat::AddToCheatString);
-    ReversibleHooks::Install("CCheat", "HandleSpecialCheats", 0x439A10, &CCheat::HandleSpecialCheats);
-    ReversibleHooks::Install("CCheat", "DoCheats", 0x439AF0, &CCheat::DoCheats);
-    ReversibleHooks::Install("CCheat", "ResetCheats", 0x438450, &CCheat::ResetCheats);
-    ReversibleHooks::Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
-    ReversibleHooks::Install("CCheat", "EnableLegimateCheat", 0x438370, &CCheat::EnableLegitimateCheat);
+    RH_ScopedClass(CCheat);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(AddToCheatString, 0x438480);
+    RH_ScopedInstall(HandleSpecialCheats, 0x439A10);
+    RH_ScopedInstall(DoCheats, 0x439AF0);
+    RH_ScopedInstall(ResetCheats, 0x438450);
+    RH_ScopedInstall(IsZoneStreamingAllowed, 0x407410);
+    RH_ScopedInstall(EnableLegitimateCheat, 0x438370);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {
             continue;
         }
 
-        ReversibleHooks::Install("CCheat", cheat.methodName, cheat.installAddress, &cheat.method);
+        RH_ScopedNamedGlobalInstall(cheat.method, cheat.methodName, cheat.installAddress);
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {
@@ -408,7 +420,7 @@ void CCheat::ExtraSunnyWeatherCheat() {
 // 0x438f90
 void CCheat::FastTimeCheat() {
     if (CTimer::GetTimeScale() < 4.0f) {
-        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f); // todo: check compiler optimization, should be ms_fTimeScale + ms_fTimeScale
+        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f);
     }
 }
 
@@ -541,8 +553,8 @@ void CCheat::HealthCheat() {
     }
 
     vehicle->m_fHealth = 1000.0f;
-    if (vehicle->m_vehicleType == VEHICLE_BIKE) {
-        auto* bike = static_cast<CBike*>(vehicle);
+    if (vehicle->IsBike()) {
+        CBike* bike = vehicle->AsBike();
         bike->field_7BC = 0;
         bike->Fix();
         bike->m_apCollidedEntities[5] = nullptr;
@@ -826,9 +838,6 @@ void CCheat::TankCheat() {
 
 // 0x43a570
 void CCheat::TankerCheat() {
-    return plugin::Call<0x43A570>();
-
-    // incomplete
     CVehicle* vehicle = VehicleCheat(MODEL_PETRO);
     if (!vehicle)
         return;
@@ -840,12 +849,11 @@ void CCheat::TankerCheat() {
         return;
 
     CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
-    CVector posn = vehicle->GetPosition();
-    trailer->SetPosn(posn);
-    trailer->SetOrientation(0.0f, 0.0f, 3.4906585f); // DegreesToRadians() ?
-    trailer->m_nStatus = STATUS_TRAIN_MOVING;
-    trailer->SetTowLink(vehicle, true);
+    trailer->SetPosn(vehicle->GetPosition());
+    trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
+    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
     CWorld::Add(trailer);
+    trailer->SetTowLink(vehicle, true);
 }
 
 // 0x43a510

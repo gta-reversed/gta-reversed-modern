@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,39 +7,44 @@
 
 #include "StdInc.h"
 
+#include "ClumpModelInfo.h"
+
 void CClumpModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CClumpModelInfo);
+    RH_ScopedCategory("Models");
+
 // VTABLE
-    ReversibleHooks::Install("CClumpModelInfo", "GetModelType", 0x4C5720, &CClumpModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "Init", 0x4C4E40, &CClumpModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "Shutdown", 0x4C4E60, &CClumpModelInfo::Shutdown_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "DeleteRwObject", 0x4C4E70, &CClumpModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "GetRwModelType", 0x4C5730, &CClumpModelInfo::GetRwModelType_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "CreateInstance_void", 0x4C5140, (RwObject * (CClumpModelInfo::*)())(&CClumpModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CClumpModelInfo", "CreateInstance_mat", 0x4C5110, (RwObject * (CClumpModelInfo::*)(RwMatrix*))(&CClumpModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CClumpModelInfo", "SetAnimFile", 0x4C5200, &CClumpModelInfo::SetAnimFile_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "ConvertAnimFileIndex", 0x4C5250, &CClumpModelInfo::ConvertAnimFileIndex_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "GetAnimFileIndex", 0x4C5740, &CClumpModelInfo::GetAnimFileIndex_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "GetBoundingBox", 0x4C5710, &CClumpModelInfo::GetBoundingBox_Reversed);
-    ReversibleHooks::Install("CClumpModelInfo", "SetClump", 0x4C4F70, &CClumpModelInfo::SetClump_Reversed);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5720);
+    RH_ScopedInstall(Init_Reversed, 0x4C4E40);
+    RH_ScopedInstall(Shutdown_Reversed, 0x4C4E60);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4E70);
+    RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5730);
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
+    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C5200);
+    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C5250);
+    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C5740);
+    RH_ScopedInstall(GetBoundingBox_Reversed, 0x4C5710);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C4F70);
 
 // CLASS FUNCTIONS
-    ReversibleHooks::Install("CClumpModelInfo", "SetFrameIds", 0x4C5460, &CClumpModelInfo::SetFrameIds);
+    RH_ScopedInstall(SetFrameIds, 0x4C5460);
 
 // STATICS
-    ReversibleHooks::Install("CClumpModelInfo", "SetHierarchyForSkinAtomic", 0x4C4EF0, &CClumpModelInfo::SetHierarchyForSkinAtomic);
-    ReversibleHooks::Install("CClumpModelInfo", "AtomicSetupLightingCB", 0x4C4F30, &CClumpModelInfo::AtomicSetupLightingCB);
-    ReversibleHooks::Install("CClumpModelInfo", "SetAtomicRendererCB", 0x4C5280, &CClumpModelInfo::SetAtomicRendererCB);
-    ReversibleHooks::Install("CClumpModelInfo", "FindFrameFromNameCB", 0x4C52A0, &CClumpModelInfo::FindFrameFromNameCB);
-    ReversibleHooks::Install("CClumpModelInfo", "FindFrameFromNameWithoutIdCB", 0x4C52F0, &CClumpModelInfo::FindFrameFromNameWithoutIdCB);
-    ReversibleHooks::Install("CClumpModelInfo", "FindFrameFromIdCB", 0x4C5350, &CClumpModelInfo::FindFrameFromIdCB);
-    ReversibleHooks::Install("CClumpModelInfo", "FillFrameArrayCB", 0x4C5390, &CClumpModelInfo::FillFrameArrayCB);
-    ReversibleHooks::Install("CClumpModelInfo", "GetFrameFromId", 0x4C53C0, &CClumpModelInfo::GetFrameFromId);
-    ReversibleHooks::Install("CClumpModelInfo", "GetFrameFromName", 0x4C5400, &CClumpModelInfo::GetFrameFromName);
-    ReversibleHooks::Install("CClumpModelInfo", "FillFrameArray", 0x4C5440, &CClumpModelInfo::FillFrameArray);
+    RH_ScopedInstall(SetHierarchyForSkinAtomic, 0x4C4EF0);
+    RH_ScopedInstall(AtomicSetupLightingCB, 0x4C4F30);
+    RH_ScopedInstall(SetAtomicRendererCB, 0x4C5280);
+    RH_ScopedInstall(FindFrameFromNameCB, 0x4C52A0);
+    RH_ScopedInstall(FindFrameFromNameWithoutIdCB, 0x4C52F0);
+    RH_ScopedInstall(FindFrameFromIdCB, 0x4C5350);
+    RH_ScopedInstall(FillFrameArrayCB, 0x4C5390);
+    RH_ScopedInstall(GetFrameFromId, 0x4C53C0);
+    RH_ScopedInstall(GetFrameFromName, 0x4C5400);
+    RH_ScopedInstall(FillFrameArray, 0x4C5440);
 
 // Other
-    ReversibleHooks::Install("CBaseModelInfo", "SetClumpModelInfoFlags", 0x5B3C30, &SetClumpModelInfoFlags);
+    RH_ScopedInstall(SetClumpModelInfoFlags, 0x5B3C30);
 }
 
 ModelInfoType CClumpModelInfo::GetModelType()
@@ -266,6 +271,10 @@ void CClumpModelInfo::SetFrameIds(RwObjectNameIdAssocation* data) {
 
         pCurComponent++;
     }
+}
+
+void CClumpModelInfo::SetClumpModelInfoFlags(uint32 flags) {
+    ::SetClumpModelInfoFlags(this, flags);
 }
 
 RpAtomic* CClumpModelInfo::SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc)

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,10 +7,15 @@
 
 #include "StdInc.h"
 
+#include "WeaponInfo.h"
+
 CWeaponInfo* aWeaponInfo = (CWeaponInfo*)0xC8AAB8;
 
 void CWeaponInfo::InjectHooks() {
-    ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
+    RH_ScopedClass(CWeaponInfo);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetSkillStatIndex, 0x743CD0);
 }
 
 CWeaponInfo::CWeaponInfo() {

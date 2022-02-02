@@ -1,12 +1,18 @@
 #include "StdInc.h"
 
+#include "EventVehicleOnFire.h"
+
 void CEventVehicleOnFire::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleOnFire", "Constructor", 0x4B10C0, &CEventVehicleOnFire::Constructor);
-    ReversibleHooks::Install("CEventVehicleOnFire", "AffectsPed_Reversed", 0x4B4FD0, &CEventVehicleOnFire::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventVehicleOnFire", "CloneEditable_Reversed", 0x4B7740, &CEventVehicleOnFire::CloneEditable_Reversed);
+    RH_ScopedClass(CEventVehicleOnFire);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B10C0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4FD0);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7740);
 }
 
+// 0x4B10C0
 CEventVehicleOnFire::CEventVehicleOnFire(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
@@ -22,30 +28,20 @@ CEventVehicleOnFire::~CEventVehicleOnFire()
 
 CEventVehicleOnFire* CEventVehicleOnFire::Constructor(CVehicle* vehicle)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventVehicleOnFire*, 0x4B10C0, CEvent*, CVehicle*>(this, vehicle);
-#else
     this->CEventVehicleOnFire::CEventVehicleOnFire(vehicle);
     return this;
-#endif
 }
 
+// 0x4B4FD0
 bool CEventVehicleOnFire::AffectsPed(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<bool, 0x4B4FD0, CEvent*, CPed*>(this, ped);
-#else
     return CEventVehicleOnFire::AffectsPed_Reversed(ped);
-#endif
 }
 
+// 0x4B7740
 CEventEditableResponse* CEventVehicleOnFire::CloneEditable()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEventEditableResponse*, 0x4B7740, CEvent*>(this);
-#else
     return CEventVehicleOnFire::CloneEditable_Reversed();
-#endif
 }
 
 bool CEventVehicleOnFire::AffectsPed_Reversed(CPed* ped)

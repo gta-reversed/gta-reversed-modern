@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,22 +7,28 @@
 
 #include "StdInc.h"
 
+#include "AtomicModelInfo.h"
+#include "TagManager.h"
+
 void CAtomicModelInfo::InjectHooks()
 {
+    RH_ScopedClass(CAtomicModelInfo);
+    RH_ScopedCategory("Models");
+
 // VTABLE
-    ReversibleHooks::Install("CAtomicModelInfo", "AsAtomicModelInfoPtr", 0x4C5560, &CAtomicModelInfo::AsAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetModelType", 0x4C5570, &CAtomicModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "Init", 0x4C4430, &CAtomicModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "DeleteRwObject", 0x4C4440, &CAtomicModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetRwModelType", 0x4C5580, &CAtomicModelInfo::GetRwModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, (RwObject * (CAtomicModelInfo::*)(RwMatrix*))(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomic", 0x4C4360, &CAtomicModelInfo::SetAtomic_Reversed);
+    RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C5560);
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5570);
+    RH_ScopedInstall(Init_Reversed, 0x4C4430);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C4440);
+    RH_ScopedInstall(GetRwModelType_Reversed, 0x4C5580);
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
+    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
+    RH_ScopedInstall(SetAtomic_Reversed, 0x4C4360);
 
 // OTHER
-    ReversibleHooks::Install("CAtomicModelInfo", "GetAtomicFromDistance", 0x4C44B0, &CAtomicModelInfo::GetAtomicFromDistance);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetupVehicleUpgradeFlags", 0x4C4570, &CAtomicModelInfo::SetupVehicleUpgradeFlags);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomicModelInfoFlags", 0x5B3B20, &SetAtomicModelInfoFlags);
+    RH_ScopedInstall(GetAtomicFromDistance, 0x4C44B0);
+    RH_ScopedInstall(SetupVehicleUpgradeFlags, 0x4C4570);
+    RH_ScopedGlobalInstall(SetAtomicModelInfoFlags, 0x5B3B20);
 }
 
 CAtomicModelInfo* CAtomicModelInfo::AsAtomicModelInfoPtr()

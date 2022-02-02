@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -17,7 +17,7 @@ public:
     CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius) {};
     CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius) {};
 
-    void Set(float radius, CVector const& center);
+    void Set(float radius, const CVector& center);
 };
 
 VALIDATE_SIZE(CSphere, 0x10);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -42,7 +42,7 @@ public:
 
     float        m_fDepth;        // col depth
 
-    void operator=(CColPoint const& right);
+    CColPoint& operator=(CColPoint const&) = default;
 };
 
 VALIDATE_SIZE(CColPoint, 0x2C);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,6 +7,11 @@
 #pragma once
 
 #include "3dMarker.h"
+#include "RGBA.h"
+#include "Vector.h"
+
+struct RpClump;
+struct RpAtomic;
 
 struct tUser3dMarker {
     bool    m_bIsUsed;
@@ -62,14 +67,17 @@ public:
     static void DirectionArrowsInit();
     static void ForceRender(uint8 bEnable);
     static RpClump* LoadMarker(char const* modelName);
-    // load user 3d markers from save file; always return true
-    static bool LoadUser3dMarkers();
+
     static C3dMarker* PlaceMarker(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
     static void PlaceMarkerCone(uint32 id, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, uint8 bEnableCollision);
     static void PlaceMarkerSet(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate);
     static void Render();
+
+    // load user 3d markers from save file; always return true
+    static bool LoadUser3dMarkers();
     // save user 3d markers to save file; always return true
-    static void SaveUser3dMarkers();
+    static bool SaveUser3dMarkers();
+
     // only set material color (m_user3dMarkerColor) for first material in first atomic; 'data' is unused
     static RpAtomic* User3dMarkerAtomicCB(RpAtomic* atomic, void* _IGNORED_ data);
     static void User3dMarkerDelete(int32 slotIndex);

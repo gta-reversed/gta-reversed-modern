@@ -1,6 +1,6 @@
 // Working?
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK (Grand Theft Auto San Andreas) file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,12 +10,13 @@
 #include "Vector.h"
 #include "StreamingInfo.h"
 #include "RenderWare.h"
-#include "Entity.h"
-#include "PtrList.h"
 #include "LinkList.h"
-#include "LoadedCarGroup.h"
-#include "Directory.h"
 #include "constants.h"
+
+class CPtrList;
+class CEntity;
+class CLoadedCarGroup;
+class CDirectory;
 
 enum class eChannelState
 {
@@ -37,7 +38,7 @@ enum class eChannelState
     STARTED = 2,
 
     // Also called ERROR, but that's a `windgi.h` macro
-    ERR = 3, 
+    ERR = 3,
 };
 
 enum eResourceFirstID : uint32 {
@@ -147,8 +148,8 @@ struct tStreamingFileDesc {
     tStreamingFileDesc() = default;
 
     tStreamingFileDesc(const char* name, bool bNotPlayerImg) :
-        m_bNotPlayerImg(bNotPlayerImg),
-        m_StreamHandle(CdStreamOpen(name))
+          m_bNotPlayerImg(bNotPlayerImg),
+          m_StreamHandle(CdStreamOpen(name))
     {
         strncpy_s(m_szName, name, std::size(m_szName));
     }
@@ -184,6 +185,10 @@ struct tStreamingChannel {
 };
 
 VALIDATE_SIZE(tStreamingChannel, 0x98);
+
+static bool IsModelDFF(int32 model) {
+    return (uint32)model < RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS;
+}
 
 class CStreaming {
 public:

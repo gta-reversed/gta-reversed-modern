@@ -1,11 +1,13 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "IplStore.h"
 
 CQuadTreeNode *&CIplStore::ms_pQuadTree = *(CQuadTreeNode **)0x8E3FAC;
 CPool<IplDef> *&CIplStore::ms_pPool = *(CPool<IplDef> **)0x8E3FB0;
@@ -15,14 +17,16 @@ uint32 MAX_IPL_INSTANCES = 1000;
 
 CEntity** ppCurrIplInstance = (CEntity**)0x8E3EFC;
 uint32& NumIplEntityIndexArrays = *(uint32*)0x8E3F00;
-int32** IplEntityIndexArrays = (int32**)0x8E3F08;
 bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
 CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
 uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
 CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
 
 void CIplStore::InjectHooks() {
-    ReversibleHooks::Install("CIplStore", "GetIplEntityIndexArray", 0x4047B0, &CIplStore::GetIplEntityIndexArray);
+    RH_ScopedClass(CIplStore);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
 }
 
 // 0x405EC0
@@ -71,7 +75,7 @@ CRect* CIplStore::GetBoundingBox(int32 iplSlotIndex) {
 }
 
 // 0x4047B0
-int32* CIplStore::GetIplEntityIndexArray(int32 arrayIndex) {
+CEntity** CIplStore::GetIplEntityIndexArray(int32 arrayIndex) {
     return IplEntityIndexArrays[arrayIndex];
 }
 
