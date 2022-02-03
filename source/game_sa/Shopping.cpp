@@ -63,8 +63,8 @@ int32 GetChangingStatIndex(const char* stat) {
 }
 
 // 0x
-void CShopping::AddPriceModifier(char const* a1, char const* a2, int32 a3) {
-    plugin::Call<0x0, char const*, char const*, int32>(a1, a2, a3);
+void CShopping::AddPriceModifier(const char* a1, const char* a2, int32 a3) {
+    plugin::Call<0x0, const char*, const char*, int32>(a1, a2, a3);
 }
 
 // 0x
@@ -83,13 +83,13 @@ void CShopping::FindItem(uint32 a1) {
 }
 
 // 0x49AE70
-void CShopping::FindSection(FILE* file, char const* sectionName) {
-    plugin::Call<0x49AE70, FILE*, char const*>(file, sectionName);
+void CShopping::FindSection(FILE* file, const char* sectionName) {
+    plugin::Call<0x49AE70, FILE*, const char*>(file, sectionName);
 }
 
 // unused
 // 0x49AF90
-void CShopping::FindSectionInSection(FILE* file, char const* sectionName, char const* a3) {
+void CShopping::FindSectionInSection(FILE* file, const char* sectionName, const char* a3) {
 
 }
 
@@ -104,8 +104,8 @@ int32 CShopping::GetItemIndex(uint32 a1) {
 }
 
 // 0x49AB30
-void CShopping::GetKey(char const* modelName, int32 index) {
-    plugin::Call<0x49AB30, char const*, int32>(modelName, index);
+void CShopping::GetKey(const char* modelName, int32 index) {
+    plugin::Call<0x49AB30, const char*, int32>(modelName, index);
 }
 
 // 0x
@@ -124,8 +124,8 @@ void CShopping::GetPrice(uint32 itemId) {
 }
 
 // 0x49AAD0
-void CShopping::GetPriceSectionFromName(char const* name) {
-    plugin::Call<0x49AAD0, char const*>(name);
+void CShopping::GetPriceSectionFromName(const char* name) {
+    plugin::Call<0x49AAD0, const char*>(name);
 }
 
 // 0x49B5E0
@@ -154,13 +154,13 @@ void CShopping::Load() {
 }
 
 // 0x49B8D0
-void CShopping::LoadPrices(char const* sectionName) {
-    plugin::Call<0x49B8D0, char const*>(sectionName);
+void CShopping::LoadPrices(const char* sectionName) {
+    plugin::Call<0x49B8D0, const char*>(sectionName);
 }
 
 // 0x49BBE0
-void CShopping::LoadShop(char const* sectionName) {
-    plugin::Call<0x49BBE0, char const*>(sectionName);
+void CShopping::LoadShop(const char* sectionName) {
+    plugin::Call<0x49BBE0, const char*>(sectionName);
 }
 
 // 0x49B6A0
@@ -179,8 +179,8 @@ void CShopping::RemoveLoadedShop() {
 }
 
 // 0x
-void CShopping::RemovePriceModifier(char const* a1, char const* a2) {
-    plugin::Call<0x0, char const*, char const*>(a1, a2);
+void CShopping::RemovePriceModifier(const char* a1, const char* a2) {
+    plugin::Call<0x0, const char*, const char*>(a1, a2);
 }
 
 // 0x

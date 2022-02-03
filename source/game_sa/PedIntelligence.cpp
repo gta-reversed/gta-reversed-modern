@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -140,7 +140,7 @@ void CPedIntelligence::SetSeeingRange(float range) {
 // Unused
 // 0x600C00
 bool CPedIntelligence::IsInHearingRange(const CVector& posn) {
-    return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, CVector const&>(this, posn);
+    return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, const CVector&>(this, posn);
 }
 
 // 0x600C60
@@ -517,12 +517,12 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     m_TaskMgr.FlushImmediately();
     CPedScriptedTaskRecord::Process();
     if (pTaskComplexBeInGroup) {
-        auto pPedGroup = CPedGroups::GetPedsGroup(m_pPed);
-        if (!pPedGroup || m_pPed->IsPlayer()) {
+        auto pedGroup = CPedGroups::GetPedsGroup(m_pPed);
+        if (!pedGroup || m_pPed->IsPlayer()) {
             delete pTaskComplexBeInGroup;
         }
         else {
-            pPedGroup->m_groupIntelligence.ComputeDefaultTasks(m_pPed);
+            pedGroup->m_groupIntelligence.ComputeDefaultTasks(m_pPed);
             m_TaskMgr.SetTask(pTaskComplexBeInGroup, 3, false);
         }
     }
@@ -672,9 +672,9 @@ bool CPedIntelligence::IsThreatenedBy(const CPed& ped) const {
 }
 
 // 0x601C90
-bool CPedIntelligence::Respects(CPed* pPed) {
+bool CPedIntelligence::Respects(CPed* ped) {
     auto respect = m_pPed->m_acquaintance.m_nRespect;
-    auto pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
+    auto pedFlag = CPedType::GetPedFlag((ePedType)ped->m_nPedType);
     return pedFlag & respect;
 }
 

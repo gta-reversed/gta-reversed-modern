@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -57,11 +57,11 @@ public:
     void SetClump_Reversed(RpClump* clump);
 
 // class
-    void AddXtraAtomics(RpClump* pClump); //empty
-    void SetFaceTexture(RwTexture* pTexture); //empty
-    void CreateHitColModelSkinned(RpClump* pClump);
-    CColModel* AnimatePedColModelSkinned(RpClump* pClump);
-    CColModel* AnimatePedColModelSkinnedWorld(RpClump* pClump);
+    void AddXtraAtomics(RpClump* clump); //empty
+    void SetFaceTexture(RwTexture* texture); //empty
+    void CreateHitColModelSkinned(RpClump* clump);
+    CColModel* AnimatePedColModelSkinned(RpClump* clump);
+    CColModel* AnimatePedColModelSkinnedWorld(RpClump* clump);
     void IncrementVoice();
 };
 

@@ -246,10 +246,8 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     field_14E = 0;
     field_14C = 0;
 
-    for (auto i = 0; i < 12; ++i) {
-        m_aEngineSounds[i].m_nIndex = i;
-        m_aEngineSounds[i].m_pSound = nullptr;
-    }
+    for (auto i = 0; auto& sound : m_aEngineSounds)
+        sound.Init(i++);
 
     m_fSirenVolume = -100.0f;
     field_230 = -100.0f;
@@ -267,8 +265,8 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     m_pHornTonSound = nullptr;
     m_pSirenSound = nullptr;
     m_pPoliceSirenSound = nullptr;
-    field_238 = 0.0;
-    field_23C = 1.0;
+    field_238 = 0.0f;
+    field_23C = 1.0f;
     field_240 = 0;
 
     m_settings = CAEVehicleAudioEntity::GetVehicleAudioSettings(entity->m_nModelIndex);

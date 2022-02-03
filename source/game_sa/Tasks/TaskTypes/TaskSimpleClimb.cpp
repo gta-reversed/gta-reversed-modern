@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -41,7 +41,6 @@ void CTaskSimpleClimb::InjectHooks()
     RH_ScopedInstall(Constructor, 0x67A110);
     RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
     RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
-    //VTABLE
     //RH_ScopedInstall(ProcessPed_Reversed, 0x680DC0);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x67A280);
 }
@@ -258,7 +257,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
         }
     }
 
-    CPad* pad = ped->IsPlayer() ? ped->AsPlayerPed()->GetPadFromPlayer() : nullptr;
+    CPad* pad = ped->IsPlayer() ? ped->AsPlayer()->GetPadFromPlayer() : nullptr;
 
     if (m_pAnim && m_pAnim->m_fBlendAmount == 1.0F)
     {
@@ -353,9 +352,9 @@ bool CTaskSimpleClimb::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x6803A0
-CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool)
+CEntity* CTaskSimpleClimb::TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool)
 {
-    auto entity = (CEntity*)ScanToGrab(pPed, climbPos, fAngle, nSurfaceType, theBool, false, false, nullptr);
+    auto entity = (CEntity*)ScanToGrab(ped, climbPos, fAngle, nSurfaceType, theBool, false, false, nullptr);
 
     if (entity)
     {
@@ -372,7 +371,7 @@ CEntity* CTaskSimpleClimb::TestForClimb(CPed* pPed, CVector& climbPos, float& fA
 
         CVector v;
         uint8 surfaceType2;
-        if (!ScanToGrab(pPed, v, angle, surfaceType2, false, true, false, &point))
+        if (!ScanToGrab(ped, v, angle, surfaceType2, false, true, false, &point))
         {
             return entity;
         }
@@ -403,10 +402,10 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
     {
         auto* entity = reinterpret_cast<CEntity*>(node->m_item);
 
-        if (entity->m_nScanCode == GetCurrentScanCode())
+        if (entity->IsScanCodeCurrent())
             continue;
 
-        entity->m_nScanCode = GetCurrentScanCode();
+        entity->SetCurrentScanCode();
 
         if (!entity->m_bUsesCollision)
             continue;
@@ -727,7 +726,7 @@ bool CTaskSimpleClimb::TestForVault(CPed* ped, CVector* point, float fAngle)
     float angle;
     uint8 nSurfaceType;
     CVector pedPos = *point + CVector(-ms_fAtEdgeOffsetHorz * sin(fAngle), ms_fAtEdgeOffsetHorz * cos(fAngle), ms_fAtEdgeOffsetVert);
-    return m_pClimbEnt->m_nType != ENTITY_TYPE_VEHICLE && !ScanToGrab(ped, v, angle, nSurfaceType, false, false, true, &pedPos);
+    return !m_pClimbEnt->IsVehicle() && !ScanToGrab(ped, v, angle, nSurfaceType, false, false, true, &pedPos);
 }
 
 // 0x67DBE0
@@ -822,13 +821,13 @@ void CTaskSimpleClimb::StartSpeech(CPed* ped)
 }
 
 // 0x67A380
-void CTaskSimpleClimb::DeleteAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleClimb::DeleteAnimCB(CAnimBlendAssociation* anim, void* data)
 {
     reinterpret_cast<CTaskSimpleClimb*>(data)->m_pAnim = nullptr;
 }
 
 // 0x67A5D0
-void CTaskSimpleClimb::GetCameraStickModifier(CEntity* pEntity, float& fVerticalAngle, float& fHorizontalAngle, float& a5, float& a6)
+void CTaskSimpleClimb::GetCameraStickModifier(CEntity* entity, float& fVerticalAngle, float& fHorizontalAngle, float& a5, float& a6)
 {
     if (!m_pAnim)
         return;

@@ -30,7 +30,7 @@ public:
     static void InjectHooks();
 
     CVehicle* RestoreCar();
-    void      StoreCar(CVehicle* pVehicle);
+    void      StoreCar(CVehicle* vehicle);
 
     // NOTSA
     void Init() { m_wModelIndex = 0; }

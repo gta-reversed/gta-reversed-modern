@@ -13,7 +13,7 @@ public:
 
     static void Init();
     static void Update();
-    static void AskForObjectToBeRenderedInGlass(CEntity* pEntity);
+    static void AskForObjectToBeRenderedInGlass(CEntity* entity);
     static void BreakGlassPhysically(CVector a1, float a2);
     static void CalcAlphaWithNormal(CVector* a1);
     static void CarWindscreenShatters(CVehicle* a1);
@@ -27,6 +27,6 @@ public:
     static void RenderShatteredPolys();
     static void WasGlassHitByBullet(CEntity* a1, CVector a2);
     static void WindowRespondsToExplosion(CEntity* a1, const CVector& a2);
-    static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown);
-    static void WindowRespondsToSoftCollision(CObject* pEntity, float fDamageIntensity);
+    static void WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown);
+    static void WindowRespondsToSoftCollision(CObject* entity, float fDamageIntensity);
 };

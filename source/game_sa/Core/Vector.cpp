@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -137,14 +137,14 @@ void CVector::operator /= (float divisor)
     z /= divisor;
 }
 
-void CVector::FromMultiply(CMatrix const& matrix, CVector const& vector)
+void CVector::FromMultiply(const CMatrix& matrix, const CVector& vector)
 {
     x = matrix.m_pos.x + matrix.m_right.x * vector.x + matrix.m_forward.x * vector.y + matrix.m_up.x * vector.z;
     y = matrix.m_pos.y + matrix.m_right.y * vector.x + matrix.m_forward.y * vector.y + matrix.m_up.y * vector.z;
     z = matrix.m_pos.z + matrix.m_right.z * vector.x + matrix.m_forward.z * vector.y + matrix.m_up.z * vector.z;
 }
 
-void CVector::FromMultiply3x3(CMatrix const& matrix, CVector const& vector)
+void CVector::FromMultiply3x3(const CMatrix& matrix, const CVector& vector)
 {
     x = matrix.m_right.x * vector.x + matrix.m_forward.x * vector.y + matrix.m_up.x * vector.z;
     y = matrix.m_right.y * vector.x + matrix.m_forward.y * vector.y + matrix.m_up.y * vector.z;

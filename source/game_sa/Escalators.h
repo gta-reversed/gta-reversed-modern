@@ -14,6 +14,6 @@ public:
 public:
     static void Shutdown();
     static void Init();
-    static void AddOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* pEntity);
+    static void AddOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* entity);
     static void Update();
 };

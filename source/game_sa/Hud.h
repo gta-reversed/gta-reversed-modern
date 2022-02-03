@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -111,9 +111,9 @@ public:
     static void ReInitialise();
     static void ResetWastedText();
     static void SetBigMessage(char* text, uint16 style);
-    static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
+    static void SetHelpMessage(const char* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(uint8 state, uint16 statId, float diff, float max); // for 'state', see enum eStatUpdateState (CStats.h)
-    static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
+    static void SetHelpMessageWithNumber(const char* text, int32 number, bool quickMessage, bool permanent);
     static void SetMessage(char* text);
     static void SetVehicleName(char* name);
     static void SetZoneName(char* name, uint8 displayState);

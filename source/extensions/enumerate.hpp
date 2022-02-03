@@ -12,7 +12,7 @@ public:
     using pointer = value_type*;
     using reference = value_type&;
 
-public: // Public for convinience, but don't access it pls
+public: // Public for convenience, but don't access it pls
     ItType m_iter{};
     ptrdiff_t m_cntr{};
 

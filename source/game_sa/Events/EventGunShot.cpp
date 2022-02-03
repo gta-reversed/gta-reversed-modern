@@ -68,15 +68,15 @@ bool CEventGunShot::AffectsPed_Reversed(CPed* ped)
     if (!m_entity)
         return false;
 
-    if (m_entity->m_nType == ENTITY_TYPE_PED && CPedGroups::AreInSameGroup(ped, static_cast<CPed*>(m_entity)))
+    if (m_entity->IsPed() && CPedGroups::AreInSameGroup(ped, m_entity->AsPed()))
         return false;
 
     if (!ped->IsInVehicleThatHasADriver()) {
-        CWanted* playerWanted = FindPlayerWanted(-1);
+        CWanted* playerWanted = FindPlayerWanted();
         if (ped->m_nPedType == PED_TYPE_COP && playerWanted->m_nWantedLevel > 0) {
             CCopPed* cop = static_cast<CCopPed*>(ped);
             if (playerWanted->IsInPursuit(cop) || playerWanted->CanCopJoinPursuit(cop)) {
-                if (m_entity != FindPlayerPed(-1))
+                if (m_entity != FindPlayerPed())
                     return false;
             }
         }
@@ -93,8 +93,9 @@ bool CEventGunShot::AffectsPed_Reversed(CPed* ped)
             if (distance .SquaredMagnitude() <= fGunShotRange * fGunShotRange) {
                 if (!m_bHasNoSound)
                     return true;
-                CVector distance = m_startPoint - ped->GetPosition();
-                if (DotProduct(distance, ped->GetForward()) > 0.0f) {
+
+                CVector dist = m_startPoint - ped->GetPosition();
+                if (DotProduct(dist, ped->GetForward()) > 0.0f) {
                     if (CWorld::GetIsLineOfSightClear(m_startPoint, ped->GetPosition(), true, true, true, true, true, false, false))
                         return true;
                 }
@@ -106,7 +107,7 @@ bool CEventGunShot::AffectsPed_Reversed(CPed* ped)
 
 bool CEventGunShot::IsCriminalEvent_Reversed()
 {
-    return m_entity && m_entity->m_nType == ENTITY_TYPE_PED && static_cast<CPed*>(m_entity)->IsPlayer();
+    return m_entity && m_entity->IsPed() && m_entity->AsPed()->IsPlayer();
 }
 
 bool CEventGunShot::TakesPriorityOver_Reversed(const CEvent& refEvent)
@@ -115,12 +116,14 @@ bool CEventGunShot::TakesPriorityOver_Reversed(const CEvent& refEvent)
         bool bIsPlayer = false;
         bool otherPedIsPlayer = false;
         const auto refEventGunShot = static_cast<const CEventGunShot*>(&refEvent);
-        CPed* ped = static_cast<CPed*>(m_entity);
-        if (m_entity && m_entity->m_nType == ENTITY_TYPE_PED)
+        CPed* ped = m_entity->AsPed();
+        if (m_entity && m_entity->IsPed())
             bIsPlayer = ped->IsPlayer();
-        CPed* otherPed = static_cast<CPed*>(refEventGunShot->m_entity);
-        if (otherPed && otherPed->m_nType == ENTITY_TYPE_PED) 
+
+        CPed* otherPed = refEventGunShot->m_entity->AsPed();
+        if (otherPed && otherPed->IsPed())
             otherPedIsPlayer = otherPed->IsPlayer();
+
         return bIsPlayer && !otherPedIsPlayer;
     }
     return GetEventPriority() >= refEvent.GetEventPriority();

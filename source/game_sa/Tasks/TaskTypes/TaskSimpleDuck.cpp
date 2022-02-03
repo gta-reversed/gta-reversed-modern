@@ -8,9 +8,9 @@ CTaskSimpleDuck* CTaskSimpleDuck::Constructor(eDuckControlTypes DuckControlType,
         (this, DuckControlType, nLengthOfDuck, nUseShotsWhizzingEvents);
 }
 
-bool CTaskSimpleDuck::CanPedDuck(CPed* pPed)
+bool CTaskSimpleDuck::CanPedDuck(CPed* ped)
 {
-    return plugin::CallAndReturn<bool, 0x692610, CPed*>(pPed);
+    return plugin::CallAndReturn<bool, 0x692610, CPed*>(ped);
 }
 
 bool CTaskSimpleDuck::ControlDuckMove(float moveSpeedX, float moveSpeedY)

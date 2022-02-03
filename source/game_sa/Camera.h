@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -354,7 +354,7 @@ public:
     void AddShakeSimple(float duration, int32 type, float intensity);
     void AllowShootingWith2PlayersInCar(bool bAllow);
     void ApplyVehicleCameraTweaks(CVehicle* vehicle);
-    void AvoidTheGeometry(CVector const* arg2, CVector const* arg3, CVector* arg4, float FOV);
+    void AvoidTheGeometry(const CVector* arg2, const CVector* arg3, CVector* arg4, float FOV);
 
     void CalculateDerivedValues(bool bForMirror, bool bOriented);
     void CalculateFrustumPlanes(bool bForMirror);
@@ -386,18 +386,18 @@ public:
     bool GetFading();
     int32 GetFadingDirection();
     CVector* GetGameCamPosition();
-    signed int GetLookDirection();
+    int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
     float GetPositionAlongSpline();
     float GetRoughDistanceToGround();
-    signed int GetScreenFadeStatus();
+    int32 GetScreenFadeStatus();
     void GetScreenRect(CRect* rect);
     bool Get_Just_Switched_Status();
 
     void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
     void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
-    void ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, CVector* targPosn);
+    void ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn);
 
     void Init();
     void InitCameraVehicleTweaks();

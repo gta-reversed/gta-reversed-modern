@@ -2,7 +2,8 @@
 
 #include "ePedStats.h"
 
-struct CPedStat {
+class CPedStat {
+public:
     uint32 m_nId;
     char   m_acName[24];
     float  m_fFleeDistance;
@@ -15,7 +16,6 @@ struct CPedStat {
     float  m_fDefendWeakness;
     int16  m_wShootingRate;
     char   m_nDefaultDecisionMaker;
-    char   _pad;
 };
 
 VALIDATE_SIZE(CPedStat, 0x34);

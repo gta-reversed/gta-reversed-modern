@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -184,7 +184,7 @@ void CTimeCycle::InitForRestart() {
     plugin::Call<0x5601F0>();
 }
 
-// Converted from cdecl void CTimeCycle::Initialise()	0x5BBAC0
+// 0x5BBAC0
 void CTimeCycle::Initialise() {
     plugin::Call<0x5BBAC0>();
 }

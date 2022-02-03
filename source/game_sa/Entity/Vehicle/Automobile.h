@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -158,7 +158,7 @@ public:
     // CVehicle
     void ProcessControlCollisionCheck(bool applySpeed) override;
     void ProcessControlInputs(uint8 playerNum) override;
-    void GetComponentWorldPosition(int32 componentId, CVector& posnOut) override;
+    void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     bool IsComponentPresent(int32 componentId) override;
     void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) override;
     float GetDooorAngleOpenRatio(eDoors door) override;
@@ -187,8 +187,8 @@ public:
     void PlayCarHorn() override;
     int32 GetNumContactWheels() override;
     void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
-    bool GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) override;
-    bool GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) override;
+    bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
+    bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
     bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
     bool BreakTowLink() override;
     float FindWheelWidth(bool bRear) override;
@@ -353,11 +353,11 @@ public:
     float GetCarPitch();
     bool IsInAir();
     // Create colliding particles
-    void dmgDrawCarCollidingParticles(CVector const&, float force, eWeaponType weapon);
+    void dmgDrawCarCollidingParticles(const CVector&, float force, eWeaponType weapon);
     void ProcessCarOnFireAndExplode(bool bExplodeImmediately);
     CObject* SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType);
     void ProcessBuoyancy();
-    void inline ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver);
+    void inline ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver);
     // Process combine
     void ProcessHarvester();
     void ProcessSwingingDoor(int32 nodeIndex, eDoors door);
@@ -377,7 +377,7 @@ public:
     void SetBumperDamage(ePanels panel, bool withoutVisualEffect);
     void SetPanelDamage(ePanels panel, bool createWindowGlass);
     void SetDoorDamage(eDoors door, bool withoutVisualEffect);
-    bool RcbanditCheck1CarWheels(CPtrList& ptrlist);
+    bool RcbanditCheck1CarWheels(CPtrList& ptrList);
     bool RcbanditCheckHitWheels();
     void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
@@ -399,7 +399,7 @@ private:
     // CVehicle
     void ProcessControlCollisionCheck_Reversed(bool applySpeed) { CAutomobile::ProcessControlCollisionCheck(applySpeed); }
     void ProcessControlInputs_Reversed(uint8 playerNum) { CAutomobile::ProcessControlInputs(playerNum); }
-    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& posnOut) { CAutomobile::GetComponentWorldPosition(componentId, posnOut); }
+    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos) { CAutomobile::GetComponentWorldPosition(componentId, outPos); }
     bool IsComponentPresent_Reversed(int32 componentId) { return CAutomobile::IsComponentPresent(componentId); }
     void OpenDoor_Reversed(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { CAutomobile::OpenDoor(ped, componentId, door, doorOpenRatio, playSound); }
     float GetDooorAngleOpenRatio_Reversed(eDoors door) { return CAutomobile::GetDooorAngleOpenRatio(door); }
@@ -428,8 +428,8 @@ private:
     void PlayCarHorn_Reversed() { CAutomobile::PlayCarHorn(); }
     int32 GetNumContactWheels_Reversed() { return CAutomobile::GetNumContactWheels(); }
     void VehicleDamage_Reversed(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
-    bool GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(posnOut, bCheckModelInfo, veh); }
-    bool GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(posnOut, bCheckModelInfo, veh); }
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(outPos, bCheckModelInfo, veh); }
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(outPos, bCheckModelInfo, veh); }
     bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CAutomobile::SetTowLink(targetVehicle, arg1); }
     bool BreakTowLink_Reversed() { return CAutomobile::BreakTowLink(); }
     float FindWheelWidth_Reversed(bool bRear) { return CAutomobile::FindWheelWidth(bRear); }

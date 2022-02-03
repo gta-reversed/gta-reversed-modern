@@ -223,8 +223,8 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
         if (pSequences->m_nFrameCount > 0)
         {
             const auto iFrame = pSequences->m_nFrameCount - 1;
-            auto* pFrame = pSequences->GetUncompressedFrame(iFrame);
-            GetDoorOffset(doorId) = pFrame->m_vecTranslation;
+            auto* frame = pSequences->GetUncompressedFrame(iFrame);
+            GetDoorOffset(doorId) = frame->m_vecTranslation;
         }
     }
 

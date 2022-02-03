@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -27,7 +27,7 @@ public:
     void RemoveAnimSequences();
     void RemoveQuaternionFlips();
     void RemoveUncompressedData();
-    void SetName(char const* string);
+    void SetName(const char* string);
     void Shutdown();
     void Uncompress();
 };

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -79,7 +79,7 @@ public:
     static void LoadAtomicFile(const char* filename);
     static RpClump* LoadAtomicFile2Return(const char* filename);
 
-    static char* LoadLine(FILESTREAM file);
+    static char* LoadLine(auto file);
     static char* LoadLine(char*& outLine, int32& outSize);
 
     static void LoadAudioZone(const char* line);

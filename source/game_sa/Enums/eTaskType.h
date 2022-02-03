@@ -1,12 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-/* multitheftauto /MTA10/sdk/game/TaskTypes.h */
+/* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/TaskTypes.h */
 
 enum eTaskType : int32 {
     // player tasks

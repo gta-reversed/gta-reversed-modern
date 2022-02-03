@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,11 +14,12 @@ enum eZoneType : uint8 {
     ZONE_TYPE_MAP = 3
 };
 
-struct CZoneExtraInfo {
+class CZoneExtraInfo {
+public:
     char   m_nGangDensity[10];
     char   m_nDealerDensity;
     RwRGBA ZoneColor;
-    char   m_nFlags;
+    uint8  m_nFlags;
     char   m_nPopulationRace;
 };
 

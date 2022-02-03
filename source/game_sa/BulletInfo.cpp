@@ -87,13 +87,13 @@ void CBulletInfo::Update() {
             CWeapon::CheckForShootingVehicleOccupant(&hitEntity, &colPoint, info.m_nWeaponType, info.m_vecPosition, newPosition);
 
             switch (hitEntity->m_nType) {
-            case eEntityType::ENTITY_TYPE_PED: {
+            case ENTITY_TYPE_PED: {
                 auto hitPed = hitEntity->AsPed();
 
                 if (hitEntity != info.m_pCreator) {
                     switch (hitPed->m_nPedState) {
-                    case ePedState::PEDSTATE_DIE:
-                    case ePedState::PEDSTATE_DEAD:
+                    case PEDSTATE_DIE:
+                    case PEDSTATE_DEAD:
                         break;
                     default: { // Not DIE or DEAD
                         // std::cout << "Hit ped\n";
@@ -106,9 +106,9 @@ void CBulletInfo::Update() {
                             hitPed->GetLocalDirection(hitPed->GetPosition() - colPoint.m_vecPoint)
                         );
                         CCrime::ReportCrime(
-                            (hitPed->m_nPedType == ePedType::PED_TYPE_COP) ? eCrimeType::CRIME_DAMAGE_COP_CAR : eCrimeType::CRIME_DAMAGE_CAR,
+                            (hitPed->m_nPedType == PED_TYPE_COP) ? eCrimeType::CRIME_DAMAGE_COP_CAR : eCrimeType::CRIME_DAMAGE_CAR,
                             hitPed,
-                            static_cast<CPed*>(info.m_pCreator)
+                            info.m_pCreator->AsPed()
                         );
                         newPosition = colPoint.m_vecPoint;
                         break;
@@ -119,23 +119,23 @@ void CBulletInfo::Update() {
                 if (CLocalisation::Blood()) {
                     g_fx.AddBlood(colPoint.m_vecPoint, colPoint.m_vecNormal, 8, hitPed->m_fContactSurfaceBrightness);
                     // std::cout << "Create blood\n";
-                    if (hitPed->m_nPedState == ePedState::PEDSTATE_DEAD) {
-                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIM_FLAG_800) ? AnimationId::ANIM_ID_FLOOR_HIT_F : AnimationId::ANIM_ID_FLOOR_HIT;
+                    if (hitPed->m_nPedState == PEDSTATE_DEAD) {
+                        const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
 
                         if (CAnimBlendAssociation* assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, 0, anim, 8.0f)) {
                             assoc->Start(0.0f);
-                            assoc->SetFlag(eAnimationFlags::ANIM_FLAG_UNLOCK_LAST_FRAME, false);
+                            assoc->SetFlag(ANIM_FLAG_UNLOCK_LAST_FRAME, false);
                             // std::cout << "Blood anim\n";
                         }
                     }
                     newPosition = colPoint.m_vecPoint;
                 }
             }
-            case eEntityType::ENTITY_TYPE_VEHICLE: {
+            case ENTITY_TYPE_VEHICLE: {
                 // std::cout << "Hit vehicle\n";
                 auto hitVehicle = hitEntity->AsVehicle();
 
-                if (info.m_pCreator && info.m_pCreator->m_nType == eEntityType::ENTITY_TYPE_PED)
+                if (info.m_pCreator && info.m_pCreator->IsPed())
                     if (info.m_pCreator->AsPed()->m_pAttachedTo == hitVehicle)
                         break;
 
@@ -168,12 +168,12 @@ void CBulletInfo::Update() {
                 if (TheCamera.IsSphereVisible(colPoint.m_vecNormal, 1.0f))
                     g_fx.AddBulletImpact(colPoint.m_vecPoint, colPoint.m_vecNormal, colPoint.m_nSurfaceTypeB, 8, colPoint.m_nLightingB.GetCurrentLighting());
 
-                if (info.m_pCreator && info.m_pCreator->m_nType == eEntityType::ENTITY_TYPE_PED)
+                if (info.m_pCreator && info.m_pCreator->IsPed())
                     if (info.m_pCreator->AsPed()->m_pAttachedTo == hitEntity)
                         break;
 
                 switch (hitEntity->m_nType) {
-                case eEntityType::ENTITY_TYPE_OBJECT: {
+                case ENTITY_TYPE_OBJECT: {
                     // std::cout << "Hit object\n";
                     auto hitObject = hitEntity->AsObject();
 
@@ -208,11 +208,11 @@ void CBulletInfo::Update() {
                     DoDamageToObject(50.0f);
                     break;
                 }
-                case eEntityType::ENTITY_TYPE_BUILDING: {
+                case ENTITY_TYPE_BUILDING: {
                     // std::cout << "Hit building\n";
                     if (info.m_pCreator && info.m_pCreator->IsPed()) {
-                        if (auto pPlayerData = info.m_pCreator->AsPed()->m_pPlayerData) {
-                            pPlayerData->m_nModelIndexOfLastBuildingShot = hitEntity->m_nModelIndex;
+                        if (auto playerData = info.m_pCreator->AsPed()->m_pPlayerData) {
+                            playerData->m_nModelIndexOfLastBuildingShot = hitEntity->m_nModelIndex;
                         }
                     }
                     break;

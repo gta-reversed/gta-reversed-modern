@@ -120,31 +120,31 @@ bool C2dEffect::PluginAttach()
     return C2dEffect::g2dEffectPluginOffset != -1;
 }
 
-void C2dEffect::DestroyAtomic(RpAtomic* pAtomic)
+void C2dEffect::DestroyAtomic(RpAtomic* atomic)
 {
-    if (!pAtomic)
+    if (!atomic)
         return;
 
-    auto pFrame = RpAtomicGetFrame(pAtomic);
-    if (pFrame) {
-        RpAtomicSetFrame(pAtomic, nullptr);
-        RwFrameDestroy(pFrame);
+    auto frame = RpAtomicGetFrame(atomic);
+    if (frame) {
+        RpAtomicSetFrame(atomic, nullptr);
+        RwFrameDestroy(frame);
     }
-    RpAtomicDestroy(pAtomic);
+    RpAtomicDestroy(atomic);
 }
 
-uint32 RpGeometryGet2dFxCount(RpGeometry* pGeometry)
+uint32 RpGeometryGet2dFxCount(RpGeometry* geometry)
 {
-    auto plugin = C2DEFFECTPLG(pGeometry, m_pEffectEntries);
+    auto plugin = C2DEFFECTPLG(geometry, m_pEffectEntries);
     if (!plugin)
         return 0;
 
     return plugin->m_nObjCount;
 }
 
-C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int32 iEffectInd)
+C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* geometry, int32 iEffectInd)
 {
-    auto plugin = C2DEFFECTPLG(pGeometry, m_pEffectEntries);
+    auto plugin = C2DEFFECTPLG(geometry, m_pEffectEntries);
     return &plugin->m_pObjects[iEffectInd];
 }
 
@@ -163,8 +163,8 @@ void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 si
     // It's the same as CModelInfo::ms_2dFXInfoStore cleaning, maybe the plugin has CStore inside too?
     // Dunno how that would work, as the size is decided at runtime, easy with some manual memory tricks tho.
     for (uint32 i = 0; i < plugin->m_nObjCount; ++i) {
-        auto& pEffect = plugin->m_pObjects[i];
-        pEffect.Shutdown();
+        auto& effect = plugin->m_pObjects[i];
+        effect.Shutdown();
     }
 
     if (C2DEFFECTPLG(object, m_pEffectEntries))

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,9 +14,9 @@ void CSimpleTransform::UpdateRwMatrix(RwMatrix* out)
     ((void(__thiscall*)(CSimpleTransform*, RwMatrix*))0x54EF40)(this, out);
 }
 
-void CSimpleTransform::Invert(CSimpleTransform const& base)
+void CSimpleTransform::Invert(const CSimpleTransform& base)
 {
-    ((void(__thiscall*)(CSimpleTransform*, CSimpleTransform const&))0x54EF90)(this, base);
+    ((void(__thiscall*)(CSimpleTransform*, const CSimpleTransform&))0x54EF90)(this, base);
 }
 
 void CSimpleTransform::UpdateMatrix(CMatrix* out)

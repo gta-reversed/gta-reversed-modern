@@ -51,7 +51,7 @@ CEventEditableResponse* CEventDeadPed::CloneEditable()
 bool CEventDeadPed::AffectsPed_Reversed(CPed* ped)
 {
     if (m_ped && ped != m_ped && ped->IsAlive()) {
-        if(!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
+        if (!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
             if (!m_ped->physicalFlags.bSubmergedInWater) {
                 CVector distance = m_ped->GetPosition() - ped->GetPosition();
                 if (m_ped->bKilledByStealth) {

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -240,7 +240,7 @@ void CWeather::RenderRainStreaks() {
         const float posMul = (s % 2) ? Wind * 0.1f : Wind * Rain * 0.1f;
         offsets[1] = offsets[0] - WindDir * posMul + CVector{ 0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.1f, 0.5f) };
 
-        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u };
+        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u }; // todo: Non-constant-expression cannot be narrowed from type 'unsigned int' to 'uint8' (aka 'unsigned char') in initializer list
         for (unsigned v = 0; v < 2; v++) {
             RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
 

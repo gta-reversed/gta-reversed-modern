@@ -16,7 +16,7 @@ void cTransmission::InjectHooks()
 // unused
 //
 // Usage:
-//     auto vehicle = FindPlayerVehicle(-1, false);
+//     auto vehicle = FindPlayerVehicle();
 //     if (vehicle) {
 //         vehicle->m_pHandlingData->GetTransmission().DisplayGearRatios();
 //     }
@@ -90,7 +90,7 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uint8& currentGear)
 }
 
 // 0x6D05E0
-float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingCheat)
+float cTransmission::CalculateDriveAcceleration(const float& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingCheat)
 {
     static float& cheatMultiplier = *(float*)0xC1CB3C;      // TODO | STATICREF // = 0.0f;
     static float& driveAcceleration = *(float*)0xC1CB38;    // TODO | STATICREF // = 0.0f;

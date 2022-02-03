@@ -7,23 +7,21 @@ class CEntity;
 class CPhysical;
 class CVehicle;
 
-// todo: Rename to tWaterLevel
-enum class eBuoyancyPointState : int32 {
+// original name, our previous name eBuoyancyPointState
+enum class tWaterLevel : int32 {
     COMPLETELY_ABOVE_WATER = 0x0,
     COLLIDING_WITH_WATER   = 0x1,
     COMPLETELY_UNDER_WATER = 0x2,
 };
 
-#pragma pack(push, 8)
 struct CBuoyancyCalcStruct {
     float   fCurrentAverageContribution;
     float   fNewPointContribution;
     CVector vecCurOffsetTurnPoint;
     float   fAddedDistToWaterSurface;
     bool    bBuoyancyDataSummed;
-    char    _pad[3];
 };
-#pragma pack(pop)
+
 VALIDATE_SIZE(CBuoyancyCalcStruct, 0x1C);
 
 class cBuoyancy {
@@ -72,15 +70,15 @@ public:
     cBuoyancy() = default; // 0x6C2740
     ~cBuoyancy() = default; // 0x6C2B80
 
-    bool ProcessBuoyancy(CPhysical* pEntity, float fBuoyancy, CVector* pVecTurnSpeed, CVector* pBuoyancy);
-    bool ProcessBuoyancyBoat(CVehicle* pVehicle, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce, bool bUnderwater);
-    bool CalcBuoyancyForce(CPhysical* pEntity, CVector* pVecTurnSpeed, CVector* pBuoyancy);
-    void PreCalcSetup(CPhysical* pEntity, float fBuoyancy);
-    void AddSplashParticles(CPhysical* pEntity, CVector vecFrom, CVector vecTo, CVector vecSplashDir, uint8 bReduceParticleSize);
-    void SimpleCalcBuoyancy(CPhysical* pEntity);
-    float SimpleSumBuoyancyData(CVector* vecPointRelativeToSurface, eBuoyancyPointState ePointState);
-    void FindWaterLevel(CVector const& vecInitialZPos, CVector* outVecOffset, eBuoyancyPointState* outInWaterState);
-    void FindWaterLevelNorm(CVector const& vecInitialZPos, CVector* outVecOffset, eBuoyancyPointState* outInWaterState, CVector* outVecNormal);
+    bool ProcessBuoyancy(CPhysical* entity, float fBuoyancy, CVector* vecTurnSpeed, CVector* buoyancy);
+    bool ProcessBuoyancyBoat(CVehicle* vehicle, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce, bool bUnderwater);
+    bool CalcBuoyancyForce(CPhysical* entity, CVector* vecTurnSpeed, CVector* buoyancy);
+    void PreCalcSetup(CPhysical* entity, float fBuoyancy);
+    void AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector vecTo, CVector vecSplashDir, uint8 bReduceParticleSize);
+    void SimpleCalcBuoyancy(CPhysical* entity);
+    float SimpleSumBuoyancyData(CVector* vecPointRelativeToSurface, tWaterLevel ePointState);
+    void FindWaterLevel(const CVector& vecInitialZPos, CVector* outVecOffset, tWaterLevel* outInWaterState);
+    void FindWaterLevelNorm(const CVector& vecInitialZPos, CVector* outVecOffset, tWaterLevel* outInWaterState, CVector* outVecNormal);
 };
 
 VALIDATE_SIZE(cBuoyancy, 0xD0);

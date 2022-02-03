@@ -64,10 +64,10 @@ public:
 
     static void InjectHooks();
 
-    CEventFireNearby(CVector const& position);
+    CEventFireNearby(const CVector& position);
     ~CEventFireNearby() {}
 private:
-    CEventFireNearby* Constructor(CVector const& position);
+    CEventFireNearby* Constructor(const CVector& position);
 public:
     eEventType GetEventType() const override { return EVENT_FIRE_NEARBY; }
     int32 GetEventPriority() const override { return 17; }

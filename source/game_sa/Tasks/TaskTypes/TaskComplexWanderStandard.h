@@ -1,11 +1,10 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-
 
 #include "TaskComplexWander.h"
 #include "TaskTimer.h"
@@ -13,8 +12,9 @@
 class CTaskComplexWanderStandard : public CTaskComplexWander {
 public:
     CTaskTimer m_TaskTimer;
-    int32 m_nMinNextScanTime;
+    int32      m_nMinNextScanTime;
 
+public:
     CTaskComplexWanderStandard* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly = true);
 };
 

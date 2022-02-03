@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -136,13 +136,13 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, 
 }
 
 // 0x486670
-void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
-    plugin::Call<0x486670, CVehicle*>(pVehicle);
+void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
+    plugin::Call<0x486670, CVehicle*>(vehicle);
 }
 
 // 0x486B00
-void CTheScripts::ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity) {
-    plugin::Call<0x486B00, CVector const&, CEntity*>(pos, pEntity);
+void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity) {
+    plugin::Call<0x486B00, const CVector&, CEntity*>(pos, entity);
 }
 
 void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
@@ -150,8 +150,8 @@ void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
 }
 
 // 0x4839A0
-signed int CTheScripts::GetActualScriptThingIndex(int32 index, uint8 type) {
-    return plugin::CallAndReturn<signed int, 0x4839A0, int32, uint8>(index, type);
+int32 CTheScripts::GetActualScriptThingIndex(int32 index, uint8 type) {
+    return plugin::CallAndReturn<int32, 0x4839A0, int32, uint8>(index, type);
 }
 
 // 0x483720
@@ -196,8 +196,8 @@ bool CTheScripts::IsPlayerOnAMission() {
 }
 
 // 0x4861F0
-bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
-    return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(pVehicle);
+bool CTheScripts::IsVehicleStopped(CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(vehicle);
 }
 
 // 0x5D4FD0

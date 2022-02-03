@@ -7,14 +7,11 @@ class CInformFriendsEventQueue {
 public:
     static void InjectHooks();
 
-    CInformFriendsEventQueue();
-    CInformFriendsEventQueue* Constructor();
-
-    ~CInformFriendsEventQueue();
-    CInformFriendsEventQueue* Destructor();
+    CInformFriendsEventQueue() = default;
+    ~CInformFriendsEventQueue() = default;
 
     static void Init();
     static void Flush();
-    static bool Add(CEntity* pEntity, CEvent* pEvent);
+    static bool Add(CEntity* entity, CEvent* event);
     static void Process();
 };

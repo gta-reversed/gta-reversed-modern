@@ -30,7 +30,7 @@ public:
 
 public:
     void SwitchOff();
-    void AddThisOne(const CVector& vecStart, CVector const& vecBottom,const  CVector& vecEnd,const  CVector& vecTop, bool bMoveDown, CEntity* entity);
+    void AddThisOne(const CVector& vecStart, const CVector& vecBottom,const  CVector& vecEnd,const  CVector& vecTop, bool bMoveDown, CEntity* entity);
     void Update();
 };
 
