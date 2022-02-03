@@ -2,6 +2,9 @@
 
 // Helper for loading col binary files
 
+// NOTE:
+// The term `face` and `triangle` are used interchangably here.
+
 #include "CompressedVector.h"
 #include "Vector.h"
 #include "Sphere.h"
@@ -79,6 +82,13 @@ struct TBox : CBox {
     }
 };
 
+struct TFaceGroup {
+    // Bounding box of all faces in this group.
+    // TODO: Check if all vertices of these triangles are within the BB or not - It might be a useful information to know.
+    CBoundingBox bb{};
+    uint16       first{}, last{}; // First and last face index (Inclusive: [first, last])
+};
+
 namespace V1 {
     using TVector = CVector;
     using TVertex = TVector;
@@ -130,11 +140,6 @@ namespace V2 {
     struct TBounds {
         CBoundingBox box{};
         CSphere      sphere{};
-    };
-
-    struct TFaceGroup {
-        CBoundingBox bb{};
-        uint16       start{}, end{}; // First and last vertex index
     };
 
     struct TFace {

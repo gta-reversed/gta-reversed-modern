@@ -262,7 +262,7 @@ bool CGame::Init1(char const *datFile) {
 }
 
 // 0x5BA1A0
-void CGame::Init2(char const* datFile) {
+void CGame::Init2(const char* datFile) {
     LoadingScreen("Loading the Game", "Add Particles");
     CTheZones::PostZoneCreation();
     CEntryExitManager::PostEntryExitsCreation();
@@ -359,8 +359,8 @@ void CGame::Init2(char const* datFile) {
 }
 
 // 0x5BA400
-void CGame::Init3(char const* datFile) {
-    plugin::Call<0x5BA400, char const*>(datFile);
+void CGame::Init3(const char* datFile) {
+    plugin::Call<0x5BA400, const char*>(datFile);
 }
 
 // 0x53BC80

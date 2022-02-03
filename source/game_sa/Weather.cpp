@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -187,10 +187,10 @@ void CWeather::RenderRainStreaks() {
     constexpr auto RAIN_STREAK_COUNT{ 32u };
 
     // These are arrays of size `RAIN_STREAK_COUNT`
-    static int32* streakPosX;     // 0xC81420;
-    static int32* streakPosY;     // 0xC8141C;
-    static int32* streakPosZ;     // 0xC81418;
-    static uint8* streakStrength; // 0xC81414
+    static int32*& streakPosX = *(int32**)0xC81420; // TODO | STATICREF
+    static int32*& streakPosY = *(int32**)0xC8141C; // TODO | STATICREF
+    static int32*& streakPosZ = *(int32**)0xC81418; // TODO | STATICREF
+    static uint8*& streakStrength = *(uint8**)0xC81414; // TODO | STATICREF
 
     if (!streakPosX) {
         // This stuff isn't even freed anywhere..
@@ -240,7 +240,7 @@ void CWeather::RenderRainStreaks() {
         const float posMul = (s % 2) ? Wind * 0.1f : Wind * Rain * 0.1f;
         offsets[1] = offsets[0] - WindDir * posMul + CVector{ 0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.1f, 0.5f) };
 
-        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u };
+        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u }; // todo: Non-constant-expression cannot be narrowed from type 'unsigned int' to 'uint8' (aka 'unsigned char') in initializer list
         for (unsigned v = 0; v < 2; v++) {
             RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
 

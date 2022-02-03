@@ -1,8 +1,8 @@
 #pragma once
+
 #include "TaskComplexWander.h"
 
-class CTaskComplexWanderMedic : public CTaskComplexWander
-{
+class CTaskComplexWanderMedic : public CTaskComplexWander {
 public:
     CTaskComplexWanderMedic* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly);
     CTaskComplexWanderMedic(int32 MoveState, uint8 Dir, bool bWanderSensibly);

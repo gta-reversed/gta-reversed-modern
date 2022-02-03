@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -88,7 +88,7 @@ public:
     uint32 GetTouchedTimeDelta();
     void Update(int32 pad);
     void UpdateMouse();
-    void ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB);
+    void ReconcileTwoControllersInput(const CControllerState& controllerA, const CControllerState& controllerB);
     void SetDrunkInputDelay(int32 delay);
     void StartShake(int16 time, uint8 frequency, uint32 arg2);
     void StartShake_Distance(int16 time, uint8 frequency, float x, float y, float z);
@@ -102,8 +102,8 @@ public:
     int16 GetSteeringUpDown();
     int16 GetPedWalkLeftRight();
     int16 GetPedWalkUpDown();
-    int16 GetPedWalkLeftRight(CPed* pPed);
-    int16 GetPedWalkUpDown(CPed* pPed);
+    int16 GetPedWalkLeftRight(CPed* ped);
+    int16 GetPedWalkUpDown(CPed* ped);
     bool GetLookLeft();
     bool GetLookRight();
     bool GetLookBehindForCar();
@@ -148,11 +148,11 @@ public:
     void Clear(bool enablePlayerControls, bool resetPhase);
     static void ProcessPad(bool numPad);
     static void UpdatePads();
-    bool WeaponJustDown(CPed* pPed);
+    bool WeaponJustDown(CPed* ped);
     bool GetEnterTargeting();
-    int32 GetWeapon(CPed* pPed);
-    int16 AimWeaponLeftRight(CPed* pPed);
-    int16 AimWeaponUpDown(CPed* pPed);
+    int32 GetWeapon(CPed* ped);
+    int16 AimWeaponLeftRight(CPed* ped);
+    int16 AimWeaponUpDown(CPed* ped);
     bool IsStandardKeyJustDown(uint8 key);
     bool IsCtrlJustDown();
     bool IsStandardKeyPressed(uint8 key);

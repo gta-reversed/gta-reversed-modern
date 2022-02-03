@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -256,27 +256,27 @@ public:
     static int32 AddScriptSearchLight(float startX, float startY, float startZ, CEntity* entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
     static uint32 AddScriptSphere(uint32 id, CVector posn, float radius);
 
-    static void AddToBuildingSwapArray(CBuilding* pBuilding, int32 oldModelId, int32 newModelId);
+    static void AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, int32 newModelId);
     static void AddToInvisibilitySwapArray(CEntity* a2, bool bVisible);
     static void AddToListOfConnectedLodObjects(CObject* pObject1, CObject* pObject2);
     static void AddToListOfSpecialAnimGroupsAttachedToCharModels(int32 modelId, char* ifpName);
     static double AddToSwitchJumpTable(int32 switchValue, int32 switchLabelLocalAddress);
     static void AddToVehicleModelsBlockedByScript(int32 modelIndex);
-    static void AddToWaitingForScriptBrainArray(CEntity* pEntity, int16 arg2);
+    static void AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
     static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, float offsetX, float offsetY, float offsetZ);
     static char CheckStreamedScriptVersion(RwStream* arg1, char* arg2);
-    static void CleanUpThisObject(CObject* pObject);
+    static void CleanUpThisObject(CObject* obj);
     static void CleanUpThisPed(CPed* ped);
-    static void CleanUpThisVehicle(CVehicle* pVehicle);
+    static void CleanUpThisVehicle(CVehicle* vehicle);
     static void ClearAllSuppressedCarModels();
     static void ClearAllVehicleModelsBlockedByScript();
-    static void ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity);
+    static void ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity);
     static void DoScriptSetupAfterPoolsHaveLoaded();
     static void DrawDebugAngledSquare(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
     static void DrawDebugCube(float x1, float y1, float x2, float y2);
     static void DrawScriptSpheres();
     static void DrawScriptSpritesAndRectangles(char bDrawBeforeFade);
-    static signed int GetActualScriptThingIndex(int32 index, uint8 type);
+    static int32 GetActualScriptThingIndex(int32 index, uint8 type);
     static uint32 GetNewUniqueScriptThingIndex(uint32 index, char type);
     static int32 GetScriptIndexFromPointer(CRunningScript* thread);
     //! type is always 8 , which refers to PedGroups
@@ -285,18 +285,18 @@ public:
     static void HighlightImportantAngledArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
     static void HighlightImportantArea(int32 markerId, float fromX, float fromY, float toX, float toY, float height);
 
-    static bool IsEntityWithinAnySearchLight(CEntity* pEntity, int32* pIndex);
-    static bool IsEntityWithinSearchLight(uint32 index, CEntity* pEntity);
+    static bool IsEntityWithinAnySearchLight(CEntity* entity, int32* pIndex);
+    static bool IsEntityWithinSearchLight(uint32 index, CEntity* entity);
     static bool IsPedStopped(CPed* ped);
     static bool IsPlayerOnAMission();
     static bool IsPointWithinSearchLight(CVector* pointPosn, int32 index);
-    static bool IsVehicleStopped(CVehicle* pVehicle);
+    static bool IsVehicleStopped(CVehicle* vehicle);
 
     static bool Load();
     static bool Save();
 
     static void MoveSearchLightBetweenTwoPoints(int32 index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
-    static void MoveSearchLightToEntity(int32 index, CEntity* pEntity, float pathSpeed);
+    static void MoveSearchLightToEntity(int32 index, CEntity* entity, float pathSpeed);
     static void MoveSearchLightToPointAndStop(int32 index, float x, float y, float z, float pathSpeed);
     static void PrintListSizes();
 
@@ -335,23 +335,23 @@ public:
         return (int32*)&ScriptSpace[offset];
     }
 
-    static int32 Read4BytesFromScript(uint32* pIp) {
-        int32 retval = ScriptSpace[*pIp + 3] << 24 | ScriptSpace[*pIp + 2] << 16 | ScriptSpace[*pIp + 1] << 8 | ScriptSpace[*pIp];
-        *pIp += 4;
+    static int32 Read4BytesFromScript(uint32* ip) {
+        int32 retval = ScriptSpace[*ip + 3] << 24 | ScriptSpace[*ip + 2] << 16 | ScriptSpace[*ip + 1] << 8 | ScriptSpace[*ip];
+        *ip += 4;
         return retval;
     }
-    static int16 Read2BytesFromScript(uint32* pIp) {
-        int16 retval = ScriptSpace[*pIp + 1] << 8 | ScriptSpace[*pIp];
-        *pIp += 2;
+    static int16 Read2BytesFromScript(uint32* ip) {
+        int16 retval = ScriptSpace[*ip + 1] << 8 | ScriptSpace[*ip];
+        *ip += 2;
         return retval;
     }
-    static int8 Read1ByteFromScript(uint32* pIp) {
-        int8 retval = ScriptSpace[*pIp];
-        *pIp += 1;
+    static int8 Read1ByteFromScript(uint32* ip) {
+        int8 retval = ScriptSpace[*ip];
+        *ip += 1;
         return retval;
     }
-    static float ReadFloatFromScript(uint32* pIp) {
-        return Read2BytesFromScript(pIp) / 16.0f;
+    static float ReadFloatFromScript(uint32* ip) {
+        return Read2BytesFromScript(ip) / 16.0f;
     }
 
     static int32 GetSizeOfVariableSpace() {

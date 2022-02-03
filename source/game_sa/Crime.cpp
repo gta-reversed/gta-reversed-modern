@@ -2,6 +2,6 @@
 
 #include "Crime.h"
 
-void CCrime::ReportCrime(eCrimeType crimeType, CPed* ped1, CPed* ped2) {
-    plugin::Call<0x532010, eCrimeType, CPed*, CPed*>(crimeType, ped1, ped2);
+void CCrime::ReportCrime(eCrimeType crimeType, CEntity* entity, CPed* ped2) {
+    plugin::Call<0x532010, eCrimeType, CEntity*, CPed*>(crimeType, entity, ped2);
 }

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -112,14 +112,14 @@ union tVehicleCompsUnion {
 VALIDATE_SIZE(tVehicleCompsUnion, 0x4);
 
 struct UpgradePosnDesc {
-  public:
+public:
     UpgradePosnDesc(){};
     ~UpgradePosnDesc(){};
 
-  public:
-    CVector m_vPosition;
+public:
+    CVector     m_vPosition;
     CQuaternion m_qRotation;
-    int32 m_nParentComponentId;
+    int32       m_nParentComponentId;
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
@@ -195,7 +195,7 @@ public:
     union {
         CAnimBlock* m_pAnimBlock;
         char* m_animBlockFileName;
-        uint32 m_dwAnimBlockIndex;
+        uint32 m_nAnimBlockIndex;
     };
 
     static class CLinkedUpgradeList {
@@ -267,9 +267,9 @@ public:
     void Init() override;
     void DeleteRwObject() override;
     RwObject* CreateInstance() override;
-    void SetAnimFile(char const* filename) override;
+    void SetAnimFile(const char* filename) override;
     void ConvertAnimFileIndex() override;
-    signed int GetAnimFileIndex() override;
+    int32 GetAnimFileIndex() override;
     void SetClump(RpClump* clump) override;
 
     // VTable implementations
@@ -277,9 +277,9 @@ public:
     void Init_Reversed();
     void DeleteRwObject_Reversed();
     RwObject* CreateInstance_Reversed();
-    void SetAnimFile_Reversed(char const* filename);
+    void SetAnimFile_Reversed(const char* filename);
     void ConvertAnimFileIndex_Reversed();
-    signed int GetAnimFileIndex_Reversed();
+    int32 GetAnimFileIndex_Reversed();
     void SetClump_Reversed(RpClump* clump);
 
     // Class methods
@@ -325,7 +325,7 @@ public:
     // get num doors in this model
     int32 GetNumDoors();
     // get position of dummy in model-space 
-    CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
+    [[nodiscard]] CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
 
     // Static method's
     // setup lights states for currently rendered vehicle
@@ -333,7 +333,7 @@ public:
     // destroying vehiclelights textures
     static void ShutdownLightTexture();
     // find remap texture with name
-    static RwTexture* FindTextureCB(char const* name);
+    static RwTexture* FindTextureCB(const char* name);
     // start using special finding callback
     static void UseCommonVehicleTexDicationary();
     // stop using special finding callback
@@ -412,18 +412,18 @@ public:
 
     // Helpers
     // ctrl+c, ctrl+v from CVehicle
-    bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
-    bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
-    bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
-    bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
-    bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
-    bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
-    bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
-    bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
-    bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
-    bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
-    bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
-    bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
+    [[nodiscard]] bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
+    [[nodiscard]] bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
+    [[nodiscard]] bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
+    [[nodiscard]] bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
+    [[nodiscard]] bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
+    [[nodiscard]] bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
+    [[nodiscard]] bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
+    [[nodiscard]] bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
+    [[nodiscard]] bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
+    [[nodiscard]] bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
+    [[nodiscard]] bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
+    [[nodiscard]] bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
 
     // These were probably inlined:
     void SetWheelSizes(float front, float rear) {

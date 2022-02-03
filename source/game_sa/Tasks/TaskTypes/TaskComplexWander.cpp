@@ -21,6 +21,7 @@ void CTaskComplexWander::InjectHooks()
 {
     RH_ScopedClass(CTaskComplexWander);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x66F450);
     RH_ScopedInstall(GetId_Reversed, 0x460CD0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140);
@@ -83,15 +84,15 @@ CTask* CTaskComplexWander::ControlSubTask(CPed* ped)
 }
 
 // 0x669DA0
-void CTaskComplexWander::UpdateDir(CPed* pPed)
+void CTaskComplexWander::UpdateDir(CPed* ped)
 {
-    return UpdateDir_Reversed(pPed);
+    return UpdateDir_Reversed(ped);
 }
 
 // 0x669ED0
-void CTaskComplexWander::UpdatePathNodes(CPed* pPed, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
+void CTaskComplexWander::UpdatePathNodes(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
 {
-    return UpdatePathNodes_Reversed(pPed, dir, originNode, targetNode, outDir);
+    return UpdatePathNodes_Reversed(ped, dir, originNode, targetNode, outDir);
 }
 
 CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
@@ -298,7 +299,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
     return m_pSubTask;
 }
 
-void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
+void CTaskComplexWander::UpdateDir_Reversed(CPed* ped)
 {
     uint8 newDir = m_nDir;
     if (m_NextNode.m_wAreaId != -1)
@@ -312,7 +313,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
                 if (pPathNode->m_nNumLinks >= 3 && CTimer::GetFrameCounter() != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
                 {
                     m_nLastUpdateDirFrameCount = CTimer::GetFrameCounter();
-                    uint8 remainder = (3 * CTimer::GetFrameCounter() + pPed->m_nRandomSeed) % 100;
+                    uint8 remainder = (3 * CTimer::GetFrameCounter() + ped->m_nRandomSeed) % 100;
                     if (remainder <= 90u)
                     {
                         if (remainder > 80u)
@@ -332,7 +333,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
     if (newDir != m_nDir)
     {
         int8 outDir;
-        UpdatePathNodes(pPed, newDir, &m_LastNode, &m_NextNode, &outDir);
+        UpdatePathNodes(ped, newDir, &m_LastNode, &m_NextNode, &outDir);
 
         uint8 currentDir = m_nDir;
         uint8 theDir = outDir;
@@ -353,11 +354,11 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* pPed)
     }
 }
 
-void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* pPed, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
+void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
 {
     *originNode = *targetNode;
     targetNode->m_wAreaId = -1;
-    const CVector& pos = pPed->GetPosition();
+    const CVector& pos = ped->GetPosition();
     ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos.x, pos.y, pos.z, originNode, targetNode, dir, outDir);
 }
 
@@ -438,10 +439,10 @@ float CTaskComplexWander::ComputeTargetHeading(CPed* ped)
 }
 
 // 0x669F60
-void CTaskComplexWander::ComputeTargetPos(CPed* pPed, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress)
+void CTaskComplexWander::ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress)
 {
     CVector outTargetPos;
-    CVector* pTargetPos = ThePaths.TakeWidthIntoAccountForWandering(&outTargetPos, *pTargetNodeAddress, pPed->m_nRandomSeed);
+    CVector* pTargetPos = ThePaths.TakeWidthIntoAccountForWandering(&outTargetPos, *pTargetNodeAddress, ped->m_nRandomSeed);
     *pOutTargetPos = *pTargetPos;
     pOutTargetPos->z += 1.0f;
 }
@@ -460,17 +461,17 @@ bool CTaskComplexWander::ValidNodes()
 }
 
 // 0x674560
-void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
+void CTaskComplexWander::ScanForBlockedNodes(CPed* ped)
 {
     if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
     {
-        if (ScanForBlockedNode(pPed, &m_NextNode))
+        if (ScanForBlockedNode(ped, &m_NextNode))
         {
-            m_pSubTask->MakeAbortable(pPed, ABORT_PRIORITY_LEISURE, 0);
+            m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, 0);
 
             int8 outDir = 0;
-            UpdatePathNodes(pPed, m_nDir, &m_LastNode, &m_NextNode, &outDir);
-            if (ScanForBlockedNode(pPed, &m_NextNode) || &m_NextNode == &m_LastNode)
+            UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, &outDir);
+            if (ScanForBlockedNode(ped, &m_NextNode) || &m_NextNode == &m_LastNode)
             {
                 m_bAllNodesBlocked = 1;
             }
@@ -479,19 +480,19 @@ void CTaskComplexWander::ScanForBlockedNodes(CPed* pPed)
 }
 
 // 0x671EF0
-bool CTaskComplexWander::ScanForBlockedNode(CPed* pPed, CNodeAddress* targetNodeAddress)
+bool CTaskComplexWander::ScanForBlockedNode(CPed* ped, CNodeAddress* targetNodeAddress)
 {
     CVector outVec;
-    CVector* pNewNodePos = ThePaths.TakeWidthIntoAccountForWandering(&outVec, *targetNodeAddress, pPed->m_nRandomSeed);
-    CVector2D distance = *pNewNodePos - pPed->GetPosition();
+    CVector* pNewNodePos = ThePaths.TakeWidthIntoAccountForWandering(&outVec, *targetNodeAddress, ped->m_nRandomSeed);
+    CVector2D distance = *pNewNodePos - ped->GetPosition();
     if (3.0f * 3.0f >= distance.SquaredMagnitude()) {
-        CPed* pClosestPed = (CPed*)pPed->m_pIntelligence->m_entityScanner.m_pClosestEntityInRange;
+        CPed* pClosestPed = (CPed*)ped->m_pIntelligence->m_entityScanner.m_pClosestEntityInRange;
         if (ScanForBlockedNode(pNewNodePos, pClosestPed))
         {
             return true;
         }
 
-        CVehicle* pClosestVehicle = (CVehicle*)pPed->m_pIntelligence->m_vehicleScanner.m_pClosestEntityInRange;
+        CVehicle* pClosestVehicle = (CVehicle*)ped->m_pIntelligence->m_vehicleScanner.m_pClosestEntityInRange;
         if (ScanForBlockedNode(pNewNodePos, pClosestVehicle))
         {
             return true;
@@ -501,13 +502,13 @@ bool CTaskComplexWander::ScanForBlockedNode(CPed* pPed, CNodeAddress* targetNode
 }
 
 // 0x66F4C0
-bool CTaskComplexWander::ScanForBlockedNode(CVector* position, CEntity* pEntity)
+bool CTaskComplexWander::ScanForBlockedNode(CVector* position, CEntity* entity)
 {
-    if (!pEntity)
+    if (!entity)
         return false;
 
-    CVector2D distance = *position - pEntity->GetPosition();
-    float fRadius = CModelInfo::GetModelInfo(pEntity->m_nModelIndex)->GetColModel()->GetBoundRadius() + 1.0f;
+    CVector2D distance = *position - entity->GetPosition();
+    float fRadius = CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->GetBoundRadius() + 1.0f;
     if (fRadius * fRadius > distance.SquaredMagnitude())
         return true;
 
@@ -515,27 +516,21 @@ bool CTaskComplexWander::ScanForBlockedNode(CVector* position, CEntity* pEntity)
 }
 
 // 0x673D00
-CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* pPed)
+CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* ped)
 {
     uint8 randomDir = CGeneral::GetRandomNumberInRange(0, 8);
-    switch (pPed->m_nPedType)
+    switch (ped->m_nPedType)
     {
     case PED_TYPE_COP:
     {
-        auto pComplexWanderCop = (CTaskComplexWanderCop*)CTask::operator new(80);
-        if (pComplexWanderCop)
-        {
-            pComplexWanderCop->Constructor(PEDMOVE_WALK, randomDir);
-            return pComplexWanderCop;
-        }
-        break;
+        return new CTaskComplexWanderCop(PEDMOVE_WALK, randomDir);
     }
     case PED_TYPE_MEDIC:
     {
         auto pTaskComplexWanderMedic = (CTaskComplexWanderMedic*)CTask::operator new(40);
         if (pTaskComplexWanderMedic)
         {
-            pTaskComplexWanderMedic->Constructor(PEDMOVE_WALK, randomDir, 1);
+            pTaskComplexWanderMedic->Constructor(PEDMOVE_WALK, randomDir, true);
             return pTaskComplexWanderMedic;
         }
         break;
@@ -545,7 +540,7 @@ CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* pPed)
         auto pTaskComplexWanderCriminal = (CTaskComplexWanderCriminal*)CTask::operator new(56);
         if (pTaskComplexWanderCriminal)
         {
-            pTaskComplexWanderCriminal->Constructor(PEDMOVE_WALK, randomDir, 1);
+            pTaskComplexWanderCriminal->Constructor(PEDMOVE_WALK, randomDir, true);
             return pTaskComplexWanderCriminal;
         }
         break;
@@ -555,7 +550,7 @@ CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* pPed)
         auto pTaskComplexWanderProstitute = (CTaskComplexWanderProstitute*)CTask::operator new(60);
         if (pTaskComplexWanderProstitute)
         {
-            pTaskComplexWanderProstitute->Constructor(PEDMOVE_WALK, randomDir, 1);
+            pTaskComplexWanderProstitute->Constructor(PEDMOVE_WALK, randomDir, true);
             return pTaskComplexWanderProstitute;
         }
         break;
@@ -565,7 +560,7 @@ CTaskComplexWander* CTaskComplexWander::GetWanderTaskByPedType(CPed* pPed)
         auto pTaskComplexWanderStandard = (CTaskComplexWanderStandard*)CTask::operator new(0x38);
         if (pTaskComplexWanderStandard)
         {
-            pTaskComplexWanderStandard->Constructor(PEDMOVE_WALK, randomDir, 1);
+            pTaskComplexWanderStandard->Constructor(PEDMOVE_WALK, randomDir, true);
             return pTaskComplexWanderStandard;
         }
         break;

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -79,8 +79,8 @@ private:
     void ProcessControl_Reversed();
     bool ProcessAI_Reversed(uint32& extraHandlingFlags);
     void PreRender_Reversed();
-    bool GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle);
-    bool GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle);
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     bool BreakTowLink_Reversed();
 };
 

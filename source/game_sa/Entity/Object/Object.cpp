@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -107,11 +107,11 @@ CObject::CObject(CDummyObject* dummyObj) : CPhysical()
 
     if (m_pRwObject)
     {
-        auto* pAtomic = m_pRwAtomic;
+        auto* atomic = m_pRwAtomic;
         if (RwObjectGetType(m_pRwObject) != rpATOMIC)
-            pAtomic = GetFirstAtomic(m_pRwClump);
+            atomic = GetFirstAtomic(m_pRwClump);
 
-        if (!CCustomBuildingRenderer::IsCBPCPipelineAttached(pAtomic))
+        if (!CCustomBuildingRenderer::IsCBPCPipelineAttached(atomic))
             m_bLightObject = true;
     }
 }
@@ -214,7 +214,7 @@ void CObject::ProcessControl_Reversed()
         && !physicalFlags.bDisableMoveForce
         && m_pDamageEntity
     ) {
-        const auto bCanCarryItems = m_pDamageEntity->m_nModelIndex == eModelID::MODEL_DUMPER || m_pDamageEntity->m_nModelIndex == eModelID::MODEL_FORKLIFT;
+        const auto bCanCarryItems = m_pDamageEntity->m_nModelIndex == MODEL_DUMPER || m_pDamageEntity->m_nModelIndex == MODEL_FORKLIFT;
         if (bCanCarryItems && m_pDamageEntity->AsAutomobile()->m_wMiscComponentAngle
             && !CRopes::IsCarriedByRope(this))
         {
@@ -430,8 +430,8 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
                     else if (!CanBeSmashed())
                     {
                         auto tempMat = CMatrix();
-                        auto* pColModel = CEntity::GetColModel();
-                        auto vecSize = pColModel->GetBoundingBox().GetSize();
+                        auto* cm = CEntity::GetColModel();
+                        auto vecSize = cm->GetBoundingBox().GetSize();
                         auto vecTransformed = *m_matrix * vecSize;
 
                         auto& vecCollidedPos = colPhysical->GetPosition();
@@ -452,7 +452,7 @@ void CObject::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bo
                     }
                 }
             }
-            else if(m_nModelIndex != eModelID::MODEL_GRENADE
+            else if (m_nModelIndex != MODEL_GRENADE
                 || !colPhysical->IsPed()
                 || m_matrix->GetPosition().z >= colPhysical->m_matrix->GetPosition().z)
             {
@@ -759,7 +759,7 @@ bool CObject::TryToExplode() {
 }
 
 // 0x59F300
-void CObject::SetObjectTargettable(uint8 targetable) {
+void CObject::SetObjectTargettable(bool targetable) {
     objectFlags.bIsTargatable = targetable;
 }
 
@@ -845,10 +845,10 @@ void CObject::LockDoor() {
 
 // 0x59F840
 void CObject::Init() {
-    m_nType = eEntityType::ENTITY_TYPE_OBJECT;
+    m_nType = ENTITY_TYPE_OBJECT;
     m_pObjectInfo = &CObjectData::GetDefault();
-    m_nColDamageEffect = eObjectColDamageEffect::COL_DAMAGE_EFFECT_NONE;
-    m_nSpecialColResponseCase = eObjectSpecialColResponseCases::COL_SPECIAL_RESPONSE_NONE;
+    m_nColDamageEffect = COL_DAMAGE_EFFECT_NONE;
+    m_nSpecialColResponseCase = COL_SPECIAL_RESPONSE_NONE;
     m_nObjectType = eObjectType::OBJECT_GAME;
     this->SetIsStatic(true);
 
@@ -993,12 +993,12 @@ void CObject::ProcessSamSiteBehaviour() {
 
     CEntity* targetEntity = nullptr;
     auto fHeading = CGeneral::GetATanOfXY(m_matrix->GetForward().x, m_matrix->GetForward().y);
-    auto* playerVeh = FindPlayerVehicle(-1, false);
+    auto* playerVeh = FindPlayerVehicle();
     if (!playerVeh
         || playerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BIKE
         || playerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_AUTOMOBILE)
     {
-        auto* player = FindPlayerPed(-1);
+        auto* player = FindPlayerPed();
         if (player->GetIntelligence()->GetTaskJetPack())
             targetEntity = player;
     }
@@ -1100,7 +1100,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
     m_fHealth -= damage * m_pObjectInfo->m_fColDamageMultiplier;
     m_fHealth = std::max(0.0F, m_fHealth);
 
-    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed(-1) && damager != FindPlayerVehicle(-1, false))
+    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle(-1, false))
         return;
 
     // Big Smoke crack palace wall break checks
@@ -1111,20 +1111,20 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 
         if (damager->IsPed())
         {
-            auto* ped = static_cast<CPed*>(damager);
-            if (!ped->bInVehicle || !ped->m_pVehicle || ped->m_pVehicle->m_nModelIndex != eModelID::MODEL_SWATVAN)
+            auto* ped = damager->AsPed();
+            if (!ped->bInVehicle || !ped->m_pVehicle || ped->m_pVehicle->m_nModelIndex != MODEL_SWATVAN)
                 return;
         }
         else if (damager->IsVehicle())
         {
-            if (damager->m_nModelIndex != eModelID::MODEL_SWATVAN)
+            if (damager->m_nModelIndex != MODEL_SWATVAN)
                 return;
         }
         else
             return;
     }
 
-    if (damager && damager->m_nModelIndex == eModelID::MODEL_FORKLIFT)
+    if (damager && damager->m_nModelIndex == MODEL_FORKLIFT)
         return;
 
     m_nLastWeaponDamage = weaponType;
@@ -1258,16 +1258,16 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
 void CObject::Explode() {
     CVector vecPos = GetPosition();
     vecPos.z += 0.5F;
-    auto* player = FindPlayerPed(-1);
+    auto* player = FindPlayerPed();
     CExplosion::AddExplosion(this, player, eExplosionType::EXPLOSION_OBJECT, vecPos, 100, true, -1.0F, false);
-    if (m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_BREAKABLE
-        || m_nColDamageEffect == eObjectColDamageEffect::COL_DAMAGE_EFFECT_BREAKABLE_REMOVED)
+    if (m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE
+        || m_nColDamageEffect == COL_DAMAGE_EFFECT_BREAKABLE_REMOVED)
     {
         vecPos.z -= 1.0F;
         auto vecDir = CVector(0.0F, 0.0F, 1.0F);
         ObjectDamage(10000.0F, &vecPos, &vecDir, this, eWeaponType::WEAPON_EXPLOSION);
     }
-    else if(!physicalFlags.bDisableCollisionForce)
+    else if (!physicalFlags.bDisableCollisionForce)
     {
         m_vecMoveSpeed.x += CGeneral::GetRandomNumberInRange(-0.0256F, 0.0256F);
         m_vecMoveSpeed.y += CGeneral::GetRandomNumberInRange(-0.0256F, 0.0256F);

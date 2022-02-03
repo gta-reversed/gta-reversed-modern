@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -41,8 +41,8 @@ private:
     void RemoveLighting_Reversed(bool bRemove);
 
 private: // Functions fully inlined in android idb, and unnamed in PC idb
-    static void      SetupCarPipeAtomicsForClump(uint32 modelId, RpClump* pClump);
-    static RpAtomic* SetupCarPipeAtomicCB(RpAtomic* pAtomic, void* data);
+    static void      SetupCarPipeAtomicsForClump(uint32 modelId, RpClump* clump);
+    static RpAtomic* SetupCarPipeAtomicCB(RpAtomic* atomic, void* data);
 };
 
 VALIDATE_SIZE(CCutsceneObject, 0x19C);

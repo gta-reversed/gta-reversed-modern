@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -111,8 +111,8 @@ public:
     }
 
     // Returns slot index for this object
-    int32 GetIndex(A* pObject) {
-        return reinterpret_cast<B*>(pObject) - m_pObjects;
+    int32 GetIndex(A* obj) {
+        return reinterpret_cast<B*>(obj) - m_pObjects;
     }
 
     // Returns pointer to object by slot index
@@ -171,16 +171,16 @@ public:
     }
 
     // Deallocates object
-    void Delete(A* pObject) {
-        int32 nIndex = reinterpret_cast<B*>(pObject) - m_pObjects;
+    void Delete(A* obj) {
+        int32 nIndex = reinterpret_cast<B*>(obj) - m_pObjects;
         m_byteMap[nIndex].bEmpty = true;
         if (nIndex < m_nFirstFree)
             m_nFirstFree = nIndex;
     }
 
     // Returns SCM handle (ref) for object (0x424160)
-    int32 GetRef(A* pObject) {
-        return (GetIndex(pObject) << 8) + m_byteMap[GetIndex(pObject)].IntValue();
+    int32 GetRef(A* obj) {
+        return (GetIndex(obj) << 8) + m_byteMap[GetIndex(obj)].IntValue();
     }
 
     // Returns pointer to object by SCM handle (ref)

@@ -18,8 +18,8 @@ CPed* CPedGroup::GetClosestGroupPed(CPed* ped, float* pOutDistance) {
     return plugin::CallMethodAndReturn<CPed*, 0x5FACD0, CPedGroup*, CPed*, float*>(this, ped, pOutDistance);
 }
 
-bool CPedGroup::IsAnyoneUsingCar(CVehicle const* vehicle) {
-    return plugin::CallMethodAndReturn<bool, 0x5F7DB0, CPedGroup*, CVehicle const*>(this, vehicle);
+bool CPedGroup::IsAnyoneUsingCar(const CVehicle* vehicle) {
+    return plugin::CallMethodAndReturn<bool, 0x5F7DB0, CPedGroup*, const CVehicle*>(this, vehicle);
 }
 
 void CPedGroup::PlayerGaveCommand_Attack(CPed* playerPed, CPed* ped) {
@@ -38,6 +38,6 @@ void CPedGroup::RemoveAllFollowers() {
     plugin::CallMethod<0x5FB7D0, CPedGroup*>(this);
 }
 
-void CPedGroup::Teleport(CVector const* Pos) {
-    plugin::CallMethod<0x5F7AD0, CPedGroup*, CVector const*>(this, Pos);
+void CPedGroup::Teleport(const CVector* pos) {
+    plugin::CallMethod<0x5F7AD0, CPedGroup*, const CVector*>(this, pos);
 }

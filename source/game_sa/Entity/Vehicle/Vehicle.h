@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -22,6 +22,11 @@
 #include "Fire.h"
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
+
+class CWeapon;
+class CPed;
+class CPlane;
+class CHeli;
 
 enum eCarWeapon {
     CAR_WEAPON_NOT_USED,
@@ -117,16 +122,12 @@ enum eFlightModel : int32 {
     FLIGHT_MODEL_HELI = 6, // also used for hydra
 };
 
-class CWeapon;
-class CPed;
-
 enum tWheelState : int32 {
     WHEEL_STATE_NORMAL,	  // standing still or rolling normally
     WHEEL_STATE_SPINNING, // rotating but not moving
     WHEEL_STATE_SKIDDING,
     WHEEL_STATE_FIXED,	  // not rotating
 };
-
 
 struct tHydrualicData {
     // applied when the vehicle is moving
@@ -406,7 +407,7 @@ public:
     virtual void ProcessControlCollisionCheck(bool applySpeed) { /* Do nothing */ }
     virtual void ProcessControlInputs(uint8 playerNum) { /* Do nothing */ }
     // component index in m_apModelNodes array
-    virtual void GetComponentWorldPosition(int32 componentId, CVector& posnOut) { /* Do nothing */ }
+    virtual void GetComponentWorldPosition(int32 componentId, CVector& outPos) { /* Do nothing */ }
     // component index in m_apModelNodes array
     virtual bool IsComponentPresent(int32 componentId) { return false; }
     virtual void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { /* Do nothing */ }
@@ -445,8 +446,8 @@ public:
     virtual void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
-    virtual bool GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
     virtual bool SetTowLink(CVehicle* targetVehicle, bool arg1) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
@@ -473,8 +474,8 @@ private:
     float GetHeightAboveRoad_Reversed();
     bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
     bool CanPedJumpOutCar_Reversed(CPed* ped);
-    bool GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
-    bool GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
     bool Save_Reversed();
     bool Load_Reversed();
 
@@ -494,7 +495,7 @@ public:
     bool CustomCarPlate_TextureCreate(CVehicleModelInfo* model);
     void CustomCarPlate_TextureDestroy();
     bool CanBeDeleted();
-    float ProcessWheelRotation(tWheelState wheelState, CVector const& arg1, CVector const& arg2, float arg3);
+    float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
     bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2);
     void ProcessDelayedExplosion();
     bool AddPassenger(CPed* passenger);
@@ -542,7 +543,7 @@ public:
     void ClearWindowOpenFlag(uint8 doorId);
     bool SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 componentIndex, int32& resultModelIndex);
     bool ClearVehicleUpgradeFlags(int32 arg0, int32 componentIndex);
-    RpAtomic* CreateUpgradeAtomic(CBaseModelInfo* model, UpgradePosnDesc const* upgradePosn, RwFrame* parentComponent, bool isDamaged);
+    RpAtomic* CreateUpgradeAtomic(CBaseModelInfo* model, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged);
     void RemoveUpgrade(int32 upgradeId);
     // return upgrade model id or -1 if not present
     int32 GetUpgrade(int32 upgradeId);
@@ -677,6 +678,9 @@ public:
     bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
+
+    CPlane* AsPlane() { return reinterpret_cast<CPlane*>(this); }
+    CHeli*  AsHeli()  { return reinterpret_cast<CHeli*>(this); }
 
 public:
     // NOTSA functions

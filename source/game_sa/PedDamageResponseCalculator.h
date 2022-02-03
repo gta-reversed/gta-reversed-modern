@@ -18,7 +18,7 @@ public:
 
 public:
     CPedDamageResponseCalculator(CEntity* entity, float fDamage, eWeaponType weaponType, ePedPieceTypes bodyPart, bool bSpeak);
-    ~CPedDamageResponseCalculator();
+    ~CPedDamageResponseCalculator() = default;
 
     void ComputeDamageResponse(CPed* ped, CPedDamageResponse* damageResponse, bool bSpeak);
 

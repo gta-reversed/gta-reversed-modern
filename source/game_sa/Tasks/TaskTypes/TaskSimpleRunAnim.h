@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -12,10 +12,9 @@
 class CTaskSimpleRunAnim : public CTaskSimpleAnim {
 public:
     AssocGroupId m_nAnimGroup;
-    AnimationId m_nAnimId;
-    float m_fBlendDelta;
-    uint16 m_nTaskType;
-    char _pad[2];
+    AnimationId  m_nAnimId;
+    float        m_fBlendDelta;
+    uint16       m_nTaskType;
 
 public:
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);

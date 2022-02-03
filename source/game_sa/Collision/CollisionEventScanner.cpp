@@ -6,7 +6,7 @@
 // messed up and made the first parameter `this`, which is a boolean, is being passed as in ecx a.k.a `this`.
 // We can rewrite this, but our goal is to keep our source code similar to gta_sa.exe.
 // Also, read the comment in CPedIntelligence::ProcessFirst.
-void CCollisionEventScanner::ScanForCollisionEvents(CPed* pVictim, CEventGroup* pEventGroup)
+void CCollisionEventScanner::ScanForCollisionEvents(CPed* victim, CEventGroup* eventGroup)
 {
-    plugin::CallMethod<0x604500, CCollisionEventScanner*, CPed*, CEventGroup*>(this, pVictim, pEventGroup);
+    plugin::CallMethod<0x604500, CCollisionEventScanner*, CPed*, CEventGroup*>(this, victim, eventGroup);
 }

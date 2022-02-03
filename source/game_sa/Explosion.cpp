@@ -43,7 +43,7 @@ void CExplosion::ClearAllExplosions() {
         exp.m_fRadius = 1.0f;
         exp.m_fVisibleDistance = 0.0f;
         exp.m_fPropagationRate = 0.0f;
-        exp.m_fGroundZ = 0.0;
+        exp.m_fGroundZ = 0.0f;
         exp.m_pCreator = nullptr;
         exp.m_pVictim = nullptr;
         exp.m_nExpireTime = 0.0f;
@@ -210,9 +210,9 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         FxSystem_c* fx{nullptr};
         if (exp->m_pVictim) {
             if (RwObject* pRwObj = exp->m_pVictim->m_pRwObject) {
-                if (RwMatrix* pMatrix = exp->m_pVictim->GetModellingMatrix()) {
+                if (RwMatrix* matrix = exp->m_pVictim->GetModellingMatrix()) {
                     CVector expToVictimDir = pos - exp->m_pVictim->GetPosition();
-                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, pMatrix, false);
+                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, matrix, false);
                 }
             }
         } else {
@@ -283,6 +283,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
+        break;
     }
     case eExplosionType::EXPLOSION_CAR:
     case eExplosionType::EXPLOSION_QUICK_CAR: {
@@ -298,6 +299,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             CCrime::ReportCrime(eCrimeType::CRIME_EXPLOSION, exp->m_pVictim->AsPed(), nullptr); /* won't do anything as second ped is nullptr */
         }
         CreateAndPlayFxWithSound("explosion_medium");
+        break;
     }
     case eExplosionType::EXPLOSION_BOAT:
     case eExplosionType::EXPLOSION_AIRCRAFT: {
@@ -309,6 +311,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_nCreatedTime = (float)CTimer::GetTimeInMS();
 
         CreateAndPlayFxWithSound("explosion_large");
+        break;
     }
     case eExplosionType::EXPLOSION_MINE: {
         if (!bInvisible) {

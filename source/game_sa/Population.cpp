@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -134,8 +134,8 @@ bool CPopulation::IsSecurityGuard(ePedType pedType) {
 }
 
 // 0x6114C0
-bool CPopulation::IsSkateable(CVector const& point) {
-    return ((bool(__cdecl*)(CVector const&))0x6114C0)(point);
+bool CPopulation::IsSkateable(const CVector& point) {
+    return ((bool(__cdecl*)(const CVector&))0x6114C0)(point);
 }
 
 // 0x611550
@@ -189,8 +189,8 @@ bool CPopulation::CanJeerAtStripper(int32 modelIndex) {
 }
 
 // 0x6117D0
-void CPopulation::PlaceGangMembers(ePedType pedType, int32 arg1, CVector const& posn) {
-    ((void(__cdecl*)(ePedType, int32, CVector const&))0x6117D0)(pedType, arg1, posn);
+void CPopulation::PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn) {
+    ((void(__cdecl*)(ePedType, int32, const CVector&))0x6117D0)(pedType, arg1, posn);
 }
 
 // 0x6117F0
@@ -209,8 +209,8 @@ void CPopulation::RemoveSpecificDriverModelsForCar(int32 carModelIndex) {
 }
 
 // 0x611B20
-bool CPopulation::IsCorrectTimeOfDayForEffect(C2dEffect const* effect) {
-    return ((bool(__cdecl*)(C2dEffect const*))0x611B20)(effect);
+bool CPopulation::IsCorrectTimeOfDayForEffect(const C2dEffect* effect) {
+    return ((bool(__cdecl*)(const C2dEffect*))0x611B20)(effect);
 }
 
 // 0x611B60
@@ -224,8 +224,8 @@ float CPopulation::FindPedMultiplierMotorway() {
 }
 
 // 0x611FC0
-void CPopulation::ManagePed(CPed* ped, CVector const& playerPosn) {
-    ((void(__cdecl*)(CPed*, CVector const&))0x611FC0)(ped, playerPosn);
+void CPopulation::ManagePed(CPed* ped, const CVector& playerPosn) {
+    ((void(__cdecl*)(CPed*, const CVector&))0x611FC0)(ped, playerPosn);
 }
 
 // 0x612240
@@ -249,13 +249,13 @@ bool CPopulation::TestSafeForRealObject(CDummyObject* dummyObject) {
 }
 
 // 0x612710
-CPed* CPopulation::AddPed(ePedType pedType, uint32 modelIndex, CVector const& posn, bool makeWander) {
-    return ((CPed * (__cdecl*)(ePedType, uint32, CVector const&, bool))0x612710)(pedType, modelIndex, posn, makeWander);
+CPed* CPopulation::AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander) {
+    return ((CPed * (__cdecl*)(ePedType, uint32, const CVector&, bool))0x612710)(pedType, modelIndex, posn, makeWander);
 }
 
 // 0x612CD0
-CPed* CPopulation::AddDeadPedInFrontOfCar(CVector const& posn, CVehicle* vehicle) {
-    return ((CPed * (__cdecl*)(CVector const&, CVehicle*))0x612CD0)(posn, vehicle);
+CPed* CPopulation::AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle) {
+    return ((CPed * (__cdecl*)(const CVector&, CVehicle*))0x612CD0)(posn, vehicle);
 }
 
 // 0x612F90
@@ -284,8 +284,8 @@ CPed* CPopulation::AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType
 }
 
 // 0x613CD0
-void CPopulation::PlaceMallPedsAsStationaryGroup(CVector const& posn) {
-    ((void(__cdecl*)(CVector const&))0x613CD0)(posn);
+void CPopulation::PlaceMallPedsAsStationaryGroup(const CVector& posn) {
+    ((void(__cdecl*)(const CVector&))0x613CD0)(posn);
 }
 
 // 0x613D60
@@ -318,30 +318,30 @@ void CPopulation::ConvertToRealObject(CDummyObject* dummyObject) {
     if (!CPopulation::TestSafeForRealObject(dummyObject))
         return;
 
-    auto* pObj = dummyObject->CreateObject();
-    if (!pObj)
+    auto* obj = dummyObject->CreateObject();
+    if (!obj)
         return;
 
     CWorld::Remove(dummyObject);
     dummyObject->m_bIsVisible = false;
     dummyObject->ResolveReferences();
 
-    pObj->SetRelatedDummy(dummyObject);
-    CWorld::Add(pObj);
+    obj->SetRelatedDummy(dummyObject);
+    CWorld::Add(obj);
 
-    if (!IsGlassModel(pObj) || CModelInfo::GetModelInfo(pObj->m_nModelIndex)->IsGlassType2())
+    if (!IsGlassModel(obj) || CModelInfo::GetModelInfo(obj->m_nModelIndex)->IsGlassType2())
     {
-        if (pObj->m_nModelIndex == ModelIndices::MI_BUOY || pObj->physicalFlags.bAttachedToEntity)
+        if (obj->m_nModelIndex == ModelIndices::MI_BUOY || obj->physicalFlags.bAttachedToEntity)
         {
-            pObj->SetIsStatic(false);
-            pObj->m_vecMoveSpeed.Set(0.0F, 0.0F, -0.001F);
-            pObj->physicalFlags.bTouchingWater = true;
-            pObj->AddToMovingList();
+            obj->SetIsStatic(false);
+            obj->m_vecMoveSpeed.Set(0.0F, 0.0F, -0.001F);
+            obj->physicalFlags.bTouchingWater = true;
+            obj->AddToMovingList();
         }
     }
     else
     {
-        pObj->m_bIsVisible = false;
+        obj->m_bIsVisible = false;
     }
 }
 
@@ -359,8 +359,8 @@ void CPopulation::ConvertToDummyObject(CObject* object) {
 
     if (object->IsObject())
     {
-        auto* pModelInfo = CModelInfo::GetModelInfo(object->m_nModelIndex)->AsAtomicModelInfoPtr();
-        if (pModelInfo && pModelInfo->IsGlassType1())
+        auto* mi = CModelInfo::GetModelInfo(object->m_nModelIndex)->AsAtomicModelInfoPtr();
+        if (mi && mi->IsGlassType1())
             pDummy->m_bIsVisible = false;
     }
 
@@ -386,13 +386,13 @@ void CPopulation::GeneratePedsAtStartOfGame() {
 }
 
 // 0x615DC0
-void CPopulation::ManageObject(CObject* object, CVector const& posn) {
-    ((void(__cdecl*)(CObject*, CVector const&))0x615DC0)(object, posn);
+void CPopulation::ManageObject(CObject* object, const CVector& posn) {
+    ((void(__cdecl*)(CObject*, const CVector&))0x615DC0)(object, posn);
 }
 
 // 0x616000
-void CPopulation::ManageDummy(CDummy* dummy, CVector const& posn) {
-    ((void(__cdecl*)(CDummy*, CVector const&))0x616000)(dummy, posn);
+void CPopulation::ManageDummy(CDummy* dummy, const CVector& posn) {
+    ((void(__cdecl*)(CDummy*, const CVector&))0x616000)(dummy, posn);
 }
 
 // 0x6160A0

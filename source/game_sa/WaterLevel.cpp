@@ -81,9 +81,9 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1
     *fOutWave += fHighFreqWaves;
 }
 
-bool CWaterLevel::GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
+bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
 {
-    return plugin::CallAndReturn<bool, 0x6EA960, CVector const&, float*, float*, float*>
+    return plugin::CallAndReturn<bool, 0x6EA960, const CVector&, float*, float*, float*>
         (vecPos, pOutWaterDepth, pOutWaterLevel, pOutGroundLevel);
 }
 

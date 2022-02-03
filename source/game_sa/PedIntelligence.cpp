@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -140,7 +140,7 @@ void CPedIntelligence::SetSeeingRange(float range) {
 // Unused
 // 0x600C00
 bool CPedIntelligence::IsInHearingRange(const CVector& posn) {
-    return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, CVector const&>(this, posn);
+    return plugin::CallMethodAndReturn<bool, 0x600C00, CPedIntelligence*, const CVector&>(this, posn);
 }
 
 // 0x600C60
@@ -481,15 +481,13 @@ void CPedIntelligence::ClearTasks(bool bClearPrimaryTasks, bool bClearSecondaryT
 void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     CTask* primaryTask = m_TaskMgr.GetTaskPrimary(TASK_PRIMARY_PRIMARY);
     CTaskComplex* pTaskComplexBeInGroup = nullptr;
-    if (primaryTask && primaryTask->GetTaskType() == TASK_COMPLEX_BE_IN_GROUP)
-    {
+    if (primaryTask && primaryTask->GetTaskType() == TASK_COMPLEX_BE_IN_GROUP) {
         pTaskComplexBeInGroup = (CTaskComplex*)primaryTask->Clone();
     }
 
     CTaskSimpleHoldEntity* taskSimpleHoldEntity = nullptr;
     CTask* secondaryTask = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-    if (secondaryTask && secondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
-    {
+    if (secondaryTask && secondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
         taskSimpleHoldEntity = (CTaskSimpleHoldEntity*)secondaryTask;
     }
 
@@ -497,13 +495,10 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     bool bIsEntityVisible = false;
     CObject* objectToHold = nullptr;
     CTaskSimpleHoldEntity* taskSimpleHoldEntityCloned = nullptr;
-    if (taskSimpleHoldEntity && taskSimpleHoldEntity->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
-    {
+    if (taskSimpleHoldEntity && taskSimpleHoldEntity->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
         objectToHold = (CObject*)taskSimpleHoldEntity->m_pEntityToHold;
-        if (objectToHold)
-        {
-            if (objectToHold->IsObject())
-            {
+        if (objectToHold) {
+            if (objectToHold->IsObject()) {
                 objectType = objectToHold->m_nObjectType;
                 bIsEntityVisible = objectToHold->m_bIsVisible;
             }
@@ -521,10 +516,19 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
     m_eventHandler.FlushImmediately();
     m_TaskMgr.FlushImmediately();
     CPedScriptedTaskRecord::Process();
-    if (taskSimpleHoldEntityCloned)
-    {
-        if (objectType != -1)
-        {
+    if (pTaskComplexBeInGroup) {
+        auto pedGroup = CPedGroups::GetPedsGroup(m_pPed);
+        if (!pedGroup || m_pPed->IsPlayer()) {
+            delete pTaskComplexBeInGroup;
+        }
+        else {
+            pedGroup->m_groupIntelligence.ComputeDefaultTasks(m_pPed);
+            m_TaskMgr.SetTask(pTaskComplexBeInGroup, 3, false);
+        }
+    }
+
+    if (taskSimpleHoldEntityCloned) {
+        if (objectType != -1) {
             objectToHold->m_nObjectType = objectType;
             objectToHold->m_bIsVisible = bIsEntityVisible;
         }
@@ -532,30 +536,26 @@ void CPedIntelligence::FlushImmediately(bool bSetPrimaryDefaultTask) {
         taskSimpleHoldEntityCloned->ProcessPed(m_pPed);
     }
 
-    if (taskComplexFacialCloned)
-    {
+    if (taskComplexFacialCloned) {
         m_TaskMgr.SetTaskSecondary(taskComplexFacialCloned, TASK_SECONDARY_FACIAL_COMPLEX);
     }
 
-    if (bSetPrimaryDefaultTask)
-    {
+    if (bSetPrimaryDefaultTask) {
         if (m_pPed->IsPlayer()) {
             auto taskSimplePlayerOnFoot = new CTaskSimplePlayerOnFoot();
             m_TaskMgr.SetTask(taskSimplePlayerOnFoot, TASK_PRIMARY_DEFAULT, false);
             return;
-        } else
-        {
-            if (m_pPed->m_nCreatedBy != PED_MISSION)
-            {
+        }
+        else {
+            if (m_pPed->m_nCreatedBy != PED_MISSION) {
                 auto taskComplexWander = CTaskComplexWander::GetWanderTaskByPedType(m_pPed);
                 m_TaskMgr.SetTask(taskComplexWander, TASK_PRIMARY_DEFAULT, false);
                 return;
             }
 
-            if (auto taskSimpleStandStill = new CTaskSimpleStandStill(0, true, false, 8.0f)) {
-                m_TaskMgr.SetTask(taskSimpleStandStill, TASK_PRIMARY_DEFAULT, false);
-                return;
-            }
+            auto taskSimpleStandStill = new CTaskSimpleStandStill(0, true, false, 8.0f);
+            m_TaskMgr.SetTask(taskSimpleStandStill, TASK_PRIMARY_DEFAULT, false);
+            return;
         }
         m_TaskMgr.SetTask(nullptr, TASK_PRIMARY_DEFAULT, false);
         return;
@@ -672,9 +672,9 @@ bool CPedIntelligence::IsThreatenedBy(const CPed& ped) const {
 }
 
 // 0x601C90
-bool CPedIntelligence::Respects(CPed* pPed) {
+bool CPedIntelligence::Respects(CPed* ped) {
     auto respect = m_pPed->m_acquaintance.m_nRespect;
-    auto pedFlag = CPedType::GetPedFlag((ePedType)pPed->m_nPedType);
+    auto pedFlag = CPedType::GetPedFlag((ePedType)ped->m_nPedType);
     return pedFlag & respect;
 }
 

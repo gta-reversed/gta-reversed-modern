@@ -20,7 +20,7 @@ public:
     eTaskType GetTaskType() override { return TASK_SIMPLE_HIT_HEAD; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
-    static void FinishAnimCB(CAnimBlendAssociation* pAnim, void* data);
+    static void FinishAnimCB(CAnimBlendAssociation* anim, void* data);
 
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool ProcessPed_Reversed(CPed* ped);

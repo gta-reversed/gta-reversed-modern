@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -44,7 +44,7 @@ public:
 
     // class methods
     struct RpAtomic* GetAtomicFromDistance(float distance);
-    void SetupVehicleUpgradeFlags(char const* name);
+    void SetupVehicleUpgradeFlags(const char* name);
 };
 
 void SetAtomicModelInfoFlags(CAtomicModelInfo* modelInfo, uint32 dwFlags);

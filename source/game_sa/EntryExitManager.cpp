@@ -73,9 +73,9 @@ void CEntryExitManager::DeleteOne(int32 index)
     plugin::Call<0x43FD50, int32>(index);
 }
 
-int32 CEntryExitManager::FindNearestEntryExit(CVector2D const& position, float range, int32 ignoreArea)
+int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea)
 {
-    return plugin::CallAndReturn<int32, 0x43F4B0, CVector2D const&, float, int32>(position, range, ignoreArea);
+    return plugin::CallAndReturn<int32, 0x43F4B0, const CVector2D&, float, int32>(position, range, ignoreArea);
 }
 
 // 0x43F0A0

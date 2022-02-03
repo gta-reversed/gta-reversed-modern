@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,7 +15,6 @@ struct RpAtomic;
 
 struct tUser3dMarker {
     bool    m_bIsUsed;
-    char    _pad1[3];
     CVector m_vecPosition;
     uint32  m_nRed;
     uint32  m_nGreen;
@@ -26,7 +25,6 @@ VALIDATE_SIZE(tUser3dMarker, 0x1C);
 
 struct tDirectionArrow {
     bool    m_bIsUsed;
-    char    _pad1[3];
     CVector m_vecPosition;
     float   m_fSize;
     CVector m_vecDirection;
@@ -66,7 +64,7 @@ public:
     static void DirectionArrowsDraw();
     static void DirectionArrowsInit();
     static void ForceRender(uint8 bEnable);
-    static RpClump* LoadMarker(char const* modelName);
+    static RpClump* LoadMarker(const char* modelName);
 
     static C3dMarker* PlaceMarker(uint32 id, uint16 type, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, float nrm_x, float nrm_y, float nrm_z, bool zCheck);
     static void PlaceMarkerCone(uint32 id, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, uint8 bEnableCollision);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto) SHARED header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -37,6 +37,9 @@ typedef uintptr_t uintptr;
 typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
+
+// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
+#define UNUSED(x) (void)(x);
 
 #define _IGNORED_
 #define _CAN_BE_NULL_

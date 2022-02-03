@@ -9,6 +9,7 @@ float& CTaskSimpleGoTo::ms_fLookAtThresholdDotProduct = *(float*)0xC18D48;
 void CTaskSimpleGoTo::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGoTo);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x6679C0);
     RH_ScopedInstall(HasCircledTarget, 0x667A10);
     RH_ScopedInstall(SetUpIK, 0x667AD0);
@@ -59,7 +60,7 @@ void CTaskSimpleGoTo::SetUpIK(CPed* ped)
     if (ped->GetIsOnScreen() && !gotoFlags.m_bIsIKChainSet
         && !g_ikChainMan.GetLookAtEntity(ped)
         && !ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK)
-        && (ped != FindPlayerPed(-1) || CPad::GetPad(0)->DisablePlayerControls)) {
+        && (ped != FindPlayerPed() || CPad::GetPad(0)->DisablePlayerControls)) {
         if (!m_pParentTask || m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING && m_pParentTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY) {
             CVector vecDistance = m_vecTargetPoint - ped->GetPosition();
             if (vecDistance.SquaredMagnitude() > 9.0f) {

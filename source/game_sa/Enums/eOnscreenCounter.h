@@ -7,6 +7,6 @@ enum class eOnscreenCounter : uint16 {
 };
 
 enum class eTimerDirection : uint8 {
-    DECREASE,
-    INCREASE,
+    INCREASE = 0,
+    DECREASE = 1,
 };

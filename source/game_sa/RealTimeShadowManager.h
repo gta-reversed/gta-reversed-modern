@@ -23,8 +23,8 @@ public:
     void ReInit();
     void Update();
 
-    CRealTimeShadow& GetRealTimeShadow(CPhysical* pPhysical);
-    void             DoShadowThisFrame(CPhysical* pPhysical);
+    CRealTimeShadow& GetRealTimeShadow(CPhysical* physical);
+    void             DoShadowThisFrame(CPhysical* physical);
     void             ReturnRealTimeShadow(CRealTimeShadow* pShadow);
 };
 

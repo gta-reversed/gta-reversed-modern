@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -56,7 +56,7 @@ public:
     // funcs
     void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
-    void                PointGunAtPosition(CVector const& posn, float arg2);
+    void                PointGunAtPosition(const CVector& posn, float arg2);
     static RwMatrix* GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
 
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);

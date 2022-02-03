@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,7 +14,7 @@ void CPlaceable::InjectHooks()
     RH_ScopedCategory("Entity");
 
     RH_ScopedOverloadedInstall(SetPosn, "xyz", 0x420B80, void(CPlaceable::*)(float, float, float));
-    RH_ScopedOverloadedInstall(SetPosn, "vector", 0x4241C0, void(CPlaceable::*)(CVector const&));
+    RH_ScopedOverloadedInstall(SetPosn, "vector", 0x4241C0, void(CPlaceable::*)(const CVector&));
     RH_ScopedInstall(SetOrientation, 0x439A80);
     RH_ScopedInstall(SetHeading, 0x43E0C0);
     RH_ScopedInstall(GetHeading, 0x441DB0);
@@ -68,13 +68,14 @@ CVector CPlaceable::GetUpVector()
 
 void CPlaceable::SetPosn(float x, float y, float z)
 {
-    auto& pPos = GetPosition();
-    pPos.Set(x, y, z);
+    auto& pos = GetPosition();
+    pos.Set(x, y, z);
 }
 
-void CPlaceable::SetPosn(CVector const& posn)
+void CPlaceable::SetPosn(const CVector& posn)
 {
-    GetPosition() = posn;
+    auto& pos = GetPosition();
+    pos = posn;
 }
 
 void CPlaceable::SetOrientation(float x, float y, float z)

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,8 +10,8 @@ class CGangInfo {
     PLUGIN_NO_DEFAULT_CONSTRUCTION(CGangInfo)
 
 public:
-    int8 m_nPedModelOverride;
-    int32       m_nGangWeapons[3];
+    int8  m_nPedModelOverride;
+    int32 m_nGangWeapons[3];
 };
 
 VALIDATE_SIZE(CGangInfo, 0x10);

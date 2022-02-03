@@ -2,13 +2,13 @@
 
 #include "TaskSimpleCarDriveTimed.h"
 
-CTaskSimpleCarDriveTimed* CTaskSimpleCarDriveTimed::Constructor(CVehicle* pVehicle, int32 nTime) {
-    this->CTaskSimpleCarDriveTimed::CTaskSimpleCarDriveTimed(pVehicle, nTime);
+CTaskSimpleCarDriveTimed* CTaskSimpleCarDriveTimed::Constructor(CVehicle* vehicle, int32 nTime) {
+    this->CTaskSimpleCarDriveTimed::CTaskSimpleCarDriveTimed(vehicle, nTime);
     return this;
 }
 
 // 0x5FF940
-CTaskSimpleCarDriveTimed::CTaskSimpleCarDriveTimed(CVehicle* pVehicle, int32 nTime) : CTaskSimpleCarDrive(pVehicle, nullptr, false), m_nTimer() {
+CTaskSimpleCarDriveTimed::CTaskSimpleCarDriveTimed(CVehicle* vehicle, int32 nTime) : CTaskSimpleCarDrive(vehicle, nullptr, false), m_nTimer() {
     m_nTime = nTime;
 }
 

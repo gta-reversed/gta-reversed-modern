@@ -33,10 +33,10 @@ void CEscalators::Init() {
 }
 
 // 0x717C90
-void CEscalators::AddOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* pEntity) {
+void CEscalators::AddOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* entity) {
     for (CEscalator& escalator : aEscalators) {
         if (!escalator.m_bExist) {
-            escalator.AddThisOne(vecStart, vecBottom, vecEnd, vecTop, bMoveDown, pEntity);
+            escalator.AddThisOne(vecStart, vecBottom, vecEnd, vecTop, bMoveDown, entity);
             break;
         }
     }

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,6 +18,7 @@
 
 class CTrain;
 class CBike;
+class CBoat;
 class CAutomobile;
 class CDummy;
 class CBuilding;
@@ -141,7 +142,7 @@ public:
     CVector* FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex);
     C2dEffect* GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot);
     CVector TransformFromObjectSpace(const CVector& offset);
-    CVector* TransformFromObjectSpace(CVector& outPosn, const CVector& offset);
+    CVector* TransformFromObjectSpace(CVector& outPos, const CVector& offset);
     void CreateEffects();
     void DestroyEffects();
     void AttachToRwObject(RwObject* object, bool updateEntityMatrix);
@@ -160,7 +161,7 @@ public:
     void ModifyMatrixForBannerInWind();
     RwMatrix* GetModellingMatrix();
     CColModel* GetColModel();
-    void CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4);
+    void CalculateBBProjection(CVector* corner1, CVector* corner2, CVector* corner3, CVector* corner4);
     void UpdateAnim();
     bool IsVisible();
     float GetDistanceFromCentreOfMassToBaseOfModel();
@@ -178,8 +179,8 @@ public:
 
 public:
     // Rw callbacks
-    static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);
-    static RpMaterial* SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData);
+    static RpAtomic* SetAtomicAlphaCB(RpAtomic* atomic, void* data);
+    static RpMaterial* SetMaterialAlphaCB(RpMaterial* material, void* data);
 
     [[nodiscard]] bool IsPhysical() const { return m_nType > ENTITY_TYPE_BUILDING && m_nType < ENTITY_TYPE_DUMMY; }
     [[nodiscard]] bool IsNothing()  const { return m_nType == ENTITY_TYPE_NOTHING; }
@@ -189,25 +190,29 @@ public:
     [[nodiscard]] bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
     [[nodiscard]] bool IsDummy()    const { return m_nType == ENTITY_TYPE_DUMMY; }
 
-    [[nodiscard]] bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
+    [[nodiscard]] bool IsModelTempCollision() const { return m_nModelIndex >= MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= MODEL_TEMPCOL_BODYPART2; }
     [[nodiscard]] bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
     [[nodiscard]] bool IsRCCar()  const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 
-    CPhysical*   AsPhysical() { return reinterpret_cast<CPhysical*>(this); }
-    CVehicle*    AsVehicle() { return reinterpret_cast<CVehicle*>(this); }
+    CPhysical*   AsPhysical()   { return reinterpret_cast<CPhysical*>(this); }
+    CVehicle*    AsVehicle()    { return reinterpret_cast<CVehicle*>(this); }
     CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
-    CBike*       AsBike() { return reinterpret_cast<CBike*>(this); }
-    CTrain*      AsTrain() { return reinterpret_cast<CTrain*>(this); }
-    CPed*        AsPed() { return reinterpret_cast<CPed*>(this); }
-    CObject*     AsObject() { return reinterpret_cast<CObject*>(this); }
-    CBuilding*   AsBuilding() { return reinterpret_cast<CBuilding*>(this); }
-    CDummy*      AsDummy() { return reinterpret_cast<CDummy*>(this); }
-    
+    CBike*       AsBike()       { return reinterpret_cast<CBike*>(this); }
+    CBoat*       AsBoat()       { return reinterpret_cast<CBoat*>(this); }
+    CTrain*      AsTrain()      { return reinterpret_cast<CTrain*>(this); }
+    CPed*        AsPed()        { return reinterpret_cast<CPed*>(this); }
+    CObject*     AsObject()     { return reinterpret_cast<CObject*>(this); }
+    CBuilding*   AsBuilding()   { return reinterpret_cast<CBuilding*>(this); }
+    CDummy*      AsDummy()      { return reinterpret_cast<CDummy*>(this); }
+
     [[nodiscard]] auto GetType() const noexcept { return m_nType; }
-	  void SetType(eEntityType type) { m_nType = type; }
-    
+    void SetType(eEntityType type) { m_nType = type; }
+
     [[nodiscard]] auto GetStatus() const noexcept { return m_nStatus; }
     void SetStatus(eEntityStatus status) { m_nStatus = status; }
+
+    bool IsScanCodeCurrent() const;
+    void SetCurrentScanCode();
 
 private:
     friend void InjectHooksMain();

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -108,7 +108,7 @@ public:
     inline uint32 GetRopeId() { return reinterpret_cast<int32>(this + m_nNumSwatOccupants - 1); }
 
     static void InitHelis();
-    static void AddHeliSearchLight(CVector const& origin, CVector const& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow);
+    static void AddHeliSearchLight(const CVector& origin, const CVector& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow);
     static void Pre_SearchLightCone();
     static void Post_SearchLightCone();
     static void SpecialHeliPreRender(); // dummy function

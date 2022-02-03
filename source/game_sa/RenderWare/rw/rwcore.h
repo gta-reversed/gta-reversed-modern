@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -1509,13 +1509,13 @@ typedef RwTexture *(*RwTextureCallBackFind)(const RwChar *name);
  * 
  * \param  texture   Pointer to the current texture.
  *
- * \param  pData   User-defined data pointer.
+ * \param  data   User-defined data pointer.
  *
  * \return Pointer to the current texture
  *
  * \see RwTexDictionaryForAllTextures
  */
-typedef RwTexture *(*RwTextureCallBack)(RwTexture *texture, void *pData);
+typedef RwTexture *(*RwTextureCallBack)(RwTexture *texture, void *data);
 
 
 /**
@@ -1530,7 +1530,7 @@ typedef RwTexture *(*RwTextureCallBack)(RwTexture *texture, void *pData);
  * 
  * \param  dict   Pointer to the current texture dictionary.
  *
- * \param  pData   User-defined data pointer.
+ * \param  data   User-defined data pointer.
  *
  * \return Pointer to the current texture dictionary
  *
@@ -2713,6 +2713,7 @@ void RwD3D9DynamicVertexBufferDestroy(); // 0x7F5AE0
 RwBool RwD3D9DynamicVertexBufferLock(RwUInt32 vertexSize, RwUInt32 numVertex, void* vertexBufferOut, void* vertexDataOut, RwUInt32* baseIndexOut); // 0x7F5B10
 RwBool RwD3D9DynamicVertexBufferUnlock(); // 0x7F5C90
 void RwRasterSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPrealloc); // 0x7FB350
+// flags RwRasterFormat, RwRasterPrivateFlag
 RwRaster* RwRasterCreate(RwInt32 width, RwInt32 height, RwInt32 depth, RwInt32 flags); // 0x7FB230
 RwBool RwRasterDestroy(RwRaster* raster); // 0x7FB020
 RwRaster* RwRasterGetOffset(RwRaster* raster, RwInt16* xOffset, RwInt16* yOffset); // 0x7FAEA0
@@ -2772,7 +2773,7 @@ void RwTexDictionarySetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocks
 RwTexDictionary* RwTexDictionaryCreate(); // 0x7F3600
 RwBool RwTexDictionaryDestroy(RwTexDictionary* dict); // 0x7F36A0
 RwTexture* RwTextureCreate(RwRaster* raster); // 0x7F37C0
-RwTexture* RwTextureRead(char const* name, char const* maskName); // 0x7F3AC0
+RwTexture* RwTextureRead(const char* name, const char* maskName); // 0x7F3AC0
 RwBool RwTextureDestroy(RwTexture* texture); // 0x7F3820
 RwTexture* RwTextureSetRaster(RwTexture* texture, RwRaster* raster); // 0x7F35D0
 RwTexture* RwTexDictionaryAddTexture(RwTexDictionary* dict, RwTexture* texture); // 0x7F3980
@@ -2780,8 +2781,8 @@ RwTexture* RwTexDictionaryRemoveTexture(RwTexture* texture); // 0x7F39C0
 RwTexture* RwTexDictionaryFindNamedTexture(RwTexDictionary* dict, const RwChar* name); // 0x7F39F0
 RwTexDictionary* RwTexDictionaryGetCurrent(); // 0x7F3A90
 RwTexDictionary* RwTexDictionarySetCurrent(RwTexDictionary* dict); // 0x7F3A70
-const RwTexDictionary* RwTexDictionaryForAllTextures(const RwTexDictionary* dict, RwTextureCallBack fpCallBack, void* pData); // 0x7F3730
-RwBool RwTexDictionaryForAllTexDictionaries(RwTexDictionaryCallBack fpCallBack, void* pData); // 0x7F3770
+const RwTexDictionary* RwTexDictionaryForAllTextures(const RwTexDictionary* dict, RwTextureCallBack fpCallBack, void* data); // 0x7F3730
+RwBool RwTexDictionaryForAllTexDictionaries(RwTexDictionaryCallBack fpCallBack, void* data); // 0x7F3770
 RwInt32 RwTextureRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x7F3BB0
 RwInt32 RwTexDictionaryRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x7F3C10
 RwInt32 RwTextureGetPluginOffset(RwUInt32 pluginID); // 0x7F3BE0

@@ -78,7 +78,7 @@ CTask* CTaskSimpleDie::Clone() {
 }
 
 // 0x62FBA0
-bool CTaskSimpleDie::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_animAssociation)
             m_animAssociation->m_fBlendDelta = -1000.0f;
@@ -182,7 +182,7 @@ eTaskType CTaskSimpleDie::GetTaskType_Reversed() {
 }
 
 // 0x62FBA0
-bool CTaskSimpleDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return CTaskSimpleDie::MakeAbortable(ped, priority, event);
 }
 

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -72,9 +72,15 @@ public:
 };
 VALIDATE_SIZE(cVehicleParams, 0x4C);
 
-struct tVehicleSound {
+class tVehicleSound {
+public:
     uint32    m_nIndex;
     CAESound* m_pSound;
+
+    void Init(auto index) {
+        m_nIndex = index;
+        m_pSound = nullptr;
+    }
 };
 VALIDATE_SIZE(tVehicleSound, 0x8);
 

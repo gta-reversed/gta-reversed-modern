@@ -34,7 +34,7 @@ CColModel::~CColModel()
     RemoveCollisionVolumes();
 }
 
-CColModel& CColModel::operator=(CColModel const& colModel)
+CColModel& CColModel::operator=(const CColModel& colModel)
 {
     //BUG(Prone) No self assignment check
     m_boundSphere.m_vecCenter = colModel.m_boundSphere.m_vecCenter;

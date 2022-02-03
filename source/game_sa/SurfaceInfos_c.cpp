@@ -67,7 +67,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
 
 uint32 SurfaceInfos_c::GetSurfaceIdFromName(char* cName)
 {
-    if (!strcmp(cName, SurfaceInfos_c::cDefaultName))
+    if (!strcmp(cName, cDefaultName))
         return SURFACE_DEFAULT;
     if (!strcmp(cName, "TARMAC"))
         return SURFACE_TARMAC;
@@ -666,9 +666,9 @@ bool SurfaceInfos_c::IsAudioTile(uint32 surfaceId)
     return m_surfaces[surfaceId].bIsAudioTile;
 }
 
-float SurfaceInfos_c::GetAdhesiveLimit(CColPoint* pColPoint)
+float SurfaceInfos_c::GetAdhesiveLimit(CColPoint* colPoint)
 {
-    auto& surfaceA = m_surfaces[pColPoint->m_nSurfaceTypeA];
-    auto& surfaceB = m_surfaces[pColPoint->m_nSurfaceTypeB];
+    auto& surfaceA = m_surfaces[colPoint->m_nSurfaceTypeA];
+    auto& surfaceB = m_surfaces[colPoint->m_nSurfaceTypeB];
     return m_adhesiveLimits[surfaceB.ucAdhesionGroup][surfaceA.ucAdhesionGroup];
 }

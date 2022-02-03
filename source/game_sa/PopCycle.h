@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -198,10 +198,10 @@ public:
     static uint8*      m_nMaxNumPeds;    // uint8 m_nMaxNumPeds[480];
     static float&      m_NumDealers_Peds;
 
-    static bool  FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, bool arg4);
+    static bool  FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4);
     static float GetCurrentPercOther_Peds();
     static void  Initialise();
-    static bool  IsPedAppropriateForCurrentZone(int32 modelindex);
+    static bool  IsPedAppropriateForCurrentZone(int32 modelIndex);
     static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
     static int32 PickARandomGroupOfOtherPeds();

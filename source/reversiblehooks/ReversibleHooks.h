@@ -54,6 +54,10 @@
 #define RH_ScopedNamedGlobalInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
+// Similar to RH_ScopedInstall but you can specify the name explicitly.
+#define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
+
 namespace ReversibleHooks {
     class RootHookCategory;
 
