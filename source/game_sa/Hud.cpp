@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -189,8 +189,8 @@ void CHud::SetBigMessage(char* text, uint16 style) {
 }
 
 // 0x588BE0
-void CHud::SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief) {
-    plugin::Call<0x588BE0, char const*, bool, bool, bool>(text, quickMessage, permanent, addToBrief);
+void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, bool addToBrief) {
+    plugin::Call<0x588BE0, const char*, bool, bool, bool>(text, quickMessage, permanent, addToBrief);
 }
 
 // 0x588D40
@@ -198,8 +198,8 @@ void CHud::SetHelpMessageStatUpdate(uint8 state, uint16 statId, float diff, floa
     plugin::Call<0x588D40, uint8, uint16, float, float>(state, statId, diff, max);
 }
 
-void CHud::SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent) {
-    plugin::Call<0x588E30, char const*, int32, bool, bool>(text, number, quickMessage, permanent);
+void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMessage, bool permanent) {
+    plugin::Call<0x588E30, const char*, int32, bool, bool>(text, number, quickMessage, permanent);
 }
 
 // 0x588F60

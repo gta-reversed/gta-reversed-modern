@@ -14,26 +14,6 @@ void CInformFriendsEventQueue::InjectHooks() {
 //    RH_ScopedInstall(Process, 0x4AC2E0);
 }
 
-// 0x
-CInformFriendsEventQueue::CInformFriendsEventQueue() {
-
-}
-
-CInformFriendsEventQueue* CInformFriendsEventQueue::Constructor() {
-    this->CInformFriendsEventQueue::CInformFriendsEventQueue();
-    return this;
-}
-
-// 0x
-CInformFriendsEventQueue::~CInformFriendsEventQueue() {
-
-}
-
-CInformFriendsEventQueue* CInformFriendsEventQueue::Destructor() {
-    this->CInformFriendsEventQueue::~CInformFriendsEventQueue();
-    return this;
-}
-
 // 0x4B2990
 void CInformFriendsEventQueue::Init() {
     CInformFriendsEventQueue::Flush();
@@ -45,8 +25,8 @@ void CInformFriendsEventQueue::Flush() {
 }
 
 // 0x4AC1E0
-bool CInformFriendsEventQueue::Add(CEntity* pEntity, CEvent* pEvent) {
-    return plugin::CallAndReturn<bool, 0x4AC1E0, CEntity*, CEvent*>(pEntity, pEvent);
+bool CInformFriendsEventQueue::Add(CEntity* entity, CEvent* event) {
+    return plugin::CallAndReturn<bool, 0x4AC1E0, CEntity*, CEvent*>(entity, event);
 }
 
 // 0x4AC2E0

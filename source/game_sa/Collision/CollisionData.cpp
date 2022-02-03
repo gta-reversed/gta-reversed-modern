@@ -73,7 +73,7 @@ void CCollisionData::RemoveCollisionVolumes()
 }
 
 // 0x40F120
-void CCollisionData::Copy(CCollisionData const& src)
+void CCollisionData::Copy(const CCollisionData& src)
 {
     assert(!bHasFaceGroups); // Avoid possible random bugs - See header for more info.
 

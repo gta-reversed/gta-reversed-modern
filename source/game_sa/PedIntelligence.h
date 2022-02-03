@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -112,7 +112,7 @@ public:
     void ProcessEventHandler();
     bool IsFriendlyWith(const CPed& ped) const;
     bool IsThreatenedBy(const CPed& ped) const;
-    bool Respects(CPed* pPed);
+    bool Respects(CPed* ped);
     bool IsInACarOrEnteringOne();
     static bool AreFriends(const CPed& ped1, const CPed& ped2);
     bool IsPedGoingSomewhereOnFoot();
@@ -121,11 +121,11 @@ public:
     bool TestForStealthKill(CPed* pTarget, bool bFullTest);
     void RecordEventForScript(int32 eventId, int32 eventPriority);
     bool HasInterestingEntites();
-    bool IsInterestingEntity(CEntity* pEntity);
+    bool IsInterestingEntity(CEntity* entity);
     void LookAtInterestingEntities();
     void RemoveAllInterestingEntities();
     bool IsPedGoingForCarDoor();
-    float CanSeeEntityWithLights(CEntity* pEntity, int32 unUsed);
+    float CanSeeEntityWithLights(CEntity* entity, int32 unUsed);
     void ProcessStaticCounter();
     void ProcessFirst();
     void Process();

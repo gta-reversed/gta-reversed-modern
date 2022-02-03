@@ -8,7 +8,7 @@ public:
     CVector m_moveSpeed;
 
 public:
-    CEventHitByWaterCannon(CVector const& point, CVector const& moveSpeed);
+    CEventHitByWaterCannon(const CVector& point, const CVector& moveSpeed);
     ~CEventHitByWaterCannon() override = default;
 
     eEventType GetEventType() const override { return EVENT_WATER_CANNON; }
@@ -22,7 +22,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CEventHitByWaterCannon* Constructor(CVector const& point, CVector const& moveSpeed);
+    CEventHitByWaterCannon* Constructor(const CVector& point, const CVector& moveSpeed);
 
     bool AffectsPed_Reversed(CPed* ped);
 };

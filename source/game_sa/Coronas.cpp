@@ -20,16 +20,16 @@ void CCoronas::InjectHooks() {
     RH_ScopedClass(CCoronas);
     RH_ScopedCategoryGlobal();
 
-//    RH_ScopedInstall(Init, 0x6FAA70);
-//    RH_ScopedInstall(Shutdown, 0x6FAB00);
-//    RH_ScopedInstall(Update, 0x6FADF0);
-//    RH_ScopedInstall(Render, 0x6FAEC0);
-//    RH_ScopedInstall(RenderReflections, 0x6FB630);
-//    RH_ScopedInstall(RenderSunReflection, 0x6FBAA0);
-//    RH_ScopedInstall(RegisterCorona, 0x6FC180);
-//    RH_ScopedInstall(RegisterCorona, 0x6FC580);
-//    RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0);
-//    RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0);
+    // RH_ScopedInstall(Init, 0x6FAA70);
+    // RH_ScopedInstall(Shutdown, 0x6FAB00);
+    // RH_ScopedInstall(Update, 0x6FADF0);
+    // RH_ScopedInstall(Render, 0x6FAEC0);
+    // RH_ScopedInstall(RenderReflections, 0x6FB630);
+    // RH_ScopedInstall(RenderSunReflection, 0x6FBAA0);
+    // RH_ScopedInstall(RegisterCorona, 0x6FC180);
+    // RH_ScopedInstall(RegisterCorona, 0x6FC580);
+    // RH_ScopedInstall(UpdateCoronaCoors, 0x6FC4D0);
+    // RH_ScopedInstall(DoSunAndMoon, 0x6FC5A0);
 }
 
 // Initialises coronas
@@ -62,7 +62,7 @@ void CCoronas::RenderReflections() {
     plugin::Call<0x6FB630>();
 }
 
-// Renders sun reflection on a water
+// Renders sun reflection on water
 // 0x6FBAA0
 void CCoronas::RenderSunReflection() {
     plugin::Call<0x6FBAA0>();
@@ -70,19 +70,19 @@ void CCoronas::RenderSunReflection() {
 
 // Creates corona by texture
 // 0x6FC180
-void CCoronas::RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, CVector const& posn, float radius, float farClip, RwTexture* texture, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used, float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay) {
-    plugin::Call<0x6FC180, uint32, CEntity*, uint8, uint8, uint8, uint8, CVector const&, float, float, RwTexture*, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool>(id, attachTo, red, green, blue, alpha, posn, radius, farClip, texture, flareType, enableReflection, checkObstacles, _param_not_used, angle, longDistance, nearClip, fadeState, fadeSpeed, onlyFromBelow, reflectionDelay);
+void CCoronas::RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector& posn, float radius, float farClip, RwTexture* texture, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used, float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay) {
+    plugin::Call<0x6FC180, uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, RwTexture*, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool>(id, attachTo, red, green, blue, alpha, posn, radius, farClip, texture, flareType, enableReflection, checkObstacles, _param_not_used, angle, longDistance, nearClip, fadeState, fadeSpeed, onlyFromBelow, reflectionDelay);
 }
 
 // Creates corona by type
 // 0x6FC580
-void CCoronas::RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, CVector const& posn, float radius, float farClip, eCoronaType coronaType, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used, float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay) {
-    plugin::Call<0x6FC580, uint32, CEntity*, uint8, uint8, uint8, uint8, CVector const&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool>(id, attachTo, red, green, blue, alpha, posn, radius, farClip, coronaType, flareType, enableReflection, checkObstacles, _param_not_used, angle, longDistance, nearClip, fadeState, fadeSpeed, onlyFromBelow, reflectionDelay);
+void CCoronas::RegisterCorona(uint32 id, CEntity* attachTo, uint8 red, uint8 green, uint8 blue, uint8 alpha, const CVector& posn, float radius, float farClip, eCoronaType coronaType, eCoronaFlareType flareType, bool enableReflection, bool checkObstacles, int32 _param_not_used, float angle, bool longDistance, float nearClip, uint8 fadeState, float fadeSpeed, bool onlyFromBelow, bool reflectionDelay) {
+    plugin::Call<0x6FC580, uint32, CEntity*, uint8, uint8, uint8, uint8, const CVector&, float, float, eCoronaType, eCoronaFlareType, bool, bool, int32, float, bool, float, uint8, float, bool, bool>(id, attachTo, red, green, blue, alpha, posn, radius, farClip, coronaType, flareType, enableReflection, checkObstacles, _param_not_used, angle, longDistance, nearClip, fadeState, fadeSpeed, onlyFromBelow, reflectionDelay);
 }
 
 // 0x6FC4D0
-void CCoronas::UpdateCoronaCoors(uint32 id, CVector const& posn, float farClip, float angle) {
-    plugin::Call<0x6FC4D0, uint32, CVector const&, float, float>(id, posn, farClip, angle);
+void CCoronas::UpdateCoronaCoors(uint32 id, const CVector& posn, float farClip, float angle) {
+    plugin::Call<0x6FC4D0, uint32, const CVector&, float, float>(id, posn, farClip, angle);
 }
 
 // Draw sun (Moon went to CClouds since SA)

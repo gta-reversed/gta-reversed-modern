@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,12 +31,12 @@ public:
     void Initialise();
 
     void SetModel(uint32 modelId, eClothesModelPart modelPart);
-    void SetModel(char const* model, eClothesModelPart modelPart);
+    void SetModel(const char* model, eClothesModelPart modelPart);
     bool GetIsWearingBalaclava();
     bool HasVisibleNewHairCut(int32 arg1);
     bool HasVisibleTattoo();
     void SetTextureAndModel(uint32 texture, uint32 model, eClothesTexturePart texturePart);
-    void SetTextureAndModel(char const* textureName, char const* modelName, eClothesTexturePart texturePart);
+    void SetTextureAndModel(const char* textureName, const char* modelName, eClothesTexturePart texturePart);
 };
 
 VALIDATE_SIZE(CPedClothesDesc, 0x78);

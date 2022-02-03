@@ -23,7 +23,7 @@ void CEntryInfoList::Flush()
 // 0x?
 void CEntryInfoList::DeleteNode(CEntryInfoNode* node)
 {
-    if(m_node == node)
+    if (m_node == node)
         m_node = node->m_next;
 
     if (node->m_previous)

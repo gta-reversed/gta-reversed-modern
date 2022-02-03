@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -68,10 +68,10 @@ public:
     void operator delete(void* object);
 
     static void InjectHooks();
-    CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy);
+    CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
     virtual ~CAnimBlendAssociation();
 private:
-    CAnimBlendAssociation* Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy);
+    CAnimBlendAssociation* Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
 public:
     void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();

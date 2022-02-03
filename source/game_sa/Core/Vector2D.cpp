@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -32,7 +32,7 @@ float CVector2D::Magnitude()
 void CVector2D::Normalise()
 {
     auto fMag = Magnitude();
-    if (fMag > 0.0)
+    if (fMag > 0.0f)
     {
         auto fRecip = 1.0F / fMag;
         x *= fRecip;
@@ -40,11 +40,11 @@ void CVector2D::Normalise()
     }
     else
     {
-        x = 1.0;
+        x = 1.0f;
     }
 }
 
-void CVector2D::operator=(CVector2D const& right)
+void CVector2D::operator=(const CVector2D& right)
 {
     x = right.x;
     y = right.y;

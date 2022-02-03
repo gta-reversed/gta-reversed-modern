@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -29,19 +29,21 @@
 #include "ePedType.h"
 
 class CPedGroup;
+class CCivilianPed;
+class CEmergencyPed;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
-        case ePedType::PED_TYPE_GANG1:
-        case ePedType::PED_TYPE_GANG2:
-        case ePedType::PED_TYPE_GANG3:
-        case ePedType::PED_TYPE_GANG4:
-        case ePedType::PED_TYPE_GANG5:
-        case ePedType::PED_TYPE_GANG6:
-        case ePedType::PED_TYPE_GANG7:
-        case ePedType::PED_TYPE_GANG8:
-        case ePedType::PED_TYPE_GANG9:
-        case ePedType::PED_TYPE_GANG10: {
+        case PED_TYPE_GANG1:
+        case PED_TYPE_GANG2:
+        case PED_TYPE_GANG3:
+        case PED_TYPE_GANG4:
+        case PED_TYPE_GANG5:
+        case PED_TYPE_GANG6:
+        case PED_TYPE_GANG7:
+        case PED_TYPE_GANG8:
+        case PED_TYPE_GANG9:
+        case PED_TYPE_GANG10: {
             return true;
         }
     }
@@ -407,7 +409,7 @@ public:
     void SetAimFlag(CEntity* aimingTo);
     void ClearAimFlag();
     // Gets point direction relatively to ped
-    int32 GetLocalDirection(CVector2D const& arg0);
+    int32 GetLocalDirection(const CVector2D& arg0);
     bool IsPedShootable();
     bool UseGroundColModel();
     bool CanPedReturnToState();
@@ -450,7 +452,7 @@ public:
     void SetPedDefaultDecisionMaker();
     // limitAngle in radians
     bool CanSeeEntity(CEntity* entity, float limitAngle);
-    bool PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode);
+    bool PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicle, bool findClosestNode);
     bool PositionAnyPedOutOfCollision();
     bool OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted);
     void SortPeds(CPed** pedList, int32 arg1, int32 arg2);
@@ -542,9 +544,13 @@ public:
     inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
     inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
-    inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-    inline bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
+    inline bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+
+    CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
+    CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
+    CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
+    CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group);
 };

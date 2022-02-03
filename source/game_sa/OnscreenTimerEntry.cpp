@@ -23,6 +23,7 @@ void COnscreenTimerEntry::Process() {
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:
         timerPtr += deltaTime;
+        break;
     case eTimerDirection::DECREASE:
         timerPtr -= deltaTime;
 
@@ -37,6 +38,7 @@ void COnscreenTimerEntry::Process() {
             m_szDescriptionTextKey[0] = '\0';
             m_bEnabled = false;
         }
+        break;
     }
 /*
 #ifndef NDEBUG

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -21,16 +21,16 @@ public:
 public:
     ListItem_c* m_pHead;
     ListItem_c* m_pTail;
-    uint32    m_nCount;
+    uint32      m_nCount;
 
 public:
     static void InjectHooks();
 
     // Add new item to the head
-    void AddItem(ListItem_c* pItem);
+    void AddItem(ListItem_c* item);
 
     // Remove given item from the list and decrease counter
-    void RemoveItem(ListItem_c* pItem);
+    void RemoveItem(ListItem_c* item);
 
     // Remove heading item and return it's pointer
     ListItem_c* RemoveHead();
@@ -45,13 +45,13 @@ public:
     uint32 GetNumItems();
 
     // Append item to the list
-    void AppendItem(ListItem_c* pItem);
+    void AppendItem(ListItem_c* item);
 
     // Append item to the list
-    void InsertAfterItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem);
+    void InsertAfterItem(ListItem_c* addedItem, ListItem_c* pExistingItem);
 
     // Append item to the list
-    void InsertBeforeItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem);
+    void InsertBeforeItem(ListItem_c* addedItem, ListItem_c* pExistingItem);
 
     // Get list head
     ListItem_c* GetHead();
@@ -60,10 +60,10 @@ public:
     ListItem_c* GetTail();
 
     // Get next item in a list
-    ListItem_c* GetNext(ListItem_c* pItem);
+    ListItem_c* GetNext(ListItem_c* item);
 
     // Get previous item
-    ListItem_c* GetPrev(ListItem_c* pItem);
+    ListItem_c* GetPrev(ListItem_c* item);
 
     // Get N-th item from list head/tail
     ListItem_c* GetItemOffset(bool bFromHead, int32 iOffset);
@@ -91,12 +91,12 @@ public:
         return static_cast<ItemType*>(List_c::RemoveTail());
     }
 
-    ItemType* GetNext(ItemType* pItem) {
-        return static_cast<ItemType*>(List_c::GetNext(pItem));
+    ItemType* GetNext(ItemType* item) {
+        return static_cast<ItemType*>(List_c::GetNext(item));
     }
 
-    ItemType* GetPrev(ItemType* pItem) {
-        return static_cast<ItemType*>(List_c::GetPrev(pItem));
+    ItemType* GetPrev(ItemType* item) {
+        return static_cast<ItemType*>(List_c::GetPrev(item));
     }
 
     ItemType* GetItemOffset(bool bFromHead, int32 iOffset) {

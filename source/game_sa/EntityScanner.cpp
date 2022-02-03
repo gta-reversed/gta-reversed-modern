@@ -17,8 +17,8 @@ void CEntityScanner::Clear() {
 }
 
 // 0x5FFA20
-void CEntityScanner::ScanForEntitiesInRange(int32 arg2, CPed* pPed) {
-    plugin::CallMethod<0x5FFA20, CEntityScanner*, int32, CPed*>(this, arg2, pPed);
+void CEntityScanner::ScanForEntitiesInRange(int32 arg2, CPed* ped) {
+    plugin::CallMethod<0x5FFA20, CEntityScanner*, int32, CPed*>(this, arg2, ped);
 }
 
 // 0x5FFF20

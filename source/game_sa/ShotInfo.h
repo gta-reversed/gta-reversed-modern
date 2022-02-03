@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -30,7 +30,7 @@ public:
     // dummy function
     static void Shutdown();
     static bool AddShot(CEntity* creator, eWeaponType weaponType, CVector origin, CVector target);
-    static bool GetFlameThrowerShotPosn(uint8 shotId, CVector* outPosn);
+    static bool GetFlameThrowerShotPosn(uint8 shotId, CVector* outPos);
     static void Update();
 };
 

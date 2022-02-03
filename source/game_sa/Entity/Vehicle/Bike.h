@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -129,13 +129,13 @@ public:
     };
 
     void SetupModelNodes();
-    void dmgDrawCarCollidingParticles(CVector const& position, float power, eWeaponType weaponType);
+    void dmgDrawCarCollidingParticles(const CVector& position, float power, eWeaponType weaponType);
     static bool DamageKnockOffRider(CVehicle* arg0, float arg1, uint16 arg2, CEntity* arg3, CVector& arg4, CVector& arg5);
     CPed* KnockOffRider(eWeaponType arg0, uint8 arg1, CPed* arg2, bool arg3);
     void SetRemoveAnimFlags(CPed* ped);
     void ReduceHornCounter();
     void ProcessBuoyancy();
-    void inline ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver);
+    void inline ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver);
     void ResetSuspension();
     bool GetAllWheelsOffGround();
     void DebugCode(); // dummy function

@@ -47,7 +47,7 @@ public:
     void ReleaseEntity();
     bool CanThrowEntity();
     void PlayAnim(AnimationId groupId, AssocGroupId animId);
-    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* pData);
+    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);
     void DropEntity(CPed* ped, bool bAddEventSoundQuiet);
     void ChoosePutDownHeight(CPed* ped);

@@ -50,8 +50,8 @@ CEntryExit* CEntryExit::GetEntryExitToDisplayNameOf() {
 }
 
 // 0x43EA00
-void CEntryExit::GetPositionRelativeToOutsideWorld(CVector& outPosn) {
-    plugin::CallMethod<0x43EA00, CEntryExit*, CVector&>(this, outPosn);
+void CEntryExit::GetPositionRelativeToOutsideWorld(CVector& outPos) {
+    plugin::CallMethod<0x43EA00, CEntryExit*, CVector&>(this, outPos);
 }
 
 // 0x43EAF0

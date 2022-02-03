@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,6 +16,8 @@ enum eAbortPriority : int32 {
 
 class CEvent;
 class CPed;
+class CTaskSimple;
+class CTaskComplex;
 
 class CTask {
 public:
@@ -35,6 +37,9 @@ public:
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
+
+    CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
+    CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
 
 private:
     friend void InjectHooksMain();

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,7 +11,6 @@
 #include "ColHelpers.h"
 #include "extensions/enumerate.hpp"
 
-#include <ranges>
 namespace rng = std::ranges;
 
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
@@ -59,37 +58,37 @@ void CCollision::SortOutCollisionAfterLoad() {
 
 // 0x411E70
 bool CCollision::TestSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2) {
-    return plugin::CallAndReturn<bool, 0x411E70, CColSphere const&, CColSphere const&>(sphere1, sphere2);
+    return plugin::CallAndReturn<bool, 0x411E70, const CColSphere&, const CColSphere&>(sphere1, sphere2);
 }
 
 // 0x411EC0
 void CalculateColPointInsideBox(const CBox& box, const CVector& point, CColPoint& colPoint) {
-    plugin::Call<0x411EC0, CBox const&, CVector const&, CColPoint&>(box, point, colPoint);
+    plugin::Call<0x411EC0, const CBox&, const CVector&, CColPoint&>(box, point, colPoint);
 }
 
 // 0x4120C0
 bool CCollision::TestSphereBox(const CSphere& sphere, const CBox& box) {
-    return plugin::CallAndReturn<bool, 0x4120C0, CSphere const&, CBox const&>(sphere, box);
+    return plugin::CallAndReturn<bool, 0x4120C0, const CSphere&, const CBox&>(sphere, box);
 }
 
 // 0x412130
 bool CCollision::ProcessSphereBox(const CColSphere& sphere, const CColBox& box, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x412130, CColSphere const&, CColBox const&, CColPoint&, float&>(sphere, box, colPoint, maxTouchDistance);
+    return plugin::CallAndReturn<bool, 0x412130, const CColSphere&, const CColBox&, CColPoint&, float&>(sphere, box, colPoint, maxTouchDistance);
 }
 
 // 0x412700
 bool CCollision::PointInTriangle(const CVector& point, const CVector* triPoints) {
-    return plugin::CallAndReturn<bool, 0x412700, CVector const&, CVector const*>(point, triPoints);
+    return plugin::CallAndReturn<bool, 0x412700, const CVector&, const CVector*>(point, triPoints);
 }
 
 // 0x412850
 float CCollision::DistToLineSqr(const CVector* lineStart, const CVector* lineEnd, const CVector* point) {
-    return plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+    return plugin::CallAndReturn<float, 0x412850, const CVector*, const CVector*, const CVector*>(lineStart, lineEnd, point);
 }
 
 // 0x412970
 float CCollision::DistToMathematicalLine(const CVector* lineStart, const CVector* lineEnd, const CVector* point) {
-    return plugin::CallAndReturn<float, 0x412970, CVector const*, CVector const*, CVector const*>(lineStart, lineEnd, point);
+    return plugin::CallAndReturn<float, 0x412970, const CVector*, const CVector*, const CVector*>(lineStart, lineEnd, point);
 }
 
 // 0x412A30
@@ -104,27 +103,27 @@ float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, floa
 
 // 0x412AA0
 bool CCollision::ProcessLineSphere(const CColLine& line, const CColSphere& sphere, CColPoint& colPoint, float& depth) {
-    return plugin::CallAndReturn<bool, 0x412AA0, CColLine const&, CColSphere const&, CColPoint&, float&>(line, sphere, colPoint, depth);
+    return plugin::CallAndReturn<bool, 0x412AA0, const CColLine&, const CColSphere&, CColPoint&, float&>(line, sphere, colPoint, depth);
 }
 
 // 0x412C70
 bool CCollision::TestLineBox_DW(const CColLine& line, const CBox& box) {
-    return plugin::CallAndReturn<bool, 0x412C70, CColLine const&, CBox const&>(line, box);
+    return plugin::CallAndReturn<bool, 0x412C70, const CColLine&, const CBox&>(line, box);
 }
 
 // 0x413070
 bool CCollision::TestLineBox(const CColLine& line, const CBox& box) {
-    return plugin::CallAndReturn<bool, 0x413070, CColLine const&, CBox const&>(line, box);
+    return plugin::CallAndReturn<bool, 0x413070, const CColLine&, const CBox&>(line, box);
 }
 
 // 0x413080
 bool CCollision::TestVerticalLineBox(const CColLine& line, const CBox& box) {
-    return plugin::CallAndReturn<bool, 0x413080, CColLine const&, CBox const&>(line, box);
+    return plugin::CallAndReturn<bool, 0x413080, const CColLine&, const CBox&>(line, box);
 }
 
 // 0x413100
 bool CCollision::ProcessLineBox(const CColLine& line, const CColBox& box, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x413100, CColLine const&, CColBox const&, CColPoint&, float&>(line, box, colPoint, maxTouchDistance);
+    return plugin::CallAndReturn<bool, 0x413100, const CColLine&, const CColBox&, CColPoint&, float&>(line, box, colPoint, maxTouchDistance);
 }
 
 // 0x4138D0
@@ -134,27 +133,27 @@ bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, f
 
 // 0x413960
 bool ProcessDiscCollision(CColPoint& colPoint1, const CMatrix& mat, const CColDisk& disk, CColPoint& colPoint2, bool& arg4, float& arg5, CColPoint& colPoint3) {
-    return plugin::CallAndReturn<bool, 0x413960, CColPoint&, CMatrix const&, CColDisk const&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5, colPoint3);
+    return plugin::CallAndReturn<bool, 0x413960, CColPoint&, const CMatrix&, const CColDisk&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5, colPoint3);
 }
 
 // 0x413AC0
 bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane) {
-    return plugin::CallAndReturn<bool, 0x413AC0, CColLine const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(line, verts, tri, triPlane);
+    return plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(line, verts, tri, triPlane);
 }
 
 // 0x4140F0
 bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x4140F0, CColLine const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
+    return plugin::CallAndReturn<bool, 0x4140F0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
 }
 
 // 0x4147E0
 bool CCollision::ProcessVerticalLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x4147E0, CColLine const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
+    return plugin::CallAndReturn<bool, 0x4147E0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
 }
 
 // 0x414D70
 bool CCollision::IsStoredPolyStillValidVerticalLine(const CVector& lineOrigin, float lineDist, CColPoint& colPoint, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x414D70, CVector const&, float, CColPoint&, CStoredCollPoly*>(lineOrigin, lineDist, colPoint, collPoly);
+    return plugin::CallAndReturn<bool, 0x414D70, const CVector&, float, CColPoint&, CStoredCollPoly*>(lineOrigin, lineDist, colPoint, collPoly);
 }
 
 // 0x415230
@@ -256,32 +255,32 @@ void CCollision::RemoveTrianglePlanes(CCollisionData* colData) {
 
 // 0x416450
 bool CCollision::ProcessSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x416450, CColSphere const&, CColSphere const&, CColPoint&, float&>(sphere1, sphere2, colPoint, maxTouchDistance);
+    return plugin::CallAndReturn<bool, 0x416450, const CColSphere&, const CColSphere&, CColPoint&, float&>(sphere1, sphere2, colPoint, maxTouchDistance);
 }
 
 // 0x4165B0
-bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, CColTrianglePlane const& triPlane) {
-    return plugin::CallAndReturn<bool, 0x4165B0, CColSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
+bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane) {
+    return plugin::CallAndReturn<bool, 0x4165B0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(sphere, verts, tri, triPlane);
 }
 
 // 0x416BA0
 bool CCollision::ProcessSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance) {
-    return plugin::CallAndReturn<bool, 0x416BA0, CColSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&, CColPoint&, float&>(sphere, verts, tri, triPlane, colPoint, maxTouchDistance);
+    return plugin::CallAndReturn<bool, 0x416BA0, const CColSphere&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&>(sphere, verts, tri, triPlane, colPoint, maxTouchDistance);
 }
 
 // 0x417470
 bool CCollision::TestLineSphere(const CColLine& line, const CColSphere& sphere) {
-    return plugin::CallAndReturn<bool, 0x417470, CColLine const&, CColSphere const&>(line, sphere);
+    return plugin::CallAndReturn<bool, 0x417470, const CColLine&, const CColSphere&>(line, sphere);
 }
 
 // 0x417610
 float CCollision::DistToLine(const CVector& lineStart, const CVector& lineEnd, const CVector& point) {
-    return plugin::CallAndReturn<float, 0x417610, CVector const&, CVector const&, CVector const&>(lineStart, lineEnd, point);
+    return plugin::CallAndReturn<float, 0x417610, const CVector&, const CVector&, const CVector&>(lineStart, lineEnd, point);
 }
 
 // 0x417730
 bool CCollision::TestLineOfSight(const CColLine& line, const CMatrix& transform, CColModel& colModel, bool doSeeThroughCheck, bool doShootThroughCheck) {
-    return plugin::CallAndReturn<bool, 0x417730, CColLine const&, CMatrix const&, CColModel&, bool, bool>(line, transform, colModel, doSeeThroughCheck, doShootThroughCheck);
+    return plugin::CallAndReturn<bool, 0x417730, const CColLine&, const CMatrix&, CColModel&, bool, bool>(line, transform, colModel, doSeeThroughCheck, doShootThroughCheck);
 }
 
 // 0x417950
@@ -344,7 +343,7 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
 
 // 0x417BF0
 bool CCollision::ProcessVerticalLine(const CColLine& line, const CMatrix& transform, CColModel& colModel, CColPoint& colPoint, float& maxTouchDistance, bool doSeeThroughCheck, bool doShootThroughCheck, CStoredCollPoly* collPoly) {
-    return plugin::CallAndReturn<bool, 0x417BF0, CColLine const&, CMatrix const&, CColModel&, CColPoint&, float&, bool, bool, CStoredCollPoly*>(line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck, collPoly);
+    return plugin::CallAndReturn<bool, 0x417BF0, const CColLine&, const CMatrix&, CColModel&, CColPoint&, float&, bool, bool, CStoredCollPoly*>(line, transform, colModel, colPoint, maxTouchDistance, doSeeThroughCheck, doShootThroughCheck, collPoly);
 }
 
 // 0x417F20
@@ -411,7 +410,7 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 * @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
 */
 int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint(&sphereCPs)[32], CColPoint* lineCPs, float* maxTouchDistance, bool arg7) {
-    // Dont these this should ever happen, but okay?
+    // Don't these this should ever happen, but okay?
     if (!cmA.m_pColData) {
         return 0;
     }
@@ -542,7 +541,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     }
                 }
             }
-        } else { // Game checked here if B.m_nNumTriangles > 0, but that is a redudant check.
+        } else { // Game checked here if B.m_nNumTriangles > 0, but that is a redundant check.
             // 0x418C40
             for (auto i = 0u; i < cdB.m_nNumTriangles; i++) {
                 ProcessOneTri(i);
@@ -581,7 +580,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     minTouchDist)
                 ) {
                     advanceColPointIdx = true;
-                    // These tests are cheap, so continue procesing
+                    // These tests are cheap, so continue processing
                 }
 
                 // Original code also processed disk's spheres here (which were added to `colBCollSpheres` above (I skipped that part as well :D))
@@ -666,7 +665,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // 0x4196B9
     // Test all of A's lines against all of B's colliding spheres, boxes and triangles,
     // and store colpoints for all lines (even if they didn't collide)
-    // (I really dont understand how the caller will know which lines have collided?)
+    // (I really don't understand how the caller will know which lines have collided?)
     if (cdA.m_nNumLines) {
         assert(maxTouchDistance);
         assert(lineCPs);
@@ -813,7 +812,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     minTouchDist)
                 ) {
                     cp.m_nSurfaceTypeA = box.m_nMaterial;
-                    cp.m_nPieceTypeA = box.m_nFlags; // Presumeably box.m_nFlags aren't actually flags.
+                    cp.m_nPieceTypeA = box.m_nFlags; // Presumably box.m_nFlags aren't actually flags.
                     cp.m_nLightingA = box.m_nLighting;
 
                     cp.m_nSurfaceTypeB = sphere.m_nMaterial;

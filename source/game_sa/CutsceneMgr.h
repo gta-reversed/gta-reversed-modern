@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -25,7 +25,6 @@ struct tCutsceneParticleEffect {
     CVector     m_vecDirection;
     bool        m_bPlaying;
     bool        m_bStopped;
-    char        _pad6A[2];
 };
 
 struct tCutsceneAttachment {
@@ -36,7 +35,7 @@ struct tCutsceneAttachment {
 
 struct tCutsceneRemoval {
     CVector m_vecPosn;
-    char m_szObjectName[32];
+    char    m_szObjectName[32];
 };
 
 extern uint32 MAX_NUM_CUTSCENE_OBJECTS; // default: 50
@@ -94,11 +93,10 @@ public:
     static CAnimBlendAssocGroup &ms_cutsceneAssociations;
     static CVector &ms_cutsceneOffset;
 
-    // dummy function
     static int32 AddCutsceneHead(CObject* object, int32 arg1);
-    static void AppendToNextCutscene(char const* objectName, char const* animName);
+    static void AppendToNextCutscene(const char* objectName, const char* animName);
     static void AttachObjectToBone(CObject* attachment, CObject* object, int32 boneId);
-    static void AttachObjectToFrame(CObject* attachment, CEntity* object, char const* frameName);
+    static void AttachObjectToFrame(CObject* attachment, CEntity* object, const char* frameName);
     static void AttachObjectToParent(CObject* attachment, CEntity* object);
     static void BuildCutscenePlayer();
     static CCutsceneObject* CreateCutsceneObject(int32 modelId);
@@ -110,19 +108,18 @@ public:
     static void HideRequestedObjects();
     static void Initialise();
     static void IsCutsceneSkipButtonBeingPressed();
-    static void LoadAnimationUncompressed(char const* animName);
-    static void LoadCutsceneData(char const* cutsceneName);
+    static void LoadAnimationUncompressed(const char* animName);
+    static void LoadCutsceneData(const char* cutsceneName);
     static void LoadCutsceneData_loading();
-    static void LoadCutsceneData_overlay(char const* cutsceneName);
+    static void LoadCutsceneData_overlay(const char* cutsceneName);
     static void LoadCutsceneData_postload();
     static void LoadCutsceneData_preload();
     static void LoadEverythingBecauseCutsceneDeletedAllOfIt();
     static void RemoveCutscenePlayer();
     static void RemoveEverythingBecauseCutsceneDoesntFitInMemory();
-    static void SetCutsceneAnim(char const* animName, CObject* object);
-    static void SetCutsceneAnimToLoop(char const* animName);
-    // dummy function
-    static void SetHeadAnim(char const* animName, CObject* headObject);
+    static void SetCutsceneAnim(const char* animName, CObject* object);
+    static void SetCutsceneAnimToLoop(const char* animName);
+    static void SetHeadAnim(const char* animName, CObject* headObject);
     static void SetupCutsceneToStart();
     static void Shutdown();
     static void SkipCutscene();
@@ -131,5 +128,5 @@ public:
     static void Update_overlay();
 };
 
-int16 FindCutsceneAudioTrackId(char const* cutsceneName);
+int16 FindCutsceneAudioTrackId(const char* cutsceneName);
 void UpdateCutsceneObjectBoundingBox(RpClump* clump, int32 modelId);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -131,8 +131,8 @@ void InjectCommonHooks()
     RH_ScopedGlobalInstall(GetDayNightBalance, 0x6FAB30);
     RH_ScopedGlobalInstall(AsciiToGxtChar, 0x718600);
     RH_ScopedGlobalInstall(WriteRaster, 0x005A4150);
-//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(CVector const&, CVector*, float*, float*));
-//    RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(CVector const&, CVector*));
+    // RH_ScopedOverloadedInstall(CalcScreenCoors, "VVff", 0x71DA00, bool(*)(const CVector&, CVector*, float*, float*));
+    // RH_ScopedOverloadedInstall(CalcScreenCoors, "VV", 0x71DAB0, bool(*)(const CVector&, CVector*));
     RH_ScopedGlobalInstall(LittleTest, 0x541330);
 
     RH_ScopedGlobalInstall(RemoveRefsCB, 0x7226D0);
@@ -183,7 +183,7 @@ const CVector& FindPlayerCentreOfWorld(int32 playerId) {
 
 // 0x56E320
 const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
-    return ((CVector const&(__cdecl*)(int32))0x56E320)(playerId);
+    return ((const CVector&(__cdecl*)(int32))0x56E320)(playerId);
 }
 
 // 0x56E400
@@ -267,18 +267,18 @@ CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {
 }
 
 // 0x54ECE0
-void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos) {
-    plugin::Call<0x54ECE0, RwV3d&, CSimpleTransform const&, RwV3d const&>(point, placement, vecPos);
+void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos) {
+    plugin::Call<0x54ECE0, RwV3d&, const CSimpleTransform&, const RwV3d&>(point, placement, vecPos);
 }
 
 // 0x54EEA0
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin) {
-    plugin::Call<0x54EEA0, RwV3d*, int32, CMatrix const&, RwV3d const*>(vecsOut, numVectors, matrix, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin) {
+    plugin::Call<0x54EEA0, RwV3d*, int32, const CMatrix&, const RwV3d*>(vecsOut, numVectors, matrix, vecsin);
 }
 
 // 0x54EE30
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin) {
-    plugin::Call<0x54EE30, RwV3d*, int32, CSimpleTransform const&, RwV3d const*>(vecsOut, numVectors, transform, vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin) {
+    plugin::Call<0x54EE30, RwV3d*, int32, const CSimpleTransform&, const RwV3d*>(vecsOut, numVectors, transform, vecsin);
 }
 
 // 0x4D62A0
@@ -328,7 +328,7 @@ void DestroyDebugFont() {
 
 // unused
 // 0x734630
-void ObrsPrintfString(char const* arg0, int16 arg1, int16 arg2) {
+void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2) {
     // NOP
 }
 
@@ -627,12 +627,12 @@ void SetLightsWithTimeOfDayColour(RpWorld* world) {
         AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult;
         AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj() * CCoronas::LightsMult;
         if (CWeather::LightningFlash) {
-            AmbientLightColourForFrame.blue = 1.0;
-            AmbientLightColourForFrame.green = 1.0;
-            AmbientLightColourForFrame.red = 1.0;
-            AmbientLightColourForFrame_PedsCarsAndObjects.blue = 1.0;
-            AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0;
-            AmbientLightColourForFrame_PedsCarsAndObjects.red = 1.0;
+            AmbientLightColourForFrame.blue = 1.0f;
+            AmbientLightColourForFrame.green = 1.0f;
+            AmbientLightColourForFrame.red = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects.blue = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects.red = 1.0f;
         }
         RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
     }
@@ -909,15 +909,15 @@ void RemoveRefsForAtomic(RpClump* clump) {
 }
 
 // 0x46A760
-bool IsGlassModel(CEntity* pEntity) {
-    if (!pEntity->IsObject())
+bool IsGlassModel(CEntity* entity) {
+    if (!entity->IsObject())
         return false;
 
-    auto pModelInfo = CModelInfo::GetModelInfo(pEntity->m_nModelIndex);
-    if (!pModelInfo->AsAtomicModelInfoPtr())
+    auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
+    if (!mi->AsAtomicModelInfoPtr())
         return false;
 
-    return pModelInfo->IsGlass();
+    return mi->IsGlass();
 }
 
 // 0x4D5F50
@@ -946,8 +946,8 @@ AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id) {
 }
 
 // 0x4D62A0
-AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name) {
-    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D62A0, RpClump*, char const*>(clump, name);
+AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name) {
+    return plugin::CallAndReturn<AnimBlendFrameData*, 0x4D62A0, RpClump*, const char*>(clump, name);
 }
 
 // 0x4D6370
@@ -961,8 +961,8 @@ CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1,
 }
 
 // 0x4D6870
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const* name) {
-    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, char const*>(clump, name);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name) {
+    return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D6870, RpClump*, const char*>(clump, name);
 }
 
 // AnimationId animId
@@ -1106,7 +1106,7 @@ bool GraphicsLowQuality() {
 }
 
 // 0x5A4150
-void WriteRaster(RwRaster* raster, char const* path) {
+void WriteRaster(RwRaster* raster, const char* path) {
     assert(raster);
     assert(path && path[0]);
 
@@ -1118,9 +1118,9 @@ void WriteRaster(RwRaster* raster, char const* path) {
 }
 
 // 0x71DA00
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY)
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX, float* screenY)
 {
-    return plugin::CallAndReturn<bool, 0x71DA00, CVector const&, CVector*, float*, float*>(vecPoint, pVecOutPos, pScreenX, pScreenY);
+    return plugin::CallAndReturn<bool, 0x71DA00, const CVector&, CVector*, float*, float*>(vecPoint, vecOutPos, screenX, screenY);
 
     // TODO: Figure out how to get screen size..
     //CVector screen =  TheCamera.m_mViewMatrix * vecPoint;
@@ -1131,18 +1131,18 @@ bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScree
 
     //CVector2D screenSize{}; // TODO..
 
-    //*pVecOutPos = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
+    //*vecOutPos = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
 
-    //*pScreenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
-    //*pScreenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
+    //*screenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
+    //*screenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
 
     //return true;
 }
 
 // 0x71DAB0
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos)
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos)
 {
-    return plugin::CallAndReturn<bool, 0x71DAB0, CVector const&, CVector*>(vecPoint, pVecOutPos);
+    return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(vecPoint, vecOutPos);
 }
 
 // 0x541330

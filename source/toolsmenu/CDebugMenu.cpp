@@ -187,15 +187,18 @@ bool showPlayerInfo;
 void CDebugMenu::ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
-    CPlayerPed* pLocalPlayer = FindPlayerPed();
-    if (pLocalPlayer != nullptr) {
-        ImGui::Begin("Player Information");
 
-        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
-        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
 
-        ImGui::End();
-    }
+    ImGui::Begin("Player Information");
+
+    auto playerPos = player->GetPosition();
+    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
+    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::End();
 }
 
 void CDebugMenu::ProcessRenderTool() {

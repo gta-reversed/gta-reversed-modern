@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -167,8 +167,8 @@ void CPickups::RemovePickupObjects() {
 }
 
 // 0x4563A0
-void CPickups::RemoveUnnecessaryPickups(CVector const& posn, float radius) {
-    plugin::Call<0x4563A0, CVector const&, float>(posn, radius);
+void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
+    plugin::Call<0x4563A0, const CVector&, float>(posn, radius);
 }
 
 // 0x455000

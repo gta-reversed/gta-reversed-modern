@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -82,7 +82,7 @@ public:
     static void InjectHooks();
 
     void RemoveCollisionVolumes();
-    void Copy(CCollisionData const& src);
+    void Copy(const CCollisionData& src);
     void CalculateTrianglePlanes();
     void RemoveTrianglePlanes();
     void GetTrianglePoint(CVector& outVec, int32 vertId);
@@ -92,7 +92,6 @@ public:
 
     // NOTSA
     auto GetNumFaceGroups() const -> uint32;
-
 
     auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
     auto GetBoxes() const { return std::span{ m_pBoxes, m_nNumBoxes }; }

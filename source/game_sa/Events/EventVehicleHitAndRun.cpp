@@ -16,8 +16,8 @@ CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
 {
     m_victim = victim;
     m_vehicle = vehicle;
-    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    m_victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));
+    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle)); // *
+    m_victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));   // ** todo: possible nullptr
 }
 
 CEventVehicleHitAndRun::~CEventVehicleHitAndRun()
@@ -56,8 +56,8 @@ void CEventVehicleHitAndRun::ReportCriminalEvent_Reversed(CPed* ped)
 {
     if (IsCriminalEvent()) {
         if (m_victim->m_nPedType == PED_TYPE_COP)
-            FindPlayerWanted(-1)->RegisterCrime(eCrimeType::CRIME_KILL_COP_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
+            FindPlayerWanted()->RegisterCrime(eCrimeType::CRIME_KILL_COP_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
         else
-            FindPlayerWanted(-1)->RegisterCrime(eCrimeType::CRIME_KILL_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
+            FindPlayerWanted()->RegisterCrime(eCrimeType::CRIME_KILL_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
     }
 }

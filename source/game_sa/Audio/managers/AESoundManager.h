@@ -31,8 +31,8 @@ public:
 public:
     static void InjectHooks();
 
-    CAESoundManager();
-    ~CAESoundManager();
+    CAESoundManager() = default;  // 0x4EFD30
+    ~CAESoundManager() = default; // 0x4EFD60
 
     bool      Initialise();
     void      Terminate();
@@ -51,7 +51,7 @@ public:
 
 public:
     bool IsPaused() const { return CTimer::GetIsPaused() || m_bManuallyPaused; }
-    bool IsSoundPaused(CAESound const& sound) const { return CAESoundManager::IsPaused() && !sound.GetUnpausable(); }
+    bool IsSoundPaused(const CAESound& sound) const { return CAESoundManager::IsPaused() && !sound.GetUnpausable(); }
 };
 VALIDATE_SIZE(CAESoundManager, 0x8CBC);
 

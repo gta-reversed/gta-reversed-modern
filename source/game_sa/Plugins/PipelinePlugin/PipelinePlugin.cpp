@@ -55,7 +55,7 @@ static RwInt32 PipelineGetSize(const void* object, RwInt32 offsetInObject, RwInt
 
 // internal
 // we need this shit as RW requires write callback
-static RwStream* PipelineStreamWrite(RwStream* stream, RwInt32 binaryLength, void const* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+static RwStream* PipelineStreamWrite(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     return stream;
 }
 

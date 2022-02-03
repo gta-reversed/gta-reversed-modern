@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -29,10 +29,10 @@ public:
     void Get(RwV3d *axis, float *angle);
 
     // Stores result of quat multiplication
-    void Multiply(CQuaternion const& a, CQuaternion const& b);
+    void Multiply(const CQuaternion& a, const CQuaternion& b);
 
     // Spherical linear interpolation
-    void Slerp(CQuaternion const& from, CQuaternion const& to, float halftheta, float sintheta_inv, float t);
+    void Slerp(const CQuaternion& from, const CQuaternion& to, float halftheta, float sintheta_inv, float t);
 
     // Quat from matrix
     void Set(RwMatrix  const& m);
@@ -44,7 +44,7 @@ public:
     void Set(RwV3d *axis, float angle);
 
     // Spherical linear interpolation
-    void Slerp(CQuaternion const& from, CQuaternion const& to, float t);
+    void Slerp(const CQuaternion& from, const CQuaternion& to, float t);
 
     // Conjugate of a quat
     void Conjugate();
@@ -53,13 +53,13 @@ public:
     float GetLengthSquared();
 
     // Add right to the quat
-    void operator+=(CQuaternion const& right);
+    void operator+=(const CQuaternion& right);
 
     // Substract right from the quat
-    void operator-=(CQuaternion const& right);
+    void operator-=(const CQuaternion& right);
 
     // Assigns value from other quat
-    void operator=(CQuaternion const& right);
+    void operator=(const CQuaternion& right);
 
     // Multiplies quat by a floating point value
     void operator*=(float multiplier);
@@ -68,10 +68,10 @@ public:
     void Scale(float multiplier);
 
     // Copies value from other quat
-    void Copy(CQuaternion const& from);
+    void Copy(const CQuaternion& from);
 
     // Gets a dot product for quats
-    void Dot(CQuaternion const& a);
+    void Dot(const CQuaternion& a);
 
     // Normalises a quat
     void Normalise();

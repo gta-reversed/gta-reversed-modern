@@ -75,10 +75,10 @@ bool CModelInfoAccelerator::GetModelInfoIdFile()
 void CModelInfoAccelerator::EndOfLoadPhase()
 {
     if (!m_bFileRead) {
-        auto pFile = CFileMgr::OpenFileForWriting(m_szFilePath);
-        if (pFile) {
-            CFileMgr::Write(pFile, m_pIDs, BUFFER_SIZE);
-            CFileMgr::CloseFile(pFile);
+        auto file = CFileMgr::OpenFileForWriting(m_szFilePath);
+        if (file) {
+            CFileMgr::Write(file, m_pIDs, BUFFER_SIZE);
+            CFileMgr::CloseFile(file);
         }
     }
 

@@ -16,7 +16,7 @@ void CColTrianglePlane::GetNormal(CVector& out)
     out = UncompressUnitVector(m_normal);
 }
 
-void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)
+void CColTrianglePlane::Set(const CompressedVector* vertices, CColTriangle& triangle)
 {
     const auto vecA = UncompressVector(vertices[triangle.m_nVertA]);
     const auto vecB = UncompressVector(vertices[triangle.m_nVertB]);

@@ -74,7 +74,7 @@ bool CEventGunAimedAt::AffectsPed_Reversed(CPed* ped)
             return false;
         if (!ped->IsInVehicleThatHasADriver()) {
             if (ped->m_nPedType == PED_TYPE_COP)
-                CCrime::ReportCrime(eCrimeType::CRIME_AIM_GUN, ped, FindPlayerPed(-1));
+                CCrime::ReportCrime(eCrimeType::CRIME_AIM_GUN, ped, FindPlayerPed());
             return true;
         }
     }

@@ -53,7 +53,7 @@ public:
 
     void Update();
     void InitDoorsAtStart();
-    bool RightModTypeForThisGarage(CVehicle* pVehicle);
+    bool RightModTypeForThisGarage(CVehicle* vehicle);
     void OpenThisGarage();
     void CloseThisGarage();
     float CalcDistToGarageRectangleSquared(float, float);
@@ -64,23 +64,23 @@ public:
     bool IsPointInsideGarage(CVector vecPoint);
     bool IsPointInsideGarage(CVector vecPoint, float fRadius);
     int32 FindMaxNumStoredCarsForGarage();
-    bool IsEntityEntirelyInside3D(CEntity* pEntity, float fRadius);
-    bool IsEntityEntirelyOutside(CEntity* pEntity, float fRadius);
+    bool IsEntityEntirelyInside3D(CEntity* entity, float fRadius);
+    bool IsEntityEntirelyOutside(CEntity* entity, float fRadius);
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
-    bool IsEntityTouching3D(CEntity* pEntity);
-    bool EntityHasASphereWayOutsideGarage(CEntity* pEntity, float fRadius);
-    bool IsAnyOtherCarTouchingGarage(CVehicle* pIgnoredVehicle);
-    void ThrowCarsNearDoorOutOfGarage(CVehicle* pIgnoredVehicle);
+    bool IsEntityTouching3D(CEntity* entity);
+    bool EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius);
+    bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVeh);
+    void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVeh);
     bool IsAnyOtherPedTouchingGarage(CPed* pIgnoredPed);
     bool IsAnyCarBlockingDoor();
-    int32 CountCarsWithCenterPointWithinGarage(CVehicle* pIgnoredVeh);
+    int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVeh);
     void RemoveCarsBlockingDoorNotInside();
     void StoreAndRemoveCarsForThisHideOut(CStoredCar* pStoredCar, int32 iMaxSlot);
     void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* pStoredCar, int32 iMaxSlot);
     void TidyUpGarage();
     void TidyUpGarageClose();
-    void CenterCarInGarage(CVehicle* pVehicle);
+    void CenterCarInGarage(CVehicle* vehicle);
     void FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor);
     bool SlideDoorOpen();
     bool SlideDoorClosed();
@@ -88,7 +88,7 @@ public:
     bool IsGarageEmpty();
 
 public:
-    static void BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition);
+    static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
 
 };
 VALIDATE_SIZE(CGarage, 0xD8);

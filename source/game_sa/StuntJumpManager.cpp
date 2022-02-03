@@ -87,7 +87,7 @@ void CStuntJumpManager::Update() {
     if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
         return;
 
-    CPlayerPed* playerPed = FindPlayerPed(-1);
+    CPlayerPed* playerPed = FindPlayerPed();
     CVehicle* playerVehicle = playerPed->m_pVehicle;
     CPlayerInfo* playerInfo = playerPed->GetPlayerInfoForThisPlayerPed();
 
@@ -169,11 +169,11 @@ void CStuntJumpManager::Update() {
 
         m_iTimer = CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
-            auto vehicle = FindPlayerVehicle(-1, false);
+            auto vehicle = FindPlayerVehicle();
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0, 0, 0, 0);
+                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
             }
         }
 

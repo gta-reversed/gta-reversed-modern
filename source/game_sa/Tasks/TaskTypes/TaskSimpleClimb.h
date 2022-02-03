@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -24,50 +24,20 @@ enum eClimbHeights : int8
 
 class CTaskSimpleClimb : public CTaskSimple {
 public:
-    bool m_bIsFinished;
-    bool m_bChangeAnimation;
-    bool m_bChangePosition;
-    bool m_bForceClimb;
-    bool m_bInvalidClimb;
-    char m_nHeightForAnim;
-    char m_nHeightForPos;
-    uint8 m_nSurfaceType;
-    char m_nFallAfterVault;
-    float m_fHandholdHeading;
-    CVector m_vecHandholdPos;
-    CEntity* m_pClimbEnt;
-    int16 m_nGetToPosCounter;
+    bool                   m_bIsFinished;
+    bool                   m_bChangeAnimation;
+    bool                   m_bChangePosition;
+    bool                   m_bForceClimb;
+    bool                   m_bInvalidClimb;
+    char                   m_nHeightForAnim;
+    char                   m_nHeightForPos;
+    uint8                  m_nSurfaceType;
+    char                   m_nFallAfterVault;
+    float                  m_fHandholdHeading;
+    CVector                m_vecHandholdPos;
+    CEntity*               m_pClimbEnt;
+    int16                  m_nGetToPosCounter;
     CAnimBlendAssociation* m_pAnim;
-
-private:
-    CTaskSimpleClimb* Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
-public:
-    CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
-    ~CTaskSimpleClimb() override;
-
-    CTask* Clone() override { return new CTaskSimpleClimb(m_pClimbEnt, m_vecHandholdPos, m_fHandholdHeading, m_nSurfaceType, (eClimbHeights)m_nHeightForAnim, m_bForceClimb); }
-    bool ProcessPed(CPed* ped) override;
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CLIMB; }
-
-    bool ProcessPed_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-
-    static CEntity* TestForClimb(CPed* pPed, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool);
-    //returns bool or CEntity*
-    static void* ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& climbPos, float& pAngle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault);
-    static CEntity* ScanToGrab(CPed* ped, CVector& climbPos, float& pAngle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition);
-    static bool CreateColModel();
-    static void Shutdown();
-    bool TestForStandUp(CPed* ped, CVector* point, float fAngle);
-    bool TestForVault(CPed* ped, CVector* point, float fAngle);
-    void StartAnim(CPed* ped);
-    void StartSpeech(CPed* ped);
-    static void DeleteAnimCB(CAnimBlendAssociation* pAnim, void* data);
-    void GetCameraStickModifier(CEntity* pEntity, float& fVerticalAngle, float& fHorizontalAngle, float& a5, float& a6);
-    void GetCameraTargetPos(CPed* ped, CVector& vecTarget);
-
-    static void InjectHooks();
 
     static CMatrix& tempMatrix;
     static bool& tempMatrix_Initialized;
@@ -85,6 +55,37 @@ public:
     static float& ms_fVaultOffsetHorz;
     static float& ms_fVaultOffsetVert;
     static float& ms_fMinForStretchGrab;
+
+public:
+    CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
+    ~CTaskSimpleClimb() override;
+
+    CTask* Clone() override { return new CTaskSimpleClimb(m_pClimbEnt, m_vecHandholdPos, m_fHandholdHeading, m_nSurfaceType, (eClimbHeights)m_nHeightForAnim, m_bForceClimb); }
+    bool ProcessPed(CPed* ped) override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() override { return TASK_SIMPLE_CLIMB; }
+
+    bool ProcessPed_Reversed(CPed* ped);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+
+    static CEntity* TestForClimb(CPed* ped, CVector& climbPos, float& fAngle, uint8& nSurfaceType, bool theBool);
+    //returns bool or CEntity*
+    static void* ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CVector& climbPos, float& angle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault);
+    static CEntity* ScanToGrab(CPed* ped, CVector& climbPos, float& angle, uint8& pSurfaceType, bool flag1, bool bStandUp, bool bVault, CVector* pedPosition);
+    static bool CreateColModel();
+    static void Shutdown();
+    bool TestForStandUp(CPed* ped, CVector* point, float fAngle);
+    bool TestForVault(CPed* ped, CVector* point, float fAngle);
+    void StartAnim(CPed* ped);
+    void StartSpeech(CPed* ped);
+    static void DeleteAnimCB(CAnimBlendAssociation* anim, void* data);
+    void GetCameraStickModifier(CEntity* entity, float& fVerticalAngle, float& fHorizontalAngle, float& a5, float& a6);
+    void GetCameraTargetPos(CPed* ped, CVector& vecTarget);
+
+    static void InjectHooks();
+    CTaskSimpleClimb* Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
+
+
 };
 
 VALIDATE_SIZE(CTaskSimpleClimb, 0x30);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -34,7 +34,7 @@ public:
 
     static void Initialise();
 
-    static signed int ChooseGangPedModel(int16 gangID);
+    static int32 ChooseGangPedModel(int16 gangID);
     //! unused
     static bool GetWillAttackPlayerWithCops(ePedType gangID);
     static bool Load();

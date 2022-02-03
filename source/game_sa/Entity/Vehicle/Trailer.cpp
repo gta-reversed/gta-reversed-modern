@@ -147,12 +147,12 @@ void CTrailer::PreRender_Reversed() {
     CTrailer::PreRender();
 }
 
-bool CTrailer::GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowHitchPos(posnOut, bCheckModelInfo, vehicle);
+bool CTrailer::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
+    return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle);
 }
 
-bool CTrailer::GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowBarPos(posnOut, bCheckModelInfo, vehicle);
+bool CTrailer::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
+    return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle);
 }
 
 bool CTrailer::BreakTowLink_Reversed() {

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -36,8 +36,8 @@ uint8* CPopCycle::m_nMaxNumPeds = (uint8*)0xC0E798;
 float& CPopCycle::m_NumDealers_Peds = *(float*)0xC0E978;
 
 // 0x60FBD0
-bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, bool arg4) {
-    return plugin::CallAndReturn<bool, 0x60FBD0, ePedType*, int32*, bool, bool>(arg1, modelindex, arg3, arg4);
+bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4) {
+    return plugin::CallAndReturn<bool, 0x60FBD0, ePedType*, int32*, bool, bool>(arg1, modelIndex, arg3, arg4);
 }
 
 // 0x610310
@@ -51,8 +51,8 @@ void CPopCycle::Initialise() {
 }
 
 // 0x610150
-bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelindex) {
-    return plugin::CallAndReturn<bool, 0x610150, int32>(modelindex);
+bool CPopCycle::IsPedAppropriateForCurrentZone(int32 modelIndex) {
+    return plugin::CallAndReturn<bool, 0x610150, int32>(modelIndex);
 }
 
 // 0x610210

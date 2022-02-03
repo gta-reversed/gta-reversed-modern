@@ -39,7 +39,7 @@ public:
     CTask* ControlSubTask_Reversed(CPed* ped);
 
     void   GoToPoint(const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUpdateTargetEvenIfItsTheSame);
-    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* pPed, float fMoveStateRadius, float fRunOrSprintRadius);
+    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* ped, float fMoveStateRadius, float fRunOrSprintRadius);
     CTask* CreateFirstSubTask(int32 taskId, CPed* ped);
 
 private:

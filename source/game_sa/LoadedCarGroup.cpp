@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,8 +15,8 @@ void CLoadedCarGroup::SortBasedOnUsage() {
 }
 
 // 0x611BD0
-int32 CLoadedCarGroup::RemoveMember(int32 modelindex) {
-    return plugin::CallMethodAndReturn<int32, 0x611BD0, CLoadedCarGroup *, int32>(this, modelindex);
+int32 CLoadedCarGroup::RemoveMember(int32 modelIndex) {
+    return plugin::CallMethodAndReturn<int32, 0x611BD0, CLoadedCarGroup *, int32>(this, modelIndex);
 }
 
 // 0x611C50

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -57,7 +57,7 @@ public:
     CSexyPedScanner                   m_sexyPedScanner;
     CNearbyFireScanner                m_nearbyFireScanner;
 
-    void ScanForEvents(CPed* pPed);
+    void ScanForEvents(CPed* ped);
     void ScanForEventsNow(CPed* ped, bool bDontScan);
 };
 

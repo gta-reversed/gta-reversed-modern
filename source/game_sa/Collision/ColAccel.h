@@ -66,14 +66,14 @@ public:
     static int32&              m_iNumIPLItems;
     static int32&              m_iNumSections;
     static int32&              m_iNumColBounds;
-    static char const*         mp_cCacheName; // MODELS\CINFO.BIN
+    static const char*         mp_cCacheName; // MODELS\CINFO.BIN
 
 public:
     static void InjectHooks();
 
     static bool   isCacheLoading();
     static void   endCache();
-    static void   addCacheCol(PackedModelStartEnd startEnd, CColModel const& colModel);
+    static void   addCacheCol(PackedModelStartEnd startEnd, const CColModel& colModel);
     static void   cacheLoadCol();
     static void   addColDef(ColDef colDef);
     static void   getColDef(ColDef& colDef);
