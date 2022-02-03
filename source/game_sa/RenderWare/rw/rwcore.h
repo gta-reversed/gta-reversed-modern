@@ -901,21 +901,52 @@ struct RwRaster
  <macro/inline functionality
  */
 
-#define RwRasterGetWidthMacro(_raster)               \
+#define RwRasterGetWidthMacro(_raster) \
     ((_raster)->width)
 
-#define RwRasterGetHeightMacro(_raster)              \
+#define RwRasterGetHeightMacro(_raster) \
     ((_raster)->height)
+
+#define RwRasterGetStrideMacro(_raster) \
+    ((_raster)->stride)
+
+#define RwRasterGetDepthMacro(_raster) \
+    ((_raster)->depth)
+
+#define RwRasterGetFormatMacro(_raster) \
+    ((((_raster)->cFormat) & (rwRASTERFORMATMASK >> 8)) << 8)
+
+#define RwRasterGetTypeMacro(_raster) \
+    (((_raster)->cType) & rwRASTERTYPEMASK)
+
+#define RwRasterGetParentMacro(_raster) \
+    ((_raster)->parent)
+
 
 #if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
 
-#define RwRasterGetWidth(_raster)                    \
+#define RwRasterGetWidth(_raster)                   \
     RwRasterGetWidthMacro(_raster)
 
-#define RwRasterGetHeight(_raster)                   \
+#define RwRasterGetHeight(_raster)                  \
     RwRasterGetHeightMacro(_raster)
 
-#endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
+#define RwRasterGetStride(_raster)                  \
+    RwRasterGetStrideMacro(_raster)
+
+#define RwRasterGetDepth(_raster)                   \
+    RwRasterGetDepthMacro(_raster)
+
+#define RwRasterGetFormat(_raster)                  \
+    RwRasterGetFormatMacro(_raster)
+
+#define RwRasterGetType(_raster)                  \
+    RwRasterGetTypeMacro(_raster)
+
+#define RwRasterGetParent(_raster)                  \
+    RwRasterGetParentMacro(_raster)
+
+#endif /* (defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 
 /****************************************************************************
  Global Defines
