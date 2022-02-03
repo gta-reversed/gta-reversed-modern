@@ -709,9 +709,9 @@ void CVehicleModelInfo::PreprocessHierarchy()
                         && nameIdAssoc->m_dwHierarchyId != CAR_WHEEL_LF
                         && handling.m_bDoubleRwheels) {
 
-                        auto сlone2 = RpAtomicClone(mainWheelAtomic);
+                        auto clone2 = RpAtomicClone(mainWheelAtomic);
                         auto newFrame = RwFrameCreate();
-                        RpAtomicSetFrame(сlone2, newFrame);
+                        RpAtomicSetFrame(clone2, newFrame);
                         RwFrameAddChild(frame, newFrame);
                         auto fOffset = fRearDoubleWheelOffsetFactor * -0.25F;
                         auto matrix = RwFrameGetMatrix(newFrame);
@@ -720,8 +720,8 @@ void CVehicleModelInfo::PreprocessHierarchy()
                         *RwMatrixGetAt(matrix)    = { 0.0F, 0.0F, 1.0F };
                         *RwMatrixGetPos(matrix)   = { fOffset, 0.0F, 0.0F };
                         matrix->flags |= (rwMATRIXINTERNALIDENTITY | rwMATRIXTYPEORTHONORMAL);
-                        RpClumpAddAtomic(m_pRwClump, сlone2);
-                        CVisibilityPlugins::SetAtomicRenderCallback(сlone2, atomicDefaultRenderCB); // in android idb it's CVisibilityPlugins::RenderWheelAtomicCB
+                        RpClumpAddAtomic(m_pRwClump, clone2);
+                        CVisibilityPlugins::SetAtomicRenderCallback(clone2, atomicDefaultRenderCB); // in android idb it's CVisibilityPlugins::RenderWheelAtomicCB
                     }
                 }
             }

@@ -35,11 +35,11 @@ public:
     } m_nFlags;
 
 public:
-    CTaskComplexProstituteSolicit(CPed* сlient);
+    CTaskComplexProstituteSolicit(CPed* client);
 
     CTask* CreateSubTask(int32 taskId, CPed* prostitute);
     static void GetRidOfPlayerProstitute();
-    static bool IsTaskValid(CPed* prostitute, CPed* сlient);
+    static bool IsTaskValid(CPed* prostitute, CPed* client);
 };
 
 VALIDATE_SIZE(CTaskComplexProstituteSolicit, 0x30);
