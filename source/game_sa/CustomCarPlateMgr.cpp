@@ -98,8 +98,7 @@ int8 CCustomCarPlateMgr::LoadPlatecharsetDat(const char* filename, uint8* data) 
 }
 
 auto ResolvePlateType(uint8 plateType) {
-    // todo: Result of comparison of constant -1 with expression of type 'uint8' (aka 'unsigned char') is always false
-    return plateType == -1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
+    return plateType == (uint8)-1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
 }
 
 // 0x6FDE50
