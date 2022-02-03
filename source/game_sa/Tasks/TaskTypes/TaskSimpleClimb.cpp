@@ -520,7 +520,7 @@ void* CTaskSimpleClimb::ScanToGrabSectorList(CPtrList* sectorList, CPed* ped, CV
                 tempMatrix = *ped->m_matrix;
                 tempMatrix.SetTranslateOnly(CWorld::m_aTempColPts->m_vecPoint);
 
-                if (CCollision::ProcessColModels(tempMatrix, ms_FindEdgeColModel, entity->GetMatrix(), *entity->GetColModel(), CWorld::m_aTempColPts, 0, 0, false) > 0)
+                if (CCollision::ProcessColModels(tempMatrix, ms_FindEdgeColModel, entity->GetMatrix(), *entity->GetColModel(), CWorld::m_aTempColPts, nullptr, nullptr, false) > 0)
                 {
                     if (fabsf(CWorld::m_aTempColPts->m_vecNormal.x) <= 0.05F
                         && fabsf(CWorld::m_aTempColPts->m_vecNormal.y) <= 0.05F)
