@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Base.h"
+
+#include "Vector.h"
+#include <rwplcore.h>
+
 struct BreakInfo_t {
     uint32               m_nPosRule;
     uint16               m_nNumVertices;

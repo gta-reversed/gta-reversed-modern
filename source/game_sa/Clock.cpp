@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Clock.h"
+
 uint8 CClock::daysInMonth[12] = {31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}; // 0x8CCF24
 
 bool& CClock::bClockHasBeenStored = *reinterpret_cast<bool*>(0xB70144);

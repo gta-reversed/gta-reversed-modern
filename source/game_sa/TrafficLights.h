@@ -32,9 +32,9 @@ public:
     static void InjectHooks();
 
 public:
-    static bool ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn);
-    static bool ShouldCarStopForBridge(CVehicle* pVehicle);
-    static void DisplayActualLight(CEntity* pEntity);
+    static bool ShouldCarStopForLight(CVehicle* vehicle, bool bUnkn);
+    static bool ShouldCarStopForBridge(CVehicle* vehicle);
+    static void DisplayActualLight(CEntity* entity);
     static bool IsMITrafficLight(int32 modelIndex);
     static uint8 LightForPeds();
 
@@ -43,7 +43,7 @@ private:
     static uint8 LightForCars2();
     static uint8 LightForCars1_Visual();
     static uint8 LightForCars2_Visual();
-    static int32 FindTrafficLightType(CEntity* pEntity);
-    static float FindOrientationForTrafficLightType(CEntity* pEntity);
+    static int32 FindTrafficLightType(CEntity* entity);
+    static float FindOrientationForTrafficLightType(CEntity* entity);
     static int32 FindTrafficLightTypeFromOrientation(float fOrientation);
 };

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -37,7 +37,7 @@ public:
 
     void operator=(const CVector2D& right);
 
-    inline CVector2D(CVector2D const& src) {
+    inline CVector2D(const CVector2D& src) {
         x = src.x;
         y = src.y;
     }

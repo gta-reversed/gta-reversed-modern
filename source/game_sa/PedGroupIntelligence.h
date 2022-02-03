@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,9 +7,9 @@
 #pragma once
 
 #include "PedTaskPair.h"
-#include "Ped.h"
-#include "Task.h"
 
+class CPed;
+class CTask;
 class CGroupEventHandler;
 class CPedGroupDefaultTaskAllocator;
 class CTaskAllocator;
@@ -41,7 +41,7 @@ public:
     CTask*     GetTaskDefault(CPed* ped);
     CTask*     GetTaskScriptCommand(CPed* ped);
     CTask*     GetTaskSecondary(CPed* ped);
-    signed int GetTaskSecondarySlot(CPed* ped);
+    int32      GetTaskSecondarySlot(CPed* ped);
     bool       IsCurrentEventValid();
     bool       IsGroupResponding();
     void       Process();
@@ -49,21 +49,21 @@ public:
     void       ReportAllBarScriptTasksFinished();
     void       ReportAllTasksFinished(CPedTaskPair* taskpair);
     void       ReportAllTasksFinished();
-    bool       ReportFinishedTask(CPed const* ped, CTask const* task, CPedTaskPair* taskpair);
-    bool       ReportFinishedTask(CPed const* ped, CTask const* task);
-    void       SetDefaultTask(CPed* ped, CTask const* task);
+    bool       ReportFinishedTask(const CPed* ped, const CTask* task, CPedTaskPair* taskpair);
+    bool       ReportFinishedTask(const CPed* ped, const CTask* task);
+    void       SetDefaultTask(CPed* ped, const CTask* task);
     void       SetDefaultTaskAllocator(CPedGroupDefaultTaskAllocator const* PedGroupDefaultTaskAllocator);
     //! see ePedGroupTaskAllocator
     void SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator);
     //! arg3 always true
     //! arg5 always false
     //! arg7 always  -1
-    void  SetEventResponseTask(CPed* ped, bool arg3, CTask const* task1, bool arg5, CTask const* task2, int32 arg7);
+    void  SetEventResponseTask(CPed* ped, bool arg3, const CTask* task1, bool arg5, const CTask* task2, int32 arg7);
     int32 SetEventResponseTaskAllocator(int32 a2);
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
-    void  SetScriptCommandTask(CPed* ped, CTask const* task);
-    void  SetTask(CPed* ped, CTask const* task, CPedTaskPair* taskpair, int32 arg5, bool arg6);
+    void  SetScriptCommandTask(CPed* ped, const CTask* task);
+    void  SetTask(CPed* ped, const CTask* task, CPedTaskPair* taskpair, int32 arg5, bool arg6);
 };
 
 VALIDATE_SIZE(CPedGroupIntelligence, 0x2A0);

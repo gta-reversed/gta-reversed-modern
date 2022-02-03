@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "VehicleAnimGroupData.h"
+
 CVehicleAnimGroup(&CVehicleAnimGroupData::m_vehicleAnimGroups)[NUM_VEH_ANIM_GROUPS] = *(CVehicleAnimGroup(*)[NUM_VEH_ANIM_GROUPS])0xC1CDC0;
 
 void CVehicleAnimGroup::InjectHooks()
@@ -221,8 +223,8 @@ CVector CVehicleAnimGroup::ComputeAnimDoorOffsets(eVehAnimDoorOffset doorId)
         if (pSequences->m_nFrameCount > 0)
         {
             const auto iFrame = pSequences->m_nFrameCount - 1;
-            auto* pFrame = pSequences->GetUncompressedFrame(iFrame);
-            GetDoorOffset(doorId) = pFrame->m_vecTranslation;
+            auto* frame = pSequences->GetUncompressedFrame(iFrame);
+            GetDoorOffset(doorId) = frame->m_vecTranslation;
         }
     }
 

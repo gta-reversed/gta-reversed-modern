@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -23,23 +23,21 @@ enum eSunbatherType : uint32
 
 class CTaskComplexSunbathe : public CTaskComplex {
 public:
-    bool                m_bStartStanding;
-    bool                m_bBathing;
-    bool                m_bBeachAnimsReferenced;
-    bool                m_bSunbatheAnimsReferenced;
-    bool                m_bAborted;
-private:
-    char _pad[3];
-public:
-    CTaskTimer          m_BathingTimer;
-    eSunbatherType      m_SunbatherType;
-    CAnimBlock*         m_pBeachAnimBlock;
-    CAnimBlock*         m_pSunbatheAnimBlock;
-    int32               m_BeachAnimBlockIndex;
-    int32               m_SunbatheAnimBlockIndex;
-    CObject*            m_pTowel;
+    bool           m_bStartStanding;
+    bool           m_bBathing;
+    bool           m_bBeachAnimsReferenced;
+    bool           m_bSunbatheAnimsReferenced;
+    bool           m_bAborted;
+    CTaskTimer     m_BathingTimer;
+    eSunbatherType m_SunbatherType;
+    CAnimBlock*    m_pBeachAnimBlock;
+    CAnimBlock*    m_pSunbatheAnimBlock;
+    int32          m_BeachAnimBlockIndex;
+    int32          m_SunbatheAnimBlockIndex;
+    CObject*       m_pTowel;
 
-    CTaskComplexSunbathe(CObject* pTowel, bool bStartStanding);
+public:
+    CTaskComplexSunbathe(CObject* towel, bool bStartStanding);
 };
 
 VALIDATE_SIZE(CTaskComplexSunbathe, 0x38);

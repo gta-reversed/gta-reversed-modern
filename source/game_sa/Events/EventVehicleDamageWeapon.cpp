@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventVehicleDamageWeapon.h"
+
 void CEventVehicleDamageWeapon::InjectHooks()
 {
     RH_ScopedClass(CEventVehicleDamageWeapon);
@@ -12,11 +14,6 @@ void CEventVehicleDamageWeapon::InjectHooks()
 // 0x61C2E0
 CEventVehicleDamageWeapon::CEventVehicleDamageWeapon(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType) :
     CEventVehicleDamage(vehicle, attacker, weaponType)
-{
-    // nothing here
-}
-
-CEventVehicleDamageWeapon::~CEventVehicleDamageWeapon()
 {
     // nothing here
 }

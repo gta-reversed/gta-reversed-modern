@@ -1,12 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
+class CVehicle;
 
 struct UpsideDownCar {
     int32  m_nHandle;
@@ -30,14 +30,14 @@ public:
 public:
     static void InjectHooks();
 
-    void        Init();
-    static bool IsCarUpsideDown(int32 carHandle);
-    static bool IsCarUpsideDown(CVehicle* vehicle);
-    bool        AreAnyCarsUpsideDown();
-    void        UpdateTimers();
-    void        AddCarToCheck(int32 car);
-    void        RemoveCarFromCheck(int32 carHandle);
-    bool        HasCarBeenUpsideDownForAWhile(int32 car);
+    void Init();
+    bool IsCarUpsideDown(int32 carHandle);
+    bool IsCarUpsideDown(CVehicle* vehicle);
+    bool AreAnyCarsUpsideDown();
+    void UpdateTimers();
+    void AddCarToCheck(int32 car);
+    void RemoveCarFromCheck(int32 carHandle);
+    bool HasCarBeenUpsideDownForAWhile(int32 car);
 };
 
 VALIDATE_SIZE(CUpsideDownCarCheck, 0x30);

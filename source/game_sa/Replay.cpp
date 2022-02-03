@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Replay.h"
+
 eReplayMode &CReplay::Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
 bool& CReplay::bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
 

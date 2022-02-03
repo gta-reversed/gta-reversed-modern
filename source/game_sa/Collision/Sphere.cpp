@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "Sphere.h"
 
 // 0x40FCF0

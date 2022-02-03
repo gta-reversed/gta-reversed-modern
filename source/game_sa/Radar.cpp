@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -144,7 +144,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(DrawRadarSprite, 0x585FF0); // OK
     RH_ScopedInstall(DrawMap, 0x586B00);
     RH_ScopedInstall(DrawRadarMap, 0x586880);
-    RH_ScopedOverloadedInstall(StreamRadarSections, "", 0x5858D0, void(*)(CVector const&));
+    RH_ScopedOverloadedInstall(StreamRadarSections, "", 0x5858D0, void(*)(const CVector&));
     RH_ScopedInstall(SetupRadarRect, 0x584A80);
     RH_ScopedInstall(GetActualBlipArrayIndex, 0x582870);
     RH_ScopedInstall(LimitToMap, 0x583350);
@@ -587,7 +587,7 @@ uint8 CRadar::CalculateBlipAlpha(float distance)
 // 0x583480
 void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in)
 {
-    ((void(__cdecl*)(CVector2D&, CVector2D const&))0x583480)(out, in);
+    ((void(__cdecl*)(CVector2D&, const CVector2D&))0x583480)(out, in);
 }
 
 // 0x583530
@@ -615,7 +615,7 @@ void CRadar::TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D
 
 // unused, see CRadar::DrawRadarSection
 // 0x583600
-void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, CVector2D const& in, int32 arg2, int32 arg3)
+void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 arg2, int32 arg3)
 {
     out.x = in.x - ((500 * arg2) - 3000.0f);
     out.y = -(in.y - ((500 * (12 - arg3)) - 3000.0f));
@@ -990,19 +990,19 @@ void GetTextureCorners(int32 x, int32 y, CVector2D* corners)
 // 0x584E00
 int32 LineRadarBoxCollision(CVector2D& result, const CVector2D& lineStart, const CVector2D& lineEnd)
 {
-    return ((int32(__cdecl*)(CVector2D&, CVector2D const&, CVector2D const&))0x584E00)(result, lineStart, lineEnd);
+    return ((int32(__cdecl*)(CVector2D&, const CVector2D&, const CVector2D&))0x584E00)(result, lineStart, lineEnd);
 }
 
 // 0x585040
 int32 CRadar::ClipRadarPoly(CVector2D* out, const CVector2D* in)
 {
-    return ((int32(__cdecl*)(CVector2D*, CVector2D const*))0x585040)(out, in);
+    return ((int32(__cdecl*)(CVector2D*, const CVector2D*))0x585040)(out, in);
 }
 
 // 0x5853D0
 void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA&  color, bool inMenu)
 {
-    ((void(__cdecl*)(CRect const&, CRGBA const&, bool))0x5853D0)(rect, color, inMenu);
+    ((void(__cdecl*)(const CRect&, const CRGBA&, bool))0x5853D0)(rect, color, inMenu);
 }
 
 // 0x585700
@@ -1169,7 +1169,7 @@ void CRadar::DrawRadarMap()
 
     DrawRadarGangOverlay(false);
 
-    CVehicle* vehicle = FindPlayerVehicle(-1, false);
+    CVehicle* vehicle = FindPlayerVehicle();
 
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         CVector playerPos = FindPlayerCentreOfWorld_NoInteriorShift(0);
@@ -1198,12 +1198,12 @@ void CRadar::DrawRadarMap()
 // 0x586B00
 void CRadar::DrawMap()
 {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     bool mapShouldDrawn = !CGame::currArea && player->m_nAreaCode == 0 && FrontEndMenuManager.m_nRadarMode != 1;
 
     CalculateCachedSinCos();
 
-    CVehicle* vehicle = FindPlayerVehicle(-1, false);
+    CVehicle* vehicle = FindPlayerVehicle();
     CPlayerInfo* playerInfo = player->GetPlayerInfoForThisPlayerPed();
     if (!vehicle || playerInfo->IsPlayerInRemoteMode()) {
         if (CTheScripts::RadarZoomValue)

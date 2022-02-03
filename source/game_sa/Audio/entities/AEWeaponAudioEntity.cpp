@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -81,7 +81,7 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, int32
         return PlayGunSounds(entity, 33, 53, 3, 4, 5, audioEventId, 0.0f, 1.0f, 1.0f);
 
     case WEAPON_TEC9:
-        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992, 1.0f);
+        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992f, 1.0f);
 
     case WEAPON_COUNTRYRIFLE:
         return PlayGunSounds(entity, 52, 53, 26, 27, 23, audioEventId, 0.0f, 0.89f, 1.0f);

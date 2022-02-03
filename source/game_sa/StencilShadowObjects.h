@@ -1,7 +1,5 @@
 #pragma once
 
-#include "StencilShadowObject.h"
-
 class CStencilShadowObject;
 
 class CStencilShadowObjects {

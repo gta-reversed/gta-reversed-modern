@@ -1,14 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
-#include "BaseModelInfo.h"
-#include "PtrListDoubleLink.h"
+class CVehicle;
+class CBaseModelInfo;
+class CPtrListDoubleLink;
 
 enum eRendererVisibility {
     RENDERER_INVISIBLE = 0,
@@ -46,7 +46,7 @@ struct tScanLists {
 VALIDATE_SIZE(tScanLists, 0x14);
 
 struct tRenderListEntry {
-    CEntity* pEntity;
+    CEntity* entity;
     float distance;
 };
 
@@ -119,7 +119,7 @@ public:
     static void ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY);
     static void ScanSectorList(int32 sectorX, int32 sectorY);
     static void ScanBigBuildingList(int32 sectorX, int32 sectorY);
-    static bool ShouldModelBeStreamed(CEntity* entity, CVector const& origin, float farClip);
+    static bool ShouldModelBeStreamed(CEntity* entity, const CVector& origin, float farClip);
     static void ScanPtrList_RequestModels(CPtrList& list);
     static void ConstructRenderList();
     static void ScanSectorList_RequestModels(int32 sectorX, int32 sectorY);
@@ -127,7 +127,7 @@ public:
     // returns objects count
     static int32 GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
     static void RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags);
-    static void RequestObjectsInDirection(CVector const& posn, float angle, int32 modelRequestFlags);
+    static void RequestObjectsInDirection(const CVector& posn, float angle, int32 modelRequestFlags);
     static void SetupScanLists(int32 sectorX, int32 sectorY);
 
     static void SetLoadingPriority(int8 priority) noexcept { m_loadingPriority = priority; } // 0x407370

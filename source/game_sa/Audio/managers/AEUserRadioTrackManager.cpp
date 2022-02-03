@@ -148,7 +148,7 @@ CAEStreamingDecoder* CAEUserRadioTrackManager::LoadUserTrack(int32 trackID) {
 // 0x4f2fd0
 bool CAEUserRadioTrackManager::ReadUserTracks() {
     CFileMgr::SetDirMyDocuments();
-    FILESTREAM file = CFileMgr::OpenFile("sa-utrax.dat", "rb");
+    auto file = CFileMgr::OpenFile("sa-utrax.dat", "rb");
     CFileMgr::SetDir("");
 
     if (file == nullptr)
@@ -267,7 +267,7 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
 
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
-    FILESTREAM file = CFileMgr::OpenFile("sa-ufiles.dat", "wb");
+    auto file = CFileMgr::OpenFile("sa-ufiles.dat", "wb");
 
     if (file == nullptr)
         self->m_nUserTracksScanState = USER_TRACK_SCAN_ERROR;
@@ -313,12 +313,12 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
 }
 
 // 0x4f4690
-int32 CAEUserRadioTrackManager::WriteUserTracksFile(const char* dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int32 depth) {
+int32 CAEUserRadioTrackManager::WriteUserTracksFile(const char* dir, size_t& currentLength, auto file, std::vector<tUserTracksInfo>& offsets, int32 depth) {
     // todo: FIX_BUGS
     return WriteUserTracksFile(UTF8ToUnicode(dir), currentLength, file, offsets, depth);
 }
 
-int32 CAEUserRadioTrackManager::WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, FILESTREAM file, std::vector<tUserTracksInfo>& offsets, int32 depth) {
+int32 CAEUserRadioTrackManager::WriteUserTracksFile(const std::wstring& dir, size_t& currentLength, auto file, std::vector<tUserTracksInfo>& offsets, int32 depth) {
     // Limit folder scan to 16 folders deep
     if (depth >= 15)
         return 0;

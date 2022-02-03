@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "InformGroupEventQueue.h"
+
 void CInformGroupEventQueue::InjectHooks() {
     RH_ScopedClass(CInformGroupEventQueue);
     RH_ScopedCategoryGlobal();
@@ -16,8 +18,8 @@ void CInformGroupEventQueue::Init() {
 }
 
 // 0x4B7CD0
-bool CInformGroupEventQueue::Add(CEntity* pEntity, CPedGroup* pPedGroup, CEvent* pEvent) {
-    return plugin::CallAndReturn<bool, 0x4B7CD0, CEntity*, CPedGroup*, CEvent*>(pEntity, pPedGroup, pEvent);
+bool CInformGroupEventQueue::Add(CEntity* entity, CPedGroup* pedGroup, CEvent* event) {
+    return plugin::CallAndReturn<bool, 0x4B7CD0, CEntity*, CPedGroup*, CEvent*>(entity, pedGroup, event);
 }
 
 // 0x4AC410

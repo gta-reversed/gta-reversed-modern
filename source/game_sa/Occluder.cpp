@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "ActiveOccluder.h"
 #include "Occluder.h"
 #include "Occlusion.h"
 
@@ -28,7 +29,7 @@ bool COccluder::ProcessOneOccluder(CActiveOccluder* activeOccluder)
 
     auto matRotX = CMatrix();
     auto matRotY = CMatrix();
-    auto matRotZ = CMatrix();;
+    auto matRotZ = CMatrix();
     auto matTransform = CMatrix();
 
     matRotX.SetRotateX(static_cast<float>(m_cRotX) * PI / 128.0F);

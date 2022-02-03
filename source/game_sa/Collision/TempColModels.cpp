@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "TempColModels.h"
+
 CColModel& CTempColModels::ms_colModelDoor1 = *(CColModel*)0x968E50;
 CColModel& CTempColModels::ms_colModelBumper1 = *(CColModel*)0x968E80;
 CColModel& CTempColModels::ms_colModelPanel1 = *(CColModel*)0x968EB0;

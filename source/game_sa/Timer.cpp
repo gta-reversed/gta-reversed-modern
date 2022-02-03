@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -94,10 +94,9 @@ void CTimer::Initialise()
     game_FPS = 0.0f;
 
     ms_fTimeScale = 1.0f;
-    ms_fSlowMotionScale = -1.0f;
+    ms_fSlowMotionScale = -1.0f; // unused
     ms_fTimeStep = 1.0f;
     ms_fOldTimeStep = 1.0f;
-    // unused dword_B7CB60 = 0xBF800000;
 
     TimerFunction_t timerFunc;
     auto frequency = GetOSWPerformanceFrequency();

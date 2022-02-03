@@ -98,8 +98,7 @@ int8 CCustomCarPlateMgr::LoadPlatecharsetDat(const char* filename, uint8* data) 
 }
 
 auto ResolvePlateType(uint8 plateType) {
-    // todo: Result of comparison of constant -1 with expression of type 'uint8' (aka 'unsigned char') is always false
-    return plateType == -1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
+    return plateType == (uint8)-1 ? CCustomCarPlateMgr::GetMapRegionPlateDesign() : plateType;
 }
 
 // 0x6FDE50
@@ -231,11 +230,11 @@ bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRast
     if (!pCharsetLockedData)
         return false;
 
-    const auto plateRasterStride = plateRaster->stride; // TODO: Use macro, maybe?
+    const auto plateRasterStride = RwRasterGetStride(plateRaster);
     if (!plateRasterStride)
         return false;
 
-    const auto charsRasterStride = charsRaster->stride; // TODO: Use macro, maybe?
+    const auto charsRasterStride = RwRasterGetStride(charsRaster);
     if (!charsRasterStride)
         return false;
 
@@ -279,7 +278,7 @@ bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRast
 RwTexture* CCustomCarPlateMgr::CreatePlateTexture(const char* text, uint8 plateType) {
     assert(text);
 
-    const auto plateRaster = RwRasterCreate(64, 16, 32, 0x604); // TODO: Figure out flags
+    const auto plateRaster = RwRasterCreate(64, 16, 32, rwRASTERFORMAT888 | rwRASTERPIXELLOCKEDWRITE);
     if (!plateRaster)
         return nullptr;
 

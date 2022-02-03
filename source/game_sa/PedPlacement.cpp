@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,8 +14,8 @@ void CPedPlacement::InjectHooks() {
 
     RH_ScopedInstall(IsPositionClearForPed, 0x616860);
     RH_ScopedInstall(FindZCoorForPed, 0x616920);
-    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Pos", 0x6168E0, CVehicle * (*)(CVector const*));
-    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Ped", 0x616A40, CVehicle * (*)(CPed const*));
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Pos", 0x6168E0, CVehicle * (*)(const CVector*));
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Ped", 0x616A40, CVehicle * (*)(const CPed*));
 }
 
 // 0x616920
@@ -71,7 +71,7 @@ CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
         return nullptr;
 
     if (vehHit->IsAutomobile() || vehHit->vehicleFlags.bIsBig) {
-        static CColPoint unusedColPoint{}; // 0xC102A0
+        static CColPoint unusedColPoint[32]; // 0xC102A0
         if (CCollision::ProcessColModels(
             *ped->m_matrix,
             *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
@@ -79,7 +79,7 @@ CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
             *vehHit->m_matrix,
             *CModelInfo::GetModelInfo(vehHit->m_nModelIndex)->GetColModel(),
 
-            &unusedColPoint, nullptr, nullptr, false
+            unusedColPoint, nullptr, nullptr, false
         )) {
             return vehHit;
         }

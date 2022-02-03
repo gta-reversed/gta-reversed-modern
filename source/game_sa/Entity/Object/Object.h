@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -140,7 +140,7 @@ public:
     bool     CanBeDeleted();
     void     SetRelatedDummy(CDummyObject* relatedDummy);
     bool     TryToExplode();
-    void     SetObjectTargettable(uint8 targetable);
+    void     SetObjectTargettable(bool targetable);
     bool     CanBeTargetted();
     void     RefModelInfo(int32 modelIndex);
     void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);

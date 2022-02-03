@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -117,4 +117,4 @@ extern float& PLANE_DAMAGE_WAVE_COUNTER_VAR;    // 0.75
 extern float& PLANE_DAMAGE_THRESHHOLD;          // 500.0
 extern float& PLANE_DAMAGE_SCALE_MASS;          // 10000.0
 extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD;  // 5000.0
-extern CVector& vecRCBaronGunPos;               // <0.0, 0.45, 0.0>
+extern CVector& vecRCBaronGunPos;               // <0.0f, 0.45, 0.0>

@@ -117,8 +117,8 @@ bool CGameLogic::IsCoopGameGoingOn() {
 }
 
 // 0x441E10
-bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* pPed, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit) {
-    return plugin::CallAndReturn<bool, 0x441E10, CPed*, float, float, float, float>(pPed, moveDirectionX, moveDirectionY, moveDirectionZ, distanceLimit);
+bool CGameLogic::IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit) {
+    return plugin::CallAndReturn<bool, 0x441E10, CPed*, float, float, float, float>(ped, moveDirectionX, moveDirectionY, moveDirectionZ, distanceLimit);
 }
 
 // 0x442020
@@ -127,8 +127,8 @@ bool CGameLogic::IsPlayerUse2PlayerControls(CPed* ped) {
 }
 
 // 0x4416E0
-bool CGameLogic::IsPointWithinLineArea(signed int a1, float x, float y) {
-    return plugin::CallAndReturn<bool, 0x4416E0, signed int, float, float>(a1, x, y);
+bool CGameLogic::IsPointWithinLineArea(int32 a1, float x, float y) {
+    return plugin::CallAndReturn<bool, 0x4416E0, int32, float, float>(a1, x, y);
 }
 
 // 0x4416C0
@@ -217,7 +217,7 @@ void CGameLogic::SkipCanBeActivated() {
 }
 
 // 0x441440
-void CGameLogic::SortOutStreamingAndMemory(CVector const& translation, float angle) {
+void CGameLogic::SortOutStreamingAndMemory(const CVector& translation, float angle) {
     CTimer::Stop();
     float farClip = CTimeCycle::FindFarClipForCoors(translation);
     RwCameraSetFarClipPlane(TheCamera.m_pRwCamera, farClip);

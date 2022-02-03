@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,18 +10,15 @@
 
 #include "PedType.h"
 #include "Buoyancy.h"
+#include "TaskSimpleSwim.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // Constructors
     // RH_ScopedInstall(Constructor, 0x5E8030);
-
-    // Destructors
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
 
-    // Static functions
     // Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
     // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
     // RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
@@ -32,8 +29,6 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
     // RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
     // RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
-
-    // Methods
     // RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     // RH_ScopedInstall(ClearWeapon, 0x5E62B0);
@@ -148,8 +143,6 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     // RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
-
-    // Virtual methods
     // RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
     // RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
@@ -312,9 +305,9 @@ void CPed::ClearAimFlag()
 }
 
 // 0x5DEF60
-int32 CPed::GetLocalDirection(CVector2D const& arg0)
+int32 CPed::GetLocalDirection(const CVector2D& arg0)
 {
-    return ((int32(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
+    return ((int32(__thiscall *)(CPed*, const CVector2D&))0x5DEF60)(this, arg0);
 }
 
 // 0x5DEFD0
@@ -582,9 +575,9 @@ bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
 }
 
 // 0x5E0820
-bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode)
+bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicle, bool findClosestNode)
 {
-    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
+    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicle, findClosestNode);
 }
 
 // 0x5E13C0
@@ -624,7 +617,7 @@ void CPed::ProcessBuoyancy()
         return;
 
     float fBuoyancyMult = 1.1F;
-    if (m_nPedState == ePedState::PEDSTATE_DEAD || m_nPedState == ePedState::PEDSTATE_DIE)
+    if (m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE)
         fBuoyancyMult = 1.8F;
 
     float fBuoyancy = fBuoyancyMult * m_fMass / 125.0F;
@@ -632,24 +625,24 @@ void CPed::ProcessBuoyancy()
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancy(this, fBuoyancy, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
         physicalFlags.bTouchingWater = false;
-        auto pSwimTask = m_pIntelligence->GetTaskSwim();
-        if (pSwimTask)
-            pSwimTask->m_fSwimStopTime = 1000.0F;
+        auto swimTask = m_pIntelligence->GetTaskSwim();
+        if (swimTask)
+            swimTask->m_fSwimStopTime = 1000.0F;
 
         return;
     }
 
     if (bIsStanding) {
-        auto& pStandingOnEntity = m_pContactEntity;
-        if (pStandingOnEntity && pStandingOnEntity->IsVehicle()) {
-            auto pStandingOnVehicle = reinterpret_cast<CVehicle*>(pStandingOnEntity);
+        auto& standingOnEntity = m_pContactEntity;
+        if (standingOnEntity && standingOnEntity->IsVehicle()) {
+            auto pStandingOnVehicle = standingOnEntity->AsVehicle();
             if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
-                auto pSwimTask = m_pIntelligence->GetTaskSwim();
-                if (!pSwimTask)
+                auto swimTask = m_pIntelligence->GetTaskSwim();
+                if (!swimTask)
                     return;
 
-                pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
+                swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
                 return;
             }
         }
@@ -662,7 +655,7 @@ void CPed::ProcessBuoyancy()
         CEntity* colEntity;
         if (CWorld::ProcessVerticalLine(vecPedPos, fCheckZ, lineColPoint, colEntity, false, true, false, false, false, false, nullptr)) {
             if (colEntity->IsVehicle()) {
-                auto colVehicle = reinterpret_cast<CVehicle*>(colEntity);
+                auto colVehicle = colEntity->AsVehicle();
                 if (colVehicle->IsBoat()
                     && !colVehicle->physicalFlags.bDestroyed
                     && colVehicle->GetMatrix().GetUp().z > 0.0F) {
@@ -711,9 +704,9 @@ void CPed::ProcessBuoyancy()
             GetEventGroup().Add(&cEvent, false);
         }
         else {
-            auto pSwimTask = m_pIntelligence->GetTaskSwim();
-            if (pSwimTask) {
-                pSwimTask->m_fSwimStopTime = 0.0F;
+            auto swimTask = m_pIntelligence->GetTaskSwim();
+            if (swimTask) {
+                swimTask->m_fSwimStopTime = 0.0F;
                 bPlayerSwimmingOrClimbing = true;
             }
             else if (m_pIntelligence->GetTaskClimb()) {
@@ -738,10 +731,10 @@ void CPed::ProcessBuoyancy()
         return;
     }
 
-    auto pSwimTask = m_pIntelligence->GetTaskSwim();
-    if (bIsStanding && pSwimTask)
+    auto swimTask = m_pIntelligence->GetTaskSwim();
+    if (bIsStanding && swimTask)
     {
-        pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
+        swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
         return;
     }
 
@@ -749,8 +742,7 @@ void CPed::ProcessBuoyancy()
         CVector vecHeadPos(0.0F, 0.0F, 0.1F);
         GetTransformedBonePosition(vecHeadPos, ePedBones::BONE_HEAD, false);
         if (vecHeadPos.z < mod_Buoyancy.m_fWaterLevel) {
-            auto pPlayerPed = reinterpret_cast<CPlayerPed*>(this);
-            pPlayerPed->HandlePlayerBreath(true, 1.0F);
+            AsPlayer()->HandlePlayerBreath(true, 1.0F);
         }
     }
 }
@@ -1116,21 +1108,21 @@ void CPed::GiveWeaponAtStartOfFight()
 
         switch (m_nPedType)
         {
-            case ePedType::PED_TYPE_GANG1:
-            case ePedType::PED_TYPE_GANG2:
-            case ePedType::PED_TYPE_GANG3:
-            case ePedType::PED_TYPE_GANG4:
-            case ePedType::PED_TYPE_GANG5:
-            case ePedType::PED_TYPE_GANG6:
-            case ePedType::PED_TYPE_GANG7:
-            case ePedType::PED_TYPE_GANG8:
-            case ePedType::PED_TYPE_GANG9:
-            case ePedType::PED_TYPE_GANG10:
+            case PED_TYPE_GANG1:
+            case PED_TYPE_GANG2:
+            case PED_TYPE_GANG3:
+            case PED_TYPE_GANG4:
+            case PED_TYPE_GANG5:
+            case PED_TYPE_GANG6:
+            case PED_TYPE_GANG7:
+            case PED_TYPE_GANG8:
+            case PED_TYPE_GANG9:
+            case PED_TYPE_GANG10:
                 GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;
-            case ePedType::PED_TYPE_DEALER:
-            case ePedType::PED_TYPE_CRIMINAL:
-            case ePedType::PED_TYPE_PROSTITUTE:
+            case PED_TYPE_DEALER:
+            case PED_TYPE_CRIMINAL:
+            case PED_TYPE_PROSTITUTE:
                 GiveRandomWeaponByType(eWeaponType::WEAPON_KNIFE, 200);
                 GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WaterCreatureManager_c.h"
+
 WaterCreatureManager_c& g_waterCreatureMan = *(WaterCreatureManager_c*)0xC1DF30;
 WaterCreatureInfo(&WaterCreatureManager_c::ms_waterCreatureInfos)[NUM_WATER_CREATURE_INFOS] = *(WaterCreatureInfo(*)[NUM_WATER_CREATURE_INFOS])0x8D3698;
 

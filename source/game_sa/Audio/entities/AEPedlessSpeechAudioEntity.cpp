@@ -49,7 +49,7 @@ void CAEPedlessSpeechAudioEntity::Terminate() {
 
 // 0x4E6380
 void CAEPedlessSpeechAudioEntity::PlayLoadedSound() {
-    plugin::CallMethod<0x4E6380, CAEPedlessSpeechAudioEntity*>(this);;
+    plugin::CallMethod<0x4E6380, CAEPedlessSpeechAudioEntity*>(this);
 }
 
 // 0x4E6090

@@ -3,8 +3,8 @@
 #include "TaskComplexEnterCarAsPassenger.h"
 
 // 0x640340
-CTaskComplexEnterCarAsPassenger::CTaskComplexEnterCarAsPassenger(CVehicle* pTargetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff)
-    : CTaskComplexEnterCar(pTargetVehicle, false, false, false, bCarryOnAfterFallingOff)
+CTaskComplexEnterCarAsPassenger::CTaskComplexEnterCarAsPassenger(CVehicle* targetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff)
+    : CTaskComplexEnterCar(targetVehicle, false, false, false, bCarryOnAfterFallingOff)
 {
     m_nTargetSeat = nTargetSeat;
 }

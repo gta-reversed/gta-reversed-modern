@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,8 +31,8 @@ void CHeli::InitHelis() {
 }
 
 // 0x6C45B0
-void CHeli::AddHeliSearchLight(CVector const& origin, CVector const& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow) {
-    ((void(__cdecl*)(CVector const&, CVector const&, float, float, uint32, uint8, uint8))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
+void CHeli::AddHeliSearchLight(const CVector& origin, const CVector& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow) {
+    ((void(__cdecl*)(const CVector&, const CVector&, float, float, uint32, uint8, uint8))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
 }
 
 // 0x6C4640

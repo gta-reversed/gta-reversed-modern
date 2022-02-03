@@ -10,12 +10,12 @@ void CGarage::InjectHooks()
 }
 
 // 0x4479F0
-void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition)
+void CGarage::BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition)
 {
     const auto fAngle = fDoorPosition * -HALF_PI;
     const auto fSin = sin(fAngle);
     const auto fCos = cos(fAngle);
-    CMatrix& matrix = pEntity->GetMatrix();
+    CMatrix& matrix = entity->GetMatrix();
 
     const auto& vecForward = matrix.GetForward();
     matrix.GetUp() = CVector(-fSin * vecForward.y, fSin * vecForward.x, fCos);
@@ -52,9 +52,9 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
 }
 
 // 0x449050
-bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* pEntity, float fRadius)
+bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius)
 {
-    return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, pEntity, fRadius);
+    return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
 }
 
 // 0x448740
@@ -77,7 +77,7 @@ bool CGarage::IsPointInsideGarage(CVector vecPoint)
 
 // todo move
 // 0x449760
-void CStoredCar::StoreCar(CVehicle* pVehicle)
+void CStoredCar::StoreCar(CVehicle* vehicle)
 {
-    plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, pVehicle);
+    plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, vehicle);
 }

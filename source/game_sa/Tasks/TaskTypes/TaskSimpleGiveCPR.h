@@ -27,7 +27,7 @@ public:
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     void ReviveDeadPed(CPed* ped);
-    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* pAnim, void* priv);
+    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* priv);
 
 private:
     friend void InjectHooksMain();

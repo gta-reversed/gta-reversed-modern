@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Box.h"
+
 void CBox::InjectHooks()
 {
     RH_ScopedClass(CBox);
@@ -9,7 +11,7 @@ void CBox::InjectHooks()
     RH_ScopedInstall(Recalc, 0x40EE20);
 }
 
-void CBox::Set(CVector const& vecMin, CVector const& vecMax)
+void CBox::Set(const CVector& vecMin, const CVector& vecMax)
 {
     m_vecMin = vecMin;
     m_vecMax = vecMax;

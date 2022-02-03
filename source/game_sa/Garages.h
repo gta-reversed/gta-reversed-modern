@@ -1,10 +1,16 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
+
+#include "StoredCar.h"
+
+class CVehicle;
+class CAutomobile;
+class CGarge;
 
 // Based on https://gtamods.com/wiki/Garage
 enum eGarageType : uint8 {
@@ -106,13 +112,13 @@ public:
     static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax);
     static void PrintMessages();
     static int32 FindGarageIndex(char*);
-    static int32 FindGarageForObject(CObject* pObject);
+    static int32 FindGarageForObject(CObject* obj);
     static float FindDoorHeightForMI(int16);
     static int32 FindSafeHouseIndexForGarageType(int32);
     static void AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32 a10, char* name, uint32 door);
     static bool IsModelIndexADoor(int32 nModelIndex);
     static void ChangeGarageType(int16, uint16, uint32);
-    static bool IsCarSprayable(CVehicle* pVehicle);
+    static bool IsCarSprayable(CVehicle* vehicle);
     static void SetTargetCarForMissionGarage(int16, CAutomobile* pCar);
     static bool HasCarBeenDroppedOffYet(int16);
     static void DeActivateGarage(int16);
@@ -124,7 +130,7 @@ public:
     static void GivePlayerDetonator();
     static void PlayerArrestedOrDied();
     static bool IsPointInAGarageCameraZone(CVector vecPos);
-    static bool IsThisCarWithingGarageArea(int16, CEntity* pEntity);
+    static bool IsThisCarWithingGarageArea(int16, CEntity* entity);
     static void StopCarFromBlowingUp(CAutomobile* pCar);
     static bool IsPointWithinHideOutGarage(CVector& pos);
     static bool IsPointWithinAnyGarage(CVector& vecPos);

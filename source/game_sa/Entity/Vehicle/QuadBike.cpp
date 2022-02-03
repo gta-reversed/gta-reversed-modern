@@ -137,7 +137,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
             m_fGasPedal = 0.0f;
         } else {
             ProcessControlInputs((uint8)m_pDriver->m_nPedType);
-            CPad* pad = m_pDriver->AsPlayerPed()->GetPadFromPlayer();
+            CPad* pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
             
             float fTurnForcePerTimeStep = 0.0f;
             const float fLeanDirection = DotProduct(m_vecTurnSpeed, m_matrix->GetRight());

@@ -73,13 +73,13 @@ bool CPools::LoadObjectPool() {
         CGenericGameStorage::LoadDataFromWorkBuffer(&iPoolRef, 4);
         CGenericGameStorage::LoadDataFromWorkBuffer(&iModelId, 4);
 
-        auto* pObjInPool = CPools::ms_pObjectPool->GetAtRefNoChecks(iPoolRef);
-        if (pObjInPool)
-            CPopulation::ConvertToDummyObject(pObjInPool);
+        auto* objInPool = CPools::ms_pObjectPool->GetAtRefNoChecks(iPoolRef);
+        if (objInPool)
+            CPopulation::ConvertToDummyObject(objInPool);
 
-        auto* pNewObj = new(iPoolRef) CObject(iModelId, false);
-        pNewObj->Load();
-        CWorld::Add(pNewObj);
+        auto* newObj = new(iPoolRef) CObject(iModelId, false);
+        newObj->Load();
+        CWorld::Add(newObj);
     }
 
     return true;
@@ -100,23 +100,23 @@ void CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot) {
     if (CPools::ms_pObjectPool->IsFreeSlotAtIndex(slot))
         return;
 
-    auto* pExistingObj = CPools::ms_pObjectPool->GetAt(slot);
-    if (pExistingObj->IsTemporary())
+    auto* existingObj = CPools::ms_pObjectPool->GetAt(slot);
+    if (existingObj->IsTemporary())
     {
-        CWorld::Remove(pExistingObj);
-        delete pExistingObj;
+        CWorld::Remove(existingObj);
+        delete existingObj;
     }
-    else if (CProjectileInfo::RemoveIfThisIsAProjectile(pExistingObj))
+    else if (CProjectileInfo::RemoveIfThisIsAProjectile(existingObj))
     {
-        auto pNewObj = new CObject(pExistingObj->m_nModelIndex, false);
-        CWorld::Remove(pExistingObj);
-        CPools::ms_pObjectPool->CopyItem(pNewObj, pExistingObj);
-        CWorld::Add(pNewObj);
+        auto newObj = new CObject(existingObj->m_nModelIndex, false);
+        CWorld::Remove(existingObj);
+        CPools::ms_pObjectPool->CopyItem(newObj, existingObj);
+        CWorld::Add(newObj);
 
-        pExistingObj->m_pRwObject = nullptr;
-        delete pExistingObj;
+        existingObj->m_pRwObject = nullptr;
+        delete existingObj;
 
-        pNewObj->m_pReferences = nullptr;
+        newObj->m_pReferences = nullptr;
     }
 }
 

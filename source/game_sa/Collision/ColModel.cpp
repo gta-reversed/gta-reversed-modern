@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ColModel.h"
+
 void CColModel::InjectHooks()
 {
     RH_ScopedClass(CColModel);
@@ -29,10 +31,10 @@ CColModel::~CColModel()
     if (!m_bIsActive)
         return;
 
-    CColModel::RemoveCollisionVolumes();
+    RemoveCollisionVolumes();
 }
 
-CColModel& CColModel::operator=(CColModel const& colModel)
+CColModel& CColModel::operator=(const CColModel& colModel)
 {
     //BUG(Prone) No self assignment check
     m_boundSphere.m_vecCenter = colModel.m_boundSphere.m_vecCenter;
@@ -88,7 +90,7 @@ void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, i
     const auto trianglesOffset = reinterpret_cast<uint32>(pAlignedAddress);
     assert(trianglesOffset && trianglesOffset >= (vertsOffset + vertsSize)); // Just to make sure that the alignment works properly
 
-    CColModel::AllocateData(trianglesOffset + trianglesSize);
+    AllocateData(trianglesOffset + trianglesSize);
     m_pColData->m_nNumSpheres = numSpheres;
     m_pColData->m_nNumLines = numLines;
     m_pColData->m_nNumBoxes = numBoxes;

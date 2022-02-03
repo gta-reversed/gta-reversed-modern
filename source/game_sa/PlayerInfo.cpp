@@ -317,12 +317,19 @@ void CPlayerInfo::PlayerFailedCriticalMission() {
 
 // 0x56E610
 void CPlayerInfo::WorkOutEnergyFromHunger() {
-    static int8 s_lastTimeHungryStateProcessed = CClock::GetGameClockHours(); // 0xB9B8F2
-    static int8 s_LastHungryState;                                            // 0xB9B8F1
-    static bool s_bHungryMessageShown;                                        // 0xB9B8F0
+
+    static bool& s_lastTimeHungryStateProcessedInitialized = *(bool*)0xB9B8F4; // TODO | STATICREF // = false;
+    static int8& s_lastTimeHungryStateProcessed = *(int8*)0xB9B8F2;            // TODO | STATICREF
+    static int8& s_LastHungryState = *(int8*)0xB9B8F1;                         // TODO | STATICREF
+    static bool& s_bHungryMessageShown = *(bool*)0xB9B8F0;                     // TODO | STATICREF
 
     if (CCheat::m_aCheatsActive[CHEAT_NEVER_GET_HUNGRY]) {
         return;
+    }
+
+    if (!s_lastTimeHungryStateProcessedInitialized) {
+        s_lastTimeHungryStateProcessedInitialized = true;
+        s_lastTimeHungryStateProcessed = CClock::GetGameClockHours();
     }
 
     auto pad = CPad::GetPad(0);

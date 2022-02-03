@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedStats.h"
+
 constexpr uint16 PED_STATS_COUNT = 43;
 
 CPedStat*& CPedStats::ms_apPedStats = *(CPedStat**)0xC0BBEC;
@@ -42,23 +44,23 @@ void CPedStats::Shutdown() {
 // 0x5BB890
 void CPedStats::LoadPedStats() {
     uint16 statIndex = 0;
-    FILESTREAM file = CFileMgr::OpenFile("DATA\\PEDSTATS.DAT", "r");
+    auto file = CFileMgr::OpenFile("DATA\\PEDSTATS.DAT", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (!*line || *line == '#') {
             continue;
         }
 
-        char   name[24];
-        float  fleeDistance;
-        float  headingChangeRate;
-        int32    fear;
-        int32    temper;
-        int32    lawfulness;
-        int32    sexiness;
-        float  attackStrength;
-        float  defendWeakness;
-        int32    shootingRate;
-        int32    defaultDecisionMaker;
+        char  name[24];
+        float fleeDistance;
+        float headingChangeRate;
+        int32 fear;
+        int32 temper;
+        int32 lawfulness;
+        int32 sexiness;
+        float attackStrength;
+        float defendWeakness;
+        int32 shootingRate;
+        int32 defaultDecisionMaker;
 
         sscanf(
             line,

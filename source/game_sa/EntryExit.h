@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,9 +8,10 @@
 
 #include "Rect.h"
 #include "Vector.h"
-#include "Object.h"
 
+class CObject;
 class CPed;
+class CEntryExit;
 
 // Each area code can have one or more interiors.
 // For more info, check https://wiki.mtasa.com/wiki/Interior_IDs
@@ -80,7 +81,7 @@ public:
 
     void GenerateAmbientPeds(const CVector& posn);
     CEntryExit* GetEntryExitToDisplayNameOf();
-    void GetPositionRelativeToOutsideWorld(CVector& outPosn);
+    void GetPositionRelativeToOutsideWorld(CVector& outPos);
     bool IsInArea(const CVector& position);
     void RequestAmbientPeds();
     void RequestObjectsInFrustum() const;

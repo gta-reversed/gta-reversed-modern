@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -11,10 +11,10 @@ Do not delete this comment block. Respect others' work!
 
 class CTaskComplexUseMobilePhone : public CTaskComplex {
 public:
-    int32 m_nDuration;
+    int32      m_nDuration;
     CTaskTimer m_timer;
-    bool m_bIsAborting;
-    bool m_bQuit;
+    bool       m_bIsAborting;
+    bool       m_bQuit;
 
     CTaskComplexUseMobilePhone(int32 nDuration);
 };

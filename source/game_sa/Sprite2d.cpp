@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -418,9 +418,9 @@ void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CR
 }
 
 // this makes some trick with sprite z position (z = NearScreenZ + 0.000001).
-void CSprite2d::SetVerticesForSniper(CRect  const& posn, CRGBA  const& color1, CRGBA  const& color2, CRGBA  const& color3, CRGBA  const& color4)
+void CSprite2d::SetVerticesForSniper(const CRect& posn, const CRGBA& color1, const CRGBA& color2, const CRGBA& color3, const CRGBA& color4)
 {
-    ((void(__cdecl*)(CRect  const&, CRGBA  const&, CRGBA  const&, CRGBA  const&, CRGBA  const&))0x727FD0)(posn, color1, color2, color3, color4);
+    ((void(__cdecl*)(const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&))0x727FD0)(posn, color1, color2, color3, color4);
 }
 
 void CSprite2d::OffsetTexCoordForBilinearFiltering(float width, float height)
@@ -429,9 +429,9 @@ void CSprite2d::OffsetTexCoordForBilinearFiltering(float width, float height)
 }
 
 // add vertices to buffer
-void CSprite2d::AddToBuffer(CRect  const& posn, CRGBA  const& color, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
+void CSprite2d::AddToBuffer(const CRect& posn, const CRGBA& color, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
 {
-    ((void(__cdecl*)(CRect  const&, CRGBA  const&, float, float, float, float, float, float, float, float))0x728200)(posn, color, u1, v1, u2, v2, u3, v3, u4, v4);
+    ((void(__cdecl*)(const CRect&, const CRGBA&, float, float, float, float, float, float, float, float))0x728200)(posn, color, u1, v1, u2, v2, u3, v3, u4, v4);
 }
 
 // non-textured polygon

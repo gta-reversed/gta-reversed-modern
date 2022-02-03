@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -34,7 +34,7 @@ void CBike::SetupModelNodes() {
 }
 
 // 0x6B5A00
-void CBike::dmgDrawCarCollidingParticles(CVector const& position, float power, eWeaponType weaponType) {
+void CBike::dmgDrawCarCollidingParticles(const CVector& position, float power, eWeaponType weaponType) {
     // NOP
 }
 
@@ -97,9 +97,9 @@ void CBike::ProcessBuoyancy() {
 
         m_vecMoveSpeed.z = std::max(-0.1F, m_vecMoveSpeed.z);
 
-        auto pDriver = static_cast<CPed*>(m_pDriver);
-        if (pDriver) {
-            ProcessPedInVehicleBuoyancy(pDriver, true);
+        auto driver = m_pDriver->AsPed();
+        if (driver) {
+            ProcessPedInVehicleBuoyancy(driver, true);
         }
         else {
             vehicleFlags.bEngineOn = false;
@@ -116,35 +116,46 @@ void CBike::ProcessBuoyancy() {
     }
 }
 
-inline void CBike::ProcessPedInVehicleBuoyancy(CPed* pPed, bool bIsDriver)
+inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
 {
-    if (!pPed)
+    if (!ped)
         return;
 
-    pPed->physicalFlags.bTouchingWater = true;
-    if (!pPed->IsPlayer() && damageFlags.bIgnoreWater)
+    ped->physicalFlags.bTouchingWater = true;
+    if (!ped->IsPlayer() && damageFlags.bIgnoreWater)
         return;
 
-    if (pPed->IsPlayer())
-        static_cast<CPlayerPed*>(pPed)->HandlePlayerBreath(true, 1.0F);
+    if (ped->IsPlayer())
+        static_cast<CPlayerPed*>(ped)->HandlePlayerBreath(true, 1.0F);
 
     if (IsAnyWheelMakingContactWithGround()) {
-        if (!pPed->IsPlayer()) {
-            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-            auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
-            if (damageEvent.AffectsPed(pPed))
-                pedDamageResponseCalc.ComputeDamageResponse(pPed, &damageEvent.m_damageResponse, true);
+        if (!ped->IsPlayer()) {
+            auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
+            auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
+            if (damageEvent.AffectsPed(ped))
+                pedDamageResponseCalc.ComputeDamageResponse(ped, &damageEvent.m_damageResponse, true);
             else
                 damageEvent.m_damageResponse.m_bDamageCalculated = true;
 
-            pPed->GetEventGroup().Add(&damageEvent, false);
+            ped->GetEventGroup().Add(&damageEvent, false);
         }
     }
     else {
-        auto knockOffBikeEvent = CEventKnockOffBike(this, &m_vecMoveSpeed, &m_vecLastCollisionImpactVelocity, m_fDamageIntensity,
-            0.0F, eKnockOffType::KNOCK_OFF_TYPE_FALL, 0, 0, nullptr, bIsDriver, false);
+        auto knockOffBikeEvent = CEventKnockOffBike(
+            this,
+            &m_vecMoveSpeed,
+            &m_vecLastCollisionImpactVelocity,
+            m_fDamageIntensity,
+            0.0F,
+            KNOCK_OFF_TYPE_FALL,
+            0,
+            0,
+            nullptr,
+            bIsDriver,
+            false
+        );
 
-        pPed->GetEventGroup().Add(&knockOffBikeEvent, false);
+        ped->GetEventGroup().Add(&knockOffBikeEvent, false);
         if (bIsDriver)
             vehicleFlags.bEngineOn = false;
     }
