@@ -35,9 +35,9 @@ public:
 
 
     struct { // 0x07
-        uint8 bUsesDisks : 1;       // Always set to false
-        uint8 bHasFaceGroups : 1;   // See the huge comment below
-        uint8 bHasShadowInfo : 1;   // See wiki.
+        uint8 bUsesDisks : 1;       // 0x1 - Always set to false
+        uint8 bHasFaceGroups : 1;   // 0x2 - See the huge comment below
+        uint8 bHasShadowInfo : 1;   // 0x4 - See wiki.
     };
 
     CColSphere* m_pSpheres;    // 0x08
@@ -68,8 +68,7 @@ public:
     //
     // NOTEs:
     // ** Col models may also be loaded by the Collision plugin from a clump file - In this case `CFileLoader::LoadCollisionModelVer2/3` is called, but then
-    //    the col data is reallocated using `MakeMultipleAlloc` which uses `Copy` to copy the data, in this case the face groups aren't preserved.
-    //    But there's a possible bug: The `Copy` function doesn't set `bHasFaceGroups` to `false` which may lead to bugs. For now I've added an `assert`.
+    //    the col data is reallocated using `MakeMultipleAlloc` which uses `Copy` to copy the data, in this case the face groups aren't copied. (And the flag is set to false in the ctor)
     CColTriangle*      m_pTriangles;            // 0x18
     CColTrianglePlane* m_pTrianglePlanes;       // 0x1C
     uint32             m_nNumShadowTriangles;   // 0x20
@@ -98,6 +97,7 @@ public:
     auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
     auto GetBoxes() const { return std::span{ m_pBoxes, m_nNumBoxes }; }
     auto GetTris() const { return std::span{ m_pTriangles, m_nNumTriangles }; }
+    auto GetLines() const { return std::span{ m_pLines, m_nNumLines }; }
 
     auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
 

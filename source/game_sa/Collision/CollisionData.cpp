@@ -75,7 +75,7 @@ void CCollisionData::RemoveCollisionVolumes()
 // 0x40F120
 void CCollisionData::Copy(CCollisionData const& src)
 {
-    assert(bHasFaceGroups); // See header file for an explanation about this.
+    assert(!bHasFaceGroups); // Avoid possible random bugs - See header for more info.
 
 // ----- SPHERES -----
     if (m_nNumSpheres != src.m_nNumSpheres || !src.m_nNumSpheres)
