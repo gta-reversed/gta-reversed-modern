@@ -35,8 +35,8 @@ void CGlass::Update() {
 }
 
 // 0x71ACD0
-void CGlass::AskForObjectToBeRenderedInGlass(CEntity* pEntity) {
-    plugin::Call<0x71ACD0, CEntity*>(pEntity);
+void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
+    plugin::Call<0x71ACD0, CEntity*>(entity);
 }
 
 // 0x71CF50
@@ -100,8 +100,8 @@ void CGlass::WasGlassHitByBullet(CEntity* a1, CVector a2) {
 }
 
 // 0x71BC40
-void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown) {
-    return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, int32>(pEntity, fDamageIntensity, vecMoveSpeed, vecPoint, bUnknown);
+void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, int32 bUnknown) {
+    return plugin::Call<0x71BC40, CEntity*, float, CVector, CVector, int32>(entity, fDamageIntensity, vecMoveSpeed, vecPoint, bUnknown);
 }
 
 // 0x71C1A0
@@ -110,6 +110,6 @@ void CGlass::WindowRespondsToExplosion(CEntity* a1, const CVector& a2) {
 }
 
 // 0x71AF70
-void CGlass::WindowRespondsToSoftCollision(CObject* pEntity, float fDamageIntensity) {
-    return plugin::Call<0x71AF70, CObject*, float>(pEntity, fDamageIntensity);
+void CGlass::WindowRespondsToSoftCollision(CObject* entity, float fDamageIntensity) {
+    return plugin::Call<0x71AF70, CObject*, float>(entity, fDamageIntensity);
 }

@@ -141,5 +141,5 @@ public:
     static CCullZoneReflection* FindMirrorAttributesForCoors_(CVector cameraPosition);
     static CCullZoneReflection* FindMirrorAttributesForCoors(float x, float y, float z);
     static CCullZone* FindZoneWithStairsAttributeForPlayer();
-    static eZoneAttributes FindAttributesForCoors(float x, float y);
+    static eZoneAttributes FindAttributesForCoors(CVector pos);
 };

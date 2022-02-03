@@ -4,6 +4,9 @@
 
 #include <rpworld.h>
 
+ RwInt32& gPipelinePluginOffset = *(RwInt32*)0x8D6080;
+
+
 void PipelinePlugin::InjectHooks() {
     RH_ScopedNamespace(PipelinePlugin);
     RH_ScopedCategory("Plugins");
@@ -15,10 +18,6 @@ void PipelinePlugin::InjectHooks() {
 }
 
 // internal
-// 0x8D6080
-static RwUInt32 gAtomicOffset = -1;
-
-// internal
 typedef struct tPipelinePlugin {
     RwUInt32 pipelineId;
 } PipelinePluginInstance;
@@ -28,7 +27,7 @@ VALIDATE_SIZE(tPipelinePlugin, 0x4);
 // internal
 // 0x72FB50
 static void* PipelineConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    if (gAtomicOffset > 0) {
+    if (gPipelinePluginOffset > 0) {
         RWPLUGINOFFSET(tPipelinePlugin, object, offsetInObject)->pipelineId = 0;
     }
     return object;
@@ -44,7 +43,7 @@ static void* PipelineCopy(void* dstObject, const void* srcObject, RwInt32 offset
 // internal
 // 0x72FB90
 static RwStream* PipelineStreamRead(RwStream* stream, RwInt32 binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    RwStreamRead(stream, RWPLUGINOFFSET(tPipelinePlugin, object, gAtomicOffset), binaryLength);
+    RwStreamRead(stream, RWPLUGINOFFSET(tPipelinePlugin, object, gPipelinePluginOffset), binaryLength);
     return stream;
 }
 
@@ -56,18 +55,18 @@ static RwInt32 PipelineGetSize(const void* object, RwInt32 offsetInObject, RwInt
 
 // internal
 // we need this shit as RW requires write callback
-static RwStream* PipelineStreamWrite(RwStream* stream, RwInt32 binaryLength, void const* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+static RwStream* PipelineStreamWrite(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     return stream;
 }
 
 // 0x72FBD0
 RwBool PipelinePluginAttach() {
-    gAtomicOffset = RpAtomicRegisterPlugin(sizeof(tPipelinePlugin), rwID_PIPELINEPLUGIN, PipelineConstructor, nullptr, PipelineCopy);
-    if (gAtomicOffset == -1) {
+    gPipelinePluginOffset = RpAtomicRegisterPlugin(sizeof(tPipelinePlugin), rwID_PIPELINEPLUGIN, PipelineConstructor, nullptr, PipelineCopy);
+    if (gPipelinePluginOffset == -1) {
         return FALSE;
     }
     if (RpAtomicRegisterPluginStream(rwID_PIPELINEPLUGIN, PipelineStreamRead, PipelineStreamWrite, PipelineGetSize) == -1) {
-        gAtomicOffset = -1;
+        gPipelinePluginOffset = -1;
         return FALSE;
     }
     return TRUE;
@@ -75,10 +74,10 @@ RwBool PipelinePluginAttach() {
 
 // 0x72FC40
 RwUInt32 GetPipelineID(RpAtomic* atomic) {
-    return RWPLUGINOFFSET(tPipelinePlugin, atomic, gAtomicOffset)->pipelineId;
+    return RWPLUGINOFFSET(tPipelinePlugin, atomic, gPipelinePluginOffset)->pipelineId;
 }
 
 // 0x72FC50
 void SetPipelineID(RpAtomic* atomic, RwUInt32 pipelineId) {
-    RWPLUGINOFFSET(tPipelinePlugin, atomic, gAtomicOffset)->pipelineId = pipelineId;
+    RWPLUGINOFFSET(tPipelinePlugin, atomic, gPipelinePluginOffset)->pipelineId = pipelineId;
 }

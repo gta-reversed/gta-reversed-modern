@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "MatrixLink.h"
+
 void CMatrixLink::InjectHooks()
 {
     RH_ScopedClass(CMatrixLink);

@@ -24,7 +24,6 @@ void CDamageManager::InjectHooks() {
     RH_ScopedInstall(GetDoorStatus, 0x6C2230); 
     RH_ScopedInstall(SetDoorStatus_Component, 0x6C21E0); 
     RH_ScopedInstall(SetDoorStatus, 0x6C21C0); 
-    RH_ScopedInstall(GetWheelStatus, 0x6C21B0); 
     RH_ScopedInstall(SetWheelStatus, 0x6C21A0); 
     RH_ScopedInstall(GetPanelStatus, 0x6C2180); 
     RH_ScopedInstall(SetPanelStatus, 0x6C2150); 
@@ -33,6 +32,7 @@ void CDamageManager::InjectHooks() {
     RH_ScopedInstall(ResetDamageStatus, 0x6C20E0); 
     RH_ScopedInstall(GetComponentGroup, 0x6C2040); 
     RH_ScopedInstall(GetCarNodeIndexFromDoor, 0x6C26F0);
+    RH_ScopedNamedInstall(GetWheelStatus_Hooked, "GetWheelStatus", 0x6C21B0);
 }
 
 // 0x6A0520

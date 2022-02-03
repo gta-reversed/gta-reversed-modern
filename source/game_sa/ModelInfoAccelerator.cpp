@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ModelInfoAccelerator.h"
+
 void CModelInfoAccelerator::InjectHooks()
 {
     RH_ScopedClass(CModelInfoAccelerator);
@@ -58,13 +60,13 @@ void CModelInfoAccelerator::End(char* arg0)
 
 bool CModelInfoAccelerator::GetModelInfoIdFile()
 {
-    auto pFile = CFileMgr::OpenFile(m_szFilePath, "rb");
-    m_bFileRead = pFile != nullptr;
+    auto file = CFileMgr::OpenFile(m_szFilePath, "rb");
+    m_bFileRead = file != nullptr;
 
     CModelInfoAccelerator::AllocModelInfoIds();
     if (m_bFileRead) {
-        CFileMgr::Read(pFile, m_pIDs, BUFFER_SIZE);
-        CFileMgr::CloseFile(pFile);
+        CFileMgr::Read(file, m_pIDs, BUFFER_SIZE);
+        CFileMgr::CloseFile(file);
     }
 
     return m_bFileRead;
@@ -73,10 +75,10 @@ bool CModelInfoAccelerator::GetModelInfoIdFile()
 void CModelInfoAccelerator::EndOfLoadPhase()
 {
     if (!m_bFileRead) {
-        auto pFile = CFileMgr::OpenFileForWriting(m_szFilePath);
-        if (pFile) {
-            CFileMgr::Write(pFile, m_pIDs, BUFFER_SIZE);
-            CFileMgr::CloseFile(pFile);
+        auto file = CFileMgr::OpenFileForWriting(m_szFilePath);
+        if (file) {
+            CFileMgr::Write(file, m_pIDs, BUFFER_SIZE);
+            CFileMgr::CloseFile(file);
         }
     }
 

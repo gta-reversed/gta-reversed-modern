@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -48,8 +48,8 @@ void FxSystem_c::AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrt
 }
 
 // 0x4AA540
-void FxSystem_c::AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7) {
-    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*, RwV3d*, float, FxPrtMult_c*, float, float, float, uint8))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
+void FxSystem_c::AddParticle(RwMatrix* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7) {
+    ((void(__thiscall *)(FxSystem_c*, RwMatrix*, RwV3d*, float, FxPrtMult_c*, float, float, float, uint8))0x4AA540)(this, transform, position, arg2, prtMult, arg4, arg5, arg6, arg7);
 }
 
 // 0x4AA610
@@ -58,8 +58,8 @@ void FxSystem_c::EnablePrim(int32 primIndex, uint8 enable) {
 }
 
 // 0x4AA630
-void FxSystem_c::SetMatrix(RwMatrixTag* matrix) {
-    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*))0x4AA630)(this, matrix);
+void FxSystem_c::SetMatrix(RwMatrix* matrix) {
+    ((void(__thiscall *)(FxSystem_c*, RwMatrix*))0x4AA630)(this, matrix);
 }
 
 // (RwV3d*)
@@ -94,8 +94,8 @@ void FxSystem_c::SetVelAdd(RwV3d* velAdd) {
 }
 
 // 0x4AA750
-bool FxSystem_c::Init(FxSystemBP_c* arg0, RwMatrixTag* local, RwMatrixTag* parent) {
-    return ((bool(__thiscall *)(FxSystem_c*, FxSystemBP_c*, RwMatrixTag*, RwMatrixTag*))0x4AA750)(this, arg0, local, parent);
+bool FxSystem_c::Init(FxSystemBP_c* arg0, RwMatrix* local, RwMatrix* parent) {
+    return ((bool(__thiscall *)(FxSystem_c*, FxSystemBP_c*, RwMatrix*, RwMatrix*))0x4AA750)(this, arg0, local, parent);
 }
 
 // 0x4AA840
@@ -109,8 +109,8 @@ void FxSystem_c::CopyParentMatrix() {
 }
 
 // 0x4AA8C0
-void FxSystem_c::GetCompositeMatrix(RwMatrixTag* out) {
-    ((void(__thiscall *)(FxSystem_c*, RwMatrixTag*))0x4AA8C0)(this, out);
+void FxSystem_c::GetCompositeMatrix(RwMatrix* out) {
+    ((void(__thiscall *)(FxSystem_c*, RwMatrix*))0x4AA8C0)(this, out);
 }
 
 // 0x4AA900

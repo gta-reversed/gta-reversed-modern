@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -43,7 +43,7 @@ public:
     void DisplayGearRatios();
     void InitGearRatios();
     void CalculateGearForSimpleCar(float speed, uint8& currentGear);
-    float CalculateDriveAcceleration(float const& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingType);
+    float CalculateDriveAcceleration(const float& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingType);
 };
 
 VALIDATE_SIZE(cTransmission, 0x68);

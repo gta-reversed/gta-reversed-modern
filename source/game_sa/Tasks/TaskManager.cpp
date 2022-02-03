@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -167,14 +167,14 @@ void CTaskManager::SetNextSubTask(CTaskComplex* task) {
             break;
         }
         task->SetSubTask(nullptr);
-        task = static_cast<CTaskComplex*>(task->m_pParentTask);
+        task = task->m_pParentTask->AsComplex();
 
         if (!task) {
             return;
         }
     }
     task->SetSubTask(nextSubTask);
-    AddSubTasks((CTaskComplex*)nextSubTask);
+    AddSubTasks(nextSubTask->AsComplex());
 }
 
 // 0x681970
@@ -182,7 +182,7 @@ CTaskSimple* CTaskManager::GetSimplestTask(CTask* task) {
     CTask* last = nullptr;
     for (; task; task = task->GetSubTask())
         last = task;
-    return static_cast<CTaskSimple*>(last);
+    return last->AsSimple();
 }
 
 // 0x6819A0
@@ -219,9 +219,9 @@ void CTaskManager::AddSubTasks(CTaskComplex* task) {
         if (subTask) {
             task->SetSubTask(subTask);
         } else {
-            SetNextSubTask(static_cast<CTaskComplex*>(task->m_pParentTask));
+            SetNextSubTask(task->m_pParentTask->AsComplex());
         }
-        task = static_cast<CTaskComplex*>(subTask);
+        task = subTask->AsComplex();
     } while (subTask);
 }
 
@@ -230,9 +230,9 @@ void CTaskManager::ParentsControlChildren(CTaskComplex* task) {
     if (!task)
         return;
 
-    for (; !task->IsSimple(); task = static_cast<CTaskComplex*>(task->GetSubTask())) {
+    for (; !task->IsSimple(); task = task->GetSubTask()->AsComplex()) {
         CTask* subTask = task->GetSubTask();
-        auto* controlSubTask = static_cast<CTaskComplex*>(task->ControlSubTask(m_pPed));
+        auto* controlSubTask = task->ControlSubTask(m_pPed)->AsComplex();
         if (subTask != controlSubTask) {
             subTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
             task->SetSubTask(controlSubTask);
@@ -261,8 +261,8 @@ void CTaskManager::SetTask(CTask* task, int32 taskIndex, bool unused) {
     delete primaryTask;
 
     m_aPrimaryTasks[taskIndex] = task;
-    AddSubTasks(static_cast<CTaskComplex*>(task));
-    if (m_aPrimaryTasks[taskIndex]) {
+    AddSubTasks(task->AsComplex());
+    if (GetTaskPrimary(taskIndex)) {
         CTask* simplestTask = GetSimplestTask(m_aPrimaryTasks[taskIndex]);
         if (!simplestTask->IsSimple()) {
             primaryTask = m_aPrimaryTasks[taskIndex];
@@ -290,7 +290,7 @@ void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
 
     m_aSecondaryTasks[taskIndex] = task;
 
-    AddSubTasks(static_cast<CTaskComplex*>(task));
+    AddSubTasks(task->AsComplex());
 
     if (CTask* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
         if (simplest && !simplest->IsSimple()) {
@@ -302,7 +302,7 @@ void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
 
 // 0x681BD0
 void CTaskManager::ClearTaskEventResponse() {
-    CTask* task = m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP];
+    CTask* task = GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
     if (task) {
         delete task;
         m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP] = nullptr;
@@ -319,7 +319,7 @@ void CTaskManager::ClearTaskEventResponse() {
 void CTaskManager::ManageTasks() {
     // Get taskIndex of first available primary task
     int32 taskIndex = 0;
-    while (!m_aPrimaryTasks[taskIndex]) { // GetTaskPrimary(taskIndex) fucks IDE linter :(
+    while (!GetTaskPrimary(taskIndex)) {
         taskIndex = taskIndex + 1;
         if (taskIndex >= TASK_PRIMARY_MAX) {
             break;
@@ -348,7 +348,7 @@ void CTaskManager::ManageTasks() {
             }
 
             simplestTask = GetSimplestTask(GetTaskPrimary(taskIndex));
-            if (!static_cast<CTaskSimple*>(simplestTask)->ProcessPed(m_pPed)) {
+            if (!simplestTask->AsSimple()->ProcessPed(m_pPed)) {
                 break;
             } else {
                 SetNextSubTask((CTaskComplex*)simplestTask->m_pParentTask);

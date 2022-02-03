@@ -26,11 +26,11 @@ void CGarage::InjectHooks() {
 }
 
 // 0x4479F0
-void CGarage::BuildRotatedDoorMatrix(CEntity* pEntity, float fDoorPosition) {
+void CGarage::BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition) {
     const auto fAngle = fDoorPosition * -HALF_PI;
     const auto fSin = sin(fAngle);
     const auto fCos = cos(fAngle);
-    CMatrix& matrix = pEntity->GetMatrix();
+    CMatrix& matrix = entity->GetMatrix();
 
     const auto& vecForward = matrix.GetForward();
     matrix.GetUp() = CVector(-fSin * vecForward.y, fSin * vecForward.x, fCos);
@@ -180,7 +180,7 @@ bool CGarage::IsGarageEmpty() {
 
     int16 outCount[2];
     CEntity* outEntities[16];
-    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, 16, outEntities, false, true, true, false, false);
+    CWorld::FindObjectsIntersectingCube(&cornerA, &cornerB, outCount, std::size(outEntities), outEntities, false, true, true, false, false);
     if (outCount[0] <= 0)
         return true;
 

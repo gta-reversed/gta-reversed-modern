@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
@@ -21,14 +21,14 @@ bool CPedIK::PointGunInDirection(float Z_angle, float arg2, bool flag, float arg
     return plugin::CallMethodAndReturn<bool, 0x5FDC00, CPedIK*, float, float, bool, float>(this, Z_angle, arg2, flag, arg4);
 }
 
-// Converted from thiscall void CPedIK::PointGunAtPosition(CVector const& posn,float arg2)	0x5FDE20 
-void CPedIK::PointGunAtPosition(CVector const& posn, float arg2) {
-    plugin::CallMethod<0x5FDE20, CPedIK*, CVector const&, float>(this, posn, arg2);
+// 0x5FDE20
+void CPedIK::PointGunAtPosition(const CVector& posn, float arg2) {
+    plugin::CallMethod<0x5FDE20, CPedIK*, const CVector&, float>(this, posn, arg2);
 }
 
 // 0x5FD8F0 
-RwMatrixTag* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrixTag* transformMat) {
-    return plugin::CallAndReturn<RwMatrixTag*, 0x5FD8F0, RwFrame*, RwMatrixTag*>(frame, transformMat);
+RwMatrix* CPedIK::GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat) {
+    return plugin::CallAndReturn<RwMatrix*, 0x5FD8F0, RwFrame*, RwMatrix*>(frame, transformMat);
 }
 
 MoveLimbResult CPedIK::MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo)

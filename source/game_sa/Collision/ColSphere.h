@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -12,7 +12,8 @@ class CColSphere : public CSphere {
 public:
     uint8 m_nMaterial;
     union {
-        uint8 m_nFlags;
+        // TODO: This aren't actually `flags`, it's `piece` (as in CColPoint::piceType)
+        uint8 m_nFlags; // There's some weird check in CCollision::ProcessColModels: Checks if `m_nFlags <= 2`
         struct {
             uint8 m_bFlag0x01 : 1;
             uint8 m_bFlag0x02 : 1;

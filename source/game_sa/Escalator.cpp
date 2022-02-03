@@ -7,7 +7,7 @@ void CEscalator::SwitchOff() {
 }
 
 void CEscalator::AddThisOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* entity) {
-    plugin::CallMethod<0x717970, CEscalator*, CVector const&, CVector const&, CVector const&, CVector const&, bool, CEntity*>(this, vecStart, vecBottom, vecEnd, vecTop, bMoveDown, entity);
+    plugin::CallMethod<0x717970, CEscalator*, const CVector&, const CVector&, const CVector&, const CVector&, bool, CEntity*>(this, vecStart, vecBottom, vecEnd, vecTop, bMoveDown, entity);
 }
 
 void CEscalator::Update() {

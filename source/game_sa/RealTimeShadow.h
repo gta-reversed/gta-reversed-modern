@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -35,7 +35,7 @@ public:
     void              Destroy();
     CShadowCamera*    GetShadowCamera();
     struct RwTexture* GetShadowRwTexture();
-    void              DrawBorderAroundTexture(RwRGBA const& color);
+    void              DrawBorderAroundTexture(const RwRGBA& color);
     // this creates all stuff for shadow processing (cameras, textures)
     bool Create(bool isBlurred, int32 blurPasses, bool drawMoreBlur);
     // this one registers shadow for entity

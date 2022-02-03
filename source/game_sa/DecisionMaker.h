@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,13 +11,12 @@
 
 class CDecisionMaker {
 public:
-    CDecision m_decision[DM_TOTAL_NUM_EVENTS];
+    CDecision m_aDecisions[DM_TOTAL_NUM_EVENTS];
 
-    inline CDecisionMaker() { // @0x4650A0
-        for (uint32 i = 0; i < DM_TOTAL_NUM_EVENTS; ++i) {
-            // m_decision[i].SetDefault();
-        }
-    }
+public:
+    static void InjectHooks();
+
+    CDecisionMaker();
 };
 
 VALIDATE_SIZE(CDecisionMaker, 0x99C);

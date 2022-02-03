@@ -210,7 +210,7 @@ void DrawColModel(const CMatrix& matrix, const CColModel& cm) {
         DrawBoundingBox(matrix, cm.m_boundBox);
     }
 
-    if (cm.m_pColData->bHasShadow) {
+    if (cm.m_pColData->bHasShadowInfo) {
         if (gDrawCollisionModule.draw_shadow_triangles) {
             DrawTriangles(matrix, cm.m_pColData->m_pShadowTriangles, cm.m_pColData->m_pShadowVertices, cm.m_pColData->m_nNumShadowTriangles, shadowTriangleColor, shadowTriangleColor);
         }

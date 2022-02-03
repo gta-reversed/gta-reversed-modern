@@ -1,20 +1,32 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
 #include <string>
+#include <RenderWare.h>
 
 #include "Vector.h"
-#include "Entity.h"
-#include "PlayerPed.h"
-#include "Vehicle.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "AnimBlendClumpData.h"
+#include "Vector2D.h"
+#include "Matrix.h"
+#include "Draw.h"
+
+class CAnimBlendClumpData;
+class CEntity;
+class CPlayerPed;
+class CWanted;
+class CPlayerInfo;
+class CVehicle;
+class CTrain;
+class CSimpleTransform;
+class AnimBlendFrameData;
+class CAnimBlendAssociation;
+class CAnimBlendHierarchy;
+class CEventGlobalGroup;
+struct RtAnimAnimation;
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 
@@ -110,9 +122,9 @@ CVector Multiply3x3(const CMatrix& m, const CVector& v);
 CVector Multiply3x3(const CVector& v, const CMatrix& m);
 CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);
 
-void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin);
 
 // Check point is within 2D rectangle
 static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
@@ -191,7 +203,7 @@ void CreateDebugFont();
 // dummy function
 void DestroyDebugFont();
 // dummy function
-void ObrsPrintfString(char const* arg0, int16 arg1, int16 arg2);
+void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2);
 // dummy function
 void FlushObrsPrintfs();
 void DefinedState();
@@ -264,17 +276,17 @@ float GetDayNightBalance();
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
-bool IsGlassModel(CEntity* pEntity);
+bool IsGlassModel(CEntity* entity);
 
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump);
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData);
 AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
-AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name);
+AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name);
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1, CAnimBlendHierarchy* hierarchy);
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const* name);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags);
@@ -308,9 +320,9 @@ bool GraphicsLowQuality();
  * Writes given raster to PNG file using RtPNGImageWrite
  */
 void Render2dStuff();
-void WriteRaster(RwRaster* raster, char const* path);
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
+void WriteRaster(RwRaster* raster, const char* path);
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX, float* screenY);
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos);
 bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir);
 bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance);
 

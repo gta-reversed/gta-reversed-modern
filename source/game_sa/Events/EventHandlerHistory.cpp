@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventHandlerHistory.h"
+
 void CEventHandlerHistory::InjectHooks()
 {
     RH_ScopedClass(CEventHandlerHistory);

@@ -28,6 +28,11 @@ void InjectHooks();
  */
 #define rwID_PIPELINEPLUGIN  MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xF3)
 
+/*
+* Pipeline plugin static offset
+*/
+extern RwInt32& gPipelinePluginOffset;
+
 /**
  * Attach pipeline plugin
  *

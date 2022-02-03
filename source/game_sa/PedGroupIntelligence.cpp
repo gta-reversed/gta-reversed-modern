@@ -1,11 +1,13 @@
 #include "StdInc.h"
 
+#include "PedGroupIntelligence.h"
+
 bool CPedGroupIntelligence::AddEvent(CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x5F7470, CPedGroupIntelligence*, CEvent*>(this, event);
 }
 
-void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, CTask const* task) {
-    plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, CTask const*>(this, ped, task);
+void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, const CTask* task) {
+    plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, const CTask*>(this, ped, task);
 }
 
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {

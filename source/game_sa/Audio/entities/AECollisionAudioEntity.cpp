@@ -162,9 +162,9 @@ void CAECollisionAudioEntity::ReportCollision(CEntity* entity1, CEntity* entity2
 
 // 0x4DBDF0
 void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
-    if (AEAudioHardware.IsSoundBankLoaded(0x1B, 3)) {
-        if (entity && entity->m_nType == ENTITY_TYPE_VEHICLE)
-            surface = entity->AsVehicle()->IsSubBMX() ? SURFACE_HAY_BALE | SURFACE_GRASS_SHORT_DRY : SURFACE_CAR;
+    if (AEAudioHardware.IsSoundBankLoaded(27, 3)) {
+        if (entity && entity->IsVehicle())
+            surface = entity->AsVehicle()->IsSubBMX() ? SURFACE_HAY_BALE | SURFACE_GRASS_SHORT_DRY : SURFACE_CAR; // ? -68 : 63;
 
         PlayBulletHitCollisionSound(surface, posn, angleWithColPointNorm);
     }

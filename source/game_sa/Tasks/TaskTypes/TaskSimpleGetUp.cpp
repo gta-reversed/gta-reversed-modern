@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGetUp.h"
+#include "PedPlacement.h"
 
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 
@@ -11,7 +12,6 @@ void CTaskSimpleGetUp::InjectHooks()
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
-    //VTABLE
     RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
 }
@@ -117,28 +117,28 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 // 0x67C770
 bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 {
-    auto pVeh = CPedPlacement::IsPositionClearOfCars(ped);
+    auto vehicle = CPedPlacement::IsPositionClearOfCars(ped);
 
-    if (!pVeh
-        || pVeh->IsBike()
-        || pVeh->IsSubQuad()
-        || pVeh == ped->m_pAttachedTo
-        || pVeh == ped->m_standingOnEntity
+    if (!vehicle
+        || vehicle->IsBike()
+        || vehicle->IsSubQuad()
+        || vehicle == ped->m_pAttachedTo
+        || vehicle == ped->m_standingOnEntity
         )
     {
-        auto pEntity = ped->m_pEntityIgnoredCollision;
+        auto entity = ped->m_pEntityIgnoredCollision;
 
-        if (!pEntity
-            || pEntity->m_nType != ENTITY_TYPE_VEHICLE
-            || pEntity->AsVehicle()->IsBike()
-            || pEntity->AsVehicle()->IsSubQuad()
-            || !IsVehiclePointerValid(pEntity->AsVehicle())
+        if (!entity
+            || !entity->IsVehicle()
+            || entity->AsVehicle()->IsBike()
+            || entity->AsVehicle()->IsSubQuad()
+            || !IsVehiclePointerValid(entity->AsVehicle())
             || (ped->m_nRandomSeed + CTimer::GetFrameCounter() - 3) % 8 == 0
             || CCollision::ProcessColModels(
                 ped->GetMatrix(),
-                *CModelInfo::GetModelInfo(ped->m_nModelIndex)->m_pColModel,
-                pEntity->GetMatrix(),
-                *CModelInfo::GetModelInfo(pEntity->m_nModelIndex)->m_pColModel,
+                *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
+                entity->GetMatrix(),
+                *CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel(),
                 m_aColPoints,
                 nullptr,
                 nullptr,
@@ -179,8 +179,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
             return false;
     }
 
-    CPedDamageResponseCalculator damageResponseCalculator(pVeh, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
-    CEventDamage eventDamage(pVeh, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+    CPedDamageResponseCalculator damageResponseCalculator(vehicle, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
+    CEventDamage eventDamage(vehicle, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
         damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
@@ -193,12 +193,11 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 }
 
 // 0x678110
-void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data)
+void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleGetUp*>(data);
-
-    pTask->m_bIsFinished = true;
-    pTask->m_bAnimFinished = true;
-    pTask->m_pAnim->m_fBlendDelta = -1000.0F;
-    pTask->m_pAnim = nullptr;
+    auto task = reinterpret_cast<CTaskSimpleGetUp*>(data);
+    task->m_bIsFinished = true;
+    task->m_bAnimFinished = true;
+    task->m_pAnim->m_fBlendDelta = -1000.0F;
+    task->m_pAnim = nullptr;
 }

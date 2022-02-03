@@ -10,7 +10,7 @@
 class CAEWaveDecoder : public CAEStreamingDecoder {
 public:
     CAEWaveDecoder(CAEDataStream* dataStream);
-    virtual ~CAEWaveDecoder();
+    virtual ~CAEWaveDecoder() = default; // 0x503290
 
     bool   Initialise() override;
     size_t FillBuffer(void* dest, size_t size) override;

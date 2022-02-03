@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Localisation.h"
 
 bool& CLocalisation::nastyGame = *(bool*)0xB9B7EC;
 bool& CLocalisation::germanGame = *(bool*)0xB9B7ED;
@@ -24,15 +26,15 @@ void CLocalisation::InjectHooks() {
     RH_ScopedInstall(Metric, 0x56D220);
     RH_ScopedInstall(Blood, 0x56D230);
     RH_ScopedInstall(Porn, 0x56D240);
-    RH_ScopedInstall(ScreamsFromKills, 0x56D240);
-    RH_ScopedInstall(Prostitutes, 0x56D240);
+    RH_ScopedInstall(ScreamsFromKills, 0x56D250);
+    RH_ScopedInstall(Prostitutes, 0x56D260);
     RH_ScopedInstall(KickingWhenDown, 0x56D270);
     RH_ScopedInstall(ShootLimbs, 0x56D280);
     RH_ScopedInstall(KnockDownPeds, 0x56D290);
-    RH_ScopedInstall(KillFrenzy, 0x56D290);
+    RH_ScopedInstall(KillFrenzy, 0x56D2A0);
     RH_ScopedInstall(StealFromDeadPed, 0x56D2B0);
     RH_ScopedInstall(KillPeds, 0x56D2C0);
-    RH_ScopedInstall(PedsOnFire, 0x56D2C0);
+    RH_ScopedInstall(PedsOnFire, 0x56D2D0);
 }
 
 // 0x56D180

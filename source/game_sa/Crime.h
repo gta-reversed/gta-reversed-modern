@@ -6,5 +6,5 @@ class CPed;
 
 class CCrime {
 public:
-    static void ReportCrime(eCrimeType crimeType, CPed* ped1, CPed* ped2);
+    static void ReportCrime(eCrimeType crimeType, CEntity* entity, CPed* ped2);
 };

@@ -26,7 +26,7 @@ void CColStore::InjectHooks()
     RH_ScopedInstall(RequestCollision, 0x410C00);
     RH_ScopedInstall(RemoveColSlot, 0x411330);
     RH_ScopedInstall(RemoveCol, 0x410730);
-    RH_ScopedOverloadedInstall(LoadCol, "", 0x410690, void(*)(int32, char const*));
+    RH_ScopedOverloadedInstall(LoadCol, "", 0x410690, void(*)(int32, const char*));
     RH_ScopedOverloadedInstall(LoadCol, "2", 0x4106D0, bool(*)(int32, uint8*, int32));
     RH_ScopedInstall(IncludeModelIndex, 0x410820);
     RH_ScopedInstall(RemoveAllCollision, 0x410E00);
@@ -126,8 +126,8 @@ void CColStore::AddCollisionNeededAtPosn(const CVector& pos)
 // 0x4107A0
 void CColStore::AddRef(int32 colNum)
 {
-    auto *pColDef = ms_pColPool->GetAt(colNum);
-    ++pColDef->m_nRefCount; //BUG: We don't check whether the GetAt returned nullptr, which it can
+    auto *colDef = ms_pColPool->GetAt(colNum);
+    ++colDef->m_nRefCount; //BUG: We don't check whether the GetAt returned nullptr, which it can
 }
 
 int32 CColStore::FindColSlot()
@@ -159,12 +159,12 @@ void CColStore::BoundingBoxesPostProcess()
 }
 
 // 0x410AD0
-void CColStore::EnsureCollisionIsInMemory(CVector const& pos)
+void CColStore::EnsureCollisionIsInMemory(const CVector& pos)
 {
     if (CStreaming::ms_disableStreaming)
         return;
 
-    auto* player = FindPlayerPed(-1);
+    auto* player = FindPlayerPed();
     const auto area = player ? player->m_nAreaCode : CGame::currArea;
     if (area != CGame::currArea)
         return;
@@ -209,18 +209,18 @@ void CColStore::IncludeModelIndex(int32 colSlot, int32 modelId)
 }
 
 // 0x410CE0
-bool CColStore::HasCollisionLoaded(CVector const& pos, int32 areaCode)
+bool CColStore::HasCollisionLoaded(const CVector& pos, int32 areaCode)
 {
     SetCollisionRequired(pos, areaCode);
     auto foundInd = -1;
     for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
     {
-        auto* pDef = ms_pColPool->GetAt(i);
-        if (!pDef || !pDef->m_bCollisionIsRequired)
+        auto* def = ms_pColPool->GetAt(i);
+        if (!def || !def->m_bCollisionIsRequired)
             continue;
 
-        pDef->m_bCollisionIsRequired = false;
-        if (pDef->m_Area.IsPointInside(pos, -110.0F) && !pDef->m_bActive)
+        def->m_bCollisionIsRequired = false;
+        if (def->m_Area.IsPointInside(pos, -110.0F) && !def->m_bActive)
         {
             foundInd = i; // Slightly modified the method logic to be more readable, result is the same
             break;
@@ -256,8 +256,8 @@ void CColStore::LoadAllCollision()
 {
     for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
     {
-        auto* pDef = ms_pColPool->GetAt(i);
-        if (!pDef)
+        auto* def = ms_pColPool->GetAt(i);
+        if (!def)
             continue;
 
         CStreaming::RequestModel(RESOURCE_ID_COL + i, 0);
@@ -267,7 +267,7 @@ void CColStore::LoadAllCollision()
 }
 
 // 0x410690
-void CColStore::LoadCol(int32 colSlot, char const* filename)
+void CColStore::LoadCol(int32 colSlot, const char* filename)
 {
     auto* def = ms_pColPool->GetAt(colSlot);
     CFileLoader::LoadCollisionFile(filename, colSlot);
@@ -326,7 +326,7 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
         else if (obj.type == MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_PED)
         {
             entity = CPools::ms_pPedPool->GetAtRef(obj.handle);
-            if (!entity || entity->AsPed()->m_nPedState == ePedState::PEDSTATE_DIE || entity->AsPed()->m_nPedState == ePedState::PEDSTATE_DEAD)
+            if (!entity || entity->AsPed()->m_nPedState == PEDSTATE_DIE || entity->AsPed()->m_nPedState == PEDSTATE_DEAD)
                 continue;
         }
 
@@ -411,7 +411,7 @@ void CColStore::RemoveRef(int32 colNum)
 }
 
 // 0x410C00
-void CColStore::RequestCollision(CVector const& pos, int32 areaCode)
+void CColStore::RequestCollision(const CVector& pos, int32 areaCode)
 {
     SetCollisionRequired(pos, areaCode);
     for (auto i = 1; i < TOTAL_COL_MODEL_IDS; ++i)
@@ -445,7 +445,7 @@ void CColStore::SetCollisionRequired(const CVector& pos, int32 areaCode)
 }
 
 // 0x4103D0
-void SetIfCollisionIsRequired(CVector2D const& vecPos, void* data)
+void SetIfCollisionIsRequired(const CVector2D& vecPos, void* data)
 {
     auto* def = static_cast<ColDef*>(data);
     if (!CColStore::ms_nRequiredCollisionArea && def->m_bInterior)
@@ -458,7 +458,7 @@ void SetIfCollisionIsRequired(CVector2D const& vecPos, void* data)
 }
 
 // 0x410470
-void SetIfCollisionIsRequiredReducedBB(CVector2D const& vecPos, void* data)
+void SetIfCollisionIsRequiredReducedBB(const CVector2D& vecPos, void* data)
 {
     auto* def = static_cast<ColDef*>(data);
     if (!def->m_Area.IsPointInside(vecPos, -80.0F))

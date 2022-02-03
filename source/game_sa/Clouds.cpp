@@ -14,7 +14,6 @@ int32& CClouds::IndividualRotation = *reinterpret_cast<int32*>(0xC6AA6C);
 float& CClouds::CloudRotation = *reinterpret_cast<float*>(0xC6AA70);
 
 tVolumetricClouds& CClouds::ms_vc = *reinterpret_cast<tVolumetricClouds*>(0xC6AAB0);
-static inline std::array<uint32, 6>& m_nPrimIndices = *reinterpret_cast<std::array<uint32, 6>*>(0xC6E93C);
 
 tMovingFog& CClouds::ms_mf = *reinterpret_cast<tMovingFog*>(0xC6C158);
 
@@ -47,7 +46,7 @@ void CClouds::InjectHooks() {
     RH_ScopedInstall(MovingFog_GetFXIntensity, 0x7136D0);
     RH_ScopedInstall(MovingFog_GetWind, 0x7136E0);
     RH_ScopedInstall(MovingFog_GetFirstFreeSlot, 0x713710);
-    RH_ScopedInstall(MovingFogRender, 0x716C90, true);
+    RH_ScopedInstall(MovingFogRender, 0x716C90);
     // RH_ScopedInstall(Render, 0x713950);
     RH_ScopedInstall(RenderSkyPolys, 0x714650);
     // RH_ScopedInstall(RenderBottomFromHeight, 0x7154B0);
@@ -132,7 +131,7 @@ void CClouds::SetUpOneSkyPoly(CVector vert1pos, CVector vert2pos, CVector vert3p
 void CClouds::MovingFogInit() {
     ms_mf = {};
     ms_mf.m_vecWind = CVector(0.06f, 0.06f, 0.0f);
-    m_nPrimIndices = { 0, 1, 2, 0, 2, 3 };
+    ms_mf.m_nPrimIndices = { 0, 1, 2, 0, 2, 3 };
 }
 
 // 0x713760
@@ -212,98 +211,89 @@ int32 CClouds::MovingFog_GetFirstFreeSlot() {
     return result;
 }
 
-// todo: fixme
 // 0x716C90
 void CClouds::MovingFogRender() {
-    if (MovingFog_GetFXIntensity() == 0.f || CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
+    if (MovingFog_GetFXIntensity() == 0.f || !CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
         return;
 
-    float step = CTimer::GetTimeStep() * (1.f / 300.f);
-    if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
-        CurrentFogIntensity = std::min(CurrentFogIntensity - step, 0.f);
-    else
-        CurrentFogIntensity = std::max(CurrentFogIntensity + step, 0.f);
+    // Adjust fog intensity
+    {
+        const float step = CTimer::GetTimeStep() / 300.f;
+        if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
+            CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f);
+        else
+            CurrentFogIntensity = std::min(CurrentFogIntensity + step, 1.f);
 
-    if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness) {
-        CurrentFogIntensity = 0.f;
-        return;
+
+        if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness) {
+            CurrentFogIntensity = 0.f;
+            return;
+        }
+
+        if (CurrentFogIntensity == 0.f) {
+            return;
+        }
     }
 
-    if (CurrentFogIntensity == 0.f)
-        return;
+    CVector camUp = TheCamera.GetUpVector(), camRight = TheCamera.GetRightVector();
 
-    CVector up = TheCamera.GetUpVector(), right = TheCamera.GetRightVector();
     CPostEffects::ImmediateModeRenderStatesStore();
     CPostEffects::ImmediateModeRenderStatesSet();
 
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,   RWRSTATE(TRUE));
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(gpCloudMaskTex->raster));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCloudMaskTex)));
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
 
-    int32 red   = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255);
-    int32 green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255);
-    int32 blue  = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomBlue + 132, 255);
+    const int32 red   = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomRed + 132, 255);
+    const int32 green = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomGreen + 132, 255);
+    const int32 blue  = std::min(CTimeCycle::m_CurrentColours.m_nSkyBottomBlue + 132, 255);
 
     int32 numVerts = 0;
-    for (auto i = 0u; i < MAX_MOVING_FOG; i++) {
-        if (!ms_mf.m_bFogSlots[i])
+    const auto RenderVertices = [&] {
+        if (RwIm3DTransform(aTempBufferVertices, numVerts, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
+            RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
+            RwIm3DEnd();
+        }
+        numVerts = 0;
+    };
+
+    for (auto fogIdx = 0u; fogIdx < MAX_MOVING_FOG; fogIdx++) {
+        if (!ms_mf.m_bFogSlots[fogIdx])
             continue;
 
-        float halfSize = ms_mf.m_fSize[i] * 0.5f;
-        CVector up1    = up * halfSize;
-        CVector right1 = right * halfSize;
+        const auto&   pos      = ms_mf.m_vecPosn[fogIdx];
+        const float   halfSize = ms_mf.m_fSize[fogIdx] / 2.f;
+        const CVector fogUp    = camUp * halfSize;
+        const CVector fogRight = camRight * halfSize;
 
-        auto alpha = static_cast<int32>(MovingFog_GetFXIntensity() * ms_mf.m_fIntensity[i] * CurrentFogIntensity);
+        // Original code used a switch case, we're going to use a lookup table to make it nicer. (And faster)
+        const struct { CVector pos; RwTexCoords uv; } corners[]{
+            { pos + fogRight + fogUp,  {0.f, 0.f} }, // Top right
+            { pos + fogRight - fogUp,  {1.f, 0.f} }, // Bottom right
+            { pos - fogRight - fogUp,  {1.f, 1.f} }, // Bottom left
+            { pos - fogRight + fogUp,  {0.f, 1.f} }, // Top left
+        };
 
-        for (const auto& ind : m_nPrimIndices) {
-            float u = 0.f, v = 0.f;
-            CVector pos = ms_mf.m_vecPosn[i];
+        const auto alpha = static_cast<int32>(MovingFog_GetFXIntensity() * ms_mf.m_fIntensity[fogIdx] * CurrentFogIntensity);
+        for (const auto& vertIdx : ms_mf.m_nPrimIndices) {
+            const auto& corner = corners[vertIdx];
 
-            switch (ind) {
-            case 0:
-                u = 0.f;
-                v = 0.f;
-                pos = right1 + up1 + pos;
-                break;
+            auto& vert = aTempBufferVertices[numVerts++];
+            RwV3dAssign(RwIm3DVertexGetPos(&vert), &corner.pos);
+            RwIm3DVertexSetRGBA(&vert, red, green, blue, alpha);
+            RwIm3DVertexSetU(&vert, corner.uv.u);
+            RwIm3DVertexSetV(&vert, corner.uv.v);
 
-            case 1:
-                u = 1.f;
-                v = 0.f;
-                pos = right1 + pos - up1;
-                break;
-
-            case 2:
-                u = 1.f;
-                v = 1.f;
-                pos = pos - right1 - up1;
-                break;
-
-            case 3:
-                u = 0.f;
-                v = 1.f;
-                pos =  pos - right1 + up1;
-                break;
-            }
-
-            RwIm3DVertexSetPos(&aTempBufferVertices[numVerts], pos.x, pos.y, pos.z);
-            RwIm3DVertexSetRGBA(&aTempBufferVertices[numVerts], red, green, blue, alpha);
-            RwIm3DVertexSetU(&aTempBufferVertices[numVerts], u);
-            RwIm3DVertexSetV(&aTempBufferVertices[numVerts], v);
-            ++numVerts;
-
+            // Flush buffer if it's getting full
             if (numVerts == TOTAL_TEMP_BUFFER_VERTICES - 2) {
-                if (RwIm3DTransform(aTempBufferVertices, numVerts, 0, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
-                    RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
-                    RwIm3DEnd();
-                }
-                numVerts = 0;
+                RenderVertices();
             }
         }
     }
 
-    if (numVerts > 0 && RwIm3DTransform(aTempBufferVertices, numVerts, 0, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXUV)) {
-        RwIm3DRenderPrimitive(rwPRIMTYPETRILIST);
-        RwIm3DEnd();
+    // Render all remaining (if any)
+    if (numVerts > 0) {
+        RenderVertices();
     }
 
     CPostEffects::ImmediateModeRenderStatesReStore();

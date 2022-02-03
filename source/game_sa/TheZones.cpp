@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -66,7 +66,7 @@ bool CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone
 
 // Returns true if point lies within zone
 // 0x572270
-bool CTheZones::PointLiesWithinZone(CVector const* point, CZone* zone) {
+bool CTheZones::PointLiesWithinZone(const CVector* point, CZone* zone) {
     return (
         (float)zone->m_fX1 <= point->x &&
         (float)zone->m_fX2 >= point->x &&
@@ -78,8 +78,8 @@ bool CTheZones::PointLiesWithinZone(CVector const* point, CZone* zone) {
 }
 
 // Returns eLevelName from position
-eLevelName CTheZones::GetLevelFromPosition(CVector const& point) {
-    return ((eLevelName(__cdecl*)(CVector const&))0x572300)(point);
+eLevelName CTheZones::GetLevelFromPosition(const CVector& point) {
+    return ((eLevelName(__cdecl*)(const CVector&))0x572300)(point);
 }
 
 // Returns pointer to zone by a point

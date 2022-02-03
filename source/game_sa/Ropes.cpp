@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,9 +11,9 @@ CRope(&CRopes::aRopes)[MAX_NUM_ROPES] = *(CRope(*)[MAX_NUM_ROPES])0xB768B8;
 int32& CRopes::PlayerControlsCrane = *(int32*)0xB76898;
 
 
-void CRopes::CreateRopeForSwatPed(CVector const& startPos)
+void CRopes::CreateRopeForSwatPed(const CVector& startPos)
 {
-    ((void(__cdecl*)(CVector const&))0x558D10)(startPos);
+    ((void(__cdecl*)(const CVector&))0x558D10)(startPos);
 }
 float CRopes::FindPickupHeight(CEntity* entity)
 {

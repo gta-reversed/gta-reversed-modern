@@ -80,20 +80,20 @@ public:
     * BlockHit(int32, int32)
     * CalculateWavesForCoordinate(int32, int32, float, float, float*, float*, float*, CVector*)
     * ChangeWaterConfiguration(int32)
-    * CreateBeachToy(CVector const&, eBeachToy)
+    * CreateBeachToy(const CVector&, eBeachToy)
     * FillQuadsAndTrianglesList()
     * FindNearestWaterAndItsFlow()
     * FixVertexOnToLine(CWaterVertex*, CWaterVertex*, CWaterVertex*, float*)
-    * GetGroundLevel(CVector const&, float*, ColData*, float)
-    * GetGroundLevel_WS(CVector const&, float*, ColData*, float)
+    * GetGroundLevel(const CVector&, float*, ColData*, float)
+    * GetGroundLevel_WS(const CVector&, float*, ColData*, float)
     *
     */
-    static bool GetWaterDepth(CVector const& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
+    static bool GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
     static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);
     /*
     * HandleBeachToysStuff()
-    * IsLocationOutOfWorldBounds_WS(CVector const&, int32)
+    * IsLocationOutOfWorldBounds_WS(const CVector&, int32)
     * MarkQuadsAndPolysToBeRendered(int32, int32, bool)
     */
     static void PreRenderWater();

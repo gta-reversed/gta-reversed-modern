@@ -1,13 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Entity.h"
-#include "FxSystem_c.h"
+class CEntity;
+class CFire;
+class FxSystem_c;
 
 class CFire {
 public:
@@ -43,7 +44,7 @@ public:
     void Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens);
     void Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens);
     void Start(CVector pos, float fStrength, CEntity* target, uint8 nGens); /* For script */
-    void CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix);
+    void CreateFxSysForStrength(const CVector& point, RwMatrix* matrix);
     void Extinguish();
     void ExtinguishWithWater(float fWaterStrength);
     void ProcessFire();

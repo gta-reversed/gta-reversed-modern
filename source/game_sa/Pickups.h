@@ -1,16 +1,17 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Pickup.h"
-#include "tPickupMessage.h"
 #include "eWeaponType.h"
 
 class CEntity;
+class CPickup;
+
+class tPickupMessage;
 
 constexpr uint32 MAX_COLLECTED_PICKUPS = 20;
 constexpr uint32 MAX_PICKUP_MESSAGES = 16;
@@ -70,7 +71,7 @@ public:
     static void RemovePickUpsInArea(float cornerA_x, float cornerA_y, float cornerA_z, float cornerB_x, float cornerB_y, float cornerB_z);
     static void RemovePickupObjects();
     // remove pickups with types PICKUP_ONCE_TIMEOUT and PICKUP_MONEY in area
-    static void RemoveUnnecessaryPickups(CVector const& posn, float radius);
+    static void RemoveUnnecessaryPickups(const CVector& posn, float radius);
     static void RenderPickUpText();
     // save pickups to save file; always return TRUE
     static bool Save();

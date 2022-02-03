@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "CarCtrl.h"
+#include "TrafficLights.h"
 
 uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
 uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;
@@ -138,7 +139,7 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 }
 
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
-    CWanted* playerWanted = FindPlayerWanted(-1);
+    CWanted* playerWanted = FindPlayerWanted();
     if (playerWanted->AreSwatRequired() 
         && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
         && CStreaming::IsModelLoaded(MODEL_SWAT)
@@ -327,8 +328,8 @@ float CCarCtrl::FindGhostRoadHeight(CVehicle* vehicle) {
 }
 
 // 0x42B270
-void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* pEntity) {
-    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, pEntity);
+void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* entity) {
+    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, entity);
 }
 
 // 0x429A70
@@ -528,8 +529,8 @@ void CCarCtrl::JoinCarWithRoadSystem(CVehicle* vehicle) {
 }
 
 // 0x42F870
-bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, CVector const& posn, bool unused, bool bIsBoat) {
-    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, CVector const&, bool, bool>(vehicle, posn, unused, bIsBoat);
+bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, const CVector& posn, bool unused, bool bIsBoat) {
+    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, const CVector&, bool, bool>(vehicle, posn, unused, bIsBoat);
 }
 
 // 0x432B10
@@ -665,7 +666,7 @@ void CCarCtrl::RemoveDistantCars() {
                 CRoadBlocks::GenerateRoadBlockCopsForCar(
                     vehicle,
                     vehicle->m_nPedsPositionForRoadBlock,
-                    vehicle->IsLawEnforcementVehicle() ? ePedType::PED_TYPE_COP : ePedType::PED_TYPE_GANG1
+                    vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
             }
         }
@@ -715,11 +716,11 @@ void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& ptrList, CVehicle* vehicle
 }
 
 // 0x426220
-void CCarCtrl::SlowCarDownForObject(CEntity* pEntity, CVehicle* vehicle, float* arg3, float arg4) {
-    const CVector entityDir = pEntity->GetPosition() - vehicle->GetPosition();
+void CCarCtrl::SlowCarDownForObject(CEntity* entity, CVehicle* vehicle, float* arg3, float arg4) {
+    const CVector entityDir = entity->GetPosition() - vehicle->GetPosition();
     const float entityHeading = DotProduct(entityDir, vehicle->GetMatrix().GetForward());
     if (entityHeading > 0.0f && entityHeading < 20.0f) {
-        if (pEntity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
+        if (entity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
             if (entityHeading >= 7.0f) {
                 *arg3 = std::min(*arg3, (1.0f - (entityHeading - 7.0f) / 13.0f)) * arg4; // Original code multiplies by 0.07692308, which is the recp. of 13
             } else {
@@ -952,8 +953,8 @@ void CCarCtrl::WeaveForOtherCar(CEntity* entity, CVehicle* vehicle, float* arg3,
 }
 
 // 0x42D680
-void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* pPhysical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
-    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, pPhysical, arg4, arg5, arg6, arg7, arg8, arg9);
+void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* physical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
+    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, physical, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 // 0x42D950

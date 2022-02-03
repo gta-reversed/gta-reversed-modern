@@ -21,8 +21,9 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
-#include "toolsmenu\HooksDebugModule.h"
+#include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
+#include "toolsmenu\DebugModules\FXDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -60,6 +61,7 @@ void CDebugMenu::ImguiInitialise() {
     VehicleDebugModule::Initialise();
     PedDebugModule::Initialise();
     MissionDebugModule::Initialise();
+    FXDebugModule::Initialise();
     m_imguiInitialised = true;
 }
 
@@ -185,37 +187,23 @@ bool showPlayerInfo;
 void CDebugMenu::ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
-    CPlayerPed* pLocalPlayer = FindPlayerPed();
-    if (pLocalPlayer != nullptr) {
-        ImGui::Begin("Player Information");
 
-        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
-        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
 
-        ImGui::End();
-    }
-}
+    ImGui::Begin("Player Information");
 
-void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
-    ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
-    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
+    auto playerPos = player->GetPosition();
+    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
+    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::End();
 }
 
 void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
-        PostFxTool();
+        FXDebugModule::ProcessImgui();
     }
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
@@ -348,6 +336,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
+    FXDebugModule::ProcessRender();
 
     ImGui::EndFrame();
     ImGui::Render();
