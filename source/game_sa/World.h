@@ -54,7 +54,7 @@ public:
     static CPtrListSingleLink(&ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X];
     static CPtrListDoubleLink &ms_listMovingEntityPtrs;
     static CPtrListDoubleLink &ms_listObjectsWithControlCode;
-    static CColPoint *m_aTempColPts; // static CColPoint m_aTempColPts[32]
+    static inline CColPoint(&m_aTempColPts)[32] = *(CColPoint(*)[32])0xB9ACD0;
     static CVector &SnookerTableMax; // default { 497.7925, -1670.3999, 13.19 }
     static CVector &SnookerTableMin; // default { 2495.8525, -1671.4099, 12.9 }
 

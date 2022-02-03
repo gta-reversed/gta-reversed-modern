@@ -36,6 +36,9 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
+// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
+#define UNUSED(x) (void)(x);
+
 #define _IGNORED_
 #define _CAN_BE_NULL_
 

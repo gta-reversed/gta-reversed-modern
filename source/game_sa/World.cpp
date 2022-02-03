@@ -31,7 +31,6 @@ uint16& CWorld::ms_nCurrentScanCode = *(uint16*)0xB7CD78;
 CPtrListSingleLink (&CWorld::ms_aLodPtrLists)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X] = *(CPtrListSingleLink(*)[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X])0xB99EB8;
 CPtrListDoubleLink& CWorld::ms_listMovingEntityPtrs = *(CPtrListDoubleLink*)0xB9ACC8;
 CPtrListDoubleLink& CWorld::ms_listObjectsWithControlCode = *(CPtrListDoubleLink*)0xB9ACCC;
-CColPoint* CWorld::m_aTempColPts = (CColPoint*)0xB9ACD0;
 CVector& CWorld::SnookerTableMax = *(CVector*)0x8CDEF4;
 CVector& CWorld::SnookerTableMin = *(CVector*)0x8CDF00;
 uint32& FilledColPointIndex = *(uint32*)0xB7CD7C;

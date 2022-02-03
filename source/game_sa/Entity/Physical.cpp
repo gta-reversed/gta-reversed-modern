@@ -500,7 +500,7 @@ int32 CPhysical::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) 
 
 int32 CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint) {
     CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), colpoint, nullptr, nullptr, false);
+    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(CColPoint(*)[32])colpoint/*should be okay for now*/, nullptr, nullptr, false);
     if (totalColPointsToProcess > 0) {
         AddCollisionRecord(entity);
         if (!entity->IsBuilding())

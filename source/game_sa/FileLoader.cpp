@@ -709,7 +709,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
 
     cd->bUsesDisks = false;
     cd->bHasShadowInfo = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -779,7 +779,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -848,7 +848,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
