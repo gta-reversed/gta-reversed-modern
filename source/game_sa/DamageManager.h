@@ -179,6 +179,13 @@ public:
     static eCarNodes GetCarNodeIndexFromPanel(ePanels panel);
     static eCarNodes GetCarNodeIndexFromDoor(eDoors door);
     static bool GetComponentGroup(tComponent nComp, tComponentGroup& outCompGroup, uint8& outComponentRelativeIdx);
+
+
+private: 
+    // Wrapper functions
+
+    // Return type has to be uint32, but we want to return `eCarWheelStatus` in our code.
+    uint32 GetWheelStatus_Hooked(eCarWheel wheel) { return (uint32)GetWheelStatus(wheel); }
 };
 
 VALIDATE_SIZE(CDamageManager, 0x18);
