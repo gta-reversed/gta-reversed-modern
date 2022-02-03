@@ -387,14 +387,18 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 
 // TODO: This function could be refactored to use ranges instead of these ugly static variables :D
 /*!
-* @brief 0x4185C0 Calculate collisions between \a cmA and \a cmB according to this feature matrix:
-* 
+* @brief 0x4185C0 Calculate collisions between \a cmA and \a cmB.
+*
+* Collisions calculated:
 *  A\B  Tri Sp  Box Lines
 * Tri       +
 * Sp    +   +   +
 * Box       +
 * Lines +   +   +
 *
+* Note: Originally the game calculated some disk stuff as well, but SA doesn't use disks (they're disabled when loadedin CFileLoader)
+* thus I omitted the code for it (it would've made the already messy code even worse)
+* 
 * @param         transformA       Transformation matrix of model A - Usually owning entity's matrix.
 * @param         cmA              Col model A
 * @param         transformB       Transformation matrix of model B - Usually owning entity's matrix.
