@@ -261,7 +261,7 @@ bool CCollision::ProcessSphereSphere(const CColSphere& sphere1, const CColSphere
 
 // 0x4165B0
 bool CCollision::TestSphereTriangle(const CColSphere& sphere, const CompressedVector* verts, const CColTriangle& tri, CColTrianglePlane const& triPlane) {
-    return plugin::CallAndReturn<bool, 0x4165B0, CSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
+    return plugin::CallAndReturn<bool, 0x4165B0, CColSphere const&, CompressedVector const*, CColTriangle const&, CColTrianglePlane const&>(sphere, verts, tri, triPlane);
 }
 
 // 0x416BA0
