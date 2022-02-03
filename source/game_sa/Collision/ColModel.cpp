@@ -1,15 +1,20 @@
 #include "StdInc.h"
 
+#include "ColModel.h"
+
 void CColModel::InjectHooks()
 {
-    ReversibleHooks::Install("CColModel", "operator new", 0x40FC30, &CColModel::operator new);
-    ReversibleHooks::Install("CColModel", "operator delete", 0x40FC40, &CColModel::operator delete);
-    ReversibleHooks::Install("CColModel", "MakeMultipleAlloc", 0x40F740, &CColModel::MakeMultipleAlloc);
-    ReversibleHooks::Install("CColModel", "AllocateData_void", 0x40F810, static_cast<void(CColModel::*)()>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "AllocateData_params", 0x40F870, static_cast<void(CColModel::*)(int32, int32, int32, int32, int32, bool)>(&CColModel::AllocateData));
-    ReversibleHooks::Install("CColModel", "RemoveCollisionVolumes", 0x40F9E0, &CColModel::RemoveCollisionVolumes);
-    ReversibleHooks::Install("CColModel", "CalculateTrianglePlanes", 0x40FA30, &CColModel::CalculateTrianglePlanes);
-    ReversibleHooks::Install("CColModel", "RemoveTrianglePlanes", 0x40FA40, &CColModel::RemoveTrianglePlanes);
+    RH_ScopedClass(CColModel);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(operator new, 0x40FC30);
+    RH_ScopedInstall(operator delete, 0x40FC40);
+    RH_ScopedInstall(MakeMultipleAlloc, 0x40F740);
+    RH_ScopedOverloadedInstall(AllocateData, "void", 0x40F810, void(CColModel::*)());
+    RH_ScopedOverloadedInstall(AllocateData, "params", 0x40F870, void(CColModel::*)(int32, int32, int32, int32, int32, bool));
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F9E0);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40FA30);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40FA40);
 }
 
 CColModel::CColModel() : m_boundBox()
@@ -26,10 +31,10 @@ CColModel::~CColModel()
     if (!m_bIsActive)
         return;
 
-    CColModel::RemoveCollisionVolumes();
+    RemoveCollisionVolumes();
 }
 
-CColModel& CColModel::operator=(CColModel const& colModel)
+CColModel& CColModel::operator=(const CColModel& colModel)
 {
     //BUG(Prone) No self assignment check
     m_boundSphere.m_vecCenter = colModel.m_boundSphere.m_vecCenter;
@@ -85,7 +90,7 @@ void CColModel::AllocateData(int32 numSpheres, int32 numBoxes, int32 numLines, i
     const auto trianglesOffset = reinterpret_cast<uint32>(pAlignedAddress);
     assert(trianglesOffset && trianglesOffset >= (vertsOffset + vertsSize)); // Just to make sure that the alignment works properly
 
-    CColModel::AllocateData(trianglesOffset + trianglesSize);
+    AllocateData(trianglesOffset + trianglesSize);
     m_pColData->m_nNumSpheres = numSpheres;
     m_pColData->m_nNumLines = numLines;
     m_pColData->m_nNumBoxes = numBoxes;

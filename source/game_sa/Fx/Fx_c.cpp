@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,47 +16,49 @@ static RxObjSpace3DVertex (&TempVertexBuffer)[4] = *(RxObjSpace3DVertex (*)[4])0
 Fx_c& g_fx = *(Fx_c*)0xA9AE00;
 
 void Fx_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("Fx_c", "Fx_c", 0x49E620, &Fx_c::Constructor);
-    // Install("Fx_c", "~Fx_c", 0x49E630, &Fx_c::Destructor);
-    Install("Fx_c", "InitStaticSystems", 0x49E660, &Fx_c::InitStaticSystems);
-    Install("Fx_c", "ExitStaticSystems", 0x49E850, &Fx_c::ExitStaticSystems);
-    Install("Fx_c", "InitEntitySystems", 0x49EA60, &Fx_c::InitEntitySystems);
-    // Install("Fx_c", "ExitEntitySystems", 0x4A12D0, &Fx_c::ExitEntitySystems);
-    Install("Fx_c", "Init", 0x49EA90, &Fx_c::Init);
-    Install("Fx_c", "Exit", 0x4A1320, &Fx_c::Exit);
-    Install("Fx_c", "Reset", 0x49EAE0, &Fx_c::Reset);
-    // Install("Fx_c", "CreateEntityFx", 0x4A11E0, &Fx_c::CreateEntityFx);
-    // Install("Fx_c", "DestroyEntityFx", 0x4A1280, &Fx_c::DestroyEntityFx);
-    // Install("Fx_c", "Update", 0x49E640, &Fx_c::Update);
-    Install("Fx_c", "Render", 0x49E650, &Fx_c::Render);
-    // Install("Fx_c", "CreateMatFromVec", 0x49E950, &Fx_c::CreateMatFromVec);
-    Install("Fx_c", "SetFxQuality", 0x49EA40, &Fx_c::SetFxQuality);
-    Install("Fx_c", "GetFxQuality", 0x49EA50, &Fx_c::GetFxQuality);
-    // Install("Fx_c", "AddBlood", 0x49EB00, &Fx_c::AddBlood);
-    // Install("Fx_c", "AddWood", 0x49EE10, &Fx_c::AddWood);
-    // Install("Fx_c", "AddSparks", 0x49F040, &Fx_c::AddSparks);
-    // Install("Fx_c", "AddTyreBurst", 0x49F300, &Fx_c::AddTyreBurst);
-    // Install("Fx_c", "AddBulletImpact", 0x49F3D0, &Fx_c::AddBulletImpact);
-    // Install("Fx_c", "AddPunchImpact", 0x49F670, &Fx_c::AddPunchImpact);
-    // Install("Fx_c", "AddDebris", 0x49F750, &Fx_c::AddDebris);
-    // Install("Fx_c", "AddGlass", 0x49F970, &Fx_c::AddGlass);
-    // Install("Fx_c", "AddWheelSpray", 0x49FB30, &Fx_c::AddWheelSpray);
-    // Install("Fx_c", "AddWheelGrass", 0x49FF20, &Fx_c::AddWheelGrass);
-    // Install("Fx_c", "AddWheelGravel", 0x4A0170, &Fx_c::AddWheelGravel);
-    // Install("Fx_c", "AddWheelMud", 0x4A03C0, &Fx_c::AddWheelMud);
-    // Install("Fx_c", "AddWheelSand", 0x4A0610, &Fx_c::AddWheelSand);
-    // Install("Fx_c", "AddWheelDust", 0x4A09C0, &Fx_c::AddWheelDust);
-    // Install("Fx_c", "TriggerWaterHydrant", 0x4A0D70, &Fx_c::TriggerWaterHydrant);
-    // Install("Fx_c", "TriggerGunshot", 0x4A0DE0, &Fx_c::TriggerGunshot);
-    // Install("Fx_c", "TriggerTankFire", 0x4A0FA0, &Fx_c::TriggerTankFire);
-    // Install("Fx_c", "TriggerWaterSplash", 0x4A1070, &Fx_c::TriggerWaterSplash);
-    // Install("Fx_c", "TriggerBulletSplash", 0x4A10E0, &Fx_c::TriggerBulletSplash);
-    // Install("Fx_c", "TriggerFootSplash", 0x4A1150, &Fx_c::TriggerFootSplash);
+    RH_ScopedClass(Fx_c);
+    RH_ScopedCategory("Fx");
 
-    Install("Fx_c", "RenderAddTri", 0x4A1410, &RenderAddTri_);
-    Install("Fx_c", "RenderEnd", 0x4A1600, &RenderEnd);
-    Install("Fx_c", "RenderBegin", 0x4A13B0, &RenderBegin);
+    // RH_ScopedInstall(Constructor, 0x49E620);
+    // RH_ScopedInstall(Destructor, 0x49E630);
+    RH_ScopedInstall(InitStaticSystems, 0x49E660);
+    RH_ScopedInstall(ExitStaticSystems, 0x49E850);
+    RH_ScopedInstall(InitEntitySystems, 0x49EA60);
+    // RH_ScopedInstall(ExitEntitySystems, 0x4A12D0);
+    RH_ScopedInstall(Init, 0x49EA90);
+    RH_ScopedInstall(Exit, 0x4A1320);
+    RH_ScopedInstall(Reset, 0x49EAE0);
+    // RH_ScopedInstall(CreateEntityFx, 0x4A11E0);
+    // RH_ScopedInstall(DestroyEntityFx, 0x4A1280);
+    // RH_ScopedInstall(Update, 0x49E640);
+    RH_ScopedInstall(Render, 0x49E650);
+    // RH_ScopedInstall(CreateMatFromVec, 0x49E950);
+    RH_ScopedInstall(SetFxQuality, 0x49EA40);
+    RH_ScopedInstall(GetFxQuality, 0x49EA50);
+    // RH_ScopedInstall(AddBlood, 0x49EB00);
+    // RH_ScopedInstall(AddWood, 0x49EE10);
+    // RH_ScopedInstall(AddSparks, 0x49F040);
+    // RH_ScopedInstall(AddTyreBurst, 0x49F300);
+    // RH_ScopedInstall(AddBulletImpact, 0x49F3D0);
+    // RH_ScopedInstall(AddPunchImpact, 0x49F670);
+    // RH_ScopedInstall(AddDebris, 0x49F750);
+    // RH_ScopedInstall(AddGlass, 0x49F970);
+    // RH_ScopedInstall(AddWheelSpray, 0x49FB30);
+    // RH_ScopedInstall(AddWheelGrass, 0x49FF20);
+    // RH_ScopedInstall(AddWheelGravel, 0x4A0170);
+    // RH_ScopedInstall(AddWheelMud, 0x4A03C0);
+    // RH_ScopedInstall(AddWheelSand, 0x4A0610);
+    // RH_ScopedInstall(AddWheelDust, 0x4A09C0);
+    // RH_ScopedInstall(TriggerWaterHydrant, 0x4A0D70);
+    // RH_ScopedInstall(TriggerGunshot, 0x4A0DE0);
+    // RH_ScopedInstall(TriggerTankFire, 0x4A0FA0);
+    // RH_ScopedInstall(TriggerWaterSplash, 0x4A1070);
+    // RH_ScopedInstall(TriggerBulletSplash, 0x4A10E0);
+    // RH_ScopedInstall(TriggerFootSplash, 0x4A1150);
+
+    RH_ScopedGlobalInstall(RenderAddTri_, 0x4A1410);
+    RH_ScopedGlobalInstall(RenderEnd, 0x4A1600);
+    RH_ScopedGlobalInstall(RenderBegin, 0x4A13B0);
 }
 
 // 0x49E620
@@ -303,7 +305,7 @@ void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRende
     RwRaster* currRaster{};
     RwRenderStateGet(rwRENDERSTATETEXTURERASTER, &currRaster);
     if (currRaster != newRaster)
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)newRaster);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(newRaster));
 }
 
 // Wrapper for original func

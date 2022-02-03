@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AutoPilot.h"
+
 CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
 {
     _smthNext = 1;
@@ -27,7 +29,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucTempActionMode = 0;
     m_ucCarMissionModeCounter = 0;
     field_41 = 0;
-    field_44 = 1.0;
+    field_44 = 1.0f;
     m_ucHeliSpeedMult = 0;   
     movementFlags.bIsStopped = false;
     movementFlags.bIsParked = false;

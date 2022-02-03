@@ -2,7 +2,7 @@
 
 #include "AEAudioChannel.h"
 
-struct CAEStreamingDecoder;
+class CAEStreamingDecoder;
 
 class CAEStreamingChannel : public CAEAudioChannel {
 public:

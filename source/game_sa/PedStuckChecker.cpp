@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
-bool CPedStuckChecker::TestPedStuck(CPed* pPed, CEventGroup* pEventGroup)
+#include "PedStuckChecker.h"
+
+bool CPedStuckChecker::TestPedStuck(CPed* ped, CEventGroup* eventGroup)
 {
-    return plugin::CallMethodAndReturn<bool, 0x602C00, CPedStuckChecker*, CPed*, CEventGroup*>(this, pPed, pEventGroup);
+    return plugin::CallMethodAndReturn<bool, 0x602C00, CPedStuckChecker*, CPed*, CEventGroup*>(this, ped, eventGroup);
 }

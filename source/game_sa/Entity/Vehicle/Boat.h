@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -82,7 +82,6 @@ public:
 
 public:
     static void InjectHooks();
-    //funcs
 
     // Virtual methods
     void SetModelIndex(uint32 index) override;
@@ -91,11 +90,22 @@ public:
     void PreRender() override;
     void Render() override;
     void ProcessControlInputs(uint8 playerNum) override;
-    void GetComponentWorldPosition(int32 componentId, CVector& posnOut) override;
+    void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     void ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 arg3, float arg4) override;
     void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
 
-    // Reversed virtual methods
+    inline void SetupModelNodes(); // fill m_aBoatNodes array
+    void DebugCode();
+    void PrintThrustAndRudderInfo(); // uses debug printing
+    void ModifyHandlingValue(const bool& bIncrement);
+    void PruneWakeTrail();
+    void AddWakePoint(CVector posn);
+
+    static bool IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats);
+    static float IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, int16 wIndex, bool bUnkn);
+    static void CheckForSkippingCalculations();
+    static void FillBoatList();
+
 private:
     void SetModelIndex_Reversed(uint32 index);
     void ProcessControl_Reversed();
@@ -104,22 +114,9 @@ private:
     void inline ProcessBoatNodeRendering(eBoatNodes eNode, float fRotation, RwUInt8 ucAlpha);
     void Render_Reversed();
     void ProcessControlInputs_Reversed(uint8 ucPadNum);
-    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& posnOut);
+    void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4);
     void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
-
-public:
-    inline void SetupModelNodes(); // fill m_aBoatNodes array
-    void DebugCode();
-    void PrintThrustAndRudderInfo(); // uses debug printing
-    void ModifyHandlingValue(bool const& bIncrement);
-    void PruneWakeTrail();
-    void AddWakePoint(CVector posn);
-
-    static bool IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats);
-    static float IsVertexAffectedByWake(CVector vecPos, CBoat* pBoat, int16 wIndex, bool bUnkn);
-    static void CheckForSkippingCalculations();
-    static void FillBoatList();
 };
 
 VALIDATE_SIZE(CBoat, 0x7E8);

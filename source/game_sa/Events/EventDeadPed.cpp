@@ -6,9 +6,12 @@
 
 void CEventDeadPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDeadPed", "Constructor", 0x4ADEA0, &CEventDeadPed::Constructor);
-    ReversibleHooks::Install("CEventDeadPed", "AffectsPed_Reversed", 0x4B4830, &CEventDeadPed::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventDeadPed", "CloneEditable_Reversed", 0x4B6E70, &CEventDeadPed::CloneEditable_Reversed);
+    RH_ScopedClass(CEventDeadPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ADEA0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4830);
+    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6E70);
 }
 
 CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
@@ -48,7 +51,7 @@ CEventEditableResponse* CEventDeadPed::CloneEditable()
 bool CEventDeadPed::AffectsPed_Reversed(CPed* ped)
 {
     if (m_ped && ped != m_ped && ped->IsAlive()) {
-        if(!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
+        if (!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
             if (!m_ped->physicalFlags.bSubmergedInWater) {
                 CVector distance = m_ped->GetPosition() - ped->GetPosition();
                 if (m_ped->bKilledByStealth) {

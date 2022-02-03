@@ -1,11 +1,13 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "VisibilityPlugins.h"
 
 int32& CVisibilityPlugins::ms_atomicPluginOffset = *(int32*)0x8D608C;
 int32& CVisibilityPlugins::ms_clumpPluginOffset = *(int32*)0x8D6094;
@@ -31,85 +33,89 @@ float& CVisibilityPlugins::gVehicleDistanceFromCamera = *(float*)0xC88024;
 float& CVisibilityPlugins::gVehicleAngleToCamera = *(float*)0xC88020;
 
 void CVisibilityPlugins::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CVisibilityPlugins", "Initialise", 0x733A20, &CVisibilityPlugins::Initialise);
-    Install("CVisibilityPlugins", "Shutdown", 0x732EB0, &CVisibilityPlugins::Shutdown);
-    Install("CVisibilityPlugins", "AtomicCopyConstructor", 0x732170, &CVisibilityPlugins::AtomicCopyConstructor);
-    Install("CVisibilityPlugins", "AtomicDestructor", 0x7321A0, &CVisibilityPlugins::AtomicDestructor);
-    Install("CVisibilityPlugins", "CalculateFadingAtomicAlpha", 0x732500, &CVisibilityPlugins::CalculateFadingAtomicAlpha);
-    Install("CVisibilityPlugins", "ClearAtomicFlag_0", 0x732310, &CVisibilityPlugins::ClearAtomicFlag);
-    Install("CVisibilityPlugins", "ClearAtomicFlag_1", 0x732330, &CVisibilityPlugins::ClearAtomicFlag);
-    Install("CVisibilityPlugins", "ClearClumpForAllAtomicsFlag", 0x732350, &CVisibilityPlugins::ClearClumpForAllAtomicsFlag);
-    Install("CVisibilityPlugins", "ClumpConstructor", 0x732E10, &CVisibilityPlugins::ClumpConstructor);
-    Install("CVisibilityPlugins", "ClumpCopyConstructor", 0x732200, &CVisibilityPlugins::ClumpCopyConstructor);
-    Install("CVisibilityPlugins", "ClumpDestructor", 0x732220, &CVisibilityPlugins::ClumpDestructor);
-    Install("CVisibilityPlugins", "DefaultVisibilityCB", 0x732A30, &CVisibilityPlugins::DefaultVisibilityCB);
-    Install("CVisibilityPlugins", "FrameConstructor", 0x7321B0, &CVisibilityPlugins::FrameConstructor);
-    Install("CVisibilityPlugins", "FrameCopyConstructor", 0x7321D0, &CVisibilityPlugins::FrameCopyConstructor);
-    Install("CVisibilityPlugins", "FrameDestructor", 0x7321F0, &CVisibilityPlugins::FrameDestructor);
-    Install("CVisibilityPlugins", "FrustumSphereCB", 0x732A40, &CVisibilityPlugins::FrustumSphereCB);
-    Install("CVisibilityPlugins", "GetAtomicId", 0x732370, &CVisibilityPlugins::GetAtomicId);
-    Install("CVisibilityPlugins", "GetAtomicModelInfo", 0x732260, &CVisibilityPlugins::GetAtomicModelInfo);
-    Install("CVisibilityPlugins", "GetClumpAlpha", 0x732B20, &CVisibilityPlugins::GetClumpAlpha);
-    Install("CVisibilityPlugins", "GetClumpModelInfo", 0x732AC0, &CVisibilityPlugins::GetClumpModelInfo);
-    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_0", 0x732C80, (float (*)(RwFrame*)) & CVisibilityPlugins::GetDistanceSquaredFromCamera);
-    Install("CVisibilityPlugins", "GetDistanceSquaredFromCamera_1", 0x732CC0, (float (*)(CVector*)) & CVisibilityPlugins::GetDistanceSquaredFromCamera);
-    Install("CVisibilityPlugins", "GetDotProductWithCameraVector", 0x7326D0, &CVisibilityPlugins::GetDotProductWithCameraVector);
-    Install("CVisibilityPlugins", "GetFrameHierarchyId", 0x732A20, &CVisibilityPlugins::GetFrameHierarchyId);
-    Install("CVisibilityPlugins", "GetModelInfoIndex", 0x732250, &CVisibilityPlugins::GetModelInfoIndex);
-    Install("CVisibilityPlugins", "GetUserValue", 0x7323A0, &CVisibilityPlugins::GetUserValue);
-    Install("CVisibilityPlugins", "InitAlphaAtomicList", 0x734530, &CVisibilityPlugins::InitAlphaAtomicList);
-    Install("CVisibilityPlugins", "InitAlphaEntityList", 0x734540, &CVisibilityPlugins::InitAlphaEntityList);
-    Install("CVisibilityPlugins", "InsertEntityIntoEntityList", 0x733DD0, &CVisibilityPlugins::InsertEntityIntoEntityList);
-    Install("CVisibilityPlugins", "InsertEntityIntoUnderwaterEntities", 0x733D90, &CVisibilityPlugins::InsertEntityIntoUnderwaterEntities);
-    Install("CVisibilityPlugins", "InsertAtomicIntoReallyDrawLastList", 0x733E10, &CVisibilityPlugins::InsertAtomicIntoReallyDrawLastList);
-    Install("CVisibilityPlugins", "InsertEntityIntoReallyDrawLastList", 0x733E50, &CVisibilityPlugins::InsertEntityIntoReallyDrawLastList);
-    Install("CVisibilityPlugins", "InsertEntityIntoSortedList", 0x734570, &CVisibilityPlugins::InsertEntityIntoSortedList);
-    Install("CVisibilityPlugins", "IsAtomicVisible", 0x732990, &CVisibilityPlugins::IsAtomicVisible);
-    Install("CVisibilityPlugins", "PluginAttach", 0x732E30, &CVisibilityPlugins::PluginAttach);
-    Install("CVisibilityPlugins", "RenderAlphaAtomic", 0x732480, &CVisibilityPlugins::RenderAlphaAtomic);
-    Install("CVisibilityPlugins", "RenderAlphaAtomics", 0x733E90, &CVisibilityPlugins::RenderAlphaAtomics);
-    Install("CVisibilityPlugins", "RenderAtomicWithAlphaCB", 0x732660, &CVisibilityPlugins::RenderAtomicWithAlphaCB);
-    Install("CVisibilityPlugins", "RenderBoatAlphaAtomics", 0x733EC0, &CVisibilityPlugins::RenderBoatAlphaAtomics);
-    Install("CVisibilityPlugins", "RenderEntity", 0x732B40, &CVisibilityPlugins::RenderEntity);
-    Install("CVisibilityPlugins", "RenderFadingAtomic", 0x732610, &CVisibilityPlugins::RenderFadingAtomic);
-    Install("CVisibilityPlugins", "RenderFadingClump", 0x732680, &CVisibilityPlugins::RenderFadingClump);
-    Install("CVisibilityPlugins", "RenderFadingClumpCB", 0x733630, &CVisibilityPlugins::RenderFadingClumpCB);
-    Install("CVisibilityPlugins", "RenderFadingEntities", 0x733F10, &CVisibilityPlugins::RenderFadingEntities);
-    Install("CVisibilityPlugins", "RenderFadingUnderwaterEntities", 0x7337D0, &CVisibilityPlugins::RenderFadingUnderwaterEntities);
-    Install("CVisibilityPlugins", "RenderHeliRotorAlphaCB", 0x7340B0, &CVisibilityPlugins::RenderHeliRotorAlphaCB);
-    Install("CVisibilityPlugins", "RenderHeliTailRotorAlphaCB", 0x734170, &CVisibilityPlugins::RenderHeliTailRotorAlphaCB);
-    Install("CVisibilityPlugins", "RenderObjNormalAtomic", 0x7323E0, &CVisibilityPlugins::RenderObjNormalAtomic);
-    Install("CVisibilityPlugins", "RenderOrderedList", 0x7337A0, &CVisibilityPlugins::RenderOrderedList);
-    Install("CVisibilityPlugins", "RenderPedCB", 0x7335B0, &CVisibilityPlugins::RenderPedCB);
-    Install("CVisibilityPlugins", "RenderPlayerCB", 0x732870, &CVisibilityPlugins::RenderPlayerCB);
-    Install("CVisibilityPlugins", "RenderReallyDrawLastObjects", 0x733800, &CVisibilityPlugins::RenderReallyDrawLastObjects);
-    Install("CVisibilityPlugins", "RenderTrainHiDetailAlphaCB", 0x734240, &CVisibilityPlugins::RenderTrainHiDetailAlphaCB);
-    Install("CVisibilityPlugins", "RenderTrainHiDetailCB", 0x733330, &CVisibilityPlugins::RenderTrainHiDetailCB);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailAlphaCB", 0x733F80, &CVisibilityPlugins::RenderVehicleHiDetailAlphaCB);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailAlphaCB_BigVehicle", 0x734370, &CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailAlphaCB_Boat", 0x7344A0, &CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailCB", 0x733240, &CVisibilityPlugins::RenderVehicleHiDetailCB);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailCB_BigVehicle", 0x733420, &CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle);
-    Install("CVisibilityPlugins", "RenderVehicleHiDetailCB_Boat", 0x733550, &CVisibilityPlugins::RenderVehicleHiDetailCB_Boat);
-    Install("CVisibilityPlugins", "RenderVehicleLoDetailCB_Boat", 0x7334F0, &CVisibilityPlugins::RenderVehicleLoDetailCB_Boat);
-    Install("CVisibilityPlugins", "RenderVehicleReallyLowDetailCB", 0x7331E0, &CVisibilityPlugins::RenderVehicleReallyLowDetailCB);
-    Install("CVisibilityPlugins", "RenderVehicleReallyLowDetailCB_BigVehicle", 0x732820, &CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle);
-    Install("CVisibilityPlugins", "RenderWeaponCB", 0x733670, &CVisibilityPlugins::RenderWeaponCB);
-    Install("CVisibilityPlugins", "RenderWeaponPedsForPC", 0x732F30, &CVisibilityPlugins::RenderWeaponPedsForPC);
-    Install("CVisibilityPlugins", "SetAtomicFlag_0", 0x7322D0, &CVisibilityPlugins::SetAtomicFlag);
-    Install("CVisibilityPlugins", "SetAtomicFlag_1", 0x7322B0, &CVisibilityPlugins::SetAtomicFlag);
-    Install("CVisibilityPlugins", "SetClumpForAllAtomicsFlag", 0x732307, &CVisibilityPlugins::SetClumpForAllAtomicsFlag);
-    Install("CVisibilityPlugins", "SetAtomicId", 0x732230, &CVisibilityPlugins::SetAtomicId);
-    Install("CVisibilityPlugins", "SetAtomicRenderCallback", 0x7328A0, &CVisibilityPlugins::SetAtomicRenderCallback);
-    Install("CVisibilityPlugins", "SetClumpAlpha", 0x732B00, &CVisibilityPlugins::SetClumpAlpha);
-    Install("CVisibilityPlugins", "SetClumpModelInfo", 0x733750, &CVisibilityPlugins::SetClumpModelInfo);
-    Install("CVisibilityPlugins", "SetFrameHierarchyId", 0x732A00, &CVisibilityPlugins::SetFrameHierarchyId);
-    Install("CVisibilityPlugins", "SetRenderWareCamera", 0x7328C0, &CVisibilityPlugins::SetRenderWareCamera);
-    Install("CVisibilityPlugins", "SetUserValue", 0x732380, &CVisibilityPlugins::SetUserValue);
-    Install("CVisibilityPlugins", "SetupVehicleVariables", 0x733160, &CVisibilityPlugins::SetupVehicleVariables);
-    Install("CVisibilityPlugins", "VehicleVisibilityCB", 0x7336F0, &CVisibilityPlugins::VehicleVisibilityCB);
-    Install("CVisibilityPlugins", "VehicleVisibilityCB_BigVehicle", 0x732AB0, &CVisibilityPlugins::VehicleVisibilityCB_BigVehicle);
+    RH_ScopedClass(CVisibilityPlugins);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x733A20);
+    RH_ScopedInstall(Shutdown, 0x732EB0);
+    RH_ScopedInstall(AtomicCopyConstructor, 0x732170);
+    RH_ScopedInstall(AtomicDestructor, 0x7321A0);
+    RH_ScopedInstall(CalculateFadingAtomicAlpha, 0x732500);
+
+    HookInstall(0x732310, ClearAtomicFlag); // Same function in 2 different places.. I don't want to deal with this, so let's static hook it..
+    HookInstall(0x732330, ClearAtomicFlag);
+    HookInstall(0x7322D0, SetAtomicFlag); // Same story..
+    HookInstall(0x7322B0, SetAtomicFlag);
+
+    RH_ScopedInstall(ClearClumpForAllAtomicsFlag, 0x732350);
+    RH_ScopedInstall(ClumpConstructor, 0x732E10);
+    RH_ScopedInstall(ClumpCopyConstructor, 0x732200);
+    RH_ScopedInstall(ClumpDestructor, 0x732220);
+    RH_ScopedInstall(DefaultVisibilityCB, 0x732A30);
+    RH_ScopedInstall(FrameConstructor, 0x7321B0);
+    RH_ScopedInstall(FrameCopyConstructor, 0x7321D0);
+    RH_ScopedInstall(FrameDestructor, 0x7321F0);
+    RH_ScopedInstall(FrustumSphereCB, 0x732A40);
+    RH_ScopedInstall(GetAtomicId, 0x732370);
+    RH_ScopedInstall(GetAtomicModelInfo, 0x732260);
+    RH_ScopedInstall(GetClumpAlpha, 0x732B20);
+    RH_ScopedInstall(GetClumpModelInfo, 0x732AC0);
+    RH_ScopedOverloadedInstall(GetDistanceSquaredFromCamera, "0", 0x732C80, float (*)(RwFrame*));
+    RH_ScopedOverloadedInstall(GetDistanceSquaredFromCamera, "1", 0x732CC0, float (*)(CVector*));
+    RH_ScopedInstall(GetDotProductWithCameraVector, 0x7326D0);
+    RH_ScopedInstall(GetFrameHierarchyId, 0x732A20);
+    RH_ScopedInstall(GetModelInfoIndex, 0x732250);
+    RH_ScopedInstall(GetUserValue, 0x7323A0);
+    RH_ScopedInstall(InitAlphaAtomicList, 0x734530);
+    RH_ScopedInstall(InitAlphaEntityList, 0x734540);
+    RH_ScopedInstall(InsertEntityIntoEntityList, 0x733DD0);
+    RH_ScopedInstall(InsertEntityIntoUnderwaterEntities, 0x733D90);
+    RH_ScopedInstall(InsertAtomicIntoReallyDrawLastList, 0x733E10);
+    RH_ScopedInstall(InsertEntityIntoReallyDrawLastList, 0x733E50);
+    RH_ScopedInstall(InsertEntityIntoSortedList, 0x734570);
+    RH_ScopedInstall(IsAtomicVisible, 0x732990);
+    RH_ScopedInstall(PluginAttach, 0x732E30);
+    RH_ScopedInstall(RenderAlphaAtomic, 0x732480);
+    RH_ScopedInstall(RenderAlphaAtomics, 0x733E90);
+    RH_ScopedInstall(RenderAtomicWithAlphaCB, 0x732660);
+    RH_ScopedInstall(RenderBoatAlphaAtomics, 0x733EC0);
+    RH_ScopedInstall(RenderEntity, 0x732B40);
+    RH_ScopedInstall(RenderFadingAtomic, 0x732610);
+    RH_ScopedInstall(RenderFadingClump, 0x732680);
+    RH_ScopedInstall(RenderFadingClumpCB, 0x733630);
+    RH_ScopedInstall(RenderFadingEntities, 0x733F10);
+    RH_ScopedInstall(RenderFadingUnderwaterEntities, 0x7337D0);
+    RH_ScopedInstall(RenderHeliRotorAlphaCB, 0x7340B0);
+    RH_ScopedInstall(RenderHeliTailRotorAlphaCB, 0x734170);
+    RH_ScopedInstall(RenderObjNormalAtomic, 0x7323E0);
+    RH_ScopedInstall(RenderOrderedList, 0x7337A0);
+    RH_ScopedInstall(RenderPedCB, 0x7335B0);
+    RH_ScopedInstall(RenderPlayerCB, 0x732870);
+    RH_ScopedInstall(RenderReallyDrawLastObjects, 0x733800);
+    RH_ScopedInstall(RenderTrainHiDetailAlphaCB, 0x734240);
+    RH_ScopedInstall(RenderTrainHiDetailCB, 0x733330);
+    RH_ScopedInstall(RenderVehicleHiDetailAlphaCB, 0x733F80);
+    RH_ScopedInstall(RenderVehicleHiDetailAlphaCB_BigVehicle, 0x734370);
+    RH_ScopedInstall(RenderVehicleHiDetailAlphaCB_Boat, 0x7344A0);
+    RH_ScopedInstall(RenderVehicleHiDetailCB, 0x733240);
+    RH_ScopedInstall(RenderVehicleHiDetailCB_BigVehicle, 0x733420);
+    RH_ScopedInstall(RenderVehicleHiDetailCB_Boat, 0x733550);
+    RH_ScopedInstall(RenderVehicleLoDetailCB_Boat, 0x7334F0);
+    RH_ScopedInstall(RenderVehicleReallyLowDetailCB, 0x7331E0);
+    RH_ScopedInstall(RenderVehicleReallyLowDetailCB_BigVehicle, 0x732820);
+    RH_ScopedInstall(RenderWeaponCB, 0x733670);
+    RH_ScopedInstall(RenderWeaponPedsForPC, 0x732F30);
+    RH_ScopedInstall(SetClumpForAllAtomicsFlag, 0x732307);
+    RH_ScopedInstall(SetAtomicId, 0x732230);
+    RH_ScopedInstall(SetAtomicRenderCallback, 0x7328A0);
+    RH_ScopedInstall(SetClumpAlpha, 0x732B00);
+    RH_ScopedInstall(SetClumpModelInfo, 0x733750);
+    RH_ScopedInstall(SetFrameHierarchyId, 0x732A00);
+    RH_ScopedInstall(SetRenderWareCamera, 0x7328C0);
+    RH_ScopedInstall(SetUserValue, 0x732380);
+    RH_ScopedInstall(SetupVehicleVariables, 0x733160);
+    RH_ScopedInstall(VehicleVisibilityCB, 0x7336F0);
+    RH_ScopedInstall(VehicleVisibilityCB_BigVehicle, 0x732AB0);
 }
 
 void CVisibilityPlugins::Initialise() {
@@ -329,7 +335,7 @@ bool CVisibilityPlugins::FrustumSphereCB(RpClump* clump) {
     CBaseModelInfo* modelInfo = FRAMEPLG(frame, m_modelInfo);
     sphere.radius = modelInfo->GetColModel()->GetBoundRadius();
     sphere.center = modelInfo->GetColModel()->GetBoundCenter();
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     RwV3dTransformPoints(&sphere.center, &sphere.center, 1, transformMatrix);
     return RwCameraFrustumTestSphere(ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
 }
@@ -343,7 +349,7 @@ CAtomicModelInfo* CVisibilityPlugins::GetAtomicModelInfo(RpAtomic* atomic) {
     int16 modelId = ATOMICPLG(atomic, m_modelId);
     if (modelId == -1)
         return nullptr;
-    return static_cast<CAtomicModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelId]);
+    return CModelInfo::GetModelInfo(modelId)->AsAtomicModelInfoPtr();
 }
 
 int32 CVisibilityPlugins::GetClumpAlpha(RpClump* clump) {
@@ -355,7 +361,7 @@ CClumpModelInfo* CVisibilityPlugins::GetClumpModelInfo(RpClump* clump) {
 }
 
 float CVisibilityPlugins::GetDistanceSquaredFromCamera(RwFrame* frame) {
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     CVector distance;
     RwV3dSub(&distance, &transformMatrix->pos, ms_pCameraPosn);
     return distance.SquaredMagnitude();
@@ -367,7 +373,7 @@ float CVisibilityPlugins::GetDistanceSquaredFromCamera(CVector* pPos) {
     return distance.SquaredMagnitude();
 }
 
-float CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrixTag* atomicMatrix, RwMatrixTag* clumpMatrix, uint16 flags) {
+float CVisibilityPlugins::GetDotProductWithCameraVector(RwMatrix* atomicMatrix, RwMatrix* clumpMatrix, uint16 flags) {
     float dotProduct1 = 0.0f;
     float dotProduct2 = *(float*)&atomicMatrix; // really?
     RwV3d distance;
@@ -415,7 +421,7 @@ bool CVisibilityPlugins::IsAtomicVisible(RpAtomic* atomic) {
     if (atomic->interpolator.flags & rpINTERPOLATORDIRTYSPHERE)
         _rpAtomicResyncInterpolatedSphere(atomic);
     RwSphere sphere = atomic->boundingSphere;
-    RwMatrixTag* transformMatrix = RwFrameGetMatrix(RpAtomicGetFrame(atomic));
+    RwMatrix* transformMatrix = RwFrameGetMatrix(RpAtomicGetFrame(atomic));
     RwV3d point;
     RwV3dTransformPoints(&point, &sphere.center, 1, transformMatrix);
     return RwCameraFrustumTestSphere(CVisibilityPlugins::ms_pCamera, &sphere) != rwSPHEREOUTSIDE;
@@ -458,33 +464,33 @@ RpAtomic* CVisibilityPlugins::RenderAtomicWithAlphaCB(RpAtomic* atomic, void* da
 }
 
 void CVisibilityPlugins::RenderBoatAlphaAtomics() {
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
     RenderOrderedList(m_alphaBoatAtomicList);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
 }
 
 // 0x732B40
-void CVisibilityPlugins::RenderEntity(CEntity* entity, int32 unused, float distance) {
+void CVisibilityPlugins::RenderEntity(CEntity* entity, float distance) {
     if (!entity->m_pRwObject)
         return;
     
     CBaseModelInfo* mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
     if (mi->bDontWriteZBuffer)
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, 0);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
 
     if (!entity->m_bDistanceFade) {
         if (CGame::currArea || mi->bDontWriteZBuffer)
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
         else
-            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)100u);
+            RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(100u));
         CRenderer::RenderOneNonRoad(entity);
     }
     else {
-        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)0);
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(0));
         int32 alpha = CalculateFadingAtomicAlpha(mi, entity, distance);
         entity->m_bImBeingRendered = true;
         if (!entity->m_bBackfaceCulled)
-            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+            RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
         bool bLightingSetup = entity->SetupLighting();
         if (RwObjectGetType(entity->m_pRwObject) == rpATOMIC)
             RenderFadingAtomic(mi, entity->m_pRwAtomic, alpha);
@@ -493,27 +499,27 @@ void CVisibilityPlugins::RenderEntity(CEntity* entity, int32 unused, float dista
         entity->RemoveLighting(bLightingSetup);
         entity->m_bImBeingRendered = false;
         if (!entity->m_bBackfaceCulled)
-            RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLBACK);
+            RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLBACK));
     }
     
     if (mi->bDontWriteZBuffer)
-        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
 }
 
 void CVisibilityPlugins::RenderFadingAtomic(CBaseModelInfo* modelInfo, RpAtomic* atomic, int32 alpha) {
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
     RenderAlphaAtomic(atomic, alpha);
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 void CVisibilityPlugins::RenderFadingClump(CBaseModelInfo* modelInfo, RpClump* clump, int32 alpha) {
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDONE));
     RpClumpForAllAtomics(clump, RenderAtomicWithAlphaCB, &alpha);
     if (modelInfo->bAdditiveRender)
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
 RpAtomic* CVisibilityPlugins::RenderFadingClumpCB(RpAtomic* atomic) {
@@ -537,8 +543,8 @@ RpAtomic* CVisibilityPlugins::RenderHeliRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_bigVehicleLod0Dist)
         return atomic;
     
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float dotProduct = RwV3dDotProduct(&clumpMatrix->at, &distance);
@@ -555,8 +561,8 @@ RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
     if (gVehicleDistanceFromCamera >= ms_vehicleLod0Dist)
         return atomic;
     
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float dotProduct1 = RwV3dDotProduct(&clumpMatrix->right, &distance);
@@ -572,7 +578,7 @@ RpAtomic* CVisibilityPlugins::RenderHeliTailRotorAlphaCB(RpAtomic* atomic) {
 
 // Unused
 RpAtomic* CVisibilityPlugins::RenderObjNormalAtomic(RpAtomic* atomic) {
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     RwV3d distance;
     RwV3dSub(&distance, &atomicMatrix->pos, ms_pCameraPosn);
     const float length = RwV3dLength(&distance);
@@ -618,18 +624,18 @@ RpAtomic* CVisibilityPlugins::RenderPlayerCB(RpAtomic* atomic) {
 }
 
 void CVisibilityPlugins::RenderReallyDrawLastObjects() {
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, 0);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATECULLMODE, (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
     SetAmbientColours();
     DeActivateDirectional();
     RenderOrderedList(m_alphaReallyDrawLastList);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, FALSE);
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
 RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
@@ -640,9 +646,9 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailAlphaCB(RpAtomic* atomic) {
         SetAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -676,8 +682,8 @@ RpAtomic* CVisibilityPlugins::RenderTrainHiDetailCB(RpAtomic* atomic) {
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f && ((atomicFlags & ATOMIC_CULL) || gVehicleDistanceFromCamera * 0.1f < dot * dot))
                 return atomic;
@@ -697,8 +703,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB(RpAtomic* atomic) {
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -730,8 +736,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_BigVehicle(RpAtomic* 
     else
         ClearAtomicFlag(atomic, ATOMIC_DISABLE_REFLECTIONS);
     uint16 atomicFlags = GetAtomicId(atomic);
-    RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-    RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+    RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+    RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
     const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
     if (gVehicleDistanceFromCamera > ms_cullBigCompsDist
         && !(atomicFlags & ATOMIC_RENDER_ALWAYS)
@@ -767,7 +773,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* atomic
         AlphaObjectInfo info{};
         info.m_distance = gVehicleDistanceFromCamera;
         info.m_atomic = atomic;
-        info.m_pCallback = CVisibilityPlugins::DefaultAtomicRenderCallback;
+        info.m_pCallback = DefaultAtomicRenderCallback;
         if (m_alphaBoatAtomicList.InsertSorted(info))
             return atomic;
     }
@@ -786,8 +792,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB(RpAtomic* atomic) {
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f && ((atomicFlags & ATOMIC_CULL) || gVehicleDistanceFromCamera * 0.1f < dot * dot))
                 return atomic;
@@ -808,8 +814,8 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailCB_BigVehicle(RpAtomic* atomi
     uint16 atomicFlags = GetAtomicId(atomic);
     if (gVehicleDistanceFromCamera > ms_cullBigCompsDist && !(atomicFlags & ATOMIC_RENDER_ALWAYS)) {
         if (gVehicleAngleToCamera < 0.2f) {
-            RwMatrixTag* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
-            RwMatrixTag* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
+            RwMatrix* atomicMatrix = RwFrameGetLTM(RpAtomicGetFrame(atomic));
+            RwMatrix* clumpMatrix = RwFrameGetLTM(RpClumpGetFrame(RpAtomicGetClump(atomic)));
             const float dot = GetDotProductWithCameraVector(atomicMatrix, clumpMatrix, atomicFlags);
             if (dot > 0.0f)
                 return atomic;
@@ -866,22 +872,22 @@ RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic
 }
 
 RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
-    RpClump* pClump = RpAtomicGetClump(atomic);
-    CClumpModelInfo* modelInfo = GetClumpModelInfo(pClump);
+    RpClump* clump = RpAtomicGetClump(atomic);
+    CClumpModelInfo* modelInfo = GetClumpModelInfo(clump);
     const float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * modelInfo->m_fDrawDistance;
-    if (GetDistanceSquaredFromCamera(RpClumpGetFrame(pClump)) < drawDistanceRadius * drawDistanceRadius)
+    if (GetDistanceSquaredFromCamera(RpClumpGetFrame(clump)) < drawDistanceRadius * drawDistanceRadius)
         AtomicDefaultRenderCallBack(atomic);
 
     return atomic;
 }
 
 void CVisibilityPlugins::RenderWeaponPedsForPC() {
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, (void*)20);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,          RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,            RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,             RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,            RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(20));
     auto link = ms_weaponPedsForPC.usedListTail.prev;
     for (; link != &ms_weaponPedsForPC.usedListHead; link = link->prev) {
         CPed* ped = link->data;
@@ -891,11 +897,11 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             RpHAnimHierarchy* pRpAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
             const int32 boneID = activeWeapon.m_nType != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
-            RwMatrixTag* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
+            RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
             if (boneID == BONE_NORMAL)
                 pRightHandMatrix = ped->GetModellingMatrix();
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
-            RwMatrixTag* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
+            RwMatrix* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);
             memcpy(weaponRwMatrix, pRightHandMatrix, sizeof(RwMatrixTag));
             if (activeWeapon.m_nType == WEAPON_PARACHUTE) {
                 static RwV3d rightWeaponTranslate = { 0.1f, -0.15f, 0.0f };
@@ -908,7 +914,7 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             eWeaponSkill weaponSkill = ped->GetWeaponSkill();
             if (CWeaponInfo::GetWeaponInfo(activeWeapon.m_nType, weaponSkill)->flags.bTwinPistol) {
                 int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, BONE_L_HAND);
-                RwMatrixTag* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
+                RwMatrix* pLeftHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
                 memcpy(weaponRwMatrix, pLeftHandMatrix, sizeof(RwMatrixTag));
                 RwMatrixRotate(weaponRwMatrix, &CPedIK::XaxisIK, 180.0f, rwCOMBINEPRECONCAT);
                 static RwV3d leftWeaponTranslate = { 0.04f, -0.05f, 0.0f };
@@ -957,8 +963,8 @@ void CVisibilityPlugins::SetClumpModelInfo(RpClump* clump, CClumpModelInfo* clum
     if (clumpModelInfo->GetModelType() != MODEL_INFO_VEHICLE)
         return;
 
-    auto pVehicleModelInfo = reinterpret_cast<CVehicleModelInfo*>(clumpModelInfo);
-    if (pVehicleModelInfo->m_nVehicleType == VEHICLE_TRAIN || pVehicleModelInfo->m_nVehicleType == VEHICLE_FPLANE)
+    CVehicleModelInfo* mi = clumpModelInfo->AsVehicleModelInfoPtr();
+    if (mi->IsTrain() || mi->m_nVehicleType == VEHICLE_TYPE_FPLANE)
         CLUMPPLG(clump, m_visibilityCallBack) = VehicleVisibilityCB_BigVehicle;
     else
         CLUMPPLG(clump, m_visibilityCallBack) = VehicleVisibilityCB;
@@ -996,7 +1002,7 @@ void CVisibilityPlugins::SetupVehicleVariables(RpClump* clump) {
         return;
 
     RwFrame* frame = RpClumpGetFrame(clump);
-    RwMatrixTag* transformMatrix = RwFrameGetLTM(frame);
+    RwMatrix* transformMatrix = RwFrameGetLTM(frame);
     CVector distance1;
     RwV3dSub(&distance1, &transformMatrix->pos, ms_pCameraPosn);
     gVehicleDistanceFromCamera = distance1.SquaredMagnitude();

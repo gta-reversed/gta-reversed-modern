@@ -9,6 +9,11 @@ class CClumpModelInfo;
  */
 #define rwID_COLLISIONPLUGIN  MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xFA)
 
+/*
+* Collision plugin static offset
+*/
+extern RwInt32& gCollisionPluginOffset;
+
 class CCollisionPlugin {
 public:
     static CClumpModelInfo*& ms_currentModel;

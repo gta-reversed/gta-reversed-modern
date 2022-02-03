@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "CarCtrl.h"
+#include "TrafficLights.h"
 
 uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
 uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;
@@ -34,27 +35,30 @@ uint32 (&aCarsToKeepTime)[2] = *(uint32(*)[2])0x96907C;
 
 void CCarCtrl::InjectHooks()
 {
+    RH_ScopedClass(CCarCtrl);
+    RH_ScopedCategoryGlobal();
+
     using namespace ReversibleHooks;
-    Install("CCarCtrl", "Init", 0x4212E0, &CCarCtrl::Init);
-    Install("CCarCtrl", "ReInit", 0x4213B0, &CCarCtrl::ReInit);
-    Install("CCarCtrl", "InitSequence", 0x421740, &CCarCtrl::InitSequence);
+    RH_ScopedInstall(Init, 0x4212E0);
+    RH_ScopedInstall(ReInit, 0x4213B0);
+    RH_ScopedInstall(InitSequence, 0x421740);
     Install("CCarCtrl", "ChooseGangCarModel", 0x421A40, &CCarCtrl::ChooseGangCarModel, false, 7);
     Install("CCarCtrl", "ChoosePoliceCarModel", 0x421980, &CCarCtrl::ChoosePoliceCarModel, false, 7);
-    Install("CCarCtrl", "CreateCarForScript", 0x431F80, &CCarCtrl::CreateCarForScript);
-    Install("CCarCtrl", "ChooseBoatModel", 0x421970, &CCarCtrl::ChooseBoatModel);
-    Install("CCarCtrl", "ChooseCarModelToLoad", 0x421900, &CCarCtrl::ChooseCarModelToLoad);
-    // Install("CCarCtrl", "GetNewVehicleDependingOnCarModel", 0x421440, &CCarCtrl::GetNewVehicleDependingOnCarModel);
-    Install("CCarCtrl", "IsAnyoneParking", 0x42C250, &CCarCtrl::IsAnyoneParking);
-    Install("CCarCtrl", "IsThisVehicleInteresting", 0x423EA0, &CCarCtrl::IsThisVehicleInteresting);
-    Install("CCarCtrl", "JoinCarWithRoadAccordingToMission", 0x432CB0, &CCarCtrl::JoinCarWithRoadAccordingToMission);
-    Install("CCarCtrl", "PossiblyFireHSMissile", 0x429600, &CCarCtrl::PossiblyFireHSMissile);
-    Install("CCarCtrl", "PruneVehiclesOfInterest", 0x423F10, &CCarCtrl::PruneVehiclesOfInterest);
-    Install("CCarCtrl", "RemoveCarsIfThePoolGetsFull", 0x4322B0, &CCarCtrl::RemoveCarsIfThePoolGetsFull);
-    Install("CCarCtrl", "RemoveDistantCars", 0x42CD10, &CCarCtrl::RemoveDistantCars);
-    Install("CCarCtrl", "RemoveFromInterestingVehicleList", 0x423ED0, &CCarCtrl::RemoveFromInterestingVehicleList);
-    Install("CCarCtrl", "ScriptGenerateOneEmergencyServicesCar", 0x42FBC0, &CCarCtrl::ScriptGenerateOneEmergencyServicesCar);
-    Install("CCarCtrl", "SlowCarDownForObject", 0x426220, &CCarCtrl::SlowCarDownForObject);
-    Install("CCarCtrl", "SlowCarOnRailsDownForTrafficAndLights", 0x434790, &CCarCtrl::SlowCarOnRailsDownForTrafficAndLights);
+    RH_ScopedInstall(CreateCarForScript, 0x431F80);
+    RH_ScopedInstall(ChooseBoatModel, 0x421970);
+    RH_ScopedInstall(ChooseCarModelToLoad, 0x421900);
+    // RH_ScopedInstall(GetNewVehicleDependingOnCarModel, 0x421440);
+    RH_ScopedInstall(IsAnyoneParking, 0x42C250);
+    RH_ScopedInstall(IsThisVehicleInteresting, 0x423EA0);
+    RH_ScopedInstall(JoinCarWithRoadAccordingToMission, 0x432CB0);
+    RH_ScopedInstall(PossiblyFireHSMissile, 0x429600);
+    RH_ScopedInstall(PruneVehiclesOfInterest, 0x423F10);
+    RH_ScopedInstall(RemoveCarsIfThePoolGetsFull, 0x4322B0);
+    RH_ScopedInstall(RemoveDistantCars, 0x42CD10);
+    RH_ScopedInstall(RemoveFromInterestingVehicleList, 0x423ED0);
+    RH_ScopedInstall(ScriptGenerateOneEmergencyServicesCar, 0x42FBC0);
+    RH_ScopedInstall(SlowCarDownForObject, 0x426220);
+    RH_ScopedInstall(SlowCarOnRailsDownForTrafficAndLights, 0x434790);
 }
 
 // 0x4212E0
@@ -135,7 +139,7 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 }
 
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
-    CWanted* playerWanted = FindPlayerWanted(-1);
+    CWanted* playerWanted = FindPlayerWanted();
     if (playerWanted->AreSwatRequired() 
         && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
         && CStreaming::IsModelLoaded(MODEL_SWAT)
@@ -243,7 +247,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (doMissionCleanup)
         CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
-    if (vehicle->IsRoadVehicle())
+    if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
 
     return vehicle;
@@ -324,8 +328,8 @@ float CCarCtrl::FindGhostRoadHeight(CVehicle* vehicle) {
 }
 
 // 0x42B270
-void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* pEntity) {
-    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, pEntity);
+void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* entity) {
+    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, entity);
 }
 
 // 0x429A70
@@ -398,25 +402,25 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
     return plugin::CallAndReturn<CVehicle*, 0x421440, int32, uint8>(modelId, createdBy);
     /*
     switch (CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr()->m_nVehicleType) {
-    case eVehicleType::VEHICLE_MTRUCK:
+    case VEHICLE_TYPE_MTRUCK:
         return new CMonsterTruck(modelId, createdBy);
-    case eVehicleType::VEHICLE_QUAD:
+    case VEHICLE_TYPE_QUAD:
         return new CQuadBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_HELI:
+    case VEHICLE_TYPE_HELI:
         return new CHeli(modelId, createdBy);
-    case eVehicleType::VEHICLE_PLANE:
+    case VEHICLE_TYPE_PLANE:
         return new CPlane(modelId, createdBy);
-    case eVehicleType::VEHICLE_BOAT:
+    case VEHICLE_TYPE_BOAT:
         return new CBoat(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAIN:
+    case VEHICLE_TYPE_TRAIN:
         return new CTrain(modelId, createdBy);
-    case eVehicleType::VEHICLE_BIKE:
+    case VEHICLE_TYPE_BIKE:
         return new CBike(modelId, createdBy);
-    case eVehicleType::VEHICLE_BMX:
+    case VEHICLE_TYPE_BMX:
         return new CBmx(modelId, createdBy);
-    case eVehicleType::VEHICLE_TRAILER:
+    case VEHICLE_TYPE_TRAILER:
         return new CTrailer(modelId, createdBy);
-    case eVehicleType::VEHICLE_AUTOMOBILE:
+    case VEHICLE_TYPE_AUTOMOBILE:
         return new CAutomobile(modelId, createdBy, 1);
     }
     return nullptr;
@@ -480,7 +484,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_POLICE_BIKE:
     case MISSION_2C:
     case MISSION_BOAT_CIRCLING_PLAYER: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, FindPlayerCoors(-1), true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_GOTOCOORDS:
@@ -489,7 +493,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_GOTOCOORDS_STRAIGHT_ACCURATE:
     case MISSION_GOTOCOORDS_ASTHECROWSWIMS:
     case MISSION_FOLLOW_PATH_RACING: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_vecDestinationCoors, true, vehicle->IsSubBoat());
         break;
     }
     case MISSION_RAMCAR_FARAWAY:
@@ -513,7 +517,7 @@ void CCarCtrl::JoinCarWithRoadAccordingToMission(CVehicle* vehicle) {
     case MISSION_42:
     case MISSION_43:
     case MISSION_44: {
-        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->m_vehicleSubType == eVehicleType::VEHICLE_BOAT);
+        JoinCarWithRoadSystemGotoCoors(vehicle, vehicle->m_autoPilot.m_pTargetCar->GetPosition(), true, vehicle->IsSubBoat());
         break;
     }
     }
@@ -525,8 +529,8 @@ void CCarCtrl::JoinCarWithRoadSystem(CVehicle* vehicle) {
 }
 
 // 0x42F870
-bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, CVector const& posn, bool unused, bool bIsBoat) {
-    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, CVector const&, bool, bool>(vehicle, posn, unused, bIsBoat);
+bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, const CVector& posn, bool unused, bool bIsBoat) {
+    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, const CVector&, bool, bool>(vehicle, posn, unused, bIsBoat);
 }
 
 // 0x432B10
@@ -662,7 +666,7 @@ void CCarCtrl::RemoveDistantCars() {
                 CRoadBlocks::GenerateRoadBlockCopsForCar(
                     vehicle,
                     vehicle->m_nPedsPositionForRoadBlock,
-                    vehicle->IsLawEnforcementVehicle() ? ePedType::PED_TYPE_COP : ePedType::PED_TYPE_GANG1
+                    vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
             }
         }
@@ -712,11 +716,11 @@ void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& ptrList, CVehicle* vehicle
 }
 
 // 0x426220
-void CCarCtrl::SlowCarDownForObject(CEntity* pEntity, CVehicle* vehicle, float* arg3, float arg4) {
-    const CVector entityDir = pEntity->GetPosition() - vehicle->GetPosition();
+void CCarCtrl::SlowCarDownForObject(CEntity* entity, CVehicle* vehicle, float* arg3, float arg4) {
+    const CVector entityDir = entity->GetPosition() - vehicle->GetPosition();
     const float entityHeading = DotProduct(entityDir, vehicle->GetMatrix().GetForward());
     if (entityHeading > 0.0f && entityHeading < 20.0f) {
-        if (pEntity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
+        if (entity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
             if (entityHeading >= 7.0f) {
                 *arg3 = std::min(*arg3, (1.0f - (entityHeading - 7.0f) / 13.0f)) * arg4; // Original code multiplies by 0.07692308, which is the recp. of 13
             } else {
@@ -949,8 +953,8 @@ void CCarCtrl::WeaveForOtherCar(CEntity* entity, CVehicle* vehicle, float* arg3,
 }
 
 // 0x42D680
-void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* pPhysical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
-    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, pPhysical, arg4, arg5, arg6, arg7, arg8, arg9);
+void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* physical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
+    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, physical, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 // 0x42D950

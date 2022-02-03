@@ -3,34 +3,36 @@
 #include "DamageManager.h"
 
 void CDamageManager::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CDamageManager", "Init", 0x6A0520, &CDamageManager::Init);
-    Install("CDamageManager", "ResetDamageStatusAndWheelDamage", 0x6A04E0, &CDamageManager::ResetDamageStatusAndWheelDamage);
-    Install("CDamageManager", "FuckCarCompletely", 0x6C25D0, &CDamageManager::FuckCarCompletely); 
-    Install("CDamageManager", "ApplyDamage", 0x6C24B0, &CDamageManager::ApplyDamage); 
-    Install("CDamageManager", "ProgressAeroplaneDamage", 0x6C2460, &CDamageManager::ProgressAeroplaneDamage); 
-    Install("CDamageManager", "ProgressWheelDamage", 0x6C2440, &CDamageManager::ProgressWheelDamage); 
-    Install("CDamageManager", "ProgressPanelDamage", 0x6C23C0, &CDamageManager::ProgressPanelDamage); 
-    Install("CDamageManager", "ProgressEngineDamage", 0x6C23B0, &CDamageManager::ProgressEngineDamage); 
-    Install("CDamageManager", "ProgressDoorDamage", 0x6C2320, &CDamageManager::ProgressDoorDamage); 
-    Install("CDamageManager", "GetAeroplaneCompStatus", 0x6C2300, &CDamageManager::GetAeroplaneCompStatus); 
-    Install("CDamageManager", "SetAeroplaneCompStatus", 0x6C22D0, &CDamageManager::SetAeroplaneCompStatus); 
-    Install("CDamageManager", "GetEngineStatus", 0x6C22C0, &CDamageManager::GetEngineStatus); 
-    Install("CDamageManager", "SetEngineStatus", 0x6C22A0, &CDamageManager::SetEngineStatus); 
-    Install("CDamageManager", "GetCarNodeIndexFromPanel", 0x6C26A0, &CDamageManager::GetCarNodeIndexFromPanel); 
-    Install("CDamageManager", "GetDoorStatus_Component", 0x6C2250, &CDamageManager::GetDoorStatus_Component); 
-    Install("CDamageManager", "GetDoorStatus", 0x6C2230, &CDamageManager::GetDoorStatus); 
-    Install("CDamageManager", "SetDoorStatus_Component", 0x6C21E0, &CDamageManager::SetDoorStatus_Component); 
-    Install("CDamageManager", "SetDoorStatus", 0x6C21C0, &CDamageManager::SetDoorStatus); 
-    Install("CDamageManager", "GetWheelStatus", 0x6C21B0, &CDamageManager::GetWheelStatus); 
-    Install("CDamageManager", "SetWheelStatus", 0x6C21A0, &CDamageManager::SetWheelStatus); 
-    Install("CDamageManager", "GetPanelStatus", 0x6C2180, &CDamageManager::GetPanelStatus); 
-    Install("CDamageManager", "SetPanelStatus", 0x6C2150, &CDamageManager::SetPanelStatus); 
-    Install("CDamageManager", "GetLightStatus", 0x6C2130, &CDamageManager::GetLightStatus); 
-    Install("CDamageManager", "SetLightStatus", 0x6C2100, &CDamageManager::SetLightStatus); 
-    Install("CDamageManager", "ResetDamageStatus", 0x6C20E0, &CDamageManager::ResetDamageStatus); 
-    Install("CDamageManager", "GetComponentGroup", 0x6C2040, &CDamageManager::GetComponentGroup); 
-    Install("CDamageManager", "GetCarNodeIndexFromDoor", 0x6C26F0, &CDamageManager::GetCarNodeIndexFromDoor);
+    RH_ScopedClass(CDamageManager);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x6A0520);
+    RH_ScopedInstall(ResetDamageStatusAndWheelDamage, 0x6A04E0);
+    RH_ScopedInstall(FuckCarCompletely, 0x6C25D0); 
+    RH_ScopedInstall(ApplyDamage, 0x6C24B0); 
+    RH_ScopedInstall(ProgressAeroplaneDamage, 0x6C2460); 
+    RH_ScopedInstall(ProgressWheelDamage, 0x6C2440); 
+    RH_ScopedInstall(ProgressPanelDamage, 0x6C23C0); 
+    RH_ScopedInstall(ProgressEngineDamage, 0x6C23B0); 
+    RH_ScopedInstall(ProgressDoorDamage, 0x6C2320); 
+    RH_ScopedInstall(GetAeroplaneCompStatus, 0x6C2300); 
+    RH_ScopedInstall(SetAeroplaneCompStatus, 0x6C22D0); 
+    RH_ScopedInstall(GetEngineStatus, 0x6C22C0); 
+    RH_ScopedInstall(SetEngineStatus, 0x6C22A0); 
+    RH_ScopedInstall(GetCarNodeIndexFromPanel, 0x6C26A0); 
+    RH_ScopedInstall(GetDoorStatus_Component, 0x6C2250); 
+    RH_ScopedInstall(GetDoorStatus, 0x6C2230); 
+    RH_ScopedInstall(SetDoorStatus_Component, 0x6C21E0); 
+    RH_ScopedInstall(SetDoorStatus, 0x6C21C0); 
+    RH_ScopedInstall(SetWheelStatus, 0x6C21A0); 
+    RH_ScopedInstall(GetPanelStatus, 0x6C2180); 
+    RH_ScopedInstall(SetPanelStatus, 0x6C2150); 
+    RH_ScopedInstall(GetLightStatus, 0x6C2130); 
+    RH_ScopedInstall(SetLightStatus, 0x6C2100); 
+    RH_ScopedInstall(ResetDamageStatus, 0x6C20E0); 
+    RH_ScopedInstall(GetComponentGroup, 0x6C2040); 
+    RH_ScopedInstall(GetCarNodeIndexFromDoor, 0x6C26F0);
+    RH_ScopedNamedInstall(GetWheelStatus_Hooked, "GetWheelStatus", 0x6C21B0);
 }
 
 // 0x6A0520
@@ -76,7 +78,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     uint8 relCompIdx{};
     GetComponentGroup(compId, group, relCompIdx);
 
-    static constexpr float afPanelDamageMultByGroup[] = { 2.5, 1.25, 3.2, 1.4, 2.5, 2.8, 0.5, 1.2, 0.87, 0.2 };
+    static constexpr float afPanelDamageMultByGroup[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f, 1.2f, 0.87f, 0.2f };
     fIntensity *= afPanelDamageMultByGroup[(size_t)group];
     if (compId == tComponent::COMPONENT_WINDSCREEN)
         fIntensity *= 0.6f;
@@ -92,7 +94,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     }
     case tComponentGroup::COMPGROUP_WHEEL: {
         ProgressWheelDamage((eCarWheel)relCompIdx);
-        break;
+        return true;
     }
     case tComponentGroup::COMPGROUP_DOOR:
     case tComponentGroup::COMPGROUP_BONNET:
@@ -117,6 +119,7 @@ bool CDamageManager::ProgressAeroplaneDamage(uint8 nFrameId) {
     const auto current = (ePanelDamageState)GetAeroplaneCompStatus(nFrameId);
     if (current == ePanelDamageState::DAMSTATE_DAMAGED)
         return false;
+
     SetAeroplaneCompStatus(nFrameId, (ePanelDamageState)((unsigned)current + 1));
     return true;
 }
@@ -126,7 +129,9 @@ bool CDamageManager::ProgressWheelDamage(eCarWheel wheel) {
     const eCarWheelStatus current = GetWheelStatus(wheel);
     if (current == eCarWheelStatus::WHEEL_STATUS_MISSING)
         return false;
+
     SetWheelStatus(wheel, (eCarWheelStatus)((unsigned)current + 1));
+    return true;
 }
 
 // 0x6C23C0

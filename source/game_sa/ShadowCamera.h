@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -23,7 +23,7 @@ public:
     void       InvertRaster();
     RwRaster*  GetRwRenderRaster();
     RwTexture* GetRwRenderTexture();
-    RwRaster*  DrawOutlineBorder(RwRGBA const& color);
+    RwRaster*  DrawOutlineBorder(const RwRGBA& color);
     RwCamera*  Create(int32 rasterSize);
     RwCamera*  Update(RpClump* object);
     RwCamera*  Update(RpAtomic* object);

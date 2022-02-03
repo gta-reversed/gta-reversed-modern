@@ -1,25 +1,30 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
 
+#include "Vector.h"
+
 void CVector::InjectHooks()
 {
-    ReversibleHooks::Install("CVector", "Magnitude", 0x4082C0, &CVector::Magnitude);
-    ReversibleHooks::Install("CVector", "Magnitude2D", 0x406D50, &CVector::Magnitude2D);
-    ReversibleHooks::Install("CVector", "Normalise", 0x59C910, &CVector::Normalise);
-    ReversibleHooks::Install("CVector", "NormaliseAndMag", 0x59C970, &CVector::NormaliseAndMag);
-    ReversibleHooks::Install("CVector", "Cross", 0x70F890, &CVector::Cross);
-    ReversibleHooks::Install("CVector", "Sum", 0x40FDD0, &CVector::Sum);
-    ReversibleHooks::Install("CVector", "Difference", 0x40FE00, &CVector::Difference);
-    ReversibleHooks::Install("CVector", "FromMultiply", 0x59C670, &CVector::FromMultiply);
-    ReversibleHooks::Install("CVector", "FromMultiply3x3", 0x59C6D0, &CVector::FromMultiply3x3);
-    ReversibleHooks::Install("CVector", "global_CrossProduct_out", 0x59C730, static_cast<CVector*(*)(CVector*, CVector*, CVector*)>(&CrossProduct));
-    ReversibleHooks::Install("CVector", "global_DotProduct_vec*vec*", 0x59C6D0, static_cast<float(*)(CVector*, CVector*)>(&DotProduct));
+    RH_ScopedClass(CVector);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Magnitude, 0x4082C0);
+    RH_ScopedInstall(Magnitude2D, 0x406D50);
+    RH_ScopedInstall(Normalise, 0x59C910);
+    RH_ScopedInstall(NormaliseAndMag, 0x59C970);
+    RH_ScopedInstall(Cross, 0x70F890);
+    RH_ScopedInstall(Sum, 0x40FDD0);
+    RH_ScopedInstall(Difference, 0x40FE00);
+    RH_ScopedInstall(FromMultiply, 0x59C670);
+    RH_ScopedInstall(FromMultiply3x3, 0x59C6D0);
+    RH_ScopedGlobalOverloadedInstall(CrossProduct, "out", 0x59C730, CVector*(*)(CVector*, CVector*, CVector*));
+    RH_ScopedGlobalOverloadedInstall(DotProduct, "vec*vec*", 0x59C6D0, float(*)(CVector*, CVector*));
 }
 
 CVector CVector::Random(float min, float max) {
@@ -132,14 +137,14 @@ void CVector::operator /= (float divisor)
     z /= divisor;
 }
 
-void CVector::FromMultiply(CMatrix const& matrix, CVector const& vector)
+void CVector::FromMultiply(const CMatrix& matrix, const CVector& vector)
 {
     x = matrix.m_pos.x + matrix.m_right.x * vector.x + matrix.m_forward.x * vector.y + matrix.m_up.x * vector.z;
     y = matrix.m_pos.y + matrix.m_right.y * vector.x + matrix.m_forward.y * vector.y + matrix.m_up.y * vector.z;
     z = matrix.m_pos.z + matrix.m_right.z * vector.x + matrix.m_forward.z * vector.y + matrix.m_up.z * vector.z;
 }
 
-void CVector::FromMultiply3x3(CMatrix const& matrix, CVector const& vector)
+void CVector::FromMultiply3x3(const CMatrix& matrix, const CVector& vector)
 {
     x = matrix.m_right.x * vector.x + matrix.m_forward.x * vector.y + matrix.m_up.x * vector.z;
     y = matrix.m_right.y * vector.x + matrix.m_forward.y * vector.y + matrix.m_up.y * vector.z;

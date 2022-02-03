@@ -4,23 +4,29 @@ CPedScriptedTaskRecordData(&CPedScriptedTaskRecord::ms_scriptedTasks)[TOTAL_SCRI
 
 void CPedScriptedTaskRecordData::InjectHooks()
 {
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Constructor",0x608330, &CPedScriptedTaskRecordData::Constructor);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithTask",0x608520, &CPedScriptedTaskRecordData::AssociateWithTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "AssociateWithEvent",0x608500, &CPedScriptedTaskRecordData::AssociateWithEvent);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CEventScriptCommand",0x608390, (void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*)) & CPedScriptedTaskRecordData::Set);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Set_CTask",0x6083E0, (void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*)) & CPedScriptedTaskRecordData::Set);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsGroupTask",0x6084A0, &CPedScriptedTaskRecordData::SetAsGroupTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "SetAsAttractorScriptTask",0x608440, &CPedScriptedTaskRecordData::SetAsAttractorScriptTask);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Flush",0x608350, &CPedScriptedTaskRecordData::Flush);
+    RH_ScopedClass(CPedScriptedTaskRecordData);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(Constructor, 0x608330);
+    RH_ScopedInstall(AssociateWithTask, 0x608520);
+    RH_ScopedInstall(AssociateWithEvent, 0x608500);
+    RH_ScopedOverloadedInstall(Set, "CEventScriptCommand", 0x608390, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CEventScriptCommand*));
+    RH_ScopedOverloadedInstall(Set, "CTask", 0x6083E0, void(CPedScriptedTaskRecordData::*)(CPed*, int32, CTask*));
+    RH_ScopedInstall(SetAsGroupTask, 0x6084A0);
+    RH_ScopedInstall(SetAsAttractorScriptTask, 0x608440);
+    RH_ScopedInstall(Flush, 0x608350);
 }
 
 void CPedScriptedTaskRecord::InjectHooks()
 {
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetRecordAssociatedWithEvent", 0x608580, &CPedScriptedTaskRecord::GetRecordAssociatedWithEvent);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_", 0x608750, (eScriptedTaskStatus(*)(CPed*)) & CPedScriptedTaskRecord::GetStatus);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetStatus_opcode", 0x608710, (eScriptedTaskStatus(*)(CPed*, int32)) & CPedScriptedTaskRecord::GetStatus);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "GetVacantSlot", 0x608540, &CPedScriptedTaskRecord::GetVacantSlot);
-    ReversibleHooks::Install("CPedScriptedTaskRecordData", "Process", 0x6085E0, &CPedScriptedTaskRecord::Process);
+    RH_ScopedClass(CPedScriptedTaskRecord);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(GetRecordAssociatedWithEvent, 0x608580);
+    RH_ScopedOverloadedInstall(GetStatus, "", 0x608750, eScriptedTaskStatus(*)(CPed*));
+    RH_ScopedOverloadedInstall(GetStatus, "opcode", 0x608710, eScriptedTaskStatus(*)(CPed*, int32));
+    RH_ScopedInstall(GetVacantSlot, 0x608540);
+    RH_ScopedInstall(Process, 0x6085E0);
 }
 
 CPedScriptedTaskRecordData::CPedScriptedTaskRecordData()
@@ -172,16 +178,16 @@ void CPedScriptedTaskRecord::Process()
             else if (taskRecordData.m_task) {
                 eScriptedTaskStatus status = taskRecordData.m_status;
                 if (status == eScriptedTaskStatus::GROUP || status == eScriptedTaskStatus::BRAIN) {
-                    CTask* pScriptedTask = nullptr;
+                    CTask* scriptedTask = nullptr;
                     if (status == eScriptedTaskStatus::GROUP) {
                         CPedGroup* pedGroup = CPedGroups::GetPedsGroup(taskRecordData.m_ped);
                         if (pedGroup)
-                            pScriptedTask = pedGroup->GetIntelligence().GetTaskScriptCommand(taskRecordData.m_ped);
+                            scriptedTask = pedGroup->GetIntelligence().GetTaskScriptCommand(taskRecordData.m_ped);
                     }
                     else if (status == eScriptedTaskStatus::BRAIN) {
-                        pScriptedTask = CScriptedBrainTaskStore::GetTask(taskRecordData.m_ped);
+                        scriptedTask = CScriptedBrainTaskStore::GetTask(taskRecordData.m_ped);
                     }
-                    if (pScriptedTask != taskRecordData.m_task)
+                    if (scriptedTask != taskRecordData.m_task)
                         taskRecordData.Flush();
                 }
                 else {

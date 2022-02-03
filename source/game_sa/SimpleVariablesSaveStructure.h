@@ -1,6 +1,8 @@
 #pragma once
 
-#include <windows.h>
+#include <minwinbase.h> // SYSTEMTIME
+
+#include "eWeatherType.h"
 
 class CVector;
 

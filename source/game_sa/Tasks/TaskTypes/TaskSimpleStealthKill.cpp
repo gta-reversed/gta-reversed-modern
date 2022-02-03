@@ -4,13 +4,15 @@
 
 void CTaskSimpleStealthKill::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "ProcessPed_Reversed", 0x62E540, &CTaskSimpleStealthKill::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "Constructor", 0x6225F0, &CTaskSimpleStealthKill::Constructor);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "Clone_Reversed", 0x623830, &CTaskSimpleStealthKill::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "GetId_Reversed", 0x622670, &CTaskSimpleStealthKill::GetId_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "MakeAbortable_Reversed", 0x6226F0, &CTaskSimpleStealthKill::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "ManageAnim", 0x6296D0, &CTaskSimpleStealthKill::ManageAnim);
-    ReversibleHooks::Install("CTaskSimpleStealthKill", "FinishAnimStealthKillCB", 0x622790, &CTaskSimpleStealthKill::FinishAnimStealthKillCB);
+    RH_ScopedClass(CTaskSimpleStealthKill);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(ProcessPed_Reversed, 0x62E540);
+    RH_ScopedInstall(Constructor, 0x6225F0);
+    RH_ScopedInstall(Clone_Reversed, 0x623830);
+    RH_ScopedInstall(GetId_Reversed, 0x622670);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6226F0);
+    RH_ScopedInstall(ManageAnim, 0x6296D0);
+    RH_ScopedInstall(FinishAnimStealthKillCB, 0x622790);
 }
 
 CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId)

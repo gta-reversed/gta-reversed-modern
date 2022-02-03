@@ -1,17 +1,19 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGetUp.h"
+#include "PedPlacement.h"
 
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 
 void CTaskSimpleGetUp::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGetUp", "Constructor", 0x677F50, &CTaskSimpleGetUp::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "StartAnim", 0x67C770, &CTaskSimpleGetUp::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "FinishGetUpAnimCB", 0x678110, &CTaskSimpleGetUp::FinishGetUpAnimCB);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleGetUp", "ProcessPed", 0x67FA80, &CTaskSimpleGetUp::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGetUp", "MakeAbortable", 0x677FE0, &CTaskSimpleGetUp::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskSimpleGetUp);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x677F50);
+    RH_ScopedInstall(StartAnim, 0x67C770);
+    RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()
@@ -115,28 +117,28 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 // 0x67C770
 bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 {
-    auto pVeh = CPedPlacement::IsPositionClearOfCars(ped);
+    auto vehicle = CPedPlacement::IsPositionClearOfCars(ped);
 
-    if (!pVeh
-        || pVeh->m_vehicleType == VEHICLE_BIKE
-        || pVeh->m_vehicleSubType == VEHICLE_QUAD
-        || pVeh == ped->m_pAttachedTo
-        || pVeh == ped->m_standingOnEntity
+    if (!vehicle
+        || vehicle->IsBike()
+        || vehicle->IsSubQuad()
+        || vehicle == ped->m_pAttachedTo
+        || vehicle == ped->m_standingOnEntity
         )
     {
-        auto pEntity = ped->m_pEntityIgnoredCollision;
+        auto entity = ped->m_pEntityIgnoredCollision;
 
-        if (!pEntity
-            || pEntity->m_nType != ENTITY_TYPE_VEHICLE
-            || pEntity->AsVehicle()->m_vehicleType == VEHICLE_BIKE
-            || pEntity->AsVehicle()->m_vehicleSubType == VEHICLE_QUAD
-            || !IsVehiclePointerValid(pEntity->AsVehicle())
+        if (!entity
+            || !entity->IsVehicle()
+            || entity->AsVehicle()->IsBike()
+            || entity->AsVehicle()->IsSubQuad()
+            || !IsVehiclePointerValid(entity->AsVehicle())
             || (ped->m_nRandomSeed + CTimer::GetFrameCounter() - 3) % 8 == 0
             || CCollision::ProcessColModels(
                 ped->GetMatrix(),
-                *CModelInfo::GetModelInfo(ped->m_nModelIndex)->m_pColModel,
-                pEntity->GetMatrix(),
-                *CModelInfo::GetModelInfo(pEntity->m_nModelIndex)->m_pColModel,
+                *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
+                entity->GetMatrix(),
+                *CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel(),
                 m_aColPoints,
                 nullptr,
                 nullptr,
@@ -177,8 +179,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
             return false;
     }
 
-    CPedDamageResponseCalculator damageResponseCalculator(pVeh, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
-    CEventDamage eventDamage(pVeh, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
+    CPedDamageResponseCalculator damageResponseCalculator(vehicle, fDamage, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false);
+    CEventDamage eventDamage(vehicle, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
         damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
@@ -191,12 +193,11 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 }
 
 // 0x678110
-void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data)
+void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleGetUp*>(data);
-
-    pTask->m_bIsFinished = true;
-    pTask->m_bAnimFinished = true;
-    pTask->m_pAnim->m_fBlendDelta = -1000.0F;
-    pTask->m_pAnim = nullptr;
+    auto task = reinterpret_cast<CTaskSimpleGetUp*>(data);
+    task->m_bIsFinished = true;
+    task->m_bAnimFinished = true;
+    task->m_pAnim->m_fBlendDelta = -1000.0F;
+    task->m_pAnim = nullptr;
 }

@@ -29,15 +29,11 @@ public:
     uint8     m_exitDoor;
     CVehicle* m_vehicle;
 
-    static void InjectHooks();
-
+public:
     CEventKnockOffBike(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOutDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff);
     CEventKnockOffBike();
-    ~CEventKnockOffBike();
-private:
-    CEventKnockOffBike* Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOutDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff);
-    CEventKnockOffBike* Constructor();
-public:
+    ~CEventKnockOffBike() override;
+
     eEventType GetEventType() const override { return EVENT_KNOCK_OFF_BIKE; }
     float GetLocalSoundLevel() override { return 60.0f; }
     int32 GetEventPriority() const override { return 70; }
@@ -46,19 +42,23 @@ public:
     bool AffectsPed(CPed* ped) override;
     bool IsCriminalEvent() override { return true; }
     void ReportCriminalEvent(CPed* ped) override;
-private:
-    bool AffectsPed_Reversed(CPed* ped);
-    void ReportCriminalEvent_Reversed(CPed* ped);
+
 public:
-    void operator=(const CEventKnockOffBike& right)
-    {
-        From(right);
-    }
+    void operator=(const CEventKnockOffBike& right) { From(right); } // 0x4B4AA0
     void From(const CEventKnockOffBike& right);
     void SetPedOutCar(CPed* ped);
     int32 CalcForcesAndAnims(CPed* ped);
     bool SetPedSafePosition(CPed* ped);
 
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CEventKnockOffBike* Constructor(CVehicle* vehicle, CVector* moveSpeed, CVector* collisionImpactVelocity, float damageIntensity, float a6, uint8 knockOffType, uint8 knockOutDirection, int32 time, CPed* ped, bool isVictimDriver, bool forceKnockOff);
+    CEventKnockOffBike* Constructor();
+
+    bool AffectsPed_Reversed(CPed* ped);
+    void ReportCriminalEvent_Reversed(CPed* ped);
 };
 
 VALIDATE_SIZE(CEventKnockOffBike, 0x3C);

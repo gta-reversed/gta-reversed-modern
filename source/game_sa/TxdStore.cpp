@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
@@ -19,34 +19,37 @@ int32& TexDictionaryLinkPluginOffset = *reinterpret_cast<int32*>(0xC88018);
 // variables list is not finished. Need to make CPools before.
 
 void CTxdStore::InjectHooks() {
-    ReversibleHooks::Install("CTxdStore", "PushCurrentTxd", 0x7316A0, &CTxdStore::PushCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "PopCurrentTxd", 0x7316B0, &CTxdStore::PopCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_name", 0x731850, static_cast<int32 (*)(const char*)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "FindTxdSlot_hash", 0x7318E0, static_cast<int32 (*)(uint32)>(&CTxdStore::FindTxdSlot));
-    ReversibleHooks::Install("CTxdStore", "StartLoadTxd", 0x731930, &CTxdStore::StartLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "Create", 0x731990, &CTxdStore::Create);
-    ReversibleHooks::Install("CTxdStore", "SetCurrentTxd", 0x7319C0, &CTxdStore::SetCurrentTxd);
-    ReversibleHooks::Install("CTxdStore", "AddRef", 0x731A00, &CTxdStore::AddRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRef", 0x731A30, &CTxdStore::RemoveRef);
-    ReversibleHooks::Install("CTxdStore", "RemoveRefWithoutDelete", 0x731A70, &CTxdStore::RemoveRefWithoutDelete);
-    ReversibleHooks::Install("CTxdStore", "GetNumRefs", 0x731AA0, &CTxdStore::GetNumRefs);
-    ReversibleHooks::Install("CTxdStore", "AddTxdSlot", 0x731C80, &CTxdStore::AddTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxdSlot", 0x731CD0, &CTxdStore::RemoveTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_stream", 0x731DD0, static_cast<bool (*)(int32, RwStream*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "LoadTxd_filename", 0x7320B0, static_cast<bool (*)(int32, const char*)>(&CTxdStore::LoadTxd));
-    ReversibleHooks::Install("CTxdStore", "FinishLoadTxd", 0x731E40, &CTxdStore::FinishLoadTxd);
-    ReversibleHooks::Install("CTxdStore", "RemoveTxd", 0x731E90, &CTxdStore::RemoveTxd);
-    ReversibleHooks::Install("CTxdStore", "Initialise", 0x731F20, &CTxdStore::Initialise);
-    ReversibleHooks::Install("CTxdStore", "Shutdown", 0x732000, &CTxdStore::Shutdown);
-    ReversibleHooks::Install("CTxdStore", "GameShutdown", 0x732060, &CTxdStore::GameShutdown);
-    ReversibleHooks::Install("CTxdStore", "GetParentTxdSlot", 0x408370, &CTxdStore::GetParentTxdSlot);
-    ReversibleHooks::Install("CTxdStore", "GetTxd", 0x408340, &CTxdStore::GetTxd);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreFindCB", 0x731720, &CTxdStore::TxdStoreFindCB);
-    ReversibleHooks::Install("CTxdStore", "TxdStoreLoadCB", 0x731710, &CTxdStore::TxdStoreLoadCB);
-    ReversibleHooks::Install("CTxdStore", "SetupTxdParent", 0x731D50, &CTxdStore::SetupTxdParent);
+    RH_ScopedClass(CTxdStore);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(PushCurrentTxd, 0x7316A0);
+    RH_ScopedInstall(PopCurrentTxd, 0x7316B0);
+    RH_ScopedOverloadedInstall(FindTxdSlot, "name", 0x731850, int32 (*)(const char*));
+    RH_ScopedOverloadedInstall(FindTxdSlot, "hash", 0x7318E0, int32 (*)(uint32));
+    RH_ScopedInstall(StartLoadTxd, 0x731930);
+    RH_ScopedInstall(Create, 0x731990);
+    RH_ScopedInstall(SetCurrentTxd, 0x7319C0);
+    RH_ScopedInstall(AddRef, 0x731A00);
+    RH_ScopedInstall(RemoveRef, 0x731A30);
+    RH_ScopedInstall(RemoveRefWithoutDelete, 0x731A70);
+    RH_ScopedInstall(GetNumRefs, 0x731AA0);
+    RH_ScopedInstall(AddTxdSlot, 0x731C80);
+    RH_ScopedInstall(RemoveTxdSlot, 0x731CD0);
+    RH_ScopedOverloadedInstall(LoadTxd, "stream", 0x731DD0, bool (*)(int32, RwStream*));
+    RH_ScopedOverloadedInstall(LoadTxd, "filename", 0x7320B0, bool (*)(int32, const char*));
+    RH_ScopedInstall(FinishLoadTxd, 0x731E40);
+    RH_ScopedInstall(RemoveTxd, 0x731E90);
+    RH_ScopedInstall(Initialise, 0x731F20);
+    RH_ScopedInstall(Shutdown, 0x732000);
+    RH_ScopedInstall(GameShutdown, 0x732060);
+    RH_ScopedInstall(GetParentTxdSlot, 0x408370);
+    RH_ScopedInstall(GetTxd, 0x408340);
+    RH_ScopedInstall(TxdStoreFindCB, 0x731720);
+    RH_ScopedInstall(TxdStoreLoadCB, 0x731710);
+    RH_ScopedInstall(SetupTxdParent, 0x731D50);
 
     // global
-    ReversibleHooks::Install("common", "RemoveIfRefCountIsGreaterThanOne", 0x731680, &RemoveIfRefCountIsGreaterThanOne);
+    RH_ScopedGlobalInstall(RemoveIfRefCountIsGreaterThanOne, 0x731680);
 }
 
 // initialise txd store

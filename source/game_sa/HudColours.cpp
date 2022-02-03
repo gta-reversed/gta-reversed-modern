@@ -1,14 +1,18 @@
 #include "StdInc.h"
 
+#include "HudColours.h"
+
 CHudColours& HudColour = *reinterpret_cast<CHudColours*>(0xBAB22C);
 
 void CHudColours::InjectHooks() {
-    ReversibleHooks::Install("CHudColours", "Constructor", 0x58FDA0, &CHudColours::Constructor);
-    ReversibleHooks::Install("CHudColours", "Destructor", 0x58FD90, &CHudColours::Destructor);
-    ReversibleHooks::Install("CHudColours", "SetRGBAValue", 0x58FD20, &CHudColours::SetRGBAValue);
-    ReversibleHooks::Install("CHudColours", "GetIntColour", 0x58FD50, &CHudColours::GetIntColour);
-    ReversibleHooks::Install("CHudColours", "GetRGB", 0x58FEA0, &CHudColours::GetRGB);
-    ReversibleHooks::Install("CHudColours", "GetRGBA", 0x58FEE0, &CHudColours::GetRGBA);
+    RH_ScopedClass(CHudColours);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x58FDA0);
+    RH_ScopedInstall(SetRGBAValue, 0x58FD20);
+    RH_ScopedInstall(GetIntColour, 0x58FD50);
+    RH_ScopedInstall(GetRGB, 0x58FEA0);
+    RH_ScopedInstall(GetRGBA, 0x58FEE0);
 }
 
 // 0x58FDA0
@@ -32,16 +36,6 @@ CHudColours::CHudColours() {
 
 CHudColours* CHudColours::Constructor() {
     this->CHudColours::CHudColours();
-    return this;
-}
-
-// 0x58FD90
-CHudColours::~CHudColours() {
-    // m_aColours[15] created on stack and should not be free.
-}
-
-CHudColours* CHudColours::Destructor() {
-    this->CHudColours::~CHudColours();
     return this;
 }
 

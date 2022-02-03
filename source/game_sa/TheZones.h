@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,11 @@
 #pragma once
 
 #include "Vector.h"
+#include "eLevelName.h"
 #include "Zone.h"
+
+class CZoneInfo;
+class CZoneExtraInfo;
 
 class CTheZones {
 public:
@@ -32,7 +36,7 @@ public:
     // Returns true if point lies within zone
     static bool PointLiesWithinZone(const CVector* point, CZone* zone);
     // Returns eLevelName from position
-    static eLevelName GetLevelFromPosition(CVector const& point);
+    static eLevelName GetLevelFromPosition(const CVector& point);
     // Returns pointer to zone by a point
     static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
     static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outZone);
@@ -54,4 +58,7 @@ public:
     static void Save();
     static void Load();
     static void PostZoneCreation();
+
+    // NOTSA
+    static const char* GetZoneName(const CVector& point);
 };

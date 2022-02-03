@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,13 +18,14 @@ class CCollision {
 public:
     static CLinkList<CCollisionData*> &ms_colModelCache;
     static int32& ms_iProcessLineNumCrossings;
+    static uint32& ms_collisionInMemory;
 
 public:
     static void InjectHooks();
+    static void Tests();
 
     static void Init();
     static void Shutdown();
-    // dummy function
     static void Update();
     static void SortOutCollisionAfterLoad();
     static bool TestSphereSphere(const CColSphere& sphere1, const CColSphere& sphere2);
@@ -73,7 +74,7 @@ public:
     static void CalculateTrianglePlanes(CColModel* colModel);
     static void RemoveTrianglePlanes(CColModel* colModel);
     // returns number of resulting collision points
-    static int32 ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint* colPoint1, CColPoint* colPoint2, float* maxTouchDistance, bool arg7);
+    static int32 ProcessColModels(const CMatrix& transform1, CColModel& colModel1, const CMatrix& transform2, CColModel& colModel2, CColPoint(&cpB)[32], CColPoint*  lineCPs, float* maxTouchDistance, bool arg7);
     static bool SphereCastVsEntity(CColSphere* sphere1, CColSphere* sphere2, CEntity* entity);
     static bool SphereVsEntity(CColSphere* sphere, CEntity* entity);
     static bool CheckCameraCollisionBuildings(int32 sectorX, int32 sectorY, CColBox* arg2, CColSphere* arg3, CColSphere* arg4, CColSphere* arg5);

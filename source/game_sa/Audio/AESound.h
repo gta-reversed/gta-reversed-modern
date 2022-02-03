@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -95,7 +95,7 @@ public:
     CAESound(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float fDistance, float speed, float timeScale, uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability);
     ~CAESound();
 
-    CAESound& operator=(CAESound const& sound);
+    CAESound& operator=(const CAESound& sound);
 
     void Initialise(int16 bankSlotId, int16 sfxId, CAEAudioEntity* baseAudio, CVector posn, float volume, float maxDistance, float speed, float timeScale, uint8 ignoredServiceCycles, eSoundEnvironment environmentFlags, float speedVariability, int16 currPlayPosn);
 
@@ -116,7 +116,7 @@ public:
     bool  GetForcedFront() const { return m_bForcedFront; }
     void  SetIndividualEnvironment(uint16 envFlag, uint16 bEnabled); // pass eSoundEnvironment as envFlag
     void  UpdatePlayTime(int16 soundLength, int16 loopStartTime, int16 playProgress);
-    void  GetRelativePosition(CVector* outPosn);
+    void  GetRelativePosition(CVector* outPos);
     void  CalculateFrequency();
     void  UpdateFrequency();
     float GetRelativePlaybackFrequencyWithDoppler();

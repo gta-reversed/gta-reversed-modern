@@ -1,5 +1,10 @@
 #pragma once
 
+#include "renderware.h"
+
+#include "Vector.h"
+#include "Matrix.h"
+
 class CEscalator {
 public:
     CVector  m_vStart;
@@ -25,7 +30,7 @@ public:
 
 public:
     void SwitchOff();
-    void AddThisOne(const CVector& vecStart, CVector const& vecBottom,const  CVector& vecEnd,const  CVector& vecTop, bool bMoveDown, CEntity* entity);
+    void AddThisOne(const CVector& vecStart, const CVector& vecBottom,const  CVector& vecEnd,const  CVector& vecTop, bool bMoveDown, CEntity* entity);
     void Update();
 };
 

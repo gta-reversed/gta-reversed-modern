@@ -1,12 +1,17 @@
 #include "StdInc.h"
 
+#include "Box.h"
+
 void CBox::InjectHooks()
 {
-    ReversibleHooks::Install("CBox", "Set", 0x40EDE0, &CBox::Set);
-    ReversibleHooks::Install("CBox", "Recalc", 0x40EE20, &CBox::Recalc);
+    RH_ScopedClass(CBox);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(Set, 0x40EDE0);
+    RH_ScopedInstall(Recalc, 0x40EE20);
 }
 
-void CBox::Set(CVector const& vecMin, CVector const& vecMax)
+void CBox::Set(const CVector& vecMin, const CVector& vecMax)
 {
     m_vecMin = vecMin;
     m_vecMax = vecMax;

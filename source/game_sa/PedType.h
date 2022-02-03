@@ -1,6 +1,6 @@
 #pragma once
 
-enum ePedType : uint32;
+#include "ePedType.h"
 
 class CPedType {
 public:

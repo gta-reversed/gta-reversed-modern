@@ -1,17 +1,22 @@
 #include "StdInc.h"
 
+#include "WaterCreatureManager_c.h"
+
 WaterCreatureManager_c& g_waterCreatureMan = *(WaterCreatureManager_c*)0xC1DF30;
 WaterCreatureInfo(&WaterCreatureManager_c::ms_waterCreatureInfos)[NUM_WATER_CREATURE_INFOS] = *(WaterCreatureInfo(*)[NUM_WATER_CREATURE_INFOS])0x8D3698;
 
 void WaterCreatureManager_c::InjectHooks()
 {
-    ReversibleHooks::Install("WaterCreatureManager_c", "Init", 0x6E3F90, &WaterCreatureManager_c::Init);
-    ReversibleHooks::Install("WaterCreatureManager_c", "Exit", 0x6E3FD0, &WaterCreatureManager_c::Exit);
-    ReversibleHooks::Install("WaterCreatureManager_c", "Update", 0x6E4F10, &WaterCreatureManager_c::Update);
-    ReversibleHooks::Install("WaterCreatureManager_c", "GetRandomWaterCreatureId", 0x6E4040, &WaterCreatureManager_c::GetRandomWaterCreatureId);
-    ReversibleHooks::Install("WaterCreatureManager_c", "CanAddWaterCreatureAtPos", 0x6E4510, &WaterCreatureManager_c::CanAddWaterCreatureAtPos);
-    ReversibleHooks::Install("WaterCreatureManager_c", "TryToFreeUpWaterCreatures", 0x6E40E0, &WaterCreatureManager_c::TryToFreeUpWaterCreatures);
-    ReversibleHooks::Install("WaterCreatureManager_c", "TryToExitGroup", 0x6E45B0, &WaterCreatureManager_c::TryToExitGroup);
+    RH_ScopedClass(WaterCreatureManager_c);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x6E3F90);
+    RH_ScopedInstall(Exit, 0x6E3FD0);
+    RH_ScopedInstall(Update, 0x6E4F10);
+    RH_ScopedInstall(GetRandomWaterCreatureId, 0x6E4040);
+    RH_ScopedInstall(CanAddWaterCreatureAtPos, 0x6E4510);
+    RH_ScopedInstall(TryToFreeUpWaterCreatures, 0x6E40E0);
+    RH_ScopedInstall(TryToExitGroup, 0x6E45B0);
 }
 
 

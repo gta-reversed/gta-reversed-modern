@@ -1,8 +1,13 @@
 #include "StdInc.h"
 
+#include "EventCreatePartnerTask.h"
+
 void CEventCreatePartnerTask::InjectHooks()
 {
-    ReversibleHooks::Install("CEventCreatePartnerTask", "CEventCreatePartnerTask", 0x5F6190, &CEventCreatePartnerTask::Constructor);
+    RH_ScopedClass(CEventCreatePartnerTask);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5F6190);
 }
 
 CEventCreatePartnerTask::CEventCreatePartnerTask(int32 randomNumber, CPed* partner, bool leadSpeaker, float distanceMultiplier)
