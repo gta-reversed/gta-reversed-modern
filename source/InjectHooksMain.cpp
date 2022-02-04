@@ -81,6 +81,7 @@
 #include "UserDisplay.h"
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
+#include "FallingGlassPane.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
