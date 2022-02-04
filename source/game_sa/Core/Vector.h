@@ -91,6 +91,14 @@ public:
         return x == 0.0F && y == 0.0F && z == 0.0F;
     }
 
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
+    }
+
     // Calculate the average position
     static CVector Average(const CVector* begin, const CVector* end);
 

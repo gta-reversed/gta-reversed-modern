@@ -326,16 +326,28 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
     }
 }
 
-// 0x4120C0
+
+/*!
+* @address 0x4120C0
+* @brief Tests if \a box is fully inside \a sphere
+*/
 bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
-#define CheckAxis(a) (sphere.m_vecCenter.a + sphere.m_fRadius >= box.m_vecMin.a && \
-                     sphere.m_vecCenter.a - sphere.m_fRadius <= box.m_vecMax.a)
-    return CheckAxis(x) && CheckAxis(y) && CheckAxis(z);
-#undef CheckAxis
+    for (auto i = 0u; i < 3u; i++) {
+        if (sphere.m_vecCenter[i] + sphere.m_fRadius < box.m_vecMin[i] ||
+            sphere.m_vecCenter[i] - sphere.m_fRadius > box.m_vecMax[i]
+        ) {
+            return false;
+        }
+    }
+    return true;
 }
 
-// 0x412130
+/*!
+* @address 0x412130
+*/
 bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float& mindistsq) {
+	// GTA's code is too complicated, uses a huge 3x3x3 if statement
+	// we can simplify the structure a lot
     // Some of the original code, to give you an idea:
     /*
     if (sphere.m_vecCenter.x + sphere.m_fRadius < box.m_vecMin.x)
@@ -432,8 +444,6 @@ bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CC
     }
     */
 
-	// GTA's code is too complicated, uses a huge 3x3x3 if statement
-	// we can simplify the structure a lot
 
 	// First make sure we have a collision at all
     if (!TestSphereBox(sph, box))
@@ -522,7 +532,9 @@ bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CC
 	return false;
 }
 
-// 0x412700
+/*!
+* @address 0x412700
+*/
 bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
     // Make everything relative to 0th vertex of the triangle
     const auto v1 = triPoints[1] - triPoints[0];
