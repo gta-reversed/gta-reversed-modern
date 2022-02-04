@@ -614,16 +614,20 @@ float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd
     return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
 }
 
-// 0x412970
+/*!
+* @address 0x412970
+* @brief Similar to \r DistToLineSqr it always returns the distance to the projected intersection point.
+*/
 float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
     const auto l = *lineEnd - *lineStart;
     const auto p = *point - *lineStart;
 
+    // See `DistToLineSqr` for a nice illustration.
     // Simple Pythagorean here, we gotta find side `a`
 
     const auto pMagSq = p.SquaredMagnitude();
     const auto cSq = pMagSq;
-    const auto bSq = (float)std::pow(DotProduct(p, l), 2) / pMagSq; // Must divide it by either `l.SquaredMagnitude()` because neither vectors are normalized
+    const auto bSq = (float)std::pow(DotProduct(p, l), 2) / pMagSq; // Dot product is scaled by `pMagSq` - Clever trick to get descale it without using sqrt
 
     const auto aSq = cSq - bSq;
     return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
