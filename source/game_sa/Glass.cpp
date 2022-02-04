@@ -117,7 +117,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
     );
 
     // Calculate direction vectors
-    const auto fwd   = Normalized(CrossProduct(vehMat.GetRight(), normal));
+    const auto fwd   = Normalized(CrossProduct(vehMat.GetRight(), normal)); // A more suitable name may be "up"
     const auto right = Normalized(CrossProduct(vehMat.GetUp(), normal));
 
     // Store world space vertex positions of both triangles
@@ -148,12 +148,13 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
     const auto rightDots = CalculateDotProducts(right);
     const auto fwdDots   = CalculateDotProducts(fwd);
 
+    // Find max values in each direction
     const float maxDotFwd   = *rng::max_element(fwdDots);
     const float maxDotRight = *rng::max_element(rightDots);
 
     float minRightFwdDotSum = FLT_MAX;
     uint32 minRightFwdDotSumIdx{};
-    for (auto i = 0; i < 6; i++) {
+    for (auto i = 0u; i < 6u; i++) {
         const auto rightDot = rightDots[i], fwdDot = fwdDots[i];
         if (rightDot + fwdDot < minRightFwdDotSum) {
             minRightFwdDotSum = rightDot + fwdDot;
@@ -161,6 +162,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
         }
     }
 
+    // Size of pane in directions
     const struct { float right, fwd; } extent{
         maxDotRight - rightDots[minRightFwdDotSumIdx],
         maxDotFwd - fwdDots[minRightFwdDotSumIdx]
