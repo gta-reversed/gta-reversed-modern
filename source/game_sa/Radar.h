@@ -1,15 +1,16 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
 #include "Vector.h"
 #include "RGBA.h"
 #include "Vector2D.h"
-#include "Sprite2d.h"
+
+class CSprite2d;
 
 // Thanks to Wesser for radar-related things
 enum eBlipAppearance {
@@ -23,7 +24,7 @@ enum eBlipType {
     BLIP_CHAR,          // 2
     BLIP_OBJECT,        // 3
     BLIP_COORD,         // 4 - Checkpoint.
-    BLIP_CONTACTPOINT,  // 5 - Sphere.
+    BLIP_CONTACT_POINT, // 5 - Sphere.
     BLIP_SPOTLIGHT,     // 6
     BLIP_PICKUP,        // 7
     BLIP_AIRSTRIP       // 8
@@ -246,7 +247,7 @@ public:
     static void ShowRadarTraceWithHeight(float x, float y, uint32 size, uint8 red, uint8 green, uint8 blue, uint8 alpha, eRadarTraceHeight height);
     static void ShowRadarMarker(CVector posn, uint32 color, float radius);
     static uint32 GetRadarTraceColour(eBlipColour color, bool bright, bool friendly);
-    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, const CRGBA& color);
+    static void DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float angle, uint32 width, uint32 height, CRGBA color);
     static void DrawYouAreHereSprite(float x, float y);
     static void SetupRadarRect(int32 x, int32 y);
     static void RequestMapSection(int32 x, int32 y);

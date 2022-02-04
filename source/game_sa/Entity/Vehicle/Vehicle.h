@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -22,6 +22,11 @@
 #include "Fire.h"
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */
+
+class CWeapon;
+class CPed;
+class CPlane;
+class CHeli;
 
 enum eCarWeapon {
     CAR_WEAPON_NOT_USED,
@@ -117,16 +122,12 @@ enum eFlightModel : int32 {
     FLIGHT_MODEL_HELI = 6, // also used for hydra
 };
 
-class CWeapon;
-class CPed;
-
 enum tWheelState : int32 {
     WHEEL_STATE_NORMAL,	  // standing still or rolling normally
     WHEEL_STATE_SPINNING, // rotating but not moving
     WHEEL_STATE_SKIDDING,
     WHEEL_STATE_FIXED,	  // not rotating
 };
-
 
 struct tHydrualicData {
     // applied when the vehicle is moving
@@ -363,13 +364,13 @@ public:
             uint8 m_bLeftRear : 1;
         } m_renderLights;
     };
-    RwTexture* m_pCustomCarPlate;
-    float      m_fRawSteerAngle;
-    uint32     m_vehicleType; // see enum eVehicleType
-    uint32     m_vehicleSubType;
-    int16      m_nPreviousRemapTxd;
-    int16      m_nRemapTxd;
-    RwTexture* m_pRemapTexture;
+    RwTexture*   m_pCustomCarPlate;
+    float        m_fRawSteerAngle;
+    eVehicleType m_nVehicleType;    // Theory by forkerer:
+    eVehicleType m_nVehicleSubType; // Hack to have stuff be 2 classes at once, like vortex which can act like a car and a boat
+    int16        m_nPreviousRemapTxd;
+    int16        m_nRemapTxd;
+    RwTexture*   m_pRemapTexture;
 
     static float &WHEELSPIN_TARGET_RATE; // 1.0
     static float &WHEELSPIN_INAIR_TARGET_RATE; // 10.0
@@ -395,8 +396,8 @@ public:
 // VIRTUAL
     void SetModelIndex(uint32 index) override;
     void DeleteRwObject() override;
-    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) override;
     void PreRender() override;
     void Render() override;
     bool SetupLighting() override;
@@ -406,7 +407,7 @@ public:
     virtual void ProcessControlCollisionCheck(bool applySpeed) { /* Do nothing */ }
     virtual void ProcessControlInputs(uint8 playerNum) { /* Do nothing */ }
     // component index in m_apModelNodes array
-    virtual void GetComponentWorldPosition(int32 componentId, CVector& posnOut) { /* Do nothing */ }
+    virtual void GetComponentWorldPosition(int32 componentId, CVector& outPos) { /* Do nothing */ }
     // component index in m_apModelNodes array
     virtual bool IsComponentPresent(int32 componentId) { return false; }
     virtual void OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenRatio, bool playSound) { /* Do nothing */ }
@@ -445,8 +446,8 @@ public:
     virtual void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
-    virtual bool GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
     virtual bool SetTowLink(CVehicle* targetVehicle, bool arg1) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
@@ -457,13 +458,13 @@ public:
 private:
     void SetModelIndex_Reversed(uint32 index);
     void DeleteRwObject_Reversed();
-    void SpecialEntityPreCollisionStuff_Reversed(CEntity* colEntity,
+    void SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical,
                                                  bool bIgnoreStuckCheck,
-                                                 bool* bCollisionDisabled,
-                                                 bool* bCollidedEntityCollisionIgnored,
-                                                 bool* bCollidedEntityUnableToMove,
-                                                 bool* bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
+                                                 bool& bCollisionDisabled,
+                                                 bool& bCollidedEntityCollisionIgnored,
+                                                 bool& bCollidedEntityUnableToMove,
+                                                 bool& bThisOrCollidedEntityStuck);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
     void PreRender_Reversed();
     void Render_Reversed();
     bool SetupLighting_Reversed();
@@ -473,8 +474,8 @@ private:
     float GetHeightAboveRoad_Reversed();
     bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
     bool CanPedJumpOutCar_Reversed(CPed* ped);
-    bool GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
-    bool GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
     bool Save_Reversed();
     bool Load_Reversed();
 
@@ -494,7 +495,7 @@ public:
     bool CustomCarPlate_TextureCreate(CVehicleModelInfo* model);
     void CustomCarPlate_TextureDestroy();
     bool CanBeDeleted();
-    float ProcessWheelRotation(tWheelState wheelState, CVector const& arg1, CVector const& arg2, float arg3);
+    float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
     bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2);
     void ProcessDelayedExplosion();
     bool AddPassenger(CPed* passenger);
@@ -542,7 +543,7 @@ public:
     void ClearWindowOpenFlag(uint8 doorId);
     bool SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 componentIndex, int32& resultModelIndex);
     bool ClearVehicleUpgradeFlags(int32 arg0, int32 componentIndex);
-    RpAtomic* CreateUpgradeAtomic(CBaseModelInfo* model, UpgradePosnDesc const* upgradePosn, RwFrame* parentComponent, bool isDamaged);
+    RpAtomic* CreateUpgradeAtomic(CBaseModelInfo* model, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged);
     void RemoveUpgrade(int32 upgradeId);
     // return upgrade model id or -1 if not present
     int32 GetUpgrade(int32 upgradeId);
@@ -630,32 +631,65 @@ public:
     void FireFixedMachineGuns();
     void DoDriveByShootings();
 
+    bool AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group);
+
 // STATIC FUNCS
     static void Shutdown();
     static void SetComponentAtomicAlpha(RpAtomic* atomic, int32 alpha);
 
 public:
-    bool IsFakeAircraft() const { return m_vehicleSubType == VEHICLE_FHELI || m_vehicleSubType == VEHICLE_FPLANE; }
-    bool IsPlane() const { return m_vehicleSubType == VEHICLE_PLANE; }
-    bool IsHeli() const { return m_vehicleSubType == VEHICLE_HELI; }
-    bool IsVehicleTypeValid() const { return m_vehicleSubType != VEHICLE_IGNORE; }
-    bool IsBoat() const { return m_vehicleType == VEHICLE_BOAT; }
-    bool IsBike() const { return m_vehicleType == VEHICLE_BIKE; }
-    bool IsQuad() const { return m_vehicleType == VEHICLE_QUAD; }
-    bool IsSubclassQuad() const { return m_vehicleSubType == VEHICLE_QUAD; }
-    bool IsAutomobile() const { return m_vehicleType == VEHICLE_AUTOMOBILE; }
-    bool IsTrain() const { return m_vehicleType == VEHICLE_TRAIN; }
-    bool IsMonsterTruck() const { return m_vehicleSubType == VEHICLE_MTRUCK; }
+    // m_nVehicleType start
+    bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
+    bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
+    bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
+    bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
+    bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
+    bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
+    bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
+    bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
+    bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
+    bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
+    bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
+    bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
+    // m_nVehicleType end
 
-    bool IsTransportVehicle() const { return m_nModelIndex == MODEL_TAXI || m_nModelIndex == MODEL_CABBIE; }
-    bool IsAmphibiousHeli() const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
-    bool IsConstructionVehicle() const { return  m_nModelIndex == MODEL_DUMPER || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
-    bool IsRoadVehicle() const { return m_vehicleSubType != VEHICLE_HELI && m_vehicleSubType != VEHICLE_PLANE && m_vehicleSubType != VEHICLE_TRAIN; }
+    // m_nVehicleSubType start
+    bool IsSubVehicleTypeValid() const { return m_nVehicleSubType != VEHICLE_TYPE_IGNORE; }
+    bool IsSubAutomobile()       const { return m_nVehicleSubType == VEHICLE_TYPE_AUTOMOBILE; }
+    bool IsSubMonsterTruck()     const { return m_nVehicleSubType == VEHICLE_TYPE_MTRUCK; }
+    bool IsSubQuad()             const { return m_nVehicleSubType == VEHICLE_TYPE_QUAD; }
+    bool IsSubHeli()             const { return m_nVehicleSubType == VEHICLE_TYPE_HELI; }
+    bool IsSubPlane()            const { return m_nVehicleSubType == VEHICLE_TYPE_PLANE; }
+    bool IsSubBoat()             const { return m_nVehicleSubType == VEHICLE_TYPE_BOAT; }
+    bool IsSubTrain()            const { return m_nVehicleSubType == VEHICLE_TYPE_TRAIN; }
+    bool IsSubFakeAircraft()     const { return m_nVehicleSubType == VEHICLE_TYPE_FHELI || m_nVehicleSubType == VEHICLE_TYPE_FPLANE; }
+    bool IsSubBike()             const { return m_nVehicleSubType == VEHICLE_TYPE_BIKE; }
+    bool IsSubBMX()              const { return m_nVehicleSubType == VEHICLE_TYPE_BMX; }
+    bool IsSubTrailer()          const { return m_nVehicleSubType == VEHICLE_TYPE_TRAILER; }
 
-    inline eVehicleCreatedBy GetCreatedBy() { return m_nCreatedBy; }
-    inline bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
+    bool IsSubRoadVehicle()      const { return !IsSubHeli() && !IsSubPlane() && !IsSubTrain(); }
+    // m_nVehicleSubType end
+
+    bool IsTransportVehicle()    const { return m_nModelIndex == MODEL_TAXI    || m_nModelIndex == MODEL_CABBIE; }
+    bool IsAmphibiousHeli()      const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
+    bool IsConstructionVehicle() const { return m_nModelIndex == MODEL_DUMPER  || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
+
+    eVehicleCreatedBy GetCreatedBy()      { return m_nCreatedBy; }
+    bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
+
+    CPlane* AsPlane() { return reinterpret_cast<CPlane*>(this); }
+    CHeli*  AsHeli()  { return reinterpret_cast<CHeli*>(this); }
+
+public:
+    // NOTSA functions
+
+    CVehicleModelInfo* GetVehicleModelInfo();
+
+    // if bWorldSpace is true, returns the position in world-space
+    // otherwise in model-space
+    CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 

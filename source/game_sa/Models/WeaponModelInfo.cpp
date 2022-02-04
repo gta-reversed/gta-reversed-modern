@@ -1,10 +1,15 @@
 #include "StdInc.h"
 
+#include "WeaponModelInfo.h"
+
 void CWeaponModelInfo::InjectHooks()
 {
-    ReversibleHooks::Install("CWeaponModelInfo", "GetModelType", 0x4C5780, &CWeaponModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CWeaponModelInfo", "Init", 0x4C98F0, &CWeaponModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CWeaponModelInfo", "SetClump", 0x4C9910, &CWeaponModelInfo::SetClump_Reversed);
+    RH_ScopedClass(CWeaponModelInfo);
+    RH_ScopedCategory("Models");
+
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5780);
+    RH_ScopedInstall(Init_Reversed, 0x4C98F0);
+    RH_ScopedInstall(SetClump_Reversed, 0x4C9910);
 }
 
 ModelInfoType CWeaponModelInfo::GetModelType()
@@ -35,17 +40,17 @@ void CWeaponModelInfo::SetClump_Reversed(RpClump* clump)
     CClumpModelInfo::SetClump(clump);
     RpClumpForAllAtomics(clump, CClumpModelInfo::SetAtomicRendererCB, CVisibilityPlugins::RenderWeaponCB);
 
-    auto pFlashFrame = CClumpModelInfo::GetFrameFromName(clump, "gunflash");
-    if (!pFlashFrame)
+    auto flashFrame = CClumpModelInfo::GetFrameFromName(clump, "gunflash");
+    if (!flashFrame)
         return;
 
-    auto pFirstAtomic = reinterpret_cast<RpAtomic*>(GetFirstObject(pFlashFrame));
-    if (!pFirstAtomic)
+    auto firstAtomic = reinterpret_cast<RpAtomic*>(GetFirstObject(flashFrame));
+    if (!firstAtomic)
         return;
 
-    CVehicle::SetComponentAtomicAlpha(pFirstAtomic, 0);
-    RpAtomicSetFlags(pFirstAtomic, 0);
-    auto pGeometry = RpAtomicGetGeometry(pFirstAtomic);
-    RpMaterialGetSurfaceProperties(RpGeometryGetMaterial(pGeometry, 0))->ambient = 16.0F;
+    CVehicle::SetComponentAtomicAlpha(firstAtomic, 0);
+    RpAtomicSetFlags(firstAtomic, 0);
+    auto geometry = RpAtomicGetGeometry(firstAtomic);
+    RpMaterialGetSurfaceProperties(RpGeometryGetMaterial(geometry, 0))->ambient = 16.0F;
 
 }

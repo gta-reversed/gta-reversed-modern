@@ -1,14 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-uint32 MAX_COLLECTED_PICKUPS = 20;
-uint32 MAX_PICKUP_MESSAGES = 16;
-uint32 MAX_NUM_PICKUPS = 620;
+#include "Pickups.h"
 
 uint8& CPickups::DisplayHelpMessage = *(uint8*)0x8A5F48;
 int32& CPickups::PlayerOnWeaponPickup = *(int32*)0x97D640;
@@ -17,10 +15,10 @@ CVector* CPickups::StaticCamCoors = (CVector*)0x97D660;
 CVehicle*& CPickups::pPlayerVehicle = *(CVehicle * *)0x97861C;
 bool& CPickups::bPickUpcamActivated = *(bool*)0x978620;
 uint16& CPickups::CollectedPickUpIndex = *(uint16*)0x978624;
-int32* CPickups::aPickUpsCollected = (int32*)0x978628;
+int32 (&CPickups::aPickUpsCollected)[MAX_COLLECTED_PICKUPS] = *(int32(*)[MAX_COLLECTED_PICKUPS])0x978628;
 uint16& CPickups::NumMessages = *(uint16*)0x978678;
-tPickupMessage* CPickups::aMessages = (tPickupMessage*)0x978680;
-CPickup* CPickups::aPickUps = (CPickup*)0x9788C0;
+tPickupMessage (&CPickups::aMessages)[MAX_PICKUP_MESSAGES] = *(tPickupMessage(*)[MAX_PICKUP_MESSAGES])0x978680;
+CPickup (&CPickups::aPickUps)[MAX_NUM_PICKUPS] = *(CPickup(*)[MAX_NUM_PICKUPS])0x9788C0;
 int32& CollectPickupBuffer = *(int32*)0x97D644;
 
 // 0x455240
@@ -169,8 +167,8 @@ void CPickups::RemovePickupObjects() {
 }
 
 // 0x4563A0
-void CPickups::RemoveUnnecessaryPickups(CVector const& posn, float radius) {
-    plugin::Call<0x4563A0, CVector const&, float>(posn, radius);
+void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
+    plugin::Call<0x4563A0, const CVector&, float>(posn, radius);
 }
 
 // 0x455000

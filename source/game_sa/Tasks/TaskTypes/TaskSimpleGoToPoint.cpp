@@ -4,14 +4,19 @@
 
 #include "TaskSimpleStandStill.h"
 #include "IKChainManager_c.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPoint::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "CTaskSimpleGoToPoint", 0x667CD0, &CTaskSimpleGoToPoint::Constructor);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "Clone", 0x66CC60, &CTaskSimpleGoToPoint::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "MakeAbortable", 0x667D60, &CTaskSimpleGoToPoint::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "ProcessPed", 0x66D710, &CTaskSimpleGoToPoint::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleGoToPoint", "UpdatePoint", 0x645700, &CTaskSimpleGoToPoint::UpdatePoint);
+    RH_ScopedClass(CTaskSimpleGoToPoint);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x667CD0);
+    RH_ScopedInstall(Clone_Reversed, 0x66CC60);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x66D710);
+    RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 
 CTaskSimpleGoToPoint::CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6) :
@@ -82,7 +87,7 @@ bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority prio
 
 bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
 {
-    CPlayerPed* pPlayer = static_cast<CPlayerPed*>(ped);
+    CPlayerPed* player = static_cast<CPlayerPed*>(ped);
     ped->m_pedIK.bSlopePitch = true;
     if (HasCircledTarget(ped)) {
         if (!gotoPointFlags.m_b05) {
@@ -114,21 +119,21 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
             ped->SetMoveState(static_cast<eMoveState>(m_moveState));
             if (ped->IsPlayer()) {
                 if (CPad::GetPad(0)->DisablePlayerControls) {
-                    pPlayer->SetPlayerMoveBlendRatio(nullptr);
-                    pPlayer->SetRealMoveAnim();
+                    player->SetPlayerMoveBlendRatio(nullptr);
+                    player->SetRealMoveAnim();
                 }
                 else {
                     bool bSprinting = false;
                     CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType, eWeaponSkill::WEAPSKILL_STD);
                     if (!pWeaponInfo->flags.bHeavy) {
-                        CTaskSimpleHoldEntity* pTask = static_cast<CTaskSimpleHoldEntity*>(ped->m_pIntelligence->GetTaskHold(false));
-                        if (!pTask || !pTask->m_pAnimBlendAssociation) {
+                        CTaskSimpleHoldEntity* task = static_cast<CTaskSimpleHoldEntity*>(ped->m_pIntelligence->GetTaskHold(false));
+                        if (!task || !task->m_pAnimBlendAssociation) {
                             CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
                             if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
                                 auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(ANIM_ID_RUN);
                                 auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(ANIM_ID_SPRINT);
                                 if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
-                                    pPlayer->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
+                                    player->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
                                     ped->SetMoveState(PEDMOVE_SPRINT);
                                     bSprinting = true;
                                 }
@@ -138,10 +143,10 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                     if (!bSprinting && ped->m_nMoveState == PEDMOVE_SPRINT)
                         ped->SetMoveState(PEDMOVE_RUN);
                     if (gotoPointFlags.m_bMoveTowardsTargetPoint)
-                        pPlayer->SetPlayerMoveBlendRatio(&m_vecTargetPoint);
+                        player->SetPlayerMoveBlendRatio(&m_vecTargetPoint);
                     else
-                        pPlayer->SetPlayerMoveBlendRatio(nullptr);
-                    pPlayer->SetRealMoveAnim();
+                        player->SetPlayerMoveBlendRatio(nullptr);
+                    player->SetRealMoveAnim();
                 }
             }
             else {

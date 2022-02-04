@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ShotInfo.h"
+
 void CShotInfo::Initialise() {
     plugin::Call<0x739B60>();
 }

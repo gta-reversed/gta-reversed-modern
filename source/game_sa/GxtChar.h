@@ -15,7 +15,7 @@ typedef GxtChar const* PCGxtStr; // 8-bit null terminated constant GXT string
  * @param   src     pointer to null-terminated source string
  * @param   dst    pointer to destination buffer
  */
-void AsciiToGxtChar(char const* src, GxtChar* dst);
+void AsciiToGxtChar(const char* src, GxtChar* dst);
 
 /**
  * Convert GXT bull terminated string to ANSI string

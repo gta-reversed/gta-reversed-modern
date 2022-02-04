@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -46,4 +46,6 @@ public:
     static uint8  GetGameClockMonth()     { return ms_nGameClockMonth; }   // 0x4E7EE0
 
     static float GetMinutesToday() { return float(ms_nGameClockMinutes + 60 * ms_nGameClockHours) + (float)ms_nGameClockSeconds * (1.0f / 60.0f); } // 0x55F470
+
+    static bool ClockHoursInRange(uint8 start, uint8 end) { return ms_nGameClockHours > start && ms_nGameClockHours < end; }
 };

@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Door.h"
 
 float& CDoor::DOOR_SPEED_MAX_CAPPED = *(float*)0x8D3950;
 

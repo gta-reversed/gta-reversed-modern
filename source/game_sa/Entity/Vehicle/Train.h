@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -48,7 +48,7 @@ public:
     float    m_fTrainSpeed; // 1.0 - train derails
     float    m_fCurrentRailDistance;
     float    m_fLength;
-    float    m_fTrainGas;   // gas pedal pressed: 255.0, moving forward: 0.0, moving back: -255.0
+    float    m_fTrainGas;   // gas pedal pressed: 255.0, moving forward: 0.0f, moving back: -255.0
     float    m_fTrainBrake; // 255.0 - braking
     union {
         struct {
@@ -147,7 +147,7 @@ VALIDATE_SIZE(CTrain, 0x6AC);
 
 extern uint32 *NumTrackNodes; // uint32 NumTrackNodes[4]
 extern float* arrTotalTrackLength; // float arrTotalTrackLength[4]
-extern CTrainNode **pTrackNodes; // CTrainNode *pTrackNodes[4]
+extern CTrainNode **trackNodes; // CTrainNode *trackNodes[4]
 extern float *StationDist; // float StationDist[6]
 
 void ProcessTrainAnnouncements(); // dummy function

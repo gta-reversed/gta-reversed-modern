@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,6 +7,7 @@
 #pragma once
 
 #include "Font.h"
+#include "eFontAlignment.h"
 
 enum eMenuType : uint8 {
     MENU_TYPE_DEFAULT,
@@ -43,8 +44,8 @@ VALIDATE_SIZE(tMenuPanel, 0x418);
 class CMenuSystem {
 public:
     static bool* MenuInUse;
-    static uint16& CurrentMenuInUse;
-    static uint16& num_menus_in_use; // name from Android PDB
+    static uint16& CurrentMenuInUse; // uint8?
+    static uint8& num_menus_in_use; // name from Android PDB
 
 public:
     static void Initialise();

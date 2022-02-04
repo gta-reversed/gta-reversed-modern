@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,7 +31,10 @@ float& CLoadingScreen::m_timeSinceLastScreen = *(float*)0xBAB340;
 CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLoadingScreen::m_aSplashes[7]
 
 void CLoadingScreen::InjectHooks() {
-    ReversibleHooks::Install("CLoadingScreen", "LoadingScreen", 0x53DED0, LoadingScreen);
+    RH_ScopedClass(CLoadingScreen);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
 
 // 0x5902B0
@@ -55,13 +58,13 @@ void CLoadingScreen::LoadSplashes(bool bStarting, bool bNvidia) {
 }
 
 // 0x590220
-void CLoadingScreen::DisplayMessage(char const* message) {
-    plugin::Call<0x590220, char const*>(message);
+void CLoadingScreen::DisplayMessage(const char* message) {
+    plugin::Call<0x590220, const char*>(message);
 }
 
 // 0x590240
-void CLoadingScreen::SetLoadingBarMsg(char const* msg1, char const* msg2) {
-    plugin::Call<0x590240, char const*, char const*>(msg1, msg2);
+void CLoadingScreen::SetLoadingBarMsg(const char* msg1, const char* msg2) {
+    plugin::Call<0x590240, const char*, const char*>(msg1, msg2);
 }
 
 // 0x590280

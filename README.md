@@ -13,7 +13,7 @@ Before you start writing code, please make sure to read the [coding guidelines](
 
 ### Requirements
 
-* [Visual Studio 2019](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
+* [Visual Studio 2022](https://visualstudio.microsoft.com/en/downloads/) (Community Edition is enough)
 * [CMake](https://cmake.org) (for those who want to use CMake instead of premake5)
 
 #### Game
@@ -29,7 +29,7 @@ Using other plugins is strongly discouraged as the compact version doesn't like 
 
 ### Build Instructions
 
-You can either build with **Premake5** or **CMake**; that's up to you.
+You can either build with **Premake5** or **CMake**; that's up to you, but a C++20 capable compiler with <ranges> support is required.
 
 First clone the project, including the submodules:
 ```shell
@@ -39,7 +39,7 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 <details>
 <summary>Premake5</summary>
 
-1) Execute `premake5.bat` (for VS2019), or `premake5 vs20xx` for other VS versions. (e.g. vs2022)
+1) Execute `premake5.bat` for 2022, or `premake5.bat vs20xx` for other VS versions. (Note: Premake works fine with vs2019, CMake requires vs2022) (e.g: `premake5.bat vs2019`) 
 
 2) You'll find gta_reversed.sln shortcut in the same folder as premake5.
 
@@ -47,6 +47,8 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 
 <details>
 <summary>CMake</summary>
+
+0) Sadly CMake requires VS22, because since CMake v3.20.4 `cxx_20` maps to `std=c++20` instead of `std=c++latest`. If you really want to avoid VS22, you can either downgrade your CMake, or change `c++20` to `c++latest` manually in the project settings... Or just use premake5 instead.
 
 1) Download and install the latest version of CMake for windows from [HERE](https://cmake.org/download/) and make sure to add it to your PATH.
 
@@ -58,7 +60,7 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 
 ![Capture](https://gitlab.com/gtahackers/gta-reversed/uploads/a4c08a7094c1d8fe6727e24aad6c0203/Capture.PNG)
 
-4) Click configure, then you will see a dialogue box. Choose "Visual Studio 16 2019" and "Win32", then click Finish.
+4) Click configure, then you will see a dialogue box. Choose the IDE you have (In the image below it's VS2019) and "Win32", then click Finish.
 
 ![CMakeSettings](https://user-images.githubusercontent.com/10183157/63577623-37a13480-c5a8-11e9-8fe4-da81fa47ca58.PNG)
 
@@ -83,13 +85,12 @@ git clone --recurse-submodules https://github.com/Updated-Classic/gta-reversed-m
 
 You can create symbolic links for artifacts to not copy them every time you compiled the project.
 
-Run console (administrator privileges may be needed) and type these commands:
-
+Open a console in the cloned git repo's directory (administrator privileges may be needed) and type in the following commands:
 ```shell
-cd "<GTA SA PATH>\scripts"
-mklink gta_reversed.asi <PROJECT PATH>\Bin\Debug\gta_reversed.asi
-mklink gta_reversed.pdb <PROJECT PATH>\Bin\Debug\gta_reversed.pdb
+cd contrib
+link_asi.bat "<GAME_PATH>/scripts"
 ```
+Replace `<GAME_PATH>` with the path to the game's root directory (i.e.: Where the `exe` is)
     
 ### Credits
 - All contributors of the [plugin-sdk](https://github.com/DK22Pac/plugin-sdk) project.

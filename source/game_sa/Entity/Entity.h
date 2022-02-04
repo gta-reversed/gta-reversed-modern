@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -18,14 +18,17 @@
 
 class CTrain;
 class CBike;
+class CBoat;
 class CAutomobile;
 class CDummy;
 class CBuilding;
+class CPhysical;
 
 class CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
+public:
     ~CEntity() override;
 
 public:
@@ -98,15 +101,13 @@ public:
     eEntityType   m_nType : 3;
     eEntityStatus m_nStatus : 5;
 
-    static void InjectHooks();
-
-    // originally virtual functions
+public:
     virtual void Add();                                             // VTab: 2, similar to previous, but with entity bound rect
-    virtual void Add(CRect const& rect);                            // VTab: 1
+    virtual void Add(const CRect& rect);                            // VTab: 1
     virtual void Remove();                                          // VTab: 3
     virtual void SetIsStatic(bool isStatic);                        // VTab: 4
-    virtual void SetModelIndex(uint32 index);                 // VTab: 5
-    virtual void SetModelIndexNoCreate(uint32 index);         // VTab: 6
+    virtual void SetModelIndex(uint32 index);                       // VTab: 5
+    virtual void SetModelIndexNoCreate(uint32 index);               // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
     virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9
@@ -115,40 +116,19 @@ public:
     virtual void ProcessShift();                                    // VTab: 12
     virtual bool TestCollision(bool bApplySpeed);                   // VTab: 13
     virtual void Teleport(CVector destination, bool resetRotation); // VTab: 14
-    virtual void SpecialEntityPreCollisionStuff(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored,
-                                                bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck); // VTab: 15
-    virtual uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);  // VTab: 16
+    virtual void SpecialEntityPreCollisionStuff(CPhysical* colPhysical,
+                                                bool bIgnoreStuckCheck,
+                                                bool& bCollisionDisabled,
+                                                bool& bCollidedEntityCollisionIgnored,
+                                                bool& bCollidedEntityUnableToMove,
+                                                bool& bThisOrCollidedEntityStuck);                                    // VTab: 15
+    virtual uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);          // VTab: 16
     virtual void PreRender();                                                                                         // VTab: 17
     virtual void Render();                                                                                            // VTab: 18
     virtual bool SetupLighting();                                                                                     // VTab: 19
     virtual void RemoveLighting(bool bRemove);                                                                        // VTab: 20
     virtual void FlagToDestroyWhenNextProcessed();                                                                    // VTab: 21
 
-private:
-    void Add_Reversed();
-    void Add_Reversed(CRect const& rect);
-    void Remove_Reversed();
-    void SetIsStatic_Reversed(bool isStatic);
-    void SetModelIndex_Reversed(uint32 index);
-    void SetModelIndexNoCreate_Reversed(uint32 index);
-    void CreateRwObject_Reversed();
-    void DeleteRwObject_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* pRect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    void Teleport_Reversed(CVector destination, bool resetRotation);
-    void SpecialEntityPreCollisionStuff_Reversed(class CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2);
-    void PreRender_Reversed();
-    void Render_Reversed();
-    bool SetupLighting_Reversed();
-    void RemoveLighting_Reversed(bool bRemove);
-    void FlagToDestroyWhenNextProcessed_Reversed();
-
-public:
-    // funcs
     void UpdateRwFrame();
     void UpdateRpHAnim();
     bool HasPreRenderEffects();
@@ -161,8 +141,8 @@ public:
     void SetRwObjectAlpha(int32 alpha);
     CVector* FindTriggerPointCoors(CVector* pOutVec, int32 triggerIndex);
     C2dEffect* GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot);
-    CVector TransformFromObjectSpace(CVector const& offset);
-    CVector* TransformFromObjectSpace(CVector& outPosn, CVector const& offset);
+    CVector TransformFromObjectSpace(const CVector& offset);
+    CVector* TransformFromObjectSpace(CVector& outPos, const CVector& offset);
     void CreateEffects();
     void DestroyEffects();
     void AttachToRwObject(RwObject* object, bool updateEntityMatrix);
@@ -174,14 +154,14 @@ public:
     // is entity touching entity
     bool GetIsTouching(CEntity* entity);
     // is entity touching sphere
-    bool GetIsTouching(CVector const& centre, float radius);
+    bool GetIsTouching(const CVector& centre, float radius);
     bool GetIsOnScreen();
     bool GetIsBoundingBoxOnScreen();
     void ModifyMatrixForTreeInWind();
     void ModifyMatrixForBannerInWind();
     RwMatrix* GetModellingMatrix();
     CColModel* GetColModel();
-    void CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4);
+    void CalculateBBProjection(CVector* corner1, CVector* corner2, CVector* corner3, CVector* corner4);
     void UpdateAnim();
     bool IsVisible();
     float GetDistanceFromCentreOfMassToBaseOfModel();
@@ -192,35 +172,73 @@ public:
     void ProcessLightsForEntity();
     void RemoveEscalatorsForEntity();
     bool IsEntityOccluded();
-    bool IsCurrentAreaOrBarberShopInterior();
+    bool IsInCurrentAreaOrBarberShopInterior();
     void UpdateRW();
+    // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
+    CEntity* FindLastLOD() noexcept;
 
 public:
     // Rw callbacks
-    static RpAtomic* SetAtomicAlphaCB(RpAtomic* pAtomic, void* pData);
-    static RpMaterial* SetMaterialAlphaCB(RpMaterial* pMaterial, void* pData);
+    static RpAtomic* SetAtomicAlphaCB(RpAtomic* atomic, void* data);
+    static RpMaterial* SetMaterialAlphaCB(RpMaterial* material, void* data);
 
-    inline bool IsPhysical() const { return m_nType > eEntityType::ENTITY_TYPE_BUILDING && m_nType < eEntityType::ENTITY_TYPE_DUMMY; }
-    inline bool IsNothing() const { return m_nType == ENTITY_TYPE_NOTHING; }
-    inline bool IsVehicle() const { return m_nType == ENTITY_TYPE_VEHICLE; }
-    inline bool IsPed() const { return m_nType == ENTITY_TYPE_PED; }
-    inline bool IsObject() const { return m_nType == ENTITY_TYPE_OBJECT; }
-    inline bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
-    inline bool IsDummy() const { return m_nType == ENTITY_TYPE_DUMMY; }
+    [[nodiscard]] bool IsPhysical() const { return m_nType > ENTITY_TYPE_BUILDING && m_nType < ENTITY_TYPE_DUMMY; }
+    [[nodiscard]] bool IsNothing()  const { return m_nType == ENTITY_TYPE_NOTHING; }
+    [[nodiscard]] bool IsVehicle()  const { return m_nType == ENTITY_TYPE_VEHICLE; }
+    [[nodiscard]] bool IsPed()      const { return m_nType == ENTITY_TYPE_PED; }
+    [[nodiscard]] bool IsObject()   const { return m_nType == ENTITY_TYPE_OBJECT; }
+    [[nodiscard]] bool IsBuilding() const { return m_nType == ENTITY_TYPE_BUILDING; }
+    [[nodiscard]] bool IsDummy()    const { return m_nType == ENTITY_TYPE_DUMMY; }
 
-    inline CPhysical* AsPhysical() { return reinterpret_cast<CPhysical*>(this); }
-    inline CVehicle* AsVehicle() { return reinterpret_cast<CVehicle*>(this); }
-    inline CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
-    inline CBike* AsBike() { return reinterpret_cast<CBike*>(this); }
-    inline CTrain* AsTrain() { return reinterpret_cast<CTrain*>(this); }
-    inline CPed* AsPed() { return reinterpret_cast<CPed*>(this); }
-    inline CObject* AsObject() { return reinterpret_cast<CObject*>(this); }
-    inline CBuilding* AsBuilding() { return reinterpret_cast<CBuilding*>(this); }
-    inline CDummy* AsDummy() { return reinterpret_cast<CDummy*>(this); }
+    [[nodiscard]] bool IsModelTempCollision() const { return m_nModelIndex >= MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= MODEL_TEMPCOL_BODYPART2; }
+    [[nodiscard]] bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; } // 0x4633E0
+    [[nodiscard]] bool IsRCCar()  const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
 
-    inline bool IsModelTempCollision() const { return m_nModelIndex >= eModelID::MODEL_TEMPCOL_DOOR1 && m_nModelIndex <= eModelID::MODEL_TEMPCOL_BODYPART2; }
-    inline bool IsStatic() const { return m_bIsStatic || m_bIsStaticWaitingForCollision; }
-    inline bool IsRCCar() const { return m_nModelIndex == MODEL_RCBANDIT || m_nModelIndex == MODEL_RCTIGER || m_nModelIndex == MODEL_RCCAM; }
+    CPhysical*   AsPhysical()   { return reinterpret_cast<CPhysical*>(this); }
+    CVehicle*    AsVehicle()    { return reinterpret_cast<CVehicle*>(this); }
+    CAutomobile* AsAutomobile() { return reinterpret_cast<CAutomobile*>(this); }
+    CBike*       AsBike()       { return reinterpret_cast<CBike*>(this); }
+    CBoat*       AsBoat()       { return reinterpret_cast<CBoat*>(this); }
+    CTrain*      AsTrain()      { return reinterpret_cast<CTrain*>(this); }
+    CPed*        AsPed()        { return reinterpret_cast<CPed*>(this); }
+    CObject*     AsObject()     { return reinterpret_cast<CObject*>(this); }
+    CBuilding*   AsBuilding()   { return reinterpret_cast<CBuilding*>(this); }
+    CDummy*      AsDummy()      { return reinterpret_cast<CDummy*>(this); }
+
+    [[nodiscard]] auto GetType() const noexcept { return m_nType; }
+    void SetType(eEntityType type) { m_nType = type; }
+
+    [[nodiscard]] auto GetStatus() const noexcept { return m_nStatus; }
+    void SetStatus(eEntityStatus status) { m_nStatus = status; }
+
+    bool IsScanCodeCurrent() const;
+    void SetCurrentScanCode();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    void Add_Reversed();
+    void Add_Reversed(const CRect& rect);
+    void Remove_Reversed();
+    void SetIsStatic_Reversed(bool isStatic);
+    void SetModelIndex_Reversed(uint32 index);
+    void SetModelIndexNoCreate_Reversed(uint32 index);
+    void CreateRwObject_Reversed();
+    void DeleteRwObject_Reversed();
+    CRect* GetBoundRect_Reversed(CRect* pRect);
+    void ProcessControl_Reversed();
+    void ProcessCollision_Reversed();
+    void ProcessShift_Reversed();
+    bool TestCollision_Reversed(bool bApplySpeed);
+    void Teleport_Reversed(CVector destination, bool resetRotation);
+    void SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
+    void PreRender_Reversed();
+    void Render_Reversed();
+    bool SetupLighting_Reversed();
+    void RemoveLighting_Reversed(bool bRemove);
+    void FlagToDestroyWhenNextProcessed_Reversed();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);

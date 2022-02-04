@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -161,6 +161,8 @@ public:
     bool IsWaterNodeNearby(CVector position, float radius);
     static void AllocatePathFindInfoMem();
     static void PreparePathData();
+    bool Load();
+    bool Save();
     void UpdateStreaming(bool a1);
 
     // pathLink is the same as the returned pointer(at least on success)
@@ -169,7 +171,7 @@ public:
     CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
 
-    inline CCarPathLink& GetCarPathLink(CCarPathLinkAddress const& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
+    inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

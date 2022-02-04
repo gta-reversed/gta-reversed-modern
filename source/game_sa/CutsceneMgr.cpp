@@ -1,10 +1,12 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "CutsceneMgr.h"
 
 uint32 MAX_NUM_CUTSCENE_OBJECTS = 50;
 uint32 MAX_NUM_CUTSCENE_PARTICLE_EFFECTS = 8;
@@ -44,7 +46,6 @@ char(*CCutsceneMgr::ms_cLoadAnimName)[32] = (char(*)[32])0xBC3288;
 char(*CCutsceneMgr::ms_cLoadObjectName)[32] = (char(*)[32])0xBC38C8;
 float &CCutsceneMgr::ms_cutsceneTimer = *(float *)0xBC3F08;
 char *CCutsceneMgr::ms_cutsceneName = (char *)0xBC3F0C;
-CCutsceneObject **CCutsceneMgr::ms_pCutsceneObjects = (CCutsceneObject **)0xBC3F18;
 uint32 &CCutsceneMgr::ms_cutscenePlayStatus = *(uint32 *)0xBC3FE0;
 uint32 &CCutsceneMgr::ms_numCutsceneObjs = *(uint32 *)0xBC3FE4;
 uint32 &CCutsceneMgr::ms_numLoadObjectNames = *(uint32 *)0xBC3FE8;
@@ -61,12 +62,12 @@ CVector &CCutsceneMgr::ms_cutsceneOffset = *(CVector *)0xBC4034;
 
 // 0x5B0380
 int32 CCutsceneMgr::AddCutsceneHead(CObject* object, int32 arg1) {
-    return plugin::CallAndReturn<int32, 0x5B0380, CObject*, int32>(object, arg1);
+    return 0;
 }
 
 // 0x4D5DB0
-void CCutsceneMgr::AppendToNextCutscene(char const* objectName, char const* animName) {
-    plugin::Call<0x4D5DB0, char const*, char const*>(objectName, animName);
+void CCutsceneMgr::AppendToNextCutscene(const char* objectName, const char* animName) {
+    plugin::Call<0x4D5DB0, const char*, const char*>(objectName, animName);
 }
 
 // 0x5B0450
@@ -75,8 +76,8 @@ void CCutsceneMgr::AttachObjectToBone(CObject* attachment, CObject* object, int3
 }
 
 // 0x5B0480
-void CCutsceneMgr::AttachObjectToFrame(CObject* attachment, CEntity* object, char const* frameName) {
-    plugin::Call<0x5B0480, CObject*, CEntity*, char const*>(attachment, object, frameName);
+void CCutsceneMgr::AttachObjectToFrame(CObject* attachment, CEntity* object, const char* frameName) {
+    plugin::Call<0x5B0480, CObject*, CEntity*, const char*>(attachment, object, frameName);
 }
 
 // 0x5B04B0
@@ -135,13 +136,13 @@ void CCutsceneMgr::IsCutsceneSkipButtonBeingPressed() {
 }
 
 // 0x4D5AB0
-void CCutsceneMgr::LoadAnimationUncompressed(char const* animName) {
-    plugin::Call<0x4D5AB0, char const*>(animName);
+void CCutsceneMgr::LoadAnimationUncompressed(const char* animName) {
+    plugin::Call<0x4D5AB0, const char*>(animName);
 }
 
 // 0x4D5E80
-void CCutsceneMgr::LoadCutsceneData(char const* cutsceneName) {
-    plugin::Call<0x4D5E80, char const*>(cutsceneName);
+void CCutsceneMgr::LoadCutsceneData(const char* cutsceneName) {
+    plugin::Call<0x4D5E80, const char*>(cutsceneName);
 }
 
 // 0x5B11C0
@@ -150,8 +151,8 @@ void CCutsceneMgr::LoadCutsceneData_loading() {
 }
 
 // 0x5B13F0
-void CCutsceneMgr::LoadCutsceneData_overlay(char const* cutsceneName) {
-    plugin::Call<0x5B13F0, char const*>(cutsceneName);
+void CCutsceneMgr::LoadCutsceneData_overlay(const char* cutsceneName) {
+    plugin::Call<0x5B13F0, const char*>(cutsceneName);
 }
 
 // 0x5AFBC0
@@ -180,18 +181,18 @@ void CCutsceneMgr::RemoveEverythingBecauseCutsceneDoesntFitInMemory() {
 }
 
 // 0x5B0390
-void CCutsceneMgr::SetCutsceneAnim(char const* animName, CObject* object) {
-    plugin::Call<0x5B0390, char const*, CObject*>(animName, object);
+void CCutsceneMgr::SetCutsceneAnim(const char* animName, CObject* object) {
+    plugin::Call<0x5B0390, const char*, CObject*>(animName, object);
 }
 
 // 0x5B0420
-void CCutsceneMgr::SetCutsceneAnimToLoop(char const* animName) {
-    plugin::Call<0x5B0420, char const*>(animName);
+void CCutsceneMgr::SetCutsceneAnimToLoop(const char* animName) {
+    plugin::Call<0x5B0420, const char*>(animName);
 }
 
 // 0x5B0440
-void CCutsceneMgr::SetHeadAnim(char const* animName, CObject* headObject) {
-    plugin::Call<0x5B0440, char const*, CObject*>(animName, headObject);
+void CCutsceneMgr::SetHeadAnim(const char* animName, CObject* headObject) {
+    // NOP
 }
 
 // 0x5B14D0
@@ -225,8 +226,8 @@ void CCutsceneMgr::Update_overlay() {
 }
 
 // 0x5AFA50
-int16 FindCutsceneAudioTrackId(char const* cutsceneName) {
-    return plugin::CallAndReturn<int16, 0x5AFA50, char const*>(cutsceneName);
+int16 FindCutsceneAudioTrackId(const char* cutsceneName) {
+    return plugin::CallAndReturn<int16, 0x5AFA50, const char*>(cutsceneName);
 }
 
 // 0x5B01E0

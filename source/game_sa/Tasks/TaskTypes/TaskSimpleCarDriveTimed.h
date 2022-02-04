@@ -11,7 +11,7 @@ public:
 
 public:
     CTaskSimpleCarDriveTimed() = delete;
-    CTaskSimpleCarDriveTimed(CVehicle* pVehicle, int32 nTime);
+    CTaskSimpleCarDriveTimed(CVehicle* vehicle, int32 nTime);
     ~CTaskSimpleCarDriveTimed() override = default;
 
     eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE_TIMED; }
@@ -22,7 +22,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleCarDriveTimed* Constructor(CVehicle* pVehicle, int32 nTime);
+    CTaskSimpleCarDriveTimed* Constructor(CVehicle* vehicle, int32 nTime);
 };
 
 VALIDATE_SIZE(CTaskSimpleCarDriveTimed, 0x70);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,11 +8,14 @@
 
 #include "Vector.h"
 #include "eBirdsBiome.h"
+#include <rwplcore.h>
 
 /*
     researched by LINK/2012
     for 'The Birds Update' mod
 */
+
+class CBirds;
 
 #pragma pack(push, 1)
 struct CBirdColor {
@@ -93,7 +96,7 @@ public:
     static void Shutdown();
     static void Update();
     static void Render();
-    static void HandleGunShot(CVector const* pointA, CVector const* pointB);
+    static void HandleGunShot(const CVector* pointA, const CVector* pointB);
 
     static void InjectHooks();
 };

@@ -1,14 +1,20 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vector.h"
+#include "Base.h"
+
 #include "PathFind.h"
-#include "eCarMission.h"
+#include "NodeAddress.h"
+#include "Vector.h"
+#include "Enums/eCarMission.h"
+
+class CVehicle;
+class CEntity;
 
 enum eCarDrivingStyle : int8
 {
@@ -87,17 +93,18 @@ public:
     CNodeAddress    m_aPathFindNodesInfo[8];
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
-    class CVehicle* m_pTargetCar;
-    class CEntity*  m_pCarWeMakingSlowDownFor;
+    CVehicle*       m_pTargetCar;
+    CEntity*        m_pCarWeMakingSlowDownFor;
     int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
-    void SetCarMission(eCarMission carMission)
-    {
+    void SetCarMission(eCarMission carMission) {
         if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN)
             m_nCarMission = carMission;
     }
+
+    void ModifySpeed(float target);
 };
 
 VALIDATE_SIZE(CAutoPilot, 0x98);

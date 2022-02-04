@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,12 +10,12 @@
 
 class CCreepingFire {
 public:
-    static uint8_t(&m_aFireStatus)[32][32];
+    static uint8 (&m_aFireStatus)[32][32];
 
 public:
     static void InjectHooks();
 
     static void SetReadyToBurn();
     static void Update();
-    static bool TryToStartFireAtCoors(CVector pos, uint8_t nGenerations, bool a5, bool bScriptFire, float fDistance);
+    static bool TryToStartFireAtCoors(CVector pos, uint8 nGenerations, bool a5, bool bScriptFire, float fDistance);
 };

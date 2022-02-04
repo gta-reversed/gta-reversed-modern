@@ -1,14 +1,19 @@
 #include "StdInc.h"
 
+#include "AccidentManager.h"
+
 CAccidentManager*& CAccidentManager::gAccidentManager = *(CAccidentManager * *)0xB9B7D0;
 
 void CAccidentManager::InjectHooks()
 {
-    ReversibleHooks::Install("CAccidentManager", "GetInstance", 0x56CF20, &CAccidentManager::GetInstance);
-    ReversibleHooks::Install("CAccidentManager", "ReportAccident", 0x56CE80, &CAccidentManager::ReportAccident);
-    ReversibleHooks::Install("CAccidentManager", "GetNumberOfFreeAccidents", 0x56CEE0, &CAccidentManager::GetNumberOfFreeAccidents);
-    ReversibleHooks::Install("CAccidentManager", "GetNearestFreeAccidentExceptThisOne", 0x56CF90, &CAccidentManager::GetNearestFreeAccidentExceptThisOne);
-    ReversibleHooks::Install("CAccidentManager", "GetNearestFreeAccident", 0x56D050, &CAccidentManager::GetNearestFreeAccident);
+    RH_ScopedClass(CAccidentManager);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetInstance, 0x56CF20);
+    RH_ScopedInstall(ReportAccident, 0x56CE80);
+    RH_ScopedInstall(GetNumberOfFreeAccidents, 0x56CEE0);
+    RH_ScopedInstall(GetNearestFreeAccidentExceptThisOne, 0x56CF90);
+    RH_ScopedInstall(GetNearestFreeAccident, 0x56D050);
 }
 
 // 0x56CF20

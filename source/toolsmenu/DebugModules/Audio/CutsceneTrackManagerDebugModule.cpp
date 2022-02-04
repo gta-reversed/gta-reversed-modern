@@ -7,7 +7,7 @@
 
 namespace CutsceneTrackManagerDebugModule {
 
-void ProcessImgui() {
+void ProcessImGui() {
     ImGui::Text("Play Request %s",      AECutsceneTrackManager.m_bPlayRequest ? "true" : "false");
     ImGui::Text("Paused %s",            AECutsceneTrackManager.m_bPaused ? "true" : "false");
     ImGui::Text("Audio Channel Id: %d", AECutsceneTrackManager.m_nAudioChannel);

@@ -14,20 +14,22 @@ constexpr const char* aPedTypeNames[PED_TYPES_COUNT] = {
 };
 
 void CPedType::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPedType", "Initialise", 0x608E40, &CPedType::Initialise);
-    Install("CPedType", "Shutdown", 0x608B00, &CPedType::Shutdown);
-    Install("CPedType", "Save", 0x5D3CD0, &CPedType::Save);
-    Install("CPedType", "Load", 0x5D3D10, &CPedType::Load);
-    Install("CPedType", "LoadPedData", 0x608B30, &CPedType::LoadPedData);
-    Install("CPedType", "FindPedType", 0x608790, &CPedType::FindPedType);
-    Install("CPedType", "GetPedFlag", 0x608830, &CPedType::GetPedFlag);
-    Install("CPedType", "GetPedTypeAcquaintances_1", 0x6089B0, static_cast<CAcquaintance*(*)(ePedType)>(&CPedType::GetPedTypeAcquaintances));
-    // Install("CPedType", "GetPedTypeAcquaintances_2", 0x6089D0, static_cast<CAcquaintance*(*)(AcquaintanceId, ePedType)>(&CPedType::GetPedTypeAcquaintances));  // todo: breaks ReversibleHooks
-    Install("CPedType", "SetPedTypeAsAcquaintance", 0x608E20, &CPedType::SetPedTypeAsAcquaintance);
-    Install("CPedType", "ClearPedTypeAcquaintances", 0x608A20, &CPedType::ClearPedTypeAcquaintances);
-    Install("CPedType", "ClearPedTypeAsAcquaintance", 0x6089F0, &CPedType::ClearPedTypeAsAcquaintance);
-    Install("CPedType", "PoliceDontCareAboutCrimesAgainstPedType", 0x608A40, &CPedType::PoliceDontCareAboutCrimesAgainstPedType);
+    RH_ScopedClass(CPedType);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x608E40);
+    RH_ScopedInstall(Shutdown, 0x608B00);
+    RH_ScopedInstall(Save, 0x5D3CD0);
+    RH_ScopedInstall(Load, 0x5D3D10);
+    RH_ScopedInstall(LoadPedData, 0x608B30);
+    RH_ScopedInstall(FindPedType, 0x608790);
+    RH_ScopedInstall(GetPedFlag, 0x608830);
+    RH_ScopedOverloadedInstall(GetPedTypeAcquaintances, "1", 0x6089B0, CAcquaintance*(*)(ePedType));
+    // RH_ScopedOverloadedInstall(GetPedTypeAcquaintances, "2", 0x6089D0, CAcquaintance*(*)(AcquaintanceId, ePedType));  // todo: breaks ReversibleHooks
+    RH_ScopedInstall(SetPedTypeAsAcquaintance, 0x608E20);
+    RH_ScopedInstall(ClearPedTypeAcquaintances, 0x608A20);
+    RH_ScopedInstall(ClearPedTypeAsAcquaintance, 0x6089F0);
+    RH_ScopedInstall(PoliceDontCareAboutCrimesAgainstPedType, 0x608A40);
 }
 
 // 0x608E40
@@ -44,7 +46,7 @@ void CPedType::Shutdown() {
 // 0x608B30
 void CPedType::LoadPedData() {
     ePedType pedType = PED_TYPE_MISSION8;
-    FILESTREAM file = CFileMgr::OpenFile("DATA\\PED.DAT", "r");
+    auto file = CFileMgr::OpenFile("DATA\\PED.DAT", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;

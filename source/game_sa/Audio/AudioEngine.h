@@ -11,7 +11,8 @@ class CEntity;
 class CColPoint;
 class CVector;
 
-struct tBeatInfo {
+class tBeatInfo {
+public:
     char  f0[12];
     char  fC[148];
     int32 m_beatInfoPresent;
@@ -72,13 +73,13 @@ public:
     static void DisableEffectsLoading();
 
     void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
-    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float a5);
+    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* entity);
     void ReportGlassCollisionEvent(eAudioEvents, CVector&);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float volume, bool forcePlaySplashSound);
     void ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical);
-    void ReportDoorMovement(CPhysical* pPhysical);
+    void ReportDoorMovement(CPhysical* physical);
     void ReportMissionAudioEvent(uint16 eventId, CVector& posn);
     void ReportMissionAudioEvent(uint16 eventId, CObject* object);
     void ReportMissionAudioEvent(uint16 eventId, CPed* ped);

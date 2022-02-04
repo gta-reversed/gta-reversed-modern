@@ -22,7 +22,7 @@ public:
 public:
     static void InjectHooks();
 
-    void Construct(CVehicle* pVeh);
-    void Extract(CVehicle* pVeh);
+    void Construct(CVehicle* v);
+    void Extract(CVehicle* v);
 };
 VALIDATE_SIZE(CVehicleSaveStructure, 0x68);

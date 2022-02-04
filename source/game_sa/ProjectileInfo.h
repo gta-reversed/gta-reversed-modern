@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,8 +7,9 @@
 #pragma once
 
 #include "eWeaponType.h"
-#include "Projectile.h"
-#include "FxSystem_c.h"
+
+class CProjectile;
+class FxSystem_c;
 
 extern uint32 MAX_PROJECTILES; // default 32
 
@@ -29,8 +30,8 @@ public:
     static void InjectHooks();
 
     static void Initialise();
-    static void RemoveFXSystem(uint8 bInstantly);
     static void Shutdown();
+    void RemoveFXSystem(bool bInstantly);
     static CProjectileInfo* GetProjectileInfo(int32 infoId);
     static void RemoveNotAdd(CEntity* creator, eWeaponType weaponType, CVector posn);
     static bool AddProjectile(CEntity* creator, eWeaponType eWeaponType, CVector posn, float force, CVector* direction, CEntity* victim);

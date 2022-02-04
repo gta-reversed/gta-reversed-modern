@@ -61,7 +61,7 @@ public:
 
     void ComputeAttractTime(int32 unused, bool time1_or_time2, float& outTime) const;
 
-    virtual void ComputeAttractPos(int32 pedId, CVector& outPosn);
+    virtual void ComputeAttractPos(int32 pedId, CVector& outPos);
     virtual void ComputeAttractHeading(int32 bQueue, float& heading);
     virtual void BroadcastDeparture(CPed* ped);
 

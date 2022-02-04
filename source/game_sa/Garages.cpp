@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 CStoredCar(&CGarages::aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE])0x96ABD4;
-CGarage(&CGarages::aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[MAX_NUM_GARAGES])0x96C048;;
+CGarage(&CGarages::aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[MAX_NUM_GARAGES])0x96C048;
 
 CGarage*& CGarages::LastGaragePlayerWasIn = *(CGarage**)0x96BFDC;
 uint32& CGarages::LastTimeHelpMessage = *(uint32*)0x96BFE0;
@@ -26,6 +26,9 @@ CGarage*& pOldToGarageWeAreIn = *(CGarage**)0x96BFD8;
 
 void CGarages::InjectHooks()
 {
+    RH_ScopedClass(CGarages);
+    RH_ScopedCategoryGlobal();
+
 }
 
 // 0x447120
@@ -46,6 +49,16 @@ void CGarages::PrintMessages()
     plugin::Call<0x447790>();
 }
 
+// 0x5D3270
+bool CGarages::Load() {
+    return plugin::CallAndReturn<bool, 0x5D3270>();
+}
+
+// 0x5D3160
+bool CGarages::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3160>();
+}
+
 // 0x447B80
 void CGarages::TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax)
 {
@@ -59,9 +72,9 @@ bool CGarages::IsModelIndexADoor(int32 nModelIndex)
 }
 
 // 0x44A240
-int32 CGarages::FindGarageForObject(CObject* pObject)
+int32 CGarages::FindGarageForObject(CObject* obj)
 {
-    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(pObject);
+    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(obj);
 }
 
 // Garage flags
@@ -72,4 +85,14 @@ int32 CGarages::FindGarageForObject(CObject* pObject)
 // 0x4471E0
 void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32 a10, char* name, uint32 door) {
     plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, eGarageType, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, door);
+}
+
+// 0x44A3C0
+void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* vehicle) {
+    plugin::Call<0x44A3C0, CVehicle*>(vehicle);
+}
+
+// 0x448900
+bool CGarages::IsPointWithinHideOutGarage(CVector& pos) {
+    return plugin::CallAndReturn<bool, 0x448900, CVector&>(pos);
 }

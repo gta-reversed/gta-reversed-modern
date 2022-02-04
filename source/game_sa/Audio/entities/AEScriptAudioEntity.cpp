@@ -111,25 +111,27 @@ void CAEScriptAudioEntity::Service() {
 }
 
 void CAEScriptAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAEScriptAudioEntity", "CAEScriptAudioEntity", 0x5074D0, &CAEScriptAudioEntity::Constructor);
-    Install("CAEScriptAudioEntity", "Initialise", 0x5B9B60, &CAEScriptAudioEntity::Initialise);
-    // Install("CAEScriptAudioEntity", "Reset", 0x4EC150, &CAEScriptAudioEntity::Reset);
-    // Install("CAEScriptAudioEntity", "GetMissionAudioLoadingStatus", 0x4EBF60, &CAEScriptAudioEntity::GetMissionAudioLoadingStatus);
-    // Install("CAEScriptAudioEntity", "IsMissionAudioSampleFinished", 0x4EBFE0, &CAEScriptAudioEntity::IsMissionAudioSampleFinished);
-    // Install("CAEScriptAudioEntity", "GetMissionAudioEvent", 0x4EC020, &CAEScriptAudioEntity::GetMissionAudioEvent);
-    // Install("CAEScriptAudioEntity", "ClearMissionAudio", 0x4EC040, &CAEScriptAudioEntity::ClearMissionAudio);
-    // Install("CAEScriptAudioEntity", "SetMissionAudioPosition", 0x4EC0C0, &CAEScriptAudioEntity::SetMissionAudioPosition);
-    // Install("CAEScriptAudioEntity", "AttachMissionAudioToPhysical", 0x4EC100, &CAEScriptAudioEntity::AttachMissionAudioToPhysical);
-    // Install("CAEScriptAudioEntity", "PreloadMissionAudio", 0x4EC190, &CAEScriptAudioEntity::PreloadMissionAudio);
-    // Install("CAEScriptAudioEntity", "PlayLoadedMissionAudio", 0x4EC270, &CAEScriptAudioEntity::PlayLoadedMissionAudio);
-    // Install("CAEScriptAudioEntity", "GetMissionAudioPosition", 0x4EC4D0, &CAEScriptAudioEntity::GetMissionAudioPosition);
-    // Install("CAEScriptAudioEntity", "PlayResidentSoundEvent", 0x4EC550, &CAEScriptAudioEntity::PlayResidentSoundEvent);
-    // Install("CAEScriptAudioEntity", "PlayMissionBankSound", 0x4EC6D0, &CAEScriptAudioEntity::PlayMissionBankSound);
-    // Install("CAEScriptAudioEntity", "ProcessMissionAudioEvent", 0x4ECCF0, &CAEScriptAudioEntity::ProcessMissionAudioEvent);
-    // Install("CAEScriptAudioEntity", "ReportMissionAudioEvent_1", 0x4EE960, static_cast<void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float)>(&CAEScriptAudioEntity::ReportMissionAudioEvent));
-    // Install("CAEScriptAudioEntity", "ReportMissionAudioEvent_2", 0x4EE940, static_cast<void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&)>(&CAEScriptAudioEntity::ReportMissionAudioEvent));
-    // Install("CAEScriptAudioEntity", "UpdateParameters", 0x4EC970, &CAEScriptAudioEntity::UpdateParameters_Reversed);
+    RH_ScopedClass(CAEScriptAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    // RH_ScopedInstall(Constructor, 0x5074D0);
+    RH_ScopedInstall(Initialise, 0x5B9B60);
+    // RH_ScopedInstall(Reset, 0x4EC150);
+    // RH_ScopedInstall(GetMissionAudioLoadingStatus, 0x4EBF60);
+    // RH_ScopedInstall(IsMissionAudioSampleFinished, 0x4EBFE0);
+    // RH_ScopedInstall(GetMissionAudioEvent, 0x4EC020);
+    // RH_ScopedInstall(ClearMissionAudio, 0x4EC040);
+    // RH_ScopedInstall(SetMissionAudioPosition, 0x4EC0C0);
+    // RH_ScopedInstall(AttachMissionAudioToPhysical, 0x4EC100);
+    // RH_ScopedInstall(PreloadMissionAudio, 0x4EC190);
+    // RH_ScopedInstall(PlayLoadedMissionAudio, 0x4EC270);
+    // RH_ScopedInstall(GetMissionAudioPosition, 0x4EC4D0);
+    // RH_ScopedInstall(PlayResidentSoundEvent, 0x4EC550);
+    // RH_ScopedInstall(PlayMissionBankSound, 0x4EC6D0);
+    // RH_ScopedInstall(ProcessMissionAudioEvent, 0x4ECCF0);
+    // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "1", 0x4EE960, void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float));
+    // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "2", 0x4EE940, void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&));
+    // RH_ScopedInstall(UpdateParameters_Reversed, 0x4EC970);
 }
 
 CAEScriptAudioEntity* CAEScriptAudioEntity::Constructor() {

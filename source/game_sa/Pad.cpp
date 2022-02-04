@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -21,13 +21,16 @@ CPad* CPad::Pads = (CPad*)0xB73458; // size is 2
 bool& CPad::bInvertLook4Pad = *(bool*)0xB73402;
 
 void CPad::InjectHooks() {
+    RH_ScopedClass(CPad);
+    RH_ScopedCategoryGlobal();
+
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
-    ReversibleHooks::Install("CPad", "isEnterJustPressed", 0x4D5980, &CPad::isEnterJustPressed);
-    ReversibleHooks::Install("CPad", "isStandardKeyJustPressed", 0x4D59B0, &CPad::isStandardKeyJustPressed);
-    ReversibleHooks::Install("CPad", "isMenuKeyJustPressed", 0x744D50, &CPad::isMenuKeyJustPressed);
-    ReversibleHooks::Install("CPad", "isTabJustPressed", 0x744D90, &CPad::isTabJustPressed);
-    ReversibleHooks::Install("CPad", "Clear", 0x541A70, &CPad::Clear);
+    RH_ScopedInstall(isEnterJustPressed, 0x4D5980);
+    RH_ScopedInstall(isStandardKeyJustPressed, 0x4D59B0);
+    RH_ScopedInstall(isMenuKeyJustPressed, 0x744D50);
+    RH_ScopedInstall(isTabJustPressed, 0x744D90);
+    RH_ScopedInstall(Clear, 0x541A70);
 }
 
 // 0x541D90
@@ -41,8 +44,8 @@ void CPad::UpdateMouse() {
 }
 
 // 0x53F530
-void CPad::ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB) {
-    plugin::CallMethod<0x53F530, CPad*, CControllerState const&, CControllerState const&>(this, controllerA, controllerB);
+void CPad::ReconcileTwoControllersInput(const CControllerState& controllerA, const CControllerState& controllerB) {
+    plugin::CallMethod<0x53F530, CPad*, const CControllerState&, const CControllerState&>(this, controllerA, controllerB);
 }
 
 // 0x53F910
@@ -101,12 +104,12 @@ int16 CPad::GetSteeringUpDown() {
     return plugin::CallMethodAndReturn<int16, 0x53FBD0, CPad*>(this);
 }
 
-int16 CPad::GetPedWalkLeftRight(CPed* pPed) {
-    return plugin::CallMethodAndReturn<int16, 0x540DC0, CPad*, CPed*>(this, pPed);
+int16 CPad::GetPedWalkLeftRight(CPed* ped) {
+    return plugin::CallMethodAndReturn<int16, 0x540DC0, CPad*, CPed*>(this, ped);
 }
 
-int16 CPad::GetPedWalkUpDown(CPed* pPed) {
-    return plugin::CallMethodAndReturn<int16, 0x540E20, CPad*, CPed*>(this, pPed);
+int16 CPad::GetPedWalkUpDown(CPed* ped) {
+    return plugin::CallMethodAndReturn<int16, 0x540E20, CPad*, CPed*>(this, ped);
 }
 
 // 0x53FC90
@@ -422,9 +425,9 @@ uint32 CPad::GetTouchedTimeDelta()
     return plugin::CallMethodAndReturn<uint32, 0x53F210, CPad*>(this);
 }
 
-bool CPad::WeaponJustDown(CPed* pPed)
+bool CPad::WeaponJustDown(CPed* ped)
 {
-    return plugin::CallMethodAndReturn<bool, 0x540250, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<bool, 0x540250, CPad*, CPed*>(this, ped);
 }
 
 bool CPad::GetEnterTargeting()
@@ -432,19 +435,19 @@ bool CPad::GetEnterTargeting()
     return plugin::CallMethodAndReturn<bool, 0x5406B0, CPad*>(this);
 }
 
-int32 CPad::GetWeapon(CPed* pPed)
+int32 CPad::GetWeapon(CPed* ped)
 {
-    return plugin::CallMethodAndReturn<int32, 0x540180, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int32, 0x540180, CPad*, CPed*>(this, ped);
 }
 
-int16 CPad::AimWeaponLeftRight(CPed* pPed)
+int16 CPad::AimWeaponLeftRight(CPed* ped)
 {
-    return plugin::CallMethodAndReturn<int16, 0x541040, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int16, 0x541040, CPad*, CPed*>(this, ped);
 }
 
-int16 CPad::AimWeaponUpDown(CPed* pPed)
+int16 CPad::AimWeaponUpDown(CPed* ped)
 {
-    return plugin::CallMethodAndReturn<int16, 0x5410C0, CPad*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<int16, 0x5410C0, CPad*, CPed*>(this, ped);
 }
 
 bool CPad::IsStandardKeyJustDown(uint8 key)
@@ -482,7 +485,7 @@ bool CPad::isEnterJustPressed() {
 
 // 0x4D59B0
 bool CPad::isStandardKeyJustPressed(uint8 key) {
-    return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key];;
+    return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key];
 }
 
 // 0x744D50

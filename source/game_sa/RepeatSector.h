@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,6 +16,14 @@ enum eRepeatSectorList {
 
 class CRepeatSector {
 public:
+    CPtrListDoubleLink& GetList(eRepeatSectorList type) noexcept {
+        return m_lists[type];
+    }
+
+    const CPtrListDoubleLink& GetList(eRepeatSectorList type) const noexcept {
+        return m_lists[type];
+    }
+//private: Preferrably use the accessor method
     CPtrListDoubleLink m_lists[3];
 };
 

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AutoPilot.h"
+
 CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
 {
     _smthNext = 1;
@@ -27,7 +29,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucTempActionMode = 0;
     m_ucCarMissionModeCounter = 0;
     field_41 = 0;
-    field_44 = 1.0;
+    field_44 = 1.0f;
     m_ucHeliSpeedMult = 0;   
     movementFlags.bIsStopped = false;
     movementFlags.bIsParked = false;
@@ -36,7 +38,11 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucHeliTargetDist2 = 10;
     field_50 = rand() % 8 + 2;
     m_vehicleRecordingId = -1;
-    m_bPlaneDogfightSomething = 0;
+    m_bPlaneDogfightSomething = false;
     m_pCarWeMakingSlowDownFor = nullptr;
     m_fMaxTrafficSpeed = 0.0F;
+}
+
+void CAutoPilot::ModifySpeed(float target) {
+    plugin::CallMethod<0x41B980, CAutoPilot*, float>(this, target);
 }

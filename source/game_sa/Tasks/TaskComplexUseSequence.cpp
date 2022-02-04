@@ -2,13 +2,16 @@
 
 void CTaskComplexUseSequence::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CTaskComplexUseSequence", 0x635450, &CTaskComplexUseSequence::Constructor);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "Clone", 0x637100, &CTaskComplexUseSequence::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "GetTaskType", 0x635490, &CTaskComplexUseSequence::GetId_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "MakeAbortable", 0x639730, &CTaskComplexUseSequence::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CreateNextSubTask", 0x6354A0, &CTaskComplexUseSequence::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "CreateFirstSubTask", 0x6354D0, &CTaskComplexUseSequence::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSequence", "ControlSubTask", 0x635530, &CTaskComplexUseSequence::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexUseSequence);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(Constructor, 0x635450);
+    RH_ScopedInstall(Clone_Reversed, 0x637100);
+    RH_ScopedInstall(GetId_Reversed, 0x635490);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x639730);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6354A0);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6354D0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x635530);
 }
 
 // 0x635450

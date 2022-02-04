@@ -1,7 +1,8 @@
 #pragma once
 
 #include "ListItem_c.h"
-#include "Object.h"
+
+class CObject;
 
 #ifdef GetObject
 #undef GetObject
@@ -39,14 +40,14 @@ public:
 public:
     static void InjectHooks();
 
-    bool Init(int32 nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth);
+    bool Init(int32 nType, CVector* vecPos, WaterCreature_c* parent, float fWaterLevel, float fWaterDepth);
     void Exit();
     void Update(float fTimeStep);
 
 public:
-    CObject* GetObject() const { return m_pObject; }
-    bool IsJellyfish() const { return m_nCreatureType == JELLYFISH1 || m_nCreatureType == JELLYFISH2; }
-    bool IsSmallFish() const {
+    [[nodiscard]] CObject* GetObject() const { return m_pObject; }
+    [[nodiscard]] bool IsJellyfish() const { return m_nCreatureType == JELLYFISH1 || m_nCreatureType == JELLYFISH2; }
+    [[nodiscard]] bool IsSmallFish() const {
         return m_nCreatureType == FISH1
             || m_nCreatureType == FISH2
             || m_nCreatureType == FISH3;

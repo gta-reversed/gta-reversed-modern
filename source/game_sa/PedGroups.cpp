@@ -9,6 +9,9 @@ uint32& CPedGroups::ms_iNoOfPlayerKills = *reinterpret_cast<uint32*>(0xC098EC);
 CPedGroup (&CPedGroups::ms_groups)[8] = *reinterpret_cast<CPedGroup (*)[8]>(0xC09920);
 
 void CPedGroups::InjectHooks() {
+    RH_ScopedClass(CPedGroups);
+    RH_ScopedCategoryGlobal();
+
 
 }
 
@@ -77,6 +80,10 @@ void CPedGroups::Process() {
 // 0x5F7F10
 bool CPedGroups::IsInPlayersGroup(CPed* ped) {
     return plugin::CallAndReturn<bool, 0x5F7F10, CPed*>(ped);
+}
+
+CPedGroup& CPedGroups::GetGroup(int32 groupId) {
+    return ms_groups[groupId];
 }
 
 // 0x5F7F40

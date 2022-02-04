@@ -6,21 +6,23 @@
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
 void IKChainManager_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("IKChainManager_c", "IsArmPointing", 0x6182B0, &IKChainManager_c::IsArmPointing);
-    // Install("IKChainManager_c", "AbortPointArm", 0x6182F0, &IKChainManager_c::AbortPointArm);
-    // Install("IKChainManager_c", "CanAccept", 0x618800, &IKChainManager_c::CanAccept);
-    // Install("IKChainManager_c", "Init", 0x6180A0, &IKChainManager_c::Init);
-    // Install("IKChainManager_c", "Exit", 0x6180D0, &IKChainManager_c::Exit);
-    // Install("IKChainManager_c", "Reset", 0x618140, &IKChainManager_c::Reset);
-    // Install("IKChainManager_c", "RemoveIKChain", 0x618170, &IKChainManager_c::RemoveIKChain);
-    // Install("IKChainManager_c", "IsLooking", 0x6181A0, &IKChainManager_c::IsLooking);
-    // Install("IKChainManager_c", "GetLookAtEntity", 0x6181D0, &IKChainManager_c::GetLookAtEntity);
-    // Install("IKChainManager_c", "AbortLookAt", 0x618280, &IKChainManager_c::AbortLookAt);
-    // Install("IKChainManager_c", "Update", 0x6186D0, &IKChainManager_c::Update);
-    // Install("IKChainManager_c", "AddIKChain", 0x618750, &IKChainManager_c::AddIKChain);
-    // Install("IKChainManager_c", "CanAcceptLookAt", 0x6188B0, &IKChainManager_c::CanAcceptLookAt);
-    // Install("IKChainManager_c", "LookAt", 0x618970, &IKChainManager_c::LookAt);
+    RH_ScopedClass(IKChainManager_c);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(IsArmPointing, 0x6182B0);
+    // RH_ScopedInstall(AbortPointArm, 0x6182F0);
+    // RH_ScopedInstall(CanAccept, 0x618800);
+    // RH_ScopedInstall(Init, 0x6180A0);
+    // RH_ScopedInstall(Exit, 0x6180D0);
+    // RH_ScopedInstall(Reset, 0x618140);
+    // RH_ScopedInstall(RemoveIKChain, 0x618170);
+    // RH_ScopedInstall(IsLooking, 0x6181A0);
+    // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
+    // RH_ScopedInstall(AbortLookAt, 0x618280);
+    // RH_ScopedInstall(Update, 0x6186D0);
+    // RH_ScopedInstall(AddIKChain, 0x618750);
+    // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
+    // RH_ScopedInstall(LookAt, 0x618970);
 }
 
 // 0x6180A0
@@ -40,7 +42,7 @@ void IKChainManager_c::Reset() {
 
 // 0x6186D0
 void IKChainManager_c::Update(float a1) {
-    return plugin::CallMethod<0x6186D0, float>(a1);
+    return plugin::CallMethod<0x6186D0, IKChainManager_c*, float>(this, a1);
 }
 
 // 0x618750
@@ -69,8 +71,8 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
 }
 
 // 0x618210
-void IKChainManager_c::GetLookAtOffset(CPed* ped, CVector* outPosn) {
-    plugin::CallMethod<0x618210, IKChainManager_c*, CPed*, CVector*>(this, ped, outPosn);
+void IKChainManager_c::GetLookAtOffset(CPed* ped, CVector* outPos) {
+    plugin::CallMethod<0x618210, IKChainManager_c*, CPed*, CVector*>(this, ped, outPos);
 }
 
 // 0x618280
@@ -85,7 +87,7 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 
 // 0x618970
 void IKChainManager_c::LookAt(Const char* name, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool bArg7, float fSpeed, int32 blendTime, int32 a10, bool bForceLooking) {
-    plugin::CallMethod<0x618970, IKChainManager_c*, Const char*, CPed*, CEntity*, int32, int32, CVector*, bool, float, int32, int32, bool>(this, name, ped, targetEntity, time, pedBoneId, posn, bArg7, fSpeed, blendTime, a10, bForceLooking);
+    plugin::CallMethod<0x618970, IKChainManager_c*, const char*, CPed*, CEntity*, int32, ePedBones, CVector*, bool, float, int32, int32, bool>(this, name, ped, targetEntity, time, pedBoneId, posn, bArg7, fSpeed, blendTime, a10, bForceLooking);
 }
 
 bool IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) {
@@ -99,7 +101,7 @@ void IKChainManager_c::AbortPointArm(int32 a1, CPed* ped, int32 a3) {
 
 // 0x618330
 bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 a2) {
-    return plugin::CallMethodAndReturn<bool, 0x0, IKChainManager_c*, CPed*, int32>(this, ped, a2);
+    return plugin::CallMethodAndReturn<bool, 0x618330, IKChainManager_c*, CPed*, int32>(this, ped, a2);
 }
 
 // 0x618B60

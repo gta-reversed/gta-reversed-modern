@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,8 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "RunningScript.h"
+
+class CRunningScript;
 
 class CStreamedScripts {
 public:
@@ -24,8 +25,8 @@ public:
     int16 m_nCountOfScripts;
     int16 field_A46;
 
-    int32           FindStreamedScript(char const* scriptname);
-    int32           FindStreamedScriptQuiet(char const* scriptName);
+    int32           FindStreamedScript(const char* scriptName);
+    int32           FindStreamedScriptQuiet(const char* scriptName);
     int16           GetProperIndexFromIndexUsedByScript(int16 scmIndex);
     const char*     GetStreamedScriptFilename(uint16 index);
     uint16          GetStreamedScriptWithThisStartAddress(uint8* dataPtr);
@@ -33,7 +34,7 @@ public:
     void            LoadStreamedScript(RwStream* stream, int32 index);
     void            ReInitialise();
     void            ReadStreamedScriptData();
-    int32           RegisterScript(char const* scriptName);
+    int32           RegisterScript(const char* scriptName);
     void            RemoveStreamedScriptFromMemory(int32 index);
     CRunningScript* StartNewStreamedScript(int32 index);
 };

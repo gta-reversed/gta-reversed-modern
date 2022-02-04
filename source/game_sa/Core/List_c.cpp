@@ -1,75 +1,74 @@
 #include "StdInc.h"
 
-void List_c::InjectHooks()
-{
-    ReversibleHooks::Install("List_c", "AddItem", 0x4A8DF0, &List_c::AddItem);
-    ReversibleHooks::Install("List_c", "RemoveItem", 0x4A8E30, &List_c::RemoveItem);
-    ReversibleHooks::Install("List_c", "RemoveHead", 0x4A8E70, &List_c::RemoveHead);
-    ReversibleHooks::Install("List_c", "RemoveTail", 0x4A8FD0, &List_c::RemoveTail);
-    ReversibleHooks::Install("List_c", "RemoveAll", 0x4A8EB0, &List_c::RemoveAll);
-    ReversibleHooks::Install("List_c", "InsertAfterItem", 0x4A8F10, &List_c::InsertAfterItem);
-    ReversibleHooks::Install("List_c", "InsertBeforeItem", 0x4A8F70, &List_c::InsertBeforeItem);
-    ReversibleHooks::Install("List_c", "GetNext", 0x4A8FF0, &List_c::GetNext);
-    ReversibleHooks::Install("List_c", "GetPrev", 0x4A9000, &List_c::GetPrev);
-    ReversibleHooks::Install("List_c", "GetNumItems", 0x4A8EC0, &List_c::GetNumItems);
-    ReversibleHooks::Install("List_c", "GetItemOffset", 0x4A9010, &List_c::GetItemOffset);
+#include "List_c.h"
+
+void List_c::InjectHooks() {
+    RH_ScopedClass(List_c);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(AddItem, 0x4A8DF0);
+    RH_ScopedInstall(RemoveItem, 0x4A8E30);
+    RH_ScopedInstall(RemoveHead, 0x4A8E70);
+    RH_ScopedInstall(RemoveTail, 0x4A8FD0);
+    RH_ScopedInstall(RemoveAll, 0x4A8EB0);
+    RH_ScopedInstall(InsertAfterItem, 0x4A8F10);
+    RH_ScopedInstall(InsertBeforeItem, 0x4A8F70);
+    RH_ScopedInstall(GetNext, 0x4A8FF0);
+    RH_ScopedInstall(GetPrev, 0x4A9000);
+    RH_ScopedInstall(GetNumItems, 0x4A8EC0);
+    RH_ScopedInstall(GetItemOffset, 0x4A9010);
 }
 
-// US-1.00 @ 0x004A8DF0
-// EU-1.00 @ 0x004A8DF0
-void List_c::AddItem(ListItem_c * pItem) {
-    assert(pItem);
+// 0x4A8DF0
+void List_c::AddItem(ListItem_c* item) {
+    assert(item);
     auto* pOldHead = m_pHead;
-    m_pHead = pItem;
-    pItem->m_pPrev = nullptr;
-    pItem->m_pNext = pOldHead;
+    m_pHead = item;
+    item->m_pPrev = nullptr;
+    item->m_pNext = pOldHead;
 
     if (pOldHead)
-        pOldHead->m_pPrev = pItem;
+        pOldHead->m_pPrev = item;
     else
-        m_pTail = pItem;
+        m_pTail = item;
 
     ++m_nCount;
 }
 
-// US-1.00 @ 0x004A8E30
-// EU-1.00 @ 0x004A8E30
-void List_c::RemoveItem(ListItem_c * pItem) {
-    assert(pItem);
+// 0x4A8E30
+void List_c::RemoveItem(ListItem_c* item) {
+    assert(item);
 
-    if (pItem->m_pNext)
-        pItem->m_pNext->m_pPrev = pItem->m_pPrev;
+    if (item->m_pNext)
+        item->m_pNext->m_pPrev = item->m_pPrev;
     else
-        m_pTail = pItem->m_pPrev;
+        m_pTail = item->m_pPrev;
 
-    if (pItem->m_pPrev)
-        pItem->m_pPrev->m_pNext = pItem->m_pNext;
+    if (item->m_pPrev)
+        item->m_pPrev->m_pNext = item->m_pNext;
     else
-        m_pHead = pItem->m_pNext;
+        m_pHead = item->m_pNext;
 
     --m_nCount;
 }
 
-ListItem_c * List_c::GetHead() {
+ListItem_c* List_c::GetHead() {
     return m_pHead;
 }
 
-ListItem_c* List_c::GetTail()
-{
+ListItem_c* List_c::GetTail() {
     return m_pTail;
 }
 
-
-// EU-1.00 @ 0x004A8E70
-ListItem_c * List_c::RemoveHead() {
-    //return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
+// 0x4A8E70
+ListItem_c* List_c::RemoveHead() {
+    // return plugin::CallMethodAndReturn<ListItem_c *, 0x004A8E70, List_c *>(this);
     if (!m_pHead)
         return nullptr;
 
     --m_nCount;
     auto* pOldHead = m_pHead;
-    if (m_pHead == m_pTail)
-    {
+    if (m_pHead == m_pTail) {
         m_pTail = nullptr;
         m_pHead = nullptr;
         return pOldHead;
@@ -82,8 +81,7 @@ ListItem_c * List_c::RemoveHead() {
     return pOldHead;
 }
 
-ListItem_c* List_c::RemoveTail()
-{
+ListItem_c* List_c::RemoveTail() {
     if (!m_pTail)
         return nullptr;
 
@@ -94,116 +92,102 @@ ListItem_c* List_c::RemoveTail()
     return pOldTail;
 }
 
-void List_c::RemoveAll()
-{
+void List_c::RemoveAll() {
     m_pHead = nullptr;
     m_pTail = nullptr;
     m_nCount = 0;
 }
 
-uint32 List_c::GetNumItems()
-{
+uint32 List_c::GetNumItems() {
     return m_nCount;
 }
 
-void List_c::AppendItem(ListItem_c* pItem)
-{
+void List_c::AppendItem(ListItem_c* item) {
     auto* pOldTail = m_pTail;
-    m_pTail = pItem;
-    pItem->m_pPrev = pOldTail;
-    pItem->m_pNext = nullptr;
+    m_pTail = item;
+    item->m_pPrev = pOldTail;
+    item->m_pNext = nullptr;
 
     if (pOldTail)
-        pOldTail->m_pNext = pItem;
+        pOldTail->m_pNext = item;
     else
-        m_pHead = pItem;
+        m_pHead = item;
 
     ++m_nCount;
 }
 
-void List_c::InsertAfterItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem)
-{
-    ++m_nCount; //BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
+void List_c::InsertAfterItem(ListItem_c* addedItem, ListItem_c* pExistingItem) {
+    ++m_nCount; // BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
     if (!m_pHead)
         return;
 
-    auto pCurItem = GetHead();
-    while (pCurItem && pCurItem != pExistingItem)
-        pCurItem = GetNext(pCurItem);
+    auto curItem = GetHead();
+    while (curItem && curItem != pExistingItem)
+        curItem = GetNext(curItem);
 
-    if (!pCurItem)
+    if (!curItem)
         return;
 
-    pAddedItem->m_pPrev = pCurItem;
-    pAddedItem->m_pNext = pCurItem->m_pNext;
-    auto* pOldNext = pCurItem->m_pNext;
-    pCurItem->m_pNext = pAddedItem;
+    addedItem->m_pPrev = curItem;
+    addedItem->m_pNext = curItem->m_pNext;
+    auto* pOldNext = curItem->m_pNext;
+    curItem->m_pNext = addedItem;
     if (pOldNext)
-        pOldNext->m_pPrev = pAddedItem;
+        pOldNext->m_pPrev = addedItem;
     else
-        m_pTail = pAddedItem;
+        m_pTail = addedItem;
 }
 
-void List_c::InsertBeforeItem(ListItem_c* pAddedItem, ListItem_c* pExistingItem)
-{
-    ++m_nCount; //BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
+void List_c::InsertBeforeItem(ListItem_c* addedItem, ListItem_c* pExistingItem) {
+    ++m_nCount; // BUG: We increment count even though the item wasn't added to table, and there's no certainity that it will
     if (!m_pHead)
         return;
 
-    auto pCurItem = GetHead();
-    while (pCurItem && pCurItem != pExistingItem)
-        pCurItem = GetNext(pCurItem);
+    auto curItem = GetHead();
+    while (curItem && curItem != pExistingItem)
+        curItem = GetNext(curItem);
 
-    if (!pCurItem)
+    if (!curItem)
         return;
 
-    pAddedItem->m_pPrev = pCurItem->m_pPrev;
-    pAddedItem->m_pNext = pCurItem;
-    auto* pOldPrev = pCurItem->m_pPrev;
-    pCurItem->m_pPrev = pAddedItem;
-    if (pOldPrev)
-        pOldPrev->m_pNext = pAddedItem;
+    addedItem->m_pPrev = curItem->m_pPrev;
+    addedItem->m_pNext = curItem;
+    auto* oldPrev = curItem->m_pPrev;
+    curItem->m_pPrev = addedItem;
+    if (oldPrev)
+        oldPrev->m_pNext = addedItem;
     else
-        m_pHead = pAddedItem;
+        m_pHead = addedItem;
 }
 
-ListItem_c * List_c::GetNext(ListItem_c * pItem) {
-    assert(pItem);
-    return pItem->m_pNext;
+ListItem_c* List_c::GetNext(ListItem_c* item) {
+    assert(item);
+    return item->m_pNext;
 }
 
-// US-1.00 @ 0x004A9000
-// EU-1.00 @ 0x004A9000
-ListItem_c * List_c::GetPrev(ListItem_c * pItem) {
-    assert(pItem);
-    return pItem->m_pPrev;
+// 0x4A9000
+ListItem_c* List_c::GetPrev(ListItem_c* item) {
+    assert(item);
+    return item->m_pPrev;
 }
 
-// US-1.00 @ 0x004A9010
-// EU-1.00 @ 0x004A9010
-ListItem_c * List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
-    if (bFromHead)
-    {
+// 0x4A9010
+ListItem_c* List_c::GetItemOffset(bool bFromHead, int32 iOffset) {
+    if (bFromHead) {
         auto* result = GetHead();
-        if (iOffset > 0 && result)
-        {
+        if (iOffset > 0 && result) {
             int32 iCounter = 0;
-            while (iCounter < iOffset && result)
-            {
+            while (iCounter < iOffset && result) {
                 ++iCounter;
                 result = GetNext(result);
             }
         }
         return result;
-    }
-    else
-    {
+    } else {
         auto* result = GetTail();
-        if (iOffset > 0 && result)
-        {
+        if (iOffset > 0 && result) {
             int32 iCounter = 0;
-            while (iCounter < iOffset && result)
-            {
+            while (iCounter < iOffset && result) {
                 ++iCounter;
                 result = GetPrev(result);
             }

@@ -3,6 +3,7 @@
 #include "TaskComplexObserveTrafficLights.h"
 #include "TaskSimpleRunAnim.h"
 #include "TaskSimpleStandStill.h"
+#include "TrafficLights.h"
 
 // 0x631790
 CTaskComplexObserveTrafficLights::CTaskComplexObserveTrafficLights() : CTaskComplex() {
