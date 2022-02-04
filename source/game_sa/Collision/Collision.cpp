@@ -297,7 +297,7 @@ bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& s
 void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint) {
     const auto pointToCenter = box.GetCenter() - point;
 
-    // Calculate component-wise distance to the closest corner (either box.min or box.max)
+    // Calculate point's component-wise distance to each corner on each axis
     #define DoAxis(a) pointToCenter.a <= 0 ? point.a - box.m_vecMin.a : box.m_vecMax.a - point.a
     const CVector pointToClosest{ DoAxis(x), DoAxis(y), DoAxis(z) };
     #undef DoAxis
