@@ -888,7 +888,7 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
 
 // 0x554B10
 void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
-    if (sectorX < 0 && sectorY < 0 && sectorX > MAX_LOD_PTR_LISTS_X && sectorY > MAX_LOD_PTR_LISTS_Y)
+    if (sectorX < 0 || sectorY < 0 || sectorX >= MAX_LOD_PTR_LISTS_X || sectorY >= MAX_LOD_PTR_LISTS_Y)
         return;
 
     bool bRequestModel = false;
