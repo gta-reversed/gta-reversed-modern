@@ -27,7 +27,7 @@ public:
 
     bool AffectsPed_Reversed(CPed* ped);
     CEventEditableResponse* CloneEditable_Reversed();
-    static bool IsEffectActive(CEntity* entity, C2dEffect const* effect);
+    static bool IsEffectActive(CEntity* entity, const C2dEffect* effect);
 };
 
 VALIDATE_SIZE(CEventAttractor, 0x20);

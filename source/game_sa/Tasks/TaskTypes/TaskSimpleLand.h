@@ -14,7 +14,6 @@ class CTaskSimpleLand : public CTaskSimple {
         };
         uint8 m_nFlags;
     };
-    uint8 _pad_11[3];
 
 public:
     CTaskSimpleLand(AnimationId nAnimId);
@@ -31,7 +30,7 @@ public:
     bool LeftFootLanded();
     bool RightFootLanded();
 
-    static void FinishAnimCB(CAnimBlendAssociation* pAnim, void* data);
+    static void FinishAnimCB(CAnimBlendAssociation* anim, void* data);
 
 private:
     friend void InjectHooksMain();

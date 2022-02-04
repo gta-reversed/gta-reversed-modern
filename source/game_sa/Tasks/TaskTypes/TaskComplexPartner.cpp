@@ -3,7 +3,9 @@
 #include "TaskComplexPartner.h"
 
 void CTaskComplexPartner::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexPartner", "CTaskComplexPartner", 0x681E70, &CTaskComplexPartner::Constructor);
+    RH_ScopedClass(CTaskComplexPartner);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x681E70);
 }
 
 // 0x681E70

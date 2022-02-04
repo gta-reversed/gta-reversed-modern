@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,10 +7,12 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "PlayerPedData.h"
 #include "Vector.h"
-#include "PlayerPed.h"
 
+class CPed;
+class CVehicle;
+class CPlayerPedData;
+class CPlayerPed;
 class CPlayerInfoSaveStructure;
 
 enum ePlayerState : uint8 {
@@ -20,10 +22,6 @@ enum ePlayerState : uint8 {
     PLAYERSTATE_FAILED_MISSION,
     PLAYERSTATE_LEFT_GAME
 };
-
-class CPed;
-class CVehicle;
-struct RwTexture;
 
 class CPlayerInfo {
 public:
@@ -91,14 +89,16 @@ public:
 
 public:
     CPlayerInfo();
+    CPlayerInfo(const CPlayerInfo&) = delete;
+    CPlayerInfo(CPlayerInfo&&) = delete;
     ~CPlayerInfo() = default; // 0x45B110
 
     static void CancelPlayerEnteringCars(CVehicle* vehicle);
     static CEntity* FindObjectToSteal(CPed* ped);
-    static void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
 
     void Process(uint32 playerIndex);
     void FindClosestCarSectorList(CPtrList& ptrList, CPed* ped, float minX, float minY, float maxX, float maxY, float* outVehDist, CVehicle** outVehicle);
+    void EvaluateCarPosition(CEntity* car, CPed* ped, float pedToVehDist, float* outDistance, CVehicle** outVehicle);
     void Clear();
     void GivePlayerParachute();
     void StreamParachuteWeapon(bool a2);

@@ -28,7 +28,7 @@ CVector UncompressUnitVector(const CompressedVector& compressedVec) {
     };
 }
 
-CompressedVector CompressUnitVector(CVector const& vec) {
+CompressedVector CompressUnitVector(const CVector& vec) {
     return {
         static_cast<int16>(vec.x * 4096.0f),
         static_cast<int16>(vec.y * 4096.0f),

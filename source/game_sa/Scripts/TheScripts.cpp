@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "TheScripts.h"
+#include "UpsideDownCarCheck.h"
 
 bool& CTheScripts::DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
 tScriptParam* CTheScripts::ScriptParams = reinterpret_cast<tScriptParam*>(0xA43C78);
@@ -95,8 +96,11 @@ CSprite2d* CTheScripts::ScriptSprites = reinterpret_cast<CSprite2d*>(0xA94B68);
 tScriptSearchlight* CTheScripts::ScriptSearchLightArray = reinterpret_cast<tScriptSearchlight*>(0xA94D68);
 
 void CTheScripts::InjectHooks() {
-    ReversibleHooks::Install("CTheScripts", "AddToBuildingSwapArray", 0x481140, &CTheScripts::AddToBuildingSwapArray);
-    ReversibleHooks::Install("CTheScripts", "UndoBuildingSwaps", 0x481290, &CTheScripts::UndoBuildingSwaps);
+    RH_ScopedClass(CTheScripts);
+    RH_ScopedCategory("Scripts");
+
+    RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
+    RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
 
 // 0x468D50
@@ -132,13 +136,13 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, 
 }
 
 // 0x486670
-void CTheScripts::CleanUpThisVehicle(CVehicle* pVehicle) {
-    plugin::Call<0x486670, CVehicle*>(pVehicle);
+void CTheScripts::CleanUpThisVehicle(CVehicle* vehicle) {
+    plugin::Call<0x486670, CVehicle*>(vehicle);
 }
 
 // 0x486B00
-void CTheScripts::ClearSpaceForMissionEntity(CVector const& pos, CEntity* pEntity) {
-    plugin::Call<0x486B00, CVector const&, CEntity*>(pos, pEntity);
+void CTheScripts::ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity) {
+    plugin::Call<0x486B00, const CVector&, CEntity*>(pos, entity);
 }
 
 void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
@@ -146,8 +150,8 @@ void CTheScripts::DoScriptSetupAfterPoolsHaveLoaded() {
 }
 
 // 0x4839A0
-signed int CTheScripts::GetActualScriptThingIndex(int32 index, uint8 type) {
-    return plugin::CallAndReturn<signed int, 0x4839A0, int32, uint8>(index, type);
+int32 CTheScripts::GetActualScriptThingIndex(int32 index, uint8 type) {
+    return plugin::CallAndReturn<int32, 0x4839A0, int32, uint8>(index, type);
 }
 
 // 0x483720
@@ -192,8 +196,8 @@ bool CTheScripts::IsPlayerOnAMission() {
 }
 
 // 0x4861F0
-bool CTheScripts::IsVehicleStopped(CVehicle* pVehicle) {
-    return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(pVehicle);
+bool CTheScripts::IsVehicleStopped(CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x4861F0, CVehicle*>(vehicle);
 }
 
 // 0x5D4FD0

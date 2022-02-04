@@ -10,14 +10,16 @@
 #include "GxtChar.h"
 
 void C_PcSave::InjectHooks() {
+    RH_ScopedClass(C_PcSave);
+    RH_ScopedCategoryGlobal();
+
     // See note in CGenericGameStorage::InjectHooks as to why all this is unhooked by default
 
-    using namespace ReversibleHooks;
-    Install("C_PcSave", "SetSaveDirectory", 0x619040, &C_PcSave::SetSaveDirectory, true);
-    Install("C_PcSave", "GenerateGameFilename", 0x6190A0, &C_PcSave::GenerateGameFilename, true);
-    Install("C_PcSave", "PopulateSlotInfo", 0x619140, &C_PcSave::PopulateSlotInfo, true);
-    Install("C_PcSave", "SaveSlot", 0x619060, &C_PcSave::SaveSlot, true);
-    Install("C_PcSave", "DeleteSlot", 0x6190D0, &C_PcSave::DeleteSlot, true);
+    RH_ScopedInstall(SetSaveDirectory, 0x619040, true);
+    RH_ScopedInstall(GenerateGameFilename, 0x6190A0, true);
+    RH_ScopedInstall(PopulateSlotInfo, 0x619140, true);
+    RH_ScopedInstall(SaveSlot, 0x619060, true);
+    RH_ScopedInstall(DeleteSlot, 0x6190D0, true);
 }
 
 // 0x619040
@@ -32,59 +34,51 @@ void C_PcSave::GenerateGameFilename(int32 slot, char* out) {
 }
 
 // 0x619140
-void C_PcSave::PopulateSlotInfo(void) {
-	s_PcSaveHelper.error = eErrorCode::NONE;
+void C_PcSave::PopulateSlotInfo() {
+    s_PcSaveHelper.error = eErrorCode::NONE;
 
-	for (auto i = 0u; i < std::size(CGenericGameStorage::ms_Slots); ++i) {
-		CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::EMPTY;
-		CGenericGameStorage::ms_SlotFileName[i][0] = 0;
-		CGenericGameStorage::ms_SlotSaveDate[i][0] = 0;
-	}
+    for (auto i = 0u; i < std::size(CGenericGameStorage::ms_Slots); ++i) {
+        CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::EMPTY;
+        CGenericGameStorage::ms_SlotFileName[i][0] = 0;
+        CGenericGameStorage::ms_SlotSaveDate[i][0] = 0;
+    }
 
-	for (auto i = 0u; i < std::size(CGenericGameStorage::ms_Slots); ++i) {
+    for (auto i = 0u; i < std::size(CGenericGameStorage::ms_Slots); ++i) {
         char path[MAX_PATH]{};
         CSimpleVariablesSaveStructure vars{};
 
-		GenerateGameFilename(i, path);
-		auto file = CFileMgr::OpenFile(path, "rb");
-		if (file) {
-			CFileMgr::Seek(file, strlen(CGenericGameStorage::ms_BlockTagName), SEEK_SET);
-			CFileMgr::Read(file, &vars, sizeof(CSimpleVariablesSaveStructure));
+        GenerateGameFilename(i, path);
+        auto file = CFileMgr::OpenFile(path, "rb");
+        if (file) {
+            CFileMgr::Seek(file, strlen(CGenericGameStorage::ms_BlockTagName), SEEK_SET);
+            CFileMgr::Read(file, &vars, sizeof(CSimpleVariablesSaveStructure));
 
-            if (std::string_view{ TopLineEmptyFile } != vars.m_szSaveName) {
-				memcpy(CGenericGameStorage::ms_SlotFileName[i], vars.m_szSaveName, 48); // TODO: why 48?
-				CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::IN_USE;
-				CGenericGameStorage::ms_SlotFileName[i][24] = 0;                        // TODO: Why 24?
-			}
-			CFileMgr::CloseFile(file);
-		}
+            if (std::string_view{TopLineEmptyFile} != vars.m_szSaveName) {
+                memcpy(CGenericGameStorage::ms_SlotFileName[i], vars.m_szSaveName, 48); // TODO: why 48?
+                CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::IN_USE;
+                CGenericGameStorage::ms_SlotFileName[i][24] = 0; // TODO: Why 24?
+            }
+            CFileMgr::CloseFile(file);
+        }
 
-		if (CGenericGameStorage::ms_Slots[i] != CGenericGameStorage::eSlotState::IN_USE) {
-			continue;
-		}
+        if (CGenericGameStorage::ms_Slots[i] != CGenericGameStorage::eSlotState::IN_USE) {
+            continue;
+        }
 
-		if (CGenericGameStorage::CheckDataNotCorrupt(i, path)) {
+        if (CGenericGameStorage::CheckDataNotCorrupt(i, path)) {
             const auto& time = vars.m_systemTime;
 
             char monthGXTKey[64]{};
-            sprintf_s(monthGXTKey, "MONTH%d", (uint32)time.wMonth); 
+            sprintf_s(monthGXTKey, "MONTH%d", (uint32)time.wMonth);
             assert(time.wMonth - 1 < 12); // NOTSA
 
             char date[128];
-            sprintf_s(date,
-                "%02d %s %04d %02d:%02d:%02d",
-                time.wDay,
-                GxtCharToAscii(TheText.Get(monthGXTKey), 0),
-                time.wYear,
-                time.wHour,
-                time.wMinute,
-                time.wSecond
-			);
-			AsciiToGxtChar(date, CGenericGameStorage::ms_SlotSaveDate[i]);
-		} else {
-			CMessages::InsertNumberInString(TheText.Get("FEC_SLC"), i, -1, -1, -1, -1, -1, CGenericGameStorage::ms_SlotFileName[i]);
-		}
-	}
+            sprintf_s(date, "%02d %s %04d %02d:%02d:%02d", time.wDay, GxtCharToAscii(TheText.Get(monthGXTKey), 0), time.wYear, time.wHour, time.wMinute, time.wSecond);
+            AsciiToGxtChar(date, CGenericGameStorage::ms_SlotSaveDate[i]);
+        } else {
+            CMessages::InsertNumberInString(TheText.Get("FEC_SLC"), i, -1, -1, -1, -1, -1, CGenericGameStorage::ms_SlotFileName[i]);
+        }
+    }
 }
 
 // 0x619060
@@ -102,7 +96,7 @@ bool C_PcSave::DeleteSlot(int32 slot) {
 
     char path[MAX_PATH]{};
     s_PcSaveHelper.error = eErrorCode::NONE;
-	GenerateGameFilename(slot, path);
+    GenerateGameFilename(slot, path);
 #ifdef DEFAULT_FUNCTIONS
     DeleteFile(path);
     if (auto f = CFileMgr::OpenFile(path, "rb")) {

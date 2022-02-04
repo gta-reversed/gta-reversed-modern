@@ -1,54 +1,96 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
+
 #include "WeaponInfo.h"
-#include <ranges>
+
 namespace rng = std::ranges;
 
 void CWeaponInfo::InjectHooks() {
-    // Constructors (1x)
-    ReversibleHooks::Install("CWeaponInfo", "CWeaponInfo", 0x743C30, &CWeaponInfo::Constructor);
+    RH_ScopedClass(CWeaponInfo);
+    RH_ScopedCategoryGlobal();
 
-    // Static functions (8x)
-    ReversibleHooks::Install("CWeaponInfo", "FindWeaponFireType", 0x5BCF30, &CWeaponInfo::FindWeaponFireType);
-    ReversibleHooks::Install("CWeaponInfo", "LoadWeaponData", 0x5BE670, &CWeaponInfo::LoadWeaponData);
-    ReversibleHooks::Install("CWeaponInfo", "Initialise", 0x5BF750, &CWeaponInfo::Initialise);
-    ReversibleHooks::Install("CWeaponInfo", "Shutdown", 0x743C50, &CWeaponInfo::Shutdown);
-    ReversibleHooks::Install("CWeaponInfo", "GetWeaponInfo", 0x743C60, &CWeaponInfo::GetWeaponInfo);
-    ReversibleHooks::Install("CWeaponInfo", "GetSkillStatIndex", 0x743CD0, &CWeaponInfo::GetSkillStatIndex);
-    ReversibleHooks::Install("CWeaponInfo", "FindWeaponType", 0x743D10, &CWeaponInfo::FindWeaponType);
-
-    // Methods (3x)
-    ReversibleHooks::Install("CWeaponInfo", "GetCrouchReloadAnimationID", 0x685700, &CWeaponInfo::GetCrouchReloadAnimationID);
-    ReversibleHooks::Install("CWeaponInfo", "GetTargetHeadRange", 0x743D50, &CWeaponInfo::GetTargetHeadRange);
-    ReversibleHooks::Install("CWeaponInfo", "GetWeaponReloadTime", 0x743D70, &CWeaponInfo::GetWeaponReloadTime);
+    RH_ScopedInstall(FindWeaponFireType, 0x5BCF30);
+    RH_ScopedInstall(LoadWeaponData, 0x5BE670);
+    RH_ScopedInstall(Initialise, 0x5BF750);
+    RH_ScopedInstall(Shutdown, 0x743C50);
+    RH_ScopedInstall(GetWeaponInfo, 0x743C60);
+    RH_ScopedInstall(GetSkillStatIndex, 0x743CD0);
+    RH_ScopedInstall(FindWeaponType, 0x743D10);
+    RH_ScopedInstall(GetCrouchReloadAnimationID, 0x685700);
+    RH_ScopedInstall(GetTargetHeadRange, 0x743D50);
+    RH_ScopedInstall(GetWeaponReloadTime, 0x743D70);
 }
 
-// 0x743C30
-CWeaponInfo* CWeaponInfo::Constructor() {
-    this->CWeaponInfo::CWeaponInfo();
-    return this;
+// 0x5BF750
+void CWeaponInfo::Initialise() {
+    for (auto& info : aWeaponInfo) {
+        info.m_vecFireOffset = CVector();
+        info.m_nWeaponFire = WEAPON_FIRE_MELEE;
+        info.m_fTargetRange = 0.0f;
+        info.m_fWeaponRange = 0.0f;
+        info.m_nModelId1 = MODEL_INVALID;
+        info.m_nModelId2 = MODEL_INVALID;
+        info.m_nSlot = -1;
+        info.m_eAnimGroup = ANIM_GROUP_DEFAULT;
+        info.m_nAmmoClip = 0;
+        info.m_nSkillLevel = 1;
+        info.m_fReqStatLevel = 0.0f;
+        info.m_fAccuracy = 1.0f;
+        info.m_fMoveSpeed = 1.0f;
+        info.m_fAnimLoopStart = 0.0f;
+        info.m_fAnimLoopEnd = 0.0f;
+        info.m_fAnimLoopFire = 0.0f;
+        info.m_fAnimLoop2Start = 0.0f;
+        info.m_fAnimLoop2End = 0.0f;
+        info.m_fAnimLoop2Fire = 0.0f;
+        info.m_fBreakoutTime = 0.0f;
+        info.m_fSpeed = 0.0f;
+        info.m_fRadius = 0.0f;
+        info.m_fLifespan = 0.0f;
+        info.m_fSpread = 0.0f;
+        info.m_nAimOffsetIndex = 0;
+        info.m_nFlags = 0;
+        info.m_nBaseCombo = 4;
+        info.m_nNumCombos = 1;
+    }
+
+    for (auto& offset : g_GunAimingOffsets) {
+        offset.AimX = 0.0f;
+        offset.AimZ = 0.0f;
+        offset.DuckX = 0.0f;
+        offset.DuckZ = 0.0f;
+        offset.RLoadA = 0;
+        offset.RLoadB = 0;
+        offset.CrouchRLoadA = 0;
+    }
+
+    LoadWeaponData();
 }
 
-// Static functions
+// 0x743C50
+void CWeaponInfo::Shutdown() {
+    // NOP
+}
+
 // 0x5BCF30
 eWeaponFire CWeaponInfo::FindWeaponFireType(const char* name) {
     static constexpr struct { std::string_view name; eWeaponFire wf; } mapping[]{
-        {"MELEE",       eWeaponFire::WEAPON_FIRE_MELEE},
-        {"INSTANT_HIT", eWeaponFire::WEAPON_FIRE_INSTANT_HIT},
-        {"PROJECTILE",  eWeaponFire::WEAPON_FIRE_PROJECTILE},
-        {"AREA_EFFECT", eWeaponFire::WEAPON_FIRE_AREA_EFFECT},
-        {"CAMERA",      eWeaponFire::WEAPON_FIRE_CAMERA},
-        {"USE",         eWeaponFire::WEAPON_FIRE_USE},
+        { "MELEE",       WEAPON_FIRE_MELEE       },
+        { "INSTANT_HIT", WEAPON_FIRE_INSTANT_HIT },
+        { "PROJECTILE",  WEAPON_FIRE_PROJECTILE  },
+        { "AREA_EFFECT", WEAPON_FIRE_AREA_EFFECT },
+        { "CAMERA",      WEAPON_FIRE_CAMERA      },
+        { "USE",         WEAPON_FIRE_USE         },
     };
     if (const auto it = rng::find(mapping, name, [](const auto& e) { return e.name; }); it != std::end(mapping))
         return it->wf;
-    return eWeaponFire::WEAPON_FIRE_INSTANT_HIT;
+
+    return WEAPON_FIRE_INSTANT_HIT;
 }
 
 bool CWeaponInfo::WeaponHasSkillStats(eWeaponType type) {
@@ -58,13 +100,13 @@ bool CWeaponInfo::WeaponHasSkillStats(eWeaponType type) {
 uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill) {
     const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL);
     switch (skill) {
-    case eWeaponSkill::WEAPSKILL_POOR:
+    case eWeaponSkill::POOR:
         return (uint32)weaponType + 25u + 0 * numWeaponsWithSkill;
-    case eWeaponSkill::WEAPSKILL_STD:
+    case eWeaponSkill::STD:
         return (uint32)weaponType;
-    case eWeaponSkill::WEAPSKILL_PRO:
+    case eWeaponSkill::PRO:
         return (uint32)weaponType + 25u + 1 * numWeaponsWithSkill;
-    case eWeaponSkill::WEAPSKILL_COP:
+    case eWeaponSkill::COP:
         return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
     }
     assert(0); // Something went wrong
@@ -73,17 +115,18 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
 
 auto GetBaseComboByName(const char* name) {
     static constexpr std::pair<std::string_view, eWeaponType> mapping[]{
-        {"UNARMED",     eWeaponType::WEAPON_KNIFE},
-        {"BBALLBAT",    eWeaponType::WEAPON_KATANA},
-        {"KNIFE",       eWeaponType::WEAPON_CHAINSAW},
-        {"GOLFCLUB",    eWeaponType::WEAPON_DILDO1},
-        {"SWORD",       eWeaponType::WEAPON_DILDO2},
-        {"CHAINSAW",    eWeaponType::WEAPON_VIBE1},
-        {"DILDO",       eWeaponType::WEAPON_VIBE2},
-        {"FLOWERS",     eWeaponType::WEAPON_FLOWERS},
+        { "UNARMED",     WEAPON_KNIFE    },
+        { "BBALLBAT",    WEAPON_KATANA   },
+        { "KNIFE",       WEAPON_CHAINSAW },
+        { "GOLFCLUB",    WEAPON_DILDO1   },
+        { "SWORD",       WEAPON_DILDO2   },
+        { "CHAINSAW",    WEAPON_VIBE1    },
+        { "DILDO",       WEAPON_VIBE2    },
+        { "FLOWERS",     WEAPON_FLOWERS  },
     };
     if (const auto it = rng::find(mapping, name, [](const auto& e) { return e.first; }); it != std::end(mapping))
         return it->second;
+
     return eWeaponType::WEAPON_KNIFE;
 }
 
@@ -150,7 +193,7 @@ void CWeaponInfo::LoadWeaponData() {
             );
 
             const auto weaponType = FindWeaponType(weaponName);
-            const auto skillLevel = WeaponHasSkillStats(weaponType) ? (eWeaponSkill)skill : eWeaponSkill::WEAPSKILL_STD;
+            const auto skillLevel = WeaponHasSkillStats(weaponType) ? (eWeaponSkill)skill : eWeaponSkill::STD;
             auto& wi = aWeaponInfo[GetWeaponInfoIndex(weaponType, skillLevel)];
             wi.m_nWeaponFire = FindWeaponFireType(fireTypeName);
             wi.m_fTargetRange = targetRange;
@@ -189,11 +232,11 @@ void CWeaponInfo::LoadWeaponData() {
                 wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(animGrpName);
             }
 
-            if (wi.m_eAnimGroup >= AssocGroupId::ANIM_GROUP_PYTHON && wi.m_eAnimGroup <= AssocGroupId::ANIM_GROUP_SPRAYCAN) {
-                wi.m_nAimOffsetIndex = wi.m_eAnimGroup - AssocGroupId::ANIM_GROUP_PYTHON;
+            if (wi.m_eAnimGroup >= ANIM_GROUP_PYTHON && wi.m_eAnimGroup <= ANIM_GROUP_SPRAYCAN) {
+                wi.m_nAimOffsetIndex = wi.m_eAnimGroup - ANIM_GROUP_PYTHON;
             }
 
-            if (skillLevel == eWeaponSkill::WEAPSKILL_STD && weaponType != eWeaponType::WEAPON_DETONATOR) {
+            if (skillLevel == eWeaponSkill::STD && weaponType != eWeaponType::WEAPON_DETONATOR) {
                 if (modelId1 > 0) {
                     static_cast<CWeaponModelInfo*>(CModelInfo::GetModelInfo(modelId1))->m_weaponInfo = weaponType;
                 }
@@ -209,7 +252,7 @@ void CWeaponInfo::LoadWeaponData() {
 
             (void)sscanf(l, "%s %s %f %f %f %f %d %d %d %d", unused, stealthAnimGrp, &aimX, &aimZ, &duckX, &duckZ, &RLoadA, &RLoadB, &crouchRLoadA, &crouchRLoadB);
 
-            g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - AssocGroupId::ANIM_GROUP_PYTHON] = {
+            g_GunAimingOffsets[CAnimManager::GetAnimationGroupId(stealthAnimGrp) - ANIM_GROUP_PYTHON] = {
                 .AimX = aimX,
                 .AimZ = aimZ,
 
@@ -268,20 +311,6 @@ void CWeaponInfo::LoadWeaponData() {
         }
     }
     CFileMgr::CloseFile(f);
-}
-
-// 0x5BF750
-void CWeaponInfo::Initialise() {
-    for (auto& v : aWeaponInfo)
-        v = {};
-    for (auto& v : g_GunAimingOffsets)
-        v = {};
-    LoadWeaponData();
-}
-
-// 0x743C50
-void CWeaponInfo::Shutdown() {
-    // NOP
 }
 
 // 0x743C60
@@ -369,10 +398,9 @@ eWeaponType CWeaponInfo::FindWeaponType(const char* type) {
     return eWeaponType::WEAPON_UNARMED;
 }
 
-// Methods
 // 0x685700
 AnimationId CWeaponInfo::GetCrouchReloadAnimationID() {
-    return flags.bCrouchFire && flags.bReload ? AnimationId::ANIM_ID_CROUCHRELOAD : AnimationId::ANIM_ID_WALK;
+    return flags.bCrouchFire && flags.bReload ? ANIM_ID_CROUCHRELOAD : ANIM_ID_WALK;
 }
 
 // 0x743D50

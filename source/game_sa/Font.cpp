@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -45,47 +45,49 @@ uint8& CFont::m_nFontOutlineOrShadow = *(uint8*)0xC71A9C;
 tFontData* gFontData = (tFontData*)0xC718B0;
 
 void CFont::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFont", "Initialise", 0x5BA690, &CFont::Initialise);
-    Install("CFont", "Shutdown", 0x7189B0, &CFont::Shutdown);
-    // Install("CFont", "PrintChar", 0x718A10, &CFont::PrintChar);
-    Install("CFont", "ParseToken", 0x718F00, &CFont::ParseToken);
+    RH_ScopedClass(CFont);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x5BA690);
+    RH_ScopedInstall(Shutdown, 0x7189B0);
+    // RH_ScopedInstall(PrintChar, 0x718A10);
+    RH_ScopedInstall(ParseToken, 0x718F00);
 
     // styling functions
-    Install("CFont", "SetScale", 0x719380, &CFont::SetScale);
-    Install("CFont", "SetScaleForCurrentLanguage", 0x7193A0, &CFont::SetScaleForCurrentLanguage);
-    Install("CFont", "SetSlantRefPoint", 0x719400, &CFont::SetSlantRefPoint);
-    Install("CFont", "SetSlant", 0x719420, &CFont::SetSlant);
-    Install("CFont", "SetColor", 0x719430, &CFont::SetColor);
-    Install("CFont", "SetFontStyle", 0x719490, &CFont::SetFontStyle);
-    Install("CFont", "SetWrapx", 0x7194D0, &CFont::SetWrapx);
-    Install("CFont", "SetCentreSize", 0x7194E0, &CFont::SetCentreSize);
-    Install("CFont", "SetRightJustifyWrap", 0x7194F0, &CFont::SetRightJustifyWrap);
-    Install("CFont", "SetAlphaFade", 0x719500, &CFont::SetAlphaFade);
-    Install("CFont", "SetDropColor", 0x719510, &CFont::SetDropColor);
-    Install("CFont", "SetDropShadowPosition", 0x719570, &CFont::SetDropShadowPosition);
-    Install("CFont", "SetEdge", 0x719590, &CFont::SetEdge);
-    Install("CFont", "SetProportional", 0x7195B0, &CFont::SetProportional);
-    Install("CFont", "SetBackground", 0x7195C0, &CFont::SetBackground);
-    Install("CFont", "SetBackgroundColor", 0x7195E0, &CFont::SetBackgroundColor);
-    Install("CFont", "SetJustify", 0x719600, &CFont::SetJustify);
-    Install("CFont", "SetOrientation", 0x719610, &CFont::SetOrientation);
+    RH_ScopedInstall(SetScale, 0x719380);
+    RH_ScopedInstall(SetScaleForCurrentLanguage, 0x7193A0);
+    RH_ScopedInstall(SetSlantRefPoint, 0x719400);
+    RH_ScopedInstall(SetSlant, 0x719420);
+    RH_ScopedInstall(SetColor, 0x719430);
+    RH_ScopedInstall(SetFontStyle, 0x719490);
+    RH_ScopedInstall(SetWrapx, 0x7194D0);
+    RH_ScopedInstall(SetCentreSize, 0x7194E0);
+    RH_ScopedInstall(SetRightJustifyWrap, 0x7194F0);
+    RH_ScopedInstall(SetAlphaFade, 0x719500);
+    RH_ScopedInstall(SetDropColor, 0x719510);
+    RH_ScopedInstall(SetDropShadowPosition, 0x719570);
+    RH_ScopedInstall(SetEdge, 0x719590);
+    RH_ScopedInstall(SetProportional, 0x7195B0);
+    RH_ScopedInstall(SetBackground, 0x7195C0);
+    RH_ScopedInstall(SetBackgroundColor, 0x7195E0);
+    RH_ScopedInstall(SetJustify, 0x719600);
+    RH_ScopedInstall(SetOrientation, 0x719610);
 
-    Install("CFont", "InitPerFrame", 0x719800, &CFont::InitPerFrame);
-    // Install("CFont", "RenderFontBuffer", 0x719840, &CFont::RenderFontBuffer);
-    Install("CFont", "GetStringWidth", 0x71A0E0, &CFont::GetStringWidth);
-    Install("CFont", "DrawFonts", 0x71A210, &CFont::DrawFonts);
-    // Install("CFont", "ProcessCurrentString", 0x71A220, &CFont::ProcessCurrentString);
-    Install("CFont", "GetNumberLines", 0x71A5E0, &CFont::GetNumberLines);
-    Install("CFont", "ProcessStringToDisplay", 0x71A600, &CFont::ProcessStringToDisplay);
-    Install("CFont", "GetTextRect", 0x71A620, &CFont::GetTextRect);
-    Install("CFont", "PrintString", 0x71A700, &CFont::PrintString);
-    Install("CFont", "PrintStringFromBottom", 0x71A820, &CFont::PrintStringFromBottom);
-    Install("CFont", "GetCharacterSize", 0x719750, &CFont::GetCharacterSize);
-    Install("CFont", "LoadFontValues", 0x7187C0, &CFont::LoadFontValues);
+    RH_ScopedInstall(InitPerFrame, 0x719800);
+    // RH_ScopedInstall(RenderFontBuffer, 0x719840);
+    RH_ScopedInstall(GetStringWidth, 0x71A0E0);
+    RH_ScopedInstall(DrawFonts, 0x71A210);
+    // RH_ScopedInstall(ProcessCurrentString, 0x71A220);
+    RH_ScopedInstall(GetNumberLines, 0x71A5E0);
+    RH_ScopedInstall(ProcessStringToDisplay, 0x71A600);
+    RH_ScopedInstall(GetTextRect, 0x71A620);
+    RH_ScopedInstall(PrintString, 0x71A700);
+    RH_ScopedInstall(PrintStringFromBottom, 0x71A820);
+    RH_ScopedInstall(GetCharacterSize, 0x719750);
+    RH_ScopedInstall(LoadFontValues, 0x7187C0);
     // Install("", "GetScriptLetterSize", 0x719670, &GetScriptLetterSize);
     // Install("", "GetIDforPropVal", 0x7192C0, &GetIDforPropVal);
-    Install("", "GetLetterIdPropValue", 0x718770, &GetLetterIdPropValue);
+    RH_ScopedGlobalInstall(GetLetterIdPropValue, 0x718770);
 }
 
 // 0x7187C0
@@ -93,7 +95,7 @@ void CFont::LoadFontValues() {
     CFileMgr::SetDir(gta_empty_string);
     auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
-    char* attrib[26];
+    char attrib[32];
 
     uint32 totalFonts = 0;
     uint32 fontId = 0;
@@ -161,7 +163,7 @@ void CFont::Initialise() {
 
     SetScale(1.0f, 1.0f);
     SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
-    SetSlant(0.0);
+    SetSlant(0.0f);
 
     SetColor(CRGBA(255, 255, 255, 0));
     SetOrientation(eFontAlignment::ALIGN_LEFT);
@@ -638,16 +640,13 @@ void CFont::RenderFontBuffer()
 float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 {
     size_t len = CMessages::GetStringLength(string);
-
     char data[400] = {0};
 
     strncpy(data, string, len);
-
     CMessages::InsertPlayerControlKeysInString(data);
 
     float width = 0.0f;
-    bool bLastWasTag = false, bLastWasLetter = false;
-
+    bool lastWasTag = false, lastWasLetter = false;
     char* pStr = data;
 
     while (true) {
@@ -657,7 +656,7 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             break;
 
         if (*pStr == '~') {
-            if (!full && (bLastWasTag || bLastWasLetter))
+            if (!full && (lastWasTag || lastWasLetter))
                 return width;
 
             char* next = pStr + 1;
@@ -668,11 +667,11 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
 
             pStr = next + 1;
 
-            if (bLastWasLetter || *pStr == '~')
-                bLastWasTag = true;
+            if (lastWasLetter || *pStr == '~')
+                lastWasTag = true;
         }
         else {
-            if (!full && *pStr == ' ' && bLastWasTag)
+            if (!full && *pStr == ' ' && lastWasTag)
                 return width;
 
             char upper = *pStr - 0x20;
@@ -684,6 +683,8 @@ float CFont::GetStringWidth(char* string, bool full, bool scriptText)
             else {
                 width += GetCharacterSize(upper);
             }
+
+            lastWasLetter = true;
         }
     }
 
@@ -755,6 +756,7 @@ void CFont::PrintString(float x, float y, const char* text)
         } else {
             CSprite2d::DrawRect(rt, m_FontBackgroundColor);
         }
+        m_bFontBackground = false;
     }
 
     ProcessStringToDisplay(x, y, text);

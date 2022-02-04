@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,7 +31,7 @@ class CClumpModelInfo : public CBaseModelInfo {
 public:
     union {
         char*  m_animFileName;
-        uint32 m_dwAnimFileIndex;
+        uint32 m_nAnimFileIndex;
     };
 
 public:
@@ -47,9 +47,9 @@ public:
     uint32 GetRwModelType() override;
     RwObject* CreateInstance() override;
     RwObject* CreateInstance(RwMatrix* matrix) override;
-    void SetAnimFile(char const* filename) override;
+    void SetAnimFile(const char* filename) override;
     void ConvertAnimFileIndex() override;
-    signed int GetAnimFileIndex() override;
+    int32 GetAnimFileIndex() override;
 
     // Added vtable methods
     virtual CBox* GetBoundingBox();
@@ -63,9 +63,9 @@ public:
     uint32 GetRwModelType_Reversed();
     RwObject* CreateInstance_Reversed();
     RwObject* CreateInstance_Reversed(RwMatrix* matrix);
-    void SetAnimFile_Reversed(char const* filename);
+    void SetAnimFile_Reversed(const char* filename);
     void ConvertAnimFileIndex_Reversed();
-    signed int GetAnimFileIndex_Reversed();
+    int32 GetAnimFileIndex_Reversed();
     CBox* GetBoundingBox_Reversed();
     void SetClump_Reversed(RpClump* clump);
 
@@ -77,7 +77,7 @@ public:
     // static functions
     static RpAtomic* SetAtomicRendererCB(RpAtomic* atomic, void* renderFunc);
     static RpAtomic* AtomicSetupLightingCB(RpAtomic* atomic, void* data);
-    static RpAtomic* SetHierarchyForSkinAtomic(RpAtomic* pAtomic, void* data);
+    static RpAtomic* SetHierarchyForSkinAtomic(RpAtomic* atomic, void* data);
     /* struct tSearchData { char *name; RwFrame *result; };
       returns 0 if we found frame, or last frame if we need to continue searching */
     static RwFrame* FindFrameFromNameCB(RwFrame* frame, void* searchData);

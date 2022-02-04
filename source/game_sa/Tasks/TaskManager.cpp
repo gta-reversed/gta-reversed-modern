@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,26 +10,29 @@
 #include "TaskManager.h"
 
 void CTaskManager::InjectHooks() {
-    ReversibleHooks::Install("CTaskManager", "CTaskManager", 0x6816A0, &CTaskManager::Constructor);
-    ReversibleHooks::Install("CTaskManager", "~CTaskManager", 0x6816D0, &CTaskManager::Destructor);
-    ReversibleHooks::Install("CTaskManager", "GetActiveTask", 0x681720, &CTaskManager::GetActiveTask);
-    ReversibleHooks::Install("CTaskManager", "FindActiveTaskByType", 0x681740, &CTaskManager::FindActiveTaskByType);
-    ReversibleHooks::Install("CTaskManager", "FindTaskByType", 0x6817D0, &CTaskManager::FindTaskByType);
-    ReversibleHooks::Install("CTaskManager", "GetTaskSecondary", 0x681810, &CTaskManager::GetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "HasTaskSecondary", 0x681820, &CTaskManager::HasTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "Flush", 0x681850, &CTaskManager::Flush);
-    ReversibleHooks::Install("CTaskManager", "FlushImmediately", 0x6818A0, &CTaskManager::FlushImmediately);
-    ReversibleHooks::Install("CTaskManager", "SetNextSubTask", 0x681920, &CTaskManager::SetNextSubTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_task", 0x681970, (CTaskSimple * (*)(CTask*)) & CTaskManager::GetSimplestTask);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestTask_tasK_index", 0x681A00, (CTaskSimple * (CTaskManager::*)(int32)) & CTaskManager::GetSimplestTask);
-    ReversibleHooks::Install("CTaskManager", "StopTimers", 0x6819A0, &CTaskManager::StopTimers);
-    ReversibleHooks::Install("CTaskManager", "GetSimplestActiveTask", 0x6819D0, &CTaskManager::GetSimplestActiveTask);
-    ReversibleHooks::Install("CTaskManager", "AddSubTasks", 0x681A30, &CTaskManager::AddSubTasks);
-    ReversibleHooks::Install("CTaskManager", "ParentsControlChildren", 0x681A80, &CTaskManager::ParentsControlChildren);
-    ReversibleHooks::Install("CTaskManager", "SetTask", 0x681AF0, &CTaskManager::SetTask);
-    ReversibleHooks::Install("CTaskManager", "SetTaskSecondary", 0x681B60, &CTaskManager::SetTaskSecondary);
-    ReversibleHooks::Install("CTaskManager", "ClearTaskEventResponse", 0x681BD0, &CTaskManager::ClearTaskEventResponse);
-    ReversibleHooks::Install("CTaskManager", "ManageTasks", 0x681C10, &CTaskManager::ManageTasks);
+    RH_ScopedClass(CTaskManager);
+    RH_ScopedCategory("Tasks");
+
+    RH_ScopedInstall(Constructor, 0x6816A0);
+    RH_ScopedInstall(Destructor, 0x6816D0);
+    RH_ScopedInstall(GetActiveTask, 0x681720);
+    RH_ScopedInstall(FindActiveTaskByType, 0x681740);
+    RH_ScopedInstall(FindTaskByType, 0x6817D0);
+    RH_ScopedInstall(GetTaskSecondary, 0x681810);
+    RH_ScopedInstall(HasTaskSecondary, 0x681820);
+    RH_ScopedInstall(Flush, 0x681850);
+    RH_ScopedInstall(FlushImmediately, 0x6818A0);
+    RH_ScopedInstall(SetNextSubTask, 0x681920);
+    RH_ScopedOverloadedInstall(GetSimplestTask, "task", 0x681970, CTaskSimple * (*)(CTask*));
+    RH_ScopedOverloadedInstall(GetSimplestTask, "index", 0x681A00, CTaskSimple * (CTaskManager::*)(int32));
+    RH_ScopedInstall(StopTimers, 0x6819A0);
+    RH_ScopedInstall(GetSimplestActiveTask, 0x6819D0);
+    RH_ScopedInstall(AddSubTasks, 0x681A30);
+    RH_ScopedInstall(ParentsControlChildren, 0x681A80);
+    RH_ScopedInstall(SetTask, 0x681AF0);
+    RH_ScopedInstall(SetTaskSecondary, 0x681B60);
+    RH_ScopedInstall(ClearTaskEventResponse, 0x681BD0);
+    RH_ScopedInstall(ManageTasks, 0x681C10);
 }
 
 // 0x6816A0
@@ -164,14 +167,14 @@ void CTaskManager::SetNextSubTask(CTaskComplex* task) {
             break;
         }
         task->SetSubTask(nullptr);
-        task = static_cast<CTaskComplex*>(task->m_pParentTask);
+        task = task->m_pParentTask->AsComplex();
 
         if (!task) {
             return;
         }
     }
     task->SetSubTask(nextSubTask);
-    AddSubTasks((CTaskComplex*)nextSubTask);
+    AddSubTasks(nextSubTask->AsComplex());
 }
 
 // 0x681970
@@ -179,7 +182,7 @@ CTaskSimple* CTaskManager::GetSimplestTask(CTask* task) {
     CTask* last = nullptr;
     for (; task; task = task->GetSubTask())
         last = task;
-    return static_cast<CTaskSimple*>(last);
+    return last->AsSimple();
 }
 
 // 0x6819A0
@@ -216,9 +219,9 @@ void CTaskManager::AddSubTasks(CTaskComplex* task) {
         if (subTask) {
             task->SetSubTask(subTask);
         } else {
-            SetNextSubTask(static_cast<CTaskComplex*>(task->m_pParentTask));
+            SetNextSubTask(task->m_pParentTask->AsComplex());
         }
-        task = static_cast<CTaskComplex*>(subTask);
+        task = subTask->AsComplex();
     } while (subTask);
 }
 
@@ -227,9 +230,9 @@ void CTaskManager::ParentsControlChildren(CTaskComplex* task) {
     if (!task)
         return;
 
-    for (; !task->IsSimple(); task = static_cast<CTaskComplex*>(task->GetSubTask())) {
+    for (; !task->IsSimple(); task = task->GetSubTask()->AsComplex()) {
         CTask* subTask = task->GetSubTask();
-        auto* controlSubTask = static_cast<CTaskComplex*>(task->ControlSubTask(m_pPed));
+        auto* controlSubTask = task->ControlSubTask(m_pPed)->AsComplex();
         if (subTask != controlSubTask) {
             subTask->MakeAbortable(m_pPed, ABORT_PRIORITY_URGENT, nullptr);
             task->SetSubTask(controlSubTask);
@@ -258,8 +261,8 @@ void CTaskManager::SetTask(CTask* task, int32 taskIndex, bool unused) {
     delete primaryTask;
 
     m_aPrimaryTasks[taskIndex] = task;
-    AddSubTasks(static_cast<CTaskComplex*>(task));
-    if (m_aPrimaryTasks[taskIndex]) {
+    AddSubTasks(task->AsComplex());
+    if (GetTaskPrimary(taskIndex)) {
         CTask* simplestTask = GetSimplestTask(m_aPrimaryTasks[taskIndex]);
         if (!simplestTask->IsSimple()) {
             primaryTask = m_aPrimaryTasks[taskIndex];
@@ -287,7 +290,7 @@ void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
 
     m_aSecondaryTasks[taskIndex] = task;
 
-    AddSubTasks(static_cast<CTaskComplex*>(task));
+    AddSubTasks(task->AsComplex());
 
     if (CTask* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
         if (simplest && !simplest->IsSimple()) {
@@ -299,7 +302,7 @@ void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
 
 // 0x681BD0
 void CTaskManager::ClearTaskEventResponse() {
-    CTask* task = m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP];
+    CTask* task = GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_TEMP);
     if (task) {
         delete task;
         m_aPrimaryTasks[TASK_PRIMARY_EVENT_RESPONSE_TEMP] = nullptr;
@@ -316,7 +319,7 @@ void CTaskManager::ClearTaskEventResponse() {
 void CTaskManager::ManageTasks() {
     // Get taskIndex of first available primary task
     int32 taskIndex = 0;
-    while (!m_aPrimaryTasks[taskIndex]) { // GetTaskPrimary(taskIndex) fucks IDE linter :(
+    while (!GetTaskPrimary(taskIndex)) {
         taskIndex = taskIndex + 1;
         if (taskIndex >= TASK_PRIMARY_MAX) {
             break;
@@ -345,7 +348,7 @@ void CTaskManager::ManageTasks() {
             }
 
             simplestTask = GetSimplestTask(GetTaskPrimary(taskIndex));
-            if (!static_cast<CTaskSimple*>(simplestTask)->ProcessPed(m_pPed)) {
+            if (!simplestTask->AsSimple()->ProcessPed(m_pPed)) {
                 break;
             } else {
                 SetNextSubTask((CTaskComplex*)simplestTask->m_pParentTask);

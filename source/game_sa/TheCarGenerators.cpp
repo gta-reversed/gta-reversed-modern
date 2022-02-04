@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TheCarGenerators.h"
+#include "CarGenerator.h"
 
 uint8& CTheCarGenerators::GenerateEvenIfPlayerIsCloseCounter = *reinterpret_cast<uint8*>(0xC279D0);
 uint8& CTheCarGenerators::ProcessCounter = *reinterpret_cast<uint8*>(0xC279D1);
@@ -10,18 +11,21 @@ CCarGenerator(&CTheCarGenerators::CarGeneratorArray)[NUM_CAR_GENERATORS] = *rein
 
 void CTheCarGenerators::InjectHooks()
 {
-    ReversibleHooks::Install("CTheCarGenerators", "CreateCarGenerator", 0x6F31A0, &CTheCarGenerators::CreateCarGenerator);
-    ReversibleHooks::Install("CTheCarGenerators", "Init", 0x6F3270, &CTheCarGenerators::Init);
-    ReversibleHooks::Install("CTheCarGenerators", "Load", 0x5D39B0, &CTheCarGenerators::Load);
-    ReversibleHooks::Install("CTheCarGenerators", "Process", 0x6F3F40, &CTheCarGenerators::Process);
-    ReversibleHooks::Install("CTheCarGenerators", "RemoveCarGenerators", 0x6F3240, &CTheCarGenerators::RemoveCarGenerators);
-    ReversibleHooks::Install("CTheCarGenerators", "Save", 0x5D38C0, &CTheCarGenerators::Save);
-    ReversibleHooks::Install("CTheCarGenerators", "Get", 0x479D60, &CTheCarGenerators::Get);
+    RH_ScopedClass(CTheCarGenerators);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(CreateCarGenerator, 0x6F31A0);
+    RH_ScopedInstall(Init, 0x6F3270);
+    RH_ScopedInstall(Load, 0x5D39B0);
+    RH_ScopedInstall(Process, 0x6F3F40);
+    RH_ScopedInstall(RemoveCarGenerators, 0x6F3240);
+    RH_ScopedInstall(Save, 0x5D38C0);
+    RH_ScopedInstall(Get, 0x479D60);
 }
 
 // return index of CarGenerator in CTheCarGenerators::CarGeneratorArray
 // 0x6F31A0
-signed int CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int32 modelId, int16 color1, int16 color2, uint8 forceSpawn, uint8 alarmChances, uint8 doorLockChances,
+int32 CTheCarGenerators::CreateCarGenerator(CVector posn, float angle, int32 modelId, int16 color1, int16 color2, uint8 forceSpawn, uint8 alarmChances, uint8 doorLockChances,
                                                  uint16 minDelay, uint16 maxDelay, uint8 iplId, bool ignorePopulationLimit)
 {
     if (modelId != -1 && (modelId < MODEL_LANDSTAL || modelId > MODEL_VEG_PALMKB8))

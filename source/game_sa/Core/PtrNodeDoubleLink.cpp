@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,9 +9,12 @@
 #include "PtrNodeDoubleLink.h"
 
 void CPtrNodeDoubleLink::InjectHooks() {
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator new", 0x5523C0, &CPtrNodeDoubleLink::operator new);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "operator delete", 0x5523D0, &CPtrNodeDoubleLink::operator delete);
-    ReversibleHooks::Install("CPtrNodeDoubleLink", "AddToList", 0x5329A0, &CPtrNodeDoubleLink::AddToList);
+    RH_ScopedClass(CPtrNodeDoubleLink);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(operator new, 0x5523C0);
+    RH_ScopedInstall(operator delete, 0x5523D0);
+    RH_ScopedInstall(AddToList, 0x5329A0);
 }
 
 void* CPtrNodeDoubleLink::operator new(uint32 size) {

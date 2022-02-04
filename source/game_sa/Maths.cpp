@@ -1,14 +1,19 @@
 #include "StdInc.h"
 
-float* CMaths::ms_SinTable = (float*)0xBB3DFC;
+#include "Maths.h"
+
+float (&CMaths::ms_SinTable)[256] = *(float(*)[256])0xBB3DFC;
 
 void CMaths::InjectHooks()
 {
-    ReversibleHooks::Install("CMaths", "InitMathsTables", 0x59AC90, &CMaths::InitMathsTables);
+    RH_ScopedClass(CMaths);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(InitMathsTables, 0x59AC90);
 }
 
 void CMaths::InitMathsTables()
 {
     for (int32 i = 0; i < 256; ++i)
-        CMaths::ms_SinTable[i] = sin(static_cast<float>(i) * PI / 128.0F);
+        ms_SinTable[i] = sin(static_cast<float>(i) * PI / 128.0F);
 }

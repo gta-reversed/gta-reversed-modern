@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,33 +11,7 @@
 #include "KeyboardState.h"
 #include "MouseControllerState.h"
 #include "ControllerState.h"
-
-enum ePadButton : uint32 {
-    LEFTSTICKX,     // Left / Right	GO_LEFT / GO_RIGHT
-    LEFTSTICKY,     // Forward / Backward	GO_FORWARD / GO_BACK
-    RIGHTSTICKX,    // Special CTRL Left / Special CTRL Right	PED_1RST_PERSON_LOOK_LEFT / PED_1RST_PERSON_LOOK_RIGHT
-    RIGHTSTICKY,    // Special CTRL Up / Special CTRL Down	PED_1RST_PERSON_LOOK_UP / PED_1RST_PERSON_LOOK_DOWN
-    LEFTSHOULDER1,  // Action, Secondary Fire	PED_ANSWER_PHONE, PED_FIREWEAPON_ALT
-    LEFTSHOULDER2,  // Previous Weapon / Zoom In	PED_CYCLE_WEAPON_LEFT / PED_SNIPER_ZOOM_IN
-    RIGHTSHOULDER1, // Aim Weapon	PED_LOCK_TARGET
-    RIGHTSHOULDER2, // Next Weapon / Zoom Out	PED_CYCLE_WEAPON_RIGHT / PED_SNIPER_ZOOM_OUT
-    DPADUP,         // Group Control Forward	GROUP_CONTROL_FWD
-    DPADDOWN,       // Group Control Backward	GROUP_CONTROL_BWD
-    DPADLEFT,       // Conversation - No	CONVERSATION_NO
-    DPADRIGHT,      // Conversation - Yes	CONVERSATION_YES
-    START,          // Pause Menu
-    SELECT,         // Change Camera	CAMERA_CHANGE_VIEW_ALL_SITUATIONS
-    SQUARE,         // Jump	PED_JUMPING
-    TRIANGLE,       // Enter Vehicle	VEHICLE_ENTER_EXIT
-    CROSS,          // Sprint	PED_SPRINT
-    CIRCLE,         // Fire Weapon	PED_FIREWEAPON
-    LEFTSHOCK,      // Crouch	PED_DUCK
-    RIGHTSHOCK,     // Look Behind	PED_LOOKBEHIND
-    // --		Sneak	SNEAK_ABOUT
-    // --		Cycle Target Left	PED_CYCLE_TARGET_LEFT
-    // --		Cycle Target Right	PED_CYCLE_TARGET_RIGHT
-    // --		Center Camera	PED_CENTER_CAMERA_BEHIND_PLAYER
-};
+#include "ePadButton.h"
 
 class CPed;
 
@@ -114,7 +88,7 @@ public:
     uint32 GetTouchedTimeDelta();
     void Update(int32 pad);
     void UpdateMouse();
-    void ReconcileTwoControllersInput(CControllerState const& controllerA, CControllerState const& controllerB);
+    void ReconcileTwoControllersInput(const CControllerState& controllerA, const CControllerState& controllerB);
     void SetDrunkInputDelay(int32 delay);
     void StartShake(int16 time, uint8 frequency, uint32 arg2);
     void StartShake_Distance(int16 time, uint8 frequency, float x, float y, float z);
@@ -128,8 +102,8 @@ public:
     int16 GetSteeringUpDown();
     int16 GetPedWalkLeftRight();
     int16 GetPedWalkUpDown();
-    int16 GetPedWalkLeftRight(CPed* pPed);
-    int16 GetPedWalkUpDown(CPed* pPed);
+    int16 GetPedWalkLeftRight(CPed* ped);
+    int16 GetPedWalkUpDown(CPed* ped);
     bool GetLookLeft();
     bool GetLookRight();
     bool GetLookBehindForCar();
@@ -174,11 +148,11 @@ public:
     void Clear(bool enablePlayerControls, bool resetPhase);
     static void ProcessPad(bool numPad);
     static void UpdatePads();
-    bool WeaponJustDown(CPed* pPed);
+    bool WeaponJustDown(CPed* ped);
     bool GetEnterTargeting();
-    int32 GetWeapon(CPed* pPed);
-    int16 AimWeaponLeftRight(CPed* pPed);
-    int16 AimWeaponUpDown(CPed* pPed);
+    int32 GetWeapon(CPed* ped);
+    int16 AimWeaponLeftRight(CPed* ped);
+    int16 AimWeaponUpDown(CPed* ped);
     bool IsStandardKeyJustDown(uint8 key);
     bool IsCtrlJustDown();
     bool IsStandardKeyPressed(uint8 key);

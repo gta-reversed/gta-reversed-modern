@@ -5,14 +5,11 @@
 
 class CTaskSimpleSlideToCoord : public CTaskSimpleRunNamedAnim {
 public:
-    CTaskSimpleSlideToCoord(CVector const&, float, float);
-    CTaskSimpleSlideToCoord(int32, char, char, float, char, char);
-
-public:
     uint8 unkn[28];
 
 public:
-    static void InjectHooks();
+    CTaskSimpleSlideToCoord(const CVector&, float, float);
+    CTaskSimpleSlideToCoord(int32, char, char, float, char, char);
 
     CTask* Clone() override;
     eTaskType GetTaskType() override;
@@ -20,6 +17,9 @@ public:
     bool ProcessPed(CPed* ped) override;
 
 private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
     CTask* Clone_Reversed();
     eTaskType GetId_Reversed();
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);

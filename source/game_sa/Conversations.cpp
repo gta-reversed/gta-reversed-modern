@@ -1,11 +1,11 @@
 #include "StdInc.h"
 
-void CPedToPlayerConversations::Clear()
-{
+#include "Conversations.h"
+
+void CPedToPlayerConversations::Clear() {
     plugin::Call<0x43AAE0>();
 }
 
-void CConversations::Clear()
-{
+void CConversations::Clear() {
     plugin::Call<0x43A7B0>();
 }

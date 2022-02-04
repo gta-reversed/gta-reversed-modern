@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,15 +16,20 @@ public:
     ~CColModel();
     static void* operator new(uint32 size);
     static void operator delete(void* data);
-    CColModel& operator=(CColModel const& colModel);
+    CColModel& operator=(const CColModel& colModel);
 
 public:
     CBoundingBox m_boundBox;
     CSphere m_boundSphere;
     uint8 m_nColSlot;
-    uint8 m_bNotEmpty : 1;
-    uint8 m_bIsSingleColDataAlloc : 1;
-    uint8 m_bIsActive : 1;
+    union {
+        struct {
+            uint8 m_bNotEmpty : 1;
+            uint8 m_bIsSingleColDataAlloc : 1;
+            uint8 m_bIsActive : 1;
+        };
+        uint8 m_nFlags{};
+    };
     CCollisionData *m_pColData;
 
 public:

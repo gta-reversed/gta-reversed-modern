@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "TimeCycle.h"
 
 float& CTimeCycle::m_BrightnessAddedToAmbientBlue{ *(float*)0xB79E30 };
 float& CTimeCycle::m_BrightnessAddedToAmbientGreen{ *(float*)0xB79E34 };
@@ -106,85 +108,88 @@ RwRGBA& CTimeCycle::m_BelowHorizonGrey{ *(RwRGBA*)0xB7CB10 };
 RwV3d& CTimeCycle::m_vecDirnLightToSun{ *(RwV3d*)0xB7CB14 };
 
 void CTimeCycle::InjectHooks() {
+    RH_ScopedClass(CTimeCycle);
+    RH_ScopedCategoryGlobal();
 
+    // RH_ScopedInstall(AddOne, 0x55FF40);
 }
 
-// Converted from cdecl void CTimeCycle::AddOne(CBox &box,int16 farclip,int32 extracolor,float strength,float falloff,float lodDistMult)	0x55FF40
+// 0x55FF40
 void CTimeCycle::AddOne(CBox& box, int16 farClip, int32 extraColor, float strength, float falloff, float lodDistMult) {
     plugin::Call<0x55FF40, CBox&, int16, int32, float, float, float>(box, farClip, extraColor, strength, falloff, lodDistMult);
 }
 
-// Converted from cdecl void CTimeCycle::CalcColoursForPoint(CVector point,CColourSet * pCurrentColourSet)	0x5603D0	
+// 0x5603D0
 void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* pCurrentColourSet) {
     plugin::Call<0x5603D0, CVector, CColourSet*>(point, pCurrentColourSet);
 }
 
-// Converted from cdecl void CTimeCycle::FindFarClipForCoors(CVector cam_pos)	0x5616E0
+// 0x5616E0
 float CTimeCycle::FindFarClipForCoors(CVector cameraPos) {
     return plugin::CallAndReturn<float, 0x5616E0, CVector>(cameraPos);
 }
 
-// Converted from cdecl void CTimeCycle::FindTimeCycleBox(CVector pos,CTimeCycleBox **outbox,float *interpolation,bool bCheckLod,bool bCheckFar,CTimeCycleBox *exclude)	0x55FFD0
+// 0x55FFD0
 void CTimeCycle::FindTimeCycleBox(CVector pos, CTimeCycleBox** outbox, float* interpolation, bool bCheckLod, bool bCheckFar, CTimeCycleBox* exclude) {
     plugin::Call<0x55FFD0, CVector, CTimeCycleBox**, float*, bool, bool, CTimeCycleBox*>(pos, outbox, interpolation, bCheckLod, bCheckFar, exclude);
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue()	0x560350
+// 0x560350
 float CTimeCycle::GetAmbientBlue() {
     return plugin::CallAndReturn<float, 0x560350>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue_BeforeBrightness()	0x5603B0
+// 0x5603B0
 float CTimeCycle::GetAmbientBlue_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x5603B0>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientBlue_Obj()	0x560380
+// 0x560380
 float CTimeCycle::GetAmbientBlue_Obj() {
     return plugin::CallAndReturn<float, 0x560380>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen()	0x560340
+// 0x560340
 float CTimeCycle::GetAmbientGreen() {
     return plugin::CallAndReturn<float, 0x560340>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen_BeforeBrightness()	0x5603A0
+// 0x5603A0
 float CTimeCycle::GetAmbientGreen_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x5603A0>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientGreen_Obj()	0x560370
+// 0x560370
 float CTimeCycle::GetAmbientGreen_Obj() {
     return plugin::CallAndReturn<float, 0x560370>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed()	0x560330
+// 0x560330
 float CTimeCycle::GetAmbientRed() {
     return plugin::CallAndReturn<float, 0x560330>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed_BeforeBrightness()	0x560390
+// 0x560390
 float CTimeCycle::GetAmbientRed_BeforeBrightness() {
     return plugin::CallAndReturn<float, 0x560390>();
 }
 
-// Converted from cdecl float CTimeCycle::GetAmbientRed_Obj()	0x560360
+// 0x560360
 float CTimeCycle::GetAmbientRed_Obj() {
     return plugin::CallAndReturn<float, 0x560360>();
 }
 
-// Converted from cdecl void CTimeCycle::InitForRestart()0x5601F0
+// 0x5601F0
 void CTimeCycle::InitForRestart() {
     plugin::Call<0x5601F0>();
 }
 
-// Converted from cdecl void CTimeCycle::Initialise()	0x5BBAC0
+// 0x5BBAC0
 void CTimeCycle::Initialise() {
     plugin::Call<0x5BBAC0>();
 }
 
-// Converted from cdecl void CTimeCycle::SetConstantParametersForPostFX()0x560210
+// 0x560210
 void CTimeCycle::SetConstantParametersForPostFX() {
     plugin::Call<0x560210>();
 }
@@ -194,17 +199,21 @@ void CTimeCycle::Shutdown() {
     plugin::Call<0x5601E0>();
 }
 
-// Converted from cdecl void CTimeCycle::StartExtraColour(int32 colour,bool bNoExtraColorInterior)	0x55FEC0
+// 0x55FEC0
 void CTimeCycle::StartExtraColour(int32 colour, bool bNoExtraColorInterior) {
     plugin::Call<0x55FEC0, int32, bool>(colour, bNoExtraColorInterior);
 }
 
-// Converted from cdecl void CTimeCycle::StopExtraColour(bool bNoExtraColorInterior)	0x55FF20
+// 0x55FF20
 void CTimeCycle::StopExtraColour(bool bNoExtraColorInterior) {
     plugin::Call<0x55FF20, bool>(bNoExtraColorInterior);
 }
 
-// Converted from cdecl void CTimeCycle::Update()	0x561760
+// 0x561760
 void CTimeCycle::Update() {
     plugin::Call<0x561760>();
+}
+
+CRGBA CTimeCycle::GetCurrentSkyBottomColor() {
+    return m_CurrentColours.GetSkyBottom();
 }

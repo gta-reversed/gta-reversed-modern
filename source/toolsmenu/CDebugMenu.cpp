@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
+#include "Utility.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -20,6 +21,9 @@
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "toolsmenu\DebugModules\CPickupsDebugModule.h"
+#include "toolsmenu\DebugModules\HooksDebugModule.h"
+#include "toolsmenu\DebugModules\CTeleportDebugModule.h"
+#include "toolsmenu\DebugModules\FXDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -30,23 +34,15 @@ ImGuiIO* CDebugMenu::io = {};
 
 static ImVec2 m_MousePos;
 
-// https://stackoverflow.com/a/19839371
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
-    auto it = std::search(
-      strHaystack.begin(), strHaystack.end(),
-      strNeedle.begin(), strNeedle.end(),
-      [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end());
-}
-
 void CDebugMenu::ImguiInitialise() {
     if (m_imguiInitialised) {
         return;
     }
 
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+
+    auto& ctx = *ImGui::CreateContext();
+
     io = &ImGui::GetIO();
     io->WantCaptureMouse = true;
     io->WantCaptureKeyboard = true;
@@ -61,9 +57,11 @@ void CDebugMenu::ImguiInitialise() {
 
     LoadMouseSprite();
 
+    TeleportDebugModule::Initialise(ctx);
     VehicleDebugModule::Initialise();
     PedDebugModule::Initialise();
     MissionDebugModule::Initialise();
+    FXDebugModule::Initialise();
     m_imguiInitialised = true;
 }
 
@@ -117,7 +115,6 @@ void CDebugMenu::ImguiInputUpdate() {
             } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
                 io->KeysDown[i] = false;
         }
-
         io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
         io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
         io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
@@ -190,142 +187,27 @@ bool showPlayerInfo;
 void CDebugMenu::ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
-    CPlayerPed* pLocalPlayer = FindPlayerPed();
-    if (pLocalPlayer != nullptr) {
-        ImGui::Begin("Player Information");
 
-        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
-        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
 
-        ImGui::End();
-    }
-}
+    ImGui::Begin("Player Information");
 
-void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
-    ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
-    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
+    auto playerPos = player->GetPosition();
+    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
+    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::End();
 }
 
 void CDebugMenu::ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
-        PostFxTool();
+        FXDebugModule::ProcessImgui();
     }
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
     }
-}
-
-// TODO: The code is a mess, clean it up
-void CDebugMenu::ProcessHooksTool() {
-    static std::string HooksFilterContent;
-
-    ImGui::PushItemWidth(465.0f);
-    bool reclaim_focus = false;
-    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-    if (ImGui::InputText(" ", &HooksFilterContent, input_text_flags)) {
-        reclaim_focus = true;
-    }
-    ImGui::PopItemWidth();
-
-    // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-    ImGui::BeginChild("##hookstool", ImVec2(0, 0));
-    ImGui::SetNextItemOpen(true);
-    ImGui::AlignTextToFramePadding();
-    if (ImGui::TreeNode("Reversible Hooks")) {
-        const auto& allHooks = ReversibleHooks::GetAllHooks();
-        // Handle disabling/enabling of all hooks at once
-        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-        std::string disabledAllStr = "all_disabled";
-        ImGui::PushID(disabledAllStr.c_str());
-        if (ImGui::Button("-")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Disable all");
-        ImGui::PopID();
-
-        ImGui::SameLine();
-        std::string enableAllStr = "all_enabled";
-        ImGui::PushID(enableAllStr.c_str());
-        if (ImGui::Button("+")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (!hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Enable all");
-        ImGui::PopID();
-        // End of disabling/enabling of all hooks at once
-
-        for (auto& classHooks : allHooks) {
-            if (!HooksFilterContent.empty() && !findStringCaseInsensitive(classHooks.first, HooksFilterContent))
-                continue;
-
-            ImGui::AlignTextToFramePadding();
-            bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
-            ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-            std::string disabledStr = classHooks.first + "_disabled";
-            ImGui::PushID(disabledStr.c_str());
-            if (ImGui::Button("-")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = false;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Disable all");
-            ImGui::PopID();
-
-            ImGui::SameLine();
-            std::string enableStr = classHooks.first + "_enabled";
-            ImGui::PushID(enableStr.c_str());
-            if (ImGui::Button("+")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = true;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Enable all");
-            ImGui::PopID();
-
-            for (auto& hook : classHooks.second)
-                if (hook->m_bIsHooked != hook->m_bImguiHooked)
-                    ReversibleHooks::Switch(hook);
-
-            if (treeOpen) {
-                for (auto& hook : classHooks.second) {
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
-                    ImGui::PopStyleVar();
-                    ImGui::SameLine();
-                    ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
-                }
-                ImGui::TreePop();
-            }
-        }
-        ImGui::TreePop();
-    }
-    ImGui::EndChild();
 }
 
 #ifdef EXTRA_DEBUG_FEATURES
@@ -367,6 +249,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
     }
 
     if (m_showMenu && FindPlayerPed()) {
+        TeleportDebugModule::ProcessImGui();
+
         ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
         ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
         if (ImGui::BeginMenuBar()) {
@@ -378,7 +262,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
             if (ImGui::BeginTabItem("Peds")) {
-                // ImGui::Checkbox("Show Player Information", &showPlayerInfo);
+                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 PedDebugModule::ProcessImgui();
                 ImGui::EndTabItem();
             }
@@ -399,7 +283,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Hooks")) {
-                ProcessHooksTool();
+                HooksDebugModule::ProcessImGui();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
@@ -424,10 +308,11 @@ static void DebugCode() {
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
-        CCheat::TankerCheat();
+        CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustDown('2')) {
         printf("");
+        CCheat::MoneyArmourHealthCheat();
     }
 }
 
@@ -450,6 +335,8 @@ void CDebugMenu::ImguiDrawLoop() {
     CDebugMenu::ImguiDisplayExtraDebugFeatures();
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
+    HooksDebugModule::ProcessRender();
+    FXDebugModule::ProcessRender();
 
     ImGui::EndFrame();
     ImGui::Render();

@@ -6,13 +6,14 @@ uint32 &CTaskSimpleFall::m_nMaxPlayerDownTime = *reinterpret_cast<uint32*>(0x8D2
 
 void CTaskSimpleFall::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleFall","Constructor", 0x6782C0, &CTaskSimpleFall::Constructor);
-    ReversibleHooks::Install("CTaskSimpleFall", "StartAnim", 0x67CA40, &CTaskSimpleFall::StartAnim);
-    ReversibleHooks::Install("CTaskSimpleFall", "ProcessFall", 0x6784C0, &CTaskSimpleFall::ProcessFall);
-    ReversibleHooks::Install("CTaskSimpleFall", "FinishFallAnimCB", 0x6786B0, &CTaskSimpleFall::FinishFallAnimCB);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleFall", "ProcessPed", 0x67FAF0, &CTaskSimpleFall::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleFall", "MakeAbortable", 0x678370, &CTaskSimpleFall::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskSimpleFall);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x6782C0);
+    RH_ScopedInstall(StartAnim, 0x67CA40);
+    RH_ScopedInstall(ProcessFall, 0x6784C0);
+    RH_ScopedInstall(FinishFallAnimCB, 0x6786B0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x67FAF0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x678370);
 }
 
 CTaskSimpleFall* CTaskSimpleFall::Constructor(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime)
@@ -72,8 +73,8 @@ bool CTaskSimpleFall::ProcessPed_Reversed(CPed* ped)
             && ped->IsPlayer()
             && !ped->bIsBeingArrested
             && ped->m_nPedState != PEDSTATE_ARRESTED
-            && ped->AsPlayerPed()->GetPadFromPlayer()
-            && !ped->AsPlayerPed()->GetPadFromPlayer()->DisablePlayerControls
+            && ped->AsPlayer()->GetPadFromPlayer()
+            && !ped->AsPlayer()->GetPadFromPlayer()->DisablePlayerControls
             )
         {
             m_nCurrentDownTime = m_nMaxPlayerDownTime - nTimeStep;
@@ -196,26 +197,26 @@ void CTaskSimpleFall::ProcessFall(CPed* ped)
         && !ped->bIsStanding
         )
     {
-        CAnimBlendAssociation* pAnim;
+        CAnimBlendAssociation* anim;
         auto pFirstAnim = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_PARTIAL);
 
         if (pFirstAnim && (pFirstAnim->m_nAnimId == ANIM_ID_FALL_BACK || pFirstAnim->m_nAnimId == ANIM_ID_FALL_FRONT))
-            pAnim = pFirstAnim;
+            anim = pFirstAnim;
         else
-            pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_BACK);
+            anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_BACK);
 
-        if (!pAnim)
-            pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
+        if (!anim)
+            anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
 
-        if (pAnim)
+        if (anim)
         {
-            if (pAnim->m_fBlendAmount > 0.3F
-                && pAnim->m_fBlendDelta >= 0.0F
-                && pAnim->m_fCurrentTime > 0.667F
-                && pAnim->m_fCurrentTime - pAnim->m_fTimeStep <= 0.667F
+            if (anim->m_fBlendAmount > 0.3F
+                && anim->m_fBlendDelta >= 0.0F
+                && anim->m_fCurrentTime > 0.667F
+                && anim->m_fCurrentTime - anim->m_fTimeStep <= 0.667F
                 )
             {
-                pAnim->Start(0.0F);
+                anim->Start(0.0F);
             }
         }
         else
@@ -228,14 +229,14 @@ void CTaskSimpleFall::ProcessFall(CPed* ped)
         && ped->bIsStanding
         && !ped->bWasStanding)
     {
-        auto pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_BACK);
-        if (!pAnim)
-            pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
+        auto anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_BACK);
+        if (!anim)
+            anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_FALL_FRONT);
 
-        if (pAnim)
+        if (anim)
         {
             ped->bKnockedUpIntoAir = false;
-            pAnim->m_fSpeed = 3.0F;
+            anim->m_fSpeed = 3.0F;
         }
         else
         {
@@ -247,10 +248,10 @@ void CTaskSimpleFall::ProcessFall(CPed* ped)
 }
 
 // 0x6786B0
-void CTaskSimpleFall::FinishFallAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleFall::FinishFallAnimCB(CAnimBlendAssociation* anim, void* data)
 {
-    CTaskSimpleFall* pTask = reinterpret_cast<CTaskSimpleFall*>(data);
-    pTask->m_pAnim = nullptr;
-    pTask->m_bIsFinished = true;
+    CTaskSimpleFall* task = reinterpret_cast<CTaskSimpleFall*>(data);
+    task->m_pAnim = nullptr;
+    task->m_bIsFinished = true;
 }
 

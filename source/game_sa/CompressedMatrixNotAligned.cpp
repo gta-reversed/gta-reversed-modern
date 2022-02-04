@@ -1,9 +1,14 @@
 #include "StdInc.h"
 
+#include "CompressedMatrixNotAligned.h"
+
 void CCompressedMatrixNotAligned::InjectHooks()
 {
-    ReversibleHooks::Install("CCompressedMatrixNotAligned", "DecompressIntoFullMatrix", 0x59B9F0, &CCompressedMatrixNotAligned::DecompressIntoFullMatrix);
-    ReversibleHooks::Install("CCompressedMatrixNotAligned", "CompressFromFullMatrix", 0x59BAD0, &CCompressedMatrixNotAligned::CompressFromFullMatrix);
+    RH_ScopedClass(CCompressedMatrixNotAligned);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(DecompressIntoFullMatrix, 0x59B9F0);
+    RH_ScopedInstall(CompressFromFullMatrix, 0x59BAD0);
 }
 
 void CCompressedMatrixNotAligned::DecompressIntoFullMatrix(CMatrix& matrix)

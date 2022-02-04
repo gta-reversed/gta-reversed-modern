@@ -14,25 +14,28 @@ tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_S
 tVehicleAudioSettings const (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<tVehicleAudioSettings const (*)[232]>(0x860AF0);
 
 void CAEVehicleAudioEntity::InjectHooks() {
+    RH_ScopedClass(CAEVehicleAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
     // VIRTUAL
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "UpdateParameters", 0x4FB6C0, &CAEVehicleAudioEntity::UpdateParameters_Reversed);
+    RH_ScopedInstall(UpdateParameters_Reversed, 0x4FB6C0);
 
     // CLASS
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "Initialise", 0x4F7670, &CAEVehicleAudioEntity::Initialise);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "Terminate", 0x4FB8C0, &CAEVehicleAudioEntity::Terminate);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "GetAircraftNearPosition", 0x4F96A0, &CAEVehicleAudioEntity::GetAircraftNearPosition);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "GetFlyingMetalVolume", 0x4F6150, &CAEVehicleAudioEntity::GetFlyingMetalVolume);
+    RH_ScopedInstall(Initialise, 0x4F7670);
+    RH_ScopedInstall(Terminate, 0x4FB8C0);
+    RH_ScopedInstall(GetAircraftNearPosition, 0x4F96A0);
+    RH_ScopedInstall(GetFlyingMetalVolume, 0x4F6150);
 
     // STATIC
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "GetVehicleAudioSettings", 0x4F5C10, &CAEVehicleAudioEntity::GetVehicleAudioSettings);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "RequestBankSlot", 0x4F4D10, &CAEVehicleAudioEntity::RequestBankSlot);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "DemandBankSlot", 0x4F4E60, &CAEVehicleAudioEntity::DemandBankSlot);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "DoesBankSlotContainThisBank", 0x4F4E30, &CAEVehicleAudioEntity::DoesBankSlotContainThisBank);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "StoppedUsingBankSlot", 0x4F4DF0, &CAEVehicleAudioEntity::StoppedUsingBankSlot);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "EnableHelicoptors", 0x4F4EF0, &CAEVehicleAudioEntity::EnableHelicoptors);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "DisableHelicoptors", 0x4F4EE0, &CAEVehicleAudioEntity::DisableHelicoptors);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "StaticGetPlayerVehicleAudioSettingsForRadio", 0x4F4ED0, &CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio);
-    ReversibleHooks::Install("CAEVehicleAudioEntity", "StaticInitialise", 0x5B99F0, &CAEVehicleAudioEntity::StaticInitialise);
+    RH_ScopedInstall(GetVehicleAudioSettings, 0x4F5C10);
+    RH_ScopedInstall(RequestBankSlot, 0x4F4D10);
+    RH_ScopedInstall(DemandBankSlot, 0x4F4E60);
+    RH_ScopedInstall(DoesBankSlotContainThisBank, 0x4F4E30);
+    RH_ScopedInstall(StoppedUsingBankSlot, 0x4F4DF0);
+    RH_ScopedInstall(EnableHelicoptors, 0x4F4EF0);
+    RH_ScopedInstall(DisableHelicoptors, 0x4F4EE0);
+    RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
+    RH_ScopedInstall(StaticInitialise, 0x5B99F0);
 }
 
 CAEVehicleAudioEntity::CAEVehicleAudioEntity() : CAEAudioEntity(), m_twinSkidSound() {
@@ -243,10 +246,8 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     field_14E = 0;
     field_14C = 0;
 
-    for (auto i = 0; i < 12; ++i) {
-        m_aEngineSounds[i].m_nIndex = i;
-        m_aEngineSounds[i].m_pSound = nullptr;
-    }
+    for (auto i = 0; auto& sound : m_aEngineSounds)
+        sound.Init(i++);
 
     m_fSirenVolume = -100.0f;
     field_230 = -100.0f;
@@ -264,8 +265,8 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     m_pHornTonSound = nullptr;
     m_pSirenSound = nullptr;
     m_pPoliceSirenSound = nullptr;
-    field_238 = 0.0;
-    field_23C = 1.0;
+    field_238 = 0.0f;
+    field_23C = 1.0f;
     field_240 = 0;
 
     m_settings = CAEVehicleAudioEntity::GetVehicleAudioSettings(entity->m_nModelIndex);

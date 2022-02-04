@@ -9,7 +9,7 @@ public:
     static void InjectHooks();
 
     static void Init();
-    static bool Add(CEntity* pEntity, CPedGroup* pPedGroup, CEvent* pEvent);
+    static bool Add(CEntity* entity, CPedGroup* pedGroup, CEvent* event);
     static void Flush();
     static void Process();
 };

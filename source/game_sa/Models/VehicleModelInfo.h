@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,39 +15,26 @@
 #include "Pool.h"
 
 #include "eVehicleClass.h"
+#include "eVehicleType.h"
+
+class CAnimBlock;
 
 // enum by forkerer (https://github.com/forkerer/)
 enum eVehicleDummies {
-    DUMMY_LIGHT_FRONT_MAIN = 0x0,
-    DUMMY_LIGHT_REAR_MAIN = 0x1,
-    DUMMY_LIGHT_FRONT_SECONDARY = 0x2,
-    DUMMY_LIGHT_REAR_SECONDARY = 0x3,
-    DUMMY_SEAT_FRONT = 0x4,
-    DUMMY_SEAT_REAR = 0x5,
-    DUMMY_EXHAUST = 0x6,
-    DUMMY_ENGINE = 0x7,
-    DUMMY_GAS_CAP = 0x8,
-    DUMMY_TRAILER_ATTACH = 0x9,
-    DUMMY_HAND_REST = 0xA,
-    DUMMY_EXHAUST_SECONDARY = 0xB,
-    DUMMY_WING_AIRTRAIL = 0xC,
-    DUMMY_VEH_GUN = 0xD,
-};
-
-enum eVehicleType {
-    VEHICLE_IGNORE = -1,
-    VEHICLE_AUTOMOBILE = 0,
-    VEHICLE_MTRUCK, // MONSTER TRUCK
-    VEHICLE_QUAD,
-    VEHICLE_HELI,
-    VEHICLE_PLANE,
-    VEHICLE_BOAT,
-    VEHICLE_TRAIN,
-    VEHICLE_FHELI,
-    VEHICLE_FPLANE,
-    VEHICLE_BIKE,
-    VEHICLE_BMX,
-    VEHICLE_TRAILER
+    DUMMY_LIGHT_FRONT_MAIN      = 0,
+    DUMMY_LIGHT_REAR_MAIN       = 1,
+    DUMMY_LIGHT_FRONT_SECONDARY = 2,
+    DUMMY_LIGHT_REAR_SECONDARY  = 3,
+    DUMMY_SEAT_FRONT            = 4,
+    DUMMY_SEAT_REAR             = 5,
+    DUMMY_EXHAUST               = 6,
+    DUMMY_ENGINE                = 7,
+    DUMMY_GAS_CAP               = 8,
+    DUMMY_TRAILER_ATTACH        = 9,
+    DUMMY_HAND_REST             = 10,
+    DUMMY_EXHAUST_SECONDARY     = 11,
+    DUMMY_WING_AIRTRAIL         = 12,
+    DUMMY_VEH_GUN               = 13,
 };
 
 enum eVehicleUpgradePosn {
@@ -125,14 +112,14 @@ union tVehicleCompsUnion {
 VALIDATE_SIZE(tVehicleCompsUnion, 0x4);
 
 struct UpgradePosnDesc {
-  public:
+public:
     UpgradePosnDesc(){};
     ~UpgradePosnDesc(){};
 
-  public:
-    CVector m_vPosition;
+public:
+    CVector     m_vPosition;
     CQuaternion m_qRotation;
-    int32 m_nParentComponentId;
+    int32       m_nParentComponentId;
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
@@ -144,7 +131,7 @@ public:
     uint8              m_nPlateType;
     char               m_szGameName[8];
     char               _pad3A[2];
-    uint32             m_nVehicleType;
+    eVehicleType       m_nVehicleType;
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
     int16              m_nWheelModelIndex;
@@ -208,7 +195,7 @@ public:
     union {
         CAnimBlock* m_pAnimBlock;
         char* m_animBlockFileName;
-        uint32 m_dwAnimBlockIndex;
+        uint32 m_nAnimBlockIndex;
     };
 
     static class CLinkedUpgradeList {
@@ -280,9 +267,9 @@ public:
     void Init() override;
     void DeleteRwObject() override;
     RwObject* CreateInstance() override;
-    void SetAnimFile(char const* filename) override;
+    void SetAnimFile(const char* filename) override;
     void ConvertAnimFileIndex() override;
-    signed int GetAnimFileIndex() override;
+    int32 GetAnimFileIndex() override;
     void SetClump(RpClump* clump) override;
 
     // VTable implementations
@@ -290,9 +277,9 @@ public:
     void Init_Reversed();
     void DeleteRwObject_Reversed();
     RwObject* CreateInstance_Reversed();
-    void SetAnimFile_Reversed(char const* filename);
+    void SetAnimFile_Reversed(const char* filename);
     void ConvertAnimFileIndex_Reversed();
-    signed int GetAnimFileIndex_Reversed();
+    int32 GetAnimFileIndex_Reversed();
     void SetClump_Reversed(RpClump* clump);
 
     // Class methods
@@ -338,7 +325,7 @@ public:
     // get num doors in this model
     int32 GetNumDoors();
     // get position of dummy in model-space 
-    CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
+    [[nodiscard]] CVector GetModelDummyPosition(eVehicleDummies dummy) const { return m_pVehicleStruct->m_avDummyPos[dummy]; } // NOTSA
 
     // Static method's
     // setup lights states for currently rendered vehicle
@@ -346,7 +333,7 @@ public:
     // destroying vehiclelights textures
     static void ShutdownLightTexture();
     // find remap texture with name
-    static RwTexture* FindTextureCB(char const* name);
+    static RwTexture* FindTextureCB(const char* name);
     // start using special finding callback
     static void UseCommonVehicleTexDicationary();
     // stop using special finding callback
@@ -424,13 +411,19 @@ public:
     static void LoadEnvironmentMaps();
 
     // Helpers
-    inline bool IsBoat() { return m_nVehicleType == eVehicleType::VEHICLE_BOAT; }
-    inline bool IsTrailer() { return m_nVehicleType == eVehicleType::VEHICLE_TRAILER; }
-    inline bool IsBike() {
-        return m_nVehicleType == eVehicleType::VEHICLE_BMX
-            || m_nVehicleType == eVehicleType::VEHICLE_BIKE
-            || m_nVehicleType == eVehicleType::VEHICLE_QUAD;
-    }
+    // ctrl+c, ctrl+v from CVehicle
+    [[nodiscard]] bool IsVehicleTypeValid()     const { return m_nVehicleType != VEHICLE_TYPE_IGNORE; }
+    [[nodiscard]] bool IsAutomobile()           const { return m_nVehicleType == VEHICLE_TYPE_AUTOMOBILE; }
+    [[nodiscard]] bool IsMonsterTruck()         const { return m_nVehicleType == VEHICLE_TYPE_MTRUCK; }
+    [[nodiscard]] bool IsQuad()                 const { return m_nVehicleType == VEHICLE_TYPE_QUAD; }
+    [[nodiscard]] bool IsHeli()                 const { return m_nVehicleType == VEHICLE_TYPE_HELI; }
+    [[nodiscard]] bool IsPlane()                const { return m_nVehicleType == VEHICLE_TYPE_PLANE; }
+    [[nodiscard]] bool IsBoat()                 const { return m_nVehicleType == VEHICLE_TYPE_BOAT; }
+    [[nodiscard]] bool IsTrain()                const { return m_nVehicleType == VEHICLE_TYPE_TRAIN; }
+    [[nodiscard]] bool IsFakeAircraft()         const { return m_nVehicleType == VEHICLE_TYPE_FHELI || m_nVehicleType == VEHICLE_TYPE_FPLANE; }
+    [[nodiscard]] bool IsBike()                 const { return m_nVehicleType == VEHICLE_TYPE_BIKE; }
+    [[nodiscard]] bool IsBMX()                  const { return m_nVehicleType == VEHICLE_TYPE_BMX; }
+    [[nodiscard]] bool IsTrailer()              const { return m_nVehicleType == VEHICLE_TYPE_TRAILER; }
 
     // These were probably inlined:
     void SetWheelSizes(float front, float rear) {

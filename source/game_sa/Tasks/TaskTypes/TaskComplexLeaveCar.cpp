@@ -2,11 +2,11 @@
 
 #include "TaskComplexLeaveCar.h"
 
-CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut) : CTaskComplex() {
+CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut) : CTaskComplex() {
     m_nTargetDoor                  = nTargetDoor;
     m_nDelayTime                   = nDelayTime;
     m_bSensibleLeaveCar            = bSensibleLeaveCar;
-    m_pTargetVehicle               = pTargetVehicle;
+    m_pTargetVehicle               = targetVehicle;
     m_bForceGetOut                 = bForceGetOut;
     m_bDie                         = false;
     m_pTaskUtilityLineUpPedWithCar = nullptr;
@@ -17,8 +17,8 @@ CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* pTargetVehicle, int32 nTarg
     m_fDieAnimSpeed                = 1.0f;
     m_bIsInAir                     = false;
 
-    if (pTargetVehicle)
-        pTargetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    if (targetVehicle)
+        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
 }
 
 CTaskComplexLeaveCar::~CTaskComplexLeaveCar() {
@@ -31,8 +31,8 @@ CTaskComplexLeaveCar::~CTaskComplexLeaveCar() {
     delete m_pTaskUtilityLineUpPedWithCar;
 }
 
-CTaskComplexLeaveCar* CTaskComplexLeaveCar::Constructor(CVehicle* pTargetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut) {
-    return plugin::CallMethodAndReturn<CTaskComplexLeaveCar*, 0x63B8C0, CTaskComplexLeaveCar*, CVehicle*, int32, int32, bool, bool>(this, pTargetVehicle, nTargetDoor, nDelayTime, bSensibleLeaveCar, bForceGetOut);
+CTaskComplexLeaveCar* CTaskComplexLeaveCar::Constructor(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut) {
+    return plugin::CallMethodAndReturn<CTaskComplexLeaveCar*, 0x63B8C0, CTaskComplexLeaveCar*, CVehicle*, int32, int32, bool, bool>(this, targetVehicle, nTargetDoor, nDelayTime, bSensibleLeaveCar, bForceGetOut);
 }
 
 CTask* CTaskComplexLeaveCar::Clone() {

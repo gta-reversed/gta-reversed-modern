@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "CullZones.h"
+
 CCullZoneReflection (&CCullZones::aMirrorAttributeZones)[72] = *(CCullZoneReflection(*)[72])0xC815C0;
 CCullZone (&CCullZones::aTunnelAttributeZones)[40] = *(CCullZone(*)[40])0xC81C80;
 CCullZone (&CCullZones::aAttributeZones)[1300] = *(CCullZone(*)[1300])0xC81F50;
@@ -11,21 +13,24 @@ int32& CCullZones::NumAttributeZones = *(int32*)0xC87AC8;
 bool& CCullZones::bMilitaryZonesDisabled = *(bool*)0xC87ACD;
 
 void CCullZones::InjectHooks() {
-    ReversibleHooks::Install("CCullZones", "Init", 0x72D6B0, &CCullZones::Init);
-    ReversibleHooks::Install("CCullZones", "AddCullZone", 0x72DF70, &CCullZones::AddCullZone);
-    ReversibleHooks::Install("CCullZones", "AddTunnelAttributeZone", 0x72DB50, &CCullZones::AddTunnelAttributeZone);
-    ReversibleHooks::Install("CCullZones", "AddMirrorAttributeZone", 0x72DC10, &CCullZones::AddMirrorAttributeZone);
-    ReversibleHooks::Install("CCullZones", "InRoomForAudio", 0x72DD70, &CCullZones::InRoomForAudio);
-    ReversibleHooks::Install("CCullZones", "CamNoRain", 0x72DDB0, &CCullZones::CamNoRain);
-    ReversibleHooks::Install("CCullZones", "PlayerNoRain", 0x72DDC0, &CCullZones::PlayerNoRain);
-    ReversibleHooks::Install("CCullZones", "FewerPeds", 0x72DD90, &CCullZones::FewerPeds);
-    ReversibleHooks::Install("CCullZones", "NoPolice", 0x72DD50, &CCullZones::NoPolice);
-    ReversibleHooks::Install("CCullZones", "DoExtraAirResistanceForPlayer", 0x72DDD0, &CCullZones::DoExtraAirResistanceForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindTunnelAttributesForCoors", 0x72D9F0, &CCullZones::FindTunnelAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindMirrorAttributesForCoors", 0x72DA70, &CCullZones::FindMirrorAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "FindZoneWithStairsAttributeForPlayer", 0x72DAD0, &CCullZones::FindZoneWithStairsAttributeForPlayer);
-    ReversibleHooks::Install("CCullZones", "FindAttributesForCoors", 0x72D970, &CCullZones::FindAttributesForCoors);
-    ReversibleHooks::Install("CCullZones", "Update", 0x72DEC0, &CCullZones::Update);
+    RH_ScopedClass(CCullZones);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x72D6B0);
+    RH_ScopedInstall(AddCullZone, 0x72DF70);
+    RH_ScopedInstall(AddTunnelAttributeZone, 0x72DB50);
+    RH_ScopedInstall(AddMirrorAttributeZone, 0x72DC10);
+    RH_ScopedInstall(InRoomForAudio, 0x72DD70);
+    RH_ScopedInstall(CamNoRain, 0x72DDB0);
+    RH_ScopedInstall(PlayerNoRain, 0x72DDC0);
+    RH_ScopedInstall(FewerPeds, 0x72DD90);
+    RH_ScopedInstall(NoPolice, 0x72DD50);
+    RH_ScopedInstall(DoExtraAirResistanceForPlayer, 0x72DDD0);
+    RH_ScopedInstall(FindTunnelAttributesForCoors, 0x72D9F0);
+    RH_ScopedInstall(FindMirrorAttributesForCoors, 0x72DA70);
+    RH_ScopedInstall(FindZoneWithStairsAttributeForPlayer, 0x72DAD0);
+    RH_ScopedInstall(FindAttributesForCoors, 0x72D970);
+    RH_ScopedInstall(Update, 0x72DEC0);
 }
 
 // 0x72D6B0
@@ -179,13 +184,13 @@ CCullZone* CCullZones::FindZoneWithStairsAttributeForPlayer() {
 }
 
 // 0x72D970
-eZoneAttributes CCullZones::FindAttributesForCoors(float x, float y) {
+eZoneAttributes CCullZones::FindAttributesForCoors(CVector pos) {
     if (NumAttributeZones <= 0)
         return eZoneAttributes::NONE;
 
     int32 out = eZoneAttributes::NONE;
     for (auto& attributeZone : aAttributeZones) {
-        if (attributeZone.IsPointWithin({x, y, 0})) {
+        if (attributeZone.IsPointWithin(pos)) {
             out |= attributeZone.flags;
         }
     }
@@ -197,11 +202,11 @@ eZoneAttributes CCullZones::FindAttributesForCoors(float x, float y) {
 void CCullZones::Update() {
     if ((CTimer::GetFrameCounter() & 7) == 2) {
         auto cameraPosition = TheCamera.GetGameCamPosition();
-        CurrentFlags_Camera = FindAttributesForCoors(cameraPosition->x, cameraPosition->y);
+        CurrentFlags_Camera = FindAttributesForCoors(cameraPosition);
     }
     else if ((CTimer::GetFrameCounter() & 7) == 6) {
         CVector posn = FindPlayerCoors();
-        CurrentFlags_Player = FindAttributesForCoors(posn.x, posn.y);
+        CurrentFlags_Player = FindAttributesForCoors(posn);
         if (!bMilitaryZonesDisabled && (CurrentFlags_Player & eZoneAttributes::MILITARY_ZONE) != 0) {
             auto player = FindPlayerPed();
             if (player->IsAlive()) {

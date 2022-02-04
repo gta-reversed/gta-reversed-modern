@@ -1,9 +1,10 @@
 #include "StdInc.h"
 
 #include "Cheat.h"
+#include "PedType.h"
+#include "PedClothesDesc.h"
 
 #include "TaskSimpleJetPack.h"
-#include "PedType.h"
 
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
@@ -12,7 +13,15 @@ bool (&CCheat::m_aCheatsActive)[TOTAL_CHEATS] = *reinterpret_cast<bool (*)[TOTAL
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
 
 // NOTSA
-std::vector<Cheat> cheats = {
+struct Cheat {
+    DWORD   installAddress;
+    void*   method;
+    const   std::string methodName;
+    uint32  hash;
+    eCheats type;
+};
+
+const auto cheats = std::to_array<Cheat>({
         { 0x4385b0,  CCheat::WeaponCheat1, "WeaponCheat1", 0xde4b237d, CHEAT_WEAPON_SET1 },
         { 0x438890,  CCheat::WeaponCheat2, "WeaponCheat2", 0xb22a28d1, CHEAT_WEAPON_SET2 },
         { 0x438b30,  CCheat::WeaponCheat3, "WeaponCheat3", 0x5a783fae, CHEAT_WEAPON_SET3 },
@@ -99,28 +108,31 @@ std::vector<Cheat> cheats = {
         { 0x4399d0,  CCheat::VehicleSkillsCheat, "VehicleSkillsCheat", 0xf01286e9, CHEAT_MAX_DRIVING_SKILLS },
         { 0x43a550,  CCheat::ApacheCheat, "ApacheCheat", 0xa841cc0a, CHEAT_SPAWN_HUNTER },
         { 0x43a560,  CCheat::QuadCheat, "QuadCheat", 0x31ea09cf, CHEAT_SPAWN_QUAD },
-        //{ 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
+        { 0x43a570,  CCheat::TankerCheat, "TankerCheat", 0xe958788a, CHEAT_SPAWN_TANKER_TRUCK },
         { 0x43a660,  CCheat::DozerCheat, "DozerCheat", 0x02c83a7c, CHEAT_SPAWN_DOZER },
         { 0x43a670,  CCheat::StuntPlaneCheat, "StuntPlaneCheat", 0xe49c3ed4, CHEAT_SPAWN_STUNT_PLANE },
         { 0x43a680,  CCheat::MonsterTruckCheat, "MonsterTruckCheat", 0x171ba8cc, CHEAT_SPAWN_MONSTER },
         { 0x0, nullptr, "", 0x86988dae, CHEAT_PROSTITUTES_PAY_YOU },
         { 0x0, nullptr, "", 0x2bdd2fa1, CHEAT_ALL_TAXIS_NITRO },
-};
+});
 
 void CCheat::InjectHooks() {
-    ReversibleHooks::Install("CCheat", "AddToCheatString", 0x438480, &CCheat::AddToCheatString);
-    ReversibleHooks::Install("CCheat", "HandleSpecialCheats", 0x439A10, &CCheat::HandleSpecialCheats);
-    ReversibleHooks::Install("CCheat", "DoCheats", 0x439AF0, &CCheat::DoCheats);
-    ReversibleHooks::Install("CCheat", "ResetCheats", 0x438450, &CCheat::ResetCheats);
-    ReversibleHooks::Install("CCheat", "IsZoneStreamingAllowed", 0x407410, &CCheat::IsZoneStreamingAllowed);
-    ReversibleHooks::Install("CCheat", "EnableLegimateCheat", 0x438370, &CCheat::EnableLegitimateCheat);
+    RH_ScopedClass(CCheat);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(AddToCheatString, 0x438480);
+    RH_ScopedInstall(HandleSpecialCheats, 0x439A10);
+    RH_ScopedInstall(DoCheats, 0x439AF0);
+    RH_ScopedInstall(ResetCheats, 0x438450);
+    RH_ScopedInstall(IsZoneStreamingAllowed, 0x407410);
+    RH_ScopedInstall(EnableLegitimateCheat, 0x438370);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {
             continue;
         }
 
-        ReversibleHooks::Install("CCheat", cheat.methodName, cheat.installAddress, &cheat.method);
+        RH_ScopedNamedGlobalInstall(cheat.method, cheat.methodName, cheat.installAddress);
 
         for (auto& cheatFunc: CCheat::m_aCheatFunctions) {
             if (reinterpret_cast<unsigned long>(cheatFunc) == cheat.installAddress) {
@@ -197,7 +209,7 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
-    for (int16 i = 0; i < 256; ++i)
+    for (auto i = 0; i < 256; ++i)
         if (CPad::NewKeyState.standardKeys[i])
             if (!CPad::OldKeyState.standardKeys[i])
                 AddToCheatString(i);
@@ -205,7 +217,7 @@ void CCheat::DoCheats() {
 
 // 0x439880
 void CCheat::AdrenalineCheat() {
-    CPlayerPedData* playerData = FindPlayerPed(-1)->m_pPlayerData;
+    CPlayerPedData* playerData = FindPlayerPed()->m_pPlayerData;
 
     m_aCheatsActive[CHEAT_ADRENALINE_MODE] ^= true;
     if (m_aCheatsActive[CHEAT_ADRENALINE_MODE]) {
@@ -254,7 +266,7 @@ void CCheat::BeachPartyCheat() {
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed* player = FindPlayerPed(-1);
+        CPlayerPed* player = FindPlayerPed();
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("torso", nullptr, CLOTHES_TEXTURE_TORSO);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("shortskhaki", "shorts", CLOTHES_TEXTURE_LEGS);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("flipflop", "flipflop", CLOTHES_TEXTURE_SHOES);
@@ -311,7 +323,7 @@ void CCheat::CountrysideInvasionCheat() {
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed(-1);
+        CPlayerPed *player = FindPlayerPed();
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("timberfawn", "bask1", CLOTHES_TEXTURE_SHOES);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("captruck", "captruck", CLOTHES_TEXTURE_HATS);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("countrytr", "countrytr", CLOTHES_TEXTURE_SPECIAL);
@@ -345,7 +357,7 @@ void CCheat::DozerCheat() {
 void CCheat::DrivebyCheat() {
     m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] ^= true;
 
-    CPlayerPed *player = FindPlayerPed(-1);
+    CPlayerPed *player = FindPlayerPed();
     if (m_aCheatsActive[CHEAT_WEAPON_AIMING_WHILE_DRIVING] && player->m_aWeapons[WEAPON_KNIFE].m_nType == WEAPON_UNARMED) {
         player->GiveDelayedWeapon(WEAPON_MICRO_UZI, 150);
         player->SetCurrentWeapon(WEAPON_MICRO_UZI);
@@ -385,7 +397,7 @@ void CCheat::ElvisLivesCheat() {
 void CCheat::EverybodyAttacksPlayerCheat() {
     m_aCheatsActive[CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD] ^= true;
     if (m_aCheatsActive[CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD]) {
-        auto player = FindPlayerPed(-1);
+        auto player = FindPlayerPed();
         for (auto i = 0; i < CPools::ms_pPedPool->m_nSize; i++) {
             auto ped = CPools::ms_pPedPool->GetAt(i);
             if (!ped || ped->IsPlayer())
@@ -408,7 +420,7 @@ void CCheat::ExtraSunnyWeatherCheat() {
 // 0x438f90
 void CCheat::FastTimeCheat() {
     if (CTimer::GetTimeScale() < 4.0f) {
-        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f); // todo: check compiler optimization, should be ms_fTimeScale + ms_fTimeScale
+        CTimer::SetTimeScale(CTimer::GetTimeScale() * 2.0f);
     }
 }
 
@@ -423,7 +435,7 @@ void CCheat::SlowTimeCheat() {
 void CCheat::FatCheat() {
     CStats::SetStatValue(STAT_FAT, 1000.0f);
 
-    CPlayerPed *player = FindPlayerPed(-1);
+    CPlayerPed *player = FindPlayerPed();
     if (player->m_nPedState != PEDSTATE_DRIVING) {
         CClothes::RebuildPlayer(player, false);
     }
@@ -457,7 +469,7 @@ void CCheat::FunhouseCheat() {
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed(-1);
+        CPlayerPed *player = FindPlayerPed();
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("torso", "torso", CLOTHES_TEXTURE_TORSO);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("legsheart", "legs", CLOTHES_TEXTURE_LEGS);
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("timberhike", "bask1", CLOTHES_TEXTURE_SHOES);
@@ -531,18 +543,18 @@ void CCheat::HandleSpecialCheats(eCheats cheatID) {
 
 // 0x438D60
 void CCheat::HealthCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     CPlayerInfo* playerInfo = player->GetPlayerInfoForThisPlayerPed();
     player->m_fHealth = playerInfo->m_nMaxHealth;
 
-    CVehicle *vehicle = FindPlayerVehicle(-1, false);
+    CVehicle *vehicle = FindPlayerVehicle();
     if (!vehicle) {
         return;
     }
 
     vehicle->m_fHealth = 1000.0f;
-    if (vehicle->m_vehicleType == VEHICLE_BIKE) {
-        auto* bike = static_cast<CBike*>(vehicle);
+    if (vehicle->IsBike()) {
+        CBike* bike = vehicle->AsBike();
         bike->field_7BC = 0;
         bike->Fix();
         bike->m_apCollidedEntities[5] = nullptr;
@@ -583,7 +595,7 @@ void CCheat::LoveConquersAllCheat() {
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed(-1);
+        CPlayerPed *player = FindPlayerPed();
         player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("gimpleg", "gimpleg", CLOTHES_TEXTURE_SPECIAL);
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
@@ -617,7 +629,7 @@ void CCheat::MayhemCheat() {
             for (uint32 pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
                 ped->m_acquaintance.SetAsAcquaintance(4, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
             }
-            CPed* closestPed = static_cast<CPed*>(ped->m_pIntelligence->m_entityScanner.GetClosestPedInRange());
+            CPed* closestPed = ped->GetIntelligence()->m_entityScanner.GetClosestPedInRange()->AsPed();
             if (closestPed) {
                 CEventAcquaintancePedHate event(closestPed);
                 event.m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT;
@@ -643,7 +655,7 @@ void CCheat::MidnightCheat() {
 
 // 0x438e40
 void CCheat::MoneyArmourHealthCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     CPlayerInfo* playerInfo = player->GetPlayerInfoForThisPlayerPed();
 
     playerInfo->m_nMoney += 250000;
@@ -658,7 +670,7 @@ void CCheat::MonsterTruckCheat() {
 
 // 0x439150
 void CCheat::MuscleCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
 
     CStats::SetStatValue(STAT_MUSCLE, 1000.0f);
     if (player->m_nPedState != PEDSTATE_DRIVING) {
@@ -710,7 +722,7 @@ void CCheat::NinjaCheat() {
         CStreaming::RequestModel(MODEL_KATANA, STREAMING_GAME_REQUIRED);
         CStreaming::LoadAllRequestedModels(false);
 
-        CPlayerPed* player = FindPlayerPed(-1);
+        CPlayerPed* player = FindPlayerPed();
         player->GiveWeapon(WEAPON_KATANA, 0, true);
         player->SetCurrentWeapon(WEAPON_KATANA);
     }
@@ -718,7 +730,7 @@ void CCheat::NinjaCheat() {
 
 // 0x4396c0
 void CCheat::NotWantedCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->CheatWantedLevel(0);
     player->bWantedByPolice = false;
     m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE] ^= true;
@@ -728,7 +740,7 @@ void CCheat::NotWantedCheat() {
 void CCheat::ParachuteCheat() {
     CStreaming::RequestModel(MODEL_GUN_PARA, STREAMING_GAME_REQUIRED);
     CStreaming::LoadAllRequestedModels(false);
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->GiveWeapon(WEAPON_PARACHUTE, 0, true);
     player->SetCurrentWeapon(WEAPON_PARACHUTE);
 }
@@ -771,7 +783,7 @@ void CCheat::SkinnyCheat() {
     CStats::SetStatValue(STAT_FAT, 0.0f);
     CStats::SetStatValue(STAT_MUSCLE, 0.0f);
 
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     if (player->m_nPedState != PEDSTATE_DRIVING) {
         CClothes::RebuildPlayer(player, false);
     }
@@ -826,9 +838,6 @@ void CCheat::TankCheat() {
 
 // 0x43a570
 void CCheat::TankerCheat() {
-    return plugin::Call<0x43A570>();
-
-    // incomplete
     CVehicle* vehicle = VehicleCheat(MODEL_PETRO);
     if (!vehicle)
         return;
@@ -840,12 +849,11 @@ void CCheat::TankerCheat() {
         return;
 
     CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
-    CVector posn = vehicle->GetPosition();
-    trailer->SetPosn(posn);
-    trailer->SetOrientation(0.0f, 0.0f, 3.4906585f); // DegreesToRadians() ?
-    trailer->m_nStatus = STATUS_TRAIN_MOVING;
-    trailer->SetTowLink(vehicle, true);
+    trailer->SetPosn(vehicle->GetPosition());
+    trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
+    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
     CWorld::Add(trailer);
+    trailer->SetTowLink(vehicle, true);
 }
 
 // 0x43a510
@@ -897,13 +905,13 @@ void CCheat::VortexCheat() {
 
 // 0x4396f0
 void CCheat::WantedCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->CheatWantedLevel(6);
 }
 
 // 0x438f20
 void CCheat::WantedLevelDownCheat() {
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->CheatWantedLevel(0);
 }
 
@@ -933,7 +941,7 @@ void CCheat::WeaponCheat1() {
 
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->GiveWeaponSet1();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -967,7 +975,7 @@ void CCheat::WeaponCheat2() {
 
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->GiveWeaponSet2();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -999,7 +1007,7 @@ void CCheat::WeaponCheat3() {
 
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed(-1);
+    CPlayerPed* player = FindPlayerPed();
     player->GiveWeaponSet3();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -1036,12 +1044,12 @@ void CCheat::WeaponSkillsCheat() {
 void CCheat::SuicideCheat() {
     CPedDamageResponseCalculator damageCalculator(nullptr, 1000.0f, WEAPON_UNARMED, PED_PIECE_TORSO, false);
     CEventDamage damageEvent(nullptr, CTimer::GetTimeInMS(), WEAPON_UNARMED, PED_PIECE_TORSO, 0, false, false);
-    CPlayerPed* pPlayer = FindPlayerPed(-1);
-    if (damageEvent.AffectsPed(pPlayer))
-        damageCalculator.ComputeDamageResponse(pPlayer, &damageEvent.m_damageResponse, true);
+    CPlayerPed* player = FindPlayerPed();
+    if (damageEvent.AffectsPed(player))
+        damageCalculator.ComputeDamageResponse(player, &damageEvent.m_damageResponse, true);
     else
         damageEvent.m_damageResponse.m_bDamageCalculated = true;
-    pPlayer->GetEventGroup().Add(&damageEvent, false);
+    player->GetEventGroup().Add(&damageEvent, false);
 }
 
 // 0x407410

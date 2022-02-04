@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -36,18 +36,20 @@ float& CRestart::ExtraPoliceStationRestartRadius = *(float*)0xA43250;
 float& CRestart::ExtraPoliceStationRestartHeading = *(float*)0xA4324C;
 
 void CRestart::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CRestart", "Initialise", 0x460630, &CRestart::Initialise);
-    Install("CRestart", "AddHospitalRestartPoint", 0x460730, &CRestart::AddHospitalRestartPoint);
-    Install("CRestart", "AddPoliceRestartPoint", 0x460780, &CRestart::AddPoliceRestartPoint);
-    Install("CRestart", "CancelOverrideRestart", 0x460800, &CRestart::CancelOverrideRestart);
-    Install("CRestart", "SetRespawnPointForDurationOfMission", 0x460810, &CRestart::SetRespawnPointForDurationOfMission);
-    Install("CRestart", "ClearRespawnPointForDurationOfMission", 0x460840, &CRestart::ClearRespawnPointForDurationOfMission);
-    // Install("CRestart", "FindClosestHospitalRestartPoint", 0x460A50, &CRestart::FindClosestHospitalRestartPoint);
-    // Install("CRestart", "FindClosestPoliceRestartPoint", 0x460850, &CRestart::FindClosestPoliceRestartPoint);
-    Install("CRestart", "OverrideNextRestart", 0x4607D0, &CRestart::OverrideNextRestart);
-    // Install("CRestart", "Load", 0x5D3770, &CRestart::Load);
-    // Install("CRestart", "Save", 0x5D3620, &CRestart::Save);
+    RH_ScopedClass(CRestart);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x460630);
+    RH_ScopedInstall(AddHospitalRestartPoint, 0x460730);
+    RH_ScopedInstall(AddPoliceRestartPoint, 0x460780);
+    RH_ScopedInstall(CancelOverrideRestart, 0x460800);
+    RH_ScopedInstall(SetRespawnPointForDurationOfMission, 0x460810);
+    RH_ScopedInstall(ClearRespawnPointForDurationOfMission, 0x460840);
+    // RH_ScopedInstall(FindClosestHospitalRestartPoint, 0x460A50);
+    // RH_ScopedInstall(FindClosestPoliceRestartPoint, 0x460850);
+    RH_ScopedInstall(OverrideNextRestart, 0x4607D0);
+    // RH_ScopedInstall(Load, 0x5D3770);
+    // RH_ScopedInstall(Save, 0x5D3620);
 }
 
 // 0x460630

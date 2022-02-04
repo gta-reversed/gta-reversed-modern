@@ -1,6 +1,5 @@
 #pragma once
 
-#include "eSurfaceType.h"
 #include "Skidmark.h"
 
 constexpr auto SKIDMARKS_COUNT{ 32u };

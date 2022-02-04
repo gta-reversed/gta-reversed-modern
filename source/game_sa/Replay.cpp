@@ -1,55 +1,60 @@
 #include "StdInc.h"
 
+#include "Replay.h"
+
 eReplayMode &CReplay::Mode = *reinterpret_cast<eReplayMode*>(0xA43088);
 bool& CReplay::bReplayEnabled = *reinterpret_cast<bool*>(0x8A6160);
 
 void CReplay::InjectHooks() {
-    ReversibleHooks::Install("CReplay", "DisableReplays", 0x45B150, &CReplay::DisableReplays);
-    ReversibleHooks::Install("CReplay", "EnableReplays", 0x45B160, &CReplay::EnableReplays);
-//    ReversibleHooks::Install("CReplay", "StorePedAnimation", 0x0, &CReplay::StorePedAnimation);
-//    ReversibleHooks::Install("CReplay", "StorePedUpdate", 0x0, &CReplay::StorePedUpdate);
-//    ReversibleHooks::Install("CReplay", "RetrievePedAnimation", 0x45B4D0, &CReplay::RetrievePedAnimation);
-//    ReversibleHooks::Install("CReplay", "ProcessReplayCamera", 0x45D060, &CReplay::ProcessReplayCamera);
-//    ReversibleHooks::Install("CReplay", "Display", 0x45C210, &CReplay::Display);
-//    ReversibleHooks::Install("CReplay", "MarkEverythingAsNew", 0x45D430, &CReplay::MarkEverythingAsNew);
-//    ReversibleHooks::Install("CReplay", "EmptyReplayBuffer", 0x45EC90, &CReplay::EmptyReplayBuffer);
-//    ReversibleHooks::Install("CReplay", "GoToNextBlock", 0x0, &CReplay::GoToNextBlock);
-//    ReversibleHooks::Install("CReplay", "RecordVehicleDeleted", 0x45EBB0, &CReplay::RecordVehicleDeleted);
-//    ReversibleHooks::Install("CReplay", "RecordPedDeleted", 0x0, &CReplay::RecordPedDeleted);
-//    ReversibleHooks::Install("CReplay", "Init", 0x45E220, &CReplay::Init);
-//    ReversibleHooks::Install("CReplay", "Init_thunk", 0x460625, &CReplay::Init);
-//    ReversibleHooks::Install("CReplay", "SaveReplayToHD", 0x45C340, &CReplay::SaveReplayToHD);
-    ReversibleHooks::Install("CReplay", "ShouldStandardCameraBeProcessed", 0x45C440, &CReplay::ShouldStandardCameraBeProcessed);
-//    ReversibleHooks::Install("CReplay", "ProcessLookAroundCam", 0x45D760, &CReplay::ProcessLookAroundCam);
-//    ReversibleHooks::Install("CReplay", "FindPoolIndexForPed", 0x0, &CReplay::FindPoolIndexForPed);
-//    ReversibleHooks::Install("CReplay", "FindPoolIndexForVehicle", 0x0, &CReplay::FindPoolIndexForVehicle);
-//    ReversibleHooks::Install("CReplay", "ProcessPedUpdate", 0x45CA70, &CReplay::ProcessPedUpdate);
-//    ReversibleHooks::Install("CReplay", "CanWeFindPoolIndexForPed", 0x0, &CReplay::CanWeFindPoolIndexForPed);
-//    ReversibleHooks::Install("CReplay", "CanWeFindPoolIndexForVehicle", 0x0, &CReplay::CanWeFindPoolIndexForVehicle);
-//    ReversibleHooks::Install("CReplay", "StorePlayerInfoVariables", 0x0, &CReplay::StorePlayerInfoVariables);
-//    ReversibleHooks::Install("CReplay", "StoreStuffInMem", 0x45F180, &CReplay::StoreStuffInMem);
-//    ReversibleHooks::Install("CReplay", "RestorePlayerInfoVariables", 0x45E1F0, &CReplay::RestorePlayerInfoVariables);
-//    ReversibleHooks::Install("CReplay", "RestoreStuffFromMem", 0x45ECD0, &CReplay::RestoreStuffFromMem);
-//    ReversibleHooks::Install("CReplay", "FinishPlayback", 0x45F050, &CReplay::FinishPlayback);
-//    ReversibleHooks::Install("CReplay", "StoreClothesDesc", 0x0, &CReplay::StoreClothesDesc);
-//    ReversibleHooks::Install("CReplay", "RecordThisFrame", 0x45E300, &CReplay::RecordThisFrame);
-//    ReversibleHooks::Install("CReplay", "RestoreClothesDesc", 0x45C7D0, &CReplay::RestoreClothesDesc);
-//    ReversibleHooks::Install("CReplay", "DealWithNewPedPacket", 0x45CEA0, &CReplay::DealWithNewPedPacket);
-//    ReversibleHooks::Install("CReplay", "PlayBackThisFrameInterpolation", 0x45F380, &CReplay::PlayBackThisFrameInterpolation);
-//    ReversibleHooks::Install("CReplay", "FastForwardToTime", 0x460350, &CReplay::FastForwardToTime);
-//    ReversibleHooks::Install("CReplay", "PlayBackThisFrame", 0x4604A0, &CReplay::PlayBackThisFrame);
-//    ReversibleHooks::Install("CReplay", "FindSizeOfPacket", 0x45C8, &CReplay::FindSizeOfPacket);
-//    ReversibleHooks::Install("CReplay", "IsThisVehicleUsedInRecording", 0x0, &CReplay::IsThisVehicleUsedInRecording);
-//    ReversibleHooks::Install("CReplay", "IsThisPedUsedInRecording", 0x0, &CReplay::IsThisPedUsedInRecording);
-//    ReversibleHooks::Install("CReplay", "InitialiseVehiclePoolConversionTable", 0x0, &CReplay::InitialiseVehiclePoolConversionTable);
-//    ReversibleHooks::Install("CReplay", "InitialisePedPoolConversionTable", 0x0, &CReplay::InitialisePedPoolConversionTable);
-//    ReversibleHooks::Install("CReplay", "InitialisePoolConversionTables", 0x0, &CReplay::InitialisePoolConversionTables);
-//    ReversibleHooks::Install("CReplay", "FindFirstFocusCoordinate", 0x45D6C0, &CReplay::FindFirstFocusCoordinate);
-//    ReversibleHooks::Install("CReplay", "NumberFramesAvailableToPlay", 0x0, &CReplay::NumberFramesAvailableToPlay);
-//    ReversibleHooks::Install("CReplay", "StreamAllNecessaryCarsAndPeds", 0x45D4B0, &CReplay::StreamAllNecessaryCarsAndPeds);
-//    ReversibleHooks::Install("CReplay", "CreatePlayerPed", 0x45D540, &CReplay::CreatePlayerPed);
-//    ReversibleHooks::Install("CReplay", "TriggerPlayback", 0x4600F0, &CReplay::TriggerPlayback);
-//    ReversibleHooks::Install("CReplay", "Update", 0x460500, &CReplay::Update);
+    RH_ScopedClass(CReplay);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(DisableReplays, 0x45B150);
+    RH_ScopedInstall(EnableReplays, 0x45B160);
+//    RH_ScopedInstall(StorePedAnimation, 0x0);
+//    RH_ScopedInstall(StorePedUpdate, 0x0);
+//    RH_ScopedInstall(RetrievePedAnimation, 0x45B4D0);
+//    RH_ScopedInstall(ProcessReplayCamera, 0x45D060);
+//    RH_ScopedInstall(Display, 0x45C210);
+//    RH_ScopedInstall(MarkEverythingAsNew, 0x45D430);
+//    RH_ScopedInstall(EmptyReplayBuffer, 0x45EC90);
+//    RH_ScopedInstall(GoToNextBlock, 0x0);
+//    RH_ScopedInstall(RecordVehicleDeleted, 0x45EBB0);
+//    RH_ScopedInstall(RecordPedDeleted, 0x0);
+//    RH_ScopedInstall(Init, 0x45E220);
+//    RH_ScopedInstall(Init, 0x460625);
+//    RH_ScopedInstall(SaveReplayToHD, 0x45C340);
+    RH_ScopedInstall(ShouldStandardCameraBeProcessed, 0x45C440);
+//    RH_ScopedInstall(ProcessLookAroundCam, 0x45D760);
+//    RH_ScopedInstall(FindPoolIndexForPed, 0x0);
+//    RH_ScopedInstall(FindPoolIndexForVehicle, 0x0);
+//    RH_ScopedInstall(ProcessPedUpdate, 0x45CA70);
+//    RH_ScopedInstall(CanWeFindPoolIndexForPed, 0x0);
+//    RH_ScopedInstall(CanWeFindPoolIndexForVehicle, 0x0);
+//    RH_ScopedInstall(StorePlayerInfoVariables, 0x0);
+//    RH_ScopedInstall(StoreStuffInMem, 0x45F180);
+//    RH_ScopedInstall(RestorePlayerInfoVariables, 0x45E1F0);
+//    RH_ScopedInstall(RestoreStuffFromMem, 0x45ECD0);
+//    RH_ScopedInstall(FinishPlayback, 0x45F050);
+//    RH_ScopedInstall(StoreClothesDesc, 0x0);
+//    RH_ScopedInstall(RecordThisFrame, 0x45E300);
+//    RH_ScopedInstall(RestoreClothesDesc, 0x45C7D0);
+//    RH_ScopedInstall(DealWithNewPedPacket, 0x45CEA0);
+//    RH_ScopedInstall(PlayBackThisFrameInterpolation, 0x45F380);
+//    RH_ScopedInstall(FastForwardToTime, 0x460350);
+//    RH_ScopedInstall(PlayBackThisFrame, 0x4604A0);
+//    RH_ScopedInstall(FindSizeOfPacket, 0x45C8);
+//    RH_ScopedInstall(IsThisVehicleUsedInRecording, 0x0);
+//    RH_ScopedInstall(IsThisPedUsedInRecording, 0x0);
+//    RH_ScopedInstall(InitialiseVehiclePoolConversionTable, 0x0);
+//    RH_ScopedInstall(InitialisePedPoolConversionTable, 0x0);
+//    RH_ScopedInstall(InitialisePoolConversionTables, 0x0);
+//    RH_ScopedInstall(FindFirstFocusCoordinate, 0x45D6C0);
+//    RH_ScopedInstall(NumberFramesAvailableToPlay, 0x0);
+//    RH_ScopedInstall(StreamAllNecessaryCarsAndPeds, 0x45D4B0);
+//    RH_ScopedInstall(CreatePlayerPed, 0x45D540);
+//    RH_ScopedInstall(TriggerPlayback, 0x4600F0);
+//    RH_ScopedInstall(Update, 0x460500);
 }
 
 // 0x460625 thunk

@@ -1,8 +1,10 @@
 #include "StdInc.h"
 
-bool CPlayerRelationshipRecorder::RecordRelationshipWithPlayer(CPed* pPed)
+#include "PlayerRelationshipRecorder.h"
+
+bool CPlayerRelationshipRecorder::RecordRelationshipWithPlayer(CPed* ped)
 {
-    return plugin::CallMethodAndReturn<bool, 0x61A1D0, CPlayerRelationshipRecorder*, CPed*>(this, pPed);
+    return plugin::CallMethodAndReturn<bool, 0x61A1D0, CPlayerRelationshipRecorder*, CPed*>(this, ped);
 }
 
 CPlayerRelationshipRecorder* CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder()

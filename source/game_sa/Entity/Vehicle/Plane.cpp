@@ -18,9 +18,12 @@ extern float& PLANE_DAMAGE_WAVE_COUNTER_VAR = *(float*)0x8D33E0;   // 0.75
 extern float& PLANE_DAMAGE_THRESHHOLD = *(float*)0x8D33E4;         // 500.0
 extern float& PLANE_DAMAGE_SCALE_MASS = *(float*)0x8D33E8;         // 10000.0
 extern float& PLANE_DAMAGE_DESTROY_THRESHHOLD = *(float*)0x8D33EC; // 5000.0
-extern CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0, 0.45, 0.0>
+extern CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0f, 0.45, 0.0>
 
 void CPlane::InjectHooks() {
+    RH_ScopedClass(CPlane);
+    RH_ScopedCategory("Vehicle/Ped");
+
 
 }
 

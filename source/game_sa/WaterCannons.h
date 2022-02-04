@@ -1,8 +1,7 @@
 #pragma once
 
-#include "WaterCannon.h"
-
 class CVector;
+class CWaterCannon;
 
 class CWaterCannons {
 public:
@@ -13,7 +12,7 @@ public:
     static void InjectHooks();
 
     static void Init();
-    static void UpdateOne(uint32 pVehicle, CVector* start, CVector* end);
+    static void UpdateOne(uint32 vehicle, CVector* start, CVector* end);
     static void Update();
     static void Render();
 };

@@ -1,10 +1,14 @@
 #include "StdInc.h"
+
 #include "ModelInfo.h"
 
 void CTimeModelInfo::InjectHooks() {
-    ReversibleHooks::Install("CTimeModelInfo", "GetModelType", 0x4C5660, &CTimeModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CTimeModelInfo", "GetTimeInfo", 0x4C5670, &CTimeModelInfo::GetTimeInfo_Reversed);
-    // ReversibleHooks::Install("CTimeModelInfo", "FindOtherTimeModel", 0x4C47E0, &CTimeModelInfo::FindOtherTimeModel);
+    RH_ScopedClass(CTimeModelInfo);
+    RH_ScopedCategory("Models");
+
+    RH_ScopedInstall(GetModelType_Reversed, 0x4C5660);
+    RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C5670);
+    // RH_ScopedInstall(FindOtherTimeModel, 0x4C47E0);
 }
 
 // 0x4C5660
