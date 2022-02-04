@@ -570,27 +570,45 @@ bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints)
     return false;
 }
 
-// 0x412850
-// Similar to `DistToMathematicalLine` but if the point on the line would be before `lineStart` or after `lineEnd`
-// the distance returned is the of the point to either lineStart or lineEnd respectively.
+/*!
+* @address 0x412850
+* @brief Retruns the squared magnitude of the perpendicular vector starting at \a point and ending on the line defined by \a lineStart and \a lineEnd.
+*
+* If this vector doesn't intersect the line (eg.: Intersection point would be before\after \a lineStart or \a lineEnd respectively) either
+* \a lineStart or \a lineEnd is returned (whichever is closer)
+*/
 float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
+    // Make line end (l) and point (p) relative to lineStart (by this lineStart becomes the space origin)
     const auto l = *lineEnd - *lineStart;
     const auto p = *point - *lineStart;
+
+    //        * P
+    //      / |
+    //   c /  | a
+    //    /   |
+    // O *----+--------* L
+    //     b  IP
+    //
+    // O    - Origin (line start)
+    // L    - Line end
+    // P    - Point
+    // IP   - Intersection point
+    // b, c - Triangle sides
+    // a    - The distance we want to find out :D
+
     const auto lineMagSq = l.SquaredMagnitude();
+    const auto bScaled   = DotProduct(p, l); // Side b scaled by magnitude of `l`
 
-    // Simple Pythagorean here, we gotta find side `a`
-
-    const auto dot = DotProduct(p, l);
-    if (dot <= 0.f) // before beginning of line, return distance to beginning
+    if (bScaled <= 0.f) // Before beginning of line, return distance to beginning
         return p.SquaredMagnitude();
 
-    if (dot >= lineMagSq) // after end of line, return distance to end
+    if (bScaled >= lineMagSq) // After end of line, return distance to end
         return (p - l).SquaredMagnitude();
 
     // Simple Pythagorean here, we gotta find side `a`
 
     const auto cSq = p.SquaredMagnitude();
-    const auto bSq = dot * dot / lineMagSq; // Neither vectors were normalized before calculating the dot product, so normalize it now
+    const auto bSq = bScaled * bScaled / lineMagSq; // Clever trick to divide by `l`'s magntiude without taking it's sqrt
 
     const auto aSq = cSq - bSq;
     return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
