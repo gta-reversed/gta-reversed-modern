@@ -577,10 +577,10 @@ bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints)
 * If this vector doesn't intersect the line (eg.: Intersection point would be before\after \a lineStart or \a lineEnd respectively) either
 * \a lineStart or \a lineEnd is returned (whichever is closer)
 */
-float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd, CVector const* point) {
+float CCollision::DistToLineSqr(CVector const& lineStart, CVector const& lineEnd, CVector const& point) {
     // Make line end (l) and point (p) relative to lineStart (by this lineStart becomes the space origin)
-    const auto l = *lineEnd - *lineStart;
-    const auto p = *point - *lineStart;
+    const auto l = lineEnd - lineStart;
+    const auto p = point - lineStart;
 
     //        * P
     //      / |

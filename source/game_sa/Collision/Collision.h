@@ -32,7 +32,7 @@ public:
     static bool TestSphereBox(CSphere const& sphere, CBox const& box);
     static bool ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float & mindistsq);
     static bool PointInTriangle(CVector const& point, CVector const* triPoints);
-    static float DistToLineSqr(CVector const* lineStart, CVector const* lineEnd, CVector const* point);
+    static float DistToLineSqr(CVector const& lineStart, CVector const& lineEnd, CVector const& point);
     static float DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point);
     static float DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY);
     static float DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY);
