@@ -442,9 +442,9 @@ void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& o
 void CGlass::RenderReflectionPolys() {
     if (ReflectionPolyVertexBaseIdx != 1536) {
 
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpShadowHeadLightsTex->raster);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpShadowHeadLightsTex)));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 
         if (RwIm3DTransform(ReflectionPolyVertexBuffer, ReflectionPolyVertexBaseIdx - 1536, nullptr, 1u)) {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &aTempBufferIndices[3072], ReflectionPolyIndexBaseIdx - 3072);
@@ -460,9 +460,9 @@ void CGlass::RenderReflectionPolys() {
 void CGlass::RenderShatteredPolys() {
     if (ShatteredVerticesBaseIdx != 1024)
     {
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpCrackedGlassTex->raster);
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpCrackedGlassTex)));
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 
         if (RwIm3DTransform(ShatteredPolyVertexBuffer, ShatteredVerticesBaseIdx - 1024, nullptr, rwIM3D_VERTEXUV))
         {
@@ -479,9 +479,9 @@ void CGlass::RenderShatteredPolys() {
 void CGlass::RenderHiLightPolys() {
     if (H1iLightPolyVerticesIdx != 0)
     {
-        RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, (void*)gpShadowExplosionTex->raster);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDONE));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDONE));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(RwTextureGetRaster(gpShadowExplosionTex)));
 
         if (RwIm3DTransform(aTempBufferVertices, H1iLightPolyVerticesIdx, nullptr, rwIM3D_VERTEXUV)) {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, aTempBufferIndices, HiLightPolyIndicesIdx);
