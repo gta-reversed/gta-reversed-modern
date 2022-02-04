@@ -611,7 +611,7 @@ float CCollision::DistToLineSqr(CVector const* lineStart, CVector const* lineEnd
     const auto bSq = bScaled * bScaled / lineMagSq; // Clever trick to divide by `l`'s magntiude without taking it's sqrt
 
     const auto aSq = cSq - bSq;
-    return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
+    return aSq;
 }
 
 /*!
