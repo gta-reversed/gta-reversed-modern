@@ -633,7 +633,10 @@ float CCollision::DistToMathematicalLine(CVector const* lineStart, CVector const
     return aSq > 0.0f ? std::sqrt(aSq) : 0.0f; // Little optimization to not call `sqrt` if the dist is 0 (it wont ever be negative)
 }
 
-// 0x412A30
+/*!
+* @address 0x412A30
+* @brief Same as \r DistToMathematicalLine but in 2D
+*/
 float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY) {
     const float px{ pointX - lineStartX }, py{ pointY - lineStartY };
     const auto  dot = px * lineEndX + py * lineEndY;
