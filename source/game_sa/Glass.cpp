@@ -184,13 +184,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
 
 bool IsGlassObjectWithCol(CEntity* entity) {
     if (entity->IsObject() && entity->m_bUsesCollision) {
-        const auto object = entity->AsObject();
-        const auto MI = CModelInfo::GetModelInfo(object->m_nModelIndex)->AsAtomicModelInfoPtr();
-        switch (MI->nSpecialType) {
-        case eModelInfoSpecialType::GLASS_TYPE_1:
-        case eModelInfoSpecialType::GLASS_TYPE_2:
-            return true;
-        }
+        return CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr()->IsGlass();
     }
     return false;
 }
