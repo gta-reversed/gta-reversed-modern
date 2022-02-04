@@ -414,24 +414,26 @@ void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& o
     for (CPtrNode *it = objList.GetNode(); it;) {
         const auto entity = static_cast<CEntity*>(it->m_item);
         it = it->GetNext();
+
+        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+            continue;
+
         if (!entity->IsObject())
             continue;
+
         const auto object = entity->AsObject();
-        const auto pAMI = CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr();
-        if (!pAMI)
-            continue;
-        if (object->m_nScanCode == CWorld::ms_nCurrentScanCode)
-            continue;
-        switch (pAMI->nSpecialType) {
-        case eModelInfoSpecialType::GLASS_TYPE_1:
-        case eModelInfoSpecialType::GLASS_TYPE_2: {
-            object->m_nScanCode = CWorld::ms_nCurrentScanCode;
-            if (const auto dist = (object->GetPosition() - point).Magnitude(); dist < outDist) {
-                outEntity = entity;
-                outDist = dist;
+        if (const auto ami = CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr()) {
+            switch (ami->nSpecialType) {
+            case eModelInfoSpecialType::GLASS_TYPE_1:
+            case eModelInfoSpecialType::GLASS_TYPE_2: {
+                object->m_nScanCode = CWorld::ms_nCurrentScanCode;
+                if (const auto dist = (object->GetPosition() - point).Magnitude(); dist < outDist) {
+                    outEntity = entity;
+                    outDist = dist;
+                }
+                break;
             }
-            break;
-        }
+            }
         }
     }
 }
