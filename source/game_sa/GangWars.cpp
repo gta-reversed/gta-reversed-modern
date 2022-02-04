@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -150,7 +150,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     State = NOT_IN_WAR;
     CMessages::AddMessage(TheText.Get("GW_YRS"), 4500, 1, true);
     CMessages::AddToPreviousBriefArray(TheText.Get("GW_YRS"), -1, -1, -1, -1, -1, -1, nullptr);
-    Provocation = 0.0;
+    Provocation = 0.0f;
     TellGangMembersTo(true);
     CStats::IncrementStat(STAT_RESPECT, 45.0);
     CTheZones::FillZonesWithGangColours(false);
@@ -165,7 +165,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
 // inlined
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
-    return plugin::CallAndReturn<bool, 0x443AE0, CZoneInfo*>(zoneInfo);;
+    return plugin::CallAndReturn<bool, 0x443AE0, CZoneInfo*>(zoneInfo);
 }
 
 // 0x4439C0

@@ -1,18 +1,11 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-
-#define FUNC_CMissionCleanup__Init 0x4637A0
-#define FUNC_CMissionCleanup__Process 0x468560
-#define FUNC_CMissionCleanup__FindFree 0x4637C0
-#define FUNC_CMissionCleanup__AddEntityToList 0x4637E0
-#define FUNC_CMissionCleanup__RemoveEntityFromList 0x4654B0
-#define FUNC_CMissionCleanup__CheckIfCollisionHasLoadedForMissionObjects 0x4652D0
 constexpr int32 NUM_MISSION_CLEANUP_OBJECTS = 75;
 
 enum MissionCleanUpEntityType : uint8 {

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventAcquaintancePed.h"
+
 void CEventAcquaintancePed::InjectHooks()
 {
     RH_ScopedClass(CEventAcquaintancePed);
@@ -70,7 +72,7 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     if (m_ped) {
         CPedGroupMembership& membership = pedGroup->GetMembership();
         if (!membership.IsMember(m_ped)
-            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_ped != pedGroup->field_0))
+            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_ped != pedGroup->m_pPed))
         {
             if (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE)
                 return true;

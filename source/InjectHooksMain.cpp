@@ -65,6 +65,22 @@
 #include "CarCtrl.h"
 #include "TagManager.h"
 #include "Clouds.h"
+#include "StuntJumpManager.h"
+#include "CustomCarPlateMgr.h"
+#include "WindModifiers.h"
+#include "PedPlacement.h"
+#include "UpsideDownCarCheck.h"
+#include "PedClothesDesc.h"
+#include "WaterCannon.h"
+#include "EntryExitManager.h"
+#include "ObjectSaveStructure.h"
+#include "PedStats.h"
+#include "TrafficLights.h"
+#include "CurrentVehicle.h"
+#include "PlaceName.h"
+#include "UserDisplay.h"
+#include "OnscreenTimer.h"
+#include "OnscreenCounterEntry.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -180,6 +196,13 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCurrentVehicle::InjectHooks();
+    CPlaceName::InjectHooks();
+    CUserDisplay::InjectHooks();
+    COnscreenTimer::InjectHooks();
+    COnscreenCounterEntry::InjectHooks();
+    CPedPlacement::InjectHooks();
+    CWindModifiers::InjectHooks();
     CGenericGameStorage::InjectHooks();
     C_PcSave::InjectHooks();
     CFileLoader::InjectHooks();
@@ -207,7 +230,6 @@ void InjectHooksMain() {
     Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
-    COnscreenCounterEntry::InjectHooks();
     CPedTaskPair::InjectHooks();
     CDirectory::InjectHooks();
     CBulletTraces::InjectHooks();
@@ -248,7 +270,7 @@ void InjectHooksMain() {
     CTimeInfo::InjectHooks();
     SurfaceInfos_c::InjectHooks();
     CPlaceable::InjectHooks();
-    CEntity::InjectHooks();;
+    CEntity::InjectHooks();
     CPhysical::InjectHooks();
     CRenderer::InjectHooks();
     CDummy::InjectHooks();
@@ -350,6 +372,7 @@ void InjectHooksMain() {
     CCustomCarPlateMgr::InjectHooks();
     CDraw::InjectHooks();
     CEntryExitManager::InjectHooks();
+    CEntryExit::InjectHooks();
     CInformGroupEventQueue::InjectHooks();
     CGangs::InjectHooks();
     CPlayerInfo::InjectHooks();
@@ -454,7 +477,7 @@ void InjectHooksMain() {
         CTaskComplexObserveTrafficLightsAndAchieveHeading::InjectHooks();
         CTaskSimpleInAir::InjectHooks();
         // CTaskComplexHitPedWithCar::InjectHooks();
-        // CTaskSimplePlayerOnFoot::InjectHooks();
+        CTaskSimplePlayerOnFoot::InjectHooks();
         CTaskComplexFollowPedFootsteps::InjectHooks();
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AccidentManager.h"
+
 CAccidentManager*& CAccidentManager::gAccidentManager = *(CAccidentManager * *)0xB9B7D0;
 
 void CAccidentManager::InjectHooks()

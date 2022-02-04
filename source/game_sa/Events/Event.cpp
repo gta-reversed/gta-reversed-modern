@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Event.h"
+
 void CEvent::InjectHooks()
 {
     RH_ScopedClass(CEvent);

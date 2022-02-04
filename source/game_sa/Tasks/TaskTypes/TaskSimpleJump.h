@@ -38,7 +38,7 @@ public:
     bool CheckIfJumpBlocked(CPed* ped);
     void Launch(CPed* ped);
     bool StartLaunchAnim(CPed* ped);
-    static void JumpAnimFinishCB(CAnimBlendAssociation* pAnim, void* data);
+    static void JumpAnimFinishCB(CAnimBlendAssociation* anim, void* data);
 };
 
 VALIDATE_SIZE(CTaskSimpleJump, 0x2C);

@@ -1,17 +1,18 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "BaseModelInfo.h"
 
 void CBaseModelInfo::InjectHooks()
 {
     RH_ScopedClass(CBaseModelInfo);
     RH_ScopedCategory("Models");
 
-// Vtable
     RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C4A80);
     RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C4A90);
     RH_ScopedInstall(AsLodAtomicModelInfoPtr_Reversed, 0x4C4AA0);
@@ -21,8 +22,6 @@ void CBaseModelInfo::InjectHooks()
     RH_ScopedInstall(SetAnimFile_Reversed, 0x4C4AC0);
     RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C4AD0);
     RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C4AE0);
-
-// Class methods
     RH_ScopedInstall(SetTexDictionary, 0x4C4B40);
     RH_ScopedInstall(ClearTexDictionary, 0x4C4B70);
     RH_ScopedInstall(AddTexDictionaryRef, 0x4C4B80);
@@ -34,8 +33,6 @@ void CBaseModelInfo::InjectHooks()
     RH_ScopedInstall(DeleteCollisionModel, 0x4C4C40);
     RH_ScopedInstall(Get2dEffect, 0x4C4C70);
     RH_ScopedInstall(Add2dEffect, 0x4C4D20);
-
-// Helpers
     RH_ScopedInstall(GetIsDrawLast, 0x5328C0);
     RH_ScopedInstall(HasBeenPreRendered, 0x5328B0);
     RH_ScopedInstall(HasComplexHierarchy, 0x4C4E00);
@@ -52,7 +49,6 @@ void CBaseModelInfo::InjectHooks()
     // Hooking SwaysInWind function causes side effects
     //RH_ScopedInstall(SwaysInWind, 0x4212C0);
 
-// Other
     RH_ScopedInstall(SetBaseModelInfoFlags, 0x5B3AD0);
 }
 
@@ -60,7 +56,7 @@ void CBaseModelInfo::InjectHooks()
 CBaseModelInfo::CBaseModelInfo()
 {
     m_nRefCount = 0;
-    CBaseModelInfo::ClearTexDictionary();
+    ClearTexDictionary();
 }
 
 CAtomicModelInfo* CBaseModelInfo::AsAtomicModelInfoPtr()
@@ -107,8 +103,8 @@ void CBaseModelInfo::Init_Reversed()
 {
     m_nRefCount = 0;
     m_pColModel = nullptr;
-    CBaseModelInfo::ClearTexDictionary();
-    CBaseModelInfo::Init2dEffects();
+    ClearTexDictionary();
+    Init2dEffects();
     m_nObjectInfoIndex = -1;
     m_fDrawDistance = 2000.0F;
     m_pRwObject = nullptr;
@@ -125,19 +121,19 @@ void CBaseModelInfo::Shutdown()
 void CBaseModelInfo::Shutdown_Reversed()
 {
     DeleteRwObject();
-    CBaseModelInfo::DeleteCollisionModel();
+    DeleteCollisionModel();
 
     bIsLod = true;
     m_nObjectInfoIndex = -1;
-    CBaseModelInfo::ClearTexDictionary();
-    CBaseModelInfo::Init2dEffects();
+    ClearTexDictionary();
+    Init2dEffects();
 }
 
-void CBaseModelInfo::SetAnimFile(char const* filename)
+void CBaseModelInfo::SetAnimFile(const char* filename)
 {
     CBaseModelInfo::SetAnimFile_Reversed(filename);
 }
-void CBaseModelInfo::SetAnimFile_Reversed(char const* filename)
+void CBaseModelInfo::SetAnimFile_Reversed(const char* filename)
 {}
 
 void CBaseModelInfo::ConvertAnimFileIndex()
@@ -148,16 +144,16 @@ void CBaseModelInfo::ConvertAnimFileIndex_Reversed() {
     // NOP
 }
 
-signed int CBaseModelInfo::GetAnimFileIndex()
+int32 CBaseModelInfo::GetAnimFileIndex()
 {
     return CBaseModelInfo::GetAnimFileIndex_Reversed();
 }
-signed int CBaseModelInfo::GetAnimFileIndex_Reversed()
+int32 CBaseModelInfo::GetAnimFileIndex_Reversed()
 {
     return -1;
 }
 
-void CBaseModelInfo::SetTexDictionary(char const* txdName)
+void CBaseModelInfo::SetTexDictionary(const char* txdName)
 {
     m_nTxdIndex = CTxdStore::FindTxdSlot(txdName);
     if (m_nTxdIndex == -1)
@@ -182,13 +178,13 @@ void CBaseModelInfo::RemoveTexDictionaryRef()
 void CBaseModelInfo::AddRef()
 {
     ++m_nRefCount;
-    CBaseModelInfo::AddTexDictionaryRef();
+    AddTexDictionaryRef();
 }
 
 void CBaseModelInfo::RemoveRef()
 {
     --m_nRefCount;
-    CBaseModelInfo::RemoveTexDictionaryRef();
+    RemoveTexDictionaryRef();
 }
 
 void CBaseModelInfo::SetColModel(CColModel *colModel, bool bIsLodModel)
@@ -200,16 +196,16 @@ void CBaseModelInfo::SetColModel(CColModel *colModel, bool bIsLodModel)
     }
 
     bIsLod = true;
-    auto pTimeInfo = GetTimeInfo();
-    if (!pTimeInfo)
+    auto timeInfo = GetTimeInfo();
+    if (!timeInfo)
         return;
 
-    if (pTimeInfo->GetOtherTimeModel() == -1)
+    if (timeInfo->GetOtherTimeModel() == -1)
         return;
 
-    auto pLodInfo = CModelInfo::GetModelInfo(pTimeInfo->GetOtherTimeModel());
-    pLodInfo->m_pColModel = colModel;
-    pLodInfo->bIsLod = false;
+    auto lodInfo = CModelInfo::GetModelInfo(timeInfo->GetOtherTimeModel());
+    lodInfo->m_pColModel = colModel;
+    lodInfo->bIsLod = false;
 }
 
 void CBaseModelInfo::Init2dEffects()
@@ -229,26 +225,26 @@ void CBaseModelInfo::DeleteCollisionModel()
 C2dEffect *CBaseModelInfo::Get2dEffect(int32 index)
 {
     auto uiStoredEffectsCount = m_n2dfxCount;
-    RpGeometry* pGeometry = nullptr;
+    RpGeometry* geometry = nullptr;
     if (m_pRwObject) {
         if (GetRwModelType() == rpATOMIC) {
-            pGeometry = RpAtomicGetGeometry(m_pRwAtomic);
+            geometry = RpAtomicGetGeometry(m_pRwAtomic);
         }
         else if (GetRwModelType() == rpCLUMP) {
-            auto pAtomic = Get2DEffectAtomic(m_pRwClump);
-            if (pAtomic) {
-                pGeometry = RpAtomicGetGeometry(pAtomic);
+            auto atomic = Get2DEffectAtomic(m_pRwClump);
+            if (atomic) {
+                geometry = RpAtomicGetGeometry(atomic);
             }
         }
 
-        if (pGeometry)
-            uiStoredEffectsCount -= RpGeometryGet2dFxCount(pGeometry);
+        if (geometry)
+            uiStoredEffectsCount -= RpGeometryGet2dFxCount(geometry);
     }
 
     if (index < uiStoredEffectsCount)
         return &CModelInfo::Get2dEffectStore()->GetItemAtIndex(index + m_n2dEffectIndex);
     else
-        return RpGeometryGet2dFxAtIndex(pGeometry, index - uiStoredEffectsCount);
+        return RpGeometryGet2dFxAtIndex(geometry, index - uiStoredEffectsCount);
 }
 
 void CBaseModelInfo::Add2dEffect(C2dEffect *effect)

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ControllerState.h"
+
 void CControllerState::InjectHooks() {
     RH_ScopedClass(CControllerState);
     RH_ScopedCategoryGlobal();

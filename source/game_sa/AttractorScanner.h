@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,8 @@
 #pragma once
 
 #include "TaskTimer.h"
-#include "Plugins\TwoDEffectPlugin\2dEffect.h"
+
+class C2dEffect;
 
 class CAttractorScanner {
 public:

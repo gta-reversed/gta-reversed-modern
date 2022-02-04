@@ -19,7 +19,6 @@ uint32& CGlass::H1iLightPolyVerticesIdx = *(uint32*)0xC71B28;
 int32& CGlass::HiLightPolyIndicesIdx = *(int32*)0xC71B2C;
 CVector2D (&CGlass::PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
 CEntity*(&CGlass::apEntitiesToBeRendered)[32] = *(CEntity*(*)[32])0xC71B58;
-int32& CGlass::NumGlassEntities = *(int32*)0xC71BD8;
 CFallingGlassPane (&CGlass::aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
 uint32& CGlass::LastColCheckMS = *(uint32*)0xC72FA8;
 
@@ -208,7 +207,8 @@ void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
 
 template<size_t N>
 std::pair<float, float> FindMinMaxZOfVertices(CVector (&vertices)[N]) {
-    return *rng::minmax_element(vertices, {}, [](auto&& v) { return v.z });
+    const auto [min, max] = rng::minmax(vertices | rng::views::transform([](auto&& v) { return v.z; }));
+    return { min, max };
 }
 
 // 0x71BC40

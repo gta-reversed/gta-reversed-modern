@@ -71,8 +71,8 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
 }
 
 // 0x618210
-void IKChainManager_c::GetLookAtOffset(CPed* ped, CVector* outPosn) {
-    plugin::CallMethod<0x618210, IKChainManager_c*, CPed*, CVector*>(this, ped, outPosn);
+void IKChainManager_c::GetLookAtOffset(CPed* ped, CVector* outPos) {
+    plugin::CallMethod<0x618210, IKChainManager_c*, CPed*, CVector*>(this, ped, outPos);
 }
 
 // 0x618280

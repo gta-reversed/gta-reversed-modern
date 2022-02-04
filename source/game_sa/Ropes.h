@@ -1,12 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Rope.h"
+class CRope;
 
 class CRopes {
 public:
@@ -14,7 +14,7 @@ public:
     static CRope (&aRopes)[MAX_NUM_ROPES]; // Access using CRopes::GetRope()
     static int32& PlayerControlsCrane;
 
-    static void  CreateRopeForSwatPed(CVector const& startPos);
+    static void  CreateRopeForSwatPed(const CVector& startPos);
     static float FindPickupHeight(CEntity* entity);
 
     // Returns id to array

@@ -124,13 +124,13 @@ void CPedAttractor::ComputeAttractTime(int32 unused, bool time1_or_time2, float&
 }
 
 // 0x5EA110
-void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPosn) {
+void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
     if (m_pEffect) {
-        outPosn = m_vecAttractorPosn - queueMp * (float)pedId * m_vecQueueDir;
+        outPos = m_vecAttractorPosn - queueMp * (float)pedId * m_vecQueueDir;
 
         if (pedId) {
-            outPosn.x += ComputeDeltaPos();
-            outPosn.y += ComputeDeltaPos();
+            outPos.x += ComputeDeltaPos();
+            outPos.y += ComputeDeltaPos();
         }
     }
 }

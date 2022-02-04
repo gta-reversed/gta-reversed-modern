@@ -6,9 +6,9 @@ void CTaskSimpleHitHead::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleHitHead);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x653060);
     RH_ScopedInstall(FinishAnimCB, 0x653150);
-    //VTABLE
     RH_ScopedInstall(MakeAbortable_Reversed, 0x6530F0);
     RH_ScopedInstall(ProcessPed_Reversed, 0x657A10);
 }
@@ -46,11 +46,11 @@ bool CTaskSimpleHitHead::ProcessPed(CPed* ped)
 }
 
 // 0x653150
-void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleHitHead::FinishAnimCB(CAnimBlendAssociation* anim, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleHitHead*>(data);
-    pTask->m_pAnim = nullptr;
-    pTask->m_bIsFinished = true;
+    auto task = reinterpret_cast<CTaskSimpleHitHead*>(data);
+    task->m_pAnim = nullptr;
+    task->m_bIsFinished = true;
 }
 
 bool CTaskSimpleHitHead::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)

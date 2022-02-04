@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -22,7 +22,7 @@ void JPegCompressScreen(RwCamera* camera, struct jpeg_destination_mgr& dst);
  *
  * @addr  0x5D0820
  */
-extern void JPegCompressScreenToFile(RwCamera* camera, char const* path);
+extern void JPegCompressScreenToFile(RwCamera* camera, const char* path);
 
 /**
  * Compress camera screen to the given buffer

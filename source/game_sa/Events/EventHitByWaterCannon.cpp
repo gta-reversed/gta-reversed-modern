@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventHitByWaterCannon.h"
+
 void CEventHitByWaterCannon::InjectHooks()
 {
     RH_ScopedClass(CEventHitByWaterCannon);
@@ -10,13 +12,13 @@ void CEventHitByWaterCannon::InjectHooks()
 }
 
 // 0x4B1290
-CEventHitByWaterCannon::CEventHitByWaterCannon(CVector const& point, CVector const& moveSpeed)
+CEventHitByWaterCannon::CEventHitByWaterCannon(const CVector& point, const CVector& moveSpeed)
 {
     m_point = point;
     m_moveSpeed = moveSpeed;
 }
 
-CEventHitByWaterCannon* CEventHitByWaterCannon::Constructor(CVector const& point, CVector const& moveSpeed)
+CEventHitByWaterCannon* CEventHitByWaterCannon::Constructor(const CVector& point, const CVector& moveSpeed)
 {
     this->CEventHitByWaterCannon::CEventHitByWaterCannon(point, moveSpeed);
     return this;

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ControllerConfigManager.h"
+
 CControllerConfigManager& ControlsManager = *(CControllerConfigManager *) 0xB70198;
 
 void CControllerConfigManager::InjectHooks() {

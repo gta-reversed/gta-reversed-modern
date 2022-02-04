@@ -2,12 +2,12 @@
 
 #include "Vector2D.h"
 #include "Vector.h"
-#include "FallingGlassPane.h"
-#include "Object.h"
 
 class CVehicle;
 class CEntity;
+class CObject;
 class CPtrList;
+class CFallingGlassPane;
 
 class CGlass {
 public:
@@ -22,7 +22,7 @@ public:
     static int32& HiLightPolyIndicesIdx;
     static CVector2D (&PanePolyCenterPositions)[5];
     static CEntity*(&apEntitiesToBeRendered)[32];
-    static int32& NumGlassEntities;
+    static inline uint32& NumGlassEntities = *(uint32*)0xC71BD8;
     static CFallingGlassPane (&aGlassPanes)[44];
     static uint32& LastColCheckMS;
 

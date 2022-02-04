@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "AnimBlendAssociation.h"
+
 void CAnimBlendAssociation::InjectHooks() {
     RH_ScopedClass(CAnimBlendAssociation);
     RH_ScopedCategory("Animation");
@@ -16,7 +18,7 @@ void CAnimBlendAssociation::operator delete(void* object) {
 }
 
 // 0x4CEFC0
-CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
+CAnimBlendAssociation::CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
     m_fBlendAmount = 1.0f;
     m_fSpeed = 1.0f;
     m_pNodeArray = nullptr;
@@ -29,7 +31,7 @@ CAnimBlendAssociation::CAnimBlendAssociation(RpClump* pClump, CAnimBlendHierarch
     m_nAnimId = -1;
     m_pNext = nullptr;
     m_pPrevious = nullptr;
-    Init(pClump, pAnimHierarchy);
+    Init(clump, animHierarchy);
 }
 
 CAnimBlendAssociation::~CAnimBlendAssociation() {
@@ -46,18 +48,25 @@ CAnimBlendAssociation::~CAnimBlendAssociation() {
 }
 
 
-CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
-    this->CAnimBlendAssociation::CAnimBlendAssociation(pClump, pAnimHierarchy);
+CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
+    this->CAnimBlendAssociation::CAnimBlendAssociation(clump, animHierarchy);
     return this;
 }
 
+inline CAnimBlendClumpData * GetAnimClumpData(RpClump * clump)
+{
+    const DWORD clumpOffset = (*(DWORD*)0xB5F878);
+    //return reinterpret_cast <CAnimBlendClumpData *> (*(&clump->object.type + clumpOffset));
+    return reinterpret_cast <CAnimBlendClumpData *> (*(DWORD *)(clumpOffset + ((int32)clump)  ));
+}
+
 // 0x4CED50
-void CAnimBlendAssociation::Init(RpClump* pClump, CAnimBlendHierarchy* pAnimHierarchy) {
-    return plugin::CallMethod<0x4CED50, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, pClump, pAnimHierarchy);
+void CAnimBlendAssociation::Init(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
+    return plugin::CallMethod<0x4CED50, CAnimBlendAssociation*, RpClump*, CAnimBlendHierarchy*>(this, clump, animHierarchy);
 
 #if 0
-    std::printf("\nCAnimBlendAssociation::Init1: called! pClump: %p | m_nSeqCount: %d\n\n", pClump, pAnimHierarchy->m_nSeqCount);
-    CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(pClump); 
+    std::printf("\nCAnimBlendAssociation::Init1: called! clump: %p | m_nSeqCount: %d\n\n", clump, animHierarchy->m_nSeqCount);
+    CAnimBlendClumpData * pAnimClumpData = GetAnimClumpData(clump);
     m_nNumBlendNodes = pAnimClumpData->m_nNumFrames;
     AllocateAnimBlendNodeArray(m_nNumBlendNodes);
     for (size_t i = 0; i < m_nNumBlendNodes; i++)
@@ -65,20 +74,20 @@ void CAnimBlendAssociation::Init(RpClump* pClump, CAnimBlendHierarchy* pAnimHier
         m_pNodeArray[i].m_pAnimBlendAssociation = this; 
     }
 
-    m_pHierarchy = pAnimHierarchy;
-    for (size_t i = 0; i < pAnimHierarchy->m_nSeqCount; i++)
+    m_pHierarchy = animHierarchy;
+    for (size_t i = 0; i < animHierarchy->m_nSeqCount; i++)
     {
-        CAnimBlendSequence& sequence = pAnimHierarchy->m_pSequences[i];
+        CAnimBlendSequence& sequence = animHierarchy->m_pSequences[i];
         AnimBlendFrameData *pAnimFrameData = nullptr;
 
         // is bone id set?
         if (sequence.m_nFlags & 0x10)
         {
-            pAnimFrameData = RpAnimBlendClumpFindBone(pClump, sequence.m_boneId);
+            pAnimFrameData = RpAnimBlendClumpFindBone(clump, sequence.m_boneId);
         }
         else 
         {
-            pAnimFrameData = RpAnimBlendClumpFindFrameFromHashKey(pClump, sequence.m_hash);
+            pAnimFrameData = RpAnimBlendClumpFindFrameFromHashKey(clump, sequence.m_hash);
         }
         if (pAnimFrameData && sequence.m_nFrameCount > 0)
         {

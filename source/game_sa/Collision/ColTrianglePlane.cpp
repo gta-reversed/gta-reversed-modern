@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "ColTrianglePlane.h"
+
 void CColTrianglePlane::InjectHooks()
 {
     RH_ScopedClass(CColTrianglePlane);
@@ -18,7 +20,7 @@ CVector CColTrianglePlane::GetNormal() const noexcept {
     return UncompressUnitVector(m_normal);
 }
 
-void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)
+void CColTrianglePlane::Set(const CompressedVector* vertices, CColTriangle& triangle)
 {
     const auto vecA = UncompressVector(vertices[triangle.m_nVertA]);
     const auto vecB = UncompressVector(vertices[triangle.m_nVertB]);

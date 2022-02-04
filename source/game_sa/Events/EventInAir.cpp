@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventInAir.h"
+
 void CEventInAir::InjectHooks()
 {
     RH_ScopedClass(CEventInAir);

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "DamageAtomicModelInfo.h"
+
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
 void CDamageAtomicModelInfo::InjectHooks()
@@ -42,9 +44,9 @@ void CDamageAtomicModelInfo::DeleteRwObject()
 void CDamageAtomicModelInfo::DeleteRwObject_Reversed()
 {
     if (m_pDamagedAtomic) {
-        auto pFrame = RpAtomicGetFrame(m_pDamagedAtomic);
+        auto frame = RpAtomicGetFrame(m_pDamagedAtomic);
         RpAtomicDestroy(m_pDamagedAtomic);
-        RwFrameDestroy(pFrame);
+        RwFrameDestroy(frame);
         m_pDamagedAtomic = nullptr;
     }
 
@@ -63,10 +65,10 @@ RwObject* CDamageAtomicModelInfo::CreateInstance_Reversed()
     if (!m_pDamagedAtomic)
         return nullptr;
 
-    auto pAtomic = RpAtomicClone(m_pDamagedAtomic);
-    auto pFrame = RwFrameCreate();
-    RpAtomicSetFrame(pAtomic, pFrame);
-    return reinterpret_cast<RwObject*>(pAtomic);
+    auto atomic = RpAtomicClone(m_pDamagedAtomic);
+    auto frame = RwFrameCreate();
+    RpAtomicSetFrame(atomic, frame);
+    return reinterpret_cast<RwObject*>(atomic);
 }
 
 RwObject* CDamageAtomicModelInfo::CreateInstance(RwMatrix* matrix)
@@ -81,11 +83,11 @@ RwObject* CDamageAtomicModelInfo::CreateInstance_Reversed(RwMatrix* matrix)
     if (!m_pDamagedAtomic)
         return nullptr;
 
-    auto pAtomic = RpAtomicClone(m_pDamagedAtomic);
-    auto pFrame = RwFrameCreate();
-    memcpy(RwFrameGetMatrix(pFrame), matrix, sizeof(*RwFrameGetMatrix(pFrame)));
-    RpAtomicSetFrame(pAtomic, pFrame);
-    return reinterpret_cast<RwObject*>(pAtomic);
+    auto atomic = RpAtomicClone(m_pDamagedAtomic);
+    auto frame = RwFrameCreate();
+    memcpy(RwFrameGetMatrix(frame), matrix, sizeof(*RwFrameGetMatrix(frame)));
+    RpAtomicSetFrame(atomic, frame);
+    return reinterpret_cast<RwObject*>(atomic);
 }
 
 void CDamageAtomicModelInfo::SetDamagedAtomic(RpAtomic* atomic)

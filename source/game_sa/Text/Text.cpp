@@ -158,7 +158,7 @@ void CText::Load(bool bKeepMissionPack) {
     }
 
     CFileMgr::SetDir("TEXT");
-    FILESTREAM file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(filename, "rb");
 
     uint16 version = 0;
     uint16 encoding = 0;

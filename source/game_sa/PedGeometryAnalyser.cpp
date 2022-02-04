@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "PedGeometryAnalyser.h"
+
 void CPedGeometryAnalyser::InjectHooks() {
     RH_ScopedClass(CPedGeometryAnalyser);
     RH_ScopedCategoryGlobal();
@@ -47,24 +49,24 @@ void CPedGeometryAnalyser::InjectHooks() {
 
 // 0x5F1B00
 void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity) {
-
+    assert(false);
 }
 
 // 0x5F32D0
 void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector&, const CVector&) {
-
+    assert(false);
 }
 
 // 0x5F1C40
 // unused
 void CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3) {
-
+    assert(false);
 }
 
 // 0x5F1B70
 // unused
 void CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
-
+    assert(false);
 }
 
 // 0x5F1E30
@@ -78,7 +80,7 @@ int32 CPedGeometryAnalyser::ComputeBuildingHitPoints(const CVector& a1, const CV
 }
 
 void CPedGeometryAnalyser::ComputeClearTarget(const CPed& ped, const CVector&, CVector&) {
-
+    assert(false);
 }
 
 // 0x5F3B70
@@ -168,11 +170,11 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, co
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector* posn, float* a4) {
-
+    assert(false);
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanes(float zPos, CEntity& entity, CVector*, float*) {
-
+    assert(false);
 }
 
 // 0x5F1750
@@ -192,7 +194,7 @@ CVector* CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanesUncachedAll(
 
 // 0x5F3C20
 void CPedGeometryAnalyser::ComputeEntityBoundingSphere(const CPed& ped, CEntity& entity, CColSphere&) {
-
+    assert(false);
 }
 
 // 0x5F3730

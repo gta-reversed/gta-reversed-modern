@@ -184,36 +184,36 @@ bool CTaskSimpleHoldEntity::MakeAbortable_Reversed(CPed* ped, eAbortPriority pri
 }
 
 bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
-    CTaskManager* pTaskManager = &ped->GetTaskManager();
+    CTaskManager* taskManager = &ped->GetTaskManager();
     if (m_bEntityRequiresProcessing) {
         m_bEntityRequiresProcessing = false;
         if (GetTaskType() == TASK_SIMPLE_PUTDOWN_ENTITY && !m_pEntityToHold && !m_pAnimBlendHierarchy && !m_nAnimGroupId) {
-            auto pHoldEntityTask = (CTaskSimpleHoldEntity*)pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
-            if (pHoldEntityTask && pHoldEntityTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY &&
-                pHoldEntityTask->m_pEntityToHold && pHoldEntityTask->m_nAnimGroupId)
+            auto holdEntityTask = (CTaskSimpleHoldEntity*)taskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
+            if (holdEntityTask && holdEntityTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY &&
+                holdEntityTask->m_pEntityToHold && holdEntityTask->m_nAnimGroupId)
             {
-                CEntity* entitToHold = pHoldEntityTask->m_pEntityToHold;
-                m_pEntityToHold = entitToHold;
-                entitToHold->RegisterReference(&m_pEntityToHold);
+                CEntity* entityToHold = holdEntityTask->m_pEntityToHold;
+                m_pEntityToHold = entityToHold;
+                entityToHold->RegisterReference(&m_pEntityToHold);
 
-                m_vecPosition = pHoldEntityTask->m_vecPosition;
+                m_vecPosition = holdEntityTask->m_vecPosition;
                 m_nAnimId = ANIM_ID_PUTDWN;
-                m_nAnimGroupId = pHoldEntityTask->m_nAnimGroupId;
+                m_nAnimGroupId = holdEntityTask->m_nAnimGroupId;
                 ChoosePutDownHeight(ped);
-                pHoldEntityTask->ReleaseEntity();
+                holdEntityTask->ReleaseEntity();
             }
             else {
                 m_bEntityDropped = true;
             }
         }
-        CEntity* entitToHold = m_pEntityToHold;
-        if (!entitToHold || m_bEntityDropped) {
+        CEntity* entityToHold = m_pEntityToHold;
+        if (!entityToHold || m_bEntityDropped) {
             m_bEntityDropped = true;
         }
         else {
-            entitToHold->m_bUsesCollision = false;
-            if (entitToHold->m_nType == ENTITY_TYPE_OBJECT) {
-                CObject* objectToHold = (CObject*)entitToHold;
+            entityToHold->m_bUsesCollision = false;
+            if (entityToHold->IsObject()) {
+                CObject* objectToHold = (CObject*)entityToHold;
                 if (objectToHold->IsStatic()) {
                     objectToHold->SetIsStatic(false);
                     objectToHold->AddToMovingList();
@@ -222,7 +222,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
                 objectToHold->m_nFakePhysics = 0;
             }
 
-            m_fRotation = entitToHold->GetHeading() - ped->m_fCurrentRotation;
+            m_fRotation = entityToHold->GetHeading() - ped->m_fCurrentRotation;
         }
     }
 
@@ -230,9 +230,8 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
         return true;
 
     if (m_nAnimId != ANIM_ID_NO_ANIMATION_SET || m_pAnimBlendHierarchy) {
-        auto pAnimBlendAssoc = m_pAnimBlendAssociation;
-        if (pAnimBlendAssoc) {
-            if (pAnimBlendAssoc->m_fBlendDelta < 0.0f && !m_bDisallowDroppingOnAnimEnd)
+        if (m_pAnimBlendAssociation) {
+            if (m_pAnimBlendAssociation->m_fBlendDelta < 0.0f && !m_bDisallowDroppingOnAnimEnd)
                 DropEntity(ped, true);
         }
         else {
@@ -245,7 +244,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
         eTaskType taskId = GetTaskType();
         if (taskId != TASK_SIMPLE_HOLD_ENTITY) {
             if (taskId != TASK_SIMPLE_PICKUP_ENTITY) {
-                auto* taskHoldEntity = static_cast<CTaskSimpleHoldEntity*>(pTaskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM));
+                auto* taskHoldEntity = static_cast<CTaskSimpleHoldEntity*>(taskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM));
                 if (taskHoldEntity && taskHoldEntity->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
                     taskHoldEntity->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
             }
@@ -267,8 +266,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
         }
         else {
             if ((m_nAnimGroupId == ANIM_GROUP_CARRY || m_nAnimGroupId == ANIM_GROUP_CARRY05 || m_nAnimGroupId == ANIM_GROUP_CARRY105) && ped->IsPlayer()) {
-                CPlayerPed* player = (CPlayerPed*)ped;
-                CPad* pad = player->GetPadFromPlayer();
+                CPad* pad = ped->AsPlayer()->GetPadFromPlayer();
                 if (pad->ExitVehicleJustDown()) {
                     auto pTaskSimplePutDownEntity = new CTaskSimplePutDownEntity();
                     CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, pTaskSimplePutDownEntity, false);
@@ -284,8 +282,8 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
     bool bUpdateEntityToHoldPosition = false;
     if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
     {
-        auto pPickupEntityTask = static_cast<CTaskSimplePickUpEntity*>(this);
-        if (!m_pAnimBlendAssociation || pPickupEntityTask->m_fMovePedUntilAnimProgress > m_pAnimBlendAssociation->m_fCurrentTime)
+        auto pickupEntityTask = static_cast<CTaskSimplePickUpEntity*>(this);
+        if (!m_pAnimBlendAssociation || pickupEntityTask->m_fMovePedUntilAnimProgress > m_pAnimBlendAssociation->m_fCurrentTime)
             return false;
         bUpdateEntityToHoldPosition = true;
     }
@@ -367,8 +365,8 @@ void CTaskSimpleHoldEntity::PlayAnim(AnimationId groupId, AssocGroupId animId) {
 }
 
 // 0x691740
-void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAssoc, void* pData) {
-    auto taskHoldEntity = reinterpret_cast<CTaskSimpleHoldEntity*>(pData);
+void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAssoc, void* data) {
+    auto taskHoldEntity = reinterpret_cast<CTaskSimpleHoldEntity*>(data);
     if (taskHoldEntity->m_bDisallowDroppingOnAnimEnd) {
         taskHoldEntity->m_nAnimId = ANIM_ID_NO_ANIMATION_SET;
         taskHoldEntity->m_nAnimGroupId = ANIM_GROUP_DEFAULT;
@@ -423,7 +421,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
     CObject* objectToHold = nullptr;
     if (m_pEntityToHold) {
         m_pEntityToHold->m_bUsesCollision = true;
-        if (m_pEntityToHold->m_nType != ENTITY_TYPE_OBJECT) {
+        if (!m_pEntityToHold->IsObject()) {
             m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
             m_pEntityToHold = nullptr;
             return;
@@ -455,7 +453,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
                     objectToHold->AddToMovingList();
                 }
                 auto* physicalEntity = static_cast<CPhysical*>(m_pEntityToHold);
-                const float randomSpeedUp = rand() * 4.6566e-10f * 0.03f + 0.03f;
+                const float randomSpeedUp = rand() * 4.6566e-10f * 0.03f + 0.03f;    // todo: math
                 const float randomSpeedRight = rand() * 4.6566e-10f * 0.06f - 0.03f;
                 physicalEntity->m_vecMoveSpeed += randomSpeedUp * ped->GetForward();
                 physicalEntity->m_vecMoveSpeed += randomSpeedRight * ped->GetRight();
@@ -493,7 +491,7 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* ped) {
     origin.z += 0.2f;
     float distance = origin.z - 1.5f;
     CEntity* outEntity = nullptr;
-    CColPoint colPoint;
+    CColPoint colPoint{};
     if (!CWorld::ProcessVerticalLine(origin, distance, colPoint, outEntity, true, false, false, true, false, false, nullptr)) {
         m_nAnimGroupId = ANIM_GROUP_CARRY;
     }
@@ -509,12 +507,12 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* ped) {
         }
     }
     if (GetTaskType() == TASK_SIMPLE_PUTDOWN_ENTITY) {
-        auto pTaskPutDownEntity = static_cast<CTaskSimplePutDownEntity*>(this);
+        auto taskPutDownEntity = static_cast<CTaskSimplePutDownEntity*>(this);
         if (m_nAnimGroupId == ANIM_GROUP_CARRY105)
-            pTaskPutDownEntity->m_fPutDownHeightZ = 0.433333f;
+            taskPutDownEntity->m_fPutDownHeightZ = 0.433333f; // todo: math
         else if (m_nAnimGroupId == ANIM_GROUP_CARRY05)
-            pTaskPutDownEntity->m_fPutDownHeightZ = 0.366667f;
+            taskPutDownEntity->m_fPutDownHeightZ = 0.366667f; // todo: math
         else
-            pTaskPutDownEntity->m_fPutDownHeightZ = 0.6f;
+            taskPutDownEntity->m_fPutDownHeightZ = 0.6f;
     }
 }

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -21,7 +21,7 @@ bool& CTrain::bDisableRandomTrains = *(bool*)0xC38010;
 CVector* CTrain::aStationCoors = (CVector*)0x8D48F8;
 uint32* NumTrackNodes = (uint32*)0xC38014;
 float* arrTotalTrackLength = (float*)0xC37FEC;
-CTrainNode** pTrackNodes = (CTrainNode * *)0xC38024;
+CTrainNode** trackNodes = (CTrainNode * *)0xC38024;
 float* StationDist = (float*)0xC38034;
 
 void CTrain::InjectHooks()
@@ -246,7 +246,7 @@ void CTrain::ProcessControl_Reversed()
     float fOldTrainHeading = GetHeading();
 
     float fTotalTrackLength = arrTotalTrackLength[m_nTrackId];
-    CTrainNode* pTrainNodes = pTrackNodes[m_nTrackId];
+    CTrainNode* trainNodes = trackNodes[m_nTrackId];
     int32 numTrackNodes = NumTrackNodes[m_nTrackId];
 
     if (trainFlags.bNotOnARailRoad == 0)
@@ -269,10 +269,10 @@ void CTrain::ProcessControl_Reversed()
                 && m_nModelIndex == MODEL_STREAKC
                 && !trainFlags.bMissionTrain)
             {
-                CPlayerPed* pLocalPlayer = FindPlayerPed(-1);
+                CPlayerPed* localPlayer = FindPlayerPed();
                 if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE)
                 {
-                    if (pLocalPlayer->m_pVehicle == this)
+                    if (localPlayer->m_pVehicle == this)
                     {
                         m_nNumPassengersToLeave = 0;
                     }
@@ -294,7 +294,7 @@ void CTrain::ProcessControl_Reversed()
 
                 if (m_nPassengersGenerationState == TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_ENTER)
                 {
-                    if (pLocalPlayer->m_pVehicle == this)
+                    if (localPlayer->m_pVehicle == this)
                     {
                         m_nNumPassengersToEnter = 0;
                     }
@@ -320,11 +320,10 @@ void CTrain::ProcessControl_Reversed()
         }
         else
         {
-            CPad* pPad = CPad::GetPad(0);
+            CPad* pad = CPad::GetPad(0);
             if (m_pDriver && m_pDriver->IsPlayer())
             {
-                CPlayerPed* pLocalPlayer = static_cast<CPlayerPed*>(m_pDriver);
-                pPad = pLocalPlayer->GetPadFromPlayer();
+                pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
             }
 
             uint32 numCarriagesPulled = FindNumCarriagesPulled();
@@ -352,7 +351,7 @@ void CTrain::ProcessControl_Reversed()
                                 float maxTrainSpeed = 0.0f;
                                 if (FindMaximumSpeedToStopAtStations(&maxTrainSpeed))
                                 {
-                                    fStopAtStationSpeed = 0.0;
+                                    fStopAtStationSpeed = 0.0f;
                                     m_nTimeWhenStoppedAtStation = timeInMilliSeconds;
                                 }
                                 else
@@ -366,48 +365,48 @@ void CTrain::ProcessControl_Reversed()
                         }
                         else if (trainFlags.bStoppedAtStation)
                         {
-                            CTrain* pTrainCarriage = this;
+                            CTrain* trainCarriage = this;
                             do
                             {
                                 trainFlags.bStoppedAtStation = false;
-                                pTrainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
-                                pTrainCarriage = pTrainCarriage->m_pNextCarriage;
-                            } while (pTrainCarriage);
+                                trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
+                                trainCarriage = trainCarriage->m_pNextCarriage;
+                            } while (trainCarriage);
                         }
                     }
                     else
                     {
-                        fStopAtStationSpeed = 0.0;
+                        fStopAtStationSpeed = 0.0f;
                         if (trainFlags.bStoppedAtStation)
                         {
-                            CTrain* pTrainCarriage = this;
+                            CTrain* trainCarriage = this;
                             do
                             {
                                 trainFlags.bPassengersCanEnterAndLeave = false;
-                                pTrainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
-                                pTrainCarriage = pTrainCarriage->m_pNextCarriage;
-                            } while (pTrainCarriage);
+                                trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_GENERATION_FINISHED;
+                                trainCarriage = trainCarriage->m_pNextCarriage;
+                            } while (trainCarriage);
                         }
                     }
                 }
                 else
                 {
-                    fStopAtStationSpeed = 0.0;
+                    fStopAtStationSpeed = 0.0f;
                     if (!trainFlags.bStoppedAtStation)
                     {
-                        CTrain* pTrainCarriage = this;
+                        CTrain* trainCarriage = this;
                         do
                         {
                             trainFlags.bStoppedAtStation = true;
                             trainFlags.bPassengersCanEnterAndLeave = true;
-                            pTrainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE;
-                            pTrainCarriage = pTrainCarriage->m_pNextCarriage;
-                        } while (pTrainCarriage);
+                            trainCarriage->m_nPassengersGenerationState = TRAIN_PASSENGERS_QUERY_NUM_PASSENGERS_TO_LEAVE;
+                            trainCarriage = trainCarriage->m_pNextCarriage;
+                        } while (trainCarriage);
                     }
                 }
 
                 fStopAtStationSpeed = fStopAtStationSpeed * 0.02f - m_fTrainSpeed;
-                if (fStopAtStationSpeed > 0.0)
+                if (fStopAtStationSpeed > 0.0f)
                 {
                     m_fTrainGas = fStopAtStationSpeed * 30.0f;
                     if (m_fTrainGas >= 1.0f)
@@ -439,20 +438,20 @@ void CTrain::ProcessControl_Reversed()
 
                 if (fTrainSpeed < 0.001f)
                 {
-                    m_fTrainBrake = 0.0;
-                    m_fTrainGas = static_cast<float>(pPad->GetAccelerate() - pPad->GetBrake());
+                    m_fTrainBrake = 0.0f;
+                    m_fTrainGas = static_cast<float>(pad->GetAccelerate() - pad->GetBrake());
                 }
                 else
                 {
-                    if (m_fTrainSpeed > 0.0)
+                    if (m_fTrainSpeed > 0.0f)
                     {
-                        m_fTrainBrake = static_cast<float>(pPad->GetBrake());
-                        m_fTrainGas = static_cast<float>(pPad->GetAccelerate());
+                        m_fTrainBrake = static_cast<float>(pad->GetBrake());
+                        m_fTrainGas = static_cast<float>(pad->GetAccelerate());
                     }
                     else
                     {
-                        m_fTrainGas = static_cast<float>(-pPad->GetBrake());
-                        m_fTrainBrake = static_cast<float>(pPad->GetAccelerate());
+                        m_fTrainGas = static_cast<float>(-pad->GetBrake());
+                        m_fTrainBrake = static_cast<float>(pad->GetAccelerate());
                     }
                 }
             }
@@ -487,14 +486,14 @@ void CTrain::ProcessControl_Reversed()
             if (m_fTrainBrake != 0.0f)
             {
                 float fTrainSpeed = m_fTrainSpeed;
-                if (m_fTrainSpeed < 0.0)
+                if (m_fTrainSpeed < 0.0f)
                 {
                     fTrainSpeed = -fTrainSpeed;
                 }
                 float fBreak = m_fTrainBrake * 0.00390625f * CTimer::GetTimeStep() * 0.006f / numCarriagesPulled;
                 if (fTrainSpeed >= fBreak)
                 {
-                    if (m_fTrainSpeed < 0.0)
+                    if (m_fTrainSpeed < 0.0f)
                     {
                         m_fTrainSpeed += fBreak;
                     }
@@ -505,7 +504,7 @@ void CTrain::ProcessControl_Reversed()
                 }
                 else
                 {
-                    m_fTrainSpeed = 0.0;
+                    m_fTrainSpeed = 0.0f;
                 }
             }
 
@@ -521,7 +520,7 @@ void CTrain::ProcessControl_Reversed()
             {
 
                 float fTheTrainSpeed = m_fTrainSpeed;
-                if (fTheTrainSpeed < 0.0)
+                if (fTheTrainSpeed < 0.0f)
                 {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
@@ -533,7 +532,7 @@ void CTrain::ProcessControl_Reversed()
                 }
 
                 fTheTrainSpeed = m_fTrainSpeed;
-                if (fTheTrainSpeed < 0.0)
+                if (fTheTrainSpeed < 0.0f)
                 {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
@@ -553,9 +552,9 @@ void CTrain::ProcessControl_Reversed()
                         previousNodeIndex2 = numTrackNodes;
                     }
 
-                    CTrainNode* pCurrentTrainNode = &pTrainNodes[m_nNodeIndex];
-                    CTrainNode* pPreviousTrainNode = &pTrainNodes[previousNodeIndex];
-                    CTrainNode* pPreviousTrainNode2 = &pTrainNodes[previousNodeIndex2];
+                    CTrainNode* pCurrentTrainNode = &trainNodes[m_nNodeIndex];
+                    CTrainNode* pPreviousTrainNode = &trainNodes[previousNodeIndex];
+                    CTrainNode* pPreviousTrainNode2 = &trainNodes[previousNodeIndex2];
 
                     CVector vecDifference1 = pCurrentTrainNode->GetPosn() - pPreviousTrainNode->GetPosn();
                     CVector vecDifference2 = pPreviousTrainNode->GetPosn() - pPreviousTrainNode2->GetPosn();
@@ -566,25 +565,25 @@ void CTrain::ProcessControl_Reversed()
                         vecDifference1.y * vecDifference2.y +
                         vecDifference1.z * vecDifference2.z < 0.99599999f)
                     {
-                        CTrain* pCarriage = this;
+                        CTrain* carriage = this;
                         bool bIsInTunnel = false;
                         while (!bIsInTunnel)
                         {
-                            bIsInTunnel = pCarriage->IsInTunnel();
-                            pCarriage = pCarriage->m_pNextCarriage;
-                            if (!pCarriage)
+                            bIsInTunnel = carriage->IsInTunnel();
+                            carriage = carriage->m_pNextCarriage;
+                            if (!carriage)
                             {
                                 if (!bIsInTunnel)
                                 {
-                                    CTrain* pTheTrainCarriage = this;
+                                    CTrain* theTrainCarriage = this;
                                     do
                                     {
                                         trainFlags.bNotOnARailRoad = true;
-                                        pTheTrainCarriage->physicalFlags.bDisableCollisionForce = false;
-                                        pTheTrainCarriage->physicalFlags.bDisableSimpleCollision = false;
-                                        pTheTrainCarriage->SetIsStatic(false);
-                                        pTheTrainCarriage = pTheTrainCarriage->m_pNextCarriage;
-                                    } while (pTheTrainCarriage);
+                                        theTrainCarriage->physicalFlags.bDisableCollisionForce = false;
+                                        theTrainCarriage->physicalFlags.bDisableSimpleCollision = false;
+                                        theTrainCarriage->SetIsStatic(false);
+                                        theTrainCarriage = theTrainCarriage->m_pNextCarriage;
+                                    } while (theTrainCarriage);
 
                                     CPhysical::ProcessControl();
                                 }
@@ -596,12 +595,12 @@ void CTrain::ProcessControl_Reversed()
             }
         }
 
-        if (m_fCurrentRailDistance < 0.0)
+        if (m_fCurrentRailDistance < 0.0f)
         {
             do
             {
                 m_fCurrentRailDistance += fTotalTrackLength;
-            } while (m_fCurrentRailDistance < 0.0);
+            } while (m_fCurrentRailDistance < 0.0f);
         }
 
         if (m_fCurrentRailDistance >= fTotalTrackLength)
@@ -616,8 +615,8 @@ void CTrain::ProcessControl_Reversed()
         int32 nextNodeIndex = m_nNodeIndex + 1;
         if (nextNodeIndex < numTrackNodes)
         {
-            CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
-            fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+            CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
+            fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
         }
         else
         {
@@ -625,8 +624,8 @@ void CTrain::ProcessControl_Reversed()
             nextNodeIndex = 0;
         }
 
-        CTrainNode* pTheTrainNode = &pTrainNodes[m_nNodeIndex];
-        float fCurrentNodeTrackLength = pTheTrainNode->m_nDistanceFromStart / 3.0f;
+        CTrainNode* theTrainNode = &trainNodes[m_nNodeIndex];
+        float fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
         while (m_fCurrentRailDistance < fCurrentNodeTrackLength || fNextNodeTrackLength < m_fCurrentRailDistance)
         {
             int32 newNodeIndex = m_nNodeIndex - 1; // previous node
@@ -637,14 +636,14 @@ void CTrain::ProcessControl_Reversed()
             m_nNodeIndex = newNodeIndex % numTrackNodes;
             m_vehicleAudio.AddAudioEvent(AE_TRAIN_CLACK, 0.0f);
 
-            pTheTrainNode = &pTrainNodes[m_nNodeIndex];
-            fCurrentNodeTrackLength = pTheTrainNode->m_nDistanceFromStart / 3.0f;
+            theTrainNode = &trainNodes[m_nNodeIndex];
+            fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
 
             nextNodeIndex = m_nNodeIndex + 1;
             if (nextNodeIndex < numTrackNodes)
             {
-                CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
-                fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+                CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
+                fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
             }
             else
             {
@@ -653,8 +652,8 @@ void CTrain::ProcessControl_Reversed()
             }
         }
 
-        CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
-        fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+        CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
+        fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
 
         float fTrackNodeDifference = fNextNodeTrackLength - fCurrentNodeTrackLength;
         if (fTrackNodeDifference < 0.0f)
@@ -664,13 +663,13 @@ void CTrain::ProcessControl_Reversed()
 
         float fTheDistance = (m_fCurrentRailDistance - fCurrentNodeTrackLength) / fTrackNodeDifference;
         CVector vecPosition1;
-        vecPosition1.x = pTheTrainNode->x * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->x * 0.125f * fTheDistance;
-        vecPosition1.y = pTheTrainNode->y * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->y * 0.125f * fTheDistance;
-        vecPosition1.z = pTheTrainNode->z * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->z * 0.125f * fTheDistance;
+        vecPosition1.x = theTrainNode->x * 0.125f * (1.0f - fTheDistance) + nextTrainNode->x * 0.125f * fTheDistance;
+        vecPosition1.y = theTrainNode->y * 0.125f * (1.0f - fTheDistance) + nextTrainNode->y * 0.125f * fTheDistance;
+        vecPosition1.z = theTrainNode->z * 0.125f * (1.0f - fTheDistance) + nextTrainNode->z * 0.125f * fTheDistance;
 
 
-        CColModel* pVehicleColModel = CModelInfo::ms_modelInfoPtrs[m_nModelIndex]->GetColModel();
-        CBoundingBox* pBoundingBox = &pVehicleColModel->GetBoundingBox();
+        CColModel* vehicleColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+        CBoundingBox* pBoundingBox = &vehicleColModel->GetBoundingBox();
         float fTotalCurrentRailDistance = pBoundingBox->m_vecMax.y - pBoundingBox->m_vecMin.y + m_fCurrentRailDistance;
         if (fTotalCurrentRailDistance > fTotalTrackLength)
         {
@@ -680,8 +679,8 @@ void CTrain::ProcessControl_Reversed()
         nextNodeIndex = m_nNodeIndex + 1;
         if (nextNodeIndex < numTrackNodes)
         {
-            CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
-            fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+            CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
+            fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
         }
         else
         {
@@ -694,14 +693,14 @@ void CTrain::ProcessControl_Reversed()
         {
             trainNodeIndex = (trainNodeIndex + 1) % numTrackNodes;
 
-            pTheTrainNode = &pTrainNodes[trainNodeIndex];
-            fCurrentNodeTrackLength = pTheTrainNode->m_nDistanceFromStart / 3.0f;
+            theTrainNode = &trainNodes[trainNodeIndex];
+            fCurrentNodeTrackLength = theTrainNode->m_nDistanceFromStart / 3.0f;
 
             nextNodeIndex = trainNodeIndex + 1;
             if (nextNodeIndex < numTrackNodes)
             {
-                CTrainNode* pNextTrainNode = &pTrainNodes[nextNodeIndex];
-                fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+                CTrainNode* nextTrainNode = &trainNodes[nextNodeIndex];
+                fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
             }
             else
             {
@@ -710,20 +709,20 @@ void CTrain::ProcessControl_Reversed()
             }
         }
 
-        pNextTrainNode = &pTrainNodes[nextNodeIndex];
-        fNextNodeTrackLength = pNextTrainNode->m_nDistanceFromStart / 3.0f;
+        nextTrainNode = &trainNodes[nextNodeIndex];
+        fNextNodeTrackLength = nextTrainNode->m_nDistanceFromStart / 3.0f;
 
         fTrackNodeDifference = fNextNodeTrackLength - fCurrentNodeTrackLength;
-        if (fTrackNodeDifference < 0.0)
+        if (fTrackNodeDifference < 0.0f)
         {
             fTrackNodeDifference += fTotalTrackLength;
         }
 
         fTheDistance = (fTotalCurrentRailDistance - fCurrentNodeTrackLength) / fTrackNodeDifference;
         CVector vecPosition2;
-        vecPosition2.x = pTheTrainNode->x * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->x * 0.125f * fTheDistance;
-        vecPosition2.y = pTheTrainNode->y * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->y * 0.125f * fTheDistance;
-        vecPosition2.z = pTheTrainNode->z * 0.125f * (1.0f - fTheDistance) + pNextTrainNode->z * 0.125f * fTheDistance;
+        vecPosition2.x = theTrainNode->x * 0.125f * (1.0f - fTheDistance) + nextTrainNode->x * 0.125f * fTheDistance;
+        vecPosition2.y = theTrainNode->y * 0.125f * (1.0f - fTheDistance) + nextTrainNode->y * 0.125f * fTheDistance;
+        vecPosition2.z = theTrainNode->z * 0.125f * (1.0f - fTheDistance) + nextTrainNode->z * 0.125f * fTheDistance;
 
         {
             CVector& vecVehiclePosition = GetPosition();
@@ -745,11 +744,11 @@ void CTrain::ProcessControl_Reversed()
 
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        uint8 trainNodeLighting = pTheTrainNode->GetLightingFromCollision();;
-        uint8 trainNextNodeLighting = pNextTrainNode->GetLightingFromCollision();
+        uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
+        uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
 
-        float fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
-        float fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
+        auto fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
+        auto fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;
@@ -757,16 +756,16 @@ void CTrain::ProcessControl_Reversed()
 
         float fNewTrainHeading = GetHeading();
         float fHeading = fNewTrainHeading - fOldTrainHeading;
-        if (fHeading <= 3.1415927f)
+        if (fHeading <= PI)
         {
-            if (fHeading < -3.1415927f)
+            if (fHeading < -PI)
             {
-                fHeading += 6.2831855f;
+                fHeading += TWO_PI;
             }
         }
         else
         {
-            fHeading -= 6.2831855f;
+            fHeading -= TWO_PI;
         }
 
         m_vecTurnSpeed = CVector(0.0f, 0.0f, fHeading / CTimer::GetTimeStep());
@@ -907,9 +906,9 @@ void CTrain::ProcessControl_Reversed()
             if (m_vecForce.SquaredMagnitude() > fMaxForceTimeStep
                 || m_vecTorque.SquaredMagnitude() > fMaxTorqueTimeStep
                 || m_fMovingSpeed >= fMaxMovingSpeed
-                || m_fDamageIntensity > 0.0
-                && m_pDamageEntity != 0
-                && (m_pDamageEntity->m_nType == ENTITY_TYPE_PED)
+                || m_fDamageIntensity > 0.0f
+                && m_pDamageEntity != nullptr
+                && (m_pDamageEntity->IsPed())
                 )
             {
                 m_nFakePhysics = 0;
@@ -944,13 +943,13 @@ void CTrain::ProcessControl_Reversed()
         {
             physicalFlags.bTouchingWater = true;
 
-            float fTimeStep = 0.0099999998f;
-            if (CTimer::GetTimeStep() >= 0.0099999998f)
+            float fTimeStep = 0.01f;
+            if (CTimer::GetTimeStep() >= 0.01f)
             {
                 fTimeStep = CTimer::GetTimeStep();
             }
 
-            float fSpeedFactor = 1.0f - vecOldTrainPosition.z / (fTimeStep * m_fMass * 0.0080000004f) * 0.050000001f;
+            float fSpeedFactor = 1.0f - vecOldTrainPosition.z / (fTimeStep * m_fMass * 0.008f) * 0.05f;
             fSpeedFactor = pow(fSpeedFactor, CTimer::GetTimeStep());
 
             m_vecMoveSpeed *= fSpeedFactor;

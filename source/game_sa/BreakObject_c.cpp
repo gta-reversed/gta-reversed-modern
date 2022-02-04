@@ -42,7 +42,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
 // Methods
 // 0x59D570
 void BreakObject_c::SetGroupData(RwMatrix* matrix, CVector* posn, float a5) {
-    plugin::CallMethod<0x59D570, BreakObject_c*, RwMatrixTag*, CVector*, float>(this, matrix, posn, a5);
+    plugin::CallMethod<0x59D570, BreakObject_c*, RwMatrix*, CVector*, float>(this, matrix, posn, a5);
 }
 
 // 0x59D7F0

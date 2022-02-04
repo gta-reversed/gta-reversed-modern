@@ -20,7 +20,7 @@ public:
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
-    void StartAnim(CPed* pPed);
+    void StartAnim(CPed* ped);
 
 private:
     friend void InjectHooksMain();

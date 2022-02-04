@@ -9,8 +9,8 @@ static float& m_fTrailerSuspensionForce = *(float*)0x8D3464;    // 1.5f
 static float& m_fTrailerDampingForce = *(float*)0x8D3468;       // 0.1f
 
 // 0x6D03A0
-CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
-    plugin::CallMethod<0x6D03A0, CTrailer*>(this);
+CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
+    plugin::CallMethod<0x6D03A0, CTrailer*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
     /*
     m_fTrailerColPointValue1 = 1.0f;
     m_fTrailerColPointValue2 = 1.0f;
@@ -147,12 +147,12 @@ void CTrailer::PreRender_Reversed() {
     CTrailer::PreRender();
 }
 
-bool CTrailer::GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowHitchPos(posnOut, bCheckModelInfo, vehicle);
+bool CTrailer::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
+    return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle);
 }
 
-bool CTrailer::GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowBarPos(posnOut, bCheckModelInfo, vehicle);
+bool CTrailer::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
+    return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle);
 }
 
 bool CTrailer::BreakTowLink_Reversed() {

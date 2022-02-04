@@ -108,7 +108,7 @@ void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector* vecOut, CVector* 
     }
 
     auto  fMult = 0.0F;
-    auto* player = FindPlayerPed(-1);
+    auto* player = FindPlayerPed();
     if (player)
         fMult = clamp(DistanceBetweenPoints(player->GetPosition(), TheCamera.GetPosition()), 0.0F, 0.5F);
 

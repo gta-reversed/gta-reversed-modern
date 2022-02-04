@@ -11,7 +11,8 @@ class CEntity;
 class CColPoint;
 class CVector;
 
-struct tBeatInfo {
+class tBeatInfo {
+public:
     char  f0[12];
     char  fC[148];
     int32 m_beatInfoPresent;
@@ -78,7 +79,7 @@ public:
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float volume, bool forcePlaySplashSound);
     void ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical);
-    void ReportDoorMovement(CPhysical* pPhysical);
+    void ReportDoorMovement(CPhysical* physical);
     void ReportMissionAudioEvent(uint16 eventId, CVector& posn);
     void ReportMissionAudioEvent(uint16 eventId, CObject* object);
     void ReportMissionAudioEvent(uint16 eventId, CPed* ped);

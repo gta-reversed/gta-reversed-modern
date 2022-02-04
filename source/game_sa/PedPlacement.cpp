@@ -1,23 +1,88 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
 
-bool CPedPlacement::FindZCoorForPed(CVector* pos) {
-    return plugin::CallAndReturn<bool, 0x616920, CVector*>(pos);
+#include "PedPlacement.h"
+
+void CPedPlacement::InjectHooks() {
+    RH_ScopedClass(CPedPlacement);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(IsPositionClearForPed, 0x616860);
+    RH_ScopedInstall(FindZCoorForPed, 0x616920);
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Pos", 0x6168E0, CVehicle * (*)(const CVector*));
+    RH_ScopedOverloadedInstall(IsPositionClearOfCars, "Ped", 0x616A40, CVehicle * (*)(const CPed*));
 }
 
-bool CPedPlacement::IsPositionClearForPed(CVector const* pos, float radius, int32 maxNumObjects, CEntity** pObjectList, uint8 bCheckVehicles, uint8 bCheckPeds, uint8 bCheckObjects) {
-    return plugin::CallAndReturn<bool, 0x616860, CVector const*, float, int32, CEntity**, uint8, uint8, uint8>(pos, radius, maxNumObjects, pObjectList, bCheckVehicles, bCheckPeds, bCheckObjects);
+// 0x616920
+bool CPedPlacement::FindZCoorForPed(CVector& inoutPos) {
+    CEntity* hitEntity{};
+
+    float firstHitZ = -100.f;
+    if (CColPoint cp{}; CWorld::ProcessVerticalLine(inoutPos + CVector{ 0.f, 0.f, 0.5f }, inoutPos.z - 100.0f, cp, hitEntity, true, true, false, false, true, false, nullptr))
+        firstHitZ = cp.m_vecPoint.z;
+
+    float secondHitZ = -100.f;
+    if (CColPoint cp{}; CWorld::ProcessVerticalLine(inoutPos + CVector{ 0.1f, 0.1f, 0.5f }, inoutPos.z - 100.0f, cp, hitEntity, true, true, false, false, true, false, nullptr))
+        secondHitZ = cp.m_vecPoint.z;
+
+    const auto highestZ = std::max(firstHitZ, secondHitZ);
+    if (highestZ <= -99.0f)
+        return false;
+
+    inoutPos.z = highestZ + 1.0f;
+    return true;
 }
 
-CVehicle* CPedPlacement::IsPositionClearOfCars(CVector const* pos) {
-    return plugin::CallAndReturn<CVehicle*, 0x6168E0, CVector const*>(pos);
+// 0x616860
+bool CPedPlacement::IsPositionClearForPed(const CVector& pos, float radius, int32 maxHitEntities, CEntity** outHitEntities, bool bCheckVehicles, bool bCheckPeds, bool bCheckObjects) {
+    int16 hitCount{};
+    CWorld::FindObjectsKindaColliding(
+        pos,
+        radius == -1.0f ? 0.75f : radius,
+        true,
+        &hitCount,
+        maxHitEntities == -1 ? 2 : maxHitEntities,
+        outHitEntities,
+        false,
+        bCheckVehicles,
+        bCheckPeds,
+        bCheckObjects,
+        false
+    );
+    return hitCount == 0;
 }
 
-CVehicle* CPedPlacement::IsPositionClearOfCars(CPed const* ped) {
-    return plugin::CallAndReturn<CVehicle*, 0x616A40, CPed const*>(ped);
+// 0x6168E0
+CVehicle* CPedPlacement::IsPositionClearOfCars(const CVector* pos) {
+    return CWorld::TestSphereAgainstWorld(*pos, 0.25, nullptr, false, true, false, false, false, false)->AsVehicle();
+}
+
+// 0x616A40
+CVehicle* CPedPlacement::IsPositionClearOfCars(const CPed* ped) {
+    const auto pedPos = ped->GetPosition();
+    const auto vehHit = IsPositionClearOfCars(&pedPos);
+
+    if (!vehHit)
+        return nullptr;
+
+    if (vehHit->IsAutomobile() || vehHit->vehicleFlags.bIsBig) {
+        static CColPoint unusedColPoint[32]; // 0xC102A0
+        if (CCollision::ProcessColModels(
+            *ped->m_matrix,
+            *CModelInfo::GetModelInfo(ped->m_nModelIndex)->GetColModel(),
+
+            *vehHit->m_matrix,
+            *CModelInfo::GetModelInfo(vehHit->m_nModelIndex)->GetColModel(),
+
+            unusedColPoint, nullptr, nullptr, false
+        )) {
+            return vehHit;
+        }
+    }
+    return nullptr;
 }

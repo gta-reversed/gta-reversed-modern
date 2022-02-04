@@ -20,9 +20,10 @@ CPedAttractorManager* GetPedAttractorManager() {
 }
 
 bool CPedAttractorManager::HasEmptySlot(const C2dEffect* effect, const CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x5EBB00, CPedAttractorManager*, C2dEffect const*, CEntity const*>(this, effect, entity);
+    return plugin::CallMethodAndReturn<bool, 0x5EBB00, CPedAttractorManager*, const C2dEffect*, const CEntity*>(this, effect, entity);
 }
 
+// 0x5EF980
 CPedAttractor* CPedAttractorManager::RegisterPed(CPed* ped, C2dEffect* attr, CEntity* entity, int a4, void* attrAry) {
     assert(0);
     return nullptr;

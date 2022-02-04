@@ -1,10 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "MenuManager.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 
@@ -122,8 +124,8 @@ void CMenuManager::ProcessMissionPackNewGame() {
     ((void(__thiscall*)(CMenuManager*))0x57D520)(this);
 }
 
-signed int CMenuManager::DoSettingsBeforeStartingAGame() {
-    return ((signed int(__thiscall*)(CMenuManager*))0x573330)(this);
+int32 CMenuManager::DoSettingsBeforeStartingAGame() {
+    return ((int32(__thiscall*)(CMenuManager*))0x573330)(this);
 }
 
 char CMenuManager::SetDefaultPreferences(eMenuPage page) {
