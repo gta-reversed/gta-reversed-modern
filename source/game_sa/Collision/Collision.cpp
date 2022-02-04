@@ -345,7 +345,7 @@ bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
 /*!
 * @address 0x412130
 */
-bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float& mindistsq) {
+bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CColPoint & colp, float& minDistSq) {
 	// GTA's code is too complicated, uses a huge 3x3x3 if statement
 	// we can simplify the structure a lot
     // Some of the original code, to give you an idea:
@@ -444,39 +444,39 @@ bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CC
     }
     */
 
-
 	// First make sure we have a collision at all
     if (!TestSphereBox(sph, box))
         return false;
 
 	// Now find out where the sphere center lies in relation to all the sides
-    // 0 - inside
-    // 1 - below min
-    // 2 - above max
-	int sideX = sph.m_vecCenter.x < box.m_vecMin.x ? 1 :
-	           sph.m_vecCenter.x > box.m_vecMax.x ? 2 :
-	           0;
-	int sideY = sph.m_vecCenter.y < box.m_vecMin.y ? 1 :
-	           sph.m_vecCenter.y > box.m_vecMax.y ? 2 :
-	           0;
-	int sideZ = sph.m_vecCenter.z < box.m_vecMin.z ? 1 :
-	           sph.m_vecCenter.z > box.m_vecMax.z ? 2 :
-	           0;
+    enum class ClosestCorner {
+        INSIDE,
+        MIN,    
+        MAX,
+    };
+    using enum ClosestCorner;
 
-	if(sideX == 0 && sideY == 0 && sideZ == 0){ // Sphere center is inside the box
+    ClosestCorner axies[3];
+    for (auto i = 0; i < 3; i++) {
+        axies[i] = sph.m_vecCenter[i] < box.m_vecMin[i] ? MIN :
+                   sph.m_vecCenter[i] > box.m_vecMax[i] ? MAX :
+                   INSIDE;
+    }
+
+	if(axies[0] == INSIDE && axies[1] == INSIDE && axies[2] == INSIDE) { // Sphere center is inside the box
         const auto p{ box.GetCenter() };
 
 		const auto dir = sph.m_vecCenter - p;
         const auto distSq = dir.SquaredMagnitude();
-		if(distSq < mindistsq){
-            point.m_vecNormal = dir / sqrt(distSq);
-			point.m_vecPoint = sph.m_vecCenter - point.m_vecNormal;
+		if(distSq < minDistSq){
+            colp.m_vecNormal = dir / sqrt(distSq); // Normalize direction
+			colp.m_vecPoint = sph.m_vecCenter - colp.m_vecNormal;
 
-            point.m_nSurfaceTypeA = sph.m_nMaterial;
-            point.m_nLightingA = sph.m_nLighting;
+            colp.m_nSurfaceTypeA = sph.m_nMaterial;
+            colp.m_nLightingA = sph.m_nLighting;
 
-            point.m_nSurfaceTypeB = box.m_nMaterial;
-            point.m_nLightingB = box.m_nLighting;
+            colp.m_nSurfaceTypeB = box.m_nMaterial;
+            colp.m_nLightingB = box.m_nLighting;
 
 			// find absolute distance to the closer side in each dimension
 			const float dx = dir.x > 0.0f ?
@@ -492,40 +492,41 @@ bool CCollision::ProcessSphereBox(CColSphere const & sph, CColBox const& box, CC
 				sph.m_vecCenter.z - box.m_vecMin.z;
 
 			// collision depth is maximum of that:
-            point.m_fDepth = std::max({ dx, dy, dz });
+            colp.m_fDepth = std::max({ dx, dy, dz });
 
 			return true;
 		}
-	}else{ // Sphere centre is outside.
+	} else { // Sphere centre is outside on at least one axis
 		
 		// Position of closest corner:
         const CVector p{
-            sideX == 1 ? box.m_vecMin.x :
-            sideX == 2 ? box.m_vecMax.x :
-            sph.m_vecCenter.x,
+            axies[0] == MIN ? box.m_vecMin.x :
+            axies[0] == MAX ? box.m_vecMax.x :
+                              sph.m_vecCenter.x,
 
-            sideY == 1 ? box.m_vecMin.y :
-            sideY == 2 ? box.m_vecMax.y :
-            sph.m_vecCenter.y,
+            axies[1] == MIN ? box.m_vecMin.y :
+            axies[1] == MAX ? box.m_vecMax.y :
+                              sph.m_vecCenter.y,
 
-            sideZ == 1 ? box.m_vecMin.z :
-            sideZ == 2 ? box.m_vecMax.z :
-            sph.m_vecCenter.z,
+            axies[2] == MIN ? box.m_vecMin.z :
+            axies[2] == MAX ? box.m_vecMax.z :
+                              sph.m_vecCenter.z,
         };
 
         const auto dir = sph.m_vecCenter - p;
         const auto distSq = dir.SquaredMagnitude();
-        if (distSq < mindistsq) {
-            point.m_vecNormal = dir / sqrt(distSq); // Normalize vector
-            point.m_vecPoint = p;
+        if (distSq < minDistSq) {
+            colp.m_vecNormal = dir / sqrt(distSq); // Normalize vector
+            colp.m_vecPoint = p;
 
-            point.m_nSurfaceTypeA = sph.m_nMaterial;
-            point.m_nLightingA = sph.m_nLighting;
+            colp.m_nSurfaceTypeA = sph.m_nMaterial;
+            colp.m_nLightingA = sph.m_nLighting;
 
-            point.m_nSurfaceTypeB = box.m_nMaterial;
-            point.m_nLightingB = box.m_nLighting;
+            colp.m_nSurfaceTypeB = box.m_nMaterial;
+            colp.m_nLightingB = box.m_nLighting;
 
-			mindistsq = distSq;
+			minDistSq = distSq;
+
 			return true;
 		}
 	}
@@ -550,7 +551,7 @@ bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints)
     // they probably wanted to avoid doing `sqrt` and divisions
     // which is smart.
 
-    const auto v1_dot_v2 = DotProduct(v1, v2);
+    const auto v1_dot_v2 = DotProduct(v1, v2); 
 
     const auto v2_dot_p = DotProduct(v2, p);
     const auto v2_magSq = v2.SquaredMagnitude();
