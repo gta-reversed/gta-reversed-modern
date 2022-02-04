@@ -381,13 +381,13 @@ void CGlass::Render() {
     ReflectionPolyVertexBaseIdx = 1536;
     ReflectionPolyIndexBaseIdx = 3072;
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, (void*)rwFILTERLINEAR);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEFOGCOLOR, (void*)CTimeCycle::m_CurrentColours.GetSkyBottom(0).ToIntARGB());
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDONE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGCOLOR,          RWRSTATE(CTimeCycle::m_CurrentColours.GetSkyBottom(0).ToIntARGB()));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDONE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     for (auto& pane : aGlassPanes) {
         if (pane.existFlag) {
@@ -399,11 +399,11 @@ void CGlass::Render() {
     RenderShatteredPolys();
     RenderReflectionPolys();
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND, (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND, (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,  RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,    RWRSTATE(FALSE));
 }
 
 // 0x71AFC0
