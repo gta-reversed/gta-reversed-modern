@@ -16,9 +16,9 @@ class CColCacheEntry;
 
 class CCollision {
 public:
-    static CLinkList<CCollisionData*> &ms_colModelCache;
+    static inline CLinkList<CCollisionData*> &ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
     static inline uint32& ms_iProcessLineNumCrossings = *(uint32*)0x9655D0;
-    static uint32& ms_collisionInMemory;
+    static inline uint32& ms_collisionInMemory = *(uint32*)0x9655D4;
 public:
     static void InjectHooks();
     static void Tests();

@@ -13,10 +13,6 @@
 
 namespace rng = std::ranges;
 
-CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
-int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
-uint32& CCollision::ms_collisionInMemory = *(uint32*)0x9655D4;
-
 void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint); // Forward declaration needed for `InjectHooks`
 
 void CCollision::InjectHooks()
@@ -332,9 +328,6 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 
 // 0x4120C0
 bool CCollision::TestSphereBox(CSphere const& sphere, CBox const& box) {
-    const auto IsValueInRange = [](float min, float max, float val) {
-        return val >= min && val <= max;
-    };
 #define CheckAxis(a) (sphere.m_vecCenter.a + sphere.m_fRadius >= box.m_vecMin.a && \
                      sphere.m_vecCenter.a - sphere.m_fRadius <= box.m_vecMax.a)
     return CheckAxis(x) && CheckAxis(y) && CheckAxis(z);
