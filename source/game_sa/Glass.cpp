@@ -56,6 +56,8 @@ void CGlass::Init() {
 
     for (auto i = 0u; i < std::size(PanePolyPositions); i++) {
         const auto& poly = PanePolyPositions[i];
+
+        // Calcualte center position of each pane by taking an average 
         PanePolyCenterPositions[i] = std::accumulate(std::begin(poly), std::end(poly), CVector2D{}) / (float)std::size(PanePolyPositions);
     }
 }
@@ -138,9 +140,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
 
     const auto CalculateDotProducts = [&](CVector direction) {
         std::array<float, 6> out{};
-        for (auto i = 0; i < 6; i++) {
-            out[i] = DotProduct(triVertices[i], direction);
-        }
+        rng::transform(triVertices, out.begin(), [&](auto&& v) { return DotProduct(v, direction); });
         return out;
     };
 
@@ -208,12 +208,7 @@ void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
 
 template<size_t N>
 std::pair<float, float> FindMinMaxZOfVertices(CVector (&vertices)[N]) {
-    float min = FLT_MAX, max = FLT_MIN;
-    for (const auto& v : vertices) {
-        min = std::min(min, v.z);
-        max = std::max(max, v.z);
-    }
-    return { min, max };
+    return *rng::minmax_element(vertices, {}, [](auto&& v) { return v.z });
 }
 
 // 0x71BC40
@@ -224,35 +219,34 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
 
     object->objectFlags.bGlassBroken = true;
 
-    if (const auto colModel = object->GetColModel(); colModel && colModel->GetTriCount() == 2) {
+    if (const auto cm = object->GetColModel(); cm && cm->GetTriCount() == 2) {
         // Object space vertices
-        CVector verticesOS[4]{};
-        for (auto i = 0; i < 4; i++) {
-            verticesOS[i] = UncompressVector(colModel->m_pColData->m_pVertices[i]);
-        }
+        CVector verticesOS[4];
+        rng::transform(std::span{ cm->m_pColData->m_pVertices, 4 }, verticesOS, UncompressVector);
 
         const auto [minZ, maxZ] = FindMinMaxZOfVertices(verticesOS);
-        //const auto vert01MaxZ = std::
 
-        uint32 furthestFromV0Idx{};
-        {
-            float max{ FLT_MIN };
-            for (auto i = 1; i < 4; i++) {
-                const auto dist = DistanceBetweenPoints2D(verticesOS[0], verticesOS[i]);
-                if (dist > max) {
-                    max = dist;
-                    furthestFromV0Idx = i;
-                }
-            }
-        }
+        const auto vertFurthestFromV0 = rng::max_element(verticesOS, {}, [&](auto&& v) { return (verticesOS[0] - v).SquaredMagnitude2D(); });
 
         // Transform vertices to world space
         const auto vert01MinZ        = std::min(verticesOS[0].z, verticesOS[1].z);
         const auto vert0Pos          = Multiply3x3(object->GetMatrix(), { verticesOS[0].x, verticesOS[0].y, vert01MinZ });
-        const auto furthestFromV0Pos = Multiply3x3(object->GetMatrix(), { verticesOS[furthestFromV0Idx].x, verticesOS[furthestFromV0Idx].y, vert01MinZ });
+        const auto furthestFromV0Pos = Multiply3x3(object->GetMatrix(), { vertFurthestFromV0->x, vertFurthestFromV0->y, vert01MinZ });
 
         AudioEngine.ReportGlassCollisionEvent(AE_GLASS_BREAK_FAST, object->GetPosition());
-        GeneratePanesForWindow(fDamageIntensity <= 300.f ? 1 : 0, vert0Pos, { 0.f, 0.f, maxZ - minZ }, furthestFromV0Pos - vert0Pos, vecMoveSpeed, vecPoint, 0.1f, object->objectFlags.bGlassBroken, max1PaneSection, 1, false);
+        GeneratePanesForWindow(
+            fDamageIntensity <= 300.f ? 1 : 0,
+            vert0Pos,
+            { 0.f, 0.f, maxZ - minZ },
+            furthestFromV0Pos - vert0Pos,
+            vecMoveSpeed,
+            vecPoint,
+            0.1f,
+            object->objectFlags.bGlassBroken,
+            max1PaneSection,
+            1,
+            false
+        );
     }
 
 }
@@ -503,19 +497,15 @@ uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
 
 // 0x71ACD0
 void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
-    if (NumGlassEntities < 31) {
+    if (NumGlassEntities + 1 < std::size(apEntitiesToBeRendered)) {
         apEntitiesToBeRendered[NumGlassEntities++] = entity;
     }
 }
 
 // 0x71ACA0
 CFallingGlassPane* CGlass::FindFreePane() {
-    for (auto& pane : aGlassPanes) {
-        if (!pane.existFlag) {
-            return &pane;
-        }
-    }
-    return nullptr;
+    const auto it = rng::find_if(aGlassPanes, [](auto&& v) {return v.existFlag; });
+    return it != std::end(aGlassPanes) ? &*it : nullptr;
 }
 
 // 0x71AF70
