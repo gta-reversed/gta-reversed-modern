@@ -955,6 +955,9 @@ bool ProcessDiscCollision(CColPoint& colPoint1, const CMatrix& mat, const CColDi
 }
 
 // 0x413AC0
+/*!
+* @address 0x413AC0
+*/
 bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane) {
     return plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(line, verts, tri, triPlane);
 }
