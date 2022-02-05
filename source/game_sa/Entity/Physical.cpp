@@ -126,7 +126,7 @@ CPhysical::CPhysical() : CEntity()
     m_pAttachedTo = nullptr;
     m_pEntityIgnoredCollision = nullptr;
 
-    m_qAttachedEntityRotation.imag.Set(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
 
     m_fDynamicLighting = 0.0f;
     m_pShadowData = nullptr;
@@ -1332,8 +1332,7 @@ void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool bApplyTu
         ApplyTurnForce(vecForce, vecForce * 0.5f);
 
     m_pAttachedTo = nullptr;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
 }
 
@@ -1358,8 +1357,7 @@ void CPhysical::DettachAutoAttachedEntity()
     m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = nullptr;
     m_pAttachedTo = nullptr;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     if (IsObject()) {
         m_fElasticity = AsObject()->m_pObjectInfo->m_fElasticity;
     }
@@ -1369,7 +1367,7 @@ void CPhysical::DettachAutoAttachedEntity()
 float CPhysical::GetLightingFromCol(bool bInteriorLighting)
 {
     float fAmbientRedBlue = CTimeCycle::GetAmbientRed_BeforeBrightness() + CTimeCycle::GetAmbientBlue_BeforeBrightness();
-    float fLighting = (CTimeCycle::GetAmbientGreen_BeforeBrightness() + fAmbientRedBlue) * 0.33333f + m_fContactSurfaceBrightness;
+    float fLighting = (CTimeCycle::GetAmbientGreen_BeforeBrightness() + fAmbientRedBlue) * (1.0f / 3.0f) + m_fContactSurfaceBrightness;
     if (!bInteriorLighting) {
         fLighting *= (CTimeCycle::SumOfCurrentRGB1() * (1.0f / 765.0f) * TEST_ADD_AMBIENT_LIGHT_FRAC + 1.0f - TEST_ADD_AMBIENT_LIGHT_FRAC)
                     + CTimeCycle::SumOfCurrentRGB2() * (1.0f / 765.0f)  * TEST_ADD_AMBIENT_LIGHT_FRAC;
@@ -4785,8 +4783,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
         m_vecAttachedEntityRotation = GetPosition();
     else 
         m_vecAttachedEntityRotation = vecAttachRotation;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = oldEntityAttachedTo;
     if (physicalFlags.bDisableCollisionForce) {
         physicalFlags.bCollidable = false;

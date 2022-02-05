@@ -87,26 +87,6 @@ float CQuaternion::GetLengthSquared() {
     return ((float(__thiscall*)(CQuaternion*))0x4D12C0)(this);
 }
 
-// Add right to the quat
-void CQuaternion::operator+=(const CQuaternion& right) {
-    ((void(__thiscall*)(CQuaternion*, const CQuaternion&))0x4D12F0)(this, right);
-}
-
-// Substract right from the quat
-void CQuaternion::operator-=(const CQuaternion& right) {
-    ((void(__thiscall*)(CQuaternion*, const CQuaternion&))0x4D1320)(this, right);
-}
-
-// Assigns value from other quat
-void CQuaternion::operator=(const CQuaternion& right) {
-    ((void(__thiscall*)(CQuaternion*, const CQuaternion&))0x4D00C0)(this, right);
-}
-
-// Multiplies quat by a floating point value
-void CQuaternion::operator*=(float multiplier) {
-    ((void(__thiscall*)(CQuaternion*, float))0x4CF9B0)(this, multiplier);
-}
-
 // Multiplies quat by a floating point value
 void CQuaternion::Scale(float multiplier) {
     ((void(__thiscall*)(CQuaternion*, float))0x4CF9B0)(this, multiplier);
