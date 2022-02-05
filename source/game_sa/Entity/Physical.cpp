@@ -83,7 +83,6 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(CheckCollision_SimpleCar, 0x54DAB0);
     RH_ScopedInstall(PlacePhysicalRelativeToOtherPhysical, 0x546DB0);
     RH_ScopedInstall(PositionAttachedEntity, 0x546FF0);
-    RH_ScopedInstall(Add, 0x546FF0);
 }
 
 // 0x542260
