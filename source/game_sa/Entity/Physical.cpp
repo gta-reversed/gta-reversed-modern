@@ -83,38 +83,62 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(CheckCollision_SimpleCar, 0x54DAB0);
     RH_ScopedInstall(PlacePhysicalRelativeToOtherPhysical, 0x546DB0);
     RH_ScopedInstall(PositionAttachedEntity, 0x546FF0);
+    RH_ScopedInstall(Add, 0x546FF0);
 }
 
+// 0x542260
 CPhysical::CPhysical() : CEntity()
 {
     m_pCollisionList.m_node = nullptr;
-    CPlaceable::AllocateStaticMatrix();
-    GetMatrix().SetUnity();
 
-    m_fMass = 1.0F;
-    m_fTurnMass = 1.0F;
-    m_fVelocityFrequency = 1.0F;
-    m_fAirResistance = 0.1F;
+    CPlaceable::AllocateStaticMatrix();
+    m_matrix->SetUnity();
+
+    m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecTurnSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecFrictionMoveSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecFrictionTurnSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecForce.Set(0.0f, 0.0f, 0.0f);
+    m_vecTorque.Set(0.0f, 0.0f, 0.0f);
+
+    m_fMass = 1.0f;
+    m_fTurnMass = 1.0f;
+    m_fVelocityFrequency = 1.0f;
+    m_fAirResistance = 0.1f;
     m_pMovingList = nullptr;
-    m_nFakePhysics = false;
+    m_nFakePhysics = 0;
     m_nNumEntitiesCollided = 0;
-    memset(m_apCollidedEntities, 0, sizeof(m_apCollidedEntities));
+    std::ranges::fill(m_apCollidedEntities, nullptr);
+
     m_nPieceType = 0;
-    m_fDamageIntensity = 0.0F;
+
+    m_fDamageIntensity = 0.0f;
     m_pDamageEntity = nullptr;
+
+    m_vecLastCollisionImpactVelocity.Set(0.0f, 0.0f, 0.0f);
+    m_vecLastCollisionPosn.Set(0.0f, 0.0f, 0.0f);
+
     m_bUsesCollision = true;
-    m_fMovingSpeed = 0.0F;
+
+    m_vecCentreOfMass.Set(0.0f, 0.0f, 0.0f);
+
+    m_fMovingSpeed = 0.0f;
     m_pAttachedTo = nullptr;
     m_pEntityIgnoredCollision = nullptr;
-    m_fDynamicLighting = 0.0F;
+
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
+
+    m_fDynamicLighting = 0.0f;
     m_pShadowData = nullptr;
-    field_38 = 100.0F;
-    m_fContactSurfaceBrightness = 1.0F;
+    field_38 = 100.0f;
 
     m_nPhysicalFlags = 0;
     physicalFlags.bApplyGravity = true;
+
+    m_fContactSurfaceBrightness = 1.0f;
 }
 
+// 0x542450
 CPhysical::~CPhysical()
 {
     if (m_pShadowData)
@@ -123,6 +147,7 @@ CPhysical::~CPhysical()
     m_pCollisionList.Flush();
 }
 
+// 0x544A30
 void CPhysical::Add()
 {
     CPhysical::Add_Reversed();
@@ -1307,8 +1332,7 @@ void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool bApplyTu
         ApplyTurnForce(vecForce, vecForce * 0.5f);
 
     m_pAttachedTo = nullptr;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
 }
 
@@ -1333,8 +1357,7 @@ void CPhysical::DettachAutoAttachedEntity()
     m_vecAttachOffset = CVector(0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = nullptr;
     m_pAttachedTo = nullptr;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     if (IsObject()) {
         m_fElasticity = AsObject()->m_pObjectInfo->m_fElasticity;
     }
@@ -1344,7 +1367,7 @@ void CPhysical::DettachAutoAttachedEntity()
 float CPhysical::GetLightingFromCol(bool bInteriorLighting)
 {
     float fAmbientRedBlue = CTimeCycle::GetAmbientRed_BeforeBrightness() + CTimeCycle::GetAmbientBlue_BeforeBrightness();
-    float fLighting = (CTimeCycle::GetAmbientGreen_BeforeBrightness() + fAmbientRedBlue) * 0.33333f + m_fContactSurfaceBrightness;
+    float fLighting = (CTimeCycle::GetAmbientGreen_BeforeBrightness() + fAmbientRedBlue) * (1.0f / 3.0f) + m_fContactSurfaceBrightness;
     if (!bInteriorLighting) {
         fLighting *= (CTimeCycle::SumOfCurrentRGB1() * (1.0f / 765.0f) * TEST_ADD_AMBIENT_LIGHT_FRAC + 1.0f - TEST_ADD_AMBIENT_LIGHT_FRAC)
                     + CTimeCycle::SumOfCurrentRGB2() * (1.0f / 765.0f)  * TEST_ADD_AMBIENT_LIGHT_FRAC;
@@ -4760,8 +4783,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
         m_vecAttachedEntityRotation = GetPosition();
     else 
         m_vecAttachedEntityRotation = vecAttachRotation;
-    m_qAttachedEntityRotation.real = 0.0f;
-    m_qAttachedEntityRotation.imag = CVector(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = oldEntityAttachedTo;
     if (physicalFlags.bDisableCollisionForce) {
         physicalFlags.bCollidable = false;
