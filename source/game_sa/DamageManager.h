@@ -180,7 +180,9 @@ public:
     static eCarNodes GetCarNodeIndexFromDoor(eDoors door);
     static bool GetComponentGroup(tComponent nComp, tComponentGroup& outCompGroup, uint8& outComponentRelativeIdx);
 
-
+    // NOTSA
+    void SetAllWheelsState(eCarWheelStatus state);
+    void SetDoorsStatus(std::initializer_list<eDoors> doors, eDoorStatus status);
 private: 
     // Wrapper functions
 

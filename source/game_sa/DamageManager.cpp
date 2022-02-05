@@ -390,6 +390,18 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
     return false;
 }
 
+void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
+    for (auto&& wheel : { CARWHEEL_FRONT_LEFT, CARWHEEL_REAR_LEFT, CARWHEEL_FRONT_RIGHT, CARWHEEL_REAR_RIGHT }) {
+        SetWheelStatus(wheel, state);
+    }
+}
+
+void CDamageManager::SetDoorsStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
+    for (auto&& door : doors) {
+        SetDoorStatus(door, status);
+    }
+}
+
 // 0x6C2230
 eDoorStatus CDamageManager::GetDoorStatus(eDoors nDoorIdx) {
     switch (nDoorIdx) {

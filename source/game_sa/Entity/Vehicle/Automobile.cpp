@@ -79,6 +79,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FixTyre, 0x6A3580);
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
     RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
+    RH_ScopedInstall(Fix_Reversed, 0x6A3440);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -1590,7 +1591,34 @@ void CAutomobile::SetupSuspensionLines()
 // 0x6A3440
 void CAutomobile::Fix()
 {
-    plugin::CallMethod<0x6A3440, CAutomobile*>(this);
+    m_damageManager.ResetDamageStatus();
+
+    // Reset actual door's status
+    if (m_pHandlingData->m_bWheelFNarrow2) {
+        m_damageManager.SetDoorsStatus({ DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }, eDoorStatus::DAMSTATE_NOTPRESENT);
+    }
+
+    vehicleFlags.bIsDamaged = false;
+
+    // Hide all DAM state atomics
+    RpClumpForAllAtomics(m_pRwClump, CVehicleModelInfo::HideAllComponentsAtomicCB, (void*)ATOMIC_IS_DAM_STATE);
+
+    // Reset rotation of some nodes
+    for (auto i = (size_t)CAR_DOOR_RF; i < (size_t)CAR_NUM_NODES; i++) {
+        if (auto frame = m_aCarNodes[i]) {
+            CMatrix mat{ RwFrameGetMatrix(frame), false };
+            mat.SetTranslate(mat.GetPosition());
+            mat.UpdateRW();
+        }
+    }
+
+    // Set all wheels
+    m_damageManager.SetAllWheelsState(eCarWheelStatus::WHEEL_STATUS_OK);
+
+    // Reset all bouncing panels
+    for (auto&& panel : m_panels) {
+        panel.ResetPanel();
+    }
 }
 
 // 0x6B3E90
