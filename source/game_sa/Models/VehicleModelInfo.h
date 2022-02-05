@@ -288,7 +288,7 @@ public:
     // set component flags
     void SetVehicleComponentFlags(RwFrame* component, uint32 flags);
     // get wheel position. Wheel is wheel id [0-3]. Local - get local offset (if false it will get world position)
-    void GetWheelPosn(int32 wheel, CVector& outVec, bool local);
+    void GetWheelPosn(int32 wheel, CVector& outVec, bool local) const;
     // get component local offset. Component is a frame hierarchy id. Returns true if component present
     bool GetOriginalCompPosition(CVector& outVec, int32 component);
     // get vehicle extra with rules. Returns extra id.
