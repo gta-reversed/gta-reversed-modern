@@ -23,15 +23,14 @@ public:
     static void InjectHooks();
     static void Tests();
 
-    static void Tests();
-
     // dummy function
+    static void Init();
     static void Update();
     static void SortOutCollisionAfterLoad();
     static bool TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2);
     static bool TestSphereBox(CSphere const& sphere, CBox const& box);
     static bool ProcessSphereBox(CColSphere const & sph, CColBox const& box, CColPoint & point, float & mindistsq);
-    static bool PointInTriangle(CVector const& point, CVector const* triPoints);
+    static bool __stdcall PointInTriangle(CVector const& point, CVector const* triPoints);
     static float DistToLineSqr(CVector const& lineStart, CVector const& lineEnd, CVector const& point);
     static float DistToMathematicalLine(CVector const* lineStart, CVector const* lineEnd, CVector const* point);
     static float DistToMathematicalLine2D(float lineStartX, float lineStartY, float lineEndX, float lineEndY, float pointX, float pointY);

@@ -17,9 +17,17 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 
 void CCollision::InjectHooks()
 {
+    // Must be done be4 hooks are injected
+#ifdef _DEBUG
+    for (auto i = 0; i < 20; i++) {
+        Tests();
+    }
+#endif
+
     RH_ScopedClass(CCollision);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Init, 0x416260);
     RH_ScopedInstall(Update, 0x411E20);
     RH_ScopedInstall(SortOutCollisionAfterLoad, 0x411E30);
     RH_ScopedInstall(TestSphereSphere, 0x411E70);
@@ -80,18 +88,20 @@ void CCollision::InjectHooks()
 
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void(*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void(*)(CCollisionData*));
-#ifdef _DEBUG
-    Tests();
-#endif
 }
 
 void CCollision::Tests() {
     const auto seed = time(nullptr);
-    srand(seed);
+    srand(seed + rand());
     std::cout << "CCollision::Tests seed: " << seed << std::endl;
 
-    const auto VectorEq = [](const CVector& lhs, const CVector& rhs) {
-        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z;
+    const auto VectorEq = [](const CVector& lhs, const CVector& rhs, float epsilon = 0.01f) {
+        for (auto i = 0u; i < 3u; i++) {
+            if (approxEqual(lhs[i], rhs[i], epsilon)) {
+                return false;
+            }
+        }
+        return true;
     };
 
     const auto ColPointEq = [&](const CColPoint& lhs, const CColPoint& rhs) {
@@ -193,16 +203,16 @@ void CCollision::Tests() {
     // PointInTriangle
     {
         const CVector tri[3]{ RandomVector(), RandomVector(), RandomVector() };
-        const auto Org = plugin::CallAndReturn<bool, 0x412700, CVector const&, CVector const*>;
+        const auto Org = (bool(__stdcall*)(CVector const&, CVector const*))0x412700;
         Test("PointInTriangle", Org, PointInTriangle, std::equal_to{}, RandomVector(), tri);
     }
 
     // DistToLineSqr
     {
-        const auto Org = plugin::CallAndReturn<float, 0x412850, CVector const*, CVector const*, CVector const*>;
+        const auto Org = plugin::CallAndReturn<double, 0x412850, CVector const*, CVector const*, CVector const*>;
         const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
         const auto CmpEq = [](float org, float rev) {
-            return approxEqual(org, rev, 0.001f);
+            return approxEqual(org, rev, 0.02f);
         };
         Test("DistToLineSqr", Org, DistToLineSqr, CmpEq, &ls, &le, &p);
     }
@@ -212,7 +222,7 @@ void CCollision::Tests() {
         const auto Org = plugin::CallAndReturn<float, 0x412A30, float, float, float, float, float, float>;
         const auto ls{ RandomVector() }, le{ RandomVector() }, p{ RandomVector() };
         const auto CmpEq = [](float org, float rev) {
-            return approxEqual(org, rev, 0.001f);
+            return approxEqual(org, rev, 0.02f);
         };
         Test("DistToLineSqr", Org, DistToMathematicalLine2D, CmpEq, ls.x, ls.y, le.x, le.y, p.x, p.y);
     }
@@ -255,7 +265,7 @@ void CCollision::Tests() {
     }
 
     // ProcessLineBox
-    {
+    /*{
         const auto Org = [&](auto line, auto box) {
             CColPoint cp{};
             float depth{ 100.f };
@@ -276,8 +286,17 @@ void CCollision::Tests() {
             return org_s == rev_s && approxEqual(rev_d, org_d, 0.001f) && ColPointEq(org_cp, rev_cp);
         };
 
-        Test("ProcessLineSphere", Org, Rev, CmpEq, RandomLine(), RandomBox());
-    }
+        Test("ProcessLineBox", Org, Rev, CmpEq, RandomLine(), RandomBox());
+    }*/
+}
+
+/*!
+* @address 0x416260
+*/
+void CCollision::Init() {
+    ms_colModelCache.Init(50);
+    ms_collisionInMemory = 0;
+    CColStore::Initialise();
 }
 
 // 0x411E20
@@ -298,7 +317,7 @@ bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& s
 
 // 0x411EC0
 void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint& colPoint) {
-    const auto pointToCenter = box.GetCenter() - point;
+    const auto pointToCenter = point - box.GetCenter();
 
     // Calculate point's component-wise distance to each corner on each axis
     #define DoAxis(a) pointToCenter.a <= 0 ? point.a - box.m_vecMin.a : box.m_vecMax.a - point.a
@@ -314,18 +333,17 @@ void CalculateColPointInsideBox(CBox const& box, CVector const& point, CColPoint
 
     if (pointToClosest.x >= pointToClosest.y || pointToClosest.x >= pointToClosest.z) {
         if (pointToClosest.y >= pointToClosest.x || pointToClosest.y >= pointToClosest.z) {
-            colPoint.m_vecNormal.z = CalcNormal(pointToClosest.z);
+            colPoint.m_vecNormal.z = CalcNormal(pointToCenter.z);
             colPoint.m_fDepth = pointToClosest.z;
         } else {
-            colPoint.m_vecNormal.y = CalcNormal(pointToClosest.y);
+            colPoint.m_vecNormal.y = CalcNormal(pointToCenter.y);
             colPoint.m_fDepth = pointToClosest.y;
         }
     } else {
-        colPoint.m_vecNormal.x = CalcNormal(pointToClosest.x);
+        colPoint.m_vecNormal.x = CalcNormal(pointToCenter.x);
         colPoint.m_fDepth = pointToClosest.x;
     }
 }
-
 
 /*!
 * @address 0x4120C0
@@ -678,7 +696,7 @@ bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& spher
     }
 
     colPoint.m_vecPoint = line.m_vecStart + l * t;
-    colPoint.m_vecNormal = Normalized(l - sph); // A little different from the original, but same effect
+    colPoint.m_vecNormal = Normalized(colPoint.m_vecPoint - sphere.m_vecCenter); // A little different from the original, but same effect
 
     colPoint.m_nSurfaceTypeB = sphere.m_nMaterial;
     colPoint.m_nLightingB = sphere.m_nLighting;

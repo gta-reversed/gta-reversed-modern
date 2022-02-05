@@ -15,14 +15,6 @@ public:
 
     CSphere() = default;
 
-    CSphere(CVector center, float radius) :
-        m_vecCenter(center),
-        m_fRadius(radius)
-    {
-    }
-
-
-    CSphere() {};
     CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius) {};
     CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius) {};
 
