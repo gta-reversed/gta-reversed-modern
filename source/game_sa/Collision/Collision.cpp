@@ -932,7 +932,10 @@ bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPo
     return true;
 }
 
-// 0x4138D0
+/*!
+* @address 0x4138D0
+* @returns If there was an intersection - TODO: What if lines are colinear?
+*/
 bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, float line1EndX, float line1EndY, float line2StartX, float line2StartY, float line2EndX, float line2EndY) {
     return ((line2StartX - line1StartX + line2EndX) * line1EndY - (line2StartY - line1StartY + line2EndY) * line1EndX)
         * ((line2StartX - line1StartX) * line1EndY - (line2StartY - line1StartY) * line1EndX) <= 0.0
@@ -941,6 +944,11 @@ bool CCollision::Test2DLineAgainst2DLine(float line1StartX, float line1StartY, f
         * ((line1StartX - line2StartX) * line2EndY - (line1StartY - line2StartY) * line2EndX) <= 0.0;
 }
 
+/*
+* @address 0x413960
+* @brief Used in the original ProcessColModels code. SA doesn't uses disks, so I won't bother with this function :D
+* @returns I dont know
+*/
 // 0x413960
 bool ProcessDiscCollision(CColPoint& colPoint1, const CMatrix& mat, const CColDisk& disk, CColPoint& colPoint2, bool& arg4, float& arg5, CColPoint& colPoint3) {
     return plugin::CallAndReturn<bool, 0x413960, CColPoint&, const CMatrix&, const CColDisk&, CColPoint&, bool&, float&, CColPoint&>(colPoint1, mat, disk, colPoint2, arg4, arg5, colPoint3);
