@@ -91,6 +91,17 @@ CPhysical::CPhysical() : CEntity()
     CPlaceable::AllocateStaticMatrix();
     GetMatrix().SetUnity();
 
+    m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecTurnSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecFrictionMoveSpeed.Set(0.0f, 0.0f, 0.0f);
+    m_vecForce.Set(0.0f, 0.0f, 0.0f);
+    m_vecTorque.Set(0.0f, 0.0f, 0.0f);
+    m_vecLastCollisionImpactVelocity.Set(0.0f, 0.0f, 0.0f);
+    m_vecLastCollisionPosn.Set(0.0f, 0.0f, 0.0f);
+    m_vecCentreOfMass.Set(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation.imag.Set(0.0f, 0.0f, 0.0f);
+    m_qAttachedEntityRotation.real = 0.0f;
+
     m_fMass = 1.0F;
     m_fTurnMass = 1.0F;
     m_fVelocityFrequency = 1.0F;
