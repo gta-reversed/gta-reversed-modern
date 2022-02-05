@@ -536,20 +536,15 @@ bool CCollision::ProcessSphereBox(CColSphere const& sph, CColBox const& box, CCo
 /*!
 * @address 0x412700
 */
-bool CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
+bool __stdcall CCollision::PointInTriangle(CVector const& point, CVector const* triPoints) {
     // Make everything relative to 0th vertex of the triangle
     const auto v1 = triPoints[1] - triPoints[0];
     const auto v2 = triPoints[2] - triPoints[0];
-    const auto p  = point - triPoints[0];
+    const auto p  = point        - triPoints[0];
 
     // NOTE:
-    // Neither v1 or v2 are normalized, which means the
-    // dot products aren't actual dot products (in math terms)
-    // but the dot product multiplied by the squared magnitude of either vectors.
-    // In order to balance this out in comparasion operations and etc..
-    // they just multiply values by the sq magnitude of v1/v2
-    // they probably wanted to avoid doing `sqrt` and divisions
-    // which is smart.
+    // Because no vectors are normalized all dot products are scaled.
+    // In order to compensate for this they multiply values by either vector's squared magnitude.
 
     const auto v1_dot_v2 = DotProduct(v1, v2); 
 
