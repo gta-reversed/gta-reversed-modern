@@ -17,6 +17,7 @@
 #include "eCarNodes.h"
 
 enum eWheelStatus;
+class CVehicleModelInfo;
 
 using eWheels = eCarWheel; // todo: maybe wrong, "eWheels" is original enum.
 
@@ -39,17 +40,17 @@ public:
     CBouncingPanel m_panels[3];
     CDoor          m_swingingChassis;
     CColPoint      m_wheelColPoint[4];
-    float          m_fWheelsSuspensionCompression[4]; // [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
-    float          m_fWheelsSuspensionCompressionPrev[4];
+    float          m_fWheelsSuspensionCompression[4];     // 0x7D4 - [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed
+    float          m_fWheelsSuspensionCompressionPrev[4]; // 0x7E4
     float          m_aWheelTimer[4];
     float          field_804;
     float          m_intertiaValue1;
     float          m_intertiaValue2;
-    int32          m_wheelSkidmarkType[4];
-    bool           m_wheelSkidmarkBloodState[4];
-    bool           m_wheelSkidmarkMuddy[4];
-    float          m_wheelRotation[4];
-    float          m_wheelPosition[4];
+    int32          m_wheelSkidmarkType[4];      // 0x810
+    bool           m_wheelSkidmarkBloodState[4];// 0x820
+    bool           m_wheelSkidmarkMuddy[4];     // 0x824
+    float          m_wheelRotation[4];          // 0x828
+    float          m_wheelPosition[4];          // 0x838
     union {
         float m_wheelSpeed[4];
         struct {
@@ -59,7 +60,7 @@ public:
             float m_fHeliWheelSpeed4;
         };
     };
-    float m_wheelRotationUnused[4]; // Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+    float m_wheelRotationUnused[4];             // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
     union {
         struct {
             uint8 bTaxiLightOn : 1;
@@ -73,14 +74,14 @@ public:
         } npcFlags;
         uint8 ucNPCVehicleFlags;
     };
-    char        field_869;
-    int16       m_doingBurnout;
-    uint16      m_wMiscComponentAngle;
-    uint16      m_wMiscComponentAnglePrev;
-    uint32      m_dwBusDoorTimerEnd;
-    int32       m_dwBusDoorTimerStart;
-    float       m_aSuspensionSpringLength[4];
-    float       m_aSuspensionLineLength[4];
+    char        field_869;                      // 0x869
+    int16       m_doingBurnout;                 // 0x86A
+    uint16      m_wMiscComponentAngle;          // 0x86C
+    uint16      m_wMiscComponentAnglePrev;      // 0x86E
+    uint32      m_dwBusDoorTimerEnd;            // 0x870
+    int32       m_dwBusDoorTimerStart;          // 0x874
+    float       m_aSuspensionSpringLength[4];   // 0x878
+    float       m_aSuspensionLineLength[4];     // 0x888
     float       m_fFrontHeightAboveRoad;
     float       m_fRearHeightAboveRoad;
     float       m_fCarTraction;
