@@ -9,6 +9,7 @@
 #include "Renderer.h"
 
 #include "Occlusion.h"
+#include "PostEffects.h"
 
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
