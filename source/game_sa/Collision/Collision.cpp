@@ -962,7 +962,16 @@ bool CCollision::TestLineTriangle(const CColLine& line, const CompressedVector* 
     return plugin::CallAndReturn<bool, 0x413AC0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&>(line, verts, tri, triPlane);
 }
 
-// 0x4140F0
+/*!
+* @address 0x4140F0
+* @Processes \a line \a tri collision.
+*
+* @param[out]    colPoint         Collision point
+* @param[in,out] maxTouchDistance Distance from line origin to intersection point
+* @pram[out]     collPoly         If given (can be null) stored the uncompressed vertices of the triangle and set's it's `actual` field to `true`
+*
+* @returns If there was a collision or not. If there was a collision, but calculated touch distance is bigger than `maxTouchDistance` it returns false regardless.
+*/
 bool CCollision::ProcessLineTriangle(const CColLine& line, const CompressedVector* verts, const CColTriangle& tri, const CColTrianglePlane& triPlane, CColPoint& colPoint, float& maxTouchDistance, CStoredCollPoly* collPoly) {
     return plugin::CallAndReturn<bool, 0x4140F0, const CColLine&, const CompressedVector*, const CColTriangle&, const CColTrianglePlane&, CColPoint&, float&, CStoredCollPoly*>(line, verts, tri, triPlane, colPoint, maxTouchDistance, collPoly);
 }
