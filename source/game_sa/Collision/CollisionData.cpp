@@ -18,6 +18,11 @@ void CCollisionData::InjectHooks()
     RH_ScopedInstall(GetLinkPtr, 0x40F6E0);
 }
 
+void CCollisionData::AllocateLines(uint32 num) {
+    m_nNumLines = num;
+    m_pLines = (CColLine*)CMemoryMgr::Malloc(sizeof(CColLine) * num);
+}
+
 // 0x40F030
 CCollisionData::CCollisionData()
 {

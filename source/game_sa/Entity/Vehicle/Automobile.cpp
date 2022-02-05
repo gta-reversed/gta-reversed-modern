@@ -8,6 +8,7 @@
 
 #include "Automobile.h"
 
+#include "ModelIndices.h"
 #include "WaterCannons.h"
 #include "Buoyancy.h"
 #include "Skidmarks.h"
@@ -79,7 +80,9 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FixTyre, 0x6A3580);
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
     RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
+
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
+    RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -1585,7 +1588,109 @@ bool CAutomobile::IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1)
 // 0x6A65D0
 void CAutomobile::SetupSuspensionLines()
 {
-    plugin::CallMethod<0x6A65D0, CAutomobile*>(this);
+    const auto& mi = *static_cast<CVehicleModelInfo*>(GetModelInfo());
+          auto& cm = *mi.GetColModel();
+          auto& cd = *cm.m_pColData;
+
+    // 0x6A65FB
+    const bool hadToAllocateLines = !cd.m_nNumLines;
+    if (hadToAllocateLines) {
+        cd.AllocateLines(ModelIndices::IsRhino(m_nModelIndex) ? 12 : 4); // Rhino has 12 lines
+    }
+
+    // 0x6A6754
+    // Calculate col line positions for wheels, set wheel pos, spring and line lengths
+    const auto& handling = *m_pHandlingData;
+    for (auto i = 0u; i < 4u; i++) {
+        auto& colLine = cd.m_pLines[i]; // Col line for this wheel
+
+        CVector wheelPos;
+        mi.GetWheelPosn(i, wheelPos, false);
+
+        if (IsSubQuad()) {
+            if (wheelPos.x <= 0.f)
+                wheelPos.x -= 0.15f;
+            else
+                wheelPos.x += 0.15f;
+        }
+
+        colLine.m_vecStart = CVector{ wheelPos.x, wheelPos.y, wheelPos.z + handling.m_fSuspensionUpperLimit };
+        colLine.m_vecEnd   = CVector{ wheelPos.x, wheelPos.y, wheelPos.z + handling.m_fSuspensionLowerLimit - mi.GetSizeOfWheel((eCarWheel)i) / 2.f };
+
+        m_wheelPosition[i]           = wheelPos.z; // Originally set earlier in the loop, but should be fine.
+        m_aSuspensionSpringLength[i] = handling.m_fSuspensionUpperLimit - handling.m_fSuspensionLowerLimit;
+        m_aSuspensionLineLength[i]   = colLine.m_vecStart.z - colLine.m_vecEnd.z;
+    }
+
+    /* NOP code - 0x6A6764
+    if (GetVehicleAppearance() != eVehicleAppearance::VEHICLE_APPEARANCE_PLANE) {
+        GetVehicleAppearance();
+    }*/
+
+    const auto CalculateHeightAboveRoad = [&](eCarWheel wheel) {
+        return (1.f - 1.f / (handling.m_fSuspensionForceLevel * 4.f)) * m_aSuspensionSpringLength[(size_t)wheel] + mi.GetSizeOfWheel(wheel) / 2.f - cd.m_pLines[(size_t)wheel].m_vecStart.z;
+    };
+
+    // 0x6A65D0
+    m_fFrontHeightAboveRoad = CalculateHeightAboveRoad(eCarWheel::CARWHEEL_FRONT_LEFT);
+    m_fRearHeightAboveRoad = CalculateHeightAboveRoad(eCarWheel::CARWHEEL_REAR_LEFT);
+
+    // 0x6A681A
+    // Adjust wheel's posiiton based on height above road
+    for (auto i = 0u; i < 4u; i++) {
+        m_wheelPosition[i] = mi.GetSizeOfWheel((eCarWheel)i) / 2.f - m_fFrontHeightAboveRoad; // Not sure why it uses front height for all wheels?
+    }
+
+    // 0x6A681C
+    // This was probably inlined? Not sure..
+    if (cd.m_pLines[0].m_vecEnd.z < cm.m_boundBox.m_vecMin.z) {
+        cd.m_pLines[0].m_vecEnd.z = cd.m_pLines[0].m_vecEnd.z; // Adjust bounding box
+
+        // Adjust bounding sphere radius - Originally outside this `if`, but that's pointless - This was most likely inlined.
+        cm.m_boundSphere.m_fRadius = std::max({ cm.m_boundSphere.m_fRadius, cm.m_boundBox.m_vecMin.Magnitude(), cm.m_boundBox.m_vecMax.Magnitude() });
+    }
+
+    // 0x6A68C1
+    // Adjust sphere sizes for rcbandit
+    if (ModelIndices::IsRCBandit(m_nModelIndex)) {
+        cm.m_boundSphere.m_fRadius = 2.f;
+
+        for (auto&& sph : cd.GetSpheres()) {
+            sph.m_fRadius = 0.3f;
+        }
+    }
+
+    // 0x6A68FD
+    if (handling.m_bForceGroundClearance && hadToAllocateLines) {
+        const auto sphBottomMinZ = (ModelIndices::IsKart(m_nModelIndex) ? 0.12f : 0.25f) - m_fFrontHeightAboveRoad;
+        for (auto&& sph : cd.GetSpheres()) {
+            const auto sphBottomZ = sph.m_vecCenter.z - sph.m_fRadius;
+            if (sphBottomZ < sphBottomMinZ) {
+                if (sph.m_fRadius > 0.4f) {
+                    sph.m_fRadius = std::max(0.4f, sphBottomZ);
+                    sph.m_vecCenter.z = sphBottomZ + sph.m_fRadius;
+                }
+            }
+        }
+    }
+
+    // 0x6A6995
+    // Rhino has 12 suspension lines, which are calculated based on the 4 main wheel's line's position
+    if (ModelIndices::IsRhino(m_nModelIndex)) {
+        size_t lineIndex{ 4u }; // Skip first 4 lines as those are already in use for the real wheels
+
+        for (auto i = 0u; i < 4u; i += 2u) { // Do left, and right side - Wheels 0, 1 are on the left side, while 2, 3 are on the right
+            for (auto j = 0u; j < 4; j++, lineIndex++) { // Add 4 extra lines on each side
+                // Calculate positions of this wheel's line by 
+                // lerping between the 2 wheel's lines on this side
+
+                const auto wheelRelativePos = (float)j * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
+                auto& line = cd.m_pLines[lineIndex];
+                line.m_vecStart = lerp(cd.m_pLines[i].m_vecStart, cd.m_pLines[i + 1].m_vecStart, wheelRelativePos);
+                line.m_vecEnd  = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
+            }
+        }
+    }
 }
 
 // 0x6A3440

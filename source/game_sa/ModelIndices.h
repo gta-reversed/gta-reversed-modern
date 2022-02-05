@@ -175,6 +175,7 @@ namespace ModelIndices {
     inline bool IsDumper(int32 modelId) { return modelId == MODEL_DUMPER; }
     inline bool IsPacker(int32 modelId) { return modelId == MODEL_PACKER; }
     inline bool IsDozer(int32 modelId) { return modelId == MODEL_DOZER; }
+    inline bool IsKart(int32 modelId) { return modelId == MODEL_KART; }
     inline bool IsForklift(int32 modelId) { return modelId == MODEL_FORKLIFT; }
     inline bool IsAndromada(int32 modelId) { return modelId == MODEL_ANDROM; }
     inline bool IsFireTruckLadder(int32 modelId) { return modelId == MODEL_FIRELA; }
