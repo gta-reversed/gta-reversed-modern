@@ -16,6 +16,7 @@
 
 #include "eVehicleClass.h"
 #include "eVehicleType.h"
+#include "eCarWheel.h"
 
 class CAnimBlock;
 
