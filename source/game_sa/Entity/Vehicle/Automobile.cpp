@@ -83,6 +83,7 @@ void CAutomobile::InjectHooks()
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
+    RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -1655,9 +1656,9 @@ void CAutomobile::SetupSuspensionLines()
     if (ModelIndices::IsRCBandit(m_nModelIndex)) {
         cm.m_boundSphere.m_fRadius = 2.f;
 
-        for (auto&& sph : cd.GetSpheres()) {
-            sph.m_fRadius = 0.3f;
-        }
+for (auto&& sph : cd.GetSpheres()) {
+    sph.m_fRadius = 0.3f;
+}
     }
 
     // 0x6A68FD
@@ -1687,7 +1688,7 @@ void CAutomobile::SetupSuspensionLines()
                 const auto wheelRelativePos = (float)j * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
                 auto& line = cd.m_pLines[lineIndex];
                 line.m_vecStart = lerp(cd.m_pLines[i].m_vecStart, cd.m_pLines[i + 1].m_vecStart, wheelRelativePos);
-                line.m_vecEnd  = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
+                line.m_vecEnd = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
             }
         }
     }
@@ -1746,7 +1747,69 @@ void CAutomobile::SetupDamageAfterLoad()
 // 0x6A47F0
 void CAutomobile::DoBurstAndSoftGroundRatios()
 {
-    plugin::CallMethod<0x6A47F0, CAutomobile*>(this);
+    const auto& mi = *static_cast<CVehicleModelInfo*>(GetModelInfo());
+    const auto speedToFwdRatio = DotProduct(m_vecMoveSpeed, m_matrix->GetForward()); // Remember: Dot product is 0 when the two vectors are perpendicular
+
+    for (auto i = 0u; i < 4u; i++) {
+        const auto& wheelCP = m_wheelColPoint[i];
+
+        const auto GetRemainingSuspensionCompression = [&, i] {
+            return (m_aSuspensionLineLength[i] - m_aSuspensionSpringLength[i]) / m_aSuspensionLineLength[i];
+        };
+
+        switch (m_damageManager.GetWheelStatus((eCarWheel)i)) {
+        case eCarWheelStatus::WHEEL_STATUS_MISSING:
+            m_fWheelsSuspensionCompression[i] = 1.f;
+            break;
+        case eCarWheelStatus::WHEEL_STATUS_BURST: {
+            // The more opposite the speed is to the forward vector the bigger chance
+            // The highest chance is when the speed is opposite to forward (ie.: It's backwards)
+            if ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * (speedToFwdRatio * 40.f + 98.f) < 100.f) {
+                m_fWheelsSuspensionCompression[i] =
+                    std::min(1.f, m_fWheelsSuspensionCompression[i] + GetRemainingSuspensionCompression() / 4.f);
+            }
+            break;
+        }
+        default: {
+            if (m_fWheelsSuspensionCompression[i] >= 1.f) {
+                break;
+            }
+
+            if (   g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != eAdhesionGroup::ADHESION_GROUP_SAND
+                || ModelIndices::IsRhino(m_nModelIndex)
+            ) {
+                if (wheelCP.m_nSurfaceTypeB == eSurfaceType::SURFACE_RAILTRACK) {
+                    float wheelSizeFactor = 1.5f / (mi.GetSizeOfWheel((eCarWheel)i) / 2.f);
+                    if (wheelSizeFactor > 0.3f) { // Basically if wheelSize > 0.9
+                        wheelSizeFactor *= speedToFwdRatio / 0.3f;
+                    }
+
+                    const auto wheelRotFactor      = m_wheelRotation[i] / wheelSizeFactor; // Some kind of contact surface factor perhaps?
+                    const auto wheelRotFactorFract = wheelRotFactor - std::floor(wheelRotFactor);
+
+                    const auto timeSpeedRotFactor      = (CTimer::GetTimeStep() * m_wheelSpeed[i] + m_wheelRotation[i]) / wheelSizeFactor;
+                    const auto timeSpeedRotFactorFract = timeSpeedRotFactor - std::floor(timeSpeedRotFactor);
+
+                    if (   m_wheelSpeed[i] > 0.f && timeSpeedRotFactorFract < wheelRotFactorFract
+                        || m_wheelSpeed[i] < 0.f && timeSpeedRotFactorFract > wheelRotFactorFract
+                    ) {
+                        m_fWheelsSuspensionCompression[i] =
+                            std::max(0.2f, m_fWheelsSuspensionCompression[i] - GetRemainingSuspensionCompression() * 0.3f);
+                    }
+                }
+            } else {
+                const auto offroadFactor = handlingFlags.bOffroadAbility2 ? 0.15f :
+                                           handlingFlags.bOffroadAbility ? 0.2f : 0.3f;
+
+                const auto adhesionFactor = std::max(0.4f, 1.f - speedToFwdRatio / 0.3f * 0.7f - CWeather::WetRoads * 0.7f);
+                
+                m_fWheelsSuspensionCompression[i] =
+                    std::min(1.f, m_fWheelsSuspensionCompression[i] + GetRemainingSuspensionCompression() * adhesionFactor);
+            }
+            break;
+        }
+        }
+    }
 }
 
 // 0x6A3770

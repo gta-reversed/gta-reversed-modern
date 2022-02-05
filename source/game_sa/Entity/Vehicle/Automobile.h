@@ -16,7 +16,6 @@
 #include "eCarWheel.h"
 #include "eCarNodes.h"
 
-enum eWheelStatus;
 class CVehicleModelInfo;
 
 using eWheels = eCarWheel; // todo: maybe wrong, "eWheels" is original enum.
@@ -51,8 +50,8 @@ public:
     bool           m_wheelSkidmarkMuddy[4];     // 0x824
     float          m_wheelRotation[4];          // 0x828
     float          m_wheelPosition[4];          // 0x838
-    union {
-        float m_wheelSpeed[4];
+    union {                                     // 0x848
+        float m_wheelSpeed[4];                  
         struct {
             float m_fHeliWheelSpeed1;
             float m_fHeliRotorSpeed;
