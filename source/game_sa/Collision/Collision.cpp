@@ -807,6 +807,15 @@ bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
 }
 
 // 0x413100
+/*!
+* @address 0x413100
+* @brief Process \a line and \a box collision.
+*
+* @param[out]    colPoint         Collision point
+* @param[in,out] maxTouchDistance Collision point depth inside box - If calculated value is higher than this value the function will return false, and no colpoint will be set.
+*
+* @returns If there was a collision or not. If there was a collision, but calculated depth is bigger than `maxTouchDistance` it returns false regardless.
+*/
 bool CCollision::ProcessLineBox(CColLine const& line, CColBox const& box, CColPoint& colPoint, float& maxTouchDistance) {
     float mint, t, x, y, z;
     CVector normal;
