@@ -384,7 +384,7 @@ void CPed::RemoveGogglesModel()
 
 int32 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
+    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nSlot;
 }
 
 // 0x5DF220
@@ -785,28 +785,28 @@ eWeaponSkill CPed::GetWeaponSkill()
 eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
-        return eWeaponSkill::WEAPSKILL_STD;
+        return eWeaponSkill::STD;
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
         int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
-        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
-        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
+        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::PRO);
+        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_PRO;
+            return eWeaponSkill::PRO;
 
-        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD);
-        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
+        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD);
+        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_POOR;
+            return eWeaponSkill::POOR;
 
-        return eWeaponSkill::WEAPSKILL_STD;
+        return eWeaponSkill::STD;
     }
 
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
 
-    return eWeaponSkill::WEAPSKILL_COP;
+    return eWeaponSkill::COP;
 }
 
 // 0x5E3C10
@@ -977,7 +977,7 @@ void CPed::ClearWeapons()
     {
         m_aWeapon.Shutdown();
     }
-    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::WEAPSKILL_STD);
+    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::STD);
     SetCurrentWeapon(getWeaponInfo->m_nSlot);
 }
 
@@ -1005,7 +1005,7 @@ void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
     {
-        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::WEAPSKILL_STD);
+        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::STD);
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
@@ -1137,17 +1137,17 @@ void CPed::GiveWeaponWhenJoiningGang()
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
         if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
-            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::WEAPSKILL_STD)->m_nSlot);
+            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::STD)->m_nSlot);
         }
         else {
             CWeaponInfo* pWeaponInfo = nullptr;
             if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::STD);
             }
             else {
                 CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::STD);
             }
             CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }
