@@ -16,10 +16,6 @@ void CQuaternion::InjectHooks() {
     RH_ScopedOverloadedInstall(Get, "", 0x59C080, void(CQuaternion::*)(RwMatrix*));
 }
 
-CQuaternion::CQuaternion() {
-    real = 0.0F;
-}
-
 // Quat to matrix
 void CQuaternion::Get(RwMatrix* out) {
     auto vecImag2 = imag + imag;

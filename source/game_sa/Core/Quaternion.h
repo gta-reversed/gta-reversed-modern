@@ -17,7 +17,7 @@ public:
 public:
     static void InjectHooks();
 
-    CQuaternion();
+    CQuaternion() { real = 0.0f; };
 
     // Quat to matrix
     void Get(RwMatrix* out);
