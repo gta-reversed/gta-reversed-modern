@@ -705,7 +705,7 @@ bool CCollision::TestLineBox_DW(CColLine const& line, CBox const& box) {
         return bb.IsPointWithin(point);
     };
 
-    // Quick early exit if any of the line vertices are in the box
+    // Quick early exit if any of the line are in the box
     if (IsInBox(line.m_vecStart) || IsInBox(line.m_vecEnd))
         return true;
 
@@ -788,23 +788,22 @@ bool CCollision::TestLineBox(CColLine const& line, CBox const& box) {
     return TestLineBox_DW(line, box);
 }
 
-// 0x413080
+/*!
+* @address 0x413080
+* @brief Test vertical \a line against \a box
+*/
 bool CCollision::TestVerticalLineBox(CColLine const& line, CBox const& box) {
-    if (line.m_vecStart.x <= box.m_vecMin.x) return false;
-    if (line.m_vecStart.x >= box.m_vecMax.x) return false;
-
-    if (line.m_vecStart.y <= box.m_vecMin.y) return false;
-    if (line.m_vecStart.y >= box.m_vecMax.y) return false;
-
-    if (line.m_vecStart.z < line.m_vecEnd.z) {
-        if (line.m_vecStart.z > box.m_vecMax.z) return false;
-        if (line.m_vecEnd.z < box.m_vecMin.z) return false;
-    } else {
-        if (line.m_vecEnd.z > box.m_vecMax.z) return false;
-        if (line.m_vecStart.z < box.m_vecMin.z) return false;
+    for (auto i = 0u; i < 2u; i++) { // Deal with x, y axies
+        if (   line.m_vecStart[i] <= box.m_vecMin[i]
+            || line.m_vecStart[i] >= box.m_vecMax[i]
+        ) {
+            return false;
+        }
     }
 
-    return true;
+    // Line might go from top to bottom, or from bottom to top, so we have to account for both cases
+    const auto [minz, maxz] = std::minmax(line.m_vecStart.z, line.m_vecEnd.z);
+    return minz <= box.m_vecMax.z && maxz >= box.m_vecMin.z;
 }
 
 // 0x413100
