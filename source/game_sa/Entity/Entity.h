@@ -23,6 +23,7 @@ class CAutomobile;
 class CDummy;
 class CBuilding;
 class CPhysical;
+class CBaseModelInfo;
 
 class CEntity : public CPlaceable {
 protected:
@@ -176,6 +177,9 @@ public:
     void UpdateRW();
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
+
+    // NOTSA
+    CBaseModelInfo* GetModelInfo() const;
 
 public:
     // Rw callbacks
