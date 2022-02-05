@@ -644,33 +644,46 @@ float CCollision::DistToMathematicalLine2D(float lineStartX, float lineStartY, f
     return distSq > 0.f ? std::sqrt(distSq) : 0.f;
 }
 
-// 0x412A80
+/*!
+* @address 0x412A80
+* @brief TODO
+*/
 float CCollision::DistAlongLine2D(float lineX, float lineY, float lineDirX, float lineDirY, float pointX, float pointY) {
     return (pointX - lineX) * lineDirX + (pointY - lineY) * lineDirY;
 }
 
-// 0x412AA0
+/*!
+* @address 0x412AA0
+* @brief Process line sphere intersection - Doesn't deal well with cases where line starts/ends inside the sphere.
+*
+* @param[in,out] depth `t` parameter - relative distance on line from it's origin (`line.start`)
+*/
 bool CCollision::ProcessLineSphere(CColLine const& line, CColSphere const& sphere, CColPoint& colPoint, float& depth) {
     const auto l      = line.m_vecEnd - line.m_vecStart;
     const auto lmagsq = l.SquaredMagnitude();
-    const auto s      = sphere.m_vecCenter - line.m_vecStart;
+    const auto sph    = sphere.m_vecCenter - line.m_vecStart;
 
-    const auto lsdot  = DotProduct(l, s); // NOTE: Neither vectors are normalized
+    // Scaled by |l|
+    const auto projLineMagScaled = DotProduct(l, sph);
 
-    // Distance of the projected center of the sphere from lineStart.
-    // Because of the way we multiply it all out it becomes a distance on the 4th power
-    // Must multiply by `lmagsq` to balance out both sides
-    const auto distQc = std::pow(lsdot, 2) - (s.SquaredMagnitude() - std::pow(sphere.m_fRadius, 2)) * lmagsq;
+    // Tanget of line to sphere centre
+    const auto tanDistSq = sph.SquaredMagnitude() - (sphere.m_fRadius * sphere.m_fRadius);
 
-    if (distQc < 0.f)
+    // `projLineMagScaled` is scaled by |l|, and the only way around it without using sqrt is to make both sides scaled by lmagsq
+    // Scaled by |l|^2 (`lmagsq`)
+    const auto distOnLineSqScaled = (projLineMagScaled * projLineMagScaled) - tanDistSq * lmagsq;
+
+    if (distOnLineSqScaled < 0.f) { // Line doesn't intersect sphere
         return false;
+    }
 
-    const auto t = (lsdot - std::sqrt(distQc)) / lmagsq; // Interpolation on the line
-    if (t < 0.f || t > 1.f || t >= depth)
+    const auto t = (projLineMagScaled - std::sqrt(distOnLineSqScaled)) / lmagsq; // Interpolation on the line
+    if (t < 0.f || t > 1.f || t >= depth) {
         return false;
+    }
 
     colPoint.m_vecPoint = line.m_vecStart + l * t;
-    colPoint.m_vecNormal = Normalized(l - s); // A little different from the original, but same effect
+    colPoint.m_vecNormal = Normalized(l - sph); // A little different from the original, but same effect
 
     colPoint.m_nSurfaceTypeB = sphere.m_nMaterial;
     colPoint.m_nLightingB = sphere.m_nLighting;
