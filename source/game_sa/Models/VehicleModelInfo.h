@@ -434,6 +434,25 @@ public:
         strcpy_s(m_szGameName, name);
     }
     void SetHandlingId(const char* handlingName);
+
+    // These two should probably be moved to a better place..
+    bool IsFrontWheel(eCarWheel wheel) const {
+        switch (wheel) {
+        case eCarWheel::CARWHEEL_FRONT_LEFT:
+        case eCarWheel::CARWHEEL_FRONT_RIGHT:
+            return true;
+        }
+        return false;
+    }
+
+    bool IsRearWheel(eCarWheel door) const {
+        return !IsFrontWheel(door);
+    }
+
+    // Return size of give wheel. If it's a front wheel `m_fWheelSizeFront` is returned, otherwise `m_fWheelSizeRear`
+    float GetSizeOfWheel(eCarWheel wheel) const {
+        return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
+    }
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);
