@@ -93,7 +93,6 @@
 #include "game_sa\ModelIndices.h"
 #include "game_sa\PedGeometryAnalyser.h"
 #include "game_sa\Debug.h"
-#include "game_sa\PostEffects.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
 #include "game_sa\Glass.h"

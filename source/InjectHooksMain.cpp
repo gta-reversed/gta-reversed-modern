@@ -82,6 +82,7 @@
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
 #include "FallingGlassPane.h"
+#include "PostEffects.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -197,6 +198,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();
