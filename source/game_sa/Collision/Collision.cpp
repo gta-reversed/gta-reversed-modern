@@ -293,7 +293,7 @@ void CCollision::SortOutCollisionAfterLoad() {
 
 // 0x411E70
 bool CCollision::TestSphereSphere(CColSphere const& sphere1, CColSphere const& sphere2) {
-    return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= sphere1.m_fRadius + sphere2.m_fRadius;
+    return (sphere1.m_vecCenter - sphere2.m_vecCenter).SquaredMagnitude() <= std::pow(sphere1.m_fRadius + sphere2.m_fRadius, 2);
 }
 
 // 0x411EC0
