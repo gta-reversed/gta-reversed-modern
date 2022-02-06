@@ -63,7 +63,6 @@ public:
         uint8 bVisible : 1;
         uint8 nPropertyTextIndex : 3; // see enum ePickupPropertyText
     } m_nFlags;
-    char _pad1E[2];
 
 public:
     static void InjectHooks();
