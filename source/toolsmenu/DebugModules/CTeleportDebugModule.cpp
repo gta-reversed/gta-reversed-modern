@@ -88,8 +88,10 @@ void ProcessImGui() {
     // Teleport button
     if (SameLine(); Button("Teleport")) {
         // Not finding ground for Z doesn't make sense with the two. So do it anyways.
+        bool forceGround = false;
+
         if (GetIO().KeyAlt) { // Random position
-            findZGround = true;
+            forceGround = true;
             areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD;
             pos = CVector{
                CGeneral::GetRandomNumberInRange(-3072.0f, 3072.0f),
@@ -103,7 +105,7 @@ void ProcessImGui() {
             auto pMarker = &CRadar::ms_RadarTrace[LOWORD(hMarker)];
 
             if (hMarker && pMarker) {
-                findZGround = true;
+                forceGround = true;
                 areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD;
                 pos = CVector{
                     pMarker->m_vPosition.x,
@@ -112,7 +114,7 @@ void ProcessImGui() {
                 };
             }
         }
-        DoTeleportTo(findZGround ? GetPositionWithGroundHeight(pos) : pos, static_cast<eAreaCodes>(areaCode));
+        DoTeleportTo((findZGround || forceGround) ? GetPositionWithGroundHeight(pos) : pos, static_cast<eAreaCodes>(areaCode));
     }
     HoveredItemTooltip("Hold `ALT` to teleport to a random position\nHold `SHIFT` to teleport to marker marked on the map");
 
@@ -120,9 +122,10 @@ void ProcessImGui() {
     if (SameLine(); Button("Save")) {
         const auto posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : GetPositionWithGroundHeight(pos) };
         const auto areaToSave{ GetIO().KeyCtrl ? FindPlayerPed()->m_nAreaCode : static_cast<eAreaCodes>(areaCode) };
+        const auto nameToSave{ name[0] ? name : CTheZones::GetZoneName(posToSave) };
 
         // Either use given name or current zone name
-        s_SavedLocations.emplace(s_SavedLocations.begin(), name[0] ? name : CTheZones::GetZoneName(posToSave), posToSave, areaToSave);
+        s_SavedLocations.emplace(s_SavedLocations.begin(), (areaToSave == eAreaCodes::AREA_CODE_NORMAL_WORLD) ? nameToSave : "<Unnamed>", posToSave, areaToSave);
 
         if (!GetIO().KeyAlt) {
             name[0] = 0; // Clear input
@@ -218,16 +221,33 @@ namespace SettingsHandler {
     // Called after every read entry line
     // `entry` is a pointer returned from `ReadOpenFn` (we dont use it in this case)
     void ReadLine(ImGuiContext* ctx, ImGuiSettingsHandler* handler, void* entry, const char* line) {
-        (void)entry;
         (void)handler;
+        auto version = reinterpret_cast<int>(entry);
 
         char name[1024]{};
         CVector pos{};
-        int area{};
-        if (sscanf(line, "%f, %f, %f, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, name) == 5) { // [^\t\n] -> https://stackoverflow.com/questions/2854488
-            s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area));
-        } else if (line[0] && line[0] != '\n') { // Report failed reads on non-empty lines only
-            std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
+
+        switch (version) {
+        case 2: {
+            int area{};
+
+            // [^\t\n] -> https://stackoverflow.com/questions/2854488
+            if (sscanf(line, "%f, %f, %f, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, name) == 5)
+                s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area));
+            else if (line[0] && line[0] != '\n') // Report failed reads on non-empty lines only
+                std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
+            break;
+        }
+        case 1: {
+            if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4)
+                s_SavedLocations.emplace_back(name, pos, eAreaCodes::AREA_CODE_NORMAL_WORLD);
+            else if (line[0] && line[0] != '\n')
+                std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
+            break;
+        }
+        default:
+            std::cerr << "Invalid teleport tool version: " << version << std::endl;
+            break;
         }
     }
 
@@ -235,9 +255,10 @@ namespace SettingsHandler {
     void WriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf) {
         (void)ctx;
 
-        out_buf->reserve(s_SavedLocations.size() * (3 * 10 + 30)); // Estimate. 3 * 10 for position + 30 for name
+        // Estimate. 3 * 10 for position + 3 for area code + 30 for name
+        out_buf->reserve(s_SavedLocations.size() * (3 * 10 + 3 + 30));
 
-        out_buf->append("[SavedLocations][Version 1]\n");
+        out_buf->append("[SavedLocations][Version 2]\n");
         for (const auto& l : s_SavedLocations) {
             out_buf->appendf("%.3f, %.3f, %.3f, %d, %s\n", l.pos.x, l.pos.y, l.pos.z, l.areaCode, l.name.c_str());
         }
@@ -247,8 +268,10 @@ namespace SettingsHandler {
     void* ReadOpen(ImGuiContext* ctx, ImGuiSettingsHandler* handler, const char* name) {
         (void)ctx;
         (void)handler;
-        (void)name;
-        return (void*)1; // Has to return a non-null value, otherwise `ReadLine` wont be called
+
+        int version{};
+        sscanf(name, "Version %d", &version);
+        return (void*)version; // Has to return a non-null value, otherwise `ReadLine` wont be called
     }
 
     void ApplyAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler) {
