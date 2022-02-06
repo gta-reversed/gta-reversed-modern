@@ -95,7 +95,7 @@ public:
     void StartShake_Train(float x, float y);
     void ProcessPCSpecificStuff();
     void StopShaking(int16 arg0);
-    static CPad* GetPad(int32 padNumber);
+    static CPad* GetPad(int32 padNumber = 0);
     int16 GetCarGunLeftRight();
     int16 GetCarGunUpDown();
     int16 GetSteeringLeftRight();

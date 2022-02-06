@@ -1855,7 +1855,204 @@ int32 CAutomobile::GetNumContactWheels()
 // 0x6A7650
 void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
 {
-    plugin::CallMethod<0x6A7650, CAutomobile*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+    if (!vehicleFlags.bWarnedPeds) {
+        return;
+    }
+
+    assert(m_matrix);
+
+    float minDmgIntensity{ 25.f };
+    float calcDmgIntensity{m_fDamageIntensity};
+    float collFxForceMult{};
+
+    if (damageIntensity == 0.f) {
+        // Man this is so stupid..
+        vecCollisionDirection = &m_vecLastCollisionImpactVelocity;
+        vecCollisionCoors     = &m_vecLastCollisionPosn;
+        damager               = m_pDamageEntity;
+
+        collFxForceMult = 1.f / x3.f;
+        minDmgIntensity = m_fMass / 1500.f * 25.f;
+
+        // 0x6A7705
+        if (m_matrix->GetUp().z < 0.f/*is flipped*/ && this != FindPlayerVehicle()) {
+            if (npcFlags.bDontDamageOnRoof) {
+                return;
+            }
+            switch (m_nStatus) {
+            case eEntityStatus::STATUS_HELI: {
+                if (physicalFlags.bSubmergedInWater)
+                    return;
+                break;
+            }
+            case eEntityStatus::STATUS_WRECKED:
+                break;
+            default: {
+                m_fHealth = std::max(0.f, m_fHealth - CTimer::GetTimeStep() * 4.f);
+                break;
+            }
+            }
+        }
+
+        // 0x6A7780
+        if (m_fDamageIntensity == 0.f
+            || physicalFlags.bCollisionProof
+            || IsSubQuad()
+        ) {
+            if (CBike::DamageKnockOffRider(this, m_fDamageIntensity, m_nPieceType, m_pDamageEntity, m_vecLastCollisionPosn, m_vecLastCollisionImpactVelocity)) {
+                return;
+            }
+        }
+
+        // 0x6A77F0
+        const auto lastImpactVel_Dot_Fwd = DotProduct(m_matrix->GetForward(), m_vecLastCollisionImpactVelocity);
+
+        // 0x6A77D6
+        if (   m_nStatus == STATUS_PHYSICS
+            && !IsMissionVehicle()
+            && lastImpactVel_Dot_Fwd < -0.4f // Imapct was from behind - (-66, 66) deg
+            && m_fDamageIntensity / m_fMass > 0.1f
+        ) {
+            m_autoPilot.m_nTempAction = 19;
+            m_autoPilot.m_nTempActionTime = CTimer::GetTimeInMS() + 4000;
+        }
+
+        if (m_pDamageEntity) {
+            // Inverted the if's a little, and used switch case to make it nicer.
+
+            switch (m_pDamageEntity->GetType()) {
+            case eEntityType::ENTITY_TYPE_VEHICLE: {
+                // 0x6A7856
+                if (!CGame::CanSeeOutSideFromCurrArea()
+                    && std::abs(lastImpactVel_Dot_Fwd) > 0.4 // Sideways impact - (142, 66) deg
+                ) {
+                    calcDmgIntensity /= 3.f;
+                }
+                break;
+            }
+            case eEntityType::ENTITY_TYPE_PED: {
+                // 0x6A7883
+                if (const auto& ped = *m_pDamageEntity->AsPed(); ped.bIsStanding) {
+                    const auto impactDir = DotProduct(ped.m_matrix->GetForward() * ped.m_vecAnimMovingShift.y, m_vecLastCollisionImpactVelocity);
+                    if (impactDir < 0.f) { // From behind - (-90, 90) deg
+                        calcDmgIntensity = std::max(0.f, calcDmgIntensity + impactDir * ped.m_fMass);
+                    }
+                }
+                break;
+            }
+            }
+        }
+    } else {
+        // 0x6A7BE5
+        if (!CanVehicleBeDamaged(damager, weapon, nullptr)) {
+            return;
+        }
+
+        collFxForceMult = 1.f;
+    }
+
+    // 0x6A78F0
+    if (   damager && damager->IsBuilding()
+        && DotProduct(*vecCollisionDirection, m_matrix->GetUp()) > 0.6f // In front - (-66, 66) deg
+    ) {
+        return;
+    }
+
+    // 0x6A792B 
+    if (m_nStatus == STATUS_PLAYER) {
+        if (CStats::GetPercentageProgress() >= 100.f) {
+            calcDmgIntensity /= 2.f;
+        }
+    } else {
+        if (   physicalFlags.bInvulnerable
+            && damager
+            && damager != FindPlayerPed()
+            && damager != FindPlayerVehicle()
+        ) {
+            return;
+        }
+    }
+
+    // 0x6A7984
+    if (damager && (damager == m_pTractor || damager == m_pTrailer)) {
+        return;
+    }
+
+    // 0x6A79AB (Condition inverted)
+    if (calcDmgIntensity > minDmgIntensity && m_nStatus != STATUS_WRECKED) {
+
+        // 0x6A79C7
+        // If we're a law enforcer, and the damager is the 
+        // player's vehicle increase their wanted level.
+        if (vehicleFlags.bIsLawEnforcer) {
+            if (const auto playedVeh = FindPlayerVehicle()) {
+                if (damager == playedVeh && m_nStatus != STATUS_ABANDONED) {
+                    // R* used magnitude, but squared magnitude is more suitable.
+                    const auto playerVehSpeedMag = playedVeh->m_vecMoveSpeed.SquaredMagnitude();
+                    if (   playerVehSpeedMag >= m_vecMoveSpeed.SquaredMagnitude() 
+                        && playerVehSpeedMag > 0.1f * 0.1f
+                    ) {
+                        FindPlayerPed()->SetWantedLevelNoDrop(1);
+                    }
+                }
+            }
+        }
+
+
+        // 0x6A7A6E
+        // Some shaky-shaky
+        if (m_nStatus == STATUS_PLAYER && calcDmgIntensity > 50.f) {
+            const auto intensity = std::min(250.f, calcDmgIntensity / m_fMass * 800.f + 100.f);
+            CPad::GetPad()->StartShake(40000 / (uint8)intensity, (uint8)intensity, 2000u);
+        }
+
+        // 0x6A7ACF 
+        if (damager && damager->IsVehicle()) {
+            m_nLastWeaponDamageType = WEAPON_RAMMEDBYCAR;
+            m_pLastDamageEntity = damager;
+            damager->RegisterReference(&m_pLastDamageEntity);
+        }
+
+        // Store light states, so later we can determine if any was blown
+        // and play the necessary fx sound
+        const auto prevLightStates = m_damageManager.GetAllLightsState();
+
+        if (m_nStatus == STATUS_PLAYER) {
+            FindPlayerInfo().m_nVehicleTimeCounter = CTimer::GetTimeInMS();
+        }
+
+        if (m_vecMoveSpeed.SquaredMagnitude() > 0.02f * 0.02f) {
+            dmgDrawCarCollidingParticles(vecCollisionCoors, calcDmgIntensity* collFxForceMult, weapon);
+        }
+
+
+    }
+
+    // 0x6A83DF
+    if (m_fHealth >= 250.f) {
+        if (ModelIndices::IsBFInjection(m_nModelIndex)) {
+            if (m_fHealth >= 400.f) {
+                if (m_fHealth < 600.f) {
+                    m_damageManager.SetEngineStatus(100u);
+                }
+            } else {
+                m_damageManager.SetEngineStatus(200u);
+            }
+        }
+    } else if (m_damageManager.GetEngineStatus() < 225u) {
+        m_damageManager.SetEngineStatus(225u);
+
+        m_dwBurnTimer = 0;
+
+        m_pLastDamageEntity = m_pDamageEntity;
+        if (m_pLastDamageEntity) {
+            m_pLastDamageEntity->RegisterReference(&m_pLastDamageEntity);
+        }
+
+        if (const auto p = PickRandomPassenger()) {
+            p->Say(33, 1500);
+        }
+    }
 }
 
 //0x6AF1D0

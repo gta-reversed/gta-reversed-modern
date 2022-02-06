@@ -676,6 +676,7 @@ public:
 
     eVehicleCreatedBy GetCreatedBy()      { return m_nCreatedBy; }
     bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
+    bool IsMissionVehicle() const { return m_nCreatedBy == MISSION_VEHICLE; }
 
     bool CanUpdateHornCounter() { return m_nAlarmState == 0 || m_nAlarmState == -1 || m_nStatus == STATUS_WRECKED; }
 

@@ -402,6 +402,15 @@ void CDamageManager::SetDoorsStatus(std::initializer_list<eDoors> doors, eDoorSt
     }
 }
 
+auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
+    return {
+        (eLightsState)m_lightStates.leftFront,
+        (eLightsState)m_lightStates.rightFront,
+        (eLightsState)m_lightStates.rightRear,
+        (eLightsState)m_lightStates.leftRear,
+    };
+}
+
 // 0x6C2230
 eDoorStatus CDamageManager::GetDoorStatus(eDoors nDoorIdx) {
     switch (nDoorIdx) {

@@ -183,6 +183,7 @@ public:
     // NOTSA
     void SetAllWheelsState(eCarWheelStatus state);
     void SetDoorsStatus(std::initializer_list<eDoors> doors, eDoorStatus status);
+    auto GetAllLightsState() const -> std::array<eLightsState, 4>;
 private: 
     // Wrapper functions
 
