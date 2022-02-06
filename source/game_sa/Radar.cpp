@@ -550,7 +550,7 @@ float CRadar::LimitRadarPoint(CVector2D& point)
 {
     float mag = point.Magnitude();
 
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         return mag;
 
     if (mag > 1.0f)
@@ -576,7 +576,7 @@ void CRadar::LimitToMap(float* pX, float* pY)
 // 0x583420
 uint8 CRadar::CalculateBlipAlpha(float distance)
 {
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         return 255;
 
     auto distAlpha = 255 - (int32)(distance * 1.0f / 60.0f * 255.0f);
@@ -627,7 +627,7 @@ void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& 
 // 0x583670
 void CRadar::CalculateCachedSinCos()
 {
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         cachedSin = 0.0f;
         cachedCos = 1.0f;
 
@@ -715,7 +715,7 @@ bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex)
 {
     CVector blipPos = ms_RadarTrace[blipIndex].m_vPosition;
 
-    if (!FrontEndMenuManager.drawRadarOrMap || !ms_RadarTrace[blipIndex].m_bShortRange
+    if (!FrontEndMenuManager.m_bDrawRadarOrMap || !ms_RadarTrace[blipIndex].m_bShortRange
     || CTheZones::ZonesRevealed > 80 || CTheZones::GetCurrentZoneLockedOrUnlocked(blipPos.x, blipPos.y))
         return true;
 
@@ -742,7 +742,7 @@ void CRadar::ChangeBlipScale(int32 blipIndex, int32 size)
     if (index == -1)
         return;
 
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         size = 1;
 
     ms_RadarTrace[index].m_nBlipSize = size;
@@ -865,7 +865,7 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 {
     CVector2D verts[4];
 
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         x *= SCREEN_WIDTH_UNIT;
         y *= SCREEN_HEIGHT_UNIT;
 
@@ -1057,7 +1057,7 @@ void CRadar::SetMapCentreToPlayerCoords()
     if (FindPlayerPed() == nullptr)
         return;
 
-    FrontEndMenuManager.drawRadarOrMap = true;
+    FrontEndMenuManager.m_bDrawRadarOrMap = true;
 
     InitFrontEndMap();
 
@@ -1072,7 +1072,7 @@ void CRadar::SetMapCentreToPlayerCoords()
 
     FrontEndMenuManager.m_vMousePos = posReal;
     FrontEndMenuManager.m_fMapBaseX = DEFAULT_SCREEN_WIDTH / 2.0f - FrontEndMenuManager.m_fMapZoom * posRadar.x;
-    FrontEndMenuManager.drawRadarOrMap = 0;
+    FrontEndMenuManager.m_bDrawRadarOrMap = 0;
     FrontEndMenuManager.m_fMapBaseY = DEFAULT_SCREEN_HEIGHT / 2.0f + FrontEndMenuManager.m_fMapZoom * posRadar.y;
 }
 
@@ -1092,7 +1092,7 @@ void CRadar::SetRadarMarkerState(int32 arg0, uint8 arg1)
 // 0x585FF0
 void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
 {
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         x *= SCREEN_WIDTH_UNIT;
         y *= SCREEN_HEIGHT_UNIT;
 

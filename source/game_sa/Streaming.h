@@ -296,10 +296,8 @@ public:
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);
     static bool HasVehicleUpgradeLoaded(int32 modelId);
-    //! does nothing (NOP)
-    static void IHaveUsedStreamingMemory();
-    //! does nothing (NOP)
-    static void ImGonnaUseStreamingMemory();
+    static void IHaveUsedStreamingMemory() {};
+    static void ImGonnaUseStreamingMemory() {};
     static void Init();
     static void Init2();
     static void InitImageList();

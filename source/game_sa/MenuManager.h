@@ -14,15 +14,15 @@
 class CRect;
 
 // Menu entries action to perform
-enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88
+enum eMenuActions { // There's many actions @0x57702E and @0x57CD88
     MENU_ACTION_NA = 0,
-    MENU_ACTION_TEXT = 1,      // Some static text at the top of the page (works only on first entry)
-    MENU_ACTION_BACK = 2,      // Back to previous menu
-    MENU_ACTION_YES = 3,       // Used as YES in menus (also as NO, weird?)
-    MENU_ACTION_NO = 4,        // Used as NO in menus  (also as YES, weird?)
-    MENU_ACTION_SWITCH = 5,    // Switch to target menu
-    MENU_ACTION_SKIP = 20,     // Skip this entry (unselectable)
-    MENU_ACTION_BACK_PC = 55,  // Same as BACK without a extra checking (?)
+    MENU_ACTION_TEXT = 1,     // Some static text at the top of the page (works only on first entry)
+    MENU_ACTION_BACK = 2,     // Back to previous menu
+    MENU_ACTION_YES = 3,      // Used as YES in menus (also as NO, weird?)
+    MENU_ACTION_NO = 4,       // Used as NO in menus  (also as YES, weird?)
+    MENU_ACTION_SWITCH = 5,   // Switch to target menu
+    MENU_ACTION_SKIP = 20,    // Skip this entry (unselectable)
+    MENU_ACTION_BACK_PC = 55, // Same as BACK without a extra checking (?)
 };
 
 // Type of menu entries
@@ -43,47 +43,47 @@ enum eMenuEntryType {
 
 enum eMenuPage {
     MENUPAGE_STATS = 0,
-    MENUPAGE_START_GAME = 1, // New Game, Load Game, Delete Game
+    MENUPAGE_START_GAME = 1,                  // New Game, Load Game, Delete Game
     MENUPAGE_BRIEF = 2,
     MENUPAGE_AUDIO_SETTINGS = 3,
     MENUPAGE_DISPLAY_SETTINGS = 4,
     MENUPAGE_MAP = 5,
-    MENUPAGE_NEW_GAME_ASK = 6, // Are you sure you want to start a new game? All current game progress will be lost. Proceed?
-    MENUPAGE_SELECT_GAME = 7, // Please select which new game you wish to start:
-    MENUPAGE_MISSIONPACK_LOADING_ASK = 8, // // Are you sure you want to load a San Andreas Mission Pack? All current game progress will be lost. Proceed?
-    MENUPAGE_LOAD_GAME = 9, // Select save file to load:
-    MENUPAGE_DELETE_GAME = 10, // Select save file to delete:
-    MENUPAGE_LOAD_GAME_ASK = 11, // All unsaved progress in your current game will be lost. Proceed with loading?
-    MENUPAGE_DELETE_GAME_ASK = 12, // Are you sure you wish to delete this save file?
+    MENUPAGE_NEW_GAME_ASK = 6,                 // Are you sure you want to start a new game? All current game progress will be lost. Proceed?
+    MENUPAGE_SELECT_GAME = 7,                  // Please select which new game you wish to start:
+    MENUPAGE_MISSIONPACK_LOADING_ASK = 8,      // // Are you sure you want to load a San Andreas Mission Pack? All current game progress will be lost. Proceed?
+    MENUPAGE_LOAD_GAME = 9,                    // Select save file to load:
+    MENUPAGE_DELETE_GAME = 10,                 // Select save file to delete:
+    MENUPAGE_LOAD_GAME_ASK = 11,               // All unsaved progress in your current game will be lost. Proceed with loading?
+    MENUPAGE_DELETE_GAME_ASK = 12,             // Are you sure you wish to delete this save file?
     MENUPAGE_LOAD_FIRST_SAVE = 13,
     MENUPAGE_DELETE_FINISHED = 14,
-    MENUPAGE_DELETE_SUCCESSFUL = 15, // // Delete Successful. Select OK to continue.
-    MENUPAGE_GAME_SAVE = 16, // Select file you wish to save to:
-    MENUPAGE_SAVE_WRITE_ASK = 17, // Are you sure you wish to save?
+    MENUPAGE_DELETE_SUCCESSFUL = 15,           // Delete Successful. Select OK to continue.
+    MENUPAGE_GAME_SAVE = 16,                   // Select file you wish to save to:
+    MENUPAGE_SAVE_WRITE_ASK = 17,              // Are you sure you wish to save?
     MENUPAGE_SAVE_DONE_1 = 18,
-    MENUPAGE_SAVE_DONE_2 = 19, // Save Successful. Select OK to continue.
-    MENUPAGE_GAME_SAVED = 20, // OK
-    MENUPAGE_GAME_LOADED = 21, // OK
-    MENUPAGE_GAME_WARNING_DONT_SAVE = 22, // Warning! One or more cheats have been activated. This may affect your save game. It is recommended that you do not save this game.
-    MENUPAGE_ASK_DISPLAY_DEFAULT_SETS = 23, // Are you sure you want to reset your current settings to default?
-    MENUPAGE_ASK_AUDIO_DEFAULT_SETS = 24, // Are you sure you want to reset your current settings to default?
+    MENUPAGE_SAVE_DONE_2 = 19,                 // Save Successful. Select OK to continue.
+    MENUPAGE_GAME_SAVED = 20,                  // OK
+    MENUPAGE_GAME_LOADED = 21,                 // OK
+    MENUPAGE_GAME_WARNING_DONT_SAVE = 22,      // Warning! One or more cheats have been activated. This may affect your save game. It is recommended that you do not save this game.
+    MENUPAGE_ASK_DISPLAY_DEFAULT_SETS = 23,    // Are you sure you want to reset your current settings to default?
+    MENUPAGE_ASK_AUDIO_DEFAULT_SETS = 24,      // Are you sure you want to reset your current settings to default?
     MENUPAGE_ASK_CONTROLLER_DEFAULT_SETS = 25, // Are you sure you want to reset your current settings to default?
     MENUPAGE_USER_TRACKS_OPTIONS = 26,
-    MENUPAGE_DISPLAY_ADVANCED = 27, // DRAW DISTANCE, ...
-    MENUPAGE_LANGUAGE = 28, // English, ...
-    MENUPAGE_SAVE_GAME_DONE = 29, // O.K
-    MENUPAGE_SAVE_GAME_FAILED = 30, // Save Unsuccessful., O.K.
-    MENUPAGE_SAVE_WRITE_FAILED = 31, // Save Unsuccessful.
-    MENUPAGE_SAVE_FAILED_FILE_ERROR = 32, // Load Unsuccessful. File Corrupted, Please delete.
-    MENUPAGE_OPTIONS = 33, // Controller Setup, Audio Setup ...
-    MENUPAGE_MAIN_MENU = 34, // Start Game, Options, Quit Game
-    MENUPAGE_QUIT_GAME_ASK = 35, // Are you sure you want to quit? All progress since the last save game will be lost. Proceed?
-    MENUPAGE_CONTROLLER_SETUP = 36, // CONFIGURATION, Redefine Controls ...
-    MENUPAGE_REDEFINE_CONTROLS = 37, // Foot Controls, Vehicle Controls
+    MENUPAGE_DISPLAY_ADVANCED = 27,            // DRAW DISTANCE, ...
+    MENUPAGE_LANGUAGE = 28,                    // English, ...
+    MENUPAGE_SAVE_GAME_DONE = 29,              // O.K
+    MENUPAGE_SAVE_GAME_FAILED = 30,            // Save Unsuccessful., O.K.
+    MENUPAGE_SAVE_WRITE_FAILED = 31,           // Save Unsuccessful.
+    MENUPAGE_SAVE_FAILED_FILE_ERROR = 32,      // Load Unsuccessful. File Corrupted, Please delete.
+    MENUPAGE_OPTIONS = 33,                     // Controller Setup, Audio Setup ...
+    MENUPAGE_MAIN_MENU = 34,                   // Start Game, Options, Quit Game
+    MENUPAGE_QUIT_GAME_ASK = 35,               // Are you sure you want to quit? All progress since the last save game will be lost. Proceed?
+    MENUPAGE_CONTROLLER_SETUP = 36,            // CONFIGURATION, Redefine Controls ...
+    MENUPAGE_REDEFINE_CONTROLS = 37,           // Foot Controls, Vehicle Controls
     MENUPAGE_CONTROLS_VEHICLE_ONFOOT = 38,
     MENUPAGE_MOUSE_SETTINGS = 39,
     MENUPAGE_JOYPAD_SETTINGS = 40,
-    MENUPAGE_PAUSE_MENU = 41, // Resume, START NEW GAME ...
+    MENUPAGE_PAUSE_MENU = 41,                  // Resume, START NEW GAME ...
     MENUPAGE_QUIT_GAME_2 = 42,
     MENUPAGE_EMPTY = 43
 };
@@ -130,15 +130,11 @@ enum eMenuTexture {
 };
 
 struct CMenuPageButton {
-    uint8 m_nActionType; // Unknown if signed or signed, but it does only '==' comparisions, so it's safe to use unsigned (moar numbers)
+    uint8 m_nActionType; // Unknown if signed or signed, but it does only '==' comparisons, so it's safe to use unsigned (moar numbers)
     char  m_szName[8];
-    char  m_nType;
-    char  m_nTargetMenu;
-
-private:
+    int8  m_nType;
+    int8  m_nTargetMenu;
     char _padB;
-
-public:
     int16 m_nPosnX;
     int16 m_nPosnY;
     char  m_nAlign;
@@ -164,7 +160,7 @@ public:
     char      field_9[23];
     char      field_20;
     bool      m_bHudOn;
-    char      field_22[2];
+    char      field_22[2]; // pad
     int32     m_nRadarMode;
     char      field_28[4];
     int32     m_nTargetBlipIndex; // blip script handle
@@ -179,27 +175,27 @@ public:
     int32     m_nBrightness;
     float     m_fDrawDistance;
     bool      m_bShowSubtitles;
-    char      field_45[4];
+    char      field_45[4]; // flags, uint32
     char      field_49;
     bool      m_bMapLegend;
     bool      m_bWidescreenOn;
     bool      m_bFrameLimiterOn;
     bool      m_bRadioAutoSelect;
     char      field_4E;
-    char      m_nSfxVolume;
-    char      m_nRadioVolume;
+    int8      m_nSfxVolume;
+    int8      m_nRadioVolume;
     bool      m_bRadioEq;
-    char      m_nRadioStation;
+    int8      m_nRadioStation;
     char      field_53;
     int32     m_nSelectedMenuItem;
     char      field_58;
-    char      drawRadarOrMap;
+    bool      m_bDrawRadarOrMap;
     char      field_5A;
     char      m_bAllStreamingStuffLoaded;
     bool      m_bMenuActive;
-    char      doGameReload;
+    bool      m_bStartGameLoading;
     char      field_5E;
-    char      isSaveDone;
+    char      m_bIsSaveDone;
     bool      m_bLoadingData;
     char      field_61[3];
     float     m_fMapZoom;
@@ -211,7 +207,7 @@ public:
     int32     titleLanguage;
     int32     textLanguage;
     eLanguage m_nLanguage;
-    char      m_nPreviousLanguage;
+    eLanguage m_nPreviousLanguage;
     char      field_86[2];
     int32     field_88;
     bool      m_bLanguageChanged;
@@ -222,12 +218,14 @@ public:
     char      field_9C[16];
     int32     field_AC;
     char      m_nRadioMode;
-    char      invertPadX1;
-    char      invertPadY1;
-    char      invertPadX2;
-    char      invertPadY2;
-    char      swapPadAxis1;
-    char      swapPadAxis2;
+
+    bool      m_bInvertPadX1;
+    bool      m_bInvertPadY1;
+    bool      m_bInvertPadX2;
+    bool      m_bInvertPadY2;
+    bool      m_bSwapPadAxis1;
+    bool      m_bSwapPadAxis2;
+
     char      field_B7;
     bool      m_bDrawMouse;
     char      field_B9[3];
@@ -243,27 +241,27 @@ public:
     int32     m_nAppliedResolution;
     int32     m_nResolution;
     int32     field_DC;
-    int32     mousePosLeftA;
-    int32     mousePosTopA;
+    int32     m_nMousePosLeftA;
+    int32     m_nMousePosTopA;
     bool      m_bSavePhotos;
     bool      m_bMainMenuSwitch;
-    char      m_nPlayerNumber;
+    int8      m_nPlayerNumber;
     char      field_EB;
     int32     field_EC;
     int32     field_F0;
     char      field_F4;
     char      field_F5[3];
-    // union{
-    //	struct{
-    CSprite2d m_aFrontEndSprites[25];
-    //	};
-    //	struct{
-    //		CSprite2d m_apRadioSprites[13];
-    //		CSprite2d m_apBackgroundTextures[8];
-    //		CSprite2d m_apAdditionalBackgroundTextures[2];
-    //		CSprite2d m_apMouseTextures[2];
-    //	};
-    //};
+
+    union {
+        struct {
+            CSprite2d m_apRadioSprites[13];
+            CSprite2d m_apBackgroundTextures[8];
+            CSprite2d m_apAdditionalBackgroundTextures[2];
+            CSprite2d m_apMouseTextures[2];
+        };
+        CSprite2d m_aFrontEndSprites[25];
+    };
+
     bool  m_bTexturesLoaded;
     uint8 m_nCurrentMenuPage;
     char  field_15E;
@@ -288,7 +286,7 @@ public:
     char  field_1AE9;
     char  field_1AEA;
     bool  m_bScanningUserTracks;
-    int32 field_1AEC;
+    int32 m_nHelperTextFadingAlpha;
     char  field_1AF0;
     char  field_1AF1;
     char  field_1AF2;
@@ -311,7 +309,7 @@ public:
     char  field_1B15;
     char  field_1B16;
     char  field_1B17;
-    int32 EventToDo;
+    int32 m_nHelperText;
     int32 field_1B1C;
     uint8 m_nTexturesRound;
     uint8 m_nNumberOfMenuOptions;
@@ -335,7 +333,7 @@ public:
     int16 field_1B46;
     int32 field_1B48;
     int32 field_1B4C;
-    char  m_nBackgroundSprite;
+    int8  m_nBackgroundSprite;
     char  field_1B51;
     int16 field_1B52;
     int32 field_1B54;
@@ -361,30 +359,79 @@ public:
     CMenuManager();
     ~CMenuManager();
 
-    void CheckForMenuClosing();
-    void ProcessFileActions();
-    void ProcessStreaming(char bImmediately);
-    void UserInput();
-    void Process();
-    void DrawWindow(const CRect& coords, const char* pKey, uint8 nColour, CRGBA backColor, bool Unused, bool bBackground);
-    char SwitchToNewScreen(char page);
-    void SaveSettings();
-    char InitialiseChangedLanguageSettings(char a2);
-    void ScrollRadioStations(char numStations);
-    void ProcessMissionPackNewGame();
-    int32 DoSettingsBeforeStartingAGame();
-    char SetDefaultPreferences(eMenuPage page);
-    char PrintMap();
-    char PrintStats();
-    char PrintBriefs();
-    char DrawControllerSetupScreen();
-    bool CheckMissionPackValidMenu();
-    static double StretchX(float x);
-    static double StretchY(float y);
-    void MessageScreen(const char* pKey, bool bRenderBig, bool bWithinFrame);
+    void Initialise();
+
+    void LoadAllTextures();
+    void SwapTexturesRound(bool frontend);
     void UnloadTextures();
+
+    void InitialiseChangedLanguageSettings();
+    bool HasLanguageChanged();
+
+    void DoSettingsBeforeStartingAGame();
+    static float StretchX(float x);
+    static float StretchY(float y);
+    void SwitchToNewScreen(int8 screen);
+    void ScrollRadioStations(int8 numStations);
+    void SetFrontEndRenderStates();
+    void SetDefaultPreferences(eMenuPage screen);
+    uint32 GetNumberOfMenuOptions();
+
+    void JumpToGenericMessageScreen(eMenuPage screen, const char* titleKey, const char* textKey);
+
+    void DrawFrontEnd();
+    void DrawBackground();
+    void DrawStandardMenus(uint8);
+    void DrawWindow(const CRect& coords, const char* key, unsigned char color, CRGBA backColor, bool unused, bool background);
+    void DrawWindowedText(float a2, float a3, RwRGBA color, char* a5, char* key, float scaleY);
+    void DrawQuitGameScreen();
+    void DrawControllerScreenExtraText(int32);
+    void DrawControllerBound(uint16, bool);
+    void DrawControllerSetupScreen();
+
+    void CentreMousePointer();
+
+    void LoadSettings();
+    void SaveSettings();
+    void SaveStatsToFile();
+    void SaveLoadFileError_SetUpErrorScreen();
+
+    void CheckSliderMovement(int8 unk);
+    bool CheckFrontEndUpInput();
+    bool CheckFrontEndDownInput();
+    bool CheckFrontEndLeftInput();
+    bool CheckFrontEndRightInput();
+    bool CheckForMenuClosing();
+    bool CheckHover(int32 left, int32 right, int32 top, int32 bottom);
+    bool CheckMissionPackValidMenu();
+    bool CheckCodesForControls(int32);
+
+    void DisplaySlider(float x, float y, float a3, float a4, float a5, float value, int32 size);
+    void DisplayHelperText(char* key);
+    void SetHelperText(int32 messageId);
+    void ResetHelperText();
+    void MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted);
+    void SmallMessageScreen(const char* key);
+
+    void PrintMap();
+    void PrintStats();
+    void PrintBriefs();
+    void PrintRadioStationList();
+
+    void UserInput();
+    void AdditionalOptionInput(bool* upPressed, bool* downPressed);
+    bool CheckRedefineControlInput();
+    void RedefineScreenUserInput(bool* accept, bool* cancel);
+
+    void Process();
+    void ProcessStreaming(bool streamAll);
+    void ProcessFileActions();
+    void ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR);
+    void ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed);
+    bool ProcessPCMenuOptions(int8, uint8);
+    void ProcessMissionPackNewGame();
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);
 
-extern CMenuManager &FrontEndMenuManager;
+extern CMenuManager& FrontEndMenuManager;
