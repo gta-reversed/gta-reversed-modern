@@ -122,10 +122,10 @@ void ProcessImGui() {
     if (SameLine(); Button("Save")) {
         const auto posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : GetPositionWithGroundHeight(pos) };
         const auto areaToSave{ GetIO().KeyCtrl ? FindPlayerPed()->m_nAreaCode : static_cast<eAreaCodes>(areaCode) };
-        const auto nameToSave{ name[0] ? name : CTheZones::GetZoneName(posToSave) };
+        const auto nameToSave{ name[0] ? name : ((areaToSave == eAreaCodes::AREA_CODE_NORMAL_WORLD) ? CTheZones::GetZoneName(posToSave) : "<Unnamed>")};
 
         // Either use given name or current zone name
-        s_SavedLocations.emplace(s_SavedLocations.begin(), (areaToSave == eAreaCodes::AREA_CODE_NORMAL_WORLD) ? nameToSave : "<Unnamed>", posToSave, areaToSave);
+        s_SavedLocations.emplace(s_SavedLocations.begin(), nameToSave, posToSave, areaToSave);
 
         if (!GetIO().KeyAlt) {
             name[0] = 0; // Clear input
