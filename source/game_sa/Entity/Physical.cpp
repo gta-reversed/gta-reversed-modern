@@ -767,7 +767,7 @@ void CPhysical::ApplyTurnForce(CVector force, CVector point)
 {
     if (!physicalFlags.bDisableTurnForce)
     {
-        CVector vecCentreOfMassMultiplied;
+        CVector vecCentreOfMassMultiplied{};
         if (!physicalFlags.bInfiniteMass)
             vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 
@@ -791,7 +791,7 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
         m_vecMoveSpeed += vecMoveSpeedForce / m_fMass;
 
     if (!physicalFlags.bDisableTurnForce && bUpdateTurnSpeed) {
-        CVector vecCentreOfMassMultiplied;
+        CVector vecCentreOfMassMultiplied{};
         float fTurnMass = m_fTurnMass;
         if (physicalFlags.bInfiniteMass)
             fTurnMass += m_vecCentreOfMass.z * m_fMass * m_vecCentreOfMass.z * 0.5f;
@@ -811,7 +811,7 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
 // 0x542CE0
 CVector CPhysical::GetSpeed(CVector point)
 {
-    CVector vecCentreOfMassMultiplied;
+    CVector vecCentreOfMassMultiplied{};
     if (!physicalFlags.bInfiniteMass)
         vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 
@@ -914,7 +914,7 @@ void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector point)
         m_vecFrictionMoveSpeed += vecTheMoveForce / m_fMass;
     }
 
-    CVector vecCentreOfMassMultiplied;
+    CVector vecCentreOfMassMultiplied{};
     if (!physicalFlags.bDisableTurnForce)
     {
         float fTurnMass = m_fTurnMass;
@@ -930,8 +930,7 @@ void CPhysical::ApplyFrictionForce(CVector vecMoveForce, CVector point)
         }
 
         CVector vecDifference = point - vecCentreOfMassMultiplied;
-        CVector vecMoveForceCrossProduct;
-        vecMoveForceCrossProduct.Cross(vecDifference, vecMoveForce);
+        CVector vecMoveForceCrossProduct = CrossProduct(vecDifference, vecMoveForce);
 
         m_vecFrictionTurnSpeed += vecMoveForceCrossProduct / fTurnMass;
     }
@@ -1052,8 +1051,7 @@ bool CPhysical::ApplyCollision(CEntity* entity, CColPoint& colPoint, float& dama
         {
             CVector vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
             CVector vecDifference = vecDistanceToPoint - vecCentreOfMassMultiplied;
-            CVector vecSpeedCrossProduct;
-            vecSpeedCrossProduct.Cross(vecDifference, vecMoveDirection);
+            CVector vecSpeedCrossProduct = CrossProduct(vecDifference, vecMoveDirection);
             float fSquaredMagnitude = vecMoveDirection.SquaredMagnitude();
             float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
@@ -1123,8 +1121,7 @@ bool CPhysical::ApplySoftCollision(CEntity* entity, CColPoint& colPoint, float& 
     }
 
     CVector vecDifference = vecDistanceToPointFromThis - vecCentreOfMassMultiplied;
-    CVector vecSpeedCrossProduct;
-    vecSpeedCrossProduct.Cross(vecDifference, vecMoveDirection);
+    CVector vecSpeedCrossProduct = CrossProduct(vecDifference, vecMoveDirection);
     float fSquaredMagnitude = vecMoveDirection.SquaredMagnitude();
     float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
@@ -1270,7 +1267,7 @@ void CPhysical::RemoveRefsToEntity(CEntity* entity)
 // 0x5442F0
 void CPhysical::DettachEntityFromEntity(float x, float y, float z, bool bApplyTurnForce)
 {
-    CMatrix vecDetachOffsetMatrix;
+    CMatrix vecDetachOffsetMatrix{};
     if (IsVehicle() && m_pAttachedTo && m_pAttachedTo->IsVehicle()) {
         CColModel* colModel = CEntity::GetColModel();
         CCollisionData* colData = colModel->m_pColData;
@@ -1566,8 +1563,7 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
     }
 
     CVector vecDifference = vecDistanceToPointFromThis - vecCentreOfMassMultiplied;
-    CVector vecCrossProduct;
-    vecCrossProduct.Cross(vecDifference, vecMoveDirection);
+    CVector vecCrossProduct = CrossProduct(vecDifference, vecMoveDirection);
     float fSquaredMagnitude = vecCrossProduct.SquaredMagnitude();
     float fCollisionMass = 1.0f / (fSquaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
@@ -1711,9 +1707,8 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
 
         vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
         float fTurnMass = m_fTurnMass;
-        CVector vecDifference = vecDistanceToPointFromThis - vecCentreOfMassMultiplied;                       // todo: shadow var
-        CVector vecCrossProduct;                                                                              // todo: shadow var
-        vecCrossProduct.Cross(vecDifference, vecMoveSpeed);
+        CVector vecDifference = vecDistanceToPointFromThis - vecCentreOfMassMultiplied; // todo: shadow var
+        CVector vecCrossProduct = CrossProduct(vecDifference, vecMoveSpeed);            // todo: shadow var
         outVecTurnSpeed += vecCrossProduct / fTurnMass;
     }
 
@@ -1780,8 +1775,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 
     CVector vecCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
     CVector vecDifference = vecDistanceToPointFromThis - vecCentreOfMassMultiplied;
-    CVector vecSpeedCrossProduct;
-    vecSpeedCrossProduct.Cross(vecDifference, vecMoveDirection);
+    CVector vecSpeedCrossProduct = CrossProduct(vecDifference, vecMoveDirection);
     float squaredMagnitude = vecSpeedCrossProduct.SquaredMagnitude();
     float fCollisionMass = -(1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass) * fMoveSpeedMagnitude);
     float fNegativeFriction = -fFriction;
@@ -1802,8 +1796,7 @@ bool CPhysical::ApplyFriction(float fFriction, CColPoint& colPoint)
 
         CVector across = vecMoveDirection * (fMoveSpeedMagnitude * 0.25f);
         CVector direction = vecMoveDirection + (colPoint.m_vecNormal * 0.1f);
-        CVector vecSpeedCrossProduct; // todo: shadow var
-        vecSpeedCrossProduct.Cross(colPoint.m_vecNormal, m_vecMoveSpeed);
+        CVector vecSpeedCrossProduct = CrossProduct(colPoint.m_vecNormal, m_vecMoveSpeed); // todo: shadow var
         vecSpeedCrossProduct.Normalise();
 
         for (int32 i = 0; i < 8; i++)
@@ -1880,8 +1873,7 @@ bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& col
         CVector vecMoveDirection = vecThisSpeedDifference * (1.0f / fThisSpeedMagnitude);
         CVector vecEntityCentreOfMassMultiplied = Multiply3x3(entity->GetMatrix(), entity->m_vecCentreOfMass);
         CVector vecEntityDifference = vecDistanceToPoint - vecEntityCentreOfMassMultiplied;
-        CVector vecEntitySpeedCrossProduct;
-        vecEntitySpeedCrossProduct.Cross(vecEntityDifference, vecMoveDirection);
+        CVector vecEntitySpeedCrossProduct = CrossProduct(vecEntityDifference, vecMoveDirection);
         float squaredMagnitude = vecEntitySpeedCrossProduct.SquaredMagnitude();
         float fEntityCollisionMass = 1.0f / ((squaredMagnitude) / entity->m_fTurnMass + 1.0f / entity->m_fMass);
         float fThisMass = m_fMass;
@@ -1938,16 +1930,14 @@ bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& col
         CVector vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 
         CVector vecThisDifference = vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied;
-        CVector vecThisSpeedCrossProduct;
-        vecThisSpeedCrossProduct.Cross(vecThisDifference, vecMoveDirection);
+        CVector vecThisSpeedCrossProduct = CrossProduct(vecThisDifference, vecMoveDirection);
         float squaredMagnitude = vecThisSpeedCrossProduct.SquaredMagnitude();
         float fThisCollisionMass = 1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
 
         CVector vecEntityCentreOfMassMultiplied = Multiply3x3(entity->GetMatrix(), entity->m_vecCentreOfMass);
 
         CVector vecEntityDifference = vecDistanceToPoint - vecEntityCentreOfMassMultiplied;
-        CVector vecEntitySpeedCrossProduct;
-        vecEntitySpeedCrossProduct.Cross(vecEntityDifference, vecMoveDirection);
+        CVector vecEntitySpeedCrossProduct = CrossProduct(vecEntityDifference, vecMoveDirection);
         squaredMagnitude = vecEntitySpeedCrossProduct.SquaredMagnitude();
         float fEntityCollisionMass = 1.0f / (squaredMagnitude / entity->m_fTurnMass + 1.0f / entity->m_fMass);
         float fSpeed = (fEntitySpeedMagnitude * fEntityCollisionMass + fThisCollisionMass * fThisSpeedMagnitude) / (fEntityCollisionMass + fThisCollisionMass);
@@ -1997,8 +1987,7 @@ bool CPhysical::ApplyFriction(CPhysical* entity, float fFriction, CColPoint& col
     CVector vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
 
     CVector vecThisDifference = vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied;
-    CVector vecThisSpeedCrossProduct;
-    vecThisSpeedCrossProduct.Cross(vecThisDifference, vecMoveDirection);
+    CVector vecThisSpeedCrossProduct = CrossProduct(vecThisDifference, vecMoveDirection);
     float squaredMagnitude = vecThisSpeedCrossProduct.SquaredMagnitude();
     float fEntityMass = entity->m_fMass;
     float fThisCollisionMass = 1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
@@ -2726,11 +2715,8 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
         bThisPedIsStandingOnEntity = false;
     }
 
-    CVector vecThisCentreOfMassMultiplied;
-    CVector vecEntityCentreOfMassMultiplied;
-
-    vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
-    vecEntityCentreOfMassMultiplied = Multiply3x3(entity->GetMatrix(), entity->m_vecCentreOfMass);
+    CVector vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+    CVector vecEntityCentreOfMassMultiplied = Multiply3x3(entity->GetMatrix(), entity->m_vecCentreOfMass);
 
     if (physicalFlags.bInfiniteMass)
     {
@@ -2823,8 +2809,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                 else
                 {
                     CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-                    CVector vecThisCrossProduct;
-                    vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+                    CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
                     float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
                     float fThisCollisionMass = 1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
                     if (!m_bHasHitWall)
@@ -3059,8 +3044,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
         float fThisMass = fThisMassFactor * m_fMass;
 
         CVector vecEntityDifference = (vecDistanceToPoint - vecEntityCentreOfMassMultiplied);
-        CVector vecEntityCrossProduct;
-        vecEntityCrossProduct.Cross(vecEntityDifference, colPoint.m_vecNormal);
+        CVector vecEntityCrossProduct = CrossProduct(vecEntityDifference, colPoint.m_vecNormal);
         float squaredMagnitude = vecEntityCrossProduct.SquaredMagnitude();
         float fEntityCollisionMass = 0.0f;
         if (entity->physicalFlags.bDisableMoveForce) {
@@ -3148,8 +3132,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
         float fEntitySpeedDotProduct = DotProduct(entity->m_vecMoveSpeed, colPoint.m_vecNormal);
 
         CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-        CVector vecThisCrossProduct;
-        vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+        CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
         float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
         float fThisCollisionMass = 0.0f;
         if (physicalFlags.bDisableMoveForce)
@@ -3257,8 +3240,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
         float fEntitySpeedDotProduct = DotProduct(vecEntitySpeed, colPoint.m_vecNormal);
 
         CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-        CVector vecThisCrossProduct;
-        vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+        CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
         float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
 
         float fThisCollisionMass = 0.0f;
@@ -3274,8 +3256,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
         fThisCollisionMass = 1.0f / fThisCollisionMass;
 
         CVector vecEntityDifference = (vecDistanceToPoint - vecEntityCentreOfMassMultiplied);
-        CVector vecEntityCrossProduct;
-        vecEntityCrossProduct.Cross(vecEntityDifference, colPoint.m_vecNormal);
+        CVector vecEntityCrossProduct = CrossProduct(vecEntityDifference, colPoint.m_vecNormal);
         squaredMagnitude = vecEntityCrossProduct.SquaredMagnitude();
 
         float fEntityCollisionMass = 0.0f;
@@ -3470,11 +3451,8 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
         bThisPedIsStandingOnEntity = false;
     }
 
-    CVector vecThisCentreOfMassMultiplied;
-    CVector vecEntityCentreOfMassMultiplied;
-
-    vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
-    vecThisCentreOfMassMultiplied = Multiply3x3(physical->GetMatrix(), physical->m_vecCentreOfMass);
+    CVector vecThisCentreOfMassMultiplied = Multiply3x3(GetMatrix(), m_vecCentreOfMass);
+    CVector vecEntityCentreOfMassMultiplied = Multiply3x3(physical->GetMatrix(), physical->m_vecCentreOfMass);
 
     if (physicalFlags.bInfiniteMass)
     {
@@ -3516,8 +3494,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
         else
         {
             CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-            CVector vecThisCrossProduct;
-            vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+            CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
             float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
 
             float fThisCollisionMass = 1.0f / (squaredMagnitude / m_fTurnMass + 1.0f / m_fMass);
@@ -3725,8 +3702,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
             float fEntitySpeedDotProduct = DotProduct(vecEntitySpeed, colPoint.m_vecNormal);
 
             CVector vecEntityDifference = (vecDistanceToPoint - vecEntityCentreOfMassMultiplied);
-            CVector vecEntityCrossProduct;
-            vecEntityCrossProduct.Cross(vecEntityDifference, colPoint.m_vecNormal);
+            CVector vecEntityCrossProduct = CrossProduct(vecEntityDifference, colPoint.m_vecNormal);
             float squaredMagnitude = vecEntityCrossProduct.SquaredMagnitude();
 
             float fMoveSpeed = 0.0f;
@@ -3816,8 +3792,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
                 float fEntitySpeedDotProduct = DotProduct(physical->m_vecMoveSpeed, colPoint.m_vecNormal);
 
                 CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-                CVector vecThisCrossProduct;
-                vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+                CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
                 float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
                 float fThisCollisionMass = 1.0f / (squaredMagnitude / (fThisMassFactor * m_fTurnMass) + 1.0f / (fThisMassFactor * m_fMass));
 
@@ -3908,14 +3883,12 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
                 float fEntitySpeedDotProduct = DotProduct(vecEntitySpeed, colPoint.m_vecNormal);
 
                 CVector vecThisDifference = (vecDistanceToPointFromThis - vecThisCentreOfMassMultiplied);
-                CVector vecThisCrossProduct;
-                vecThisCrossProduct.Cross(vecThisDifference, colPoint.m_vecNormal);
+                CVector vecThisCrossProduct = CrossProduct(vecThisDifference, colPoint.m_vecNormal);
                 float squaredMagnitude = vecThisCrossProduct.SquaredMagnitude();
                 float fThisCollisionMass = 1.0f / (squaredMagnitude / (fThisMassFactor * m_fTurnMass) + 1.0f / (fThisMassFactor * m_fMass));
 
                 CVector vecEntityDifference = (vecDistanceToPoint - vecEntityCentreOfMassMultiplied);
-                CVector vecEntityCrossProduct;
-                vecEntityCrossProduct.Cross(vecEntityDifference, colPoint.m_vecNormal);
+                CVector vecEntityCrossProduct = CrossProduct(vecEntityDifference, colPoint.m_vecNormal);
                 squaredMagnitude = vecEntityCrossProduct.SquaredMagnitude();
                 float fEntityCollisionMass = 1.0f / (squaredMagnitude / (fEntityMassFactor * physical->m_fTurnMass) + 1.0f / (fEntityMassFactor * physical->m_fMass));
 
