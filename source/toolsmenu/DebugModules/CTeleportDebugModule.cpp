@@ -32,7 +32,7 @@ CVector GetPositionWithGroundHeight(CVector2D pos) {
     return { pos.x, pos.y, CWorld::FindGroundZForCoord(pos.x, pos.y) + 2.f };
 }
 
-// Teleport to exact coordinates, and set player to be in the normal world
+// Teleport to exact coordinates
 void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD) {
     CStreaming::LoadSceneCollision(pos);
     CStreaming::LoadScene(pos);
@@ -42,7 +42,6 @@ void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMA
     CStreaming::RemoveBuildingsNotInArea(areaCode);
     CTimeCycle::StopExtraColour(false);
 
-    // For now just teleport to ground height
     if (auto vehicle = FindPlayerVehicle()) {
         vehicle->SetPosn(pos);
         vehicle->ResetTurnSpeed();
