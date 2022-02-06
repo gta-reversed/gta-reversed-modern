@@ -340,7 +340,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
     FXDebugModule::ProcessRender();
-    TeleportDebugModule::ProcessRender();
+    TeleportDebugModule::ProcessInput();
 
     ImGui::EndFrame();
     ImGui::Render();
