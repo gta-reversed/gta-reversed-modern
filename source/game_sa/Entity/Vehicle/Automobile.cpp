@@ -84,6 +84,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
     RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
+    RH_ScopedInstall(PlayCarHorn_Reversed, 0x6A3770);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -1815,7 +1816,28 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
 // 0x6A3770
 void CAutomobile::PlayCarHorn()
 {
-    plugin::CallMethod<0x6A3770, CAutomobile*>(this);
+    if (m_nAlarmState && m_nAlarmState != -1 && m_nStatus != STATUS_WRECKED || m_nHornCounter) {
+        return;
+    }
+
+    if (m_nCarHornTimer) {
+        m_nCarHornTimer -= 1;
+        return;
+    }
+
+    m_nCarHornTimer = rand() % 128 - 106;
+    if (const auto r = m_nCarHornTimer % 8; r < 4) {
+        if (r >= 2) {
+            if (m_pDriver && m_autoPilot.carCtrlFlags.bHonkAtCar) {
+                m_pDriver->Say(AE_FRONTEND_FRENZY_ONGOING);
+            }
+        }
+        m_nHornCounter = 45;
+    } else {
+        if (m_pDriver) {
+            m_pDriver->Say(AE_FRONTEND_FRENZY_ONGOING);
+        }
+    }
 }
 
 // 0x6A62B0
