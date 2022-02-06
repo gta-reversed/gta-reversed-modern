@@ -222,8 +222,7 @@ namespace SettingsHandler {
     // `entry` is a pointer returned from `ReadOpenFn` (we dont use it in this case)
     void ReadLine(ImGuiContext* ctx, ImGuiSettingsHandler* handler, void* entry, const char* line) {
         (void)handler;
-        auto version = reinterpret_cast<int>(entry);
-
+        const auto version = reinterpret_cast<int>(entry);
         char name[1024]{};
         CVector pos{};
 
