@@ -25,6 +25,8 @@ struct SavedLocation {
 
 static std::vector<SavedLocation> s_SavedLocations{};
 static bool                       s_windowOpen{ true };
+static bool                       s_findZGround{ true };
+static SavedLocation              s_prevLocation{};
 
 namespace TeleportDebugModule {
 
@@ -34,6 +36,11 @@ CVector GetPositionWithGroundHeight(CVector2D pos) {
 
 // Teleport to exact coordinates
 void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+    // Save previous location for teleporting back.
+    s_prevLocation.pos = FindPlayerPed()->GetPosition();
+    s_prevLocation.areaCode = FindPlayerPed()->m_nAreaCode;
+    s_prevLocation.selected = true; // mark the position is saved.
+
     CStreaming::LoadSceneCollision(pos);
     CStreaming::LoadScene(pos);
 
@@ -73,8 +80,7 @@ void ProcessImGui() {
     SameLine(); InputText("Name", name, std::size(name));
     PopItemWidth();
 
-    static bool findZGround = true;
-    Checkbox("Ground for Z", &findZGround);
+    Checkbox("Ground for Z", &s_findZGround);
 
     // Helper to draw tooltip over hovered item
     const auto HoveredItemTooltip = [](auto text) {
@@ -114,7 +120,7 @@ void ProcessImGui() {
                 };
             }
         }
-        DoTeleportTo((findZGround || forceGround) ? GetPositionWithGroundHeight(pos) : pos, static_cast<eAreaCodes>(areaCode));
+        DoTeleportTo((s_findZGround || forceGround) ? GetPositionWithGroundHeight(pos) : pos, static_cast<eAreaCodes>(areaCode));
     }
     HoveredItemTooltip("Hold `ALT` to teleport to a random position\nHold `SHIFT` to teleport to marker marked on the map");
 
@@ -145,8 +151,12 @@ void ProcessImGui() {
         const auto visibleFilter = std::views::filter(IsItemVisible);
         auto visibleItems = s_SavedLocations | visibleFilter;
 
+        // Do not show indicies if the list is filtered.
+        bool isFiltered = std::distance(visibleItems.begin(), visibleItems.end()) != s_SavedLocations.size();
+
         // Saved positions table
-        if (BeginTable("Saved Positions", 3, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
+        if (BeginTable("Saved Positions", 4, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
+            TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Position", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Area code", ImGuiTableColumnFlags_WidthFixed);
@@ -155,11 +165,16 @@ void ProcessImGui() {
             // Draw visible items
             for (auto it = visibleItems.begin(); it != visibleItems.end(); it++) {
                 auto& v = *it;
+                auto idx = std::distance(visibleItems.begin(), it) + 1;
 
                 PushID(&v);
                 BeginGroup();
-
                 TableNextRow();
+                TableNextColumn();
+
+                // Index text
+                if (!isFiltered) Text("%d", idx);
+                else Text("-");
 
                 if (TableNextColumn(); Selectable(v.name.c_str(), v.selected, ImGuiSelectableFlags_SpanAllColumns)) {
                     // Here we implement the common Windows like select stuff
@@ -181,7 +196,7 @@ void ProcessImGui() {
 
                 // Teleport on double click
                 if (IsItemHovered() && IsMouseDoubleClicked(0)) {
-                    DoTeleportTo(findZGround ? GetPositionWithGroundHeight(v.pos) : v.pos, v.areaCode);
+                    DoTeleportTo(s_findZGround ? GetPositionWithGroundHeight(v.pos) : v.pos, v.areaCode);
                 }
 
                 // Position text
@@ -207,7 +222,26 @@ void ProcessImGui() {
     End();
 }
 
-void ProcessRender() {}
+void ProcessRender() {
+    if (CPad::NewKeyState.lctrl) {
+        CPad* pad = CPad::GetPad(0);
+
+        if (pad->IsStandardKeyJustDown('0') && s_prevLocation.selected)
+            DoTeleportTo(s_prevLocation.pos, s_prevLocation.areaCode);
+
+        // check for all digits except 0
+        for (auto i = '1'; i < 'A'; i++) {
+            auto idx = i - '1';
+
+            if (s_SavedLocations.size() <= idx) break;
+            if (!pad->IsStandardKeyJustDown(i)) continue;
+
+            const auto& location = s_SavedLocations[idx];
+
+            DoTeleportTo(s_findZGround ? GetPositionWithGroundHeight(location.pos) : location.pos, location.areaCode);
+        }
+    }
+}
 
 namespace SettingsHandler {
     // Clear all settings
