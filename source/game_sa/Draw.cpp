@@ -25,8 +25,8 @@ void CDraw::InjectHooks() {
 }
 
 // 0x6FF410
-void CDraw::SetFOV(float fovValue) {
-    ms_fFOV = fovValue;
+void CDraw::SetFOV(float fov) {
+    ms_fFOV = fov;
 }
 
 // 0x6FF420
