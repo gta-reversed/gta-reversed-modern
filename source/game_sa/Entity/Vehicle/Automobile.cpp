@@ -84,6 +84,9 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(TellHeliToGoToCoors, 0x6A2390);
     RH_ScopedInstall(TellPlaneToGoToCoors, 0x6A2470);
     RH_ScopedInstall(SetTotalDamage, 0x6A27F0);
+    RH_ScopedInstall(CustomCarPlate_BeforeRenderingStart, 0x6A2F00);
+    RH_ScopedInstall(CustomCarPlate_AfterRenderingStop, 0x6A2F30);
+    
     
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3087,16 +3090,26 @@ void CAutomobile::ReduceHornCounter()
     if (m_nHornCounter) m_nHornCounter--;
 }
 
+static RwTexture*& renderLicensePlateTexture{ *(RwTexture**)0xC1BFD8 };
+
 // 0x6A2F00
 void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model)
 {
-    ((void(__thiscall*)(CAutomobile*, CVehicleModelInfo*))0x6A2F00)(this, model);
+    if (model->m_pPlateMaterial) {
+        renderLicensePlateTexture = RpMaterialGetTexture(model->m_pPlateMaterial);
+        RwTextureAddRef(renderLicensePlateTexture);
+        RpMaterialSetTexture(model->m_pPlateMaterial, m_pCustomCarPlate);
+    }
 }
 
 // 0x6A2F30
 void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model)
 {
-    ((void(__thiscall*)(CAutomobile*, CVehicleModelInfo*))0x6A2F30)(this, model);
+    if (model->m_pPlateMaterial) {
+        RpMaterialSetTexture(model->m_pPlateMaterial, renderLicensePlateTexture);
+        RwTextureDestroy(renderLicensePlateTexture);
+        renderLicensePlateTexture = nullptr;
+    }
 }
 
 // 0x6A2F70
