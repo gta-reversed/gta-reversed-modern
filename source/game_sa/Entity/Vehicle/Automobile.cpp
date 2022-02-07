@@ -94,6 +94,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(ProcessAutoBusDoors, 0x6A38A0);
     RH_ScopedInstall(BoostJumpControl, 0x6A3A60);
     RH_ScopedInstall(StopNitroEffect, 0x6A3E60);
+    RH_ScopedInstall(NitrousControl, 0x6A3EA0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3333,9 +3334,64 @@ void CAutomobile::StopNitroEffect() {
 }
 
 // 0x6A3EA0
-void CAutomobile::NitrousControl(int8 arg0)
+void CAutomobile::NitrousControl(int8 boost)
 {
-    ((void(__thiscall*)(CAutomobile*, int8))0x6A3EA0)(this, arg0);
+    if (boost != 0) {
+        if (boost > 0) {
+            handlingFlags.bNosInst = true;
+            m_fTireTemperature = 1.f;
+            m_nNitroBoosts = boost;
+        } else if (boost < 0) {
+            handlingFlags.bNosInst = false;
+            m_fTireTemperature = 0.f;
+            m_nNitroBoosts = 0;
+        }
+        StopNitroEffect();
+    } else {
+        const auto driverPad = m_pDriver->IsPlayer() ? m_pDriver->AsPlayer()->GetPadFromPlayer() : nullptr;
+
+        if (m_fTireTemperature == 1.f && m_nNitroBoosts > 0) {
+            if (m_nStatus == STATUS_PHYSICS) {
+                if (   !driverPad
+                    || !driverPad->GetCarGunFired()
+                    || driverPad->GetLookLeft()
+                    || driverPad->GetLookRight()
+                    || driverPad->GetLookBehindForCar()
+                ) {
+                    StopNitroEffect();
+                    return;
+                }
+            }
+
+            m_fTireTemperature = -0.000001f; // Just set some small negative value
+
+            if (m_nNitroBoosts >= 101) {
+                StopNitroEffect();
+                return;
+            }
+
+            m_nNitroBoosts -= 1;
+            StopNitroEffect();
+            return;
+        }
+
+        if (m_fTireTemperature >= 0.f) {
+            m_fTireTemperature = std::min(1.f, m_fTireTemperature + std::max(0.25f, 1.f - m_fGasPedal) * (CTimer::GetTimeStep() / 100.f));
+            DoNitroEffect((1.f - m_fTireTemperature) / 2.f);
+        } else {
+            m_fTireTemperature = m_fTireTemperature - CTimer::GetTimeStep() / 100.f;
+            if (m_fTireTemperature < -1.f) {
+                m_fTireTemperature = 0.000001f; // Just set some small positive vaue.
+                if (!m_nNitroBoosts) {
+                    handlingFlags.bNosInst = false;
+                    RemoveUpgrade(eVehicleUpgradePosn::UPGRADE_NITRO);
+                    m_fTireTemperature = 1.f;
+                }
+            }
+
+            DoNitroEffect(m_fGasPedal <= 0.f ? 0.5f : m_fGasPedal * 0.5f + 0.5f);
+        }
+    }
 }
 
 // 0x6A40F0
