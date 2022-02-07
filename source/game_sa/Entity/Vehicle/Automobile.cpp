@@ -90,6 +90,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FixDoor, 0x6A35A0);
     RH_ScopedInstall(FixPanel, 0x6A3670);
     RH_ScopedInstall(PlayHornIfNecessary, 0x6A3820);
+    RH_ScopedInstall(SetBusDoorTimer, 0x6A3860);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3189,9 +3190,10 @@ void CAutomobile::PlayHornIfNecessary() {
 }
 
 // 0x6A3860
-void CAutomobile::SetBusDoorTimer(uint32 time, uint8 arg1)
-{
-    ((void(__thiscall*)(CAutomobile*, uint32, uint8))0x6A3860)(this, time, arg1);
+void CAutomobile::SetBusDoorTimer(uint32 timerEndDelta, bool setAsStartedInPast) {
+    const auto time = setAsStartedInPast ? CTimer::GetTimeInMS() - 500u : CTimer::GetTimeInMS();
+    m_dwBusDoorTimerStart = time;
+    m_dwBusDoorTimerEnd = time + std::max(1000u, timerEndDelta);
 }
 
 // 0x6A38A0
