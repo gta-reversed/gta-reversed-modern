@@ -82,6 +82,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
     RH_ScopedInstall(GetMovingCollisionOffset, 0x6A2150);
     RH_ScopedInstall(TellHeliToGoToCoors, 0x6A2390);
+    RH_ScopedInstall(TellPlaneToGoToCoors, 0x6A2470);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -2983,9 +2984,23 @@ void CAutomobile::ClearHeliOrientation()
 }
 
 // 0x6A2470
+// TODO: Why is this here?
 void CAutomobile::TellPlaneToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax)
 {
-    ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2470)(this, x, y, z, altitudeMin, altitudeMax);
+    m_autoPilot.m_vecDestinationCoors = CVector{ x, y, z };
+    m_autoPilot.m_nCarMission = MISSION_PLANE_FLYTOCOORS;
+    m_autoPilot.m_nCruiseSpeed = 0;
+
+    AsPlane()->m_minAltitude = std::max(altitudeMin, z);
+    AsPlane()->m_maxAltitude = altitudeMax;
+
+    m_nStatus = STATUS_PHYSICS;
+
+    if (m_aircraftGoToHeading == 0.f) {
+        m_aircraftGoToHeading = CGeneral::GetATanOfXY(m_matrix->GetForward().x, m_matrix->GetForward().y);
+    }
+
+    vehicleFlags.bEngineOn = true;
 }
 
 // unused
