@@ -80,6 +80,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FixTyre, 0x6A3580);
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
     RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
+    RH_ScopedInstall(GetMovingCollisionOffset, 0x6A2150);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -2928,7 +2929,25 @@ bool CAutomobile::UpdateMovingCollision(float angle)
 // 0x6A2150
 float CAutomobile::GetMovingCollisionOffset()
 {
-    return ((float(__thiscall*)(CAutomobile*))0x6A2150)(this);
+    if (m_wMiscComponentAngle) {
+        switch (m_nModelIndex) {
+        case eModelID::MODEL_DUMPER:
+            return m_aCarNodes[CAR_MISC_C] ? (float)m_wMiscComponentAngle * CMonsterTruck::DUMPER_COL_ANGLEMULT : 0.0f;
+
+        case eModelID::MODEL_PACKER:
+            return (float)m_wMiscComponentAngle / -10000.f;
+
+        case eModelID::MODEL_DOZER:
+            return m_aCarNodes[CAR_MISC_A] ? (float)m_wMiscComponentAngle / 5000.f : 0.0f;
+
+        case eModelID::MODEL_ANDROM:
+            return m_aCarNodes[CAR_MISC_E] ? (float)m_wMiscComponentAngle * CPlane::ANDROM_COL_ANGLE_MULT : 0.0f;
+
+        case eModelID::MODEL_FORKLIFT:
+            return (float)m_wMiscComponentAngle * 0.0006f; // / 1666.66?
+        }
+    }
+    return 0.f;
 }
 
 // 0x6A2390
