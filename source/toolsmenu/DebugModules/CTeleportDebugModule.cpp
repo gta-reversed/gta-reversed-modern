@@ -12,6 +12,7 @@
 #include <string_view>
 #include <chrono>
 #include "Radar.h"
+#include "enumerate.hpp"
 
 namespace rng = std::ranges;
 using namespace ImGui;
@@ -28,6 +29,7 @@ static std::vector<SavedLocation> s_SavedLocations{};
 static bool                       s_windowOpen{ true };
 static bool                       s_findZGround{ true };
 static SavedLocation              s_prevLocation{};
+static char                       s_nameFilter[1024]{};
 
 namespace TeleportDebugModule {
 
@@ -71,12 +73,12 @@ void ProcessImGui() {
 
     static CVector pos{};
     PushItemWidth(140.f);
-    InputFloat3("", reinterpret_cast<float(&)[3]>(pos), "%.3f"); // Kinda hacky, but it's okay, if this was to break, we'd have bigger problems anyways.
+    InputFloat3("Coords", reinterpret_cast<float(&)[3]>(pos), "%.3f"); // Kinda hacky, but it's okay, if this was to break, we'd have bigger problems anyways.
     PopItemWidth();
 
     static int areaCode{};
-    PushItemWidth(40.f);
-    SameLine(); InputInt("", &areaCode, 0);
+    PushItemWidth(30.f);
+    SameLine(); InputInt("Area", &areaCode, 0);
     PopItemWidth();
 
     // Name input
@@ -146,17 +148,13 @@ void ProcessImGui() {
 
     if (!s_SavedLocations.empty()) {
         // Search tool input
-        static char searchInput[1024]{};
-        InputText("Search", searchInput, std::size(searchInput), ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_AutoSelectAll);
-        const std::string_view searchInputSV{ searchInput };
+        InputText("Search", s_nameFilter, std::size(s_nameFilter), ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_AutoSelectAll);
+        const std::string_view searchInputSV{ s_nameFilter };
 
         // Filter views stuff
         const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || findStringCaseInsensitive(l.name, searchInputSV); };
         const auto visibleFilter = std::views::filter(IsItemVisible);
         auto visibleItems = s_SavedLocations | visibleFilter;
-
-        // Do not show indices if the list is filtered.
-        bool isFiltered = std::distance(visibleItems.begin(), visibleItems.end()) != s_SavedLocations.size();
 
         // Saved positions table
         if (BeginTable("Saved Positions", 5, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
@@ -175,11 +173,7 @@ void ProcessImGui() {
                 PushID(&v);
                 BeginGroup();
                 TableNextRow();
-                TableNextColumn();
-
-                // Index text
-                if (!isFiltered) Text("%d", idx);
-                else Text("-");
+                TableNextColumn(); Text("%d", idx);
 
                 if (TableNextColumn(); Selectable(v.name.c_str(), v.selected, ImGuiSelectableFlags_SpanAllColumns)) {
                     // Here we implement the common Windows like select stuff
@@ -242,15 +236,27 @@ void ProcessInput() {
     if (pad->IsStandardKeyJustDown('0') && s_prevLocation.selected)
         DoTeleportTo(s_prevLocation.pos, s_prevLocation.areaCode);
 
-    // check for all digits except 0
+    // prepare filter stuff
+    const std::string_view searchInputSV{ s_nameFilter };
+    const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || findStringCaseInsensitive(l.name, searchInputSV); };
+    const auto visibleFilter = std::views::filter(IsItemVisible);
+
+    auto visibleItems = s_SavedLocations | visibleFilter;
+    auto posIdx{-1};
+
     for (auto i = '1'; i < 'A'; i++) {
-        auto idx = i - '1';
+        if (pad->IsStandardKeyJustDown(i)) {
+            posIdx = i - '1';
+            break;
+        }
+    }
+    if (posIdx == -1) return;
 
-        if (s_SavedLocations.size() <= idx) break;
-        if (!pad->IsStandardKeyJustDown(i)) continue;
-
-        const auto& location = s_SavedLocations[idx];
-        DoTeleportTo(location.findGround ? GetPositionWithGroundHeight(location.pos) : location.pos, location.areaCode);
+    for (auto&& [i, pos] : enumerate(visibleItems)) {
+        if (i == posIdx) {
+            DoTeleportTo(pos.findGround ? GetPositionWithGroundHeight(pos.pos) : pos.pos, pos.areaCode);
+            break;
+        }
     }
 }
 
