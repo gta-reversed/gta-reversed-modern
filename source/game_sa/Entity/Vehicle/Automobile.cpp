@@ -92,6 +92,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(PlayHornIfNecessary, 0x6A3820);
     RH_ScopedInstall(SetBusDoorTimer, 0x6A3860);
     RH_ScopedInstall(ProcessAutoBusDoors, 0x6A38A0);
+    RH_ScopedInstall(BoostJumpControl, 0x6A3A60);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3243,7 +3244,14 @@ void CAutomobile::ProcessAutoBusDoors() {
 // 0x6A3A60
 void CAutomobile::BoostJumpControl()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A3A60)(this);
+    if (m_pDriver && m_pDriver->IsPlayer()) {
+        if (const auto playerPad = m_pDriver->AsPlayer()->GetPadFromPlayer()) {
+            if (playerPad->HornJustDown() && m_fWheelsSuspensionCompression[0] < 1.f) {
+                ApplyMoveForce(CVector{ 0.f, 0.f, 1.f } * (m_fMass * 0.15f));
+                ApplyTurnForce(m_matrix->GetUp() * (m_fTurnMass / 100.f), m_matrix->GetForward());
+            }
+        }
+    }
 }
 
 // 0x6A3BD0

@@ -332,7 +332,7 @@ public:
     static void SetAllTaxiLights(bool enable);
     // Play horn for NPC vehicle (called @CAutomobile::ProcessAI)
     void PlayHornIfNecessary();
-    void SetBusDoorTimer(uint32 time, uint8 arg1);
+    void SetBusDoorTimer(uint32 time, bool setAsStartedInPast);
     void ProcessAutoBusDoors();
     // Make player vehicle jumps when pressing horn
     void BoostJumpControl();
