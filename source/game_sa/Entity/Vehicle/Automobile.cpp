@@ -100,6 +100,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(TowTruckControl, 0x6A40F0);
     RH_ScopedInstall(KnockPedOutCar, 0x6A44C0);
     RH_ScopedInstall(PopBootUsingPhysics, 0x6A44D0);
+    RH_ScopedInstall(CloseAllDoors, 0x6A4520);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -1453,6 +1454,7 @@ float CAutomobile::GetDooorAngleOpenRatio(uint32 door)
     case 18:
         return 0.0f;
     default:
+        assert(0); // Prevent usage mistakes - There's is an eDoors overload, and if an int literal is used instead of the enum this function will be called incorrectly.
         return 0.0f;
     }
 }
@@ -1484,6 +1486,7 @@ bool CAutomobile::IsDoorReady(uint32 door)
     case 18:
         return true;
     default:
+        assert(0); // Prevent usage mistakes - There's is an eDoors overload, and if an int literal is used instead of the enum this function will be called incorrectly.
         return false;
     }
 }
@@ -1515,6 +1518,7 @@ bool CAutomobile::IsDoorFullyOpen(uint32 door)
     case 18:
         return false;
     default:
+        assert(0); // Prevent usage mistakes - There's is an eDoors overload, and if an int literal is used instead of the enum this function will be called incorrectly.
         return false;
     }
 }
@@ -1540,6 +1544,7 @@ bool CAutomobile::IsDoorClosed(uint32 door)
     case 18:
         return false;
     default:
+        assert(0); // Prevent usage mistakes - There's is an eDoors overload, and if an int literal is used instead of the enum this function will be called incorrectly.
         return false;
     }
 }
@@ -1547,7 +1552,7 @@ bool CAutomobile::IsDoorClosed(uint32 door)
 // 0x6A2330
 bool CAutomobile::IsDoorMissing(eDoors door)
 {
-    return m_damageManager.GetDoorStatus(door) == 4;
+    return m_damageManager.GetDoorStatus(door) == DAMSTATE_NOTPRESENT;
 }
 
 // 0x6A6500
@@ -1565,6 +1570,7 @@ bool CAutomobile::IsDoorMissing(uint32 door)
     case 18:
         return true;
     default:
+        assert(0); // Prevent usage mistakes - There's is an eDoors overload, and if an int literal is used instead of the enum this function will be called incorrectly.
         return false;
     }
 }
@@ -3482,7 +3488,25 @@ void CAutomobile::PopBootUsingPhysics()
 // 0x6A4520
 void CAutomobile::CloseAllDoors()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A4520)(this);
+    const auto& mi = *GetModelInfo()->AsVehicleModelInfoPtr();
+
+    const auto CloseDoor = [this](tComponent comp, eDoors door) {
+        if (!IsDoorMissing(door)) {
+            OpenDoor(nullptr, comp, door, 0.f, true);
+        }
+    };
+
+    assert(mi.m_nNumDoors > 0);
+    CloseDoor(tComponent::COMPONENT_DOOR_RR, eDoors::DOOR_LEFT_FRONT); // TODO: Again, enums dont seem to match up..
+    if (mi.m_nNumDoors > 1) {
+        CloseDoor(tComponent::COMPONENT_DOOR_RF, eDoors::DOOR_RIGHT_FRONT);
+        if (mi.m_nNumDoors > 2) {
+            assert(mi.m_nNumDoors == 4); // Pirulax: May assert, I'm not sure. Let me know if it did.
+
+            CloseDoor(tComponent::COMPONENT_WING_LF, eDoors::DOOR_LEFT_REAR); // TODO: Enums dont match at all..
+            CloseDoor(tComponent::COMPONENT_DOOR_LR, eDoors::DOOR_RIGHT_REAR);
+        }
+    }
 }
 
 void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
