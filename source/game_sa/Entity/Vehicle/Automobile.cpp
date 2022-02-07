@@ -86,8 +86,8 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetTotalDamage, 0x6A27F0);
     RH_ScopedInstall(CustomCarPlate_BeforeRenderingStart, 0x6A2F00);
     RH_ScopedInstall(CustomCarPlate_AfterRenderingStop, 0x6A2F30);
-    
-    
+    RH_ScopedInstall(GetAllWheelsOffGround, 0x6A2F70);
+
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
     RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
@@ -3115,7 +3115,7 @@ void CAutomobile::CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model)
 // 0x6A2F70
 bool CAutomobile::GetAllWheelsOffGround()
 {
-    return ((bool(__thiscall*)(CAutomobile*))0x6A2F70)(this);
+    return m_nWheelsOnGround == 0;
 }
 
 // 0x6A2F80
