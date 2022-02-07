@@ -186,7 +186,7 @@ public:
     float GetHeightAboveRoad() override;
     void PlayCarHorn() override;
     int32 GetNumContactWheels() override;
-    void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
+    void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
     bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
     bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
     bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
@@ -427,7 +427,7 @@ private:
     float GetHeightAboveRoad_Reversed() { return CAutomobile::GetHeightAboveRoad(); }
     void PlayCarHorn_Reversed() { CAutomobile::PlayCarHorn(); }
     int32 GetNumContactWheels_Reversed() { return CAutomobile::GetNumContactWheels(); }
-    void VehicleDamage_Reversed(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
+    void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
     bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(outPos, bCheckModelInfo, veh); }
     bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(outPos, bCheckModelInfo, veh); }
     bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CAutomobile::SetTowLink(targetVehicle, arg1); }

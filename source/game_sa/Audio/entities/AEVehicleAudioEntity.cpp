@@ -469,6 +469,10 @@ void CAEVehicleAudioEntity::Terminate() {
     m_bEnabled = false;
 }
 
+uint32 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
+    return plugin::CallMethodAndReturn<uint32, 0x4F4F00>(this);
+}
+
 void CAEVehicleAudioEntity::PlaySkidSound(int16 soundType, float speed, float volume) {
     plugin::CallMethod<0x4F8360, CAEAudioEntity*, int16, float, float>(this, soundType, speed, volume);
 }

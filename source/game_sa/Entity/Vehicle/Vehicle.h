@@ -129,6 +129,24 @@ enum tWheelState : int32 {
     WHEEL_STATE_FIXED,	  // not rotating
 };
 
+enum class eVehicleCollisionComponent : uint16
+{
+    DEFAULT = 0x0,
+    BONNET = 0x1,
+    BOOT = 0x2,
+    BUMP_FRONT = 0x3,
+    BUMP_REAR = 0x4,
+    DOOR_LF = 0x5,
+    DOOR_RF = 0x6,
+    DOOR_LR = 0x7,
+    DOOR_RR = 0x8,
+    WING_LF = 0x9,
+    WING_RF = 0xA,
+    WING_LR = 0xB,
+    WING_RR = 0xC,
+    WINDSCREEN = 0x13,
+};
+
 struct tHydrualicData {
     // applied when the vehicle is moving
     // or when hopping keys are pressed (numpad keys)
@@ -443,7 +461,7 @@ public:
     virtual float GetHeightAboveRoad();
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
-    virtual void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
+    virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
@@ -496,7 +514,7 @@ public:
     void CustomCarPlate_TextureDestroy();
     bool CanBeDeleted();
     float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
-    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2);
+    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8& arg2);
     void ProcessDelayedExplosion();
     bool AddPassenger(CPed* passenger);
     bool AddPassenger(CPed* passenger, uint8 seatNumber);

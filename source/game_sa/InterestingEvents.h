@@ -16,6 +16,7 @@ public:
         // 15 CEventHandler::ComputeDamageResponse
         // 16 CEventHandler::ComputeKnockOffBikeResponse
         // 17 CAutomobile::VehicleDamage
+        VEHICLE_DAMAGE = 17,
         // 18 CTaskComplexRoadRage::CreateFirstSubTask
         // 19 CTaskComplexKillPedOnFootMelee::CreateFirstSubTask
         // 20 CEventHandler::ComputePedEnteredVehicleResponse

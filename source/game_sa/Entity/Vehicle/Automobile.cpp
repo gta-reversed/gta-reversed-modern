@@ -85,6 +85,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
     RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
     RH_ScopedInstall(PlayCarHorn_Reversed, 0x6A3770);
+    RH_ScopedInstall(VehicleDamage_Reversed, 0x6A7650);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -245,7 +246,7 @@ void CAutomobile::ProcessControl()
         m_nFakePhysics = 0;
     }
 
-    VehicleDamage(0.0f, 0, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
+    VehicleDamage(0.0f, eVehicleCollisionComponent::DEFAULT, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
     if (m_nStatus == STATUS_PLAYER && ModelIndices::HasWaterCannon(m_nModelIndex)) {
         FireTruckControl(nullptr);
     }
@@ -1853,26 +1854,30 @@ int32 CAutomobile::GetNumContactWheels()
 }
 
 // 0x6A7650
-void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
+void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
 {
-    if (!vehicleFlags.bWarnedPeds) {
+    assert(this);
+
+    if (!vehicleFlags.bCanBeDamaged) {
         return;
     }
 
     assert(m_matrix);
 
     float minDmgIntensity{ 25.f };
-    float calcDmgIntensity{m_fDamageIntensity};
-    float collFxForceMult{};
+    float calcDmgIntensity{ damageIntensity };
+    float collForceMult{ 1.f / 3.f };
 
     if (damageIntensity == 0.f) {
         // Man this is so stupid..
         vecCollisionDirection = &m_vecLastCollisionImpactVelocity;
         vecCollisionCoors     = &m_vecLastCollisionPosn;
         damager               = m_pDamageEntity;
+        collisionComponent    = (eVehicleCollisionComponent)m_nPieceType;
 
-        collFxForceMult = 1.f / x3.f;
-        minDmgIntensity = m_fMass / 1500.f * 25.f;
+        collForceMult = 1.f;
+        minDmgIntensity  = m_fMass / 1500.f * 25.f;
+        calcDmgIntensity = m_fDamageIntensity;
 
         // 0x6A7705
         if (m_matrix->GetUp().z < 0.f/*is flipped*/ && this != FindPlayerVehicle()) {
@@ -1944,11 +1949,11 @@ void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent
         }
     } else {
         // 0x6A7BE5
-        if (!CanVehicleBeDamaged(damager, weapon, nullptr)) {
+        if (uint8 unused{}; !CanVehicleBeDamaged(damager, weapon, unused)) {
             return;
         }
 
-        collFxForceMult = 1.f;
+        collForceMult = 1.f;
     }
 
     // 0x6A78F0
@@ -1980,7 +1985,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent
 
     // 0x6A79AB (Condition inverted)
     if (calcDmgIntensity > minDmgIntensity && m_nStatus != STATUS_WRECKED) {
-
+        printf("calcDmgIntensity: %.2f\n", calcDmgIntensity);
         // 0x6A79C7
         // If we're a law enforcer, and the damager is the 
         // player's vehicle increase their wanted level.
@@ -2014,18 +2019,239 @@ void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent
         }
 
         // Store light states, so later we can determine if any was blown
-        // and play the necessary fx sound
+        // and play the fx sound
         const auto prevLightStates = m_damageManager.GetAllLightsState();
 
         if (m_nStatus == STATUS_PLAYER) {
             FindPlayerInfo().m_nVehicleTimeCounter = CTimer::GetTimeInMS();
         }
 
-        if (m_vecMoveSpeed.SquaredMagnitude() > 0.02f * 0.02f) {
-            dmgDrawCarCollidingParticles(vecCollisionCoors, calcDmgIntensity* collFxForceMult, weapon);
+        // 0x6A7B63
+        const auto moveSpeedMagSq = m_vecMoveSpeed.SquaredMagnitude();
+        if (moveSpeedMagSq > 0.02f * 0.02f) {
+            dmgDrawCarCollidingParticles(vecCollisionCoors, calcDmgIntensity * collForceMult, weapon);
         }
 
+        if (m_matrix->GetUp().z > 0.f /*Not flipped on roof*/ || moveSpeedMagSq > 0.3f) {
+            const auto ApplyDamageToComponent = [this, intensity = calcDmgIntensity * 4.f](tComponent c) {
+                m_damageManager.ApplyDamage(this, c, intensity, m_pHandlingData->m_fCollisionDamageMultiplier);
+            };
 
+            // Returned value:
+            // [-oo, 0] - Left side (In bounding box if: [-1, 0] )
+            // [0, +oo] - Right side (In bounding box if: [0, 1] )
+            const auto GetCollisionPointLocalDirection = [&, this] {
+                const auto collDirDotRight = DotProduct(vecCollisionCoors - GetPosition() , m_matrix->GetRight());
+
+                // Since the dot product is scaled by the distance of the collision point from us
+                // If we divide it by the width of our bounding box we can determinate how far
+                // the point is:
+                // [-oo, 0] - Left side (In bounding box if: [-1, 0] )
+                // [0, +oo] - Right side (In bounding box if: [0, 1] )
+            #ifdef FIX_BUGS
+                return collDirDotRight / (GetColModel()->m_boundBox.GetWidth() / 2.f);
+            #else
+                // Must be positive, otherwise calculation below might not work (Adding abs might help?)
+                // Also, here they rely on the fact that all bounding boxes are symmetrical split by the Y axis
+                // Which is true for all vehicle models in the vanilla SA (AFAIK)
+                // But in order to prevent weird bugs we gotta do it the right way.
+                assert(GetColModel()->m_boundBox.m_vecMax.x > 0.f); 
+                return collDirDotRight / GetColModel()->m_boundBox.m_vecMax.x;
+            #endif  
+            };
+
+            switch (collisionComponent) {
+            case eVehicleCollisionComponent::BONNET:
+                ApplyDamageToComponent(tComponent::COMPONENT_BONNET);
+                break;
+            case eVehicleCollisionComponent::BOOT:
+                ApplyDamageToComponent(tComponent::COMPONENT_BOOT);
+                break;
+            case eVehicleCollisionComponent::BUMP_FRONT: {
+                ApplyDamageToComponent(tComponent::COMPONENT_BUMP_FRONT);
+
+                const auto localDir       = GetCollisionPointLocalDirection();
+                const auto colDirDotRight = DotProduct(*vecCollisionDirection, m_matrix->GetRight());
+
+                // Possibly apply right/left wing damage based on direction
+                if (   localDir > 0.7f // [0, 45] deg
+                    || localDir > 0.5f && colDirDotRight < -0.5f && m_fMass * 0.35f < calcDmgIntensity
+                ) {
+                    ApplyDamageToComponent(tComponent::COMPONENT_WING_RF);
+                } else if (
+                       localDir > -0.7f // [90, 135] deg
+                    || localDir > -0.5f && colDirDotRight > 0.5f && m_fMass * 0.35f < calcDmgIntensity
+                ) {
+                    ApplyDamageToComponent(tComponent::COMPONENT_WING_LF);
+                }
+
+                // Possibly apply bonnet damage if front bumper is not `ok`
+                if (   m_damageManager.GetPanelStatus(ePanels::FRONT_BUMPER) != DAMSTATE_OK && m_fMass * 0.2f < calcDmgIntensity
+                    || weapon < WEAPON_LAST_WEAPON && (rand() % 3 == 0) // If it was a weapon, apply damage by randomly
+                ) {
+                    ApplyDamageToComponent(tComponent::COMPONENT_BONNET);
+                }
+
+                // Possibly apply windscreen damage if front bumper is `damaged`
+                if (m_damageManager.GetPanelStatus(ePanels::FRONT_BUMPER) >= DAMSTATE_DAMAGED && m_fMass * 0.2f < calcDmgIntensity) {
+                    ApplyDamageToComponent(tComponent::COMPONENT_WINDSCREEN);
+                }
+                break;
+            }
+            case eVehicleCollisionComponent::BUMP_REAR: {
+                ApplyDamageToComponent(tComponent::COMPONENT_BUMP_REAR);
+
+                const auto localDir = GetCollisionPointLocalDirection();
+
+                // If this is a van possibly apply damage to the rear doors
+                if (vehicleFlags.bIsVan && m_fMass * 0.35f < calcDmgIntensity) {
+                    if (localDir > 0.1f) { // [-90, -85] deg
+                        ApplyDamageToComponent(tComponent::COMPONENT_DOOR_RR);
+                    } else if (localDir < -0.1f) { // [-95, -90]
+                        ApplyDamageToComponent(tComponent::COMPONENT_DOOR_LR);
+                    }
+                }
+
+                // Possibly apply damage to boot if not already damaged
+                if (m_damageManager.GetPanelStatus(ePanels::REAR_BUMPER) < DAMSTATE_DAMAGED) {
+                    ApplyDamageToComponent(tComponent::COMPONENT_BOOT);
+                }
+
+
+                break;
+            }
+            case eVehicleCollisionComponent::DOOR_LF:
+                ApplyDamageToComponent(tComponent::COMPONENT_DOOR_LF);
+                break;
+            case eVehicleCollisionComponent::DOOR_RF:
+                ApplyDamageToComponent(tComponent::COMPONENT_DOOR_RF);
+                break;
+            case eVehicleCollisionComponent::DOOR_LR:
+                ApplyDamageToComponent(tComponent::COMPONENT_DOOR_LR);
+                break;
+            case eVehicleCollisionComponent::DOOR_RR:
+                ApplyDamageToComponent(tComponent::COMPONENT_DOOR_RR);
+                break;
+            case eVehicleCollisionComponent::WING_LF:
+                ApplyDamageToComponent(tComponent::COMPONENT_WING_LF);
+                break;
+            case eVehicleCollisionComponent::WING_RF:
+                ApplyDamageToComponent(tComponent::COMPONENT_WING_RF);
+                break;
+            case eVehicleCollisionComponent::WINDSCREEN:
+                ApplyDamageToComponent(tComponent::COMPONENT_WINDSCREEN);
+                break;
+            }
+        }
+
+        // 0x6A8052
+        auto calcCollHealthLoss = (calcDmgIntensity - minDmgIntensity) * m_pHandlingData->m_fCollisionDamageMultiplier * 0.6f * collForceMult;
+
+        switch (m_nModelIndex) {
+        case eModelID::MODEL_SECURICA: {
+            if (m_pDamageEntity && m_pDamageEntity->GetStatus() == STATUS_PLAYER) {
+                calcCollHealthLoss *= 7.f;
+            }
+            break;
+        }
+        case eModelID::MODEL_RCRAIDER:
+        case eModelID::MODEL_RCGOBLIN:
+        case eModelID::MODEL_RCTIGER: {
+            calcCollHealthLoss *= 30.f;
+            break;
+        }
+        }
+
+        if (m_pDamageEntity && ModelIndices::IsRhino(m_pDamageEntity->m_nModelIndex)) {
+            calcCollHealthLoss *= 15.f;
+        }
+
+        // 0x6A80E1
+        if (calcCollHealthLoss > 0.f) {
+            if (calcCollHealthLoss > 5.f) {
+                if (m_pDamageEntity) {
+                    if (m_pDamageEntity->IsVehicle()) {
+                        const auto& damagedVeh = *m_pDamageEntity->AsVehicle();
+
+                        if (damagedVeh.m_pDriver && m_pDriver) {
+                            // Add collision event
+                            {
+                                const auto ProcessEvent = [](CVehicle& damager, CVehicle& reciever) {
+                                    CEventVehicleDamageCollision event{ &damager, &reciever, WEAPON_RAMMEDBYCAR };
+                                    damager.m_pDriver->GetEventGroup().Add(&event);
+                                };
+
+                                if (DotProduct(
+                                    m_pDamageEntity->AsPhysical()->m_vecMoveSpeed - m_vecMoveSpeed,
+                                    m_vecLastCollisionImpactVelocity
+                                ) < 0.f // Forces are opposite
+                                    ) {
+                                    ProcessEvent(*this, *m_pDamageEntity->AsVehicle());
+                                }
+                                else {
+                                    ProcessEvent(*m_pDamageEntity->AsVehicle(), *this);
+                                }
+                            }
+
+                            // Make our driver say something reacting to the collision..
+                            if (&damagedVeh != FindPlayerVehicle() || damagedVeh.IsMissionVehicle()) {
+                                switch (m_vehicleAudio.GetVehicleTypeForAudio()) {
+                                case 1:
+                                    m_pDriver->Say(66);
+                                    break;
+                                case 0:
+                                    m_pDriver->Say(67);
+                                    break;
+                                default:
+                                    m_pDriver->Say(68);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (this == FindPlayerVehicle()) {
+                        if (const auto p = PickRandomPassenger()) {
+                            p->Say(m_pDamageEntity->IsPed() ? 36 : 29);
+                        }
+                    }
+                }
+                g_InterestingEvents.Add(CInterestingEvents::EType::VEHICLE_DAMAGE, this);
+            }
+
+            // Had to re-order all this mess.
+            
+            // Decrease m_fHealth
+            const auto prevHealth = m_fHealth;
+
+            // 0x6A82CB
+            if (this == FindPlayerVehicle()->AsAutomobile()) {
+                m_fHealth -= vehicleFlags.bTakeLessDamage ? calcCollHealthLoss / 6.f : calcCollHealthLoss / 2.f;
+            } else if (vehicleFlags.bTakeLessDamage) {
+                m_fHealth -= calcCollHealthLoss / 12.f;
+            } else {
+                if (m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle()) {
+                    m_fHealth -= calcCollHealthLoss / 1.5f;
+                }
+                else {
+                    m_fHealth -= calcCollHealthLoss / 4.f;
+                }
+            }
+            printf("Health: %.2f (Loss: %.2f) \n", m_fHealth, prevHealth - m_fHealth);
+            // 0x6A8338
+            if (CCheat::m_aCheatsActive[eCheats::CHEAT_SMASH_N_BOOM] && m_pDamageEntity && m_pDamageEntity == FindPlayerVehicle()) {
+                BlowUpCar(m_pDamageEntity, false);
+            }
+            else if (m_fHealth <= 0.f && (uint16)prevHealth > 0) { // 0x6A8354
+                m_fHealth = 1.f; // 0x6A8374
+                if (m_pDamageEntity && ModelIndices::IsRhino(m_nModelIndex) && FindPlayerVehicle()->AsAutomobile() != this) {
+                    BlowUpCar(m_pDamageEntity, false);
+                }
+            }
+        }
+
+        if (!std::ranges::equal(prevLightStates, m_damageManager.GetAllLightsState())) { // Check if a light was smashed
+            m_vehicleAudio.AddAudioEvent(AE_LIGHT_SMASH, 0.f); // Yeah, play sound
+        }
     }
 
     // 0x6A83DF

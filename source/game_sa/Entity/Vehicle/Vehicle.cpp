@@ -1310,9 +1310,9 @@ float CVehicle::ProcessWheelRotation(tWheelState wheelState, const CVector& arg1
 }
 
 // 0x6D1280
-bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2)
+bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8& arg2)
 {
-    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, uint8*))0x6D1280)(this, damager, weapon, arg2);
+    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, uint8*))0x6D1280)(this, damager, weapon, &arg2);
 }
 
 // 0x6D1340

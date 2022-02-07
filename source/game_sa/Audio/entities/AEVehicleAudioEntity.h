@@ -201,7 +201,7 @@ public:
     void    Service();
     void    Initialise(CEntity* entity);
     void    Terminate();
-    void    GetVehicleTypeForAudio();
+    uint32    GetVehicleTypeForAudio();
     void    IsAccInhibited(cVehicleParams& params);
     void    IsAccInhibitedBackwards(cVehicleParams& params);
     void    IsAccInhibitedForLowSpeed(cVehicleParams& params);
