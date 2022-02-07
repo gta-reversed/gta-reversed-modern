@@ -88,6 +88,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(CustomCarPlate_AfterRenderingStop, 0x6A2F30);
     RH_ScopedInstall(GetAllWheelsOffGround, 0x6A2F70);
     RH_ScopedInstall(FixDoor, 0x6A35A0);
+    RH_ScopedInstall(FixPanel, 0x6A3670);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3148,9 +3149,23 @@ void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
 }
 
 // 0x6A3670
-void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel)
-{
-    ((void(__thiscall*)(CAutomobile*, int32, ePanels))0x6A3670)(this, nodeIndex, panel);
+void CAutomobile::FixPanel(int32 nodeIndex, ePanels panel) {
+    m_damageManager.SetPanelStatus(panel, DAMSTATE_OK);
+
+    // Remove any bouncing panels belonging to this node
+    for (auto&& panel : m_panels) {
+        if (panel.m_nFrameId == nodeIndex) {
+            panel.ResetPanel();
+        }
+    }
+
+    if (const auto frame = m_aCarNodes[nodeIndex]) { // Same code as in FixDoor.. Maybe this was a standalone function, like "FixNode"?
+        SetComponentVisibility(frame, 1);
+
+        CMatrix mat{ RwFrameGetLTM(frame), false };
+        mat.SetTranslate(GetPosition());
+        mat.UpdateRW();
+    }
 }
 
 // 0x6A3740

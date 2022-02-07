@@ -382,7 +382,6 @@ public:
     void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
     CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
