@@ -98,6 +98,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(StopNitroEffect, 0x6A3E60);
     RH_ScopedInstall(NitrousControl, 0x6A3EA0);
     RH_ScopedInstall(TowTruckControl, 0x6A40F0);
+    RH_ScopedInstall(KnockPedOutCar, 0x6A44C0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3456,7 +3457,7 @@ void CAutomobile::TowTruckControl()
 // 0x6A44C0
 CPed* CAutomobile::KnockPedOutCar(eWeaponType arg0, uint16 arg1, CPed* arg2)
 {
-    return ((CPed * (__thiscall*)(CAutomobile*, eWeaponType, uint16, CPed*))0x6A44C0)(this, arg0, arg1, arg2);
+    return arg2;
 }
 
 // 0x6A44D0
