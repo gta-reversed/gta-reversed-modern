@@ -87,6 +87,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(CustomCarPlate_BeforeRenderingStart, 0x6A2F00);
     RH_ScopedInstall(CustomCarPlate_AfterRenderingStop, 0x6A2F30);
     RH_ScopedInstall(GetAllWheelsOffGround, 0x6A2F70);
+    RH_ScopedInstall(FixDoor, 0x6A35A0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3131,9 +3132,19 @@ void CAutomobile::FixTyre(eWheels wheel)
 }
 
 // 0x6A35A0
-void CAutomobile::FixDoor(int32 nodeIndex, eDoors door)
-{
-    ((void(__thiscall*)(CAutomobile*, int32, eDoors))0x6A35A0)(this, nodeIndex, door);
+void CAutomobile::FixDoor(int32 nodeIndex, eDoors door) {
+    if (!m_pHandlingData->m_bNoDoors) {
+        m_doors[door].Open(0.f);
+        m_damageManager.SetDoorStatus(door, DAMSTATE_OK);
+        if (const auto frame = m_aCarNodes[nodeIndex]) {
+            SetComponentVisibility(frame, 1);
+
+            // Reset it's matrix
+            CMatrix mat{ RwFrameGetLTM(frame), false };
+            mat.SetTranslate(GetPosition());
+            mat.UpdateRW();
+        }
+    }
 }
 
 // 0x6A3670
