@@ -90,6 +90,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetTowBarPos_Reversed, 0x6AF250);
     RH_ScopedInstall(SetTowLink_Reversed, 0x6B4410);
     RH_ScopedInstall(BreakTowLink_Reversed, 0x6A4400);
+    RH_ScopedInstall(FindWheelWidth_Reversed, 0x6A6090);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -2459,7 +2460,36 @@ bool CAutomobile::BreakTowLink() {
 // 0x6A6090
 float CAutomobile::FindWheelWidth(bool bRear)
 {
-    return plugin::CallMethodAndReturn<float, 0x6A6090, CAutomobile*>(this);
+    constexpr struct { eVehicleHandlingFlags flag; float mult; } mapping[2][4]{
+        { // Rear wheel
+            {VEHICLE_HANDLING_WHEEL_R_NARROW2, 0.65f},
+            {VEHICLE_HANDLING_WHEEL_R_NARROW, 0.8f},
+            {VEHICLE_HANDLING_WHEEL_R_WIDE, 1.1f},
+            {VEHICLE_HANDLING_WHEEL_R_WIDE2, 1.25}
+        },
+        { // Front wheel
+            {VEHICLE_HANDLING_WHEEL_F_NARROW2, 0.65f},
+            {VEHICLE_HANDLING_WHEEL_F_NARROW, 0.8f},
+            {VEHICLE_HANDLING_WHEEL_F_WIDE, 1.1f},
+            {VEHICLE_HANDLING_WHEEL_F_WIDE2, 1.25}
+        }
+    };
+
+    const auto& mi = *GetModelInfo()->AsVehicleModelInfoPtr();
+
+    auto wheelWidth = (bRear ? mi.m_fWheelSizeRear : mi.m_fWheelSizeFront) / 2.8f;
+    if (m_nModelIndex == eModelID::MODEL_KART) {
+        wheelWidth *= 1.5f;
+    }
+
+    // Find first flag an apply it, and return that as the result
+    for (auto&& [flag, mult] : mapping[bRear ? 1 : 0]) {
+        if (m_nHandlingFlagsIntValue & flag) {
+            return wheelWidth * mult;
+        }
+    }
+
+    return wheelWidth;
 }
 
 // 0x5D47E0
