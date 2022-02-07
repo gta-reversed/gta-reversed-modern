@@ -12,13 +12,16 @@ public:
     uint16 m_wNodeId{(uint16)-1u};
 
     constexpr CNodeAddress() = default;
-    constexpr CNodeAddress(int16 areaId, int16 nodeId) : m_wAreaId(areaId), m_wNodeId(nodeId) {}
+    constexpr CNodeAddress(uint16 areaId, uint16 nodeId) : m_wAreaId(areaId), m_wNodeId(nodeId) {}
 
     bool operator==(CNodeAddress const&) const = default;
     bool operator!=(CNodeAddress const&) const = default;
 
+    inline bool IsAreaValid() {
+        return m_wAreaId != (uint16)-1;
+    }
     inline bool IsValid() {
-        return m_wAreaId != -1 || m_wNodeId != -1;
+        return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1;
     }
 };
 

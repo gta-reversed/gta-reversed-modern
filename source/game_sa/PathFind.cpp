@@ -20,8 +20,16 @@ void CPathFind::InjectHooks()
 {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
+    RH_ScopedInstall(Init, 0x44D080);
+    RH_ScopedInstall(ReInit, 0x44E4E0);
+    RH_ScopedInstall(Shutdown, 0x450950);
+    RH_ScopedInstall(TidyUpNodeSwitchesAfterMission, 0x44D3B0);
+    RH_ScopedInstall(UnMarkAllRoadNodesAsDontWander, 0x44D400);
+    RH_ScopedInstall(RemoveForbiddenForScriptedCars, 0x44DD00);
+    RH_ScopedInstall(MarkRoadNodeAsDontWander, 0x450560);
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
+    RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
 }
 
 void CPathNode::InjectHooks() {
@@ -35,9 +43,9 @@ CVector CPathNode::GetNodeCoors()
     return UncompressLargeVector(m_posn);
 }
 
+// 0x44D080
 void CPathFind::Init()
 {
-    plugin::CallMethod<0x44D080, CPathFind*>(this);
     static int32 NumTempExternalNodes = 0; //Unused
     m_dwNumForbiddenAreas = 0;
     m_bForbiddenForScriptedCarsEnabled = false;
@@ -55,9 +63,43 @@ void CPathFind::Init()
     memset(m_aInteriorNodes, 0xFF, sizeof(m_aInteriorNodes));
 }
 
+// 0x44E4E0
+void CPathFind::ReInit() {
+    m_dwNumForbiddenAreas = 0;
+    m_bForbiddenForScriptedCarsEnabled = false;
+}
+
 // 0x450950
 void CPathFind::Shutdown() {
-    plugin::CallMethod<0x450950, CPathFind*>(this);
+    for (auto i = 0u; i < 8; ++i) {
+        for (auto k = 0u; k < 8; ++k) {
+            auto modelIndex = RESOURCE_ID_DAT + i + (k * 8);
+            if (m_pPathNodes[k * 8 + i])
+                CStreaming::RemoveModel(modelIndex);
+        }
+    }
+}
+
+// 0x44D3B0
+void CPathFind::TidyUpNodeSwitchesAfterMission() {
+    m_dwNumForbiddenAreas = std::min(54u, m_dwNumForbiddenAreas);
+}
+
+// 0x44D400
+void CPathFind::UnMarkAllRoadNodesAsDontWander() {
+    for (auto i = 0u; i < NUM_PATH_MAP_AREAS; ++i) {
+        if (!m_pPathNodes[i])
+            continue;
+
+        for (auto nodeInd = 0u; nodeInd < m_dwNumVehicleNodes[i]; ++nodeInd) {
+            m_pPathNodes[i][nodeInd].m_bDontWander = false;
+        }
+    }
+}
+
+// 0x44DD00
+void CPathFind::RemoveForbiddenForScriptedCars() {
+    m_bForbiddenForScriptedCarsEnabled = false;
 }
 
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress)
@@ -102,6 +144,15 @@ void CPathFind::SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, floa
     return plugin::CallMethod<0x44D960, CPathFind*, float, float, float, float, bool>(this, fXMin, fXMax, fYMin, fYMax, bTrainCrossing);
 }
 
+// 0x450560
+void CPathFind::MarkRoadNodeAsDontWander(float x, float y, float z) {
+    auto node = FindNodeClosestToCoors(x, y, z, 0, 999999.88f, 0, 0, 0, 0, 0);
+    if (!node.IsValid())
+        return;
+
+    m_pPathNodes[node.m_wAreaId][node.m_wNodeId].m_bDontWander = true;
+}
+
 CPathNode *CPathFind::GetPathNode(CNodeAddress address)
 {
     return ((CPathNode *(__thiscall *)(CPathFind *, CNodeAddress))0x420AC0)(this, address);
@@ -114,7 +165,19 @@ int32 CPathFind::LoadPathFindData(RwStream *stream, int32 index)
 
 void CPathFind::UnLoadPathFindData(int32 index)
 {
-    return plugin::CallMethod<0x44D0F0, CPathFind*, int32>(this, index);
+    delete[] m_pPathNodes[index];
+    delete[] m_pNaviNodes[index];
+    delete[] m_pNodeLinks[index];
+    delete[] m_pNaviLinks[index];
+    delete[] m_pLinkLengths[index];
+    delete[] m_pPathIntersections[index];
+
+    m_pPathNodes[index] = nullptr;
+    m_pNaviNodes[index] = nullptr;
+    m_pNodeLinks[index] = nullptr;
+    m_pNaviLinks[index] = nullptr;
+    m_pLinkLengths[index] = nullptr;
+    m_pPathIntersections[index] = nullptr;
 }
 
 int32 CPathFind::LoadSceneForPathNodes(CVector point)
@@ -127,11 +190,13 @@ bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
     return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
 }
 
-CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance,
+CNodeAddress CPathFind::FindNodeClosestToCoors(float X, float Y, float Z, int32 _nodeType, float maxDistance,
     uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6)
 {
-    return plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int32, float,
-        uint16, int32, uint16, uint16, int32>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+    CNodeAddress tempAddress;
+    plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int32, float, uint16, int32, uint16, uint16, int32>(
+        this, &tempAddress, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+    return tempAddress;
 }
 
 // 0x44D2B0
@@ -179,5 +244,5 @@ CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, CNodeAddress address
             return CNodeAddress(NUM_PATH_MAP_AREAS + interiorInd, nodeId);
     }
 
-    return CNodeAddress((int16)-1u, addressToFind.m_wNodeId);
+    return CNodeAddress((uint16)-1, addressToFind.m_wNodeId);
 }

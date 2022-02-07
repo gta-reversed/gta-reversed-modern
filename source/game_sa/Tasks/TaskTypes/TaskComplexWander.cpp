@@ -43,8 +43,8 @@ CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderS
     m_nMoveState = moveState;
     m_nDir = dir;
     m_fTargetRadius = fTargetRadius;
-    m_LastNode.m_wAreaId = -1;
-    m_NextNode.m_wAreaId = -1;
+    m_LastNode.m_wAreaId = (uint16)-1;
+    m_NextNode.m_wAreaId = (uint16)-1;
     m_nFlags = 0xF0;
     m_bWanderSensibly = bWanderSensibly;
     m_nLastUpdateDirFrameCount = 0;
@@ -134,7 +134,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
             m_nDir++;
             UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8*)& m_nDir);
 
-            if (m_NextNode.m_wAreaId != -1 && m_LastNode.m_wAreaId != -1)
+            if (m_NextNode.IsAreaValid() && m_LastNode.IsAreaValid())
             {
                 if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId)
                 {
@@ -258,8 +258,8 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
     if (m_bNewDir && subTaskId == TASK_SIMPLE_GO_TO_POINT)
     {
         m_bNewDir = 0;
-        m_NextNode.m_wAreaId = -1;
-        m_LastNode.m_wAreaId = -1;
+        m_NextNode.m_wAreaId = (uint16)-1;
+        m_LastNode.m_wAreaId = (uint16)-1;
         return CreateFirstSubTask(ped);
     }
     else
@@ -302,7 +302,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 void CTaskComplexWander::UpdateDir_Reversed(CPed* ped)
 {
     uint8 newDir = m_nDir;
-    if (m_NextNode.m_wAreaId != -1)
+    if (m_NextNode.IsAreaValid())
     {
         if (ThePaths.m_pPathNodes[m_NextNode.m_wAreaId])
         {
@@ -357,7 +357,7 @@ void CTaskComplexWander::UpdateDir_Reversed(CPed* ped)
 void CTaskComplexWander::UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir)
 {
     *originNode = *targetNode;
-    targetNode->m_wAreaId = -1;
+    targetNode->m_wAreaId = (uint16)-1;
     const CVector& pos = ped->GetPosition();
     ThePaths.FindNextNodeWandering(PATH_TYPE_BOATS, pos.x, pos.y, pos.z, originNode, targetNode, dir, outDir);
 }
@@ -450,7 +450,7 @@ void CTaskComplexWander::ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNo
 // 0x669F30
 bool CTaskComplexWander::ValidNodes()
 {
-    if (m_NextNode.m_wAreaId != -1 && m_LastNode.m_wAreaId != -1)
+    if (m_NextNode.IsAreaValid() && m_LastNode.IsAreaValid())
     {
         if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId)
         {
@@ -463,7 +463,7 @@ bool CTaskComplexWander::ValidNodes()
 // 0x674560
 void CTaskComplexWander::ScanForBlockedNodes(CPed* ped)
 {
-    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.IsAreaValid())
     {
         if (ScanForBlockedNode(ped, &m_NextNode))
         {

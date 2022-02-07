@@ -152,7 +152,11 @@ public:
     static void InjectHooks();
 
     void Init();
+    void ReInit();
     void Shutdown();
+    void TidyUpNodeSwitchesAfterMission();
+    void UnMarkAllRoadNodesAsDontWander();
+    void RemoveForbiddenForScriptedCars();
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
@@ -162,6 +166,7 @@ public:
                       bool includeNodesWithoutLinks, bool waterPath);
 
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
+    void MarkRoadNodeAsDontWander(float x, float y, float z);
 
     CPathNode* GetPathNode(CNodeAddress address);
     int32 LoadPathFindData(RwStream* stream, int32 index);
@@ -179,7 +184,7 @@ public:
     // pathLink is the same as the returned pointer(at least on success)
     // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and
     // the result is stored in it
-    CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
+    CNodeAddress FindNodeClosestToCoors(float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
 
     inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) {
