@@ -19,8 +19,8 @@ using namespace ImGui;
 struct SavedLocation {
     std::string name{};
     CVector     pos{};
-    eAreaCodes  areaCode{};
-    bool        findGround{};
+    eAreaCodes  areaCode{ eAreaCodes::AREA_CODE_NORMAL_WORLD };
+    bool        findGround{ true };
     bool        selected{};
 };
 
@@ -56,7 +56,7 @@ void TeleportTo(const CVector& pos, eAreaCodes areaCode) {
         FindPlayerPed()->Teleport(pos, true);
 }
 
-void DoTeleportTo(const CVector& pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD) {
     // Save previous location for teleporting back.
     s_prevLocation.pos = FindPlayerPed()->GetPosition();
     s_prevLocation.areaCode = FindPlayerPed()->m_nAreaCode;
@@ -205,7 +205,11 @@ void ProcessImGui() {
                 }
 
                 // Position text
-                TableNextColumn(); Text("%.2f %.2f %.2f", v.pos.x, v.pos.y, v.pos.z);
+                TableNextColumn();
+                if (v.findGround)
+                    Text("%.2f %.2f", v.pos.x, v.pos.y);
+                else
+                    Text("%.2f %.2f %.2f", v.pos.x, v.pos.y, v.pos.z);
                 
                 // Area code ID text
                 TableNextColumn(); Text("%d %s", v.areaCode, (v.areaCode == AREA_CODE_NORMAL_WORLD) ? "(outside)" : "");
@@ -282,7 +286,7 @@ namespace SettingsHandler {
         }
         case 1: {
             if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4)
-                s_SavedLocations.emplace_back(name, pos, eAreaCodes::AREA_CODE_NORMAL_WORLD, true);
+                s_SavedLocations.emplace_back(name, pos);
             else if (line[0] && line[0] != '\n')
                 std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
             break;
