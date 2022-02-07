@@ -576,7 +576,7 @@ void CEntity::PreRender_Reversed()
     if (!IsObject() && !IsDummy())
         return;
 
-    if (IsObject() && !IsDummy()) {
+    if (IsObject()) {
         auto obj = AsObject();
         if (m_nModelIndex == ModelIndices::MI_COLLECTABLE1) {
             CPickups::DoCollectableEffects(this);
@@ -802,7 +802,8 @@ void CEntity::PreRender_Reversed()
             ModifyMatrixForPoleInWind();
         }
     }
-    else if (m_nModelIndex == ModelIndices::MI_TRAFFICLIGHTS) {
+
+    if (m_nModelIndex == ModelIndices::MI_TRAFFICLIGHTS) {
         CTrafficLights::DisplayActualLight(this);
         CShadows::StoreShadowForPole(this, 2.957F, 0.147F, 0.0F, 16.0F, 0.4F, 0);
     }
