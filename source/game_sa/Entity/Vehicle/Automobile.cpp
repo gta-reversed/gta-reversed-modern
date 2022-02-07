@@ -93,6 +93,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetBusDoorTimer, 0x6A3860);
     RH_ScopedInstall(ProcessAutoBusDoors, 0x6A38A0);
     RH_ScopedInstall(BoostJumpControl, 0x6A3A60);
+    RH_ScopedInstall(StopNitroEffect, 0x6A3E60);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3322,9 +3323,13 @@ void CAutomobile::DoNitroEffect(float power)
 }
 
 // 0x6A3E60
-void CAutomobile::StopNitroEffect()
-{
-    ((void(__thiscall*)(CAutomobile*))0x6A3E60)(this);
+void CAutomobile::StopNitroEffect() {
+    for (auto&& fx : m_exhaustNitroFxSystem) {
+        if (fx) {
+            fx->Kill();
+            fx = nullptr;
+        }
+    }
 }
 
 // 0x6A3EA0
