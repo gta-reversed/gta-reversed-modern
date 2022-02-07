@@ -99,6 +99,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(NitrousControl, 0x6A3EA0);
     RH_ScopedInstall(TowTruckControl, 0x6A40F0);
     RH_ScopedInstall(KnockPedOutCar, 0x6A44C0);
+    RH_ScopedInstall(PopBootUsingPhysics, 0x6A44D0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3461,9 +3462,21 @@ CPed* CAutomobile::KnockPedOutCar(eWeaponType arg0, uint16 arg1, CPed* arg2)
 }
 
 // 0x6A44D0
+// UNUSED - Likely inlined?
 void CAutomobile::PopBootUsingPhysics()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A44D0)(this);
+    switch (m_damageManager.GetDoorStatus(eDoors::DOOR_BOOT)) {
+    case DAMSTATE_DAMAGED:
+        return;
+    case DAMSTATE_OK:
+        // Original code: 
+        // m_damageManager.SetDoorStatus(eDoors::DOOR_BOOT, DAMSTATE_OPENED);
+        // [[fallthrough]]; Probably a mistake from their part. (TODO: Use break here, and uncomment code and see what happens)
+    default:
+        m_damageManager.SetDoorStatus(eDoors::DOOR_BOOT, DAMSTATE_OPENED_DAMAGED);
+        break;
+    }
+    m_doors[eDoors::DOOR_BOOT].m_fAngVel = -2.f;
 }
 
 // 0x6A4520
