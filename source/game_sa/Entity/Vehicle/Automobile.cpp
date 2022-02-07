@@ -91,6 +91,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(FixPanel, 0x6A3670);
     RH_ScopedInstall(PlayHornIfNecessary, 0x6A3820);
     RH_ScopedInstall(SetBusDoorTimer, 0x6A3860);
+    RH_ScopedInstall(ProcessAutoBusDoors, 0x6A38A0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3197,9 +3198,46 @@ void CAutomobile::SetBusDoorTimer(uint32 timerEndDelta, bool setAsStartedInPast)
 }
 
 // 0x6A38A0
-void CAutomobile::ProcessAutoBusDoors()
-{
-    ((void(__thiscall*)(CAutomobile*))0x6A38A0)(this);
+void CAutomobile::ProcessAutoBusDoors() {
+    const auto time = CTimer::GetTimeInMS();
+
+    if (m_dwBusDoorTimerEnd <= time) {
+        if (m_dwBusDoorTimerStart) {
+            constexpr struct { eDoors door; tComponent comp; uint32 flagMask; } doors[]{
+                {eDoors::DOOR_LEFT_FRONT, tComponent::COMPONENT_DOOR_RR, 1}, // TODO: `COMPONENT_DOOR_RR` doesn't match up with `DOOR_LEFT_FRONT`
+                {eDoors::DOOR_RIGHT_FRONT, tComponent::COMPONENT_DOOR_RF, 4}
+            };
+
+            for (auto&& [door, comp, flagMask] : doors) {
+                if (!IsDoorMissing(door) && (m_nGettingInFlags & flagMask)) {
+                    OpenDoor(nullptr, comp, door, 0.f, true);
+                }
+            }
+            
+            m_dwBusDoorTimerEnd = 0;
+            m_dwBusDoorTimerStart = 0;
+        }
+    } else if (m_dwBusDoorTimerEnd && time > m_dwBusDoorTimerEnd - 500) {
+        if (!IsDoorMissing(eDoors::DOOR_LEFT_FRONT) && (m_nGettingInFlags & 1)) {
+            const auto OpenThisDoor = [this](float ratio) {
+                OpenDoor(nullptr, COMPONENT_DOOR_RR, DOOR_LEFT_FRONT, ratio, true); // TODO: `COMPONENT_DOOR_RR` doesn't match up with `DOOR_LEFT_FRONT`
+            };
+
+            if (IsDoorClosed(eDoors::DOOR_LEFT_FRONT)) {
+                m_dwBusDoorTimerStart = 0;
+                OpenThisDoor(0.f);
+            } else {
+                OpenThisDoor(1.f - (float)(time - m_dwBusDoorTimerEnd + 500) / 500.f);
+            }
+        }
+
+        if (!IsDoorMissing(eDoors::DOOR_RIGHT_FRONT) && (m_nGettingInFlags & 4)) {
+            if (IsDoorClosed(eDoors::DOOR_RIGHT_FRONT)) {
+                m_dwBusDoorTimerEnd = time;
+            }
+            OpenDoor(nullptr, COMPONENT_DOOR_RF, DOOR_RIGHT_FRONT, 0.f, true);
+        }
+    }
 }
 
 // 0x6A3A60
