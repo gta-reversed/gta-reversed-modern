@@ -101,6 +101,8 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(KnockPedOutCar, 0x6A44C0);
     RH_ScopedInstall(PopBootUsingPhysics, 0x6A44D0);
     RH_ScopedInstall(CloseAllDoors, 0x6A4520);
+    RH_ScopedInstall(GetCarRoll, 0x6A6010);
+    RH_ScopedInstall(GetCarPitch, 0x6A6050);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3761,16 +3763,31 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
     }
 }
 
-// 0x6A6010
-float CAutomobile::GetCarRoll()
-{
-    return ((float(__thiscall*)(CAutomobile*))0x6A6010)(this);
+
+// TODO: Could add these to CMatrix as well, might be useful.. Like: CMatrix::GetRoll()
+
+/*!
+* @address 0x6A6010
+* @brief Returns `roll` in DEGREES
+*/
+float CAutomobile::GetCarRoll() {
+    const auto& right = m_matrix->GetRight();
+    const auto rightMag2D = right.Magnitude2D();
+
+    // If up.z < 0.f we're flipped, in which case `right` is more like `left` so we have to negate it.
+    return RWRAD2DEG(atan2(right.z, m_matrix->GetUp().z < 0.f ? -rightMag2D : rightMag2D)); 
 }
 
-// 0x6A6050
-float CAutomobile::GetCarPitch()
-{
-    return ((float(__thiscall*)(CAutomobile*))0x6A6050)(this);
+/*!
+* @address 0x6A6050
+* @brief Returns `pitch` in RADIANS
+*/
+float CAutomobile::GetCarPitch() {
+    const auto& fwd = m_matrix->GetForward();
+    const auto  fwdMag2D = fwd.Magnitude2D();
+
+    // `up.z` < 0 means we're flipped on the roof, which also means `forward` is more like `backward`, so we have to negate it.
+    return atan2(fwd.z, m_matrix->GetUp().z < 0.f ? -fwdMag2D : fwdMag2D);
 }
 
 // 0x6A6140
