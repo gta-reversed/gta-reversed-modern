@@ -20,6 +20,7 @@ struct SavedLocation {
     std::string name{};
     CVector     pos{};
     eAreaCodes  areaCode{};
+    bool        findGround{};
     bool        selected{};
 };
 
@@ -135,7 +136,7 @@ void ProcessImGui() {
         const auto nameToSave{ name[0] ? name : ((areaToSave == AREA_CODE_NORMAL_WORLD) ? CTheZones::GetZoneName(posToSave) : "<Unnamed>")};
 
         // Either use given name or current zone name
-        s_SavedLocations.emplace(s_SavedLocations.begin(), nameToSave, posToSave, areaToSave);
+        s_SavedLocations.emplace(s_SavedLocations.begin(), nameToSave, posToSave, areaToSave, s_findZGround);
 
         if (!GetIO().KeyAlt) {
             name[0] = 0; // Clear input
@@ -155,14 +156,15 @@ void ProcessImGui() {
         auto visibleItems = s_SavedLocations | visibleFilter;
 
         // Do not show indices if the list is filtered.
-        bool isFiltered = std::distance(visibleItems.begin(), visibleItems.end()) != s_SavedLocations.size();
+        bool isFiltered = visibleItems.empty();
 
         // Saved positions table
-        if (BeginTable("Saved Positions", 4, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
+        if (BeginTable("Saved Positions", 5, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
             TableSetupColumn("Index", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Name", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Position", ImGuiTableColumnFlags_WidthFixed);
             TableSetupColumn("Area code", ImGuiTableColumnFlags_WidthFixed);
+            TableSetupColumn("Ground", ImGuiTableColumnFlags_WidthFixed);
             TableHeadersRow();
 
             // Draw visible items
@@ -199,7 +201,7 @@ void ProcessImGui() {
 
                 // Teleport on double click
                 if (IsItemHovered() && IsMouseDoubleClicked(0)) {
-                    DoTeleportTo(s_findZGround ? GetPositionWithGroundHeight(v.pos) : v.pos, v.areaCode);
+                    DoTeleportTo(v.findGround ? GetPositionWithGroundHeight(v.pos) : v.pos, v.areaCode);
                 }
 
                 // Position text
@@ -207,6 +209,9 @@ void ProcessImGui() {
                 
                 // Area code ID text
                 TableNextColumn(); Text("%d %s", v.areaCode, (v.areaCode == AREA_CODE_NORMAL_WORLD) ? "(outside)" : "");
+
+                // Ground text
+                TableNextColumn(); Text("%s", v.findGround ? "Yes" : "No");
 
                 EndGroup();
                 PopID();
@@ -241,7 +246,7 @@ void ProcessInput() {
         if (!pad->IsStandardKeyJustDown(i)) continue;
 
         const auto& location = s_SavedLocations[idx];
-        DoTeleportTo(s_findZGround ? GetPositionWithGroundHeight(location.pos) : location.pos, location.areaCode);
+        DoTeleportTo(location.findGround ? GetPositionWithGroundHeight(location.pos) : location.pos, location.areaCode);
     }
 }
 
@@ -266,17 +271,18 @@ namespace SettingsHandler {
         switch (version) {
         case 2: {
             int area{};
+            int findGround{1};
 
             // [^\t\n] -> https://stackoverflow.com/questions/2854488
-            if (sscanf(line, "%f, %f, %f, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, name) == 5)
-                s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area));
+            if (sscanf(line, "%f, %f, %f, %d, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, &findGround, name) == 6)
+                s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area), static_cast<bool>(findGround));
             else if (line[0] && line[0] != '\n') // Report failed reads on non-empty lines only
                 std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
             break;
         }
         case 1: {
             if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4)
-                s_SavedLocations.emplace_back(name, pos, eAreaCodes::AREA_CODE_NORMAL_WORLD);
+                s_SavedLocations.emplace_back(name, pos, eAreaCodes::AREA_CODE_NORMAL_WORLD, true);
             else if (line[0] && line[0] != '\n')
                 std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
             break;
@@ -296,16 +302,15 @@ namespace SettingsHandler {
 
         out_buf->append("[SavedLocations][Version 2]\n");
         for (const auto& l : s_SavedLocations) {
-            out_buf->appendf("%.3f, %.3f, %.3f, %d, %s\n", l.pos.x, l.pos.y, l.pos.z, l.areaCode, l.name.c_str());
+            out_buf->appendf("%.3f, %.3f, %.3f, %d, %d, %s\n", l.pos.x, l.pos.y, l.pos.z, l.areaCode, l.findGround, l.name.c_str());
         }
     }
 
-    // Required to have, but for us, it's a NOP
     void* ReadOpen(ImGuiContext* ctx, ImGuiSettingsHandler* handler, const char* name) {
         UNUSED(ctx);
         UNUSED(handler);
 
-        int version{};
+        int version{2};
         sscanf(name, "Version %d", &version);
         return (void*)version; // Has to return a non-null value, otherwise `ReadLine` won't be called
     }
@@ -316,9 +321,9 @@ namespace SettingsHandler {
 
         if (s_SavedLocations.empty()) {
             s_SavedLocations = {
-                { "Map centre", { 0.f,     0.f,      0.f   } },
-                { "CJ's House", { 2495.2f, -1686.0f, 13.6f } },
-                { "SF Airport", { 2495.1f, 1658.2f,  13.5f } }
+                { "Map centre", { 0.f,     0.f,      0.f   }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true },
+                { "CJ's House", { 2495.2f, -1686.0f, 13.6f }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true },
+                { "SF Airport", { 2495.1f, 1658.2f,  13.5f }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true }
             };
         }
     }

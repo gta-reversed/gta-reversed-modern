@@ -305,7 +305,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
-    if (CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
     CPad* pad = CPad::GetPad(0);
