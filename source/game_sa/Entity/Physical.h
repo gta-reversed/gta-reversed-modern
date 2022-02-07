@@ -238,8 +238,7 @@ public:
     }
 
 // HELPERS
-public:
-    bool IsImmovable()const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
 private:
     friend void InjectHooksMain();
