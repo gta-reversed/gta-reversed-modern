@@ -71,6 +71,10 @@ void ProcessImGui() {
     ImGui::SetNextWindowSize({ 400.f, 350.f }, ImGuiCond_FirstUseEver);
     ImGui::Begin("Teleporter Window", &s_windowOpen);
 
+    const auto& AlignRight = [&](float pad) {
+        return GetWindowContentRegionMax().x - pad;
+    };
+
     static CVector pos{};
     PushItemWidth(140.f);
     InputFloat3("Coords", reinterpret_cast<float(&)[3]>(pos), "%.3f"); // Kinda hacky, but it's okay, if this was to break, we'd have bigger problems anyways.
@@ -83,7 +87,7 @@ void ProcessImGui() {
 
     // Name input
     static char name[1024]{};
-    PushItemWidth(140.f);
+    PushItemWidth(AlignRight(CalcTextSize("Name").x + 275.0f));
     SameLine(); InputText("Name", name, std::size(name));
     PopItemWidth();
 
@@ -99,7 +103,8 @@ void ProcessImGui() {
     };
 
     // Teleport button
-    if (SameLine(); Button("Teleport")) {
+    SameLine(AlignRight(64.0f + 9.0f + 36.0f)); // [teleport] + space + [save]
+    if (Button("Teleport", { 64.0f, 19.0f })) {
         // Not finding ground for Z doesn't make sense with the two. So do it anyways.
         bool forceGround = false;
 
@@ -132,7 +137,8 @@ void ProcessImGui() {
     HoveredItemTooltip("Hold `ALT` to teleport to a random position\nHold `SHIFT` to teleport to marker marked on the map");
 
     // Save position button
-    if (SameLine(); Button("Save")) {
+    SameLine(AlignRight(36.0f));
+    if (Button("Save", { 36.0f, 19.0f })) {
         const auto posToSave{ GetIO().KeyCtrl ? FindPlayerPed()->GetPosition() : GetPositionWithGroundHeight(pos) };
         const auto areaToSave{ GetIO().KeyCtrl ? FindPlayerPed()->m_nAreaCode : static_cast<eAreaCodes>(areaCode) };
         const auto nameToSave{ name[0] ? name : ((areaToSave == AREA_CODE_NORMAL_WORLD) ? CTheZones::GetZoneName(posToSave) : "<Unnamed>")};
@@ -148,6 +154,7 @@ void ProcessImGui() {
 
     if (!s_SavedLocations.empty()) {
         // Search tool input
+        PushItemWidth(AlignRight(CalcTextSize("Search").x + 11.0f));
         InputText("Search", s_nameFilter, std::size(s_nameFilter), ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_AutoSelectAll);
         const std::string_view searchInputSV{ s_nameFilter };
 
@@ -229,7 +236,7 @@ void ProcessImGui() {
 }
 
 void ProcessInput() {
-    if (!CPad::NewKeyState.lctrl)
+    if (CDebugMenu::Visible() || !CPad::NewKeyState.lctrl)
         return;
 
     CPad* pad = CPad::GetPad(0);
