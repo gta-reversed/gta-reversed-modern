@@ -29,7 +29,7 @@ public:
     float Magnitude() const;
 
     // Returns length of 2d vector
-    float Magnitude2D();
+    float Magnitude2D() const;
 
     // Normalises a vector
     void Normalise();

@@ -103,6 +103,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(CloseAllDoors, 0x6A4520);
     RH_ScopedInstall(GetCarRoll, 0x6A6010);
     RH_ScopedInstall(GetCarPitch, 0x6A6050);
+    RH_ScopedInstall(IsInAir, 0x6A6140);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3793,7 +3794,15 @@ float CAutomobile::GetCarPitch() {
 // 0x6A6140
 bool CAutomobile::IsInAir()
 {
-    return ((bool(__thiscall*)(CAutomobile*))0x6A6140)(this);
+    if (physicalFlags.bDontApplySpeed) {
+        return true;
+    }
+
+    if (!physicalFlags.bSubmergedInWater) {
+        return AreAllWheelsNotTouchingGround() && m_vecMoveSpeed.IsZero();
+    }
+
+    return false;
 }
 
 // 0x6A6DC0

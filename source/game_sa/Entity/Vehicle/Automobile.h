@@ -269,6 +269,10 @@ public:
         return m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_RIGHT];
     }
 
+    [[nodiscard]] bool AreAllWheelsNotTouchingGround() const {
+        return std::ranges::all_of(m_fWheelsSuspensionCompression, [](float v) {return v >= 1.f; });
+    }
+
     // check the previous compression state using m_fWheelsSuspensionCompressionPrev
     bool DidAnyWheelTouchShallowWaterGroundPrev() {
         for (int32 i = 0; i < 4; i++) {

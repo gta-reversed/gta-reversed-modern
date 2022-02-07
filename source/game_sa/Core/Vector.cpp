@@ -38,7 +38,7 @@ float CVector::Magnitude() const
     return sqrt(x * x + y * y + z * z);
 }
 
-float CVector::Magnitude2D()
+float CVector::Magnitude2D() const
 {
     return sqrt(x * x + y * y);
 }
