@@ -86,6 +86,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
     RH_ScopedInstall(PlayCarHorn_Reversed, 0x6A3770);
     RH_ScopedInstall(VehicleDamage_Reversed, 0x6A7650);
+    RH_ScopedInstall(GetTowHitchPos_Reversed, 0x6AF1D0);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -2284,17 +2285,14 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 //0x6AF1D0
 bool CAutomobile::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
 {
-    return plugin::CallMethodAndReturn<bool, 0x6AF1D0, CAutomobile*, CVector&, bool, CVehicle*>(this, outPos, bCheckModelInfo, veh);
-
-    if (!bCheckModelInfo)
-        return false;
-
-    outPos.x = 0.0f;
-    outPos.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y - 0.5f; // todo: CRopes::FindPickupHeight
-    outPos.z = 0.5f - m_fFrontHeightAboveRoad;
-    // todo: MultiplyMatrixWithVector(&outPos, m_matrix, outPos);
-
-    return true;
+    if (bCheckModelInfo) {
+        outPos = MultiplyMatrixWithVector(*m_matrix, {
+            0.f,
+            GetColModel()->m_boundBox.m_vecMax.y - 0.5f,
+            0.5f - m_fFrontHeightAboveRoad
+        });
+    }
+    return false;
 }
 
 // 0x6AF250
