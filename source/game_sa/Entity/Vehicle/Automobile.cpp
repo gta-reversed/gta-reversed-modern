@@ -87,6 +87,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(PlayCarHorn_Reversed, 0x6A3770);
     RH_ScopedInstall(VehicleDamage_Reversed, 0x6A7650);
     RH_ScopedInstall(GetTowHitchPos_Reversed, 0x6AF1D0);
+    RH_ScopedInstall(GetTowBarPos_Reversed, 0x6AF250);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -2296,9 +2297,81 @@ bool CAutomobile::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle
 }
 
 // 0x6AF250
-bool CAutomobile::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
-{
-    return plugin::CallMethodAndReturn<bool, 0x6AF250, CAutomobile*, CVector&, bool, CVehicle*>(this, outPos, bCheckModelInfo, veh);
+bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* attachTo) {
+    switch (m_nModelIndex) {
+    case eModelID::MODEL_TOWTRUCK:
+    case eModelID::MODEL_TRACTOR: {
+        float baseY{ -1.05f };
+        if (m_nModelIndex == MODEL_TRACTOR) {
+            if (attachTo && attachTo->IsSubTrailer() && attachTo->m_nModelIndex != MODEL_FARMTR1) {
+                return false;
+            }
+            baseY = -0.6f;
+        } else if (attachTo && attachTo->IsSubTrailer()) {
+            return false;
+        }
+
+        outPos = MultiplyMatrixWithVector(*m_matrix, {
+            0.f,
+            baseY + GetColModel()->m_boundBox.m_vecMin.y,
+            (1.f - (float)m_wMiscComponentAngle / 20'000.f) / 2.f + 0.5f
+        });
+        return true;
+    }
+    default: {
+        if (!m_aCarNodes[CAR_MISC_A]) {
+            break;
+        }
+
+        const auto GetMiscAPos = [this] {
+            return *RwMatrixGetPos(RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]));
+        };
+         
+        switch (m_nModelIndex) {
+        case eModelID::MODEL_PETRO:
+        case eModelID::MODEL_RDTRAIN:
+        case eModelID::MODEL_LINERUN:
+        case eModelID::MODEL_ARTICT3: {
+            outPos = GetMiscAPos();
+            return true;
+        }
+        case eModelID::MODEL_UTILITY: {
+            if (attachTo && attachTo->m_nModelIndex == MODEL_UTILTR1) {
+                outPos = GetMiscAPos();
+                return true;
+            }
+            break;
+        }
+        case eModelID::MODEL_BAGGAGE:
+        case eModelID::MODEL_TUG:
+        case eModelID::MODEL_BAGBOXA:
+        case eModelID::MODEL_BAGBOXB: {
+            if (attachTo) {
+                switch (attachTo->m_nModelIndex) {
+                case eModelID::MODEL_BAGBOXA:
+                case eModelID::MODEL_BAGBOXB:
+                case eModelID::MODEL_TUGSTAIR:
+                    outPos = GetMiscAPos();
+                    return true;
+                }
+            }
+            break;
+        }
+        }
+        break;
+    }
+    }
+
+    if (ignoreModelType) {
+        outPos = MultiplyMatrixWithVector(*m_matrix, {
+            0.f,
+            GetColModel()->m_boundBox.m_vecMin.y - 0.5f,
+            0.5f - m_fFrontHeightAboveRoad
+        });
+        return true;
+    }
+
+    return false;
 }
 
 // 0x6B4410
