@@ -89,6 +89,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetTowHitchPos_Reversed, 0x6AF1D0);
     RH_ScopedInstall(GetTowBarPos_Reversed, 0x6AF250);
     RH_ScopedInstall(SetTowLink_Reversed, 0x6B4410);
+    RH_ScopedInstall(BreakTowLink_Reversed, 0x6A4400);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -2435,9 +2436,24 @@ bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
 }
 
 // 0x6A4400
-bool CAutomobile::BreakTowLink()
-{
-    return plugin::CallMethodAndReturn<bool, 0x6A4400, CAutomobile*>(this);
+bool CAutomobile::BreakTowLink() {
+    if (m_pTractor) {
+        CEntity::ClearReference(m_pTractor->m_pTrailer);
+        CEntity::ClearReference(m_pTractor);
+    }
+
+    switch (m_nStatus) {
+    case eEntityStatus::STATUS_REMOTE_CONTROLLED:
+    case eEntityStatus::STATUS_PLAYER_DISABLED: {
+        if (m_pDriver) {
+            m_nStatus = m_pDriver->IsPlayer() ? eEntityStatus::STATUS_PLAYER : eEntityStatus::STATUS_PHYSICS;
+        } else {
+            m_nStatus = m_fHealth >= 1.f ? eEntityStatus::STATUS_ABANDONED : eEntityStatus::STATUS_WRECKED;
+        }
+        return true;
+    }
+    }
+    return false;
 }
 
 // 0x6A6090
