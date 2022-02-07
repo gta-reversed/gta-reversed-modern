@@ -81,6 +81,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
     RH_ScopedInstall(SetAllTaxiLights, 0x6A3760);
     RH_ScopedInstall(GetMovingCollisionOffset, 0x6A2150);
+    RH_ScopedInstall(TellHeliToGoToCoors, 0x6A2390);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -2951,9 +2952,22 @@ float CAutomobile::GetMovingCollisionOffset()
 }
 
 // 0x6A2390
-void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax)
-{
-    ((void(__thiscall*)(CAutomobile*, float, float, float, float, float))0x6A2390)(this, x, y, z, altitudeMin, altitudeMax);
+// TODO: Why is this here?
+void CAutomobile::TellHeliToGoToCoors(float x, float y, float z, float altitudeMin, float altitudeMax) {
+    m_autoPilot.m_vecDestinationCoors = CVector{ x, y, z };
+    m_autoPilot.m_nCarMission = MISSION_HELI_FLYTOCOORS;
+    m_autoPilot.m_nCruiseSpeed = 100;
+
+    AsHeli()->m_fMinAltitude = altitudeMin;
+    AsHeli()->m_fMaxAltitude = altitudeMax;
+
+    m_nStatus = STATUS_PHYSICS;
+
+    if (m_aircraftGoToHeading == 0.f) {
+        m_aircraftGoToHeading = CGeneral::GetATanOfXY(m_matrix->GetForward().x, m_matrix->GetForward().y) + PI;
+        while (m_aircraftGoToHeading > TWO_PI);
+            m_aircraftGoToHeading -= TWO_PI; // TODO: Is dis some inlined function?
+    }
 }
 
 // 0x6A2450
