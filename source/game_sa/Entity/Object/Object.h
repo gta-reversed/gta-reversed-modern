@@ -13,7 +13,7 @@ enum eObjectType {
     OBJECT_UNKNOWN = 0,
     OBJECT_GAME = 1,
     OBJECT_MISSION = 2,
-    OBJECT_TEMPORARY = 3,
+    OBJECT_TEMPORARY = 3, // AKA OBJECT_TYPE_FLYING_COMPONENT
     OBJECT_TYPE_CUTSCENE = 4,
     OBJECT_TYPE_DECORATION = 5, // Hand object, projectiles, escalator step, water creatures, no clue what this enum value should be called
     OBJECT_MISSION2 = 6

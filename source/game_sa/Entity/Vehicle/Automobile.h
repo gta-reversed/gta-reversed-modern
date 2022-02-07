@@ -90,7 +90,7 @@ public:
     float       m_fMoveDirection;
     int32       field_8B4[6];
     int32       field_8C8[6];
-    int32       m_dwBurnTimer;
+    float       m_dwBurnTimer;
     CPhysical*  m_pWheelCollisionEntity[4];
     CVector     m_vWheelCollisionPos[4];
     char        field_924;

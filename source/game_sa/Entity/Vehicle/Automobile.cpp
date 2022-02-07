@@ -105,6 +105,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetCarPitch, 0x6A6050);
     RH_ScopedInstall(IsInAir, 0x6A6140);
     RH_ScopedInstall(dmgDrawCarCollidingParticles, 0x6A6DC0);
+    RH_ScopedInstall(SpawnFlyingComponent, 0x6A8580);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -2303,7 +2304,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
     } else if (m_damageManager.GetEngineStatus() < 225u) {
         m_damageManager.SetEngineStatus(225u);
 
-        m_dwBurnTimer = 0;
+        m_fBurnTimer = 0.f;
 
         m_pLastDamageEntity = m_pDamageEntity;
         if (m_pLastDamageEntity) {
@@ -3872,9 +3873,157 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
 }
 
 // 0x6A8580
-CObject* CAutomobile::SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType)
+CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType)
 {
-    return ((CObject * (__thiscall*)(CAutomobile*, int32, uint32))0x6A8580)(this, nodeIndex, collisionType);
+    if (CObject::nNoTempObjects >= 150) {
+        return;
+    }
+
+    auto compFrame = m_aCarNodes[(size_t)nodeIndex];
+    if (!compFrame) {
+        return;
+    }
+
+    // Check if this frame has a current atomic object (If there's no atomic the component is invisible I think)
+    {
+        RpAtomic* atomic{};
+        RwFrameForAllObjects(compFrame, GetCurrentAtomicObjectCB, &atomic);
+        if (!atomic) {
+            return;
+        }
+    }
+
+    CPools::GetObjectPool()->m_bIsLocked = true;
+    auto obj = new CObject;
+    CPools::GetObjectPool()->m_bIsLocked = false;
+    if (!obj) {
+        return;
+    }
+
+    const auto& frameLTM = RwFrameGetLTM(compFrame);
+
+    if (nodeIndex == eCarNodes::CAR_WINDSCREEN) {
+        obj->SetModelIndexNoCreate(MODEL_TEMPCOL_BONNET1);
+    } else {
+        switch (collisionType) {
+        case 0u: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_BUMPER1);
+
+            CMatrix frameMat{ frameLTM, false };
+            obj->m_vecCentreOfMass = CVector{
+                -DotProduct(frameMat.GetPosition() - GetPosition(), m_matrix->GetRight()), // Set it's X centre on mass depending on where it is on our local X axis
+                0.f,
+                0.f
+            };
+            break;
+        }
+        case 1u: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_WHEEL1);
+            break;
+        }
+        case 2u: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_DOOR1);
+            obj->m_vecCentreOfMass = CVector{ 0.f, -0.5f, 0.f };
+            obj->m_bDrawLast = true;
+            break;
+        }
+        case 3u: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_BONNET1);
+            obj->m_vecCentreOfMass = CVector{ 0.f, 0.4f, 0.f };
+            break;
+        }
+        case 4u: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_BOOT1);
+            obj->m_vecCentreOfMass = CVector{ 0.f, -0.3f, 0.f };
+            break;
+        }
+        default: {
+            obj->SetModelIndexNoCreate(MODEL_TEMPCOL_PANEL1);
+            break;
+        }
+        }
+    }
+
+    obj->RefModelInfo(m_nModelIndex);
+
+    // Create a new frame using the flying object's atomic
+    auto flyingObjFrame = RwFrameCreate();
+    auto clonedFlyingObjAtomic = RpAtomicClone(obj->m_pRwAtomic);
+    RpAtomicSetFrame(clonedFlyingObjAtomic, flyingObjFrame);
+    *RwFrameGetMatrix(flyingObjFrame) = *frameLTM; // TODO: This most likely isn't the correct way to do this..
+    CVisibilityPlugins::SetAtomicRenderCallback(clonedFlyingObjAtomic, nullptr);
+    obj->AttachToRwObject(obj->m_pRwObject, true);
+
+    obj->m_bDontStream = true;
+    obj->m_fMass = 10.f;
+    obj->m_fTurnMass = 25.f;
+    obj->m_fAirResistance = 0.97f;
+    obj->m_fElasticity = 0.1f;
+    obj->m_fBuoyancyConstant = 0.106666f;
+    obj->m_nObjectType = OBJECT_TEMPORARY;
+
+    obj->SetIsStatic(false);
+
+    CObject::nNoTempObjects++;
+    if (CObject::nNoTempObjects <= 20u) {
+        if (CObject::nNoTempObjects <= 10u) {
+            obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 20'000;
+        } else {
+            obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 10'000;
+        }
+    } else {
+        obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 4'000;
+    }
+
+    const auto GetMoveSpeedZ = [&, this] {
+        if (m_vecMoveSpeed.z <= 0.f) {
+            if (m_matrix->GetUp().z < 0.f /*flipped*/) {
+                switch (collisionType) {
+                case 3:
+                case 4:
+                case 18:
+                    return 0.04f - m_vecMoveSpeed.z * 1.5f;
+                }
+            }
+            return m_vecMoveSpeed.z / 4.f;
+        } else {
+            return m_vecMoveSpeed.z * 1.5f;
+        }
+    };
+    obj->m_vecMoveSpeed = CVector{m_vecMoveSpeed.x*0.75f, m_vecMoveSpeed.y*0.75f, GetMoveSpeedZ()};
+    obj->m_vecTurnSpeed = m_vecTurnSpeed * 2.f;
+
+    auto objDir = Normalized(obj->GetPosition() - GetPosition());
+    switch (collisionType) {
+    case 3:
+    case 4:
+    case 18: {
+        objDir += m_matrix->GetUp();
+        if (m_matrix->GetUp().z > 0.f/*not flipped*/) {
+            obj->m_matrix->GetPosition() += m_matrix->GetUp() * m_vecMoveSpeed.Magnitude2D();
+        }
+        break;
+    }
+    }
+
+    obj->ApplyMoveForce(objDir);
+
+    if (collisionType == 1) {
+        obj->m_fTurnMass = 5.f;
+        obj->m_vecTurnSpeed.x = 0.5f;
+        obj->m_fAirResistance = 0.99f;
+    }
+
+    if (m_nStatus == STATUS_WRECKED && IsVisible()) {
+        const auto camDirUnnorm = TheCamera.GetPosition() - GetPosition();
+        if (DotProduct(objDir, camDirUnnorm) > -0.5f) { // Object's direction is opposite to that of the camera's
+            auto camDir = Normalized(camDirUnnorm);
+            camDir.z += 0.3f;
+            obj->ApplyMoveForce(camDir * 5.f); // Apply some move force toward the camera's direction
+        }
+    }
+
+    return obj;
 }
 
 // 0x6A8C00
