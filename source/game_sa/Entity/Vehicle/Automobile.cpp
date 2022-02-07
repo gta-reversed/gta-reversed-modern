@@ -89,6 +89,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetAllWheelsOffGround, 0x6A2F70);
     RH_ScopedInstall(FixDoor, 0x6A35A0);
     RH_ScopedInstall(FixPanel, 0x6A3670);
+    RH_ScopedInstall(PlayHornIfNecessary, 0x6A3820);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3181,9 +3182,10 @@ void CAutomobile::SetAllTaxiLights(bool enable)
 }
 
 // 0x6A3820
-void CAutomobile::PlayHornIfNecessary()
-{
-    ((void(__thiscall*)(CAutomobile*))0x6A3820)(this);
+void CAutomobile::PlayHornIfNecessary() {
+    if ((m_autoPilot.carCtrlFlags.bHonkAtPed || m_autoPilot.carCtrlFlags.bHonkAtCar) && !HasCarStoppedBecauseOfLight()) {
+        PlayCarHorn();
+    }
 }
 
 // 0x6A3860
