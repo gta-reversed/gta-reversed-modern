@@ -466,7 +466,7 @@ public:
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
     virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool SetTowLink(CVehicle* targetVehicle, bool arg1) { return false; }
+    virtual bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
     virtual bool Save();

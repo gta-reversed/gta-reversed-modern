@@ -35,8 +35,8 @@ void CTrailer::SetupSuspensionLines() {
 }
 
 // 0x6CFDF0
-bool CTrailer::SetTowLink(CVehicle* targetVehicle, bool arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x6CFDF0, CTrailer*, CVehicle*, bool>(this, targetVehicle, arg1);
+bool CTrailer::SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) {
+    return plugin::CallMethodAndReturn<bool, 0x6CFDF0, CTrailer*, CVehicle*, bool>(this, tractor, setMyPosToTowBar);
 }
 
 // 0x6CF030
@@ -119,8 +119,8 @@ CTrailer* CTrailer::Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) {
     return this;
 }
 
-bool CTrailer::SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) {
-    return CTrailer::SetTowLink(targetVehicle, arg1);
+bool CTrailer::SetTowLink_Reversed(CVehicle* tractor, bool arg1) {
+    return CTrailer::SetTowLink(tractor, arg1);
 }
 
 void CTrailer::SetupSuspensionLines_Reversed() {

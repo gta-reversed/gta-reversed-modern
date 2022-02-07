@@ -189,7 +189,7 @@ public:
     void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
     bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
     bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
-    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) override;
     bool BreakTowLink() override;
     float FindWheelWidth(bool bRear) override;
     bool Save() override;
@@ -430,7 +430,7 @@ private:
     void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
     bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(outPos, bCheckModelInfo, veh); }
     bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(outPos, bCheckModelInfo, veh); }
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CAutomobile::SetTowLink(targetVehicle, arg1); }
+    bool SetTowLink_Reversed(CVehicle* tractor, bool arg1) { return CAutomobile::SetTowLink(tractor, arg1); }
     bool BreakTowLink_Reversed() { return CAutomobile::BreakTowLink(); }
     float FindWheelWidth_Reversed(bool bRear) { return CAutomobile::FindWheelWidth(bRear); }
     bool Save_Reversed() { return CAutomobile::Save(); }

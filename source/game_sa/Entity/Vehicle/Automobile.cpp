@@ -88,6 +88,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(VehicleDamage_Reversed, 0x6A7650);
     RH_ScopedInstall(GetTowHitchPos_Reversed, 0x6AF1D0);
     RH_ScopedInstall(GetTowBarPos_Reversed, 0x6AF250);
+    RH_ScopedInstall(SetTowLink_Reversed, 0x6B4410);
 }
 
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
@@ -2375,9 +2376,62 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
 }
 
 // 0x6B4410
-bool CAutomobile::SetTowLink(CVehicle* targetVehicle, bool arg1)
-{
-    return plugin::CallMethodAndReturn<bool, 0x6B4410, CAutomobile*, CVehicle*, bool>(this, targetVehicle, arg1);
+bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
+    if (!tractor) {
+        return false;
+    }
+
+    if (m_pTractor) {
+        return false;
+    }
+
+    switch (m_nStatus) {
+    case eEntityStatus::STATUS_PHYSICS:
+    case eEntityStatus::STATUS_REMOTE_CONTROLLED:
+    case eEntityStatus::STATUS_ABANDONED:
+        break;
+    case eEntityStatus::STATUS_SIMPLE:
+        return false;
+    default: {
+        CCarCtrl::SwitchVehicleToRealPhysics(this);
+        break;
+    }
+    }
+
+    m_nStatus = STATUS_REMOTE_CONTROLLED;
+
+    m_pTractor = tractor;
+    tractor->RegisterReference(reinterpret_cast<CEntity**>(&m_pTractor));
+
+    m_pTractor->m_pTrailer = this;
+    RegisterReference(reinterpret_cast<CEntity**>(&m_pTractor->m_pTrailer));
+
+    for (auto&& entity : { AsVehicle(), tractor}) {
+        entity->RemoveFromMovingList();
+        entity->AddToMovingList();
+    }
+
+    if (placeMeOnRoadProperly) {
+        switch (tractor->m_nModelIndex) {
+        case eModelID::MODEL_TOWTRUCK:
+        case eModelID::MODEL_TRACTOR: {
+            tractor->AsAutomobile()->m_wMiscComponentAngle = 10'000;
+            break;
+        }
+        }
+
+        SetHeading(tractor->GetHeading());
+
+        if (CVector towHitchPos{}, towBarPos{}; GetTowHitchPos(towHitchPos, true, this) && tractor->GetTowBarPos(towBarPos, true, this)) {
+            SetPosn(towBarPos - (towHitchPos - GetPosition()));
+            PlaceOnRoadProperly();
+            return true;
+        }
+    } else {
+        UpdateTrailerLink(true, false);
+        return true;
+    }
+    return false;
 }
 
 // 0x6A4400
