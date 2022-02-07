@@ -104,6 +104,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetCarRoll, 0x6A6010);
     RH_ScopedInstall(GetCarPitch, 0x6A6050);
     RH_ScopedInstall(IsInAir, 0x6A6140);
+    RH_ScopedInstall(dmgDrawCarCollidingParticles, 0x6A6DC0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -3447,7 +3448,7 @@ void CAutomobile::TowTruckControl()
             CEntity* entitiesInRange[16]{};
             int16 numEntitiesInRange{};
             CWorld::FindObjectsInRange(towBarPos, 10.f, true, &numEntitiesInRange, std::size(entitiesInRange), entitiesInRange, false, true, false, false, false);
-            for (CVehicle* vehInRange : std::span{ entitiesInRange , numEntitiesInRange } | std::views::transform([](auto&& e) { return e->AsVehicle(); })) {
+            for (CVehicle* vehInRange : std::span{ entitiesInRange , (size_t)numEntitiesInRange } | std::views::transform([](auto&& e) { return e->AsVehicle(); })) {
                 if (vehInRange != this) {
                     if (CVector hitchPos{}; vehInRange->AsVehicle()->GetTowHitchPos(hitchPos, true, this)) {
                         if (!vehInRange->vehicleFlags.bIsLocked) {
@@ -3806,9 +3807,63 @@ bool CAutomobile::IsInAir()
 }
 
 // 0x6A6DC0
-void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float force, eWeaponType weapon)
-{
-    ((void(__thiscall*)(CAutomobile*, const CVector&, float, eWeaponType))0x6A6DC0)(this, position, force, weapon);
+void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float force, eWeaponType weapon) {
+    if (!GetIsOnScreen()) {
+        return;
+    }
+
+    switch (weapon) {
+    case eWeaponType::WEAPON_UNARMED:
+    case eWeaponType::WEAPON_FLOWERS:
+        break;
+    default: {
+        auto fxDirection = m_vecMoveSpeed;
+        const auto speedMag = fxDirection.NormaliseAndMag();
+        
+        g_fx.AddSparks(
+            const_cast<CVector&>(position),
+            fxDirection,
+            speedMag * -10.f,
+            ((int8)force / 10 + 4) % 64,
+            m_vecMoveSpeed,
+            eSparkType::SPARK_PARTICLE_SPARK2,
+            0.3f,
+            1.f
+        );
+        break;
+    }
+    }
+
+    
+    CVector fxPos{ lerp(GetPosition(), position, 0.7f) };
+
+    // Add smoke
+    {
+        FxPrtMult_c prtMult{ 0.4f, 0.4f , 0.4f, 0.6f, 0.4f, 1.f, 1.f };
+        CVector velocity{};
+
+        // The higher our speed the more particles we create
+        const auto numSmokes = std::max(1u, (uint32)((m_vecMoveSpeed * CTimer::GetTimeStep()).Magnitude() * 4.f));
+        for (auto i = 0u; i < numSmokes; i++) {
+            g_fx.m_pPrtSmoke_huge->AddParticle(
+                &fxPos,
+                &velocity,
+                0.f,
+                &prtMult,
+                -1.f,
+                1.2f,
+                0.6f,
+                0
+            );
+        }
+    }
+    
+    // Add debris
+    if (m_vecMoveSpeed.SquaredMagnitude() <= 0.25f * 0.25f) {
+        auto color = CVehicleModelInfo::ms_vehicleColourTable[m_nPrimaryColor] * m_fContactSurfaceBrightness;
+        auto rwcolor = color.ToRwRGBA();
+        g_fx.AddDebris(fxPos, rwcolor, 0.06f, force / 100 + 1);
+    }
 }
 
 void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
