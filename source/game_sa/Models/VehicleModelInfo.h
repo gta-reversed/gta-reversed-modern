@@ -175,6 +175,10 @@ public:
             return m_avDummyPos[dummy] != 0.0F;
         }
 
+        bool IsComponentDamageable(int32 nodeIndex) {
+            return m_nMaskComponentsDamagable & (1 << nodeIndex);
+        }
+
     } * m_pVehicleStruct;
 
     char        field_60[464];

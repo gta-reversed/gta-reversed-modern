@@ -83,7 +83,8 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(GetMovingCollisionOffset, 0x6A2150);
     RH_ScopedInstall(TellHeliToGoToCoors, 0x6A2390);
     RH_ScopedInstall(TellPlaneToGoToCoors, 0x6A2470);
-
+    RH_ScopedInstall(SetTotalDamage, 0x6A27F0);
+    
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
     RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
@@ -3024,9 +3025,52 @@ void CAutomobile::SetRandomDamage(bool arg0)
 }
 
 // 0x6A27F0
-void CAutomobile::SetTotalDamage(bool arg0)
+void CAutomobile::SetTotalDamage(bool randomness)
 {
-    ((void(__thiscall*)(CAutomobile*, bool))0x6A27F0)(this, arg0);
+    const auto IsComponentDamageable = [vehStruct = GetModelInfo()->AsVehicleModelInfoPtr()->m_pVehicleStruct](uint32 c) {
+        return vehStruct->IsComponentDamageable(c);
+    };
+
+    // Doors
+    for (auto i = 0u; i < MAX_DOORS; i++) {
+        const auto nodeIdx{ CDamageManager::GetCarNodeIndexFromDoor((eDoors)i) };
+        if (const auto doorFrame{ m_aCarNodes[nodeIdx] }) {
+            if (!randomness || CGeneral::GetRandomNumberInRange(0, 3)) {
+                if (m_damageManager.GetDoorStatus((eDoors)i) == DAMSTATE_OK && IsComponentDamageable(nodeIdx)) {
+                    m_damageManager.SetDoorStatus((eDoors)i, DAMSTATE_DAMAGED);
+                    SetComponentVisibility(doorFrame, 2);
+                }
+            } else {
+                m_damageManager.SetDoorStatus((eDoors)i, DAMSTATE_NOTPRESENT);
+                SetComponentVisibility(doorFrame, 0);
+            }
+        }
+    }
+
+    // Panels
+    for (auto i = 0u; i < MAX_PANELS; i++) {
+        switch ((ePanels)i) {
+        case ePanels::REAR_LEFT_PANEL:
+        case ePanels::REAR_RIGHT_PANEL:
+            break;
+
+        default: {
+            const auto nodeIdx{ CDamageManager::GetCarNodeIndexFromPanel((ePanels)i) };
+            if (const auto panelFrame{ m_aCarNodes[nodeIdx] }) {
+                if (!randomness || CGeneral::GetRandomNumberInRange(0, 3)) {
+                    if (m_damageManager.GetPanelStatus((ePanels)i) == DAMSTATE_OK && IsComponentDamageable(nodeIdx)) {
+                        m_damageManager.SetPanelStatus((ePanels)i, DAMSTATE_OPENED);
+                        SetComponentVisibility(panelFrame, 2);
+                    }
+                } else {
+                    m_damageManager.SetPanelStatus((ePanels)i, DAMSTATE_OPENED_DAMAGED);
+                    SetComponentVisibility(panelFrame, 0);
+                }
+            }
+            break;
+        }
+        }
+    }
 }
 
 // unused?
