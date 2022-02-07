@@ -29,6 +29,8 @@ static const CVector TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET = TANK_SHOT_DOOM_
 static const uint32 TIGER_GUNFIRE_RATE = 60;
 static const CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
+constexpr uint16 TOW_MISC_ANGLE_MAX = 20'000;
+
 void CAutomobile::InjectHooks()
 {
     RH_ScopedClass(CAutomobile);
@@ -95,6 +97,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(BoostJumpControl, 0x6A3A60);
     RH_ScopedInstall(StopNitroEffect, 0x6A3E60);
     RH_ScopedInstall(NitrousControl, 0x6A3EA0);
+    RH_ScopedInstall(TowTruckControl, 0x6A40F0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -2332,7 +2335,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
         outPos = MultiplyMatrixWithVector(*m_matrix, {
             0.f,
             baseY + GetColModel()->m_boundBox.m_vecMin.y,
-            (1.f - (float)m_wMiscComponentAngle / 20'000.f) / 2.f + 0.5f
+            (1.f - (float)m_wMiscComponentAngle / (float)TOW_MISC_ANGLE_MAX) / 2.f + 0.5f
         });
         return true;
     }
@@ -3397,7 +3400,57 @@ void CAutomobile::NitrousControl(int8 boost)
 // 0x6A40F0
 void CAutomobile::TowTruckControl()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6A40F0)(this);
+    if (m_nStatus != STATUS_PLAYER) {
+        return;
+    }
+
+    if (!m_pDriver || !m_pDriver->IsPlayer()) {
+        return;
+    }
+
+    const auto driversPad = m_pDriver->AsPlayer()->GetPadFromPlayer();
+    if (!driversPad) {
+        return;
+    }
+
+    // Update misc comp. angle 
+    if (const auto carUpDown{ (float)driversPad->GetCarGunUpDown() }; std::abs(carUpDown) > 10.f) {
+        if (carUpDown > 0.f) {
+            m_wMiscComponentAngle = std::max(
+                m_pTrailer ? TOW_MISC_ANGLE_MAX / 2 : 0, // Minimum angle
+                m_wMiscComponentAngle - (uint16)(carUpDown * 2.f * CTimer::GetTimeStep()) // New angle
+            );
+        } else {
+            if (m_wMiscComponentAngle < TOW_MISC_ANGLE_MAX) {
+                m_wMiscComponentAngle = std::min<uint16>(
+                    TOW_MISC_ANGLE_MAX,
+                    m_wMiscComponentAngle + (uint16)(std::abs(carUpDown) * 6.f * CTimer::GetTimeStep())
+                );
+            }
+        }
+    }
+
+    // Attach a suitable vehicle in range if we don't already have a trailer
+    if (m_wMiscComponentAngle == TOW_MISC_ANGLE_MAX && !m_pTrailer) {
+        if (CVector towBarPos{}; GetTowBarPos(towBarPos, false, this)) {
+            CEntity* entitiesInRange[16]{};
+            int16 numEntitiesInRange{};
+            CWorld::FindObjectsInRange(towBarPos, 10.f, true, &numEntitiesInRange, std::size(entitiesInRange), entitiesInRange, false, true, false, false, false);
+            for (CVehicle* vehInRange : std::span{ entitiesInRange , numEntitiesInRange } | std::views::transform([](auto&& e) { return e->AsVehicle(); })) {
+                if (vehInRange != this) {
+                    if (CVector hitchPos{}; vehInRange->AsVehicle()->GetTowHitchPos(hitchPos, true, this)) {
+                        if (!vehInRange->vehicleFlags.bIsLocked) {
+                            if (std::abs(hitchPos.z - towBarPos.z) < 1.f && (hitchPos - towBarPos).SquaredMagnitude2D() < 0.5f * 0.5f) {
+                                vehInRange->SetTowLink(this, false);
+                                m_wMiscComponentAngle -= 100;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // 0x6A44C0
