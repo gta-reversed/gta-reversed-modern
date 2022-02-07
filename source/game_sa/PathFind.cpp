@@ -10,25 +10,49 @@
 #include "PathFind.h"
 
 CPathFind &ThePaths = *(CPathFind *)(0x96F050);
+int32& CPathFind::InteriorIDBeingBuilt = *(int32*)0x96EF88;
+bool& CPathFind::bInteriorBeingBuilt = *(bool*)0x96F031 ;
+int32& CPathFind::NumNodesGiven = *(int32*)0x96EF80;
+int32& CPathFind::NumLinksToExteriorNodes = *(int32*)0x96EAB8;
+int32& CPathFind::NewInteriorSlot = *(int32*)0x96EF84;
 
 void CPathFind::InjectHooks()
 {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
+    RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
+    RH_ScopedInstall(StartNewInterior, 0x44DE80);
+}
 
-
+void CPathNode::InjectHooks() {
+    RH_ScopedClass(CPathNode);
+    RH_ScopedCategoryGlobal();
+    RH_ScopedInstall(GetNodeCoors, 0x420A10);
 }
 
 CVector CPathNode::GetNodeCoors()
 {
-    CVector result;
-    ((void(__thiscall *)(CPathNode *, CVector *))0x420A10)(this, &result);
-    return result;
+    return UncompressLargeVector(m_posn);
 }
 
 void CPathFind::Init()
 {
     plugin::CallMethod<0x44D080, CPathFind*>(this);
+    static int32 NumTempExternalNodes = 0; //Unused
+    m_dwNumForbiddenAreas = 0;
+    m_bForbiddenForScriptedCarsEnabled = false;
+
+    for (auto i = 0u; i < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS; ++i) {
+        m_pPathNodes[i] = nullptr;
+        m_pNaviNodes[i] = nullptr;
+        m_pNodeLinks[i] = nullptr;
+        m_pLinkLengths[i] = nullptr;
+        m_pPathIntersections[i] = nullptr;
+        m_pNaviLinks[i] = nullptr; // Out of array bounds write, same as in original code
+        field_EA4[i] = nullptr; // Out of array bounds write, same as in original code
+    }
+
+    memset(m_aInteriorNodes, 0xFF, sizeof(m_aInteriorNodes));
 }
 
 // 0x450950
@@ -133,4 +157,27 @@ bool CPathFind::Save() {
 // 0x450A60
 void CPathFind::UpdateStreaming(bool a1) {
     return plugin::CallMethod<0x450A60, CPathFind*, bool>(this, a1);
+}
+
+// 0x44DE80
+void CPathFind::StartNewInterior(int interiorNum) {
+    InteriorIDBeingBuilt = interiorNum;
+    bInteriorBeingBuilt = true;
+    NumNodesGiven = 0;
+    NumLinksToExteriorNodes = 0;
+
+    // BUG: Possible endless loop if 8 interiors are loaded i think
+    NewInteriorSlot = 0;
+    while (m_aInteriorNodes[NewInteriorSlot].IsValid())
+        NewInteriorSlot++;
+}
+
+// 0x451300 unused
+CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId) {
+    for (auto interiorInd = 0; interiorInd < NUM_PATH_INTERIOR_AREAS; ++interiorInd) {
+        if (m_aInteriorNodes[interiorInd] == addressToFind)
+            return CNodeAddress(NUM_PATH_MAP_AREAS + interiorInd, nodeId);
+    }
+
+    return CNodeAddress((int16)-1u, addressToFind.m_wNodeId);
 }

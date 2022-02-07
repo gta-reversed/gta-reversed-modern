@@ -105,6 +105,8 @@ public:
     uint32 m_nBehaviourType : 4; // 1 - roadblock
                                  // 2 - parking node
 
+public:
+    static void InjectHooks();
     CVector GetNodeCoors();
 };
 
@@ -129,15 +131,22 @@ public:
     uint32                 m_dwNumAddresses[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     int32                  field_1544[2048];
     uint32                 m_dwTotalNumNodesInSearchList;
-    CNodeAddress           char3548[8];
+    CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumForbiddenAreas;
-    CForbiddenArea         m_aForbiddenAreas[64];
+    CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
     bool                   m_bForbiddenForScriptedCarsEnabled;
     char                   _padding[3];
     float                  m_fForbiddenForScrCarsX1;
     float                  m_fForbiddenForScrCarsX2;
     float                  m_fForbiddenForScrCarsY1;
     float                  m_fForbiddenForScrCarsY2;
+
+public:
+    static int32& InteriorIDBeingBuilt;
+    static bool& bInteriorBeingBuilt;
+    static int32& NumNodesGiven;
+    static int32& NumLinksToExteriorNodes;
+    static int32& NewInteriorSlot;
 
 public:
     static void InjectHooks();
@@ -164,6 +173,8 @@ public:
     bool Load();
     bool Save();
     void UpdateStreaming(bool a1);
+    void StartNewInterior(int interiorNum);
+    CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
 
     // pathLink is the same as the returned pointer(at least on success)
     // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and
@@ -171,7 +182,10 @@ public:
     CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
 
-    inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
+    inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) {
+        assert(address.m_wAreaId < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS);
+        return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId];
+    }
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);
