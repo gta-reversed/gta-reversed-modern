@@ -156,7 +156,7 @@ void ProcessImGui() {
         auto visibleItems = s_SavedLocations | visibleFilter;
 
         // Do not show indices if the list is filtered.
-        bool isFiltered = visibleItems.empty();
+        bool isFiltered = std::distance(visibleItems.begin(), visibleItems.end()) != s_SavedLocations.size();
 
         // Saved positions table
         if (BeginTable("Saved Positions", 5, ImGuiTableFlags_Resizable | ImGuiTableFlags_Reorderable | ImGuiTableFlags_BordersInnerH | ImGuiTableFlags_ScrollY)) {
