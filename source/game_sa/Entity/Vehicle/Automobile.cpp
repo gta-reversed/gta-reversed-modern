@@ -4796,7 +4796,9 @@ void CAutomobile::PlaceOnRoadProperly()
 // 0x6AF910
 void CAutomobile::PopBoot() {
     if (m_damageManager.IsDoorClosed(eDoors::DOOR_BOOT)) {
-        const auto& door = m_doors[eDoors::DOOR_BOOT];
+        auto& door = m_doors[eDoors::DOOR_BOOT];
+
+        door.OpenFully();
 
         CMatrix frameMat{ RwFrameGetMatrix(m_aCarNodes[eCarNodes::CAR_BOOT]) };
         CVector rot{ 0.f, 0.f, 0.f };

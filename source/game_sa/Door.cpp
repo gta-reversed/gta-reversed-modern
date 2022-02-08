@@ -26,6 +26,11 @@ void CDoor::Open(float openRatio) {
     plugin::CallMethod<0x6F4790, CDoor*, float>(this, openRatio);
 }
 
+
+void CDoor::OpenFully() {
+    m_fAngle = m_fOpenAngle;
+}
+
 // 0x6F47E0
 float CDoor::GetAngleOpenRatio() {
     return plugin::CallMethodAndReturn<float, 0x6F47E0, CDoor*>(this);
