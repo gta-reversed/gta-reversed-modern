@@ -4035,6 +4035,8 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
     if (physicalFlags.bDestroyed)
         obj->physicalFlags.bDestroyed = true;
 
+    CWorld::Add(obj);
+
     return obj;
 }
 
