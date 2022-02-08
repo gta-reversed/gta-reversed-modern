@@ -104,7 +104,7 @@ public:
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
     static void SetupPlayerPed(int playerId);
 
-    // NOTASA
+    // NOTSA
     CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
     CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };

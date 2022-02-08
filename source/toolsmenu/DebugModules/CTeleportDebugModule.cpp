@@ -47,6 +47,7 @@ void TeleportTo(const CVector& pos, eAreaCodes areaCode) {
     CStreaming::RemoveBuildingsNotInArea(areaCode);
     CTimeCycle::StopExtraColour(false);
 
+    auto player = FindPlayerPed();
     if (auto vehicle = FindPlayerVehicle()) {
         vehicle->SetPosn(pos);
         vehicle->ResetTurnSpeed();
@@ -55,7 +56,11 @@ void TeleportTo(const CVector& pos, eAreaCodes areaCode) {
         vehicle->ResetFrictionTurnSpeed();
     }
     else
-        FindPlayerPed()->Teleport(pos, true);
+        player->Teleport(pos, true);
+
+    auto& group = player->GetGroup();
+    if (auto& mem = group.GetMembership(); mem.CountMembersExcludingLeader())
+        group.Teleport(&pos);
 }
 
 void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD) {
