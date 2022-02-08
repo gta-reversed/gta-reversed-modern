@@ -111,6 +111,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(PopDoor, 0x6ADEF0);
     RH_ScopedInstall(PopPanel, 0x6ADF80);
     RH_ScopedInstall(ScanForCrimes, 0x6ADFF0);
+    RH_ScopedInstall(BlowUpCarsInPath, 0x6AF110);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4657,9 +4658,32 @@ void CAutomobile::TankControl()
 }
 
 // 0x6AF110
-void CAutomobile::BlowUpCarsInPath()
-{
-    ((void(__thiscall*)(CAutomobile*))0x6AF110)(this);
+void CAutomobile::BlowUpCarsInPath() {
+    if (m_vecMoveSpeed.SquaredMagnitude() < 0.1f * 0.1f) { // Originally `Magnitude() < 0.1f`
+        return;
+    }
+
+    if (npcFlags.ucTaxiUnkn6) {
+        return;
+    }
+
+    for (auto&& e : GetCollidingEntities()) {
+        if (!e)
+            continue; // I don't think should ever happen? But original code checks...
+        if (!e->IsVehicle())
+            continue;
+
+        auto& veh = *e->AsVehicle();
+        if (ModelIndices::IsRhino(veh.m_nModelIndex))
+            continue;
+        if (veh.physicalFlags.bDestroyed)
+            continue;
+
+        if (this == FindPlayerVehicle()) {
+            CCrime::ReportCrime(eCrimeType::CRIME_EXPLOSION, &veh, FindPlayerPed());
+        }
+        veh.BlowUpCar(this, false);
+    }
 }
 
 // 0x6AF420

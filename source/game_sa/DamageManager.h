@@ -11,6 +11,8 @@
 
 class CAutomobile;
 
+// TODO: Seems like these are the damage states for doors only.
+//       Panel's seems to be different, more like: DAMSTATE_OK, DAMSTATE_DAMAGED, DAMSTATE_MISSING
 enum ePanelDamageState : uint8 {
     DAMSTATE_OK             = 0, // Closed
     DAMSTATE_OPENED         = 1, // Open
