@@ -99,7 +99,15 @@ public:
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
 
-    void SetRotate(const CVector& rot) { return SetRotate(rot.x, rot.z, rot.z); }
+    void SetRotate(const CVector& rot) {
+        SetRotate(rot.x, rot.z, rot.z);
+    }
+
+    void SetRotateKeepPos(const CVector& rot) {
+        auto pos{ m_pos };
+        SetRotate(rot.x, rot.z, rot.z);
+        m_pos = pos;
+    }
 
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:

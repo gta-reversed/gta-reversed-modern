@@ -112,7 +112,8 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(PopPanel, 0x6ADF80);
     RH_ScopedInstall(ScanForCrimes, 0x6ADFF0);
     RH_ScopedInstall(BlowUpCarsInPath, 0x6AF110);
-    RH_ScopedInstall(BlowUpCarsInPath, 0x6AF910);
+    RH_ScopedInstall(PopBoot, 0x6AF910);
+    RH_ScopedInstall(CloseBoot, 0x6AFA20);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4809,9 +4810,17 @@ void CAutomobile::PopBoot() {
 }
 
 // 0x6AFA20
-void CAutomobile::CloseBoot()
-{
-    ((void(__thiscall*)(CAutomobile*))0x6AFA20)(this);
+void CAutomobile::CloseBoot() {
+    auto& door = m_doors[eDoors::DOOR_BOOT];
+
+    door.CloseFully();
+
+    // Code copy pasted from `PopBoot`:
+    CMatrix frameMat{ RwFrameGetMatrix(m_aCarNodes[eCarNodes::CAR_BOOT]) };
+    CVector rot{ 0.f, 0.f, 0.f };
+    rot[door.m_nAxis] = door.m_fAngle;
+    frameMat.SetRotateKeepPos(rot);
+    frameMat.UpdateRW();
 }
 
 // 0x6B0690

@@ -26,6 +26,9 @@ void CDoor::Open(float openRatio) {
     plugin::CallMethod<0x6F4790, CDoor*, float>(this, openRatio);
 }
 
+void CDoor::CloseFully() {
+    m_fAngle = m_fClosedAngle;
+}
 
 void CDoor::OpenFully() {
     m_fAngle = m_fOpenAngle;
