@@ -110,6 +110,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(RemoveBonnetInPedCollision, 0x6AA200);
     RH_ScopedInstall(PopDoor, 0x6ADEF0);
     RH_ScopedInstall(PopPanel, 0x6ADF80);
+    RH_ScopedInstall(ScanForCrimes, 0x6ADFF0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4482,10 +4483,22 @@ void CAutomobile::PopPanel(eCarNodes nodeIdx, ePanels panel, bool showVisualEffe
     SetComponentVisibility(m_aCarNodes[nodeIdx], 0u);
 }
 
-// 0x6ADFF0
+/*!
+* @address 0x6ADFF0
+*/
 void CAutomobile::ScanForCrimes()
 {
-    ((void(__thiscall*)(CAutomobile*))0x6ADFF0)(this);
+    if (const auto playerVeh = FindPlayerVehicle()) {
+        if (playerVeh->IsAutomobile()) {
+            if (playerVeh->m_nAlarmState && playerVeh->m_nAlarmState != (uint16)-1) {
+                if (playerVeh->m_nStatus != eEntityStatus::STATUS_WRECKED) {
+                    if ((playerVeh->GetPosition() - GetPosition()).SquaredMagnitude() < 20.f * 20.f) {
+                        FindPlayerPed()->SetWantedLevelNoDrop(1);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void CAutomobile::TankControl()
