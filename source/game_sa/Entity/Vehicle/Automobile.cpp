@@ -108,6 +108,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SpawnFlyingComponent, 0x6A8580);
     RH_ScopedInstall(ProcessSwingingDoor, 0x6A9D70);
     RH_ScopedInstall(RemoveBonnetInPedCollision, 0x6AA200);
+    RH_ScopedInstall(PopDoor, 0x6ADEF0);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -1741,7 +1742,7 @@ void CAutomobile::Fix()
 
     // Reset actual door's status
     if (m_pHandlingData->m_bWheelFNarrow2) {
-        m_damageManager.SetDoorsStatus({ DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }, eDoorStatus::DAMSTATE_NOTPRESENT);
+        m_damageManager.SetDoorStatus({ DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }, eDoorStatus::DAMSTATE_NOTPRESENT);
     }
 
     vehicleFlags.bIsDamaged = false;
@@ -4439,9 +4440,23 @@ void CAutomobile::UpdateWheelMatrix(int32 nodeIndex, int32 flags)
 }
 
 // 0x6ADEF0
-void CAutomobile::PopDoor(int32 nodeIndex, eDoors door, bool showVisualEffect)
+void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffect)
 {
-    ((void(__thiscall*)(CAutomobile*, int32, eDoors, bool))0x6ADEF0)(this, nodeIndex, door, showVisualEffect);
+    if (!m_damageManager.IsDoorPresent(doorIdx)) {
+        return;
+    }
+
+    if (showVisualEffect) {
+        if (nodeIdx != eCarNodes::CAR_NODE_NONE) {
+            SpawnFlyingComponent(nodeIdx, nodeIdx == eCarNodes::CAR_CHASSIS ? 4u : 2u);
+        } else {
+            const auto obj = SpawnFlyingComponent(CAR_NODE_NONE, 3u);
+            m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, obj);
+        }
+    }
+
+    m_damageManager.SetDoorStatus(doorIdx, DAMSTATE_NOTPRESENT);
+    SetComponentVisibility(m_aCarNodes[nodeIdx], 0);
 }
 
 // 0x6ADF80
