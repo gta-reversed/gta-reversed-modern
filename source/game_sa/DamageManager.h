@@ -12,11 +12,11 @@
 class CAutomobile;
 
 enum ePanelDamageState : uint8 {
-    DAMSTATE_OK             = 0,
-    DAMSTATE_OPENED         = 1,
-    DAMSTATE_DAMAGED        = 2,
-    DAMSTATE_OPENED_DAMAGED = 3,
-    DAMSTATE_NOTPRESENT     = 4
+    DAMSTATE_OK             = 0, // Closed
+    DAMSTATE_OPENED         = 1, // Open
+    DAMSTATE_DAMAGED        = 2, // Closed
+    DAMSTATE_OPENED_DAMAGED = 3, // Open
+    DAMSTATE_NOTPRESENT     = 4  // Missing
 };
 
 // original name
@@ -163,7 +163,7 @@ public:
     eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx);
     void SetDoorStatus_Component(tComponent door, eDoorStatus status);
 
-    eDoorStatus GetDoorStatus(eDoors door);
+    eDoorStatus GetDoorStatus(eDoors door) const;
     void SetDoorStatus(eDoors door, eDoorStatus status);
 
     eCarWheelStatus GetWheelStatus(eCarWheel wheel);
@@ -184,6 +184,11 @@ public:
     void SetAllWheelsState(eCarWheelStatus state);
     void SetDoorsStatus(std::initializer_list<eDoors> doors, eDoorStatus status);
     auto GetAllLightsState() const -> std::array<eLightsState, 4>;
+    bool IsDoorOpen(eDoors door) const;
+    bool IsDoorClosed(eDoors door) const;
+    bool IsDoorPresent(eDoors door) const;
+    void SetDoorOpen(eDoors door);
+    void SetDoorClosed(eDoors door);
 private: 
     // Wrapper functions
 

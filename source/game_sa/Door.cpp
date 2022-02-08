@@ -12,13 +12,13 @@
 float& CDoor::DOOR_SPEED_MAX_CAPPED = *(float*)0x8D3950;
 
 // 0x6F4040
-bool CDoor::Process(CVehicle* vehicle, CVector& arg1, CVector& arg2, CVector& arg3) {
-    return plugin::CallMethodAndReturn<bool, 0x6F4040, CDoor*, CVehicle*, CVector&, CVector&, CVector&>(this, vehicle, arg1, arg2, arg3);
+bool CDoor::Process(CVehicle* vehicle, CVector& arg1, CVector& arg2, const CVector& thisDoorPos) {
+    return plugin::CallMethodAndReturn<bool, 0x6F4040, CDoor*, CVehicle*, CVector&, CVector&, CVector&>(this, vehicle, arg1, arg2, const_cast<CVector&>(thisDoorPos));
 }
 
 // 0x6F4540
-bool CDoor::ProcessImpact(CVehicle* vehicle, CVector& arg1, CVector& arg2, CVector& arg3) {
-    return plugin::CallMethodAndReturn<bool, 0x6F4540, CDoor*, CVehicle*, CVector&, CVector&, CVector&>(this, vehicle, arg1, arg2, arg3);
+bool CDoor::ProcessImpact(CVehicle* vehicle, CVector& arg1, CVector& arg2, const CVector& thisDoorPos) {
+    return plugin::CallMethodAndReturn<bool, 0x6F4540, CDoor*, CVehicle*, CVector&, CVector&, CVector&>(this, vehicle, arg1, arg2, const_cast<CVector&>(thisDoorPos));
 }
 
 // 0x6F4790

@@ -106,6 +106,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(IsInAir, 0x6A6140);
     RH_ScopedInstall(dmgDrawCarCollidingParticles, 0x6A6DC0);
     RH_ScopedInstall(SpawnFlyingComponent, 0x6A8580);
+    RH_ScopedInstall(ProcessSwingingDoor, 0x6A9D70);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4307,9 +4308,106 @@ void CAutomobile::ProcessHarvester()
 }
 
 // 0x6A9D70
-void CAutomobile::ProcessSwingingDoor(int32 nodeIndex, eDoors door)
+void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
 {
-    ((void(__thiscall*)(CAutomobile*, int32, eDoors))0x6A9D70)(this, nodeIndex, door);
+    constexpr auto BONNET_SWING_RADIUS = 0.05f;
+
+    auto frame = m_aCarNodes[(size_t)nodeIdx];
+    if (!frame) {
+        return;
+    }
+
+    if (!m_damageManager.IsDoorPresent(doorIdx)) {
+        return;
+    }
+
+    if (m_damageManager.IsDoorClosed(doorIdx)) {
+        if (m_fDamageIntensity <= 100.f || doorIdx == DOOR_BONNET) {
+            return;
+        }
+
+        switch (m_nStatus) {
+        case eEntityStatus::STATUS_PLAYER:
+        case eEntityStatus::STATUS_PHYSICS:
+            break;
+        default:
+            return;
+        }
+    }
+
+    CMatrix frameMatrix{ RwFrameGetMatrix(frame) };
+
+    auto& door = m_doors[doorIdx];
+
+    if (m_damageManager.IsDoorClosed(doorIdx) && CanDoorsBeDamaged()) {
+        if (door.ProcessImpact(
+            this,
+            m_doorRelatedPosition1,
+            m_doorRelatedPosition2,
+            Multiply3x3(*m_matrix, frameMatrix.GetPosition())
+        )) {
+            m_damageManager.SetDoorOpen(doorIdx);
+        }
+    }
+
+    // Try opening the door (If it's not open already)
+    if (!m_damageManager.IsDoorOpen(doorIdx)) {
+        return;
+    }
+
+    // 0x6A9F02
+    // If it's the bonnet, we possibly apply some angle velocity based on our current speed
+    if (doorIdx == eDoors::DOOR_BONNET) {
+        auto& bonnet = m_doors[eDoors::DOOR_BONNET];
+        if ((bonnet.m_nDirn & 15) == 1) { // == 1 necessary
+            bonnet.m_fAngVel += ((std::sin(bonnet.m_fAngle + 0.1f) * BONNET_SWING_RADIUS) * m_matrix->GetForward() * m_vecMoveSpeed).ComponentwiseSum();
+        }
+    }
+
+    // 0x6A9F91
+    // Now process it, if successful close it and do AudioFX
+    if (door.Process(
+        this,
+        m_doorRelatedPosition1,
+        m_doorRelatedPosition2,
+        Multiply3x3(*m_matrix, frameMatrix.GetPosition())
+    )) {
+        m_damageManager.SetDoorClosed(doorIdx);
+        m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
+    }
+
+    // Update component rotation based on it's stored angle
+    {
+        CVector rotation{ 0.f, 0.f, 0.f };
+        rotation[door.m_nAxis] = door.m_fAngle;
+        frameMatrix.SetRotate(rotation);
+        frameMatrix.UpdateRW();
+    }
+
+    // Possibly detach bonnet and let it fly
+    if (doorIdx == eDoors::DOOR_BONNET) {
+        if (   door.m_nDoorState == DAMSTATE_OPENED                      // Still open (couldn't close it)
+            && DotProduct(m_vecMoveSpeed, m_matrix->GetForward()) > 0.4f // Speed's direction is kinda forwards
+        ) {
+            auto flyingObj = SpawnFlyingComponent(CAR_BONNET, 2);
+
+            m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, flyingObj);
+            SetComponentVisibility(m_aCarNodes[CAR_BONNET], 0);
+            m_damageManager.SetDoorStatus(DOOR_BONNET, DAMSTATE_NOTPRESENT);
+
+            // Apply some additional forces to the flying component
+            if (flyingObj) {
+                // Apply move speed (with some randomness in up/down direction)
+                flyingObj->m_vecMoveSpeed = m_vecMoveSpeed * 0.4f + m_matrix->GetRight() * 0.1f;
+                if (rand() % 2) {
+                    flyingObj->m_vecMoveSpeed += m_matrix->GetUp() / 2.f;
+                } else {
+                    flyingObj->m_vecMoveSpeed -= m_matrix->GetUp() / 2.f;
+                }
+                flyingObj->ApplyTurnForce(m_matrix->GetUp() * 10.f, m_matrix->GetForward());
+            }
+        }
+    }
 }
 
 // 0x6AA200

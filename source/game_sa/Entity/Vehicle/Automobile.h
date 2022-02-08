@@ -88,9 +88,10 @@ public:
     float       m_aircraftGoToHeading;
     float       m_fRotationBalance; // used in CHeli::TestSniperCollision
     float       m_fMoveDirection;
-    int32       field_8B4[6];
+    CVector     m_doorRelatedPosition1;
+    CVector     m_doorRelatedPosition2;
     int32       field_8C8[6];
-    float       m_dwBurnTimer;
+    float       m_fBurnTimer;
     CPhysical*  m_pWheelCollisionEntity[4];
     CVector     m_vWheelCollisionPos[4];
     char        field_924;
@@ -359,12 +360,12 @@ public:
     // Create colliding particles
     void dmgDrawCarCollidingParticles(const CVector&, float force, eWeaponType weapon);
     void ProcessCarOnFireAndExplode(bool bExplodeImmediately);
-    CObject* SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType);
+    CObject* SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType);
     void ProcessBuoyancy();
     void inline ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver);
     // Process combine
     void ProcessHarvester();
-    void ProcessSwingingDoor(int32 nodeIndex, eDoors door);
+    void ProcessSwingingDoor(eCarNodes nodeIndex, eDoors door);
     // Returns spawned flying component?
     CObject* RemoveBonnetInPedCollision();
     void UpdateWheelMatrix(int32 nodeIndex, int32 flags);

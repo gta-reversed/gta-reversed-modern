@@ -22,7 +22,7 @@ class CDoor {
 public:
     float      m_fOpenAngle;
     float      m_fClosedAngle;
-    int16      m_nDirn;
+    int16      m_nDirn; // Seems to be a bitfield?
     uint8      m_nAxis;
     eDoorState m_nDoorState;
     float      m_fAngle;
@@ -31,8 +31,8 @@ public:
 
     static float& DOOR_SPEED_MAX_CAPPED; // 0.5f
 
-    bool  Process(CVehicle* vehicle, CVector& arg1, CVector& arg2, CVector& arg3);
-    bool  ProcessImpact(CVehicle* vehicle, CVector& arg1, CVector& arg2, CVector& arg3);
+    bool  Process(CVehicle* vehicle, CVector& arg1, CVector& arg2, const CVector& arg3);
+    bool  ProcessImpact(CVehicle* vehicle, CVector& arg1, CVector& arg2, const CVector& arg3);
     void  Open(float openRatio);
     float GetAngleOpenRatio();
     bool  IsClosed();

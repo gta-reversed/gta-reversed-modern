@@ -29,7 +29,7 @@ class CMatrix {
 public:
     CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
-    CMatrix(RwMatrix* matrix, bool temporary); // like previous + attach
+    CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     ~CMatrix();                                // destructor detaches matrix if attached
     CMatrix() {
         m_pAttachMatrix = nullptr;
@@ -98,6 +98,8 @@ public:
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    void SetRotate(const CVector& rot) { return SetRotate(rot.x, rot.z, rot.z); }
 
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:
