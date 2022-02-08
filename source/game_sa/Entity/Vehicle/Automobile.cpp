@@ -4023,6 +4023,12 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
         }
     }
 
+    if (CCollision::ProcessColModels(*obj->m_matrix, *obj->GetColModel(), *m_matrix, *GetColModel(), CWorld::m_aTempColPts, nullptr, nullptr, false) > 0)
+        obj->m_pEntityIgnoredCollision = this;
+     
+    if (physicalFlags.bDestroyed)
+        obj->physicalFlags.bDestroyed = true;
+
     return obj;
 }
 
