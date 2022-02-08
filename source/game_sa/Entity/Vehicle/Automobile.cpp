@@ -4385,7 +4385,9 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     {
         CVector rotation{ 0.f, 0.f, 0.f };
         rotation[door.m_nAxis] = door.m_fAngle;
+        const auto savedPos = frameMatrix.GetPosition();
         frameMatrix.SetRotate(rotation);
+        frameMatrix.GetPosition() = savedPos;
         frameMatrix.UpdateRW();
     }
 
