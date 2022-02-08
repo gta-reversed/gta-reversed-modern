@@ -109,6 +109,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(ProcessSwingingDoor, 0x6A9D70);
     RH_ScopedInstall(RemoveBonnetInPedCollision, 0x6AA200);
     RH_ScopedInstall(PopDoor, 0x6ADEF0);
+    RH_ScopedInstall(PopPanel, 0x6ADF80);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4460,9 +4461,25 @@ void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffe
 }
 
 // 0x6ADF80
-void CAutomobile::PopPanel(int32 nodeIndex, ePanels panel, bool showVisualEffect)
-{
-    ((void(__thiscall*)(CAutomobile*, int32, ePanels, bool))0x6ADF80)(this, nodeIndex, panel, showVisualEffect);
+void CAutomobile::PopPanel(eCarNodes nodeIdx, ePanels panel, bool showVisualEffect) {
+    if (m_damageManager.GetPanelStatus(panel) == ePanelDamageState::DAMSTATE_OPENED_DAMAGED) {
+        return;
+    }
+
+    if (showVisualEffect) {
+        switch (nodeIdx) {
+        case eCarNodes::CAR_WHEEL_LF:
+        case eCarNodes::CAR_WHEEL_LM:
+            SpawnFlyingComponent(nodeIdx, 0u);
+            break;
+        default:
+            SpawnFlyingComponent(nodeIdx, 5u);
+            break;
+        }
+    }
+
+    m_damageManager.SetPanelStatus(panel, ePanelDamageState::DAMSTATE_OPENED_DAMAGED);
+    SetComponentVisibility(m_aCarNodes[nodeIdx], 0u);
 }
 
 // 0x6ADFF0
