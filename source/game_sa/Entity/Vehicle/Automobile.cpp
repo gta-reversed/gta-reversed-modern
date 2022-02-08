@@ -107,6 +107,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(dmgDrawCarCollidingParticles, 0x6A6DC0);
     RH_ScopedInstall(SpawnFlyingComponent, 0x6A8580);
     RH_ScopedInstall(ProcessSwingingDoor, 0x6A9D70);
+    RH_ScopedInstall(RemoveBonnetInPedCollision, 0x6AA200);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4410,10 +4411,25 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     }
 }
 
-// 0x6AA200
-CObject* CAutomobile::RemoveBonnetInPedCollision()
-{
-    return ((CObject * (__thiscall*)(CAutomobile*))0x6AA200)(this);
+/*!
+* @address 0x6AA200
+* @brief Remove bonnet if it's present and open
+* @returns Flying component object (May be null even in case the bonnet was removed - See \r SpawnFlyingComponent as to when this happens)
+*/
+CObject* CAutomobile::RemoveBonnetInPedCollision() {
+    if (!m_aCarNodes[eCarNodes::CAR_BONNET] || !m_damageManager.IsDoorOpen(eDoors::DOOR_BONNET)) {
+        return nullptr; // Not present or open
+    }
+
+    if (const auto& bonnet = m_doors[eCarNodes::CAR_BONNET]; bonnet.m_fOpenAngle * 0.4f >= bonnet.m_fAngle) { // TODO: CDoor - Probably inlined (IsDoorHalfOpen?)
+        return nullptr;
+    }
+
+    auto flyingComp = SpawnFlyingComponent(eCarNodes::CAR_BONNET, 2u);
+    m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, flyingComp);
+    SetComponentVisibility(m_aCarNodes[eCarNodes::CAR_BONNET], 0);
+    m_damageManager.SetDoorStatus(eDoors::DOOR_BONNET, eDoorStatus::DAMSTATE_NOTPRESENT);
+    return flyingComp;
 }
 
 // 0x6AA290
