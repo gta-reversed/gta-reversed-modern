@@ -82,8 +82,6 @@
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
 #include "PostEffects.h"
-#include "OctTree.h"
-#include "OctTreeBase.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -191,7 +189,6 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
@@ -199,8 +196,6 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    COctTree::InjectHooks();
-    COctTreeBase::InjectHooks();
     CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();

@@ -49,12 +49,12 @@ void COctTree::ShutdownPool() {
 
 // 0x5A75B0
 bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    const auto poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1);
+    const auto poolIndex = ((colorRed << ms_level >> 5) & 4) + ((colorGreen << ms_level >> 6) & 2) + ((colorBlue << ms_level >> 7) & 1); // todo:
     ms_level++;
 
-    m_nRedComponent += colorRed;
+    m_nRedComponent   += colorRed;
     m_nGreenComponent += colorGreen;
-    m_nBlueComponent += colorBlue;
+    m_nBlueComponent  += colorBlue;
     m_nLevel++;
 
     if (ms_level == std::size(m_aChildrens) || m_bLastStep) {
@@ -101,9 +101,9 @@ bool COctTree::InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
 // 0x5A70F0
 void COctTree::FillPalette(uint8* colors) {
     if (m_bLastStep) {
-        colors[ms_level + 0] = m_nRedComponent / m_nLevel;
+        colors[ms_level + 0] = m_nRedComponent   / m_nLevel;
         colors[ms_level + 1] = m_nGreenComponent / m_nLevel;
-        colors[ms_level + 2] = m_nBlueComponent / m_nLevel;
+        colors[ms_level + 2] = m_nBlueComponent  / m_nLevel;
         colors[ms_level + 3] = 128;
 
         m_nLevel = ms_level++;
@@ -127,7 +127,7 @@ uint32 COctTree::FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 color
 
     COctTree* treeElement = this;
     do {
-        uint32 treeIndex = treeElement->m_aChildrens[(colorBlue >> 7) + ((colorGreen >> 6) & 2) + ((colorRed >> 5) & 4)];
+        uint32 treeIndex = treeElement->m_aChildrens[(colorBlue >> 7) + ((colorGreen >> 6) & 2) + ((colorRed >> 5) & 4)]; // todo:
         if (!ms_octTreePool.IsFreeSlotAtIndex(treeIndex))
             treeElement = ms_octTreePool.GetAt(treeIndex);
 
@@ -219,39 +219,4 @@ void COctTree::empty() {
 
         poolIndex = -1;
     }
-}
-
-void COctTree::InjectHooks() {
-    RH_ScopedClass(COctTree);
-    RH_ScopedCategory("Core");
-
-    RH_ScopedInstall(Constructor, 0x5A6DB0);
-    RH_ScopedInstall(Destructor, 0x5A7490);
-    RH_ScopedInstall(InitPool, 0x5A7460);
-    RH_ScopedInstall(ShutdownPool, 0x5A6F70);
-    RH_ScopedInstall(InsertTree_Reversed, 0x5A75B0);
-    RH_ScopedInstall(FillPalette_Reversed, 0x5A70F0);
-    RH_ScopedInstall(FindNearestColour, 0x5A71E0);
-    RH_ScopedInstall(NoOfChildren, 0x5A6DE0);
-    RH_ScopedInstall(ReduceTree, 0x5A7040);
-    RH_ScopedInstall(RemoveChildren, 0x5A74F0);
-    RH_ScopedInstall(empty, 0x5A6FC0);
-}
-
-COctTree* COctTree::Constructor() {
-    this->COctTree::COctTree();
-    return this;
-}
-
-COctTree* COctTree::Destructor() {
-    this->COctTree::~COctTree();
-    return this;
-}
-
-bool COctTree::InsertTree_Reversed(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) {
-    return COctTree::InsertTree(colorRed, colorGreen, colorBlue);
-}
-
-void COctTree::FillPalette_Reversed(uint8* colors) {
-    COctTree::FillPalette(colors);
 }

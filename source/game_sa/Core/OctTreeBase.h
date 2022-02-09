@@ -23,16 +23,6 @@ public:
     void Init(int32 numBranches);
     bool Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
     void ReduceBranches(int32 newBranchesCount);
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    COctTreeBase* Constructor();
-    COctTreeBase* Destructor();
-
-    bool InsertTree_Reversed(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
-    void FillPalette_Reversed(uint8* colors);
 };
 
 extern COctTreeBase& gOctTreeBase;
