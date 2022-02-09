@@ -162,19 +162,19 @@ public:
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
     // And chose accordingly.
-    eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx);
+    eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx) const;
     void SetDoorStatus_Component(tComponent door, eDoorStatus status);
 
     eDoorStatus GetDoorStatus(eDoors door) const;
     void SetDoorStatus(eDoors door, eDoorStatus status);
 
-    eCarWheelStatus GetWheelStatus(eCarWheel wheel);
+    eCarWheelStatus GetWheelStatus(eCarWheel wheel) const;
     void SetWheelStatus(eCarWheel wheel, eCarWheelStatus status);
 
-    ePanelDamageState GetPanelStatus(ePanels panel);
+    ePanelDamageState GetPanelStatus(ePanels panel) const;
     void SetPanelStatus(ePanels panel, ePanelDamageState status);
 
-    eLightsState GetLightStatus(eLights light);
+    eLightsState GetLightStatus(eLights light) const;
     void SetLightStatus(eLights light, eLightsState status);
 
     // returns -1 if no node for this panel
@@ -184,7 +184,7 @@ public:
 
     // NOTSA
     void SetAllWheelsState(eCarWheelStatus state);
-    void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status);
+    void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status); 
     auto GetAllLightsState() const -> std::array<eLightsState, 4>;
     bool IsDoorOpen(eDoors door) const;
     bool IsDoorClosed(eDoors door) const;

@@ -23,7 +23,7 @@ void CDamageManager::InjectHooks() {
     RH_ScopedInstall(GetDoorStatus_Component, 0x6C2250); 
     RH_ScopedInstall(GetDoorStatus, 0x6C2230); 
     RH_ScopedInstall(SetDoorStatus_Component, 0x6C21E0); 
-    RH_ScopedInstall(SetDoorStatus, 0x6C21C0); 
+    RH_ScopedOverloadedInstall(SetDoorStatus, "", 0x6C21C0, void(CDamageManager::*)(eDoors, eDoorStatus));
     RH_ScopedInstall(SetWheelStatus, 0x6C21A0); 
     RH_ScopedInstall(GetPanelStatus, 0x6C2180); 
     RH_ScopedInstall(SetPanelStatus, 0x6C2150); 
@@ -241,7 +241,7 @@ eCarNodes CDamageManager::GetCarNodeIndexFromPanel(ePanels panel) {
 }
 
 // 0x6C2250
-eDoorStatus CDamageManager::GetDoorStatus_Component(tComponent doorComp) {
+eDoorStatus CDamageManager::GetDoorStatus_Component(tComponent doorComp) const {
     /* Enums don't seem to match up... */
     switch (doorComp) {
     case tComponent::COMPONENT_DOOR_RF:
@@ -290,7 +290,7 @@ void CDamageManager::SetDoorStatus(eDoors door, eDoorStatus status) {
 }
 
 // 0x6C21B0
-eCarWheelStatus CDamageManager::GetWheelStatus(eCarWheel wheel) {
+eCarWheelStatus CDamageManager::GetWheelStatus(eCarWheel wheel) const {
     return m_anWheelsStatus[(unsigned)wheel];
 }
 
@@ -300,7 +300,7 @@ void CDamageManager::SetWheelStatus(eCarWheel wheel, eCarWheelStatus status) {
 }
 
 // 0x6C2180
-ePanelDamageState CDamageManager::GetPanelStatus(ePanels panel) {
+ePanelDamageState CDamageManager::GetPanelStatus(ePanels panel) const {
     return (ePanelDamageState)((m_nPanelsStatus >> (4 * (unsigned)panel)) & 0xF);
 }
 
@@ -310,7 +310,7 @@ void CDamageManager::SetPanelStatus(ePanels panel, ePanelDamageState status) {
 }
 
 // 0x6C2130
-eLightsState CDamageManager::GetLightStatus(eLights light) {
+eLightsState CDamageManager::GetLightStatus(eLights light) const {
     return (eLightsState)((m_nLightsStatus >> (2 * (unsigned)light)) & 3);
 }
 
@@ -388,6 +388,33 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
     }
     }
     return false;
+}
+
+void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
+    constexpr eCarWheel wheels[]{
+        eCarWheel::CARWHEEL_FRONT_LEFT,
+        eCarWheel::CARWHEEL_REAR_LEFT,
+        eCarWheel::CARWHEEL_FRONT_RIGHT,
+        eCarWheel::CARWHEEL_REAR_RIGHT
+    };
+    for (auto&& wheel : wheels) {
+        SetWheelStatus(wheel, state);
+    }
+}
+
+void CDamageManager::SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
+    for (auto&& door : doors) {
+        SetDoorStatus(door, status);
+    }
+}
+
+auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
+    return {
+        GetLightStatus(eLights::LIGHT_FRONT_LEFT),
+        GetLightStatus(eLights::LIGHT_FRONT_RIGHT),
+        GetLightStatus(eLights::LIGHT_REAR_LEFT),
+        GetLightStatus(eLights::LIGHT_REAR_RIGHT)
+    };
 }
 
 /*!

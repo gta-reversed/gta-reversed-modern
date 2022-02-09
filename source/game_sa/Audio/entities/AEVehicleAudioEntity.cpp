@@ -501,6 +501,10 @@ float CAEVehicleAudioEntity::GetFlyingMetalVolume(CPhysical* physical) {
     return CAEAudioUtility::AudioLog10(fVol) * 10.0F;
 }
 
+void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents ae, CEntity* e) {
+    return plugin::CallAndReturn<void, 0x4F7580>(this, ae, e);
+}
+
 void CAEVehicleAudioEntity::PlayTrainBrakeSound(int16 soundType, float speed, float volume) {
     plugin::CallMethod<0x4FA630, CAEAudioEntity*, int16, float, float>(this, soundType, speed, volume);
 }

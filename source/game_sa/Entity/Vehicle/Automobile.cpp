@@ -4824,9 +4824,131 @@ void CAutomobile::CloseBoot() {
 }
 
 // 0x6B0690
-void CAutomobile::DoHeliDustEffect(float arg0, float arg1)
-{
-    ((void(__thiscall*)(CAutomobile*, float, float))0x6B0690)(this, arg0, arg1);
+void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
+    const auto KillDustFx = [this] {
+        if (m_pDustParticle) {
+            m_pDustParticle->Kill();
+            m_pDustParticle = nullptr;
+            m_heliDustFxTimeConst = 0.f;
+        }
+    };
+
+    const auto& myPos = GetPosition();
+
+    // 0x6B07E9
+    // Moved early out here instead
+    if ((myPos - TheCamera.GetPosition()).SquaredMagnitude() >= 50.f * 50.f) {
+        KillDustFx();
+        return;
+    }
+
+    switch (m_nVehicleSubType) {
+    case eVehicleType::VEHICLE_TYPE_HELI: {
+        if (m_fHeliRotorSpeed < 0.1125f) {
+            KillDustFx();
+            return;
+        }
+        break;
+    }
+    case eVehicleType::VEHICLE_TYPE_PLANE: {
+        break;
+    }
+    default: {
+        KillDustFx();
+        return;
+    }
+    }
+
+    // 0x6B0705
+
+    // Figure out ground position, and if it's under water
+
+    CColPoint groundCP{};
+    CEntity* hitEntity{}; // Unused
+    CWorld::ProcessVerticalLine(myPos, -1000.f, groundCP, hitEntity, true, false, false, false, false, false, nullptr); // TODO: Check if it returned true :D
+    const bool isGroundSand = g_surfaceInfos->IsSand(groundCP.m_nSurfaceTypeB);
+
+    auto waterLevel{-1000.f};
+    const bool isThereWaterUnderUs = CWaterLevel::GetWaterLevel(myPos, waterLevel, false, nullptr);
+    const auto isHitPosUnderWater = isThereWaterUnderUs && waterLevel > groundCP.m_vecPoint.z;
+
+    const auto groundZ = isHitPosUnderWater ? waterLevel : groundCP.m_vecPoint.z;
+    const auto distToGroundZ = myPos.z - groundZ;
+
+    // Calculate max height for fx to be played
+    const auto GetBaseMaxZForFx = [this]{
+        switch (m_nModelIndex) {
+        case eModelID::MODEL_RCGOBLIN:
+        case eModelID::MODEL_RCRAIDER:
+            return 3.f;
+        }
+        return 30.f;
+    };
+    const auto maxZForFx = GetBaseMaxZForFx() * fxMaxZMult;
+
+    // Check if we're flying low enough for the fx to be played. If not, kill it, and return.
+    if (distToGroundZ >= maxZForFx) {
+        KillDustFx();
+        return;
+    }
+
+    // Early out moved to top
+
+    // Add danger event if we're flying too low to the ground
+    if (CTimer::GetFrameCounter() % 20 == 0) {
+        const auto dangerRadius = m_nModelIndex == MODEL_HYDRA ? 30.f : 20.f;
+        if (distToGroundZ < dangerRadius) {
+            CEventDanger danger{this, dangerRadius};
+            GetEventGlobalGroup()->Add(&danger);
+        }
+    }
+
+    // 0x6B08B1
+    // Create and play fx if it doesn't exist.
+    if (!m_pDustParticle) {
+        CVector fxPos{0.f, 0.f, 0.f};
+        m_pDustParticle = g_fxMan.CreateFxSystem("heli_dust", &fxPos, nullptr, true);
+        if (!m_pDustParticle) { // Failed, return
+            return;
+        }
+        m_pDustParticle->SetLocalParticles(true);
+        m_pDustParticle->Play();
+    }
+
+    // Update time constant of fx
+    {
+        const auto heightProgess = (maxZForFx - distToGroundZ) / maxZForFx * timeConstMult;
+        const auto heightProgessSq = heightProgess * heightProgess;
+
+        // TODO: Figure out a better way to do this... Very ugly.
+        // Basically it's stepping `m_heliDustFxTimeConst` by 0.04 towards `heightProgessSq`.
+        if (m_heliDustFxTimeConst < heightProgessSq) {
+            m_heliDustFxTimeConst = std::min(m_heliDustFxTimeConst + 0.04f, heightProgessSq);
+        } else if (m_heliDustFxTimeConst > heightProgessSq) { // Must check if less, because they might be equal (tbh, the chance for that to happen are... small)
+            m_heliDustFxTimeConst = std::max(m_heliDustFxTimeConst - 0.04f, heightProgessSq);
+        }
+
+        m_pDustParticle->SetConstTime(true, m_heliDustFxTimeConst);
+    }
+
+    // Update offset of fx
+    m_pDustParticle->SetOffsetPos({myPos.x, myPos.y, groundZ});
+
+    // Finally enable/disable prims (whatever that is)
+    m_pDustParticle->EnablePrim(0, !isHitPosUnderWater && !isGroundSand); // Dust or similar particles?
+    m_pDustParticle->EnablePrim(1, !isHitPosUnderWater && isGroundSand);  // Sand particles?
+    m_pDustParticle->EnablePrim(2, isHitPosUnderWater);                   // Water particles?
+
+    // Above code originally (kinda):
+    //if (isHitPosUnderWater) {
+    //    m_pDustParticle->EnablePrim(0, false);
+    //    m_pDustParticle->EnablePrim(1, false);
+    //    m_pDustParticle->EnablePrim(2, true);
+    //} else {
+    //    m_pDustParticle->EnablePrim(0, !isGroundSand);
+    //    m_pDustParticle->EnablePrim(1, isGroundSand);
+    //    m_pDustParticle->EnablePrim(2, false);
+    //}
 }
 
 // 0x6B1350

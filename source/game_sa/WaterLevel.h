@@ -135,4 +135,7 @@ public:
 
     // NOTSA
     static bool IsPointUnderwaterNoWaves(CVector point);
+    static bool GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals) {
+        return GetWaterLevel(pos.x, pos.y, pos.z, &outWaterLevel, touchingWater, normals);
+    }
 };

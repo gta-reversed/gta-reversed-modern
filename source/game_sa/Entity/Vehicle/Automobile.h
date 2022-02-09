@@ -138,7 +138,7 @@ public:
     uint8       m_harvesterParticleCounter;
     char        field_981;
     int16       field_982;
-    float       field_984;
+    float m_heliDustFxTimeConst;
 
     // variables
     static constexpr float PACKER_COL_ANGLE_MULT = -0.0001f;
@@ -369,8 +369,8 @@ public:
     // Returns spawned flying component?
     CObject* RemoveBonnetInPedCollision();
     void UpdateWheelMatrix(int32 nodeIndex, int32 flags);
-    void PopDoor(int32 nodeIndex, eDoors door, bool showVisualEffect);
-    void PopPanel(int32 nodeIndex, ePanels panel, bool showVisualEffect);
+    void PopDoor(eCarNodes nodeIndex, eDoors door, bool showVisualEffect);
+    void PopPanel(eCarNodes nodeIndex, ePanels panel, bool showVisualEffect);
     void ScanForCrimes();
     void TankControl();
     // Makes a vehicles acts like a tank on a road - blows up collided vehicles. Must be called in a loop
