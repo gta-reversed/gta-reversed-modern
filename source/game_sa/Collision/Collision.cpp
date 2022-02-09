@@ -30,7 +30,7 @@ void CCollision::InjectHooks()
     RH_ScopedOverloadedInstall(CalculateTrianglePlanes, "colData", 0x416330, void(*)(CCollisionData*));
     RH_ScopedOverloadedInstall(RemoveTrianglePlanes, "colData", 0x416400, void(*)(CCollisionData*));
     RH_ScopedInstall(ProcessLineOfSight, 0x417950);
-    RH_ScopedInstall(ProcessColModels, 0x4185C0);
+    // RH_ScopedInstall(ProcessColModels, 0x4185C0);
 }
 
 // 0x416260
@@ -410,6 +410,8 @@ void CCollision::RemoveTrianglePlanes(CColModel* colModel) {
 * @returns Number of sphere collision points found (At most ~~32~~ 31 - Original function is buggy)
 */
 int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, const CMatrix& transformB, CColModel& cmB, CColPoint(&sphereCPs)[32], CColPoint* lineCPs, float* maxTouchDistance, bool arg7) {
+    return plugin::CallAndReturn<int32, 0x4185C0, const CMatrix&, CColModel&, const CMatrix&, CColModel&, CColPoint(&)[32], CColPoint*, float*, bool>(transformA, cmA, transformB, cmB, sphereCPs, lineCPs, maxTouchDistance, arg7);
+
     // Don't these this should ever happen, but okay?
     if (!cmA.m_pColData) {
         return 0;
