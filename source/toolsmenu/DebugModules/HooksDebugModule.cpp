@@ -17,6 +17,10 @@ using namespace ImGui;
 
 static std::string HooksFilterContent;
 
+bool IsFiltered() {
+    return !HooksFilterContent.empty();
+}
+
 // Applies current filter on the given category (first call should always be the root)
 // Returns if the given category is visible or not
 // A category is visible if either:
@@ -29,7 +33,7 @@ bool ApplyFilterToCategory(RH::HookCategory& cat) {
             anySubCatsVisible = true;
         }
     }
-    cat.m_isVisible = anySubCatsVisible || HooksFilterContent.empty() || findStringCaseInsensitive(cat.Name(), HooksFilterContent);
+    cat.m_isVisible = anySubCatsVisible || !IsFiltered() || findStringCaseInsensitive(cat.Name(), HooksFilterContent);
     return cat.m_isVisible;
 }
 
@@ -56,13 +60,18 @@ void RenderCategory(RH::HookCategory& cat) {
 
     // Disable all hooks in category at once
     {
-        SetNextItemOpen(HooksFilterContent.empty() ? cat.m_isCategoryOpen : true); // When the search tool is in use open all tree nodes
+        SetNextItemOpen(IsFiltered() || cat.m_isCategoryOpen); // When the search tool is in use open all tree nodes
 
         bool cbClicked{};
         bool cbState{};
         TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, isCategoryOpen);
         if (cbClicked) {
             cat.SetAllItemsEnabled(cbState);
+        }
+
+        // Save state if we haven't overwrote it
+        if (!IsFiltered()) {
+            cat.m_isCategoryOpen = isCategoryOpen;
         }
     }
 
