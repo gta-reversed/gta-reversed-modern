@@ -457,6 +457,20 @@ bool CDamageManager::IsDoorPresent(eDoors door) const {
 
 /*!
 * @notsa
+* @brief   Checks if door is damaged.
+* @returns Returns if door's state is neither \r DAMSTATE_OK or \r DAMSTATE_OPENED
+*/
+bool CDamageManager::IsDoorDamaged(eDoors door) const {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OK:
+    case eDoorStatus::DAMSTATE_OPENED:
+        return false;
+    }
+    return true;
+}
+
+/*!
+* @notsa
 * @brief Sets door open. Shouldn't be called if door isn't present (will assert in debug).
 */
 void CDamageManager::SetDoorOpen(eDoors door) {

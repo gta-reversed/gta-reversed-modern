@@ -189,6 +189,7 @@ public:
     bool IsDoorOpen(eDoors door) const;
     bool IsDoorClosed(eDoors door) const;
     bool IsDoorPresent(eDoors door) const;
+    bool IsDoorDamaged(eDoors door) const;
     void SetDoorOpen(eDoors door);
     void SetDoorClosed(eDoors door);
 private: 
