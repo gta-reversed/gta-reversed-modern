@@ -53,20 +53,20 @@ void ProcessCategory(RH::HookCategory& cat) {
         cbClicked = CheckboxTristate(label, triState, cbStateOut);
     };
 
-    bool categoryOpen{};
-
     // Disable all hooks in category at once
     {
+        SetNextItemOpen(cat.m_isCategoryOpen);
+
         bool cbClicked{};
         bool cbState{};
-        TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, categoryOpen);
+        TreeNodeWithCheckbox(cat.Name().c_str(), cat.OverallState(), cbState, cbClicked, cat.m_isCategoryOpen);
         if (cbClicked) {
             cat.SetAllItemsEnabled(cbState);
         }
     }
 
     // Draw hooks, and subcategories
-    if (categoryOpen) {
+    if (cat.m_isCategoryOpen) {
         // Draw hooks (if any)
         if (!cat.Items().empty()) {
             const auto DrawItems = [&] {

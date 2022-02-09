@@ -13,6 +13,7 @@ public:
     RootHookCategory() :
         HookCategory{ RH_RootCategoryName, nullptr } // Root has no parent
     {
+        m_isCategoryOpen = true; // Root should be opened by default
     }
 
     RootHookCategory(const RootHookCategory&) = delete;

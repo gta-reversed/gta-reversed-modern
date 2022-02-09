@@ -254,6 +254,8 @@ public:
     HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
     HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
     bool                      m_isVisible{true};                  // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
+    bool                      m_isCategoryOpen{};                 // If this category's tree node is currently open
+
 private:
 
     HookCategory*             m_parent{};        // Category we belong to - In case of `RootHookCategory` this is always `nullptr`.
