@@ -18,8 +18,68 @@ uint16& CPickups::CollectedPickUpIndex = *(uint16*)0x978624;
 int32 (&CPickups::aPickUpsCollected)[MAX_COLLECTED_PICKUPS] = *(int32(*)[MAX_COLLECTED_PICKUPS])0x978628;
 uint16& CPickups::NumMessages = *(uint16*)0x978678;
 tPickupMessage (&CPickups::aMessages)[MAX_PICKUP_MESSAGES] = *(tPickupMessage(*)[MAX_PICKUP_MESSAGES])0x978680;
-CPickup (&CPickups::aPickUps)[MAX_NUM_PICKUPS] = *(CPickup(*)[MAX_NUM_PICKUPS])0x9788C0;
 int32& CollectPickupBuffer = *(int32*)0x97D644;
+
+void CPickups::InjectHooks() {
+    RH_ScopedClass(CPickups);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x454A70);
+    // RH_ScopedInstall(ReInit, 0x456E60);
+    // RH_ScopedInstall(AddToCollectedPickupsArray, 0x455240);
+    // RH_ScopedInstall(CreatePickupCoorsCloseToCoors, 0x458A80);
+    // RH_ScopedInstall(CreateSomeMoney, 0x458970);
+    // RH_ScopedInstall(DetonateMinesHitByGunShot, 0x4590C0);
+    // RH_ScopedInstall(DoCollectableEffects, 0x455E20);
+    // RH_ScopedInstall(DoMineEffects, 0x4560E0);
+    // RH_ScopedInstall(DoMoneyEffects, 0x454E80);
+    // RH_ScopedInstall(DoPickUpEffects, 0x455720);
+    // RH_ScopedInstall(FindPickUpForThisObject, 0x4551C0);
+    // RH_ScopedInstall(GenerateNewOne, 0x456F20);
+    // RH_ScopedInstall(GenerateNewOne_WeaponType, 0x457380);
+    // RH_ScopedInstall(GetActualPickupIndex, 0x4552A0);
+    // RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
+    // RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
+    // RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
+    // RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
+    // RH_ScopedInstall(ModelForWeapon, 0x454AC0);
+    // RH_ScopedInstall(PassTime, 0x455200);
+    // RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
+    // RH_ScopedInstall(PickedUpOyster, 0x4552D0);
+    // RH_ScopedInstall(PictureTaken, 0x456A70);
+    // RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
+    // RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
+    // RH_ScopedInstall(RemovePickUp, 0x4573D0);
+    // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
+    // RH_ScopedInstall(RemovePickupObjects, 0x455470);
+    // RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
+    // RH_ScopedInstall(RenderPickUpText, 0x455000);
+    // RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
+    // RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
+    // RH_ScopedInstall(Update, 0x458DE0);
+    // RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
+    // RH_ScopedInstall(WeaponForModel, 0x454AE0);
+    // RH_ScopedInstall(Load, 0x5D35A0);
+    // RH_ScopedInstall(Save, 0x5D3540);
+}
+
+// 0x454A70
+void CPickups::Init() {
+    NumMessages = 0;
+    for (auto& pickup : aPickUps) {
+        pickup.m_nPickupType = PICKUP_NONE;
+        pickup.m_nReferenceIndex = 1;
+        pickup.m_pObject = nullptr;
+    }
+    std::ranges::fill(aPickUpsCollected, 0);
+    CollectedPickUpIndex = 0;
+    DisplayHelpMessage = 10;
+}
+
+// 0x456E60
+void CPickups::ReInit() {
+    plugin::Call<0x456E60>();
+}
 
 // 0x455240
 void CPickups::AddToCollectedPickupsArray(int32 handle) {
@@ -96,19 +156,9 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
     return plugin::CallAndReturn<bool, 0x4564F0, uint16, int32>(modelId, playerId);
 }
 
-// 0x454A70
-void CPickups::Init() {
-    plugin::Call<0x454A70>();
-}
-
 // 0x454B40
 bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
     return plugin::CallAndReturn<bool, 0x454B40, int32>(pickupHandle);
-}
-
-// 0x5D35A0
-bool CPickups::Load() {
-    return plugin::CallAndReturn<bool, 0x5D35A0>();
 }
 
 // 0x454AC0
@@ -141,11 +191,6 @@ bool CPickups::PlayerCanPickUpThisWeaponTypeAtThisMoment(eWeaponType weaponType)
     return plugin::CallAndReturn<bool, 0x4554C0, eWeaponType>(weaponType);
 }
 
-// 0x456E60
-void CPickups::ReInit() {
-    plugin::Call<0x456E60>();
-}
-
 // 0x456DE0
 void CPickups::RemoveMissionPickUps() {
     plugin::Call<0x456DE0>();
@@ -176,11 +221,6 @@ void CPickups::RenderPickUpText() {
     plugin::Call<0x455000>();
 }
 
-// 0x5D3540
-bool CPickups::Save() {
-    return plugin::CallAndReturn<bool, 0x5D3540>();
-}
-
 // 0x456450
 bool CPickups::TestForPickupsInBubble(CVector posn, float radius) {
     return plugin::CallAndReturn<bool, 0x456450, CVector, float>(posn, radius);
@@ -204,6 +244,15 @@ void CPickups::UpdateMoneyPerDay(int32 pickupHandle, uint16 money) {
 // 0x454AE0
 int32 CPickups::WeaponForModel(int32 modelId) {
     return plugin::CallAndReturn<int32, 0x454AE0, int32>(modelId);
+}
+
+// 0x5D35A0
+bool CPickups::Load() {
+    return plugin::CallAndReturn<bool, 0x5D35A0>();
+}
+// 0x5D3540
+bool CPickups::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3540>();
 }
 
 // 0x454B70

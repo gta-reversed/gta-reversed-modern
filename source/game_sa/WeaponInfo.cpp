@@ -98,7 +98,7 @@ bool CWeaponInfo::WeaponHasSkillStats(eWeaponType type) {
 }
 
 uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill) {
-    const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL);
+    const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL) + 1;
     switch (skill) {
     case eWeaponSkill::POOR:
         return (uint32)weaponType + 25u + 0 * numWeaponsWithSkill;
@@ -110,7 +110,7 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
         return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
     }
     assert(0); // Something went wrong
-    return 47;
+    return WEAPON_LAST_WEAPON;
 }
 
 auto GetBaseComboByName(const char* name) {

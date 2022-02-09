@@ -37,6 +37,7 @@ public:
     void  RemoveAllFollowers();
     void  Teleport(const CVector* pos);
 
+    // NOTSA
     inline CPedGroupIntelligence& GetIntelligence() { return m_groupIntelligence; }
 
     inline auto& GetMembership() const { return m_groupMembership; }

@@ -134,7 +134,7 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
             m_nDir++;
             UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, (int8*)& m_nDir);
 
-            if (m_NextNode.m_wAreaId != -1 && m_LastNode.m_wAreaId != -1)
+            if (m_NextNode.m_wAreaId != (uint16)-1 && m_LastNode.m_wAreaId != (uint16)-1)
             {
                 if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId)
                 {
@@ -215,24 +215,24 @@ CTask* CTaskComplexWander::CreateNextSubTask_Reversed(CPed* ped)
         return nullptr;
     }
 
-    CTaskComplexSequence* pTaskComplexSequence = new CTaskComplexSequence();
-    auto pTaskSimpleStandStill = new CTaskSimpleStandStill(500, 0, 0, 8.0f);
-    pTaskComplexSequence->AddTask(pTaskSimpleStandStill);
+    auto* sequence = new CTaskComplexSequence();
+    auto pTaskSimpleStandStill = new CTaskSimpleStandStill(500, false, false, 8.0f);
+    sequence->AddTask(pTaskSimpleStandStill);
 
-    pTaskComplexSequence->AddTask(new CTaskSimpleRunAnim(ped->m_nAnimGroup, ANIM_ID_ROADCROSS, 4.0F, false));
+    sequence->AddTask(new CTaskSimpleRunAnim(ped->m_nAnimGroup, ANIM_ID_ROADCROSS, 4.0F, false));
 
     auto pTaskSimpleScratchHead = (CTaskSimpleScratchHead*)CTask::operator new(32);
     if (pTaskSimpleScratchHead)
     {
         pTaskSimpleScratchHead->Constructor();
     }
-    pTaskComplexSequence->AddTask(pTaskSimpleScratchHead);
+    sequence->AddTask(pTaskSimpleScratchHead);
 
     CVector outTargetPos;
     ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
     auto pTaskSimpleGoToPoint = new CTaskSimpleGoToPoint(m_nMoveState, outTargetPos, m_fTargetRadius, false, false);
-    pTaskComplexSequence->AddTask(pTaskSimpleGoToPoint);
-    return pTaskComplexSequence;
+    sequence->AddTask(pTaskSimpleGoToPoint);
+    return sequence;
 }
 
 CTask* CTaskComplexWander::CreateFirstSubTask_Reversed(CPed* ped)
@@ -270,7 +270,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
             CVector outTargetPos;
             ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
             auto pTaskSimpleGoToPoint = (CTaskSimpleGoToPoint*)m_pSubTask;
-            pTaskSimpleGoToPoint->UpdatePoint(outTargetPos, 0.5, 0);
+            pTaskSimpleGoToPoint->UpdatePoint(outTargetPos, 0.5, false);
         }
         else
         {
@@ -290,7 +290,7 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 
         if (ped->m_pIntelligence->m_AnotherStaticCounter > 30)
         {
-            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, 0))
+            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             {
                 return CreateSubTask(ped, TASK_SIMPLE_SCRATCH_HEAD);
             }
@@ -302,15 +302,15 @@ CTask* CTaskComplexWander::ControlSubTask_Reversed(CPed* ped)
 void CTaskComplexWander::UpdateDir_Reversed(CPed* ped)
 {
     uint8 newDir = m_nDir;
-    if (m_NextNode.m_wAreaId != -1)
+    if (m_NextNode.m_wAreaId != (uint16)-1)
     {
         if (ThePaths.m_pPathNodes[m_NextNode.m_wAreaId])
         {
-            CPathNode* pPathNodes = ThePaths.m_pPathNodes[m_NextNode.m_wAreaId];
-            CPathNode* pPathNode = &pPathNodes[m_NextNode.m_wNodeId];
-            if (pPathNode)
+            CPathNode* pathNodes = ThePaths.m_pPathNodes[m_NextNode.m_wAreaId];
+            CPathNode* pathNode = &pathNodes[m_NextNode.m_wNodeId];
+            if (pathNode)
             {
-                if (pPathNode->m_nNumLinks >= 3 && CTimer::GetFrameCounter() != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
+                if (pathNode->m_nNumLinks >= 3 && CTimer::GetFrameCounter() != m_nLastUpdateDirFrameCount && m_bWanderSensibly)
                 {
                     m_nLastUpdateDirFrameCount = CTimer::GetFrameCounter();
                     uint8 remainder = (3 * CTimer::GetFrameCounter() + ped->m_nRandomSeed) % 100;
@@ -378,10 +378,7 @@ CTask* CTaskComplexWander::CreateSubTask(CPed* ped, int32 taskId)
         {
             CVector outTargetPos;
             ComputeTargetPos(ped, &outTargetPos, &m_NextNode);
-            auto pTaskGotoPoint = new CTaskSimpleGoToPoint(m_nMoveState, outTargetPos, m_fTargetRadius, false, false);
-            if (pTaskGotoPoint)
-                return (CTask*)pTaskGotoPoint;
-            break;
+            return new CTaskSimpleGoToPoint(m_nMoveState, outTargetPos, m_fTargetRadius, false, false);
         }
         case TASK_FINISHED:
         {
@@ -450,7 +447,7 @@ void CTaskComplexWander::ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNo
 // 0x669F30
 bool CTaskComplexWander::ValidNodes()
 {
-    if (m_NextNode.m_wAreaId != -1 && m_LastNode.m_wAreaId != -1)
+    if (m_NextNode.m_wAreaId != (uint16)-1 && m_LastNode.m_wAreaId != (uint16)-1)
     {
         if (m_NextNode.m_wAreaId != m_LastNode.m_wAreaId || m_NextNode.m_wNodeId != m_LastNode.m_wNodeId)
         {
@@ -463,11 +460,11 @@ bool CTaskComplexWander::ValidNodes()
 // 0x674560
 void CTaskComplexWander::ScanForBlockedNodes(CPed* ped)
 {
-    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != -1)
+    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT && m_NextNode.m_wAreaId != (uint16)-1)
     {
         if (ScanForBlockedNode(ped, &m_NextNode))
         {
-            m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, 0);
+            m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
 
             int8 outDir = 0;
             UpdatePathNodes(ped, m_nDir, &m_LastNode, &m_NextNode, &outDir);
@@ -486,14 +483,14 @@ bool CTaskComplexWander::ScanForBlockedNode(CPed* ped, CNodeAddress* targetNodeA
     CVector* pNewNodePos = ThePaths.TakeWidthIntoAccountForWandering(&outVec, *targetNodeAddress, ped->m_nRandomSeed);
     CVector2D distance = *pNewNodePos - ped->GetPosition();
     if (3.0f * 3.0f >= distance.SquaredMagnitude()) {
-        CPed* pClosestPed = (CPed*)ped->m_pIntelligence->m_entityScanner.m_pClosestEntityInRange;
-        if (ScanForBlockedNode(pNewNodePos, pClosestPed))
+        CPed* closestPed = ped->m_pIntelligence->m_entityScanner.m_pClosestEntityInRange->AsPed();
+        if (ScanForBlockedNode(pNewNodePos, closestPed))
         {
             return true;
         }
 
-        CVehicle* pClosestVehicle = (CVehicle*)ped->m_pIntelligence->m_vehicleScanner.m_pClosestEntityInRange;
-        if (ScanForBlockedNode(pNewNodePos, pClosestVehicle))
+        CVehicle* closestVehicle = ped->GetIntelligence()->m_vehicleScanner.m_pClosestEntityInRange->AsVehicle();
+        if (ScanForBlockedNode(pNewNodePos, closestVehicle))
         {
             return true;
         }

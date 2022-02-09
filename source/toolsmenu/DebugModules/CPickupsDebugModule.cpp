@@ -1,12 +1,15 @@
 #include "StdInc.h"
 
 #include "CPickupsDebugModule.h"
+#include "CTeleportDebugModule.h"
 
 #include "imgui.h"
 #include "Pickups.h"
+#include "extensions/enumerate.hpp"
 
-// std::unordered_map<uint8, std::string>
-constexpr struct { ePickupType type; std::string_view name; } PICKUP_TYPES_NAME_MAP[] = {
+using namespace ImGui;
+
+const std::unordered_map<ePickupType, std::string> PICKUP_TYPES_NAME_MAP = {
     { PICKUP_NONE,                     "NONE",                     },
     { PICKUP_IN_SHOP,                  "IN_SHOP",                  },
     { PICKUP_ON_STREET,                "ON_STREET",                },
@@ -34,14 +37,38 @@ constexpr struct { ePickupType type; std::string_view name; } PICKUP_TYPES_NAME_
 
 namespace CPickupsDebugModule {
 
-void ProcessImGui() {
-    using namespace ImGui;
+void DrawTable(auto& pickups) {
+    if (ImGui::BeginTable("Pickups", 6, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable)) {
+        ImGui::TableNextColumn(); ImGui::TableHeader("Id");
+        ImGui::TableNextColumn(); ImGui::TableHeader("Type");
+        ImGui::TableNextColumn(); ImGui::TableHeader("Model Id");
+        ImGui::TableNextColumn(); ImGui::TableHeader("Visible");
+        ImGui::TableNextColumn(); ImGui::TableHeader("Revenue Value");
+        ImGui::TableNextColumn(); ImGui::TableHeader("Ammo");
 
+        for (const auto& [i, pickup] : enumerate(pickups)) {
+            ImGui::PushID(i);
+
+            ImGui::TableNextColumn(); Text("%d", i);
+            ImGui::TableNextColumn(); Text("%s", PICKUP_TYPES_NAME_MAP.at(pickup.m_nPickupType).c_str());
+            ImGui::TableNextColumn(); Text("%d", pickup.m_nModelIndex);
+            ImGui::TableNextColumn(); Text("%d", pickup.m_nFlags.bVisible);
+            ImGui::TableNextColumn(); Text("%.2f", pickup.m_fRevenueValue);
+            ImGui::TableNextColumn(); Text("%d", pickup.m_nAmmo);
+
+            ImGui::PopID();
+        }
+    ImGui::EndTable();
+    }
+}
+
+void ProcessImGui() {
     if (Button("Hide All")) {
         for (auto& pickup : CPickups::aPickUps) {
             pickup.m_nFlags.bVisible = false;
         }
     }
+    SameLine();
     if (Button("Show All")) {
         for (auto& pickup : CPickups::aPickUps) {
             pickup.m_nFlags.bVisible = true;
@@ -49,50 +76,36 @@ void ProcessImGui() {
         }
     }
 
-    if (ImGui::BeginTable("Pickups Near Player", 1, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders)) {
-        for (auto i = 0; auto& pickup : CPickups::aPickUps) {
-            if (!pickup.m_pObject)
-                continue;
+    {
+        BeginGroup();
+        CPickup* pickup = &CPickups::aPickUps[12];
 
-            ImGui::PushID(i);
+        std::ptrdiff_t index = pickup - CPickups::aPickUps.data(); // !sue
+        Text("Id %d", index);
 
-            const auto posn = UncompressLargeVector(pickup.m_vecPos);
-            ImGui::TableNextColumn();
-            Text("%.2f %.2f %.2f", posn.x, posn.y, posn.z);
+        const auto posn = UncompressLargeVector(pickup->m_vecPos);
+        Text("Position %.2f %.2f %.2f", posn.x, posn.y, posn.z);
+        if (Button("Teleport")) TeleportDebugModule::TeleportTo(posn);
 
-            ImGui::PopID();
-            i++;
-        }
-        ImGui::EndTable();
+        SameLine(); if (Button("Change Visibility")) pickup->m_nFlags.bVisible ^= true;
+
+        EndGroup();
     }
 
-    if (ImGui::BeginTable("Pickups", 5, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders)) {
-        for (auto i = 0; auto& pickup : CPickups::aPickUps) {
-            ImGui::PushID(i);
-
-            ImGui::TableNextColumn(); Text("#%d", i);
-
-            const auto posn = UncompressLargeVector(pickup.m_vecPos);
-            ImGui::TableNextColumn(); Text("%.2f %.2f %.2f", posn.x, posn.y, posn.z);
-
-            ImGui::TableNextColumn();
-            if (Button("Teleport")) { // todo: see CStreamingDebugModule (refactor)
-                CStreaming::LoadSceneCollision({posn.x, posn.y, 100.f});
-                FindPlayerPed()->Teleport({posn.x, posn.y, CWorld::FindGroundZForCoord(posn.x, posn.y) + 2.f}, true);
-            }
-
-            ImGui::TableNextColumn();
-            Text("%d", pickup.m_nFlags.bVisible);
-
-            ImGui::TableNextColumn();
-            if (Button("Change Visibility")) {
-                pickup.m_nFlags.bVisible ^= true;
-            }
-
-            ImGui::PopID();
-            i++;
+    if (ImGui::BeginTabBar("Pickups")) {
+        if (ImGui::BeginTabItem("All")) {
+            DrawTable(CPickups::aPickUps);
+            ImGui::EndTabItem();
         }
-        ImGui::EndTable();
+
+        auto IsVisible = [](CPickup& pickup) { return pickup.m_pObject; };
+        auto filteredPickups = CPickups::aPickUps | std::views::filter(IsVisible);
+
+        if (ImGui::BeginTabItem("Near Player")) {
+            DrawTable(filteredPickups);
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
     }
 }
 
