@@ -118,6 +118,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(CloseBoot, 0x6AFA20);
     RH_ScopedInstall(SetBumperDamage, 0x6B1350);
     RH_ScopedInstall(SetPanelDamage, 0x6B1480);
+    RH_ScopedInstall(SetDoorDamage, 0x6B1600);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -5046,9 +5047,87 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
 }
 
 // 0x6B1600
-void CAutomobile::SetDoorDamage(eDoors door, bool withoutVisualEffect)
+void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
 {
-    ((void(__thiscall*)(CAutomobile*, eDoors, bool))0x6B1600)(this, door, withoutVisualEffect);
+    auto nodeIdx = CDamageManager::GetCarNodeIndexFromDoor(doorIdx);
+    auto frame = m_aCarNodes[nodeIdx];
+    if (!frame) {
+        return;
+    }
+
+    const auto isDamageable = GetModelInfo()->AsVehicleModelInfoPtr()->m_pVehicleStruct->IsComponentDamageable(nodeIdx);
+
+    auto& door{ m_doors[doorIdx] };
+
+    if (doorIdx != eDoors::DOOR_BOOT) { // TODO: Invert this condition to make it nicer
+        if (!CanDoorsBeDamaged()) {
+            switch (m_damageManager.GetDoorStatus(doorIdx)) {
+            case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
+            case eDoorStatus::DAMSTATE_NOTPRESENT: {
+                door.Open(0.f);
+                m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_DAMAGED);
+                return;
+            }
+            }
+        }
+    } else {
+        if (m_pHandlingData->m_bAltSteerOpt) {
+            switch (m_damageManager.GetDoorStatus(doorIdx)) {
+            case eDoorStatus::DAMSTATE_OPENED: {
+                m_damageManager.SetDoorStatus(doorIdx, isDamageable ? eDoorStatus::DAMSTATE_DAMAGED : eDoorStatus::DAMSTATE_NOTPRESENT);
+                break;
+            }
+            case eDoorStatus::DAMSTATE_OPENED_DAMAGED: {
+                m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_NOTPRESENT);
+                break;
+            }
+            }
+        }
+    }
+
+    switch (m_damageManager.GetDoorStatus(doorIdx)) {
+    case DAMSTATE_DAMAGED: {
+        if (isDamageable) {
+            if (door.m_fPrevAngle == 0.f) {
+                break;
+            }
+
+            door.m_fAngle     = 0.f;
+            door.m_fPrevAngle = 0.f;
+            door.m_fAngVel    = 0.f;
+
+            // Reset component rotation
+            {
+                CMatrix frameMatrix{ RwFrameGetMatrix(frame) };
+                frameMatrix.SetRotateKeepPos({});
+                frameMatrix.UpdateRW();
+            }
+
+            m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
+        }
+        break;
+    }
+    case DAMSTATE_NOTPRESENT: {
+        if (!withoutVisualEffect) {
+            if (doorIdx == eDoors::DOOR_BONNET) { // Inverted
+                const auto obj = SpawnFlyingComponent(nodeIdx, 3u);
+                m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, obj);
+            } else {
+                SpawnFlyingComponent(nodeIdx, doorIdx == eDoors::DOOR_BOOT ? 4u : 2u);
+            }
+        }
+        SetComponentVisibility(frame, 0);
+        break;
+    }
+    case DAMSTATE_OPENED:
+    case DAMSTATE_OPENED_DAMAGED: {
+        RwFrameForAllObjects(frame, CVehicleModelInfo::SetAtomicFlagCB, (void*)ATOMIC_RENDER_ALWAYS);
+        if (doorIdx == eDoors::DOOR_BONNET) {
+            door.m_fAngVel = 0.2f;
+        }
+        break;
+    }
+    }
 }
 
 // 0x6B3F70
