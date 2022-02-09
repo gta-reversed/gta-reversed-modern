@@ -1048,7 +1048,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
     }
 
 DONT_MODIFY_MOVE_BLEND_RATIO:
-    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy)) {
+    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy)) {
         if (!player->m_standingOnEntity || !player->m_standingOnEntity->m_bIsStatic || player->m_standingOnEntity->m_bHasContacted) {
             if (!player->GetIntelligence()->GetTaskHold(false) || !((CTaskSimpleHoldEntity*)player->GetIntelligence()->GetTaskHold(false))->m_pAnimBlendAssociation) {
                 CAnimBlendHierarchy*  animHierarchy = nullptr;
@@ -1084,7 +1084,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 
     if (
         !player->bIsInTheAir
-        && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy)
+        && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy)
         && pad->JumpJustDown()
         && !pad->GetTarget()
         && !player->m_pAttachedTo

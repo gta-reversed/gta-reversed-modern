@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Clouds.h"
+#include "PostEffects.h"
 
 // float& CClouds::m_fVolumetricCloudDensity; // unused
 // bool& CClouds::m_bVolumetricCloudHeightSwitch; // unused

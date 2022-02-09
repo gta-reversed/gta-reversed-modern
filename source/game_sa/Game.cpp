@@ -33,6 +33,7 @@
 #include "TempColModels.h"
 #include "PedStats.h"
 #include "UserDisplay.h"
+#include "PostEffects.h"
 #include "Rope.h"
 #include "Ropes.h"
 

@@ -81,8 +81,8 @@ void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
 
     m_nTimeForNextShot = 0;
 
-    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId1;
+    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId2;
 
     if (model1 != -1)
         CModelInfo::GetModelInfo(model1)->AddRef();
@@ -120,8 +120,8 @@ void CWeapon::ShutdownWeapons() {
 // 0x73A380
 void CWeapon::Shutdown() 
 {
-    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId1;
+    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId2;
 
     if (weaponModelID1 != -1)
         CModelInfo::GetModelInfo(weaponModelID1)->RemoveRef();
@@ -241,7 +241,7 @@ void CWeapon::Reload(CPed* owner) {
 
 // 0x73B1C0
 bool CWeapon::IsTypeMelee() {
-    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD);
+    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
     return weaponInfo->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
 }
 
@@ -519,7 +519,7 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
-    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::WEAPSKILL_STD;
+    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD;
 
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }

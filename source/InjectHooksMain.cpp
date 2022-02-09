@@ -81,6 +81,7 @@
 #include "UserDisplay.h"
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
+#include "PostEffects.h"
 #include "Rope.h"
 #include "Ropes.h"
 
@@ -199,6 +200,7 @@ void InjectHooksMain() {
 
     CRope::InjectHooks();
     CRopes::InjectHooks();
+    CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();
