@@ -3884,12 +3884,12 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
 CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType)
 {
     if (CObject::nNoTempObjects >= 150) {
-        return;
+        return nullptr;
     }
 
     auto compFrame = m_aCarNodes[(size_t)nodeIndex];
     if (!compFrame) {
-        return;
+        return nullptr;
     }
 
     // Check if this frame has a current atomic object (If there's no atomic the component is invisible I think)
@@ -3897,7 +3897,7 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
         RpAtomic* atomic{};
         RwFrameForAllObjects(compFrame, GetCurrentAtomicObjectCB, &atomic);
         if (!atomic) {
-            return;
+            return nullptr;
         }
     }
 
@@ -3905,7 +3905,7 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
     auto obj = new CObject;
     CPools::GetObjectPool()->m_bIsLocked = false;
     if (!obj) {
-        return;
+        return nullptr;
     }
 
     const auto& frameLTM = RwFrameGetLTM(compFrame);
