@@ -20,7 +20,7 @@ static std::string HooksFilterContent;
 // Applies current filter on the given category (first call should always be the root)
 // Returns if the given category is visible or not
 // A category is visible if either:
-// - Any of it's subcategories is visible
+// - Any of it's subcategories are visible
 // - It's matches the search criteria
 bool ApplyFilterToCategory(RH::HookCategory& cat) {
     bool anySubCatsVisible{};
@@ -33,8 +33,7 @@ bool ApplyFilterToCategory(RH::HookCategory& cat) {
     return cat.m_isVisible;
 }
 
-// Draw category (First call should always be the root)
-void ProcessCategory(RH::HookCategory& cat) {
+void RenderCategory(RH::HookCategory& cat) {
     if (!cat.m_isVisible) {
         return;
     }
@@ -116,7 +115,7 @@ void ProcessCategory(RH::HookCategory& cat) {
 
         // Draw subcategories
         for (auto& v : cat.SubCategories()) {
-            ProcessCategory(v);
+            RenderCategory(v);
         }
 
         TreePop();
@@ -143,7 +142,7 @@ void ProcessImGui() {
     }
 
     if (BeginChild("##hookstool")) {
-        ProcessCategory(RH::GetRootCategory());
+        RenderCategory(RH::GetRootCategory());
         EndChild();
     }
 }
