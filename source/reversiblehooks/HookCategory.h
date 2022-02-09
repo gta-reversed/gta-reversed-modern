@@ -94,9 +94,11 @@ public:
     // Find subcategory by name - Only checks for top-level children
     // If none found a sub-category will be created with the given name.
     auto& FindOrCreateSubcategory(std::string_view name) {
-        if (auto cat = FindSubcategory(name))
+        if (auto* cat = FindSubcategory(name))
             return *cat; // Return found
-        return m_subCategories.emplace_back(std::string{ name }, this); // Create it
+
+        // Insert it - It will be sorted later
+        return m_subCategories.emplace_back(std::string{ name }, this);
     }
 
     // Iterates over all items, including those in all subcategories
@@ -109,6 +111,18 @@ public:
         }
         for (auto& cat : m_subCategories) {
             cat.ForEachItem(fn);
+        }
+    }
+
+    // Called when `InjectHooksMain` has finished - That is, all hooks have been injected.
+    // From this point on no items/categories should be added/removed.
+    void OnInjectionEnd() {
+        // Re-sort all categories (uses operator<=> defined below)
+        m_subCategories.sort();
+
+        // Propagte to all child
+        for (auto&& cat : m_subCategories) {
+            cat.OnInjectionEnd();
         }
     }
 
@@ -224,6 +238,15 @@ private:
             [](const auto& v) { return v->Hooked(); }
         );
         ReCalculateOverallStateAndMaybeNotify();
+    }
+
+    // Main ordering criteria is the no. of top-level sub categories
+    // Secondary criteria is the name
+    friend std::weak_ordering operator<=>(const HookCategory& lhs, const HookCategory& rhs) {
+        const auto numSubCatOrder = rhs.SubCategories().size() <=> lhs.SubCategories().size();
+        if (std::is_eq(numSubCatOrder)) 
+            return rhs.Name() <=> lhs.Name(); // Same number of sub-categories, order by name
+        return numSubCatOrder; // Order by no. of sub-categories
     }
 public:
     // Stuff required for the Hooks tool
