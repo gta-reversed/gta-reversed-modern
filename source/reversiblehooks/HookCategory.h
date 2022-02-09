@@ -48,7 +48,11 @@ public:
     void AddItem(Item item) {
         assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
 
-        auto& emplaced = m_items.emplace_back(std::move(item));
+        // Lexographically sorted insert 
+        m_items.emplace(
+            rng::upper_bound(m_items, item->Name(), {}, [](auto&& v) { return v->Name(); }),
+            std::move(item)
+        );
         OnOneItemStateChange(); // Deal with possible state change introduced by item
     }
 
