@@ -117,13 +117,13 @@ private:
         }
 
         for (auto& cat : m_subCategories) {
-            cat.SetAllItemsEnabled_Internal(enabled, true);
+            cat.SetAllItemsEnabled_Internal(enabled, false); // No need to notify parents as we'll do that ourselves
         }
 
         const auto state = enabled ? HooksState::ALL : HooksState::NONE;
         m_itemsState = state;
         m_subcatsState = state;
-        ReCalculateOverallStateAndMaybeNotify(notifyParent);
+        ReCalculateOverallStateAndMaybeNotify(notifyParent); // It's enough if only we notify our parent
     }
 
     // Recalculates overall state, and if changed, notifies parent.
