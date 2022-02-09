@@ -117,6 +117,7 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(PopBoot, 0x6AF910);
     RH_ScopedInstall(CloseBoot, 0x6AFA20);
     RH_ScopedInstall(SetBumperDamage, 0x6B1350);
+    RH_ScopedInstall(SetPanelDamage, 0x6B1480);
 
     RH_ScopedInstall(Fix_Reversed, 0x6A3440);
     RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
@@ -4970,16 +4971,8 @@ void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
     switch (m_damageManager.GetPanelStatus(panel)) {
     case ePanelDamageState::DAMSTATE_DAMAGED: {
         if (!m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
-            // NOTE/TODO/BUG: 
-            // This is the original code.. I'm not sure how it works..
-            // It checks panel's frame == `nodeIdx`, but only up until the first one whose frame is == -1... Weird, maybe a bug?
-            for (auto&& panel : m_panels) {
-                if (panel.m_nFrameId == (uint16)-1) {
-                    panel.SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.5f, -0.2f));
-                    break;
-                } else if (panel.m_nFrameId == nodeIdx) {
-                    break;
-                }
+            if (auto* panel = CheckIfExistsGetFree(nodeIdx)) {
+                panel->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
             }
         }
         break;
@@ -5001,7 +4994,55 @@ void CAutomobile::SetBumperDamage(ePanels panel, bool withoutVisualEffect)
 // 0x6B1480
 void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
 {
-    ((void(__thiscall*)(CAutomobile*, ePanels, bool))0x6B1480)(this, panel, createWindowGlass);
+    auto nodeIdx = CDamageManager::GetCarNodeIndexFromPanel(panel);
+    auto frame = m_aCarNodes[nodeIdx];
+    if (!frame) {
+        return;
+    }
+
+    if (!GetModelInfo()->AsVehicleModelInfoPtr()->m_pVehicleStruct->IsComponentDamageable(nodeIdx)) {
+        return;
+    }
+
+    switch (m_damageManager.GetPanelStatus(panel)) {
+    case ePanelDamageState::DAMSTATE_DAMAGED: {
+        if (m_pHandlingData->m_bBouncePanels) { // TODO: Weird... The flag name might be incorrect, because here we actually set the bouncing panel.
+            return;
+        }
+        if (auto* panel = CheckIfExistsGetFree(nodeIdx)) {
+            switch (nodeIdx) {
+            case eCarNodes::CAR_WINDSCREEN:
+            case eCarNodes::CAR_WING_LF:
+            case eCarNodes::CAR_WING_RF:
+                break;
+            default: {
+                panel->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
+                break;
+            }
+            }
+        }
+        SetComponentVisibility(frame, 2);
+        break;
+    }
+    case ePanelDamageState::DAMSTATE_OPENED: {
+        if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+            m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_WINDSCREEN_SHATTER, 0.f);
+        }
+        SetComponentVisibility(frame, 2);
+        break;
+    }
+    case ePanelDamageState::DAMSTATE_OPENED_DAMAGED: {
+        if (createWindowGlass) {
+            if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+                CGlass::CarWindscreenShatters(this);
+            }
+        } else {
+            SpawnFlyingComponent(nodeIdx, 5u);
+        }
+        SetComponentVisibility(frame, 0);
+        break;
+    }
+    }
 }
 
 // 0x6B1600
@@ -5187,6 +5228,23 @@ void CAutomobile::FireTruckControl(CFire* fire)
 bool CAutomobile::HasCarStoppedBecauseOfLight()
 {
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
+}
+
+/*!
+* @notsa
+*/
+CBouncingPanel* CAutomobile::CheckIfExistsGetFree(eCarNodes nodeIdx) {
+    // NOTE/TODO/BUG: 
+    // This is the original code.. I'm not sure how it works..
+    // It checks panel's frame == `nodeIdx`, but only up until the first one whose frame is == -1... Weird, maybe a bug?
+    for (auto&& panel : m_panels) {
+        if (panel.m_nFrameId == (uint16)-1) {
+            return &panel;
+        } else if (panel.m_nFrameId == nodeIdx) {
+            return nullptr;
+        }
+    }
+    return nullptr;
 }
 
 // 0x6A0750
