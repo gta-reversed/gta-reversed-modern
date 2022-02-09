@@ -3479,7 +3479,7 @@ void CStreaming::StreamVehiclesAndPeds() {
 
 // 0x40B650
 void CStreaming::StreamVehiclesAndPeds_Always(const CVector& unused) {
-    if (CVehicle* vehicle = FindPlayerVehicle(-1, false)) {
+    if (CVehicle* vehicle = FindPlayerVehicle()) {
         switch (vehicle->m_nVehicleSubType) {
         case VEHICLE_TYPE_PLANE:
             return;

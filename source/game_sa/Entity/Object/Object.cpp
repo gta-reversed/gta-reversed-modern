@@ -1098,7 +1098,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
     m_fHealth -= damage * m_pObjectInfo->m_fColDamageMultiplier;
     m_fHealth = std::max(0.0F, m_fHealth);
 
-    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle(-1, false))
+    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle())
         return;
 
     // Big Smoke crack palace wall break checks

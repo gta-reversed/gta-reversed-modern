@@ -1200,7 +1200,7 @@ void CWorld::RemoveFallenCars() {
             if (vehicle->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE) && !vehicle->physicalFlags.bDestroyed)
                 return true;
 
-            if (vehicle == FindPlayerVehicle(-1, false))
+            if (vehicle == FindPlayerVehicle())
                 return true;
 
             return vehicle->m_pDriver && vehicle->m_pDriver->IsPlayer();

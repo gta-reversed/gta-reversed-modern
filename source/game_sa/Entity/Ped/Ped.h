@@ -373,7 +373,7 @@ public:
     bool SetupLighting() override;
     void RemoveLighting(bool bRemove) override;
     void FlagToDestroyWhenNextProcessed() override;
-    int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) override;
+    int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) override;
 
     // Process applied anim 0x86C3B4
     virtual void SetMoveAnim();

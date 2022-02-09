@@ -979,7 +979,7 @@ void CRenderer::ConstructRenderList() {
         float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
         if (player->GetPosition().z - fGroundHeightZ > 50.0f) {
             float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);
-            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle(-1, false))
+            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle())
                 ms_bInTheSky = true;
         }
         const float fCameraZ = TheCamera.GetPosition().z;

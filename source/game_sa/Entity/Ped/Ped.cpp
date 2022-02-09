@@ -1343,7 +1343,7 @@ void CPed::FlagToDestroyWhenNextProcessed()
 }
 
 // 0x5E2530
-int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
+int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 {
-    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
+    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CEntity*, CColPoint*>(this, entity, colPoint);
 }
