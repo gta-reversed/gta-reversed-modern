@@ -690,6 +690,7 @@ public:
     // if bWorldSpace is true, returns the position in world-space
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
+    int32 GetRopeIndex();
 };
 VALIDATE_SIZE(CVehicle, 0x5A0);
 

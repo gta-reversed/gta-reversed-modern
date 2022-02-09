@@ -276,8 +276,6 @@
 #include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
-#include "game_sa\Rope.h"
-#include "game_sa\Ropes.h"
 #include "game_sa\Scene.h"
 #include "game_sa\ScriptResourceManager.h"
 #include "game_sa\ScriptsForBrains.h"
