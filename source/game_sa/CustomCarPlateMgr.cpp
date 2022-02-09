@@ -230,11 +230,11 @@ bool CCustomCarPlateMgr::RenderLicenseplateTextToRaster(const char* text, RwRast
     if (!pCharsetLockedData)
         return false;
 
-    const auto plateRasterStride = plateRaster->stride; // TODO: Use macro, maybe?
+    const auto plateRasterStride = RwRasterGetStride(plateRaster);
     if (!plateRasterStride)
         return false;
 
-    const auto charsRasterStride = charsRaster->stride; // TODO: Use macro, maybe?
+    const auto charsRasterStride = RwRasterGetStride(charsRaster);
     if (!charsRasterStride)
         return false;
 

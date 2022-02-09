@@ -54,7 +54,7 @@ void CBulletInfo::AddBullet(CEntity* creator, eWeaponType weaponType, CVector po
     if (auto info = GetFree()) {
         info->m_pCreator     = creator;
         info->m_nWeaponType  = weaponType;
-        info->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nDamage;
+        info->m_nDamage      = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nDamage;
         info->m_vecPosition  = posn;
         info->m_vecVelocity  = velocity;
         info->m_nDestroyTime = (float)(CTimer::GetTimeInMS() + 1000);

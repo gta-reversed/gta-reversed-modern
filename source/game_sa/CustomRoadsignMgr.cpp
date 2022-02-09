@@ -352,11 +352,11 @@ bool RoadsignGenerateTextRaster(char* roadName, int32 numLetters, RwRaster* char
     if (!CCustomRoadsignMgr::pCharsetLockedRaster)
         return false;
 
-    const auto charStride = charsetRaster->stride; //TODO: Missing RwRasterGetStride macro;
+    const auto charStride = RwRasterGetStride(charsetRaster);
     if (!charStride)
         return false;
     
-    const auto signStride = signRaster->stride; //TODO: Same as above
+    const auto signStride = RwRasterGetStride(signRaster);
     if (!signStride)
         return false;
 
@@ -384,6 +384,7 @@ bool RoadsignGenerateTextRaster(char* roadName, int32 numLetters, RwRaster* char
     return true;
 }
 
+// 0x6FE260
 void RoadsignGetLineAndRow(char cLetter, int32* line, int32* row)
 {
     switch (cLetter)

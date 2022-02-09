@@ -6,6 +6,7 @@
 #include "BreakManager_c.h"
 #include "PlantMgr.h"
 #include "Clouds.h"
+#include "PostEffects.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;

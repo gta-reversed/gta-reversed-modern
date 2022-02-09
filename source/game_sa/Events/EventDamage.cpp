@@ -188,7 +188,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
         }
     }
     if (ped->bHasBulletProofVest) {
-        if (CWeaponInfo::GetWeaponInfo(m_weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
+        if (CWeaponInfo::GetWeaponInfo(m_weaponType, eWeaponSkill::STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
             if (m_pedPieceType == PED_PIECE_TORSO || m_pedPieceType == PED_PIECE_ASS)
                 return false;
         }
@@ -704,7 +704,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
 // 0x4B3FC0
 void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
     if (ped->bInVehicle && ped->m_pVehicle) {
-        CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)this->m_weaponType, eWeaponSkill::WEAPSKILL_STD);
+        CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo((eWeaponType)this->m_weaponType, eWeaponSkill::STD);
         if (!pWeaponInfo->m_nWeaponFire
             && m_weaponType
             && m_weaponType != WEAPON_BRASSKNUCKLE
