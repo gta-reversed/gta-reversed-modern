@@ -1173,7 +1173,7 @@ void CWorld::RemoveFallenPeds() {
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
             CNodeAddress pathNodeAddress;
             ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.m_wAreaId != -1) {
+            if (pathNodeAddress.m_wAreaId != (uint16)-1) {
                 CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 pathNodePos.z += 2.0f;
                 ped->Teleport(pathNodePos, false);
@@ -1209,7 +1209,7 @@ void CWorld::RemoveFallenCars() {
         if (ShouldWeKeepIt()) {
             CNodeAddress pathNodeAddress;
             ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPos.x, vecPos.y, vecPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.m_wAreaId != -1) {
+            if (pathNodeAddress.m_wAreaId != (uint16)-1) {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else
@@ -2999,10 +2999,9 @@ CRepeatSector* GetRepeatSector(int32 x, int32 y) {
 
 // 0x4072C0
 CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
-    // Commented out because those happen weirdly frequently, for now replaced with check of total array bound
-    //assert(x < MAX_LOD_PTR_LISTS_X);
-    //assert(y < MAX_LOD_PTR_LISTS_Y);
-    assert(&ms_aLodPtrLists[y][x] <= &ms_aLodPtrLists[MAX_LOD_PTR_LISTS_Y][MAX_LOD_PTR_LISTS_X]);
+    assert(x < MAX_LOD_PTR_LISTS_X);
+    assert(y < MAX_LOD_PTR_LISTS_Y);
+
     return ms_aLodPtrLists[y][x];
 }
 

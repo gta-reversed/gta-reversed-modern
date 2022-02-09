@@ -273,11 +273,15 @@ void CCarGenerator::DoInternalProcessing()
     if (!nightTime &&
         (vehicle->m_nModelIndex == MODEL_TRACTOR || vehicle->m_nModelIndex == MODEL_COMBINE))
     {
+        // 0x6F3BF4
+
         CVector vehPosn = vehicle->GetPosition();
         CNodeAddress pathLink;
         ThePaths.FindNodeClosestToCoors(&pathLink, vehPosn.x, vehPosn.y, vehPosn.z, 0, 20.0F, 0, 0, 0, 0, 1);
-        if (pathLink.m_wAreaId != -1 || pathLink.m_wNodeId != -1)
+        if (pathLink.m_wAreaId != (uint16)-1)
         {
+            assert(pathLink.m_wNodeId != (uint16)-1);
+
             CPathNode& pathNode = ThePaths.m_pPathNodes[pathLink.m_wAreaId][pathLink.m_wNodeId];
             if (pathNode.m_nNumLinks != 0)
             {

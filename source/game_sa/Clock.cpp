@@ -85,7 +85,7 @@ void CClock::Update() {
                     CStats::IncrementStat(STAT_DAYS_PASSED_IN_GAME, 1.0f);
 
                     // next month
-                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth]) {
+                    if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth - 1]) {
                         ms_nGameClockDays = 1;
                         if (++ms_nGameClockMonth > 12u)
                                 ms_nGameClockMonth = 1;
@@ -189,7 +189,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
             if (ms_nGameClockMonth == 0)
                 ms_nGameClockMonth = 12;
 
-            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth];
+            ms_nGameClockDays = daysInMonth[ms_nGameClockMonth - 1];
         }
         CurrentDay--;
 
@@ -198,7 +198,7 @@ void CClock::OffsetClockByADay(uint32 timeDirection) {
     } else {
         ms_nGameClockDays++;
 
-        if (daysInMonth[ms_nGameClockMonth] < ms_nGameClockDays) {
+        if (daysInMonth[ms_nGameClockMonth - 1] < ms_nGameClockDays) {
             ms_nGameClockMonth++;
             ms_nGameClockDays = 1;
 

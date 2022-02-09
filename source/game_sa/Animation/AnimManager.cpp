@@ -70,6 +70,16 @@ char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
     return plugin::CallAndReturn<char*, 0x4D3A30, AssocGroupId>(groupId);
 }
 
+// NOTSA
+AssocGroupId CAnimManager::GetAnimationGroupId(const char* name) {
+    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
+        if (std::string_view{ name } == GetAnimGroupName((AssocGroupId)i)) {
+            return (AssocGroupId)i;
+        }
+    }
+    return (AssocGroupId)ms_numAnimAssocDefinitions;
+}
+
 // 0x4D3A40
 CAnimBlendAssociation* CAnimManager::CreateAnimAssociation(AssocGroupId groupId, AnimationId animId) {
     return plugin::CallAndReturn<CAnimBlendAssociation*, 0x4D3A40, AssocGroupId, AnimationId>(groupId, animId);

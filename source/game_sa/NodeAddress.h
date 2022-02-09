@@ -8,8 +8,8 @@
 
 class CNodeAddress {
 public:
-    int16 m_wAreaId{-1};
-    int16 m_wNodeId{-1};
+    uint16 m_wAreaId{(uint16)-1u};
+    uint16 m_wNodeId{(uint16)-1u};
 
     constexpr CNodeAddress() = default;
 

@@ -81,6 +81,7 @@
 #include "UserDisplay.h"
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
+#include "PostEffects.h"
 #include "OctTree.h"
 #include "OctTreeBase.h"
 
@@ -200,6 +201,7 @@ void InjectHooksMain() {
 
     COctTree::InjectHooks();
     COctTreeBase::InjectHooks();
+    CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();
     CUserDisplay::InjectHooks();

@@ -1023,7 +1023,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
         newEntity->m_bTunnelTransition = true;
     if (objInstance->m_bRedundantStream)
         newEntity->m_bUnimportantStream = true;
-    newEntity->m_nAreaCode = objInstance->m_nAreaCode;
+    newEntity->m_nAreaCode = static_cast<eAreaCodes>(objInstance->m_nAreaCode);
     newEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
 
     if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)

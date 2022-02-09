@@ -305,6 +305,9 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+        return;
+
     CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
@@ -337,6 +340,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
     FXDebugModule::ProcessRender();
+    TeleportDebugModule::ProcessInput();
 
     ImGui::EndFrame();
     ImGui::Render();
