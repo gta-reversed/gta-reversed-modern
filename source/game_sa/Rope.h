@@ -11,17 +11,17 @@
 class CEntity;
 class CObject;
 
-// TODO: Find out what CRANE_MAGNET1/2/3/4 is exactly..
+// todo: Better names, see CreateHookObjectForRope
 enum class eRopeType : uint8 {
-    NONE          = 0,
-    CRANE_MAGNET1 = 1,
-    CRANE_HARNESS = 2,
-    MAGNET        = 3,
-    CRANE_MAGNET2 = 4,
-    WRECKING_BALL = 5,
-    CRANE_MAGNET3 = 6, // https://gta.fandom.com/wiki/Hunter_Quarry
-    CRANE_MAGNET4 = 7,
-    SWAT          = 8
+    NONE             = 0,
+    CRANE_MAGNET1    = 1,
+    CRANE_HARNESS    = 2,
+    MAGNET           = 3,
+    CRANE_MAGNO      = 4, // see ModelIndices::MI_MAGNOCRANE
+    WRECKING_BALL    = 5,
+    QUARRY_CRANE_ARM = 6,
+    CRANE_TROLLEY    = 7,
+    SWAT             = 8
 };
 
 constexpr auto NUM_ROPE_SEGMENTS{ 32u };
@@ -48,7 +48,7 @@ public:
     static void InjectHooks();
 
     void ReleasePickedUpObject();
-    bool DoControlsApply();
+    bool DoControlsApply() const;
     void CreateHookObjectForRope();
     int8 UpdateWeightInRope(float a2, float a3, float a4, int32 a5, float* a6);
     void Remove();

@@ -19,11 +19,11 @@ void CRope::InjectHooks() {
 // inlined see 0x557959
 // use switch like in Android?
 // 0x555FB0
-bool CRope::DoControlsApply() {
-    return    m_nType == eRopeType::CRANE_MAGNET2 && CRopes::PlayerControlsCrane == 1
+bool CRope::DoControlsApply() const {
+    return    m_nType == eRopeType::CRANE_MAGNO && CRopes::PlayerControlsCrane == 1
            || m_nType == eRopeType::WRECKING_BALL && CRopes::PlayerControlsCrane == 2
-           || m_nType == eRopeType::CRANE_MAGNET4 && CRopes::PlayerControlsCrane == 3
-           || m_nType == eRopeType::CRANE_MAGNET3 && CRopes::PlayerControlsCrane == 4
+           || m_nType == eRopeType::CRANE_TROLLEY && CRopes::PlayerControlsCrane == 3
+           || m_nType == eRopeType::QUARRY_CRANE_ARM && CRopes::PlayerControlsCrane == 4
            || m_nType == eRopeType::CRANE_MAGNET1
            || m_nType == eRopeType::MAGNET
            || m_nType == eRopeType::CRANE_HARNESS;
@@ -49,9 +49,9 @@ void CRope::CreateHookObjectForRope() {
     ModelIndex modelIndex = -1;
     switch (m_nType) {
     case eRopeType::CRANE_MAGNET1:
-    case eRopeType::CRANE_MAGNET2:
-    case eRopeType::CRANE_MAGNET3:
-    case eRopeType::CRANE_MAGNET4:
+    case eRopeType::CRANE_MAGNO:
+    case eRopeType::QUARRY_CRANE_ARM:
+    case eRopeType::CRANE_TROLLEY:
         modelIndex = MI_CRANE_MAGNET;
         break;
     case eRopeType::CRANE_HARNESS:
@@ -145,7 +145,7 @@ void CRope::Render() {
         RwIm3DEnd();
     }
 
-    if (m_nType == eRopeType::CRANE_MAGNET3) {
+    if (m_nType == eRopeType::QUARRY_CRANE_ARM) {
         const CVector pos[] = { m_aSegments[0], { 709.32f, 916.20f, 53.0f } }; // Hunter Quarry
         for (auto i = 0u; i < std::size(pos); i++) {
             RxObjSpace3DVertexSetPreLitColor(GetVertex(i), &color);
