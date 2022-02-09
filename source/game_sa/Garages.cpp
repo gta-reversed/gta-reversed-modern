@@ -16,7 +16,7 @@ void CGarages::InjectHooks() {
     RH_ScopedInstall(PlayerArrestedOrDied, 0x449E60);
     RH_ScopedInstall(AllRespraysCloseOrOpen, 0x448B30);
     RH_ScopedInstall(IsModelIndexADoor, 0x448AF0);
-    RH_ScopedInstall(FindSafeHouseIndexForGarageType, 0x4489F0);
+    // RH_ScopedInstall(FindSafeHouseIndexForGarageType, 0x4489F0);
     // RH_ScopedInstall(FindGarageForObject, 0x44A240);
     RH_ScopedInstall(IsPointWithinHideOutGarage, 0x448900);
     RH_ScopedInstall(IsGarageOpen, 0x447D00);
@@ -29,10 +29,11 @@ void CGarages::InjectHooks() {
     // RH_ScopedInstall(StoreCarInNearestImpoundingGarage, 0x44A3C0);
     RH_ScopedInstall(TriggerMessage, 0x447B80);
     RH_ScopedInstall(PrintMessages, 0x447790);
-    RH_ScopedInstall(SetGarageType, 0x4476D0);
+    RH_ScopedInstall(ChangeGarageType, 0x4476D0);
     RH_ScopedInstall(GetGarageNumberByName, 0x447680);
-    RH_ScopedInstall(Load, 0x5D3270, true); // bad
-    RH_ScopedInstall(Save, 0x5D3160, true); // possible bad
+    // RH_ScopedInstall(CountCarsInHideoutGarage, 0x44A210);
+    // RH_ScopedInstall(Load, 0x5D3270, true); // bad
+    // RH_ScopedInstall(Save, 0x5D3160, true); // possible bad
 }
 
 // 0x447120
@@ -85,6 +86,52 @@ void CGarages::Shutdown() {
     }
 }
 
+// 0x44C8C0
+void CGarages::Update() {
+    if (CReplay::Mode == eReplayMode::REPLAY_MODE_1 || CGameLogic::IsCoopGameGoingOn())
+        return;
+
+    bCamShouldBeOutside = false;
+    pOldToGarageWeAreIn = TheCamera.m_pToGarageWeAreIn;
+    TheCamera.m_pToGarageWeAreIn = nullptr;
+    TheCamera.m_pToGarageWeAreInForHackAvoidFirstPerson = nullptr;
+
+    for (int32 i = 0; auto& garage : aGarages) {
+        garage.Update(i++);
+    }
+
+    if (CTimer::GetFrameCounter() % 16 != 12) // todo: magic number
+        return;
+
+    auto& garageToCheck = GetGarage(LastUpdatedGarageId++);
+    if (LastUpdatedGarageId >= std::size(aGarages))
+        LastUpdatedGarageId = 0;
+
+    if (garageToCheck.m_nType == eGarageType::INVALID)
+        return;
+
+    // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
+    const auto camPos = TheCamera.GetPosition();
+    if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
+        && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
+    ) {
+        garageToCheck.TidyUpGarageClose();
+    } else {
+        garageToCheck.TidyUpGarage();
+    }
+}
+
+// 0x448660
+void CGarages::GivePlayerDetonator() {
+    auto player = FindPlayerPed();
+    auto slot = CWeaponInfo::GetWeaponInfo(WEAPON_DETONATOR, eWeaponSkill::STD)->m_nSlot;
+    player->GiveWeapon(WEAPON_DETONATOR, 1, true);
+    player->m_aWeapons[slot].m_nState = WEAPONSTATE_READY;
+    player->m_pPlayerData->m_nChosenWeapon = slot;
+    if (player->m_nSavedWeapon != WEAPON_UNIDENTIFIED)
+        player->m_nSavedWeapon = WEAPON_DETONATOR;
+}
+
 // 0x4471E0
 // Garage flags
 // 0x1	door opens up and rotate
@@ -98,7 +145,7 @@ void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, 
 // 0x44A170
 void CGarages::CloseHideOutGaragesBeforeSave() {
     for (auto& garage : aGarages) {
-        if (garage.IsHideOut() && garage.IsClosed()) {
+        if (garage.IsHideOut() && garage.m_nDoorState == GARAGE_DOOR_OPEN) {
             garage.SetClosed();
             garage.StoreAndRemoveCarsForThisHideOut(GetStoredCarsInSafehouse(FindSafeHouseIndexForGarageType(garage.m_nType)), 4); // todo: 4 is NUM_GARAGE_STORED_CARS?
             garage.RemoveCarsBlockingDoorNotInside();
@@ -143,56 +190,53 @@ bool CGarages::IsModelIndexADoor(int32 model) {
     return false;
 }
 
+// wrong
 // 0x4489F0
-int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType gtype) {
-    switch (gtype)
-    {
-    case SAFEHOUSE_SANTAMARIA:
-        return 1;
-    case SAGEHOUSE_ROCKSHORE:
-        return 2;
-    case SAFEHOUSE_FORTCARSON:
-        return 3;
-    case SAFEHOUSE_VERDANTMEADOWS:
-        return 4;
-    case SAFEHOUSE_DILLIMORE:
-        return 5;
-    case SAFEHOUSE_PRICKLEPINE:
-        return 6;
-    case SAFEHOUSE_WHITEWOOD:
-        return 7;
-    case SAFEHOUSE_PALOMINOCREEK:
-        return 8;
-    case SAFEHOUSE_REDSANDSWEST:
-        return 9;
-    case SAFEHOUSE_ELCORONA:
-        return 10;
-    case SAFEHOUSE_MULHOLLAND:
-        return 11;
-    case IMPOUND_LS:
-        return 12;
-    case IMPOUND_SF:
-        return 13;
-    case IMPOUND_LV:
-        return 14;
-    case SAFEHOUSE_CALTONHEIGHTS:
-        return 15;
-    case SAFEHOUSE_PARADISO:
-        return 16;
-    case SAFEHOUSE_DOHERTY:
-        return 17;
-    case SAFEHOUSE_HASHBURY:
-        return 18;
-    case HANGAR_ABANDONED_AIRPORT:
-        return 19;
-    default:
-        return 0;
+int32 CGarages::FindSafeHouseIndexForGarageType(eGarageType type) {
+    return plugin::CallAndReturn<int32, 0x4489F0, eGarageType>(type);
+
+    switch (type) {
+    case SAFEHOUSE_SANTAMARIA:     return 1;
+    case SAGEHOUSE_ROCKSHORE:      return 2;
+    case SAFEHOUSE_FORTCARSON:     return 3;
+    case SAFEHOUSE_VERDANTMEADOWS: return 4;
+    case SAFEHOUSE_DILLIMORE:      return 5;
+    case SAFEHOUSE_PRICKLEPINE:    return 6;
+    case SAFEHOUSE_WHITEWOOD:      return 7;
+    case SAFEHOUSE_PALOMINOCREEK:  return 8;
+    case SAFEHOUSE_REDSANDSWEST:   return 9;
+    case SAFEHOUSE_ELCORONA:       return 10;
+    case SAFEHOUSE_MULHOLLAND:     return 11;
+    case IMPOUND_LS:               return 12;
+    case IMPOUND_SF:               return 13;
+    case IMPOUND_LV:               return 14;
+    case SAFEHOUSE_CALTONHEIGHTS:  return 15;
+    case SAFEHOUSE_PARADISO:       return 16;
+    case SAFEHOUSE_DOHERTY:        return 17;
+    case SAFEHOUSE_HASHBURY:       return 18;
+    case HANGAR_ABANDONED_AIRPORT: return 19;
+    default:                       return 0;
     }
 }
 
 // 0x44A240
 int16 CGarages::FindGarageForObject(CObject* obj) {
     return plugin::CallAndReturn<int16, 0x44A240, CObject*>(obj);
+}
+
+// 0x447680
+int16 CGarages::FindGarageIndex(char* name) {
+    for (auto i = 0; i < NumGarages; i++) {
+        if (_stricmp(name, GetGarage(i).m_anName) == 0)
+            return i;
+    }
+    return -1;
+}
+
+// 0x449C30
+float CGarages::FindDoorHeightForMI(uint32 modelIndex) {
+    const auto* mi = CModelInfo::GetModelInfo(modelIndex);
+    return mi->GetColModel()->GetBoundingBox().GetHeight() - 0.1f;
 }
 
 // 0x448900
@@ -230,7 +274,7 @@ bool CGarages::IsCarSprayable(CVehicle* vehicle) {
     * artict1 is Articulated Trailer which by logic cannot to sprayed due big size, but who know..
     * original code also disallow artict1 to be sprayed (tested)
     */
-    case eModelID::MODEL_ARTICT1: // 
+    case eModelID::MODEL_ARTICT1:
     case eModelID::MODEL_FIRETRUK:
     case eModelID::MODEL_AMBULAN:
         return false;
@@ -238,39 +282,28 @@ bool CGarages::IsCarSprayable(CVehicle* vehicle) {
     return true;
 }
 
-// 0x44C8C0
-void CGarages::Update() {
-    if (CReplay::Mode == eReplayMode::REPLAY_MODE_1 || CGameLogic::IsCoopGameGoingOn())
-        return;
+// 0x449740
+bool CGarages::IsThisCarWithinGarageArea(int16 garageId, CEntity* entity) {
+    return GetGarage(garageId).IsEntityEntirelyInside3D(entity, 0.0f);
+}
 
-    bCamShouldBeOutside = false;
-    pOldToGarageWeAreIn = TheCamera.m_pToGarageWeAreIn;
-    TheCamera.m_pToGarageWeAreIn = nullptr;
-    TheCamera.m_pToGarageWeAreInForHackAvoidFirstPerson = nullptr;
-
-    for (int32 i = 0; auto& garage : aGarages) {
-        garage.Update(i++);
+// 0x448990
+bool CGarages::IsPointWithinAnyGarage(CVector& point) {
+    for (auto& garage : aGarages) {
+        if (garage.m_nType != eGarageType::INVALID || garage.IsPointInsideGarage(point)) {
+            return true;
+        }
     }
+    return false;
+}
 
-    if (CTimer::GetFrameCounter() % 16 != 12)
-        return;
-
-    auto& garageToCheck = GetGarage(LastUpdatedGarageId++);
-    if (LastUpdatedGarageId >= std::size(aGarages))
-        LastUpdatedGarageId = 0;
-
-    if (garageToCheck.m_nType == eGarageType::INVALID)
-        return;
-
-    // Originally they've clearly used an some kind of `abs` macro (probably to "optimize" it)... And failed miserably lol
-    const auto camPos = TheCamera.GetPosition();
-    if (   std::abs(garageToCheck.m_fLeftCoord - camPos.x) < 40.f
-        && std::abs(garageToCheck.m_fFrontCoord - camPos.y) < 40.f
-    ) {
-        garageToCheck.TidyUpGarageClose();
-    } else {
-        garageToCheck.TidyUpGarage();
+// 0x449BA0
+bool CGarages::IsPointInAGarageCameraZone(CVector point) {
+    for (auto& garage : aGarages) {
+        if (garage.m_nType && garage.IsPointInsideGarage(point, 0.5f)) // todo: m_nType == ONLY_TARGET_VEH or != INVALID
+            return true;
     }
+    return false;
 }
 
 // 0x447CD0
@@ -299,7 +332,7 @@ void CGarages::SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle) {
             garage.SetClosed();
     } else {
 #if FIX_BUGS
-        // NOTE/TODO: They forgot to call `CleanUpOldReference`
+        // NOTE/TODO: They forgot to call `CleanUpOldReference` | test it!
         if (garage.m_pTargetCar)
             garage.m_pTargetCar->CleanUpOldReference(reinterpret_cast<CEntity**>(&garage.m_pTargetCar));
 #endif
@@ -363,178 +396,6 @@ void CGarages::PrintMessages() {
 }
 
 // 0x4476D0
-void CGarages::SetGarageType(int16 garageId, eGarageType type, int32 unused) {
-    auto& garage = GetGarage(garageId);
-    garage.m_nType = type;
-    switch (type) {
-    case eGarageType::BOMBSHOP_TIMED:
-    case eGarageType::BOMBSHOP_ENGINE:
-    case eGarageType::BOMBSHOP_REMOTE:
-    case eGarageType::PAYNSPRAY: {
-        garage.m_nDoorState = GARAGE_DOOR_CLOSED;
-        garage.m_fDoorPosition = 0.f;
-        break;
-    }
-    case eGarageType::BURGLARY: {
-        break; // NOP
-    }
-    default: {
-        if (garage.m_nDoorState == GARAGE_DOOR_CLOSED) {
-            garage.m_nDoorState = GARAGE_DOOR_OPEN;
-            garage.m_fDoorPosition = 1.f;
-        }
-        break;
-    }
-    }
-}
-
-// 0x447680
-int16 CGarages::GetGarageNumberByName(const char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        const auto& garage = aGarages[i];
-        if (_stricmp(garage.m_anName, name) == 0)
-            return i;
-    }
-    return -1;
-}
-
-// 0x5D3270
-bool CGarages::Load() {
-    CloseHideOutGaragesBeforeSave();
-
-    LoadDataFromWorkBuffer(NumGarages);
-    LoadDataFromWorkBuffer(BombsAreFree);
-    LoadDataFromWorkBuffer(RespraysAreFree);
-    LoadDataFromWorkBuffer(NoResprays);
-    LoadDataFromWorkBuffer(CarsCollected);
-    LoadDataFromWorkBuffer(BankVansCollected);
-    LoadDataFromWorkBuffer(PoliceCarsCollected);
-
-    for (auto& v : CarTypesCollected) {
-        LoadDataFromWorkBuffer(v);
-    }
-
-    LoadDataFromWorkBuffer(LastTimeHelpMessage);
-
-    // NOTE: Here they messsed up the order of loops
-    //       C/C++ is row-major, so, the row loop should've been the outer one..
-    //       This is important, because the array isn't accessed contiguously
-    //       Which means the data isn't saved contiguously either, so watch out for that.
-    for (auto c = 0; c < 4; c++) {
-        for (auto r = 0; r < 20; r++) {
-            LoadDataFromWorkBuffer(aCarsInSafeHouse[r][c]);
-        }
-    }
-
-    std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { printf("%d\n", car->m_wModelIndex); });
-
-    for (auto i = 0; i < NumGarages; i++) {
-        CSaveGarage sg{};
-        LoadDataFromWorkBuffer(sg);
-        sg.CopyGarageOutOfSaveGarage(aGarages[i]);
-    }
-
-    MessageEndTime = 0;
-    MessageStartTime = 0;
-    bCamShouldBeOutside = false;
-
-    return true;
-}
-
-// todo: fix Update()
-// 0x5D3160
-bool CGarages::Save() {
-    SaveDataToWorkBuffer(NumGarages);
-    SaveDataToWorkBuffer(BombsAreFree);
-    SaveDataToWorkBuffer(RespraysAreFree);
-    SaveDataToWorkBuffer(NoResprays);
-    SaveDataToWorkBuffer(CarsCollected);
-    SaveDataToWorkBuffer(BankVansCollected);
-    SaveDataToWorkBuffer(PoliceCarsCollected);
-
-    for (auto carType : CarTypesCollected) {
-        SaveDataToWorkBuffer(carType);
-    }
-
-    SaveDataToWorkBuffer(LastTimeHelpMessage);
-
-    // NOTE: Here they messsed up the order of loops
-    //       C/C++ is row-major, so, the row loop should've been the outer one..
-    //       This is important, because the array isn't accessed contiguously
-    //       Which means the data isn't saved contiguously either, so watch out for that.
-    for (auto c = 0; c < 4; c++) {
-        for (auto r = 0; r < 20; r++) {
-            SaveDataToWorkBuffer(aCarsInSafeHouse[r][c]);
-        }
-    }
-
-    for (auto i = 0; i < NumGarages; i++) {
-        CSaveGarage sg{};
-        sg.CopyGarageIntoSaveGarage(aGarages[i]);
-        SaveDataToWorkBuffer(sg);
-    }
-
-    return true;
-}
-
-// 0x44A3C0
-void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* vehicle) {
-    plugin::Call<0x44A3C0, CVehicle*>(vehicle);
-}
-
-//
-//  todo: review, sort, test - below code
-//
-
-// 0x448660
-void CGarages::GivePlayerDetonator() {
-    auto player = FindPlayerPed();
-    auto slot = CWeaponInfo::GetWeaponInfo(WEAPON_DETONATOR, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
-    player->GiveWeapon(WEAPON_DETONATOR, 1, true);
-    player->m_aWeapons[slot].m_nState = WEAPONSTATE_READY;
-    player->m_pPlayerData->m_nChosenWeapon = slot;
-    if (player->m_nSavedWeapon != WEAPON_UNIDENTIFIED)
-        player->m_nSavedWeapon = WEAPON_DETONATOR;
-}
-
-// 0x449740
-bool CGarages::IsThisCarWithinGarageArea(int16 garageId, CEntity* entity) {
-    return GetGarage(garageId).IsEntityEntirelyInside3D(entity, 0.0f);
-}
-
-// 0x448890
-void CGarages::StopCarFromBlowingUp(CAutomobile* vehicle) {
-    vehicle->m_nBurnTimer = 0;
-    vehicle->m_fHealth = vehicle->m_fHealth <= 300.0f ? 300.0f : vehicle->m_fHealth;
-
-    auto& manager = vehicle->m_damageManager;
-    if (manager.GetEngineStatus() >= 275) {
-        manager.SetEngineStatus(manager.GetEngineStatus());
-    } else {
-        manager.SetEngineStatus(275u);
-    }
-}
-
-// 0x448990
-bool CGarages::IsPointWithinAnyGarage(CVector& point) {
-    for (auto& garage : aGarages) {
-        if (garage.m_nType != eGarageType::INVALID || garage.IsPointInsideGarage(point)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// 0x447680
-int16 CGarages::FindGarageIndex(char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        if (_stricmp(name, GetGarage(i).m_anName) == 0)
-            return i;
-    }
-    return -1;
-}
-
-// 0x4476D0
 void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused) {
     auto garage = GetGarage(garageId);
     garage.m_nType = type;
@@ -560,29 +421,131 @@ void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused)
     }
 }
 
-// wrong
+// 0x447680
+int16 CGarages::GetGarageNumberByName(const char* name) {
+    for (auto i = 0; i < NumGarages; i++) {
+        const auto& garage = aGarages[i];
+        if (_stricmp(garage.m_anName, name) == 0)
+            return i;
+    }
+    return -1;
+}
+
+// 0x5D3270
+bool CGarages::Load() {
+    return plugin::CallAndReturn<bool, 0x5D3270>();
+
+    CloseHideOutGaragesBeforeSave();
+
+    LoadDataFromWorkBuffer(NumGarages);
+    LoadDataFromWorkBuffer(BombsAreFree);
+    LoadDataFromWorkBuffer(RespraysAreFree);
+    LoadDataFromWorkBuffer(NoResprays);
+    LoadDataFromWorkBuffer(CarsCollected);
+    LoadDataFromWorkBuffer(BankVansCollected);
+    LoadDataFromWorkBuffer(PoliceCarsCollected);
+
+    for (auto& v : CarTypesCollected) {
+        LoadDataFromWorkBuffer(v);
+    }
+
+    LoadDataFromWorkBuffer(LastTimeHelpMessage);
+
+    // NOTE: Here they messed up the order of loops
+    //       C/C++ is row-major, so, the row loop should've been the outer one..
+    //       This is important, because the array isn't accessed contiguously
+    //       Which means the data isn't saved contiguously either, so watch out for that.
+    for (auto c = 0; c < 4; c++) {
+        for (auto r = 0; r < 20; r++) {
+            LoadDataFromWorkBuffer(aCarsInSafeHouse[r][c]);
+        }
+    }
+
+    // our debug leftover std::ranges::for_each(aCarsInSafeHouse, [&](auto& car) { printf("%d\n", car->m_wModelIndex); });
+
+    for (auto i = 0; i < NumGarages; i++) {
+        CSaveGarage sg{};
+        LoadDataFromWorkBuffer(sg);
+        sg.CopyGarageOutOfSaveGarage(aGarages[i]);
+    }
+
+    MessageEndTime = 0;
+    MessageStartTime = 0;
+    bCamShouldBeOutside = false;
+
+    return true;
+}
+
+// todo: fix Update()
+// 0x5D3160
+bool CGarages::Save() {
+    return plugin::CallAndReturn<bool, 0x5D3160>();
+
+    SaveDataToWorkBuffer(NumGarages);
+    SaveDataToWorkBuffer(BombsAreFree);
+    SaveDataToWorkBuffer(RespraysAreFree);
+    SaveDataToWorkBuffer(NoResprays);
+    SaveDataToWorkBuffer(CarsCollected);
+    SaveDataToWorkBuffer(BankVansCollected);
+    SaveDataToWorkBuffer(PoliceCarsCollected);
+
+    for (auto carType : CarTypesCollected) {
+        SaveDataToWorkBuffer(carType);
+    }
+
+    SaveDataToWorkBuffer(LastTimeHelpMessage);
+
+    // NOTE: Here they messed up the order of loops
+    //       C/C++ is row-major, so, the row loop should've been the outer one..
+    //       This is important, because the array isn't accessed contiguously
+    //       Which means the data isn't saved contiguously either, so watch out for that.
+    for (auto c = 0; c < 4; c++) {
+        for (auto r = 0; r < 20; r++) {
+            SaveDataToWorkBuffer(aCarsInSafeHouse[r][c]);
+        }
+    }
+
+    for (auto i = 0; i < NumGarages; i++) {
+        CSaveGarage sg{};
+        sg.CopyGarageIntoSaveGarage(aGarages[i]);
+        SaveDataToWorkBuffer(sg);
+    }
+
+    return true;
+}
+
+// 0x44A3C0
+void CGarages::StoreCarInNearestImpoundingGarage(CVehicle* vehicle) {
+    plugin::Call<0x44A3C0, CVehicle*>(vehicle);
+}
+
+// unused
+// 0x448890
+void CGarages::StopCarFromBlowingUp(CAutomobile* vehicle) {
+    return plugin::Call<0x448890, CVehicle*>(vehicle);
+
+    // untested
+    vehicle->m_nBurnTimer = 0;
+    vehicle->m_fHealth = vehicle->m_fHealth <= 300.0f ? 300.0f : vehicle->m_fHealth;
+
+    auto& manager = vehicle->m_damageManager;
+    if (manager.GetEngineStatus() >= 275) {
+        manager.SetEngineStatus(manager.GetEngineStatus());
+    } else {
+        manager.SetEngineStatus(275u);
+    }
+}
+
+// untested, unused (inlined?)
 // 0x447E10
 bool CGarages::HasResprayHappened(int16 garageId) {
     auto& garage = GetGarage(garageId);
-    return garage.m_bUsedRespray;
-}
-
-// 0x449C30
-float CGarages::FindDoorHeightForMI(uint32 modelIndex) {
-    auto* mi = CModelInfo::GetModelInfo(modelIndex);
-    return mi->GetColModel()->GetBoundingBox().GetHeight() - 0.1f;
+    const auto resprayed = garage.m_bUsedRespray;
+    garage.m_bUsedRespray = false;
+    return resprayed;
 }
 
 // 0x44A210
 int32 CGarages::CountCarsInHideoutGarage(eGarageType type) {
     return plugin::CallAndReturn<int32, 0x44A210, eGarageType>(type);
-}
-
-// 0x449BA0
-bool CGarages::IsPointInAGarageCameraZone(CVector point) {
-    for (auto& garage : aGarages) {
-        if (garage.m_nType && garage.IsPointInsideGarage(point, 0.5f)) // todo: m_nType == ONLY_TARGET_VEH or != INVALID
-            return true;
-    }
-    return false;
 }

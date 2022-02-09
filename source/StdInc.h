@@ -211,8 +211,6 @@
 #include "game_sa\GangInfo.h"
 #include "game_sa\Gangs.h"
 #include "game_sa\GangWars.h"
-#include "game_sa\Garage.h"
-#include "game_sa\Garages.h"
 #include "game_sa\General.h"
 #include "game_sa\GenericGameStorage.h"
 #include "game_sa\cHandlingDataMgr.h"

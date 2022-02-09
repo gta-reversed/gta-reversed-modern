@@ -11,6 +11,7 @@
 #include "EntryExitManager.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "Garages.h"
 
 constexpr uint32 SIZE_OF_ONE_GAME_IN_BYTES = 202748;
 

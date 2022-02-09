@@ -28,6 +28,8 @@
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
+#include "Garage.h"
+#include "Garages.h"
 
 #include "CDebugMenu.h"
 

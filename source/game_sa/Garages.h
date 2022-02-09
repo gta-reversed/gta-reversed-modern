@@ -14,9 +14,9 @@ class CVector;
 
 class CGarages {
 public:
-    static constexpr int32 MAX_NUM_SAFEHOUSES = 20;
-    static constexpr int32 MAX_CARS_IN_SAFEHOUSE = 4;
-    static constexpr int32 MAX_NUM_GARAGES = 50;
+    static constexpr auto MAX_NUM_SAFEHOUSES{ 20 };
+    static constexpr auto MAX_CARS_IN_SAFEHOUSE{ 4 };
+    static constexpr auto MAX_NUM_GARAGES{ 50 };
 
     static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD4;
     static inline CGarage    (&aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[50])0x96C048;
@@ -46,44 +46,49 @@ public:
     static void Init();
     static void Init_AfterRestart();
     static void Shutdown();
+    static void Update();
+
     static void AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags);
     static void CloseHideOutGaragesBeforeSave();
     static void PlayerArrestedOrDied();
     static void AllRespraysCloseOrOpen(bool state);
+
     static int32 FindSafeHouseIndexForGarageType(eGarageType type);
     static int16 FindGarageForObject(CObject*);
+    static int16 FindGarageIndex(char* name);
+    static float FindDoorHeightForMI(uint32 modelIndex);
+
     static bool IsModelIndexADoor(int32 model);
     static bool IsPointWithinHideOutGarage(Const CVector& point);
     static bool IsGarageOpen(int16 garageId);
     static bool IsGarageClosed(int16 garageId);
     static bool IsCarSprayable(CVehicle* vehicle);
-    static void Update();
+    static bool IsPointInAGarageCameraZone(CVector point);
+    static bool IsThisCarWithinGarageArea(int16 garageId, CEntity* entity);
+    static bool IsPointWithinAnyGarage(CVector& point);
+
     static void ActivateGarage(int16 a1);
     static void DeActivateGarage(int16 garageId);
     static void SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle);
-    static void TriggerMessage(const char* tagMsg, int16 msgMin, uint16 time, int16 msgMax);
-    static void PrintMessages();
-    static void SetGarageType(int16 garageId, eGarageType type, int32 unused);
+
     static int16 GetGarageNumberByName(const char* name);
     static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
-    static bool Load();
-    static bool Save();
 
-public:
-    static CGarage&    GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
-    static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
-    static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
-
-    static int16 FindGarageIndex(char* name);
     static void ChangeGarageType(int16 garageId, eGarageType type, uint32 unused);
     static bool HasCarBeenDroppedOffYet(int16 garageId) { return GetGarage(garageId).m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; } // 0x447C90
     static bool HasResprayHappened(int16 garageId);
     static bool CameraShouldBeOutside() { return bCamShouldBeOutside; } // 0x448650
     static void GivePlayerDetonator();
-    static float FindDoorHeightForMI(uint32 modelIndex);
-    static bool IsPointInAGarageCameraZone(CVector point);
-    static bool IsThisCarWithinGarageArea(int16 garageId, CEntity* entity);
     static void StopCarFromBlowingUp(CAutomobile* vehicle);
-    static bool IsPointWithinAnyGarage(CVector& point);
     static int32 CountCarsInHideoutGarage(eGarageType type);
+
+    static void TriggerMessage(const char* tagMsg, int16 msgMin, uint16 time, int16 msgMax);
+    static void PrintMessages();
+
+    static bool Load();
+    static bool Save();
+
+    static CGarage&    GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
+    static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
+    static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
 };

@@ -128,7 +128,7 @@ public:
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
-    static constexpr size_t NUM_GARAGE_STORED_CARS = 4;
+    static constexpr auto NUM_GARAGE_STORED_CARS{ 4u };
 
     static void InjectHooks();
 
@@ -171,10 +171,10 @@ public:
     bool SlideDoorOpen();
     bool SlideDoorClosed();
     bool IsGarageEmpty();
-
     static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
 
-    [[nodiscard]] bool IsHideOut() const; // NOTSA
+    // NOTSA section
+    [[nodiscard]] bool IsHideOut() const;
     [[nodiscard]] bool IsOpen()   const { return m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
     [[nodiscard]] bool IsClosed() const { return m_nDoorState == GARAGE_DOOR_CLOSED; }
     void SetOpened() { m_nDoorState = GARAGE_DOOR_OPEN; }

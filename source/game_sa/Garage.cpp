@@ -10,7 +10,7 @@ void CGarage::InjectHooks() {
     // RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
     // RH_ScopedInstall(TidyUpGarage, 0x449C50);
     RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
-    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
+    // RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
     // RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
     // RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
     // RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
