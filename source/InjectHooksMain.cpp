@@ -189,7 +189,6 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
-
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 

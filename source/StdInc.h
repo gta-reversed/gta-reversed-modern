@@ -33,8 +33,6 @@
 #include "Matrix.h"
 #include "MatrixLink.h"
 #include "MatrixLinkList.h"
-#include "OctTree.h"
-#include "OctTreeBase.h"
 #include "Pool.h"
 #include "PtrList.h"
 #include "PtrListDoubleLink.h"
