@@ -3897,13 +3897,11 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
         return nullptr;
     }
 
-    // Check if this frame has a current atomic object (If there's no atomic the component is invisible I think)
-    {
-        RpAtomic* atomic{};
-        RwFrameForAllObjects(compFrame, GetCurrentAtomicObjectCB, &atomic);
-        if (!atomic) {
-            return nullptr;
-        }
+    // Grab frame's atomic (so we can clone it later)
+    RpAtomic* compAtomic{};
+    RwFrameForAllObjects(compFrame, GetCurrentAtomicObjectCB, &compAtomic);
+    if (!compAtomic) {
+        return nullptr; // No atomic means there's nothing to render :D
     }
 
     CPools::GetObjectPool()->m_bIsLocked = true;
@@ -3961,11 +3959,11 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
 
     // Create a new frame using the flying object's atomic
     auto flyingObjFrame = RwFrameCreate();
-    auto clonedFlyingObjAtomic = RpAtomicClone(obj->m_pRwAtomic);
-    RpAtomicSetFrame(clonedFlyingObjAtomic, flyingObjFrame);
-    *RwFrameGetMatrix(flyingObjFrame) = *frameLTM; // TODO: This most likely isn't the correct way to do this..
+    auto clonedFlyingObjAtomic = RpAtomicClone(compAtomic); // Clone this component's atomic
+    RpAtomicSetFrame(clonedFlyingObjAtomic, flyingObjFrame); // Associate the cloned atomic with a the new frame
+    *RwFrameGetMatrix(flyingObjFrame) = *frameLTM; // Set this frame's matrix to be the same as the component's - TODO: This most likely isn't the correct way to do this..
     CVisibilityPlugins::SetAtomicRenderCallback(clonedFlyingObjAtomic, nullptr);
-    obj->AttachToRwObject(obj->m_pRwObject, true);
+    obj->AttachToRwObject((RwObject*)clonedFlyingObjAtomic, true);
 
     obj->m_bDontStream = true;
     obj->m_fMass = 10.f;
