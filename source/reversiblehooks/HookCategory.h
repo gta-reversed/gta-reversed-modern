@@ -81,14 +81,14 @@ public:
         return it == m_items.end() ? nullptr : *it;
     }
 
-    // Find subcategory by name - Only checks for children
+    // Find subcategory by name - Only checks for top-level children
     HookCategory* FindSubcategory(std::string_view name) {
         const auto it = rng::find_if(m_subCategories, [&](const auto& c) { return c.Name() == name; });
         return it == m_subCategories.end() ? nullptr : &*it;
     }
 
-    // Find subcategory by name - Only checks for children
-    // If none found a category will be created with the given name.
+    // Find subcategory by name - Only checks for top-level children
+    // If none found a sub-category will be created with the given name.
     auto& FindOrCreateSubcategory(std::string_view name) {
         if (auto cat = FindSubcategory(name))
             return *cat; // Return found
