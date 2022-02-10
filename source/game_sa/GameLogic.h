@@ -85,7 +85,7 @@ public:
     static void RestorePlayerStuffDuringResurrection(CPlayerPed* player, float x, float y, float z, float playerStartHeading);
     static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
     static void SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
-    static void SkipCanBeActivated();
+    static bool SkipCanBeActivated();
     static void SortOutStreamingAndMemory(const CVector& translation, float angle);
     static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
     static void Update();

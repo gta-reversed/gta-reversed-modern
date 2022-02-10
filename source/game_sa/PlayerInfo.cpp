@@ -2,6 +2,7 @@
 
 #include "PlayerInfo.h"
 #include "FireManager.h"
+#include "MenuSystem.h"
 
 void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
@@ -368,7 +369,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
             bool bDecreaseHealth{};
             if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
                 CStats::DecrementStat(STAT_FAT, 25.0f);
-                CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
+                CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_FAT, 25.0f);
                 bDecreaseHealth = true;
                 if (!s_LastHungryState)
                     s_LastHungryState = m_nNumHoursDidntEat + 24;
@@ -379,7 +380,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
                     m_pPed->m_fHealth -= 2.0f;
             } else {
                 CStats::DecrementStat(STAT_MUSCLE, 25.0);
-                CStats::DisplayScriptStatUpdateMessage(0, STAT_MUSCLE, 25.0f);
+                CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_MUSCLE, 25.0f);
             }
         } else {
             CHud::SetHelpMessage(TheText.Get("NOTEAT"), true, false, true);

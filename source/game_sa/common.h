@@ -67,7 +67,9 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 
 extern int32 gDefaultTaskTime;
 
-extern char *gString; // char gString[200]
+extern char (&gString)[352];
+extern char (&gString2)[352];
+extern char (&gGxtString)[550];
 
 extern float &GAME_GRAVITY; // default 0.0080000004
 
