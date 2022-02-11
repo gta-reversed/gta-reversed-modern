@@ -158,7 +158,7 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
-        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES" }
+        defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
         includedirs {
             "source", "source/**",
             "libs/vorbis/include",
