@@ -25,7 +25,6 @@ public:
     uint8 type;
     char  _padding[2];
 };
-
 VALIDATE_SIZE(CForbiddenArea, 0x1C);
 
 class CCarPathLinkAddress {
@@ -43,16 +42,24 @@ public:
         return *reinterpret_cast<uint16*>(this) != 0xFFFF;
     }
 };
-
 VALIDATE_SIZE(CCarPathLinkAddress, 0x2);
 
 class CPathIntersectionInfo {
 public:
     uint8 m_bRoadCross : 1;
     uint8 m_bPedTrafficLight : 1;
-};
 
+    inline void Clear() {
+        *(uint8*)this = 0u;
+    }
+};
 VALIDATE_SIZE(CPathIntersectionInfo, 0x1);
+
+class CPathUnknClass {
+public:
+    uint32 m_aUnknVals[16];
+};
+VALIDATE_SIZE(CPathUnknClass, 0x40);
 
 class CCarPathLink {
 public:
@@ -72,7 +79,6 @@ public:
     uint16 m_nTrafficLightState : 2; // 1 - North-South, 2 - West-East cycle, enum: eTrafficLightsDirection
     uint16 m_bTrainCrossing : 1;
 };
-
 VALIDATE_SIZE(CCarPathLink, 0xE);
 
 class CPathNode {
@@ -109,7 +115,6 @@ public:
     static void InjectHooks();
     CVector GetNodeCoors();
 };
-
 VALIDATE_SIZE(CPathNode, 0x1C);
 
 class CPathFind {
@@ -129,7 +134,9 @@ public:
     uint32                 m_dwNumPedNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumCarPathLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumAddresses[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
-    int32                  field_1544[2048];
+    CPathUnknClass         m_aUnknVals1[NUM_PATH_MAP_AREAS];
+    CPathUnknClass         m_aUnknVals2[NUM_PATH_MAP_AREAS];
+    //int32                  field_1544[2048];
     uint32                 m_dwTotalNumNodesInSearchList;
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumForbiddenAreas;
@@ -180,6 +187,7 @@ public:
     void UpdateStreaming(bool a1);
     void StartNewInterior(int interiorNum);
     CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
+    void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
 
     // pathLink is the same as the returned pointer(at least on success)
     // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and

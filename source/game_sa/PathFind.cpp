@@ -30,6 +30,7 @@ void CPathFind::InjectHooks()
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
     RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
+    RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
 }
 
 void CPathNode::InjectHooks() {
@@ -245,4 +246,47 @@ CNodeAddress CPathFind::ReturnInteriorNodeIndex(int32 unkn, CNodeAddress address
     }
 
     return CNodeAddress((uint16)-1, addressToFind.m_wNodeId);
+}
+
+// 0x44E000
+void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAddress second) {
+    auto& firstPathInfo = m_pPathNodes[first.m_wAreaId][first.m_wNodeId];
+    auto numAddresses = m_dwNumAddresses[first.m_wAreaId];
+
+    uint32_t firstLinkId;
+    if (firstPathInfo.m_wBaseLinkId >= numAddresses)
+        firstLinkId = firstPathInfo.m_wBaseLinkId;
+    else {
+        auto* nodeLink = &m_pNodeLinks[first.m_wAreaId][numAddresses];
+        auto linkCounter = 0u;
+        while (!nodeLink->IsAreaValid()) {
+            nodeLink += 12; // No clue why we jump 12 objects each time
+            ++linkCounter;
+        }
+
+        firstLinkId = numAddresses + 12 * linkCounter;
+        for (auto i = 0u; i < firstPathInfo.m_nNumLinks; ++i) {
+            m_pNodeLinks[first.m_wAreaId][firstLinkId + i] = m_pNodeLinks[first.m_wAreaId][firstPathInfo.m_wBaseLinkId + i];
+            m_pLinkLengths[first.m_wAreaId][firstLinkId + i] = m_pLinkLengths[first.m_wAreaId][firstPathInfo.m_wBaseLinkId + i];
+            m_pPathIntersections[first.m_wAreaId][firstLinkId + i] = m_pPathIntersections[first.m_wAreaId][firstPathInfo.m_wBaseLinkId + i];
+        }
+
+        if (first.m_wAreaId < NUM_PATH_MAP_AREAS) {
+            auto& linkInfo = m_aUnknVals1[first.m_wAreaId];
+            for (auto i = 0u; i < 16; ++i) {
+                if ((linkInfo.m_aUnknVals[i] & 0x80000000u) == 0)
+                    continue;
+
+                m_aUnknVals1[first.m_wAreaId].m_aUnknVals[i] = firstPathInfo.m_wBaseLinkId;
+                m_aUnknVals2[first.m_wAreaId].m_aUnknVals[i] = firstLinkId;
+                break;
+            }
+        }
+    }
+
+    m_pNodeLinks[first.m_wAreaId][firstLinkId + firstPathInfo.m_nNumLinks] = second;
+    m_pLinkLengths[first.m_wAreaId][firstLinkId + firstPathInfo.m_nNumLinks] = 5;
+    m_pPathIntersections[first.m_wAreaId][firstLinkId + firstPathInfo.m_nNumLinks].Clear();
+    firstPathInfo.m_nNumLinks++;
+    firstPathInfo.m_wBaseLinkId = firstLinkId;
 }

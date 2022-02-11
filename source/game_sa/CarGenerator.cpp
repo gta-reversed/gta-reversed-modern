@@ -279,7 +279,7 @@ void CCarGenerator::DoInternalProcessing()
         CNodeAddress pathLink = ThePaths.FindNodeClosestToCoors(vehPosn.x, vehPosn.y, vehPosn.z, 0, 20.0F, 0, 0, 0, 0, 1);        
         if (pathLink.IsAreaValid())
         {
-            assert(pathLink.m_wNodeId != (uint16)-1);
+            assert(pathLink.IsValid());
 
             CPathNode& pathNode = ThePaths.m_pPathNodes[pathLink.m_wAreaId][pathLink.m_wNodeId];
             if (pathNode.m_nNumLinks != 0)
