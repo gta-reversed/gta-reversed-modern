@@ -13,7 +13,7 @@ static auto SplitStringView(std::string_view str, std::string_view delim) {
     return str
         | std::ranges::views::split(delim)
         | std::ranges::views::transform([](auto&& rng) {
-            return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+            return std::string_view(rng.begin(), rng.end());
         });
 }
 

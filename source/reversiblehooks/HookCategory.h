@@ -22,6 +22,19 @@ public:
     //    SOME = -1 // Some hooked
     //};
 
+    // Used for HookTool searching
+    enum class NameMatchType {
+        NONE,
+        PARTIAL,
+        FULL
+    };
+
+    enum class VisibilityState {
+        INVISIBLE,  // Not shown at all
+        CLOSED,      // Shown, but not opened
+        OPEN,       // Shown and opened
+    };
+
 public:
     HookCategory(std::string name, HookCategory* parent) :
         m_name{ std::move(name) },
@@ -30,19 +43,32 @@ public:
     }
 
     // Accessors
-    auto OverallState()           const { return m_overallState; }
+    auto OverallState()         const { return m_overallState; }
+                                
+    auto ItemsState()           const { return m_itemsState; }
+                                
+    auto SubcategoriesState()   const { return m_subcatsState; }
+                                
+    const auto& Name()          const { return m_name; }
+                                
+    const auto& SubCategories() const { return m_subCategories; }
+    auto&       SubCategories()       { return m_subCategories; }
+                                
+    const auto& Items()         const { return m_items; }
+    auto&       Items()               { return m_items; }
+                                
+    auto Parent()               const { return m_parent; }
 
-    auto ItemsState()             const { return m_itemsState; }
+    bool Visible()              const { return m_isVisible; }
+    void Visible(bool visible)        { m_isVisible = visible; }
 
-    auto SubcategoriesState()     const { return m_subcatsState; }
+    bool Open()                 const { return m_isOpen; }
+    void Open(bool open)              { m_isOpen = open; }
 
-    const auto& Name()            const { return m_name; }
-
-    const auto& SubCategories()   const { return m_subCategories; }
-    auto&       SubCategories()         { return m_subCategories; }
-
-    const auto& Items()           const { return m_items; }
-    auto&       Items()                 { return m_items; }
+    //bool Visible()              const { return m_visibilityState != VisibilityState::INVISIBLE; }
+    //void Visible(bool visible)        { if (visible) { Open(false); } else { m_visibilityState = VisibilityState::INVISIBLE; } }
+    //bool Open()                 const { return m_visibilityState == VisibilityState::OPEN; }
+    //void Open(bool open)              { m_visibilityState = open ? VisibilityState::OPEN : VisibilityState::CLOSED; }
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
@@ -250,12 +276,15 @@ private:
     }
 public:
     // Stuff required for the Hooks tool
-    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
-    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
-    HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
-    bool                      m_isVisible{true};                  // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
-    bool                      m_isCategoryOpen{};                 // If this category's tree node is currently open
-
+    HooksState                m_itemsState{ HooksState::ALL };            // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
+    HooksState                m_subcatsState{ HooksState::ALL };          // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
+    HooksState                m_overallState{ HooksState::ALL };          // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
+    bool                      m_isVisible{true};                          // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
+    bool                      m_isOpen{};                                 // Is our tree currently open
+    NameMatchType             m_nameMatchType{};
+    //bool                      m_isVisible{};                              // Is our tree node drawn at all
+    VisibilityState           m_visibilityState{VisibilityState::CLOSED}; // Visiblity state when searching(filtering), otherwise irrelevant.
+    bool                      m_anyItemsVisible{};                        // Used when searching 
 private:
 
     HookCategory*             m_parent{};        // Category we belong to - In case of `RootHookCategory` this is always `nullptr`.
