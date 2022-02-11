@@ -1,33 +1,20 @@
 #include "StdInc.h"
 
+#include "StuntJumpManager.h"
+
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
 
-// 0xA9A888
-CPool<CStuntJump>* CStuntJumpManager::mp_poolStuntJumps{};
-// 0xA9A88C
-CStuntJump* CStuntJumpManager::mp_Active = nullptr;
-// 0xA9A890
-bool CStuntJumpManager::m_bActive;
-// 0xA9A891
-bool CStuntJumpManager::m_bHitReward;
-// 0xA9A894
-uint32 CStuntJumpManager::m_iTimer;
-// 0xA9A898 int32
-eJumpState CStuntJumpManager::m_jumpState;
-// 0xA9A89C
-int32 CStuntJumpManager::m_iNumJumps;
-// 0xA9A8A0
-uint32 CStuntJumpManager::m_iNumCompleted;
-
-
 void CStuntJumpManager::InjectHooks() {
-    ReversibleHooks::Install("CStuntJumpManager", "Init", 0x49CA50, &CStuntJumpManager::Init);
-    ReversibleHooks::Install("CStuntJumpManager", "Shutdown", 0x49CBC0, &CStuntJumpManager::Shutdown);
-    ReversibleHooks::Install("CStuntJumpManager", "ShutdownForRestart", 0x49CB10, &CStuntJumpManager::ShutdownForRestart);
-    ReversibleHooks::Install("CStuntJumpManager", "Save", 0x5D5570, &CStuntJumpManager::Save);
-    ReversibleHooks::Install("CStuntJumpManager", "Load", 0x5D5920, &CStuntJumpManager::Load);
-    ReversibleHooks::Install("CStuntJumpManager", "AddOne", 0x49CB40, &CStuntJumpManager::AddOne);
-    ReversibleHooks::Install("CStuntJumpManager", "Update", 0x49C490, &CStuntJumpManager::Update);
+    RH_ScopedClass(CStuntJumpManager);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x49CA50);
+    RH_ScopedInstall(Shutdown, 0x49CBC0);
+    RH_ScopedInstall(ShutdownForRestart, 0x49CB10);
+    RH_ScopedInstall(Save, 0x5D5570);
+    RH_ScopedInstall(Load, 0x5D5920);
+    RH_ScopedInstall(AddOne, 0x49CB40);
+    RH_ScopedInstall(Update, 0x49C490);
 }
 
 // 0x49CA50
@@ -56,7 +43,7 @@ void CStuntJumpManager::ShutdownForRestart() {
 }
 
 // 0x5D5570
-void CStuntJumpManager::Save() {
+bool CStuntJumpManager::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&m_iNumJumps, sizeof(m_iNumJumps));
     for (auto i = 0; i < STUNT_JUMP_COUNT; i++) {
         CStuntJump* jump = mp_poolStuntJumps->GetAt(i);
@@ -64,10 +51,11 @@ void CStuntJumpManager::Save() {
             CGenericGameStorage::SaveDataToWorkBuffer(jump, sizeof(CStuntJump));
         }
     }
+    return true;
 }
 
 // 0x5D5920
-void CStuntJumpManager::Load(int32 a1, int32 a2) {
+bool CStuntJumpManager::Load() {
     uint32 jumpCount;
     CGenericGameStorage::LoadDataFromWorkBuffer(&jumpCount, sizeof(jumpCount));
     for (uint32 i = 0; i < jumpCount; i++) {
@@ -75,6 +63,7 @@ void CStuntJumpManager::Load(int32 a1, int32 a2) {
         CGenericGameStorage::LoadDataFromWorkBuffer(jump, sizeof(CStuntJump));
         m_iNumJumps++;
     }
+    return true;
 }
 
 // 0x49CB40
@@ -98,7 +87,7 @@ void CStuntJumpManager::Update() {
     if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
         return;
 
-    CPlayerPed* playerPed = FindPlayerPed(-1);
+    CPlayerPed* playerPed = FindPlayerPed();
     CVehicle* playerVehicle = playerPed->m_pVehicle;
     CPlayerInfo* playerInfo = playerPed->GetPlayerInfoForThisPlayerPed();
 
@@ -180,11 +169,11 @@ void CStuntJumpManager::Update() {
 
         m_iTimer = CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
-            auto vehicle = FindPlayerVehicle(-1, false);
+            auto vehicle = FindPlayerVehicle();
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0, 0, 0, 0);
+                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
             }
         }
 

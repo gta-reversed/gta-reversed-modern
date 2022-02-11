@@ -4,7 +4,7 @@
 
 #define NAME_LENGTH 23
 
-RwInt32 gPluginOffset;
+RwInt32& gNodeNamePluginOffset = *(RwInt32*)0xC87C5C;
 
 /**
  * NodeName plugin structure
@@ -16,16 +16,20 @@ typedef struct tNodeNamePlugin {
 } NodeNamePluginInstance;
 
 void NodeNamePlugin::InjectHooks() {
-    ReversibleHooks::Install("NodeNamePlugin", "NodeNamePluginAttach", 0x72FAB0, &NodeNamePluginAttach);
-    ReversibleHooks::Install("NodeNamePlugin", "GetFrameNodeName", 0x72FB30, &GetFrameNodeName);
-    ReversibleHooks::Install("NodeNamePlugin", "SetFrameNodeName", 0x72FB00, &SetFrameNodeName);
+    RH_ScopedNamespace(NodeNamePlugin);
+    RH_ScopedCategory("Plugins");
+
+    // TODO: These should be moved into the namespace instead of being global...
+    RH_ScopedGlobalInstall(NodeNamePluginAttach, 0x72FAB0);
+    RH_ScopedGlobalInstall(GetFrameNodeName, 0x72FB30);
+    RH_ScopedGlobalInstall(SetFrameNodeName, 0x72FB00);
 }
 
 // internal
 // 0x72F9C0
 static void* NodeNameConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    if (gPluginOffset > 0)
-        RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset)->name[0] = '\0';
+    if (gNodeNamePluginOffset > 0)
+        RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset)->name[0] = '\0';
 
     return object;
 }
@@ -39,54 +43,54 @@ static void* NodeNameDestructor(void* object, RwInt32 offsetInObject, RwInt32 si
 // internal
 // 0x72F9F0
 static void* NodeNameCopy(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    strncpy(RWPLUGINOFFSET(NodeNamePluginInstance, dstObject, gPluginOffset)->name, RWPLUGINOFFSET(NodeNamePluginInstance, srcObject, gPluginOffset)->name, NAME_LENGTH);
+    strncpy(RWPLUGINOFFSET(NodeNamePluginInstance, dstObject, gNodeNamePluginOffset)->name, RWPLUGINOFFSET(NodeNamePluginInstance, srcObject, gNodeNamePluginOffset)->name, NAME_LENGTH);
     return dstObject;
 }
 
 // internal
 // 0x72FA50
 static RwStream* NodeNameStreamRead(RwStream* stream, RwInt32 binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    RwStreamRead(stream, RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset), binaryLength);
-    RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset)->name[binaryLength] = 0;
+    RwStreamRead(stream, RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset), binaryLength);
+    RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset)->name[binaryLength] = 0;
     return stream;
 }
 
 // internal
 // 0x72FA20
 static RwStream* NodeNameStreamWrite(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    RwStreamWrite(stream, RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset), binaryLength);
+    RwStreamWrite(stream, RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset), binaryLength);
     return stream;
 }
 
 // internal
 // 0x72FA80
 static RwInt32 NodeNameStreamGetSize(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    if (RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset))
-        return strlen(RWPLUGINOFFSET(NodeNamePluginInstance, object, gPluginOffset)->name);
+    if (RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset))
+        return strlen(RWPLUGINOFFSET(NodeNamePluginInstance, object, gNodeNamePluginOffset)->name);
 
     return 0;
 }
 
 RwBool NodeNamePluginAttach() {
     // register plugin
-    gPluginOffset = RwFrameRegisterPlugin(sizeof(NodeNamePluginInstance), rwID_NODENAMEPLUGIN, NodeNameConstructor, NodeNameDestructor, NodeNameCopy);
+    gNodeNamePluginOffset = RwFrameRegisterPlugin(sizeof(NodeNamePluginInstance), rwID_NODENAMEPLUGIN, NodeNameConstructor, NodeNameDestructor, NodeNameCopy);
 
     // register stream operations
     RwFrameRegisterPluginStream(rwID_NODENAMEPLUGIN, NodeNameStreamRead, NodeNameStreamWrite, NodeNameStreamGetSize);
 
-    return gPluginOffset != -1;
+    return gNodeNamePluginOffset != -1;
 }
 
 const RwChar* GetFrameNodeName(RwFrame* frame) {
-    if (gPluginOffset > 0)
-        return RWPLUGINOFFSET(NodeNamePluginInstance, frame, gPluginOffset)->name;
+    if (gNodeNamePluginOffset > 0)
+        return RWPLUGINOFFSET(NodeNamePluginInstance, frame, gNodeNamePluginOffset)->name;
 
     return nullptr;
 }
 
 void SetFrameNodeName(RwFrame* frame, const RwChar* name) {
-    if (gPluginOffset > 0) {
-        strncpy(RWPLUGINOFFSET(NodeNamePluginInstance, frame, gPluginOffset)->name, name, NAME_LENGTH);
-        RWPLUGINOFFSET(NodeNamePluginInstance, frame, gPluginOffset)->name[NAME_LENGTH] = '\0';
+    if (gNodeNamePluginOffset > 0) {
+        strncpy(RWPLUGINOFFSET(NodeNamePluginInstance, frame, gNodeNamePluginOffset)->name, name, NAME_LENGTH);
+        RWPLUGINOFFSET(NodeNamePluginInstance, frame, gNodeNamePluginOffset)->name[NAME_LENGTH] = '\0';
     }
 }

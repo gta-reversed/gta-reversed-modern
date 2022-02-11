@@ -7,23 +7,25 @@ float& CSprite::m_f2DFarScreenZ = *(float*)0xC4B8D4;
 float& CSprite::m_fRecipNearClipPlane = *(float*)0xC4B8D0;
 
 void CSprite::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CSprite", "Initialise", 0x70CE10, &CSprite::Initialise);
-    Install("CSprite", "InitSpriteBuffer", 0x70CFB0, &CSprite::InitSpriteBuffer);
-    // Install("CSprite", "FlushSpriteBuffer", 0x70CF20, &CSprite::FlushSpriteBuffer);
-    // Install("CSprite", "CalcScreenCoors", 0x70CE30, &CSprite::CalcScreenCoors);
-    // Install("CSprite", "CalcHorizonCoors", 0x70E3E0, &CSprite::CalcHorizonCoors);
-    // Install("CSprite", "Set4Vertices2D_0", 0x70E1C0, static_cast<void (*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(CSprite::Set4Vertices2D));
-    // Install("CSprite", "Set4Vertices2D_1", 0x70E2D0, static_cast<void (*)(RwD3D9Vertex*, float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&)>(CSprite::Set4Vertices2D));
-    // Install("CSprite", "RenderOneXLUSprite", 0x70D000, &CSprite::RenderOneXLUSprite);
-    // Install("CSprite", "RenderOneXLUSprite_Triangle", 0x70D320, &CSprite::RenderOneXLUSprite_Triangle);
-    // Install("CSprite", "RenderOneXLUSprite_Rotate_Aspect", 0x70D490, &CSprite::RenderOneXLUSprite_Rotate_Aspect);
-    // Install("CSprite", "RenderOneXLUSprite2D", 0x70F540, &CSprite::RenderOneXLUSprite2D);
-    // Install("CSprite", "RenderBufferedOneXLUSprite", 0x70E4A0, &CSprite::RenderBufferedOneXLUSprite);
-    // Install("CSprite", "RenderBufferedOneXLUSprite_Rotate_Aspect", 0x70E780, &CSprite::RenderBufferedOneXLUSprite_Rotate_Aspect);
-    // Install("CSprite", "RenderBufferedOneXLUSprite_Rotate_Dimension", 0x70EAB0, &CSprite::RenderBufferedOneXLUSprite_Rotate_Dimension);
-    // Install("CSprite", "RenderBufferedOneXLUSprite_Rotate_2Colours", 0x70EDE0, &CSprite::RenderBufferedOneXLUSprite_Rotate_2Colours);
-    // Install("CSprite", "RenderBufferedOneXLUSprite2D", 0x70F440, &CSprite::RenderBufferedOneXLUSprite2D);
+    RH_ScopedClass(CSprite);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Initialise, 0x70CE10);
+    RH_ScopedInstall(InitSpriteBuffer, 0x70CFB0);
+    // RH_ScopedInstall(FlushSpriteBuffer, 0x70CF20);
+    RH_ScopedInstall(CalcScreenCoors, 0x70CE30);
+    // RH_ScopedInstall(CalcHorizonCoors, 0x70E3E0);
+    // RH_ScopedOverloadedInstall(Set4Vertices2D, "0", 0x70E1C0, void (*)(RwD3D9Vertex*, const CRect&, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    // RH_ScopedOverloadedInstall(Set4Vertices2D, "1", 0x70E2D0, void (*)(RwD3D9Vertex*, float, float, float, float, float, float, float, float, const CRGBA&, const CRGBA&, const CRGBA&, const CRGBA&));
+    // RH_ScopedInstall(RenderOneXLUSprite, 0x70D000);
+    // RH_ScopedInstall(RenderOneXLUSprite_Triangle, 0x70D320);
+    // RH_ScopedInstall(RenderOneXLUSprite_Rotate_Aspect, 0x70D490);
+    // RH_ScopedInstall(RenderOneXLUSprite2D, 0x70F540);
+    // RH_ScopedInstall(RenderBufferedOneXLUSprite, 0x70E4A0);
+    // RH_ScopedInstall(RenderBufferedOneXLUSprite_Rotate_Aspect, 0x70E780);
+    // RH_ScopedInstall(RenderBufferedOneXLUSprite_Rotate_Dimension, 0x70EAB0);
+    // RH_ScopedInstall(RenderBufferedOneXLUSprite_Rotate_2Colours, 0x70EDE0);
+    // RH_ScopedInstall(RenderBufferedOneXLUSprite2D, 0x70F440);
 }
 
 // 0x70CE10
@@ -34,7 +36,7 @@ void CSprite::Initialise() {
 // 0x70CFB0
 void CSprite::InitSpriteBuffer() {
     m_f2DNearScreenZ = RwIm2DGetNearScreenZ();
-    m_f2DFarScreenZ = RwIm2DGetFarScreenZ();
+    m_f2DFarScreenZ  = RwIm2DGetFarScreenZ();
 }
 
 // unused
@@ -57,7 +59,23 @@ void CSprite::Draw3DSprite(float, float, float, float, float, float, float, floa
 
 // 0x70CE30
 bool CSprite::CalcScreenCoors(const RwV3d& posn, RwV3d* out, float* w, float* h, bool checkMaxVisible, bool checkMinVisible) {
-    return plugin::CallAndReturn<bool, 0x70CE30, const RwV3d&, RwV3d*, float*, float*, bool, bool>(posn, out, w, h, checkMaxVisible, checkMinVisible);
+    *out = MultiplyMatrixWithVector(TheCamera.GetViewMatrix(), posn);
+
+    if (out->z <= CDraw::GetNearClipZ() + 1.0f && checkMinVisible)
+        return false;
+
+    if (out->z >= CDraw::GetFarClipZ() && checkMaxVisible)
+        return false;
+
+    const float recip = 1.0f / out->z;
+
+    out->x = SCREEN_WIDTH * recip * out->x;
+    out->y = SCREEN_HEIGHT * recip * out->y;
+
+    *w = SCREEN_WIDTH  * recip / CDraw::GetFOV() * 70.0f;
+    *h = SCREEN_HEIGHT * recip / CDraw::GetFOV() * 70.0f;
+
+    return true;
 }
 
 // 0x70E3E0

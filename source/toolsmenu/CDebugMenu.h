@@ -31,12 +31,9 @@ private:
 
     static void ProcessRenderTool();
     static void PostFxTool();
-    static void ProcessHooksTool();
 #ifdef EXTRA_DEBUG_FEATURES
     static void ProcessExtraDebugFeatures();
 #endif
     //static void ToggleHook();
     static void LoadMouseSprite();
 };
-
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle);

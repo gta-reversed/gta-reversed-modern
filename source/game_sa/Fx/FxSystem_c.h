@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -69,19 +69,19 @@ public:
     void Kill();
     void AttachToBone(CEntity* entity, int32 boneId);
     void AddParticle(RwV3d* position, RwV3d* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, uint8 arg7);
-    void AddParticle(RwMatrixTag* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7);
+    void AddParticle(RwMatrix* transform, RwV3d* position, float arg2, FxPrtMult_c* prtMult, float arg4, float arg5, float arg6, uint8 arg7);
     void EnablePrim(int32 primIndex, uint8 enable);
-    void SetMatrix(RwMatrixTag* matrix);
-    void SetOffsetPos(RwV3d* pos);
+    void SetMatrix(RwMatrix* matrix);
+    void SetOffsetPos(const CVector& pos);
     void AddOffsetPos(RwV3d* pos);
     void SetConstTime(uint8 arg0, float amount);
     void SetRateMult(float mult);
     void SetTimeMult(float mult);
     void SetVelAdd(RwV3d* velAdd);
-    bool Init(FxSystemBP_c* arg0, RwMatrixTag* local, RwMatrixTag* parent);
+    bool Init(FxSystemBP_c* arg0, RwMatrix* local, RwMatrix* parent);
     void Exit();
     void CopyParentMatrix();
-    void GetCompositeMatrix(RwMatrixTag* out);
+    void GetCompositeMatrix(RwMatrix* out);
     eFxSystemPlayStatus GetPlayStatus();
     void SetLocalParticles(uint8 enable);
     uint32 ForAllParticles(void(*callback)(Particle_c *, int32, void **), void* data);

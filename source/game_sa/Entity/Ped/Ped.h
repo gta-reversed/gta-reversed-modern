@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -23,56 +23,27 @@
 
 #include "AnimationEnums.h"
 #include "eWeaponType.h"
+#include "eWeaponSkill.h"
 #include "ePedState.h"
 #include "ePedStats.h"
+#include "ePedType.h"
 
-enum ePedType : uint32 {
-    PED_TYPE_PLAYER1 = 0,
-    PED_TYPE_PLAYER2,
-    PED_TYPE_PLAYER_NETWORK,
-    PED_TYPE_PLAYER_UNUSED,
-    PED_TYPE_CIVMALE,
-    PED_TYPE_CIVFEMALE,
-    PED_TYPE_COP,
-    PED_TYPE_GANG1,
-    PED_TYPE_GANG2,
-    PED_TYPE_GANG3,
-    PED_TYPE_GANG4,
-    PED_TYPE_GANG5,
-    PED_TYPE_GANG6,
-    PED_TYPE_GANG7,
-    PED_TYPE_GANG8,
-    PED_TYPE_GANG9,
-    PED_TYPE_GANG10,
-    PED_TYPE_DEALER,
-    PED_TYPE_MEDIC,
-    PED_TYPE_FIREMAN,
-    PED_TYPE_CRIMINAL,
-    PED_TYPE_BUM,
-    PED_TYPE_PROSTITUTE,
-    PED_TYPE_SPECIAL,
-    PED_TYPE_MISSION1,
-    PED_TYPE_MISSION2,
-    PED_TYPE_MISSION3,
-    PED_TYPE_MISSION4,
-    PED_TYPE_MISSION5,
-    PED_TYPE_MISSION6,
-    PED_TYPE_MISSION7,
-    PED_TYPE_MISSION8
-};
+class CPedGroup;
+class CCivilianPed;
+class CEmergencyPed;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
-        case ePedType::PED_TYPE_GANG1:
-        case ePedType::PED_TYPE_GANG2:
-        case ePedType::PED_TYPE_GANG3:
-        case ePedType::PED_TYPE_GANG4:
-        case ePedType::PED_TYPE_GANG5:
-        case ePedType::PED_TYPE_GANG6:
-        case ePedType::PED_TYPE_GANG7:
-        case ePedType::PED_TYPE_GANG8:
-        case ePedType::PED_TYPE_GANG9:
-        case ePedType::PED_TYPE_GANG10: {
+        case PED_TYPE_GANG1:
+        case PED_TYPE_GANG2:
+        case PED_TYPE_GANG3:
+        case PED_TYPE_GANG4:
+        case PED_TYPE_GANG5:
+        case PED_TYPE_GANG6:
+        case PED_TYPE_GANG7:
+        case PED_TYPE_GANG8:
+        case PED_TYPE_GANG9:
+        case PED_TYPE_GANG10: {
             return true;
         }
     }
@@ -142,7 +113,7 @@ enum eFightingStyle : int8 {
 
 class CObject;
 class CVehicle;
-struct CPedStat;
+class CPedStat;
 class CPedStats;
 
 class CPed : public CPhysical {
@@ -395,8 +366,8 @@ public:
     void DeleteRwObject() override;
     void ProcessControl() override;
     void Teleport(CVector destination, bool resetRotation) override;
-    void SpecialEntityPreCollisionStuff(CEntity* colEntity, bool bIgnoreStuckCheck, bool* bCollisionDisabled, bool* bCollidedEntityCollisionIgnored, bool* bCollidedEntityUnableToMove, bool* bThisOrCollidedEntityStuck) override;
-    uint8 SpecialEntityCalcCollisionSteps(bool* bProcessCollisionBeforeSettingTimeStep, bool* unk2) override;
+    void SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) override;
+    uint8 SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) override;
     void PreRender() override;
     void Render() override;
     bool SetupLighting() override;
@@ -438,7 +409,7 @@ public:
     void SetAimFlag(CEntity* aimingTo);
     void ClearAimFlag();
     // Gets point direction relatively to ped
-    int32 GetLocalDirection(CVector2D const& arg0);
+    int32 GetLocalDirection(const CVector2D& arg0);
     bool IsPedShootable();
     bool UseGroundColModel();
     bool CanPedReturnToState();
@@ -481,7 +452,7 @@ public:
     void SetPedDefaultDecisionMaker();
     // limitAngle in radians
     bool CanSeeEntity(CEntity* entity, float limitAngle);
-    bool PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode);
+    bool PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicle, bool findClosestNode);
     bool PositionAnyPedOutOfCollision();
     bool OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted);
     void SortPeds(CPed** pedList, int32 arg1, int32 arg2);
@@ -558,26 +529,32 @@ public:
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
-    inline uint8 GetCreatedBy() { return m_nCreatedBy; }
-    inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
-    inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
-    inline CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
-    inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
-    inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-    inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
-    inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
-    inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
-    inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
-    inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
-    inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
-    inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
-    inline CPlayerPed* AsPlayerPed() { return reinterpret_cast<CPlayerPed*>(this); }
-  
-    bool IsStateDriving() const noexcept { return m_nPedState == ePedState::PEDSTATE_DRIVING; }
-    // NOTSA
-    bool IsInVehicleAsPassenger() const noexcept {
-        return bInVehicle && bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
-    }
+    CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+    uint8 GetCreatedBy() { return m_nCreatedBy; }
+    bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
+    bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
+    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+    int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
+    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
+    CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
+    CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
+    CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
+    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+    void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+    bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
+    bool IsInVehicleAsPassenger() const noexcept;
+
+    CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
+    CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
+    CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
+    CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
+
+    bool IsFollowerOfGroup(const CPedGroup& group);
 };
+
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);

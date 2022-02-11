@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -19,7 +19,7 @@ enum eClothesTexturePart : int32 {
     CLOTHES_TEXTURE_LEFT_CHEST      = 9,
     CLOTHES_TEXTURE_RIGHT_CHEST     = 10,
     CLOTHES_TEXTURE_STOMACH         = 11,
-    CLOTHES_TEXTURE_LOWER_BACK      = 11, // todo: 12?
+    CLOTHES_TEXTURE_LOWER_BACK      = 11, // todo: add 12?
     CLOTHES_TEXTURE_NECKLACE        = 13,
     CLOTHES_TEXTURE_BRACELET        = 14,
     CLOTHES_TEXTURE_GLASSES         = 15,

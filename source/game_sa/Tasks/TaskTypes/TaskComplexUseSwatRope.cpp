@@ -5,15 +5,20 @@
 #include "TaskSimpleAbseil.h"
 #include "TaskSimplePause.h"
 #include "TaskSimpleNone.h"
+#include "PedPlacement.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 void CTaskComplexUseSwatRope::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Constructor", 0x659470, &CTaskComplexUseSwatRope::Constructor);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateSubTask", 0x659620, &CTaskComplexUseSwatRope::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "Clone", 0x659C30, &CTaskComplexUseSwatRope::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateFirstSubTask", 0x65A440, &CTaskComplexUseSwatRope::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "CreateNextSubTask", 0x65A3E0, &CTaskComplexUseSwatRope::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "ControlSubTask", 0x65A460, &CTaskComplexUseSwatRope::ControlSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseSwatRope", "MakeAbortable", 0x659530, &CTaskComplexUseSwatRope::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskComplexUseSwatRope);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x659470);
+    RH_ScopedInstall(CreateSubTask, 0x659620);
+    RH_ScopedInstall(Clone_Reversed, 0x659C30);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65A440);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65A3E0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x65A460);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x659530);
 }
 
 CTaskComplexUseSwatRope* CTaskComplexUseSwatRope::Constructor(uint32 ropeId, CHeli* heli) {
@@ -136,7 +141,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
 
     if (subTaskType == TASK_SIMPLE_PAUSE || subTaskType == TASK_SIMPLE_ABSEIL) {
         CVector groundCoord = ped->GetPosition();
-        CPedPlacement::FindZCoorForPed(&groundCoord);
+        CPedPlacement::FindZCoorForPed(groundCoord);
         if (ped->GetPosition().z - 2.0F < groundCoord.z && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr))
             return CreateSubTask(TASK_NONE, ped);
 

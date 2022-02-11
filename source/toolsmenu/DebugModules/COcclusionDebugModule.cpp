@@ -3,6 +3,7 @@
 #ifdef EXTRA_DEBUG_FEATURES
 
 #include "Occlusion.h"
+#include "ActiveOccluder.h"
 #include "Occluder.h"
 #include "Lines.h"
 

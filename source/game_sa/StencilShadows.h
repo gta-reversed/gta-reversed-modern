@@ -1,5 +1,7 @@
 #pragma once
 
+class CStencilShadowObject;
+
 class CStencilShadows {
 public:
     static CStencilShadowObject* m_StencilShadowObjects[64];

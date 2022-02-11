@@ -5,10 +5,12 @@
 CHandShaker*& gHandShaker = *(CHandShaker**)0xB6ECA0;
 
 void CHandShaker::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CHandShaker", "SetDefaults", 0x517330, &CHandShaker::SetDefaults);
-    Install("CHandShaker", "Reset", 0x50D860, &CHandShaker::Reset);
-    // Install("CHandShaker", "Process", 0x50D930, &CHandShaker::Process);
+    RH_ScopedClass(CHandShaker);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(SetDefaults, 0x517330);
+    RH_ScopedInstall(Reset, 0x50D860);
+    // RH_ScopedInstall(Process, 0x50D930);
 }
 
 // 0x517330

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -55,20 +55,23 @@ float(&CWeather::saBannerWindOffsets)[32] = *(float(*)[32])0x8CCF70;
 
 
 void CWeather::InjectHooks() {
-    ReversibleHooks::Install("CWeather", "Init", 0x72A480, &CWeather::Init);
-//    ReversibleHooks::Install("CWeather", "AddRain", 0x72A9A0, &CWeather::AddRain);
-//    ReversibleHooks::Install("CWeather", "AddSandStormParticles", 0x72A820, &CWeather::AddSandStormParticles);
-    ReversibleHooks::Install("CWeather", "FindWeatherTypesList", 0x72A520, &CWeather::FindWeatherTypesList);
-    ReversibleHooks::Install("CWeather", "ForceWeather", 0x72A4E0, &CWeather::ForceWeather);
-    ReversibleHooks::Install("CWeather", "ForceWeatherNow", 0x72A4F0, &CWeather::ForceWeatherNow);
-//    ReversibleHooks::Install("CWeather", "ForecastWeather", 0x72A590, &CWeather::ForecastWeather);
-    ReversibleHooks::Install("CWeather", "ReleaseWeather", 0x72A510, &CWeather::ReleaseWeather);
-    ReversibleHooks::Install("CWeather", "RenderRainStreaks", 0x72AF70, &CWeather::RenderRainStreaks);
-    ReversibleHooks::Install("CWeather", "SetWeatherToAppropriateTypeNow", 0x72A790, &CWeather::SetWeatherToAppropriateTypeNow);
-//    ReversibleHooks::Install("CWeather", "Update", 0x72B850, &CWeather::Update);
-//    ReversibleHooks::Install("CWeather", "UpdateInTunnelness", 0x72B630, &CWeather::UpdateInTunnelness);
-    ReversibleHooks::Install("CWeather", "UpdateWeatherRegion", 0x72A640, &CWeather::UpdateWeatherRegion);
-    ReversibleHooks::Install("CWeather", "IsRainy", 0x4ABF50, &CWeather::IsRainy);
+    RH_ScopedClass(CWeather);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x72A480);
+    // RH_ScopedInstall(AddRain, 0x72A9A0);
+    // RH_ScopedInstall(AddSandStormParticles, 0x72A820);
+    // RH_ScopedInstall(FindWeatherTypesList, 0x72A520, true); // bad
+    RH_ScopedInstall(ForceWeather, 0x72A4E0);
+    RH_ScopedInstall(ForceWeatherNow, 0x72A4F0);
+    // RH_ScopedInstall(ForecastWeather, 0x72A590);
+    RH_ScopedInstall(ReleaseWeather, 0x72A510);
+    RH_ScopedInstall(RenderRainStreaks, 0x72AF70);
+    RH_ScopedInstall(SetWeatherToAppropriateTypeNow, 0x72A790);
+    // RH_ScopedInstall(Update, 0x72B850);
+    // RH_ScopedInstall(UpdateInTunnelness, 0x72B630);
+    // RH_ScopedInstall(UpdateWeatherRegion, 0x72A640, true); // bad
+    RH_ScopedInstall(IsRainy, 0x4ABF50);
 }
 
 // 0x72A480
@@ -100,17 +103,24 @@ void CWeather::AddSandStormParticles() {
     plugin::Call<0x72A820>();
 }
 
+// todo: fixme
 // 0x72A520
 const eWeatherType* CWeather::FindWeatherTypesList() {
+    return plugin::CallAndReturn<const eWeatherType*, 0x72A520>();
+
     switch (WeatherRegion) {
     case WEATHER_REGION_LA:
         return WeatherTypesListLA;
+
     case WEATHER_REGION_SF:
         return WeatherTypesListSF;
+
     case WEATHER_REGION_LV:
         return WeatherTypesListVegas;
+
     case WEATHER_REGION_DESERT:
         return WeatherTypesListDesert;
+
     default:
         return WeatherTypesListDefault;
     }
@@ -177,10 +187,10 @@ void CWeather::RenderRainStreaks() {
     constexpr auto RAIN_STREAK_COUNT{ 32u };
 
     // These are arrays of size `RAIN_STREAK_COUNT`
-    static int32* streakPosX;     // 0xC81420;
-    static int32* streakPosY;     // 0xC8141C;
-    static int32* streakPosZ;     // 0xC81418;
-    static uint8* streakStrength; // 0xC81414
+    static int32*& streakPosX = *(int32**)0xC81420; // TODO | STATICREF
+    static int32*& streakPosY = *(int32**)0xC8141C; // TODO | STATICREF
+    static int32*& streakPosZ = *(int32**)0xC81418; // TODO | STATICREF
+    static uint8*& streakStrength = *(uint8**)0xC81414; // TODO | STATICREF
 
     if (!streakPosX) {
         // This stuff isn't even freed anywhere..
@@ -230,7 +240,7 @@ void CWeather::RenderRainStreaks() {
         const float posMul = (s % 2) ? Wind * 0.1f : Wind * Rain * 0.1f;
         offsets[1] = offsets[0] - WindDir * posMul + CVector{ 0.0f, 0.0f, CGeneral::GetRandomNumberInRange(0.1f, 0.5f) };
 
-        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u };
+        const uint8 alphas[]{ streakStrength[s], streakStrength[s] / 2u }; // todo: Non-constant-expression cannot be narrowed from type 'unsigned int' to 'uint8' (aka 'unsigned char') in initializer list
         for (unsigned v = 0; v < 2; v++) {
             RxObjSpace3DVertex* vertex = &aTempBufferVertices[GetRealVertexIndex(v)];
 
@@ -251,26 +261,26 @@ void CWeather::RenderRainStreaks() {
         uiTempBufferIndicesStored += 2;
     }
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEFOGTYPE,           (void*)rwFOGTYPELINEAR);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)NULL);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEFOGTYPE,           RWRSTATE(rwFOGTYPELINEAR));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 
     if (RwIm3DTransform(aTempBufferVertices, uiTempBufferVerticesStored, nullptr, rwIM3D_VERTEXXYZ)) {
         RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, aTempBufferIndices, uiTempBufferIndicesStored);
         RwIm3DEnd();
     }
 
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 }
 
 // 0x72A790
@@ -294,6 +304,7 @@ void CWeather::UpdateInTunnelness() {
     plugin::Call<0x72B630>();
 }
 
+// todo: fixme
 // 0x72A640
 void CWeather::UpdateWeatherRegion(CVector* posn) {
     CVector vecPos = TheCamera.GetPosition();

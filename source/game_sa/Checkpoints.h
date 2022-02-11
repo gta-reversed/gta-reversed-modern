@@ -1,14 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Checkpoint.h"
+class Checkpoint;
 
-extern uint32 MAX_NUM_CHECKPOINTS; // default 32
+constexpr auto MAX_NUM_CHECKPOINTS{ 32u };
 
 class CCheckpoints {
 public:

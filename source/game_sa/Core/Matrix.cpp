@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Matrix.h"
 
 uint8* CMatrix::EulerIndices1 = (uint8*)0x866D9C;
 uint8* CMatrix::EulerIndices2 = (uint8*)0x866D94;
@@ -15,48 +17,51 @@ CMatrix& gDummyMatrix = *(CMatrix*)0xB74240;
 
 void CMatrix::InjectHooks()
 {
-    ReversibleHooks::Install("CMatrix", "Attach", 0x59BD10, &CMatrix::Attach);
-    ReversibleHooks::Install("CMatrix", "Detach", 0x59ACF0, &CMatrix::Detach);
-    ReversibleHooks::Install("CMatrix", "CopyOnlyMatrix", 0x59ADD0, &CMatrix::CopyOnlyMatrix);
-    ReversibleHooks::Install("CMatrix", "Update", 0x59BB60, &CMatrix::Update);
-    ReversibleHooks::Install("CMatrix", "UpdateMatrix", 0x59AD20, &CMatrix::UpdateMatrix);
-    ReversibleHooks::Install("CMatrix", "UpdateRW", 0x59BBB0, &CMatrix::UpdateRW);
-    ReversibleHooks::Install("CMatrix", "UpdateRwMatrix", 0x59AD70, &CMatrix::UpdateRwMatrix);
-    ReversibleHooks::Install("CMatrix", "SetUnity", 0x59AE70, &CMatrix::SetUnity);
-    ReversibleHooks::Install("CMatrix", "ResetOrientation", 0x59AEA0, &CMatrix::ResetOrientation);
-    ReversibleHooks::Install("CMatrix", "SetScale_f", 0x59AED0, (void(CMatrix::*)(float))(&CMatrix::SetScale));
-    ReversibleHooks::Install("CMatrix", "SetScale_fff", 0x59AF00, (void(CMatrix::*)(float, float, float))(&CMatrix::SetScale));
-    ReversibleHooks::Install("CMatrix", "SetTranslateOnly", 0x59AF80, &CMatrix::SetTranslateOnly);
-    ReversibleHooks::Install("CMatrix", "SetTranslate", 0x59AF40, &CMatrix::SetTranslate);
-    ReversibleHooks::Install("CMatrix", "SetRotateXOnly", 0x59AFA0, &CMatrix::SetRotateXOnly);
-    ReversibleHooks::Install("CMatrix", "SetRotateYOnly", 0x59AFE0, &CMatrix::SetRotateYOnly);
-    ReversibleHooks::Install("CMatrix", "SetRotateZOnly", 0x59B020, &CMatrix::SetRotateZOnly);
-    ReversibleHooks::Install("CMatrix", "SetRotateX", 0x59B060, &CMatrix::SetRotateX);
-    ReversibleHooks::Install("CMatrix", "SetRotateY", 0x59B0A0, &CMatrix::SetRotateY);
-    ReversibleHooks::Install("CMatrix", "SetRotateZ", 0x59B0E0, &CMatrix::SetRotateZ);
-    ReversibleHooks::Install("CMatrix", "SetRotate_xyz", 0x59B120, (void(CMatrix::*)(float, float, float))(&CMatrix::SetRotate));
-    ReversibleHooks::Install("CMatrix", "RotateX", 0x59B1E0, &CMatrix::RotateX);
-    ReversibleHooks::Install("CMatrix", "RotateY", 0x59B2C0, &CMatrix::RotateY);
-    ReversibleHooks::Install("CMatrix", "RotateZ", 0x59B390, &CMatrix::RotateZ);
-    ReversibleHooks::Install("CMatrix", "Rotate", 0x59B460, &CMatrix::Rotate);
-    ReversibleHooks::Install("CMatrix", "Reorthogonalise", 0x59B6A0, &CMatrix::Reorthogonalise);
-    ReversibleHooks::Install("CMatrix", "CopyToRwMatrix", 0x59B8B0, &CMatrix::CopyToRwMatrix);
-    ReversibleHooks::Install("CMatrix", "SetRotate_quat", 0x59BBF0, (void(CMatrix::*)(CQuaternion&))(&CMatrix::SetRotate));
-    ReversibleHooks::Install("CMatrix", "Scale", 0x459350, &CMatrix::Scale);
-    ReversibleHooks::Install("CMatrix", "ForceUpVector", 0x59B7E0, &CMatrix::ForceUpVector);
-    ReversibleHooks::Install("CMatrix", "ConvertToEulerAngles", 0x59A840, &CMatrix::ConvertToEulerAngles);
-    ReversibleHooks::Install("CMatrix", "ConvertFromEulerAngles", 0x59AA40, &CMatrix::ConvertFromEulerAngles);
-    ReversibleHooks::Install("CMatrix", "operator=", 0x59BBC0, &CMatrix::operator=);
-    ReversibleHooks::Install("CMatrix", "operator+=", 0x59ADF0, &CMatrix::operator+=);
-    ReversibleHooks::Install("CMatrix", "operator*=", 0x411A80, &CMatrix::operator*=);
-    ReversibleHooks::Install("CMatrix", "operator*_Mat", 0x59BE30, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator*));
-    ReversibleHooks::Install("CMatrix", "operator*_Vec", 0x59C890, (CVector(*)(CMatrix const&, CVector const&))(&::operator*));
-    ReversibleHooks::Install("CMatrix", "operator+", 0x59BFA0, (CMatrix(*)(CMatrix const&, CMatrix const&))(&::operator+));
-    ReversibleHooks::Install("CMatrix", "Invert_1", 0x59B920, (CMatrix&(*)(CMatrix&, CMatrix&)) &Invert);
-    ReversibleHooks::Install("CMatrix", "Invert_2", 0x59BDD0, (CMatrix(*)(CMatrix&)) &Invert);
+    RH_ScopedClass(CMatrix);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(Attach, 0x59BD10);
+    RH_ScopedInstall(Detach, 0x59ACF0);
+    RH_ScopedInstall(CopyOnlyMatrix, 0x59ADD0);
+    RH_ScopedInstall(Update, 0x59BB60);
+    RH_ScopedInstall(UpdateMatrix, 0x59AD20);
+    RH_ScopedInstall(UpdateRW, 0x59BBB0);
+    RH_ScopedInstall(UpdateRwMatrix, 0x59AD70);
+    RH_ScopedInstall(SetUnity, 0x59AE70);
+    RH_ScopedInstall(ResetOrientation, 0x59AEA0);
+    RH_ScopedOverloadedInstall(SetScale, "f", 0x59AED0, void(CMatrix::*)(float));
+    RH_ScopedOverloadedInstall(SetScale, "fff", 0x59AF00, void(CMatrix::*)(float, float, float));
+    RH_ScopedInstall(SetTranslateOnly, 0x59AF80);
+    RH_ScopedInstall(SetTranslate, 0x59AF40);
+    RH_ScopedInstall(SetRotateXOnly, 0x59AFA0);
+    RH_ScopedInstall(SetRotateYOnly, 0x59AFE0);
+    RH_ScopedInstall(SetRotateZOnly, 0x59B020);
+    RH_ScopedInstall(SetRotateX, 0x59B060);
+    RH_ScopedInstall(SetRotateY, 0x59B0A0);
+    RH_ScopedInstall(SetRotateZ, 0x59B0E0);
+    RH_ScopedOverloadedInstall(SetRotate, "xyz", 0x59B120, void(CMatrix::*)(float, float, float));
+    RH_ScopedInstall(RotateX, 0x59B1E0);
+    RH_ScopedInstall(RotateY, 0x59B2C0);
+    RH_ScopedInstall(RotateZ, 0x59B390);
+    RH_ScopedInstall(Rotate, 0x59B460);
+    RH_ScopedInstall(Reorthogonalise, 0x59B6A0);
+    RH_ScopedInstall(CopyToRwMatrix, 0x59B8B0);
+    RH_ScopedOverloadedInstall(SetRotate, "quat", 0x59BBF0, void(CMatrix::*)(CQuaternion&));
+    RH_ScopedInstall(Scale, 0x459350);
+    RH_ScopedInstall(ForceUpVector, 0x59B7E0);
+    RH_ScopedInstall(ConvertToEulerAngles, 0x59A840);
+    RH_ScopedInstall(ConvertFromEulerAngles, 0x59AA40);
+    RH_ScopedInstall(operator=, 0x59BBC0);
+    RH_ScopedInstall(operator+=, 0x59ADF0);
+    RH_ScopedInstall(operator*=, 0x411A80);
+    RH_ScopedGlobalOverloadedInstall(operator*, "Mat", 0x59BE30, CMatrix(*)(const CMatrix&, const CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(const CMatrix&, const CVector&));
+    RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(const CMatrix&, const CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(const CMatrix&));
 }
 
-CMatrix::CMatrix(CMatrix const& matrix)
+CMatrix::CMatrix(const CMatrix& matrix)
 {
     m_pAttachMatrix = nullptr;
     m_bOwnsAttachedMatrix = false;
@@ -94,7 +99,7 @@ void CMatrix::Detach()
 }
 
 // copy base RwMatrix to another matrix
-void CMatrix::CopyOnlyMatrix(CMatrix const& matrix)
+void CMatrix::CopyOnlyMatrix(const CMatrix& matrix)
 {
     memcpy(this, &matrix, sizeof(RwMatrix));
 }
@@ -126,7 +131,7 @@ void CMatrix::UpdateRwMatrix(RwMatrix* matrix)
     RwMatrixUpdate(matrix);
 }
 
-void CMatrix::UpdateMatrix(RwMatrixTag* rwMatrix)
+void CMatrix::UpdateMatrix(RwMatrix* rwMatrix)
 {
     m_right = *RwMatrixGetRight(rwMatrix);
     m_forward = *RwMatrixGetUp(rwMatrix);
@@ -499,13 +504,13 @@ void CMatrix::ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags)
     m_up.Set     (fArr[2][0], fArr[2][1], fArr[2][2]);
 }
 
-void CMatrix::operator=(CMatrix const& rvalue)
+void CMatrix::operator=(const CMatrix& rvalue)
 {
     CMatrix::CopyOnlyMatrix(rvalue);
     CMatrix::UpdateRW();
 }
 
-void CMatrix::operator+=(CMatrix const& rvalue)
+void CMatrix::operator+=(const CMatrix& rvalue)
 {
     m_right += rvalue.m_right;
     m_forward += rvalue.m_forward;
@@ -513,12 +518,12 @@ void CMatrix::operator+=(CMatrix const& rvalue)
     m_pos += rvalue.m_pos;
 }
 
-void CMatrix::operator*=(CMatrix const& rvalue)
+void CMatrix::operator*=(const CMatrix& rvalue)
 {
     *this = (*this * rvalue);
 }
 
-CMatrix operator*(CMatrix const& a, CMatrix const& b)
+CMatrix operator*(const CMatrix& a, const CMatrix& b)
 {
     auto result = CMatrix();
     result.m_right =   a.m_right * b.m_right.x   + a.m_forward * b.m_right.y   + a.m_up * b.m_right.z;
@@ -528,7 +533,7 @@ CMatrix operator*(CMatrix const& a, CMatrix const& b)
     return result;
 }
 
-CVector operator*(CMatrix const& a, CVector const& b)
+CVector operator*(const CMatrix& a, const CVector& b)
 {
     CVector result;
     result.x = a.m_pos.x + a.m_right.x * b.x + a.m_forward.x * b.y + a.m_up.x * b.z;
@@ -536,7 +541,7 @@ CVector operator*(CMatrix const& a, CVector const& b)
     result.z = a.m_pos.z + a.m_right.z * b.x + a.m_forward.z * b.y + a.m_up.z * b.z;
     return result;
 }
-CMatrix operator+(CMatrix const& a, CMatrix const& b)
+CMatrix operator+(const CMatrix& a, const CMatrix& b)
 {
     CMatrix result;
     result.m_right =   a.m_right + b.m_right;
@@ -562,9 +567,9 @@ CMatrix& Invert(CMatrix& in, CMatrix& out)
     return out;
 }
 
-CMatrix Invert(CMatrix& in)
+CMatrix Invert(const CMatrix& in)
 {
     CMatrix result;
-    Invert(in, result);
+    Invert(const_cast<CMatrix&>(in), result); // const cast necessary because it's fucked - but it wont be modified.
     return result;
 }

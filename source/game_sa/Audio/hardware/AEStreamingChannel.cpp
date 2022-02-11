@@ -118,31 +118,33 @@ void CAEStreamingChannel::Service() {
 }
 
 void CAEStreamingChannel::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAEStreamingChannel", "CAEStreamingChannel", 0x4F1800, &CAEStreamingChannel::Constructor);
+    RH_ScopedClass(CAEStreamingChannel);
+    RH_ScopedCategory("Audio/Hardware");
+
+    // RH_ScopedInstall(Constructor, 0x4F1800);
     // Install("CAEStreamingChannel", "~CAEStreamingChannel", 0x4F2200, static_cast<CAEStreamingChannel*(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Destructor));
-    // Install("CAEStreamingChannel", "SynchPlayback", 0x4F1870, &CAEStreamingChannel::SynchPlayback);
-    // Install("CAEStreamingChannel", "PrepareStream", 0x4F23D0, &CAEStreamingChannel::PrepareStream);
-    // Install("CAEStreamingChannel", "Initialise", 0x4F22F0, &CAEStreamingChannel::Initialise);
-    // Install("CAEStreamingChannel", "Pause", 0x4F2170, &CAEStreamingChannel::Pause);
-    // Install("CAEStreamingChannel", "SetReady", 0x4F1FF0, &CAEStreamingChannel::SetReady);
-    // Install("CAEStreamingChannel", "SetBassEQ", 0x4F1F30, &CAEStreamingChannel::SetBassEQ);
-    // Install("CAEStreamingChannel", "FillBuffer", 0x4F1E20, &CAEStreamingChannel::FillBuffer);
-    // Install("CAEStreamingChannel", "InitialiseSilence", 0x4F1C70, &CAEStreamingChannel::InitialiseSilence);
-    // Install("CAEStreamingChannel", "SetNextStream", 0x4F1DE0, &CAEStreamingChannel::SetNextStream);
-    // Install("CAEStreamingChannel", "AddFX", 0x4F1AE0, &CAEStreamingChannel::AddFX);
-    // Install("CAEStreamingChannel", "Stop", 0x4F1A90, static_cast<int8(CAEStreamingChannel::*)(bool)>(&CAEStreamingChannel::Stop));
-    // Install("CAEStreamingChannel", "GetPlayingTrackID", 0x4F1A60, &CAEStreamingChannel::GetPlayingTrackID);
-    // Install("CAEStreamingChannel", "GetActiveTrackID", 0x4F1A40, &CAEStreamingChannel::GetActiveTrackID);
-    // Install("CAEStreamingChannel", "UpdatePlayTime", 0x4F18A0, &CAEStreamingChannel::UpdatePlayTime);
-    // Install("CAEStreamingChannel", "RemoveFX", 0x4F1C20, &CAEStreamingChannel::RemoveFX);
-    // Install("CAEStreamingChannel", "Service", 0x4F2550, &CAEStreamingChannel::Service_Reversed);
-    // Install("CAEStreamingChannel", "IsSoundPlaying", 0x4F2040, &CAEStreamingChannel::IsSoundPlaying_Reversed);
-    // Install("CAEStreamingChannel", "GetPlayTime", 0x4F19E0, &CAEStreamingChannel::GetPlayTime_Reversed);
-    // Install("CAEStreamingChannel", "GetLength", 0x4F1880, &CAEStreamingChannel::GetLength_Reversed);
-    // Install("CAEStreamingChannel", "Play", 0x4F1D40, &CAEStreamingChannel::Play_Reversed);
-    // Install("CAEStreamingChannel", "Stop", 0x4F21C0, static_cast<int8(CAEStreamingChannel::*)()>(&CAEStreamingChannel::Stop_Reversed));
-    // Install("CAEStreamingChannel", "SetFrequencyScalingFactor", 0x4F2060, &CAEStreamingChannel::SetFrequencyScalingFactor_Reversed);
+    // RH_ScopedInstall(SynchPlayback, 0x4F1870);
+    // RH_ScopedInstall(PrepareStream, 0x4F23D0);
+    // RH_ScopedInstall(Initialise, 0x4F22F0);
+    // RH_ScopedInstall(Pause, 0x4F2170);
+    // RH_ScopedInstall(SetReady, 0x4F1FF0);
+    // RH_ScopedInstall(SetBassEQ, 0x4F1F30);
+    // RH_ScopedInstall(FillBuffer, 0x4F1E20);
+    // RH_ScopedInstall(InitialiseSilence, 0x4F1C70);
+    // RH_ScopedInstall(SetNextStream, 0x4F1DE0);
+    // RH_ScopedInstall(AddFX, 0x4F1AE0);
+    // RH_ScopedOverloadedInstall(Stop, "", 0x4F1A90, int8(CAEStreamingChannel::*)(bool));
+    // RH_ScopedInstall(GetPlayingTrackID, 0x4F1A60);
+    // RH_ScopedInstall(GetActiveTrackID, 0x4F1A40);
+    // RH_ScopedInstall(UpdatePlayTime, 0x4F18A0);
+    // RH_ScopedInstall(RemoveFX, 0x4F1C20);
+    // RH_ScopedInstall(Service_Reversed, 0x4F2550);
+    // RH_ScopedInstall(IsSoundPlaying_Reversed, 0x4F2040);
+    // RH_ScopedInstall(GetPlayTime_Reversed, 0x4F19E0);
+    // RH_ScopedInstall(GetLength_Reversed, 0x4F1880);
+    // RH_ScopedInstall(Play_Reversed, 0x4F1D40);
+    // RH_ScopedOverloadedInstall(Stop_Reversed, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
+    // RH_ScopedInstall(SetFrequencyScalingFactor_Reversed, 0x4F2060);
 }
 
 // 0x4F1800

@@ -1,62 +1,94 @@
 #include "StdInc.h"
 
+#include "Event.h"
+
 void CEvent::InjectHooks()
 {
-    ReversibleHooks::Install("CEvent", "CEvent", 0x4ABFC0, &CEvent::Constructor);
-    ReversibleHooks::Install("CEvent", "CalcSoundLevelIncrement", 0x4AC050, &CEvent::CalcSoundLevelIncrement);
-    ReversibleHooks::Install("CEvent", "GetSoundLevel", 0x4B2850, &CEvent::GetSoundLevel);
+    RH_ScopedClass(CEvent);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ABFC0);
+    RH_ScopedInstall(CalcSoundLevelIncrement, 0x4AC050);
+    RH_ScopedInstall(GetSoundLevel, 0x4B2850);
 }
 
 void CEventRevived::InjectHooks()
 {
-    ReversibleHooks::Install("CEventRevived", "CEventRevived", 0x4AEC50, &CEventRevived::Constructor);
-    ReversibleHooks::Install("CEventRevived", "AffectsPed_Reversed", 0x4AECB0, &CEventRevived::AffectsPed_Reversed);
+    RH_ScopedClass(CEventRevived);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AEC50);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4AECB0);
 }
 
 void CEventEscalator::InjectHooks()
 {
-    ReversibleHooks::Install("CEventEscalator", "CEventEscalator", 0x5FF820, &CEventEscalator::Constructor);
-    ReversibleHooks::Install("CEventEscalator", "AffectsPed_Reversed", 0x4B2580, &CEventEscalator::AffectsPed_Reversed);
+    RH_ScopedClass(CEventEscalator);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF820);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2580);
 }
 
 void CEventSexyVehicle::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSexyVehicle", "CEventSexyVehicle", 0x4AF010, &CEventSexyVehicle::Constructor);
+    RH_ScopedClass(CEventSexyVehicle);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF010);
 }
 
 void CEventChatPartner::InjectHooks()
 {
-    ReversibleHooks::Install("CEventChatPartner", "CEventChatPartner", 0x4AECD0, &CEventChatPartner::Constructor);
+    RH_ScopedClass(CEventChatPartner);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AECD0);
 }
 
 void CEventCopCarBeingStolen::InjectHooks()
 {
-    ReversibleHooks::Install("CEventCopCarBeingStolen", "CEventCopCarBeingStolen", 0x4B1740, &CEventCopCarBeingStolen::Constructor);
-    ReversibleHooks::Install("CEventCopCarBeingStolen", "AffectsPed_Reversed", 0x4B1860, &CEventCopCarBeingStolen::AffectsPed_Reversed);
+    RH_ScopedClass(CEventCopCarBeingStolen);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1740);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1860);
 }
 
 void CEventCarUpsideDown::InjectHooks()
 {
-    ReversibleHooks::Install("CEventCarUpsideDown", "CEventCarUpsideDown", 0x4B1CC0, &CEventCarUpsideDown::Constructor);
-    ReversibleHooks::Install("CEventCarUpsideDown", "AffectsPed_Reversed", 0x4B1DB0, &CEventCarUpsideDown::AffectsPed_Reversed);
+    RH_ScopedClass(CEventCarUpsideDown);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1CC0);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1DB0);
 }
 
 void CEventPassObject::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPassObject", "CEventPassObject", 0x65DC70, &CEventPassObject::Constructor);
-    ReversibleHooks::Install("CEventPassObject", "IsValid_Reversed", 0x4B1700, &CEventPassObject::IsValid_Reversed);
+    RH_ScopedClass(CEventPassObject);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x65DC70);
+    RH_ScopedInstall(IsValid_Reversed, 0x4B1700);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
 {
-    ReversibleHooks::Install("CEventLeanOnVehicle", "CEventLeanOnVehicle", 0x65DAF0, &CEventLeanOnVehicle::Constructor);
-    ReversibleHooks::Install("CEventLeanOnVehicle", "IsValid_Reversed", 0x4B16C0, &CEventLeanOnVehicle::IsValid_Reversed);
+    RH_ScopedClass(CEventLeanOnVehicle);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x65DAF0);
+    RH_ScopedInstall(IsValid_Reversed, 0x4B16C0);
 }
 
 void CEventOnFire::InjectHooks()
 {
-    ReversibleHooks::Install("CEventOnFire", "CEventOnFire", 0x5FF740, &CEventOnFire::Constructor);
-    ReversibleHooks::Install("CEventOnFire", "AffectsPed_Reversed", 0x4B1050, &CEventOnFire::AffectsPed_Reversed);
+    RH_ScopedClass(CEventOnFire);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF740);
+    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1050);
 }
 
 CEvent::CEvent() {

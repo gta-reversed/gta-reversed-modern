@@ -4,12 +4,6 @@
 
 class CColPoint;
 
-enum eSkidMarkType {
-    SKIDMARK_DEFAULT = 0,
-    SKIDMARK_SANDY,
-    SKIDMARK_MUDDY
-};
-
 class SurfaceInfos_c {
 public:
     float         m_adhesiveLimits[6][6];
@@ -67,7 +61,7 @@ public:
     bool IsAudioMetal(uint32 surfaceId);
     bool IsAudioLongGrass(uint32 surfaceId);
     bool IsAudioTile(uint32 surfaceId);
-    float GetAdhesiveLimit(CColPoint* pColPoint);
+    float GetAdhesiveLimit(CColPoint* colPoint);
 };
 VALIDATE_SIZE(SurfaceInfos_c, 0x8F4);
 

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -131,9 +131,9 @@ public:
     void StoreParameters(int16 count);
 
     void ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx);
-    void ReadParametersForNewlyStartedScript(CRunningScript* pNewScript);
-    void ReadTextLabelFromScript(char* pBuffer, uint8 nBufferLength);
-    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* pModelId);
+    void ReadParametersForNewlyStartedScript(CRunningScript* newScript);
+    void ReadTextLabelFromScript(char* buffer, uint8 nBufferLength);
+    void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId);
     int16 GetIndexOfGlobalVariable();
     int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
@@ -143,14 +143,14 @@ public:
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck
 
-    void SetCharCoordinates(CPed* pPed, float x, float y, float z, bool bWarpGang, bool bOffset);
+    void SetCharCoordinates(CPed* ped, float x, float y, float z, bool bWarpGang, bool bOffset);
     void GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opcode);
 
     void AddScriptToList(CRunningScript** queueList);
     void RemoveScriptFromList(CRunningScript** queueList);
     void ShutdownThisScript();
 
-    bool IsPedDead(CPed* pPed);
+    bool IsPedDead(CPed* ped);
     bool ThisIsAValidRandomPed(ePedType pedType, bool civilian, bool gang, bool criminal);
     void ScriptTaskPickUpObject(int32 commandId);
 

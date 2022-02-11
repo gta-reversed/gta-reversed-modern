@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,8 +7,7 @@
 #pragma once
 
 #include "Vector.h"
-
-enum ePedType : uint32;
+#include "ePedType.h"
 
 enum ePedGroupPlacerType {
     GROUP_PLACER_FORMATION1 = 0,
@@ -20,14 +19,12 @@ enum ePedGroupPlacerType {
 
 class CPedGroupPlacer {
 public:
-    //! 1
-    static int32 const& ms_minGangSize;
-    //! 5
-    static int32 const& ms_maxGangSize;
+    static const int32& ms_minGangSize; // 1
+    static const int32& ms_maxGangSize; // 5
 
-    bool PlaceChatGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 unused);
-    bool PlaceFormationGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 unused);
+    bool PlaceChatGroup(ePedType type, int32 numOfPeds, const CVector* origin, int32 unused);
+    bool PlaceFormationGroup(ePedType type, int32 numOfPeds, const CVector* origin, int32 unused);
     //! see ePedGroupPlacerType
-    bool PlaceGroup(ePedType pedtype, int32 numOfPeds, CVector const* origin, int32 nGroupPlacerType);
-    bool PlaceRandomGroup(ePedType pedtype, int32 numOfPeds, CVector* origin, int32 unused);
+    bool PlaceGroup(ePedType type, int32 numOfPeds, const CVector* origin, int32 nGroupPlacerType);
+    bool PlaceRandomGroup(ePedType type, int32 numOfPeds, CVector* origin, int32 unused);
 };

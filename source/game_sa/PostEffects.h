@@ -11,6 +11,8 @@ enum eHeatHazeFXType {
     HEAT_HAZE_2,
     HEAT_HAZE_3,
     HEAT_HAZE_4,
+
+    MAX_HEAT_HAZE_TYPES
 };
 
 class CPostEffects {
@@ -94,33 +96,33 @@ public:
     static bool& m_bHeatHazeFX;
     static int32& m_HeatHazeFXSpeedMin;
     static int32& m_HeatHazeFXSpeedMax;
-    static int32& m_HeatHazeFXIntensity;
-    static int32& m_HeatHazeFXType;
-    static int32& m_HeatHazeFXTypeLast;
-    static int32& m_HeatHazeFXRandomShift;
+    static uint32& m_HeatHazeFXIntensity;
+    static uint32& m_HeatHazeFXType;
+    static uint32& m_HeatHazeFXTypeLast;
+    static uint32& m_HeatHazeFXRandomShift;
     static bool& m_bHeatHazeMaskModeTest;
     static float& m_fHeatHazeFXFadeSpeed;
     static float& m_fHeatHazeFXInsideBuildingFadeSpeed;
     static float& m_HeatHazeFXHourOfDayEnd;
     static float& m_HeatHazeFXHourOfDayStart;
-    static float& m_HeatHazeFXRenderSizeX;
-    static float& m_HeatHazeFXRenderSizeY;
-    static float& m_HeatHazeFXScanSizeX;
-    static float& m_HeatHazeFXScanSizeY;
+    static uint32& m_HeatHazeFXRenderSizeX;
+    static uint32& m_HeatHazeFXRenderSizeY;
+    static uint32& m_HeatHazeFXScanSizeX;
+    static uint32& m_HeatHazeFXScanSizeY;
 
     static bool& m_bInfraredVision;
     static float& m_fInfraredVisionFilterRadius;
     static float& m_fInfraredVisionSwitchOnFXCount;
     static int32& m_InfraredVisionGrainStrength;
-    static RwRGBA& m_InfraredVisionCol;
-    static RwRGBA& m_InfraredVisionMainCol;
+    static CRGBA& m_InfraredVisionCol;
+    static CRGBA& m_InfraredVisionMainCol;
     static RwRGBAReal& m_fInfraredVisionHeatObjectCol;
 
     static bool& m_bNightVision;
     static float& m_fNightVisionSwitchOnFXCount;
     static float& m_fNightVisionSwitchOnFXTime;
     static int32& m_NightVisionGrainStrength;
-    static RwRGBA& m_NightVisionMainCol;
+    static CRGBA& m_NightVisionMainCol;
 
     static bool& m_bWaterDepthDarkness;
     static float& m_fWaterFXStartUnderWaterness;
@@ -130,7 +132,7 @@ public:
     static float& m_waterStrength;
     static float& m_waterSpeed;
     static float& m_waterFreq;
-    static RwRGBA& m_waterCol;
+    static CRGBA& m_waterCol;
 
 public:
     static void InjectHooks();
@@ -141,7 +143,7 @@ public:
     static void SetupBackBufferVertex();
     static void Update();
 
-    static void DrawQuad(float x1, float y1, float x2, float y2, char red, uint32 green, uint32 blue, uint8 alpha, RwRaster* raster);
+    static void DrawQuad(float x1, float y1, float x2, float y2, uint8 red, uint8 green, uint8 blue, uint8 alpha, RwRaster* raster);
     static void DrawQuadSetDefaultUVs();
     static void DrawQuadSetPixelUVs(float u0, float v0, float u1, float v1, float u3, float v3, float u2, float v2);
     static void DrawQuadSetUVs(float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4);
@@ -204,3 +206,5 @@ m_smokeyDistance
 m_smokeyEnable
 m_smokeyStrength
 */
+
+bool RsCameraBeginUpdate(RwCamera* camera);

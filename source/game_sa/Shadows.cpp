@@ -1,10 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "Shadows.h"
 
 uint32 MAX_STORED_SHADOWS = 48;
 uint32 MAX_PERMANENT_SHADOWS = 48;
@@ -68,8 +70,8 @@ void CShadows::RemoveOilInArea(float x1, float y1, float x2, float y2) {
 }
 
 // 0x707550
-void CShadows::GunShotSetsOilOnFire(CVector const* shotOrigin, CVector const* shotTarget) {
-    ((void(__cdecl*)(CVector const*, CVector const*))0x707550)(shotOrigin, shotTarget);
+void CShadows::GunShotSetsOilOnFire(const CVector* shotOrigin, const CVector* shotTarget) {
+    ((void(__cdecl*)(const CVector*, const CVector*))0x707550)(shotOrigin, shotTarget);
 }
 
 // 0x7076B0

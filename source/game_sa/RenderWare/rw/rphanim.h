@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -226,7 +226,7 @@ struct RpHAnimHierarchy
     RwMatrix           *pMatrixArray;   /**< Pointer to node matrices*/
     void               *pMatrixArrayUnaligned; /**< Pointer to memory used for node matrices
                                                 * from which the aligned pMatrixArray is allocated */
-    RpHAnimNodeInfo    *pNodeInfo;     /**< Array of node information (push/pop flags etc) */
+    RpHAnimNodeInfo    *nodeInfo;     /**< Array of node information (push/pop flags etc) */
     RwFrame            *parentFrame;    /**< Pointer to the Root RwFrame of the hierarchy this
                                            * RpHAnimHierarchy represents */
     RpHAnimHierarchy   *parentHierarchy;                       /**< Internal use */

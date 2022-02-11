@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,8 @@
 #pragma once
 
 #include "Vector.h"
-#include "FxSystem_c.h"
+
+class FxSystem_c;
 
 enum eObjectColDamageEffect : uint8 {
     COL_DAMAGE_EFFECT_NONE = 0,
@@ -79,13 +80,13 @@ public:
 public:
     static void InjectHooks();
 
-    static void Initialise(const char* fileName, bool bUnused);
-    static void SetObjectData(int32 dwModelIndex, CObject& pObject);
+    static void Initialise(const char* fileName);
+    static void SetObjectData(int32 dwModelIndex, CObject& obj);
 
-    bool operator==(CObjectData const& right) const;
+    bool operator==(const CObjectData& right) const;
 
 public:
-    inline static CObjectData& GetAtIndex(int32 dwIndex) { return ms_aObjectInfo[dwIndex]; }
+    inline static CObjectData& GetAtIndex(int32 index) { return ms_aObjectInfo[index]; }
     inline static constexpr CObjectData& GetDefault() { return ms_aObjectInfo[0]; }
 };
 

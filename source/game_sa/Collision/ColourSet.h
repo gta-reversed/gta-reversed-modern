@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -61,6 +61,9 @@ public:
     uint16 m_nWaterFogAlpha;
     float  m_fIllumination;
     float  m_fLodDistMult;
+
+public:
+    static void InjectHooks();
 
     // funcs
     CColourSet(int32 weatherId, int32 timeId);

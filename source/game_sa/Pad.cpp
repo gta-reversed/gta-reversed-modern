@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -29,6 +29,9 @@ static bool& byte_8CD782 = *(bool*)0x8CD782; // true by default, left here for d
 static char& byte_B73401 = *(char*)0xB73401; // unused, unknown
 
 void CPad::InjectHooks() {
+    RH_ScopedClass(CPad);
+    RH_ScopedCategoryGlobal();
+
     HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
     using namespace ReversibleHooks;

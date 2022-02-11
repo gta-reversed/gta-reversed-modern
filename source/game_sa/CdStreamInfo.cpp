@@ -49,15 +49,18 @@ static CSync cdStreamThreadSync;
 
 void InjectCdStreamHooks()
 {
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamOpen", 0x4067B0, &CdStreamOpen);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamSync", 0x406460, &CdStreamSync);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamGetStatus", 0x4063E0, &CdStreamGetStatus);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRead", 0x406A20, &CdStreamRead);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamThread", 0x406560, &CdStreamThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInitThread", 0x4068F0, &CdStreamInitThread);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamInit", 0x406B70, &CdStreamInit);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamRemoveImages", 0x406690, &CdStreamRemoveImages);
-    ReversibleHooks::Install("CdStreamInfo", "CdStreamShutdown", 0x406370, &CdStreamShutdown);
+    RH_ScopedNamespaceName("CdStream");
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(CdStreamOpen, 0x4067B0);
+    RH_ScopedGlobalInstall(CdStreamSync, 0x406460);
+    RH_ScopedGlobalInstall(CdStreamGetStatus, 0x4063E0);
+    RH_ScopedGlobalInstall(CdStreamRead, 0x406A20);
+    RH_ScopedGlobalInstall(CdStreamThread, 0x406560);
+    RH_ScopedGlobalInstall(CdStreamInitThread, 0x4068F0);
+    RH_ScopedGlobalInstall(CdStreamInit, 0x406B70);
+    RH_ScopedGlobalInstall(CdStreamRemoveImages, 0x406690);
+    RH_ScopedGlobalInstall(CdStreamShutdown, 0x406370);
 }
 
 // 0x4067B0

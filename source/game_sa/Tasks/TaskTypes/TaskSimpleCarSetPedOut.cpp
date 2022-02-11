@@ -2,18 +2,18 @@
 
 #include "TaskSimpleCarSetPedOut.h"
 
-CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* pTargetVehicle, int32 nTargetDoor, bool bSwitchOffEngine)
+CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, int32 nTargetDoor, bool bSwitchOffEngine)
 {
     m_nTargetDoor = nTargetDoor;
-    m_pTargetVehicle = pTargetVehicle;
+    m_pTargetVehicle = targetVehicle;
     m_bSwitchOffEngine = bSwitchOffEngine;
     m_bWarpingOutOfCar = 0;
     m_bFallingOutOfCar = 0;
     m_bKnockedOffBike = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (pTargetVehicle)
-        pTargetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    if (targetVehicle)
+        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
 }
 
 CTaskSimpleCarSetPedOut::~CTaskSimpleCarSetPedOut()

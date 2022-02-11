@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -25,14 +25,17 @@ int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 
 void CTheZones::InjectHooks() {
-    ReversibleHooks::Install("CTheZones", "ResetZonesRevealed", 0x572110, &CTheZones::ResetZonesRevealed);
-    ReversibleHooks::Install("CTheZones", "GetCurrentZoneLockedOrUnlocked", 0x572130, &CTheZones::GetCurrentZoneLockedOrUnlocked);
-    ReversibleHooks::Install("CTheZones", "PointLiesWithinZone", 0x572270, &CTheZones::PointLiesWithinZone);
-    ReversibleHooks::Install("CTheZones", "GetNavigationZone", 0x572590, &CTheZones::GetNavigationZone);
-    ReversibleHooks::Install("CTheZones", "GetMapZone", 0x5725A0, &CTheZones::GetMapZone);
-    ReversibleHooks::Install("CTheZones", "Save", 0x5D2E60, &CTheZones::Save);
-    ReversibleHooks::Install("CTheZones", "Load", 0x5D2F40, &CTheZones::Load);
-    ReversibleHooks::Install("CTheZones", "PostZoneCreation", 0x572B70, &CTheZones::PostZoneCreation);
+    RH_ScopedClass(CTheZones);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ResetZonesRevealed, 0x572110);
+    RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
+    RH_ScopedInstall(PointLiesWithinZone, 0x572270);
+    RH_ScopedInstall(GetNavigationZone, 0x572590);
+    RH_ScopedInstall(GetMapZone, 0x5725A0);
+    RH_ScopedInstall(Save, 0x5D2E60);
+    RH_ScopedInstall(Load, 0x5D2F40);
+    RH_ScopedInstall(PostZoneCreation, 0x572B70);
 }
 
 // 0x5720D0
@@ -63,7 +66,7 @@ bool CTheZones::ZoneIsEntirelyContainedWithinOtherZone(CZone* zone1, CZone* zone
 
 // Returns true if point lies within zone
 // 0x572270
-bool CTheZones::PointLiesWithinZone(CVector const* point, CZone* zone) {
+bool CTheZones::PointLiesWithinZone(const CVector* point, CZone* zone) {
     return (
         (float)zone->m_fX1 <= point->x &&
         (float)zone->m_fX2 >= point->x &&
@@ -75,8 +78,8 @@ bool CTheZones::PointLiesWithinZone(CVector const* point, CZone* zone) {
 }
 
 // Returns eLevelName from position
-eLevelName CTheZones::GetLevelFromPosition(CVector const& point) {
-    return ((eLevelName(__cdecl*)(CVector const&))0x572300)(point);
+eLevelName CTheZones::GetLevelFromPosition(const CVector& point) {
+    return ((eLevelName(__cdecl*)(const CVector&))0x572300)(point);
 }
 
 // Returns pointer to zone by a point
@@ -206,4 +209,12 @@ void CTheZones::Load() {
 // 0x572B70
 void CTheZones::PostZoneCreation() {
     // NOP
+}
+
+const char* CTheZones::GetZoneName(const CVector& point) {
+    CZone* zone{};
+    auto extraInfo = GetZoneInfo(point, &zone);
+    if (zone)
+        return zone->GetTranslatedName();
+    return "Unknown zone";
 }

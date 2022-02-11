@@ -1,16 +1,18 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "LoadedCarGroup.h"
-#include "Ped.h"
-#include "Dummy.h"
-#include "DummyObject.h"
-#include "Zone.h"
+#include "eLevelName.h"
+
+class CLoadedCarGroup;
+class CPed;
+class CDummy;
+class CDummyObject;
+class CZone;
 
 enum ePedRace {
     RACE_DEFAULT = 0,
@@ -110,7 +112,7 @@ public:
     // returns false
     static bool IsSecurityGuard(ePedType pedType);
     // checks if surface at this point is skateable
-    static bool IsSkateable(CVector const& point);
+    static bool IsSkateable(const CVector& point);
     // calls CGangs::ChooseGangPedModel(int32); parameter - gang id?
     static void ChooseGangOccupation(int32 arg0);
     // empty function, returns ped
@@ -130,31 +132,31 @@ public:
     static bool CanSolicitPlayerInCar(int32 modelIndex);
     // returns true if ped type is PED_TYPE_CIVMALE
     static bool CanJeerAtStripper(int32 modelIndex);
-    static void PlaceGangMembers(ePedType pedType, int32 arg1, CVector const& posn);
+    static void PlaceGangMembers(ePedType pedType, int32 arg1, const CVector& posn);
     static void LoadSpecificDriverModelsForCar(int32 carModelIndex);
     // returns ped model index
     static int32 FindSpecificDriverModelForCar_ToUse(int32 carModelIndex);
     static void  RemoveSpecificDriverModelsForCar(int32 carModelIndex);
-    static bool  IsCorrectTimeOfDayForEffect(C2dEffect const* effect);
+    static bool  IsCorrectTimeOfDayForEffect(const C2dEffect* effect);
     // return CPopulation::m_bMoreCarsAndFewerPeds? 1.7f : 1.0f;
     static float FindCarMultiplierMotorway();
     // return 1.0f;
     static float FindPedMultiplierMotorway();
-    static void  ManagePed(CPed* ped, CVector const& playerPosn);
+    static void  ManagePed(CPed* ped, const CVector& playerPosn);
     static int32 FindNumberOfPedsWeCanPlaceOnBenches();
     static void  RemoveAllRandomPeds();
     static bool  TestRoomForDummyObject(CObject* object);
     static bool  TestSafeForRealObject(CDummyObject* dummyObject);
-    static CPed* AddPed(ePedType pedType, uint32 modelIndex, CVector const& posn, bool makeWander);
+    static CPed* AddPed(ePedType pedType, uint32 modelIndex, const CVector& posn, bool makeWander);
     // creates male01 ped in front of car?
-    static CPed* AddDeadPedInFrontOfCar(CVector const& posn, CVehicle* vehicle);
+    static CPed* AddDeadPedInFrontOfCar(const CVector& posn, CVehicle* vehicle);
     static int32 ChooseCivilianOccupation(bool male, bool female, int32 animType, int32 ignoreModelIndex, int32 statType, bool arg5, bool arg6, bool checkAttractor, char* attrName);
     static void  ChooseCivilianCoupleOccupations(int32& model1, int32& model2);
     static int32 ChooseCivilianOccupationForVehicle(bool male, CVehicle* vehicle);
     static void  CreateWaitingCoppers(CVector posn, float arg1);
     // Creates ped in a vehicle. gangPedType can be set to -1
     static CPed* AddPedInCar(CVehicle* vehicle, bool driver, int32 gangPedType, int32 seatNumber, bool male, bool criminal);
-    static void  PlaceMallPedsAsStationaryGroup(CVector const& posn);
+    static void  PlaceMallPedsAsStationaryGroup(const CVector& posn);
     static void  PlaceCouple(ePedType pedType1, int32 modelIndex1, ePedType pedType2, int32 modelIndex2, CVector posn);
     // Creates ped at attractor. decisionMakerType can be set to -1
     static bool  AddPedAtAttractor(int32 modelIndex, C2dEffect* attractor, CVector posn, CEntity* entity, int32 decisionMakerType);
@@ -167,8 +169,8 @@ public:
     // returns number of generated peds?
     static int32 GeneratePedsAtAttractors(CVector posn, float arg1, float arg2, float arg3, float arg4, int32 decisionMakerType, int32 numPeds);
     static void GeneratePedsAtStartOfGame();
-    static void ManageObject(CObject* object, CVector const& posn);
-    static void ManageDummy(CDummy* dummy, CVector const& posn);
+    static void ManageObject(CObject* object, const CVector& posn);
+    static void ManageDummy(CDummy* dummy, const CVector& posn);
     static void ManageAllPopulation();
     static void ManagePopulation();
     static void RemovePedsIfThePoolGetsFull();

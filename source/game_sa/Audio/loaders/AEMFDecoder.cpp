@@ -366,16 +366,19 @@ void CAEMFDecoder::Shutdown() {
 }
 
 void CAEMFDecoder::InjectHooks() {
-    ReversibleHooks::Install("CAEMFDecoder", "CAEMFDecoder", 0x4e7770, &CAEMFDecoder::Constructor);
-    ReversibleHooks::Install("CAEMFDecoder", "~CAEMFDecoder", 0x4e77c0, &CAEMFDecoder::Destructor);
-    ReversibleHooks::Install("CAEMFDecoder", "InitLibrary", 0x4e7c70, &CAEMFDecoder::InitLibrary);
-    ReversibleHooks::Install("CAEMFDecoder", "Initialise", 0x4e7cb0, &CAEMFDecoder::Initialise);
-    ReversibleHooks::Install("CAEMFDecoder", "FillBuffer", 0x4e7860, &CAEMFDecoder::FillBuffer);
-    ReversibleHooks::Install("CAEMFDecoder", "GetStreamLengthMs", 0x4e7920, &CAEMFDecoder::GetStreamLengthMs);
-    ReversibleHooks::Install("CAEMFDecoder", "GetStreamPlayTimeMs", 0x4e7940, &CAEMFDecoder::GetStreamPlayTimeMs);
-    ReversibleHooks::Install("CAEMFDecoder", "SetCursor", 0x4e78e0, &CAEMFDecoder::SetCursor);
-    ReversibleHooks::Install("CAEMFDecoder", "GetSampleRate", 0x4e78c0, &CAEMFDecoder::GetSampleRate);
-    ReversibleHooks::Install("CAEMFDecoder", "GetStreamID", 0x4e77b0, &CAEMFDecoder::GetStreamID);
+    RH_ScopedClass(CAEMFDecoder);
+    RH_ScopedCategory("Audio/Loaders");
+
+    RH_ScopedInstall(Constructor, 0x4e7770);
+    RH_ScopedInstall(Destructor, 0x4e77c0);
+    RH_ScopedInstall(InitLibrary, 0x4e7c70);
+    RH_ScopedInstall(Initialise, 0x4e7cb0);
+    RH_ScopedInstall(FillBuffer, 0x4e7860);
+    RH_ScopedInstall(GetStreamLengthMs, 0x4e7920);
+    RH_ScopedInstall(GetStreamPlayTimeMs, 0x4e7940);
+    RH_ScopedInstall(SetCursor, 0x4e78e0);
+    RH_ScopedInstall(GetSampleRate, 0x4e78c0);
+    RH_ScopedInstall(GetStreamID, 0x4e77b0);
 }
 
 CAEMFDecoder* CAEMFDecoder::Constructor(char* filename, int32 trackID) {

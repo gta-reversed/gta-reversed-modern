@@ -3,12 +3,14 @@
 #include "FxMemoryPool_c.h"
 
 void FxMemoryPool_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("FxMemoryPool_c", "Init", 0x4A9C30, &FxMemoryPool_c::Init);
-    Install("FxMemoryPool_c", "Exit", 0x4A9C80, &FxMemoryPool_c::Exit);
-    Install("FxMemoryPool_c", "Reset", 0x4A9C90, &FxMemoryPool_c::Reset);
-    Install("FxMemoryPool_c", "GetMem", 0x4A9CA0, &FxMemoryPool_c::GetMem);
-    Install("FxMemoryPool_c", "Optimise", 0x4A9CD0, &FxMemoryPool_c::Optimise);
+    RH_ScopedClass(FxMemoryPool_c);
+    RH_ScopedCategory("Fx");
+
+    RH_ScopedInstall(Init, 0x4A9C30);
+    RH_ScopedInstall(Exit, 0x4A9C80);
+    RH_ScopedInstall(Reset, 0x4A9C90);
+    RH_ScopedInstall(GetMem, 0x4A9CA0);
+    RH_ScopedInstall(Optimise, 0x4A9CD0);
 }
 
 // 0x4A9C30

@@ -1,22 +1,17 @@
 #include "StdInc.h"
 
-CPool<CPed, CCopPed>*& CPools::ms_pPedPool = *(CPool<CPed, CCopPed>**)0xB74490;
-CPool<CVehicle, CHeli>*& CPools::ms_pVehiclePool = *(CPool<CVehicle, CHeli>**)0xB74494;
-CPool<CBuilding>*& CPools::ms_pBuildingPool = *(CPool<CBuilding>**)0xB74498;
-CPool<CObject, CCutsceneObject>*& CPools::ms_pObjectPool = *(CPool<CObject, CCutsceneObject>**)0xB7449C;
-CPool<CDummy>*& CPools::ms_pDummyPool = *(CPool<CDummy>**)0xB744A0;
-CPool<CColModel>*& CPools::ms_pColModelPool = *(CPool<CColModel>**)0xB744A4;
-CPool<CTask, CTaskSimpleSlideToCoord>*& CPools::ms_pTaskPool = *(CPool<CTask, CTaskSimpleSlideToCoord>**)0xB744A8;
-CPool<CPedIntelligence>*& CPools::ms_pPedIntelligencePool = *(CPool<CPedIntelligence>**)0xB744C0;
-CPool<CPtrNodeSingleLink>*& CPools::ms_pPtrNodeSingleLinkPool = *(CPool<CPtrNodeSingleLink>**)0xB74484;
-CPool<CPtrNodeDoubleLink>*& CPools::ms_pPtrNodeDoubleLinkPool = *(CPool<CPtrNodeDoubleLink>**)0xB74488;
-CPool<CEntryInfoNode>*& CPools::ms_pEntryInfoNodePool = *(CPool<CEntryInfoNode>**)0xB7448C;
-CPool<CPointRoute>*& CPools::ms_pPointRoutePool = *(CPool<CPointRoute>**)0xB744B0;
+#include "Pools.h"
+
+// #include "PointRoute.h"
+
 
 void CPools::InjectHooks()
 {
-    ReversibleHooks::Install("CPools", "LoadObjectPool", 0x5D4A40, &CPools::LoadObjectPool);
-    ReversibleHooks::Install("CPools", "MakeSureSlotInObjectPoolIsEmpty", 0x550080, &CPools::MakeSureSlotInObjectPoolIsEmpty);
+    RH_ScopedClass(CPools);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(LoadObjectPool, 0x5D4A40);
+    RH_ScopedInstall(MakeSureSlotInObjectPoolIsEmpty, 0x550080);
 }
 
 int32 CPools::CheckBuildingAtomics() {
@@ -78,13 +73,13 @@ bool CPools::LoadObjectPool() {
         CGenericGameStorage::LoadDataFromWorkBuffer(&iPoolRef, 4);
         CGenericGameStorage::LoadDataFromWorkBuffer(&iModelId, 4);
 
-        auto* pObjInPool = CPools::ms_pObjectPool->GetAtRefNoChecks(iPoolRef);
-        if (pObjInPool)
-            CPopulation::ConvertToDummyObject(pObjInPool);
+        auto* objInPool = CPools::ms_pObjectPool->GetAtRefNoChecks(iPoolRef);
+        if (objInPool)
+            CPopulation::ConvertToDummyObject(objInPool);
 
-        auto* pNewObj = new(iPoolRef) CObject(iModelId, false);
-        pNewObj->Load();
-        CWorld::Add(pNewObj);
+        auto* newObj = new(iPoolRef) CObject(iModelId, false);
+        newObj->Load();
+        CWorld::Add(newObj);
     }
 
     return true;
@@ -105,23 +100,23 @@ void CPools::MakeSureSlotInObjectPoolIsEmpty(int32 slot) {
     if (CPools::ms_pObjectPool->IsFreeSlotAtIndex(slot))
         return;
 
-    auto* pExistingObj = CPools::ms_pObjectPool->GetAt(slot);
-    if (pExistingObj->IsTemporary())
+    auto* existingObj = CPools::ms_pObjectPool->GetAt(slot);
+    if (existingObj->IsTemporary())
     {
-        CWorld::Remove(pExistingObj);
-        delete pExistingObj;
+        CWorld::Remove(existingObj);
+        delete existingObj;
     }
-    else if (CProjectileInfo::RemoveIfThisIsAProjectile(pExistingObj))
+    else if (CProjectileInfo::RemoveIfThisIsAProjectile(existingObj))
     {
-        auto pNewObj = new CObject(pExistingObj->m_nModelIndex, false);
-        CWorld::Remove(pExistingObj);
-        CPools::ms_pObjectPool->CopyItem(pNewObj, pExistingObj);
-        CWorld::Add(pNewObj);
+        auto newObj = new CObject(existingObj->m_nModelIndex, false);
+        CWorld::Remove(existingObj);
+        CPools::ms_pObjectPool->CopyItem(newObj, existingObj);
+        CWorld::Add(newObj);
 
-        pExistingObj->m_pRwObject = nullptr;
-        delete pExistingObj;
+        existingObj->m_pRwObject = nullptr;
+        delete existingObj;
 
-        pNewObj->m_pReferences = nullptr;
+        newObj->m_pReferences = nullptr;
     }
 }
 

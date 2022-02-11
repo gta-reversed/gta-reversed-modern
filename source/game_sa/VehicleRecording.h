@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Vector.h"
 #include "PathFind.h"
 
@@ -69,7 +71,7 @@ public:
      */
     static bool  HasRecordingFileBeenLoaded(int32 rrrNumber);
     static void  Load(RwStream* stream, int32 resourceId, int32 totalSize);
-    static int32 RegisterRecordingFile(char const* name);
+    static int32 RegisterRecordingFile(const char* name);
     static void  SetPlaybackSpeed(CVehicle* vehicle, float speed);
     static void  RenderLineSegment(int32& numVertices);
     /*
@@ -80,7 +82,9 @@ public:
      * RequestRecordingFile(int32)
      * RestoreInfoForCar(CVehicle*, CVehicleStateEachFrame*, bool)
      * RestoreInfoForMatrix(CMatrix&, CVehicleStateEachFrame*)
-     * SaveOrRetrieveDataForThisFrame()
+     */
+    static void SaveOrRetrieveDataForThisFrame();
+    /*
      * SetRecordingToPointClosestToCoors(int32, CVector)
      * ShutDown()
      * SkipForwardInRecording(CVehicle*, float)

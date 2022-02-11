@@ -6,10 +6,13 @@ uint32& CBrightLights::NumBrightLights = *(uint32*)0xC7C6FC;
 tBrightLight (&CBrightLights::aBrightLights)[MAX_NUM_BRIGHTLIGHTS] = *(tBrightLight(*)[MAX_NUM_BRIGHTLIGHTS])0xC7CB58;
 
 void CBrightLights::InjectHooks() {
-    ReversibleHooks::Install("CBrightLights", "Init", 0x722140, &CBrightLights::Init);
-    ReversibleHooks::Install("CBrightLights", "RenderOutGeometryBuffer", 0x722150, &CBrightLights::RenderOutGeometryBuffer);
-    ReversibleHooks::Install("CBrightLights", "Render", 0x7241C0, &CBrightLights::Render);
-    ReversibleHooks::Install("CBrightLights", "RegisterOne", 0x724770, &CBrightLights::RegisterOne);
+    RH_ScopedClass(CBrightLights);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x722140);
+    RH_ScopedInstall(RenderOutGeometryBuffer, 0x722150);
+    RH_ScopedInstall(Render, 0x7241C0);
+    RH_ScopedInstall(RegisterOne, 0x724770);
 }
 
 // 0x722140
@@ -36,12 +39,12 @@ void CBrightLights::Render() {
     if (NumBrightLights == 0)
         return;
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)nullptr);
-    RwRenderStateSet(rwRENDERSTATECULLMODE,          (void*)rwCULLMODECULLNONE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
+    RwRenderStateSet(rwRENDERSTATECULLMODE,          RWRSTATE(rwCULLMODECULLNONE));
 
     uiTempBufferVerticesStored = 0;
     uiTempBufferIndicesStored = 0;

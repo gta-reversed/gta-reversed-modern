@@ -1,12 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Sprite2d.h"
+class CSprite2d;
 
 class CLoadingScreen {
 public:
@@ -39,8 +39,8 @@ public:
 
     static void RenderSplash();
     static void LoadSplashes(bool bStarting, bool bNvidia);
-    static void DisplayMessage(char const* message);
-    static void SetLoadingBarMsg(char const* msg1, char const* msg2);
+    static void DisplayMessage(const char* message);
+    static void SetLoadingBarMsg(const char* msg1, const char* msg2);
     static float GetClockTime(bool bIgnorePauseTime);
     static void Pause();
     static void Continue();

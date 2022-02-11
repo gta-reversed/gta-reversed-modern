@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -33,7 +33,7 @@ public:
 
     void FreeStaticMatrix();
     void SetPosn(float x, float y, float z);
-    void SetPosn(CVector const& posn);
+    void SetPosn(const CVector& posn);
     void SetOrientation(float x, float y, float z);
     void GetOrientation(float& x, float& y, float& z);
     void SetHeading(float heading);
