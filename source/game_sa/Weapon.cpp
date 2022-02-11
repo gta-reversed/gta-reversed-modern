@@ -206,7 +206,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
         CVector creatorPos = FindPlayerCoors();
         CPad* creatorPad = CPad::GetPad(shooter->m_nPedType);
 
-        creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
+        creatorPad->StartShake_Distance(240, 128, creatorPos);
         CamShakeNoPos(&TheCamera, 0.2f);
     }
 

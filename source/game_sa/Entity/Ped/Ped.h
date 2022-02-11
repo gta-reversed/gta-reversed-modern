@@ -530,22 +530,23 @@ public:
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
     CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
-    inline uint8 GetCreatedBy() { return m_nCreatedBy; }
-    inline bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
-    inline bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
-    inline CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
-    inline int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
-    inline CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
-    inline CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
-    inline CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
-    inline CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
-    inline CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
-    inline CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
-    inline CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
-    inline CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
-    inline CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
-    inline bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
-    inline void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+    uint8 GetCreatedBy() { return m_nCreatedBy; }
+    bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
+    bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
+    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+    int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
+    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
+    CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
+    CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
+    CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
+    CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
+    CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+    void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
+    bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
+    bool IsInVehicleAsPassenger() const noexcept;
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
     CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
@@ -554,4 +555,6 @@ public:
 
     bool IsFollowerOfGroup(const CPedGroup& group);
 };
+
+RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);
