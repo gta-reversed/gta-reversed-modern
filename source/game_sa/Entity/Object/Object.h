@@ -40,14 +40,14 @@ public:
     uint16              m_wCostValue;
     union {
         struct {
-            uint32 bIsPickup : 1;
-            uint32 b0x02 : 1;
-            uint32 bPickupPropertyForSale : 1;
-            uint32 bPickupInShopOutOfStock : 1;
-            uint32 bGlassBroken : 1;
-            uint32 b0x20 : 1;
-            uint32 bIsExploded : 1;
-            uint32 bChangesVehColor : 1;
+            uint32 bIsPickup : 1;               // 0x1
+            uint32 b0x02 : 1;                   // 0x2
+            uint32 bPickupPropertyForSale : 1;  // 0x4
+            uint32 bPickupInShopOutOfStock : 1; // 0x8
+            uint32 bGlassBroken : 1;            // 0x10
+            uint32 b0x20 : 1;                   // 0x20
+            uint32 bIsExploded : 1;             // 0x40
+            uint32 bChangesVehColor : 1;        // 0x80
 
             uint32 bIsLampPost : 1;
             uint32 bIsTargatable : 1;
