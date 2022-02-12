@@ -219,19 +219,19 @@ void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, 
 
     object->objectFlags.bGlassBroken = true;
 
-    if (const auto cm = object->GetColModel(); cm && cm->GetTriCount() == 2) {
+    if (const auto cd = object->GetColModel()->m_pColData; cd && cd->m_nNumTriangles == 2) {
         // Object space vertices
         CVector verticesOS[4];
-        rng::transform(std::span{ cm->m_pColData->m_pVertices, 4 }, verticesOS, UncompressVector);
+        rng::transform(std::span{ cd->m_pVertices, 4 }, verticesOS, UncompressVector);
 
         const auto [minZ, maxZ] = FindMinMaxZOfVertices(verticesOS);
 
-        const auto vertFurthestFromV0 = rng::max_element(verticesOS, {}, [&](auto&& v) { return (verticesOS[0] - v).SquaredMagnitude2D(); });
+        // R* used `Mag2D`, but `SqMag2D` is a better choice
+        const auto vertFurthestFromV0 = rng::max_element(verticesOS, {}, [v0 = verticesOS[0]](auto&& v) { return (v0 - v).SquaredMagnitude2D(); });
 
         // Transform vertices to world space
-        const auto vert01MinZ        = std::min(verticesOS[0].z, verticesOS[1].z);
-        const auto vert0Pos          = Multiply3x3(object->GetMatrix(), { verticesOS[0].x, verticesOS[0].y, vert01MinZ });
-        const auto furthestFromV0Pos = Multiply3x3(object->GetMatrix(), { vertFurthestFromV0->x, vertFurthestFromV0->y, vert01MinZ });
+        const auto vert0Pos          = MultiplyMatrixWithVector(object->GetMatrix(), { verticesOS[0].x, verticesOS[0].y, minZ });
+        const auto furthestFromV0Pos = MultiplyMatrixWithVector(object->GetMatrix(), { vertFurthestFromV0->x, vertFurthestFromV0->y, minZ });
 
         AudioEngine.ReportGlassCollisionEvent(AE_GLASS_BREAK_FAST, object->GetPosition());
         GeneratePanesForWindow(
@@ -242,13 +242,17 @@ void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, 
             vecMoveSpeed,
             vecPoint,
             0.1f,
-            object->objectFlags.bGlassBroken,
+            //object->objectFlags.bGlassBroken,
+            (bool)((object->m_nObjectFlags >> 4) & 0xFFFFFF01),
             max1PaneSection,
             1,
             false
         );
     }
 
+    object->m_bUsesCollision = false;
+    object->m_bIsVisible = false;
+    object->objectFlags.b0x20 = true;
 }
 
 /*
