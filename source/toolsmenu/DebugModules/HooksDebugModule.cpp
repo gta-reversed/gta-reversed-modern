@@ -10,6 +10,7 @@
 #include <string>
 #include <ranges>
 #include <optional>
+#include <regex>
 
 namespace RH = ReversibleHooks;
 namespace rng = std::ranges;
@@ -65,36 +66,62 @@ namespace Entity {
 
 static std::string HooksFilterContent;
 struct FilterTool {
-    static constexpr std::string_view HOOKNAME_SEP{ "::" };
+    // If either of these 2 separators is changed make sure to alter the regex as well.
+
     static constexpr std::string_view NAMESPACE_SEP{ "/" };
+    static constexpr std::string_view HOOKNAME_SEP{ "::" };
 
-    std::string m_input{};          // Used as char buffer for the ImGUI input - Will only ever contain letters (a-zA-Z)
-    bool        m_caseSensitive{};
+    // Maybe one day.. For now it's fine
+    // Regex used for checking if the input is valid, see `ProcessImGui` in this class.
+    //static inline const std::regex INPUT_VALID_REGEX{
+    //    R"r(\/?(?:\w+\/)*\w+(?:\:{2}\w*|\:))r", // We're using in r-string here to avoid the need of escaping all `\`
+    //    std::regex::optimize | std::regex::icase
+    //}; 
 
-    // Contains `m_input`'s tokens split by `::`
-    // If there was a trailing `::` an empty string is emplaced to the end
+
+    // Used as char buffer for the ImGUI input - May only ever contain letters (a-zA-Z) and `HOOKNAME_SEP`, `NAMESPACE_SEP`
+    std::string m_input{};          
+
+    // Are the string checks case sensitive?
+    // It is used, but there's no GUI to change it for now, it is case-insensitive by defult.
+    bool m_caseSensitive{};
+
+    // Contains all the tokens on the left side split by `NAMESPACE_SEP` of the input split by `HOOKNAME_SEP`
+    // Eg `m_input` => content:
+    // - `Name/Space/` => `Name`, `Space`, `` (<= empty string)
+    // - `Name/Space/::` => -||- (Same as the above example)
+    // - `/` - `` (empty string) - Indicates root namespace (See `IsRelativeToRootNamespace`)
     std::vector<std::string_view> m_namespaceTokens{};
 
-    std::string_view m_hookFilter{}; // Filter of function name
+    // Filter of hook name
+    std::string_view m_hookFilter{}; 
 
+    // Clears both filters
+    // Making all items visible again is done by `DoFilter`
     void ClearFilters() {
         m_namespaceTokens.clear(); // Clear only, so allocated memory is kept
         m_hookFilter = {};
     }
 
+    // Are either filters active
     bool IsFilterActive() {
         return !m_namespaceTokens.empty() || !m_hookFilter.empty();
     }
 
+    // Are we filtering namespaces
     bool IsNamespaceFilterActive() {
         return !m_namespaceTokens.empty();
     }
 
+    // Are we filtering hooks
     bool IsHookFilterActive() {
         return !m_hookFilter.empty();
     }
 
-    bool IsBaseRootNamespace() {
+    // Should the current filtered namespace be relative to the root namespace.
+    // This is the case when the user prepends the namespace tokens with a `/` (NAMESPACE_SEP).
+    // Eg.: `/Entity` should only show the `Entity` namespace under `Root` (But not, for example, `Audio/AEVehicleAudioEntity`)
+    bool IsRelativeToRootNamespace() {
         return m_namespaceTokens.size() >= 1 && m_namespaceTokens.front().empty();
     }
 
@@ -137,7 +164,7 @@ struct FilterTool {
 
         // If we're using the root namespace only but there's no hook filter we paractically dont't filter anything
         // Example user inputs: `/`, `/::`, `::`
-        if (IsBaseRootNamespace() && m_namespaceTokens.size() == 1 && !IsHookFilterActive()) {
+        if (IsRelativeToRootNamespace() && m_namespaceTokens.size() == 1 && !IsHookFilterActive()) {
             ClearFilters();
         }
 
@@ -152,12 +179,27 @@ struct FilterTool {
 
     void ProcessImGui() {
         // Required to disallow spaces and other stuff - Makes processing input significiantly easier.
-        const auto AlphaOnlyFilter = [](ImGuiInputTextCallbackData* data) {
-            return std::isalpha((uint8_t)data->EventChar);
+        // Also gets rid of some invalid constructrs, like `////` or `:::::::`
+        const auto AlphaOnlyFilter = [](ImGuiInputTextCallbackData* data) -> int {
+            switch (data->EventFlag) {
+            case ImGuiInputTextFlags_CallbackCharFilter: {
+                if (!std::isalpha((uint8_t)data->EventChar)) {
+                    if (!std::isdigit((uint8_t)data->EventChar)) {
+                        if (!NAMESPACE_SEP.contains((char)data->EventChar)) {
+                            if (!HOOKNAME_SEP.contains((char)data->EventChar)) {
+                                return 1; // Discard this char
+                            }
+                        }
+                    }
+                }
+                return 0; // Keep it
+            }
+            }
+            return true;
         };
 
         PushItemWidth(GetWindowContentRegionMax().x - 10.f);
-        if (InputText(" ", &m_input, 0, AlphaOnlyFilter)) {
+        if (InputText(" ", &m_input, ImGuiInputTextFlags_CallbackCharFilter, AlphaOnlyFilter)) {
             OnInputUpdate();
             DoFilter(RH::GetRootCategory());
         }
@@ -223,7 +265,7 @@ struct FilterTool {
         // When using root namespace our visibility is decided by our sub-categories' items and our items, if none of them are visible we aren't either,
         // otherwise current filters also impact our visibility.
         if (IsNamespaceFilterActive()) {
-            if (IsBaseRootNamespace()) {
+            if (IsRelativeToRootNamespace()) {
                 const auto ProcessFilter = [&, this]() -> std::pair<bool, bool> {
                     if (depth == 0) { // Special case - Root namespace depth, no need to check any tokens
                         assert(m_namespaceTokens.front().empty()); // This codepath should be unreachable unless first token is empty
