@@ -134,6 +134,19 @@ public:
 
     void SetDmRadius(float r) { m_fDmRadius = r; }
     void SetNumPedsToScan(uint32 n) { m_nDmNumPedsToScan = n; }
+
+    // NOTSA
+    bool IsUsingGun() {
+        if (GetTaskUseGun()) {
+            return true;
+        }
+        if (auto simplestTask = m_TaskMgr.GetSimplestActiveTask()) {
+            if (simplestTask->GetTaskType() == TASK_SIMPLE_GANG_DRIVEBY) {
+                return true;
+            }
+        }
+        return false;
+    }
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);

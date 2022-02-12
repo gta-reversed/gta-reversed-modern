@@ -1347,3 +1347,8 @@ int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
 {
     return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
 }
+
+// NOTSA
+bool CPed::IsInVehicleAsPassenger() const noexcept {
+    return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
+}
