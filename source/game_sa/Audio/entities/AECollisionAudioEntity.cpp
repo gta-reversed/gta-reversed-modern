@@ -136,7 +136,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector
 }
 
 // 0x4DA070
-void CAECollisionAudioEntity::ReportGlassCollisionEvent(int32 glassSoundType, const CVector& posn, uint32 time) {
+void CAECollisionAudioEntity::ReportGlassCollisionEvent(int32 glassSoundType, Const CVector& posn, uint32 time) {
     plugin::CallMethod<0x4DA070, CAECollisionAudioEntity*, int32, const CVector&, uint32>(this, glassSoundType, posn, time);
 }
 

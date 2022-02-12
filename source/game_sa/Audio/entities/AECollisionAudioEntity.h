@@ -48,7 +48,7 @@ public:
     void PlayOneShotCollisionSound(CEntity* entity1, CEntity* entity2, uint8 a3, uint8 a4, float a5, CVector& posn);
     void PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float angleWithColPointNorm);
 
-    void ReportGlassCollisionEvent(int32 glassSoundType, const CVector& posn, uint32 time);
+    void ReportGlassCollisionEvent(int32 glassSoundType, Const CVector& posn, uint32 time);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float height, bool splashMoreThanOnce);
     void ReportObjectDestruction(CEntity* entity);

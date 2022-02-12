@@ -75,7 +75,7 @@ public:
     void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
     void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* entity);
-    void ReportGlassCollisionEvent(eAudioEvents, const CVector&);
+    void ReportGlassCollisionEvent(eAudioEvents, Const CVector&);
     void ReportWaterSplash(CVector posn, float volume);
     void ReportWaterSplash(CPhysical* physical, float volume, bool forcePlaySplashSound);
     void ReportWeaponEvent(int32_t audioEvent, eWeaponType weaponType, CPhysical* physical);
