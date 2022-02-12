@@ -12,10 +12,18 @@
 
 #define NUM_PATH_MAP_AREAS 64
 #define NUM_PATH_INTERIOR_AREAS 8
+#define NUM_DYNAMIC_LINKS_PER_AREA 16
 
 enum ePathType {
     PATH_TYPE_CARS = 0,
     PATH_TYPE_BOATS
+};
+
+enum eTrafficLevel {
+    TRAFFIC_FULL = 0,
+    TRAFFIC_HIGH = 1,
+    TRAFFIC_MEDIUM = 2,
+    TRAFFIC_LOW = 3,
 };
 
 class CForbiddenArea {
@@ -57,7 +65,13 @@ VALIDATE_SIZE(CPathIntersectionInfo, 0x1);
 
 class CPathUnknClass {
 public:
-    uint32 m_aUnknVals[16];
+    union {
+        uint32 value;
+        struct {
+            uint32 pad : 31;
+            uint32 lastBit : 1;
+        };
+    } m_aLinks[NUM_DYNAMIC_LINKS_PER_AREA];
 };
 VALIDATE_SIZE(CPathUnknClass, 0x40);
 
@@ -134,9 +148,8 @@ public:
     uint32                 m_dwNumPedNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumCarPathLinks[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumAddresses[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
-    CPathUnknClass         m_aUnknVals1[NUM_PATH_MAP_AREAS];
-    CPathUnknClass         m_aUnknVals2[NUM_PATH_MAP_AREAS];
-    //int32                  field_1544[2048];
+    CPathUnknClass         m_aDynamicLinksBaseIds[NUM_PATH_MAP_AREAS];
+    CPathUnknClass         m_aDynamicLinksIds[NUM_PATH_MAP_AREAS];
     uint32                 m_dwTotalNumNodesInSearchList;
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumForbiddenAreas;
@@ -174,9 +187,12 @@ public:
 
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
     void MarkRoadNodeAsDontWander(float x, float y, float z);
+    void SwitchRoadsOffInAreaForOneRegion(float fXMin, float fXMax, float fYMin, float fYMax,
+                                          float fZMin, float fZMax, bool bEnable, char type, int areaId, bool bBoats);
 
     CPathNode* GetPathNode(CNodeAddress address);
-    int32 LoadPathFindData(RwStream* stream, int32 index);
+    void LoadPathFindData(int32 areaId);
+    void LoadPathFindData(RwStream* stream, int32 areaId);
     void UnLoadPathFindData(int32 index);
     int32 LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);

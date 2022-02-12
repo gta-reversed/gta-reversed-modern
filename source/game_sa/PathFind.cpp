@@ -29,7 +29,10 @@ void CPathFind::InjectHooks()
     RH_ScopedInstall(MarkRoadNodeAsDontWander, 0x450560);
     RH_ScopedInstall(ReturnInteriorNodeIndex, 0x451300);
     RH_ScopedInstall(StartNewInterior, 0x44DE80);
+    RH_ScopedOverloadedInstall(LoadPathFindData, "void", 0x452F40, void (CPathFind::*)(int));
+    RH_ScopedOverloadedInstall(LoadPathFindData, "stream", 0x4529F0, void (CPathFind::*)(RwStream*, int));    
     RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
+    RH_ScopedInstall(GetPathNode, 0x420AC0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
 }
 
@@ -154,14 +157,81 @@ void CPathFind::MarkRoadNodeAsDontWander(float x, float y, float z) {
     m_pPathNodes[node.m_wAreaId][node.m_wNodeId].m_bDontWander = true;
 }
 
-CPathNode *CPathFind::GetPathNode(CNodeAddress address)
-{
-    return ((CPathNode *(__thiscall *)(CPathFind *, CNodeAddress))0x420AC0)(this, address);
+void CPathFind::SwitchRoadsOffInAreaForOneRegion(float fXMin, float fXMax, float fYMin, float fYMax, float fZMin, float fZMax, bool bEnable, char type, int areaId, bool bBoats) {
+    return plugin::CallMethod<0x452820, CPathFind*, float, float, float, float, float, float, bool, char, int, bool>(this, fXMin, fXMax, fYMin, fYMax, fZMin, fZMax, bEnable, type,
+                                                                                                                     areaId, bBoats);
 }
 
-int32 CPathFind::LoadPathFindData(RwStream *stream, int32 index)
+CPathNode *CPathFind::GetPathNode(CNodeAddress address)
 {
-    return plugin::CallMethodAndReturn<int32, 0x4529F0, CPathFind*, RwStream *, int32>(this, stream, index);
+    assert(address.IsValid());
+    return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
+}
+
+void CPathFind::LoadPathFindData(int32 areaId) {
+    CTimer::Suspend();
+    sprintf(gString, "data\\paths\\nodes%d.dat", areaId);
+    auto* stream = RwStreamOpen(RwStreamType::rwSTREAMFILENAME, RwStreamAccessType::rwSTREAMREAD, gString);
+    LoadPathFindData(stream, areaId);
+    CTimer::Resume();
+}
+
+void CPathFind::LoadPathFindData(RwStream *stream, int32 areaId)
+{
+    RwStreamRead(stream, &m_dwNumNodes[areaId], sizeof(uint32));
+    RwStreamRead(stream, &m_dwNumVehicleNodes[areaId], sizeof(uint32));
+    RwStreamRead(stream, &m_dwNumPedNodes[areaId], sizeof(uint32));
+    RwStreamRead(stream, &m_dwNumCarPathLinks[areaId], sizeof(uint32));
+    RwStreamRead(stream, &m_dwNumAddresses[areaId], sizeof(uint32));
+
+    auto numNodes = m_dwNumNodes[areaId];
+    if (numNodes) {
+        m_pPathNodes[areaId] = new CPathNode[numNodes];
+        RwStreamRead(stream, m_pPathNodes[areaId], sizeof(CPathNode) * numNodes);
+    } else {
+        m_pPathNodes[areaId] = new CPathNode[1];
+    }
+
+    auto numCarPathLinks = m_dwNumCarPathLinks[areaId];
+    if (numCarPathLinks) {
+        m_pNaviNodes[areaId] = new CCarPathLink[numCarPathLinks];
+        RwStreamRead(stream, m_pNaviNodes[areaId], sizeof(CCarPathLink) * numCarPathLinks);
+    } else {
+        m_pNaviNodes[areaId] = nullptr;
+    }
+
+    auto numAddresses = m_dwNumAddresses[areaId];
+    if (numAddresses) {
+        auto numToAdd = numAddresses + NUM_DYNAMIC_LINKS_PER_AREA * 12;
+        m_pNodeLinks[areaId] = new CNodeAddress[numToAdd];
+        m_pNaviLinks[areaId] = new CCarPathLinkAddress[numAddresses];
+        m_pLinkLengths[areaId] = new uint8[numToAdd];
+        m_pPathIntersections[areaId] = new CPathIntersectionInfo[numToAdd];
+        RwStreamRead(stream, m_pNodeLinks[areaId], sizeof(CNodeAddress) * numToAdd);
+        RwStreamRead(stream, m_pNaviLinks[areaId], sizeof(CCarPathLinkAddress) * numAddresses);
+        RwStreamRead(stream, m_pLinkLengths[areaId], sizeof(uint8) * numToAdd);
+        RwStreamRead(stream, m_pPathIntersections[areaId], sizeof(CPathIntersectionInfo) * numToAdd);
+    } else {
+        m_pNodeLinks[areaId] = nullptr;
+        m_pNaviLinks[areaId] = nullptr;
+        m_pLinkLengths[areaId] = nullptr;
+        m_pPathIntersections[areaId] = nullptr;
+    }
+
+    for (auto i = 0u; i < numNodes; ++i) {
+        auto& node = m_pPathNodes[areaId][i];
+        node.m_bEmergencyVehiclesOnly = (node.m_nTrafficLevel == TRAFFIC_MEDIUM || node.m_nTrafficLevel == TRAFFIC_LOW);
+    }
+
+    for (auto i = 0u; i < m_dwNumForbiddenAreas; ++i) {
+        auto& area = m_aForbiddenAreas[i];
+        SwitchRoadsOffInAreaForOneRegion(area.x1, area.x2, area.y1, area.y2, area.z1, area.z2, area.bEnable, area.type, areaId, false);
+    }
+
+    for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
+        m_aDynamicLinksBaseIds[areaId].m_aLinks[i].value = (uint32)-1;
+        m_aDynamicLinksIds[areaId].m_aLinks[i].value = (uint32)-1;
+    }
 }
 
 void CPathFind::UnLoadPathFindData(int32 index)
@@ -272,13 +342,14 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
         }
 
         if (first.m_wAreaId < NUM_PATH_MAP_AREAS) {
-            auto& linkInfo = m_aUnknVals1[first.m_wAreaId];
-            for (auto i = 0u; i < 16; ++i) {
-                if ((linkInfo.m_aUnknVals[i] & 0x80000000u) == 0)
+            auto& linkInfo = m_aDynamicLinksBaseIds[first.m_wAreaId];
+            for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
+                // Uninitialized dynamic link is set to -1, so if it's assigned anything last bit will change, no clue why R* didn't compare with -1 directly
+                if (!linkInfo.m_aLinks[i].lastBit)
                     continue;
 
-                m_aUnknVals1[first.m_wAreaId].m_aUnknVals[i] = firstPathInfo.m_wBaseLinkId;
-                m_aUnknVals2[first.m_wAreaId].m_aUnknVals[i] = firstLinkId;
+                m_aDynamicLinksBaseIds[first.m_wAreaId].m_aLinks[i].value = firstPathInfo.m_wBaseLinkId;
+                m_aDynamicLinksIds[first.m_wAreaId].m_aLinks[i].value = firstLinkId;
                 break;
             }
         }
