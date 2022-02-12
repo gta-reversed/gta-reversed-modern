@@ -33,7 +33,7 @@ public:
     static bool HasGlassBeenShatteredAtCoors(CVector point);
     static void CarWindscreenShatters(CVehicle* vehicle);
     static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
-    static void WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
+    static void WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
     static void GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
                                        bool bShatter, bool numSectionsMax1, int32 numSections, bool unk);
     static void Update();
@@ -47,5 +47,5 @@ public:
     static CFallingGlassPane* FindFreePane();
     static void WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity);
     static void BreakGlassPhysically(CVector pos, float radius);
-    static void WindowRespondsToExplosion(CEntity* entity, const CVector point);
+    static void WindowRespondsToExplosion(CEntity* entity, Const CVector point);
 };

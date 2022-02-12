@@ -11,14 +11,14 @@ namespace rng = std::ranges;
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
 int32& CGlass::ReflectionPolyIndexBaseIdx = *(int32*)0xC71B1C;
-RxObjSpace3DLitVertex(&CGlass::ReflectionPolyVertexBuffer)[1706] = *(RxObjSpace3DLitVertex(*)[1706])0xC5B158;
-RxObjSpace3DLitVertex(&CGlass::ShatteredPolyVertexBuffer)[512] = *(RxObjSpace3DLitVertex(*)[512])0xC5B158;
+RxObjSpace3DLitVertex (&CGlass::ReflectionPolyVertexBuffer)[1706] = *(RxObjSpace3DLitVertex(*)[1706])0xC5B158;
+RxObjSpace3DLitVertex (&CGlass::ShatteredPolyVertexBuffer)[512] = *(RxObjSpace3DLitVertex(*)[512])0xC56958;
 int32& CGlass::ShatteredVerticesBaseIdx = *(int32*)0xC71B20;
 int32& CGlass::ShatteredIndicesBaseIdx = *(int32*)0xC71B24;
 uint32& CGlass::H1iLightPolyVerticesIdx = *(uint32*)0xC71B28;
 int32& CGlass::HiLightPolyIndicesIdx = *(int32*)0xC71B2C;
 CVector2D (&CGlass::PanePolyCenterPositions)[5] = *(CVector2D(*)[5])0xC71B30;
-CEntity*(&CGlass::apEntitiesToBeRendered)[32] = *(CEntity*(*)[32])0xC71B58;
+CEntity* (&CGlass::apEntitiesToBeRendered)[32] = *(CEntity * (*)[32])0xC71B58;
 CFallingGlassPane (&CGlass::aGlassPanes)[44] = *(CFallingGlassPane(*)[44])0xC71BF8;
 uint32& CGlass::LastColCheckMS = *(uint32*)0xC72FA8;
 
@@ -60,7 +60,7 @@ void CGlass::Init() {
     }
 }
 
-// Unused
+// (float, float, float ) & unused
 // 0x71CB70
 bool CGlass::HasGlassBeenShatteredAtCoors(CVector point) {
     CWorld::IncrementCurrentScanCode();
@@ -210,8 +210,8 @@ std::pair<float, float> FindMinMaxZOfVertices(CVector (&vertices)[N]) {
 }
 
 // 0x71BC40
-void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection) {
-    auto object = pEntity->AsObject();
+void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection) {
+    auto object = entity->AsObject();
     if (!object->objectFlags.b0x20)
         return;
 
@@ -395,6 +395,7 @@ void CGlass::Render() {
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,    RWRSTATE(FALSE));
 }
 
+// (CEntity**, float, float, float)
 // 0x71AFC0
 void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& outEntity, CVector point) {
     if (!objList.GetNode())
@@ -483,6 +484,7 @@ void CGlass::RenderHiLightPolys() {
     }
 }
 
+// (CVector*)
 // 0x71ACF0
 uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
     const auto camFwd = TheCamera.GetForward();
@@ -599,7 +601,7 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
 }
 
 // 0x71C1A0
-void CGlass::WindowRespondsToExplosion(CEntity* entity, const CVector point) {
+void CGlass::WindowRespondsToExplosion(CEntity* entity, Const CVector point) {
     if (!entity->m_bUsesCollision)
         return;
 
