@@ -45,7 +45,7 @@ public:
     static uint8 CalcAlphaWithNormal(const CVector& normal);
     static void AskForObjectToBeRenderedInGlass(CEntity* entity);
     static CFallingGlassPane* FindFreePane();
-    static void WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity);
+    static void WindowRespondsToSoftCollision(CEntity* entity, float fDamageIntensity);
     static void BreakGlassPhysically(CVector pos, float radius);
     static void WindowRespondsToExplosion(CEntity* entity, Const CVector point);
 };

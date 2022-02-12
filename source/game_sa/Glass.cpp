@@ -499,7 +499,7 @@ uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
 
 // 0x71ACD0
 void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
-    if (NumGlassEntities + 1 < std::size(apEntitiesToBeRendered)) {
+    if (NumGlassEntities < std::size(apEntitiesToBeRendered) - 1) {
         apEntitiesToBeRendered[NumGlassEntities++] = entity;
     }
 }
@@ -511,10 +511,10 @@ CFallingGlassPane* CGlass::FindFreePane() {
 }
 
 // 0x71AF70
-void CGlass::WindowRespondsToSoftCollision(CObject* object, float fDamageIntensity) {
-    if (object->m_bUsesCollision && fDamageIntensity > 50.f && !object->objectFlags.bGlassBroken) {
-        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, object->GetPosition());
-        object->objectFlags.bGlassBroken = true;
+void CGlass::WindowRespondsToSoftCollision(CEntity* entity, float fDamageIntensity) {
+    if (entity->m_bUsesCollision && fDamageIntensity > 50.f && !entity->AsObject()->objectFlags.bGlassBroken) {
+        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, entity->GetPosition());
+        entity->AsObject()->objectFlags.bGlassBroken = true;
     }
 }
 
