@@ -3,7 +3,14 @@
 #include <string_view>
 #include <ranges>
 
-static bool findStringCaseInsensitive(std::string_view haystack, std::string_view needle) {
+// Always returns `true` if either strings are empty (This matches the behaviour of `haystack.find(needle) != npos`)
+static bool StringContainsString(std::string_view haystack, std::string_view needle, bool caseSensitive = true) {
+    if (caseSensitive) {
+        return haystack.find(needle) != std::string_view::npos;
+    }
+    if (haystack.empty() || needle.empty()) {
+        return true;
+    }
     return !std::ranges::search(haystack, needle, {}, std::toupper, std::toupper).empty();
 }
 
