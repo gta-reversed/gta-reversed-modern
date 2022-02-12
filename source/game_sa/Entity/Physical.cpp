@@ -987,7 +987,7 @@ void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
                 return;
         }
 
-        if (m_nNumEntitiesCollided < 6) {
+        if (m_nNumEntitiesCollided < std::size(m_apCollidedEntities)) {
             m_apCollidedEntities[m_nNumEntitiesCollided] = collidedEntity;
             m_nNumEntitiesCollided++;
         }
@@ -3343,7 +3343,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
             }
         }
 
-        if (CCheat::m_aCheatsActive[CHEAT_CARS_FLOAT_AWAY_WHEN_HIT])
+        if (CCheat::IsActive(CHEAT_CARS_FLOAT_AWAY_WHEN_HIT))
         {
             if (FindPlayerVehicle() == thisVehicle
                 && entity->IsVehicle() && entityVehicle->m_nCreatedBy != MISSION_VEHICLE)
