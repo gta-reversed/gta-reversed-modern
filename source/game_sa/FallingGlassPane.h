@@ -1,32 +1,29 @@
 #pragma once
 
-#include <Matrix.h>
+class CMatrix;
 
 class CFallingGlassPane {
 public:
-    CMatrix matrix = {};        // 0
-    CVector velocity = {};      // 0x48
-    CVector randomNumbers = {}; // 0x54
-    uint32 createdTime = {};     // 0x60
-    float groundZ = {};         // 0x64
-    float size = {};            // 0x68
-    uint8 nPieceIndex = {};     // 0x6C
-    int8 existFlag = {};        // 0x6D
-    int8 bRenderShatter = {};   // 0x6E
-    int8 field_6F = {};         // 0x6F
+    CMatrix m_Matrix;
+    CVector m_Velocity;
+    CVector m_RandomNumbers;
+    uint32  m_nCreatedTime;
+    float   m_fGroundZ;
+    float   m_fSize;
+    uint8   m_nPieceIndex;
+    bool    m_bExistFlag;
+    int8    m_bRenderShatter;
+    bool    m_f6F;
+
 public:
     static void InjectHooks();
 
-    ~CFallingGlassPane();
-    CFallingGlassPane();
+    CFallingGlassPane() = default;  // 0x71A8B0
+    ~CFallingGlassPane() = default; // 0x71A8C0
 
     void Update();
     auto CalculateHiHlightPolyColor();
     auto CalculateShatterPolyColor();
     void Render();
-
-private:
-    CFallingGlassPane* Constructor();
-    CFallingGlassPane* Destructor();
 };
 VALIDATE_SIZE(CFallingGlassPane, 0x70);

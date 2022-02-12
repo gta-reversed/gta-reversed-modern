@@ -2,53 +2,33 @@
 #include "FallingGlassPane.h"
 
 void CFallingGlassPane::InjectHooks() {
-    ReversibleHooks::Install("CFallingGlassPane", "CFallingGlassPane", 0x71A8B0, &CFallingGlassPane::Constructor);
-    ReversibleHooks::Install("CFallingGlassPane", "~CFallingGlassPane", 0x71A8C0, &CFallingGlassPane::Destructor);
     ReversibleHooks::Install("CFallingGlassPane", "Update", 0x71AA10, &CFallingGlassPane::Update);
     ReversibleHooks::Install("CFallingGlassPane", "Render", 0x71B100, &CFallingGlassPane::Render);
 }
 
-// 0x71A8B0
-CFallingGlassPane::CFallingGlassPane() {}
-
-// 0x71A8B0
-CFallingGlassPane* CFallingGlassPane::Constructor() {
-    this->CFallingGlassPane::CFallingGlassPane();
-    return this;
-}
-
-// 0x71A8C0
-CFallingGlassPane::~CFallingGlassPane() {}
-
-// 0x71A8C0
-CFallingGlassPane* CFallingGlassPane::Destructor() {
-    this->CFallingGlassPane::~CFallingGlassPane();
-    return this;
-}
-
 // 0x71AA10
 void CFallingGlassPane::Update() {
-    if (CTimer::GetTimeInMS() < createdTime)
+    if (CTimer::GetTimeInMS() < m_nCreatedTime)
         return;
 
-    auto& pos = matrix.GetPosition();
+    auto& pos = m_Matrix.GetPosition();
 
-    if (field_6F) {
-        pos += CTimer::GetTimeStep() * 0.35f * velocity;
-        velocity.z -= CTimer::GetTimeStep() / 100.f;
+    if (m_f6F) {
+        pos += CTimer::GetTimeStep() * 0.35f * m_Velocity;
+        m_Velocity.z -= CTimer::GetTimeStep() / 100.f;
     } else {
-        pos += CTimer::GetTimeStep() * velocity;
-        velocity.z -= CTimer::GetTimeStep() / 50.f;
+        pos += CTimer::GetTimeStep() * m_Velocity;
+        m_Velocity.z -= CTimer::GetTimeStep() / 50.f;
     }
 
-    matrix.GetRight()   += CrossProduct(randomNumbers, matrix.GetRight());
-    matrix.GetForward() += CrossProduct(randomNumbers, matrix.GetForward());
-    matrix.GetUp()      += CrossProduct(randomNumbers, matrix.GetUp());
+    m_Matrix.GetRight()   += CrossProduct(m_RandomNumbers, m_Matrix.GetRight());
+    m_Matrix.GetForward() += CrossProduct(m_RandomNumbers, m_Matrix.GetForward());
+    m_Matrix.GetUp()      += CrossProduct(m_RandomNumbers, m_Matrix.GetUp());
 
-    if (pos.z < groundZ) {
-        existFlag = false;
-        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT_GROUND, { pos.x, pos.y, groundZ });
-        if (!field_6F) {
+    if (pos.z < m_fGroundZ) {
+        m_bExistFlag = false;
+        AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT_GROUND, { pos.x, pos.y, m_fGroundZ });
+        if (!m_f6F) {
             RwRGBA color{ 255, 255, 255, 32 };
             for (auto i = 0; i < 4; i++) {
                 g_fx.AddGlass(pos, color, CGeneral::GetRandomNumberInRange(0.02f, 0.06f), 1);
@@ -58,15 +38,15 @@ void CFallingGlassPane::Update() {
 }
 
 auto CFallingGlassPane::CalculateHiHlightPolyColor() {
-    const auto alpha       = (float)CGlass::CalcAlphaWithNormal(Normalized(matrix.GetForward()));
-    const auto delta       = (float)std::clamp(CTimer::GetTimeInMS() - createdTime, 0u, 500u);
+    const auto alpha       = (float)CGlass::CalcAlphaWithNormal(Normalized(m_Matrix.GetForward()));
+    const auto delta       = (float)std::clamp(CTimer::GetTimeInMS() - m_nCreatedTime, 0u, 500u);
     const auto scaledAlpha = (unsigned)(alpha * delta / 500.f);
-    const auto final       = field_6F ? std::max(64u, scaledAlpha) : scaledAlpha;
+    const auto final       = m_f6F ? std::max(64u, scaledAlpha) : scaledAlpha;
     return RwRGBA(final, final, final, final);
 }
 
 auto CFallingGlassPane::CalculateShatterPolyColor() {
-    const auto camDist = (matrix.GetPosition() - TheCamera.GetPosition()).Magnitude();
+    const auto camDist = (m_Matrix.GetPosition() - TheCamera.GetPosition()).Magnitude();
     if (camDist > 30.f) {
         const auto alpha = (uint8)((1.0f - (camDist - 30.f) / 10.f) * 140.f);
         return RwRGBA(alpha, alpha, alpha, alpha);
@@ -83,15 +63,15 @@ void CFallingGlassPane::Render() {
     {
         const auto color = CalculateHiHlightPolyColor();
         constexpr RwTexCoords uv[3] = {
-            {0.5f, 0.5f},
-            {0.5f, 0.6f},
-            {0.6f, 0.6f},
+            { 0.5f, 0.5f },
+            { 0.5f, 0.6f },
+            { 0.6f, 0.6f },
         };
         for (auto i = 0u; i < 3u; i++) {
             auto& vertex = aTempBufferVertices[CGlass::H1iLightPolyVerticesIdx + i];
 
-            const auto pos2DOS = CGlass::PanePolyPositions[nPieceIndex][i] - CGlass::PanePolyCenterPositions[nPieceIndex];
-            vertices[i] = MultiplyMatrixWithVector(matrix, { pos2DOS.x, 0.f, pos2DOS.y });
+            const auto pos2DOS = CGlass::PanePolyPositions[m_nPieceIndex][i] - CGlass::PanePolyCenterPositions[m_nPieceIndex];
+            vertices[i] = MultiplyMatrixWithVector(m_Matrix, { pos2DOS.x, 0.f, pos2DOS.y });
             RxObjSpace3DVertexSetPos(&vertex, &vertices[i]);
 
             RxObjSpace3DVertexSetU(&vertex, uv[i].u);
@@ -110,7 +90,7 @@ void CFallingGlassPane::Render() {
         CGlass::HiLightPolyIndicesIdx += 6;
     }
 
-    if (bRenderShatter) {
+    if (m_bRenderShatter) {
         const auto color = CalculateShatterPolyColor();
         for (auto i = 0u; i < 3u; i++) {
             auto& vertex = aTempBufferVertices[CGlass::ShatteredVerticesBaseIdx + i];
@@ -118,7 +98,7 @@ void CFallingGlassPane::Render() {
             RxObjSpace3DVertexSetPos(&vertex, &vertices[i]);
             RxObjSpace3DVertexSetPreLitColor(&vertex, &color);
 
-            const auto uv = CGlass::PanePolyPositions[nPieceIndex][i] * size * 4.f;
+            const auto uv = CGlass::PanePolyPositions[m_nPieceIndex][i] * m_fSize * 4.f;
             RxObjSpace3DVertexSetU(&vertex, uv.x);
             RxObjSpace3DVertexSetV(&vertex, uv.y);
         }

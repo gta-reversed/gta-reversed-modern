@@ -50,7 +50,7 @@ void CGlass::InjectHooks() {
 // 0x71A8D0
 void CGlass::Init() {
     for (auto& pane : aGlassPanes) {
-        pane.existFlag = false;
+        pane.m_bExistFlag = false;
     }
 
     for (auto i = 0u; i < std::size(PanePolyPositions); i++) {
@@ -302,52 +302,53 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
     for (auto posY = 0u; posY < countY; posY++) {
         for (auto posX = 0u; posX < countX; posX++) {
             for (auto piece = 0u; piece < 5u; piece++) {
-                if (auto pane = FindFreePane()) {
-                    pane->nPieceIndex = piece;
+                CFallingGlassPane* pane = FindFreePane();
+                if (!pane)
+                    continue;
 
-                    // Calculate matrix
-                    auto& mat = pane->matrix;
-                    mat.GetRight() = Normalized(right) * sizeX;
-                    mat.GetUp() = Normalized(fwd) * sizeY;
-                    mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
+                pane->m_nPieceIndex = piece;
 
-                    const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{(float)posX, (float)posY};
-                    mat.GetPosition() = point + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
+                // Calculate matrix
+                auto& mat = pane->m_Matrix;
+                mat.GetRight() = Normalized(right) * sizeX;
+                mat.GetUp() = Normalized(fwd) * sizeY;
+                mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
 
-                    {
-                        constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
-                        pane->velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
-                    }
+                const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{(float)posX, (float)posY};
+                mat.GetPosition() = point + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
 
-                    if (velocityCenterDragCoeff != 0.0f) {
-                        pane->velocity += Normalized(mat.GetPosition() - center) * velocityCenterDragCoeff;
-                    }
-
-                    {
-                        constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
-                        pane->randomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
-                    }
-
-                    switch (type) {
-                    case 1: {
-                        pane->createdTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
-                        break;
-                    }
-                    case 2:
-                    default: {
-                        pane->createdTime = CTimer::GetTimeInMS();
-                        break;
-                    }
-                    }
-
-                    pane->groundZ = groundZ;
-                    pane->bRenderShatter = bShatter;
-                    pane->size = sizeY;
-                    pane->field_6F = unk;
-                    pane->existFlag = true;
+                {
+                    constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                    pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
                 }
-            }
 
+                if (velocityCenterDragCoeff != 0.0f) {
+                    pane->m_Velocity += Normalized(mat.GetPosition() - center) * velocityCenterDragCoeff;
+                }
+
+                {
+                    constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
+                    pane->m_RandomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
+                }
+
+                switch (type) {
+                case 1: {
+                    pane->m_nCreatedTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
+                    break;
+                }
+                case 2:
+                default: {
+                    pane->m_nCreatedTime = CTimer::GetTimeInMS();
+                    break;
+                }
+                }
+
+                pane->m_fGroundZ = groundZ;
+                pane->m_bRenderShatter = bShatter;
+                pane->m_fSize = sizeY;
+                pane->m_f6F = unk;
+                pane->m_bExistFlag = true;
+            }
         }
     }
 }
@@ -355,7 +356,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
 // 0x71B0D0
 void CGlass::Update() {
     for (auto& pane : aGlassPanes) {
-        if (pane.existFlag) {
+        if (pane.m_bExistFlag) {
             pane.Update();
         }
     }
@@ -380,7 +381,7 @@ void CGlass::Render() {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     for (auto& pane : aGlassPanes) {
-        if (pane.existFlag) {
+        if (pane.m_bExistFlag) {
             pane.Render();
         }
     }
@@ -504,7 +505,7 @@ void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
 
 // 0x71ACA0
 CFallingGlassPane* CGlass::FindFreePane() {
-    const auto it = rng::find_if(aGlassPanes, [](auto&& v) {return v.existFlag; });
+    const auto it = rng::find_if(aGlassPanes, [](auto&& v) {return v.m_bExistFlag; });
     return it != std::end(aGlassPanes) ? &*it : nullptr;
 }
 

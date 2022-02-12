@@ -44,8 +44,9 @@ public:
     void RemoveCollisionVolumes();
     void CalculateTrianglePlanes();
     void RemoveTrianglePlanes();
-    auto GetTriCount() const noexcept { return m_pColData ? m_pColData->m_nNumTriangles : 0u; }
-// HELPERS
+
+    // HELPERS
+    [[nodiscard]] auto GetTriCount() const noexcept { return m_pColData ? m_pColData->m_nNumTriangles : 0u; }
     inline float GetBoundRadius() const { return m_boundSphere.m_fRadius; }
     inline CVector& GetBoundCenter() { return m_boundSphere.m_vecCenter; }
     inline CBoundingBox& GetBoundingBox() { return m_boundBox; }
