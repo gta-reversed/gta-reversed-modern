@@ -12,7 +12,7 @@ public:
     float   m_fSize;
     uint8   m_nPieceIndex;
     bool    m_bExistFlag;
-    int8    m_bRenderShatter;
+    bool    m_bRenderShatter;
     bool    m_f6F;
 
 public:
@@ -22,8 +22,8 @@ public:
     ~CFallingGlassPane() = default; // 0x71A8C0
 
     void Update();
-    auto CalculateHiHlightPolyColor();
-    auto CalculateShatterPolyColor();
+    RwRGBA CalculateHiLightPolyColor();
+    RwRGBA CalculateShatterPolyColor();
     void Render();
 };
 VALIDATE_SIZE(CFallingGlassPane, 0x70);

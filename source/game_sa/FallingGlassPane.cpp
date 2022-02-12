@@ -37,21 +37,21 @@ void CFallingGlassPane::Update() {
     }
 }
 
-auto CFallingGlassPane::CalculateHiHlightPolyColor() {
+RwRGBA CFallingGlassPane::CalculateHiLightPolyColor() {
     const auto alpha       = (float)CGlass::CalcAlphaWithNormal(Normalized(m_Matrix.GetForward()));
     const auto delta       = (float)std::clamp(CTimer::GetTimeInMS() - m_nCreatedTime, 0u, 500u);
     const auto scaledAlpha = (unsigned)(alpha * delta / 500.f);
-    const auto final       = m_f6F ? std::max(64u, scaledAlpha) : scaledAlpha;
-    return RwRGBA(final, final, final, final);
+    const uint8 final      = m_f6F ? std::max(64u, scaledAlpha) : scaledAlpha;
+    return { final, final, final, final};
 }
 
-auto CFallingGlassPane::CalculateShatterPolyColor() {
+RwRGBA CFallingGlassPane::CalculateShatterPolyColor() {
     const auto camDist = (m_Matrix.GetPosition() - TheCamera.GetPosition()).Magnitude();
     if (camDist > 30.f) {
         const auto alpha = (uint8)((1.0f - (camDist - 30.f) / 10.f) * 140.f);
-        return RwRGBA(alpha, alpha, alpha, alpha);
+        return { alpha, alpha, alpha, alpha };
     }
-    return RwRGBA(140u, 140u, 140u, 140u);
+    return { 140u, 140u, 140u, 140u};
 }
 
 // 0x71B100
@@ -61,7 +61,7 @@ void CFallingGlassPane::Render() {
     // Render HiLightPoly's
     CVector vertices[3]{};
     {
-        const auto color = CalculateHiHlightPolyColor();
+        const auto color = CalculateHiLightPolyColor();
         constexpr RwTexCoords uv[3] = {
             { 0.5f, 0.5f },
             { 0.5f, 0.6f },
