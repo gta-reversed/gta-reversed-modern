@@ -22,19 +22,6 @@ public:
     //    SOME = -1 // Some hooked
     //};
 
-    // Used for HookTool searching
-    enum class NameMatchType {
-        NONE,
-        PARTIAL,
-        FULL
-    };
-
-    enum class VisibilityState {
-        INVISIBLE,  // Not shown at all
-        CLOSED,      // Shown, but not opened
-        OPEN,       // Shown and opened
-    };
-
 public:
     HookCategory(std::string name, HookCategory* parent) :
         m_name{ std::move(name) },
@@ -64,11 +51,6 @@ public:
 
     bool Open()                 const { return m_isOpen; }
     void Open(bool open)              { m_isOpen = open; }
-
-    //bool Visible()              const { return m_visibilityState != VisibilityState::INVISIBLE; }
-    //void Visible(bool visible)        { if (visible) { Open(false); } else { m_visibilityState = VisibilityState::INVISIBLE; } }
-    //bool Open()                 const { return m_visibilityState == VisibilityState::OPEN; }
-    //void Open(bool open)              { m_visibilityState = open ? VisibilityState::OPEN : VisibilityState::CLOSED; }
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
@@ -281,9 +263,6 @@ public:
     HooksState                m_overallState{ HooksState::ALL };          // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
     bool                      m_isVisible{true};                          // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
     bool                      m_isOpen{};                                 // Is our tree currently open
-    NameMatchType             m_nameMatchType{};
-    //bool                      m_isVisible{};                              // Is our tree node drawn at all
-    VisibilityState           m_visibilityState{VisibilityState::CLOSED}; // Visiblity state when searching(filtering), otherwise irrelevant.
     bool                      m_anyItemsVisible{};                        // Used when searching 
 private:
 
