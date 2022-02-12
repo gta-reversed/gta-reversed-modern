@@ -10,65 +10,16 @@
 #include <string>
 #include <ranges>
 #include <optional>
-#include <regex>
-
 
 namespace RH = ReversibleHooks;
 namespace rng = std::ranges;
 using namespace ImGui;
 
-// TODO: Comment this out. Used to experiment with VS's CTRL + T behaviour
-namespace lvl1 {
-    void fn1();
-    namespace lvl2 {
-        void fn2();
-        void lvl2fn();
-        namespace lvl3 {
-            void fn3();
-
-            namespace lvl4 {
-                void fn4();
-
-                namespace noname {
-
-                };
-            };
-
-            namespace noname {
-
-            };
-        };
-        namespace noname {
-
-        };
-    };
-};
-
-namespace Entity {
-    namespace Vehicle {
-        namespace Automobile {
-
-        };
-    };
-};
-
-// Matches must be in order. It doesn't matter if a sub-category in-between doesn't match
-// Eg.:
-// - `lvl::noname` will match both `lvl1::lvl2::noname` and `lvl1::lvl2::lvl3::noname`
-// - `lvl::lvl::noname` will still match both
-// - `lvl::lvl::lvl::noname` will only match `lvl1::lvl2::lvl3::noname`
-// Last token is always used for matching namespace/function (in our case hook) names
-// if last token is empty just ignore it in the case of functions, but take into account for
-// namespaces.
-// Eg.: `lvl1` should show all functions/namespaces with the name containing `lvl1`, but
-// `lvl1::` should only show children/functions of namespaces whose name contains `lvl`
-// If a sub-category in-between doesn't match don't show it's functions, but only namespaces that match
-// Eg.: `lvl2::lvl` should only show 
-
-static std::string HooksFilterContent;
-struct FilterTool {
-    // If either of these 2 separators is changed make sure to alter the regex as well.
-
+// Namespace for the hook filter
+// It is intentionally not a class/struct (As it's a singleton and static classes are stupid)
+namespace HookFilter {
+    // If either of these separators is changed make sure to alter the regex as well.
+    // Also all the comments :D
     static constexpr std::string_view NAMESPACE_SEP{ "/" };
     static constexpr std::string_view HOOKNAME_SEP{ "::" };
 
@@ -79,12 +30,11 @@ struct FilterTool {
     //    std::regex::optimize | std::regex::icase
     //}; 
 
-
-    // Used as char buffer for the ImGUI input - May only ever contain letters (a-zA-Z) and `HOOKNAME_SEP`, `NAMESPACE_SEP`
+    // Used as char buffer for the ImGUI input
     std::string m_input{};          
 
     // Are the string checks case sensitive?
-    // It is used, but there's no GUI to change it for now, it is case-insensitive by defult.
+    // It is used, but there's no GUI to change it for now. It is case-insensitive by defult (false).
     bool m_caseSensitive{};
 
     // Contains all the tokens on the left side split by `NAMESPACE_SEP` of the input split by `HOOKNAME_SEP`
@@ -92,6 +42,7 @@ struct FilterTool {
     // - `Name/Space/` => `Name`, `Space`, `` (<= empty string)
     // - `Name/Space/::` => -||- (Same as the above example)
     // - `/` - `` (empty string) - Indicates root namespace (See `IsRelativeToRootNamespace`)
+    // - `///` - 4 empty strings
     std::vector<std::string_view> m_namespaceTokens{};
 
     // Filter of hook name
@@ -140,78 +91,6 @@ struct FilterTool {
         return m_namespaceTokens.size() >= 1 && m_namespaceTokens.front().empty();
     }
 
-    void OnInputUpdate() {
-        const std::string_view inputsv{ m_input };
-
-        ClearFilters();
-
-        if (inputsv.empty()) {
-            return; // No filters
-        }
-
-        // We copy VS's CTRL + T behaviour. I'm lazy to explain it :D
-        // Try it for yourself. There's a little code above for it, uncomment it.
-
-        {   
-            const auto sepPos = inputsv.rfind(HOOKNAME_SEP);
-
-            // First half contains the namespace filter tokens
-            for (auto t : SplitStringView(inputsv.substr(0, sepPos), NAMESPACE_SEP)) {
-                m_namespaceTokens.emplace_back(t);
-            }
-
-            // Second half (if any) contains the hook/function name filter
-            if (sepPos != std::string_view::npos) {
-                m_hookFilter = inputsv.substr(sepPos + HOOKNAME_SEP.size());
-            }
-        }
-
-
-        //if (m_namespaceTokens.size() < 2) { // If less than 2 tokens there was no `NAMESPACE_SEP` - That's fine.
-        //    return;
-        //}
-
-        // In case user passes in a string with multiple `/` with nothing inbetween we will have quite a few empty tokens.
-        //// We have have to remove all the leading empty tokens up until the last empty one.
-        while (m_namespaceTokens.size() >= 2 && m_namespaceTokens[0].empty() && m_namespaceTokens[1].empty()) {
-            m_namespaceTokens.erase(m_namespaceTokens.begin());
-        }
-
-        std::cout << "update input: ";
-        for (auto&& t : m_namespaceTokens) {
-            std::cout << '`' << t << "`,";
-        }
-        std::cout << ";" << m_hookFilter.value_or("None") << "\n";
-
-        /*m_namespaceTokens.erase(
-            std::remove_if(m_namespaceTokens.rbegin(), m_namespaceTokens.rend() - 1, [](auto&& t) { return t.empty(); }).base(),
-            m_namespaceTokens.end()
-        );*/
-
-        // If we're using the root namespace only but there's no hook filter we paractically dont't filter anything
-        // Example user inputs: `/`, `/::`, `::`
-        if (IsRelativeToRootNamespace() && m_namespaceTokens.size() == 1 && IsHookFilterActive()) {
-            ClearFilters();
-        }
-
-        //// If there are exactly 2 tokens and both sides are empty there's nothing to filter.
-        //if (m_namespaceTokens.size() == 2) { 
-        //    if (rng::all_of(m_namespaceTokens, [](auto&& t) { return t.empty(); })) {
-        //        ClearFilters();
-        //        return;
-        //    }
-        //}
-    }
-
-    void ProcessImGui() {
-        PushItemWidth(GetWindowContentRegionMax().x - 10.f);
-        if (InputText(" ", &m_input)) {
-            OnInputUpdate();
-            DoFilter(RH::GetRootCategory());
-        }
-        PopItemWidth();
-    }
-
     // Make all categories and their items possibly visible and/or open
     void MakeAllVisibleAndOpen(RH::HookCategory& cat, bool visible, bool open) {
         cat.Visible(true);
@@ -228,7 +107,7 @@ struct FilterTool {
     }
 
     // Returns `pair<visible, open>` of this category
-    std::pair<bool, bool> DoFilter_Internal(RH::HookCategory& cat, size_t depth = 0) {
+    auto DoFilter_Internal(RH::HookCategory& cat, size_t depth = 0) -> std::pair<bool, bool> {
         // Will be set to the appropriate values on return
         cat.Visible(false);
         cat.Open(false);
@@ -236,7 +115,7 @@ struct FilterTool {
         const auto hasSubCategories = !cat.SubCategories().empty();
 
         // Process all sub-categories, and return if any category is pair<visible, open>
-        const auto ProcessSubCategories = [&, this] {
+        const auto ProcessSubCategories = [&] {
             bool anyVisible{}, anyOpen{};
             for (auto& sc : cat.SubCategories()) {
                 const auto [visible, open] = DoFilter_Internal(sc, depth + 1);
@@ -246,7 +125,7 @@ struct FilterTool {
             return std::make_pair(anyVisible, anyOpen);
         };
 
-        // If `doFilter` argument is `false` all items are set visible, and `false` is returned
+        // If `doFilter` argument is `false` all items are set visible, and either true (if we have hooks) or false (if `cat.Items().empty()`) is returned.
         // otherwise items are filtered and true if returned if at least 1 item is visible.
         const auto ProcessItems = [&](bool allowFilter) {
             if (allowFilter && IsHookFilterActive()) {
@@ -255,7 +134,6 @@ struct FilterTool {
                     i->m_isVisible = StringContainsString(i->Name(), *m_hookFilter, m_caseSensitive);
                     cat.m_anyItemsVisible |= i->m_isVisible;
                 }
-                return cat.m_anyItemsVisible;
             } else { // Otherwise make sure all items are visible (if any)
                 if (cat.Items().empty()) { // No items, make sure flag is set correctly.
                     cat.m_anyItemsVisible = false;
@@ -265,43 +143,39 @@ struct FilterTool {
                         i->m_isVisible = true; 
                     }
                 }
-                return true;
             }
+            return cat.m_anyItemsVisible;
         };
 
-        // When using root namespace our visibility is decided by our sub-categories' items and our items, if none of them are visible we aren't either,
-        // otherwise current filters also impact our visibility.
         if (IsNamespaceFilterActive()) {
             if (IsRelativeToRootNamespace()) { // Eg.: (Notice the trailing `/`) /Entity/Ped/Player/ (Should show `Root/Entity/Ped/CPlayerPed`)
-                const auto ProcessFilter = [&, this]() -> bool {
+                // Using root namespace.
+                // In this case all tokens must match up to root
+
+                const auto ProcessFilter = [&]() -> bool {
                     if (depth == 0) { // Special case - Root namespace depth, no need to check any tokens
                         assert(m_namespaceTokens.front().empty()); // This codepath should be unreachable unless first token is empty
                         return true; 
                     } else if (depth < m_namespaceTokens.size()) {
                         if (   hasSubCategories                      // Unless we're last category to match we must have more sub-categories so all tokens can match
-                            || depth == m_namespaceTokens.size() - 1 // Last category that to match, it's fine if we don't have any sub-categories
-                            || m_namespaceTokens.back().empty()      // Or last token is empty (Empty tokens always match everything) - This way last category can be opened without clicking
+                            || depth == m_namespaceTokens.size() - 1 // Last token to match, so there will be no more, thus it's fine if there are no more subcategories.
+                            || m_namespaceTokens.back().empty()      // Or last token is empty (Empty strings always match everything) - This way a trailing `/` opens the category (like `::` does)
                         ) {
                             return StringContainsString(cat.Name(), m_namespaceTokens[depth], m_caseSensitive);
                         } else {
                             return false; // Not enough children to statify all tokens
                         }
                     } else { // Our parents fully matched the tokens, they just want to make us visible, but not open
-                        //assert(cat.Parent()->Visible()); // Should be unreachable unless parent is visible at this point
                         return true;
                     }
                 };
 
-                if (cat.Name() == "CPlayerPed") {
-                    //__debugbreak();
-                    const volatile bool test{ };
-                }
                 const auto byFilterVisible = ProcessFilter();
                 if (!byFilterVisible) {
                     return {};
                 }
 
-                // If botom level, and hook filtering is present make us open, and dont show any sub-categories of ours
+                // If botom level, and hook filtering is present: make us open, and dont show any more sub-categories
                 if (depth == m_namespaceTokens.size() - 1 /*bottom level*/ && IsHookFilterPresent()) {
                     MakeAllVisibleAndOpen(cat, false, false);
 
@@ -314,9 +188,6 @@ struct FilterTool {
                 }
 
                 const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
-                if (!byFilterVisible && !anySCVisible) {
-                    return {};
-                }
 
                 const bool open    = anySCOpen || depth + 1 < m_namespaceTokens.size() /*All categories before the bottom level should be open*/;
                 const bool visible = anySCVisible || byFilterVisible;
@@ -326,18 +197,20 @@ struct FilterTool {
 
                 return { visible, open };
             } else { // Eg.: Ped/Player/ (Should show `Root/Entity/Ped/CPlayerPed`)
-                const auto ProcessFilter = [&, this]() -> bool {
-                    // Not in the root namespace
-                    // All tokens should match in order reverse order starting at us, eg.:
-                    // Entity::Ped::CPed
-                    //              <This is `cat`>
-                    // So, in order to be visible, `cat`s name should contain `CPed`
-                    // it's parent's name should contain `Ped` and it's parent's name should contain `Entity`
+                // Not in the root namespace
+                // All tokens should match in reverse order starting at us, eg.:
+                // Entity::Ped::Ped
+                // So, in order to be visible* `cat`s name should contain `Ped`
+                // it's parent's name should contain `Ped` and it's parent's name should contain `Entity`
+                // *We may be visible if there are subcategories visible even if this function returns false
 
-                    // Parents: Root-Entity-Ped-CPed
-                    // Depth:   0     1       2    3   <= Also number of tokens
-                    // Tokens:        Entity::Ped::Ped
-                    if (depth < m_namespaceTokens.size()) { // Not enough categories to possibly staisfy all tokens
+                // Example:
+                // Parents: Root-Entity-Ped-CPed
+                // Depth:   0     1       2    3   <= Also number of tokens
+                // Tokens:        Entity::Ped::Ped
+
+                const auto ProcessFilter = [&]() -> bool {
+                    if (depth < m_namespaceTokens.size()) { // Optimization: Not enough categories to possibly staisfy all tokens
                         return false;
                     }
 
@@ -352,15 +225,11 @@ struct FilterTool {
                 };
 
                 const auto byFilterVisible = ProcessFilter();
-                const auto itemsVisible = ProcessItems(true);
+                const auto itemsVisible = ProcessItems(true); // Filter items
                 const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
 
                 const bool open    = anySCOpen || anySCVisible || hasSubCategories && (byFilterVisible) || IsHookFilterPresent() && itemsVisible;
                 const bool visible = byFilterVisible && itemsVisible || anySCVisible;
-
-                /*if (cat.Name() == "CAudioEngine") {
-                    __debugbreak();
-                }*/
 
                 cat.Visible(visible);
                 cat.Open(open);
@@ -368,13 +237,14 @@ struct FilterTool {
                 return { visible, open };
             }
 ;       } else {
-            // Filter hook names
+            // Filter by hook names
+            // Category is visible if it:
+            // - It has visible hooks (After filtering) 
+            // - Or it has visible sub-categories
 
-            const auto itemsVisible = ProcessItems(true);
-            const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
+            const auto itemsVisible = ProcessItems(true); // Filter items
+            const auto [anySCVisible, anySCOpen] = ProcessSubCategories(); 
 
-            // We should be open if we have visible items, or any of our
-            // sc's is open (otherwise that sc wouldn't appear to the user)
             const auto open = itemsVisible || anySCOpen;
 
             const bool visible = open || anySCVisible;
@@ -393,18 +263,69 @@ struct FilterTool {
             MakeAllVisibleAndOpen(cat, true, false); // Make all visible, but closed
         }        
     }
-} s_HookFilter;
 
-bool IsFiltered() {
-    return !HooksFilterContent.empty();
-}
+    void OnInputUpdate() {
+        const std::string_view inputsv{ m_input };
+
+        ClearFilters();
+
+        if (inputsv.empty()) {
+            return; // No filters
+        }
+
+        {   
+            const auto sepPos = inputsv.rfind(HOOKNAME_SEP);
+
+            // First half contains the namespace filter tokens
+            for (auto t : SplitStringView(inputsv.substr(0, sepPos), NAMESPACE_SEP)) {
+                m_namespaceTokens.emplace_back(t);
+            }
+
+            // Second half (if any) contains the hook/function name filter
+            if (sepPos != std::string_view::npos) {
+                m_hookFilter = inputsv.substr(sepPos + HOOKNAME_SEP.size());
+            }
+        }
+
+        // In case user passes in a string with multiple `/` with nothing inbetween we will have quite a few empty tokens.
+        //// We have have to remove all the leading empty tokens up until the last empty one.
+        while (m_namespaceTokens.size() >= 2 && m_namespaceTokens[0].empty() && m_namespaceTokens[1].empty()) {
+            m_namespaceTokens.erase(m_namespaceTokens.begin());
+        }
+
+        // Don't delte this please //
+        //
+        /*std::cout << "update input: ";
+        for (auto&& t : m_namespaceTokens) {
+            std::cout << '`' << t << "`,";
+        }
+        std::cout << ";" << m_hookFilter.value_or("None") << "\n";*/
+
+        // If we're using the root namespace only but there's no hook filter we paractically dont't filter anything
+        // Example user inputs: `/`, `/::`, `::`
+        if (IsRelativeToRootNamespace() && m_namespaceTokens.size() == 1 && IsHookFilterActive()) {
+            ClearFilters();
+        }
+    }
+
+    void ProcessImGui() {
+        PushItemWidth(GetWindowContentRegionMax().x - 10.f);
+        if (InputText(" ", &m_input)) {
+            OnInputUpdate();
+            DoFilter(RH::GetRootCategory());
+        }
+        PopItemWidth();
+    }
+};
 
 void RenderCategory(RH::HookCategory& cat) {
     if (!cat.Visible()) {
         return;
     }
 
-    PushID(&cat); // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
+    // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
+    // Using this instead of the name as it's faster than encoding a string (And we care about performance, since this is mostly run in debug mode)
+    PushID(&cat);
 
     const auto& name = cat.Name();
 
@@ -432,17 +353,12 @@ void RenderCategory(RH::HookCategory& cat) {
         }
 
         cat.Open(isCategoryOpen);
-
-        // Save state if we haven't overwrote it
-        /*if (!IsFiltered()) {
-            cat.m_isCategoryOpen = isCategoryOpen;
-        }*/
     }
 
     // Draw hooks, and subcategories
     if (isCategoryOpen) {
         // Draw hooks (if any)
-        if (!cat.Items().empty()) {
+        if (!cat.Items().empty() && cat.m_anyItemsVisible) {
             const auto DrawItems = [&] {
                 for (auto& item : cat.Items()) {
                     if (!item->m_isVisible) {
@@ -503,7 +419,7 @@ void RenderCategory(RH::HookCategory& cat) {
 
 namespace HooksDebugModule {
 void ProcessImGui() {
-    s_HookFilter.ProcessImGui();
+    HookFilter::ProcessImGui();
 
     if (BeginChild("##hookstool")) {
         RenderCategory(RH::GetRootCategory());
