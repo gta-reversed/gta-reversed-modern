@@ -46,7 +46,6 @@ void CGlass::InjectHooks() {
     RH_ScopedInstall(WindowRespondsToExplosion, 0x71C1A0);
 }
 
-// Static functions
 // 0x71A8D0
 void CGlass::Init() {
     for (auto& pane : aGlassPanes) {
@@ -56,13 +55,13 @@ void CGlass::Init() {
     for (auto i = 0u; i < std::size(PanePolyPositions); i++) {
         const auto& poly = PanePolyPositions[i];
 
-        // Calcualte center position of each pane by taking an average 
+        // Calculate center position of each pane by taking an average
         PanePolyCenterPositions[i] = std::accumulate(std::begin(poly), std::end(poly), CVector2D{}) / (float)std::size(PanePolyPositions);
     }
 }
 
-// 0x71CB70
 // Unused
+// 0x71CB70
 bool CGlass::HasGlassBeenShatteredAtCoors(CVector point) {
     CWorld::IncrementCurrentScanCode();
     const float minX = point.x - 30.f;
@@ -85,8 +84,8 @@ bool CGlass::HasGlassBeenShatteredAtCoors(CVector point) {
 }
 
 // 0x71C2B0
-void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
-    const auto colModel = pVeh->GetColModel();
+void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
+    const auto colModel = vehicle->GetColModel();
     if (!colModel || colModel->GetTriCount() < 2) {
         return;
     }
@@ -109,7 +108,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
 
     CCollision::CalculateTrianglePlanes(colModel);
 
-    auto& vehMat = (CMatrix&)pVeh->GetMatrix();
+    auto& vehMat = (CMatrix&)vehicle->GetMatrix();
 
     // Grab normal and transform it to world space
     const auto normal = Multiply3x3(
@@ -172,8 +171,7 @@ void CGlass::CarWindscreenShatters(CVehicle* pVeh) {
         2,
         blPos,
         fwd * extent.fwd,
-        right * extent.right,
-        pVeh->m_vecMoveSpeed,
+        right * extent.right, vehicle->m_vecMoveSpeed,
         blPos + fwd * extent.fwd / 2.f + right * extent.right / 2.f,
         0.1f,
         false,
@@ -265,8 +263,8 @@ void CGlass::WindowRespondsToCollision(CEntity* pEntity, float fDamageIntensity,
  * - Neither 'size' vectors are normalized!
  *
  * type                    - 0, 1, 2 - Undocumented yet
- * point                     - BL
- * fwd, right      - As illustrated above
+ * point                   - BL
+ * fwd, right              - As illustrated above
  * center                  - The centre of the above rectangle (each pane is a piece of it)
  * velocity                - How fast the panes fly
  * velocityCenterDragCoeff - Modify the velocity's direction to be more towards the center point
@@ -402,11 +400,11 @@ void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& o
     if (!objList.GetNode())
         return;
 
-    for (CPtrNode *it = objList.GetNode(); it;) {
+    for (CPtrNode* it = objList.GetNode(); it;) {
         const auto entity = static_cast<CEntity*>(it->m_item);
         it = it->GetNext();
 
-        if (entity->m_nScanCode == CWorld::ms_nCurrentScanCode)
+        if (entity->IsScanCodeCurrent())
             continue;
 
         if (!entity->IsObject())
@@ -437,7 +435,8 @@ void CGlass::RenderReflectionPolys() {
         RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
         RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 
-        if (RwIm3DTransform(ReflectionPolyVertexBuffer, ReflectionPolyVertexBaseIdx - 1536, nullptr, 1u)) {
+        if (RwIm3DTransform(ReflectionPolyVertexBuffer, ReflectionPolyVertexBaseIdx - 1536, nullptr, rwIM3D_VERTEXUV))
+        {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &aTempBufferIndices[3072], ReflectionPolyIndexBaseIdx - 3072);
             RwIm3DEnd();
         }
@@ -600,6 +599,19 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
 }
 
 // 0x71C1A0
-void CGlass::WindowRespondsToExplosion(CEntity* entity, const CVector& pos) {
-    plugin::Call<0x71C1A0, CEntity*, CVector>(entity, pos);
+void CGlass::WindowRespondsToExplosion(CEntity* entity, const CVector point) {
+    if (!entity->m_bUsesCollision)
+        return;
+
+    auto diff = (entity->GetPosition() - point);
+    auto dist = diff.Magnitude();
+    if (dist >= 10.0f)
+    {
+        if (dist < 30.0f)
+            entity->AsObject()->objectFlags.bGlassBroken = true;
+    }
+    else
+    {
+        CGlass::WindowRespondsToCollision(entity, 10000.0f, diff * (0.3f / dist), entity->GetPosition(), true);
+    }
 }
