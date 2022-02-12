@@ -606,19 +606,18 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
 }
 
 // 0x71C1A0
-void CGlass::WindowRespondsToExplosion(CEntity* entity, Const CVector point) {
-    if (!entity->m_bUsesCollision)
+void CGlass::WindowRespondsToExplosion(CEntity* entity, CVector pos) {
+    if (!entity->m_bUsesCollision) {
         return;
-
-    auto diff = (entity->GetPosition() - point);
-    auto dist = diff.Magnitude();
-    if (dist >= 10.0f)
-    {
-        if (dist < 30.0f)
-            entity->AsObject()->objectFlags.bGlassBroken = true;
     }
-    else
-    {
-        CGlass::WindowRespondsToCollision(entity, 10000.0f, diff * (0.3f / dist), entity->GetPosition(), true);
+
+    const auto entityToPosDir{ entity->GetPosition() - pos };
+    const auto dist{ entityToPosDir.Magnitude() };
+    if (dist >= 10.f) {
+        if (dist < 30.f) {
+            entity->AsObject()->objectFlags.bGlassBroken = true;
+        }
+    } else {
+        WindowRespondsToCollision(entity, 10000.f, entityToPosDir * (0.3f / dist), entity->GetPosition(), true);
     }
 }
