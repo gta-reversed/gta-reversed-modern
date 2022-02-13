@@ -554,7 +554,7 @@ void CCheat::HealthCheat() {
     vehicle->m_fHealth = 1000.0f;
     if (vehicle->IsBike()) {
         CBike* bike = vehicle->AsBike();
-        bike->field_7BC = 0;
+        bike->m_fFireBlowUpTimer = 0.0f;
         bike->Fix();
     } else if (vehicle->IsAutomobile()) {
         vehicle->m_apCollidedEntities[5] = nullptr; // todo: magic number

@@ -54,7 +54,7 @@ public:
     float        m_planeHeadingPrev;
     float        m_forwardZ;
     uint32       m_nStartedFlyingTime;
-    float        m_propSpeed;
+    float        m_fPropSpeed;
     float        field_9C8;
     float        m_fLandingGearStatus;
     int32        m_planeDamageWave;
@@ -67,7 +67,6 @@ public:
     FxSystem_c*  m_pSmokeParticle;
     uint32       m_nSmokeTimer;
     bool         m_bSmokeEjectorEnabled;
-    char         _pad[3];
 
 public:
     static int32& GenPlane_ModelIndex;

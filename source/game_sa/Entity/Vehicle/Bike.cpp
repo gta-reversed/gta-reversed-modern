@@ -28,7 +28,7 @@ void CBike::InjectHooks() {
     RH_ScopedInstall(DebugCode, 0x6B67A0);
     // RH_ScopedInstall(DoSoftGroundResistance, 0x6B6D40);
     RH_ScopedInstall(PlayHornIfNecessary, 0x6B7130);
-    // RH_ScopedInstall(CalculateLeanMatrix, 0x6B7150);
+    RH_ScopedInstall(CalculateLeanMatrix, 0x6B7150);
     // RH_ScopedInstall(ProcessRiderAnims, 0x6B7280);
     // RH_ScopedInstall(FixHandsToBars, 0x6B7F90);
     // RH_ScopedInstall(PlaceOnRoadProperly, 0x6BEEB0);
@@ -156,7 +156,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
         return;
 
     ped->physicalFlags.bTouchingWater = true;
-    if (!ped->IsPlayer() && damageFlags.bIgnoreWater)
+    if (!ped->IsPlayer() && bikeFlags.bIgnoreWater)
         return;
 
     if (ped->IsPlayer())
@@ -261,19 +261,17 @@ void CBike::PlayHornIfNecessary() {
 
 // 0x6B7150
 void CBike::CalculateLeanMatrix() {
-    return ((void(__thiscall*)(CBike*))0x6B7150)(this);
+    if (m_bLeanMatrixCalculated)
+        return;
 
-    // wrong
-    if (!m_bLeanMatrixCalculated) {
-        CMatrix m;
-        m.SetRotateX(fabs(m_rideAnimData.m_fAnimLean) * -0.05f);
-        m.RotateY(m_rideAnimData.m_fAnimLean);
-        m_mLeanMatrix = *static_cast<CMatrix*>(m_matrix);
-        m_mLeanMatrix *= m;
-
-        m_bLeanMatrixCalculated = true;
-        m_mLeanMatrix.GetPosition() = CEntity::GetColModel()->GetBoundingBox().m_vecMin.z * m_matrix->GetUp() * (1.0f - cos(m_rideAnimData.m_fAnimLean));
-    }
+    CMatrix mat;
+    mat.SetRotateX(fabs(m_rideAnimData.m_fAnimLean) * -0.05f);
+    mat.RotateY(m_rideAnimData.m_fAnimLean);
+    m_mLeanMatrix = GetMatrix();
+    m_mLeanMatrix = m_mLeanMatrix * mat;
+    // place wheel back on ground
+    m_mLeanMatrix.GetPosition() += GetUp() * (1.0f - cos(m_rideAnimData.m_fAnimLean)) * GetColModel()->GetBoundingBox().m_vecMin.z;
+    m_bLeanMatrixCalculated = true;
 }
 
 // 0x6B7F90
@@ -299,7 +297,7 @@ void CBike::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
 // 0x6B7050
 void CBike::Fix() {
     vehicleFlags.bIsDamaged = false;
-    damageFlags.bDamageFlag7 = false;
+    bikeFlags.bIsOnFire = false;
     m_anWheelDamageState[0] = 0;
     m_anWheelDamageState[1] = 0;
 }

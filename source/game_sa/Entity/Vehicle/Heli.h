@@ -43,7 +43,7 @@ struct tHeliLight {
     uint32  m_nCoronaIndex;
     bool    field_24; // unknown flag
     bool    m_bDrawShadow;
-    CVector m_vecUseless[3];
+    CVector m_vecUseless[3]; // m_aSearchLightHistory
 
     void Init() {
         m_vecOrigin = CVector{};
@@ -59,7 +59,7 @@ class FxSystem_c;
 
 class CHeli : public CAutomobile {
 public:
-    char         m_nHeliFlags;
+    uint8        m_nHeliFlags;
     float        m_fLeftRightSkid;
     float        m_fSteeringUpDown;
     float        m_fSteeringLeftRight;
@@ -72,19 +72,21 @@ public:
     float        m_fMinAltitude;
     int32        field_9B4;
     char         field_9B8;
-    char         m_nNumSwatOccupants;
-    char         m_anSwatIDs[4];
-    int32        field_9C0[4];
-    int32        field_9D0;
+    int8         m_nNumSwatOccupants;
+    uint8        m_aSwatState[4];
+    CVector      field_9C0;
+    int          f9CC;
+    int          f9D0;
     FxSystem_c** m_pParticlesList;
-    char         field_9D8[24];
-    int32        field_9F0;
+    float        m_aSearchLightHistoryX[3];
+    float        m_aSearchLightHistoryY[3];
+    uint32       m_nSearchLightTimer;
     CVector      m_vecSearchLightTarget;
     float        m_fSearchLightIntensity;
-    int32        field_A04;
-    int32        field_A08;
+    uint32       m_nShootTimer;
+    uint32       m_nPoliceShoutTimer;
     FxSystem_c** m_ppGunflashFx;
-    char         m_nFiringMultiplier;
+    int8         m_nFiringMultiplier;
     bool         m_bSearchLightEnabled;
     float        field_A14;
 

@@ -45,10 +45,10 @@ void CBmx::LaunchBunnyHopCB(CAnimBlendAssociation* blendAssoc, void* data) {
 
 // 0x6C0500 | inlined | see 0x6C11F3
 void CBmx::GetFrameOffset(float& a1, float& a2) {
-    const auto d1 = field_760 - field_768;
-    const auto d2 = field_764 - field_76C;
+    const auto d1 = m_aWheelFrontPosition - m_aWheelBaseFrontPosition;
+    const auto d2 = m_aWheelRearPosition - m_aWheelBaseRearPosition;
 
-    a1 = (1.0 - m_f830) * d1 + d2 * m_f830;
+    a1 = (1.0f - m_f830) * d1 + d2 * m_f830;
     a2 = atan2(d1 - d2, m_fWheelsBalance);
 }
 

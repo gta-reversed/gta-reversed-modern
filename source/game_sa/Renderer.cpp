@@ -570,7 +570,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->damageFlags.bDamageFlag8))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
