@@ -45,7 +45,7 @@ public:
             uint32 bPickupPropertyForSale : 1;  // 0x4
             uint32 bPickupInShopOutOfStock : 1; // 0x8
             uint32 bGlassBroken : 1;            // 0x10
-            uint32 b0x20 : 1;                   // 0x20
+            uint32 b0x20 : 1;                   // 0x20 - Something glass related, see `WindowRespondsToCollision`
             uint32 bIsExploded : 1;             // 0x40
             uint32 bChangesVehColor : 1;        // 0x80
 

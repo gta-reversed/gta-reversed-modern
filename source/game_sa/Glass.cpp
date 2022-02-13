@@ -112,7 +112,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     );
 
     // Calculate direction vectors
-    const auto fwd   = Normalized(CrossProduct(vehMat.GetRight(), normal)); // A more suitable name may be "up"
+    const auto fwd   = Normalized(CrossProduct(vehMat.GetRight(), normal));
     const auto right = Normalized(CrossProduct(vehMat.GetUp(), normal));
 
     // Store world space vertex positions of both triangles
