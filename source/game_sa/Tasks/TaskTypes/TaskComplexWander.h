@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 #include "TaskComplex.h"
 #include "NodeAddress.h"
 
@@ -27,9 +26,6 @@ class CNodeAddress;
 class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
-protected:
-    CTaskComplexWander(plugin::dummy_func_t) : CTaskComplex() {}
-
 public:
     int32        m_nMoveState; // see eMoveState
     uint8        m_nDir;
@@ -49,29 +45,18 @@ public:
     };
 
 public:
-    static void InjectHooks();
-
+    CTaskComplexWander(plugin::dummy_func_t) : CTaskComplex() { /* todo: Remove NOTSA */ }
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
-    ~CTaskComplexWander();
-    CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+    ~CTaskComplexWander() override = default;
 
-    // original virtual functions
-    eTaskType GetTaskType() override;
+    eTaskType GetTaskType() override { return TASK_COMPLEX_WANDER; }; // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
     virtual int32 GetWanderType() = 0;
     virtual void ScanForStuff(CPed* ped) = 0;
     virtual void UpdateDir(CPed* ped);
-    virtual void UpdatePathNodes(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, uint8* outDir);
-
-    // reversed virtual functions
-    eTaskType GetId_Reversed() { return TASK_COMPLEX_WANDER; };
-    CTask* CreateNextSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
-    CTask* ControlSubTask_Reversed(CPed* ped);
-    void UpdateDir_Reversed(CPed* ped);
-    void UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, uint8* outDir);
+    virtual void UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 
     CTask* CreateSubTask(CPed* ped, int32 taskId);
     void ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
@@ -82,6 +67,18 @@ public:
     bool ScanForBlockedNode(CVector* position, class CEntity* entity);
 
     static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
+
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
+    void UpdateDir_Reversed(CPed* ped);
+    void UpdatePathNodes_Reversed(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 };
 
 VALIDATE_SIZE(CTaskComplexWander, 0x28);

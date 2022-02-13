@@ -7,23 +7,23 @@ struct CPointRoute;
 
 class CTaskComplexFollowNodeRoute : public CTaskComplex {
 public:
-    CVector m_vecTargetPos;
-    int m_nMode;
-    float m_fRadius;
-    float m_fUnkn1;
-    float m_fUnkn2;
+    CVector      m_vecTargetPos;
+    int32        m_nMode;
+    float        m_fRadius;
+    float        m_fUnkn1;
+    float        m_fUnkn2;
     CNodeAddress m_nodeAddress1;
-    CNodeRoute* m_pNodeRoute;
+    CNodeRoute*  m_pNodeRoute;
     CPointRoute* m_pPointRoute;
     CNodeAddress m_nodeAddress2;
-    int unkn0;
-    int m_nTime;
-    int m_nTimeStartMaybe;
-    int m_nSomeTime;
-    bool bUnkn1;
-    bool m_bStoppedMaybe;
+    int32        unkn0;
+    int32        m_nTime;
+    int32 m_nTimeStarted;
+    int32 m_nTimeStopped;
+    bool         bUnkn1;
+    bool         m_bStoppedMaybe;
     union {
-        uint32_t m_nFlags;
+        uint32 m_nFlags;
         struct {
             uint32 m_bUnknFlag0x1 : 1;
             uint32 m_bUnknFlag0x2 : 1;
@@ -38,18 +38,11 @@ public:
     float m_afUnkn[4];
 
 public:
-    CTaskComplexFollowNodeRoute(int mode, const CVector& targetPos, float radius, float fUnkn1, float fUnkn2, bool bUnknFlag, int time, bool bUnknFlag2);
-    ~CTaskComplexFollowNodeRoute();
+    CTaskComplexFollowNodeRoute(int32 mode, const CVector& targetPos, float radius, float fUnkn1, float fUnkn2, bool bUnknFlag, int32 time, bool bUnknFlag2);
+    ~CTaskComplexFollowNodeRoute() override;
 
-    CTask* Clone() override {
-        auto* clone = new CTaskComplexFollowNodeRoute(m_nMode, m_vecTargetPos, m_fRadius, m_fUnkn1, m_fUnkn2, m_bUnknFlag0x1, m_nTime, m_bUnknFlag0x8);
-        clone->m_nodeAddress1 = m_nodeAddress1;
-        return clone;
-    }
-    eTaskType GetTaskType() override {
-        return TASK_COMPLEX_FOLLOW_NODE_ROUTE;
-    }
-
+    CTask* Clone() override;
+    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_NODE_ROUTE; } // 0x66EB60
     void StopTimer(const CEvent* event) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
@@ -65,13 +58,20 @@ public:
     eTaskType CalcGoToTaskType(CPed* ped, eTaskType taskType);
     float CalcBlendRatio(CPed* ped, bool bUsePointRoute);
     bool CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
-    void ComputePathNodes(CPed* ped);
+    void ComputePathNodes(const CPed* ped);
     void SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
 
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
+
+    CTask* Clone_Reversed() { return CTaskComplexFollowNodeRoute::Clone(); };
+    void StopTimer_Reversed(const CEvent* event) { CTaskComplexFollowNodeRoute::StopTimer(event); };
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexFollowNodeRoute::MakeAbortable(ped, priority, event); };
+    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::CreateNextSubTask(ped); };
+    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::CreateFirstSubTask(ped); };
+    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexFollowNodeRoute::ControlSubTask(ped); };
 
 };
 
