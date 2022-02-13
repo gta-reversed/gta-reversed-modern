@@ -129,6 +129,9 @@ public:
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
     ~CAutomobile() override;
 
+    // CEntity
+    void Teleport(CVector destination, bool resetRotation) override;
+
     // CPhysical
     void ProcessControl() override;
 
@@ -371,7 +374,7 @@ private:
     void DoHoverSuspensionRatios_Reversed() { return CAutomobile::DoHoverSuspensionRatios(); }
     void ProcessSuspension_Reversed() { return CAutomobile::ProcessSuspension(); }
 
-    // CPhysical
+    void Teleport_Reversed(CVector destination, bool resetRotation) { CAutomobile::Teleport(destination, resetRotation); };
     void ProcessControl_Reversed() { CAutomobile::ProcessControl(); }
 
     // CVehicle

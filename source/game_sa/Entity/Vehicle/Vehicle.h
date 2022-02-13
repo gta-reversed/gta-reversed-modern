@@ -105,7 +105,7 @@ enum eCarPiece {
     CAR_PIECE_WINDSCREEN = 19,
 };
 
-enum eRotationAxis {
+enum eRotationAxis : int32 {
     AXIS_X = 0,
     AXIS_Y = 1,
     AXIS_Z = 2
@@ -566,7 +566,7 @@ public:
     void FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus);
     // always return false?
     void BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 arg3, float arg4);
-    void SetComponentRotation(RwFrame* component, int32 axis, float angle, bool bResetPosition); // rotation axis: eRotationAxis
+    void SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition); // rotation axis: eRotationAxis
     void SetTransmissionRotation(RwFrame* component, float arg1, float arg2, CVector posn, bool isFront);
     void ProcessBoatControl(tBoatHandlingData* boatHandling, float* fWaterResistance, bool bCollidedWithWorld, bool bPostCollision);
     void DoBoatSplashes(float fWaterDamping);

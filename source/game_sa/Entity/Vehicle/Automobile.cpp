@@ -55,23 +55,24 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetHeliOrientation, 0x6A2450);
     RH_ScopedInstall(ClearHeliOrientation, 0x6A2460);
 
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6A2210); 
-    RH_ScopedInstall(IsComponentPresent_Reversed, 0x6A2250); 
-    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "enum", 0x6A2270, float (CAutomobile::*)(eDoors)); 
-    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "uint", 0x6A62C0, float (CAutomobile::*)(uint32)); 
-    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors)); 
-    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "uint", 0x6A6350, bool (CAutomobile::*)(uint32)); 
-    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors)); 
-    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32)); 
-    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors)); 
-    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32)); 
-    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors)); 
-    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "uint", 0x6A6500, bool (CAutomobile::*)(uint32)); 
-    RH_ScopedInstall(IsOpenTopCar_Reversed, 0x6A2350); 
-    RH_ScopedInstall(IsRoomForPedToLeaveCar_Reversed, 0x6A3850); 
-    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B3E90); 
-    RH_ScopedInstall(GetHeightAboveRoad_Reversed, 0x6A62B0); 
-    RH_ScopedInstall(GetNumContactWheels_Reversed, 0x6A62A0); 
+    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6A2210);
+    RH_ScopedInstall(IsComponentPresent_Reversed, 0x6A2250);
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
+    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
+    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
+    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
+    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
+    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    RH_ScopedInstall(IsOpenTopCar_Reversed, 0x6A2350);
+    RH_ScopedInstall(IsRoomForPedToLeaveCar_Reversed, 0x6A3850);
+    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B3E90);
+    RH_ScopedInstall(GetHeightAboveRoad_Reversed, 0x6A62B0);
+    RH_ScopedInstall(GetNumContactWheels_Reversed, 0x6A62A0);
+    RH_ScopedInstall(Teleport_Reversed, 0x6A9CA0);
     // Install("CAutomobile", "GetTowHitchPos, 0x6AF1D0, &CAutomobile::GetTowHitchPos);
     RH_ScopedInstall(Save_Reversed, 0x5D47E0);
     RH_ScopedInstall(Load_Reversed, 0x5D2980);
@@ -1700,7 +1701,7 @@ bool CAutomobile::BreakTowLink()
 // 0x6A6090
 float CAutomobile::FindWheelWidth(bool bRear)
 {
-    return plugin::CallMethodAndReturn<float, 0x6A6090, CAutomobile*>(this);
+    return plugin::CallMethodAndReturn<float, 0x6A6090, CAutomobile*, bool>(this, bRear);
 }
 
 // 0x5D47E0
@@ -3462,9 +3463,24 @@ bool CAutomobile::HasCarStoppedBecauseOfLight()
     return ((bool(__thiscall*)(CAutomobile*))0x44D520)(this);
 }
 
+// 0x6AAB50
 void CAutomobile::PreRender()
 {
     plugin::CallMethod<0x6AAB50, CAutomobile*>(this);
+}
+
+// 0x6A9CA0
+void CAutomobile::Teleport(CVector destination, bool resetRotation) {
+    CWorld::Remove(this);
+    GetPosition() = destination;
+
+    if (resetRotation)
+        SetOrientation(0.0f, 0.0f, 0.0f);
+
+    ResetMoveSpeed();
+    ResetTurnSpeed();
+    ResetSuspension();
+    CWorld::Add(this);
 }
 
 // 0x6A0750
