@@ -82,6 +82,8 @@
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
 #include "PostEffects.h"
+#include "Rope.h"
+#include "Ropes.h"
 #include "FallingGlassPane.h"
 #include "Glass.h"
 
@@ -198,6 +200,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CRope::InjectHooks();
+    CRopes::InjectHooks();
     CWeaponInfo::InjectHooks();
     CCurrentVehicle::InjectHooks();
     CPlaceName::InjectHooks();

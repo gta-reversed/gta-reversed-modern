@@ -94,8 +94,8 @@ void CSimpleVariablesSaveStructure::Construct() {
     m_bHasDisplayedPlayerQuitEnterCarHelpText = CPlayerPed::bHasDisplayedPlayerQuitEnterCarHelpText;
 
     m_bHasPlayerCheated = CCheat::m_bHasPlayerCheated;
-    m_bAllTaxisNitro = CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO];
-    m_bProstitutesPayYou = CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU];
+    m_bAllTaxisNitro = CCheat::IsActive(CHEAT_ALL_TAXIS_NITRO);
+    m_bProstitutesPayYou = CCheat::IsActive(CHEAT_PROSTITUTES_PAY_YOU);
 }
 
 // 0x5D1EA0
@@ -171,12 +171,12 @@ void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
         if (pTaxiNitroCheat)
             pTaxiNitroCheat();
         else
-            CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO] ^= true;
+            CCheat::Toggle(CHEAT_ALL_TAXIS_NITRO);
     }
     if (m_bProstitutesPayYou) {
         if (pProstitutesPayYouCheat)
             pProstitutesPayYouCheat();
         else
-            CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU] ^= true;
+            CCheat::Toggle(CHEAT_PROSTITUTES_PAY_YOU);
     }
 }

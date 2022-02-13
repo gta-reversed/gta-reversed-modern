@@ -613,7 +613,7 @@ void CBoat::ProcessControl_Reversed() {
         && (m_fPropSpeed > CPlane::PLANE_MIN_PROP_SPEED || m_vecMoveSpeed.SquaredMagnitude() > CPlane::PLANE_MIN_PROP_SPEED)) {
         FlyingControl(FLIGHT_MODEL_PLANE, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
     }
-    else if (CCheat::m_aCheatsActive[eCheats::CHEAT_BOATS_FLY])
+    else if (CCheat::IsActive(CHEAT_BOATS_FLY))
         FlyingControl(FLIGHT_MODEL_BOAT, -10000.0f, -10000.0f, -10000.0f, -10000.0f);
 
     if (m_nBoatFlags.bAnchored) {
@@ -697,7 +697,7 @@ void CBoat::PreRender_Reversed()
         auto pMoving = m_aBoatNodes[eBoatNodes::BOAT_MOVING];
         if (pMoving) {
             CVehicle::SetComponentRotation(pMoving, eRotationAxis::AXIS_Z, this->m_fMovingHiRotation, 1);
-            if (CCheat::m_aCheatsActive[CHEAT_INVISIBLE_CAR])
+            if (CCheat::IsActive(CHEAT_INVISIBLE_CAR))
             {
                 auto pFirstObj = reinterpret_cast<RpAtomic*>(GetFirstObject(pMoving));
                 RpAtomicRenderMacro(pFirstObj);
@@ -769,7 +769,7 @@ inline void CBoat::ProcessBoatNodeRendering(eBoatNodes eNode, float fRotation, R
 void CBoat::Render_Reversed()
 {
     m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
-    if (CCheat::m_aCheatsActive[eCheats::CHEAT_INVISIBLE_CAR])
+    if (CCheat::IsActive(CHEAT_INVISIBLE_CAR))
         return;
 
     CVehicle::Render();

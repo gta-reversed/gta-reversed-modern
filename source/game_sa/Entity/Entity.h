@@ -15,6 +15,7 @@
 #include "eEntityType.h"
 #include "eEntityStatus.h"
 #include "eModelID.h"
+#include "eAreaCodes.h"
 
 class CVehicle;
 class CTrain;
@@ -33,7 +34,7 @@ class CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
-public:
+public: // Changed in CRope branch
     ~CEntity() override;
 
 public:
@@ -96,7 +97,7 @@ public:
     CLink<CEntity*>* m_pStreamingLink;
     uint16           m_nScanCode;
     uint8            m_nIplIndex;
-    uint8            m_nAreaCode; // see eAreaCodes
+    eAreaCodes       m_nAreaCode;
     union {
         int32    m_nLodIndex; // -1 - without LOD model
         CEntity* m_pLod;

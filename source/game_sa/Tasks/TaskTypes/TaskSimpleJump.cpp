@@ -172,7 +172,7 @@ void CTaskSimpleJump::Launch(CPed* ped)
         fJumpForce *= modifier;
     }
 
-    if (ped->IsPlayer() && CCheat::m_aCheatsActive[CHEAT_MEGAJUMP])
+    if (ped->IsPlayer() && CCheat::IsActive(CHEAT_MEGAJUMP))
         fJumpForce *= 10.0F;
 
     ped->ApplyMoveForce(0.0F, 0.0F, fJumpForce);
