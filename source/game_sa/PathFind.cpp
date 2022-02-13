@@ -60,8 +60,8 @@ void CPathFind::Init()
         m_pNodeLinks[i] = nullptr;
         m_pLinkLengths[i] = nullptr;
         m_pPathIntersections[i] = nullptr;
-        m_pNaviLinks[i] = nullptr; // Out of array bounds write, same as in original code
-        field_EA4[i] = nullptr; // Out of array bounds write, same as in original code
+        m_pNaviLinks[i] = nullptr; //BUG: Out of array bounds write, same as in original code
+        m_aUnused[i] = nullptr; // BUG: Out of array bounds write, same as in original code
     }
 
     memset(m_aInteriorNodes, 0xFF, sizeof(m_aInteriorNodes));
@@ -220,12 +220,12 @@ void CPathFind::LoadPathFindData(RwStream *stream, int32 areaId)
 
     for (auto i = 0u; i < numNodes; ++i) {
         auto& node = m_pPathNodes[areaId][i];
-        node.m_bEmergencyVehiclesOnly = (node.m_nTrafficLevel == TRAFFIC_MEDIUM || node.m_nTrafficLevel == TRAFFIC_LOW);
+        node.m_bEmergencyVehiclesOnly = node.IsLowTrafficLevel();
     }
 
     for (auto i = 0u; i < m_dwNumForbiddenAreas; ++i) {
         auto& area = m_aForbiddenAreas[i];
-        SwitchRoadsOffInAreaForOneRegion(area.x1, area.x2, area.y1, area.y2, area.z1, area.z2, area.bEnable, area.type, areaId, false);
+        SwitchRoadsOffInAreaForOneRegion(area.m_fxMin, area.m_fXMax, area.m_fYMin, area.m_fYMax, area.m_fZMin, area.m_fZMax, area.m_bEnable, area.type, areaId, false);
     }
 
     for (auto i = 0u; i < NUM_DYNAMIC_LINKS_PER_AREA; ++i) {
@@ -261,21 +261,16 @@ bool CPathFind::IsWaterNodeNearby(CVector position, float radius)
     return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
 }
 
-CNodeAddress CPathFind::FindNodeClosestToCoors(float X, float Y, float Z, int32 _nodeType, float maxDistance,
+CNodeAddress CPathFind::FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance,
     uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6)
 {
     CNodeAddress tempAddress;
-    plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int32, float, uint16, int32, uint16, uint16, int32>(
-        this, &tempAddress, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+    plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, CVector, int32, float, uint16, int32, uint16, uint16, int32>(
+        this, &tempAddress, pos, nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
     return tempAddress;
 }
 
-// 0x44D2B0
-void CPathFind::AllocatePathFindInfoMem() {
-    // NOP
-}
-
-// 0x44D0E0
+// 
 void CPathFind::PreparePathData() {
     // NOP
 }

@@ -28,8 +28,13 @@ enum eTrafficLevel {
 
 class CForbiddenArea {
 public:
-    float x1, x2, y1, y2, z1, z2;
-    bool  bEnable;
+    float m_fxMin;
+    float m_fXMax;
+    float m_fYMin;
+    float m_fYMax;
+    float m_fZMin;
+    float m_fZMax;
+    bool  m_bEnable;
     uint8 type;
     char  _padding[2];
 };
@@ -128,6 +133,10 @@ public:
 public:
     static void InjectHooks();
     CVector GetNodeCoors();
+
+    inline bool IsLowTrafficLevel() {
+        return m_nTrafficLevel == TRAFFIC_MEDIUM || m_nTrafficLevel == TRAFFIC_LOW;
+    }
 };
 VALIDATE_SIZE(CPathNode, 0x1C);
 
@@ -142,7 +151,7 @@ public:
     uint8*                 m_pLinkLengths[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     CPathIntersectionInfo* m_pPathIntersections[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     CCarPathLinkAddress*   m_pNaviLinks[NUM_PATH_MAP_AREAS];
-    void*                  field_EA4[NUM_PATH_MAP_AREAS];
+    void*                  m_aUnused[NUM_PATH_MAP_AREAS];
     uint32                 m_dwNumNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumVehicleNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumPedNodes[NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS];
@@ -172,32 +181,82 @@ public:
     static void InjectHooks();
 
     void Init();
-    void ReInit();
-    void Shutdown();
+    static void PreparePathData() { /*noop 0x44D0E0*/ }
+    void UnLoadPathFindData(int32 index);
+    void RemoveBadStartNode(CVector pos, CNodeAddress* address, short* numPathFindNodes);
+    void CountFloodFillGroups(unsigned char type);
+    void CheckGrid();
+    float CalcRoadDensity(float x, float y);
+    void RemoveNodeFromList(CPathNode* node);
+    void AddNodeToList(CPathNode* node, int list);
+    float CalcDistToAnyConnectingLinks(CPathNode* node, CVector pos);
+    void FindNodeClosestInRegion(CNodeAddress* outAddress, uint16 areaId, CVector pos, uint8 nodeType, float* outDist, bool bLowTraffic, bool bUnkn, bool bBoats, bool bUnused);
+    bool These2NodesAreAdjacent(CNodeAddress address1, CNodeAddress address2);
+    void RecordNodesInCircle(const CVector& center, float radius, uint8 nodeType, int maxNum, CNodeAddress* outAddresses, bool bLowTraffic, bool a8, bool bUnkn, bool maxNumNodes,
+                             bool bUnused);
+    CNodeAddress FindNodeClosestToCoorsFavourDirection(CVector pos, uint8 nodeType, float dirX, float dirY);
+    void FindNodePairClosestToCoors(CVector pos, unsigned __int8 nodeType, CNodeAddress* outFirst, CNodeAddress* outSecond, float* outDist, float minDist, float maxDist,
+                                    bool bLowTraffic, bool bUnused, bool bBoats);
+    float FindNodeOrientationForCarPlacement(CNodeAddress address);
+    float FindNodeOrientationForCarPlacementFacingDestination(CNodeAddress address, float dirX, float dirY, bool bUnkn) { /*noop, not in PC idb, unused in mobile*/ }
+    static void AllocatePathFindInfoMem() { /*noop 0x44D2B0*/ }
+    void StoreNodeInfoCar(short, short, signed char, signed char, short, short, short, float, signed char, signed char, bool, bool, unsigned char, bool, bool, unsigned char,
+                          unsigned char) {/*noop*/ }
+    void StoreNodeInfoPed(short, short, signed char, signed char, short, short, short, float, bool, unsigned char, bool, unsigned char) { /*noop*/ }
+    void StoreDetachedNodeInfoPed(int, signed char, int, float, float, float, float, bool, bool, bool, unsigned char, bool, unsigned char, bool) { /*noop*/ }
+    void StoreDetachedNodeInfoCar(int, signed char, int, float, float, float, float, signed char, signed char, bool, bool, unsigned char, bool, bool, unsigned char, bool,
+                                  unsigned char) { /*noop*/ }
+    void RegisterMarker(CVector* pos) { /*noop*/ }
+    bool ThisNodeWillLeadIntoADeadEnd(CPathNode* startNode, CPathNode* endNode);
     void TidyUpNodeSwitchesAfterMission();
+    void SwitchRoadsInAngledArea(float, float, float, float, float, float, float, unsigned char, unsigned char) { /*noop*/ }
+    bool ThisNodeHasToBeSwitchedOff(CPathNode* node);
+    int CountNeighboursToBeSwitchedOff(CPathNode* node);
+    void SwitchOffNodeAndNeighbours(CPathNode* node, CPathNode** out1, CPathNode** out2, char bLowTraffic, uint8 areaId);
+    void SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, int areaId, uint8 bUnused);
+    void SwitchRoadsOffInArea(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, bool bForbidden);
+    void SwitchPedRoadsOffInArea(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType);
+    void LoadPathFindData(RwStream* stream, int32 areaId);
+    void LoadPathFindData(int32 areaId);
     void UnMarkAllRoadNodesAsDontWander();
-    void RemoveForbiddenForScriptedCars();
-    bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
+    void MarkRoadsBetweenLevelsInArea(float, float, float, float, float, float) { /*noop*/ }
+    void PedMarkRoadsBetweenLevelsInArea(float, float, float, float, float, float) { /*noop*/ }
+    void MarkRoadsBetweenLevelsNodeAndNeighbours(int) { /*noop*/ }
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
-    CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
-    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir);
+    bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
+    uint32 FindRegionForCoors(float x, float y);
+    void GeneratePedCreationCoors_Interior(float x, float y, CVector* outCoords, CNodeAddress* unused1, CNodeAddress* unused2, float* outOrientation);
+    void GeneratePedCreationCoors(float x, float y, float minDist1, float maxDist1, float minDist2, float maxDist2, CVector* outCoords, CNodeAddress* outAddress1,
+                                  CNodeAddress* outAddress2, float* outOrientation, bool bLowTraffic, CMatrix* transformMatrix);
+    uint32 FindXRegionForCoors(float x);
+    uint32 FindYRegionForCoors(float y);
+    float FindXCoorsForRegion(uint32 regionX);
+    float FindYCoorsForRegion(uint32 regionY);
+    CNodeAddress FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
+                                         uint16 bBoatsOnly, int32 unk6);
+    void MarkRoadNodeAsDontWander(float x, float y, float z);
+    void RecordNodesClosestToCoors(CVector pos, uint8 nodeType, int count, CNodeAddress* outAddresses, float maxDist, bool, bool, bool, bool);
+    void Find2NodesForCarCreation(CVector pos, CNodeAddress* outAddress1, CNodeAddress* outAddress2, bool bLowTraffic);
+    CNodeAddress FindNthNodeClosestToCoors(CVector pos, uint8 nodeType, float maxDistance, bool bLowTraffic, bool bUnkn, int nthNode, bool bBoatsOnly, bool bIgnoreInterior,
+                                           CNodeAddress* outNode);
+    void FindNextNodeWandering(uint8 nodeType, CVector vecPos, CNodeAddress* originAddress, CNodeAddress* targetAddress, uint8 dir, uint8* outDir);
     void DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr, CVector target, CNodeAddress* pResultNodes, int16* pNodesCount, int32 maxNodesToFind,
                       float* pDistance, float maxSearchDistance, CNodeAddress* targetAddr, float maxUnkLimit, bool oneSideOnly, CNodeAddress forbiddenNodeAddr,
                       bool includeNodesWithoutLinks, bool waterPath);
+    bool TestCoorsCloseness(CVector vecEnd, uint8 nodeType, CVector vecStart); // unused
+    void ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVector& vecEnd, const CNodeAddress& address, CNodeRoute&)
+
+    void ReInit();
+    void Shutdown();
+    void RemoveForbiddenForScriptedCars();
+    CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
+    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir);
 
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
-    void MarkRoadNodeAsDontWander(float x, float y, float z);
-    void SwitchRoadsOffInAreaForOneRegion(float fXMin, float fXMax, float fYMin, float fYMax,
-                                          float fZMin, float fZMax, bool bEnable, char type, int areaId, bool bBoats);
 
     CPathNode* GetPathNode(CNodeAddress address);
-    void LoadPathFindData(int32 areaId);
-    void LoadPathFindData(RwStream* stream, int32 areaId);
-    void UnLoadPathFindData(int32 index);
     int32 LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
-    static void AllocatePathFindInfoMem();
-    static void PreparePathData();
     bool Load();
     bool Save();
     void UpdateStreaming(bool a1);
@@ -205,11 +264,7 @@ public:
     CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
     void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
 
-    // pathLink is the same as the returned pointer(at least on success)
-    // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and
-    // the result is stored in it
-    CNodeAddress FindNodeClosestToCoors(float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
-                                         uint16 bBoatsOnly, int32 unk6);
+
 
     inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) {
         assert(address.m_wAreaId < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS);

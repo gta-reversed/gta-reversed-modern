@@ -393,6 +393,7 @@ void InjectHooksMain() {
     CWeather::InjectHooks();
     CPathFind::InjectHooks();
     CPathNode::InjectHooks();
+    CNodeRoute::InjectHooks();
     CLoadMonitor::InjectHooks();
     CPlantMgr::InjectHooks();
     CDecisionMakerTypes::InjectHooks();

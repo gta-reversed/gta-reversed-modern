@@ -49,7 +49,7 @@ typedef CPool<CEntryInfoNode>                 CEntryInfoNodePool;
 typedef CPool<CPointRoute>                    CPointRoutePool;
 // typedef CPool<CPatrolRoute>                   CPatrolRoutePool;
 typedef CPool<CEvent>                         CEventPool;
-// typedef CPool<CNodeRoute>                     CNodeRoutePool;
+typedef CPool<CNodeRoute>                     CNodeRoutePool;
 typedef CPool<CTaskAllocator>                 CTaskAllocatorPool;
 // typedef CPool<CPedAttractor>                  CPedAttractorPool;
 
@@ -69,7 +69,7 @@ public:
     static inline CPointRoutePool*&        ms_pPointRoutePool        = *(CPointRoutePool**)0xB744B0;
     //static inline CPatrolRoutePool*&       ms_pPatrolRoutePool       = *(CPatrolRoutePool**)0xB744B4;
     static inline CEventPool*&             ms_pEventPool             = *(CEventPool**)0xB744AC;
-    //static inline CNodeRoutePool*&         ms_pNodeRoutePool         = *(CNodeRoutePool**)0xB744B8;
+    static inline CNodeRoutePool*&         ms_pNodeRoutePool         = *(CNodeRoutePool**)0xB744B8;
     static inline CTaskAllocatorPool*&     ms_pTaskAllocatorPool     = *(CTaskAllocatorPool**)0xB744BC;
     //static inline CPedAttractorPool*&      ms_pPedAttractorPool      = *(CPedAttractorPool**)0xB744C4;
 
