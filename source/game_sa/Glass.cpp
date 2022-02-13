@@ -116,10 +116,12 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     const auto right = Normalized(CrossProduct(vehMat.GetUp(), normal));
 
     // Store world space vertex positions of both triangles
+    // Should be more like [2][3] but a multdim array would've been way harder to deal with
+    // so we're going to use a flattened [6] array
     CVector triVertices[6]{};
-    for (auto t = 0; t < 2; t++) {
+    for (auto t = 0; t < 2; t++) { // t - triangle idx
         const auto& tri = triangles[glassTriIdx + t];
-        for (auto v = 0; v < 3; v++) {
+        for (auto v = 0; v < 3; v++) { // v - vertex idx of this triangle
             triVertices[t * 3 + v] = MultiplyMatrixWithVector(
                 vehMat,
                 UncompressVector(colModel->m_pColData->m_pVertices[tri.m_vertIndices[v]])
@@ -130,6 +132,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     // Calculate dot products for both directions
     // The dot product of the position of a vertex and `right` will give it's "position" on the `right` axis
     // same goes for `fwd`
+    // By this we basically get a 2D position of each vertex on the plane of the glass.
 
     const auto CalculateDotProducts = [&](CVector direction) {
         std::array<float, 6> out{};
@@ -138,13 +141,16 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     };
 
     // Calculate dot products for all vertices on both direction vectors
+    // In 2D terms right would be `x` and `fwd` would be `y`
     const auto rightDots = CalculateDotProducts(right);
     const auto fwdDots   = CalculateDotProducts(fwd);
 
     // Find max values in each direction
+    // This will give us the top right point basically
     const float maxDotFwd   = *rng::max_element(fwdDots);
     const float maxDotRight = *rng::max_element(rightDots);
 
+    // Calculate bottom left corner
     float minRightFwdDotSum = FLT_MAX;
     uint32 minRightFwdDotSumIdx{};
     for (auto i = 0u; i < 6u; i++) {
@@ -156,6 +162,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
     }
 
     // Size of pane in directions
+    // MSVC shows a warning here (C28020), but I don't think there's any issue.
     const struct { float right, fwd; } extent{
         maxDotRight - rightDots[minRightFwdDotSumIdx],
         maxDotFwd - fwdDots[minRightFwdDotSumIdx]
