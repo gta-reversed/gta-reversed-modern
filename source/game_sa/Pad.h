@@ -20,6 +20,21 @@ enum {
     MAX_PADS
 };
 
+enum class eFunctionKeys : uint8 {
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
+};
+
 #define KEY_IS_PRESSED(btn)    (NewKeyState.btn && !OldKeyState.btn)
 
 #define BUTTON_IS_PRESSED(btn) (NewState.btn && !OldState.btn)
@@ -188,20 +203,8 @@ public:
     [[nodiscard]] bool GroupControlBackJustDown() const noexcept            { return !DisablePlayerControls && IsDPadDownPressed(); }                                        // 0x541260
 
     // KEYBOARD
-    [[nodiscard]] bool IsFKeyJustDown(uint8 key) const noexcept             { return NewKeyState.FKeys[key] && OldKeyState.FKeys[key]; }
-    [[nodiscard]] bool IsFKeyJustPressed(uint8 key) const noexcept          { return NewKeyState.FKeys[key] && !OldKeyState.FKeys[key]; }
-    [[nodiscard]] bool IsF1JustPressed() const noexcept                     { return IsFKeyJustPressed(0); }
-    [[nodiscard]] bool IsF2JustPressed() const noexcept                     { return IsFKeyJustPressed(1); }
-    [[nodiscard]] bool IsF3JustPressed() const noexcept                     { return IsFKeyJustPressed(2); }
-    [[nodiscard]] bool IsF4JustPressed() const noexcept                     { return IsFKeyJustPressed(3); }
-    [[nodiscard]] bool IsF5JustPressed() const noexcept                     { return IsFKeyJustPressed(4); }
-    [[nodiscard]] bool IsF6JustPressed() const noexcept                     { return IsFKeyJustPressed(5); }
-    [[nodiscard]] bool IsF7JustPressed() const noexcept                     { return IsFKeyJustPressed(6); }
-    [[nodiscard]] bool IsF8JustPressed() const noexcept                     { return IsFKeyJustPressed(7); }
-    [[nodiscard]] bool IsF9JustPressed() const noexcept                     { return IsFKeyJustPressed(8); }
-    [[nodiscard]] bool IsF10JustPressed() const noexcept                    { return IsFKeyJustPressed(9); }
-    [[nodiscard]] bool IsF11JustPressed() const noexcept                    { return IsFKeyJustPressed(10); }
-    [[nodiscard]] bool IsF12JustPressed() const noexcept                    { return IsFKeyJustPressed(11); }
+    [[nodiscard]] bool IsFKeyJustDown(eFunctionKeys key) const noexcept     { auto k = static_cast<uint8>(key); return NewKeyState.FKeys[k] && OldKeyState.FKeys[k]; }
+    [[nodiscard]] bool IsFKeyJustPressed(eFunctionKeys key) const noexcept  { auto k = static_cast<uint8>(key); return NewKeyState.FKeys[k] && !OldKeyState.FKeys[k]; }
 
     [[nodiscard]] bool IsStandardKeyJustDown(uint8 key) const noexcept      { return NewKeyState.standardKeys[key] && OldKeyState.standardKeys[key]; }                       //
     [[nodiscard]] bool IsStandardKeyJustPressed(uint8 key) const noexcept   { return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key]; }                      // 0x4D59B0
