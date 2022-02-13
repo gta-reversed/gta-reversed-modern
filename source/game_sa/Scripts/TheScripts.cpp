@@ -164,6 +164,15 @@ int32 CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
     return plugin::CallAndReturn<int32, 0x464D20, CRunningScript*>(thread);
 }
 
+// 0x470370
+void CTheScripts::ReinitialiseSwitchStatementData() {
+    NumberOfEntriesStillToReadForSwitch = 0;
+    ValueToCheckInSwitchStatement = 0;
+    SwitchDefaultExists = 0;
+    SwitchDefaultAddress = 0;
+    NumberOfEntriesInSwitchTable = 0;
+}
+
 // 0x46ABC0
 int32 CTheScripts::RemoveFromWaitingForScriptBrainArray(CEntity* a1, int16 modelIndex) {
     return plugin::CallAndReturn<int32, 0x46ABC0, CEntity*, int16>(a1, modelIndex);

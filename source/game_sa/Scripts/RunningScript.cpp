@@ -2,6 +2,37 @@
 
 #include "RunningScript.h"
 
+int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
+int8(CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
+    &ProcessCommands0To99,
+    &ProcessCommands100To199,
+    &ProcessCommands200To299,
+    &ProcessCommands300To399,
+    &ProcessCommands400To499,
+    &ProcessCommands500To599,
+    &ProcessCommands600To699,
+    &ProcessCommands700To799,
+    &ProcessCommands800To899,
+    &ProcessCommands900To999,
+    &ProcessCommands1000To1099,
+    &ProcessCommands1100To1199,
+    &ProcessCommands1200To1299,
+    &ProcessCommands1300To1399,
+    &ProcessCommands1400To1499,
+    &ProcessCommands1500To1599,
+    &ProcessCommands1600To1699,
+    &ProcessCommands1700To1799,
+    &ProcessCommands1800To1899,
+    &ProcessCommands1900To1999,
+    &ProcessCommands2000To2099,
+    &ProcessCommands2100To2199,
+    &ProcessCommands2200To2299,
+    &ProcessCommands2300To2399,
+    &ProcessCommands2400To2499,
+    &ProcessCommands2500To2599,
+    &ProcessCommands2600To2699
+};
+
 void CRunningScript::InjectHooks() {
     RH_ScopedClass(CRunningScript);
     RH_ScopedCategory("Scripts");
@@ -36,8 +67,8 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     // RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
     // RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
-    // Install("CRunningScript", "AddScriptToList", 0x, &CRunningScript::AddScriptToList);
-    // RH_ScopedInstall(RemoveScriptFromList, 0x464BD0);
+    RH_ScopedInstall(AddScriptToList, 0x464C00);
+    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0);
     // RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
     RH_ScopedInstall(IsPedDead, 0x464D70);
     // RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
@@ -46,7 +77,7 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(UpdatePC, 0x464DA0);
     // RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
 
-    // RH_ScopedInstall(Process, 0x469F00);
+    RH_ScopedInstall(Process, 0x469F00);
 
     // RH_ScopedInstall(ProcessCommands0To99, 0x465E60);
     // RH_ScopedInstall(ProcessCommands100To199, 0x466DE0);
@@ -103,9 +134,13 @@ void CRunningScript::Init() {
 }
 
 // Adds script to list
-// 0x
+// 0x464C00
 void CRunningScript::AddScriptToList(CRunningScript** queueList) {
-    plugin::CallMethod<0x464C00, CRunningScript*, CRunningScript**>(this, queueList);
+    m_pNext = *queueList;
+    m_pPrev = nullptr;
+    if (*queueList)
+        (*queueList)->m_pPrev = this;
+    *queueList = this;
 }
 
 // 0x
@@ -323,7 +358,13 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
 // Removes script from list
 // 0x464BD0
 void CRunningScript::RemoveScriptFromList(CRunningScript** queueList) {
-    plugin::CallMethod<0x464BD0, CRunningScript*, CRunningScript**>(this, queueList);
+    if (m_pPrev)
+        m_pPrev->m_pNext = m_pNext;
+    else
+        *queueList = m_pNext;
+
+    if (m_pNext)
+        m_pNext->m_pPrev = m_pPrev;
 }
 
 // 0x46AF50
@@ -360,22 +401,67 @@ void CRunningScript::UpdatePC(int32 newIP) {
 
 // unused
 // 0x469EB0
-void CRunningScript::ProcessOneCommand() {
-    plugin::CallMethod<0x469EB0, CRunningScript*>(this);
+int8 CRunningScript::ProcessOneCommand() {
+    ++CTheScripts::CommandsExecuted;
+
+    int32 command = *(uint16*)m_pCurrentIP;  // TODO: replace with inline call
+    m_pCurrentIP += 2;
+
+    m_bNotFlag = (command & 0x8000) != 0;
+    command &= 0x7FFF;
+
+    // CUSTOM CODE: First we try to call our (reversed) implementation for the current command
+    int8 ret = (this->*reSA_CommandHandlerTable[command / 100])(command);
+    if (ret == COMMAND_NOT_IMPLEMENTED_YET)
+    {
+        // Not implemented -> invoke the original opcode
+        ret = CommandHandlerTable[command / 100](this, command);
+    }
+    // TODO: Inspect whether CommandHandlerTable is a design decision or it's a modernish MSVC&GCC optimisation
+
+    return ret;
 }
 
 // 0x469F00
-void CRunningScript::Process() {
-    plugin::CallMethod<0x469F00, CRunningScript*>(this);
+int8 CRunningScript::Process() {
+    if (m_pSceneSkipIP && CCutsceneMgr::IsCutsceneSkipButtonBeingPressed())
+    {
+        CHud::m_BigMessage[1][0] = 0;
+        UpdatePC(*(int32*)&m_pSceneSkipIP);
+        m_pSceneSkipIP = 0;
+        m_nWakeTime = 0;
+    }
+    if (m_bUseMissionCleanup)
+        DoDeathArrestCheck();
+
+    if (m_bIsMission && CTheScripts::FailCurrentMission == 1)
+    {
+        while (m_nSP > 1) // inline(?): while (stack.size > 1) { stack.pop() }
+            --m_nSP;
+
+        if (m_nSP == 1)
+        {
+            m_nSP = 0;
+            m_pCurrentIP = m_apStack[0];
+        }
+    }
+    CTheScripts::ReinitialiseSwitchStatementData();
+    if (CTimer::m_snTimeInMilliseconds >= m_nWakeTime) // m_nWakeTime might be unsigned, while m_snTimeInMillis is 100% SIGNED
+    {
+        while (!ProcessOneCommand())
+            ;
+    }
+
+    return 0;
 }
 
 // 0x465E60
-void CRunningScript::ProcessCommands0To99(int32 commandId) {
+int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
     switch (commandId) {
     case COMMAND_NOP: // 0x000
         break;
     case COMMAND_WAIT: // 0x001
-        CollectParameters(1);
+        // CollectParameters(1);
         break;
     case COMMAND_GOTO: // 0x002
         break;
@@ -576,10 +662,12 @@ void CRunningScript::ProcessCommands0To99(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x466DE0
-void CRunningScript::ProcessCommands100To199(int32 commandId) {
+int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
     switch (commandId) {
     case COMMAND_SUB_INT_VAR_FROM_INT_LVAR: // 0x064
         break;
@@ -784,10 +872,12 @@ void CRunningScript::ProcessCommands100To199(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x469390
-void CRunningScript::ProcessCommands200To299(int32 commandId) {
+int8 CRunningScript::ProcessCommands200To299(int32 commandId) {
     switch (commandId) {
     case COMMAND_VAR_FLOAT: // 0x0C8
         break;
@@ -992,10 +1082,12 @@ void CRunningScript::ProcessCommands200To299(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47C100
-void CRunningScript::ProcessCommands300To399(int32 commandId) {
+int8 CRunningScript::ProcessCommands300To399(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_CHAR_INVINCIBLE: // 0x12C
         break;
@@ -1200,10 +1292,12 @@ void CRunningScript::ProcessCommands300To399(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47D210
-void CRunningScript::ProcessCommands400To499(int32 commandId) {
+int8 CRunningScript::ProcessCommands400To499(int32 commandId) {
     switch (commandId) {
     case COMMAND_ADD_UPSIDEDOWN_CAR_CHECK: // 0x190
         break;
@@ -1408,10 +1502,12 @@ void CRunningScript::ProcessCommands400To499(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47E090
-void CRunningScript::ProcessCommands500To599(int32 commandId) {
+int8 CRunningScript::ProcessCommands500To599(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_CAR_UPSIDEDOWN: // 0x1F4
         break;
@@ -1604,10 +1700,10 @@ void CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_RESTORE_WEATHER: // 0x252
         break;
     case COMMAND_STORE_CLOCK: // 0x253
-        CClock::StoreClock();
+        // CClock::StoreClock();
         break;
     case COMMAND_RESTORE_CLOCK: // 0x254
-        CClock::RestoreClock();
+        // CClock::RestoreClock();
         break;
     case COMMAND_RESTART_CRITICAL_MISSION: // 0x255
         break;
@@ -1618,10 +1714,12 @@ void CRunningScript::ProcessCommands500To599(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47F370
-void CRunningScript::ProcessCommands600To699(int32 commandId) {
+int8 CRunningScript::ProcessCommands600To699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_COLL_OBJ_WAIT_ON_FOOT: // 0x258
         break;
@@ -1826,10 +1924,12 @@ void CRunningScript::ProcessCommands600To699(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47FA30
-void CRunningScript::ProcessCommands700To799(int32 commandId) {
+int8 CRunningScript::ProcessCommands700To799(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_SWAT_REQUIRED: // 0x2BC
         break;
@@ -2034,10 +2134,12 @@ void CRunningScript::ProcessCommands700To799(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x481300
-void CRunningScript::ProcessCommands800To899(int32 commandId) {
+int8 CRunningScript::ProcessCommands800To899(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_CHAR_IN_PLAYERS_GROUP: // 0x320
         break;
@@ -2242,10 +2344,12 @@ void CRunningScript::ProcessCommands800To899(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x483BD0
-void CRunningScript::ProcessCommands900To999(int32 commandId) {
+int8 CRunningScript::ProcessCommands900To999(int32 commandId) {
     switch (commandId) {
     case COMMAND_PRINT_STRING_IN_STRING_NOW: // 0x384
         break;
@@ -2450,10 +2554,12 @@ void CRunningScript::ProcessCommands900To999(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x489500
-void CRunningScript::ProcessCommands1000To1099(int32 commandId) {
+int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     switch (commandId) {
     case COMMAND_FLASH_RADAR_BLIP: // 0x3E8
         break;
@@ -2658,10 +2764,12 @@ void CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x48A320
-void CRunningScript::ProcessCommands1100To1199(int32 commandId) {
+int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     switch (commandId) {
     case COMMAND_LOAD_COLLISION_WITH_SCREEN: // 0x44C
         break;
@@ -2866,10 +2974,12 @@ void CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x48B590
-void CRunningScript::ProcessCommands1200To1299(int32 commandId) {
+int8 CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_INT_VAR_GREATER_THAN_CONSTANT: // 0x4B0
         break;
@@ -3074,10 +3184,12 @@ void CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x48CDD0
-void CRunningScript::ProcessCommands1300To1399(int32 commandId) {
+int8 CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_CHAR_CAN_BE_DAMAGED_BY_MEMBERS_OF_GANG: // 0x514
         break;
@@ -3291,10 +3403,12 @@ void CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x48EAA0
-void CRunningScript::ProcessCommands1400To1499(int32 commandId) {
+int8 CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     switch (commandId) {
     case COMMAND_REGISTER_VIGILANTE_LEVEL: // 0x578
         break;
@@ -3499,10 +3613,12 @@ void CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x490DB0
-void CRunningScript::ProcessCommands1500To1599(int32 commandId) {
+int8 CRunningScript::ProcessCommands1500To1599(int32 commandId) {
     switch (commandId) {
     case COMMAND_TASK_SMART_FLEE_POINT: // 0x5DC
         break;
@@ -3707,10 +3823,12 @@ void CRunningScript::ProcessCommands1500To1599(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x493FE0
-void CRunningScript::ProcessCommands1600To1699(int32 commandId) {
+int8 CRunningScript::ProcessCommands1600To1699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PEDTYPE_AS_THREAT: // 0x640
         break;
@@ -3915,10 +4033,12 @@ void CRunningScript::ProcessCommands1600To1699(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x496E00
-void CRunningScript::ProcessCommands1700To1799(int32 commandId) {
+int8 CRunningScript::ProcessCommands1700To1799(int32 commandId) {
     switch (commandId) {
     case COMMAND_TASK_KILL_THREATS_ON_FOOT_WHILE_DUCKING: // 0x6A4
         break;
@@ -4123,10 +4243,12 @@ void CRunningScript::ProcessCommands1700To1799(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x46D050
-void CRunningScript::ProcessCommands1800To1899(int32 commandId) {
+int8 CRunningScript::ProcessCommands1800To1899(int32 commandId) {
     switch (commandId) {
     case COMMAND_CLEAR_CHAR_DECISION_MAKER_EVENT_RESPONSE: // 0x708
         break;
@@ -4331,10 +4453,12 @@ void CRunningScript::ProcessCommands1800To1899(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x46B460
-void CRunningScript::ProcessCommands1900To1999(int32 commandId) {
+int8 CRunningScript::ProcessCommands1900To1999(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_ZONE_GANG_STRENGTH: // 0x76C
         break;
@@ -4539,10 +4663,12 @@ void CRunningScript::ProcessCommands1900To1999(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x472310
-void CRunningScript::ProcessCommands2000To2099(int32 commandId) {
+int8 CRunningScript::ProcessCommands2000To2099(int32 commandId) {
     switch (commandId) {
     case COMMAND_GET_CURRENT_DAY_OF_WEEK: // 0x7D0
         break;
@@ -4747,10 +4873,12 @@ void CRunningScript::ProcessCommands2000To2099(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x470A90
-void CRunningScript::ProcessCommands2100To2199(int32 commandId) {
+int8 CRunningScript::ProcessCommands2100To2199(int32 commandId) {
     switch (commandId) {
     case COMMAND_DO_CAMERA_BUMP: // 0x834
         break;
@@ -4955,10 +5083,12 @@ void CRunningScript::ProcessCommands2100To2199(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x474900
-void CRunningScript::ProcessCommands2200To2299(int32 commandId) {
+int8 CRunningScript::ProcessCommands2200To2299(int32 commandId) {
     switch (commandId) {
     case COMMAND_ENABLE_CRANE_CONTROLS: // 0x898
         break;
@@ -5163,10 +5293,12 @@ void CRunningScript::ProcessCommands2200To2299(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x4762D0
-void CRunningScript::ProcessCommands2300To2399(int32 commandId) {
+int8 CRunningScript::ProcessCommands2300To2399(int32 commandId) {
     switch (commandId) {
     case COMMAND_GET_MENU_POSITION: // 0x8FC
         break;
@@ -5371,10 +5503,12 @@ void CRunningScript::ProcessCommands2300To2399(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x478000
-void CRunningScript::ProcessCommands2400To2499(int32 commandId) {
+int8 CRunningScript::ProcessCommands2400To2499(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PLAYER_DISPLAY_VITAL_STATS_BUTTON: // 0x960
         break;
@@ -5579,10 +5713,12 @@ void CRunningScript::ProcessCommands2400To2499(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x47A760
-void CRunningScript::ProcessCommands2500To2599(int32 commandId) {
+int8 CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_PETROL_TANK_WEAKPOINT: // 0x9C4
         break;
@@ -5787,10 +5923,12 @@ void CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }
 
 // 0x479DA0
-void CRunningScript::ProcessCommands2600To2699(int32 commandId) {
+int8 CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_SWIM_SPEED: // 0xA28
         break;
@@ -5886,4 +6024,6 @@ void CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     default:
         break;
     }
+
+    return COMMAND_NOT_IMPLEMENTED_YET;
 }

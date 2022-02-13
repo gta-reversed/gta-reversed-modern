@@ -101,8 +101,11 @@ public:
     bool            m_bIsMission;
     char            _padDD[3];
 
+    static constexpr int8 COMMAND_NOT_IMPLEMENTED_YET = -2;
+
 public:
-    static uint8(__thiscall** CommandHandlerTable)(CRunningScript* _this, uint16 commandId); // static uint8(__thiscall *CommandHandlerTable[27])(CRunningScript *,uint16 )
+    static int8(__thiscall** CommandHandlerTable)(CRunningScript* _this, int32 commandId); // static int8(__thiscall *CommandHandlerTable[27])(CRunningScript *, int32)
+    static int8(CRunningScript::* reSA_CommandHandlerTable[27])(int32 commandId);
 
     static void InjectHooks();
 
@@ -157,35 +160,35 @@ public:
     void UpdateCompareFlag(bool state);
     void UpdatePC(int32 newIP);
 
-    void ProcessOneCommand();
-    void Process();
-    void ProcessCommands0To99(int32 commandId);
-    void ProcessCommands100To199(int32 commandId);
-    void ProcessCommands200To299(int32 commandId);
-    void ProcessCommands300To399(int32 commandId);
-    void ProcessCommands400To499(int32 commandId);
-    void ProcessCommands500To599(int32 commandId);
-    void ProcessCommands600To699(int32 commandId);
-    void ProcessCommands700To799(int32 commandId);
-    void ProcessCommands800To899(int32 commandId);
-    void ProcessCommands900To999(int32 commandId);
-    void ProcessCommands1000To1099(int32 commandId);
-    void ProcessCommands1100To1199(int32 commandId);
-    void ProcessCommands1200To1299(int32 commandId);
-    void ProcessCommands1300To1399(int32 commandId);
-    void ProcessCommands1400To1499(int32 commandId);
-    void ProcessCommands1500To1599(int32 commandId);
-    void ProcessCommands1600To1699(int32 commandId);
-    void ProcessCommands1700To1799(int32 commandId);
-    void ProcessCommands1800To1899(int32 commandId);
-    void ProcessCommands1900To1999(int32 commandId);
-    void ProcessCommands2000To2099(int32 commandId);
-    void ProcessCommands2100To2199(int32 commandId);
-    void ProcessCommands2200To2299(int32 commandId);
-    void ProcessCommands2300To2399(int32 commandId);
-    void ProcessCommands2400To2499(int32 commandId);
-    void ProcessCommands2500To2599(int32 commandId);
-    void ProcessCommands2600To2699(int32 commandId);
+    int8 ProcessOneCommand();
+    int8 Process();
+    int8 ProcessCommands0To99(int32 commandId);
+    int8 ProcessCommands100To199(int32 commandId);
+    int8 ProcessCommands200To299(int32 commandId);
+    int8 ProcessCommands300To399(int32 commandId);
+    int8 ProcessCommands400To499(int32 commandId);
+    int8 ProcessCommands500To599(int32 commandId);
+    int8 ProcessCommands600To699(int32 commandId);
+    int8 ProcessCommands700To799(int32 commandId);
+    int8 ProcessCommands800To899(int32 commandId);
+    int8 ProcessCommands900To999(int32 commandId);
+    int8 ProcessCommands1000To1099(int32 commandId);
+    int8 ProcessCommands1100To1199(int32 commandId);
+    int8 ProcessCommands1200To1299(int32 commandId);
+    int8 ProcessCommands1300To1399(int32 commandId);
+    int8 ProcessCommands1400To1499(int32 commandId);
+    int8 ProcessCommands1500To1599(int32 commandId);
+    int8 ProcessCommands1600To1699(int32 commandId);
+    int8 ProcessCommands1700To1799(int32 commandId);
+    int8 ProcessCommands1800To1899(int32 commandId);
+    int8 ProcessCommands1900To1999(int32 commandId);
+    int8 ProcessCommands2000To2099(int32 commandId);
+    int8 ProcessCommands2100To2199(int32 commandId);
+    int8 ProcessCommands2200To2299(int32 commandId);
+    int8 ProcessCommands2300To2399(int32 commandId);
+    int8 ProcessCommands2400To2499(int32 commandId);
+    int8 ProcessCommands2500To2599(int32 commandId);
+    int8 ProcessCommands2600To2699(int32 commandId);
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);
