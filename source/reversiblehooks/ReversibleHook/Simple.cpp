@@ -102,7 +102,6 @@ void Simple::Switch()
         VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibOriginalFunctionContent, m_iLibHookedBytes);
     }
     m_bIsHooked = !m_bIsHooked;
-    m_isVisible = m_bIsHooked;
 }
 
 void Simple::Check() {
