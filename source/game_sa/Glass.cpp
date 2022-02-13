@@ -444,7 +444,6 @@ void CGlass::RenderReflectionPolys() {
         RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
         RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 
-        printf("%d\n", ReflectionPolyVertexBaseIdx);
         if (RwIm3DTransform(ReflectionPolyVertexBuffer, ReflectionPolyVertexBaseIdx - 1536, nullptr, rwIM3D_VERTEXUV))
         {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &aTempBufferIndices[3072], ReflectionPolyIndexBaseIdx - 3072);
