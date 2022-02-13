@@ -190,18 +190,18 @@ public:
     // KEYBOARD
     [[nodiscard]] bool IsFKeyJustDown(uint8 key) const noexcept             { return NewKeyState.FKeys[key] && OldKeyState.FKeys[key]; }
     [[nodiscard]] bool IsFKeyJustPressed(uint8 key) const noexcept          { return NewKeyState.FKeys[key] && !OldKeyState.FKeys[key]; }
-    [[nodiscard]] bool IsF1JustPressed() const noexcept                     { return IsFKeyJustPressed(1); }
-    [[nodiscard]] bool IsF2JustPressed() const noexcept                     { return IsFKeyJustPressed(2); }
-    [[nodiscard]] bool IsF3JustPressed() const noexcept                     { return IsFKeyJustPressed(3); }
-    [[nodiscard]] bool IsF4JustPressed() const noexcept                     { return IsFKeyJustPressed(4); }
-    [[nodiscard]] bool IsF5JustPressed() const noexcept                     { return IsFKeyJustPressed(5); }
-    [[nodiscard]] bool IsF6JustPressed() const noexcept                     { return IsFKeyJustPressed(6); }
-    [[nodiscard]] bool IsF7JustPressed() const noexcept                     { return IsFKeyJustPressed(7); }
-    [[nodiscard]] bool IsF8JustPressed() const noexcept                     { return IsFKeyJustPressed(8); }
-    [[nodiscard]] bool IsF9JustPressed() const noexcept                     { return IsFKeyJustPressed(9); }
-    [[nodiscard]] bool IsF10JustPressed() const noexcept                    { return IsFKeyJustPressed(10); }
-    [[nodiscard]] bool IsF11JustPressed() const noexcept                    { return IsFKeyJustPressed(11); }
-    [[nodiscard]] bool IsF12JustPressed() const noexcept                    { return IsFKeyJustPressed(12); }
+    [[nodiscard]] bool IsF1JustPressed() const noexcept                     { return IsFKeyJustPressed(0); }
+    [[nodiscard]] bool IsF2JustPressed() const noexcept                     { return IsFKeyJustPressed(1); }
+    [[nodiscard]] bool IsF3JustPressed() const noexcept                     { return IsFKeyJustPressed(2); }
+    [[nodiscard]] bool IsF4JustPressed() const noexcept                     { return IsFKeyJustPressed(3); }
+    [[nodiscard]] bool IsF5JustPressed() const noexcept                     { return IsFKeyJustPressed(4); }
+    [[nodiscard]] bool IsF6JustPressed() const noexcept                     { return IsFKeyJustPressed(5); }
+    [[nodiscard]] bool IsF7JustPressed() const noexcept                     { return IsFKeyJustPressed(6); }
+    [[nodiscard]] bool IsF8JustPressed() const noexcept                     { return IsFKeyJustPressed(7); }
+    [[nodiscard]] bool IsF9JustPressed() const noexcept                     { return IsFKeyJustPressed(8); }
+    [[nodiscard]] bool IsF10JustPressed() const noexcept                    { return IsFKeyJustPressed(9); }
+    [[nodiscard]] bool IsF11JustPressed() const noexcept                    { return IsFKeyJustPressed(10); }
+    [[nodiscard]] bool IsF12JustPressed() const noexcept                    { return IsFKeyJustPressed(11); }
 
     [[nodiscard]] bool IsStandardKeyJustDown(uint8 key) const noexcept      { return NewKeyState.standardKeys[key] && OldKeyState.standardKeys[key]; }                       //
     [[nodiscard]] bool IsStandardKeyJustPressed(uint8 key) const noexcept   { return NewKeyState.standardKeys[key] && !OldKeyState.standardKeys[key]; }                      // 0x4D59B0
