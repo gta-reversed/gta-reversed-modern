@@ -9,7 +9,7 @@ class CPhysical;
 
 class CPointRoute {
 public:
-    uint32 m_nNumPoints;
+    uint32  m_nNumPoints;
     CVector m_vecPoints[8];
 
     CPointRoute() : m_nNumPoints(0) {}
