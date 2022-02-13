@@ -9,6 +9,7 @@
 #include "CompressedVector.h"
 #include "Vector.h"
 #include "NodeAddress.h"
+#include "NodeRoute.h"
 
 #define NUM_PATH_MAP_AREAS 64
 #define NUM_PATH_INTERIOR_AREAS 8
@@ -163,7 +164,7 @@ public:
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
     uint32                 m_dwNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
-    bool                   m_bForbiddenForScriptedCarsEnabled;
+    bool                   m_bNodesLoadingRequested;
     char                   _padding[3];
     float                  m_fForbiddenForScrCarsX1;
     float                  m_fForbiddenForScrCarsX2;
@@ -244,25 +245,41 @@ public:
                       float* pDistance, float maxSearchDistance, CNodeAddress* targetAddr, float maxUnkLimit, bool oneSideOnly, CNodeAddress forbiddenNodeAddr,
                       bool includeNodesWithoutLinks, bool waterPath);
     bool TestCoorsCloseness(CVector vecEnd, uint8 nodeType, CVector vecStart); // unused
-    void ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVector& vecEnd, const CNodeAddress& address, CNodeRoute&)
-
-    void ReInit();
-    void Shutdown();
-    void RemoveForbiddenForScriptedCars();
-    CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
-    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir);
-
+    void ComputeRoute(uint8 nodeType, const CVector& vecStart, const CVector& vecEnd, const CNodeAddress& address, CNodeRoute& nodeRoute);
+    void FindStartPointOfRegion(int regionX, int regionY, float& outX, float& outY);
     void SetLinksBridgeLights(float fXMin, float fXMax, float fYMin, float fYMax, bool bTrainCrossing);
-
-    CPathNode* GetPathNode(CNodeAddress address);
-    int32 LoadSceneForPathNodes(CVector point);
+    CVector FindNodeCoorsForScript(CNodeAddress address, bool* bFound);
+    CVector FindNodeCoorsForScript(CNodeAddress address1, CNodeAddress address2, float* fOutDir, bool* bFound);
+    void Shutdown();
+    CVector TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed);
+    void TakeWidthIntoAccountForCoors(CNodeAddress address, CNodeAddress address2, uint16 seed, float* fOut1, float* fOut2);
+    static void MarkRegionsForCoors(CVector vecPos, float radius);
+    void SetPathsNeededAtPosition(const CVector& vecPos);
+    void UpdateStreaming(bool bForceStreaming);
+    void MakeRequestForNodesToBeLoaded(float x1, float x2, float y1, float y2);
+    void ReleaseRequestedNodes();
+    void ReInit();
+    bool AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY);
+    bool HaveRequestedNodesBeenLoaded();
+    void LoadSceneForPathNodes(CVector point);
     bool IsWaterNodeNearby(CVector position, float radius);
+    void StartNewInterior(int interiorNum);
+    CNodeAddress AddNodeToNewInterior(float x, float y, float z, bool bDontWander, int8 con0, int8 con1, int8 con2, int8 con3, int8 con4, int8 con5);
+    void AddInteriorLink(int unkn1, int unkn2);
+    void AddInteriorLinkToExternalNode(int unkn, CNodeAddress interiorAddress, CNodeAddress exteriorAddress);
+    void RemoveInteriorLinks(int unkn);
+    CNodeAddress FindNearestExteriorNodeToInteriorNode(int interiorId);
+    void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
+    void AddDynamicLinkBetween2Nodes(CNodeAddress node1, CNodeAddress node2);
+    void CompleteNewInterior(CNodeAddress* outAddress);
+    void RemoveInterior(uint32 interior);
+    CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
+    CNodeAddress FindLinkBetweenNodes(CNodeAddress node1, CNodeAddress node2);
+    CVector FindParkingNodeInArea(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     bool Load();
     bool Save();
-    void UpdateStreaming(bool a1);
-    void StartNewInterior(int interiorNum);
-    CNodeAddress ReturnInteriorNodeIndex(int32 unkn, CNodeAddress addressToFind, int16 nodeId);
-    void AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress node1, CNodeAddress node2);
+
+    CPathNode* GetPathNode(CNodeAddress address);
 
 
 

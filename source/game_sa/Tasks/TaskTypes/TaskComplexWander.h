@@ -63,7 +63,7 @@ public:
     virtual int32 GetWanderType() = 0;
     virtual void ScanForStuff(CPed* ped) = 0;
     virtual void UpdateDir(CPed* ped);
-    virtual void UpdatePathNodes(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir);
+    virtual void UpdatePathNodes(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, uint8* outDir);
 
     // reversed virtual functions
     eTaskType GetId_Reversed() { return TASK_COMPLEX_WANDER; };
@@ -71,7 +71,7 @@ public:
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);
     void UpdateDir_Reversed(CPed* ped);
-    void UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, int8* outDir);
+    void UpdatePathNodes_Reversed(CPed* ped, int8 dir, CNodeAddress* originNode, CNodeAddress* targetNode, uint8* outDir);
 
     CTask* CreateSubTask(CPed* ped, int32 taskId);
     void ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);

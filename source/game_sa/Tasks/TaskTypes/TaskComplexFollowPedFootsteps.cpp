@@ -19,9 +19,7 @@ CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTas
     if (ped)
         ped->RegisterReference(reinterpret_cast<CEntity**>(&m_targetPed));
 
-    m_pointRoute = CPools::ms_pPointRoutePool->New();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
+    m_pointRoute = new CPointRoute();
 }
 
 CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed* ped) {

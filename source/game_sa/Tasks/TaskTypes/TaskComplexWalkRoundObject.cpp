@@ -20,9 +20,7 @@ CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const 
     if (m_object)
         m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
 
-    m_pointRoute = CPools::ms_pPointRoutePool->New();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
+    m_pointRoute = new CPointRoute();
 }
 
 CTaskComplexWalkRoundObject::~CTaskComplexWalkRoundObject() {
