@@ -9,6 +9,12 @@ class CObject;
 class CPtrList;
 class CFallingGlassPane;
 
+enum class ePaneType : uint32 {
+    DEFAULT = 0,
+    DELAYED = 1,
+    CAR     = 2
+};
+
 class CGlass {
 public:
     static CVector2D (&PanePolyPositions)[4][3];
@@ -34,7 +40,7 @@ public:
     static void CarWindscreenShatters(CVehicle* vehicle);
     static void WasGlassHitByBullet(CEntity* entity, CVector hitPos);
     static void WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection);
-    static void GeneratePanesForWindow(uint32 type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
+    static void GeneratePanesForWindow(ePaneType type, CVector pos, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
                                        bool bShatter, bool numSectionsMax1, int32 numSections, bool unk);
     static void Update();
     static void Render();

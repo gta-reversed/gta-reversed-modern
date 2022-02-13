@@ -18,6 +18,7 @@
 #include "WindModifiers.h"
 #include "EntryExitManager.h"
 #include "TrafficLights.h"
+#include "Glass.h"
 
 void CEntity::InjectHooks()
 {

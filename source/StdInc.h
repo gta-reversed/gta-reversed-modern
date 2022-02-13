@@ -95,7 +95,6 @@
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\Glass.h"
 #include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\PlayerRelationshipRecorder.h"

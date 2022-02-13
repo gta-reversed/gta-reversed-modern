@@ -16,6 +16,7 @@
 #include "eEntityStatus.h"
 #include "eModelID.h"
 
+class CVehicle;
 class CTrain;
 class CBike;
 class CBoat;

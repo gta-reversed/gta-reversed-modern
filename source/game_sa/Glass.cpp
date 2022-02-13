@@ -1,11 +1,13 @@
 #include "StdInc.h"
-#include "Glass.h"
-#include "FallingGlassPane.h"
+
 #include <numeric>
 #include <ranges>
 #include <array>
 #include <functional>
-#include <Lines.h>
+
+#include "Glass.h"
+#include "FallingGlassPane.h"
+
 namespace rng = std::ranges;
 
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
@@ -49,7 +51,7 @@ void CGlass::InjectHooks() {
 // 0x71A8D0
 void CGlass::Init() {
     for (auto& pane : aGlassPanes) {
-        pane.m_bExistFlag = false;
+        pane.m_bExist = false;
     }
 
     for (auto i = 0u; i < std::size(PanePolyPositions); i++) {
@@ -168,7 +170,7 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
 
     const auto blPos = triVertices[minRightFwdDotSumIdx];
     GeneratePanesForWindow(
-        2,
+        ePaneType::CAR,
         blPos,
         fwd * extent.fwd,
         right * extent.right, vehicle->m_vecMoveSpeed,
@@ -233,7 +235,7 @@ void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, 
 
         AudioEngine.ReportGlassCollisionEvent(AE_GLASS_BREAK_FAST, object->GetPosition());
         GeneratePanesForWindow(
-            fDamageIntensity <= 300.f ? 1 : 0,
+            fDamageIntensity <= 300.f ? ePaneType::DELAYED : ePaneType::DEFAULT,
             vert0Pos,
             { 0.f, 0.f, maxZ - minZ },
             furthestFromV0Pos - vert0Pos,
@@ -262,7 +264,7 @@ void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, 
  *
  * - Neither 'size' vectors are normalized!
  *
- * type                    - 0, 1, 2 - Undocumented yet
+ * type                    - @ePaneType
  * point                   - BL
  * fwd, right              - As illustrated above
  * center                  - The centre of the above rectangle (each pane is a piece of it)
@@ -272,11 +274,10 @@ void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, 
  * numSectionsMax1         - Limit no. of sections to 1 - Unsure what's it use-case as setting `numSections` to 1 achieves the same
  * numSections             - No. of sections of each axis, the total number of sections will be `numSections ^ 2` (squared)
 **/
-void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
+void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, CVector right, CVector velocity, CVector center, float velocityCenterDragCoeff,
                                     bool bShatter, bool numSectionsMax1, int32 numSections, bool unk) {
 
     const float totalSizeY = fwd.Magnitude(), totalSizeX = right.Magnitude();
-
 
     // Calculate no. of sections, and section size
     const auto CalculateCountOfSectionsAndSizeAxis = [&](auto axisSize) {
@@ -287,7 +288,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
     const auto [countX, sizeX] = CalculateCountOfSectionsAndSizeAxis(totalSizeX);
     const auto [countY, sizeY] = CalculateCountOfSectionsAndSizeAxis(totalSizeY);
 
-    //printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
+    // printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
 
     bool hitGround{};
     float groundZ = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &hitGround, nullptr);
@@ -299,7 +300,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
 
     for (auto posY = 0u; posY < countY; posY++) {
         for (auto posX = 0u; posX < countX; posX++) {
-            for (auto piece = 0u; piece < 5u; piece++) {
+            for (auto piece = 0u; piece < std::size(PanePolyPositions); piece++) {
                 CFallingGlassPane* pane = FindFreePane();
                 if (!pane)
                     continue;
@@ -312,11 +313,11 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
                 mat.GetUp() = Normalized(fwd) * sizeY;
                 mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
 
-                const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{(float)posX, (float)posY};
+                const auto paneCenterPos = PanePolyCenterPositions[piece] * CVector2D{ sizeX, sizeY } + CVector2D{ (float)posX, (float)posY };
                 mat.GetPosition() = point + Normalized(fwd) * paneCenterPos.y + Normalized(right) * paneCenterPos.x;
 
                 {
-                    constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                    constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) * 0.0015f; };
                     pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
                 }
 
@@ -330,11 +331,11 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
                 }
 
                 switch (type) {
-                case 1: {
+                case ePaneType::DELAYED: {
                     pane->m_nCreatedTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
                     break;
                 }
-                case 2:
+                case ePaneType::CAR:
                 default: {
                     pane->m_nCreatedTime = CTimer::GetTimeInMS();
                     break;
@@ -345,7 +346,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
                 pane->m_bRenderShatter = bShatter;
                 pane->m_fSize = sizeY;
                 pane->m_f6F = unk;
-                pane->m_bExistFlag = true;
+                pane->m_bExist = true;
             }
         }
     }
@@ -354,7 +355,7 @@ void CGlass::GeneratePanesForWindow(uint32 type, CVector point, CVector fwd, CVe
 // 0x71B0D0
 void CGlass::Update() {
     for (auto& pane : aGlassPanes) {
-        if (pane.m_bExistFlag) {
+        if (pane.m_bExist) {
             pane.Update();
         }
     }
@@ -379,7 +380,7 @@ void CGlass::Render() {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
 
     for (auto& pane : aGlassPanes) {
-        if (pane.m_bExistFlag) {
+        if (pane.m_bExist) {
             pane.Render();
         }
     }
@@ -395,7 +396,7 @@ void CGlass::Render() {
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,    RWRSTATE(FALSE));
 }
 
-// (CEntity**, float, float, float)
+// (..., CEntity**, float, float, float)
 // 0x71AFC0
 void CGlass::FindWindowSectorList(CPtrList& objList, float& outDist, CEntity*& outEntity, CVector point) {
     if (!objList.GetNode())
@@ -436,6 +437,7 @@ void CGlass::RenderReflectionPolys() {
         RwRenderStateSet(rwRENDERSTATESRCBLEND,      RWRSTATE(rwBLENDSRCALPHA));
         RwRenderStateSet(rwRENDERSTATEDESTBLEND,     RWRSTATE(rwBLENDINVSRCALPHA));
 
+        printf("%d\n", ReflectionPolyVertexBaseIdx);
         if (RwIm3DTransform(ReflectionPolyVertexBuffer, ReflectionPolyVertexBaseIdx - 1536, nullptr, rwIM3D_VERTEXUV))
         {
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, &aTempBufferIndices[3072], ReflectionPolyIndexBaseIdx - 3072);
@@ -487,7 +489,7 @@ void CGlass::RenderHiLightPolys() {
 // (CVector*)
 // 0x71ACF0
 uint8 CGlass::CalcAlphaWithNormal(const CVector& normal) {
-    const auto camFwd = TheCamera.GetForward();
+    const auto& camFwd = TheCamera.GetForward();
     const auto fwdOnNormalProj2x = ProjectVector(camFwd, normal) * 2.f;
     const auto factor = ( // TODO: What the fuck is going on here???
           camFwd.x - fwdOnNormalProj2x.x
@@ -506,8 +508,11 @@ void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
 
 // 0x71ACA0
 CFallingGlassPane* CGlass::FindFreePane() {
-    const auto it = rng::find_if(aGlassPanes, [](auto&& v) {return v.m_bExistFlag; });
-    return it != std::end(aGlassPanes) ? &*it : nullptr;
+    for (auto& pane : aGlassPanes) {
+        if (!pane.m_bExist)
+            return &pane;
+    }
+    return nullptr;
 }
 
 // 0x71AF70
@@ -579,9 +584,9 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
                     AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, object->GetPosition());
 
                     GeneratePanesForWindow(
-                        1,
+                        ePaneType::DELAYED,
                         v0Pos,
-                        {0.f, 0.f, maxZ - minZ},
+                        { 0.f, 0.f, maxZ - minZ },
                         furthestOfV0Pos - v0Pos,
                         {},
                         point,

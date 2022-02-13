@@ -1,9 +1,14 @@
 #include "StdInc.h"
+
 #include "FallingGlassPane.h"
+#include "Glass.h"
 
 void CFallingGlassPane::InjectHooks() {
-    ReversibleHooks::Install("CFallingGlassPane", "Update", 0x71AA10, &CFallingGlassPane::Update);
-    ReversibleHooks::Install("CFallingGlassPane", "Render", 0x71B100, &CFallingGlassPane::Render);
+    RH_ScopedClass(CFallingGlassPane);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Update, 0x71AA10);
+    RH_ScopedInstall(Render, 0x71B100);
 }
 
 // 0x71AA10
@@ -26,7 +31,7 @@ void CFallingGlassPane::Update() {
     m_Matrix.GetUp()      += CrossProduct(m_RandomNumbers, m_Matrix.GetUp());
 
     if (pos.z < m_fGroundZ) {
-        m_bExistFlag = false;
+        m_bExist = false;
         AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT_GROUND, { pos.x, pos.y, m_fGroundZ });
         if (!m_f6F) {
             RwRGBA color{ 255, 255, 255, 32 };

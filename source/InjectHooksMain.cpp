@@ -81,8 +81,9 @@
 #include "UserDisplay.h"
 #include "OnscreenTimer.h"
 #include "OnscreenCounterEntry.h"
-#include "FallingGlassPane.h"
 #include "PostEffects.h"
+#include "FallingGlassPane.h"
+#include "Glass.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -189,7 +190,6 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
-
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
