@@ -46,7 +46,7 @@ public:
     float          field_804;
     float          m_intertiaValue1; // m_anWheelSurfaceType[2]
     float          m_intertiaValue2; // *
-    int32          m_wheelSkidmarkType[4];
+    int32          m_wheelSkidmarkType[4]; // 0x810
     bool           m_wheelSkidmarkBloodState[4];
     bool           m_wheelSkidmarkMuddy[4];
     float          m_wheelRotation[4];
@@ -60,7 +60,7 @@ public:
             float m_fHeliWheelSpeed4;
         };
     };
-    float m_wheelRotationUnused[4]; // Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+    float m_wheelRotationUnused[4];             // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
     union {
         struct {
             uint8 bTaxiLightOn : 1;
@@ -74,14 +74,14 @@ public:
         } npcFlags;
         uint8 ucNPCVehicleFlags;
     };
-    char        field_869;
-    int16       m_doingBurnout;
-    uint16      m_wMiscComponentAngle;
-    uint16      m_wMiscComponentAnglePrev;
-    uint32      m_dwBusDoorTimerEnd;
-    int32       m_dwBusDoorTimerStart;
-    float       m_aSuspensionSpringLength[4];
-    float       m_aSuspensionLineLength[4];
+    char        field_869;                      // 0x869
+    int16       m_doingBurnout;                 // 0x86A
+    uint16      m_wMiscComponentAngle;          // 0x86C
+    uint16      m_wMiscComponentAnglePrev;      // 0x86E
+    uint32      m_dwBusDoorTimerEnd;            // 0x870
+    int32       m_dwBusDoorTimerStart;          // 0x874
+    float       m_aSuspensionSpringLength[4];   // 0x878
+    float       m_aSuspensionLineLength[4];     // 0x888
     float       m_fFrontHeightAboveRoad;
     float       m_fRearHeightAboveRoad;
     float       m_fCarTraction;
@@ -90,12 +90,12 @@ public:
     float       m_aircraftGoToHeading;
     float       m_fRotationBalance; // Controls destroyed helicopter rotation
     float       m_fMoveDirection;
-    int32       field_8B4[6];
+    CVector     m_doorRelatedPosition1;
+    CVector     m_doorRelatedPosition2;
     int32       field_8C8[6];
-    int32       m_dwBurnTimer;
+    int32       m_fBurnTimer;
     CPhysical*  m_apWheelCollisionEntity[4];
     CVector     m_vWheelCollisionPos[4]; // Bike::m_avTouchPointsLocalSpace
-
     char        field_928[28];
     int32       field_940;
     int32       field_944;
@@ -113,7 +113,7 @@ public:
     uint8       m_harvesterParticleCounter;
     char        field_981;
     int16       field_982;
-    float       field_984;
+    float m_heliDustFxTimeConst;
 
     // variables
     static constexpr float PACKER_COL_ANGLE_MULT = -0.0001f;
@@ -166,10 +166,10 @@ public:
     float GetHeightAboveRoad() override;
     void PlayCarHorn() override;
     int32 GetNumContactWheels() override;
-    void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
+    void VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
     bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
     bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) override;
-    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) override;
     bool BreakTowLink() override;
     float FindWheelWidth(bool bRear) override;
     bool Save() override;
@@ -228,7 +228,7 @@ public:
     static void SetAllTaxiLights(bool enable);
     // Play horn for NPC vehicle (called @CAutomobile::ProcessAI)
     void PlayHornIfNecessary();
-    void SetBusDoorTimer(uint32 time, uint8 arg1);
+    void SetBusDoorTimer(uint32 time, bool setAsStartedInPast);
     void ProcessAutoBusDoors();
     // Make player vehicle jumps when pressing horn
     void BoostJumpControl();
@@ -250,17 +250,17 @@ public:
     // Create colliding particles
     void dmgDrawCarCollidingParticles(const CVector&, float force, eWeaponType weapon);
     void ProcessCarOnFireAndExplode(bool bExplodeImmediately);
-    CObject* SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType);
+    CObject* SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType);
     void ProcessBuoyancy();
     void inline ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver);
     // Process combine
     void ProcessHarvester();
-    void ProcessSwingingDoor(int32 nodeIndex, eDoors door);
+    void ProcessSwingingDoor(eCarNodes nodeIndex, eDoors door);
     // Returns spawned flying component?
     CObject* RemoveBonnetInPedCollision();
     void UpdateWheelMatrix(int32 nodeIndex, int32 flags);
-    void PopDoor(int32 nodeIndex, eDoors door, bool showVisualEffect);
-    void PopPanel(int32 nodeIndex, ePanels panel, bool showVisualEffect);
+    void PopDoor(eCarNodes nodeIndex, eDoors door, bool showVisualEffect);
+    void PopPanel(eCarNodes nodeIndex, ePanels panel, bool showVisualEffect);
     void ScanForCrimes();
     void TankControl();
     // Makes a vehicles acts like a tank on a road - blows up collided vehicles. Must be called in a loop
@@ -279,6 +279,7 @@ public:
 
     // NOTSA section
 
+    CBouncingPanel* CheckIfExistsGetFree(eCarNodes nodeIdx);
     CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
 
     void SetEngineState(bool state) {
@@ -286,6 +287,10 @@ public:
             vehicleFlags.bEngineOn = false;
         else
             vehicleFlags.bEngineOn = state;
+    }
+
+    [[nodiscard]] bool AreAllWheelsNotTouchingGround() const {
+        return std::ranges::all_of(m_fWheelsSuspensionCompression, [](float v) {return v >= 1.f; });
     }
 
     bool IsAnyWheelMakingContactWithGround() {
@@ -408,10 +413,10 @@ private:
     float GetHeightAboveRoad_Reversed() { return CAutomobile::GetHeightAboveRoad(); }
     void PlayCarHorn_Reversed() { CAutomobile::PlayCarHorn(); }
     int32 GetNumContactWheels_Reversed() { return CAutomobile::GetNumContactWheels(); }
-    void VehicleDamage_Reversed(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
+    void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CAutomobile::VehicleDamage(damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
     bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowHitchPos(outPos, bCheckModelInfo, veh); }
     bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh) { return CAutomobile::GetTowBarPos(outPos, bCheckModelInfo, veh); }
-    bool SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) { return CAutomobile::SetTowLink(targetVehicle, arg1); }
+    bool SetTowLink_Reversed(CVehicle* tractor, bool arg1) { return CAutomobile::SetTowLink(tractor, arg1); }
     bool BreakTowLink_Reversed() { return CAutomobile::BreakTowLink(); }
     float FindWheelWidth_Reversed(bool bRear) { return CAutomobile::FindWheelWidth(bRear); }
     bool Save_Reversed() { return CAutomobile::Save(); }

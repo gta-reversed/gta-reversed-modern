@@ -49,7 +49,7 @@ public:
     CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CTrailer() override = default; // 0x6CED10
 
-    bool SetTowLink(CVehicle* targetVehicle, bool arg1) override;
+    bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) override;
     void ScanForTowLink();
 
     void SetupSuspensionLines() override;

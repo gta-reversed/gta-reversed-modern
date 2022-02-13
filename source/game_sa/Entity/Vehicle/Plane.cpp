@@ -130,8 +130,8 @@ void CPlane::SetupDamageAfterLoad() {
 }
 
 // 0x6CC4B0
-void CPlane::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) {
-    plugin::CallMethod<0x6CC4B0, CPlane*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+void CPlane::VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) {
+    plugin::CallMethod<0x6CC4B0, CPlane*, float, eVehicleCollisionComponent, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon);
 }
 
 // 0x6CAB90

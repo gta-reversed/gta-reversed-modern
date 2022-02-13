@@ -109,7 +109,7 @@ public:
     void PreRender() override;
     void Teleport(CVector destination, bool resetRotation) override;
     void ProcessControl() override;
-    void VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
+    void VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) override;
     void SetupSuspensionLines() override;
     void SetModelIndex(uint32 index) override;
     void PlayCarHorn() override;
@@ -190,7 +190,7 @@ private:
     void PreRender_Reversed() { CBike::PreRender(); }
     void Teleport_Reversed(CVector destination, bool resetRotation) { CBike::Teleport(destination, resetRotation); }
     void ProcessControl_Reversed() { CBike::ProcessControl(); }
-    void VehicleDamage_Reversed(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CBike::VehicleDamage(damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
+    void VehicleDamage_Reversed(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { CBike::VehicleDamage(damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon); }
     void SetupSuspensionLines_Reversed() { CBike::SetupSuspensionLines(); }
     void SetModelIndex_Reversed(uint32 index) { CBike::SetModelIndex(index); }
     void PlayCarHorn_Reversed() { CBike::PlayCarHorn(); }

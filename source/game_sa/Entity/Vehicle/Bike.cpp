@@ -340,8 +340,8 @@ void CBike::Teleport(CVector destination, bool resetRotation) {
 }
 
 // 0x6B8EC0
-void CBike::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) {
-    plugin::CallMethod<0x6B8EC0, CBike*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+void CBike::VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) {
+    plugin::CallMethod<0x6B8EC0, CBike*, float, eVehicleCollisionComponent, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon);
 }
 
 // 0x6B89B0

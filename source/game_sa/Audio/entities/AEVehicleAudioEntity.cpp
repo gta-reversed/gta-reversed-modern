@@ -469,6 +469,10 @@ void CAEVehicleAudioEntity::Terminate() {
     m_bEnabled = false;
 }
 
+uint32 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
+    return plugin::CallMethodAndReturn<uint32, 0x4F4F00>(this);
+}
+
 void CAEVehicleAudioEntity::PlaySkidSound(int16 soundType, float speed, float volume) {
     plugin::CallMethod<0x4F8360, CAEAudioEntity*, int16, float, float>(this, soundType, speed, volume);
 }
@@ -497,6 +501,12 @@ float CAEVehicleAudioEntity::GetFlyingMetalVolume(CPhysical* physical) {
     return CAEAudioUtility::AudioLog10(fVol) * 10.0F;
 }
 
+// 0x4F7580
+void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents eventId, CEntity* entity) {
+    return plugin::CallMethod<0x4F7580>(this, eventId, entity);
+}
+
+// 0x4FA630
 void CAEVehicleAudioEntity::PlayTrainBrakeSound(int16 soundType, float speed, float volume) {
     plugin::CallMethod<0x4FA630, CAEAudioEntity*, int16, float, float>(this, soundType, speed, volume);
 }

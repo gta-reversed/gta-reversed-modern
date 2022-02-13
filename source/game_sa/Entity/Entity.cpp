@@ -2528,6 +2528,10 @@ CEntity* CEntity::FindLastLOD() noexcept {
     return it;
 }
 
+CBaseModelInfo* CEntity::GetModelInfo() const {
+    return CModelInfo::GetModelInfo(m_nModelIndex);
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
     auto geometry = RpAtomicGetGeometry(atomic);

@@ -54,8 +54,8 @@ void CTrailer::SetupSuspensionLines() {
 }
 
 // 0x6CFDF0
-bool CTrailer::SetTowLink(CVehicle* targetVehicle, bool arg1) {
-    return plugin::CallMethodAndReturn<bool, 0x6CFDF0, CTrailer*, CVehicle*, bool>(this, targetVehicle, arg1);
+bool CTrailer::SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) {
+    return plugin::CallMethodAndReturn<bool, 0x6CFDF0, CTrailer*, CVehicle*, bool>(this, tractor, setMyPosToTowBar);
 }
 
 // 0x6CF030

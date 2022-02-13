@@ -341,7 +341,7 @@ void CVehicleModelInfo::SetVehicleComponentFlags(RwFrame* component, uint32 flag
         RwFrameForAllObjects(component, SetAtomicFlagCB, (void*)eAtomicComponentFlag::ATOMIC_HAS_ALPHA);
 }
 
-void CVehicleModelInfo::GetWheelPosn(int32 wheel, CVector& outVec, bool local)
+void CVehicleModelInfo::GetWheelPosn(int32 wheel, CVector& outVec, bool local) const
 {
     auto frame = CClumpModelInfo::GetFrameFromId(m_pRwClump, ms_wheelFrameIDs[wheel]);
 

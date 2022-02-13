@@ -153,6 +153,10 @@ T clamp(T value, T low, T high)
     return std::min(std::max(value, low), high);
 }
 
+inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
+    return fMin * (1.0F - fProgress) + fMax * fProgress;
+}
+
 inline const float lerp(float fMin, float fMax, float fProgress) {
     return fMin * (1.0F - fProgress) + fMax * fProgress;
 }

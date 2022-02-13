@@ -258,7 +258,7 @@ void CAutomobile::ProcessControl()
         m_nFakePhysics = 0;
     }
 
-    VehicleDamage(0.0f, 0, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
+    VehicleDamage(0.0f, eVehicleCollisionComponent::DEFAULT, nullptr, nullptr, nullptr, WEAPON_RAMMEDBYCAR);
     if (m_nStatus == STATUS_PLAYER && ModelIndices::HasWaterCannon(m_nModelIndex)) {
         FireTruckControl(nullptr);
     }
@@ -1659,9 +1659,9 @@ int32 CAutomobile::GetNumContactWheels()
 }
 
 // 0x6A7650
-void CAutomobile::VehicleDamage(float damageIntensity, uint16 collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
+void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon)
 {
-    plugin::CallMethod<0x6A7650, CAutomobile*, float, uint16, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, collisionComponent, damager, vecCollisionCoors, vecCollisionDirection, weapon);
+    plugin::CallMethod<0x6A7650, CAutomobile*, float, eVehicleCollisionComponent, CEntity*, CVector*, CVector*, eWeaponType>(this, damageIntensity, component, damager, vecCollisionCoors, vecCollisionDirection, weapon);
 }
 
 //0x6AF1D0
@@ -2271,9 +2271,9 @@ void CAutomobile::PlayHornIfNecessary()
 }
 
 // 0x6A3860
-void CAutomobile::SetBusDoorTimer(uint32 time, uint8 arg1)
+void CAutomobile::SetBusDoorTimer(uint32 time, bool setAsStartedInPast)
 {
-    ((void(__thiscall*)(CAutomobile*, uint32, uint8))0x6A3860)(this, time, arg1);
+    ((void(__thiscall*)(CAutomobile*, uint32, bool))0x6A3860)(this, time, setAsStartedInPast);
 }
 
 // 0x6A38A0
@@ -2668,9 +2668,9 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
 }
 
 // 0x6A8580
-CObject* CAutomobile::SpawnFlyingComponent(int32 nodeIndex, uint32 collisionType)
+CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType)
 {
-    return ((CObject * (__thiscall*)(CAutomobile*, int32, uint32))0x6A8580)(this, nodeIndex, collisionType);
+    return ((CObject * (__thiscall*)(CAutomobile*, eCarNodes, uint32))0x6A8580)(this, nodeIndex, collisionType);
 }
 
 // 0x6A8C00
@@ -2948,9 +2948,9 @@ void CAutomobile::ProcessHarvester()
 }
 
 // 0x6A9D70
-void CAutomobile::ProcessSwingingDoor(int32 nodeIndex, eDoors door)
+void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIndex, eDoors door)
 {
-    ((void(__thiscall*)(CAutomobile*, int32, eDoors))0x6A9D70)(this, nodeIndex, door);
+    ((void(__thiscall*)(CAutomobile*, eCarNodes, eDoors))0x6A9D70)(this, nodeIndex, door);
 }
 
 // 0x6AA200
@@ -2966,15 +2966,15 @@ void CAutomobile::UpdateWheelMatrix(int32 nodeIndex, int32 flags)
 }
 
 // 0x6ADEF0
-void CAutomobile::PopDoor(int32 nodeIndex, eDoors door, bool showVisualEffect)
+void CAutomobile::PopDoor(eCarNodes nodeIndex, eDoors door, bool showVisualEffect)
 {
-    ((void(__thiscall*)(CAutomobile*, int32, eDoors, bool))0x6ADEF0)(this, nodeIndex, door, showVisualEffect);
+    ((void(__thiscall*)(CAutomobile*, eCarNodes, eDoors, bool))0x6ADEF0)(this, nodeIndex, door, showVisualEffect);
 }
 
 // 0x6ADF80
-void CAutomobile::PopPanel(int32 nodeIndex, ePanels panel, bool showVisualEffect)
+void CAutomobile::PopPanel(eCarNodes nodeIndex, ePanels panel, bool showVisualEffect)
 {
-    ((void(__thiscall*)(CAutomobile*, int32, ePanels, bool))0x6ADF80)(this, nodeIndex, panel, showVisualEffect);
+    ((void(__thiscall*)(CAutomobile*, eCarNodes, ePanels, bool))0x6ADF80)(this, nodeIndex, panel, showVisualEffect);
 }
 
 // 0x6ADFF0
