@@ -136,8 +136,7 @@ CVehicleModelInfo::CVehicleModelInfo() : CClumpModelInfo()
     m_nFlags = 0;
     m_nAnimBlockIndex = -1;
     memset(m_anUpgrades, 0xFF, sizeof(m_anUpgrades));
-    for (int32 i = 0; i < 4; ++i)
-        m_anRemapTxds[i] = -1;
+    std::ranges::fill(m_anRemapTxds, -1);
 }
 
 ModelInfoType CVehicleModelInfo::GetModelType()
@@ -167,13 +166,12 @@ void CVehicleModelInfo::DeleteRwObject()
 }
 void CVehicleModelInfo::DeleteRwObject_Reversed()
 {
-    if (m_pVehicleStruct)
-        delete m_pVehicleStruct;
-
+    delete m_pVehicleStruct;
     m_pVehicleStruct = nullptr;
     CClumpModelInfo::DeleteRwObject();
 }
 
+// 0x4C9680
 RwObject* CVehicleModelInfo::CreateInstance()
 {
     return CVehicleModelInfo::CreateInstance_Reversed();

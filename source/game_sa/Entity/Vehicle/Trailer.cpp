@@ -8,8 +8,27 @@ static float& RELINK_TRAILER_DIFF_LIMIT_Z = *(float*)0x8D3474;  // 1.0f
 static float& m_fTrailerSuspensionForce = *(float*)0x8D3464;    // 1.5f
 static float& m_fTrailerDampingForce = *(float*)0x8D3468;       // 0.1f
 
+void CTrailer::InjectHooks() {
+    RH_ScopedClass(CTrailer);
+    RH_ScopedCategory("Vehicle");
+
+    // RH_ScopedInstall(Constructor, 0x6D03A0);
+    // RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0);
+    // RH_ScopedInstall(SetTowLink, 0x6CFDF0);
+    // RH_ScopedInstall(ScanForTowLink, 0x6CF030);
+    RH_ScopedInstall(ResetSuspension, 0x6CEE50);
+    // RH_ScopedInstall(ProcessSuspension, 0x6CF6A0);
+    // RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0);
+    // RH_ScopedInstall(ProcessControl, 0x6CED20);
+    // RH_ScopedInstall(ProcessAI, 0x6CF590);
+    // RH_ScopedInstall(PreRender, 0x6CFAC0);
+    // RH_ScopedInstall(GetTowHitchPos, 0x6CEEA0);
+    // RH_ScopedInstall(GetTowBarPos, 0x6CFD60);
+    // RH_ScopedInstall(BreakTowLink, 0x6CEFB0);
+}
+
 // 0x6D03A0
-CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
+CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
     plugin::CallMethod<0x6D03A0, CTrailer*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
     /*
     m_fTrailerColPointValue1 = 1.0f;
@@ -93,68 +112,4 @@ bool CTrailer::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh
 // 0x6CEFB0
 bool CTrailer::BreakTowLink() {
     return plugin::CallMethodAndReturn<bool, 0x6CEFB0, CTrailer*>(this);
-}
-
-void CTrailer::InjectHooks() {
-    RH_ScopedClass(CTrailer);
-    RH_ScopedCategory("Vehicle/Ped");
-
-    // RH_ScopedInstall(Constructor, 0x6D03A0);
-    // RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0);
-    // RH_ScopedInstall(SetTowLink, 0x6CFDF0);
-    // RH_ScopedInstall(ScanForTowLink, 0x6CF030);
-    RH_ScopedInstall(ResetSuspension, 0x6CEE50);
-    // RH_ScopedInstall(ProcessSuspension, 0x6CF6A0);
-    // RH_ScopedInstall(ProcessEntityCollision, 0x6CFFD0);
-    // RH_ScopedInstall(ProcessControl, 0x6CED20);
-    // RH_ScopedInstall(ProcessAI, 0x6CF590);
-    // RH_ScopedInstall(PreRender, 0x6CFAC0);
-    // RH_ScopedInstall(GetTowHitchPos, 0x6CEEA0);
-    // RH_ScopedInstall(GetTowBarPos, 0x6CFD60);
-    // RH_ScopedInstall(BreakTowLink, 0x6CEFB0);
-}
-
-CTrailer* CTrailer::Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) {
-    this->CTrailer::CTrailer(modelIndex, createdBy);
-    return this;
-}
-
-bool CTrailer::SetTowLink_Reversed(CVehicle* targetVehicle, bool arg1) {
-    return CTrailer::SetTowLink(targetVehicle, arg1);
-}
-
-void CTrailer::SetupSuspensionLines_Reversed() {
-    CTrailer::SetupSuspensionLines();
-}
-
-void CTrailer::ResetSuspension_Reversed() {
-    CTrailer::ResetSuspension();
-}
-
-void CTrailer::ProcessSuspension_Reversed() {
-    CTrailer::ProcessSuspension();
-}
-
-void CTrailer::ProcessControl_Reversed() {
-    CTrailer::ProcessControl();
-}
-
-bool CTrailer::ProcessAI_Reversed(uint32& extraHandlingFlags) {
-    return CTrailer::ProcessAI(extraHandlingFlags);
-}
-
-void CTrailer::PreRender_Reversed() {
-    CTrailer::PreRender();
-}
-
-bool CTrailer::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowHitchPos(outPos, bCheckModelInfo, vehicle);
-}
-
-bool CTrailer::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle) {
-    return CTrailer::GetTowBarPos(outPos, bCheckModelInfo, vehicle);
-}
-
-bool CTrailer::BreakTowLink_Reversed() {
-    return CTrailer::BreakTowLink();
 }

@@ -206,7 +206,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (TheCamera.m_bWideScreenOn)
         return;
 
-    if (!FindPlayerVehicle(-1, false))
+    if (!FindPlayerVehicle())
         return;
 
     if (CReplay::Mode == 1)
