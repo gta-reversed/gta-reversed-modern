@@ -7,7 +7,7 @@ float& fWheelExtensionRate = *(float*)0x8D33AC;
 
 void CMonsterTruck::InjectHooks() {
     RH_ScopedClass(CMonsterTruck);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     // RH_ScopedInstall(ProcessEntityCollision, 0x6C8AE0);
     // RH_ScopedInstall(ProcessSuspension, 0x6C83A0);

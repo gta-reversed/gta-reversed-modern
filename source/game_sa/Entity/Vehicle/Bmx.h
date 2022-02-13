@@ -26,7 +26,7 @@ enum eBmxNodes {
 
 class CBmx : public CBike {
 public:
-    float m_fTimeStep; // change name; related to time step
+    float m_fTimeStep;         // todo: change name; related to time step
     float m_fBaseAnimLean;     // always 0.0f
     float m_fRotPedalChainset; // rotX for BMX_CHAINSET
     float m_fRotPedalR;        // rotX BMX_PEDAL_R

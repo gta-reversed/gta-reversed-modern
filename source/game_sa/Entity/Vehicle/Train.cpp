@@ -34,7 +34,7 @@ float (&StationDist)[6] = *(float (*)[6])0xC38034;
 void CTrain::InjectHooks()
 {
     RH_ScopedClass(CTrain);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
 }

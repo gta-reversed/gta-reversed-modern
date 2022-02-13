@@ -15,7 +15,7 @@ tHeliLight (&CHeli::HeliSearchLights)[4] = *(tHeliLight(*)[4])0xC1C990;
 
 void CHeli::InjectHooks() {
     RH_ScopedClass(CHeli);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(InitHelis, 0x6C4560);
     RH_ScopedInstall(AddHeliSearchLight, 0x6C45B0);
@@ -31,7 +31,7 @@ void CHeli::InjectHooks() {
 }
 
 // 0x6C4190
-CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, true) {
+CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
     plugin::CallMethod<0x6C4190, CHeli*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
 }
 

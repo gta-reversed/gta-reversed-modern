@@ -70,13 +70,13 @@ public:
     float        m_fMaxAltitude;
     float        field_9AC;
     float        m_fMinAltitude;
-    int32        field_9B4;
+    float        field_9B4; // m_fHeading related
     char         field_9B8;
     int8         m_nNumSwatOccupants;
     uint8        m_aSwatState[4];
     CVector      field_9C0;
-    int          f9CC;
-    int          f9D0;
+    int32        f9CC; // unused?
+    int32        f9D0; // unused?
     FxSystem_c** m_pParticlesList;
     float        m_aSearchLightHistoryX[3];
     float        m_aSearchLightHistoryY[3];

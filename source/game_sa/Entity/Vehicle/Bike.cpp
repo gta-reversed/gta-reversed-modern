@@ -12,7 +12,7 @@
 
 void CBike::InjectHooks() {
     RH_ScopedClass(CBike);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     // RH_ScopedInstall(Constructor, 0x6BF430);
     RH_ScopedInstall(Destructor, 0x6B57A0);

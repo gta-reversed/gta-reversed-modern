@@ -28,7 +28,7 @@ class CPed;
 class CPlane;
 class CHeli;
 
-enum eCarWeapon {
+enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,
     CAR_WEAPON_HEAVY_GUN,
     CAR_WEAPON_FREEFALL_BOMB,
@@ -337,7 +337,7 @@ public:
     char            field_510;             // not used?
     char            field_511;             // initialised, but not used?
     char            field_512;             // initialised, but not used?
-    char            m_nVehicleWeaponInUse; // see enum eCarWeapon
+    eCarWeapon      m_nVehicleWeaponInUse;
     uint32          m_nHornCounter;
     char            field_518;       // random id related to siren
     char            m_nCarHornTimer; // car horn related

@@ -10,7 +10,7 @@ static float& m_fTrailerDampingForce = *(float*)0x8D3468;       // 0.1f
 
 void CTrailer::InjectHooks() {
     RH_ScopedClass(CTrailer);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     // RH_ScopedInstall(Constructor, 0x6D03A0);
     // RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0);

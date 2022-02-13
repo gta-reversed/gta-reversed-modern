@@ -317,19 +317,6 @@ static void DebugCode() {
         printf("");
         CCheat::MoneyArmourHealthCheat();
     }
-    if (pad->IsStandardKeyJustDown('3')) {
-        printf("");
-        auto mi = CModelInfo::GetModelInfo(411)->AsVehicleModelInfoPtr();
-        auto type = mi->m_nVehicleType;
-        CVehicle* vehicle = new CAutomobile(561, RANDOM_VEHICLE, true);
-        vehicle->SetPosn(FindPlayerCoors() + CVector(2.f, 0.0f, 2.0f));
-        CWorld::Add(vehicle);
-    }
-    if (pad->IsStandardKeyJustDown('4')) {
-        CVehicle* vehicle = new CBoat(472, PARKED_VEHICLE);
-        vehicle->SetPosn(FindPlayerCoors() + CVector(2.f, 0.0f, 2.0f));
-        CWorld::Add(vehicle);
-    }
 }
 
 void CDebugMenu::ImguiDrawLoop() {

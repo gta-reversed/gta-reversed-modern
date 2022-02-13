@@ -63,7 +63,7 @@ char (*VehicleNames)[14] = (char (*)[14])0x8D3978;
 void CVehicle::InjectHooks()
 {
     RH_ScopedClass(CVehicle);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(SetModelIndex_Reversed, 0x6D6A40);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x6D6410);
@@ -209,12 +209,12 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_pDustParticle = nullptr;
     m_pCustomCarPlate = nullptr;
 
-    memset(m_anUpgrades, 0xFFu, sizeof(m_anUpgrades));
+    memset(m_anUpgrades, 255, sizeof(m_anUpgrades));
     m_fWheelScale = 1.0f;
     m_nWindowsOpenFlags = 0;
     m_nNitroBoosts = 0;
     m_nHasslePosId = 0;
-    m_nVehicleWeaponInUse = 0;
+    m_nVehicleWeaponInUse = CAR_WEAPON_NOT_USED;
     m_fDirtLevel = (float)((rand() % 15));
     m_nCreationTime = CTimer::GetTimeInMS();
     SetCollisionLighting(0x48);
@@ -328,19 +328,19 @@ void CVehicle::SetModelIndex_Reversed(uint32 index)
         break;
     }
 
-    //Set up weapons
+    // Set up weapons
     switch (m_nModelIndex)
     {
     case MODEL_RUSTLER:
     case MODEL_STUNT:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_HEAVY_GUN;
+        m_nVehicleWeaponInUse = CAR_WEAPON_HEAVY_GUN;
         break;
     case MODEL_BEAGLE:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_FREEFALL_BOMB;
+        m_nVehicleWeaponInUse = CAR_WEAPON_FREEFALL_BOMB;
         break;
     case MODEL_HYDRA:
     case MODEL_TORNADO:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_LOCK_ON_ROCKET;
+        m_nVehicleWeaponInUse = CAR_WEAPON_LOCK_ON_ROCKET;
         break;
     }
 }

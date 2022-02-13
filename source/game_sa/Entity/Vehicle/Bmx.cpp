@@ -2,7 +2,7 @@
 
 void CBmx::InjectHooks() {
     RH_ScopedClass(CBmx);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6BF9B0);
     RH_ScopedInstall(BurstTyre_Reversed, 0x6BF9C0);

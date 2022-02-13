@@ -19,7 +19,7 @@ RxVertexIndex* CBoat::auRenderIndices = (RxVertexIndex*)0xC27988;
 
 void CBoat::InjectHooks() {
     RH_ScopedClass(CBoat);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(SetModelIndex_Reversed, 0x6F1140);
     RH_ScopedInstall(ProcessControl_Reversed, 0x6F1770);

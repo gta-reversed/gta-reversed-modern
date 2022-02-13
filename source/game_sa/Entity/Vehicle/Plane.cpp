@@ -24,7 +24,7 @@ CVector& vecRCBaronGunPos = *(CVector*)0x8D33F0;            // <0.0f, 0.45f, 0.0
 
 void CPlane::InjectHooks() {
     RH_ScopedClass(CPlane);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(InitPlaneGenerationAndRemoval, 0x6CAD90);
     RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C9140);
@@ -57,9 +57,6 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) 
 
 // 0x6C9160
 CPlane::~CPlane() {
-    plugin::CallMethod<0x6C9160, CPlane*>(this);
-    return;
-
     if (m_pGunParticles) {
         for (auto i = 0; i < CVehicle::GetPlaneNumGuns(); i++) {
             auto& particle = m_pGunParticles[i];
