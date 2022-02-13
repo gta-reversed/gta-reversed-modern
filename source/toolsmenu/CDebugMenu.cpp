@@ -322,7 +322,7 @@ static void DebugCode() {
 void CDebugMenu::ImguiDrawLoop() {
     CPad* pad = CPad::GetPad(0);
     // CTRL + M or F7
-    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsFKeyJustPressed(eFunctionKeys::F7)) {
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }
