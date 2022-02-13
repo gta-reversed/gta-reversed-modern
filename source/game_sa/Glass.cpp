@@ -1,14 +1,7 @@
 #include "StdInc.h"
 
-#include <numeric>
-#include <ranges>
-#include <array>
-#include <functional>
-
 #include "Glass.h"
 #include "FallingGlassPane.h"
-
-namespace rng = std::ranges;
 
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
@@ -305,55 +298,56 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
     for (auto posY = 0u; posY < countY; posY++) {
         for (auto posX = 0u; posX < countX; posX++) {
             for (auto piece = 0u; piece < std::size(PanePolyPositions); piece++) {
-                if (CFallingGlassPane* pane = FindFreePane()) {
-                    pane->m_nPieceIndex = piece;
+                CFallingGlassPane* pane = FindFreePane();
+                if (!pane)
+                    continue;
 
-                    // Calculate matrix
-                    auto& mat = pane->m_Matrix;
-                    mat.GetRight() = Normalized(right) * sizeX;
-                    mat.GetUp() = Normalized(fwd) * sizeY;
-                    mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
+                pane->m_nPieceIndex = piece;
 
-                    // Matrix's position is the center of the glass pane
-                    const auto paneCenterPos = (PanePolyCenterPositions[piece] + CVector2D{ (float)posX, (float)posY } )* CVector2D{ sizeX, sizeY };
-                    mat.GetPosition() = point
-                        + Normalized(fwd) * paneCenterPos.y 
-                        + Normalized(right) * paneCenterPos.x;
+                // Calculate matrix
+                auto& mat = pane->m_Matrix;
+                mat.GetRight() = Normalized(right) * sizeX;
+                mat.GetUp() = Normalized(fwd) * sizeY;
+                mat.GetForward() = Normalized(CrossProduct(mat.GetRight(), mat.GetUp()));
 
-                    {
-                        constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
-                        pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
-                    }
+                // Matrix's position is the center of the glass pane
+                const auto paneCenterPos = (PanePolyCenterPositions[piece] + CVector2D{ (float)posX, (float)posY } )* CVector2D{ sizeX, sizeY };
+                mat.GetPosition() = point
+                    + Normalized(fwd) * paneCenterPos.y
+                    + Normalized(right) * paneCenterPos.x;
 
-                    if (velocityCenterDragCoeff != 0.0f) {
-                        pane->m_Velocity += Normalized(mat.GetPosition() - center) * velocityCenterDragCoeff;
-                    }
-
-                    {
-                        constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
-                        pane->m_RandomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
-                    }
-
-                    switch (type) {
-                    case 1: {
-                        pane->m_nCreatedTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
-                        break;
-                    }
-                    case 2:
-                    case 0:{
-                        pane->m_nCreatedTime = CTimer::GetTimeInMS();
-                        break;
-                    }
-                    }
-
-                    pane->m_fGroundZ = groundZ;
-                    pane->m_bRenderShatter = bShatter;
-                    pane->m_fSize = sizeY;
-                    pane->m_f6F = unk;
-                    pane->m_bExist = true;
+                {
+                    constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                    pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
                 }
-            }
 
+                if (velocityCenterDragCoeff != 0.0f) {
+                    pane->m_Velocity += Normalized(mat.GetPosition() - center) * velocityCenterDragCoeff;
+                }
+
+                {
+                    constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
+                    pane->m_RandomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
+                }
+
+                switch (type) {
+                case ePaneType::DELAYED: {
+                    pane->m_nCreatedTime = CTimer::GetTimeInMS() + (uint32)((mat.GetPosition() - center).Magnitude() * 100.f);
+                    break;
+                }
+                case ePaneType::CAR:
+                case ePaneType::DEFAULT:{
+                    pane->m_nCreatedTime = CTimer::GetTimeInMS();
+                    break;
+                }
+                }
+
+                pane->m_fGroundZ = groundZ;
+                pane->m_bRenderShatter = bShatter;
+                pane->m_fSize = sizeY;
+                pane->m_f6F = unk;
+                pane->m_bExist = true;
+            }
         }
     }
 }
@@ -514,16 +508,11 @@ void CGlass::AskForObjectToBeRenderedInGlass(CEntity* entity) {
 
 // 0x71ACA0
 CFallingGlassPane* CGlass::FindFreePane() {
-<<<<<<< HEAD
     for (auto& pane : aGlassPanes) {
         if (!pane.m_bExist)
             return &pane;
     }
     return nullptr;
-=======
-    const auto it = rng::find_if(aGlassPanes, [](auto&& v) { return !v.existFlag; });
-    return it != std::end(aGlassPanes) ? &*it : nullptr;
->>>>>>> 3b18bb1e (Fix GeneratePanesForWindow)
 }
 
 // 0x71AF70
@@ -618,7 +607,6 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
 
 // 0x71C1A0
 void CGlass::WindowRespondsToExplosion(CEntity* entity, CVector pos) {
-<<<<<<< HEAD
     if (!entity->m_bUsesCollision) {
         return;
     }
@@ -632,7 +620,4 @@ void CGlass::WindowRespondsToExplosion(CEntity* entity, CVector pos) {
     } else {
         WindowRespondsToCollision(entity, 10000.f, entityToPosDir * (0.3f / dist), entity->GetPosition(), true);
     }
-=======
-    plugin::Call<0x71C1A0, CEntity*, CVector>(entity, pos);
->>>>>>> 3b18bb1e (Fix GeneratePanesForWindow)
 }
