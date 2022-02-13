@@ -9,11 +9,19 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <functional>
 #include <iostream>
 #include <cassert>
 #include <array>
+#include <vector>
+#include <numeric>
+#include <cstring>
+#include <tuple>
+#include <initializer_list>
+
 #include <ranges>
+namespace rng = std::ranges;
 
 #include "Base.h"
 
