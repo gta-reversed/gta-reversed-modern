@@ -99,6 +99,9 @@ void CTheScripts::InjectHooks() {
     RH_ScopedClass(CTheScripts);
     RH_ScopedCategory("Scripts");
 
+    // RH_ScopedInstall(Init, 0x468D50);
+    RH_ScopedInstall(StartNewScript, 0x464C20);
+    RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
 }
@@ -161,7 +164,7 @@ uint32 CTheScripts::GetNewUniqueScriptThingIndex(uint32 index, char type) {
 
 // 0x464D20
 int32 CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
-    return plugin::CallAndReturn<int32, 0x464D20, CRunningScript*>(thread);
+    return (thread - CTheScripts::ScriptsArray) / sizeof(CRunningScript);
 }
 
 // 0x470370
@@ -185,7 +188,15 @@ void CTheScripts::RemoveThisPed(CPed* ped) {
 
 // 0x464C20
 CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
-    return plugin::CallAndReturn<CRunningScript*, 0x464C20, uint8*>(startIP);
+    CRunningScript* pNew = pIdleScripts;
+
+    pNew->RemoveScriptFromList(&pIdleScripts);
+    pNew->Init();
+    pNew->m_pCurrentIP = startIP;
+    pNew->AddScriptToList(&pActiveScripts);
+    pNew->m_bIsActive = true;
+
+    return pNew;
 }
 
 void CTheScripts::UndoBuildingSwaps() {

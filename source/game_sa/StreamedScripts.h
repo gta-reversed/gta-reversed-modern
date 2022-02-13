@@ -13,7 +13,7 @@ class CRunningScript;
 class CStreamedScripts {
 public:
     struct {
-        void* data;
+        uint8* data;
         char  m_nStatus;
         char  field_5;
         int16 m_nScmIndex;
@@ -24,6 +24,8 @@ public:
     int32 m_nLargestExternalSize;
     int16 m_nCountOfScripts;
     int16 field_A46;
+
+    static void     InjectHooks();
 
     int32           FindStreamedScript(const char* scriptName);
     int32           FindStreamedScriptQuiet(const char* scriptName);

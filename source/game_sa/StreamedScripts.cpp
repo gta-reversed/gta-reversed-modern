@@ -2,6 +2,13 @@
 
 #include "StreamedScripts.h"
 
+void CStreamedScripts::InjectHooks() {
+    RH_ScopedClass(CStreamedScripts);
+    RH_ScopedCategory("Scripts");
+
+    RH_ScopedInstall(StartNewStreamedScript, 0x470890);
+}
+
 void CStreamedScripts::Initialise() {
     plugin::CallMethod<0x470660, CStreamedScripts*>(this);
 }
@@ -16,6 +23,32 @@ void CStreamedScripts::ReInitialise() {
 
 void CStreamedScripts::RemoveStreamedScriptFromMemory(int32 index) {
     plugin::CallMethod<0x4708E0, CStreamedScripts*, int32>(this, index);
+}
+
+// 0x470890
+CRunningScript* CStreamedScripts::StartNewStreamedScript(int32 index)
+{
+    auto* pScriptInfo = &m_aScripts[index];
+    uint8 *pIp = pScriptInfo->data;
+
+    if (pIp)
+    {
+        CRunningScript *pNew = CTheScripts::StartNewScript(pIp);
+        pNew->m_pBaseIP = pIp;
+        pNew->m_bIsExternal = true;
+
+        pScriptInfo->m_nStatus++;
+        CStreaming::SetMissionDoesntRequireModel(index + RESOURCE_ID_SCM);
+        return pNew;
+    }
+
+    return nullptr;
+}
+
+// 0x470750
+void CStreamedScripts::ReadStreamedScriptData()
+{
+    plugin::CallMethod<0x470750, CStreamedScripts*>(this);
 }
 
 int32 CStreamedScripts::RegisterScript(const char* scriptName) {

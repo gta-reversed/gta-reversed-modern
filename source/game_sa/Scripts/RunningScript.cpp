@@ -618,7 +618,17 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
     case COMMAND_TERMINATE_THIS_SCRIPT: // 0x04E
         break;
     case COMMAND_START_NEW_SCRIPT: // 0x04F
-        break;
+    {
+        CollectParameters(1);
+
+        int32 offset = CTheScripts::ScriptParams[0].iParam; // Btw ScriptParams should be in the global scope(?)
+        if (offset < 0) // This doesn't make sense
+            offset = commandId; // For Mobile, offset is set to 0 here. WD fix perhaps?
+
+        CRunningScript* pNew = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[offset]);
+        ReadParametersForNewlyStartedScript(pNew);
+        return 0;
+    }
     case COMMAND_GOSUB: // 0x050
         break;
     case COMMAND_RETURN: // 0x051
@@ -910,7 +920,9 @@ int8 CRunningScript::ProcessCommands200To299(int32 commandId) {
     case COMMAND_ANDOR: // 0x0D6
         break;
     case COMMAND_LAUNCH_MISSION: // 0x0D7
-        break;
+        CollectParameters(1);
+        CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[CTheScripts::ScriptParams[0].iParam]);
+        return 0;
     case COMMAND_MISSION_HAS_FINISHED: // 0x0D8
         break;
     case COMMAND_STORE_CAR_CHAR_IS_IN: // 0x0D9
@@ -1708,7 +1720,9 @@ int8 CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_RESTART_CRITICAL_MISSION: // 0x255
         break;
     case COMMAND_IS_PLAYER_PLAYING: // 0x256
-        break;
+        CollectParameters(1);
+        UpdateCompareFlag(CWorld::Players[CTheScripts::ScriptParams[0].iParam].m_nPlayerState == PLAYERSTATE_PLAYING);
+        return 0;
     case COMMAND_SET_COLL_OBJ_NO_OBJ: // 0x257
         break;
     default:
@@ -2350,6 +2364,8 @@ int8 CRunningScript::ProcessCommands800To899(int32 commandId) {
 
 // 0x483BD0
 int8 CRunningScript::ProcessCommands900To999(int32 commandId) {
+    char str[52];
+
     switch (commandId) {
     case COMMAND_PRINT_STRING_IN_STRING_NOW: // 0x384
         break;
@@ -2416,7 +2432,13 @@ int8 CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_IS_CHAR_MALE: // 0x3A3
         break;
     case COMMAND_SCRIPT_NAME: // 0x3A4
-        break;
+        ReadTextLabelFromScript(str, 8);
+
+        for (int i = 0; i < 8; i++)
+            str[i] = tolower(str[i]);
+
+        strncpy(m_szName, str, 8);
+        return 0;
     case COMMAND_CHANGE_GARAGE_TYPE_WITH_CAR_MODEL: // 0x3A5
         break;
     case COMMAND_FIND_DRUG_PLANE_COORDINATES: // 0x3A6
@@ -2654,9 +2676,64 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     case COMMAND_IS_CAR_DOOR_CLOSED: // 0x415
         break;
     case COMMAND_LOAD_AND_LAUNCH_MISSION: // 0x416
-        break;
+        return 0;
     case COMMAND_LOAD_AND_LAUNCH_MISSION_INTERNAL: // 0x417
-        break;
+    {
+        CollectParameters(1);
+        int32 missionId = CTheScripts::ScriptParams[0].iParam;
+
+        // Mostly CP from StartMission @ MissionDebugModule
+        if (CTheScripts::NumberOfExclusiveMissionScripts > 0) {
+            if (missionId <= 65532)
+                return 0;
+            missionId = 0xFFFF - missionId;
+        }
+        CTimer::Suspend();
+        int offsetToMission = CTheScripts::MultiScriptArray[missionId];
+        CFileMgr::ChangeDir("\\");
+        if (CGame::bMissionPackGame) {
+            size_t bytesRead = 0;
+            while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
+                CFileMgr::SetDirMyDocuments();
+                sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+                FILE* file = CFileMgr::OpenFile(gString, "rb");
+                if (file) {
+                    CFileMgr::Seek(file, offsetToMission, 0);
+                    bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+                    CFileMgr::CloseFile(file);
+                    if (bytesRead >= 1) {
+                        CTheScripts::WipeLocalVariableMemoryForMissionScript();
+                        CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+                        script->m_bUseMissionCleanup = true;
+                        script->m_bIsMission = true;
+                        script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+                        CTheScripts::bAlreadyRunningAMissionScript = true;
+                        CGameLogic::ClearSkip(false);
+                    }
+                }
+                if (bytesRead >= 1) {
+                    break;
+                }
+            }
+        }
+        CFileMgr::SetDir(gta_empty_string);
+        if (!CGame::bMissionPackGame) {
+            FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
+            CFileMgr::Seek(file, offsetToMission, 0);
+            CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+            CFileMgr::CloseFile(file);
+
+            CTheScripts::WipeLocalVariableMemoryForMissionScript();
+            CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+            script->m_bUseMissionCleanup = true;
+            script->m_bIsMission = true;
+            script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+            CTheScripts::bAlreadyRunningAMissionScript = true;
+            CGameLogic::ClearSkip(false);
+        }
+        CTimer::Resume();
+        return 0;
+    }
     case COMMAND_SET_OBJECT_DRAW_LAST: // 0x418
         break;
     case COMMAND_GET_AMMO_IN_PLAYER_WEAPON: // 0x419

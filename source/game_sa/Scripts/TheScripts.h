@@ -322,7 +322,7 @@ public:
     static void ScriptConnectLodsFunction(int32 objectHandle1, int32 objectHandle2);
     static void ScriptDebugCircle2D(float x, float y, float width, float height, CRGBA color);
     static CRunningScript* StartNewScript(uint8* startIP);
-    static int32 StartNewScript(uint8* startIP, uint16 index);
+    // static int32 StartNewScript(uint8* startIP, uint16 index); // seems unused
     static void StartTestScript();
     static void UndoBuildingSwaps();
     static void UndoEntityInvisibilitySettings();

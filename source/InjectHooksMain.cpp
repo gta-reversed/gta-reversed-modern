@@ -268,6 +268,7 @@ void InjectHooksMain() {
     List_c::InjectHooks();
     CRunningScript::InjectHooks();
     CTheScripts::InjectHooks();
+    CStreamedScripts::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
