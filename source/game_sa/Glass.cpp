@@ -207,7 +207,7 @@ std::pair<float, float> FindMinMaxZOfVertices(CVector (&vertices)[N]) {
 // 0x71BC40
 void CGlass::WindowRespondsToCollision(CEntity* entity, float fDamageIntensity, CVector vecMoveSpeed, CVector vecPoint, bool max1PaneSection) {
     auto object = entity->AsObject();
-    if (!object->objectFlags.b0x20)
+    if (object->objectFlags.b0x20)
         return;
 
     object->objectFlags.bGlassBroken = true;
