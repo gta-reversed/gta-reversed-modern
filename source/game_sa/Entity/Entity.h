@@ -17,12 +17,17 @@
 #include "eModelID.h"
 #include "eAreaCodes.h"
 
+class CVehicle;
 class CTrain;
 class CBike;
 class CBoat;
 class CAutomobile;
-class CDummy;
+class CBike;
+class CTrain;
+class CPed;
+class CObject;
 class CBuilding;
+class CDummy;
 class CPhysical;
 
 class CEntity : public CPlaceable {

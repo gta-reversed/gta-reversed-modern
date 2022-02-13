@@ -84,6 +84,8 @@
 #include "PostEffects.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "FallingGlassPane.h"
+#include "Glass.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -368,6 +370,7 @@ void InjectHooksMain() {
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
     CSpecialFX::InjectHooks();
+    CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
     CPedGroups::InjectHooks();
     CClock::InjectHooks();
