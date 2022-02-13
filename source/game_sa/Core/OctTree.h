@@ -9,45 +9,37 @@
 #include "Pool.h"
 
 class COctTree {
-protected:
-    COctTree(plugin::dummy_func_t) {}
+public:
+    uint32 m_nLevel;
+    bool   m_bLastStep;       // no children
+    int32  m_aChildrens[4];   // pool slot IDs,  -1 - empty
+    uint32 m_nRedComponent;
+    uint32 m_nGreenComponent;
+    uint32 m_nBlueComponent;
 
 public:
-    uint32 level;
-    bool   lastStep; // no childrens
-    char   _pad09;
-    int16  childrens[8]; // pool slot IDs,  -1 - empty
-    char   _pad1A[2];
-    uint32 redComponent;
-    uint32 greenComponent;
-    uint32 blueComponent;
-
     static bool&            ms_bFailed;
     static uint32&          ms_level;
     static CPool<COctTree>& ms_octTreePool;
 
 public:
-    // vtable
-
-    bool InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
-    void FillPalette(uint8* colors);
+    COctTree();
+    ~COctTree();
 
     static void* operator new(uint32 size);
     static void  operator delete(void* data);
 
-    COctTree();
-    ~COctTree();
+    //vtable
+    virtual bool InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    virtual void FillPalette(uint8* colors);
 
-    uint32 FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
-    void   InitPool(void* data, int32 dataSize);
-    uint32 NoOfChildren();
-    void   ReduceTree();
-    void   RemoveChildren();
-    void   ShutdownPool();
-    void   empty();
-
-private:
-    virtual void virtual_dummy() {}
+    static void InitPool(void* data, int32 dataSize);
+    static void ShutdownPool();
+    uint32      FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    uint32      NoOfChildren();
+    void        ReduceTree();
+    void        RemoveChildren();
+    void        empty();
 };
 
 VALIDATE_SIZE(COctTree, 0x28);

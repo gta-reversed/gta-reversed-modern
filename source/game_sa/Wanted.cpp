@@ -273,7 +273,7 @@ bool CWanted::AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& po
 
 // 0x562120
 void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     auto wantedLevel = m_nWantedLevel;
@@ -390,7 +390,7 @@ void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& pos
 
 // 0x562470
 void CWanted::SetWantedLevel(uint32 level) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     uint32 newLevel = std::min(level, MaximumWantedLevel);

@@ -412,9 +412,9 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             cameraShake = 0.6f;
         TheCamera.CamShake(cameraShake, pos.x, pos.y, pos.z);
 
-        CPad::GetPad(0)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+        CPad::GetPad(0)->StartShake_Distance(300, 128, pos);
         if (CGameLogic::IsCoopGameGoingOn())
-            CPad::GetPad(1)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+            CPad::GetPad(1)->StartShake_Distance(300, 128, pos);
     }
 }
 

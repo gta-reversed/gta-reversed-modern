@@ -12,6 +12,8 @@
 #include "CarCtrl.h"
 #include "Radar.h"
 #include "VehicleSaveStructure.h"
+#include "Rope.h"
+#include "Ropes.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
@@ -1776,37 +1778,48 @@ void CVehicle::UpdateWinch()
 // 0x6D3C70
 void CVehicle::RemoveWinch()
 {
-    ((void(__thiscall*)(CVehicle*))0x6D3C70)(this);
+    return plugin::CallMethod<0x6D3C70, CVehicle*>(this);
+
+    const auto ropeIndex = GetRopeIndex();
+    if (ropeIndex >= 0)
+        CRopes::GetRope(ropeIndex).Remove();
+
+    // todo: m_nBombLightsWinchFlags &= 0x9Fu;
+}
+
+// NOTSA
+int32 CVehicle::GetRopeIndex() {
+    return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
 }
 
 // 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch()
 {
-    ((void(__thiscall*)(CVehicle*))0x6D3CB0)(this);
+    return CRopes::GetRope(GetRopeIndex()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
-void CVehicle::PickUpEntityWithWinch(CEntity* arg0)
+void CVehicle::PickUpEntityWithWinch(CEntity* entity)
 {
-    ((void(__thiscall*)(CVehicle*, CEntity*))0x6D3CD0)(this, arg0);
+    return CRopes::GetRope(GetRopeIndex()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
 CEntity* CVehicle::QueryPickedUpEntityWithWinch()
 {
-    return ((CEntity * (__thiscall*)(CVehicle*))0x6D3CF0)(this);
+    return CRopes::GetRope(GetRopeIndex()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
 float CVehicle::GetRopeHeightForHeli()
 {
-    return ((float(__thiscall*)(CVehicle*))0x6D3D10)(this);
+    return CRopes::GetRope(GetRopeIndex()).m_fSegmentLength;
 }
 
 // 0x6D3D30
 void CVehicle::SetRopeHeightForHeli(float height)
 {
-    ((void(__thiscall*)(CVehicle*, float))0x6D3D30)(this, height);
+    CRopes::GetRope(GetRopeIndex()).m_fSegmentLength = height;
 }
 
 // 0x6D3D60
@@ -2655,7 +2668,8 @@ bool CVehicle::DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 li
 // 0x6E0E20
 void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
-    CVector pointModelSpace = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_nModelIndex))->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
+    const auto mi = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    CVector pointModelSpace = mi->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
     if (dummyId == 1 && pointModelSpace.IsZero())
         return;
 
@@ -2692,7 +2706,7 @@ void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
     const uint8 alphas[] = { alpha, alpha, 0, 0, alpha };
 
     RxObjSpace3DVertex vertices[5];
-    for (unsigned i = 0; i < 5; i++) {
+    for (auto i = 0u; i < std::size(vertices); i++) {
         const RwRGBA color = { 255, 255, 255, alphas[i] };
         RxObjSpace3DVertexSetPreLitColor(&vertices[i], &color);
         RxObjSpace3DVertexSetPos(&vertices[i], &posn[i]);

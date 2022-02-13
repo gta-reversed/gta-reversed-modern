@@ -678,7 +678,7 @@ void CPlayerPed::ResetPlayerBreath() {
 void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
-    if (!bDecreaseAir || CCheat::m_aCheatsActive[CHEAT_INFINITE_OXYGEN]) {
+    if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
         breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)

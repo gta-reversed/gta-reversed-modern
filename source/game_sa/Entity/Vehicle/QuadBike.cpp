@@ -201,7 +201,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
                 
             DoDriveByShootings();
 
-            if (CCheat::m_aCheatsActive[eCheats::CHEAT_CARS_ON_WATER]) {
+            if (CCheat::IsActive(CHEAT_CARS_ON_WATER)) {
                 Remove();
             }
         }

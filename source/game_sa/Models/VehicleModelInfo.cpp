@@ -434,7 +434,7 @@ void CVehicleModelInfo::SetVehicleColour(uint8 prim, uint8 sec, uint8 tert, uint
 // 0x4C8500
 void CVehicleModelInfo::ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert, uint8& quat, int32 variationShift)
 {
-    if (!m_nNumColorVariations || CCheat::m_aCheatsActive[eCheats::CHEAT_BLACK_TRAFFIC]) {
+    if (!m_nNumColorVariations || CCheat::IsActive(CHEAT_BLACK_TRAFFIC)) {
         prim = 0;
         sec = 0;
         tert = 0;
@@ -442,7 +442,7 @@ void CVehicleModelInfo::ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert
         return;
     }
 
-    if (CCheat::m_aCheatsActive[eCheats::CHEAT_PINK_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_PINK_TRAFFIC)) {
         prim = 126;
         sec = 126;
         tert = 126;

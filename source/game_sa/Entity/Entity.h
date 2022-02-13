@@ -29,7 +29,7 @@ class CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
-public:
+public: // Changed in CRope branch
     ~CEntity() override;
 
 public:

@@ -2946,22 +2946,22 @@ bool CStreaming::IsCarModelNeededInCurrentZone(int32 modelId) {
         return false;
 
     // Check cheats
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY])
+    if (CCheat::IsActive(CHEAT_BEACH_PARTY))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_BEACHFOLK, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_COUNTRY_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_FARMERS, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_CHEAP_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT1, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_FAST_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT2, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME])
+    if (CCheat::IsActive(CHEAT_NINJA_THEME))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT3, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME])
+    if (CCheat::IsActive(CHEAT_FUNHOUSE_THEME))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT4, modelId);
 
     // Check in current popcycle
@@ -3202,27 +3202,27 @@ void CStreaming::StreamOneNewCar() {
 
     bool bCheatActive = false;
     int32 carGroupId = 0;
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
+    if (CCheat::IsActive(CHEAT_BEACH_PARTY)) {
         carGroupId = POPCYCLE_CARGROUP_BEACHFOLK;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_COUNTRY_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_FARMERS;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_CHEAP_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT1;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_FAST_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT2;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME]) {
+    if (CCheat::IsActive(CHEAT_NINJA_THEME)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT3;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
+    if (CCheat::IsActive(CHEAT_FUNHOUSE_THEME)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT4;
         bCheatActive = true;
     }
@@ -3273,8 +3273,7 @@ void CStreaming::StreamOneNewCar() {
     }
 
     if (carModelId < 0) {
-        int32 carGroupId = CPopCycle::PickARandomGroupOfOtherPeds();
-        carModelId = CCarCtrl::ChooseCarModelToLoad(carGroupId);
+        carModelId = CCarCtrl::ChooseCarModelToLoad(CPopCycle::PickARandomGroupOfOtherPeds());
         if (carModelId < 0)
             return;
     }
@@ -3518,26 +3517,26 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
            const auto slot = std::ranges::find_if(ms_pedsLoaded,
                 [](auto model) { return model == -1 || CModelInfo::GetModelInfo(model)->m_nRefCount == 0; }
             );
-            if (slot != std::end(ms_pedsLoaded)) {
-                int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
-                if (pedModelId != *slot && pedModelId >= 0) {
-                    RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                    GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED); // Ok???? Y?
+           if (slot != std::end(ms_pedsLoaded)) {
+               int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
+               if (pedModelId != *slot && pedModelId >= 0) {
+                   RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
+                   GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED); // Ok???? Y?
 
-                    if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
-                        SetModelAndItsTxdDeletable(*slot);
-                       *slot = -1;
-                    } else {
-                        ++ms_numPedsLoaded;
-                    }
+                   if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
+                       SetModelAndItsTxdDeletable(*slot);
+                      *slot = -1;
+                   } else {
+                       ++ms_numPedsLoaded;
+                   }
 
-                    int32 freeSlot = 0;
-                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
-                    ms_pedsLoaded[freeSlot] = pedModelId;
+                   int32 freeSlot = 0;
+                   for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
+                   ms_pedsLoaded[freeSlot] = pedModelId;
 
-                    timeBeforeNextLoad = 300;
-                }
-            }
+                   timeBeforeNextLoad = 300;
+               }
+           }
         }
     } else {
         int32 numPedsToLoad = ms_numPedsLoaded;
@@ -3623,7 +3622,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
         if (CPopCycle::m_pCurrZoneInfo->GangDensity[i] != 0)
             gangsNeeded |= (1 << i);
     }
-    if (CCheat::m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS])
+    if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS))
         gangsNeeded |= 0xFF; // All gangs basically
 
     CGangWars::TellStreamingWhichGangsAreNeeded(&gangsNeeded);
