@@ -163,7 +163,7 @@ void ProcessImGui() {
         const std::string_view searchInputSV{ s_nameFilter };
 
         // Filter views stuff
-        const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || findStringCaseInsensitive(l.name, searchInputSV); };
+        const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || StringContainsString(l.name, searchInputSV, false); };
         const auto visibleFilter = std::views::filter(IsItemVisible);
         auto visibleItems = s_SavedLocations | visibleFilter;
 
@@ -249,7 +249,7 @@ void ProcessInput() {
 
     // prepare filter stuff
     const std::string_view searchInputSV{ s_nameFilter };
-    const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || findStringCaseInsensitive(l.name, searchInputSV); };
+    const auto IsItemVisible = [&](auto& l) { return searchInputSV.empty() || StringContainsString(l.name, searchInputSV, false); };
     const auto visibleFilter = std::views::filter(IsItemVisible);
 
     auto visibleItems = s_SavedLocations | visibleFilter;

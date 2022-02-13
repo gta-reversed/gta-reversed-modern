@@ -30,7 +30,7 @@ Simple::Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo,
             VirtualProtect((void*)m_iRealHookedAddress, m_iHookedBytes, dwProtectHoodlum[0], &dwProtectHoodlum[1]);
 
         m_bIsHooked = true;
-        m_bImguiHooked = true;
+        m_isVisible = true;
     };
 
     const int maxBytesToProtect = std::max(iJmpCodeSize, 8);
@@ -102,7 +102,7 @@ void Simple::Switch()
         VirtualCopy((void*)m_iLibFunctionAddress, (void*)&m_LibOriginalFunctionContent, m_iLibHookedBytes);
     }
     m_bIsHooked = !m_bIsHooked;
-    m_bImguiHooked = m_bIsHooked;
+    m_isVisible = m_bIsHooked;
 }
 
 void Simple::Check() {
