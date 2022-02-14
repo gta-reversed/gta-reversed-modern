@@ -84,6 +84,8 @@
 #include "PostEffects.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "FallingGlassPane.h"
+#include "Glass.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -222,7 +224,6 @@ void InjectHooksMain() {
     CClothes::InjectHooks();
     CBulletInfo::InjectHooks();
     CRestart::InjectHooks();
-    CPlaneTrail::InjectHooks();
     CCopPed::InjectHooks();
     CDamageManager::InjectHooks();
     CCreepingFire::InjectHooks();
@@ -291,7 +292,6 @@ void InjectHooksMain() {
     CVisibilityPlugins::InjectHooks();
     CPed::InjectHooks();
     CPedIntelligence::InjectHooks();
-    CTrain::InjectHooks();
     CCollision::InjectHooks();
     CColSphere::InjectHooks();
     CColLine::InjectHooks();
@@ -323,10 +323,6 @@ void InjectHooksMain() {
     CEscalators::InjectHooks();
     CWeapon::InjectHooks();
     cTransmission::InjectHooks();
-    CVehicle::InjectHooks();
-    CAutomobile::InjectHooks();
-    CBike::InjectHooks();
-    CBoat::InjectHooks();
     CPlayerPed::InjectHooks();
     CStats::InjectHooks();
     CCarCtrl::InjectHooks();
@@ -368,6 +364,7 @@ void InjectHooksMain() {
     CInformFriendsEventQueue::InjectHooks();
     C3dMarkers::InjectHooks();
     CSpecialFX::InjectHooks();
+    CFallingGlassPane::InjectHooks();
     CGlass::InjectHooks();
     CPedGroups::InjectHooks();
     CClock::InjectHooks();
@@ -407,11 +404,6 @@ void InjectHooksMain() {
     CLocalisation::InjectHooks();
     CSimpleVariablesSaveStructure::InjectHooks();
     CPedGeometryAnalyser::InjectHooks();
-    CPlane::InjectHooks();
-    CHeli::InjectHooks();
-    CBmx::InjectHooks();
-    CTrailer::InjectHooks();
-    CQuadBike::InjectHooks();
     NodeNamePlugin::InjectHooks();
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
@@ -425,6 +417,7 @@ void InjectHooksMain() {
     CWaterCannons::InjectHooks();
     CWaterCannon::InjectHooks();
     CSprite::InjectHooks();
+    CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
@@ -652,10 +645,25 @@ void InjectHooksMain() {
         // FxSystem_c::InjectHooks();
     };
 
+    const auto Vehicle = []() {
+        CAutomobile::InjectHooks();
+        CBike::InjectHooks();
+        CBmx::InjectHooks();
+        CBoat::InjectHooks();
+        CHeli::InjectHooks();
+        CMonsterTruck::InjectHooks();
+        CPlane::InjectHooks();
+        CQuadBike::InjectHooks();
+        CTrailer::InjectHooks();
+        CTrain::InjectHooks();
+        CVehicle::InjectHooks();
+    };
+
     Audio();
     Tasks();
     Events();
     Fx();
+    Vehicle();
 
     ReversibleHooks::OnInjectionEnd();
 }

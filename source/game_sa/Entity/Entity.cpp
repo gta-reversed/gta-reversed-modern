@@ -18,6 +18,7 @@
 #include "WindModifiers.h"
 #include "EntryExitManager.h"
 #include "TrafficLights.h"
+#include "Glass.h"
 
 void CEntity::InjectHooks()
 {
@@ -2525,6 +2526,10 @@ CEntity* CEntity::FindLastLOD() noexcept {
     CEntity* it = this;
     for (; it->m_pLod; it = it->m_pLod);
     return it;
+}
+
+CBaseModelInfo* CEntity::GetModelInfo() const {
+    return CModelInfo::GetModelInfo(m_nModelIndex);
 }
 
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)

@@ -90,7 +90,7 @@ public:
     void SetLinkPtr(CLink<CCollisionData*>* link);
     CLink<CCollisionData*>* GetLinkPtr();
 
-    // NOTSA
+    // NOTSA section
     auto GetNumFaceGroups() const -> uint32;
 
     auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
@@ -99,6 +99,8 @@ public:
     auto GetLines() const { return std::span{ m_pLines, m_nNumLines }; }
 
     auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
+
+    void AllocateLines(uint32 num);
 
 private:
     // HELPERS

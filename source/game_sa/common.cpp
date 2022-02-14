@@ -266,6 +266,10 @@ CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec) {
     return const_cast<CMatrix&>(mat).GetPosition() + Multiply3x3(const_cast<CMatrix&>(mat), vec);
 }
 
+CVector MultiplyMatrixWithVector(CMatrix& m, const CVector& v) {
+    return m.GetPosition() + Multiply3x3(m, v);
+}
+
 // 0x54ECE0
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos) {
     plugin::Call<0x54ECE0, RwV3d&, const CSimpleTransform&, const RwV3d&>(point, placement, vecPos);

@@ -16,6 +16,7 @@
 
 #include "eVehicleClass.h"
 #include "eVehicleType.h"
+#include "eCarWheel.h"
 
 class CAnimBlock;
 
@@ -174,6 +175,10 @@ public:
             return m_avDummyPos[dummy] != 0.0F;
         }
 
+        bool IsComponentDamageable(int32 nodeIndex) {
+            return m_nMaskComponentsDamagable & (1 << nodeIndex);
+        }
+
     } * m_pVehicleStruct;
 
     char        field_60[464];
@@ -288,7 +293,7 @@ public:
     // set component flags
     void SetVehicleComponentFlags(RwFrame* component, uint32 flags);
     // get wheel position. Wheel is wheel id [0-3]. Local - get local offset (if false it will get world position)
-    void GetWheelPosn(int32 wheel, CVector& outVec, bool local);
+    void GetWheelPosn(int32 wheel, CVector& outVec, bool local) const;
     // get component local offset. Component is a frame hierarchy id. Returns true if component present
     bool GetOriginalCompPosition(CVector& outVec, int32 component);
     // get vehicle extra with rules. Returns extra id.
@@ -434,6 +439,25 @@ public:
         strcpy_s(m_szGameName, name);
     }
     void SetHandlingId(const char* handlingName);
+
+    // These two should probably be moved to a better place..
+    bool IsFrontWheel(eCarWheel wheel) const {
+        switch (wheel) {
+        case CARWHEEL_FRONT_LEFT:
+        case CARWHEEL_FRONT_RIGHT:
+            return true;
+        }
+        return false;
+    }
+
+    bool IsRearWheel(eCarWheel door) const {
+        return !IsFrontWheel(door);
+    }
+
+    // Return size of give wheel. If it's a front wheel `m_fWheelSizeFront` is returned, otherwise `m_fWheelSizeRear`
+    float GetSizeOfWheel(eCarWheel wheel) const {
+        return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
+    }
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

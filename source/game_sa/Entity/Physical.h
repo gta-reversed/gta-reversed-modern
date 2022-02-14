@@ -63,9 +63,6 @@ enum eEntityAltCollision : uint16 {
 
 class CPhysical : public CEntity {
 public:
-    CPhysical();
-    ~CPhysical() override;
-public:
     float  field_38;
     uint32 m_nLastCollisionTime;
     union {
@@ -157,6 +154,9 @@ public:
     static CVector& fxDirection;
 
 public:
+    CPhysical();
+    ~CPhysical() override;
+
     // originally virtual functions
     void Add() override;
     void Remove() override;
@@ -165,7 +165,7 @@ public:
     void ProcessCollision() override;
     void ProcessShift() override;
     bool TestCollision(bool bApplySpeed) override;
-    virtual int32 ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint);
+    virtual int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint);
 
 public:
     void RemoveAndAdd();
@@ -240,18 +240,23 @@ public:
 // HELPERS
     bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
+    auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    void Add_Reversed();
-    void Remove_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* rect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    int32 ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint);
+    CPhysical* Constructor() { this->CPhysical::CPhysical(); return this; }
+    CPhysical* Destructor() { this->CPhysical::~CPhysical(); return this; }
+
+    void Add_Reversed() { CPhysical::Add(); }
+    void Remove_Reversed() { CPhysical::Remove(); }
+    CRect* GetBoundRect_Reversed(CRect* rect) { return CPhysical::GetBoundRect(rect); }
+    void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
+    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CPhysical::ProcessEntityCollision(entity, colPoint); }
+    void ProcessCollision_Reversed() { CPhysical::ProcessCollision(); }
+    void ProcessShift_Reversed() { CPhysical::ProcessShift(); }
+    bool TestCollision_Reversed(bool bApplySpeed) { return CPhysical::TestCollision(bApplySpeed); }
 };
 
 VALIDATE_SIZE(CPhysical, 0x138);

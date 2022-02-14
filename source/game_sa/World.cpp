@@ -13,6 +13,7 @@
 #include "FireManager.h"
 #include "CarCtrl.h"
 #include "TagManager.h"
+#include "Glass.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
@@ -1200,7 +1201,7 @@ void CWorld::RemoveFallenCars() {
             if (vehicle->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE) && !vehicle->physicalFlags.bDestroyed)
                 return true;
 
-            if (vehicle == FindPlayerVehicle(-1, false))
+            if (vehicle == FindPlayerVehicle())
                 return true;
 
             return vehicle->m_pDriver && vehicle->m_pDriver->IsPlayer();
@@ -1857,7 +1858,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             if (veh->IsSubPlane()) {
                 auto normalBackwards = cp.m_vecNormal;
                 auto colPos = colPointPos + veh->GetPosition();
-                veh->VehicleDamage(1000.f, 0, creator, &colPos, &normalBackwards, WEAPON_EXPLOSION);
+                veh->VehicleDamage(1000.f, eVehicleCollisionComponent::DEFAULT, creator, &colPos, &normalBackwards, WEAPON_EXPLOSION);
             }
 
             break;
