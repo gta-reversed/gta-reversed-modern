@@ -124,7 +124,8 @@ bool CEntryExit::HasNameSet() const {
 
 // 0x43E460
 bool CEntryExit::IsInArea(const CVector& position) {
-    const auto CheckPointInRect = [this](const CVector& point) {
+
+    const auto CheckPointInEnteranceRect = [this](const CVector& point) {
         if (m_recEntrance.IsPointInside(CVector2D{ point })) {
             if (std::abs(point.z - m_fEntranceZ) < 1.f) {
                 return true;
@@ -133,10 +134,9 @@ bool CEntryExit::IsInArea(const CVector& position) {
         return false;
     };
 
-    if (m_fEntranceAngle == 0.f) { // Common case whenn rotation is 0
-        return CheckPointInRect(position);
-    } else { // Sadly here we have to transform the point, and only then can we check if its in the rect
-        return CheckPointInRect(MultiplyMatrixWithVector(GetRectEnteranceMatrix(), position));
+    // It's quite common `m_fEntranceAngle` is 0, so I guess this is some kind of an optimization?
+    return CheckPointInEnteranceRect(m_fEntranceAngle == 0.f ? position : TransformEnterancePoint(position));
+}
     }
 }
 
