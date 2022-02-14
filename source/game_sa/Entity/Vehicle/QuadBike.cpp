@@ -8,7 +8,7 @@ CVector& vecQuadResistance = *(CVector*)0x8D3458; // { 0.995f, 0.995f, 1.0f } //
 
 void CQuadBike::InjectHooks() {
     RH_ScopedClass(CQuadBike);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
 // todo: RH_ScopedInstall(Constructor, 0x6CE370);
     RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
@@ -34,14 +34,16 @@ CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobil
     m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId);
     m_nVehicleSubType = VEHICLE_TYPE_QUAD;
 
-    field_9AC = 0; // unused
-    field_9B0 = 0; // unused
-    field_9B4 = 0; // unused
+    { // unused
+    field_9A8[0] = 0;
+    field_9A8[1] = 0;
+    field_9A8[2] = 0;
+    field_9A8[3] = 1.0f; // see SetupSuspensionLines
+    }
 
-    field_9A8 = 1.0f; // unused, initialised there and in SetupSuspensionLines
     SetupSuspensionLines();
 
-    m_nQuadFlags &= ~1u; // usless
+    m_nQuadFlags &= ~1u; // useless
     m_fSteerAngle = 0.0f;
 }
 
@@ -74,18 +76,18 @@ void CQuadBike::PreRender() {
     auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     {
         CVector wheelPos;
-        modelInfo->GetWheelPosn(eCarWheel::CARWHEEL_REAR_LEFT, wheelPos, false);
+        modelInfo->GetWheelPosn(CARWHEEL_REAR_LEFT, wheelPos, false);
         SetTransmissionRotation(
-            m_aCarNodes[eQuadBikeNodes::QUAD_REAR_AXLE],
-            m_wheelPosition[eCarWheel::CARWHEEL_REAR_LEFT],
-            m_wheelPosition[eCarWheel::CARWHEEL_REAR_RIGHT],
+            m_aCarNodes[QUAD_REAR_AXLE],
+            m_wheelPosition[CARWHEEL_REAR_LEFT],
+            m_wheelPosition[CARWHEEL_REAR_RIGHT],
             wheelPos,
             false
         );
     }
     
     CVector wheelFrontLeftPos;
-    modelInfo->GetWheelPosn(eCarWheel::CARWHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
+    modelInfo->GetWheelPosn(CARWHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
     
     // Original code saves position of each matrix (because calls to SetRotation set the pos. to 0), then restores it
     // We just use SetRotateYOnly which doesn't modify the position
@@ -93,7 +95,7 @@ void CQuadBike::PreRender() {
     if (auto suspensionLF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_LF]) {
         CMatrix mat;
         mat.Attach(&suspensionLF->modelling, false);
-        mat.SetRotateYOnly(atan2(m_wheelPosition[eCarWheel::CARWHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
+        mat.SetRotateYOnly(atan2(m_wheelPosition[CARWHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
     
@@ -195,8 +197,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
                 }
             }
             const float fValue = std::pow(m_pHandling->m_fDesLean, CTimer::GetTimeStep()); // TODO: Name this variable properly
-            m_sRideAnimData.m_fAnimLean = fValue * m_sRideAnimData.m_fAnimLean
-                                          - m_pHandling->m_fFullAnimLean * m_fSteerAngle / RWDEG2RAD(m_pHandlingData->m_fSteeringLock) * (1.0f - fValue);
+            m_sRideAnimData.m_fAnimLean = fValue * m_sRideAnimData.m_fAnimLean - m_pHandling->m_fFullAnimLean * m_fSteerAngle / RWDEG2RAD(m_pHandlingData->m_fSteeringLock) * (1.0f - fValue);
                 
             DoDriveByShootings();
 
@@ -211,46 +212,43 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
 
 // 0x6CDCC0
 void CQuadBike::ProcessControl() {
-    if (m_nStatus == STATUS_PLAYER && bDoQuadDamping) {
-        const auto turnSpeed_Mult_Matrix = Multiply3x3(m_vecTurnSpeed, *m_matrix);
-        float v2 = vecQuadResistance.y, v5 = vecQuadResistance.x;
-        if (AreFrontWheelsNotTouchingGround()) {
-            if (!AreRearWheelsNotTouchingGround() && m_matrix->GetForward().z > 0.0f) {
-                v5 = vecQuadResistance.x - std::min(0.07f, fabs(m_pHandling->m_fWheelieAng - m_matrix->GetForward().z) * 0.25f);
+    if (m_nStatus != STATUS_PLAYER || !bDoQuadDamping) {
+        CAutomobile::ProcessControl();
+        return;
+    }
+
+    const auto turnSpeed_Mult_Matrix = Multiply3x3(m_vecTurnSpeed, *m_matrix);
+    float v2 = vecQuadResistance.y, v5 = vecQuadResistance.x;
+    if (AreFrontWheelsNotTouchingGround()) {
+        if (!AreRearWheelsNotTouchingGround() && m_matrix->GetForward().z > 0.0f) {
+            v5 = vecQuadResistance.x - std::min(0.07f, fabs(m_pHandling->m_fWheelieAng - m_matrix->GetForward().z) * 0.25f);
+        }
+    } else {
+        if (m_aWheelTimer[CARWHEEL_REAR_LEFT] == 1.0f && m_aWheelTimer[CARWHEEL_REAR_RIGHT] == 1.0f) {
+            if (m_matrix->GetForward().z < 0.0f) {
+                v5 = vecQuadResistance.x * (0.9f + std::min(0.1f, fabs(m_pHandling->m_fStoppieAng - m_matrix->GetForward().z) * 0.3f));
             }
         } else {
-            if (m_aWheelTimer[eCarWheel::CARWHEEL_REAR_LEFT] == 1.0f && m_aWheelTimer[eCarWheel::CARWHEEL_REAR_RIGHT] == 1.0f) {
-                if (m_matrix->GetForward().z < 0.0f) {
-                    v5 = vecQuadResistance.x * (0.9f + std::min(0.1f, fabs(m_pHandling->m_fStoppieAng - m_matrix->GetForward().z) * 0.3f));
-                }
-            } else {
-                v2 = 0.5f;
-            }
+            v2 = 0.5f;
         }
-        const CVector worldSpaceSpeed = Multiply3x3(m_vecTurnSpeed, *m_matrix);
-        CVector unk{
-            // In the original code `x` is calculated once then immediately overwritten by the below line
-            std::pow(vecQuadResistance.x, CTimer::GetTimeStep()),
-            vecQuadResistance.y / (worldSpaceSpeed.y * worldSpaceSpeed.y + 1.0f),
-            1.0f
-        };
-        const auto worldCentreOfMass = Multiply3x3(m_vecCentreOfMass, *m_matrix);
-
-        const float v9 = std::pow(unk.y, CTimer::GetTimeStep()) * worldSpaceSpeed.y - worldSpaceSpeed.y;
-        ApplyTurnForce(
-            m_matrix->GetUp() * -1.0f * v9 * m_fTurnMass,
-            m_matrix->GetRight() + worldCentreOfMass
-        );
-
-        const float v19 = worldSpaceSpeed.x * unk.x - worldSpaceSpeed.x;
-        ApplyTurnForce(
-            m_matrix->GetUp() * v19 * m_fTurnMass,
-            m_matrix->GetForward() + worldCentreOfMass
-        );
     }
+
+    const CVector worldSpaceSpeed = Multiply3x3(m_vecTurnSpeed, *m_matrix);
+    CVector unk{ // In the original code `x` is calculated once then immediately overwritten by the below line
+        std::pow(vecQuadResistance.x, CTimer::GetTimeStep()),
+        vecQuadResistance.y / (worldSpaceSpeed.y * worldSpaceSpeed.y + 1.0f),
+        1.0f
+    };
+    const auto worldCentreOfMass = Multiply3x3(m_vecCentreOfMass, *m_matrix);
+
+    const float v9 = std::pow(unk.y, CTimer::GetTimeStep()) * worldSpaceSpeed.y - worldSpaceSpeed.y;
+    ApplyTurnForce(m_matrix->GetUp() * -1.0f * v9 * m_fTurnMass, m_matrix->GetRight() + worldCentreOfMass);
+
+    const float v19 = worldSpaceSpeed.x * unk.x - worldSpaceSpeed.x;
+    ApplyTurnForce(m_matrix->GetUp() * v19 * m_fTurnMass, m_matrix->GetForward() + worldCentreOfMass);
+
     CAutomobile::ProcessControl();
 }
-
 
 // 0x6CE020
 void CQuadBike::ProcessControlInputs(uint8 playerNum) {
@@ -284,8 +282,8 @@ void CQuadBike::ProcessControlInputs(uint8 playerNum) {
 
 // 0x6CE280
 void CQuadBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
-    if (!m_bOffscreen) {
-        CBike::ProcessRiderAnims(driver, this, &m_sRideAnimData, m_pHandling);
+    if (!m_bOffscreen) { // see CBike::ProcessDrivingAnims
+        CBike::ProcessRiderAnims(driver, this, &m_sRideAnimData, m_pHandling, 0);
     }
 }
 
@@ -310,6 +308,6 @@ void CQuadBike::SetupDamageAfterLoad() {
 
 // 0x6CDCA0
 void CQuadBike::SetupSuspensionLines() {
-    field_9A8 = 1.0f;
+    field_9A8[0] = 1.0f;
     CAutomobile::SetupSuspensionLines();
 }

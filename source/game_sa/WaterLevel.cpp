@@ -22,7 +22,7 @@ void CWaterLevel::InjectHooks()
     RH_ScopedClass(CWaterLevel);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(GetWaterLevel, 0x6EB690);
+    RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
     RH_ScopedInstall(SyncWater, 0x6E76E0);
     RH_ScopedInstall(CalculateWavesOnlyForCoordinate, 0x6E7210);
     //RH_ScopedInstall(AddWaveToResult, 0x6E81E0);

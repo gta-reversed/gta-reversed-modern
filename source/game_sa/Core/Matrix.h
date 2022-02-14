@@ -29,12 +29,12 @@ class CMatrix {
 public:
     CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
-    CMatrix(RwMatrix* matrix, bool temporary); // like previous + attach
-    ~CMatrix();                                // destructor detaches matrix if attached
+    CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
         m_pAttachMatrix = nullptr;
         m_bOwnsAttachedMatrix = false;
     }
+    ~CMatrix();                                        // destructor detaches matrix if attached
 
 private:
     // RwV3d-like:
@@ -98,6 +98,16 @@ public:
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    void SetRotate(const CVector& rot) {
+        SetRotate(rot.x, rot.z, rot.z);
+    }
+
+    void SetRotateKeepPos(const CVector& rot) {
+        auto pos{ m_pos };
+        SetRotate(rot.x, rot.z, rot.z);
+        m_pos = pos;
+    }
 
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:

@@ -23,9 +23,15 @@ class CTrain;
 class CBike;
 class CBoat;
 class CAutomobile;
+class CBike;
+class CTrain;
+class CPed;
+class CObject;
+class CBuilding;
 class CDummy;
 class CBuilding;
 class CPhysical;
+class CBaseModelInfo;
 
 class CEntity : public CPlaceable {
 protected:
@@ -168,7 +174,7 @@ public:
     void UpdateAnim();
     bool IsVisible();
     float GetDistanceFromCentreOfMassToBaseOfModel();
-    void CleanUpOldReference(CEntity** entity);
+    void CleanUpOldReference(CEntity** entity); // See helper SafeCleanUpOldReference
     void ResolveReferences();
     void PruneReferences();
     void RegisterReference(CEntity** entity);
@@ -180,6 +186,17 @@ public:
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
 
+    // NOTSA
+    CBaseModelInfo* GetModelInfo() const;
+
+    // Wrapper around the mess called `CleanUpOldReference` 
+    template<typename T>
+    void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        if (ref) {
+            ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
+            ref = nullptr;
+        }
+    }
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* atomic, void* data);
