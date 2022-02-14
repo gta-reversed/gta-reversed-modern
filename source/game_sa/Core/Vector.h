@@ -29,7 +29,7 @@ public:
     float Magnitude() const;
 
     // Returns length of 2d vector
-    float Magnitude2D();
+    float Magnitude2D() const;
 
     // Normalises a vector
     void Normalise();
@@ -79,6 +79,10 @@ public:
         z = vec.z;
     }
 
+    inline float ComponentwiseSum() const {
+        return x + y + z;
+    }
+
     inline float SquaredMagnitude() const {
         return x * x + y * y + z * z;
     }
@@ -89,6 +93,14 @@ public:
 
     inline bool IsZero() const {
         return x == 0.0F && y == 0.0F && z == 0.0F;
+    }
+
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
     }
 
     // Calculate the average position
@@ -164,5 +176,7 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
-
+static CVector ProjectVector(const CVector& what, const CVector& onto) {
+    return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
+}
 VALIDATE_SIZE(CVector, 0xC);

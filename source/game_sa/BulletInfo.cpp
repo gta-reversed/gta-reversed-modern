@@ -4,6 +4,7 @@
 
 #include "FireManager.h"
 #include "AudioEngine.h"
+#include "Glass.h"
 
 // Note: This class is only used by CWeapon::FireSniper
 

@@ -17,6 +17,8 @@
 #include "eModelID.h"
 #include "eAreaCodes.h"
 
+class CObject;
+class CVehicle;
 class CTrain;
 class CBike;
 class CBoat;

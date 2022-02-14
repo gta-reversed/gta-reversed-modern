@@ -8,7 +8,7 @@
 
 #include "Physical.h"
 #include "CarCtrl.h"
-
+#include "Glass.h"
 #include "TaskSimpleClimb.h"
 
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
