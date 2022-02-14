@@ -6,8 +6,6 @@
 */
 #include "StdInc.h"
 
-#include <initializer_list>
-
 #include "World.h"
 #include "IKChainManager_c.h"
 #include "FireManager.h"
