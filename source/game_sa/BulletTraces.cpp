@@ -66,22 +66,19 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
     CMatrix camMat = TheCamera.GetMatrix();
     const CVector camPos = camMat.GetPosition();
 
-    const float fromCamDir_Dot_CamRight = DotProduct(*from - camPos, camMat.GetRight());
-    const float fromCamDir_Dot_CamUp    = DotProduct(*from - camPos, camMat.GetUp());
-    const float fromCamDir_Dot_CamFwd   = DotProduct(*from - camPos, camMat.GetForward());
+    // Transform both point into camera's space
+    const auto fromCS = Multiply3x3(*from - camPos, camMat);
+    const auto toCS   = Multiply3x3(*to - camPos, camMat);
 
-    const float toCamDir_Dot_CamRight   = DotProduct(*to - camPos, camMat.GetRight());
-    const float toCamDir_Dot_CamFwd     = DotProduct(*to - camPos, camMat.GetForward());
-
-    if (toCamDir_Dot_CamFwd * fromCamDir_Dot_CamFwd < 0.0f) {
-        const float absFromCamDir_Dot_CamFwd = fabs(fromCamDir_Dot_CamFwd);
-        const float absToCamDir_Dot_CamFwd = fabs(toCamDir_Dot_CamFwd);
+    if (toCS.y * fromCS.z < 0.0f) {
+        const float absFromCamDir_Dot_CamFwd = fabs(fromCS.z);
+        const float absToCamDir_Dot_CamFwd = fabs(toCS.y);
 
         const float v43 = absFromCamDir_Dot_CamFwd / (absFromCamDir_Dot_CamFwd + absToCamDir_Dot_CamFwd);
-        const float v51 = DotProduct(*to - camPos, camMat.GetUp()) - fromCamDir_Dot_CamUp;
+        const float v51 = toCS.z - fromCS.y;
         const float v52 = v51 * v43;
-        const float v44 = (toCamDir_Dot_CamRight - fromCamDir_Dot_CamRight) * v43 + fromCamDir_Dot_CamRight;
-        const float v42 = CVector2D{ v52 + fromCamDir_Dot_CamUp, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
+        const float v44 = (toCS.x - fromCS.x) * v43 + fromCS.x;
+        const float v42 = CVector2D{ v52 + fromCS.y, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
 
         if (v42 < 2.0f) {
             const float v45 = 1.0f - v42 * 0.5f;
@@ -90,13 +87,13 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
                 AudioEngine.ReportFrontendAudioEvent(event, volumeChange, 1.0f);
             };
             if (v45 != 0.0f) {
-                if (fromCamDir_Dot_CamFwd <= 0.0f) {
+                if (fromCS.z <= 0.0f) {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
                 } else {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
                 }
             } else {
-                if (fromCamDir_Dot_CamFwd <= 0.0f) {
+                if (fromCS.z <= 0.0f) {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
                 } else {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
