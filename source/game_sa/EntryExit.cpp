@@ -2,7 +2,8 @@
 
 #include "EntryExit.h"
 #include "EntryExitManager.h"
-#include <optional>
+#include "TaskComplexGotoDoorAndOpen.h"
+#include "TaskSimpleUninterruptable.h"
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -14,11 +15,11 @@ void CEntryExit::InjectHooks() {
 
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
     RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
-    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
-    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
+    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0, true);
     RH_ScopedInstall(IsInArea, 0x43E460);
-    // RH_ScopedInstall(TransitionStarted, 0x43FFD0);
-    // RH_ScopedInstall(TransitionFinished, 0x4404A0);
+    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00); 
+    RH_ScopedInstall(TransitionStarted, 0x43FFD0, true); // Wrong direction of walk
+    RH_ScopedInstall(TransitionFinished, 0x4404A0, true);
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
     // RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
@@ -60,11 +61,17 @@ CEntryExit* CEntryExit::GetEntryExitToDisplayNameOf() {
 }
 
 // 0x43EA00
+// TODO: `_asm` shouldn't be removed, because the caller `EntryExitManager::GetPositionRelativeToOutsideWorld`
+// uses it as well (and without reserving `edx` it is going to crash)
 void CEntryExit::GetPositionRelativeToOutsideWorld(CVector& outPos) {
+    _asm { push edx }; 
+
     const auto enex = GetLinkedOrThis();
     if (enex->m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
         outPos += GetPosition() - enex->m_vecExitPos;
     }
+
+    _asm { pop edx };
 }
 
 // Return center of enterance rect
@@ -84,9 +91,13 @@ CMatrix CEntryExit::GetRectEnteranceMatrix() const {
     return mat;
 }
 
+bool CEntryExit::IsVisibleByTime() const {
+    return CClock::GetIsTimeInRange(m_nTimeOn, m_nTimeOff);
+}
+
 // Transforms a point into the enterance rect
 CVector CEntryExit::TransformEnterancePoint(const CVector& point) const {
-    return MultiplyMatrixWithVector(GetRectEnteranceMatrix(), point);
+    return MultiplyMatrixWithVector(GetRectEnteranceMatrix(), point - GetPosition());
 }
 
 // 0x43EAF0
@@ -137,12 +148,105 @@ bool CEntryExit::IsInArea(const CVector& position) {
     // It's quite common `m_fEntranceAngle` is 0, so I guess this is some kind of an optimization?
     return CheckPointInEnteranceRect(m_fEntranceAngle == 0.f ? position : TransformEnterancePoint(position));
 }
-    }
-}
 
 // 0x43FFD0
 bool CEntryExit::TransitionStarted(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x43FFD0, CEntryExit*, CPed*>(this, ped);
+    if (   !m_nFlags.bEnableAccess
+        || CEntryExitManager::ms_exitEnterState != 0
+        || !IsVisibleByTime()
+    ) {
+        return false;
+    }
+
+    // If ped in vehicle check if enex accepts it
+    if (ped->bInVehicle) {
+        if (ped->m_pVehicle->m_pHandlingData->m_bIsBig) { // Move before the IsAuto or Bike check
+            return false; // No big vehicles allowed :(
+        }
+
+        switch (ped->m_pVehicle->m_nVehicleType) {
+        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE: {
+            if (!m_nFlags.bCarsAndAircraft) {
+                return false;
+            }
+            break;
+        }
+        case eVehicleType::VEHICLE_TYPE_BIKE: {
+            if (!m_nFlags.bBikesAndMotorcycles) {
+                return false;
+            }
+            break;
+        }
+        default: { // Nothing else is disallowed - TODO: Allow uncomment this, I want my Rhino in CJ's house
+            return false;
+        }
+        }
+    } else if (m_nFlags.bDisableExit) {
+        return false;
+    }
+
+    if (m_pLink) {
+        ms_spawnPoint = m_pLink;
+        m_pLink->m_pLink = this;
+    } else {
+        ms_spawnPoint = this;
+    }
+
+    const auto spawnPointExitToUs{ ms_spawnPoint->m_vecExitPos - GetPosition() };
+
+    if (!ped->AsPlayer()->CanPlayerStartMission()) {
+        return false;
+    }
+
+    m_nFlags.bEnteredWithoutExit = true;
+    ms_pDoor = nullptr;
+
+    ped->bCanExitCar = false;
+
+    const auto AddPedScriptCommand = [ped](auto* task) {
+        CEventScriptCommand scriptCmdEvent{ ePrimaryTasks::TASK_PRIMARY_PRIMARY, task, false };
+        ped->GetEventGroup().Add(&scriptCmdEvent);
+    };
+
+    if ((m_nFlags.bUnknownPairing || m_nFlags.bFoodDateFlag) || ped->bInVehicle) {
+        if (spawnPointExitToUs.Magnitude() > 10.f) {
+            ms_bWarping = true;
+        }
+    } else {
+        ms_bWarping = spawnPointExitToUs.Magnitude() > 10.f;
+
+        const auto spawnPointExitToUsDir = Normalized(spawnPointExitToUs);
+
+        const auto SetupFixedCamera = [this](CVector lookAtDir) {
+            // 0x43FFD0
+
+            auto fixedModePos{ GetPosition() - lookAtDir * 3.f };
+            fixedModePos.z += 1.f;
+            TheCamera.SetCamPositionForFixedMode(fixedModePos, {});
+            TheCamera.TakeControlNoEntity(GetPosition() + lookAtDir, eSwitchType::SWITCHTYPE_JUMPCUT, 1);
+        };
+
+
+        if (const auto door = CEntryExitManager::FindNearestDoor(*this, 10.f)) {
+            AddPedScriptCommand(new CTaskComplexGotoDoorAndOpen(door));
+            ms_pDoor = door;
+
+            SetupFixedCamera(Normalized(CVector{ CVector2D{door->GetPosition()} - GetPosition2D(), 0.f }));
+        } else {
+            if (ms_bWarping) {
+                m_nFlags.bUnknownPairing = true;
+                return true;
+            }
+            AddPedScriptCommand(new CTaskComplexGotoDoorAndOpen(GetPosition(), GetPosition() + spawnPointExitToUsDir * 4.f));
+        }
+    }
+
+    CPad::GetPad()->bPlayerOnInteriorTransition = true;
+    if (!ped->bInVehicle) {
+        AddPedScriptCommand(new CTaskSimpleUninterruptable);
+    }
+
+    return true;
 }
 
 // 0x4404A0
