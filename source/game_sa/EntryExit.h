@@ -70,11 +70,12 @@ public:
 
     // NOTSA
 
-    // These 4 were probably inlined
+    // These 5 were probably inlined
     CVector2D GetPosition2D() const;
     CVector GetPosition() const;
     auto GetLinkedOrThis() { return m_pLink ? m_pLink : this; }
     auto GetLinkedOrThis() const { return m_pLink ? m_pLink : this; }
+    bool IsVisibleByTime() const;
 
     // Most likely didnt exist in this form.
     CMatrix GetRectEnteranceMatrix() const;

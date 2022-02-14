@@ -15,11 +15,11 @@ void CEntryExit::InjectHooks() {
 
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
     RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
-    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0, true);
+    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
     RH_ScopedInstall(IsInArea, 0x43E460);
     RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00); 
-    RH_ScopedInstall(TransitionStarted, 0x43FFD0, true); // Wrong direction of walk
-    RH_ScopedInstall(TransitionFinished, 0x4404A0, true);
+    RH_ScopedInstall(TransitionStarted, 0x43FFD0);
+    //RH_ScopedInstall(TransitionFinished, 0x4404A0);
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
     // RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
@@ -218,8 +218,7 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
         const auto spawnPointExitToUsDir = Normalized(spawnPointExitToUs);
 
         const auto SetupFixedCamera = [this](CVector lookAtDir) {
-            // 0x43FFD0
-
+            // 0x44031A
             auto fixedModePos{ GetPosition() - lookAtDir * 3.f };
             fixedModePos.z += 1.f;
             TheCamera.SetCamPositionForFixedMode(fixedModePos, {});
@@ -228,11 +227,14 @@ bool CEntryExit::TransitionStarted(CPed* ped) {
 
 
         if (const auto door = CEntryExitManager::FindNearestDoor(*this, 10.f)) {
+            // 0x4401AB
+
             AddPedScriptCommand(new CTaskComplexGotoDoorAndOpen(door));
             ms_pDoor = door;
 
             SetupFixedCamera(Normalized(CVector{ CVector2D{door->GetPosition()} - GetPosition2D(), 0.f }));
         } else {
+            // 0x440246
             if (ms_bWarping) {
                 m_nFlags.bUnknownPairing = true;
                 return true;

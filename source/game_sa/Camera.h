@@ -438,7 +438,7 @@ public:
     void ResetDuckingSystem(CPed *ped);
 
     void SetCamCutSceneOffSet(const CVector* cutsceneOffset);
-    void SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset);
+    void SetCamPositionForFixedMode(const CVector& fixedModeSource, const CVector& fixedModeUpOffset);
     void SetCameraDirectlyBehindForFollowPed_CamOnAString();
     void SetCameraDirectlyInFrontForFollowPed_CamOnAString();
     void SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* targetPed);
@@ -466,7 +466,7 @@ public:
     void StoreValuesDuringInterPol(CVector *sourceDuringInter, CVector *targetDuringInter, CVector *upDuringInter, float *FOVDuringInter);
 
     void TakeControl(CEntity *target, eCamMode modeToGoTo, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
-    void TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
+    void TakeControlNoEntity(const CVector& fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
     void TakeControlAttachToEntity(CEntity* target, CEntity* attached, CVector* attachedCamOffset, CVector* attachedCamLookAt, float attachedCamAngle, eSwitchType switchType, int32 whoIsInControlOfTheCamera);
     void TakeControlWithSpline(eSwitchType switchType);
 

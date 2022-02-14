@@ -382,9 +382,9 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
 }
 
 // 0x50BEC0
-void CCamera::SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset) {
-    m_vecFixedModeSource = *fixedModeSource;
-    m_vecFixedModeUpOffSet = *fixedModeUpOffset;
+void CCamera::SetCamPositionForFixedMode(const CVector& fixedModeSource, const CVector& fixedModeUpOffset) {
+    m_vecFixedModeSource = fixedModeSource;
+    m_vecFixedModeUpOffSet = fixedModeUpOffset;
     m_bGarageFixedCamPositionSet = false;
 }
 
@@ -522,8 +522,8 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C8B0, CCamera*, const CVector*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlNoEntity(const CVector& fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C8B0, CCamera*, const CVector&, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C910

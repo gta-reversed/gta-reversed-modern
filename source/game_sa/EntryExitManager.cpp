@@ -103,6 +103,10 @@ void CEntryExitManager::GetPositionRelativeToOutsideWorld(CVector& positionInOut
     plugin::Call<0x43F150, CVector&>(positionInOut);
 }
 
+CObject* CEntryExitManager::FindNearestDoor(const CEntryExit& entryExit, float range) {
+    return plugin::CallAndReturn<CObject*, 0x43F630, const CEntryExit&, float>(entryExit, range);
+}
+
 // 0x43F180
 void CEntryExitManager::EnableBurglaryHouses(bool a1) {
     plugin::Call<0x43F180, bool>(a1);
