@@ -16,7 +16,7 @@ void CEntryExit::InjectHooks() {
     RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
     RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
     RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
-    // RH_ScopedInstall(IsInArea, 0x43E460);
+    RH_ScopedInstall(IsInArea, 0x43E460);
     // RH_ScopedInstall(TransitionStarted, 0x43FFD0);
     // RH_ScopedInstall(TransitionFinished, 0x4404A0);
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
@@ -76,6 +76,19 @@ CVector2D CEntryExit::GetPosition2D() const {
     return CVector2D{ m_recEntrance.GetCenter() };
 }
 
+// Returns the matrix with which `rectEnterance`'s points were calculated.
+CMatrix CEntryExit::GetRectEnteranceMatrix() const {
+    CMatrix mat;
+    mat.SetRotateZ(m_fEntranceAngle);
+    mat.GetPosition() = GetPosition();
+    return mat;
+}
+
+// Transforms a point into the enterance rect
+CVector CEntryExit::TransformEnterancePoint(const CVector& point) const {
+    return MultiplyMatrixWithVector(GetRectEnteranceMatrix(), point);
+}
+
 // 0x43EAF0
 void CEntryExit::FindValidTeleportPoint(CVector* outTeleportPoint) {
     const auto spawnPointExitPos = ms_spawnPoint->m_vecExitPos;
@@ -111,7 +124,20 @@ bool CEntryExit::HasNameSet() const {
 
 // 0x43E460
 bool CEntryExit::IsInArea(const CVector& position) {
-    return plugin::CallMethodAndReturn<bool, 0x43E460, CEntryExit*, const CVector&>(this, position);
+    const auto CheckPointInRect = [this](const CVector& point) {
+        if (m_recEntrance.IsPointInside(CVector2D{ point })) {
+            if (std::abs(point.z - m_fEntranceZ) < 1.f) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    if (m_fEntranceAngle == 0.f) { // Common case whenn rotation is 0
+        return CheckPointInRect(position);
+    } else { // Sadly here we have to transform the point, and only then can we check if its in the rect
+        return CheckPointInRect(MultiplyMatrixWithVector(GetRectEnteranceMatrix(), position));
+    }
 }
 
 // 0x43FFD0

@@ -68,11 +68,20 @@ public:
     void FindValidTeleportPoint(CVector* point);
     bool HasNameSet() const;
 
+    // NOTSA
+
+    // These 4 were probably inlined
     CVector2D GetPosition2D() const;
     CVector GetPosition() const;
-
     auto GetLinkedOrThis() { return m_pLink ? m_pLink : this; }
     auto GetLinkedOrThis() const { return m_pLink ? m_pLink : this; }
+
+    // Most likely didnt exist in this form.
+    CMatrix GetRectEnteranceMatrix() const;
+
+    // This possibly existed in some form.
+    // `IsInArea` has some transformation code Which is very similar to the one in `CEnExManager::AddOne`
+    CVector TransformEnterancePoint(const CVector& point) const;
 };
 
 VALIDATE_SIZE(CEntryExit, 0x3C);
