@@ -41,6 +41,62 @@ CBulletTrace* CBulletTraces::GetFree() {
     return nullptr;
 }
 
+void PlayFrontEndSoundForTrace(CVector fromWorldSpace, CVector toWorldSpace) {
+    CMatrix camMat = TheCamera.GetMatrix();
+    const CVector& camPos = camMat.GetPosition();
+
+    // Make their position relative to the camera's
+    const auto fromRelToCam = fromWorldSpace - camPos;
+    const auto toRelToCam = toWorldSpace - camPos;
+
+    // Transform both points into the camera's space ((C)cam (S)pace - CS)
+    const float fromCSY = DotProduct(fromRelToCam, camMat.GetForward());
+
+    const float toCSY = DotProduct(toRelToCam, camMat.GetForward());
+
+    if (std::signbit(toCSY) == std::signbit(fromCSY)) { // Originally: toCSY * fromCSY < 0.0f - Check if signs differ
+        return; // Both points are either in front or behind us
+    }
+
+    // They do, in this case points are on opposite sides (one behind, one in front of the camera)
+
+    // Now calculate the remaining coordinates
+    const float fromCSX = DotProduct(fromRelToCam, camMat.GetRight());
+    const float fromCSZ = DotProduct(fromRelToCam, camMat.GetUp());
+
+    const float toCSX = DotProduct(toRelToCam, camMat.GetRight());
+    const float toCSZ = DotProduct(toRelToCam, camMat.GetUp());
+
+    // Calculate distance to point on line that is on the same Y axis as the camera
+    // (This point on line is basically the bullet when passing by the camera)
+        
+    // Interpolation on line
+    const float t = fabs(fromCSY) / (fabs(fromCSY) + fabs(toCSY));
+
+    const float pointOnLineZ = fromCSZ + (toCSZ - fromCSZ) * t;
+    const float pointOnLineX = fromCSX + (toCSX - fromCSX) * t;
+
+    // Calculate distance from camera to point on line
+    const float camToLineDist = std::hypotf(pointOnLineZ, pointOnLineX);
+
+    if (camToLineDist >= 2.0f) {
+        return; // Point too far from camera
+    }
+
+    const auto ReportBulletAudio = [&](auto event) {
+        const float volDistFactor = 1.0f - camToLineDist * 0.5f;
+        const float volumeChange  = volDistFactor == 0.0f ? -100.0f : std::log10(volDistFactor);
+        AudioEngine.ReportFrontendAudioEvent(event, volumeChange, 1.0f);
+    };
+
+    const bool isComingFromBehind = fromCSY <= 0.0f; // Is the bullet coming from behind us?
+    if (0.f <= pointOnLineX) { // Is bullet passing on the right of the camera?
+        ReportBulletAudio(isComingFromBehind ? AE_FRONTEND_BULLET_PASS_RIGHT_REAR : AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+    } else { // Bullet passing on left of the camera.
+        ReportBulletAudio(isComingFromBehind ? AE_FRONTEND_BULLET_PASS_LEFT_REAR : AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
+    }
+}
+
 // 0x723750
 void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 disappearTime, uint8 alpha)
 {
@@ -53,7 +109,7 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
         pTrace->m_fRadius = radius;
 
         // Determinate lifetime based on index in aTraces array
-        // (Probably done to keep the amount of traces as low as possible)
+        // This way we can kinda make sure all traces will be visible (even if for only a brief amount of time)
         const auto traceIdx = GetTraceIndex(pTrace);
         if (traceIdx < 10) {
             pTrace->m_nLifeTime = (uint32)(traceIdx < 5 ? disappearTime : disappearTime / 2.0f);
@@ -61,46 +117,7 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
             pTrace->m_nLifeTime = (uint32)(disappearTime / 4.0f);
         }
     }
-    // Play sound front-end
-
-    CMatrix camMat = TheCamera.GetMatrix();
-    const CVector camPos = camMat.GetPosition();
-
-    // Transform both point into camera's space
-    const auto fromCS = Multiply3x3(*from - camPos, camMat);
-    const auto toCS   = Multiply3x3(*to - camPos, camMat);
-
-    if (toCS.y * fromCS.y < 0.0f) {
-        const float absFromCamDir_Dot_CamFwd = fabs(fromCS.y);
-        const float absToCamDir_Dot_CamFwd = fabs(toCS.y);
-
-        const float v43 = absFromCamDir_Dot_CamFwd / (absFromCamDir_Dot_CamFwd + absToCamDir_Dot_CamFwd);
-        const float v51 = toCS.z - fromCS.z;
-        const float v52 = v51 * v43;
-        const float v44 = (toCS.x - fromCS.x) * v43 + fromCS.x;
-        const float v42 = CVector2D{ v52 + fromCS.z, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
-
-        if (v42 < 2.0f) {
-            const float v45 = 1.0f - v42 * 0.5f;
-            const auto ReportFrontEndAudioEvent = [&](auto event) {
-                const float volumeChange = v45 == 0.0f ? -100.0f : std::log10(v45);
-                AudioEngine.ReportFrontendAudioEvent(event, volumeChange, 1.0f);
-            };
-            if (v45 != 0.0f) {
-                if (fromCS.y <= 0.0f) {
-                    ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
-                } else {
-                    ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
-                }
-            } else {
-                if (fromCS.y <= 0.0f) {
-                    ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
-                } else {
-                    ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
-                }
-            }
-        }
-    }
+    PlayFrontEndSoundForTrace(*from, *to);
 }
 
 // 0x726AF0
