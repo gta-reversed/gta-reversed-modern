@@ -2,6 +2,7 @@
 
 #include "EntryExit.h"
 #include "EntryExitManager.h"
+#include <optional>
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -14,7 +15,7 @@ void CEntryExit::InjectHooks() {
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
     RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
     RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
-    // RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
+    RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
     // RH_ScopedInstall(IsInArea, 0x43E460);
     // RH_ScopedInstall(TransitionStarted, 0x43FFD0);
     // RH_ScopedInstall(TransitionFinished, 0x4404A0);
@@ -76,8 +77,32 @@ CVector2D CEntryExit::GetPosition2D() const {
 }
 
 // 0x43EAF0
-void CEntryExit::FindValidTeleportPoint(CVector* point) {
-    plugin::CallMethod<0x43EAF0, CEntryExit*>(this);
+void CEntryExit::FindValidTeleportPoint(CVector* outTeleportPoint) {
+    const auto spawnPointExitPos = ms_spawnPoint->m_vecExitPos;
+
+    if (!CWorld::TestSphereAgainstWorld(spawnPointExitPos, 0.35f, nullptr, true, true, true, true, true, false)) {
+        return;
+    }
+
+    // Test 8 spheres around the spawn point, and return whichever
+    // doesn't collide with the world and the line of sight between it and `outPoint` is clear
+    for (auto r : { 1.25f, 2.f }) { // Test with 2 ranges
+        constexpr auto NumTestPoints{ 8 };
+        for (auto i = 0; i < NumTestPoints; i++) {
+            const auto rot{ (float)i * TWO_PI / (float)NumTestPoints };
+            const auto point = *outTeleportPoint + CVector{
+                std::cos(rot) * r,
+                std::sin(rot) * r,
+                0.f
+            };
+            if (!CWorld::TestSphereAgainstWorld(point, 0.35f, nullptr, true, true, true, true, true, false)) {
+                if (CWorld::GetIsLineOfSightClear(*outTeleportPoint, point, true, true, false, true, true, false, false)) {
+                    *outTeleportPoint = point;
+                    return;
+                }
+            }
+        }
+    }
 }
 
 bool CEntryExit::HasNameSet() const {

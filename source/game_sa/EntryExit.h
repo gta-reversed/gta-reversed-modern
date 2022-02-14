@@ -67,6 +67,12 @@ public:
     void ProcessStealableObjects(CPed* ped);
     void FindValidTeleportPoint(CVector* point);
     bool HasNameSet() const;
+
+    CVector2D GetPosition2D() const;
+    CVector GetPosition() const;
+
+    auto GetLinkedOrThis() { return m_pLink ? m_pLink : this; }
+    auto GetLinkedOrThis() const { return m_pLink ? m_pLink : this; }
 };
 
 VALIDATE_SIZE(CEntryExit, 0x3C);
