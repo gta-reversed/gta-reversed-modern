@@ -13,7 +13,7 @@ void CEntryExit::InjectHooks() {
 
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
     RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
-    // RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
+    RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
     // RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
     // RH_ScopedInstall(IsInArea, 0x43E460);
     // RH_ScopedInstall(TransitionStarted, 0x43FFD0);
@@ -60,7 +60,19 @@ CEntryExit* CEntryExit::GetEntryExitToDisplayNameOf() {
 
 // 0x43EA00
 void CEntryExit::GetPositionRelativeToOutsideWorld(CVector& outPos) {
-    plugin::CallMethod<0x43EA00, CEntryExit*, CVector&>(this, outPos);
+    const auto enex = GetLinkedOrThis();
+    if (enex->m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        outPos += GetPosition() - enex->m_vecExitPos;
+    }
+}
+
+// Return center of enterance rect
+CVector CEntryExit::GetPosition() const {
+    return CVector{ m_recEntrance.GetCenter(), m_fEntranceZ };
+}
+
+CVector2D CEntryExit::GetPosition2D() const {
+    return CVector2D{ m_recEntrance.GetCenter() };
 }
 
 // 0x43EAF0
