@@ -86,6 +86,7 @@
 #include "Ropes.h"
 #include "FallingGlassPane.h"
 #include "Glass.h"
+#include "MenuSystem.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -200,6 +201,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CMenuSystem::InjectHooks();
     CRope::InjectHooks();
     CRopes::InjectHooks();
     CWeaponInfo::InjectHooks();

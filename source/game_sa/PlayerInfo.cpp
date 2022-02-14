@@ -2,6 +2,7 @@
 
 #include "PlayerInfo.h"
 #include "FireManager.h"
+#include "MenuSystem.h"
 
 void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
