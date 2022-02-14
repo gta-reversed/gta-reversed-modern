@@ -70,15 +70,15 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
     const auto fromCS = Multiply3x3(*from - camPos, camMat);
     const auto toCS   = Multiply3x3(*to - camPos, camMat);
 
-    if (toCS.y * fromCS.z < 0.0f) {
-        const float absFromCamDir_Dot_CamFwd = fabs(fromCS.z);
+    if (toCS.y * fromCS.y < 0.0f) {
+        const float absFromCamDir_Dot_CamFwd = fabs(fromCS.y);
         const float absToCamDir_Dot_CamFwd = fabs(toCS.y);
 
         const float v43 = absFromCamDir_Dot_CamFwd / (absFromCamDir_Dot_CamFwd + absToCamDir_Dot_CamFwd);
-        const float v51 = toCS.z - fromCS.y;
+        const float v51 = toCS.z - fromCS.z;
         const float v52 = v51 * v43;
         const float v44 = (toCS.x - fromCS.x) * v43 + fromCS.x;
-        const float v42 = CVector2D{ v52 + fromCS.y, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
+        const float v42 = CVector2D{ v52 + fromCS.z, v44 }.Magnitude(); // Originally uses sqrt and stuff, but this is cleaner
 
         if (v42 < 2.0f) {
             const float v45 = 1.0f - v42 * 0.5f;
@@ -87,13 +87,13 @@ void CBulletTraces::AddTrace(CVector* from, CVector* to, float radius, uint32 di
                 AudioEngine.ReportFrontendAudioEvent(event, volumeChange, 1.0f);
             };
             if (v45 != 0.0f) {
-                if (fromCS.z <= 0.0f) {
+                if (fromCS.y <= 0.0f) {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
                 } else {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
                 }
             } else {
-                if (fromCS.z <= 0.0f) {
+                if (fromCS.y <= 0.0f) {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
                 } else {
                     ReportFrontEndAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
