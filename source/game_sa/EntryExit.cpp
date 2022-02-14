@@ -26,14 +26,11 @@ void CEntryExit::InjectHooks() {
 // 0x43E8B0
 void CEntryExit::GenerateAmbientPeds(const CVector& posn) {
     CPopulation::bInPoliceStation = false;
-    if (CGame::currArea) {
-        if (_stricmp("POLICE1", m_szName) == 0 ||
-            _stricmp("POLICE2", m_szName) == 0 ||
-            _stricmp("POLICE3", m_szName) == 0 ||
-            _stricmp("POLICE4", m_szName) == 0
-        ) {
-            CPopulation::bInPoliceStation = true;
-        }
+    if (CGame::currArea != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        constexpr const char* PoliceStationEnExNames[]{ "POLICE1", "POLICE2", "POLICE3", "POLICE4" };
+        CPopulation::bInPoliceStation =
+            rng::any_of(PoliceStationEnExNames, [this](auto&& n) { return _stricmp(m_szName, n) == 0; });
+
         auto numPedsToSpawn = m_pLink ? m_pLink->m_nNumberOfPeds : m_nNumberOfPeds;
         CPopulation::NumberOfPedsInUseInterior = numPedsToSpawn;
         CPopulation::PopulateInterior(numPedsToSpawn, posn);
