@@ -66,6 +66,7 @@ public:
     void WarpGangWithPlayer(CPed* ped);
     void ProcessStealableObjects(CPed* ped);
     void FindValidTeleportPoint(CVector* point);
+    bool HasNameSet() const;
 };
 
 VALIDATE_SIZE(CEntryExit, 0x3C);

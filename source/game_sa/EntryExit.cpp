@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "EntryExit.h"
+#include "EntryExitManager.h"
 
 bool& CEntryExit::ms_bWarping = *(bool*)0x96A7B8;
 CObject*& CEntryExit::ms_pDoor = *(CObject**)0x96A7BC;
@@ -11,7 +12,7 @@ void CEntryExit::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GenerateAmbientPeds, 0x43E8B0);
-    // RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
+    RH_ScopedInstall(GetEntryExitToDisplayNameOf, 0x43E650);
     // RH_ScopedInstall(GetPositionRelativeToOutsideWorld, 0x43EA00);
     // RH_ScopedInstall(FindValidTeleportPoint, 0x43EAF0);
     // RH_ScopedInstall(IsInArea, 0x43E460);
@@ -43,7 +44,18 @@ void CEntryExit::GenerateAmbientPeds(const CVector& posn) {
 
 // 0x43E650
 CEntryExit* CEntryExit::GetEntryExitToDisplayNameOf() {
-    return plugin::CallMethodAndReturn<CEntryExit*, 0x43E650, CEntryExit*>(this);
+    if (ms_spawnPoint->m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD && HasNameSet()) {
+        if (m_nArea != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+            // TODO: Probably inlined from `CEntryExitManager`
+            if (   CEntryExitManager::ms_entryExitStackPosn > 1
+                && CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn - 1] == ms_spawnPoint
+            ) {
+                return CEntryExitManager::ms_entryExitStack[CEntryExitManager::ms_entryExitStackPosn];
+            }
+            return this;
+        }
+    }
+    return nullptr;
 }
 
 // 0x43EA00
@@ -54,6 +66,10 @@ void CEntryExit::GetPositionRelativeToOutsideWorld(CVector& outPos) {
 // 0x43EAF0
 void CEntryExit::FindValidTeleportPoint(CVector* point) {
     plugin::CallMethod<0x43EAF0, CEntryExit*>(this);
+}
+
+bool CEntryExit::HasNameSet() const {
+    return m_szName[0] != 0;
 }
 
 // 0x43E460
