@@ -46,10 +46,10 @@ public:
 
     union {
         struct {
-            uint16 unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
-            uint16 unk2 : 1; // unused
-            uint16 bPlayerAwaitsInGarage : 1;
-            uint16 bPlayerOnInteriorTransition : 1;
+            uint16 unk1 : 1; // eCamMode::MODE_1STPERSON leftover?      // 0x1
+            uint16 unk2 : 1; // unused                                  // 0x2
+            uint16 bPlayerAwaitsInGarage : 1;                           // 0x4
+            uint16 bPlayerOnInteriorTransition : 1;                     // 0x8
             uint16 unk3 : 1; // unused
             uint16 bPlayerSafe : 1;
             uint16 bPlayerTalksOnPhone : 1; // bPlayerSafeForPhoneCall?
