@@ -554,6 +554,8 @@ public:
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
     bool IsFollowerOfGroup(const CPedGroup& group);
+
+    RwMatrix& GetBoneMatrix(ePedBones bone) const;
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);

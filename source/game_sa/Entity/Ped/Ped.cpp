@@ -38,7 +38,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     RH_ScopedInstall(GiveWeapon, 0x5E6080);
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
-    // RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
+    RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
     // RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
     // RH_ScopedInstall(ClearAll, 0x5E5320);
@@ -933,10 +933,52 @@ void CPed::PlayFootSteps()
     ((void(__thiscall *)(CPed*))0x5E57F0)(this);
 }
 
-// 0x5E5ED0
-void CPed::AddWeaponModel(int32 modelIndex)
-{
-    ((void(__thiscall *)(CPed*, int32))0x5E5ED0)(this, modelIndex);
+
+/*!
+* @addr 0x5E5ED0
+* @brief Create model for current active weapon. Also creates FX for molotov if `this->IsPlayer()`.
+* @param modelIndex Model that should be created for the current weapon.
+*/
+void CPed::AddWeaponModel(int32 modelIndex) {
+   if (modelIndex == -1) {
+       return;
+   }
+
+   // Make sure this weapon is supposed to have a model
+   // (May be set to false even if it does, eg.: in case of infrared or night googles, see `TakeOffGoggles`)
+   auto& activeWep = GetActiveWeapon();
+   if (activeWep.m_bNoModel) {
+       return;
+   }
+
+   // Remove old model (if any)
+   if (m_pWeaponObject) {
+       RemoveWeaponModel(-1);
+   }
+
+   // Create clump for model
+   auto& wepMI = *CModelInfo::GetModelInfo(modelIndex);
+   m_pWeaponObject = (RpClump*)wepMI.CreateInstance();
+   m_pGunflashObject = m_pWeaponObject ? CClumpModelInfo::GetFrameFromName(m_pWeaponObject, "gunflash") : nullptr;
+   wepMI.AddRef();
+
+   m_nWeaponModelId = modelIndex;
+
+   // If player and model is molotov create FX for it.
+   if (IsPlayer()) {
+       if (activeWep.m_nType == eWeaponType::WEAPON_MOLOTOV
+           && modelIndex == eModelID::MODEL_MOLOTOV
+           && !activeWep.m_pFxSystem
+        ) {
+           CVector pos{ 0.f, 0.f, 0.f };
+           activeWep.m_pFxSystem = g_fxMan.CreateFxSystem("molotov_flame", &pos, &GetBoneMatrix(ePedBones::BONE_R_HAND), false);
+           if (const auto fx = activeWep.m_pFxSystem) {
+               fx->SetLocalParticles(true);
+               fx->CopyParentMatrix();
+               fx->Play();
+           }
+       }
+   }
 }
 
 // 0x5E6010
@@ -1414,6 +1456,11 @@ bool CPed::IsInVehicleThatHasADriver()
 
 bool CPed::IsFollowerOfGroup(const CPedGroup& group) {
     return group.GetMembership().IsFollower(this);
+}
+
+RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
+    const auto hierarchy = GetAnimHierarchyFromClump(m_pRwClump);
+    return RpHAnimHierarchyGetMatrixArray(hierarchy)[(size_t)bone];
 }
 
 // 0x5E4880
