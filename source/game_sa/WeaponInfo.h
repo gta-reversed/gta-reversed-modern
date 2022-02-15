@@ -103,7 +103,7 @@ public:
     static void Shutdown();
 
     static void LoadWeaponData();
-    static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill);
+    static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill = eWeaponSkill::STD);
     static eWeaponType FindWeaponType(const char *name);
     static eWeaponFire FindWeaponFireType(const char *name);
     static int32 GetSkillStatIndex(eWeaponType weaponType);

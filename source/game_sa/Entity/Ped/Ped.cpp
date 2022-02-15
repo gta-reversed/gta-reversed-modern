@@ -33,7 +33,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
     RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
-    // RH_ScopedInstall(ClearWeapon, 0x5E62B0);
+    RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
     // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     // RH_ScopedInstall(GiveWeapon, 0x5E6080);
@@ -1004,7 +1004,28 @@ void CPed::SetCurrentWeapon(eWeaponType weaponType)
 // 0x5E62B0
 void CPed::ClearWeapon(eWeaponType weaponType)
 {
-    ((void(__thiscall*)(CPed*, eWeaponType))0x5E62B0)(this, weaponType);
+    auto wepSlot = CWeaponInfo::GetWeaponInfo(weaponType)->m_nSlot;
+    if (wepSlot == -1) {
+        return; // Weapon has no slot. (How could this happen?)
+    }
+
+    auto& wep = m_aWeapons[wepSlot];
+    if (wep.m_nType != weaponType) {
+        return; // Slot doesn't contain the given weapon - Might happen as some weapons share slots.
+    }
+
+    if (m_nActiveWeaponSlot == wepSlot) {
+        SetCurrentWeapon(eWeaponType::WEAPON_UNARMED);
+    }
+
+    wep.Shutdown();
+
+    switch (weaponType) {
+    case eWeaponType::WEAPON_NIGHTVISION:
+    case eWeaponType::WEAPON_INFRARED:
+        RemoveGogglesModel();
+        break;
+    }
 }
 
 // 0x5E6320
