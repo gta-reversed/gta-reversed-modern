@@ -21,7 +21,7 @@ void CPed::InjectHooks() {
 
     // Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
     // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
-    // RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
+    RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
     // RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     // RH_ScopedInstall(Update, 0x5DEBE0);
     RH_ScopedInstall(Initialise, 0x5DEBB0);
@@ -1217,7 +1217,7 @@ void CPed::RemoveBodyPart(int32 boneId, char localDir)
 // 0x5F0190
 void CPed::SpawnFlyingComponent(int32 arg0, char arg1)
 {
-    ((void(__thiscall *)(CPed*, int32, char))0x5F0190)(this, arg0, arg1);
+    // NOP
 }
 
 // 0x5F01A0
