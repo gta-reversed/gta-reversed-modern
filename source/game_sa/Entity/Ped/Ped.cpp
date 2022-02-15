@@ -22,7 +22,7 @@ void CPed::InjectHooks() {
     // Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
     // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
-    // RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
+    RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     // RH_ScopedInstall(Update, 0x5DEBE0);
     RH_ScopedInstall(Initialise, 0x5DEBB0);
     // RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
@@ -210,7 +210,9 @@ bool CPed::PedIsReadyForConversation(bool arg0)
 // 0x455560
 bool CPed::PedCanPickUpPickUp()
 {
-    return ((bool(__thiscall *)(CPed*))0x455560)(this);
+    auto& taskmgr = FindPlayerPed(0)->GetTaskManager();
+    return !taskmgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)
+        && !taskmgr.FindActiveTaskByType(TASK_COMPLEX_USE_MOBILE_PHONE);
 }
 
 // 0x4590F0
