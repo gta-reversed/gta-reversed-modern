@@ -23,7 +23,7 @@ void CPed::InjectHooks() {
     // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
     RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
-    // RH_ScopedInstall(Update, 0x5DEBE0);
+    RH_ScopedInstall(Update, 0x5DEBE0);
     RH_ScopedInstall(Initialise, 0x5DEBB0);
     // RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
     // RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
@@ -249,7 +249,7 @@ void CPed::SetPedStats(ePedStats statsType) {
 // 0x5DEBE0
 void CPed::Update()
 {
-    ((void(__thiscall *)(CPed*))0x5DEBE0)(this);
+    // NOP
 }
 
 // 0x5DEC00
