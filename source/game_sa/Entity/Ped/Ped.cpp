@@ -35,7 +35,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
-    // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
+    RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     // RH_ScopedInstall(GiveWeapon, 0x5E6080);
     // RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     // RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
@@ -990,9 +990,28 @@ void CPed::GiveWeaponSet3() {
 }
 
 // 0x5E61F0
-void CPed::SetCurrentWeapon(int32 slot)
-{
-    ((void(__thiscall *)(CPed*, int32))0x5E61F0)(this, slot);
+void CPed::SetCurrentWeapon(int32 slot) {
+    if (slot == -1) {
+        return;
+    }
+
+    // Remove current weapon's model (if any)
+    if (const auto currWepType = GetActiveWeapon().m_nType; currWepType != eWeaponType::WEAPON_UNARMED) {
+        RemoveWeaponModel(CWeaponInfo::GetWeaponInfo(currWepType)->m_nModelId1);
+    }
+
+    // Set as active slot
+    m_nActiveWeaponSlot = slot;
+
+    // Set chosen weapon in player data
+    if (const auto playerData = AsPlayer()->m_pPlayerData) {
+        playerData->m_nChosenWeapon = slot;
+    }
+
+    // Load weapon in this slot (if any)
+    if (const auto thisWepType = m_aWeapons[slot].m_nType; thisWepType != eWeaponType::WEAPON_UNARMED) {
+        AddWeaponModel(CWeaponInfo::GetWeaponInfo(thisWepType)->m_nModelId1);
+    }
 }
 
 // 0x5E6280
