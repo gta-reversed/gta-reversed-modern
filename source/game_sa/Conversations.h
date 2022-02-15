@@ -1,7 +1,11 @@
 #pragma once
 
+class CPed;
+
 class CPedToPlayerConversations {
 public:
+    static inline CPed*& m_pPed = *(CPed**)0x9691C0;
+
     static void Clear();
 };
 

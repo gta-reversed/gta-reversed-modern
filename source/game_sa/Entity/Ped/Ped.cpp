@@ -12,6 +12,7 @@
 #include "Buoyancy.h"
 #include "TaskSimpleSwim.h"
 #include "PedStats.h"
+#include "Conversations.h" 
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -30,7 +31,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
     RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
     RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
-    // RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
+    RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     // RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
@@ -199,7 +200,7 @@ bool CPed::Load()
 // 0x43AB90
 bool CPed::PedIsInvolvedInConversation()
 {
-    return ((bool(__thiscall *)(CPed*))0x43AB90)(this);
+    return this == CPedToPlayerConversations::m_pPed;
 }
 
 // 0x43ABA0
