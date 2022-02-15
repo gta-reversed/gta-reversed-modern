@@ -27,7 +27,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Initialise, 0x5DEBB0);
     RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
     RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
-    // RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
+    RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
     // RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
     // RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
@@ -432,9 +432,43 @@ float CPed::GetBikeRidingSkill()
 }
 
 // 0x5DF560
-void CPed::ShoulderBoneRotation(RpClump* clump)
-{
-    plugin::Call<0x5DF560, RpClump*>(clump);
+void CPed::ShoulderBoneRotation(RpClump* clump) {
+    auto GetMatrixOf = [matrixArray = RpHAnimHierarchyGetMatrixArray(GetAnimHierarchyFromClump(clump))](ePedBones bone) mutable -> RwMatrix& {
+        return matrixArray[(size_t)bone];
+    };
+
+    constexpr struct { ePedBones breast, upperArm, clavicle; } bones[]{
+        {ePedBones::BONE_L_BREAST, ePedBones::BONE_L_UPPER_ARM, ePedBones::BONE_L_CLAVICLE},
+        {ePedBones::BONE_R_BREAST, ePedBones::BONE_R_UPPER_ARM, ePedBones::BONE_R_CLAVICLE},
+    };
+
+    // Update left, and right sides
+    for (auto [breast, upperArm, clavicle] : bones) {
+        auto& breastRwMat = GetMatrixOf(breast);
+
+        // Update matrix of l_breast to be the same as l_upper_arm's
+        breastRwMat = GetMatrixOf(upperArm);
+
+        CMatrix breastMat{ &breastRwMat };
+        CMatrix clavicleMat{ &GetMatrixOf(clavicle) };
+
+        // Transform matrix from left_clavicle's space to left_breast's
+        breastMat *= Invert(clavicleMat); 
+
+        // Half it's X rotation
+
+        float x, y, z;
+        breastMat.ConvertToEulerAngles(&x, &y, &z, ORDER_ZYX | SWAP_XZ);
+        // Originally there is an `if` check of a static bool value, which is always true.
+        x /= 2.f;
+        breastMat.ConvertFromEulerAngles(x, y, z, ORDER_ZYX | SWAP_XZ);
+
+        // Transform it back into it's own space
+        breastMat *= clavicleMat;
+
+        // Finally, update it's RW associated matrix
+        breastMat.UpdateRW();      
+    }
 }
 
 // 0x5DF8D0
