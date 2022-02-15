@@ -34,7 +34,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
-    // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
+    RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
     // RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     // RH_ScopedInstall(GiveWeapon, 0x5E6080);
     // RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
@@ -996,9 +996,8 @@ void CPed::SetCurrentWeapon(int32 slot)
 }
 
 // 0x5E6280
-void CPed::SetCurrentWeapon(eWeaponType weaponType)
-{
-    ((void(__thiscall *)(CPed*, eWeaponType))0x5E6280)(this, weaponType);
+void CPed::SetCurrentWeapon(eWeaponType weaponType) {
+    SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(weaponType)->m_nSlot);
 }
 
 // 0x5E62B0
