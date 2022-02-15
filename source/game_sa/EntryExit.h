@@ -63,7 +63,7 @@ public:
     void RequestObjectsInFrustum() const;
     bool TransitionFinished(CPed* ped);
     bool TransitionStarted(CPed* ped);
-    void WarpGangWithPlayer(CPed* ped);
+    static void WarpGangWithPlayer(CPed* ped);
     void ProcessStealableObjects(CPed* ped);
     void FindValidTeleportPoint(CVector* point);
     bool HasNameSet() const;

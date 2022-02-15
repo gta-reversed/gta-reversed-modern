@@ -23,7 +23,7 @@ void CEntryExit::InjectHooks() {
     //RH_ScopedInstall(TransitionFinished, 0x4404A0); // TODO - Needs 2 stub to be added in order to compile
     RH_ScopedInstall(RequestObjectsInFrustum, 0x43E690);
     RH_ScopedInstall(RequestAmbientPeds, 0x43E6D0);
-    // RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
+    //RH_ScopedInstall(WarpGangWithPlayer, 0x43F1F0);
     // RH_ScopedInstall(ProcessStealableObjects, 0x43E990);
 }
 
@@ -505,7 +505,23 @@ void CEntryExit::RequestObjectsInFrustum() const {
 
 // 0x43F1F0
 void CEntryExit::WarpGangWithPlayer(CPed* ped) {
-    plugin::CallMethod<0x43F1F0, CEntryExit*, CPed*>(this, ped);
+    /*if (!CPedGroups::ScriptReferenceIndex[ped->AsPlayer()->GetGroupIdx()]) {
+        return;
+    }
+
+    auto& playerGroup = ped->AsPlayer()->GetGroup();
+    auto& grpMembership = playerGroup.GetMembership();
+
+    if (!grpMembership.IsLeader(ped)) {
+        return;
+    }
+
+    for (auto i = 0; i < 8 - 1; i++) {
+        const auto member = grpMembership.GetMember(i);
+        if (!member || member == ped || )
+
+        // TODO: Missing CTaskComplexFollowLeaderInFormation::ms_offsets
+    }*/
 }
 
 // 0x43E990

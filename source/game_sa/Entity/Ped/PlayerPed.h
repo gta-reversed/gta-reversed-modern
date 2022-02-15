@@ -105,7 +105,8 @@ public:
     static void SetupPlayerPed(int playerId);
 
     // NOTSA
-    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    auto GetGroupIdx() const { return m_pPlayerData->m_nPlayerGroup; }
+    CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(GetGroupIdx()); }
     CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };
 
