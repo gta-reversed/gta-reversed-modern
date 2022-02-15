@@ -981,7 +981,7 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
             AddWeaponModel(givenWepInfo->m_nModelId1);
         }
     } else { // Same weapon already in the slot, update its ammo count and `Reload()` it
-        if (wepSlot == eWeaponSlot::WEAPONSLOT_TYPE_GIFT) { // Gifts have no ammo :D
+        if (wepSlot == eWeaponSlot::GIFT) { // Gifts have no ammo :D
             return;
         }
 
