@@ -37,6 +37,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
     RH_ScopedInstall(GiveWeapon, 0x5E6080);
+    RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     // RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
     // RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
@@ -941,7 +942,25 @@ void CPed::AddWeaponModel(int32 modelIndex)
 // 0x5E6010
 void CPed::TakeOffGoggles()
 {
-    ((void(__thiscall *)(CPed*))0x5E6010)(this);
+    auto& wepInSlot = GetWeaponInSlot(GetWeaponSlot(eWeaponType::WEAPON_INFRARED));
+
+    // Game checks if wepInSlot.m_nType != UNARMED here, not sure why? Probably compiler mistake on switch case codegen..
+
+    switch (wepInSlot.m_nType) {
+    case eWeaponType::WEAPON_INFRARED:
+    case eWeaponType::WEAPON_NIGHTVISION: {
+        // Remove googles model
+        RemoveGogglesModel();
+        wepInSlot.m_bNoModel = false;
+
+        // If it's the active weapon re-add it (? - Not sure)
+        if (&wepInSlot == &GetActiveWeapon()) {
+            AddWeaponModel(wepInSlot.GetWeaponInfo().m_nModelId1);
+        }
+
+        break;
+    }
+    }
 }
 
 // 0x5E6080
