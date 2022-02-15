@@ -526,5 +526,6 @@ void CEntryExit::WarpGangWithPlayer(CPed* ped) {
 
 // 0x43E990
 void CEntryExit::ProcessStealableObjects(CPed* ped) {
+    // TODO: Missing `InteriorManager_c`
     plugin::CallMethod<0x43E990, CEntryExit*, CPed*>(this, ped);
 }
