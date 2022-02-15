@@ -134,3 +134,7 @@ bool CPathFind::Save() {
 void CPathFind::UpdateStreaming(bool a1) {
     return plugin::CallMethod<0x450A60, CPathFind*, bool>(this, a1);
 }
+
+void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
+    return plugin::CallAndReturn<void, 0x44DCD0, CPathFind*, const CVector&>(this,posn);
+}

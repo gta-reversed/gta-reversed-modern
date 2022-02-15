@@ -82,12 +82,12 @@ public:
     * ChangeWaterConfiguration(int32)
     * CreateBeachToy(const CVector&, eBeachToy)
     * FillQuadsAndTrianglesList()
-    * FindNearestWaterAndItsFlow()
     * FixVertexOnToLine(CWaterVertex*, CWaterVertex*, CWaterVertex*, float*)
     * GetGroundLevel(const CVector&, float*, ColData*, float)
     * GetGroundLevel_WS(const CVector&, float*, ColData*, float)
     *
     */
+    static void FindNearestWaterAndItsFlow();
     static bool GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel);
     static bool GetWaterLevel(float x, float y, float z, float * pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals);
     static bool GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2);

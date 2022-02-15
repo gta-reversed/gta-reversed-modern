@@ -164,6 +164,7 @@ public:
     bool Load();
     bool Save();
     void UpdateStreaming(bool a1);
+    void SetPathsNeededAtPosition(const CVector& posn);
 
     // pathLink is the same as the returned pointer(at least on success)
     // pathLink should be a pointer to CNodeAddress on the stack or somewhere, and

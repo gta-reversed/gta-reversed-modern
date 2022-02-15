@@ -81,6 +81,10 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1
     *fOutWave += fHighFreqWaves;
 }
 
+void CWaterLevel::FindNearestWaterAndItsFlow() {
+    plugin::Call<0x6E9D70>();
+}
+
 bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
 {
     return plugin::CallAndReturn<bool, 0x6EA960, const CVector&, float*, float*, float*>
