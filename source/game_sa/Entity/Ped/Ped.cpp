@@ -36,8 +36,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
     RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
-    // RH_ScopedInstall(GiveWeapon, 0x5E6080);
-    // RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
+    RH_ScopedInstall(GiveWeapon, 0x5E6080);
     // RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
     // RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
@@ -946,9 +945,59 @@ void CPed::TakeOffGoggles()
 }
 
 // 0x5E6080
-void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused)
-{
-    ((void(__thiscall *)(CPed*, eWeaponType, uint32, bool))0x5E6080)(this, weaponType, ammo, likeUnused);
+void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
+    const auto givenWepInfo = CWeaponInfo::GetWeaponInfo(weaponType);
+    auto& wepInSlot = GetWeaponInSlot(givenWepInfo->m_nSlot);
+    const auto wepSlot = (eWeaponSlot)givenWepInfo->m_nSlot;
+
+    if (wepInSlot.m_nType != weaponType) { // Another weapon in the slot, remove it, and set this weapon
+
+        // Remove previous weapon (and possibly add any ammo it had to `ammo`)
+        if (wepInSlot.m_nType != eWeaponType::WEAPON_UNARMED) {
+            switch (wepSlot) {
+            case eWeaponSlot::SHOTGUN:
+            case eWeaponSlot::SMG:
+            case eWeaponSlot::RIFLE: {
+                ammo += wepInSlot.m_nTotalAmmo;
+                break;
+            }
+            }
+
+            RemoveWeaponModel(wepInSlot.GetWeaponInfo().m_nModelId1);
+
+            if (givenWepInfo->m_nSlot == CWeaponInfo::GetWeaponInfo(eWeaponType::WEAPON_INFRARED)->m_nSlot) {
+                RemoveGogglesModel();
+            }
+
+            wepInSlot.Shutdown();
+        }
+
+        // Give new
+        wepInSlot.Initialise(weaponType, ammo, this);
+
+        // Now `wepInSlot` is the weapon we've given to the player
+
+        if (givenWepInfo->m_nSlot == m_nActiveWeaponSlot && !bInVehicle) {
+            AddWeaponModel(givenWepInfo->m_nModelId1);
+        }
+    } else { // Same weapon already in the slot, update its ammo count and `Reload()` it
+        if (wepSlot == eWeaponSlot::WEAPONSLOT_TYPE_GIFT) { // Gifts have no ammo :D
+            return;
+        }
+
+        wepInSlot.m_nTotalAmmo = std::min(99'999u, wepInSlot.m_nTotalAmmo + ammo);
+        wepInSlot.Reload(this);
+
+        if (wepInSlot.m_nState == eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
+            if (wepInSlot.m_nTotalAmmo > 0) {
+                wepInSlot.m_nState = eWeaponState::WEAPONSTATE_READY;
+            }
+        }
+    }
+
+    if (wepInSlot.m_nState != eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
+        wepInSlot.m_nState = eWeaponState::WEAPONSTATE_READY;
+    }
 }
 
 // NOTSA

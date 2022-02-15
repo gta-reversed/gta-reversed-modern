@@ -22,6 +22,23 @@ enum eWeaponState : uint32 {
     WEAPONSTATE_MELEE_MADECONTACT
 };
 
+/* Source: https://wiki.multitheftauto.com/wiki/GetPedWeaponSlot */
+enum class eWeaponSlot : uint32 {
+    UNARMED,
+    MELEE,
+    HANDGUN,
+    SHOTGUN,
+    SMG,        // Used for drive-by's
+    RIFLE,
+    SNIPER,
+    HEAVY,
+    THROWN,
+    SPECIAL,
+    GIFT,
+    PARACHUTE,
+    DETONATOR,
+};
+
 class CPed;
 class CVehicle;
 class CColModel;
