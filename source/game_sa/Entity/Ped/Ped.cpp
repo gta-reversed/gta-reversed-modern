@@ -25,7 +25,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     RH_ScopedInstall(Update, 0x5DEBE0);
     RH_ScopedInstall(Initialise, 0x5DEBB0);
-    // RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
+    RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
     // RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
     // RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
     // RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
