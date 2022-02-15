@@ -11,6 +11,7 @@
 #include "PedType.h"
 #include "Buoyancy.h"
 #include "TaskSimpleSwim.h"
+#include "PedStats.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -28,7 +29,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(UpdateStatLeavingVehicle, 0x5E01B0);
     RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
     RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
-    // RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
+    RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
     // RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     // RH_ScopedInstall(ClearWeapon, 0x5E62B0);
@@ -496,9 +497,11 @@ void CPed::RestoreHeadingRate()
 }
 
 // 0x5DFD70
-void CPed::RestoreHeadingRateCB(CAnimBlendAssociation* association, void* data)
-{
-    ((void(__cdecl *)(CAnimBlendAssociation*, void*))0x5DFD70)(association, data);
+void CPed::RestoreHeadingRateCB(CAnimBlendAssociation* assoc, void* data) {
+    UNUSED(assoc);
+
+    auto& ped = *((CPed*)data);
+    ped.m_fHeadingChangeRate = ped.m_pStats->m_fHeadingChangeRate;
 }
 
 // 0x5DFD90
