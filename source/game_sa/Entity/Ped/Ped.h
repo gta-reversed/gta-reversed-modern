@@ -473,7 +473,7 @@ public:
     bool TurnBody();
     bool IsPointerValid();
     void GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones);
-    CObject* GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
+    void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
     void SetCharCreatedBy(ePedCreatedBy createdBy);

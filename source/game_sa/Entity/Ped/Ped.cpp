@@ -891,13 +891,13 @@ void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBon
 }
 
 // 0x5E4390
-CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
+void CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
 
     // Deal with ped already holding an entity.
     // If `replace` is `true`, just drop the entity, otherwise do nothing.
     if (const auto task = GetTaskManager().FindActiveTaskByType(eTaskType::TASK_SIMPLE_HOLD_ENTITY)) {
         if (!GetEntityThatThisPedIsHolding() || !replace) {
-            return nullptr;
+            return;
         }
         DropEntityThatThisPedIsHolding(true);
     }
