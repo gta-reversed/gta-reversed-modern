@@ -52,7 +52,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
     RH_ScopedInstall(SetPedState, 0x5E4500);
     RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
-    // RH_ScopedInstall(ClearLookFlag, 0x5E1950);
+    RH_ScopedInstall(ClearLookFlag, 0x5E1950);
     // RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
     // RH_ScopedInstall(UpdatePosition, 0x5E1B10);
     // RH_ScopedInstall(MakeTyresMuddySectorList, 0x6AE0D0);
@@ -861,9 +861,33 @@ void CPed::SetWeaponSkill(eWeaponType weaponType, char skill)
 }
 
 // 0x5E1950
-void CPed::ClearLookFlag()
-{
-    ((void(__thiscall *)(CPed*))0x5E1950)(this);
+void CPed::ClearLookFlag() {
+    if (!bIsLooking) {
+        return;
+    }
+
+    // Originally there's a do-while loop, but it will never iterate more than once, so I won't add it.
+    // do { ...
+
+    bIsLooking = false;
+    bIsDrowning = false;
+    bIsRestoringLook = true;
+
+    if (!bIsDucking) {
+        switch (m_nPedState) { // TODO: Probably inlined function here
+        case ePedState::PEDSTATE_DRIVING:
+        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+            break;
+        default: {
+            m_pedIK.bTorsoUsed = false;
+            break;
+        }
+        }
+    }
+
+    m_nLookTime = CTimer::GetTimeInMS() + (IsPlayer() ? 4000 : 2000);
+
+    // .. } while ((PEDSTATE_LOOK_HEADING || PEDSTATE_LOOK_ENTITY) && bIsLooking), but `bIsLooking` will never be true at this point.
 }
 
 // 0x5E3FF0

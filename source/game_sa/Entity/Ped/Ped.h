@@ -339,7 +339,7 @@ public:
     int32               field_73C;
     int32               m_nWeaponModelId;
     int32               field_744;
-    int32               field_748;
+    int32               m_nLookTime;
     int32               field_74C;
     int32               m_nDeathTime;
     char                m_nBodypartToRemove;

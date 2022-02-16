@@ -42,10 +42,10 @@ public:
     union {
         uint32 m_nFlags;
         struct {
-            uint32 bGunReachedTarget : 1;
-            uint32 bTorsoUsed : 1;
-            uint32 bUseArm : 1;
-            uint32 bSlopePitch : 1;
+            uint32 bGunReachedTarget : 1; // 0x1
+            uint32 bTorsoUsed : 1;        // 0x2
+            uint32 bUseArm : 1;           // 0x4
+            uint32 bSlopePitch : 1;       // 0x8
         };
     };
 
