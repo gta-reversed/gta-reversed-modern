@@ -1,10 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
+#include "Rect.h"
 
 void CRect::InjectHooks()
 {
@@ -14,8 +16,8 @@ void CRect::InjectHooks()
     RH_ScopedInstall(IsFlipped, 0x404190);
     RH_ScopedInstall(Restrict, 0x404200);
     RH_ScopedInstall(Resize, 0x404260);
-    RH_ScopedOverloadedInstall(IsPointInside, "", 0x404290, bool(CRect::*)(CVector2D const&) const);
-    RH_ScopedOverloadedInstall(IsPointInside, "Tolerance", 0x4042D0, bool(CRect::*)(CVector2D const&, float) const);
+    RH_ScopedOverloadedInstall(IsPointInside, "", 0x404290, bool(CRect::*)(const CVector2D&) const);
+    RH_ScopedOverloadedInstall(IsPointInside, "Tolerance", 0x4042D0, bool(CRect::*)(const CVector2D&, float) const);
     RH_ScopedInstall(SetFromCenter, 0x43E020);
     RH_ScopedOverloadedInstall(GetCenter, "", 0x43E050, void(CRect::*)(float*, float*) const);
     RH_ScopedInstall(StretchToPoint, 0x5327F0);
@@ -42,7 +44,7 @@ inline bool CRect::IsFlipped() const
     return left > right || top > bottom;
 }
 
-inline void CRect::Restrict(CRect const& restriction)
+inline void CRect::Restrict(const CRect& restriction)
 {
     if (restriction.left < left)
         left = restriction.left;
@@ -65,13 +67,13 @@ inline void CRect::Resize(float resizeX, float resizeY)
     bottom += resizeY;
 }
 
-inline bool CRect::IsPointInside(CVector2D const& point) const
+inline bool CRect::IsPointInside(const CVector2D& point) const
 {
     return left <= point.x && right >= point.x
         && top <= point.y && bottom >= point.y;
 }
 
-inline bool CRect::IsPointInside(CVector2D const& point, float tolerance) const
+inline bool CRect::IsPointInside(const CVector2D& point, float tolerance) const
 {
     return left - tolerance <= point.x && right + tolerance >= point.x
         && top - tolerance <= point.y && bottom + tolerance >= point.y;

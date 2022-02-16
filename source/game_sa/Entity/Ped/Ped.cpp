@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,18 +10,15 @@
 
 #include "PedType.h"
 #include "Buoyancy.h"
+#include "TaskSimpleSwim.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // Constructors
     // RH_ScopedInstall(Constructor, 0x5E8030);
-
-    // Destructors
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
 
-    // Static functions
     // Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
     // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
     // RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
@@ -32,8 +29,6 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(UpdateStatEnteringVehicle, 0x5E01A0);
     // RH_ScopedInstall(ShoulderBoneRotation, 0x5DF560);
     // RH_ScopedInstall(RestoreHeadingRateCB, 0x5DFD70);
-
-    // Methods
     // RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     // RH_ScopedInstall(ClearWeapon, 0x5E62B0);
@@ -148,8 +143,6 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     // RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
-
-    // Virtual methods
     // RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
     // RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
@@ -312,9 +305,9 @@ void CPed::ClearAimFlag()
 }
 
 // 0x5DEF60
-int32 CPed::GetLocalDirection(CVector2D const& arg0)
+int32 CPed::GetLocalDirection(const CVector2D& arg0)
 {
-    return ((int32(__thiscall *)(CPed*, CVector2D const&))0x5DEF60)(this, arg0);
+    return ((int32(__thiscall *)(CPed*, const CVector2D&))0x5DEF60)(this, arg0);
 }
 
 // 0x5DEFD0
@@ -391,7 +384,7 @@ void CPed::RemoveGogglesModel()
 
 int32 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nSlot;
+    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nSlot;
 }
 
 // 0x5DF220
@@ -582,9 +575,9 @@ bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
 }
 
 // 0x5E0820
-bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicke, bool findClosestNode)
+bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicle, bool findClosestNode)
 {
-    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicke, findClosestNode);
+    return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicle, findClosestNode);
 }
 
 // 0x5E13C0
@@ -624,7 +617,7 @@ void CPed::ProcessBuoyancy()
         return;
 
     float fBuoyancyMult = 1.1F;
-    if (m_nPedState == ePedState::PEDSTATE_DEAD || m_nPedState == ePedState::PEDSTATE_DIE)
+    if (m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE)
         fBuoyancyMult = 1.8F;
 
     float fBuoyancy = fBuoyancyMult * m_fMass / 125.0F;
@@ -632,24 +625,24 @@ void CPed::ProcessBuoyancy()
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancy(this, fBuoyancy, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
         physicalFlags.bTouchingWater = false;
-        auto pSwimTask = m_pIntelligence->GetTaskSwim();
-        if (pSwimTask)
-            pSwimTask->m_fSwimStopTime = 1000.0F;
+        auto swimTask = m_pIntelligence->GetTaskSwim();
+        if (swimTask)
+            swimTask->m_fSwimStopTime = 1000.0F;
 
         return;
     }
 
     if (bIsStanding) {
-        auto& pStandingOnEntity = m_pContactEntity;
-        if (pStandingOnEntity && pStandingOnEntity->IsVehicle()) {
-            auto pStandingOnVehicle = reinterpret_cast<CVehicle*>(pStandingOnEntity);
+        auto& standingOnEntity = m_pContactEntity;
+        if (standingOnEntity && standingOnEntity->IsVehicle()) {
+            auto pStandingOnVehicle = standingOnEntity->AsVehicle();
             if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
-                auto pSwimTask = m_pIntelligence->GetTaskSwim();
-                if (!pSwimTask)
+                auto swimTask = m_pIntelligence->GetTaskSwim();
+                if (!swimTask)
                     return;
 
-                pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
+                swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
                 return;
             }
         }
@@ -662,7 +655,7 @@ void CPed::ProcessBuoyancy()
         CEntity* colEntity;
         if (CWorld::ProcessVerticalLine(vecPedPos, fCheckZ, lineColPoint, colEntity, false, true, false, false, false, false, nullptr)) {
             if (colEntity->IsVehicle()) {
-                auto colVehicle = reinterpret_cast<CVehicle*>(colEntity);
+                auto colVehicle = colEntity->AsVehicle();
                 if (colVehicle->IsBoat()
                     && !colVehicle->physicalFlags.bDestroyed
                     && colVehicle->GetMatrix().GetUp().z > 0.0F) {
@@ -711,9 +704,9 @@ void CPed::ProcessBuoyancy()
             GetEventGroup().Add(&cEvent, false);
         }
         else {
-            auto pSwimTask = m_pIntelligence->GetTaskSwim();
-            if (pSwimTask) {
-                pSwimTask->m_fSwimStopTime = 0.0F;
+            auto swimTask = m_pIntelligence->GetTaskSwim();
+            if (swimTask) {
+                swimTask->m_fSwimStopTime = 0.0F;
                 bPlayerSwimmingOrClimbing = true;
             }
             else if (m_pIntelligence->GetTaskClimb()) {
@@ -738,10 +731,10 @@ void CPed::ProcessBuoyancy()
         return;
     }
 
-    auto pSwimTask = m_pIntelligence->GetTaskSwim();
-    if (bIsStanding && pSwimTask)
+    auto swimTask = m_pIntelligence->GetTaskSwim();
+    if (bIsStanding && swimTask)
     {
-        pSwimTask->m_fSwimStopTime += CTimer::GetTimeStep();
+        swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
         return;
     }
 
@@ -749,8 +742,7 @@ void CPed::ProcessBuoyancy()
         CVector vecHeadPos(0.0F, 0.0F, 0.1F);
         GetTransformedBonePosition(vecHeadPos, ePedBones::BONE_HEAD, false);
         if (vecHeadPos.z < mod_Buoyancy.m_fWaterLevel) {
-            auto pPlayerPed = reinterpret_cast<CPlayerPed*>(this);
-            pPlayerPed->HandlePlayerBreath(true, 1.0F);
+            AsPlayer()->HandlePlayerBreath(true, 1.0F);
         }
     }
 }
@@ -793,28 +785,28 @@ eWeaponSkill CPed::GetWeaponSkill()
 eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
     if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
-        return eWeaponSkill::WEAPSKILL_STD;
+        return eWeaponSkill::STD;
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
         int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
-        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_PRO);
-        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_nReqStatLevel);
+        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::PRO);
+        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_PRO;
+            return eWeaponSkill::PRO;
 
-        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD);
-        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_nReqStatLevel);
+        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD);
+        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::WEAPSKILL_POOR;
+            return eWeaponSkill::POOR;
 
-        return eWeaponSkill::WEAPSKILL_STD;
+        return eWeaponSkill::STD;
     }
 
     if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
         return m_nWeaponSkill;
 
-    return eWeaponSkill::WEAPSKILL_COP;
+    return eWeaponSkill::COP;
 }
 
 // 0x5E3C10
@@ -985,7 +977,7 @@ void CPed::ClearWeapons()
     {
         m_aWeapon.Shutdown();
     }
-    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::WEAPSKILL_STD);
+    CWeaponInfo* getWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_UNARMED, eWeaponSkill::STD);
     SetCurrentWeapon(getWeaponInfo->m_nSlot);
 }
 
@@ -1013,7 +1005,7 @@ void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED)
     {
-        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::WEAPSKILL_STD);
+        CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::STD);
         CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
@@ -1116,21 +1108,21 @@ void CPed::GiveWeaponAtStartOfFight()
 
         switch (m_nPedType)
         {
-            case ePedType::PED_TYPE_GANG1:
-            case ePedType::PED_TYPE_GANG2:
-            case ePedType::PED_TYPE_GANG3:
-            case ePedType::PED_TYPE_GANG4:
-            case ePedType::PED_TYPE_GANG5:
-            case ePedType::PED_TYPE_GANG6:
-            case ePedType::PED_TYPE_GANG7:
-            case ePedType::PED_TYPE_GANG8:
-            case ePedType::PED_TYPE_GANG9:
-            case ePedType::PED_TYPE_GANG10:
+            case PED_TYPE_GANG1:
+            case PED_TYPE_GANG2:
+            case PED_TYPE_GANG3:
+            case PED_TYPE_GANG4:
+            case PED_TYPE_GANG5:
+            case PED_TYPE_GANG6:
+            case PED_TYPE_GANG7:
+            case PED_TYPE_GANG8:
+            case PED_TYPE_GANG9:
+            case PED_TYPE_GANG10:
                 GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;
-            case ePedType::PED_TYPE_DEALER:
-            case ePedType::PED_TYPE_CRIMINAL:
-            case ePedType::PED_TYPE_PROSTITUTE:
+            case PED_TYPE_DEALER:
+            case PED_TYPE_CRIMINAL:
+            case PED_TYPE_PROSTITUTE:
                 GiveRandomWeaponByType(eWeaponType::WEAPON_KNIFE, 200);
                 GiveRandomWeaponByType(eWeaponType::WEAPON_PISTOL, 400);
                 break;
@@ -1143,19 +1135,19 @@ void CPed::GiveWeaponAtStartOfFight()
 void CPed::GiveWeaponWhenJoiningGang()
 {
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
-        if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
+        if (CCheat::IsActive(CHEAT_NO_ONE_CAN_STOP_US)) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
-            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::WEAPSKILL_STD)->m_nSlot);
+            SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::STD)->m_nSlot);
         }
         else {
             CWeaponInfo* pWeaponInfo = nullptr;
-            if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
+            if (CCheat::IsActive(CHEAT_ROCKET_MAYHEM)) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::STD);
             }
             else {
                 CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
-                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::WEAPSKILL_STD);
+                pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::STD);
             }
             CPed::SetCurrentWeapon(pWeaponInfo->m_nSlot);
         }
@@ -1351,7 +1343,12 @@ void CPed::FlagToDestroyWhenNextProcessed()
 }
 
 // 0x5E2530
-int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
+int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 {
-    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
+    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CEntity*, CColPoint*>(this, entity, colPoint);
+}
+
+// NOTSA
+bool CPed::IsInVehicleAsPassenger() const noexcept {
+    return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
 }

@@ -81,7 +81,7 @@ void CScriptedBrainTaskStore::Clear(CPed* ped)
     for (int32 i = 0; i < TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES; i++) {
         CScriptedBrainTaskEntry& entry = ms_entries[i];
         if (entry.m_ped == ped) {
-            if(entry.m_task)
+            if (entry.m_task)
                 delete entry.m_task;
             entry.m_task = nullptr;
             if (entry.m_ped)

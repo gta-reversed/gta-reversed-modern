@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "DecisionMakerTypes.h"
+
 void CDecisionMakerTypesFileLoader::InjectHooks() {
     RH_ScopedClass(CDecisionMakerTypesFileLoader);
     RH_ScopedCategoryGlobal();
@@ -64,9 +66,9 @@ void CDecisionMakerTypes::MakeDecision(CPed* ped, int32 eventType, int32 eventSo
 }
 
 // 0x606F80
-int32 CDecisionMakerTypes::MakeDecision(CPedGroup* pPedGroup, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4) {
+int32 CDecisionMakerTypes::MakeDecision(CPedGroup* pedGroup, int32 eventType, int32 eventSourceType, bool bIsPedInVehicle, int32 taskId1, int32 taskId2, int32 taskId3, int32 taskId4) {
     return plugin::CallMethodAndReturn <int32, 0x606F80, CDecisionMakerTypes*, CPedGroup*, int32, int32, bool, int32, int32, int32, int32>
-        (this, pPedGroup, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4);
+        (this, pedGroup, eventType, eventSourceType, bIsPedInVehicle, taskId1, taskId2, taskId3, taskId4);
 }
 
 // 0x6044C0

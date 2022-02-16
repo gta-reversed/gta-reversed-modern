@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,16 +11,20 @@
 #include "PointLights.h"
 #include "Escalators.h"
 #include "CustomBuildingDNPipeline.h"
+#include "ActiveOccluder.h"
 #include "Occlusion.h"
 #include "MotionBlurStreaks.h"
 #include "TagManager.h"
+#include "WindModifiers.h"
+#include "EntryExitManager.h"
+#include "TrafficLights.h"
+#include "Glass.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-//Virtual
     RH_ScopedOverloadedInstall(Add_Reversed, "void", 0x533020, void(CEntity::*)());
     RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedInstall(Remove_Reversed, 0x534AE0);
@@ -41,8 +45,6 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetupLighting_Reversed, 0x553DC0);
     RH_ScopedInstall(RemoveLighting_Reversed, 0x553370);
     RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x403EB0);
-
-//Class
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
     RH_ScopedInstall(UpdateRpHAnim, 0x532B20);
     RH_ScopedInstall(HasPreRenderEffects, 0x532B70);
@@ -55,8 +57,8 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetRwObjectAlpha, 0x5332C0);
     RH_ScopedInstall(FindTriggerPointCoors, 0x533380);
     RH_ScopedInstall(GetRandom2dEffect, 0x533410);
-    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ref", 0x5334F0, CVector(CEntity::*)(CVector const&));
-    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ptr", 0x533560, CVector*(CEntity::*)(CVector&, CVector const&));
+    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ref", 0x5334F0, CVector(CEntity::*)(const CVector&));
+    RH_ScopedOverloadedInstall(TransformFromObjectSpace, "ptr", 0x533560, CVector*(CEntity::*)(CVector&, const CVector&));
     RH_ScopedInstall(CreateEffects, 0x533790);
     RH_ScopedInstall(DestroyEffects, 0x533BF0);
     RH_ScopedInstall(AttachToRwObject, 0x533ED0);
@@ -65,7 +67,7 @@ void CEntity::InjectHooks()
     RH_ScopedOverloadedInstall(GetBoundCentre, "ref", 0x534290, void(CEntity::*)(CVector&));
     RH_ScopedInstall(RenderEffects, 0x5342B0);
     RH_ScopedOverloadedInstall(GetIsTouching, "ent", 0x5343F0, bool(CEntity::*)(CEntity*));
-    RH_ScopedOverloadedInstall(GetIsTouching, "vec", 0x5344B0, bool(CEntity::*)(CVector const&, float));
+    RH_ScopedOverloadedInstall(GetIsTouching, "vec", 0x5344B0, bool(CEntity::*)(const CVector&, float));
     RH_ScopedInstall(GetIsOnScreen, 0x534540);
     RH_ScopedInstall(GetIsBoundingBoxOnScreen, 0x5345D0);
     RH_ScopedInstall(ModifyMatrixForTreeInWind, 0x534E90);
@@ -86,8 +88,6 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateRW, 0x446F90);
     RH_ScopedInstall(SetAtomicAlphaCB, 0x533290);
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
-
-//Statics
     RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
 }
@@ -95,14 +95,14 @@ void CEntity::InjectHooks()
 CEntity::CEntity() : CPlaceable()
 {
     m_nStatus = eEntityStatus::STATUS_PLAYER;
-    m_nType = eEntityType::ENTITY_TYPE_BUILDING;
+    m_nType = ENTITY_TYPE_BUILDING;
 
     m_nFlags = 0;
     m_bIsVisible = true;
     m_bBackfaceCulled = true;
 
     m_nScanCode = 0;
-    m_nAreaCode = 0;
+    m_nAreaCode = eAreaCodes::AREA_CODE_NORMAL_WORLD;
     m_nModelIndex = 0xFFFF;
     m_pRwObject = nullptr;
     m_nIplIndex = 0;
@@ -134,11 +134,11 @@ void CEntity::Add_Reversed()
     Add(rect);
 }
 
-void CEntity::Add(CRect const& rect)
+void CEntity::Add(const CRect& rect)
 {
     CEntity::Add_Reversed(rect);
 }
-void CEntity::Add_Reversed(CRect const& rect)
+void CEntity::Add_Reversed(const CRect& rect)
 {
     CRect usedRect = rect;
     if (usedRect.left < -3000.0F)
@@ -352,10 +352,11 @@ void CEntity::CreateRwObject_Reversed()
             break;
         
         if (IsObject()) {
-            auto pObj = static_cast<CObject*>(this);
-            if (!pObj->m_pMovingList)
-                pObj->AddToMovingList();
-            pObj->SetIsStatic(false);
+            auto obj = AsObject();
+            if (!obj->m_pMovingList) {
+                obj->AddToMovingList();
+            }
+            obj->SetIsStatic(false);
         }
         else {
             CWorld::ms_listMovingEntityPtrs.AddItem(this);
@@ -462,7 +463,7 @@ void CEntity::ProcessControl()
 }
 void CEntity::ProcessControl_Reversed()
 {
-    return;
+    // NOP
 }
 
 void CEntity::ProcessCollision()
@@ -471,7 +472,7 @@ void CEntity::ProcessCollision()
 }
 void CEntity::ProcessCollision_Reversed()
 {
-    return;
+    // NOP
 }
 
 void CEntity::ProcessShift()
@@ -480,7 +481,7 @@ void CEntity::ProcessShift()
 }
 void CEntity::ProcessShift_Reversed()
 {
-    return;
+    // NOP
 }
 
 bool CEntity::TestCollision(bool bApplySpeed)
@@ -498,7 +499,7 @@ void CEntity::Teleport(CVector destination, bool resetRotation)
 }
 void CEntity::Teleport_Reversed(CVector destination, bool resetRotation)
 {
-    return;
+    // NOP
 }
 
 // 0x403E90
@@ -555,9 +556,10 @@ void CEntity::PreRender_Reversed()
     if (!m_bHasPreRenderEffects)
         return;
 
-    if (ami && ami->SwaysInWind()
-        && (!IsObject() || !static_cast<CObject*>(this)->objectFlags.bIsExploded)) {
-
+    if (   ami
+        && ami->SwaysInWind()
+        && (!IsObject() || !AsObject()->objectFlags.bIsExploded)
+    ) {
         auto vecCamPos = CVector2D(TheCamera.GetPosition());
         auto vecEntPos = CVector2D(GetPosition());
         auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
@@ -575,8 +577,8 @@ void CEntity::PreRender_Reversed()
     if (!IsObject() && !IsDummy())
         return;
 
-    if (IsObject() && !IsDummy()) {
-        auto obj = reinterpret_cast<CObject*>(this);
+    if (IsObject()) {
+        auto obj = AsObject();
         if (m_nModelIndex == ModelIndices::MI_COLLECTABLE1) {
             CPickups::DoCollectableEffects(this);
             UpdateRW();
@@ -597,7 +599,7 @@ void CEntity::PreRender_Reversed()
                 UpdateRwFrame();
             }
         }
-        else if (m_nModelIndex == eModelID::MODEL_MISSILE) {
+        else if (m_nModelIndex == MODEL_MISSILE) {
             if (CReplay::Mode != REPLAY_MODE_1) {
                 CVector vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() % 16) / 16.0F;
@@ -726,7 +728,7 @@ void CEntity::PreRender_Reversed()
             UpdateRW();
             UpdateRwFrame();
         }
-        else if (m_nModelIndex == eModelID::MODEL_GRENADE) {
+        else if (m_nModelIndex == MODEL_GRENADE) {
             auto const& vecPos = GetPosition();
             auto vecScaledCam = TheCamera.m_mCameraMatrix.GetRight() * 0.07F;
             auto vecStreakStart = vecPos - vecScaledCam;
@@ -735,7 +737,7 @@ void CEntity::PreRender_Reversed()
                 CMotionBlurStreaks::RegisterStreak(reinterpret_cast<uint32>(this), 100, 100, 100, 255, vecStreakStart, vecStreakEnd);
             }
         }
-        else if (m_nModelIndex == eModelID::MODEL_MOLOTOV) {
+        else if (m_nModelIndex == MODEL_MOLOTOV) {
             auto const& vecPos = GetPosition();
             auto vecScaledCam = TheCamera.m_mCameraMatrix.GetRight() * 0.07F;
             auto vecStreakStart = vecPos - vecScaledCam;
@@ -801,7 +803,8 @@ void CEntity::PreRender_Reversed()
             ModifyMatrixForPoleInWind();
         }
     }
-    else if (m_nModelIndex == ModelIndices::MI_TRAFFICLIGHTS) {
+
+    if (m_nModelIndex == ModelIndices::MI_TRAFFICLIGHTS) {
         CTrafficLights::DisplayActualLight(this);
         CShadows::StoreShadowForPole(this, 2.957F, 0.147F, 0.0F, 16.0F, 0.4F, 0);
     }
@@ -910,7 +913,7 @@ void CEntity::FlagToDestroyWhenNextProcessed()
 
 void CEntity::FlagToDestroyWhenNextProcessed_Reversed()
 {
-    return;
+    // NOP
 }
 
 // 0x532B00
@@ -930,8 +933,8 @@ void CEntity::UpdateRpHAnim()
         return;
 
     if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic)) && !m_bDontUpdateHierarchy) {
-        auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pRwClump);
-        RpHAnimHierarchyUpdateMatrices(pAnimHierarchy);
+        auto* animHierarchy = GetAnimHierarchyFromSkinClump(m_pRwClump);
+        RpHAnimHierarchyUpdateMatrices(animHierarchy);
     }
 }
 
@@ -946,9 +949,9 @@ bool CEntity::HasPreRenderEffects()
         && m_nModelIndex != ModelIndices::MI_CARMINE
         && m_nModelIndex != ModelIndices::MI_NAUTICALMINE
         && m_nModelIndex != ModelIndices::MI_BRIEFCASE
-        && m_nModelIndex != eModelID::MODEL_MISSILE
-        && m_nModelIndex != eModelID::MODEL_GRENADE
-        && m_nModelIndex != eModelID::MODEL_MOLOTOV
+        && m_nModelIndex != MODEL_MISSILE
+        && m_nModelIndex != MODEL_GRENADE
+        && m_nModelIndex != MODEL_MOLOTOV
         && m_nModelIndex != ModelIndices::MI_BEACHBALL
         && m_nModelIndex != ModelIndices::MI_MAGNOCRANE_HOOK
         && m_nModelIndex != ModelIndices::MI_WRECKING_BALL
@@ -1051,7 +1054,7 @@ void CEntity::ModifyMatrixForCrane()
     if (!parentMatrix)
         return;
 
-    auto tempMat = CMatrix(parentMatrix, 0);
+    auto tempMat = CMatrix(parentMatrix, false);
     auto fRot = (CTimer::GetTimeInMS() & 0x3FF) * (PI / 512.26F);
     tempMat.SetRotateZOnly(fRot);
     tempMat.UpdateRW();
@@ -1093,17 +1096,17 @@ bool IsEntityPointerValid(CEntity* entity)
         return false;
 
     switch (entity->m_nType) {
-    case eEntityType::ENTITY_TYPE_BUILDING:
+    case ENTITY_TYPE_BUILDING:
         return IsBuildingPointerValid(reinterpret_cast<CBuilding*>(entity));
-    case eEntityType::ENTITY_TYPE_VEHICLE:
+    case ENTITY_TYPE_VEHICLE:
         return IsVehiclePointerValid(reinterpret_cast<CVehicle*>(entity));
-    case eEntityType::ENTITY_TYPE_PED:
-        return IsPedPointerValid(reinterpret_cast<CPed*>(entity));
-    case eEntityType::ENTITY_TYPE_OBJECT:
+    case ENTITY_TYPE_PED:
+        return IsPedPointerValid(entity->AsPed());
+    case ENTITY_TYPE_OBJECT:
         return IsObjectPointerValid(reinterpret_cast<CObject*>(entity));
-    case eEntityType::ENTITY_TYPE_DUMMY:
+    case ENTITY_TYPE_DUMMY:
         return IsDummyPointerValid(reinterpret_cast<CDummy*>(entity));
-    case eEntityType::ENTITY_TYPE_NOTINPOOLS:
+    case ENTITY_TYPE_NOTINPOOLS:
         return true;
     }
 
@@ -1161,7 +1164,7 @@ C2dEffect* CEntity::GetRandom2dEffect(int32 effectType, bool bCheckForEmptySlot)
 }
 
 // 0x5334F0
-CVector CEntity::TransformFromObjectSpace(CVector const& offset)
+CVector CEntity::TransformFromObjectSpace(const CVector& offset)
 {
     auto result = CVector();
     if (m_matrix) {
@@ -1174,11 +1177,11 @@ CVector CEntity::TransformFromObjectSpace(CVector const& offset)
 }
 
 // 0x533560
-CVector* CEntity::TransformFromObjectSpace(CVector& outPosn, CVector const& offset)
+CVector* CEntity::TransformFromObjectSpace(CVector& outPos, const CVector& offset)
 {
     auto result = TransformFromObjectSpace(offset);
-    outPosn = result;
-    return &outPosn;
+    outPos = result;
+    return &outPos;
 }
 
 // 0x533790
@@ -1444,7 +1447,7 @@ bool CEntity::GetIsTouching(CEntity* entity)
 }
 
 // 0x5344B0
-bool CEntity::GetIsTouching(CVector const& centre, float radius)
+bool CEntity::GetIsTouching(const CVector& centre, float radius)
 {
     CVector thisVec;
     GetBoundCentre(thisVec);
@@ -1460,11 +1463,11 @@ bool CEntity::GetIsOnScreen()
     GetBoundCentre(thisVec);
     auto fThisRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
 
-    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatInverse)))
+    if (TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatInverse)))
         return true;
 
     if (TheCamera.m_bMirrorActive)
-        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrixTag*>(&TheCamera.m_mMatMirrorInverse));
+        return TheCamera.IsSphereVisible(thisVec, fThisRadius, reinterpret_cast<RwMatrix*>(&TheCamera.m_mMatMirrorInverse));
 
     return false;
 }
@@ -1602,8 +1605,8 @@ RwMatrix* CEntity::GetModellingMatrix()
 // 0x535300
 CColModel* CEntity::GetColModel()
 {
-    if (IsVehicle() && static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex > -1)
-        return &CVehicle::m_aSpecialColModel[static_cast<CVehicle*>(this)->m_vehicleSpecialColIndex];
+    if (IsVehicle() && AsVehicle()->m_vehicleSpecialColIndex > -1)
+        return &CVehicle::m_aSpecialColModel[AsVehicle()->m_vehicleSpecialColIndex];
     else
         return CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
 }
@@ -1611,7 +1614,7 @@ CColModel* CEntity::GetColModel()
 // 0x535340
 //https://gamedev.stackexchange.com/a/35948
 //https://gamedev.stackexchange.com/questions/153326/how-to-rotate-directional-billboard-particle-sprites-toward-the-direction-the-pa/153814#153814
-void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, CVector* pVecCorner3, CVector* pVecCorner4)
+void CEntity::CalculateBBProjection(CVector* corner1, CVector* corner2, CVector* corner3, CVector* corner4)
 {
     CMatrix& matrix = GetMatrix();
     auto fMagRight = CVector2D(matrix.GetRight()).Magnitude();
@@ -1693,32 +1696,32 @@ void CEntity::CalculateBBProjection(CVector* pVecCorner1, CVector* pVecCorner2, 
     auto fMult13 = fMult1 + fMult3;
     auto fMult24 = fMult2 + fMult4;
 
-    *pVecCorner1 = CVector{
+    *corner1 = CVector{
         vecTransformed.x + (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24),
         vecTransformed.y + (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24),
         vecTransformed.z + (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24),
     };
-    *pVecCorner2 = CVector{
+    *corner2 = CVector{
         vecTransformed.x + (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24),
         vecTransformed.y + (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24),
         vecTransformed.z + (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24),
     };
-    *pVecCorner3 = CVector{
+    *corner3 = CVector{
         vecDir.x - (vecNormalized.x * fMult13) + (vecNormalized.y * fMult24),
         vecDir.y - (vecNormalized.y * fMult13) + (-vecNormalized.x * fMult24),
         vecDir.z - (vecNormalized.z * fMult13) + (vecNormalized.z * fMult24),
     };
-    *pVecCorner4 = CVector{
+    *corner4 = CVector{
         vecDir.x - (vecNormalized.x * fMult13) - (vecNormalized.y * fMult24),
         vecDir.y - (vecNormalized.y * fMult13) - (-vecNormalized.x * fMult24),
         vecDir.z - (vecNormalized.z * fMult13) - (vecNormalized.z * fMult24),
     };
 
     const auto& vecPos = GetPosition();
-    pVecCorner1->z = vecPos.z;
-    pVecCorner2->z = vecPos.z;
-    pVecCorner3->z = vecPos.z;
-    pVecCorner4->z = vecPos.z;
+    corner1->z = vecPos.z;
+    corner2->z = vecPos.z;
+    corner3->z = vecPos.z;
+    corner4->z = vecPos.z;
 
 }
 
@@ -1735,7 +1738,7 @@ void CEntity::UpdateAnim()
 
     bool bOnScreen;
     float fStep;
-    if (IsObject() && static_cast<CObject*>(this)->m_nObjectType == eObjectType::OBJECT_TYPE_CUTSCENE) {
+    if (IsObject() && AsObject()->m_nObjectType == eObjectType::OBJECT_TYPE_CUTSCENE) {
         bOnScreen = true;
         fStep = CTimer::GetTimeStepNonClippedInSeconds();
     }
@@ -1864,9 +1867,9 @@ void CEntity::RegisterReference(CEntity** entity)
         if (!CReferences::pEmptyList) {
             auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
             for (int32 i = 0; i < iVehsSize; ++i) {
-                auto pVeh = CPools::ms_pVehiclePool->GetAt(i);
-                if (pVeh) {
-                    pVeh->PruneReferences();
+                auto vehicle = CPools::ms_pVehiclePool->GetAt(i);
+                if (vehicle) {
+                    vehicle->PruneReferences();
                     if (CReferences::pEmptyList)
                         break;
                 }
@@ -1877,9 +1880,9 @@ void CEntity::RegisterReference(CEntity** entity)
         if (!CReferences::pEmptyList) {
             auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
             for (int32 i = 0; i < iObjectsSize; ++i) {
-                auto pObj = CPools::ms_pObjectPool->GetAt(i);
-                if (pObj) {
-                    pObj->PruneReferences();
+                auto obj = CPools::ms_pObjectPool->GetAt(i);
+                if (obj) {
+                    obj->PruneReferences();
                     if (CReferences::pEmptyList)
                         break;
                 }
@@ -1904,7 +1907,7 @@ void CEntity::ProcessLightsForEntity()
         return;
 
     if (IsVehicle()) {
-        if (static_cast<CVehicle*>(this)->physicalFlags.bDestroyed)
+        if (AsVehicle()->physicalFlags.bDestroyed)
             return;
     }
     else {
@@ -1995,7 +1998,7 @@ void CEntity::ProcessLightsForEntity()
 
         const auto& vecPos = GetPosition();
         auto iFlashType = effect->light.m_nCoronaFlashType;
-        float fBalance;
+        float fBalance; // todo: shadow var
         uint32 uiMode, uiOffset;
         if (iFlashType == e2dCoronaFlashType::FLASH_RANDOM_WHEN_WET && CWeather::WetRoads > 0.5F || bCoronaVisible) {
             switch (iFlashType) {
@@ -2056,7 +2059,7 @@ void CEntity::ProcessLightsForEntity()
                 break;
 
             case e2dCoronaFlashType::FLASH_TRAINCROSSING:
-                if (IsObject() && static_cast<CObject*>(this)->objectFlags.bTrainCrossEnabled) {
+                if (IsObject() && AsObject()->objectFlags.bTrainCrossEnabled) {
                     if (CTimer::GetTimeInMS() & 0x400)
                         bDoColorLight = true;
 
@@ -2186,7 +2189,7 @@ void CEntity::ProcessLightsForEntity()
                 }
 
                 auto fSizeMult = 1.0F;
-                if (m_nModelIndex == eModelID::MODEL_RCBARON) {
+                if (m_nModelIndex == MODEL_RCBARON) {
                     fBrightness *= 1.9F;
                     fSizeMult = 2.0F;
                 }
@@ -2525,6 +2528,10 @@ CEntity* CEntity::FindLastLOD() noexcept {
     return it;
 }
 
+CBaseModelInfo* CEntity::GetModelInfo() const {
+    return CModelInfo::GetModelInfo(m_nModelIndex);
+}
+
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)
 {
     auto geometry = RpAtomicGetGeometry(atomic);
@@ -2537,4 +2544,12 @@ RpMaterial* CEntity::SetMaterialAlphaCB(RpMaterial* material, void* data)
 {
     material->color.alpha = (RwUInt8)data;
     return material;
+}
+
+bool CEntity::IsScanCodeCurrent() const {
+    return m_nScanCode == GetCurrentScanCode();
+}
+
+void CEntity::SetCurrentScanCode() {
+    m_nScanCode = GetCurrentScanCode();
 }

@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "WeaponModelInfo.h"
+
 void CWeaponModelInfo::InjectHooks()
 {
     RH_ScopedClass(CWeaponModelInfo);
@@ -38,17 +40,17 @@ void CWeaponModelInfo::SetClump_Reversed(RpClump* clump)
     CClumpModelInfo::SetClump(clump);
     RpClumpForAllAtomics(clump, CClumpModelInfo::SetAtomicRendererCB, CVisibilityPlugins::RenderWeaponCB);
 
-    auto pFlashFrame = CClumpModelInfo::GetFrameFromName(clump, "gunflash");
-    if (!pFlashFrame)
+    auto flashFrame = CClumpModelInfo::GetFrameFromName(clump, "gunflash");
+    if (!flashFrame)
         return;
 
-    auto pFirstAtomic = reinterpret_cast<RpAtomic*>(GetFirstObject(pFlashFrame));
-    if (!pFirstAtomic)
+    auto firstAtomic = reinterpret_cast<RpAtomic*>(GetFirstObject(flashFrame));
+    if (!firstAtomic)
         return;
 
-    CVehicle::SetComponentAtomicAlpha(pFirstAtomic, 0);
-    RpAtomicSetFlags(pFirstAtomic, 0);
-    auto pGeometry = RpAtomicGetGeometry(pFirstAtomic);
-    RpMaterialGetSurfaceProperties(RpGeometryGetMaterial(pGeometry, 0))->ambient = 16.0F;
+    CVehicle::SetComponentAtomicAlpha(firstAtomic, 0);
+    RpAtomicSetFlags(firstAtomic, 0);
+    auto geometry = RpAtomicGetGeometry(firstAtomic);
+    RpMaterialGetSurfaceProperties(RpGeometryGetMaterial(geometry, 0))->ambient = 16.0F;
 
 }

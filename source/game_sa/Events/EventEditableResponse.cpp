@@ -86,11 +86,11 @@ bool CEventEditableResponse::HasEditableResponse() const {
 }
 
 CEvent* CEventEditableResponse::Clone_Reversed() {
-    CEventEditableResponse* pClonedEvent = CloneEditable();
-    pClonedEvent->m_taskId = m_taskId;
-    pClonedEvent->field_10 = field_10;
-    pClonedEvent->m_bAddToEventGroup = m_bAddToEventGroup;
-    return pClonedEvent;
+    CEventEditableResponse* clonedEvent = CloneEditable();
+    clonedEvent->m_taskId = m_taskId;
+    clonedEvent->field_10 = field_10;
+    clonedEvent->m_bAddToEventGroup = m_bAddToEventGroup;
+    return clonedEvent;
 }
 
 
@@ -101,24 +101,24 @@ bool CEventEditableResponse::WillRespond() {
 
 // 0x4AC4A0
 void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
-    CVehicle* pVehicle = ped->m_pVehicle;
+    CVehicle* vehicle = ped->m_pVehicle;
     if (ped->bInVehicle && DoInformVehicleOccupants(ped) && m_bAddToEventGroup) {
-        CPed* pDriver = pVehicle->m_pDriver;
-        if (pDriver && pDriver != ped) {
-            auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
-            pClonedEvent->m_taskId = TASK_NONE;
-            pClonedEvent->m_bAddToEventGroup = false;
-            pDriver->m_pIntelligence->m_eventGroup.Add(pClonedEvent, false);
-            delete pClonedEvent;
+        CPed* driver = vehicle->m_pDriver;
+        if (driver && driver != ped) {
+            auto clonedEvent = static_cast<CEventEditableResponse*>(Clone());
+            clonedEvent->m_taskId = TASK_NONE;
+            clonedEvent->m_bAddToEventGroup = false;
+            driver->m_pIntelligence->m_eventGroup.Add(clonedEvent, false);
+            delete clonedEvent;
         }
-        for (uint8 i = 0; i < pVehicle->m_nMaxPassengers; i++) {
-            CPed* pPassenger = pVehicle->m_apPassengers[i];
+        for (uint8 i = 0; i < vehicle->m_nMaxPassengers; i++) {
+            CPed* pPassenger = vehicle->m_apPassengers[i];
             if (pPassenger && pPassenger != ped) {
-                auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
-                pClonedEvent->m_taskId = TASK_NONE;
-                pClonedEvent->m_bAddToEventGroup = false;
-                pPassenger->m_pIntelligence->m_eventGroup.Add(pClonedEvent, false);
-                delete pClonedEvent;
+                auto clonedEvent = static_cast<CEventEditableResponse*>(Clone());
+                clonedEvent->m_taskId = TASK_NONE;
+                clonedEvent->m_bAddToEventGroup = false;
+                pPassenger->m_pIntelligence->m_eventGroup.Add(clonedEvent, false);
+                delete clonedEvent;
             }
         }
     }
@@ -133,64 +133,65 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
     if (!numPedsToScan)
         return;
 
-    CEntity** pEntities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
+    CEntity** entities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
     for (size_t entityIndex = 0; entityIndex < numPedsToScan; entityIndex++) {
-        CEntity* pEntity = pEntities[entityIndex];
-        if (!pEntity)
+        CEntity* entity = entities[entityIndex];
+        if (!entity)
             continue;
-        CPed* pEntityPed = static_cast<CPed*>(pEntity);
-        if (pEntityPed->m_nPedType == PED_TYPE_COP) {
-            if (pEntityPed->m_nPedType != PED_TYPE_COP)
+
+        CPed* entityPed = entity->AsPed();
+        if (entityPed->m_nPedType == PED_TYPE_COP) {
+            if (entityPed->m_nPedType != PED_TYPE_COP)
                 continue;
-            CPlayerPedData * pPlayerData = FindPlayerPed(0)->m_pPlayerData;
-            if (pPlayerData->m_pWanted && pPlayerData->m_pWanted->m_nWantedLevel)
+
+            CPlayerPedData * playerData = FindPlayerPed(0)->m_pPlayerData;
+            if (playerData->m_pWanted && playerData->m_pWanted->m_nWantedLevel)
                 continue;
         }
         else {
             uint32 pedAcquaintances = ped->m_acquaintance.GetAcquaintances(0);
-            bool bFlagSet = pedAcquaintances & CPedType::GetPedFlag(pEntityPed->m_nPedType);
-            if (pEntityPed->IsPlayer()) {
-                uint32 entityAcquaintances = pEntityPed->m_acquaintance.GetAcquaintances(0);
+            bool bFlagSet = pedAcquaintances & CPedType::GetPedFlag(entityPed->m_nPedType);
+            if (entityPed->IsPlayer()) {
+                uint32 entityAcquaintances = entityPed->m_acquaintance.GetAcquaintances(0);
                 bFlagSet = entityAcquaintances & CPedType::GetPedFlag(ped->m_nPedType);
             }
             if (!bFlagSet)
                 continue;
         }
         float fDmRadius = ped->m_pIntelligence->m_fDmRadius;
-        CVector direction = ped->GetPosition() - pEntity->GetPosition();
+        CVector direction = ped->GetPosition() - entity->GetPosition();
         if (fDmRadius * fDmRadius > direction.SquaredMagnitude()) {
-            auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
-            pClonedEvent->m_taskId = TASK_NONE;
-            pClonedEvent->m_bAddToEventGroup = false;
-            if (!CInformFriendsEventQueue::Add(pEntity, pClonedEvent))
-                delete pClonedEvent;
+            auto clonedEvent = static_cast<CEventEditableResponse*>(Clone());
+            clonedEvent->m_taskId = TASK_NONE;
+            clonedEvent->m_bAddToEventGroup = false;
+            if (!CInformFriendsEventQueue::Add(entity, clonedEvent))
+                delete clonedEvent;
         }
     }
 }
 
 // 0x4B7DF0
 void CEventEditableResponse::InformGroup(CPed* ped) {
-    CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(ped);
-    if (!pPedGroup)
+    CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
+    if (!pedGroup)
         return;
 
-    auto pClonedEvent = static_cast<CEventEditableResponse*>(Clone());
-    pClonedEvent->m_taskId = TASK_NONE;
-    pClonedEvent->m_bAddToEventGroup = false;
-    if (!CInformGroupEventQueue::Add(ped, pPedGroup, pClonedEvent))
-        delete pClonedEvent;
+    auto clonedEvent = static_cast<CEventEditableResponse*>(Clone());
+    clonedEvent->m_taskId = TASK_NONE;
+    clonedEvent->m_bAddToEventGroup = false;
+    if (!CInformGroupEventQueue::Add(ped, pedGroup, clonedEvent))
+        delete clonedEvent;
 }
 
 // 0x4AC5A0
 void CEventEditableResponse::TriggerLookAt(CPed* ped) {
-    CEntity* pSourceEntity = GetSourceEntity();
-    if (pSourceEntity) {
-        if (pSourceEntity->m_nType == ENTITY_TYPE_PED) {
-            CPed* pTargetPed = static_cast<CPed*>(pSourceEntity);
-            g_ikChainMan.LookAt("CEventEditableResponse", ped, pTargetPed, 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
+    CEntity* sourceEntity = GetSourceEntity();
+    if (sourceEntity) {
+        if (sourceEntity->IsPed()) {
+            g_ikChainMan.LookAt("CEventEditableResponse", ped, sourceEntity->AsPed(), 2000, BONE_HEAD, nullptr, true, 0.25f, 500, 3, false);
             return;
         }
-        g_ikChainMan.LookAt("CEventEditableResponse", ped, pSourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("CEventEditableResponse", ped, sourceEntity, 2000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
     }
 }
 
@@ -262,12 +263,12 @@ CEventSpecial* CEventSpecial::Constructor()
     return this;
 }
 
-CEventFireNearby::CEventFireNearby(CVector const& position)
+CEventFireNearby::CEventFireNearby(const CVector& position)
 {
     m_position = position;
 }
 
-CEventFireNearby* CEventFireNearby::Constructor(CVector const& position)
+CEventFireNearby* CEventFireNearby::Constructor(const CVector& position)
 {
     this->CEventFireNearby::CEventFireNearby(position);
     return this;
@@ -338,7 +339,7 @@ bool CEventDanger::AffectsPed_Reversed(CPed* ped)
 
 bool CEventDanger::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
-    if (GetSourceEntity() && GetSourceEntity()->m_nType == ENTITY_TYPE_PED) {
+    if (GetSourceEntity() && GetSourceEntity()->IsPed()) {
         CPed* leader = pedGroup->GetMembership().GetLeader();
         if (leader) {
             CVector2D distance = leader->GetPosition() - m_dangerFrom->GetPosition();
@@ -350,8 +351,8 @@ bool CEventDanger::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 
 CEntity* CEventDanger::GetSourceEntity_Reversed() const
 {
-    if (m_dangerFrom && m_dangerFrom->m_nType != ENTITY_TYPE_PED && m_dangerFrom->m_nType == ENTITY_TYPE_VEHICLE) {
-        CVehicle* vehicle = static_cast<CVehicle*>(m_dangerFrom);
+    if (m_dangerFrom && !m_dangerFrom->IsPed() && m_dangerFrom->IsVehicle()) {
+        CVehicle* vehicle = m_dangerFrom->AsVehicle();
         if (vehicle->m_pDriver)
             return vehicle->m_pDriver;
     }

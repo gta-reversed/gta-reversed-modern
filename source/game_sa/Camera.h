@@ -1,22 +1,26 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Placeable.h"
-#include "Cam.h"
+#include <RenderWare.h>
+
 #include "QueuedMode.h"
-#include "Vector.h"
-#include "RenderWare.h"
 #include "CamPathSplines.h"
-#include "Matrix.h"
-#include "Vehicle.h"
-#include "Rect.h"
-#include "Ped.h"
-#include "Garage.h"
+#include "eCamMode.h"
+#include "eVehicleType.h"
+#include "ePedType.h"
+
+class CEntity;
+class CVector;
+class CVehicle;
+class CMatrix;
+class CPed;
+class CSphere;
+class CGarage;
 
 enum class eFadeFlag : uint16 {
     FADE_IN,
@@ -350,7 +354,7 @@ public:
     void AddShakeSimple(float duration, int32 type, float intensity);
     void AllowShootingWith2PlayersInCar(bool bAllow);
     void ApplyVehicleCameraTweaks(CVehicle* vehicle);
-    void AvoidTheGeometry(CVector const* arg2, CVector const* arg3, CVector* arg4, float FOV);
+    void AvoidTheGeometry(const CVector* arg2, const CVector* arg3, CVector* arg4, float FOV);
 
     void CalculateDerivedValues(bool bForMirror, bool bOriented);
     void CalculateFrustumPlanes(bool bForMirror);
@@ -382,18 +386,18 @@ public:
     bool GetFading();
     int32 GetFadingDirection();
     CVector* GetGameCamPosition();
-    signed int GetLookDirection();
+    int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
     float GetPositionAlongSpline();
     float GetRoughDistanceToGround();
-    signed int GetScreenFadeStatus();
+    int32 GetScreenFadeStatus();
     void GetScreenRect(CRect* rect);
     bool Get_Just_Switched_Status();
 
     void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
     void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
-    void ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, CVector* targPosn);
+    void ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn);
 
     void Init();
     void InitCameraVehicleTweaks();
@@ -401,7 +405,7 @@ public:
     void InitialiseCameraForDebugMode();
     bool IsExtraEntityToIgnore(CEntity *entity);
     bool IsItTimeForNewCamera(int32 camSequence, int32 startTime);
-    bool IsSphereVisible(const CVector& origin, float radius, RwMatrixTag *transformMatrix);
+    bool IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix);
     bool IsSphereVisible(const CVector& origin, float radius);
     bool IsSphereVisible(const CSphere& sphere) { return IsSphereVisible(sphere.m_vecCenter, sphere.m_fRadius); }
     void LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase);
@@ -486,6 +490,7 @@ public:
     static void SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom);
 
     RwMatrix* GetRwMatrix() { return RwFrameGetMatrix(RwCameraGetFrame(m_pRwCamera)); }
+    CMatrix& GetViewMatrix() { return m_mViewMatrix; }
 };
 
 VTABLE_DESC(CCamera, 0x8630E8, 1);

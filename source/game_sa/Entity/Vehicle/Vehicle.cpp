@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,57 +10,61 @@
 
 #include "Buoyancy.h"
 #include "CarCtrl.h"
+#include "Radar.h"
+#include "VehicleSaveStructure.h"
+#include "Rope.h"
+#include "Ropes.h"
 
-float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;
-float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;
-float& CVehicle::WHEELSPIN_RISE_RATE = *(float*)0x8D34A0;
-float& CVehicle::WHEELSPIN_FALL_RATE = *(float*)0x8D34A4;
-float& CVehicle::m_fAirResistanceMult = *(float*)0x8D34A8;
-float& CVehicle::ms_fRailTrackResistance = *(float*)0x8D34AC;
-float& CVehicle::ms_fRailTrackResistanceDefault = *(float*)0x8D34B0;
+float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
+float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
+float& CVehicle::WHEELSPIN_RISE_RATE = *(float*)0x8D34A0;            // 0.95f
+float& CVehicle::WHEELSPIN_FALL_RATE = *(float*)0x8D34A4;            // 0.7f
+float& CVehicle::m_fAirResistanceMult = *(float*)0x8D34A8;           // 2.5f
+float& CVehicle::ms_fRailTrackResistance = *(float*)0x8D34AC;        // 0.003f
+float& CVehicle::ms_fRailTrackResistanceDefault = *(float*)0x8D34B0; // 0.003f
 bool& CVehicle::bDisableRemoteDetonation = *(bool*)0xC1CC00;
 bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
 int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
-CColModel** CVehicle::m_aSpecialColVehicle = (CColModel * *)0xC1CC08;
+CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
-tHydrualicData(&CVehicle::m_aSpecialHydraulicData)[4] = *(tHydrualicData(*)[4])0xC1CB60;
+tHydraulicData (&CVehicle::m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
-float& fBurstTyreMod = *(float*)0x8D34B4;
-float& fBurstSpeedMax = *(float*)0x8D34B8;
-float& CAR_NOS_EXTRA_SKID_LOSS = *(float*)0x8D34BC;
-float& WS_TRAC_FRAC_LIMIT = *(float*)0x8D34C0;
-float& WS_ALREADY_SPINNING_LOSS = *(float*)0x8D34C4;
-float& fBurstBikeTyreMod = *(float*)0x8D34C8;
-float& fBurstBikeSpeedMax = *(float*)0x8D34CC;
-float& fTweakBikeWheelTurnForce = *(float*)0x8D34D0;
-float& AUTOGYRO_ROTORSPIN_MULT = *(float*)0x8D34D4;
-float& AUTOGYRO_ROTORSPIN_MULTLIMIT = *(float*)0x8D34D8;
-float& AUTOGYRO_ROTORSPIN_DAMP = *(float*)0x8D34DC;
-float& AUTOGYRO_ROTORLIFT_MULT = *(float*)0x8D34E0;
-float& AUTOGYRO_ROTORLIFT_FALLOFF = *(float*)0x8D34E4;
-float& AUTOGYRO_ROTORTILT_ANGLE = *(float*)0x8D34E8;
-float& ROTOR_SEMI_THICKNESS = *(float*)0x8D34EC;
-float* fSpeedMult = (float*)0x8D34F8;
-float& fDamagePosSpeedShift = *(float*)0x8D3510;
-float& DIFF_LIMIT = *(float*)0x8D35B4;
-float& DIFF_SPRING_MULT_X = *(float*)0x8D35B8;
-float& DIFF_SPRING_MULT_Y = *(float*)0x8D35BC;
-float& DIFF_SPRING_MULT_Z = *(float*)0x8D35C0;
-float& DIFF_SPRING_COMPRESS_MULT = *(float*)0x8D35C4;
-CVector* VehicleGunOffset = (CVector*)0x8D35D4;
+float& fBurstTyreMod = *(float*)0x8D34B4;                // 0.13f
+float& fBurstSpeedMax = *(float*)0x8D34B8;               // 0.3f
+float& CAR_NOS_EXTRA_SKID_LOSS = *(float*)0x8D34BC;      // 0.9f
+float& WS_TRAC_FRAC_LIMIT = *(float*)0x8D34C0;           // 0.3f
+float& WS_ALREADY_SPINNING_LOSS = *(float*)0x8D34C4;     // 0.2f
+float& fBurstBikeTyreMod = *(float*)0x8D34C8;            // 0.05f
+float& fBurstBikeSpeedMax = *(float*)0x8D34CC;           // 0.12f
+float& fTweakBikeWheelTurnForce = *(float*)0x8D34D0;     // 2.0f
+float& AUTOGYRO_ROTORSPIN_MULT = *(float*)0x8D34D4;      // 0.006f
+float& AUTOGYRO_ROTORSPIN_MULTLIMIT = *(float*)0x8D34D8; // 0.25f
+float& AUTOGYRO_ROTORSPIN_DAMP = *(float*)0x8D34DC;      // 0.997f
+float& AUTOGYRO_ROTORLIFT_MULT = *(float*)0x8D34E0;      // 4.5f
+float& AUTOGYRO_ROTORLIFT_FALLOFF = *(float*)0x8D34E4;   // 0.75f
+float& AUTOGYRO_ROTORTILT_ANGLE = *(float*)0x8D34E8;     // 0.25f
+float& ROTOR_SEMI_THICKNESS = *(float*)0x8D34EC;         // 0.05f
+float* fSpeedMult = (float*)0x8D34F8;                    // float fSpeedMult[5] = { 0.8f, 0.75f, 0.85f, 0.9f, 0.85f, 0.85f }
+float& fDamagePosSpeedShift = *(float*)0x8D3510;         // 0.4f
+float& DIFF_LIMIT = *(float*)0x8D35B4;                   // 0.8f
+float& DIFF_SPRING_MULT_X = *(float*)0x8D35B8;           // 0.05f
+float& DIFF_SPRING_MULT_Y = *(float*)0x8D35BC;           // 0.05f
+float& DIFF_SPRING_MULT_Z = *(float*)0x8D35C0;           // 0.1f
+float& DIFF_SPRING_COMPRESS_MULT = *(float*)0x8D35C4;    // 2.0f
+CVector (&VehicleGunOffset)[14] = *(CVector(*)[14])0x8D35D4; // maybe [12]
+
 char*& HandlingFilename = *(char**)0x8D3970;
-char(*VehicleNames)[14] = (char(*)[14])0x8D3978;
+char (*VehicleNames)[14] = (char (*)[14])0x8D3978;
 
 void CVehicle::InjectHooks()
 {
     RH_ScopedClass(CVehicle);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
-// VTABLE
     RH_ScopedInstall(SetModelIndex_Reversed, 0x6D6A40);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x6D6410);
     RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x6D6640);
@@ -78,8 +82,6 @@ void CVehicle::InjectHooks()
     RH_ScopedInstall(GetTowBarPos_Reversed, 0x6DFBE0);
     RH_ScopedInstall(Save_Reversed, 0x5D4760);
     RH_ScopedInstall(Load_Reversed, 0x5D2900);
-
-// CLASS
     RH_ScopedInstall(Shutdown, 0x6D0B40);
     RH_ScopedInstall(GetRemapIndex, 0x6D0B70);
     RH_ScopedInstall(SetRemap, 0x6D0C00);
@@ -95,14 +97,17 @@ void CVehicle::InjectHooks()
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
     RH_ScopedInstall(DoHeadLightBeam, 0x6E0E20);
-
+    RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30);
 }
 
+// 0x6D5F10
 CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(), m_autoPilot()
 {
-    //plugin::CallMethod<0x6D5F10, CVehicle*, uint8>(this, createdBy);
+    // plugin::CallMethod<0x6D5F10, CVehicle*, uint8>(this, createdBy);
+    // return;
+
     m_bHasPreRenderEffects = true;
-    m_nType = eEntityType::ENTITY_TYPE_VEHICLE;
+    m_nType = ENTITY_TYPE_VEHICLE;
 
     m_fRawSteerAngle = 0.0f;
     m_fSteerAngle = 0.0f;
@@ -204,22 +209,23 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_pDustParticle = nullptr;
     m_pCustomCarPlate = nullptr;
 
-    memset(m_anUpgrades, 0xFFu, sizeof(m_anUpgrades));
+    memset(m_anUpgrades, 255, sizeof(m_anUpgrades));
     m_fWheelScale = 1.0f;
     m_nWindowsOpenFlags = 0;
     m_nNitroBoosts = 0;
     m_nHasslePosId = 0;
-    m_nVehicleWeaponInUse = 0;
+    m_nVehicleWeaponInUse = CAR_WEAPON_NOT_USED;
     m_fDirtLevel = (float)((rand() % 15));
     m_nCreationTime = CTimer::GetTimeInMS();
-    CVehicle::SetCollisionLighting(0x48);
+    SetCollisionLighting(0x48);
 }
 
+// 0x6E2B40
 CVehicle::~CVehicle()
 {
     CReplay::RecordVehicleDeleted(this);
     m_nAlarmState = 0;
-    CVehicle::DeleteRwObject();
+    DeleteRwObject();
     CRadar::ClearBlipForEntity(eBlipType::BLIP_CAR, CPools::ms_pVehiclePool->GetRef(this));
 
     if (m_pDriver)
@@ -250,7 +256,7 @@ CVehicle::~CVehicle()
 
     if (m_vehicleSpecialColIndex > -1)
     {
-        CVehicle::m_aSpecialColVehicle[m_vehicleSpecialColIndex] = nullptr;
+        m_aSpecialColVehicle[m_vehicleSpecialColIndex] = nullptr;
         m_vehicleSpecialColIndex = -1;
     }
 
@@ -301,8 +307,8 @@ void CVehicle::SetModelIndex(uint32 index)
 void CVehicle::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndex(index);
-    auto pVehModelInfo = reinterpret_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(index));
-    CustomCarPlate_TextureCreate(pVehModelInfo);
+    auto vehModelInfo = CModelInfo::GetModelInfo(index)->AsVehicleModelInfoPtr();
+    CustomCarPlate_TextureCreate(vehModelInfo);
 
     for (size_t i = 0; i <= 1; ++i)
         m_anExtras[i] = CVehicleModelInfo::ms_compsUsed[i];
@@ -310,11 +316,11 @@ void CVehicle::SetModelIndex_Reversed(uint32 index)
     m_nMaxPassengers = CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(index);
     switch (m_nModelIndex)
     {
-    case eModelID::MODEL_RCBANDIT:
-    case eModelID::MODEL_RCBARON:
-    case eModelID::MODEL_RCRAIDER:
-    case eModelID::MODEL_RCGOBLIN:
-    case eModelID::MODEL_RCTIGER:
+    case MODEL_RCBANDIT:
+    case MODEL_RCBARON:
+    case MODEL_RCRAIDER:
+    case MODEL_RCGOBLIN:
+    case MODEL_RCTIGER:
         vehicleFlags.bIsRCVehicle = true;
         break;
     default:
@@ -322,19 +328,19 @@ void CVehicle::SetModelIndex_Reversed(uint32 index)
         break;
     }
 
-    //Set up weapons
+    // Set up weapons
     switch (m_nModelIndex)
     {
-    case eModelID::MODEL_RUSTLER:
-    case eModelID::MODEL_STUNT:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_HEAVY_GUN;
+    case MODEL_RUSTLER:
+    case MODEL_STUNT:
+        m_nVehicleWeaponInUse = CAR_WEAPON_HEAVY_GUN;
         break;
-    case eModelID::MODEL_BEAGLE:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_FREEFALL_BOMB;
+    case MODEL_BEAGLE:
+        m_nVehicleWeaponInUse = CAR_WEAPON_FREEFALL_BOMB;
         break;
-    case eModelID::MODEL_HYDRA:
-    case eModelID::MODEL_TORNADO:
-        m_nVehicleWeaponInUse = eCarWeapon::CAR_WEAPON_LOCK_ON_ROCKET;
+    case MODEL_HYDRA:
+    case MODEL_TORNADO:
+        m_nVehicleWeaponInUse = CAR_WEAPON_LOCK_ON_ROCKET;
         break;
     }
 }
@@ -577,7 +583,7 @@ void CVehicle::PreRender_Reversed()
     m_renderLights.m_bLeftRear = false;
 
     const auto fCoeff = CPhysical::GetLightingFromCol(false) * 0.4F;
-    CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr()->SetEnvMapCoeff(fCoeff);
+    GetVehicleModelInfo()->SetEnvMapCoeff(fCoeff);
 }
 
 void CVehicle::Render()
@@ -586,9 +592,9 @@ void CVehicle::Render()
 }
 void CVehicle::Render_Reversed()
 {
-    auto* vehicleMI = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    auto* mi = GetVehicleModelInfo();
     const auto iDirtLevel = static_cast<int32>(m_fDirtLevel) & 0xF;
-    CVehicleModelInfo::SetDirtTextures(vehicleMI, iDirtLevel);
+    CVehicleModelInfo::SetDirtTextures(mi, iDirtLevel);
 
     CEntity::Render();
 }
@@ -864,9 +870,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
-    auto* radioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_TUNE_RADIO);
+    auto* radioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_CAR_TUNE_RADIO);
     if (bBlend)
-        radioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_CAR_TUNE_RADIO, 4.0F);
+        radioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CAR_TUNE_RADIO, 4.0F);
 
     if (radioTuneAnim)
         return;
@@ -915,9 +921,9 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
 
     if (!idleAnim)
     {
-        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, AnimationId::ANIM_ID_CAR_SIT))
+        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_CAR_SIT))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
         }
         return;
     }
@@ -950,7 +956,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
             || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
             && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F))
         {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
         }
         return;
     }
@@ -983,7 +989,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
             lookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
     }
     else
     {
@@ -998,7 +1004,7 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend)
             lookRightAnim->m_fBlendDelta = 0.0F;
         }
         else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, AssocGroupId::ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
     }
 
     if (lookBackAnim)
@@ -1089,34 +1095,34 @@ bool CVehicle::CanPedJumpOutCar_Reversed(CPed* ped)
 }
 
 // 0x871F6C
-bool CVehicle::GetTowHitchPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+bool CVehicle::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
 {
-    return CVehicle::GetTowHitchPos_Reversed(posnOut, bCheckModelInfo, veh);
+    return CVehicle::GetTowHitchPos_Reversed(outPos, bCheckModelInfo, veh);
 }
-bool CVehicle::GetTowHitchPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+bool CVehicle::GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
 {
     if (!bCheckModelInfo)
         return false;
 
     auto const fColFront = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMax.y;
-    posnOut.Set(0.0F, fColFront + 1.0F, 0.0F);
-    posnOut = *m_matrix * posnOut;
+    outPos.Set(0.0F, fColFront + 1.0F, 0.0F);
+    outPos = *m_matrix * outPos;
     return true;
 }
 
 // 0x871F70
-bool CVehicle::GetTowBarPos(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+bool CVehicle::GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
 {
-    return CVehicle::GetTowBarPos_Reversed(posnOut, bCheckModelInfo, veh);
+    return CVehicle::GetTowBarPos_Reversed(outPos, bCheckModelInfo, veh);
 }
-bool CVehicle::GetTowBarPos_Reversed(CVector& posnOut, bool bCheckModelInfo, CVehicle* veh)
+bool CVehicle::GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
 {
     if (!bCheckModelInfo)
         return false;
 
     auto const fColRear = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox().m_vecMin.y;
-    posnOut.Set(0.0F, fColRear - 1.0F, 0.0F);
-    posnOut = *m_matrix * posnOut;
+    outPos.Set(0.0F, fColRear - 1.0F, 0.0F);
+    outPos = *m_matrix * outPos;
     return true;
 }
 
@@ -1161,12 +1167,12 @@ void CVehicle::Shutdown()
 // 0x6D0B70
 int32 CVehicle::GetRemapIndex()
 {
-    auto* modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
-    if (modelInfo->GetNumRemaps() <= 0)
+    auto* mi = GetVehicleModelInfo();
+    if (mi->GetNumRemaps() <= 0)
         return -1;
 
-    for (auto i = 0; i < modelInfo->GetNumRemaps(); ++i)
-        if (modelInfo->m_anRemapTxds[i] == m_nPreviousRemapTxd)
+    for (auto i = 0; i < mi->GetNumRemaps(); ++i)
+        if (mi->m_anRemapTxds[i] == m_nPreviousRemapTxd)
             return i;
 
     return -1;
@@ -1204,7 +1210,7 @@ void CVehicle::SetRemap(int32 remapIndex)
     }
     else
     {
-        auto const infoRemapInd = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr()->m_anRemapTxds[remapIndex];
+        auto const infoRemapInd = GetVehicleModelInfo()->m_anRemapTxds[remapIndex];
         if (infoRemapInd == m_nPreviousRemapTxd)
             return;
 
@@ -1305,15 +1311,15 @@ bool CVehicle::CanBeDeleted()
 }
 
 // 0x6D1230
-float CVehicle::ProcessWheelRotation(tWheelState wheelState, CVector const& arg1, CVector const& arg2, float arg3)
+float CVehicle::ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3)
 {
-    return ((float(__thiscall*)(CVehicle*, tWheelState, CVector const&, CVector const&, float))0x6D1230)(this, wheelState, arg1, arg2, arg3);
+    return ((float(__thiscall*)(CVehicle*, tWheelState, const CVector&, const CVector&, float))0x6D1230)(this, wheelState, arg1, arg2, arg3);
 }
 
 // 0x6D1280
-bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8* arg2)
+bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8& arg2)
 {
-    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, uint8*))0x6D1280)(this, damager, weapon, arg2);
+    return ((bool(__thiscall*)(CVehicle*, CEntity*, eWeaponType, uint8*))0x6D1280)(this, damager, weapon, &arg2);
 }
 
 // 0x6D1340
@@ -1378,9 +1384,7 @@ bool CVehicle::IsPassenger(int32 modelIndex)
 
 bool CVehicle::IsDriver(CPed* ped)
 {
-    if (ped)
-        return ped == m_pDriver;
-    return false;
+    return ped ? ped == m_pDriver : false;
 }
 
 bool CVehicle::IsDriver(int32 modelIndex)
@@ -1521,7 +1525,7 @@ void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState
 void CVehicle::ApplyBoatWaterResistance(tBoatHandlingData* boatHandling, float fImmersionDepth)
 {
     float fSpeedMult = pow(fImmersionDepth, 2.0F) * m_pHandlingData->m_fSuspensionForceLevel * m_fMass / 1000.0F;
-    if (m_nModelIndex == eModelID::MODEL_SKIMMER)
+    if (m_nModelIndex == MODEL_SKIMMER)
         fSpeedMult *= 30.0F;
 
     auto fMoveDotProduct = DotProduct(m_vecMoveSpeed, GetForward());
@@ -1700,9 +1704,9 @@ RpAtomic* RemoveAllUpgradesCB(RpAtomic* atomic, void* data)
 }
 
 // 0x6D3510
-RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* model, UpgradePosnDesc const* upgradePosn, RwFrame* parentComponent, bool isDamaged)
+RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* model, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged)
 {
-    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, UpgradePosnDesc const*, RwFrame*, bool))0x6D3510)(this, model, upgradePosn, parentComponent, isDamaged);
+    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, const UpgradePosnDesc*, RwFrame*, bool))0x6D3510)(this, model, upgradePosn, parentComponent, isDamaged);
 }
 
 // 0x6D3630
@@ -1774,37 +1778,48 @@ void CVehicle::UpdateWinch()
 // 0x6D3C70
 void CVehicle::RemoveWinch()
 {
-    ((void(__thiscall*)(CVehicle*))0x6D3C70)(this);
+    return plugin::CallMethod<0x6D3C70, CVehicle*>(this);
+
+    const auto ropeIndex = GetRopeIndex();
+    if (ropeIndex >= 0)
+        CRopes::GetRope(ropeIndex).Remove();
+
+    // todo: m_nBombLightsWinchFlags &= 0x9Fu;
+}
+
+// NOTSA
+int32 CVehicle::GetRopeIndex() {
+    return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
 }
 
 // 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch()
 {
-    ((void(__thiscall*)(CVehicle*))0x6D3CB0)(this);
+    return CRopes::GetRope(GetRopeIndex()).ReleasePickedUpObject();
 }
 
 // 0x6D3CD0
-void CVehicle::PickUpEntityWithWinch(CEntity* arg0)
+void CVehicle::PickUpEntityWithWinch(CEntity* entity)
 {
-    ((void(__thiscall*)(CVehicle*, CEntity*))0x6D3CD0)(this, arg0);
+    return CRopes::GetRope(GetRopeIndex()).PickUpObject(entity);
 }
 
 // 0x6D3CF0
 CEntity* CVehicle::QueryPickedUpEntityWithWinch()
 {
-    return ((CEntity * (__thiscall*)(CVehicle*))0x6D3CF0)(this);
+    return CRopes::GetRope(GetRopeIndex()).m_pRopeAttachObject;
 }
 
 // 0x6D3D10
 float CVehicle::GetRopeHeightForHeli()
 {
-    return ((float(__thiscall*)(CVehicle*))0x6D3D10)(this);
+    return CRopes::GetRope(GetRopeIndex()).m_fSegmentLength;
 }
 
 // 0x6D3D30
 void CVehicle::SetRopeHeightForHeli(float height)
 {
-    ((void(__thiscall*)(CVehicle*, float))0x6D3D30)(this, height);
+    CRopes::GetRope(GetRopeIndex()).m_fSegmentLength = height;
 }
 
 // 0x6D3D60
@@ -1828,7 +1843,22 @@ float CVehicle::GetPlaneGunsAutoAimAngle()
 // 0x6D3F30
 int32 CVehicle::GetPlaneNumGuns()
 {
-    return ((int32(__thiscall*)(CVehicle*))0x6D3F30)(this);
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+    case MODEL_SEASPAR:
+    case MODEL_RCBARON:
+    case MODEL_MAVERICK:
+    case MODEL_POLMAV:
+    case MODEL_CARGOBOB:
+        return 1;
+    case MODEL_RUSTLER:
+        return 6;
+    case MODEL_HYDRA:
+    case MODEL_TORNADO:
+        return 2;
+    default:
+        return 0;
+    }
 }
 
 // 0x6D4010
@@ -1985,7 +2015,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
                 if (brake > 500.0f)
                     brake *= 0.1f;
-                else if(m_nModelIndex == MODEL_RCBANDIT)
+                else if (m_nModelIndex == MODEL_RCBANDIT)
                     brake *= 0.2f;
             }
         }
@@ -2105,9 +2135,9 @@ void CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 }
 
 // 0x6DBA30
-void CVehicle::SetComponentRotation(RwFrame* component, int32 axis, float angle, bool bResetPosition)
+void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition)
 {
-    plugin::CallMethod<0x6DBA30, CVehicle*, RwFrame*, int32, float, bool>(this, component, axis, angle, bResetPosition);
+    plugin::CallMethod<0x6DBA30, CVehicle*, RwFrame*, eRotationAxis, float, bool>(this, component, axis, angle, bResetPosition);
 }
 
 // 0x6DBBB0
@@ -2124,7 +2154,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     if (!mod_Buoyancy.ProcessBuoyancyBoat(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce, bCollidedWithWorld)) {
         physicalFlags.bSubmergedInWater = false;
         if (IsSubBoat())
-            static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = false;
+            AsBoat()->m_nBoatFlags.bOnWater = false;
 
         return;
     }
@@ -2146,11 +2176,11 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             if (m_pDriver) {
                 m_pDriver->physicalFlags.bTouchingWater = true;
                 if (m_pDriver->IsPlayer())
-                    static_cast<CPlayerPed*>(m_pDriver)->HandlePlayerBreath(true, 1.0F);
+                    m_pDriver->AsPlayer()->HandlePlayerBreath(true, 1.0F);
                 else
                 {
-                    auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, false);
-                    auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, ePedPieceTypes::PED_PIECE_TORSO, 0, false, true);
+                    auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
+                    auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
                     if (damageEvent.AffectsPed(m_pDriver))
                         pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, &damageEvent.m_damageResponse, true);
                     else
@@ -2164,7 +2194,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     auto vecUsedBuoyancyForce = vecBuoyancyForce;
     auto fImmersionDepth = mod_Buoyancy.m_fEntityWaterImmersion;
-    if (m_nModelIndex == eModelID::MODEL_SKIMMER
+    if (m_nModelIndex == MODEL_SKIMMER
         && GetUp().z < -0.5F
         && fabs(m_vecMoveSpeed.x) < 0.2F
         && fabs(m_vecMoveSpeed.y) < 0.2F) {
@@ -2176,7 +2206,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
     if (bCollidedWithWorld)
         CPhysical::ApplyTurnForce(vecBuoyancyForce * 0.4F, vecBuoyancyTurnPoint);
 
-    if (m_nModelIndex == eModelID::MODEL_SKIMMER) {
+    if (m_nModelIndex == MODEL_SKIMMER) {
         auto fCheckedMass = CTimer::GetTimeStep() * m_fMass;
         if (m_f2ndSteerAngle != 0.0F
             || (GetForward().z < -0.5F
@@ -2208,7 +2238,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     if (!bPostCollision && bOnWater && GetUp().z > 0.0F) {
         auto fMoveForce = m_vecMoveSpeed.SquaredMagnitude() * boatHandling->m_fAqPlaneForce * CTimer::GetTimeStep() * vecBuoyancyForce.z * 0.5F;
-        if (m_nModelIndex == eModelID::MODEL_SKIMMER)
+        if (m_nModelIndex == MODEL_SKIMMER)
             fMoveForce *= (m_fGasPedal + 1.0F);
         else if (m_fGasPedal <= 0.05F)
             fMoveForce = 0.0F;
@@ -2228,7 +2258,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     CPad* pad = nullptr;
     if (m_nStatus == eEntityStatus::STATUS_PLAYER && m_pDriver && m_pDriver->IsPlayer()) {
-        pad = static_cast<CPlayerPed*>(m_pDriver)->GetPadFromPlayer();
+        pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
     }
 
     if (GetUp().z > -0.6F) {
@@ -2239,7 +2269,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         if (fabs(m_fGasPedal) > 0.05F || fMoveSpeed > 0.01F) {
             if (IsSubBoat() && bOnWater && fMoveSpeed > 0.05F) {
                 //GetColModel(); Unused call
-                static_cast<CBoat*>(this)->AddWakePoint(GetPosition());
+                AsBoat()->AddWakePoint(GetPosition());
             }
 
             auto fTraction = 1.0F;
@@ -2265,18 +2295,18 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             CWaterLevel::GetWaterLevel(vecWorldThrustPos.x, vecWorldThrustPos.y, vecWorldThrustPos.z, &fWaterLevel, 1, nullptr);
             if (vecWorldThrustPos.z - 0.5F >= fWaterLevel) {
                 if (IsSubBoat())
-                    static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = false;
+                    AsBoat()->m_nBoatFlags.bMovingOnWater = false;
             }
             else {
                 auto fThrustDepth = fWaterLevel - vecWorldThrustPos.z + 0.5F;
                 fThrustDepth = std::min(fThrustDepth * fThrustDepth, 1.0F);
 
                 if (IsSubBoat())
-                    static_cast<CBoat*>(this)->m_nBoatFlags.bMovingOnWater = true;
+                    AsBoat()->m_nBoatFlags.bMovingOnWater = true;
 
                 bool bIsSlowingDown = false;
                 auto fGasState = fabs(m_fGasPedal);
-                if (fGasState < 0.01F || m_nModelIndex == eModelID::MODEL_SKIMMER) {
+                if (fGasState < 0.01F || m_nModelIndex == MODEL_SKIMMER) {
                     bIsSlowingDown = true;
                 }
                 else {
@@ -2379,7 +2409,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         ApplyBoatWaterResistance(boatHandling, fImmersionDepth);
     }
 
-    if ((m_nModelIndex != eModelID::MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
+    if ((m_nModelIndex != MODEL_SKIMMER || m_f2ndSteerAngle == 0.0F) && !bCollidedWithWorld) {
         auto vecTurnRes = Pow(boatHandling->m_vecTurnRes, CTimer::GetTimeStep());
         m_vecTurnSpeed = Multiply3x3(m_vecTurnSpeed, GetMatrix());
         m_vecTurnSpeed.y *= vecTurnRes.y;
@@ -2423,8 +2453,8 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
     *fLastWaterImmersionDepth = fImmersionDepth;
     if (IsSubBoat()) {
-        static_cast<CBoat*>(this)->m_vecWaterDamping = vecBuoyancyForce;
-        static_cast<CBoat*>(this)->m_nBoatFlags.bOnWater = bOnWater;
+        AsBoat()->m_vecWaterDamping = vecBuoyancyForce;
+        AsBoat()->m_nBoatFlags.bOnWater = bOnWater;
     }
     else if (IsAutomobile()) {
         this->AsAutomobile()->m_fDoomHorizontalRotation = vecBuoyancyForce.Magnitude();
@@ -2460,16 +2490,16 @@ void CVehicle::AddExhaustParticles()
     {
         return;
     }
-    auto pVehicleModelInfo = static_cast<CVehicleModelInfo*>(CModelInfo::ms_modelInfoPtrs[m_nModelIndex]);
-    CVector firstExhaustPos = pVehicleModelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
+    auto mi = GetVehicleModelInfo();
+    CVector firstExhaustPos = mi->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
     CVector secondExhaustPos = firstExhaustPos;
     secondExhaustPos.x *= -1.0f;
     CMatrix entityMatrix (*m_matrix);
     bool bHasDoubleExhaust = m_pHandlingData->m_bDoubleExhaust;
     if (IsSubBike()) {
-        auto* pBike = static_cast<CBike*>(this);
-        pBike->CalculateLeanMatrix();
-        entityMatrix = pBike->m_mLeanMatrix;
+        auto* bike = AsBike();
+        bike->CalculateLeanMatrix();
+        entityMatrix = bike->m_mLeanMatrix;
         switch (m_nModelIndex)
         {
         case MODEL_FCR900:
@@ -2478,7 +2508,7 @@ void CVehicle::AddExhaustParticles()
             break;
         case MODEL_NRG500:
             if (!m_anExtras[0] || m_anExtras[0] == 1)
-                secondExhaustPos = pVehicleModelInfo->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST_SECONDARY];
+                secondExhaustPos = mi->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST_SECONDARY];
             break;
         case MODEL_BF400:
             if (m_anExtras[0] == 2)
@@ -2523,44 +2553,45 @@ void CVehicle::AddExhaustParticles()
             FxPrtMult_c fxPrt(0.9f, 0.9f, 1.0f, particleAlpha, 0.2f, 1.0f, fLife);
             int32 numExhausts = 2;
             for (int32 i = 0; i < 2; i++) {
-                FxSystem_c* pFirstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* firstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                 if (bFirstExhaustSubmergedInWater) {
                     fxPrt.m_color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    pFirstExhaustFxSystem = g_fx.m_pPrtBubble;
+                    firstExhaustFxSystem = g_fx.m_pPrtBubble;
                 }
-                pFirstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                firstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 if (bHasDoubleExhaust) {
-                    FxSystem_c* pSecondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                    FxSystem_c* secondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                     if (bSecondExhaustSubmergedInWater)
                     {
                         fxPrt.m_color.alpha = particleAlpha * 0.5f;
                         fxPrt.m_fSize = 0.6f;
-                        pSecondExhaustFxSystem = g_fx.m_pPrtBubble;
+                        secondExhaustFxSystem = g_fx.m_pPrtBubble;
                     }
-                    pSecondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                    secondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 }
+
                 if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
                     if (rand() % 2) {
-                        FxSystem_c* pSecondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                         if (bFirstExhaustSubmergedInWater)
                         {
                             fxPrt.m_color.alpha = particleAlpha * 0.5f;
                             fxPrt.m_fSize = 0.6f;
-                            pSecondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                            secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
                         }
-                        pSecondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                        secondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }
                     else if (bHasDoubleExhaust)
                     {
-                        FxSystem_c* pSecondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                         if (bSecondExhaustSubmergedInWater)
                         {
                             fxPrt.m_color.alpha = particleAlpha * 0.5f;
                             fxPrt.m_fSize = 0.6f;
-                            pSecondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                            secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
                         }
-                        pSecondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
+                        secondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }
                 }
             }
@@ -2637,7 +2668,8 @@ bool CVehicle::DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 li
 // 0x6E0E20
 void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
-    CVector pointModelSpace = static_cast<CVehicleModelInfo*>(CModelInfo::GetModelInfo(m_nModelIndex))->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
+    const auto mi = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
+    CVector pointModelSpace = mi->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
     if (dummyId == 1 && pointModelSpace.IsZero())
         return;
 
@@ -2674,7 +2706,7 @@ void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
     const uint8 alphas[] = { alpha, alpha, 0, 0, alpha };
 
     RxObjSpace3DVertex vertices[5];
-    for (unsigned i = 0; i < 5; i++) {
+    for (auto i = 0u; i < std::size(vertices); i++) {
         const RwRGBA color = { 255, 255, 255, alphas[i] };
         RxObjSpace3DVertexSetPreLitColor(&vertices[i], &color);
         RxObjSpace3DVertexSetPos(&vertices[i], &posn[i]);

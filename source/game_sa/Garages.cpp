@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 CStoredCar(&CGarages::aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE])0x96ABD4;
-CGarage(&CGarages::aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[MAX_NUM_GARAGES])0x96C048;;
+CGarage(&CGarages::aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[MAX_NUM_GARAGES])0x96C048;
 
 CGarage*& CGarages::LastGaragePlayerWasIn = *(CGarage**)0x96BFDC;
 uint32& CGarages::LastTimeHelpMessage = *(uint32*)0x96BFE0;
@@ -72,9 +72,9 @@ bool CGarages::IsModelIndexADoor(int32 nModelIndex)
 }
 
 // 0x44A240
-int32 CGarages::FindGarageForObject(CObject* pObject)
+int32 CGarages::FindGarageForObject(CObject* obj)
 {
-    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(pObject);
+    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(obj);
 }
 
 // Garage flags

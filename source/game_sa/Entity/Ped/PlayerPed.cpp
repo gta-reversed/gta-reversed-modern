@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,8 @@
 
 #include "PlayerPed.h"
 #include "TagManager.h"
+#include "PedClothesDesc.h"
+#include "PedStats.h"
 
 bool (&abTempNeverLeavesGroup)[7] = *(bool (*)[7])0xC0BC08;
 int32& gPlayIdlesAnimBlockIndex = *(int32*)0xC0BC10;
@@ -158,10 +160,10 @@ void CPlayerPed::ReactivatePlayerPed(int32 playerId) {
 // 0x609560
 CPad* CPlayerPed::GetPadFromPlayer() {
     switch (m_nPedType) {
-    case ePedType::PED_TYPE_PLAYER1:
+    case PED_TYPE_PLAYER1:
         return CPad::GetPad(0);
 
-    case ePedType::PED_TYPE_PLAYER2:
+    case PED_TYPE_PLAYER2:
         return CPad::GetPad(1);
     }
     assert(0); // shouldn't happen
@@ -186,7 +188,7 @@ bool CPlayerPed::CanPlayerStartMission() {
         return false;
 
     if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetTaskType() == eTaskType::TASK_SIMPLE_CAR_DRIVE) {
+        if (task->GetTaskType() == TASK_SIMPLE_CAR_DRIVE) {
             return false;
         }
     }
@@ -206,11 +208,11 @@ bool CPlayerPed::IsHidden() {
 // 0x609650
 void CPlayerPed::ReApplyMoveAnims() {
     constexpr AnimationId anims[]{
-        AnimationId::ANIM_ID_WALK,
-        AnimationId::ANIM_ID_RUN,
-        AnimationId::ANIM_ID_SPRINT,
-        AnimationId::ANIM_ID_IDLE,
-        AnimationId::ANIM_ID_WALK_START
+        ANIM_ID_WALK,
+        ANIM_ID_RUN,
+        ANIM_ID_SPRINT,
+        ANIM_ID_IDLE,
+        ANIM_ID_WALK_START
     };
     for (const AnimationId& id : anims) {
         if (CAnimBlendAssociation* anim = RpAnimBlendClumpGetAssociation(m_pRwClump, id)) {
@@ -253,8 +255,8 @@ bool CPlayerPed::DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1) {
 
     if (m_nActiveWeaponSlot == weaponSlot) {
         switch (m_nPedState) {
-        case ePedState::PEDSTATE_ATTACK:
-        case ePedState::PEDSTATE_AIMGUN:
+        case PEDSTATE_ATTACK:
+        case PEDSTATE_AIMGUN:
             return false;
         }
     }
@@ -355,17 +357,17 @@ bool CPlayerPed::PedCanBeTargettedVehicleWise(CPed* ped) {
 // 0x609DE0
 float CPlayerPed::FindTargetPriority(CEntity* entity) {
     switch (entity->m_nType) {
-    case eEntityType::ENTITY_TYPE_VEHICLE:
+    case ENTITY_TYPE_VEHICLE:
         return 0.1f;
 
-    case eEntityType::ENTITY_TYPE_PED: {
+    case ENTITY_TYPE_PED: {
         auto ped = entity->AsPed();
 
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        if (ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_KILL_PED_ON_FOOT) ||
-            ped->GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_ARREST_PED)
+        if (ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT) ||
+            ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ARREST_PED)
         ) {
             return 0.8f;
         }
@@ -373,7 +375,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         if (CPedGroups::AreInSameGroup(this, ped))
             return 0.05f;
 
-        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+        if (ped->m_nPedType == PED_TYPE_GANG2)
             return 0.06f;
 
         if (ped->IsCreatedByMission())
@@ -382,7 +384,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         return 0.1f;
     }
 
-    case eEntityType::ENTITY_TYPE_OBJECT: {
+    case ENTITY_TYPE_OBJECT: {
         switch (entity->AsObject()->m_nObjectType) {
         case eObjectType::OBJECT_MISSION:
         case eObjectType::OBJECT_MISSION2:
@@ -676,13 +678,13 @@ void CPlayerPed::ResetPlayerBreath() {
 void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
-    if (!bDecreaseAir || CCheat::m_aCheatsActive[CHEAT_INFINITE_OXYGEN]) {
+    if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
         breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
         else
-            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), ePedPieceTypes::PED_PIECE_TORSO, 0);
+            CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), PED_PIECE_TORSO, 0);
     }
 }
 
@@ -694,7 +696,7 @@ void CPlayerPed::SetRealMoveAnim() {
 // 0x60B460
 void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
     GetActiveWeapon().StopWeaponEffect();
-    if (m_nPedState == ePedState::PEDSTATE_SNIPER_MODE)
+    if (m_nPedState == PEDSTATE_SNIPER_MODE)
         TheCamera.ClearPlayerWeaponMode();
 
     SetCurrentWeapon(weaponType);
@@ -714,7 +716,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
         m_pPlayerData->m_bFreeAiming = false;
 
 
-    if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE))
+    if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
         anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
@@ -763,7 +765,7 @@ bool CPlayerPed::DoesTargetHaveToBeBroken(CEntity* entity, CWeapon* weapon) {
         return true;
 
     if (weapon->m_nType == eWeaponType::WEAPON_SPRAYCAN) {
-        if (entity->m_nType == eEntityType::ENTITY_TYPE_BUILDING) {
+        if (entity->IsBuilding()) {
             if (CTagManager::IsTag(entity)) {
                 if (CTagManager::GetAlpha(entity) == 255) { // they probably used -1
                     return true;
@@ -830,7 +832,7 @@ CPed* CPlayerPed::FindPedToAttack() {
             continue;
         if (membership.IsMember(ped))
             continue;
-        if (ped->m_nPedType == ePedType::PED_TYPE_GANG2)
+        if (ped->m_nPedType == PED_TYPE_GANG2)
             continue;
 
         CVector point = ped->GetPosition();
@@ -935,7 +937,7 @@ void CPlayerPed::SetupPlayerPed(int32 playerId) {
     playerInfo.m_pPed = ped;
 
     if (playerId == 1)
-        ped->m_nPedType = ePedType::PED_TYPE_PLAYER2;
+        ped->m_nPedType = PED_TYPE_PLAYER2;
 
     ped->SetOrientation(0.0f, 0.0f, 0.0f);
     CWorld::Add(ped);

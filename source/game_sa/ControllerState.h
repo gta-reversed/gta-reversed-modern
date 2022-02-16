@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Pad.h"
-
 class CPad;
 
 // Set values to 128 unless otherwise specified

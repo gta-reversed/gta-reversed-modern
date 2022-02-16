@@ -2,18 +2,18 @@
 
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 
-CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* pTargetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* pUtility)
+CTaskSimpleCarSetPedInAsPassenger::CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* utility)
 {
-    m_iTargetDoor = nTargetDoor;
+    m_nTargetDoor = nTargetDoor;
     m_bIsFinished = 0;
     m_pAnim = 0;
-    m_pTargetVehicle = pTargetVehicle;
-    m_pUtility = pUtility;
+    m_pTargetVehicle = targetVehicle;
+    m_pUtility = utility;
     m_bWarpingInToCar = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (pTargetVehicle)
-        pTargetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    if (targetVehicle)
+        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
 }
 
 CTaskSimpleCarSetPedInAsPassenger::~CTaskSimpleCarSetPedInAsPassenger()

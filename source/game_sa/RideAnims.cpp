@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 CRideAnims& aDriveAnimIdsLow = *(CRideAnims*)0x8D3514;
 CRideAnims& aDriveAnimIdsBoat = *(CRideAnims*)0x8D3524;
 CRideAnims& aDriveAnimIdsBad = *(CRideAnims*)0x8D3534;

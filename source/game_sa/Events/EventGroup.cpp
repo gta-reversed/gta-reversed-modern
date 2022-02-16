@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventGroup.h"
+
 void CEventGroup::InjectHooks()
 {
     RH_ScopedClass(CEventGroup);

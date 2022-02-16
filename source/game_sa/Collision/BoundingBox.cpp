@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "BoundingBox.h"
+
 int32& numBBFailed = *(int32*)0xB71808;
 
 CBoundingBox::CBoundingBox()

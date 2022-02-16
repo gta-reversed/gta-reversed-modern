@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "KeyboardState.h"
+
 void CKeyboardState::InjectHooks() {
     RH_ScopedClass(CKeyboardState);
     RH_ScopedCategoryGlobal();

@@ -1,5 +1,8 @@
 #pragma once
 
+class CEntity;
+class CVector;
+
 class CIdleCam {
 public:
 

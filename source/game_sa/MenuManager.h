@@ -1,14 +1,17 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vector2D.h"
+#include "RGBA.h"
 #include "Sprite2d.h"
+#include "Vector2D.h"
 #include "eLanguage.h"
+
+class CRect;
 
 // Menu entries action to perform
 enum eMenuActions {   // There's many actions @0x57702E and @0x57CD88
@@ -159,7 +162,7 @@ public:
     float     m_fStatsScrollSpeed;
     char      field_8;
     char      field_9[23];
-    char      field_20;
+    bool      m_PrefsUseVibration;
     bool      m_bHudOn;
     char      field_22[2];
     int32     m_nRadarMode;
@@ -369,7 +372,7 @@ public:
     char InitialiseChangedLanguageSettings(char a2);
     void ScrollRadioStations(char numStations);
     void ProcessMissionPackNewGame();
-    signed int DoSettingsBeforeStartingAGame();
+    int32 DoSettingsBeforeStartingAGame();
     char SetDefaultPreferences(eMenuPage page);
     char PrintMap();
     char PrintStats();

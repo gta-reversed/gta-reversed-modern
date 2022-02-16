@@ -1,11 +1,13 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Stats.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;
@@ -667,7 +669,7 @@ void CStats::ModifyStat(eStats stat, float value) {
 bool CStats::Save() {
     float unsavedKills = GetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT);
     IncrementStat(STAT_TOTAL_LEGITIMATE_KILLS, unsavedKills);
-    SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.0);
+    SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.0f);
 
     CGenericGameStorage::SaveDataToWorkBuffer(StatTypesFloat,           sizeof(StatTypesFloat));
     CGenericGameStorage::SaveDataToWorkBuffer(StatTypesInt,             sizeof(StatTypesInt));

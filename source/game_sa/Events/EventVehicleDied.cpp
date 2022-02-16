@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EventVehicleDied.h"
+
 void CEventVehicleDied::InjectHooks()
 {
     RH_ScopedClass(CEventVehicleDied);

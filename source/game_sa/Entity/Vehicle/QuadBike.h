@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -30,6 +30,7 @@ enum eQuadBikeNodes {
     QUAD_HANDLEBARS = 17,
     QUAD_MISC_A = 18,
     QUAD_MISC_B = 19,
+
     QUAD_NUM_NODES
 };
 
@@ -37,12 +38,8 @@ class CQuadBike : public CAutomobile {
 public:
     tBikeHandlingData* m_pHandling;
     CRideAnimData      m_sRideAnimData;
-    float              field_9A8;
-    int32              field_9AC;
-    int32              field_9B0;
-    int32              field_9B4;
+    float              field_9A8[4]; // unused
     uint8              m_nQuadFlags;
-    char               _pad1[3];
 
 public:
     CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy);

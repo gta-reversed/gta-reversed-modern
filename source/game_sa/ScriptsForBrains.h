@@ -1,14 +1,15 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Entity.h"
-#include "Object.h"
 #include "Vector.h"
+
+class CEntity;
+class CObject;
 
 struct tScriptForBrains {
     int16  m_nIMGindex;
@@ -32,16 +33,16 @@ public:
 public:
      void AddNewScriptBrain(int16 ImgIndex, int16 Model, uint16 Priority, int8 attachType, int8 Type, float Radius);
      void AddNewStreamedScriptBrainForCodeUse(int16 a2, char *a3, int8 attachtype);
-     void CheckIfNewEntityNeedsScript(CEntity *pEntity, int8 attachType, void *unused);
+     void CheckIfNewEntityNeedsScript(CEntity *entity, int8 attachType, void *unused);
      int16 GetIndexOfScriptBrainWithThisName(char const *name, int8 Attachtype);
      bool HasAttractorScriptBrainWithThisNameLoaded(char const *name);
      void Init();
      bool IsObjectWithinBrainActivationRange(CObject *entity, CVector const *point);
      void MarkAttractorScriptBrainWithThisNameAsNoLongerNeeded(char const *name);
      void RequestAttractorScriptBrainWithThisName(char const *name);
-     void StartAttractorScriptBrainWithThisName(char const *name, CEntity *pEntity, uint8 bHasAScriptBrain);
-     void StartNewStreamedScriptBrain(uint8 index, CEntity *pEntity, uint8 bHasAScriptBrain);
-     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity *pEntity, int8 attachType, uint8 bAddToWaitingArray);
-     void StartOrRequestNewStreamedScriptBrainWithThisName(char const *name, CEntity *pEntity, int8 attachType);
+     void StartAttractorScriptBrainWithThisName(char const *name, CEntity *entity, uint8 bHasAScriptBrain);
+     void StartNewStreamedScriptBrain(uint8 index, CEntity *entity, uint8 bHasAScriptBrain);
+     void StartOrRequestNewStreamedScriptBrain(uint8 index, CEntity *entity, int8 attachType, uint8 bAddToWaitingArray);
+     void StartOrRequestNewStreamedScriptBrainWithThisName(char const *name, CEntity *entity, int8 attachType);
      void SwitchAllObjectBrainsWithThisID(int8 ID, bool bStatus);
 };

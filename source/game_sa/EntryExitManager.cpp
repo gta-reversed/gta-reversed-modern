@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "EntryExitManager.h"
+
 CEntryExit* (&CEntryExitManager::ms_entryExitStack)[4] = *reinterpret_cast<CEntryExit * (*)[4]>(0x96A720);
 bool& CEntryExitManager::ms_bBurglaryHousesEnabled = *reinterpret_cast<bool*>(0x96A730);
 int32& CEntryExitManager::ms_oldAreaCode = *reinterpret_cast<int32*>(0x96A734);
@@ -71,9 +73,9 @@ void CEntryExitManager::DeleteOne(int32 index)
     plugin::Call<0x43FD50, int32>(index);
 }
 
-int32 CEntryExitManager::FindNearestEntryExit(CVector2D const& position, float range, int32 ignoreArea)
+int32 CEntryExitManager::FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea)
 {
-    return plugin::CallAndReturn<int32, 0x43F4B0, CVector2D const&, float, int32>(position, range, ignoreArea);
+    return plugin::CallAndReturn<int32, 0x43F4B0, const CVector2D&, float, int32>(position, range, ignoreArea);
 }
 
 // 0x43F0A0
@@ -94,6 +96,11 @@ void CEntryExitManager::SetAreaCodeForVisibleObjects() {
 // 0x43EFD0
 int32 CEntryExitManager::GetEntryExitIndex(const char* name, uint16 enabledFlags, uint16 disabledFlags) {
     return plugin::CallAndReturn<int32, 0x43EFD0, const char*, uint16, uint16>(name, enabledFlags, disabledFlags);
+}
+
+// 0x43F150
+void CEntryExitManager::GetPositionRelativeToOutsideWorld(CVector& positionInOut) {
+    plugin::Call<0x43F150, CVector&>(positionInOut);
 }
 
 // 0x43F180

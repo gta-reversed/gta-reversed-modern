@@ -23,9 +23,9 @@ void CWaterCannons::Init() {
 }
 
 // 0x728CB0
-void CWaterCannons::UpdateOne(uint32 pVehicle, CVector* start, CVector* end) {
+void CWaterCannons::UpdateOne(uint32 vehicle, CVector* start, CVector* end) {
     for (auto& cannon : aCannons) {
-        if (cannon.m_nId == pVehicle) {
+        if (cannon.m_nId == vehicle) {
             cannon.Update_NewInput(start, end);
             return;
         }
@@ -40,7 +40,7 @@ void CWaterCannons::UpdateOne(uint32 pVehicle, CVector* start, CVector* end) {
 
     auto& cannon = aCannons[i];
     cannon.Init();
-    cannon.m_nId = pVehicle;
+    cannon.m_nId = vehicle;
     cannon.Update_NewInput(start, end);
 }
 

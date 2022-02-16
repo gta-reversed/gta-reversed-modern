@@ -26,5 +26,6 @@ enum eCarNodes {
     CAR_MISC_C     = 22,
     CAR_MISC_D     = 23,
     CAR_MISC_E     = 24,
+
     CAR_NUM_NODES
 };

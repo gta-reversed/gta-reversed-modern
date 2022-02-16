@@ -43,7 +43,7 @@ void CExplosion::ClearAllExplosions() {
         exp.m_fRadius = 1.0f;
         exp.m_fVisibleDistance = 0.0f;
         exp.m_fPropagationRate = 0.0f;
-        exp.m_fGroundZ = 0.0;
+        exp.m_fGroundZ = 0.0f;
         exp.m_pCreator = nullptr;
         exp.m_pVictim = nullptr;
         exp.m_nExpireTime = 0.0f;
@@ -121,6 +121,26 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+void CExplosion::SetCreator(CEntity* newCreator) noexcept {
+    if (m_pCreator)
+        m_pCreator->CleanUpOldReference(&m_pCreator);
+
+    if (newCreator)
+        newCreator->RegisterReference(&m_pCreator);
+
+    m_pCreator = newCreator;
+}
+
+void CExplosion::SetVictim(CEntity* newVictim) noexcept {
+    if (m_pVictim)
+        m_pVictim->CleanUpOldReference(&m_pVictim);
+
+    if (newVictim)
+        newVictim->RegisterReference(&m_pVictim);
+
+    m_pVictim = newVictim;
+}
+
 bool DoesNeedToVehProcessBombTimer(eExplosionType type) {
     switch (type) {
     case eExplosionType::EXPLOSION_ROCKET:
@@ -190,9 +210,9 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         FxSystem_c* fx{nullptr};
         if (exp->m_pVictim) {
             if (RwObject* pRwObj = exp->m_pVictim->m_pRwObject) {
-                if (RwMatrix* pMatrix = exp->m_pVictim->GetModellingMatrix()) {
+                if (RwMatrix* matrix = exp->m_pVictim->GetModellingMatrix()) {
                     CVector expToVictimDir = pos - exp->m_pVictim->GetPosition();
-                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, pMatrix, false);
+                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, matrix, false);
                 }
             }
         } else {
@@ -263,6 +283,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
+        break;
     }
     case eExplosionType::EXPLOSION_CAR:
     case eExplosionType::EXPLOSION_QUICK_CAR: {
@@ -278,6 +299,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             CCrime::ReportCrime(eCrimeType::CRIME_EXPLOSION, exp->m_pVictim->AsPed(), nullptr); /* won't do anything as second ped is nullptr */
         }
         CreateAndPlayFxWithSound("explosion_medium");
+        break;
     }
     case eExplosionType::EXPLOSION_BOAT:
     case eExplosionType::EXPLOSION_AIRCRAFT: {
@@ -289,6 +311,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_nCreatedTime = (float)CTimer::GetTimeInMS();
 
         CreateAndPlayFxWithSound("explosion_large");
+        break;
     }
     case eExplosionType::EXPLOSION_MINE: {
         if (!bInvisible) {
@@ -389,9 +412,9 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             cameraShake = 0.6f;
         TheCamera.CamShake(cameraShake, pos.x, pos.y, pos.z);
 
-        CPad::GetPad(0)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+        CPad::GetPad(0)->StartShake_Distance(300, 128, pos);
         if (CGameLogic::IsCoopGameGoingOn())
-            CPad::GetPad(1)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+            CPad::GetPad(1)->StartShake_Distance(300, 128, pos);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -37,10 +37,11 @@ public:
     static CAnimBlock* GetAnimationBlock(const char* name);
     static uint32 GetAnimationBlockIndex(const char* name);
     static int32 GetFirstAssocGroup(const char* basename);
-    static CAnimBlendHierarchy* GetAnimation(uint32 hash, CAnimBlock const* ifp);
-    static CAnimBlendHierarchy* GetAnimation(const char* animName, CAnimBlock const* ifp);
+    static CAnimBlendHierarchy* GetAnimation(uint32 hash, const CAnimBlock* ifp);
+    static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* ifp);
     static char* GetAnimGroupName(AssocGroupId groupId);
     static char* GetAnimBlockName(AssocGroupId groupId);
+    static AssocGroupId GetAnimationGroupId(const char* name);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, AnimationId animId);
     static CAnimBlendStaticAssociation* GetAnimAssociation(AssocGroupId groupId, const char* arg2);
     static int32 GetNumRefsToAnimBlock(int32 index);

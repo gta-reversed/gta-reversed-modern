@@ -6,7 +6,7 @@ class CEntity;
 
 class CTaskComplexGoPickUpEntity : public CTaskComplex {
 public:
-    CEntity* pEntity;
+    CEntity* m_pEntity;
     CVector  m_vecPosition;
     CVector  m_vecPickupPosition;
     uint32   m_nTimePassedSinceLastSubTaskCreatedInMs;

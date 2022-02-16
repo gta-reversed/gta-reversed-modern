@@ -4,6 +4,6 @@ class CPed;
 
 class CPlayerRelationshipRecorder {
 public:
-    bool                                RecordRelationshipWithPlayer(CPed* pPed);
+    bool RecordRelationshipWithPlayer(CPed* ped);
     static CPlayerRelationshipRecorder* GetPlayerRelationshipRecorder();
 };

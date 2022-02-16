@@ -1,11 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
+
+#include "Matrix.h"
 
 uint8* CMatrix::EulerIndices1 = (uint8*)0x866D9C;
 uint8* CMatrix::EulerIndices2 = (uint8*)0x866D94;
@@ -52,14 +54,14 @@ void CMatrix::InjectHooks()
     RH_ScopedInstall(operator=, 0x59BBC0);
     RH_ScopedInstall(operator+=, 0x59ADF0);
     RH_ScopedInstall(operator*=, 0x411A80);
-    RH_ScopedGlobalOverloadedInstall(operator*, "Mat", 0x59BE30, CMatrix(*)(CMatrix const&, CMatrix const&));
-    RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(CMatrix const&, CVector const&));
-    RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(CMatrix const&, CMatrix const&));
+    RH_ScopedGlobalOverloadedInstall(operator*, "Mat", 0x59BE30, CMatrix(*)(const CMatrix&, const CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(operator*, "Vec", 0x59C890, CVector(*)(const CMatrix&, const CVector&));
+    RH_ScopedGlobalOverloadedInstall(operator+, "", 0x59BFA0, CMatrix(*)(const CMatrix&, const CMatrix&));
     RH_ScopedGlobalOverloadedInstall(Invert, "1", 0x59B920, CMatrix&(*)(CMatrix&, CMatrix&));
-    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(CMatrix&));
+    RH_ScopedGlobalOverloadedInstall(Invert, "2", 0x59BDD0, CMatrix(*)(const CMatrix&));
 }
 
-CMatrix::CMatrix(CMatrix const& matrix)
+CMatrix::CMatrix(const CMatrix& matrix)
 {
     m_pAttachMatrix = nullptr;
     m_bOwnsAttachedMatrix = false;
@@ -97,7 +99,7 @@ void CMatrix::Detach()
 }
 
 // copy base RwMatrix to another matrix
-void CMatrix::CopyOnlyMatrix(CMatrix const& matrix)
+void CMatrix::CopyOnlyMatrix(const CMatrix& matrix)
 {
     memcpy(this, &matrix, sizeof(RwMatrix));
 }
@@ -129,7 +131,7 @@ void CMatrix::UpdateRwMatrix(RwMatrix* matrix)
     RwMatrixUpdate(matrix);
 }
 
-void CMatrix::UpdateMatrix(RwMatrixTag* rwMatrix)
+void CMatrix::UpdateMatrix(RwMatrix* rwMatrix)
 {
     m_right = *RwMatrixGetRight(rwMatrix);
     m_forward = *RwMatrixGetUp(rwMatrix);
@@ -502,13 +504,13 @@ void CMatrix::ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags)
     m_up.Set     (fArr[2][0], fArr[2][1], fArr[2][2]);
 }
 
-void CMatrix::operator=(CMatrix const& rvalue)
+void CMatrix::operator=(const CMatrix& rvalue)
 {
     CMatrix::CopyOnlyMatrix(rvalue);
     CMatrix::UpdateRW();
 }
 
-void CMatrix::operator+=(CMatrix const& rvalue)
+void CMatrix::operator+=(const CMatrix& rvalue)
 {
     m_right += rvalue.m_right;
     m_forward += rvalue.m_forward;
@@ -516,12 +518,12 @@ void CMatrix::operator+=(CMatrix const& rvalue)
     m_pos += rvalue.m_pos;
 }
 
-void CMatrix::operator*=(CMatrix const& rvalue)
+void CMatrix::operator*=(const CMatrix& rvalue)
 {
     *this = (*this * rvalue);
 }
 
-CMatrix operator*(CMatrix const& a, CMatrix const& b)
+CMatrix operator*(const CMatrix& a, const CMatrix& b)
 {
     auto result = CMatrix();
     result.m_right =   a.m_right * b.m_right.x   + a.m_forward * b.m_right.y   + a.m_up * b.m_right.z;
@@ -531,7 +533,7 @@ CMatrix operator*(CMatrix const& a, CMatrix const& b)
     return result;
 }
 
-CVector operator*(CMatrix const& a, CVector const& b)
+CVector operator*(const CMatrix& a, const CVector& b)
 {
     CVector result;
     result.x = a.m_pos.x + a.m_right.x * b.x + a.m_forward.x * b.y + a.m_up.x * b.z;
@@ -539,7 +541,7 @@ CVector operator*(CMatrix const& a, CVector const& b)
     result.z = a.m_pos.z + a.m_right.z * b.x + a.m_forward.z * b.y + a.m_up.z * b.z;
     return result;
 }
-CMatrix operator+(CMatrix const& a, CMatrix const& b)
+CMatrix operator+(const CMatrix& a, const CMatrix& b)
 {
     CMatrix result;
     result.m_right =   a.m_right + b.m_right;
@@ -565,9 +567,9 @@ CMatrix& Invert(CMatrix& in, CMatrix& out)
     return out;
 }
 
-CMatrix Invert(CMatrix& in)
+CMatrix Invert(const CMatrix& in)
 {
     CMatrix result;
-    Invert(in, result);
+    Invert(const_cast<CMatrix&>(in), result); // const cast necessary because it's fucked - but it wont be modified.
     return result;
 }
