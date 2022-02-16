@@ -49,7 +49,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
     RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
     RH_ScopedInstall(SetPedState, 0x5E4500);
-    // RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
+    RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
     // RH_ScopedInstall(ClearLookFlag, 0x5E1950);
     // RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
     // RH_ScopedInstall(UpdatePosition, 0x5E1B10);
@@ -889,9 +889,25 @@ void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBon
 }
 
 // 0x5E4390
-CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace)
-{
-    return ((CObject* (__thiscall *)(CPed*, int32, uint8))0x5E4390)(this, modelIndex, replace);
+CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
+
+    // Deal with ped already holding an entity.
+    // If `replace` is `true`, just drop the entity, otherwise do nothing.
+    if (const auto task = GetTaskManager().FindActiveTaskByType(eTaskType::TASK_SIMPLE_HOLD_ENTITY)) {
+        if (!GetEntityThatThisPedIsHolding() || !replace) {
+            return nullptr;
+        }
+        DropEntityThatThisPedIsHolding(true);
+    }
+
+    // Create object
+    auto object = new CObject(modelIndex, false);
+    object->SetPosn(GetPosition());
+    CWorld::Add(object);
+
+    // Create task
+    CVector pos{ 0.f, 0.f, 0.f };
+    GetTaskManager().SetTaskSecondary(new CTaskSimpleHoldEntity(object, &pos, PED_NODE_RIGHT_HAND), TASK_SECONDARY_PARTIAL_ANIM);
 }
 
 // 0x5E4500
