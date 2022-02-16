@@ -88,6 +88,7 @@ public:
     void CopyToRwMatrix(RwMatrix* matrix); // similar to UpdateRW(RwMatrixTag *)
     void SetRotate(CQuaternion& quat);
     void Scale(float scale);
+    void ScaleXYZ(float x, float y, float z);
     void ForceUpVector(CVector vecUp);
     void ConvertToEulerAngles(float* pX, float* pY, float* pZ, uint32 uiFlags);
     void ConvertFromEulerAngles(float x, float y, float z, uint32 uiFlags);

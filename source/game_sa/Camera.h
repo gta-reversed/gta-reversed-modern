@@ -47,7 +47,6 @@ enum class eGroundHeightType : int32 {
 };
 
 class CCamera : public CPlaceable {
-    //PLUGIN_NO_DEFAULT_CONSTRUCTION(CCamera)
 public:
     bool            m_bAboveGroundTrainNodesLoaded;
     bool            m_bBelowGroundTrainNodesLoaded;
@@ -335,11 +334,6 @@ public:
     static bool &m_bUseMouse3rdPerson;
     static bool &bDidWeProcessAnyCinemaCam;
 
-    /* virtual functions */
-
-    // vtable function #0 (destructor)
-
-    /* virtual functions - end */
 public:
     static void InjectHooks();
 
@@ -405,7 +399,7 @@ public:
     void InitialiseCameraForDebugMode();
     bool IsExtraEntityToIgnore(CEntity *entity);
     bool IsItTimeForNewCamera(int32 camSequence, int32 startTime);
-    bool IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix);
+    bool IsSphereVisible(const CVector& origin, float radius, Const RwMatrix* transformMatrix);
     bool IsSphereVisible(const CVector& origin, float radius);
     bool IsSphereVisible(const CSphere& sphere) { return IsSphereVisible(sphere.m_vecCenter, sphere.m_fRadius); }
     void LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase);

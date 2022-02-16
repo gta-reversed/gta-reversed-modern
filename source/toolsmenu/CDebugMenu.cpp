@@ -22,6 +22,7 @@
 #include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 #include "toolsmenu\DebugModules\FXDebugModule.h"
+#include "toolsmenu\DebugModules\C3dMarkersDebugModule.h"
 #include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
@@ -148,6 +149,10 @@ void CDebugMenu::ImguiInputUpdate() {
 
     UpdateKeyboard();
     UpdateMouse();
+
+    // Restore the changed state of the pad in UpdateMouse.
+    // Without this, some effects will not display (e.g. C3dMarker)
+    CPad::GetPad(0)->DisablePlayerControls = false;
 }
 
 void CDebugMenu::ImguiDisplayFramePerSecond() {
@@ -239,6 +244,11 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Pools")) {
             PoolsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("3D Marker")) {
+            C3dMarkersDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 

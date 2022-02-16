@@ -612,8 +612,17 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
 }
 
 // 0x420C40
-bool CCamera::IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix) {
-    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, RwMatrix*>(this, origin, radius, transformMatrix);
+bool CCamera::IsSphereVisible(const CVector& origin, float radius, Const RwMatrix* transformMatrix) {
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, const RwMatrix*>(this, origin, radius, transformMatrix);
+
+    CVector points = origin;
+    RwV3dTransformPoints(&points, &points, 1, transformMatrix);
+    return points.y + radius >= CDraw::GetNearClipZ()
+        && points.y - radius <= CDraw::GetFarClipZ()
+        && points.x * m_avecFrustumNormals[0].x + points.y * m_avecFrustumNormals[0].y <= radius
+        && points.x * m_avecFrustumNormals[1].x + points.y * m_avecFrustumNormals[1].y <= radius
+        && points.z * m_avecFrustumNormals[2].z + points.y * m_avecFrustumNormals[2].y <= radius
+        && points.z * m_avecFrustumNormals[3].z + points.y * m_avecFrustumNormals[3].y <= radius;
 }
 
 // 0x420D40

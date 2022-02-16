@@ -45,7 +45,6 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(Add, 0x563220);
     RH_ScopedInstall(Remove, 0x563280);
 
-    // RH_ScopedInstall(hasCollisionBeenLoaded, 0x410CE0);
     RH_ScopedInstall(StopAllLawEnforcersInTheirTracks, 0x566C10);
     RH_ScopedInstall(CallOffChaseForArea, 0x566A60);
     RH_ScopedInstall(ExtinguishAllCarFiresInArea, 0x566950);

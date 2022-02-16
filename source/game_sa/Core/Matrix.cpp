@@ -334,6 +334,10 @@ void CMatrix::Scale(float scale) {
     m_up *= scale;
 }
 
+void CMatrix::ScaleXYZ(float x, float y, float z) {
+
+}
+
 void CMatrix::ForceUpVector(CVector vecUp) {
     auto vecCross = CrossProduct(m_forward, vecUp);
     auto vecCross2 = CrossProduct(vecUp, vecCross);
@@ -523,6 +527,7 @@ void CMatrix::operator*=(const CMatrix& rvalue)
     *this = (*this * rvalue);
 }
 
+// 0x59BE30
 CMatrix operator*(const CMatrix& a, const CMatrix& b)
 {
     auto result = CMatrix();

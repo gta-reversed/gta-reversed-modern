@@ -207,6 +207,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCheckpoint::InjectHooks();
+    CCheckpoints::InjectHooks();
     CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
     CRopes::InjectHooks();
@@ -370,6 +372,7 @@ void InjectHooksMain() {
     CGridRef::InjectHooks();
     CShopping::InjectHooks();
     CInformFriendsEventQueue::InjectHooks();
+    C3dMarker::InjectHooks();
     C3dMarkers::InjectHooks();
     CSpecialFX::InjectHooks();
     CFallingGlassPane::InjectHooks();

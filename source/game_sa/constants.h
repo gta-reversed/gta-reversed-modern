@@ -33,3 +33,8 @@ constexpr float STREAMING_ANGLE_THRESHOLD_RAD = 0.36f;
 constexpr float MAX_BIGBUILDING_STREAMING_RADIUS_SQUARED = 80000.0f;
 constexpr float BIGBUILDING_STREAMING_ANGLE_THRESHOLD_RAD = 0.7f;
 constexpr float LOWLOD_CAMERA_HEIGHT_THRESHOLD = 80.0f;
+
+// C3dMarkers
+constexpr auto MAX_NUM_3DMARKERS{ 32 };
+constexpr auto MAX_NUM_USER_3DMARKERS{ 5 };
+constexpr auto MAX_NUM_DIRECTION_ARROWS{ 5 };
