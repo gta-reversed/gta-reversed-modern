@@ -12,7 +12,10 @@
 #include "Buoyancy.h"
 #include "TaskSimpleSwim.h"
 #include "PedStats.h"
-#include "Conversations.h" 
+#include "Conversations.h"
+#include "TaskSimpleLand.h"
+#include "AEAudioUtility.h"
+#include "PedClothesDesc.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -39,7 +42,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GiveWeapon, 0x5E6080);
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
-    // RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
+    RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
     // RH_ScopedInstall(ClearAll, 0x5E5320);
     // RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
@@ -928,9 +931,236 @@ void CPed::DoFootLanded(bool leftFoot, uint8 arg1)
 }
 
 // 0x5E57F0
-void CPed::PlayFootSteps()
-{
-    ((void(__thiscall *)(CPed*))0x5E57F0)(this);
+void CPed::PlayFootSteps() {
+    auto& anim = *RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
+
+    const auto IsWalkRunSprintAnim = [&] {
+        switch (anim.m_nAnimId) {
+        case AnimationId::ANIM_ID_WALK:
+        case AnimationId::ANIM_ID_RUN:
+        case AnimationId::ANIM_ID_SPRINT: {
+            return true;
+        }
+        }
+        return false;
+    };
+
+    if (bDoBloodyFootprints) {
+        if (m_nDeathTime && m_nDeathTime < 300) {
+            m_nDeathTime -= 1;
+            if (!m_nDeathTime) {
+                bDoBloodyFootprints = false;
+            }
+        }
+    }
+
+    if (!bIsStanding) {
+        return;
+    }
+
+    // 0x5E58FB, 0x5E5A0B, 0x5E5AB9, 0x5E5E64, 0x5E5D87
+    const auto DoProcessLanding = [this] {
+        if (bIsLanding) { // Redudant check.. probably inlined function?
+            if (const auto task = GetTaskManager().GetSimplestActiveTask(); task->GetTaskType() == eTaskType::TASK_SIMPLE_LAND) {
+                auto landedTask = task->As<CTaskSimpleLand>();
+                if (landedTask->RightFootLanded()) {
+                    DoFootLanded(false, true);
+                } else if (landedTask->RightFootLanded()) {
+                    DoFootLanded(true, true);
+                }
+            }
+        }
+    };
+
+    // TODO: Is this inlined? What is this doing exactly? (Anim stuff)
+    float blendAmount1{}, blendAmount2{};
+    CAnimBlendAssociation* lastAssocWithFlag100{};
+    auto* lastAssoc = &anim;
+    do { // 0x5E58A1
+        if (lastAssoc->m_nFlags & ANIM_FLAG_100) {
+            blendAmount1 += lastAssoc->m_fBlendAmount;
+            lastAssocWithFlag100 = lastAssoc;
+        } else {
+            if ((lastAssoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+                if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
+                    if (lastAssoc->m_nFlags & ANIM_FLAG_PARTIAL || bIsDucking) {
+                        blendAmount2 += lastAssoc->m_fBlendAmount;
+                    }
+                }
+            }
+        }
+    } while (lastAssoc);
+
+
+    if (!lastAssocWithFlag100 || blendAmount1 <= 0.5f || blendAmount2 >= 1.f) { // 0x5E58FB
+        DoProcessLanding();
+        return;
+    }
+
+    auto* lastAssocHier = lastAssoc->m_pHierarchy;
+
+    float minAnimTime = lastAssocHier->m_fTotalTime / 15.f;
+    float maxAnimTime = lastAssocHier->m_fTotalTime / 2.f + minAnimTime; // Weird.. Why adding `minAnimTime` to it?
+
+    if (bIsDucking) {
+        minAnimTime += 0.2f;
+        maxAnimTime += 0.2f;
+    }
+
+    if (m_pStats == &CPedStats::ms_apPedStats[STAT_BURGULAR_STATUS]) { // 0X5E5968
+
+        // NOTE: The number `15` seems to be reoccuring, it's used above as well.
+        const float animTimeMult = lastAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
+
+        float adhisionMult{ 1.f };
+        switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
+        case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
+            if (rand() % 64) {
+                m_vecAnimMovingShiftLocal *= 0.2f;
+            }
+
+            DoProcessLanding();
+            return;
+        }
+        case eAdhesionGroup::ADHESION_GROUP_WET: { // 0X5E59B1
+            m_vecAnimMovingShiftLocal *= 0.3f;
+            DoProcessLanding();
+            return;
+        }
+        case eAdhesionGroup::ADHESION_GROUP_LOOSE: { // 0x5E5A25
+            if (rand() % 128) {
+                m_vecAnimMovingShiftLocal *= 0.5f;
+            }
+            adhisionMult = 0.5f;
+            break;
+        }
+        }
+
+        if (m_pedAudio.field_7C) { // Move condition out here, but originally it was at 0x5E5AFA and 0x5E5A68
+            const auto DoAddSkateAE = [&, this](eAudioEvents ae) {
+                // 0x5E5AB4
+                m_pedAudio.AddAudioEvent(
+                    ae,
+                    CAEAudioUtility::AudioLog10(adhisionMult) * 20.f,
+                    lastAssoc->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
+                );
+            };
+
+            if (   lastAssoc->m_fCurrentTime <= 0.f
+                || lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep > 0.f
+            ) {
+                if (   adhisionMult > 0.2f
+                    && lastAssoc->m_fCurrentTime > animTimeMult
+                    && lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep <= animTimeMult
+                ) {
+                    // 0x5E5B46
+                    DoAddSkateAE(eAudioEvents::AE_PED_SKATE_RIGHT);
+                }
+            } else {
+                // 0x5E5AB4
+                DoAddSkateAE(eAudioEvents::AE_PED_SKATE_LEFT);
+            }
+        }
+
+        DoProcessLanding();
+        return;
+    }
+
+    // 0x5E5E56 and 0x5E5D57.. Seems like inlined?
+    const auto DoFootStepAE = [&, this](bool isLeftFoot) {
+        if (m_pedAudio.field_7C) {
+            const auto DoAddFootStepAE = [&, this](float volume, float speed) {
+                m_pedAudio.AddAudioEvent(isLeftFoot ? eAudioEvents::AE_PED_FOOTSTEP_RIGHT : eAudioEvents::AE_PED_FOOTSTEP_LEFT, volume, speed);
+            };
+
+            if (bIsDucking) {
+                DoAddFootStepAE(-18.f, 0.8f);
+            } else {
+                const auto DoAddMovingFootStepAE = [&, this](float volume, float speed) {
+                    if (m_nAnimGroup == ANIM_GROUP_PLAYERSNEAK) {
+                        DoAddFootStepAE(volume - 6.f, speed - 0.1f);
+                    } else {
+                        DoAddFootStepAE(volume, speed);
+                    }
+                };
+
+                switch (m_nMoveState) {
+                case eMoveState::PEDMOVE_RUN:
+                    DoAddMovingFootStepAE(-6.f, 1.1f);
+                    break;
+                case eMoveState::PEDMOVE_SPRINT:
+                    DoAddMovingFootStepAE(0.f, 1.2f);
+                    break;
+                default:
+                    DoAddMovingFootStepAE(-12.f, 0.9f);
+                    break;
+                }
+            }
+        }
+        DoFootLanded(isLeftFoot, IsWalkRunSprintAnim());
+    };
+
+    // 0x5E5B50
+    if (   minAnimTime > lastAssoc->m_fCurrentTime
+        || lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep >= minAnimTime
+    ) {
+        // 0x5E5D8E
+        if (lastAssoc->m_fCurrentTime >= (double)maxAnimTime
+            && lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep < maxAnimTime)
+        {
+            // 0x5E592B - 0x5E5E56
+            DoFootStepAE(false); // Do right foot step AE
+            DoProcessLanding();
+            return;
+        }
+    }
+
+    if (IsPlayer()) { // 0x5E5B79
+        if (const auto pd = m_pPlayerData) {
+            const auto DoEventSoundQuiet = [this](float volume) {
+                // 0x5E5BCB
+                CEventSoundQuiet event{ this, volume, (uint32)-1, {0.f, 0.f, 0.f}};
+                GetEventGlobalGroup()->Add(&event);
+            };
+
+            const auto isWearingBalaclava = pd->m_pPedClothesDesc->GetIsWearingBalaclava();
+            switch (m_nMoveState) {
+            case eMoveState::PEDMOVE_JOG:   // 0x5E5BAD -- hehehe, 0x 5E5 - BAD
+            case eMoveState::PEDMOVE_RUN: { // 0x5E5BB6
+                // 0x5E5BDD
+                if (pd->m_fMoveBlendRatio >= 2.f) {
+                    DoEventSoundQuiet(isWearingBalaclava ? 55.f : 45.f);
+                } else {
+                    const auto DoEventSoundQuiet_MoveBlendFactor = [&](float moveBlendFactor) {
+                        // 0x5E5C31
+                        if (const auto volume = (pd->m_fMoveBlendRatio - 1.f) * moveBlendFactor + 30.f; volume > 0.f) {
+                            DoEventSoundQuiet(volume);
+                        }
+                    };
+
+                    // 0x05E5BF3
+                    if (isWearingBalaclava && pd->m_fMoveBlendRatio > 1.1f) {
+                        DoEventSoundQuiet_MoveBlendFactor(20.f);
+                    } else if (pd->m_fMoveBlendRatio > 1.5f) {
+                        DoEventSoundQuiet_MoveBlendFactor(15.f);
+                    }
+                }
+                break;
+            }
+            case eMoveState::PEDMOVE_SPRINT: { // 0x5E5BBB 
+                DoEventSoundQuiet(isWearingBalaclava ? 65.f : 55.f);
+                break;
+            }
+            }
+            if (pd->m_pPedClothesDesc->GetIsWearingBalaclava()) {
+            }
+        }
+    }
+
+    // 0x5E5C8D
+    DoFootStepAE(true); // Do left foot step AE
+    DoFootLanded(true, IsWalkRunSprintAnim());
+    DoProcessLanding();
 }
 
 

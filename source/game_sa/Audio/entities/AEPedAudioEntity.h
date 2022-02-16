@@ -33,7 +33,7 @@ public:
     float                  field_158;
 
 public:
-    void AddAudioEvent(int32 audioEventVolumeIndex, float arg2, float arg3, CPhysical* physical, uint8 arg5, int32 arg7, uint32 arg8);
+    void AddAudioEvent(int32 audioEventVolumeIndex, float volume, float speed, CPhysical* physical = nullptr, uint8 arg5 = 0, int32 arg7 = 0, uint32 arg8 = 0);
     static void StaticInitialise();
 };
 

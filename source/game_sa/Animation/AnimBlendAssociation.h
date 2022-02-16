@@ -26,9 +26,9 @@ enum eAnimationFlags {
     ANIM_FLAG_TRANLSATE_X        = 0x80,
     ANIM_FLAG_100                = 0x100,
     ANIM_FLAG_200                = 0x200,
-    ANIM_FLAG_400                = 0x400,
+    ANIM_FLAG_ADD_TO_BLEND       = 0x400,
     ANIM_FLAG_800                = 0x800,
-    ANIM_FLAG_1000               = 0x1000,
+    ANIM_FLAG_SECONDARY_TASK_ANIM= 0x1000,
     ANIM_FLAG_FREEZE_TRANSLATION = 0x2000,
     ANIM_FLAG_BLOCK_REFERENCED   = 0x4000,
     ANIM_FLAG_INDESTRUCTIBLE     = 0x8000 // the animation is never destroyed if this flag is set, NO MATTER WHAT
