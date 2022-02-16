@@ -48,7 +48,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
     // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
     RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
-    // RH_ScopedInstall(SetPedState, 0x5E4500);
+    RH_ScopedInstall(SetPedState, 0x5E4500);
     // RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
     // RH_ScopedInstall(ClearLookFlag, 0x5E1950);
     // RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
@@ -895,9 +895,22 @@ CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace)
 }
 
 // 0x5E4500
-void CPed::SetPedState(ePedState pedState)
-{
-    ((void(__thiscall *)(CPed*, ePedState))0x5E4500)(this, pedState);
+void CPed::SetPedState(ePedState pedState) {
+    switch (state) {
+    case ePedState ::PEDSTATE_DEAD:
+    case ePedState ::PEDSTATE_DIE: {
+        if (m_pCoverPoint) {
+            CCoverPoint::ReleaseCoverPointForPed(m_pCoverPoint, this);
+            m_pCoverPoint=  nullptr;
+        }
+
+        if (bClearRadarBlipOnDeath) {
+            CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetRef(this));
+        }
+        break;
+    }
+    }
+    m_nPedState = pedState;
 }
 
 // 0x5E47E0
