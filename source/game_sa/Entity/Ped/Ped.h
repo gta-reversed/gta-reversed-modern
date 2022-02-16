@@ -32,6 +32,8 @@
 class CPedGroup;
 class CCivilianPed;
 class CEmergencyPed;
+class CCoverPoint;
+class CEntryExit;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
@@ -353,8 +355,8 @@ public:
     float               m_fTurretAngleB;
     int32               m_nTurretPosnMode;
     int32               m_nTurretAmmo;
-    void*               m_pCoverPoint;            // CCoverPoint *
-    void*               m_pEnex;                  // CEnEx *
+    CCoverPoint*        m_pCoverPoint;            // CCoverPoint *
+    CEntryExit*         m_pEnex;                  // CEnEx *
     float               m_fRemovalDistMultiplier; // 1.0 by default
     int16               m_nSpecialModelIndex;
     char                field_796[2];

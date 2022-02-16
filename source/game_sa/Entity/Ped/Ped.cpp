@@ -16,6 +16,8 @@
 #include "TaskSimpleLand.h"
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
+#include "TaskSimpleHoldEntity.h"
+#include "Radar.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -912,17 +914,18 @@ CObject* CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
 
 // 0x5E4500
 void CPed::SetPedState(ePedState pedState) {
-    switch (state) {
+    switch (pedState) {
     case ePedState ::PEDSTATE_DEAD:
     case ePedState ::PEDSTATE_DIE: {
         if (m_pCoverPoint) {
-            CCoverPoint::ReleaseCoverPointForPed(m_pCoverPoint, this);
-            m_pCoverPoint=  nullptr;
+            m_pCoverPoint->ReleaseCoverPointForPed(this);
+            m_pCoverPoint =  nullptr;
         }
 
         if (bClearRadarBlipOnDeath) {
             CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetRef(this));
         }
+
         break;
     }
     }
