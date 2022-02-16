@@ -45,7 +45,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
     RH_ScopedInstall(ClearAll, 0x5E5320);
-    // RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
+    RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
     // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
     // RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
     // RH_ScopedInstall(SetPedState, 0x5E4500);
@@ -913,9 +913,10 @@ void CPed::CalculateNewVelocity()
 }
 
 // 0x5E52E0
-void CPed::CalculateNewOrientation()
-{
-    ((void(__thiscall *)(CPed*))0x5E52E0)(this);
+void CPed::CalculateNewOrientation() {
+    if (CReplay::Mode != REPLAY_MODE_1 && IsPedInControl()) {
+        SetOrientation(0.f, 0.f, m_fCurrentRotation);
+    }
 }
 
 // 0x5E5320
