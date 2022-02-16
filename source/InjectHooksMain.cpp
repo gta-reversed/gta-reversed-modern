@@ -200,7 +200,6 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    CRestart::InjectHooks();
     CRope::InjectHooks();
     CRopes::InjectHooks();
     CWeaponInfo::InjectHooks();
