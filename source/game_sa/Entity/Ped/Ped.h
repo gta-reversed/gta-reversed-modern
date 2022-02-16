@@ -546,6 +546,7 @@ public:
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
+    bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
     bool IsInVehicleAsPassenger() const noexcept;
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }

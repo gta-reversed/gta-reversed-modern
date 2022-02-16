@@ -44,7 +44,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
     RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
-    // RH_ScopedInstall(ClearAll, 0x5E5320);
+    RH_ScopedInstall(ClearAll, 0x5E5320);
     // RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
     // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
     // RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
@@ -919,9 +919,15 @@ void CPed::CalculateNewOrientation()
 }
 
 // 0x5E5320
-void CPed::ClearAll()
-{
-    ((void(__thiscall *)(CPed*))0x5E5320)(this);
+void CPed::ClearAll() {
+    if (IsPedInControl() || IsStateDead()) {
+        bRenderPedInCar = true;
+        bHitSteepSlope = false;
+        bCrouchWhenScared = false;
+        m_nPedState = ePedState::PEDSTATE_NONE;
+        m_nMoveState = eMoveState::PEDMOVE_NONE;
+        m_pEntityIgnoredCollision = nullptr;
+    }
 }
 
 // 0x5E5380
