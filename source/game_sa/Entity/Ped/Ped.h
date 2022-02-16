@@ -28,6 +28,7 @@
 #include "ePedStats.h"
 #include "ePedType.h"
 
+
 class CPedGroup;
 class CCivilianPed;
 class CEmergencyPed;
@@ -473,7 +474,7 @@ public:
     CObject* GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
-    void SetCharCreatedBy(uint8 createdBy);
+    void SetCharCreatedBy(ePedCreatedBy createdBy);
     void CalculateNewVelocity();
     void CalculateNewOrientation();
     void ClearAll();

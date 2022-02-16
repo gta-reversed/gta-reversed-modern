@@ -47,7 +47,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearAll, 0x5E5320);
     RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
     // RH_ScopedInstall(CalculateNewVelocity, 0x5E4C50);
-    // RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
+    RH_ScopedInstall(SetCharCreatedBy, 0x5E47E0);
     // RH_ScopedInstall(SetPedState, 0x5E4500);
     // RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
     // RH_ScopedInstall(ClearLookFlag, 0x5E1950);
@@ -901,9 +901,24 @@ void CPed::SetPedState(ePedState pedState)
 }
 
 // 0x5E47E0
-void CPed::SetCharCreatedBy(uint8 createdBy)
-{
-    ((void(__thiscall *)(CPed*, uint8))0x5E47E0)(this, createdBy);
+void CPed::SetCharCreatedBy(ePedCreatedBy createdBy) {
+    m_nCreatedBy = createdBy;
+    if (!IsPlayer()) {
+        GetIntelligence()->SetPedDecisionMakerType(IsCreatedByMission() ? -1 : m_pStats->m_nDefaultDecisionMaker);
+    } else {
+        GetIntelligence()->SetPedDecisionMakerType(-2);
+    }
+
+    if (IsCreatedByMission()) {
+        auto intel = GetIntelligence();
+
+        intel->SetSeeingRange(30.f);
+        intel->SetHearingRange(30.f);
+        if (!IsPlayer()) {
+            intel->m_fDmRadius = 0.f;
+            intel->m_nDmNumPedsToScan = 0;
+        }
+    }
 }
 
 // 0x5E4C50
