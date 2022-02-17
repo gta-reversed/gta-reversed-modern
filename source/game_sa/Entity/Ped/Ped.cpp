@@ -166,6 +166,8 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
     // RH_ScopedInstall(Save_Reversed, 0x5D5730);
     // RH_ScopedInstall(Load_Reversed, 0x5D4640);
+
+    RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
 
 CPed::CPed(ePedType pedtype) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
@@ -1879,9 +1881,11 @@ void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uin
 }
 
 // 0x5F0060
-RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data)
-{
-    return ((RwObject* (__cdecl *)(RwObject*, void*))0x5F0060)(rwObject, data);
+RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data) {
+    if (!data) {
+        rwObjectSetFlags(rwObject, 0); // TODO: Figure out what the flag is
+    }
+    return rwObject;
 }
 
 /*!
