@@ -335,8 +335,8 @@ public:
     char                field_72F;
     CFire*              m_pFire;
     int32               field_734;
-    int32               field_738;
-    int32               field_73C;
+    CEntity*            m_pLookTarget;
+    float               m_fLookDirection; // In RAD
     int32               m_nWeaponModelId;
     int32               field_744;
     int32               m_nLookTime;
@@ -468,7 +468,7 @@ public:
     void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
     void PutOnGoggles();
     eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
-    void SetWeaponSkill(eWeaponType weaponType, char skill);
+    void SetWeaponSkill(eWeaponType weaponType, eWeaponSkill skill);
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();

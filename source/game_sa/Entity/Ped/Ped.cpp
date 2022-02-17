@@ -62,7 +62,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
     RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
-    // RH_ScopedInstall(TurnBody, 0x5E4000);
+    RH_ScopedInstall(TurnBody, 0x5E4000);
     // RH_ScopedInstall(IsPointerValid, 0x5E4220);
     // RH_ScopedInstall(GetBonePosition, 0x5E4280);
     // RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
@@ -952,9 +952,42 @@ void CPed::ClearLook()
 }
 
 // 0x5E4000
-bool CPed::TurnBody()
-{
-    return ((bool(__thiscall *)(CPed*))0x5E4000)(this);
+/*!
+* @addr    0x5E4000
+* @brief   Turns ped to look at `m_pLookTarget`.
+* @returns If `m_fCurrentRotation` changed.
+*/
+bool CPed::TurnBody() {
+    if (m_pLookTarget) { // TODO: Use some specialized function, this is ugly
+        auto& targetPos = m_pLookTarget->GetPosition();
+        auto& myPos = GetPosition();
+        m_fLookDirection = CGeneral::GetRadianAngleBetweenPoints(
+            targetPos.x,
+            targetPos.y,
+            myPos.x,
+            myPos.y
+        );
+    }
+
+    m_fLookDirection = CGeneral::LimitRadianAngle(m_fLookDirection);
+
+    // Some logic to make sure `m_fCurrentRotation` is always in the range [-PI, PI] or [0, 2PI] ? Not sure.. TODO.
+    if (m_fCurrentRotation + PI >= m_fLookDirection) {
+        if (m_fCurrentRotation - PI > m_fLookDirection) {
+            m_fCurrentRotation += PI;
+        }
+    } else {
+        m_fCurrentRotation -= PI;
+    }
+
+    m_fAimingRotation = m_fLookDirection;
+
+    if (std::abs(m_fCurrentRotation - m_fLookDirection) <= 0.05f) {
+        return true;
+    } else {
+        m_fCurrentRotation -= (m_fCurrentRotation - m_fLookDirection) / 5.f;
+        return false;
+    }
 }
 
 // 0x5E4220
