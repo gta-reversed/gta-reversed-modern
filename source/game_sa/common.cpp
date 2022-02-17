@@ -236,6 +236,10 @@ CWanted* FindPlayerWanted(int32 playerId) {
 }
 
 
+CPedGroup& FindPlayerGroup(int32 playerId) {
+    return FindPlayerPed()->GetGroup();
+}
+
 // NOTSA, inlined
 CPlayerInfo& FindPlayerInfo(int playerId) {
     return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];

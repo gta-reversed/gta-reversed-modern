@@ -99,7 +99,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetWeaponSlot, 0x5DF200);
     RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
     RH_ScopedInstall(CanBeDeletedEvenInVehicle, 0x5DF150);
-    // RH_ScopedInstall(CanBeDeleted, 0x5DF100);
+    RH_ScopedInstall(CanBeDeleted, 0x5DF100);
     RH_ScopedInstall(CanStrafeOrMouseControl, 0x5DF090);
     RH_ScopedInstall(CanBeArrested, 0x5DF060);
     // RH_ScopedInstall(CanSetPedState, 0x5DF030);
@@ -376,15 +376,19 @@ bool CPed::CanStrafeOrMouseControl()
         m_nPedState == PEDSTATE_ANSWER_MOBILE;
 }
 
-// 0x5DF100
-bool CPed::CanBeDeleted()
-{
-    return ((bool(__thiscall *)(CPed*))0x5DF100)(this);
+/*!
+* @addr 0x5DF100
+* @brief Check if ped can be deleted
+* @returns Always false if ped is in vehicle or is follower of player's group.
+*/
+bool CPed::CanBeDeleted() {
+    return !bInVehicle && !IsFollowerOfGroup(FindPlayerGroup()) && CanBeDeletedEvenInVehicle();
 }
 
 /*!
 * @addr 0x5DF100
 * @brief Check if ped can be deleted even if it's in a vehicle.
+* @returns False only if created by PED_UNKNOWN or PED_MISSION, true otherwise.
 */
 bool CPed::CanBeDeletedEvenInVehicle()
 {
