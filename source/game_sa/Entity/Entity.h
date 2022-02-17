@@ -206,7 +206,7 @@ public:
     // + clears the old entity (if any)
     // + set the new entity (if any)
     template<typename T, typename Y>
-    static void SetEntityReference(T*& inOutRef, Y* entity) requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> {
+    static void ChangeEntityReference(T*& inOutRef, Y* entity) requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> {
         ClearReference(inOutRef); // Clear old
         if (entity) { // Set new (if any)
             inOutRef = entity;
