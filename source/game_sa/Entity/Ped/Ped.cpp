@@ -71,7 +71,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
-    // RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
+    RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
     // RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
     // RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
     // RH_ScopedInstall(Say, 0x5EFFE0);
@@ -1906,9 +1906,22 @@ bool CPed::DoesLOSBulletHitPed(CColPoint& colPoint)
 }
 
 // 0x5F0250
-void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta)
-{
-    ((void(__thiscall *)(CPed*, int32, float))0x5F0250)(this, likeUnused, blendDelta);
+void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
+    bool bFoundNotPartialAnim{};
+    for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
+        if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, AnimationId::ANIM_ID_FIRE)) {
+            assoc->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+            if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL)) {
+                assoc->m_fBlendDelta = blendDelta;
+            } else {
+                bFoundNotPartialAnim = true;
+            }
+        }
+    }
+
+    if (bFoundNotPartialAnim) {
+        CAnimManager::BlendAnimation(m_pRwClump, m_nAnimGroup, ANIM_ID_IDLE, -blendDelta);
+    }
 }
 
 // 0x5F02C0
