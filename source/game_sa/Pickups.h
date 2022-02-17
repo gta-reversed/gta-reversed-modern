@@ -84,6 +84,10 @@ public:
     static int32 WeaponForModel(int32 modelId);
     static bool Load();
     static bool Save();
+
+    // Helpers NOTSA
+    static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos);
+    static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& out_x, float& out_y, float& out_z);
 };
 
 extern int32 &CollectPickupBuffer;

@@ -114,7 +114,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
-    // RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
+    RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
     // RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
     // RH_ScopedInstall(IsWearingGoggles, 0x479D10);
     // RH_ScopedInstall(SetAmmo, 0x5DF290);
@@ -278,10 +278,13 @@ void CPed::CreateDeadPedMoney() {
     }
 }
 
-// 0x459180
-void CPed::CreateDeadPedPickupCoors(float* pX, float* pY, float* pZ)
-{
-    ((void(__thiscall *)(CPed*, float*, float*, float*))0x459180)(this, pX, pY, pZ);
+/*!
+* @addr 0x459180
+* @brief Created a pickup close to the ped's position (Using \r CPickups::CreatePickupCoorsCloseToCoors)
+* @param [out] outPickupX, outPickupY, outPickupZ Position of the created pickup.
+*/
+void CPed::CreateDeadPedPickupCoors(float& outPickupX, float& outPickupY, float& outPickupZ) {
+    CPickups::CreatePickupCoorsCloseToCoors(GetPosition(), outPickupX, outPickupY, outPickupZ);
 }
 
 // 0x4591D0
