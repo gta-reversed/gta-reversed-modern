@@ -87,7 +87,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
     RH_ScopedInstall(SetIdle, 0x5E7980);
-    // RH_ScopedOverloadedInstall(SetLook, "", 0x5E79B0, int32(CPed::*)(float));
+    RH_ScopedOverloadedInstall(SetLook, "", 0x5E79B0, int32(CPed::*)(float));
     // RH_ScopedOverloadedInstall(SetLook, "", 0x5E7A60, int32(CPed::*)(CEntity *));
     // RH_ScopedInstall(Look, 0x5E7B20);
     RH_ScopedInstall(ReplaceWeaponForScriptedCutscene, 0x5E6530);
@@ -966,7 +966,7 @@ void CPed::ClearLookFlag() {
     bIsRestoringLook = true;
 
     if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably inlined function here
+        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::SetLook`)
         case ePedState::PEDSTATE_DRIVING:
         case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
             break;
@@ -1705,6 +1705,7 @@ void CPed::SetIdle() {
     case ePedState::PEDSTATE_MUG:
     case ePedState::PEDSTATE_FLEE_ENTITY:
         break;
+
     case ePedState::PEDSTATE_AIMGUN:
         m_nPedState = ePedState::PEDSTATE_IDLE;
         [[fallthrough]];
@@ -1715,9 +1716,34 @@ void CPed::SetIdle() {
 }
 
 // 0x5E79B0
-void CPed::SetLook(float heading)
-{
-    ((void(__thiscall *)(CPed*, float))0x5E79B0)(this, heading);
+void CPed::SetLook(float heading) {
+    if (!IsPedInControl()) {
+        return;
+    }
+
+    m_nPedState = ePedState::PEDSTATE_LOOK_HEADING;
+
+    if (m_nLookTime >= CTimer::GetTimeInMS()) {
+        return;
+    }
+
+    bIsLooking = false;
+    m_fLookDirection = heading;
+    m_nLookTime = 0;
+
+    ClearReference(m_pLookTarget);
+
+    if (!bIsDucking) {
+        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::ClearLookFlag`)
+        case ePedState::PEDSTATE_DRIVING:
+        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+            break;
+        default: {
+            m_pedIK.bTorsoUsed = false;
+            break;
+        }
+        }
+    }
 }
 
 // 0x5E7A60

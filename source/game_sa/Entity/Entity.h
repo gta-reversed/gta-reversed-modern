@@ -189,9 +189,12 @@ public:
     // NOTSA
     CBaseModelInfo* GetModelInfo() const;
 
-    // Wrapper around the mess called `CleanUpOldReference` 
+    // Wrapper around the mess called `CleanUpOldReference`
+    // Takes in `ref` (which is usally a member variable),
+    // calls `CleanUpOldReference` on it, then sets it to `nullptr`
+    // Used often in the code. 
     template<typename T>
-    void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+    static void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         if (ref) {
             ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
             ref = nullptr;
