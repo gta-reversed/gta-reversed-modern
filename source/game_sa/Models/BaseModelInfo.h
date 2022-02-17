@@ -176,6 +176,13 @@ public:
 
     void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
 
+    // NOTSA helpers
+    auto CreateInstanceAddRef() {
+        auto* inst = CreateInstance();
+        AddRef();
+        return inst;
+    }
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

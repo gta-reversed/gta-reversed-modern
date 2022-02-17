@@ -59,7 +59,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPedInControl, 0x5E3960);
     RH_ScopedInstall(RemoveWeaponModel, 0x5E3990);
     // RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370);
-    // RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
+    RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
     // RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
     // RH_ScopedInstall(ClearLook, 0x5E3FF0);
     // RH_ScopedInstall(TurnBody, 0x5E4000);
@@ -857,9 +857,13 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
 }
 
 // 0x5E3A90
-void CPed::AddGogglesModel(int32 modelIndex, bool* pGogglesType)
-{
-    ((void(__thiscall *)(CPed*, int32, bool*))0x5E3A90)(this, modelIndex, pGogglesType);
+void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
+    if (modelIndex != -1) {
+        m_pGogglesObject = CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
+
+        m_pGogglesState = inOutGogglesState;
+        inOutGogglesState = true;
+    }
 }
 
 // 0x5E3AE0

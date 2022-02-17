@@ -288,7 +288,7 @@ public:
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;
-    uint8*              m_pGogglesState;
+    bool                m_pGogglesState;
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
     int16               field_506;
     int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
@@ -465,7 +465,7 @@ public:
     void ProcessBuoyancy();
     bool IsPedInControl();
     void RemoveWeaponModel(int32 modelIndex);
-    void AddGogglesModel(int32 modelIndex, bool* pGogglesType);
+    void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
     void PutOnGoggles();
     eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
     void SetWeaponSkill(eWeaponType weaponType, char skill);
