@@ -1945,9 +1945,9 @@ bool CPed::IsFollowerOfGroup(const CPedGroup& group) {
     return group.GetMembership().IsFollower(this);
 }
 
-RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
+RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const { 
     const auto hierarchy = GetAnimHierarchyFromClump(m_pRwClump);
-    return RpHAnimHierarchyGetMatrixArray(hierarchy)[(size_t)bone];
+    return RpHAnimHierarchyGetMatrixArray(hierarchy)[RpHAnimIDGetIndex(hierarchy, (size_t)bone)];
 }
 
 // 0x5E4880
