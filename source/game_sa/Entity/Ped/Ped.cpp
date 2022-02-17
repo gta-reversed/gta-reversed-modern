@@ -108,9 +108,9 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
     RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
-    // RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, int8(CPed::*)(CEntity *));
-    // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, int8(CPed::*)(CEntity *, bool, bool));
-    // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, int8(CPed::*)(float, bool, bool));
+    RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, void(CPed::*)(CEntity *));
+    RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
+    RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, void(CPed::*)(float, bool, bool));
     // RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     // RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     // RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
@@ -293,21 +293,71 @@ bool CPed::CanUseTorsoWhenLooking()
 }
 
 // 0x5DEDC0
-void CPed::SetLookFlag(float lookHeading, bool likeUnused, bool arg2)
-{
-    ((void(__thiscall *)(CPed*, float, bool, bool))0x5DEDC0)(this, lookHeading, likeUnused, arg2);
+void CPed::SetLookFlag(float lookHeading, bool unused, bool ignoreLookTime) {
+    UNUSED(unused);
+
+    if (m_nLookTime >= CTimer::GetTimeInMS() && !ignoreLookTime) {
+        return;
+    }
+
+    bIsLooking = true;
+    m_fLookDirection = lookHeading;
+    m_nLookTime = 0;
+
+    ClearReference(m_pLookTarget);
+
+    if (!bIsDucking) {
+        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::ClearLookFlag`)
+        case ePedState::PEDSTATE_DRIVING:
+        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+            break;
+        default: {
+            m_pedIK.bTorsoUsed = false;
+            break;
+        }
+        }
+    }
 }
 
 // 0x5DEE40
-void CPed::SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2)
-{
-    ((void(__thiscall *)(CPed*, CEntity*, bool, bool))0x5DEE40)(this, lookingTo, likeUnused, arg2);
+void CPed::SetLookFlag(CEntity* lookingTo, bool unused, bool ignoreLookTime) {
+    UNUSED(unused);
+
+    if (m_nLookTime >= CTimer::GetTimeInMS() && !ignoreLookTime) {
+        return;
+    }
+
+    // TODO:
+    // Now, either `SetLook` is inlined here, or this function is inlined in `SetLook`..
+    // Im 99% sure it's the latter
+
+    bIsRestoringLook = false;
+    bIsLooking = true;
+
+    ChangeEntityReference(m_pLookTarget, lookingTo);
+
+    m_fLookDirection = 999'999.f;
+    m_nLookTime = 0;
+
+    if (!bIsDucking) {
+        switch (m_nPedState) { // TODO: Probably (at this point im 99% sure) inlined function here (Also used in `CPed::ClearLookFlag` and the the other `SetLook` overload)
+        case ePedState::PEDSTATE_DRIVING:
+        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+            break;
+        default: {
+            m_pedIK.bTorsoUsed = false;
+            break;
+        }
+        }
+    }
 }
 
 // 0x5DEED0
-void CPed::SetAimFlag(CEntity* aimingTo)
-{
-    ((void(__thiscall *)(CPed*, CEntity*))0x5DEED0)(this, aimingTo);
+void CPed::SetAimFlag(CEntity* aimingTo) {
+    bIsAimingGun = true;
+    bIsRestoringGun = false;
+    ChangeEntityReference(m_pLookTarget, aimingTo);
+    m_nLookTime = 0;
 }
 
 // 0x5DEF20
@@ -1910,6 +1960,7 @@ void CPed::SetLook(CEntity* entity) {
         return;
     }
 
+    bIsRestoringLook = false;
     bIsLooking = true;
 
     ChangeEntityReference(m_pLookTarget, entity);
