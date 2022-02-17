@@ -113,7 +113,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, void(CPed::*)(float, bool, bool));
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
-    // RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
+    RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
     // RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
     // RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
     // RH_ScopedInstall(IsWearingGoggles, 0x479D10);
@@ -252,9 +252,30 @@ bool CPed::PedCanPickUpPickUp()
 }
 
 // 0x4590F0
-void CPed::CreateDeadPedMoney()
-{
-    ((void(__thiscall *)(CPed*))0x4590F0)(this);
+void CPed::CreateDeadPedMoney() {
+    if (!CLocalisation::StealFromDeadPed()) {
+        return;
+    }
+
+    switch (m_nPedType) {
+    case ePedType::PED_TYPE_COP:
+    case ePedType::PED_TYPE_MEDIC:
+    case ePedType::PED_TYPE_FIREMAN:
+        return;
+    }
+
+    if (IsCreatedByMission() && !bMoneyHasBeenGivenByScript) {
+        return;
+    }
+
+    if (bInVehicle) {
+        return;
+    }
+
+    if (m_nMoneyCount > 10) {
+        CPickups::CreateSomeMoney(GetPosition(), m_nMoneyCount);
+        m_nMoneyCount = 0;
+    }
 }
 
 // 0x459180
