@@ -115,7 +115,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
     RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
-    // RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
+    RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
     // RH_ScopedInstall(IsWearingGoggles, 0x479D10);
     // RH_ScopedInstall(SetAmmo, 0x5DF290);
     // RH_ScopedInstall(SetStayInSamePlace, 0x481090);
@@ -287,10 +287,61 @@ void CPed::CreateDeadPedPickupCoors(float& outPickupX, float& outPickupY, float&
     CPickups::CreatePickupCoorsCloseToCoors(GetPosition(), outPickupX, outPickupY, outPickupZ);
 }
 
-// 0x4591D0
-void CPed::CreateDeadPedWeaponPickups()
-{
-    ((void(__thiscall *)(CPed*))0x4591D0)(this);
+/*!
+* @address notsa
+* @copybrief CPed::CreateDeadPedPickupCoors
+* @param [out] pickupPos Position of the created pickup.
+*/
+void CPed::CreateDeadPedPickupCoors(CVector& pickupPos) {
+    return CreateDeadPedPickupCoors(pickupPos.x, pickupPos.y, pickupPos.z);
+}
+
+
+/*!
+* @addr 0x4591D0
+* @brief Create weapon/ammo pickups for dead ped
+*/
+void CPed::CreateDeadPedWeaponPickups() {
+    if (bInVehicle || bDoesntDropWeaponsWhenDead) {
+        return;
+    }
+
+    for (auto& wep : m_aWeapons) {
+        switch (wep.m_nType) {
+        case eWeaponType::WEAPON_UNARMED:
+        case eWeaponType::WEAPON_DETONATOR:
+            continue;
+        }
+        
+        if (!wep.m_nTotalAmmo && !wep.IsTypeMelee()) {
+            continue;
+        }
+
+        // Now, create a pickup at close to our position
+        CVector pickupPos{};
+        CreateDeadPedPickupCoors(pickupPos);
+        pickupPos.z += 0.3f;
+
+        // No. of ammo the pickups will contain
+        const auto pickupAmmo{ std::min(wep.m_nTotalAmmo, (uint32)AmmoForWeapon_OnStreet[(size_t)wep.m_nType] * 2) };
+
+        if (CPickups::TryToMerge_WeaponType(
+            pickupPos,
+            wep.m_nType,
+            ePickupType::PICKUP_ONCE_TIMEOUT,
+            pickupAmmo,
+            false
+        )) {
+            CPickups::GenerateNewOne_WeaponType(
+                pickupPos,
+                wep.m_nType,
+                bDeathPickupsPersist ? ePickupType::PICKUP_ONCE_FOR_MISSION : ePickupType::PICKUP_ONCE_TIMEOUT,
+                pickupAmmo,
+                false,
+                false
+            );
+        }
+    }
 }
 
 // 0x5DEBB0

@@ -397,7 +397,7 @@ public:
     bool PedIsReadyForConversation(bool arg0);
     bool PedCanPickUpPickUp(); // TODO: Seems to be __cdecl? (static)
     void CreateDeadPedMoney();
-    void CreateDeadPedPickupCoors(float* pX, float* pY, float* pZ);
+    void CreateDeadPedPickupCoors(float& outPickupX, float& outPickupY, float& outPickupZ);
     void CreateDeadPedWeaponPickups();
     static void Initialise();
     void SetPedStats(ePedStats statsType);
@@ -558,9 +558,13 @@ public:
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
+    // NOTSA helpers
+
     bool IsFollowerOfGroup(const CPedGroup& group);
 
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
+
+    void CreateDeadPedPickupCoors(CVector& pickupPos);
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
