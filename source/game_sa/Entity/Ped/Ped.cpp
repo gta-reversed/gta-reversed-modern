@@ -87,8 +87,8 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
     RH_ScopedInstall(SetIdle, 0x5E7980);
-    RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, int32(CPed::*)(float));
-    RH_ScopedOverloadedInstall(SetLook, "Entity", 0x5E7A60, int32(CPed::*)(CEntity *));
+    RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, void(CPed::*)(float));
+    RH_ScopedOverloadedInstall(SetLook, "Entity", 0x5E7A60, void(CPed::*)(CEntity *));
     RH_ScopedInstall(Look, 0x5E7B20);
     RH_ScopedInstall(ReplaceWeaponForScriptedCutscene, 0x5E6530);
     RH_ScopedInstall(RemoveWeaponForScriptedCutscene, 0x5E6550);
