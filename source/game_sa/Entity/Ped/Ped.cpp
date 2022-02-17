@@ -102,7 +102,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanBeDeleted, 0x5DF100);
     RH_ScopedInstall(CanStrafeOrMouseControl, 0x5DF090);
     RH_ScopedInstall(CanBeArrested, 0x5DF060);
-    // RH_ScopedInstall(CanSetPedState, 0x5DF030);
+    RH_ScopedInstall(CanSetPedState, 0x5DF030);
     RH_ScopedInstall(CanPedReturnToState, 0x5DF000);
     // RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
     // RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
@@ -347,9 +347,17 @@ bool CPed::CanPedReturnToState()
 }
 
 // 0x5DF030
-bool CPed::CanSetPedState()
-{
-    return ((bool(__thiscall *)(CPed*))0x5DF030)(this);
+bool CPed::CanSetPedState() {
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_DIE:
+    case ePedState::PEDSTATE_DEAD:
+    case ePedState::PEDSTATE_ARRESTED:
+    case ePedState::PEDSTATE_ENTER_CAR:
+    case ePedState::PEDSTATE_CARJACK:
+    case ePedState::PEDSTATE_STEAL_CAR:
+        return true;
+    }
+    return false;
 }
 
 bool CPed::CanBeArrested()
