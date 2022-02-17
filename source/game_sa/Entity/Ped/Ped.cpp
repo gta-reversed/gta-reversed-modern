@@ -104,7 +104,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanBeArrested, 0x5DF060);
     RH_ScopedInstall(CanSetPedState, 0x5DF030);
     RH_ScopedInstall(CanPedReturnToState, 0x5DF000);
-    // RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
+    RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
     // RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
     // RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     // RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
@@ -329,9 +329,15 @@ bool CPed::IsPedShootable()
 }
 
 // 0x5DEFE0
-bool CPed::UseGroundColModel()
-{
-    return ((bool(__thiscall *)(CPed*))0x5DEFE0)(this);
+bool CPed::UseGroundColModel() {
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_FALL:
+    case ePedState::PEDSTATE_EVADE_DIVE:
+    case ePedState::PEDSTATE_DIE:
+    case ePedState::PEDSTATE_DEAD:
+        return true;
+    }
+    return false;
 }
 
 bool CPed::CanPedReturnToState()
