@@ -87,8 +87,8 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
     RH_ScopedInstall(SetIdle, 0x5E7980);
-    RH_ScopedOverloadedInstall(SetLook, "", 0x5E79B0, int32(CPed::*)(float));
-    // RH_ScopedOverloadedInstall(SetLook, "", 0x5E7A60, int32(CPed::*)(CEntity *));
+    RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, int32(CPed::*)(float));
+    RH_ScopedOverloadedInstall(SetLook, "Entity", 0x5E7A60, int32(CPed::*)(CEntity *));
     // RH_ScopedInstall(Look, 0x5E7B20);
     RH_ScopedInstall(ReplaceWeaponForScriptedCutscene, 0x5E6530);
     RH_ScopedInstall(RemoveWeaponForScriptedCutscene, 0x5E6550);
@@ -1727,7 +1727,7 @@ void CPed::SetLook(float heading) {
         return;
     }
 
-    bIsLooking = false;
+    bIsLooking = true;
     m_fLookDirection = heading;
     m_nLookTime = 0;
 
@@ -1747,9 +1747,35 @@ void CPed::SetLook(float heading) {
 }
 
 // 0x5E7A60
-void CPed::SetLook(CEntity* entity)
-{
-    ((void(__thiscall *)(CPed*, CEntity*))0x5E7A60)(this, entity);
+void CPed::SetLook(CEntity* entity) {
+    if (!IsPedInControl()) {
+        return;
+    }
+
+    m_nPedState = ePedState::PEDSTATE_LOOK_ENTITY;
+
+    if (m_nLookTime >= CTimer::GetTimeInMS()) {
+        return;
+    }
+
+    bIsLooking = true;
+
+    ChangeEntityReference(m_pLookTarget, entity);
+
+    m_fLookDirection = 999'999.f;
+    m_nLookTime = 0;
+
+    if (!bIsDucking) {
+        switch (m_nPedState) { // TODO: Probably (at this point im 99% sure) inlined function here (Also used in `CPed::ClearLookFlag` and the the other `SetLook` overload)
+        case ePedState::PEDSTATE_DRIVING:
+        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+            break;
+        default: {
+            m_pedIK.bTorsoUsed = false;
+            break;
+        }
+        }
+    }
 }
 
 // 0x5E7B20
