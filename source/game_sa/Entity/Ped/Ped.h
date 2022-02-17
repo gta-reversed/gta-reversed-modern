@@ -528,6 +528,8 @@ public:
     void MakeTyresMuddySectorList(CPtrList& ptrList);
     void DeadPedMakesTyresBloody();
     bool IsInVehicleThatHasADriver();
+    bool IsWearingGoggles() const { return !!m_pGogglesObject; }
+
     void SetArmour(float v) { m_fArmour = v; }
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }

@@ -116,7 +116,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
     RH_ScopedOverloadedInstall(CreateDeadPedPickupCoors, "", 0x459180, void(CPed::*)(float&, float&, float&));
     RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
-    // RH_ScopedInstall(IsWearingGoggles, 0x479D10);
+    RH_ScopedInstall(IsWearingGoggles, 0x479D10);
     // RH_ScopedInstall(SetAmmo, 0x5DF290);
     // RH_ScopedInstall(SetStayInSamePlace, 0x481090);
     // RH_ScopedInstall(SetPedStats, 0x5DEBC0);
