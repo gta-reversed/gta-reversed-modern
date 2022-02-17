@@ -528,6 +528,7 @@ public:
     void MakeTyresMuddySectorList(CPtrList& ptrList);
     void DeadPedMakesTyresBloody();
     bool IsInVehicleThatHasADriver();
+    void SetStayInSamePlace(bool enable) { bStayInSamePlace = enable; }
     bool IsWearingGoggles() const { return !!m_pGogglesObject; }
 
     void SetArmour(float v) { m_fArmour = v; }
