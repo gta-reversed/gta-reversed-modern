@@ -512,9 +512,9 @@ public:
     void GiveWeaponAtStartOfFight();
     void GiveWeaponWhenJoiningGang();
     bool GetPedTalking();
-    void DisablePedSpeech(int16 arg0);
+    void DisablePedSpeech(bool stopCurrentSpeech);
     void EnablePedSpeech();
-    void DisablePedSpeechForScriptSpeech(bool );
+    void DisablePedSpeechForScriptSpeech(bool stopCurrentSpeech);
     void EnablePedSpeechForScriptSpeech();
     bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);

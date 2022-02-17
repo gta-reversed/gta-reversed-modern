@@ -79,9 +79,9 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x5EFF90);
     RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x5EFF80);
-    // RH_ScopedInstall(EnablePedSpeech, 0x5EFF70);
-    // RH_ScopedInstall(DisablePedSpeech, 0x5EFF60);
-    // RH_ScopedInstall(GetPedTalking, 0x5EFF50);
+    RH_ScopedInstall(EnablePedSpeech, 0x5EFF70);
+    RH_ScopedInstall(DisablePedSpeech, 0x5EFF60);
+    RH_ScopedInstall(GetPedTalking, 0x5EFF50);
     RH_ScopedInstall(GiveWeaponWhenJoiningGang, 0x5E8BE0);
     // RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
@@ -1834,21 +1834,18 @@ void CPed::GiveWeaponWhenJoiningGang()
 }
 
 // 0x5EFF50
-bool CPed::GetPedTalking()
-{
-    return ((bool(__thiscall *)(CPed*))0x5EFF50)(this);
+bool CPed::GetPedTalking() {
+    m_pedSpeech.GetPedTalking();
 }
 
 // 0x5EFF60
-void CPed::DisablePedSpeech(int16 arg0)
-{
-    ((void(__thiscall *)(CPed*, int16))0x5EFF60)(this, arg0);
+void CPed::DisablePedSpeech(bool stopCurrentSpeech) {
+    m_pedSpeech.DisablePedSpeech(stopCurrentSpeech);
 }
 
 // 0x5EFF70
-void CPed::EnablePedSpeech()
-{
-    ((void(__thiscall *)(CPed*))0x5EFF70)(this);
+void CPed::EnablePedSpeech() {
+    m_pedSpeech.EnablePedSpeech();
 }
 
 // 0x5EFF80
