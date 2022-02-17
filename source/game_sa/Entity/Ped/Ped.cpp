@@ -63,7 +63,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
-    // RH_ScopedInstall(IsPointerValid, 0x5E4220);
+    RH_ScopedInstall(IsPointerValid, 0x5E4220);
     // RH_ScopedInstall(GetBonePosition, 0x5E4280);
     // RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     // RH_ScopedInstall(SortPeds, 0x5E17E0);
@@ -991,9 +991,9 @@ bool CPed::TurnBody() {
 }
 
 // 0x5E4220
-bool CPed::IsPointerValid()
-{
-    return ((bool(__thiscall *)(CPed*))0x5E4220)(this);
+bool CPed::IsPointerValid() {
+    const auto ref = CPools::GetPedPool()->GetRef(this);
+    return ref >= 0 && ref < 140 && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed()); // TODO: `140` is IIRC the size of CPool<CPed>, so a variable should be used here.
 }
 
 // 0x5E4280
