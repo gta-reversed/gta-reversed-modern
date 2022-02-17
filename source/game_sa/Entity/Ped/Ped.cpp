@@ -441,8 +441,10 @@ float CPed::GetBikeRidingSkill()
 
 // 0x5DF560
 void CPed::ShoulderBoneRotation(RpClump* clump) {
-    auto GetMatrixOf = [matrixArray = RpHAnimHierarchyGetMatrixArray(GetAnimHierarchyFromClump(clump))](ePedBones bone) mutable -> RwMatrix& {
-        return matrixArray[(size_t)bone];
+    // Note: Didn't use `GetBoneMatrix` here, because it would be slower
+    // (Because it would call `GetAnimHierarchyFromClump` multiple tiems)
+    auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](ePedBones bone) mutable -> RwMatrix& {
+        return (RpHAnimHierarchyGetMatrixArray(hier))[RpHAnimIDGetIndex(hier, (size_t)bone)];
     };
 
     constexpr struct { ePedBones breast, upperArm, clavicle; } bones[]{
