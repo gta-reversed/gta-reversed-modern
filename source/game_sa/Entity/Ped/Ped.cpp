@@ -53,7 +53,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetPedState, 0x5E4500);
     RH_ScopedInstall(GiveObjectToPedToHold, 0x5E4390);
     RH_ScopedInstall(ClearLookFlag, 0x5E1950);
-    // RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
+    RH_ScopedInstall(WorkOutHeadingForMovingFirstPerson, 0x5E1A00);
     // RH_ScopedInstall(UpdatePosition, 0x5E1B10);
     // RH_ScopedInstall(MakeTyresMuddySectorList, 0x6AE0D0);
     RH_ScopedInstall(IsPedInControl, 0x5E3960);
@@ -644,9 +644,22 @@ void CPed::SortPeds(CPed** pedList, int32 arg1, int32 arg2)
 }
 
 // 0x5E1A00
-float CPed::WorkOutHeadingForMovingFirstPerson(float heading)
-{
-    return ((float(__thiscall *)(CPed*, float))0x5E1A00)(this, heading);
+float CPed::WorkOutHeadingForMovingFirstPerson(float heading) {
+    if (!IsPlayer() || !m_pPlayerData) {
+        return 0.f; // Probably shouldn't ever happen, but okay
+    }
+
+    const auto walkUpDown = (float)CPad::GetPad()->GetPedWalkUpDown();
+    const auto walkLeftRight = (float)CPad::GetPad()->GetPedWalkLeftRight();
+    if (walkUpDown == 0.f) {
+        if (walkLeftRight != 0.f) {
+            m_pPlayerData->m_fFPSMoveHeading = walkLeftRight < 0.f ? HALF_PI : -HALF_PI;
+        }
+    } else {
+        m_pPlayerData->m_fFPSMoveHeading = CGeneral::GetRadianAngleBetweenPoints(0.f, 0.f, -walkLeftRight, walkUpDown);
+    }
+
+    return CGeneral::LimitRadianAngle(heading + m_pPlayerData->m_fFPSMoveHeading);
 }
 
 // 0x5E1B10
