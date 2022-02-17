@@ -52,7 +52,7 @@ public:
     uint32       m_nTotalAmmo;
     uint32       m_nTimeForNextShot;
     uint8        field_14;
-    uint8        m_bNoModel;
+    uint8        m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
     uint8        field_16;
     uint8        field_17;
     FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle

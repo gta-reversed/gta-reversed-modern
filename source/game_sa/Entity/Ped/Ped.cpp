@@ -18,6 +18,7 @@
 #include "PedClothesDesc.h"
 #include "TaskSimpleHoldEntity.h"
 #include "Radar.h"
+#include "PostEffects.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -65,7 +66,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
     RH_ScopedInstall(GetBonePosition, 0x5E4280);
-    // RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
+    RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     // RH_ScopedInstall(SortPeds, 0x5E17E0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
@@ -861,15 +862,46 @@ void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
     if (modelIndex != -1) {
         m_pGogglesObject = CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
 
-        m_pGogglesState = inOutGogglesState;
+        m_bGogglesState = inOutGogglesState;
         inOutGogglesState = true;
     }
 }
 
 // 0x5E3AE0
-void CPed::PutOnGoggles()
-{
-    ((void(__thiscall *)(CPed*))0x5E3AE0)(this);
+void CPed::PutOnGoggles() {
+    auto& wepInSlot = GetWeaponInSlot(GetWeaponSlot(eWeaponType::WEAPON_INFRARED));
+
+    // Game checks if wepInSlot.m_nType != UNARMED here, not sure why? Probably compiler mistake on switch case codegen.. 
+
+    switch (wepInSlot.m_nType) {
+    case eWeaponType::WEAPON_INFRARED:
+    case eWeaponType::WEAPON_NIGHTVISION: {
+
+        // Add(load) googles model and enable PostFX 
+        const auto DoAddGogglesModel = [&, this](bool& state) {
+            AddGogglesModel(wepInSlot.GetWeaponInfo().m_nModelId1, state);
+        };
+
+        switch (wepInSlot.m_nType) {
+        case eWeaponType::WEAPON_INFRARED:
+            DoAddGogglesModel(CPostEffects::m_bInfraredVision);
+            break;
+        case eWeaponType::WEAPON_NIGHTVISION:
+            DoAddGogglesModel(CPostEffects::m_bNightVision);
+            break;
+        }
+
+        // Make sure weapon model doesn't get loaded (Because we've put the them on)
+        wepInSlot.m_bNoModel = true;
+
+        // If it was the active weapon: unload it's weapon model
+        if (&wepInSlot == &GetActiveWeapon()) {
+            RemoveWeaponModel(wepInSlot.GetWeaponInfo().m_nModelId1);
+        }
+
+        break;
+    }
+    }
 }
 
 eWeaponSkill CPed::GetWeaponSkill()
@@ -1403,9 +1435,10 @@ void CPed::TakeOffGoggles()
     case eWeaponType::WEAPON_NIGHTVISION: {
         // Remove googles model
         RemoveGogglesModel();
+
         wepInSlot.m_bNoModel = false;
 
-        // If it's the active weapon re-add it (? - Not sure)
+        // Since we've took off the goggles we might have to load it's weapon model
         if (&wepInSlot == &GetActiveWeapon()) {
             AddWeaponModel(wepInSlot.GetWeaponInfo().m_nModelId1);
         }
