@@ -259,7 +259,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
     if (secondaryTask) {
         if (secondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
-            return secondaryTask;
+            return secondaryTask->AsComplex();
         }
     }
 
@@ -274,7 +274,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     {
         return nullptr;
     }
-    return activeSimplestTask;
+    return activeSimplestTask->AsComplex();
 }
 
 // 0x601070

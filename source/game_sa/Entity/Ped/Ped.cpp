@@ -83,7 +83,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DisablePedSpeech, 0x5EFF60);
     RH_ScopedInstall(GetPedTalking, 0x5EFF50);
     RH_ScopedInstall(GiveWeaponWhenJoiningGang, 0x5E8BE0);
-    // RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
+    RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
     // RH_ScopedInstall(SetIdle, 0x5E7980);
@@ -1759,9 +1759,24 @@ void CPed::RequestDelayedWeapon()
 }
 
 // 0x5E89B0
-void CPed::GiveDelayedWeapon(eWeaponType weaponType, uint32 ammo)
-{
-    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5E89B0)(this, weaponType, ammo);
+void CPed::GiveDelayedWeapon(eWeaponType weaponType, uint32 ammo) {
+    // If not a player drop entity in ped's hand (if any)
+    if (!IsPlayer()) {
+        if (const auto task = (CTaskSimpleHoldEntity*)GetIntelligence()->GetTaskHold(false)) {
+            if (task->m_pEntityToHold) {
+                if (task->m_nBoneFrameId == ePedNode::PED_NODE_RIGHT_HAND) {
+                    DropEntityThatThisPedIsHolding(true);
+                }
+            }
+        }
+    }
+
+    // Set delayed weapon (If ped doesn't already have one)
+    if (m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED) {
+        m_nDelayedWeaponAmmo = ammo;
+        m_nDelayedWeapon = weaponType;
+        RequestDelayedWeapon();
+    }
 }
 
 // 0x5E8A30
