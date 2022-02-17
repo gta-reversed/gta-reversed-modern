@@ -1852,14 +1852,14 @@ void CPed::EnablePedSpeech()
 }
 
 // 0x5EFF80
-void CPed::DisablePedSpeechForScriptSpeech(int16 arg0)
+void CPed::DisablePedSpeechForScriptSpeech(bool stopCurrentSpeech)
 {
-    ((void(__thiscall *)(CPed*, int16))0x5EFF80)(this, arg0);
+    m_pedSpeech.DisablePedSpeechForScriptSpeech(stopCurrentSpeech);
 }
 
 // 0x5EFF90
 void CPed::EnablePedSpeechForScriptSpeech() {
-    return m_pedSpeech.EnablePedSpeechForScriptSpeech();
+    m_pedSpeech.EnablePedSpeechForScriptSpeech();
 }
 
 // 0x5EFFA0
