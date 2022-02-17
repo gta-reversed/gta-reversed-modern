@@ -86,7 +86,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
     RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
-    // RH_ScopedInstall(SetIdle, 0x5E7980);
+    RH_ScopedInstall(SetIdle, 0x5E7980);
     // RH_ScopedOverloadedInstall(SetLook, "", 0x5E79B0, int32(CPed::*)(float));
     // RH_ScopedOverloadedInstall(SetLook, "", 0x5E7A60, int32(CPed::*)(CEntity *));
     // RH_ScopedInstall(Look, 0x5E7B20);
@@ -1699,9 +1699,19 @@ void CPed::PreRenderAfterTest()
 }
 
 // 0x5E7980
-void CPed::SetIdle()
-{
-    ((void(__thiscall *)(CPed*))0x5E7980)(this);
+void CPed::SetIdle() {
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_IDLE:
+    case ePedState::PEDSTATE_MUG:
+    case ePedState::PEDSTATE_FLEE_ENTITY:
+        break;
+    case ePedState::PEDSTATE_AIMGUN:
+        m_nPedState = ePedState::PEDSTATE_IDLE;
+        [[fallthrough]];
+    default:
+        m_nMoveState = eMoveState::PEDMOVE_STILL;
+        break;
+    }
 }
 
 // 0x5E79B0
