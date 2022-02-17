@@ -67,7 +67,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(GetBonePosition, 0x5E4280);
     // RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     // RH_ScopedInstall(SortPeds, 0x5E17E0);
-    // RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
+    RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
     // RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
     // RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
@@ -1566,9 +1566,17 @@ void CPed::RemoveWeaponWhenEnteringVehicle(int32 arg0) {
 }
 
 // 0x5E6490
-void CPed::ReplaceWeaponWhenExitingVehicle()
-{
-    ((void(__thiscall *)(CPed*))0x5E6490)(this);
+void CPed::ReplaceWeaponWhenExitingVehicle() {
+    if (m_pPlayerData) {
+        m_pPlayerData->m_bInVehicleDontAllowWeaponChange = false;
+    }
+
+    if (!IsPlayer() || m_nSavedWeapon == eWeaponType::WEAPON_UNIDENTIFIED) { // Not player, or has no saved weapon
+        AddWeaponModel(GetActiveWeapon().GetWeaponInfo().m_nModelId1);
+    } else { // Is player and has saved weapon, set it - TODO: Invert `if` logic to be more clear.. Eg.: if (IsPlayer() && m_nSavedWeapon != eWeaponType::WEAPON_UNIDENTIFIED)
+        SetCurrentWeapon((eWeaponType)m_nSavedWeapon);
+        m_nSavedWeapon = eWeaponType::WEAPON_UNIDENTIFIED;
+    }
 }
 
 // 0x5E6530
