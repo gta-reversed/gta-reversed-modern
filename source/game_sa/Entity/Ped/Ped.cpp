@@ -1525,9 +1525,44 @@ void CPed::ClearWeapons()
 }
 
 // 0x5E6370
-void CPed::RemoveWeaponWhenEnteringVehicle(int32 arg0)
-{
+void CPed::RemoveWeaponWhenEnteringVehicle(int32 arg0) {
     ((void(__thiscall *)(CPed*, int32))0x5E6370)(this, arg0);
+
+    // Missing some code below (Had too many jumps and I was lazy to deal with it all)
+    /*if (m_pPlayerData) {
+        m_pPlayerData->m_bInVehicleDontAllowWeaponChange = true;
+    }
+
+    if (m_nSavedWeapon != eWeaponType::WEAPON_UNIDENTIFIED) {
+        return;
+    }
+
+    const auto RemoveActiveWepModel = [this] {
+        RemoveWeaponModel(GetActiveWeapon().GetWeaponInfo().m_nModelId1);
+    };
+
+    if (!IsPlayer() || !AsPlayer()->GetPlayerInfoForThisPlayerPed()->m_bCanDoDriveBy) {
+        RemoveActiveWepModel();
+        return;
+    }
+
+
+    const auto SaveCurrentSetActiveWeapon = [](eWeaponType wt) {
+
+    };
+
+    if (arg0) {
+        const auto IsWeaponInSlotWithAmmo = [this](eWeaponSlot slot, eWeaponType wt) {
+            const auto& wepInSlot = GetWeaponInSlot(slot);
+            return wepInSlot.m_nType == wt && wepInSlot.m_nTotalAmmo > 0;
+        };
+
+        if (   IsWeaponInSlotWithAmmo(eWeaponSlot::SHOTGUN, eWeaponType::WEAPON_SAWNOFF_SHOTGUN)
+            || IsWeaponInSlotWithAmmo(eWeaponSlot::HANDGUN, eWeaponType::WEAPON_PISTOL)
+        ) {
+            SaveCurrentSetActiveWeapon(eWeaponType::WEAPON_GOLFCLUB);
+        }
+    }*/
 }
 
 // 0x5E6490
