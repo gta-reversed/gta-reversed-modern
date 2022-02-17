@@ -373,10 +373,10 @@ void CEventDamage::From(const CEventDamage& event) {
 
 // 0x4B3A20
 void CEventDamage::ProcessDamage(CPed* ped) {
-    int32 boneFrameId = 0;
-    ComputeBodyPartToRemove(boneFrameId);
-    if (boneFrameId)
-        ped->RemoveBodyPart(boneFrameId, m_ucDirection);
+    int32 pedNode = 0;
+    ComputeBodyPartToRemove(pedNode);
+    if (pedNode)
+        ped->RemoveBodyPart((ePedNode)pedNode, m_ucDirection);
 }
 
 // todo: ePedNode

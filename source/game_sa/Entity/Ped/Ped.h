@@ -152,7 +152,7 @@ public:
             uint32 bIsNearCar : 1;             // has been in a collision last fram
             uint32 bRenderPedInCar : 1;        // has been in a collision last fram
             uint32 bUpdateAnimHeading : 1;     // update ped heading due to heading change during anim sequence
-            uint32 bRemoveHead : 1;            // waiting on AntiSpazTimer to remove head
+            uint32 bRemoveHead : 1;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
             uint32 bFiringWeapon : 1;         // is pulling trigger
             uint32 bHasACamera : 1;           // does ped possess a camera to document accidents
@@ -281,7 +281,7 @@ public:
     CPlayerPedData*     m_pPlayerData;
     ePedCreatedBy       m_nCreatedBy;
     char                field_485[3];
-    AnimBlendFrameData* m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode
+    AnimBlendFrameData* m_apBones[TOTAL_PED_NODES]; // for Index, see ePedNode - TODO: Name incorrect, should be `m_apNodes` instead.
     AssocGroupId        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CAcquaintance m_acquaintance;
@@ -519,7 +519,7 @@ public:
     void CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
     void Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
-    void RemoveBodyPart(int32 boneId, char localDir);
+    void RemoveBodyPart(ePedNode pedNode, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
     uint8 DoesLOSBulletHitPed(CColPoint& colPoint);
     void RemoveWeaponAnims(int32 likeUnused, float blendDelta);

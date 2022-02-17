@@ -73,7 +73,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
     RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
     RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
-    // RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
+    RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
     // RH_ScopedInstall(Say, 0x5EFFE0);
     // RH_ScopedInstall(SayScript, 0x5EFFB0);
     // RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
@@ -1887,10 +1887,22 @@ RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data)
     return ((RwObject* (__cdecl *)(RwObject*, void*))0x5F0060)(rwObject, data);
 }
 
-// 0x5F0140
-void CPed::RemoveBodyPart(int32 boneId, char localDir)
-{
-    ((void(__thiscall *)(CPed*, int32, char))0x5F0140)(this, boneId, localDir);
+/*!
+* @addr 0x5F0140
+* @brief Remove body part
+* @todo See if it works with body parts other than the head
+*/
+void CPed::RemoveBodyPart(ePedNode pedNode, char localDir) {
+    UNUSED(localDir);
+
+    if (m_apBones[pedNode]->m_pIFrame) {
+        if (CLocalisation::ShootLimbs()) {
+            bRemoveHead = true;
+            m_nBodypartToRemove = pedNode;
+        }
+    } else {
+        printf("Trying to remove ped component");
+    }
 }
 
 // 0x5F0190
