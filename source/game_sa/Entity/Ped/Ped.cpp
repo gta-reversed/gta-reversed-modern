@@ -75,7 +75,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
     RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
     RH_ScopedInstall(Say, 0x5EFFE0);
-    // RH_ScopedInstall(SayScript, 0x5EFFB0);
+    RH_ScopedInstall(SayScript, 0x5EFFB0);
     // RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
     // RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x5EFF90);
     // RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x5EFF80);
@@ -1872,14 +1872,14 @@ void CPed::CanPedHoldConversation()
 // 0x5EFFB0
 void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3)
 {
-    ((void(__thiscall *)(CPed*, int32, uint8, uint8, uint8))0x5EFFB0)(this, arg0, arg1, arg2, arg3);
+    m_pedSpeech.AddScriptSayEvent(eAudioEvents::AE_SCRIPT_SPEECH_PED, arg0, arg1, arg2, arg3);
 }
 
 // 0x5EFFE0
 void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
 {
     if (arg0) {
-        m_pedSpeech.AddSayEvent(AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5);
+        m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5);
     }
 }
 
