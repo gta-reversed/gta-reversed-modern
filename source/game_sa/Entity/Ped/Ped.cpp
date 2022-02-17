@@ -117,7 +117,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(CreateDeadPedPickupCoors, "", 0x459180, void(CPed::*)(float&, float&, float&));
     RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
     RH_ScopedInstall(IsWearingGoggles, 0x479D10);
-    // RH_ScopedInstall(SetAmmo, 0x5DF290);
+    RH_ScopedInstall(SetAmmo, 0x5DF290);
     // RH_ScopedInstall(SetStayInSamePlace, 0x481090);
     // RH_ScopedInstall(SetPedStats, 0x5DEBC0);
     // RH_ScopedInstall(SetMoveState, 0x5DEC00);
@@ -656,7 +656,7 @@ void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
     if (wepSlot != -1) {
         auto& wepInSlot = GetWeaponInSlot(wepSlot);
         
-        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u);
+        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u); // Clamp upper
 
         // TODO: Inlined
         if (wepInSlot.m_nState == eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
@@ -667,10 +667,25 @@ void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
     }
 }
 
-// 0x5DF290
-void CPed::SetAmmo(eWeaponType weaponType, uint32 ammo)
-{
-    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF290)(this, weaponType, ammo);
+/*!
+* @addr 0x5DF290
+* @brief Im lazy to write it :D Similar to \r CPed::GrantAmmo
+*/
+void CPed::SetAmmo(eWeaponType weaponType, uint32 ammo) {
+    const auto wepSlot = GetWeaponSlot(weaponType);
+    if (wepSlot != -1) {
+        auto& wepInSlot = GetWeaponInSlot(wepSlot);
+
+        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u);
+        wepInSlot.m_nAmmoInClip = std::max(wepInSlot.m_nTotalAmmo, wepInSlot.m_nAmmoInClip);
+
+        // TODO: Inlined
+        if (wepInSlot.m_nState == eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
+            if (wepInSlot.m_nTotalAmmo > 0) {
+                wepInSlot.m_nState = eWeaponState::WEAPONSTATE_READY;
+            }
+        }
+    }
 }
 
 // 0x5DF300
