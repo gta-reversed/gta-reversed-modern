@@ -516,7 +516,7 @@ public:
     void EnablePedSpeech();
     void DisablePedSpeechForScriptSpeech(int16 arg0);
     void EnablePedSpeechForScriptSpeech();
-    void CanPedHoldConversation();
+    bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
     void Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
     void RemoveBodyPart(ePedNode pedNode, char localDir);

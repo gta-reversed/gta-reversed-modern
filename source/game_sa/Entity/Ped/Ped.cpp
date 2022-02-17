@@ -76,7 +76,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
     RH_ScopedInstall(Say, 0x5EFFE0);
     RH_ScopedInstall(SayScript, 0x5EFFB0);
-    // RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
+    RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
     // RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x5EFF90);
     // RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x5EFF80);
     // RH_ScopedInstall(EnablePedSpeech, 0x5EFF70);
@@ -1864,9 +1864,8 @@ void CPed::EnablePedSpeechForScriptSpeech()
 }
 
 // 0x5EFFA0
-void CPed::CanPedHoldConversation()
-{
-    ((void(__thiscall *)(CPed*))0x5EFFA0)(this);
+bool CPed::CanPedHoldConversation() {
+    return m_pedSpeech.CanPedHoldConversation();
 }
 
 // 0x5EFFB0
