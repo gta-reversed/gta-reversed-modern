@@ -106,7 +106,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanPedReturnToState, 0x5DF000);
     RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
     RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
-    // RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
+    RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     // RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
     // RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, int8(CPed::*)(CEntity *));
     // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, int8(CPed::*)(CEntity *, bool, bool));
@@ -317,9 +317,12 @@ void CPed::ClearAimFlag()
 }
 
 // 0x5DEF60
-int32 CPed::GetLocalDirection(const CVector2D& arg0)
-{
-    return ((int32(__thiscall *)(CPed*, const CVector2D&))0x5DEF60)(this, arg0);
+float CPed::GetLocalDirection(const CVector2D& point) {
+    auto angle = (float)atan2(-point.x, point.y) - m_fCurrentRotation + PI / 4.f;
+    while (angle < 0.f) {
+        angle += TWO_PI;
+    }
+    return angle;
 }
 
 // 0x5DEFD0
