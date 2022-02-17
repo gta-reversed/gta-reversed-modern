@@ -95,7 +95,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GiveWeaponAtStartOfFight, 0x5E8AB0);
     RH_ScopedInstall(ProcessBuoyancy, 0x5E1FA0);
     // RH_ScopedInstall(PositionPedOutOfCollision, 0x5E0820);
-    // RH_ScopedInstall(GrantAmmo, 0x5DF220);
+    RH_ScopedInstall(GrantAmmo, 0x5DF220);
     RH_ScopedInstall(GetWeaponSlot, 0x5DF200);
     // RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
     // RH_ScopedInstall(CanBeDeletedEvenInVehicle, 0x5DF150);
@@ -399,10 +399,24 @@ int32 CPed::GetWeaponSlot(eWeaponType weaponType)
     return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nSlot;
 }
 
-// 0x5DF220
-void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo)
-{
-    ((void(__thiscall *)(CPed*, eWeaponType, uint32))0x5DF220)(this, weaponType, ammo);
+/*!
+* @addr 0x5DF220
+* @brief Set \a weaponType's slot totalAmmo to \a ammo. Also changes the gun's state to `READY`
+*/
+void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
+    const auto wepSlot = GetWeaponSlot(weaponType);
+    if (wepSlot != -1) {
+        auto& wepInSlot = GetWeaponInSlot(wepSlot);
+        
+        wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u);
+
+        // TODO: Inlined
+        if (wepInSlot.m_nState == eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
+            if (wepInSlot.m_nTotalAmmo > 0) {
+                wepInSlot.m_nState = eWeaponState::WEAPONSTATE_READY;
+            }
+        }
+    }
 }
 
 // 0x5DF290
@@ -1498,6 +1512,7 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
         wepInSlot.m_nTotalAmmo = std::min(99'999u, wepInSlot.m_nTotalAmmo + ammo);
         wepInSlot.Reload(this);
 
+        // TODO: Inlined
         if (wepInSlot.m_nState == eWeaponState::WEAPONSTATE_OUT_OF_AMMO) {
             if (wepInSlot.m_nTotalAmmo > 0) {
                 wepInSlot.m_nState = eWeaponState::WEAPONSTATE_READY;
