@@ -1926,13 +1926,13 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
 
 // 0x5F02C0
 bool CPed::IsPedHeadAbovePos(float zPos) {
-    RwV3d posSpineSpace{}; // Placeholder - 0, 0, 0
-    RwV3d spinePos{};
+    RwV3d zero{}; // Placeholder - 0, 0, 0
+    RwV3d headPos{};
 
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
-    RwV3dTransformPoint(&spinePos, &posSpineSpace, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
 
-    return zPos + GetPosition().z < spinePos.z;
+    return zPos + GetPosition().z < headPos.z;
 }
 
 // 0x5F0360
