@@ -1038,6 +1038,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBon
     } else if (!bCalledPreRender) { // Return static local bone positions, if it they weren't updated yet.
         #include "PedStdBonePositions.h"
         outPosition = MultiplyMatrixWithVector(*m_matrix, aStdBonePosisions[boneId]);
+        return;
     }
 
     if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy
