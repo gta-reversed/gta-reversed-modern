@@ -119,7 +119,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsWearingGoggles, 0x479D10);
     RH_ScopedInstall(SetAmmo, 0x5DF290);
     RH_ScopedInstall(SetStayInSamePlace, 0x481090);
-    // RH_ScopedInstall(SetPedStats, 0x5DEBC0);
+    RH_ScopedInstall(SetPedStats, 0x5DEBC0);
     // RH_ScopedInstall(SetMoveState, 0x5DEC00);
     // RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
     // RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
@@ -350,11 +350,12 @@ void CPed::Initialise() {
     CCarEnterExit::SetAnimOffsetForEnterOrExitVehicle();
 }
 
-// unused
-// 0x5DEBC0
+/*!
+* @addr 0x5DEBC0
+* @unused
+*/
 void CPed::SetPedStats(ePedStats statsType) {
-    // auto index = static_cast<int32>(statsType);
-    // m_pStats = &CPedStats::ms_apPedStats[index];
+    m_pStats = &CPedStats::ms_apPedStats[(size_t)statsType];
 }
 
 // 0x5DEBE0
