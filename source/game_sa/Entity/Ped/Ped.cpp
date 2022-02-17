@@ -98,7 +98,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GrantAmmo, 0x5DF220);
     RH_ScopedInstall(GetWeaponSlot, 0x5DF200);
     RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
-    // RH_ScopedInstall(CanBeDeletedEvenInVehicle, 0x5DF150);
+    RH_ScopedInstall(CanBeDeletedEvenInVehicle, 0x5DF150);
     // RH_ScopedInstall(CanBeDeleted, 0x5DF100);
     RH_ScopedInstall(CanStrafeOrMouseControl, 0x5DF090);
     RH_ScopedInstall(CanBeArrested, 0x5DF060);
@@ -382,10 +382,18 @@ bool CPed::CanBeDeleted()
     return ((bool(__thiscall *)(CPed*))0x5DF100)(this);
 }
 
-// 0x5DF150
+/*!
+* @addr 0x5DF100
+* @brief Check if ped can be deleted even if it's in a vehicle.
+*/
 bool CPed::CanBeDeletedEvenInVehicle()
 {
-    return ((bool(__thiscall *)(CPed*))0x5DF150)(this);
+    switch (m_nCreatedBy) {
+    case ePedCreatedBy::PED_MISSION:
+    case ePedCreatedBy::PED_UNKNOWN:
+        return false;
+    }
+    return true;
 }
 
 // 0x5DF170
