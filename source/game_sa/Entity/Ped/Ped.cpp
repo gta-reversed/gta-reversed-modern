@@ -61,7 +61,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370);
     RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
     RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
-    // RH_ScopedInstall(ClearLook, 0x5E3FF0);
+    RH_ScopedInstall(ClearLook, 0x5E3FF0);
     // RH_ScopedInstall(TurnBody, 0x5E4000);
     // RH_ScopedInstall(IsPointerValid, 0x5E4220);
     // RH_ScopedInstall(GetBonePosition, 0x5E4280);
