@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include <optional>
 #include "Ped.h"
 
 #include "PedType.h"
@@ -97,7 +97,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(PositionPedOutOfCollision, 0x5E0820);
     RH_ScopedInstall(GrantAmmo, 0x5DF220);
     RH_ScopedInstall(GetWeaponSlot, 0x5DF200);
-    // RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
+    RH_ScopedInstall(PositionAnyPedOutOfCollision, 0x5E13C0);
     // RH_ScopedInstall(CanBeDeletedEvenInVehicle, 0x5DF150);
     // RH_ScopedInstall(CanBeDeleted, 0x5DF100);
     RH_ScopedInstall(CanStrafeOrMouseControl, 0x5DF090);
@@ -644,10 +644,60 @@ bool CPed::PositionPedOutOfCollision(int32 exitDoor, CVehicle* vehicle, bool fin
     return ((bool(__thiscall *)(CPed*, int32, CVehicle*, bool))0x5E0820)(this, exitDoor, vehicle, findClosestNode);
 }
 
-// 0x5E13C0
-bool CPed::PositionAnyPedOutOfCollision()
-{
-    return ((bool(__thiscall *)(CPed*))0x5E13C0)(this);
+/*!
+* @addr     0x5E13C0
+* @brief    Teleport ped to the furthest point from here that isn't colliding with a building or ped.
+* @returns  If there was at lest one such point.
+*/
+bool CPed::PositionAnyPedOutOfCollision() {
+    struct Point {
+        CVector pos{};
+        bool    found{};
+        float   distSq{};
+    };
+    Point vehiclePoint{}, noCollPoint{};
+
+    // Find 2 points furthest away from us:
+    // - One that is colliding with a vehicle, (vehiclePoint)
+    // - One that isn't colliding with one. (noCollPoint)
+    // Neither point should be colliding with a building or ped.
+    auto testPoint{ GetPosition() };
+    for (auto y = 0; y < 15; y++) {
+        testPoint.y -= 3.5f;
+        for (auto x = 0; x < 15; x++) {
+            testPoint.x -= 3.5f;
+
+            // If we collide with a building or ped skip
+            if (!CWorld::TestSphereAgainstWorld(testPoint, 0.6f, this, /*buildings: */true, false, false, true, false, false)) {
+                continue;
+            }
+
+            const auto PossiblyUpdatePoint = [&, this](Point& p) {
+                const auto dist{ (testPoint - GetPosition()).SquaredMagnitude() };
+                if (dist > p.distSq) {
+                    p.pos = testPoint;
+                    p.distSq = dist;
+                    p.found = true;
+                }
+            };
+
+            // Check for collision with vehicles
+            if (CWorld::TestSphereAgainstWorld(testPoint, 0.6f, this, false, /*vehicles: */true, false, false, false, false)) {
+                PossiblyUpdatePoint(vehiclePoint);
+            } else { // Not collided with anything
+                PossiblyUpdatePoint(noCollPoint);
+            }
+        }
+    }
+
+    // Set our position to one of the point's
+    if (noCollPoint.found) { // If there was a point not colliding with a vehicle use it
+        SetPosn(noCollPoint.pos);
+    } else if (vehiclePoint.found) { // Otherwise use the other one collided with one (if any)
+        SetPosn(vehiclePoint.pos + CVector{ 0.f, 0.f, GetBoundingBox().m_vecMax.z });
+    }
+
+    return noCollPoint.found || vehiclePoint.found;
 }
 
 // 0x5E1660
