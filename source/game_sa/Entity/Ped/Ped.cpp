@@ -60,7 +60,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RemoveWeaponModel, 0x5E3990);
     // RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370);
     RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
-    // RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
+    RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
     // RH_ScopedInstall(ClearLook, 0x5E3FF0);
     // RH_ScopedInstall(TurnBody, 0x5E4000);
     // RH_ScopedInstall(IsPointerValid, 0x5E4220);
@@ -904,10 +904,15 @@ eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
     return eWeaponSkill::COP;
 }
 
-// 0x5E3C10
-void CPed::SetWeaponSkill(eWeaponType weaponType, char skill)
+/*!
+* @addr 0x5E3C10
+* @brief Set weapon skill, unless `this->IsPlayer()`.
+*/
+void CPed::SetWeaponSkill(eWeaponType weaponType, eWeaponSkill skill)
 {
-    ((void(__thiscall *)(CPed*, eWeaponType, char))0x5E3C10)(this, weaponType, skill);
+    if (!IsPlayer()) {
+        m_nWeaponSkill = skill;
+    }
 }
 
 // 0x5E1950
