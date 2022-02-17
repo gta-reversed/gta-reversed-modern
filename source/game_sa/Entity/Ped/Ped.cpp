@@ -78,7 +78,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SayScript, 0x5EFFB0);
     RH_ScopedInstall(CanPedHoldConversation, 0x5EFFA0);
     RH_ScopedInstall(EnablePedSpeechForScriptSpeech, 0x5EFF90);
-    // RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x5EFF80);
+    RH_ScopedInstall(DisablePedSpeechForScriptSpeech, 0x5EFF80);
     // RH_ScopedInstall(EnablePedSpeech, 0x5EFF70);
     // RH_ScopedInstall(DisablePedSpeech, 0x5EFF60);
     // RH_ScopedInstall(GetPedTalking, 0x5EFF50);

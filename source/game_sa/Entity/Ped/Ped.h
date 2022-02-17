@@ -514,7 +514,7 @@ public:
     bool GetPedTalking();
     void DisablePedSpeech(int16 arg0);
     void EnablePedSpeech();
-    void DisablePedSpeechForScriptSpeech(int16 arg0);
+    void DisablePedSpeechForScriptSpeech(bool );
     void EnablePedSpeechForScriptSpeech();
     bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
