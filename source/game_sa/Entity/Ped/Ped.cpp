@@ -111,7 +111,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, void(CPed::*)(CEntity *));
     RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
     RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, void(CPed::*)(float, bool, bool));
-    // RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
+    RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     // RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     // RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
     // RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
@@ -287,9 +287,19 @@ void CPed::RestartNonPartialAnims()
 }
 
 // 0x5DED90
-bool CPed::CanUseTorsoWhenLooking()
-{
-    return ((bool(__thiscall *)(CPed*))0x5DED90)(this);
+// TODO: Inlined in SetLook and SetLookFlag (although latter is inlined the former as well)
+bool CPed::CanUseTorsoWhenLooking() {
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_DRIVING:
+    case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
+        return false;
+    }
+
+    if (bIsDucking) {
+        return false;
+    }
+
+    return true;
 }
 
 // 0x5DEDC0
