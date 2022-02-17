@@ -1913,7 +1913,7 @@ void CPed::GiveWeaponWhenJoiningGang()
 
 // 0x5EFF50
 bool CPed::GetPedTalking() {
-    m_pedSpeech.GetPedTalking();
+    return m_pedSpeech.GetPedTalking();
 }
 
 // 0x5EFF60
