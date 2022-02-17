@@ -72,7 +72,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
     RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
-    // RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
+    RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
     // RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
     // RH_ScopedInstall(Say, 0x5EFFE0);
     // RH_ScopedInstall(SayScript, 0x5EFFB0);
@@ -1900,9 +1900,26 @@ void CPed::SpawnFlyingComponent(int32 arg0, char arg1)
 }
 
 // 0x5F01A0
-bool CPed::DoesLOSBulletHitPed(CColPoint& colPoint)
-{
-    return ((bool(__thiscall *)(CPed*, CColPoint&))0x5F01A0)(this, colPoint);
+/*!
+* @addr 0x5F01A0
+* @brief Check if line of sight bullet would hit the ped (Does a basic check of colpoint.point.z against head position)
+* @returns 0, 1 - Yes , 2 - No. Always `1` if ped is falling.
+*/
+uint8 CPed::DoesLOSBulletHitPed(CColPoint& colPoint) {
+    // TODO: Below is just a copy of the code in `IsPedHeadAbovePos` - A separate function should be made.
+    RwV3d zero{}; // Placeholder - 0, 0, 0
+    RwV3d headPos{};
+
+    // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
+    RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+
+    if (m_nPedState == ePedState::PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust 
+        return 1;
+    } else if (headPos.z + 0.2f <= colPoint.m_vecPoint.z) {
+        return 0;
+    } else {
+        return 2;
+    }
 }
 
 // 0x5F0250

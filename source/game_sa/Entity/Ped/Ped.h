@@ -288,7 +288,7 @@ public:
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;
-    bool                m_pGogglesState;
+    bool                m_bGogglesState;
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
     int16               field_506;
     int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
@@ -521,7 +521,7 @@ public:
     void Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
     void RemoveBodyPart(int32 boneId, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
-    bool DoesLOSBulletHitPed(CColPoint& colPoint);
+    uint8 DoesLOSBulletHitPed(CColPoint& colPoint);
     void RemoveWeaponAnims(int32 likeUnused, float blendDelta);
     bool IsPedHeadAbovePos(float zPos);
     void KillPedWithCar(CVehicle* car, float fDamageIntensity, bool bPlayDeadAnimation);
