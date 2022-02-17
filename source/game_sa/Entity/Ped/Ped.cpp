@@ -112,7 +112,7 @@ void CPed::InjectHooks() {
     RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
     RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, void(CPed::*)(float, bool, bool));
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
-    // RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
+    RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     // RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
     // RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
     // RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
@@ -212,9 +212,35 @@ bool CPed::PedIsInvolvedInConversation()
 }
 
 // 0x43ABA0
-bool CPed::PedIsReadyForConversation(bool arg0)
-{
-    return ((bool(__thiscall *)(CPed*, bool))0x43ABA0)(this, arg0);
+bool CPed::PedIsReadyForConversation(bool checkLocalPlayerWantedLevel) {
+    // We don't talk when we're behind the wheel! (Nor when we're fighting...)
+    if (bInVehicle || GetIntelligence()->GetTaskFighting()) {
+        return false;
+    }
+    
+    if (checkLocalPlayerWantedLevel && FindPlayerPed()->GetWanted()->m_nWantedLevel) {
+        return false;
+    }
+
+    // If we're doing any of these we don't have the mental power to chat...
+    switch (m_nMoveState) {
+    case eMoveState::PEDMOVE_JOG:
+    case eMoveState::PEDMOVE_RUN:
+    case eMoveState::PEDMOVE_SPRINT:
+        return false;
+    }
+
+    if (!IsCreatedByMission()) { // Don't check if we've a chatting task/event if we're a mission ped
+        if (GetIntelligence()->FindTaskByType(eTaskType::TASK_COMPLEX_PARTNER_CHAT)) {
+            return false;
+        }
+
+        if (GetIntelligence()->m_eventGroup.GetEventOfType(eEventType::EVENT_CHAT_PARTNER)) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // 0x455560
