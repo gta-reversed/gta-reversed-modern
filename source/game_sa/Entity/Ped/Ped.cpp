@@ -105,7 +105,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanSetPedState, 0x5DF030);
     RH_ScopedInstall(CanPedReturnToState, 0x5DF000);
     RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
-    // RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
+    RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
     // RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     // RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
     // RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, int8(CPed::*)(CEntity *));
@@ -323,9 +323,59 @@ int32 CPed::GetLocalDirection(const CVector2D& arg0)
 }
 
 // 0x5DEFD0
-bool CPed::IsPedShootable()
-{
-    return ((bool(__thiscall *)(CPed*))0x5DEFD0)(this);
+bool CPed::IsPedShootable() {
+    // Not sure if they used a switch case or `<= PEDSTATE_STATES_CAN_SHOOT` originally, but I'll use a switch case.
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_NONE:
+    case ePedState::PEDSTATE_IDLE:
+    case ePedState::PEDSTATE_LOOK_ENTITY:
+    case ePedState::PEDSTATE_LOOK_HEADING:
+    case ePedState::PEDSTATE_WANDER_RANGE:
+    case ePedState::PEDSTATE_WANDER_PATH:
+    case ePedState::PEDSTATE_SEEK_POSITION:
+    case ePedState::PEDSTATE_SEEK_ENTITY:
+    case ePedState::PEDSTATE_FLEE_POSITION:
+    case ePedState::PEDSTATE_FLEE_ENTITY:
+    case ePedState::PEDSTATE_PURSUE:
+    case ePedState::PEDSTATE_FOLLOW_PATH:
+    case ePedState::PEDSTATE_SNIPER_MODE:
+    case ePedState::PEDSTATE_ROCKETLAUNCHER_MODE:
+    case ePedState::PEDSTATE_DUMMY:
+    case ePedState::PEDSTATE_PAUSE:
+    case ePedState::PEDSTATE_ATTACK:
+    case ePedState::PEDSTATE_FIGHT:
+    case ePedState::PEDSTATE_FACE_PHONE:
+    case ePedState::PEDSTATE_MAKE_PHONECALL:
+    case ePedState::PEDSTATE_CHAT:
+    case ePedState::PEDSTATE_MUG:
+    case ePedState::PEDSTATE_AIMGUN:
+    case ePedState::PEDSTATE_AI_CONTROL:
+    case ePedState::PEDSTATE_SEEK_CAR:
+    case ePedState::PEDSTATE_SEEK_BOAT_POSITION:
+    case ePedState::PEDSTATE_FOLLOW_ROUTE:
+    case ePedState::PEDSTATE_CPR:
+    case ePedState::PEDSTATE_SOLICIT:
+    case ePedState::PEDSTATE_BUY_ICE_CREAM:
+    case ePedState::PEDSTATE_INVESTIGATE_EVENT:
+    case ePedState::PEDSTATE_EVADE_STEP:
+    case ePedState::PEDSTATE_ON_FIRE:
+    case ePedState::PEDSTATE_SUNBATHE:
+    case ePedState::PEDSTATE_FLASH:
+    case ePedState::PEDSTATE_JOG:
+    case ePedState::PEDSTATE_ANSWER_MOBILE:
+    case ePedState::PEDSTATE_HANG_OUT:
+    case ePedState::PEDSTATE_STATES_NO_AI:
+    case ePedState::PEDSTATE_ABSEIL_FROM_HELI:
+    case ePedState::PEDSTATE_SIT:
+    case ePedState::PEDSTATE_JUMP:
+    case ePedState::PEDSTATE_FALL:
+    case ePedState::PEDSTATE_GETUP:
+    case ePedState::PEDSTATE_STAGGER:
+    case ePedState::PEDSTATE_EVADE_DIVE:
+    case ePedState::PEDSTATE_STATES_CAN_SHOOT:
+    return true;
+    }
+    return false;
 }
 
 // 0x5DEFE0
