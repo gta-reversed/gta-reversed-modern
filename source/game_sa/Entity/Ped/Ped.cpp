@@ -89,7 +89,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetIdle, 0x5E7980);
     RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, int32(CPed::*)(float));
     RH_ScopedOverloadedInstall(SetLook, "Entity", 0x5E7A60, int32(CPed::*)(CEntity *));
-    // RH_ScopedInstall(Look, 0x5E7B20);
+    RH_ScopedInstall(Look, 0x5E7B20);
     RH_ScopedInstall(ReplaceWeaponForScriptedCutscene, 0x5E6530);
     RH_ScopedInstall(RemoveWeaponForScriptedCutscene, 0x5E6550);
     RH_ScopedInstall(GiveWeaponAtStartOfFight, 0x5E8AB0);
@@ -1779,9 +1779,8 @@ void CPed::SetLook(CEntity* entity) {
 }
 
 // 0x5E7B20
-void CPed::Look()
-{
-    ((void(__thiscall *)(CPed*))0x5E7B20)(this);
+void CPed::Look() {
+    TurnBody();
 }
 
 // 0x5E7CB0
