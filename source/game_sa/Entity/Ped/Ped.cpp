@@ -64,7 +64,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    // RH_ScopedInstall(GetBonePosition, 0x5E4280);
+    RH_ScopedInstall(GetBonePosition, 0x5E4280);
     // RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     // RH_ScopedInstall(SortPeds, 0x5E17E0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
@@ -997,9 +997,23 @@ bool CPed::IsPointerValid() {
 }
 
 // 0x5E4280
-void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones)
-{
-    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E4280)(this, outPosition, boneId, updateSkinBones);
+void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones) {
+    if (updateSkinBones) {
+        if (!bCalledPreRender) {
+            UpdateRpHAnim();
+            bCalledPreRender = true;
+        }
+    } else if (!bCalledPreRender) { // Return static local bone positions, if it they weren't updated yet.
+        #include "PedStdBonePositions.h"
+        outPosition = MultiplyMatrixWithVector(*m_matrix, aStdBonePosisions[boneId]);
+    }
+
+    if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy
+        RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[boneId])); // IMPORTANT NOTE: And C fanboys consider this readable..
+    } else {
+        outPosition = GetPosition(); // Return something close to valid..
+        assert(0); // NOTSA: Let's see if this is possible at all. 
+    }
 }
 
 // 0x5E4390
