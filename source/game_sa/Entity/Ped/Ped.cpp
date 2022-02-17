@@ -70,7 +70,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SortPeds, 0x5E17E0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
-    // RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
+    RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
     // RH_ScopedInstall(RemoveWeaponAnims, 0x5F0250);
     // RH_ScopedInstall(DoesLOSBulletHitPed, 0x5F01A0);
     // RH_ScopedInstall(RemoveBodyPart, 0x5F0140);
@@ -641,6 +641,7 @@ bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted)
 }
 
 // 0x5E17E0
+// Unused (only ever called by itself)
 void CPed::SortPeds(CPed** pedList, int32 arg1, int32 arg2)
 {
     ((void(__thiscall *)(CPed*, CPed**, int32, int32))0x5E17E0)(this, pedList, arg1, arg2);
@@ -1911,9 +1912,14 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta)
 }
 
 // 0x5F02C0
-bool CPed::IsPedHeadAbovePos(float zPos)
-{
-    return ((bool(__thiscall *)(CPed*, float))0x5F02C0)(this, zPos);
+bool CPed::IsPedHeadAbovePos(float zPos) {
+    RwV3d posSpineSpace{}; // Placeholder - 0, 0, 0
+    RwV3d spinePos{};
+
+    // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
+    RwV3dTransformPoint(&spinePos, &posSpineSpace, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
+
+    return zPos + GetPosition().z < spinePos.z;
 }
 
 // 0x5F0360
