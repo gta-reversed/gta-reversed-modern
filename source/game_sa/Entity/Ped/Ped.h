@@ -289,9 +289,9 @@ public:
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;
     uint8*              m_pGogglesState;
-    int16               m_nWeaponGunflashAlphaMP1;
+    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
     int16               field_506;
-    int16               m_nWeaponGunflashAlphaMP2;
+    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
     int16               field_50A;
     CPedIK              m_pedIK;
     int32               field_52C;

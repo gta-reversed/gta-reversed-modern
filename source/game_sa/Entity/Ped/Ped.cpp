@@ -57,7 +57,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(UpdatePosition, 0x5E1B10);
     // RH_ScopedInstall(MakeTyresMuddySectorList, 0x6AE0D0);
     RH_ScopedInstall(IsPedInControl, 0x5E3960);
-    // RH_ScopedInstall(RemoveWeaponModel, 0x5E3990);
+    RH_ScopedInstall(RemoveWeaponModel, 0x5E3990);
     // RH_ScopedInstall(RemoveWeaponWhenEnteringVehicle, 0x5E6370);
     // RH_ScopedInstall(AddGogglesModel, 0x5E3A90);
     // RH_ScopedInstall(SetWeaponSkill, 0x5E3C10);
@@ -818,9 +818,42 @@ bool CPed::IsPedInControl()
 }
 
 // 0x5E3990
-void CPed::RemoveWeaponModel(int32 modelIndex)
-{
-    ((void(__thiscall *)(CPed*, int32))0x5E3990)(this, modelIndex);
+void CPed::RemoveWeaponModel(int32 modelIndex) {
+
+    // For players remove any attached FX (Created in `AddWeaponModel` for molotov)
+    if (IsPlayer()) {
+        auto& activeWep = GetActiveWeapon();
+        if (activeWep.m_pFxSystem) {
+            g_fxMan.DestroyFxSystem(activeWep.m_pFxSystem);
+            activeWep.m_pFxSystem = nullptr;
+        }
+    }
+
+    // Deal with weapon's loaded clump (if any)
+    if (m_pWeaponObject) {
+        if (   modelIndex == -1
+            || CModelInfo::GetModelInfo(modelIndex) == CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)
+        ) {
+            // Release model info
+            CModelInfo::GetModelInfo(modelIndex)->RemoveRef(); // Originally CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef(), but both return the same pointer.
+
+            // Remove atomics anim from skin
+            if (const auto atomic = GetFirstAtomic(m_pWeaponObject)) {
+                if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+                    RpClumpForAllAtomics(m_pWeaponObject, AtomicRemoveAnimFromSkinCB, nullptr);
+                }
+            }
+
+            // Destroy clump
+            RpClumpDestroy(m_pWeaponObject);
+            m_pWeaponObject = nullptr;
+            m_pGunflashObject = nullptr;
+        }
+    }
+
+    m_nWeaponGunflashAlphaMP1 = 0;
+    m_nWeaponGunflashAlphaMP2 = 0;
+    m_nWeaponModelId = -1;
 }
 
 // 0x5E3A90
