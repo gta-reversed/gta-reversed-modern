@@ -114,7 +114,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
-    RH_ScopedInstall(CreateDeadPedPickupCoors, 0x459180);
+    RH_ScopedOverloadedInstall(CreateDeadPedPickupCoors, "", 0x459180, void(CPed::*)(float&, float&, float&));
     RH_ScopedInstall(CreateDeadPedWeaponPickups, 0x4591D0);
     // RH_ScopedInstall(IsWearingGoggles, 0x479D10);
     // RH_ScopedInstall(SetAmmo, 0x5DF290);
@@ -338,7 +338,7 @@ void CPed::CreateDeadPedWeaponPickups() {
                 bDeathPickupsPersist ? ePickupType::PICKUP_ONCE_FOR_MISSION : ePickupType::PICKUP_ONCE_TIMEOUT,
                 pickupAmmo,
                 false,
-                false
+                nullptr
             );
         }
     }
@@ -1345,6 +1345,8 @@ bool CPed::IsPointerValid() {
     return ref >= 0 && ref < 140 && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed()); // TODO: `140` is IIRC the size of CPool<CPed>, so a variable should be used here.
 }
 
+#include "PedStdBonePositions.h"
+
 // 0x5E4280
 void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones) {
     if (updateSkinBones) {
@@ -1353,8 +1355,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBon
             bCalledPreRender = true;
         }
     } else if (!bCalledPreRender) { // Return static local bone positions, if it they weren't updated yet.
-        #include "PedStdBonePositions.h"
-        outPosition = MultiplyMatrixWithVector(*m_matrix, aStdBonePosisions[boneId]);
+        outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(boneId));
         return;
     }
 
