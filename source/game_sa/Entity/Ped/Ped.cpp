@@ -107,7 +107,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(UseGroundColModel, 0x5DEFE0);
     RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
     RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
-    // RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
+    RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
     // RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, int8(CPed::*)(CEntity *));
     // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, int8(CPed::*)(CEntity *, bool, bool));
     // RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, int8(CPed::*)(float, bool, bool));
@@ -311,9 +311,17 @@ void CPed::SetAimFlag(CEntity* aimingTo)
 }
 
 // 0x5DEF20
-void CPed::ClearAimFlag()
-{
-    ((void(__thiscall *)(CPed*))0x5DEF20)(this);
+void CPed::ClearAimFlag() {
+    if (bIsAimingGun) {
+        bIsAimingGun = false;
+        bIsRestoringGun = true;
+        m_pedIK.bUseArm = false;
+        m_nLookTime = 0;
+    }
+
+    if (m_pPlayerData) {
+        m_pPlayerData->m_fLookPitch = 0.f;
+    }
 }
 
 // 0x5DEF60
