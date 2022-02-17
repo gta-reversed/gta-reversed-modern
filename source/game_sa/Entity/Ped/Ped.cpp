@@ -120,7 +120,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetAmmo, 0x5DF290);
     RH_ScopedInstall(SetStayInSamePlace, 0x481090);
     RH_ScopedInstall(SetPedStats, 0x5DEBC0);
-    // RH_ScopedInstall(SetMoveState, 0x5DEC00);
+    RH_ScopedInstall(SetMoveState, 0x5DEC00);
     // RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
     // RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
     // RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
@@ -364,10 +364,11 @@ void CPed::Update()
     // NOP
 }
 
-// 0x5DEC00
-void CPed::SetMoveState(eMoveState moveState)
-{
-    ((void(__thiscall *)(CPed*, eMoveState))0x5DEC00)(this, moveState);
+/*!
+* @addr 0x5DEC00
+*/
+void CPed::SetMoveState(eMoveState moveState) {
+    m_nMoveState = (int32)moveState;
 }
 
 // 0x5DEC10
