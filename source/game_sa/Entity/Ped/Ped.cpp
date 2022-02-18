@@ -2649,11 +2649,46 @@ CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 turretAng
 
 /*!
 * @addr 0x5E7EC0
-* @todo
 */
-void CPed::DettachPedFromEntity()
-{
-    ((void(__thiscall *)(CPed*))0x5E7EC0)(this);
+void CPed::DettachPedFromEntity(){
+    const auto wasAttachedTo = m_pAttachedTo;
+
+    // BUG/NOTE: Again, ClearOldReference not called.
+    m_pAttachedTo = nullptr;
+
+    switch (m_nPedState) {
+    case ePedState::PEDSTATE_DIE: {
+        m_pEntityIgnoredCollision = wasAttachedTo;
+        ApplyMoveForce(wasAttachedTo->GetMatrix().GetForward() * -4.f);
+        bIsStanding = false;
+        break;
+    }
+    case ePedState::PEDSTATE_DEAD: // Skip this
+        break;
+
+    default: {
+        CAnimManager::BlendAnimation(m_pRwClump, m_nAnimGroup, AnimationId::ANIM_ID_IDLE, 1000.f);
+        bIsStanding = true;
+
+        // Restore old weapon if any
+        if (m_nSavedWeapon != eWeaponType::WEAPON_UNIDENTIFIED) {
+            GetActiveWeapon().m_nAmmoInClip = 0;
+            GetActiveWeapon().m_nTotalAmmo = 0;
+
+            SetCurrentWeapon(m_nSavedWeapon);
+            GetActiveWeapon().m_nTotalAmmo = (uint32)m_nTurretAmmo;
+
+            m_nSavedWeapon = eWeaponType::WEAPON_UNIDENTIFIED;
+        }
+
+        if (IsPlayer()) {
+            AsPlayer()->ClearWeaponTarget();
+        }
+
+        break;
+    }
+    }
+
 }
 
 /*!
