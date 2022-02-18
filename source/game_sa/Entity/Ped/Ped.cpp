@@ -17,6 +17,7 @@
 #include "AEAudioUtility.h"
 #include "PedClothesDesc.h"
 #include "TaskSimpleHoldEntity.h"
+#include "TaskComplexGoPickUpEntity.h"
 #include "Radar.h"
 #include "PostEffects.h"
 
@@ -134,8 +135,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
     RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
     RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
-    // RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
-    // RH_ScopedInstall(GetHoldingTask, 0x5E0290);
+    RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
+    RH_ScopedInstall(GetHoldingTask, 0x5E0290);
     // RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
     // RH_ScopedInstall(DoGunFlash, 0x5DF340);
     // RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
@@ -899,28 +900,37 @@ void CPed::ReleaseCoverPoint()
 }
 
 // 0x5E0290
-CTask* CPed::GetHoldingTask()
-{
-    return ((CTask* (__thiscall *)(CPed*))0x5E0290)(this);
+CTaskSimpleHoldEntity* CPed::GetHoldingTask() {
+    // Man programming in C++03 must've been a pain.. if, if, if, if, if, if... IF. 
+    if (const auto task = GetTaskManager().FindActiveTaskFromList({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
+        return task->As<CTaskSimpleHoldEntity>();
+    }
+    return nullptr;
 }
 
 // 0x5E02E0
 CEntity* CPed::GetEntityThatThisPedIsHolding()
 {
-    return ((CEntity* (__thiscall *)(CPed*))0x5E02E0)(this);
+    if (const auto task = GetHoldingTask()) {
+        return task->m_pEntityToHold;
+    }
+
+    if (const auto task = GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_GO_PICKUP_ENTITY)) {
+        return task->As<CTaskComplexGoPickUpEntity>()->m_pEntity;
+    }
+
+    return nullptr;
 }
 
 // 0x5E0360
 void CPed::DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity) {
-    if (const auto task = GetTaskManager().FindActiveTaskOfTheseTypes({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
-        const auto holdTask = task->As<CTaskSimpleHoldEntity>();
-
+    if (const auto task = GetHoldingTask()) {
         // Drop the entity
-        holdTask->DropEntity(this, true);
+        task->DropEntity(this, true);
 
         // Delete held entity (If any)
         if (bDeleteHeldEntity) {
-            if (const auto heldEntity = holdTask->m_pEntityToHold) {
+            if (const auto heldEntity = task->m_pEntityToHold) {
                 if (!heldEntity->IsObject() || !heldEntity->AsObject()->IsMissionObject()) {
                     heldEntity->DeleteRwObject(); // TODO; Are these 3 lines inlined?
                     CWorld::Remove(heldEntity);
@@ -933,9 +943,8 @@ void CPed::DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity) {
 
 // 0x5E0400
 bool CPed::CanThrowEntityThatThisPedIsHolding() {
-    // Man programming in C++03 must've been a pain..
-    if (const auto task = GetTaskManager().FindActiveTaskOfTheseTypes({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
-        return task->As<CTaskSimpleHoldEntity>()->CanThrowEntity();
+    if (const auto task = GetHoldingTask()) {
+        return task->CanThrowEntity();
     }
     return false;
 }

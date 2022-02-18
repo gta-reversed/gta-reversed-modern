@@ -447,9 +447,9 @@ public:
     void UpdateStatLeavingVehicle();
     void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, bool updateSkinBones);
     void ReleaseCoverPoint();
-    CTask* GetHoldingTask();
+    CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();
-    void DropEntityThatThisPedIsHolding(uint8 arg0);
+    void DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity);
     bool CanThrowEntityThatThisPedIsHolding();
     bool IsPlayingHandSignal();
     void StopPlayingHandSignal();

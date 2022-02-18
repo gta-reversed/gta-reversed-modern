@@ -42,6 +42,9 @@ public:
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
 
     // NOTSA
+
+    // I thought this is a good idea, turns out not so much
+    // TODO: Get rid of it :D
     template<typename T>
     T* As() {
         return static_cast<T*>(this);
