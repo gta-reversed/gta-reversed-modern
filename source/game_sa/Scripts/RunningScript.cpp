@@ -812,12 +812,15 @@ int8 CRunningScript::Process() {
 int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
     switch (commandId) {
     case COMMAND_NOP: // 0x000
-        break;
+        return 0;
     case COMMAND_WAIT: // 0x001
-        // CollectParameters(1);
-        break;
+        CollectParameters(1);
+        m_nWakeTime = CTheScripts::ScriptParams[0].iParam + CTimer::m_snTimeInMilliseconds;
+        return 1;
     case COMMAND_GOTO: // 0x002
-        break;
+        CollectParameters(1);
+        UpdatePC(CTheScripts::ScriptParams[0].iParam);
+        return 0;
     case COMMAND_SHAKE_CAM: // 0x003
         break;
     case COMMAND_SET_VAR_INT: // 0x004
@@ -967,9 +970,18 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
     case COMMAND_GOTO_IF_TRUE: // 0x04C
         break;
     case COMMAND_GOTO_IF_FALSE: // 0x04D
-        break;
+        CollectParameters(1);
+        if (m_bCondResult)
+            return 0;
+        UpdatePC(CTheScripts::ScriptParams[0].iParam);
+        return 0;
     case COMMAND_TERMINATE_THIS_SCRIPT: // 0x04E
-        break;
+        if (m_bIsMission)
+            CTheScripts::bAlreadyRunningAMissionScript = false;
+        RemoveScriptFromList(&CTheScripts::pActiveScripts);
+        AddScriptToList(&CTheScripts::pIdleScripts);
+        ShutdownThisScript();
+        return 1;
     case COMMAND_START_NEW_SCRIPT: // 0x04F
     {
         CollectParameters(1);
@@ -3202,6 +3214,8 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
 
 // 0x48A320
 int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
+    char str[52];
+
     switch (commandId) {
     case COMMAND_LOAD_COLLISION_WITH_SCREEN: // 0x44C
         break;
@@ -3230,7 +3244,26 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     case COMMAND_IS_PLAYER_TARGETTING_OBJECT: // 0x458
         break;
     case COMMAND_TERMINATE_ALL_SCRIPTS_WITH_THIS_NAME: // 0x459
-        break;
+    {
+        ReadTextLabelFromScript(str, 8);
+
+        for (int i = 0; i < 8; i++)
+            str[i] = tolower(str[i]);
+
+        CRunningScript *script = CTheScripts::pActiveScripts;
+        while (script)
+        {
+            CRunningScript* next = script->m_pNext;
+            if (!strcmp(script->m_szName, str))
+            {
+                script->RemoveScriptFromList(&CTheScripts::pActiveScripts);
+                script->AddScriptToList(&CTheScripts::pIdleScripts);
+                script->ShutdownThisScript();
+            }
+            script = next;
+        }
+        return 0;
+    }
     case COMMAND_DISPLAY_TEXT_WITH_NUMBER: // 0x45A
         break;
     case COMMAND_DISPLAY_TEXT_WITH_2_NUMBERS: // 0x45B
