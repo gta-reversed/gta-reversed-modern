@@ -341,7 +341,7 @@ public:
     float               m_fLookDirection; // In RAD
     int32               m_nWeaponModelId;
     int32               field_744;
-    int32               m_nLookTime;
+    uint32              m_nLookTime;
     int32               field_74C;
     int32               m_nDeathTime;
     char                m_nBodypartToRemove;
@@ -570,6 +570,13 @@ public:
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
+
+
+private:
+    // Virtual method wrappers
+    void SetModelIndex_Reversed(int32 model) { CPed::SetModelIndex(model); }
+    void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
+    void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);

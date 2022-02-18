@@ -20,6 +20,7 @@
 #include "TaskComplexGoPickUpEntity.h"
 #include "Radar.h"
 #include "PostEffects.h"
+#include "PedStdBonePositions.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -724,7 +725,11 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
     return slot != -1 && GetWeaponInSlot(slot).m_nType == weaponType;
 }
 
-// 0x5DF340
+/*!
+* @addr 0x5DF340
+* @brief Do gun flash by resetting it's alpha to max
+* @returns Always true
+*/
 bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
     // Really elegant.. ;D
     if (bRightHand) {
@@ -735,6 +740,8 @@ bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
         nm_fWeaponGunFlashAlphaProgMP1 = CPed::m_sGunFlashBlendStart / arg0;
     }
     RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, CGeneral::GetRandomNumberInRange(-360.f, 360.f), rwCOMBINEPRECONCAT);
+
+    return true;
 }
 
 // 0x5DF400
@@ -827,11 +834,11 @@ void CPed::ShoulderBoneRotation(RpClump* clump) {
 
 /*!
 * @addr 0x5DF8D0
-* @brief Set look timer relative to now
+* @brief Set look timer relative to now, but only if it has expired.
 * @param time Time the timer ends relative to now
 */
 void CPed::SetLookTimer(uint32 time) {
-    if (CTimer::GetTimeInMS() > this->m_nLookTime) {
+    if (CTimer::GetTimeInMS() > m_nLookTime) {
         m_nLookTime = CTimer::GetTimeInMS() + time;
     }
 }
@@ -1525,8 +1532,6 @@ bool CPed::IsPointerValid() {
     const auto ref = CPools::GetPedPool()->GetRef(this);
     return ref >= 0 && ref < 140 && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed()); // TODO: `140` is IIRC the size of CPool<CPed>, so a variable should be used here.
 }
-
-#include "PedStdBonePositions.h"
 
 // 0x5E4280
 void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones) {
@@ -2646,6 +2651,8 @@ void CPed::ProcessControl()
 
 // 0x5E4110 todo: CPed::Teleport(CVector)
 void CPed::Teleport(CVector destination, bool resetRotation) {
+    UNUSED(resetRotation);
+
     if (IsPlayer() || GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_LEAVE_CAR)) {
         GetIntelligence()->FlushImmediately(true);
     }

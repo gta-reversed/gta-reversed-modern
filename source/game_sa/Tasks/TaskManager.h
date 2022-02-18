@@ -85,7 +85,7 @@ public:
         });
     }
 
-    CTask* FindActiveTaskOfTheseTypes(std::initializer_list<eTaskType> types) {
+    CTask* FindActiveTaskFromList(std::initializer_list<eTaskType> types) {
         for (auto type : types) {
             if (const auto task = FindActiveTaskByType(type)) {
                 return task;
