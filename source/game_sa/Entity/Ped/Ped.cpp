@@ -122,7 +122,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetPedStats, 0x5DEBC0);
     RH_ScopedInstall(SetMoveState, 0x5DEC00);
     RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
-    // RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
+    RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
     // RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
     // RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
     // RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
@@ -382,9 +382,12 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 }
 
 // 0x5DED10
-void CPed::StopNonPartialAnims()
-{
-    ((void(__thiscall *)(CPed*))0x5DED10)(this);
+void CPed::StopNonPartialAnims() {
+    for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
+            assoc->SetFlag(ANIM_FLAG_STARTED, false);
+        }
+    }
 }
 
 // 0x5DED50

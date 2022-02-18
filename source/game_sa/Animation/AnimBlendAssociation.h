@@ -54,7 +54,7 @@ struct SClumpAnimAssoc {
     float                m_fSpeed;
     float                m_fTimeStep;
     int16                m_nAnimId;
-    uint16               m_nFlags;
+    uint16               m_nFlags; // TODO: use bitfield
 };
 
 class CAnimBlendAssociation : public SClumpAnimAssoc {
