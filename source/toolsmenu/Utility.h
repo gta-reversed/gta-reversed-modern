@@ -20,7 +20,7 @@ static auto SplitStringView(std::string_view str, std::string_view delim) {
     return str
         | std::ranges::views::split(delim)
         | std::ranges::views::transform([](auto&& rng) {
-#if 0 // C++23 - String view from range
+#if _HAS_CXX23 // C++23 - String view from range
             return std::string_view(rng.begin(), rng.end());
 #else
             return std::string_view(&*rng.begin(), std::ranges::distance(rng));

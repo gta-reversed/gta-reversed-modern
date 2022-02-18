@@ -988,14 +988,14 @@ void CPed::ShoulderBoneRotation(RpClump* clump) {
     for (auto [breast, upperArm, clavicle] : bones) {
         auto& breastRwMat = GetMatrixOf(breast);
 
-        // Update matrix of l_breast to be the same as l_upper_arm's
+        // Make the breast's matrix same as the upper arm's
         breastRwMat = GetMatrixOf(upperArm);
 
         CMatrix breastMat{ &breastRwMat };
         CMatrix clavicleMat{ &GetMatrixOf(clavicle) };
 
-        // Transform matrix from left_clavicle's space to left_breast's
-        breastMat *= Invert(clavicleMat); 
+        // Calculate breast to clavicle transformation matrix (and store it in breastMat)
+        breastMat = Invert(clavicleMat) * breastMat;
 
         // Half it's X rotation
 
@@ -1006,7 +1006,7 @@ void CPed::ShoulderBoneRotation(RpClump* clump) {
         breastMat.ConvertFromEulerAngles(x, y, z, ORDER_ZYX | SWAP_XZ);
 
         // Transform it back into it's own space
-        breastMat *= clavicleMat;
+        breastMat = clavicleMat * breastMat;
 
         // Finally, update it's RW associated matrix
         breastMat.UpdateRW();      
@@ -1245,7 +1245,8 @@ void CPed::StopPlayingHandSignal() {
 * @returns Get walk speed in units/s based on the ped's anim group's WALK anim.
 */
 float CPed::GetWalkAnimSpeed() {
-    auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, nullptr)->m_pHierarchy;
+    auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, AnimationId::ANIM_ID_WALK)->m_pHierarchy;
+
     CAnimManager::UncompressAnimation(hier);
     auto& firstSequence = hier->GetSequences()[ANIM_ID_WALK];
 
