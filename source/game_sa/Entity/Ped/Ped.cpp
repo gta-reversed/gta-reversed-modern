@@ -141,7 +141,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DoGunFlash, 0x5DF340);
     RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
     RH_ScopedInstall(IsAlive, 0x5E0170);
-    // RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
+    RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
     // RH_ScopedInstall(Undress, 0x5E00F0);
     // RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
     // RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
@@ -2519,9 +2519,26 @@ void CPed::MakeTyresMuddySectorList(CPtrList& ptrList)
 }
 
 // 0x6B4200
-void CPed::DeadPedMakesTyresBloody()
-{
-    ((void(__thiscall *)(CPed*))0x6B4200)(this);
+void CPed::DeadPedMakesTyresBloody() {
+    CWorld::IncrementCurrentScanCode();
+
+    const auto& pos = GetPosition();
+
+    const float minX = pos.x - 2.f;
+    const float maxX = pos.x + 2.f;
+    const float minY = pos.y - 2.f;
+    const float maxY = pos.y + 2.f;
+
+    const int32 startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
+    const int32 startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
+    const int32 endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
+    const int32 endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
+
+    for (int32 sy = startSectorY; sy <= endSectorY; ++sy) {
+        for (int32 sx = startSectorX; sx <= endSectorX; ++sx) {
+            MakeTyresMuddySectorList(GetRepeatSector(sx, sy)->GetList(REPEATSECTOR_VEHICLES));
+        }
+    }
 }
 
 bool CPed::IsInVehicleThatHasADriver()
