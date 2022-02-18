@@ -130,7 +130,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(CanSeeEntity, 0x5E0730);
     RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
     RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
-    // RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
+    RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
     // RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
     // RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
     // RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
@@ -929,9 +929,10 @@ bool CPed::IsPlayingHandSignal()
 }
 
 // 0x5E0480
-void CPed::StopPlayingHandSignal()
-{
-    ((void(__thiscall *)(CPed*))0x5E0480)(this);
+void CPed::StopPlayingHandSignal() {
+    if (const auto task = GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_HANDSIGNAL_ANIM)) {
+        task->MakeAbortable(this, ABORT_PRIORITY_URGENT, nullptr);
+    }
 }
 
 // 0x5E04B0
