@@ -31,8 +31,8 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(Constructor, 0x5E8030);
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
 
-    // Install("CPed", "operator delete", 0x5E4760, &CPed::operator delete);
-    // Install("CPed", "operator new", 0x5E4720, &CPed::operator new);
+    RH_ScopedInstall(operator delete, 0x5E4760);
+    RH_ScopedInstall(operator new, 0x5E4720);
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
     RH_ScopedInstall(PedCanPickUpPickUp, 0x455560);
     RH_ScopedInstall(Update, 0x5DEBE0);
@@ -185,14 +185,14 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 * @addr 0x5E4720
 */
 void* CPed::operator new(uint32 size) {
-    return ((void* (__cdecl *)(uint32))0x5E4720)(size);
+    CPools::GetPedPool()->New();
 }
 
 /*!
 * @addr 0x5E4760
 */
 void CPed::operator delete(void* data) {
-    ((void(__cdecl *)(void*))0x5E4760)(data);
+    CPools::GetPedPool()->Delete((CPed*)data);
 }
 
 /*!
@@ -336,8 +336,7 @@ bool CPed::Load() {
 /*!
 * @addr 0x43AB90
 */
-bool CPed::PedIsInvolvedInConversation()
-{
+bool CPed::PedIsInvolvedInConversation() {
     return this == CPedToPlayerConversations::m_pPed;
 }
 
@@ -378,11 +377,8 @@ bool CPed::PedIsReadyForConversation(bool checkLocalPlayerWantedLevel) {
 /*!
 * @addr 0x455560
 */
-bool CPed::PedCanPickUpPickUp()
-{
-    auto& taskmgr = FindPlayerPed(0)->GetTaskManager();
-    return !taskmgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)
-        && !taskmgr.FindActiveTaskByType(TASK_COMPLEX_USE_MOBILE_PHONE);
+bool CPed::PedCanPickUpPickUp() {
+    return FindPlayerPed(0)->GetTaskManager().FindActiveTaskFromList({ TASK_COMPLEX_ENTER_CAR_AS_DRIVER, TASK_COMPLEX_USE_MOBILE_PHONE });
 }
 
 /*!

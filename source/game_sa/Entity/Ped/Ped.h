@@ -474,7 +474,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBones);
+    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
