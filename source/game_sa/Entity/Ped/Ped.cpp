@@ -159,7 +159,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
     // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
     // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
-    // RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
+    RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
     // RH_ScopedInstall(Render_Reversed, 0x5E7680);
     // RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
     // RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);

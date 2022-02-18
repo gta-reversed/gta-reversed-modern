@@ -577,6 +577,7 @@ private:
     void SetModelIndex_Reversed(int32 model) { CPed::SetModelIndex(model); }
     void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
     void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
+    void PreRender_Reversed() { CPed::PreRender(); }
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
