@@ -32,6 +32,9 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(Constructor, 0x5E8030);
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
 
+    RH_ScopedInstall(DettachPedFromEntity, 0x5E7EC0);
+    RH_ScopedInstall(AttachPedToBike, 0x5E7E60);
+    RH_ScopedInstall(AttachPedToEntity, 0x5E7CB0);
     RH_ScopedInstall(OurPedCanSeeThisEntity, 0x5E1660);
     RH_ScopedInstall(operator delete, 0x5E4760);
     RH_ScopedInstall(operator new, 0x5E4720);
@@ -115,6 +118,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
     RH_ScopedOverloadedInstall(SetAimFlag, "Entity", 0x5DEED0, void(CPed::*)(CEntity *));
+    RH_ScopedOverloadedInstall(SetAimFlag, "Heading", 0x5E8830, void(CPed::*)(float));
     RH_ScopedOverloadedInstall(SetLookFlag, "Entity", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
     RH_ScopedOverloadedInstall(SetLookFlag, "Heading", 0x5DEDC0, void(CPed::*)(float, bool, bool));
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
