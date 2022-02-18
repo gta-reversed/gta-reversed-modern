@@ -509,7 +509,7 @@ public:
     void SetLook(CEntity* entity);
     void Look();
     CEntity* AttachPedToEntity(CEntity* entity, CVector offset, uint16 arg2, float arg3, eWeaponType weaponType);
-    CEntity* AttachPedToBike(CEntity* entity, CVector offset, uint16 arg2, float arg3, float arg4, eWeaponType weaponType);
+    void AttachPedToBike(CEntity* entity, CVector offset, uint16 arg2, float arg3, float arg4, eWeaponType weaponType);
     void DettachPedFromEntity();
     void SetAimFlag(float heading);
     bool CanWeRunAndFireWithWeapon();

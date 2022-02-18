@@ -112,11 +112,16 @@ public:
     auto GetTargetHeadRange() -> float;
     auto GetWeaponReloadTime() -> uint32;
 
-    // NOTSA - check if weapon has skill stats
+    // NOTSA
+
+    // Check if weapon has skill stats
     static bool WeaponHasSkillStats(eWeaponType type);
 
-    // NOTSA - get weapon info index for this type and with this skill
+    // Get weapon info index for this type and with this skill
     static uint32 GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill);
+
+    // Return both model IDs as an array
+    auto GetModels() const { return std::to_array({ m_nModelId1, m_nModelId2 }); }
 };
 
 VALIDATE_SIZE(CWeaponInfo, 0x70);

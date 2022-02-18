@@ -31,7 +31,8 @@ void CPed::InjectHooks() {
 
     // RH_ScopedInstall(Constructor, 0x5E8030);
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
-
+    
+    RH_ScopedInstall(RequestDelayedWeapon, 0x5E8910);
     RH_ScopedInstall(DettachPedFromEntity, 0x5E7EC0);
     RH_ScopedInstall(AttachPedToBike, 0x5E7E60);
     RH_ScopedInstall(AttachPedToEntity, 0x5E7CB0);
@@ -2645,7 +2646,7 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
 /*!
 * @addr 0x5E7E60
 */
-CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 turretAngleA, float turretAngleB, float turretPosnMode, eWeaponType weaponType) {
+void CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 turretAngleA, float turretAngleB, float turretPosnMode, eWeaponType weaponType) {
     if (AttachPedToEntity(entity, offset, turretAngleA, turretAngleB, weaponType)) {
         m_nTurretPosnMode = turretPosnMode;
     }
@@ -2720,11 +2721,28 @@ bool CPed::CanWeRunAndFireWithWeapon() {
 
 /*!
 * @addr 0x5E8910
-* @todo
 */
-void CPed::RequestDelayedWeapon()
-{
-    ((void(__thiscall *)(CPed*))0x5E8910)(this);
+void CPed::RequestDelayedWeapon() {
+    if (m_nDelayedWeapon == eWeaponType::WEAPON_UNIDENTIFIED) {
+        return;
+    }
+
+    // Simplified a little using an array. Originally it had too much copy paste.
+
+    const auto models = CWeaponInfo::GetWeaponInfo(m_nDelayedWeapon)->GetModels();
+
+    // Request models
+    for (auto model : models) {
+        if (model != -1) {
+            CStreaming::RequestModel(model, STREAMING_KEEP_IN_MEMORY);
+        }
+    }
+
+    // If it has no model, or at least one model is loaded..
+    if (rng::all_of(models, [](auto m) { return m == -1 || CStreaming::IsModelLoaded(m); })) {
+        GiveWeapon(m_nDelayedWeapon, m_nDelayedWeaponAmmo, true);
+        m_nDelayedWeapon = eWeaponType::WEAPON_UNIDENTIFIED;
+    }
 }
 
 /*!
