@@ -186,7 +186,7 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 * @addr 0x5E4720
 */
 void* CPed::operator new(uint32 size) {
-    CPools::GetPedPool()->New();
+    return CPools::GetPedPool()->New();
 }
 
 /*!
