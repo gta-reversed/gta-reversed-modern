@@ -127,7 +127,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
     RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
     RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
-    // RH_ScopedInstall(CanSeeEntity, 0x5E0730);
+    RH_ScopedInstall(CanSeeEntity, 0x5E0730);
     // RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
     // RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
     // RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
@@ -946,10 +946,29 @@ void CPed::SetPedDefaultDecisionMaker()
     ((void(__thiscall *)(CPed*))0x5E06E0)(this);
 }
 
-// 0x5E0730
-bool CPed::CanSeeEntity(CEntity* entity, float limitAngle)
-{
-    return ((bool(__thiscall *)(CPed*, CEntity*, float))0x5E0730)(this, entity, limitAngle);
+/*!
+* @addr 0x5E0730
+* @brief Check if entity is a given range of rotation given by \r limitAngle [-limitAngle, limitAngle
+*/
+bool CPed::CanSeeEntity(CEntity* entity, float limitAngle) {
+
+    // TODO: Inlined? 0x5E0780, 0x5E07BB
+    const auto FixRadianAngle = [](float angle) {
+        if (angle < TWO_PI) {
+            if (angle < 0.f) {
+                return angle + TWO_PI;
+            }
+        } else {
+            return angle - TWO_PI;
+        }
+        return angle;
+    };
+
+    // R* used the degree returning function, and converted to radians, we just use the radian version directly
+    const auto pointAngle = FixRadianAngle(CGeneral::GetRadianAngleBetweenPoints(entity->GetPosition2D(), GetPosition2D()));
+
+    const auto delta = std::abs(m_fCurrentRotation - pointAngle);
+    return delta < limitAngle || delta > TWO_PI - limitAngle;
 }
 
 // 0x5E0820
