@@ -2640,11 +2640,11 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
 
 /*!
 * @addr 0x5E7E60
-* @todo
 */
-CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 arg2, float arg3, float arg4, eWeaponType weaponType)
-{
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, float, eWeaponType))0x5E7E60)(this, entity, offset, arg2, arg3, arg4, weaponType);
+CEntity* CPed::AttachPedToBike(CEntity* entity, CVector offset, uint16 turretAngleA, float turretAngleB, float turretPosnMode, eWeaponType weaponType) {
+    if (AttachPedToEntity(entity, offset, turretAngleA, turretAngleB, weaponType)) {
+        m_nTurretPosnMode = turretPosnMode;
+    }
 }
 
 /*!

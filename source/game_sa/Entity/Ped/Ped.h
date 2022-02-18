@@ -352,11 +352,15 @@ public:
     char                m_nLastWeaponDamage;
     CEntity*            m_pLastEntityDamage;
     int32               field_768;
+
+    // TODO: Not turret, but rather attached entity, see `AttachPedToEntity` and `AttachPedToBike`
     CVector             m_vecTurretOffset;
     uint16              m_fTurretAngleA;
     float               m_fTurretAngleB;
-    int32               m_nTurretPosnMode;
+    float               m_nTurretPosnMode;
     int32               m_nTurretAmmo;
+    // **
+
     CCoverPoint*        m_pCoverPoint;            // CCoverPoint *
     CEntryExit*         m_pEnex;                  // CEnEx *
     float               m_fRemovalDistMultiplier; // 1.0 by default
