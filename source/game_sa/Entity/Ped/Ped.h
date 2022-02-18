@@ -125,6 +125,8 @@ protected:
         plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
         plugin::dummy, plugin::dummy, plugin::dummy } {}
 public:
+    static inline int32 m_sGunFlashBlendStart = 10'000; // 0x8D1370
+
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
     CAEWeaponAudioEntity    m_weaponAudio;

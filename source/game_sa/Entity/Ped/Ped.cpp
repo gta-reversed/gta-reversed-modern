@@ -126,7 +126,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
     RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
     RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
-    // RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
+    RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
     // RH_ScopedInstall(CanSeeEntity, 0x5E0730);
     // RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
     // RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
@@ -730,9 +730,31 @@ bool CPed::DoGunFlash(int32 arg0, bool arg1)
 }
 
 // 0x5DF400
-void CPed::SetGunFlashAlpha(bool rightHand)
-{
-    ((void(__thiscall *)(CPed*, bool))0x5DF400)(this, rightHand);
+void CPed::SetGunFlashAlpha(bool rightHand) {
+    if (!m_pGunflashObject) {
+        return;
+    }
+
+    if (m_nWeaponGunflashAlphaMP1 < 0 && m_nWeaponGunflashAlphaMP2 < 0) { // Reordered a little.
+        return;
+    }
+
+    auto& gunFlashAlphaInHand = rightHand ? m_nWeaponGunflashAlphaMP2 : m_nWeaponGunflashAlphaMP1;
+
+    if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
+        // They used a clever trick to not have to conver to float..
+        // Then they converted to a float to check if the number is higher than 255.. XDDD
+        if (gunFlashAlphaInHand < 0) {
+            CVehicle::SetComponentAtomicAlpha(atomic, 0);
+        } else {
+            CVehicle::SetComponentAtomicAlpha(atomic, std::min(255, 350 * gunFlashAlphaInHand / m_sGunFlashBlendStart));
+        }
+        RpAtomicSetFlags(atomic, ATOMIC_IS_LEFT); // NOTE: Not sure if this is the correct enum (but the value of 4 is correct)
+    }
+
+    if (!gunFlashAlphaInHand) {
+        gunFlashAlphaInHand = (uint16)-1;
+    }
 }
 
 // 0x5DF4E0
