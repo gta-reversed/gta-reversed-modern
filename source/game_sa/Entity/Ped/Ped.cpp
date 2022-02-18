@@ -139,7 +139,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetHoldingTask, 0x5E0290);
     RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
     RH_ScopedInstall(DoGunFlash, 0x5DF340);
-    // RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
+    RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
     RH_ScopedInstall(IsAlive, 0x5E0170);
     // RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
     // RH_ScopedInstall(Undress, 0x5E00F0);
@@ -894,10 +894,27 @@ void CPed::UpdateStatLeavingVehicle()
     // NOP
 }
 
-// 0x5E01C0
-void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, bool updateSkinBones)
-{
-    ((void(__thiscall *)(CPed*, RwV3d&, uint32, bool))0x5E01C0)(this, inOffsetOutPosn, boneId, updateSkinBones);
+/*!
+* @addr 0x5E01C0
+* @brief Transform \r inOffsetOutPosn into the given \r bone's space
+*
+* @param [in,out] inOffsetOutPosn The position to be transformed in-place.
+* @param          updateSkinBones If `UpdateRpHAnim` should be called
+*/
+void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones bone, bool updateSkinBones) {
+    // Pretty much the same as GetBonePosition..
+    if (updateSkinBones) {
+        if (!bCalledPreRender) {
+            UpdateRpHAnim();
+            bCalledPreRender = true;
+        }
+    } else if (!bCalledPreRender) { // Return static local bone position instead
+        inOffsetOutPosn = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(bone));
+        return;
+    }
+
+    // Return actual position
+    RwV3dTransformPoints(&inOffsetOutPosn, &inOffsetOutPosn, 1, &GetBoneMatrix(bone));
 }
 
 // 0x5E0270
@@ -1493,14 +1510,14 @@ void CPed::GetBonePosition(RwV3d& outPosition, uint32 boneId, bool updateSkinBon
             UpdateRpHAnim();
             bCalledPreRender = true;
         }
-    } else if (!bCalledPreRender) { // Return static local bone positions, if it they weren't updated yet.
+    } else if (!bCalledPreRender) { // Return static local bone position instead
         outPosition = MultiplyMatrixWithVector(*m_matrix, GetPedBoneStdPosition(boneId));
         return;
     }
 
-    if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy
+    if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[boneId])); // IMPORTANT NOTE: And C fanboys consider this readable..
-    } else {
+    } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
         assert(0); // NOTSA: Let's see if this is possible at all. 
     }
