@@ -148,8 +148,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
     RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
-    // RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
-    // RH_ScopedInstall(SetRadioStation, 0x5DFD90);
+    RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
+    RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     // RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
     // RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
@@ -839,8 +839,7 @@ bool CPed::IsPlayer() const
 }
 
 // 0x5DF910
-void CPed::SetPedPositionInCar()
-{
+void CPed::SetPedPositionInCar() {
     ((void(__thiscall *)(CPed*))0x5DF910)(this);
 }
 
@@ -860,10 +859,18 @@ void CPed::RestoreHeadingRateCB(CAnimBlendAssociation* assoc, void* data) {
     ped.m_fHeadingChangeRate = ped.m_pStats->m_fHeadingChangeRate;
 }
 
-// 0x5DFD90
+/*!
+* @addr 0x5DFD90
+* @brief Set random radio station if ped is in car. The station is chosen randomly, and is either `m_nRadio1` or `m_nRadio2` from the ped's \r CPedModelInfo
+*/
 void CPed::SetRadioStation()
 {
-    ((void(__thiscall*)(CPed*))0x5DFD90)(this);
+    if (!IsPlayer() && m_pVehicle) {
+        if (m_pVehicle->m_pDriver == this) {
+            const auto& mi = *(CPedModelInfo*)GetModelInfo();
+            m_pVehicle->m_vehicleAudio.m_settings.m_nRadioID = (rand() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
+        }
+    }
 }
 
 // 0x5DFDF0

@@ -28,8 +28,8 @@ public:
     uint16     m_nCarsCanDriveMask;
     uint16     m_nPedFlags;
     CColModel* m_pHitColModel;
-    uint8      m_nRadio1;
-    uint8      m_nRadio2;
+    eRadioID      m_nRadio1;
+    eRadioID      m_nRadio2;
     uint8      m_nRace;
     char       _pad;
     int16      m_nPedAudioType;
