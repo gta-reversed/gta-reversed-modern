@@ -581,6 +581,7 @@ private:
     void Render_Reversed() { CPed::Render(); }
     bool SetupLighting_Reversed() { return CPed::SetupLighting(); }
     void RemoveLighting_Reversed(bool bRemove) { CPed::RemoveLighting(bRemove); }
+    void FlagToDestroyWhenNextProcessed_Reversed() { CPed::FlagToDestroyWhenNextProcessed(); }
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);

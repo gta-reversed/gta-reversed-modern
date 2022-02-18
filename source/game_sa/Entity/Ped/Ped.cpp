@@ -164,7 +164,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Render_Reversed, 0x5E7680);
     RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
     RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
-    // RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
+    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
     // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
     // RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
     // RH_ScopedInstall(Save_Reversed, 0x5D5730);
@@ -2803,9 +2803,31 @@ void CPed::RemoveLighting(bool bRemove) {
 }
 
 // 0x5E7B70
-void CPed::FlagToDestroyWhenNextProcessed()
-{
-    plugin::CallMethod<0x5E7B70, CPed*>(this);
+void CPed::FlagToDestroyWhenNextProcessed() {
+    if (!bInVehicle) {
+        return;
+    }
+
+    if (!m_pVehicle) {
+        return;
+    }
+
+    if (m_pVehicle->IsDriver(this)) {
+        ClearReference(m_pVehicle->m_pDriver);
+        if (IsPlayer() || m_pVehicle->m_nStatus != STATUS_WRECKED) {
+            m_pVehicle->m_nStatus = STATUS_ABANDONED;
+        }
+    } else {
+        m_pVehicle->RemovePassenger(this);
+    }
+    bInVehicle = false;
+
+    if (IsVehiclePointerValid(m_pVehicle)) {
+        ClearReference(m_pVehicle);
+    }
+    m_pVehicle = nullptr;
+
+    SetPedState(IsCreatedByMission() ? ePedState::PEDSTATE_DEAD : ePedState::PEDSTATE_NONE);
 }
 
 // 0x5E2530
