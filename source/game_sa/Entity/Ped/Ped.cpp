@@ -124,7 +124,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
     RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
     RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
-    // RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
+    RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
     // RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
     // RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
     // RH_ScopedInstall(CanSeeEntity, 0x5E0730);
@@ -701,9 +701,9 @@ void CPed::SetAmmo(eWeaponType weaponType, uint32 ammo) {
 }
 
 // 0x5DF300
-bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType)
-{
-    return ((bool(__thiscall *)(CPed*, eWeaponType))0x5DF300)(this, weaponType);
+bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
+    const auto slot = GetWeaponSlot(weaponType);
+    return slot != -1 && GetWeaponInSlot(slot).m_nType == weaponType;
 }
 
 // 0x5DF340
