@@ -153,7 +153,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
     RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
-    // RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
+    RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
     // RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
     // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
