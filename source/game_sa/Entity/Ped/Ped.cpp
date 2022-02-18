@@ -2708,16 +2708,14 @@ void CPed::SetAimFlag(float heading) {
         m_pedIK.bUseArm = false;
     }
 
-    m_pedIK.bUseArm = GetActiveWeapon().GetWeaponInfo(this).flags.bAimWithArm;
+    m_pedIK.bUseArm = CanWeRunAndFireWithWeapon();
 }
 
 /*!
 * @addr 0x5E88E0
-* @todo
 */
-bool CPed::CanWeRunAndFireWithWeapon()
-{
-    return ((bool(__thiscall *)(CPed*))0x5E88E0)(this);
+bool CPed::CanWeRunAndFireWithWeapon() {
+    return GetActiveWeapon().GetWeaponInfo(this).flags.bAimWithArm;
 }
 
 /*!
