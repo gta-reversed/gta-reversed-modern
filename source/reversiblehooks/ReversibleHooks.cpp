@@ -42,11 +42,11 @@ void OnInjectionEnd() {
 }
 
 namespace detail {
-void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault) {
+void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault, int stackArguments) {
     // Functions with the same name are asserted in `HookCategory::AddItem()`
     assert(s_HookedAddresses.insert(installAddress).second); // If this asserts that means the address was hooked once already - Thats bad!
 
-    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize);
+    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize, stackArguments);
     item->State(!bDisableByDefault);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
