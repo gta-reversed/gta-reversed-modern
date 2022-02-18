@@ -63,6 +63,7 @@ public:
     static CColModel& ms_PelletTestCol;
 
 public:
+    CWeapon() = default;
     CWeapon(plugin::dummy_func_t) {}
     CWeapon(eWeaponType weaponType, int32 ammo);
 

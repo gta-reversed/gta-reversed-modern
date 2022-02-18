@@ -22,6 +22,7 @@
 #include "PostEffects.h"
 #include "PedStdBonePositions.h"
 #include "TaskSimpleJetPack.h"
+#include "PedSaveStructure.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -167,8 +168,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
     // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
     RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
-    // RH_ScopedInstall(Save_Reversed, 0x5D5730);
-    // RH_ScopedInstall(Load_Reversed, 0x5D4640);
+    RH_ScopedInstall(Save_Reversed, 0x5D5730);
+    RH_ScopedInstall(Load_Reversed, 0x5D4640);
 
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
@@ -298,15 +299,28 @@ void CPed::SetMoveAnim() {
 }
 
 // 0x5D5730
-bool CPed::Save()
-{
-    return ((bool(__thiscall *)(CPed*))(*(void ***)this)[25])(this);
+bool CPed::Save() {
+    CPedSaveStructure save;
+    save.Construct(this);
+
+    uint32 size{ sizeof(save) };
+    CGenericGameStorage::SaveDataToWorkBuffer(&size, sizeof(size));
+    CGenericGameStorage::SaveDataToWorkBuffer(&save, sizeof(save));
+
+    return true;
 }
 
 // 0x5D4640
-bool CPed::Load()
-{
-    return plugin::CallMethodAndReturn<bool, 0x5D4640, CPed*>(this);
+bool CPed::Load() {
+    CPedSaveStructure save;
+    uint32 size{};
+    CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(size));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&save, sizeof(save));
+
+    assert(size == sizeof(save)); // NOTSA
+    save.Extract(this);
+
+    return true;
 }
 
 // 0x43AB90
