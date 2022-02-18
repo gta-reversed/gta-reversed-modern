@@ -132,7 +132,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
     RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
     RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
-    // RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
+    RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
     // RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
     // RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
     // RH_ScopedInstall(GetHoldingTask, 0x5E0290);
@@ -917,9 +917,14 @@ void CPed::DropEntityThatThisPedIsHolding(uint8 arg0)
 }
 
 // 0x5E0400
-bool CPed::CanThrowEntityThatThisPedIsHolding()
-{
-    return ((bool(__thiscall *)(CPed*))0x5E0400)(this);
+bool CPed::CanThrowEntityThatThisPedIsHolding() {
+    // Man programming in C++03 must've been a pain..
+    for (auto type : { TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY }) {
+        if (const auto task = GetTaskManager().FindActiveTaskByType(type)) {
+            return task->As<CTaskSimpleHoldEntity>()->CanThrowEntity();
+        }
+    }
+    return false;
 }
 
 // 0x5E0460
