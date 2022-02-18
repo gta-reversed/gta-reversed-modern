@@ -145,7 +145,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Undress, 0x5E00F0);
     RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
     RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
-    // RH_ScopedInstall(Dress, 0x5E0130);
+    RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
     // RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
     // RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
@@ -878,9 +878,13 @@ void CPed::Undress(char* modelName) {
 }
 
 // 0x5E0130
-void CPed::Dress()
-{
-    ((void(__thiscall *)(CPed*))0x5E0130)(this);
+void CPed::Dress() {
+    SetModelIndex(m_nModelIndex);
+    if (m_nPedState != ePedState::PEDSTATE_DRIVING) {
+        m_nPedState = ePedState::PEDSTATE_IDLE;
+    }
+    CWorld::Add(this);
+    RestoreHeadingRate();
 }
 
 // 0x5E0170
