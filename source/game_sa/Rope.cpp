@@ -63,6 +63,8 @@ void CRope::CreateHookObjectForRope() {
     case eRopeType::WRECKING_BALL:
         modelIndex = MI_WRECKING_BALL;
         break;
+    case eRopeType::SWAT:
+        return; // Just so the assert below wont be hit.
     default: {
         assert(0); // NOTSA
         return;
