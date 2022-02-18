@@ -44,8 +44,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(PedIsInvolvedInConversation, 0x43AB90);
     RH_ScopedInstall(ClearWeapons, 0x5E6320);
     RH_ScopedInstall(ClearWeapon, 0x5E62B0);
-    RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E6280, void(CPed::*)(eWeaponType));
-    RH_ScopedOverloadedInstall(SetCurrentWeapon, "", 0x5E61F0, void(CPed::*)(int32));
+    RH_ScopedOverloadedInstall(SetCurrentWeapon, "WepType", 0x5E6280, void(CPed::*)(eWeaponType));
+    RH_ScopedOverloadedInstall(SetCurrentWeapon, "Slot", 0x5E61F0, void(CPed::*)(int32));
     RH_ScopedInstall(GiveWeapon, 0x5E6080);
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
@@ -112,9 +112,9 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPedShootable, 0x5DEFD0);
     RH_ScopedInstall(GetLocalDirection, 0x5DEF60);
     RH_ScopedInstall(ClearAimFlag, 0x5DEF20);
-    RH_ScopedOverloadedInstall(SetAimFlag, "", 0x5DEED0, void(CPed::*)(CEntity *));
-    RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
-    RH_ScopedOverloadedInstall(SetLookFlag, "", 0x5DEDC0, void(CPed::*)(float, bool, bool));
+    RH_ScopedOverloadedInstall(SetAimFlag, "Entity", 0x5DEED0, void(CPed::*)(CEntity *));
+    RH_ScopedOverloadedInstall(SetLookFlag, "Entity", 0x5DEE40, void(CPed::*)(CEntity *, bool, bool));
+    RH_ScopedOverloadedInstall(SetLookFlag, "Heading", 0x5DEDC0, void(CPed::*)(float, bool, bool));
     RH_ScopedInstall(CanUseTorsoWhenLooking, 0x5DED90);
     RH_ScopedInstall(PedIsReadyForConversation, 0x43ABA0);
     RH_ScopedInstall(CreateDeadPedMoney, 0x4590F0);
@@ -768,6 +768,10 @@ bool CPed::CanBeDeletedEvenInVehicle()
 
 // 0x5DF170
 void CPed::RemoveGogglesModel() {
+    if (!m_pGogglesObject) {
+        return;
+    }
+
     // Release model info
     CVisibilityPlugins::GetClumpModelInfo((RpClump*)m_pGogglesObject)->RemoveRef();
 
