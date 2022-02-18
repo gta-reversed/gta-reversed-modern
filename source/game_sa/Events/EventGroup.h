@@ -23,7 +23,6 @@ public:
 
     CEventGroup(CPed* ped);
     virtual ~CEventGroup();
-private:
     CEventGroup* Constructor(CPed* ped);
 public:
     CEvent * Add(CEvent* event, bool bValid = false);

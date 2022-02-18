@@ -37,6 +37,8 @@ void OnInjectionEnd() {
     s_HookedAddresses.clear();
     s_HookedAddresses = {};
 #endif
+    s_RootCategory.OnInjectionEnd();
+
 }
 
 namespace detail {

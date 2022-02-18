@@ -9,11 +9,19 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <functional>
 #include <iostream>
 #include <cassert>
 #include <array>
+#include <vector>
+#include <numeric>
+#include <cstring>
+#include <tuple>
+#include <initializer_list>
+
 #include <ranges>
+namespace rng = std::ranges;
 
 #include "Base.h"
 
@@ -33,8 +41,6 @@
 #include "Matrix.h"
 #include "MatrixLink.h"
 #include "MatrixLinkList.h"
-#include "OctTree.h"
-#include "OctTreeBase.h"
 #include "Pool.h"
 #include "PtrList.h"
 #include "PtrListDoubleLink.h"
@@ -95,7 +101,6 @@
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\Glass.h"
 #include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\PlayerRelationshipRecorder.h"
@@ -278,8 +283,6 @@
 #include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
-#include "game_sa\Rope.h"
-#include "game_sa\Ropes.h"
 #include "game_sa\Scene.h"
 #include "game_sa\ScriptResourceManager.h"
 #include "game_sa\ScriptsForBrains.h"

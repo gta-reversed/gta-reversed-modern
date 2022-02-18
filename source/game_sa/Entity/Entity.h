@@ -17,12 +17,20 @@
 #include "eModelID.h"
 #include "eAreaCodes.h"
 
+class CObject;
+class CVehicle;
 class CTrain;
 class CBike;
 class CBoat;
 class CAutomobile;
+class CBike;
+class CTrain;
+class CPed;
+class CObject;
+class CBuilding;
 class CDummy;
 class CBuilding;
+class CDummy;
 class CPhysical;
 class CBaseModelInfo;
 
@@ -30,7 +38,7 @@ class CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();
-public:
+public: // Changed in CRope branch
     ~CEntity() override;
 
 public:

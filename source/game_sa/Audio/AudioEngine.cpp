@@ -358,7 +358,7 @@ void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn
 }
 
 // 0x506EE0
-void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, CVector& posn) {
+void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn) {
     m_CollisionAE.ReportGlassCollisionEvent(glassSoundType, posn, 0);
 }
 

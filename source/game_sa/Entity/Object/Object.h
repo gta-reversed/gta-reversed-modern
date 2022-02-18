@@ -10,13 +10,13 @@
 #include "ObjectData.h"
 
 enum eObjectType {
-    OBJECT_UNKNOWN = 0,
-    OBJECT_GAME = 1,
-    OBJECT_MISSION = 2,
-    OBJECT_TEMPORARY = 3, // AKA OBJECT_TYPE_FLYING_COMPONENT
-    OBJECT_TYPE_CUTSCENE = 4,
+    OBJECT_UNKNOWN         = 0,
+    OBJECT_GAME            = 1,
+    OBJECT_MISSION         = 2,
+    OBJECT_TEMPORARY       = 3, // AKA OBJECT_TYPE_FLYING_COMPONENT
+    OBJECT_TYPE_CUTSCENE   = 4,
     OBJECT_TYPE_DECORATION = 5, // Hand object, projectiles, escalator step, water creatures, no clue what this enum value should be called
-    OBJECT_MISSION2 = 6
+    OBJECT_MISSION2        = 6
 };
 
 class CDummyObject;
@@ -40,14 +40,14 @@ public:
     uint16              m_wCostValue;
     union {
         struct {
-            uint32 bIsPickup : 1;
-            uint32 b0x02 : 1;
-            uint32 bPickupPropertyForSale : 1;
-            uint32 bPickupInShopOutOfStock : 1;
-            uint32 bGlassBroken : 1;
-            uint32 b0x20 : 1;
-            uint32 bIsExploded : 1;
-            uint32 bChangesVehColor : 1;
+            uint32 bIsPickup : 1;               // 0x1
+            uint32 b0x02 : 1;                   // 0x2
+            uint32 bPickupPropertyForSale : 1;  // 0x4
+            uint32 bPickupInShopOutOfStock : 1; // 0x8
+            uint32 bGlassBroken : 1;            // 0x10
+            uint32 b0x20 : 1;                   // 0x20 - Something glass related, see `WindowRespondsToCollision`
+            uint32 bIsExploded : 1;             // 0x40
+            uint32 bChangesVehColor : 1;        // 0x80
 
             uint32 bIsLampPost : 1;
             uint32 bIsTargatable : 1;

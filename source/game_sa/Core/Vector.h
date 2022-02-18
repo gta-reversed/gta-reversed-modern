@@ -176,5 +176,7 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
-
+static CVector ProjectVector(const CVector& what, const CVector& onto) {
+    return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
+}
 VALIDATE_SIZE(CVector, 0xC);

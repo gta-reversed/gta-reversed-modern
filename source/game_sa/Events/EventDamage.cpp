@@ -683,7 +683,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     }
                 }
             }
-            if (CCheat::m_aCheatsActive[CHEAT_MEGA_PUNCH]) {
+            if (CCheat::IsActive(CHEAT_MEGA_PUNCH)) {
                 if (!m_weaponType || m_weaponType == WEAPON_BRASSKNUCKLE || m_weaponType == WEAPON_PARACHUTE)
                     fForceFactor = fForceFactor * 20.0f;
             }

@@ -87,6 +87,7 @@ constexpr float PI = 3.14159265358979323846f;
 constexpr float HALF_PI = PI / 2.0f;
 constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
 constexpr float SQRT_2 = 1.41421356237309504880f;
+constexpr float SQRT_3 = 1.73205080757f;
 constexpr float SIN_PI = 0.0f; // std::sin(PI);
 constexpr float COS_PI = -1.0f; // std::cos(PI);
 

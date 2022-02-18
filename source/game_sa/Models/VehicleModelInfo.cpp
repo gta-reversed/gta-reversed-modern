@@ -136,8 +136,7 @@ CVehicleModelInfo::CVehicleModelInfo() : CClumpModelInfo()
     m_nFlags = 0;
     m_nAnimBlockIndex = -1;
     memset(m_anUpgrades, 0xFF, sizeof(m_anUpgrades));
-    for (int32 i = 0; i < 4; ++i)
-        m_anRemapTxds[i] = -1;
+    std::ranges::fill(m_anRemapTxds, -1);
 }
 
 ModelInfoType CVehicleModelInfo::GetModelType()
@@ -167,13 +166,12 @@ void CVehicleModelInfo::DeleteRwObject()
 }
 void CVehicleModelInfo::DeleteRwObject_Reversed()
 {
-    if (m_pVehicleStruct)
-        delete m_pVehicleStruct;
-
+    delete m_pVehicleStruct;
     m_pVehicleStruct = nullptr;
     CClumpModelInfo::DeleteRwObject();
 }
 
+// 0x4C9680
 RwObject* CVehicleModelInfo::CreateInstance()
 {
     return CVehicleModelInfo::CreateInstance_Reversed();
@@ -436,7 +434,7 @@ void CVehicleModelInfo::SetVehicleColour(uint8 prim, uint8 sec, uint8 tert, uint
 // 0x4C8500
 void CVehicleModelInfo::ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert, uint8& quat, int32 variationShift)
 {
-    if (!m_nNumColorVariations || CCheat::m_aCheatsActive[eCheats::CHEAT_BLACK_TRAFFIC]) {
+    if (!m_nNumColorVariations || CCheat::IsActive(CHEAT_BLACK_TRAFFIC)) {
         prim = 0;
         sec = 0;
         tert = 0;
@@ -444,7 +442,7 @@ void CVehicleModelInfo::ChooseVehicleColour(uint8& prim, uint8& sec, uint8& tert
         return;
     }
 
-    if (CCheat::m_aCheatsActive[eCheats::CHEAT_PINK_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_PINK_TRAFFIC)) {
         prim = 126;
         sec = 126;
         tert = 126;

@@ -3274,7 +3274,7 @@ void CRunningScript::ProcessCommands1300To1399(int32 commandId) {
         if (ScriptParams[0])
             CCheat::EnableLegitimateCheat(CHEAT_ALL_TAXIS_NITRO);
         else
-            CCheat::m_aCheatsActive[CHEAT_ALL_TAXIS_NITRO] = false;
+            CCheat::IsActive(CHEAT_ALL_TAXIS_NITRO) = false;
         */
         break;
     }
@@ -5841,7 +5841,7 @@ void CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         if (ScriptParams[0])
             CCheat::EnableLegitimateCheat(CHEAT_PROSTITUTES_PAY_YOU);
         else
-            CCheat::m_aCheatsActive[CHEAT_PROSTITUTES_PAY_YOU] = false;
+            CCheat::IsActive(CHEAT_PROSTITUTES_PAY_YOU) = false;
         */
         break;
     }

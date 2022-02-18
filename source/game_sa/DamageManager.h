@@ -162,19 +162,19 @@ public:
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
     // And chose accordingly.
-    eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx) const;
+    [[nodiscard]] eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx) const;
     void SetDoorStatus_Component(tComponent door, eDoorStatus status);
 
-    eDoorStatus GetDoorStatus(eDoors door) const;
+    [[nodiscard]] eDoorStatus GetDoorStatus(eDoors door) const;
     void SetDoorStatus(eDoors door, eDoorStatus status);
 
-    eCarWheelStatus GetWheelStatus(eCarWheel wheel) const;
+    [[nodiscard]] eCarWheelStatus GetWheelStatus(eCarWheel wheel) const;
     void SetWheelStatus(eCarWheel wheel, eCarWheelStatus status);
 
-    ePanelDamageState GetPanelStatus(ePanels panel) const;
+    [[nodiscard]] ePanelDamageState GetPanelStatus(ePanels panel) const;
     void SetPanelStatus(ePanels panel, ePanelDamageState status);
 
-    eLightsState GetLightStatus(eLights light) const;
+    [[nodiscard]] eLightsState GetLightStatus(eLights light) const;
     void SetLightStatus(eLights light, eLightsState status);
 
     // returns -1 if no node for this panel
@@ -185,13 +185,14 @@ public:
     // NOTSA
     void SetAllWheelsState(eCarWheelStatus state);
     void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status); 
-    auto GetAllLightsState() const -> std::array<eLightsState, 4>;
-    bool IsDoorOpen(eDoors door) const;
-    bool IsDoorClosed(eDoors door) const;
-    bool IsDoorPresent(eDoors door) const;
-    bool IsDoorDamaged(eDoors door) const;
     void SetDoorOpen(eDoors door);
     void SetDoorClosed(eDoors door);
+    [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
+    [[nodiscard]] bool IsDoorOpen(eDoors door) const;
+    [[nodiscard]] bool IsDoorClosed(eDoors door) const;
+    [[nodiscard]] bool IsDoorPresent(eDoors door) const;
+    [[nodiscard]] bool IsDoorDamaged(eDoors door) const;
+
 private: 
     // Wrapper functions
 

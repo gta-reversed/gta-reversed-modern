@@ -30,11 +30,11 @@ public:
     CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
-    ~CMatrix();                                // destructor detaches matrix if attached
     CMatrix() {
         m_pAttachMatrix = nullptr;
         m_bOwnsAttachedMatrix = false;
     }
+    ~CMatrix();                                        // destructor detaches matrix if attached
 
 private:
     // RwV3d-like:

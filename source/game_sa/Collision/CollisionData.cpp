@@ -271,3 +271,9 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
     }
     return {};
 }
+
+// NOTSA
+void CCollisionData::AllocateLines(uint32 num) {
+    m_nNumLines = num;
+    m_pLines = (CColLine*)CMemoryMgr::Malloc(sizeof(CColLine) * num);
+}

@@ -40,8 +40,11 @@ struct Base {
     const auto  Type()   const { return m_type; }
     const auto  Hooked() const { return m_bIsHooked; }
     const char* Symbol() const { return Type() == HookType::Simple ? "S" : "V"; } // Symbol in ImGui
-    
-    bool m_bImguiHooked = false;   // Workaround for imgui - Maybe somehow get rid of it in the future..
+
+public:
+    // ImGui stuff
+    bool m_isVisible{};
+
 protected:
     bool        m_bIsHooked{};     // Is hook installed
     std::string m_fnName{}; // Name of function, eg.: `Add` (Referring to CEntity::Add)

@@ -43,7 +43,7 @@ public:
     float          m_fWheelsSuspensionCompressionPrev[4]; // 0x7E4
     float          m_aWheelTimer[4];
     float          field_804;
-    float          m_intertiaValue1;
+    float          m_intertiaValue1;            //  m_anWheelSurfaceType[2]
     float          m_intertiaValue2;
     int32          m_wheelSkidmarkType[4];      // 0x810
     bool           m_wheelSkidmarkBloodState[4];// 0x820
@@ -84,44 +84,18 @@ public:
     float       m_fFrontHeightAboveRoad;
     float       m_fRearHeightAboveRoad;
     float       m_fCarTraction;
+
     float       m_fTireTemperature;
     float       m_aircraftGoToHeading;
-    float       m_fRotationBalance; // used in CHeli::TestSniperCollision
+    float       m_fRotationBalance; // Controls destroyed helicopter rotation
     float       m_fMoveDirection;
     CVector     m_doorRelatedPosition1;
     CVector     m_doorRelatedPosition2;
     int32       field_8C8[6];
-    float       m_fBurnTimer;
-    CPhysical*  m_pWheelCollisionEntity[4];
-    CVector     m_vWheelCollisionPos[4];
-    char        field_924;
-    char        field_925;
-    char        field_926;
-    char        field_927;
-    char        field_928;
-    char        field_929;
-    char        field_92A;
-    char        field_92B;
-    char        field_92C;
-    char        field_92D;
-    char        field_92E;
-    char        field_92F;
-    char        field_930;
-    char        field_931;
-    char        field_932;
-    char        field_933;
-    char        field_934;
-    char        field_935;
-    char        field_936;
-    char        field_937;
-    char        field_938;
-    char        field_939;
-    char        field_93A;
-    char        field_93B;
-    char        field_93C;
-    char        field_93D;
-    char        field_93E;
-    char        field_93F;
+    int32       m_fBurnTimer;
+    CPhysical*  m_apWheelCollisionEntity[4];
+    CVector     m_vWheelCollisionPos[4]; // Bike::m_avTouchPointsLocalSpace
+    char        field_928[28];
     int32       field_940;
     int32       field_944;
     float       m_fDoomVerticalRotation;
@@ -150,8 +124,12 @@ public:
     static CMatrix*        matW2B;
 
 public:
-    CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) {}
+    CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) { /* todo: remove NOTSA*/ }
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
+    ~CAutomobile() override;
+
+    // CEntity
+    void Teleport(CVector destination, bool resetRotation) override;
 
     // CPhysical
     void ProcessControl() override;
@@ -202,95 +180,7 @@ public:
     virtual void DoHoverSuspensionRatios();
     virtual void ProcessSuspension();
 
-    void PreRender() override { plugin::CallMethod<0x6AAB50, CAutomobile*>(this); }
-
-    void SetEngineState(bool state)
-    {
-        if (vehicleFlags.bEngineBroken)
-            vehicleFlags.bEngineOn = false;
-        else
-            vehicleFlags.bEngineOn = state;
-    }
-
-    bool IsAnyWheelMakingContactWithGround() {
-        return m_fWheelsSuspensionCompression[0] != 1.0F
-            || m_fWheelsSuspensionCompression[1] != 1.0F
-            || m_fWheelsSuspensionCompression[2] != 1.0F
-            || m_fWheelsSuspensionCompression[3] != 1.0F;
-    };
-
-    bool IsAnyWheelNotMakingContactWithGround() {
-        return m_fWheelsSuspensionCompression[0] == 1.0F
-            || m_fWheelsSuspensionCompression[1] == 1.0F
-            || m_fWheelsSuspensionCompression[2] == 1.0F
-            || m_fWheelsSuspensionCompression[3] == 1.0F;
-    };
-
-    bool IsAnyWheelTouchingSand() {
-        for (int32 i = 0; i < 4; i++) {
-            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
-                if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    bool IsAnyWheelTouchingRailTrack() {
-        for (int32 i = 0; i < 4; i++) {
-            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
-                if (m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_RAILTRACK)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-    bool IsAnyWheelTouchingShallowWaterGround() {
-        for (int32 i = 0; i < 4; i++) {
-            if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
-                return true;
-        }
-        return false;
-    }
-
-    bool IsAnyFrontAndRearWheelTouchingGround() {
-        if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f) {
-            if (m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f)
-                return true;
-        }
-        return false;
-    }
-
-    [[nodiscard]] bool AreFrontWheelsNotTouchingGround() const { // NOTSA
-        return m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_FRONT_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_FRONT_RIGHT];
-    }
-
-    [[nodiscard]] bool AreRearWheelsNotTouchingGround() const { // NOTSA
-        return m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[eCarWheel::CARWHEEL_REAR_RIGHT];
-    }
-
-    [[nodiscard]] bool AreAllWheelsNotTouchingGround() const {
-        return std::ranges::all_of(m_fWheelsSuspensionCompression, [](float v) {return v >= 1.f; });
-    }
-
-    // check the previous compression state using m_fWheelsSuspensionCompressionPrev
-    bool DidAnyWheelTouchShallowWaterGroundPrev() {
-        for (int32 i = 0; i < 4; i++) {
-            if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
-                return true;
-        }
-        return false;
-    }
-    bool DidAnyWheelTouchGroundPrev() {
-        for (int32 i = 0; i < 4; i++) {
-            if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f)
-                return true;
-        }
-        return false;
-    }
-
-    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
+    void PreRender() override;
 
     // Find and save components ptrs (RwFrame) to m_modelNodes array
     void SetupModelNodes();
@@ -347,8 +237,7 @@ public:
     void StopNitroEffect();
     void NitrousControl(int8);
     void TowTruckControl();
-    // Empty function
-    CPed* KnockPedOutCar(eWeaponType arg0, uint16 arg1, CPed* arg2);
+    CPed* KnockPedOutCar(eWeaponType type, uint16 a2, CPed* ped);
     void PopBootUsingPhysics();
     // Close all doors
     void CloseAllDoors();
@@ -386,12 +275,98 @@ public:
     bool RcbanditCheckHitWheels();
     void FireTruckControl(CFire* fire);
     bool HasCarStoppedBecauseOfLight();
+
+    // NOTSA section
+
+    CBouncingPanel* CheckIfExistsGetFree(eCarNodes nodeIdx);
     CDoor& GetDoor(eDoors door) { return m_doors[(unsigned)door]; }
 
+    void SetEngineState(bool state) {
+        if (vehicleFlags.bEngineBroken)
+            vehicleFlags.bEngineOn = false;
+        else
+            vehicleFlags.bEngineOn = state;
+    }
 
-    // Helpers - NOTSA
-    CBouncingPanel* CheckIfExistsGetFree(eCarNodes nodeIdx);
+    [[nodiscard]] bool AreAllWheelsNotTouchingGround() const {
+        return std::ranges::all_of(m_fWheelsSuspensionCompression, [](float v) {return v >= 1.f; });
+    }
 
+    bool IsAnyWheelMakingContactWithGround() {
+        return m_fWheelsSuspensionCompression[0] != 1.0F
+               || m_fWheelsSuspensionCompression[1] != 1.0F
+               || m_fWheelsSuspensionCompression[2] != 1.0F
+               || m_fWheelsSuspensionCompression[3] != 1.0F;
+    };
+
+    bool IsAnyWheelNotMakingContactWithGround() {
+        return m_fWheelsSuspensionCompression[0] == 1.0F
+               || m_fWheelsSuspensionCompression[1] == 1.0F
+               || m_fWheelsSuspensionCompression[2] == 1.0F
+               || m_fWheelsSuspensionCompression[3] == 1.0F;
+    };
+
+    bool IsAnyWheelTouchingSand() {
+        for (int32 i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
+                if (g_surfaceInfos->GetAdhesionGroup(m_wheelColPoint[i].m_nSurfaceTypeB) == ADHESION_GROUP_SAND)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsAnyWheelTouchingRailTrack() {
+        for (int32 i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f) {
+                if (m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_RAILTRACK)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    bool IsAnyWheelTouchingShallowWaterGround() {
+        for (int32 i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompression[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsAnyFrontAndRearWheelTouchingGround() {
+        if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f) {
+            if (m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f)
+                return true;
+        }
+        return false;
+    }
+
+    [[nodiscard]] bool AreFrontWheelsNotTouchingGround() const {
+        return m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT];
+    }
+
+    [[nodiscard]] bool AreRearWheelsNotTouchingGround() const {
+        return m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT];
+    }
+
+    // check the previous compression state using m_fWheelsSuspensionCompressionPrev
+    bool DidAnyWheelTouchShallowWaterGroundPrev() {
+        for (int32 i = 0; i < 4; i++) {
+            if (m_fWheelsSuspensionCompressionPrev[i] < 1.0f && m_wheelColPoint[i].m_nSurfaceTypeB == SURFACE_WATER_SHALLOW)
+                return true;
+        }
+        return false;
+    }
+    bool DidAnyWheelTouchGroundPrev() {
+        for (float prevSuspension : m_fWheelsSuspensionCompressionPrev) {
+            if (prevSuspension < 1.0f)
+                return true;
+        }
+        return false;
+    }
+
+    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
 
 private:
     friend void InjectHooksMain();
@@ -403,7 +378,7 @@ private:
     void DoHoverSuspensionRatios_Reversed() { return CAutomobile::DoHoverSuspensionRatios(); }
     void ProcessSuspension_Reversed() { return CAutomobile::ProcessSuspension(); }
 
-    // CPhysical
+    void Teleport_Reversed(CVector destination, bool resetRotation) { CAutomobile::Teleport(destination, resetRotation); };
     void ProcessControl_Reversed() { CAutomobile::ProcessControl(); }
 
     // CVehicle

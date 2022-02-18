@@ -264,7 +264,7 @@ public:
     void    ProcessPlayerBicycle(cVehicleParams& params);
     void    ProcessDummyBicycle(cVehicleParams& params);
     float   GetFlyingMetalVolume(CPhysical*);
-    void    AddAudioEvent(eAudioEvents ae, CEntity* e);
+    void    AddAudioEvent(eAudioEvents eventId, CEntity* entity);
     void    GetHornState(uint8*, cVehicleParams& params);
     void    GetSirenState(uint8*, uint8*, cVehicleParams& params);
     void    PlayHornOrSiren(uint8, uint8, uint8, cVehicleParams& params);

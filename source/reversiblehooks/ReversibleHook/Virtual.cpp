@@ -28,7 +28,6 @@ void Virtual::Switch()
     }
 
     m_bIsHooked = !m_bIsHooked;
-    m_bImguiHooked = m_bIsHooked;
 }
 };
 };

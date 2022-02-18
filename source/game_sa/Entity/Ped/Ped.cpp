@@ -1135,13 +1135,13 @@ void CPed::GiveWeaponAtStartOfFight()
 void CPed::GiveWeaponWhenJoiningGang()
 {
     if (m_aWeapons[m_nActiveWeaponSlot].m_nType == WEAPON_UNARMED && m_nDelayedWeapon == WEAPON_UNIDENTIFIED) {
-        if (CCheat::m_aCheatsActive[eCheats::CHEAT_NO_ONE_CAN_STOP_US]) {
+        if (CCheat::IsActive(CHEAT_NO_ONE_CAN_STOP_US)) {
             GiveDelayedWeapon(WEAPON_AK47, 200);
             SetCurrentWeapon(CWeaponInfo::GetWeaponInfo(WEAPON_AK47, eWeaponSkill::STD)->m_nSlot);
         }
         else {
             CWeaponInfo* pWeaponInfo = nullptr;
-            if (CCheat::m_aCheatsActive[eCheats::CHEAT_ROCKET_MAYHEM]) {
+            if (CCheat::IsActive(CHEAT_ROCKET_MAYHEM)) {
                 GiveDelayedWeapon(WEAPON_RLAUNCHER, 200);
                 pWeaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::STD);
             }
@@ -1343,7 +1343,12 @@ void CPed::FlagToDestroyWhenNextProcessed()
 }
 
 // 0x5E2530
-int32 CPed::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint)
+int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 {
-    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CPhysical*, CColPoint*>(this, entity, colpoint);
+    return plugin::CallMethodAndReturn<int32, 0x5E2530, CPed*, CEntity*, CColPoint*>(this, entity, colPoint);
+}
+
+// NOTSA
+bool CPed::IsInVehicleAsPassenger() const noexcept {
+    return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
 }

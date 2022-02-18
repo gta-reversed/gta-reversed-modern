@@ -390,12 +390,13 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
     return false;
 }
 
+// NOTSA
 void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
     constexpr eCarWheel wheels[]{
-        eCarWheel::CARWHEEL_FRONT_LEFT,
-        eCarWheel::CARWHEEL_REAR_LEFT,
-        eCarWheel::CARWHEEL_FRONT_RIGHT,
-        eCarWheel::CARWHEEL_REAR_RIGHT
+        CARWHEEL_FRONT_LEFT,
+        CARWHEEL_REAR_LEFT,
+        CARWHEEL_FRONT_RIGHT,
+        CARWHEEL_REAR_RIGHT
     };
     for (auto&& wheel : wheels) {
         SetWheelStatus(wheel, state);

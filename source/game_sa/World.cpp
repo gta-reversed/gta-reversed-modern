@@ -6,13 +6,12 @@
 */
 #include "StdInc.h"
 
-#include <initializer_list>
-
 #include "World.h"
 #include "IKChainManager_c.h"
 #include "FireManager.h"
 #include "CarCtrl.h"
 #include "TagManager.h"
+#include "Glass.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
@@ -1200,7 +1199,7 @@ void CWorld::RemoveFallenCars() {
             if (vehicle->IsCreatedBy(eVehicleCreatedBy::MISSION_VEHICLE) && !vehicle->physicalFlags.bDestroyed)
                 return true;
 
-            if (vehicle == FindPlayerVehicle(-1, false))
+            if (vehicle == FindPlayerVehicle())
                 return true;
 
             return vehicle->m_pDriver && vehicle->m_pDriver->IsPlayer();
