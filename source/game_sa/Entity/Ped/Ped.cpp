@@ -128,7 +128,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
     RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
     RH_ScopedInstall(CanSeeEntity, 0x5E0730);
-    // RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
+    RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
     // RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
     // RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
     // RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
@@ -941,9 +941,12 @@ float CPed::GetWalkAnimSpeed()
 }
 
 // 0x5E06E0
-void CPed::SetPedDefaultDecisionMaker()
-{
-    ((void(__thiscall *)(CPed*))0x5E06E0)(this);
+void CPed::SetPedDefaultDecisionMaker() {
+    if (!IsPlayer()) {
+        GetIntelligence()->SetPedDecisionMakerType(IsCreatedByMission() ? -1 : m_pStats->m_nDefaultDecisionMaker);
+    } else {
+        GetIntelligence()->SetPedDecisionMakerType(-2);
+    }
 }
 
 /*!
@@ -1497,11 +1500,8 @@ void CPed::SetPedState(ePedState pedState) {
 // 0x5E47E0
 void CPed::SetCharCreatedBy(ePedCreatedBy createdBy) {
     m_nCreatedBy = createdBy;
-    if (!IsPlayer()) {
-        GetIntelligence()->SetPedDecisionMakerType(IsCreatedByMission() ? -1 : m_pStats->m_nDefaultDecisionMaker);
-    } else {
-        GetIntelligence()->SetPedDecisionMakerType(-2);
-    }
+
+    SetPedDefaultDecisionMaker();
 
     if (IsCreatedByMission()) {
         auto intel = GetIntelligence();
