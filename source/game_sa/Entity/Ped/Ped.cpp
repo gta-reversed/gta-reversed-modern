@@ -151,7 +151,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
     RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
-    RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
+    //RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
@@ -229,8 +229,8 @@ void CPed::SetMoveAnim() {
     } else if (m_nMoveState != eMoveState::PEDMOVE_NONE) {
         m_nSwimmingMoveState = m_nMoveState;
 
-        // TODO: What's happening here?
-        switch (m_nMoveState) {
+        
+        switch (m_nMoveState) { // TODO: What's happening here?
         case eMoveState::PEDMOVE_WALK:
         case eMoveState::PEDMOVE_RUN:
         case eMoveState::PEDMOVE_SPRINT: {
@@ -518,7 +518,6 @@ void CPed::RestartNonPartialAnims() {
 }
 
 // 0x5DED90
-// TODO: Inlined in SetLook and SetLookFlag (although latter is inlined the former as well)
 bool CPed::CanUseTorsoWhenLooking() {
     switch (m_nPedState) {
     case ePedState::PEDSTATE_DRIVING:
@@ -547,16 +546,8 @@ void CPed::SetLookFlag(float lookHeading, bool unused, bool ignoreLookTime) {
 
     ClearReference(m_pLookTarget);
 
-    if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::ClearLookFlag`)
-        case ePedState::PEDSTATE_DRIVING:
-        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
-            break;
-        default: {
-            m_pedIK.bTorsoUsed = false;
-            break;
-        }
-        }
+    if (CanUseTorsoWhenLooking()) {
+        m_pedIK.bTorsoUsed = false;
     }
 }
 
@@ -568,10 +559,6 @@ void CPed::SetLookFlag(CEntity* lookingTo, bool unused, bool ignoreLookTime) {
         return;
     }
 
-    // TODO:
-    // Now, either `SetLook` is inlined here, or this function is inlined in `SetLook`..
-    // Im 99% sure it's the latter
-
     bIsRestoringLook = false;
     bIsLooking = true;
 
@@ -580,16 +567,8 @@ void CPed::SetLookFlag(CEntity* lookingTo, bool unused, bool ignoreLookTime) {
     m_fLookDirection = 999'999.f;
     m_nLookTime = 0;
 
-    if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably (at this point im 99% sure) inlined function here (Also used in `CPed::ClearLookFlag` and the the other `SetLook` overload)
-        case ePedState::PEDSTATE_DRIVING:
-        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
-            break;
-        default: {
-            m_pedIK.bTorsoUsed = false;
-            break;
-        }
-        }
+    if (CanUseTorsoWhenLooking()) {
+        m_pedIK.bTorsoUsed = false;
     }
 }
 
@@ -896,7 +875,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 void CPed::ResetGunFlashAlpha() {
     if (m_pGunflashObject) {
         if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
-            RpAtomicSetFlags(atomic, ATOMIC_IS_LEFT); // TODO: Use enum
+            RpAtomicSetFlags(atomic, 4); // TODO: Use enum
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         }
     }
@@ -1461,7 +1440,7 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
             || CModelInfo::GetModelInfo(modelIndex) == CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)
         ) {
             // Release model info
-            CModelInfo::GetModelInfo(modelIndex)->RemoveRef(); // Originally CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef(), but both return the same pointer.
+            CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef(); 
 
             // Remove atomics anim from skin
             if (const auto atomic = GetFirstAtomic(m_pWeaponObject)) {
@@ -1585,16 +1564,8 @@ void CPed::ClearLookFlag() {
     bIsDrowning = false;
     bIsRestoringLook = true;
 
-    if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::SetLook`)
-        case ePedState::PEDSTATE_DRIVING:
-        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
-            break;
-        default: {
-            m_pedIK.bTorsoUsed = false;
-            break;
-        }
-        }
+    if (CanUseTorsoWhenLooking()) {
+        m_pedIK.bTorsoUsed = false;
     }
 
     m_nLookTime = CTimer::GetTimeInMS() + (IsPlayer() ? 4000 : 2000);
@@ -1615,15 +1586,8 @@ void CPed::ClearLook()
 * @returns If `m_fCurrentRotation` changed.
 */
 bool CPed::TurnBody() {
-    if (m_pLookTarget) { // TODO: Use some specialized function, this is ugly
-        auto& targetPos = m_pLookTarget->GetPosition();
-        auto& myPos = GetPosition();
-        m_fLookDirection = CGeneral::GetRadianAngleBetweenPoints(
-            targetPos.x,
-            targetPos.y,
-            myPos.x,
-            myPos.y
-        );
+    if (m_pLookTarget) {
+        m_fLookDirection = CGeneral::GetRadianAngleBetweenPoints(m_pLookTarget->GetPosition2D(), GetPosition2D());
     }
 
     m_fLookDirection = CGeneral::LimitRadianAngle(m_fLookDirection);
@@ -1649,8 +1613,7 @@ bool CPed::TurnBody() {
 
 // 0x5E4220
 bool CPed::IsPointerValid() {
-    const auto ref = CPools::GetPedPool()->GetRef(this);
-    return ref >= 0 && ref < 140 && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed()); // TODO: `140` is IIRC the size of CPool<CPed>, so a variable should be used here.
+    return CPools::GetPedPool()->IsObjectValid(this) && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed());
 }
 
 // 0x5E4280
@@ -1815,6 +1778,8 @@ void CPed::PlayFootSteps() {
                 }
             }
         }
+
+        lastAssoc = RpAnimBlendGetNextAssociation(lastAssoc);
     } while (lastAssoc);
 
 
@@ -1823,7 +1788,7 @@ void CPed::PlayFootSteps() {
         return;
     }
 
-    auto* lastAssocHier = lastAssoc->m_pHierarchy;
+    auto* lastAssocHier = lastAssocWithFlag100->m_pHierarchy;
 
     float minAnimTime = lastAssocHier->m_fTotalTime / 15.f;
     float maxAnimTime = lastAssocHier->m_fTotalTime / 2.f + minAnimTime; // Weird.. Why adding `minAnimTime` to it?
@@ -1836,7 +1801,7 @@ void CPed::PlayFootSteps() {
     if (m_pStats == &CPedStats::ms_apPedStats[STAT_BURGULAR_STATUS]) { // 0X5E5968
 
         // NOTE: The number `15` seems to be reoccuring, it's used above as well.
-        const float animTimeMult = lastAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
+        const float animTimeMult = lastAssocWithFlag100->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
         float adhisionMult{ 1.f };
         switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
@@ -1868,16 +1833,16 @@ void CPed::PlayFootSteps() {
                 m_pedAudio.AddAudioEvent(
                     ae,
                     CAEAudioUtility::AudioLog10(adhisionMult) * 20.f,
-                    lastAssoc->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
+                    lastAssocWithFlag100->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
                 );
             };
 
-            if (   lastAssoc->m_fCurrentTime <= 0.f
-                || lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep > 0.f
+            if (   lastAssocWithFlag100->m_fCurrentTime <= 0.f
+                || lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep > 0.f
             ) {
                 if (   adhisionMult > 0.2f
-                    && lastAssoc->m_fCurrentTime > animTimeMult
-                    && lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep <= animTimeMult
+                    && lastAssocWithFlag100->m_fCurrentTime > animTimeMult
+                    && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep <= animTimeMult
                 ) {
                     // 0x5E5B46
                     DoAddSkateAE(eAudioEvents::AE_PED_SKATE_RIGHT);
@@ -1927,12 +1892,12 @@ void CPed::PlayFootSteps() {
     };
 
     // 0x5E5B50
-    if (   minAnimTime > lastAssoc->m_fCurrentTime
-        || lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep >= minAnimTime
+    if (   minAnimTime > lastAssocWithFlag100->m_fCurrentTime
+        || lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep >= minAnimTime
     ) {
         // 0x5E5D8E
-        if (lastAssoc->m_fCurrentTime >= (double)maxAnimTime
-            && lastAssoc->m_fCurrentTime - lastAssoc->m_fTimeStep < maxAnimTime)
+        if (lastAssocWithFlag100->m_fCurrentTime >= (double)maxAnimTime
+            && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep < maxAnimTime)
         {
             // 0x5E592B - 0x5E5E56
             DoFootStepAE(false); // Do right foot step AE
@@ -2342,49 +2307,16 @@ void CPed::SetLook(float heading) {
 
     ClearReference(m_pLookTarget);
 
-    if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably inlined function here (Also used in `CPed::ClearLookFlag`)
-        case ePedState::PEDSTATE_DRIVING:
-        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
-            break;
-        default: {
-            m_pedIK.bTorsoUsed = false;
-            break;
-        }
-        }
+    if (CanUseTorsoWhenLooking()) {
+        m_pedIK.bTorsoUsed = false;
     }
 }
 
 // 0x5E7A60
 void CPed::SetLook(CEntity* entity) {
-    if (!IsPedInControl()) {
-        return;
-    }
-
-    m_nPedState = ePedState::PEDSTATE_LOOK_ENTITY;
-
-    if (m_nLookTime >= CTimer::GetTimeInMS()) {
-        return;
-    }
-
-    bIsRestoringLook = false;
-    bIsLooking = true;
-
-    ChangeEntityReference(m_pLookTarget, entity);
-
-    m_fLookDirection = 999'999.f;
-    m_nLookTime = 0;
-
-    if (!bIsDucking) {
-        switch (m_nPedState) { // TODO: Probably (at this point im 99% sure) inlined function here (Also used in `CPed::ClearLookFlag` and the the other `SetLook` overload)
-        case ePedState::PEDSTATE_DRIVING:
-        case ePedState::PEDSTATE_DRAGGED_FROM_CAR:
-            break;
-        default: {
-            m_pedIK.bTorsoUsed = false;
-            break;
-        }
-        }
+    if (IsPedInControl()) {
+        m_nPedState = ePedState::PEDSTATE_LOOK_ENTITY;
+        SetLookFlag(entity, false, false);
     }
 }
 
@@ -2735,7 +2667,6 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     m_nAnimGroup = mi.m_nAnimType;
     CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, AnimationId::ANIM_ID_IDLE);
 
-    // TODO: Is this whole statement inlined?
     if (CanUseTorsoWhenLooking()) {
         m_pedIK.bTorsoUsed = true;
     }
