@@ -543,7 +543,7 @@ public:
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
-    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
+    CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
@@ -582,6 +582,7 @@ private:
     bool SetupLighting_Reversed() { return CPed::SetupLighting(); }
     void RemoveLighting_Reversed(bool bRemove) { CPed::RemoveLighting(bRemove); }
     void FlagToDestroyWhenNextProcessed_Reversed() { CPed::FlagToDestroyWhenNextProcessed(); }
+    void SetMoveAnim_Reversed() { CPed::SetMoveAnim(); }
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);

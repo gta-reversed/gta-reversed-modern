@@ -166,7 +166,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
     RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
     // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
-    // RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
+    RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
     // RH_ScopedInstall(Save_Reversed, 0x5D5730);
     // RH_ScopedInstall(Load_Reversed, 0x5D4640);
 
@@ -191,9 +191,110 @@ void CPed::operator delete(void* data) {
 }
 
 // 0x5E4A00
-void CPed::SetMoveAnim()
-{
-    ((void(__thiscall *)(CPed*))(*(void ***)this)[24])(this);
+void CPed::SetMoveAnim() {
+    if (!IsAlive() || bIsDucking || m_pAttachedTo) {
+        return;
+    }
+
+    const auto DoUpdateMoveAnim = [this](auto* assoc) {
+        if (!bMoveAnimSpeedHasBeenSetByTask) {
+            SetMoveAnimSpeed(assoc);
+        }
+    };
+
+    if (m_nSwimmingMoveState == m_nMoveState) {
+        switch (m_nMoveState) {
+        case eMoveState::PEDMOVE_WALK:
+        case eMoveState::PEDMOVE_JOG:
+        case eMoveState::PEDMOVE_RUN:
+        case eMoveState::PEDMOVE_SPRINT: {
+            const auto GetAnimId = [this] {
+                switch (m_nMoveState) {
+                case eMoveState::PEDMOVE_RUN:
+                    return AnimationId::ANIM_ID_RUN;
+                case eMoveState::PEDMOVE_SPRINT:
+                    return AnimationId::ANIM_ID_SPRINT;
+                }
+                return AnimationId::ANIM_ID_WALK;
+            };
+
+            if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, GetAnimId())) {
+                DoUpdateMoveAnim(assoc);
+            }
+
+            break;
+        }
+        }
+    } else if (m_nMoveState != eMoveState::PEDMOVE_NONE) {
+        m_nSwimmingMoveState = m_nMoveState;
+
+        // TODO: What's happening here?
+        switch (m_nMoveState) {
+        case eMoveState::PEDMOVE_WALK:
+        case eMoveState::PEDMOVE_RUN:
+        case eMoveState::PEDMOVE_SPRINT: {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIM_FLAG_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIM_FLAG_PARTIAL)) {
+                if ((assoc->m_nFlags & ANIM_FLAG_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+                    assoc->m_fBlendDelta = -2.f;
+                    assoc->SetFlag(ANIM_FLAG_FREEZE_LAST_FRAME, true);
+                }
+            }
+
+            ClearAimFlag();
+            ClearLookFlag();
+
+            break;
+        }
+        }
+
+        // Do BlendAnimation and call `DoUpdateMoveAnim` aftewards
+        const auto DoBlendAnim = [&, this](AssocGroupId grp, AnimationId animId, float blendDelta) {
+            if (const auto assoc = CAnimManager::BlendAnimation(m_pRwClump, grp, animId, blendDelta)) {
+                DoUpdateMoveAnim(assoc);
+            }
+        };
+        
+        switch (m_nMoveState) {
+        case eMoveState::PEDMOVE_STILL:
+            DoBlendAnim(m_nAnimGroup, AnimationId::ANIM_ID_IDLE, 4.f);
+            return;
+
+        case eMoveState::PEDMOVE_TURN_L:
+            DoBlendAnim(ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_TURN_L, 16.f);
+            return;
+
+        case eMoveState::PEDMOVE_TURN_R:
+            DoBlendAnim(ANIM_GROUP_DEFAULT, AnimationId::ANIM_ID_TURN_R, 16.f);
+            return;
+
+        case eMoveState::PEDMOVE_WALK:
+            DoBlendAnim(m_nAnimGroup, AnimationId::ANIM_ID_WALK, 1.f);
+            return;
+
+        case eMoveState::PEDMOVE_RUN:
+            DoBlendAnim(m_nAnimGroup, AnimationId::ANIM_ID_RUN, m_nPedState == ePedState::PEDSTATE_FLEE_ENTITY ? 3.f : 1.f);
+            return;
+
+        case eMoveState::PEDMOVE_SPRINT: {
+            // If we're in a group, and our leader is sprinting as well sprinting should be played with a different anim group
+            if (CPedGroups::IsInPlayersGroup(this)) {
+                if (const auto leader = CPedGroups::GetPedsGroup(this)->GetMembership().GetLeader()) {
+                    switch (leader->m_nMoveState) {
+                    case eMoveState::PEDMOVE_RUN:
+                    case eMoveState::PEDMOVE_SPRINT: {
+                        DoBlendAnim(ANIM_GROUP_PLAYER, ANIM_ID_SPRINT, 1.f);
+                        return;
+                    }
+                    }
+                }
+            }
+            DoBlendAnim(m_nAnimGroup, AnimationId::ANIM_ID_SPRINT, 1.f);
+            return;
+        }
+        }
+    } else {
+        m_nSwimmingMoveState = eMoveState::PEDMOVE_NONE;
+    }
 }
 
 // 0x5D5730
@@ -1182,7 +1283,7 @@ void CPed::ProcessBuoyancy()
         return;
 
     float fBuoyancyMult = 1.1F;
-    if (m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE)
+    if (!IsAlive())
         fBuoyancyMult = 1.8F;
 
     float fBuoyancy = fBuoyancyMult * m_fMass / 125.0F;
@@ -1578,19 +1679,14 @@ void CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
 
 // 0x5E4500
 void CPed::SetPedState(ePedState pedState) {
-    switch (pedState) {
-    case ePedState ::PEDSTATE_DEAD:
-    case ePedState ::PEDSTATE_DIE: {
+    m_nPedState = pedState;
+    if (!IsAlive()) {
         ReleaseCoverPoint();
-
         if (bClearRadarBlipOnDeath) {
             CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetRef(this));
         }
 
-        break;
     }
-    }
-    m_nPedState = pedState;
 }
 
 // 0x5E47E0
