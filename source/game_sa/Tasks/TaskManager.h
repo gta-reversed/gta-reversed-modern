@@ -84,6 +84,15 @@ public:
             return FindActiveTaskByType(type);
         });
     }
+
+    CTask* FindActiveTaskOfTheseTypes(std::initializer_list<eTaskType> types) {
+        for (auto type : types) {
+            if (const auto task = FindActiveTaskByType(type)) {
+                return task;
+            }
+        }
+        return nullptr;
+    }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);

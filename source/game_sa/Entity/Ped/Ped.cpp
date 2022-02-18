@@ -133,7 +133,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
     RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
     RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
-    // RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
+    RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
     // RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
     // RH_ScopedInstall(GetHoldingTask, 0x5E0290);
     // RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
@@ -911,18 +911,31 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
 }
 
 // 0x5E0360
-void CPed::DropEntityThatThisPedIsHolding(uint8 arg0)
-{
-    ((void(__thiscall *)(CPed*, uint8))0x5E0360)(this, arg0);
+void CPed::DropEntityThatThisPedIsHolding(bool bDeleteHeldEntity) {
+    if (const auto task = GetTaskManager().FindActiveTaskOfTheseTypes({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
+        const auto holdTask = task->As<CTaskSimpleHoldEntity>();
+
+        // Drop the entity
+        holdTask->DropEntity(this, true);
+
+        // Delete held entity (If any)
+        if (bDeleteHeldEntity) {
+            if (const auto heldEntity = holdTask->m_pEntityToHold) {
+                if (!heldEntity->IsObject() || !heldEntity->AsObject()->IsMissionObject()) {
+                    heldEntity->DeleteRwObject(); // TODO; Are these 3 lines inlined?
+                    CWorld::Remove(heldEntity);
+                    delete heldEntity;
+                }
+            }
+        }
+    }
 }
 
 // 0x5E0400
 bool CPed::CanThrowEntityThatThisPedIsHolding() {
     // Man programming in C++03 must've been a pain..
-    for (auto type : { TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY }) {
-        if (const auto task = GetTaskManager().FindActiveTaskByType(type)) {
-            return task->As<CTaskSimpleHoldEntity>()->CanThrowEntity();
-        }
+    if (const auto task = GetTaskManager().FindActiveTaskOfTheseTypes({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
+        return task->As<CTaskSimpleHoldEntity>()->CanThrowEntity();
     }
     return false;
 }
