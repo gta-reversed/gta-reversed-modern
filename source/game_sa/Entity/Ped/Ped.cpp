@@ -6,6 +6,7 @@
 */
 #include "StdInc.h"
 #include <optional>
+#include <WeaponInfo.h>
 #include "Ped.h"
 
 #include "PedType.h"
@@ -2576,11 +2577,65 @@ void CPed::Look() {
 
 /*!
 * @addr 0x5E7CB0
-* @todo
+* @brief Attach a weapon to us or something, not sure.
+* @returns \a entity
 */
-CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 arg2, float arg3, eWeaponType weaponType)
-{
-    return ((CEntity* (__thiscall *)(CPed*, CEntity*, CVector, uint16, float, eWeaponType))0x5E7CB0)(this, entity, offset, arg2, arg3, weaponType);
+CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretAngleA, float turretAngleB, eWeaponType weaponType) {
+    if (!entity || bInVehicle) {
+        return nullptr;
+    }
+
+    // BUG/NOTE: ClearReference not called here?
+    m_pAttachedTo = entity->AsPhysical();
+    m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
+
+    m_vecTurretOffset = offset;
+    m_fTurretAngleB = turretAngleB;
+    m_fTurretAngleA = turretAngleA;
+
+    // Deal collision with `entity`
+    if (!IsPlayer()) {
+        if (entity->IsVehicle()) {
+            m_pEntityIgnoredCollision = entity->AsPhysical();
+        }
+    } else { // For player just disable collision
+        m_bUsesCollision = false;
+    }
+
+    if (m_nSavedWeapon == eWeaponType::WEAPON_UNIDENTIFIED) {
+        m_nSavedWeapon = GetActiveWeapon().m_nType;
+        m_nTurretAmmo = GetActiveWeapon().m_nTotalAmmo;
+    }
+
+    if (!IsPlayer()) {
+        GiveWeapon(weaponType, 30'000, true);
+        SetCurrentWeapon(weaponType);
+        PositionAttachedPed();
+    } else {
+        if (weaponType != eWeaponType::WEAPON_UNARMED) {
+            GiveWeapon(weaponType, 30'000, true);
+        }
+
+        m_pPlayerData->m_nChosenWeapon = weaponType;
+        
+        if (weaponType == eWeaponType::WEAPON_CAMERA) {
+            TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_CAMERA);
+        } else {
+            // With the pool cue we can aim as well, so it needs a different cam mode.
+            if (   entity->m_nModelIndex == eModelID::MODEL_POOLCUE
+                && !CWeaponInfo::GetWeaponInfo(weaponType)->flags.b1stPerson
+            ) {
+                TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_AIMWEAPON_ATTACHED);
+                m_pPlayerData->m_bFreeAiming = true;
+            } else {
+                TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_HELICANNON_1STPERSON);
+            }
+        }
+        m_nPedState = ePedState::PEDSTATE_SNIPER_MODE;
+        PositionAttachedPed();
+    }
+
+    return entity;
 }
 
 /*!

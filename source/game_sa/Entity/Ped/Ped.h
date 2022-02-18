@@ -353,7 +353,7 @@ public:
     CEntity*            m_pLastEntityDamage;
     int32               field_768;
     CVector             m_vecTurretOffset;
-    float               m_fTurretAngleA;
+    uint16              m_fTurretAngleA;
     float               m_fTurretAngleB;
     int32               m_nTurretPosnMode;
     int32               m_nTurretAmmo;
