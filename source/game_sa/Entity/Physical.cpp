@@ -288,7 +288,7 @@ void CPhysical::ProcessCollision()
                 automobile->m_apWheelCollisionEntity[1] = nullptr;
                 automobile->m_apWheelCollisionEntity[2] = nullptr;
                 automobile->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = automobile->m_aWheelColPoint;
+                wheelsColPoints = automobile->m_wheelColPoint;
                 pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression;
                 wheelsCollisionPositions = automobile->m_vWheelCollisionPos;
             }

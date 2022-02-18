@@ -31,7 +31,6 @@ CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
-tHydraulicData (&CVehicle::m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 float& fBurstTyreMod = *(float*)0x8D34B4;                // 0.13f
 float& fBurstSpeedMax = *(float*)0x8D34B8;               // 0.3f
