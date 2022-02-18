@@ -579,6 +579,8 @@ private:
     void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
     void PreRender_Reversed() { CPed::PreRender(); }
     void Render_Reversed() { CPed::Render(); }
+    bool SetupLighting_Reversed() { return CPed::SetupLighting(); }
+    void RemoveLighting_Reversed(bool bRemove) { CPed::RemoveLighting(bRemove); }
 };
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);

@@ -162,8 +162,8 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
     RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
     RH_ScopedInstall(Render_Reversed, 0x5E7680);
-    // RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
-    // RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
+    RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
+    RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
     // RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
     // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
     // RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
@@ -2785,16 +2785,21 @@ void CPed::Render() {
 }
 
 // 0x553F00
-bool CPed::SetupLighting()
-{
+bool CPed::SetupLighting() {
   ActivateDirectional();
   return CRenderer::SetupLightingForEntity(this);
 }
 
 // 0x5533B0
-void CPed::RemoveLighting(bool bRemove)
-{
-    plugin::CallMethod<0x5533B0, CPed*, bool>(this, bRemove);
+void CPed::RemoveLighting(bool bRemove) {
+    UNUSED(bRemove);
+
+    if (!physicalFlags.bDestroyed) {
+        CPointLights::RemoveLightsAffectingObject();
+    }
+
+    SetAmbientColours();
+    DeActivateDirectional();
 }
 
 // 0x5E7B70
