@@ -155,7 +155,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
     RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
-    // RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
+    RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
     // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
     // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
     // RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
@@ -2645,9 +2645,19 @@ void CPed::ProcessControl()
 }
 
 // 0x5E4110 todo: CPed::Teleport(CVector)
-void CPed::Teleport(CVector destination, bool resetRotation)
-{
-    plugin::CallMethod<0x5E4110, CPed*, CVector, bool>(this, destination, resetRotation);
+void CPed::Teleport(CVector destination, bool resetRotation) {
+    if (IsPlayer() || GetTaskManager().FindActiveTaskByType(eTaskType::TASK_COMPLEX_LEAVE_CAR)) {
+        GetIntelligence()->FlushImmediately(true);
+    }
+
+    CWorld::Remove(this);
+    SetPosn(destination);
+    bIsStanding = false;
+    ClearReference(m_pDamageEntity);
+    CWorld::Add(this);
+
+    m_vecMoveSpeed.Reset();
+    m_vecTurnSpeed.Reset();
 }
 
 // 0x5E3C30

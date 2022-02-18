@@ -69,6 +69,10 @@ public:
         z = Z;
     }
 
+    void Reset() {
+        Set(0.f, 0.f, 0.f);
+    }
+
     inline RwV3d ToRwV3d() {
         return { x, y, z };
     }
