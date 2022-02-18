@@ -2693,11 +2693,18 @@ void CPed::DettachPedFromEntity(){
 
 /*!
 * @addr 0x5E8830
-* @todo
 */
-void CPed::SetAimFlag(float heading)
-{
-    ((void(__thiscall*)(CPed*, float))0x5E8830)(this, heading);
+void CPed::SetAimFlag(float heading) {
+    bIsAimingGun = true;
+    bIsRestoringGun = false;
+    ClearReference(m_pLookTarget);
+    m_nLookTime = 0;
+
+    if (bIsDucking) {
+        m_pedIK.bUseArm = false;
+    }
+
+    m_pedIK.bUseArm = GetActiveWeapon().GetWeaponInfo(this).flags.bAimWithArm;
 }
 
 /*!
