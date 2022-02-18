@@ -143,7 +143,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsAlive, 0x5E0170);
     RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
     RH_ScopedInstall(Undress, 0x5E00F0);
-    // RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
+    RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
     // RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
     // RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
@@ -819,10 +819,15 @@ void CPed::ShoulderBoneRotation(RpClump* clump) {
     }
 }
 
-// 0x5DF8D0
-void CPed::SetLookTimer(uint32 time)
-{
-    ((void(__thiscall *)(CPed*, uint32))0x5DF8D0)(this, time);
+/*!
+* @addr 0x5DF8D0
+* @brief Set look timer relative to now
+* @param time Time the timer ends relative to now
+*/
+void CPed::SetLookTimer(uint32 time) {
+    if (CTimer::GetTimeInMS() > this->m_nLookTime) {
+        m_nLookTime = CTimer::GetTimeInMS() + time;
+    }
 }
 
 // 0x5DF8F0
