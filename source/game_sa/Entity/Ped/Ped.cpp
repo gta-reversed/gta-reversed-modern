@@ -5,7 +5,6 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-#include <optional>
 #include <WeaponInfo.h>
 #include "Ped.h"
 
