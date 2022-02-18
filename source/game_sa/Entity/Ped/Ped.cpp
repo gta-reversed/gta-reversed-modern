@@ -31,6 +31,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(Constructor, 0x5E8030);
     // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
 
+    RH_ScopedInstall(OurPedCanSeeThisEntity, 0x5E1660);
     RH_ScopedInstall(operator delete, 0x5E4760);
     RH_ScopedInstall(operator new, 0x5E4720);
     RH_ScopedInstall(SpawnFlyingComponent, 0x5F0190);
@@ -1360,11 +1361,26 @@ bool CPed::PositionAnyPedOutOfCollision() {
 
 /*!
 * @addr 0x5E1660
-* @todo
 */
-bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted)
-{
-    return ((bool(__thiscall *)(CPed*, CEntity*, bool))0x5E1660)(this, entity, isSpotted);
+bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted) {
+    if (!isSpotted) {
+        const auto dir2D{ entity->GetPosition2D() - GetPosition2D() };
+        if (   DotProduct2D(dir2D, m_matrix->GetForward()) < 0.f // Is behind us
+            || dir2D.SquaredMagnitude() >= 40.f * 40.f           // Using SqMag instead of Mag
+        ) {
+            return false;
+        }
+    }
+
+    auto target{entity->GetPosition()};
+    if (entity->IsPed()) {
+        target.z += 1.f; // Adjust for head pos?
+    }
+    
+    // Seems like they explicitly use this one instead of `IsLineOfSightClear` because of the `shootThru` check.
+    CColPoint cp{};
+    CEntity* hitEntity{};
+    return !CWorld::ProcessLineOfSight(GetPosition(), target, cp, hitEntity, true, false, false, isSpotted, false, false, false, isSpotted);
 }
 
 /*!

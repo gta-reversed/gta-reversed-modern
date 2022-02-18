@@ -31,7 +31,7 @@ public:
 
     void  Normalise();
 
-    inline float SquaredMagnitude() {
+    inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
 
