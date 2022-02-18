@@ -331,31 +331,33 @@ public:
     static void WipeLocalVariableMemoryForMissionScript();
 
     static int32* GetPointerToScriptVariable(uint32 offset) {
+        // TODO: find out how this method changed between re3 and GTA:SA
         assert(offset >= 8 && offset < CTheScripts::GetSizeOfVariableSpace());
         return (int32*)&ScriptSpace[offset];
     }
 
-    static int32 Read4BytesFromScript(uint32* ip) {
-        int32 retval = ScriptSpace[*ip + 3] << 24 | ScriptSpace[*ip + 2] << 16 | ScriptSpace[*ip + 1] << 8 | ScriptSpace[*ip];
-        *ip += 4;
+    static int32 Read4BytesFromScript(uint8*& ip) {
+        int32 retval = *reinterpret_cast<int32*>(ip); // big-endian unfriendly/unaligned mem access
+        ip += 4;
         return retval;
     }
-    static int16 Read2BytesFromScript(uint32* ip) {
-        int16 retval = ScriptSpace[*ip + 1] << 8 | ScriptSpace[*ip];
-        *ip += 2;
+    static int16 Read2BytesFromScript(uint8*& ip) {
+        int16 retval = *reinterpret_cast<int16*>(ip);
+        ip += 2;
         return retval;
     }
-    static int8 Read1ByteFromScript(uint32* ip) {
-        int8 retval = ScriptSpace[*ip];
-        *ip += 1;
+    static int8 Read1ByteFromScript(uint8*& ip) {
+        int8 retval = *reinterpret_cast<int8*>(ip);
+        ip += 1;
         return retval;
     }
-    static float ReadFloatFromScript(uint32* ip) {
-        return Read2BytesFromScript(ip) / 16.0f;
+    static float ReadFloatFromScript(uint8*& ip) {
+        int32 retval = Read4BytesFromScript(ip);
+        return *reinterpret_cast<float*>(&retval);
     }
 
     static int32 GetSizeOfVariableSpace() {
-        uint32 tmp = 3;
-        return Read4BytesFromScript(&tmp);
+        uint8* tmp = &ScriptSpace[3];
+        return Read4BytesFromScript(tmp);
     }
 };

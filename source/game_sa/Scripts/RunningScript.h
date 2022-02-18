@@ -73,6 +73,26 @@ union tScriptParam {
 VALIDATE_SIZE(tScriptParam, 0x4);
 
 class CRunningScript {
+    enum {
+        ANDOR_NONE = 0,
+        ANDS_1 = 1,
+        ANDS_2,
+        ANDS_3,
+        ANDS_4,
+        ANDS_5,
+        ANDS_6,
+        ANDS_7,
+        ANDS_8,
+        ORS_1 = 21,
+        ORS_2,
+        ORS_3,
+        ORS_4,
+        ORS_5,
+        ORS_6,
+        ORS_7,
+        ORS_8
+    };
+
 public:
     CRunningScript* m_pNext;
     CRunningScript* m_pPrev;
@@ -133,15 +153,15 @@ public:
 
     void StoreParameters(int16 count);
 
-    void ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx);
+    void ReadArrayInformation(int32 updateIp, uint16* outArrVarOffset, int32* outArrElemIdx);
     void ReadParametersForNewlyStartedScript(CRunningScript* newScript);
     void ReadTextLabelFromScript(char* buffer, uint8 nBufferLength);
     void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId);
-    int16 GetIndexOfGlobalVariable();
+    uint16 GetIndexOfGlobalVariable();
     int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
-    void* GetPointerToLocalVariable(int32 varId);
-    void* GetPointerToLocalArrayElement(int32 off, uint16 idx, uint8 mul);
+    tScriptParam* GetPointerToLocalVariable(int32 varId);
+    tScriptParam* GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize);
     tScriptParam* GetPointerToScriptVariable(uint8 variableType);
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck

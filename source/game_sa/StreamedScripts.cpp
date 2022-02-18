@@ -9,6 +9,14 @@ void CStreamedScripts::InjectHooks() {
     RH_ScopedInstall(StartNewStreamedScript, 0x470890);
 }
 
+uint32 CStreamedScripts::GetStreamedScriptWithThisStartAddress(uint8* dataPtr)
+{
+    uint16 result;
+    for (result = 0; result < 82 && m_aScripts[result].data != dataPtr; ++result)
+        ;
+    return result;
+}
+
 void CStreamedScripts::Initialise() {
     plugin::CallMethod<0x470660, CStreamedScripts*>(this);
 }

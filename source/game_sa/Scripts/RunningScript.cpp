@@ -52,18 +52,17 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
     // RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
     // RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
-    // RH_ScopedInstall(CollectParameters, 0x464080);
-    // RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250);
-    // RH_ScopedInstall(StoreParameters, 0x464370);
-    // RH_ScopedInstall(ReadArrayInformation, 0x463CF0);
-    // RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500);
-    // RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50);
-    // RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
-    // RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700);
+    RH_ScopedInstall(CollectParameters, 0x464080);
+    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250);
+    RH_ScopedInstall(StoreParameters, 0x464370);
+    RH_ScopedInstall(ReadArrayInformation, 0x463CF0);
+    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500);
+    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50);
+    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700);
     // RH_ScopedInstall(GetPadState, 0x485B10);
-    // Install("CRunningScript", "GetPointerToLocalVariable", 0x, &CRunningScript::GetPointerToLocalVariable);
-    // RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0);
-    // RH_ScopedInstall(GetPointerToScriptVariable, 0x464790);
+    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0);
+    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0);
+    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790);
     // RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     // RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
     // RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
@@ -73,10 +72,9 @@ void CRunningScript::InjectHooks() {
     RH_ScopedInstall(IsPedDead, 0x464D70);
     // RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
     // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
-    // RH_ScopedInstall(UpdateCompareFlag, 0x4859D0);
-    // RH_ScopedInstall(UpdatePC, 0x464DA0);
-    // RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
-
+    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0);
+    RH_ScopedInstall(UpdatePC, 0x464DA0);
+    RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 
     // RH_ScopedInstall(ProcessCommands0To99, 0x465E60);
@@ -143,9 +141,12 @@ void CRunningScript::AddScriptToList(CRunningScript** queueList) {
     *queueList = this;
 }
 
-// 0x
-void* CRunningScript::GetPointerToLocalVariable(int32 varId) {
-    return plugin::CallMethodAndReturn<void*, 0x463CA0, CRunningScript*, int32>( this, varId);
+// 0x463CA0
+tScriptParam* CRunningScript::GetPointerToLocalVariable(int32 varIndex) {
+    if (m_bIsMission)
+        return (tScriptParam*)&CTheScripts::LocalVariablesForCurrentMission[varIndex];
+    else
+        return (tScriptParam*)&m_aLocalVars[varIndex];
 }
 
 // 0x465C20
@@ -253,12 +254,94 @@ void CRunningScript::CharInAreaCheckCommand(int32 commandId) {
 // Collects parameter and returns it.
 // 0x464250
 tScriptParam CRunningScript::CollectNextParameterWithoutIncreasingPC() {
-    return plugin::CallMethodAndReturn<tScriptParam, 0x464250, CRunningScript*>(this);
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+    uint8* pIp = m_pCurrentIP;
+    tScriptParam result = {.iParam = -1};
+
+    switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
+    {
+    case SCRIPT_PARAM_STATIC_INT_32BITS:
+        result.iParam = CTheScripts::Read4BytesFromScript(m_pCurrentIP);
+        break;
+    case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        result.iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]);
+        break;
+    }
+    case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        result = *GetPointerToLocalVariable(index);
+        break;
+    }
+    case SCRIPT_PARAM_STATIC_INT_8BITS:
+        result.iParam = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+        break;
+    case SCRIPT_PARAM_STATIC_INT_16BITS:
+        result.iParam = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        break;
+    case SCRIPT_PARAM_STATIC_FLOAT:
+        result.fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
+        break;
+    case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+        ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
+        result.iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
+        break;
+    case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
+        ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
+        result = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
+        break;
+    }
+
+    m_pCurrentIP = pIp;
+    return result;
 }
 
 // 0x464080
 void CRunningScript::CollectParameters(int16 count) {
-    plugin::CallMethod<0x464080, CRunningScript*, int16>(this, count);
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+
+    for (int i = 0; i < count; i++)
+    {
+        switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
+        {
+        case SCRIPT_PARAM_STATIC_INT_32BITS:
+            CTheScripts::ScriptParams[i].iParam = CTheScripts::Read4BytesFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            CTheScripts::ScriptParams[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]);
+            break;
+        }
+        case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            CTheScripts::ScriptParams[i] = *GetPointerToLocalVariable(index);
+            break;
+        }
+        case SCRIPT_PARAM_STATIC_INT_8BITS:
+            CTheScripts::ScriptParams[i].iParam = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_STATIC_INT_16BITS:
+            CTheScripts::ScriptParams[i].iParam = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_STATIC_FLOAT:
+            CTheScripts::ScriptParams[i].fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            CTheScripts::ScriptParams[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
+            break;
+        case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            CTheScripts::ScriptParams[i] = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
+            break;
+        }
+    }
 }
 
 // 0x485A50
@@ -309,8 +392,21 @@ void CRunningScript::GetCorrectPedModelIndexForEmergencyServiceType(ePedType ped
 
 // Returns offset of global variable
 // 0x464700
-int16 CRunningScript::GetIndexOfGlobalVariable() {
-    return plugin::CallMethodAndReturn<int16, 0x464700>(this);
+uint16 CRunningScript::GetIndexOfGlobalVariable() {
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+
+    switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
+    {
+    case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+        return CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+    case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        return arrVarOffset + 4 * arrElemIdx;
+    default:
+        // ???
+        return (uint16)(uint32)this;
+    }
 }
 
 // Returns state of pad button
@@ -321,14 +417,66 @@ int16 CRunningScript::GetPadState(uint16 playerIndex, eButtonId buttonId) {
 
 // Returns pointer to local variable pointed by offset and array index as well as multiplier.
 // 0x463CC0
-void* CRunningScript::GetPointerToLocalArrayElement(int32 off, uint16 idx, uint8 mul) {
-    return plugin::CallMethodAndReturn<void*, 0x463CC0, CRunningScript*, int32, uint16, uint8>(this, off, idx, mul);
+tScriptParam* CRunningScript::GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize) {
+    int32 index = arrVarOffset + arrElemSize * arrElemIdx;
+    if (m_bIsMission)
+        return (tScriptParam*)&CTheScripts::LocalVariablesForCurrentMission[index];
+    else
+        return (tScriptParam*)&m_aLocalVars[index];
 }
 
 // Returns pointer to script variable of any type.
 // 0x464790
 tScriptParam* CRunningScript::GetPointerToScriptVariable(uint8 variableType) {
-    return plugin::CallMethodAndReturn<tScriptParam*, 0x464790, CRunningScript*, uint8>(this, variableType);
+    uint8 arrElemSize;
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+
+    variableType = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+    switch (variableType)
+    {
+    case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+    case SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE:
+    case SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        return (tScriptParam*)&CTheScripts::LocalVariablesForCurrentMission[index];
+    }
+
+    case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+    case SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE:
+    case SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        return GetPointerToLocalVariable(index);
+    }
+
+    case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+    case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
+    case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
+        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        if (variableType == SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY)
+            return (tScriptParam*)&CTheScripts::ScriptSpace[16 * arrElemIdx + arrVarOffset];
+        else if (variableType == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
+            return (tScriptParam*)&CTheScripts::ScriptSpace[8 * arrElemIdx + arrVarOffset];
+        else
+            return (tScriptParam*)&CTheScripts::ScriptSpace[4 * arrElemIdx + arrVarOffset];
+
+    case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
+    case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
+    case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
+        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        if (variableType == SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY)
+            arrElemSize = 4;
+        else if (variableType == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
+            arrElemSize = 2;
+        else
+            arrElemSize = 1;
+        return GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, arrElemSize);
+
+    default:
+        return nullptr;
+    }
 }
 
 // Terminates a script
@@ -337,22 +485,154 @@ void CRunningScript::ShutdownThisScript() {
     plugin::CallMethod<0x465AA0, CRunningScript*>(this);
 }
 
-// Reads array offset and value from array index variable.
+// Reads array var base offset and element index from index variable.
 // 0x463CF0
-void CRunningScript::ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx) {
-    plugin::CallMethod<0x463CF0, CRunningScript*, int32, uint16*, int32*>(this, move, pOffset, pIdx);
+void CRunningScript::ReadArrayInformation(int32 updateIp, uint16* outArrVarOffset, int32* outArrElemIdx) {
+    uint8* pIp = m_pCurrentIP;
+
+    *outArrVarOffset = CTheScripts::Read2BytesFromScript(pIp);
+    uint16 arrayIndexVar = CTheScripts::Read2BytesFromScript(pIp);
+    bool isGlobalIndexVar = CTheScripts::Read2BytesFromScript(pIp) < 0; // high bit set
+
+    if (isGlobalIndexVar)
+        *outArrElemIdx = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrayIndexVar]);
+    else
+        *outArrElemIdx = GetPointerToLocalVariable(arrayIndexVar)->iParam;
+
+    if (updateIp)
+        m_pCurrentIP = pIp;
 }
 
 // Collects parameters and puts them to local variables of new script
 // 0x464500
 void CRunningScript::ReadParametersForNewlyStartedScript(CRunningScript* newScript) {
-    plugin::CallMethod<0x464500, CRunningScript*, CRunningScript*>(this, newScript);
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+    int8 type = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+
+    for (int i = 0; type != SCRIPT_PARAM_END_OF_ARGUMENTS; type = CTheScripts::Read1ByteFromScript(m_pCurrentIP), i++)
+    {
+        switch (type)
+        {
+        case SCRIPT_PARAM_STATIC_INT_32BITS:
+            newScript->m_aLocalVars[i].iParam = CTheScripts::Read4BytesFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            newScript->m_aLocalVars[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]);
+            break;
+        }
+        case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            newScript->m_aLocalVars[i] = *GetPointerToLocalVariable(index);
+            break;
+        }
+        case SCRIPT_PARAM_STATIC_INT_8BITS:
+            newScript->m_aLocalVars[i].iParam = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_STATIC_INT_16BITS:
+            newScript->m_aLocalVars[i].iParam = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_STATIC_FLOAT:
+            newScript->m_aLocalVars[i].fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
+            break;
+        case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            newScript->m_aLocalVars[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
+            break;
+        case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            newScript->m_aLocalVars[i] = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 // Collects string parameter
 // 0x463D50
 void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) {
-    plugin::CallMethod<0x463D50, CRunningScript*, char*, uint8>(this, buffer, nBufferLength);
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+
+    int8 type = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+    switch (type)
+    {
+    case SCRIPT_PARAM_STATIC_SHORT_STRING:
+        for (int i = 0; i < 8; ++i)
+            buffer[i] = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+        break;
+
+    case SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        strncpy(buffer, (char*)&CTheScripts::ScriptSpace[index], 8);
+        break;
+    }
+
+    case SCRIPT_PARAM_LOCAL_SHORT_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        strncpy(buffer, (char*)GetPointerToLocalVariable(index), 8);
+        break;
+    }
+
+    case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
+    case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
+        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
+            strncpy(buffer, (char*)&CTheScripts::ScriptSpace[8 * arrElemIdx + arrVarOffset], 8);
+        else
+            strncpy(buffer, (char*)&CTheScripts::ScriptSpace[16 * arrElemIdx + arrVarOffset], std::min<uint8>(nBufferLength, 16));
+        break;
+
+    case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
+    case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
+        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
+            strncpy(buffer, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 2), 8);
+        else
+            strncpy(buffer, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 4), std::min<uint8>(nBufferLength, 16));
+        break;
+
+    case SCRIPT_PARAM_STATIC_PASCAL_STRING:
+    {
+        int16 nStringLen = CTheScripts::Read1ByteFromScript(m_pCurrentIP); // sign extension. max size = 127, not 255
+        for (uint8 i = 0; i < nStringLen; i++)
+            buffer[i] = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+
+        if (nStringLen < nBufferLength)
+            memset(&buffer[(uint8)nStringLen], 0, (uint8)(nBufferLength - nStringLen));
+        break;
+    }
+
+    case SCRIPT_PARAM_STATIC_LONG_STRING:
+        // slightly changed code: original code is a bit messy and calls Read1ByteFromScript
+        // in a loop and does some additional checks to ensure that buffer can hold the data
+        strncpy(buffer, (char*)m_pCurrentIP, std::min<uint8>(nBufferLength, 16));
+        m_pCurrentIP += 16;
+        break;
+
+    case SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        strncpy(buffer, (char*)&CTheScripts::ScriptSpace[index], std::min<uint8>(nBufferLength, 16));
+        break;
+    }
+
+    case SCRIPT_PARAM_LOCAL_LONG_STRING_VARIABLE:
+    {
+        uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+        strncpy(buffer, (char*)GetPointerToLocalVariable(index), std::min<uint8>(nBufferLength, 16));
+        break;
+    }
+
+    default:
+        break;
+    }
 }
 
 // Removes script from list
@@ -379,7 +659,35 @@ void CRunningScript::SetCharCoordinates(CPed* ped, float x, float y, float z, bo
 
 // 0x464370
 void CRunningScript::StoreParameters(int16 count) {
-    plugin::CallMethod<0x464370, CRunningScript*, int16>(this, count);
+    uint16 arrVarOffset;
+    int32 arrElemIdx;
+
+    for (int i = 0; i < count; i++)
+    {
+        switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
+        {
+        case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]) = CTheScripts::ScriptParams[i].iParam;
+            break;
+        }
+        case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
+        {
+            uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
+            *GetPointerToLocalVariable(index) = CTheScripts::ScriptParams[i];
+            break;
+        }
+        case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]) = CTheScripts::ScriptParams[i].iParam;
+            break;
+        case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
+            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1) = CTheScripts::ScriptParams[i];
+            break;
+        }
+    }
 }
 
 // 0x489490
@@ -390,13 +698,45 @@ bool CRunningScript::ThisIsAValidRandomPed(ePedType pedType, bool civilian, bool
 // Updates comparement flag, used in conditional commands
 // 0x4859D0
 void CRunningScript::UpdateCompareFlag(bool state) {
-    plugin::CallMethod<0x4859D0, CRunningScript*, bool>(this, state);
+    if (m_bNotFlag)
+        state = !state;
+
+    if (m_nLogicalOp == ANDOR_NONE)
+    {
+        m_bCondResult = state;
+        return;
+    }
+
+    if (m_nLogicalOp >= ANDS_1 && m_nLogicalOp <= ANDS_8)
+    {
+        m_bCondResult &= state;
+        if (m_nLogicalOp == ANDS_1)
+            m_nLogicalOp = ANDOR_NONE;
+        else
+            m_nLogicalOp--;
+
+        return;
+    }
+
+    if (m_nLogicalOp >= ORS_1 && m_nLogicalOp <= ORS_8)
+    {
+        m_bCondResult |= state;
+        if (m_nLogicalOp == ORS_1)
+            m_nLogicalOp = ANDOR_NONE;
+        else
+            m_nLogicalOp--;
+
+        return;
+    }
 }
 
 // Sets instruction pointer, used in GOTO-like commands
 // 0x464DA0
 void CRunningScript::UpdatePC(int32 newIP) {
-    plugin::CallMethod<0x464DA0, CRunningScript*, int32>(this, newIP);
+    if (newIP >= 0)
+        m_pCurrentIP = &CTheScripts::ScriptSpace[newIP];
+    else
+        m_pCurrentIP = &m_pBaseIP[-newIP];
 }
 
 // unused
@@ -404,8 +744,7 @@ void CRunningScript::UpdatePC(int32 newIP) {
 int8 CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
-    int32 command = *(uint16*)m_pCurrentIP;  // TODO: replace with inline call
-    m_pCurrentIP += 2;
+    int32 command = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
 
     m_bNotFlag = (command & 0x8000) != 0;
     command &= 0x7FFF;
@@ -920,9 +1259,11 @@ int8 CRunningScript::ProcessCommands200To299(int32 commandId) {
     case COMMAND_ANDOR: // 0x0D6
         break;
     case COMMAND_LAUNCH_MISSION: // 0x0D7
+    {
         CollectParameters(1);
-        CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[CTheScripts::ScriptParams[0].iParam]);
+        auto* pNew = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[CTheScripts::ScriptParams[0].iParam]);
         return 0;
+    }
     case COMMAND_MISSION_HAS_FINISHED: // 0x0D8
         break;
     case COMMAND_STORE_CAR_CHAR_IS_IN: // 0x0D9
