@@ -144,7 +144,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
     RH_ScopedInstall(Undress, 0x5E00F0);
     RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
-    // RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
+    RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
     // RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
     // RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
@@ -842,10 +842,12 @@ void CPed::SetPedPositionInCar()
     ((void(__thiscall *)(CPed*))0x5DF910)(this);
 }
 
-// 0x5DFD60
-void CPed::RestoreHeadingRate()
-{
-    ((void(__thiscall *)(CPed*))0x5DFD60)(this);
+/*!
+* @addr 0x5DFD60
+* @brief Set head changing rate to value stored in m_pStats
+*/
+void CPed::RestoreHeadingRate() {
+    m_fHeadingChangeRate = m_pStats->m_fHeadingChangeRate;
 }
 
 // 0x5DFD70
