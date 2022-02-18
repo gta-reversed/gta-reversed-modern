@@ -137,7 +137,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(DropEntityThatThisPedIsHolding, 0x5E0360);
     RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
     RH_ScopedInstall(GetHoldingTask, 0x5E0290);
-    // RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
+    RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
     // RH_ScopedInstall(DoGunFlash, 0x5DF340);
     // RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
     RH_ScopedInstall(IsAlive, 0x5E0170);
@@ -894,9 +894,11 @@ void CPed::GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, boo
 }
 
 // 0x5E0270
-void CPed::ReleaseCoverPoint()
-{
-    ((void(__thiscall *)(CPed*))0x5E0270)(this);
+void CPed::ReleaseCoverPoint() {
+    if (m_pCoverPoint) {
+        m_pCoverPoint->ReleaseCoverPointForPed(this);
+        m_pCoverPoint = nullptr;
+    }
 }
 
 // 0x5E0290
@@ -1524,10 +1526,7 @@ void CPed::SetPedState(ePedState pedState) {
     switch (pedState) {
     case ePedState ::PEDSTATE_DEAD:
     case ePedState ::PEDSTATE_DIE: {
-        if (m_pCoverPoint) {
-            m_pCoverPoint->ReleaseCoverPointForPed(this);
-            m_pCoverPoint =  nullptr;
-        }
+        ReleaseCoverPoint();
 
         if (bClearRadarBlipOnDeath) {
             CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetRef(this));
