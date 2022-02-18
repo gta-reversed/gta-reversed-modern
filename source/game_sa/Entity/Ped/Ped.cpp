@@ -129,7 +129,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
     RH_ScopedInstall(CanSeeEntity, 0x5E0730);
     RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
-    // RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
+    RH_ScopedInstall(GetWalkAnimSpeed, 0x5E04B0);
     // RH_ScopedInstall(StopPlayingHandSignal, 0x5E0480);
     // RH_ScopedInstall(IsPlayingHandSignal, 0x5E0460);
     // RH_ScopedInstall(CanThrowEntityThatThisPedIsHolding, 0x5E0400);
@@ -935,9 +935,24 @@ void CPed::StopPlayingHandSignal()
 }
 
 // 0x5E04B0
-float CPed::GetWalkAnimSpeed()
-{
-    return ((float(__thiscall *)(CPed*))0x5E04B0)(this);
+float CPed::GetWalkAnimSpeed() {
+    auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, nullptr)->m_pHierarchy;
+    CAnimManager::UncompressAnimation(hier);
+    auto& firstSequence = hier->GetSequences()[0];
+
+    if (!firstSequence.m_nFrameCount) {
+        return 0.f; // No frames
+    }
+
+    // NOTE: This is quite garbage, based on at least 5 assumptions, more of a hack than a solution from R*'s side.
+    //       It won't work correctly if first frame is not a root frame, nor if the animation happens on any other axis than Y, etc..
+
+    const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
+    const auto lastFrameY = firstSequence.m_isRoot ? 
+        lastFrame->m_vecTranslation.y :
+        ((CAnimSequenceChildFrameUncompressed*)lastFrame)->m_quat.imag.y;
+
+    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->m_vecTranslation.y) / hier->m_fTotalTime;
 }
 
 // 0x5E06E0
