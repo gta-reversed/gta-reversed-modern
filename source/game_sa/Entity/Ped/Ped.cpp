@@ -147,7 +147,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
     RH_ScopedInstall(Dress, 0x5E0130);
     RH_ScopedInstall(IsPlayer, 0x5DF8F0);
-    // RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
+    RH_ScopedInstall(GetBikeRidingSkill, 0x5DF510);
     // RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
     // RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
@@ -772,9 +772,11 @@ void CPed::ResetGunFlashAlpha()
 }
 
 // 0x5DF510
-float CPed::GetBikeRidingSkill()
-{
-    return ((float(__thiscall *)(CPed*))0x5DF510)(this);
+float CPed::GetBikeRidingSkill() {
+    if (m_pPlayerData) {
+        return std::min(1000.f, CStats::GetStatValue(eStats::STAT_BIKE_SKILL) / 1000.f);
+    }
+    return IsCreatedByMission() ? 1.f : 0.f;
 }
 
 // 0x5DF560
