@@ -123,7 +123,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetMoveState, 0x5DEC00);
     RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
     RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
-    // RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
+    RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
     // RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
     // RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
     // RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
@@ -391,9 +391,12 @@ void CPed::StopNonPartialAnims() {
 }
 
 // 0x5DED50
-void CPed::RestartNonPartialAnims()
-{
-    ((void(__thiscall *)(CPed*))0x5DED50)(this);
+void CPed::RestartNonPartialAnims() {
+    for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
+        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
+            assoc->SetFlag(ANIM_FLAG_STARTED, true);
+        }
+    }
 }
 
 // 0x5DED90
