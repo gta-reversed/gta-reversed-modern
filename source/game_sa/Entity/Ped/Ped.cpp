@@ -142,7 +142,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
     RH_ScopedInstall(IsAlive, 0x5E0170);
     RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
-    // RH_ScopedInstall(Undress, 0x5E00F0);
+    RH_ScopedInstall(Undress, 0x5E00F0);
     // RH_ScopedInstall(SetLookTimer, 0x5DF8D0);
     // RH_ScopedInstall(RestoreHeadingRate, 0x5DFD60);
     // RH_ScopedInstall(Dress, 0x5E0130);
@@ -864,9 +864,10 @@ void CPed::PositionAttachedPed()
 }
 
 // 0x5E00F0
-void CPed::Undress(char* modelName)
-{
-    ((void(__thiscall *)(CPed*, char*))0x5E00F0)(this, modelName);
+void CPed::Undress(char* modelName) {
+    DeleteRwObject();
+    CStreaming::RequestSpecialModel(IsPlayer() ? 0 : m_nModelIndex, modelName, STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+    CWorld::Remove(this);
 }
 
 // 0x5E0130
