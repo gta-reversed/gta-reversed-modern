@@ -121,7 +121,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetStayInSamePlace, 0x481090);
     RH_ScopedInstall(SetPedStats, 0x5DEBC0);
     RH_ScopedInstall(SetMoveState, 0x5DEC00);
-    // RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
+    RH_ScopedInstall(SetMoveAnimSpeed, 0x5DEC10);
     // RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
     // RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
     // RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
@@ -372,9 +372,13 @@ void CPed::SetMoveState(eMoveState moveState) {
 }
 
 // 0x5DEC10
-void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association)
-{
-    ((void(__thiscall *)(CPed*, CAnimBlendAssociation*))0x5DEC10)(this, association);
+void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
+    const auto pitchFactor = std::clamp(m_pedIK.m_fSlopePitch, -0.3f, 0.3f);
+    if (IsCreatedByMission()) {
+        association->m_fSpeed = pitchFactor + 1.f;
+    } else {
+        association->m_fSpeed = pitchFactor + 1.2f - m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f;
+    }
 }
 
 // 0x5DED10
