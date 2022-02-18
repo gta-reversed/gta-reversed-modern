@@ -125,7 +125,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(StopNonPartialAnims, 0x5DED10);
     RH_ScopedInstall(RestartNonPartialAnims, 0x5DED50);
     RH_ScopedInstall(DoWeHaveWeaponAvailable, 0x5DF300);
-    // RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
+    RH_ScopedInstall(RemoveGogglesModel, 0x5DF170);
     // RH_ScopedInstall(SetGunFlashAlpha, 0x5DF400);
     // RH_ScopedInstall(CanSeeEntity, 0x5E0730);
     // RH_ScopedInstall(SetPedDefaultDecisionMaker, 0x5E06E0);
@@ -649,9 +649,26 @@ bool CPed::CanBeDeletedEvenInVehicle()
 }
 
 // 0x5DF170
-void CPed::RemoveGogglesModel()
-{
-    ((void(__thiscall *)(CPed*))0x5DF170)(this);
+void CPed::RemoveGogglesModel() {
+    // Release model info
+    CVisibilityPlugins::GetClumpModelInfo((RpClump*)m_pGogglesObject)->RemoveRef();
+
+    // Remove atomics anim from skin
+    if (const auto atomic = GetFirstAtomic((RpClump*)m_pGogglesObject)) {
+        if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
+            RpClumpForAllAtomics(m_pWeaponObject, AtomicRemoveAnimFromSkinCB, nullptr);
+        }
+    }
+
+    // Destroy clump
+    RpClumpDestroy(m_pWeaponObject);
+    m_pWeaponObject = nullptr;
+
+    // Disable FX's of the goggles. (See mem. var. `m_pGogglesState` in the header)
+    if (m_pGogglesState) {
+        *m_pGogglesState = false;
+        m_pGogglesState = nullptr;
+    }
 }
 
 int32 CPed::GetWeaponSlot(eWeaponType weaponType)
@@ -1206,7 +1223,7 @@ void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
     if (modelIndex != -1) {
         m_pGogglesObject = CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
 
-        m_bGogglesState = inOutGogglesState;
+        m_pGogglesState = &inOutGogglesState;
         inOutGogglesState = true;
     }
 }

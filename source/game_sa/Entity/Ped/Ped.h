@@ -288,7 +288,7 @@ public:
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject;
     RwObject*           m_pGogglesObject;
-    bool                m_bGogglesState;
+    bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
     int16               field_506;
     int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
