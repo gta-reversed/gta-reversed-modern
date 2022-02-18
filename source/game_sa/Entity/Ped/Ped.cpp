@@ -21,6 +21,7 @@
 #include "Radar.h"
 #include "PostEffects.h"
 #include "PedStdBonePositions.h"
+#include "TaskSimpleJetPack.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -160,7 +161,7 @@ void CPed::InjectHooks() {
     // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
     // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
     RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
-    // RH_ScopedInstall(Render_Reversed, 0x5E7680);
+    RH_ScopedInstall(Render_Reversed, 0x5E7680);
     // RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
     // RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
     // RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
@@ -1365,7 +1366,7 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
 // 0x5E3A90
 void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
     if (modelIndex != -1) {
-        m_pGogglesObject = CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
+        m_pGogglesObject = (RwFrame*)CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
 
         m_pGogglesState = &inOutGogglesState;
         inOutGogglesState = true;
@@ -2692,9 +2693,95 @@ void CPed::PreRender()
 }
 
 // 0x5E7680
-void CPed::Render()
-{
-    plugin::CallMethod<0x5E7680, CPed*>(this);
+void CPed::Render() {
+    if (!bDontRender && !(m_bIsVisible || CMirrors::ShouldRenderPeds())) {
+        return;
+    }
+
+    uint32 storedAlphaRef{};
+    if (IsPlayer()) {
+        RwRenderStateGet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(&storedAlphaRef));
+    }
+
+    // Moved early out to top from here
+
+    // Now do some extra checks if in vehicle
+    if (   bInVehicle
+        && m_pVehicle
+        && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR)
+        && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP)
+    ) {
+        if (!bRenderPedInCar) {
+            return;
+        }
+
+        if (   !m_pVehicle->IsBike()
+            && !m_pVehicle->IsSubQuad()
+            && !IsPlayer()
+        ) {
+            // Okay, let's check if the ped is close enough to the camera
+
+            const auto IsDistInRange = [this](auto range) {
+                const auto distSq = (TheCamera.GetPosition() - GetPosition()).SquaredMagnitude();
+                const auto finalRange = range * TheCamera.m_fLODDistMultiplier;
+                return distSq < finalRange * finalRange;
+            };
+            if (!IsDistInRange(m_pVehicle->IsBoat() ? 40.f : 25.f)) {
+                return;
+            }
+        }
+    }
+
+    // Render us (And any extra FX)
+    if (CPostEffects::IsVisionFXActive()) {
+        CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(this);
+        CPostEffects::NightVisionSetLights();
+        CEntity::Render();
+        CPostEffects::InfraredVisionRestoreLightsForHeatObjects();
+    } else {
+        CEntity::Render();
+    }
+
+    // Render weapon (and gun flash) as well. (Done for local player only if flag is set.)
+    if (!m_pPlayerData || m_pPlayerData->m_bRenderWeapon) { 
+        if (m_pWeaponObject) {
+            if (!bInVehicle || !GetIntelligence()->GetTaskSwim() || GetIntelligence()->GetTaskHold(false)) {
+                weaponPedsForPc_Insert(this);
+                if (m_nWeaponGunflashAlphaMP1 > 0 || m_nWeaponGunflashAlphaMP2 > 0) {
+                    ResetGunFlashAlpha();
+                }
+            }
+        }
+    }
+
+    // Render goggles object
+    if (m_pGogglesObject) {
+        auto& headMat = GetBoneMatrix(ePedBones::BONE_HEAD);
+
+        // Update goggle's matrix with head's
+        *RwFrameGetMatrix(m_pGogglesObject) = headMat; // TODO: Is there a better way to do this?
+        
+        // Calculate it's position
+        RwV3d pos{ 0.f, 0.84f, 0.f }; // Offset
+        RwV3dTransformPoints(&pos, &pos, 1, &headMat);
+
+        RwV3dAssign(RwMatrixGetPos(RwFrameGetMatrix(m_pGogglesObject)), &pos); // IMPORTANT NOTE: I still don't agree with C fanboys, this is not readable.
+
+        RwFrameUpdateObjects(m_pGogglesObject);
+        RpClumpRender((RpClump*)m_pGogglesObject);
+    }
+
+    // Render JetPack
+    if (const auto task = GetIntelligence()->GetTaskJetPack()) {
+        task->Process();
+    }
+
+    bIsCached = true; // Hmm.. More is "isRendered" ?
+
+    // Restore alpha test fn
+    if (IsPlayer()) {
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(storedAlphaRef));
+    }
 }
 
 // 0x553F00
