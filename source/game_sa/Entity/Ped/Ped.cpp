@@ -151,7 +151,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetPedPositionInCar, 0x5DF910);
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
-    // RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
+    RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
     // RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
     // RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
@@ -757,7 +757,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
         } else {
             CVehicle::SetComponentAtomicAlpha(atomic, std::min(255, 350 * gunFlashAlphaInHand / m_sGunFlashBlendStart));
         }
-        RpAtomicSetFlags(atomic, ATOMIC_IS_LEFT); // NOTE: Not sure if this is the correct enum (but the value of 4 is correct)
+        RpAtomicSetFlags(atomic, 4); // TODO: Use enum
     }
 
     if (!gunFlashAlphaInHand) {
@@ -766,9 +766,13 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 }
 
 // 0x5DF4E0
-void CPed::ResetGunFlashAlpha()
-{
-    ((void(__thiscall *)(CPed*))0x5DF4E0)(this);
+void CPed::ResetGunFlashAlpha() {
+    if (m_pGunflashObject) {
+        if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
+            RpAtomicSetFlags(atomic, ATOMIC_IS_LEFT); // TODO: Use enum
+            CVehicle::SetComponentAtomicAlpha(atomic, 0);
+        }
+    }
 }
 
 // 0x5DF510
