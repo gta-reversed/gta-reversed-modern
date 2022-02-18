@@ -39,6 +39,22 @@ void CRunningScript::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x4648E0);
     RH_ScopedInstall(GetCorrectPedModelIndexForEmergencyServiceType, 0x464F50);
+
+    /**
+    * IMPORTANT: There are optimised chunks of code in the original game where a function X
+    * calls another function Y and expects that ECX is preserved across the call, even though
+    * __thiscall does not guarantee that. This will lead to crashes (in the debug build, at least)
+    * because our reversed functions clobber ECX.
+    *
+    * Some of the functions that are expected to preserve ECX are:
+    * - CollectParameters
+    * - CollectNextParameterWithoutIncreasingPC
+    * - StoreParameters
+    *
+    * For the time being, it is better not to install these hooks, or implement some kind of thunk
+    * hook code that saves ECX and restores it after call.
+    */
+
     // RH_ScopedInstall(LocateCarCommand, 0x487A20);
     // RH_ScopedInstall(LocateObjectCommand, 0x487D10);
     // RH_ScopedInstall(PlayAnimScriptCommand, 0x470150);
@@ -52,29 +68,29 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(CharInAngledAreaCheckCommand, 0x487F60);
     // RH_ScopedInstall(FlameInAngledAreaCheckCommand, 0x488780);
     // RH_ScopedInstall(ObjectInAngledAreaCheckCommand, 0x4883F0);
-    RH_ScopedInstall(CollectParameters, 0x464080);
-    RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250);
-    RH_ScopedInstall(StoreParameters, 0x464370);
-    RH_ScopedInstall(ReadArrayInformation, 0x463CF0);
-    RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500);
-    RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50);
-    RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700);
+    // RH_ScopedInstall(CollectParameters, 0x464080);
+    // RH_ScopedInstall(CollectNextParameterWithoutIncreasingPC, 0x464250);
+    // RH_ScopedInstall(StoreParameters, 0x464370);
+    // RH_ScopedInstall(ReadArrayInformation, 0x463CF0);
+    // RH_ScopedInstall(ReadParametersForNewlyStartedScript, 0x464500);
+    // RH_ScopedInstall(ReadTextLabelFromScript, 0x463D50);
+    // RH_ScopedInstall(GetIndexOfGlobalVariable, 0x464700);
     // RH_ScopedInstall(GetPadState, 0x485B10);
-    RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0);
-    RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0);
-    RH_ScopedInstall(GetPointerToScriptVariable, 0x464790);
+    // RH_ScopedInstall(GetPointerToLocalVariable, 0x463CA0);
+    // RH_ScopedInstall(GetPointerToLocalArrayElement, 0x463CC0);
+    // RH_ScopedInstall(GetPointerToScriptVariable, 0x464790);
     // RH_ScopedInstall(DoDeathArrestCheck, 0x485A50);
     // RH_ScopedInstall(SetCharCoordinates, 0x464DC0);
     // RH_ScopedInstall(GivePedScriptedTask, 0x465C20);
-    RH_ScopedInstall(AddScriptToList, 0x464C00);
-    RH_ScopedInstall(RemoveScriptFromList, 0x464BD0);
+    // RH_ScopedInstall(AddScriptToList, 0x464C00);
+    // RH_ScopedInstall(RemoveScriptFromList, 0x464BD0);
     // RH_ScopedInstall(ShutdownThisScript, 0x465AA0);
     RH_ScopedInstall(IsPedDead, 0x464D70);
     // RH_ScopedInstall(ThisIsAValidRandomPed, 0x489490);
     // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
-    RH_ScopedInstall(UpdateCompareFlag, 0x4859D0);
-    RH_ScopedInstall(UpdatePC, 0x464DA0);
-    RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
+    // RH_ScopedInstall(UpdateCompareFlag, 0x4859D0);
+    // RH_ScopedInstall(UpdatePC, 0x464DA0);
+    // RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
 
     // RH_ScopedInstall(ProcessCommands0To99, 0x465E60);
@@ -253,45 +269,43 @@ void CRunningScript::CharInAreaCheckCommand(int32 commandId) {
 
 // Collects parameter and returns it.
 // 0x464250
-tScriptParam CRunningScript::CollectNextParameterWithoutIncreasingPC() {
+int32 CRunningScript::CollectNextParameterWithoutIncreasingPC() {
     uint16 arrVarOffset;
     int32 arrElemIdx;
     uint8* pIp = m_pCurrentIP;
-    tScriptParam result = {.iParam = -1};
+    int32 result = -1;
 
     switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
     {
     case SCRIPT_PARAM_STATIC_INT_32BITS:
-        result.iParam = CTheScripts::Read4BytesFromScript(m_pCurrentIP);
+    case SCRIPT_PARAM_STATIC_FLOAT:
+        result = CTheScripts::Read4BytesFromScript(m_pCurrentIP);
         break;
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        result.iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]);
+        result = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[index]);
         break;
     }
     case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        result = *GetPointerToLocalVariable(index);
+        result = GetPointerToLocalVariable(index)->iParam;
         break;
     }
     case SCRIPT_PARAM_STATIC_INT_8BITS:
-        result.iParam = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+        result = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
         break;
     case SCRIPT_PARAM_STATIC_INT_16BITS:
-        result.iParam = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        break;
-    case SCRIPT_PARAM_STATIC_FLOAT:
-        result.fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
+        result = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
         break;
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
         ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
-        result.iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
+        result = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
         break;
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
         ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
-        result = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
+        result = GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1)->iParam;
         break;
     }
 

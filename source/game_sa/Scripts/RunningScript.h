@@ -149,7 +149,7 @@ public:
     void ObjectInAngledAreaCheckCommand(int32 commandId);
 
     void CollectParameters(int16 count);
-    tScriptParam CollectNextParameterWithoutIncreasingPC();
+    int32 CollectNextParameterWithoutIncreasingPC();
 
     void StoreParameters(int16 count);
 
