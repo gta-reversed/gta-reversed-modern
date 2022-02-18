@@ -152,7 +152,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
-    // RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
+    RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
     // RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
     // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
     // RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
@@ -2585,9 +2585,51 @@ RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
 }
 
 // 0x5E4880
-void CPed::SetModelIndex(uint32 modelIndex)
-{
-    plugin::CallMethod<0x5E4880, CPed*, uint32>(this, modelIndex);
+void CPed::SetModelIndex(uint32 modelIndex) {
+    m_bIsVisible = true;
+
+    CEntity::SetModelIndex(modelIndex);
+
+    RpAnimBlendClumpInit(m_pRwClump);
+    RpAnimBlendClumpFillFrameArray(m_pRwClump, m_apBones);
+
+    auto& mi = *(CPedModelInfo*)GetModelInfo();
+
+    SetPedStats(mi.m_nStatType);
+    RestoreHeadingRate();
+
+    SetPedDefaultDecisionMaker();
+
+    // Set random money count
+    const auto GetRandomMoneyCount = [this] {
+        if (CGeneral::GetRandomNumberInRange(0.f, 100.f) < 3.f) { // Moved up here
+            return 400;
+        } else if (CPopCycle::IsPedInGroupTheseGroups(m_nModelIndex, { POPCYCLE_GROUP_BUSINESS, POPCYCLE_GROUP_CASUAL_RICH })) {
+            return rand() % 50 + 20;
+        } else {
+            return rand() % 25;
+        }
+    };
+    m_nMoneyCount = GetRandomMoneyCount();
+
+    m_nAnimGroup = mi.m_nAnimType;
+    CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, AnimationId::ANIM_ID_IDLE);
+
+    // TODO: Is this whole statement inlined?
+    if (CanUseTorsoWhenLooking()) {
+        m_pedIK.bTorsoUsed = true;
+    }
+
+    // Deal with animation stuff once again
+    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_pvecPedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
+
+    // Create hit col model
+    if (!mi.m_pHitColModel) {
+        mi.CreateHitColModelSkinned(m_pRwClump);
+    }
+
+    // And finally update our rph anim
+    UpdateRpHAnim();
 }
 
 // 0x5DEBF0

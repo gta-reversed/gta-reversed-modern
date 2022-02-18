@@ -346,7 +346,7 @@ public:
     int32               m_nDeathTime;
     char                m_nBodypartToRemove;
     char                field_755;
-    int16               m_nMoneyCount;
+    int16               m_nMoneyCount; // Used for money pickup when ped is killed
     int32               field_758;
     int32               field_75C;
     char                m_nLastWeaponDamage;
@@ -445,7 +445,7 @@ public:
     bool IsAlive();
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
-    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, uint32 boneId, bool updateSkinBones);
+    void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones);
     void ReleaseCoverPoint();
     CTaskSimpleHoldEntity* GetHoldingTask();
     CEntity* GetEntityThatThisPedIsHolding();

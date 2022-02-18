@@ -22,7 +22,7 @@ public:
     CPedModelInfo() : CClumpModelInfo(), m_pHitColModel(nullptr) {}
     ~CPedModelInfo() { if (m_pHitColModel) delete m_pHitColModel; }
 public:
-    int32      m_nAnimType;
+    AssocGroupId      m_nAnimType;
     ePedType     m_nPedType;
     ePedStats     m_nStatType;
     uint16     m_nCarsCanDriveMask;
