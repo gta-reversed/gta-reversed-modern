@@ -138,7 +138,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetEntityThatThisPedIsHolding, 0x5E02E0);
     RH_ScopedInstall(GetHoldingTask, 0x5E0290);
     RH_ScopedInstall(ReleaseCoverPoint, 0x5E0270);
-    // RH_ScopedInstall(DoGunFlash, 0x5DF340);
+    RH_ScopedInstall(DoGunFlash, 0x5DF340);
     // RH_ScopedInstall(GetTransformedBonePosition, 0x5E01C0);
     RH_ScopedInstall(IsAlive, 0x5E0170);
     // RH_ScopedInstall(DeadPedMakesTyresBloody, 0x6B4200);
@@ -725,9 +725,16 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 }
 
 // 0x5DF340
-bool CPed::DoGunFlash(int32 arg0, bool arg1)
-{
-    return ((bool(__thiscall *)(CPed*, int32, bool))0x5DF340)(this, arg0, arg1);
+bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
+    // Really elegant.. ;D
+    if (bRightHand) {
+        m_nWeaponGunflashAlphaMP2 = CPed::m_sGunFlashBlendStart;
+        nm_fWeaponGunFlashAlphaProgMP2 = CPed::m_sGunFlashBlendStart / arg0;
+    } else {
+        m_nWeaponGunflashAlphaMP1 = CPed::m_sGunFlashBlendStart;
+        nm_fWeaponGunFlashAlphaProgMP1 = CPed::m_sGunFlashBlendStart / arg0;
+    }
+    RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, CGeneral::GetRandomNumberInRange(-360.f, 360.f), rwCOMBINEPRECONCAT);
 }
 
 // 0x5DF400

@@ -292,9 +292,9 @@ public:
     RwObject*           m_pGogglesObject;
     bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
-    int16               field_506;
+    int16               nm_fWeaponGunFlashAlphaProgMP1;
     int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
-    int16               field_50A;
+    int16               nm_fWeaponGunFlashAlphaProgMP2;
     CPedIK              m_pedIK;
     int32               field_52C;
     ePedState           m_nPedState;
