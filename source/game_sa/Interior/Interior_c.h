@@ -18,39 +18,39 @@ class Furniture_c;
 
 class Interior_c : public ListItem_c {
 public:
-    int32             m_interiorId;
-    int32             m_pGroup;
-    int32             m_areaCode;
-    tEffectFurniture* m_furnitureEffect;
-    RwMatrix          m_matrix;
-    int32             field_58;
-    List_c            m_list;
-    char              field_68[900];
-    int16             field_3EC;
-    int16             field_3EE;
-    CNodeAddress      m_nodeAddress;
-    int16             field_3F4;
-    int16             field_3F6;
-    int32             field_3F8;
-    int32             field_3FC;
-    CVector           m_position;
-    int8              field_40C;
-    int8              m_interiorInfosCount;
-    int32             field_412;
-    int32             field_416;
-    int32             field_41A;
-    int32             field_41E;
-    int32             field_422;
-    int32             field_426;
-    int32             field_42A;
-    int32             field_42E;
-    int32             field_432;
-    char              gap436[346];
-    InteriorInfo_t    m_interiorInfos[16];
-    int8              m_furnitureGroupId;
-    int8              m_furnitureId;
-    int8              field_792;
-    int8              field_793;
+    int32             m_interiorId;         // 0x8
+    int32             m_pGroup;             // 0xC
+    int32             m_areaCode;           // 0x10
+    tEffectFurniture* m_furnitureEffect;    // 0x14
+    RwMatrix          m_matrix;             // 0x18
+    int32             field_58;             // 0x58
+    List_c            m_list;               // 0x5C
+    char              field_68[900];        // 0x68
+    int16             field_3EC;            // 0x3EC
+    int16             field_3EE;            // 0x3EE
+    CNodeAddress      m_nodeAddress;        // 0x3F0
+    int16             field_3F4;            // 0x3F4
+    int16             field_3F6;            // 0x3F6
+    int32             field_3F8;            // 0x3F8
+    int32             field_3FC;            // 0x3FC
+    CVector           m_position;           // 0x400
+    int8              field_40C;            // 0x40C
+    int8              m_interiorInfosCount; // 0x40D
+    int32             field_412;            // 0x412
+    int32             field_416;            // 0x416
+    int32             field_41A;            // 0x41A
+    int32             field_41E;            // 0x41E
+    int32             field_422;            // 0x422
+    int32             field_426;            // 0x426
+    int32             field_42A;            // 0x42A
+    int32             field_42E;            // 0x42E
+    int32             field_432;            // 0x432
+    char              gap436[346];          // 0x436
+    InteriorInfo_t    m_interiorInfos[16];  // 0x590
+    int8              m_furnitureGroupId;   // 0x790
+    int8              m_furnitureId;        // 0x791
+    int8              field_792;            // 0x792
+    int8              field_793;            // 0x793
 
 public:
     static void InjectHooks();

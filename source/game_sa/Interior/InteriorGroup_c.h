@@ -10,23 +10,23 @@ class Interior_c;
 class InteriorInfo_t;
 
 class InteriorGroup_c : public ListItem_c {
-    CEntity*    m_pEntity;
-    uint8       m_nId;
-    uint8       m_furnitureId;
-    uint8       m_animType;
-    uint8       m_interiorCount;
-    Interior_c* m_interiors[8];
-    int32       field_30;
-    int8        m_isVisible;
-    int8        m_removePeds;
-    int8        m_pedCount;
-    int8        field_37;
-    CPed*       m_peds[16];
-    int32       field_78[16];
-    int8        m_pathSetupComplete;
-    int8        m_updatePeds;
-    int8        m_animBlockReferenced;
-    int8        field_BB;
+    CEntity*    m_pEntity;             // 0x8
+    uint8       m_nId;                 // 0xC
+    uint8       m_furnitureId;         // 0xD
+    uint8       m_animType;            // 0xE
+    uint8       m_interiorCount;       // 0xF
+    Interior_c* m_interiors[8];        // 0x10
+    int32       field_30;              // 0x30
+    int8        m_isVisible;           // 0x34
+    int8        m_removePeds;          // 0x35
+    int8        m_pedCount;            // 0x36
+    int8        field_37;              // 0x37
+    CPed*       m_peds[16];            // 0x38
+    int32       field_78[16];          // 0x78
+    int8        m_pathSetupComplete;   // 0xB8
+    int8        m_updatePeds;          // 0xB9
+    int8        m_animBlockReferenced; // 0xBA
+    int8        field_BB;              // 0xBB
 
 public:
     static void InjectHooks();
