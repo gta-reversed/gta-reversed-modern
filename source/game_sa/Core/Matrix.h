@@ -100,12 +100,12 @@ public:
     static uint8* EulerIndices2;
 
     void SetRotate(const CVector& rot) {
-        SetRotate(rot.x, rot.z, rot.z);
+        SetRotate(rot.x, rot.y, rot.z);
     }
 
     void SetRotateKeepPos(const CVector& rot) {
         auto pos{ m_pos };
-        SetRotate(rot.x, rot.z, rot.z);
+        SetRotate(rot.x, rot.y, rot.z);
         m_pos = pos;
     }
 

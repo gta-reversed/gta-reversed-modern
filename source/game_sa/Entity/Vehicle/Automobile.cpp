@@ -4411,13 +4411,12 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
         m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
     }
 
+	// 0x6A9FCE
     // Update component rotation based on it's stored angle
     {
         CVector rotation{ 0.f, 0.f, 0.f };
         rotation[door.m_nAxis] = door.m_fAngle;
-        const auto savedPos = frameMatrix.GetPosition();
-        frameMatrix.SetRotate(rotation);
-        frameMatrix.GetPosition() = savedPos;
+        frameMatrix.SetRotateKeepPos(rotation);
         frameMatrix.UpdateRW();
     }
 
