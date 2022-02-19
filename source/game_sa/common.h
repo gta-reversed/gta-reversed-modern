@@ -53,8 +53,8 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
-#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)
+#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
 

@@ -15,6 +15,7 @@
 #include "GxtChar.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"
+#include "SpecialFX.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
@@ -1168,6 +1169,40 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
 
 // 0x53E230
 void Render2dStuff() {
+    const auto DrawOuterZoomBox = []() {
+        CPed* player = FindPlayerPed();
+        eWeaponType weaponType = WEAPON_UNARMED;
+        if (player)
+            weaponType = player->GetActiveWeapon().m_nType;
+        eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
+        bool firstPersonWeapon = false;
+        if (camMode == MODE_SNIPER
+            || camMode == MODE_SNIPER_RUNABOUT
+            || camMode == MODE_ROCKETLAUNCHER
+            || camMode == MODE_ROCKETLAUNCHER_RUNABOUT
+            || camMode == MODE_CAMERA
+            || camMode == MODE_HELICANNON_1STPERSON)
+        {
+            firstPersonWeapon = true;
+        }
+
+        if ((weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_ROCKET) && firstPersonWeapon) {
+            CRGBA black(0, 0, 0, 255);
+            if (weaponType == WEAPON_ROCKET)
+            {
+                CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180.0f)), black);
+                CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170.0f), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+            }
+            else
+            {
+                CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210.0f)), black);
+                CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210.0f), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+            }
+            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210.0f), SCREEN_HEIGHT), black);
+            CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210.0f), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
+        }
+    };
+
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
@@ -1178,39 +1213,8 @@ void Render2dStuff() {
 
     CReplay::Display();
     CPickups::RenderPickUpText();
-    if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn)
-        TheCamera.DrawBordersForWideScreen();
-    CPed* player = FindPlayerPed();
-    eWeaponType weaponType = WEAPON_UNARMED;
-    if (player)
-        weaponType = player->GetActiveWeapon().m_nType;
-    eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
-    bool firstPersonWeapon = false;
-    if (camMode == MODE_SNIPER
-        || camMode == MODE_SNIPER_RUNABOUT
-        || camMode == MODE_ROCKETLAUNCHER
-        || camMode == MODE_ROCKETLAUNCHER_RUNABOUT
-        || camMode == MODE_CAMERA
-        || camMode == MODE_HELICANNON_1STPERSON)
-    {
-        firstPersonWeapon = true;
-    }
-    if ((weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_ROCKET) && firstPersonWeapon)
-    {
-        CRGBA black(0, 0, 0, 255);
-        if (weaponType == WEAPON_ROCKET)
-        {
-            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180)), black);
-            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170), SCREEN_WIDTH, SCREEN_HEIGHT), black);
-        }
-        else
-        {
-            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
-            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
-        }
-        CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
-        CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
-    }
+    if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn) TheCamera.DrawBordersForWideScreen();
+    DrawOuterZoomBox();
     AudioEngine.DisplayRadioStationName();
     CHud::Draw();
     CSpecialFX::Render2DFXs();
