@@ -1,47 +1,137 @@
 #include "StdInc.h"
-
 #include "WaterLevel.h"
 
-uint32& CWaterLevel::m_nWaterConfiguration = *(uint32*)0xC228A0;
-uint32& CWaterLevel::m_nWaterTimeOffset = *(uint32*)0xC228A4;
-float* CWaterLevel::faWaveMultipliersX = (float*)0x8D38C8;
-float* CWaterLevel::faWaveMultipliersY = (float*)0x8D38E8;
-
-RwRaster* CWaterLevel::waterclear256Raster = (RwRaster*)0xC228A8;
-RwTexture* CWaterLevel::texWaterclear256 = (RwTexture*)0xC228AC;
-RwRaster* CWaterLevel::seabd32Raster = (RwRaster*)0xC228B0;
-RwTexture* CWaterLevel::texSeabd32 = (RwTexture*)0xC228B4;
-RwRaster* CWaterLevel::waterwakeRaster = (RwRaster*)0xC228B8;
-RwTexture* CWaterLevel::texWaterwake = (RwTexture*)0xC228BC;
-
-bool& CWaterLevel::m_bWaterFog = *(bool*)0x8D37D4;
-bool& CWaterLevel::m_bWaterFogScript = *(bool*)0x8D37D5;
-
-void CWaterLevel::InjectHooks()
-{
+void CWaterLevel::InjectHooks() {
     RH_ScopedClass(CWaterLevel);
     RH_ScopedCategoryGlobal();
 
+    //RH_ScopedGlobalInstall(Shutdown, 0x6E59E0);
+    //RH_ScopedGlobalInstall(RenderWaterTriangle, 0x6EE240);
+    //RH_ScopedGlobalInstall(RenderFlatWaterTriangle, 0x6EE080);
+    //RH_ScopedGlobalInstall(RenderBoatWakes, 0x6ED9A0);
+    //RH_ScopedGlobalInstall(SplitWaterTriangleAlongXLine, 0x6ECF00);
+    //RH_ScopedGlobalInstall(RenderWaterRectangle, 0x6EC5D0);
+    //RH_ScopedGlobalInstall(RenderFlatWaterRectangle, 0x6EBEC0);
+    //RH_ScopedGlobalInstall(SplitWaterRectangleAlongXLine, 0x6EB810);
+    //RH_ScopedGlobalInstall(PreRenderWater, 0x6EB710);
     RH_ScopedOverloadedInstall(GetWaterLevel, "", 0x6EB690, bool(*)(float, float, float, float*, uint8, CVector*));
-    RH_ScopedInstall(SyncWater, 0x6E76E0);
-    RH_ScopedInstall(CalculateWavesOnlyForCoordinate, 0x6E7210);
-    //RH_ScopedInstall(AddWaveToResult, 0x6E81E0);
-    //RH_ScopedInstall(GetWaterLevelNoWaves, 0x6E8580);
+    //RH_ScopedGlobalInstall(WaterLevelInitialise, 0x6EAE80);
+    //RH_ScopedGlobalInstall(SetUpWaterFog, 0x6EA9F0);
+    //RH_ScopedGlobalInstall(RenderWakeSegment, 0x6EA260);
+    //RH_ScopedGlobalInstall(FindNearestWaterAndItsFlow, 0x6E9D70);
+    //RH_ScopedGlobalInstall(GetWaterLevelNoWaves, 0x6E8580);
+    //RH_ScopedGlobalInstall(RenderWaterFog, 0x6E7760);
+    RH_ScopedGlobalInstall(CalculateWavesOnlyForCoordinate, 0x6E6EF0);
+    //RH_ScopedGlobalInstall(ScanThroughBlocks, 0x6E6D10);
+    //RH_ScopedGlobalInstall(SplitWaterTriangleAlongYLine, 0x6EE5A0);
+    //RH_ScopedGlobalInstall(RenderWater, 0x6EF650);
+    //RH_ScopedGlobalInstall(AddWaveToResult, 0x6E81E0);
 }
 
+// 0x6E59E0
+RwTexture * CWaterLevel::Shutdown() {
+    return plugin::CallAndReturn<RwTexture *, 0x6E59E0>();
+}
+
+// 0x6E81E0
 void CWaterLevel::AddWaveToResult(float x, float y, float* pfWaterLevel, float fUnkn1, float fUnkn2, CVector* pVecNormal)
 {
     plugin::Call<0x6E81E0, float, float, float*, float, float, CVector*>(x, y, pfWaterLevel, fUnkn1, fUnkn2, pVecNormal);
-    return;
-
-    /*if (!ReversibleHooks::Hooked("CWaterLevel", "ProcessBuoyancy")) {
-        plugin::Call<0x6E81E0, float, float, float*, float, float, CVector*>(x, y, pfWaterLevel, fUnkn1, fUnkn2, pVecNormal);
-        return;
-    }*/
 }
 
-void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1, float fUnkn2, float* fOutWave)
+// 0x6EE240
+void CWaterLevel::RenderWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
+    plugin::Call<0x6EE240, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+
+// 0x6EE080
+void CWaterLevel::RenderFlatWaterTriangle(int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
+    plugin::Call<0x6EE080, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+
+// 0x6ED9A0
+void CWaterLevel::RenderBoatWakes() {
+    plugin::Call<0x6ED9A0>();
+}
+
+// 0x6ECF00
+void CWaterLevel::SplitWaterTriangleAlongXLine(int32 a7, int32 a1, int32 a2, CRenPar a4, int32 a5, int32 a6, CRenPar arg18, int32 a8, int32 a9, CRenPar a10) {
+    plugin::Call<0x6ECF00, int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a7, a1, a2, a4, a5, a6, arg18, a8, a9, a10);
+}
+
+// 0x6EC5D0
+void CWaterLevel::RenderWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8) {
+    plugin::Call<0x6EC5D0, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8);
+}
+
+// 0x6EBEC0
+int32 CWaterLevel::RenderFlatWaterRectangle(int32 a1, int32 a2, int32 a3, int32 a4, CRenPar a5, CRenPar a6, CRenPar a7, CRenPar a8) {
+    return plugin::CallAndReturn<int32, 0x6EBEC0, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8);
+}
+
+// 0x6EB810
+void CWaterLevel::SplitWaterRectangleAlongXLine(int32 a1, int32 a2, int32 a3, int32 a4, int32 a5, CRenPar a6, CRenPar a7, CRenPar a8, CRenPar a9) {
+    plugin::Call<0x6EB810, int32, int32, int32, int32, int32, CRenPar, CRenPar, CRenPar, CRenPar>(a1, a2, a3, a4, a5, a6, a7, a8, a9);
+}
+
+// 0x6EB710
+void CWaterLevel::PreRenderWater() {
+    plugin::Call<0x6EB710>();
+}
+
+// 0x6EB690
+bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals) {
+    float fUnkn1, fUnkn2;
+    if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
+        return false;
+
+    if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
+        *pOutWaterLevel = 0.0F;
+        return false;
+    }
+
+    AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
+    return true;
+}
+
+// 0x6EAE80
+void CWaterLevel::WaterLevelInitialise() {
+    plugin::Call<0x6EAE80>();
+}
+
+// 0x6EA9F0
+void CWaterLevel::SetUpWaterFog(int32 a1, int32 a2, int32 a3, int32 a4) {
+    plugin::Call<0x6EA9F0, int32, int32, int32, int32>(a1, a2, a3, a4);
+}
+
+// 0x6EA260
+int32 CWaterLevel::RenderWakeSegment(CVector2D & a1, CVector2D & a2, CVector2D & a3, CVector2D & a4, float & a5, float & a6, float & alphaMult1, float & alphaMult2, float & a9) {
+    return plugin::CallAndReturn<int32, 0x6EA260, CVector2D &, CVector2D &, CVector2D &, CVector2D &, float &, float &, float &, float &, float &>(a1, a2, a3, a4, a5, a6, alphaMult1, alphaMult2, a9);
+}
+
+// 0x6E9D70
+void CWaterLevel::FindNearestWaterAndItsFlow() {
+    plugin::Call<0x6E9D70>();
+}
+
+// 0x6E8580
+bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2) {
+    return plugin::CallAndReturn<bool, 0x6E8580, float, float, float, float *, float *, float *>(x, y, z, pOutWaterLevel, fUnkn1, fUnkn2);
+}
+
+bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
 {
+    return plugin::CallAndReturn<bool, 0x6EA960, const CVector&, float*, float*, float*>
+        (vecPos, pOutWaterDepth, pOutWaterLevel, pOutGroundLevel);
+}
+
+// 0x6E7760
+void CWaterLevel::RenderWaterFog() {
+    plugin::Call<0x6E7760>();
+}
+
+// 0x6E6EF0
+void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fLowFreqMult, float fMidHighFreqMult, float& fOutWave) {
     if (x < 0)
         x = -x;
 
@@ -59,51 +149,40 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fUnkn1
     const auto fTwoPiToChar = 256.0F / TWO_PI;
 
     const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
-    const auto fLowFreqMult = TWO_PI / 64.0F;
-    auto fIndex = (static_cast<float>(iTimeOffset % 5000U) * fLowFreqOffsetMult + (fX + fY) * fLowFreqMult) * fTwoPiToChar;
+    auto fIndex = (static_cast<float>(iTimeOffset % 5000U) * fLowFreqOffsetMult + (fX + fY) * (TWO_PI / 64.0F)) * fTwoPiToChar;
     uint8 uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fLowFreqWaves = CMaths::ms_SinTable[uiIndex] * 2.0F * fWaveMultiplier * fUnkn1;
-    *fOutWave += fLowFreqWaves;
+    float fLowFreqWaves = CMaths::ms_SinTable[uiIndex] * 2.0F * fWaveMultiplier * fLowFreqMult;
+    fOutWave += fLowFreqWaves;
 
     const auto fMidFreqOffsetMult = TWO_PI / 3500.0F;
     const auto fMidFreqXMult = TWO_PI / 26.0F;
     const auto fMidFreqYMult = TWO_PI / 52.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3500U) * fMidFreqOffsetMult + (fX * fMidFreqXMult) + (fY * fMidFreqYMult)) * fTwoPiToChar;
     uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fMidFreqWaves = CMaths::ms_SinTable[uiIndex] * 1.0F * fWaveMultiplier * fUnkn2;
-    *fOutWave += fMidFreqWaves;
+    float fMidFreqWaves = CMaths::ms_SinTable[uiIndex] * 1.0F * fWaveMultiplier * fMidHighFreqMult;
+    fOutWave += fMidFreqWaves;
 
     const auto fHighFreqOffsetMult = TWO_PI / 3000.0F;
     const auto fHighFreqYMult = TWO_PI / 20.0F;
     fIndex = (static_cast<float>(iTimeOffset % 3000U) * fHighFreqOffsetMult + (fY * fHighFreqYMult)) * fTwoPiToChar;
     uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fHighFreqWaves = CMaths::ms_SinTable[uiIndex] * 0.5F * fWaveMultiplier * fUnkn2;
-    *fOutWave += fHighFreqWaves;
+    float fHighFreqWaves = CMaths::ms_SinTable[uiIndex] * 0.5F * fWaveMultiplier * fMidHighFreqMult;
+    fOutWave += fHighFreqWaves;
 }
 
-bool CWaterLevel::GetWaterDepth(const CVector& vecPos, float* pOutWaterDepth, float* pOutWaterLevel, float* pOutGroundLevel)
-{
-    return plugin::CallAndReturn<bool, 0x6EA960, const CVector&, float*, float*, float*>
-        (vecPos, pOutWaterDepth, pOutWaterLevel, pOutGroundLevel);
+// 0x6E6D10
+void CWaterLevel::ScanThroughBlocks() {
+    plugin::Call<0x6E6D10>();
 }
 
-bool CWaterLevel::GetWaterLevel(float x, float y, float z, float* pOutWaterLevel, uint8 bTouchingWater, CVector* pVecNormals)
-{
-    float fUnkn1, fUnkn2;
-    if (!GetWaterLevelNoWaves(x, y, z, pOutWaterLevel, &fUnkn1, &fUnkn2))
-        return false;
-
-    if ((*pOutWaterLevel - z > 3.0F) && !bTouchingWater) {
-        *pOutWaterLevel = 0.0F;
-        return false;
-    }
-
-    AddWaveToResult(x, y, pOutWaterLevel, fUnkn1, fUnkn2, pVecNormals);
-    return true;
+// 0x6EE5A0
+void CWaterLevel::SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9) {
+    plugin::Call<0x6EE5A0, int32, int32, int32, CRenPar, int32, int32, CRenPar, int32, int32, CRenPar>(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9);
 }
 
-bool CWaterLevel::GetWaterLevelNoWaves(float x, float y, float z, float* pOutWaterLevel, float* fUnkn1, float* fUnkn2) {
-    return plugin::CallAndReturn<bool, 0x6E8580, float, float, float, float*, float*, float*>(x, y, z, pOutWaterLevel, fUnkn1, fUnkn2);
+// 0x6EF650
+void CWaterLevel::RenderWater() {
+    plugin::Call<0x6EF650>();
 }
 
 void CWaterLevel::SyncWater()
@@ -111,24 +190,14 @@ void CWaterLevel::SyncWater()
     m_nWaterTimeOffset = CTimer::GetTimeInMS();
 }
 
-// 0x6EAE80
-void CWaterLevel::WaterLevelInitialise() {
-    plugin::Call<0x6EAE80>();
-}
-
-bool CWaterLevel::IsPointUnderwaterNoWaves(CVector point) {
+// NOTSA
+bool CWaterLevel::IsPointUnderwaterNoWaves(const CVector& point) {
     float level{};
     if (GetWaterLevelNoWaves(point.x, point.y, point.z, &level, nullptr, nullptr))
         return level > point.z;
     return false;
 }
 
-// 0x6EB710
-void CWaterLevel::PreRenderWater() {
-    plugin::Call<0x6EB710>();
-}
-
-// 0x6EF650
-void CWaterLevel::RenderWater() {
-    plugin::Call<0x6EF650>();
+bool CWaterLevel::GetWaterLevel(const CVector& pos, float& outWaterLevel, bool touchingWater, CVector* normals) {
+    return GetWaterLevel(pos.x, pos.y, pos.z, &outWaterLevel, touchingWater, normals);
 }
