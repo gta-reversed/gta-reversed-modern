@@ -86,6 +86,12 @@
 #include "Ropes.h"
 #include "FallingGlassPane.h"
 #include "Glass.h"
+#include "FurnitureGroup_c.h"
+#include "FurnitureManager_c.h"
+#include "FurnitureSubGroup_c.h"
+#include "Interior_c.h"
+#include "InteriorGroup_c.h"
+#include "InteriorManager_c.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -660,6 +666,15 @@ void InjectHooksMain() {
         CTrailer::InjectHooks();
         CTrain::InjectHooks();
         CVehicle::InjectHooks();
+    };
+
+    const auto Interior = []() {
+        FurnitureGroup_c::InjectHooks();
+        FurnitureManager_c::InjectHooks();
+        FurnitureSubGroup_c::InjectHooks();
+        Interior_c::InjectHooks();
+        InteriorGroup_c::InjectHooks();
+        InteriorManager_c::InjectHooks();
     };
 
     Audio();
