@@ -23,7 +23,7 @@ class CTask {
 public:
     CTask* m_pParentTask;
 
-    void* operator new(uint32 size);
+    void* operator new(unsigned size);
     void operator delete(void* object);
 
     CTask() { m_pParentTask = nullptr; } // 0x61A340

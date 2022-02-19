@@ -2,6 +2,7 @@
 #include "StdInc.h"
 
 #include "config.h"
+#include "extensions/container.hpp" // to pass checks
 
 void InjectHooksMain();
 

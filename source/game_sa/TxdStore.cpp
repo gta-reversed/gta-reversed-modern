@@ -8,7 +8,7 @@
 
 #include "TxdStore.h"
 
-CPool<TxdDef>*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CPool<TxdDef>**>(0xC8800C);
+CTxdPool*& CTxdStore::ms_pTxdPool = *reinterpret_cast<CTxdPool**>(0xC8800C);
 RwTexDictionary*& CTxdStore::ms_pStoredTxd = *reinterpret_cast<RwTexDictionary**>(0xC88010);
 int32& CTxdStore::ms_lastSlotFound = *reinterpret_cast<int32*>(0xC88014);
 
@@ -56,10 +56,10 @@ void CTxdStore::InjectHooks() {
 // 0x731F20
 void CTxdStore::Initialise() {
     if (!ms_pTxdPool)
-        ms_pTxdPool = new CPool<TxdDef>(TOTAL_TXD_MODEL_IDS, "TexDictionary");
+        ms_pTxdPool = new CTxdPool(TOTAL_TXD_MODEL_IDS, "TexDictionary");
 
-    for (int32 i = 0; i < 4; i++)
-        defaultTxds[i] = static_cast<int16>(AddTxdSlot("*"));
+    for (auto& txd : defaultTxds)
+        txd = static_cast<int16>(AddTxdSlot("*"));
 
     RwTextureSetFindCallBack(TxdStoreFindCB);
     RwTextureSetReadCallBack(TxdStoreLoadCB);

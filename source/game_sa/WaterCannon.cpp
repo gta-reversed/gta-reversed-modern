@@ -114,8 +114,8 @@ CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
 // 0x7295E0
 void CWaterCannon::PushPeds() {
     const auto sectionsBounding = GetSectionsBoundingBox();
-    for (int pedIdx = 0; pedIdx < CPools::ms_pPedPool->m_nSize; pedIdx++) {
-        CPed* ped = CPools::ms_pPedPool->GetAt(pedIdx);
+    for (int pedIdx = 0; pedIdx < GetPedPool()->m_nSize; pedIdx++) {
+        CPed* ped = GetPedPool()->GetAt(pedIdx);
         if (!ped)
             continue;
 

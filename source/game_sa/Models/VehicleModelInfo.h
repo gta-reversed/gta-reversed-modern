@@ -131,7 +131,6 @@ public:
     char               field_30;
     uint8              m_nPlateType;
     char               m_szGameName[8];
-    char               _pad3A[2];
     eVehicleType       m_nVehicleType;
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
@@ -152,7 +151,7 @@ public:
     public:
         CVehicleStructure();
         ~CVehicleStructure();
-        static void* operator new(uint32 size);
+        static void* operator new(unsigned size);
         static void  operator delete(void* data);
 
     public:
@@ -168,14 +167,14 @@ public:
         uint32          m_nMaskComponentsDamagable;
 
     public:
-        static CPool<CVehicleModelInfo::CVehicleStructure>*& m_pInfoPool;
+        static inline CPool<CVehicleStructure>*& m_pInfoPool = *(CPool<CVehicleStructure>**)0xB4E680;
 
     public: // Helpers
-        inline bool IsDummyActive(eVehicleDummies dummy) const {
+        [[nodiscard]] bool IsDummyActive(eVehicleDummies dummy) const {
             return m_avDummyPos[dummy] != 0.0F;
         }
 
-        bool IsComponentDamageable(int32 nodeIndex) {
+        [[nodiscard]] bool IsComponentDamageable(int32 nodeIndex) const {
             return m_nMaskComponentsDamagable & (1 << nodeIndex);
         }
 
@@ -195,7 +194,6 @@ public:
     uint8       m_nCurrentQuaternaryColor;
     int16       m_anUpgrades[18];
     int16       m_anRemapTxds[4];
-    char        _pad302[2];
 
     union {
         CAnimBlock* m_pAnimBlock;
@@ -204,12 +202,12 @@ public:
     };
 
     static class CLinkedUpgradeList {
-      public:
+    public:
         int16 m_anUpgrade1[30];
         int16 m_anUpgrade2[30];
         uint32 m_nLinksCount;
 
-      public:
+    public:
         // add upgrade with components upgrade1 and upgrade2
         void AddUpgradeLink(int16 upgrade1, int16 upgrade2);
         // find linked upgrade for this upgrade. In this case upgrade param could be upgrade1 or upgrade2
@@ -266,8 +264,8 @@ public:
     static void InjectHooks();
 
     CVehicleModelInfo();
+    ~CVehicleModelInfo() override = default; // 0x4C5920;
 
-    // VTable
     ModelInfoType GetModelType() override;
     void Init() override;
     void DeleteRwObject() override;
@@ -441,7 +439,7 @@ public:
     void SetHandlingId(const char* handlingName);
 
     // These two should probably be moved to a better place..
-    bool IsFrontWheel(eCarWheel wheel) const {
+    [[nodiscard]] bool IsFrontWheel(eCarWheel wheel) const {
         switch (wheel) {
         case CARWHEEL_FRONT_LEFT:
         case CARWHEEL_FRONT_RIGHT:
@@ -450,12 +448,12 @@ public:
         return false;
     }
 
-    bool IsRearWheel(eCarWheel door) const {
+    [[nodiscard]] bool IsRearWheel(eCarWheel door) const {
         return !IsFrontWheel(door);
     }
 
     // Return size of give wheel. If it's a front wheel `m_fWheelSizeFront` is returned, otherwise `m_fWheelSizeRear`
-    float GetSizeOfWheel(eCarWheel wheel) const {
+    [[nodiscard]] float GetSizeOfWheel(eCarWheel wheel) const {
         return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
     }
 };

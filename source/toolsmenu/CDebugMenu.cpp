@@ -1,7 +1,6 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
-#include "Utility.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -10,7 +9,6 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
-#include <sstream>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -24,6 +22,7 @@
 #include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 #include "toolsmenu\DebugModules\FXDebugModule.h"
+#include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -238,6 +237,11 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Pools")) {
+            PoolsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
@@ -325,6 +329,10 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustDown('2')) {
         printf("");
         CCheat::MoneyArmourHealthCheat();
+    }
+    if (pad->IsStandardKeyJustDown('4')) {
+        printf("");
+        PedDebugModule::SpawnRandomPed();
     }
 }
 

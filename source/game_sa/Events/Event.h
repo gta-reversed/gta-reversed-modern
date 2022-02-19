@@ -17,7 +17,7 @@ public:
     bool  field_B;
 
 public:
-    static void* operator new(uint32 size) {
+    static void* operator new(unsigned size) {
         return ((CEvent * (__cdecl*)(uint32))0x4B5620)(size);
     }
 

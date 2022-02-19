@@ -328,8 +328,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 32 == 0) {
-        for (auto i = CPools::ms_pVehiclePool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i);
+        for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
                 continue;
 
@@ -347,8 +347,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 4 == 0) {
-        for (auto i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+        for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
                 continue;
 

@@ -11,14 +11,14 @@ void CEntryInfoNode::InjectHooks()
     RH_ScopedInstall(operator delete, 0x536DD0);
 }
 
-void* CEntryInfoNode::operator new(uint32 size)
+void* CEntryInfoNode::operator new(unsigned size)
 {
-    return CPools::ms_pEntryInfoNodePool->New();
+    return GetEntryInfoNodePool()->New();
 }
 
 void CEntryInfoNode::operator delete(void* ptr, size_t sz)
 {
-    CPools::ms_pEntryInfoNodePool->Delete(reinterpret_cast<CEntryInfoNode*>(ptr));
+    GetEntryInfoNodePool()->Delete(reinterpret_cast<CEntryInfoNode*>(ptr));
 }
 
 void CEntryInfoNode::AddToList(CEntryInfoNode* next)
