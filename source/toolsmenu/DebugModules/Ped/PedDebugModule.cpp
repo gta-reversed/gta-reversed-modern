@@ -3,7 +3,7 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <imgui_internal.h>
-#include <extensions/utils.hpp>
+#include <extensions/random.hpp>
 
 #include "PedDebugModule.h"
 
@@ -313,8 +313,10 @@ void SpawnPed(int32 modelId, CVector position) {
 }
 
 void SpawnRandomPed() {
-    auto randomPed = random<CDebugMenuToolInput::ToolMap>(m_pedsMap);
-    SpawnPed(randomPed.first, FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f)));
+    SpawnPed(
+        notsa::random_iter(m_pedsMap)->first,
+        FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f))
+    );
 }
 
 void ProcessImGui() {
