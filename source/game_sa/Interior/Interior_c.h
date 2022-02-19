@@ -18,46 +18,48 @@ class Furniture_c;
 
 class Interior_c : public ListItem_c {
 public:
-    int32 m_interiorId = {};                  // 0x8
-    int32 m_pGroup = {};                      // 0xC
-    int32 m_areaCode = {};                    // 0x10
-    tEffectFurniture* m_furnitureEffect = {}; // 0x14
-    RwMatrix m_matrix = {};                   // 0x18
-    int32 field_58 = {};                      // 0x58
-    List_c m_list = {};                       // 0x5C
-    char field_68[900] = {};                  // 0x68
-    int16 field_3EC = {};                     // 0x3EC
-    int16 field_3EE = {};                     // 0x3EE
-    CNodeAddress m_nodeAddress = {};          // 0x3F0
-    int16 field_3F4 = {};                     // 0x3F4
-    int16 field_3F6 = {};                     // 0x3F6
-    int32 field_3F8 = {};                     // 0x3F8
-    int32 field_3FC = {};                     // 0x3FC
-    CVector m_position = {};                  // 0x400
-    int8 field_40C = {};                      // 0x40C
-    int8 m_interiorInfosCount = {};           // 0x40D
-    int8 pad[2];
-    int32 field_412 = {};                    // 0x412
-    int32 field_416 = {};                    // 0x416
-    int32 field_41A = {};                    // 0x41A
-    int32 field_41E = {};                    // 0x41E
-    int32 field_422 = {};                    // 0x422
-    int32 field_426 = {};                    // 0x426
-    int32 field_42A = {};                    // 0x42A
-    int32 field_42E = {};                    // 0x42E
-    int32 field_432 = {};                    // 0x432
-    char gap436[346] = {};                   // 0x436
-    InteriorInfo_t m_interiorInfos[16] = {}; // 0x590
-    int8 m_furnitureGroupId = {};            // 0x790
-    int8 m_furnitureId = {};                 // 0x791
-    int8 field_792 = {};                     // 0x792
-    int8 field_793 = {};                     // 0x793
+    int32             m_interiorId;
+    int32             m_pGroup;
+    int32             m_areaCode;
+    tEffectFurniture* m_furnitureEffect;
+    RwMatrix          m_matrix;
+    int32             field_58;
+    List_c            m_list;
+    char              field_68[900];
+    int16             field_3EC;
+    int16             field_3EE;
+    CNodeAddress      m_nodeAddress;
+    int16             field_3F4;
+    int16             field_3F6;
+    int32             field_3F8;
+    int32             field_3FC;
+    CVector           m_position;
+    int8              field_40C;
+    int8              m_interiorInfosCount;
+    int32             field_412;
+    int32             field_416;
+    int32             field_41A;
+    int32             field_41E;
+    int32             field_422;
+    int32             field_426;
+    int32             field_42A;
+    int32             field_42E;
+    int32             field_432;
+    char              gap436[346];
+    InteriorInfo_t    m_interiorInfos[16];
+    int8              m_furnitureGroupId;
+    int8              m_furnitureId;
+    int8              field_792;
+    int8              field_793;
 
 public:
     static void InjectHooks();
 
-    ~Interior_c();
     Interior_c();
+    ~Interior_c() = default; // 0x591360
+
+    int32 Init(CVector* a2);
+    void Exit();
 
     CObject* Bedroom_AddTableItem(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6, int32 a7);
     void FurnishBedroom();
@@ -83,12 +85,11 @@ public:
     void Shop_AddShelfInfo(int32 a2, int32 a3, int32 a5);
     void Shop_FurnishEdges();
     int8 GetBoundingBox(FurnitureEntity_c* entity, CVector* a3);
-    int32 Init(RwV3d* a2);
     void ResetTiles();
-    CObject* PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsety, float offsetZ, float rotationZ);
+    CObject* PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsetY, float offsetZ, float rotationZ);
     ListItem_c* GetFurnitureEntity(CEntity*);
-    bool IsPtInside(RwV3d* a2, float a3, float a4, float a5);
-    void CalcMatrix(RwV3d* translation);
+    bool IsPtInside(CVector* a2, float a3, float a4, float a5);
+    void CalcMatrix(CVector* translation);
     void Furnish();
     void Unfurnish();
     int8 CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5);
@@ -98,11 +99,10 @@ public:
     int32 GetNumEmptyTiles(int32 a2, int32 a3, int32 a4, int32 a5);
     int32 GetRandomTile(int32 a2, int32* a3, int32* a4);
     void Shop_FurnishAisles();
-    RwV3d* GetTileCentre(float offsetX, float offsetY, RwV3d* pointsIn);
+    CVector* GetTileCentre(float offsetX, float offsetY, CVector* pointsIn);
     void AddGotoPt(int32 a, int32 b, float a3, float a4);
     bool AddInteriorInfo(int32 actionType, float offsetX, float offsetY, int32 direction, CEntity* entityIgnoredCollision);
     void AddPickups();
-    void Exit();
     void FindBoundingBox(int32, int32, int32*, int32*, int32*, int32*, int32*);
     void CalcExitPts();
     bool IsVisible();
@@ -113,9 +113,5 @@ public:
                                 int32* a13);
     bool FindEmptyTiles(int32 a3, int32 a4, int32* arg8, int32* a5);
     void FurnishShop(int32 a2);
-
-private:
-    Interior_c* Constructor();
-    Interior_c* Destructor();
 };
 VALIDATE_SIZE(Interior_c, 0x794);

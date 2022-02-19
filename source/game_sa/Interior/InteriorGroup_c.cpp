@@ -6,7 +6,6 @@ void InteriorGroup_c::InjectHooks() {
     RH_ScopedCategory("Interior");
 
     // RH_ScopedInstall(Constructor, 0x597FE0);
-
     // RH_ScopedInstall(Destructor, 0x597FF0);
 
     // RH_ScopedInstall(Init, 0x5947E0);
@@ -35,33 +34,19 @@ void InteriorGroup_c::InjectHooks() {
     // RH_ScopedInstall(AddInterior, 0x594840);
 }
 
-// 0x597FE0
-InteriorGroup_c::InteriorGroup_c() {}
-
-// 0x597FE0
-InteriorGroup_c* InteriorGroup_c::Constructor() {
-    this->InteriorGroup_c::InteriorGroup_c();
-    return this;
-}
-
-// 0x597FF0
-InteriorGroup_c::~InteriorGroup_c() {}
-
-// 0x597FF0
-InteriorGroup_c* InteriorGroup_c::Destructor() {
-    this->InteriorGroup_c::~InteriorGroup_c();
-    return this;
-}
-
-// Methods
 // 0x5947E0
-CEntity* InteriorGroup_c::Init(CEntity* entity, int32 a3) {
-    return plugin::CallMethodAndReturn<CEntity*, 0x5947E0, InteriorGroup_c*, CEntity*, int32>(this, entity, a3);
+void InteriorGroup_c::Init(CEntity* entity, int32 a3) {
+    plugin::CallMethod<0x5947E0, InteriorGroup_c*, CEntity*, int32>(this, entity, a3);
 }
 
 // 0x5968E0
 void InteriorGroup_c::Update() {
     plugin::CallMethod<0x5968E0, InteriorGroup_c*>(this);
+}
+
+// 0x594840
+int32 InteriorGroup_c::AddInterior(Interior_c* interior) {
+    return plugin::CallMethodAndReturn<int32, 0x594840, InteriorGroup_c*, Interior_c*>(this, interior);
 }
 
 // 0x596890
@@ -80,13 +65,13 @@ int32 InteriorGroup_c::SetupHousePeds() {
 }
 
 // 0x595590
-int8_t InteriorGroup_c::SetupPaths() {
-    return plugin::CallMethodAndReturn<int8_t, 0x595590, InteriorGroup_c*>(this);
+int8 InteriorGroup_c::SetupPaths() {
+    return plugin::CallMethodAndReturn<int8, 0x595590, InteriorGroup_c*>(this);
 }
 
 // 0x595380
-int8_t InteriorGroup_c::ArePathsLoaded() {
-    return plugin::CallMethodAndReturn<int8_t, 0x595380, InteriorGroup_c*>(this);
+int8 InteriorGroup_c::ArePathsLoaded() {
+    return plugin::CallMethodAndReturn<int8, 0x595380, InteriorGroup_c*>(this);
 }
 
 // 0x595320
@@ -95,23 +80,23 @@ void InteriorGroup_c::Setup() {
 }
 
 // 0x595290
-int8_t InteriorGroup_c::Exit() {
-    return plugin::CallMethodAndReturn<int8_t, 0x595290, InteriorGroup_c*>(this);
+int8 InteriorGroup_c::Exit() {
+    return plugin::CallMethodAndReturn<int8, 0x595290, InteriorGroup_c*>(this);
 }
 
 // 0x595250
-int8_t InteriorGroup_c::ContainsInteriorType(int32 a2) {
-    return plugin::CallMethodAndReturn<int8_t, 0x595250, InteriorGroup_c*, int32>(this, a2);
+int8 InteriorGroup_c::ContainsInteriorType(int32 a2) {
+    return plugin::CallMethodAndReturn<int8, 0x595250, InteriorGroup_c*, int32>(this, a2);
 }
 
 // 0x595200
-int8_t InteriorGroup_c::CalcIsVisible() {
-    return plugin::CallMethodAndReturn<int8_t, 0x595200, InteriorGroup_c*>(this);
+int8 InteriorGroup_c::CalcIsVisible() {
+    return plugin::CallMethodAndReturn<int8, 0x595200, InteriorGroup_c*>(this);
 }
 
 // 0x595160
-int8_t InteriorGroup_c::DereferenceAnims() {
-    return plugin::CallMethodAndReturn<int8_t, 0x595160, InteriorGroup_c*>(this);
+int8 InteriorGroup_c::DereferenceAnims() {
+    return plugin::CallMethodAndReturn<int8, 0x595160, InteriorGroup_c*>(this);
 }
 
 // 0x5950D0
@@ -125,8 +110,8 @@ void InteriorGroup_c::UpdateOfficePeds() {
 }
 
 // 0x594E30
-int8_t InteriorGroup_c::RemovePed(CPed* a2) {
-    return plugin::CallMethodAndReturn<int8_t, 0x594E30, InteriorGroup_c*, CPed*>(this, a2);
+int8 InteriorGroup_c::RemovePed(CPed* a2) {
+    return plugin::CallMethodAndReturn<int8, 0x594E30, InteriorGroup_c*, CPed*>(this, a2);
 }
 
 // 0x594C10
@@ -168,9 +153,4 @@ int32 InteriorGroup_c::GetNumInteriorInfos(int32 a2) {
 // 0x5948C0
 int32 InteriorGroup_c::GetRandomInterior() {
     return plugin::CallMethodAndReturn<int32, 0x5948C0, InteriorGroup_c*>(this);
-}
-
-// 0x594840
-int32 InteriorGroup_c::AddInterior(Interior_c* a2) {
-    return plugin::CallMethodAndReturn<int32, 0x594840, InteriorGroup_c*, Interior_c*>(this, a2);
 }

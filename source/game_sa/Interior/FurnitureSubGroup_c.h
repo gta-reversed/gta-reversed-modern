@@ -8,25 +8,20 @@ class Furniture_c;
 
 class FurnitureSubGroup_c : public ListItem_c {
 public:
-    int32 m_nSubgroupId = {};             // 8
-    List_c m_furniturList = {};           // 0xC
-    bool m_bCanPlaceInFrontOfWindow = {}; // 0x18
-    bool m_bIsTall = {};                  // 0x19
-    bool m_bCanSteal = {};                // 0x1A
-    int8_t _pad1B = {};                   // 0x1B
+    int32   m_nSubgroupId;
+    List_c  m_Furnitures;
+    bool    m_bCanPlaceInFrontOfWindow;
+    bool    m_bIsTall;
+    bool    m_bCanSteal;
 
 public:
     static void InjectHooks();
 
-    ~FurnitureSubGroup_c();
-    FurnitureSubGroup_c();
+    FurnitureSubGroup_c() = default;  // 0x590E20
+    ~FurnitureSubGroup_c() = default; // 0x590E70
 
+    bool AddFurniture(uint16 modelId, int16 id, uint8 wealthMin, uint8 wealthMax, uint8 maxAng);
     Furniture_c* GetFurniture(int16 id, uint8 wealth);
     int32 GetRandomId(uint8 a2);
-    bool AddFurniture(uint16 modelId, int16 id, uint8 wealthMin, uint8 wealthMax, uint8 maxAng);
-
-private:
-    FurnitureSubGroup_c* Constructor();
-    FurnitureSubGroup_c* Destructor();
 };
 VALIDATE_SIZE(FurnitureSubGroup_c, 0x1C);

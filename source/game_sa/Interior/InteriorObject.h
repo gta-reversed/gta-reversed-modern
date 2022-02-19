@@ -8,9 +8,9 @@ class CEntity;
 
 struct InteriorObject {
     CEntity* m_pObject;
-    int32 m_nModelId;
-    int32 m_nInteriorId;
-    CVector m_vPosition;
-    int8 m_bIsStolen;
-    int8 m_field_19[3];
+    int32    m_nModelId;
+    int32    m_nInteriorId;
+    CVector  m_vPosition;
+    bool     m_bIsStolen;
+    int8     m_field_19[3];
 };

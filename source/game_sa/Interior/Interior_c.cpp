@@ -64,24 +64,21 @@ void Interior_c::InjectHooks() {
 }
 
 // 0x5921D0
-Interior_c::Interior_c() {}
-
-// 0x5921D0
-Interior_c* Interior_c::Constructor() {
-    this->Interior_c::Interior_c();
-    return this;
+Interior_c::Interior_c() : ListItem_c() {
+    field_3EC = -1;
+    m_nodeAddress.m_wAreaId = (uint16)-1;
 }
 
-// 0x591360
-Interior_c::~Interior_c() {}
-
-// 0x591360
-Interior_c* Interior_c::Destructor() {
-    this->Interior_c::~Interior_c();
-    return this;
+// 0x593BF0
+int32 Interior_c::Init(CVector* a2) {
+    return plugin::CallMethodAndReturn<int32, 0x593BF0, Interior_c*, CVector*>(this, a2);
 }
 
-// Methods
+// 0x592230
+void Interior_c::Exit() {
+    plugin::CallMethod<0x592230, Interior_c*>(this);
+}
+
 // 0x593F10
 CObject* Interior_c::Bedroom_AddTableItem(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6, int32 a7) {
     return plugin::CallMethodAndReturn<CObject*, 0x593F10, Interior_c*, int32, int32, int32, int32, int32, int32>(this, a2, a3, a4, a5, a6, a7);
@@ -163,8 +160,8 @@ void Interior_c::FurnishOffice() {
 }
 
 // 0x599BB0
-int8_t Interior_c::Shop_Place3PieceUnit(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6) {
-    return plugin::CallMethodAndReturn<int8_t, 0x599BB0, Interior_c*, int32, int32, int32, int32, int32>(this, a2, a3, a4, a5, a6);
+int8 Interior_c::Shop_Place3PieceUnit(int32 a2, int32 a3, int32 a4, int32 a5, int32 a6) {
+    return plugin::CallMethodAndReturn<int8, 0x599BB0, Interior_c*, int32, int32, int32, int32, int32>(this, a2, a3, a4, a5, a6);
 }
 
 // 0x599DC0
@@ -198,13 +195,8 @@ void Interior_c::Shop_FurnishEdges() {
 }
 
 // 0x593DB0
-int8_t Interior_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* a3) {
-    return plugin::CallMethodAndReturn<int8_t, 0x593DB0, Interior_c*, FurnitureEntity_c*, CVector*>(this, entity, a3);
-}
-
-// 0x593BF0
-int32 Interior_c::Init(RwV3d* a2) {
-    return plugin::CallMethodAndReturn<int32, 0x593BF0, Interior_c*, RwV3d*>(this, a2);
+int8 Interior_c::GetBoundingBox(FurnitureEntity_c* entity, CVector* a3) {
+    return plugin::CallMethodAndReturn<int8, 0x593DB0, Interior_c*, FurnitureEntity_c*, CVector*>(this, entity, a3);
 }
 
 // 0x593910
@@ -213,8 +205,8 @@ void Interior_c::ResetTiles() {
 }
 
 // 0x5934E0
-CObject* Interior_c::PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsety, float offsetZ, float rotationZ) {
-    return plugin::CallMethodAndReturn<CObject*, 0x5934E0, Interior_c*, uint8, Furniture_c*, float, float, float, float>(this, isStealable, furniture, offsetX, offsety, offsetZ,
+CObject* Interior_c::PlaceObject(uint8 isStealable, Furniture_c* furniture, float offsetX, float offsetY, float offsetZ, float rotationZ) {
+    return plugin::CallMethodAndReturn<CObject*, 0x5934E0, Interior_c*, uint8, Furniture_c*, float, float, float, float>(this, isStealable, furniture, offsetX, offsetY, offsetZ,
                                                                                                                          rotationZ);
 }
 
@@ -224,13 +216,13 @@ ListItem_c* Interior_c::GetFurnitureEntity(CEntity* entity) {
 }
 
 // 0x5913E0
-bool Interior_c::IsPtInside(RwV3d* a2, float a3, float a4, float a5) {
-    return plugin::CallMethodAndReturn<bool, 0x5913E0, Interior_c*, RwV3d*, float, float, float>(this, a2, a3, a4, a5);
+bool Interior_c::IsPtInside(CVector* a2, float a3, float a4, float a5) {
+    return plugin::CallMethodAndReturn<bool, 0x5913E0, Interior_c*, CVector*, float, float, float>(this, a2, a3, a4, a5);
 }
 
 // 0x5914D0
-void Interior_c::CalcMatrix(RwV3d* translation) {
-    plugin::CallMethod<0x5914D0, Interior_c*, RwV3d*>(this, translation);
+void Interior_c::CalcMatrix(CVector* translation) {
+    plugin::CallMethod<0x5914D0, Interior_c*, CVector*>(this, translation);
 }
 
 // 0x591590
@@ -244,8 +236,8 @@ void Interior_c::Unfurnish() {
 }
 
 // 0x591680
-int8_t Interior_c::CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5) {
-    return plugin::CallMethodAndReturn<int8_t, 0x591680, Interior_c*, int32, int32, int32, int32, uint8>(this, a1, a2, a3, a4, a5);
+int8 Interior_c::CheckTilesEmpty(int32 a1, int32 a2, int32 a3, int32 a4, uint8 a5) {
+    return plugin::CallMethodAndReturn<int8, 0x591680, Interior_c*, int32, int32, int32, int32, uint8>(this, a1, a2, a3, a4, a5);
 }
 
 // 0x591700
@@ -279,8 +271,8 @@ void Interior_c::Shop_FurnishAisles() {
 }
 
 // 0x591BD0
-RwV3d* Interior_c::GetTileCentre(float offsetX, float offsetY, RwV3d* pointsIn) {
-    return plugin::CallMethodAndReturn<RwV3d*, 0x591BD0, Interior_c*, float, float, RwV3d*>(this, offsetX, offsetY, pointsIn);
+CVector* Interior_c::GetTileCentre(float offsetX, float offsetY, CVector* pointsIn) {
+    return plugin::CallMethodAndReturn<CVector*, 0x591BD0, Interior_c*, float, float, CVector*>(this, offsetX, offsetY, pointsIn);
 }
 
 // 0x591D20
@@ -296,11 +288,6 @@ bool Interior_c::AddInteriorInfo(int32 actionType, float offsetX, float offsetY,
 // 0x591F90
 void Interior_c::AddPickups() {
     plugin::CallMethod<0x591F90, Interior_c*>(this);
-}
-
-// 0x592230
-void Interior_c::Exit() {
-    plugin::CallMethod<0x592230, Interior_c*>(this);
 }
 
 // 0x5922C0
