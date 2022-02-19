@@ -19,25 +19,24 @@ public:
     int32             m_nDuration2;
     
 public:
-    static void InjectHooks();
-
-    ~CTaskComplexFacial() override;
     CTaskComplexFacial();
+    ~CTaskComplexFacial() override = default; // 0x690D90
 
     void StopAll();
 
-    CTask* Clone() override;
     eTaskType GetTaskType() override { return TASK_COMPLEX_FACIAL; }
+    CTask* Clone() override { return new CTaskComplexFacial(); }; // 0x6928B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
 private:
-    CTaskComplexFacial* Constructor();
-    CTaskComplexFacial* Destructor();
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
-    // Virtual wrappers for hooks
+    CTaskComplexFacial* Constructor() { this->CTaskComplexFacial::CTaskComplexFacial(); return this; }
+
     CTask* Clone_Reversed() { return CTaskComplexFacial::Clone(); }
     int32  GetTaskType_Reversed() { return CTaskComplexFacial::GetTaskType(); }
     bool   MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexFacial::MakeAbortable(ped, priority, event); }
