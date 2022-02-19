@@ -504,7 +504,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Test B's boxes against A's bounding sphere
     static uint32 collBoxB[MAX_BOXES]; // Indices of B's boxes colliding with A's bounding sphere
     uint32 numCollBoxB{};
-    for (auto&& [i, box] : enumerate(cdB.GetBoxes())) {
+    for (auto&& [i, box] : notsa::enumerate(cdB.GetBoxes())) {
         if (TestSphereBox(colABoundSphereSpaceB, box)) {
             collBoxB[numCollBoxB++] = i;
             if (numCollBoxB >= MAX_BOXES) {
