@@ -489,7 +489,7 @@ void InjectHooksMain() {
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
         // CTaskComplexCopInCar::InjectHooks();
-        // CTaskComplexFacial::InjectHooks();
+        CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
         CTaskSimpleGetUp::InjectHooks();
         CTaskSimpleUninterruptable::InjectHooks();
