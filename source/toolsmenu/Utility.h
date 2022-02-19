@@ -20,10 +20,12 @@ static auto SplitStringView(std::string_view str, std::string_view delim) {
     return str
         | std::ranges::views::split(delim)
         | std::ranges::views::transform([](auto&& rng) {
-#if _HAS_CXX23 // C++23 - String view from range
+#if 0 // C++23 - String view from range
             return std::string_view(rng.begin(), rng.end());
 #else
-            return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+            // Workaround for MS-STL debug assert when trying to add to string's end iterator
+            const auto size = std::ranges::distance(rng);
+            return size ? std::string_view(&*rng.begin(), size) : "";
 #endif
         });
 }
