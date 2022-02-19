@@ -184,7 +184,7 @@ void CDebugMenu::ImGuiDrawMouse() {
 }
 
 bool showPlayerInfo;
-void CDebugMenu::ShowPlayerInfo() {
+void ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
 
@@ -192,16 +192,16 @@ void CDebugMenu::ShowPlayerInfo() {
     if (!player)
         return;
 
-    ImGui::Begin("Player Information");
+    ImGui::Begin("Player Information", &showPlayerInfo, ImGuiWindowFlags_NoTitleBar);
 
-    auto playerPos = player->GetPosition();
+    auto& playerPos = player->GetPosition();
     float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
     ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
 
     ImGui::End();
 }
 
-void CDebugMenu::ProcessRenderTool() {
+void ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
         FXDebugModule::ProcessImgui();
     }
@@ -213,7 +213,7 @@ void CDebugMenu::ProcessRenderTool() {
 #ifdef EXTRA_DEBUG_FEATURES
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlussion")) {
+        if (ImGui::BeginTabItem("Occlusion")) {
             COcclusionDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
@@ -243,6 +243,21 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
 }
 #endif
 
+void SpawnTab() {
+    if (ImGui::BeginTabBar("")) {
+        if (ImGui::BeginTabItem("Ped")) {
+            PedDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Vehicle")) {
+            VehicleDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+    }
+    ImGui::EndTabBar();
+}
+
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
         return;
@@ -261,13 +276,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
         }
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
-            if (ImGui::BeginTabItem("Peds")) {
-                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                PedDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Vehicles")) {
-                VehicleDebugModule::ProcessImgui();
+            if (ImGui::BeginTabItem("Spawn")) {
+                SpawnTab();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Cheats")) {
@@ -288,9 +298,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
             }
             if (ImGui::BeginTabItem("Other")) {
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
-#ifdef EXTRA_DEBUG_FEATURES
+                ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
-#endif
                 if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }

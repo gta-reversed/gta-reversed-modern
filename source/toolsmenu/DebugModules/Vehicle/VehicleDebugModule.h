@@ -3,7 +3,7 @@
 namespace VehicleDebugModule {
 
 void Initialise();
-void ProcessImgui();
+void ProcessImGui();
 void ProcessRender();
 
 } // namespace VehicleDebugModule

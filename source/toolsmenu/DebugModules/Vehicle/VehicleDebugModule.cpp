@@ -256,7 +256,7 @@ static void Spawn_RC_Cars() {
     }
 }
 
-void ProcessImgui() {
+void ProcessImGui() {
     ImGui::PushItemWidth(465.0f);
     bool reclaim_focus = false;
     ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
@@ -272,7 +272,7 @@ void ProcessImgui() {
 
     m_vehicleToolInput.Process();
 
-    ImGui::BeginChild("##vehiclestool", ImVec2(0, 310));
+    ImGui::BeginChild("##vehiclestool", ImVec2(0, 280));
     const auto w = ImGui::GetWindowWidth();
     static bool widthSet = false;
     ImGui::Columns(2);

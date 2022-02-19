@@ -326,7 +326,7 @@ void ProcessImgui() {
 
     m_pedToolInput.Process();
 
-    ImGui::BeginChild("##pedstool", ImVec2(0, 310));
+    ImGui::BeginChild("##pedstool", ImVec2(0, 280));
     const auto  w = ImGui::GetWindowWidth();
     static bool widthSet = false;
     ImGui::Columns(2);
