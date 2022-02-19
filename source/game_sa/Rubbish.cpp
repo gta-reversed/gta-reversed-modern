@@ -1,5 +1,5 @@
-#include "Rubbish.h"
 #include "StdInc.h"
+#include "Rubbish.h"
 
 void CRubbish::InjectHooks() {
   RH_ScopedClass(CRubbish);
