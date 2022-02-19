@@ -247,7 +247,7 @@ CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
 // 0x600FB0
 CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
     CTask* task = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (task && task->GetTaskType() == TASK_SIMPLE_THROW) {
+    if (task && task->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE) {
         return (CTaskSimpleThrowProjectile*)task;
     }
     return nullptr;
