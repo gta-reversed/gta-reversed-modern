@@ -114,6 +114,7 @@
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
 #include "TaskComplexFallAndGetUp.h"
+#include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
@@ -487,6 +488,7 @@ void InjectHooksMain() {
         CTaskSimpleGetUp::InjectHooks();
         CTaskSimpleUninterruptable::InjectHooks();
         CTaskComplexFallAndGetUp::InjectHooks();
+        CTaskComplexFollowLeaderInFormation::InjectHooks();
         // CTaskSimpleTriggerLookAt::InjectHooks();
         CTaskSimpleHitHead::InjectHooks();
         // CTaskUtilityLineUpPedWithCar::InjectHooks();

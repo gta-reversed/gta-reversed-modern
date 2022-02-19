@@ -1,0 +1,39 @@
+#pragma once
+
+#include "TaskComplex.h"
+#include "Vector.h"
+
+class CPedGroup;
+class CPed;
+
+class CTaskComplexFollowLeaderInFormation : public CTaskComplex {
+    CPedGroup* m_group;     // 0xC
+    CPed*      m_leader;    // 0x10        
+    CVector    m_pos;       // 0x14
+    uint32     m_int;       // 0x20
+    float      m_dist;      // 0x24 - Max distance between m_pos and some point, not sure. See `ControlSubTask`. Ignored if < 0
+
+public:
+    CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist);
+    ~CTaskComplexFollowLeaderInFormation() override;
+
+    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION; }
+    CTask*    Clone() override { return plugin::CallMethodAndReturn<CTask*, 0x695740, CTaskComplexFollowLeaderInFormation*>(this); } // 0x695740
+    CTask*    CreateNextSubTask(CPed* ped) override;
+    CTask*    CreateFirstSubTask(CPed* ped) override;
+    CTask*    ControlSubTask(CPed* ped) override;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexFollowLeaderInFormation* Constructor(CPedGroup* pedGroup, CPed* ped, CVector const& posn, float a5) { return this; }
+    CTaskComplexFollowLeaderInFormation* Destructor() { this->CTaskComplexFollowLeaderInFormation::~CTaskComplexFollowLeaderInFormation(); return this; }
+
+    CTask*    Clone_Reversed() { return CTaskComplexFollowLeaderInFormation::Clone(); }
+    eTaskType GetTaskType_Reversed() { return CTaskComplexFollowLeaderInFormation::GetTaskType(); }
+    CTask*    CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexFollowLeaderInFormation::CreateNextSubTask(ped); }
+    CTask*    CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexFollowLeaderInFormation::CreateFirstSubTask(ped); }
+    CTask*    ControlSubTask_Reversed(CPed* ped) { return CTaskComplexFollowLeaderInFormation::ControlSubTask(ped); }
+};
+VALIDATE_SIZE(CTaskComplexFollowLeaderInFormation, 0x28);
