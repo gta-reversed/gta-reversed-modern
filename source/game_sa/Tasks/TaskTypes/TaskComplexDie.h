@@ -1,9 +1,3 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "TaskComplex.h"
@@ -12,11 +6,11 @@
 
 class CTaskComplexDie : public CTaskComplex {
 public:
-    eWeaponType m_nWeaponType; // Means Of Death
-    int32       m_animGroup;
-    int32       m_animID;
-    float       m_fBlendDelta;
-    float       m_fAnimSpeed;
+    eWeaponType  m_nWeaponType;
+    AssocGroupId m_nAnimGroup;
+    AnimationId  m_nAnimID;
+    float        m_fBlendDelta;
+    float        m_fAnimSpeed;
 
     union {
         uint32 m_nFlags;
@@ -26,13 +20,13 @@ public:
             uint32 bFallToDeathOverRailing : 1;
         };
     };
-    int32 nFallToDeathDir;
+    int32 m_nFallToDeathDir;
 
 public:
     CTaskComplexDie(
-        eWeaponType nWeaponType /*=WEAPONTYPE_UNARMED*/,
-        AssocGroupId animGroup /*ANIM_STD_PED*/,
-        AnimationId animID/*ANIM_STD_KO_FRONT*/,
+        eWeaponType nWeaponType,
+        AssocGroupId animGroup,
+        AnimationId animID,
         float fBlendDelta,
         float fAnimSpeed,
         bool bBeingKilledByStealth,
@@ -40,8 +34,16 @@ public:
         int32 nFallToDeathDir,
         bool bFallToDeathOverRailing
     );
+    ~CTaskComplexDie() override = default; // 0x6300C0 0x637910
 
+    eTaskType GetTaskType() override { return TASK_COMPLEX_DIE; } // 0x6300B0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed*) override;
+    CTask* Clone() override;
+
+    void SayDeathSample(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexDie, 0x28);
-

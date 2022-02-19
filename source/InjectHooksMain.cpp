@@ -188,6 +188,7 @@
 #include "TaskSimpleGoToPointFine.h"
 #include "TaskSimpleIKManager.h"
 #include "TaskComplexDie.h"
+#include "TaskComplexDieInCar.h"
 #include "TaskComplexEnterBoatAsDriver.h"
 #include "TaskSimpleFight.h"
 #include "TaskComplexUseWaterCannon.h"
@@ -562,6 +563,7 @@ void InjectHooksMain() {
         CTaskSimpleGoToPointFine::InjectHooks();
         // CTaskSimpleIKManager::InjectHooks();
         // CTaskComplexDie::InjectHooks();
+        CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
