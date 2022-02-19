@@ -643,6 +643,7 @@ void InjectHooksMain() {
         FxManager_c::InjectHooks();
         FxSystemBP_c::InjectHooks();
         // FxSystem_c::InjectHooks();
+        FxPrimBP_c::InjectHooks();
     };
 
     const auto Vehicle = []() {
