@@ -2,6 +2,5 @@
 
 class CRubbish {
 public:
-    static void InjectHooks();
-    static void SetVisibility();
+    static void SetVisibility(bool unk);
 };
