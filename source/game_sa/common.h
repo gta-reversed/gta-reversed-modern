@@ -69,13 +69,15 @@ extern int32 gDefaultTaskTime;
 
 extern char *gString; // char gString[200]
 
-extern float &GAME_GRAVITY; // default 0.0080000004
+extern float &GAME_GRAVITY; // default 0.008f
 
 extern char(&PC_Scratch)[16384];
 
 extern float& gfLaRiotsLightMult;
 
-const uint32 rwVENDORID_ROCKSTAR = 0x0253F2;
+// taken from rpplugin.h
+#define rwVENDORID_DEVELOPER 0x0253F2
+
 extern uint32 &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
@@ -245,21 +247,16 @@ void SkinGetBonePositions(RpClump* clump);
 void SkinSetBonePositions(RpClump* clump);
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
 void SetLightsWithTimeOfDayColour(RpWorld* world);
-// dummy function
 void LightsEnable(int32 arg0);
+void LightsCreate(RpWorld* world);
 void LightsDestroy(RpWorld* world);
-// lighting = [0.0f;1.0f]
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting);
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world);
 void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float red, float green, float blue);
 void RemoveExtraDirectionalLights(RpWorld* world);
-// lighting = [0.0f;1.0f]
-void SetAmbientAndDirectionalColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours_Mild(float lighting);
-// lighting = [0.0f;1.0f], unused
+void SetAmbientAndDirectionalColours(float fMult);
+void SetFlashyColours(float fMult);
+void SetFlashyColours_Mild(float fMult);
 void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
@@ -269,8 +266,7 @@ void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
 void SetDirectionalColours(RwRGBAReal* color);
-// lighting = [0.0f;1.0f]
-void SetLightColoursForPedsCarsAndObjects(float lighting);
+void SetLightColoursForPedsCarsAndObjects(float fMult);
 void SetLightsForInfraredVisionHeatObjects();
 void StoreAndSetLightsForInfraredVisionHeatObjects();
 void RestoreLightsForInfraredVisionHeatObjects();

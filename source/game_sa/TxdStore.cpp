@@ -288,11 +288,11 @@ int32 CTxdStore::GetNumRefs(int32 index) {
 }
 
 RwTexDictionary* CTxdStore::GetTxdParent(RwTexDictionary* txd) {
-    return *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset);
+    return *RWPLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset);
 }
 
 void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
-    *PLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset) = parent;
+    *RWPLUGINOFFSET(RwTexDictionary*, txd, TexDictionaryLinkPluginOffset) = parent;
 }
 
 // 0x731D50
