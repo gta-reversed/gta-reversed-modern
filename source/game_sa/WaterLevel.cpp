@@ -29,8 +29,8 @@ void CWaterLevel::InjectHooks() {
 }
 
 // 0x6E59E0
-RwTexture * CWaterLevel::Shutdown() {
-    return plugin::CallAndReturn<RwTexture *, 0x6E59E0>();
+void CWaterLevel::Shutdown() {
+    plugin::Call<0x6E59E0>();
 }
 
 // 0x6E81E0
@@ -138,8 +138,8 @@ void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fLowFr
     if (y < 0)
         y = -y;
 
-    auto xInd = (x / 2) & 0x7;
-    auto yInd = (y / 2) & 0x7;
+    auto xInd = (x / 2) & 7;
+    auto yInd = (y / 2) & 7;
 
     auto fWaveMultiplier = CWeather::Wavyness * faWaveMultipliersX[xInd] * faWaveMultipliersY[yInd];
     auto fX = static_cast<float>(x);
@@ -185,8 +185,7 @@ void CWaterLevel::RenderWater() {
     plugin::Call<0x6EF650>();
 }
 
-void CWaterLevel::SyncWater()
-{
+void CWaterLevel::SyncWater() {
     m_nWaterTimeOffset = CTimer::GetTimeInMS();
 }
 
