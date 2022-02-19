@@ -1515,7 +1515,7 @@ RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data)
 }
 
 // 0x6D2700
-void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState)
+void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState) // see eAtomicComponentFlag
 {
     ((void(__thiscall*)(CVehicle*, RwFrame*, uint32))0x6D2700)(this, component, visibilityState);
 }

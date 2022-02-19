@@ -5084,55 +5084,74 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
 
     auto& door{ m_doors[doorIdx] };
 
-    if (doorIdx != eDoors::DOOR_BOOT) { // TODO: Invert this condition to make it nicer
-        if (!CanDoorsBeDamaged()) {
-            switch (m_damageManager.GetDoorStatus(doorIdx)) {
-            case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
-            case eDoorStatus::DAMSTATE_NOTPRESENT: {
-                door.Open(0.f);
-                m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_DAMAGED);
-                return;
-            }
-            }
-        }
-    } else {
-        if (m_pHandlingData->m_bAltSteerOpt) {
-            switch (m_damageManager.GetDoorStatus(doorIdx)) {
-            case eDoorStatus::DAMSTATE_OPENED: {
-                m_damageManager.SetDoorStatus(doorIdx, isDamageable ? eDoorStatus::DAMSTATE_DAMAGED : eDoorStatus::DAMSTATE_NOTPRESENT);
-                break;
-            }
-            case eDoorStatus::DAMSTATE_OPENED_DAMAGED: {
-                m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_NOTPRESENT);
-                break;
-            }
-            }
-        }
-    }
+	// Leaving this here for further refernce...
+	// The `if` @ `0x6B1650` is inverted here a little, because
+	// `0x6B169C` is only reachable if `eDoors::DOOR_BOOT` in which all other if's are ignored (that is the one at `0x6B1650` and `0x6B1673`)
+	// If the door isn't BOOT, but is BONNET just ignore it, because of `0x6B1660`
+	// Now, if it's neither, then we go on and check the logical invert of the 2 other conditions at `0x6B1650`
+	// If those are all true we will end up @ `0x6B1673`
 
+	switch (doorIdx) {
+	case eDoors::DOOR_BOOT: {
+		// 0x6B169C
+		if (m_pHandlingData->m_bAltSteerOpt) {
+			switch (m_damageManager.GetDoorStatus(eDoors::DOOR_BOOT)) {
+			case eDoorStatus::DAMSTATE_OPENED: {
+				m_damageManager.SetDoorStatus(eDoors::DOOR_BOOT, isDamageable ? eDoorStatus::DAMSTATE_DAMAGED : eDoorStatus::DAMSTATE_NOTPRESENT);
+				break;
+			}
+			case eDoorStatus::DAMSTATE_OPENED_DAMAGED: {
+				m_damageManager.SetDoorStatus(eDoors::DOOR_BOOT, eDoorStatus::DAMSTATE_NOTPRESENT);
+				break;
+			}
+			}
+		}
+		break;
+	}
+	case eDoors::DOOR_BONNET: // Check from 0x6B1660
+		break;
+
+	default: {
+		// Inverted `if` from `0x6B1650`, this way we get to the `else` branch at `0x6B1667`
+		if (!CanDoorsBeDamaged()) {
+			switch (m_damageManager.GetDoorStatus(doorIdx)) { // 0x6B1659
+			case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
+			case eDoorStatus::DAMSTATE_NOTPRESENT: {
+				// 0x0x6B1667
+				door.Open(0.f);
+				m_damageManager.SetDoorStatus(doorIdx, eDoorStatus::DAMSTATE_DAMAGED);
+				return;
+			}
+			}
+		}
+		break;
+	}
+	}
+
+	// 0x6B16E5
     switch (m_damageManager.GetDoorStatus(doorIdx)) {
-    case DAMSTATE_DAMAGED: {
+    case DAMSTATE_DAMAGED: { // 0x6B16E5
         if (isDamageable) {
-            if (door.m_fPrevAngle == 0.f) {
-                break;
-            }
+			SetComponentVisibility(frame, ATOMIC_IS_DAM_STATE);
+        }
 
-            door.m_fAngle     = 0.f;
-            door.m_fPrevAngle = 0.f;
-            door.m_fAngVel    = 0.f;
+        if (door.m_fPrevAngle != 0.f) {
+			door.m_fAngle     = 0.f;
+			door.m_fPrevAngle = 0.f;
+			door.m_fAngVel    = 0.f;
 
-            // Reset component rotation
-            {
-                CMatrix frameMatrix{ RwFrameGetMatrix(frame) };
-                frameMatrix.SetRotateKeepPos({});
-                frameMatrix.UpdateRW();
-            }
+			// Reset component rotation
+			{
+				CMatrix frameMatrix{ RwFrameGetMatrix(frame) };
+				frameMatrix.SetRotateKeepPos({});
+				frameMatrix.UpdateRW();
+			}
 
-            m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
+			m_vehicleAudio.AddAudioEvent((eAudioEvents)((int32)AE_CAR_BONNET_CLOSE + (int32)doorIdx), 0.f);
         }
         break;
     }
-    case DAMSTATE_NOTPRESENT: {
+    case DAMSTATE_NOTPRESENT: { // 0x6B17F0
         if (!withoutVisualEffect) {
             if (doorIdx == eDoors::DOOR_BONNET) { // Inverted
                 const auto obj = SpawnFlyingComponent(nodeIdx, 3u);
@@ -5141,10 +5160,10 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
                 SpawnFlyingComponent(nodeIdx, doorIdx == eDoors::DOOR_BOOT ? 4u : 2u);
             }
         }
-        SetComponentVisibility(frame, 0);
+        SetComponentVisibility(frame, ATOMIC_IS_NOT_PRESENT);
         break;
     }
-    case DAMSTATE_OPENED:
+    case DAMSTATE_OPENED: // 0x6B16E5
     case DAMSTATE_OPENED_DAMAGED: {
         RwFrameForAllObjects(frame, CVehicleModelInfo::SetAtomicFlagCB, (void*)ATOMIC_RENDER_ALWAYS);
         if (doorIdx == eDoors::DOOR_BONNET) {
