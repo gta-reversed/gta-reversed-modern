@@ -6,22 +6,36 @@
 */
 #pragma once
 
-class CPed;
+#include "Base.h"
+
 class CPedGroupMembership;
+class CPed;
 
 class CPedList {
 public:
-    int32 m_nCount;
-    CPed* m_apPeds[30];
+    uint32_t m_count = {};
+    CPed* m_peds[30] = {};
 
-    void BuildListFromGroup_NoLeader(CPedGroupMembership* pedGroupMemberShip);
-    void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership* pedGroupMembership);
-    void BuildListOfPedsOfPedType(int32 pedtype);
+public:
+    static void InjectHooks();
+
     void Empty();
-    void ExtractPedsWithGuns(CPedList* pedlist);
-    void FillUpHoles();
-    void RemovePedsAttackingPedType(int32 pedtype);
-    void RemovePedsThatDontListenToPlayer();
-};
+    void BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership);
+    void ExtractPedsWithGuns(CPedList& pFrom);
+    void ClearUnused();
+    void AddMember(CPed* ped);
+    void RemoveMemberNoFill(int i);
+    CPed* Get(int i);
+    uint32_t GetCapacity() const;
 
+    // Inlined functions below (Present in Android version)
+    void FillUpHoles();
+    void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership* pedGroupMembership);
+    void BuildListOfPedsOfPedType(int pedtype);
+    void RemovePedsAttackingPedType(int pedtype);
+    void RemovePedsThatDontListenToPlayer();
+
+    CPed** begin() { return m_peds; }
+    CPed** end() { return m_peds + GetCapacity(); }
+};
 VALIDATE_SIZE(CPedList, 0x7C);
