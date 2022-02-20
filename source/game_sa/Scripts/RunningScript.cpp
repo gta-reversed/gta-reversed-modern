@@ -2,6 +2,7 @@
 
 #include "RunningScript.h"
 #include "TaskSimplePlayerOnFoot.h"
+#include "Radar.h"
 
 int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
 int8(CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
@@ -440,7 +441,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_VARIABLE:
     {
         uint16 index = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
-        return (tScriptParam*)&CTheScripts::LocalVariablesForCurrentMission[index];
+        return (tScriptParam*)&CTheScripts::ScriptSpace[index];
     }
 
     case SCRIPT_PARAM_LOCAL_NUMBER_VARIABLE:
@@ -455,9 +456,9 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
         ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
-        if (variableType == SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY)
+        if (type == SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY)
             return (tScriptParam*)&CTheScripts::ScriptSpace[16 * arrElemIdx + arrVarOffset];
-        else if (variableType == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
+        else if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
             return (tScriptParam*)&CTheScripts::ScriptSpace[8 * arrElemIdx + arrVarOffset];
         else
             return (tScriptParam*)&CTheScripts::ScriptSpace[4 * arrElemIdx + arrVarOffset];
@@ -466,9 +467,9 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
         ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
-        if (variableType == SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY)
+        if (type == SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY)
             arrElemSize = 4;
-        else if (variableType == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
+        else if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
             arrElemSize = 2;
         else
             arrElemSize = 1;
@@ -4189,7 +4190,20 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_ADD_SHORT_RANGE_BLIP_FOR_COORD: // 0x4CD
         break;
     case COMMAND_ADD_SHORT_RANGE_SPRITE_BLIP_FOR_COORD: // 0x4CE
-        break;
+    {
+        CollectParameters(4);
+        CVector pos = *(CVector*)&CTheScripts::ScriptParams[0];
+        if (pos.z <= -100.0f)
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+
+        int32 index = CollectNextParameterWithoutIncreasingPC(); // pointless
+        CRadar::GetActualBlipArrayIndex(index); // pointless
+        int32 blip = CRadar::SetShortRangeCoordBlip(BLIP_COORD, pos, 5, BLIP_DISPLAY_BOTH, m_szName);
+        CRadar::SetBlipSprite(blip, CTheScripts::ScriptParams[3].iParam);
+        CTheScripts::ScriptParams[0].iParam = blip;
+        StoreParameters(1);
+        return 0;
+    }
     case COMMAND_ADD_MONEY_SPENT_ON_CLOTHES: // 0x4CF
         break;
     case COMMAND_SET_HELI_ORIENTATION: // 0x4D0
