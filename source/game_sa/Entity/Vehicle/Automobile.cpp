@@ -3927,9 +3927,10 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
         return nullptr; // No atomic means there's nothing to render :D
     }
 
-    CPools::GetObjectPool()->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     auto obj = new CObject;
-    CPools::GetObjectPool()->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
+
     if (!obj) {
         return nullptr;
     }
