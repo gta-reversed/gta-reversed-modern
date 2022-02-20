@@ -19,7 +19,7 @@ void CStuntJumpManager::InjectHooks() {
 
 // 0x49CA50
 void CStuntJumpManager::Init() {
-    mp_poolStuntJumps = new CPool<CStuntJump>(STUNT_JUMP_COUNT, "Stunt Jumps");
+    mp_poolStuntJumps = new CStuntJumpsPool(STUNT_JUMP_COUNT, "Stunt Jumps");
     m_bActive = true;
 }
 

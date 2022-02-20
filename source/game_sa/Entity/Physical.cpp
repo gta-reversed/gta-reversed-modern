@@ -794,7 +794,7 @@ CVector CPhysical::GetSpeed(CVector point)
     The code for this function is fine, but it will crash if we hook it. This function should be
     only hooked after reversing all references to this function: 
     CPhysical::ApplySpeed (done)
-    CWorld::Process
+    CWorld::Process (done)
     CAutoMobile::ProcessControlCollisionCheck
     CBike::ProcessControlCollisionCheck
     CTrain::ProcessControl (Done)

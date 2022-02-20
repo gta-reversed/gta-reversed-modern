@@ -226,7 +226,7 @@ CVehicle::~CVehicle()
     CReplay::RecordVehicleDeleted(this);
     m_nAlarmState = 0;
     DeleteRwObject();
-    CRadar::ClearBlipForEntity(eBlipType::BLIP_CAR, CPools::ms_pVehiclePool->GetRef(this));
+    CRadar::ClearBlipForEntity(eBlipType::BLIP_CAR, GetVehiclePool()->GetRef(this));
 
     if (m_pDriver)
         m_pDriver->FlagToDestroyWhenNextProcessed();
@@ -292,12 +292,12 @@ CVehicle::~CVehicle()
         CDarkel::RegisterCarBlownUpByPlayer(this, 0);
 }
 
-void* CVehicle::operator new(uint32 size) {
-    return CPools::ms_pVehiclePool->New();
+void* CVehicle::operator new(unsigned size) {
+    return GetVehiclePool()->New();
 }
 
 void CVehicle::operator delete(void* data) {
-    CPools::ms_pVehiclePool->Delete(static_cast<CVehicle*>(data));
+    GetVehiclePool()->Delete(static_cast<CVehicle*>(data));
 }
 
 void CVehicle::SetModelIndex(uint32 index)

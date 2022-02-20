@@ -2850,8 +2850,8 @@ void CAutomobile::ProcessHarvester()
     if (m_vecMoveSpeed.Magnitude2D() > 0.01f) {
         if ((CTimer::GetFrameCounter() & 1) != 0)
         {
-            for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
-                CPed* ped = CPools::ms_pPedPool->GetAt(i);
+            for (int32 i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
+                CPed* ped = GetPedPool()->GetAt(i);
                 if (!ped)
                     continue;
 
@@ -2875,8 +2875,8 @@ void CAutomobile::ProcessHarvester()
         }
         else
         {
-            for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
-                CObject* object = CPools::ms_pObjectPool->GetAt(i);
+            for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
+                CObject* object = GetObjectPool()->GetAt(i);
                 if (!object)
                     continue;
 

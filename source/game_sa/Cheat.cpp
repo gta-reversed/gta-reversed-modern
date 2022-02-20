@@ -294,8 +294,8 @@ void CCheat::BlackCarsCheat() {
 
 // 0x439d80
 void CCheat::BlowUpCarsCheat() {
-    for (int32 index = 0; index < CPools::ms_pVehiclePool->m_nSize; index++) {
-        CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(index);
+    for (int32 index = 0; index < GetVehiclePool()->m_nSize; index++) {
+        CVehicle* vehicle = GetVehiclePool()->GetAt(index);
         if (vehicle) {
             vehicle->BlowUpCar(nullptr, false);
         }
@@ -398,8 +398,8 @@ void CCheat::EverybodyAttacksPlayerCheat() {
     Toggle(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD);
     if (IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         auto player = FindPlayerPed();
-        for (auto i = 0; i < CPools::ms_pPedPool->m_nSize; i++) {
-            auto ped = CPools::ms_pPedPool->GetAt(i);
+        for (auto i = 0; i < GetPedPool()->m_nSize; i++) {
+            auto ped = GetPedPool()->GetAt(i);
             if (!ped || ped->IsPlayer())
                 continue;
 
@@ -615,7 +615,7 @@ void CCheat::MayhemCheat() {
             CPedType::SetPedTypeAsAcquaintance(4, static_cast<ePedType>(pedType), 0xFFFFF);
         }
 
-        auto pedPool = CPools::ms_pPedPool;
+        auto pedPool = GetPedPool();
         if (!pedPool->m_nSize) {
             return;
         }

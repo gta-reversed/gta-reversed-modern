@@ -20,8 +20,8 @@ void FxSystemBP_c::InjectHooks() {
 }
 
 // 0x4AA100
-void* FxSystemBP_c::operator new(uint32 size) {
-    return plugin::CallAndReturn<void*, 0x4AA100, uint32>(size);
+void* FxSystemBP_c::operator new(unsigned size) {
+    return g_fxMan.m_pool.GetMem(size, 4);;
 }
 
 // 0x4AA0D0

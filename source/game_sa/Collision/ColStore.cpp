@@ -6,7 +6,7 @@ CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;
 int32 CColStore::ms_nRequiredCollisionArea = *(int32*)0x965554;
 
-CPool<ColDef>* &CColStore::ms_pColPool = *(CPool<ColDef>**)0x965560;
+CColPool* &CColStore::ms_pColPool = *(CColPool**)0x965560;
 CQuadTreeNode* &CColStore::ms_pQuadTree = *(CQuadTreeNode**)0x96555C;
 
 void CColStore::InjectHooks()
@@ -42,7 +42,7 @@ void CColStore::InjectHooks()
     RH_ScopedGlobalInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
 }
 
-void* ColDef::operator new(uint32 size)
+void* ColDef::operator new(unsigned size)
 {
     return CColStore::ms_pColPool->New();
 }
@@ -58,7 +58,7 @@ void CColStore::Initialise()
     const auto rect = CRect(-3000.0F, -3000.0F, 3000.0F, 3000.0F);
     ms_bCollisionNeeded = false;
     if (!ms_pColPool)
-        ms_pColPool = new CPool<ColDef>(TOTAL_COL_MODEL_IDS, "CollisionFiles");
+        ms_pColPool = new CColPool(TOTAL_COL_MODEL_IDS, "CollisionFiles");
 
     AddColSlot("generic");
     ms_pQuadTree = new CQuadTreeNode(rect, 3);
@@ -319,13 +319,13 @@ void CColStore::LoadCollision(CVector pos, bool bIgnorePlayerVeh)
         CEntity* entity = nullptr;
         if (obj.type == MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_VEHICLE)
         {
-            entity = CPools::ms_pVehiclePool->GetAtRef(obj.handle);
+            entity = GetVehiclePool()->GetAtRef(obj.handle);
             if (!entity || entity->m_nStatus == eEntityStatus::STATUS_WRECKED)
                 continue;
         }
         else if (obj.type == MissionCleanUpEntityType::MISSION_CLEANUP_ENTITY_TYPE_PED)
         {
-            entity = CPools::ms_pPedPool->GetAtRef(obj.handle);
+            entity = GetPedPool()->GetAtRef(obj.handle);
             if (!entity || entity->AsPed()->m_nPedState == PEDSTATE_DIE || entity->AsPed()->m_nPedState == PEDSTATE_DEAD)
                 continue;
         }

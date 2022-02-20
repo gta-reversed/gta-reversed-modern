@@ -197,7 +197,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
                 }
             }
             const float fValue = std::pow(m_pHandling->m_fDesLean, CTimer::GetTimeStep()); // TODO: Name this variable properly
-            m_sRideAnimData.m_fAnimLean = fValue * m_sRideAnimData.m_fAnimLean - m_pHandling->m_fFullAnimLean * m_fSteerAngle / RWDEG2RAD(m_pHandlingData->m_fSteeringLock) * (1.0f - fValue);
+            m_sRideAnimData.m_fAnimLean = fValue * m_sRideAnimData.m_fAnimLean - m_pHandling->m_fFullAnimLean * m_fSteerAngle / DegreesToRadians(m_pHandlingData->m_fSteeringLock) * (1.0f - fValue);
                 
             DoDriveByShootings();
 

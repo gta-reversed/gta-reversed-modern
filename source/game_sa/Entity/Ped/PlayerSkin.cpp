@@ -1,9 +1,8 @@
 #include "StdInc.h"
 
 int32& CPlayerSkin::m_txdSlot = *(int32*) 0xC3F03C;
-RpClump*& CPlayerSkin::m_Clump = *(RpClump**)(0xC3F040);
-float& CPlayerSkin::m_Angle = *(float*) 0xC3F048;
-uint32& CPlayerSkin::m_C3F04C = *(uint32*) 0xC3F04C; // todo: Rename CPlayerSkin:m_C3F04C
+
+RpClump*& gpPlayerClump = *(RpClump**)(0xC3F040);
 
 void CPlayerSkin::InjectHooks() {
     RH_ScopedClass(CPlayerSkin);
@@ -17,44 +16,45 @@ void CPlayerSkin::InjectHooks() {
 
 // 0x6FF8A0
 void CPlayerSkin::Initialise() {
-    CPlayerSkin::m_txdSlot = CTxdStore::AddTxdSlot(TXD_SKIN_SLOT);
-    CTxdStore::Create(CPlayerSkin::m_txdSlot);
-    CTxdStore::AddRef(CPlayerSkin::m_txdSlot);
+    m_txdSlot = CTxdStore::AddTxdSlot("skin");
+    CTxdStore::Create(m_txdSlot);
+    CTxdStore::AddRef(m_txdSlot);
 }
 
 // 0x6FF8D0
 void CPlayerSkin::Shutdown() {
-    CTxdStore::RemoveTxdSlot(CPlayerSkin::m_txdSlot);
+    CTxdStore::RemoveTxdSlot(m_txdSlot);
 }
 
 // unused
 // 0x6FF900
 void CPlayerSkin::RenderFrontendSkinEdit() {
-    RwV3d vector = {1.35f, 0.1f, 7.725f};
-    RwV3d axis = {0.0f, 1.0f, 0.0f};
+    static uint32 s_LastFlash; // 0xC3F04C
+    static float  s_Angle;     // 0xC3F048
 
-    auto* parentFrame = static_cast<RwFrame*>(Scene.m_pRwCamera->object.object.parent);
-    RwRGBAReal color{255, 255, 255, 1.0f};
-    if (CTimer::GetTimeInMSPauseMode() - CPlayerSkin::m_C3F04C > 7) {
-        CPlayerSkin::m_Angle = CPlayerSkin::m_Angle + 2.0f;
-        if (CPlayerSkin::m_Angle > 360.0) {
-            CPlayerSkin::m_Angle -= 360.0f;
+    RwRGBAReal color{ 255, 255, 255, 1.0f };
+    if (CTimer::GetTimeInMSPauseMode() - s_LastFlash > 7) {
+        s_Angle = s_Angle + 2.0f;
+        if (s_Angle > 360.0) {
+            s_Angle -= 360.0f;
         }
-        CPlayerSkin::m_C3F04C = CTimer::GetTimeInMSPauseMode();
+        s_LastFlash = CTimer::GetTimeInMSPauseMode();
     }
-    auto* frame = static_cast<RwFrame*>(CPlayerSkin::m_Clump->object.parent);
-    RwFrameTransform(frame, &parentFrame->modelling, rwCOMBINEREPLACE);
+    auto* frame = RpClumpGetFrame(gpPlayerClump);
+    RwFrameTransform(frame, RwFrameGetMatrix(RwCameraGetFrame(Scene.m_pRwCamera)), rwCOMBINEREPLACE);
+    RwV3d vector = { 1.35f, 0.1f, 7.725f };
     RwFrameTranslate(frame, &vector, rwCOMBINEPRECONCAT);
-    RwFrameRotate(frame, &axis, CPlayerSkin::m_Angle, rwCOMBINEPRECONCAT);
+    RwV3d axis = { 0.0f, 1.0f, 0.0f };
+    RwFrameRotate(frame, &axis, s_Angle, rwCOMBINEPRECONCAT);
     RwFrameUpdateObjects(frame);
     SetAmbientColours(&color);
-    RpClumpRender(CPlayerSkin::m_Clump);
+    RpClumpRender(gpPlayerClump);
 }
 
 // 0x6FFA10
 RwTexture* CPlayerSkin::GetSkinTexture(const char* name) {
     CTxdStore::PushCurrentTxd();
-    CTxdStore::SetCurrentTxd(CPlayerSkin::m_txdSlot);
+    CTxdStore::SetCurrentTxd(m_txdSlot);
     RwTexture* skinTexture = RwTextureRead(name, nullptr);
     CTxdStore::PopCurrentTxd();
     if (skinTexture) {
@@ -81,7 +81,7 @@ RwTexture* CPlayerSkin::GetSkinTexture(const char* name) {
     RwTexture* texture = RwTextureCreate(raster);
     RwTextureSetName(texture, name);
     RwTextureSetFilterMode(texture, rwFILTERLINEAR);
-    RwTexDictionaryAddTexture(CTxdStore::ms_pTxdPool->GetAtRef(CPlayerSkin::m_txdSlot)->m_pRwDictionary, texture);
+    RwTexDictionaryAddTexture(CTxdStore::ms_pTxdPool->GetAtRef(m_txdSlot)->m_pRwDictionary, texture);
     RwImageDestroy(image);
     return texture;
 }

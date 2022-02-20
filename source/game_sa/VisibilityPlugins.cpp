@@ -223,21 +223,21 @@ bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float dista
 bool CVisibilityPlugins::PluginAttach() {
     ms_atomicPluginOffset = RpAtomicRegisterPlugin(
         sizeof(tAtomicVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x00),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x00),
         AtomicConstructor,
         AtomicDestructor,
         AtomicCopyConstructor
     );
     ms_clumpPluginOffset = RpClumpRegisterPlugin(
         sizeof(tClumpVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x01),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x01),
         ClumpConstructor,
         ClumpDestructor,
         ClumpCopyConstructor
     );
     ms_framePluginOffset = RwFrameRegisterPlugin(
         sizeof(tFrameVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x02),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x02),
         FrameConstructor,
         FrameDestructor,
         FrameCopyConstructor

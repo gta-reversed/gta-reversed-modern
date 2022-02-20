@@ -263,7 +263,7 @@ void ProcessInput() {
     }
     if (posIdx == -1) return;
 
-    for (auto&& [i, pos] : enumerate(visibleItems)) {
+    for (auto&& [i, pos] : notsa::enumerate(visibleItems)) {
         if (i == posIdx) {
             DoTeleportTo(pos.findGround ? GetPositionWithGroundHeight(pos.pos) : pos.pos, pos.areaCode);
             break;

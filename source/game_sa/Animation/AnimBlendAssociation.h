@@ -64,7 +64,7 @@ public:
     void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
     void *m_pCallbackData;
 
-    void* operator new(uint32 size);
+    void* operator new(unsigned size);
     void operator delete(void* object);
 
     static void InjectHooks();

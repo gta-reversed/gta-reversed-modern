@@ -2,14 +2,9 @@
 
 #include "RenderWare.h"
 
-#define TXD_SKIN_SLOT "skin"
-
 class CPlayerSkin {
 public:
     static int32&    m_txdSlot;
-    static float&    m_Angle;
-    static uint32&   m_C3F04C;
-    static RpClump*& m_Clump;
 
 public:
     static void InjectHooks();
