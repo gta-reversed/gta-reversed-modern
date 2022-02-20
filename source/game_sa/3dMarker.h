@@ -23,6 +23,9 @@ enum e3dMarkerType {
     MARKER3D_TORUS = 4,
     MARKER3D_CONE = 5,
     MARKER3D_CONE_NO_COLLISION = 6,
+
+    MARKER3D_NUM,
+
     MARKER3D_NA = 257
 };
 
