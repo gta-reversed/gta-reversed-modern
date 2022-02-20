@@ -12,29 +12,23 @@
 // 0x630040
 CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
                                  AssocGroupId animGroup,
-                                 AnimationId animId,
+                                 AnimationId animID,
                                  float fBlendDelta,
                                  float fAnimSpeed,
                                  bool bBeingKilledByStealth,
-                                 bool bFallingToDeath,
-                                 int32 nFallToDeathDir,
-                                 bool bFallToDeathOverRailing
-) : CTaskComplex() {
-    m_nWeaponType = nWeaponType;
-    m_nAnimID = animId;
-    m_fBlendDelta = fBlendDelta;
-    m_nAnimGroup = animGroup;
-    m_fAnimSpeed = fAnimSpeed;
-bBeingKilledByStealth = bBeingKilledByStealth;
-bFallingToDeath = bFallingToDeath;
-bFallToDeathOverRailing = bFallToDeathOverRailing;
-    m_nFallToDeathDir = nFallToDeathDir;
+                                 bool bFallingToDeath, eFallDir nFallToDeathDir,
+                                 bool bFallToDeathOverRailing) : CTaskComplex()
+{
+    m_nWeaponType           = nWeaponType;
+    m_nAnimID               = animID;
+    m_fBlendDelta           = fBlendDelta;
+    m_nAnimGroup            = animGroup;
+    m_fAnimSpeed            = fAnimSpeed;
+    bBeingKilledByStealth   = bBeingKilledByStealth;
+    bFallingToDeath         = bFallingToDeath;
+    bFallToDeathOverRailing = bFallToDeathOverRailing;
+    m_nFallToDeathDir       = nFallToDeathDir;
 };
-
-// 0x630580
-CTask* CTaskComplexDie::ControlSubTask(CPed*) {
-    return m_pSubTask;
-}
 
 // 0x636060
 CTask* CTaskComplexDie::Clone() {
@@ -44,7 +38,7 @@ CTask* CTaskComplexDie::Clone() {
         m_nAnimID,
         m_fBlendDelta,
         m_fAnimSpeed,
-        !bBeingKilledByStealth,
+        bBeingKilledByStealth,
         bFallingToDeath,
         m_nFallToDeathDir,
         bFallToDeathOverRailing
@@ -61,20 +55,20 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) {
     switch (m_nWeaponType) {
     case WEAPON_RAMMEDBYCAR:
     case WEAPON_RUNOVERBYCAR:
-        ped->Say(342, 0, 1.0f, 0, 0, 0);
+        ped->Say(342);
         break;
     case WEAPON_EXPLOSION:
         return;
     case WEAPON_DROWNING:
-        ped->Say(341, 0, 1.0f, 0, 0, 0);
+        ped->Say(341);
         break;
     case WEAPON_FALL:
-        ped->Say(342, 0, 1.0f, 0, 0, 0);
+        ped->Say(342);
         if (CLocalisation::Blood())
             ped->m_pedAudio.AddAudioEvent(119, 0.0f, 1.0, ped, 0, 0, 0);
         break;
     default:
-        ped->Say(343, 0, 1.0f, 0, 0, 0);
+        ped->Say(343);
         break;
     }
 }
@@ -93,6 +87,7 @@ CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) {
         return ped->bInVehicle ? new CTaskSimpleDrownInCar() : CreateFirstSubTask(ped);
     }
     }
+    // todo: warning C4715: 'CTaskComplexDie::CreateNextSubTask': not all control paths return a value
 }
 
 // 0x6302D0
@@ -100,7 +95,7 @@ CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
     SayDeathSample(ped);
     if (m_nWeaponType != WEAPON_DROWNING
         || !ped->bInVehicle
-        || ped->m_nFourthPedFlags < 0 // todo: ped->m_nFourthPedFlags
+        || ped->bForceDieInCar
         || ped->m_pVehicle && (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli())
     ) {
         ped->SetPedState(PEDSTATE_DIE);
@@ -115,26 +110,27 @@ CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
         }
         else if (bFallingToDeath)
         {
-            const auto GetFallDirection = [this]{
+            const auto GetFallDirection = [=]() -> CVector {
                 switch (m_nFallToDeathDir) {
-                case 0:
+                case eFallDir::FORWARD:
                     return ped->m_matrix->GetForward();
-                case 1:
+                case eFallDir::LEFT:
                     return ped->m_matrix->GetRight() * -1.0f;
-                case 2:
+                case eFallDir::BACKWARD:
                     return ped->m_matrix->GetForward() * -1.0f;
-                case 3:
+                case eFallDir::RIGHT:
                     return ped->m_matrix->GetRight();
                 default:
-                    return {}; // Just to return something so compiler doesn't cry
+                    // Originally not initialized
+                    // Just to return something so compiler doesn't cry
+                    return {};
                 }
             };
-            return new CTaskComplexFallToDeath(m_nFallToDeathDir, GetFallDirection(), bFallToDeathOverRailing, false);
+            return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), bFallToDeathOverRailing, false);
         } else {
             return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);
         }
-    } else {
-        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
     }
-    return nullptr;
+
+    return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
 }

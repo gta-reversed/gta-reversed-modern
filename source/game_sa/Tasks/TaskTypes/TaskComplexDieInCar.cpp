@@ -1,4 +1,3 @@
-#include <CarCtrl.h>
 #include "StdInc.h"
 
 #include "TaskComplexDieInCar.h"
@@ -56,16 +55,16 @@ CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) {
     auto currentEvent = ped->GetEventHandlerHistory().GetCurrentEvent();
     if (currentEvent) {
         if (currentEvent->GetEventType() == EVENT_DAMAGE) {
-            if (ped->m_pVehicle->m_pDriver) {
-                if (ped->m_pVehicle->m_pDriver != ped) {
+            if (auto& driver = ped->m_pVehicle->m_pDriver) {
+                if (driver != ped) {
                     auto* event = static_cast<CEventDamage*>(currentEvent->Clone());
                     event->m_bAddToEventGroup = false;
-                    ped->m_pVehicle->m_pDriver->GetEventGroup().Add(event, false);
+                    driver->GetEventGroup().Add(event, false);
                     delete event;
                 }
             }
 
-            for (auto& passenger : std::span(ped->m_pVehicle->m_apPassengers, ped->m_pVehicle->m_nMaxPassengers)) {
+            for (auto& passenger : ped->m_pVehicle->GetPassengers()) {
                 if (!passenger)
                     continue;
 

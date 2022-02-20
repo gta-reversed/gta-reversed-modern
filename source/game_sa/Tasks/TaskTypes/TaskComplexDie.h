@@ -6,6 +6,8 @@
 
 class CTaskComplexDie : public CTaskComplex {
 public:
+    enum class eFallDir : int32 { FORWARD, LEFT, BACKWARD, RIGHT };
+
     eWeaponType  m_nWeaponType;
     AssocGroupId m_nAnimGroup;
     AnimationId  m_nAnimID;
@@ -20,7 +22,7 @@ public:
             uint32 bFallToDeathOverRailing : 1;
         };
     };
-    int32 m_nFallToDeathDir;
+    eFallDir m_nFallToDeathDir;
 
 public:
     CTaskComplexDie(
@@ -31,7 +33,7 @@ public:
         float fAnimSpeed,
         bool bBeingKilledByStealth,
         bool bFallingToDeath,
-        int32 nFallToDeathDir,
+        eFallDir nFallToDeathDir,
         bool bFallToDeathOverRailing
     );
     ~CTaskComplexDie() override = default; // 0x6300C0 0x637910
@@ -40,7 +42,7 @@ public:
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
-    CTask* ControlSubTask(CPed*) override;
+    CTask* ControlSubTask(CPed*) override { return m_pSubTask; } // 0x630580
     CTask* Clone() override;
 
     void SayDeathSample(CPed* ped);

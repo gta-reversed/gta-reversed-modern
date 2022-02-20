@@ -12,9 +12,7 @@ public:
 
 public:
     explicit CTaskComplexDieInCar(eWeaponType weaponType);
-
-    // 0x62FCF0, 0x6375D0
-    ~CTaskComplexDieInCar() override = default;
+    ~CTaskComplexDieInCar() override = default; // 0x62FCF0, 0x6375D0
 
     eTaskType GetTaskType() override { return TASK_COMPLEX_DIE_IN_CAR; };       // 0x62FCB0
     CTask* Clone() override { return new CTaskComplexDieInCar(m_nWeaponType); } // 0x635F90
@@ -47,3 +45,4 @@ private:
     CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexDieInCar::CreateNextSubTask(ped); }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexDieInCar::MakeAbortable(ped, priority, event); }
 };
+VALIDATE_SIZE(CTaskComplexDieInCar, 0x1C);
