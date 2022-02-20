@@ -86,6 +86,12 @@
 #include "Ropes.h"
 #include "FallingGlassPane.h"
 #include "Glass.h"
+#include "FurnitureGroup_c.h"
+#include "FurnitureManager_c.h"
+#include "FurnitureSubGroup_c.h"
+#include "Interior_c.h"
+#include "InteriorGroup_c.h"
+#include "InteriorManager_c.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -114,6 +120,7 @@
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
 #include "TaskComplexFallAndGetUp.h"
+#include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
 #include "TaskUtilityLineUpPedWithCar.h"
@@ -200,6 +207,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
     CRopes::InjectHooks();
     CWeaponInfo::InjectHooks();
@@ -482,11 +490,12 @@ void InjectHooksMain() {
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
         // CTaskComplexCopInCar::InjectHooks();
-        // CTaskComplexFacial::InjectHooks();
+        CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
         CTaskSimpleGetUp::InjectHooks();
         CTaskSimpleUninterruptable::InjectHooks();
         CTaskComplexFallAndGetUp::InjectHooks();
+        CTaskComplexFollowLeaderInFormation::InjectHooks();
         // CTaskSimpleTriggerLookAt::InjectHooks();
         CTaskSimpleHitHead::InjectHooks();
         // CTaskUtilityLineUpPedWithCar::InjectHooks();
@@ -643,6 +652,7 @@ void InjectHooksMain() {
         FxManager_c::InjectHooks();
         FxSystemBP_c::InjectHooks();
         // FxSystem_c::InjectHooks();
+        FxPrimBP_c::InjectHooks();
     };
 
     const auto Vehicle = []() {
@@ -657,6 +667,15 @@ void InjectHooksMain() {
         CTrailer::InjectHooks();
         CTrain::InjectHooks();
         CVehicle::InjectHooks();
+    };
+
+    const auto Interior = []() {
+        FurnitureGroup_c::InjectHooks();
+        FurnitureManager_c::InjectHooks();
+        FurnitureSubGroup_c::InjectHooks();
+        Interior_c::InjectHooks();
+        InteriorGroup_c::InjectHooks();
+        InteriorManager_c::InjectHooks();
     };
 
     Audio();

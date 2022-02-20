@@ -51,7 +51,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
 
             if (event->GetEventType() == EVENT_DAMAGE) {
                 auto secondary = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                if (secondary->GetTaskType() == TASK_SIMPLE_THROW || eventDamage->m_bKnockOffPed) {
+                if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bKnockOffPed) {
                     ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
                 }
                 goto LABEL_12;

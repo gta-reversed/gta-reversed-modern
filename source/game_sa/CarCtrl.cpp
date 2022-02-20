@@ -202,7 +202,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
         CWorld::Add(boat);
 
         if (doMissionCleanup)
-            CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+            CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
         return boat;
     }
@@ -245,7 +245,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     CWorld::Add(vehicle);
     if (doMissionCleanup)
-        CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+        CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
     if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
@@ -429,8 +429,8 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
 
 // 0x42C250
 bool CCarCtrl::IsAnyoneParking() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             switch (vehicle->m_autoPilot.m_nCarMission) {
             case eCarMission::MISSION_PARK_PARALLEL_0:
             case eCarMission::MISSION_PARK_PARALLEL_1:
@@ -622,15 +622,15 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
     if (CTimer::GetFrameCounter() % 8 != 3)
         return;
 
-    if (CPools::ms_pVehiclePool->GetNoOfFreeSpaces() >= 8)
+    if (GetVehiclePool()->GetNoOfFreeSpaces() >= 8)
         return;
 
     // Find closest deletable vehicle
     const CVector camPos = TheCamera.GetPosition();
     float fClosestDist = std::numeric_limits<float>::max();
     CVehicle* closestVeh = nullptr;
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             if (IsThisVehicleInteresting(vehicle))
                 continue;
             if (vehicle->vehicleFlags.bIsLocked)
@@ -655,8 +655,8 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
 
 // 0x42CD10
 void CCarCtrl::RemoveDistantCars() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             PossiblyRemoveVehicle(vehicle);
             if (!vehicle->vehicleFlags.bCreateRoadBlockPeds)
                 continue;

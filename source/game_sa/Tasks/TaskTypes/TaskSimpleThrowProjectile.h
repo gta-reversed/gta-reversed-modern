@@ -15,7 +15,6 @@ public:
     bool                   m_bIsAborting;
     bool                   m_bFinished;
     bool                   m_bStarted;
-    char                   _pad;
     CAnimBlendAssociation* m_pAnim;
     CEntity*               m_pTarget;
     CVector                m_vecPosition;
@@ -26,7 +25,7 @@ public:
     ~CTaskSimpleThrowProjectile() override;
 
     CTask* Clone() override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); }; // 0x623030
-    eTaskType GetTaskType() { return TASK_SIMPLE_THROW; }; // 0x61F6F0
+    eTaskType GetTaskType() override { return TASK_SIMPLE_THROW_PROJECTILE; };                    // 0x61F6F0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

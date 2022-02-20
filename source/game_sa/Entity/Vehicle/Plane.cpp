@@ -163,8 +163,8 @@ void CPlane::SetGearDown() {
 uint32 CPlane::CountPlanesAndHelis() {
     auto counter = 0;
 
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             if (vehicle->IsSubHeli() || vehicle->IsSubPlane())
                 counter++;
         }

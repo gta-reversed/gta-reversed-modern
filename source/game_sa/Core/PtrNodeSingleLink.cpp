@@ -14,10 +14,10 @@ void CPtrNodeSingleLink::AddToList(CPtrListSingleLink* list) {
     list->m_node = reinterpret_cast<CPtrNode*>(this);
 }
 
-void* CPtrNodeSingleLink::operator new(uint32 size) {
-    return CPools::ms_pPtrNodeSingleLinkPool->New();
+void* CPtrNodeSingleLink::operator new(unsigned size) {
+    return GetPtrNodeSingleLinkPool()->New();
 }
 
 void CPtrNodeSingleLink::operator delete(void* data) {
-    CPools::ms_pPtrNodeSingleLinkPool->Delete(static_cast<CPtrNodeSingleLink*>(data));
+    GetPtrNodeSingleLinkPool()->Delete(static_cast<CPtrNodeSingleLink*>(data));
 }

@@ -1853,9 +1853,9 @@ void CEntity::RegisterReference(CEntity** entity)
     }
 
     if (!m_pReferences && !CReferences::pEmptyList) {
-        auto iPedsSize = CPools::ms_pPedPool->GetSize();
+        auto iPedsSize = GetPedPool()->GetSize();
         for (int32 i = 0; i < iPedsSize; ++i) {
-            auto ped = CPools::ms_pPedPool->GetAt(i);
+            auto ped = GetPedPool()->GetAt(i);
             if (ped) {
                 ped->PruneReferences();
                 if (CReferences::pEmptyList)
@@ -1865,9 +1865,9 @@ void CEntity::RegisterReference(CEntity** entity)
         }
 
         if (!CReferences::pEmptyList) {
-            auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
+            auto iVehsSize = GetVehiclePool()->GetSize();
             for (int32 i = 0; i < iVehsSize; ++i) {
-                auto vehicle = CPools::ms_pVehiclePool->GetAt(i);
+                auto vehicle = GetVehiclePool()->GetAt(i);
                 if (vehicle) {
                     vehicle->PruneReferences();
                     if (CReferences::pEmptyList)
@@ -1878,9 +1878,9 @@ void CEntity::RegisterReference(CEntity** entity)
         }
 
         if (!CReferences::pEmptyList) {
-            auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
+            auto iObjectsSize = GetObjectPool()->GetSize();
             for (int32 i = 0; i < iObjectsSize; ++i) {
-                auto obj = CPools::ms_pObjectPool->GetAt(i);
+                auto obj = GetObjectPool()->GetAt(i);
                 if (obj) {
                     obj->PruneReferences();
                     if (CReferences::pEmptyList)

@@ -4,7 +4,7 @@
 
 bool& COctTree::ms_bFailed = *(bool*)0xBC12DC;
 uint32& COctTree::ms_level = *(uint32*)0xBC12E0;
-CPool<COctTree>& COctTree::ms_octTreePool = *(CPool<COctTree>*)0xBC12E4;
+COctTreePool& COctTree::ms_octTreePool = *(COctTreePool*)0xBC12E4;
 COctTree*& gpTmpOctTree = *(COctTree**)0xBC12D8;
 
 // 0x5A6DB0
@@ -23,7 +23,7 @@ COctTree::~COctTree() {
 }
 
 // 0x5A7410
-void* COctTree::operator new(uint32 size) {
+void* COctTree::operator new(unsigned size) {
     return ms_octTreePool.New();
 }
 

@@ -27,13 +27,8 @@ private:
     static void ImguiDisplayExtraDebugFeatures();
     static void ImguiDisplayPlayerInfo();
 
-    static void ShowPlayerInfo();
-
-    static void ProcessRenderTool();
-    static void PostFxTool();
 #ifdef EXTRA_DEBUG_FEATURES
     static void ProcessExtraDebugFeatures();
 #endif
-    //static void ToggleHook();
     static void LoadMouseSprite();
 };

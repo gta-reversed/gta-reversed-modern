@@ -407,7 +407,7 @@ public:
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void operator delete(void* data);
 
     void SetModelIndex(uint32 index) override;

@@ -32,9 +32,6 @@ RwTexture*& gpWhiteTexture = *(RwTexture**)0xB4E3EC;
 float& fEnvMapDefaultCoeff = *(float*)0x8A7780;
 float& fRearDoubleWheelOffsetFactor = *(float*)0x8A7784;
 
-typedef CVehicleModelInfo::CVehicleStructure CVehicleStructure;
-CPool<CVehicleModelInfo::CVehicleStructure>*& CVehicleModelInfo::CVehicleStructure::m_pInfoPool = *(CPool<CVehicleModelInfo::CVehicleStructure> **)0xB4E680;
-
 void CVehicleModelInfo::InjectHooks()
 {
     RH_ScopedClass(CVehicleModelInfo);
@@ -1280,7 +1277,7 @@ void CVehicleModelInfo::SetupCommonData()
     ms_pLightsTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelights128");
     ms_pLightsOnTexture = RwTexDictionaryFindNamedTexture(vehicleTxd, "vehiclelightson128");
     CLoadingScreen::NewChunkLoaded();
-    CVehicleModelInfo::CVehicleStructure::m_pInfoPool = new CPool<CVehicleModelInfo::CVehicleStructure>(50, "VehicleStruct");
+    CVehicleStructure::m_pInfoPool = new CPool<CVehicleStructure>(50, "VehicleStruct");
     CCarFXRenderer::InitialiseDirtTexture();
 }
 
@@ -1569,6 +1566,7 @@ int16 CVehicleModelInfo::CLinkedUpgradeList::FindOtherUpgrade(int16 upgrade)
     return -1;
 }
 
+// 0x4C8D60
 CVehicleModelInfo::CVehicleStructure::CVehicleStructure() : m_aUpgrades()
 {
     for (auto& vecPos : m_avDummyPos)
@@ -1592,23 +1590,23 @@ CVehicleModelInfo::CVehicleStructure::~CVehicleStructure()
     }
 }
 
-void* CVehicleModelInfo::CVehicleStructure::operator new(uint32 size)
+void* CVehicleModelInfo::CVehicleStructure::operator new(unsigned size)
 {
-    return CVehicleModelInfo::CVehicleStructure::m_pInfoPool->New();
+    return m_pInfoPool->New();
 }
 
 void CVehicleModelInfo::CVehicleStructure::operator delete(void* data)
 {
-    CVehicleModelInfo::CVehicleStructure::m_pInfoPool->Delete(reinterpret_cast<CVehicleModelInfo::CVehicleStructure*>(data));
+    m_pInfoPool->Delete(reinterpret_cast<CVehicleStructure*>(data));
 }
 
 bool IsValidCompRule(int32 nRule)
 {
     return nRule != eComponentsRules::ONLY_WHEN_RAINING
-        || CWeather::OldWeatherType == eWeatherType::WEATHER_RAINY_COUNTRYSIDE
-        || CWeather::NewWeatherType == eWeatherType::WEATHER_RAINY_COUNTRYSIDE
-        || CWeather::OldWeatherType == eWeatherType::WEATHER_RAINY_SF
-        || CWeather::NewWeatherType == eWeatherType::WEATHER_RAINY_SF;
+        || CWeather::OldWeatherType == WEATHER_RAINY_COUNTRYSIDE
+        || CWeather::NewWeatherType == WEATHER_RAINY_COUNTRYSIDE
+        || CWeather::OldWeatherType == WEATHER_RAINY_SF
+        || CWeather::NewWeatherType == WEATHER_RAINY_SF;
 }
 
 int32 ChooseComponent(int32 rule, int32 comps)

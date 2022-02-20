@@ -338,7 +338,7 @@ void CCarGenerator::DoInternalProcessing()
         m_nSecondaryColor = vehicle->m_nSecondaryColor;
     }
     CVisibilityPlugins::SetClumpAlpha(vehicle->m_pRwClump, 0);
-    m_nVehicleHandle = CPools::ms_pVehiclePool->GetRef(vehicle);
+    m_nVehicleHandle = GetVehiclePool()->GetRef(vehicle);
     m_nNextGenTime = CalcNextGen();
 }
 
@@ -358,7 +358,7 @@ void CCarGenerator::Process()
 
     if (m_nVehicleHandle != -1)
     {
-        auto vehicle = CPools::ms_pVehiclePool->GetAtRef(m_nVehicleHandle);
+        auto vehicle = GetVehiclePool()->GetAtRef(m_nVehicleHandle);
         if (!vehicle)
             m_nVehicleHandle = -1;
         else if (vehicle->m_nStatus == eEntityStatus::STATUS_PLAYER)

@@ -168,7 +168,7 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 }
 
 // 0x5E4720
-void* CPed::operator new(uint32 size) {
+void* CPed::operator new(unsigned size) {
     return ((void* (__cdecl *)(uint32))0x5E4720)(size);
 }
 

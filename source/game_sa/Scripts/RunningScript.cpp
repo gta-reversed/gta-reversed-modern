@@ -119,12 +119,12 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
         CTaskSequences::AddTaskToActiveSequence(task);
         return;
     }
-    CPed* ped = CPools::ms_pPedPool->GetAtRef(pedHandle);
+    CPed* ped = GetPedPool()->GetAtRef(pedHandle);
     CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
     CPed* otherPed = nullptr;
     if (m_externalType == 5 || m_externalType == 2 || !m_externalType || m_externalType == 3) {
         int32* pLocalVariable = reinterpret_cast<int32*>(GetPointerToLocalVariable(0));
-        otherPed = CPools::ms_pPedPool->GetAtRef(*pLocalVariable);
+        otherPed = GetPedPool()->GetAtRef(*pLocalVariable);
     }
     if (ped->bHasAScriptBrain && otherPed != ped) {
         delete task;

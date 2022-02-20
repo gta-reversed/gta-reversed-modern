@@ -247,7 +247,7 @@ CTaskSimpleUseGun* CPedIntelligence::GetTaskUseGun() {
 // 0x600FB0
 CTaskSimpleThrowProjectile* CPedIntelligence::GetTaskThrow() {
     CTask* task = m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK);
-    if (task && task->GetTaskType() == TASK_SIMPLE_THROW) {
+    if (task && task->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE) {
         return (CTaskSimpleThrowProjectile*)task;
     }
     return nullptr;
@@ -1058,11 +1058,11 @@ float CPedIntelligence::GetPedFOVRange()
 }
 
 // 0x6074A0
-void* CPedIntelligence::operator new(uint32 size) {
-    return CPools::ms_pPedIntelligencePool->New();
+void* CPedIntelligence::operator new(unsigned size) {
+    return GetPedIntelligencePool()->New();
 }
 
 // 0x6074E0
 void CPedIntelligence::operator delete(void* object) {
-    CPools::ms_pPedIntelligencePool->Delete(static_cast<CPedIntelligence*>(object));
+    GetPedIntelligencePool()->Delete(static_cast<CPedIntelligence*>(object));
 }
