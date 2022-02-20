@@ -58,7 +58,11 @@ public:
     // Initializes pool
     CPool(int32 size, const char* name) {
         m_pObjects = static_cast<B*>(operator new(sizeof(B) * size));
+        assert(m_pObjects);
+
         m_byteMap  = new tPoolObjectFlags[size]();
+        assert(m_byteMap);
+
         m_nSize = size;
         m_nFirstFree = -1;
         m_bOwnsAllocations = true;
@@ -74,8 +78,8 @@ public:
     // Initialises a pool with pre-allocated
     // To be called one-time-only for statically allocated pools.
     void Init(int32 size, void* objects, void* infos) {
-        // Since we statically allocated the pools we do not deallocate.
-        assert(m_pObjects == nullptr);
+        assert(m_pObjects == nullptr); // Since we statically allocated the pools we do not deallocate.
+
         m_pObjects = static_cast<B*>(objects);
         m_byteMap  = static_cast<tPoolObjectFlags*>(infos);
         m_nSize = size;
@@ -111,31 +115,37 @@ public:
     // Returns if specified slot is free
     // 0x404940
     bool IsFreeSlotAtIndex(int32 idx) {
+        assert(IsIndexInBounds(idx));
         return m_byteMap[idx].bEmpty;
     }
 
     // Returns slot index for this object
     int32 GetIndex(A* obj) {
+        assert(IsFromObjectArray(obj));
         return reinterpret_cast<B*>(obj) - m_pObjects;
     }
 
     // Returns pointer to object by slot index
-    A* GetAt(int32 index) {
-        return !IsFreeSlotAtIndex(index) ? (A*)&m_pObjects[index] : nullptr;
+    A* GetAt(int32 idx) {
+        assert(IsIndexInBounds(idx));
+        return !IsFreeSlotAtIndex(idx) ? (A*)&m_pObjects[idx] : nullptr;
     }
 
     // Marks slot as free / used (0x404970)
     void SetFreeAt(int32 idx, bool bFree) {
+        assert(IsIndexInBounds(idx));
         m_byteMap[idx].bEmpty = bFree;
     }
 
     // Set new id for slot (0x54F9F0)
     void SetIdAt(int32 idx, uint8 id) {
+        assert(IsIndexInBounds(idx));
         m_byteMap[idx].nId = id;
     }
 
     // Get id for slot (0x552200)
     uint8 GetIdAt(int32 idx) {
+        assert(IsIndexInBounds(idx));
         return m_byteMap[idx].nId;
     }
 
@@ -146,30 +156,33 @@ public:
             if (++m_nFirstFree >= m_nSize) {
                 if (bReachedTop) {
                     m_nFirstFree = -1;
+                    assert(0);          // Shouldn't happen
                     return nullptr;
                 }
                 bReachedTop = true;
                 m_nFirstFree = 0;
             }
         } while (!m_byteMap[m_nFirstFree].bEmpty);
+
         m_byteMap[m_nFirstFree].bEmpty = false;
         ++m_byteMap[m_nFirstFree].nId;
+
         return &m_pObjects[m_nFirstFree];
     }
 
     // Allocates object at a specific index from a SCM handle (ref) (0x59F610)
     void CreateAtRef(int32 ref) {
-        const auto slot = ref >> 8;
-        m_byteMap[slot].bEmpty = false;
-        m_byteMap[slot].nId = ref & 0x7F;
+        const auto idx = GetIndexFromRef(ref); // GetIndexFromRef asserts if idx out of range 
+        m_byteMap[idx].bEmpty = false;
+        m_byteMap[idx].nId = ref & 0x7F;
         m_nFirstFree = 0;
-        while (!m_byteMap[m_nFirstFree].bEmpty)
+        while (!m_byteMap[m_nFirstFree].bEmpty) // Find next free
             ++m_nFirstFree;
     }
 
     // 0x5A1C00
     A* New(int32 ref) {
-        A* result = &m_pObjects[ref >> 8];
+        A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range 
         CreateAtRef(ref);
         return result;
     }
@@ -184,20 +197,20 @@ public:
 
     // Returns SCM handle (ref) for object (0x424160)
     int32 GetRef(A* obj) {
-        return (GetIndex(obj) << 8) + m_byteMap[GetIndex(obj)].IntValue();
+        const auto idx = GetIndex(obj);
+        return (idx << 8) + m_byteMap[idx].IntValue();
     }
 
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
-        int32 slotIndex = ref >> 8;
-        return slotIndex >= 0
-            && slotIndex < m_nSize
-            && m_byteMap[slotIndex].IntValue() == (ref & 0xFF) ? reinterpret_cast<A*>(&m_pObjects[slotIndex]) : nullptr;
+        int32 idx = ref >> 8; // It is possible the ref is invalid here, thats why we check for the idx is valid below (And also why GetIndexFromRef isnt used, it would assert)
+        return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF) ?
+            reinterpret_cast<A*>(&m_pObjects[idx]) :
+            nullptr;
     }
 
     A* GetAtRefNoChecks(int32 ref) {
-        int32 slotIndex = ref >> 8;
-        return GetAt(slotIndex);
+        return GetAt(GetIndexFromRef(ref));
     }
 
     // 0x54F6B0
@@ -230,6 +243,27 @@ public:
     // Helper so we don't write memcpy manually
     void CopyItem(A* dest, A* src) {
         *reinterpret_cast<B*>(dest) = *reinterpret_cast<B*>(src);
+    }
+
+    //
+    // NOTSA section
+    //
+
+    // Check if index is in array bounds
+    bool IsIndexInBounds(int32 idx) {
+        return idx >= 0 && idx < m_nSize;
+    }
+
+    // Check if object pointer is inside object array (eg.: It's index is in the bounds of the array)
+    bool IsFromObjectArray(A* obj) const {
+        return obj >= m_pObjects && obj < m_pObjects + m_nSize;
+    }
+
+    // Get slot index from ref
+    int32 GetIndexFromRef(int32 ref) {
+        const auto idx = ref >> 8;
+        assert(IsIndexInBounds(idx));
+        return idx;
     }
 };
 
