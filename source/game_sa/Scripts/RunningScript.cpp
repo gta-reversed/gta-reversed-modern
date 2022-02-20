@@ -1,11 +1,12 @@
 #include "StdInc.h"
 
 #include "RunningScript.h"
+#include "TheScripts.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "Radar.h"
 
 int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
-int8(CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
+int8 (CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
     &ProcessCommands0To99,
     &ProcessCommands100To199,
     &ProcessCommands200To299,
@@ -162,8 +163,8 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
     CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
     CPed* otherPed = nullptr;
     if (m_externalType == 5 || m_externalType == 2 || !m_externalType || m_externalType == 3) {
-        int32* pLocalVariable = reinterpret_cast<int32*>(GetPointerToLocalVariable(0));
-        otherPed = GetPedPool()->GetAtRef(*pLocalVariable);
+        auto* localVariable = reinterpret_cast<int32*>(GetPointerToLocalVariable(0));
+        otherPed = GetPedPool()->GetAtRef(*localVariable);
     }
     if (ped->bHasAScriptBrain && otherPed != ped) {
         delete task;
@@ -174,7 +175,7 @@ void CRunningScript::GivePedScriptedTask(int32 pedHandle, CTask* task, int32 opc
         }
     } else if (!pedGroup || ped->IsPlayer()) {
         CEventScriptCommand eventScriptCommand(TASK_PRIMARY_PRIMARY, task, false);
-        CEventScriptCommand* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, false));
+        auto* event = static_cast<CEventScriptCommand*>(ped->GetEventGroup().Add(&eventScriptCommand, false));
         if (event) {
             const int32 slot = CPedScriptedTaskRecord::GetVacantSlot();
             CPedScriptedTaskRecord::ms_scriptedTasks[slot].Set(ped, opcode, event);
@@ -259,7 +260,7 @@ void CRunningScript::CharInAreaCheckCommand(int32 commandId) {
 int32 CRunningScript::CollectNextParameterWithoutIncreasingPC() {
     uint16 arrVarOffset;
     int32 arrElemIdx;
-    uint8* pIp = m_pCurrentIP;
+    uint8* ip = m_pCurrentIP;
     int32 result = -1;
 
     switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
@@ -296,7 +297,7 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC() {
         break;
     }
 
-    m_pCurrentIP = pIp;
+    m_pCurrentIP = ip;
     return result;
 }
 
@@ -563,7 +564,7 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     switch (type)
     {
     case SCRIPT_PARAM_STATIC_SHORT_STRING:
-        for (int i = 0; i < 8; ++i)
+        for (auto i = 0; i < 8; ++i)
             buffer[i] = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
         break;
 
@@ -602,7 +603,7 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
     case SCRIPT_PARAM_STATIC_PASCAL_STRING:
     {
         int16 nStringLen = CTheScripts::Read1ByteFromScript(m_pCurrentIP); // sign extension. max size = 127, not 255
-        for (uint8 i = 0; i < nStringLen; i++)
+        for (auto i = 0; i < nStringLen; i++)
             buffer[i] = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
 
         if (nStringLen < nBufferLength)
@@ -663,7 +664,7 @@ void CRunningScript::StoreParameters(int16 count) {
     uint16 arrVarOffset;
     int32 arrElemIdx;
 
-    for (int i = 0; i < count; i++)
+    for (auto i = 0; i < count; i++)
     {
         switch (CTheScripts::Read1ByteFromScript(m_pCurrentIP))
         {
@@ -740,8 +741,7 @@ void CRunningScript::UpdatePC(int32 newIP) {
         m_pCurrentIP = &m_pBaseIP[-newIP];
 }
 
-// unused
-// 0x469EB0
+// 0x469EB0, inlined
 int8 CRunningScript::ProcessOneCommand() {
     ++CTheScripts::CommandsExecuted;
 
@@ -750,7 +750,7 @@ int8 CRunningScript::ProcessOneCommand() {
     m_bNotFlag = (command & 0x8000) != 0;
     command &= 0x7FFF;
 
-    // CUSTOM CODE: First we try to call our (reversed) implementation for the current command
+    // NOTSA: First we try to call our (reversed) implementation for the current command
     int8 ret = (this->*reSA_CommandHandlerTable[command / 100])(command);
     if (ret == COMMAND_NOT_IMPLEMENTED_YET)
     {
@@ -768,9 +768,10 @@ int8 CRunningScript::Process() {
     {
         CHud::m_BigMessage[1][0] = 0;
         UpdatePC(*(int32*)&m_pSceneSkipIP);
-        m_pSceneSkipIP = 0;
+        m_pSceneSkipIP = nullptr;
         m_nWakeTime = 0;
     }
+
     if (m_bUseMissionCleanup)
         DoDeathArrestCheck();
 
@@ -786,7 +787,7 @@ int8 CRunningScript::Process() {
         }
     }
     CTheScripts::ReinitialiseSwitchStatementData();
-    if (CTimer::m_snTimeInMilliseconds >= m_nWakeTime) // m_nWakeTime might be unsigned, while m_snTimeInMillis is 100% SIGNED
+    if (CTimer::GetTimeInMS() >= m_nWakeTime) // m_nWakeTime might be unsigned, while m_snTimeInMillis is 100% SIGNED
     {
         while (!ProcessOneCommand())
             ;
@@ -802,7 +803,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
         return 0;
     case COMMAND_WAIT: // 0x001
         CollectParameters(1);
-        m_nWakeTime = CTheScripts::ScriptParams[0].iParam + CTimer::m_snTimeInMilliseconds;
+        m_nWakeTime = CTheScripts::ScriptParams[0].iParam + CTimer::GetTimeInMS();
         return 1;
     case COMMAND_GOTO: // 0x002
         CollectParameters(1);
@@ -814,401 +815,401 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
         return 0;
     case COMMAND_SET_VAR_INT: // 0x004
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        *pVar = CTheScripts::ScriptParams[0];
+        *var = CTheScripts::ScriptParams[0];
         return 0;
     }
     case COMMAND_SET_VAR_FLOAT: // 0x005
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        *pVar = CTheScripts::ScriptParams[0];
+        *var = CTheScripts::ScriptParams[0];
         return 0;
     }
     case COMMAND_SET_LVAR_INT: // 0x006
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        *pVar = CTheScripts::ScriptParams[0];
+        *var = CTheScripts::ScriptParams[0];
         return 0;
     }
     case COMMAND_SET_LVAR_FLOAT: // 0x007
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        *pVar = CTheScripts::ScriptParams[0];
+        *var = CTheScripts::ScriptParams[0];
         return 0;
     }
     case COMMAND_ADD_VAL_TO_INT_VAR: // 0x008
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->iParam += CTheScripts::ScriptParams[0].iParam;
+        var->iParam += CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_ADD_VAL_TO_FLOAT_VAR: // 0x009
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam += CTheScripts::ScriptParams[0].fParam;
+        var->fParam += CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_ADD_VAL_TO_INT_LVAR: // 0x00A
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->iParam += CTheScripts::ScriptParams[0].iParam;
+        var->iParam += CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_ADD_VAL_TO_FLOAT_LVAR: // 0x00B
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam += CTheScripts::ScriptParams[0].fParam;
+        var->fParam += CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_SUB_VAL_FROM_INT_VAR: // 0x00C
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->iParam -= CTheScripts::ScriptParams[0].iParam;
+        var->iParam -= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_SUB_VAL_FROM_FLOAT_VAR: // 0x00D
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam -= CTheScripts::ScriptParams[0].fParam;
+        var->fParam -= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_SUB_VAL_FROM_INT_LVAR: // 0x00E
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->iParam -= CTheScripts::ScriptParams[0].iParam;
+        var->iParam -= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_SUB_VAL_FROM_FLOAT_LVAR: // 0x00F
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam -= CTheScripts::ScriptParams[0].fParam;
+        var->fParam -= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_MULT_INT_VAR_BY_VAL: // 0x010
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->iParam *= CTheScripts::ScriptParams[0].iParam;
+        var->iParam *= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_VAR_BY_VAL: // 0x011
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam *= CTheScripts::ScriptParams[0].fParam;
+        var->fParam *= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_MULT_INT_LVAR_BY_VAL: // 0x012
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->iParam *= CTheScripts::ScriptParams[0].iParam;
+        var->iParam *= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_LVAR_BY_VAL: // 0x013
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam *= CTheScripts::ScriptParams[0].fParam;
+        var->fParam *= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_DIV_INT_VAR_BY_VAL: // 0x014
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->iParam /= CTheScripts::ScriptParams[0].iParam;
+        var->iParam /= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_VAR_BY_VAL: // 0x015
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam /= CTheScripts::ScriptParams[0].fParam;
+        var->fParam /= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_DIV_INT_LVAR_BY_VAL: // 0x016
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->iParam /= CTheScripts::ScriptParams[0].iParam;
+        var->iParam /= CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_LVAR_BY_VAL: // 0x017
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam /= CTheScripts::ScriptParams[0].fParam;
+        var->fParam /= CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER: // 0x018
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam > CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_NUMBER: // 0x019
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam > CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_THAN_INT_VAR: // 0x01A
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > var->iParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_THAN_INT_LVAR: // 0x01B
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > var->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_THAN_INT_VAR: // 0x01C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->iParam > var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_LVAR: // 0x01D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam > var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_THAN_INT_LVAR: // 0x01E
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam > var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_VAR: // 0x01F
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->iParam > var2->iParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_NUMBER: // 0x020
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam > CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam > CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_NUMBER: // 0x021
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam > CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam > CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_VAR: // 0x022
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > var->fParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_LVAR: // 0x023
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > var->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR: // 0x024
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->fParam > var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_LVAR: // 0x025
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam > var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_LVAR: // 0x026
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam > var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_VAR: // 0x027
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->fParam > var2->fParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x028
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam >= CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x029
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam >= CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02A
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= var->iParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02B
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= var->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->iParam >= var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam >= var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02E
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam >= var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02F
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->iParam >= var2->iParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x030
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam >= CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam >= CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x031
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam >= CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam >= CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x032
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= var->fParam);
         return 0;
     }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x033
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= var->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x034
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->fParam >= var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x035
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam >= var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x036
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam >= var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x037
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->fParam >= var2->fParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_EQUAL_TO_NUMBER: // 0x038
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam == CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam == CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_EQUAL_TO_NUMBER: // 0x039
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam == CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam == CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_EQUAL_TO_INT_VAR: // 0x03A
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->iParam == var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_EQUAL_TO_INT_LVAR: // 0x03B
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam == var2->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_EQUAL_TO_INT_LVAR: // 0x03C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->iParam == var2->iParam);
         return 0;
     }
 
@@ -1221,37 +1222,37 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
 
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER: // 0x042
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam == CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam == CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_NUMBER: // 0x043
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->fParam == CTheScripts::ScriptParams[0].fParam);
+        UpdateCompareFlag(var->fParam == CTheScripts::ScriptParams[0].fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_VAR: // 0x044
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(var1->fParam == var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_FLOAT_LVAR: // 0x045
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam == var2->fParam);
         return 0;
     }
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_LVAR: // 0x046
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(var1->fParam == var2->fParam);
         return 0;
     }
 
@@ -1303,7 +1304,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
     {
         CollectParameters(4);
         int32 index = CTheScripts::ScriptParams[0].iParam;
-        if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/))
+        if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/)) // todo (Izzotop): rename MODEL_NULL -> MI_PLAYER
         {
             CStreaming::RequestSpecialModel(0, "player", STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY | STREAMING_PRIORITY_REQUEST);
             CStreaming::LoadAllRequestedModels(true);
@@ -1325,7 +1326,7 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
         StoreParameters(1);
 
         CTask* task = new CTaskSimplePlayerOnFoot();
-        player->m_pPed->m_pIntelligence->m_TaskMgr.SetTask(task, TASK_PRIMARY_DEFAULT);
+        player->m_pPed->GetTaskManager().SetTask(task, TASK_PRIMARY_DEFAULT);
         return 0;
     }
 
@@ -1336,86 +1337,86 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
 
     case COMMAND_ADD_INT_VAR_TO_INT_VAR: // 0x058
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam += pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam += var2->iParam;
         return 0;
     }
     case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR: // 0x059
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam += pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam += var2->fParam;
         return 0;
     }
     case COMMAND_ADD_INT_LVAR_TO_INT_LVAR: // 0x05A
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam += pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam += var2->iParam;
         return 0;
     }
     case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR: // 0x05B
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam += pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam += var2->fParam;
         return 0;
     }
     case COMMAND_ADD_INT_VAR_TO_INT_LVAR: // 0x05C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam += pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam += var2->iParam;
         return 0;
     }
     case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR: // 0x05D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam += pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam += var2->fParam;
         return 0;
     }
     case COMMAND_ADD_INT_LVAR_TO_INT_VAR: // 0x05E
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam += pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam += var2->iParam;
         return 0;
     }
     case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR: // 0x05F
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam += pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam += var2->fParam;
         return 0;
     }
     case COMMAND_SUB_INT_VAR_FROM_INT_VAR: // 0x060
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam -= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam -= var2->iParam;
         return 0;
     }
     case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR: // 0x061
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam -= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam -= var2->fParam;
         return 0;
     }
     case COMMAND_SUB_INT_LVAR_FROM_INT_LVAR: // 0x062
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam -= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam -= var2->iParam;
         return 0;
     }
     case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_LVAR: // 0x063
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam -= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam -= var2->fParam;
         return 0;
     }
     default:
@@ -1431,377 +1432,377 @@ int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
     switch (commandId) {
     case COMMAND_SUB_INT_VAR_FROM_INT_LVAR: // 0x064
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam -= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam -= var2->iParam;
         return 0;
     }
     case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_LVAR: // 0x065
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam -= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam -= var2->fParam;
         return 0;
     }
     case COMMAND_SUB_INT_LVAR_FROM_INT_VAR: // 0x066
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam -= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam -= var2->iParam;
         return 0;
     }
     case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_VAR: // 0x067
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam -= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam -= var2->fParam;
         return 0;
     }
     case COMMAND_MULT_INT_VAR_BY_INT_VAR: // 0x068
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam *= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam *= var2->iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_VAR: // 0x069
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam *= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam *= var2->fParam;
         return 0;
     }
     case COMMAND_MULT_INT_LVAR_BY_INT_LVAR: // 0x06A
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam *= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam *= var2->iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_LVAR: // 0x06B
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam *= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam *= var2->fParam;
         return 0;
     }
     case COMMAND_MULT_INT_VAR_BY_INT_LVAR: // 0x06C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam *= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam *= var2->iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR: // 0x06D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam *= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam *= var2->fParam;
         return 0;
     }
     case COMMAND_MULT_INT_LVAR_BY_INT_VAR: // 0x06E
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam *= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam *= var2->iParam;
         return 0;
     }
     case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR: // 0x06F
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam *= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam *= var2->fParam;
         return 0;
     }
     case COMMAND_DIV_INT_VAR_BY_INT_VAR: // 0x070
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam /= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam /= var2->iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_VAR: // 0x071
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam /= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam /= var2->fParam;
         return 0;
     }
     case COMMAND_DIV_INT_LVAR_BY_INT_LVAR: // 0x072
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam /= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam /= var2->iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_LVAR: // 0x073
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam /= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam /= var2->fParam;
         return 0;
     }
     case COMMAND_DIV_INT_VAR_BY_INT_LVAR: // 0x074
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam /= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam /= var2->iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR: // 0x075
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam /= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam /= var2->fParam;
         return 0;
     }
     case COMMAND_DIV_INT_LVAR_BY_INT_VAR: // 0x076
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam /= pVar2->iParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam /= var2->iParam;
         return 0;
     }
     case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR: // 0x077
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam /= pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam /= var2->fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_VAL_TO_FLOAT_VAR: // 0x078
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam += CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        var->fParam += CTimer::GetTimeStep() * CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_VAL_TO_FLOAT_LVAR: // 0x079
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam += CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        var->fParam += CTimer::GetTimeStep() * CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_VAR: // 0x07A
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam += CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_LVAR: // 0x07B
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam += CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR: // 0x07C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam += CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR: // 0x07D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam += CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_VAR: // 0x07E
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->fParam -= CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        var->fParam -= CTimer::GetTimeStep() * CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_LVAR: // 0x07F
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->fParam -= CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        var->fParam -= CTimer::GetTimeStep() * CTheScripts::ScriptParams[0].fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_VAR: // 0x080
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam -= CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_LVAR: // 0x081
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam -= CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR: // 0x082
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam -= CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR: // 0x083
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam -= CTimer::GetTimeStep() * var2->fParam;
         return 0;
     }
     case COMMAND_SET_VAR_INT_TO_VAR_INT: // 0x084
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_LVAR_INT_TO_LVAR_INT: // 0x085
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_VAR_FLOAT_TO_VAR_FLOAT: // 0x086
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_LVAR_FLOAT_TO_LVAR_FLOAT: // 0x087
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT: // 0x088
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT: // 0x089
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_VAR_INT_TO_LVAR_INT: // 0x08A
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_SET_LVAR_INT_TO_VAR_INT: // 0x08B
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        *pVar1 = *pVar2;
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *var1 = *var2;
         return 0;
     }
     case COMMAND_CSET_VAR_INT_TO_VAR_FLOAT: // 0x08C
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam = static_cast<int32>(var2->fParam);
         return 0;
     }
     case COMMAND_CSET_VAR_FLOAT_TO_VAR_INT: // 0x08D
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam = static_cast<float>(var2->iParam);
         return 0;
     }
     case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT: // 0x08E
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->iParam = static_cast<int32>(var2->fParam);
         return 0;
     }
     case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT: // 0x08F
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        var1->fParam = static_cast<float>(var2->iParam);
         return 0;
     }
     case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT: // 0x090
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam = static_cast<int32>(var2->fParam);
         return 0;
     }
     case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT: // 0x091
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam = static_cast<float>(var2->iParam);
         return 0;
     }
     case COMMAND_CSET_LVAR_INT_TO_LVAR_FLOAT: // 0x092
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->iParam = static_cast<int32>(var2->fParam);
         return 0;
     }
     case COMMAND_CSET_LVAR_FLOAT_TO_LVAR_INT: // 0x093
     {
-        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
-        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        tScriptParam* var1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var2 = GetPointerToScriptVariable(VAR_LOCAL);
+        var1->fParam = static_cast<float>(var2->iParam);
         return 0;
     }
     case COMMAND_ABS_VAR_INT: // 0x094
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar->iParam = std::abs(pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        var->iParam = std::abs(var->iParam);
         return 0;
     }
     case COMMAND_ABS_LVAR_INT: // 0x095
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar->iParam = std::abs(pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        var->iParam = std::abs(var->iParam);
         return 0;
     }
     case COMMAND_ABS_VAR_FLOAT: // 0x096
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar->fParam = std::abs(pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        var->fParam = std::abs(var->fParam);
         return 0;
     }
     case COMMAND_ABS_LVAR_FLOAT: // 0x097
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        pVar->fParam = std::abs(pVar->fParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        var->fParam = std::abs(var->fParam);
         return 0;
     }
     case COMMAND_GENERATE_RANDOM_FLOAT: // 0x098
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CGeneral::GetRandomNumber();
         CGeneral::GetRandomNumber();
         CGeneral::GetRandomNumber();
-        pVar->fParam = CGeneral::GetRandomNumber() / (32768.0f * 2); // 100% NOT GetRandomNumberInRange(0, 0.5)
+        var->fParam = CGeneral::GetRandomNumber() / (32768.0f * 2); // 100% NOT GetRandomNumberInRange(0, 0.5)
         return 0;
     }
     case COMMAND_GENERATE_RANDOM_INT: // 0x099
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        pVar->iParam = CGeneral::GetRandomNumber();
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        var->iParam = CGeneral::GetRandomNumber();
         return 0;
     }
     case COMMAND_CREATE_CHAR: // 0x09A
@@ -3739,14 +3740,14 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
             missionId = 0xFFFF - missionId;
         }
         CTimer::Suspend();
-        int offsetToMission = CTheScripts::MultiScriptArray[missionId];
+        int32 offsetToMission = CTheScripts::MultiScriptArray[missionId];
         CFileMgr::ChangeDir("\\");
         if (CGame::bMissionPackGame) {
             size_t bytesRead = 0;
             while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
                 CFileMgr::SetDirMyDocuments();
                 sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
-                FILE* file = CFileMgr::OpenFile(gString, "rb");
+                auto* file = CFileMgr::OpenFile(gString, "rb");
                 if (file) {
                     CFileMgr::Seek(file, offsetToMission, 0);
                     bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
@@ -3768,7 +3769,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
         }
         CFileMgr::SetDir(gta_empty_string);
         if (!CGame::bMissionPackGame) {
-            FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
+            auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
             CFileMgr::Seek(file, offsetToMission, 0);
             CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
             CFileMgr::CloseFile(file);
@@ -4117,16 +4118,16 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
         break;
     case COMMAND_SET_VAR_INT_TO_CONSTANT: // 0x4AE
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        pVar->iParam = CTheScripts::ScriptParams[0].iParam;
+        var->iParam = CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     case COMMAND_SET_LVAR_INT_TO_CONSTANT: // 0x4AF
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        pVar->iParam = CTheScripts::ScriptParams[0].iParam;
+        var->iParam = CTheScripts::ScriptParams[0].iParam;
         return 0;
     }
     default:
@@ -4141,58 +4142,58 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_INT_VAR_GREATER_THAN_CONSTANT: // 0x4B0
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam > CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_CONSTANT: // 0x4B1
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam > CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_CONSTANT_GREATER_THAN_INT_VAR: // 0x4B2
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > var->iParam);
         return 0;
     }
     case COMMAND_IS_CONSTANT_GREATER_THAN_INT_LVAR: // 0x4B3
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > var->iParam);
         return 0;
     }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_CONSTANT: // 0x4B4
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam >= CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_CONSTANT: // 0x4B5
     {
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
         CollectParameters(1);
-        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        UpdateCompareFlag(var->iParam >= CTheScripts::ScriptParams[0].iParam);
         return 0;
     }
     case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_VAR: // 0x4B6
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= var->iParam);
         return 0;
     }
     case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x4B7
     {
         CollectParameters(1);
-        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
-        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        tScriptParam* var = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= var->iParam);
         return 0;
     }
     case COMMAND_GET_CHAR_WEAPON_IN_SLOT: // 0x4B8

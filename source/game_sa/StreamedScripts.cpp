@@ -1,20 +1,13 @@
 #include "StdInc.h"
 
 #include "StreamedScripts.h"
+#include "TheScripts.h"
 
 void CStreamedScripts::InjectHooks() {
     RH_ScopedClass(CStreamedScripts);
     RH_ScopedCategory("Scripts");
 
     RH_ScopedInstall(StartNewStreamedScript, 0x470890);
-}
-
-uint32 CStreamedScripts::GetStreamedScriptWithThisStartAddress(uint8* dataPtr)
-{
-    uint16 result;
-    for (result = 0; result < 82 && m_aScripts[result].data != dataPtr; ++result)
-        ;
-    return result;
 }
 
 void CStreamedScripts::Initialise() {
@@ -36,18 +29,18 @@ void CStreamedScripts::RemoveStreamedScriptFromMemory(int32 index) {
 // 0x470890
 CRunningScript* CStreamedScripts::StartNewStreamedScript(int32 index)
 {
-    auto* pScriptInfo = &m_aScripts[index];
-    uint8 *pIp = pScriptInfo->data;
+    auto* scriptInfo = &m_aScripts[index];
+    uint8* ip = scriptInfo->data;
 
-    if (pIp)
+    if (ip)
     {
-        CRunningScript *pNew = CTheScripts::StartNewScript(pIp);
-        pNew->m_pBaseIP = pIp;
-        pNew->m_bIsExternal = true;
+        CRunningScript * script = CTheScripts::StartNewScript(ip);
+        script->SetBaseIp(ip);
+        script->SetExternal(true);
 
-        pScriptInfo->m_nStatus++;
-        CStreaming::SetMissionDoesntRequireModel(index + RESOURCE_ID_SCM);
-        return pNew;
+        scriptInfo->m_nStatus++;
+        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(index));
+        return script;
     }
 
     return nullptr;
@@ -61,4 +54,13 @@ void CStreamedScripts::ReadStreamedScriptData()
 
 int32 CStreamedScripts::RegisterScript(const char* scriptName) {
     return plugin::CallMethodAndReturn<int32, 0x4706C0, CStreamedScripts*, const char*>(this, scriptName);
+}
+
+// 0x?
+uint32 CStreamedScripts::GetStreamedScriptWithThisStartAddress(uint8* dataPtr)
+{
+    uint16 result;
+    for (result = 0; result < 82 && m_aScripts[result].data != dataPtr; ++result) // todo: ~~magic number~~ sizeof m_aScripts[82];
+        ;
+    return result;
 }

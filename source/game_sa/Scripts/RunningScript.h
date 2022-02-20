@@ -214,6 +214,11 @@ public:
     int8 ProcessCommands2400To2499(int32 commandId);
     int8 ProcessCommands2500To2599(int32 commandId);
     int8 ProcessCommands2600To2699(int32 commandId);
+
+    void SetBaseIp(uint8* ip) { m_pBaseIP = ip; }
+    void SetCurrentIp(uint8* ip) { m_pCurrentIP = ip; }
+    void SetActive(bool active) { m_bIsActive = active; }
+    void SetExternal(bool external) { m_bIsExternal = external; }
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

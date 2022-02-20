@@ -100,7 +100,8 @@ void CTheScripts::InjectHooks() {
     RH_ScopedCategory("Scripts");
 
     // RH_ScopedInstall(Init, 0x468D50);
-    RH_ScopedInstall(StartNewScript, 0x464C20);
+    RH_ScopedOverloadedInstall(StartNewScript, "", 0x464C20, CRunningScript* (*)(uint8*));
+    // RH_ScopedOverloadedInstall(StartNewScript, "index", 0x464C90, CRunningScript* (*)(uint8*, uint16));
     RH_ScopedInstall(StartTestScript, 0x464D40);
     RH_ScopedInstall(AddToBuildingSwapArray, 0x481140);
     RH_ScopedInstall(UndoBuildingSwaps, 0x481290);
@@ -115,7 +116,7 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, 
     if (building->m_nIplIndex)
         return;
 
-    for (auto& swap : CTheScripts::BuildingSwapArray) {
+    for (auto& swap : BuildingSwapArray) {
         if (swap.m_pCBuilding == building) {
             if (newModelId == swap.m_nOldModelIndex) {
                 swap.m_pCBuilding = nullptr;
@@ -128,7 +129,7 @@ void CTheScripts::AddToBuildingSwapArray(CBuilding* building, int32 oldModelId, 
         }
     }
 
-    for (auto& swap : CTheScripts::BuildingSwapArray) {
+    for (auto& swap : BuildingSwapArray) {
         if (!swap.m_pCBuilding) {
             swap.m_pCBuilding = building;
             swap.m_nOldModelIndex = oldModelId;
@@ -170,10 +171,10 @@ int32 CTheScripts::GetScriptIndexFromPointer(CRunningScript* thread) {
 // 0x470370
 void CTheScripts::ReinitialiseSwitchStatementData() {
     NumberOfEntriesStillToReadForSwitch = 0;
-    ValueToCheckInSwitchStatement = 0;
-    SwitchDefaultExists = 0;
-    SwitchDefaultAddress = 0;
-    NumberOfEntriesInSwitchTable = 0;
+    ValueToCheckInSwitchStatement       = 0;
+    SwitchDefaultExists                 = false;
+    SwitchDefaultAddress                = nullptr;
+    NumberOfEntriesInSwitchTable        = 0;
 }
 
 // 0x46ABC0
@@ -188,19 +189,24 @@ void CTheScripts::RemoveThisPed(CPed* ped) {
 
 // 0x464C20
 CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
-    CRunningScript* pNew = pIdleScripts;
+    CRunningScript* scripts = pIdleScripts;
 
-    pNew->RemoveScriptFromList(&pIdleScripts);
-    pNew->Init();
-    pNew->m_pCurrentIP = startIP;
-    pNew->AddScriptToList(&pActiveScripts);
-    pNew->m_bIsActive = true;
+    scripts->RemoveScriptFromList(&pIdleScripts);
+    scripts->Init();
+    scripts->SetCurrentIp(startIP);
+    scripts->AddScriptToList(&pActiveScripts);
+    scripts->SetActive(true);
 
-    return pNew;
+    return scripts;
+}
+
+// 0x464C90
+CRunningScript* StartNewScript(uint8* startIP, uint16 index) {
+    return plugin::CallAndReturn<CRunningScript*, 0x464C90, uint8*, uint16>(startIP, index);
 }
 
 void CTheScripts::UndoBuildingSwaps() {
-    for (auto& swap : CTheScripts::BuildingSwapArray) {
+    for (auto& swap : BuildingSwapArray) {
         if (swap.m_pCBuilding) {
             swap.m_pCBuilding->ReplaceWithNewModel(swap.m_nOldModelIndex);
             swap.m_pCBuilding = nullptr;
@@ -237,7 +243,7 @@ void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
 
 // 0x464D40
 void CTheScripts::StartTestScript() {
-    StartNewScript(CTheScripts::ScriptSpace);
+    StartNewScript(ScriptSpace);
 }
 
 // 0x46A000
