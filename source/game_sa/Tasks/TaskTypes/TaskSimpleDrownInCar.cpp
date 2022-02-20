@@ -10,7 +10,7 @@ bool CTaskSimpleDrownInCar::ProcessPed(CPed* ped) {
         CStats::IncrementStat(STAT_TIMES_DROWNED, 1.0f);
 
     if (ped == FindPlayerPed()) {
-        ped->m_pVehicle->m_nStatus = static_cast<eEntityStatus>(STATUS_WRECKED | STATUS_TRAIN_NOT_MOVING); // todo: ped->m_pVehicle->m_nType = ped->m_pVehicle->m_nType & 7 | 0x48;
+        ped->m_pVehicle->m_nStatus = STATUS_PLANE;
     }
 
     CEventDeath event(true);

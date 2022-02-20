@@ -17,19 +17,13 @@ bool CTaskComplexFallToDeath::MakeAbortable(CPed* ped, eAbortPriority priority, 
     if (priority != ABORT_PRIORITY_IMMEDIATE)
         return false;
 
-    // anim 1
-    if (m_nAnimId != ANIM_ID_UNDEFINED) {
-        auto association = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_nAnimId);
-        if (association)
-            association->m_fBlendDelta = -1000.0f;
+    for (auto animId : {m_nAnimId, m_nAnimId1}) {
+        if (animId != ANIM_ID_UNDEFINED) {
+            if (const auto association = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId))
+                association->m_fBlendDelta = -1000.0f;
+        }
     }
 
-    // anim 2
-    if (m_nAnimId1 != ANIM_ID_UNDEFINED) {
-        auto association = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_nAnimId1);
-        if (association)
-            association->m_fBlendDelta = -1000.0f;
-    }
 
     return true;
 }
@@ -41,7 +35,7 @@ CTask* CTaskComplexFallToDeath::ControlSubTask(CPed* ped) {
 
 // 0x679120
 CTask* CTaskComplexFallToDeath::CreateFirstSubTask(CPed* ped) {
-    ped->m_nPedFlags &= ~1u; // bIsStanding = false;
+    ped->bIsStanding = false;
     ped->ApplyMoveForce({
         ms_LateralForceMagnitude * m_posn.x,
         ms_LateralForceMagnitude * m_posn.y,

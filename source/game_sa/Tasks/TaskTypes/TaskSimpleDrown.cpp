@@ -12,7 +12,7 @@ CTaskSimpleDrown::CTaskSimpleDrown() : CTaskSimpleDie(ANIM_GROUP_DEFAULT, ANIM_I
 bool CTaskSimpleDrown::ProcessPed(CPed* ped) {
     if (m_bShouldExecute) {
         ped->SetPedState(PEDSTATE_DIE);
-        ped->bIsInTheAir = false; //  &= ~0x200u
+        ped->bIsInTheAir = false; 
         if (ped == FindPlayerPed())
             CStats::IncrementStat(STAT_TIMES_DROWNED, 1.0f);
         m_bShouldExecute = 0;

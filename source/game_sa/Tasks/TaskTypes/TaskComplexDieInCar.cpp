@@ -22,7 +22,7 @@ CTask* CTaskComplexDieInCar::ControlSubTask(CPed* ped) {
         return m_pSubTask;
 
     if (m_bUpdateTime) {
-        m_nTimeMS = CTimer::GetTimeStep();
+        m_nTimeMS = CTimer::GetTimeInMS();
         m_bUpdateTime = false;
     }
 
@@ -79,7 +79,7 @@ CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) {
         }
     }
 
-    if (ped->m_nFourthPedFlags < 0) // TODO: SLOBYTE(ped->m_nFourthPedFlags) < 0
+    if (ped->bForceDieInCar)
         return CreateSubTask(TASK_SIMPLE_DIE_IN_CAR, ped);
 
     if (m_nWeaponType == WEAPON_EXPLOSION)
@@ -105,7 +105,7 @@ CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) {
 // 0x62FD00
 void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle)
 {
-    if (vehicle->m_nStatus != STATUS_WRECKED) { // TODO: CHECK FLAG
+    if (vehicle->m_nStatus == STATUS_SIMPLE) {
         CCarCtrl::SwitchVehicleToRealPhysics(vehicle);
     }
     vehicle->m_autoPilot.m_nCruiseSpeed    = 0;
@@ -116,17 +116,22 @@ void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle)
 
 // 0x637850
 CTask* CTaskComplexDieInCar::CreateNextSubTask(CPed* ped) {
-    if (m_pSubTask->GetTaskType() == TASK_SIMPLE_DIE_IN_CAR)
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_DIE_IN_CAR:
         return CreateSubTask(TASK_FINISHED, ped);
-
-    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_LEAVE_CAR_AND_DIE) {
+    case TASK_COMPLEX_LEAVE_CAR_AND_DIE:
         return CreateSubTask(ped->m_pVehicle && ped->bInVehicle ? TASK_SIMPLE_DIE_IN_CAR : TASK_FINISHED, ped);
+    default:
+        return nullptr;
     }
-
-    return nullptr;
 }
 
 // 0x62FCC0
 bool CTaskComplexDieInCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) && m_pSubTask->MakeAbortable(ped, priority, event);
+    switch (priority) {
+    case ABORT_PRIORITY_URGENT:
+    case ABORT_PRIORITY_IMMEDIATE:
+        return m_pSubTask->MakeAbortable(ped, priority, event);
+    }
+    return false;
 }

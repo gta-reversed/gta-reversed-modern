@@ -25,7 +25,9 @@ CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
     m_fBlendDelta = fBlendDelta;
     m_nAnimGroup = animGroup;
     m_fAnimSpeed = fAnimSpeed;
-    // todo: m_nFlags = m_nFlags & 0xFFFFFFF8 | bBeingKilledByStealth | (2 * (bFallingToDeath | (2 * bFallToDeathOverRailing)));
+bBeingKilledByStealth = bBeingKilledByStealth;
+bFallingToDeath = bFallingToDeath;
+bFallToDeathOverRailing = bFallToDeathOverRailing;
     m_nFallToDeathDir = nFallToDeathDir;
 };
 
@@ -79,22 +81,18 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) {
 
 // 0x6301E0
 CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) {
-    auto taskType = m_pSubTask->GetTaskType();
-    if (taskType <= TASK_SIMPLE_DROWN_IN_CAR) {
-        if (taskType >= TASK_COMPLEX_DIE_IN_CAR || taskType >= TASK_SIMPLE_DIE && taskType <= TASK_SIMPLE_DROWN) {
-            ped->bKilledByStealth = true;
-            return nullptr;
-        }
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_DIE:
+    case TASK_SIMPLE_DROWN:
+    case TASK_COMPLEX_DIE_IN_CAR:
+    case TASK_SIMPLE_DROWN_IN_CAR: {
+        ped->bKilledByStealth = true;
         return nullptr;
     }
-
-    if (taskType != TASK_COMPLEX_LEAVE_CAR)
-        return nullptr;
-
-    if (!ped->bInVehicle)
-        return CreateFirstSubTask(ped);
-
-    return new CTaskSimpleDrownInCar();
+    case TASK_COMPLEX_LEAVE_CAR: {
+        return ped->bInVehicle ? new CTaskSimpleDrownInCar() : CreateFirstSubTask(ped);
+    }
+    }
 }
 
 // 0x6302D0
@@ -115,32 +113,28 @@ CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
         {
             return new CTaskSimpleDrown();
         }
-        else if ((m_nFlags & 2) != 0)
+        else if (bFallingToDeath)
         {
-            CVector posn; // originally not initialized
-            switch (m_nFallToDeathDir) {
-            case 0:
-                posn = ped->m_matrix->GetForward();
-                break;
-            case 1:
-                posn = ped->m_matrix->GetRight() * -1.0f;
-                break;
-            case 2:
-                posn = ped->m_matrix->GetForward() * -1.0f;
-                break;
-            case 3:
-                posn = ped->m_matrix->GetRight();
-                break;
-            default:
-                break;
-            }
-
-            return new CTaskComplexFallToDeath(m_nFallToDeathDir, &posn, (m_nFlags & 4) != 0, 0);
+            const auto GetFallDirection = [this]{
+                switch (m_nFallToDeathDir) {
+                case 0:
+                    return ped->m_matrix->GetForward();
+                case 1:
+                    return ped->m_matrix->GetRight() * -1.0f;
+                case 2:
+                    return ped->m_matrix->GetForward() * -1.0f;
+                case 3:
+                    return ped->m_matrix->GetRight();
+                default:
+                    return {}; // Just to return something so compiler doesn't cry
+                }
+            };
+            return new CTaskComplexFallToDeath(m_nFallToDeathDir, GetFallDirection(), bFallToDeathOverRailing, false);
         } else {
             return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);
         }
     } else {
-        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, 0, 1);
+        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
     }
     return nullptr;
 }
