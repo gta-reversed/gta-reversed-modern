@@ -19,6 +19,7 @@
 #include "EntryExitManager.h"
 #include "TrafficLights.h"
 #include "Glass.h"
+#include "TheScripts.h"
 
 void CEntity::InjectHooks()
 {

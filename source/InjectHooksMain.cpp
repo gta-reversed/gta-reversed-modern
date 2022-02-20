@@ -92,6 +92,8 @@
 #include "Interior_c.h"
 #include "InteriorGroup_c.h"
 #include "InteriorManager_c.h"
+#include "TheScripts.h"
+#include "RunningScript.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

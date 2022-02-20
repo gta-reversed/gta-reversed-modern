@@ -3,6 +3,7 @@
 #include "EventVehicleToSteal.h"
 
 #include "TaskComplexEnterCar.h"
+#include "TheScripts.h"
 
 void CEventVehicleToSteal::InjectHooks()
 {

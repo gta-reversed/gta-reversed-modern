@@ -5,6 +5,7 @@
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
 #include "CarCtrl.h"
+#include "TheScripts.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);

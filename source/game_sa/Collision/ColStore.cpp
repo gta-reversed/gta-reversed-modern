@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "ColStore.h"
+#include "TheScripts.h"
 
 CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;
@@ -14,7 +15,6 @@ void CColStore::InjectHooks()
     RH_ScopedClass(CColStore);
     RH_ScopedCategory("Collision");
 
-// CLASS
     RH_ScopedInstall(Initialise, 0x4113F0);
     RH_ScopedInstall(Shutdown, 0x4114D0);
     RH_ScopedInstall(AddCollisionNeededAtPosn, 0x4103A0);
@@ -37,7 +37,6 @@ void CColStore::InjectHooks()
     RH_ScopedInstall(HasCollisionLoaded, 0x410CE0);
     RH_ScopedInstall(LoadCollision, 0x410860);
 
-// OTHER
     RH_ScopedGlobalInstall(SetIfCollisionIsRequired, 0x4103D0);
     RH_ScopedGlobalInstall(SetIfCollisionIsRequiredReducedBB, 0x410470);
 }
