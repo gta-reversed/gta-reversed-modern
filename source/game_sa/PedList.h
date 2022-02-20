@@ -13,20 +13,14 @@ class CPed;
 
 class CPedList {
 public:
-    uint32_t m_count = {};
-    CPed* m_peds[30] = {};
-
+    uint32_t              m_count{};
+    std::array<CPed*, 30> m_peds{};
 public:
     static void InjectHooks();
 
     void Empty();
     void BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership);
     void ExtractPedsWithGuns(CPedList& pFrom);
-    void ClearUnused();
-    void AddMember(CPed* ped);
-    void RemoveMemberNoFill(int i);
-    CPed* Get(int i);
-    uint32_t GetCapacity() const;
 
     // Inlined functions below (Present in Android version)
     void FillUpHoles();
@@ -35,7 +29,10 @@ public:
     void RemovePedsAttackingPedType(int pedtype);
     void RemovePedsThatDontListenToPlayer();
 
-    CPed** begin() { return m_peds; }
-    CPed** end() { return m_peds + GetCapacity(); }
+    // NOTSA
+    void ClearUnused();
+    void AddMember(CPed* ped);
+    void RemoveMemberNoFill(int i);
+    CPed* Get(int i);
 };
 VALIDATE_SIZE(CPedList, 0x7C);

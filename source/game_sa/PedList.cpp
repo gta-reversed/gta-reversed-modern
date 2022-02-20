@@ -1,65 +1,30 @@
 #include "StdInc.h"
-#include "CPedList.h"
+#include "PedList.h"
 
 void CPedList::InjectHooks() {
-    ReversibleHooks::Install("CPedList", "Empty", 0x699DB0, &CPedList::Empty);
-    ReversibleHooks::Install("CPedList", "BuildListFromGroup_NoLeader", 0x699DD0, &CPedList::BuildListFromGroup_NoLeader);
-    ReversibleHooks::Install("CPedList", "ExtractPedsWithGuns", 0x69A4C0, &CPedList::ExtractPedsWithGuns);
+    RH_ScopedClass(CPedList);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Empty, 0x699DB0);
+    RH_ScopedInstall(BuildListFromGroup_NoLeader, 0x699DD0);
+    RH_ScopedInstall(ExtractPedsWithGuns, 0x69A4C0);
 }
 
 // 0x699DB0
 void CPedList::Empty() {
-    m_count = 0;
-    memset(m_peds, 0, sizeof(m_peds));
-}
-
-void CPedList::ClearUnused() {
-    if (m_count < GetCapacity()) {
-        memset(m_peds[m_count], 0, sizeof(m_peds[0]) * (GetCapacity() - m_count));
-    }
-}
-
-uint32_t CPedList::GetCapacity() const {
-    return ARRAYSIZE(m_peds);
-}
-
-void CPedList::AddMember(CPed* ped) {
-    if (m_count < GetCapacity())
-        m_peds[m_count++] = ped;
-    else {
-        assert(0); // NOTSA
-    }
-}
-
-void CPedList::RemoveMemberNoFill(int i) {
-    m_peds[i] = nullptr;
-    m_count--;
-    // Must call FillUpHoles afterwards!
-}
-
-CPed* CPedList::Get(int i) {
-    return m_peds[i];
+    *this = {};
 }
 
 // 0x699DD0
 void CPedList::BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership) {
     m_count = 0;
-    for (int i = 0; i < 7; i++) { // TODO: Why 7?
+
+    for (int i = 0; i < TOTAL_PED_GROUP_MEMBERS - 1; i++) { // last member is the leader, ignore him
         if (CPed* ped = groupMembership.GetMember(i)) {
             AddMember(ped);
         }
     }
     ClearUnused();
-}
-
-void CPedList::FillUpHoles() {
-    CPed** copyTo = begin();
-    for (CPed** it = begin(); it != end(); it++) {
-        if (copyTo != it && *it) { // NOTSA: `copyTo != it` is important to avoid UB
-            *copyTo++ = *it;
-        }
-    }
-    ClearUnused(); // Note: Original code differs a little, but does the same thing.
 }
 
 // 0x69A4C0
@@ -71,4 +36,34 @@ void CPedList::ExtractPedsWithGuns(CPedList& from) {
         }
     }
     from.FillUpHoles();
+}
+
+
+// After nulling out a field in the
+// array there might be a hole, so it has to be filled
+void CPedList::FillUpHoles() {
+    rng::fill(rng::remove(m_peds, nullptr), nullptr);
+}
+
+//
+// NOTSA section
+//
+
+// nulls out everything after the first `m_count` elements
+void CPedList::ClearUnused() {
+    rng::fill(m_peds | std::views::drop(m_count), nullptr);
+}
+
+void CPedList::AddMember(CPed* ped) {
+    m_peds[m_count++] = ped;
+}
+
+// Must call FillUpHoles afterwards!
+void CPedList::RemoveMemberNoFill(int i) {
+    m_peds[i] = nullptr;
+    m_count--;
+}
+
+CPed* CPedList::Get(int i) {
+    return m_peds[i];
 }
