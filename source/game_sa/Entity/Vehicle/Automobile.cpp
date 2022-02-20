@@ -337,11 +337,10 @@ void CAutomobile::ProcessControl()
                 m_pDriver->AsPlayer()->ResetPlayerBreath();
             }
             else {
-                for (uint8 i = 0; i < m_nMaxPassengers; i++) {
-                    CPed* passenger = m_apPassengers[i];
-                    if (passenger && passenger->IsPlayer())
+                for (auto& passenger : GetPassengers()) {
+                    if (passenger && passenger->IsPlayer()) {
                         passenger->AsPlayer()->ResetPlayerBreath();
-
+                    }
                 }
             }
         }
@@ -2788,9 +2787,8 @@ void CAutomobile::ProcessBuoyancy()
         auto driver = m_pDriver->AsPed();
         ProcessPedInVehicleBuoyancy(driver, true);
 
-        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
-            auto pCurPassenger = m_apPassengers[iPassengerInd];
-            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        for (auto& passenger : GetPassengers()) {
+            ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }
     else {

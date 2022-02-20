@@ -139,9 +139,8 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
-            auto pCurPassenger = m_apPassengers[iPassengerInd];
-            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        for (auto& passenger : GetPassengers()) {
+            ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }
     else {

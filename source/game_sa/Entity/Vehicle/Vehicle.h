@@ -679,6 +679,7 @@ public:
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
+    auto GetPassengers() { return std::span(m_apPassengers, m_nMaxPassengers); }
 
 private:
     friend void InjectHooksMain();

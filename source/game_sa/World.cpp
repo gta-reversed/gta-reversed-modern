@@ -1367,8 +1367,8 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
             driver = nullptr;
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (auto& passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
@@ -2553,8 +2553,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             driver = nullptr;
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (auto& passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
