@@ -20,6 +20,7 @@ public:
     static uint32 GetNodeHeadingFromVector(float x, float y);
     static bool SolveQuadratic(float a, float b, float c, float& x1, float& x2);
     static float GetAngleBetweenPoints(float x1, float y1, float x2, float y2);
+    static uint16 GetRandomNumber();
     static int32 GetRandomNumberInRange(const int32 min, const int32 max);
     static float GetRandomNumberInRange(const float min, const float max);
 };

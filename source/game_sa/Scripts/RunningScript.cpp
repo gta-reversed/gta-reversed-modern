@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "RunningScript.h"
+#include "TaskSimplePlayerOnFoot.h"
 
 int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
 int8(CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
@@ -426,13 +427,13 @@ tScriptParam* CRunningScript::GetPointerToLocalArrayElement(int32 arrVarOffset, 
 
 // Returns pointer to script variable of any type.
 // 0x464790
-tScriptParam* CRunningScript::GetPointerToScriptVariable(uint8 variableType) {
+tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType variableType) {
     uint8 arrElemSize;
     uint16 arrVarOffset;
     int32 arrElemIdx;
 
-    variableType = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
-    switch (variableType)
+    int8 type = CTheScripts::Read1ByteFromScript(m_pCurrentIP);
+    switch (type)
     {
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_VARIABLE:
@@ -807,153 +808,460 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
         UpdatePC(CTheScripts::ScriptParams[0].iParam);
         return 0;
     case COMMAND_SHAKE_CAM: // 0x003
-        break;
+        CollectParameters(1);
+        CamShakeNoPos(&TheCamera, CTheScripts::ScriptParams[0].iParam / 1000.0f);
+        return 0;
     case COMMAND_SET_VAR_INT: // 0x004
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        *pVar = CTheScripts::ScriptParams[0];
+        return 0;
+    }
     case COMMAND_SET_VAR_FLOAT: // 0x005
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        *pVar = CTheScripts::ScriptParams[0];
+        return 0;
+    }
     case COMMAND_SET_LVAR_INT: // 0x006
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        *pVar = CTheScripts::ScriptParams[0];
+        return 0;
+    }
     case COMMAND_SET_LVAR_FLOAT: // 0x007
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        *pVar = CTheScripts::ScriptParams[0];
+        return 0;
+    }
     case COMMAND_ADD_VAL_TO_INT_VAR: // 0x008
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->iParam += CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_ADD_VAL_TO_FLOAT_VAR: // 0x009
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam += CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_ADD_VAL_TO_INT_LVAR: // 0x00A
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->iParam += CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_ADD_VAL_TO_FLOAT_LVAR: // 0x00B
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam += CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_SUB_VAL_FROM_INT_VAR: // 0x00C
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->iParam -= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_SUB_VAL_FROM_FLOAT_VAR: // 0x00D
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam -= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_SUB_VAL_FROM_INT_LVAR: // 0x00E
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->iParam -= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_SUB_VAL_FROM_FLOAT_LVAR: // 0x00F
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam -= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_VAR_BY_VAL: // 0x010
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->iParam *= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_VAR_BY_VAL: // 0x011
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam *= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_LVAR_BY_VAL: // 0x012
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->iParam *= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_LVAR_BY_VAL: // 0x013
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam *= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_VAR_BY_VAL: // 0x014
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->iParam /= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_VAR_BY_VAL: // 0x015
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam /= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_LVAR_BY_VAL: // 0x016
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->iParam /= CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_LVAR_BY_VAL: // 0x017
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam /= CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER: // 0x018
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_NUMBER: // 0x019
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_THAN_INT_VAR: // 0x01A
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_THAN_INT_LVAR: // 0x01B
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_THAN_INT_VAR: // 0x01C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_LVAR: // 0x01D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_THAN_INT_LVAR: // 0x01E
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_INT_VAR: // 0x01F
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->iParam > pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_NUMBER: // 0x020
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam > CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_NUMBER: // 0x021
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam > CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_VAR: // 0x022
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > pVar->fParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_THAN_FLOAT_LVAR: // 0x023
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam > pVar->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_VAR: // 0x024
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_LVAR: // 0x025
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_THAN_FLOAT_LVAR: // 0x026
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_THAN_FLOAT_VAR: // 0x027
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->fParam > pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x028
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x029
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02A
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02B
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x02E
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_INT_VAR: // 0x02F
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->iParam >= pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x030
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam >= CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_NUMBER: // 0x031
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam >= CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x032
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= pVar->fParam);
+        return 0;
+    }
     case COMMAND_IS_NUMBER_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x033
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].fParam >= pVar->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x034
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x035
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_GREATER_OR_EQUAL_TO_FLOAT_LVAR: // 0x036
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_GREATER_OR_EQUAL_TO_FLOAT_VAR: // 0x037
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->fParam >= pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_EQUAL_TO_NUMBER: // 0x038
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam == CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_EQUAL_TO_NUMBER: // 0x039
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam == CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_EQUAL_TO_INT_VAR: // 0x03A
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_EQUAL_TO_INT_LVAR: // 0x03B
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_EQUAL_TO_INT_LVAR: // 0x03C
-        break;
-    case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_NUMBER: // 0x03D
-        break;
-    case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_NUMBER: // 0x03E
-        break;
-    case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_VAR: // 0x03F
-        break;
-    case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_INT_LVAR: // 0x040
-        break;
-    case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_LVAR: // 0x041
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->iParam == pVar2->iParam);
+        return 0;
+    }
+
+    // Not implemented:
+    // case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_NUMBER: // 0x03D
+    // case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_NUMBER: // 0x03E
+    // case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_VAR: // 0x03F
+    // case COMMAND_IS_INT_LVAR_NOT_EQUAL_TO_INT_LVAR: // 0x040
+    // case COMMAND_IS_INT_VAR_NOT_EQUAL_TO_INT_LVAR: // 0x041
+
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_NUMBER: // 0x042
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam == CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_NUMBER: // 0x043
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->fParam == CTheScripts::ScriptParams[0].fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_VAR: // 0x044
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_LVAR_EQUAL_TO_FLOAT_LVAR: // 0x045
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        return 0;
+    }
     case COMMAND_IS_FLOAT_VAR_EQUAL_TO_FLOAT_LVAR: // 0x046
-        break;
-    case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_NUMBER: // 0x047
-        break;
-    case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_NUMBER: // 0x048
-        break;
-    case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_VAR: // 0x049
-        break;
-    case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_FLOAT_LVAR: // 0x04A
-        break;
-    case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_LVAR: // 0x04B
-        break;
-    case COMMAND_GOTO_IF_TRUE: // 0x04C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(pVar1->fParam == pVar2->fParam);
+        return 0;
+    }
+
+    // Not implemented:
+    // case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_NUMBER: // 0x047
+    // case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_NUMBER: // 0x048
+    // case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_VAR: // 0x049
+    // case COMMAND_IS_FLOAT_LVAR_NOT_EQUAL_TO_FLOAT_LVAR: // 0x04A
+    // case COMMAND_IS_FLOAT_VAR_NOT_EQUAL_TO_FLOAT_LVAR: // 0x04B
+    // case COMMAND_GOTO_IF_TRUE: // 0x04C
+
     case COMMAND_GOTO_IF_FALSE: // 0x04D
         CollectParameters(1);
         if (m_bCondResult)
@@ -980,47 +1288,137 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
         return 0;
     }
     case COMMAND_GOSUB: // 0x050
-        break;
+        CollectParameters(1);
+        m_apStack[m_nSP++] = m_pCurrentIP;
+        UpdatePC(CTheScripts::ScriptParams[0].iParam);
+        return 0;
     case COMMAND_RETURN: // 0x051
-        break;
+        m_pCurrentIP = m_apStack[--m_nSP];
+        return 0;
     case COMMAND_LINE: // 0x052
-        break;
+        CollectParameters(6);
+        return 0;
     case COMMAND_CREATE_PLAYER: // 0x053
-        break;
-    case COMMAND_GET_PLAYER_COORDINATES: // 0x054
-        break;
-    case COMMAND_SET_PLAYER_COORDINATES: // 0x055
-        break;
-    case COMMAND_IS_PLAYER_IN_AREA_2D: // 0x056
-        break;
-    case COMMAND_IS_PLAYER_IN_AREA_3D: // 0x057
-        break;
+    {
+        CollectParameters(4);
+        int32 index = CTheScripts::ScriptParams[0].iParam;
+        if (!CStreaming::IsModelLoaded(0 /*MI_PLAYER*/))
+        {
+            CStreaming::RequestSpecialModel(0, "player", STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY | STREAMING_PRIORITY_REQUEST);
+            CStreaming::LoadAllRequestedModels(true);
+        }
+
+        CPlayerPed::SetupPlayerPed(index);
+        CPlayerInfo* player = &CWorld::Players[index];
+        player->m_pPed->SetCharCreatedBy(PED_MISSION);
+        CPlayerPed::DeactivatePlayerPed(index);
+
+        CVector pos = *(CVector*)&CTheScripts::ScriptParams[1];
+        if (pos.z <= -100.0f)
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+        pos.z += player->m_pPed->GetDistanceFromCentreOfMassToBaseOfModel();
+        player->m_pPed->SetPosn(pos);
+        CTheScripts::ClearSpaceForMissionEntity(pos, player->m_pPed);
+        CPlayerPed::ReactivatePlayerPed(index);
+        CTheScripts::ScriptParams[0].iParam = index;
+        StoreParameters(1);
+
+        CTask* task = new CTaskSimplePlayerOnFoot();
+        player->m_pPed->m_pIntelligence->m_TaskMgr.SetTask(task, TASK_PRIMARY_DEFAULT);
+        return 0;
+    }
+
+    // case COMMAND_GET_PLAYER_COORDINATES: // 0x054
+    // case COMMAND_SET_PLAYER_COORDINATES: // 0x055
+    // case COMMAND_IS_PLAYER_IN_AREA_2D: // 0x056
+    // case COMMAND_IS_PLAYER_IN_AREA_3D: // 0x057
+
     case COMMAND_ADD_INT_VAR_TO_INT_VAR: // 0x058
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam += pVar2->iParam;
+        return 0;
+    }
     case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_VAR: // 0x059
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam += pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_INT_LVAR_TO_INT_LVAR: // 0x05A
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam += pVar2->iParam;
+        return 0;
+    }
     case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_LVAR: // 0x05B
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam += pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_INT_VAR_TO_INT_LVAR: // 0x05C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam += pVar2->iParam;
+        return 0;
+    }
     case COMMAND_ADD_FLOAT_VAR_TO_FLOAT_LVAR: // 0x05D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam += pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_INT_LVAR_TO_INT_VAR: // 0x05E
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam += pVar2->iParam;
+        return 0;
+    }
     case COMMAND_ADD_FLOAT_LVAR_TO_FLOAT_VAR: // 0x05F
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam += pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_INT_VAR_FROM_INT_VAR: // 0x060
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam -= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_VAR: // 0x061
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam -= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_INT_LVAR_FROM_INT_LVAR: // 0x062
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam -= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_LVAR: // 0x063
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam -= pVar2->fParam;
+        return 0;
+    }
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -1028,133 +1426,400 @@ int8 CRunningScript::ProcessCommands0To99(int32 commandId) {
 
 // 0x466DE0
 int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
+    char label[12];
     switch (commandId) {
     case COMMAND_SUB_INT_VAR_FROM_INT_LVAR: // 0x064
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam -= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_SUB_FLOAT_VAR_FROM_FLOAT_LVAR: // 0x065
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam -= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_INT_LVAR_FROM_INT_VAR: // 0x066
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam -= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_SUB_FLOAT_LVAR_FROM_FLOAT_VAR: // 0x067
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam -= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_VAR_BY_INT_VAR: // 0x068
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam *= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_VAR: // 0x069
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam *= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_LVAR_BY_INT_LVAR: // 0x06A
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam *= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_LVAR: // 0x06B
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam *= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_VAR_BY_INT_LVAR: // 0x06C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam *= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_VAR_BY_FLOAT_LVAR: // 0x06D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam *= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_MULT_INT_LVAR_BY_INT_VAR: // 0x06E
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam *= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_MULT_FLOAT_LVAR_BY_FLOAT_VAR: // 0x06F
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam *= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_VAR_BY_INT_VAR: // 0x070
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam /= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_VAR: // 0x071
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam /= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_LVAR_BY_INT_LVAR: // 0x072
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam /= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_LVAR: // 0x073
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam /= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_VAR_BY_INT_LVAR: // 0x074
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam /= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_VAR_BY_FLOAT_LVAR: // 0x075
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam /= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_DIV_INT_LVAR_BY_INT_VAR: // 0x076
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam /= pVar2->iParam;
+        return 0;
+    }
     case COMMAND_DIV_FLOAT_LVAR_BY_FLOAT_VAR: // 0x077
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam /= pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_VAL_TO_FLOAT_VAR: // 0x078
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam += CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_VAL_TO_FLOAT_LVAR: // 0x079
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam += CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_VAR: // 0x07A
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_LVAR: // 0x07B
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_FLOAT_VAR_TO_FLOAT_LVAR: // 0x07C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_ADD_TIMED_FLOAT_LVAR_TO_FLOAT_VAR: // 0x07D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam += CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_VAR: // 0x07E
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->fParam -= CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_VAL_FROM_FLOAT_LVAR: // 0x07F
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->fParam -= CTimer::ms_fTimeStep * CTheScripts::ScriptParams[0].fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_VAR: // 0x080
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_LVAR: // 0x081
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_FLOAT_VAR_FROM_FLOAT_LVAR: // 0x082
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SUB_TIMED_FLOAT_LVAR_FROM_FLOAT_VAR: // 0x083
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam -= CTimer::ms_fTimeStep * pVar2->fParam;
+        return 0;
+    }
     case COMMAND_SET_VAR_INT_TO_VAR_INT: // 0x084
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_LVAR_INT_TO_LVAR_INT: // 0x085
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_VAR_FLOAT_TO_VAR_FLOAT: // 0x086
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_LVAR_FLOAT_TO_LVAR_FLOAT: // 0x087
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_VAR_FLOAT_TO_LVAR_FLOAT: // 0x088
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_LVAR_FLOAT_TO_VAR_FLOAT: // 0x089
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_VAR_INT_TO_LVAR_INT: // 0x08A
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_SET_LVAR_INT_TO_VAR_INT: // 0x08B
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        *pVar1 = *pVar2;
+        return 0;
+    }
     case COMMAND_CSET_VAR_INT_TO_VAR_FLOAT: // 0x08C
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        return 0;
+    }
     case COMMAND_CSET_VAR_FLOAT_TO_VAR_INT: // 0x08D
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        return 0;
+    }
     case COMMAND_CSET_LVAR_INT_TO_VAR_FLOAT: // 0x08E
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        return 0;
+    }
     case COMMAND_CSET_LVAR_FLOAT_TO_VAR_INT: // 0x08F
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        return 0;
+    }
     case COMMAND_CSET_VAR_INT_TO_LVAR_FLOAT: // 0x090
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        return 0;
+    }
     case COMMAND_CSET_VAR_FLOAT_TO_LVAR_INT: // 0x091
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_GLOBAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        return 0;
+    }
     case COMMAND_CSET_LVAR_INT_TO_LVAR_FLOAT: // 0x092
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->iParam = static_cast<int32>(pVar2->fParam);
+        return 0;
+    }
     case COMMAND_CSET_LVAR_FLOAT_TO_LVAR_INT: // 0x093
-        break;
+    {
+        tScriptParam* pVar1 = GetPointerToScriptVariable(VAR_LOCAL);
+        tScriptParam* pVar2 = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar1->fParam = static_cast<float>(pVar2->iParam);
+        return 0;
+    }
     case COMMAND_ABS_VAR_INT: // 0x094
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar->iParam = std::abs(pVar->iParam);
+        return 0;
+    }
     case COMMAND_ABS_LVAR_INT: // 0x095
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar->iParam = std::abs(pVar->iParam);
+        return 0;
+    }
     case COMMAND_ABS_VAR_FLOAT: // 0x096
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar->fParam = std::abs(pVar->fParam);
+        return 0;
+    }
     case COMMAND_ABS_LVAR_FLOAT: // 0x097
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        pVar->fParam = std::abs(pVar->fParam);
+        return 0;
+    }
     case COMMAND_GENERATE_RANDOM_FLOAT: // 0x098
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CGeneral::GetRandomNumber();
+        CGeneral::GetRandomNumber();
+        CGeneral::GetRandomNumber();
+        pVar->fParam = CGeneral::GetRandomNumber() / (32768.0f * 2); // 100% NOT GetRandomNumberInRange(0, 0.5)
+        return 0;
+    }
     case COMMAND_GENERATE_RANDOM_INT: // 0x099
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        pVar->iParam = CGeneral::GetRandomNumber();
+        return 0;
+    }
     case COMMAND_CREATE_CHAR: // 0x09A
         break;
     case COMMAND_DELETE_CHAR: // 0x09B
         break;
-    case COMMAND_CHAR_WANDER_DIR: // 0x09C
-        break;
-    case COMMAND_CHAR_WANDER_RANGE: // 0x09D
-        break;
-    case COMMAND_CHAR_FOLLOW_PATH: // 0x09E
-        break;
-    case COMMAND_CHAR_SET_IDLE: // 0x09F
-        break;
+
+    // case COMMAND_CHAR_WANDER_DIR: // 0x09C
+    // case COMMAND_CHAR_WANDER_RANGE: // 0x09D
+    // case COMMAND_CHAR_FOLLOW_PATH: // 0x09E
+    // case COMMAND_CHAR_SET_IDLE: // 0x09F
+
     case COMMAND_GET_CHAR_COORDINATES: // 0x0A0
         break;
     case COMMAND_SET_CHAR_COORDINATES: // 0x0A1
         break;
-    case COMMAND_IS_CHAR_STILL_ALIVE: // 0x0A2
-        break;
+
+    // case COMMAND_IS_CHAR_STILL_ALIVE: // 0x0A2
+
     case COMMAND_IS_CHAR_IN_AREA_2D: // 0x0A3
         break;
     case COMMAND_IS_CHAR_IN_AREA_3D: // 0x0A4
@@ -1173,8 +1838,9 @@ int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
         break;
     case COMMAND_SET_CAR_COORDINATES: // 0x0AB
         break;
-    case COMMAND_IS_CAR_STILL_ALIVE: // 0x0AC
-        break;
+
+    // case COMMAND_IS_CAR_STILL_ALIVE: // 0x0AC
+
     case COMMAND_SET_CAR_CRUISE_SPEED: // 0x0AD
         break;
     case COMMAND_SET_CAR_DRIVING_STYLE: // 0x0AE
@@ -1185,52 +1851,82 @@ int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
         break;
     case COMMAND_IS_CAR_IN_AREA_3D: // 0x0B1
         break;
-    case COMMAND_SPECIAL_0: // 0x0B2
-        break;
-    case COMMAND_SPECIAL_1: // 0x0B3
-        break;
-    case COMMAND_SPECIAL_2: // 0x0B4
-        break;
-    case COMMAND_SPECIAL_3: // 0x0B5
-        break;
-    case COMMAND_SPECIAL_4: // 0x0B6
-        break;
-    case COMMAND_SPECIAL_5: // 0x0B7
-        break;
-    case COMMAND_SPECIAL_6: // 0x0B8
-        break;
-    case COMMAND_SPECIAL_7: // 0x0B9
-        break;
+
+    // case COMMAND_SPECIAL_0: // 0x0B2
+    // case COMMAND_SPECIAL_1: // 0x0B3
+    // case COMMAND_SPECIAL_2: // 0x0B4
+    // case COMMAND_SPECIAL_3: // 0x0B5
+    // case COMMAND_SPECIAL_4: // 0x0B6
+    // case COMMAND_SPECIAL_5: // 0x0B7
+    // case COMMAND_SPECIAL_6: // 0x0B8
+    // case COMMAND_SPECIAL_7: // 0x0B9
+
     case COMMAND_PRINT_BIG: // 0x0BA
-        break;
+    {
+        ReadTextLabelFromScript(label, 8);
+        char* text = TheText.Get(label);
+        CollectParameters(2);
+        CMessages::AddBigMessage(text, CTheScripts::ScriptParams[0].iParam, (eMessageStyle)(CTheScripts::ScriptParams[1].iParam - 1));
+        return 0;
+    }
     case COMMAND_PRINT: // 0x0BB
-        break;
+    {
+        ReadTextLabelFromScript(label, 8);
+        char *text = TheText.Get(label);
+        CollectParameters(2);
+        if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
+            CMessages::AddMessage(text, CTheScripts::ScriptParams[0].iParam, CTheScripts::ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CTheScripts::bAddNextMessageToPreviousBriefs = true;
+        return 0;
+    }
     case COMMAND_PRINT_NOW: // 0x0BC
-        break;
-    case COMMAND_PRINT_SOON: // 0x0BD
-        break;
+    {
+        ReadTextLabelFromScript(label, 8);
+        char *text = TheText.Get(label);
+        CollectParameters(2);
+        if (!text || text[0] != '~' || text[1] != 'z' || text[2] != '~' || FrontEndMenuManager.m_bShowSubtitles)
+            CMessages::AddMessageJumpQ(text, CTheScripts::ScriptParams[0].iParam, CTheScripts::ScriptParams[1].iParam, CTheScripts::bAddNextMessageToPreviousBriefs);
+        CTheScripts::bAddNextMessageToPreviousBriefs = true;
+        return 0;
+    }
+
+    // case COMMAND_PRINT_SOON: // 0x0BD
+
     case COMMAND_CLEAR_PRINTS: // 0x0BE
-        break;
+        CMessages::ClearMessages(false);
+        return 0;
     case COMMAND_GET_TIME_OF_DAY: // 0x0BF
-        break;
+        CTheScripts::ScriptParams[0].iParam = CClock::ms_nGameClockHours;
+        CTheScripts::ScriptParams[1].iParam = CClock::ms_nGameClockMinutes;
+        StoreParameters(2);
+        return 0;
     case COMMAND_SET_TIME_OF_DAY: // 0x0C0
-        break;
+        CollectParameters(2);
+        CClock::SetGameClock(CTheScripts::ScriptParams[0].iParam, CTheScripts::ScriptParams[1].iParam, 0);
+        return 0;
     case COMMAND_GET_MINUTES_TO_TIME_OF_DAY: // 0x0C1
-        break;
+        CollectParameters(2);
+        CTheScripts::ScriptParams[0].iParam = CClock::GetGameClockMinutesUntil(CTheScripts::ScriptParams[0].iParam, CTheScripts::ScriptParams[1].iParam);
+        StoreParameters(1);
+        return 0;
     case COMMAND_IS_POINT_ON_SCREEN: // 0x0C2
-        break;
+    {
+        CollectParameters(4);
+        CVector pos = *(CVector*)&CTheScripts::ScriptParams[0];
+        if (pos.z <= -100.0f)
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+        UpdateCompareFlag(TheCamera.IsSphereVisible(&pos, CTheScripts::ScriptParams[3].fParam));
+        return 0;
+    }
     case COMMAND_DEBUG_ON: // 0x0C3
-        break;
+        return 0;
     case COMMAND_DEBUG_OFF: // 0x0C4
-        break;
-    case COMMAND_RETURN_TRUE: // 0x0C5
-        break;
-    case COMMAND_RETURN_FALSE: // 0x0C6
-        break;
-    case COMMAND_VAR_INT: // 0x0C7
-        break;
+        return 0;
+    // case COMMAND_RETURN_TRUE: // 0x0C5
+    // case COMMAND_RETURN_FALSE: // 0x0C6
+    // case COMMAND_VAR_INT: // 0x0C7
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -1239,42 +1935,43 @@ int8 CRunningScript::ProcessCommands100To199(int32 commandId) {
 // 0x469390
 int8 CRunningScript::ProcessCommands200To299(int32 commandId) {
     switch (commandId) {
-    case COMMAND_VAR_FLOAT: // 0x0C8
-        break;
-    case COMMAND_LVAR_INT: // 0x0C9
-        break;
-    case COMMAND_LVAR_FLOAT: // 0x0CA
-        break;
-    case COMMAND_START_SCOPE: // 0x0CB
-        break;
-    case COMMAND_END_SCOPE: // 0x0CC
-        break;
-    case COMMAND_REPEAT: // 0x0CD
-        break;
-    case COMMAND_ENDREPEAT: // 0x0CE
-        break;
-    case COMMAND_IF: // 0x0CF
-        break;
-    case COMMAND_IFNOT: // 0x0D0
-        break;
-    case COMMAND_ELSE: // 0x0D1
-        break;
-    case COMMAND_ENDIF: // 0x0D2
-        break;
-    case COMMAND_WHILE: // 0x0D3
-        break;
-    case COMMAND_WHILENOT: // 0x0D4
-        break;
-    case COMMAND_ENDWHILE: // 0x0D5
-        break;
+    // case COMMAND_VAR_FLOAT: // 0x0C8
+    // case COMMAND_LVAR_INT: // 0x0C9
+    // case COMMAND_LVAR_FLOAT: // 0x0CA
+    // case COMMAND_START_SCOPE: // 0x0CB
+    // case COMMAND_END_SCOPE: // 0x0CC
+    // case COMMAND_REPEAT: // 0x0CD
+    // case COMMAND_ENDREPEAT: // 0x0CE
+    // case COMMAND_IF: // 0x0CF
+    // case COMMAND_IFNOT: // 0x0D0
+    // case COMMAND_ELSE: // 0x0D1
+    // case COMMAND_ENDIF: // 0x0D2
+    // case COMMAND_WHILE: // 0x0D3
+    // case COMMAND_WHILENOT: // 0x0D4
+    // case COMMAND_ENDWHILE: // 0x0D5
+
     case COMMAND_ANDOR: // 0x0D6
-        break;
-    case COMMAND_LAUNCH_MISSION: // 0x0D7
-    {
         CollectParameters(1);
-        auto* pNew = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[CTheScripts::ScriptParams[0].iParam]);
+        m_nLogicalOp = CTheScripts::ScriptParams[0].iParam;
+        if (m_nLogicalOp == ANDOR_NONE)
+        {
+            m_bCondResult = false;
+        }
+        else if (m_nLogicalOp >= ANDS_1 && m_nLogicalOp <= ANDS_8)
+        {
+            m_nLogicalOp++;
+            m_bCondResult = true;
+        }
+        else if (m_nLogicalOp >= ORS_1 && m_nLogicalOp <= ORS_8)
+        {
+            m_nLogicalOp++;
+            m_bCondResult = false;
+        }
         return 0;
-    }
+    case COMMAND_LAUNCH_MISSION: // 0x0D7
+        CollectParameters(1);
+        CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[CTheScripts::ScriptParams[0].iParam]);
+        return 0;
     case COMMAND_MISSION_HAS_FINISHED: // 0x0D8
         break;
     case COMMAND_STORE_CAR_CHAR_IS_IN: // 0x0D9
@@ -1444,7 +2141,7 @@ int8 CRunningScript::ProcessCommands200To299(int32 commandId) {
     case COMMAND_MAKE_CHAR_DO_NOTHING: // 0x12B
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -1654,7 +2351,7 @@ int8 CRunningScript::ProcessCommands300To399(int32 commandId) {
     case COMMAND_IS_CAR_STUCK_ON_ROOF: // 0x18F
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -1864,7 +2561,7 @@ int8 CRunningScript::ProcessCommands400To499(int32 commandId) {
     case COMMAND_IS_CAR_IN_AIR_PROPER: // 0x1F3
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -2078,7 +2775,7 @@ int8 CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_SET_COLL_OBJ_NO_OBJ: // 0x257
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -2288,7 +2985,7 @@ int8 CRunningScript::ProcessCommands600To699(int32 commandId) {
     case COMMAND_HAS_CAR_BEEN_TAKEN_TO_GARAGE: // 0x2BB
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -2498,7 +3195,7 @@ int8 CRunningScript::ProcessCommands700To799(int32 commandId) {
     case COMMAND_IS_CHAR_IN_CHARS_GROUP: // 0x31F
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -2708,7 +3405,7 @@ int8 CRunningScript::ProcessCommands800To899(int32 commandId) {
     case COMMAND_IS_ICECREAM_JINGLE_ON: // 0x383
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -2926,7 +3623,7 @@ int8 CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_FLASH_HUD_OBJECT: // 0x3E7
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -3191,7 +3888,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     case COMMAND_IS_CHAR_ON_FOOT: // 0x44B
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -3422,7 +4119,7 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     case COMMAND_SET_LVAR_INT_TO_CONSTANT: // 0x4AF
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -3632,7 +4329,7 @@ int8 CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_PRINT_HELP_FOREVER_WITH_NUMBER: // 0x513
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -3830,16 +4527,12 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     case COMMAND_IS_CHAR_STUCK: // 0x571
         break;
     case COMMAND_SET_ALL_TAXIS_HAVE_NITRO: // 0x572
-    {
-        /*
         CollectParameters(1);
-        if (ScriptParams[0])
+        if (CTheScripts::ScriptParams[0].iParam)
             CCheat::EnableLegitimateCheat(CHEAT_ALL_TAXIS_NITRO);
         else
-            CCheat::IsActive(CHEAT_ALL_TAXIS_NITRO) = false;
-        */
-        break;
-    }
+            CCheat::Disable(CHEAT_ALL_TAXIS_NITRO);
+        return 0;
     case COMMAND_SET_CHAR_STOP_SHOOT_DONT_SEEK_ENTITY: // 0x573
         break;
     case COMMAND_FREEZE_CAR_POSITION_AND_DONT_LOAD_COLLISION: // 0x574
@@ -3851,7 +4544,7 @@ int8 CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     case COMMAND_SET_FADE_AND_JUMPCUT_AFTER_RC_EXPLOSION: // 0x577
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -4061,7 +4754,7 @@ int8 CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     case COMMAND_TASK_FLEE_CHAR: // 0x5DB
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -4271,7 +4964,7 @@ int8 CRunningScript::ProcessCommands1500To1599(int32 commandId) {
     case COMMAND_PERFORM_SEQUENCE_TASK_REPEATEDLY: // 0x63F
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -4481,7 +5174,7 @@ int8 CRunningScript::ProcessCommands1600To1699(int32 commandId) {
     case COMMAND_GET_CAR_MASS: // 0x6A3
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -4691,7 +5384,7 @@ int8 CRunningScript::ProcessCommands1700To1799(int32 commandId) {
     case COMMAND_SKIP_CUTSCENE_START_INTERNAL: // 0x707
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -4901,7 +5594,7 @@ int8 CRunningScript::ProcessCommands1800To1899(int32 commandId) {
     case COMMAND_GET_ZONE_DEALER_STRENGTH: // 0x76B
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -5111,7 +5804,7 @@ int8 CRunningScript::ProcessCommands1900To1999(int32 commandId) {
     case COMMAND_SET_TWO_PLAYER_CAM_MODE_SEPARATE_CARS: // 0x7CF
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -5321,7 +6014,7 @@ int8 CRunningScript::ProcessCommands2000To2099(int32 commandId) {
     case COMMAND_HAS_OBJECT_BEEN_PHOTOGRAPHED: // 0x833
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -5531,7 +6224,7 @@ int8 CRunningScript::ProcessCommands2100To2199(int32 commandId) {
     case COMMAND_IS_VEHICLE_TOUCHING_OBJECT: // 0x897
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -5741,7 +6434,7 @@ int8 CRunningScript::ProcessCommands2200To2299(int32 commandId) {
     case COMMAND_SET_COORD_BLIP_APPEARANCE: // 0x8FB
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -5951,7 +6644,7 @@ int8 CRunningScript::ProcessCommands2300To2399(int32 commandId) {
     case COMMAND_GET_DOOR_ANGLE_RATIO: // 0x95F
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -6161,7 +6854,7 @@ int8 CRunningScript::ProcessCommands2400To2499(int32 commandId) {
     case COMMAND_IS_COP_VEHICLE_IN_AREA_3D_NO_SAVE: // 0x9C3
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -6371,7 +7064,7 @@ int8 CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     case COMMAND_SET_DEATH_WEAPONS_PERSIST: // 0xA27
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;
@@ -6423,16 +7116,12 @@ int8 CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     case COMMAND_SET_UP_CONVERSATION_END_NODE_WITH_SCRIPTED_SPEECH: // 0xA3C
         break;
     case COMMAND_ACTIVATE_PIMP_CHEAT: // 0xA3D
-    {
-        /*
         CollectParameters(1);
-        if (ScriptParams[0])
+        if (CTheScripts::ScriptParams[0].iParam)
             CCheat::EnableLegitimateCheat(CHEAT_PROSTITUTES_PAY_YOU);
         else
-            CCheat::IsActive(CHEAT_PROSTITUTES_PAY_YOU) = false;
-        */
-        break;
-    }
+            CCheat::Disable(CHEAT_PROSTITUTES_PAY_YOU);
+        return 0;
     case COMMAND_GET_RANDOM_CHAR_IN_AREA_OFFSET_NO_SAVE: // 0xA3E
         break;
     case COMMAND_SET_SCRIPT_COOP_GAME: // 0xA3F
@@ -6472,7 +7161,7 @@ int8 CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     case COMMAND_DO_DEBUG_STUFF: // 0xA50
         break;
     default:
-        break;
+        return -1;
     }
 
     return COMMAND_NOT_IMPLEMENTED_YET;

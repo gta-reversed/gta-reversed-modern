@@ -39,6 +39,11 @@ enum eScriptParameterType {
     SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY,
 };
 
+enum eScriptVariableType : uint8 {
+    VAR_LOCAL = 1,
+    VAR_GLOBAL = 2
+};
+
 enum eButtonId {
     BUTTON_LEFT_STICK_X,
     BUTTON_LEFT_STICK_Y,
@@ -162,7 +167,7 @@ public:
 
     tScriptParam* GetPointerToLocalVariable(int32 varId);
     tScriptParam* GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize);
-    tScriptParam* GetPointerToScriptVariable(uint8 variableType);
+    tScriptParam* GetPointerToScriptVariable(eScriptVariableType variableType);
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck
 
