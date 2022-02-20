@@ -287,11 +287,11 @@ int32 CRunningScript::CollectNextParameterWithoutIncreasingPC() {
         result = CTheScripts::Read2BytesFromScript(m_pCurrentIP);
         break;
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
-        ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(false, &arrVarOffset, &arrElemIdx);
         result = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
         break;
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
-        ReadArrayInformation(0, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(false, &arrVarOffset, &arrElemIdx);
         result = GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1)->iParam;
         break;
     }
@@ -334,11 +334,11 @@ void CRunningScript::CollectParameters(int16 count) {
             CTheScripts::ScriptParams[i].fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
             break;
         case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             CTheScripts::ScriptParams[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
             break;
         case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             CTheScripts::ScriptParams[i] = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
             break;
         }
@@ -402,7 +402,7 @@ uint16 CRunningScript::GetIndexOfGlobalVariable() {
     case SCRIPT_PARAM_GLOBAL_NUMBER_VARIABLE:
         return CTheScripts::Read2BytesFromScript(m_pCurrentIP);
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
-        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         return arrVarOffset + 4 * arrElemIdx;
     default:
         // ???
@@ -455,7 +455,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
     case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
-        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY)
             return (tScriptParam*)&CTheScripts::ScriptSpace[16 * arrElemIdx + arrVarOffset];
         else if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
@@ -466,7 +466,7 @@ tScriptParam* CRunningScript::GetPointerToScriptVariable(eScriptVariableType var
     case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
-        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY)
             arrElemSize = 4;
         else if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
@@ -540,11 +540,11 @@ void CRunningScript::ReadParametersForNewlyStartedScript(CRunningScript* newScri
             newScript->m_aLocalVars[i].fParam = CTheScripts::ReadFloatFromScript(m_pCurrentIP);
             break;
         case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             newScript->m_aLocalVars[i].iParam = *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]);
             break;
         case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             newScript->m_aLocalVars[i] = *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1);
             break;
         default:
@@ -583,7 +583,7 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
 
     case SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_GLOBAL_LONG_STRING_ARRAY:
-        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_GLOBAL_SHORT_STRING_ARRAY)
             strncpy(buffer, (char*)&CTheScripts::ScriptSpace[8 * arrElemIdx + arrVarOffset], 8);
         else
@@ -592,7 +592,7 @@ void CRunningScript::ReadTextLabelFromScript(char* buffer, uint8 nBufferLength) 
 
     case SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY:
     case SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY:
-        ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+        ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
         if (type == SCRIPT_PARAM_LOCAL_SHORT_STRING_ARRAY)
             strncpy(buffer, (char*)GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 2), 8);
         else
@@ -680,11 +680,11 @@ void CRunningScript::StoreParameters(int16 count) {
             break;
         }
         case SCRIPT_PARAM_GLOBAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             *reinterpret_cast<int32*>(&CTheScripts::ScriptSpace[arrVarOffset + 4 * arrElemIdx]) = CTheScripts::ScriptParams[i].iParam;
             break;
         case SCRIPT_PARAM_LOCAL_NUMBER_ARRAY:
-            ReadArrayInformation(1, &arrVarOffset, &arrElemIdx);
+            ReadArrayInformation(true, &arrVarOffset, &arrElemIdx);
             *GetPointerToLocalArrayElement(arrVarOffset, arrElemIdx, 1) = CTheScripts::ScriptParams[i];
             break;
         }
@@ -4116,9 +4116,19 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     case COMMAND_IS_CHAR_IN_WATER: // 0x4AD
         break;
     case COMMAND_SET_VAR_INT_TO_CONSTANT: // 0x4AE
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        pVar->iParam = CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     case COMMAND_SET_LVAR_INT_TO_CONSTANT: // 0x4AF
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        pVar->iParam = CTheScripts::ScriptParams[0].iParam;
+        return 0;
+    }
     default:
         return -1;
     }
@@ -4130,21 +4140,61 @@ int8 CRunningScript::ProcessCommands1100To1199(int32 commandId) {
 int8 CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     switch (commandId) {
     case COMMAND_IS_INT_VAR_GREATER_THAN_CONSTANT: // 0x4B0
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_THAN_CONSTANT: // 0x4B1
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam > CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_CONSTANT_GREATER_THAN_INT_VAR: // 0x4B2
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_CONSTANT_GREATER_THAN_INT_LVAR: // 0x4B3
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam > pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_VAR_GREATER_OR_EQUAL_TO_CONSTANT: // 0x4B4
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_INT_LVAR_GREATER_OR_EQUAL_TO_CONSTANT: // 0x4B5
-        break;
+    {
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        CollectParameters(1);
+        UpdateCompareFlag(pVar->iParam >= CTheScripts::ScriptParams[0].iParam);
+        return 0;
+    }
     case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_VAR: // 0x4B6
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_GLOBAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        return 0;
+    }
     case COMMAND_IS_CONSTANT_GREATER_OR_EQUAL_TO_INT_LVAR: // 0x4B7
-        break;
+    {
+        CollectParameters(1);
+        tScriptParam* pVar = GetPointerToScriptVariable(VAR_LOCAL);
+        UpdateCompareFlag(CTheScripts::ScriptParams[0].iParam >= pVar->iParam);
+        return 0;
+    }
     case COMMAND_GET_CHAR_WEAPON_IN_SLOT: // 0x4B8
         break;
     case COMMAND_GET_CLOSEST_STRAIGHT_ROAD: // 0x4B9
