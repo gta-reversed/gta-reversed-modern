@@ -198,7 +198,6 @@ void InjectHooksMain() {
 
     // WaitForDebugger();
     CPedList::InjectHooks();
-    CDebug::InjectHooks();
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
