@@ -426,7 +426,7 @@ public:
     bool CanBeArrested();
     bool CanStrafeOrMouseControl();
     bool CanBeDeleted();
-    bool CanBeDeletedEvenInVehicle();
+    bool CanBeDeletedEvenInVehicle() const;
     void RemoveGogglesModel();
     int32 GetWeaponSlot(eWeaponType weaponType);
     void GrantAmmo(eWeaponType weaponType, uint32 ammo);
@@ -446,7 +446,7 @@ public:
     void PositionAttachedPed();
     void Undress(char* modelName);
     void Dress();
-    bool IsAlive();
+    bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
     void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones);
@@ -469,7 +469,7 @@ public:
     float WorkOutHeadingForMovingFirstPerson(float heading);
     void UpdatePosition();
     void ProcessBuoyancy();
-    bool IsPedInControl();
+    bool IsPedInControl() const;
     void RemoveWeaponModel(int32 modelIndex);
     void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
     void PutOnGoggles();
