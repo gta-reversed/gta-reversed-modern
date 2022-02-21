@@ -3212,31 +3212,29 @@ void CPed::PreRender()
 * @addr 0x5E7680
 */
 void CPed::Render() {
-    // 0x5E76BE
-    if (!bDontRender && !(m_bIsVisible || CMirrors::ShouldRenderPeds())) {
-        return;
-    }
-
     // Save alpha fn. ref for player peds
-    uint32 storedAlphaRef{};
+    uint32 storedAlphaRef{1};
     if (IsPlayer()) {
         RwRenderStateGet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(&storedAlphaRef));
+        RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(1u));
     }
 
-    // Moved early out to top from here
+    // 0x5E76BE
+    if (bDontRender || !(m_bIsVisible || CMirrors::ShouldRenderPeds())) {
+        return;
+    }
 
     // 0x5E76F9 - 0x5E7735
     // Now do some extra checks if in vehicle (possibly early out)
     if (   bInVehicle
         && m_pVehicle
-        && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR)
-        && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP)
+        && !GetTaskManager().FindActiveTaskFromList({ TASK_COMPLEX_LEAVE_CAR, TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP })
     ) {
         // 0x5E774A
         if (!bRenderPedInCar) {
             return;
         }
-            
+
         // 0x5E7765 - 0x5E7774
         if (   !m_pVehicle->IsBike()
             && !m_pVehicle->IsSubQuad()
@@ -3269,9 +3267,9 @@ void CPed::Render() {
 
     // 0x5E7817
     // Render weapon (and gun flash) as well. (Done for local player only if flag is set.)
-    if (!m_pPlayerData || m_pPlayerData->m_bRenderWeapon) { 
-        if (m_pWeaponObject) {
-            if (!bInVehicle || !GetIntelligence()->GetTaskSwim() || GetIntelligence()->GetTaskHold(false)) {
+    if (m_pWeaponObject) {
+        if (!m_pPlayerData || m_pPlayerData->m_bRenderWeapon) {
+            if ((!bInVehicle || !GetIntelligence()->GetTaskSwim()) && !GetIntelligence()->GetTaskHold(false)) {
                 weaponPedsForPc_Insert(this);
                 if (m_nWeaponGunflashAlphaMP1 > 0 || m_nWeaponGunflashAlphaMP2 > 0) {
                     ResetGunFlashAlpha();
@@ -3287,9 +3285,9 @@ void CPed::Render() {
 
         // Update goggle's matrix with head's
         *RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject)) = headMat; // TODO: Is there a better way to do this?
-        
-        // Calculate it's new position 
-        RwV3d pos{ 0.f, 0.084f, 0.f }; // Offset 
+
+        // Calculate it's new position
+        RwV3d pos{0.f, 0.084f, 0.f};                   // Offset
         RwV3dTransformPoints(&pos, &pos, 1, &headMat); // Transform offset into the head's space
 
         RwV3dAssign(RwMatrixGetPos(RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject))), &pos);
@@ -3304,7 +3302,7 @@ void CPed::Render() {
         task->Process();
     }
 
-    bIsCached = true; // TODO/NOTE: Hmm.. Seems like the flag name is a little misleading.
+    bHasBeenRendered = true;
 
     // 0x5E794D
     // Restore alpha test fn for player peds
