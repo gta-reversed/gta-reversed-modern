@@ -933,7 +933,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 
     auto& gunFlashAlphaInHand = rightHand ? m_nWeaponGunflashAlphaMP2 : m_nWeaponGunflashAlphaMP1;
 
-    if (auto atomic = (RpAtomic*)GetFirstObject(RpClumpGetFrame(m_pGunflashObject))) {
+    if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
         // They used a clever trick to not have to conver to float..
         // Then they converted to a float to check if the number is higher than 255.. XDDD
         if (gunFlashAlphaInHand < 0) {
@@ -955,7 +955,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 */
 void CPed::ResetGunFlashAlpha() {
     if (m_pGunflashObject) {
-        if (auto atomic = (RpAtomic*)GetFirstObject(RpClumpGetFrame(m_pGunflashObject))) {
+        if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
             RpAtomicSetFlags(atomic, 4); // TODO: Use enum
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         }
