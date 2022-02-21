@@ -93,7 +93,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GetPedTalking, 0x5EFF50);
     RH_ScopedInstall(GiveWeaponWhenJoiningGang, 0x5E8BE0);
     RH_ScopedInstall(GiveDelayedWeapon, 0x5E89B0);
-    RH_ScopedOverloadedInstall(GetWeaponSkill, "", 0x5E6580, eWeaponSkill(CPed::*)());
+    RH_ScopedOverloadedInstall(GetWeaponSkill, "Current", 0x5E6580, eWeaponSkill(CPed::*)());
+    RH_ScopedOverloadedInstall(GetWeaponSkill, "WeaponType", 0x5E3B60, eWeaponSkill(CPed::*)(eWeaponType));
     // RH_ScopedInstall(PreRenderAfterTest, 0x5E65A0);
     RH_ScopedInstall(SetIdle, 0x5E7980);
     RH_ScopedOverloadedInstall(SetLook, "Heading", 0x5E79B0, void(CPed::*)(float));
@@ -1694,33 +1695,33 @@ eWeaponSkill CPed::GetWeaponSkill() {
 
 /*!
 * @addr     0x5E3B60
-* @returns Skill with \a weaponType. In case we're a player this is the stat with the given weapon, otherwise the mem. var. `m_nWeaponSkill`.
+* @returns Skill with \a weaponType. In case we're a player it's based on our current stat level with this weapon type, otherwise the mem. var. `m_nWeaponSkill`.
 */
 eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-    if (weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9)
-        return eWeaponSkill::STD;
-
-    if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
-    {
-        int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
-        CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::PRO);
-        auto golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
-        if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::PRO;
-
-        CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD);
-        auto brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
-        if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
-            return eWeaponSkill::POOR;
-
+    if (!CWeaponInfo::WeaponHasSkillStats(weaponType)) {
         return eWeaponSkill::STD;
     }
 
-    if (weaponType != WEAPON_PISTOL || m_nPedType != PED_TYPE_COP)
-        return m_nWeaponSkill;
+    if (IsPlayer())
+    {
+        const auto GetReqStatLevelWith = [this](eWeaponSkill skill) {
+            return (float)GetActiveWeapon().GetWeaponInfo(skill).m_fReqStatLevel;
+        };
 
-    return eWeaponSkill::COP;
+        const auto statValue = CStats::GetStatValue((eStats)CWeaponInfo::GetSkillStatIndex(weaponType));
+        if (statValue >= GetReqStatLevelWith(eWeaponSkill::PRO)) {
+            return eWeaponSkill::PRO;
+        } else if (statValue <= GetReqStatLevelWith(eWeaponSkill::POOR)) {
+            return eWeaponSkill::POOR;
+        } else {
+            return eWeaponSkill::STD; // Somewhere in-between poor and pro stat levels
+        }
+    } else {
+        if (weaponType == WEAPON_PISTOL && m_nPedType == PED_TYPE_COP)
+            return eWeaponSkill::COP;
+        return m_nWeaponSkill;
+    }
 }
 
 /*!
@@ -2714,7 +2715,7 @@ void CPed::SetAimFlag(float heading) {
 
     if (bIsDucking) {
         m_pedIK.bUseArm = false;
-    }
+    } // It's intentionally overwritten
 
     m_pedIK.bUseArm = CanWeRunAndFireWithWeapon();
 }

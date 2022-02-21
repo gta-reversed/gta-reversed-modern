@@ -106,7 +106,7 @@ public:
     static CWeaponInfo *GetWeaponInfo(eWeaponType weaponType, eWeaponSkill skill = eWeaponSkill::STD);
     static eWeaponType FindWeaponType(const char *name);
     static eWeaponFire FindWeaponFireType(const char *name);
-    static int32 GetSkillStatIndex(eWeaponType weaponType);
+    static eStats GetSkillStatIndex(eWeaponType weaponType);
 
     auto GetCrouchReloadAnimationID() -> AnimationId;
     auto GetTargetHeadRange() -> float;

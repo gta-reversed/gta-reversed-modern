@@ -319,20 +319,22 @@ CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponID, eWeaponSkill skill
 }
 
 // 0x743CD0
-int32 CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
-    if (!WeaponHasSkillStats(weaponType))
-        return -1;
+eStats CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
+    if (!WeaponHasSkillStats(weaponType)) {
+        assert(0);
+        return (eStats)-1;
+    }
 
     if (weaponType <= WEAPON_M4)
-        return weaponType - WEAPON_PISTOL + STAT_PISTOL_SKILL;
+        return (eStats)(weaponType - WEAPON_PISTOL + STAT_PISTOL_SKILL);
 
     if (weaponType == WEAPON_TEC9)
-        return STAT_MACHINE_PISTOL_SKILL;
+        return (eStats)STAT_MACHINE_PISTOL_SKILL;
 
     if (weaponType == WEAPON_COUNTRYRIFLE)
-        return STAT_GAMBLING;
+        return (eStats)STAT_GAMBLING;
 
-    return weaponType + STAT_PISTOL_SKILL;
+    return (eStats)(weaponType + STAT_PISTOL_SKILL);
 }
 
 // 0x743D10

@@ -519,8 +519,10 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
-    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD;
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
+}
 
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

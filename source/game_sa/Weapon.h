@@ -8,6 +8,7 @@
 
 #include "eWeaponType.h"
 #include "Vector2D.h"
+#include "eWeaponSkill.h"
 
 class FxSystem_c;
 class CColPoint;
@@ -116,6 +117,7 @@ public:
     static bool ProcessLineOfSight(const CVector& startPoint, const CVector& endPoint, CColPoint& outColPoint, CEntity*& outEntity, eWeaponType weaponType, CEntity* arg5, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool arg11, bool doIgnoreCameraCheck);
 
     CWeaponInfo& GetWeaponInfo(CPed* owner = nullptr);
+    CWeaponInfo& GetWeaponInfo(eWeaponSkill skill);
 
 private:
     friend void InjectHooksMain();
