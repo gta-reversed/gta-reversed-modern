@@ -30,6 +30,7 @@ class CObject;
 class CBuilding;
 class CDummy;
 class CBuilding;
+class CDummy;
 class CPhysical;
 class CBaseModelInfo;
 

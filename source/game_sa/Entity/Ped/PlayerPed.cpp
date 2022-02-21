@@ -84,7 +84,7 @@ VALIDATE_SIZE(WorkBufferSaveData, 132u + 4u);
 // todo: fix
 // 0x5D46E0
 bool CPlayerPed::Load_Reversed() {
-    return plugin::CallMethodAndReturn<bool, 0x5D46E0>(this);
+    return plugin::CallMethodAndReturn<bool, 0x5D46E0, CPlayerPed*>(this);
 
     CPed::Load();
 
@@ -822,8 +822,8 @@ CPed* CPlayerPed::FindPedToAttack() {
     float closestDistance = std::numeric_limits<float>::max();
 
     CPedGroupMembership& membership = GetGroupMembership();
-    for (int i = 0; CPools::ms_pPedPool->GetSize(); i++) {
-        CPed* ped = CPools::ms_pPedPool->GetAt(i);
+    for (int i = 0; GetPedPool()->GetSize(); i++) {
+        CPed* ped = GetPedPool()->GetAt(i);
         if (!ped)
             continue;
         if (ped->IsPlayer())
@@ -958,4 +958,12 @@ bool CPlayerPed::FindWeaponLockOnTarget() {
 // 0x60E530
 bool CPlayerPed::FindNextWeaponLockOnTarget(CEntity* arg0, bool arg1) {
     return plugin::CallMethodAndReturn<bool, 0x60E530, CPlayerPed *, CEntity*, bool>(this, arg0, arg1);
+}
+
+bool CPlayerPed::Load() {
+    return CPlayerPed::Load_Reversed();
+}
+
+bool CPlayerPed::Save() {
+    return CPlayerPed::Save_Reversed();
 }

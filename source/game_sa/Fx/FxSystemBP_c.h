@@ -34,7 +34,8 @@ public:
     ~FxSystemBP_c();
     FxSystemBP_c* Destructor();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
+    static void  operator delete(void* dat);
 
     void Load(char* filename, int32 file, int32 version);
 

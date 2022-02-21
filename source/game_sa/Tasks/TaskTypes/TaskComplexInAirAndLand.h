@@ -4,11 +4,9 @@
 
 class CTaskComplexInAirAndLand : public CTaskComplex {
 public:
-    uint8 m_bUsingJumpGlide;
-    uint8 m_bUsingFallGlide;
-    uint8 m_bInvalidClimb;
-    uint8 _pad;
-
+    bool m_bUsingJumpGlide;
+    bool m_bUsingFallGlide;
+    bool m_bInvalidClimb;
 
 public:
     CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bUsingFallGlide);

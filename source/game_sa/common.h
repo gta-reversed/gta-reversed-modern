@@ -53,8 +53,8 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
-#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)
+#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
 
@@ -69,13 +69,15 @@ extern int32 gDefaultTaskTime;
 
 extern char *gString; // char gString[200]
 
-extern float &GAME_GRAVITY; // default 0.0080000004
+extern float &GAME_GRAVITY; // default 0.008f
 
 extern char(&PC_Scratch)[16384];
 
 extern float& gfLaRiotsLightMult;
 
-const uint32 rwVENDORID_ROCKSTAR = 0x0253F2;
+// taken from rpplugin.h
+#define rwVENDORID_DEVELOPER 0x0253F2
+
 extern uint32 &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
@@ -245,21 +247,16 @@ void SkinGetBonePositions(RpClump* clump);
 void SkinSetBonePositions(RpClump* clump);
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
 void SetLightsWithTimeOfDayColour(RpWorld* world);
-// dummy function
 void LightsEnable(int32 arg0);
+void LightsCreate(RpWorld* world);
 void LightsDestroy(RpWorld* world);
-// lighting = [0.0f;1.0f]
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting);
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world);
 void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float red, float green, float blue);
 void RemoveExtraDirectionalLights(RpWorld* world);
-// lighting = [0.0f;1.0f]
-void SetAmbientAndDirectionalColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours_Mild(float lighting);
-// lighting = [0.0f;1.0f], unused
+void SetAmbientAndDirectionalColours(float fMult);
+void SetFlashyColours(float fMult);
+void SetFlashyColours_Mild(float fMult);
 void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
@@ -269,8 +266,7 @@ void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
 void SetDirectionalColours(RwRGBAReal* color);
-// lighting = [0.0f;1.0f]
-void SetLightColoursForPedsCarsAndObjects(float lighting);
+void SetLightColoursForPedsCarsAndObjects(float fMult);
 void SetLightsForInfraredVisionHeatObjects();
 void StoreAndSetLightsForInfraredVisionHeatObjects();
 void RestoreLightsForInfraredVisionHeatObjects();

@@ -134,7 +134,7 @@ CObject::~CObject()
         CColStore::RemoveRef(colModel->m_nColSlot);
     }
 
-    CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, CPools::ms_pObjectPool->GetRef(this));
+    CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, GetObjectPool()->GetRef(this));
 
     if (m_nRefModelIndex != -1)
         CModelInfo::GetModelInfo(m_nRefModelIndex)->RemoveRef();
@@ -156,19 +156,25 @@ CObject::~CObject()
         m_pFire->Extinguish();
 }
 
-void* CObject::operator new(uint32 size)
+void* CObject::operator new(unsigned size)
 {
-    return CPools::ms_pObjectPool->New();
+    return GetObjectPool()->New();
 }
 
-void* CObject::operator new(uint32 size, int32 iPoolRef)
+void* CObject::operator new(unsigned size, int32 poolRef)
 {
-    return CPools::ms_pObjectPool->New(iPoolRef);
+    return GetObjectPool()->New(poolRef);
 }
 
 void CObject::operator delete(void* obj)
 {
-    CPools::ms_pObjectPool->Delete(static_cast<CObject*>(obj));
+    GetObjectPool()->Delete(static_cast<CObject*>(obj));
+}
+
+// NOTSA
+void CObject::operator delete(void* obj, int32 poolRef)
+{
+    GetObjectPool()->Delete(static_cast<CObject*>(obj));
 }
 
 // 0x5A0760
@@ -1356,7 +1362,7 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
 
 // 0x5A1840
 void CObject::TryToFreeUpTempObjects(int32 numObjects) {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
@@ -1364,7 +1370,7 @@ void CObject::TryToFreeUpTempObjects(int32 numObjects) {
         if (numObjects <= 0)
             return;
 
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary() && !obj->IsVisible()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1375,12 +1381,12 @@ void CObject::TryToFreeUpTempObjects(int32 numObjects) {
 
 // 0x5A18B0
 void CObject::DeleteAllTempObjects() {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i) {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1390,12 +1396,12 @@ void CObject::DeleteAllTempObjects() {
 
 // 0x5A1910
 void CObject::DeleteAllMissionObjects() {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i)  {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsMissionObject()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1405,12 +1411,12 @@ void CObject::DeleteAllMissionObjects() {
 
 // 0x5A1980
 void CObject::DeleteAllTempObjectsInArea(CVector point, float radius) {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i) {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (!obj || !obj->IsTemporary())
             continue;
 
@@ -1458,9 +1464,9 @@ bool CObject::CanBeUsedToTakeCoverBehind() {
 
 // 0x5A1F60
 CObject* CObject::Create(int32 modelIndex, bool bUnused) {
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     auto* obj = new CObject(modelIndex, false); //BUG? most likely the unused parameter was supposed to be passed to the constructor
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (obj)
         return obj;
@@ -1473,9 +1479,9 @@ CObject* CObject::Create(int32 modelIndex, bool bUnused) {
 
 // 0x5A2070
 CObject* CObject::Create(CDummyObject* dummyObject) {
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     auto* obj = new CObject(dummyObject);
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (obj)
         return obj;
@@ -1547,12 +1553,12 @@ void CObject::ProcessControlLogic() {
 
 // 0x5A2B90
 bool IsObjectPointerValid_NotInWorld(CObject* object) {
-    return CPools::ms_pObjectPool->IsObjectValid(object);
+    return GetObjectPool()->IsObjectValid(object);
 }
 
 // 0x5A2C20
 bool IsObjectPointerValid(CObject* object) {
-    if (!CPools::ms_pObjectPool->IsObjectValid(object))
+    if (!GetObjectPool()->IsObjectValid(object))
         return false;
 
     if (object->m_bIsBIGBuilding)

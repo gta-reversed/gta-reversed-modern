@@ -194,6 +194,7 @@ CBox* CClumpModelInfo::GetBoundingBox_Reversed()
     return &GetColModel()->GetBoundingBox();
 }
 
+// 0x4C4F70
 void CClumpModelInfo::SetClump(RpClump* clump)
 {
     CClumpModelInfo::SetClump_Reversed(clump);
@@ -234,7 +235,7 @@ void CClumpModelInfo::SetClump_Reversed(RpClump* clump)
             auto geometry = RpAtomicGetGeometry(firstAtomic);
             auto skin = RpSkinGeometryGetSkin(geometry);
             for (int32 i = 0; i < RpGeometryGetNumVertices(geometry); ++i) {
-                auto& weight = RpSkinGetVertexBoneWeights(skin)[i];
+                auto& weight = RpSkinGetVertexBoneWeights(skin)[i]; // todoL: originally RpSkinGetVertexBoneWeights returns const obj*
                 auto fRecip = 1.0F / (weight.w0 + weight.w1 + weight.w2 + weight.w3);
                 weight.w0 *= fRecip;
                 weight.w1 *= fRecip;

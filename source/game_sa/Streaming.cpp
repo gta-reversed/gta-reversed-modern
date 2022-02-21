@@ -1348,8 +1348,8 @@ void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
 // 0x409430
 // Load big buildings around `point`
 void CStreaming::RequestBigBuildings(const CVector& point) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding) {
             if (CRenderer::ShouldModelBeStreamed(building, point, TheCamera.m_pRwCamera->farPlane))
                 RequestModel(building->m_nModelIndex, 0);
@@ -1782,21 +1782,21 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
 
     // Make sure model isn't used anywhere by destroying all objects/peds using it.
     if (modelInfo->m_nRefCount > 0) {
-        for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CPed* ped = CPools::ms_pPedPool->GetAt(i);
+            CPed* ped = GetPedPool()->GetAt(i);
             if (ped && ped->m_nModelIndex == modelId && !ped->IsPlayer() && ped->CanBeDeletedEvenInVehicle()) {
                 CTheScripts::RemoveThisPed(ped);
             }
         }
 
-        for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (obj && obj->m_nModelIndex == modelId && obj->CanBeDeleted()) {
                 CWorld::Remove(obj);
                 CWorld::RemoveReferencesToDeletedObject(obj);
@@ -2116,8 +2116,8 @@ void CStreaming::RemoveAllUnusedModels() {
 // 0x4093B0
 // Remove all BIG building's RW objects and models
 void CStreaming::RemoveBigBuildings() {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding && !building->m_bImBeingRendered) {
             building->DeleteRwObject();
             if (!CModelInfo::GetModelInfo(building->m_nModelIndex)->m_nRefCount)
@@ -2129,8 +2129,8 @@ void CStreaming::RemoveBigBuildings() {
 // 0x4094B0
 // Remove buildings, objects and dummies not in the current area (as in CWorld::currArea)
 void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_pRwObject) {
             if (!building->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!building->m_bImBeingRendered && !building->m_bIsBIGBuilding)
@@ -2138,8 +2138,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
-        CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+    for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
+        CObject* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->m_pRwObject) {
             if (obj->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!obj->m_bImBeingRendered && obj->m_nObjectType == eObjectType::OBJECT_GAME)
@@ -2147,8 +2147,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pDummyPool->GetSize() - 1; i >= 0; i--) {
-        CDummy* dummy = CPools::ms_pDummyPool->GetAt(i);
+    for (int32 i = GetDummyPool()->GetSize() - 1; i >= 0; i--) {
+        CDummy* dummy = GetDummyPool()->GetAt(i);
         if (dummy && dummy->m_pRwObject) {
             if (dummy->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!dummy->m_bImBeingRendered)

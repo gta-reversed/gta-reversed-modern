@@ -9,13 +9,13 @@
 #include "Task.h"
 
 // 0x61A5A0
-void* CTask::operator new(uint32 size) {
-    return CPools::ms_pTaskPool->New();
+void* CTask::operator new(unsigned size) {
+    return GetTaskPool()->New();
 }
 
 // 0x61A5B0
 void CTask::operator delete(void* object) {
-    CPools::ms_pTaskPool->Delete(static_cast<CTask*>(object));
+    GetTaskPool()->Delete(static_cast<CTask*>(object));
 }
 
 // 0x421180

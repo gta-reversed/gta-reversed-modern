@@ -11,7 +11,7 @@
 class CDummy : public CEntity {
 public:
     CDummy() : CEntity() { m_nType = ENTITY_TYPE_DUMMY; }
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void  operator delete(void* obj);
 
 public:

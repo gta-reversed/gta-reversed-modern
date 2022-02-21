@@ -459,7 +459,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
     // Test `spheres` against bounding box `bb` and store all colliding sphere's indices in `collidedIdxs`
     const auto TestSpheresAgainstBB = []<size_t N>(auto&& spheres, const auto& bb, uint32& numCollided, uint32 (&collidedIdxs)[N]) {
-        for (const auto& [i, sp] : enumerate(spheres)) {
+        for (const auto& [i, sp] : notsa::enumerate(spheres)) {
             if (TestSphereBox(sp, bb)) {
                 assert(numCollided < N); // Avoid out-of-bounds (Game originally didn't check)
                 collidedIdxs[numCollided++] = (uint32)i;
@@ -504,7 +504,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Test B's boxes against A's bounding sphere
     static uint32 collBoxB[MAX_BOXES]; // Indices of B's boxes colliding with A's bounding sphere
     uint32 numCollBoxB{};
-    for (auto&& [i, box] : enumerate(cdB.GetBoxes())) {
+    for (auto&& [i, box] : notsa::enumerate(cdB.GetBoxes())) {
         if (TestSphereBox(colABoundSphereSpaceB, box)) {
             collBoxB[numCollBoxB++] = i;
             if (numCollBoxB >= MAX_BOXES) {

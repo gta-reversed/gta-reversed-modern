@@ -95,7 +95,27 @@ void CReplay::RetrievePedAnimation() {
 
 // 0x45C210
 void CReplay::Display() {
-    plugin::Call<0x45C210>();
+    static uint32& g_nReplayTimer = *(uint32*)0xA43240;
+
+    if (!CReplay::Mode)
+        return;
+
+    g_nReplayTimer += 1;
+    if ((g_nReplayTimer & 32) == 0)
+        return;
+
+    CFont::SetScale(SCREEN_SCALE_X(1.5f), SCREEN_SCALE_Y(1.5f));
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetBackground(false, false);
+    auto v8 = (RsGlobal.maximumWidth - 20); // what?
+    CFont::SetCentreSize(float(RsGlobal.maximumWidth - 20));
+    CFont::SetProportional(true);
+    CFont::SetColor({ 255u, 255u, 200u, 200u });
+    CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
+    if (CReplay::Mode == REPLAY_MODE_1) {
+        v8 = (RsGlobal.maximumWidth / 10); // ok
+        CFont::PrintString(float(RsGlobal.maximumWidth / 10), float(RsGlobal.maximumHeight / 15), TheText.Get("REPLAY"));
+    }
 }
 
 // 0x45D430

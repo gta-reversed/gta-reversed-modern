@@ -318,14 +318,14 @@ void CBoat::FillBoatList() {
     auto vecCamDir = CVector2D(TheCamera.m_mCameraMatrix.GetForward());
     vecCamDir.Normalise();
 
-    auto iVehNum = CPools::ms_pVehiclePool->GetSize();
+    auto iVehNum = GetVehiclePool()->GetSize();
     if (!iVehNum)
         return;
 
     int32 iCurBoat = 0;
 
     for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
-        auto vehicle = CPools::ms_pVehiclePool->GetAt(iInd);
+        auto vehicle = GetVehiclePool()->GetAt(iInd);
         if (!vehicle || !vehicle->IsBoat())
             continue;
 

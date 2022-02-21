@@ -9,7 +9,7 @@ void CAnimBlendAssociation::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x4CEFC0);
 }
 
-void* CAnimBlendAssociation::operator new(uint32 size) {
+void* CAnimBlendAssociation::operator new(unsigned size) {
     return ((CAnimBlendAssociation * (__cdecl*)(uint32))0x82119A)(size);
 }
 
