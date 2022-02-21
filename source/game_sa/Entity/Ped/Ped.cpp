@@ -1706,7 +1706,7 @@ eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
     if (IsPlayer())
     {
         const auto GetReqStatLevelWith = [this](eWeaponSkill skill) {
-            return (float)GetActiveWeapon().GetWeaponInfo(skill).m_fReqStatLevel;
+            return (float)GetActiveWeapon().GetWeaponInfo(skill).m_nReqStatLevel;
         };
 
         const auto statValue = CStats::GetStatValue((eStats)CWeaponInfo::GetSkillStatIndex(weaponType));

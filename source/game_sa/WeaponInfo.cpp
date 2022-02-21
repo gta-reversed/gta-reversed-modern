@@ -39,7 +39,7 @@ void CWeaponInfo::Initialise() {
         info.m_eAnimGroup = ANIM_GROUP_DEFAULT;
         info.m_nAmmoClip = 0;
         info.m_nSkillLevel = 1;
-        info.m_fReqStatLevel = 0.0f;
+        info.m_nReqStatLevel = 0;
         info.m_fAccuracy = 1.0f;
         info.m_fMoveSpeed = 1.0f;
         info.m_fAnimLoopStart = 0.0f;
@@ -205,7 +205,7 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nDamage = dmg;
             wi.m_vecFireOffset = offset;
             wi.m_nSkillLevel = (uint32)skillLevel;
-            wi.m_fReqStatLevel = reqStatLevelForSkill;
+            wi.m_nReqStatLevel = reqStatLevelForSkill;
             wi.m_fAccuracy = accuracy;
             wi.m_fMoveSpeed = moveSpeed;
             wi.m_fBreakoutTime = (float)breakoutTime / 30.f;
