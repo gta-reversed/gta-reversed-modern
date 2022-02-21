@@ -1827,7 +1827,8 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
     }
 
     if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
-        RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[bone])); // IMPORTANT NOTE: And C fanboys consider this readable..
+        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questinable whenever that's needed at all..)
+        RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
         assert(0); // NOTSA: Let's see if this is possible at all. 
