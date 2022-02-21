@@ -1938,7 +1938,9 @@ void CPed::DoFootLanded(bool leftFoot, uint8 arg1)
 * @addr 0x5E57F0
 */
 void CPed::PlayFootSteps() {
-    auto& anim = *RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
+    return plugin::CallMethod<0x5E57F0>(this);
+    // Below code is kinda working.. kinda. I'm too lazy to fix it, good luck future me!
+    /* auto& anim = *RpAnimBlendClumpGetFirstAssociation(m_pRwClump);
 
     const auto IsWalkRunSprintAnim = [&] {
         switch (anim.m_nAnimId) {
@@ -1979,18 +1981,18 @@ void CPed::PlayFootSteps() {
     };
 
     // TODO: Is this inlined? What is this doing exactly? (Anim stuff)
-    float blendAmount1{}, blendAmount2{};
-    CAnimBlendAssociation* lastAssocWithFlag100{};
+    float walkBlendTotal{}, idleBlendTotal{};
+    CAnimBlendAssociation* walkAssoc{};
     auto* lastAssoc = &anim;
     do { // 0x5E58A1
-        if (lastAssoc->m_nFlags & ANIM_FLAG_100) {
-            blendAmount1 += lastAssoc->m_fBlendAmount;
-            lastAssocWithFlag100 = lastAssoc;
+        if (lastAssoc->m_nFlags & ANIM_FLAG_WALK) {
+            walkBlendTotal += lastAssoc->m_fBlendAmount;
+            walkAssoc = lastAssoc;
         } else {
             if ((lastAssoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
                     if (lastAssoc->m_nFlags & ANIM_FLAG_PARTIAL || bIsDucking) {
-                        blendAmount2 += lastAssoc->m_fBlendAmount;
+                        idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
             }
@@ -2000,15 +2002,15 @@ void CPed::PlayFootSteps() {
     } while (lastAssoc);
 
 
-    if (!lastAssocWithFlag100 || blendAmount1 <= 0.5f || blendAmount2 >= 1.f) { // 0x5E58FB
+    if (!walkAssoc || walkBlendTotal <= 0.5f || idleBlendTotal >= 1.f) { // 0x5E58FB
         DoProcessLanding();
         return;
     }
 
-    auto* lastAssocHier = lastAssocWithFlag100->m_pHierarchy;
+    auto* walkAssocHier = walkAssoc->m_pHierarchy;
 
-    float minAnimTime = lastAssocHier->m_fTotalTime / 15.f;
-    float maxAnimTime = lastAssocHier->m_fTotalTime / 2.f + minAnimTime; // Weird.. Why adding `minAnimTime` to it?
+    float minAnimTime = walkAssocHier->m_fTotalTime / 15.f;
+    float maxAnimTime = walkAssocHier->m_fTotalTime / 2.f + minAnimTime; // Weird.. Why adding `minAnimTime` to it?
 
     if (bIsDucking) {
         minAnimTime += 0.2f;
@@ -2018,7 +2020,7 @@ void CPed::PlayFootSteps() {
     if (m_pStats == &CPedStats::ms_apPedStats[STAT_BURGULAR_STATUS]) { // 0X5E5968
 
         // NOTE: The number `15` seems to be reoccurring, it's used above as well.
-        const float animTimeMult = lastAssocWithFlag100->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
+        const float animTimeMult = walkAssoc->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
         float adhesionMult{ 1.f };
         switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
@@ -2049,16 +2051,16 @@ void CPed::PlayFootSteps() {
                 // 0x5E5AB4
                 m_pedAudio.AddAudioEvent(audio,
                     CAEAudioUtility::AudioLog10(adhesionMult) * 20.f,
-                    lastAssocWithFlag100->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
+                    walkAssoc->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
                 );
             };
 
-            if (   lastAssocWithFlag100->m_fCurrentTime <= 0.f
-                || lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep > 0.f
+            if (   walkAssoc->m_fCurrentTime <= 0.f
+                || walkAssoc->m_fCurrentTime - walkAssoc->m_fTimeStep > 0.f
             ) {
                 if (adhesionMult > 0.2f
-                    && lastAssocWithFlag100->m_fCurrentTime > animTimeMult
-                    && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep <= animTimeMult
+                    && walkAssoc->m_fCurrentTime > animTimeMult
+                    && walkAssoc->m_fCurrentTime - walkAssoc->m_fTimeStep <= animTimeMult
                 ) {
                     // 0x5E5B46
                     DoAddSkateAE(eAudioEvents::AE_PED_SKATE_RIGHT);
@@ -2108,12 +2110,12 @@ void CPed::PlayFootSteps() {
     };
 
     // 0x5E5B50
-    if (   minAnimTime > lastAssocWithFlag100->m_fCurrentTime
-        || lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep >= minAnimTime
+    if (   minAnimTime > walkAssoc->m_fCurrentTime
+        || walkAssoc->m_fCurrentTime - walkAssoc->m_fTimeStep >= minAnimTime
     ) {
         // 0x5E5D8E
-        if (lastAssocWithFlag100->m_fCurrentTime >= (double)maxAnimTime
-            && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep < maxAnimTime)
+        if (walkAssoc->m_fCurrentTime >= (double)maxAnimTime
+            && walkAssoc->m_fCurrentTime - walkAssoc->m_fTimeStep < maxAnimTime)
         {
             // 0x5E592B - 0x5E5E56
             DoFootStepAE(false); // Do right footstep AE
@@ -2167,7 +2169,7 @@ void CPed::PlayFootSteps() {
     // 0x5E5C8D
     DoFootStepAE(true); // Do left foot step AE
     DoFootLanded(true, IsWalkRunSprintAnim());
-    DoProcessLanding();
+    DoProcessLanding(); */
 }
 
 /*!

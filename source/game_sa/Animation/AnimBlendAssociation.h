@@ -24,9 +24,9 @@ enum eAnimationFlags {
     ANIM_FLAG_MOVEMENT           = 0x20,
     ANIM_FLAG_TRANLSATE_Y        = 0x40,
     ANIM_FLAG_TRANLSATE_X        = 0x80,
-    ANIM_FLAG_100                = 0x100,
+    ANIM_FLAG_WALK               = 0x100,  // See `CPed::PlayFootSteps()`
     ANIM_FLAG_200                = 0x200,
-    ANIM_FLAG_ADD_TO_BLEND       = 0x400,
+    ANIM_FLAG_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIM_FLAG_IDLE, see `CPed::PlayFootSteps()`
     ANIM_FLAG_800                = 0x800,
     ANIM_FLAG_SECONDARY_TASK_ANIM= 0x1000,
     ANIM_FLAG_FREEZE_TRANSLATION = 0x2000,
