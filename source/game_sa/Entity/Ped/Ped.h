@@ -466,7 +466,7 @@ public:
     void UpdatePosition();
     void ProcessBuoyancy();
     bool IsPedInControl() const;
-    void RemoveWeaponModel(int32 modelIndex);
+    void RemoveWeaponModel(int32 modelIndex = MODEL_INVALID);
     void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
     void PutOnGoggles();
     eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
@@ -570,7 +570,6 @@ public:
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
-
 
 private:
     // Virtual method wrappers

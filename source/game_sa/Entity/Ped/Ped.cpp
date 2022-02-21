@@ -492,8 +492,8 @@ void CPed::CreateDeadPedWeaponPickups() {
             continue;
         }
         
-        if (!wep.m_nTotalAmmo && !wep.IsTypeMelee()) {
-            continue;
+        if (!wep.m_nTotalAmmo && !wep.IsTypeMelee()) { 
+            continue; // Has no ammo, but isn't a melee weapon.. so it's a weapon with no ammo :D
         }
 
         // Now, create a pickup at close to our position
@@ -766,13 +766,43 @@ bool CPed::UseGroundColModel() {
 */
 bool CPed::CanPedReturnToState()
 {
-    return m_nPedState <= PEDSTATE_STATES_NO_AI
-        && m_nPedState != PEDSTATE_AIMGUN
-        && m_nPedState != PEDSTATE_ATTACK
-        && m_nPedState != PEDSTATE_FIGHT
-        && m_nPedState != PEDSTATE_EVADE_STEP
-        && m_nPedState != PEDSTATE_SNIPER_MODE
-        && m_nPedState != PEDSTATE_LOOK_ENTITY;
+    switch (m_nPedState) {
+    case PEDSTATE_NONE:
+    case PEDSTATE_IDLE:
+    case PEDSTATE_LOOK_HEADING:
+    case PEDSTATE_WANDER_RANGE:
+    case PEDSTATE_WANDER_PATH:
+    case PEDSTATE_SEEK_POSITION:
+    case PEDSTATE_SEEK_ENTITY:
+    case PEDSTATE_FLEE_POSITION:
+    case PEDSTATE_FLEE_ENTITY:
+    case PEDSTATE_PURSUE:
+    case PEDSTATE_FOLLOW_PATH:
+    case PEDSTATE_ROCKETLAUNCHER_MODE:
+    case PEDSTATE_DUMMY:
+    case PEDSTATE_PAUSE:
+    case PEDSTATE_FACE_PHONE:
+    case PEDSTATE_MAKE_PHONECALL:
+    case PEDSTATE_CHAT:
+    case PEDSTATE_MUG:
+    case PEDSTATE_AI_CONTROL:
+    case PEDSTATE_SEEK_CAR:
+    case PEDSTATE_SEEK_BOAT_POSITION:
+    case PEDSTATE_FOLLOW_ROUTE:
+    case PEDSTATE_CPR:
+    case PEDSTATE_SOLICIT:
+    case PEDSTATE_BUY_ICE_CREAM:
+    case PEDSTATE_INVESTIGATE_EVENT:
+    case PEDSTATE_ON_FIRE:
+    case PEDSTATE_SUNBATHE:
+    case PEDSTATE_FLASH:
+    case PEDSTATE_JOG:
+    case PEDSTATE_ANSWER_MOBILE:
+    case PEDSTATE_HANG_OUT:
+    case PEDSTATE_STATES_NO_AI:
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -796,11 +826,15 @@ bool CPed::CanSetPedState() {
 */
 bool CPed::CanBeArrested()
 {
-    return m_nPedState != PEDSTATE_DIE
-        && m_nPedState != PEDSTATE_DEAD
-        && m_nPedState != PEDSTATE_ARRESTED
-        && m_nPedState != PEDSTATE_ENTER_CAR
-        && m_nPedState != PEDSTATE_EXIT_CAR;
+    switch (m_nPedState) {
+    case PEDSTATE_DIE:
+    case PEDSTATE_DEAD:
+    case PEDSTATE_ARRESTED:
+    case PEDSTATE_ENTER_CAR:
+    case PEDSTATE_EXIT_CAR:
+        return false;
+    }
+    return true;
 }
 
 /*!
@@ -808,15 +842,19 @@ bool CPed::CanBeArrested()
 */
 bool CPed::CanStrafeOrMouseControl()
 {
-    return m_nPedState == PEDSTATE_IDLE
-        || m_nPedState == PEDSTATE_FLEE_ENTITY
-        || m_nPedState == PEDSTATE_FLEE_POSITION
-        || m_nPedState == PEDSTATE_NONE
-        || m_nPedState == PEDSTATE_AIMGUN
-        || m_nPedState == PEDSTATE_ATTACK
-        || m_nPedState == PEDSTATE_FIGHT
-        || m_nPedState == PEDSTATE_JUMP
-        || m_nPedState == PEDSTATE_ANSWER_MOBILE;
+    switch (m_nPedState) {
+    case PEDSTATE_IDLE:
+    case PEDSTATE_FLEE_ENTITY:
+    case PEDSTATE_FLEE_POSITION:
+    case PEDSTATE_NONE:
+    case PEDSTATE_AIMGUN:
+    case PEDSTATE_ATTACK:
+    case PEDSTATE_FIGHT:
+    case PEDSTATE_JUMP:
+    case PEDSTATE_ANSWER_MOBILE:
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -881,7 +919,7 @@ void CPed::RemoveGogglesModel() {
 */
 int32 CPed::GetWeaponSlot(eWeaponType weaponType)
 {
-    return CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nSlot;
+    return CWeaponInfo::GetWeaponInfo(weaponType)->m_nSlot;
 }
 
 /*!
@@ -1074,7 +1112,12 @@ void CPed::SetLookTimer(uint32 time) {
 */
 bool CPed::IsPlayer() const
 {
-    return m_nPedType == PED_TYPE_PLAYER1 || m_nPedType == PED_TYPE_PLAYER2;
+    switch (m_nPedType) {
+    case PED_TYPE_PLAYER1:
+    case PED_TYPE_PLAYER2:
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -1142,7 +1185,7 @@ void CPed::Undress(char* modelName) {
 void CPed::Dress() {
     SetModelIndex(m_nModelIndex);
     if (m_nPedState != PEDSTATE_DRIVING) {
-        m_nPedState = PEDSTATE_IDLE;
+        SetPedState(PEDSTATE_IDLE);
     }
     CWorld::Add(this);
     RestoreHeadingRate();
@@ -1152,9 +1195,13 @@ void CPed::Dress() {
 * @addr 0x5E0170
 * @brief Checks if the Pedestrian is still alive.
 */
-bool CPed::IsAlive() const
-{
-    return m_nPedState != PEDSTATE_DIE && m_nPedState != PEDSTATE_DEAD;
+bool CPed::IsAlive() const {
+    switch (m_nPedState) {
+    case PEDSTATE_DIE:
+    case PEDSTATE_DEAD:
+        return true;
+    }
+    return false;
 }
 
 /*!
@@ -1418,7 +1465,7 @@ bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted) {
     if (!isSpotted) {
         const auto dir2D{ entity->GetPosition2D() - GetPosition2D() };
         if (   DotProduct2D(dir2D, m_matrix->GetForward()) < 0.f // Is behind us
-            || dir2D.SquaredMagnitude() >= 40.f * 40.f           // Using SqMag instead of Mag
+            || dir2D.SquaredMagnitude() >= 40.f * 40.f           // NOTSA: Using SqMag instead of Mag
         ) {
             return false;
         }
@@ -1620,12 +1667,7 @@ void CPed::ProcessBuoyancy()
 */
 bool CPed::IsPedInControl() const
 {
-    if (!bIsLanding && !bIsInTheAir)
-    {
-        if (IsAlive() && m_nPedState != PEDSTATE_ARRESTED)
-            return true;
-    }
-    return false;
+    return !bIsLanding && !bIsInTheAir && IsAlive() && m_nPedState != PEDSTATE_ARRESTED;
 }
 
 /*!
@@ -2577,9 +2619,11 @@ void CPed::SetIdle() {
 
     case PEDSTATE_AIMGUN:
         m_nPedState = PEDSTATE_IDLE;
-        [[fallthrough]];
+        m_nMoveState = PEDMOVE_STILL;
+        break;
+
     default:
-        m_nMoveState = eMoveState::PEDMOVE_STILL;
+        m_nMoveState = PEDMOVE_STILL;
         break;
     }
 }
@@ -2846,26 +2890,26 @@ void CPed::GiveWeaponAtStartOfFight()
 
         switch (m_nPedType)
         {
-            case PED_TYPE_GANG1:
-            case PED_TYPE_GANG2:
-            case PED_TYPE_GANG3:
-            case PED_TYPE_GANG4:
-            case PED_TYPE_GANG5:
-            case PED_TYPE_GANG6:
-            case PED_TYPE_GANG7:
-            case PED_TYPE_GANG8:
-            case PED_TYPE_GANG9:
-            case PED_TYPE_GANG10:
-                GiveRandomWeaponByType(WEAPON_PISTOL, 400);
-                break;
-            case PED_TYPE_DEALER:
-            case PED_TYPE_CRIMINAL:
-            case PED_TYPE_PROSTITUTE:
-                GiveRandomWeaponByType(WEAPON_KNIFE, 200);
-                GiveRandomWeaponByType(WEAPON_PISTOL, 400);
-                break;
-            default:
-                break;
+        case PED_TYPE_GANG1:
+        case PED_TYPE_GANG2:
+        case PED_TYPE_GANG3:
+        case PED_TYPE_GANG4:
+        case PED_TYPE_GANG5:
+        case PED_TYPE_GANG6:
+        case PED_TYPE_GANG7:
+        case PED_TYPE_GANG8:
+        case PED_TYPE_GANG9:
+        case PED_TYPE_GANG10:
+            GiveRandomWeaponByType(WEAPON_PISTOL, 400);
+            break;
+        case PED_TYPE_DEALER:
+        case PED_TYPE_CRIMINAL:
+        case PED_TYPE_PROSTITUTE:
+            GiveRandomWeaponByType(WEAPON_KNIFE, 200);
+            GiveRandomWeaponByType(WEAPON_PISTOL, 400);
+            break;
+        default:
+            break;
         }
     }
 }
@@ -3099,11 +3143,10 @@ void CPed::DeadPedMakesTyresBloody() {
 
 /*!
 * @notsa
-* @returns If player is in a vehicle and is it's driver
+* @returns If player is in a vehicle that has a driver as a passenger 
 */
-bool CPed::IsInVehicleThatHasADriver()
-{
-    if (bInVehicle) { // todo: IsInVehicleAsPassenger
+bool CPed::IsInVehicleThatHasADriver() {
+    if (bInVehicle) { // todo: IsInVehicleAsPassenger - Before refactoring check if `IsPassanger` returns true if `this` is the driver.
         if (m_pVehicle && m_pVehicle->IsPassenger(this) && m_pVehicle->m_pDriver)
             return true;
     }
