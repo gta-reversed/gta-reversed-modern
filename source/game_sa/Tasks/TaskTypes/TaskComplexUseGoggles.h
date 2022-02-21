@@ -25,27 +25,18 @@ public:
 
 private:
     friend void InjectHooksMain();
-    static void InjectHooks() {
-        RH_ScopedClass(CTaskComplexUseGoggles);
-        RH_ScopedCategory("Tasks/TaskTypes");
-
-        RH_ScopedInstall(Clone_Reversed, 0x637060);
-        RH_ScopedInstall(GetTaskType_Reversed, 0x634F10);
-        RH_ScopedInstall(CreateNextSubTask_Reversed, 0x634F40);
-        RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x634F90);
-        RH_ScopedInstall(ControlSubTask_Reversed, 0x635050);
-    };
+    static void InjectHooks();
 
     CTaskComplexUseGoggles* Constructor() {
         this->CTaskComplexUseGoggles::CTaskComplexUseGoggles();
         return this;
     }
 
-    CTask* Clone_Reversed() { return Clone(); };
-    eTaskType GetTaskType_Reversed() { return GetTaskType(); };
-    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CreateNextSubTask(ped); };
-    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CreateFirstSubTask(ped); };
-    CTask* ControlSubTask_Reversed(CPed* ped) { return ControlSubTask(ped); };
+    CTask* Clone_Reversed() { return CTaskComplexUseGoggles::Clone(); };
+    eTaskType GetTaskType_Reversed() { return CTaskComplexUseGoggles::GetTaskType(); };
+    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexUseGoggles::CreateNextSubTask(ped); };
+    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexUseGoggles::CreateFirstSubTask(ped); };
+    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexUseGoggles::ControlSubTask(ped); };
 };
 
-extern void TaskComplexUseGogglesTestCode();
+void TaskComplexUseGogglesTestCode();

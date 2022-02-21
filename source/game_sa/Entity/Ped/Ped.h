@@ -288,8 +288,8 @@ public:
     CVector2D           m_vecAnimMovingShiftLocal;
     CAcquaintance m_acquaintance;
     RpClump*            m_pWeaponObject;
-    RwFrame*            m_pGunflashObject;
-    RwFrame*            m_pGogglesObject;  // I'm really unsure at this point what the type is.. But afaik all 3 can be mixed
+    RwFrame*            m_pGunflashObject; // A frame in the Clump `m_pWeaponObject`
+    RpClump*            m_pGogglesObject;
     bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
     int16               nm_fWeaponGunFlashAlphaProgMP1;

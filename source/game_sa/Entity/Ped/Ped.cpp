@@ -815,18 +815,20 @@ void CPed::RemoveGogglesModel() {
     }
 
     // Release model info
-    CVisibilityPlugins::GetClumpModelInfo((RpClump*)m_pGogglesObject)->RemoveRef();
+    CVisibilityPlugins::GetClumpModelInfo(m_pGogglesObject)->RemoveRef();
 
     // Remove atomics anim from skin
-    if (const auto atomic = GetFirstAtomic((RpClump*)m_pGogglesObject)) {
+    if (const auto atomic = GetFirstAtomic(m_pGogglesObject)) {
         if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(atomic))) {
-            RpClumpForAllAtomics(m_pWeaponObject, AtomicRemoveAnimFromSkinCB, nullptr);
+            RpClumpForAllAtomics(m_pGogglesObject, AtomicRemoveAnimFromSkinCB, nullptr);
         }
     }
 
+    RpClumpGetFrame(m_pGogglesObject);
+
     // Destroy clump
-    RpClumpDestroy(m_pWeaponObject);
-    m_pWeaponObject = nullptr;
+    RpClumpDestroy((RpClump*)m_pGogglesObject);
+    m_pGogglesObject = nullptr;
 
     // Disable FX's of the goggles. (See mem. var. `m_pGogglesState` in the header)
     if (m_pGogglesState) {
@@ -900,6 +902,10 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 * @returns Always true
 */
 bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
+    if (!m_pGunflashObject || !m_pWeaponObject) {
+        return false;
+    }
+
     // Really elegant.. ;D
     if (bRightHand) {
         m_nWeaponGunflashAlphaMP2 = CPed::m_sGunFlashBlendStart;
@@ -908,7 +914,7 @@ bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
         m_nWeaponGunflashAlphaMP1 = CPed::m_sGunFlashBlendStart;
         nm_fWeaponGunFlashAlphaProgMP1 = CPed::m_sGunFlashBlendStart / arg0;
     }
-    RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, CGeneral::GetRandomNumberInRange(-360.f, 360.f), rwCOMBINEPRECONCAT);
+    RwMatrixRotate(RwFrameGetMatrix(RpClumpGetFrame(m_pGunflashObject)), &CPedIK::XaxisIK, CGeneral::GetRandomNumberInRange(-360.f, 360.f), rwCOMBINEPRECONCAT);
 
     return true;
 }
@@ -928,7 +934,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 
     auto& gunFlashAlphaInHand = rightHand ? m_nWeaponGunflashAlphaMP2 : m_nWeaponGunflashAlphaMP1;
 
-    if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
+    if (auto atomic = (RpAtomic*)GetFirstObject(RpClumpGetFrame(m_pGunflashObject))) {
         // They used a clever trick to not have to conver to float..
         // Then they converted to a float to check if the number is higher than 255.. XDDD
         if (gunFlashAlphaInHand < 0) {
@@ -950,7 +956,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 */
 void CPed::ResetGunFlashAlpha() {
     if (m_pGunflashObject) {
-        if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
+        if (auto atomic = (RpAtomic*)GetFirstObject(RpClumpGetFrame(m_pGunflashObject))) {
             RpAtomicSetFlags(atomic, 4); // TODO: Use enum
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         }
@@ -1629,8 +1635,10 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
 * @brief Createa goggles model for current infrared/nightvision. See \r PutOnGoggles.
 */
 void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
+    assert(!m_pGogglesObject); // Make sure it's not created already
+
     if (modelIndex != -1) {
-        m_pGogglesObject = (RwFrame*)CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
+        m_pGogglesObject = (RpClump*)CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
 
         m_pGogglesState = &inOutGogglesState;
         inOutGogglesState = true;
@@ -1800,7 +1808,7 @@ bool CPed::TurnBody() {
 * @brief Check if `this` is valid. Probably used by scripts?
 */
 bool CPed::IsPointerValid() {
-    return CPools::GetPedPool()->IsObjectValid(this) && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed());
+    return GetPedPool()->IsObjectValid(this) && (!m_pCollisionList.IsEmpty() || this == FindPlayerPed());
 }
 
 /*!
@@ -1861,7 +1869,7 @@ void CPed::SetPedState(ePedState pedState) {
     if (!IsAlive()) {
         ReleaseCoverPoint();
         if (bClearRadarBlipOnDeath) {
-            CRadar::ClearBlipForEntity(BLIP_CHAR, CPools::GetPedPool()->GetRef(this));
+            CRadar::ClearBlipForEntity(BLIP_CHAR, GetPedPool()->GetRef(this));
         }
     }
 }
@@ -2312,6 +2320,7 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
     GiveWeapon(WEAPON_RLAUNCHER, 200, true);
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
+    GiveWeapon(WEAPON_INFRARED, 200, true);
 }
 
 /*!
@@ -2327,6 +2336,7 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
     GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
+    GiveWeapon(WEAPON_NIGHTVISION, 200, true);
 }
 
 /*!
@@ -3203,6 +3213,7 @@ void CPed::PreRender()
 * @addr 0x5E7680
 */
 void CPed::Render() {
+    // 0x5E76BE
     if (!bDontRender && !(m_bIsVisible || CMirrors::ShouldRenderPeds())) {
         return;
     }
@@ -3215,20 +3226,24 @@ void CPed::Render() {
 
     // Moved early out to top from here
 
+    // 0x5E76F9 - 0x5E7735
     // Now do some extra checks if in vehicle (possibly early out)
     if (   bInVehicle
         && m_pVehicle
         && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR)
         && !GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP)
     ) {
+        // 0x5E774A
         if (!bRenderPedInCar) {
             return;
         }
-
+            
+        // 0x5E7765 - 0x5E7774
         if (   !m_pVehicle->IsBike()
             && !m_pVehicle->IsSubQuad()
             && !IsPlayer()
         ) {
+            // 0x5E77DD
             // Okay, let's check if the ped is close enough to the camera
 
             const auto IsPedInRangeOfCamera = [this](auto range) {
@@ -3242,6 +3257,7 @@ void CPed::Render() {
         }
     }
 
+    // 0x5E77E3
     // Render us (And any extra FX)
     if (CPostEffects::IsVisionFXActive()) {
         CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(this);
@@ -3252,6 +3268,7 @@ void CPed::Render() {
         CEntity::Render();
     }
 
+    // 0x5E7817
     // Render weapon (and gun flash) as well. (Done for local player only if flag is set.)
     if (!m_pPlayerData || m_pPlayerData->m_bRenderWeapon) { 
         if (m_pWeaponObject) {
@@ -3264,23 +3281,25 @@ void CPed::Render() {
         }
     }
 
+    // 0x5E787C
     // Render goggles object
     if (m_pGogglesObject) {
         auto& headMat = GetBoneMatrix(ePedBones::BONE_HEAD);
 
         // Update goggle's matrix with head's
-        *RwFrameGetMatrix(m_pGogglesObject) = headMat; // TODO: Is there a better way to do this?
+        *RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject)) = headMat; // TODO: Is there a better way to do this?
         
-        // Calculate it's position
-        RwV3d pos{ 0.f, 0.84f, 0.f }; // Offset
-        RwV3dTransformPoints(&pos, &pos, 1, &headMat);
+        // Calculate it's new position 
+        RwV3d pos{ 0.f, 0.084f, 0.f }; // Offset 
+        RwV3dTransformPoints(&pos, &pos, 1, &headMat); // Transform offset into the head's space
 
-        RwV3dAssign(RwMatrixGetPos(RwFrameGetMatrix(m_pGogglesObject)), &pos); // IMPORTANT NOTE: I still don't agree with C fanboys, this is not readable.
+        RwV3dAssign(RwMatrixGetPos(RwFrameGetMatrix(RpClumpGetFrame(m_pGogglesObject))), &pos);
+        RwFrameUpdateObjects(RpClumpGetFrame(m_pGogglesObject)); // After changing the position it has to be updated
 
-        RwFrameUpdateObjects(m_pGogglesObject);
-        RpClumpRender((RpClump*)m_pGogglesObject);
+        RpClumpRender(m_pGogglesObject);
     }
 
+    // 0x5E7927
     // Render JetPack (if any)
     if (const auto task = GetIntelligence()->GetTaskJetPack()) {
         task->Process();
@@ -3288,6 +3307,7 @@ void CPed::Render() {
 
     bIsCached = true; // TODO/NOTE: Hmm.. Seems like the flag name is a little misleading.
 
+    // 0x5E794D
     // Restore alpha test fn for player peds
     if (IsPlayer()) {
         RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(storedAlphaRef));

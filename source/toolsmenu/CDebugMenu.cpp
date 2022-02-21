@@ -24,6 +24,8 @@
 #include "toolsmenu\DebugModules\FXDebugModule.h"
 #include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
 
+#include "TaskComplexUseGoggles.h"
+
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
 bool CDebugMenu::m_showFPS = false;
@@ -332,7 +334,7 @@ static void DebugCode() {
     }
     if (pad->IsStandardKeyJustDown('4')) {
         printf("");
-        PedDebugModule::SpawnRandomPed();
+        TaskComplexUseGogglesTestCode();
     }
 }
 
