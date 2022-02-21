@@ -120,10 +120,6 @@ class CPedStat;
 class CPedStats;
 
 class CPed : public CPhysical {
-protected:
-    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
-        plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
-        plugin::dummy, plugin::dummy, plugin::dummy } {}
 public:
     static inline int32 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
@@ -369,8 +365,6 @@ public:
     int32               field_798;
 
 public:
-    // class virtual functions
-
     void SetModelIndex(uint32 modelIndex) override;
     void DeleteRwObject() override;
     void ProcessControl() override;
@@ -397,7 +391,9 @@ public:
     static void* operator new(unsigned size);
     static void operator delete(void* data);
 
+    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{} {}
     CPed(ePedType);
+    ~CPed();
 
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);
@@ -426,7 +422,7 @@ public:
     bool CanBeArrested();
     bool CanStrafeOrMouseControl();
     bool CanBeDeleted();
-    bool CanBeDeletedEvenInVehicle();
+    bool CanBeDeletedEvenInVehicle() const;
     void RemoveGogglesModel();
     int32 GetWeaponSlot(eWeaponType weaponType);
     void GrantAmmo(eWeaponType weaponType, uint32 ammo);
@@ -446,7 +442,7 @@ public:
     void PositionAttachedPed();
     void Undress(char* modelName);
     void Dress();
-    bool IsAlive();
+    bool IsAlive() const;
     void UpdateStatEnteringVehicle();
     void UpdateStatLeavingVehicle();
     void GetTransformedBonePosition(RwV3d& inOffsetOutPosn, ePedBones boneId, bool updateSkinBones);
@@ -469,7 +465,7 @@ public:
     float WorkOutHeadingForMovingFirstPerson(float heading);
     void UpdatePosition();
     void ProcessBuoyancy();
-    bool IsPedInControl();
+    bool IsPedInControl() const;
     void RemoveWeaponModel(int32 modelIndex);
     void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
     void PutOnGoggles();

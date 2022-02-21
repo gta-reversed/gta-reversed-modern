@@ -126,7 +126,7 @@ public:
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
 
-    virtual void UpdateParameters(CAESound* sound, int16 curPlayPos);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
     virtual void AddScriptSayEvent(int32, int32, uint8, uint8, uint8);
     virtual void Terminate();
     virtual void PlayLoadedSound();
