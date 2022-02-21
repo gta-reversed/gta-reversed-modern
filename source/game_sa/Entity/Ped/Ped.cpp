@@ -1689,9 +1689,8 @@ void CPed::PutOnGoggles() {
 * @addr    0x5E6580
 * @returns Weapon skill with current weapon
 */
-eWeaponSkill CPed::GetWeaponSkill()
-{
-    return GetWeaponSkill(m_aWeapons[m_nActiveWeaponSlot].m_nType);
+eWeaponSkill CPed::GetWeaponSkill() {
+    return GetWeaponSkill(GetActiveWeapon().m_nType);
 }
 
 /*!
