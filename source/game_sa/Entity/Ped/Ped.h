@@ -120,10 +120,6 @@ class CPedStat;
 class CPedStats;
 
 class CPed : public CPhysical {
-protected:
-    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
-        plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
-        plugin::dummy, plugin::dummy, plugin::dummy } {}
 public:
     static inline int32 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
@@ -369,8 +365,6 @@ public:
     int32               field_798;
 
 public:
-    // class virtual functions
-
     void SetModelIndex(uint32 modelIndex) override;
     void DeleteRwObject() override;
     void ProcessControl() override;
@@ -397,7 +391,9 @@ public:
     static void* operator new(unsigned size);
     static void operator delete(void* data);
 
+    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{} {}
     CPed(ePedType);
+    ~CPed();
 
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);

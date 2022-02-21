@@ -189,6 +189,48 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 }
 
 /*!
+* @addr 0x5E8620
+ */
+CPed::~CPed() {
+    plugin::CallMethod<0x5E8620, CPed*>(this);
+    return;
+
+    CReplay::RecordPedDeleted(this);
+    if ((m_nThirdPedFlags & 0x1000000) != 0) {
+        // CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains[m_nSpecialModelIndex].IMG_index + 26230);
+        m_nThirdPedFlags &= ~0x1000000u;
+        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
+        m_nSpecialModelIndex = -1;
+    }
+
+    CWorld::Remove(this);
+    // CRadar::ClearBlipForEntity(BLIP_CHAR, ((((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4) << 8) + CPools::ms_pPedPool->m_byteMap[((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4].nValue);
+    //  CConversations::RemoveConversationForPed(this);
+    ClearReference(m_pVehicle);
+    if (m_pFire) {
+        m_pFire->Extinguish();
+    }
+
+    if (m_pCoverPoint) {
+        m_pCoverPoint->ReleaseCoverPointForPed(this);
+        m_pCoverPoint = nullptr;
+    }
+
+    ClearWeapons();
+
+    if ((m_nSecondPedFlags & 0x10000) != 0)
+        --CPopulation::NumMiamiViceCops;
+
+    CPopulation::UpdatePedCount(this, 1);
+    m_pedSpeech.Terminate();
+    m_weaponAudio.Terminate();
+    // m_pedAudio.Terminate();
+    delete m_pIntelligence;
+    ClearReference(m_pLookTarget); // they forgot set nullptr to m_pLookTarget
+    // _vector_destructor(this->m_aWeapons, 28, 13, (int)CWeaponSlot__destructor);
+}
+
+/*!
 * @addr 0x5E4720
 */
 void* CPed::operator new(unsigned size) {
@@ -520,7 +562,7 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
     if (IsCreatedByMission()) {
         association->m_fSpeed = pitchFactor + 1.f;
     } else {
-        association->m_fSpeed = pitchFactor + 1.2f - m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f;
+        association->m_fSpeed = pitchFactor + 1.2f - m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f; // todo: use GetRandom from CGeneral::
     }
 }
 
@@ -724,14 +766,13 @@ bool CPed::UseGroundColModel() {
 */
 bool CPed::CanPedReturnToState()
 {
-    return
-        m_nPedState <= PEDSTATE_STATES_NO_AI &&
-        m_nPedState != PEDSTATE_AIMGUN &&
-        m_nPedState != PEDSTATE_ATTACK &&
-        m_nPedState != PEDSTATE_FIGHT &&
-        m_nPedState != PEDSTATE_EVADE_STEP &&
-        m_nPedState != PEDSTATE_SNIPER_MODE &&
-        m_nPedState != PEDSTATE_LOOK_ENTITY;
+    return m_nPedState <= PEDSTATE_STATES_NO_AI
+        && m_nPedState != PEDSTATE_AIMGUN
+        && m_nPedState != PEDSTATE_ATTACK
+        && m_nPedState != PEDSTATE_FIGHT
+        && m_nPedState != PEDSTATE_EVADE_STEP
+        && m_nPedState != PEDSTATE_SNIPER_MODE
+        && m_nPedState != PEDSTATE_LOOK_ENTITY;
 }
 
 /*!
@@ -755,12 +796,11 @@ bool CPed::CanSetPedState() {
 */
 bool CPed::CanBeArrested()
 {
-    return
-        m_nPedState != PEDSTATE_DIE &&
-        m_nPedState != PEDSTATE_DEAD &&
-        m_nPedState != PEDSTATE_ARRESTED &&
-        m_nPedState != PEDSTATE_ENTER_CAR &&
-        m_nPedState != PEDSTATE_EXIT_CAR;
+    return m_nPedState != PEDSTATE_DIE
+        && m_nPedState != PEDSTATE_DEAD
+        && m_nPedState != PEDSTATE_ARRESTED
+        && m_nPedState != PEDSTATE_ENTER_CAR
+        && m_nPedState != PEDSTATE_EXIT_CAR;
 }
 
 /*!
@@ -768,16 +808,15 @@ bool CPed::CanBeArrested()
 */
 bool CPed::CanStrafeOrMouseControl()
 {
-    return
-        m_nPedState == PEDSTATE_IDLE ||
-        m_nPedState == PEDSTATE_FLEE_ENTITY ||
-        m_nPedState == PEDSTATE_FLEE_POSITION ||
-        m_nPedState == PEDSTATE_NONE ||
-        m_nPedState == PEDSTATE_AIMGUN ||
-        m_nPedState == PEDSTATE_ATTACK ||
-        m_nPedState == PEDSTATE_FIGHT ||
-        m_nPedState == PEDSTATE_JUMP ||
-        m_nPedState == PEDSTATE_ANSWER_MOBILE;
+    return m_nPedState == PEDSTATE_IDLE
+        || m_nPedState == PEDSTATE_FLEE_ENTITY
+        || m_nPedState == PEDSTATE_FLEE_POSITION
+        || m_nPedState == PEDSTATE_NONE
+        || m_nPedState == PEDSTATE_AIMGUN
+        || m_nPedState == PEDSTATE_ATTACK
+        || m_nPedState == PEDSTATE_FIGHT
+        || m_nPedState == PEDSTATE_JUMP
+        || m_nPedState == PEDSTATE_ANSWER_MOBILE;
 }
 
 /*!
@@ -907,13 +946,14 @@ bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
 
     // Really elegant.. ;D
     if (bRightHand) {
-        m_nWeaponGunflashAlphaMP2 = m_sGunFlashBlendStart;
+        m_nWeaponGunflashAlphaMP2      = m_sGunFlashBlendStart;
         nm_fWeaponGunFlashAlphaProgMP2 = m_sGunFlashBlendStart / arg0;
     } else {
-        m_nWeaponGunflashAlphaMP1 = m_sGunFlashBlendStart;
+        m_nWeaponGunflashAlphaMP1      = m_sGunFlashBlendStart;
         nm_fWeaponGunFlashAlphaProgMP1 = m_sGunFlashBlendStart / arg0;
     }
-    RwMatrixRotate(RwFrameGetMatrix(RpClumpGetFrame(m_pGunflashObject)), &CPedIK::XaxisIK, CGeneral::GetRandomNumberInRange(-360.f, 360.f), rwCOMBINEPRECONCAT);
+    const auto angle = CGeneral::GetRandomNumberInRange(-360.f, 360.f);
+    RwMatrixRotate(RwFrameGetMatrix(RpClumpGetFrame(m_pGunflashObject)), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
 
     return true;
 }
@@ -2484,7 +2524,7 @@ void CPed::ReplaceWeaponWhenExitingVehicle() {
     }
 
     if (IsPlayer() && m_nSavedWeapon != WEAPON_UNIDENTIFIED) {
-        SetCurrentWeapon((eWeaponType)m_nSavedWeapon);
+        SetCurrentWeapon(m_nSavedWeapon);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     } else {                                                           // Not player, or has no saved weapon
         AddWeaponModel(GetActiveWeapon().GetWeaponInfo().m_nModelId1); // Load current active weapon
@@ -2616,7 +2656,7 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
 
     if (m_nSavedWeapon == WEAPON_UNIDENTIFIED) {
         m_nSavedWeapon = GetActiveWeapon().m_nType;
-        m_nTurretAmmo = GetActiveWeapon().m_nTotalAmmo;
+        m_nTurretAmmo = GetActiveWeapon().m_nTotalAmmo; // todo: unify types
     }
 
     if (!IsPlayer()) {
