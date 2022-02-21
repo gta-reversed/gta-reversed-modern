@@ -241,7 +241,6 @@ void CPed::SetMoveAnim() {
     } else if (m_nMoveState != eMoveState::PEDMOVE_NONE) {
         m_nSwimmingMoveState = m_nMoveState;
 
-        
         switch (m_nMoveState) { // TODO: What's happening here?
         case eMoveState::PEDMOVE_WALK:
         case eMoveState::PEDMOVE_RUN:
@@ -260,7 +259,7 @@ void CPed::SetMoveAnim() {
         }
         }
 
-        // Do BlendAnimation and call `DoUpdateMoveAnim` aftewards
+        // Do BlendAnimation and call `DoUpdateMoveAnim` afterwards
         const auto DoBlendAnim = [&, this](AssocGroupId grp, AnimationId animId, float blendDelta) {
             if (const auto assoc = CAnimManager::BlendAnimation(m_pRwClump, grp, animId, blendDelta)) {
                 DoUpdateMoveAnim(assoc);
@@ -976,7 +975,7 @@ float CPed::GetBikeRidingSkill() {
 
 /*!
 * @addr 0x5DF560
-* @brief Deal with sholder bone (clavicle) roation based on arm and breast rotation
+* @brief Deal with shoulder bone (clavicle) rotation based on arm and breast rotation
 */
 void CPed::ShoulderBoneRotation(RpClump* clump) {
     // Note: Didn't use `GetBoneMatrix` here, because it would be slower
@@ -1632,7 +1631,7 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
 
 /*!
 * @addr 0x5E3A90
-* @brief Createa goggles model for current infrared/nightvision. See \r PutOnGoggles.
+* @brief Creates goggles model for current infrared/night vision. See \r PutOnGoggles.
 */
 void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
     assert(!m_pGogglesObject); // Make sure it's not created already
@@ -1647,7 +1646,7 @@ void CPed::AddGogglesModel(int32 modelIndex, bool & inOutGogglesState) {
 
 /*!
 * @addr 0x5E3AE0
-* @brief Puts on goggles if current weapon is infrared/nightvision. (Also removes weapon model from hand and enabled corresponding PostFX)
+* @brief Puts on goggles if current weapon is infrared/night vision. (Also removes weapon model from hand and enabled corresponding PostFX)
 */
 void CPed::PutOnGoggles() {
     auto& wepInSlot = GetWeaponInSlot(GetWeaponSlot(eWeaponType::WEAPON_INFRARED));
@@ -1699,19 +1698,19 @@ eWeaponSkill CPed::GetWeaponSkill() {
 */
 eWeaponSkill CPed::GetWeaponSkill(eWeaponType weaponType)
 {
-    if ( weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9 )
+    if (weaponType < WEAPON_PISTOL || weaponType > WEAPON_TEC9)
         return eWeaponSkill::STD;
 
     if (!m_nPedType || m_nPedType == PED_TYPE_PLAYER2)
     {
         int32 skillStat = CWeaponInfo::GetSkillStatIndex(weaponType);
         CWeaponInfo* pGolfClubWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::PRO);
-        float golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
+        auto golfClubStatLevel = static_cast<float>(pGolfClubWeaponInfo->m_fReqStatLevel);
         if (golfClubStatLevel <= CStats::GetStatValue((eStats)skillStat))
             return eWeaponSkill::PRO;
 
         CWeaponInfo* brassKnuckleWeaponInfo = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD);
-        float brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
+        auto brassKnuckleStatLevel = static_cast<float>(brassKnuckleWeaponInfo->m_fReqStatLevel);
         if (brassKnuckleStatLevel > CStats::GetStatValue((eStats)skillStat))
             return eWeaponSkill::POOR;
 
@@ -1737,7 +1736,7 @@ void CPed::SetWeaponSkill(eWeaponType weaponType, eWeaponSkill skill)
 
 /*!
 * @addr 0x5E1950
-* @brief Clear ped look, and start restoing it
+* @brief Clear ped look, and start restoring it
 */
 void CPed::ClearLookFlag() {
     if (!bIsLooking) {
@@ -1965,7 +1964,7 @@ void CPed::PlayFootSteps() {
 
     // 0x5E58FB, 0x5E5A0B, 0x5E5AB9, 0x5E5E64, 0x5E5D87
     const auto DoProcessLanding = [this] {
-        if (bIsLanding) { // Redudant check.. probably inlined function?
+        if (bIsLanding) { // Redundant check.. probably inlined function?
             if (const auto task = GetTaskManager().GetSimplestActiveTask(); task->GetTaskType() == eTaskType::TASK_SIMPLE_LAND) {
                 auto landedTask = task->As<CTaskSimpleLand>();
                 if (landedTask->RightFootLanded()) {
@@ -2016,10 +2015,10 @@ void CPed::PlayFootSteps() {
 
     if (m_pStats == &CPedStats::ms_apPedStats[STAT_BURGULAR_STATUS]) { // 0X5E5968
 
-        // NOTE: The number `15` seems to be reoccuring, it's used above as well.
+        // NOTE: The number `15` seems to be reoccurring, it's used above as well.
         const float animTimeMult = lastAssocWithFlag100->m_nAnimId != AnimationId::ANIM_ID_WALK ? 8.f / 15.f : 5.f / 15.f;
 
-        float adhisionMult{ 1.f };
+        float adhesionMult{ 1.f };
         switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
             if (rand() % 64) {
@@ -2038,17 +2037,16 @@ void CPed::PlayFootSteps() {
             if (rand() % 128) {
                 m_vecAnimMovingShiftLocal *= 0.5f;
             }
-            adhisionMult = 0.5f;
+            adhesionMult = 0.5f;
             break;
         }
         }
 
         if (m_pedAudio.field_7C) { // Move condition out here, but originally it was at 0x5E5AFA and 0x5E5A68
-            const auto DoAddSkateAE = [&, this](eAudioEvents ae) {
+            const auto DoAddSkateAE = [&, this](eAudioEvents audio) {
                 // 0x5E5AB4
-                m_pedAudio.AddAudioEvent(
-                    ae,
-                    CAEAudioUtility::AudioLog10(adhisionMult) * 20.f,
+                m_pedAudio.AddAudioEvent(audio,
+                    CAEAudioUtility::AudioLog10(adhesionMult) * 20.f,
                     lastAssocWithFlag100->m_nAnimId == AnimationId::ANIM_ID_WALK ? 1.f : 0.75f
                 );
             };
@@ -2056,7 +2054,7 @@ void CPed::PlayFootSteps() {
             if (   lastAssocWithFlag100->m_fCurrentTime <= 0.f
                 || lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep > 0.f
             ) {
-                if (   adhisionMult > 0.2f
+                if (adhesionMult > 0.2f
                     && lastAssocWithFlag100->m_fCurrentTime > animTimeMult
                     && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep <= animTimeMult
                 ) {
@@ -2116,7 +2114,7 @@ void CPed::PlayFootSteps() {
             && lastAssocWithFlag100->m_fCurrentTime - lastAssocWithFlag100->m_fTimeStep < maxAnimTime)
         {
             // 0x5E592B - 0x5E5E56
-            DoFootStepAE(false); // Do right foot step AE
+            DoFootStepAE(false); // Do right footstep AE
             DoProcessLanding();
             return;
         }
@@ -2219,7 +2217,7 @@ void CPed::AddWeaponModel(int32 modelIndex) {
 
 /*!
 * @addr 0x5E6010
-* @brief Takoe off goggles (Infrared/Nightvision weapon)
+* @brief Take off goggles (Infrared/Night Vision weapon)
 */
 void CPed::TakeOffGoggles()
 {
@@ -2247,7 +2245,7 @@ void CPed::TakeOffGoggles()
 
 /*!
 * @addr 0x5E6080
-* @brief Give ped weapon \a weaponType with ammo \a ammo. If ped has already the same weapon, just add the ammo to the weapon's current total ammo, and reaload it.
+* @brief Give ped weapon \a weaponType with ammo \a ammo. If ped has already the same weapon, just add the ammo to the weapon's current total ammo, and reload it.
 */
 void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
     const auto givenWepInfo = CWeaponInfo::GetWeaponInfo(weaponType);
