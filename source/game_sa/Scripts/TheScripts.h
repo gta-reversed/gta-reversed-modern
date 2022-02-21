@@ -150,6 +150,9 @@ enum eScriptThingType : int32 {
     SCRIPT_THING_PED_GROUP
 };
 
+constexpr int32 MAIN_SCRIPT_SIZE    = 200000;
+constexpr int32 MISSION_SCRIPT_SIZE = 69000;
+
 class CTheScripts {
 public:
     static bool& DbgFlag;
@@ -227,8 +230,8 @@ public:
     static CUpsideDownCarCheck& UpsideDownCars;
     static tScriptParam* LocalVariablesForCurrentMission; // static ScriptVar LocalVariablesForCurrentMission[1024]
                                                           //! Script space, where main.scm MAIN section is loaded.
-    static uint8* ScriptSpace;                     // static char ScriptSpace[200000]
-    static char* MissionBlock;                            // static char MissionBlock[69000]
+    static uint8* ScriptSpace;                     // static char ScriptSpace[MAIN_SCRIPT_SIZE]
+    static char* MissionBlock;                            // static char MissionBlock[MISSION_SCRIPT_SIZE]
     static CRunningScript*& pIdleScripts;
     static CRunningScript*& pActiveScripts;
     static CRunningScript* ScriptsArray; // static CRunningScript ScriptsArray[96]

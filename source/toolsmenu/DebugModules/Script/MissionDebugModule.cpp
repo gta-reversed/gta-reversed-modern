@@ -160,10 +160,10 @@ void Initialise() {
 
 void InitializeAndStartNewScript() {
     CTheScripts::WipeLocalVariableMemoryForMissionScript();
-    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE]);
     script->m_bUseMissionCleanup = true;
     script->m_bIsMission = true;
-    script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+    script->m_pBaseIP = &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE];
     CTheScripts::bAlreadyRunningAMissionScript = true;
     CGameLogic::ClearSkip(false);
 }
@@ -210,7 +210,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
             FILE* file = CFileMgr::OpenFile(gString, "rb");
             if (file) {
                 CFileMgr::Seek(file, offsetToMission, 0);
-                bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+                bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE], MISSION_SCRIPT_SIZE);
                 CFileMgr::CloseFile(file);
                 if (bytesRead >= 1) {
                     InitializeAndStartNewScript();
@@ -221,11 +221,11 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
             }
         }
     }
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
     if (!CGame::bMissionPackGame) {
         FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
         CFileMgr::Seek(file, offsetToMission, 0);
-        CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+        CFileMgr::Read(file, &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE], MISSION_SCRIPT_SIZE);
         CFileMgr::CloseFile(file);
         InitializeAndStartNewScript();
     }

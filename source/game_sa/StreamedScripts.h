@@ -12,6 +12,8 @@ class CRunningScript;
 
 class CStreamedScripts {
 public:
+    static constexpr uint16 NUM_STREAMED_SCRIPTS = 82;
+
     struct {
         uint8* data;
         char   m_nStatus;
@@ -19,7 +21,7 @@ public:
         int16  m_nScmIndex;
         char   m_Name[20];
         int32  m_nSize;
-    } m_aScripts[82];
+    } m_aScripts[NUM_STREAMED_SCRIPTS];
 
     int32 m_nLargestExternalSize;
     int16 m_nCountOfScripts;

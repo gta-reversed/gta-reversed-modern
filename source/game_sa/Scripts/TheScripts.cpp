@@ -189,15 +189,15 @@ void CTheScripts::RemoveThisPed(CPed* ped) {
 
 // 0x464C20
 CRunningScript* CTheScripts::StartNewScript(uint8* startIP) {
-    CRunningScript* scripts = pIdleScripts;
+    CRunningScript* script = pIdleScripts;
 
-    scripts->RemoveScriptFromList(&pIdleScripts);
-    scripts->Init();
-    scripts->SetCurrentIp(startIP);
-    scripts->AddScriptToList(&pActiveScripts);
-    scripts->SetActive(true);
+    script->RemoveScriptFromList(&pIdleScripts);
+    script->Init();
+    script->SetCurrentIp(startIP);
+    script->AddScriptToList(&pActiveScripts);
+    script->SetActive(true);
 
-    return scripts;
+    return script;
 }
 
 // 0x464C90

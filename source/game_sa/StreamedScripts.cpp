@@ -56,11 +56,11 @@ int32 CStreamedScripts::RegisterScript(const char* scriptName) {
     return plugin::CallMethodAndReturn<int32, 0x4706C0, CStreamedScripts*, const char*>(this, scriptName);
 }
 
-// 0x?
+// 0x470910
 uint32 CStreamedScripts::GetStreamedScriptWithThisStartAddress(uint8* dataPtr)
 {
     uint16 result;
-    for (result = 0; result < 82 && m_aScripts[result].data != dataPtr; ++result) // todo: ~~magic number~~ sizeof m_aScripts[82];
+    for (result = 0; result < NUM_STREAMED_SCRIPTS && m_aScripts[result].data != dataPtr; ++result)
         ;
     return result;
 }
