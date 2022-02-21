@@ -26,6 +26,7 @@ constexpr int32 MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y
 constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
+constexpr CRect WORLD_BOUND_RECT{ -3000.0F, -3000.0F, 3000.0F, 3000.0F };
 
 class CWorld {
 public:
@@ -200,8 +201,7 @@ public:
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
     static bool IsInWorldBounds(CVector2D pos) { // NOTSA
-        return pos.x > -3000.0f && pos.x < 3000.0f
-            && pos.y > -3000.0f && pos.y < 3000.0f;
+        return WORLD_BOUND_RECT.IsPointInside(pos);
     }
 };
 

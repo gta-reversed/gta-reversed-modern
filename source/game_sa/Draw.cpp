@@ -74,7 +74,7 @@ void DoFade() {
                 std::max<uint8>(0, CDraw::FadeValue)
             );
         }
-
-        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
+        // NOTE: Originally bottom <=> top were swapped by error. I swapped them to be correct because our CRect ctor asserts.
+        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f,  SCREEN_HEIGHT + 5.0f }, color);
     }
 }

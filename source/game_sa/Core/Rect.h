@@ -20,18 +20,35 @@
 
 class CRect {
 public:
-    float left;   // x1
-    float bottom; // y2
-    float right;  // x2
-    float top;    // y1
+    float left   = 1000000.0F;  // x1
+    float bottom = -1000000.0F; // y2
+    float right  = -1000000.0F; // x2
+    float top    = 1000000.0F;  // y1
 
 public:
     static void InjectHooks();
 
-    CRect();
-    CRect(float fLeft, float fTop, float fRight, float fBottom);
+    constexpr CRect() = default;
+    constexpr CRect(float fLeft, float fTop, float fRight, float fBottom) :
+        left{ fLeft },
+        top{ fTop },
+        right{ fRight },
+        bottom{ fBottom }
+    {
+        assert(!IsFlipped());
+    }
 
-    bool IsFlipped() const;
+    // From center and size
+    constexpr CRect(const CVector2D& center, float size) :
+        left{ center.x - size, },
+        top{ center.y - size, },
+        right{ center.x + size, },
+        bottom{ center.y + size, }
+    {
+        assert(!IsFlipped());
+    }
+
+    constexpr bool IsFlipped() const { return left > right || top > bottom; }
     void Restrict(const CRect& restriction);
     void Resize(float resizeX, float resizeY);
     bool IsPointInside(const CVector2D& point) const;

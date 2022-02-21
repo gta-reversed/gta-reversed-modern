@@ -23,27 +23,6 @@ void CRect::InjectHooks()
     RH_ScopedInstall(StretchToPoint, 0x5327F0);
 }
 
-CRect::CRect(float fLeft, float fTop, float fRight, float fBottom)
-{
-    left = fLeft;
-    top = fTop;
-    right = fRight;
-    bottom = fBottom;
-}
-
-CRect::CRect()
-{
-    left = 1000000.0F;
-    top = 1000000.0F;
-    right = -1000000.0F;
-    bottom = -1000000.0F;
-}
-
-inline bool CRect::IsFlipped() const
-{
-    return left > right || top > bottom;
-}
-
 inline void CRect::Restrict(const CRect& restriction)
 {
     if (restriction.left < left)
