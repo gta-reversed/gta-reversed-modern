@@ -205,6 +205,8 @@
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
+    // WaitForDebugger();
+    CPedList::InjectHooks();
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
