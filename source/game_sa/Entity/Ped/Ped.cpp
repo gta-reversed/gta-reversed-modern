@@ -54,7 +54,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(GiveWeapon, 0x5E6080);
     RH_ScopedInstall(TakeOffGoggles, 0x5E6010);
     RH_ScopedInstall(AddWeaponModel, 0x5E5ED0);
-    RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
+    //RH_ScopedInstall(PlayFootSteps, 0x5E57F0);
     // RH_ScopedInstall(DoFootLanded, 0x5E5380);
     RH_ScopedInstall(ClearAll, 0x5E5320);
     RH_ScopedInstall(CalculateNewOrientation, 0x5E52E0);
