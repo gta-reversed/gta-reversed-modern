@@ -750,15 +750,17 @@ int8 CRunningScript::ProcessOneCommand() {
     m_bNotFlag = (command & 0x8000) != 0;
     command &= 0x7FFF;
 
+    const auto InvokeHandlerFromTable = [this, idx = command / 100, command](auto&& tbl) {
+        return std::invoke(tbl[idx], this, command);
+    };
+
     // NOTSA: First we try to call our (reversed) implementation for the current command
-    int8 ret = (this->*reSA_CommandHandlerTable[command / 100])(command);
-    if (ret == COMMAND_NOT_IMPLEMENTED_YET)
-    {
-        // Not implemented -> invoke the original opcode
-        ret = CommandHandlerTable[command / 100](this, command);
+    if (const auto ret = InvokeHandlerFromTable(reSA_CommandHandlerTable); ret != COMMAND_NOT_IMPLEMENTED_YET) {
+        return ret; // Implemented, don't call original handler.
     }
 
-    return ret;
+    // Not implemented -> invoke the original opcode
+    return InvokeHandlerFromTable(CommandHandlerTable);
 }
 
 // 0x469F00
