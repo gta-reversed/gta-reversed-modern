@@ -154,8 +154,18 @@ enum eScriptThingType : int32 {
 static constexpr uint32 MISSION_SCRIPT_SIZE = 69000;
 class CTheScripts {
 public:
-    static constexpr uint32 MAIN_SCRIPT_SIZE    = 200000;
-    static constexpr int32 NUM_BUILDING_SWAPS   = 25;
+    static constexpr uint32 MAIN_SCRIPT_SIZE   = 200000;
+    static constexpr uint32 SCRIPT_SPACE_SIZE  = MAIN_SCRIPT_SIZE + MISSION_SCRIPT_SIZE;
+    static constexpr int32  NUM_BUILDING_SWAPS = 25;
+
+    //! Lower `MAIN_SCRIPT_SIZE` is where MAIN.SCM is, remaining `MISSION_SCRIPT_SIZE` is for other loaded scripts.
+    static inline uint8(&ScriptSpace)[SCRIPT_SPACE_SIZE] = *(uint8(*)[SCRIPT_SPACE_SIZE])0xA49960;
+
+    //! Refernce to \r ScriptSpace's lower portion for MAIN.SCM - Prefer this over `&ScriptSpace[0]`
+    static inline uint8(&MainSCMBlock)[MAIN_SCRIPT_SIZE] = *(uint8(*)[MAIN_SCRIPT_SIZE])(0xA49960 + 0); // Can't use `&ScriptSpace[0]` because init order seems to be messed up...
+
+    //! Refernce to \r ScriptSpace's upper portion for other scripts - Prefer this over `&ScriptSpace[MAIN_SCRIPT_SIZE]`
+    static inline uint8(&MissionBlock)[MISSION_SCRIPT_SIZE] = *(uint8(*)[MISSION_SCRIPT_SIZE])(0xA49960 + MAIN_SCRIPT_SIZE);  // Can't use `&ScriptSpace[MAIN_SCRIPT_SIZE]` because init order seems to be messed up...
 
     static inline tScriptParam(&ScriptParams)[10] = *(tScriptParam(*)[10])0xA43C78;
     static inline tScriptSwitchCase(&SwitchJumpTable)[75] = *(tScriptSwitchCase(*)[75])0xA43CF8;
@@ -171,8 +181,6 @@ public:
     static inline CEntity(&InvisibilitySettingArray)[20] = *(CEntity(*)[20])0xA449E0;
     static inline tUsedObject(&UsedObjectArray)[395] = *(tUsedObject(*)[395])0xA44B70;
     static inline tScriptParam(&LocalVariablesForCurrentMission)[1024] = *(tScriptParam(*)[1024])0xA48960;
-    static inline uint8(&ScriptSpace)[MAIN_SCRIPT_SIZE] = *(uint8(*)[MAIN_SCRIPT_SIZE])0xA49960;  //! MAIN.SCM's space. (Originally size was MAIN_SCRIPT_SIZE + MISSION_SCRIPT_SIZE, but we split it into two, other part is \r MissionBlock
-    static inline uint8(&MissionBlock)[MISSION_SCRIPT_SIZE] = *(uint8(*)[MISSION_SCRIPT_SIZE])0xA7A6A0; //! Originally part of \r ScriptSpace. Only mission scripts are loaded here.
     static inline CRunningScript(&ScriptsArray)[96] = *(CRunningScript(*)[96])0xA8B430;
     static inline tScriptSphere(&ScriptSphereArray)[16] = *(tScriptSphere(*)[16])0xA91268;
     static inline tScriptText(&IntroTextLines)[96] = *(tScriptText(*)[96])0xA44B68;
@@ -358,7 +366,7 @@ public:
     }
 
     static int32 GetSizeOfVariableSpace() {
-        uint8* tmp = &ScriptSpace[3];
+        uint8* tmp = &MainSCMBlock[3];
         return Read4BytesFromScript(tmp);
     }
 };

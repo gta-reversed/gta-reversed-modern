@@ -9,7 +9,13 @@
 #include "TheScripts.h"
 #include "UpsideDownCarCheck.h"
 
+
 void CTheScripts::InjectHooks() {
+    // Has to have these, because there seems to be something going on with the variable init order
+    // For now I just changed it to use static addresses, not sure whats going on..
+    assert((void*)0xA49960 == (void*)&MainSCMBlock[0]);
+    assert((void*)(0xA7A6A0) == (void*)&MissionBlock[0]);
+
     RH_ScopedClass(CTheScripts);
     RH_ScopedCategory("Scripts");
 
@@ -157,7 +163,7 @@ void CTheScripts::WipeLocalVariableMemoryForMissionScript() {
 
 // 0x464D40
 void CTheScripts::StartTestScript() {
-    StartNewScript(ScriptSpace);
+    StartNewScript(MainSCMBlock);
 }
 
 // 0x46A000
