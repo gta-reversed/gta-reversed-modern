@@ -5,10 +5,8 @@
 #include "TaskSimplePlayerOnFoot.h"
 #include "Radar.h"
 
-int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
-
 //! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
-int8 (CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
+CRunningScript::CommandHandlerTable_t CRunningScript::reSA_CommandHandlerTable = {
     &ProcessCommands0To99,
     &ProcessCommands100To199,
     &ProcessCommands200To299,

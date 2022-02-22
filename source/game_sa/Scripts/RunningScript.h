@@ -129,8 +129,10 @@ public:
     static constexpr int8 COMMAND_NOT_IMPLEMENTED_YET = -2;
 
 public:
-    static int8(__thiscall** CommandHandlerTable)(CRunningScript* _this, int32 commandId); // static int8(__thiscall *CommandHandlerTable[27])(CRunningScript *, int32)
-    static int8(CRunningScript::* reSA_CommandHandlerTable[27])(int32 commandId);
+    using CommandHandlerFn_t = int8(__thiscall CRunningScript::*)(int32);
+    using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
+    static inline std::array<CommandHandlerFn_t, 27>& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
+    static CommandHandlerTable_t reSA_CommandHandlerTable;
 
     static void InjectHooks();
 
