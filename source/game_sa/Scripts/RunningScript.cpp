@@ -6,6 +6,8 @@
 #include "Radar.h"
 
 int8(__thiscall** CRunningScript::CommandHandlerTable)(CRunningScript* _this, int32 commandId) = reinterpret_cast<int8(__thiscall**)(CRunningScript*, int32)>(0x8A6168);
+
+//! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
 int8 (CRunningScript::* CRunningScript::reSA_CommandHandlerTable[27])(int32 commandId) = {
     &ProcessCommands0To99,
     &ProcessCommands100To199,
@@ -786,10 +788,8 @@ int8 CRunningScript::Process() {
         }
     }
     CTheScripts::ReinitialiseSwitchStatementData();
-    if (CTimer::GetTimeInMS() >= m_nWakeTime)
-    {
-        while (!ProcessOneCommand())
-            ;
+    if (CTimer::GetTimeInMS() >= (uint32)m_nWakeTime) {
+        while (!ProcessOneCommand()); // Process commands
     }
 
     return 0;
@@ -3749,14 +3749,14 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
                 auto* file = CFileMgr::OpenFile(gString, "rb");
                 if (file) {
                     CFileMgr::Seek(file, offsetToMission, 0);
-                    bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE], MISSION_SCRIPT_SIZE);
+                    bytesRead = CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
                     CFileMgr::CloseFile(file);
                     if (bytesRead >= 1) {
                         CTheScripts::WipeLocalVariableMemoryForMissionScript();
-                        CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE]);
+                        CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
                         script->m_bUseMissionCleanup = true;
                         script->m_bIsMission = true;
-                        script->m_pBaseIP = &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE];
+                        script->m_pBaseIP = &CTheScripts::MissionBlock[0];
                         CTheScripts::bAlreadyRunningAMissionScript = true;
                         CGameLogic::ClearSkip(false);
                     }
@@ -3770,14 +3770,14 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
         if (!CGame::bMissionPackGame) {
             auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
             CFileMgr::Seek(file, offsetToMission, 0);
-            CFileMgr::Read(file, &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE], MISSION_SCRIPT_SIZE);
+            CFileMgr::Read(file, &CTheScripts::MissionBlock, MISSION_SCRIPT_SIZE);
             CFileMgr::CloseFile(file);
 
             CTheScripts::WipeLocalVariableMemoryForMissionScript();
-            CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE]);
+            CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
             script->m_bUseMissionCleanup = true;
             script->m_bIsMission = true;
-            script->m_pBaseIP = &CTheScripts::ScriptSpace[MAIN_SCRIPT_SIZE];
+            script->m_pBaseIP = &CTheScripts::MissionBlock[0];
             CTheScripts::bAlreadyRunningAMissionScript = true;
             CGameLogic::ClearSkip(false);
         }

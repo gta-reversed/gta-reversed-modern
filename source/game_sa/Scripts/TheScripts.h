@@ -150,101 +150,99 @@ enum eScriptThingType : int32 {
     SCRIPT_THING_PED_GROUP
 };
 
-constexpr int32 MAIN_SCRIPT_SIZE    = 200000;
-constexpr int32 MISSION_SCRIPT_SIZE = 69000;
 
+static constexpr uint32 MISSION_SCRIPT_SIZE = 69000;
 class CTheScripts {
 public:
-    static bool& DbgFlag;
-    static tScriptParam* ScriptParams;         // static tScriptParam ScriptParams[10]
-    static tScriptSwitchCase* SwitchJumpTable; // static tScriptSwitchCase SwitchJumpTable[75]
-    static uint16& NumberOfEntriesInSwitchTable;
-    static void*& SwitchDefaultAddress;
-    static bool& SwitchDefaultExists;
-    static int32& ValueToCheckInSwitchStatement;
-    static uint16& NumberOfEntriesStillToReadForSwitch;
-    static tScriptSequence* ScriptSequenceTaskArray; // static tScriptSequence ScriptSequenceTaskArray[64]
-    static uint16& NumberOfScriptCheckpoints;
-    static tScriptCheckpoint* ScriptCheckpointArray;     // static tScriptCheckpoint ScriptCheckpointArray[20]
-    static tScriptEffectSystem* ScriptEffectSystemArray; // static tScriptEffectSystem ScriptEffectSystemArray[32]
-    static int16& CardStackPosition;
-    static int16* CardStack; // static int16 CardStack[312]
-    static bool& bDrawSubtitlesBeforeFade;
-    static bool& bDrawOddJobTitleBeforeFade;
-    static bool& bScriptHasFadedOut;
-    static bool& bAddNextMessageToPreviousBriefs;
-    static int32& ForceRandomCarModel;
-    static bool& bDrawCrossHair;
-    static bool& bEnableCraneRelease;
-    static bool& bEnableCraneLower;
-    static bool& bEnableCraneRaise;
-    static float& fCameraHeadingStepWhenPlayerIsAttached;
-    static float& fCameraHeadingWhenPlayerIsAttached;
-    static bool& bDisplayHud;
-    static bool& HideAllFrontEndMapBlips;
-    static bool& RadarShowBlipOnAllLevels;
-    static uint8& RadarZoomValue;
-    static bool& bPlayerIsOffTheMap;
-    static char& RiotIntensity;
-    static bool& bPlayerHasMetDebbieHarry;
-    static bool& bDisplayNonMiniGameHelpMessages;
-    static bool& bMiniGameInProgress;
-    static int32& ScriptPickupCycleIndex;
-    static char& FailCurrentMission;
-    static bool& bAlreadyRunningAMissionScript;
-    static uint32& LargestNumberOfMissionScriptLocalVariables;
-    static uint16& NumberOfExclusiveMissionScripts;
-    static uint16& NumberOfMissionScripts;
-    static uint32& LargestMissionScriptSize;
-    static uint32& MainScriptSize;
-    static int32* MultiScriptArray; // static char MultiScriptArray[800]
-    static bool& bUsingAMultiScriptFile;
-    static int32& StoreVehicleIndex;
-    static bool& StoreVehicleWasRandom;
-    static uint16& CommandsExecuted;
-    static uint16& ScriptsUpdated;
-    static int32* ScriptConnectLodsObjects;                      // static int32 ScriptConnectLodsObjects[20]
-    static tScriptAttachedAnimGroup* ScriptAttachedAnimGroups; // static tScriptAttachedAnimGroup ScriptAttachedAnimGroups[8]
-    static int32* VehicleModelsBlockedByScript;                  // static int32 VehicleModelsBlockedByScript[20]
-    static int32* SuppressedVehicleModels;                       // static int32 SuppressedVehicleModels[40]
-    static CEntity** InvisibilitySettingArray;                 // static CEntity *InvisibilitySettingArray[20]
+    static constexpr uint32 MAIN_SCRIPT_SIZE    = 200000;
+    static constexpr int32 NUM_BUILDING_SWAPS   = 25;
 
-    static constexpr int32 NUM_BUILDING_SWAPS = 25;
-    static tBuildingSwap (&BuildingSwapArray)[NUM_BUILDING_SWAPS]; // static tBuildingSwap BuildingSwapArray[25]
+    static inline tScriptParam(&ScriptParams)[10] = *(tScriptParam(*)[10])0xA43C78;
+    static inline tScriptSwitchCase(&SwitchJumpTable)[75] = *(tScriptSwitchCase(*)[75])0xA43CF8;
+    static inline tScriptCheckpoint(&ScriptCheckpointArray)[20] = *(tScriptCheckpoint(*)[20])0xA44070;
+    static inline tScriptEffectSystem(&ScriptEffectSystemArray)[32] = *(tScriptEffectSystem(*)[32])0xA44110;
+    static inline tScriptSequence(&ScriptSequenceTaskArray)[64] = *(tScriptSequence(*)[64])0xA43F68;
+    static inline int16(&CardStack)[312] = *(int16(*)[312])0xA44218;
+    static inline int32(&MultiScriptArray)[800] = *(int32(*)[800])0xA444C8;
+    static inline int32(&ScriptConnectLodsObjects)[20] = *(int32(*)[20])0xA44800;
+    static inline tScriptAttachedAnimGroup(&ScriptAttachedAnimGroups)[8] = *(tScriptAttachedAnimGroup(*)[8])0xA44850;
+    static inline int32(&VehicleModelsBlockedByScript)[20] = *(int32(*)[20])0xA448F0;
+    static inline int32(&SuppressedVehicleModels)[40] = *(int32(*)[40])0xA44940;
+    static inline CEntity(&InvisibilitySettingArray)[20] = *(CEntity(*)[20])0xA449E0;
+    static inline tUsedObject(&UsedObjectArray)[395] = *(tUsedObject(*)[395])0xA44B70;
+    static inline tScriptParam(&LocalVariablesForCurrentMission)[1024] = *(tScriptParam(*)[1024])0xA48960;
+    static inline uint8(&ScriptSpace)[MAIN_SCRIPT_SIZE] = *(uint8(*)[MAIN_SCRIPT_SIZE])0xA49960;  //! MAIN.SCM's space. (Originally size was MAIN_SCRIPT_SIZE + MISSION_SCRIPT_SIZE, but we split it into two, other part is \r MissionBlock
+    static inline uint8(&MissionBlock)[MISSION_SCRIPT_SIZE] = *(uint8(*)[MISSION_SCRIPT_SIZE])0xA7A6A0; //! Originally part of \r ScriptSpace. Only mission scripts are loaded here.
+    static inline CRunningScript(&ScriptsArray)[96] = *(CRunningScript(*)[96])0xA8B430;
+    static inline tScriptSphere(&ScriptSphereArray)[16] = *(tScriptSphere(*)[16])0xA91268;
+    static inline tScriptText(&IntroTextLines)[96] = *(tScriptText(*)[96])0xA44B68;
+    static inline tScriptRectangle(&IntroRectangles)[128] = *(tScriptRectangle(*)[128])0xA92D68;
+    static inline CSprite2d(&ScriptSprites)[128] = *(CSprite2d(*)[128])0xA94B68;
+    static inline tScriptSearchlight(&ScriptSearchLightArray)[8] = *(tScriptSearchlight(*)[8])0xA94D68;
 
-    static uint16& NumberOfIntroRectanglesThisFrame;
-    static uint16& MessageWidth;
-    static uint16& MessageCentre;
-    static bool& bUseMessageFormatting;
-    static uint16& CurrentTextDrawer;
-    static bool& UseTextCommands;
-    static uint16& NumberOfIntroTextLinesThisFrame;
-    static uint16& NumberOfUsedObjects;
-    static tUsedObject* UsedObjectArray; // static tUsedObject UsedObjectArray[395]
-    static int32& LastRandomPedId;
-    static uint32& LastMissionPassedTime;
-    static int32& OnAMissionFlag;
-    static CEntity*& EntitiesWaitingForScriptBrain;
-    static CStreamedScripts& StreamedScripts;
-    static CScriptResourceManager& ScriptResourceManager;
-    static CUpsideDownCarCheck& UpsideDownCars;
-    static tScriptParam* LocalVariablesForCurrentMission; // static ScriptVar LocalVariablesForCurrentMission[1024]
-                                                          //! Script space, where main.scm MAIN section is loaded.
-    static uint8* ScriptSpace;                     // static char ScriptSpace[MAIN_SCRIPT_SIZE]
-    static char* MissionBlock;                            // static char MissionBlock[MISSION_SCRIPT_SIZE]
-    static CRunningScript*& pIdleScripts;
-    static CRunningScript*& pActiveScripts;
-    static CRunningScript* ScriptsArray; // static CRunningScript ScriptsArray[96]
-    static uint16& NumberOfScriptSearchLights;
-    static CMissionCleanup& MissionCleanUp;
-    static CStuckCarCheck& StuckCars;
-    static CScriptsForBrains& ScriptsForBrains;
-    static tScriptSphere* ScriptSphereArray;           // static CScriptSphere ScriptSphereArray[16]
-    static tScriptText* IntroTextLines;                // static tScriptText IntroTextLines[96]
-    static tScriptRectangle* IntroRectangles;          // static tScriptRectangle IntroRectangles[128]
-    static CSprite2d* ScriptSprites;                   // static CSprite2d ScriptSprites[128]
-    static tScriptSearchlight* ScriptSearchLightArray; // static tScriptSearchlight ScriptSearchLightArray[8]
-
+    static inline bool& DbgFlag = *reinterpret_cast<bool*>(0x859CF8);
+    static inline uint16& NumberOfEntriesInSwitchTable = *reinterpret_cast<uint16*>(0xA43F50);
+    static inline void*& SwitchDefaultAddress = *reinterpret_cast<void**>(0xA43F54);
+    static inline bool& SwitchDefaultExists = *reinterpret_cast<bool*>(0xA43F58);
+    static inline int32& ValueToCheckInSwitchStatement = *reinterpret_cast<int32*>(0xA43F5C);
+    static inline uint16& NumberOfEntriesStillToReadForSwitch = *reinterpret_cast<uint16*>(0xA43F60);
+    static inline uint16& NumberOfScriptCheckpoints = *reinterpret_cast<uint16*>(0xA44068);
+    static inline int16& CardStackPosition = *reinterpret_cast<int16*>(0xA44210);
+    static inline bool& bDrawSubtitlesBeforeFade = *reinterpret_cast<bool*>(0xA44488);
+    static inline bool& bDrawOddJobTitleBeforeFade = *reinterpret_cast<bool*>(0xA44489);
+    static inline bool& bScriptHasFadedOut = *reinterpret_cast<bool*>(0xA4448A);
+    static inline bool& bAddNextMessageToPreviousBriefs = *reinterpret_cast<bool*>(0xA4448B);
+    static inline int32& ForceRandomCarModel = *reinterpret_cast<int32*>(0xA4448C);
+    static inline bool& bDrawCrossHair = *reinterpret_cast<bool*>(0xA44490);
+    static inline bool& bEnableCraneRelease = *reinterpret_cast<bool*>(0xA44494);
+    static inline bool& bEnableCraneLower = *reinterpret_cast<bool*>(0xA44495);
+    static inline bool& bEnableCraneRaise = *reinterpret_cast<bool*>(0xA44496);
+    static inline float& fCameraHeadingStepWhenPlayerIsAttached = *reinterpret_cast<float*>(0xA44498);
+    static inline float& fCameraHeadingWhenPlayerIsAttached = *reinterpret_cast<float*>(0xA4449C);
+    static inline bool& bDisplayHud = *reinterpret_cast<bool*>(0xA444A0);
+    static inline bool& HideAllFrontEndMapBlips = *reinterpret_cast<bool*>(0xA444A1);
+    static inline bool& RadarShowBlipOnAllLevels = *reinterpret_cast<bool*>(0xA444A2);
+    static inline uint8& RadarZoomValue = *reinterpret_cast<uint8*>(0xA444A3);
+    static inline bool& bPlayerIsOffTheMap = *reinterpret_cast<bool*>(0xA444A4);
+    static inline char& RiotIntensity = *reinterpret_cast<char*>(0xA444A5);
+    static inline bool& bPlayerHasMetDebbieHarry = *reinterpret_cast<bool*>(0xA444A6);
+    static inline bool& bDisplayNonMiniGameHelpMessages = *reinterpret_cast<bool*>(0xA444A7);
+    static inline bool& bMiniGameInProgress = *reinterpret_cast<bool*>(0xA444A8);
+    static inline int32& ScriptPickupCycleIndex = *reinterpret_cast<int32*>(0xA444AC);
+    static inline char& FailCurrentMission = *reinterpret_cast<char*>(0xA444B0);
+    static inline bool& bAlreadyRunningAMissionScript = *reinterpret_cast<bool*>(0xA444B1);
+    static inline uint32& LargestNumberOfMissionScriptLocalVariables = *reinterpret_cast<uint32*>(0xA444B4);
+    static inline uint16& NumberOfExclusiveMissionScripts = *reinterpret_cast<uint16*>(0xA444B8);
+    static inline uint16& NumberOfMissionScripts = *reinterpret_cast<uint16*>(0xA444BC);
+    static inline uint32& LargestMissionScriptSize = *reinterpret_cast<uint32*>(0xA444C0);
+    static inline uint32& MainScriptSize = *reinterpret_cast<uint32*>(0xA444C4);
+    static inline bool& bUsingAMultiScriptFile = *reinterpret_cast<bool*>(0xA447E8);
+    static inline int32& StoreVehicleIndex = *reinterpret_cast<int32*>(0xA447EC);
+    static inline bool& StoreVehicleWasRandom = *reinterpret_cast<bool*>(0xA447F0);
+    static inline uint16& CommandsExecuted = *reinterpret_cast<uint16*>(0xA447F4);
+    static inline uint16& ScriptsUpdated = *reinterpret_cast<uint16*>(0xA447F8);
+    static inline tBuildingSwap(&BuildingSwapArray)[NUM_BUILDING_SWAPS] = *reinterpret_cast<tBuildingSwap(*)[NUM_BUILDING_SWAPS]>(0xA44A30);
+    static inline uint16& NumberOfIntroRectanglesThisFrame = *reinterpret_cast<uint16*>(0xA44B5C);
+    static inline uint16& MessageWidth = *reinterpret_cast<uint16*>(0xA44B60);
+    static inline uint16& MessageCentre = *reinterpret_cast<uint16*>(0xA44B64);
+    static inline bool& bUseMessageFormatting = *reinterpret_cast<bool*>(0xA44B66);
+    static inline bool& UseTextCommands = *reinterpret_cast<bool*>(0xA44B67);
+    static inline uint16& CurrentTextDrawer = *reinterpret_cast<uint16*>(0xA44B68);
+    static inline uint16& NumberOfIntroTextLinesThisFrame = *reinterpret_cast<uint16*>(0xA44B68);
+    static inline uint16& NumberOfUsedObjects = *reinterpret_cast<uint16*>(0xA44B6C);
+    static inline int32& LastRandomPedId = *reinterpret_cast<int32*>(0xA476A4);
+    static inline uint32& LastMissionPassedTime = *reinterpret_cast<uint32*>(0xA476A8);
+    static inline int32& OnAMissionFlag = *reinterpret_cast<int32*>(0xA476AC);
+    static inline CEntity*& EntitiesWaitingForScriptBrain = *reinterpret_cast<CEntity**>(0xA476B0);
+    static inline CStreamedScripts& StreamedScripts = *reinterpret_cast<CStreamedScripts*>(0xA47B60);
+    static inline CScriptResourceManager& ScriptResourceManager = *reinterpret_cast<CScriptResourceManager*>(0xA485A8);
+    static inline CUpsideDownCarCheck& UpsideDownCars = *reinterpret_cast<CUpsideDownCarCheck*>(0xA4892C);
+    static inline CRunningScript*& pIdleScripts = *reinterpret_cast<CRunningScript**>(0xA8B428);
+    static inline CRunningScript*& pActiveScripts = *reinterpret_cast<CRunningScript**>(0xA8B42C);
+    static inline uint16& NumberOfScriptSearchLights = *reinterpret_cast<uint16*>(0xA90830);
+    static inline CMissionCleanup& MissionCleanUp = *reinterpret_cast<CMissionCleanup*>(0xA90850);
+    static inline CStuckCarCheck& StuckCars = *reinterpret_cast<CStuckCarCheck*>(0xA90AB0);
+    static inline CScriptsForBrains& ScriptsForBrains = *reinterpret_cast<CScriptsForBrains*>(0xA90CF0);
 public:
     static void InjectHooks();
 
