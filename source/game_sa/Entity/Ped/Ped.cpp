@@ -1199,9 +1199,9 @@ bool CPed::IsAlive() const {
     switch (m_nPedState) {
     case PEDSTATE_DIE:
     case PEDSTATE_DEAD:
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 /*!
