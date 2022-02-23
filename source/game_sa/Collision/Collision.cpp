@@ -331,7 +331,6 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         }
     }
 
-    //localMinTouchDist = maxTouchDistance;
     if (localMinTouchDist < maxTouchDistance) {
         colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
         colPoint.m_vecNormal = Multiply3x3(transform, colPoint.m_vecNormal);
