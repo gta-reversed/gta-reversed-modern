@@ -686,8 +686,8 @@ float CPed::GetLocalDirection(const CVector2D& point) {
     while (angle < 0.f) {
         angle += TWO_PI;
     }
-    return angle;
-}
+    return angle / (PI / 2.f); // Weird..
+} 
 
 /*!
 * @addr 0x5DEFD0
