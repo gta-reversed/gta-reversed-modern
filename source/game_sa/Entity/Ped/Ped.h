@@ -393,7 +393,7 @@ public:
 
     CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{} {}
     CPed(ePedType);
-    ~CPed();
+    //~CPed();
 
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);

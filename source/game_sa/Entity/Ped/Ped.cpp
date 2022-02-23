@@ -191,9 +191,9 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 /*!
 * @addr 0x5E8620
  */
-CPed::~CPed() {
-    plugin::CallMethod<0x5E8620, CPed*>(this);
-    return;
+//CPed::~CPed() {
+//    plugin::CallMethod<0x5E8620, CPed*>(this);
+//    return;
 
     // Untested, missing some code
     /* CReplay::RecordPedDeleted(this);
@@ -228,7 +228,7 @@ CPed::~CPed() {
     // m_pedAudio.Terminate(); - Missing 
     delete m_pIntelligence;
     ClearReference(m_pLookTarget); */
-}
+//}
 
 /*!
 * @addr 0x5E4720
