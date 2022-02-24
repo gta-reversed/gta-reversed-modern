@@ -23,6 +23,8 @@
 #include "PedStdBonePositions.h"
 #include "TaskSimpleJetPack.h"
 #include "PedSaveStructure.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexFacial.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -181,11 +183,35 @@ void CPed::InjectHooks() {
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
 
-CPed::CPed(ePedType pedtype) : CPhysical(), m_aWeapons{ plugin::dummy, plugin::dummy, plugin::dummy,
-plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy, plugin::dummy,
-plugin::dummy, plugin::dummy, plugin::dummy }
+// Most of the variable/flag setting is done in the header
+CPed::CPed(ePedType pedType) : CPhysical{},
+    m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
+    m_nPedType{ pedType },
+    m_pIntelligence{ new CPedIntelligence{this} }
 {
-    ((void(__thiscall *)(CPed*, ePedType))0x5E8030)(this, pedtype);
+    m_nType = ENTITY_TYPE_PED;
+    physicalFlags.bCanBeCollidedWith = true;
+    physicalFlags.bDisableTurnForce = true;
+    m_weaponAudio.Initialise();
+    m_pedAudio.Initialise();
+
+    GiveWeapon(WEAPON_UNARMED, 0, true);
+
+    if (!IsPlayer()) {
+        GetTaskManager().SetTaskSecondary(new CTaskComplexFacial{}, TASK_SECONDARY_FACIAL_COMPLEX);
+    }
+    GetTaskManager().SetTask(new CTaskSimpleStandStill{ 0, true, false, 8.0 }, TASK_PRIMARY_DEFAULT, false);
+
+    CPopulation::UpdatePedCount(this, 0);
+
+    if (CCheat::m_aCheatsActive[CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD]) {
+        if (!IsPlayer()) {
+            m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
+
+            CEventAcquaintancePedHate event(FindPlayerPed());
+            GetEventGroup().Add(&event);
+        }
+    }
 }
 
 /*!
@@ -3219,7 +3245,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     CEntity::SetModelIndex(modelIndex);
 
     RpAnimBlendClumpInit(m_pRwClump);
-    RpAnimBlendClumpFillFrameArray(m_pRwClump, m_apBones);
+    RpAnimBlendClumpFillFrameArray(m_pRwClump, m_apBones.data());
 
     auto& mi = *(CPedModelInfo*)GetModelInfo();
 

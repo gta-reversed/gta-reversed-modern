@@ -18,3 +18,7 @@ void CAEPedAudioEntity::Terminate() {
     m_pPed = nullptr;
     StopjetPack*/
 }
+
+void CAEPedAudioEntity::Initialise() {
+    plugin::CallMethod<0x4E0E80>(this);
+}
