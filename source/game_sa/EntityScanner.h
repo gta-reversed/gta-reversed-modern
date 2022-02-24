@@ -15,8 +15,8 @@ protected:
 
 public:
     int32    field_4;
-    uint32   m_nCount;
-    CEntity* m_apEntities[16];
+    uint32   m_nCount{16};
+    CEntity* m_apEntities[16]{};
     CEntity* m_pClosestEntityInRange;
 
 public:

@@ -34,6 +34,8 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedClass(CPedIntelligence);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Constructor, 0x607140);
+
     RH_ScopedInstall(GetPedEntities, 0x4893E0);
     RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
     RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0);
@@ -84,6 +86,22 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedInstall(ProcessFirst, 0x6073A0);
     RH_ScopedInstall(Process, 0x608260);
     RH_ScopedInstall(GetActivePrimaryTask, 0x4B85B0);
+}
+
+// 0x607140
+CPedIntelligence::CPedIntelligence(CPed* ped) :
+    m_pPed{ ped }
+{
+    if (IsPedTypeGang(ped->m_nPedType)) {
+        m_fSeeingRange = 40.f;
+        m_fHearingRange = 40.f;
+    }
+}
+
+// 0x607140
+CPedIntelligence* CPedIntelligence::Constructor(CPed* ped) {
+    this->CPedIntelligence::CPedIntelligence(ped);
+    return this;
 }
 
 // 0x4893E0
@@ -259,7 +277,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     CTask* secondaryTask = taskManager->GetTaskSecondary(TASK_SECONDARY_PARTIAL_ANIM);
     if (secondaryTask) {
         if (secondaryTask->GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
-            return secondaryTask;
+            return secondaryTask->AsComplex();
         }
     }
 
@@ -274,7 +292,7 @@ CTask* CPedIntelligence::GetTaskHold(bool bIgnoreCheckingForSimplestActiveTask) 
     {
         return nullptr;
     }
-    return activeSimplestTask;
+    return activeSimplestTask->AsComplex();
 }
 
 // 0x601070
