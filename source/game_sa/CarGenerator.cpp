@@ -340,6 +340,14 @@ void CCarGenerator::DoInternalProcessing()
     }
     CVisibilityPlugins::SetClumpAlpha(vehicle->m_pRwClump, 0);
     m_nVehicleHandle = GetVehiclePool()->GetRef(vehicle);
+
+#ifdef FIX_BUGS
+    if (m_nGenerateCount < (uint16)-1)
+#else
+    if (m_nGenerateCount < -1)
+#endif
+        m_nGenerateCount--;
+
     m_nNextGenTime = CalcNextGen();
 }
 
@@ -413,7 +421,7 @@ void CCarGenerator::SwitchOff()
 // 0x6F32C0
 void CCarGenerator::SwitchOn()
 {
-    m_nGenerateCount = -1;
+    m_nGenerateCount = (uint16)-1;
     m_nNextGenTime = CalcNextGen();
 }
 
