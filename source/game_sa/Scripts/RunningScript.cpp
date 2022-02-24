@@ -4,6 +4,9 @@
 #include "TheScripts.h"
 #include "TaskSimplePlayerOnFoot.h"
 #include "Radar.h"
+#include "TheCarGenerators.h"
+#include "CarGenerator.h"
+#include "FireManager.h"
 
 //! @NOTSA - Our reversed command handler table. See \r ProcessOneCommand
 CRunningScript::CommandHandlerTable_t CRunningScript::reSA_CommandHandlerTable = {
@@ -2216,7 +2219,18 @@ int8 CRunningScript::ProcessCommands300To399(int32 commandId) {
     case COMMAND_CREATE_CAR_GENERATOR: // 0x14B
         break;
     case COMMAND_SWITCH_CAR_GENERATOR: // 0x14C
-        break;
+    {
+        CollectParameters(2);
+        CCarGenerator* cargen = CTheCarGenerators::Get(CTheScripts::ScriptParams[0].iParam);
+        if (CTheScripts::ScriptParams[1].iParam) {
+            cargen->SwitchOn();
+            if (CTheScripts::ScriptParams[1].iParam <= 100)
+                cargen->m_nGenerateCount = CTheScripts::ScriptParams[1].iParam;
+        } else {
+            cargen->SwitchOff();
+        }
+        return 0;
+    }
     case COMMAND_ADD_PAGER_MESSAGE: // 0x14D
         break;
     case COMMAND_DISPLAY_ONSCREEN_TIMER: // 0x14E
@@ -3034,7 +3048,15 @@ int8 CRunningScript::ProcessCommands700To799(int32 commandId) {
     case COMMAND_GET_GROUND_Z_FOR_3D_COORD: // 0x2CE
         break;
     case COMMAND_START_SCRIPT_FIRE: // 0x2CF
-        break;
+    {
+        CollectParameters(5);
+        CVector pos = *(CVector*)&CTheScripts::ScriptParams[0];
+        if (pos.z <= -100.0f)
+            pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
+        CTheScripts::ScriptParams[0].iParam = gFireManager.StartScriptFire(pos, nullptr, 0.8f, 1, CTheScripts::ScriptParams[3].iParam, CTheScripts::ScriptParams[4].iParam);
+        StoreParameters(1);
+        return 0;
+    }
     case COMMAND_IS_SCRIPT_FIRE_EXTINGUISHED: // 0x2D0
         break;
     case COMMAND_REMOVE_SCRIPT_FIRE: // 0x2D1
@@ -3770,7 +3792,7 @@ int8 CRunningScript::ProcessCommands1000To1099(int32 commandId) {
         if (!CGame::bMissionPackGame) {
             auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
             CFileMgr::Seek(file, offsetToMission, 0);
-            CFileMgr::Read(file, &CTheScripts::MissionBlock, MISSION_SCRIPT_SIZE);
+            CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
             CFileMgr::CloseFile(file);
 
             CTheScripts::WipeLocalVariableMemoryForMissionScript();
