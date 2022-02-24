@@ -140,7 +140,7 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
 
 // 0x
 void CReplay::RecordPedDeleted(CPed* ped) {
-    plugin::Call<0x0, CPed*>(ped);
+    plugin::Call<0x45EC20, CPed*>(ped);
 }
 
 // 0x

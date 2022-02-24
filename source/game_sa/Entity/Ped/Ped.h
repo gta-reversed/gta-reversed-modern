@@ -393,7 +393,7 @@ public:
 
     CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{} {}
     CPed(ePedType);
-    //~CPed();
+    ~CPed();
 
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);
@@ -573,6 +573,8 @@ public:
 
 private:
     // Virtual method wrappers
+    auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
+    auto Destructor() { this->CPed::~CPed(); return this; }
     void SetModelIndex_Reversed(int32 model) { CPed::SetModelIndex(model); }
     void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
     void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }

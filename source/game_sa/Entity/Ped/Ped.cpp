@@ -29,8 +29,8 @@ void CPed::InjectHooks() {
     RH_ScopedCategory("Entity/Ped");
 
     // RH_ScopedInstall(Constructor, 0x5E8030);
-    // Install("CPed", "~CPed", 0x5E8620, static_cast<CPed*(CPed::*)()>(&CPed::Destructor));
-    
+    RH_ScopedInstall(Destructor, 0x5E8620);
+
     RH_ScopedInstall(RequestDelayedWeapon, 0x5E8910);
     RH_ScopedInstall(DettachPedFromEntity, 0x5E7EC0);
     RH_ScopedInstall(AttachPedToBike, 0x5E7E60);
@@ -191,6 +191,45 @@ plugin::dummy, plugin::dummy, plugin::dummy }
 /*!
 * @addr 0x5E8620
  */
+CPed::~CPed() {
+    CReplay::RecordPedDeleted(this);
+
+    // Remove script brain
+    if (bWaitingForScriptBrainToLoad) {
+        CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex + RESOURCE_ID_SCM);
+        bWaitingForScriptBrainToLoad = false;
+        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
+        m_nSpecialModelIndex = -1;
+    }
+
+    CWorld::Remove(this);
+    CRadar::ClearBlipForEntity(BLIP_CHAR, GetPedPool()->GetRef(this));
+    CConversations::RemoveConversationForPed(this);
+
+    ClearReference(m_pVehicle);
+
+    if (m_pFire) {
+        m_pFire->Extinguish();
+    }
+
+    ReleaseCoverPoint();
+    ClearWeapons();
+
+    if (bMiamiViceCop) {
+        CPopulation::NumMiamiViceCops--;
+    }
+
+    CPopulation::UpdatePedCount(this, 1);
+
+    m_pedSpeech.Terminate();
+    m_weaponAudio.Terminate();
+    m_pedAudio.Terminate();
+
+    delete m_pIntelligence;
+
+    ClearReference(m_pLookTarget);
+}
+
 //CPed::~CPed() {
 //    plugin::CallMethod<0x5E8620, CPed*>(this);
 //    return;
