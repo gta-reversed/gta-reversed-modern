@@ -148,6 +148,7 @@ public:
 
 private:
     CPedIntelligence* Constructor(CPed* ped);
+    CPedIntelligence* Destructor();
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);

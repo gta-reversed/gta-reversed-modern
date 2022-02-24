@@ -35,6 +35,7 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Constructor, 0x607140);
+    RH_ScopedInstall(Destructor, 0x607300);
 
     RH_ScopedInstall(GetPedEntities, 0x4893E0);
     RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
@@ -98,10 +99,9 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
     }
 }
 
-// 0x607140
-CPedIntelligence* CPedIntelligence::Constructor(CPed* ped) {
-    this->CPedIntelligence::CPedIntelligence(ped);
-    return this;
+// 0x607300
+CPedIntelligence::~CPedIntelligence() {
+    CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder()->ClearRelationshipWithPlayer(m_pPed);
 }
 
 // 0x4893E0
@@ -1083,4 +1083,16 @@ void* CPedIntelligence::operator new(unsigned size) {
 // 0x6074E0
 void CPedIntelligence::operator delete(void* object) {
     GetPedIntelligencePool()->Delete(static_cast<CPedIntelligence*>(object));
+}
+
+// 0x607140
+CPedIntelligence* CPedIntelligence::Constructor(CPed* ped) {
+    this->CPedIntelligence::CPedIntelligence(ped);
+    return this;
+}
+
+// 0x607300
+CPedIntelligence* CPedIntelligence::Destructor() {
+    this->CPedIntelligence::~CPedIntelligence();
+    return this;
 }
