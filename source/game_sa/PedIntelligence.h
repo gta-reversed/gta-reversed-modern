@@ -49,7 +49,7 @@ public:
     uint8            m_nEventPriority{};
     char             field_D3{};
     CVehicleScanner  m_vehicleScanner{};
-    CEntityScanner   m_entityScanner{};
+    CEntityScanner   m_entityScanner{}; // TODO: Should be CPedScanner.. (Source: See original ctor)
     CMentalHealth    m_mentalHealth{};
     char             field_188{};
     CEventScanner    m_eventScanner{};

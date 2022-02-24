@@ -9,6 +9,10 @@
 class CEntity;
 class CPed;
 
+// Just a theory..
+// Since this is originally a virtual class..
+// Maybe it was templated? Like: `template<class Entity_t, size_t MaxCount>` ?
+
 class CEntityScanner {
 protected:
     void* vtable;
