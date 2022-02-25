@@ -174,6 +174,7 @@ public:
     virtual void ProcessFlyingCarStuff();
     virtual void DoHoverSuspensionRatios();
     virtual void ProcessSuspension();
+    int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) override;
 
     void PreRender() override;
 

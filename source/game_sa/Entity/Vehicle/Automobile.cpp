@@ -16,8 +16,6 @@
 #include "Glass.h"
 #include "ModelIndices.h"
 
-namespace rng = std::ranges;
-
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
 CMatrix* CAutomobile::matW2B = (CMatrix*)0xC1C220;
@@ -140,10 +138,11 @@ void CAutomobile::InjectHooks()
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) :
     CVehicle(createdBy)
 {
-    auto& mi = *(CVehicleModelInfo*)GetModelInfo();
 
     CVehicle::SetModelIndex(modelIndex);
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
+
+    auto& mi = *(CVehicleModelInfo*)GetModelInfo(); // has to be called after `SetModelIndex` has been called.
 
     m_pHandlingData = &mi.GetHandlingData(); // For now this has to be here, because the model index is not set in the member init list
     m_pFlyingHandlingData = &mi.GetFlyingHandlingData(); // Moved this over here
@@ -1665,6 +1664,10 @@ void CAutomobile::ProcessSuspension()
             }
         }
     }
+}
+
+int32 CAutomobile::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
+    return plugin::CallMethodAndReturn<int32, 0x6ACE70, CAutomobile*, CEntity*, CColPoint*>(this, entity, colPoint);
 }
 
 // 0x6A29C0
