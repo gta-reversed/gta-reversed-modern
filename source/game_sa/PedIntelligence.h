@@ -72,6 +72,7 @@ public:
     static void operator delete(void* object);
 
     CPedIntelligence(CPed* ped);
+    ~CPedIntelligence();
 
     CEntity** GetPedEntities();
     void SetPedDecisionMakerType(int32 newType);
