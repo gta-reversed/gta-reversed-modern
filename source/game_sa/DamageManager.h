@@ -140,6 +140,8 @@ public:
 public:
     static void InjectHooks();
 
+    CDamageManager(float wheelDamageEffect);
+
     void Init();
     void ResetDamageStatus();
     void ResetDamageStatusAndWheelDamage();

@@ -14,6 +14,7 @@
 #include "Skidmarks.h"
 #include "CarCtrl.h"
 #include "Glass.h"
+#include "ModelIndices.h"
 
 namespace rng = std::ranges;
 
@@ -135,9 +136,231 @@ void CAutomobile::InjectHooks()
 }
 
 // 0x6B0A90
-CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) : CVehicle(plugin::dummy)
+// All the zero-init is done in the header!
+CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) :
+    CVehicle(createdBy)
 {
-    plugin::CallMethod<0x6B0A90, CAutomobile*, int32, eVehicleCreatedBy, bool>(this, modelIndex, createdBy, setupSuspensionLines);
+    auto& mi = *(CVehicleModelInfo*)GetModelInfo();
+
+    CVehicle::SetModelIndex(modelIndex);
+    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
+
+    m_pHandlingData = &mi.GetHandlingData(); // For now this has to be here, because the model index is not set in the member init list
+    m_pFlyingHandlingData = &mi.GetFlyingHandlingData(); // Moved this over here
+
+    if (m_pHandlingData->m_bHydraulicGeom && rand() % 4 == 0) { // 0x6B0BD7
+        AddVehicleUpgrade(ModelIndices::MI_HYDRAULICS);
+    }
+
+    // 0x6B0C2E
+    mi.ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
+
+    // 0x6B0C49
+    if (m_pHandlingData->m_bIsVan) {
+        vehicleFlags.bIsVan = true;
+    }
+    if (m_pHandlingData->m_bIsBig) {
+        vehicleFlags.bIsBig = true;
+    }
+    if (m_pHandlingData->m_bIsBus) {
+        vehicleFlags.bIsBus = true;
+    }
+    if (m_pHandlingData->m_bIsLow) {
+        vehicleFlags.bLowVehicle = true;
+    }
+
+    // 0x6B0CA8
+    // Deal with front doors
+    {
+        // Left
+        auto& doorLF = m_doors[eDoors::DOOR_LEFT_FRONT];
+        doorLF.m_nAxis = 2;
+        doorLF.m_fClosedAngle = 0.f;
+        doorLF.m_fOpenAngle = vehicleFlags.bIsBus ? PI * 0.4f : PI * 0.5f; // `PI * 0.4f` or `PI * o.4f`, same thing, although they used the latter most likely.
+
+        // Right
+        auto& doorRF = m_doors[eDoors::DOOR_RIGHT_FRONT];
+        doorRF = doorLF;
+        doorRF.m_fOpenAngle = -doorLF.m_fOpenAngle;
+    }
+
+    // 0x6B0CF0
+    // Deal with rear doors
+    if (modelIndex == MODEL_RHINO) { // For Rhino just hide it
+        for (auto door : { DOOR_LEFT_REAR, DOOR_RIGHT_REAR }) {
+            m_doors[(size_t)door] = {
+                .m_fOpenAngle = 1.f,
+                .m_fClosedAngle = 1.f,
+                .m_fAngle = 1.f,
+                .m_fPrevAngle = 1.f
+            };
+        }
+
+        // Hide both
+        for (auto comp : { CAR_WHEEL_LM, CAR_WHEEL_RM }) {
+            rwObjectSetFlags(GetFirstObject(m_aCarNodes[comp]), ATOMIC_IS_NOT_PRESENT);
+        }
+    } else { // 0x6B0D57
+        auto& doorLR = m_doors[DOOR_LEFT_REAR];
+        auto& doorRR = m_doors[DOOR_RIGHT_REAR];
+
+        doorLR.m_nAxis = 2;
+        doorLR.m_fClosedAngle = 0.f;
+
+        doorRR.m_fClosedAngle = 0.f;
+        doorRR.m_nAxis = 2;
+
+        if (vehicleFlags.bIsVan) {
+            doorLR.m_fOpenAngle = -PI * 0.4f;
+            doorLR.m_nDirn = 20;
+
+            doorRR.m_fOpenAngle = PI * 0.4f;
+            doorRR.m_nDirn = 20;
+        } else {
+            doorLR.m_fOpenAngle = -PI * 0.5f;
+            doorLR.m_nDirn = 16;
+
+            doorRR.m_fOpenAngle = PI * 0.5f;
+            doorRR.m_nDirn = 19;
+        }
+    }
+
+    // 0x6B0DBE 
+    // Bonnet
+    {
+        auto& bonnet = m_doors[DOOR_BONNET];
+        bonnet.m_nAxis = 0;
+        bonnet.m_fClosedAngle = 0.f;
+        bonnet.m_fOpenAngle = m_pHandlingData->m_bReverseBonnet ? PI * 0.3f : -PI * 0.3f;
+        bonnet.m_nDirn = m_pHandlingData->m_bReverseBonnet ? 33 : 36;
+    }
+
+    // 0x6B0DF4
+    // Boot(y)
+    {
+        auto& boot = m_doors[DOOR_BOOT];
+
+        if (m_pHandlingData->m_bHangingBoot) {
+            boot.m_fOpenAngle = PI * 0.4f;
+            boot.m_nDirn = 21;
+        } else if (m_pHandlingData->m_bTailgateBoot) {
+            boot.m_fOpenAngle = PI * 0.5f;
+            boot.m_nDirn = 18;
+        } else {
+            boot.m_fOpenAngle = -PI * 0.3f;
+            boot.m_nDirn = 20;
+        }
+
+        boot.m_fClosedAngle = 0.f;
+        boot.m_nAxis = 0;
+    }
+
+    // 0x6B0E4B
+    // If model has no doors, hide them all
+    if (m_pHandlingData->m_bNoDoors) {
+        m_damageManager.SetDoorStatus({ DOOR_LEFT_FRONT, DOOR_RIGHT_FRONT, DOOR_LEFT_REAR, DOOR_RIGHT_REAR }, DAMSTATE_NOTPRESENT);
+    }
+
+    // Init this field which is never used
+    for (auto& v : field_8CC) {
+        constexpr auto magic = -0.15f;
+        v = (0.15f - magic) * rand() * RAND_MAX_FLOAT_RECIPROCAL + magic; // Becomes: 0.3f * rand() * RAND_MAX_FLOAT_RECIPROCAL + magic
+    }
+
+    // 0x6B0EE6
+    // Do something with misc components? Not sure..
+    switch (modelIndex) {
+    case MODEL_TOWTRUCK: {
+        if (m_aCarNodes[CAR_MISC_B]) {
+            if (auto& panelFL = m_panels[FRONT_LEFT_PANEL]; panelFL.m_nFrameId == -1) {
+                panelFL.SetPanel(CAR_MISC_B, 2, 1.f);
+            }
+            break;
+        } // Otherwise fallthru
+        [[fallthrough]];
+    }
+    case MODEL_TRACTOR: {
+        if (m_aCarNodes[CAR_BOOT]) {
+            if (auto& panelFL = m_panels[FRONT_LEFT_PANEL]; panelFL.m_nFrameId == -1) {
+                panelFL.SetPanel(CAR_BOOT, 1, 1.f);
+            }
+            break;
+        }
+        break;
+    }
+    }
+
+    // 0x6B0F3B
+    // Deal with swinging chassis
+    if (m_pHandlingData->m_bSwingingChassis) {
+        m_swingingChassis.m_nDoorState = eDoorState::DOOR_HIT_MAX_END;
+        m_swingingChassis.m_nAxis = 2;
+        m_swingingChassis.m_nDirn = 196;
+        const auto GetAnglMult = [modelIndex] {
+            switch (modelIndex) {
+            case MODEL_COPCARVG:
+            case MODEL_ESPERANT:
+                return 0.03f;
+            case MODEL_STRETCH:
+                return 0.01f;
+            }
+            return 0.02f;
+        };
+        m_swingingChassis.m_fOpenAngle = PI * GetAnglMult();
+        m_swingingChassis.m_fClosedAngle = -m_swingingChassis.m_fOpenAngle;
+    } else if (modelIndex == MODEL_FIRELA) {
+        m_swingingChassis.m_fOpenAngle = PI / 10.f;
+        m_swingingChassis.m_fClosedAngle = -m_swingingChassis.m_fOpenAngle;
+        m_swingingChassis.m_nAxis = 2;
+        m_swingingChassis.m_nDirn = 388;
+        m_swingingChassis.m_nDoorState = eDoorState::DOOR_HIT_MAX_END;
+    }
+
+    // 0x6B1048
+    m_fMass = m_pHandlingData->m_fMass;
+    m_fTurnMass = m_pHandlingData->m_fTurnMass;
+    m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
+    m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
+    m_fAirResistance = m_pHandlingData->m_fDragMult <= 0.01f ? m_pHandlingData->m_fDragMult : m_pHandlingData->m_fDragMult / 1000 * 0.5f; // Weird hack..
+
+    // 0x6B1111
+    rng::fill(m_fWheelsSuspensionCompression, 1.f);
+    rng::fill(m_fWheelsSuspensionCompressionPrev, 1.f);
+
+    // 0x6B119A
+    if (setupSuspensionLines) {
+        CAutomobile::SetupSuspensionLines();
+    }
+
+    m_nStatus = eEntityStatus::STATUS_SIMPLE;
+
+    if (m_nDoorLock == CARLOCK_UNLOCKED) {
+        if (IsLawEnforcementVehicle()) {
+            m_nDoorLock = CARLOCK_COP_CAR;
+        }
+    }
+    switch (m_nModelIndex) {
+    case -2: { // 0x6B120F
+        // I don't think this is reachable, as it would crash somewhere above.
+
+        rwObjectSetFlags(GetFirstObject(m_aCarNodes[CAR_WHEEL_LF]), ATOMIC_IS_NOT_PRESENT);
+
+        // Probably an inlined function here, as there was a redundant check here (model == -2)
+        CMatrix wheelRFMat{ RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]) };
+        CMatrix wheelLFMat{ RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]) };
+        wheelRFMat.SetTranslate({ wheelLFMat.GetPosition().x + 0.1f, 0.f, wheelLFMat.GetPosition().z});
+        wheelRFMat.UpdateRW();
+        break;
+    }
+    case MODEL_RHINO: { // 0x6B12D6
+        physicalFlags.bExplosionProof = true;
+        physicalFlags.bBulletProof = true;
+        break;
+    }
+    }
+
+    // 0x6B12F6
+    m_vehicleAudio.Initialise(this);
 }
 
 // 0x6A61E0
@@ -2582,7 +2805,7 @@ void CAutomobile::SetupModelNodes()
     for (auto& carNode : m_aCarNodes) {
         carNode = nullptr;
     }
-    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes);
+    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
 }
 
 void CAutomobile::HydraulicControl()
@@ -4378,8 +4601,8 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     if (m_damageManager.IsDoorClosed(doorIdx) && CanDoorsBeDamaged()) {
         if (door.ProcessImpact(
             this,
-            m_doorRelatedPosition1,
-            m_doorRelatedPosition2,
+            m_moveForce,
+            m_turnForce,
             Multiply3x3(*m_matrix, frameMatrix.GetPosition())
         )) {
             m_damageManager.SetDoorOpen(doorIdx);
@@ -4404,8 +4627,8 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
     // Now process it, if successful close it and do AudioFX
     if (door.Process(
         this,
-        m_doorRelatedPosition1,
-        m_doorRelatedPosition2,
+        m_moveForce,
+        m_turnForce,
         Multiply3x3(*m_matrix, frameMatrix.GetPosition())
     )) {
         m_damageManager.SetDoorClosed(doorIdx);
