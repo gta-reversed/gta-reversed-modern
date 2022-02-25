@@ -1501,10 +1501,10 @@ bool CPed::PositionAnyPedOutOfCollision() {
             }
 
             const auto PossiblyUpdatePoint = [&, this](Point& p) {
-                const auto dist{ (testPoint - GetPosition()).SquaredMagnitude() };
-                if (dist > p.distSq) {
+                const auto distSq{ (testPoint - GetPosition()).SquaredMagnitude() };
+                if (distSq < p.distSq) {
                     p.pos = testPoint;
-                    p.distSq = dist;
+                    p.distSq = distSq;
                     p.found = true;
                 }
             };
