@@ -34,6 +34,9 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedClass(CPedIntelligence);
     RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Constructor, 0x607140);
+    RH_ScopedInstall(Destructor, 0x607300);
+
     RH_ScopedInstall(GetPedEntities, 0x4893E0);
     RH_ScopedInstall(SetPedDecisionMakerType, 0x600B50);
     RH_ScopedInstall(SetPedDecisionMakerTypeInGroup, 0x600BB0);
@@ -84,6 +87,21 @@ void CPedIntelligence::InjectHooks()
     RH_ScopedInstall(ProcessFirst, 0x6073A0);
     RH_ScopedInstall(Process, 0x608260);
     RH_ScopedInstall(GetActivePrimaryTask, 0x4B85B0);
+}
+
+// 0x607140
+CPedIntelligence::CPedIntelligence(CPed* ped) :
+    m_pPed{ ped }
+{
+    if (IsPedTypeGang(ped->m_nPedType)) {
+        m_fSeeingRange = 40.f;
+        m_fHearingRange = 40.f;
+    }
+}
+
+// 0x607300
+CPedIntelligence::~CPedIntelligence() {
+    CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder()->ClearRelationshipWithPlayer(m_pPed);
 }
 
 // 0x4893E0
@@ -1065,4 +1083,16 @@ void* CPedIntelligence::operator new(unsigned size) {
 // 0x6074E0
 void CPedIntelligence::operator delete(void* object) {
     GetPedIntelligencePool()->Delete(static_cast<CPedIntelligence*>(object));
+}
+
+// 0x607140
+CPedIntelligence* CPedIntelligence::Constructor(CPed* ped) {
+    this->CPedIntelligence::CPedIntelligence(ped);
+    return this;
+}
+
+// 0x607300
+CPedIntelligence* CPedIntelligence::Destructor() {
+    this->CPedIntelligence::~CPedIntelligence();
+    return this;
 }
