@@ -76,6 +76,10 @@ public:
         x = X;
         y = Y;
     }
+     
+    float Heading() const {
+        return std::atan2(-x, y);
+    }
 };
 
 inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

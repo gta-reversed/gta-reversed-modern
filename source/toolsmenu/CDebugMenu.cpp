@@ -320,18 +320,25 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
+    CPad* pad = CPad::GetPad(0);
+
+    static bool doGodMode{};
+    if (pad->IsStandardKeyJustPressed('2')) {
+        doGodMode = !doGodMode;
+        printf("God mode state: %i\n", (int)doGodMode);
+    }
+    if (doGodMode) {
+        CCheat::MoneyArmourHealthCheat();
+    }
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
         CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
-        CCheat::MoneyArmourHealthCheat();
-    }
+
     if (pad->IsStandardKeyJustDown('4')) {
         printf("");
         TaskComplexUseGogglesTestCode();

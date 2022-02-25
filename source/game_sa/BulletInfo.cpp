@@ -92,19 +92,14 @@ void CBulletInfo::Update() {
                 auto hitPed = hitEntity->AsPed();
 
                 if (hitEntity != info.m_pCreator) {
-                    switch (hitPed->m_nPedState) {
-                    case PEDSTATE_DIE:
-                    case PEDSTATE_DEAD:
-                        break;
-                    default: { // Not DIE or DEAD
-                        // std::cout << "Hit ped\n";
+                    if (hitPed->IsAlive()) {
                         CWeapon::GenerateDamageEvent(
                             hitPed,
                             info.m_pCreator,
                             info.m_nWeaponType,
                             info.m_nDamage,
                             (ePedPieceTypes)colPoint.m_nPieceTypeB,
-                            hitPed->GetLocalDirection(hitPed->GetPosition() - colPoint.m_vecPoint)
+                            hitPed->GetLocalDirection(hitPed->GetPosition2D() - CVector2D{ colPoint.m_vecPoint })
                         );
                         CCrime::ReportCrime(
                             (hitPed->m_nPedType == PED_TYPE_COP) ? eCrimeType::CRIME_DAMAGE_COP_CAR : eCrimeType::CRIME_DAMAGE_CAR,
@@ -112,8 +107,6 @@ void CBulletInfo::Update() {
                             info.m_pCreator->AsPed()
                         );
                         newPosition = colPoint.m_vecPoint;
-                        break;
-                    }
                     }
                 }
 

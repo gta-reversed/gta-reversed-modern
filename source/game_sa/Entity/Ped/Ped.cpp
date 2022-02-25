@@ -744,14 +744,19 @@ void CPed::ClearAimFlag() {
 
 /*!
 * @addr 0x5DEF60
-* @addr Get angle of point relative to the ped's current rotation
+* @returns Which quadrant a given point is in relative to the ped's rotation. (Google: "Angle quadrants" - https://www.mathstips.com/wp-content/uploads/2014/03/unit-circle.png)
+* @param point Point should be relative to the ped's position. Eg.: point = actualPoint - ped.GetPostion2D()
 */
-float CPed::GetLocalDirection(const CVector2D& point) {
-    auto angle = (float)atan2(-point.x, point.y) - m_fCurrentRotation + PI / 4.f;
-    while (angle < 0.f) {
-        angle += TWO_PI;
-    }
-    return angle / (PI / 2.f); // Weird..
+uint8 CPed::GetLocalDirection(const CVector2D& point) {
+    float angle;
+    for (angle = point.Heading() - m_fCurrentRotation + RWDEG2RAD(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
+    return ((uint8)RWRAD2DEG(angle) / 90) % 4; // See original code below:
+
+    // Original R* code - Kinda stupid, we just use modulo instead.
+    // int32 dir;
+    //for (dir = (int)RWRAD2DEG(angle) / 90; angle > 3; angle -= 4);
+    // 0-forward, 1-left, 2-backward, 3-right.
+    //return angle;
 } 
 
 /*!

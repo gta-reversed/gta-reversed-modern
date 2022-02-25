@@ -406,8 +406,7 @@ public:
     void SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2);
     void SetAimFlag(CEntity* aimingTo);
     void ClearAimFlag();
-    // Gets point direction relatively to ped
-    float GetLocalDirection(const CVector2D& arg0);
+    uint8 GetLocalDirection(const CVector2D& arg0);
     bool IsPedShootable();
     bool UseGroundColModel();
     bool CanPedReturnToState();
