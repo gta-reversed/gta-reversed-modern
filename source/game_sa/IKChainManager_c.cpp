@@ -13,7 +13,7 @@ void IKChainManager_c::InjectHooks() {
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
     // RH_ScopedInstall(AbortPointArm, 0x6182F0);
     // RH_ScopedInstall(CanAccept, 0x618800);
-    // RH_ScopedInstall(Init, 0x6180A0);
+    RH_ScopedInstall(Init, 0x6180A0);
     // RH_ScopedInstall(Exit, 0x6180D0);
     RH_ScopedInstall(Reset, 0x618140);
     // RH_ScopedInstall(RemoveIKChain, 0x618170);
@@ -28,7 +28,9 @@ void IKChainManager_c::InjectHooks() {
 
 // 0x6180A0
 bool IKChainManager_c::Init() {
-    return plugin::CallMethodAndReturn<bool, 0x6180A0, IKChainManager_c*>(this);
+    for (auto&& v : m_chains) {
+        m_freeList.AddItem(&v);
+    }
 }
 
 // 0x6180D0
@@ -48,9 +50,7 @@ void IKChainManager_c::Exit() {
 // 0x618140
 void IKChainManager_c::Reset() {
     Exit();
-    for (auto&& c : m_chains) {
-        m_freeList.AddItem(&c);
-    }
+    Init();
 }
 
 // 0x6186D0
