@@ -33,8 +33,8 @@ public:
 public:
     static void InjectHooks();
 
-    ~CTaskSimpleIKChain();
     CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
+    ~CTaskSimpleIKChain() override;
 
 
     void BlendOut(int32 blendOutTime);
