@@ -10,6 +10,8 @@
 
 class CTaskSimpleIKManager : public CTaskSimple {
 public:
+    // 0 - CTaskSimpleIKLookAt
+    // 1, 2 - Left and right arm `CTaskSimpleIKPointArm`
     CTaskSimpleIKChain* m_pIKChainTasks[4]{};
     bool                m_bAborting{};
 
