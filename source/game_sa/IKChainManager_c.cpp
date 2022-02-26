@@ -21,7 +21,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(CanAccept, 0x618800);
     RH_ScopedInstall(IsLooking, 0x6181A0);
     RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
-    // RH_ScopedInstall(GetLookAtOffset, 0x618210);
+    RH_ScopedInstall(GetLookAtOffset, 0x618210);
     // RH_ScopedInstall(AbortLookAt, 0x618280);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
@@ -140,8 +140,11 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
 }
 
 // 0x618210
-void IKChainManager_c::GetLookAtOffset(CPed* ped, CVector* outPos) {
-    plugin::CallMethod<0x618210, IKChainManager_c*, CPed*, CVector*>(this, ped, outPos);
+CVector IKChainManager_c::GetLookAtOffset(CPed* ped) { // TODO: It's possible this is incorrect, originally it took the vector as an arg (although that's probably a compiler optimization)
+    if (const auto task = GetPedIKLookAtTask(ped)) {
+        return task->GetLookAtOffset();
+    }
+    return {};
 }
 
 // 0x618280

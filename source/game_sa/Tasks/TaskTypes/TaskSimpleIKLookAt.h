@@ -19,6 +19,7 @@ public:
         bool bUseTorso,float speed,int32 blendTime,int32 m_priority);
 
     auto GetLookAtEntity() { return m_pEntity; }
+    auto GetLookAtOffset() { return m_vecOffsetPos; }
 };
 
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);

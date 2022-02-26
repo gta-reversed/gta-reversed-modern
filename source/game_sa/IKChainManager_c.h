@@ -25,7 +25,7 @@ public:
     bool CanAccept(CPed* ped, float);
     bool IsLooking(CPed* ped);
     CEntity* GetLookAtEntity(CPed* ped);
-    void GetLookAtOffset(CPed* ped, CVector* outPos);
+    CVector GetLookAtOffset(CPed* ped);
     void AbortLookAt(CPed* ped, int32);
     bool CanAcceptLookAt(CPed* ped);
     void LookAt(Const char* name, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool bArg7, float fSpeed, int32 blendTime, int32 a10, bool bForceLooking);
