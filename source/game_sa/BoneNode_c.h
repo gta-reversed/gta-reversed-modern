@@ -24,3 +24,4 @@ public:
     float max_2;
     float m_speed;
 };
+VALIDATE_SIZE(BoneNode_c, 0x98);

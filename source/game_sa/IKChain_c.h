@@ -31,3 +31,4 @@ public:
   uint8 m_indexInList;
   int8  m_priority;
 };
+VALIDATE_SIZE(IKChain_c, 0x58);
