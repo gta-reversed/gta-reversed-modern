@@ -6,6 +6,7 @@
 */
 #pragma once
 
+// TODO: Sort by value...
 enum ePedBones : int32 {
     BONE_UNKNOWN = -1,
     BONE_NORMAL = 0, // Normal or Root, both are same
@@ -39,7 +40,11 @@ enum ePedBones : int32 {
     BONE_R_THIGH = 51,
     BONE_R_CALF = 52,
     BONE_R_FOOT = 53,
-    BONE_R_TOE_0 = 54
+    BONE_R_TOE_0 = 54,
+
+
+
+    BONE_NUM = 303
 };
 
 

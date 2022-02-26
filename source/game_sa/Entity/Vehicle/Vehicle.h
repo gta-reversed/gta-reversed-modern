@@ -679,6 +679,7 @@ public:
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
+    bool HasDriver() const { return !!m_pDriver; }
 
 private:
     friend void InjectHooksMain();

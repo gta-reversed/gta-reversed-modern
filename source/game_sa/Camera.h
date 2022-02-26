@@ -449,7 +449,7 @@ public:
     void SetMotionBlurAlpha(int32 alpha);
     void SetNearClipBasedOnPedCollision(float arg2);
     void SetNearClipScript(float nearClip);
-    void SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom);
+    void SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom = 0, int16 minZoom = 0);
     void SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, uint32 timeForInterpolation);
     void SetPercentAlongCutScene(float percent);
     void SetRwCamera(RwCamera* camera);

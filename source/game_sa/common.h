@@ -27,6 +27,7 @@ class CAnimBlendAssociation;
 class CAnimBlendHierarchy;
 class CEventGlobalGroup;
 struct RtAnimAnimation;
+class CPedGroup;
 
 const char gta_empty_string[4] = {0, 0, 0, 0};
 
@@ -118,7 +119,8 @@ CPlayerPed * FindPlayerPed(int32 playerId = -1);
 CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
-
+// returns player's group
+CPedGroup& FindPlayerGroup(int32 playerId = -1); // NOTSA
 CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
 CVector Multiply3x3(const CMatrix& m, const CVector& v);

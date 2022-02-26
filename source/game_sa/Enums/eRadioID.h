@@ -7,7 +7,7 @@
 #pragma once
 
 // Genre-based names
-enum eRadioID : int8 {
+enum eRadioID : uint8 {
     RADIO_EMERGENCY_AA,    // AA
     RADIO_CLASSIC_HIP_HOP, // Playback FM
     RADIO_COUNTRY,         // K-Rose

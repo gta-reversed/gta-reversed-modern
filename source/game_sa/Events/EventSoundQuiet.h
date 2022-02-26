@@ -12,10 +12,10 @@ public:
 
     static void InjectHooks();
 
-    CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position);
+    CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position);
     ~CEventSoundQuiet();
 private:
-    CEventSoundQuiet* Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position);
+    CEventSoundQuiet* Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position);
 public:
     eEventType GetEventType() const override { return EVENT_SOUND_QUIET; }
     int32 GetEventPriority() const override { return 8; }

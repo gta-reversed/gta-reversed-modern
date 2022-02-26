@@ -31,7 +31,7 @@ public:
 
     void  Normalise();
 
-    inline float SquaredMagnitude() {
+    inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
 
@@ -75,6 +75,10 @@ public:
     inline void Set(float X, float Y) {
         x = X;
         y = Y;
+    }
+     
+    float Heading() const {
+        return std::atan2(-x, y);
     }
 };
 

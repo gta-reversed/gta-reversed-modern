@@ -56,6 +56,11 @@ struct tFrameVisibilityPlugin {
 };
 VALIDATE_SIZE(tFrameVisibilityPlugin, 0x4);
 
+// TODO: Probably belongs inside `CVisibilityPlugins`
+static void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
+}
+
 class CVisibilityPlugins {
 public:
     static const int32 TOTAL_ALPHA_LISTS = 20;

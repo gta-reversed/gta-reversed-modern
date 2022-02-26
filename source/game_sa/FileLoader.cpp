@@ -1436,10 +1436,10 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
         for (auto i = 0; i < nAssocGroups; i++) {
             if (CAnimManager::GetAnimGroupName((AssocGroupId)i) == std::string_view{animGroup}) {
-                return i;
+                return (AssocGroupId)i;
             }
         }
-        return nAssocGroups;
+        return (AssocGroupId)nAssocGroups;
     };
 
     const auto mi = CModelInfo::AddPedModel(modelId);
@@ -1453,8 +1453,8 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     mi->m_nAnimType = FindAnimGroup();
     mi->m_nCarsCanDriveMask = carsCanDriveMask;
     mi->m_nPedFlags = flags;
-    mi->m_nRadio2 = radio2 + 1;
-    mi->m_nRadio1 = radio1 + 1;
+    mi->m_nRadio2 = (eRadioID)(radio2 + 1);
+    mi->m_nRadio1 = (eRadioID)(radio1 + 1);
     mi->m_nRace = CPopulation::FindPedRaceFromName(modelName);
     mi->m_nPedAudioType = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
     mi->m_nVoiceMin = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);

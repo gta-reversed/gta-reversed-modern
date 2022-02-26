@@ -21,7 +21,7 @@ public:
 public:
     static void InjectHooks();
 
-    CEventGroup(CPed* ped);
+    explicit CEventGroup(CPed* ped);
     virtual ~CEventGroup();
     CEventGroup* Constructor(CPed* ped);
 

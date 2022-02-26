@@ -214,4 +214,8 @@ public:
     static char  GetCurrentPercTypeGroup(int32 groupId, uint8 zonePopulationType) {
         return m_nPercTypeGroup[720 * m_nCurrentTimeIndex + 360 * m_nCurrentTimeOfWeek + 18 * zonePopulationType + groupId];
     }
+
+    static bool IsPedInGroupTheseGroups(int32 modelIndex, std::initializer_list<ePopcycleGroup> groups) {
+        return rng::any_of(groups, [=](auto grp) {return IsPedInGroup(modelIndex, grp); });
+    }
 };
