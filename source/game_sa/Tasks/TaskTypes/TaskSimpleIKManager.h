@@ -10,15 +10,30 @@
 
 class CTaskSimpleIKManager : public CTaskSimple {
 public:
-    CTaskSimpleIKChain* m_pIKChainTasks[4];
-    bool                m_bAborting;
-
-
+    CTaskSimpleIKChain* m_pIKChainTasks[4]{};
+    bool                m_bAborting{};
 
 public:
-    CTaskSimpleIKManager();
+    static void InjectHooks();
 
-    CTaskSimpleIKChain* GetTaskAtSlot(uint32 slut) { return m_pIKChainTasks[slut]; }
+    CTaskSimpleIKManager();
+    ~CTaskSimpleIKManager();
+
+    void AddIKChainTask(CTaskSimpleIKChain* task, int32 slot);
+    CTaskSimpleIKChain* GetTaskAtSlot(int32);
+
+    CTaskSimpleIKManager* Clone() override;
+    eTaskType GetTaskType() override;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    bool ProcessPed(CPed* ped) override;
+private:
+    CTaskSimpleIKManager* Constructor();
+    CTaskSimpleIKManager* Destructor();
+
+    CTaskSimpleIKManager* Clone_Reversed() { return CTaskSimpleIKManager::Clone(); }
+    eTaskType GetTaskType_Reversed() { return CTaskSimpleIKManager::GetTaskType(); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleIKManager::MakeAbortable(ped, priority, event); }
+    bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleIKManager::ProcessPed(ped); }
 };
 
 VALIDATE_SIZE(CTaskSimpleIKManager, 0x1C);
