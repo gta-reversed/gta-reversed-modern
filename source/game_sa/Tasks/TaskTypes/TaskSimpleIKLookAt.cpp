@@ -41,10 +41,10 @@ CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Destructor() {
 }
 
 // 0x634050
-void CTaskSimpleIKLookAt::UpdateLookAtInfo(char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 arg_20, float fSpeed,
+void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed,
                                            int32 blendTime, int32 unused) {
-    plugin::CallMethod<0x634050, CTaskSimpleIKLookAt*, char*, CPed*, CEntity*, int32, int32, RwV3d, uint8, float, int32, int32>(this, strPurpose, ped, targetPed, time, pedBoneID,
-                                                                                                                                lookAtOffset, arg_20, fSpeed, blendTime, unused);
+    plugin::CallMethod<0x634050, CTaskSimpleIKLookAt*, const char*, CPed*, CEntity*, int32, int32, RwV3d, bool, float, int32, int32>(this, strPurpose, ped, targetPed, time, pedBoneID,
+                                                                                                                                lookAtOffset, useTorso, fSpeed, blendTime, unused);
 }
 
 // 0x634120

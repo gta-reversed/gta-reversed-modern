@@ -24,7 +24,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(GetLookAtOffset, 0x618210);
     RH_ScopedInstall(AbortLookAt, 0x618280);
     RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
-    // RH_ScopedInstall(LookAt, 0x618970);
+    RH_ScopedInstall(LookAt, 0x618970);
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
     // RH_ScopedInstall(AbortPointArm, 0x6182F0);
     // RH_ScopedInstall(IsFacingTarget, 0x618330);
@@ -162,7 +162,7 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
     // If ped doesn't accept look at IK's abort it (if any) and return false
     if (!ped->bDontAcceptIKLookAts) {
         if (IsLooking(ped)) {
-            AbortLookAt(ped, 250);
+            AbortLookAt(ped);
         }
         return false;
     }
@@ -183,8 +183,34 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 }
 
 // 0x618970
-void IKChainManager_c::LookAt(Const char* name, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool bArg7, float fSpeed, int32 blendTime, int32 a10, bool bForceLooking) {
-    plugin::CallMethod<0x618970, IKChainManager_c*, const char*, CPed*, CEntity*, int32, ePedBones, CVector*, bool, float, int32, int32, bool>(this, name, ped, targetEntity, time, pedBoneId, posn, bArg7, fSpeed, blendTime, a10, bForceLooking);
+void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime, uint8 priority, bool bForceLooking) {
+    if (!bForceLooking) {
+        if (!CanAcceptLookAt(ped) || *(bool*)0xC1542C) { // TODO `byte_C1542C` | staticref
+            return;
+        }
+    }
+
+    // Make sure we have an IK manager task
+    if (!GetPedIKManagerTask(ped)) {
+        ped->GetTaskManager().SetTaskSecondary(new CTaskSimpleIKManager(), TASK_SECONDARY_IK);
+    }
+
+    const auto lookAtOffset = posn ? *posn : CVector{};
+
+    // Now, either update existing task or create one
+    if (const auto lookAt = GetPedIKLookAtTask(ped)) {
+        if (priority < lookAt->m_nPriority) {
+            return;
+        }
+        if (useTorso || !lookAt->m_bUseTorso) {
+            lookAt->UpdateLookAtInfo(purpose, ped, targetEntity, time, (int32)pedBoneId, lookAtOffset, useTorso && lookAt->m_bUseTorso, fSpeed, blendTime, priority);
+        } else {
+            AbortLookAt(ped);
+        }
+    } else { // Doesn't have task yet, create it
+        GetPedIKManagerTask(ped)->AddIKChainTask(
+            new CTaskSimpleIKLookAt{purpose, targetEntity, time, (int32)pedBoneId, lookAtOffset, useTorso, fSpeed, (uint32)blendTime, priority}, 0);
+    }
 }
 
 bool IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) {

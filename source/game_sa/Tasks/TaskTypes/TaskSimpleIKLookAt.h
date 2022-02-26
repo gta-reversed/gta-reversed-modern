@@ -16,10 +16,10 @@ public:
 public:
     static void InjectHooks();
 
+    CTaskSimpleIKLookAt(const char* purpose, CEntity* lookAtEntity, int32 time, int32 pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
     ~CTaskSimpleIKLookAt();
-    CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
 
-    void UpdateLookAtInfo(char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 arg_20, float fSpeed, int32 blendTime,
+    void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime,
                           int32 unused);
     CEntity* GetLookAtEntity();
     CVector GetLookAtOffset();
