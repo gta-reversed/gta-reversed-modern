@@ -28,7 +28,7 @@ void IKChain_c::InjectHooks() {
 // Methods
 // 0x617870
 void IKChain_c::Exit() {
-    for (auto i = 0u; i < m_count; i++) {
+    for (auto i = 0; i < m_count; i++) {
         g_boneNodeMan.ReturnBoneNode(m_bones[i]);
     }
     delete[] m_bones;
@@ -43,7 +43,7 @@ void IKChain_c::Update(float timeStep) {
 // 0x618370
 bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
                      int32 priority) {
-    return plugin::CallMethodAndReturn<bool, 0x618370, IKChain_c*,const char*, int32, CPed*, int32, RwV3d, int32, CEntity*, int32, RwV3d, float, int32>(
+    return plugin::CallMethodAndReturn<bool, 0x618370, IKChain_c*, const char*, int32, CPed*, int32, RwV3d, int32, CEntity*, int32, RwV3d, float, int32>(
         this, name, IndexInList, ped, animId, bonePosn, animId_1, entity, offsetBoneTag, posn, a11, priority);
 }
 

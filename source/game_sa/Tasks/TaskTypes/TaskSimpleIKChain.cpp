@@ -96,7 +96,7 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
     }
 
     // 0x633D2B
-    if (m_nTime == -1 && CTimer::GetTimeInMS() > m_nEndTime) {
+    if (m_nTime == -1 && (int32)CTimer::GetTimeInMS() > m_nEndTime) {
         g_ikChainMan.RemoveIKChain(m_pIKChain);
         m_pIKChain = nullptr;
         return true;
@@ -113,14 +113,14 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
     // 0x633D75
     if (m_nTime != -1) {
-        if (CTimer::GetTimeInMS() >= m_nEndTime - m_nBlendTime) {
+        if ((int32)CTimer::GetTimeInMS() >= m_nEndTime - m_nBlendTime) {
             m_fTargetBlend = 0.f;
             m_nTargetTime = m_nEndTime;
         }
     }
 
     // 0x633D98
-    if (CTimer::GetTimeInMS() <= m_nTargetTime) {
+    if ((int32)CTimer::GetTimeInMS() <= m_nTargetTime) {
         m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.f, (float)CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
     } else {
         m_fBlend = m_fTargetBlend;
