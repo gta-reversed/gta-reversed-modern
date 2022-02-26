@@ -19,7 +19,7 @@ public:
     ePedBones  m_nEffectorBoneTag{};
     RwV3d      m_vecEffectorVec{};
     CEntity*   m_pEntity{};
-    ePedBones  m_nffsetBoneTag{};
+    ePedBones  m_nOffsetBoneTag{};
     int16      pad{}; // Must be kept, because originally `m_nffsetBoneTag` was likely an int32 - This inits the high word to 0
     RwV3d      m_vecOffsetPos{};
     float      m_fSpeed{};

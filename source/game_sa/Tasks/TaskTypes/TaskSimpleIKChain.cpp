@@ -15,7 +15,7 @@ void CTaskSimpleIKChain::InjectHooks() {
     RH_ScopedInstall(GetTaskType_Reversed, 0x62EC30);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
     RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
-    //RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
+    RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
 
 }
 
@@ -147,6 +147,6 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
 // 0x633BD0
 bool CTaskSimpleIKChain::CreateIKChain(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x633BD0, CTaskSimpleIKChain*, CPed*>(this, ped);
+    m_pIKChain = g_ikChainMan.AddIKChain("", 3, ped, m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, {}, 3);
+    return !!m_pIKChain;
 }
-
