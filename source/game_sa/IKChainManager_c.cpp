@@ -26,7 +26,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     RH_ScopedInstall(LookAt, 0x618970);
     RH_ScopedInstall(IsArmPointing, 0x6182B0);
-    // RH_ScopedInstall(AbortPointArm, 0x6182F0);
+    RH_ScopedInstall(AbortPointArm, 0x6182F0);
     // RH_ScopedInstall(IsFacingTarget, 0x618330);
     // RH_ScopedInstall(PointArm, 0x618B60);
 }
@@ -220,8 +220,11 @@ bool IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) { // May be __stdca
 }
 
 // 0x6182F0
-void IKChainManager_c::AbortPointArm(int32 a1, CPed* ped, int32 a3) {
-    return plugin::CallMethod<0x6182F0, IKChainManager_c*, int32, CPed*, int32>(this, a1, ped, a3);
+void IKChainManager_c::AbortPointArm(int32 slot, CPed* ped, int32 blendOutTime) {
+    const auto mgr = GetPedIKManagerTask(ped);
+    if (const auto lookAt = static_cast<CTaskSimpleIKChain*>(mgr->GetTaskAtSlot(slot + 1))) {
+        lookAt->BlendOut(blendOutTime);
+    }
 }
 
 // 0x618330

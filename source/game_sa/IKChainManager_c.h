@@ -32,7 +32,7 @@ public:
 
     void PointArm(Const char* taskName, int32 a2, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float fSpeedMB, int32 blendTimeMB, float a9);
     static bool IsArmPointing(int32, CPed* ped);
-    void AbortPointArm(int32 a1, CPed* ped, int32 a3);
+    static void AbortPointArm(int32 a1, CPed* ped, int32 a3);
     bool IsFacingTarget(CPed* ped, int32);
 
 public:
