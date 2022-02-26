@@ -281,6 +281,10 @@ bool CMirrors::IsEitherScreenVisibleToCam() {
     return false;
 }
 
+bool CMirrors::ShouldRenderPeds() {
+    return CMirrors::bRenderingReflection && CMirrors::TypeOfMirror != 2;
+}
+
 // 0x726DF0
 void CMirrors::BeforeConstructRenderList() {
     if (d3dRestored) {

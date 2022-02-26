@@ -77,7 +77,7 @@ public:
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
 
-    void Process();
+    void Process(); // AKA RenderJetPack
     void ProcessThrust(CPed* ped);
     void ProcessAnims(CPed* ped);
     void ProcessControlInput(CPlayerPed* player);

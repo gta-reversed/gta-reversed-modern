@@ -1543,6 +1543,14 @@ void CVehicleModelInfo::SetHandlingId(const char* handlingName) {
     m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingName);
 }
 
+tHandlingData& CVehicleModelInfo::GetHandlingData() const {
+    return gHandlingDataMgr.m_aVehicleHandling[m_nHandlingId];
+}
+
+tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
+    return gHandlingDataMgr.m_aFlyingHandling[m_nHandlingId];
+}
+
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
 {
     m_anUpgrade1[m_nLinksCount] = upgrade1;

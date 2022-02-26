@@ -31,7 +31,6 @@ CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
-tHydraulicData (&CVehicle::m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 float& fBurstTyreMod = *(float*)0x8D34B4;                // 0.13f
 float& fBurstSpeedMax = *(float*)0x8D34B8;               // 0.3f
@@ -1516,7 +1515,7 @@ RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data)
 }
 
 // 0x6D2700
-void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState)
+void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState) // see eAtomicComponentFlag
 {
     ((void(__thiscall*)(CVehicle*, RwFrame*, uint32))0x6D2700)(this, component, visibilityState);
 }

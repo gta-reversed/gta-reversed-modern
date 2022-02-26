@@ -129,20 +129,21 @@ enum tWheelState : int32 {
     WHEEL_STATE_FIXED,	  // not rotating
 };
 
-enum class eVehicleCollisionComponent : uint16 {
-    DEFAULT    = 0x0,
-    BONNET     = 0x1,
-    BOOT       = 0x2,
+enum class eVehicleCollisionComponent : uint16
+{
+    DEFAULT = 0x0,
+    BONNET = 0x1,
+    BOOT = 0x2,
     BUMP_FRONT = 0x3,
-    BUMP_REAR  = 0x4,
-    DOOR_LF    = 0x5,
-    DOOR_RF    = 0x6,
-    DOOR_LR    = 0x7,
-    DOOR_RR    = 0x8,
-    WING_LF    = 0x9,
-    WING_RF    = 0xA,
-    WING_LR    = 0xB,
-    WING_RR    = 0xC,
+    BUMP_REAR = 0x4,
+    DOOR_LF = 0x5,
+    DOOR_RF = 0x6,
+    DOOR_LR = 0x7,
+    DOOR_RR = 0x8,
+    WING_LF = 0x9,
+    WING_RF = 0xA,
+    WING_LR = 0xB,
+    WING_RR = 0xC,
     WINDSCREEN = 0x13,
 };
 
@@ -399,7 +400,7 @@ public:
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
     static CColModel (&m_aSpecialColModel)[4];
-    static tHydraulicData(&m_aSpecialHydraulicData)[4];
+    static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 public:
     CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
@@ -458,7 +459,7 @@ public:
     virtual float GetHeightAboveRoad();
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
-    virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
+    virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
@@ -679,6 +680,7 @@ public:
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
+    bool HasDriver() const { return !!m_pDriver; }
 
 private:
     friend void InjectHooksMain();

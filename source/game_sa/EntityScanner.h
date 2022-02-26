@@ -9,14 +9,18 @@
 class CEntity;
 class CPed;
 
+// Just a theory..
+// Since this is originally a virtual class..
+// Maybe it was templated? Like: `template<class Entity_t, size_t MaxCount>` ?
+
 class CEntityScanner {
 protected:
     void* vtable;
 
 public:
     int32    field_4;
-    uint32   m_nCount;
-    CEntity* m_apEntities[16];
+    uint32   m_nCount{16};
+    CEntity* m_apEntities[16]{};
     CEntity* m_pClosestEntityInRange;
 
 public:

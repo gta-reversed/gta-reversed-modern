@@ -19,14 +19,14 @@ struct tPedColNodeInfo {
 
 class CPedModelInfo : public CClumpModelInfo {
 public:
-    int32      m_nAnimType;
+    AssocGroupId      m_nAnimType;
     ePedType   m_nPedType;
     ePedStats  m_nStatType;
     uint16     m_nCarsCanDriveMask;
     uint16     m_nPedFlags;
     CColModel* m_pHitColModel;
-    uint8      m_nRadio1;
-    uint8      m_nRadio2;
+    eRadioID      m_nRadio1;
+    eRadioID      m_nRadio2;
     uint8      m_nRace;
     int16      m_nPedAudioType;
     int16      m_nVoiceMin; // Also called voice1

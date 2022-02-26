@@ -1088,7 +1088,7 @@ void CWorld::SetPedsChoking(float x, float y, float z, float radius, CEntity* ga
                     eWeaponType::WEAPON_TEARGAS,
                     1,
                     PED_PIECE_TORSO,
-                    ped->GetLocalDirection(ped->GetPosition() - CVector{x, y, z})
+                    ped->GetLocalDirection(ped->GetPosition2D() - CVector2D{x, y})
                 );   
             }
         }
@@ -1874,7 +1874,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             if (const auto attachedTo = ped->m_pAttachedTo; attachedTo && attachedTo->IsVehicle() && attachedTo->m_nStatus == STATUS_WRECKED) {
                 CPedDamageResponseCalculator pedDamageResponseCalculator{ creator, 1000.f, WEAPON_EXPLOSION, PED_PIECE_TORSO, false};
                 
-                CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, (uint8)pedLocalDir, false, !!ped->bIsTalking };
+                CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
                     pedDamageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
                 } else {

@@ -15,6 +15,7 @@
 #include "EventScanner.h"
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
+#include "MentalHealth.h"
 
 class CPed;
 class CEntity;
@@ -32,37 +33,32 @@ class CTaskSimpleInAir;
 
 class CPedIntelligence {
 public:
-    CPed*            m_pPed;
-    CTaskManager     m_TaskMgr;
-    CEventHandler    m_eventHandler;
-    CEventGroup      m_eventGroup;
-    int32            m_nDecisionMakerType;
-    int32            m_nDecisionMakerTypeInGroup;
-    float            m_fHearingRange;
-    float            m_fSeeingRange;
-    uint32           m_nDmNumPedsToScan;
-    float            m_fDmRadius;
-    int32            field_CC;
-    char             field_D0;
-    uint8            m_nEventId;
-    uint8            m_nEventPriority;
-    char             field_D3;
-    CVehicleScanner  m_vehicleScanner;
-    CEntityScanner   m_entityScanner;
-    char             field_174;
-    char             gap_175[3];
-    CTaskTimer       field_178;
-    int32            field_184;
-    char             field_188;
-    char             gap_189[3];
-    CEventScanner    m_eventScanner;
-    bool             field_260;
-    char             field_261[3];
-    CPedStuckChecker m_pedStuckChecker;
-    int32            m_AnotherStaticCounter;
-    int32            m_StaticCounter;
-    CVector          m_vecLastPedPosDuringDamageEntity;
-    CEntity*         m_apInterestingEntities[3];
+    CPed*            m_pPed{};
+    CTaskManager     m_TaskMgr{ m_pPed };
+    CEventHandler    m_eventHandler{ m_pPed };
+    CEventGroup      m_eventGroup{ m_pPed };
+    int32            m_nDecisionMakerType{-1};
+    int32            m_nDecisionMakerTypeInGroup{-1};
+    float            m_fHearingRange{15.f};
+    float            m_fSeeingRange{15.f};
+    uint32           m_nDmNumPedsToScan{3};
+    float            m_fDmRadius{15.f};
+    float            field_CC{30.f};
+    char             field_D0{-1};
+    uint8            m_nEventId{};
+    uint8            m_nEventPriority{};
+    char             field_D3{};
+    CVehicleScanner  m_vehicleScanner{};
+    CEntityScanner   m_entityScanner{}; // TODO: Should be CPedScanner.. (Source: See original ctor)
+    CMentalHealth    m_mentalHealth{};
+    char             field_188{};
+    CEventScanner    m_eventScanner{};
+    bool             field_260{};
+    CPedStuckChecker m_pedStuckChecker{};
+    int32            m_AnotherStaticCounter{};
+    int32            m_StaticCounter{};
+    CVector          m_vecLastPedPosDuringDamageEntity{};
+    CEntity*         m_apInterestingEntities[3]{};
 
     static float& STEALTH_KILL_RANGE;
     static float& LIGHT_AI_LEVEL_MAX;
@@ -74,6 +70,9 @@ public:
 
     static void* operator new(unsigned size);
     static void operator delete(void* object);
+
+    CPedIntelligence(CPed* ped);
+    ~CPedIntelligence();
 
     CEntity** GetPedEntities();
     void SetPedDecisionMakerType(int32 newType);
@@ -147,6 +146,10 @@ public:
         }
         return false;
     }
+
+private:
+    CPedIntelligence* Constructor(CPed* ped);
+    CPedIntelligence* Destructor();
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);

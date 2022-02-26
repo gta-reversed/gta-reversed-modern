@@ -2,8 +2,6 @@
 
 #include "cHandlingDataMgr.h"
 
-cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;
-
 void cHandlingDataMgr::InjectHooks(){
     RH_ScopedClass(cHandlingDataMgr);
     RH_ScopedCategoryGlobal();

@@ -39,7 +39,11 @@ enum ePedBones : int16 {
     BONE_R_THIGH = 51,
     BONE_R_CALF = 52,
     BONE_R_FOOT = 53,
-    BONE_R_TOE_0 = 54
+    BONE_R_TOE_0 = 54,
+
+
+
+    BONE_NUM = 303
 };
 
 
