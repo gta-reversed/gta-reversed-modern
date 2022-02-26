@@ -20,8 +20,12 @@ public:
 
     void UpdatePointArmInfo(const char* purpose, CEntity* entity, ePedBones bone, RwV3d posn, float a8, int32 timeOffset);
 
-    CTaskSimpleIKPointArm* Clone() override { return new CTaskSimpleIKPointArm{ *this }; }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_POINT_R_ARM; } // Weird.. L_ARM never used?
+    CTaskSimpleIKPointArm* Clone() override {
+        return new CTaskSimpleIKPointArm{*this};
+    }
+    eTaskType GetTaskType() override {
+        return TASK_SIMPLE_IK_POINT_R_ARM;
+    } // Weird.. L_ARM never used?
 
     bool CreateIKChain(CPed* ped) override;
 

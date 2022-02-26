@@ -7,7 +7,7 @@ void CTaskSimpleIKLookAt::InjectHooks() {
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Constructor, 0x633E00);
-    RH_ScopedOverloadedInstall(Destructor, "", 0x633EF0, CTaskSimpleIKLookAt*(CTaskSimpleIKLookAt::*)());
+    RH_ScopedOverloadedInstall(Destructor, "", 0x633EF0, CTaskSimpleIKLookAt * (CTaskSimpleIKLookAt::*)());
 
     RH_ScopedInstall(UpdateLookAtInfo, 0x634050);
     RH_ScopedInstall(GetLookAtEntity, 0x634120);
@@ -18,16 +18,14 @@ void CTaskSimpleIKLookAt::InjectHooks() {
 }
 
 // 0x633E00
-CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority) :
-    CTaskSimpleIKChain{ name, BONE_HEAD, {0.f, 0.05f, 0.f}, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime},
-    m_nPriority{priority},
-    m_bUseTorso{useTorso}
-{
-}
+CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed,
+                                         uint32 blendTime, uint8 priority)
+    : CTaskSimpleIKChain{name, BONE_HEAD, {0.f, 0.05f, 0.f}, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime}, m_nPriority{priority}, m_bUseTorso{
+                                                                                                                                                                     useTorso} {}
 
 // 0x633E00
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 useTorso, float fSpeed, int32 blendTime,
-                                                      int32 priority) {
+CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 useTorso, float fSpeed,
+                                                      int32 blendTime, int32 priority) {
     this->CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(name, lookAtEntity, time, pedBoneID, lookAtOffset, useTorso, fSpeed, blendTime, priority);
     return this;
 }

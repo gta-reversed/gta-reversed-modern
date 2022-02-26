@@ -16,29 +16,21 @@ void CTaskSimpleIKChain::InjectHooks() {
     RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
     RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
     RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
-
 }
 
 // 0x6339C0
-CTaskSimpleIKChain::CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) :
-    CTaskSimple{},
-    m_nEffectorBoneTag{ effectorBoneTag },
-    m_nTime{ time },
-    m_nBlendTime{ blendTime },
-    m_vecEffectorVec{ effectorVec },
-    m_vecOffsetPos{ offsetPos },
-    m_nPivotBoneTag{ pivotBoneTag },
-    m_pEntity{ entity },
-    m_bEntityExist{ !!entity },
-    m_fSpeed{ speed }
-{
+CTaskSimpleIKChain::CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag,
+                                       RwV3d offsetPos, float speed, int32 time, int32 blendTime)
+    : CTaskSimple{}, m_nEffectorBoneTag{effectorBoneTag}, m_nTime{time}, m_nBlendTime{blendTime}, m_vecEffectorVec{effectorVec}, m_vecOffsetPos{offsetPos},
+      m_nPivotBoneTag{pivotBoneTag}, m_pEntity{entity}, m_bEntityExist{!!entity}, m_fSpeed{speed} {
     if (m_pEntity) {
         m_pEntity->RegisterReference(&m_pEntity);
     }
 }
 
 // 0x6339C0
-CTaskSimpleIKChain* CTaskSimpleIKChain::Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime) {
+CTaskSimpleIKChain* CTaskSimpleIKChain::Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag,
+                                                    RwV3d offsetPos, float speed, int32 time, int32 blendTime) {
     this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime);
     return this;
 }

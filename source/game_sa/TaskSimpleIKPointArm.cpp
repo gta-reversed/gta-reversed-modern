@@ -17,11 +17,9 @@ void CTaskSimpleIKPointArm::InjectHooks() {
 }
 
 // 0x634150
-CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, int32 arm, CEntity* targetEntity, ePedBones offsetBone, RwV3d offsetPosn, float speed, int32 blendTime) :
-    CTaskSimpleIKChain{ purpose, arm ? BONE_L_HAND : BONE_R_HAND, CVector{ 0.f, 0.05f, 0.f }, BONE_NORMAL, targetEntity, offsetBone, offsetPosn, speed, 999'999, blendTime },
-    m_hand{arm}
-{
-}
+CTaskSimpleIKPointArm::CTaskSimpleIKPointArm(const char* purpose, int32 arm, CEntity* targetEntity, ePedBones offsetBone, RwV3d offsetPosn, float speed, int32 blendTime)
+    : CTaskSimpleIKChain{purpose, arm ? BONE_L_HAND : BONE_R_HAND, CVector{0.f, 0.05f, 0.f}, BONE_NORMAL, targetEntity, offsetBone, offsetPosn, speed, 999'999, blendTime},
+      m_hand{arm} {}
 
 // 0x634240
 CTaskSimpleIKPointArm::~CTaskSimpleIKPointArm() {}

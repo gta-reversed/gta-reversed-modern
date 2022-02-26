@@ -81,12 +81,12 @@ void IKChainManager_c::Update(float timeStep) {
 }
 
 /*!
-* @addr 0x618750
-* @brief Tries initing a new chain from the free list.
-* @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
-*/
+ * @addr 0x618750
+ * @brief Tries initing a new chain from the free list.
+ * @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
+ */
 IKChain_c* IKChainManager_c::AddIKChain(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag,
-    RwV3d posn, float a11, int32 priority) {
+                                        RwV3d posn, float a11, int32 priority) {
     if (auto chain = m_freeList.RemoveHead()) {
         if (chain->Init(name, IndexInList, ped, animId, bonePosn, animId_1, entity, offsetBoneTag, posn, a11, priority)) {
             m_activeList.AddItem(chain);
@@ -110,9 +110,7 @@ bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
         return false;
     }
 
-    return TheCamera.m_PlayerWeaponMode.m_nMode == MODE_SNIPER
-        || dist >= 999.f
-        || dist*dist >= (TheCamera.GetPosition() - ped->GetPosition()).SquaredMagnitude();
+    return TheCamera.m_PlayerWeaponMode.m_nMode == MODE_SNIPER || dist >= 999.f || dist * dist >= (TheCamera.GetPosition() - ped->GetPosition()).SquaredMagnitude();
 }
 
 // NOTSA
@@ -149,7 +147,8 @@ CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
 }
 
 // 0x618210
-CVector IKChainManager_c::GetLookAtOffset(CPed* ped) { // TODO: It's possible this is incorrect, originally it took the vector as an arg (although that's probably a compiler optimization)
+CVector
+IKChainManager_c::GetLookAtOffset(CPed* ped) { // TODO: It's possible this is incorrect, originally it took the vector as an arg (although that's probably a compiler optimization)
     if (const auto task = GetPedIKLookAtTask(ped)) {
         return task->GetLookAtOffset();
     }
@@ -181,11 +180,9 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
         return false;
     }
 
-    const auto GetPedClumpAnimAssoc = [ped](AnimationId anim) {
-        return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim);
-    };
+    const auto GetPedClumpAnimAssoc = [ped](AnimationId anim) { return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim); };
 
-    if (rng::any_of(std::to_array({ ANIM_ID_DRNKBR_PRTL, ANIM_ID_SMKCIG_PRTL, ANIM_ID_DRNKBR_PRTL_F }), GetPedClumpAnimAssoc)) {
+    if (rng::any_of(std::to_array({ANIM_ID_DRNKBR_PRTL, ANIM_ID_SMKCIG_PRTL, ANIM_ID_DRNKBR_PRTL_F}), GetPedClumpAnimAssoc)) {
         return false;
     }
 
@@ -193,7 +190,8 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 }
 
 // 0x618970
-void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime, uint8 priority, bool bForceLooking) {
+void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime,
+                              uint8 priority, bool bForceLooking) {
     if (!bForceLooking) {
         if (!CanAcceptLookAt(ped) || *(bool*)0xC1542C) { // TODO `byte_C1542C` | staticref
             return;
@@ -215,13 +213,12 @@ void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEnt
             AbortLookAt(ped);
         }
     } else { // Doesn't have task yet, create it
-        taskIKMgr.AddIKChainTask(
-            new CTaskSimpleIKLookAt{purpose, targetEntity, time, pedBoneId, lookAtOffset, useTorso, fSpeed, (uint32)blendTime, priority}, 0);
+        taskIKMgr.AddIKChainTask(new CTaskSimpleIKLookAt{purpose, targetEntity, time, pedBoneId, lookAtOffset, useTorso, fSpeed, (uint32)blendTime, priority}, 0);
     }
 }
 
 // 0x6182B0
-bool __stdcall IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) { 
+bool __stdcall IKChainManager_c::IsArmPointing(int32 nSlot, CPed* ped) {
     const auto mgr = GetPedIKManagerTask(ped);
     return mgr && mgr->GetTaskAtSlot(nSlot + 1);
 }
@@ -263,6 +260,6 @@ void IKChainManager_c::PointArm(Const char* purpose, int32 arm, CPed* ped, CEnti
     if (const auto pointArm = static_cast<CTaskSimpleIKPointArm*>(taskIKMgr.GetTaskAtSlot(slot))) {
         pointArm->UpdatePointArmInfo(purpose, target, pedBoneId, offset, speed, blendTime);
     } else { // Create task
-        taskIKMgr.AddIKChainTask(new CTaskSimpleIKPointArm{ purpose, arm, target, pedBoneId, offset, speed, blendTime }, slot);
+        taskIKMgr.AddIKChainTask(new CTaskSimpleIKPointArm{purpose, arm, target, pedBoneId, offset, speed, blendTime}, slot);
     }
 }
