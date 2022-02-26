@@ -1,6 +1,7 @@
 #include "StdInc.h"
 #include "TaskSimpleIKPointArm.h"
 #include "IKChain_c.h"
+#include "IKChainManager_c.h"
 
 void CTaskSimpleIKPointArm::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKPointArm);
@@ -12,7 +13,7 @@ void CTaskSimpleIKPointArm::InjectHooks() {
     RH_ScopedInstall(UpdatePointArmInfo, 0x634370);
     // RH_ScopedInstall(Clone_Reversed, 0x634250);
     RH_ScopedInstall(GetTaskType_Reversed, 0x634230);
-    // RH_ScopedInstall(CreateIKChain_Reversed, 0x6342F0);
+    RH_ScopedInstall(CreateIKChain_Reversed, 0x6342F0);
 }
 
 // 0x634150
@@ -60,5 +61,6 @@ void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity
 
 // 0x6342F0
 bool CTaskSimpleIKPointArm::CreateIKChain(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6342F0, CTaskSimpleIKPointArm*, CPed*>(this, ped);
+    m_pIKChain = g_ikChainMan.AddIKChain("", m_hand ? 2 : 1, ped, m_nEffectorBoneTag, m_vecEffectorVec, 4, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
+    return !!m_pIKChain;
 }
