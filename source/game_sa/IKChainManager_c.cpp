@@ -14,7 +14,7 @@ void IKChainManager_c::InjectHooks() {
     // RH_ScopedInstall(CanAccept, 0x618800);
     // RH_ScopedInstall(Init, 0x6180A0);
     // RH_ScopedInstall(Exit, 0x6180D0);
-    // RH_ScopedInstall(Reset, 0x618140);
+    RH_ScopedInstall(Reset, 0x618140);
     // RH_ScopedInstall(RemoveIKChain, 0x618170);
     // RH_ScopedInstall(IsLooking, 0x6181A0);
     // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
@@ -37,7 +37,10 @@ void IKChainManager_c::Exit() {
 
 // 0x618140
 void IKChainManager_c::Reset() {
-    return plugin::CallMethod<0x618140, IKChainManager_c*>(this);
+    Exit();
+    for (auto&& c : m_chains) {
+        m_freeList.AddItem(&c);
+    }
 }
 
 // 0x6186D0
@@ -47,7 +50,7 @@ void IKChainManager_c::Update(float timeStep) {
     for (auto i = 0u; i < 4u; i++) {
         CWorld::IncrementCurrentScanCode();
 
-        for (auto it = m_list1.GetHead(); it; it = it = m_list1.GetNext(it)) {
+        for (auto it = m_activeList.GetHead(); it; it = it = m_activeList.GetNext(it)) {
             auto& v = *(IKChain_c*)it;
             if (v.m_indexInList == i) {
                 // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..

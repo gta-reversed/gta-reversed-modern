@@ -1,10 +1,10 @@
 #pragma once
 
+#include "List_c.h"
+#include "IKChain_c.h"
+
 class CPed;
 class CEntity;
-class IKChain_c;
-
-#include "List_c.h"
 
 class IKChainManager_c {
 public:
@@ -35,11 +35,12 @@ public:
     bool IsFacingTarget(CPed* ped, int32);
 
 public:
-    char                      pad[2804];
-    TList_c<IKChain_c>        m_list0; 
-    List_c                    m_list1; // TODO: Use `TLIst_c`
-    char                      pad1[768];
+    IKChain_c                 m_chains[32]{};
+    TList_c<IKChain_c>        m_activeList{};
+    TList_c<IKChain_c>        m_freeList{};
+    char                      pad1[754];
     //CTaskSimpleAchieveHeading m_list2[32]; // pad1 was this originally, but I really don't think it's really this.
 };
+VALIDATE_SIZE(IKChainManager_c, 0xE0C);
 
 extern IKChainManager_c& g_ikChainMan;
