@@ -37,7 +37,7 @@ public:
 
 
     void BlendOut(int32 blendOutTime);
-    CTaskSimpleIKChain* GetIKChain();
+    IKChain_c*      GetIKChain();
 
     CTaskSimpleIKChain* Clone() override;
     eTaskType           GetTaskType() override { return TASK_SIMPLE_IK_CHAIN; }

@@ -70,8 +70,8 @@ void CTaskSimpleIKChain::BlendOut(int32 blendOutTime) {
 }
 
 // 0x633C70
-CTaskSimpleIKChain* CTaskSimpleIKChain::GetIKChain() {
-    return plugin::CallMethodAndReturn<CTaskSimpleIKChain*, 0x633C70, CTaskSimpleIKChain*>(this);
+IKChain_c* CTaskSimpleIKChain::GetIKChain() {
+    return m_pIKChain;
 }
 
 // 0x633B00
