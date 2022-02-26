@@ -4,6 +4,7 @@
 #include "IKChain_c.h"
 #include "BoneNodeManager_c.h"
 #include "TaskSimpleIKManager.h"
+#include "TaskSimpleIKLookAt.h"
 
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
@@ -19,7 +20,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(RemoveIKChain, 0x618170);
     RH_ScopedInstall(CanAccept, 0x618800);
     RH_ScopedInstall(IsLooking, 0x6181A0);
-    // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
+    RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     // RH_ScopedInstall(GetLookAtOffset, 0x618210);
     // RH_ScopedInstall(AbortLookAt, 0x618280);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
@@ -118,9 +119,23 @@ bool IKChainManager_c::IsLooking(CPed* ped) {
     return task && static_cast<CTaskSimpleIKManager*>(task)->GetTaskAtSlot(0);
 }
 
+CTaskSimpleIKManager* GetPedIKManagerTask(CPed* ped) {
+    return static_cast<CTaskSimpleIKManager*>(ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK));
+}
+
+CTaskSimpleIKLookAt* GetPedIKLookAtTask(CPed* ped) {
+    if (const auto mgr = GetPedIKManagerTask(ped)) {
+        return static_cast<CTaskSimpleIKLookAt*>(mgr->GetTaskAtSlot(0));
+    }
+    return nullptr;
+}
+
 // 0x6181D0
 CEntity* IKChainManager_c::GetLookAtEntity(CPed* ped) {
-    return plugin::CallMethodAndReturn<CEntity*, 0x6181D0, IKChainManager_c*, CPed*>(this, ped);
+    if (const auto task = GetPedIKLookAtTask(ped)) {
+        return task->GetLookAtEntity();
+    }
+    return nullptr;
 }
 
 // 0x618210

@@ -17,6 +17,8 @@ public:
 
     CTaskSimpleIKLookAt(char* idString _IGNORED_ ,CEntity* entity,int32 time,int32 offsetBoneTag, RwV3d offsetPos,
         bool bUseTorso,float speed,int32 blendTime,int32 m_priority);
+
+    auto GetLookAtEntity() { return m_pEntity; }
 };
 
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);
