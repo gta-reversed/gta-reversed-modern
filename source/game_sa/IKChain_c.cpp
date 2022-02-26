@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "IKChain_c.h"
+#include "BoneNodeManager_c.h"
 
 void IKChain_c::InjectHooks() {
     RH_ScopedClass(IKChain_c);
@@ -27,7 +28,11 @@ void IKChain_c::InjectHooks() {
 // Methods
 // 0x617870
 void IKChain_c::Exit() {
-    plugin::CallMethod<0x617870, IKChain_c*>(this);
+    for (auto i = 0u; i < m_count; i++) {
+        g_boneNodeMan.ReturnBoneNode(&m_bones[i]);
+    }
+    delete[] m_bones;
+    m_bones = nullptr;
 }
 
 // 0x6184B0

@@ -36,12 +36,7 @@ bool IKChainManager_c::Init() {
 // 0x6180D0
 void IKChainManager_c::Exit() {
     for (auto it = m_activeList.GetTail(); it; it = m_activeList.GetPrev(it)) {
-        auto& item = *(IKChain_c*)it;
-        for (auto i = 0u; i < item.m_count; i++) {
-            g_boneNodeMan.ReturnBoneNode(&item.m_bones[i]);
-        }
-        delete[] item.m_bones;
-        item.m_bones = nullptr;
+        ((IKChain_c*)it)->Exit();
     }
     m_activeList.RemoveAll();
     m_freeList.RemoveAll();
