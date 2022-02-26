@@ -36,6 +36,7 @@ bool IKChainManager_c::Init() {
     for (auto&& v : m_chains) {
         m_freeList.AddItem(&v);
     }
+    return true;
 }
 
 // 0x6180D0

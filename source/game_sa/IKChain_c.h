@@ -14,6 +14,9 @@ class IKChain_c : public ListItem_c {
 public:
     static void InjectHooks();
 
+    IKChain_c() = default;
+    ~IKChain_c() = default;
+
     void Exit();
     void Update(float unused);
     bool Init(const char* name, int32 indexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int32 priority);
