@@ -12,7 +12,7 @@ void IKChainManager_c::InjectHooks() {
 
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
     // RH_ScopedInstall(AbortPointArm, 0x6182F0);
-    // RH_ScopedInstall(CanAccept, 0x618800);
+    RH_ScopedInstall(CanAccept, 0x618800);
     RH_ScopedInstall(Init, 0x6180A0);
     // RH_ScopedInstall(Exit, 0x6180D0);
     RH_ScopedInstall(Reset, 0x618140);
@@ -98,8 +98,14 @@ void IKChainManager_c::RemoveIKChain(IKChain_c* chain) {
 }
 
 // 0x618800
-bool IKChainManager_c::CanAccept(CPed* ped, float a2) {
-    return plugin::CallMethodAndReturn<bool, 0x618800, IKChainManager_c*, CPed*, float>(this, ped, a2);
+bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
+    if (!ped->GetModellingMatrix() || !ped->IsAlive() || !ped->GetIsOnScreen()) {
+        return false;
+    }
+
+    return TheCamera.m_PlayerWeaponMode.m_nMode == MODE_SNIPER
+        || dist >= 999.f
+        || dist*dist >= (TheCamera.GetPosition() - ped->GetPosition()).SquaredMagnitude();
 }
 
 // 0x6181A0
