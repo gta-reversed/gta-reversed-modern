@@ -15,11 +15,12 @@ public:
     int32      m_nBlendTime{};
     IKChain_c* m_pIKChain{};
     int16      m_nAlotId{};
-    int16      m_nPivotBoneTag{};
-    int16      m_nEffectorBoneTag{};
+    ePedBones  m_nPivotBoneTag{};
+    ePedBones  m_nEffectorBoneTag{};
     RwV3d      m_vecEffectorVec{};
     CEntity*   m_pEntity{};
-    int32      m_nOffsetBoneTag{};
+    ePedBones  m_nffsetBoneTag{};
+    int16      pad{}; // Must be kept, because originally `m_nffsetBoneTag` was likely an int32 - This inits the high word to 0
     RwV3d      m_vecOffsetPos{};
     float      m_fSpeed{};
     bool       m_bEntityExist{};
@@ -33,7 +34,7 @@ public:
     static void InjectHooks();
 
     ~CTaskSimpleIKChain();
-    CTaskSimpleIKChain(const char* name, int16 effectorBoneTag, RwV3d effectorVec, int16 pivotBoneTag, CEntity* entity, int32 offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
+    CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
 
 
     void BlendOut(int32 blendOutTime);
@@ -46,7 +47,7 @@ public:
 
     virtual bool CreateIKChain(CPed* ped);
 private:
-    CTaskSimpleIKChain* Constructor(char* name, int32 effectorBoneTag, RwV3d effectorVec, int32 pivotBoneTag, CEntity* a6, int32 offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
+    CTaskSimpleIKChain* Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
     CTaskSimpleIKChain* Destructor();
 
     CTask* Clone_Reversed() { return CTaskSimpleIKChain::Clone(); }
