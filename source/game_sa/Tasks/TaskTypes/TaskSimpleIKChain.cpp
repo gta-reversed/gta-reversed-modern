@@ -13,7 +13,7 @@ void CTaskSimpleIKChain::InjectHooks() {
     //RH_ScopedInstall(GetIKChain, 0x633C70);
     //RH_ScopedInstall(Clone_Reversed, 0x633B00);
     RH_ScopedInstall(GetTaskType_Reversed, 0x62EC30);
-    //RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
     //RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
     //RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
 
@@ -82,7 +82,11 @@ CTaskSimpleIKChain* CTaskSimpleIKChain::Clone() {
 
 // 0x639450
 bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x639450, CTaskSimpleIKChain*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
+        return true;
+    }
+    BlendOut(250);
+    return false;
 }
 
 // 0x633C80
