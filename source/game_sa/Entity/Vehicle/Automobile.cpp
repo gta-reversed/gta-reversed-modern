@@ -1958,9 +1958,9 @@ void CAutomobile::SetupSuspensionLines()
     if (ModelIndices::IsRCBandit(m_nModelIndex)) {
         cm.m_boundSphere.m_fRadius = 2.f;
 
-for (auto&& sph : cd.GetSpheres()) {
-    sph.m_fRadius = 0.3f;
-}
+        for (auto&& sph : cd.GetSpheres()) {
+            sph.m_fRadius = 0.3f;
+        }
     }
 
     // 0x6A68FD
@@ -1987,7 +1987,7 @@ for (auto&& sph : cd.GetSpheres()) {
                 // Calculate positions of this wheel's line by 
                 // lerping between the 2 wheel's lines on this side
 
-                const auto wheelRelativePos = (float)j * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
+                const auto wheelRelativePos = (float)(j + 1u) * 0.2f; // 0.2 probably comes from `1 / 4` - some spacing
                 auto& line = cd.m_pLines[lineIndex];
                 line.m_vecStart = lerp(cd.m_pLines[i].m_vecStart, cd.m_pLines[i + 1].m_vecStart, wheelRelativePos);
                 line.m_vecEnd = lerp(cd.m_pLines[i].m_vecEnd, cd.m_pLines[i + 1].m_vecEnd, wheelRelativePos);
@@ -2568,7 +2568,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
     } else if (m_damageManager.GetEngineStatus() < 225u) {
         m_damageManager.SetEngineStatus(225u);
 
-        m_fBurnTimer = 0.;
+        m_fBurnTimer = 0.f;
 
         m_pLastDamageEntity = m_pDamageEntity;
         if (m_pLastDamageEntity) {
