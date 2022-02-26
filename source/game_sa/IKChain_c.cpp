@@ -29,7 +29,7 @@ void IKChain_c::InjectHooks() {
 // 0x617870
 void IKChain_c::Exit() {
     for (auto i = 0u; i < m_count; i++) {
-        g_boneNodeMan.ReturnBoneNode(&m_bones[i]);
+        g_boneNodeMan.ReturnBoneNode(m_bones[i]);
     }
     delete[] m_bones;
     m_bones = nullptr;
