@@ -37,7 +37,7 @@ public:
     ~CTaskSimpleIKChain() override;
 
 
-    void BlendOut(int32 blendOutTime);
+    void BlendOut(int32 blendOutTime = 250);
     IKChain_c*      GetIKChain();
 
     CTaskSimpleIKChain* Clone() override;

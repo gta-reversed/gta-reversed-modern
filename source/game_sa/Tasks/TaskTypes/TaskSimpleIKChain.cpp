@@ -14,7 +14,7 @@ void CTaskSimpleIKChain::InjectHooks() {
     //RH_ScopedInstall(Clone_Reversed, 0x633B00);
     RH_ScopedInstall(GetTaskType_Reversed, 0x62EC30);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
     //RH_ScopedInstall(CreateIKChain_Reversed, 0x633BD0);
 
 }
@@ -91,7 +91,58 @@ bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEven
 
 // 0x633C80
 bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x633C80, CTaskSimpleIKChain*, CPed*>(this, ped);
+    // 0x633CAB
+    // If IK chain doesn't exist, try creating and early out
+    if (!m_pIKChain) {
+        if (!m_bEntityExist || m_pEntity) {
+            if (CreateIKChain(ped)) {
+                if (m_nTime == -1) {
+                    m_nEndTime = -1;
+                } else {
+                    m_nEndTime = CTimer::GetTimeInMS() + m_nTime;
+                }
+                m_nTargetTime = CTimer::GetTimeInMS() + m_nBlendTime;
+                m_fTargetBlend = 1.f;
+                m_pIKChain->SetBlend(m_fBlend);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // 0x633D2B
+    if (m_nTime == -1 && CTimer::GetTimeInMS() > m_nEndTime) {
+        g_ikChainMan.RemoveIKChain(m_pIKChain);
+        m_pIKChain = nullptr;
+        return true;
+    }
+
+    // Deal with blending
+
+    // 0x633D50
+    if (m_bEntityExist && !m_pEntity) {
+        m_bEntityExist = false;
+        m_pIKChain->UpdateTarget(false);
+        BlendOut();
+    }
+
+    // 0x633D75
+    if (m_nTime != -1) {
+        if (CTimer::GetTimeInMS() >= m_nEndTime - m_nBlendTime) {
+            m_fTargetBlend = 0.f;
+            m_nTargetTime = m_nEndTime;
+        }
+    }
+
+    // 0x633D98
+    if (CTimer::GetTimeInMS() <= m_nTargetTime) {
+        m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.f, (float)CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
+    } else {
+        m_fBlend = m_fTargetBlend;
+    }
+
+    m_pIKChain->SetBlend(m_fBlend);
+    return false;
 }
 
 // 0x633BD0
