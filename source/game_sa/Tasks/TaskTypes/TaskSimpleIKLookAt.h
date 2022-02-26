@@ -20,6 +20,6 @@ public:
 
     auto GetLookAtEntity() { return m_pEntity; }
     auto GetLookAtOffset() { return m_vecOffsetPos; }
+    void BlendOut(uint32 blendOutTime);
 };
-
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);

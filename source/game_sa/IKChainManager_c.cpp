@@ -22,7 +22,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(IsLooking, 0x6181A0);
     RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     RH_ScopedInstall(GetLookAtOffset, 0x618210);
-    // RH_ScopedInstall(AbortLookAt, 0x618280);
+    RH_ScopedInstall(AbortLookAt, 0x618280);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
@@ -148,8 +148,10 @@ CVector IKChainManager_c::GetLookAtOffset(CPed* ped) { // TODO: It's possible th
 }
 
 // 0x618280
-void IKChainManager_c::AbortLookAt(CPed* ped, int32 blendOutTime) {
-    return plugin::CallMethod<0x618280, IKChainManager_c*, CPed*, int32>(this, ped, blendOutTime);
+void IKChainManager_c::AbortLookAt(CPed* ped, uint32 blendOutTime) {
+    if (const auto task = GetPedIKLookAtTask(ped)) {
+        task->BlendOut(blendOutTime);
+    }
 }
 
 // 0x6188B0
