@@ -58,11 +58,6 @@ void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity
     }
 }
 
-// 0x634250
-CTaskSimpleIKPointArm* CTaskSimpleIKPointArm::Clone() {
-    return plugin::CallMethodAndReturn<CTaskSimpleIKPointArm*, 0x634250, CTaskSimpleIKPointArm*>(this);
-}
-
 // 0x6342F0
 bool CTaskSimpleIKPointArm::CreateIKChain(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x6342F0, CTaskSimpleIKPointArm*, CPed*>(this, ped);

@@ -14,15 +14,14 @@ public:
 public:
     static void InjectHooks();
 
+    CTaskSimpleIKPointArm(const CTaskSimpleIKPointArm&) = default;
     CTaskSimpleIKPointArm(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, RwV3d offsetPosn, float speed, int32 blendTime);
     ~CTaskSimpleIKPointArm() override;
 
     void UpdatePointArmInfo(const char* purpose, CEntity* entity, ePedBones bone, RwV3d posn, float a8, int32 timeOffset);
 
-    CTaskSimpleIKPointArm* Clone() override;
-    eTaskType GetTaskType() override {
-        return TASK_SIMPLE_IK_POINT_R_ARM;
-    }
+    CTaskSimpleIKPointArm* Clone() override { return new CTaskSimpleIKPointArm{ *this }; }
+    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_POINT_R_ARM; } // Weird.. L_ARM never used?
 
     bool CreateIKChain(CPed* ped) override;
 
