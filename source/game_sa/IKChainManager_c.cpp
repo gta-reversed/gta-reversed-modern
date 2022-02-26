@@ -2,6 +2,7 @@
 
 #include "IKChainManager_c.h"
 #include "IKChain_c.h"
+#include "BoneNodeManager_c.h"
 
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
@@ -32,7 +33,16 @@ bool IKChainManager_c::Init() {
 
 // 0x6180D0
 void IKChainManager_c::Exit() {
-    return plugin::CallMethod<0x6180D0, IKChainManager_c*>(this);
+    for (auto it = m_activeList.GetTail(); it; it = m_activeList.GetPrev(it)) {
+        auto& item = *(IKChain_c*)it;
+        for (auto i = 0u; i < item.m_count; i++) {
+            g_boneNodeMan.ReturnBoneNode(&item.m_bones[i]);
+        }
+        delete[] item.m_bones;
+        item.m_bones = nullptr;
+    }
+    m_activeList.RemoveAll();
+    m_freeList.RemoveAll();
 }
 
 // 0x618140

@@ -16,7 +16,7 @@ public:
 public:
   CPed *m_ped;
   int32 m_count;
-  BoneNode_c *m_bones;
+  BoneNode_c *m_bones; // BoneNode_c[m_count] -> Array
   RwMatrix *m_matrix;
   float m_blend;
   uint16 m_animId;
