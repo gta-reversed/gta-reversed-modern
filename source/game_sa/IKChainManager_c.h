@@ -31,7 +31,7 @@ public:
     void LookAt(Const char* name, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool bArg7, float fSpeed, int32 blendTime, uint8 taskPriority, bool bForceLooking);
 
     void PointArm(Const char* taskName, int32 a2, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float fSpeedMB, int32 blendTimeMB, float a9);
-    bool IsArmPointing(int32, CPed* ped);
+    static bool IsArmPointing(int32, CPed* ped);
     void AbortPointArm(int32 a1, CPed* ped, int32 a3);
     bool IsFacingTarget(CPed* ped, int32);
 
