@@ -3,18 +3,17 @@
 
 void CTaskSimpleIKManager::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKManager);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategoryGlobal();
 
-    //RH_ScopedInstall(Constructor, 0x6337F0);
-    //RH_ScopedOverloadedInstall(Destructor, "", 0x633830, CTaskSimpleIKManager * (CTaskSimpleIKManager::*)());
+    RH_ScopedInstall(Constructor, 0x6337F0);
+    RH_ScopedInstall(Destructor, 0x633830);
 
-    //RH_ScopedInstall(AddIKChainTask, 0x633940);
-    //RH_ScopedInstall(GetTaskAtSlot, 0x6339B0);
-    //RH_ScopedInstall(Clone_Reversed, 0x639350);
-    //RH_ScopedInstall(GetTaskType_Reversed, 0x633820);
-    //RH_ScopedInstall(MakeAbortable_Reversed, 0x6338A0);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x6338E0);
-
+    RH_ScopedInstall(AddIKChainTask, 0x633940);
+    RH_ScopedInstall(GetTaskAtSlot, 0x6339B0);
+    // RH_ScopedInstall(Clone_Reversed, 0x639350);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x633820);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6338A0);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x6338E0);
 }
 
 // 0x6337F0
@@ -30,7 +29,10 @@ CTaskSimpleIKManager* CTaskSimpleIKManager::Constructor() {
 
 // 0x633830
 CTaskSimpleIKManager::~CTaskSimpleIKManager() {
-    // Everything done by the compiler
+    for (auto&& task : m_pIKChainTasks) {
+        delete task;
+    }
+    // Everything else done by the compiler
 }
 
 // 0x633830
@@ -39,14 +41,21 @@ CTaskSimpleIKManager* CTaskSimpleIKManager::Destructor() {
     return this;
 }
 
-// 0x633940
-void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 a3) {
-    plugin::CallMethod<0x633940, CTaskSimpleIKManager*, CTaskSimpleIKChain*, int32>(this, task, a3);
-}
-
-// 0x6339B0
-CTaskSimpleIKChain* CTaskSimpleIKManager::GetTaskAtSlot(int32 slut) {
-    return plugin::CallMethodAndReturn<CTaskSimpleIKChain*, 0x6339B0, CTaskSimpleIKManager*, int32>(this, slut);
+/*!
+* @addr 0x633940
+* @brief Store \a task in \a slot.
+* @param slot If < 0 the first unused slot will be used.
+*/
+void CTaskSimpleIKManager::AddIKChainTask(CTaskSimpleIKChain* task, int32 slot) {
+    if (slot < 0) { // Find free slot, and store `task` there.
+        const auto it = rng::find(m_pIKChainTasks, nullptr);
+        if (it != m_pIKChainTasks.end()) {
+            *it = task;
+        }
+    } else { // Store `task` in the given `slot`
+        assert(!m_pIKChainTasks[slot]); // Otherwise memory leak
+        m_pIKChainTasks[slot] = task;
+    }
 }
 
 // 0x639350
@@ -54,17 +63,37 @@ CTaskSimpleIKManager* CTaskSimpleIKManager::Clone() {
     return plugin::CallMethodAndReturn<CTaskSimpleIKManager*, 0x639350, CTaskSimpleIKManager*>(this);
 }
 
-// 0x633820
-eTaskType CTaskSimpleIKManager::GetTaskType() {
-    return plugin::CallMethodAndReturn<eTaskType, 0x633820, CTaskSimpleIKManager*>(this);
-}
-
 // 0x6338A0
 bool CTaskSimpleIKManager::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x6338A0, CTaskSimpleIKManager*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
+        for (auto&& task : m_pIKChainTasks) {
+            delete task;
+            task = nullptr;
+        }
+        return true;
+    } else {
+        m_bAborting = true;
+        return false;
+    }
 }
 
 // 0x6338E0
 bool CTaskSimpleIKManager::ProcessPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6338E0, CTaskSimpleIKManager*, CPed*>(this, ped);
+    if (m_bAborting) {
+        return true;
+    }
+
+    bool hasAllProcessedPed{true};
+    for (auto&& task : m_pIKChainTasks) {
+        if (task) {
+            if (task->ProcessPed(ped)) {
+                delete task;
+                task = nullptr;
+            } else {
+                hasAllProcessedPed = false;
+            }
+        }
+    }
+
+    return hasAllProcessedPed;
 }

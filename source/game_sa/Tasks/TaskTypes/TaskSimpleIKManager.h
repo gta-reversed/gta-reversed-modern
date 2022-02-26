@@ -10,22 +10,22 @@
 
 class CTaskSimpleIKManager : public CTaskSimple {
 public:
-    // 0 - CTaskSimpleIKLookAt
+    // 0    - `CTaskSimpleIKLookAt`
     // 1, 2 - Left and right arm `CTaskSimpleIKPointArm`
-    CTaskSimpleIKChain* m_pIKChainTasks[4]{};
-    bool                m_bAborting{};
+    std::array<CTaskSimpleIKChain*, 4> m_pIKChainTasks{};
+    bool                               m_bAborting{};
 
 public:
     static void InjectHooks();
 
     CTaskSimpleIKManager();
-    ~CTaskSimpleIKManager();
+    ~CTaskSimpleIKManager() override;
 
     void AddIKChainTask(CTaskSimpleIKChain* task, int32 slot);
-    CTaskSimpleIKChain* GetTaskAtSlot(int32);
+    CTaskSimpleIKChain* GetTaskAtSlot(int32 slot) { return m_pIKChainTasks[slot]; }
 
     CTaskSimpleIKManager* Clone() override;
-    eTaskType GetTaskType() override;
+    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_MANAGER; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
 private:
