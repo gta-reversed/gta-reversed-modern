@@ -138,6 +138,8 @@ void CAutomobile::InjectHooks()
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) :
     CVehicle(createdBy)
 {
+    m_nVehicleType = VEHICLE_TYPE_AUTOMOBILE;
+    m_nVehicleSubType = VEHICLE_TYPE_AUTOMOBILE;
 
     CVehicle::SetModelIndex(modelIndex);
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
