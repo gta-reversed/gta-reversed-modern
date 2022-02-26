@@ -140,6 +140,8 @@ public:
 public:
     static void InjectHooks();
 
+    CDamageManager(float wheelDamageEffect);
+
     void Init();
     void ResetDamageStatus();
     void ResetDamageStatusAndWheelDamage();
@@ -185,13 +187,13 @@ public:
     // NOTSA
     void SetAllWheelsState(eCarWheelStatus state);
     void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status); 
+    void SetDoorOpen(eDoors door);
+    void SetDoorClosed(eDoors door);
     [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
     [[nodiscard]] bool IsDoorOpen(eDoors door) const;
     [[nodiscard]] bool IsDoorClosed(eDoors door) const;
     [[nodiscard]] bool IsDoorPresent(eDoors door) const;
     [[nodiscard]] bool IsDoorDamaged(eDoors door) const;
-    void SetDoorOpen(eDoors door);
-    void SetDoorClosed(eDoors door);
 
 private: 
     // Wrapper functions

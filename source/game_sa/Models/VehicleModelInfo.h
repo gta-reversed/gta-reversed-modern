@@ -135,8 +135,7 @@ public:
     float              m_fWheelSizeFront;
     float              m_fWheelSizeRear;
     int16              m_nWheelModelIndex;
-    uint8              m_nHandlingId;
-    int8               field_4B;
+    uint16             m_nHandlingId;
     uint8              m_nNumDoors;
     eVehicleClass      m_nVehicleClass;
     uint8              m_nFlags;
@@ -441,8 +440,8 @@ public:
     // These two should probably be moved to a better place..
     [[nodiscard]] bool IsFrontWheel(eCarWheel wheel) const {
         switch (wheel) {
-        case CARWHEEL_FRONT_LEFT:
-        case CARWHEEL_FRONT_RIGHT:
+        case eCarWheel::CARWHEEL_FRONT_LEFT:
+        case eCarWheel::CARWHEEL_FRONT_RIGHT:
             return true;
         }
         return false;
@@ -456,6 +455,9 @@ public:
     [[nodiscard]] float GetSizeOfWheel(eCarWheel wheel) const {
         return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
     }
+
+    tHandlingData& GetHandlingData() const;
+    tFlyingHandlingData& GetFlyingHandlingData() const;
 };
 VALIDATE_SIZE(CVehicleModelInfo::CVehicleStructure, 0x314);
 VALIDATE_SIZE(CVehicleModelInfo, 0x308);

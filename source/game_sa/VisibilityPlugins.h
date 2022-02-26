@@ -14,6 +14,7 @@ class CClumpModelInfo;
 class CAtomicModelInfo;
 
 enum eAtomicComponentFlag {
+    ATOMIC_IS_NOT_PRESENT = 0x0,
     ATOMIC_IS_OK_STATE = 0x1,
     ATOMIC_IS_DAM_STATE = 0x2,
     ATOMIC_IS_LEFT = 0x4,

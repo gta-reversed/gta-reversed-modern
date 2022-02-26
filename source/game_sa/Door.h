@@ -20,14 +20,14 @@ enum eDoorState : uint8 {
 
 class CDoor {
 public:
-    float      m_fOpenAngle;
-    float      m_fClosedAngle;
-    int16      m_nDirn; // Seems to be a bitfield? 2 x 4 bits
-    uint8      m_nAxis;
-    eDoorState m_nDoorState;
-    float      m_fAngle;
-    float      m_fPrevAngle;
-    float      m_fAngVel;    // Angular velocity 
+    float      m_fOpenAngle{};
+    float      m_fClosedAngle{};
+    int16      m_nDirn{}; // Def a bitfield. 2 x 4 bits + some more
+    uint8      m_nAxis{}; // X, Y, Z - Right/left, front/back, up/down
+    eDoorState m_nDoorState{};
+    float      m_fAngle{};
+    float      m_fPrevAngle{};
+    float      m_fAngVel{};    // Angular velocity 
 
     static float& DOOR_SPEED_MAX_CAPPED; // 0.5f
 

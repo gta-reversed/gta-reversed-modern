@@ -288,9 +288,11 @@ void CPhysical::ProcessCollision()
                 automobile->m_apWheelCollisionEntity[1] = nullptr;
                 automobile->m_apWheelCollisionEntity[2] = nullptr;
                 automobile->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = automobile->m_aWheelColPoint;
-                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression;
-                wheelsCollisionPositions = automobile->m_vWheelCollisionPos;
+
+                // TODO: Use std::array<> for these local variables
+                wheelsColPoints = automobile->m_wheelColPoint.data();
+                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression.data();
+                wheelsCollisionPositions = automobile->m_vWheelCollisionPos.data();
             }
             CCollisionData* colData = GetColModel()->m_pColData;
             int32 collisionIndex = 0;

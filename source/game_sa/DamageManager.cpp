@@ -35,6 +35,12 @@ void CDamageManager::InjectHooks() {
     RH_ScopedNamedInstall(GetWheelStatus_Hooked, "GetWheelStatus", 0x6C21B0);
 }
 
+CDamageManager::CDamageManager(float wheelDamageEffect) :
+    m_fWheelDamageEffect{ wheelDamageEffect }
+{
+    ResetDamageStatus();
+}
+
 // 0x6A0520
 void CDamageManager::Init() {
     m_fWheelDamageEffect = 0.0f;

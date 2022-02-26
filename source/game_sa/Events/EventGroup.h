@@ -24,8 +24,8 @@ public:
     explicit CEventGroup(CPed* ped);
     virtual ~CEventGroup();
     CEventGroup* Constructor(CPed* ped);
-
-    CEvent* Add(CEvent* event, bool bValid = false);
+public:
+    CEvent * Add(CEvent* event, bool bValid = false);
     bool HasScriptCommandOfTaskType(eTaskType taskId);
     bool HasEventOfType(CEvent* event);
     bool HasEvent(CEvent* event);
