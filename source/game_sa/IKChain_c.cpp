@@ -6,7 +6,7 @@ void IKChain_c::InjectHooks() {
     RH_ScopedClass(IKChain_c);
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
 
-    // RH_ScopedInstall(Exit, 0x617870);
+    RH_ScopedInstall(Exit, 0x617870);
     // RH_ScopedInstall(Update, 0x6184B0);
     // RH_ScopedInstall(Init, 0x618370);
     // RH_ScopedInstall(IsAtTarget, 0x617F30);
