@@ -1,25 +1,45 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
-#include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
+#include "Base.h"
+#include <rwplcore.h>
+
 #include "TaskSimpleIKChain.h"
+
+class CEntity;
+class CPed;
 
 class CTaskSimpleIKLookAt : public CTaskSimpleIKChain {
 public:
-    bool m_bUseTorso;
-    int8 m_nPriority;
+    bool  m_bUseTorso{};
+    uint8 m_nPriority{};
 
-    CTaskSimpleIKLookAt(char* idString _IGNORED_ ,CEntity* entity,int32 time,int32 offsetBoneTag, RwV3d offsetPos,
-        bool bUseTorso,float speed,int32 blendTime,int32 m_priority);
+public:
+    static void InjectHooks();
 
-    auto GetLookAtEntity() { return m_pEntity; }
-    auto GetLookAtOffset() { return m_vecOffsetPos; }
-    void BlendOut(uint32 blendOutTime);
+    ~CTaskSimpleIKLookAt();
+    CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
+
+    void UpdateLookAtInfo(char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 arg_20, float fSpeed, int32 blendTime,
+                          int32 unused);
+    CEntity* GetLookAtEntity();
+    CVector GetLookAtOffset();
+
+    CTaskSimpleIKLookAt* Clone() override;
+    eTaskType GetTaskType() override { return TASK_SIMPLE_IK_LOOK_AT; }
+    bool CreateIKChain(CPed* ped) override;
+
+private:
+    CTaskSimpleIKLookAt* Constructor(char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 a9, float fSpeed, int32 blendTime, int32 a12);
+    CTaskSimpleIKLookAt* Destructor();
+
+    CTask* Clone_Reversed() {
+        return CTaskSimpleIKLookAt::Clone();
+    }
+    eTaskType GetTaskType_Reversed() {
+        return CTaskSimpleIKLookAt::GetTaskType();
+    }
+    bool CreateIKChain_Reversed(CPed* ped) {
+        return CTaskSimpleIKLookAt::CreateIKChain(ped);
+    }
 };
 VALIDATE_SIZE(CTaskSimpleIKLookAt, 0x5C);
