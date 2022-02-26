@@ -11,7 +11,7 @@ void CTaskSimpleIKPointArm::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x634240);
 
     RH_ScopedInstall(UpdatePointArmInfo, 0x634370);
-    // RH_ScopedInstall(Clone_Reversed, 0x634250);
+    RH_ScopedInstall(Clone_Reversed, 0x634250);
     RH_ScopedInstall(GetTaskType_Reversed, 0x634230);
     RH_ScopedInstall(CreateIKChain_Reversed, 0x6342F0);
 }
