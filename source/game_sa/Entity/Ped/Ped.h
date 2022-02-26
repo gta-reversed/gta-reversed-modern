@@ -153,7 +153,7 @@ public:
         uint32 bRemoveHead : 1 = false;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
         uint32 bFiringWeapon : 1 = false;         // is pulling trigger
-        uint32 bHasACamera : 1 = rand() % 4 == 0; // does ped possess a camera to document accidents
+        uint32 bHasACamera : 1 = rand() % 4 != 0; // does ped possess a camera to document accidents
         uint32 bPedIsBleeding : 1 = false;        // Ped loses a lot of blood if true
         uint32 bStopAndShoot : 1 = false;         // Ped cannot reach target to attack with fist, need to use gun
         uint32 bIsPedDieAnimPlaying : 1 = false;  // is ped die animation finished so can dead now
