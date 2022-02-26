@@ -72,7 +72,7 @@ void IKChainManager_c::Update(float timeStep) {
                 }
 
                 // Now update the IKChain itself
-                v.Update();
+                v.Update(timeStep);
             }
         }
     }
