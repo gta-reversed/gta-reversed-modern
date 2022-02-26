@@ -5,6 +5,7 @@
 #include "BoneNodeManager_c.h"
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKLookAt.h"
+#include "TaskSimpleIKPointArm.h"
 
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
@@ -28,7 +29,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(IsArmPointing, 0x6182B0);
     RH_ScopedInstall(AbortPointArm, 0x6182F0);
     RH_ScopedInstall(IsFacingTarget, 0x618330);
-    // RH_ScopedInstall(PointArm, 0x618B60);
+    RH_ScopedInstall(PointArm, 0x618B60);
 }
 
 // 0x6180A0
@@ -114,8 +115,14 @@ bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
         || dist*dist >= (TheCamera.GetPosition() - ped->GetPosition()).SquaredMagnitude();
 }
 
-CTaskSimpleIKManager* GetPedIKManagerTask(CPed* ped) {
-    return static_cast<CTaskSimpleIKManager*>(ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK));
+CTaskSimpleIKManager* GetPedIKManagerTask(CPed* ped, bool create = false) {
+    if (const auto mgr = static_cast<CTaskSimpleIKManager*>(ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK))) {
+        return mgr;
+    } else if (create) {
+        ped->GetTaskManager().SetTaskSecondary(new CTaskSimpleIKManager(), TASK_SECONDARY_IK);
+        return GetPedIKManagerTask(ped, false);
+    }
+    return nullptr;
 }
 
 CTaskSimpleIKLookAt* GetPedIKLookAtTask(CPed* ped) {
@@ -181,7 +188,7 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 
     return !RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SMKCIG_PRTL_F);
 }
-
+//task, name, entity, pointAt, lookAtOffset, speed, blendTime
 // 0x618970
 void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime, uint8 priority, bool bForceLooking) {
     if (!bForceLooking) {
@@ -190,26 +197,23 @@ void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEnt
         }
     }
 
-    // Make sure we have an IK manager task
-    if (!GetPedIKManagerTask(ped)) {
-        ped->GetTaskManager().SetTaskSecondary(new CTaskSimpleIKManager(), TASK_SECONDARY_IK);
-    }
+    auto& taskIKMgr = *GetPedIKManagerTask(ped, true);
 
     const auto lookAtOffset = posn ? *posn : CVector{};
 
     // Now, either update existing task or create one
-    if (const auto lookAt = GetPedIKLookAtTask(ped)) {
+    if (const auto lookAt = static_cast<CTaskSimpleIKLookAt*>(taskIKMgr.GetTaskAtSlot(0))) {
         if (priority < lookAt->m_nPriority) {
             return;
         }
         if (useTorso || !lookAt->m_bUseTorso) {
-            lookAt->UpdateLookAtInfo(purpose, ped, targetEntity, time, (int32)pedBoneId, lookAtOffset, useTorso && lookAt->m_bUseTorso, fSpeed, blendTime, priority);
+            lookAt->UpdateLookAtInfo(purpose, ped, targetEntity, time, pedBoneId, lookAtOffset, useTorso && lookAt->m_bUseTorso, fSpeed, blendTime, priority);
         } else {
             AbortLookAt(ped);
         }
     } else { // Doesn't have task yet, create it
-        GetPedIKManagerTask(ped)->AddIKChainTask(
-            new CTaskSimpleIKLookAt{purpose, targetEntity, time, (int32)pedBoneId, lookAtOffset, useTorso, fSpeed, (uint32)blendTime, priority}, 0);
+        GetPedIKManagerTask(ped, true)->AddIKChainTask(
+            new CTaskSimpleIKLookAt{purpose, targetEntity, time, pedBoneId, lookAtOffset, useTorso, fSpeed, (uint32)blendTime, priority}, 0);
     }
 }
 
@@ -238,6 +242,19 @@ bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 slot) {
 }
 
 // 0x618B60
-void IKChainManager_c::PointArm(Const char* taskName, int32 a2, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float fSpeedMB, int32 blendTimeMB, float a9) {
-    plugin::CallMethod<0x618B60, IKChainManager_c*, const char*, int32, CPed*, CEntity*, ePedBones, CVector*, float, int32, float>(this, taskName, a2, ped, target, pedBoneId, posn, fSpeedMB, blendTimeMB, a9);
+void IKChainManager_c::PointArm(Const char* purpose, int32 arm, CPed* ped, CEntity* target, ePedBones pedBoneId, CVector* posn, float speed, int32 blendTime) {
+    assert(arm <= 1); // I have a theory: that is, that `arm` is a bool, like `bool isLeftArm`. Let's test it!
+
+    auto& taskIKMgr = *GetPedIKManagerTask(ped, true);
+
+    const auto slot = arm + 1;
+
+    const auto offset = posn ? *posn : CVector{};
+
+    // Now, either create or update existing
+    if (const auto pointArm = static_cast<CTaskSimpleIKPointArm*>(taskIKMgr.GetTaskAtSlot(slot))) {
+        pointArm->UpdatePointArmInfo(purpose, target, pedBoneId, offset, speed, blendTime);
+    } else { // Create task
+        taskIKMgr.AddIKChainTask(new CTaskSimpleIKPointArm{ purpose, arm, target, pedBoneId, offset, speed, blendTime }, slot);
+    }
 }
