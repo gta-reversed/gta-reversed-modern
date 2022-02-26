@@ -11,6 +11,11 @@ RwV3d& CPedIK::XaxisIK = *(RwV3d*)0x8D232C;
 RwV3d& CPedIK::YaxisIK = *(RwV3d*)0x8D2338;
 RwV3d& CPedIK::ZaxisIK = *(RwV3d*)0x8D2344;
 
+CPedIK::CPedIK(CPed* ped) :
+    m_pPed{ped}
+{
+}
+
 // 0x5FDDB0 
 void CPedIK::RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag) {
     plugin::CallMethod<0x5FDDB0, CPedIK*, AnimBlendFrameData*, LimbOrientation&, bool>(this, bone, orientation, flag);

@@ -6,7 +6,7 @@ void CCopPed::InjectHooks() {
     RH_ScopedClass(CCopPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // RH_ScopedInstall(Constructor, 0x5DDC60); todo: unhook and test when core components of Ped will be reversed
+    RH_ScopedInstall(Constructor, 0x5DDC60);
     RH_ScopedInstall(Destructor, 0x5DE0D0);
     RH_ScopedInstall(SetPartner, 0x5DDE80);
     RH_ScopedInstall(AddCriminalToKill, 0x5DDEB0);
@@ -37,7 +37,10 @@ eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
 }
 
 // 0x5DDC60
-CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(PED_TYPE_COP), m_nCopTypeOrModelID(copTypeOrModelID) {
+CCopPed::CCopPed(uint32_t copTypeOrModelID) :
+    CPed{ PED_TYPE_COP },
+    m_nCopTypeOrModelID{ copTypeOrModelID }
+{
     SetModelIndex(ResolveModelForCopType(copTypeOrModelID)); /* R* originally seem to have used this switch to set the model as well, but this is nicer */
 
     switch (copTypeOrModelID) {
@@ -87,9 +90,9 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(PED_TYPE_COP), m_nCopTypeOrMo
     field_79D = 0;
     field_7A4 = 0;
 
-    if (m_pTargetedObject)
+    if (m_pTargetedObject) // Oookay?
         m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-    m_pTargetedObject = 0;
+    m_pTargetedObject = nullptr;
 
     m_pIntelligence->SetDmRadius(60.0f);
     m_pIntelligence->SetNumPedsToScan(8);

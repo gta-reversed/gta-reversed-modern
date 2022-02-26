@@ -32,12 +32,12 @@ VALIDATE_SIZE(LimbMovementInfo, 0x18);
 
 class CPedIK {
 public:
-    CPed*           m_pPed;
-    LimbOrientation m_TorsoOrien;
-    float           m_fSlopePitch;
-    float           m_fSlopePitchLimitMult;
-    float           m_fSlopeRoll;
-    float           m_fBodyRoll;
+    CPed*           m_pPed{};
+    LimbOrientation m_TorsoOrien{};
+    float           m_fSlopePitch{};
+    float           m_fSlopePitchLimitMult{};
+    float           m_fSlopeRoll{};
+    float           m_fBodyRoll{};
 
     union {
         uint32 m_nFlags;
@@ -54,6 +54,8 @@ public:
     static RwV3d& ZaxisIK;
 
     // funcs
+    CPedIK(CPed* ped);
+
     void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
     void                PointGunAtPosition(const CVector& posn, float arg2);
