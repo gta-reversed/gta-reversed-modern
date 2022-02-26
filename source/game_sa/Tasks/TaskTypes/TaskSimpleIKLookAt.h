@@ -16,6 +16,7 @@ public:
 public:
     static void InjectHooks();
 
+    CTaskSimpleIKLookAt(const CTaskSimpleIKLookAt&) = default;
     CTaskSimpleIKLookAt(const char* purpose, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
     ~CTaskSimpleIKLookAt() override;
 
@@ -24,7 +25,7 @@ public:
     CEntity* GetLookAtEntity();
     CVector GetLookAtOffset();
 
-    CTaskSimpleIKLookAt* Clone() override;
+    CTaskSimpleIKLookAt* Clone() override { return new CTaskSimpleIKLookAt{ *this }; }
     eTaskType GetTaskType() override { return TASK_SIMPLE_IK_LOOK_AT; }
     bool CreateIKChain(CPed* ped) override;
 
