@@ -17,7 +17,7 @@ public:
     static void InjectHooks();
 
     CTaskSimpleIKLookAt(const char* purpose, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
-    ~CTaskSimpleIKLookAt();
+    ~CTaskSimpleIKLookAt() override;
 
     void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime,
                           int32 unused);

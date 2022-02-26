@@ -9,10 +9,10 @@ void CTaskSimpleIKLookAt::InjectHooks() {
     RH_ScopedOverloadedInstall(Destructor, "", 0x633EF0, CTaskSimpleIKLookAt*(CTaskSimpleIKLookAt::*)());
 
     // RH_ScopedInstall(UpdateLookAtInfo, 0x634050);
-    // RH_ScopedInstall(GetLookAtEntity, 0x634120);
-    // RH_ScopedInstall(GetLookAtOffset, 0x634130);
+    RH_ScopedInstall(GetLookAtEntity, 0x634120);
+    RH_ScopedInstall(GetLookAtOffset, 0x634130);
     // RH_ScopedInstall(Clone_Reversed, 0x633F00);
-    // RH_ScopedInstall(GetTaskType_Reversed, 0x633EE0);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x633EE0);
     // RH_ScopedInstall(CreateIKChain_Reversed, 0x633FC0);
 }
 
@@ -49,7 +49,7 @@ void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CE
 
 // 0x634120
 CEntity* CTaskSimpleIKLookAt::GetLookAtEntity() {
-    return plugin::CallMethodAndReturn<CEntity*, 0x634120, CTaskSimpleIKLookAt*>(this);
+    return m_pEntity;
 }
 
 // 0x634130
