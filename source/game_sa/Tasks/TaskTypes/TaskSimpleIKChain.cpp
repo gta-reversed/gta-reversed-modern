@@ -9,9 +9,7 @@ void CTaskSimpleIKChain::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x6339C0);
     RH_ScopedInstall(Destructor, 0x633A90);
 
-    //RH_ScopedInstall(BlendOut, 0x633C40);
-    //RH_ScopedInstall(GetIKChain, 0x633C70);
-    //RH_ScopedInstall(Clone_Reversed, 0x633B00);
+    RH_ScopedInstall(Clone_Reversed, 0x633B00);
     RH_ScopedInstall(GetTaskType_Reversed, 0x62EC30);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x639450);
     RH_ScopedInstall(ProcessPed_Reversed, 0x633C80);
@@ -57,8 +55,6 @@ CTaskSimpleIKChain* CTaskSimpleIKChain::Destructor() {
     return this;
 }
 
-
-
 // 0x633C40
 void CTaskSimpleIKChain::BlendOut(int32 blendOutTime) {
     if (!m_bIsBlendingOut) {
@@ -73,11 +69,6 @@ void CTaskSimpleIKChain::BlendOut(int32 blendOutTime) {
 // 0x633C70
 IKChain_c* CTaskSimpleIKChain::GetIKChain() {
     return m_pIKChain;
-}
-
-// 0x633B00
-CTaskSimpleIKChain* CTaskSimpleIKChain::Clone() {
-    return plugin::CallMethodAndReturn< CTaskSimpleIKChain*, 0x633B00, CTaskSimpleIKChain*>(this);
 }
 
 // 0x639450

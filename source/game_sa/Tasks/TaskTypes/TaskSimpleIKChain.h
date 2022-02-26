@@ -33,6 +33,7 @@ public:
 public:
     static void InjectHooks();
 
+    CTaskSimpleIKChain(const CTaskSimpleIKChain&) = default;
     CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag, RwV3d offsetPos, float speed, int32 time, int32 blendTime);
     ~CTaskSimpleIKChain() override;
 
@@ -40,7 +41,7 @@ public:
     void BlendOut(int32 blendOutTime = 250);
     IKChain_c*      GetIKChain();
 
-    CTaskSimpleIKChain* Clone() override;
+    CTaskSimpleIKChain* Clone() override { return new CTaskSimpleIKChain{*this}; }
     eTaskType           GetTaskType() override { return TASK_SIMPLE_IK_CHAIN; }
     bool                MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool                ProcessPed(CPed* ped) override;
