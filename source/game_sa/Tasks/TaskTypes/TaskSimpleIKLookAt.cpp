@@ -4,7 +4,7 @@
 
 void CTaskSimpleIKLookAt::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKLookAt);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x633E00);
     RH_ScopedOverloadedInstall(Destructor, "", 0x633EF0, CTaskSimpleIKLookAt * (CTaskSimpleIKLookAt::*)());

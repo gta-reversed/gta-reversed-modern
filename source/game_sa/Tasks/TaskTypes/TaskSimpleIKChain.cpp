@@ -4,7 +4,7 @@
 
 void CTaskSimpleIKChain::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKChain);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6339C0);
     RH_ScopedInstall(Destructor, 0x633A90);

@@ -3,7 +3,7 @@
 
 void CTaskSimpleIKManager::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKManager);
-    RH_ScopedCategoryGlobal();
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6337F0);
     RH_ScopedInstall(Destructor, 0x633830);
