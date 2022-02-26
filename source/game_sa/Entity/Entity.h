@@ -192,7 +192,7 @@ public:
 
     // Wrapper around the mess called `CleanUpOldReference` 
     template<typename T>
-    void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+    static void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         if (ref) {
             ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
             ref = nullptr;
