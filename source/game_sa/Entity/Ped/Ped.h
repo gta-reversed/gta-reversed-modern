@@ -148,12 +148,12 @@ public:
         uint32 bIsLanding : 1 = false;             // is landing after being in the air
         uint32 bHitSomethingLastFrame : 1 = false; // has been in a collision last fram
         uint32 bIsNearCar : 1 = false;             // has been in a collision last fram
-        uint32 bRenderPedInCar : 1 = true;        // has been in a collision last fram
+        uint32 bRenderPedInCar : 1 = true;         // has been in a collision last fram
         uint32 bUpdateAnimHeading : 1 = false;     // update ped heading due to heading change during anim sequence
         uint32 bRemoveHead : 1 = false;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
         uint32 bFiringWeapon : 1 = false;         // is pulling trigger
-        uint32 bHasACamera : 1 = !!(rand() % 4);  // does ped possess a camera to document accidents
+        uint32 bHasACamera : 1 = rand() % 4 == 0; // does ped possess a camera to document accidents
         uint32 bPedIsBleeding : 1 = false;        // Ped loses a lot of blood if true
         uint32 bStopAndShoot : 1 = false;         // Ped cannot reach target to attack with fist, need to use gun
         uint32 bIsPedDieAnimPlaying : 1 = false;  // is ped die animation finished so can dead now
@@ -165,110 +165,110 @@ public:
         uint32 bCrouchWhenShooting : 1 = false;   // duck behind cars etc
         uint32 bIsDucking : 1 = false;            // duck behind cars etc
         uint32 bGetUpAnimStarted : 1 = false;     // don't want to play getup anim if under something
-        uint32 bDoBloodyFootprints : 1 = false;   // uint32 bIsLeader :1;
+        uint32 bDoBloodyFootprints : 1 = false;   // bIsLeader
         uint32 bDontDragMeOutCar : 1 = false;
         uint32 bStillOnValidPoly : 1 = false;     // set if the polygon the ped is on is still valid for collision
-        uint32 bAllowMedicsToReviveMe : 1 = false;
+        uint32 bAllowMedicsToReviveMe : 1 = true;
 
         // 5th byte starts here (m_nSecondPedFlags)
-        uint32 bResetWalkAnims : 1;
-        uint32 bOnBoat : 1;               // flee but only using nodes
-        uint32 bBusJacked : 1;            // flee but only using nodes
-        uint32 bFadeOut : 1;              // set if you want ped to fade out
-        uint32 bKnockedUpIntoAir : 1;     // has ped been knocked up into the air by a car collision
-        uint32 bHitSteepSlope : 1;        // has ped collided/is standing on a steep slope (surface type)
-        uint32 bCullExtraFarAway : 1;     // special ped only gets culled if it's extra far away (for roadblocks)
-        uint32 bTryingToReachDryLand : 1; // has ped just exited boat and trying to get to dry land
+        uint32 bResetWalkAnims : 1 = false;
+        uint32 bOnBoat : 1 = false;               // flee but only using nodes
+        uint32 bBusJacked : 1 = false;            // flee but only using nodes
+        uint32 bFadeOut : 1 = false;              // set if you want ped to fade out
+        uint32 bKnockedUpIntoAir : 1 = false;     // has ped been knocked up into the air by a car collision
+        uint32 bHitSteepSlope : 1 = false;        // has ped collided/is standing on a steep slope (surface type)
+        uint32 bCullExtraFarAway : 1 = false;     // special ped only gets culled if it's extra far away (for roadblocks)
+        uint32 bTryingToReachDryLand : 1 = false; // has ped just exited boat and trying to get to dry land
 
-        uint32 bCollidedWithMyVehicle : 1;
-        uint32 bRichFromMugging : 1;        // ped has lots of cash cause they've been mugging people
-        uint32 bChrisCriminal : 1;          // Is a criminal as killed during Chris' police mission (should be counted as such)
-        uint32 bShakeFist : 1;              // test shake hand at look entity
-        uint32 bNoCriticalHits : 1;         // ped cannot be killed by a single bullet
-        uint32 bHasAlreadyBeenRecorded : 1; // Used for replays
-        uint32 bUpdateMatricesRequired : 1; // if PedIK has altered bones so matrices need updated this frame
-        uint32 bFleeWhenStanding : 1;       //
+        uint32 bCollidedWithMyVehicle : 1 = false;
+        uint32 bRichFromMugging : 1 = false;        // ped has lots of cash cause they've been mugging people
+        uint32 bChrisCriminal : 1 = false;          // Is a criminal as killed during Chris' police mission (should be counted as such)
+        uint32 bShakeFist : 1 = false;              // test shake hand at look entity
+        uint32 bNoCriticalHits : 1 = false;         // ped cannot be killed by a single bullet
+        uint32 bHasAlreadyBeenRecorded : 1 = false; // Used for replays
+        uint32 bUpdateMatricesRequired : 1 = false; // if PedIK has altered bones so matrices need updated this frame
+        uint32 bFleeWhenStanding : 1 = false;       //
 
-        uint32 bMiamiViceCop : 1;
-        uint32 bMoneyHasBeenGivenByScript : 1;
-        uint32 bHasBeenPhotographed : 1;
-        uint32 bIsDrowning : 1;
-        uint32 bDrownsInWater : 1;
-        uint32 bHeadStuckInCollision : 1;
-        uint32 bDeadPedInFrontOfCar : 1;
-        uint32 bStayInCarOnJack : 1;
+        uint32 bMiamiViceCop : 1 = false;
+        uint32 bMoneyHasBeenGivenByScript : 1 = false;
+        uint32 bHasBeenPhotographed : 1 = false;
+        uint32 bIsDrowning : 1 = false;
+        uint32 bDrownsInWater : 1 = true;
+        uint32 bHeadStuckInCollision : 1 = false;
+        uint32 bDeadPedInFrontOfCar : 1 = false;
+        uint32 bStayInCarOnJack : 1 = false;
 
-        uint32 bDontFight : 1;
-        uint32 bDoomAim : 1;
-        uint32 bCanBeShotInVehicle : 1;
-        uint32 bPushedAlongByCar : 1; // ped is getting pushed along by car collision (so don't take damage from horz velocity)
-        uint32 bNeverEverTargetThisPed : 1;
-        uint32 bThisPedIsATargetPriority : 1;
-        uint32 bCrouchWhenScared : 1;
-        uint32 bKnockedOffBike : 1;
+        uint32 bDontFight : 1 = false;
+        uint32 bDoomAim : 1 = true;
+        uint32 bCanBeShotInVehicle : 1 = true;
+        uint32 bPushedAlongByCar : 1 = false; // ped is getting pushed along by car collision (so don't take damage from horz velocity)
+        uint32 bNeverEverTargetThisPed : 1 = false;
+        uint32 bThisPedIsATargetPriority : 1 = false;
+        uint32 bCrouchWhenScared : 1 = false;
+        uint32 bKnockedOffBike : 1 = false;
 
         // 9th byte starts here (m_nThirdPedFlags)
-        uint32 bDonePositionOutOfCollision : 1;
-        uint32 bDontRender : 1;
-        uint32 bHasBeenAddedToPopulation : 1;
-        uint32 bHasJustLeftCar : 1;
-        uint32 bIsInDisguise : 1;
-        uint32 bDoesntListenToPlayerGroupCommands : 1;
-        uint32 bIsBeingArrested : 1;
-        uint32 bHasJustSoughtCover : 1;
+        uint32 bDonePositionOutOfCollision : 1 = false;
+        uint32 bDontRender : 1 = false;
+        uint32 bHasBeenAddedToPopulation : 1 = false;
+        uint32 bHasJustLeftCar : 1 = false;
+        uint32 bIsInDisguise : 1 = false;
+        uint32 bDoesntListenToPlayerGroupCommands : 1 = false;
+        uint32 bIsBeingArrested : 1 = false;
+        uint32 bHasJustSoughtCover : 1 = false;
 
-        uint32 bKilledByStealth : 1;
-        uint32 bDoesntDropWeaponsWhenDead : 1;
-        uint32 bCalledPreRender : 1;
-        uint32 bBloodPuddleCreated : 1; // Has a static puddle of blood been created yet
-        uint32 bPartOfAttackWave : 1;
-        uint32 bClearRadarBlipOnDeath : 1;
-        uint32 bNeverLeavesGroup : 1;        // flag that we want to test 3 extra spheres on col model
-        uint32 bTestForBlockedPositions : 1; // this sets these indicator flags for various positions on the front of the ped
+        uint32 bKilledByStealth : 1 = false;
+        uint32 bDoesntDropWeaponsWhenDead : 1 = false;
+        uint32 bCalledPreRender : 1 = false;
+        uint32 bBloodPuddleCreated : 1 = false; // Has a static puddle of blood been created yet
+        uint32 bPartOfAttackWave : 1 = false;
+        uint32 bClearRadarBlipOnDeath : 1 = false;
+        uint32 bNeverLeavesGroup : 1 = false;        // flag that we want to test 3 extra spheres on col model
+        uint32 bTestForBlockedPositions : 1 = false; // this sets these indicator flags for various positions on the front of the ped
 
-        uint32 bRightArmBlocked : 1;
-        uint32 bLeftArmBlocked : 1;
-        uint32 bDuckRightArmBlocked : 1;
-        uint32 bMidriffBlockedForJump : 1;
-        uint32 bFallenDown : 1;
-        uint32 bUseAttractorInstantly : 1;
-        uint32 bDontAcceptIKLookAts : 1;
-        uint32 bHasAScriptBrain : 1;
+        uint32 bRightArmBlocked : 1 = false;
+        uint32 bLeftArmBlocked : 1 = false;
+        uint32 bDuckRightArmBlocked : 1 = false;
+        uint32 bMidriffBlockedForJump : 1 = false;
+        uint32 bFallenDown : 1 = false;
+        uint32 bUseAttractorInstantly : 1 = false;
+        uint32 bDontAcceptIKLookAts : 1 = false;
+        uint32 bHasAScriptBrain : 1 = false;
 
-        uint32 bWaitingForScriptBrainToLoad : 1;
-        uint32 bHasGroupDriveTask : 1;
-        uint32 bCanExitCar : 1;
-        uint32 CantBeKnockedOffBike : 2; // 0=Default(harder for mission peds) 1=Never 2=Always normal(also for mission peds)
-        uint32 bHasBeenRendered : 1;
-        uint32 bIsCached : 1;
-        uint32 bPushOtherPeds : 1;   // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
-        uint32 bPedThirdFlags32 : 1; // unknown
+        uint32 bWaitingForScriptBrainToLoad : 1 = false;
+        uint32 bHasGroupDriveTask : 1 = false;
+        uint32 bCanExitCar : 1 = true;
+        uint32 CantBeKnockedOffBike : 2 = false; // (harder for mission peds)   normal(also for mission peds)
+        uint32 bHasBeenRendered : 1 = false;
+        uint32 bIsCached : 1 = false;
+        uint32 bPushOtherPeds : 1 = false;   // GETS RESET EVERY FRAME - SET IN TASK: want to push other peds around (eg. leader of a group or ped trying to get in a car)
+        uint32 bPedThirdFlags32 : 1 = false; // unknown
 
         // 13th byte starts here (m_nFourthPedFlags)
-        uint32 bHasBulletProofVest : 1;
-        uint32 bUsingMobilePhone : 1;
-        uint32 bUpperBodyDamageAnimsOnly : 1;
-        uint32 bStuckUnderCar : 1;
-        uint32 bKeepTasksAfterCleanUp : 1; // If true ped will carry on with task even after cleanup
-        uint32 bIsDyingStuck : 1;
-        uint32 bIgnoreHeightCheckOnGotoPointTask : 1; // set when walking round buildings, reset when task quits
-        uint32 bForceDieInCar : 1;
+        uint32 bHasBulletProofVest : 1 = false;
+        uint32 bUsingMobilePhone : 1 = false;
+        uint32 bUpperBodyDamageAnimsOnly : 1 = false;
+        uint32 bStuckUnderCar : 1 = false;
+        uint32 bKeepTasksAfterCleanUp : 1 = false; // If true ped will carry on with task even after cleanup
+        uint32 bIsDyingStuck : 1 = false;
+        uint32 bIgnoreHeightCheckOnGotoPointTask : 1 = false; // set when walking round buildings, reset when task quits
+        uint32 bForceDieInCar : 1 = false;
 
-        uint32 bCheckColAboveHead : 1;
-        uint32 bIgnoreWeaponRange : 1;
-        uint32 bDruggedUp : 1;
-        uint32 bWantedByPolice : 1; // if this is set, the cops will always go after this ped when they are doing a KillCriminal task
-        uint32 bSignalAfterKill : 1;
-        uint32 bCanClimbOntoBoat : 1;
-        uint32 bPedHitWallLastFrame : 1; // useful to store this so that AI knows (normal will still be available)
-        uint32 bIgnoreHeightDifferenceFollowingNodes : 1;
+        uint32 bCheckColAboveHead : 1 = false;
+        uint32 bIgnoreWeaponRange : 1 = false;
+        uint32 bDruggedUp : 1 = false;
+        uint32 bWantedByPolice : 1 = false; // if this is set, the cops will always go after this ped when they are doing a KillCriminal task
+        uint32 bSignalAfterKill : 1 = true;
+        uint32 bCanClimbOntoBoat : 1 = false;
+        uint32 bPedHitWallLastFrame : 1 = false; // useful to store this so that AI knows (normal will still be available)
+        uint32 bIgnoreHeightDifferenceFollowingNodes : 1 = false;
 
-        uint32 bMoveAnimSpeedHasBeenSetByTask : 1;
-        uint32 bGetOutUpsideDownCar : 1;
-        uint32 bJustGotOffTrain : 1;
-        uint32 bDeathPickupsPersist : 1;
-        uint32 bTestForShotInVehicle : 1;
-        uint32 bUsedForReplay : 1; // This ped is controlled by replay and should be removed when replay is done.
+        uint32 bMoveAnimSpeedHasBeenSetByTask : 1 = false;
+        uint32 bGetOutUpsideDownCar : 1 = true;
+        uint32 bJustGotOffTrain : 1 = false;
+        uint32 bDeathPickupsPersist : 1 = false;
+        uint32 bTestForShotInVehicle : 1 = false;
+        uint32 bUsedForReplay : 1 = false; // This ped is controlled by replay and should be removed when replay is done.
     };
     CPedIntelligence*   m_pIntelligence{};
     CPlayerPedData*     m_pPlayerData{};
@@ -285,7 +285,7 @@ public:
     int16               nm_fWeaponGunFlashAlphaProgMP1{};
     int16               m_nWeaponGunflashAlphaMP2{}; // AKA m_nWeaponGunflashStateRightHand
     int16               nm_fWeaponGunFlashAlphaProgMP2{};
-    CPedIK              m_pedIK{};
+    CPedIK              m_pedIK{this};
     int32               field_52C{};
     ePedState           m_nPedState{ PEDSTATE_IDLE };
     int32               m_nMoveState{ PEDMOVE_STILL };
@@ -478,7 +478,7 @@ public:
     void PlayFootSteps();
     void AddWeaponModel(int32 modelIndex);
     void TakeOffGoggles();
-    void GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused);
+    eWeaponSlot GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused);
     void GiveWeaponSet1();
     void GiveWeaponSet2();
     void GiveWeaponSet3();

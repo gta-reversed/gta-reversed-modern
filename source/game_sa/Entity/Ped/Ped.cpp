@@ -30,7 +30,7 @@ void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // RH_ScopedInstall(Constructor, 0x5E8030);
+    RH_ScopedInstall(Constructor, 0x5E8030);
     RH_ScopedInstall(Destructor, 0x5E8620);
 
     RH_ScopedInstall(RequestDelayedWeapon, 0x5E8910);
@@ -189,11 +189,16 @@ CPed::CPed(ePedType pedType) : CPhysical{},
     m_nPedType{ pedType },
     m_pIntelligence{ new CPedIntelligence{this} }
 {
+    m_fMass = 70.0;
+    m_fTurnMass = 100.0;
+    m_fAirResistance = 1.f / 175.f;
+    m_fElasticity = 0.05f;
+
     m_nType = ENTITY_TYPE_PED;
     physicalFlags.bCanBeCollidedWith = true;
     physicalFlags.bDisableTurnForce = true;
-    m_weaponAudio.Initialise();
-    m_pedAudio.Initialise();
+    m_weaponAudio.Initialise(this);
+    m_pedAudio.Initialise(this);
 
     GiveWeapon(WEAPON_UNARMED, 0, true);
 
@@ -2402,8 +2407,9 @@ void CPed::TakeOffGoggles()
 /*!
 * @addr 0x5E6080
 * @brief Give ped weapon \a weaponType with ammo \a ammo. If ped has already the same weapon, just add the ammo to the weapon's current total ammo, and reload it.
+* @returns Slot of \a weaponType
 */
-void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
+eWeaponSlot CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
     const auto givenWepInfo = CWeaponInfo::GetWeaponInfo(weaponType);
     auto& wepInSlot = GetWeaponInSlot(givenWepInfo->m_nSlot);
     const auto wepSlot = (eWeaponSlot)givenWepInfo->m_nSlot;
@@ -2440,7 +2446,7 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
         }
     } else { // Same weapon already in the slot, update its ammo count and `Reload()` it
         if (wepSlot == eWeaponSlot::GIFT) { // Gifts have no ammo :D
-            return;
+            return eWeaponSlot::GIFT;
         }
 
         wepInSlot.m_nTotalAmmo = std::min(99'999u, wepInSlot.m_nTotalAmmo + ammo);
@@ -2457,6 +2463,8 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
     if (wepInSlot.m_nState != WEAPONSTATE_OUT_OF_AMMO) {
         wepInSlot.m_nState = WEAPONSTATE_READY;
     }
+
+    return wepSlot;
 }
 
 /*!
