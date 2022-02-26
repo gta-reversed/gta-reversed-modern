@@ -16,7 +16,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(Init, 0x6180A0);
     // RH_ScopedInstall(Exit, 0x6180D0);
     RH_ScopedInstall(Reset, 0x618140);
-    // RH_ScopedInstall(RemoveIKChain, 0x618170);
+    RH_ScopedInstall(RemoveIKChain, 0x618170);
     // RH_ScopedInstall(IsLooking, 0x6181A0);
     // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     // RH_ScopedInstall(AbortLookAt, 0x618280);
@@ -92,7 +92,9 @@ IKChain_c* IKChainManager_c::AddIKChain(const char* name, int32 IndexInList, CPe
 
 // 0x618170
 void IKChainManager_c::RemoveIKChain(IKChain_c* chain) {
-    plugin::CallMethod<0x618170, IKChainManager_c*, IKChain_c*>(this, chain);
+    chain->Exit();
+    m_activeList.RemoveItem(chain);
+    m_freeList.AddItem(chain);
 }
 
 // 0x618800
