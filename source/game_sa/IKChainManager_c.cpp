@@ -23,7 +23,7 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     RH_ScopedInstall(GetLookAtOffset, 0x618210);
     RH_ScopedInstall(AbortLookAt, 0x618280);
-    // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
+    RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
     // RH_ScopedInstall(IsArmPointing, 0x6182B0);
     // RH_ScopedInstall(AbortPointArm, 0x6182F0);
@@ -114,12 +114,6 @@ bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
         || dist*dist >= (TheCamera.GetPosition() - ped->GetPosition()).SquaredMagnitude();
 }
 
-// 0x6181A0
-bool IKChainManager_c::IsLooking(CPed* ped) {
-    const auto task = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK);
-    return task && static_cast<CTaskSimpleIKManager*>(task)->GetTaskAtSlot(0);
-}
-
 CTaskSimpleIKManager* GetPedIKManagerTask(CPed* ped) {
     return static_cast<CTaskSimpleIKManager*>(ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK));
 }
@@ -129,6 +123,11 @@ CTaskSimpleIKLookAt* GetPedIKLookAtTask(CPed* ped) {
         return static_cast<CTaskSimpleIKLookAt*>(mgr->GetTaskAtSlot(0));
     }
     return nullptr;
+}
+
+// 0x6181A0
+bool IKChainManager_c::IsLooking(CPed* ped) {
+    return !!GetPedIKLookAtTask(ped);
 }
 
 // 0x6181D0
@@ -156,7 +155,31 @@ void IKChainManager_c::AbortLookAt(CPed* ped, uint32 blendOutTime) {
 
 // 0x6188B0
 bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6188B0, CPed*>(ped);
+    if (!CanAccept(ped, 20.f)) {
+        return false;
+    }
+
+    // If ped doesn't accept look at IK's abort it (if any) and return false
+    if (!ped->bDontAcceptIKLookAts) {
+        if (IsLooking(ped)) {
+            AbortLookAt(ped, 250);
+        }
+        return false;
+    }
+
+    if (ped->m_pedIK.bUnk) {
+        return false;
+    }
+
+    const auto GetPedClumpAnimAssoc = [ped](AnimationId anim) {
+        return RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim);
+    };
+
+    if (rng::any_of(std::to_array({ ANIM_ID_DRNKBR_PRTL, ANIM_ID_SMKCIG_PRTL, ANIM_ID_DRNKBR_PRTL_F }), GetPedClumpAnimAssoc)) {
+        return false;
+    }
+
+    return !RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_SMKCIG_PRTL_F);
 }
 
 // 0x618970

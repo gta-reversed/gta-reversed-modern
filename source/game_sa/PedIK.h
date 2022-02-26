@@ -46,6 +46,7 @@ public:
             uint32 bTorsoUsed : 1;
             uint32 bUseArm : 1;
             uint32 bSlopePitch : 1;
+            uint32 bUnk : 1;
         };
     };
 
