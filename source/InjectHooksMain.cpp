@@ -52,7 +52,6 @@
 #include "MotionBlurStreaks.h"
 #include "GroupEventHandler.h"
 #include "SimpleVariablesSaveStructure.h"
-#include "IKChainManager_c.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
@@ -92,6 +91,8 @@
 #include "Interior_c.h"
 #include "InteriorGroup_c.h"
 #include "InteriorManager_c.h"
+#include "IKChain_c.h"
+#include "IKChainManager_c.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -200,6 +201,12 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 
+// IK Tasks
+#include "TaskSimpleIKChain.h"
+#include "TaskSimpleIKLookAt.h"
+#include "TaskSimpleIKManager.h"
+#include "TaskSimpleIKPointArm.h"
+
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
@@ -208,6 +215,9 @@ void InjectHooksMain() {
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
+
+    IKChainManager_c::InjectHooks();
+    IKChain_c::InjectHooks();
 
     CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
@@ -239,7 +249,6 @@ void InjectHooksMain() {
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
-    IKChainManager_c::InjectHooks();
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
@@ -576,6 +585,12 @@ void InjectHooksMain() {
         // CTaskComplexBeCop::InjectHooks();
         CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
         CTaskComplexArrestPed::InjectHooks();
+
+        // IK Tasks
+        CTaskSimpleIKChain::InjectHooks();
+        CTaskSimpleIKLookAt::InjectHooks();
+        CTaskSimpleIKManager::InjectHooks();
+        CTaskSimpleIKPointArm::InjectHooks();
     };
 
     const auto Events = []() {
