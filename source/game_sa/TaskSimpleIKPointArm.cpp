@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "TaskSimpleIKPointArm.h"
+#include "IKChain_c.h"
 
 void CTaskSimpleIKPointArm::InjectHooks() {
     RH_ScopedClass(CTaskSimpleIKPointArm);
@@ -8,7 +9,7 @@ void CTaskSimpleIKPointArm::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x634150);
     RH_ScopedInstall(Destructor, 0x634240);
 
-    // RH_ScopedInstall(UpdatePointArmInfo, 0x634370);
+    RH_ScopedInstall(UpdatePointArmInfo, 0x634370);
     // RH_ScopedInstall(Clone_Reversed, 0x634250);
     RH_ScopedInstall(GetTaskType_Reversed, 0x634230);
     // RH_ScopedInstall(CreateIKChain_Reversed, 0x6342F0);
@@ -36,8 +37,25 @@ CTaskSimpleIKPointArm* CTaskSimpleIKPointArm::Destructor() {
 }
 
 // 0x634370
-void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity, ePedBones offsetBoneTag, RwV3d posn, float speed, int32 timeOffset) {
-    plugin::CallMethod<0x634370, CTaskSimpleIKPointArm*, const char*, CEntity*, ePedBones, RwV3d, float, int32>(this, name, entity, offsetBoneTag, posn, speed, timeOffset);
+void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity, ePedBones offsetBoneTag, RwV3d posn, float speed, int32 blendTime) {
+    m_bEntityExist = !!entity;
+    CEntity::ChangeEntityReference(m_pEntity, entity);
+
+    m_nOffsetBoneTag = offsetBoneTag;
+    m_vecOffsetPos = posn;
+    m_fSpeed = speed;
+    m_nBlendTime = blendTime;
+    m_nEndTime = CTimer::GetTimeInMS() + 999'999;
+    m_fTargetBlend = 1.f;
+    m_nTargetTime = CTimer::GetTimeInMS() + blendTime;
+    m_bIsBlendingOut = false;
+
+    // Update IK chain
+    if (m_pIKChain) {
+        m_pIKChain->UpdateEntity(m_pEntity);
+        m_pIKChain->UpdateOffset(m_nOffsetBoneTag, m_vecOffsetPos);
+        m_pIKChain->UpdateTarget(1u);
+    }
 }
 
 // 0x634250
