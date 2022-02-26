@@ -14,7 +14,7 @@ void CTaskSimpleIKLookAt::InjectHooks() {
     RH_ScopedInstall(GetLookAtOffset, 0x634130);
     RH_ScopedInstall(Clone_Reversed, 0x633F00);
     RH_ScopedInstall(GetTaskType_Reversed, 0x633EE0);
-    //RH_ScopedInstall(CreateIKChain_Reversed, 0x633FC0);
+    RH_ScopedInstall(CreateIKChain_Reversed, 0x633FC0);
 }
 
 // 0x633E00
@@ -73,15 +73,16 @@ CEntity* CTaskSimpleIKLookAt::GetLookAtEntity() {
 
 // 0x634130
 CVector CTaskSimpleIKLookAt::GetLookAtOffset() { // We return a vector here.. Hopefully this is ABI compatible.
-    return plugin::CallMethodAndReturn<CVector, 0x634130, CTaskSimpleIKLookAt*>(this);
-}
-
-// 0x633F00
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() {
-    return plugin::CallMethodAndReturn<CTaskSimpleIKLookAt*, 0x633F00, CTaskSimpleIKLookAt*>(this);
+    return m_vecOffsetPos;
 }
 
 // 0x633FC0
 bool CTaskSimpleIKLookAt::CreateIKChain(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x633FC0, CTaskSimpleIKLookAt*, CPed*>(this, ped);
+    m_nPivotBoneTag = BONE_NECK;
+    m_pIKChain = g_ikChainMan.AddIKChain("", BONE_NORMAL, ped, m_nEffectorBoneTag, m_vecEffectorVec, BONE_NECK, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nPriority);
+    if (m_pIKChain) {
+        m_pIKChain->ClampLimits(5, 0, 1u, 0, 1);
+        return true;
+    }
+    return false;
 }
