@@ -16,7 +16,7 @@ public:
 
     void Exit();
     void Update(float unused);
-    bool Init(char* a2, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int32 priority);
+    bool Init(const char* name, int32 indexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int32 priority);
     bool IsAtTarget(float a2, float* a3);
     bool IsFacingTarget();
     void UpdateTarget(uint8 target);

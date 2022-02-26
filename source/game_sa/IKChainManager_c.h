@@ -18,7 +18,8 @@ public:
     void Reset();
     void Update(float a1);
 
-    IKChain_c* AddIKChain(Const char* name, int32 a2, CPed* ped, int32 a4, CVector a5, int32 a6, CEntity* entity, int32 a8, CVector a9, float a10, int32 a11);
+    IKChain_c* AddIKChain(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
+        int32 priority);
     void RemoveIKChain(IKChain_c* chain);
 
     bool CanAccept(CPed* ped, float);

@@ -21,7 +21,7 @@ void IKChainManager_c::InjectHooks() {
     // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     // RH_ScopedInstall(AbortLookAt, 0x618280);
     RH_ScopedInstall(Update, 0x6186D0);
-    // RH_ScopedInstall(AddIKChain, 0x618750);
+    RH_ScopedInstall(AddIKChain, 0x618750);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
 }
@@ -73,9 +73,21 @@ void IKChainManager_c::Update(float timeStep) {
     }
 }
 
-// 0x618750
-IKChain_c* IKChainManager_c::AddIKChain(Const char* name, int32 a2, CPed* ped, int32 a4, CVector a5, int32 a6, CEntity* entity, int32 a8, CVector a9, float a10, int32 a11) {
-    return plugin::CallMethodAndReturn<IKChain_c*, 0x618750, IKChainManager_c*, const char*, int32, CPed*, int32, CVector, int32, CEntity*, int32, CVector, float, int32>(this, name, a2, ped, a4, a5, a6, entity, a8, a9, a10, a11);
+/*!
+* @addr 0x618750
+* @brief Tries initing a new chain from the free list.
+* @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
+*/
+IKChain_c* IKChainManager_c::AddIKChain(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag,
+    RwV3d posn, float a11, int32 priority) {
+    if (auto chain = m_freeList.RemoveHead()) {
+        if (chain->Init(name, IndexInList, ped, animId, bonePosn, animId_1, entity, offsetBoneTag, posn, a11, priority)) {
+            m_activeList.AddItem(chain);
+            return chain;
+        }
+        m_freeList.AddItem(chain); // Failed, add back to free list
+    }
+    return nullptr; // No more free chains
 }
 
 // 0x618170
