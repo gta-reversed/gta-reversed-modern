@@ -3,6 +3,7 @@
 #include "IKChainManager_c.h"
 #include "IKChain_c.h"
 #include "BoneNodeManager_c.h"
+#include "TaskSimpleIKManager.h"
 
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
@@ -10,20 +11,23 @@ void IKChainManager_c::InjectHooks() {
     RH_ScopedClass(IKChainManager_c);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(IsArmPointing, 0x6182B0);
-    // RH_ScopedInstall(AbortPointArm, 0x6182F0);
-    RH_ScopedInstall(CanAccept, 0x618800);
     RH_ScopedInstall(Init, 0x6180A0);
-    // RH_ScopedInstall(Exit, 0x6180D0);
+    RH_ScopedInstall(Exit, 0x6180D0);
     RH_ScopedInstall(Reset, 0x618140);
-    RH_ScopedInstall(RemoveIKChain, 0x618170);
-    // RH_ScopedInstall(IsLooking, 0x6181A0);
-    // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
-    // RH_ScopedInstall(AbortLookAt, 0x618280);
     RH_ScopedInstall(Update, 0x6186D0);
     RH_ScopedInstall(AddIKChain, 0x618750);
+    RH_ScopedInstall(RemoveIKChain, 0x618170);
+    RH_ScopedInstall(CanAccept, 0x618800);
+    RH_ScopedInstall(IsLooking, 0x6181A0);
+    // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
+    // RH_ScopedInstall(GetLookAtOffset, 0x618210);
+    // RH_ScopedInstall(AbortLookAt, 0x618280);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
+    // RH_ScopedInstall(IsArmPointing, 0x6182B0);
+    // RH_ScopedInstall(AbortPointArm, 0x6182F0);
+    // RH_ScopedInstall(IsFacingTarget, 0x618330);
+    // RH_ScopedInstall(PointArm, 0x618B60);
 }
 
 // 0x6180A0
@@ -36,7 +40,7 @@ bool IKChainManager_c::Init() {
 // 0x6180D0
 void IKChainManager_c::Exit() {
     for (auto it = m_activeList.GetTail(); it; it = m_activeList.GetPrev(it)) {
-        ((IKChain_c*)it)->Exit();
+        static_cast<IKChain_c*>(it)->Exit();
     }
     m_activeList.RemoveAll();
     m_freeList.RemoveAll();
@@ -110,7 +114,8 @@ bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
 
 // 0x6181A0
 bool IKChainManager_c::IsLooking(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6181A0, IKChainManager_c*, CPed*>(this, ped);
+    const auto task = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_IK);
+    return task && static_cast<CTaskSimpleIKManager*>(task)->GetTaskAtSlot(0);
 }
 
 // 0x6181D0

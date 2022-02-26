@@ -13,8 +13,12 @@ public:
     CTaskSimpleIKChain* m_pIKChainTasks[4];
     bool                m_bAborting;
 
+
+
 public:
     CTaskSimpleIKManager();
+
+    CTaskSimpleIKChain* GetTaskAtSlot(uint32 slut) { return m_pIKChainTasks[slut]; }
 };
 
 VALIDATE_SIZE(CTaskSimpleIKManager, 0x1C);
