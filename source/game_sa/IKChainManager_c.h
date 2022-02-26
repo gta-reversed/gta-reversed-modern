@@ -4,6 +4,8 @@ class CPed;
 class CEntity;
 class IKChain_c;
 
+#include "List_c.h"
+
 class IKChainManager_c {
 public:
     static void InjectHooks();
@@ -31,6 +33,13 @@ public:
     bool IsArmPointing(int32, CPed* ped);
     void AbortPointArm(int32 a1, CPed* ped, int32 a3);
     bool IsFacingTarget(CPed* ped, int32);
+
+public:
+    char                      pad[2804];
+    TList_c<IKChain_c>        m_list0; 
+    List_c                    m_list1; // TODO: Use `TLIst_c`
+    char                      pad1[768];
+    //CTaskSimpleAchieveHeading m_list2[32]; // pad1 was this originally, but I really don't think it's really this.
 };
 
 extern IKChainManager_c& g_ikChainMan;

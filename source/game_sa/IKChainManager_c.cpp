@@ -1,7 +1,7 @@
 #include "StdInc.h"
 
 #include "IKChainManager_c.h"
-// #include "IKChain_c.h"
+#include "IKChain_c.h"
 
 IKChainManager_c& g_ikChainMan = *(IKChainManager_c*)0xC15448;
 
@@ -19,7 +19,7 @@ void IKChainManager_c::InjectHooks() {
     // RH_ScopedInstall(IsLooking, 0x6181A0);
     // RH_ScopedInstall(GetLookAtEntity, 0x6181D0);
     // RH_ScopedInstall(AbortLookAt, 0x618280);
-    // RH_ScopedInstall(Update, 0x6186D0);
+    RH_ScopedInstall(Update, 0x6186D0);
     // RH_ScopedInstall(AddIKChain, 0x618750);
     // RH_ScopedInstall(CanAcceptLookAt, 0x6188B0);
     // RH_ScopedInstall(LookAt, 0x618970);
@@ -41,8 +41,28 @@ void IKChainManager_c::Reset() {
 }
 
 // 0x6186D0
-void IKChainManager_c::Update(float a1) {
-    return plugin::CallMethod<0x6186D0, IKChainManager_c*, float>(this, a1);
+void IKChainManager_c::Update(float timeStep) {
+    UNUSED(timeStep);
+
+    for (auto i = 0u; i < 4u; i++) {
+        CWorld::IncrementCurrentScanCode();
+
+        for (auto it = m_list1.GetHead(); it; it = it = m_list1.GetNext(it)) {
+            auto& v = *(IKChain_c*)it;
+            if (v.m_indexInList == i) {
+                // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..
+                if (v.m_ped) {
+                    if (!v.m_ped->IsScanCodeCurrent()) {
+                        v.m_ped->UpdateRpHAnim();
+                        v.m_ped->SetCurrentScanCode();
+                    }
+                }
+
+                // Now update the IKChain itself
+                v.Update();
+            }
+        }
+    }
 }
 
 // 0x618750
