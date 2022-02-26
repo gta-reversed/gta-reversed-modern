@@ -15,7 +15,7 @@ public:
     static void InjectHooks();
 
     CTaskSimpleIKPointArm(const char* purpose, int32 hand, CEntity* targetEntity, ePedBones bone, RwV3d offsetPosn, float speed, int32 blendTime);
-    ~CTaskSimpleIKPointArm();
+    ~CTaskSimpleIKPointArm() override;
 
     void UpdatePointArmInfo(const char* purpose, CEntity* entity, ePedBones bone, RwV3d posn, float a8, int32 timeOffset);
 
