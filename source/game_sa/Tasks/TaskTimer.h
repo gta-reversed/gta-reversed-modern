@@ -10,11 +10,10 @@
 
 class CTaskTimer {
 public:
-    uint32 m_nStartTime;
-    int32  m_nInterval;
-    bool   m_bStarted;
-    bool   m_bStopped;
-    char   _pad[2];
+    uint32 m_nStartTime{};
+    int32  m_nInterval{};
+    bool   m_bStarted{};
+    bool   m_bStopped{};
 
 public:
     static void InjectHooks();
