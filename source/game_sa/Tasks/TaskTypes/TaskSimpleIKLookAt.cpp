@@ -17,17 +17,17 @@ void CTaskSimpleIKLookAt::InjectHooks() {
 }
 
 // 0x633E00
-CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority) :
-    CTaskSimpleIKChain{ name, 5, {0.f, 0.05f, 0.f}, 0, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime},
+CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority) :
+    CTaskSimpleIKChain{ name, BONE_HEAD, {0.f, 0.05f, 0.f}, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime},
     m_nPriority{priority},
     m_bUseTorso{useTorso}
 {
 }
 
 // 0x633E00
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Constructor(char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 a9, float fSpeed, int32 blendTime,
-                                                      int32 a12) {
-    this->CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(name, lookAtEntity, time, pedBoneID, lookAtOffset, a9, fSpeed, blendTime, a12);
+CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 useTorso, float fSpeed, int32 blendTime,
+                                                      int32 priority) {
+    this->CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(name, lookAtEntity, time, pedBoneID, lookAtOffset, useTorso, fSpeed, blendTime, priority);
     return this;
 }
 
@@ -41,9 +41,9 @@ CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Destructor() {
 }
 
 // 0x634050
-void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed,
+void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed,
                                            int32 blendTime, int32 unused) {
-    plugin::CallMethod<0x634050, CTaskSimpleIKLookAt*, const char*, CPed*, CEntity*, int32, int32, RwV3d, bool, float, int32, int32>(this, strPurpose, ped, targetPed, time, pedBoneID,
+    plugin::CallMethod<0x634050, CTaskSimpleIKLookAt*, const char*, CPed*, CEntity*, int32, ePedBones, RwV3d, bool, float, int32, int32>(this, strPurpose, ped, targetPed, time, pedBoneID,
                                                                                                                                 lookAtOffset, useTorso, fSpeed, blendTime, unused);
 }
 

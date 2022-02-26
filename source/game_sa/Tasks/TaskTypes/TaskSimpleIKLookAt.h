@@ -16,10 +16,10 @@ public:
 public:
     static void InjectHooks();
 
-    CTaskSimpleIKLookAt(const char* purpose, CEntity* lookAtEntity, int32 time, int32 pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
+    CTaskSimpleIKLookAt(const char* purpose, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed, uint32 blendTime, uint8 priority);
     ~CTaskSimpleIKLookAt();
 
-    void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, int32 pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime,
+    void UpdateLookAtInfo(const char* strPurpose, CPed* ped, CEntity* targetPed, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, bool useTorso, float fSpeed, int32 blendTime,
                           int32 unused);
     CEntity* GetLookAtEntity();
     CVector GetLookAtOffset();
@@ -29,7 +29,7 @@ public:
     bool CreateIKChain(CPed* ped) override;
 
 private:
-    CTaskSimpleIKLookAt* Constructor(char* name, CEntity* lookAtEntity, int32 time, int32 pedBoneID, RwV3d lookAtOffset, uint8 a9, float fSpeed, int32 blendTime, int32 a12);
+    CTaskSimpleIKLookAt* Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 a9, float fSpeed, int32 blendTime, int32 a12);
     CTaskSimpleIKLookAt* Destructor();
 
     CTask* Clone_Reversed() {
