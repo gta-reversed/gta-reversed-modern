@@ -282,6 +282,6 @@ void IKChain_c::SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBl
 }
 
 // 0x618590
-void IKChain_c::GetLimits(int32 a2, int32 type, float* a3, float* a4) {
-    plugin::CallMethod<0x618590>(this, a2, type, a3, a4);
+void IKChain_c::GetLimits(int32 boneTag, int32 type, float& outMin, float& outMax) {
+    GetBoneNodeFromTag(boneTag)->GetLimits(type, &outMin, &outMax);
 }

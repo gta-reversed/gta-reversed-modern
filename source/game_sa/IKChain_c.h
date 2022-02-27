@@ -35,7 +35,7 @@ public:
     void SetBlend(float value);
     void MoveBonesToTarget();
     void SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBlendFrameData* a7);
-    void GetLimits(int32 a2, int32 type, float* a3, float* a4);
+    void GetLimits(int32 a2, int32 type, float& a3, float& a4);
 
     auto GetBones() { return std::span{ m_bones, (size_t)m_count }; }
 
