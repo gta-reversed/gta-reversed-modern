@@ -93,6 +93,21 @@ public:
         }
         return nullptr;
     }
+
+    template<Task T>
+    auto Find() {
+        return static_cast<T*>(FindActiveTaskByType(T::Type));
+    }
+
+    template<Task... Ts>
+    bool Has() {
+        return (... || FindActiveTaskByType(Ts::Type));
+    }
+
+    template<eTaskType... Ts>
+    bool Has() {
+        return (... || FindActiveTaskByType(Ts));
+    }
 };
 
 VALIDATE_SIZE(CTaskManager, 0x30);
