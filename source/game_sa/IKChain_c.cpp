@@ -7,7 +7,7 @@ void IKChain_c::InjectHooks() {
     RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Exit, 0x617870);
-    // RH_ScopedInstall(Update, 0x6184B0);
+    RH_ScopedInstall(Update, 0x6184B0);
     // RH_ScopedInstall(Init, 0x618370);
     // RH_ScopedInstall(IsAtTarget, 0x617F30);
     // RH_ScopedInstall(IsFacingTarget, 0x617E60);
@@ -37,7 +37,12 @@ void IKChain_c::Exit() {
 
 // 0x6184B0
 void IKChain_c::Update(float timeStep) {
-    plugin::CallMethod<0x6184B0, IKChain_c*, float>(this, timeStep);
+    m_matrix = &m_ped->GetBoneMatrix(m_bone);
+    m_bones[m_count - 1]->CalcWldMat(m_matrix);
+    MoveBonesToTarget();
+    for (auto&& bone : GetBones()) {
+        bone->BlendKeyframe(m_blend);
+    }
 }
 
 // 0x618370

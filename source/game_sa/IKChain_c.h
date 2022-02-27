@@ -36,6 +36,8 @@ public:
     void SetupBones(int32 a2, RwV3d posn, int32 animId, AnimBlendFrameData* a7);
     void GetLimits(int32 a2, int32 type, float* a3, float* a4);
 
+    auto GetBones() { return std::span{ m_bones, m_count }; }
+
 public:
     CPed* m_ped;
     int32 m_count;
@@ -44,7 +46,7 @@ public:
     float m_blend;
     uint16 m_animId;
     CVector m_bonePosn;
-    int32 gap2C;
+    ePedBones m_bone;
     CEntity* m_entity;
     int32 m_offsetBoneTag;
     CVector m_offsetPos;
