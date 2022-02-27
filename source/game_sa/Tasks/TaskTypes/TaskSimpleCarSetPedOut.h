@@ -21,6 +21,8 @@ public:
     uint8     m_nNumGettingInToClear;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_OUT;
+
     CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, int32 nTargetDoor, bool bSwitchOffEngine);
     ~CTaskSimpleCarSetPedOut();
 

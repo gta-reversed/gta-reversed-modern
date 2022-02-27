@@ -50,6 +50,8 @@ public:
     static float &SWIM_STOP_TIME;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_SWIM;
+
     CTaskSimpleSwim(CVector* pos, CPed* ped);
     ~CTaskSimpleSwim() override;
 

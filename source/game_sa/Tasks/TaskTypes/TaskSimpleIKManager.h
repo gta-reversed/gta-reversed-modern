@@ -14,6 +14,8 @@ public:
     bool                m_bAborting;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_IK_MANAGER;
+
     CTaskSimpleIKManager();
 };
 

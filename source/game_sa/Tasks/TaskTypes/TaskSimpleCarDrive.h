@@ -40,6 +40,8 @@ public:
     char _pad[3];
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CAR_DRIVE;
+
     CTaskSimpleCarDrive() = delete;
 
     CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);

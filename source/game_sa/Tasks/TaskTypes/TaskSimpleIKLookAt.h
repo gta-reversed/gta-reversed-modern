@@ -15,6 +15,8 @@ public:
     bool m_bUseTorso;
     int8 m_nPriority;
 
+    static constexpr auto Type = TASK_SIMPLE_IK_LOOK_AT;
+
     CTaskSimpleIKLookAt(char* idString _IGNORED_ ,CEntity* entity,int32 time,int32 offsetBoneTag, RwV3d offsetPos,
         bool bUseTorso,float speed,int32 blendTime,int32 m_priority);
 };

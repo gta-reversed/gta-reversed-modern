@@ -12,6 +12,8 @@ public:
     CHeli* m_pHeli;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_USE_SWAT_ROPE;
+
     CTaskComplexUseSwatRope(uint32 ropeId, CHeli* heli);
     CTaskComplexUseSwatRope(uint32 ropeId);
     ~CTaskComplexUseSwatRope() override;

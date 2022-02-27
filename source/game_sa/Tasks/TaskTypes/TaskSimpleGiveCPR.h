@@ -17,6 +17,8 @@ public:
     float m_fInitialHealth;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GIVE_CPR;
+
     CTaskSimpleGiveCPR(CAccident* pAccident);
     ~CTaskSimpleGiveCPR() override;
 
