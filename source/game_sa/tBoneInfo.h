@@ -1,10 +1,11 @@
 #pragma once
 
 #include "Base.h"
+#include "ePedBones.h"
 
 struct tBoneInfo {
-    int16 field_0;
-    int16 field_2;
+    ePedBones m_current; // This bone
+    ePedBones m_prev;    // Previous connected bone
     int32 field_4;
     int32 field_8;
     int32 field_C;

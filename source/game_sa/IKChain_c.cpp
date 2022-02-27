@@ -21,7 +21,7 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(SetOffsetBoneTag, 0x617C20);
     RH_ScopedInstall(SetBlend, 0x617C10);
     RH_ScopedInstall(MoveBonesToTarget, 0x6178B0);
-    // RH_ScopedInstall(SetupBones, 0x617CA0);
+    RH_ScopedInstall(SetupBones, 0x617CA0);
     // RH_ScopedInstall(GetLimits, 0x618590);
 }
 
@@ -252,8 +252,33 @@ void IKChain_c::MoveBonesToTarget() {
 }
 
 // 0x617CA0
-void IKChain_c::SetupBones(int32 a2, RwV3d posn, int32 animId, AnimBlendFrameData* a7) {
-    plugin::CallMethod<0x617CA0, IKChain_c*, int32, RwV3d, int32, AnimBlendFrameData*>(this, a2, posn, animId, a7);
+void IKChain_c::SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBlendFrameData* frames) {
+    auto& hier = m_ped->GetAnimHierarchy();
+    m_matrix = &RpHAnimHierarchyGetMatrixArray(&hier)[RpHAnimIDGetIndex(&hier, (RwInt32)bone)];
+    m_bone = bone;
+
+    BoneNode_c* bones[32]; // TODO: Magic number
+    m_count = 0;
+    for (auto boneIt = boneTag; boneIt != bone; boneIt = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag(boneIt)].m_prev) {
+        auto node = g_boneNodeMan.GetBoneNode();
+        node->Init(boneIt, frames[RpHAnimIDGetIndex(&hier, (RwInt32)boneIt)].m_pIFrame);
+        bones[m_count++] = node;
+    }
+
+    assert(m_count); // Doesn't really make a whole lot of sense if theres not a single bone
+    m_bones = new BoneNode_c*[m_count];
+    rng::copy(bones, m_bones);
+
+    // Link bones together
+    for (auto&& bone : GetBones()) {
+        auto prevBone = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag((ePedBones)bone->m_boneTag)].m_prev;
+        if (prevBone > -1) {
+            if (const auto next = GetBoneNodeFromTag(prevBone)) {
+                //printf("next: %i\n", nextIdx);
+                next->AddChild(bone);
+            }
+        }
+    }
 }
 
 // 0x618590
