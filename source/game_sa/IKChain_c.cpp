@@ -144,8 +144,9 @@ void IKChain_c::UpdateEntity(CEntity* entity) {
 }
 
 // 0x617C60
-BoneNode_c* IKChain_c::GetBoneNodeFromTag(int32 a2) {
-    return plugin::CallMethodAndReturn<BoneNode_c*, 0x617C60, IKChain_c*, int32>(this, a2);
+BoneNode_c* IKChain_c::GetBoneNodeFromTag(int32 tag) {
+    const auto it = rng::find_if(GetBones(), [tag](auto&& b) { return b->m_boneTag == tag; });
+    return it != GetBones().end() ? *it : nullptr;
 }
 
 // 0x617C50
