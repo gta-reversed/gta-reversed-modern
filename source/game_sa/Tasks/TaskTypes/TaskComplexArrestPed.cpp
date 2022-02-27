@@ -11,7 +11,7 @@ void CTaskComplexArrestPed::InjectHooks() {
 
     RH_ScopedInstall(MakeAbortable, 0x68BA60);
     //RH_ScopedInstall(CreateNextSubTask, 0x690220);
-    //RH_ScopedInstall(CreateFirstSubTask, 0x6907A0);
+    RH_ScopedInstall(CreateFirstSubTask, 0x6907A0);
     //RH_ScopedInstall(ControlSubTask, 0x68D350);
     //RH_ScopedInstall(CreateSubTask, 0x68CF80);
 }
@@ -55,7 +55,38 @@ CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) {
 }
 
 CTask* CTaskComplexArrestPed::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x6907A0, CTaskComplexArrestPed*, CPed*>(this, ped);
+    if (!m_pedToArrest) {
+        return nullptr;
+    }
+
+    m_subTaskNeedsToBeCreated = false;
+
+    if (!m_pedToArrest->bInVehicle) {
+        return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+    }
+
+    if (m_pedToArrest->m_pVehicle->IsBike() || m_pedToArrest->m_pVehicle->IsSubQuad()) { // Just drag ped from a bike/quad
+        return CreateSubTask(TASK_COMPLEX_DRAG_PED_FROM_CAR, ped);
+    }
+
+    if (m_pedToArrest->m_pVehicle->IsSubBoat()) { // If they're in a boat, just destroy it
+        if (ped->GetActiveWeapon().IsTypeMelee()) { // Make sure ped has an actual weapon in their hand
+            if (ped->DoWeHaveWeaponAvailable(WEAPON_SHOTGUN)) { // Use shotgun (if available)
+                ped->SetCurrentWeapon(WEAPON_SHOTGUN);
+            } else { // Otherwise a pistol
+                if (!ped->DoWeHaveWeaponAvailable(WEAPON_PISTOL)) { // Make sure they have one
+                    ped->GiveWeapon(WEAPON_PISTOL, 10, 0);
+                }
+                ped->SetCurrentWeapon(WEAPON_PISTOL);
+            }
+        }
+        return CreateSubTask(TASK_COMPLEX_DESTROY_CAR, ped);
+    } else {
+        if (m_pedToArrest->m_pVehicle->IsUpsideDown() || m_pedToArrest->m_pVehicle->IsOnItsSide()) {
+            return CreateSubTask(TASK_COMPLEX_DESTROY_CAR, ped);
+        }
+        return CreateSubTask(TASK_COMPLEX_CAR_OPEN_DRIVER_DOOR, ped);
+    }
 }
 
 CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped) {
