@@ -71,8 +71,8 @@ void BoneNode_c::SetSpeed(float speed) {
 }
 
 // 0x616CB0
-double BoneNode_c::GetSpeed() {
-    return plugin::CallMethodAndReturn<double, 0x616CB0, BoneNode_c*>(this);
+float BoneNode_c::GetSpeed() {
+    return m_speed;
 }
 
 // 0x616C50
@@ -91,8 +91,8 @@ void BoneNode_c::AddChild(BoneNode_c* children) {
 }
 
 // 0x616CD0
-RwMatrixTag* BoneNode_c::CalcWldMat(RwMatrixTag* boneMatrix) {
-    return plugin::CallMethodAndReturn<RwMatrixTag*, 0x616CD0, BoneNode_c*, RwMatrixTag*>(this, boneMatrix);
+RwMatrix* BoneNode_c::CalcWldMat(const RwMatrix* boneMatrix) {
+    return plugin::CallMethodAndReturn<RwMatrix*, 0x616CD0, BoneNode_c*, const RwMatrix*>(this, boneMatrix);
 }
 
 // 0x6177B0

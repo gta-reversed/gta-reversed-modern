@@ -20,7 +20,7 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(SetOffsetPos, 0x617C30);
     RH_ScopedInstall(SetOffsetBoneTag, 0x617C20);
     RH_ScopedInstall(SetBlend, 0x617C10);
-    // RH_ScopedInstall(MoveBonesToTarget, 0x6178B0);
+    RH_ScopedInstall(MoveBonesToTarget, 0x6178B0);
     // RH_ScopedInstall(SetupBones, 0x617CA0);
     // RH_ScopedInstall(GetLimits, 0x618590);
 }
@@ -91,7 +91,7 @@ bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones b
 // 0x617F30
 bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
     // They used RwV3d stuff, but that's ugly.
-    const auto dist = (m_vec - m_bones[0]->GetPosition()).Magnitude();
+    const auto dist = (m_offset - m_bones[0]->GetPosition()).Magnitude();
     if (outDist) {
         outDist = dist;
     }
@@ -107,7 +107,7 @@ bool IKChain_c::IsFacingTarget() {
     RwV3dNormalize(&targetPos, &targetPos);
 
     RwV3d dir;
-    RwV3dSub(&dir, &m_vec, &targetPos);
+    RwV3dSub(&dir, &m_offset, &targetPos);
     RwV3dNormalize(&dir, &dir);
 
     return RwV3dDotProduct(&dir, &targetPos) >= 0.95f && m_blend > 0.98f;
@@ -171,7 +171,84 @@ void IKChain_c::SetBlend(float value) {
 
 // 0x6178B0
 void IKChain_c::MoveBonesToTarget() {
-    plugin::CallMethod<0x6178B0, IKChain_c*>(this);
+    if (m_targetMB) {
+        if (m_entity) {
+            const auto mat = m_entity->GetModellingMatrix();
+            if (m_offsetBoneTag == ePedBones::BONE_UNKNOWN) {
+                if (mat) {
+                    RwV3dTransformPoint(&m_offset, &m_offsetPos, mat);
+                }
+            } else {
+                m_entity->AsPed()->GetBonePosition(m_offset, (ePedBones)m_offsetBoneTag);
+                if (mat) {
+                    RwV3d transformed;
+                    RwV3dTransformVector(&transformed, &m_offsetPos, mat);
+                    RwV3dAdd(&m_offset, &transformed, &m_offset);
+                }
+            }
+        } else {
+            m_offset = m_offsetPos;
+        }
+    }
+
+    auto bones = GetBones();
+    if (bones.empty()) {
+        return;
+    }
+
+    constexpr auto DIST_TOLERANCE = 0.00001f;
+
+    const auto root = bones.front();
+    for (auto&& bone : bones) {
+        RwV3d transformedBonePos;
+        RwV3dTransformVector(&transformedBonePos, &m_bonePosn, &root->GetMatrix()); // Not sure why it's transformed every iteration..
+
+        RwV3d dirBoneToRoot; // = transformedBonePos + root->pos - bone->pos
+        RwV3dAdd(&dirBoneToRoot, &transformedBonePos, &root->GetPosition());
+        RwV3dSub(&dirBoneToRoot, &dirBoneToRoot, &bone->GetPosition());
+        if (RwV3dLength(&dirBoneToRoot) <= DIST_TOLERANCE) {
+            continue;
+        }
+        RwV3dNormalize(&dirBoneToRoot, &dirBoneToRoot);
+
+        RwV3d dirBoneToOffset; // = m_offset - bone->pos
+        RwV3dSub(&dirBoneToOffset, &m_offset, &bone->GetPosition());
+        if (RwV3dLength(&dirBoneToOffset) <= DIST_TOLERANCE) {
+            continue;
+        }
+        RwV3dNormalize(&dirBoneToOffset, &dirBoneToOffset);
+
+        const auto dot = RwV3dDotProduct(&dirBoneToOffset, &dirBoneToRoot);
+        if (dot >= 0.997f) { // Make sure they don't point in the same direction
+            continue;
+        }
+
+        const auto matrix = bone->m_parent ? &bone->m_parent->GetMatrix() : m_matrix;
+
+        RtQuat quat;
+        RtQuatConvertFromMatrix(&quat, matrix);
+
+        // NOTE: Normalize Quat.. I wonder why there isn't a macro or something for this?
+        {
+            const auto mag = RwV3dDotProduct(&quat.imag, &quat.imag) + quat.real * quat.real;
+            if (mag > 0.f) {
+                const auto recp = 1.f / mag;
+                quat.real *= recp;
+                RwV3dScale(&quat.imag, &quat.imag, -recp);
+            }
+        }
+        
+        RwV3d cross;
+        RwV3dCrossProduct(&cross, &dirBoneToRoot, &dirBoneToOffset);
+
+        RwV3d axis;
+        RtQuatTransformVectors(&axis, &cross, 1, &quat);
+
+        RtQuatRotate(&bone->m_orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_speed),
+                     rwCOMBINEPOSTCONCAT);
+        bone->Limit(m_blend); // Originally this was in an `if`, but the variable that was checked was always `true`
+        bone->CalcWldMat(matrix);
+    }
 }
 
 // 0x617CA0

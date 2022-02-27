@@ -36,13 +36,14 @@ public:
     void Limit(float float_1);
     void BlendKeyframe(float blend);
     void SetSpeed(float);
-    double GetSpeed();
+    float GetSpeed();
     void SetLimits(int32 type, float min, float max);
     void GetLimits(int32 type, float* pMin, float* pMax);
     void AddChild(BoneNode_c * children);
-    RwMatrixTag* CalcWldMat(RwMatrixTag * boneMatrix);
+    RwMatrix* CalcWldMat(const RwMatrix* boneMatrix);
     int8_t Init(int32 a2, RpHAnimBlendInterpFrame * a3);
-    auto GetPosition() const { return *RwMatrixGetPos(&m_worldMat); }
+    const auto& GetPosition() const { return *RwMatrixGetPos(&m_worldMat); }
+    const auto& GetMatrix() const { return m_worldMat;  }
 
 private:
     BoneNode_c* Constructor() {

@@ -46,13 +46,13 @@ public:
     RwMatrix* m_matrix;
     float m_blend;
     uint16 m_bone1;
-    CVector m_bonePosn;
+    RwV3d m_bonePosn;
     ePedBones m_bone;
     CEntity* m_entity;
-    int32 m_offsetBoneTag;
+    int32 m_offsetBoneTag; // ePedBones.. Just that we have to use int32 here... :D
     CVector m_offsetPos;
     float m_speed;
-    CVector m_vec;
+    CVector m_offset; //< `m_offsetPos` transformed with `m_entity`'s modelling matrix. See `MoveBonesToTarget`
     uint8 m_targetMB;
     uint8 m_indexInList;
     int8 m_priority;
