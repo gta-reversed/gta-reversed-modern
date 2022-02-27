@@ -22,7 +22,7 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(SetBlend, 0x617C10);
     RH_ScopedInstall(MoveBonesToTarget, 0x6178B0);
     RH_ScopedInstall(SetupBones, 0x617CA0);
-    // RH_ScopedInstall(GetLimits, 0x618590);
+    RH_ScopedInstall(GetLimits, 0x618590);
 }
 
 // Methods
