@@ -186,17 +186,22 @@ void CPed::InjectHooks() {
 // Most of the variable/flag setting is done in the header
 CPed::CPed(ePedType pedType) : CPhysical{},
     m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
-    m_nPedType{ pedType },
-    m_pIntelligence{ new CPedIntelligence{this} }
+    m_nPedType{ pedType }
 {
+    // Has to be here for now, because it's inited before `m_nPedType` (Which is used in CPedIntel's ctor)
+    m_pIntelligence = new CPedIntelligence{ this };
+
     m_fMass = 70.0;
     m_fTurnMass = 100.0;
     m_fAirResistance = 1.f / 175.f;
     m_fElasticity = 0.05f;
 
     m_nType = ENTITY_TYPE_PED;
+
+    // 0x5E8196
     physicalFlags.bCanBeCollidedWith = true;
     physicalFlags.bDisableTurnForce = true;
+
     m_weaponAudio.Initialise(this);
     m_pedAudio.Initialise(this);
 
