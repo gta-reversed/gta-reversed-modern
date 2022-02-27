@@ -8,8 +8,8 @@ void CAEPedAudioEntity::StaticInitialise() {
     AEAudioHardware.LoadSoundBank(128, 32);
 }
 
-void CAEPedAudioEntity::Initialise() {
-    plugin::CallMethod<0x4E0E80>(this);
+void CAEPedAudioEntity::Initialise(CPed* ped) {
+    plugin::CallMethod<0x4E0E80>(this, ped);
 }
 
 void CAEPedAudioEntity::Terminate() {

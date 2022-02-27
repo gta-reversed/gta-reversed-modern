@@ -33,7 +33,7 @@ public:
     float                  field_158{};
 
 public:
-    void Initialise();
+    void Initialise(CPed* ped);
     static void StaticInitialise();
     void Terminate();
 
