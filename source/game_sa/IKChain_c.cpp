@@ -156,7 +156,7 @@ int8 IKChain_c::GetPriority() {
 
 // 0x617C30
 void IKChain_c::SetOffsetPos(RwV3d value) {
-    plugin::CallMethod<0x617C30, IKChain_c*, RwV3d>(this, value);
+    m_offsetPos = value;
 }
 
 // 0x617C20
