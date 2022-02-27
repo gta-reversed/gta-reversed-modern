@@ -217,7 +217,7 @@ public:
 
     /*!
     * @addr 0x54F6B0
-    * @brief Calculate the number of unsued slots. Caution: Slow, especially for large pools.
+    * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
     */
     size_t GetNoOfUsedSpaces() {
         return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
