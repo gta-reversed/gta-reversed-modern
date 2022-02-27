@@ -42,6 +42,7 @@ public:
     void AddChild(BoneNode_c * children);
     RwMatrixTag* CalcWldMat(RwMatrixTag * boneMatrix);
     int8_t Init(int32 a2, RpHAnimBlendInterpFrame * a3);
+    auto GetPosition() const { return *RwMatrixGetPos(&m_worldMat); }
 
 private:
     BoneNode_c* Constructor() {

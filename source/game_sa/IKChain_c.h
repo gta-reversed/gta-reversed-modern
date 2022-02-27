@@ -22,7 +22,7 @@ public:
     void Update(float unused);
     bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
               int8 priority);
-    bool IsAtTarget(float a2, float* a3);
+    bool IsAtTarget(float a2, float& outDist);
     bool IsFacingTarget();
     void UpdateTarget(uint8 target);
     void UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn);

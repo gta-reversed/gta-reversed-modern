@@ -8,8 +8,8 @@ void IKChain_c::InjectHooks() {
 
     RH_ScopedInstall(Exit, 0x617870);
     RH_ScopedInstall(Update, 0x6184B0);
-    // RH_ScopedInstall(Init, 0x618370);
-    // RH_ScopedInstall(IsAtTarget, 0x617F30);
+    RH_ScopedInstall(IsAtTarget, 0x617F30);
+    RH_ScopedInstall(Init, 0x618370);
     // RH_ScopedInstall(IsFacingTarget, 0x617E60);
     // RH_ScopedInstall(UpdateTarget, 0x617E50);
     // RH_ScopedInstall(UpdateOffset, 0x617E20);
@@ -92,8 +92,13 @@ bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones b
 }
 
 // 0x617F30
-bool IKChain_c::IsAtTarget(float a2, float* a3) {
-    return plugin::CallMethodAndReturn<bool, 0x617F30, IKChain_c*, float, float*>(this, a2, a3);
+bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
+    // They used RwV3d stuff, but that's ugly.
+    const auto dist = (m_vec - m_bones[0]->GetPosition()).Magnitude();
+    if (outDist) {
+        outDist = dist;
+    }
+    return dist <= maxDist && m_blend > 0.98f;
 }
 
 // 0x617E60
