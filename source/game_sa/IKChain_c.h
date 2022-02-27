@@ -26,7 +26,7 @@ public:
     bool IsFacingTarget();
     void UpdateTarget(uint8 target);
     void UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn);
-    void ClampLimits(int32 a1, uint8 a2, uint8 a3, uint8 a4, int32 a5);
+    void ClampLimits(int32 a1, uint8 a2, uint8 a3, uint8 a4, bool a5);
     void UpdateEntity(CEntity* entity);
     BoneNode_c* GetBoneNodeFromTag(int32 a2);
     int8 GetPriority();

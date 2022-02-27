@@ -128,8 +128,13 @@ void IKChain_c::UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn) {
 }
 
 // 0x618520
-void IKChain_c::ClampLimits(int32 a1, uint8 a2, uint8 a3, uint8 a4, int32 a5) {
-    plugin::CallMethod<0x618520, IKChain_c*, int32, uint8, uint8, uint8, int32>(this, a1, a2, a3, a4, a5);
+void IKChain_c::ClampLimits(int32 boneTag, uint8 a2, uint8 a3, uint8 a4, bool useCurrentLimits) {
+    auto& bone = *GetBoneNodeFromTag(boneTag);
+    if (useCurrentLimits) {
+        bone.ClampLimitsCurrent(a2, a3, a4);
+    } else {
+        bone.ClampLimitsDefault(a2, a3, a4);
+    }
 }
 
 // 0x617E00
