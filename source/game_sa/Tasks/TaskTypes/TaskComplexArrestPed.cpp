@@ -36,6 +36,22 @@ bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, co
 
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x690220, CTaskComplexArrestPed*, CPed*>(this, ped);
+    /*if (!m_pedToArrest) {
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
+
+    if (m_pedToArrest->bIsBeingArrested) {
+        switch (m_pSubTask->GetTaskType()) {
+        case TASK_SIMPLE_ARREST_PED:
+            break;
+        case TASK_COMPLEX_SEEK_ENTITY: { // TODO: Missing 
+            if ()
+        }
+        }
+        if (m_pSubTask->GetTaskType() != TASK_SIMPLE_ARREST_PED) {
+
+        }
+    }*/
 }
 
 CTask* CTaskComplexArrestPed::CreateFirstSubTask(CPed* ped) {
