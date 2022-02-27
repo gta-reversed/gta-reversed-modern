@@ -80,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(CleanUpOldReference, 0x571A00);
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
-    RH_ScopedInstall(RegisterReference, 0x571B70);
+    RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ProcessLightsForEntity, 0x6FC7A0);
     RH_ScopedInstall(RemoveEscalatorsForEntity, 0x717900);
     RH_ScopedInstall(IsEntityOccluded, 0x71FAE0);

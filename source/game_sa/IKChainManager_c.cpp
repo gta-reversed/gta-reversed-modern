@@ -85,10 +85,10 @@ void IKChainManager_c::Update(float timeStep) {
  * @brief Tries initing a new chain from the free list.
  * @returns A new `IKChain_c` object, unless there are no more free chains or it's init failed.
  */
-IKChain_c* IKChainManager_c::AddIKChain(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag,
-                                        RwV3d posn, float a11, int32 priority) {
+IKChain_c* IKChainManager_c::AddIKChain(const char* name, int32 IndexInList, CPed* ped, ePedBones bone1, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float speed,
+    int32 priority) {
     if (auto chain = m_freeList.RemoveHead()) {
-        if (chain->Init(name, IndexInList, ped, animId, bonePosn, animId_1, entity, offsetBoneTag, posn, a11, priority)) {
+        if (chain->Init(name, IndexInList, ped, bone1, bonePosn, bone2, entity, offsetBoneTag, posn, speed, priority)) {
             m_activeList.AddItem(chain);
             return chain;
         }

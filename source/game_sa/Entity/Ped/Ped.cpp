@@ -514,6 +514,17 @@ void CPed::CreateDeadPedPickupCoors(CVector& pickupPos) {
 }
 
 /*!
+* @notsa
+*/
+RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
+    return *GetAnimHierarchyFromSkinClump(m_pRwClump);
+}
+
+CAnimBlendClumpData& CPed::GetAnimBlendData() const {
+    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+}
+
+/*!
 * @addr 0x4591D0
 * @brief Create weapon/ammo pickups for dead ped
 */

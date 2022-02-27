@@ -9,9 +9,6 @@
 
 class BoneNode_c : public ListItem_c {
 public:
-    BoneNode_c() = default;
-    ~BoneNode_c() = default;
-
     int32 m_boneTag;
     RtQuat* m_interpFrame;
     RtQuat m_orientation;

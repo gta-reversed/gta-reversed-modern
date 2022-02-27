@@ -18,7 +18,7 @@ public:
     void Reset();
     void Update(float a1);
 
-    IKChain_c* AddIKChain(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
+    IKChain_c* AddIKChain(const char* name, int32 IndexInList, CPed* ped, ePedBones bone1, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
                           int32 priority);
     void RemoveIKChain(IKChain_c* chain);
 

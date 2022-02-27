@@ -25,24 +25,14 @@ void BoneNode_c::InjectHooks() {
     //RH_ScopedInstall(Init, 0x6177B0);
 }
 
-// 0x616B30
-BoneNode_c::BoneNode_c() {
-    // Done by the compiler
-}
-
-// 0x616B80
-BoneNode_c::~BoneNode_c() {
-    // Done by the compiler
-}
-
 // 0x6171F0
 RtQuat BoneNode_c::EulerToQuat(RwV3d* angles) {
-    plugin::CallAndReturn<RtQuat, 0x6171F0, RwV3d*>(angles);
+    return plugin::CallAndReturn<RtQuat, 0x6171F0, RwV3d*>(angles);
 }
 
 // 0x617080
 RwV3d BoneNode_c::QuatToEuler(RtQuat* quat) {
-    plugin::CallAndReturn<RwV3d, 0x617080, RtQuat*>(quat);
+    return plugin::CallAndReturn<RwV3d, 0x617080, RtQuat*>(quat);
 }
 
 // 0x617050
@@ -56,8 +46,8 @@ void BoneNode_c::ClampLimitsCurrent(uint8 a2, uint8 a3, uint8 a4) {
 }
 
 // 0x617530
-void BoneNode_c::ClampLimitsDefault(uint8, uint8, uint8) {
-    plugin::CallMethod<0x617530, BoneNode_c*, uint8, uint8, uint8>(this, , , );
+void BoneNode_c::ClampLimitsDefault(uint8 a1, uint8 a2, uint8 a3) {
+    plugin::CallMethod<0x617530, BoneNode_c*, uint8, uint8, uint8>(this, a1, a2, a3);
 }
 
 // 0x617490
@@ -76,8 +66,8 @@ void BoneNode_c::BlendKeyframe(float blend) {
 }
 
 // 0x616CC0
-void BoneNode_c::SetSpeed(float) {
-    plugin::CallMethod<0x616CC0, BoneNode_c*, float>(this, );
+void BoneNode_c::SetSpeed(float speed) {
+    plugin::CallMethod<0x616CC0, BoneNode_c*, float>(this, speed);
 }
 
 // 0x616CB0

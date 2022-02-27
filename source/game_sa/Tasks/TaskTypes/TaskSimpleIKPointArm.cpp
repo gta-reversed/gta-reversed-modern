@@ -59,6 +59,6 @@ void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity
 
 // 0x6342F0
 bool CTaskSimpleIKPointArm::CreateIKChain(CPed* ped) {
-    m_pIKChain = g_ikChainMan.AddIKChain("", m_hand ? 2 : 1, ped, m_nEffectorBoneTag, m_vecEffectorVec, 4, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
+    m_pIKChain = g_ikChainMan.AddIKChain("", m_hand ? BONE_SPINE : BONE_PELVIS, ped, m_nEffectorBoneTag, m_vecEffectorVec, BONE_NECK, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
     return !!m_pIKChain;
 }

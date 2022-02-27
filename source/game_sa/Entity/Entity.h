@@ -214,7 +214,12 @@ public:
             inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
         }
     }
-    
+
+    template<typename T>
+    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* atomic, void* data);

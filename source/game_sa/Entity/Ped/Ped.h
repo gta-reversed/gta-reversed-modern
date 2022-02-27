@@ -34,6 +34,8 @@ class CCivilianPed;
 class CEmergencyPed;
 class CCoverPoint;
 class CEntryExit;
+class CAnimBlendClumpData;
+struct RpHAnimHierarchy;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
@@ -562,6 +564,8 @@ public:
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
+    RpHAnimHierarchy& GetAnimHierarchy() const;
+    CAnimBlendClumpData& GetAnimBlendData() const;
 
 private:
     // Virtual method wrappers
