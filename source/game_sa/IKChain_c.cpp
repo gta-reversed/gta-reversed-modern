@@ -76,10 +76,7 @@ bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones b
     m_blend = 0.f;
     m_bone1 = bone;
 
-    m_entity = entity;
-    if (entity) {
-        m_entity->RegisterReference(m_entity);
-    }
+    UpdateEntity(entity);
 
     m_offsetBoneTag = offsetBoneTag;
     m_offsetPos = posn;
@@ -139,7 +136,11 @@ void IKChain_c::ClampLimits(int32 boneTag, uint8 a2, uint8 a3, uint8 a4, bool us
 
 // 0x617E00
 void IKChain_c::UpdateEntity(CEntity* entity) {
-    plugin::CallMethod<0x617E00, IKChain_c*, CEntity*>(this, entity);
+    // NOTE: No unregistering the ref?
+    m_entity = entity;
+    if (entity) {
+        m_entity->RegisterReference(m_entity);
+    }
 }
 
 // 0x617C60
