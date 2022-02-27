@@ -390,7 +390,7 @@ public:
 
     bool PedIsInvolvedInConversation();
     bool PedIsReadyForConversation(bool arg0);
-    bool PedCanPickUpPickUp(); // TODO: Seems to be __cdecl? (static)
+    static bool PedCanPickUpPickUp();
     void CreateDeadPedMoney();
     void CreateDeadPedPickupCoors(float& outPickupX, float& outPickupY, float& outPickupZ);
     void CreateDeadPedWeaponPickups();

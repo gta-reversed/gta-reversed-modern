@@ -138,19 +138,19 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
     plugin::Call<0x45EBB0, CVehicle*>(vehicle);
 }
 
-// 0x
+// 0x45EC20
 void CReplay::RecordPedDeleted(CPed* ped) {
     plugin::Call<0x45EC20, CPed*>(ped);
 }
 
-// 0x
+// 0x45EFA0
 void CReplay::InitialiseVehiclePoolConversionTable() {
-    plugin::Call<0x0>();
+    plugin::Call<0x45EFA0>();
 }
 
-// 0x
+// 0x45EF20
 void CReplay::InitialisePedPoolConversionTable() {
-    plugin::Call<0x0>();
+    plugin::Call<0x45EF20>();
 }
 
 // 0x

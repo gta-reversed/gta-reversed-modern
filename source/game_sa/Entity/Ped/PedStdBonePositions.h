@@ -312,7 +312,7 @@ constexpr const auto& GetPedBoneStdPosition(uint32 bone) { // ePedBone
         { 0.0f, 0.0f, 0.0f },
         { 0.0f, 0.0f, 0.0f },
         { 0.0f, 0.0f, 0.0f },
-    { 0.0f, 0.0f, 0.0f }
+        { 0.0f, 0.0f, 0.0f }
 };
     return aStdBonePosisions[(size_t)bone];
 }

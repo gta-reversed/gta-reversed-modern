@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-#include <WeaponInfo.h>
+
 #include "Ped.h"
 
 #include "PedType.h"
@@ -25,6 +25,7 @@
 #include "PedSaveStructure.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexFacial.h"
+#include "WeaponInfo.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
@@ -214,7 +215,7 @@ CPed::CPed(ePedType pedType) : CPhysical{},
 
     CPopulation::UpdatePedCount(this, 0);
 
-    if (CCheat::m_aCheatsActive[CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD]) {
+    if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
             m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
 
@@ -232,7 +233,7 @@ CPed::~CPed() {
 
     // Remove script brain
     if (bWaitingForScriptBrainToLoad) {
-        CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex + RESOURCE_ID_SCM);
+        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex));
         bWaitingForScriptBrainToLoad = false;
         CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
         m_nSpecialModelIndex = -1;
@@ -265,45 +266,6 @@ CPed::~CPed() {
 
     ClearReference(m_pLookTarget);
 }
-
-//CPed::~CPed() {
-//    plugin::CallMethod<0x5E8620, CPed*>(this);
-//    return;
-
-    // Untested, missing some code
-    /* CReplay::RecordPedDeleted(this);
-    if ((m_nThirdPedFlags & 0x1000000) != 0) {
-        // CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains[m_nSpecialModelIndex].IMG_index + 26230);
-        m_nThirdPedFlags &= ~0x1000000u;
-        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
-        m_nSpecialModelIndex = -1;
-    }
-
-    CWorld::Remove(this);
-    // CRadar::ClearBlipForEntity(BLIP_CHAR, ((((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4) << 8) + CPools::ms_pPedPool->m_byteMap[((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4].nValue);
-    //  CConversations::RemoveConversationForPed(this);
-    ClearReference(m_pVehicle);
-    if (m_pFire) {
-        m_pFire->Extinguish();
-    }
-
-    if (m_pCoverPoint) {
-        m_pCoverPoint->ReleaseCoverPointForPed(this);
-        m_pCoverPoint = nullptr;
-    }
-
-    ClearWeapons();
-
-    if ((m_nSecondPedFlags & 0x10000) != 0)
-        --CPopulation::NumMiamiViceCops;
-
-    CPopulation::UpdatePedCount(this, 1);
-    m_pedSpeech.Terminate();
-    m_weaponAudio.Terminate();
-    // m_pedAudio.Terminate(); - Missing 
-    delete m_pIntelligence;
-    ClearReference(m_pLookTarget); */
-//}
 
 /*!
 * @addr 0x5E4720
