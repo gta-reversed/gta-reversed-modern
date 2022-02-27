@@ -123,7 +123,8 @@ void IKChain_c::UpdateTarget(uint8 target) {
 
 // 0x617E20
 void IKChain_c::UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn) {
-    plugin::CallMethod<0x617E20, IKChain_c*, int32, RwV3d>(this, offsetBoneTag, offsetPosn);
+    m_offsetBoneTag = offsetBoneTag;
+    m_offsetPos = offsetPosn;
 }
 
 // 0x618520
