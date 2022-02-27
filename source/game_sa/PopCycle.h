@@ -216,6 +216,6 @@ public:
     }
 
     static bool IsPedInGroupTheseGroups(int32 modelIndex, std::initializer_list<ePopcycleGroup> groups) {
-        return rng::any_of(groups, [=](auto grp) {return IsPedInGroup(modelIndex, grp); });
+        return rng::any_of(groups, [=](auto grp) { return IsPedInGroup(modelIndex, grp); });
     }
 };

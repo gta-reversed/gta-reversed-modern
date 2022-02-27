@@ -368,6 +368,16 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
+    auto Constructor(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) {
+        this->CAutomobile::CAutomobile(modelIndex, createdBy, setupSuspensionLines);
+        return this;
+    }
+
+    auto Destructor() {
+        this->CAutomobile::~CAutomobile();
+        return this;
+    }
+
     bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CAutomobile::ProcessAI(extraHandlingFlags); }
     void ResetSuspension_Reversed() { return CAutomobile::ResetSuspension(); }
     void ProcessFlyingCarStuff_Reversed() { return CAutomobile::ProcessFlyingCarStuff(); }

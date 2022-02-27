@@ -38,6 +38,9 @@ void CAutomobile::InjectHooks()
     RH_ScopedClass(CAutomobile);
     RH_ScopedCategory("Vehicle");
 
+    RH_ScopedInstall(Constructor, 0x6B0A90);
+    RH_ScopedInstall(Destructor, 0x6A61E0);
+
     RH_ScopedInstall(ProcessControl_Reversed, 0x6B1880);
     RH_ScopedInstall(AddMovingCollisionSpeed_Reversed, 0x6A1ED0);
     RH_ScopedInstall(ProcessAI_Reversed, 0x6B4800);
@@ -138,6 +141,8 @@ void CAutomobile::InjectHooks()
 CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines) :
     CVehicle(createdBy)
 {
+    m_nVehicleType = VEHICLE_TYPE_AUTOMOBILE;
+    m_nVehicleSubType = VEHICLE_TYPE_AUTOMOBILE;
 
     CVehicle::SetModelIndex(modelIndex);
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aCarNodes.data());
@@ -169,18 +174,18 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     }
 
     // 0x6B0CA8
-    // Deal with front doors
+    // Deal with front doors 
     {
-        // Left
-        auto& doorLF = m_doors[eDoors::DOOR_LEFT_FRONT];
-        doorLF.m_nAxis = 2;
-        doorLF.m_fClosedAngle = 0.f;
-        doorLF.m_fOpenAngle = vehicleFlags.bIsBus ? PI * 0.4f : PI * 0.5f; // `PI * 0.4f` or `PI * o.4f`, same thing, although they used the latter most likely.
-
         // Right
         auto& doorRF = m_doors[eDoors::DOOR_RIGHT_FRONT];
-        doorRF = doorLF;
-        doorRF.m_fOpenAngle = -doorLF.m_fOpenAngle;
+        doorRF.m_nAxis = 2;
+        doorRF.m_fClosedAngle = 0.f;
+        doorRF.m_fOpenAngle = vehicleFlags.bIsBus ? PI * 0.4f : PI * 0.5f; // `PI * 0.4f` or `PI * o.4f`, same thing, although they used the latter most likely.
+
+        // Left
+        auto& doorLF = m_doors[eDoors::DOOR_LEFT_FRONT];
+        doorLF = doorRF;
+        doorLF.m_fOpenAngle = -doorRF.m_fOpenAngle;
     }
 
     // 0x6B0CF0

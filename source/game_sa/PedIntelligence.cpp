@@ -23,6 +23,7 @@
 #include "TaskSimpleDuck.h"
 #include "TaskSimpleClimb.h"
 #include "CollisionEventScanner.h"
+#include "PlayerRelationshipRecorder.h"
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f
@@ -101,7 +102,7 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
 
 // 0x607300
 CPedIntelligence::~CPedIntelligence() {
-    CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder()->ClearRelationshipWithPlayer(m_pPed);
+    GetPlayerRelationshipRecorder()->ClearRelationshipWithPlayer(m_pPed);
 }
 
 // 0x4893E0
@@ -1049,7 +1050,7 @@ void CPedIntelligence::Process() {
     m_eventHandler.HandleEvents();
     m_TaskMgr.ManageTasks();
 
-    auto recorder = CPlayerRelationshipRecorder::GetPlayerRelationshipRecorder();
+    auto recorder = GetPlayerRelationshipRecorder();
     recorder->RecordRelationshipWithPlayer(m_pPed);
     LookAtInterestingEntities();
 

@@ -210,15 +210,13 @@
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
-    // WaitForDebugger();
-    CPedList::InjectHooks();
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
     IKChainManager_c::InjectHooks();
     IKChain_c::InjectHooks();
-
+    CPedList::InjectHooks();
     CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
     CRopes::InjectHooks();

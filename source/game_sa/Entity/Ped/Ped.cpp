@@ -5,7 +5,7 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-#include <WeaponInfo.h>
+
 #include "Ped.h"
 
 #include "PedType.h"
@@ -25,12 +25,13 @@
 #include "PedSaveStructure.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexFacial.h"
+#include "WeaponInfo.h"
 
 void CPed::InjectHooks() {
     RH_ScopedClass(CPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // RH_ScopedInstall(Constructor, 0x5E8030);
+    RH_ScopedInstall(Constructor, 0x5E8030);
     RH_ScopedInstall(Destructor, 0x5E8620);
 
     RH_ScopedInstall(RequestDelayedWeapon, 0x5E8910);
@@ -186,14 +187,24 @@ void CPed::InjectHooks() {
 // Most of the variable/flag setting is done in the header
 CPed::CPed(ePedType pedType) : CPhysical{},
     m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
-    m_nPedType{ pedType },
-    m_pIntelligence{ new CPedIntelligence{this} }
+    m_nPedType{ pedType }
 {
+    // Has to be here for now, because it's inited before `m_nPedType` (Which is used in CPedIntel's ctor)
+    m_pIntelligence = new CPedIntelligence{ this };
+
+    m_fMass = 70.0;
+    m_fTurnMass = 100.0;
+    m_fAirResistance = 1.f / 175.f;
+    m_fElasticity = 0.05f;
+
     m_nType = ENTITY_TYPE_PED;
+
+    // 0x5E8196
     physicalFlags.bCanBeCollidedWith = true;
     physicalFlags.bDisableTurnForce = true;
-    m_weaponAudio.Initialise();
-    m_pedAudio.Initialise();
+
+    m_weaponAudio.Initialise(this);
+    m_pedAudio.Initialise(this);
 
     GiveWeapon(WEAPON_UNARMED, 0, true);
 
@@ -204,7 +215,7 @@ CPed::CPed(ePedType pedType) : CPhysical{},
 
     CPopulation::UpdatePedCount(this, 0);
 
-    if (CCheat::m_aCheatsActive[CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD]) {
+    if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
             m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
 
@@ -222,7 +233,7 @@ CPed::~CPed() {
 
     // Remove script brain
     if (bWaitingForScriptBrainToLoad) {
-        CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex + RESOURCE_ID_SCM);
+        CStreaming::SetMissionDoesntRequireModel(SCMToModelId(CTheScripts::ScriptsForBrains.m_aScriptForBrains[m_nSpecialModelIndex].m_nIMGindex));
         bWaitingForScriptBrainToLoad = false;
         CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
         m_nSpecialModelIndex = -1;
@@ -255,45 +266,6 @@ CPed::~CPed() {
 
     ClearReference(m_pLookTarget);
 }
-
-//CPed::~CPed() {
-//    plugin::CallMethod<0x5E8620, CPed*>(this);
-//    return;
-
-    // Untested, missing some code
-    /* CReplay::RecordPedDeleted(this);
-    if ((m_nThirdPedFlags & 0x1000000) != 0) {
-        // CStreaming::SetMissionDoesntRequireModel(CTheScripts::ScriptsForBrains[m_nSpecialModelIndex].IMG_index + 26230);
-        m_nThirdPedFlags &= ~0x1000000u;
-        CTheScripts::RemoveFromWaitingForScriptBrainArray(this, m_nSpecialModelIndex);
-        m_nSpecialModelIndex = -1;
-    }
-
-    CWorld::Remove(this);
-    // CRadar::ClearBlipForEntity(BLIP_CHAR, ((((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4) << 8) + CPools::ms_pPedPool->m_byteMap[((char*)this - (char*)CPools::ms_pPedPool->m_pObjects) / 0x7C4].nValue);
-    //  CConversations::RemoveConversationForPed(this);
-    ClearReference(m_pVehicle);
-    if (m_pFire) {
-        m_pFire->Extinguish();
-    }
-
-    if (m_pCoverPoint) {
-        m_pCoverPoint->ReleaseCoverPointForPed(this);
-        m_pCoverPoint = nullptr;
-    }
-
-    ClearWeapons();
-
-    if ((m_nSecondPedFlags & 0x10000) != 0)
-        --CPopulation::NumMiamiViceCops;
-
-    CPopulation::UpdatePedCount(this, 1);
-    m_pedSpeech.Terminate();
-    m_weaponAudio.Terminate();
-    // m_pedAudio.Terminate(); - Missing 
-    delete m_pIntelligence;
-    ClearReference(m_pLookTarget); */
-//}
 
 /*!
 * @addr 0x5E4720
@@ -2402,8 +2374,9 @@ void CPed::TakeOffGoggles()
 /*!
 * @addr 0x5E6080
 * @brief Give ped weapon \a weaponType with ammo \a ammo. If ped has already the same weapon, just add the ammo to the weapon's current total ammo, and reload it.
+* @returns Slot of \a weaponType
 */
-void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
+eWeaponSlot CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
     const auto givenWepInfo = CWeaponInfo::GetWeaponInfo(weaponType);
     auto& wepInSlot = GetWeaponInSlot(givenWepInfo->m_nSlot);
     const auto wepSlot = (eWeaponSlot)givenWepInfo->m_nSlot;
@@ -2440,7 +2413,7 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
         }
     } else { // Same weapon already in the slot, update its ammo count and `Reload()` it
         if (wepSlot == eWeaponSlot::GIFT) { // Gifts have no ammo :D
-            return;
+            return eWeaponSlot::GIFT;
         }
 
         wepInSlot.m_nTotalAmmo = std::min(99'999u, wepInSlot.m_nTotalAmmo + ammo);
@@ -2457,6 +2430,8 @@ void CPed::GiveWeapon(eWeaponType weaponType, uint32 ammo, bool likeUnused) {
     if (wepInSlot.m_nState != WEAPONSTATE_OUT_OF_AMMO) {
         wepInSlot.m_nState = WEAPONSTATE_READY;
     }
+
+    return wepSlot;
 }
 
 /*!

@@ -185,7 +185,9 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
 
 bool IsGlassObjectWithCol(CEntity* entity) {
     if (entity->IsObject() && entity->m_bUsesCollision) {
-        return CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr()->IsGlass();
+        if (const auto ami = entity->GetModelInfo()->AsAtomicModelInfoPtr()) {
+            return ami->IsGlass();
+        }
     }
     return false;
 }

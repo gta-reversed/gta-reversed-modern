@@ -282,7 +282,7 @@ bool CMirrors::IsEitherScreenVisibleToCam() {
 }
 
 bool CMirrors::ShouldRenderPeds() {
-    return CMirrors::bRenderingReflection && CMirrors::TypeOfMirror != 2;
+    return bRenderingReflection && TypeOfMirror != 2;
 }
 
 // 0x726DF0

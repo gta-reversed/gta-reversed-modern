@@ -50,7 +50,7 @@ public:
     char             field_D3{};
     CVehicleScanner  m_vehicleScanner{};
     CEntityScanner   m_entityScanner{}; // TODO: Should be CPedScanner.. (Source: See original ctor)
-    CMentalHealth    m_mentalHealth{};
+    CMentalState     m_mentalState;
     char             field_188{};
     CEventScanner    m_eventScanner{};
     bool             field_260{};
