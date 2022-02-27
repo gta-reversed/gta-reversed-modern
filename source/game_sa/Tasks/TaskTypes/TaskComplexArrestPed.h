@@ -29,7 +29,15 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexArrestPed* Constructor(CPed* ped);
+    CTaskComplexArrestPed* Constructor(CPed* ped) {
+        this->CTaskComplexArrestPed::CTaskComplexArrestPed(ped);
+        return this;
+    }
+
+    CTaskComplexArrestPed* Destructor() {
+        this->CTaskComplexArrestPed::~CTaskComplexArrestPed();
+        return this;
+    }
 };
 
 VALIDATE_SIZE(CTaskComplexArrestPed, 0x24);

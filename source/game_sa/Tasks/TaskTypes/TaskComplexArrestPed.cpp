@@ -6,24 +6,21 @@ void CTaskComplexArrestPed::InjectHooks() {
     RH_ScopedClass(CTaskComplexArrestPed);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x68B990);
+    RH_ScopedInstall(Destructor, 0x68BA00);
 }
 
 // 0x68B990
-CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) : CTaskComplex() {
-    m_pedToArrest = ped;
-    m_vehicle = nullptr;
-    if (ped)
+CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) :
+    m_pedToArrest{ped}
+{
+    if (ped) {
         ped->RegisterReference(reinterpret_cast<CEntity**>(&m_pedToArrest));
+    }
 }
 
 CTaskComplexArrestPed::~CTaskComplexArrestPed() {
     if (m_pedToArrest)
         m_pedToArrest->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pedToArrest));
-}
-
-CTaskComplexArrestPed* CTaskComplexArrestPed::Constructor(CPed* ped) {
-    this->CTaskComplexArrestPed::CTaskComplexArrestPed(ped);
-    return this;
 }
 
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
