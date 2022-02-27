@@ -11,7 +11,8 @@ static bool StringContainsString(std::string_view haystack, std::string_view nee
     if (haystack.empty() || needle.empty()) {
         return true;
     }
-    return !std::ranges::search(haystack, needle, {}, std::toupper, std::toupper).empty();
+    const auto ToUpper = [](auto&& c) { return (char)std::toupper((unsigned char)c); };
+    return !std::ranges::search(haystack, needle, {}, ToUpper, ToUpper).empty();
 }
 
 // https://stackoverflow.com/a/48403210

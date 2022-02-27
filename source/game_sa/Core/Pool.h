@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <execution>
+
 #define INVALID_POOL_SLOT (-1)
 
 /*
@@ -213,14 +215,12 @@ public:
         return GetAt(GetIndexFromRef(ref));
     }
 
-    // 0x54F6B0
-    auto GetNoOfUsedSpaces() {
-        int32 counter = 0;
-        for (auto i = 0; i < m_nSize; ++i) {
-            if (!IsFreeSlotAtIndex(i))
-                ++counter;
-        }
-        return counter;
+    /*!
+    * @addr 0x54F6B0
+    * @brief Calculate the number of unsued slots. Caution: Slow, especially for large pools.
+    */
+    size_t GetNoOfUsedSpaces() {
+        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {
