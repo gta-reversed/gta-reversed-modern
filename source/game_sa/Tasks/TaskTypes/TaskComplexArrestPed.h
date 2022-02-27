@@ -6,12 +6,12 @@ class CVehicle;
 
 class CTaskComplexArrestPed : public CTaskComplex {
 public:
-    bool      m_subTaskNeedsToBeCreated;
-    CPed*     m_pedToArrest;
-    int32     field_14;
-    int32     field_18;
-    int32     field_1C;
-    CVehicle* m_vehicle;
+    bool      m_subTaskNeedsToBeCreated{};
+    CPed*     m_pedToArrest{};
+    int32     field_14{};
+    int32     field_18{};
+    int32     field_1C{};
+    CVehicle* m_vehicle{};
 
 public:
     CTaskComplexArrestPed(CPed* ped);
