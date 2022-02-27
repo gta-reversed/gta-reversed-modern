@@ -19,12 +19,41 @@ public:
     BoneNode_c* m_parent;
     TList_c<BoneNode_c> m_childs;
     RwMatrix m_worldMat;
-    float min_0;
-    float min_1;
-    float min_2;
-    float max_0;
-    float max_1;
-    float max_2;
+    RwV3d m_limitMin;
+    RwV3d m_limitMax;
     float m_speed;
+public:
+    static void InjectHooks();
+
+    BoneNode_c() = default;
+    ~BoneNode_c() = default;
+
+    // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
+    static RtQuat EulerToQuat(RwV3d * a1);
+    static RwV3d  QuatToEuler(RtQuat * quat);
+    static  int32 GetIdFromBoneTag(ePedBones bone);
+
+    void ClampLimitsCurrent(uint8 a2, uint8 a3, uint8 a4);
+    void ClampLimitsDefault(uint8, uint8, uint8);
+    void InitLimits();
+    void Limit(float float_1);
+    void BlendKeyframe(float blend);
+    void SetSpeed(float);
+    double GetSpeed();
+    void SetLimits(int32 type, float min, float max);
+    void GetLimits(int32 type, float* pMin, float* pMax);
+    void AddChild(BoneNode_c * children);
+    RwMatrixTag* CalcWldMat(RwMatrixTag * boneMatrix);
+    int8_t Init(int32 a2, RpHAnimBlendInterpFrame * a3);
+
+private:
+    BoneNode_c* Constructor() {
+        this->BoneNode_c::BoneNode_c();
+        return this;
+    }
+    BoneNode_c* Destructor() {
+        this->BoneNode_c::~BoneNode_c();
+        return this;
+    }
 };
 VALIDATE_SIZE(BoneNode_c, 0x98);
