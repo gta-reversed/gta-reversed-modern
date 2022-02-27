@@ -74,3 +74,4 @@ private:
     }
 };
 VALIDATE_SIZE(CTaskSimpleIKChain, 0x58);
+constexpr auto v = sizeof(CTaskSimpleIKChain);
