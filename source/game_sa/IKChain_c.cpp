@@ -10,10 +10,10 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(Update, 0x6184B0);
     RH_ScopedInstall(IsAtTarget, 0x617F30);
     RH_ScopedInstall(Init, 0x618370);
-    // RH_ScopedInstall(IsFacingTarget, 0x617E60);
-    // RH_ScopedInstall(UpdateTarget, 0x617E50);
-    // RH_ScopedInstall(UpdateOffset, 0x617E20);
-    // RH_ScopedInstall(ClampLimits, 0x618520);
+    RH_ScopedInstall(IsFacingTarget, 0x617E60);
+    RH_ScopedInstall(UpdateTarget, 0x617E50);
+    RH_ScopedInstall(UpdateOffset, 0x617E20);
+    RH_ScopedInstall(ClampLimits, 0x618520);
     // RH_ScopedInstall(UpdateEntity, 0x617E00);
     // RH_ScopedInstall(GetBoneNodeFromTag, 0x617C60);
     // RH_ScopedInstall(GetPriority, 0x617C50);
