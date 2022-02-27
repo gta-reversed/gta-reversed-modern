@@ -103,7 +103,17 @@ bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
 
 // 0x617E60
 bool IKChain_c::IsFacingTarget() {
-    return plugin::CallMethodAndReturn<bool, 0x617E60, IKChain_c*>(this);
+    // Geniune cancer :D
+
+    RwV3d targetPos;
+    RwV3dTransformVector(&targetPos, &m_bonePosn, &m_bones[0]->m_worldMat);
+    RwV3dNormalize(&targetPos, &targetPos);
+
+    RwV3d dir;
+    RwV3dSub(&dir, &m_vec, &targetPos);
+    RwV3dNormalize(&dir, &dir);
+
+    return RwV3dDotProduct(&dir, &targetPos) >= 0.95f && m_blend > 0.98f;
 }
 
 // 0x617E50
