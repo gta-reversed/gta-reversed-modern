@@ -5,8 +5,15 @@
 void CTaskComplexArrestPed::InjectHooks() {
     RH_ScopedClass(CTaskComplexArrestPed);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x68B990);
     RH_ScopedInstall(Destructor, 0x68BA00);
+
+    RH_ScopedInstall(MakeAbortable, 0x68BA60);
+    //RH_ScopedInstall(CreateNextSubTask, 0x690220);
+    //RH_ScopedInstall(CreateFirstSubTask, 0x6907A0);
+    //RH_ScopedInstall(ControlSubTask, 0x68D350);
+    //RH_ScopedInstall(CreateSubTask, 0x68CF80);
 }
 
 // 0x68B990
@@ -24,7 +31,7 @@ CTaskComplexArrestPed::~CTaskComplexArrestPed() {
 }
 
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x68BA60, CTaskComplexArrestPed*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) {
