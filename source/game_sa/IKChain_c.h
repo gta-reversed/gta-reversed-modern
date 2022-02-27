@@ -2,6 +2,7 @@
 
 #include "Base.h"
 #include <rwplcore.h>
+#include <span>
 
 #include "ListItem_c.h"
 #include "BoneNode_c.h"
@@ -19,8 +20,8 @@ public:
 
     void Exit();
     void Update(float unused);
-    bool Init(const char* name, int32 indexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
-              int32 priority);
+    bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
+              int8 priority);
     bool IsAtTarget(float a2, float* a3);
     bool IsFacingTarget();
     void UpdateTarget(uint8 target);
@@ -36,7 +37,7 @@ public:
     void SetupBones(int32 a2, RwV3d posn, int32 animId, AnimBlendFrameData* a7);
     void GetLimits(int32 a2, int32 type, float* a3, float* a4);
 
-    auto GetBones() { return std::span{ m_bones, m_count }; }
+    auto GetBones() { return std::span{ m_bones, (size_t)m_count }; }
 
 public:
     CPed* m_ped;
@@ -44,13 +45,13 @@ public:
     BoneNode_c** m_bones; // BoneNode_c*[m_count] -> Array
     RwMatrix* m_matrix;
     float m_blend;
-    uint16 m_animId;
+    uint16 m_bone1;
     CVector m_bonePosn;
     ePedBones m_bone;
     CEntity* m_entity;
     int32 m_offsetBoneTag;
     CVector m_offsetPos;
-    float float44;
+    float m_speed;
     CVector m_vec;
     uint8 m_targetMB;
     uint8 m_indexInList;

@@ -46,10 +46,49 @@ void IKChain_c::Update(float timeStep) {
 }
 
 // 0x618370
-bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, int32 animId, RwV3d bonePosn, int32 animId_1, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
-                     int32 priority) {
-    return plugin::CallMethodAndReturn<bool, 0x618370, IKChain_c*, const char*, int32, CPed*, int32, RwV3d, int32, CEntity*, int32, RwV3d, float, int32>(
-        this, name, IndexInList, ped, animId, bonePosn, animId_1, entity, offsetBoneTag, posn, a11, priority);
+bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float speed,
+                     int8 priority) {
+    m_ped = ped;
+
+    const auto frames = m_ped->GetAnimBlendData().m_pFrames;
+
+    if (frames[0].m_bCheckBlendNodeClumpKeyFrames || !frames[0].m_bUpdatingFrame) {
+        return false;
+    }
+
+    if (!m_ped->bHasBeenRendered) {
+        return false;
+    }
+
+    // Check if frame of this bone has non-zero translation 
+    {
+        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_ped->GetAnimHierarchy(), (RwInt32)bone)].m_pIFrame;
+        if (CVector{ boneFrame->translation }.IsZero()) {
+            return false;
+        }
+    }
+
+    m_ped->RegisterReference(m_ped);
+
+    m_bones = nullptr;
+    SetupBones(bone, bonePosn, bone2, frames);
+    m_bonePosn = bonePosn;
+    m_blend = 0.f;
+    m_bone1 = bone;
+
+    m_entity = entity;
+    if (entity) {
+        m_entity->RegisterReference(m_entity);
+    }
+
+    m_offsetBoneTag = offsetBoneTag;
+    m_offsetPos = posn;
+    m_speed = speed;
+    m_targetMB = 1;
+    m_indexInList = IndexInList;
+    m_priority = priority;
+
+    return true;
 }
 
 // 0x617F30
