@@ -17,8 +17,8 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(UpdateEntity, 0x617E00);
     RH_ScopedInstall(GetBoneNodeFromTag, 0x617C60);
     RH_ScopedInstall(GetPriority, 0x617C50);
-    // RH_ScopedInstall(SetOffsetPos, 0x617C30);
-    // RH_ScopedInstall(SetOffsetBoneTag, 0x617C20);
+    RH_ScopedInstall(SetOffsetPos, 0x617C30);
+    RH_ScopedInstall(SetOffsetBoneTag, 0x617C20);
     // RH_ScopedInstall(SetBlend, 0x617C10);
     // RH_ScopedInstall(MoveBonesToTarget, 0x6178B0);
     // RH_ScopedInstall(SetupBones, 0x617CA0);
@@ -161,7 +161,7 @@ void IKChain_c::SetOffsetPos(RwV3d value) {
 
 // 0x617C20
 void IKChain_c::SetOffsetBoneTag(int32 value) {
-    plugin::CallMethod<0x617C20, IKChain_c*, int32>(this, value);
+    m_offsetBoneTag = value;
 }
 
 // 0x617C10
