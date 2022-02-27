@@ -118,7 +118,7 @@ bool IKChain_c::IsFacingTarget() {
 
 // 0x617E50
 void IKChain_c::UpdateTarget(uint8 target) {
-    plugin::CallMethod<0x617E50, IKChain_c*, uint8>(this, target);
+    m_targetMB = target;
 }
 
 // 0x617E20
