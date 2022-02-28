@@ -98,42 +98,51 @@ bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEven
 
 bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
 {
-    if (ped->IsAlive() && !ped->m_pAttachedTo && m_victim && !ped->bInVehicle && !m_victim->bInVehicle &&
-        m_victim->GetIntelligence()->m_AnotherStaticCounter <= 30 && !ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
-        if (m_movestate < PEDMOVE_WALK) {
-            CPedGroup* victimGroup = CPedGroups::GetPedsGroup(m_victim);
-            if (victimGroup && !victimGroup->GetMembership().IsLeader(m_victim)) {
-                if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f)
-                    return false;
+    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
+        return false;
+    }
 
-                // Check if they bot have the same _PARTNER_ tasks
-                if (const auto pedsTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>()) {
-                    if (const auto victimsTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>()) {
-                        if (pedsTask->GetTaskType() == victimsTask->GetTaskType()) {
-                            return false;
-                        }
-                    }
-                }
+    if (!m_victim || m_victim->bInVehicle || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
+        return false;
+    }
 
-                if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
-                    if (task->m_ped == m_victim) {
-                        return false;
-                    }
-                }
+    switch (m_movestate) {
+    case PEDMOVE_NONE:
+    case PEDMOVE_STILL:
+    case PEDMOVE_TURN_L:
+    case PEDMOVE_TURN_R:
+        break;
+    default:
+        return false;
+    }
 
-                if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
-                    if (task->m_target == m_victim) {
-                        if (ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
-                            return false;
-                        }
-                    }
-                }
+    if (const auto victimsGroup = CPedGroups::GetPedsGroup(m_victim); !victimsGroup || victimsGroup->GetMembership().IsLeader(m_victim)) {
+        return false;
+    }
 
-                return true;
+    if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f) { // If collision's velocity is not in [-120, 120] - So basically, if coming from behind
+        return false;
+    }
+
+    if (ped->GetTaskManager().HasOneSameTask<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>(m_victim->GetTaskManager())) {
+        return false;
+    }
+                
+    if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
+        if (task->m_ped == m_victim) {
+            return false;
+        }
+    }
+
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_victim) {
+            if (ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
+                return false;
             }
         }
     }
-    return false;
+
+    return true;
 }
 
 CEventPedCollisionWithPlayer::CEventPedCollisionWithPlayer(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState) :

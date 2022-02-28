@@ -156,11 +156,12 @@ public:
         return Find<T>();
     }
 
-    // Check if other task mgr has at least one matching task
+    // Check if two task mangers have the same task
+    // Only returns true if the first found task is the same for both.
     template<eTaskType... Ts>
-    bool HasMatchingTask(CTaskManager& mgr) {
+    bool HasOneSameTask(CTaskManager& mgr) {
         if (const auto our = Find<Ts...>()) {
-            if (const auto other = mgr.Find<Ts...>()) {
+            if (const auto other = mgr.Find<Ts...>()) { // Find first task from the list
                 if (our->GetTaskType() == other->GetTaskType()) {
                     return true;
                 }
