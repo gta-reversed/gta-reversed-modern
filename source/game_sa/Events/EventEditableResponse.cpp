@@ -282,9 +282,7 @@ bool CEventFireNearby::AffectsPed(CPed* ped)
 
 bool CEventFireNearby::AffectsPed_Reversed(CPed* ped)
 {
-    if (ped->GetTaskManager().Find<TASK_COMPLEX_EXTINGUISH_FIRES>())
-        return false;
-    return ped->IsAlive();
+    return !ped->GetTaskManager().Has<TASK_COMPLEX_EXTINGUISH_FIRES>() && ped->IsAlive();
 }
 
 
