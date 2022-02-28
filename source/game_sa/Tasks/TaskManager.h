@@ -108,6 +108,17 @@ public:
         return nullptr;
     }
 
+    // Find simplest active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type)
+    template<Task T>
+    T* GetSimplestActiveTaskAs() {
+        if (const auto task = GetSimplestActiveTask()) {
+            if (task->GetTaskType() == T::Type) {
+                return static_cast<T*>(task);
+            }
+        }
+        return nullptr;
+    }
+
     // Find an active task from the give types and return the first one.
     template<eTaskType... Ts>
     auto Find() { // TODO: For now just return `CTask*`, but would be nice to return the first common base class somehow
@@ -118,13 +129,13 @@ public:
 
     // Find an active task from the given types and return the first one.
     template<Task... Ts>
-    auto Find() { 
+    auto Find() requires(sizeof...(Ts) > 1) { // Only use this overload if there's more than 1 Task
         return Find<Ts::Type...>();
     }
 
     template<Task T>
     T* Find() {
-        return static_cast<T*>(Find<Ts::Type>());
+        return static_cast<T*>(Find<T::Type>());
     }
 
     template<Task... Ts>

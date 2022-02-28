@@ -75,7 +75,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped)
 
 bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
 {
-    auto taskEnterCarAsDriver = reinterpret_cast<CTaskComplexEnterCarAsDriver*>(ped->GetTaskManager().Find<TASK_COMPLEX_ENTER_CAR_AS_DRIVER>());
+    auto taskEnterCarAsDriver = ped->GetTaskManager().Find<CTaskComplexEnterCarAsDriver>();
     auto goToTask = reinterpret_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
     if (ped->IsPlayer() && !taskEnterCarAsDriver && !CTask::IsGoToTask(goToTask))
         return false;
@@ -83,14 +83,15 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
     if (!ped->IsAlive() || ped->bInVehicle || m_moveState == PEDMOVE_STILL)
         return false;
 
-    auto taskWalkRoundCar = reinterpret_cast<CTaskComplexWalkRoundCar*>(ped->GetTaskManager().Find<TASK_COMPLEX_WALK_ROUND_CAR>());
-    if (taskWalkRoundCar && taskWalkRoundCar->m_vehicle != m_vehicle) {
-        if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == taskWalkRoundCar->m_vehicle) ||
-            (m_vehicle->m_pTractor && m_vehicle->m_pTractor == taskWalkRoundCar->m_vehicle))
-        {
-            taskWalkRoundCar->SetNewVehicle(m_vehicle, 0);
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexWalkRoundCar>()) {
+        if (task->m_vehicle != m_vehicle) {
+            if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == task->m_vehicle) ||
+                (m_vehicle->m_pTractor && m_vehicle->m_pTractor == task->m_vehicle)
+            ) {
+                task->SetNewVehicle(m_vehicle, 0);
+            }
+            return false;
         }
-        return false;
     }
 
     if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsSubVehicleTypeValid() && !m_vehicle->IsSubFakeAircraft()) {
