@@ -6,7 +6,10 @@
 */
 #pragma once
 
+#include "Base.h"
+#include <initializer_list>
 #include "Task.h"
+#include <algorithm>
 
 enum ePrimaryTasks // array indexes
 {
@@ -81,7 +84,7 @@ public:
     // NOTSA - Check if any of the given tasks is active
     bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
         return std::any_of(types.begin(), types.end(), [this](auto type) {
-            return Find<type>();
+            return FindActiveTaskByType(type);
         });
     }
 
@@ -94,18 +97,37 @@ public:
         return nullptr;
     }
 
+    // Find active task, check if its of type `T`, and return it, nullptr othetwise (if not found/not of the requrested type)
+    template<Task T>
+    T* GetActiveTaskAs() {
+        if (const auto task = GetActiveTask()) {
+            if (task->GetTaskType() == T::Type) {
+                return static_cast<T*>(task);
+            }
+        }
+        return nullptr;
+    }
+
     template<Task T>
     auto Find() {
         return static_cast<T*>(FindActiveTaskByType(T::Type));
     }
 
-    template<eTaskType Type>
+    template<eTaskType T>
     auto Find() {
-        return Find<Type>();
+        return FindActiveTaskByType(T);
+    }
+
+    // Find an active task from the give types and return the first one.
+    template<eTaskType... Ts>
+    CTask* Find() { // TODO: For now just return `CTask*`, but would be nice to return the first common base class somehow
+        CTask* ret{};
+        (... || (ret = Find<Ts>)); // Find first active task from given types
+        return ret;
     }
 
     template<Task... Ts>
-    bool Has() {
+    bool HasAnyOf() {
         // This won't work if the task has no `Type` member
         // If it has a `GetTaskType` function feel free to add it,
         // otherwise don't.
@@ -113,7 +135,7 @@ public:
     }
 
     template<eTaskType... Ts>
-    bool Has() {
+    bool HasAnyOf() {
         return (... || Find<Ts>());
     }
 };

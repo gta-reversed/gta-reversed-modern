@@ -1362,7 +1362,7 @@ bool CPed::CanThrowEntityThatThisPedIsHolding() {
 * @returns If there's a HANDSIGNAL task
 */
 bool CPed::IsPlayingHandSignal() {
-    return GetTaskManager().Has<TASK_COMPLEX_HANDSIGNAL_ANIM>();
+    return GetTaskManager().HasAnyOf<TASK_COMPLEX_HANDSIGNAL_ANIM>();
 }
 
 /*!
@@ -1967,7 +1967,7 @@ void CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
 
     // Deal with ped already holding an entity.
     // If `replace` is `true`, just drop the entity, otherwise do nothing.
-    if (GetTaskManager().Has<TASK_SIMPLE_HOLD_ENTITY>()) {
+    if (GetTaskManager().HasAnyOf<TASK_SIMPLE_HOLD_ENTITY>()) {
         if (!GetEntityThatThisPedIsHolding() || !replace) {
             return;
         }
@@ -3288,7 +3288,7 @@ void CPed::ProcessControl()
 void CPed::Teleport(CVector destination, bool resetRotation) {
     UNUSED(resetRotation);
 
-    if (IsPlayer() || GetTaskManager().Has<TASK_COMPLEX_LEAVE_CAR>()) {
+    if (IsPlayer() || GetTaskManager().HasAnyOf<TASK_COMPLEX_LEAVE_CAR>()) {
         GetIntelligence()->FlushImmediately(true);
     }
 

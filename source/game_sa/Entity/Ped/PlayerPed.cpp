@@ -366,7 +366,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        if (ped->GetTaskManager().Has<TASK_COMPLEX_KILL_PED_ON_FOOT, TASK_COMPLEX_ARREST_PED>()) {
+        if (ped->GetTaskManager().HasAnyOf<TASK_COMPLEX_KILL_PED_ON_FOOT, TASK_COMPLEX_ARREST_PED>()) {
             return 0.8f;
         }
 

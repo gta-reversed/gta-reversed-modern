@@ -132,7 +132,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
     if (m_pDriver && m_pDriver->IsPlayer()) {    
         PruneReferences();
         if (m_pDriver->m_nPedState == PEDSTATE_ARRESTED ||
-            m_pDriver->GetTaskManager().IsAnyTaskActiveByType({TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN, TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT})
+            m_pDriver->GetTaskManager().HasAnyOf<TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN, TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT>()
         ) {
             vehicleFlags.bIsHandbrakeOn = true;
             m_fBreakPedal = 1.0f;
