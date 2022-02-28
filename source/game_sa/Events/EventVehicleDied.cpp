@@ -52,8 +52,7 @@ CEvent* CEventVehicleDied::Clone_Reversed()
 bool CEventVehicleDied::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive() && !m_IsOccupantLeavingCar) {
-        CTask* pTaskComplexLeaveCar = ped->GetTaskManager().Find<TASK_COMPLEX_LEAVE_CAR>();
-        m_IsOccupantLeavingCar = pTaskComplexLeaveCar ? true : false;
+        m_IsOccupantLeavingCar = ped->GetTaskManager().Has<TASK_COMPLEX_LEAVE_CAR>();
         if ((m_IsOccupantLeavingCar || ped->bInVehicle) && m_vehicle)
             return ped->m_pVehicle == m_vehicle;
     }
