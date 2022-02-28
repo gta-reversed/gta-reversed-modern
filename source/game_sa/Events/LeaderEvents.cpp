@@ -188,13 +188,12 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
         return false;
 
     CPed* targetPed = nullptr;
-    auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().Find<TASK_COMPLEX_KILL_PED_ON_FOOT>());
-    if (killPedOnFootTask) {
-        targetPed = killPedOnFootTask->m_target;
+    if (const auto killPedOnFoot = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        targetPed = killPedOnFoot->m_target;
         if (targetPed != m_ped) {
-            auto arrestPedTask = reinterpret_cast<CTaskComplexArrestPed*>(ped->GetTaskManager().Find<TASK_COMPLEX_ARREST_PED>());
-            if (arrestPedTask)
-                targetPed = arrestPedTask->m_pedToArrest;
+            if (const auto arrestPed = ped->GetTaskManager().Find<CTaskComplexArrestPed>()) {
+                targetPed = arrestPed->m_pedToArrest;
+            }
         }
     }
 
