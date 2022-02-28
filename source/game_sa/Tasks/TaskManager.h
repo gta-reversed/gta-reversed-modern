@@ -108,22 +108,23 @@ public:
         return nullptr;
     }
 
-    template<Task T>
-    auto Find() {
-        return static_cast<T*>(FindActiveTaskByType(T::Type));
-    }
-
-    template<eTaskType T>
-    auto Find() {
-        return FindActiveTaskByType(T);
-    }
-
     // Find an active task from the give types and return the first one.
     template<eTaskType... Ts>
-    CTask* Find() { // TODO: For now just return `CTask*`, but would be nice to return the first common base class somehow
+    auto Find() { // TODO: For now just return `CTask*`, but would be nice to return the first common base class somehow
         CTask* ret{};
-        (... || (ret = Find<Ts>)); // Find first active task from given types
+        (... || (ret = FindActiveTaskByType(Ts))); // Find first active task from given types
         return ret;
+    }
+
+    // Find an active task from the given types and return the first one.
+    template<Task... Ts>
+    auto Find() { 
+        return Find<Ts::Type...>();
+    }
+
+    template<Task T>
+    T* Find() {
+        return static_cast<T*>(Find<Ts::Type>());
     }
 
     template<Task... Ts>
@@ -137,6 +138,24 @@ public:
     template<eTaskType... Ts>
     bool HasAnyOf() {
         return (... || Find<Ts>());
+    }
+
+    template<eTaskType T>
+    bool Has() {
+        return Find<T>();
+    }
+
+    // Check if other task mgr has at least one matching task
+    template<eTaskType... Ts>
+    bool HasMatchingTask(CTaskManager& mgr) {
+        if (const auto our = Find<Ts...>()) {
+            if (const auto other = mgr.Find<Ts...>()) {
+                if (our->GetTaskType() == other->GetTaskType()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 };
 

@@ -256,43 +256,33 @@ bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent)
 
 bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
 {
-    if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL)
+    if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL) {
         return false;
+    }
 
-    CTask* partnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
-    if (!partnerTask)
-        partnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_BE_IN_COUPLE>();
+    if (ped->GetTaskManager().HasMatchingTask<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_ped->GetTaskManager())) {
+        return false;
+    }
 
-    if (!partnerTask)
-        partnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
-
-    if (partnerTask) {
-        CTask* thisPedPartnerTask = m_ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
-        if (!thisPedPartnerTask)
-            thisPedPartnerTask = m_ped->GetTaskManager().Find<TASK_COMPLEX_BE_IN_COUPLE>();
-
-        if (!thisPedPartnerTask)
-            thisPedPartnerTask = m_ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
-
-        if (thisPedPartnerTask) {
-            if (partnerTask->GetTaskType() == thisPedPartnerTask->GetTaskType())
-                return false;
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexFollowPedFootsteps>()) {
+        if (task->m_targetPed == m_ped) {
+            return false;
         }
     }
 
-    auto followFootstepsTask = reinterpret_cast<CTaskComplexFollowPedFootsteps*>(ped->GetTaskManager().Find<TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS>());
-    if (followFootstepsTask && followFootstepsTask->m_targetPed == m_ped)
-        return false;
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_ped) {
+            return false;
+        }
+    }
 
-    auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-    if (killPedOnFootTask && killPedOnFootTask->m_target == m_ped)
-        return false;
+    if (const auto simplest = ped->GetTaskManager().GetSimplestActiveTask()) {
+        if (CTask::IsGoToTask(simplest)) {
+            return true;
+        }
+    }
 
-    CTask* activeTask = ped->GetTaskManager().GetSimplestActiveTask();
-    if (!activeTask || !CTask::IsGoToTask(activeTask))
-        return false;
-
-    return true;
+    return false;
 }
 
 bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
