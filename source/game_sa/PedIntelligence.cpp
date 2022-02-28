@@ -699,15 +699,15 @@ bool CPedIntelligence::Respects(CPed* ped) {
 
 // 0x601CC0
 bool CPedIntelligence::IsInACarOrEnteringOne() {
-    if (auto taskComplexEnterCar = m_TaskMgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER)) {
+    if (auto taskComplexEnterCar = m_TaskMgr.Find<TASK_COMPLEX_ENTER_CAR_AS_DRIVER>()) {
         return static_cast<CTaskComplexEnterCar*>(taskComplexEnterCar)->m_pTargetVehicle;
     }
 
-    if (auto taskComplexEnterCar = m_TaskMgr.FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_PASSENGER)) {
+    if (auto taskComplexEnterCar = m_TaskMgr.Find<TASK_COMPLEX_ENTER_CAR_AS_PASSENGER>()) {
         return static_cast<CTaskComplexEnterCar*>(taskComplexEnterCar)->m_pTargetVehicle;
     }
 
-    if (auto takSimpleCarDrive = m_TaskMgr.FindActiveTaskByType(TASK_SIMPLE_CAR_DRIVE)) {
+    if (auto takSimpleCarDrive = m_TaskMgr.Find<TASK_SIMPLE_CAR_DRIVE>()) {
         return static_cast<CTaskSimpleCarDrive*>(takSimpleCarDrive)->m_pVehicle;
     }
 

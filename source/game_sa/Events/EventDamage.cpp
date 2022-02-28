@@ -168,7 +168,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
         if (m_pSourceEntity) {
             if (m_pSourceEntity->IsPed() && pedSourceEntity->m_nPedType == PED_TYPE_GANG2 && m_weaponType >= WEAPON_GRENADE) {
                 CTaskManager* taskManager = &pedSourceEntity->GetTaskManager();
-                auto task = static_cast<CTaskComplexKillPedOnFoot*>(taskManager->FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
+                auto task = static_cast<CTaskComplexKillPedOnFoot*>(taskManager->Find<TASK_COMPLEX_KILL_PED_ON_FOOT>());
                 if (!task || task->m_target != ped)
                     return false;
             }

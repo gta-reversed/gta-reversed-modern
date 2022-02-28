@@ -105,13 +105,13 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
             if (victimGroup && !victimGroup->GetMembership().IsLeader(m_victim)) {
                 if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f)
                     return false;
-                CTask* pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
+                CTask* pedPartnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
                 if (!pedPartnerTask)
-                    pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
+                    pedPartnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
                 if (pedPartnerTask) {
-                    CTask* victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
+                    CTask* victimPartnerTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
                     if (!victimPartnerTask)
-                        victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
+                        victimPartnerTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
                     if (victimPartnerTask) {
                         if (pedPartnerTask->GetTaskType() == victimPartnerTask->GetTaskType())
                             return false;
@@ -123,9 +123,9 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
                 {
                     return false;
                 }
-                auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
+                auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().Find<TASK_COMPLEX_KILL_PED_ON_FOOT>());
                 if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_target == m_victim
-                    && ped->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_FIGHT_CTRL)) {
+                    && ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
                     return false;
                 }
                 else {
@@ -249,7 +249,7 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
             }
             // CEventPotentialWalkIntoBuilding doesn't even exist on PC
             assert (ped->GetEventHandler().GetCurrentEventType() != EVENT_POTENTIAL_WALK_INTO_BUILDING);
-            if (dotProduct <= -0.5f && !ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CLIMB))
+            if (dotProduct <= -0.5f && !ped->GetTaskManager().Find<TASK_COMPLEX_CLIMB>())
                 return ped->GetEventHandler().GetCurrentEventType() != EVENT_GUN_AIMED_AT;
         }
     }
