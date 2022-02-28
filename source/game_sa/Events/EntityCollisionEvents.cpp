@@ -105,32 +105,31 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
             if (victimGroup && !victimGroup->GetMembership().IsLeader(m_victim)) {
                 if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f)
                     return false;
-                CTask* pedPartnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
-                if (!pedPartnerTask)
-                    pedPartnerTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
-                if (pedPartnerTask) {
-                    CTask* victimPartnerTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL>();
-                    if (!victimPartnerTask)
-                        victimPartnerTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_GREET>();
-                    if (victimPartnerTask) {
-                        if (pedPartnerTask->GetTaskType() == victimPartnerTask->GetTaskType())
+
+                // Check if they bot have the same _PARTNER_ tasks
+                if (const auto pedsTask = ped->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>()) {
+                    if (const auto victimsTask = m_victim->GetTaskManager().Find<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>()) {
+                        if (pedsTask->GetTaskType() == victimsTask->GetTaskType()) {
                             return false;
+                        }
                     }
                 }
-                CTask* pedActiveTask = ped->GetTaskManager().GetActiveTask();
-                if (pedActiveTask && pedActiveTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING
-                    && reinterpret_cast<CTaskComplexAvoidOtherPedWhileWandering*>(pedActiveTask)->m_ped == m_victim)
-                {
-                    return false;
+
+                if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
+                    if (task->m_ped == m_victim) {
+                        return false;
+                    }
                 }
-                auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().Find<TASK_COMPLEX_KILL_PED_ON_FOOT>());
-                if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_target == m_victim
-                    && ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
-                    return false;
+
+                if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+                    if (task->m_target == m_victim) {
+                        if (ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
+                            return false;
+                        }
+                    }
                 }
-                else {
-                    return true;
-                }
+
+                return true;
             }
         }
     }
