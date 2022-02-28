@@ -51,6 +51,7 @@ public:
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
+    auto GetVehicle() const { return m_pVehicle; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

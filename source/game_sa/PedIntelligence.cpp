@@ -24,6 +24,10 @@
 #include "TaskSimpleClimb.h"
 #include "CollisionEventScanner.h"
 #include "PlayerRelationshipRecorder.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+#include "TaskSimpleCarDrive.h"
+
 
 float& CPedIntelligence::STEALTH_KILL_RANGE = *reinterpret_cast<float*>(0x8D2398); // 2.5f
 float& CPedIntelligence::LIGHT_AI_LEVEL_MAX = *reinterpret_cast<float*>(0x8D2380); // 0.3f
@@ -699,16 +703,16 @@ bool CPedIntelligence::Respects(CPed* ped) {
 
 // 0x601CC0
 bool CPedIntelligence::IsInACarOrEnteringOne() {
-    if (auto taskComplexEnterCar = m_TaskMgr.Find<TASK_COMPLEX_ENTER_CAR_AS_DRIVER>()) {
-        return static_cast<CTaskComplexEnterCar*>(taskComplexEnterCar)->m_pTargetVehicle;
+    if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsDriver>()) {
+        return !!task->GetVehicle();
     }
 
-    if (auto taskComplexEnterCar = m_TaskMgr.Find<TASK_COMPLEX_ENTER_CAR_AS_PASSENGER>()) {
-        return static_cast<CTaskComplexEnterCar*>(taskComplexEnterCar)->m_pTargetVehicle;
+    if (const auto task = m_TaskMgr.Find<CTaskComplexEnterCarAsPassenger>()) {
+        return !!task->GetVehicle();
     }
 
-    if (auto takSimpleCarDrive = m_TaskMgr.Find<TASK_SIMPLE_CAR_DRIVE>()) {
-        return static_cast<CTaskSimpleCarDrive*>(takSimpleCarDrive)->m_pVehicle;
+    if (const auto task = m_TaskMgr.Find<CTaskSimpleCarDrive>()) {
+        return !!task->GetVehicle();
     }
 
     return false;
