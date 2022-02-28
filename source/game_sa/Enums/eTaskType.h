@@ -572,6 +572,3 @@ enum eTaskType : int32 {
     */
     MAX_NUM_TASK_TYPES
 };
-
-template<typename>
-constexpr inline eTaskType TaskToTaskType;

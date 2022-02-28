@@ -81,7 +81,7 @@ public:
     // NOTSA - Check if any of the given tasks is active
     bool IsAnyTaskActiveByType(std::initializer_list<int32> types) {
         return std::any_of(types.begin(), types.end(), [this](auto type) {
-            return FindActiveTaskByType(type);
+            return Find<type>();
         });
     }
 
@@ -99,14 +99,22 @@ public:
         return static_cast<T*>(FindActiveTaskByType(T::Type));
     }
 
+    template<eTaskType Type>
+    auto Find() {
+        return Find<Type>();
+    }
+
     template<Task... Ts>
     bool Has() {
+        // This won't work if the task has no `Type` member
+        // If it has a `GetTaskType` function feel free to add it,
+        // otherwise don't.
         return (... || FindActiveTaskByType(Ts::Type));
     }
 
     template<eTaskType... Ts>
     bool Has() {
-        return (... || FindActiveTaskByType(Ts));
+        return (... || Find<Ts>());
     }
 };
 
