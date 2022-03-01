@@ -19,6 +19,8 @@ public:
     bool             m_bHighJump;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_JUMP;
+
     CTaskComplexJump(eComplexJumpType type);
     ~CTaskComplexJump() override {}
 

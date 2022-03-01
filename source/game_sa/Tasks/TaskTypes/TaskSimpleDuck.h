@@ -36,6 +36,9 @@ public:
     uint8 m_nDuckControlType;
     uint8 m_nCountDownFrames;
 
+public:
+    static constexpr auto Type = TASK_SIMPLE_DUCK;
+
     CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
     static bool CanPedDuck(CPed* ped);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);

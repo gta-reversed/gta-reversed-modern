@@ -33,6 +33,8 @@ public:
     int32    m_bIsBlendingOut;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_IK_CHAIN;
+
     CTaskSimpleIKChain(char* idString,
                        int32 effectorBoneTag,
                        RwV3d effectorVec,

@@ -14,6 +14,8 @@ class CTaskComplexFollowLeaderInFormation : public CTaskComplex {
     float      m_dist;      // 0x24 - Max distance between m_pos and some point, not sure. See `ControlSubTask`. Ignored if < 0
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_FOLLOW_LEADER_IN_FORMATION;
+
     CTaskComplexFollowLeaderInFormation(CPedGroup* pedGroup, CPed* ped, const CVector& posn, float dist);
     ~CTaskComplexFollowLeaderInFormation() override;
 

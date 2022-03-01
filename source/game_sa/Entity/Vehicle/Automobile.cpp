@@ -1319,10 +1319,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         if (m_vecMoveSpeed.SquaredMagnitude() < 0.01f
             || m_pDriver
             && m_pDriver->IsPlayer()
-            && (m_pDriver->m_nPedState == PEDSTATE_ARRESTED
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT)
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT)
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN)))
+            && (m_pDriver->m_nPedState == PEDSTATE_ARRESTED || m_pDriver->GetTaskManager().HasAnyOf<TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT, TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN>()))
         {
             m_fBreakPedal = 1.0f;
             m_fGasPedal = 0.0f;

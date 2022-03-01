@@ -21,6 +21,8 @@ private:
 public:
     float m_fBlendData;
 
+    static constexpr auto Type = TASK_SIMPLE_STAND_STILL;
+
     static void InjectHooks();
 
     CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);

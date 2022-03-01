@@ -37,6 +37,8 @@ public:
     static uint32 ms_nMaxSlowFallFrames; // 0x8D2EF8
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_IN_AIR;
+
     CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump);
     ~CTaskSimpleInAir() override;
 

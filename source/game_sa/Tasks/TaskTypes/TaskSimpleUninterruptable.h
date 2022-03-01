@@ -6,6 +6,8 @@ class CTaskSimpleUninterruptable : public CTaskSimple {
 private:
     CTaskSimpleUninterruptable* Constructor();
 public:
+    static constexpr auto Type = TASK_SIMPLE_UNINTERRUPTABLE;
+
     CTaskSimpleUninterruptable() {}
     ~CTaskSimpleUninterruptable() override {}
 

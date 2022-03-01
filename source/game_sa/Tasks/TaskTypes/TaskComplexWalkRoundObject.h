@@ -18,6 +18,8 @@ public:
     int32        field_30;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_WALK_ROUND_OBJECT;
+
     CTaskComplexWalkRoundObject(int32 moveState, const CVector& targetPoint, CEntity* object);
     ~CTaskComplexWalkRoundObject() override;
 

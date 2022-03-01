@@ -17,12 +17,14 @@ public:
     char      _pad_21[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE;
+
     explicit CTaskComplexCarDrive(CVehicle* vehicle);
     CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, int32 arg4);
     ~CTaskComplexCarDrive() override;
 
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_CAR_DRIVE; }
+    eTaskType GetTaskType() override { return Type; }
 
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

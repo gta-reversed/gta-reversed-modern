@@ -16,6 +16,8 @@ public:
     CTaskTimer m_nSubTaskCreatedTimer;
 
 public:
+    static constexpr auto Type = WANDER_TYPE_COP;
+
     CTaskComplexWanderCop(int32 moveState, uint8 dir);
     ~CTaskComplexWanderCop();
 

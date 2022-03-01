@@ -13,11 +13,13 @@ class CTaskComplexBeInGroup : public CTaskComplex {
     int32  m_secondaryTaskSlot; // used as index in CTaskManager::m_aSecondaryTasks
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_BE_IN_GROUP;
+
     CTaskComplexBeInGroup(int32 groupId, bool isLeader);
     ~CTaskComplexBeInGroup() {}
 
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_BE_IN_GROUP; }
+    eTaskType GetTaskType() override { return Type; }
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
