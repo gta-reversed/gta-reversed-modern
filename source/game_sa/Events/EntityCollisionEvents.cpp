@@ -124,7 +124,7 @@ bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
         return false;
     }
 
-    if (ped->GetTaskManager().HasOneSameTask<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>(m_victim->GetTaskManager())) {
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>(m_victim->GetTaskManager())) {
         return false;
     }
                 
