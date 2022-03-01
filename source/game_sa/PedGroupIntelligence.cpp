@@ -41,3 +41,7 @@ void CPedGroupIntelligence::SetPrimaryTaskAllocator(CTaskAllocator* taskAllocato
 void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int32 nPedGroupTaskAllocator) {
     plugin::CallMethod<0x5FBB70, CPedGroupIntelligence*, int32>(this, nPedGroupTaskAllocator);
 }
+
+bool CPedGroupIntelligence::ReportFinishedTask(const CPed* ped, const CTask* task) {
+    return plugin::CallMethodAndReturn<bool, 0x5F86F0>(this, ped, task);
+}
