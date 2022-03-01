@@ -261,7 +261,7 @@ bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
         return false;
     }
 
-    if (ped->GetTaskManager().HasMatchingTask<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_ped->GetTaskManager())) {
+    if (ped->GetTaskManager().HasOneSameTask<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_ped->GetTaskManager())) {
         return false;
     }
 
