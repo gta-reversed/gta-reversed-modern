@@ -30,6 +30,8 @@ public:
     CTask*    ControlSubTask(CPed* ped) override;
 
 private:
+    auto& GetGroup() const { return CPedGroups::GetGroup(m_groupId); }
+
     // 0x632E50
     CTaskComplexBeInGroup* Constructor(int32 groupId, bool isLeader) {
         this->CTaskComplexBeInGroup::CTaskComplexBeInGroup(groupId, isLeader);

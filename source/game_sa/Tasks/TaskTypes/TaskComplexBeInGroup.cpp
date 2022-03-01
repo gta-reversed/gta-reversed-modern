@@ -13,7 +13,7 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
     RH_ScopedInstall(Clone_Reversed, 0x636BE0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x632E90);
-    //RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
     //RH_ScopedInstall(CreateNextSubTask_Reversed, 0x632F40);
     //RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x632FB0);
     //RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
@@ -76,7 +76,17 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
 
 bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 { 
-    return plugin::CallMethodAndReturn<bool, 0x632EB0, CTask*, CPed*, int32, const CEvent*>(this, ped, priority, event);
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
+        auto& groupIntel = GetGroup().GetIntelligence();
+        for (auto t : { &m_mainTask, &m_secondaryTask }) {
+            if (*t && CTask::IsTaskPtr(*t)) {
+                groupIntel.ReportFinishedTask(ped, *t);
+                *t = nullptr;
+            }
+        }
+    }
+
+    return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 CTask* CTaskComplexBeInGroup::CreateNextSubTask(CPed* ped)
