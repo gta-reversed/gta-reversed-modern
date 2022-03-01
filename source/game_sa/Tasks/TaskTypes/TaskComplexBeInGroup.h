@@ -19,7 +19,7 @@ public:
     CTaskComplexBeInGroup(int32 groupId, bool isLeader);
     ~CTaskComplexBeInGroup() {}
 
-    void MonitorMainGroupTask(CPed* ped);
+    CTask* MonitorMainGroupTask(CPed* ped);
     void MonitorSecondaryGroupTask(CPed* ped);
 
     CTask*    Clone() override { return new CTaskComplexBeInGroup{m_groupId, m_isLeader}; }

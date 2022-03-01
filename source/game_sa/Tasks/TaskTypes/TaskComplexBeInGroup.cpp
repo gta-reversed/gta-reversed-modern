@@ -26,18 +26,21 @@ CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) :
 }
 
 // 0x633010
-void CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
+CTask* CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
     if (const auto groupMainTask = CPedGroups::GetGroup(m_groupId).GetIntelligence().GetTaskMain(ped)) {
         if (groupMainTask != m_mainTask || groupMainTask->GetTaskType() != m_mainTaskId) {
-            if (groupMainTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
                 m_mainTask = groupMainTask;
                 m_mainTaskId = groupMainTask->GetTaskType();
+                return groupMainTask->Clone();
             }
         }
-    } else if (m_mainTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+    } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
         m_mainTask = nullptr;
         m_mainTaskId = TASK_NONE;
+        return nullptr;
     }
+    return m_pSubTask;
 }
 
 // 0x6330B0
