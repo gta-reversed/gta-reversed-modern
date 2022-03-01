@@ -16,7 +16,7 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x632F40);
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x632FB0);
-    //RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
 }
 
 CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) :
