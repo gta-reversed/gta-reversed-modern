@@ -15,7 +15,7 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(GetTaskType_Reversed, 0x632E90);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x632F40);
-    //RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x632FB0);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x632FB0);
     //RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
 }
 
@@ -103,9 +103,22 @@ CTask* CTaskComplexBeInGroup::CreateNextSubTask(CPed* ped) {
     }
 }
 
-CTask* CTaskComplexBeInGroup::CreateFirstSubTask(CPed* ped)
-{
-    return plugin::CallMethodAndReturn<CTask*, 0x632FB0, CTask*, CPed*>(this, ped);
+CTask* CTaskComplexBeInGroup::CreateFirstSubTask(CPed* ped) {
+    m_ped = ped;
+    m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+
+    // Below code basically the same as `CreateNextSubTask`
+    // TODO: Maybe move this into a separate function? (To reduce copy paste)
+    auto& intel = GetGroup().GetIntelligence();
+    if (const auto main = intel.GetTaskMain(ped)) { // Return group's main task (if any)
+        m_mainTask = main;
+        m_mainTaskId = main->GetTaskType();
+        return main->Clone();
+    } else {
+        m_mainTask = nullptr;
+        m_mainTaskId = TASK_NONE;
+        return nullptr;
+    }
 }
 
 CTask* CTaskComplexBeInGroup::ControlSubTask(CPed* ped)
