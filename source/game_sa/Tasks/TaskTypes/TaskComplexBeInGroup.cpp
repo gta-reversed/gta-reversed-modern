@@ -9,7 +9,7 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x632E50);
     RH_ScopedInstall(Destructor, 0x632EA0);
 
-    //RH_ScopedInstall(MonitorMainGroupTask, 0x633010);
+    RH_ScopedInstall(MonitorMainGroupTask, 0x633010);
     //RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
     //RH_ScopedInstall(Clone_Reversed, 0x636BE0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x632E90);
@@ -27,7 +27,17 @@ CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) :
 
 // 0x633010
 void CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<void, 0x633010, CTaskComplexBeInGroup*, CPed*>(this, ped);
+    if (const auto groupMainTask = CPedGroups::GetGroup(m_groupId).GetIntelligence().GetTaskMain(ped)) {
+        if (groupMainTask != m_mainTask || groupMainTask->GetTaskType() != m_mainTaskId) {
+            if (groupMainTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                m_mainTask = groupMainTask;
+                m_mainTaskId = groupMainTask->GetTaskType();
+            }
+        }
+    } else if (m_mainTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+        m_mainTask = nullptr;
+        m_mainTaskId = TASK_NONE;
+    }
 }
 
 // 0x6330B0

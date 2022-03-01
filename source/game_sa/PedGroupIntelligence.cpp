@@ -10,6 +10,10 @@ void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, const CTask* task) {
     plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, const CTask*>(this, ped, task);
 }
 
+CTask* CPedGroupIntelligence::GetMainTask(CPed* ped) {
+    return plugin::CallAndReturn<CTask*, 0x5F85A0>(this, ped);
+}
+
 void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
     plugin::CallMethod<0x5F88D0, CPedGroupIntelligence*, CPed*>(this, ped);
 }
