@@ -22,7 +22,7 @@ public:
     void MonitorMainGroupTask(CPed* ped);
     void MonitorSecondaryGroupTask(CPed* ped);
 
-    CTask*    Clone() override;
+    CTask*    Clone() override { return new CTaskComplexBeInGroup{m_groupId, m_isLeader}; }
     eTaskType GetTaskType() override { return Type; }
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask*    CreateNextSubTask(CPed* ped) override;
