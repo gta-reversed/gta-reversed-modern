@@ -10,7 +10,7 @@ void CPedGroupIntelligence::SetScriptCommandTask(CPed* ped, const CTask* task) {
     plugin::CallMethod<0x5F8560, CPedGroupIntelligence*, CPed*, const CTask*>(this, ped, task);
 }
 
-CTask* CPedGroupIntelligence::GetMainTask(CPed* ped) {
+CTask* CPedGroupIntelligence::GetTaskMain(CPed* ped) {
     return plugin::CallAndReturn<CTask*, 0x5F85A0>(this, ped);
 }
 
@@ -20,6 +20,14 @@ void CPedGroupIntelligence::ComputeDefaultTasks(CPed* ped) {
 
 CTask* CPedGroupIntelligence::GetTaskScriptCommand(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x5F8690, CPedGroupIntelligence*, CPed*>(this, ped);
+}
+
+CTask* CPedGroupIntelligence::GetTaskSecondary(CPed* ped) {
+    return plugin::CallMethodAndReturn<CTask*, 0x681810>(this, ped);
+}
+
+int32 CPedGroupIntelligence::GetTaskSecondarySlot(CPed* ped) {
+    return plugin::CallMethodAndReturn<int32, 0x5F8650>(this, ped);
 }
 
 int32 CPedGroupIntelligence::SetGroupDecisionMakerType(int32 a2) {

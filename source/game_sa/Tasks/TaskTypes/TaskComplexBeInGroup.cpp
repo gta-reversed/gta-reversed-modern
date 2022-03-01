@@ -10,7 +10,7 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x632EA0);
 
     RH_ScopedInstall(MonitorMainGroupTask, 0x633010);
-    //RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
+    RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
     //RH_ScopedInstall(Clone_Reversed, 0x636BE0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x632E90);
     //RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
@@ -42,7 +42,36 @@ void CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
 
 // 0x6330B0
 void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
-    plugin::CallMethod<0x6330B0, CTaskComplexBeInGroup*, CPed*>(this, ped);
+    // Check if ped has finished the group task (if any)
+    auto& groupIntel = CPedGroups::GetGroup(m_groupId).GetIntelligence();
+    const auto grpSecTask = groupIntel.GetTaskSecondary(ped);
+    const auto pedGrpSecTaskSlot = groupIntel.GetTaskSecondarySlot(ped);
+    const auto pedGrpSecTask = ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot);
+    if (m_secondaryTask == grpSecTask) {
+        if (m_secondaryTask) { // Check if theres any task at all (Not both nullptr)
+            // Check if ped has finished the task
+            if (!pedGrpSecTask) {
+                groupIntel.ReportFinishedTask(ped, m_secondaryTask);
+                m_secondaryTask = nullptr;
+                m_secondaryTaskSlot = -1;
+            }
+        }
+    } else { // Group has a new task, apply it to the ped
+
+        // Abort peds task in the previous stored slot
+        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_secondaryTaskSlot)) {
+            task->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
+        }
+
+        // Make sure ped has the task the new task (and abort current)
+        if (!pedGrpSecTask || pedGrpSecTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+            m_secondaryTask = grpSecTask;
+            m_secondaryTaskSlot = pedGrpSecTaskSlot;
+            if (grpSecTask) { 
+                ped->GetTaskManager().SetTaskSecondary(grpSecTask->Clone(), pedGrpSecTaskSlot);
+            }
+        }
+    }
 }
 
 CTask* CTaskComplexBeInGroup::Clone()

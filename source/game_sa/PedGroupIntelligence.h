@@ -63,7 +63,7 @@ public:
     int32 SetGroupDecisionMakerType(int32 a2);
     void  SetPrimaryTaskAllocator(CTaskAllocator* taskAllocator);
     void  SetScriptCommandTask(CPed* ped, const CTask* task);
-    CTask* GetMainTask(CPed* ped);
+    CTask* GetTaskMain(CPed* ped);
     void  SetTask(CPed* ped, const CTask* task, CPedTaskPair* taskpair, int32 arg5, bool arg6);
 };
 
