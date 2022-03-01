@@ -124,7 +124,7 @@ CTask* CTaskComplexBeInGroup::CreateFirstSubTask(CPed* ped) {
     }
 }
 
-CTask* CTaskComplexBeInGroup::ControlSubTask(CPed* ped)
-{
-    return plugin::CallMethodAndReturn<CTask*, 0x638AA0, CTask*, CPed*>(this, ped);
+CTask* CTaskComplexBeInGroup::ControlSubTask(CPed* ped) {
+    MonitorSecondaryGroupTask(ped);
+    return MonitorMainGroupTask(ped);
 }
