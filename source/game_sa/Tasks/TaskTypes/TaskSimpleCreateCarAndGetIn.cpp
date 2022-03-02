@@ -8,10 +8,17 @@ void CTaskSimpleCreateCarAndGetIn::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x6493E0);
     RH_ScopedInstall(Destructor, 0x64CEA0);
 
-    // RH_ScopedInstall(Clone_Reversed, 0x64A410);
+    RH_ScopedInstall(Clone_Reversed, 0x64A410);
     RH_ScopedInstall(GetTaskType_Reversed, 0x649430);
     // RH_ScopedInstall(MakeAbortable_Reversed, 0x649440);
     // RH_ScopedInstall(ProcessPed_Reversed, 0x64CF40);
+}
+
+// NOTSA
+CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(const CTaskSimpleCreateCarAndGetIn& o) :
+    m_model{o.m_model},
+    m_pos{o.m_pos}
+{
 }
 
 // 0x6493E0
