@@ -36,11 +36,6 @@ CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn() {
     }
 }
 
-// 0x64A410
-CTask* CTaskSimpleCreateCarAndGetIn::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A410, CTaskSimpleCreateCarAndGetIn*>(this);
-}
-
 // 0x649440
 bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
     return true;
