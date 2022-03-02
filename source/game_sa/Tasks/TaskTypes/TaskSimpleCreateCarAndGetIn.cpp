@@ -63,15 +63,19 @@ bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
     m_vehCreationPos = nodePos;
     m_waitTimeSet = false;
 
+    // If vehicle is not created yet lets check if it can be created at all
     if (!m_createdVeh) {
+        // Make sure position isn't visible by camera
         if (TheCamera.IsSphereVisible({ m_vehCreationPos, 3.f })) {
             return true;
         }
 
+        // Also make sure peds position isn't visible by the camera
         if (TheCamera.IsSphereVisible({ ped->GetPosition(), ped->GetColModel()->GetBoundRadius() })) {
             return true;
         }
 
+        // And make sure the ped isn't stuck or something
         if (!CPedPlacement::IsPositionClearForPed(ped->GetPosition(), 3.f, -1, 0, true, true, true)) {
             return true;
         }
