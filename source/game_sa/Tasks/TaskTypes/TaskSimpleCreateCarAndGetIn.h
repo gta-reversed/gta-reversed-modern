@@ -7,9 +7,9 @@ public:
     CVector     m_pos{};                // 0x8
     int32       m_model{};              // 0x14
     CVehicle*   m_createdVeh{};         // 0x18
-    CVector     m_pathNodePos{};        // 0x1C
-    int32       m_timeMs{};             // 0x28
-    int32       m_waitTime{};           // 0x2C
+    CVector     m_vehCreationPos{};        // 0x1C
+    uint32       m_timeMs{};             // 0x28
+    uint32       m_waitTime{};           // 0x2C
     bool        m_waitTimeSet{};        // 0x30
     int8        m_resetWaitTime{};      // 0x31
 
@@ -28,6 +28,8 @@ public:
     bool ProcessPed(CPed* ped) override;
 
 private:
+    void CleanupCreatedVehicle();
+
     CTaskSimpleCreateCarAndGetIn* Constructor(CVector const& pos, int32 model) {
         this->CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(pos, model);
         return this;
@@ -37,7 +39,6 @@ private:
         this->CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn();
         return this;
     }
-
 
     CTask * Clone_Reversed() { return CTaskSimpleCreateCarAndGetIn::Clone(); }
     auto GetTaskType_Reversed() { return CTaskSimpleCreateCarAndGetIn::GetTaskType(); }

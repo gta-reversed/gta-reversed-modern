@@ -110,6 +110,22 @@ CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X,
         uint16, int32, uint16, uint16, int32>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
 }
 
+CVector* CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress nodeAddr, bool* outIsAddrValid) {
+    return plugin::CallMethodAndReturn<CVector*, 0x4505E0, CPathFind*, CVector&, CNodeAddress, bool*>(this, outPos, nodeAddr, outIsAddrValid);
+}
+
+CNodeAddress CPathFind::FindNodeClosestToCoors(const CVector& pos, int32 nodeType, float maxDist, uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6) {
+    CNodeAddress addr{};
+    FindNodeClosestToCoors(&addr, pos.x, pos.y, pos.z, nodeType, maxDist, unk2, unk3, unk4, bBoatsOnly, unk6);
+    return addr;
+}
+
+bool CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr) {
+    bool valid{};
+    FindNodeCoorsForScript(outPos, addr, &valid);
+    return valid;
+}
+
 // 0x44D2B0
 void CPathFind::AllocatePathFindInfoMem() {
     // NOP

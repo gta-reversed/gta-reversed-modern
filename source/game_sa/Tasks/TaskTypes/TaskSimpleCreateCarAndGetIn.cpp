@@ -1,5 +1,9 @@
 #include "StdInc.h"
 #include "TaskSimpleCreateCarAndGetIn.h"
+#include "PedPlacement.h"
+#include "TaskSimpleStandStill.h"
+#include "CarCtrl.h"
+#include "TaskSimpleCarSetPedInAsDriver.h"
 
 void CTaskSimpleCreateCarAndGetIn::InjectHooks() {
     RH_ScopedClass(CTaskSimpleCreateCarAndGetIn);
@@ -11,7 +15,7 @@ void CTaskSimpleCreateCarAndGetIn::InjectHooks() {
     RH_ScopedInstall(Clone_Reversed, 0x64A410);
     RH_ScopedInstall(GetTaskType_Reversed, 0x649430);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x649440);
-    // RH_ScopedInstall(ProcessPed_Reversed, 0x64CF40);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x64CF40);
 }
 
 // NOTSA
@@ -31,8 +35,7 @@ CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(CVector const& pos, i
 // 0x64CEA0
 CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn() {
     if (m_createdVeh) {
-        CTheScripts::CleanUpThisVehicle(m_createdVeh);
-        CTheScripts::MissionCleanUp.RemoveEntityFromList(GetVehiclePool()->GetRef(m_createdVeh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+        CleanupCreatedVehicle();
     }
 }
 
@@ -43,5 +46,68 @@ bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority prior
 
 // 0x64CF40
 bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x64CF40, CTaskSimpleCreateCarAndGetIn*, CPed*>(this, ped);
+    CVector nodePos{};
+    if (!ThePaths.FindNodeCoorsForScript(nodePos, ThePaths.FindNodeClosestToCoors(m_pos))) {
+        if (!m_waitTimeSet) {
+            m_timeMs = CTimer::GetTimeInMS();
+            m_waitTime = 2000;
+            m_waitTimeSet = true;
+        }
+        if (m_resetWaitTime) {
+            m_timeMs = CTimer::GetTimeInMS();
+            m_resetWaitTime = false;
+        }
+        return CTimer::GetTimeInMS() >= m_timeMs + m_waitTime;
+    }
+
+    m_vehCreationPos = nodePos;
+    m_waitTimeSet = false;
+
+    if (!m_createdVeh) {
+        if (TheCamera.IsSphereVisible({ m_vehCreationPos, 3.f })) {
+            return true;
+        }
+
+        if (TheCamera.IsSphereVisible({ ped->GetPosition(), ped->GetColModel()->GetBoundRadius() })) {
+            return true;
+        }
+
+        if (!CPedPlacement::IsPositionClearForPed(ped->GetPosition(), 3.f, -1, 0, true, true, true)) {
+            return true;
+        }
+    }
+
+    // Weird..
+    {
+        CTaskSimpleStandStill task{ 0, 0, 0, 8.f };
+        task.ProcessPed(ped);
+    }
+
+    // Make sure model is loaded
+    if (!CStreaming::IsModelLoaded(m_model)) {
+        CStreaming::RequestModel(m_model, STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+        return false;
+    }
+
+    // Create vehicle and set ped in as driver
+    if (!m_createdVeh) {
+        m_createdVeh = CCarCtrl::CreateCarForScript(m_model, m_vehCreationPos, true);
+
+        CTaskSimpleCarSetPedInAsDriver task{ m_createdVeh, nullptr };
+        task.ProcessPed(ped);
+    }
+ 
+    if (!m_createdVeh->IsStatic()) {
+        return false;
+    }
+
+    // Veh is static now, so remove it, and signal task finish
+    CleanupCreatedVehicle();
+    return true;
+}
+
+void CTaskSimpleCreateCarAndGetIn::CleanupCreatedVehicle() {
+    CTheScripts::CleanUpThisVehicle(m_createdVeh);
+    CTheScripts::MissionCleanUp.RemoveEntityFromList(GetVehiclePool()->GetRef(m_createdVeh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+    m_createdVeh = nullptr;
 }
