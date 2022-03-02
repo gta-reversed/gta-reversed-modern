@@ -10,7 +10,7 @@ void CTaskSimpleCreateCarAndGetIn::InjectHooks() {
 
     RH_ScopedInstall(Clone_Reversed, 0x64A410);
     RH_ScopedInstall(GetTaskType_Reversed, 0x649430);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x649440);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x649440);
     // RH_ScopedInstall(ProcessPed_Reversed, 0x64CF40);
 }
 
@@ -43,7 +43,7 @@ CTask* CTaskSimpleCreateCarAndGetIn::Clone() {
 
 // 0x649440
 bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x649440, CTaskSimpleCreateCarAndGetIn*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    return true;
 }
 
 // 0x64CF40
