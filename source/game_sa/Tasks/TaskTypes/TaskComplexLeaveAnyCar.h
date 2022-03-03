@@ -21,7 +21,7 @@ public:
     eTaskType GetTaskType() override { return Type; }
     CTask * CreateNextSubTask(CPed * ped) override { return nullptr; }
     CTask * CreateFirstSubTask(CPed * ped) override;
-    CTask * ControlSubTask(CPed * ped) override;
+    CTask * ControlSubTask(CPed * ped) override { return m_pSubTask; }
 private:
     CTaskComplexLeaveAnyCar* Constructor(int32 delayTime, bool sensibleLeaveCar, bool forceGetOut) {
         this->CTaskComplexLeaveAnyCar::CTaskComplexLeaveAnyCar(delayTime, sensibleLeaveCar, forceGetOut);
