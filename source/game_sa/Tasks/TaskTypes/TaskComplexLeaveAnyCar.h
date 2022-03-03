@@ -19,7 +19,7 @@ public:
 
     CTask* Clone() override { new CTaskComplexLeaveAnyCar{*this}; }
     eTaskType GetTaskType() override { return Type; }
-    CTask * CreateNextSubTask(CPed * ped) override;
+    CTask * CreateNextSubTask(CPed * ped) override { return nullptr; }
     CTask * CreateFirstSubTask(CPed * ped) override;
     CTask * ControlSubTask(CPed * ped) override;
 private:
