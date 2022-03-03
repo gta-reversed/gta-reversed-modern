@@ -27,6 +27,7 @@ class CWeapon;
 class CPed;
 class CPlane;
 class CHeli;
+class CPedGroup;
 
 enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,

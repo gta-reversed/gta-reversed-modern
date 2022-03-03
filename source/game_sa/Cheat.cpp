@@ -628,7 +628,7 @@ void CCheat::MayhemCheat() {
             for (uint32 pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
                 ped->m_acquaintance.SetAsAcquaintance(4, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
             }
-            CPed* closestPed = ped->GetIntelligence()->m_entityScanner.GetClosestPedInRange()->AsPed();
+            CPed* closestPed = ped->GetIntelligence()->m_pedScanner.GetClosestPedInRange()->AsPed();
             if (closestPed) {
                 CEventAcquaintancePedHate event(closestPed);
                 event.m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT;

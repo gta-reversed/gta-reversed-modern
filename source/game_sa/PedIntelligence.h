@@ -16,6 +16,7 @@
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
 #include "MentalHealth.h"
+#include "PedScanner.h"
 
 class CPed;
 class CEntity;
@@ -49,7 +50,7 @@ public:
     uint8            m_nEventPriority{};
     char             field_D3{};
     CVehicleScanner  m_vehicleScanner{};
-    CEntityScanner   m_entityScanner{}; // TODO: Should be CPedScanner.. (Source: See original ctor)
+    CPedScanner      m_pedScanner{};
     CMentalState     m_mentalState;
     char             field_188{};
     CEventScanner    m_eventScanner{};

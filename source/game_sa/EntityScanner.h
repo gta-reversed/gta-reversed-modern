@@ -28,7 +28,5 @@ public:
 
     void     Clear();
     void     ScanForEntitiesInRange(int32 arg2, CPed* ped);
-    CEntity* GetClosestPedInRange();
 };
-
 VALIDATE_SIZE(CEntityScanner, 0x50);

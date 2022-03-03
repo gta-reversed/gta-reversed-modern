@@ -112,7 +112,7 @@ CPedIntelligence::~CPedIntelligence() {
 // 0x4893E0
 CEntity** CPedIntelligence::GetPedEntities()
 {
-    return m_entityScanner.m_apEntities;
+    return m_pedScanner.m_apEntities;
 }
 
 // 0x600B50
@@ -180,7 +180,7 @@ bool CPedIntelligence::IsInSeeingRange(const CVector& posn) {
 bool CPedIntelligence::FindRespectedFriendInInformRange() {
     auto respect = m_pPed->m_acquaintance.GetAcquaintances(0); // todo: m_nRespect
     for (uint32 pedScanIndex = 0; pedScanIndex < m_nDmNumPedsToScan; pedScanIndex++) {
-        CPed* pedEntity = (CPed*)m_entityScanner.m_apEntities[pedScanIndex];
+        CPed* pedEntity = (CPed*)m_pedScanner.m_apEntities[pedScanIndex];
         if (pedEntity) {
             if (CPedType::GetPedFlag(pedEntity->m_nPedType) & respect) {
                 CVector distance = m_pPed->GetPosition() - pedEntity->GetPosition();
@@ -753,7 +753,7 @@ void CPedIntelligence::FlushIntelligence() {
     m_eventHandler.m_history.ClearAllEvents();
     m_eventGroup.Flush(false);
     m_vehicleScanner.Clear();
-    m_entityScanner.Clear();
+    m_pedScanner.Clear();
     m_eventScanner.m_attractorScanner.Clear();
 }
 
@@ -1048,7 +1048,7 @@ void CPedIntelligence::Process() {
     m_vehicleScanner.ScanForVehiclesInRange(m_pPed);
 
     if (m_pPed->IsAlive())
-        m_entityScanner.ScanForEntitiesInRange(1, m_pPed);
+        m_pedScanner.ScanForEntitiesInRange(1, m_pPed);
 
     m_eventScanner.ScanForEvents(m_pPed);
     m_eventHandler.HandleEvents();
