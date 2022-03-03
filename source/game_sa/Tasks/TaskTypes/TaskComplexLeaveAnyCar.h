@@ -14,9 +14,10 @@ public:
     static void InjectHooks();
 
     CTaskComplexLeaveAnyCar(int32 delayTime, bool sensibleLeaveCar, bool forceGetOut);
+    CTaskComplexLeaveAnyCar(const CTaskComplexLeaveAnyCar&) = default; // NOTSA - For `Clone()`
     ~CTaskComplexLeaveAnyCar() = default;
 
-    CTask * Clone() override;
+    CTask* Clone() override { new CTaskComplexLeaveAnyCar{*this}; }
     eTaskType GetTaskType() override { return Type; }
     CTask * CreateNextSubTask(CPed * ped) override;
     CTask * CreateFirstSubTask(CPed * ped) override;

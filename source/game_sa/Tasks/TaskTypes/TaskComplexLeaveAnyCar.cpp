@@ -9,8 +9,8 @@ void CTaskComplexLeaveAnyCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x421150);
     RH_ScopedInstall(Destructor, 0x421270);
 
-    //RH_ScopedInstall(Clone_Reversed, 0x4211C0);
-    //RH_ScopedInstall(GetTaskType_Reversed, 0x421240);
+    RH_ScopedInstall(Clone_Reversed, 0x4211C0);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x421240);
     //RH_ScopedInstall(CreateNextSubTask_Reversed, 0x63BCD0);
     //RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x63BCE0);
     //RH_ScopedInstall(ControlSubTask_Reversed, 0x63BDC0);
@@ -22,11 +22,6 @@ CTaskComplexLeaveAnyCar::CTaskComplexLeaveAnyCar(int32 delayTime, bool sensibleL
     m_delayTime{delayTime},
     m_forceGetOut{forceGetOut}
 {
-}
-
-// 0x4211C0
-CTask* CTaskComplexLeaveAnyCar::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x4211C0, CTaskComplexLeaveAnyCar*>(this);
 }
 
 // 0x63BCD0
