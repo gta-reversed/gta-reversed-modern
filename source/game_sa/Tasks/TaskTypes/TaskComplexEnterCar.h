@@ -18,6 +18,8 @@ enum eTargetDoor {
     TARGET_DOOR_REAR_LEFT   = 11
 };
 
+// Note: This class is abstract, that is, it can't be directly constructed,
+// rather, use one of the derived classes.
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
