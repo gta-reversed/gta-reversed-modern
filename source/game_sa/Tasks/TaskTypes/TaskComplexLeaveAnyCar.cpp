@@ -8,7 +8,6 @@ void CTaskComplexLeaveAnyCar::InjectHooks() {
     RH_ScopedClass(CTaskComplexLeaveAnyCar);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // Constructors (1x)
     RH_ScopedInstall(Constructor, 0x421150);
     RH_ScopedInstall(Destructor, 0x421270);
 
