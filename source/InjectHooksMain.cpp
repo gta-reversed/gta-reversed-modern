@@ -94,6 +94,7 @@
 #include "InteriorManager_c.h"
 
 // Tasks
+#include "TaskComplexBeInGroup.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -571,7 +572,7 @@ void InjectHooksMain() {
         // CTaskSimpleSlideToCoord::InjectHooks();
         // CTaskComplexPartnerDeal::InjectHooks();
         CTaskSimplePickUpEntity::InjectHooks();
-        // CTaskComplexBeInGroup::InjectHooks();
+        CTaskComplexBeInGroup::InjectHooks();
         // CTaskComplexBeCop::InjectHooks();
         CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
         CTaskComplexArrestPed::InjectHooks();
