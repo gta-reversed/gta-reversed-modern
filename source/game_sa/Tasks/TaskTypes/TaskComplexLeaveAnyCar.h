@@ -17,7 +17,7 @@ public:
     CTaskComplexLeaveAnyCar(const CTaskComplexLeaveAnyCar&) = default; // NOTSA - For `Clone()`
     ~CTaskComplexLeaveAnyCar() = default;
 
-    CTask* Clone() override { new CTaskComplexLeaveAnyCar{*this}; }
+    CTask* Clone() override { return new CTaskComplexLeaveAnyCar{*this}; }
     eTaskType GetTaskType() override { return Type; }
     CTask * CreateNextSubTask(CPed * ped) override { return nullptr; }
     CTask * CreateFirstSubTask(CPed * ped) override;
