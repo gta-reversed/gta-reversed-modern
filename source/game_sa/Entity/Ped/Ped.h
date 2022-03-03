@@ -563,6 +563,7 @@ public:
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
 
+    bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
