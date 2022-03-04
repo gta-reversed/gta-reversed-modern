@@ -275,7 +275,7 @@ bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
         return false;
 
     for (auto i = 0u; i < numPeds; i++) {
-        if (CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).IsLoaded())
+        if (!CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).IsLoaded())
             return true;
     }
 
