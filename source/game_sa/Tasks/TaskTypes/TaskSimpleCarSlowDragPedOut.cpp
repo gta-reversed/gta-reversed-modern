@@ -11,8 +11,8 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedGlobalInstall(FinishAnimCarSlowDragPedOutCB, 0x648180);
     RH_ScopedInstall(ComputeAnimID_Wrapper, 0x648100);
     RH_ScopedInstall(StartAnim, 0x64C010);
-    //RH_ScopedInstall(Clone_Reversed, 0x649FD0);
-    //RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
+    RH_ScopedInstall(Clone_Reversed, 0x649FD0);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
     //RH_ScopedInstall(ProcessPed_Reversed, 0x64E060);
     //RH_ScopedInstall(SetPedPosition_Reversed, 0x6480E0);
