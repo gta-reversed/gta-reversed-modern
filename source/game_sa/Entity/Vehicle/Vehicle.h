@@ -683,6 +683,7 @@ public:
     int32 GetRopeIndex();
     bool HasDriver() const { return !!m_pDriver; }
     CVehicleAnimGroup& GetAnimGroup() const;
+    AssocGroupId GetAnimGroupId() const;
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

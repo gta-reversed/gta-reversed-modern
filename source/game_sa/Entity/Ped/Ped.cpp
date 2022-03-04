@@ -3036,12 +3036,11 @@ void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3) {
 
 /*!
 * @addr 0x5EFFE0
+* @returns Played soundID - TODO: I'm not sure about this..
 */
-void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
+int16 CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
 {
-    if (arg0) {
-        m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5);
-    }
+    return arg0 ? m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5) : -1;
 }
 
 /*!

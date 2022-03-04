@@ -1795,6 +1795,10 @@ CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
     return CVehicleAnimGroupData::m_vehicleAnimGroups[m_pHandlingData->m_nAnimGroup];
 }
 
+AssocGroupId CVehicle::GetAnimGroupId() const {
+    return (AssocGroupId)((int32)ANIM_GROUP_STDCARAMIMS + (int32)m_pHandlingData->m_nAnimGroup);
+}
+
 // 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch()
 {

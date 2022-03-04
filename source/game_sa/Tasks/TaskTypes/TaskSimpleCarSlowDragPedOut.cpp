@@ -14,7 +14,7 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedInstall(Clone_Reversed, 0x649FD0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x64E060);
+    RH_ScopedInstall(ProcessPed_Reversed, 0x64E060);
     //RH_ScopedInstall(SetPedPosition_Reversed, 0x6480E0);
 }
 
@@ -93,6 +93,14 @@ void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
     m_animAssoc->SetFinishCallback(FinishAnimCarSlowDragPedOutCB, this);
 }
 
+/*!
+* @notsa
+* @brief Return ped in the given seat (basically the ped we'll drag out)
+*/
+CPed* CTaskSimpleCarSlowDragPedOut::GetJackedPed() {
+    return m_targetDoor == TARGET_DOOR_DRIVER ? m_vehicle->m_pDriver : m_vehicle->m_apPassengers[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_vehicle, (int32)m_targetDoor)];
+}
+
 // 0x64BFB0
 bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const*) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
@@ -110,7 +118,49 @@ bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority prior
 
 // 0x64E060
 bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x64E060, CTaskSimpleCarSlowDragPedOut*, CPed*>(this, ped);
+    if (m_animFinished || !m_vehicle) {
+        return true;
+    }
+
+    // Make sure we actually need to drag the ped out
+    switch (m_vehicle->GetAnimGroupId()) {
+    case ANIM_GROUP_COACHCARANIMS:
+    case ANIM_GROUP_TANKCARANIMS:
+        return true;
+    case ANIM_GROUP_BUSCARANIMS: {
+        if (m_targetDoor == TARGET_DOOR_FRONT_RIGHT) {
+            return true;
+        }
+        break;
+    }
+    }
+
+    // Play anim and make peds talk (if not already playing)
+    if (!m_animAssoc) {
+        StartAnim(ped);
+
+        // Make peds say something
+        if (m_vehicle) { // Redundant check, maybe inlined?
+            if (const auto jackedPed = GetJackedPed()) {
+                const auto DoTalk = [this](auto ped1, auto ped2) {
+                    if (!SayJacked(ped1, m_vehicle)) {
+                        SayJacking(ped2, ped1, m_vehicle);
+                    }
+                };
+                if (rand() % 1024 <= 512) {
+                    DoTalk(jackedPed, ped);
+                } else {
+                    DoTalk(ped, jackedPed);
+                }
+            }
+        }
+    }
+
+    // Process door open ratio according to animation's current time
+    const auto [grp, id] = ComputeAnimID();
+    m_vehicle->ProcessOpenDoor(ped, m_targetDoor, grp, id, m_animAssoc->m_fCurrentTime);
+
+    return false;
 }
 
 // 0x6480E0

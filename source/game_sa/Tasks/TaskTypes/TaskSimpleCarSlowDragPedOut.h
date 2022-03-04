@@ -10,7 +10,7 @@ class CTaskUtilityLineUpPedWithCar;
 
 class CTaskSimpleCarSlowDragPedOut : public CTaskSimple {
 public:
-    bool m_animFinished{};                                          // 8
+    bool m_animFinished{};                                  // 0x8
     CAnimBlendAssociation* m_animAssoc{};                   // 0xC
     CVehicle* m_vehicle{};                                  // 0x10
     eTargetDoor m_targetDoor{};                             // 0x14
@@ -30,6 +30,7 @@ public:
 
     std::pair<AssocGroupId, AnimationId> ComputeAnimID();
     void StartAnim(CPed* ped);
+    CPed* GetJackedPed(); // NOTSA 
 
     CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut{ *this }; }
     eTaskType GetTaskType() override { return Type; }
