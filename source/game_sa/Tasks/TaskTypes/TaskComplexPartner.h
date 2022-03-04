@@ -29,6 +29,8 @@ public:
     char          _pad;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_PARTNER;
+
     CTaskComplexPartner(const char* commandName, CPed* partner, bool leadSpeaker, float distanceMultiplier, bool makePedAlwaysFacePartner, int8 updateDirectionCount, CVector point);
     ~CTaskComplexPartner();
 

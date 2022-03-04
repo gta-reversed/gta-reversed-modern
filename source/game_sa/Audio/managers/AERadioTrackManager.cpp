@@ -206,7 +206,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (TheCamera.m_bWideScreenOn)
         return;
 
-    if (!FindPlayerVehicle(-1, false))
+    if (!FindPlayerVehicle())
         return;
 
     if (CReplay::Mode == 1)
@@ -401,8 +401,8 @@ void CAERadioTrackManager::UpdateRadioVolumes() {
             }
 
             volumea = fEffectsScalingFactor;
-            if (__FYL2X__(volumea / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f >= 0.0) {
-                v4 = 0.0;
+            if (__FYL2X__(volumea / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f >= 0.0f) {
+                v4 = 0.0f;
             } else {
                 volumeb = fEffectsScalingFactor;
                 v4 = __FYL2X__(volumeb / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f;
@@ -595,6 +595,7 @@ void CAERadioTrackManager::CheckForPause() {
     } else {
         // todo: See CAEVehicleAudioEntity::Terminate:437 m_nRadioType.
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
+        // todo: Comparison of different enumeration types
         if (settings && (settings->m_nRadioType == RADIO_EMERGENCY_AA || settings->m_nRadioType == RADIO_CLASSIC_ROCK || settings->m_nRadioType == RADIO_COUNTRY) || AudioEngine.IsAmbienceRadioActive()) {
             m_bPauseMode = false;
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, 0, 1.0f);

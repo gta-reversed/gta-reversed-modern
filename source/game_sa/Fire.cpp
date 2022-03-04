@@ -101,28 +101,28 @@ void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens
 // see 0x53A050 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens) {
     switch (target->m_nType) {
-    case eEntityType::ENTITY_TYPE_PED: {
-        auto targetPed = static_cast<CPed*>(target);
+    case ENTITY_TYPE_PED: {
+        auto targetPed = target->AsPed();
         targetPed->m_pFire = this;
         CCrime::ReportCrime(
-            targetPed->m_nPedType == ePedType::PED_TYPE_COP ? eCrimeType::CRIME_SET_COP_PED_ON_FIRE : eCrimeType::CRIME_SET_PED_ON_FIRE,
+            targetPed->m_nPedType == PED_TYPE_COP ? eCrimeType::CRIME_SET_COP_PED_ON_FIRE : eCrimeType::CRIME_SET_PED_ON_FIRE,
             targetPed,
-            static_cast<CPed*>(creator)
+            creator->AsPed()
         );
         break;
     }
-    case eEntityType::ENTITY_TYPE_VEHICLE: {
-        auto targetVehicle = static_cast<CVehicle*>(target);
+    case ENTITY_TYPE_VEHICLE: {
+        auto targetVehicle = target->AsVehicle();
         targetVehicle->m_pFire = this;
         CCrime::ReportCrime(
             eCrimeType::CRIME_SET_CAR_ON_FIRE,
-            reinterpret_cast<CPed*>(targetVehicle), // TODO: Change ReportCrime's signature to take CEntity* here..
-            static_cast<CPed*>(creator)
+            targetVehicle,
+            creator->AsPed()
         );
         break;
     }
-    case eEntityType::ENTITY_TYPE_OBJECT: {
-        static_cast<CObject*>(target)->m_pFire = this;
+    case ENTITY_TYPE_OBJECT: {
+        target->AsObject()->m_pFire = this;
         break;
     }
     }
@@ -137,7 +137,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 n
     m_fStrength = 1.0f;
     m_vecPosition = target->GetPosition();
 
-    if (target->IsPed() && static_cast<CPed*>(target)->IsPlayer())
+    if (target->IsPed() && target->AsPed()->IsPlayer())
         m_nTimeToBurn = CTimer::GetTimeInMS() + 2333;
     else if (target->IsVehicle())
         m_nTimeToBurn = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(0, 1000) + 3000;
@@ -167,11 +167,11 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
 
     if (target) {
         switch (target->m_nType) { /* Set target's `m_pFire` to `this` */
-        case eEntityType::ENTITY_TYPE_PED:
-            static_cast<CPed*>(target)->m_pFire = this;
+        case ENTITY_TYPE_PED:
+            target->AsPed()->m_pFire = this;
             break;
-        case eEntityType::ENTITY_TYPE_VEHICLE:
-            static_cast<CVehicle*>(target)->m_pFire = this;
+        case ENTITY_TYPE_VEHICLE:
+            target->AsVehicle()->m_pFire = this;
             break;
         }
     }
@@ -235,12 +235,12 @@ void CFire::Extinguish() {
 
     if (m_pEntityTarget) {
         switch (m_pEntityTarget->m_nType) {
-        case eEntityType::ENTITY_TYPE_PED: {
-            static_cast<CPed*>(m_pEntityTarget)->m_pFire = nullptr;
+        case ENTITY_TYPE_PED: {
+            m_pEntityTarget->AsPed()->m_pFire = nullptr;
             break;
         }
-        case eEntityType::ENTITY_TYPE_VEHICLE: {
-            static_cast<CVehicle*>(m_pEntityTarget)->m_pFire = nullptr;
+        case ENTITY_TYPE_VEHICLE: {
+            m_pEntityTarget->AsVehicle()->m_pFire = nullptr;
             break;
         }
         }
@@ -261,8 +261,8 @@ void CFire::ProcessFire() {
         m_vecPosition = m_pEntityTarget->GetPosition();
 
         switch (m_pEntityTarget->m_nType) {
-        case eEntityType::ENTITY_TYPE_PED: {
-            auto targetPed = static_cast<CPed*>(m_pEntityTarget);
+        case ENTITY_TYPE_PED: {
+            auto targetPed = m_pEntityTarget->AsPed();
 
             if (targetPed->m_pFire != this) {
                 Extinguish();
@@ -270,8 +270,8 @@ void CFire::ProcessFire() {
             }
 
             switch (targetPed->m_nPedState) {
-            case ePedState::PEDSTATE_DIE:
-            case ePedState::PEDSTATE_DEAD: {
+            case PEDSTATE_DIE:
+            case PEDSTATE_DEAD: {
                 m_vecPosition.z -= 1.0f; /* probably because ped is laying on the ground */
                 break;
             }
@@ -287,8 +287,8 @@ void CFire::ProcessFire() {
 
             break;
         }
-        case eEntityType::ENTITY_TYPE_VEHICLE: {
-            auto targetVehicle = static_cast<CVehicle*>(m_pEntityTarget);
+        case ENTITY_TYPE_VEHICLE: {
+            auto targetVehicle = m_pEntityTarget->AsVehicle();
 
             if (targetVehicle->m_pFire != this) {
                 Extinguish();
@@ -307,7 +307,7 @@ void CFire::ProcessFire() {
         }
 
         if (m_pFxSystem) {
-            auto targetPhysical = static_cast<CPhysical*>(m_pEntityTarget);
+            auto targetPhysical = m_pEntityTarget->AsPhysical();
             m_pFxSystem->SetOffsetPos(m_vecPosition + CTimer::GetTimeStep() * 2.0f * targetPhysical->m_vecMoveSpeed);
         }
     }
@@ -328,8 +328,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 32 == 0) {
-        for (auto i = CPools::ms_pVehiclePool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i);
+        for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
                 continue;
 
@@ -347,8 +347,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 4 == 0) {
-        for (auto i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+        for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
                 continue;
 

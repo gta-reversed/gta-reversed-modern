@@ -3,6 +3,7 @@
 #include <imgui.h>
 #include <imgui_stdlib.h>
 #include <imgui_internal.h>
+#include <extensions/random.hpp>
 
 #include "PedDebugModule.h"
 
@@ -14,8 +15,8 @@ CDebugMenuToolInput m_pedToolInput;
 
 CDebugMenuToolInput::ToolMap m_pedsMap{
     { 0, "CJ"},
-    { 1,   "Truth" },
-    { 2,   "Maccer" },
+    // wrong id or smth { 1,   "Truth" },
+    // wrong id or smth { 2,   "Maccer" },
     { 7,   "Male 01 (Special" },
     { 9,   "Black Female Old Rich" },
     { 10,  "Black Female Old Street" },
@@ -283,6 +284,7 @@ CDebugMenuToolInput::ToolMap m_pedsMap{
     { 287, "Army Officer" },
     { 288, "Desert Sheriff" },
     // These are cutscene specific
+    /* crash
     { 290, "Special Actor 1" },
     { 291, "Special Actor 2" },
     { 292, "Special Actor 3" },
@@ -293,25 +295,31 @@ CDebugMenuToolInput::ToolMap m_pedsMap{
     { 297, "Special Actor 8" },
     { 298, "Special Actor 9" },
     { 299, "Special Actor 10" }
+    */
 };
 
 void Initialise() {
     m_pedToolInput.Initialise(256, &m_pedsMap);
 }
 
-void SpawnPed(int32 modelID, CVector position) {
-    CStreaming::RequestModel(modelID, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
+void SpawnPed(int32 modelId, CVector position) {
+    CStreaming::RequestModel(modelId, STREAMING_MISSION_REQUIRED | STREAMING_KEEP_IN_MEMORY);
     CStreaming::LoadAllRequestedModels(false);
-    CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelID) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelID);
-    if (ped) {
-        ped->SetOrientation(0.0f, 0.0f, 0.0f);
-        ped->SetPosn(position);
-        CWorld::Add(ped);
-        ped->PositionAnyPedOutOfCollision();
-    }
+    CPed* ped = new CCivilianPed(CPopulation::IsFemale(modelId) ? PED_TYPE_CIVFEMALE : PED_TYPE_CIVMALE, modelId);
+    ped->SetOrientation(0.0f, 0.0f, 0.0f);
+    ped->SetPosn(position);
+    CWorld::Add(ped);
+    ped->PositionAnyPedOutOfCollision();
 }
 
-void ProcessImgui() {
+void SpawnRandomPed() {
+    SpawnPed(
+        notsa::random_iter(m_pedsMap)->first,
+        FindPlayerPed()->TransformFromObjectSpace(CVector(2.0f, 2.0f, 0.0f))
+    );
+}
+
+void ProcessImGui() {
     ImGui::PushItemWidth(465.0f);
     bool reclaim_focus = false;
     if (ImGui::InputText(" ", &m_pedToolInput.GetInputBuffer(), ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -326,7 +334,7 @@ void ProcessImgui() {
 
     m_pedToolInput.Process();
 
-    ImGui::BeginChild("##pedstool", ImVec2(0, 310));
+    ImGui::BeginChild("##pedstool", ImVec2(0, 280));
     const auto  w = ImGui::GetWindowWidth();
     static bool widthSet = false;
     ImGui::Columns(2);
@@ -341,9 +349,7 @@ void ProcessImgui() {
     ImGui::NextColumn();
     ImGui::Separator();
     static int32 selectedId = -1;
-    for (const auto& x : m_pedToolInput.GetGridListMap()) {
-        const int32        id = x.first;
-        const std::string& name = x.second;
+    for (const auto& [id, name] : m_pedToolInput.GetGridListMap()) {
         ImGui::PushID(id);
 
         ImGui::Text("%i", id);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -12,7 +12,7 @@ public:
     int16 field_2C;
 
     void  SortBasedOnUsage();
-    int32 RemoveMember(int32 modelindex);
+    int32 RemoveMember(int32 modelIndex);
     int32 PickRandomCar(bool arg1, bool arg2);
     int32 PickLeastUsedModel(int32 minRefs);
     int32 GetMember(int32 count) const;

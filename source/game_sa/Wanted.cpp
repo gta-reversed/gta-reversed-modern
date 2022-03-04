@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -273,7 +273,7 @@ bool CWanted::AddCrimeToQ(eCrimeType crimeType, int32 crimeId, const CVector& po
 
 // 0x562120
 void CWanted::ReportCrimeNow(eCrimeType crimeType, const CVector& posn, bool bPoliceDontReallyCare) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     auto wantedLevel = m_nWantedLevel;
@@ -390,7 +390,7 @@ void CWanted::RegisterCrime_Immediately(eCrimeType crimeType, const CVector& pos
 
 // 0x562470
 void CWanted::SetWantedLevel(uint32 level) {
-    if (CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE])
+    if (CCheat::IsActive(CHEAT_I_DO_AS_I_PLEASE))
         return;
 
     uint32 newLevel = std::min(level, MaximumWantedLevel);
@@ -456,7 +456,7 @@ void CWanted::ClearWantedLevelAndGoOnParole() {
 int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
     auto numCops = 0;
 
-    auto pedPool = CPools::GetPedPool();
+    auto pedPool = GetPedPool();
     for (auto i = pedPool->GetSize(); i; i--) {
         if (auto ped = pedPool->GetAt(i - 1)) {
             if (ped->m_nPedType != PED_TYPE_COP || !ped->IsAlive())
@@ -467,7 +467,7 @@ int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
         }
     }
 
-    auto vehPool = CPools::GetVehiclePool();
+    auto vehPool = GetVehiclePool();
     for (auto i = vehPool->GetSize(); i; i--) {
         if (auto veh = vehPool->GetAt(i - 1)) {
             bool isCopVehicle = veh->vehicleFlags.bIsLawEnforcer || veh->m_nModelIndex == MODEL_POLMAV;

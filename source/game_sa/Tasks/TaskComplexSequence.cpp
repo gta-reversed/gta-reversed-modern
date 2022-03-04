@@ -101,12 +101,8 @@ CTask* CTaskComplexSequence::CreateNextSubTask_Reversed(CPed* ped)
 
 CTask* CTaskComplexSequence::CreateFirstSubTask_Reversed(CPed* ped)
 {
-    CTask* pCurrentTask = m_aTasks[m_nCurrentTaskIndex];
-    if (pCurrentTask)
-    {
-        return pCurrentTask->Clone();
-    }
-    return nullptr;
+    CTask* currentTask = m_aTasks[m_nCurrentTaskIndex];
+    return currentTask ? currentTask->Clone() : nullptr;
 }
 
 CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped)
@@ -115,16 +111,16 @@ CTask* CTaskComplexSequence::ControlSubTask_Reversed(CPed* ped)
 }
 
 // 0x632D10
-void CTaskComplexSequence::AddTask(CTask* pTask)
+void CTaskComplexSequence::AddTask(CTask* task)
 {
     for (auto& m_aTask : m_aTasks) {
         if (!m_aTask) {
-            m_aTask = pTask;
+            m_aTask = task;
             return;
         }
     }
 
-    delete pTask;
+    delete task;
 }
 
 // 0x632C70
@@ -160,8 +156,8 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int3
 void CTaskComplexSequence::Flush()
 {
     for (auto& m_aTask : m_aTasks) {
-        CTask* pTask = m_aTask;
-        delete pTask;
+        CTask* task = m_aTask;
+        delete task;
         m_aTask = nullptr;
     }
 

@@ -54,6 +54,7 @@ CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle
         vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
 }
 
+// 0x4AE3C0
 CEventPotentialWalkIntoVehicle::~CEventPotentialWalkIntoVehicle()
 {
     if (m_vehicle)
@@ -74,44 +75,48 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped)
 
 bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
 {
-    auto taskEnterCarAsDriver = reinterpret_cast<CTaskComplexEnterCarAsDriver*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER));
+    auto taskEnterCarAsDriver = ped->GetTaskManager().Find<CTaskComplexEnterCarAsDriver>();
     auto goToTask = reinterpret_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
-    if (!ped->IsPlayer() || taskEnterCarAsDriver || CTask::IsGoToTask(goToTask)) {
-        if (ped->IsAlive() && !ped->bInVehicle && m_moveState != PEDMOVE_STILL) {
-            auto pTaskWalkRoundCar = reinterpret_cast<CTaskComplexWalkRoundCar*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_WALK_ROUND_CAR));
-            if (pTaskWalkRoundCar && pTaskWalkRoundCar->m_vehicle != m_vehicle) {
-                if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == pTaskWalkRoundCar->m_vehicle) ||
-                    (m_vehicle->m_pTractor && m_vehicle->m_pTractor == pTaskWalkRoundCar->m_vehicle))
-                {
-                    pTaskWalkRoundCar->SetNewVehicle(m_vehicle, 0);
-                }
-                return false;
-            }
-            if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsSubVehicleTypeValid() && !m_vehicle->IsSubFakeAircraft()) {
-                bool isGoToPointTask = false;
-                CVector targetPos;
-                if (goToTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
-                    targetPos = goToTask->m_vecTargetPoint;
-                    isGoToPointTask = true;
-                }
-                if (taskEnterCarAsDriver) {
-                    if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsSubPlane())
-                        return false;
+    if (ped->IsPlayer() && !taskEnterCarAsDriver && !CTask::IsGoToTask(goToTask))
+        return false;
 
-                    targetPos = taskEnterCarAsDriver->GetTargetPos();
-                }
-                if (isGoToPointTask || taskEnterCarAsDriver) {
-                    CVector surfacePoint;
-                    CPedGeometryAnalyser::ComputeClosestSurfacePoint(*ped, *m_vehicle, surfacePoint);
-                    int32 hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(surfacePoint, *m_vehicle);
-                    if (hitSide != CPedGeometryAnalyser::ComputeEntityHitSide(targetPos, *m_vehicle))
-                        return true;
+    if (!ped->IsAlive() || ped->bInVehicle || m_moveState == PEDMOVE_STILL)
+        return false;
 
-                    return false;
-                }
-                return true;
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexWalkRoundCar>()) {
+        if (task->m_vehicle != m_vehicle) {
+            if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == task->m_vehicle) ||
+                (m_vehicle->m_pTractor && m_vehicle->m_pTractor == task->m_vehicle)
+            ) {
+                task->SetNewVehicle(m_vehicle, 0);
             }
+            return false;
         }
+    }
+
+    if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsSubVehicleTypeValid() && !m_vehicle->IsSubFakeAircraft()) {
+        bool isGoToPointTask = false;
+        CVector targetPos;
+        if (goToTask->GetTaskType() == TASK_SIMPLE_GO_TO_POINT) {
+            targetPos = goToTask->m_vecTargetPoint;
+            isGoToPointTask = true;
+        }
+        if (taskEnterCarAsDriver) {
+            if (m_vehicle == taskEnterCarAsDriver->m_pTargetVehicle && m_vehicle->IsSubPlane())
+                return false;
+
+            targetPos = taskEnterCarAsDriver->GetTargetPos();
+        }
+        if (isGoToPointTask || taskEnterCarAsDriver) {
+            CVector surfacePoint;
+            CPedGeometryAnalyser::ComputeClosestSurfacePoint(*ped, *m_vehicle, surfacePoint);
+            int32 hitSide = CPedGeometryAnalyser::ComputeEntityHitSide(surfacePoint, *m_vehicle);
+            if (hitSide != CPedGeometryAnalyser::ComputeEntityHitSide(targetPos, *m_vehicle))
+                return true;
+
+            return false;
+        }
+        return true;
     }
     return false;
 }
@@ -144,35 +149,38 @@ bool CEventPotentialWalkIntoObject::AffectsPed(CPed* ped)
 
 bool CEventPotentialWalkIntoObject::AffectsPed_Reversed(CPed* ped)
 {
-    if (!ped->IsPlayer() && ped->IsAlive() && m_object) {
-        if (m_moveState != PEDMOVE_STILL
-            && !ped->m_pAttachedTo
-            && m_object->m_pAttachedTo != ped
-            && !m_object->physicalFlags.bDisableMoveForce)
-        {
-            CColModel* colModel = CModelInfo::GetModelInfo(m_object->m_nModelIndex)->GetColModel();
-            CVector length = colModel->m_boundBox.m_vecMax - colModel->m_boundBox.m_vecMin;
-            if (length.x >= 0.01f && length.y >= 0.01f && length.z >= 0.01f) {
-                CTask* activeTask = ped->GetTaskManager().GetActiveTask();
-                if (activeTask) {
-                    assert(activeTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY); // unused task
-                    if (activeTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_OBJECT) {
-                        auto taskWalkRoundObject = reinterpret_cast<CTaskComplexWalkRoundObject*>(activeTask);
-                        if (taskWalkRoundObject->m_object == m_object)
-                            return false;
-                    }
-                }
-                return true;
-            }
-        }
+    if (ped->IsPlayer() || !ped->IsAlive() || !m_object)
+        return false;
 
+    if (m_moveState != PEDMOVE_STILL
+        && !ped->m_pAttachedTo
+        && m_object->m_pAttachedTo != ped
+        && !m_object->physicalFlags.bDisableMoveForce)
+    {
+        CColModel* colModel = CModelInfo::GetModelInfo(m_object->m_nModelIndex)->GetColModel();
+        CVector length = colModel->m_boundBox.m_vecMax - colModel->m_boundBox.m_vecMin;
+        if (length.x >= 0.01f && length.y >= 0.01f && length.z >= 0.01f) {
+            CTask* activeTask = ped->GetTaskManager().GetActiveTask();
+            if (!activeTask)
+                return true;
+
+            assert(activeTask->GetTaskType() != TASK_COMPLEX_AVOID_ENTITY); // unused task
+            if (activeTask->GetTaskType() == TASK_COMPLEX_WALK_ROUND_OBJECT) {
+                auto taskWalkRoundObject = reinterpret_cast<CTaskComplexWalkRoundObject*>(activeTask);
+                if (taskWalkRoundObject->m_object == m_object)
+                    return false;
+            }
+            return true;
+        }
     }
+
     return false;
 }
 
-CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(CVector* firePos, float fireSize, int32 moveState)
+// 0x4B1E20
+CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(const CVector& firePos, float fireSize, int32 moveState)
 {
-    m_firePos = *firePos;
+    m_firePos = firePos;
     m_fireSize = fireSize;
     m_moveState = moveState;
     if (fireSize < 1.0f) {
@@ -188,7 +196,7 @@ CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(CVector* firePos, float
     }
 }
 
-CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(CVector* firePos, float fireSize, int32 moveState)
+CEventPotentialWalkIntoFire* CEventPotentialWalkIntoFire::Constructor(const CVector& firePos, float fireSize, int32 moveState)
 {
     this->CEventPotentialWalkIntoFire::CEventPotentialWalkIntoFire(firePos, fireSize, moveState);
     return this;
@@ -215,9 +223,9 @@ bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
     return false;
 }
 
-CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, CVector* targetPoint, int32 moveState)
+CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector& targetPoint, int32 moveState)
 {
-    m_targetPoint = *targetPoint;
+    m_targetPoint = targetPoint;
     m_ped = ped;
     m_moveState = moveState;
     ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
@@ -229,7 +237,7 @@ CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed()
         m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
 }
 
-CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, CVector* targetPoint, int32 moveState)
+CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState)
 {
     this->CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(ped, targetPoint, moveState);
     return this;
@@ -249,45 +257,36 @@ bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent)
 
 bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
 {
-    if (ped->IsAlive() && m_ped && m_moveState != PEDMOVE_STILL) {
-        CTask* partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-        if (!partnerTask)
-            partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
-
-        if (!partnerTask)
-            partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-
-        if (partnerTask) {
-            CTask* thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-            if (!thisPedPartnerTask)
-                thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
-            if (!thisPedPartnerTask)
-                thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-            if (thisPedPartnerTask) {
-                if (partnerTask->GetTaskType() == thisPedPartnerTask->GetTaskType())
-                    return false;
-            }
-        }
-        auto followFootstepsTask = reinterpret_cast<CTaskComplexFollowPedFootsteps*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS));
-        if (followFootstepsTask && followFootstepsTask->m_targetPed == m_ped)
-            return false;
-
-        auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-        if (killPedOnFootTask && killPedOnFootTask->m_target == m_ped) 
-            return false;
-
-        CTask* activeTask = ped->GetTaskManager().GetSimplestActiveTask();
-        if (!activeTask || !CTask::IsGoToTask(activeTask))
-            return false;
-
-        return true;
+    if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL) {
+        return false;
     }
+
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_ped->GetTaskManager())) {
+        return false;
+    }
+
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexFollowPedFootsteps>()) {
+        if (task->m_targetPed == m_ped) {
+            return false;
+        }
+    }
+
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_ped) {
+            return false;
+        }
+    }
+
+    if (const auto simplest = ped->GetTaskManager().GetSimplestActiveTask()) {
+        if (CTask::IsGoToTask(simplest)) {
+            return true;
+        }
+    }
+
     return false;
 }
 
 bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
-    if (CEventHandler::IsTemporaryEvent(refEvent))
-        return true;
-    return CEvent::TakesPriorityOver(refEvent);
+    return CEventHandler::IsTemporaryEvent(refEvent) ? true : CEvent::TakesPriorityOver(refEvent);
 }

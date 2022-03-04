@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,6 +31,11 @@ void CAEWeaponAudioEntity::Initialise() {
     m_nChainsawSoundState = 4;
     if (!AudioEngine.IsLoadingTuneActive())
         AEAudioHardware.LoadSoundBank(143, 5);
+}
+
+// 0x4E6AA0
+void CAEWeaponAudioEntity::Initialise(CPed* ped) {
+    plugin::CallMethod<0x4E6AA0>(this, ped);
 }
 
 void CAEWeaponAudioEntity::AddAudioEvent(int32 audioEventId) {
@@ -81,7 +86,7 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, int32
         return PlayGunSounds(entity, 33, 53, 3, 4, 5, audioEventId, 0.0f, 1.0f, 1.0f);
 
     case WEAPON_TEC9:
-        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992, 1.0f);
+        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992f, 1.0f);
 
     case WEAPON_COUNTRYRIFLE:
         return PlayGunSounds(entity, 52, 53, 26, 27, 23, audioEventId, 0.0f, 0.89f, 1.0f);
@@ -259,7 +264,8 @@ void CAEWeaponAudioEntity::InjectHooks() {
 
     // RH_ScopedInstall(Constructor, 0x5DE990);
     // RH_ScopedInstall(Destructor, 0x507560);
-    RH_ScopedInstall(Initialise, 0x503450);
+    RH_ScopedOverloadedInstall(Initialise, "void", 0x503450, void(CAEWeaponAudioEntity::*)());
+    //RH_ScopedOverloadedInstall(Initialise, "CPed*", 0x4E6AA0, void(CAEWeaponAudioEntity::*)(CPed*));
     RH_ScopedInstall(Reset, 0x503490);
     // RH_ScopedInstall(Terminate, 0x503480);
     RH_ScopedInstall(WeaponFire, 0x504F80);

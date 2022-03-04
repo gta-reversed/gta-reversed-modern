@@ -30,8 +30,8 @@ RwInt32 RwFreeListPurge(RwFreeList* freelist) {
     return ((RwInt32(__cdecl *)(RwFreeList*))0x801E00)(freelist);
 }
 
-RwFreeList* RwFreeListForAllUsed(RwFreeList* freelist, RwFreeListCallBack fpCallBack, void* pData) {
-    return ((RwFreeList*(__cdecl *)(RwFreeList*, RwFreeListCallBack, void*))0x801E90)(freelist, fpCallBack, pData);
+RwFreeList* RwFreeListForAllUsed(RwFreeList* freelist, RwFreeListCallBack fpCallBack, void* data) {
+    return ((RwFreeList*(__cdecl *)(RwFreeList*, RwFreeListCallBack, void*))0x801E90)(freelist, fpCallBack, data);
 }
 
 RwInt32 RwFreeListPurgeAllFreeLists() {
@@ -42,16 +42,16 @@ void RwStreamSetFreeListCreateParams(RwInt32 blockSize, RwInt32 numBlocksToPreal
     ((void(__cdecl *)(RwInt32, RwInt32))0x7EC760)(blockSize, numBlocksToPrealloc);
 }
 
-RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType type, RwStreamAccessType accessType, const void* pData) {
-    return ((RwStream*(__cdecl *)(RwStream*, RwBool, RwStreamType, RwStreamAccessType, const void*))0x7EC810)(stream, rwOwned, type, accessType, pData);
+RwStream* _rwStreamInitialize(RwStream* stream, RwBool rwOwned, RwStreamType type, RwStreamAccessType accessType, const void* data) {
+    return ((RwStream*(__cdecl *)(RwStream*, RwBool, RwStreamType, RwStreamAccessType, const void*))0x7EC810)(stream, rwOwned, type, accessType, data);
 }
 
-RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* pData) {
-    return ((RwStream*(__cdecl *)(RwStreamType, RwStreamAccessType, const void*))0x7ECEF0)(type, accessType, pData);
+RwStream* RwStreamOpen(RwStreamType type, RwStreamAccessType accessType, const void* data) {
+    return ((RwStream*(__cdecl *)(RwStreamType, RwStreamAccessType, const void*))0x7ECEF0)(type, accessType, data);
 }
 
-RwBool RwStreamClose(RwStream* stream, void* pData) {
-    return ((RwBool(__cdecl *)(RwStream*, void*))0x7ECE20)(stream, pData);
+RwBool RwStreamClose(RwStream* stream, void* data) {
+    return ((RwBool(__cdecl *)(RwStream*, void*))0x7ECE20)(stream, data);
 }
 
 RwUInt32 RwStreamRead(RwStream* stream, void* buffer, RwUInt32 length) {

@@ -21,9 +21,9 @@ CColModel::CColModel() : m_boundBox()
 {
     m_nColSlot = 0;
     m_pColData = nullptr;
-    m_bNotEmpty = false;
+    m_bNotEmpty             = false;
     m_bIsSingleColDataAlloc = false;
-    m_bIsActive = true;
+    m_bIsActive             = true;
 }
 
 CColModel::~CColModel()
@@ -34,7 +34,7 @@ CColModel::~CColModel()
     RemoveCollisionVolumes();
 }
 
-CColModel& CColModel::operator=(CColModel const& colModel)
+CColModel& CColModel::operator=(const CColModel& colModel)
 {
     //BUG(Prone) No self assignment check
     m_boundSphere.m_vecCenter = colModel.m_boundSphere.m_vecCenter;
@@ -146,13 +146,10 @@ void CColModel::RemoveTrianglePlanes()
         m_pColData->RemoveTrianglePlanes();
 }
 
-void* CColModel::operator new(uint32 size)
-{
-	return CPools::ms_pColModelPool->New();
+void* CColModel::operator new(unsigned size) {
+    return GetColModelPool()->New();
 }
 
-void CColModel::operator delete(void* data)
-{
-    CPools::ms_pColModelPool->Delete(static_cast<CColModel*>(data));
+void CColModel::operator delete(void* data) {
+    GetColModelPool()->Delete(static_cast<CColModel*>(data));
 }
-

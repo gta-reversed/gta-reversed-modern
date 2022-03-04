@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,7 +16,7 @@ public:
     CLink<T>  freeListTail;
     CLink<T>* links;
 
-    void* operator new(uint32 size) {
+    void* operator new(unsigned size) {
         return ((void*(__cdecl*)(uint32))0x821195)(size);
     }
 

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -12,10 +12,12 @@
 
 class CEntity;
 
+typedef CPool<IplDef> CIplPool;
+
 class CIplStore {
 public:
+    static CIplPool*&      ms_pPool;
     static CQuadTreeNode*& ms_pQuadTree;
-    static CPool<IplDef>*& ms_pPool;
 
 public:
     static void InjectHooks();
@@ -24,19 +26,19 @@ public:
     static void Shutdown();
 
     // returns slot index
-    static int32 AddIplSlot(char const* name);
-    static void AddIplsNeededAtPosn(CVector const& posn);
+    static int32 AddIplSlot(const char* name);
+    static void AddIplsNeededAtPosn(const CVector& posn);
     static void ClearIplsNeededAtPosn();
     static void EnableDynamicStreaming(int32 iplSlotIndex, bool enable);
-    static void EnsureIplsAreInMemory(CVector const& posn);
+    static void EnsureIplsAreInMemory(const CVector& posn);
     // returns -1 if slot not found
-    static int32 FindIplSlot(char const* name);
+    static int32 FindIplSlot(const char* name);
     static CRect* GetBoundingBox(int32 iplSlotIndex);
     static CEntity** GetIplEntityIndexArray(int32 arrayIndex);
     static char* GetIplName(int32 iplSlotIndex);
     // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
-    static bool HaveIplsLoaded(CVector const& coords, int32 playerNumber);
+    static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber);
     static void IncludeEntity(int32 iplSlotIndex, CEntity* entity);
     static void Save();
     static void Load();
@@ -51,10 +53,10 @@ public:
     static void RemoveIplWhenFarAway(int32 iplSlotIndex);
     static void RemoveRelatedIpls(int32 entityArraysIndex);
     static void RequestIplAndIgnore(int32 iplSlotIndex);
-    static void RequestIpls(CVector const& posn, int32 playerNumber);
-    static void SetIplsRequired(CVector const& posn, int32 playerNumber);
+    static void RequestIpls(const CVector& posn, int32 playerNumber);
+    static void SetIplsRequired(const CVector& posn, int32 playerNumber);
     static void SetIsInterior(int32 iplSlotIndex, bool isInterior);
-    static int32 SetupRelatedIpls(char const* iplName, int32 entityArraysIndex, CEntity** instances);
+    static int32 SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances);
 
     // 0x59EB20
     inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
@@ -71,6 +73,6 @@ extern CVector& gvecIplsNeededAtPosn;
 extern uint32& gCurrIplInstancesCount;
 extern CEntity** gCurrIplInstances; // CEntity *gCurrIplInstances[1000]
 
-void SetIfInteriorIplIsRequired(CVector2D const& posn, void* data);
-void SetIfIplIsRequired(CVector2D const& posn, void* data);
-void SetIfIplIsRequiredReducedBB(CVector2D const& posn, void* data);
+void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data);
+void SetIfIplIsRequired(const CVector2D& posn, void* data);
+void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data);

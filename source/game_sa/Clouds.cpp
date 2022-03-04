@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Clouds.h"
+#include "PostEffects.h"
 
 // float& CClouds::m_fVolumetricCloudDensity; // unused
 // bool& CClouds::m_bVolumetricCloudHeightSwitch; // unused
@@ -213,16 +214,16 @@ int32 CClouds::MovingFog_GetFirstFreeSlot() {
 
 // 0x716C90
 void CClouds::MovingFogRender() {
-    if (MovingFog_GetFXIntensity() == 0.f || CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
+    if (MovingFog_GetFXIntensity() == 0.f || !CGame::CanSeeOutSideFromCurrArea() && FindPlayerPed()->m_nAreaCode != AREA_CODE_NORMAL_WORLD)
         return;
 
     // Adjust fog intensity
     {
         const float step = CTimer::GetTimeStep() / 300.f;
         if (CCullZones::CamNoRain() && CCullZones::PlayerNoRain())
-            CurrentFogIntensity = std::min(CurrentFogIntensity - step, 0.f);
+            CurrentFogIntensity = std::max(CurrentFogIntensity - step, 0.f);
         else
-            CurrentFogIntensity = std::max(CurrentFogIntensity + step, 0.f);
+            CurrentFogIntensity = std::min(CurrentFogIntensity + step, 1.f);
 
 
         if (CWeather::UnderWaterness >= CPostEffects::m_fWaterFXStartUnderWaterness) {

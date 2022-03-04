@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,7 @@
 
 #include "AnimSequenceFrames.h"
 
+// The sequence of key frames of one animated node
 class CAnimBlendSequence {
 public:
     CAnimBlendSequence();
@@ -44,7 +45,7 @@ public:
         uint16 m_nFlags;
     };
     uint16 m_nFrameCount;
-    void*  m_pFrames;
+    void*  m_pFrames;     // Either `CAnimSequenceRootFrameUncompressed` or `CAnimSequenceRootFrameCompressed` depending on `m_isCompressed` (TODO: Im not 99% sure)
 
 public:
     static void InjectHooks();
@@ -56,7 +57,7 @@ public:
     int32 RemoveQuaternionFlips();
     void RemoveUncompressedData(uint8* arg1);
     void SetBoneTag(int32 hash);
-    void SetName(char const* string);
+    void SetName(const char* string);
     void SetNumFrames(int32 count, bool arg2, bool arg3, uint8* arg4);
     void Uncompress(uint8* arg1);
 

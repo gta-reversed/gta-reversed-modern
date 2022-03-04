@@ -53,21 +53,21 @@ void CReferences::RemoveReferencesToPlayer() {
 }
 
 void CReferences::PruneAllReferencesInWorld() {
-    auto iPedsSize = CPools::ms_pPedPool->GetSize();
+    auto iPedsSize = GetPedPool()->GetSize();
     for (int32 i = 0; i < iPedsSize; ++i) {
-        if (auto ped = CPools::ms_pPedPool->GetAt(i))
+        if (auto ped = GetPedPool()->GetAt(i))
             ped->PruneReferences();
     }
 
-    auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
+    auto iVehsSize = GetVehiclePool()->GetSize();
     for (int32 i = 0; i < iVehsSize; ++i) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i))
+        if (auto vehicle = GetVehiclePool()->GetAt(i))
             vehicle->PruneReferences();
     }
 
-    auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
+    auto iObjectsSize = GetObjectPool()->GetSize();
     for (int32 i = 0; i < iObjectsSize; ++i) {
-        if (auto obj = CPools::ms_pObjectPool->GetAt(i))
+        if (auto obj = GetObjectPool()->GetAt(i))
             obj->PruneReferences();
     }
 }

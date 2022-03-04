@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -13,13 +13,13 @@ class CVehicle;
 
 class CCheat {
 public:
-    static constexpr uint16 CHEAT_STRING_SIZE = 30;
-    static constexpr uint16 CHEAT_MIN_HASH_SIZE = 6;
+    static constexpr auto CHEAT_STRING_SIZE{ 30 };
+    static constexpr auto CHEAT_MIN_HASH_SIZE{ 6 };
 
     static void (*(&m_aCheatFunctions)[TOTAL_CHEATS])();
-    static int32 (&m_aCheatHashKeys)[TOTAL_CHEATS];    // static int32 m_aCheatHashKeys[TOTAL_CHEATS]
-    static char (&m_CheatString)[CHEAT_STRING_SIZE]; // static char m_CheatString[CHEAT_STRING_SIZE]
-    static bool (&m_aCheatsActive)[TOTAL_CHEATS];    // static bool m_aCheatsActive[TOTAL_CHEATS]
+    static int32 (&m_aCheatHashKeys)[TOTAL_CHEATS];
+    static char (&m_CheatString)[CHEAT_STRING_SIZE];
+    static bool (&m_aCheatsActive)[TOTAL_CHEATS];
     static bool &m_bHasPlayerCheated;
 
 public:
@@ -53,7 +53,7 @@ public:
      static void GangLandCheat();
      static void GangsCheat();
      static void GolfcartCheat();
-     static void HandleSpecialCheats(eCheats cheatID);
+     static void HandleSpecialCheats(eCheats cheat);
      static void HealthCheat();
      static void HearseCheat();
      static void JetpackCheat();
@@ -99,4 +99,21 @@ public:
      static void WeaponSkillsCheat();
      static bool IsZoneStreamingAllowed();
      static void EnableLegitimateCheat(eCheats cheat);
+
+# ifdef USE_ADDITIONAL_CHEATS
+     static void WeaponCheat4();
+     static void WeaponSlotCheat();
+     static void TimeTravelCheat();
+     static void ScriptBypassCheat();
+     static void ShowMappingsCheat();
+     static void TogglePlayerInvincibility();
+     static void ToggleShowTapToTarget();
+     static void ToggleShowTargeting();
+     static void TheGamblerCheat();
+# endif
+
+     [[nodiscard]] static bool IsActive(eCheats cheat) noexcept { return m_aCheatsActive[cheat]; };
+     static void Toggle(eCheats cheat)  { m_aCheatsActive[cheat] ^= true; }
+     static void Enable(eCheats cheat)  { m_aCheatsActive[cheat] = true; }
+     static void Disable(eCheats cheat) { m_aCheatsActive[cheat] = false; }
 };

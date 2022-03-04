@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -46,7 +46,7 @@ public:
     bool                        m_bTimeCounting; // todo: good name
     uint32                      m_nWantedLevel;
     uint32                      m_nWantedLevelBeforeParole;
-    CCrimeBeingQd               m_CrimesBeingQd[16];
+    CCrimeBeingQd               m_CrimesBeingQd[16]; // Crimes Being Queued
     CCopPed*                    m_pCopsInPursuit[MAX_COPS_IN_PURSUIT];
     CAEPoliceScannerAudioEntity m_PoliceScannerAudio;
     bool                        m_bLeavePlayerAlone;

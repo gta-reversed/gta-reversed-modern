@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -32,20 +32,20 @@ VALIDATE_SIZE(LimbMovementInfo, 0x18);
 
 class CPedIK {
 public:
-    CPed*           m_pPed;
-    LimbOrientation m_TorsoOrien;
-    float           m_fSlopePitch;
-    float           m_fSlopePitchLimitMult;
-    float           m_fSlopeRoll;
-    float           m_fBodyRoll;
+    CPed*           m_pPed{};
+    LimbOrientation m_TorsoOrien{};
+    float           m_fSlopePitch{};
+    float           m_fSlopePitchLimitMult{};
+    float           m_fSlopeRoll{};
+    float           m_fBodyRoll{};
 
     union {
         uint32 m_nFlags;
         struct {
-            uint32 bGunReachedTarget : 1;
-            uint32 bTorsoUsed : 1;
-            uint32 bUseArm : 1;
-            uint32 bSlopePitch : 1;
+            uint32 bGunReachedTarget : 1; // 0x1
+            uint32 bTorsoUsed : 1;        // 0x2
+            uint32 bUseArm : 1;           // 0x4
+            uint32 bSlopePitch : 1;       // 0x8
         };
     };
 
@@ -54,9 +54,11 @@ public:
     static RwV3d& ZaxisIK;
 
     // funcs
+    CPedIK(CPed* ped);
+
     void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
-    void                PointGunAtPosition(CVector const& posn, float arg2);
+    void                PointGunAtPosition(const CVector& posn, float arg2);
     static RwMatrix* GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
 
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);

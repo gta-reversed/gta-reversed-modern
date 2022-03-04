@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -30,5 +30,5 @@ public:
     static int32 CreateIndexBuffer(uint32 numIndices, uint32 format, void** ppIndexBuffer);
     static int32 CreateTexture(int32 width, int32 height, uint32 format, void** ppTexture);
     static void DestroyIndexBuffer(void* pIndexBuffer);
-    static void DestroyTexture(void* pTexture);
+    static void DestroyTexture(void* texture);
 };

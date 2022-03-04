@@ -25,12 +25,14 @@ public:
     char       field_5D[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING;
+
     CTaskComplexAvoidOtherPedWhileWandering(CPed* ped, const CVector& targetPoint, int32 moveState);
     ~CTaskComplexAvoidOtherPedWhileWandering();
 
     CTask* Clone() override;
     CTask* ControlSubTask(CPed* ped) override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING; }
+    eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

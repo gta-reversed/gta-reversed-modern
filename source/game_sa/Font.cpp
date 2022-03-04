@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -163,7 +163,7 @@ void CFont::Initialise() {
 
     SetScale(1.0f, 1.0f);
     SetSlantRefPoint(SCREEN_WIDTH, 0.0f);
-    SetSlant(0.0);
+    SetSlant(0.0f);
 
     SetColor(CRGBA(255, 255, 255, 0));
     SetOrientation(eFontAlignment::ALIGN_LEFT);

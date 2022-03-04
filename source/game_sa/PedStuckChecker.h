@@ -17,7 +17,8 @@ public:
     uint16         m_radius;
     ePedStuckState m_state;
 
-    bool TestPedStuck(CPed* pPed, CEventGroup* pEventGroup);
+public:
+    bool TestPedStuck(CPed* ped, CEventGroup* eventGroup);
 };
 
 VALIDATE_SIZE(CPedStuckChecker, 0x10);

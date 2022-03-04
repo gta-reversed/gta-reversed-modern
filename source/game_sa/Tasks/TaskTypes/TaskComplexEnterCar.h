@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -61,6 +61,8 @@ public:
     CTask*         ControlSubTask(CPed* ped) override;
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
+
+    auto GetVehicle() const { return m_pTargetVehicle; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);

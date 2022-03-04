@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -51,8 +51,8 @@ public:
     // static functions
 
     static void  Init();
-    static float GenerateLightsAffectingObject(CVector const* point, float* totalLighting, CEntity* entity);
-    static float GetLightMultiplier(CVector const* point);
+    static float GenerateLightsAffectingObject(const CVector* point, float* totalLighting, CEntity* entity);
+    static float GetLightMultiplier(const CVector* point);
     static void  RemoveLightsAffectingObject();
     static bool  ProcessVerticalLineUsingCache(CVector point, float* outZ);
     static void  AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected);

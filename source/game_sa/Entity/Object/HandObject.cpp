@@ -5,31 +5,30 @@ void CHandObject::InjectHooks()
     RH_ScopedClass(CHandObject);
     RH_ScopedCategory("Entity/Object");
 
-// VIRTUAL
     RH_ScopedInstall(ProcessControl_Reversed, 0x59EC40);
     RH_ScopedInstall(PreRender_Reversed, 0x59ECD0);
     RH_ScopedInstall(Render_Reversed, 0x59EE80);
 }
 
-CHandObject::CHandObject(int32 handModelIndex, CPed* pPed, bool bLeftHand) : CObject()
+CHandObject::CHandObject(int32 handModelIndex, CPed* ped, bool bLeftHand) : CObject()
 {
-    auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(pPed->m_pRwClump);
-    m_pPed = pPed;
-    pPed->UpdateRpHAnim();
+    auto* animHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
+    m_pPed = ped;
+    ped->UpdateRpHAnim();
 
     if (bLeftHand)
-        m_nBoneIndex = RpHAnimIDGetIndex(pAnimHierarchy, ePedBones::BONE_L_FORE_ARM);
+        m_nBoneIndex = RpHAnimIDGetIndex(animHierarchy, ePedBones::BONE_L_FORE_ARM);
     else
-        m_nBoneIndex = RpHAnimIDGetIndex(pAnimHierarchy, ePedBones::BONE_R_FORE_ARM);
+        m_nBoneIndex = RpHAnimIDGetIndex(animHierarchy, ePedBones::BONE_R_FORE_ARM);
 
     CEntity::SetModelIndex(handModelIndex);
     RpAnimBlendClumpInit(m_pRwClump);
 
-    auto* pPedModelInfo = CModelInfo::GetModelInfo(pPed->m_nModelIndex);
-    auto* pTxd = CTxdStore::ms_pTxdPool->GetAt(pPedModelInfo->m_nTxdIndex);
-    m_pTexture = RwTexDictionaryFindHashNamedTexture(pTxd->m_pRwDictionary, pPedModelInfo->m_nKey);
+    auto* pedModelInfo = CModelInfo::GetModelInfo(ped->m_nModelIndex);
+    auto* txd = CTxdStore::ms_pTxdPool->GetAt(pedModelInfo->m_nTxdIndex);
+    m_pTexture = RwTexDictionaryFindHashNamedTexture(txd->m_pRwDictionary, pedModelInfo->m_nKey);
     if (!m_pTexture)
-        m_pTexture = GetFirstTexture(pTxd->m_pRwDictionary);
+        m_pTexture = GetFirstTexture(txd->m_pRwDictionary);
 
     m_nStatus = eEntityStatus::STATUS_SIMPLE;
     m_bUsesCollision = false;
@@ -49,9 +48,9 @@ void CHandObject::ProcessControl()
 }
 void CHandObject::ProcessControl_Reversed()
 {
-    auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
-    auto* pMatArr = RpHAnimHierarchyGetMatrixArray(pAnimHierarchy);
-    const auto boneMat = CMatrix(&pMatArr[m_nBoneIndex], false);
+    auto* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+    auto* matArr = RpHAnimHierarchyGetMatrixArray(animHierarchy);
+    const auto boneMat = CMatrix(&matArr[m_nBoneIndex], false);
     *static_cast<CMatrix*>(m_matrix) = boneMat;
 
     m_bIsInSafePosition = true;
@@ -64,13 +63,12 @@ void CHandObject::PreRender()
 }
 void CHandObject::PreRender_Reversed()
 {
-    auto* pAnimHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
+    auto* animHierarchy = GetAnimHierarchyFromSkinClump(m_pPed->m_pRwClump);
     m_pPed->UpdateRpHAnim();
     m_pPed->m_bDontUpdateHierarchy = true;
 
-    auto* pMatArr = RpHAnimHierarchyGetMatrixArray(pAnimHierarchy);
-    const auto boneMat = CMatrix(&pMatArr[m_nBoneIndex], false);
-    *static_cast<CMatrix*>(m_matrix) = boneMat;
+    auto* matArr = RpHAnimHierarchyGetMatrixArray(animHierarchy);
+    *static_cast<CMatrix*>(m_matrix) = CMatrix(&matArr[m_nBoneIndex], false);
 
     if (m_bUpdatedMatricesArray)
         m_bUpdatedMatricesArray = false;
@@ -80,12 +78,12 @@ void CHandObject::PreRender_Reversed()
         auto iStackCounter = 0;
         while (iStackCounter >= 0)
         {
-            auto* pBoneMat = &pMatArr[nBoneInd];
-            *RwMatrixGetAt(pBoneMat) = { 0.0F, 0.0F, 0.0F };
-            *RwMatrixGetUp(pBoneMat) = { 0.0F, 0.0F, 0.0F };
-            *RwMatrixGetRight(pBoneMat) = { 0.0F, 0.0F, 0.0F };
+            auto* boneMat = &matArr[nBoneInd];
+            *RwMatrixGetAt(boneMat) = { 0.0F, 0.0F, 0.0F };
+            *RwMatrixGetUp(boneMat) = { 0.0F, 0.0F, 0.0F };
+            *RwMatrixGetRight(boneMat) = { 0.0F, 0.0F, 0.0F };
 
-            const auto unFlags = static_cast<uint32>(pAnimHierarchy->pNodeInfo[nBoneInd].flags);
+            const auto unFlags = static_cast<uint32>(animHierarchy->pNodeInfo[nBoneInd].flags);
             if ((unFlags & rpHANIMPUSHPARENTMATRIX) != 0)
                 ++iStackCounter;
             else if ((unFlags & rpHANIMPOPPARENTMATRIX) != 0)
@@ -107,7 +105,7 @@ void CHandObject::Render()
 }
 void CHandObject::Render_Reversed()
 {
-    auto* pFirstAtomic = GetFirstAtomic(m_pRwClump);
-    RpMaterialSetTexture(RpGeometryGetMaterial(RpAtomicGetGeometry(pFirstAtomic), 0), m_pTexture);
+    auto* firstAtomic = GetFirstAtomic(m_pRwClump);
+    RpMaterialSetTexture(RpGeometryGetMaterial(RpAtomicGetGeometry(firstAtomic), 0), m_pTexture);
     CObject::Render();
 }

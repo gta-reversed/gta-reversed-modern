@@ -2,8 +2,7 @@
 
 #include "ColBox.h"
 
-CColBox& CColBox::operator=(CColBox const& right)
-{
+CColBox& CColBox::operator=(const CColBox& right) {
     m_vecMin = right.m_vecMin;
     m_vecMax = right.m_vecMax;
     m_nMaterial = right.m_nMaterial;

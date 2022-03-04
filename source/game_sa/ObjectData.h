@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -81,9 +81,9 @@ public:
     static void InjectHooks();
 
     static void Initialise(const char* fileName);
-    static void SetObjectData(int32 dwModelIndex, CObject& pObject);
+    static void SetObjectData(int32 dwModelIndex, CObject& obj);
 
-    bool operator==(CObjectData const& right) const;
+    bool operator==(const CObjectData& right) const;
 
 public:
     inline static CObjectData& GetAtIndex(int32 index) { return ms_aObjectInfo[index]; }

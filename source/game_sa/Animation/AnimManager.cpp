@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -51,13 +51,13 @@ int32 CAnimManager::GetFirstAssocGroup(const char* basename) {
 }
 
 // 0x4D39F0
-CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, CAnimBlock const* ifp) {
-    return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D39F0, uint32, CAnimBlock const*>(hash, ifp);
+CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, const CAnimBlock* ifp) {
+    return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D39F0, uint32, const CAnimBlock*>(hash, ifp);
 }
 
 // 0x4D42F0
-CAnimBlendHierarchy* CAnimManager::GetAnimation(const char* animName, CAnimBlock const* ifp) {
-    return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D42F0, const char*, CAnimBlock const*>(animName, ifp);
+CAnimBlendHierarchy* CAnimManager::GetAnimation(const char* animName, const CAnimBlock* ifp) {
+    return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D42F0, const char*, const CAnimBlock*>(animName, ifp);
 }
 
 // 0x4D3A20
@@ -68,6 +68,16 @@ char* CAnimManager::GetAnimGroupName(AssocGroupId groupId) {
 // 0x4D3A30
 char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
     return plugin::CallAndReturn<char*, 0x4D3A30, AssocGroupId>(groupId);
+}
+
+// NOTSA
+AssocGroupId CAnimManager::GetAnimationGroupId(const char* name) {
+    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
+        if (std::string_view{ name } == GetAnimGroupName((AssocGroupId)i)) {
+            return (AssocGroupId)i;
+        }
+    }
+    return (AssocGroupId)ms_numAnimAssocDefinitions;
 }
 
 // 0x4D3A40

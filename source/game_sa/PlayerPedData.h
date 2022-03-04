@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -36,11 +36,11 @@ public:
         struct {
             uint32 m_bStoppedMoving : 1;
             uint32 m_bAdrenaline : 1;
-            uint32 m_bHaveTargetSelected : 1; // Needed to work out whether we lost target this frame
+            uint32 m_bHaveTargetSelected : 1;             // Needed to work out whether we lost target this frame
             uint32 m_bFreeAiming : 1;
             uint32 m_bCanBeDamaged : 1;
-            uint32 m_bAllMeleeAttackPtsBlocked : 1; // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
-            uint32 m_bJustBeenSnacking : 1;         // If this bit is true we have just bought something from a vending machine
+            uint32 m_bAllMeleeAttackPtsBlocked : 1;       // if all of m_pMeleeAttackers[] is blocked by collision, just attack straight ahead
+            uint32 m_bJustBeenSnacking : 1;               // If this bit is true we have just bought something from a vending machine
             uint32 m_bRequireHandleBreath : 1;
 
             uint32 m_bGroupStuffDisabled : 1;             // if this is true the player can't recrout or give his group commands.

@@ -262,8 +262,8 @@ RpBuildMesh* _rpBuildMeshAddTriangle(RpBuildMesh* mesh, RpMaterial* material, Rw
     return ((RpBuildMesh*(__cdecl *)(RpBuildMesh*, RpMaterial*, RwInt32, RwInt32, RwInt32, RwUInt16, RwUInt16, RwUInt16, RwUInt16))0x758C00)(mesh, material, vert1, vert2, vert3, matIndex, textureIndex, rasterIndex, pipelineIndex);
 }
 
-RpMeshHeader* _rpMeshHeaderForAllMeshes(RpMeshHeader* meshHeader, RpMeshCallBack fpCallBack, void* pData) {
-    return ((RpMeshHeader*(__cdecl *)(RpMeshHeader*, RpMeshCallBack, void*))0x758D30)(meshHeader, fpCallBack, pData);
+RpMeshHeader* _rpMeshHeaderForAllMeshes(RpMeshHeader* meshHeader, RpMeshCallBack fpCallBack, void* data) {
+    return ((RpMeshHeader*(__cdecl *)(RpMeshHeader*, RpMeshCallBack, void*))0x758D30)(meshHeader, fpCallBack, data);
 }
 
 RwStream* _rpMeshWrite(const RpMeshHeader* meshHeader, const void* object, RwStream* stream, const RpMaterialList* matList) {
@@ -390,8 +390,8 @@ RpMaterial* RpGeometryTriangleGetMaterial(const RpGeometry* geometry, const RpTr
     return ((RpMaterial*(__cdecl *)(const RpGeometry*, const RpTriangle*))0x74C760)(geometry, triangle);
 }
 
-RpGeometry* RpGeometryForAllMaterials(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData) {
-    return ((RpGeometry*(__cdecl *)(RpGeometry*, RpMaterialCallBack, void*))0x74C790)(geometry, fpCallBack, pData);
+RpGeometry* RpGeometryForAllMaterials(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* data) {
+    return ((RpGeometry*(__cdecl *)(RpGeometry*, RpMaterialCallBack, void*))0x74C790)(geometry, fpCallBack, data);
 }
 
 RpGeometry* RpGeometryLock(RpGeometry* geometry, RwInt32 lockMode) {
@@ -402,8 +402,8 @@ RpGeometry* RpGeometryUnlock(RpGeometry* geometry) {
     return ((RpGeometry*(__cdecl *)(RpGeometry*))0x74C800)(geometry);
 }
 
-const RpGeometry* RpGeometryForAllMeshes(const RpGeometry* geometry, RpMeshCallBack fpCallBack, void* pData) {
-    return ((const RpGeometry*(__cdecl *)(const RpGeometry*, RpMeshCallBack, void*))0x74CA60)(geometry, fpCallBack, pData);
+const RpGeometry* RpGeometryForAllMeshes(const RpGeometry* geometry, RpMeshCallBack fpCallBack, void* data) {
+    return ((const RpGeometry*(__cdecl *)(const RpGeometry*, RpMeshCallBack, void*))0x74CA60)(geometry, fpCallBack, data);
 }
 
 RpGeometry* RpGeometryCreate(RwInt32 numVert, RwInt32 numTriangles, RwUInt32 format) {
@@ -454,8 +454,8 @@ RpWorldSector* RpWorldSectorRender(RpWorldSector* worldSector) {
     return ((RpWorldSector*(__cdecl *)(RpWorldSector*))0x761C50)(worldSector);
 }
 
-const RpWorldSector* RpWorldSectorForAllMeshes(const RpWorldSector* sector, RpMeshCallBack fpCallBack, void* pData) {
-    return ((const RpWorldSector*(__cdecl *)(const RpWorldSector*, RpMeshCallBack, void*))0x761C60)(sector, fpCallBack, pData);
+const RpWorldSector* RpWorldSectorForAllMeshes(const RpWorldSector* sector, RpMeshCallBack fpCallBack, void* data) {
+    return ((const RpWorldSector*(__cdecl *)(const RpWorldSector*, RpMeshCallBack, void*))0x761C60)(sector, fpCallBack, data);
 }
 
 RwInt32 RpWorldSectorRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB) {
@@ -598,16 +598,16 @@ void RpClumpGtaCancelStream() {
     plugin::Call<0x72E700>();
 }
 
-RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* pData) {
-    return ((RpClump*(__cdecl *)(RpClump*, RpAtomicCallBack, void*))0x749B70)(clump, callback, pData);
+RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* data) {
+    return ((RpClump*(__cdecl *)(RpClump*, RpAtomicCallBack, void*))0x749B70)(clump, callback, data);
 }
 
-RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* pData) {
-    return ((RpClump*(__cdecl *)(RpClump*, RpLightCallBack, void*))0x749C00)(clump, callback, pData);
+RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* data) {
+    return ((RpClump*(__cdecl *)(RpClump*, RpLightCallBack, void*))0x749C00)(clump, callback, data);
 }
 
-RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* pData) {
-    return ((RpClump*(__cdecl *)(RpClump*, RwCameraCallBack, void*))0x749BB0)(clump, callback, pData);
+RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* data) {
+    return ((RpClump*(__cdecl *)(RpClump*, RwCameraCallBack, void*))0x749BB0)(clump, callback, data);
 }
 
 RpAtomic* RpAtomicSetFrame(RpAtomic* atomic, RwFrame* frame) {
@@ -794,12 +794,12 @@ void _rpWorldSectorDestroyRecurse(RpSector* sector) {
     ((void(__cdecl *)(RpSector*))0x74ED50)(sector);
 }
 
-RwBool _rpWorldForAllGlobalLights(RpLightCallBack callBack, void* pData) {
-    return ((RwBool(__cdecl *)(RpLightCallBack, void*))0x74EF10)(callBack, pData);
+RwBool _rpWorldForAllGlobalLights(RpLightCallBack callBack, void* data) {
+    return ((RwBool(__cdecl *)(RpLightCallBack, void*))0x74EF10)(callBack, data);
 }
 
-RpWorldSector* _rpWorldSectorForAllLocalLights(RpWorldSector* sector, RpLightCallBack callBack, void* pData) {
-    return ((RpWorldSector*(__cdecl *)(RpWorldSector*, RpLightCallBack, void*))0x74EF60)(sector, callBack, pData);
+RpWorldSector* _rpWorldSectorForAllLocalLights(RpWorldSector* sector, RpLightCallBack callBack, void* data) {
+    return ((RpWorldSector*(__cdecl *)(RpWorldSector*, RpLightCallBack, void*))0x74EF60)(sector, callBack, data);
 }
 
 RpWorldSector* _rpSectorDefaultRenderCallBack(RpWorldSector* sector) {
@@ -826,20 +826,20 @@ RwBool RpWorldPluginAttach() {
     return ((RwBool(__cdecl *)(void))0x74FDA0)();
 }
 
-RpWorld* RpWorldForAllClumps(RpWorld* world, RpClumpCallBack fpCallBack, void* pData) {
-    return ((RpWorld*(__cdecl *)(RpWorld*, RpClumpCallBack, void*))0x74FB80)(world, fpCallBack, pData);
+RpWorld* RpWorldForAllClumps(RpWorld* world, RpClumpCallBack fpCallBack, void* data) {
+    return ((RpWorld*(__cdecl *)(RpWorld*, RpClumpCallBack, void*))0x74FB80)(world, fpCallBack, data);
 }
 
-RpWorld* RpWorldForAllMaterials(RpWorld* world, RpMaterialCallBack fpCallBack, void* pData) {
-    return ((RpWorld*(__cdecl *)(RpWorld*, RpMaterialCallBack, void*))0x74FBC0)(world, fpCallBack, pData);
+RpWorld* RpWorldForAllMaterials(RpWorld* world, RpMaterialCallBack fpCallBack, void* data) {
+    return ((RpWorld*(__cdecl *)(RpWorld*, RpMaterialCallBack, void*))0x74FBC0)(world, fpCallBack, data);
 }
 
-RpWorld* RpWorldForAllLights(RpWorld* world, RpLightCallBack fpCallBack, void* pData) {
-    return ((RpWorld*(__cdecl *)(RpWorld*, RpLightCallBack, void*))0x74FC00)(world, fpCallBack, pData);
+RpWorld* RpWorldForAllLights(RpWorld* world, RpLightCallBack fpCallBack, void* data) {
+    return ((RpWorld*(__cdecl *)(RpWorld*, RpLightCallBack, void*))0x74FC00)(world, fpCallBack, data);
 }
 
-RpWorld* RpWorldForAllWorldSectors(RpWorld* world, RpWorldSectorCallBack fpCallBack, void* pData) {
-    return ((RpWorld*(__cdecl *)(RpWorld*, RpWorldSectorCallBack, void*))0x74FC70)(world, fpCallBack, pData);
+RpWorld* RpWorldForAllWorldSectors(RpWorld* world, RpWorldSectorCallBack fpCallBack, void* data) {
+    return ((RpWorld*(__cdecl *)(RpWorld*, RpWorldSectorCallBack, void*))0x74FC70)(world, fpCallBack, data);
 }
 
 RpWorld* RpWorldRender(RpWorld* world) {
@@ -1098,8 +1098,8 @@ RwCamera* RwCameraForAllAtomicsInFrustum(RwCamera* camera, RpAtomicCallBack call
     return ((RwCamera*(__cdecl *)(RwCamera*, RpAtomicCallBack, void*))0x7517F0)(camera, callback, data);
 }
 
-RwCamera* RwCameraForAllSectorsInFrustum(RwCamera* camera, RpWorldSectorCallBack callBack, void* pData) {
-    return ((RwCamera*(__cdecl *)(RwCamera*, RpWorldSectorCallBack, void*))0x751660)(camera, callBack, pData);
+RwCamera* RwCameraForAllSectorsInFrustum(RwCamera* camera, RpWorldSectorCallBack callBack, void* data) {
+    return ((RwCamera*(__cdecl *)(RwCamera*, RpWorldSectorCallBack, void*))0x751660)(camera, callBack, data);
 }
 
 RpLight* RpLightForAllWorldSectors(RpLight* light, RpWorldSectorCallBack callback, void* data) {

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -17,7 +17,7 @@ void CGeneral::InjectHooks() {
 
     RH_ScopedInstall(LimitAngle, 0x53CB00);
     RH_ScopedInstall(LimitRadianAngle, 0x53CB50);
-    RH_ScopedInstall(GetRadianAngleBetweenPoints, 0x53CBE0);
+    RH_ScopedOverloadedInstall(GetRadianAngleBetweenPoints, "", 0x53CBE0, float(*)(float, float, float, float));
     RH_ScopedInstall(GetATanOfXY, 0x53CC70);
     RH_ScopedInstall(GetNodeHeadingFromVector, 0x53CDC0);
     RH_ScopedInstall(SolveQuadratic, 0x53CE30);
@@ -118,12 +118,12 @@ uint32 CGeneral::GetNodeHeadingFromVector(float x, float y) {
     if (angle < 0.0f)
         angle += TWO_PI;
 
-    angle = TWO_PI - angle + RWDEG2RAD(22.5f);
+    angle = TWO_PI - angle + DegreesToRadians(22.5f);
 
     if (angle >= TWO_PI)
         angle -= TWO_PI;
 
-    return (uint32)floor(angle / RWDEG2RAD(45.0f));
+    return (uint32)floor(angle / DegreesToRadians(45.0f));
 }
 
 // 0x53CE30
@@ -172,4 +172,8 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
 #else
     return min + (max - min) * rand() * RAND_MAX_FLOAT_RECIPROCAL;
 #endif
+}
+
+float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
+    return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }

@@ -2,8 +2,11 @@
 
 namespace PedDebugModule {
 
+void SpawnPed(int32 modelId, CVector position);
+void SpawnRandomPed();
+
 void Initialise();
-void ProcessImgui();
+void ProcessImGui();
 void ProcessRender();
 
 } // namespace PedDebugModule

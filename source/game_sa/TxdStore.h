@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,13 +10,13 @@
 #include "TxdDef.h"
 #include "Pool.h"
 
+typedef CPool<TxdDef> CTxdPool;
+
 class CTxdStore {
 public:
-    // class variables
-
-    static CPool<TxdDef>*& ms_pTxdPool;
+    static CTxdPool*&        ms_pTxdPool;
     static RwTexDictionary*& ms_pStoredTxd;
-    static int32& ms_lastSlotFound;
+    static int32&            ms_lastSlotFound;
     // variables list is not finished. Need to make CPools before.
 
     static int16 (&defaultTxds)[4];

@@ -243,7 +243,7 @@ void CAESoundManager::Service() {
         auto freq = sound.GetRelativePlaybackFrequencyWithDoppler();
         auto slomoFactor = sound.GetSlowMoFrequencyScalingFactor();
 
-        CAEAudioHardwarePlayFlags flags;
+        CAEAudioHardwarePlayFlags flags{};
         flags.m_nFlags = 0;
 
         flags.m_bIsFrontend        = sound.GetFrontEnd();

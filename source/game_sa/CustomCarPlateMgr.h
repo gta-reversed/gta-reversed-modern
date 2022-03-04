@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -38,7 +38,7 @@ public:
     static bool GeneratePlateText(char* buf, uint32 len);
     static void Shutdown();
     static int8 GetMapRegionPlateDesign();
-    static int8 LoadPlatecharsetDat(char const* filename, uint8* data);
+    static int8 LoadPlatecharsetDat(const char* filename, uint8* data);
     static void SetupMaterialPlatebackTexture(RpMaterial* material, uint8 plateType);
     static RwTexture* CreatePlateTexture(const char* text, uint8 plateType);
     static int8 SetupClumpAfterVehicleUpgrade(RpClump* clump, RpMaterial* plateMaterial, uint8 plateType);

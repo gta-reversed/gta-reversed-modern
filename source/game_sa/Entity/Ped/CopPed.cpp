@@ -6,7 +6,7 @@ void CCopPed::InjectHooks() {
     RH_ScopedClass(CCopPed);
     RH_ScopedCategory("Entity/Ped");
 
-    // RH_ScopedInstall(Constructor, 0x5DDC60); todo: unhook and test when core components of Ped will be reversed
+    RH_ScopedInstall(Constructor, 0x5DDC60);
     RH_ScopedInstall(Destructor, 0x5DE0D0);
     RH_ScopedInstall(SetPartner, 0x5DDE80);
     RH_ScopedInstall(AddCriminalToKill, 0x5DDEB0);
@@ -18,37 +18,40 @@ void CCopPed::InjectHooks() {
 /* Horrible design, but R* also allowed to pass in a ModelID */
 eModelID ResolveModelForCopType(uint32_t typeOrModelID) {
     switch (typeOrModelID) {
-    case eCopType::COP_TYPE_CITYCOP:
+    case COP_TYPE_CITYCOP:
         return (eModelID)CStreaming::GetDefaultCopModel();
-    case eCopType::COP_TYPE_LAPDM1:
-        return eModelID::MODEL_LAPDM1;
-    case eCopType::COP_TYPE_CSHER:
-        return eModelID::MODEL_CSHER;
-    case eCopType::COP_TYPE_ARMY:
-        return eModelID::MODEL_ARMY;
-    case eCopType::COP_TYPE_FBI:
-        return eModelID::MODEL_FBI;
-    case eCopType::COP_TYPE_SWAT1:
-    case eCopType::COP_TYPE_SWAT2:
-        return eModelID::MODEL_SWAT;
+    case COP_TYPE_LAPDM1:
+        return MODEL_LAPDM1;
+    case COP_TYPE_CSHER:
+        return MODEL_CSHER;
+    case COP_TYPE_ARMY:
+        return MODEL_ARMY;
+    case COP_TYPE_FBI:
+        return MODEL_FBI;
+    case COP_TYPE_SWAT1:
+    case COP_TYPE_SWAT2:
+        return MODEL_SWAT;
     default:
         return (eModelID)typeOrModelID; /* A modelID was passed in */
     }
 }
 
 // 0x5DDC60
-CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nCopTypeOrModelID(copTypeOrModelID) {
+CCopPed::CCopPed(uint32_t copTypeOrModelID) :
+    CPed{ PED_TYPE_COP },
+    m_nCopTypeOrModelID{ copTypeOrModelID }
+{
     SetModelIndex(ResolveModelForCopType(copTypeOrModelID)); /* R* originally seem to have used this switch to set the model as well, but this is nicer */
 
     switch (copTypeOrModelID) {
     /* Done in ResolveModelForCopType
-    case eCopType::COP_TYPE_CITYCOP:
+    case COP_TYPE_CITYCOP:
         ...;
-    case eCopType::COP_TYPE_LAPDM1:
+    case COP_TYPE_LAPDM1:
         ...;
     */
-    case eCopType::COP_TYPE_SWAT1:
-    case eCopType::COP_TYPE_SWAT2: {
+    case COP_TYPE_SWAT1:
+    case COP_TYPE_SWAT2: {
         GiveDelayedWeapon(eWeaponType::WEAPON_MICRO_UZI, 1000);
         SetCurrentWeapon(eWeaponType::WEAPON_MICRO_UZI);
         SetArmour(50.0f);
@@ -56,7 +59,7 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nC
         SetWeaponAccuracy(68);
         break;
     }
-    case eCopType::COP_TYPE_FBI: {
+    case COP_TYPE_FBI: {
         GiveDelayedWeapon(eWeaponType::WEAPON_MP5, 1000);
         SetCurrentWeapon(eWeaponType::WEAPON_MP5);
         SetArmour(100.0f);
@@ -64,7 +67,7 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nC
         SetWeaponAccuracy(76);
         break;
     }
-    case eCopType::COP_TYPE_ARMY: {
+    case COP_TYPE_ARMY: {
         GiveDelayedWeapon(eWeaponType::WEAPON_M4, 1000);
         SetCurrentWeapon(eWeaponType::WEAPON_M4);
         SetArmour(100.0f);
@@ -87,9 +90,9 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) : CPed(ePedType::PED_TYPE_COP), m_nC
     field_79D = 0;
     field_7A4 = 0;
 
-    if (m_pTargetedObject)
+    if (m_pTargetedObject) // Oookay?
         m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-    m_pTargetedObject = 0;
+    m_pTargetedObject = nullptr;
 
     m_pIntelligence->SetDmRadius(60.0f);
     m_pIntelligence->SetNumPedsToScan(8);
@@ -168,12 +171,12 @@ void CCopPed::AddCriminalToKill(CPed* criminal) {
         return;
 
     switch (criminal->m_nPedType) {
-    case ePedType::PED_TYPE_COP:
-    case ePedType::PED_TYPE_MEDIC:
-    case ePedType::PED_TYPE_FIREMAN:
+    case PED_TYPE_COP:
+    case PED_TYPE_MEDIC:
+    case PED_TYPE_FIREMAN:
         return;
     }
-    if ((unsigned)criminal->m_nPedType >= (unsigned)ePedType::PED_TYPE_MISSION1)
+    if ((unsigned)criminal->m_nPedType >= (unsigned)PED_TYPE_MISSION1)
         return;
 
     if (criminal->IsCreatedBy(ePedCreatedBy::PED_MISSION))
@@ -249,12 +252,12 @@ void CCopPed::ProcessControl_Reversed() {
     if (m_bWasPostponed)
         return;
 
-    if (m_nPedState == ePedState::PEDSTATE_DEAD)
+    if (m_nPedState == PEDSTATE_DEAD)
         return;
 
     GetActiveWeapon().Update(this);
 
-    if (m_nPedState == ePedState::PEDSTATE_DIE)
+    if (m_nPedState == PEDSTATE_DIE)
         return;
 
     if (m_pTargetedObject)

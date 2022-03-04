@@ -250,8 +250,8 @@ bool CCamera::GetLookingLRBFirstPerson() {
 }
 
 // 0x50AE90
-signed int CCamera::GetLookDirection() {
-    return plugin::CallMethodAndReturn<signed int, 0x50AE90, CCamera*>(this);
+int32 CCamera::GetLookDirection() {
+    return plugin::CallMethodAndReturn<int32, 0x50AE90, CCamera*>(this);
 }
 
 // 0x50AED0
@@ -349,13 +349,13 @@ void CCamera::RestoreWithJumpCut() {
 
 // 0x50BD20
 void CCamera::SetCamCutSceneOffSet(const CVector* cutsceneOffset) {
-    return plugin::CallMethod<0x50BAB0, CCamera*, CVector const*>(this, cutsceneOffset);
+    return plugin::CallMethod<0x50BAB0, CCamera*, const CVector*>(this, cutsceneOffset);
 }
 
 // 0x50BD40
 void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
     m_bCamDirectlyBehind = true;
-    CPed* player = FindPlayerPed(-1);
+    CPed* player = FindPlayerPed();
     if (player) {
         m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
@@ -364,7 +364,7 @@ void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
 // 0x50BD70
 void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     m_bCamDirectlyInFront = true;
-    CPed* player = FindPlayerPed(-1);
+    CPed* player = FindPlayerPed();
     if (player) {
         m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
@@ -382,7 +382,7 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
 }
 
 // 0x50BEC0
-void CCamera::SetCamPositionForFixedMode(CVector const* fixedModeSource, CVector const* fixedModeUpOffset) {
+void CCamera::SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset) {
     m_vecFixedModeSource = *fixedModeSource;
     m_vecFixedModeUpOffSet = *fixedModeUpOffset;
     m_bGarageFixedCamPositionSet = false;
@@ -422,7 +422,7 @@ void CCamera::SetNearClipScript(float nearClip) {
 }
 
 // 0x50BFB0
-void CCamera::SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom) {
+void CCamera::SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom, int16 minZoom) {
     m_PlayerWeaponMode.m_nMode     = mode;
     m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_nMinZoom  = minZoom;
@@ -482,7 +482,7 @@ void CCamera::StartCooperativeCamMode() {
     CGameLogic::n2PlayerPedInFocus = 2;
 }
 
-//! unused
+// unused
 // 0x50C270
 void CCamera::StopCooperativeCamMode() {
     m_bCooperativeCamMode = false;
@@ -522,8 +522,8 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C8B0, CCamera*, CVector const*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C8B0, CCamera*, const CVector*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C910
@@ -542,7 +542,7 @@ void CCamera::TakeControlWithSpline(eSwitchType switchType) {
 }
 
 // 0x50CB10
-void CCamera::UpdateAimingCoors(CVector const* aimingTargetCoors) {
+void CCamera::UpdateAimingCoors(const CVector* aimingTargetCoors) {
     m_vecAimingTargetCoors.x = aimingTargetCoors->x;
     m_vecAimingTargetCoors.y = aimingTargetCoors->y;
     m_vecAimingTargetCoors.z = aimingTargetCoors->z;
@@ -612,13 +612,13 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
 }
 
 // 0x420C40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrix* transformMatrix) {
-    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrix*>(this, origin, radius, transformMatrix);
+bool CCamera::IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix) {
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
 // 0x420D40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, CVector const&, float>(this, origin, radius);
+bool CCamera::IsSphereVisible(const CVector& origin, float radius) {
+    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, const CVector&, float>(this, origin, radius);
 }
 
 // unused
@@ -768,7 +768,7 @@ void CCamera::DrawBordersForWideScreen() {
 // 0x514950
 void CCamera::FinishCutscene() {
     TheCamera.SetPercentAlongCutScene(100.0f);
-    m_fPositionAlongSpline = 1.0;
+    m_fPositionAlongSpline = 1.0f;
     m_bCutsceneFinished = true;
 }
 
@@ -793,8 +793,8 @@ void CCamera::CalculateDerivedValues(bool bForMirror, bool bOriented) {
 }
 
 // 0x516B20
-void CCamera::ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, CVector* targPosn) {
-    return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, pVehicle, pPed, source, targPosn);
+void CCamera::ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn) {
+    return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, vehicle, ped, source, targPosn);
 }
 
 static CMatrix& preMirrorMat = *(CMatrix*)0xB6FE40;

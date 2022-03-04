@@ -1,11 +1,10 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
-
 
 #include "TaskSimple.h"
 #include "AnimBlendAssociation.h"
@@ -27,19 +26,21 @@ public:
     int16 m_nShotWhizzingCounter;
     CAnimBlendAssociation *m_pDuckAnim; 
     CAnimBlendAssociation *m_pMoveAnim;
-  
-    bool m_bIsFinished;
 
+    bool m_bIsFinished;
     bool m_bIsAborting;
-    bool m_bNeedToSetDuckFlag; // incase bIsDucking flag gets cleared elsewhere, so we know to stop duck task
-    bool m_bIsInControl;	// if duck task is being controlled by another task then it requires continuous control
+    bool m_bNeedToSetDuckFlag;  // in case bIsDucking flag gets cleared elsewhere, so we know to stop duck task
+    bool m_bIsInControl;        // if duck task is being controlled by another task then it requires continuous control
   
     CVector2D m_vecMoveCommand; 
     uint8 m_nDuckControlType;
     uint8 m_nCountDownFrames;
 
+public:
+    static constexpr auto Type = TASK_SIMPLE_DUCK;
+
     CTaskSimpleDuck * Constructor (eDuckControlTypes DuckControlType, uint16 nLengthOfDuck, int16 nUseShotsWhizzingEvents = -1);
-    static bool CanPedDuck(CPed* pPed);
+    static bool CanPedDuck(CPed* ped);
     bool ControlDuckMove(float moveSpeedX, float moveSpeedY);
     bool IsTaskInUseByOtherTasks(); 
 };

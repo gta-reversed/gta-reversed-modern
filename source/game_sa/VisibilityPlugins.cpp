@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -223,21 +223,21 @@ bool CVisibilityPlugins::InsertEntityIntoSortedList(CEntity* entity, float dista
 bool CVisibilityPlugins::PluginAttach() {
     ms_atomicPluginOffset = RpAtomicRegisterPlugin(
         sizeof(tAtomicVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x00),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x00),
         AtomicConstructor,
         AtomicDestructor,
         AtomicCopyConstructor
     );
     ms_clumpPluginOffset = RpClumpRegisterPlugin(
         sizeof(tClumpVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x01),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x01),
         ClumpConstructor,
         ClumpDestructor,
         ClumpCopyConstructor
     );
     ms_framePluginOffset = RwFrameRegisterPlugin(
         sizeof(tFrameVisibilityPlugin),
-        MAKECHUNKID(rwVENDORID_ROCKSTAR, 0x02),
+        MAKECHUNKID(rwVENDORID_DEVELOPER, 0x02),
         FrameConstructor,
         FrameDestructor,
         FrameCopyConstructor
@@ -349,7 +349,7 @@ CAtomicModelInfo* CVisibilityPlugins::GetAtomicModelInfo(RpAtomic* atomic) {
     int16 modelId = ATOMICPLG(atomic, m_modelId);
     if (modelId == -1)
         return nullptr;
-    return static_cast<CAtomicModelInfo*>(CModelInfo::ms_modelInfoPtrs[modelId]);
+    return CModelInfo::GetModelInfo(modelId)->AsAtomicModelInfoPtr();
 }
 
 int32 CVisibilityPlugins::GetClumpAlpha(RpClump* clump) {
@@ -773,7 +773,7 @@ RpAtomic* CVisibilityPlugins::RenderVehicleHiDetailAlphaCB_Boat(RpAtomic* atomic
         AlphaObjectInfo info{};
         info.m_distance = gVehicleDistanceFromCamera;
         info.m_atomic = atomic;
-        info.m_pCallback = CVisibilityPlugins::DefaultAtomicRenderCallback;
+        info.m_pCallback = DefaultAtomicRenderCallback;
         if (m_alphaBoatAtomicList.InsertSorted(info))
             return atomic;
     }
@@ -872,10 +872,10 @@ RpAtomic* CVisibilityPlugins::RenderVehicleReallyLowDetailCB_BigVehicle(RpAtomic
 }
 
 RpAtomic* CVisibilityPlugins::RenderWeaponCB(RpAtomic* atomic) {
-    RpClump* pClump = RpAtomicGetClump(atomic);
-    CClumpModelInfo* modelInfo = GetClumpModelInfo(pClump);
+    RpClump* clump = RpAtomicGetClump(atomic);
+    CClumpModelInfo* modelInfo = GetClumpModelInfo(clump);
     const float drawDistanceRadius = TheCamera.m_fLODDistMultiplier * modelInfo->m_fDrawDistance;
-    if (GetDistanceSquaredFromCamera(RpClumpGetFrame(pClump)) < drawDistanceRadius * drawDistanceRadius)
+    if (GetDistanceSquaredFromCamera(RpClumpGetFrame(clump)) < drawDistanceRadius * drawDistanceRadius)
         AtomicDefaultRenderCallBack(atomic);
 
     return atomic;

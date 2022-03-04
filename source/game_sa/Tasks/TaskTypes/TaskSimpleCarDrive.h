@@ -40,6 +40,8 @@ public:
     char _pad[3];
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CAR_DRIVE;
+
     CTaskSimpleCarDrive() = delete;
 
     CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
@@ -49,6 +51,7 @@ public:
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
+    auto GetVehicle() const { return m_pVehicle; }
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

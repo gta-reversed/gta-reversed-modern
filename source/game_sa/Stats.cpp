@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -669,7 +669,7 @@ void CStats::ModifyStat(eStats stat, float value) {
 bool CStats::Save() {
     float unsavedKills = GetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT);
     IncrementStat(STAT_TOTAL_LEGITIMATE_KILLS, unsavedKills);
-    SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.0);
+    SetStatValue(STAT_KILLS_SINCE_LAST_CHECKPOINT, 0.0f);
 
     CGenericGameStorage::SaveDataToWorkBuffer(StatTypesFloat,           sizeof(StatTypesFloat));
     CGenericGameStorage::SaveDataToWorkBuffer(StatTypesInt,             sizeof(StatTypesInt));

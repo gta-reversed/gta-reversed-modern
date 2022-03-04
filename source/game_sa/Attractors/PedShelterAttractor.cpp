@@ -10,10 +10,10 @@ CVector CPedShelterAttractor::GetDisplacement(int32 pedId) {
 }
 
 // 0x5EFC40
-void CPedShelterAttractor::ComputeAttractPos(int32 pedId, CVector& outPosn) {
+void CPedShelterAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
     if (m_pEffect) {
         CVector displacement = GetDisplacement(pedId);
-        outPosn = displacement + m_vecAttractorPosn;
+        outPos = displacement + m_vecAttractorPosn;
     }
 }
 

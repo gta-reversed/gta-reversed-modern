@@ -6,6 +6,7 @@
 #include "BreakManager_c.h"
 #include "PlantMgr.h"
 #include "Clouds.h"
+#include "PostEffects.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;
@@ -130,8 +131,8 @@ void CMirrors::RenderMirrorBuffer() {
             };
 
             RxObjSpace3DVertex vertices[4];
-            for (int i = 0; i < 4; i++) {
-                RwIm3DVertexSetRGBA(&vertices[i], 0xFF, 0xFF, 0xFF, 0xFF);
+            for (int i = 0; i < std::size(vertices); i++) {
+                RwIm3DVertexSetRGBA(&vertices[i], 255, 255, 255, 255);
                 RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &Screens8Track[x][i]);
                 RwIm3DVertexSetU(&vertices[i], uvs[i].x);
                 RwIm3DVertexSetV(&vertices[i], uvs[i].y);
@@ -158,9 +159,9 @@ void CMirrors::RenderMirrorBuffer() {
         };
 
         RwIm2DVertex vertices[4];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < std::size(vertices); i++) {
             RwIm2DVertexSetRecipCameraZ(&vertices[i], 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera));
-            RwIm2DVertexSetIntRGBA(&vertices[i], 0xFF, 0xFF, 0xFF, 0xFF);
+            RwIm2DVertexSetIntRGBA(&vertices[i], 255, 255, 255, 255);
 
             RwIm2DVertexSetScreenX(&vertices[i], pos[i].x);
             RwIm2DVertexSetScreenY(&vertices[i], pos[i].y);
@@ -191,7 +192,7 @@ void CMirrors::RenderMirrorBuffer() {
         // Make a function out of it.
 
         RxObjSpace3DVertex vertices[4];
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < std::size(vertices); i++) {
             RwIm3DVertexSetRGBA(&vertices[i], 255, 255, 255, 255);
             RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &pos[i]);
             RwIm3DVertexSetU(&vertices[i], uvs[i].x);
@@ -278,6 +279,10 @@ bool CMirrors::IsEitherScreenVisibleToCam() {
         }
     }
     return false;
+}
+
+bool CMirrors::ShouldRenderPeds() {
+    return bRenderingReflection && TypeOfMirror != 2;
 }
 
 // 0x726DF0
@@ -412,7 +417,7 @@ void RenderScene() {
         constexpr float flt_8CD4F0 = 2.0f;
         constexpr float flt_8CD4EC = 5.9604645e-8f;
 
-        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25 - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
+        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * v3 + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
         RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);

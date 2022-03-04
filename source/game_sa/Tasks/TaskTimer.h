@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,7 +14,6 @@ public:
     int32  m_nInterval;
     bool   m_bStarted;
     bool   m_bStopped;
-    char   _pad[2];
 
 public:
     static void InjectHooks();

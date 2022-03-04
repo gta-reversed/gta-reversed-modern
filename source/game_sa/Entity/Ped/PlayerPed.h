@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,15 +31,14 @@ public:
     bool Load_Reversed();
     bool Save_Reversed();
 
-    bool Load() override { return Load_Reversed(); }
-    bool Save() override { return Save_Reversed(); }
+    bool Load() override;
+    bool Save() override;
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();
     bool DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1);
-    // dummy function
     void ProcessPlayerWeapon(CPad* pad);
     void PickWeaponAllowedFor2Player();
     void UpdateCameraWeaponModes(CPad* pad);
@@ -104,7 +103,7 @@ public:
     static bool PedCanBeTargettedVehicleWise(CPed* ped);
     static void SetupPlayerPed(int playerId);
 
-    // NOTASA
+    // NOTSA
     CPedGroup& GetGroup() const noexcept { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); }
     CPedGroupMembership& GetGroupMembership() const noexcept { return GetGroup().GetMembership(); }
 };

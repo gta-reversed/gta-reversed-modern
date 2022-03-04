@@ -7,7 +7,7 @@ class CClumpModelInfo;
 /**
  * collision plugin unique rwID
  */
-#define rwID_COLLISIONPLUGIN  MAKECHUNKID(rwVENDORID_ROCKSTAR, 0xFA)
+#define rwID_COLLISIONPLUGIN  MAKECHUNKID(rwVENDORID_DEVELOPER, 0xFA)
 
 /*
 * Collision plugin static offset

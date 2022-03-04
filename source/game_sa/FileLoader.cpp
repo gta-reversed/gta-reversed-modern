@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -110,7 +110,7 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    auto   objID{ eModelID::MODEL_INVALID };
+    auto   objID{ MODEL_INVALID };
     char   modelName[24]{};
     char   txdName[24]{};
     char   animName[16]{ "null" };
@@ -199,7 +199,7 @@ char* FindFirstNonNullOrWS(char* it) {
 
 // 0x536F80
 // Load line into static buffer (`ms_line`)
-char* CFileLoader::LoadLine(FILESTREAM file) {
+char* CFileLoader::LoadLine(auto file) {
     if (!CFileMgr::ReadLine(file, ms_line, sizeof(ms_line)))
         return nullptr;
 
@@ -423,7 +423,7 @@ void CFileLoader::LoadClumpFile(const char* filename) {
 
 // 0x5B4040
 int32 CFileLoader::LoadClumpObject(const char* line) {
-    int32 objId{ eModelID::MODEL_INVALID };
+    int32 objId{ MODEL_INVALID };
     char  modelName[24];
     char  texName[24];
 
@@ -500,7 +500,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
-        if (mi->GetModelType() == eModelInfoType::MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
+        if (mi->GetModelType() == MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }
@@ -709,7 +709,7 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
 
     cd->bUsesDisks = false;
     cd->bHasShadowInfo = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -779,7 +779,7 @@ void CFileLoader::LoadCollisionModelVer3(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -848,7 +848,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
     cd->m_nNumShadowTriangles = h.nShdwFaces;
 
     cd->bUsesDisks = false;
-    cd->bNotEmpty = h.HasFaceGroups();
+    cd->bHasFaceGroups = h.HasFaceGroups();
 
     // Set given field in `CCollisionData` based on offset in file.
     // If it's 0 then nullptr, otherwise a pointer to where the data is in memory.
@@ -885,7 +885,7 @@ void CFileLoader::LoadCollisionModelVer4(uint8* buffer, uint32 dataSize, CColMod
 
 // 0x5B3C60
 int32 CFileLoader::LoadObject(const char* line) {
-    int32  modelId{ eModelID::MODEL_INVALID};
+    int32  modelId{ MODEL_INVALID};
     char   modelName[24];
     char   texName[24];
     float  fDrawDist;
@@ -929,8 +929,8 @@ void CFileLoader::Load2dEffect(const char* line) {
     return plugin::Call<0x5B7670, const char*>(line);
 
     // todo:
-    auto modelId{ eModelID::MODEL_INVALID };
-    CVector pos;
+    auto modelId{ MODEL_INVALID };
+    CVector pos{};
     int32 type;
     (void*)sscanf(line, "%d %f %f %f %d", &modelId, &pos.x, &pos.y, &pos.z, &type);
 
@@ -1023,7 +1023,7 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
         newEntity->m_bTunnelTransition = true;
     if (objInstance->m_bRedundantStream)
         newEntity->m_bUnimportantStream = true;
-    newEntity->m_nAreaCode = objInstance->m_nAreaCode;
+    newEntity->m_nAreaCode = static_cast<eAreaCodes>(objInstance->m_nAreaCode);
     newEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
 
     if (objInstance->m_nModelId == ModelIndices::MI_TRAINCROSSING)
@@ -1041,8 +1041,8 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
             {
                 CRect rect;
                 newEntity->GetBoundRect(&rect);
-                auto* pColDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
-                pColDef->m_Area.Restrict(rect);
+                auto* colDef = CColStore::ms_pColPool->GetAt(cm->m_nColSlot);
+                colDef->m_Area.Restrict(rect);
             }
         }
         else
@@ -1081,7 +1081,7 @@ CEntity* CFileLoader::LoadObjectInstance(const char* line) {
 
 // 0x5B4B40
 void CFileLoader::LoadCullZone(const char* line) {
-    CVector center, mirrorDirection;
+    CVector center{}, mirrorDirection{};
     float unknown, length, bottom, width, unknown2, zTop, cm;
     int32 flags, flags2 = 0;
 
@@ -1135,7 +1135,7 @@ void CFileLoader::LoadCullZone(const char* line) {
 void CFileLoader::LoadEntryExit(const char* line) {
     uint32 numOfPeds = 2;
     uint32 timeOn = 0, timeOff = 24;
-    CVector enter, exit;
+    CVector enter{}, exit{};
     CVector2D range;
     float enteranceAngle;
     float unused;
@@ -1228,7 +1228,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
 void CFileLoader::LoadGarage(const char* line) {
     uint32 flags;
     uint32 type;
-    CVector p1, p2;
+    CVector p1{}, p2{};
     float frontX, frontY;
     char name[128];
 
@@ -1398,7 +1398,7 @@ int32 CFileLoader::LoadPathHeader(const char* line, int32& outPathType) {
 // PEDS
 // 0x5B7420
 int32 CFileLoader::LoadPedObject(const char* line) {
-    auto   modelId{ eModelID::MODEL_INVALID };
+    auto   modelId{ MODEL_INVALID };
     int32  radio1{}, radio2{};
     uint32 flags{};
     int32  carsCanDriveMask{};
@@ -1436,10 +1436,10 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     const auto FindAnimGroup = [animGroup, nAssocGroups = CAnimManager::ms_numAnimAssocDefinitions] {
         for (auto i = 0; i < nAssocGroups; i++) {
             if (CAnimManager::GetAnimGroupName((AssocGroupId)i) == std::string_view{animGroup}) {
-                return i;
+                return (AssocGroupId)i;
             }
         }
-        return nAssocGroups;
+        return (AssocGroupId)nAssocGroups;
     };
 
     const auto mi = CModelInfo::AddPedModel(modelId);
@@ -1453,8 +1453,8 @@ int32 CFileLoader::LoadPedObject(const char* line) {
     mi->m_nAnimType = FindAnimGroup();
     mi->m_nCarsCanDriveMask = carsCanDriveMask;
     mi->m_nPedFlags = flags;
-    mi->m_nRadio2 = radio2 + 1;
-    mi->m_nRadio1 = radio1 + 1;
+    mi->m_nRadio2 = (eRadioID)(radio2 + 1);
+    mi->m_nRadio1 = (eRadioID)(radio1 + 1);
     mi->m_nRace = CPopulation::FindPedRaceFromName(modelName);
     mi->m_nPedAudioType = CAEPedSpeechAudioEntity::GetAudioPedType(pedVoiceType);
     mi->m_nVoiceMin = CAEPedSpeechAudioEntity::GetVoice(voiceMin, mi->m_nPedAudioType);
@@ -1636,7 +1636,7 @@ void CFileLoader::LoadPickup(const char* line) {
 // 0x5B45D0
 void CFileLoader::LoadStuntJump(const char* line) {
     CBoundingBox start, target;
-    CVector cameraPosn;
+    CVector cameraPosn{};
     int32 reward;
 
     int32 iNumRead = sscanf(
@@ -1688,7 +1688,7 @@ int32 CFileLoader::LoadTXDParent(const char* line) {
 // IPL -> TCYC
 // 0x5B81D0
 void CFileLoader::LoadTimeCyclesModifier(const char* line) {
-    CVector vec1, vec2;
+    CVector vec1{}, vec2{};
     int32 farClip;
     int32 extraColor;
     float extraColorIntensity;
@@ -1715,17 +1715,17 @@ void CFileLoader::LoadTimeCyclesModifier(const char* line) {
     if (iNumRead < 12)
         lodDistMult = unused;
 
-    CBox box;
+    CBox box{};
     box.Set(vec1, vec2);
     return CTimeCycle::AddOne(box, farClip, extraColor, extraColorIntensity, falloffDist, lodDistMult);
 }
 
 // 0x5B3DE0
 int32 CFileLoader::LoadTimeObject(const char* line) {
-    auto  modelId{ eModelID::MODEL_INVALID };
+    auto  modelId{ MODEL_INVALID };
     char  modelName[24];
     char  texName[24];
-    float drawDistance[3];
+    float drawDistance[3]{};
     int32 flags;
     int32 timeOn;
     int32 timeOff;
@@ -1770,7 +1770,7 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
 
 // 0x5B6F30
 int32 CFileLoader::LoadVehicleObject(const char* line) {
-    auto  modelId{ eModelID::MODEL_INVALID };
+    auto  modelId{ MODEL_INVALID };
     char  modelName[24]{};
     char  texName[24]{};
     char  type[8]{};
@@ -1914,7 +1914,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
 
 // 0x5B3FB0
 int32 CFileLoader::LoadWeaponObject(const char* line) {
-    auto objId{ eModelID::MODEL_INVALID };
+    auto objId{ MODEL_INVALID };
     char modelName[24];
     char texName[24];
     char animName[16];
@@ -1935,7 +1935,7 @@ int32 CFileLoader::LoadWeaponObject(const char* line) {
 void CFileLoader::LoadZone(const char* line) {
     char  name[24];
     int32 type;
-    CVector min, max;
+    CVector min{}, max{};
     int32 island;
     char  zoneName[12];
 
@@ -2248,7 +2248,7 @@ void CFileLoader::ReloadPaths(const char* filename) {
 
     bool pathAllocated = false;
     int32 pathEntryIndex = -1;
-    FILESTREAM file = CFileMgr::OpenFile(filename, "r");
+    auto file = CFileMgr::OpenFile(filename, "r");
     for (char* line = LoadLine(file); line; line = LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;

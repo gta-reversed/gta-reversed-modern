@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -162,7 +162,7 @@ public:
     float     m_fStatsScrollSpeed;
     char      field_8;
     char      field_9[23];
-    char      field_20;
+    bool      m_PrefsUseVibration;
     bool      m_bHudOn;
     char      field_22[2];
     int32     m_nRadarMode;
@@ -372,7 +372,7 @@ public:
     char InitialiseChangedLanguageSettings(char a2);
     void ScrollRadioStations(char numStations);
     void ProcessMissionPackNewGame();
-    signed int DoSettingsBeforeStartingAGame();
+    int32 DoSettingsBeforeStartingAGame();
     char SetDefaultPreferences(eMenuPage page);
     char PrintMap();
     char PrintStats();

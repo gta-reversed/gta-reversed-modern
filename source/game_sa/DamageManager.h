@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -11,12 +11,14 @@
 
 class CAutomobile;
 
+// TODO: Seems like these are the damage states for doors only.
+//       Panel's seems to be different, more like: DAMSTATE_OK, DAMSTATE_DAMAGED, DAMSTATE_MISSING
 enum ePanelDamageState : uint8 {
-    DAMSTATE_OK             = 0,
-    DAMSTATE_OPENED         = 1,
-    DAMSTATE_DAMAGED        = 2,
-    DAMSTATE_OPENED_DAMAGED = 3,
-    DAMSTATE_NOTPRESENT     = 4
+    DAMSTATE_OK             = 0, // Closed
+    DAMSTATE_OPENED         = 1, // Open
+    DAMSTATE_DAMAGED        = 2, // Closed
+    DAMSTATE_OPENED_DAMAGED = 3, // Open
+    DAMSTATE_NOTPRESENT     = 4  // Missing
 };
 
 // original name
@@ -138,6 +140,8 @@ public:
 public:
     static void InjectHooks();
 
+    CDamageManager(float wheelDamageEffect);
+
     void Init();
     void ResetDamageStatus();
     void ResetDamageStatusAndWheelDamage();
@@ -160,25 +164,42 @@ public:
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
     // To select the correct version to call look at the called function's address when you are REing code
     // And chose accordingly.
-    eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx);
+    [[nodiscard]] eDoorStatus GetDoorStatus_Component(tComponent nDoorIdx) const;
     void SetDoorStatus_Component(tComponent door, eDoorStatus status);
 
-    eDoorStatus GetDoorStatus(eDoors door);
+    [[nodiscard]] eDoorStatus GetDoorStatus(eDoors door) const;
     void SetDoorStatus(eDoors door, eDoorStatus status);
 
-    eCarWheelStatus GetWheelStatus(eCarWheel wheel);
+    [[nodiscard]] eCarWheelStatus GetWheelStatus(eCarWheel wheel) const;
     void SetWheelStatus(eCarWheel wheel, eCarWheelStatus status);
 
-    ePanelDamageState GetPanelStatus(ePanels panel);
+    [[nodiscard]] ePanelDamageState GetPanelStatus(ePanels panel) const;
     void SetPanelStatus(ePanels panel, ePanelDamageState status);
 
-    eLightsState GetLightStatus(eLights light);
+    [[nodiscard]] eLightsState GetLightStatus(eLights light) const;
     void SetLightStatus(eLights light, eLightsState status);
 
     // returns -1 if no node for this panel
     static eCarNodes GetCarNodeIndexFromPanel(ePanels panel);
     static eCarNodes GetCarNodeIndexFromDoor(eDoors door);
     static bool GetComponentGroup(tComponent nComp, tComponentGroup& outCompGroup, uint8& outComponentRelativeIdx);
+
+    // NOTSA
+    void SetAllWheelsState(eCarWheelStatus state);
+    void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status); 
+    void SetDoorOpen(eDoors door);
+    void SetDoorClosed(eDoors door);
+    [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
+    [[nodiscard]] bool IsDoorOpen(eDoors door) const;
+    [[nodiscard]] bool IsDoorClosed(eDoors door) const;
+    [[nodiscard]] bool IsDoorPresent(eDoors door) const;
+    [[nodiscard]] bool IsDoorDamaged(eDoors door) const;
+
+private: 
+    // Wrapper functions
+
+    // Return type has to be uint32, but we want to return `eCarWheelStatus` in our code.
+    uint32 GetWheelStatus_Hooked(eCarWheel wheel) { return (uint32)GetWheelStatus(wheel); }
 };
 
 VALIDATE_SIZE(CDamageManager, 0x18);

@@ -72,9 +72,9 @@ bool CGarages::IsModelIndexADoor(int32 nModelIndex)
 }
 
 // 0x44A240
-int32 CGarages::FindGarageForObject(CObject* pObject)
+int32 CGarages::FindGarageForObject(CObject* obj)
 {
-    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(pObject);
+    return plugin::CallAndReturn<int32, 0x44A240, CObject*>(obj);
 }
 
 // Garage flags

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -139,7 +139,7 @@ int32 CCarCtrl::ChooseModel(int32* arg1) {
 }
 
 int32 CCarCtrl::ChoosePoliceCarModel(uint32 ignoreLvpd1Model) {
-    CWanted* playerWanted = FindPlayerWanted(-1);
+    CWanted* playerWanted = FindPlayerWanted();
     if (playerWanted->AreSwatRequired() 
         && CStreaming::IsModelLoaded(MODEL_ENFORCER) 
         && CStreaming::IsModelLoaded(MODEL_SWAT)
@@ -202,7 +202,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
         CWorld::Add(boat);
 
         if (doMissionCleanup)
-            CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+            CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(boat), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
         return boat;
     }
@@ -245,7 +245,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     CWorld::Add(vehicle);
     if (doMissionCleanup)
-        CTheScripts::MissionCleanUp.AddEntityToList(CPools::ms_pVehiclePool->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+        CTheScripts::MissionCleanUp.AddEntityToList(GetVehiclePool()->GetRef(vehicle), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
 
     if (vehicle->IsSubRoadVehicle())
         vehicle->m_autoPilot.movementFlags.bIsStopped = true;
@@ -328,8 +328,8 @@ float CCarCtrl::FindGhostRoadHeight(CVehicle* vehicle) {
 }
 
 // 0x42B270
-void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* pEntity) {
-    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, pEntity);
+void CCarCtrl::FireHeliRocketsAtTarget(CAutomobile* entityLauncher, CEntity* entity) {
+    plugin::Call<0x42B270, CAutomobile*, CEntity*>(entityLauncher, entity);
 }
 
 // 0x429A70
@@ -429,8 +429,8 @@ CVehicle* CCarCtrl::GetNewVehicleDependingOnCarModel(int32 modelId, uint8 create
 
 // 0x42C250
 bool CCarCtrl::IsAnyoneParking() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             switch (vehicle->m_autoPilot.m_nCarMission) {
             case eCarMission::MISSION_PARK_PARALLEL_0:
             case eCarMission::MISSION_PARK_PARALLEL_1:
@@ -529,8 +529,8 @@ void CCarCtrl::JoinCarWithRoadSystem(CVehicle* vehicle) {
 }
 
 // 0x42F870
-bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, CVector const& posn, bool unused, bool bIsBoat) {
-    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, CVector const&, bool, bool>(vehicle, posn, unused, bIsBoat);
+bool CCarCtrl::JoinCarWithRoadSystemGotoCoors(CVehicle* vehicle, const CVector& posn, bool unused, bool bIsBoat) {
+    return plugin::CallAndReturn<bool, 0x42F870, CVehicle*, const CVector&, bool, bool>(vehicle, posn, unused, bIsBoat);
 }
 
 // 0x432B10
@@ -622,15 +622,15 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
     if (CTimer::GetFrameCounter() % 8 != 3)
         return;
 
-    if (CPools::ms_pVehiclePool->GetNoOfFreeSpaces() >= 8)
+    if (GetVehiclePool()->GetNoOfFreeSpaces() >= 8)
         return;
 
     // Find closest deletable vehicle
     const CVector camPos = TheCamera.GetPosition();
     float fClosestDist = std::numeric_limits<float>::max();
     CVehicle* closestVeh = nullptr;
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             if (IsThisVehicleInteresting(vehicle))
                 continue;
             if (vehicle->vehicleFlags.bIsLocked)
@@ -655,8 +655,8 @@ void CCarCtrl::RemoveCarsIfThePoolGetsFull() {
 
 // 0x42CD10
 void CCarCtrl::RemoveDistantCars() {
-    for (auto i = 0; i < CPools::ms_pVehiclePool->GetSize(); i++) {
-        if (auto vehicle = CPools::ms_pVehiclePool->GetAt(i)) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        if (auto vehicle = GetVehiclePool()->GetAt(i)) {
             PossiblyRemoveVehicle(vehicle);
             if (!vehicle->vehicleFlags.bCreateRoadBlockPeds)
                 continue;
@@ -666,7 +666,7 @@ void CCarCtrl::RemoveDistantCars() {
                 CRoadBlocks::GenerateRoadBlockCopsForCar(
                     vehicle,
                     vehicle->m_nPedsPositionForRoadBlock,
-                    vehicle->IsLawEnforcementVehicle() ? ePedType::PED_TYPE_COP : ePedType::PED_TYPE_GANG1
+                    vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
             }
         }
@@ -716,11 +716,11 @@ void CCarCtrl::SlowCarDownForCarsSectorList(CPtrList& ptrList, CVehicle* vehicle
 }
 
 // 0x426220
-void CCarCtrl::SlowCarDownForObject(CEntity* pEntity, CVehicle* vehicle, float* arg3, float arg4) {
-    const CVector entityDir = pEntity->GetPosition() - vehicle->GetPosition();
+void CCarCtrl::SlowCarDownForObject(CEntity* entity, CVehicle* vehicle, float* arg3, float arg4) {
+    const CVector entityDir = entity->GetPosition() - vehicle->GetPosition();
     const float entityHeading = DotProduct(entityDir, vehicle->GetMatrix().GetForward());
     if (entityHeading > 0.0f && entityHeading < 20.0f) {
-        if (pEntity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
+        if (entity->GetColModel()->GetBoundRadius() + vehicle->GetColModel()->GetBoundingBox().m_vecMax.x > fabs(DotProduct(entityDir, vehicle->GetMatrix().GetRight()))) {
             if (entityHeading >= 7.0f) {
                 *arg3 = std::min(*arg3, (1.0f - (entityHeading - 7.0f) / 13.0f)) * arg4; // Original code multiplies by 0.07692308, which is the recp. of 13
             } else {
@@ -953,8 +953,8 @@ void CCarCtrl::WeaveForOtherCar(CEntity* entity, CVehicle* vehicle, float* arg3,
 }
 
 // 0x42D680
-void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* pPhysical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
-    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, pPhysical, arg4, arg5, arg6, arg7, arg8, arg9);
+void CCarCtrl::WeaveThroughCarsSectorList(CPtrList& ptrList, CVehicle* vehicle, CPhysical* physical, float arg4, float arg5, float arg6, float arg7, float* arg8, float* arg9) {
+    plugin::Call<0x42D680, CPtrList&, CVehicle*, CPhysical*, float, float, float, float, float*, float*>(ptrList, vehicle, physical, arg4, arg5, arg6, arg7, arg8, arg9);
 }
 
 // 0x42D950

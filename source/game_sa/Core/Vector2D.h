@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,13 +31,13 @@ public:
 
     void  Normalise();
 
-    inline float SquaredMagnitude() {
+    inline float SquaredMagnitude() const {
         return x * x + y * y;
     }
 
     void operator=(const CVector2D& right);
 
-    inline CVector2D(CVector2D const& src) {
+    inline CVector2D(const CVector2D& src) {
         x = src.x;
         y = src.y;
     }
@@ -75,6 +75,10 @@ public:
     inline void Set(float X, float Y) {
         x = X;
         y = Y;
+    }
+     
+    float Heading() const {
+        return std::atan2(-x, y);
     }
 };
 

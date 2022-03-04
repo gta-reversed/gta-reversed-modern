@@ -56,12 +56,12 @@ if (MSVC)
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 # DISABLE DEP. WARNINGS (GCC)
     target_compile_options(ogg PRIVATE "-w")
-    target_compile_options(imgui PRIVATE "-w")
+    #target_compile_options(imgui PRIVATE "-w")
     target_compile_options(vorbisfile PRIVATE "-w")
 elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 # DISABLE DEP. WARNINGS (CLANG)
     target_compile_options(ogg PRIVATE "-Wno-everything")
-    target_compile_options(imgui PRIVATE "-Wno-everything")
+    #target_compile_options(imgui PRIVATE "-Wno-everything")
     target_compile_options(vorbisfile PRIVATE "-Wno-everything")
 endif()
 set_target_properties(gta_reversed
@@ -98,6 +98,7 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Enums/
     source/game_sa/Events/
     source/game_sa/Fx/
+    source/game_sa/Interior/
     source/game_sa/Models/
     source/game_sa/Plugins/
     source/game_sa/RenderWare/
@@ -114,6 +115,7 @@ target_compile_definitions(gta_reversed PRIVATE
     NOMINMAX
     USE_GTASA_ALLOCATOR
     EXTRA_DEBUG_FEATURES
+    FIX_BUGS
 )
 target_compile_features(gta_reversed PRIVATE cxx_std_23)
 

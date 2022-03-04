@@ -71,9 +71,9 @@ public:
     static void ForceDeathRestart();
     static void InitAtStartOfGame();
     static bool IsCoopGameGoingOn();
-    static bool IsPlayerAllowedToGoInThisDirection(CPed* pPed, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
+    static bool IsPlayerAllowedToGoInThisDirection(CPed* ped, float moveDirectionX, float moveDirectionY, float moveDirectionZ, float distanceLimit);
     static bool IsPlayerUse2PlayerControls(CPed* ped);
-    static bool IsPointWithinLineArea(signed int a1, float x, float y);
+    static bool IsPointWithinLineArea(int32 a1, float x, float y);
     static bool IsSkipWaitingForScriptToFadeIn();
     static bool LaRiotsActiveHere();
     static void Save();
@@ -86,7 +86,7 @@ public:
     static void SetPlayerWantedLevelForForbiddenTerritories(uint16 townNumber);
     static void SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAfterMission, CEntity* vehicle, bool bFinishedByScript);
     static void SkipCanBeActivated();
-    static void SortOutStreamingAndMemory(CVector const& translation, float angle);
+    static void SortOutStreamingAndMemory(const CVector& translation, float angle);
     static void StopPlayerMovingFromDirection(int32 playerId, CVector direction);
     static void Update();
     static void UpdateSkip();

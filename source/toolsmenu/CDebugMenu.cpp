@@ -1,7 +1,6 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
-#include "Utility.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -10,7 +9,6 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
-#include <sstream>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -24,6 +22,9 @@
 #include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 #include "toolsmenu\DebugModules\FXDebugModule.h"
+#include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
+
+#include "TaskComplexUseGoggles.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -184,21 +185,24 @@ void CDebugMenu::ImGuiDrawMouse() {
 }
 
 bool showPlayerInfo;
-void CDebugMenu::ShowPlayerInfo() {
+void ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
-    CPlayerPed* pLocalPlayer = FindPlayerPed();
-    if (pLocalPlayer != nullptr) {
-        ImGui::Begin("Player Information");
 
-        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
-        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
 
-        ImGui::End();
-    }
+    ImGui::Begin("Player Information", &showPlayerInfo, ImGuiWindowFlags_NoTitleBar);
+
+    auto& playerPos = player->GetPosition();
+    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
+    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::End();
 }
 
-void CDebugMenu::ProcessRenderTool() {
+void ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
         FXDebugModule::ProcessImgui();
     }
@@ -210,7 +214,7 @@ void CDebugMenu::ProcessRenderTool() {
 #ifdef EXTRA_DEBUG_FEATURES
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlussion")) {
+        if (ImGui::BeginTabItem("Occlusion")) {
             COcclusionDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
@@ -235,10 +239,30 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Pools")) {
+            PoolsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
 #endif
+
+void SpawnTab() {
+    if (ImGui::BeginTabBar("")) {
+        if (ImGui::BeginTabItem("Ped")) {
+            PedDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Vehicle")) {
+            VehicleDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+    }
+    ImGui::EndTabBar();
+}
 
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
@@ -258,13 +282,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
         }
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
-            if (ImGui::BeginTabItem("Peds")) {
-                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                PedDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Vehicles")) {
-                VehicleDebugModule::ProcessImgui();
+            if (ImGui::BeginTabItem("Spawn")) {
+                SpawnTab();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Cheats")) {
@@ -285,9 +304,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
             }
             if (ImGui::BeginTabItem("Other")) {
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
-#ifdef EXTRA_DEBUG_FEATURES
+                ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
-#endif
                 if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }
@@ -303,20 +321,34 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 
 static void DebugCode() {
     CPad* pad = CPad::GetPad(0);
+
+    static bool doGodMode{};
+    if (pad->IsStandardKeyJustPressed('2')) {
+        doGodMode = !doGodMode;
+        printf("God mode state: %i\n", (int)doGodMode);
+    }
+    if (doGodMode) {
+        CCheat::MoneyArmourHealthCheat();
+    }
+
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+        return;
+
     if (pad->IsStandardKeyJustDown('1')) {
         printf("");
         CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
+
+    if (pad->IsStandardKeyJustDown('4')) {
         printf("");
-        CCheat::MoneyArmourHealthCheat();
+        TaskComplexUseGogglesTestCode();
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
     CPad* pad = CPad::GetPad(0);
-    auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
-    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
+    // CTRL + M or F7
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }
@@ -334,6 +366,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
     FXDebugModule::ProcessRender();
+    TeleportDebugModule::ProcessInput();
 
     ImGui::EndFrame();
     ImGui::Render();

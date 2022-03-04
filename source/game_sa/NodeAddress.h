@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,8 +8,8 @@
 
 class CNodeAddress {
 public:
-    int16 m_wAreaId{-1};
-    int16 m_wNodeId{-1};
+    uint16 m_wAreaId{(uint16)-1u};
+    uint16 m_wNodeId{(uint16)-1u};
 
     constexpr CNodeAddress() = default;
 

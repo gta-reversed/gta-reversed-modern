@@ -9,11 +9,19 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <functional>
 #include <iostream>
 #include <cassert>
 #include <array>
+#include <vector>
+#include <numeric>
+#include <cstring>
+#include <tuple>
+#include <initializer_list>
+
 #include <ranges>
+namespace rng = std::ranges;
 
 #include "Base.h"
 
@@ -33,8 +41,6 @@
 #include "Matrix.h"
 #include "MatrixLink.h"
 #include "MatrixLinkList.h"
-#include "OctTree.h"
-#include "OctTreeBase.h"
 #include "Pool.h"
 #include "PtrList.h"
 #include "PtrListDoubleLink.h"
@@ -52,17 +58,51 @@
 #include "List_c.h"
 #include "SArray.h"
 
+#include "game_sa\Enums\eCheats.h"
+#include "game_sa\Enums\AnimationEnums.h"
+#include "game_sa\Enums\eAnimBlendCallbackType.h"
+#include "game_sa\Enums\eAudioEvents.h"
+#include "game_sa\Enums\eCamMode.h"
+#include "game_sa\Enums\eCarMission.h"
+#include "game_sa\Enums\eClothesModelPart.h"
+#include "game_sa\Enums\eClothesTexturePart.h"
+#include "game_sa\Enums\eCrimeType.h"
+#include "game_sa\Enums\eDecisionMakerEvents.h"
+#include "game_sa\Enums\eEmergencyPedVoices.h"
+#include "game_sa\Enums\eEntityStatus.h"
+#include "game_sa\Enums\eEntityType.h"
+#include "game_sa\Enums\eEventType.h"
+#include "game_sa\Enums\eModelID.h"
+#include "game_sa\Enums\ePedBones.h"
+#include "game_sa\Enums\ePedModel.h"
+#include "game_sa\Enums\ePedState.h"
+#include "game_sa\Enums\eRadioID.h"
+#include "game_sa\Enums\eScriptCommands.h"
+#include "game_sa\Enums\eSoundID.h"
+#include "game_sa\Enums\eSprintType.h"
+#include "game_sa\Enums\eStatModAbilities.h"
+#include "game_sa\Enums\eStats.h"
+#include "game_sa\Enums\eStatsReactions.h"
+#include "game_sa\Enums\eSurfaceType.h"
+#include "game_sa\Enums\eTaskType.h"
+#include "game_sa\Enums\eVehicleClass.h"
+#include "game_sa\Enums\eVehicleHandlingFlags.h"
+#include "game_sa\Enums\eVehicleHandlingModelFlags.h"
+#include "game_sa\Enums\eWeaponFire.h"
+#include "game_sa\Enums\eWeaponFlags.h"
+#include "game_sa\Enums\eWeaponModel.h"
+#include "game_sa\Enums\eWeaponType.h"
+#include "game_sa\Enums\eWinchType.h"
+#include "game_sa\Enums\eItemDefinitionFlags.h"
+
 #include "game_sa\constants.h"
 #include "game_sa\ModelIndices.h"
 #include "game_sa\PedGeometryAnalyser.h"
 #include "game_sa\Debug.h"
-#include "game_sa\PostEffects.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\Glass.h"
 #include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
-#include "game_sa\PlayerRelationshipRecorder.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
 #include "game_sa\DecisionMakerTypes.h"
@@ -242,8 +282,6 @@
 #include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
-#include "game_sa\Rope.h"
-#include "game_sa\Ropes.h"
 #include "game_sa\Scene.h"
 #include "game_sa\ScriptResourceManager.h"
 #include "game_sa\ScriptsForBrains.h"
@@ -341,43 +379,6 @@
 #include "game_sa\Audio\config\eAudioBank.h"
 #include "game_sa\Audio\config\eAudioSlot.h"
 #include "game_sa\Audio\config\eSFX.h"
-
-#include "game_sa\Enums\eCheats.h"
-#include "game_sa\Enums\AnimationEnums.h"
-#include "game_sa\Enums\eAnimBlendCallbackType.h"
-#include "game_sa\Enums\eAudioEvents.h"
-#include "game_sa\Enums\eCamMode.h"
-#include "game_sa\Enums\eCarMission.h"
-#include "game_sa\Enums\eClothesModelPart.h"
-#include "game_sa\Enums\eClothesTexturePart.h"
-#include "game_sa\Enums\eCrimeType.h"
-#include "game_sa\Enums\eDecisionMakerEvents.h"
-#include "game_sa\Enums\eEmergencyPedVoices.h"
-#include "game_sa\Enums\eEntityStatus.h"
-#include "game_sa\Enums\eEntityType.h"
-#include "game_sa\Enums\eEventType.h"
-#include "game_sa\Enums\eModelID.h"
-#include "game_sa\Enums\ePedBones.h"
-#include "game_sa\Enums\ePedModel.h"
-#include "game_sa\Enums\ePedState.h"
-#include "game_sa\Enums\eRadioID.h"
-#include "game_sa\Enums\eScriptCommands.h"
-#include "game_sa\Enums\eSoundID.h"
-#include "game_sa\Enums\eSprintType.h"
-#include "game_sa\Enums\eStatModAbilities.h"
-#include "game_sa\Enums\eStats.h"
-#include "game_sa\Enums\eStatsReactions.h"
-#include "game_sa\Enums\eSurfaceType.h"
-#include "game_sa\Enums\eTaskType.h"
-#include "game_sa\Enums\eVehicleClass.h"
-#include "game_sa\Enums\eVehicleHandlingFlags.h"
-#include "game_sa\Enums\eVehicleHandlingModelFlags.h"
-#include "game_sa\Enums\eWeaponFire.h"
-#include "game_sa\Enums\eWeaponFlags.h"
-#include "game_sa\Enums\eWeaponModel.h"
-#include "game_sa\Enums\eWeaponType.h"
-#include "game_sa\Enums\eWinchType.h"
-#include "game_sa\Enums\eItemDefinitionFlags.h"
 
 #include "game_sa\Fx\CarFXRenderer.h"
 #include "game_sa\Fx\FxBox_c.h"

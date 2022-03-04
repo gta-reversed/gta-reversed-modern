@@ -7,16 +7,20 @@ void CColTrianglePlane::InjectHooks()
     RH_ScopedClass(CColTrianglePlane);
     RH_ScopedCategory("Collision");
 
-    RH_ScopedInstall(GetNormal, 0x411610);
+    RH_ScopedOverloadedInstall(GetNormal, "Out", 0x411610, void(CColTrianglePlane::*)(CVector&));
     RH_ScopedInstall(Set, 0x411660);
 }
 
 void CColTrianglePlane::GetNormal(CVector& out)
 {
-    out = UncompressUnitVector(m_normal);
+    out = GetNormal();
 }
 
-void CColTrianglePlane::Set(CompressedVector const* vertices, CColTriangle& triangle)
+CVector CColTrianglePlane::GetNormal() const noexcept {
+    return UncompressUnitVector(m_normal);
+}
+
+void CColTrianglePlane::Set(const CompressedVector* vertices, CColTriangle& triangle)
 {
     const auto vecA = UncompressVector(vertices[triangle.m_nVertA]);
     const auto vecB = UncompressVector(vertices[triangle.m_nVertB]);

@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -26,6 +26,9 @@ public:
         };
     };
     uint8 _pad[3];
+
+public:
+    static constexpr auto Type = TASK_COMPLEX_HANDSIGNAL_ANIM;
 
     CTaskComplexPlayHandSignalAnim(AnimationId animationId, float blendFactor);
     CTask* CreateSubTask(int32 taskType);

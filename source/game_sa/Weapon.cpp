@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -81,14 +81,14 @@ void CWeapon::Initialise(eWeaponType weaponType, int32 ammo, CPed* owner) {
 
     m_nTimeForNextShot = 0;
 
-    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 model1 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId1;
+    int32 model2 = CWeaponInfo::GetWeaponInfo(weaponType, eWeaponSkill::STD)->m_nModelId2;
 
     if (model1 != -1)
-        CModelInfo::ms_modelInfoPtrs[model1]->AddRef();
+        CModelInfo::GetModelInfo(model1)->AddRef();
 
     if (model2 != -1)
-        CModelInfo::ms_modelInfoPtrs[model2]->AddRef();
+        CModelInfo::GetModelInfo(model2)->AddRef();
 
     m_pFxSystem = nullptr;
     m_bNoModel = false;
@@ -120,14 +120,14 @@ void CWeapon::ShutdownWeapons() {
 // 0x73A380
 void CWeapon::Shutdown() 
 {
-    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId1;
-    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nModelId2;
+    int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId1;
+    int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId2;
 
     if (weaponModelID1 != -1)
-        CModelInfo::ms_modelInfoPtrs[weaponModelID1]->RemoveRef();
+        CModelInfo::GetModelInfo(weaponModelID1)->RemoveRef();
     
     if (weaponModelID2 != -1)
-        CModelInfo::ms_modelInfoPtrs[weaponModelID2]->RemoveRef();
+        CModelInfo::GetModelInfo(weaponModelID2)->RemoveRef();
 
     m_nType = eWeaponType::WEAPON_UNARMED;
     m_nState = eWeaponState::WEAPONSTATE_READY;
@@ -206,13 +206,13 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
         CVector creatorPos = FindPlayerCoors();
         CPad* creatorPad = CPad::GetPad(shooter->m_nPedType);
 
-        creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
+        creatorPad->StartShake_Distance(240, 128, creatorPos);
         CamShakeNoPos(&TheCamera, 0.2f);
     }
 
-    if (shooter->m_nType == PED_TYPE_PLAYER_UNUSED)
+    if (shooter->m_nType == PED_TYPE_PLAYER_UNUSED) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter);
-    else if (shooter->m_nType == PED_TYPE_PLAYER_NETWORK && shooter->field_460)
+    else if (shooter->m_nType == PED_TYPE_PLAYER_NETWORK && shooter->field_460) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->field_460);
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
@@ -241,7 +241,7 @@ void CWeapon::Reload(CPed* owner) {
 
 // 0x73B1C0
 bool CWeapon::IsTypeMelee() {
-    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::WEAPSKILL_STD);
+    auto weaponInfo = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
     return weaponInfo->m_nWeaponFire == eWeaponFire::WEAPON_FIRE_MELEE;
 }
 
@@ -335,30 +335,30 @@ float CWeapon::TargetWeaponRangeMultiplier(CEntity* victim, CEntity* weaponOwner
         return 1.0f;
 
     switch (victim->m_nType) {
-    case eEntityType::ENTITY_TYPE_VEHICLE: {
+    case ENTITY_TYPE_VEHICLE: {
         if (!victim->AsVehicle()->IsBike())
             return 3.0f;
         break;
     }
-    case eEntityType::ENTITY_TYPE_PED: {
-        CPed* pedVictim = static_cast<CPed*>(victim);
+    case ENTITY_TYPE_PED: {
+        CPed* pedVictim = victim->AsPed();
 
         if (pedVictim->m_pVehicle && !pedVictim->m_pVehicle->IsBike()) {
             return 3.0f;
         }
 
-        if (CEntity* pAttachedTo = pedVictim->m_pAttachedTo) {
-            if (pAttachedTo->IsVehicle() && !static_cast<CVehicle*>(pAttachedTo)->IsBike())
+        if (CEntity* attachedTo = pedVictim->m_pAttachedTo) {
+            if (attachedTo->IsVehicle() && !attachedTo->AsVehicle()->IsBike())
                 return 3.0f;
         }
         break;
     }
     }
 
-    if (!weaponOwner->IsPed() || !static_cast<CPed*>(weaponOwner)->IsPlayer())
+    if (!weaponOwner->IsPed() || !weaponOwner->AsPed()->IsPlayer())
         return 1.0f;
 
-    switch (TheCamera.GetActiveCamera().m_nMode) {
+    switch (CCamera::GetActiveCamera().m_nMode) {
     case MODE_TWOPLAYER_IN_CAR_AND_SHOOTING:
         return 2.0f;
     case MODE_HELICANNON_1STPERSON:
@@ -483,8 +483,8 @@ bool CWeapon::FireInstantHitFromCar(CVehicle* vehicle, bool leftSide, bool right
 }
 
 // 0x73F480
-bool CWeapon::CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* colPoint, eWeaponType weaponType, CVector const& origin, CVector const& target) {
-    return plugin::CallAndReturn<bool, 0x73F480, CEntity**, CColPoint*, eWeaponType, CVector const&, CVector const&>(pCarEntity, colPoint, weaponType, origin, target);
+bool CWeapon::CheckForShootingVehicleOccupant(CEntity** pCarEntity, CColPoint* colPoint, eWeaponType weaponType, const CVector& origin, const CVector& target) {
+    return plugin::CallAndReturn<bool, 0x73F480, CEntity**, CColPoint*, eWeaponType, const CVector&, const CVector&>(pCarEntity, colPoint, weaponType, origin, target);
 }
 
 // 0x73F910
@@ -519,8 +519,10 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
-    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::WEAPSKILL_STD;
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
+}
 
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

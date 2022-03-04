@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -78,3 +78,4 @@ enum eWeaponType : uint32
     WEAPON_ANYWEAPON,
     WEAPON_FLARE,
 };
+constexpr auto NUM_WEAPONS{ (size_t)WEAPON_LAST_WEAPON + 1 };

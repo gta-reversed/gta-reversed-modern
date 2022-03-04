@@ -12,9 +12,9 @@ void CTaskSimpleInAir::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleInAir);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x678CD0);
     RH_ScopedInstall(DeleteAnimCB, 0x678E60);
-    //VTABLE
     RH_ScopedInstall(ProcessPed_Reversed, 0x680600);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x678DC0);
 }
@@ -28,9 +28,9 @@ CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsin
 // 0x678CD0
 CTaskSimpleInAir::CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump) : m_timer()
 {
-    this->bUsingJumpGlide = bUsingJumpGlide;
-    this->bUsingFallGlide = bUsingFallGlide;
-    this->bUsingClimbJump = bUsingClimbJump;
+    this->m_bUsingJumpGlide = bUsingJumpGlide;
+    this->m_bUsingFallGlide = bUsingFallGlide;
+    this->m_bUsingClimbJump = bUsingClimbJump;
 
     m_pAnim = nullptr;
     m_fMinZSpeed = 0.0F;
@@ -82,7 +82,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     if (!m_pAnim)
     {
         ped->bIsInTheAir = true;
-        if (bUsingJumpGlide)
+        if (m_bUsingJumpGlide)
         {
             m_pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_JUMP_GLIDE);
             if (!m_pAnim)
@@ -90,7 +90,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (!m_pAnim || m_pAnim->m_fBlendAmount < 1.0F && m_pAnim->m_fBlendDelta <= 0.0F)
                 CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_JUMP_GLIDE, 4.0F);
         }
-        else if (bUsingFallGlide)
+        else if (m_bUsingFallGlide)
         {
             if (ped->m_vecMoveSpeed.z <= 0.0F)
             {
@@ -120,10 +120,10 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         ped->ApplyMoveForce(0.0F, 0.0F, CTimer::GetTimeStep() * ped->m_fMass * 0.35F * GAME_GRAVITY);
     }
     else if (ped->m_vecMoveSpeed.z > 0.0F && !ped->m_vecMoveSpeed.IsZero()
-        || !bUsingFallGlide && (ped->m_nPedState == PEDSTATE_DIE || ped->m_nPedState == PEDSTATE_DEAD)
+        || !m_bUsingFallGlide && (ped->m_nPedState == PEDSTATE_DIE || ped->m_nPedState == PEDSTATE_DEAD)
         )
     {
-        if (!bUsingFallGlide)
+        if (!m_bUsingFallGlide)
         {
             if (m_pParentTask && m_pParentTask->m_pParentTask && m_pParentTask->m_pParentTask->GetTaskType() == TASK_COMPLEX_JUMP)
             {
@@ -145,7 +145,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         if (!bStopFalling)
             bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, colEntity, true, true, false, true, false, false, 0);
 
-        if (bUsingFallGlide)
+        if (m_bUsingFallGlide)
         {
             if (ms_fSlowFallThreshold < ped->m_vecMoveSpeed.z && ped->m_vecMoveSpeed.z <= 0.0F)
             {
@@ -180,7 +180,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             || ped->m_pAttachedTo
             )
         {
-            if (m_pAnim && bUsingFallGlide)
+            if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_fBlendDelta = -1000.0F;
                 m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
@@ -192,10 +192,8 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         }
     }
 
-    if (bUsingJumpGlide
-        && !m_pClimbEntity
-        && ped->m_nPedState != PEDSTATE_DIE
-        && ped->m_nPedState != PEDSTATE_DEAD
+    if (m_bUsingJumpGlide && !m_pClimbEntity
+        && ped->IsAlive()
         && ped->IsPlayer()
         && CGame::CanSeeOutSideFromCurrArea()
         && ped->m_vecMoveSpeed.z > -0.2F
@@ -241,9 +239,9 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x678E60
-void CTaskSimpleInAir::DeleteAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleInAir::DeleteAnimCB(CAnimBlendAssociation* anim, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleInAir*>(data);
-    if (pTask && pTask->m_pAnim && pTask->m_pAnim == pAnim)
-        pTask->m_pAnim = nullptr;
+    auto task = reinterpret_cast<CTaskSimpleInAir*>(data);
+    if (task && task->m_pAnim && task->m_pAnim == anim)
+        task->m_pAnim = nullptr;
 }

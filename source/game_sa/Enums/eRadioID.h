@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,7 +7,7 @@
 #pragma once
 
 // Genre-based names
-enum eRadioID : int8 {
+enum eRadioID : uint8 {
     RADIO_EMERGENCY_AA,    // AA
     RADIO_CLASSIC_HIP_HOP, // Playback FM
     RADIO_COUNTRY,         // K-Rose

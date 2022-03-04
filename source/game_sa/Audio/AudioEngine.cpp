@@ -126,7 +126,7 @@ bool CAudioEngine::Initialise() {
     }
 
     CAEAudioEntity::m_pAudioEventVolumes = new int8[45401];
-    FILESTREAM file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
+    auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
     if (!file) {
         return false;
     }
@@ -137,7 +137,7 @@ bool CAudioEngine::Initialise() {
     CFileMgr::CloseFile(file);
 
     m_FrontendAE.Initialise();
-    CAudioEngine::SetEffectsFaderScalingFactor(0.0);
+    CAudioEngine::SetEffectsFaderScalingFactor(0.0f);
     CAEAudioUtility::StaticInitialise();
     CAEPedAudioEntity::StaticInitialise();
     CAEPedSpeechAudioEntity::StaticInitialise();
@@ -358,7 +358,7 @@ void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn
 }
 
 // 0x506EE0
-void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, CVector& posn) {
+void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn) {
     m_CollisionAE.ReportGlassCollisionEvent(glassSoundType, posn, 0);
 }
 
@@ -384,7 +384,7 @@ void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CPed* ped) {
 
 // 0x507390
 void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CVehicle* vehicle) {
-    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle, 0.0, 1.0f);
+    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle, 0.0f, 1.0f);
 }
 
 // 0x5073B0

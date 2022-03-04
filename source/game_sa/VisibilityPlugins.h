@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -14,6 +14,7 @@ class CClumpModelInfo;
 class CAtomicModelInfo;
 
 enum eAtomicComponentFlag {
+    ATOMIC_IS_NOT_PRESENT = 0x0,
     ATOMIC_IS_OK_STATE = 0x1,
     ATOMIC_IS_DAM_STATE = 0x2,
     ATOMIC_IS_LEFT = 0x4,
@@ -55,6 +56,11 @@ struct tFrameVisibilityPlugin {
     };
 };
 VALIDATE_SIZE(tFrameVisibilityPlugin, 0x4);
+
+// TODO: Probably belongs inside `CVisibilityPlugins`
+static void weaponPedsForPc_Insert(CPed* ped) {
+    plugin::Call<0x5E46D0>(ped);
+}
 
 class CVisibilityPlugins {
 public:

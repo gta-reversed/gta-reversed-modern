@@ -6,10 +6,10 @@ class CEventGunShotWhizzedBy : public CEventGunShot {
 public:
     static void InjectHooks();
 
-    CEventGunShotWhizzedBy(CEntity* entity, CVector const& startPoint, CVector const& endPoint, bool bHasNoSound);
+    CEventGunShotWhizzedBy(CEntity* entity, const CVector& startPoint, const CVector& endPoint, bool bHasNoSound);
     ~CEventGunShotWhizzedBy() {};
 private:
-    CEventGunShotWhizzedBy* Constructor(CEntity* entity, CVector const& startPoint, CVector const& endPoint, bool bHasNoSound);
+    CEventGunShotWhizzedBy* Constructor(CEntity* entity, const CVector& startPoint, const CVector& endPoint, bool bHasNoSound);
 public:
     eEventType GetEventType() const override { return EVENT_SHOT_FIRED_WHIZZED_BY; }
     int32 GetEventPriority() const override { return 36; }
