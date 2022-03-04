@@ -10,7 +10,7 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
 
     RH_ScopedGlobalInstall(FinishAnimCarSlowDragPedOutCB, 0x648180);
     RH_ScopedInstall(ComputeAnimID_Wrapper, 0x648100);
-    //RH_ScopedInstall(StartAnim, 0x64C010);
+    RH_ScopedInstall(StartAnim, 0x64C010);
     //RH_ScopedInstall(Clone_Reversed, 0x649FD0);
     //RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
     //RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
@@ -88,7 +88,9 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
 
 // 0x64C010
 void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
-    plugin::CallMethod<0x64C010, CTaskSimpleCarSlowDragPedOut*, CPed*>(this, ped);
+    const auto [grp, id] = ComputeAnimID();
+    m_animAssoc = CAnimManager::BlendAnimation(ped->m_pRwClump, grp, id, 1000.f);
+    m_animAssoc->SetFinishCallback(FinishAnimCarSlowDragPedOutCB, this);
 }
 
 // 0x64BFB0
