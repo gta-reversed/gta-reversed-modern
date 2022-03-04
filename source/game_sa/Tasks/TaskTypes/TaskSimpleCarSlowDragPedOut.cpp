@@ -8,8 +8,8 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x647FE0);
     RH_ScopedInstall(Destructor, 0x648070);
 
-    //RH_ScopedGlobalInstall(FinishAnimCarSlowDragPedOutCB, 0x648180);
-    //RH_ScopedInstall(ComputeAnimID, 0x648100);
+    RH_ScopedGlobalInstall(FinishAnimCarSlowDragPedOutCB, 0x648180);
+    RH_ScopedInstall(ComputeAnimID_Wrapper, 0x648100);
     //RH_ScopedInstall(StartAnim, 0x64C010);
     //RH_ScopedInstall(Clone_Reversed, 0x649FD0);
     //RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
@@ -48,12 +48,42 @@ CTaskSimpleCarSlowDragPedOut::~CTaskSimpleCarSlowDragPedOut() {
 // 0x648180
 void CTaskSimpleCarSlowDragPedOut::FinishAnimCarSlowDragPedOutCB(CAnimBlendAssociation* anim, void* taskPtr) {
     auto self = (CTaskSimpleCarSlowDragPedOut*)taskPtr; // `this` ptr of the instance that this anim belongs to
-    plugin::Call<0x648180, CAnimBlendAssociation*, CTaskSimpleCarSlowDragPedOut*>(anim, self);
+    self->m_animFinished = true;
+    self->m_animAssoc = nullptr;
+    if (self->m_vehicle) {
+        // Open door
+        const auto [grp, id] = self->ComputeAnimID();
+        self->m_vehicle->ProcessOpenDoor(nullptr, self->m_targetDoor, grp, id, 1.f);
+
+        // Mark door as opened (Not sure why it's done here, not in `ProcessOpenDoor`...)
+        if (self->m_vehicle->IsAutomobile()) {
+            self->m_vehicle->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)self->m_targetDoor);
+        }
+    }
 }
 
 // 0x648100
-void CTaskSimpleCarSlowDragPedOut::ComputeAnimID(AssocGroupId& animGrp, AnimationId& animId) {
-    return plugin::CallMethod<0x648100, CTaskSimpleCarSlowDragPedOut*, AssocGroupId&, AnimationId&>(this, animGrp, animId);
+std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID() {
+    const auto id = [this] {
+        switch (m_targetDoor)
+        {
+        case TARGET_DOOR_FRONT_RIGHT:
+        case TARGET_DOOR_REAR_RIGHT:
+            return ANIM_ID_CAR_PULLOUT_RHS;
+
+        case TARGET_DOOR_DRIVER:
+        case TARGET_DOOR_REAR_LEFT:
+            return ANIM_ID_CAR_PULLOUT_LHS;
+
+        case TARGET_DOOR_UNK: // TODO: Figure this out
+            return ANIM_ID_UNKNOWN_15;
+
+        default:
+            assert(0); // Not reachable
+            return ANIM_ID_UNDEFINED;
+        }
+    }();
+    return { (AssocGroupId)m_vehicle->GetAnimGroup().GetGroup(id), id };
 }
 
 // 0x64C010
@@ -74,4 +104,8 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
 // 0x6480E0
 bool CTaskSimpleCarSlowDragPedOut::SetPedPosition(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x6480E0, CTaskSimpleCarSlowDragPedOut*, CPed*>(this, ped);
+}
+
+void CTaskSimpleCarSlowDragPedOut::ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId) {
+    std::tie(animGrp, animId) = ComputeAnimID();
 }

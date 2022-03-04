@@ -1791,6 +1791,10 @@ int32 CVehicle::GetRopeIndex() {
     return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
 }
 
+CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
+    return CVehicleAnimGroupData::m_vehicleAnimGroups[m_pHandlingData->m_nAnimGroup];
+}
+
 // 0x6D3CB0
 void CVehicle::ReleasePickedUpEntityWithWinch()
 {

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include "TaskSimple.h"
 #include "Enums/eTargetDoor.h"
 
@@ -9,7 +10,7 @@ class CTaskUtilityLineUpPedWithCar;
 
 class CTaskSimpleCarSlowDragPedOut : public CTaskSimple {
 public:
-    bool m_unk3{};                                          // 8
+    bool m_animFinished{};                                          // 8
     CAnimBlendAssociation* m_animAssoc{};                   // 0xC
     CVehicle* m_vehicle{};                                  // 0x10
     eTargetDoor m_targetDoor{};                             // 0x14
@@ -27,7 +28,7 @@ public:
 
     static void FinishAnimCarSlowDragPedOutCB(CAnimBlendAssociation* anim, void* task);
 
-    void ComputeAnimID(AssocGroupId& animGrp, AnimationId& animId);
+    std::pair<AssocGroupId, AnimationId> ComputeAnimID();
     void StartAnim(CPed* ped);
 
     CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut{ *this }; }
@@ -37,6 +38,8 @@ public:
     bool SetPedPosition(CPed* ped) override;
 
 private:
+    void ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId);
+
     CTaskSimpleCarSlowDragPedOut* Constructor(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) {
         this->CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(veh, targetDoor, lineUpPedWithCarTask, isPedStatic);
         return this;

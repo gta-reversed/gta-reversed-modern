@@ -489,7 +489,7 @@ void CDamageManager::SetDoorOpen(eDoors door) {
         SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
         break;
     case eDoorStatus::DAMSTATE_NOTPRESENT:
-        assert(0 && "Door should be present @ SetDoorOpen");
+        //assert(0 && "Door should be present @ SetDoorOpen");
         break;
     }
 }
