@@ -101,7 +101,7 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (!bCanTriggerGangWarWhenOnAMission && CTheScripts::IsPlayerOnAMission())
         return;
 
-    if (pedType != ePedType::PED_TYPE_GANG1 && pedType != ePedType::PED_TYPE_GANG3)
+    if (pedType != PED_TYPE_GANG1 && pedType != PED_TYPE_GANG3)
         return;
 
     if (NumSpecificZones == 0)
@@ -294,20 +294,8 @@ bool CGangWars::PickZoneToAttack() {
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
-    auto size = CPools::ms_pVehiclePool->GetSize();
-
-    if (!size)
-        return;
-
-    auto vehPool = CPools::GetVehiclePool();
-    for (auto i = vehPool->GetSize(); i; i--) {
-        auto id = vehPool->GetIdAt(i - 1);
-
-        if (id < 0)
-            continue;
-
-        auto vehicle = vehPool->GetAt(i - 1);
-
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
         if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
             vehicle->vehicleFlags.bPartOfAttackWave = false;
             vehicle->SetVehicleCreatedBy(1);
