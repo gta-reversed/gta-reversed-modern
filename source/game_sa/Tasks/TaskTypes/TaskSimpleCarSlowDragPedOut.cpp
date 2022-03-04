@@ -13,7 +13,7 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedInstall(StartAnim, 0x64C010);
     //RH_ScopedInstall(Clone_Reversed, 0x649FD0);
     //RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
-    //RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
     //RH_ScopedInstall(ProcessPed_Reversed, 0x64E060);
     //RH_ScopedInstall(SetPedPosition_Reversed, 0x6480E0);
 }
@@ -94,8 +94,18 @@ void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
 }
 
 // 0x64BFB0
-bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x64BFB0, CTaskSimpleCarSlowDragPedOut*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const*) {
+    if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
+        if (m_animAssoc) {
+            m_animAssoc->m_fBlendDelta = -1000.f;
+        }
+        if (m_vehicle) {
+            const auto [grp, id] = ComputeAnimID();
+            m_vehicle->ProcessOpenDoor(ped, m_targetDoor, grp, id, 1.f);
+        }
+        return true;
+    }
+    return false;
 }
 
 // 0x64E060
