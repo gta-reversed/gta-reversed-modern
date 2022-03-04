@@ -1,5 +1,6 @@
 #include "StdInc.h"
 #include "TaskSimpleCarSlowDragPedOut.h"
+#include "TaskUtilityLineUpPedWithCar.h"
 
 void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedClass(CTaskSimpleCarSlowDragPedOut);
@@ -15,7 +16,7 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
     RH_ScopedInstall(GetTaskType_Reversed, 0x648060);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x64BFB0);
     RH_ScopedInstall(ProcessPed_Reversed, 0x64E060);
-    //RH_ScopedInstall(SetPedPosition_Reversed, 0x6480E0);
+    RH_ScopedInstall(SetPedPosition_Reversed, 0x6480E0);
 }
 
 // 0x647FE0
@@ -165,7 +166,8 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
 
 // 0x6480E0
 bool CTaskSimpleCarSlowDragPedOut::SetPedPosition(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x6480E0, CTaskSimpleCarSlowDragPedOut*, CPed*>(this, ped);
+    m_lineUpPedWithCarTask->ProcessPed(ped, m_vehicle, m_animAssoc);
+    return true;
 }
 
 void CTaskSimpleCarSlowDragPedOut::ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId) {
