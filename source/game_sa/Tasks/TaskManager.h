@@ -76,7 +76,7 @@ public:
     void ClearTaskEventResponse();
     void ManageTasks();
 
-    // Why they doesn't have version for *primary tasks*? :thinking
+    // Why they doesn't have version for *primary tasks*? :thinking:
     CTask* GetTaskPrimary(int32 taskIndex) noexcept {
         return m_aPrimaryTasks[taskIndex];
     }
