@@ -5270,7 +5270,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
             case eCarNodes::CAR_WING_RF:
                 break;
             default: {
-                panel->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
+                panel->SetPanel(nodeIdx, 1, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
                 break;
             }
             }
@@ -5279,7 +5279,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
         break;
     }
     case ePanelDamageState::DAMSTATE_OPENED: {
-        if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+        if (panel == ePanels::WINDSCREEN_PANEL) {
             m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_WINDSCREEN_SHATTER, 0.f);
         }
         SetComponentVisibility(frame, 2);
@@ -5287,7 +5287,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
     }
     case ePanelDamageState::DAMSTATE_OPENED_DAMAGED: {
         if (createWindowGlass) {
-            if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+            if (panel == ePanels::WINDSCREEN_PANEL) {
                 CGlass::CarWindscreenShatters(this);
             }
         } else {
