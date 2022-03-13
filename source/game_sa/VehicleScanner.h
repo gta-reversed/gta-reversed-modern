@@ -6,5 +6,5 @@ class CPed;
 
 class CVehicleScanner : public CEntityScanner {
 public:
-    void ScanForVehiclesInRange(CPed* ped);
+    void ScanForVehiclesInRange(const CPed& ped);
 };

@@ -2,7 +2,7 @@
 
 #include "VehicleScanner.h"
 
-void CVehicleScanner::ScanForVehiclesInRange(CPed* ped)
-{
-    plugin::CallMethod<0x5FFE60, CVehicleScanner*, CPed*>(this, ped);
+// 0x5FFE60
+void CVehicleScanner::ScanForVehiclesInRange(const CPed& ped) {
+    plugin::CallMethod<0x5FFE60, CVehicleScanner*, const CPed&>(this, ped);
 }

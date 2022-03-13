@@ -133,7 +133,7 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
     if (!numPedsToScan)
         return;
 
-    CEntity** entities = ped->m_pIntelligence->m_entityScanner.m_apEntities;
+    CEntity** entities = ped->GetIntelligence()->GetPedEntities();
     for (size_t entityIndex = 0; entityIndex < numPedsToScan; entityIndex++) {
         CEntity* entity = entities[entityIndex];
         if (!entity)
