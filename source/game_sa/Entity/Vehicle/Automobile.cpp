@@ -3634,7 +3634,12 @@ void CAutomobile::NitrousControl(int8 boost)
         }
         StopNitroEffect();
     } else {
-        const auto driverPad = m_pDriver->IsPlayer() ? m_pDriver->AsPlayer()->GetPadFromPlayer() : nullptr;
+        // m_bIsVisible || m_bWasPostponed || m_bIsInSafePosition || m_bIsStuck || m_bHasContacted
+        bool flag = m_nFlags & 0xf8;
+
+        CPad* driverPad = nullptr;
+        if (!flag && m_pDriver->IsPlayer())
+            driverPad = m_pDriver->AsPlayer()->GetPadFromPlayer();
 
         if (m_fTireTemperature == 1.f && m_nNitroBoosts > 0) {
             if (m_nStatus == STATUS_PHYSICS) {
