@@ -112,6 +112,7 @@
 #include "TaskComplexGetUpAndStandStill.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "TaskSimpleDie.h"
+#include "TaskSimpleDuck.h"
 #include "TaskComplexPolicePursuit.h"
 #include "TaskSimpleFacial.h"
 #include "TaskComplexCopInCar.h"
@@ -492,6 +493,7 @@ void InjectHooksMain() {
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();
         CTaskSimpleDie::InjectHooks();
+        CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
         // CTaskComplexCopInCar::InjectHooks();
