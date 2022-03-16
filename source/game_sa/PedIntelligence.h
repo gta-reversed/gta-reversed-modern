@@ -81,7 +81,7 @@ public:
     void SetHearingRange(float range);
     void SetSeeingRange(float range);
     bool IsInHearingRange(const CVector& posn);
-    bool IsInSeeingRange(const CVector& posn);
+    bool IsInSeeingRange(const CVector& posn) const;
     bool FindRespectedFriendInInformRange();
     bool IsRespondingToEvent(eEventType eventType);
     void AddTaskPhysResponse(CTask* task, int32 unUsed);
@@ -110,7 +110,7 @@ public:
     void ProcessEventHandler();
     bool IsFriendlyWith(const CPed& ped) const;
     bool IsThreatenedBy(const CPed& ped) const;
-    bool Respects(CPed* ped);
+    bool Respects(CPed* ped) const;
     bool IsInACarOrEnteringOne();
     static bool AreFriends(const CPed& ped1, const CPed& ped2);
     bool IsPedGoingSomewhereOnFoot();
@@ -128,7 +128,7 @@ public:
     void ProcessFirst();
     void Process();
     CTask* GetActivePrimaryTask();
-    float GetPedFOVRange();
+    float GetPedFOVRange() const;
 
     void SetDmRadius(float r) { m_fDmRadius = r; }
     void SetNumPedsToScan(uint32 n) { m_nDmNumPedsToScan = n; }
@@ -150,6 +150,7 @@ public:
     CPedScanner&     GetPedScanner()      { return m_pedScanner; }
     CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
     CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities; }     // 0x4893E0
+    CEntity*         GetPedEntity(uint32 index) { return GetPedEntities()[index]; } // todo: GetPedEntity or degrades readability?
     CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities; }
 
 private:

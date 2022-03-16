@@ -324,7 +324,7 @@ public:
     eWeaponSkill        m_nWeaponSkill{ eWeaponSkill::STD };
     eFightingStyle      m_nFightingStyle{ STYLE_STANDARD };
     char                m_nAllowedAttackMoves{};
-    char                field_72F{};
+    uint8               field_72F; // taskId related? 0x4B5C47
     CFire*              m_pFire{};
     float               field_734{1.f};
     CEntity*            m_pLookTarget{};
@@ -525,26 +525,33 @@ public:
     void SetStayInSamePlace(bool enable) { bStayInSamePlace = enable; }
     bool IsWearingGoggles() const { return !!m_pGogglesObject; }
 
+    // NOTSA helpers
     void SetArmour(float v) { m_fArmour = v; }
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
+    CAcquaintance& GetAcquaintance() { return m_acquaintance; }
     CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+
     uint8 GetCreatedBy() { return m_nCreatedBy; }
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
-    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+
     CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
@@ -554,8 +561,6 @@ public:
     CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
-
-    // NOTSA helpers
 
     bool IsFollowerOfGroup(const CPedGroup& group);
 

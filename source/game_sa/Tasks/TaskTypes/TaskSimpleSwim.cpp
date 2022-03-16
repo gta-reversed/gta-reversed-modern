@@ -246,7 +246,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped)
             CPedDamageResponseCalculator damageCalculator(nullptr, CTimer::GetTimeStep(), WEAPON_DROWNING, PED_PIECE_TORSO, false);
             CEventDamage eventDamage(nullptr, CTimer::GetTimeInMS(), WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
             if (eventDamage.AffectsPed(ped))
-                damageCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                damageCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
             else
                 eventDamage.m_damageResponse.m_bDamageCalculated = true;
             ped->GetEventGroup().Add(&eventDamage, false);
@@ -899,7 +899,7 @@ void CTaskSimpleSwim::ProcessControlAI(CPed* ped)
             if (m_pPed)
             {
                 CPedGroup* pedGroup = CPedGroups::GetPedsGroup(ped);
-                if (pedGroup && pedGroup->m_groupMembership.GetLeader() == m_pPed)
+                if (pedGroup && pedGroup->GetMembership().GetLeader() == m_pPed)
                 {
                     bPedGroupSet = true;
                     auto swimTask = m_pPed->GetIntelligence()->GetTaskSwim();

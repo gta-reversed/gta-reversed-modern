@@ -186,7 +186,7 @@ void CPed::InjectHooks() {
 
 // Most of the variable/flag setting is done in the header
 CPed::CPed(ePedType pedType) : CPhysical{},
-    m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
+    m_acquaintance{CPedType::GetPedTypeAcquaintances(pedType)},
     m_nPedType{ pedType }
 {
     // Has to be here for now, because it's inited before `m_nPedType` (Which is used in CPedIntel's ctor)
@@ -217,7 +217,7 @@ CPed::CPed(ePedType pedType) : CPhysical{},
 
     if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
-            m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
+            GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
 
             CEventAcquaintancePedHate event(FindPlayerPed());
             GetEventGroup().Add(&event);
@@ -1580,7 +1580,7 @@ void CPed::ProcessBuoyancy()
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancy(this, fBuoyancy, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
         physicalFlags.bTouchingWater = false;
-        auto swimTask = m_pIntelligence->GetTaskSwim();
+        auto swimTask = GetIntelligence()->GetTaskSwim();
         if (swimTask)
             swimTask->m_fSwimStopTime = 1000.0F;
 
@@ -1593,7 +1593,7 @@ void CPed::ProcessBuoyancy()
             auto pStandingOnVehicle = standingOnEntity->AsVehicle();
             if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
-                auto swimTask = m_pIntelligence->GetTaskSwim();
+                auto swimTask = GetIntelligence()->GetTaskSwim();
                 if (!swimTask)
                     return;
 
@@ -1660,12 +1660,12 @@ void CPed::ProcessBuoyancy()
             GetEventGroup().Add(&cEvent, false);
         }
         else {
-            auto swimTask = m_pIntelligence->GetTaskSwim();
+            auto swimTask = GetIntelligence()->GetTaskSwim();
             if (swimTask) {
                 swimTask->m_fSwimStopTime = 0.0F;
                 bPlayerSwimmingOrClimbing = true;
             }
-            else if (m_pIntelligence->GetTaskClimb()) {
+            else if (GetIntelligence()->GetTaskClimb()) {
                 bPlayerSwimmingOrClimbing = true;
             }
             else {
@@ -1687,7 +1687,7 @@ void CPed::ProcessBuoyancy()
         return;
     }
 
-    auto swimTask = m_pIntelligence->GetTaskSwim();
+    auto swimTask = GetIntelligence()->GetTaskSwim();
     if (bIsStanding && swimTask)
     {
         swimTask->m_fSwimStopTime += CTimer::GetTimeStep();

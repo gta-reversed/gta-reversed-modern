@@ -403,11 +403,11 @@ void CCheat::EverybodyAttacksPlayerCheat() {
             if (!ped || ped->IsPlayer())
                 continue;
 
-            ped->m_acquaintance.SetAsAcquaintance(4, CPedType::GetPedFlag(PED_TYPE_PLAYER1));
+            ped->GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(PED_TYPE_PLAYER1));
 
             CEventAcquaintancePedHate event(player);
             event.m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT;
-            ped->m_pIntelligence->m_eventGroup.Add(&event, false);
+            ped->GetEventGroup().Add(&event, false);
         }
     }
 }
@@ -626,13 +626,13 @@ void CCheat::MayhemCheat() {
                 continue;
 
             for (uint32 pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
-                ped->m_acquaintance.SetAsAcquaintance(4, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
+                ped->GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
             }
             CPed* closestPed = ped->GetIntelligence()->GetPedScanner().GetClosestPedInRange()->AsPed();
             if (closestPed) {
                 CEventAcquaintancePedHate event(closestPed);
                 event.m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT;
-                ped->m_pIntelligence->m_eventGroup.Add(&event, false);
+                ped->GetEventGroup().Add(&event, false);
             }
         }
     } else {
@@ -1044,7 +1044,7 @@ void CCheat::SuicideCheat() {
     CEventDamage damageEvent(nullptr, CTimer::GetTimeInMS(), WEAPON_UNARMED, PED_PIECE_TORSO, 0, false, false);
     CPlayerPed* player = FindPlayerPed();
     if (damageEvent.AffectsPed(player))
-        damageCalculator.ComputeDamageResponse(player, &damageEvent.m_damageResponse, true);
+        damageCalculator.ComputeDamageResponse(player, damageEvent.m_damageResponse, true);
     else
         damageEvent.m_damageResponse.m_bDamageCalculated = true;
     player->GetEventGroup().Add(&damageEvent, false);
