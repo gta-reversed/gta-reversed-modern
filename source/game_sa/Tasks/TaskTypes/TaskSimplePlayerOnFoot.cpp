@@ -937,7 +937,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         player->GetIntelligence()->ClearTaskDuckSecondary();
         auto useGunTask = player->GetIntelligence()->GetTaskUseGun();
         if (!useGunTask || useGunTask->m_pWeaponInfo->flags.bAimWithArm) {
-            int32 pedMoveState = PEDMOVE_NONE;
+            auto pedMoveState = PEDMOVE_NONE;
             if (pad->GetSprint()) {
                 if (pedMoveBlendRatio <= 0.5f) {
                     return;

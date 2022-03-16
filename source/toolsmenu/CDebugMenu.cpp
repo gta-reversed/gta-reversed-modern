@@ -356,7 +356,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();

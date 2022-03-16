@@ -261,13 +261,9 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped)
 // 0x68A8E0
 void CTaskSimpleSwim::ApplyRollAndPitch(CPed* ped)
 {
-    LimbOrientation theLimbOrientation{};
-    theLimbOrientation.m_fYaw = m_fAimingRotation;
-    theLimbOrientation.m_fPitch = m_fUpperTorsoRotationX;
-    ped->m_pedIK.RotateTorso(ped->m_apBones[PED_NODE_UPPER_TORSO], theLimbOrientation, rwCOMBINEREPLACE);
-    RwObject* rwObject = ped->m_pRwObject;
-    if (rwObject)
-    {
+    LimbOrientation LimbOrientation(m_fAimingRotation, m_fUpperTorsoRotationX);
+    ped->m_pedIK.RotateTorso(ped->m_apBones[PED_NODE_UPPER_TORSO], LimbOrientation, rwCOMBINEREPLACE);
+    if (ped->m_pRwObject) {
         CMatrix pedMatrix(ped->GetModellingMatrix(), false);
         CMatrix rotationMatrix;
         rotationMatrix.SetTranslate(CVector(0.0f, 0.0f, 0.0f));
