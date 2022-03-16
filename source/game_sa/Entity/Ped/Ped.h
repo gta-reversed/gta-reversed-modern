@@ -543,6 +543,7 @@ public:
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
+    CTaskManager& GetTaskManager() const { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }

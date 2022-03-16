@@ -124,7 +124,7 @@ CPedIntelligence::CPedIntelligence(CPed* ped) :
 
 // 0x607300
 CPedIntelligence::~CPedIntelligence() {
-    GetPlayerRelationshipRecorder()->ClearRelationshipWithPlayer(m_pPed);
+    GetPlayerRelationshipRecorder().ClearRelationshipWithPlayer(m_pPed);
 }
 
 // 0x600B50
@@ -1044,9 +1044,7 @@ void CPedIntelligence::Process() {
     m_eventScanner.ScanForEvents(*m_pPed);
     m_eventHandler.HandleEvents();
     m_TaskMgr.ManageTasks();
-
-    auto recorder = GetPlayerRelationshipRecorder();
-    recorder->RecordRelationshipWithPlayer(m_pPed);
+    GetPlayerRelationshipRecorder().RecordRelationshipWithPlayer(m_pPed);
     LookAtInterestingEntities();
 
     g_LoadMonitor.EndTimer(0);
