@@ -29,8 +29,6 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-const char gta_empty_string[4] = {0, 0, 0, 0};
-
 #define DEFAULT_SCREEN_WIDTH (640.0f)
 #define DEFAULT_SCREEN_HEIGHT (448.0f)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)

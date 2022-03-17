@@ -199,7 +199,7 @@ void CText::Load(bool bKeepMissionPack) {
     strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
     m_bCdErrorLoaded = true;
 
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
     if (bKeepMissionPack)
         return;
@@ -208,7 +208,7 @@ void CText::Load(bool bKeepMissionPack) {
         if (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CTimer::Suspend();
             LoadMissionPackText();
-            CFileMgr::SetDir(gta_empty_string);
+            CFileMgr::SetDir("");
             CTimer::Resume();
         }
     }
