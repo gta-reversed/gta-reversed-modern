@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "RepeatSector.h"
 class CEntity;
 class CPed;
 
@@ -27,8 +28,7 @@ public:
     ~CEntityScanner();
 
     void Clear();
-    virtual void ScanForEntitiesInRange(int32 arg2, const CPed& ped);
-    [[nodiscard]] CEntity* GetClosestPedInRange() const;
+    virtual void ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped);
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

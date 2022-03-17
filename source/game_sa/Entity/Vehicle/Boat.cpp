@@ -481,7 +481,7 @@ void CBoat::ProcessControl_Reversed() {
                 fGivenDamage *= 0.5F;
         } else {
             if (fGivenDamage > 60.0F && m_pDriver)
-                m_pDriver->Say(0x44U, 0, 1.0F, 0, 0, 0);
+                m_pDriver->Say(68);
 
             fGivenDamage -= 25.0F;
             if (vehicleFlags.bTakeLessDamage)

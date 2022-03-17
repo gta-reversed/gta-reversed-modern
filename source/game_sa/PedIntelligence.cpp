@@ -800,7 +800,7 @@ bool CPedIntelligence::TestForStealthKill(CPed* target, bool bFullTest) {
         );
         CPedGroup* pedGroup = CPedGroups::GetPedsGroup(target);
         if (bAcquaintancesFlagSet && pedGroup) {
-            CEventGroupEvent* eventGroupEvent = pedGroup->GetIntelligence().m_oldEventGroupEvent;
+            CEventGroupEvent* eventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
             if (eventGroupEvent && eventGroupEvent->GetSourceEntity() == m_pPed && bAcquaintancesFlagSet)
                 return false;
         }

@@ -64,7 +64,11 @@ public:
     static CColModel& ms_PelletTestCol;
 
 public:
-    CWeapon() = default;
+    CWeapon() { // 0x441E00
+        field_14    = 0;
+        m_bNoModel  = false;
+        m_pFxSystem = nullptr;
+    };
     CWeapon(eWeaponType weaponType, int32 ammo);
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);

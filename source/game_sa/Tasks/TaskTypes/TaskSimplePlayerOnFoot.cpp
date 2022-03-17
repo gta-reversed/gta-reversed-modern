@@ -635,7 +635,7 @@ PED_WEAPON_AIMING_CODE:
                     CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                     if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
                         if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
-                            player->Say(176, 0, 1.0f, 0, 0, 0);
+                            player->Say(176);
                         }
                         CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
                         if (pedGroup) {

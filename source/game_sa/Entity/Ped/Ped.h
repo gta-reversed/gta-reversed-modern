@@ -28,7 +28,6 @@
 #include "ePedStats.h"
 #include "ePedType.h"
 
-
 class CPedGroup;
 class CCivilianPed;
 class CEmergencyPed;
@@ -384,7 +383,6 @@ public:
     static void* operator new(unsigned size);
     static void operator delete(void* data);
 
-    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{}, m_pedIK{CPedIK(this)} {}
     CPed(ePedType pedType);
     ~CPed();
 
