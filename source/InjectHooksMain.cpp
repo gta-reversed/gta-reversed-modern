@@ -209,6 +209,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CWeaponEffects::InjectHooks();
     CPedList::InjectHooks();
     CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
