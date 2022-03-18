@@ -185,7 +185,7 @@ private:
     void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) { CBike::ProcessDrivingAnims(driver, bBlend); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CBike::BurstTyre(tyreComponentId, bPhysicalEffect); }
     void ProcessControlInputs_Reversed(uint8 playerNum) { CBike::ProcessControlInputs(playerNum); }
-    void ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { CBike::ProcessEntityCollision(entity, colPoint); }
+    int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CBike::ProcessEntityCollision(entity, colPoint); }
     void Render_Reversed() { CBike::Render(); }
     void PreRender_Reversed() { CBike::PreRender(); }
     void Teleport_Reversed(CVector destination, bool resetRotation) { CBike::Teleport(destination, resetRotation); }
