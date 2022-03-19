@@ -7,8 +7,8 @@ CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle) : CTaskComplex() {
     plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C9D0, CTaskComplexCarDrive*, CVehicle*>(this, vehicle);
 }
 
-CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, int32 arg4) : CTaskComplex() {
-    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C940, CTaskComplexCarDrive*, CVehicle*, float, int32, int32>(this, vehicle, arg2, arg3, arg4);
+CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle) : CTaskComplex() {
+    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C940, CTaskComplexCarDrive*, CVehicle*, float, int32, eCarDrivingStyle>(this, vehicle, speed, carModelIndexToCreate, carDrivingStyle);
 }
 
 CTaskComplexCarDrive::~CTaskComplexCarDrive() {

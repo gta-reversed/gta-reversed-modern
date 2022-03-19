@@ -1,26 +1,28 @@
 #pragma once
 
 #include "TaskComplex.h"
-#include "Vehicle.h"
+#include "Enums/eCarMission.h"
+#include "Enums/eCarDrivingStyle.h"
+
+class CVehicle;
 
 class CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
-    float     m_fSpeed;
-    int32     field_14;
-    int32     field_18;
-    uint8     field_1C;
-    uint8     m_nbTrafficBehavior;
-    uint8     m_nbDriverBehavior;
-    uint8     field_1F;
-    uint8     m_bSavedVehicleBehavior;
-    char      _pad_21[3];
+    float m_fSpeed;
+    int m_carModelIndexToCreate;
+    int m_carDrivingStyle; // `eCarDrivingStyle`, sadly we cant use it as the member type, because the underlaying type isn't int32
+    char field_1C; // Not padding
+    int8 m_nbTrafficBehavior;
+    int8 m_nbDriverBehavior;
+    int8 m_nSpeed;
+    bool m_bSavedVehicleBehavior;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE;
 
     explicit CTaskComplexCarDrive(CVehicle* vehicle);
-    CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, int32 arg4);
+    CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, eCarDrivingStyle carDrivingStyle);
     ~CTaskComplexCarDrive() override;
 
     CTask*    Clone() override;
@@ -34,5 +36,4 @@ public:
     virtual CTask* CreateSubTaskCannotGetInCar(CPed* ped);
     virtual CTask* Drive(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskComplexCarDrive, 0x24);
