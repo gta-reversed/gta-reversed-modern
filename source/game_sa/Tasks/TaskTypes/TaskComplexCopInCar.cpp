@@ -1,5 +1,13 @@
 #include "StdInc.h"
 #include "TaskComplexCopInCar.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskComplexLeaveCar.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+#include "TaskComplexPolicePursuit.h"
+#include "TaskComplexWanderCop.h"
+#include "TaskComplexCarDrive.h"
 
 void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedClass(CTaskComplexCopInCar);
@@ -38,8 +46,21 @@ CTaskComplexCopInCar::~CTaskComplexCopInCar() {
 }
  
 // 0x68C9E0
-void CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
-    plugin::CallMethod<0x68C9E0, CTaskComplexCopInCar*, eTaskType, CPed*>(this, taskType, copPed);
+CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
+    switch (taskType) {
+    case TASK_SIMPLE_CAR_DRIVE:
+        return new CTaskSimpleCarDrive{ m_pVehicle };
+    case TASK_COMPLEX_LEAVE_CAR: {
+        copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_KNOCK_OFF_BIKE);
+        return new CTaskComplexLeaveCar{ m_pVehicle, 0, 0, true, false };
+    }
+    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: {
+        copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
+        return new CTaskComplexEnterCarAsDriver{ m_pVehicle };
+    }
+    case TASK_SIMPLE_STAND_STILL:
+        return tasksimplestand
+    }
 }
 
 // 0x68CEC0

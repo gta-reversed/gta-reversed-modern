@@ -26,7 +26,7 @@ public:
     ~CTaskComplexCopInCar() override;
     CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool flag_0x1);
 
-    void CreateSubTask(eTaskType taskType, CPed* copPed);
+    CTask* CreateSubTask(eTaskType taskType, CPed* copPed);
 
     CTask* Clone() override;
     eTaskType GetTaskType() override { return Type; }
