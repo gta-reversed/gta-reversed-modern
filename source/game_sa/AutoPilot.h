@@ -12,18 +12,10 @@
 #include "NodeAddress.h"
 #include "Vector.h"
 #include "Enums/eCarMission.h"
+#include "Enums/eCarDrivingStyle.h"
 
 class CVehicle;
 class CEntity;
-
-enum eCarDrivingStyle : int8
-{
-    DRIVINGSTYLE_STOP_FOR_CARS,
-    DRIVINGSTYLE_SLOW_DOWN_FOR_CARS,
-    DRIVINGSTYLE_AVOID_CARS,
-    DRIVINGSTYLE_PLOUGH_THROUGH,
-    DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS
-};
 
 class CAutoPilot {
 public:
