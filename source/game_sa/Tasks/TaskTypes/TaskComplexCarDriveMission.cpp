@@ -20,6 +20,7 @@ CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(CVehicle* pVehicle, CVe
     m_targetVehicle{pTargetVehicle},
     m_carMission{(uint32)carDriveMission}
 {
+    CEntity::SafeRegisterRef(m_targetVehicle);
 }
 
 // NOTSA
