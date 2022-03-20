@@ -22,7 +22,7 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
 }
@@ -101,8 +101,11 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
             };
         }
     }
+    case TASK_FINISHED:
+        return nullptr;
+
     default:
-        assert(0 && "Unreachable"); // Should be unreachable
+        NOTSA_UNREACHABLE;
         return nullptr;
     }
 }
@@ -137,7 +140,66 @@ bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
 
 // 0x68FA50
 CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x68FA50, CTaskComplexCopInCar*, CPed*>(this, ped);
+    // Ped is a CopPed*
+
+    if (!m_pCop2 || m_pCop2->IsStateDead()) {
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
+
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_COMPLEX_CAR_DRIVE_MISSION: {
+        m_flag0x2 = true;
+        return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
+    }
+    case TASK_COMPLEX_POLICE_PURSUIT: {
+        if (!FindPlayerWanted()->m_nWantedLevel) {
+            return CreateSubTask(TASK_FINISHED, ped);
+        }
+
+        if (FindPlayerWanted()->CanCopJoinPursuit((CCopPed*)ped) && static_cast<CTaskComplexPolicePursuit*>(m_pSubTask)->m_nFlags & 4) {
+            // 0x68FBC6 - Inverted
+            if (m_pCop2->bIsBeingArrested) {
+                return CreateSubTask(TASK_FINISHED, ped);
+            }
+
+            if (m_pCop2->bInVehicle && m_pVehicle != m_pCop2->m_pVehicle) {
+                if (m_pVehicle && m_flag0x1) {
+                    if (ped->bInVehicle) {
+                        return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
+                    } else if ((m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() < 4.f * 4.f) {
+                        return CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped);
+                    }
+                }
+            }
+        }
+
+        m_timer2.m_nStartTime = CTimer::m_snTimeInMilliseconds;
+        m_timer2.m_nInterval = 3000;
+        m_timer2.m_bStarted = 1;
+        return CreateSubTask(TASK_COMPLEX_WANDER, ped);
+    }
+    case TASK_SIMPLE_CAR_DRIVE: {
+        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+        return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
+    }
+    case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: // 0x68FA89
+    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: // 0x68FA94
+    {
+        if (!ped->bInVehicle || !ped->m_pVehicle) { // TODO: Invert this, and use ped->IsInVehicle()
+            return CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped);
+        } else {
+            ped->m_pVehicle->ChangeLawEnforcerState(true);
+            m_flag0x4 = false;
+            m_flag0x8 = ped->bIsLanding; // TODO: Not sure.
+            return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
+        }
+    }
+    case TASK_COMPLEX_LEAVE_CAR: { // 0x68FAA0
+        return CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped);
+    }
+    default:
+        return CreateSubTask(TASK_FINISHED, ped);
+    }
 }
 
 // 0x68FA10

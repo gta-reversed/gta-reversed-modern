@@ -10,7 +10,7 @@ class CTaskComplexCopInCar : public CTaskComplex {
 public:
     CVehicle* m_pVehicle{};    // 0xC
     CPed* m_pCop1{};           // 0x10
-    CPed* m_pCop2{};           // 0x14
+    CPed* m_pCop2{};           // 0x14 - TODO: I have a suspicion this isn't actually cop2, but rather like `suspect`, or `target`
     CTaskTimer m_timer1{};     // 0x18
     CTaskTimer m_timer2{};     // 0x24
     uint8 m_flag0x1 : 1{};     // 0x30 - 0st bit
