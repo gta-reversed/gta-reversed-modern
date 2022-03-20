@@ -21,7 +21,7 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(CreateSubTask, 0x68C9E0);
     RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
     // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
@@ -109,7 +109,30 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
 
 // 0x68C940
 bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x68C940, CTaskComplexCopInCar*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    if (!m_pSubTask) {
+        return true;
+    }
+
+    if (!m_pSubTask->MakeAbortable(ped, priority, event)) {
+        return false;
+    }
+
+    if (event && event->GetEventType() == EVENT_DAMAGE) {
+        const auto dmgEvent = (CEventDamage*)event;
+        if (dmgEvent->m_damageResponse.m_bHealthZero) {
+            if (dmgEvent->m_bAddToEventGroup && ped->bInVehicle) {
+                if (ped->m_pVehicle == m_pVehicle && m_pVehicle) {
+                    if (m_pVehicle->IsDriver(ped)) {
+                        m_pVehicle->m_nStatus = STATUS_ABANDONED;
+                        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+                        m_pVehicle->m_autoPilot.m_nCruiseSpeed = 0;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 // 0x68FA50
