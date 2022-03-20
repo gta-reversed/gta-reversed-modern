@@ -15,17 +15,17 @@ void CTaskComplexCarDriveMission::InjectHooks() {
 }
 
 // 0x63CC30
-CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(CVehicle* pVehicle, CVehicle* pTargetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) :
+CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(CVehicle* pVehicle, CEntity* targetEntity, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) :
     CTaskComplexCarDrive{pVehicle, fSpeed, -1, carDrivingStyle},
-    m_targetVehicle{pTargetVehicle},
+    m_targetEntity{ targetEntity },
     m_carMission{(uint32)carDriveMission}
 {
-    CEntity::SafeRegisterRef(m_targetVehicle);
+    CEntity::SafeRegisterRef(m_targetEntity);
 }
 
 // NOTSA
 CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(const CTaskComplexCarDriveMission& o) :
-    CTaskComplexCarDriveMission{o.m_pVehicle, o.m_targetVehicle, (eCarMission)o.m_carMission, (eCarDrivingStyle)o.m_carDrivingStyle, o.m_fSpeed}
+    CTaskComplexCarDriveMission{o.m_pVehicle, o.m_targetEntity, (eCarMission)o.m_carMission, (eCarDrivingStyle)o.m_carDrivingStyle, o.m_fSpeed}
 {
 }
 
@@ -46,7 +46,7 @@ void CTaskComplexCarDriveMission::SetUpCar() {
     autopilot.m_nCruiseSpeed = (uint32)m_fSpeed;
     autopilot.m_speed = (float)autopilot.m_nCruiseSpeed;
     autopilot.m_nCarDrivingStyle = (eCarDrivingStyle)m_carDrivingStyle;
-    autopilot.m_pTargetCar = m_targetVehicle;
+    autopilot.m_pTargetCar = m_targetEntity->AsVehicle();
     autopilot.m_nTimeToStartMission = CTimer::m_snTimeInMilliseconds;
 
     CEntity::SafeRegisterRef(autopilot.m_pTargetCar);

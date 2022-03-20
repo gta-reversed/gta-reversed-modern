@@ -8,6 +8,8 @@
 #include "TaskComplexPolicePursuit.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexCarDrive.h"
+#include "TaskComplexCarDriveMission.h"
+#include "Enums/eCarDrivingStyle.h"
 
 void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedClass(CTaskComplexCopInCar);
@@ -16,7 +18,9 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x68C7F0);
     RH_ScopedInstall(Destructor, 0x68C8C0);
 
+    RH_ScopedInstall(CreateSubTask, 0x68C9E0);
     RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
     // RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
     // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
@@ -62,9 +66,45 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
         return new CTaskComplexEnterCarAsDriver{ m_pVehicle };
     }
     case TASK_SIMPLE_STAND_STILL:
-        return tasksimplestand
+        return new CTaskSimpleStandStill{ 1000, true, false, 8.f };
+    case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: {
+        copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
+        return new CTaskComplexEnterCarAsPassenger{ m_pVehicle, 0, false };
     }
-}
+    case TASK_COMPLEX_POLICE_PURSUIT:
+        return new CTaskComplexPolicePursuit{};
+    case TASK_COMPLEX_WANDER:
+        return new CTaskComplexWanderCop{ PEDMOVE_WALK, (uint8)CGeneral::GetRandomNumberInRange(0, 8) };
+    case TASK_COMPLEX_CAR_DRIVE_MISSION: {
+        const auto targetEntity = m_pCop2->bInVehicle ? (CEntity*)m_pCop2->m_pVehicle : (CEntity*)m_pCop2;
+        if (m_pCop2->IsPlayer()) {
+            return new CTaskComplexCarDriveMission{
+                m_pVehicle,
+                targetEntity,
+                m_pCop2->bInVehicle ? (eCarMission)CCarAI::FindPoliceCarMissionForWantedLevel() : MISSION_POLICE_BIKE,
+                (eCarDrivingStyle)CCarAI::FindPoliceCarSpeedForWantedLevel(m_pVehicle), // TODO: This really doesn't add up.. How does this work?
+                10.f
+            };
+        } else {
+            const auto GetDrivingMission = [this] {
+                if (m_pCop2->bInVehicle) {
+                    return rand() % 4 < 2 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+                }
+                return MISSION_37;
+            };
+            return new CTaskComplexCarDriveMission{
+                m_pVehicle,
+                targetEntity,
+                GetDrivingMission(),
+                (eCarDrivingStyle)(this->m_pVehicle->m_pHandlingData->m_transmissionData.field_5C * 54.0), // TODO: This really doesn't add up.. How does this work?
+                10.f
+            };
+        }
+    }
+    default:
+        assert(0 && "Unreachable"); // Should be unreachable
+        return nullptr;
+    }
 }
 
 // 0x68C940
