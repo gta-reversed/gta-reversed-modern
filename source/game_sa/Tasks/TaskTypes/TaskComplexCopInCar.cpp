@@ -24,7 +24,7 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
 }
 
 // 0x68C7F0
@@ -190,7 +190,7 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
         } else {
             ped->m_pVehicle->ChangeLawEnforcerState(true);
             m_flag0x4 = false;
-            m_flag0x8 = ped->bIsLanding; // TODO: Not sure.
+            m_flag0x8 = ped->bInVehicle; // TODO: Not sure.
             return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
         }
     }
@@ -213,5 +213,115 @@ CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
 
 // 0x68FD50
 CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x68FD50, CTaskComplexCopInCar*, CPed*>(this, ped);
+    if (!m_pCop2 || m_pCop2->IsStateDead()) { // Inverted
+        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? CreateSubTask(TASK_FINISHED, ped) : m_pSubTask; // Inverted
+    }
+
+    // 0x68FD7E
+    if (m_pVehicle && !m_pVehicle->m_pDriver && m_pVehicle->m_autoPilot.m_nCarMission != MISSION_NONE) {
+        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+    }
+
+    if (!m_flag0x1 && (!m_pCop1 || m_pCop1->IsStateDead())) { // 0x68FDA7
+        m_flag0x1 = true;
+    }
+
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_COMPLEX_POLICE_PURSUIT: { // 0x690061
+        if (!m_pCop2->bInVehicle || !m_pCop2->m_pVehicle) { // TODO: Use IsInVehicle()
+            return m_pSubTask;
+        }
+
+        if (m_pCop2->m_pVehicle == m_pVehicle) {
+            return m_pSubTask;
+        }
+
+        if (!m_pVehicle) {
+            return m_pSubTask;
+        }
+
+        if (m_flag0x1) {
+            return m_pSubTask;
+        }
+
+        if (m_pVehicle->m_fHealth <= 0.f) {
+            return m_pSubTask;
+        }
+
+        if (m_pVehicle->m_pFire) {
+            return m_pSubTask;
+        }
+
+        if (m_pVehicle->IsOnItsSide()) {
+            return m_pSubTask;
+        }
+
+        if (m_pCop2->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f) {
+            if ((m_pCop2->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) {
+                return m_pSubTask;
+            }
+        }
+
+        if ((m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() >= 4.f * 4.f) {
+            return m_pSubTask;
+        }
+
+        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ?
+            CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped) : m_pSubTask;
+    }
+    case TASK_COMPLEX_WANDER: {
+        return m_timer2.IsOutOfTime() && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ?
+            CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped) : m_pSubTask; // Inverted
+    }
+    case TASK_COMPLEX_CAR_DRIVE_MISSION: { // 0x68FDDE
+        if (m_flag0x8 != m_pCop2->bInVehicle) {
+            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                m_flag0x8 = m_pCop2->bInVehicle;
+                return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
+            }
+        }
+        return m_flag0x2 && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped) : m_pSubTask; // Inverted
+    }
+    case TASK_SIMPLE_CAR_DRIVE: { // 0x68FE65
+        if (!m_flag0x2) {
+            return m_pSubTask;
+        }
+
+        if (!m_flag0x1) {
+            if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                m_flag0x2 = false;
+                return CreateNextSubTask(ped);
+            }
+            return m_pSubTask;
+        }
+
+        if (!m_timer1.m_bStarted) {
+            m_timer1.Start(m_flag0x4 ? CGeneral::GetRandomNumberInRange(0, 2000) + 3000 : CGeneral::GetRandomNumberInRange(0, 1250) + 250);
+            return m_pSubTask;
+        }
+
+        if (   !m_pCop2->bInVehicle || !m_pCop2->m_pVehicle // TOOD: Use !m_pCop2->IsInVehicle()
+            || m_pCop2->m_pVehicle == m_pVehicle
+            || (m_pCop2->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f && (m_pCop2->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) // Same code used above
+            || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) // This is really weird.. Here they check if its not abortable, then below check if its abortable..
+        ) {
+            if (m_timer1.IsOutOfTime()) {
+                if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
+                    m_flag0x2 = false;
+                    m_timer1.m_bStarted = false;
+                    return CreateNextSubTask(ped);
+                }
+                return m_pSubTask;
+            }
+        }
+
+        m_flag0x2 = false;
+        m_flag0x4 = false;
+        m_flag0x8 = ped->bInVehicle; // TODO: Not sure.
+        return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
+    }
+    default:
+        break;
+    }
+    return m_pSubTask;
 }
