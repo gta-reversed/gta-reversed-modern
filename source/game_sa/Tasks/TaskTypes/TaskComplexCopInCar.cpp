@@ -23,7 +23,7 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x68FD50);
 }
 
@@ -204,7 +204,11 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
 
 // 0x68FA10
 CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x68FA10, CTaskComplexCopInCar*, CPed*>(this, ped);
+    ped->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
+    if (!m_pCop1) {
+        m_flag0x1 = true;
+    }
+    return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
 }
 
 // 0x68FD50
