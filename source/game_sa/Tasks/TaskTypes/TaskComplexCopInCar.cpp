@@ -16,10 +16,7 @@ void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x68C7F0);
     RH_ScopedInstall(Destructor, 0x68C8C0);
 
-    // RH_ScopedInstall(CreateSubTask, 0x68C9E0);
-
-    // RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
-    // RH_ScopedInstall(GetTaskType_Reversed, 0x68C8B0);
+    RH_ScopedInstall(Clone_Reversed, 0x68CEC0);
     // RH_ScopedInstall(MakeAbortable_Reversed, 0x68C940);
     // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68FA50);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x68FA10);
@@ -36,6 +33,12 @@ CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* 
     CEntity::SafeRegisterRef(m_pVehicle);
     CEntity::SafeRegisterRef(m_pCop1);
     CEntity::SafeRegisterRef(m_pCop2);
+}
+
+// NOTSA
+CTaskComplexCopInCar::CTaskComplexCopInCar(const CTaskComplexCopInCar& o) :
+    CTaskComplexCopInCar{o.m_pVehicle, o.m_pCop1, o.m_pCop2, o.m_flag0x1}
+{
 }
 
 // 0x68C8C0
@@ -62,10 +65,6 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
         return tasksimplestand
     }
 }
-
-// 0x68CEC0
-CTask* CTaskComplexCopInCar::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x68CEC0, CTaskComplexCopInCar*>(this);
 }
 
 // 0x68C940

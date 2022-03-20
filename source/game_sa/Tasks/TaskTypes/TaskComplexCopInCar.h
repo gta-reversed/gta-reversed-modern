@@ -25,10 +25,11 @@ public:
 
     ~CTaskComplexCopInCar() override;
     CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool flag_0x1);
+    CTaskComplexCopInCar(const CTaskComplexCopInCar&); // NOTSA: `Clone()` helper
 
     CTask* CreateSubTask(eTaskType taskType, CPed* copPed);
 
-    CTask* Clone() override;
+    CTask* Clone() override { return new CTaskComplexCopInCar{ *this }; }
     eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
