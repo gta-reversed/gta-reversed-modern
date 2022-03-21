@@ -9,6 +9,14 @@ void CTaskSimpleAnim::InjectHooks()
     RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
 }
 
+CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed) :
+    m_bHoldLastFrame{bHoldLastFrame},
+    m_bDontInterrupt{bDontInterrupt},
+    m_bRunInSequence{bRunInSequence},
+    m_bOffsetAvailable{bOffsetPed}
+{
+}
+
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple()
 {
     m_bIsFinished = false;

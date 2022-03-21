@@ -13,6 +13,7 @@
 class CTaskSimpleAnim : public CTaskSimple {
 public:
     CTaskSimpleAnim(bool bHoldLastFrame);
+    CTaskSimpleAnim(bool bHoldLastFrame, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed);
     ~CTaskSimpleAnim();
 
 public:
