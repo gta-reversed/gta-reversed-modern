@@ -25,14 +25,14 @@ CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(CPed* ped, CVec
     }
 }
 
+CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(const CTaskSimpleWaitUntilPedIsOutCar&) :
+    CTaskSimpleWaitUntilPedIsOutCar{m_pedToWaitFor, m_pos}
+{
+}
+
 // 0x6494F0
 CTaskSimpleWaitUntilPedIsOutCar::~CTaskSimpleWaitUntilPedIsOutCar() {
     CEntity::ClearReference(m_pedToWaitFor);
-}
-
-// 0x64A4B0
-CTask* CTaskSimpleWaitUntilPedIsOutCar::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A4B0, CTaskSimpleWaitUntilPedIsOutCar*>(this);
 }
 
 // 0x649550

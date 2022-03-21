@@ -19,9 +19,10 @@ public:
     static void InjectHooks();
 
     CTaskSimpleWaitUntilPedIsOutCar(CPed * ped, CVector const& pos);
+    CTaskSimpleWaitUntilPedIsOutCar(const CTaskSimpleWaitUntilPedIsOutCar&); // NOTSA: `Clone()` helper
     ~CTaskSimpleWaitUntilPedIsOutCar();
 
-    CTask * Clone() override;
+    CTask* Clone() override { return new CTaskSimpleWaitUntilPedIsOutCar{ *this }; }
     eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return true; }
     bool ProcessPed(CPed * ped) override;
