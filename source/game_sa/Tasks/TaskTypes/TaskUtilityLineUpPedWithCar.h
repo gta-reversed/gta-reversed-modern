@@ -6,21 +6,37 @@
 */
 #pragma once
 
-#include "TaskSimple.h"
-#include "Ped.h"
+#include "Base.h"
+#include "Vector.h"
 
 class CTaskUtilityLineUpPedWithCar {
 public:
-    CVector vecOffsets;
-    int32 field_C;
-    int32 m_nTime;
-    int32 field_14;
-    int32 field_18;
+    CVector m_offset{};
+    float m_doorOpenPosZ{-999.99f};
+    int32_t m_time{};
+    int32_t m_doorOpenPosType{};
+    int32_t m_doorIdx{};
 
-    CTaskUtilityLineUpPedWithCar(const CVector& offsets, int32 nTime, int32 arg3, int32 arg4);
-    CVector* GetLocalPositionToOpenCarDoor(int32 unused, CVehicle* vehicle, float arg3, CAnimBlendAssociation* animBlendAssoc);
-    void ProcessPed(CPed* ped, CVehicle* vehicle, CAnimBlendAssociation* animBlendAssoc);
-    RwV3d* GetPositionToOpenCarDoor(int32 unused, CVehicle* vehicle, float arg2, CAnimBlendAssociation* animBlendAssoc);
+public:
+    CTaskUtilityLineUpPedWithCar(const CVector& offset, int32 time, int32 doorOpenPosType, int32 doorIdx);
+    ~CTaskUtilityLineUpPedWithCar() = default;
+
+    CVector GetLocalPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc);
+    CVector GetPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc);
+    bool ProcessPed(CPed* pPed, CVehicle* pVehicle, CAnimBlendAssociation* pAnimAssoc);
+
+private: // Wrappers for hooks
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskUtilityLineUpPedWithCar* Constructor(CVector* offsets, int32 nTime, int32 doorOpenPosType, int32 doorIdx) {
+        this->CTaskUtilityLineUpPedWithCar::CTaskUtilityLineUpPedWithCar(offsets, nTime, doorOpenPosType, doorIdx);
+        return this;
+    }
+
+    CTaskUtilityLineUpPedWithCar* Destructor() {
+        this->CTaskUtilityLineUpPedWithCar::~CTaskUtilityLineUpPedWithCar();
+        return this;
+    }
 };
-
 VALIDATE_SIZE(CTaskUtilityLineUpPedWithCar, 0x1C);
