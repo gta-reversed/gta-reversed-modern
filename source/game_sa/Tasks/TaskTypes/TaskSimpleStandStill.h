@@ -25,7 +25,7 @@ public:
 
     static void InjectHooks();
 
-    CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+    CTaskSimpleStandStill(int32 nTime, bool Looped = false, bool bUseAnimIdleStance = false, float fBlendData = 8.f);
     ~CTaskSimpleStandStill();
 private:
 	CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
