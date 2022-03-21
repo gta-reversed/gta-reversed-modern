@@ -200,6 +200,7 @@
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
+#include "TaskComplexCarDriveMission.h"
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
@@ -472,6 +473,7 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         CTaskSimpleWaitUntilPedIsOutCar::InjectHooks();
+        CTaskComplexCarDriveMission::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();
         CTaskComplexUseMobilePhone::InjectHooks();
