@@ -1,3 +1,46 @@
 #include "StdInc.h"
-
 #include "TaskUtilityLineUpPedWithCar.h"
+
+void CTaskUtilityLineUpPedWithCar::InjectHooks() {
+    RH_ScopedClass(CTaskUtilityLineUpPedWithCar);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x64FBB0);
+    RH_ScopedGlobalInstall(Destructor, 0x64FC00);
+
+    // RH_ScopedInstall(GetLocalPositionToOpenCarDoor, 0x64FC10);
+    // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x650A80);
+    // RH_ScopedInstall(ProcessPed, 0x6513A0);
+}
+
+// 0x64FBB0
+CTaskUtilityLineUpPedWithCar::CTaskUtilityLineUpPedWithCar(const CVector& offset, int32 time, int32 doorOpenPosType, int32 doorIdx) :
+    m_offset{offset},
+    m_time{time},
+    m_doorOpenPosType{doorOpenPosType},
+    m_doorIdx{doorIdx}
+{
+}
+
+// The following 2 functions seem to have copy ellision on the returned CVector, that the compiled functions
+// took a vector ptr as their first arg. Now, hopefully our code will compile to the same stuff.
+// If not, it might crash here, in that case a wrapper function should be used.
+
+// 0x64FC10
+CVector CTaskUtilityLineUpPedWithCar::GetLocalPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc) {
+    CVector out;
+    plugin::CallMethodAndReturn<CVector, 0x64FC10, CTaskUtilityLineUpPedWithCar*, CVector*, CVehicle*, float, CAnimBlendAssociation*>(this, &out, vehicle, animProgress, animAssoc);
+    return out;
+}
+
+// 0x650A80
+CVector CTaskUtilityLineUpPedWithCar::GetPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc) {
+    CVector out;
+    plugin::CallMethodAndReturn<CVector, 0x650A80, CTaskUtilityLineUpPedWithCar*, CVector*, CVehicle*, float, CAnimBlendAssociation*>(this, &out, vehicle, animProgress, animAssoc);
+    return out;
+}
+
+// 0x6513A0
+bool CTaskUtilityLineUpPedWithCar::ProcessPed(CPed* pPed, CVehicle* pVehicle, CAnimBlendAssociation* pAnimAssoc) {
+    return plugin::CallMethodAndReturn<bool, 0x6513A0, CTaskUtilityLineUpPedWithCar*, CPed*, CVehicle*, CAnimBlendAssociation*>(this, pPed, pVehicle, pAnimAssoc);
+}
