@@ -471,6 +471,8 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
+        CTaskManager::InjectHooks();
+
         CTaskComplexCarDriveMission::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();
