@@ -51,12 +51,12 @@ int32 CAnimManager::GetFirstAssocGroup(const char* basename) {
 }
 
 // 0x4D39F0
-CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, const CAnimBlock* ifp) {
+CAnimBlendHierarchy* CAnimManager::GetAnimation(uint32 hash, const CAnimBlock* ifp) { // TODO: Move this to `CAnimBlock`
     return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D39F0, uint32, const CAnimBlock*>(hash, ifp);
 }
 
 // 0x4D42F0
-CAnimBlendHierarchy* CAnimManager::GetAnimation(const char* animName, const CAnimBlock* ifp) {
+CAnimBlendHierarchy* CAnimManager::GetAnimation(const char* animName, const CAnimBlock* ifp) { // TODO: Move this to `CAnimBlock`
     return plugin::CallAndReturn<CAnimBlendHierarchy*, 0x4D42F0, const char*, const CAnimBlock*>(animName, ifp);
 }
 

@@ -91,7 +91,7 @@ public:
         return x * x + y * y + z * z;
     }
 
-    inline float SquaredMagnitude2D() {
+    inline float SquaredMagnitude2D() const {
         return x * x + y * y;
     }
 
