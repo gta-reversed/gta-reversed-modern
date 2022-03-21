@@ -297,7 +297,7 @@ public:
     uint32              m_nTimeTillWeNeedThisPed{};
     CVector2D           m_vecAnimMovingShift{};
     float               m_fCurrentRotation{};
-    float               m_fAimingRotation{};
+    float               m_fAimingRotation{}; // In radians
     float               m_fHeadingChangeRate{15.f};
     float               m_fMoveAnim{0.1f}; // not sure about the name here
     CEntity*            m_standingOnEntity{};

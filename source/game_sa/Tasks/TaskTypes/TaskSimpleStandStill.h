@@ -16,16 +16,14 @@ public:
     CTaskTimer m_timer;
     bool m_bLooped;
     bool m_bUseAnimIdleStance;
-private:
-    char _pad[2];
-public:
     float m_fBlendData;
 
+public:
     static constexpr auto Type = TASK_SIMPLE_STAND_STILL;
 
     static void InjectHooks();
 
-    CTaskSimpleStandStill(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
+    CTaskSimpleStandStill(int32 nTime = 0, bool Looped = false, bool bUseAnimIdleStance = false, float fBlendData = 8.f);
     ~CTaskSimpleStandStill();
 private:
 	CTaskSimpleStandStill* Constructor(int32 nTime, bool Looped, bool bUseAnimIdleStance, float fBlendData);
