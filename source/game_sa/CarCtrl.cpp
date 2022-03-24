@@ -234,7 +234,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     vehicle->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
     vehicle->m_autoPilot.m_nTempAction = 0;
-    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     vehicle->m_autoPilot.m_speed = 13.0F;
     vehicle->m_autoPilot.m_nCruiseSpeed = 13;
     vehicle->m_autoPilot.m_nCurrentLane = 0;
