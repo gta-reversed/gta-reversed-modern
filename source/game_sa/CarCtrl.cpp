@@ -178,7 +178,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (CModelInfo::IsBoatModel(modelid))
     {
         auto* boat = new CBoat(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-        if (posn.z <= -100.0F)
+        if (posn.z <= MAP_Z_LOW_LIMIT)
             posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
         posn.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
@@ -208,7 +208,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     }
 
     auto* vehicle = GetNewVehicleDependingOnCarModel(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-    if (posn.z <= -100.0F)
+    if (posn.z <= MAP_Z_LOW_LIMIT)
         posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
     posn.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();

@@ -1167,7 +1167,7 @@ void CWorld::RemoveFallenPeds() {
             continue;
 
         const CVector& vecPedPos = ped->GetPosition();
-        if (vecPedPos.z > -100.0f)
+        if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
             CNodeAddress pathNodeAddress;
@@ -1192,7 +1192,7 @@ void CWorld::RemoveFallenCars() {
             continue;
 
         const CVector& vecPos = vehicle->GetPosition();
-        if (vecPos.z > -100.0f)
+        if (vecPos.z > MAP_Z_LOW_LIMIT)
             continue;
 
         const auto ShouldWeKeepIt = [vehicle]() {

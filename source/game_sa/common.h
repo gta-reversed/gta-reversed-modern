@@ -64,6 +64,9 @@ class CPedGroup;
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+#define PUSH_RENDERGROUP(str) 0
+#define POP_RENDERGROUP() 0
+
 extern int32 gDefaultTaskTime;
 
 extern char *gString; // char gString[200]

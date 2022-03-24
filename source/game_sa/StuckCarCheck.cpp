@@ -76,7 +76,6 @@ void CStuckCarCheck::Process() {
     plugin::CallMethod<0x465680, CStuckCarCheck*>(this);
 }
 
-// See CStuckCarCheck::ResetArrayElement
 // 0x463B80
 void CStuckCarCheck::RemoveCarFromCheck(int32 carHandle) {
     return plugin::CallMethod<0x463B80, CStuckCarCheck*, int32>(this, carHandle);
@@ -88,18 +87,22 @@ void CStuckCarCheck::RemoveCarFromCheck(int32 carHandle) {
     }
 }
 
-// Used in Init and RemoveCarFromCheck
-// Not presented on PC because inlined. See Android PDB (v1.0 0x2B3534)
-void CStuckCarCheck::ResetArrayElement(StuckCar& car) {
+// 0x463970 | refactored
+void CStuckCarCheck::ResetArrayElement(uint16 carHandle) {
+    ResetArrayElement(m_aStuckCars[carHandle]);
+}
+
+// NOTSA
+void CStuckCarCheck::ResetArrayElement(tStuckCar& car) {
+    car.m_vCarPos    = CVector(-5000.0f, -5000.0f, -5000.0f);
     car.m_nCarHandle = -1;
-    car.m_vCarPos = CVector(-5000.0f, -5000.0f, -5000.0f);
     car.m_nStartTime = -1;
-    car.m_fDistance = 0.0f;
+    car.m_fDistance  = 0.0f;
     car.m_nStuckTime = 0;
-    car.m_bCarStuck = false;
-    car.field_1D = false;
-    car.m_bStuck = false;
-    car.m_bFlipped = false;
-    car.m_bbWarp = false;
-    car.m_pathID = false;
+    car.m_bCarStuck  = false;
+    car.field_1D     = 0;
+    car.m_bStuck     = false;
+    car.m_bFlipped   = false;
+    car.m_bbWarp     = false;
+    car.m_nPathId     = 0;
 }

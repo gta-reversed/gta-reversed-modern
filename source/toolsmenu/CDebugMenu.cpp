@@ -303,6 +303,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
                 ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);

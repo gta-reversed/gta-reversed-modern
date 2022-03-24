@@ -4235,12 +4235,12 @@ CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collision
     CObject::nNoTempObjects++;
     if (CObject::nNoTempObjects <= 20u) {
         if (CObject::nNoTempObjects <= 10u) {
-            obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 20'000;
+            obj->m_nRemovalTime = CTimer::GetTimeInMS() + 20'000;
         } else {
-            obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 10'000;
+            obj->m_nRemovalTime = CTimer::GetTimeInMS() + 10'000;
         }
     } else {
-        obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 4'000;
+        obj->m_nRemovalTime = CTimer::GetTimeInMS() + 4'000;
     }
 
     const auto GetMoveSpeedZ = [&, this] {

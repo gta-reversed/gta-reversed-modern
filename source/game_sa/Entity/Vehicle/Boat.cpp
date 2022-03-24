@@ -916,7 +916,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
     obj->m_nObjectType = eObjectType::OBJECT_TEMPORARY;
     obj->SetIsStatic(false);
     obj->objectFlags.bIsPickup = false;
-    obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 20000;
+    obj->m_nRemovalTime = CTimer::GetTimeInMS() + 20000;
 
     obj->m_vecMoveSpeed = m_vecMoveSpeed;
     if (GetUp().z <= 0.0F)

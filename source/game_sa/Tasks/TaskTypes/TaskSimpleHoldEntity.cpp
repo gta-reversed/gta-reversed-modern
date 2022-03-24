@@ -435,7 +435,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
                     if (objectType != OBJECT_TEMPORARY)
                         ++CObject::nNoTempObjects;
                     objectToHold->m_nObjectType = OBJECT_TEMPORARY;
-                    objectToHold->m_dwRemovalTime = 0;
+                    objectToHold->m_nRemovalTime = 0;
                     objectToHold->m_bUsesCollision = false;
                     objectToHold->m_bIsVisible = false;
                     bUpdateEntityPosition = false;
