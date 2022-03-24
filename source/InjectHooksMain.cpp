@@ -92,6 +92,8 @@
 #include "Interior_c.h"
 #include "InteriorGroup_c.h"
 #include "InteriorManager_c.h"
+#include "Checkpoint.h"
+#include "Checkpoints.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -209,6 +211,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCheckpoint::InjectHooks();
+    CCheckpoints::InjectHooks();
     CWeaponEffects::InjectHooks();
     CPedList::InjectHooks();
     CBouncingPanel::InjectHooks();
