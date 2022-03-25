@@ -1221,8 +1221,23 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
     return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
 }
 
+// 0x53E160
+void RenderDebugShit() {
+    PUSH_RENDERGROUP("RenderDebugShit");
+    CTheScripts::RenderTheScriptDebugLines();
+#ifndef FINAL
+    // if(gbShowCollisionLines) CRenderer::RenderCollisionLines();
+    // ThePaths.DisplayPathData();
+    // CDebug::DrawLines();
+    DefinedState();
+#endif
+    POP_RENDERGROUP();
+}
+
 // 0x53E230
 void Render2dStuff() {
+    RenderDebugShit(); // NOTSA, temp
+
     const auto DrawOuterZoomBox = []() {
         CPed* player = FindPlayerPed();
         eWeaponType weaponType = WEAPON_UNARMED;

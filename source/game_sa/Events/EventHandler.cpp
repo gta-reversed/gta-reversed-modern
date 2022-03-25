@@ -5,6 +5,7 @@
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskComplexStuckInAir.h"
+// #include "TaskComplexSmartFleeEntity.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
@@ -406,10 +407,9 @@ void CEventHandler::ComputePedToFleeResponse(CEvent* event, CTask* task1, CTask*
     plugin::CallMethod<0x4B9B50, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 
     /*
-    auto _task1 = static_cast<CTask*>(task1);
-    if (_task1->entity) {
-        m_ped->Say(69, 0, 1.0f, 0, 0, 0);
-        m_eventResponseTask = new CTaskComplexSmartFleeEntity(_task1->entity, 1, 100.0f, -1, 1000, 1.0f);
+    if (auto* ped = static_cast<CEventPedToFlee*>(event)->m_ped) {
+        m_ped->Say(69);
+        m_eventResponseTask = new CTaskComplexSmartFleeEntity(ped, 1, 100.0f, -1, 1000, 1.0f);
     }
     */
 }

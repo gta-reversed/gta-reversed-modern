@@ -1,7 +1,7 @@
 #pragma once
 
-enum class eSkidMarkType {
-    DEFALT = 0,
+enum class eSkidMarkType : uint32 {
+    DEFAULT = 0,
     SANDY,
     MUDDY,
     BLOODY,
@@ -35,7 +35,7 @@ struct CSkidmark {
     CVector GetFirstPartPosn() const { return GetPartPosn(0); }
     CSphere GetBoundingSphere() const;
 
-    void Init(uint32_t id, CVector posn, eSkidMarkType type, const bool* bloodState);
+    void Init(uint32 id, CVector posn, eSkidMarkType type, const bool* bloodState);
     void Update();
     void Render() const;
     void RegisterNewPart(CVector posn, CVector2D dir, float length, bool* bloodState);

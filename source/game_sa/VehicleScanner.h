@@ -4,9 +4,10 @@
 #include "Vehicle.h"
 
 class CPed;
+class CVehicle;
 
 class CVehicleScanner : public CEntityScanner {
 public:
-    void ScanForVehiclesInRange(CPed* ped);
-    auto GetClosestVehicleInRange() const { return m_pClosestEntityInRange->AsVehicle(); }
+    void ScanForVehiclesInRange(const CPed& ped);
+    CVehicle* GetClosestVehicleInRange() const;
 };

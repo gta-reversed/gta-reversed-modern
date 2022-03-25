@@ -19,6 +19,13 @@ struct LimbOrientation {
 public:
     float m_fYaw;
     float m_fPitch;
+
+    LimbOrientation() {
+        m_fYaw    = 0.0f;
+        m_fPitch  = 0.0f;
+    }
+
+    LimbOrientation(float yaw, float pitch) : m_fYaw(yaw), m_fPitch(pitch) { }
 };
 VALIDATE_SIZE(LimbOrientation, 0x8);
 
@@ -32,12 +39,12 @@ VALIDATE_SIZE(LimbMovementInfo, 0x18);
 
 class CPedIK {
 public:
-    CPed*           m_pPed{};
-    LimbOrientation m_TorsoOrien{};
-    float           m_fSlopePitch{};
-    float           m_fSlopePitchLimitMult{};
-    float           m_fSlopeRoll{};
-    float           m_fBodyRoll{};
+    CPed*           m_pPed;
+    LimbOrientation m_TorsoOrien;
+    float           m_fSlopePitch;
+    float           m_fSlopePitchLimitMult;
+    float           m_fSlopeRoll;
+    float           m_fBodyRoll;
 
     union {
         uint32 m_nFlags;
@@ -53,13 +60,13 @@ public:
     static RwV3d& YaxisIK;
     static RwV3d& ZaxisIK;
 
-    // funcs
-    CPedIK(CPed* ped);
+public:
+    explicit CPedIK(CPed* ped);
 
     void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
     void                PointGunAtPosition(const CVector& posn, float arg2);
-    static RwMatrix* GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
+    static RwMatrix*    GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
 
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo, float fNormalize);

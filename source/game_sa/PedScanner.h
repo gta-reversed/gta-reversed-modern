@@ -1,9 +1,9 @@
 #pragma once
 
-#include "EntityScanner.h"
-#include "Ped.h"
+class CEntityScanner;
 
 class CPedScanner : public CEntityScanner {
 public:
-    CPed* GetClosestPedInRange() { return m_pClosestEntityInRange->AsPed(); }
+    void ScanForPedsInRange(const CPed& ped);
+    CPed* GetClosestPedInRange() const;
 };

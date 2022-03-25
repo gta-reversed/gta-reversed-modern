@@ -347,10 +347,10 @@ void CVehicleModelInfo::GetWheelPosn(int32 wheel, CVector& outVec, bool local) c
     else {
         auto matrix = RwMatrixCreate();
         memcpy(matrix, RwFrameGetMatrix(frame), sizeof(CMatrix));
-        auto pParent = RwFrameGetParent(frame);
-        while (pParent) {
-            RwMatrixTransform(matrix, RwFrameGetMatrix(pParent), RwOpCombineType::rwCOMBINEPOSTCONCAT);
-            pParent = RwFrameGetParent(pParent);
+        auto parent = RwFrameGetParent(frame);
+        while (parent) {
+            RwMatrixTransform(matrix, RwFrameGetMatrix(parent), RwOpCombineType::rwCOMBINEPOSTCONCAT);
+            parent = RwFrameGetParent(parent);
         }
 
         outVec = *RwMatrixGetPos(matrix);
@@ -600,20 +600,20 @@ void CVehicleModelInfo::PreprocessHierarchy()
             RwFrameForAllChildren(RpClumpGetFrame(m_pRwClump), CClumpModelInfo::FindFrameFromNameWithoutIdCB, &searchStruct);
             if (searchStruct.m_pFrame) {
                 if (flags.bIsDummy) {
-                    auto& vecDummyPos = m_pVehicleStruct->m_avDummyPos[nameIdAssoc->m_dwHierarchyId];
+                    auto& vecDummyPos = *GetModelDummyPosition(static_cast<eVehicleDummies>(nameIdAssoc->m_dwHierarchyId));
                     vecDummyPos = *RwMatrixGetPos(RwFrameGetMatrix(searchStruct.m_pFrame));
-                    auto pParent = RwFrameGetParent(searchStruct.m_pFrame);
-                    if (pParent) {
-                        while (RwFrameGetParent(pParent)) {
-                            RwV3dTransformPoints(&vecDummyPos, &vecDummyPos, 1, RwFrameGetMatrix(pParent));
-                            pParent = RwFrameGetParent(pParent);
+                    auto parent = RwFrameGetParent(searchStruct.m_pFrame);
+                    if (parent) {
+                        while (RwFrameGetParent(parent)) {
+                            RwV3dTransformPoints(&vecDummyPos, &vecDummyPos, 1, RwFrameGetMatrix(parent));
+                            parent = RwFrameGetParent(parent);
                         }
                     }
                     RwFrameDestroy(searchStruct.m_pFrame);
                 }
                 else if (flags.bIsUpgrade) {
-                    auto pParent = RwFrameGetParent(searchStruct.m_pFrame);
-                    auto parentHierarchyId = CVisibilityPlugins::GetFrameHierarchyId(pParent);
+                    auto parent = RwFrameGetParent(searchStruct.m_pFrame);
+                    auto parentHierarchyId = CVisibilityPlugins::GetFrameHierarchyId(parent);
                     auto& upgrade = m_pVehicleStruct->m_aUpgrades[nameIdAssoc->m_dwHierarchyId];
                     upgrade.m_vPosition = *RwMatrixGetPos(RwFrameGetMatrix(searchStruct.m_pFrame));
                     upgrade.m_qRotation.Set(*RwFrameGetMatrix(searchStruct.m_pFrame));
@@ -1166,8 +1166,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
     if ((uint16)data == 0xFFFF) {
-        RpMatFXMaterialSetEffects(material, RpMatFXMaterialFlags::rpMATFXEFFECTNULL);
-        return material;
+        return DisableMatFx(material, data);
     }
 
     if (RpMatFXMaterialGetEffects(material) != RpMatFXMaterialFlags::rpMATFXEFFECTENVMAP)

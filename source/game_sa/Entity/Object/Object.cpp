@@ -892,7 +892,7 @@ void CObject::Init() {
 
     m_fHealth = 1000.0F;
     m_fDoorStartAngle = -1001.0F;
-    m_dwRemovalTime = 0;
+    m_nRemovalTime = 0;
     m_nBonusValue = 0;
     m_wCostValue = 0;
     for (auto& col : m_nCarColor)

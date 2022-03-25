@@ -495,10 +495,10 @@ public:
     void RemoveDriver(bool arg0);
     CPed* SetUpDriver(int32 pedType, bool arg1, bool arg2);
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
-    bool IsPassenger(CPed* ped);
-    bool IsPassenger(int32 modelIndex);
-    bool IsDriver(CPed* ped);
-    bool IsDriver(int32 modelIndex);
+    bool IsPassenger(CPed* ped) const;
+    bool IsPassenger(int32 modelIndex) const;
+    bool IsDriver(CPed* ped) const;
+    bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
     // return this->m_pCoords->matrix.GetUp().z <= -0.9;
     bool IsUpsideDown();

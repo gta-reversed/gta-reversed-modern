@@ -76,7 +76,7 @@ public:
     tColLighting  m_nColLighting;
     int16         m_nRefModelIndex;
     uint8         m_nCarColor[4];  // this is used for detached car parts
-    int32         m_dwRemovalTime; // time when this object must be deleted
+    uint32        m_nRemovalTime;  // time when this object must be deleted
     float         m_fHealth;
     float         m_fDoorStartAngle; // this is used for door objects
     float         m_fScale;

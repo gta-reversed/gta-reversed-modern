@@ -9,25 +9,29 @@
 class CRunningScript;
 
 enum eScriptResourceType {
-    RESOURCETYPE_ANIMATION = 1,
-    RESOURCETYPE_MODEL_OR_SPECIAL_CHAR,
-    RESOURCETYPE_DECISION_MAKER
+    RESOURCE_TYPE_ANIMATION = 1,
+    RESOURCE_TYPE_MODEL_OR_SPECIAL_CHAR,
+    RESOURCE_TYPE_DECISION_MAKER
+};
+
+struct tScriptResource {
+    int32               m_nModelId;
+    void*               m_pThread;
+    eScriptResourceType m_nType;
 };
 
 class CScriptResourceManager {
 public:
-    struct {
-        int32  m_nModelId;
-        void*  m_pThread;
-        uint16 type; // see eScriptResourceType
-    } m_aScriptResources[75];
+    tScriptResource m_aScriptResources[75];
 
-    //! see eScriptResourceType
-    void AddToResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
-    //! see eScriptResourceType
-    bool HasResourceBeenRequested(int32 ModelId, uint32 a4);
-    //! see eScriptResourceType
-    bool RemoveFromResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
+public:
+    void Initialise();
+    void AddToResourceManager(int32 modelId, eScriptResourceType resourceType, CRunningScript* script);
+    bool RemoveFromResourceManager(int32 modelId, eScriptResourceType resourceType, CRunningScript* script);
+    bool HasResourceBeenRequested(int32 modelId, eScriptResourceType resourceType);
+    bool Save();
+    bool Load();
 };
 
 VALIDATE_SIZE(CScriptResourceManager, 0x384);
+VALIDATE_SIZE(tScriptResource, 0xC);

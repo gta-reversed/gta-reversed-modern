@@ -11,24 +11,13 @@
 #include "PathFind.h"
 #include "NodeAddress.h"
 #include "Vector.h"
-#include "Enums/eCarMission.h"
+#include "eCarMission.h"
+#include "eCarDrivingStyle.h"
 
 class CVehicle;
 class CEntity;
 
-enum eCarDrivingStyle : int8
-{
-    DRIVINGSTYLE_STOP_FOR_CARS,
-    DRIVINGSTYLE_SLOW_DOWN_FOR_CARS,
-    DRIVINGSTYLE_AVOID_CARS,
-    DRIVINGSTYLE_PLOUGH_THROUGH,
-    DRIVINGSTYLE_STOP_FOR_CARS_IGNORE_LIGHTS
-};
-
 class CAutoPilot {
-public:
-    CAutoPilot();
-
 public:
     CNodeAddress        m_currentAddress;
     CNodeAddress        m_startingRouteNode;
@@ -99,12 +88,16 @@ public:
     bool            m_bPlaneDogfightSomething;
     int16           field_96;
 
-    void SetCarMission(eCarMission carMission) {
+public:
+    CAutoPilot();
+
+    void ModifySpeed(float target);
+    void RemoveOnePathNode();
+
+    void SetCarMission(eCarMission carMission) { // NOTSA | inlined
         if (m_nCarMission != MISSION_CRASH_PLANE_AND_BURN && m_nCarMission != MISSION_CRASH_HELI_AND_BURN)
             m_nCarMission = carMission;
     }
-
-    void ModifySpeed(float target);
 };
 
 VALIDATE_SIZE(CAutoPilot, 0x98);
