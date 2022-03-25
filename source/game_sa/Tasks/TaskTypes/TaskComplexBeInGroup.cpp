@@ -8,7 +8,6 @@ void CTaskComplexBeInGroup::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x632E50);
     RH_ScopedInstall(Destructor, 0x632EA0);
-
     RH_ScopedInstall(MonitorMainGroupTask, 0x633010);
     RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
     RH_ScopedInstall(Clone_Reversed, 0x636BE0);
@@ -19,25 +18,30 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
 }
 
-CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) :
-    m_groupId{groupId},
-    m_isLeader{isLeader}
-{
+// 0x632E50
+CTaskComplexBeInGroup::CTaskComplexBeInGroup(int32 groupId, bool isLeader) : CTaskComplex() {
+    m_nGroupId           = groupId;
+    m_Ped                = nullptr;
+    m_MainTask           = nullptr;
+    m_SecondaryTask      = nullptr;
+    m_bIsLeader          = isLeader;
+    m_nMainTaskId        = TASK_NONE;
+    m_nSecondaryTaskSlot = -1;
 }
 
 // 0x633010
 CTask* CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
-    if (const auto groupMainTask = CPedGroups::GetGroup(m_groupId).GetIntelligence().GetTaskMain(ped)) {
-        if (groupMainTask != m_mainTask || groupMainTask->GetTaskType() != m_mainTaskId) {
+    if (const auto groupMainTask = CPedGroups::GetGroup(m_nGroupId).GetIntelligence().GetTaskMain(ped)) {
+        if (groupMainTask != m_MainTask || groupMainTask->GetTaskType() != m_nMainTaskId) {
             if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
-                m_mainTask = groupMainTask;
-                m_mainTaskId = groupMainTask->GetTaskType();
+                m_MainTask = groupMainTask;
+                m_nMainTaskId = groupMainTask->GetTaskType();
                 return groupMainTask->Clone();
             }
         }
     } else if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
-        m_mainTask = nullptr;
-        m_mainTaskId = TASK_NONE;
+        m_MainTask = nullptr;
+        m_nMainTaskId = TASK_NONE;
         return nullptr;
     }
     return m_pSubTask;
@@ -46,30 +50,30 @@ CTask* CTaskComplexBeInGroup::MonitorMainGroupTask(CPed* ped) {
 // 0x6330B0
 void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     // Check if ped has finished the group task (if any)
-    auto& groupIntel = CPedGroups::GetGroup(m_groupId).GetIntelligence();
+    auto& groupIntel = CPedGroups::GetGroup(m_nGroupId).GetIntelligence();
     const auto grpSecTask = groupIntel.GetTaskSecondary(ped);
     const auto pedGrpSecTaskSlot = groupIntel.GetTaskSecondarySlot(ped);
     const auto pedGrpSecTask = ped->GetTaskManager().GetTaskSecondary(pedGrpSecTaskSlot);
-    if (m_secondaryTask == grpSecTask) {
-        if (m_secondaryTask) { // Check if theres any task at all (Not both nullptr)
+    if (m_SecondaryTask == grpSecTask) {
+        if (m_SecondaryTask) { // Check if theres any task at all (Not both nullptr)
             // Check if ped has finished the task
             if (!pedGrpSecTask) {
-                groupIntel.ReportFinishedTask(ped, m_secondaryTask);
-                m_secondaryTask = nullptr;
-                m_secondaryTaskSlot = -1;
+                groupIntel.ReportFinishedTask(ped, m_SecondaryTask);
+                m_SecondaryTask = nullptr;
+                m_nSecondaryTaskSlot = -1;
             }
         }
     } else { // Group has a new task, apply it to the ped
 
         // Abort peds task in the previous stored slot
-        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_secondaryTaskSlot)) {
+        if (const auto task = ped->GetTaskManager().GetTaskSecondary(m_nSecondaryTaskSlot)) {
             task->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr);
         }
 
         // Make sure ped has the task the new task (and abort current)
         if (!pedGrpSecTask || pedGrpSecTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
-            m_secondaryTask = grpSecTask;
-            m_secondaryTaskSlot = pedGrpSecTaskSlot;
+            m_SecondaryTask = grpSecTask;
+            m_nSecondaryTaskSlot = pedGrpSecTaskSlot;
             if (grpSecTask) { 
                 ped->GetTaskManager().SetTaskSecondary(grpSecTask->Clone(), pedGrpSecTaskSlot);
             }
@@ -77,14 +81,15 @@ void CTaskComplexBeInGroup::MonitorSecondaryGroupTask(CPed* ped) {
     }
 }
 
+// 0x632EB0
 bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
 { 
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         auto& groupIntel = GetGroup().GetIntelligence();
-        for (auto t : { &m_mainTask, &m_secondaryTask }) {
-            if (*t && CTask::IsTaskPtr(*t)) {
-                groupIntel.ReportFinishedTask(ped, *t);
-                *t = nullptr;
+        for (auto task : { &m_MainTask, &m_SecondaryTask }) {
+            if (*task && CTask::IsTaskPtr(*task)) {
+                groupIntel.ReportFinishedTask(ped, *task);
+                *task = nullptr;
             }
         }
     }
@@ -92,38 +97,41 @@ bool CTaskComplexBeInGroup::MakeAbortable(CPed* ped, eAbortPriority priority, co
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
+// 0x632F40
 CTask* CTaskComplexBeInGroup::CreateNextSubTask(CPed* ped) {
     auto& intel = GetGroup().GetIntelligence();
-    intel.ReportFinishedTask(ped, m_pSubTask); // Report this task as finished, and proceed
+    intel.ReportFinishedTask(ped, m_pSubTask);      // Report this task as finished, and proceed
     if (const auto main = intel.GetTaskMain(ped)) { // Return group's main task (if any)
-        m_mainTask = main;
-        m_mainTaskId = main->GetTaskType();
+        m_MainTask = main;
+        m_nMainTaskId = main->GetTaskType();
         return main->Clone();
     } else {
-        m_mainTask = nullptr;
-        m_mainTaskId = TASK_NONE;
+        m_MainTask = nullptr;
+        m_nMainTaskId = TASK_NONE;
         return nullptr;
     }
 }
 
+// 0x632FB0
 CTask* CTaskComplexBeInGroup::CreateFirstSubTask(CPed* ped) {
-    m_ped = ped;
-    m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    m_Ped = ped;
+    m_Ped->RegisterReference(reinterpret_cast<CEntity**>(&m_Ped));
 
     // Below code basically the same as `CreateNextSubTask`
     // TODO: Maybe move this into a separate function? (To reduce copy paste)
     auto& intel = GetGroup().GetIntelligence();
     if (const auto main = intel.GetTaskMain(ped)) { // Return group's main task (if any)
-        m_mainTask = main;
-        m_mainTaskId = main->GetTaskType();
+        m_MainTask = main;
+        m_nMainTaskId = main->GetTaskType();
         return main->Clone();
     } else {
-        m_mainTask = nullptr;
-        m_mainTaskId = TASK_NONE;
+        m_MainTask = nullptr;
+        m_nMainTaskId = TASK_NONE;
         return nullptr;
     }
 }
 
+// 0x638AA0
 CTask* CTaskComplexBeInGroup::ControlSubTask(CPed* ped) {
     MonitorSecondaryGroupTask(ped);
     return MonitorMainGroupTask(ped);
