@@ -89,8 +89,7 @@ void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
 void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
     for (auto& car : m_aUpsideDownCars) {
         if (car.m_nHandle == carHandle) {
-            car.m_nHandle = -1;
-            car.m_nTime = 0;
+            car.Clear();
         }
     }
 }

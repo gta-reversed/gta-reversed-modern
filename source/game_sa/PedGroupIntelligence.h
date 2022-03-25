@@ -18,20 +18,21 @@ class CPedGroup;
 class CEventGroupEvent;
 
 class CPedGroupIntelligence {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupIntelligence)
-
 public:
     CPedGroup*                     m_pPedGroup;
-    CEventGroupEvent*              m_oldEventGroupEvent;
-    CEventGroupEvent*              m_eventGroupEvent;
+    CEventGroupEvent*              m_pOldEventGroupEvent;
+    CEventGroupEvent*              m_pEventGroupEvent;
     CPedTaskPair                   m_groupTasks[32];
     CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator*                m_pPrimaryTaskAllocator;
     CTaskAllocator*                m_pEventResponseTaskAllocator;
-    int32                          m_dwDecisionMakerType;
-    int32                          m_taskSequenceId; // Used in CTaskSequences::ms_taskSequence
+    int32                          m_nDecisionMakerType;
+    int32                          m_nTaskSequenceId; // Used in CTaskSequences::ms_taskSequence
 
 public:
+    CPedGroupIntelligence();
+    ~CPedGroupIntelligence();
+
     bool       AddEvent(CEvent* event);
     void       ComputeDefaultTasks(CPed* ped);
     void*      ComputeEventResponseTasks();

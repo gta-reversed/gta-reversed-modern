@@ -123,7 +123,6 @@ public:
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
     uint8               m_nContactSurface;
-    char                field_BB;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;
@@ -131,7 +130,6 @@ public:
     CVector             m_vecLastCollisionImpactVelocity;
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
-    int16               field_FA;
     CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;

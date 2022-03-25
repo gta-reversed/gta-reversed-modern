@@ -2,6 +2,16 @@
 
 #include "PedGroupIntelligence.h"
 
+// 0x5F7250
+CPedGroupIntelligence::CPedGroupIntelligence() {
+    plugin::CallMethod<0x5F7250, CPedGroupIntelligence*>(this);
+}
+
+// 0x5F7350
+CPedGroupIntelligence::~CPedGroupIntelligence() {
+    plugin::CallMethod<0x5F7350, CPedGroupIntelligence*>(this);
+}
+
 bool CPedGroupIntelligence::AddEvent(CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x5F7470, CPedGroupIntelligence*, CEvent*>(this, event);
 }

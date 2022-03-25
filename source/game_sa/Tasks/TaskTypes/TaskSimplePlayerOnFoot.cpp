@@ -315,7 +315,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 CPedDamageResponseCalculator damageCalculator(player, 0.0f, activeWeaponType, PED_PIECE_TORSO, false);
                 CEventDamage eventDamage(player, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, targetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(targetEntity)) {
-                    damageCalculator.ComputeDamageResponse(targetEntity, &eventDamage.m_damageResponse, false);
+                    damageCalculator.ComputeDamageResponse(targetEntity, eventDamage.m_damageResponse, false);
                     targetEntity->GetEventGroup().Add(&eventDamage, false);
                     CCrime::ReportCrime(eCrimeType::CRIME_SEALTH_KILL_PED_WITH_KNIFE, targetEntity, player);
                     player->m_weaponAudio.AddAudioEvent(AE_WEAPON_STEALTH_KILL);
@@ -635,7 +635,7 @@ PED_WEAPON_AIMING_CODE:
                     CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                     if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
                         if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
-                            player->Say(176, 0, 1.0f, 0, 0, 0);
+                            player->Say(176);
                         }
                         CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
                         if (pedGroup) {
@@ -937,7 +937,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         player->GetIntelligence()->ClearTaskDuckSecondary();
         auto useGunTask = player->GetIntelligence()->GetTaskUseGun();
         if (!useGunTask || useGunTask->m_pWeaponInfo->flags.bAimWithArm) {
-            int32 pedMoveState = PEDMOVE_NONE;
+            auto pedMoveState = PEDMOVE_NONE;
             if (pad->GetSprint()) {
                 if (pedMoveBlendRatio <= 0.5f) {
                     return;

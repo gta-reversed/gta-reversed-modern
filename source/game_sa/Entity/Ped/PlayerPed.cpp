@@ -122,8 +122,48 @@ bool CPlayerPed::Save_Reversed() {
 }
 
 // 0x60D5B0
-CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy) {
-    plugin::CallMethod<0x60D5B0, CPlayerPed *, int32, bool>(this, playerId, bGroupCreated);
+CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYER1) {
+    m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
+    m_pPlayerData->AllocateData();
+
+    SetModelIndex(MODEL_PLAYER);
+
+    CPlayerPed::SetInitialState(bGroupCreated);
+    if (m_pTargetedObject)
+        CEntity::CleanUpOldReference(reinterpret_cast<CEntity**>(m_pTargetedObject));
+
+    m_pTargetedObject = nullptr;
+
+    SetPedState(PEDSTATE_IDLE);
+
+    gPlayIdlesAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
+
+    if (!bGroupCreated) {
+        m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
+
+        auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.m_bIsMissionGroup = true;
+        group.m_groupMembership.SetLeader(this);
+        group.Process();
+
+        m_pPlayerData->m_bGroupStuffDisabled = false; // m_pPlayerData->m_nPlayerFlags &= ~0x100u;
+        m_pPlayerData->m_bGroupAlwaysFollow  = false; // m_pPlayerData->m_nPlayerFlags &= ~0x200u;
+        m_pPlayerData->m_bGroupNeverFollow   = false; // m_pPlayerData->m_nPlayerFlags &= ~0x400u;
+    }
+
+    m_fMaxHealth = CStats::GetFatAndMuscleModifier(STAT_MOD_MAX_HEALTH);
+    m_fHealth    = m_fMaxHealth;
+
+    m_nFightingStyle      = STYLE_GRAB_KICK;
+    m_nAllowedAttackMoves = 15;
+
+    m_p3rdPersonMouseTarget = nullptr;
+    field_7A0 = 0;
+    m_pedSpeech.Initialise(this);
+    m_pIntelligence->m_fDmRadius = 30.0f;
+    m_pIntelligence->m_nDmNumPedsToScan = 2;
+    bUsedForReplay = true;
 }
 
 // 0x6094A0
@@ -172,32 +212,30 @@ CPad* CPlayerPed::GetPadFromPlayer() {
 
 // 0x609590
 bool CPlayerPed::CanPlayerStartMission() {
-    if (CGameLogic::GameState != GAME_STATE_INITIAL)
-        return false;
-
-    if (CGameLogic::IsCoopGameGoingOn())
+    if (CGameLogic::GameState != GAME_STATE_INITIAL || CGameLogic::IsCoopGameGoingOn())
         return false;
 
     if (!IsPedInControl() && !IsStateDriving())
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+    auto& taskMgr = GetTaskManager();
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE))
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_SAY))
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP))
         return false;
 
-    if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetTaskType() == TASK_SIMPLE_CAR_DRIVE) {
-            return false;
-        }
-    }
+    auto primaryTask = taskMgr.GetTaskPrimary(TASK_PRIMARY_PRIMARY);
+    if (primaryTask != nullptr && primaryTask->GetTaskType() != TASK_SIMPLE_CAR_DRIVE)
+        return false;
+
+    if (taskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK))
+        return false;
 
     if (!IsAlive())
         return false;
 
-    return !GetEventGroup().GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
-   
+    return !GetEventGroup().GetEventOfType(EVENT_SCRIPT_COMMAND);
 }
 
 // 0x609620
@@ -496,7 +534,7 @@ void CPlayerPed::DisbandPlayerGroup() {
     CPedGroupMembership& membership = GetGroupMembership();
     const uint32 nMembers = membership.CountMembersExcludingLeader();
     if (nMembers > 0)
-        Say(nMembers > 1 ? 149 : 150, 0, 1.0f, 0, 0, 0);
+        Say(nMembers > 1 ? 149 : 150);
     else
         membership.RemoveAllFollowers(true);
 }

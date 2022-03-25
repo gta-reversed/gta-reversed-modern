@@ -98,7 +98,6 @@ public:
     static tHeliLight (&HeliSearchLights)[4];
 
 public:
-    CHeli(plugin::dummy_func_t) : CAutomobile(plugin::dummy) { /* todo: remove NOTSA */ }
     CHeli(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CHeli() override; // 0x6C4340, 0x6C4810
 
@@ -141,6 +140,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
+    CHeli* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CHeli::CHeli(modelIndex, createdBy); return this;}
     void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { return CHeli::BlowUpCar(damager, bHideExplosion); }
     void Fix_Reversed() { CHeli::Fix(); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CHeli::BurstTyre(tyreComponentId, bPhysicalEffect); }

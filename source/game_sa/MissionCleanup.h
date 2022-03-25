@@ -26,17 +26,20 @@ enum MissionCleanUpEntityType : uint8 {
 };
 
 struct tMissionCleanupEntity {
-    char  type;
-    char  _pad[3];
+    int8  type;
     int32 handle;
+
+    tMissionCleanupEntity() { // 0x468DC0
+        type   = 0;
+        handle = 0;
+    }
 };
 VALIDATE_SIZE(tMissionCleanupEntity, 0x8);
 
 class CMissionCleanup {
 public:
     tMissionCleanupEntity m_Objects[75];
-    char                  m_Count;
-    char                  _pad[3];
+    int8                  m_Count;
 
 public:
     // Default constructor
