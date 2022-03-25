@@ -4,21 +4,18 @@
 
 class CTaskSimpleCreateCarAndGetIn : public CTaskSimple {
 public:
-    CVector     m_pos{};                // 0x8
-    int32       m_model{};              // 0x14
-    CVehicle*   m_createdVeh{};         // 0x18
-    CVector     m_vehCreationPos{};        // 0x1C
-    uint32       m_timeMs{};             // 0x28
-    uint32       m_waitTime{};           // 0x2C
-    bool        m_waitTimeSet{};        // 0x30
-    int8        m_resetWaitTime{};      // 0x31
+    CVector   m_Pos;
+    int32     m_nModel;
+    CVehicle* m_CreatedVeh;
+    CVector   m_VehCreationPos;
+    uint32    m_nTimeMs;
+    uint32    m_nWaitTime;
+    bool      m_bWaitTimeSet;
+    bool      m_bResetWaitTime;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_CREATE_CAR_AND_GET_IN;
 
-    static void InjectHooks();
-
-    CTaskSimpleCreateCarAndGetIn(const CTaskSimpleCreateCarAndGetIn&); // NOTSA - Helper for `Clone`
     CTaskSimpleCreateCarAndGetIn(CVector const& pos, int32 model);
     ~CTaskSimpleCreateCarAndGetIn();
 
@@ -30,16 +27,10 @@ public:
 private:
     void CleanupCreatedVehicle();
 
-    CTaskSimpleCreateCarAndGetIn* Constructor(CVector const& pos, int32 model) {
-        this->CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(pos, model);
-        return this;
-    }
-
-    CTaskSimpleCreateCarAndGetIn* Destructor() {
-        this->CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn();
-        return this;
-    }
-
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CTaskSimpleCreateCarAndGetIn* Constructor(CVector const& pos, int32 model) { this->CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(pos, model); return this; }
+    CTaskSimpleCreateCarAndGetIn* Destructor() { this->CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn(); return this; }
     CTask * Clone_Reversed() { return CTaskSimpleCreateCarAndGetIn::Clone(); }
     auto GetTaskType_Reversed() { return CTaskSimpleCreateCarAndGetIn::GetTaskType(); }
     bool MakeAbortable_Reversed(CPed * ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCreateCarAndGetIn::MakeAbortable(ped, priority, event); }

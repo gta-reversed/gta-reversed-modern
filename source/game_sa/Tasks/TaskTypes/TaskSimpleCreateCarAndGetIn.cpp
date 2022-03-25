@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimpleCreateCarAndGetIn.h"
 #include "PedPlacement.h"
 #include "TaskSimpleStandStill.h"
@@ -11,30 +12,26 @@ void CTaskSimpleCreateCarAndGetIn::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x6493E0);
     RH_ScopedInstall(Destructor, 0x64CEA0);
-
     RH_ScopedInstall(Clone_Reversed, 0x64A410);
     RH_ScopedInstall(GetTaskType_Reversed, 0x649430);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x649440);
     RH_ScopedInstall(ProcessPed_Reversed, 0x64CF40);
 }
 
-// NOTSA
-CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(const CTaskSimpleCreateCarAndGetIn& o) :
-    m_model{o.m_model},
-    m_pos{o.m_pos}
-{
-}
-
 // 0x6493E0
-CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(CVector const& pos, int32 model) :
-    m_pos{pos},
-    m_model{model}
-{
+CTaskSimpleCreateCarAndGetIn::CTaskSimpleCreateCarAndGetIn(const CVector& pos, int32 model) : CTaskSimple() {
+    m_Pos            = pos;
+    m_CreatedVeh     = nullptr;
+    m_nModel         = model;
+    m_nTimeMs        = 0;
+    m_nWaitTime      = 0;
+    m_bWaitTimeSet   = false;
+    m_bResetWaitTime = false;
 }
 
 // 0x64CEA0
 CTaskSimpleCreateCarAndGetIn::~CTaskSimpleCreateCarAndGetIn() {
-    if (m_createdVeh) {
+    if (m_CreatedVeh) {
         CleanupCreatedVehicle();
     }
 }
@@ -47,26 +44,26 @@ bool CTaskSimpleCreateCarAndGetIn::MakeAbortable(CPed* ped, eAbortPriority prior
 // 0x64CF40
 bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
     CVector nodePos{};
-    if (!ThePaths.FindNodeCoorsForScript(nodePos, ThePaths.FindNodeClosestToCoors(m_pos))) {
-        if (!m_waitTimeSet) {
-            m_timeMs = CTimer::GetTimeInMS();
-            m_waitTime = 2000;
-            m_waitTimeSet = true;
+    if (!ThePaths.FindNodeCoorsForScript(nodePos, ThePaths.FindNodeClosestToCoors(m_Pos))) {
+        if (!m_bWaitTimeSet) {
+            m_nTimeMs = CTimer::GetTimeInMS();
+            m_nWaitTime = 2000;
+            m_bWaitTimeSet = true;
         }
-        if (m_resetWaitTime) {
-            m_timeMs = CTimer::GetTimeInMS();
-            m_resetWaitTime = false;
+        if (m_bResetWaitTime) {
+            m_nTimeMs = CTimer::GetTimeInMS();
+            m_bResetWaitTime = false;
         }
-        return CTimer::GetTimeInMS() >= m_timeMs + m_waitTime;
+        return CTimer::GetTimeInMS() >= m_nTimeMs + m_nWaitTime;
     }
 
-    m_vehCreationPos = nodePos;
-    m_waitTimeSet = false;
+    m_VehCreationPos = nodePos;
+    m_bWaitTimeSet = false;
 
     // If vehicle is not created yet lets check if it can be created at all
-    if (!m_createdVeh) {
+    if (!m_CreatedVeh) {
         // Make sure position isn't visible by camera
-        if (TheCamera.IsSphereVisible({ m_vehCreationPos, 3.f })) {
+        if (TheCamera.IsSphereVisible({ m_VehCreationPos, 3.f })) {
             return true;
         }
 
@@ -88,20 +85,20 @@ bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
     }
 
     // Make sure model is loaded
-    if (!CStreaming::IsModelLoaded(m_model)) {
-        CStreaming::RequestModel(m_model, STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
+    if (!CStreaming::IsModelLoaded(m_nModel)) {
+        CStreaming::RequestModel(m_nModel, STREAMING_KEEP_IN_MEMORY | STREAMING_MISSION_REQUIRED);
         return false;
     }
 
     // Create vehicle and set ped in as driver
-    if (!m_createdVeh) {
-        m_createdVeh = CCarCtrl::CreateCarForScript(m_model, m_vehCreationPos, true);
+    if (!m_CreatedVeh) {
+        m_CreatedVeh = CCarCtrl::CreateCarForScript(m_nModel, m_VehCreationPos, true);
 
-        CTaskSimpleCarSetPedInAsDriver task{ m_createdVeh, nullptr };
+        CTaskSimpleCarSetPedInAsDriver task{ m_CreatedVeh, nullptr };
         task.ProcessPed(ped);
     }
  
-    if (!m_createdVeh->IsStatic()) {
+    if (!m_CreatedVeh->IsStatic()) {
         return false;
     }
 
@@ -110,8 +107,9 @@ bool CTaskSimpleCreateCarAndGetIn::ProcessPed(CPed* ped) {
     return true;
 }
 
+// NOTSA
 void CTaskSimpleCreateCarAndGetIn::CleanupCreatedVehicle() {
-    CTheScripts::CleanUpThisVehicle(m_createdVeh);
-    CTheScripts::MissionCleanUp.RemoveEntityFromList(GetVehiclePool()->GetRef(m_createdVeh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
-    m_createdVeh = nullptr;
+    CTheScripts::CleanUpThisVehicle(m_CreatedVeh);
+    CTheScripts::MissionCleanUp.RemoveEntityFromList(GetVehiclePool()->GetRef(m_CreatedVeh), MISSION_CLEANUP_ENTITY_TYPE_VEHICLE);
+    m_CreatedVeh = nullptr;
 }
