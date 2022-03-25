@@ -15,9 +15,8 @@ void CTaskSimpleCarDrive::InjectHooks() {
     //RH_ScopedInstall(ProcessHeadBopping, 0x6428C0);
     //RH_ScopedInstall(ProcessArmBopping, 0x642AE0);
     //RH_ScopedInstall(ProcessBopping, 0x642E70);
-
     //RH_ScopedInstall(Clone_Reversed, 0x63DC20);
-    //RH_ScopedInstall(GetTaskType_Reversed, 0x63C450);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x63C450);
     //RH_ScopedInstall(MakeAbortable_Reversed, 0x63C670);
     //RH_ScopedInstall(ProcessPed_Reversed, 0x644470);
     //RH_ScopedInstall(SetPedPosition_Reversed, 0x63C770);
