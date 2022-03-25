@@ -16,7 +16,7 @@ public:
     char                          field_1D{};
     int32                         m_nBoppingStartTime{-1};
     int32                         field_24{};
-    int32                         m_nBoppingEndTime{};
+    int32                         m_nBoppingEndTime{}; // Seemingly not a tick count, but rather the bopping interval 
     float                         m_fBoppingProgress; // 0.0 to 1.0
     int32                         m_nBoppingCompletedTimes{};
     int32                         m_nHeadBoppingStartTime{};
@@ -42,7 +42,7 @@ public:
     CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
 
     void TriggerIK(CPed* ped);
-    int32 UpdateBopping();
+    void UpdateBopping();
     void StartBopping(CPed* ped);
     void ProcessHeadBopping(CPed* ped, uint8 a3, float a4);
     void ProcessArmBopping(CPed* pPed, uint8 a3, float a4);

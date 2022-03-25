@@ -11,7 +11,7 @@ void CTaskSimpleCarDrive::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x63C460);
 
     RH_ScopedInstall(TriggerIK, 0x63C500);
-    //RH_ScopedInstall(UpdateBopping, 0x63C900);
+    RH_ScopedInstall(UpdateBopping, 0x63C900);
     //RH_ScopedInstall(StartBopping, 0x642760);
     //RH_ScopedInstall(ProcessHeadBopping, 0x6428C0);
     //RH_ScopedInstall(ProcessArmBopping, 0x642AE0);
@@ -69,8 +69,10 @@ void CTaskSimpleCarDrive::TriggerIK(CPed* ped) {
 }
 
 // 0x63C900
-int32 CTaskSimpleCarDrive::UpdateBopping() {
-    return plugin::CallMethodAndReturn<int32, 0x63C900, CTaskSimpleCarDrive*>(this);
+void CTaskSimpleCarDrive::UpdateBopping() {
+    const auto timeDelta = CTimer::GetTimeInMS() - m_nBoppingStartTime;
+    m_fBoppingProgress = (float)(timeDelta % m_nBoppingEndTime) / (float)m_nBoppingEndTime;
+    m_nBoppingCompletedTimes = timeDelta / m_nBoppingEndTime % 2;
 }
 
 // 0x642760
