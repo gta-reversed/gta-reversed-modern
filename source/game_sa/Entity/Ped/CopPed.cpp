@@ -261,7 +261,7 @@ void CCopPed::ProcessControl_Reversed() {
         return;
 
     if (m_pTargetedObject)
-        Say(220, 0, 1.0f, 0, 0, 0);
+        Say(220);
 
     if (!field_79D)
         return;

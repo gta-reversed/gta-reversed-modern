@@ -57,7 +57,7 @@ void CSkidmark::Update() {
 CRGBA CSkidmark::GetColor() const {
     const auto GetBaseColor = [this]() -> CRGBA {
         switch (m_nType) {
-        case eSkidMarkType::DEFALT:
+        case eSkidMarkType::DEFAULT:
             return { 0, 0, 0, 255 };
 
         case eSkidMarkType::SANDY:

@@ -36,12 +36,6 @@ void CEventDamage::InjectHooks() {
 
 // 0x4B33B0
 CEventDamage::CEventDamage(const CEventDamage& event) : CEventEditableResponse() {
-    m_damageResponse.m_fDamageHealth      = 0.0f;
-    m_damageResponse.m_fDamageArmor       = 0.0f;
-    m_damageResponse.m_bHealthZero        = false;
-    m_damageResponse.m_bForceDeath        = false;
-    m_damageResponse.m_bDamageCalculated  = false;
-    m_damageResponse.m_bCheckIfAffectsPed = false;
     From(event);
 }
 
@@ -59,14 +53,6 @@ CEventDamage::CEventDamage(CEntity* source, uint32 startTime, eWeaponType weapon
     m_nAnimID       = ANIM_ID_NO_ANIMATION_SET;
     m_fAnimBlend    = 8.0f;
     m_fAnimSpeed    = 1.0f;
-
-    // todo: same as above, CPedDamageResponse.Init()?
-    m_damageResponse.m_fDamageHealth = 0.0f;
-    m_damageResponse.m_fDamageArmor = 0.0f;
-    m_damageResponse.m_bHealthZero = false;
-    m_damageResponse.m_bForceDeath = false;
-    m_damageResponse.m_bDamageCalculated = false;
-    m_damageResponse.m_bCheckIfAffectsPed = false;
 
     if (m_pSourceEntity)
         m_pSourceEntity->RegisterReference(&m_pSourceEntity);
@@ -257,8 +243,8 @@ bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
     if (activeTask->GetTaskType() != TASK_SIMPLE_STEALTH_KILL)
         return true;
 
-    for (auto memberId = 0; memberId < 8; memberId++) {
-        CPed* groupMember = pedGroup->m_groupMembership.GetMember(memberId);
+    for (auto memberId = 0; memberId < 8; memberId++) { // todo: magic number
+        CPed* groupMember = pedGroup->GetMembership().GetMember(memberId);
         if (groupMember) {
             CVector vecDirection = m_pSourceEntity->GetPosition() - groupMember->GetPosition();
             vecDirection.Normalise();
@@ -289,23 +275,19 @@ void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
     if (IsCriminalEvent() && m_pSourceEntity) {
         bool bPoliceCareAboutCrime = CPedType::PoliceDontCareAboutCrimesAgainstPedType(ped->m_nPedType);
         if (m_weaponType <= WEAPON_CHAINSAW) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_DAMAGED_PED;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_DAMAGED_COP;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_DAMAGED_COP : CRIME_DAMAGED_PED;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
+
         if (m_weaponType <= WEAPON_DETONATOR || m_weaponType == WEAPON_SPRAYCAN) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_DAMAGE_CAR;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_DAMAGE_COP_CAR;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_DAMAGE_COP_CAR : CRIME_DAMAGE_CAR;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
+
         if (m_weaponType == WEAPON_RAMMEDBYCAR || m_weaponType == WEAPON_RUNOVERBYCAR) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_KILL_PED_WITH_CAR;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_KILL_COP_PED_WITH_CAR;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_KILL_COP_PED_WITH_CAR : CRIME_KILL_PED_WITH_CAR;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
@@ -327,12 +309,14 @@ bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
         || refEvent.GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
         return true;
     }
+
     auto* ped = m_pSourceEntity->AsPed();
     if (m_pSourceEntity && m_pSourceEntity->IsPed() && ped->IsPlayer() && refEvent.GetEventType() == EVENT_DAMAGE) {
         if (refEvent.GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
             return CEvent::TakesPriorityOver(refEvent);
         return true;
     }
+
     if (refEvent.GetEventType() == EVENT_DAMAGE) {
         if (GetSourceEntity() != refEvent.GetSourceEntity())
             return true;
@@ -858,7 +842,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f));
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f)); // todo: GetRandomNumberInRange(int)
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
@@ -939,12 +923,11 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             m_fAnimBlend = 8.0f;
             m_nAnimID = m_ucDirection + ANIM_ID_SHOT_PARTIAL;
             if (ped->IsPlayer()) {
-              CPlayerPedData * pPedPlayerData = ped->m_pPlayerData;
-                if (CTimer::GetTimeInMS() > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
+                if (CTimer::GetTimeInMS() > ped->m_pPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
                     if (m_weaponType == WEAPON_M4)
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::GetTimeInMS() + 2500.0f);
+                        ped->m_pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(float(CTimer::GetTimeInMS()) + 2500.0f);
                     else
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::GetTimeInMS() + 1500.0f);
+                        ped->m_pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(float(CTimer::GetTimeInMS()) + 1500.0f);
                 }
                 else {
                     m_nAnimID = ANIM_ID_NO_ANIMATION_SET;

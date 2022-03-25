@@ -47,26 +47,23 @@ void CReferences::RemoveReferencesToPlayer() {
     if (player) {
         player->ResolveReferences();
         auto& group = CPedGroups::GetGroup(player->m_pPlayerData->m_nPlayerGroup);
-        group.m_groupMembership.SetLeader(player);
+        group.GetMembership().SetLeader(player);
         group.Process();
     }
 }
 
 void CReferences::PruneAllReferencesInWorld() {
-    auto iPedsSize = GetPedPool()->GetSize();
-    for (int32 i = 0; i < iPedsSize; ++i) {
+    for (int32 i = 0; i < GetPedPool()->GetSize(); ++i) {
         if (auto ped = GetPedPool()->GetAt(i))
             ped->PruneReferences();
     }
 
-    auto iVehsSize = GetVehiclePool()->GetSize();
-    for (int32 i = 0; i < iVehsSize; ++i) {
+    for (int32 i = 0; i < GetVehiclePool()->GetSize(); ++i) {
         if (auto vehicle = GetVehiclePool()->GetAt(i))
             vehicle->PruneReferences();
     }
 
-    auto iObjectsSize = GetObjectPool()->GetSize();
-    for (int32 i = 0; i < iObjectsSize; ++i) {
+    for (int32 i = 0; i < GetObjectPool()->GetSize(); ++i) {
         if (auto obj = GetObjectPool()->GetAt(i))
             obj->PruneReferences();
     }

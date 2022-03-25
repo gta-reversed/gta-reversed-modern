@@ -185,8 +185,6 @@ namespace rng = std::ranges;
 #include "game_sa\CarAI.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
-#include "game_sa\Checkpoint.h"
-#include "game_sa\Checkpoints.h"
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"

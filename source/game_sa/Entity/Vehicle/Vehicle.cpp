@@ -88,8 +88,10 @@ void CVehicle::InjectHooks()
     RH_ScopedInstall(UpdateLightingFromStoredPolys, 0x6D0CC0);
     RH_ScopedInstall(CalculateLightingFromCollision, 0x6D0CF0);
     RH_ScopedInstall(ProcessWheel, 0x6D6C00);
-    RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*));
-    RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32));
+    RH_ScopedOverloadedInstall(IsPassenger, "Ped", 0x6D1BD0, bool(CVehicle::*)(CPed*) const);
+    RH_ScopedOverloadedInstall(IsPassenger, "Int", 0x6D1C00, bool(CVehicle::*)(int32) const);
+    RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
+    RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32) const);
     RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
@@ -1370,23 +1372,36 @@ CPed* CVehicle::SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool 
 }
 
 // 0x6D1BD0
-bool CVehicle::IsPassenger(CPed* ped)
+bool CVehicle::IsPassenger(CPed* ped) const
 {
-    return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1BD0)(this, ped);
+    if (!ped)
+        return false;
+
+    for (const auto& passenger : m_apPassengers) {
+        if (passenger == ped) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x6D1C00
-bool CVehicle::IsPassenger(int32 modelIndex)
+bool CVehicle::IsPassenger(int32 modelIndex) const
 {
-    return ((bool(__thiscall*)(CVehicle*, int32))0x6D1C00)(this, modelIndex);
+    for (const auto& passenger : m_apPassengers) {
+        if (passenger->m_nModelIndex == modelIndex) {
+            return true;
+        }
+    }
+    return false;
 }
 
-bool CVehicle::IsDriver(CPed* ped)
+bool CVehicle::IsDriver(CPed* ped) const
 {
     return ped ? ped == m_pDriver : false;
 }
 
-bool CVehicle::IsDriver(int32 modelIndex)
+bool CVehicle::IsDriver(int32 modelIndex) const
 {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
@@ -2031,7 +2046,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
     if (speedSq > adhesion * adhesion) {
         if (*wheelState != WHEEL_STATE_FIXED) {
             float tractionLimit = WS_TRAC_FRAC_LIMIT;
-            if (contactSpeedFwd > 0.15f && (!wheelId || wheelId == CARWHEEL_FRONT_RIGHT))
+            if (contactSpeedFwd > 0.15f && (!wheelId || wheelId == CAR_WHEEL_FRONT_RIGHT))
                 tractionLimit += tractionLimit;
             if (bDriving && tractionLimit * adhesion < fabs(fwd))
                 *wheelState = WHEEL_STATE_SPINNING;
@@ -2181,7 +2196,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
                     auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
                     if (damageEvent.AffectsPed(m_pDriver))
-                        pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, &damageEvent.m_damageResponse, true);
+                        pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, damageEvent.m_damageResponse, true);
                     else
                         damageEvent.m_damageResponse.m_bDamageCalculated = true;
 
@@ -2490,7 +2505,7 @@ void CVehicle::AddExhaustParticles()
         return;
     }
     auto mi = GetVehicleModelInfo();
-    CVector firstExhaustPos = mi->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST];
+    CVector firstExhaustPos = mi->GetModelDummyPosition(DUMMY_EXHAUST);
     CVector secondExhaustPos = firstExhaustPos;
     secondExhaustPos.x *= -1.0f;
     CMatrix entityMatrix (*m_matrix);
@@ -2507,7 +2522,7 @@ void CVehicle::AddExhaustParticles()
             break;
         case MODEL_NRG500:
             if (!m_anExtras[0] || m_anExtras[0] == 1)
-                secondExhaustPos = mi->m_pVehicleStruct->m_avDummyPos[DUMMY_EXHAUST_SECONDARY];
+                secondExhaustPos = mi->GetModelDummyPosition(DUMMY_EXHAUST_SECONDARY);
             break;
         case MODEL_BF400:
             if (m_anExtras[0] == 2)
@@ -2667,8 +2682,8 @@ bool CVehicle::DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 li
 // 0x6E0E20
 void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
 {
-    const auto mi = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
-    CVector pointModelSpace = mi->m_pVehicleStruct->m_avDummyPos[2 * dummyId];
+    const auto* mi = GetVehicleModelInfo();
+    CVector pointModelSpace = mi->GetModelDummyPosition(static_cast<eVehicleDummies>(2 * dummyId));
     if (dummyId == 1 && pointModelSpace.IsZero())
         return;
 
@@ -2818,6 +2833,6 @@ void CVehicle::DoDriveByShootings()
 bool CVehicle::AreAnyOfPassengersFollowerOfGroup(const CPedGroup& group) {
     const auto end = m_apPassengers + m_nMaxPassengers;
     return std::find_if(m_apPassengers, end, [&](CPed* passenger) {
-        return group.m_groupMembership.IsFollower(passenger);
+        return group.GetMembership().IsFollower(passenger);
     }) != end;
 }

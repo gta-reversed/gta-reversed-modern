@@ -28,12 +28,17 @@ CTaskComplexPartner::CTaskComplexPartner(const char* commandName, CPed* partner,
         partner->RegisterReference(reinterpret_cast<CEntity**>(&m_partner));
 }
 
+/*!
+ * @addr 0x683A40
+ */
 CTaskComplexPartner::~CTaskComplexPartner() {
     if (m_partner)
         m_partner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_partner));
+
     if (m_requiredAnimsStreamedIn) {
-        if (memcmp(m_animBlockName, gta_empty_string, 1u))
+        if (strcmp(m_animBlockName, "") != 0) {
             CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_animBlockName));
+        }
         m_requiredAnimsStreamedIn = false;
     }
 }

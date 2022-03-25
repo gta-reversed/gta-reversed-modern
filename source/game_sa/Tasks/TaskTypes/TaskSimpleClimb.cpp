@@ -814,9 +814,9 @@ void CTaskSimpleClimb::StartSpeech(CPed* ped)
     if (ped->IsPlayer())
     {
         if (m_nHeightForAnim == CLIMB_PULLUP)
-            ped->Say(354, 0, 1.0F, 0, 0, 0);
+            ped->Say(354);
         else if (m_nHeightForAnim == CLIMB_STANDUP)
-            ped->Say(355, 0, 1.0F, 0, 0, 0);
+            ped->Say(355);
     }
 }
 

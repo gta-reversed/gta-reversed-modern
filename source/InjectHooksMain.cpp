@@ -92,8 +92,11 @@
 #include "Interior_c.h"
 #include "InteriorGroup_c.h"
 #include "InteriorManager_c.h"
+#include "Checkpoint.h"
+#include "Checkpoints.h"
 
 // Tasks
+#include "TaskComplexCarDriveMission.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -112,6 +115,7 @@
 #include "TaskComplexGetUpAndStandStill.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "TaskSimpleDie.h"
+#include "TaskSimpleDuck.h"
 #include "TaskComplexPolicePursuit.h"
 #include "TaskSimpleFacial.h"
 #include "TaskComplexCopInCar.h"
@@ -199,6 +203,7 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
+#include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
 
 void InjectHooksMain() {
@@ -208,6 +213,9 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCheckpoint::InjectHooks();
+    CCheckpoints::InjectHooks();
+    CWeaponEffects::InjectHooks();
     CPedList::InjectHooks();
     CBouncingPanel::InjectHooks();
     CRope::InjectHooks();
@@ -471,6 +479,7 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
+        CTaskManager::InjectHooks();
         CTaskComplexLeaveAnyCar::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();
@@ -490,6 +499,7 @@ void InjectHooksMain() {
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();
         CTaskSimpleDie::InjectHooks();
+        CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
         // CTaskComplexCopInCar::InjectHooks();
@@ -547,7 +557,8 @@ void InjectHooksMain() {
         // CTaskSimpleDuck::InjectHooks();
         CTaskComplexMedicTreatInjuredPed::InjectHooks();
         CTaskSimplePlayHandSignalAnim::InjectHooks();
-        // CTaskComplexCarDrive::InjectHooks();
+        CTaskComplexCarDrive::InjectHooks();
+        CTaskComplexCarDriveMission::InjectHooks();
         // CTaskComplexKillPedFromBoat::InjectHooks();
         // CTaskComplexLeaveCar::InjectHooks();
         CTaskComplexTreatAccident::InjectHooks();

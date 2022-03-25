@@ -6,14 +6,14 @@ int32& CPlane::GenPlane_ModelIndex = *(int32*)0xC1CAD8;
 uint32& CPlane::GenPlane_Status = *(uint32*)0xC1CADC;
 uint32& CPlane::GenPlane_LastTimeGenerated = *(uint32*)0xC1CAE0;
 
-bool& CPlane::GenPlane_Active = *(bool*)0x8D33BC;               // true
-float& CPlane::ANDROM_COL_ANGLE_MULT = *(float*)0x8D33C0;       // 0.00015f
-float& CPlane::HARRIER_NOZZLE_ROTATE_LIMIT = *(float*)0x8D33C4; // 5000.0f
-float& CPlane::HARRIER_NOZZLE_SWITCH_LIMIT = *(float*)0x8D33C8; // 3000.0f
-float& CPlane::PLANE_MIN_PROP_SPEED = *(float*)0x8D33CC;        // 0.05f
-float& CPlane::PLANE_STD_PROP_SPEED = *(float*)0x8D33D0;        // 0.18f
-float& CPlane::PLANE_MAX_PROP_SPEED = *(float*)0x8D33D4;        // 0.34f
-float& CPlane::PLANE_ROC_PROP_SPEED = *(float*)0x8D33D8;        // 0.01f
+bool& CPlane::GenPlane_Active = *(bool*)0x8D33BC;                 // true
+float& CPlane::ANDROM_COL_ANGLE_MULT = *(float*)0x8D33C0;         // 0.00015f
+uint16& CPlane::HARRIER_NOZZLE_ROTATE_LIMIT = *(uint16*)0x8D33C4; // 5000
+uint16& CPlane::HARRIER_NOZZLE_SWITCH_LIMIT = *(uint16*)0x8D33C8; // 3000
+float& CPlane::PLANE_MIN_PROP_SPEED = *(float*)0x8D33CC;          // 0.05f
+float& CPlane::PLANE_STD_PROP_SPEED = *(float*)0x8D33D0;          // 0.18f
+float& CPlane::PLANE_MAX_PROP_SPEED = *(float*)0x8D33D4;          // 0.34f
+float& CPlane::PLANE_ROC_PROP_SPEED = *(float*)0x8D33D8;          // 0.01f
 
 float& HARRIER_NOZZLE_ROTATERATE = *(float*)0x8D33DC;       // 25.0f
 float& PLANE_DAMAGE_WAVE_COUNTER_VAR = *(float*)0x8D33E0;   // 0.75f
@@ -26,6 +26,7 @@ void CPlane::InjectHooks() {
     RH_ScopedClass(CPlane);
     RH_ScopedCategory("Vehicle");
 
+    RH_ScopedInstall(Constructor, 0x6C8E20);
     RH_ScopedInstall(InitPlaneGenerationAndRemoval, 0x6CAD90);
     RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C9140);
     RH_ScopedInstall(BurstTyre_Reversed, 0x6C9150);
@@ -51,8 +52,96 @@ void CPlane::InjectHooks() {
 }
 
 // 0x6C8E20
-CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) /* CAutomobile(modelIndex, createdBy, true) */ {
-    plugin::CallMethod<0x6C8E20, CPlane*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, true) {
+    m_nVehicleSubType = VEHICLE_TYPE_PLANE;
+
+    m_fLeftRightSkid               = 0.0f;
+    m_fSteeringUpDown              = 0.0f;
+    m_fSteeringLeftRight           = 0.0f;
+    m_fAccelerationBreakStatus     = 0.0f;
+    m_fAccelerationBreakStatusPrev = 1.0f;
+    m_fPropSpeed                   = 0.0f;
+    field_9C8                      = 0.0f;
+    m_fLandingGearStatus           = 0.0f;
+    field_9A0                      = 0;
+    m_planeCreationHeading         = 0.0f;
+    m_planeHeading                 = 0.0f;
+    m_planeHeadingPrev             = 0.0f;
+    m_maxAltitude                  = 15.0f;
+    m_altitude                     = 25.0f;
+    m_minAltitude                  = 20.0f;
+    m_forwardZ                     = 0;
+    m_nStartedFlyingTime           = 0;
+    m_fSteeringFactor              = 0.0f;
+
+    if (m_nModelIndex != MODEL_VORTEX)
+        m_nPhysicalFlags |= PHYSICAL_25;
+
+    m_nExtendedRemovalRange = 255;
+    vehicleFlags.bNeverUseSmallerRemovalRange = true; // m_nFlags5 | 0x40;
+    vehicleFlags.bIsBig = true; // m_nFlags2 | 4;
+
+    auto& leftDoor = m_doors[DOOR_LEFT_FRONT];
+    switch (modelIndex) {
+    case MODEL_HYDRA:
+    case MODEL_RUSTLER:
+    case MODEL_CROPDUST:
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        leftDoor.m_fOpenAngle = 1.8849558f;
+        leftDoor.m_nAxis = 1;
+        leftDoor.m_nDirn = 19;
+        leftDoor.m_fClosedAngle = 0.0f;
+        break;
+    case MODEL_SHAMAL:
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        leftDoor.m_fOpenAngle = -2.3561945f;
+        leftDoor.m_fClosedAngle = 0.0f;
+        leftDoor.m_nAxis = 1;
+        leftDoor.m_nDirn = 18;
+        rwObjectSetFlags(GetFirstObject(m_aCarNodes[PLANE_WHEEL_LF]), 0);
+        break;
+    case MODEL_NEVADA:
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        leftDoor.m_fOpenAngle = -1.2566371f;
+        leftDoor.m_nAxis = 2;
+        leftDoor.m_nDirn = 20;
+        leftDoor.m_fClosedAngle = 0.0f;
+        break;
+    case MODEL_VORTEX:
+        if (m_panels[FRONT_LEFT_PANEL].m_nFrameId == (uint16)-1)
+            m_panels[FRONT_LEFT_PANEL].SetPanel(PLANE_GEAR_L, 1, -0.25f);
+        break;
+    case MODEL_STUNT:
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        leftDoor.m_fOpenAngle = 1.8849558f;
+        leftDoor.m_fClosedAngle = 0.0f;
+        leftDoor.m_nAxis = 1;
+        leftDoor.m_nDirn = 19;
+        rwObjectSetFlags(GetFirstObject(m_aCarNodes[PLANE_WHEEL_LB]), 0);
+        rwObjectSetFlags(GetFirstObject(m_aCarNodes[PLANE_WHEEL_RB]), 0);
+        break;
+    }
+
+    for (auto wheelId = 0; wheelId < 4; wheelId++) {
+        CVector modelPos, localPos;
+        GetVehicleModelInfo()->GetWheelPosn(wheelId, modelPos, false);
+        GetVehicleModelInfo()->GetWheelPosn(wheelId, localPos, true);
+        m_wheelPosition[wheelId] = m_wheelPosition[wheelId] - modelPos.z + localPos.z;
+    }
+
+    m_planeDamageWave = 0;
+    m_pGunParticles = nullptr;
+    m_nFiringMultiplier = 16;
+    field_9DC = 0;
+    field_9E0 = 0;
+    std::ranges::fill(m_apJettrusParticles, nullptr);
+
+    m_pSmokeParticle = nullptr;
+
+    if (m_nModelIndex == MODEL_HYDRA)
+        m_wMiscComponentAngle = HARRIER_NOZZLE_ROTATE_LIMIT;
+
+    m_bSmokeEjectorEnabled = false;
 }
 
 // 0x6C9160
@@ -143,20 +232,20 @@ void CPlane::IsAlreadyFlying() {
 void CPlane::SetGearUp() {
     m_fLandingGearStatus = 1.0f;
     m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f * m_pFlyingHandlingData->m_fGearUpR;
-    m_damageManager.SetWheelStatus(CARWHEEL_FRONT_LEFT,  WHEEL_STATUS_MISSING);
-    m_damageManager.SetWheelStatus(CARWHEEL_REAR_LEFT,   WHEEL_STATUS_MISSING);
-    m_damageManager.SetWheelStatus(CARWHEEL_FRONT_RIGHT, WHEEL_STATUS_MISSING);
-    m_damageManager.SetWheelStatus(CARWHEEL_REAR_RIGHT,  WHEEL_STATUS_MISSING);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_MISSING);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_MISSING);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_MISSING);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_RIGHT,  WHEEL_STATUS_MISSING);
 }
 
 // 0x6CAC70
 void CPlane::SetGearDown() {
     m_fLandingGearStatus = 0.0f;
     m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f;
-    m_damageManager.SetWheelStatus(CARWHEEL_FRONT_LEFT,  WHEEL_STATUS_OK);
-    m_damageManager.SetWheelStatus(CARWHEEL_REAR_LEFT,   WHEEL_STATUS_OK);
-    m_damageManager.SetWheelStatus(CARWHEEL_FRONT_RIGHT, WHEEL_STATUS_OK);
-    m_damageManager.SetWheelStatus(CARWHEEL_REAR_RIGHT,  WHEEL_STATUS_OK);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_LEFT,  WHEEL_STATUS_OK);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_LEFT,   WHEEL_STATUS_OK);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, WHEEL_STATUS_OK);
+    m_damageManager.SetWheelStatus(CAR_WHEEL_REAR_RIGHT,  WHEEL_STATUS_OK);
 }
 
 // 0x6CCA50

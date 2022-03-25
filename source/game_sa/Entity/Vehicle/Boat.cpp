@@ -481,7 +481,7 @@ void CBoat::ProcessControl_Reversed() {
                 fGivenDamage *= 0.5F;
         } else {
             if (fGivenDamage > 60.0F && m_pDriver)
-                m_pDriver->Say(0x44U, 0, 1.0F, 0, 0, 0);
+                m_pDriver->Say(68);
 
             fGivenDamage -= 25.0F;
             if (vehicleFlags.bTakeLessDamage)
@@ -916,7 +916,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
     obj->m_nObjectType = eObjectType::OBJECT_TEMPORARY;
     obj->SetIsStatic(false);
     obj->objectFlags.bIsPickup = false;
-    obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 20000;
+    obj->m_nRemovalTime = CTimer::GetTimeInMS() + 20000;
 
     obj->m_vecMoveSpeed = m_vecMoveSpeed;
     if (GetUp().z <= 0.0F)
