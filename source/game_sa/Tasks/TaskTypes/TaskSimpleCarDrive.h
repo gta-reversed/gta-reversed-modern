@@ -14,7 +14,7 @@ public:
     int32                         field_18{};
     char                          field_1C{};
     char                          field_1D{};
-    int32                         m_nBoppingStartTime{};
+    int32                         m_nBoppingStartTime{-1};
     int32                         field_24{};
     int32                         m_nBoppingEndTime{};
     float                         m_fBoppingProgress; // 0.0 to 1.0
@@ -24,7 +24,7 @@ public:
     float                         m_fHeadBoppingOrientation{};
     float                         m_fRandomHeadBoppingMultiplier{};
     float                         m_fHeadBoppingFactor{};
-    int32                         m_nArmBoppingStartTime{-1};
+    int32                         m_nArmBoppingStartTime{};
     int32                         m_nTimePassedSinceCarUpSideDown{};
     CTaskTimer                    m_copCarStolenTimer{};
 
@@ -41,10 +41,18 @@ public:
 
     CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
 
+    void TriggerIK(CPed* ped);
+    int32 UpdateBopping();
+    void StartBopping(CPed* ped);
+    void ProcessHeadBopping(CPed* ped, uint8 a3, float a4);
+    void ProcessArmBopping(CPed* pPed, uint8 a3, float a4);
+    void ProcessBopping(CPed* a2, uint8 a3);
+
     eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
     CTask* Clone() override;
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool SetPedPosition(CPed* ped) override;
 
     auto GetVehicle() const { return m_pVehicle; }
 
@@ -68,5 +76,4 @@ private: // Wrappers for hooks
     bool ProcessPed_Reversed(CPed* ped) { return CTaskSimpleCarDrive::ProcessPed(ped); }
     bool SetPedPosition_Reversed(CPed* ped) { return CTaskSimpleCarDrive::SetPedPosition(ped); }
 };
-
 VALIDATE_SIZE(CTaskSimpleCarDrive, 0x60);

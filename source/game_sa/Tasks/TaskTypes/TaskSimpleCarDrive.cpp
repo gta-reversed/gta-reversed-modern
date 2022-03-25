@@ -23,24 +23,62 @@ void CTaskSimpleCarDrive::InjectHooks() {
     //RH_ScopedInstall(SetPedPosition_Reversed, 0x63C770);
 }
 
+// 0x63C340
 CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle) :
     m_pVehicle{vehicle},
     m_bUpdateCurrentVehicle{updateCurrentVehicle},
     m_pTaskUtilityLineUpPedWithCar{ utilityTask ? new CTaskUtilityLineUpPedWithCar{CVector{}, 0, utilityTask->m_doorOpenPosType, utilityTask->m_doorIdx} : nullptr}
 {
-    if (m_pVehicle) {
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-    }
+    CEntity::SafeRegisterRef(m_pVehicle);
 }
 
+// 0x63C500
+void CTaskSimpleCarDrive::TriggerIK(CPed* ped) {
+    plugin::CallMethod<0x63C500, CTaskSimpleCarDrive*, CPed*>(this, ped);
+}
+
+// 0x63C900
+int32 CTaskSimpleCarDrive::UpdateBopping() {
+    return plugin::CallMethodAndReturn<int32, 0x63C900, CTaskSimpleCarDrive*>(this);
+}
+
+// 0x642760
+void CTaskSimpleCarDrive::StartBopping(CPed* ped) {
+    plugin::CallMethod<0x642760, CTaskSimpleCarDrive*, CPed*>(this, ped);
+}
+
+// 0x6428C0
+void CTaskSimpleCarDrive::ProcessHeadBopping(CPed* ped, uint8 a3, float a4) {
+    plugin::CallMethod<0x6428C0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, ped, a3, a4);
+}
+
+// 0x642AE0
+void CTaskSimpleCarDrive::ProcessArmBopping(CPed* pPed, uint8 a3, float a4) {
+    plugin::CallMethod<0x642AE0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, pPed, a3, a4);
+}
+
+// 0x642E70
+void CTaskSimpleCarDrive::ProcessBopping(CPed* a2, uint8 a3) {
+    plugin::CallMethod<0x642E70, CTaskSimpleCarDrive*, CPed*, uint8>(this, a2, a3);
+}
+
+// 0x63DC20
+CTask* CTaskSimpleCarDrive::Clone() {
+    return plugin::CallMethodAndReturn< CTask*, 0x63DC20, CTaskSimpleCarDrive*>(this);
+}
+
+// 0x63C670
+bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    return plugin::CallMethodAndReturn<bool, 0x63C670, CTaskSimpleCarDrive*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+}
+
+// 0x644470
 bool CTaskSimpleCarDrive::ProcessPed(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x644470, CTaskSimpleCarDrive*, CPed*>(this, ped);
 }
 
-CTask* CTaskSimpleCarDrive::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x63DC20, CTaskSimpleCarDrive*>(this);
+// 0x63C770
+bool CTaskSimpleCarDrive::SetPedPosition(CPed* ped) {
+    return plugin::CallMethodAndReturn<bool, 0x63C770, CTaskSimpleCarDrive*, CPed*>(this, ped);
 }
 
-bool CTaskSimpleCarDrive::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x63DC20, CTaskSimpleCarDrive*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
-}
