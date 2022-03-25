@@ -18,25 +18,26 @@ void CTaskSimpleIKLookAt::InjectHooks() {
 }
 
 // 0x633E00
-CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed,
-                                         uint32 blendTime, uint8 priority)
-    : CTaskSimpleIKChain{name, BONE_HEAD, {0.f, 0.05f, 0.f}, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime}, m_nPriority{priority}, m_bUseTorso{
-                                                                                                                                                                     useTorso} {}
-
-// 0x633E00
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Constructor(char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, RwV3d lookAtOffset, uint8 useTorso, float fSpeed,
-                                                      int32 blendTime, int32 priority) {
-    this->CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(name, lookAtEntity, time, pedBoneID, lookAtOffset, useTorso, fSpeed, blendTime, priority);
-    return this;
+CTaskSimpleIKLookAt::CTaskSimpleIKLookAt(Const char* name, CEntity* lookAtEntity, int32 time, ePedBones pedBoneID, CVector lookAtOffset, bool useTorso, float speed,
+                                         int32 blendTime, int8 priority
+)
+    : CTaskSimpleIKChain{name, BONE_HEAD, { 0.f, 0.05f, 0.f }, BONE_NORMAL, lookAtEntity, pedBoneID, lookAtOffset, speed, time, blendTime}
+{
+    m_nPriority = priority;
+    m_bUseTorso = useTorso;
 }
 
-// 0x633EF0
-CTaskSimpleIKLookAt::~CTaskSimpleIKLookAt() {}
-
-// 0x633EF0
-CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Destructor() {
-    this->CTaskSimpleIKLookAt::~CTaskSimpleIKLookAt();
-    return this;
+// 0x633F00
+CTaskSimpleIKLookAt* CTaskSimpleIKLookAt::Clone() {
+    auto* task = new CTaskSimpleIKLookAt("", m_pEntity, m_nTime, m_nOffsetBoneTag, m_vecOffsetPos, m_bUseTorso, m_fSpeed, m_nBlendTime, m_nPriority);
+    if (m_pIKChain) {
+        task->m_fBlend        = m_fBlend;
+        task->m_nEndTime      = m_nEndTime;
+        task->m_fTargetBlend  = m_fTargetBlend;
+        task->m_nTargetTime   = m_nTargetTime;
+        task->m_nPivotBoneTag = m_nPivotBoneTag;
+    }
+    return task;
 }
 
 // 0x634050
@@ -60,7 +61,7 @@ void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CE
     if (m_pIKChain) {
         m_pIKChain->UpdateEntity(m_pEntity);
         m_pIKChain->UpdateOffset(m_nOffsetBoneTag, m_vecOffsetPos);
-        m_pIKChain->UpdateTarget(1u);
+        m_pIKChain->UpdateTarget(true);
     }
 }
 

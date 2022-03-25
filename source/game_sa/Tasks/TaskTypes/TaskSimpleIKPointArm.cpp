@@ -53,7 +53,7 @@ void CTaskSimpleIKPointArm::UpdatePointArmInfo(const char* name, CEntity* entity
     if (m_pIKChain) {
         m_pIKChain->UpdateEntity(m_pEntity);
         m_pIKChain->UpdateOffset(m_nOffsetBoneTag, m_vecOffsetPos);
-        m_pIKChain->UpdateTarget(1u);
+        m_pIKChain->UpdateTarget(true);
     }
 }
 

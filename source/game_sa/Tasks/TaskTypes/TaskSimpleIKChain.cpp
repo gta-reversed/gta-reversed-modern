@@ -19,20 +19,21 @@ void CTaskSimpleIKChain::InjectHooks() {
 }
 
 // 0x6339C0
-CTaskSimpleIKChain::CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag,
-                                       RwV3d offsetPos, float speed, int32 time, int32 blendTime)
-    : CTaskSimple{}, m_nEffectorBoneTag{effectorBoneTag}, m_nTime{time}, m_nBlendTime{blendTime}, m_vecEffectorVec{effectorVec}, m_vecOffsetPos{offsetPos},
-      m_nPivotBoneTag{pivotBoneTag}, m_pEntity{entity}, m_bEntityExist{!!entity}, m_fSpeed{speed} {
-    if (m_pEntity) {
-        m_pEntity->RegisterReference(&m_pEntity);
-    }
-}
-
-// 0x6339C0
-CTaskSimpleIKChain* CTaskSimpleIKChain::Constructor(char* name, ePedBones effectorBoneTag, RwV3d effectorVec, ePedBones pivotBoneTag, CEntity* a6, ePedBones offsetBoneTag,
-                                                    RwV3d offsetPos, float speed, int32 time, int32 blendTime) {
-    this->CTaskSimpleIKChain::CTaskSimpleIKChain(name, effectorBoneTag, effectorVec, pivotBoneTag, a6, offsetBoneTag, offsetPos, speed, time, blendTime);
-    return this;
+CTaskSimpleIKChain::CTaskSimpleIKChain(const char* name, ePedBones effectorBoneTag, CVector effectorPos, ePedBones pivotBoneTag, CEntity* entity, ePedBones offsetBoneTag,
+                                       CVector offsetPos, float speed, int32 time, int32 blendTime) : CTaskSimple()
+{
+    m_nEffectorBoneTag = effectorBoneTag;
+    m_nTime            = time;
+    m_nBlendTime       = blendTime;
+    m_vecEffectorVec   = effectorPos;
+    m_vecOffsetPos     = offsetPos;
+    m_nPivotBoneTag    = pivotBoneTag;
+    m_pIKChain         = nullptr;
+    m_pEntity          = entity;
+    m_bEntityExist     = !!entity;
+    m_fSpeed           = speed;
+    CEntity::SafeRegisterRef(m_pEntity);
+    m_bIsBlendingOut   = false;
 }
 
 // 0x633A90
@@ -43,10 +44,17 @@ CTaskSimpleIKChain::~CTaskSimpleIKChain() {
     CEntity::ClearReference(m_pEntity);
 }
 
-// 0x633A90
-CTaskSimpleIKChain* CTaskSimpleIKChain::Destructor() {
-    this->CTaskSimpleIKChain::~CTaskSimpleIKChain();
-    return this;
+// 0x633B00
+CTaskSimpleIKChain* CTaskSimpleIKChain::Clone() {
+
+    auto* task = new CTaskSimpleIKChain("", m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, m_nTime, m_nBlendTime);
+    if (m_pIKChain) {
+        task->m_fBlend       = m_fBlend;
+        task->m_nEndTime     = m_nEndTime;
+        task->m_fTargetBlend = m_fTargetBlend;
+        task->m_nTargetTime  = m_nTargetTime;
+    }
+    return task;
 }
 
 // 0x633C40
@@ -76,7 +84,6 @@ bool CTaskSimpleIKChain::MakeAbortable(CPed* ped, eAbortPriority priority, CEven
 
 // 0x633C80
 bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
-    // 0x633CAB
     // If IK chain doesn't exist, try creating and early out
     if (!m_pIKChain) {
         if (!m_bEntityExist || m_pEntity) {
@@ -132,6 +139,6 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
 // 0x633BD0
 bool CTaskSimpleIKChain::CreateIKChain(CPed* ped) {
-    m_pIKChain = g_ikChainMan.AddIKChain("", 3, ped, m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, {}, 3);
-    return !!m_pIKChain;
+    m_pIKChain = g_ikChainMan.AddIKChain("", 3, ped, m_nEffectorBoneTag, m_vecEffectorVec, m_nPivotBoneTag, m_pEntity, m_nOffsetBoneTag, m_vecOffsetPos, m_fSpeed, 3);
+    return m_pIKChain != nullptr;
 }

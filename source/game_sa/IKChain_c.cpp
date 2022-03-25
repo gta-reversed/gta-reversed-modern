@@ -38,99 +38,101 @@ bool IKChain_c::Init(const char* name,
                      float speed,
                      int8 priority
 ) {
-    m_ped = ped;
+    m_Ped = ped;
 
-    const auto frames = m_ped->GetAnimBlendData().m_Frames;
+    const auto frames = m_Ped->GetAnimBlendData().m_Frames;
 
     if (frames[0].m_bCheckBlendNodeClumpKeyFrames || !frames[0].m_bUpdatingFrame) {
         return false;
     }
 
-    if (!m_ped->bHasBeenRendered) {
+    if (!m_Ped->bHasBeenRendered) {
         return false;
     }
 
     // Check if frame of this bone has non-zero translation 
     {
-        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_ped->GetAnimHierarchy(), (RwInt32)bone)].m_pIFrame;
+        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)bone)].m_pIFrame;
         if (CVector{ boneFrame->translation }.IsZero()) {
             return false;
         }
     }
 
-    m_ped->RegisterReference(m_ped);
+    m_Ped->RegisterReference(m_Ped);
 
-    m_bones = nullptr;
+    m_Bones = nullptr;
     SetupBones(bone, bonePosn, bone2, frames);
-    m_bonePosn = bonePosn;
-    m_blend = 0.f;
-    m_bone1 = bone;
+    m_BonePosn = bonePosn;
+    m_Blend = 0.f;
+    m_Bone1 = bone;
 
     UpdateEntity(entity);
 
-    m_offsetBoneTag = offsetBoneTag;
-    m_offsetPos = posn;
-    m_speed = speed;
-    m_targetMB = 1;
-    m_indexInList = IndexInList;
-    m_priority = priority;
+    m_OffsetBoneTag = offsetBoneTag;
+    m_OffsetPos = posn;
+    m_Speed = speed;
+    m_TargetMB = 1;
+    m_IndexInList = IndexInList;
+    m_Priority = priority;
 
     return true;
 }
 
 // 0x617870
 void IKChain_c::Exit() {
-    for (auto i = 0; i < m_count; i++) {
-        g_boneNodeMan.ReturnBoneNode(m_bones[i]);
+    for (auto& bone : GetBones()) {
+        g_boneNodeMan.ReturnBoneNode(bone);
     }
-    delete[] m_bones;
-    m_bones = nullptr;
+    delete[] m_Bones;
+    m_Bones = nullptr;
 }
 
 // 0x6184B0
 void IKChain_c::Update(float timeStep) {
-    m_matrix = &m_ped->GetBoneMatrix(m_bone);
-    m_bones[m_count - 1]->CalcWldMat(m_matrix);
+    UNUSED(timeStep);
+
+    m_Matrix = &m_Ped->GetBoneMatrix(m_Bone);
+    m_Bones[m_Count - 1]->CalcWldMat(m_Matrix);
     MoveBonesToTarget();
     for (auto&& bone : GetBones()) {
-        bone->BlendKeyframe(m_blend);
+        bone->BlendKeyframe(m_Blend);
     }
 }
 
 // 0x617F30
 bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
     // They used RwV3d stuff, but that's ugly.
-    const auto dist = (m_offset - m_bones[0]->GetPosition()).Magnitude();
+    const auto dist = (m_Offset - m_Bones[0]->GetPosition()).Magnitude();
     if (outDist) {
         outDist = dist;
     }
-    return dist <= maxDist && m_blend > 0.98f;
+    return dist <= maxDist && m_Blend > 0.98f;
 }
 
 // 0x617E60
 bool IKChain_c::IsFacingTarget() {
-    // Geniune cancer :D
+    // Genuine cancer :D
 
     RwV3d targetPos;
-    RwV3dTransformVector(&targetPos, &m_bonePosn, &m_bones[0]->m_WorldMat);
+    RwV3dTransformVector(&targetPos, &m_BonePosn, &m_Bones[0]->m_WorldMat);
     RwV3dNormalize(&targetPos, &targetPos);
 
     RwV3d dir;
-    RwV3dSub(&dir, &m_offset, &targetPos);
+    RwV3dSub(&dir, &m_Offset, &targetPos);
     RwV3dNormalize(&dir, &dir);
 
-    return RwV3dDotProduct(&dir, &targetPos) >= 0.95f && m_blend > 0.98f;
+    return RwV3dDotProduct(&dir, &targetPos) >= 0.95f && m_Blend > 0.98f;
 }
 
 // 0x617E50
-void IKChain_c::UpdateTarget(uint8 target) {
-    m_targetMB = target;
+void IKChain_c::UpdateTarget(bool target) {
+    m_TargetMB = target;
 }
 
 // 0x617E20
-void IKChain_c::UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn) {
-    m_offsetBoneTag = offsetBoneTag;
-    m_offsetPos = offsetPosn;
+void IKChain_c::UpdateOffset(int32 offsetBoneTag, CVector offsetPosn) {
+    m_OffsetBoneTag = offsetBoneTag;
+    m_OffsetPos = offsetPosn;
 }
 
 // 0x618520
@@ -146,10 +148,8 @@ void IKChain_c::ClampLimits(int32 boneTag, bool LimitX, bool LimitY, bool LimitZ
 // 0x617E00
 void IKChain_c::UpdateEntity(CEntity* entity) {
     // NOTE: No unregistering the ref?
-    m_entity = entity;
-    if (entity) {
-        m_entity->RegisterReference(m_entity);
-    }
+    m_Entity = entity;
+    CEntity::SafeRegisterRef(m_Entity);
 }
 
 // 0x617C60
@@ -160,43 +160,43 @@ BoneNode_c* IKChain_c::GetBoneNodeFromTag(int32 tag) {
 
 // 0x617C50
 int8 IKChain_c::GetPriority() {
-    return m_priority;
+    return m_Priority;
 }
 
 // 0x617C30
-void IKChain_c::SetOffsetPos(RwV3d value) {
-    m_offsetPos = value;
+void IKChain_c::SetOffsetPos(CVector value) {
+    m_OffsetPos = value;
 }
 
 // 0x617C20
 void IKChain_c::SetOffsetBoneTag(int32 value) {
-    m_offsetBoneTag = value;
+    m_OffsetBoneTag = value;
 }
 
 // 0x617C10
 void IKChain_c::SetBlend(float value) {
-    m_blend = value;
+    m_Blend = value;
 }
 
 // 0x6178B0
 void IKChain_c::MoveBonesToTarget() {
-    if (m_targetMB) {
-        if (m_entity) {
-            const auto mat = m_entity->GetModellingMatrix();
-            if (m_offsetBoneTag == ePedBones::BONE_UNKNOWN) {
+    if (m_TargetMB) {
+        if (m_Entity) {
+            const auto mat = m_Entity->GetModellingMatrix();
+            if (m_OffsetBoneTag == ePedBones::BONE_UNKNOWN) {
                 if (mat) {
-                    RwV3dTransformPoint(&m_offset, &m_offsetPos, mat);
+                    RwV3dTransformPoint(&m_Offset, &m_OffsetPos, mat);
                 }
             } else {
-                m_entity->AsPed()->GetBonePosition(m_offset, (ePedBones)m_offsetBoneTag);
+                m_Entity->AsPed()->GetBonePosition(m_Offset, (ePedBones)m_OffsetBoneTag);
                 if (mat) {
                     RwV3d transformed;
-                    RwV3dTransformVector(&transformed, &m_offsetPos, mat);
-                    RwV3dAdd(&m_offset, &transformed, &m_offset);
+                    RwV3dTransformVector(&transformed, &m_OffsetPos, mat);
+                    RwV3dAdd(&m_Offset, &transformed, &m_Offset);
                 }
             }
         } else {
-            m_offset = m_offsetPos;
+            m_Offset = m_OffsetPos;
         }
     }
 
@@ -210,7 +210,7 @@ void IKChain_c::MoveBonesToTarget() {
     const auto root = bones.front();
     for (auto&& bone : bones) {
         RwV3d transformedBonePos;
-        RwV3dTransformVector(&transformedBonePos, &m_bonePosn, &root->GetMatrix()); // Not sure why it's transformed every iteration..
+        RwV3dTransformVector(&transformedBonePos, &m_BonePosn, &root->GetMatrix()); // Not sure why it's transformed every iteration..
 
         RwV3d dirBoneToRoot; // = transformedBonePos + root->pos - bone->pos
         RwV3dAdd(&dirBoneToRoot, &transformedBonePos, &root->GetPosition());
@@ -221,7 +221,7 @@ void IKChain_c::MoveBonesToTarget() {
         RwV3dNormalize(&dirBoneToRoot, &dirBoneToRoot);
 
         RwV3d dirBoneToOffset; // = m_offset - bone->pos
-        RwV3dSub(&dirBoneToOffset, &m_offset, &bone->GetPosition());
+        RwV3dSub(&dirBoneToOffset, &m_Offset, &bone->GetPosition());
         if (RwV3dLength(&dirBoneToOffset) <= DIST_TOLERANCE) {
             continue;
         }
@@ -232,7 +232,7 @@ void IKChain_c::MoveBonesToTarget() {
             continue;
         }
 
-        const auto matrix = bone->m_Parent ? &bone->m_Parent->GetMatrix() : m_matrix;
+        const auto matrix = bone->m_Parent ? &bone->m_Parent->GetMatrix() : m_Matrix;
 
         RtQuat quat;
         RtQuatConvertFromMatrix(&quat, matrix);
@@ -253,36 +253,36 @@ void IKChain_c::MoveBonesToTarget() {
         RwV3d axis;
         RtQuatTransformVectors(&axis, &cross, 1, &quat);
 
-        RtQuatRotate(&bone->m_Orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_speed), rwCOMBINEPOSTCONCAT);
-        bone->Limit(m_blend); // Originally this was in an `if`, but the variable that was checked was always `true`
+        RtQuatRotate(&bone->m_Orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_Speed), rwCOMBINEPOSTCONCAT);
+        bone->Limit(m_Blend); // Originally this was in an `if`, but the variable that was checked was always `true`
         bone->CalcWldMat(matrix);
     }
 }
 
 // 0x617CA0
-void IKChain_c::SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBlendFrameData* frames) {
-    auto& hier = m_ped->GetAnimHierarchy();
-    m_matrix = &RpHAnimHierarchyGetMatrixArray(&hier)[RpHAnimIDGetIndex(&hier, (RwInt32)bone)];
-    m_bone = bone;
+void IKChain_c::SetupBones(ePedBones boneTag, CVector posn, ePedBones bone, AnimBlendFrameData* frames) {
+    auto& hier = m_Ped->GetAnimHierarchy();
+    m_Matrix = &RpHAnimHierarchyGetMatrixArray(&hier)[RpHAnimIDGetIndex(&hier, (RwInt32)bone)];
+    m_Bone = bone;
 
     BoneNode_c* bones[32]; // TODO: Magic number, BoneNodeManager_c::ms_boneInfos.size()
-    m_count = 0;
+    m_Count = 0;
     for (auto boneIt = boneTag; boneIt != bone; boneIt = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag(boneIt)].m_prev) {
         auto node = g_boneNodeMan.GetBoneNode();
         node->Init(boneIt, frames[RpHAnimIDGetIndex(&hier, (RwInt32)boneIt)].m_pIFrame);
-        bones[m_count++] = node;
+        bones[m_Count++] = node;
     }
 
-    assert(m_count); // Doesn't really make a whole lot of sense if theres not a single bone
-    m_bones = new BoneNode_c*[m_count];
-    rng::copy(bones, m_bones);
+    assert(m_Count); // Doesn't really make a whole lot of sense if theres not a single bone
+    m_Bones = new BoneNode_c*[m_Count];
+    rng::copy(bones, m_Bones);
 
     // Link bones together
     for (auto&& bonex : GetBones()) {
         auto prevBone = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag((ePedBones)bonex->m_BoneTag)].m_prev;
         if (prevBone > -1) {
             if (const auto next = GetBoneNodeFromTag(prevBone)) {
-                //printf("next: %i\n", nextIdx);
+                // printf("next: %i\n", nextIdx);
                 next->AddChild(bonex);
             }
         }

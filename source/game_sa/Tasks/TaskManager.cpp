@@ -290,8 +290,8 @@ void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
 
     AddSubTasks(task->AsComplex());
 
-    if (CTask* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
-        if (simplest && !simplest->IsSimple()) {
+    if (auto* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
+        if (!simplest->IsSimple()) {
             delete m_aSecondaryTasks[taskIndex];
             m_aSecondaryTasks[taskIndex] = nullptr;
         }

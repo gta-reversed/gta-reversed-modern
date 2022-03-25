@@ -21,39 +21,39 @@ public:
     bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int8 priority);
     void Exit();
     void Update(float unused);
-    bool IsAtTarget(float a2, float& outDist);
+    bool IsAtTarget(float maxDist, float& outDist);
     bool IsFacingTarget();
-    void UpdateTarget(uint8 target);
-    void UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn);
+    void UpdateTarget(bool target);
+    void UpdateOffset(int32 offsetBoneTag, CVector offsetPosn);
     void ClampLimits(int32 boneTag, bool LimitX, bool LimitY, bool LimitZ, bool UseCurrentLimits);
     void UpdateEntity(CEntity* entity);
-    BoneNode_c* GetBoneNodeFromTag(int32 a2);
+    BoneNode_c* GetBoneNodeFromTag(int32 tag);
     int8 GetPriority();
-    void SetOffsetPos(RwV3d value);
+    void SetOffsetPos(CVector value);
     void SetOffsetBoneTag(int32 value);
     void SetBlend(float value);
     void MoveBonesToTarget();
-    void SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBlendFrameData* a7);
+    void SetupBones(ePedBones boneTag, CVector posn, ePedBones bone, AnimBlendFrameData* frames);
     void GetLimits(int32 boneTag, eRotationAxis axis, float& outMin, float& outMax);
 
-    auto GetBones() { return std::span{ m_bones, (size_t)m_count }; }
+    auto GetBones() { return std::span{ m_Bones, (size_t)m_Count }; }
 
 public:
-    CPed* m_ped;
-    int32 m_count;
-    BoneNode_c** m_bones; // BoneNode_c*[m_count] -> Array
-    RwMatrix* m_matrix;
-    float m_blend;
-    uint16 m_bone1;
-    RwV3d m_bonePosn;
-    ePedBones m_bone;
-    CEntity* m_entity;
-    int32 m_offsetBoneTag; // ePedBones.. Just that we have to use int32 here... :D
-    CVector m_offsetPos;
-    float m_speed;
-    CVector m_offset; //< `m_offsetPos` transformed with `m_entity`'s modelling matrix. See `MoveBonesToTarget`
-    uint8 m_targetMB;
-    uint8 m_indexInList;
-    int8 m_priority;
+    CPed*        m_Ped;
+    int32        m_Count;
+    BoneNode_c** m_Bones; // BoneNode_c*[m_count] -> Array
+    RwMatrix*    m_Matrix;
+    float        m_Blend;
+    uint16       m_Bone1;
+    RwV3d        m_BonePosn;
+    ePedBones    m_Bone;
+    CEntity*     m_Entity;
+    int32        m_OffsetBoneTag; // ePedBones.. Just that we have to use int32 here... :D
+    CVector      m_OffsetPos;
+    float        m_Speed;
+    CVector      m_Offset; //< `m_offsetPos` transformed with `m_entity`'s modelling matrix. See `MoveBonesToTarget`
+    bool         m_TargetMB; // Mouse Button
+    uint8        m_IndexInList;
+    int8         m_Priority;
 };
 VALIDATE_SIZE(IKChain_c, 0x58);

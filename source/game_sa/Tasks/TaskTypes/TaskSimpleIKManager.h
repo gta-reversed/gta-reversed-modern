@@ -12,12 +12,10 @@ class CTaskSimpleIKManager : public CTaskSimple {
 public:
     // 0    - `CTaskSimpleIKLookAt`
     // 1, 2 - Left and right arm `CTaskSimpleIKPointArm`
-    std::array<CTaskSimpleIKChain*, 4> m_pIKChainTasks{};
-    bool                               m_bAborting{};
+    std::array<CTaskSimpleIKChain*, 4> m_pIKChainTasks;
+    bool                               m_bAborting;
 
 public:
-    static void InjectHooks();
-
     CTaskSimpleIKManager();
     ~CTaskSimpleIKManager() override;
 
@@ -28,10 +26,13 @@ public:
     eTaskType GetTaskType() override { return TASK_SIMPLE_IK_MANAGER; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
-private:
-    CTaskSimpleIKManager* Constructor();
-    CTaskSimpleIKManager* Destructor();
 
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskSimpleIKManager* Constructor() { this->CTaskSimpleIKManager::CTaskSimpleIKManager(); return this; }
+    CTaskSimpleIKManager* Destructor() { this->CTaskSimpleIKManager::~CTaskSimpleIKManager(); return this; }
     CTaskSimpleIKManager* Clone_Reversed() { return CTaskSimpleIKManager::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleIKManager::GetTaskType(); }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleIKManager::MakeAbortable(ped, priority, event); }

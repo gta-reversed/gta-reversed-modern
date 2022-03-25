@@ -18,13 +18,8 @@ void CTaskSimpleIKManager::InjectHooks() {
 
 // 0x6337F0
 CTaskSimpleIKManager::CTaskSimpleIKManager() {
-    // Everything done in header by the compiler
-}
-
-// 0x6337F0
-CTaskSimpleIKManager* CTaskSimpleIKManager::Constructor() {
-    this->CTaskSimpleIKManager::CTaskSimpleIKManager();
-    return this;
+    rng::fill(m_pIKChainTasks, nullptr);
+    m_bAborting = false;
 }
 
 // 0x633830
@@ -32,13 +27,6 @@ CTaskSimpleIKManager::~CTaskSimpleIKManager() {
     for (auto&& task : m_pIKChainTasks) {
         delete task;
     }
-    // Everything else done by the compiler
-}
-
-// 0x633830
-CTaskSimpleIKManager* CTaskSimpleIKManager::Destructor() {
-    this->CTaskSimpleIKManager::~CTaskSimpleIKManager();
-    return this;
 }
 
 /*!
