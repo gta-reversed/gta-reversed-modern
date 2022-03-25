@@ -6,8 +6,7 @@ class CTaskComplexEnterAnyCarAsDriver : public CTaskComplex {
 public:
     static constexpr auto Type = TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER;
 
-    static void InjectHooks();
-
+    CTaskComplexEnterAnyCarAsDriver() = default;
     ~CTaskComplexEnterAnyCarAsDriver() = default;
 
     CTask* Clone() override { return new CTaskComplexEnterAnyCarAsDriver{}; }
@@ -17,11 +16,10 @@ public:
     CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; }
 
 private:
-    CTaskComplexEnterAnyCarAsDriver* Destructor() {
-        this->CTaskComplexEnterAnyCarAsDriver::~CTaskComplexEnterAnyCarAsDriver();
-        return this;
-    }
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
+    CTaskComplexEnterAnyCarAsDriver* Destructor() { this->CTaskComplexEnterAnyCarAsDriver::~CTaskComplexEnterAnyCarAsDriver(); return this; }
     CTask* Clone_Reversed() { return CTaskComplexEnterAnyCarAsDriver::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskComplexEnterAnyCarAsDriver::GetTaskType(); }
     CTask* CreateNextSubTask_Reversed(CPed * ped) { return CTaskComplexEnterAnyCarAsDriver::CreateNextSubTask(ped); }

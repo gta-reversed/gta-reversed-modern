@@ -7,8 +7,6 @@ void CTaskComplexEnterAnyCarAsDriver::InjectHooks() {
     RH_ScopedClass(CTaskComplexEnterAnyCarAsDriver);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Destructor, 0x63D100);
-
     RH_ScopedInstall(Clone_Reversed, 0x63DE60);
     RH_ScopedInstall(GetTaskType_Reversed, 0x63D0F0);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x63D110);
@@ -18,9 +16,8 @@ void CTaskComplexEnterAnyCarAsDriver::InjectHooks() {
 
 // 0x643510
 CTask* CTaskComplexEnterAnyCarAsDriver::CreateFirstSubTask(CPed* ped) {
-
     // Try entering the closest vehicle (If it's stealable)
-    if (const auto closestVeh = ped->GetIntelligence()->m_vehicleScanner.GetClosestVehicleInRange()) {
+    if (const auto closestVeh = ped->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange()) {
         if (CCarEnterExit::IsVehicleStealable(closestVeh, ped)) {
             return new CTaskComplexEnterCarAsDriver{ closestVeh };
         }
@@ -29,12 +26,12 @@ CTask* CTaskComplexEnterAnyCarAsDriver::CreateFirstSubTask(CPed* ped) {
     // Otherwise just enter the closest vehicle (Not sure why they didn't use `GetClosestVehicleInRange`?)
     auto closestDistSq = FLT_MAX;
     CVehicle* closest{};
-    for (auto v : ped->GetIntelligence()->m_vehicleScanner.m_apEntities) {
-        if (v) {
-            const auto distSq = (v->GetPosition() - ped->GetPosition()).SquaredMagnitude();
+    for (auto vehicle : ped->GetIntelligence()->GetVehicleScanner().m_apEntities) {
+        if (vehicle) {
+            const auto distSq = (vehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude();
             if (distSq < closestDistSq) {
                 closestDistSq = distSq;
-                closest = v->AsVehicle();
+                closest = vehicle->AsVehicle();
             }
         }
     }
