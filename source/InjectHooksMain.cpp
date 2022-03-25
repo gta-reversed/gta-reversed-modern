@@ -206,6 +206,7 @@
 #include "TaskComplexEnterAnyCarAsDriver.h"
 #include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
+#include "TaskSimpleCreateCarAndGetIn.h"
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
@@ -481,6 +482,7 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         CTaskManager::InjectHooks();
+        CTaskSimpleCreateCarAndGetIn::InjectHooks();
         CTaskComplexEnterAnyCarAsDriver::InjectHooks();
         CTaskComplexLeaveAnyCar::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();

@@ -169,7 +169,15 @@ public:
     CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
 
+
+    CVector* FindNodeCoorsForScript(CVector& outPos, CNodeAddress nodeAddr, bool* outIsAddrValid);
+
     inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
+
+    // Helpers - NOTSA
+    CNodeAddress FindNodeClosestToCoors(const CVector& pos, int32 nodeType = 0, float maxDist = 999999.88f, uint16 unk2 = 1, int32 unk3 = 1, uint16 unk4 = 0, uint16 bBoatsOnly = 0, int32 unk6 = 0);
+    bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
+
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);
