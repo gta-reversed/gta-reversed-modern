@@ -29,6 +29,11 @@ bool CTask::IsGoToTask(CTask* task) {
            task->GetTaskType() == TASK_SIMPLE_GO_TO_POINT_FINE;
 }
 
+// 0x61A4B0
+bool CTask::IsTaskPtr(CTask* task) {
+    return plugin::CallAndReturn<bool, 0x61A4B0>(task);
+}
+
 void CTask::InjectHooks() {
     RH_ScopedClass(CTask);
     RH_ScopedCategory("Tasks");

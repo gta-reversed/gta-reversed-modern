@@ -586,7 +586,7 @@ void InjectHooksMain() {
         // CTaskSimpleSlideToCoord::InjectHooks();
         // CTaskComplexPartnerDeal::InjectHooks();
         CTaskSimplePickUpEntity::InjectHooks();
-        // CTaskComplexBeInGroup::InjectHooks();
+        CTaskComplexBeInGroup::InjectHooks();
         // CTaskComplexBeCop::InjectHooks();
         CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
         CTaskComplexArrestPed::InjectHooks();
