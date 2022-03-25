@@ -93,6 +93,8 @@
 #include "InteriorManager_c.h"
 #include "IKChain_c.h"
 #include "IKChainManager_c.h"
+#include "BoneNode_c.h"
+#include "BoneNodeManager_c.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -210,6 +212,8 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    BoneNode_c::InjectHooks();
+    BoneNodeManager_c::InjectHooks();
     CAnimBlendClumpData::InjectHooks();
     IKChainManager_c::InjectHooks();
     IKChain_c::InjectHooks();

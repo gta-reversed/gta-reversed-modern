@@ -18,15 +18,14 @@ public:
     IKChain_c() = default;
     ~IKChain_c() = default;
 
+    bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int8 priority);
     void Exit();
     void Update(float unused);
-    bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11,
-              int8 priority);
     bool IsAtTarget(float a2, float& outDist);
     bool IsFacingTarget();
     void UpdateTarget(uint8 target);
     void UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn);
-    void ClampLimits(int32 a1, uint8 a2, uint8 a3, uint8 a4, bool a5);
+    void ClampLimits(int32 boneTag, bool LimitX, bool LimitY, bool LimitZ, bool UseCurrentLimits);
     void UpdateEntity(CEntity* entity);
     BoneNode_c* GetBoneNodeFromTag(int32 a2);
     int8 GetPriority();
@@ -35,7 +34,7 @@ public:
     void SetBlend(float value);
     void MoveBonesToTarget();
     void SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBlendFrameData* a7);
-    void GetLimits(int32 a2, int32 type, float& a3, float& a4);
+    void GetLimits(int32 boneTag, eRotationAxis axis, float& outMin, float& outMax);
 
     auto GetBones() { return std::span{ m_bones, (size_t)m_count }; }
 

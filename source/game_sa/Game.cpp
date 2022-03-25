@@ -16,7 +16,7 @@
 #include "FireManager.h"
 #include "Fx_c.h"
 #include "BreakManager_c.h"
-// todo: #include "BoneNodeManager_c.h"
+#include "BoneNodeManager_c.h"
 // todo: #include "ShadowManager.h"
 #include "PedType.h"
 #include "IKChainManager_c.h"

@@ -5,9 +5,6 @@ void BoneNodeManager_c::InjectHooks() {
     RH_ScopedClass(BoneNodeManager_c);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Constructor, 0x617330);
-    // RH_ScopedInstall(Destructor, 0x617390);
-
     // RH_ScopedInstall(Init, 0x6173F0);
     // RH_ScopedInstall(Exit, 0x617420);
     // RH_ScopedInstall(Reset, 0x617430);
@@ -16,25 +13,6 @@ void BoneNodeManager_c::InjectHooks() {
     // RH_ScopedInstall(GetNumBoneNodesLeft, 0x617480);
 }
 
-// 0x617330
-BoneNodeManager_c::BoneNodeManager_c() {}
-
-// 0x617330
-BoneNodeManager_c* BoneNodeManager_c::Constructor() {
-    this->BoneNodeManager_c::BoneNodeManager_c();
-    return this;
-}
-
-// 0x617390
-BoneNodeManager_c::~BoneNodeManager_c() {}
-
-// 0x617390
-BoneNodeManager_c* BoneNodeManager_c::Destructor() {
-    this->BoneNodeManager_c::~BoneNodeManager_c();
-    return this;
-}
-
-// Methods
 // 0x6173F0
 bool BoneNodeManager_c::Init() {
     return plugin::CallMethodAndReturn<int8_t, 0x6173F0, BoneNodeManager_c*>(this);

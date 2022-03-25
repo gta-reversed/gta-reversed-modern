@@ -4,12 +4,12 @@
 
 void IKChain_c::InjectHooks() {
     RH_ScopedClass(IKChain_c);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category! Animation?
 
+    RH_ScopedInstall(Init, 0x618370);
     RH_ScopedInstall(Exit, 0x617870);
     RH_ScopedInstall(Update, 0x6184B0);
     RH_ScopedInstall(IsAtTarget, 0x617F30);
-    RH_ScopedInstall(Init, 0x618370);
     RH_ScopedInstall(IsFacingTarget, 0x617E60);
     RH_ScopedInstall(UpdateTarget, 0x617E50);
     RH_ScopedInstall(UpdateOffset, 0x617E20);
@@ -25,29 +25,19 @@ void IKChain_c::InjectHooks() {
     RH_ScopedInstall(GetLimits, 0x618590);
 }
 
-// Methods
-// 0x617870
-void IKChain_c::Exit() {
-    for (auto i = 0; i < m_count; i++) {
-        g_boneNodeMan.ReturnBoneNode(m_bones[i]);
-    }
-    delete[] m_bones;
-    m_bones = nullptr;
-}
-
-// 0x6184B0
-void IKChain_c::Update(float timeStep) {
-    m_matrix = &m_ped->GetBoneMatrix(m_bone);
-    m_bones[m_count - 1]->CalcWldMat(m_matrix);
-    MoveBonesToTarget();
-    for (auto&& bone : GetBones()) {
-        bone->BlendKeyframe(m_blend);
-    }
-}
-
 // 0x618370
-bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float speed,
-                     int8 priority) {
+bool IKChain_c::Init(const char* name,
+                     int32 IndexInList,
+                     CPed* ped,
+                     ePedBones bone,
+                     RwV3d bonePosn,
+                     ePedBones bone2,
+                     CEntity* entity,
+                     int32 offsetBoneTag,
+                     RwV3d posn,
+                     float speed,
+                     int8 priority
+) {
     m_ped = ped;
 
     const auto frames = m_ped->GetAnimBlendData().m_Frames;
@@ -88,6 +78,25 @@ bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones b
     return true;
 }
 
+// 0x617870
+void IKChain_c::Exit() {
+    for (auto i = 0; i < m_count; i++) {
+        g_boneNodeMan.ReturnBoneNode(m_bones[i]);
+    }
+    delete[] m_bones;
+    m_bones = nullptr;
+}
+
+// 0x6184B0
+void IKChain_c::Update(float timeStep) {
+    m_matrix = &m_ped->GetBoneMatrix(m_bone);
+    m_bones[m_count - 1]->CalcWldMat(m_matrix);
+    MoveBonesToTarget();
+    for (auto&& bone : GetBones()) {
+        bone->BlendKeyframe(m_blend);
+    }
+}
+
 // 0x617F30
 bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
     // They used RwV3d stuff, but that's ugly.
@@ -103,7 +112,7 @@ bool IKChain_c::IsFacingTarget() {
     // Geniune cancer :D
 
     RwV3d targetPos;
-    RwV3dTransformVector(&targetPos, &m_bonePosn, &m_bones[0]->m_worldMat);
+    RwV3dTransformVector(&targetPos, &m_bonePosn, &m_bones[0]->m_WorldMat);
     RwV3dNormalize(&targetPos, &targetPos);
 
     RwV3d dir;
@@ -125,12 +134,12 @@ void IKChain_c::UpdateOffset(int32 offsetBoneTag, RwV3d offsetPosn) {
 }
 
 // 0x618520
-void IKChain_c::ClampLimits(int32 boneTag, uint8 a2, uint8 a3, uint8 a4, bool useCurrentLimits) {
+void IKChain_c::ClampLimits(int32 boneTag, bool LimitX, bool LimitY, bool LimitZ, bool UseCurrentLimits) {
     auto& bone = *GetBoneNodeFromTag(boneTag);
-    if (useCurrentLimits) {
-        bone.ClampLimitsCurrent(a2, a3, a4);
+    if (UseCurrentLimits) {
+        bone.ClampLimitsCurrent(LimitX, LimitY, LimitZ);
     } else {
-        bone.ClampLimitsDefault(a2, a3, a4);
+        bone.ClampLimitsDefault(LimitX, LimitY, LimitZ);
     }
 }
 
@@ -145,7 +154,7 @@ void IKChain_c::UpdateEntity(CEntity* entity) {
 
 // 0x617C60
 BoneNode_c* IKChain_c::GetBoneNodeFromTag(int32 tag) {
-    const auto it = rng::find_if(GetBones(), [tag](auto&& b) { return b->m_boneTag == tag; });
+    const auto it = rng::find_if(GetBones(), [tag](auto&& b) { return b->m_BoneTag == tag; });
     return it != GetBones().end() ? *it : nullptr;
 }
 
@@ -223,7 +232,7 @@ void IKChain_c::MoveBonesToTarget() {
             continue;
         }
 
-        const auto matrix = bone->m_parent ? &bone->m_parent->GetMatrix() : m_matrix;
+        const auto matrix = bone->m_Parent ? &bone->m_Parent->GetMatrix() : m_matrix;
 
         RtQuat quat;
         RtQuatConvertFromMatrix(&quat, matrix);
@@ -244,8 +253,7 @@ void IKChain_c::MoveBonesToTarget() {
         RwV3d axis;
         RtQuatTransformVectors(&axis, &cross, 1, &quat);
 
-        RtQuatRotate(&bone->m_orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_speed),
-                     rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(&bone->m_Orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_speed), rwCOMBINEPOSTCONCAT);
         bone->Limit(m_blend); // Originally this was in an `if`, but the variable that was checked was always `true`
         bone->CalcWldMat(matrix);
     }
@@ -257,7 +265,7 @@ void IKChain_c::SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBl
     m_matrix = &RpHAnimHierarchyGetMatrixArray(&hier)[RpHAnimIDGetIndex(&hier, (RwInt32)bone)];
     m_bone = bone;
 
-    BoneNode_c* bones[32]; // TODO: Magic number
+    BoneNode_c* bones[32]; // TODO: Magic number, BoneNodeManager_c::ms_boneInfos.size()
     m_count = 0;
     for (auto boneIt = boneTag; boneIt != bone; boneIt = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag(boneIt)].m_prev) {
         auto node = g_boneNodeMan.GetBoneNode();
@@ -270,18 +278,18 @@ void IKChain_c::SetupBones(ePedBones boneTag, RwV3d posn, ePedBones bone, AnimBl
     rng::copy(bones, m_bones);
 
     // Link bones together
-    for (auto&& bone : GetBones()) {
-        auto prevBone = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag((ePedBones)bone->m_boneTag)].m_prev;
+    for (auto&& bonex : GetBones()) {
+        auto prevBone = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag((ePedBones)bonex->m_BoneTag)].m_prev;
         if (prevBone > -1) {
             if (const auto next = GetBoneNodeFromTag(prevBone)) {
                 //printf("next: %i\n", nextIdx);
-                next->AddChild(bone);
+                next->AddChild(bonex);
             }
         }
     }
 }
 
 // 0x618590
-void IKChain_c::GetLimits(int32 boneTag, int32 type, float& outMin, float& outMax) {
-    GetBoneNodeFromTag(boneTag)->GetLimits(type, &outMin, &outMax);
+void IKChain_c::GetLimits(int32 boneTag, eRotationAxis axis, float& outMin, float& outMax) {
+    GetBoneNodeFromTag(boneTag)->GetLimits(axis, outMin, outMax);
 }
