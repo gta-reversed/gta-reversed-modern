@@ -1328,8 +1328,8 @@ CEntity* CPed::GetEntityThatThisPedIsHolding()
         return task->m_pEntityToHold;
     }
 
-    if (const auto task = GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_GO_PICKUP_ENTITY)) {
-        return task->As<CTaskComplexGoPickUpEntity>()->m_pEntity;
+    if (const auto task = GetTaskManager().Find<CTaskComplexGoPickUpEntity>()) {
+        return task->m_pEntity;
     }
 
     return nullptr;
@@ -1373,7 +1373,7 @@ bool CPed::CanThrowEntityThatThisPedIsHolding() {
 * @returns If there's a HANDSIGNAL task
 */
 bool CPed::IsPlayingHandSignal() {
-    return !!GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_HANDSIGNAL_ANIM);
+    return GetTaskManager().HasAnyOf<TASK_COMPLEX_HANDSIGNAL_ANIM>();
 }
 
 /*!
@@ -1381,7 +1381,7 @@ bool CPed::IsPlayingHandSignal() {
 * @brief Stop the HANDSINGAL task
 */
 void CPed::StopPlayingHandSignal() {
-    if (const auto task = GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_HANDSIGNAL_ANIM)) {
+    if (const auto task = GetTaskManager().Find<TASK_COMPLEX_HANDSIGNAL_ANIM>()) {
         task->MakeAbortable(this, ABORT_PRIORITY_URGENT, nullptr);
     }
 }
@@ -1978,7 +1978,7 @@ void CPed::GiveObjectToPedToHold(int32 modelIndex, uint8 replace) {
 
     // Deal with ped already holding an entity.
     // If `replace` is `true`, just drop the entity, otherwise do nothing.
-    if (const auto task = GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_HOLD_ENTITY)) {
+    if (GetTaskManager().HasAnyOf<TASK_SIMPLE_HOLD_ENTITY>()) {
         if (!GetEntityThatThisPedIsHolding() || !replace) {
             return;
         }
@@ -3299,7 +3299,7 @@ void CPed::ProcessControl()
 void CPed::Teleport(CVector destination, bool resetRotation) {
     UNUSED(resetRotation);
 
-    if (IsPlayer() || GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR)) {
+    if (IsPlayer() || GetTaskManager().HasAnyOf<TASK_COMPLEX_LEAVE_CAR>()) {
         GetIntelligence()->FlushImmediately(true);
     }
 
@@ -3434,7 +3434,7 @@ void CPed::Render() {
     // 0x5E7927
     // Render JetPack (if any)
     if (const auto task = GetIntelligence()->GetTaskJetPack()) {
-        task->Process();
+        task->Process(this);
     }
 
     bHasBeenRendered = true;

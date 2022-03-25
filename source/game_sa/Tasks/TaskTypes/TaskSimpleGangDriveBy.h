@@ -40,6 +40,8 @@ public:
     CVector                m_vecCoords;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GANG_DRIVEBY;
+
     CTaskSimpleGangDriveBy(CEntity *target, const CVector *targetPos, float abortRange, int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS);
     ~CTaskSimpleGangDriveBy();
 

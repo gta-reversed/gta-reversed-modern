@@ -220,6 +220,20 @@ public:
         RegisterReference(reinterpret_cast<CEntity**>(&ref));
     }
 
+    template<typename T>
+    static void SafeRegisterRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->RegisterReference(reinterpret_cast<CEntity**>(&e));
+        }
+    }
+
+    template<typename T>
+    static void SafeCleanUpRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->CleanUpOldReference(reinterpret_cast<CEntity**>(&e));
+        }
+    }
+
 public:
     // Rw callbacks
     static RpAtomic* SetAtomicAlphaCB(RpAtomic* atomic, void* data);

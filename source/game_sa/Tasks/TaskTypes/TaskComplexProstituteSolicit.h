@@ -35,6 +35,8 @@ public:
     } m_nFlags;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_PROSTITUTE_SOLICIT;
+
     CTaskComplexProstituteSolicit(CPed* client);
 
     CTask* CreateSubTask(int32 taskId, CPed* prostitute);

@@ -1319,10 +1319,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         if (m_vecMoveSpeed.SquaredMagnitude() < 0.01f
             || m_pDriver
             && m_pDriver->IsPlayer()
-            && (m_pDriver->m_nPedState == PEDSTATE_ARRESTED
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT)
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT)
-                || m_pDriver->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN)))
+            && (m_pDriver->m_nPedState == PEDSTATE_ARRESTED || m_pDriver->GetTaskManager().HasAnyOf<TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT, TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN>()))
         {
             m_fBreakPedal = 1.0f;
             m_fGasPedal = 0.0f;
@@ -3637,7 +3634,12 @@ void CAutomobile::NitrousControl(int8 boost)
         }
         StopNitroEffect();
     } else {
-        const auto driverPad = m_pDriver->IsPlayer() ? m_pDriver->AsPlayer()->GetPadFromPlayer() : nullptr;
+        // m_bIsVisible || m_bWasPostponed || m_bIsInSafePosition || m_bIsStuck || m_bHasContacted
+        bool flag = m_nFlags & 0xf8;
+
+        CPad* driverPad = nullptr;
+        if (!flag && m_pDriver->IsPlayer())
+            driverPad = m_pDriver->AsPlayer()->GetPadFromPlayer();
 
         if (m_fTireTemperature == 1.f && m_nNitroBoosts > 0) {
             if (m_nStatus == STATUS_PHYSICS) {
@@ -5273,7 +5275,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
             case eCarNodes::CAR_WING_RF:
                 break;
             default: {
-                panel->SetPanel(nodeIdx, 0, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
+                panel->SetPanel(nodeIdx, 1, CGeneral::GetRandomNumberInRange(-0.2f, -0.5f));
                 break;
             }
             }
@@ -5282,7 +5284,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
         break;
     }
     case ePanelDamageState::DAMSTATE_OPENED: {
-        if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+        if (panel == ePanels::WINDSCREEN_PANEL) {
             m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_WINDSCREEN_SHATTER, 0.f);
         }
         SetComponentVisibility(frame, 2);
@@ -5290,7 +5292,7 @@ void CAutomobile::SetPanelDamage(ePanels panel, bool createWindowGlass)
     }
     case ePanelDamageState::DAMSTATE_OPENED_DAMAGED: {
         if (createWindowGlass) {
-            if (nodeIdx == eCarNodes::CAR_WHEEL_RB) {
+            if (panel == ePanels::WINDSCREEN_PANEL) {
                 CGlass::CarWindscreenShatters(this);
             }
         } else {

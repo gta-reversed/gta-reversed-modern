@@ -32,6 +32,8 @@ public:
     CAnimBlendAssociation* m_pAnimBlendAssociation;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_HOLD_ENTITY;
+
     CTaskSimpleHoldEntity(
         CEntity* entityToHold,
         CVector* posn,

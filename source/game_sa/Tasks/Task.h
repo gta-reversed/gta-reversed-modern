@@ -57,5 +57,7 @@ private:
     void* New(uint32);
     void  Delete(void* object);
 };
-
 VALIDATE_SIZE(CTask, 0x8);
+
+template<typename T>
+concept Task = std::is_base_of_v<CTask, T>;

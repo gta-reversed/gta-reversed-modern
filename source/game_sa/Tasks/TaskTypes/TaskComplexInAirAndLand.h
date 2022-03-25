@@ -9,6 +9,8 @@ public:
     bool m_bInvalidClimb;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_IN_AIR_AND_LAND;
+
     CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bUsingFallGlide);
     ~CTaskComplexInAirAndLand() override {}
 

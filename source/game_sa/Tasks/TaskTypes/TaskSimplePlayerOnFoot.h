@@ -25,6 +25,8 @@ public:
     CEntity* m_pLookingAtEntity; // always 0
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_PLAYER_ON_FOOT;
+
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 

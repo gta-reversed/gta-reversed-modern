@@ -49,6 +49,8 @@ public:
     };
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_WANDER;
+
     static void InjectHooks();
 
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);

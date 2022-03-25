@@ -21,6 +21,8 @@ public:
     char       _flags[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_COP_IN_CAR;
+
     CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool arg3);
 };
 

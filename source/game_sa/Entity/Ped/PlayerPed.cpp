@@ -172,32 +172,30 @@ CPad* CPlayerPed::GetPadFromPlayer() {
 
 // 0x609590
 bool CPlayerPed::CanPlayerStartMission() {
-    if (CGameLogic::GameState != GAME_STATE_INITIAL)
-        return false;
-
-    if (CGameLogic::IsCoopGameGoingOn())
+    if (CGameLogic::GameState != GAME_STATE_INITIAL || CGameLogic::IsCoopGameGoingOn())
         return false;
 
     if (!IsPedInControl() && !IsStateDriving())
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_ATTACK))
+    auto& taskMgr = GetTaskManager();
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_PHYSICAL_RESPONSE))
         return false;
 
-    if (GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_SAY))
+    if (taskMgr.GetTaskPrimary(TASK_PRIMARY_EVENT_RESPONSE_NONTEMP))
         return false;
 
-    if (auto task = GetTaskManager().GetTaskSecondary(eSecondaryTasks::TASK_SECONDARY_FACIAL_COMPLEX)) {
-        if (task->GetTaskType() == TASK_SIMPLE_CAR_DRIVE) {
-            return false;
-        }
-    }
+    auto primaryTask = taskMgr.GetTaskPrimary(TASK_PRIMARY_PRIMARY);
+    if (primaryTask != nullptr && primaryTask->GetTaskType() != TASK_SIMPLE_CAR_DRIVE)
+        return false;
+
+    if (taskMgr.GetTaskSecondary(TASK_SECONDARY_ATTACK))
+        return false;
 
     if (!IsAlive())
         return false;
 
-    return !GetEventGroup().GetEventOfType(eEventType::EVENT_SCRIPT_COMMAND);
-   
+    return !GetEventGroup().GetEventOfType(EVENT_SCRIPT_COMMAND);
 }
 
 // 0x609620
@@ -366,9 +364,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
         if (ped->bThisPedIsATargetPriority)
             return 1.0f;
 
-        if (ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT) ||
-            ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ARREST_PED)
-        ) {
+        if (ped->GetTaskManager().HasAnyOf<TASK_COMPLEX_KILL_PED_ON_FOOT, TASK_COMPLEX_ARREST_PED>()) {
             return 0.8f;
         }
 

@@ -61,6 +61,8 @@ public:
     CTask*         ControlSubTask(CPed* ped) override;
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
+
+    auto GetVehicle() const { return m_pTargetVehicle; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);
