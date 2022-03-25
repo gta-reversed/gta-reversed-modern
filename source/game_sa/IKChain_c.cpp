@@ -50,7 +50,7 @@ bool IKChain_c::Init(const char* name, int32 IndexInList, CPed* ped, ePedBones b
                      int8 priority) {
     m_ped = ped;
 
-    const auto frames = m_ped->GetAnimBlendData().m_pFrames;
+    const auto frames = m_ped->GetAnimBlendData().m_Frames;
 
     if (frames[0].m_bCheckBlendNodeClumpKeyFrames || !frames[0].m_bUpdatingFrame) {
         return false;

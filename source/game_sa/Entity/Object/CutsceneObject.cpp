@@ -43,8 +43,8 @@ void CCutsceneObject::SetModelIndex_Reversed(unsigned index)
     {
         RpAnimBlendClumpInit(m_pRwClump);
         auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
-        animData->m_pvecPedPosition = &m_vecMoveSpeed;
-        animData->m_pFrames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
+        animData->m_PedPosition = &m_vecMoveSpeed;
+        animData->m_Frames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
         CCutsceneObject::SetupCarPipeAtomicsForClump(index, m_pRwClump);
     }
     CModelInfo::GetModelInfo(index)->m_nAlpha = 0xFF;
@@ -128,7 +128,7 @@ void CCutsceneObject::PreRender_Reversed()
                     auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
-                    sphere->center = animData->m_pFrames->m_pIFrame->translation;
+                    sphere->center = animData->m_Frames->m_pIFrame->translation;
                 }
             }
         }

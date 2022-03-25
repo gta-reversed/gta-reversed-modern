@@ -209,6 +209,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CAnimBlendClumpData::InjectHooks();
     IKChainManager_c::InjectHooks();
     IKChain_c::InjectHooks();
     CPedList::InjectHooks();

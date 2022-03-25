@@ -3265,7 +3265,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_pvecPedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
+    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
 
     // Create hit col model
     if (!mi.m_pHitColModel) {
