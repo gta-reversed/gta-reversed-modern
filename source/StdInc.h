@@ -84,6 +84,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eStats.h"
 #include "game_sa\Enums\eStatsReactions.h"
 #include "game_sa\Enums\eSurfaceType.h"
+#include "game_sa\Enums\eTargetDoor.h"
 #include "game_sa\Enums\eTaskType.h"
 #include "game_sa\Enums\eVehicleClass.h"
 #include "game_sa\Enums\eVehicleHandlingFlags.h"

@@ -9,7 +9,7 @@
 #include "TaskComplex.h"
 #include "PathFind.h"
 #include "TaskUtilityLineUpPedWithCar.h"
-#include "Enums/eTargetDoor.h"
+#include "eTargetDoor.h"
 
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
@@ -23,7 +23,6 @@ public:
             uint8 m_bCarryOnAfterFallingOff : 1;
         };
     };
-    char  _pad[3];
     int32 m_nTargetDoor;
     int32 m_nTargetDoorOppositeToFlag;
     int32 m_nTargetSeat;
