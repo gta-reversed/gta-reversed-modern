@@ -191,7 +191,7 @@ public:
     CBaseModelInfo* GetModelInfo() const;
 
     // Wrapper around the mess called `CleanUpOldReference`
-    // Takes in `ref` (which is usally a member variable),
+    // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`
     // Used often in the code. 
     template<typename T>

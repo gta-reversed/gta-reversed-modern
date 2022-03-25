@@ -96,6 +96,7 @@
 #include "Checkpoints.h"
 
 // Tasks
+#include "TaskComplexCarDriveMission.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -479,7 +480,6 @@ void InjectHooksMain() {
     const auto Tasks = []() {
         CTaskManager::InjectHooks();
 
-        CTaskComplexCarDriveMission::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();
         CTaskComplexUseMobilePhone::InjectHooks();
@@ -556,7 +556,8 @@ void InjectHooksMain() {
         // CTaskSimpleDuck::InjectHooks();
         CTaskComplexMedicTreatInjuredPed::InjectHooks();
         CTaskSimplePlayHandSignalAnim::InjectHooks();
-        // CTaskComplexCarDrive::InjectHooks();
+        CTaskComplexCarDrive::InjectHooks();
+        CTaskComplexCarDriveMission::InjectHooks();
         // CTaskComplexKillPedFromBoat::InjectHooks();
         // CTaskComplexLeaveCar::InjectHooks();
         CTaskComplexTreatAccident::InjectHooks();
