@@ -3434,7 +3434,7 @@ void CPed::Render() {
     // 0x5E7927
     // Render JetPack (if any)
     if (const auto task = GetIntelligence()->GetTaskJetPack()) {
-        task->Process(this);
+        task->RenderJetPack(this);
     }
 
     bHasBeenRendered = true;
