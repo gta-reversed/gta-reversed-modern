@@ -11,6 +11,8 @@
 #include "TaskUtilityLineUpPedWithCar.h"
 #include "eTargetDoor.h"
 
+// Note: This class is abstract, that is, it can't be directly constructed,
+// rather, use one of the derived classes.
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "EntityScanner.h"
+#include "Vehicle.h"
 
 class CPed;
 class CVehicle;

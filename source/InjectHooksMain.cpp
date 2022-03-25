@@ -203,6 +203,7 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
+#include "TaskComplexEnterAnyCarAsDriver.h"
 #include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
 
@@ -480,6 +481,7 @@ void InjectHooksMain() {
 
     const auto Tasks = []() {
         CTaskManager::InjectHooks();
+        CTaskComplexEnterAnyCarAsDriver::InjectHooks();
         CTaskComplexLeaveAnyCar::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();

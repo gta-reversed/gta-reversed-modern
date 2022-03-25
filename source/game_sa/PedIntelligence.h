@@ -16,6 +16,7 @@
 #include "VehicleScanner.h"
 #include "PedScanner.h"
 #include "MentalHealth.h"
+#include "PedScanner.h"
 
 class CPed;
 class CEntity;
