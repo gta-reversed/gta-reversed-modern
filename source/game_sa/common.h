@@ -29,8 +29,6 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-const char gta_empty_string[4] = {0, 0, 0, 0};
-
 #define DEFAULT_SCREEN_WIDTH (640.0f)
 #define DEFAULT_SCREEN_HEIGHT (448.0f)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
@@ -65,6 +63,9 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #endif
+
+#define PUSH_RENDERGROUP(str) 0
+#define POP_RENDERGROUP() 0
 
 extern int32 gDefaultTaskTime;
 

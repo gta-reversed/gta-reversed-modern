@@ -54,11 +54,8 @@ CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNode
         (this, outPosition, nodeAddress, randomSeed);
 }
 
-void CPathFind::FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress,
-                                      CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir)
-{
-    plugin::CallMethod <0x451B70, CPathFind*, int32, float, float, float, CNodeAddress*, CNodeAddress*, uint32, int8*>
-        (this, pathType, x, y, z, startNodeAddress, targetNodeAddress, dir, outDir);
+void CPathFind::FindNextNodeWandering(ePathType pathType, CVector pos, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint8 dir, uint8* outDir) {
+    plugin::CallMethod <0x451B70, CPathFind*, ePathType, CVector, CNodeAddress*, CNodeAddress*, uint8, uint8*>(this, pathType, pos, startNodeAddress, targetNodeAddress, dir, outDir);
 }
 
 void CPathFind::DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr,

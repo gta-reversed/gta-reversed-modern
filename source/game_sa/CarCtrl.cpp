@@ -178,7 +178,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     if (CModelInfo::IsBoatModel(modelid))
     {
         auto* boat = new CBoat(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-        if (posn.z <= -100.0F)
+        if (posn.z <= MAP_Z_LOW_LIMIT)
             posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
         posn.z += boat->GetDistanceFromCentreOfMassToBaseOfModel();
@@ -208,7 +208,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
     }
 
     auto* vehicle = GetNewVehicleDependingOnCarModel(modelid, eVehicleCreatedBy::MISSION_VEHICLE);
-    if (posn.z <= -100.0F)
+    if (posn.z <= MAP_Z_LOW_LIMIT)
         posn.z = CWorld::FindGroundZForCoord(posn.x, posn.y);
 
     posn.z += vehicle->GetDistanceFromCentreOfMassToBaseOfModel();
@@ -234,7 +234,7 @@ CVehicle* CCarCtrl::CreateCarForScript(int32 modelid, CVector posn, bool doMissi
 
     vehicle->m_autoPilot.m_nCarMission = eCarMission::MISSION_NONE;
     vehicle->m_autoPilot.m_nTempAction = 0;
-    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVINGSTYLE_STOP_FOR_CARS;
+    vehicle->m_autoPilot.m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     vehicle->m_autoPilot.m_speed = 13.0F;
     vehicle->m_autoPilot.m_nCruiseSpeed = 13;
     vehicle->m_autoPilot.m_nCurrentLane = 0;

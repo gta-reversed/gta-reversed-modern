@@ -183,7 +183,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     CEventDamage eventDamage(vehicle, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
-        damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+        damageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
     else
         eventDamage.m_damageResponse.m_bDamageCalculated = true;
 
