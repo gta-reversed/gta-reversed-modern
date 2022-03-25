@@ -135,7 +135,6 @@
 #include "TaskComplexWaitForPed.h"
 #include "TaskComplexJump.h"
 #include "TaskComplexWanderStandard.h"
-#include "TaskSimpleIKLookAt.h"
 #include "TaskComplexSunbathe.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskSimpleTogglePedThreatScanner.h"
@@ -143,7 +142,6 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
-#include "TaskSimpleIKChain.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
@@ -187,7 +185,6 @@
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
 #include "TaskSimpleGoToPointFine.h"
-#include "TaskSimpleIKManager.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
 #include "TaskSimpleFight.h"
@@ -200,8 +197,6 @@
 #include "TaskComplexBeCop.h"
 #include "TaskComplexAvoidOtherPedWhileWandering.h"
 #include "TaskComplexArrestPed.h"
-
-// IK Tasks
 #include "TaskSimpleIKChain.h"
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimpleIKManager.h"
@@ -570,7 +565,10 @@ void InjectHooksMain() {
         CTaskSimplePutDownEntity::InjectHooks();
         CTaskComplexUseSwatRope::InjectHooks();
         CTaskSimpleGoToPointFine::InjectHooks();
-        // CTaskSimpleIKManager::InjectHooks();
+        CTaskSimpleIKChain::InjectHooks();
+        CTaskSimpleIKManager::InjectHooks();
+        CTaskSimpleIKPointArm::InjectHooks();
+        CTaskSimpleIKLookAt::InjectHooks();
         // CTaskComplexDie::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
@@ -583,12 +581,6 @@ void InjectHooksMain() {
         // CTaskComplexBeCop::InjectHooks();
         CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
         CTaskComplexArrestPed::InjectHooks();
-
-        // IK Tasks
-        CTaskSimpleIKChain::InjectHooks();
-        CTaskSimpleIKLookAt::InjectHooks();
-        CTaskSimpleIKManager::InjectHooks();
-        CTaskSimpleIKPointArm::InjectHooks();
     };
 
     const auto Events = []() {
