@@ -13,9 +13,9 @@ void CTaskSimpleGoToPoint::InjectHooks()
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x667CD0);
-    RH_ScopedInstall(Clone_Reversed, 0x66CC60);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x667D60);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x66D710);
+    RH_ScopedVirtualInstall(Clone, 0x66CC60);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x667D60);
+    RH_ScopedVirtualInstall(ProcessPed, 0x66D710);
     RH_ScopedInstall(UpdatePoint, 0x645700);
 }
 

@@ -8,8 +8,8 @@ void CEventSoundQuiet::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5E05B0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5240);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x5E0670);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B5240);
+    RH_ScopedVirtualInstall(CloneEditable, 0x5E0670);
 }
 
 // 0x5E05B0

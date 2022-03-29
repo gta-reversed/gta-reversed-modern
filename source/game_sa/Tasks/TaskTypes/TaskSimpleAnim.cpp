@@ -6,7 +6,7 @@ void CTaskSimpleAnim::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleAnim);
     RH_ScopedCategory("Tasks/TaskTypes");
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x61A790);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x61A790);
 }
 
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple()

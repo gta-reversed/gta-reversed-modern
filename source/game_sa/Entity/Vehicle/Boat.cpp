@@ -21,15 +21,15 @@ void CBoat::InjectHooks() {
     RH_ScopedClass(CBoat);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x6F1140);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F1770);
-    RH_ScopedInstall(Teleport_Reversed, 0x6F20E0);
-    RH_ScopedInstall(PreRender_Reversed, 0x6F1180);
-    RH_ScopedInstall(Render_Reversed, 0x6F0210);
-    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6F0A10);
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6F01D0);
-    RH_ScopedInstall(ProcessOpenDoor_Reversed, 0x6F0190);
-    RH_ScopedInstall(BlowUpCar_Reversed, 0x6F21B0);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x6F1140);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F1770);
+    RH_ScopedVirtualInstall(Teleport, 0x6F20E0);
+    RH_ScopedVirtualInstall(PreRender, 0x6F1180);
+    RH_ScopedVirtualInstall(Render, 0x6F0210);
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6F0A10);
+    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6F01D0);
+    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6F0190);
+    RH_ScopedVirtualInstall(BlowUpCar, 0x6F21B0);
     RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
     RH_ScopedInstall(AddWakePoint, 0x6F2550);
     RH_ScopedInstall(SetupModelNodes, 0x6F01A0);

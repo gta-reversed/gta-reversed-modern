@@ -16,7 +16,7 @@ void CEventLeaderEnteredCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x48E1C0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0EF0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0EF0);
 }
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
@@ -25,7 +25,7 @@ void CEventLeaderExitedCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B8300);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0F80);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0F80);
 }
 
 void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
@@ -34,7 +34,7 @@ void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x63A110);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B1010);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B1010);
 }
 
 void CEventAreaCodes::InjectHooks()
@@ -43,8 +43,8 @@ void CEventAreaCodes::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2190);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2270);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B2350);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2270);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B2350);
 }
 
 void CEventLeaderEntryExit::InjectHooks()

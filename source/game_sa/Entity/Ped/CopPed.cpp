@@ -12,7 +12,7 @@ void CCopPed::InjectHooks() {
     RH_ScopedInstall(AddCriminalToKill, 0x5DDEB0);
     RH_ScopedInstall(RemoveCriminalToKill, 0x5DE040);
     RH_ScopedInstall(ClearCriminalsToKill, 0x5DE070);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5DE160);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5DE160);
 }
 
 /* Horrible design, but R* also allowed to pass in a ModelID */

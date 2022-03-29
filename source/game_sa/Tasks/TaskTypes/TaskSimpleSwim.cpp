@@ -10,10 +10,10 @@ void CTaskSimpleSwim::InjectHooks() {
     RH_ScopedClass(CTaskSimpleSwim);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x688930);
-    RH_ScopedInstall(Clone_Reversed, 0x68B050);
-    RH_ScopedInstall(GetId_Reversed, 0x6889F0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x68B1C0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x68B100);
+    RH_ScopedVirtualInstall(Clone, 0x68B050);
+    RH_ScopedVirtualInstall(GetId, 0x6889F0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x68B1C0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x68B100);
     RH_ScopedInstall(ApplyRollAndPitch, 0x68A8E0);
     RH_ScopedInstall(ProcessSwimAnims, 0x6899F0);
     RH_ScopedInstall(ProcessSwimmingResistance, 0x68A1D0);

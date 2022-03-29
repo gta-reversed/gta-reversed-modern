@@ -14,8 +14,8 @@ void CEventKnockOffBike::InjectHooks()
     using namespace ReversibleHooks;
     RH_ScopedOverloadedInstall(Constructor, "first", 0x4AFCF0, CEventKnockOffBike*(CEventKnockOffBike::*)(CVehicle*, CVector*, CVector*, float, float, uint8, uint8, int32, CPed*, bool, bool));
     RH_ScopedOverloadedInstall(Constructor, "second", 0x4AFC70, CEventKnockOffBike*(CEventKnockOffBike::*)());
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFEE0);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B4E80);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFEE0);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B4E80);
     RH_ScopedInstall(From, 0x4AFDD0);
     RH_ScopedInstall(SetPedOutCar, 0x4AFF60);
     RH_ScopedInstall(CalcForcesAndAnims, 0x4B0020);

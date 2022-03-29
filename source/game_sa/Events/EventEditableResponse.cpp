@@ -10,8 +10,8 @@ void CEventEditableResponse::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC450);
-    RH_ScopedInstall(Clone_Reversed, 0x420ED0);
-    RH_ScopedInstall(HasEditableResponse_Reversed, 0x420EF0);
+    RH_ScopedVirtualInstall(Clone, 0x420ED0);
+    RH_ScopedVirtualInstall(HasEditableResponse, 0x420EF0);
     RH_ScopedInstall(WillRespond, 0x4AC490);
     RH_ScopedInstall(InformVehicleOccupants, 0x4AC4A0);
     RH_ScopedInstall(InformRespectedFriends, 0x4B2B00);
@@ -34,7 +34,7 @@ void CEventFireNearby::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1F10);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1F90);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1F90);
 }
 
 void CEventDanger::InjectHooks() {
@@ -42,9 +42,9 @@ void CEventDanger::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2600);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5470);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B54E0);
-    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4B2700);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B5470);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B54E0);
+    RH_ScopedVirtualInstall(GetSourceEntity, 0x4B2700);
 }
 
 void CEventSeenPanickedPed::InjectHooks() {
@@ -52,7 +52,7 @@ void CEventSeenPanickedPed::InjectHooks() {
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2080);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B53C0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B53C0);
 }
 
 // 0x4AC450

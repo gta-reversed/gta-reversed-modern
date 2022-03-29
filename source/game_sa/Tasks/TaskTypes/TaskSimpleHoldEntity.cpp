@@ -11,11 +11,11 @@ void CTaskSimpleHoldEntity::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "1", 0x6913A0, CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x691470, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x691550, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags));
-    RH_ScopedInstall(Clone_Reversed, 0x6929B0);
-    RH_ScopedInstall(GetId_Reversed, 0x691460);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x693BD0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x693C40);
-    RH_ScopedInstall(SetPedPosition_Reversed, 0x6940A0);
+    RH_ScopedVirtualInstall(Clone, 0x6929B0);
+    RH_ScopedVirtualInstall(GetId, 0x691460);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x693BD0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x693C40);
+    RH_ScopedVirtualInstall(SetPedPosition, 0x6940A0);
     RH_ScopedInstall(ReleaseEntity, 0x6916E0);
     RH_ScopedInstall(CanThrowEntity, 0x691700);
     RH_ScopedInstall(PlayAnim, 0x691720);

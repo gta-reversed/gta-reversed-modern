@@ -12,8 +12,8 @@ void CTaskSimpleGetUp::InjectHooks()
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67FA80);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x677FE0);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()

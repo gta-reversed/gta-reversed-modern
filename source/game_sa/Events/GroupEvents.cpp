@@ -8,7 +8,7 @@ void CEventPlayerCommandToGroup::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B23D0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B24D0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B24D0);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
@@ -17,7 +17,7 @@ void CEventPlayerCommandToGroupAttack::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5F6340);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B2530);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B2530);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()

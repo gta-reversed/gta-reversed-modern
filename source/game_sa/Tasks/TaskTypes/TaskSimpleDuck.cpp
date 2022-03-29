@@ -11,8 +11,8 @@ void CTaskSimpleDuck::InjectHooks() {
     // RH_ScopedInstall(CanPedDuck, 0x692610);
     // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
     // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x692100);
-    // RH_ScopedInstall(ProcessPed_Reversed, 0x694390);
+    // RH_ScopedVirtualInstall(MakeAbortable, 0x692100);
+    // RH_ScopedVirtualInstall(ProcessPed, 0x694390);
 }
 
 // 0x691FC0

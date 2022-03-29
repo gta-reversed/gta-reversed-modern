@@ -18,8 +18,8 @@ void CMonsterTruck::InjectHooks() {
     RH_ScopedInstall(PreRender, 0x6C7DE0);
     // RH_ScopedInstall(ExtendSuspension, 0x6C7D80);
     // RH_ScopedInstall(ResetSuspension, 0x6C7D40);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C7D30);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C7D20);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6C7D30);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C7D20);
 }
 
 // 0x6C8D60

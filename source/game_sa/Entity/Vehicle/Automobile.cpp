@@ -41,13 +41,13 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(Constructor, 0x6B0A90);
     RH_ScopedInstall(Destructor, 0x6A61E0);
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6B1880);
-    RH_ScopedInstall(AddMovingCollisionSpeed_Reversed, 0x6A1ED0);
-    RH_ScopedInstall(ProcessAI_Reversed, 0x6B4800);
-    RH_ScopedInstall(ResetSuspension_Reversed, 0x6A2AE0);
-    RH_ScopedInstall(ProcessFlyingCarStuff_Reversed, 0x6A8500);
-    RH_ScopedInstall(DoHoverSuspensionRatios_Reversed, 0x6A45C0);
-    RH_ScopedInstall(ProcessSuspension_Reversed, 0x6AFB10);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6B1880);
+    RH_ScopedVirtualInstall(AddMovingCollisionSpeed, 0x6A1ED0);
+    RH_ScopedVirtualInstall(ProcessAI, 0x6B4800);
+    RH_ScopedVirtualInstall(ResetSuspension, 0x6A2AE0);
+    RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6A8500);
+    RH_ScopedVirtualInstall(DoHoverSuspensionRatios, 0x6A45C0);
+    RH_ScopedVirtualInstall(ProcessSuspension, 0x6AFB10);
     RH_ScopedInstall(SetupModelNodes, 0x6A0770);
     RH_ScopedInstall(HydraulicControl, 0x6A07A0);
     RH_ScopedInstall(UpdateMovingCollision, 0x6A1460);
@@ -63,27 +63,27 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetHeliOrientation, 0x6A2450);
     RH_ScopedInstall(ClearHeliOrientation, 0x6A2460);
 
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6A2210);
-    RH_ScopedInstall(IsComponentPresent_Reversed, 0x6A2250);
-    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
-    RH_ScopedOverloadedInstall(GetDooorAngleOpenRatio_Reversed, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
-    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
-    RH_ScopedOverloadedInstall(IsDoorReady_Reversed, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
-    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
-    RH_ScopedOverloadedInstall(IsDoorFullyOpen_Reversed, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
-    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
-    RH_ScopedOverloadedInstall(IsDoorClosed_Reversed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
-    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
-    RH_ScopedOverloadedInstall(IsDoorMissing_Reversed, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
-    RH_ScopedInstall(IsOpenTopCar_Reversed, 0x6A2350);
-    RH_ScopedInstall(IsRoomForPedToLeaveCar_Reversed, 0x6A3850);
-    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B3E90);
-    RH_ScopedInstall(GetHeightAboveRoad_Reversed, 0x6A62B0);
-    RH_ScopedInstall(GetNumContactWheels_Reversed, 0x6A62A0);
-    RH_ScopedInstall(Teleport_Reversed, 0x6A9CA0);
+    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6A2210);
+    RH_ScopedVirtualInstall(IsComponentPresent, 0x6A2250);
+    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
+    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    RH_ScopedVirtualInstall(IsOpenTopCar, 0x6A2350);
+    RH_ScopedVirtualInstall(IsRoomForPedToLeaveCar, 0x6A3850);
+    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B3E90);
+    RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6A62B0);
+    RH_ScopedVirtualInstall(GetNumContactWheels, 0x6A62A0);
+    RH_ScopedVirtualInstall(Teleport, 0x6A9CA0);
     // Install("CAutomobile", "GetTowHitchPos, 0x6AF1D0, &CAutomobile::GetTowHitchPos);
-    RH_ScopedInstall(Save_Reversed, 0x5D47E0);
-    RH_ScopedInstall(Load_Reversed, 0x5D2980);
+    RH_ScopedVirtualInstall(Save, 0x5D47E0);
+    RH_ScopedVirtualInstall(Load, 0x5D2980);
     RH_ScopedInstall(ReduceHornCounter, 0x6A29A0);
     RH_ScopedInstall(FixTyre, 0x6A3580);
     RH_ScopedInstall(SetTaxiLight, 0x6A3740);
@@ -124,16 +124,16 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(SetPanelDamage, 0x6B1480);
     RH_ScopedInstall(SetDoorDamage, 0x6B1600);
 
-    RH_ScopedInstall(Fix_Reversed, 0x6A3440);
-    RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6A65D0);
-    RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6A47F0);
-    RH_ScopedInstall(PlayCarHorn_Reversed, 0x6A3770);
-    RH_ScopedInstall(VehicleDamage_Reversed, 0x6A7650);
-    RH_ScopedInstall(GetTowHitchPos_Reversed, 0x6AF1D0);
-    RH_ScopedInstall(GetTowBarPos_Reversed, 0x6AF250);
-    RH_ScopedInstall(SetTowLink_Reversed, 0x6B4410);
-    RH_ScopedInstall(BreakTowLink_Reversed, 0x6A4400);
-    RH_ScopedInstall(FindWheelWidth_Reversed, 0x6A6090);
+    RH_ScopedVirtualInstall(Fix, 0x6A3440);
+    RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6A65D0);
+    RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6A47F0);
+    RH_ScopedVirtualInstall(PlayCarHorn, 0x6A3770);
+    RH_ScopedVirtualInstall(VehicleDamage, 0x6A7650);
+    RH_ScopedVirtualInstall(GetTowHitchPos, 0x6AF1D0);
+    RH_ScopedVirtualInstall(GetTowBarPos, 0x6AF250);
+    RH_ScopedVirtualInstall(SetTowLink, 0x6B4410);
+    RH_ScopedVirtualInstall(BreakTowLink, 0x6A4400);
+    RH_ScopedVirtualInstall(FindWheelWidth, 0x6A6090);
 }
 
 // 0x6B0A90

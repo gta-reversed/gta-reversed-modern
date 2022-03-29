@@ -10,9 +10,9 @@ void CEventAcquaintancePed::InjectHooks()
     CEventAcquaintancePedHate::InjectHooks();
     CEventAcquaintancePedHateBadlyLit::InjectHooks();
     RH_ScopedInstall(Constructor, 0x4AF820);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA30);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4AF970);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AF8F0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA30);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4AF970);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AF8F0);
 }
 
 void CEventSeenCop::InjectHooks()
@@ -118,7 +118,7 @@ void CEventAcquaintancePedHateBadlyLit::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF250);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AFA90);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA90);
 }
 
 CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)

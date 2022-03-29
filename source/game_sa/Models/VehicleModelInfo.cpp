@@ -44,14 +44,14 @@ void CVehicleModelInfo::InjectHooks()
         RH_ScopedInstall(FindOtherUpgrade, 0x4C74D0);
     }
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C7650);
-    RH_ScopedInstall(Init_Reversed, 0x4C7630);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C9890);
-    RH_ScopedInstall(CreateInstance_Reversed, 0x4C9680);
-    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C7670);
-    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C76D0);
-    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C7660);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C95C0);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C7650);
+    RH_ScopedVirtualInstall(Init, 0x4C7630);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C9890);
+    RH_ScopedVirtualInstall(CreateInstance, 0x4C9680);
+    RH_ScopedVirtualInstall(SetAnimFile, 0x4C7670);
+    RH_ScopedVirtualInstall(ConvertAnimFileIndex, 0x4C76D0);
+    RH_ScopedVirtualInstall(GetAnimFileIndex, 0x4C7660);
+    RH_ScopedVirtualInstall(SetClump, 0x4C95C0);
     RH_ScopedInstall(SetAtomicRenderCallbacks, 0x4C7B10);
     RH_ScopedInstall(SetVehicleComponentFlags, 0x4C7C10);
     RH_ScopedInstall(GetWheelPosn, 0x4C7D20);

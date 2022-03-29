@@ -10,12 +10,12 @@ void CTaskComplexBeInGroup::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x632EA0);
     RH_ScopedInstall(MonitorMainGroupTask, 0x633010);
     RH_ScopedInstall(MonitorSecondaryGroupTask, 0x6330B0);
-    RH_ScopedInstall(Clone_Reversed, 0x636BE0);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x632E90);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x632EB0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x632F40);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x632FB0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x638AA0);
+    RH_ScopedVirtualInstall(Clone, 0x636BE0);
+    RH_ScopedVirtualInstall(GetTaskType, 0x632E90);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x632EB0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x632F40);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x632FB0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x638AA0);
 }
 
 // 0x632E50

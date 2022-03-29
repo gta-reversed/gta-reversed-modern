@@ -8,9 +8,9 @@ void CTaskComplexCarDriveMission::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x63CC30);
     RH_ScopedInstall(Destructor, 0x63CCC0);
-    RH_ScopedInstall(Clone_Reversed, 0x63DD70);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x63CCB0);
-    RH_ScopedInstall(SetUpCar_Reversed, 0x63CD20);
+    RH_ScopedVirtualInstall(Clone, 0x63DD70);
+    RH_ScopedVirtualInstall(GetTaskType, 0x63CCB0);
+    RH_ScopedVirtualInstall(SetUpCar, 0x63CD20);
 }
 
 // 0x63CC30

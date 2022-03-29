@@ -10,7 +10,7 @@ void CEventVehicleToSteal::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF670);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF760);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AF760);
 }
 
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)

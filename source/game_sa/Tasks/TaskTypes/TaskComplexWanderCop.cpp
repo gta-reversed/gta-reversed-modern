@@ -10,11 +10,11 @@ void CTaskComplexWanderCop::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x460C80);
-    RH_ScopedInstall(Clone_Reversed, 0x460CE0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674860);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x674750);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x674D80);
-    RH_ScopedInstall(ScanForStuff_Reversed, 0x6702B0);
+    RH_ScopedVirtualInstall(Clone, 0x460CE0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674860);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x674750);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x674D80);
+    RH_ScopedVirtualInstall(ScanForStuff, 0x6702B0);
     RH_ScopedInstall(LookForCarAlarms, 0x66B1B0);
     RH_ScopedInstall(LookForStolenCopCars, 0x66B290);
     RH_ScopedInstall(LookForCriminals, 0x66B300);

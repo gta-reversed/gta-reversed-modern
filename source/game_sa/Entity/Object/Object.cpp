@@ -24,16 +24,16 @@ void CObject::InjectHooks()
     RH_ScopedClass(CObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
-    RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5A2130);
-    RH_ScopedInstall(Teleport_Reversed, 0x5A17B0);
-    RH_ScopedInstall(PreRender_Reversed, 0x59FD50);
-    RH_ScopedInstall(Render_Reversed, 0x59F180);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x554FA0);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x553E10);
-    RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x59FEE0);
-    RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5A02E0);
+    RH_ScopedVirtualInstall(SetIsStatic, 0x5A0760);
+    RH_ScopedVirtualInstall(CreateRwObject, 0x59F110);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5A2130);
+    RH_ScopedVirtualInstall(Teleport, 0x5A17B0);
+    RH_ScopedVirtualInstall(PreRender, 0x59FD50);
+    RH_ScopedVirtualInstall(Render, 0x59F180);
+    RH_ScopedVirtualInstall(SetupLighting, 0x554FA0);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x553E10);
+    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x59FEE0);
+    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5A02E0);
     RH_ScopedInstall(Init, 0x59F840);
     RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
     RH_ScopedInstall(CanBeDeleted, 0x59F120);

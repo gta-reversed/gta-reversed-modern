@@ -41,8 +41,8 @@ void CTaskSimpleClimb::InjectHooks()
     RH_ScopedInstall(Constructor, 0x67A110);
     RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
     RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x680DC0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x67A280);
+    //RH_ScopedVirtualInstall(ProcessPed, 0x680DC0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x67A280);
 }
 
 CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb)

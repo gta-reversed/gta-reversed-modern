@@ -112,7 +112,7 @@ void CAEFrontendAudioEntity::InjectHooks() {
     // RH_ScopedInstall(AddAudioEvent, 0x4DD4A0);
     RH_ScopedInstall(IsRadioTuneSoundActive, 0x4DD480);
     RH_ScopedInstall(IsLoadingTuneActive, 0x4DD470);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DEDA0);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DEDA0);
 }
 
 void CAEFrontendAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
