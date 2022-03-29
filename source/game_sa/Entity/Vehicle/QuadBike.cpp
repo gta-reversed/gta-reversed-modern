@@ -11,17 +11,17 @@ void CQuadBike::InjectHooks() {
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6CE370);
-    RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
-    RH_ScopedInstall(GetRideAnimData_Reversed, 0x6CDC90);
-    RH_ScopedInstall(PreRender_Reversed, 0x6CEAD0);
-    RH_ScopedInstall(ProcessAI_Reversed, 0x6CE460);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6CDCC0);
-    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6CE020);
-    RH_ScopedInstall(ProcessDrivingAnims_Reversed, 0x6CE280);
-    RH_ScopedInstall(ProcessSuspension_Reversed, 0x6CE270);
-    RH_ScopedInstall(ResetSuspension_Reversed, 0x6CDCB0);
-    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6CE340);
-    RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6CDCA0);
+    RH_ScopedVirtualInstall(Fix, 0x6CE2B0);
+    RH_ScopedVirtualInstall(GetRideAnimData, 0x6CDC90);
+    RH_ScopedVirtualInstall(PreRender, 0x6CEAD0);
+    RH_ScopedVirtualInstall(ProcessAI, 0x6CE460);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0);
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CE020);
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6CE280);
+    RH_ScopedVirtualInstall(ProcessSuspension, 0x6CE270);
+    RH_ScopedVirtualInstall(ResetSuspension, 0x6CDCB0);
+    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6CE340);
+    RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6CDCA0);
 }
 
 // 0x6CE370

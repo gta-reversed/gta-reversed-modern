@@ -22,11 +22,11 @@ void CTaskComplexWander::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x66F450);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x674140);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6740E0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x674C30);
-    RH_ScopedInstall(UpdateDir_Reversed, 0x669DA0);
-    RH_ScopedInstall(UpdatePathNodes_Reversed, 0x669ED0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674140);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6740E0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x674C30);
+    RH_ScopedVirtualInstall(UpdateDir, 0x669DA0);
+    RH_ScopedVirtualInstall(UpdatePathNodes, 0x669ED0);
     RH_ScopedInstall(CreateSubTask, 0x671CB0);
     RH_ScopedInstall(ComputeTargetPos, 0x669F60);
     RH_ScopedInstall(ComputeTargetHeading, 0x66F530);

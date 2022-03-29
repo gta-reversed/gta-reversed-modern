@@ -8,8 +8,8 @@ void CEventGotKnockedOverByCar::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1B60);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1C70);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7960);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1C70);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7960);
 }
 
 // 0x4B1B60

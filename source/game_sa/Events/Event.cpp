@@ -18,7 +18,7 @@ void CEventRevived::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AEC50);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AECB0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AECB0);
 }
 
 void CEventEscalator::InjectHooks()
@@ -27,7 +27,7 @@ void CEventEscalator::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF820);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2580);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2580);
 }
 
 void CEventSexyVehicle::InjectHooks()
@@ -52,7 +52,7 @@ void CEventCopCarBeingStolen::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1740);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1860);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1860);
 }
 
 void CEventCarUpsideDown::InjectHooks()
@@ -61,7 +61,7 @@ void CEventCarUpsideDown::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1CC0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1DB0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1DB0);
 }
 
 void CEventPassObject::InjectHooks()
@@ -70,7 +70,7 @@ void CEventPassObject::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x65DC70);
-    RH_ScopedInstall(IsValid_Reversed, 0x4B1700);
+    RH_ScopedVirtualInstall(IsValid, 0x4B1700);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
@@ -79,7 +79,7 @@ void CEventLeanOnVehicle::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x65DAF0);
-    RH_ScopedInstall(IsValid_Reversed, 0x4B16C0);
+    RH_ScopedVirtualInstall(IsValid, 0x4B16C0);
 }
 
 void CEventOnFire::InjectHooks()
@@ -88,7 +88,7 @@ void CEventOnFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF740);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1050);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1050);
 }
 
 CEvent::CEvent() {

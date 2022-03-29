@@ -18,7 +18,7 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedCategory("Audio/Entities");
 
     // VIRTUAL
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4FB6C0);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4FB6C0);
 
     // CLASS
     RH_ScopedInstall(Initialise, 0x4F7670);

@@ -10,10 +10,10 @@ void CEventVehicleDamage::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B18D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1A00);
-    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4B1A90);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B50B0);
-    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4B1A70);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1A00);
+    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4B1A90);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B50B0);
+    RH_ScopedVirtualInstall(GetSourceEntity, 0x4B1A70);
 }
 
 // 0x4B18D0

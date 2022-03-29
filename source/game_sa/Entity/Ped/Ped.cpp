@@ -164,21 +164,21 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
-    // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
-    RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
-    // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
-    // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
-    RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
-    RH_ScopedInstall(Render_Reversed, 0x5E7680);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
-    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
-    // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
-    RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
-    RH_ScopedInstall(Save_Reversed, 0x5D5730);
-    RH_ScopedInstall(Load_Reversed, 0x5D4640);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x5E4880);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x5DEBF0);
+    // RH_ScopedVirtualInstall(ProcessControl, 0x5E8CD0);
+    RH_ScopedVirtualInstall(Teleport, 0x5E4110);
+    // RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x5E3C30);
+    // RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5E3E90);
+    RH_ScopedVirtualInstall(PreRender, 0x5E8A20);
+    RH_ScopedVirtualInstall(Render, 0x5E7680);
+    RH_ScopedVirtualInstall(SetupLighting, 0x553F00);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x5533B0);
+    RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x5E7B70);
+    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x5E2530);
+    RH_ScopedVirtualInstall(SetMoveAnim, 0x5E4A00);
+    RH_ScopedVirtualInstall(Save, 0x5D5730);
+    RH_ScopedVirtualInstall(Load, 0x5D4640);
 
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }

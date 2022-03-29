@@ -10,11 +10,11 @@ void CTaskComplexLeaveAnyCar::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x421150);
     RH_ScopedInstall(Destructor, 0x421270);
-    RH_ScopedInstall(Clone_Reversed, 0x4211C0);
-    RH_ScopedInstall(GetTaskType_Reversed, 0x421240);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x63BCD0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x63BCE0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x63BDC0);
+    RH_ScopedVirtualInstall(Clone, 0x4211C0);
+    RH_ScopedVirtualInstall(GetTaskType, 0x421240);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x63BCD0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x63BCE0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x63BDC0);
 }
 
 // 0x421150

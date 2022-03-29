@@ -1112,8 +1112,8 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x685750);
     RH_ScopedInstall(Destructor, 0x6857D0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x688810);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6857E0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x688810);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0);
     // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
     RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
     RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);

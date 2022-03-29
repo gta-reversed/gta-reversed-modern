@@ -10,8 +10,8 @@ void CEventDeadPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ADEA0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4830);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6E70);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4830);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6E70);
 }
 
 CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)

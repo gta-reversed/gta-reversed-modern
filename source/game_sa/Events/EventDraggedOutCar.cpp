@@ -9,7 +9,7 @@ void CEventDraggedOutCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x4AD250);
     RH_ScopedInstall(AffectsPed, 0x4AD3A0);
     RH_ScopedInstall(AffectsPedGroup, 0x4AD3C0);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6DC0);
 }
 
 // // 0x4AD250

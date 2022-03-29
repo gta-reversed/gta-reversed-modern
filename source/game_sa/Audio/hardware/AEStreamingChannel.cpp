@@ -138,13 +138,13 @@ void CAEStreamingChannel::InjectHooks() {
     // RH_ScopedInstall(GetActiveTrackID, 0x4F1A40);
     // RH_ScopedInstall(UpdatePlayTime, 0x4F18A0);
     // RH_ScopedInstall(RemoveFX, 0x4F1C20);
-    // RH_ScopedInstall(Service_Reversed, 0x4F2550);
-    // RH_ScopedInstall(IsSoundPlaying_Reversed, 0x4F2040);
-    // RH_ScopedInstall(GetPlayTime_Reversed, 0x4F19E0);
-    // RH_ScopedInstall(GetLength_Reversed, 0x4F1880);
-    // RH_ScopedInstall(Play_Reversed, 0x4F1D40);
-    // RH_ScopedOverloadedInstall(Stop_Reversed, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
-    // RH_ScopedInstall(SetFrequencyScalingFactor_Reversed, 0x4F2060);
+    // RH_ScopedVirtualInstall(Service, 0x4F2550);
+    // RH_ScopedVirtualInstall(IsSoundPlaying, 0x4F2040);
+    // RH_ScopedVirtualInstall(GetPlayTime, 0x4F19E0);
+    // RH_ScopedVirtualInstall(GetLength, 0x4F1880);
+    // RH_ScopedVirtualInstall(Play, 0x4F1D40);
+    // RH_ScopedVirtualOverloadedInstall(Stop, "", 0x4F21C0, int8(CAEStreamingChannel::*)());
+    // RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4F2060);
 }
 
 // 0x4F1800

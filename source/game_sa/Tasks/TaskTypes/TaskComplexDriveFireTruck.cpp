@@ -13,10 +13,10 @@ void CTaskComplexDriveFireTruck::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659310);
     RH_ScopedInstall(CreateSubTask, 0x65A240);
-    RH_ScopedInstall(Clone_Reversed, 0x659BC0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65B140);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65B090);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65B1E0);
+    RH_ScopedVirtualInstall(Clone, 0x659BC0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65B140);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65B090);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65B1E0);
 }
 
 CTaskComplexDriveFireTruck* CTaskComplexDriveFireTruck::Constructor(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver) {

@@ -4,9 +4,9 @@ void CBmx::InjectHooks() {
     RH_ScopedClass(CBmx);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6BF9B0);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6BF9C0);
-    RH_ScopedInstall(FindWheelWidth_Reversed, 0x6C0550);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6BF9B0);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6BF9C0);
+    RH_ScopedVirtualInstall(FindWheelWidth, 0x6C0550);
 }
 
 CBmx::CBmx(int32 modelIndex, eVehicleCreatedBy createdBy) : CBike(plugin::dummy) {

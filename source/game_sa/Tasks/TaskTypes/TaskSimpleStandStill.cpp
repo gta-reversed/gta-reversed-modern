@@ -8,8 +8,8 @@ void CTaskSimpleStandStill::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x62F310);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x4B8690);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x62F370);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x4B8690);
+    RH_ScopedVirtualInstall(ProcessPed, 0x62F370);
 }
 
 // 0x62F310

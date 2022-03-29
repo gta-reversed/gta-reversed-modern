@@ -8,8 +8,8 @@ void CEventVehicleDied::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B0D10);
-    RH_ScopedInstall(Clone_Reversed, 0x4B76D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B0E00);
+    RH_ScopedVirtualInstall(Clone, 0x4B76D0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B0E00);
 }
 
 CEventVehicleDied::CEventVehicleDied (CVehicle* vehicle)

@@ -8,7 +8,7 @@ void CEventPedToFlee::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF240);
-    RH_ScopedInstall(Clone_Reversed, 0x4B73D0);
+    RH_ScopedVirtualInstall(Clone, 0x4B73D0);
 }
 
 CEventPedToFlee::CEventPedToFlee(CPed* ped)

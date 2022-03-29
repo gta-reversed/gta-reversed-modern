@@ -313,7 +313,7 @@ void CAEPoliceScannerAudioEntity::InjectHooks() {
     RH_ScopedInstall(PopulateScannerDialogueLists, 0x4E6B60);
     RH_ScopedInstall(CanWePlayNewScannerDialogue, 0x4E6C00);
     RH_ScopedInstall(PlayPoliceScannerDialogue, 0x4E6ED0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4E7590);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4E7590);
     // RH_ScopedInstall(Service, 0x4E7630);
 }
 
