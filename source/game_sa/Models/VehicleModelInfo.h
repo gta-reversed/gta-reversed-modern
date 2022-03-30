@@ -456,6 +456,8 @@ public:
         return IsFrontWheel(wheel) ? m_fWheelSizeFront : m_fWheelSizeRear;
     }
 
+    float GetWheelSize(bool front) { return front ? m_fWheelSizeFront : m_fWheelSizeRear; } // 0x6A06F0
+
     tHandlingData& GetHandlingData() const;
     tFlyingHandlingData& GetFlyingHandlingData() const;
 };

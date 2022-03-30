@@ -287,9 +287,9 @@ void CHeli::ProcessControlInputs(uint8 playerNum) {
 
 // 0x6C4400
 void CHeli::Render() {
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
+    auto* mi = GetVehicleModelInfo();
     m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
-    mi->AsVehicleModelInfoPtr()->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
+    mi->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
 
     auto staticRotor = m_aCarNodes[HELI_STATIC_ROTOR];
     RpAtomic* data = nullptr;

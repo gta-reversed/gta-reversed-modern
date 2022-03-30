@@ -212,7 +212,7 @@ public:
     // Set random damage to vehicle. Called when generating a vehicle @CCarCtrl::GenerateOneRandomCar
     void SetRandomDamage(bool arg0);
     // Make a vehicle fully damaged
-    void SetTotalDamage(bool arg0);
+    void SetTotalDamage(bool component);
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
     void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);

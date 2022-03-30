@@ -1280,6 +1280,7 @@ void CVehicleModelInfo::SetupCommonData()
     CCarFXRenderer::InitialiseDirtTexture();
 }
 
+// 0x5B6890
 void CVehicleModelInfo::LoadVehicleColours()
 {
     char buffer[1024];
@@ -1435,6 +1436,7 @@ void CVehicleModelInfo::LoadVehicleColours()
     CFileMgr::CloseFile(file);
 }
 
+// 0x5B65A0
 void CVehicleModelInfo::LoadVehicleUpgrades()
 {
     for (auto& wheelUpgrade : ms_numWheelUpgrades)
@@ -1526,6 +1528,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
     CFileMgr::CloseFile(file);
 }
 
+// 0x4C8780
 void CVehicleModelInfo::LoadEnvironmentMaps()
 {
     CTxdStore::PushCurrentTxd();
@@ -1697,15 +1700,16 @@ int32 GetListOfComponentsNotUsedByRules(uint32 compRules, int32 numExtras, int32
     return iNumComps;
 }
 
+// 0x4C83B0
 RpMaterial* RemoveWindowAlphaCB(RpMaterial* material, void* data)
 {
-    auto color = RpMaterialGetColor(material);
+    auto* color = RpMaterialGetColor(material);
     if (color->alpha == 255)
         return material;
 
     auto ppEntries = reinterpret_cast<tRestoreEntry**>(data);
-    (*ppEntries)->m_pAddress = RpMaterialGetColor(material);
-    (*ppEntries)->m_pValue = *reinterpret_cast<void**>(RpMaterialGetColor(material));
+    (*ppEntries)->m_pAddress = color;
+    (*ppEntries)->m_pValue = *reinterpret_cast<void**>(color);
     (*ppEntries)++;
 
     color->red = 0;
@@ -1716,6 +1720,7 @@ RpMaterial* RemoveWindowAlphaCB(RpMaterial* material, void* data)
     return material;
 }
 
+// 0x4C7BD0
 RwObject* GetOkAndDamagedAtomicCB(RwObject* object, void* data)
 {
     auto out = reinterpret_cast<RwObject**>(data);
@@ -1729,6 +1734,7 @@ RwObject* GetOkAndDamagedAtomicCB(RwObject* object, void* data)
     return object;
 }
 
+// 0x7323C0
 RpAtomic* atomicDefaultRenderCB(RpAtomic* atomic)
 {
     AtomicDefaultRenderCallBack(atomic);
