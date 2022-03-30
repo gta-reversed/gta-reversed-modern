@@ -321,33 +321,27 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
-    CPad* pad = CPad::GetPad(0);
-
-    static bool doGodMode{};
-    if (pad->IsStandardKeyJustPressed('2')) {
-        doGodMode = !doGodMode;
-        printf("God mode state: %i\n", (int)doGodMode);
-    }
-    if (doGodMode) {
-        CCheat::MoneyArmourHealthCheat();
-    }
+    CPad* pad = CPad::GetPad();
 
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
         CCheat::JetpackCheat();
     }
-
+    if (pad->IsStandardKeyJustPressed('2')) {
+        CCheat::MoneyArmourHealthCheat();
+    }
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
     if (pad->IsStandardKeyJustDown('4')) {
-        printf("");
-        TaskComplexUseGogglesTestCode();
+        FindPlayerPed()->Teleport({ -1956.25110f, 297.625519f, 35.0370331f }, true);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
     // CTRL + M or F7
     if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;

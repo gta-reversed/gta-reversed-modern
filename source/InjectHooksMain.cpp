@@ -52,7 +52,6 @@
 #include "MotionBlurStreaks.h"
 #include "GroupEventHandler.h"
 #include "SimpleVariablesSaveStructure.h"
-#include "IKChainManager_c.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "CreepingFire.h"
@@ -94,6 +93,10 @@
 #include "InteriorManager_c.h"
 #include "Checkpoint.h"
 #include "Checkpoints.h"
+#include "IKChain_c.h"
+#include "IKChainManager_c.h"
+#include "BoneNode_c.h"
+#include "BoneNodeManager_c.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -138,7 +141,6 @@
 #include "TaskComplexWaitForPed.h"
 #include "TaskComplexJump.h"
 #include "TaskComplexWanderStandard.h"
-#include "TaskSimpleIKLookAt.h"
 #include "TaskComplexSunbathe.h"
 #include "TaskComplexEnterCar.h"
 #include "TaskSimpleTogglePedThreatScanner.h"
@@ -146,7 +148,6 @@
 #include "TaskComplexCrossRoadLookAndAchieveHeading.h"
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskSimpleAchieveHeading.h"
-#include "TaskSimpleIKChain.h"
 #include "TaskSimpleGiveCPR.h"
 #include "TaskSimpleCarSetPedInAsPassenger.h"
 #include "TaskComplexDriveFireTruck.h"
@@ -190,7 +191,6 @@
 #include "TaskSimplePutDownEntity.h"
 #include "TaskComplexUseSwatRope.h"
 #include "TaskSimpleGoToPointFine.h"
-#include "TaskSimpleIKManager.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexEnterBoatAsDriver.h"
 #include "TaskSimpleFight.h"
@@ -207,6 +207,10 @@
 #include "TaskComplexCarDriveMission.h"
 #include "TaskComplexLeaveAnyCar.h"
 #include "TaskSimpleCreateCarAndGetIn.h"
+#include "TaskSimpleIKChain.h"
+#include "TaskSimpleIKLookAt.h"
+#include "TaskSimpleIKManager.h"
+#include "TaskSimpleIKPointArm.h"
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
@@ -215,6 +219,11 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    BoneNode_c::InjectHooks();
+    BoneNodeManager_c::InjectHooks();
+    CAnimBlendClumpData::InjectHooks();
+    IKChainManager_c::InjectHooks();
+    IKChain_c::InjectHooks();
     CCheckpoint::InjectHooks();
     CCheckpoints::InjectHooks();
     CWeaponEffects::InjectHooks();
@@ -249,7 +258,6 @@ void InjectHooksMain() {
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
-    IKChainManager_c::InjectHooks();
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
@@ -579,7 +587,10 @@ void InjectHooksMain() {
         CTaskSimplePutDownEntity::InjectHooks();
         CTaskComplexUseSwatRope::InjectHooks();
         CTaskSimpleGoToPointFine::InjectHooks();
-        // CTaskSimpleIKManager::InjectHooks();
+        CTaskSimpleIKChain::InjectHooks();
+        CTaskSimpleIKManager::InjectHooks();
+        CTaskSimpleIKPointArm::InjectHooks();
+        CTaskSimpleIKLookAt::InjectHooks();
         // CTaskComplexDie::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();

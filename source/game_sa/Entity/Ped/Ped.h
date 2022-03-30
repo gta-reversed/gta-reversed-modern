@@ -33,6 +33,8 @@ class CCivilianPed;
 class CEmergencyPed;
 class CCoverPoint;
 class CEntryExit;
+class CAnimBlendClumpData;
+struct RpHAnimHierarchy;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
@@ -464,7 +466,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones);
+    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
@@ -566,6 +568,8 @@ public:
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
+    RpHAnimHierarchy& GetAnimHierarchy() const;
+    CAnimBlendClumpData& GetAnimBlendData() const;
 
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
 private:

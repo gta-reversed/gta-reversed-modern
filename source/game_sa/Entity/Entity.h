@@ -216,6 +216,11 @@ public:
     }
 
     template<typename T>
+    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
+    template<typename T>
     static void SafeRegisterRef(T*& e) requires std::is_base_of_v<CEntity, T> {
         if (e) {
             e->RegisterReference(reinterpret_cast<CEntity**>(&e));

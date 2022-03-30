@@ -6,7 +6,7 @@
 */
 #pragma once
 
-enum ePedBones : int32 {
+enum ePedBones : int16 {
     BONE_UNKNOWN     = -1,
 
     BONE_NORMAL      = 0, // Normal or Root, both are same
@@ -50,6 +50,3 @@ enum ePedBones : int32 {
 
     BONE_NUM = 303
 };
-
-
-

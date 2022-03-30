@@ -594,6 +594,17 @@ void CPed::CreateDeadPedPickupCoors(CVector& pickupPos) {
 }
 
 /*!
+* @notsa
+*/
+RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
+    return *GetAnimHierarchyFromSkinClump(m_pRwClump);
+}
+
+CAnimBlendClumpData& CPed::GetAnimBlendData() const {
+    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+}
+
+/*!
 * @addr 0x4591D0
 * @brief Create weapon/ammo pickups for dead ped
 */
@@ -801,8 +812,8 @@ void CPed::ClearAimFlag() {
 */
 uint8 CPed::GetLocalDirection(const CVector2D& point) {
     float angle;
-    for (angle = point.Heading() - m_fCurrentRotation + RWDEG2RAD(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
-    return ((uint8)RWRAD2DEG(angle) / 90) % 4; // See original code below:
+    for (angle = point.Heading() - m_fCurrentRotation + RadiansToDegrees(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
+    return ((uint8)RadiansToDegrees(angle) / 90) % 4; // See original code below:
 
     // Original R* code - Kinda stupid, we just use modulo instead.
     // int32 dir;
@@ -3334,7 +3345,7 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_pvecPedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
+    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
 
     // Create hit col model
     if (!mi.m_pHitColModel) {
@@ -3503,7 +3514,7 @@ void CPed::Render() {
     // 0x5E7927
     // Render JetPack (if any)
     if (const auto task = GetIntelligence()->GetTaskJetPack()) {
-        task->Process(this);
+        task->RenderJetPack(this);
     }
 
     bHasBeenRendered = true;

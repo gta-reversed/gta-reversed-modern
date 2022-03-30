@@ -938,7 +938,7 @@ void CPlayerPed::EvaluateTarget(CEntity* target, CEntity *& outTarget, float & o
     if (DoesTargetHaveToBeBroken(target, &GetActiveWeapon()))
         return;
 
-    const float targetAngleDeg = fabs(RWRAD2DEG(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
+    const float targetAngleDeg = std::fabs(RadiansToDegrees(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
 
     float viewAngleMultiplier = 1.0f - targetAngleDeg / PLAYER_MAX_TARGET_VIEW_ANGLE;
     if (dist > 1.0f)

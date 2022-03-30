@@ -184,6 +184,7 @@ public:
             uint32 bSteerRearwheels : 1;
             uint32 bHbRearwheelSteer : 1;
             uint32 bAltSteerOpt : 1;
+
             uint32 bWheelFNarrow2 : 1;
             uint32 bWheelFNarrow : 1;
             uint32 bWheelFWide : 1;
@@ -192,6 +193,7 @@ public:
             uint32 bWheelRNarrow : 1;
             uint32 bWheelRWide : 1;
             uint32 bWheelRWide2 : 1;
+
             uint32 bHydraulicGeom : 1;
             uint32 bHydraulicInst : 1;
             uint32 bHydraulicNone : 1;
