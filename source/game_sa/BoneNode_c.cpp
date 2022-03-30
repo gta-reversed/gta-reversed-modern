@@ -68,7 +68,7 @@ CVector BoneNode_c::QuatToEuler(CQuaternion* quat, CVector* angles) {
 
 // 0x617050
 int32 BoneNode_c::GetIdFromBoneTag(ePedBones bone) {
-    for (auto i = 0; i < BoneNodeManager_c::ms_boneInfos.size(); i++) {
+    for (auto i = 0u; i < BoneNodeManager_c::ms_boneInfos.size(); i++) {
         if (BoneNodeManager_c::ms_boneInfos[i].m_current == bone) {
             return i;
         }
