@@ -73,17 +73,16 @@ public:
     static uint32& GenPlane_Status;
     static uint32& GenPlane_LastTimeGenerated;
 
-    static bool& GenPlane_Active;               // true
-    static float& ANDROM_COL_ANGLE_MULT;        // 0.00015
-    static float& HARRIER_NOZZLE_ROTATE_LIMIT;  // 5000.0
-    static float& HARRIER_NOZZLE_SWITCH_LIMIT;  // 3000.0
-    static float& PLANE_MIN_PROP_SPEED;         // 0.05
-    static float& PLANE_STD_PROP_SPEED;         // 0.18
-    static float& PLANE_MAX_PROP_SPEED;         // 0.34
-    static float& PLANE_ROC_PROP_SPEED;         // 0.01
+    static bool& GenPlane_Active;
+    static float& ANDROM_COL_ANGLE_MULT;
+    static uint16& HARRIER_NOZZLE_ROTATE_LIMIT;
+    static uint16& HARRIER_NOZZLE_SWITCH_LIMIT;
+    static float& PLANE_MIN_PROP_SPEED;
+    static float& PLANE_STD_PROP_SPEED;
+    static float& PLANE_MAX_PROP_SPEED;
+    static float& PLANE_ROC_PROP_SPEED;
 
 public:
-    CPlane(plugin::dummy_func_t) : CAutomobile(plugin::dummy) { /* todo: remove NOTSA */ }
     CPlane(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CPlane() override;
 

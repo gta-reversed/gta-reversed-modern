@@ -23,7 +23,7 @@ void CTaskComplexWanderCop::InjectHooks() {
 
 // 0x460C80
 CTaskComplexWanderCop::CTaskComplexWanderCop(int32 moveState, uint8 dir) : CTaskComplexWander(moveState, dir, true, 0.5f) {
-    m_pTaskComplexMoveGoToPointAndStandStill = nullptr;
+    m_pGoToPointAndStandStillTask = nullptr;
     m_nTimePassedSinceLastLookedForCriminals = 0;
     m_nTimePassedSinceLastLookedForCarAlarmsAndStolenCopCars = 0;
     m_pLastCriminalPedLookedFor = nullptr;
@@ -31,7 +31,7 @@ CTaskComplexWanderCop::CTaskComplexWanderCop(int32 moveState, uint8 dir) : CTask
 
 // 0x460D60
 CTaskComplexWanderCop::~CTaskComplexWanderCop() {
-    delete (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
+    delete m_pGoToPointAndStandStillTask;
 }
 
 // 0x460C80
@@ -60,11 +60,6 @@ CTask* CTaskComplexWanderCop::ControlSubTask(CPed* ped) {
     return ControlSubTask_Reversed(ped);
 }
 
-// 0x460D50
-int32 CTaskComplexWanderCop::GetWanderType() {
-    return CTaskComplexWanderCop::GetWanderType_Reversed();
-}
-
 // 0x6702B0
 void CTaskComplexWanderCop::ScanForStuff(CPed* ped) {
     return ScanForStuff_Reversed(ped);
@@ -85,18 +80,17 @@ CTask* CTaskComplexWanderCop::CreateNextSubTask_Reversed(CPed* ped) {
         m_nSubTaskCreatedTimer.m_nStartTime = CTimer::GetTimeInMS();
         m_nSubTaskCreatedTimer.m_nInterval = 3000;
         m_nSubTaskCreatedTimer.m_bStarted = true;
-        if (m_pTaskComplexMoveGoToPointAndStandStill) {
-            return ((CTask*)m_pTaskComplexMoveGoToPointAndStandStill)->Clone();
+        if (m_pGoToPointAndStandStillTask) {
+            return m_pGoToPointAndStandStillTask->Clone();
         } else {
             return CTaskComplexWander::CreateFirstSubTask(ped);
         }
     } else {
-        auto* gotoStandStill = (CTask*)m_pTaskComplexMoveGoToPointAndStandStill;
-        if (gotoStandStill && m_pSubTask->GetTaskType() == gotoStandStill->GetTaskType()) {
+        if (m_pGoToPointAndStandStillTask && m_pSubTask->GetTaskType() == m_pGoToPointAndStandStillTask->GetTaskType()) {
             return nullptr;
         } else {
-            if (m_pTaskComplexMoveGoToPointAndStandStill) {
-                return ((CTask*)m_pTaskComplexMoveGoToPointAndStandStill)->Clone();
+            if (m_pGoToPointAndStandStillTask) {
+                return m_pGoToPointAndStandStillTask->Clone();
             } else {
                 return CTaskComplexWander::CreateNextSubTask(ped);
             }
@@ -114,18 +108,13 @@ CTask* CTaskComplexWanderCop::CreateFirstSubTask_Reversed(CPed* ped) {
     }
 
     if (!ShouldPursuePlayer(ped)) {
-        if (m_pTaskComplexMoveGoToPointAndStandStill) {
-            return ((CTask*)m_pTaskComplexMoveGoToPointAndStandStill)->Clone();
+        if (m_pGoToPointAndStandStillTask) {
+            return m_pGoToPointAndStandStillTask->Clone();
         }
         return CTaskComplexWander::CreateFirstSubTask(ped);
     }
 
-    auto pTaskComplexPolicePursuit = (CTaskComplexPolicePursuit*)CTask::operator new(24);
-    if (!pTaskComplexPolicePursuit) {
-        return nullptr;
-    }
-    pTaskComplexPolicePursuit->Constructor();
-    return (CTask*)pTaskComplexPolicePursuit;
+    return new CTaskComplexPolicePursuit();
 }
 
 CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped) {
@@ -136,7 +125,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped) {
         if (m_pSubTask->GetTaskType() == TASK_COMPLEX_POLICE_PURSUIT) {
             return m_pSubTask;
         }
-        if (m_pTaskComplexMoveGoToPointAndStandStill) {
+        if (m_pGoToPointAndStandStillTask) {
             return m_pSubTask;
         }
 
@@ -146,12 +135,7 @@ CTask* CTaskComplexWanderCop::ControlSubTask_Reversed(CPed* ped) {
         return m_pSubTask;
     }
 
-    auto pTaskComplexPolicePursuit = (CTaskComplexPolicePursuit*)CTask::operator new(24);
-    if (pTaskComplexPolicePursuit) {
-        pTaskComplexPolicePursuit->Constructor();
-        return pTaskComplexPolicePursuit;
-    }
-    return nullptr;
+    return new CTaskComplexPolicePursuit();
 }
 
 void CTaskComplexWanderCop::ScanForStuff_Reversed(CPed* ped) {
@@ -216,12 +200,12 @@ void CTaskComplexWanderCop::LookForStolenCopCars(CPed* ped) {
 // 0x66B300
 void CTaskComplexWanderCop::LookForCriminals(CPed* ped) {
     CPed* criminalPed = nullptr;
-    for (auto& entity : ped->GetIntelligence()->m_entityScanner.m_apEntities) {
-        criminalPed = (CPed*)entity;
+    for (auto& entity : ped->GetIntelligence()->m_pedScanner.m_apEntities) {
+        criminalPed = entity->AsPed();
         if (!criminalPed)
             continue;
 
-        int32 pedType = criminalPed->m_nPedType;
+        auto pedType = criminalPed->m_nPedType;
         if (pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10 || pedType == PED_TYPE_CRIMINAL && criminalPed != m_pLastCriminalPedLookedFor) {
             CTask* activeTask = criminalPed->GetTaskManager().GetActiveTask();
             if (activeTask && activeTask->GetTaskType() == GetTaskType()) {

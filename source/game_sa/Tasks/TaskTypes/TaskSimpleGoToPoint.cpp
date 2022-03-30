@@ -48,7 +48,7 @@ bool CTaskSimpleGoToPoint::MakeAbortable(CPed* ped, eAbortPriority priority, con
 }
 
 // 0x66D710
-bool CTaskSimpleGoToPoint::ProcessPed(class CPed* ped)
+bool CTaskSimpleGoToPoint::ProcessPed(CPed* ped)
 {
     return CTaskSimpleGoToPoint::ProcessPed_Reversed(ped);
 }
@@ -81,7 +81,8 @@ bool CTaskSimpleGoToPoint::MakeAbortable_Reversed(CPed* ped, eAbortPriority prio
     return true;
 }
 
-bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
+// 0x66D710
+bool CTaskSimpleGoToPoint::ProcessPed_Reversed(CPed* ped)
 {
     CPlayerPed* player = ped->AsPlayer();
     ped->m_pedIK.bSlopePitch = true;
@@ -96,15 +97,15 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
         }
     }
     if (ped->bHasJustLeftCar) {
-        ped->m_pIntelligence->m_eventScanner.ScanForEventsNow(ped, false);
+        ped->GetIntelligence()->GetEventScanner().ScanForEventsNow(*ped, false);
         ped->bHasJustLeftCar = false;
     }
     else if (ped->bHasJustSoughtCover) {
-        ped->m_pIntelligence->m_eventScanner.ScanForEventsNow(ped, true);
+        ped->GetIntelligence()->GetEventScanner().ScanForEventsNow(*ped, true);
         ped->bHasJustSoughtCover = false;
     }
     else {
-        CTaskSimpleDuck* pDuckTask = ped->m_pIntelligence->GetTaskDuck(false);
+        CTaskSimpleDuck* pDuckTask = ped->GetIntelligence()->GetTaskDuck(false);
         if (pDuckTask) {
             float fMoveSpeedY = 1.1f;
             if (m_moveState == PEDMOVE_WALK)
@@ -120,16 +121,16 @@ bool CTaskSimpleGoToPoint::ProcessPed_Reversed(class CPed* ped)
                 }
                 else {
                     bool bSprinting = false;
-                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->m_aWeapons[ped->m_nActiveWeaponSlot].m_nType, eWeaponSkill::STD);
+                    CWeaponInfo* pWeaponInfo = CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_nType, eWeaponSkill::STD);
                     if (!pWeaponInfo->flags.bHeavy) {
-                        auto* task = static_cast<CTaskSimpleHoldEntity*>(ped->m_pIntelligence->GetTaskHold(false));
+                        auto* task = static_cast<CTaskSimpleHoldEntity*>(ped->GetIntelligence()->GetTaskHold(false));
                         if (!task || !task->m_pAnimBlendAssociation) {
-                            CAnimBlendAssocGroup* pAnimGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
+                            CAnimBlendAssocGroup* animGroup = &CAnimManager::ms_aAnimAssocGroups[ped->m_nAnimGroup];
                             if (!ped->m_pPlayerData->m_bPlayerSprintDisabled && !g_surfaceInfos->CantSprintOn(ped->m_nContactSurface)) {
-                                auto pAnimStaticAssoc1 = pAnimGroup->GetAnimation(ANIM_ID_RUN);
-                                auto pAnimStaticAssoc2 = pAnimGroup->GetAnimation(ANIM_ID_SPRINT);
-                                if (pAnimStaticAssoc1->m_pHierarchy != pAnimStaticAssoc2->m_pHierarchy &&
-                                    player->ControlButtonSprint(SPRINT_GROUND) >= 1.0f) {
+                                auto assoc1 = animGroup->GetAnimation(ANIM_ID_RUN);
+                                auto assoc2 = animGroup->GetAnimation(ANIM_ID_SPRINT);
+                                if (assoc1->m_pHierarchy != assoc2->m_pHierarchy && player->ControlButtonSprint(SPRINT_GROUND) >= 1.0f)
+                                {
                                     ped->SetMoveState(PEDMOVE_SPRINT);
                                     bSprinting = true;
                                 }

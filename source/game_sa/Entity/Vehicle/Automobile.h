@@ -15,6 +15,7 @@
 #include "eSurfaceType.h"
 #include "eCarWheel.h"
 #include "eCarNodes.h"
+enum class eSkidMarkType : uint32;
 
 class CVehicleModelInfo;
 
@@ -33,25 +34,27 @@ class FxSystem_c;
 
 class CAutomobile : public CVehicle {
 public:
-    CDamageManager m_damageManager{0.5f};
-    std::array<CDoor, 6> m_doors{};
-    std::array<RwFrame*, CAR_NUM_NODES> m_aCarNodes{};
-    std::array<CBouncingPanel, 3> m_panels{};
-    CDoor m_swingingChassis{};
-    std::array<CColPoint, 4> m_wheelColPoint{};
-    std::array<float, 4> m_fWheelsSuspensionCompression{};     // 0x7D4 - [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed - Filled with 1.f in the ctor
-    std::array<float, 4> m_fWheelsSuspensionCompressionPrev{}; // 0x7E4 - Filled with 1.f in the ctor
-    std::array<float, 4> m_aWheelTimer{};
-    float field_804{20.f};
-    float m_intertiaValue1{}; //  m_anWheelSurfaceType[2]
-    float m_intertiaValue2{};
-    std::array<int32, 4> m_wheelSkidmarkType{};      // 0x810
-    std::array<bool, 4> m_wheelSkidmarkBloodState{}; // 0x820
-    std::array<bool, 4> m_wheelSkidmarkMuddy{};      // 0x824
-    std::array<float, 4> m_wheelRotation{};          // 0x828
-    std::array<float, 4> m_wheelPosition{};          // 0x838
-    union {                                          // 0x848
-        std::array<float, 4> m_wheelSpeed{};
+    CDamageManager                      m_damageManager;
+    std::array<CDoor, 6>                m_doors;
+    std::array<RwFrame*, CAR_NUM_NODES> m_aCarNodes;
+    std::array<CBouncingPanel, 3>       m_panels;
+    CDoor                               m_swingingChassis;
+    std::array<CColPoint, 4>            m_wheelColPoint;
+    std::array<float, 4>                m_fWheelsSuspensionCompression;     // 0x7D4 - [0-1] with 0 being suspension fully compressed, and 1 being completely relaxed - Filled with 1.f in the ctor
+    std::array<float, 4>                m_fWheelsSuspensionCompressionPrev; // 0x7E4 - Filled with 1.f in the ctor
+    std::array<float, 4>                m_aWheelTimer;
+
+    float field_804;
+    float m_fIntertiaValue1; //  m_anWheelSurfaceType[2]
+    float m_fIntertiaValue2;
+
+    std::array<eSkidMarkType, 4> m_wheelSkidmarkType;       // 0x810
+    std::array<bool,          4> m_wheelSkidmarkBloodState; // 0x820
+    std::array<bool,          4> m_wheelSkidmarkMuddy;      // 0x824
+    std::array<float,         4> m_wheelRotation;           // 0x828
+    std::array<float,         4> m_wheelPosition;           // 0x838
+    union {                                                 // 0x848
+        std::array<float, 4> m_wheelSpeed;
         struct {
             float m_fHeliWheelSpeed1;
             float m_fHeliRotorSpeed;
@@ -59,67 +62,75 @@ public:
             float m_fHeliWheelSpeed4;
         };
     };
-    std::array<float, 4> m_wheelRotationUnused{}; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+    std::array<float, 4> m_wheelRotationUnused; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+
     struct {
-        uint8 bTaxiLightOn : 1 {m_sAllTaxiLights};
-        uint8 ucNPCFlagPad2 : 1 {};
-        uint8 bIgnoreWater : 1 {};
-        uint8 bDontDamageOnRoof : 1 {};
-        uint8 bTakePanelDamage : 1 {true};
-        uint8 ucTaxiUnkn6 : 1 {true};
-        uint8 bLostTraction : 1 {};
-        uint8 bSoftSuspension : 1 {};
+        uint8 bTaxiLightOn : 1 { m_sAllTaxiLights };
+        uint8 ucNPCFlagPad2 : 1 ;
+        uint8 bIgnoreWater : 1 ;
+        uint8 bDontDamageOnRoof : 1 ;
+        uint8 bTakePanelDamage : 1 { true };
+        uint8 ucTaxiUnkn6 : 1 { true };
+        uint8 bLostTraction : 1 ;
+        uint8 bSoftSuspension : 1 ;
     } npcFlags;
-    int16 m_doingBurnout{};                           // 0x86A
-    uint16 m_wMiscComponentAngle{};                   // 0x86C
-    uint16 m_wMiscComponentAnglePrev{};               // 0x86E
-    uint32 m_dwBusDoorTimerEnd{};                     // 0x870
-    int32 m_dwBusDoorTimerStart{};                    // 0x874
-    std::array<float, 4> m_aSuspensionSpringLength{}; // 0x878
-    std::array<float, 4> m_aSuspensionLineLength{};   // 0x888
-    float m_fFrontHeightAboveRoad{};
-    float m_fRearHeightAboveRoad{};
-    float m_fCarTraction{1.f};
-    float m_fTireTemperature{1.f};
-    float m_aircraftGoToHeading{};
-    float m_fRotationBalance{}; // Controls destroyed helicopter rotation
-    float m_fMoveDirection{};
-    CVector m_moveForce{};
-    CVector m_turnForce{};
-    std::array<float, 6> field_8CC{}; // Inited in ctor with random values, but seemingly unused.
-    int32 m_fBurnTimer{};
-    std::array<CPhysical*, 4> m_apWheelCollisionEntity{};
-    std::array<CVector, 4> m_vWheelCollisionPos{}; // Bike::m_avTouchPointsLocalSpace
-    std::array<char, 28> field_928{};
-    int32 field_940{};
-    int32 field_944{};
-    float m_fDoomVerticalRotation{};
-    float m_fDoomHorizontalRotation{0.05f};
-    float m_fForcedOrientation{1.f};
-    std::array<float, 2> m_fUpDownLightAngle{};
-    uint8 m_nNumContactWheels{};
-    uint8 m_nWheelsOnGround{};
-    uint8 m_wheelsOnGrounPrev{};
-    char field_963{};
-    float field_964{};
-    std::array<tWheelState, 4> m_aWheelState{};
-    std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem{};
-    uint8 m_harvesterParticleCounter{};
-    char field_981{};
-    int16 field_982{};
-    float m_heliDustFxTimeConst{};
+
+    bool   m_bDoingBurnout;                         // 0x86A
+    uint16 m_wMiscComponentAngle;                   // 0x86C
+    uint16 m_wMiscComponentAnglePrev;               // 0x86E
+    uint32 m_nBusDoorTimerEnd;                      // 0x870
+    uint32 m_nBusDoorTimerStart;                    // 0x874
+    std::array<float, 4> m_aSuspensionSpringLength; // 0x878
+    std::array<float, 4> m_aSuspensionLineLength;   // 0x888
+    float m_fFrontHeightAboveRoad;
+    float m_fRearHeightAboveRoad;
+    float m_fCarTraction;
+    float m_fTireTemperature;
+    float m_fAircraftGoToHeading;
+    float m_fRotationBalance; // Controls destroyed helicopter rotation
+    float m_fMoveDirection;
+    CVector m_moveForce;
+    CVector m_turnForce;
+    std::array<float, 6> field_8CC; // Inited in ctor with random values, but seemingly unused.
+
+    float m_fBurnTimer;
+
+    std::array<CPhysical*, 4> m_apWheelCollisionEntity;
+    std::array<CVector, 4>    m_vWheelCollisionPos; // Bike::m_avTouchPointsLocalSpace
+
+    CPed* m_pExplosionVictim;
+    std::array<char, 24> field_928;
+
+    int32 field_940;
+    int32 field_944;
+    float m_fDoomVerticalRotation;
+    float m_fDoomHorizontalRotation;
+    float m_fForcedOrientation;
+    std::array<float, 2> m_fUpDownLightAngle;
+    uint8 m_nNumContactWheels;
+    uint8 m_nWheelsOnGround;
+    uint8 m_wheelsOnGrounPrev;
+    char  field_963;
+    float m_fSomeGasPedalStuff;
+
+    std::array<tWheelState, 4> m_aWheelState;
+    std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
+
+    uint8 m_harvesterParticleCounter;
+    char  field_981;
+    int16 field_982;
+    float m_heliDustFxTimeConst;
 
     // variables
-    static constexpr float PACKER_COL_ANGLE_MULT = -0.0001f;
+    static constexpr float PACKER_COL_ANGLE_MULT   = -0.0001f;
     static constexpr float FORKLIFT_COL_ANGLE_MULT = 0.0006f;
-    static constexpr float DOZER_COL_ANGLE_MULT = 0.0002f;
-    static constexpr float ROLL_ONTO_WHEELS_FORCE = 0.0025f;
+    static constexpr float DOZER_COL_ANGLE_MULT    = 0.0002f;
+    static constexpr float ROLL_ONTO_WHEELS_FORCE  = 0.0025f;
     static bool&           m_sAllTaxiLights;
     static CVector&        vecHunterGunPos; // { 0.0f, 4.8f, -1.3f }
     static CMatrix*        matW2B;
 
 public:
-    CAutomobile(plugin::dummy_func_t) : CVehicle(plugin::dummy) { /* todo: remove NOTSA*/ }
     CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool setupSuspensionLines);
     ~CAutomobile() override;
 
@@ -201,14 +212,13 @@ public:
     // Set random damage to vehicle. Called when generating a vehicle @CCarCtrl::GenerateOneRandomCar
     void SetRandomDamage(bool arg0);
     // Make a vehicle fully damaged
-    void SetTotalDamage(bool arg0);
+    void SetTotalDamage(bool component);
     void ReduceHornCounter();
     // Apply custom car plate texture to vehicle
     void CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model);
     // Reset car plate texture after rendering
     void CustomCarPlate_AfterRenderingStop(CVehicleModelInfo* model);
-    // Check if vehicle is in air
-    bool GetAllWheelsOffGround();
+    bool GetAllWheelsOffGround() const;
     // Some debug function
     void DebugCode();
     // Repair vehicle's tyre
@@ -331,19 +341,19 @@ public:
     }
 
     bool IsAnyFrontAndRearWheelTouchingGround() {
-        if (m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT] < 1.0f) {
-            if (m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT] < 1.0f)
+        if (m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_LEFT] < 1.0f  || m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_RIGHT] < 1.0f) {
+            if (m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_LEFT] < 1.0f || m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_RIGHT] < 1.0f)
                 return true;
         }
         return false;
     }
 
     [[nodiscard]] bool AreFrontWheelsNotTouchingGround() const {
-        return m_fWheelsSuspensionCompression[CARWHEEL_FRONT_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CARWHEEL_FRONT_RIGHT];
+        return m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CAR_WHEEL_FRONT_RIGHT];
     }
 
     [[nodiscard]] bool AreRearWheelsNotTouchingGround() const {
-        return m_fWheelsSuspensionCompression[CARWHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CARWHEEL_REAR_RIGHT];
+        return m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_LEFT] >= 1.0f && m_fWheelsSuspensionCompression[CAR_WHEEL_REAR_RIGHT];
     }
 
     // check the previous compression state using m_fWheelsSuspensionCompressionPrev

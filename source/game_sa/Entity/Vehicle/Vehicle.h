@@ -27,6 +27,7 @@ class CWeapon;
 class CPed;
 class CPlane;
 class CHeli;
+class CPedGroup;
 
 enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,
@@ -183,6 +184,7 @@ public:
             uint32 bSteerRearwheels : 1;
             uint32 bHbRearwheelSteer : 1;
             uint32 bAltSteerOpt : 1;
+
             uint32 bWheelFNarrow2 : 1;
             uint32 bWheelFNarrow : 1;
             uint32 bWheelFWide : 1;
@@ -191,6 +193,7 @@ public:
             uint32 bWheelRNarrow : 1;
             uint32 bWheelRWide : 1;
             uint32 bWheelRWide2 : 1;
+
             uint32 bHydraulicGeom : 1;
             uint32 bHydraulicInst : 1;
             uint32 bHydraulicNone : 1;
@@ -494,10 +497,10 @@ public:
     void RemoveDriver(bool arg0);
     CPed* SetUpDriver(int32 pedType, bool arg1, bool arg2);
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
-    bool IsPassenger(CPed* ped);
-    bool IsPassenger(int32 modelIndex);
-    bool IsDriver(CPed* ped);
-    bool IsDriver(int32 modelIndex);
+    bool IsPassenger(CPed* ped) const;
+    bool IsPassenger(int32 modelIndex) const;
+    bool IsDriver(CPed* ped) const;
+    bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
     // return this->m_pCoords->matrix.GetUp().z <= -0.9;
     bool IsUpsideDown();

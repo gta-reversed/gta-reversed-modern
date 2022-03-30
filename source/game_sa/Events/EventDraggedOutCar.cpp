@@ -13,7 +13,7 @@ void CEventDraggedOutCar::InjectHooks() {
 }
 
 // // 0x4AD250
-CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) {
+CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) : CEventEditableResponse() {
     m_carjacker = carjacker;
     m_vehicle = vehicle;
     m_IsDriverSeat = IsDriverSeat;
@@ -42,7 +42,7 @@ bool CEventDraggedOutCar::AffectsPed(CPed* ped) {
 
 // 0x4AD3C0
 bool CEventDraggedOutCar::AffectsPedGroup(CPedGroup* pedGroup) {
-    return FindPlayerPed() == pedGroup->m_groupMembership.GetLeader();
+    return FindPlayerPed() == pedGroup->GetMembership().GetLeader();
 }
 
 // 0x4B6DC0

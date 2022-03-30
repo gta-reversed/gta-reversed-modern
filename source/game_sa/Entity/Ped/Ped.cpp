@@ -79,7 +79,6 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
     RH_ScopedInstall(GetBonePosition, 0x5E4280);
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
-    // RH_ScopedInstall(SortPeds, 0x5E17E0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
@@ -184,40 +183,121 @@ void CPed::InjectHooks() {
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
 
-// Most of the variable/flag setting is done in the header
-CPed::CPed(ePedType pedType) : CPhysical{},
-    m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
-    m_nPedType{ pedType }
-{
-    // Has to be here for now, because it's inited before `m_nPedType` (Which is used in CPedIntel's ctor)
-    m_pIntelligence = new CPedIntelligence{ this };
+// 0x5E8030
+CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
+    m_vecAnimMovingShiftLocal = CVector2D();
 
-    m_fMass = 70.0;
-    m_fTurnMass = 100.0;
-    m_fAirResistance = 1.f / 175.f;
-    m_fElasticity = 0.05f;
+    m_fHealth = 100.0f;
+    m_fMaxHealth = 100.0f;
+    m_fArmour = 0.0f;
 
+    m_nPedType = pedType;
     m_nType = ENTITY_TYPE_PED;
 
     // 0x5E8196
     physicalFlags.bCanBeCollidedWith = true;
     physicalFlags.bDisableTurnForce = true;
 
+    m_nCreatedBy = PED_GAME;
+    m_pVehicle = nullptr;
+    field_52C = 0;
+    field_744 = 0;
+    field_74C = 0;
+    m_nLookTime = 0;
+    m_nDeathTime = 0;
+
+    m_vecAnimMovingShift = CVector2D();
+    field_56C = CVector();
+    field_578 = CVector(0.0f, 0.0f, 1.0f);
+
+    m_nPedState = PEDSTATE_IDLE;
+    m_nMoveState = PEDMOVE_STILL;
+    m_fCurrentRotation = 0.0f;
+    m_fHeadingChangeRate = 15.0f;
+    m_fMoveAnim = 0.1f;
+    m_fAimingRotation = 0.0f;
+    m_standingOnEntity = nullptr;
+    m_nWeaponShootingRate = 40;
+    field_594 = 0;
+    m_pEntityIgnoredCollision = nullptr;
+    m_nSwimmingMoveState = 0;
+    m_pFire = nullptr;
+    field_734 = 1.0f;
+    m_pTargetedObject = nullptr;
+    m_pLookTarget = nullptr;
+    m_fLookDirection = 0.0f;
+    m_pContactEntity = nullptr;
+    field_588 = 99999.992f;
+    m_fMass = 70.0f;
+    m_fTurnMass = 100.0f;
+    m_fAirResistance = 1.f / 175.f;
+    m_fElasticity = 0.05f;
+    m_nBodypartToRemove = -1;
+
     m_weaponAudio.Initialise(this);
     m_pedAudio.Initialise(this);
 
+    m_acquaintance = CPedType::GetPedTypeAcquaintances(m_nPedType);
+    m_nSavedWeapon = WEAPON_UNIDENTIFIED;
+    m_nDelayedWeapon = WEAPON_UNIDENTIFIED;
+    m_nActiveWeaponSlot = 0;
+
+    for (auto& weapon : m_aWeapons ) {
+        weapon.m_nType = WEAPON_UNARMED;
+        weapon.m_nState = WEAPONSTATE_READY;
+        weapon.m_nAmmoInClip = 0;
+        weapon.m_nTotalAmmo = 0;
+        weapon.m_nTimeForNextShot = 0;
+    }
+
+    m_nWeaponSkill = eWeaponSkill::STD;
+    m_nFightingStyle = STYLE_STANDARD;
+    m_nAllowedAttackMoves = 0;
+
     GiveWeapon(WEAPON_UNARMED, 0, true);
+
+    m_nWeaponAccuracy = 60;
+    m_nLastWeaponDamage = -1;
+    m_pLastEntityDamage = nullptr;
+    field_768 = 0;
+    m_pAttachedTo = nullptr;
+    m_nTurretAmmo = 0;
+    field_460 = nullptr;
+    field_468 = 0;
+    m_nWeaponModelId = -1;
+    m_nMoneyCount = 0;
+    field_72F = 0;
+    m_nTimeTillWeNeedThisPed = 0;
+    field_590 = 0;
+    m_pWeaponObject = nullptr;
+    m_pGunflashObject = nullptr;
+    m_pGogglesObject = nullptr;
+    m_pGogglesState = nullptr;
+    m_nWeaponGunflashAlphaMP1 = 0;
+    nm_fWeaponGunFlashAlphaProgMP1 = 0;
+    m_nWeaponGunflashAlphaMP2 = 0;
+    nm_fWeaponGunFlashAlphaProgMP2 = 0;
+    m_pCoverPoint = nullptr;
+    m_pEnex = nullptr;
+    field_798 = -1;
+
+    m_pIntelligence = new CPedIntelligence(this);
+    m_pPlayerData = nullptr;
 
     if (!IsPlayer()) {
         GetTaskManager().SetTaskSecondary(new CTaskComplexFacial{}, TASK_SECONDARY_FACIAL_COMPLEX);
     }
     GetTaskManager().SetTask(new CTaskSimpleStandStill{ 0, true, false, 8.0 }, TASK_PRIMARY_DEFAULT, false);
 
+    field_758 = 0;
+    m_fRemovalDistMultiplier = 1.0f;
+    m_nSpecialModelIndex = -1;
+
     CPopulation::UpdatePedCount(this, 0);
 
     if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
-            m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
+            GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
 
             CEventAcquaintancePedHate event(FindPlayerPed());
             GetEventGroup().Add(&event);
@@ -297,15 +377,15 @@ void CPed::SetMoveAnim() {
 
     if (m_nSwimmingMoveState == m_nMoveState) {
         switch (m_nMoveState) {
-        case eMoveState::PEDMOVE_WALK:
-        case eMoveState::PEDMOVE_JOG:
-        case eMoveState::PEDMOVE_RUN:
-        case eMoveState::PEDMOVE_SPRINT: {
+        case PEDMOVE_WALK:
+        case PEDMOVE_JOG:
+        case PEDMOVE_RUN:
+        case PEDMOVE_SPRINT: {
             const auto GetAnimId = [this] {
                 switch (m_nMoveState) {
-                case eMoveState::PEDMOVE_RUN:
+                case PEDMOVE_RUN:
                     return ANIM_ID_RUN;
-                case eMoveState::PEDMOVE_SPRINT:
+                case PEDMOVE_SPRINT:
                     return ANIM_ID_SPRINT;
                 }
                 return ANIM_ID_WALK;
@@ -318,13 +398,13 @@ void CPed::SetMoveAnim() {
             break;
         }
         }
-    } else if (m_nMoveState != eMoveState::PEDMOVE_NONE) {
+    } else if (m_nMoveState != PEDMOVE_NONE) {
         m_nSwimmingMoveState = m_nMoveState;
 
         switch (m_nMoveState) { // TODO: What's happening here?
-        case eMoveState::PEDMOVE_WALK:
-        case eMoveState::PEDMOVE_RUN:
-        case eMoveState::PEDMOVE_SPRINT: {
+        case PEDMOVE_WALK:
+        case PEDMOVE_RUN:
+        case PEDMOVE_SPRINT: {
             for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIM_FLAG_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIM_FLAG_PARTIAL)) {
                 if ((assoc->m_nFlags & ANIM_FLAG_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
                     assoc->m_fBlendDelta = -2.f;
@@ -347,33 +427,33 @@ void CPed::SetMoveAnim() {
         };
         
         switch (m_nMoveState) {
-        case eMoveState::PEDMOVE_STILL:
+        case PEDMOVE_STILL:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_IDLE, 4.f);
             return;
 
-        case eMoveState::PEDMOVE_TURN_L:
+        case PEDMOVE_TURN_L:
             DoBlendAnim(ANIM_GROUP_DEFAULT, ANIM_ID_TURN_L, 16.f);
             return;
 
-        case eMoveState::PEDMOVE_TURN_R:
+        case PEDMOVE_TURN_R:
             DoBlendAnim(ANIM_GROUP_DEFAULT, ANIM_ID_TURN_R, 16.f);
             return;
 
-        case eMoveState::PEDMOVE_WALK:
+        case PEDMOVE_WALK:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_WALK, 1.f);
             return;
 
-        case eMoveState::PEDMOVE_RUN:
+        case PEDMOVE_RUN:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_RUN, m_nPedState == PEDSTATE_FLEE_ENTITY ? 3.f : 1.f);
             return;
 
-        case eMoveState::PEDMOVE_SPRINT: {
+        case PEDMOVE_SPRINT: {
             // If we're in a group, and our leader is sprinting as well sprinting should be played with a different anim group
             if (CPedGroups::IsInPlayersGroup(this)) {
                 if (const auto leader = CPedGroups::GetPedsGroup(this)->GetMembership().GetLeader()) {
                     switch (leader->m_nMoveState) {
-                    case eMoveState::PEDMOVE_RUN:
-                    case eMoveState::PEDMOVE_SPRINT: {
+                    case PEDMOVE_RUN:
+                    case PEDMOVE_SPRINT: {
                         DoBlendAnim(ANIM_GROUP_PLAYER, ANIM_ID_SPRINT, 1.f);
                         return;
                     }
@@ -385,7 +465,7 @@ void CPed::SetMoveAnim() {
         }
         }
     } else {
-        m_nSwimmingMoveState = eMoveState::PEDMOVE_NONE;
+        m_nSwimmingMoveState = PEDMOVE_NONE;
     }
 }
 
@@ -440,9 +520,9 @@ bool CPed::PedIsReadyForConversation(bool checkLocalPlayerWantedLevel) {
 
     // If we're doing any of these we don't have the mental power to chat...
     switch (m_nMoveState) {
-    case eMoveState::PEDMOVE_JOG:
-    case eMoveState::PEDMOVE_RUN:
-    case eMoveState::PEDMOVE_SPRINT:
+    case PEDMOVE_JOG:
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
         return false;
     }
 
@@ -599,7 +679,7 @@ void CPed::Update()
 * @addr 0x5DEC00
 */
 void CPed::SetMoveState(eMoveState moveState) {
-    m_nMoveState = (int32)moveState;
+    m_nMoveState = moveState;
 }
 
 /*!
@@ -1097,7 +1177,7 @@ void CPed::ResetGunFlashAlpha() {
 * @addr 0x5DF510
 * @returns If ped is a player returns stat value BIKE_SKILL, otherwise 1 for mission peds and 0 for all others.
 */
-float CPed::GetBikeRidingSkill() {
+float CPed::GetBikeRidingSkill() const {
     if (m_pPlayerData) {
         return std::min(1000.f, CStats::GetStatValue(eStats::STAT_BIKE_SKILL) / 1000.f);
     }
@@ -1591,7 +1671,7 @@ void CPed::ProcessBuoyancy()
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancy(this, fBuoyancy, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
         physicalFlags.bTouchingWater = false;
-        auto swimTask = m_pIntelligence->GetTaskSwim();
+        auto swimTask = GetIntelligence()->GetTaskSwim();
         if (swimTask)
             swimTask->m_fSwimStopTime = 1000.0F;
 
@@ -1604,7 +1684,7 @@ void CPed::ProcessBuoyancy()
             auto pStandingOnVehicle = standingOnEntity->AsVehicle();
             if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
-                auto swimTask = m_pIntelligence->GetTaskSwim();
+                auto swimTask = GetIntelligence()->GetTaskSwim();
                 if (!swimTask)
                     return;
 
@@ -1671,12 +1751,12 @@ void CPed::ProcessBuoyancy()
             GetEventGroup().Add(&cEvent, false);
         }
         else {
-            auto swimTask = m_pIntelligence->GetTaskSwim();
+            auto swimTask = GetIntelligence()->GetTaskSwim();
             if (swimTask) {
                 swimTask->m_fSwimStopTime = 0.0F;
                 bPlayerSwimmingOrClimbing = true;
             }
-            else if (m_pIntelligence->GetTaskClimb()) {
+            else if (GetIntelligence()->GetTaskClimb()) {
                 bPlayerSwimmingOrClimbing = true;
             }
             else {
@@ -1698,7 +1778,7 @@ void CPed::ProcessBuoyancy()
         return;
     }
 
-    auto swimTask = m_pIntelligence->GetTaskSwim();
+    auto swimTask = GetIntelligence()->GetTaskSwim();
     if (bIsStanding && swimTask)
     {
         swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
@@ -2056,7 +2136,7 @@ void CPed::ClearAll() {
         bHitSteepSlope = false;
         bCrouchWhenScared = false;
         m_nPedState = PEDSTATE_NONE;
-        m_nMoveState = eMoveState::PEDMOVE_NONE;
+        m_nMoveState = PEDMOVE_NONE;
         m_pEntityIgnoredCollision = nullptr;
     }
 }
@@ -2229,10 +2309,10 @@ void CPed::PlayFootSteps() {
                 };
 
                 switch (m_nMoveState) {
-                case eMoveState::PEDMOVE_RUN:
+                case PEDMOVE_RUN:
                     DoAddMovingFootStepAE(-6.f, 1.1f);
                     break;
-                case eMoveState::PEDMOVE_SPRINT:
+                case PEDMOVE_SPRINT:
                     DoAddMovingFootStepAE(0.f, 1.2f);
                     break;
                 default:
@@ -2269,8 +2349,8 @@ void CPed::PlayFootSteps() {
 
             const auto isWearingBalaclava = pd->m_pPedClothesDesc->GetIsWearingBalaclava();
             switch (m_nMoveState) {
-            case eMoveState::PEDMOVE_JOG:   // 0x5E5BAD -- hehehe, 0x 5E5 - BAD
-            case eMoveState::PEDMOVE_RUN: { // 0x5E5BB6
+            case PEDMOVE_JOG:   // 0x5E5BAD -- hehehe, 0x 5E5 - BAD
+            case PEDMOVE_RUN: { // 0x5E5BB6
                 // 0x5E5BDD
                 if (pd->m_fMoveBlendRatio >= 2.f) {
                     DoEventSoundQuiet(isWearingBalaclava ? 55.f : 45.f);
@@ -2291,7 +2371,7 @@ void CPed::PlayFootSteps() {
                 }
                 break;
             }
-            case eMoveState::PEDMOVE_SPRINT: { // 0x5E5BBB 
+            case PEDMOVE_SPRINT: { // 0x5E5BBB 
                 DoEventSoundQuiet(isWearingBalaclava ? 65.f : 55.f);
                 break;
             }
@@ -2563,8 +2643,8 @@ void CPed::ClearWeapon(eWeaponType weaponType)
 */
 void CPed::ClearWeapons()
 {
-    CPed::RemoveWeaponModel(MODEL_INVALID);
-    CPed::RemoveGogglesModel();
+    RemoveWeaponModel(MODEL_INVALID);
+    RemoveGogglesModel();
     for (auto& m_aWeapon : m_aWeapons) {
         m_aWeapon.Shutdown();
     }
@@ -2649,7 +2729,7 @@ void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED) {
         CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::STD);
-        CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
+        SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
 }
@@ -2988,10 +3068,10 @@ void CPed::GiveWeaponWhenJoiningGang()
                 weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::STD);
             }
             else {
-                CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
+                GiveDelayedWeapon(WEAPON_PISTOL, 200);
                 weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::STD);
             }
-            CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
+            SetCurrentWeapon(weaponInfo->m_nSlot);
         }
     }
 }

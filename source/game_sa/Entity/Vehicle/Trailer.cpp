@@ -12,7 +12,7 @@ void CTrailer::InjectHooks() {
     RH_ScopedClass(CTrailer);
     RH_ScopedCategory("Vehicle");
 
-    // RH_ScopedInstall(Constructor, 0x6D03A0);
+    RH_ScopedInstall(Constructor, 0x6D03A0);
     // RH_ScopedInstall(SetupSuspensionLines, 0x6CF1A0);
     // RH_ScopedInstall(SetTowLink, 0x6CFDF0);
     // RH_ScopedInstall(ScanForTowLink, 0x6CF030);
@@ -29,8 +29,6 @@ void CTrailer::InjectHooks() {
 
 // 0x6D03A0
 CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
-    plugin::CallMethod<0x6D03A0, CTrailer*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
-    /*
     m_fTrailerColPointValue1 = 1.0f;
     m_fTrailerColPointValue2 = 1.0f;
     m_fTrailerTowedRatio     = 1.0f;
@@ -43,9 +41,7 @@ CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(
 
     SetupSuspensionLines();
 
-    // m_nType = m_nType & 7 | 0x20;
-    m_nStatus = static_cast<eEntityStatus>(m_nStatus & STATUS_TRAIN_MOVING);
-     */
+    m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }
 
 // 0x6CF1A0

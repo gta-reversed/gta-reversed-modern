@@ -67,11 +67,11 @@ void CMonsterTruck::PreRender() {
     CMatrix mat;
     CVector pos;
 
-    mi->GetWheelPosn(CARWHEEL_FRONT_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CARWHEEL_FRONT_LEFT], m_wheelPosition[CARWHEEL_FRONT_RIGHT], pos, true);
+    mi->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CAR_WHEEL_FRONT_LEFT], m_wheelPosition[CAR_WHEEL_FRONT_RIGHT], pos, true);
 
-    mi->GetWheelPosn(CARWHEEL_REAR_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CARWHEEL_REAR_LEFT], m_wheelPosition[CARWHEEL_REAR_RIGHT], pos, false);
+    mi->GetWheelPosn(CAR_WHEEL_REAR_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CAR_WHEEL_REAR_LEFT], m_wheelPosition[CAR_WHEEL_REAR_RIGHT], pos, false);
 
     if (m_nModelIndex == MODEL_DUMPER) {
         if (auto node = m_aCarNodes[MONSTER_MISC_A]) {

@@ -15,7 +15,7 @@ void CIniFile::InjectHooks() {
 
 // 0x56D070
 void CIniFile::LoadIniFile() {
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
     auto file = CFileMgr::OpenFile("gta3.ini", "r");
     if (file) {
         CFileMgr::ReadLine(file, gString, 200);

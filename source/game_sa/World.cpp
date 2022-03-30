@@ -1167,7 +1167,7 @@ void CWorld::RemoveFallenPeds() {
             continue;
 
         const CVector& vecPedPos = ped->GetPosition();
-        if (vecPedPos.z > -100.0f)
+        if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
             CNodeAddress pathNodeAddress;
@@ -1192,7 +1192,7 @@ void CWorld::RemoveFallenCars() {
             continue;
 
         const CVector& vecPos = vehicle->GetPosition();
-        if (vecPos.z > -100.0f)
+        if (vecPos.z > MAP_Z_LOW_LIMIT)
             continue;
 
         const auto ShouldWeKeepIt = [vehicle]() {
@@ -1876,7 +1876,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
-                    pedDamageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                    pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
                 } else {
                     eventDamage.m_damageResponse.m_bDamageCalculated = true;
                 }
@@ -1905,7 +1905,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, (uint8)pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
-                    pedDamageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                    pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
                 }
                 else {
                     eventDamage.m_damageResponse.m_bDamageCalculated = true;

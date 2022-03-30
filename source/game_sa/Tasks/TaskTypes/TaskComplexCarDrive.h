@@ -1,28 +1,28 @@
 #pragma once
 
 #include "TaskComplex.h"
-#include "Enums/eCarMission.h"
-#include "Enums/eCarDrivingStyle.h"
+#include "eCarMission.h"
+#include "eCarDrivingStyle.h"
 
 class CVehicle;
 
 class CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
-    float m_fSpeed;
-    int m_carModelIndexToCreate;
-    int m_carDrivingStyle; // `eCarDrivingStyle`, sadly we cant use it as the member type, because the underlaying type isn't int32
-    char field_1C; // Not padding
-    int8 m_nbTrafficBehavior;
-    int8 m_nbDriverBehavior;
-    int8 m_nSpeed;
-    bool m_bSavedVehicleBehavior;
+    float     m_fSpeed;
+    int32     m_carModelIndexToCreate;
+    int32     m_nCarDrivingStyle; // `eCarDrivingStyle`, sadly we cant use it as the member type, because the underlaying type isn't int32
+    char      field_1C; // 0: AS_DRIVER 1: AS_PASSENGER 2: ANY_CAR_AS_DRIVER
+    int8      m_nOldCarDrivingStyle;
+    int8      m_nCarMission;
+    uint8     m_nSpeed;
+    bool      m_bSavedVehicleBehavior;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE;
 
     explicit CTaskComplexCarDrive(CVehicle* vehicle);
-    CTaskComplexCarDrive(CVehicle* vehicle, float arg2, int32 arg3, eCarDrivingStyle carDrivingStyle);
+    CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle);
     ~CTaskComplexCarDrive() override;
 
     CTask*    Clone() override;
@@ -31,9 +31,25 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
     virtual void   SetUpCar();
     virtual CTask* CreateSubTaskCannotGetInCar(CPed* ped);
     virtual CTask* Drive(CPed* ped);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CTaskComplexCarDrive* Constructor_0(CVehicle* vehicle) { this->CTaskComplexCarDrive::CTaskComplexCarDrive(vehicle); return this; }
+    CTaskComplexCarDrive* Constructor_1(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle) { this->CTaskComplexCarDrive::CTaskComplexCarDrive(vehicle, speed, carModelIndexToCreate, carDrivingStyle); return this; }
+    CTaskComplexCarDrive* Destructor() { this->CTaskComplexCarDrive::~CTaskComplexCarDrive(); return this; }
+    CTask* Clone_Reversed() { return CTaskComplexCarDrive::Clone(); }
+    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexCarDrive::CreateNextSubTask(ped); }
+    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexCarDrive::CreateFirstSubTask(ped); }
+    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexCarDrive::ControlSubTask(ped); }
+    CTask* CreateSubTask_Reversed(eTaskType taskType, CPed* ped) { return CTaskComplexCarDrive::CreateSubTask(taskType, ped); }
+    void   SetUpCar_Reversed() { CTaskComplexCarDrive::SetUpCar(); }
+    CTask* CreateSubTaskCannotGetInCar_Reversed(CPed* ped) { return CTaskComplexCarDrive::CreateSubTaskCannotGetInCar(ped); }
+    CTask* Drive_Reversed(CPed* ped) { return CTaskComplexCarDrive::Drive(ped); }
 };
 VALIDATE_SIZE(CTaskComplexCarDrive, 0x24);

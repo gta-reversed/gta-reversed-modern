@@ -26,7 +26,6 @@ public:
     bool          m_makePedAlwaysFacePartner;
     char          m_animBlockName[16];
     bool          m_requiredAnimsStreamedIn;
-    char          _pad;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_PARTNER;
@@ -40,7 +39,6 @@ public:
     CTask*       ControlSubTask(CPed* ped) override;
     virtual void StreamRequiredAnims();
     virtual void RemoveStreamedAnims();
-
 
 private:
     friend void InjectHooksMain();

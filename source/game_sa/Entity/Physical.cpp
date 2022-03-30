@@ -135,6 +135,7 @@ CPhysical::CPhysical() : CEntity()
     m_nPhysicalFlags = 0;
     physicalFlags.bApplyGravity = true;
 
+    m_nContactSurface = SURFACE_DEFAULT; // NOTSA; If not initialize, it will go out of bounds in the SurfaceInfos_c
     m_fContactSurfaceBrightness = 1.0f;
 }
 

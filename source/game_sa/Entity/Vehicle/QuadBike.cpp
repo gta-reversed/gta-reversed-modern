@@ -10,7 +10,7 @@ void CQuadBike::InjectHooks() {
     RH_ScopedClass(CQuadBike);
     RH_ScopedCategory("Vehicle");
 
-// todo: RH_ScopedInstall(Constructor, 0x6CE370);
+    RH_ScopedInstall(Constructor, 0x6CE370);
     RH_ScopedInstall(Fix_Reversed, 0x6CE2B0);
     RH_ScopedInstall(GetRideAnimData_Reversed, 0x6CDC90);
     RH_ScopedInstall(PreRender_Reversed, 0x6CEAD0);
@@ -25,13 +25,9 @@ void CQuadBike::InjectHooks() {
 }
 
 // 0x6CE370
-CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false)
-{
-    plugin::CallMethod<0x6CE370, CAutomobile*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
-    return;
-
+CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
     m_sRideAnimData.m_nAnimGroup = ANIM_GROUP_QUAD;
-    m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr()->m_nHandlingId);
+    m_pHandling = gHandlingDataMgr.GetBikeHandlingPointer(GetVehicleModelInfo()->m_nHandlingId);
     m_nVehicleSubType = VEHICLE_TYPE_QUAD;
 
     { // unused
@@ -54,7 +50,7 @@ CQuadBike* CQuadBike::Constructor(int32 modelIndex, eVehicleCreatedBy createdBy)
 
 // 0x6CE2B0
 void CQuadBike::Fix() {
-    for (auto i = 2; i < 6; i++) {
+    for (auto i = 2; i < 6; i++) { // from DOOR_LEFT_FRONT to MAX_DOORS
         m_damageManager.SetDoorStatus(static_cast<eDoors>(i), eDoorStatus::DAMSTATE_NOTPRESENT);
     }
     vehicleFlags.bIsDamaged = false;
@@ -76,18 +72,18 @@ void CQuadBike::PreRender() {
     auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
     {
         CVector wheelPos;
-        modelInfo->GetWheelPosn(CARWHEEL_REAR_LEFT, wheelPos, false);
+        modelInfo->GetWheelPosn(CAR_WHEEL_REAR_LEFT, wheelPos, false);
         SetTransmissionRotation(
             m_aCarNodes[QUAD_REAR_AXLE],
-            m_wheelPosition[CARWHEEL_REAR_LEFT],
-            m_wheelPosition[CARWHEEL_REAR_RIGHT],
+            m_wheelPosition[CAR_WHEEL_REAR_LEFT],
+            m_wheelPosition[CAR_WHEEL_REAR_RIGHT],
             wheelPos,
             false
         );
     }
     
     CVector wheelFrontLeftPos;
-    modelInfo->GetWheelPosn(CARWHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
+    modelInfo->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
     
     // Original code saves position of each matrix (because calls to SetRotation set the pos. to 0), then restores it
     // We just use SetRotateYOnly which doesn't modify the position
@@ -95,14 +91,14 @@ void CQuadBike::PreRender() {
     if (auto suspensionLF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_LF]) {
         CMatrix mat;
         mat.Attach(&suspensionLF->modelling, false);
-        mat.SetRotateYOnly(atan2(m_wheelPosition[CARWHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
+        mat.SetRotateYOnly(atan2(m_wheelPosition[CAR_WHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
     
     if (auto suspensionRF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_RF]) {
         CMatrix mat;
         mat.Attach(&suspensionRF->modelling, false);
-        mat.SetRotateYOnly(-atan2(m_wheelPosition[eCarWheel::CARWHEEL_FRONT_RIGHT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
+        mat.SetRotateYOnly(-atan2(m_wheelPosition[eCarWheel::CAR_WHEEL_FRONT_RIGHT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
     
@@ -224,7 +220,7 @@ void CQuadBike::ProcessControl() {
             v5 = vecQuadResistance.x - std::min(0.07f, fabs(m_pHandling->m_fWheelieAng - m_matrix->GetForward().z) * 0.25f);
         }
     } else {
-        if (m_aWheelTimer[CARWHEEL_REAR_LEFT] == 1.0f && m_aWheelTimer[CARWHEEL_REAR_RIGHT] == 1.0f) {
+        if (m_aWheelTimer[CAR_WHEEL_REAR_LEFT] == 1.0f && m_aWheelTimer[CAR_WHEEL_REAR_RIGHT] == 1.0f) {
             if (m_matrix->GetForward().z < 0.0f) {
                 v5 = vecQuadResistance.x * (0.9f + std::min(0.1f, fabs(m_pHandling->m_fStoppieAng - m_matrix->GetForward().z) * 0.3f));
             }
