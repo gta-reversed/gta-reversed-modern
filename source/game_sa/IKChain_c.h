@@ -21,14 +21,14 @@ public:
     bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int8 priority);
     void Exit();
     void Update(float unused);
-    bool IsAtTarget(float maxDist, float& outDist);
+    bool IsAtTarget(float maxDist, float* outDist);
     bool IsFacingTarget();
     void UpdateTarget(bool target);
     void UpdateOffset(int32 offsetBoneTag, CVector offsetPosn);
     void ClampLimits(int32 boneTag, bool LimitX, bool LimitY, bool LimitZ, bool UseCurrentLimits);
     void UpdateEntity(CEntity* entity);
     BoneNode_c* GetBoneNodeFromTag(int32 tag);
-    int8 GetPriority();
+    int8 GetPriority() const;
     void SetOffsetPos(CVector value);
     void SetOffsetBoneTag(int32 value);
     void SetBlend(float value);

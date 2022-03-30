@@ -47,14 +47,14 @@ void CTaskSimpleIKLookAt::UpdateLookAtInfo(const char* strPurpose, CPed* ped, CE
     CEntity::ChangeEntityReference(m_pEntity, targetPed);
 
     m_nOffsetBoneTag = pedBoneID;
-    m_vecOffsetPos = lookAtOffset;
-    m_bUseTorso = useTorso;
-    m_nTime = time;
-    m_fSpeed = fSpeed;
-    m_nBlendTime = blendTime;
-    m_nEndTime = CTimer::GetTimeInMS() + time;
-    m_fTargetBlend = 1.f;
-    m_nTargetTime = CTimer::GetTimeInMS() + blendTime;
+    m_vecOffsetPos   = lookAtOffset;
+    m_bUseTorso      = useTorso;
+    m_nTime          = time;
+    m_fSpeed         = fSpeed;
+    m_nBlendTime     = blendTime;
+    m_nEndTime       = CTimer::GetTimeInMS() + time;
+    m_fTargetBlend   = 1.0f;
+    m_nTargetTime    = CTimer::GetTimeInMS() + blendTime;
     m_bIsBlendingOut = false;
 
     // Update IK chain

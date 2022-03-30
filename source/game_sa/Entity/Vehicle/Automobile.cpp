@@ -4215,7 +4215,7 @@ float CAutomobile::GetCarRoll() {
     const auto rightMag2D = right.Magnitude2D();
 
     // If up.z < 0.f we're flipped, in which case `right` is more like `left` so we have to negate it.
-    return RWRAD2DEG(std::atan2(right.z, m_matrix->GetUp().z < 0.f ? -rightMag2D : rightMag2D));
+    return RadiansToDegrees(std::atan2(right.z, m_matrix->GetUp().z < 0.f ? -rightMag2D : rightMag2D));
 }
 
 /*!

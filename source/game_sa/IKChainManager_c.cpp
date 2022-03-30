@@ -34,19 +34,19 @@ void IKChainManager_c::InjectHooks() {
 
 // 0x6180A0
 bool IKChainManager_c::Init() {
-    for (auto&& chain : m_chains) {
-        m_freeList.AddItem(&chain);
+    for (auto& chain : m_Chains) {
+        m_FreeList.AddItem(&chain);
     }
     return true;
 }
 
 // 0x6180D0
 void IKChainManager_c::Exit() {
-    for (auto it = m_activeList.GetTail(); it; it = m_activeList.GetPrev(it)) {
+    for (auto it = m_ActiveList.GetTail(); it; it = m_ActiveList.GetPrev(it)) {
         static_cast<IKChain_c*>(it)->Exit();
     }
-    m_activeList.RemoveAll();
-    m_freeList.RemoveAll();
+    m_ActiveList.RemoveAll();
+    m_FreeList.RemoveAll();
 }
 
 // 0x618140
@@ -60,7 +60,7 @@ void IKChainManager_c::Update(float timeStep) {
     for (auto i = 0u; i < 4u; i++) {
         CWorld::IncrementCurrentScanCode();
 
-        for (auto it = m_activeList.GetHead(); it; it = it = m_activeList.GetNext(it)) {
+        for (auto it = m_ActiveList.GetHead(); it; it = it = m_ActiveList.GetNext(it)) {
             auto& chain = *(IKChain_c*)it;
             if (chain.m_IndexInList == i) {
                 // Update RpHAnim of ped (if any) - TODO: Maybe move this code into `IKChain_c::Update` as well..
@@ -95,12 +95,12 @@ IKChain_c* IKChainManager_c::AddIKChain(const char* name,
                                         float speed,
                                         int32 priority
 ) {
-    if (auto chain = m_freeList.RemoveHead()) {
+    if (auto chain = m_FreeList.RemoveHead()) {
         if (chain->Init(name, IndexInList, ped, bone1, bonePosn, bone2, entity, offsetBoneTag, posn, speed, priority)) {
-            m_activeList.AddItem(chain);
+            m_ActiveList.AddItem(chain);
             return chain;
         }
-        m_freeList.AddItem(chain); // Failed, add back to free list
+        m_FreeList.AddItem(chain); // Failed, add back to free list
     }
     return nullptr; // No more free chains
 }
@@ -108,12 +108,12 @@ IKChain_c* IKChainManager_c::AddIKChain(const char* name,
 // 0x618170
 void IKChainManager_c::RemoveIKChain(IKChain_c* chain) {
     chain->Exit();
-    m_activeList.RemoveItem(chain);
-    m_freeList.AddItem(chain);
+    m_ActiveList.RemoveItem(chain);
+    m_FreeList.AddItem(chain);
 }
 
 // 0x618800
-bool IKChainManager_c::CanAccept(CPed* ped, float dist) {
+bool IKChainManager_c::CanAccept(CPed* ped, float dist) const {
     if (!ped->GetModellingMatrix() || !ped->IsAlive() || !ped->GetIsOnScreen()) {
         return false;
     }
@@ -142,7 +142,7 @@ CTaskSimpleIKLookAt* GetPedIKLookAtTask(CPed* ped) {
 }
 
 // 0x6181A0
-bool IKChainManager_c::IsLooking(CPed* ped) {
+bool IKChainManager_c::IsLooking(CPed* ped) const {
     return !!GetPedIKLookAtTask(ped);
 }
 
@@ -199,10 +199,8 @@ bool IKChainManager_c::CanAcceptLookAt(CPed* ped) {
 // 0x618970
 void IKChainManager_c::LookAt(Const char* purpose, CPed* ped, CEntity* targetEntity, int32 time, ePedBones pedBoneId, CVector* posn, bool useTorso, float fSpeed, int32 blendTime,
                               int32 priority, bool bForceLooking) {
-    if (!bForceLooking) {
-        if (!CanAcceptLookAt(ped) || *(bool*)0xC1542C) { // TODO `byte_C1542C` | staticref
-            return;
-        }
+    if (!bForceLooking && !CanAcceptLookAt(ped)) { // byte_C1542C
+        return;
     }
 
     auto& taskIKMgr = *GetPedIKManagerTask(ped, true);
@@ -240,7 +238,7 @@ void __stdcall IKChainManager_c::AbortPointArm(int32 slot, CPed* ped, int32 blen
 }
 
 // 0x618330
-bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 slot) {
+bool IKChainManager_c::IsFacingTarget(CPed* ped, int32 slot) const {
     if (const auto mgr = GetPedIKManagerTask(ped)) {
         if (const auto task = mgr->GetTaskAtSlot(slot)) {
             return task->GetIKChain()->IsFacingTarget();

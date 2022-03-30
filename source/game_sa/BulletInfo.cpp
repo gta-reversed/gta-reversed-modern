@@ -221,7 +221,7 @@ void CBulletInfo::Update() {
                 dir.Normalise();
                 const float dirDotColPointNorm = DotProduct(dir, colPoint.m_vecNormal);
                 if (dirDotColPointNorm < 0.0f) {
-                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RWRAD2DEG(asin(-dirDotColPointNorm)));
+                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RadiansToDegrees(asin(-dirDotColPointNorm)));
                 }
             }
             CGlass::WasGlassHitByBullet(hitEntity, colPoint.m_vecPoint);

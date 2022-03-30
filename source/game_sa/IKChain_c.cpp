@@ -53,7 +53,7 @@ bool IKChain_c::Init(const char* name,
     // Check if frame of this bone has non-zero translation 
     {
         const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)bone)].m_pIFrame;
-        if (CVector{ boneFrame->translation }.IsZero()) {
+        if (boneFrame->translation.IsZero()) {
             return false;
         }
     }
@@ -71,7 +71,7 @@ bool IKChain_c::Init(const char* name,
     m_OffsetBoneTag = offsetBoneTag;
     m_OffsetPos = posn;
     m_Speed = speed;
-    m_TargetMB = 1;
+    m_TargetMB = true;
     m_IndexInList = IndexInList;
     m_Priority = priority;
 
@@ -100,11 +100,11 @@ void IKChain_c::Update(float timeStep) {
 }
 
 // 0x617F30
-bool IKChain_c::IsAtTarget(float maxDist, float& outDist) {
+bool IKChain_c::IsAtTarget(float maxDist, float* outDist) {
     // They used RwV3d stuff, but that's ugly.
     const auto dist = (m_Offset - m_Bones[0]->GetPosition()).Magnitude();
     if (outDist) {
-        outDist = dist;
+        *outDist = dist;
     }
     return dist <= maxDist && m_Blend > 0.98f;
 }
@@ -159,7 +159,7 @@ BoneNode_c* IKChain_c::GetBoneNodeFromTag(int32 tag) {
 }
 
 // 0x617C50
-int8 IKChain_c::GetPriority() {
+int8 IKChain_c::GetPriority() const {
     return m_Priority;
 }
 
@@ -178,6 +178,7 @@ void IKChain_c::SetBlend(float value) {
     m_Blend = value;
 }
 
+// todo: Get rid off RwV3d, RtQuat
 // 0x6178B0
 void IKChain_c::MoveBonesToTarget() {
     if (m_TargetMB) {
@@ -253,7 +254,7 @@ void IKChain_c::MoveBonesToTarget() {
         RwV3d axis;
         RtQuatTransformVectors(&axis, &cross, 1, &quat);
 
-        RtQuatRotate(&bone->m_Orientation, &axis, RWRAD2DEG(bone->GetSpeed() * std::acos(dot) * m_Speed), rwCOMBINEPOSTCONCAT);
+        RtQuatRotate(reinterpret_cast<RtQuat*>(&bone->m_Orientation), &axis, RadiansToDegrees(bone->GetSpeed() * std::acos(dot) * m_Speed), rwCOMBINEPOSTCONCAT);
         bone->Limit(m_Blend); // Originally this was in an `if`, but the variable that was checked was always `true`
         bone->CalcWldMat(matrix);
     }

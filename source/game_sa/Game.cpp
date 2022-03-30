@@ -170,7 +170,7 @@ void CGame::ShutDownForRestart() {
     gFireManager.Shutdown();
     g_fx.Reset();
     g_breakMan.ResetAll();
-    // todo: g_boneNodeMan.Reset();
+    g_boneNodeMan.Reset();
     g_ikChainMan.Reset();
     // todo: g_realTimeShadowMan.Shutdown();
     CTheZones::ResetZonesRevealed();

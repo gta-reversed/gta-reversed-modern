@@ -140,7 +140,7 @@ bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
 
 // 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+    return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
 }
 
 /**

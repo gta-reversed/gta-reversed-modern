@@ -10,15 +10,15 @@
 
 class BoneNode_c : public ListItem_c {
 public:
-    int32                    m_BoneTag;
+    ePedBones                m_BoneTag;
     RpHAnimBlendInterpFrame* m_InterpFrame;
-    RtQuat                   m_Orientation;
-    RwV3d                    m_Pos;
+    CQuaternion              m_Orientation; // * RpHAnimBlendInterpFrame ?
+    CVector                  m_Pos;         // * * *
     BoneNode_c*              m_Parent;
     TList_c<BoneNode_c>      m_Childs;
     RwMatrix                 m_WorldMat;
-    RwV3d                    m_LimitMin;
-    RwV3d                    m_LimitMax;
+    CVector                  m_LimitMin;
+    CVector                  m_LimitMax;
     float                    m_Speed;
 
 public:
@@ -31,8 +31,8 @@ public:
     void InitLimits();
 
     // Originally these 2 took in the return value as a pointer, lets see if this is ABI compatible..
-    static RtQuat EulerToQuat(RwV3d* vec);
-    static RwV3d  QuatToEuler(RtQuat* quat);
+    static CQuaternion EulerToQuat(CVector* angles, CQuaternion* quat);
+    static CVector QuatToEuler(CQuaternion* quat, CVector* angles);
     static int32  GetIdFromBoneTag(ePedBones bone);
 
     void ClampLimitsCurrent(bool LimitX, bool LimitY, bool LimitZ);
