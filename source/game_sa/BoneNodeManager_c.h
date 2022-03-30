@@ -26,7 +26,7 @@ public:
     void Reset();
     BoneNode_c* GetBoneNode();
     void ReturnBoneNode(BoneNode_c* bone);
-    int32 GetNumBoneNodesLeft();
+    uint32 GetNumBoneNodesLeft() const;
 };
 VALIDATE_SIZE(BoneNodeManager_c, 0x4C0C);
 
