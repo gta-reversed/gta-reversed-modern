@@ -13,7 +13,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedGlobalInstall(CanPedDuck, 0x692610);
 
     RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
-    // RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
+    RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
     // RH_ScopedInstall(RestartTask, 0x692390);
     // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
     // RH_ScopedInstall(SetMoveAnim, 0x6939F0);
@@ -130,8 +130,20 @@ bool CTaskSimpleDuck::IsTaskInUseByOtherTasks() {
 }
 
 // 0x692340
-int8_t CTaskSimpleDuck::AbortBecauseOfOtherDuck(CPed* ped) {
-    return plugin::CallMethodAndReturn<int8_t, 0x692340, CTaskSimpleDuck*, CPed*>(this, ped);
+void CTaskSimpleDuck::AbortBecauseOfOtherDuck(CPed* ped) {
+    if (m_pDuckAnim) {
+        m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+        m_pDuckAnim = nullptr;
+    }
+
+    if (m_pMoveAnim) {
+        m_pMoveAnim->m_fBlendDelta = -8.0;
+        m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+        m_pMoveAnim = nullptr;
+    }
+
+    m_bNeedToSetDuckFlag = true;
+    m_bIsFinished = true;
 }
 
 // 0x692390

@@ -46,7 +46,7 @@ public:
     static bool CanPedDuck(CPed* ped);
 
     bool IsTaskInUseByOtherTasks();
-    int8_t AbortBecauseOfOtherDuck(CPed* ped);
+    void AbortBecauseOfOtherDuck(CPed* ped); // May've been returning bool originally, unsure.
     int32 RestartTask(CPed* ped);
     void ControlDuckMove(CVector2D moveSpeed = {});
     void SetMoveAnim(CPed*);
