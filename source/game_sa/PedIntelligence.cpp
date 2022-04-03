@@ -406,12 +406,7 @@ void CPedIntelligence::SetTaskDuckSecondary(uint16 nLengthOfDuck) {
         }
     }
 
-    auto taskSimpleDuck = (CTaskSimpleDuck*)CTask::operator new(40);
-    if (taskSimpleDuck)
-    {
-        taskSimpleDuck->Constructor(DUCK_TASK_CONTROLLED, nLengthOfDuck, -1);
-    }
-    taskManager->SetTaskSecondary(taskSimpleDuck, TASK_SECONDARY_DUCK);
+    taskManager->SetTaskSecondary(new CTaskSimpleDuck{ DUCK_TASK_CONTROLLED, nLengthOfDuck, -1 }, TASK_SECONDARY_DUCK);
 
     CTask* secondaryAttackTask = taskManager->GetTaskSecondary(TASK_SECONDARY_ATTACK);
     if (secondaryAttackTask && secondaryAttackTask->GetTaskType() == TASK_SIMPLE_USE_GUN)

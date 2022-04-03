@@ -78,7 +78,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
             }
             else {
                 CTaskSimpleDuck* pDuckTask = ped->m_pIntelligence->GetTaskDuck(false);
-                pDuckTask->ControlDuckMove(0.0f, 0.0f);
+                pDuckTask->ControlDuckMove();
             }
             if (ped->m_pPlayerData)
                 ped->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
@@ -86,7 +86,7 @@ bool CTaskSimpleStandStill::ProcessPed_Reversed(CPed* ped)
     }
     if (ped->bIsDucking && ped->m_pIntelligence->GetTaskDuck(false)) {
         CTaskSimpleDuck* pDuckTask = ped->m_pIntelligence->GetTaskDuck(false);
-        pDuckTask->ControlDuckMove(0.0f, 0.0f);
+        pDuckTask->ControlDuckMove();
     }
     else {
         ped->SetMoveState(PEDMOVE_STILL);

@@ -83,8 +83,8 @@ public:
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
     void SetCurrentTime(float currentTime);
-    void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data);
-    void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data);
+    void SetDeleteCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
+    void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data = nullptr);
     void Start(float currentTime);
     void SyncAnimation(CAnimBlendAssociation* syncWith);
     bool UpdateBlend(float blendDeltaMult);
