@@ -15,7 +15,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
     RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
     RH_ScopedInstall(RestartTask, 0x692390);
-    // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
+    RH_ScopedInstall(ControlDuckMove, 0x6923F0);
     // RH_ScopedInstall(SetMoveAnim, 0x6939F0);
 
     // RH_ScopedInstall(Clone_Reversed, 0x692CF0);
@@ -160,7 +160,27 @@ void CTaskSimpleDuck::RestartTask(CPed* ped) {
 
 // 0x6923F0
 void CTaskSimpleDuck::ControlDuckMove(CVector2D moveSpeed) {
-    plugin::CallMethod<0x6923F0, CTaskSimpleDuck*, CVector2D>(this, moveSpeed);
+    m_bIsInControl = true;
+
+    if (std::abs(m_vecMoveCommand.x) == 1.f) { // Originally checked if either -1 or 1 (this achieves the same thing)
+        return;
+    }
+
+    const auto timerStep = CTimer::GetTimeStep() * 0.07f;
+    if (const auto moveDeltaY = moveSpeed.y - m_vecMoveCommand.y; moveDeltaY <= timerStep) {
+        if (moveDeltaY >= -timerStep) {
+            m_vecMoveCommand.y = moveSpeed.y;
+        } else {
+            m_vecMoveCommand.y -= moveSpeed.y;
+        }
+    } else {
+        m_vecMoveCommand.y += moveSpeed.y;
+    }
+
+    if (std::abs(m_vecMoveCommand.y) < 0.1f && std::abs(m_vecMoveCommand.y) >= 0.9f) {
+        m_vecMoveCommand.y = 0.f;
+        m_vecMoveCommand.x = m_vecMoveCommand.x <= 0.f ? -1.f : 1.f;
+    }
 }
 
 // 0x6939F0
