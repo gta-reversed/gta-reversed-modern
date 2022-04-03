@@ -165,27 +165,31 @@ void CTaskSimpleDuck::RestartTask(CPed* ped) {
 }
 
 // 0x6923F0
-void CTaskSimpleDuck::ControlDuckMove(CVector2D moveSpeed) {
+// `CVector2D` the desired move dir. The `y` axis being fwd/bwd, and `x` being left/right.
+void CTaskSimpleDuck::ControlDuckMove(CVector2D moveDir) {
     m_bIsInControl = true;
 
+    // If going full fwd/bwd ignore left/right commmands
     if (std::abs(m_vecMoveCommand.x) == 1.f) { // Originally checked if either -1 or 1 (this achieves the same thing)
         return;
     }
 
-    const auto timerStep = CTimer::GetTimeStep() * 0.07f;
-    if (const auto moveDeltaY = moveSpeed.y - m_vecMoveCommand.y; moveDeltaY <= timerStep) {
-        if (moveDeltaY >= -timerStep) {
-            m_vecMoveCommand.y = moveSpeed.y;
+    // Change direction, but limit maximum change to `maxUnits`
+    const auto maxUnits = CTimer::GetTimeStep() * 0.07f;
+    const auto moveDeltaY = moveDir.y - m_vecMoveCommand.y; 
+    if (moveDeltaY <= maxUnits) {
+        if (moveDeltaY >= -maxUnits) {
+            m_vecMoveCommand.y = moveDir.y;
         } else {
-            m_vecMoveCommand.y -= moveSpeed.y;
+            m_vecMoveCommand.y -= maxUnits;
         }
     } else {
-        m_vecMoveCommand.y += moveSpeed.y;
+        m_vecMoveCommand.y += maxUnits;
     }
 
-    if (std::abs(m_vecMoveCommand.y) < 0.1f && std::abs(m_vecMoveCommand.y) >= 0.9f) {
+    if (std::abs(moveDir.y) < 0.1f && std::abs(moveDir.x) >= 0.9f) {
         m_vecMoveCommand.y = 0.f;
-        m_vecMoveCommand.x = m_vecMoveCommand.x <= 0.f ? -1.f : 1.f;
+        m_vecMoveCommand.x = moveDir.x <= 0.f ? -1.f : 1.f;
     }
 }
 
