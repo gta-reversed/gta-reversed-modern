@@ -80,6 +80,8 @@ public:
     float Heading() const {
         return std::atan2(-x, y);
     }
+
+    bool IsZero() const { return x == 0.f && y == 0.f; }
 };
 
 inline CVector2D operator-(const CVector2D& vecOne, const CVector2D& vecTwo) {

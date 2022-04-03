@@ -12,7 +12,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedGlobalInstall(DeleteDuckAnimCB, 0x692550);
     RH_ScopedGlobalInstall(CanPedDuck, 0x692610);
 
-    // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
+    RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
     // RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
     // RH_ScopedInstall(RestartTask, 0x692390);
     // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
@@ -118,8 +118,15 @@ bool CTaskSimpleDuck::CanPedDuck(CPed* ped) {
 }
 
 // 0x61C3D0
-BOOL CTaskSimpleDuck::IsTaskInUseByOtherTasks() {
-    return plugin::CallMethodAndReturn<BOOL, 0x61C3D0, CTaskSimpleDuck*>(this);
+bool CTaskSimpleDuck::IsTaskInUseByOtherTasks() {
+    if (m_vecMoveCommand.IsZero()) {
+        if (m_pDuckAnim) {
+            if (m_pDuckAnim->m_fBlendAmount >= 1.f && !m_bIsAborting && m_nShotWhizzingCounter <= 0) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 // 0x692340

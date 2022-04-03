@@ -45,7 +45,7 @@ public:
     static void DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* task);
     static bool CanPedDuck(CPed* ped);
 
-    BOOL IsTaskInUseByOtherTasks();
+    bool IsTaskInUseByOtherTasks();
     int8_t AbortBecauseOfOtherDuck(CPed* ped);
     int32 RestartTask(CPed* ped);
     void ControlDuckMove(CVector2D moveSpeed = {});
