@@ -42,7 +42,7 @@ public:
     ~CTaskSimpleDuck();
     CTaskSimpleDuck(eDuckControlType duckControlType, uint16 lengthOfDuck, int16 showWhizzingCounter);
 
-    static CTaskSimpleDuck* DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* task);
+    static void DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* task);
     static bool CanPedDuck(CPed* ped);
 
     BOOL IsTaskInUseByOtherTasks();

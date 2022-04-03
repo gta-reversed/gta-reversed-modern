@@ -9,7 +9,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
 
-    // RH_ScopedGlobalInstall(DeleteDuckAnimCB, 0x692550);
+    RH_ScopedGlobalInstall(DeleteDuckAnimCB, 0x692550);
     // RH_ScopedGlobalInstall(CanPedDuck, 0x692610);
 
     // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
@@ -52,8 +52,39 @@ CTaskSimpleDuck::~CTaskSimpleDuck() {
 }
 
 // 0x692550
-CTaskSimpleDuck* CTaskSimpleDuck::DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* task) {
-    return plugin::CallAndReturn<CTaskSimpleDuck*, 0x692550, CAnimBlendAssociation*, void*>(assoc, task);
+void CTaskSimpleDuck::DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* data) {
+    const auto self = static_cast<CTaskSimpleDuck*>(data); // aka `this`
+    if (!self) {
+        return;
+    }
+
+    if (!assoc) {
+        return;
+    }
+
+    switch (assoc->m_nAnimId) {
+    case ANIM_ID_WEAPON_CROUCH:
+    case ANIM_ID_DUCK_COWER: {
+        if (!self->m_pMoveAnim || !self->m_bIsAborting) {
+            self->m_bIsFinished = true;
+        }
+        self->m_pMoveAnim = nullptr; // Moved below `if`
+        break;
+    }
+    case ANIM_ID_CROUCH_ROLL_L:
+    case ANIM_ID_CROUCH_ROLL_R: {
+        self->m_vecMoveCommand.x = 0.0;
+        [[fallthrough]];
+    }
+    case ANIM_ID_GUNCROUCHFWD:
+    case ANIM_ID_GUNCROUCHBWD: {
+        if (self->m_bIsAborting) {
+            self->m_bIsFinished = 1;
+        }
+        self->m_pMoveAnim = nullptr; // Moved below `if`
+        break;
+    }
+    }
 }
 
 // 0x692610
