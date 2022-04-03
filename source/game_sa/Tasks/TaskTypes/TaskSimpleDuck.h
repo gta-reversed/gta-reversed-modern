@@ -28,7 +28,7 @@ public:
     CAnimBlendAssociation* m_pMoveAnim = {};  // 0x14
     int8 m_bIsFinished = {};                  // 0x18
     int8 m_bIsAborting = {};                  // 0x19
-    bool m_bNeedToSetDuckFlag = {true};       // 0x1A - In case bIsDucking flag gets cleared elsewhere, so we know to stop duck task
+    bool m_bNeedToSetDuckFlag = {true};       // 0x1A - In case ped->bIsDucking flag gets cleared elsewhere, so we know to stop duck task
     int8 m_bIsInControl = {true};             // 0x1B - If duck task is being controlled by another task then it requires continuous control
     CVector2D m_vecMoveCommand = {0.f, 0.f};  // 0x1C
     eDuckControlType m_nDuckControlType = {}; // 0x24
@@ -47,7 +47,7 @@ public:
 
     bool IsTaskInUseByOtherTasks();
     void AbortBecauseOfOtherDuck(CPed* ped); // May've been returning bool originally, unsure.
-    int32 RestartTask(CPed* ped);
+    void RestartTask(CPed* ped);
     void ControlDuckMove(CVector2D moveSpeed = {});
     void SetMoveAnim(CPed*);
 

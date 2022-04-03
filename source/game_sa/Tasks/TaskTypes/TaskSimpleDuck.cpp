@@ -14,7 +14,7 @@ void CTaskSimpleDuck::InjectHooks() {
 
     RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
     RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
-    // RH_ScopedInstall(RestartTask, 0x692390);
+    RH_ScopedInstall(RestartTask, 0x692390);
     // RH_ScopedInstall(ControlDuckMove, 0x6923F0);
     // RH_ScopedInstall(SetMoveAnim, 0x6939F0);
 
@@ -147,8 +147,15 @@ void CTaskSimpleDuck::AbortBecauseOfOtherDuck(CPed* ped) {
 }
 
 // 0x692390
-int32 CTaskSimpleDuck::RestartTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<int32, 0x692390, CTaskSimpleDuck*, CPed*>(this, ped);
+void CTaskSimpleDuck::RestartTask(CPed* ped) {
+    if (m_bNeedToSetDuckFlag) {
+        ped->bIsDucking = true;
+        m_bNeedToSetDuckFlag = false;
+    }
+
+    if (m_nShotWhizzingCounter >= 0) {
+        m_nShotWhizzingCounter = CGeneral::GetRandomNumberInRange(1000, 2500);
+    }
 }
 
 // 0x6923F0
