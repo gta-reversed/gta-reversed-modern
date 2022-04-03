@@ -18,7 +18,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedInstall(ControlDuckMove, 0x6923F0);
     // RH_ScopedInstall(SetMoveAnim, 0x6939F0);
 
-    // RH_ScopedInstall(Clone_Reversed, 0x692CF0);
+    RH_ScopedInstall(Clone_Reversed, 0x692CF0);
     // RH_ScopedInstall(GetTaskType_Reversed, 0x692020);
     // RH_ScopedInstall(MakeAbortable_Reversed, 0x692100);
     // RH_ScopedInstall(ProcessPed_Reversed, 0x694390);
@@ -32,6 +32,11 @@ CTaskSimpleDuck::CTaskSimpleDuck(eDuckControlType duckControlType, uint16 length
     m_nStartTime{CTimer::GetTimeInMS()}
 {
     // Rest set in the header!
+}
+
+CTaskSimpleDuck::CTaskSimpleDuck(const CTaskSimpleDuck& o) :
+    CTaskSimpleDuck{o.m_nDuckControlType, o.m_nLengthOfDuck, o.m_nShotWhizzingCounter}
+{
 }
 
 // 0x692030
@@ -186,11 +191,6 @@ void CTaskSimpleDuck::ControlDuckMove(CVector2D moveSpeed) {
 // 0x6939F0
 void CTaskSimpleDuck::SetMoveAnim(CPed* ped) {
     plugin::CallMethod<0x6939F0, CTaskSimpleDuck*, CPed*>(this, ped);
-}
-
-// 0x692CF0
-CTask* CTaskSimpleDuck::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x692CF0, CTaskSimpleDuck*>(this);
 }
 
 // 0x692100

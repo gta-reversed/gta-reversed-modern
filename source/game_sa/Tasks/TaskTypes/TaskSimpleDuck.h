@@ -39,8 +39,9 @@ public:
 
     static void InjectHooks();
 
-    ~CTaskSimpleDuck();
     CTaskSimpleDuck(eDuckControlType duckControlType, uint16 lengthOfDuck, int16 showWhizzingCounter);
+    CTaskSimpleDuck(const CTaskSimpleDuck&); // NOTSA: `Clone()` helper
+    ~CTaskSimpleDuck();
 
     static void DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* task);
     static bool CanPedDuck(CPed* ped);
@@ -51,7 +52,7 @@ public:
     void ControlDuckMove(CVector2D moveSpeed = {});
     void SetMoveAnim(CPed*);
 
-    CTask* Clone() override;
+    CTask* Clone() override { return new CTaskSimpleDuck{ *this }; }
     eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
