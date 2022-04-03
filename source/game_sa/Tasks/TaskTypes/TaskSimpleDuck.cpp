@@ -10,7 +10,7 @@ void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x692030);
 
     RH_ScopedGlobalInstall(DeleteDuckAnimCB, 0x692550);
-    // RH_ScopedGlobalInstall(CanPedDuck, 0x692610);
+    RH_ScopedGlobalInstall(CanPedDuck, 0x692610);
 
     // RH_ScopedInstall(IsTaskInUseByOtherTasks, 0x61C3D0);
     // RH_ScopedInstall(AbortBecauseOfOtherDuck, 0x692340);
@@ -89,7 +89,32 @@ void CTaskSimpleDuck::DeleteDuckAnimCB(CAnimBlendAssociation* assoc, void* data)
 
 // 0x692610
 bool CTaskSimpleDuck::CanPedDuck(CPed* ped) {
-    return plugin::CallAndReturn<bool, 0x692610, CPed*>(ped);
+    if (ped->IsPlayer()) {
+        switch (ped->m_nMoveState) {
+        case PEDMOVE_RUN:
+        case PEDMOVE_SPRINT:
+            return false;
+        }
+    }
+
+    const auto& activeWep = ped->GetActiveWeapon();
+    const auto& pedActiveWepInf = activeWep.GetWeaponInfo(ped);
+
+    switch (pedActiveWepInf.m_nWeaponFire) {
+    case eWeaponFire::WEAPON_FIRE_MELEE:
+    case eWeaponFire::WEAPON_FIRE_USE:
+        return true;
+    }
+
+    if (activeWep.m_nType == WEAPON_SPRAYCAN) {
+        return true;
+    }
+
+    if (pedActiveWepInf.flags.bCrouchFire) {
+        return true;
+    }
+
+    return false;
 }
 
 // 0x61C3D0
