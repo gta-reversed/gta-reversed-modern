@@ -546,7 +546,7 @@ void InjectHooksMain() {
         // CTaskComplexWanderProstitute::InjectHooks();
         CTaskComplexPartnerGreet::InjectHooks();
         // CTaskComplexWalkRoundCar::InjectHooks();
-        // CTaskSimpleDuck::InjectHooks();
+        CTaskSimpleDuck::InjectHooks();
         CTaskComplexMedicTreatInjuredPed::InjectHooks();
         CTaskSimplePlayHandSignalAnim::InjectHooks();
         // CTaskComplexCarDrive::InjectHooks();

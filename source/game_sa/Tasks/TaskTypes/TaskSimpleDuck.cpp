@@ -1,10 +1,11 @@
 #include "StdInc.h"
 #include "TaskSimpleDuck.h"
 #include "AnimBlendAssociation.h"
+#include "TaskSimpleUseGun.h"
 
 void CTaskSimpleDuck::InjectHooks() {
     RH_ScopedClass(CTaskSimpleDuck);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes"); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Constructor, 0x691FC0);
     RH_ScopedInstall(Destructor, 0x692030);
@@ -19,8 +20,8 @@ void CTaskSimpleDuck::InjectHooks() {
     // RH_ScopedInstall(SetMoveAnim, 0x6939F0);
 
     RH_ScopedInstall(Clone_Reversed, 0x692CF0);
-    // RH_ScopedInstall(GetTaskType_Reversed, 0x692020);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x692100);
+    RH_ScopedInstall(GetTaskType_Reversed, 0x692020);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x692100);
     // RH_ScopedInstall(ProcessPed_Reversed, 0x694390);
 }
 
@@ -195,7 +196,108 @@ void CTaskSimpleDuck::SetMoveAnim(CPed* ped) {
 
 // 0x692100
 bool CTaskSimpleDuck::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x692100, CTaskSimpleDuck*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    switch (priority) {
+    case ABORT_PRIORITY_IMMEDIATE: { // 0x69210C
+        // Replace/blend duck anim with idle anim
+        if (m_pDuckAnim) {
+            if (m_pDuckAnim->m_nFlags & ANIM_FLAG_PARTIAL) {
+                m_pDuckAnim->m_fBlendDelta = -1000.f;
+            } else {
+                CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, 1000.f);
+            }
+            m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+            m_pDuckAnim = nullptr;
+        }
+
+        if (m_pMoveAnim) {
+            m_pMoveAnim->m_fBlendDelta = -1000.f;
+            m_pMoveAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+            m_pMoveAnim = nullptr;
+        }
+        ped->bIsDucking = false;
+        m_bNeedToSetDuckFlag = 1;
+        return true;
+    }
+    case ABORT_PRIORITY_URGENT: { // 0x69219B
+        if (m_nShotWhizzingCounter >= 0) { // Originally > -1
+            if (event) {
+                if (event->GetEventType() == EVENT_SHOT_FIRED_WHIZZED_BY) {
+                    if (static_cast<const CEventGunShotWhizzedBy*>(event)->m_taskId == TASK_SIMPLE_DUCK_WHILE_SHOTS_WHIZZING) {
+                        if (event->GetSourceEntity()) {
+                            ped->bIsDucking = false;
+                            m_bNeedToSetDuckFlag = 1;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    }
+    }
+
+    if (m_pMoveAnim) { // 0x6921E5
+        switch (m_pMoveAnim->m_nAnimId) {
+        case ANIM_ID_CROUCH_ROLL_L:
+        case ANIM_ID_CROUCH_ROLL_R:
+            return false;
+        }
+    }
+
+    const auto blendDelta = (priority == ABORT_PRIORITY_URGENT) ? -8.f : -4.f;
+
+    if (m_pDuckAnim) {
+        if (m_pDuckAnim->m_fBlendAmount > 0.f && m_pDuckAnim->m_fBlendDelta >= 0.f) {
+            if (m_pDuckAnim->m_nFlags & ANIM_FLAG_PARTIAL) {
+                m_pDuckAnim->m_fBlendDelta = blendDelta;
+            }
+            CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, blendDelta);
+            ped->m_nSwimmingMoveState = eMoveState::PEDMOVE_STILL;
+        }
+
+        if (priority == ABORT_PRIORITY_URGENT) {
+            m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+            m_pDuckAnim = nullptr;
+        }
+    }
+
+    if (m_pMoveAnim) {
+        if (m_pMoveAnim->m_fBlendAmount > 0.f && m_pMoveAnim->m_fBlendDelta >= 0.f) {
+            switch (m_pMoveAnim->m_nAnimId) {
+            default: {
+                if (priority != ABORT_PRIORITY_URGENT) {
+                    break;
+                }
+                [[fallthrough]];
+            }
+            case ANIM_ID_GUNCROUCHFWD:
+            case ANIM_ID_GUNCROUCHBWD:
+                m_pMoveAnim->m_fBlendDelta = blendDelta;
+                m_pMoveAnim->m_nFlags &= ANIM_FLAG_STARTED;
+            }
+                
+        }
+
+        if (priority == ABORT_PRIORITY_URGENT) {
+            m_pMoveAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB);
+            m_pMoveAnim = nullptr;
+        }
+    }
+
+    if (const auto task = ped->GetIntelligence()->GetTaskUseGun()) {
+        task->ClearAnim(ped);
+    }
+
+    if (priority == ABORT_PRIORITY_URGENT) {
+        m_bIsFinished = true;
+        ped->bIsDucking = false;
+        m_bNeedToSetDuckFlag = 1;
+        return true;
+    }
+
+    m_bIsAborting = true;
+
+    return false;
 }
 
 // 0x694390
