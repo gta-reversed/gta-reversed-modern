@@ -279,7 +279,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fVisibleDistance = 200.0f;
             exp->m_fDamagePercentage = 0.2f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
