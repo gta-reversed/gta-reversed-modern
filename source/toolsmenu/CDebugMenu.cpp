@@ -9,6 +9,7 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
+#include <extensions/ScriptCommands.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -72,7 +73,7 @@ void CDebugMenu::LoadMouseSprite() {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
         CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+        m_mouseSprite.SetTexture("mouse", "mousea");
     } else {
         printf("Failed to load fronten_pc.txd\n");
     }
@@ -304,6 +305,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
             }
             if (ImGui::BeginTabItem("Other")) {
                 ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
+                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
                 ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
@@ -336,7 +338,13 @@ static void DebugCode() {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
     if (pad->IsStandardKeyJustDown('4')) {
-        FindPlayerPed()->Teleport({ -1956.25110f, 297.625519f, 35.0370331f }, true);
+        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
+        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+    }
+    if (pad->IsStandardKeyJustDown('5')) {
+        CVector pos{};
+        Command<COMMAND_GET_PLAYER_COORDINATES>(0, &pos.x, &pos.y, &pos.z);
+        printf("%f %f %f\n", pos.x, pos.y, pos.z);
     }
 }
 
