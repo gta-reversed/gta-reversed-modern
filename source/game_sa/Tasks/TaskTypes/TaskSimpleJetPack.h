@@ -65,6 +65,8 @@ public:
     static float& LEG_SWING_DAMP_FRAC;    // 0.98f
 
   public:
+    static constexpr auto Type = TASK_SIMPLE_JETPACK;
+
     static void InjectHooks();
 
     CTaskSimpleJetPack(const CVector* pVecTargetPos = nullptr, float fCruiseHeight = 10.0f, int32 nHoverTime = 0, CEntity* entity = nullptr);
@@ -77,7 +79,7 @@ public:
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
 
-    void Process();
+    void RenderJetPack(CPed* ped);
     void ProcessThrust(CPed* ped);
     void ProcessAnims(CPed* ped);
     void ProcessControlInput(CPlayerPed* player);

@@ -22,16 +22,16 @@ void CPedPlacement::InjectHooks() {
 bool CPedPlacement::FindZCoorForPed(CVector& inoutPos) {
     CEntity* hitEntity{};
 
-    float firstHitZ = -100.f;
+    float firstHitZ = MAP_Z_LOW_LIMIT;
     if (CColPoint cp{}; CWorld::ProcessVerticalLine(inoutPos + CVector{ 0.f, 0.f, 0.5f }, inoutPos.z - 100.0f, cp, hitEntity, true, true, false, false, true, false, nullptr))
         firstHitZ = cp.m_vecPoint.z;
 
-    float secondHitZ = -100.f;
+    float secondHitZ = MAP_Z_LOW_LIMIT;
     if (CColPoint cp{}; CWorld::ProcessVerticalLine(inoutPos + CVector{ 0.1f, 0.1f, 0.5f }, inoutPos.z - 100.0f, cp, hitEntity, true, true, false, false, true, false, nullptr))
         secondHitZ = cp.m_vecPoint.z;
 
     const auto highestZ = std::max(firstHitZ, secondHitZ);
-    if (highestZ <= -99.0f)
+    if (highestZ <= MAP_Z_LOW_LIMIT + 1.0f) // -99.0f
         return false;
 
     inoutPos.z = highestZ + 1.0f;

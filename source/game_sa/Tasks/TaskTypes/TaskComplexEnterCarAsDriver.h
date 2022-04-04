@@ -10,6 +10,8 @@
 
 class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
+    static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
+
     CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
     ~CTaskComplexEnterCarAsDriver() {}
 

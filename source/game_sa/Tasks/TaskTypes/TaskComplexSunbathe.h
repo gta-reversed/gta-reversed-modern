@@ -37,6 +37,8 @@ public:
     CObject*       m_pTowel;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_SUNBATHE;
+
     CTaskComplexSunbathe(CObject* towel, bool bStartStanding);
 };
 

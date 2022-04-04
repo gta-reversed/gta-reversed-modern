@@ -79,8 +79,8 @@ bool CTaskSimpleJetPack::ProcessPed(CPed* ped) {
 }
 
 // 0x67F6A0
-void CTaskSimpleJetPack::Process() {
-    plugin::CallMethod<0x67F6A0, CTaskSimpleJetPack*>(this);
+void CTaskSimpleJetPack::RenderJetPack(CPed* ped) {
+    plugin::CallMethod<0x67F6A0, CTaskSimpleJetPack*>(this, ped);
 }
 
 // 0x67EF20

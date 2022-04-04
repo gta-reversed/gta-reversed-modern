@@ -17,7 +17,7 @@ void CGeneral::InjectHooks() {
 
     RH_ScopedInstall(LimitAngle, 0x53CB00);
     RH_ScopedInstall(LimitRadianAngle, 0x53CB50);
-    RH_ScopedInstall(GetRadianAngleBetweenPoints, 0x53CBE0);
+    RH_ScopedOverloadedInstall(GetRadianAngleBetweenPoints, "", 0x53CBE0, float(*)(float, float, float, float));
     RH_ScopedInstall(GetATanOfXY, 0x53CC70);
     RH_ScopedInstall(GetNodeHeadingFromVector, 0x53CDC0);
     RH_ScopedInstall(SolveQuadratic, 0x53CE30);
@@ -140,7 +140,7 @@ bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
 
 // 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+    return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
 }
 
 uint16 CGeneral::GetRandomNumber()
@@ -182,4 +182,8 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
 #else
     return min + (max - min) * rand() * RAND_MAX_FLOAT_RECIPROCAL;
 #endif
+}
+
+float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
+    return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }

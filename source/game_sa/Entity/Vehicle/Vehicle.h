@@ -27,6 +27,7 @@ class CWeapon;
 class CPed;
 class CPlane;
 class CHeli;
+class CPedGroup;
 
 enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,
@@ -129,20 +130,21 @@ enum tWheelState : int32 {
     WHEEL_STATE_FIXED,	  // not rotating
 };
 
-enum class eVehicleCollisionComponent : uint16 {
-    DEFAULT    = 0x0,
-    BONNET     = 0x1,
-    BOOT       = 0x2,
+enum class eVehicleCollisionComponent : uint16
+{
+    DEFAULT = 0x0,
+    BONNET = 0x1,
+    BOOT = 0x2,
     BUMP_FRONT = 0x3,
-    BUMP_REAR  = 0x4,
-    DOOR_LF    = 0x5,
-    DOOR_RF    = 0x6,
-    DOOR_LR    = 0x7,
-    DOOR_RR    = 0x8,
-    WING_LF    = 0x9,
-    WING_RF    = 0xA,
-    WING_LR    = 0xB,
-    WING_RR    = 0xC,
+    BUMP_REAR = 0x4,
+    DOOR_LF = 0x5,
+    DOOR_RF = 0x6,
+    DOOR_LR = 0x7,
+    DOOR_RR = 0x8,
+    WING_LF = 0x9,
+    WING_RF = 0xA,
+    WING_LR = 0xB,
+    WING_RR = 0xC,
     WINDSCREEN = 0x13,
 };
 
@@ -182,6 +184,7 @@ public:
             uint32 bSteerRearwheels : 1;
             uint32 bHbRearwheelSteer : 1;
             uint32 bAltSteerOpt : 1;
+
             uint32 bWheelFNarrow2 : 1;
             uint32 bWheelFNarrow : 1;
             uint32 bWheelFWide : 1;
@@ -190,6 +193,7 @@ public:
             uint32 bWheelRNarrow : 1;
             uint32 bWheelRWide : 1;
             uint32 bWheelRWide2 : 1;
+
             uint32 bHydraulicGeom : 1;
             uint32 bHydraulicInst : 1;
             uint32 bHydraulicNone : 1;
@@ -399,7 +403,7 @@ public:
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
     static CColModel (&m_aSpecialColModel)[4];
-    static tHydraulicData(&m_aSpecialHydraulicData)[4];
+    static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 public:
     CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
@@ -458,7 +462,7 @@ public:
     virtual float GetHeightAboveRoad();
     virtual void PlayCarHorn() { /* Do nothing */ }
     virtual int32 GetNumContactWheels() { return 4; }
-    virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent component, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
+    virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
     virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
@@ -493,10 +497,10 @@ public:
     void RemoveDriver(bool arg0);
     CPed* SetUpDriver(int32 pedType, bool arg1, bool arg2);
     CPed* SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3);
-    bool IsPassenger(CPed* ped);
-    bool IsPassenger(int32 modelIndex);
-    bool IsDriver(CPed* ped);
-    bool IsDriver(int32 modelIndex);
+    bool IsPassenger(CPed* ped) const;
+    bool IsPassenger(int32 modelIndex) const;
+    bool IsDriver(CPed* ped) const;
+    bool IsDriver(int32 modelIndex) const;
     void KillPedsInVehicle();
     // return this->m_pCoords->matrix.GetUp().z <= -0.9;
     bool IsUpsideDown();
@@ -679,6 +683,7 @@ public:
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
+    bool HasDriver() const { return !!m_pDriver; }
 
 private:
     friend void InjectHooksMain();
@@ -735,4 +740,3 @@ void CVehicle::GetGasTankPosition();
 void CVehicle::SetTappedGasTankVehicle(CEntity* entity);
 bool CVehicle::GetHasDualExhausts() { return (m_pHandlingData->m_nModelFlags >> 13) & 1; // m_bNoExhaust }
 */
-

@@ -10,10 +10,10 @@ void CEventGunShot::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC610);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2CD0);
-    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4AC810);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AC780);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6B20);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2CD0);
+    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4AC810);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AC780);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6B20);
 }
 
 // 0x4AC610

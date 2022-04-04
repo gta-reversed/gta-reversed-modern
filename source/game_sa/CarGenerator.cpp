@@ -196,14 +196,14 @@ void CCarGenerator::DoInternalProcessing()
 
         CVector posn = UncompressLargeVector(m_vecPosn);
         baseZ = posn.z;
-        if (baseZ <= -100.0f)
+        if (baseZ <= MAP_Z_LOW_LIMIT)
             baseZ = CWorld::FindGroundZForCoord(posn.x, posn.y);
         vehicle->m_nExtendedRemovalRange = 255;
     }
     else
     {
         CVector posn = UncompressLargeVector(m_vecPosn);
-        if (posn.z > -100.0f)
+        if (posn.z > MAP_Z_LOW_LIMIT)
             posn.z += 1.0f;
         else
             posn.z = 1000.0f;

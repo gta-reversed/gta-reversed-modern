@@ -184,7 +184,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     CTheScripts::bPlayerIsOffTheMap = false;
     CGame::currArea = 0;
     CPlayerPed* player = FindPlayerPed();
-    FindPlayerPed()->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
+    player->m_nAreaCode = AREA_CODE_NORMAL_WORLD;
     if (!CGame::currArea) {
         player->m_pEnex = nullptr;
         CEntryExitManager::ms_entryExitStackPosn = 0;
@@ -200,14 +200,14 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
         missionId = 0xFFFF - missionId;
     }
     CTimer::Suspend();
-    int offsetToMission = CTheScripts::MultiScriptArray[missionId];
+    int32 offsetToMission = CTheScripts::MultiScriptArray[missionId];
     CFileMgr::ChangeDir("\\");
     if (CGame::bMissionPackGame) {
         size_t bytesRead = 0;
         while (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CFileMgr::SetDirMyDocuments();
             sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
-            FILE* file = CFileMgr::OpenFile(gString, "rb");
+            auto* file = CFileMgr::OpenFile(gString, "rb");
             if (file) {
                 CFileMgr::Seek(file, offsetToMission, 0);
                 bytesRead = CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
@@ -223,7 +223,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     }
     CFileMgr::SetDir("");
     if (!CGame::bMissionPackGame) {
-        FILE* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
+        auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
         CFileMgr::Seek(file, offsetToMission, 0);
         CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
         CFileMgr::CloseFile(file);
@@ -267,9 +267,7 @@ void ProcessImgui() {
     ImGui::NextColumn();
     ImGui::Separator();
     static int32 selectedId = -1;
-    for (const auto& x : m_missionToolInput.GetGridListMap()) {
-        const int32 id = x.first;
-        const std::string& name = x.second;
+    for (const auto& [id, name] : m_missionToolInput.GetGridListMap()) {
         ImGui::PushID(id);
 
         ImGui::Text("%i", id);

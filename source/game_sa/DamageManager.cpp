@@ -35,6 +35,12 @@ void CDamageManager::InjectHooks() {
     RH_ScopedNamedInstall(GetWheelStatus_Hooked, "GetWheelStatus", 0x6C21B0);
 }
 
+CDamageManager::CDamageManager(float wheelDamageEffect) :
+    m_fWheelDamageEffect{ wheelDamageEffect }
+{
+    ResetDamageStatus();
+}
+
 // 0x6A0520
 void CDamageManager::Init() {
     m_fWheelDamageEffect = 0.0f;
@@ -392,17 +398,13 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
 
 // NOTSA
 void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
-    constexpr eCarWheel wheels[]{
-        CARWHEEL_FRONT_LEFT,
-        CARWHEEL_REAR_LEFT,
-        CARWHEEL_FRONT_RIGHT,
-        CARWHEEL_REAR_RIGHT
-    };
+    constexpr eCarWheel wheels[]{CAR_WHEEL_FRONT_LEFT, CAR_WHEEL_REAR_LEFT, CAR_WHEEL_FRONT_RIGHT, CAR_WHEEL_REAR_RIGHT};
     for (auto&& wheel : wheels) {
         SetWheelStatus(wheel, state);
     }
 }
 
+// NOTSA
 void CDamageManager::SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
     for (auto&& door : doors) {
         SetDoorStatus(door, status);

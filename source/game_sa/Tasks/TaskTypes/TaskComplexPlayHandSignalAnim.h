@@ -27,6 +27,9 @@ public:
     };
     uint8 _pad[3];
 
+public:
+    static constexpr auto Type = TASK_COMPLEX_HANDSIGNAL_ANIM;
+
     CTaskComplexPlayHandSignalAnim(AnimationId animationId, float blendFactor);
     CTask* CreateSubTask(int32 taskType);
     int32 GetAnimIdForPed(CPed* ped);

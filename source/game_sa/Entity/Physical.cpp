@@ -40,14 +40,14 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
     RH_ScopedInstall(RemoveFromMovingList, 0x542860);
     RH_ScopedInstall(AddToMovingList, 0x542800);
-    RH_ScopedInstall(Add_Reversed, 0x544A30);
-    RH_ScopedInstall(Remove_Reversed, 0x5424C0); 
-    RH_ScopedInstall(GetBoundRect_Reversed, 0x5449B0);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5485E0);
-    RH_ScopedInstall(ProcessCollision_Reversed, 0x54DFB0);
-    RH_ScopedInstall(ProcessShift_Reversed, 0x54DB10);
-    RH_ScopedInstall(TestCollision_Reversed, 0x54DEC0);
-    RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x546D00);
+    RH_ScopedVirtualInstall(Add, 0x544A30);
+    RH_ScopedVirtualInstall(Remove, 0x5424C0);
+    RH_ScopedVirtualInstall(GetBoundRect, 0x5449B0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5485E0);
+    RH_ScopedVirtualInstall(ProcessCollision, 0x54DFB0);
+    RH_ScopedVirtualInstall(ProcessShift, 0x54DB10);
+    RH_ScopedVirtualInstall(TestCollision, 0x54DEC0);
+    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x546D00);
     RH_ScopedInstall(ApplyGravity, 0x542FE0);
     RH_ScopedInstall(ApplyFrictionMoveForce, 0x5430A0);
     RH_ScopedInstall(ApplyFrictionForce, 0x543220);
@@ -135,6 +135,7 @@ CPhysical::CPhysical() : CEntity()
     m_nPhysicalFlags = 0;
     physicalFlags.bApplyGravity = true;
 
+    m_nContactSurface = SURFACE_DEFAULT; // NOTSA; If not initialize, it will go out of bounds in the SurfaceInfos_c
     m_fContactSurfaceBrightness = 1.0f;
 }
 
@@ -288,9 +289,11 @@ void CPhysical::ProcessCollision()
                 automobile->m_apWheelCollisionEntity[1] = nullptr;
                 automobile->m_apWheelCollisionEntity[2] = nullptr;
                 automobile->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = automobile->m_aWheelColPoint;
-                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression;
-                wheelsCollisionPositions = automobile->m_vWheelCollisionPos;
+
+                // TODO: Use std::array<> for these local variables
+                wheelsColPoints = automobile->m_wheelColPoint.data();
+                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression.data();
+                wheelsCollisionPositions = automobile->m_vWheelCollisionPos.data();
             }
             CCollisionData* colData = GetColModel()->m_pColData;
             int32 collisionIndex = 0;

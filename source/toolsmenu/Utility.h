@@ -11,7 +11,8 @@ static bool StringContainsString(std::string_view haystack, std::string_view nee
     if (haystack.empty() || needle.empty()) {
         return true;
     }
-    return !std::ranges::search(haystack, needle, {}, std::toupper, std::toupper).empty();
+    const auto ToUpper = [](auto&& c) { return (char)std::toupper((unsigned char)c); };
+    return !std::ranges::search(haystack, needle, {}, ToUpper, ToUpper).empty();
 }
 
 // https://stackoverflow.com/a/48403210
@@ -23,7 +24,9 @@ static auto SplitStringView(std::string_view str, std::string_view delim) {
 #if 0 // C++23 - String view from range
             return std::string_view(rng.begin(), rng.end());
 #else
-            return std::string_view(&*rng.begin(), std::ranges::distance(rng));
+            // Workaround for MS-STL debug assert when trying to add to string's end iterator
+            const auto size = std::ranges::distance(rng);
+            return size ? std::string_view(&*rng.begin(), size) : "";
 #endif
         });
 }

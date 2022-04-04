@@ -13,13 +13,15 @@ class  CBouncingPanel {
     static float& BOUNCE_HANGING_RETURN_MULT; // 0.02
 
 public:
-    uint16 m_nFrameId;
-    uint16 m_nAxis;
-    float    m_fAngleLimit;
-    CVector  m_vecRotation;
-    CVector  m_vecPos;
+    uint16 m_nFrameId{(uint16)-1};
+    uint16 m_nAxis{};
+    float    m_fAngleLimit{};
+    CVector  m_vecRotation{};
+    CVector  m_vecPos{};
 
 public:
+    CBouncingPanel() = default;
+
     static void InjectHooks();
 
     void ResetPanel();

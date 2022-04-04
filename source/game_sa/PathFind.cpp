@@ -54,11 +54,8 @@ CVector* CPathFind::TakeWidthIntoAccountForWandering(CVector* outPosition, CNode
         (this, outPosition, nodeAddress, randomSeed);
 }
 
-void CPathFind::FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress,
-                                      CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir)
-{
-    plugin::CallMethod <0x451B70, CPathFind*, int32, float, float, float, CNodeAddress*, CNodeAddress*, uint32, int8*>
-        (this, pathType, x, y, z, startNodeAddress, targetNodeAddress, dir, outDir);
+void CPathFind::FindNextNodeWandering(ePathType pathType, CVector pos, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint8 dir, uint8* outDir) {
+    plugin::CallMethod <0x451B70, CPathFind*, ePathType, CVector, CNodeAddress*, CNodeAddress*, uint8, uint8*>(this, pathType, pos, startNodeAddress, targetNodeAddress, dir, outDir);
 }
 
 void CPathFind::DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr,
@@ -108,6 +105,22 @@ CNodeAddress* CPathFind::FindNodeClosestToCoors(CNodeAddress* pathLink, float X,
 {
     return plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, float, float, float, int32, float,
         uint16, int32, uint16, uint16, int32>(this, pathLink, X, Y, Z, _nodeType, maxDistance, unk2, unk3, unk4, bBoatsOnly, unk6);
+}
+
+CVector* CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress nodeAddr, bool* outIsAddrValid) {
+    return plugin::CallMethodAndReturn<CVector*, 0x4505E0, CPathFind*, CVector&, CNodeAddress, bool*>(this, outPos, nodeAddr, outIsAddrValid);
+}
+
+CNodeAddress CPathFind::FindNodeClosestToCoors(const CVector& pos, int32 nodeType, float maxDist, uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6) {
+    CNodeAddress addr{};
+    FindNodeClosestToCoors(&addr, pos.x, pos.y, pos.z, nodeType, maxDist, unk2, unk3, unk4, bBoatsOnly, unk6);
+    return addr;
+}
+
+bool CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr) {
+    bool valid{};
+    FindNodeCoorsForScript(outPos, addr, &valid);
+    return valid;
 }
 
 // 0x44D2B0

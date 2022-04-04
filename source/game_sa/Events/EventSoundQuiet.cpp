@@ -8,12 +8,12 @@ void CEventSoundQuiet::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5E05B0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B5240);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x5E0670);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B5240);
+    RH_ScopedVirtualInstall(CloneEditable, 0x5E0670);
 }
 
 // 0x5E05B0
-CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position)
+CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position)
 {
     m_fLocalSoundLevel = fLocalSoundLevel;
     m_startTimeInMs = startTime;
@@ -21,7 +21,7 @@ CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint
     m_position = position;
     if (m_entity)
         m_entity->RegisterReference(&m_entity);
-    if (m_startTimeInMs != -1)
+    if (m_startTimeInMs != (uint32)-1)
         return;
     m_startTimeInMs = CTimer::GetTimeInMS();
     m_position = m_entity->GetPosition();
@@ -33,7 +33,7 @@ CEventSoundQuiet::~CEventSoundQuiet()
         m_entity->CleanUpOldReference(&m_entity);
 }
 
-CEventSoundQuiet* CEventSoundQuiet::Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, CVector& position)
+CEventSoundQuiet* CEventSoundQuiet::Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position)
 {
     this->CEventSoundQuiet::CEventSoundQuiet(entity, fLocalSoundLevel, startTime, position);
     return this;

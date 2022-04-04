@@ -9,11 +9,11 @@ void CEventDraggedOutCar::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x4AD250);
     RH_ScopedInstall(AffectsPed, 0x4AD3A0);
     RH_ScopedInstall(AffectsPedGroup, 0x4AD3C0);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6DC0);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6DC0);
 }
 
 // // 0x4AD250
-CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) {
+CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) : CEventEditableResponse() {
     m_carjacker = carjacker;
     m_vehicle = vehicle;
     m_IsDriverSeat = IsDriverSeat;
@@ -42,7 +42,7 @@ bool CEventDraggedOutCar::AffectsPed(CPed* ped) {
 
 // 0x4AD3C0
 bool CEventDraggedOutCar::AffectsPedGroup(CPedGroup* pedGroup) {
-    return FindPlayerPed() == pedGroup->m_groupMembership.GetLeader();
+    return FindPlayerPed() == pedGroup->GetMembership().GetLeader();
 }
 
 // 0x4B6DC0

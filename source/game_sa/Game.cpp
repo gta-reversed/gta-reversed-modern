@@ -16,7 +16,7 @@
 #include "FireManager.h"
 #include "Fx_c.h"
 #include "BreakManager_c.h"
-// todo: #include "BoneNodeManager_c.h"
+#include "BoneNodeManager_c.h"
 // todo: #include "ShadowManager.h"
 #include "PedType.h"
 #include "IKChainManager_c.h"
@@ -171,7 +171,7 @@ void CGame::ShutDownForRestart() {
     gFireManager.Shutdown();
     g_fx.Reset();
     g_breakMan.ResetAll();
-    // todo: g_boneNodeMan.Reset();
+    g_boneNodeMan.Reset();
     g_ikChainMan.Reset();
     // todo: g_realTimeShadowMan.Shutdown();
     CTheZones::ResetZonesRevealed();

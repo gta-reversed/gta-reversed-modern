@@ -11,6 +11,8 @@ public:
     int32   field_38;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_TO_POINT;
+
     CTaskComplexDriveToPoint(CVehicle* vehicle, CVector& point, float speed, int32 arg4, int32 arg5, float arg6, int32 arg7);
     ~CTaskComplexDriveToPoint();
 };

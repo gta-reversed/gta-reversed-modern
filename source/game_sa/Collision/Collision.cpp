@@ -331,7 +331,6 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         }
     }
 
-    //localMinTouchDist = maxTouchDistance;
     if (localMinTouchDist < maxTouchDistance) {
         colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
         colPoint.m_vecNormal = Multiply3x3(transform, colPoint.m_vecNormal);
@@ -601,7 +600,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     cp,
                     minTouchDist)
                 ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nSurfaceTypeA = static_cast<eSurfaceType>(box.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeA = box.m_nFlags;
                     cp.m_nLightingA = box.m_nLighting;
 
@@ -813,11 +812,11 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     cp,
                     minTouchDist)
                 ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nSurfaceTypeA = static_cast<eSurfaceType>(box.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeA = box.m_nFlags; // Presumably box.m_nFlags aren't actually flags.
                     cp.m_nLightingA = box.m_nLighting;
 
-                    cp.m_nSurfaceTypeB = sphere.m_nMaterial;
+                    cp.m_nSurfaceTypeB = static_cast<eSurfaceType>(sphere.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeB = sphere.m_nFlags;
                     cp.m_nLightingB = sphere.m_nLighting;
 

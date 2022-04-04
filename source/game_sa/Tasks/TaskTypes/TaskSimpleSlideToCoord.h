@@ -8,6 +8,8 @@ public:
     uint8 unkn[28];
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_SLIDE_TO_COORD;
+
     CTaskSimpleSlideToCoord(const CVector&, float, float);
     CTaskSimpleSlideToCoord(int32, char, char, float, char, char);
 

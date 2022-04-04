@@ -2,6 +2,22 @@
 
 #include "PedGroup.h"
 
+// 0x5FC150
+CPedGroup::CPedGroup() {
+    m_groupMembership.m_pPedGroup = this;
+    m_groupIntelligence.m_pPedGroup = this;
+    m_bIsMissionGroup = false;
+    m_pPed = nullptr;
+    m_bMembersEnterLeadersVehicle = true;
+}
+
+// 0x5FC190
+CPedGroup::~CPedGroup() {
+    for (auto i = 0; i < m_groupMembership.m_apMembers.size(); i++) {
+        m_groupMembership.RemoveMember(i);
+    }
+}
+
 float CPedGroup::FindDistanceToFurthestMember() {
     return plugin::CallMethodAndReturn<float, 0x5FB010, CPedGroup*>(this);
 }

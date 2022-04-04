@@ -24,6 +24,8 @@
 #include "toolsmenu\DebugModules\FXDebugModule.h"
 #include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
 
+#include "TaskComplexUseGoggles.h"
+
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
 bool CDebugMenu::m_showFPS = false;
@@ -301,6 +303,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
                 ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
@@ -318,26 +321,27 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
+    CPad* pad = CPad::GetPad();
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    CPad* pad = CPad::GetPad(0);
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
         CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
+    if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
     }
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
     if (pad->IsStandardKeyJustDown('4')) {
-        printf("");
-        PedDebugModule::SpawnRandomPed();
+        FindPlayerPed()->Teleport({ -1956.25110f, 297.625519f, 35.0370331f }, true);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
     // CTRL + M or F7
     if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
@@ -347,7 +351,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();

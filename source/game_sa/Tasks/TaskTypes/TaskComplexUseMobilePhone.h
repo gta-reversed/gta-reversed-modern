@@ -16,6 +16,9 @@ public:
     bool       m_bIsAborting;
     bool       m_bQuit;
 
+public:
+    static constexpr auto Type = TASK_COMPLEX_USE_MOBILE_PHONE;
+
     CTaskComplexUseMobilePhone(int32 nDuration);
 };
 

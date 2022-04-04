@@ -12,8 +12,8 @@ void CEventPedCollisionWithPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC990);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ACAD0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACB10);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ACAD0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACB10);
 }
 
 void CEventPedCollisionWithPlayer::InjectHooks()
@@ -38,7 +38,7 @@ void CEventObjectCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACCF0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4ACE30);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4ACE30);
 }
 
 void CEventBuildingCollision::InjectHooks()
@@ -47,7 +47,7 @@ void CEventBuildingCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ACF00);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AD070);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AD070);
     RH_ScopedInstall(IsHeadOnCollision, 0x4AD1E0);
     RH_ScopedInstall(CanTreatBuildingAsObject, 0x4B3120);
 }
@@ -98,43 +98,51 @@ bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEven
 
 bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
 {
-    if (ped->IsAlive() && !ped->m_pAttachedTo && m_victim && !ped->bInVehicle && !m_victim->bInVehicle &&
-        m_victim->GetIntelligence()->m_AnotherStaticCounter <= 30 && !ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
-        if (m_movestate < PEDMOVE_WALK) {
-            CPedGroup* victimGroup = CPedGroups::GetPedsGroup(m_victim);
-            if (victimGroup && !victimGroup->GetMembership().IsLeader(m_victim)) {
-                if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f)
-                    return false;
-                CTask* pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-                if (!pedPartnerTask)
-                    pedPartnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-                if (pedPartnerTask) {
-                    CTask* victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-                    if (!victimPartnerTask)
-                        victimPartnerTask = m_victim->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-                    if (victimPartnerTask) {
-                        if (pedPartnerTask->GetTaskType() == victimPartnerTask->GetTaskType())
-                            return false;
-                    }
-                }
-                CTask* pedActiveTask = ped->GetTaskManager().GetActiveTask();
-                if (pedActiveTask && pedActiveTask->GetTaskType() == TASK_COMPLEX_AVOID_OTHER_PED_WHILE_WANDERING
-                    && reinterpret_cast<CTaskComplexAvoidOtherPedWhileWandering*>(pedActiveTask)->m_ped == m_victim)
-                {
-                    return false;
-                }
-                auto pTaskKillPedOnFoot = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-                if (pTaskKillPedOnFoot && pTaskKillPedOnFoot->m_target == m_victim
-                    && ped->GetTaskManager().FindActiveTaskByType(TASK_SIMPLE_FIGHT_CTRL)) {
-                    return false;
-                }
-                else {
-                    return true;
-                }
+    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
+        return false;
+    }
+
+    if (!m_victim || m_victim->bInVehicle || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
+        return false;
+    }
+
+    switch (m_movestate) {
+    case PEDMOVE_NONE:
+    case PEDMOVE_STILL:
+    case PEDMOVE_TURN_L:
+    case PEDMOVE_TURN_R:
+        break;
+    default:
+        return false;
+    }
+
+    if (const auto victimsGroup = CPedGroups::GetPedsGroup(m_victim); !victimsGroup || victimsGroup->GetMembership().IsLeader(m_victim)) {
+        return false;
+    }
+
+    if (DotProduct(m_collisionImpactVelocity, ped->GetForward()) > -0.5f) { // If collision's velocity is not in [-120, 120] - So basically, if coming from behind
+        return false;
+    }
+
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_PARTNER_GREET>(m_victim->GetTaskManager())) {
+        return false;
+    }
+                
+    if (const auto task = ped->GetTaskManager().GetActiveTaskAs<CTaskComplexAvoidOtherPedWhileWandering>()) {
+        if (task->m_ped == m_victim) {
+            return false;
+        }
+    }
+
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_victim) {
+            if (ped->GetTaskManager().Find<TASK_SIMPLE_FIGHT_CTRL>()) {
+                return false;
             }
         }
     }
-    return false;
+
+    return true;
 }
 
 CEventPedCollisionWithPlayer::CEventPedCollisionWithPlayer(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState) :
@@ -249,7 +257,7 @@ bool CEventBuildingCollision::AffectsPed_Reversed(CPed* ped)
             }
             // CEventPotentialWalkIntoBuilding doesn't even exist on PC
             assert (ped->GetEventHandler().GetCurrentEventType() != EVENT_POTENTIAL_WALK_INTO_BUILDING);
-            if (dotProduct <= -0.5f && !ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CLIMB))
+            if (dotProduct <= -0.5f && !ped->GetTaskManager().Find<TASK_COMPLEX_CLIMB>())
                 return ped->GetEventHandler().GetCurrentEventType() != EVENT_GUN_AIMED_AT;
         }
     }

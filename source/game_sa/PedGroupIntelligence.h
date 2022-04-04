@@ -18,30 +18,36 @@ class CPedGroup;
 class CEventGroupEvent;
 
 class CPedGroupIntelligence {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupIntelligence)
-
 public:
     CPedGroup*                     m_pPedGroup;
-    CEventGroupEvent*              m_oldEventGroupEvent;
-    CEventGroupEvent*              m_eventGroupEvent;
-    CPedTaskPair                   m_groupTasks[32];
+    CEventGroupEvent*              m_pOldEventGroupEvent;
+    CEventGroupEvent*              m_pEventGroupEvent;
+    CPedTaskPair                   m_groupTasks[32]; // todo: split array
     CPedGroupDefaultTaskAllocator* m_pPedGroupDefaultTaskAllocator;
     CTaskAllocator*                m_pPrimaryTaskAllocator;
     CTaskAllocator*                m_pEventResponseTaskAllocator;
-    int32                          m_dwDecisionMakerType;
-    int32                          m_taskSequenceId; // Used in CTaskSequences::ms_taskSequence
+    int32                          m_nDecisionMakerType;
+    int32                          m_nTaskSequenceId; // Used in CTaskSequences::ms_taskSequence
 
 public:
+    static void InjectHooks();
+
+    CPedGroupIntelligence();
+    ~CPedGroupIntelligence();
+
     bool       AddEvent(CEvent* event);
     void       ComputeDefaultTasks(CPed* ped);
     void*      ComputeEventResponseTasks();
     void       ComputeScriptCommandTasks();
     void       FlushTasks(CPedTaskPair* taskpair, CPed* ped);
-    CTask*     GetTask(CPed* ped, CPedTaskPair const* taskpair);
+
+    CTask*     GetTask(CPed* ped, CPedTaskPair const* taskPair);
+    CTask*     GetTaskMain(CPed* ped);
     CTask*     GetTaskDefault(CPed* ped);
     CTask*     GetTaskScriptCommand(CPed* ped);
     CTask*     GetTaskSecondary(CPed* ped);
     int32      GetTaskSecondarySlot(CPed* ped);
+
     bool       IsCurrentEventValid();
     bool       IsGroupResponding();
     void       Process();

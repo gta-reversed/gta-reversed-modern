@@ -23,77 +23,112 @@ struct tBuildingSwap {
     CBuilding* m_pCBuilding;
     int32      m_nNewModelIndex;
     int32      m_nOldModelIndex;
+
+    tBuildingSwap() { // 0x469270
+        Clear();
+    }
+
+    tBuildingSwap(CBuilding* building, int32 nNewModelIndex, int32 nOldModelIndex) {
+        m_pCBuilding     = building;
+        m_nNewModelIndex = nNewModelIndex;
+        m_nOldModelIndex = nOldModelIndex;
+    }
+
+    void Clear() {
+        m_pCBuilding     = nullptr;
+        m_nNewModelIndex = -1;
+        m_nOldModelIndex = -1;
+    }
 };
 
 struct tScriptSwitchCase {
     int32 m_nSwitchValue;
     int32 m_nSwitchLabelAddress;
 };
+VALIDATE_SIZE(tScriptSwitchCase, 0x8);
 
 struct tScriptCheckpoint {
-    char  bUsed;
-    char  field_1;
-    int16 wUniqueID;
-    void* field_4;
+    bool  m_bUsed;
+    char  m_field_1;
+    int16 m_nId;
+    void* m_field_4;
+
+    tScriptCheckpoint() { // 0x469334
+        m_bUsed   = false;
+        m_nId     = 1;
+        m_field_4 = nullptr;
+    }
 };
+VALIDATE_SIZE(tScriptCheckpoint, 0x8);
+
 struct tScriptEffectSystem {
     char  bUsed;
-    int16 wUniqueID;
+    int16 nId;
     void* m_pFxSystem;
 };
+VALIDATE_SIZE(tScriptEffectSystem, 0x8);
 
 struct tScriptSequence {
-    char  bUsed;
-    int16 wUniqueID;
+    bool  bUsed;
+    int16 nId;
 };
+VALIDATE_SIZE(tScriptSequence, 0x4);
 
 struct tScriptText {
-    float  letterWidth;
-    int32  letterHeight;
-    RwRGBA color;
-    char   m_bJustify;
-    char   centered;
-    char   withBackground;
-    char   _pad;
-    int32  lineHeight;
-    int32  lineWidth;
-    RwRGBA backgroundBoxColor;
-    char   proportional;
-    RwRGBA backgroundColor;
-    char   shadowType;
-    char   outlineType;
-    char   m_bDrawBeforeFade;
-    char   m_bRightJustify;
-    char   _pad_25;
-    char   _pad_26;
-    char   _pad_27;
-    int32  font;
-    int32  xPosition;
-    int32  yPosition;
-    char   gxtEntry[8];
-    int32  param1;
-    int32  param2;
+    float     letterWidth;
+    int32     letterHeight;
+    RwRGBA    color;
+    bool      m_bJustify;
+    bool      m_bCentered;
+    bool      m_bWithBackground;
+    float     m_fLineHeight;
+    float     m_fLineWidth;
+    RwRGBA    backgroundBoxColor;
+    bool      m_bProportional;
+    RwRGBA    backgroundColor;
+    int8      m_nShadowType;
+    int8      m_nOutlineType;
+    bool      m_bDrawBeforeFade;
+    bool      m_bRightJustify;
+    int32     font;
+    CVector2D pos;
+    char      gxtEntry[8];
+    int32     param1;
+    int32     param2;
+
+    void Init(); // 0x4690A8
 };
+VALIDATE_SIZE(tScriptText, 0x44);
 
 struct tScriptRectangle {
-    int32 type;
-    char  m_bDrawBeforeFade;
-    char  field_5;
-    int16 textureID;
-    int32 cornerA_X;
-    int32 cornerA_Y;
-    int32 cornerB_X;
-    int32 cornerB_Y;
-    int32 angle;
-    int32 transparentColor;
-    char  gxt[8];
-    int32 field_28;
-    int32 field_2C;
-    int32 field_30;
-    int32 field_34;
-    char  textboxStyle;
-    char  field_39[3];
+    int32     m_nType;
+    bool      m_bDrawBeforeFade;
+    char      field_5;
+    int16     m_nTextureId;
+    CVector2D cornerA;
+    CVector2D cornerB;
+    int32     m_nAngle;
+    CRGBA     m_nTransparentColor;
+    char      gxt[8];
+    int32     field_28;
+    int32     field_2C;
+    int32     field_30;
+    int32     field_34;
+    uint32    m_nTextboxStyle;
+
+    void Init() { // 0x4691C8
+        m_nType             = 0;
+        m_bDrawBeforeFade   = false;
+        m_nTextureId        = -1;
+        cornerA             = CVector2D();
+        cornerB             = CVector2D();
+        m_nAngle            = 0;
+        m_nTransparentColor = CRGBA(255, 255, 255, 255);
+        gxt[0]              = 0;
+        m_nTextboxStyle     = 3;
+    }
 };
+VALIDATE_SIZE(tScriptRectangle, 0x3C);
 
 struct tScriptAttachedAnimGroup {
     int32 m_nModelID;
@@ -101,41 +136,91 @@ struct tScriptAttachedAnimGroup {
 };
 
 struct tScriptSearchlight {
-    char  bUsed;
-    char  field_1;
-    char  bEnableShadow;
-    char  field_3;
-    int16 wUniqueID;
-    int16 field_6;
-    RwV3d position;
-    RwV3d target;
-    float targetRadius;
-    float baseRadius;
-    RwV3d pathCoord1;
-    RwV3d pathCoord2;
-    float pathSpeed;
-    int32 attachedEntity;
-    int32 followingEntity;
-    int32 tower;
-    int32 housing;
-    int32 bulb;
-    RwV3d targetSpot;
-    RwV3d field_64;
-    RwV3d field_70;
+    bool     bUsed;
+    char     field_1;
+    bool     bEnableShadow;
+    char     field_3;
+    int16    nId;
+    int16    field_6;
+    CVector  position;
+    CVector  target;
+    float    fTargetRadius;
+    float    fBaseRadius;
+    CVector  vPathCoord1;
+    CVector  vPathCoord2;
+    float    fPathSpeed;
+    CEntity* pAttachedEntity;
+    CEntity* pFollowingEntity;
+    CEntity* pTower;
+    CEntity* pHousing;
+    CEntity* pBulb;
+    CVector  vTargetSpot;
+    CVector  vf64;
+    CVector  vf70;
 };
+VALIDATE_SIZE(tScriptSearchlight, 0x7C);
 
 struct tUsedObject {
     char  szModelName[24];
-    int32 dwModelIndex;
+    int32 nModelIndex;
+
+    tUsedObject() = default; // 0x468F20
 };
+VALIDATE_SIZE(tUsedObject, 0x1C);
 
 struct tScriptSphere {
-    char  bUsed;
-    char  field_1;
-    int16 wUniqueID;
-    int32 field_4;
-    RwV3d vCoords;
-    int32 fRadius;
+    bool    m_bUsed;
+    char    m_f1;
+    int16   m_f2;
+    int32   m_nId;
+    CVector m_vCoords;
+    float   m_fRadius;
+
+    tScriptSphere() { // 0x469060
+        m_vCoords = CVector();
+        m_bUsed   = false;
+        m_f2      = 1;
+        m_nId     = 0;
+        m_fRadius = 0.0f;
+    }
+};
+VALIDATE_SIZE(tScriptSphere, 0x18);
+
+struct tStoredLine {
+    CVector vecInf;
+    CVector vecSup;
+    uint32  color1;
+    uint32  color2;
+};
+VALIDATE_SIZE(tStoredLine, 0x20);
+
+struct tScriptBrainWaitEntity {
+    CEntity* m_pEntity;
+    int16    m_nSpecialModelIndex;
+    int16    field_6;
+
+    tScriptBrainWaitEntity() { // 0x468E12
+        m_pEntity = nullptr;
+        m_nSpecialModelIndex = -1;
+    }
+};
+VALIDATE_SIZE(tScriptBrainWaitEntity, 0x8);
+
+enum {
+    MAX_NUM_SCRIPTS               = 96,
+    MAX_NUM_SCRIPT_SPRITES        = 128,
+    MAX_NUM_SCRIPT_SPHERES        = 16,
+    MAX_NUM_USED_OBJECTS          = 395,
+    MAX_NUM_MISSION_SCRIPTS       = 200,
+    MAX_NUM_BUILDING_SWAPS        = 25,
+    MAX_NUM_INVISIBILITY_SETTINGS = 20,
+    MAX_NUM_INTRO_TEXT_LINES      = 96,
+    MAX_NUM_SCRIPT_RECTANGLES     = 128,
+    MAX_NUM_SCRIPT_SEARCH_LIGHT   = 8,
+    MAX_NUM_SCRIPT_SEQUENCE_TASKS = 64,
+    MAX_NUM_SCRIPT_CHECKPOINTS    = 20,
+    MAX_NUM_SCRIPT_EFFECT_SYSTEMS = 32,
+    MAX_NUM_STORED_LINES          = 1024
 };
 
 enum eScriptThingType : int32 {
@@ -259,9 +344,12 @@ public:
     static void InitialiseConnectLodObjects(uint16 a1);
     static void InitialiseSpecialAnimGroup(uint16 a1);
     static void InitialiseSpecialAnimGroupsAttachedToCharModels();
+    static void ReadObjectNamesFromScript();
+    static void UpdateObjectIndices();
+    static void ReadMultiScriptFileOffsetsFromScript();
 
-    static int32 AddScriptCheckpoint(float atX, float atY, float atZ, float PointToX, float PointToY, float PointToZ, float radius, int32 type);
-    static int32 AddScriptEffectSystem(FxSystem_c* a1);
+    static int32 AddScriptCheckpoint(float atX, float atY, float atZ, float pointToX, float pointToY, float pointToZ, float radius, int32 type);
+    static int32 AddScriptEffectSystem(FxSystem_c* system);
     static int32 AddScriptSearchLight(float startX, float startY, float startZ, CEntity* entity, float targetX, float targetY, float targetZ, float targetRadius, float baseRadius);
     static uint32 AddScriptSphere(uint32 id, CVector posn, float radius);
 
@@ -273,7 +361,7 @@ public:
     static void AddToVehicleModelsBlockedByScript(int32 modelIndex);
     static void AddToWaitingForScriptBrainArray(CEntity* entity, int16 arg2);
     static void AttachSearchlightToSearchlightObject(int32 searchLightId, CObject* tower, CObject* housing, CObject* bulb, float offsetX, float offsetY, float offsetZ);
-    static char CheckStreamedScriptVersion(RwStream* arg1, char* arg2);
+    static char CheckStreamedScriptVersion(RwStream* stream, char* arg2);
     static void CleanUpThisObject(CObject* obj);
     static void CleanUpThisPed(CPed* ped);
     static void CleanUpThisVehicle(CVehicle* vehicle);
@@ -281,18 +369,13 @@ public:
     static void ClearAllVehicleModelsBlockedByScript();
     static void ClearSpaceForMissionEntity(const CVector& pos, CEntity* entity);
     static void DoScriptSetupAfterPoolsHaveLoaded();
-    static void DrawDebugAngledSquare(float x1, float y1, float x2, float y2, float x3, float y3, float x4, float y4);
-    static void DrawDebugCube(float x1, float y1, float x2, float y2);
-    static void DrawScriptSpheres();
-    static void DrawScriptSpritesAndRectangles(char bDrawBeforeFade);
+
     static int32 GetActualScriptThingIndex(int32 index, uint8 type);
     static uint32 GetNewUniqueScriptThingIndex(uint32 index, char type);
     static int32 GetScriptIndexFromPointer(CRunningScript* thread);
     //! type is always 8 , which refers to PedGroups
     static uint32 GetUniqueScriptThingIndex(int32 playerGroup, uint8 type);
     static bool HasVehicleModelBeenBlockedByScript(int32 modelIndex);
-    static void HighlightImportantAngledArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
-    static void HighlightImportantArea(int32 markerId, float fromX, float fromY, float toX, float toY, float height);
 
     static bool IsEntityWithinAnySearchLight(CEntity* entity, int32* pIndex);
     static bool IsEntityWithinSearchLight(uint32 index, CEntity* entity);
@@ -307,14 +390,11 @@ public:
     static void MoveSearchLightBetweenTwoPoints(int32 index, float x1, float y1, float z1, float x2, float y2, float z2, float pathSpeed);
     static void MoveSearchLightToEntity(int32 index, CEntity* entity, float pathSpeed);
     static void MoveSearchLightToPointAndStop(int32 index, float x, float y, float z, float pathSpeed);
-    static void PrintListSizes();
 
     static void Process();
     static void ProcessAllSearchLights();
     static void ProcessWaitingForScriptBrainArray();
 
-    static void ReadMultiScriptFileOffsetsFromScript();
-    static void ReadObjectNamesFromScript();
     static void ReinitialiseSwitchStatementData();
 
     static void RemoveFromVehicleModelsBlockedByScript(int32 modelIndex);
@@ -335,9 +415,23 @@ public:
     static void StartTestScript();
     static void UndoBuildingSwaps();
     static void UndoEntityInvisibilitySettings();
-    static void UpdateObjectIndices();
     static void UseSwitchJumpTable(int32* pSwitchLabelAddress);
     static void WipeLocalVariableMemoryForMissionScript();
+
+    // DEBUG
+    static void ScriptDebugLine3D(const CVector& start, const CVector& end, uint32 color1, uint32 color2);
+    static void RenderTheScriptDebugLines();
+
+    static void PrintListSizes();
+
+    static void DrawScriptSpheres();
+    static void HighlightImportantArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float height);
+    static void HighlightImportantAngledArea(uint32 markerId, float fromX, float fromY, float toX, float toY, float angledToX, float angledToY, float angledFromX, float angledFromY, float height);
+    static void DrawDebugSquare(float, float, float, float);
+    static void DrawDebugAngledSquare(const CVector2D& inf, const CVector2D& sup, const CVector2D& rotSup, const CVector2D& rotInf);
+    static void DrawDebugCube(const CVector& inf, const CVector& sup);
+    static void DrawDebugAngledCube(const CVector& inf, const CVector& sup, const CVector2D& rotSup, const CVector2D& rotInf);
+    static void DrawScriptSpritesAndRectangles(bool bDrawBeforeFade);
 
     static int32* GetPointerToScriptVariable(uint32 offset) {
         // TODO: find out how this method changed between re3 and GTA:SA

@@ -47,6 +47,8 @@ public:
     bool m_bAimImmediate;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_USE_GUN;
+
     CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 

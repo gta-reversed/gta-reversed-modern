@@ -24,15 +24,63 @@ void CHeli::InjectHooks() {
     RH_ScopedInstall(SwitchPoliceHelis, 0x6C4800);
     RH_ScopedInstall(RenderAllHeliSearchLights, 0x6C7C50);
     RH_ScopedInstall(TestSniperCollision, 0x6C6890);
-    RH_ScopedInstall(Render_Reversed, 0x6C4400);
-    RH_ScopedInstall(Fix_Reversed, 0x6C4530);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C4330);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C4320);
+    RH_ScopedVirtualInstall(Render, 0x6C4400);
+    RH_ScopedVirtualInstall(Fix, 0x6C4530);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6C4330);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C4320);
 }
 
 // 0x6C4190
-CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile({}) {
-    plugin::CallMethod<0x6C4190, CHeli*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, true) {
+    m_nVehicleSubType = VEHICLE_TYPE_HELI;
+
+    m_fLeftRightSkid           = 0.0f;
+    m_fSteeringUpDown          = 0.0f;
+    m_fSteeringLeftRight       = 0.0f;
+    m_fAccelerationBreakStatus = 0.0f;
+
+    field_99C = 0;
+    m_fRotorZ = 0;
+    m_fSecondRotorZ = 0;
+
+    m_fMinAltitude = 10.0f;
+    m_fMaxAltitude = 10.0f;
+
+    field_9AC = 10.0f;
+    field_9B4 = 0;
+
+    m_nHeliFlags = m_nHeliFlags & 0xFC;
+    m_fSearchLightIntensity = 0.0f;
+    m_nPhysicalFlags = m_nPhysicalFlags | PHYSICAL_25; // todo: bDontCollideWithFlyers
+
+    if (modelIndex == MODEL_HUNTER) {
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
+        m_doors[DOOR_LEFT_FRONT].m_fOpenAngle = 0.94247788f; // todo: magic number
+        m_doors[DOOR_LEFT_FRONT].m_fClosedAngle = 0.0f;
+        m_doors[DOOR_LEFT_FRONT].m_nAxis = 1;
+        m_doors[DOOR_LEFT_FRONT].m_nDirn = 19;
+    }
+
+    m_nNumSwatOccupants = 4;
+    std::ranges::fill(m_aSwatState, 0);
+
+    m_nSearchLightTimer = CTimer::GetTimeInMS();
+
+    std::ranges::fill(m_aSearchLightHistoryX, 0.0f);
+    std::ranges::fill(m_aSearchLightHistoryY, 0.0f);
+
+    m_nShootTimer = 0;
+    m_nPoliceShoutTimer = CTimer::GetTimeInMS();
+
+    vehicleFlags.bNeverUseSmallerRemovalRange = true; // 0x6C42BD
+    m_autoPilot.m_ucHeliTargetDist2 = 10;
+
+    m_ppGunflashFx = nullptr;
+    m_nFiringMultiplier = 16;
+
+    field_9B8 = 0;
+    m_bSearchLightEnabled = false;
+    field_A14 = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * 6.0f + 2.0f;
 }
 
 // 0x6C4340
@@ -239,9 +287,9 @@ void CHeli::ProcessControlInputs(uint8 playerNum) {
 
 // 0x6C4400
 void CHeli::Render() {
-    auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
+    auto* mi = GetVehicleModelInfo();
     m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
-    mi->AsVehicleModelInfoPtr()->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
+    mi->SetVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor);
 
     auto staticRotor = m_aCarNodes[HELI_STATIC_ROTOR];
     RpAtomic* data = nullptr;

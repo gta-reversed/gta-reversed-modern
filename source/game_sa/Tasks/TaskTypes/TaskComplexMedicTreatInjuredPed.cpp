@@ -22,10 +22,10 @@ void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     RH_ScopedInstall(CreateDealWithNextAccidentTask, 0x65A020);
     RH_ScopedInstall(FindNearestAccident, 0x658CC0);
     RH_ScopedInstall(FindAccidentPosition, 0x658D20);
-    RH_ScopedInstall(Clone_Reversed, 0x659AF0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x659FE0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65A990);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65ABF0);
+    RH_ScopedVirtualInstall(Clone, 0x659AF0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x659FE0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A990);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65ABF0);
 }
 
 CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, bool isDriver) {

@@ -48,6 +48,17 @@ CTask* CTaskComplexUseGoggles::ControlSubTask(CPed* ped) {
     return m_pSubTask;
 }
 
+void CTaskComplexUseGoggles::InjectHooks() {
+    RH_ScopedClass(CTaskComplexUseGoggles);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedVirtualInstall(Clone, 0x637060);
+    RH_ScopedVirtualInstall(GetTaskType, 0x634F10);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x634F40);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x634F90);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x635050);
+};
+
 void TaskComplexUseGogglesTestCode() {
     CStreaming::RequestModel(MODEL_NVGOGGLES, STREAMING_GAME_REQUIRED);
     CPlayerPed* player = FindPlayerPed();

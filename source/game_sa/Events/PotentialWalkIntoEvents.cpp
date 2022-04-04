@@ -15,7 +15,7 @@ void CEventPotentialWalkIntoVehicle::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE320);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE420);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE420);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
@@ -24,7 +24,7 @@ void CEventPotentialWalkIntoObject::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE5D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4950);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
@@ -33,7 +33,7 @@ void CEventPotentialWalkIntoFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1E20);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B6890);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B6890);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
@@ -42,8 +42,8 @@ void CEventPotentialWalkIntoPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE6E0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE800);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AE950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE800);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AE950);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState)
@@ -75,7 +75,7 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed(CPed* ped)
 
 bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
 {
-    auto taskEnterCarAsDriver = reinterpret_cast<CTaskComplexEnterCarAsDriver*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ENTER_CAR_AS_DRIVER));
+    auto taskEnterCarAsDriver = ped->GetTaskManager().Find<CTaskComplexEnterCarAsDriver>();
     auto goToTask = reinterpret_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
     if (ped->IsPlayer() && !taskEnterCarAsDriver && !CTask::IsGoToTask(goToTask))
         return false;
@@ -83,14 +83,15 @@ bool CEventPotentialWalkIntoVehicle::AffectsPed_Reversed(CPed* ped)
     if (!ped->IsAlive() || ped->bInVehicle || m_moveState == PEDMOVE_STILL)
         return false;
 
-    auto taskWalkRoundCar = reinterpret_cast<CTaskComplexWalkRoundCar*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_WALK_ROUND_CAR));
-    if (taskWalkRoundCar && taskWalkRoundCar->m_vehicle != m_vehicle) {
-        if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == taskWalkRoundCar->m_vehicle) ||
-            (m_vehicle->m_pTractor && m_vehicle->m_pTractor == taskWalkRoundCar->m_vehicle))
-        {
-            taskWalkRoundCar->SetNewVehicle(m_vehicle, 0);
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexWalkRoundCar>()) {
+        if (task->m_vehicle != m_vehicle) {
+            if ((m_vehicle->m_pTrailer && m_vehicle->m_pTrailer == task->m_vehicle) ||
+                (m_vehicle->m_pTractor && m_vehicle->m_pTractor == task->m_vehicle)
+            ) {
+                task->SetNewVehicle(m_vehicle, 0);
+            }
+            return false;
         }
-        return false;
     }
 
     if (!ped->m_pAttachedTo && m_vehicle && m_vehicle->IsSubVehicleTypeValid() && !m_vehicle->IsSubFakeAircraft()) {
@@ -256,43 +257,33 @@ bool CEventPotentialWalkIntoPed::TakesPriorityOver(const CEvent& refEvent)
 
 bool CEventPotentialWalkIntoPed::AffectsPed_Reversed(CPed* ped)
 {
-    if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL)
+    if (!ped->IsAlive() || !m_ped || m_moveState == PEDMOVE_STILL) {
         return false;
+    }
 
-    CTask* partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-    if (!partnerTask)
-        partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
+    if (ped->GetTaskManager().IsFirstFoundTaskMatching<TASK_COMPLEX_PARTNER_DEAL, TASK_COMPLEX_BE_IN_COUPLE, TASK_COMPLEX_PARTNER_GREET>(m_ped->GetTaskManager())) {
+        return false;
+    }
 
-    if (!partnerTask)
-        partnerTask = ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-
-    if (partnerTask) {
-        CTask* thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_DEAL);
-        if (!thisPedPartnerTask)
-            thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_BE_IN_COUPLE);
-
-        if (!thisPedPartnerTask)
-            thisPedPartnerTask = m_ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_PARTNER_GREET);
-
-        if (thisPedPartnerTask) {
-            if (partnerTask->GetTaskType() == thisPedPartnerTask->GetTaskType())
-                return false;
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexFollowPedFootsteps>()) {
+        if (task->m_targetPed == m_ped) {
+            return false;
         }
     }
 
-    auto followFootstepsTask = reinterpret_cast<CTaskComplexFollowPedFootsteps*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS));
-    if (followFootstepsTask && followFootstepsTask->m_targetPed == m_ped)
-        return false;
+    if (const auto task = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        if (task->m_target == m_ped) {
+            return false;
+        }
+    }
 
-    auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetIntelligence()->FindTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-    if (killPedOnFootTask && killPedOnFootTask->m_target == m_ped)
-        return false;
+    if (const auto simplest = ped->GetTaskManager().GetSimplestActiveTask()) {
+        if (CTask::IsGoToTask(simplest)) {
+            return true;
+        }
+    }
 
-    CTask* activeTask = ped->GetTaskManager().GetSimplestActiveTask();
-    if (!activeTask || !CTask::IsGoToTask(activeTask))
-        return false;
-
-    return true;
+    return false;
 }
 
 bool CEventPotentialWalkIntoPed::TakesPriorityOver_Reversed(const CEvent& refEvent)

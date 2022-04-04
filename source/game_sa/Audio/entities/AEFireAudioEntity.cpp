@@ -180,7 +180,7 @@ void CAEFireAudioEntity::InjectHooks() {
     RH_ScopedInstall(AddAudioEvent, 0x4DD3C0);
     RH_ScopedInstall(PlayFireSounds, 0x4DD0D0);
     RH_ScopedInstall(PlayWaterSounds, 0x4DD270);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCF60);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCF60);
 }
 
 void CAEFireAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
