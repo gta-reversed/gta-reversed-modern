@@ -254,6 +254,7 @@ public:
     OpcodeResult ProcessCommands2400To2499(int32 commandId);
     OpcodeResult ProcessCommands2500To2599(int32 commandId);
     OpcodeResult ProcessCommands2600To2699(int32 commandId);
+    OpcodeResult ProcessExternalCommands(int32 commandId); // NOTSA
 
     void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
     void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
