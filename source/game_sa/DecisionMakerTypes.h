@@ -19,6 +19,8 @@ public:
 
 class CDecisionMakerTypes {
 public:
+    static inline std::array<uint16, 20>& ScriptReferenceIndex = *(std::array<uint16, 20>*)0xC0AFF4;
+
     static void InjectHooks();
 
     static void AddDecisionMaker(CDecisionMakerTypes* decisionMakerTypes, CDecisionMaker* decisionMaker, eDecisionTypes decisionMakerType, bool bUseMissionCleanup);

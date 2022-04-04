@@ -143,6 +143,16 @@ float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
     return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
 }
 
+uint16 CGeneral::GetRandomNumber()
+{
+    static_assert(RAND_MAX == 0x7FFF, "PC-generated random numbers should not exceed 32767");
+#ifdef BETTER_RNG
+    static_assert(false, "PC-generated random numbers should not exceed 32767");
+#else
+    return rand();
+#endif
+}
+
 /**
  * Returns a pseudo-random number between min and max, exclusive [min, max).
  * @param  min Minimum value

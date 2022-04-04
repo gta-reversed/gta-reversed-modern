@@ -6,7 +6,7 @@
 */
 #pragma once
 
-constexpr int32 NUM_MISSION_CLEANUP_OBJECTS = 75;
+constexpr auto NUM_MISSION_CLEANUP_OBJECTS = 75;
 
 enum MissionCleanUpEntityType : uint8 {
     MISSION_CLEANUP_ENTITY_TYPE_EMPTY          = 0, // free slot
@@ -38,8 +38,8 @@ VALIDATE_SIZE(tMissionCleanupEntity, 0x8);
 
 class CMissionCleanup {
 public:
-    tMissionCleanupEntity m_Objects[75];
-    int8                  m_Count;
+    std::array<tMissionCleanupEntity, NUM_MISSION_CLEANUP_OBJECTS> m_Objects;
+    int8 m_Count;
 
 public:
     // Default constructor

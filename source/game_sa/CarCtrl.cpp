@@ -9,6 +9,7 @@
 
 #include "CarCtrl.h"
 #include "TrafficLights.h"
+#include "TheScripts.h"
 
 uint32& CCarCtrl::NumLawEnforcerCars = *(uint32*)0x969098;
 uint32& CCarCtrl::NumParkedCars = *(uint32*)0x9690A0;

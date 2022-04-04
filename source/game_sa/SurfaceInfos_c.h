@@ -9,7 +9,8 @@ typedef uint32 SurfaceId;
 class SurfaceInfos_c {
 public:
     float m_adhesiveLimits[6][6];
-    std::array<SurfaceInfo_c, TOTAL_NUM_SURFACE_TYPES> m_surfaces;
+    // todo: std::array<SurfaceInfo_c, TOTAL_NUM_SURFACE_TYPES> m_surfaces;
+    SurfaceInfo_c m_surfaces[TOTAL_NUM_SURFACE_TYPES];
 
     static constexpr const char* cDefaultName = "DEFAULT"; // 0x85C658 😏
 

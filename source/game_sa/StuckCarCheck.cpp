@@ -6,10 +6,10 @@ void CStuckCarCheck::InjectHooks() {
     RH_ScopedClass(CStuckCarCheck);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Init, 0x4639E0);
+    RH_ScopedInstall(Init, 0x4639E0);
     // RH_ScopedInstall(AddCarToCheck, 0x465970);
     // RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60);
-    // RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
+    RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
     // RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00);
     // RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70);
     // RH_ScopedInstall(Process, 0x465680);
@@ -18,8 +18,6 @@ void CStuckCarCheck::InjectHooks() {
 
 // 0x4639E0
 void CStuckCarCheck::Init() {
-    return plugin::Call<0x4639E0, CStuckCarCheck*>(this);
-
     for (auto& car : m_aStuckCars) {
         ResetArrayElement(car);
     }
@@ -37,12 +35,10 @@ bool CStuckCarCheck::AttemptToWarpVehicle(CVehicle* vehicle, CVector* origin, fl
 
 // 0x463C40
 void CStuckCarCheck::ClearStuckFlagForCar(int32 carHandle) {
-    return plugin::Call<0x463C40, CStuckCarCheck*, int32>(this, carHandle);
-
     for (auto& car : m_aStuckCars) {
         if (car.m_nCarHandle == carHandle) {
             car.m_bCarStuck = false;
-            return;
+            return; // NOTSA optimization
         }
     }
 }

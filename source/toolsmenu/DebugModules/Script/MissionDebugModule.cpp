@@ -8,6 +8,7 @@
 
 #include "CDebugMenuToolInput.h"
 #include "EntryExitManager.h"
+#include "TheScripts.h"
 
 namespace MissionDebugModule {
 
@@ -159,10 +160,10 @@ void Initialise() {
 
 void InitializeAndStartNewScript() {
     CTheScripts::WipeLocalVariableMemoryForMissionScript();
-    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::ScriptSpace[200000]);
+    CRunningScript* script = CTheScripts::StartNewScript(&CTheScripts::MissionBlock[0]);
     script->m_bUseMissionCleanup = true;
     script->m_bIsMission = true;
-    script->m_pBaseIP = &CTheScripts::ScriptSpace[200000];
+    script->m_pBaseIP = &CTheScripts::MissionBlock[0];
     CTheScripts::bAlreadyRunningAMissionScript = true;
     CGameLogic::ClearSkip(false);
 }
@@ -209,7 +210,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
             auto* file = CFileMgr::OpenFile(gString, "rb");
             if (file) {
                 CFileMgr::Seek(file, offsetToMission, 0);
-                bytesRead = CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+                bytesRead = CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
                 CFileMgr::CloseFile(file);
                 if (bytesRead >= 1) {
                     InitializeAndStartNewScript();
@@ -224,7 +225,7 @@ bool StartMission(int32 missionId, bool bDoMissionCleanUp = true) {
     if (!CGame::bMissionPackGame) {
         auto* file = CFileMgr::OpenFile("data\\script\\main.scm", "rb");
         CFileMgr::Seek(file, offsetToMission, 0);
-        CFileMgr::Read(file, &CTheScripts::ScriptSpace[200000], 69000);
+        CFileMgr::Read(file, &CTheScripts::MissionBlock[0], MISSION_SCRIPT_SIZE);
         CFileMgr::CloseFile(file);
         InitializeAndStartNewScript();
     }

@@ -665,6 +665,11 @@ public:
     [[nodiscard]] bool IsAmphibiousHeli()      const { return m_nModelIndex == MODEL_SEASPAR || m_nModelIndex == MODEL_LEVIATHN; }
     [[nodiscard]] bool IsConstructionVehicle() const { return m_nModelIndex == MODEL_DUMPER  || m_nModelIndex == MODEL_DOZER || m_nModelIndex == MODEL_FORKLIFT; }
 
+    bool IsRealBike()  { return m_pHandlingData->m_bIsBike;  }
+    bool IsRealHeli()  { return m_pHandlingData->m_bIsHeli;  }
+    bool IsRealPlane() { return m_pHandlingData->m_bIsPlane; }
+    bool IsRealBoat()  { return m_pHandlingData->m_bIsBoat;  }
+
     eVehicleCreatedBy GetCreatedBy()      { return m_nCreatedBy; }
     bool IsCreatedBy(eVehicleCreatedBy v) { return v == m_nCreatedBy; }
     bool IsMissionVehicle() const { return m_nCreatedBy == MISSION_VEHICLE; }
