@@ -82,36 +82,8 @@ void CRunningScript::InjectHooks() {
     // RH_ScopedInstall(ScriptTaskPickUpObject, 0x46AF50);
     RH_ScopedInstall(UpdateCompareFlag, 0x4859D0, false, 5, 1);
     RH_ScopedInstall(UpdatePC, 0x464DA0, false, 5, 1);
-    // RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
+    RH_ScopedInstall(ProcessOneCommand, 0x469EB0);
     RH_ScopedInstall(Process, 0x469F00);
-
-    // RH_ScopedInstall(ProcessCommands0To99, 0x465E60);
-    // RH_ScopedInstall(ProcessCommands100To199, 0x466DE0);
-    // RH_ScopedInstall(ProcessCommands200To299, 0x469390);
-    // RH_ScopedInstall(ProcessCommands300To399, 0x47C100);
-    // RH_ScopedInstall(ProcessCommands400To499, 0x47D210);
-    // RH_ScopedInstall(ProcessCommands500To599, 0x47E090);
-    // RH_ScopedInstall(ProcessCommands600To699, 0x47F370);
-    // RH_ScopedInstall(ProcessCommands700To799, 0x47FA30);
-    // RH_ScopedInstall(ProcessCommands800To899, 0x481300);
-    // RH_ScopedInstall(ProcessCommands900To999, 0x483BD0);
-    // RH_ScopedInstall(ProcessCommands1000To1099, 0x489500);
-    // RH_ScopedInstall(ProcessCommands1100To1199, 0x48A320);
-    // RH_ScopedInstall(ProcessCommands1200To1299, 0x48B590);
-    // RH_ScopedInstall(ProcessCommands1300To1399, 0x48CDD0);
-    // RH_ScopedInstall(ProcessCommands1400To1499, 0x48EAA0);
-    // RH_ScopedInstall(ProcessCommands1500To1599, 0x490DB0);
-    // RH_ScopedInstall(ProcessCommands1600To1699, 0x493FE0);
-    // RH_ScopedInstall(ProcessCommands1700To1799, 0x496E00);
-    // RH_ScopedInstall(ProcessCommands1800To1899, 0x46D050);
-    // RH_ScopedInstall(ProcessCommands1900To1999, 0x46B460);
-    // RH_ScopedInstall(ProcessCommands2000To2099, 0x472310);
-    // RH_ScopedInstall(ProcessCommands2100To2199, 0x470A90);
-    // RH_ScopedInstall(ProcessCommands2200To2299, 0x474900);
-    // RH_ScopedInstall(ProcessCommands2300To2399, 0x4762D0);
-    // RH_ScopedInstall(ProcessCommands2400To2499, 0x478000);
-    // RH_ScopedInstall(ProcessCommands2500To2599, 0x47A760);
-    // RH_ScopedInstall(ProcessCommands2600To2699, 0x479DA0);
 }
 
 // 0x4648E0
