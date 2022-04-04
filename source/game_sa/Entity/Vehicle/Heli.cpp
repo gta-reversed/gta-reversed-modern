@@ -6,13 +6,6 @@
 */
 #include "StdInc.h"
 
-bool& CHeli::bPoliceHelisAllowed = *(bool*)0x8D338C;
-uint32& CHeli::TestForNewRandomHelisTimer = *(uint32*)0xC1C960;
-CHeli* (&CHeli::pHelis)[2] = *(CHeli*(*)[2])0xC1C964;
-uint32& CHeli::NumberOfSearchLights = *(uint32*)0xC1C96C;
-bool& CHeli::bHeliControlsCheat = *(bool*)0xC1C970;
-tHeliLight (&CHeli::HeliSearchLights)[4] = *(tHeliLight(*)[4])0xC1C990;
-
 void CHeli::InjectHooks() {
     RH_ScopedClass(CHeli);
     RH_ScopedCategory("Vehicle");
@@ -51,23 +44,23 @@ CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelI
 
     m_nHeliFlags = m_nHeliFlags & 0xFC;
     m_fSearchLightIntensity = 0.0f;
-    m_nPhysicalFlags = m_nPhysicalFlags | PHYSICAL_25; // todo: bDontCollideWithFlyers
+    physicalFlags.bDontCollideWithFlyers = true;
 
     if (modelIndex == MODEL_HUNTER) {
         m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
-        m_doors[DOOR_LEFT_FRONT].m_fOpenAngle = 0.94247788f; // todo: magic number
+        m_doors[DOOR_LEFT_FRONT].m_fOpenAngle = (3.0f * PI) / 10.0f;
         m_doors[DOOR_LEFT_FRONT].m_fClosedAngle = 0.0f;
         m_doors[DOOR_LEFT_FRONT].m_nAxis = 1;
         m_doors[DOOR_LEFT_FRONT].m_nDirn = 19;
     }
 
     m_nNumSwatOccupants = 4;
-    std::ranges::fill(m_aSwatState, 0);
+    m_aSwatState.fill(0);
 
     m_nSearchLightTimer = CTimer::GetTimeInMS();
 
-    std::ranges::fill(m_aSearchLightHistoryX, 0.0f);
-    std::ranges::fill(m_aSearchLightHistoryY, 0.0f);
+    m_aSearchLightHistoryX.fill(0.0f);
+    m_aSearchLightHistoryY.fill(0.0f);
 
     m_nShootTimer = 0;
     m_nPoliceShoutTimer = CTimer::GetTimeInMS();
@@ -80,15 +73,14 @@ CHeli::CHeli(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelI
 
     field_9B8 = 0;
     m_bSearchLightEnabled = false;
-    field_A14 = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * 6.0f + 2.0f;
+    field_A14 = CGeneral::GetRandomNumberInRange(2.0, 8.0f);
 }
 
 // 0x6C4340
 CHeli::~CHeli() {
     if (m_ppGunflashFx) {
         for (auto i = 0; i < CVehicle::GetPlaneNumGuns(); i++) {
-            auto& fx = m_ppGunflashFx[i];
-            if (fx) {
+            if (auto& fx = m_ppGunflashFx[i]) {
                 fx->Kill();
                 g_fxMan.DestroyFxSystem(fx);
             }
@@ -112,8 +104,6 @@ void CHeli::InitHelis() {
 
 // 0x6C45B0
 void CHeli::AddHeliSearchLight(const CVector& origin, const CVector& target, float targetRadius, float power, uint32 coronaIndex, uint8 unknownFlag, uint8 drawShadow) {
-    // return ((void(__cdecl*)(const CVector&, const CVector&, float, float, uint32, uint8, uint8))0x6C45B0)(origin, target, targetRadius, power, coronaIndex, unknownFlag, drawShadow);
-
     auto& light = HeliSearchLights[NumberOfSearchLights];
 
     light.m_vecOrigin     = origin;
@@ -219,7 +209,7 @@ void CHeli::TestSniperCollision(CVector* origin, CVector* target) {
         const auto mat = (CMatrix*)heli->m_matrix;
         auto out = MultiplyMatrixWithVector(*mat, { -0.43f, 1.49f, 1.5f });
         if (CCollision::DistToLine(origin, target, &out) < 0.8f) {
-            heli->m_fRotationBalance = (float)(rand() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383
+            heli->m_fRotationBalance = (float)(rand() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383 [-0.05, 0.05]
             heli->BlowUpCar(FindPlayerPed(), false);
             heli->m_nNumSwatOccupants = 0;
         };

@@ -75,26 +75,26 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(mode
     m_fSteeringFactor              = 0.0f;
 
     if (m_nModelIndex != MODEL_VORTEX)
-        m_nPhysicalFlags |= PHYSICAL_25;
+        physicalFlags.bDontCollideWithFlyers = true;
 
     m_nExtendedRemovalRange = 255;
-    vehicleFlags.bNeverUseSmallerRemovalRange = true; // m_nFlags5 | 0x40;
-    vehicleFlags.bIsBig = true; // m_nFlags2 | 4;
+    vehicleFlags.bNeverUseSmallerRemovalRange = true;
+    vehicleFlags.bIsBig = true;
 
     auto& leftDoor = m_doors[DOOR_LEFT_FRONT];
     switch (modelIndex) {
     case MODEL_HYDRA:
     case MODEL_RUSTLER:
     case MODEL_CROPDUST:
-        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
-        leftDoor.m_fOpenAngle = 1.8849558f;
+        m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK); // todo: add func(openAngle, closedAngle, axis, dir)
+        leftDoor.m_fOpenAngle = (3.0f * PI) / 5.0f;
+        leftDoor.m_fClosedAngle = 0.0f;
         leftDoor.m_nAxis = 1;
         leftDoor.m_nDirn = 19;
-        leftDoor.m_fClosedAngle = 0.0f;
         break;
     case MODEL_SHAMAL:
         m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
-        leftDoor.m_fOpenAngle = -2.3561945f;
+        leftDoor.m_fOpenAngle = -((3.0f * PI) / 4.0f);
         leftDoor.m_fClosedAngle = 0.0f;
         leftDoor.m_nAxis = 1;
         leftDoor.m_nDirn = 18;
@@ -102,10 +102,10 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(mode
         break;
     case MODEL_NEVADA:
         m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
-        leftDoor.m_fOpenAngle = -1.2566371f;
+        leftDoor.m_fOpenAngle = -((2.0f * PI) / 5.0f);
+        leftDoor.m_fClosedAngle = 0.0f;
         leftDoor.m_nAxis = 2;
         leftDoor.m_nDirn = 20;
-        leftDoor.m_fClosedAngle = 0.0f;
         break;
     case MODEL_VORTEX:
         if (m_panels[FRONT_LEFT_PANEL].m_nFrameId == (uint16)-1)
@@ -113,7 +113,7 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(mode
         break;
     case MODEL_STUNT:
         m_damageManager.SetDoorStatus(DOOR_LEFT_FRONT, DAMSTATE_OK);
-        leftDoor.m_fOpenAngle = 1.8849558f;
+        leftDoor.m_fOpenAngle = (3.0f * PI) / 5.0f;
         leftDoor.m_fClosedAngle = 0.0f;
         leftDoor.m_nAxis = 1;
         leftDoor.m_nDirn = 19;
@@ -134,7 +134,7 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(mode
     m_nFiringMultiplier = 16;
     field_9DC = 0;
     field_9E0 = 0;
-    std::ranges::fill(m_apJettrusParticles, nullptr);
+    m_apJettrusParticles.fill(nullptr);
 
     m_pSmokeParticle = nullptr;
 
@@ -148,8 +148,7 @@ CPlane::CPlane(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(mode
 CPlane::~CPlane() {
     if (m_pGunParticles) {
         for (auto i = 0; i < CVehicle::GetPlaneNumGuns(); i++) {
-            auto& particle = m_pGunParticles[i];
-            if (particle) {
+            if (auto& particle = m_pGunParticles[i]) {
                 particle->Kill();
                 g_fxMan.DestroyFxSystem(particle);
             }
@@ -159,14 +158,10 @@ CPlane::~CPlane() {
     }
 
     for (auto& particle : m_apJettrusParticles) {
-        particle->Kill();
-        particle = nullptr;
+        FxSystem_c::KillAndClear(particle);
     }
 
-    if (m_pSmokeParticle) {
-        m_pSmokeParticle->Kill();
-        m_pSmokeParticle = nullptr;
-    }
+    FxSystem_c::SafeKillAndClear(m_pSmokeParticle);
 
     m_vehicleAudio.Terminate();
     CAutomobile::~CAutomobile();

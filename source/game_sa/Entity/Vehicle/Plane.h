@@ -63,7 +63,7 @@ public:
     int32        field_9DC;
     int32        field_9E0;
     int32        field_9E4;
-    FxSystem_c*  m_apJettrusParticles[4];
+    std::array<FxSystem_c*, 4> m_apJettrusParticles;
     FxSystem_c*  m_pSmokeParticle;
     uint32       m_nSmokeTimer;
     bool         m_bSmokeEjectorEnabled;

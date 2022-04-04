@@ -43,7 +43,7 @@ enum ePhysicalFlags {
     PHYSICAL_INVULNERABLE            = 0x400000,
     PHYSICAL_EXPLOSIONPROOF          = 0x800000,
 
-    PHYSICAL_25                      = 0x1000000,
+    PHYSICAL_DONTCOLLIDEWITHFLYERS   = 0x1000000,
     PHYSICAL_ATTACHEDTOENTITY        = 0x2000000,
     PHYSICAL_27                      = 0x4000000,
     PHYSICAL_TOUCHINGWATER           = 0x8000000,

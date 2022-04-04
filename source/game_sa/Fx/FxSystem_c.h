@@ -96,4 +96,17 @@ public:
     void DoFxAudio(CVector posn);
     bool IsVisible();
     bool Update(RwCamera* camera, float timeDelta);
+
+    template<typename T>
+    static void KillAndClear(T*& fx) requires std::is_base_of_v<FxSystem_c, T> {
+        fx->Kill();
+        fx = nullptr;
+    }
+
+    template<typename T>
+    static void SafeKillAndClear(T*& fx) requires std::is_base_of_v<FxSystem_c, T> {
+        if (fx) {
+            KillAndClear(fx);
+        }
+    }
 };
