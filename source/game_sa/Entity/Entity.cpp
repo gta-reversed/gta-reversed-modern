@@ -1120,7 +1120,7 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->iSlotMachineIndex == triggerIndex) {
+        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->slotMachineIndex.m_nId == triggerIndex) {
             *outVec = GetMatrix() * effect->m_vecPosn;
             return outVec;
         }
@@ -1595,12 +1595,12 @@ void CEntity::ModifyMatrixForBannerInWind()
     UpdateRwFrame();
 }
 
-RwMatrix* CEntity::GetModellingMatrix()
-{
+// 0x46A2D0
+RwMatrix* CEntity::GetModellingMatrix() {
     if (!m_pRwObject)
         return nullptr;
 
-    return RwFrameGetMatrix((RwFrame*)rwObjectGetParent(m_pRwObject));
+    return RwFrameGetMatrix(RwFrameGetParent(m_pRwObject));
 }
 
 // 0x535300
@@ -2512,6 +2512,7 @@ bool CEntity::IsInCurrentAreaOrBarberShopInterior()
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
+// 0x446F90
 void CEntity::UpdateRW() {
     if (!m_pRwObject)
         return;

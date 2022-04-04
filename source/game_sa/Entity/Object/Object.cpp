@@ -767,12 +767,12 @@ bool CObject::TryToExplode() {
 
 // 0x59F300
 void CObject::SetObjectTargettable(bool targetable) {
-    objectFlags.bIsTargatable = targetable;
+    objectFlags.bIsTargetable = targetable;
 }
 
 // 0x59F320
 bool CObject::CanBeTargetted() {
-    return objectFlags.bIsTargatable;
+    return objectFlags.bIsTargetable;
 }
 
 // 0x59F330
@@ -927,7 +927,7 @@ void CObject::Init() {
         objectFlags.bIsLampPost = false;
     }
 
-    objectFlags.bIsTargatable = false;
+    objectFlags.bIsTargetable = false;
     physicalFlags.bAttachedToEntity = false;
 
     m_nAreaCode = eAreaCodes::AREA_CODE_13;
