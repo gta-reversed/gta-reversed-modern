@@ -99,7 +99,7 @@
 #include "BoneNodeManager_c.h"
 #include "TheScripts.h"
 #include "RunningScript.h"
-// #include "Scripted2dEffects.h"
+#include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
 
@@ -715,7 +715,7 @@ void InjectHooksMain() {
         CRunningScript::InjectHooks();
         CTheScripts::InjectHooks();
         CStreamedScripts::InjectHooks();
-        // CScripted2dEffects::InjectHooks();
+        CScripted2dEffects::InjectHooks();
         CScriptResourceManager::InjectHooks();
     };
 
