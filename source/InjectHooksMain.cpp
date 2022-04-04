@@ -101,6 +101,7 @@
 #include "RunningScript.h"
 // #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
+#include "PedAttractorManager.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -223,6 +224,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
     CAnimBlendClumpData::InjectHooks();
