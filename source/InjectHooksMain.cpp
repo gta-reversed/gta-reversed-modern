@@ -99,6 +99,8 @@
 #include "BoneNodeManager_c.h"
 #include "TheScripts.h"
 #include "RunningScript.h"
+// #include "Scripted2dEffects.h"
+#include "ScriptResourceManager.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -288,9 +290,6 @@ void InjectHooksMain() {
     CPtrNodeSingleLink::InjectHooks();
     CPtrListSingleLink::InjectHooks();
     List_c::InjectHooks();
-    CRunningScript::InjectHooks();
-    CTheScripts::InjectHooks();
-    CStreamedScripts::InjectHooks();
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
@@ -710,11 +709,20 @@ void InjectHooksMain() {
         InteriorManager_c::InjectHooks();
     };
 
+    const auto Scripts = []() {
+        CRunningScript::InjectHooks();
+        CTheScripts::InjectHooks();
+        CStreamedScripts::InjectHooks();
+        // CScripted2dEffects::InjectHooks();
+        CScriptResourceManager::InjectHooks();
+    };
+
     Audio();
     Tasks();
     Events();
     Fx();
     Vehicle();
+    Scripts();
 
     ReversibleHooks::OnInjectionEnd();
 }
