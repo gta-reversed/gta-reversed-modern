@@ -35,8 +35,7 @@ CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCrui
     m_fLegSwingSideSpeed = 0.0f;
     m_fLegTwistSpeed = 0.0f;
 
-    if (entity)
-        entity->RegisterReference(&m_pTargetEnt);
+    CEntity::SafeRegisterRef(m_pTargetEnt);
 
     if (pVecTargetPos)
         m_vecTargetPos = *pVecTargetPos;

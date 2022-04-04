@@ -68,16 +68,13 @@ CTaskSimpleClimb::CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget,
     m_nGetToPosCounter = 0;
     m_bForceClimb = bForceClimb;
     m_nFallAfterVault = -1;
-
-    if (m_pClimbEnt)
-        m_pClimbEnt->RegisterReference(&m_pClimbEnt);
+    CEntity::SafeRegisterRef(m_pClimbEnt);
 }
 
 // 0x67A1D0
 CTaskSimpleClimb::~CTaskSimpleClimb()
 {
-    if (m_pClimbEnt)
-        m_pClimbEnt->CleanUpOldReference(&m_pClimbEnt);
+    CEntity::SafeCleanUpRef(m_pClimbEnt);
 
     if (m_pAnim) {
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);

@@ -315,14 +315,12 @@ bool CEventFireNearby::AffectsPed_Reversed(CPed* ped)
 // 0x4B2600
 CEventDanger::CEventDanger(CEntity* dangerFrom, float dangerRadius) : CEventEditableResponse() {
     m_dangerFrom = dangerFrom;
-    if (dangerFrom)
-        dangerFrom->RegisterReference(reinterpret_cast<CEntity**>(&m_dangerFrom));
+    CEntity::SafeRegisterRef(m_dangerFrom);
     m_dangerRadius = dangerRadius;
 }
 
 CEventDanger::~CEventDanger() {
-    if (m_dangerFrom)
-        m_dangerFrom->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_dangerFrom));
+    CEntity::SafeCleanUpRef(m_dangerFrom);
 }
 
 CEventDanger* CEventDanger::Constructor(CEntity* dangerFrom, float dangerRadius) {
@@ -381,14 +379,12 @@ CEntity* CEventDanger::GetSourceEntity_Reversed() const {
 // 0x4B2080
 CEventSeenPanickedPed::CEventSeenPanickedPed(CPed* ped) : CEventEditableResponse() {
     m_ped = ped;
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 // 0x4B2130
 CEventSeenPanickedPed::~CEventSeenPanickedPed() {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventSeenPanickedPed* CEventSeenPanickedPed::Constructor(CPed* ped) {

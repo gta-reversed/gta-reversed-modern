@@ -19,14 +19,12 @@ CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
     m_ped = ped;
     field_18 = bUnknown;
     m_deathTimeInMs = deathTimeInMs;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventDeadPed::~CEventDeadPed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4ADEA0

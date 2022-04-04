@@ -22,18 +22,14 @@ CEventVehicleDamage::CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, e
     m_attacker = attacker;
     m_vehicle = vehicle;
     m_weaponType = weaponType;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_attacker)
-        m_attacker->RegisterReference(&m_attacker);
+    CEntity::SafeRegisterRef(m_vehicle);
+    CEntity::SafeRegisterRef(m_attacker);
 }
 
 CEventVehicleDamage::~CEventVehicleDamage()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_attacker)
-        m_attacker->CleanUpOldReference(&m_attacker);
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_attacker);
 }
 
 CEventVehicleDamage* CEventVehicleDamage::Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)

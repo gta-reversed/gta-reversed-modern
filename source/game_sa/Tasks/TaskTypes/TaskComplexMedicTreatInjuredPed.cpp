@@ -40,12 +40,8 @@ CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* veh
     m_bIsDriver     = isDriver;
     m_pAccident     = nullptr;
     m_bLeftCarOnce  = false;
-
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerMedic);
 }
 
 // 0x658C30
@@ -53,11 +49,8 @@ CTaskComplexMedicTreatInjuredPed::~CTaskComplexMedicTreatInjuredPed() {
     if (m_pAccident && m_pAccident->m_pPed && !m_pAccident->m_bIsRevived)
         m_pAccident->m_bIsTreated = false;
 
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerMedic);
 }
 
 // 0x658DB0

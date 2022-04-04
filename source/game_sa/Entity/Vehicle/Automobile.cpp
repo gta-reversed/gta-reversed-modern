@@ -476,8 +476,7 @@ void CAutomobile::ProcessControl()
         if (!vehicleFlags.bDriverLastFrame && m_nBombOnBoard == BOMB_IGNITION_ACTIVATED) {
             m_wBombTimer = 1000;
             m_pWhoDetonatedMe = m_pWhoInstalledBombOnMe;
-            if (m_pWhoInstalledBombOnMe)
-                CEntity::RegisterReference(reinterpret_cast<CEntity**>(&m_pWhoDetonatedMe));
+            CEntity::SafeRegisterRef(m_pWhoDetonatedMe);
         }
         vehicleFlags.bDriverLastFrame = true;
     }
@@ -1069,8 +1068,7 @@ void CAutomobile::ProcessControl()
             }
         }
         else {
-            m_pTrailer->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTrailer));
-            m_pTrailer = nullptr;
+            CEntity::ClearReference(m_pTrailer);
         }
     }
 
@@ -2719,12 +2717,10 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         m_fBurnTimer = 0.f;
 
         m_pLastDamageEntity = m_pDamageEntity;
-        if (m_pLastDamageEntity) {
-            m_pLastDamageEntity->RegisterReference(&m_pLastDamageEntity);
-        }
+        CEntity::SafeRegisterRef(m_pLastDamageEntity);
 
-        if (const auto p = PickRandomPassenger()) {
-            p->Say(33, 1500);
+        if (const auto passenger = PickRandomPassenger()) {
+            passenger->Say(33, 1500);
         }
     }
 }

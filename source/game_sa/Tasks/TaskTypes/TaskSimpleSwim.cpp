@@ -44,8 +44,7 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple() {
     if (pos)
         m_vecPos = *pos;
 
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_pPed));
+    CEntity::SafeRegisterRef(m_pPed);
 
     m_pFxSystem = nullptr;
     m_bTriggerWaterSplash = false;
@@ -59,11 +58,8 @@ CTaskSimpleSwim::~CTaskSimpleSwim() {
         CAnimManager::RemoveAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
     }
 
-    if (m_pEntity)
-        m_pEntity->CleanUpOldReference(&m_pEntity);
-
-    if (m_pPed)
-        m_pPed->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPed));
+    CEntity::SafeCleanUpRef(m_pEntity);
+    CEntity::SafeCleanUpRef(m_pPed);
 }
 
 // 0x688930
@@ -527,8 +523,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped)
                     player->m_vecMoveSpeed.z = static_cast <float> (8.0f / player->m_fMass);
                     CEntity* entity = CTaskSimpleClimb::TestForClimb(player, m_pClimbPos, m_fAngle, m_nSurfaceType, true);
                     m_pEntity = entity;
-                    if (entity)
-                        entity->RegisterReference(&m_pEntity);
+                    CEntity::SafeRegisterRef(m_pEntity);
                     break;
                 }
                 if (RpAnimBlendClumpGetAssociation(player->m_pRwClump, ANIM_ID_CLIMB_JUMP)) {

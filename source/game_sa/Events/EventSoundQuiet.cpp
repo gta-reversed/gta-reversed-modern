@@ -19,8 +19,7 @@ CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint
     m_startTimeInMs = startTime;
     m_entity = entity;
     m_position = position;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
     if (m_startTimeInMs != (uint32)-1)
         return;
     m_startTimeInMs = CTimer::GetTimeInMS();
@@ -29,8 +28,7 @@ CEventSoundQuiet::CEventSoundQuiet(CEntity* entity, float fLocalSoundLevel, uint
 
 CEventSoundQuiet::~CEventSoundQuiet()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 CEventSoundQuiet* CEventSoundQuiet::Constructor(CEntity* entity, float fLocalSoundLevel, uint32 startTime, const CVector& position)

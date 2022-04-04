@@ -15,14 +15,12 @@ void CEventPedToChase::InjectHooks()
 CEventPedToChase::CEventPedToChase(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventPedToChase::~CEventPedToChase()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventPedToChase* CEventPedToChase::Constructor(CPed* ped)

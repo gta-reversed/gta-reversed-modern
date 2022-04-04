@@ -16,14 +16,12 @@ void CEventVehicleOnFire::InjectHooks()
 CEventVehicleOnFire::CEventVehicleOnFire(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleOnFire::~CEventVehicleOnFire()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventVehicleOnFire* CEventVehicleOnFire::Constructor(CVehicle* vehicle)

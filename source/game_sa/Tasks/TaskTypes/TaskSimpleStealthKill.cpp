@@ -18,14 +18,13 @@ void CTaskSimpleStealthKill::InjectHooks()
 CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
     m_bKeepTargetAlive = keepTargetAlive;
-    m_pTarget = target;
-    m_nAssocGroupId = groupId;
-    m_bIsAborting = false;
-    m_bIsFinished = false;
-    m_pAnim = nullptr;
-    m_nTime = 0;
-    if (target)
-        target->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
+    m_pTarget          = target;
+    m_nAssocGroupId    = groupId;
+    m_bIsAborting      = false;
+    m_bIsFinished      = false;
+    m_pAnim            = nullptr;
+    m_nTime            = 0;
+    CEntity::SafeRegisterRef(m_pTarget);
 }
 
 // 0x6225F0

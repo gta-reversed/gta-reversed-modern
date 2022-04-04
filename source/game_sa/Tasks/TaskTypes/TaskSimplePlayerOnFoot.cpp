@@ -83,10 +83,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
                 ) {
                     TheCamera.ClearPlayerWeaponMode();
                     CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                    if (ped->m_pTargetedObject) {
-                        ped->m_pTargetedObject->CleanUpOldReference(&ped->m_pTargetedObject);
-                    }
-                    ped->m_pTargetedObject = nullptr;
+                    CEntity::ClearReference(ped->m_pTargetedObject);
                 }
             }
         }

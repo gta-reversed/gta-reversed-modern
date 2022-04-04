@@ -90,9 +90,7 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) :
     field_79D = 0;
     field_7A4 = 0;
 
-    if (m_pTargetedObject) // Oookay?
-        m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-    m_pTargetedObject = nullptr;
+    CEntity::ClearReference(m_pTargetedObject); // Oookay?
 
     m_pIntelligence->SetDmRadius(60.0f);
     m_pIntelligence->SetNumPedsToScan(8);
@@ -124,20 +122,16 @@ CCopPed* CCopPed::Destructor() {
 
 // 0x5DDE80
 void CCopPed::SetPartner(CCopPed* partner) {
-    if (m_pCopPartner)
-        m_pCopPartner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pCopPartner));
-
+    CEntity::SafeCleanUpRef(m_pCopPartner);
     m_pCopPartner = partner;
-    if (partner)
-        partner->RegisterReference(reinterpret_cast<CEntity**>(&m_pCopPartner));
+    CEntity::SafeRegisterRef(m_pCopPartner);
 }
 
 // NOTSA
 void CCopPed::ClearCriminalListFromDeadPeds() {
     for (CPed*& ped : m_apCriminalsToKill) {
         if (ped && ped->m_fHealth <= 0.0f) {
-            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
-            ped = nullptr;
+            CEntity::ClearReference(ped);
         }
     }
 }
@@ -216,6 +210,7 @@ void CCopPed::AddCriminalToKill(CPed* criminal) {
 // 0x5DE040
 void CCopPed::RemoveCriminalToKill(int32 unk, int32 nCriminalLocalIdx) {
     CPed*& criminal = m_apCriminalsToKill[nCriminalLocalIdx];
+    assert(criminal);
     criminal->RegisterReference(reinterpret_cast<CEntity**>(&criminal));
     m_apCriminalsToKill[nCriminalLocalIdx] = nullptr;
 }
@@ -227,8 +222,7 @@ void CCopPed::ClearCriminalsToKill() {
             ped->m_nTimeTillWeNeedThisPed = CTimer::GetTimeInMS();
             ped->bCullExtraFarAway = false;
             ped->m_fRemovalDistMultiplier = 1.0f;
-            ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&ped));
-            ped = nullptr;
+            CEntity::ClearReference(ped);
         }
     }
 }

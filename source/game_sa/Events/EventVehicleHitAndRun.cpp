@@ -22,10 +22,8 @@ CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
 
 CEventVehicleHitAndRun::~CEventVehicleHitAndRun()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 // 0x4AE990

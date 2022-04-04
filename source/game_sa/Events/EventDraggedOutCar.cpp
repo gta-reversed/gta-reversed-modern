@@ -15,19 +15,15 @@ void CEventDraggedOutCar::InjectHooks() {
 // // 0x4AD250
 CEventDraggedOutCar::CEventDraggedOutCar(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) : CEventEditableResponse() {
     m_carjacker = carjacker;
-    m_vehicle = vehicle;
+    m_vehicle   = vehicle;
     m_IsDriverSeat = IsDriverSeat;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_carjacker)
-        m_carjacker->RegisterReference(reinterpret_cast<CEntity**>(&m_carjacker));
+    CEntity::SafeRegisterRef(m_vehicle);
+    CEntity::SafeRegisterRef(m_carjacker);
 }
 
 CEventDraggedOutCar::~CEventDraggedOutCar() {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_carjacker)
-        m_carjacker->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_carjacker));
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_carjacker);
 }
 
 CEventDraggedOutCar* CEventDraggedOutCar::Constructor(CVehicle* vehicle, CPed* carjacker, bool IsDriverSeat) {

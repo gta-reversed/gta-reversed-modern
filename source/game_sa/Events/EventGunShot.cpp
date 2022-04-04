@@ -23,14 +23,12 @@ CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoi
     m_endPoint = endPoint;
     m_entity = entity;
     m_bHasNoSound = bHasNoSound;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
 }
 
 CEventGunShot::~CEventGunShot()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)

@@ -236,8 +236,7 @@ void CPhysical::ProcessControl()
         m_nNumEntitiesCollided = 0;
         m_nPieceType = 0;
         m_fDamageIntensity = 0.0f;
-        if (m_pDamageEntity)
-            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
+        CEntity::SafeCleanUpRef(m_pDamageEntity);
         m_pDamageEntity = nullptr;
         ApplyFriction();
         if (!m_pAttachedTo || physicalFlags.bInfiniteMass)
@@ -698,10 +697,13 @@ void CPhysical::SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, C
     if (fDamageIntensity > m_fDamageIntensity) {
         m_fDamageIntensity = fDamageIntensity;
         m_nPieceType = colPoint.m_nPieceTypeA;
+
+        // CEntity::ChangeEntityReference?
         if (m_pDamageEntity)
             m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
         m_pDamageEntity = entity;
         entity->RegisterReference(&m_pDamageEntity);
+
         m_vecLastCollisionPosn = colPoint.m_vecPoint;
         m_vecLastCollisionImpactVelocity = fDistanceMult * colPoint.m_vecNormal;
         if (IsObject() && colPoint.m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
@@ -924,9 +926,7 @@ void CPhysical::SkipPhysics()
         m_nNumEntitiesCollided = 0;
         m_nPieceType = 0;
         m_fDamageIntensity = 0.0f;
-        if (m_pDamageEntity)
-            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
-        m_pDamageEntity = nullptr;
+        CEntity::ClearReference(m_pDamageEntity);
         ResetFrictionTurnSpeed();
         ResetFrictionMoveSpeed();
     }
@@ -4720,6 +4720,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
 
     CEntity* oldEntityAttachedTo = m_pAttachedTo;
     m_pAttachedTo = entityAttachTo;
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
     m_vecAttachOffset = vecAttachOffset;
     if (physicalFlags.bInfiniteMass) 
@@ -4753,6 +4754,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector* vecAtta
 
     CPhysical* oldEntityAttachedTo = m_pAttachedTo;
     m_pAttachedTo = entityAttachTo;
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
     CMatrix entityAttachedtoMatrix(m_pAttachedTo->GetMatrix());
     auto* attachedToAutoMobile = m_pAttachedTo->AsAutomobile();

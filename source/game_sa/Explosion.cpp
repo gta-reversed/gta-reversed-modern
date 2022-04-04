@@ -121,23 +121,17 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+// NOTSA
 void CExplosion::SetCreator(CEntity* newCreator) noexcept {
-    if (m_pCreator)
-        m_pCreator->CleanUpOldReference(&m_pCreator);
-
-    if (newCreator)
-        newCreator->RegisterReference(&m_pCreator);
-
+    CEntity::SafeCleanUpRef(m_pCreator);
+    CEntity::SafeRegisterRef(newCreator);
     m_pCreator = newCreator;
 }
 
+// NOTSA
 void CExplosion::SetVictim(CEntity* newVictim) noexcept {
-    if (m_pVictim)
-        m_pVictim->CleanUpOldReference(&m_pVictim);
-
-    if (newVictim)
-        newVictim->RegisterReference(&m_pVictim);
-
+    CEntity::SafeCleanUpRef(m_pVictim);
+    CEntity::SafeRegisterRef(newVictim);
     m_pVictim = newVictim;
 }
 

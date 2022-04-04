@@ -54,21 +54,19 @@ void CEventBuildingCollision::InjectHooks()
 
 CEventPedCollisionWithPed::CEventPedCollisionWithPed(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
 {
-    m_pieceType = pieceType;
-    m_damageIntensity = damageIntensity;
-    m_victim = victim;
+    m_pieceType               = pieceType;
+    m_damageIntensity         = damageIntensity;
+    m_victim                  = victim;
     m_collisionImpactVelocity = *collisionImpactVelocity;
-    m_collisionPos = *collisionPos;
-    m_movestate = moveState;
-    m_victimMoveState = victimMoveState;
-    if (victim)
-        victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));
+    m_collisionPos            = *collisionPos;
+    m_movestate               = moveState;
+    m_victimMoveState         = victimMoveState;
+    CEntity::SafeRegisterRef(m_victim);
 }
 
 CEventPedCollisionWithPed::~CEventPedCollisionWithPed()
 {
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 CEventPedCollisionWithPed* CEventPedCollisionWithPed::Constructor(int16 pieceType, float damageIntensity, CPed* victim, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState, int16 victimMoveState)
@@ -175,14 +173,12 @@ CEventObjectCollision::CEventObjectCollision(int16 pieceType, float damageIntens
     m_object = object;
     m_collisionImpactVelocity = *collisionImpactVelocity;
     m_collisionPos = *collisionPos;
-    if (m_object)
-        m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 }
 
 CEventObjectCollision::~CEventObjectCollision()
 {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 }
 
 CEventObjectCollision* CEventObjectCollision::Constructor(int16 pieceType, float damageIntensity, CObject* object, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)
@@ -216,14 +212,12 @@ CEventBuildingCollision::CEventBuildingCollision(int16 pieceType, float damageIn
     m_building = building;
     m_collisionImpactVelocity = *collisionImpactVelocity;
     m_collisionPos = *collisionPos;
-    if (building)
-        m_building->RegisterReference(reinterpret_cast<CEntity**>(&m_building));
+    CEntity::SafeRegisterRef(m_building);
 }
 
 CEventBuildingCollision::~CEventBuildingCollision()
 {
-    if (m_building)
-        m_building->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_building));
+    CEntity::SafeCleanUpRef(m_building);
 }
 
 CEventBuildingCollision* CEventBuildingCollision::Constructor(int16 pieceType, float damageIntensity, CBuilding* building, CVector* collisionImpactVelocity, CVector* collisionPos, int16 moveState)

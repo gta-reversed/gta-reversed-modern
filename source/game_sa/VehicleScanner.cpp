@@ -11,13 +11,9 @@ void CVehicleScanner::ScanForVehiclesInRange(const CPed& ped) {
         if (ped.m_nCreatedBy == PED_MISSION)
             CEntityScanner::ScanForEntitiesInRange(REPEATSECTOR_VEHICLES, ped);
 
-        if (m_pClosestEntityInRange)
-            m_pClosestEntityInRange->CleanUpOldReference(reinterpret_cast<CEntity**>(m_pClosestEntityInRange));
-
+        CEntity::SafeCleanUpRef(m_pClosestEntityInRange);
         m_pClosestEntityInRange = ped.m_pVehicle;
-        if (ped.m_pVehicle) {
-            ped.m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pClosestEntityInRange));
-        }
+        CEntity::SafeRegisterRef(m_pClosestEntityInRange);
     } else {
         CEntityScanner::ScanForEntitiesInRange(REPEATSECTOR_VEHICLES, ped);
     }

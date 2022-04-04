@@ -220,6 +220,8 @@ void CAEVehicleAudioEntity::Service() {
 }
 
 void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
+    assert(entity);
+
     field_144 = 0;
     m_pEntity = entity;
     m_bPlayerDriver = false;

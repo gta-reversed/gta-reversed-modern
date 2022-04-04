@@ -129,10 +129,8 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     SetModelIndex(MODEL_PLAYER);
 
     CPlayerPed::SetInitialState(bGroupCreated);
-    if (m_pTargetedObject)
-        CEntity::CleanUpOldReference(reinterpret_cast<CEntity**>(m_pTargetedObject));
 
-    m_pTargetedObject = nullptr;
+    CEntity::ClearReference(m_pTargetedObject);
 
     SetPedState(PEDSTATE_IDLE);
 
@@ -350,9 +348,7 @@ void CPlayerPed::ProcessAnimGroups() {
 // 0x609C80
 void CPlayerPed::ClearWeaponTarget() {
     if (IsPlayer()) {
-        if (m_pTargetedObject)
-            m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-        m_pTargetedObject = nullptr;
+        CEntity::ClearReference(m_pTargetedObject);
         TheCamera.ClearPlayerWeaponMode();
         CWeaponEffects::ClearCrossHair(m_nPedType);
     }
@@ -438,10 +434,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
 
 // 0x609ED0
 void CPlayerPed::Clear3rdPersonMouseTarget() {
-    if (m_p3rdPersonMouseTarget) {
-        m_p3rdPersonMouseTarget->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_p3rdPersonMouseTarget));
-        m_p3rdPersonMouseTarget = nullptr;
-    }
+    CEntity::ClearReference(m_p3rdPersonMouseTarget);
 }
 
 // 0x609EF0

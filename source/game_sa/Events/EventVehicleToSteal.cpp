@@ -17,14 +17,12 @@ void CEventVehicleToSteal::InjectHooks()
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleToSteal::~CEventVehicleToSteal()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4AF670

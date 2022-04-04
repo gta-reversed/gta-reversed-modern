@@ -60,14 +60,12 @@ void CEventStuckInAir::InjectHooks()
 CEventStuckInAir::CEventStuckInAir(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventStuckInAir::~CEventStuckInAir()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)

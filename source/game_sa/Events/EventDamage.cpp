@@ -54,14 +54,12 @@ CEventDamage::CEventDamage(CEntity* source, uint32 startTime, eWeaponType weapon
     m_fAnimBlend    = 8.0f;
     m_fAnimSpeed    = 1.0f;
 
-    if (m_pSourceEntity)
-        m_pSourceEntity->RegisterReference(&m_pSourceEntity);
+    CEntity::SafeRegisterRef(m_pSourceEntity);
     m_bPedInVehicle = true; // if we're setting this to true, then why do we have bPedInVehicle parameter in this constructor? bug?
 }
 
 CEventDamage::~CEventDamage() {
-    if (m_pSourceEntity)
-        m_pSourceEntity->CleanUpOldReference(&m_pSourceEntity);
+    CEntity::SafeCleanUpRef(m_pSourceEntity);
 }
 
 CEventDamage* CEventDamage::Constructor(const CEventDamage& event) {
@@ -340,8 +338,7 @@ CEventEditableResponse* CEventDamage::CloneEditable_Reversed() {
 // 0x4AD9C0
 void CEventDamage::From(const CEventDamage& event) {
     m_pSourceEntity = event.m_pSourceEntity;
-    if (event.m_pSourceEntity)
-        event.m_pSourceEntity->RegisterReference(&m_pSourceEntity);
+    CEntity::SafeRegisterRef(m_pSourceEntity);
 
     m_nStartTime     = event.m_nStartTime;
     m_weaponType     = event.m_weaponType;

@@ -23,17 +23,14 @@ CTaskComplexPartner::CTaskComplexPartner(const char* commandName, CPed* partner,
     m_firstToTargetFlag        = -1;
     m_requiredAnimsStreamedIn  = false;
     m_animBlockName[0]         = '\0';
-
-    if (partner)
-        partner->RegisterReference(reinterpret_cast<CEntity**>(&m_partner));
+    CEntity::SafeRegisterRef(partner);
 }
 
 /*!
  * @addr 0x683A40
  */
 CTaskComplexPartner::~CTaskComplexPartner() {
-    if (m_partner)
-        m_partner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_partner));
+    CEntity::SafeCleanUpRef(m_partner);
 
     if (m_requiredAnimsStreamedIn) {
         if (strcmp(m_animBlockName, "") != 0) {

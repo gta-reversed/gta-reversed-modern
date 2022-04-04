@@ -2821,6 +2821,7 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
 
     // BUG/NOTE: ClearReference not called here?
     m_pAttachedTo = entity->AsPhysical();
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
 
     m_vecTurretOffset = offset;

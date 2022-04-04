@@ -344,10 +344,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
 
 // 0x6916E0
 void CTaskSimpleHoldEntity::ReleaseEntity() {
-    if (m_pEntityToHold) {
-        m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-        m_pEntityToHold = nullptr;
-    }
+    CEntity::ClearReference(m_pEntityToHold);
 }
 
 // 0x691700
@@ -375,11 +372,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAs
     else
     {
         if (taskHoldEntity->GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY && animAssoc->m_fBlendAmount > 0.0f) {
-            CEntity* entityToHold = taskHoldEntity->m_pEntityToHold;
-            if (entityToHold) {
-                entityToHold->CleanUpOldReference(&taskHoldEntity->m_pEntityToHold);
-                taskHoldEntity->m_pEntityToHold = nullptr;
-            }
+            CEntity::ClearReference(taskHoldEntity->m_pEntityToHold);
         }
         taskHoldEntity->m_bEntityDropped = true;
         taskHoldEntity->m_pAnimBlendAssociation = nullptr;
@@ -422,8 +415,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
     if (m_pEntityToHold) {
         m_pEntityToHold->m_bUsesCollision = true;
         if (!m_pEntityToHold->IsObject()) {
-            m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-            m_pEntityToHold = nullptr;
+            CEntity::ClearReference(m_pEntityToHold);
             return;
         }
         objectToHold = static_cast<CObject*>(m_pEntityToHold);
@@ -479,8 +471,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
             objectToHold->UpdateRW();
             objectToHold->UpdateRwFrame();
         }
-        m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-        m_pEntityToHold = nullptr;
+        CEntity::ClearReference(m_pEntityToHold);
         return;
     }
 }

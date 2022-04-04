@@ -749,7 +749,8 @@ bool CObject::CanBeDeleted() {
 // 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
     m_pDummyObject = relatedDummy;
-    relatedDummy->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
+    assert(m_pDummyObject);
+    m_pDummyObject->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
 }
 
 // 0x59F2D0
@@ -1434,7 +1435,8 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
     auto& rope = CRopes::GetRope(iRopeInd);
     rope.ReleasePickedUpObject();
     rope.m_pAttachedEntity = attachTo;
-    attachTo->RegisterReference(&rope.m_pAttachedEntity);
+    assert(rope.m_pAttachedEntity);
+    rope.m_pAttachedEntity->RegisterReference(&rope.m_pAttachedEntity);
 
     auto vecRopePoint = CVector();
     vecRopePoint.z = CRopes::FindPickupHeight(attachTo);

@@ -26,14 +26,12 @@ void CEventSeenCop::InjectHooks()
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAcquaintancePed::~CEventAcquaintancePed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)

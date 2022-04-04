@@ -26,16 +26,14 @@ void CEventScriptedAttractor::InjectHooks()
 CEventAttractor::CEventAttractor(C2dEffect* effect, CEntity* entity, bool bAvoidLookingAtAttractor)
 {
     m_2dEffect = effect;
-    m_entity = entity;
+    m_entity   = entity;
     m_bAvoidLookingAtAttractor = bAvoidLookingAtAttractor;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
 }
 
 CEventAttractor::~CEventAttractor()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 // 0x4AF350

@@ -43,8 +43,7 @@ CTaskSimpleJump::~CTaskSimpleJump()
     if (m_pAnim)
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
-    if (m_pClimbEntity)
-        m_pClimbEntity->CleanUpOldReference(&m_pClimbEntity);
+    CEntity::SafeCleanUpRef(m_pClimbEntity);
 }
 
 // 0x67C510

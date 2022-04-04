@@ -33,6 +33,7 @@ CTaskComplexUseSwatRope::CTaskComplexUseSwatRope(uint32 ropeId, CHeli* heli) : C
     m_fCoorAlongRope = 0.0F;
     m_bIsOnHeli      = true;
 
+    // todo: CEntity::SafeRegisterRef
     m_pHeli->RegisterReference(reinterpret_cast<CEntity**>(&m_pHeli));
 }
 

@@ -58,14 +58,12 @@ void CEventLeaderEntryExit::InjectHooks()
 CEventLeaderEnteredCarAsDriver::CEventLeaderEnteredCarAsDriver(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver::~CEventLeaderEnteredCarAsDriver()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver* CEventLeaderEnteredCarAsDriver::Constructor(CVehicle* vehicle)
@@ -154,14 +152,12 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pe
 CEventAreaCodes::CEventAreaCodes(CPed* ped)
 {
     m_ped = ped;
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAreaCodes::~CEventAreaCodes()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAreaCodes* CEventAreaCodes::Constructor(CPed* ped)

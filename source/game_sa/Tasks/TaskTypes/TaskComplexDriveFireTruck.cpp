@@ -31,20 +31,14 @@ CTaskComplexDriveFireTruck::CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* 
     m_bIsDriver       = bIsDriver;
     m_pFire           = nullptr;
 
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerFireman);
 }
 
 // 0x6593A0
 CTaskComplexDriveFireTruck::~CTaskComplexDriveFireTruck() {
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerFireman);
 }
 
 // 0x659BC0

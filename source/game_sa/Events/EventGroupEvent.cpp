@@ -16,14 +16,12 @@ CEventGroupEvent::CEventGroupEvent(CPed* ped, CEvent* event)
 {
     m_ped = ped;
     m_event = event;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventGroupEvent::~CEventGroupEvent()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 
     delete m_event;
 }
