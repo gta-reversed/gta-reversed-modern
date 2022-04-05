@@ -14,7 +14,7 @@
 #include "WaterCreatureManager_c.h"
 #include "MenuManager.h"
 #include "FireManager.h"
-#include "Fx_c.h"
+#include "Fx.h"
 #include "BreakManager_c.h"
 #include "BoneNodeManager_c.h"
 // todo: #include "ShadowManager.h"

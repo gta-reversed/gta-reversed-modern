@@ -6,8 +6,8 @@
 */
 #pragma once
 
-#include "FxSphere_c.h"
-#include "FxPlane_c.h"
+#include "FxSphere.h"
+#include "FxPlane.h"
 
 class FxFrustumInfo_c {
 public:

@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "FxSystemBP_c.h"
+#include "FxSystemBP.h"
 
 void FxSystemBP_c::InjectHooks() {
     RH_ScopedClass(FxSystemBP_c);

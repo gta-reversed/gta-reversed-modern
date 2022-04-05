@@ -7,7 +7,7 @@
 
 #include "StdInc.h"
 
-#include "Fx_c.h"
+#include "Fx.h"
 
 #include "rwcore.h" // RxObjSpace3dVertex
 

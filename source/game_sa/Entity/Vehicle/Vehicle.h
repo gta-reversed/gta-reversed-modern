@@ -18,7 +18,7 @@
 #include "PtrList.h"
 #include "RideAnimData.h"
 #include "DamageManager.h"
-#include "FxSystem_c.h"
+#include "FxSystem.h"
 #include "Fire.h"
 
 /*  Thanks to MTA team for https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CVehicleSA.cpp */

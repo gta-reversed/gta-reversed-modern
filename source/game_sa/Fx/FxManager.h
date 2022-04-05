@@ -9,10 +9,10 @@
 #include "RenderWare.h"
 #include "List_c.h"
 
-#include "FxFrustumInfo_c.h"
-#include "FxMemoryPool_c.h"
-#include "FxSystemBP_c.h"
-#include "FxSystem_c.h"
+#include "FxFrustumInfo.h"
+#include "FxMemoryPool.h"
+#include "FxSystemBP.h"
+#include "FxSystem.h"
 
 class FxEmitterPrt_c;
 

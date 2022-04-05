@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "AnimBlendAssociation.h"
-#include "FxSystem_c.h"
+#include "FxSystem.h"
 
 class CPed;
 class CPlayerPed;

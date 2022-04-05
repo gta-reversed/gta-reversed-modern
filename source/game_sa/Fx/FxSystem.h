@@ -10,9 +10,9 @@
 #include "RenderWare.h"
 #include "Vector.h"
 #include "AEFireAudioEntity.h"
-#include "FxPrtMult_c.h"
-#include "FxSphere_c.h"
-#include "FxBox_c.h"
+#include "FxPrtMult.h"
+#include "FxSphere.h"
+#include "FxBox.h"
 
 enum eFxSystemKillStatus {
     FX_NOT_KILLED = 0,

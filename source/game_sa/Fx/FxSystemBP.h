@@ -7,7 +7,7 @@
 #pragma once
 
 #include "ListItem_c.h"
-#include "FxSphere_c.h"
+#include "FxSphere.h"
 
 class FxSystem_c;
 

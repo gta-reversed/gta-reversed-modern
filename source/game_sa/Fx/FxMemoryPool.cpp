@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "FxMemoryPool_c.h"
+#include "FxMemoryPool.h"
 
 void FxMemoryPool_c::InjectHooks() {
     RH_ScopedClass(FxMemoryPool_c);
