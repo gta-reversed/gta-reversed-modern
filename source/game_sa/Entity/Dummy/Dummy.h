@@ -8,7 +8,7 @@
 
 #include "Entity.h"
 
-class CDummy : public CEntity {
+class NOTSA_EXPORT_VTABLE CDummy : public CEntity {
 public:
     CDummy() : CEntity() { m_nType = ENTITY_TYPE_DUMMY; }
     static void* operator new(unsigned size);

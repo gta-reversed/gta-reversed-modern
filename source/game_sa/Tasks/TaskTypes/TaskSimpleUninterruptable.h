@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleUninterruptable : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleUninterruptable : public CTaskSimple {
 private:
     CTaskSimpleUninterruptable* Constructor();
 public:

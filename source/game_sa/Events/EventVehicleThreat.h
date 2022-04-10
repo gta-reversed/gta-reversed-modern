@@ -3,6 +3,6 @@
 class CEventEditableResponse;
 
 // unused ?
-class CEventVehicleThreat : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleThreat : public CEventEditableResponse {
 public:
 };

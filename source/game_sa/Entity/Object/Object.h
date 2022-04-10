@@ -22,7 +22,7 @@ enum eObjectType {
 class CDummyObject;
 class CFire;
 
-class CObject : public CPhysical {
+class NOTSA_EXPORT_VTABLE CObject : public CPhysical {
 public:
     CPtrNodeDoubleLink* m_pControlCodeList;
     uint8               m_nObjectType; // see enum eObjectType

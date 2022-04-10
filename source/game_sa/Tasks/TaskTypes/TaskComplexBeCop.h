@@ -1,7 +1,7 @@
 #pragma once
 #include "TaskComplexWanderCop.h"
 
-class CTaskComplexBeCop : public CTaskComplexWanderCop
+class NOTSA_EXPORT_VTABLE CTaskComplexBeCop : public CTaskComplexWanderCop
 {
     eTaskType GetTaskType() override;
 

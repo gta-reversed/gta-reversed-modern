@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Vector.h"
 
-class CEventSoundQuiet : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventSoundQuiet : public CEventEditableResponse {
 public:
     CEntity* m_entity;
     float    m_fLocalSoundLevel;

@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleNone : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleNone : public CTaskSimple {
 public:
     CTaskSimpleNone() = default;
     ~CTaskSimpleNone() override = default;

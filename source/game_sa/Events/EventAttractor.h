@@ -5,7 +5,7 @@
 class C2dEffect;
 class CEntity;
 
-class CEventAttractor : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventAttractor : public CEventEditableResponse {
 public:
     C2dEffect* m_2dEffect;
     CEntity*   m_entity;
@@ -32,7 +32,7 @@ public:
 
 VALIDATE_SIZE(CEventAttractor, 0x20);
 
-class CEventScriptedAttractor : public CEventAttractor {
+class NOTSA_EXPORT_VTABLE CEventScriptedAttractor : public CEventAttractor {
 public:
 
     static void InjectHooks();

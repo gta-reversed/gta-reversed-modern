@@ -9,7 +9,7 @@ class CPed;
 class CTaskSimpleIKChain;
 class IKChain_c;
 
-class CTaskSimpleIKChain : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleIKChain : public CTaskSimple {
 public:
     int32     m_nTime;
     int32     m_nBlendTime;

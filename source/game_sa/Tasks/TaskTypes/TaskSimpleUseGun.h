@@ -13,7 +13,7 @@
 #include "AnimBlendAssociation.h"
 #include "Entity.h"
 
-class CTaskSimpleUseGun : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleUseGun : public CTaskSimple {
 public:
     bool m_bIsFinished;
     bool m_bIsInControl;

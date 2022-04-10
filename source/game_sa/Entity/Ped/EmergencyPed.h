@@ -8,13 +8,13 @@
 
 #include "Ped.h"
 
-class CEmergencyPed : public CPed {
+class NOTSA_EXPORT_VTABLE CEmergencyPed : public CPed {
 public:
     CEmergencyPed(uint32 pedType, uint32 modelIndex);
 
     bool InRange(CPed* ped);
 
-    void ProcessControl();
+    void ProcessControl() override {}
 };
 
 VALIDATE_SIZE(CEmergencyPed, 0x79C);
