@@ -1,6 +1,8 @@
 #include "StdInc.h"
 #include <unordered_set>
 
+#include "extensions/enumerate.hpp"
+
 #include "ReversibleHooks.h"
 #include "ReversibleHook/Simple.h"
 #include "ReversibleHook/Virtual.h"
@@ -17,10 +19,6 @@ std::unordered_set<uint32> s_HookedAddresses{};  // Original GTA addresses to wh
 
 RootHookCategory& GetRootCategory() {
     return s_RootCategory;
-}
-
-void InstallVTable(void* VTableAddress, std::initializer_list<VTableFunction> fns) {
-
 }
 
 void CheckAll() {
@@ -43,6 +41,15 @@ void OnInjectionEnd() {
 #endif
     s_RootCategory.OnInjectionEnd();
 
+}
+
+void InstallVTable(std::string_view category, std::string_view className, void** pvtblGTA, std::initializer_list<detail::VTableFunction> fns) {
+    const auto pvtblOur = detail::GetVTableAddress(className);
+
+    for (auto&& [fnIdx, fn] : notsa::enumerate(fns)) {
+        // std::string fnName, void** pvtblGTA, void** pvtblOur, uint32 vtblIdx
+        auto item = std::make_shared<ReversibleHook::Virtual>(fn.name, pvtblGTA, pvtblOur, fnIdx);
+    }
 }
 
 namespace detail {

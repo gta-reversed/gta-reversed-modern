@@ -10,21 +10,22 @@ namespace ReversibleHooks{
 namespace ReversibleHook{
 
 struct Virtual : Base {
-    Virtual(std::string fnName, void** pvtblGTA, uint32 vtblIdx, void* pfnOur);
+    Virtual(std::string fnName, void** pvtblGTA, void** pvtblOur, uint32 vtblIdx);
     ~Virtual() override = default;
  
     void Switch() override;
-    void Check() override {} // Nothing to do 
+    void Check() override; 
 private:
-    void** m_pvtblGTA{};   // Pointer to GTA vtable
-    uint32 m_vtblIdx{};   // Index of this function in the vtable
-    void*  m_pfnOur{};  // Our function
-    void*  m_pfnGTA{};  // The original GTA function (Extracted from the vtable)
+    enum {
+        GTA,
+        OUR
+    };
 
-    SHookContent m_LibHookContent{};
-    uint8        m_LibOriginalFunctionContent[sizeof(m_LibHookContent)]{};
-    uint32       m_iLibHookedBytes{};
-    uint32       m_iLibFunctionAddress{};
+    // These 2 arrays are indexed using the above enum
+    void** m_pvtbl[2]{};        // vtbl pointers
+    void*  m_pfn[2]{};          // Original function pointers
+    //uint8  m_originalByte[2]{}; // We replace the beginning of both functions with a hardware break (`int3`). This here stores the original beginning.
+    uint32 m_vtblIdx{};         // Index of this function in the vtable
 };
 };
 };

@@ -66,47 +66,39 @@
 #define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
+#define RH_VTFPure                          ReversibleHooks::detail::purevtblfn
+#define RH_ScopedVTInstall(pvtblGTA, ...)   ReversibleHooks::InstallVTable(RhCurrentCat.name, RHCurrentScopeName.name, reinterpret_cast<void**>(pvtblGTA), {__VA_ARGS__})
+#define RH_VTFDef(name)                     ReversibleHooks::detail::VTableFunction{name}
+
 namespace ReversibleHooks {
     class RootHookCategory;
 
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
-    };
-
-    struct VTableFunction {
-        template<typename Fn>
-        VTableFunction(Fn fn, std::string_view name) :
-            functionPtr{ FunctionPointerToVoidP(fn) },
-            name{ name }
-        {
-        }
-
-        void*            functionPtr{};
-        std::string_view name{};
     };
 
     RootHookCategory& GetRootCategory();
 
     namespace detail {
         // Change protection of memory pages, and automatically rollback on scope exit
-        struct ScopedVirtualProtectModify {
-            ScopedVirtualProtectModify(LPVOID address, SIZE_T sz, DWORD newProtect = PAGE_EXECUTE_READWRITE) :
+        struct ScopedVirtualProtectAutoRollback {
+            ScopedVirtualProtectAutoRollback(LPVOID address, SIZE_T sz, DWORD newProtect = PAGE_EXECUTE_READWRITE) :
                 m_addr{ address },
                 m_sz{ sz }
             {
                 if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
-                    assert(0); // Failed
+                    NOTSA_UNREACHABLE();
                 }
             }
 
-            ~ScopedVirtualProtectModify() {
-                DWORD oldProtect{};
-                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
-                    assert(0); // Failed
+            ~ScopedVirtualProtectAutoRollback() {
+                DWORD currentProtect{}; // Should be the same as `newProtect` given in the ctor.. But we wont check for it.
+                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &currentProtect) == 0) {
+                    NOTSA_UNREACHABLE();
                 }
             }
 
@@ -115,7 +107,12 @@ namespace ReversibleHooks {
             LPVOID m_addr{};
             DWORD  m_sz{};
         };
-    
+
+        struct VTableFunction {
+            std::string_view name{};
+        };
+        static constexpr VTableFunction purevtblfn{}; // Marking a pure vtable function
+
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false, int stackArguments = -1);
         void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
         /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
@@ -131,12 +128,12 @@ namespace ReversibleHooks {
     }
 
     template <typename T>
-    static void InstallVirtual(std::string_view category, std::string fnName, T libVTableAddress, std::vector<uint32> vecAddressesToHook) {
+    static void InstallVirtual(std::string_view category, std::string_view className, std::string fnName, uint32 vtblIdx, void** pvtblGTA) {
         auto ptr = FunctionPointerToVoidP(libVTableAddress);
         detail::HookInstallVirtual(category, std::move(fnName), ptr, std::move(vecAddressesToHook));
     }
 
-    void InstallVTable(void* VTableAddress, std::initializer_list<VTableFunction> fns);
+    static void InstallVTable(std::string category, std::string_view className, void** pvtblGTA, std::initializer_list<detail::VTableFunction> fns);
 
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
