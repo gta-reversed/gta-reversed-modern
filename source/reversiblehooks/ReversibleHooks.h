@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include "HookSystem.h"
 
 //
 // Helper macros - For help regarding usage see how they're used (`Find all references` and take a look)
@@ -76,9 +77,45 @@ namespace ReversibleHooks {
         std::string name{};
     };
 
+    struct VTableFunction {
+        template<typename Fn>
+        VTableFunction(Fn fn, std::string_view name) :
+            functionPtr{ FunctionPointerToVoidP(fn) },
+            name{ name }
+        {
+        }
+
+        void*            functionPtr{};
+        std::string_view name{};
+    };
+
     RootHookCategory& GetRootCategory();
 
     namespace detail {
+        // Change protection of memory pages, and automatically rollback on scope exit
+        struct ScopedVirtualProtectModify {
+            ScopedVirtualProtectModify(LPVOID address, SIZE_T sz, DWORD newProtect = PAGE_EXECUTE_READWRITE) :
+                m_addr{ address },
+                m_sz{ sz }
+            {
+                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                    assert(0); // Failed
+                }
+            }
+
+            ~ScopedVirtualProtectModify() {
+                DWORD oldProtect{};
+                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                    assert(0); // Failed
+                }
+            }
+
+        private:
+            DWORD  m_oldProtect{};
+            LPVOID m_addr{};
+            DWORD  m_sz{};
+        };
+    
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false, int stackArguments = -1);
         void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
         /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
@@ -98,6 +135,8 @@ namespace ReversibleHooks {
         auto ptr = FunctionPointerToVoidP(libVTableAddress);
         detail::HookInstallVirtual(category, std::move(fnName), ptr, std::move(vecAddressesToHook));
     }
+
+    void InstallVTable(void* VTableAddress, std::initializer_list<VTableFunction> fns);
 
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);

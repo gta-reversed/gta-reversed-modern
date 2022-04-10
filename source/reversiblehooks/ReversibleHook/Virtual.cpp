@@ -4,30 +4,26 @@
 
 namespace ReversibleHooks{
 namespace ReversibleHook{
-Virtual::Virtual(std::string fnName, void* libFuncAddress, std::vector<uint32> vecAddressesToHook) :
+Virtual::Virtual(std::string fnName, void** pvtblGTA, uint32 vtblIdx, void* pfnOur) :
     Base{ std::move(fnName), HookType::Virtual },
-    m_LibFunctionAddress{ reinterpret_cast<uint32>(libFuncAddress) },
-    m_vecHookedAddresses{ std::move(vecAddressesToHook) }
+    m_pvtblGTA{pvtblGTA},
+    m_vtblIdx{vtblIdx},
+    m_pfnOur{pfnOur}
 {
-    assert(!vecAddressesToHook.empty());
+    // Make sure we have R/W access to the vtbl entry
+    detail::ScopedVirtualProtectAutoRollback svpm{ m_pvtblGTA, sizeof(void*), PAGE_EXECUTE_READWRITE };
 
-    DWORD dwProtectInitial[2] = { 0 };
-    VirtualProtect((void*)vecAddressesToHook[0], 4, PAGE_EXECUTE_READWRITE, &dwProtectInitial[0]);
-    m_OriginalFunctionAddress = *reinterpret_cast<uint32*>(vecAddressesToHook[0]);
-    VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
+    // Read original pfn
+    m_pfnGTA = m_pvtblGTA[m_vtblIdx];
 
-    m_bIsHooked = false;
-    Switch(); // Installs hooks (also sets `m_bIsHooked` to `true`)
+    // Modify the vtable entry to point to our function
+    m_pvtblGTA[m_vtblIdx] = m_pfnOur;
+
+
 };
 
-void Virtual::Switch()
-{
-    for (auto uiAddress : m_vecHookedAddresses) {
-        using namespace ReversibleHooks::detail;
-        VirtualCopy((void*)uiAddress, (void*)(m_bIsHooked ? m_OriginalFunctionAddress : m_LibFunctionAddress), 5);
-    }
+void Virtual::Switch() {
 
-    m_bIsHooked = !m_bIsHooked;
 }
 };
 };

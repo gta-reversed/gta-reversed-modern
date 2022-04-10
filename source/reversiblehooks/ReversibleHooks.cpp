@@ -19,6 +19,10 @@ RootHookCategory& GetRootCategory() {
     return s_RootCategory;
 }
 
+void InstallVTable(void* VTableAddress, std::initializer_list<VTableFunction> fns) {
+
+}
+
 void CheckAll() {
     s_RootCategory.ForEachItem([](auto& item) {
         item->Check();

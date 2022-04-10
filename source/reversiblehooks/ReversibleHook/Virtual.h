@@ -10,16 +10,21 @@ namespace ReversibleHooks{
 namespace ReversibleHook{
 
 struct Virtual : Base {
-    Virtual(std::string fnName, void* libFuncAddress, std::vector<uint32> vecAddressesToHook);
-    virtual ~Virtual() override = default;
-
-    virtual void Switch() override;
-    virtual void Check() override {} // Nothing to do 
+    Virtual(std::string fnName, void** pvtblGTA, uint32 vtblIdx, void* pfnOur);
+    ~Virtual() override = default;
+ 
+    void Switch() override;
+    void Check() override {} // Nothing to do 
 private:
-    std::vector<uint32> m_vecHookedAddresses;
-    uint32              m_OriginalFunctionAddress;
-    uint32              m_LibFunctionAddress;
-};
+    void** m_pvtblGTA{};   // Pointer to GTA vtable
+    uint32 m_vtblIdx{};   // Index of this function in the vtable
+    void*  m_pfnOur{};  // Our function
+    void*  m_pfnGTA{};  // The original GTA function (Extracted from the vtable)
 
+    SHookContent m_LibHookContent{};
+    uint8        m_LibOriginalFunctionContent[sizeof(m_LibHookContent)]{};
+    uint32       m_iLibHookedBytes{};
+    uint32       m_iLibFunctionAddress{};
+};
 };
 };
