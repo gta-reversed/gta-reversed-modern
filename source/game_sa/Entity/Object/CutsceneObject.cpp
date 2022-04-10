@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "CutsceneObject.h"
+#include "CarFXRenderer.h"
+
 char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[NUM_CUTSCENE_VEHS])0x8D0F68;
 
 void CCutsceneObject::InjectHooks()

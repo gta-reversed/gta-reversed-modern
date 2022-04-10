@@ -10,6 +10,7 @@
 
 #include <Windows.h>
 #include <extensions/ScriptCommands.h>
+#include <extensions/random.hpp>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -265,6 +266,117 @@ void SpawnTab() {
     ImGui::EndTabBar();
 }
 
+// todo: FxDebugModule
+const char* PARTICLES[] = {
+    "prt_blood",
+    "prt_boatsplash",
+    "prt_bubbles",
+    "prt_cardebris",
+    "prt_collisionsmoke",
+    "prt_glass",
+    "prt_gunshell",
+    "prt_sand",
+    "prt_sand2",
+    "prt_smokeII_3_expand",
+    "prt_smoke_huge",
+    "prt_spark",
+    "prt_spark2",
+    "prt_splash",
+    "prt_wake",
+    "prt_watersplash",
+    "prt_wheeldirt",
+    "boat_prop",
+    "camflash",
+    "exhale",
+    "explosion_fuel_car",
+    "explosion_large",
+    "explosion_medium",
+    "explosion_molotov",
+    "explosion_small",
+    "explosion_tiny",
+    "extinguisher",
+    "fire",
+    "fire_bike",
+    "fire_car",
+    "fire_large",
+    "fire_med",
+    "flamethrower",
+    "gunflash",
+    "gunsmoke",
+    "heli_dust",
+    "jetpack",
+    "jetthrust",
+    "molotov_flame",
+    "nitro",
+    "overheat_car",
+    "overheat_car_electric",
+    "riot_smoke",
+    "spraycan",
+    "tank_fire",
+    "teargas",
+    "teargasAD",
+    "water_hydrant",
+    "water_ripples",
+    "water_speed",
+    "water_splash",
+    "water_splsh_big",
+    "water_splsh_sml",
+    "water_swim",
+    "cigarette_smoke",
+    "flame",
+    "insects",
+    "smoke30lit",
+    "smoke30m",
+    "smoke50lit",
+    "vent",
+    "vent2",
+    "waterfall_end",
+    "water_fnt_tme",
+    "water_fountain",
+    "tree_hit_fir",
+    "tree_hit_palm",
+    "blood_heli",
+    "carwashspray",
+    "cement",
+    "cloudfast",
+    "coke_puff",
+    "coke_trail",
+    "explosion_barrel",
+    "explosion_crate",
+    "explosion_door",
+    "petrolcan",
+    "puke",
+    "shootlight",
+    "smoke_flare",
+    "wallbust",
+    "ws_factorysmoke",
+};
+
+std::vector<int32> s_Particles;
+
+void PlayParticle(std::string_view particle) {
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
+
+    CVector pos = player->GetPosition() + CVector{ 5.0f, 0.0f, 0.0f };
+    int32 handle;
+    Command<COMMAND_CREATE_FX_SYSTEM>(particle.data(), pos.x, pos.y, pos.z, 1, &handle);
+    Command<COMMAND_PLAY_FX_SYSTEM>(handle);
+    s_Particles.push_back(handle);
+}
+
+void PlayRandomParticle() {
+    PlayParticle(notsa::random_value(PARTICLES));
+}
+
+void StopAll() {
+    for (int32& particle : s_Particles) {
+        Command<COMMAND_KILL_FX_SYSTEM>(particle);
+    }
+    s_Particles.clear();
+}
+
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
         return;
@@ -312,6 +424,16 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }
+
+                for (auto& particle : PARTICLES) {
+                    ImGui::SameLine();
+                    ImGui::Text(particle);
+                    if (ImGui::Button(particle)) {
+                        PlayParticle(particle);
+                    }
+                }
+
+
                 ImGui::EndTabItem();
             }
 
@@ -342,9 +464,10 @@ static void DebugCode() {
         Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
     }
     if (pad->IsStandardKeyJustDown('5')) {
-        CVector pos{};
-        Command<COMMAND_GET_PLAYER_COORDINATES>(0, &pos.x, &pos.y, &pos.z);
-        printf("%f %f %f\n", pos.x, pos.y, pos.z);
+        PlayRandomParticle();
+    }
+    if (pad->IsStandardKeyJustDown('6')) {
+        PlayParticle("smoke30m");
     }
 }
 

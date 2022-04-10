@@ -14,6 +14,7 @@
 #include "VehicleSaveStructure.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "FxPrtMult.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
@@ -2567,43 +2568,43 @@ void CVehicle::AddExhaustParticles()
             FxPrtMult_c fxPrt(0.9f, 0.9f, 1.0f, particleAlpha, 0.2f, 1.0f, fLife);
             int32 numExhausts = 2;
             for (int32 i = 0; i < 2; i++) {
-                FxSystem_c* firstExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                FxSystem_c* firstExhaustFxSystem = g_fx.m_SmokeII3expand;
                 if (bFirstExhaustSubmergedInWater) {
-                    fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                    fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                     fxPrt.m_fSize = 0.6f;
-                    firstExhaustFxSystem = g_fx.m_pPrtBubble;
+                    firstExhaustFxSystem = g_fx.m_Bubble;
                 }
                 firstExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 if (bHasDoubleExhaust) {
-                    FxSystem_c* secondExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                    FxSystem_c* secondExhaustFxSystem = g_fx.m_SmokeII3expand;
                     if (bSecondExhaustSubmergedInWater)
                     {
-                        fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                        fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                         fxPrt.m_fSize = 0.6f;
-                        secondExhaustFxSystem = g_fx.m_pPrtBubble;
+                        secondExhaustFxSystem = g_fx.m_Bubble;
                     }
                     secondExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                 }
 
                 if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
                     if (rand() % 2) {
-                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                         if (bFirstExhaustSubmergedInWater)
                         {
-                            fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                            fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                             fxPrt.m_fSize = 0.6f;
-                            secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                            secondaryExhaustFxSystem = g_fx.m_Bubble;
                         }
                         secondaryExhaustFxSystem->AddParticle(&firstExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }
                     else if (bHasDoubleExhaust)
                     {
-                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
+                        FxSystem_c* secondaryExhaustFxSystem = g_fx.m_SmokeII3expand;
                         if (bSecondExhaustSubmergedInWater)
                         {
-                            fxPrt.m_color.alpha = particleAlpha * 0.5f;
+                            fxPrt.m_Color.alpha = particleAlpha * 0.5f;
                             fxPrt.m_fSize = 0.6f;
-                            secondaryExhaustFxSystem = g_fx.m_pPrtBubble;
+                            secondaryExhaustFxSystem = g_fx.m_Bubble;
                         }
                         secondaryExhaustFxSystem->AddParticle(&secondExhaustPos, &vecParticleVelocity, 0.0f, &fxPrt, -1.0f, m_fContactSurfaceBrightness, 0.6f, 0);
                     }

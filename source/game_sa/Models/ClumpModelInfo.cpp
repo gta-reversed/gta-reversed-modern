@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "ClumpModelInfo.h"
+#include "CarFXRenderer.h"
 
 void CClumpModelInfo::InjectHooks()
 {
@@ -279,9 +280,13 @@ RpAtomic* CClumpModelInfo::SetAtomicRendererCB(RpAtomic* atomic, void* renderFun
 RpAtomic* CClumpModelInfo::AtomicSetupLightingCB(RpAtomic* atomic, void* data)
 {
     if (CCustomBuildingRenderer::IsCBPCPipelineAttached(atomic))
+    {
         CCustomBuildingRenderer::AtomicSetup(atomic);
+    }
     else if (CCarFXRenderer::IsCCPCPipelineAttached(atomic))
+    {
         CCarFXRenderer::CustomCarPipeAtomicSetup(atomic);
+    }
 
     return atomic;
 }

@@ -14,6 +14,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "TheScripts.h"
+#include "FxPrtMult.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -958,23 +959,23 @@ void CObject::Init() {
 
 // 0x59FB50
 void CObject::DoBurnEffect() {
-    const auto& pBox = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox();
-    const auto& vecSize = pBox.GetSize();
+    const auto& box = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundingBox();
+    const auto& vecSize = box.GetSize();
     const auto nUsedSize = static_cast<int32>(vecSize.x * vecSize.y * vecSize.z * m_fBurnDamage / 20.0F);
     if (nUsedSize <= 0)
         return;
 
     for (auto i = 0; i < nUsedSize; ++i)
     {
-        const auto fRandX = CGeneral::GetRandomNumberInRange(pBox.m_vecMin.x, pBox.m_vecMax.x);
-        const auto fRandY = CGeneral::GetRandomNumberInRange(pBox.m_vecMin.y, pBox.m_vecMax.y);
-        const auto fRandZ = CGeneral::GetRandomNumberInRange(pBox.m_vecMin.z, pBox.m_vecMax.z);
+        const auto fRandX = CGeneral::GetRandomNumberInRange(box.m_vecMin.x, box.m_vecMax.x);
+        const auto fRandY = CGeneral::GetRandomNumberInRange(box.m_vecMin.y, box.m_vecMax.y);
+        const auto fRandZ = CGeneral::GetRandomNumberInRange(box.m_vecMin.z, box.m_vecMax.z);
         auto vecParticlePos = *m_matrix * CVector(fRandX, fRandY, fRandZ);
 
-        //auto smokePart = FxPrtMult_c() Originally overwritten right after
+        // auto smokePart = FxPrtMult_c() Originally overwritten right after
         auto smokePart = FxPrtMult_c(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F);
         auto vecVelocity = CVector(0.0F, 0.0F, 0.02F);
-        g_fx.m_pPrtSmokeII3expand->AddParticle(&vecParticlePos, &vecVelocity, 0.0F, &smokePart, -1.0F, 1.2F, 0.6F, false);
+        g_fx.m_SmokeII3expand->AddParticle(&vecParticlePos, &vecVelocity, 0.0F, &smokePart, -1.0F, 1.2F, 0.6F, false);
     }
 }
 

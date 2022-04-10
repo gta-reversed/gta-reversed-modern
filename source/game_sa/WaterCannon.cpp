@@ -2,6 +2,7 @@
 
 #include "WaterCannon.h"
 #include "FireManager.h"
+#include "FxPrtMult.h"
 
 void CWaterCannon::InjectHooks() {
     RH_ScopedClass(CWaterCannon);
@@ -161,11 +162,11 @@ void CWaterCannon::PushPeds() {
             FxPrtMult_c prtInfo{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.2f };
 
             CVector particleVelocity = ped->m_vecMoveSpeed * 0.3f;
-            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+            g_fx.m_SmokeII3expand->AddParticle(&pedPosn, &particleVelocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
             CVector particleVelocity2 = ped->m_vecMoveSpeed * -0.3f;
             particleVelocity2.z += 0.5f;
-            g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
+            g_fx.m_SmokeII3expand->AddParticle(&pedPosn, &particleVelocity2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
             break;
         }
@@ -251,10 +252,10 @@ void CWaterCannon::Render() {
                     for (int n = 0; n < 2; n++) {
                         const auto unk = (float)(n / CTimer::GetTimeStepInMS());
 
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &direction, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        g_fx.m_WaterSplash->AddParticle(&colPoint.m_vecPoint, &direction, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
 
                         CVector retadedSignature = direction * 0.6f;
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &retadedSignature, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        g_fx.m_WaterSplash->AddParticle(&colPoint.m_vecPoint, &retadedSignature, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
                     }
 
                     m_audio.SetSplashInfo(colPoint.m_vecPoint, direction.Magnitude());

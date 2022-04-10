@@ -7,6 +7,7 @@
 #include "PlantMgr.h"
 #include "Clouds.h"
 #include "PostEffects.h"
+#include "CarFXRenderer.h"
 
 RwRaster*& CMirrors::pBuffer = *(RwRaster**)0xC7C71C;
 RwRaster*& CMirrors::pZBuffer = *(RwRaster**)0xC7C720;
@@ -70,7 +71,7 @@ void CMirrors::CreateBuffer() {
         return;
     
     const auto depth = RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera));
-    if (g_fx.GetFxQuality() >= FxQuality_e::FXQUALITY_MEDIUM) {
+    if (g_fx.GetFxQuality() >= FX_QUALITY_MEDIUM) {
         pBuffer = RwRasterCreate(1024, 512, depth, rwRASTERTYPECAMERATEXTURE);
         if (pBuffer) {
             pZBuffer = RwRasterCreate(1024, 512, depth, rwRASTERTYPEZBUFFER);

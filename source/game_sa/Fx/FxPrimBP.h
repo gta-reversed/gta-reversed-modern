@@ -11,71 +11,57 @@
 #include "FxInfoManager.h"
 
 class FxPrim_c;
+class FxPrimBP_c;
 
 struct FxName32_t {
     char value[32];
 };
 
 struct FxBufferedMatrix {
-    int16 rightX;
-    int16 rightY;
-    int16 rightZ;
+    union {
+        struct {
+            CompressedVector right;
+            CompressedVector up;
+            CompressedVector at;
+            CompressedVector pos;
+        };
+        int16 data[12];
+    };
 
-    int16 upX;
-    int16 upY;
-    int16 upZ;
-
-    int16 apX;
-    int16 apY;
-    int16 apZ;
-
-    int16 posX;
-    int16 posY;
-    int16 posZ;
-
-    static constexpr float COMPRESS_VALUE = 32767.0f;
-    inline void CompressInto(RwMatrix*mat) {
-        mat->right.x = (float)rightX * COMPRESS_VALUE;
-        mat->right.y = (float)rightY * COMPRESS_VALUE;
-        mat->right.z = (float)rightZ * COMPRESS_VALUE;
-        mat->up.x    = (float)upX    * COMPRESS_VALUE;
-        mat->up.y    = (float)upY    * COMPRESS_VALUE;
-        mat->up.z    = (float)upZ    * COMPRESS_VALUE;
-        mat->at.x    = (float)apX    * COMPRESS_VALUE;
-        mat->at.y    = (float)apY    * COMPRESS_VALUE;
-        mat->at.z    = (float)apZ    * COMPRESS_VALUE;
-        mat->pos.x   = (float)posX   * COMPRESS_VALUE;
-        mat->pos.y   = (float)posY   * COMPRESS_VALUE;
-        mat->pos.z   = (float)posZ   * COMPRESS_VALUE;
+    void CompressInto(RwMatrix* mat) {
+        mat->right = CompressFxVector(right);
+        mat->up    = CompressFxVector(up);
+        mat->at    = CompressFxVector(at);
+        mat->pos   = CompressFxVector(pos);
     }
 
-    inline void UncompressInto(RwMatrix* mat) { // maybe wrong
-        mat->right.x = (float)rightX / COMPRESS_VALUE;
-        mat->right.y = (float)rightY / COMPRESS_VALUE;
-        mat->right.z = (float)rightZ / COMPRESS_VALUE;
-        mat->up.x    = (float)upX    / COMPRESS_VALUE;
-        mat->up.y    = (float)upY    / COMPRESS_VALUE;
-        mat->up.z    = (float)upZ    / COMPRESS_VALUE;
-        mat->at.x    = (float)apX    / COMPRESS_VALUE;
-        mat->at.y    = (float)apY    / COMPRESS_VALUE;
-        mat->at.z    = (float)apZ    / COMPRESS_VALUE;
-        mat->pos.x   = (float)posX   / COMPRESS_VALUE;
-        mat->pos.y   = (float)posY   / COMPRESS_VALUE;
-        mat->pos.z   = (float)posZ   / COMPRESS_VALUE;
+    void UncompressInto(RwMatrix* out) {
+        out->right = UncompressFxVector(right);
+        out->up    = UncompressFxVector(up);
+        out->at    = UncompressFxVector(at);
+        out->pos   = UncompressFxVector(pos);
+    }
+
+    int16 operator[](size_t i) const {
+        return (&right.x)[i];
+    }
+
+    int16& operator[](size_t i) {
+        return (&right.x)[i];
     }
 };
 
 class FxPrimBP_c {
 public:
-    char              field_4;
-    uint8             m_nSrcBlendId;
-    uint8             m_nDstBlendId;
-    uint8             m_nAlphaOn;
-    FxBufferedMatrix* m_pMatrixBuffered;
-    RwTexture*        m_apTextures[4];
-    int32             field_1C;
-    List_c            m_EmitterPtrs;
-    FxInfoManager_c   m_FxInfoManager;
+    char                      field_4;
+    uint8                     m_nSrcBlendId;
+    uint8                     m_nDstBlendId;
+    bool                      m_bAlphaOn;
+    FxBufferedMatrix*         m_pMatrixBuffered;
+    std::array<RwTexture*, 4> m_apTextures;
+    int32                     field_1C;
+    TList_c<Particle_c>       m_Particles;
+    FxInfoManager_c           m_FxInfoManager;
 
 public:
     static void InjectHooks();
@@ -83,9 +69,11 @@ public:
     FxPrimBP_c();
     virtual ~FxPrimBP_c() = 0;
     virtual bool Load(FILESTREAM file, int32 version, FxName32_t* textureNames) = 0;
-    virtual bool LoadTextures(FxName32_t* textureNames, int32 iVersion) = 0;
+    virtual bool LoadTextures(FxName32_t* textureNames, int32 version) = 0;
     virtual FxPrim_c* CreateInstance() = 0;
     virtual void Update(float a1) = 0;
+    virtual void Render(RwCamera* camera, uint32 a2, float a3, bool bCanRenderHeatHaze) = 0;
+    virtual bool FreePrtFromPrim(FxSystem_c* system) = 0;
 
     void GetRWMatrix(RwMatrix* outMatrix);
 };

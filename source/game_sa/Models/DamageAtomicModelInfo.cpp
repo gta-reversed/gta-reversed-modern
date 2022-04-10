@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "DamageAtomicModelInfo.h"
+#include "CarFXRenderer.h"
 
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
@@ -94,7 +95,11 @@ void CDamageAtomicModelInfo::SetDamagedAtomic(RpAtomic* atomic)
 {
     m_pDamagedAtomic = atomic;
     if (CCustomBuildingRenderer::IsCBPCPipelineAttached(atomic))
+    {
         CCustomBuildingRenderer::AtomicSetup(atomic);
+    }
     else if (CCarFXRenderer::IsCCPCPipelineAttached(atomic))
+    {
         CCarFXRenderer::SetCustomFXAtomicRenderPipelinesVMICB(atomic, nullptr);
+    }
 }

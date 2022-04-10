@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Buoyancy.h"
+#include "FxPrtMult.h"
 
 cBuoyancy& mod_Buoyancy = *(cBuoyancy*)0xC1C890;
 float& cBuoyancy::fPointVolMultiplier = *(float*)0x8D32C8;
@@ -313,7 +314,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector v
         auto vecVelocity = vecSplashDir * fMoveSpeed * 60.0F + vecVelocityModifier;
         float fRand = CGeneral::GetRandomNumberInRange(0.0F, 0.5F);
         vecTransformedPoint += (vecSplashDir * fRand);
-        g_fx.m_pPrtWatersplash->AddParticle(&vecTransformedPoint, &vecVelocity, 0.0F, &curParticle, -1.0F, 1.2F, 0.6F, 0);
+        g_fx.m_WaterSplash->AddParticle(&vecTransformedPoint, &vecVelocity, 0.0F, &curParticle, -1.0F, 1.2F, 0.6F, 0);
     }
 
     if (entity->IsPed()) {
@@ -333,7 +334,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector v
             else
                 vecPedParticlePos.z += 0.5F;
 
-            g_fx.m_pPrtWake->AddParticle(&vecPedParticlePos, &vecPedVelocity, 0.0F, &curParticle, fPedAngle, 1.2F, 0.6F, 0);
+            g_fx.m_Wake->AddParticle(&vecPedParticlePos, &vecPedVelocity, 0.0F, &curParticle, fPedAngle, 1.2F, 0.6F, 0);
             ped->m_pedAudio.AddAudioEvent(eAudioEvents::AE_PED_SWIM_WAKE, 0.0F, 1.0F, nullptr, 0, 0, 0);
         }
     }

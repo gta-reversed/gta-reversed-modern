@@ -24,7 +24,7 @@ public:
     void  Init();
     void  Exit();
     void  Reset();
-    void* GetMem(int32 size, int32 align);
+    void* GetMem(int32 size, int32 align = sizeof(void*));
     void  Optimise();
 };
 

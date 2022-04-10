@@ -29,6 +29,20 @@
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
 
+// FX
+#include "FxSystemBP.h"
+#include "FxSystem.h"
+#include "FxSphere.h"
+#include "FxPrimBP.h"
+#include "FxPrim.h"
+#include "FxMemoryPool.h"
+#include "FxManager.h"
+#include "FxFrustumInfo.h"
+#include "FxEmitterPrt.h"
+#include "FxEmitterBP.h"
+#include "FxEmitter.h"
+#include "Fx.h"
+
 #include "CDebugMenu.h"
 
 #include "CarGenerator.h"
@@ -224,6 +238,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    const auto Unsorted = []() {
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
@@ -267,7 +282,6 @@ void InjectHooksMain() {
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
-    Fx_c::InjectHooks();
     CBrightLights::InjectHooks();
     CShinyTexts::InjectHooks();
     CPedTaskPair::InjectHooks();
@@ -454,6 +468,7 @@ void InjectHooksMain() {
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    };
 
     const auto Audio = []() {
         CAEVehicleAudioEntity::InjectHooks();
@@ -682,10 +697,18 @@ void InjectHooksMain() {
     };
 
     const auto Fx = []() {
-        FxManager_c::InjectHooks();
         FxSystemBP_c::InjectHooks();
-        // FxSystem_c::InjectHooks();
+        FxSystem_c::InjectHooks();
+        FxSphere_c::InjectHooks();
         FxPrimBP_c::InjectHooks();
+        FxMemoryPool_c::InjectHooks();
+        FxInfoManager_c::InjectHooks();
+        FxManager_c::InjectHooks();
+        // ReversibleHooks::Install("FxFrustumInfo_c", "IsCollision", 0x4AA030, &FxFrustumInfo_c::IsCollision);
+        ReversibleHooks::Install("FxEmitterPrt_c", "operator new[]", 0x4A18B0, &FxEmitterPrt_c::operator new[]);
+        FxEmitterBP_c::InjectHooks();
+        FxEmitter_c::InjectHooks();
+        Fx_c::InjectHooks();
     };
 
     const auto Vehicle = []() {
@@ -719,12 +742,13 @@ void InjectHooksMain() {
         CScriptResourceManager::InjectHooks();
     };
 
-    Audio();
-    Tasks();
-    Events();
+    // Unsorted();
+    // Audio();
+    // Tasks();
+    // Events();
     Fx();
-    Vehicle();
-    Scripts();
+    // Vehicle();
+    // Scripts();
 
     ReversibleHooks::OnInjectionEnd();
 }

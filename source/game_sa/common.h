@@ -172,6 +172,8 @@ constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
 }
 
+// Converts radians to degrees
+// 57.295826
 constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
