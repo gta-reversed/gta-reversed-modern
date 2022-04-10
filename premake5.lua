@@ -158,6 +158,11 @@ group ""
             ["Sources/*"] = {"source/**.c*",},
             ["*"] = {"premake5.lua", "CMakeLists.txt"}
         }
+
+        filter "action:vs*"
+            linkoptions "/ignore:4251,4275"
+        filter {} -- reset filter
+
         defines { "NOMINMAX", "USE_GTASA_ALLOCATOR", "EXTRA_DEBUG_FEATURES", "FIX_BUGS" }
         includedirs {
             "source", "source/**",
