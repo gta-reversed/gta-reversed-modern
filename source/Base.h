@@ -12,6 +12,8 @@
 #define VALIDATE_OFFSET(struc, member, offset) \
 	static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
+
+
 VALIDATE_SIZE(bool, 1);
 VALIDATE_SIZE(char, 1);
 VALIDATE_SIZE(short, 2);
@@ -64,6 +66,12 @@ static void unreachable(const char* method, const char* file, int line, std::str
 #define NOTSA_UNREACHABLE(...) __assume(false)
 #endif
 #endif
+
+// In order to be able to get the vtable address using GetProcAddress
+// the whole class must be exported. (Along which the vtable is exported as well)
+// See `ReversibleHooks::detail::GetClassVTableAddress`
+#define NOTSA_EXPORT_VTABLE __declspec(dllexport)
+
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments
 #define UNUSED(x) (void)(x);
 

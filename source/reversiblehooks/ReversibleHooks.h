@@ -95,6 +95,8 @@ namespace ReversibleHooks {
         bool IsFunctionHooked(const std::string& category, const std::string& fnName);
         std::shared_ptr<SReversibleHook> GetHook(const std::string& category, const std::string& fnName);*/
         void VirtualCopy(void* dst, void* src, size_t nbytes);
+
+        void** GetVTableAddress(std::string_view name);
     };
 
     template <typename T>
@@ -118,6 +120,6 @@ namespace ReversibleHooks {
 
     // Stuff called from InjectHooksMain()
 
-    void OnInjectionBegin();
+    void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
 };

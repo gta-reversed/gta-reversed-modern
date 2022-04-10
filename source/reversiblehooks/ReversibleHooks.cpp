@@ -8,7 +8,8 @@
 
 namespace ReversibleHooks {
 
-RootHookCategory           s_RootCategory{};
+RootHookCategory s_RootCategory{};
+HMODULE          s_hThisDLL{}; // Handle to this DLL, only valid after `OnInjectionBegin` is called.
 
 #ifndef NDEBUG
 // Not particularly memory efficient, but it should be fine
@@ -35,8 +36,10 @@ void SwitchHook(std::string_view funcName) {
     });
 }
 
-void OnInjectionBegin() {
-#ifndef NDEBUG
+void OnInjectionBegin(HMODULE hThisDLL) {
+    s_hThisDLL = hThisDLL;
+
+#ifndef NDEBUG 
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
 #endif
 }
@@ -47,8 +50,8 @@ void OnInjectionEnd() {
     s_HookedAddresses.clear();
     s_HookedAddresses = {};
 #endif
-    s_RootCategory.OnInjectionEnd();
 
+    s_RootCategory.OnInjectionEnd();
 }
 
 namespace detail {
@@ -81,6 +84,18 @@ void VirtualCopy(void* dst, void* src, size_t nbytes) {
     VirtualProtect(dst, nbytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
     memcpy(dst, src, nbytes);
     VirtualProtect(dst, nbytes, dwProtect[0], &dwProtect[1]);
+}
+
+// The VTable is exported as a symbol, in the format `??_7<class name>@@6B@` where `<class name>` is the name of the class.
+// In order for this to work the class has to be exported (So the `NOTSA_EXPORT_VTABLE` macro has to be used)
+void** GetVTableAddress(std::string_view className) {
+    CHAR buffer[1024];
+    sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data()); 
+    if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
+        return vtbl;
+    } else {
+        NOTSA_UNREACHABLE();
+    }
 }
 
 }; // namespace detail
