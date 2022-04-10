@@ -52,7 +52,7 @@ set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT g
 
 add_library(gta_reversed MODULE ${_headerfiles_list} ${_sourcefiles_list} .editorconfig)
 if (MSVC)
-    target_compile_options(gta_reversed PRIVATE "/MP" "/Zc:preprocessor" "/wd26812" "/wd26495")
+    target_compile_options(gta_reversed PRIVATE "/MP" "/Zc:preprocessor" "/wd26812" "/wd26495" "/wd4251" "/wd4275")
 elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 # DISABLE DEP. WARNINGS (GCC)
     target_compile_options(ogg PRIVATE "-w")

@@ -1,7 +1,7 @@
 #pragma once
 #include "TaskSimple.h"
 
-class CTaskSimpleSetStayInSamePlace : public CTaskSimple
+class NOTSA_EXPORT_VTABLE CTaskSimpleSetStayInSamePlace : public CTaskSimple
 {
 public:
     uint8 m_bStayInSamePlace;

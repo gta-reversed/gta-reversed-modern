@@ -4,7 +4,7 @@
 
 class CVehicle;
 
-class CEventVehicleOnFire : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleOnFire : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 

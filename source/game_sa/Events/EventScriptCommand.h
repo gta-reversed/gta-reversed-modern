@@ -4,7 +4,7 @@
 
 class CTask;
 
-class CEventScriptCommand : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventScriptCommand : public CEvent {
 public:
     int32  m_primaryTaskIndex;
     CTask* m_task;

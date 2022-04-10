@@ -57,7 +57,7 @@ private:
 
 VALIDATE_SIZE(CEvent, 0xC);
 
-class CEventRevived : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventRevived : public CEvent {
 public:
     CEventRevived() {}
     ~CEventRevived() {}
@@ -79,7 +79,7 @@ private:
 
 VALIDATE_SIZE(CEventRevived, 0xC);
 
-class CEventEscalator : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventEscalator : public CEvent {
 public:
     CEventEscalator() {}
     ~CEventEscalator() override = default;
@@ -102,7 +102,7 @@ private:
 
 VALIDATE_SIZE(CEventEscalator, 0xC);
 
-class CEventSexyVehicle : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventSexyVehicle : public CEvent {
 public:
     CVehicle* m_vehicle;
 
@@ -126,7 +126,7 @@ private:
 
 VALIDATE_SIZE(CEventSexyVehicle, 0x10);
 
-class CEventChatPartner : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventChatPartner : public CEvent {
 public:
     bool  m_leadSpeaker;
     char  _pad[3];
@@ -151,7 +151,7 @@ private:
 
 VALIDATE_SIZE(CEventChatPartner, 0x14);
 
-class CEventCopCarBeingStolen : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventCopCarBeingStolen : public CEvent {
 public:
     CPed* m_hijacker;
     CVehicle* m_vehicle;
@@ -177,7 +177,7 @@ private:
 
 VALIDATE_SIZE(CEventCopCarBeingStolen, 0x14);
 
-class CEventCarUpsideDown : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventCarUpsideDown : public CEvent {
 public:
     CVehicle* m_vehicle;
 
@@ -205,7 +205,7 @@ VALIDATE_SIZE(CEventCarUpsideDown, 0x10);
 
 class CEntity;
 
-class CEventPassObject : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventPassObject : public CEvent {
 public:
     CEntity* m_giver;
     bool     m_dontPassObject;
@@ -233,7 +233,7 @@ private:
 
 VALIDATE_SIZE(CEventPassObject, 0x14);
 
-class CEventLeanOnVehicle : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventLeanOnVehicle : public CEvent {
 public:
     CVehicle* m_vehicle;
     int32 m_leanAnimDurationInMs;
@@ -260,7 +260,7 @@ private:
 
 VALIDATE_SIZE(CEventLeanOnVehicle, 0x14);
 
-class CEventOnFire : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventOnFire : public CEvent {
 public:
     CEventOnFire() = default;
     ~CEventOnFire() override = default;

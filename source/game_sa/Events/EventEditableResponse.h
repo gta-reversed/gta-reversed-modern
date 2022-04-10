@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventEditableResponse : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventEditableResponse : public CEvent {
 public:
     bool   m_bAddToEventGroup;
     bool   field_D;
@@ -37,7 +37,7 @@ private:
 
 VALIDATE_SIZE(CEventEditableResponse, 0x14);
 
-class CEventSpecial : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventSpecial : public CEventEditableResponse {
 public:
     CEventSpecial() = default; // 0x4B1AE0
     ~CEventSpecial() override = default; // 0x4B6750 ?
@@ -56,7 +56,7 @@ private:
 
 VALIDATE_SIZE(CEventSpecial, 0x14);
 
-class CEventFireNearby : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventFireNearby : public CEventEditableResponse {
 public:
     CVector m_position;
 
@@ -80,7 +80,7 @@ private:
 
 VALIDATE_SIZE(CEventFireNearby, 0x20);
 
-class CEventDanger : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDanger : public CEventEditableResponse {
 public:
     CEntity* m_dangerFrom;
     float m_dangerRadius;
@@ -108,7 +108,7 @@ private:
 
 VALIDATE_SIZE(CEventDanger, 0x1C);
 
-class CEventSeenPanickedPed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventSeenPanickedPed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 

@@ -5,7 +5,7 @@
 
 class CPed;
 
-class CEventGroupEvent : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventGroupEvent : public CEvent {
 public:
     CPed*   m_ped;
     CEvent* m_event;

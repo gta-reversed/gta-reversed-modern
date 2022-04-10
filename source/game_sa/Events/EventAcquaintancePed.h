@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Vector.h"
 
-class CEventAcquaintancePed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
@@ -29,7 +29,7 @@ private:
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
-class CEventAcquaintancePedHate : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHate : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
     ~CEventAcquaintancePedHate() {}
@@ -45,7 +45,7 @@ private:
     CEventAcquaintancePedHate* Constructor(CPed* ped);
 };
 
-class CEventAcquaintancePedRespect : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedRespect : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedRespect(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedRespect() {}
@@ -55,7 +55,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedRespect(m_ped); }
 };
 
-class CEventAcquaintancePedLike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedLike : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedLike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedLike() {}
@@ -65,7 +65,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedLike(m_ped); }
 };
 
-class CEventAcquaintancePedDislike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedDislike : public CEventAcquaintancePed {
 public:
     CEventAcquaintancePedDislike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedDislike() {}
@@ -75,7 +75,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedDislike(m_ped); }
 };
 
-class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
 public:
     uint32 m_startTimeInMs;
     CVector m_point;
@@ -96,7 +96,7 @@ private:
     bool AffectsPed_Reversed(CPed* ped);
 };
 
-class CEventSeenCop : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventSeenCop : public CEventAcquaintancePed {
 public:
     static void InjectHooks();
 

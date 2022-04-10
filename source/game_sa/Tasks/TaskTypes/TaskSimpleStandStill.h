@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-class CTaskSimpleStandStill : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleStandStill : public CTaskSimple {
 public:
     int32      m_nTime;
     CTaskTimer m_timer;

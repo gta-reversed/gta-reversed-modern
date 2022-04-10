@@ -10,7 +10,7 @@
 #include "eWeaponType.h"
 #include "Vehicle.h"
 
-class CTaskComplexDie : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexDie : public CTaskComplex {
 public:
     eWeaponType m_nWeaponType; // Means Of Death
     int32       m_animGroup;

@@ -10,7 +10,7 @@
 #include "TaskTimer.h"
 #include "TaskComplex.h"
 
-class CTaskComplexKillPedOnFoot : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexKillPedOnFoot : public CTaskComplex {
 public:
     uint8      m_bit_1 : 1;
     uint8      m_bit_2 : 1;

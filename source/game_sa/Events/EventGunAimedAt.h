@@ -5,7 +5,7 @@
 
 class CPed;
 
-class CEventGunAimedAt : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventGunAimedAt : public CEventEditableResponse {
 public:
     CPed* m_ped;
 

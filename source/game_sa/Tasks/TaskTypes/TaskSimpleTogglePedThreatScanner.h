@@ -1,6 +1,6 @@
 #include "TaskSimple.h"
 
-class CTaskSimpleTogglePedThreatScanner : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleTogglePedThreatScanner : public CTaskSimple {
 public:
     bool m_bScanAllowedScriptPed;
     bool m_bScanAllowedInVehicle;

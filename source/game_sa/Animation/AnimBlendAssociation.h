@@ -57,7 +57,7 @@ struct SClumpAnimAssoc {
     uint16               m_nFlags; // TODO: use bitfield
 };
 
-class CAnimBlendAssociation : public SClumpAnimAssoc {
+class NOTSA_EXPORT_VTABLE CAnimBlendAssociation : public SClumpAnimAssoc {
 public:
     eAnimBlendCallbackType m_nCallbackType;
 

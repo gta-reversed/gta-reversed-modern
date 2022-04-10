@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventDeath : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventDeath : public CEvent {
     bool   m_bDrowning;
     char   _pad[3];
 public:

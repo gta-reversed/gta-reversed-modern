@@ -10,7 +10,7 @@
 
 class CPed;
 
-class CTaskSimple : public CTask {
+class NOTSA_EXPORT_VTABLE CTaskSimple : public CTask {
 public:
     CTaskSimple();
     ~CTaskSimple() override = default;

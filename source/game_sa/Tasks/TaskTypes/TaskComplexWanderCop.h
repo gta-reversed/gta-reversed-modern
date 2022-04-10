@@ -6,7 +6,7 @@
 
 class CPed;
 
-class CTaskComplexWanderCop : public CTaskComplexWander {
+class NOTSA_EXPORT_VTABLE CTaskComplexWanderCop : public CTaskComplexWander {
 public:
     CTaskComplexGoToPointAndStandStill* m_pGoToPointAndStandStillTask;
     CTaskTimer                          m_nScanForStuffTimer;

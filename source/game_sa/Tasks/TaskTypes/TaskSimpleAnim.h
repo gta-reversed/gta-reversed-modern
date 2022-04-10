@@ -10,7 +10,7 @@
 #include "TaskSimple.h"
 #include "AnimBlendAssociation.h"
 
-class CTaskSimpleAnim : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleAnim : public CTaskSimple {
 public:
     CTaskSimpleAnim(bool bHoldLastFrame);
     ~CTaskSimpleAnim();
