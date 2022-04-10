@@ -218,8 +218,6 @@
 #include "TaskSimpleIKPointArm.h"
 
 void InjectHooksMain() {
-    ReversibleHooks::OnInjectionBegin();
-
     InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
@@ -725,6 +723,10 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
+}
 
+void InjectHooksMain(HMODULE hThisDLL) {
+    ReversibleHooks::OnInjectionBegin(hThisDLL);
+    InjectHooksMain();
     ReversibleHooks::OnInjectionEnd();
 }
