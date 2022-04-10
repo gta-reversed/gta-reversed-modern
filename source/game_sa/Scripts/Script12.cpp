@@ -127,7 +127,13 @@ OpcodeResult CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_SET_HELI_ORIENTATION: // 0x4D0
         break;
     case COMMAND_CLEAR_HELI_ORIENTATION: // 0x4D1
-        break;
+    {
+        CollectParameters(1);
+        auto* heli = GetVehiclePool()->GetAt(ScriptParams[0].iParam)->AsAutomobile();
+        assert(heli && heli->IsRealHeli());
+        heli->ClearHeliOrientation();
+        return OR_CONTINUE;
+    }
     case COMMAND_PLANE_GOTO_COORDS: // 0x4D2
         break;
     case COMMAND_GET_NTH_CLOSEST_CAR_NODE: // 0x4D3
@@ -147,7 +153,10 @@ OpcodeResult CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_HAS_OBJECT_COLLIDED_WITH_ANYTHING: // 0x4DA
         break;
     case COMMAND_REMOVE_RC_BUGGY: // 0x4DB
-        break;
+    {
+        FindPlayerInfo(CWorld::PlayerInFocus).BlowUpRCBuggy(false);
+        return OR_CONTINUE;
+    }
     case COMMAND_HAS_PHOTOGRAPH_BEEN_TAKEN: // 0x4DC
         break;
     case COMMAND_GET_CHAR_ARMOUR: // 0x4DD
@@ -176,7 +185,8 @@ OpcodeResult CRunningScript::ProcessCommands1200To1299(int32 commandId) {
         break;
     case COMMAND_IS_OBJECT_IN_AREA_2D: // 0x4E9
     case COMMAND_IS_OBJECT_IN_AREA_3D: // 0x4EA
-        break;
+        ObjectInAreaCheckCommand(commandId);
+        return OR_CONTINUE;
     case COMMAND_TASK_TOGGLE_DUCK: // 0x4EB
         break;
     case COMMAND_SET_ZONE_CIVILIAN_CAR_INFO: // 0x4EC
@@ -204,7 +214,17 @@ OpcodeResult CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_DISPLAY_NTH_ONSCREEN_COUNTER_WITH_STRING: // 0x4F7
         break;
     case COMMAND_ADD_SET_PIECE: // 0x4F8
-        break;
+        CollectParameters(13);
+        CSetPieces::AddOne(
+            ScriptParams[0].uParam,
+            CTheScripts::ReadCVectorFromScript(1),
+            CTheScripts::ReadCVectorFromScript(3),
+            CTheScripts::ReadCVectorFromScript(5),
+            CTheScripts::ReadCVectorFromScript(7),
+            CTheScripts::ReadCVectorFromScript(9),
+            CTheScripts::ReadCVectorFromScript(11)
+        );
+        return OR_CONTINUE;
     case COMMAND_SET_EXTRA_COLOURS: // 0x4F9
         break;
     case COMMAND_CLEAR_EXTRA_COLOURS: // 0x4FA
@@ -238,11 +258,27 @@ OpcodeResult CRunningScript::ProcessCommands1200To1299(int32 commandId) {
     case COMMAND_CLOSE_ALL_CAR_DOORS: // 0x508
         break;
     case COMMAND_GET_DISTANCE_BETWEEN_COORDS_2D: // 0x509
-        break;
+    {
+        CollectParameters(4);
+        ScriptParams[0].fParam = (CTheScripts::ReadCVector2DFromScript(0) - CTheScripts::ReadCVector2DFromScript(2)).Magnitude();
+        StoreParameters(1);
+        return OR_CONTINUE;
+    }
     case COMMAND_GET_DISTANCE_BETWEEN_COORDS_3D: // 0x50A
-        break;
+    {
+        CollectParameters(6);
+        ScriptParams[0].fParam = (CTheScripts::ReadCVectorFromScript(0) - CTheScripts::ReadCVectorFromScript(3)).Magnitude();
+        StoreParameters(1);
+        return OR_CONTINUE;
+    }
     case COMMAND_POP_CAR_BOOT_USING_PHYSICS: // 0x50B
-        break;
+    {
+        CollectParameters(1);
+        auto* car = GetVehiclePool()->GetAt(ScriptParams[0].iParam)->AsAutomobile();
+        assert(car && car->IsAutomobile());
+        car->PopBootUsingPhysics();
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_FIRST_PERSON_WEAPON_CAMERA: // 0x50C
         break;
     case COMMAND_IS_CHAR_LEAVING_VEHICLE_TO_DIE: // 0x50D

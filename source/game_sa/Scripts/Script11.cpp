@@ -55,7 +55,8 @@ OpcodeResult CRunningScript::ProcessCommands1100To1199(int32 commandId) {
     case COMMAND_DISPLAY_TEXT_WITH_2_NUMBERS: // 0x45B
         break;
     case COMMAND_FAIL_CURRENT_MISSION: // 0x45C 0x48A70D
-        break;
+        CTheScripts::FailCurrentMission = 2;
+        return OR_CONTINUE;
     case COMMAND_GET_CLOSEST_OBJECT_OF_TYPE: // 0x45D
         break;
     case COMMAND_PLACE_OBJECT_RELATIVE_TO_OBJECT: // 0x45E

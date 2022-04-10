@@ -43,7 +43,14 @@ OpcodeResult CRunningScript::ProcessCommands700To799(int32 commandId) {
     case COMMAND_GOSUB_FILE: // 0x2CD
         break;
     case COMMAND_GET_GROUND_Z_FOR_3D_COORD: // 0x2CE
-        break;
+    {
+        CollectParameters(3);
+        const CVector pos = CTheScripts::ReadCVectorFromScript(0);
+        bool success = false;
+        *(float*)&ScriptParams[0] = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &success, nullptr);
+        StoreParameters(1);
+        return OR_CONTINUE;
+    }
     case COMMAND_START_SCRIPT_FIRE: // 0x2CF
     {
         CollectParameters(5);
@@ -132,9 +139,15 @@ OpcodeResult CRunningScript::ProcessCommands700To799(int32 commandId) {
     case COMMAND_SET_CUTSCENE_HEAD_ANIM: // 0x2F5
         break;
     case COMMAND_SIN: // 0x2F6
-        break;
+        CollectParameters(1);
+        ScriptParams[0].fParam = std::sin(DegreesToRadians(ScriptParams[0].fParam));
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_COS: // 0x2F7
-        break;
+        CollectParameters(1);
+        ScriptParams[0].fParam = std::cos(DegreesToRadians(ScriptParams[0].fParam));
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_GET_CAR_FORWARD_X: // 0x2F8
         break;
     case COMMAND_GET_CAR_FORWARD_Y: // 0x2F9
@@ -176,37 +189,73 @@ OpcodeResult CRunningScript::ProcessCommands700To799(int32 commandId) {
     case COMMAND_SET_CHAR_OBJ_FOLLOW_CHAR_IN_FORMATION: // 0x30B
         break;
     case COMMAND_PLAYER_MADE_PROGRESS: // 0x30C
-        break;
+        CollectParameters(1);
+        CStats::IncrementStat(STAT_PROGRESS_MADE, ScriptParams[0].fParam);
+        return OR_CONTINUE;
     case COMMAND_SET_PROGRESS_TOTAL: // 0x30D
-        break;
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_TOTAL_PROGRESS, ScriptParams[0].fParam);
+        return OR_CONTINUE;
+    case COMMAND_REGISTER_JUMP_DISTANCE: // 0x30E | NOTSA
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_MAXIMUM_INSANE_JUMP_DISTANCE, std::max(CStats::GetStatValue(STAT_MAXIMUM_INSANE_JUMP_DISTANCE), ScriptParams[0].fParam));
+        return OR_CONTINUE;
     case COMMAND_REGISTER_JUMP_HEIGHT: // 0x30F | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_MAXIMUM_INSANE_JUMP_HEIGHT, std::max(CStats::GetStatValue(STAT_MAXIMUM_INSANE_JUMP_HEIGHT), ScriptParams[0].fParam));
+        return OR_CONTINUE;
     case COMMAND_REGISTER_JUMP_FLIPS: // 0x310 | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_MAXIMUM_INSANE_JUMP_FLIPS, std::max(CStats::GetStatValue(STAT_MAXIMUM_INSANE_JUMP_FLIPS), ScriptParams[0].fParam));
+        return OR_CONTINUE;
     case COMMAND_REGISTER_JUMP_SPINS: // 0x311 | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_MAXIMUM_INSANE_JUMP_ROTATION, std::max(CStats::GetStatValue(STAT_MAXIMUM_INSANE_JUMP_ROTATION), ScriptParams[0].fParam));
+        return OR_CONTINUE;
     case COMMAND_REGISTER_JUMP_STUNT: // 0x312 | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::SetStatValue(STAT_BEST_INSANE_STUNT_AWARDED, std::max(CStats::GetStatValue(STAT_BEST_INSANE_STUNT_AWARDED), ScriptParams[0].fParam));
+        return OR_CONTINUE;
     case COMMAND_REGISTER_UNIQUE_JUMP_FOUND: // 0x313 | NOTSA
-        break;
+        CStats::IncrementStat(STAT_UNIQUE_JUMPS_FOUND, 1.0f);
+        return OR_CONTINUE;
     case COMMAND_SET_UNIQUE_JUMPS_TOTAL: // 0x314 | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::IncrementStat(STAT_UNIQUE_JUMPS_DONE, ScriptParams[0].fParam); // ?
+        return OR_CONTINUE;
     case COMMAND_REGISTER_PASSENGER_DROPPED_OFF_TAXI: // 0x315 | NOTSA
-        break;
+        CStats::IncrementStat(STAT_PASSENGERS_DROPPED_OFF, 1.0f);
+        return OR_CONTINUE;
     case COMMAND_REGISTER_MONEY_MADE_TAXI: // 0x316 | NOTSA
-        break;
+        CollectParameters(1);
+        CStats::IncrementStat(STAT_CASH_MADE_IN_A_TAXI, ScriptParams[0].fParam); // float or int
+        return OR_CONTINUE;
     case COMMAND_REGISTER_MISSION_GIVEN: // 0x317
-        break;
+        CStats::IncrementStat(STAT_MISSION_ATTEMPTS, 1.0f);
+        return OR_CONTINUE;
     case COMMAND_REGISTER_MISSION_PASSED: // 0x318
         break;
     case COMMAND_SET_CHAR_RUNNING: // 0x319
         break;
     case COMMAND_REMOVE_ALL_SCRIPT_FIRES: // 0x31A
-        break;
+        gFireManager.RemoveAllScriptFires();
+        return OR_CONTINUE;
     case COMMAND_IS_FIRST_CAR_COLOUR: // 0x31B
-        break;
+    {
+        CollectParameters(2);
+        CVehicle* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        UpdateCompareFlag(vehicle->m_nPrimaryColor == ScriptParams[1].iParam);
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_SECOND_CAR_COLOUR: // 0x31C
-        break;
+    {
+        CollectParameters(2);
+        CVehicle* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        UpdateCompareFlag(vehicle->m_nSecondaryColor == ScriptParams[1].iParam);
+        return OR_CONTINUE;
+    }
     case COMMAND_HAS_CHAR_BEEN_DAMAGED_BY_WEAPON: // 0x31D
         break;
     case COMMAND_HAS_CAR_BEEN_DAMAGED_BY_WEAPON: // 0x31E

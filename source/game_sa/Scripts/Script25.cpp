@@ -99,27 +99,62 @@ OpcodeResult CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     case COMMAND_RESET_VEHICLE_CAMERA_TWEAK: // 0x9F0
         break;
     case COMMAND_REPORT_MISSION_AUDIO_EVENT_AT_CHAR: // 0x9F1
-        break;
+    {
+        CollectParameters(2);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        assert(ped);
+        AudioEngine.ReportMissionAudioEvent(ScriptParams[1].u16Param, ped);
+        return OR_CONTINUE;
+    }
     case COMMAND_DOES_DECISION_MAKER_EXIST: // 0x9F2
         break;
     case COMMAND_GET_RANDOM_TRAIN_IN_SPHERE_NO_SAVE: // 0x9F3
         break;
     case COMMAND_IGNORE_HEIGHT_DIFFERENCE_FOLLOWING_NODES: // 0x9F4
-        break;
+    {
+        CollectParameters(2);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        assert(ped);
+        ped->bIgnoreHeightDifferenceFollowingNodes = ScriptParams[1].bParam; // 0x8000
+        return OR_CONTINUE;
+    }
     case COMMAND_SHUT_ALL_CHARS_UP: // 0x9F5
-        break;
+        CollectParameters(1);
+        if (ScriptParams[0].bParam) {
+            CAEPedSpeechAudioEntity::DisableAllPedSpeech();
+        } else {
+            CAEPedSpeechAudioEntity::EnableAllPedSpeech();
+        }
+        return OR_CONTINUE;
     case COMMAND_SET_CHAR_GET_OUT_UPSIDE_DOWN_CAR: // 0x9F6
-        break;
+    {
+        CollectParameters(2);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        assert(ped);
+        ped->bGetOutUpsideDownCar = ScriptParams[1].bParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_REPORT_MISSION_AUDIO_EVENT_AT_CAR: // 0x9F7
-        break;
+    {
+        CollectParameters(2);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        AudioEngine.ReportMissionAudioEvent(ScriptParams[1].u16Param, vehicle);
+        return OR_CONTINUE;
+    }
     case COMMAND_DO_WEAPON_STUFF_AT_START_OF_2P_GAME: // 0x9F8
-        break;
+        CGameLogic::DoWeaponStuffAtStartOf2PlayerGame(1);
+        return OR_CONTINUE;
     case COMMAND_SET_MENU_HEADER_ORIENTATION: // 0x9F9 | NOTSA
+        // CMenuSystem::SetHeaderOrientation
         break;
     case COMMAND_HAS_GAME_JUST_RETURNED_FROM_FRONTEND: // 0x9FA
-        break;
+        UpdateCompareFlag(CPad::GetPad(0)->JustOutOfFrontEnd == 1);
+        return OR_CONTINUE;
     case COMMAND_GET_CURRENT_LANGUAGE: // 0x9FB
-        break;
+        ScriptParams[0].uParam = static_cast<uint8>(FrontEndMenuManager.m_nLanguage);
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_IS_OBJECT_INTERSECTING_WORLD: // 0x9FC
         break;
     case COMMAND_GET_STRING_WIDTH: // 0x9FD
@@ -127,7 +162,9 @@ OpcodeResult CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     case COMMAND_RESET_VEHICLE_HYDRAULICS: // 0x9FE
         break;
     case COMMAND_SET_RESPAWN_POINT_FOR_DURATION_OF_MISSION: // 0x9FF
-        break;
+        CollectParameters(3);
+        CRestart::SetRespawnPointForDurationOfMission(CTheScripts::ReadCVectorFromScript(0));
+        return OR_CONTINUE;
     case COMMAND_IS_THIS_MODEL_A_BIKE: // 0xA00
         break;
     case COMMAND_IS_THIS_MODEL_A_CAR: // 0xA01
@@ -143,72 +180,194 @@ OpcodeResult CRunningScript::ProcessCommands2500To2599(int32 commandId) {
     case COMMAND_IS_NEXT_STATION_ALLOWED: // 0xA06
         break;
     case COMMAND_SKIP_TO_NEXT_ALLOWED_STATION: // 0xA07
-        break;
+    {
+        CollectParameters(1);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle && vehicle->IsTrain());
+        CTrain::SkipToNextAllowedStation(vehicle->AsTrain());
+        return OR_CONTINUE;
+    }
     case COMMAND_GET_STRING_WIDTH_WITH_NUMBER: // 0xA08
         break;
     case COMMAND_SHUT_CHAR_UP_FOR_SCRIPTED_SPEECH: // 0xA09
         break;
     case COMMAND_ENABLE_DISABLED_ATTRACTORS_ON_OBJECT: // 0xA0A
-        break;
+    {
+        CollectParameters(2);
+        auto* obj = GetObjectPool()->GetAt(ScriptParams[0].iParam);
+        assert(obj);
+        obj->objectFlags.b0x1000000 = ScriptParams[1].bParam; // todo: rename obj->objectFlags.b0x1000000
+        return OR_CONTINUE;
+    }
     case COMMAND_LOAD_SCENE_IN_DIRECTION: // 0xA0B
-        break;
+    {
+        CollectParameters(4);
+        auto pos     = CTheScripts::ReadCVectorFromScript(0);
+        auto heading = DegreesToRadians(ScriptParams[3].fParam);
+
+        CTimer::Stop();
+        CRenderer::RequestObjectsInDirection(pos, heading, STREAMING_LOADING_SCENE);
+        CStreaming::LoadScene(pos);
+        CTimer::Update();
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_PLAYER_USING_JETPACK: // 0xA0C
         break;
     case COMMAND_BLOCK_VEHICLE_MODEL: // 0xA0D
         break;
     case COMMAND_CLEAR_THIS_PRINT_BIG_NOW: // 0xA0E
-        break;
+    {
+        CollectParameters(1);
+        CMessages::ClearThisPrintBigNow(static_cast<eMessageStyle>(ScriptParams[0].u16Param - 1));
+        return OR_CONTINUE;
+    }
     case COMMAND_HAS_LANGUAGE_CHANGED: // 0xA0F
         break;
     case COMMAND_INCREMENT_INT_STAT_NO_MESSAGE: // 0xA10
-        break;
+    {
+        CollectParameters(2);
+        CStats::IncrementStat(static_cast<eStats>(ScriptParams[0].iParam), ScriptParams[1].fParam);
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_EXTRA_CAR_COLOURS: // 0xA11
-        break;
+    {
+        CollectParameters(3);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        vehicle->m_nTertiaryColor   = ScriptParams[1].u8Param;
+        vehicle->m_nQuaternaryColor = ScriptParams[2].u8Param;
+        return OR_CONTINUE;
+    }
     case COMMAND_GET_EXTRA_CAR_COLOURS: // 0xA12
-        break;
+    {
+        CollectParameters(1);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        ScriptParams[0].u8Param = vehicle->m_nTertiaryColor;  // todo: u8 or u32 output?
+        ScriptParams[1].u8Param = vehicle->m_nQuaternaryColor;
+        StoreParameters(2);
+        return OR_CONTINUE;
+    }
     case COMMAND_MANAGE_ALL_POPULATION: // 0xA13
         CPopulation::ManageAllPopulation();
         return OR_CONTINUE;
     case COMMAND_SET_NO_RESPRAYS: // 0xA14
+    {
         break;
+        CollectParameters(1);
+        CGarages::NoResprays = ScriptParams[0].bParam;
+        //todo: CGarages::AllRespraysCloseOrOpen(ScriptParams[0].bParam);
+        return OR_CONTINUE;
+    }
     case COMMAND_HAS_CAR_BEEN_RESPRAYED: // 0xA15
         break;
     case COMMAND_ATTACH_MISSION_AUDIO_TO_CAR: // 0xA16
-        break;
+    {
+        CollectParameters(2);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[1].iParam);
+        assert(vehicle);
+        AudioEngine.AttachMissionAudioToPhysical(ScriptParams[0].u8Param - 1, vehicle);
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_HAS_BEEN_OWNED_FOR_CAR_GENERATOR: // 0xA17
-        break;
+    {
+        CollectParameters(2);
+        auto* generator = CTheCarGenerators::Get(ScriptParams[0].iParam);
+        generator->bPlayerHasAlreadyOwnedCar = ScriptParams[1].bParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_UP_CONVERSATION_NODE_WITH_SCRIPTED_SPEECH: // 0xA18 0x47BA77
-        break;
+    {
+        break; // todo:
+        char a[8], b[8], c[8];
+        ReadTextLabelFromScript(a, 8);
+        ReadTextLabelFromScript(b, 8);
+        ReadTextLabelFromScript(c, 8);
+        CollectParameters(3);
+        // CConversations::SetUpConversationNode(a, b, c, -ScriptParams[0], -ScriptParams[1], -ScriptParams[2]);
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_AREA_NAME: // 0xA19
-        break;
+        char key[8];
+        ReadTextLabelFromScript(key, 8);
+        CHud::SetZoneName(TheText.Get(key), 1);
+        return OR_CONTINUE;
     case COMMAND_TASK_PLAY_ANIM_SECONDARY: // 0xA1A
-        break;
+        PlayAnimScriptCommand(commandId);
+        return OR_CONTINUE;
     case COMMAND_IS_CHAR_TOUCHING_CHAR: // 0xA1B
         break;
     case COMMAND_DISABLE_HELI_AUDIO: // 0xA1C
+    {
         break;
+        CollectParameters(2);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        if (ScriptParams[1].bParam) {
+            // todo: vehicle->m_vehicleAudio.EnableHelicoptor();
+        } else {
+            // todo: vehicle->m_vehicleAudio.DisableHelicoptor();
+        }
+        return OR_CONTINUE;
+    }
     case COMMAND_TASK_HAND_GESTURE: // 0xA1D
         break;
     case COMMAND_TAKE_PHOTO: // 0xA1E
-        break;
+        CollectParameters(1);
+        CWeapon::ms_bTakePhoto = true;
+        CPostEffects::m_bSavePhotoFromScript = ScriptParams[0].bParam;
+        return OR_CONTINUE;
     case COMMAND_INCREMENT_FLOAT_STAT_NO_MESSAGE: // 0xA1F
-        break;
+        CollectParameters(2);
+        CStats::IncrementStat(static_cast<eStats>(ScriptParams[0].iParam), ScriptParams[1].fParam);
+        return OR_CONTINUE;
     case COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_ALWAYS: // 0xA20
-        break;
+        CollectParameters(2);
+        FindPlayerPed(ScriptParams[0].iParam)->ForceGroupToAlwaysFollow(ScriptParams[1].bParam);
+        return OR_CONTINUE;
     case COMMAND_IMPROVE_CAR_BY_CHEATING: // 0xA21
-        break;
+    {
+        CollectParameters(2);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        vehicle->vehicleFlags.bUseCarCheats = ScriptParams[1].bParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_CHANGE_CAR_COLOUR_FROM_MENU: // 0xA22
-        break;
+    {
+        break; // todo: GetCarColourFromGrid
+        CollectParameters(4);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[1].iParam);
+        assert(vehicle);
+        auto color = 0;//CMenuSystem::GetCarColourFromGrid(ScriptParams[0].u8param, ScriptParams[3].u8param);
+        if (ScriptParams[2].bParam) {
+            vehicle->m_nPrimaryColor = color;
+        } else {
+            vehicle->m_nSecondaryColor = color;
+        }
+        return OR_CONTINUE;
+    }
     case COMMAND_HIGHLIGHT_MENU_ITEM: // 0xA23
         break;
+        //CollectParameters(3);
+        //CMenuSystem::HighlightOneItem(ScriptParams[0].uParam, ScriptParams[1].uParam, ScriptParams[2].bParam);
     case COMMAND_SET_DISABLE_MILITARY_ZONES: // 0xA24
-        break;
+        CollectParameters(1);
+        CCullZones::bMilitaryZonesDisabled = ScriptParams[0].bParam;
+        return OR_CONTINUE;
     case COMMAND_SET_CAMERA_POSITION_UNFIXED: // 0xA25
         break;
     case COMMAND_SET_RADIO_TO_PLAYERS_FAVOURITE_STATION: // 0xA26
-        break;
+        AudioEngine.RetuneRadio(CStats::FindMostFavoriteRadioStation());
+        return OR_CONTINUE;
     case COMMAND_SET_DEATH_WEAPONS_PERSIST: // 0xA27
-        break;
+    {
+        CollectParameters(2);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        assert(ped);
+        ped->bDeathPickupsPersist = ScriptParams[1].bParam;
+        return OR_CONTINUE;
+    }
     default:
         return OR_INTERRUPT;
     }

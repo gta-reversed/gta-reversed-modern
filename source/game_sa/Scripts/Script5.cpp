@@ -45,9 +45,15 @@ OpcodeResult CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_LOCATE_CHAR_IN_CAR_CAR_3D: // 0x207
         break;
     case COMMAND_GENERATE_RANDOM_FLOAT_IN_RANGE: // 0x208
-        break;
+        CollectParameters(2);
+        ScriptParams[0].fParam = CGeneral::GetRandomNumberInRange(ScriptParams[0].fParam, ScriptParams[1].fParam);
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_GENERATE_RANDOM_INT_IN_RANGE: // 0x209
-        break;
+        CollectParameters(2);
+        ScriptParams[0].fParam = CGeneral::GetRandomNumberInRange(ScriptParams[0].fParam, ScriptParams[1].fParam);
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_LOCK_CAR_DOORS: // 0x20A
         break;
     case COMMAND_EXPLODE_CAR: // 0x20B
@@ -153,11 +159,29 @@ OpcodeResult CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_HAS_SPECIAL_CHARACTER_LOADED: // 0x23D
         break;
     case COMMAND_FLASH_CAR: // 0x23E | NOTSA
-        break;
+    {
+        CollectParameters(2);
+        CVehicle* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        assert(vehicle);
+        // todo:
+        return OR_CONTINUE;
+    }
     case COMMAND_FLASH_CHAR: // 0x23F | NOTSA
-        break;
+    {
+        CollectParameters(2);
+        CPed* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        assert(ped);
+        // todo: ped->
+        return OR_CONTINUE;
+    }
     case COMMAND_FLASH_OBJECT: // 0x240 | NOTSA
-        break;
+    {
+        CollectParameters(2);
+        CObject* object = GetObjectPool()->GetAt(ScriptParams[0].iParam);
+        assert(object);
+        // todo:
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_PLAYER_IN_REMOTE_MODE: // 0x241
         break;
     case COMMAND_ARM_CAR_WITH_BOMB: // 0x242
@@ -189,7 +213,13 @@ OpcodeResult CRunningScript::ProcessCommands500To599(int32 commandId) {
     case COMMAND_DRAW_CORONA: // 0x24F
         break;
     case COMMAND_DRAW_LIGHT: // 0x250 | NOTSA
-        break;
+    {
+        CollectParameters(6);
+        CVector pos = CTheScripts::ReadCVectorFromScript(0);
+        CVector color = CTheScripts::ReadCVectorFromScript(3) / 255.0f;
+        CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, pos, {}, 12.0f, color.x, color.y, color.z, 0, true, nullptr);
+        return OR_CONTINUE;
+    }
     case COMMAND_STORE_WEATHER: // 0x251 | NOTSA
         break;
     case COMMAND_RESTORE_WEATHER: // 0x252 | NOTSA

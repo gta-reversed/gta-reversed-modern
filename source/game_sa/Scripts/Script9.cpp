@@ -154,11 +154,19 @@ OpcodeResult CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_DOES_OBJECT_EXIST: // 0x3CA
         break;
     case COMMAND_LOAD_SCENE: // 0x3CB
-        break;
+        CollectParameters(3);
+        CTimer::Stop();
+        CStreaming::LoadScene(CTheScripts::ReadCVectorFromScript(0));
+        CTimer::Update();
+        return OR_CONTINUE;
     case COMMAND_ADD_STUCK_CAR_CHECK: // 0x3CC
-        break;
+        CollectParameters(3);
+        CTheScripts::StuckCars.AddCarToCheck(ScriptParams[0].iParam, ScriptParams[1].fParam, ScriptParams[2].uParam, 0, 0, 0, 0, 0);
+        return OR_CONTINUE;
     case COMMAND_REMOVE_STUCK_CAR_CHECK: // 0x3CD
-        break;
+        CollectParameters(1);
+        CTheScripts::StuckCars.RemoveCarFromCheck(ScriptParams[0].iParam);
+        return OR_CONTINUE;
     case COMMAND_IS_CAR_STUCK: // 0x3CE
         break;
     case COMMAND_LOAD_MISSION_AUDIO: // 0x3CF
@@ -192,7 +200,9 @@ OpcodeResult CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_ADD_SPRITE_BLIP_FOR_PICKUP: // 0x3DD
         break;
     case COMMAND_SET_PED_DENSITY_MULTIPLIER: // 0x3DE
-        break;
+        CollectParameters(1);
+        CPopulation::PedDensityMultiplier = ScriptParams[0].fParam;
+        return OR_CONTINUE;
     case COMMAND_FORCE_RANDOM_PED_TYPE: // 0x3DF
         break;
     case COMMAND_SET_TEXT_DRAW_BEFORE_FADE: // 0x3E0
@@ -208,9 +218,12 @@ OpcodeResult CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_PRINT_HELP: // 0x3E5
         break;
     case COMMAND_CLEAR_HELP: // 0x3E6
-        break;
+        CHud::SetHelpMessage(nullptr, true, false, false);
+        return OR_CONTINUE;
     case COMMAND_FLASH_HUD_OBJECT: // 0x3E7
-        break;
+        CollectParameters(1);
+        CHud::m_ItemToFlash = ScriptParams[0].iParam;
+        return OR_CONTINUE;
     default:
         return OR_INTERRUPT;
     }

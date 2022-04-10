@@ -17,15 +17,21 @@ OpcodeResult CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     case COMMAND_PLAY_ANNOUNCEMENT: // 0x57D
         break;
     case COMMAND_SET_PLAYER_IS_IN_STADIUM: // 0x57E
-        break;
+        CollectParameters(1);
+        CTheScripts::bPlayerIsOffTheMap = ScriptParams[0].bParam;
+        return OR_CONTINUE;
     case COMMAND_GET_BUS_FARES_COLLECTED_BY_PLAYER: // 0x57F
         break;
     case COMMAND_SET_CHAR_OBJ_BUY_ICE_CREAM: // 0x580
         break;
     case COMMAND_DISPLAY_RADAR: // 0x581 | NOTSA
-        break;
+        CollectParameters(1);
+        CTheScripts::HideAllFrontEndMapBlips = ScriptParams[0].bParam;
+        return OR_CONTINUE;
     case COMMAND_REGISTER_BEST_POSITION: // 0x582
-        break;
+        CollectParameters(2);
+        CStats::RegisterBestPosition(static_cast<eStats>(ScriptParams[0].uParam), ScriptParams[1].fParam);
+        return OR_CONTINUE;
     case COMMAND_IS_PLAYER_IN_INFO_ZONE: // 0x583
         break;
     case COMMAND_CLEAR_CHAR_ICE_CREAM_PURCHASE: // 0x584
@@ -41,7 +47,15 @@ OpcodeResult CRunningScript::ProcessCommands1400To1499(int32 commandId) {
     case COMMAND_SET_LOAD_COLLISION_FOR_OBJECT_FLAG: // 0x589
         break;
     case COMMAND_ADD_BIG_GUN_FLASH: // 0x58A
-        break;
+    {
+        CollectParameters(6);
+        auto origin = CTheScripts::ReadCVectorFromScript(0);
+        auto target = CTheScripts::ReadCVectorFromScript(3) - origin;
+        target.Normalise();
+        CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, origin, {}, 5.0f, 1.0f, 0.8f, 0.0f, 0, false, nullptr);
+        g_fx.TriggerGunshot(0, origin, target, true);
+        return OR_CONTINUE;
+    }
     case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM: // 0x58B
         break;
     case COMMAND_GET_PROGRESS_PERCENTAGE: // 0x58C

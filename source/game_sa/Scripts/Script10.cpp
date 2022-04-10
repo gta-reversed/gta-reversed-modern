@@ -11,7 +11,8 @@ OpcodeResult CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     case COMMAND_SET_GENERATE_CARS_AROUND_CAMERA: // 0x3EA
         break;
     case COMMAND_CLEAR_SMALL_PRINTS: // 0x3EB
-        break;
+        CMessages::ClearSmallMessagesOnly();
+        return OR_CONTINUE;
     case COMMAND_HAS_MILITARY_CRANE_COLLECTED_ALL_CARS: // 0x3EC
         break;
     case COMMAND_SET_UPSIDEDOWN_CAR_NOT_DAMAGED: // 0x3ED
@@ -246,7 +247,8 @@ OpcodeResult CRunningScript::ProcessCommands1000To1099(int32 commandId) {
     case COMMAND_SET_SCRIPT_FIRE_AUDIO: // 0x444
         break;
     case COMMAND_ARE_ANY_CAR_CHEATS_ACTIVATED: // 0x445
-        break;
+        UpdateCompareFlag(CCheat::IsActive(CHEAT_PERFECT_HANDLING) || CCheat::IsActive(CHEAT_CARS_ON_WATER) || CCheat::IsActive(CHEAT_BOATS_FLY));
+        return OR_CONTINUE;
     case COMMAND_SET_CHAR_SUFFERS_CRITICAL_HITS: // 0x446
         break;
     case COMMAND_IS_PLAYER_LIFTING_A_PHONE: // 0x447

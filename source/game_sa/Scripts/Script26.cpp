@@ -7,13 +7,31 @@
 OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     switch (commandId) {
     case COMMAND_SET_SWIM_SPEED: // 0xA28
-        break;
+    {
+        CollectParameters(2);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        if (!ped) return OR_CONTINUE;
+
+        auto* task = ped->GetIntelligence()->GetTaskSwim();
+        if (!task) return OR_CONTINUE;
+
+        task->m_fAnimSpeed = ScriptParams[1].fParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_PLAYER_CLIMBING: // 0xA29
-        break;
+    {
+        const auto* player = FindPlayerPed(ScriptParams[0].iParam);
+        const auto* task   = player->GetIntelligence()->GetTaskClimb();
+        UpdateCompareFlag(task != nullptr);
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_THIS_HELP_MESSAGE_BEING_DISPLAYED: // 0xA2A
         break;
     case COMMAND_IS_WIDESCREEN_ON_IN_OPTIONS: // 0xA2B
-        break;
+    {
+        UpdateCompareFlag(FrontEndMenuManager.m_bWidescreenOn);
+        return OR_CONTINUE;
+    }
     case COMMAND_DRAW_SUBTITLES_BEFORE_FADE: // 0xA2C
         break;
     case COMMAND_DRAW_ODDJOB_TITLE_BEFORE_FADE: // 0xA2D
