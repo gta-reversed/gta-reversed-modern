@@ -12,6 +12,8 @@
 #define VALIDATE_OFFSET(struc, member, offset) \
 	static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
+
+
 VALIDATE_SIZE(bool, 1);
 VALIDATE_SIZE(char, 1);
 VALIDATE_SIZE(short, 2);
@@ -37,6 +39,18 @@ typedef uintptr_t uintptr;
 typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
+
+// Use this macro for unreachable code paths.. Will be eventually replaced by something like llvm::unreachable
+#if __has_builtin(__builtin_unreachable)
+#define NOTSA_UNREACHABLE() __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define NOTSA_UNREACHABLE() __assume(false)
+#endif
+
+// In order to be able to get the vtable address using GetProcAddress
+// the whole class must be exported. (Along which the vtable is exported as well)
+// See `ReversibleHooks::detail::GetClassVTableAddress`
+#define NOTSA_EXPORT_VTABLE __declspec(dllexport)
 
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
 #define UNUSED(x) (void)(x);
