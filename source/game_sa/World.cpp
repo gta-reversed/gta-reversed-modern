@@ -159,7 +159,7 @@ void CWorld::Initialise() {
 void CWorld::Add(CEntity* entity) {
     entity->UpdateRW();
     entity->UpdateRwFrame();
-    entity->Add();
+    entity->GetRectAdd();
     if (!entity->IsBuilding() && !entity->IsDummy()) {
         if (!entity->IsStatic()) {
             entity->AsPhysical()->AddToMovingList();

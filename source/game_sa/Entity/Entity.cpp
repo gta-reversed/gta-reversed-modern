@@ -26,31 +26,6 @@ void CEntity::InjectHooks()
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    //RH_ScopedVTInstall(0x863928,
-    //    RH_VTFDef("Destructor"),
-    //    RH_VTFDef("Add(CRect)"),
-    //    RH_VTFDef("Add"),
-    //    RH_VTFDef("Remove"),
-    //    RH_VTFDef("SetIsStatic"),
-    //    RH_VTFDef("SetModelIndex"),
-    //    RH_VTFDef("SetModelIndexNoCreate"),
-    //    RH_VTFDef("CreateRwObject"),
-    //    RH_VTFDef("DeleteRwObject"),
-    //    RH_VTFDef("GetBoundRect"),
-    //    RH_VTFDef("ProcessControl"),
-    //    RH_VTFDef("ProcessCollision"),
-    //    RH_VTFDef("ProcessShift"),
-    //    RH_VTFDef("TestCollision"),
-    //    RH_VTFDef("Teleport"),
-    //    RH_VTFDef("SpecialEntityPreCollisionStuff"),
-    //    RH_VTFDef("SpecialEntityCalcCollisionSteps"),
-    //    RH_VTFDef("PreRender"),
-    //    RH_VTFDef("Render"),
-    //    RH_VTFDef("SetupLighting"),
-    //    RH_VTFDef("RemoveLighting"),
-    //    RH_VTFDef("FlagToDestroyWhenNextProcessed"),
-    //);
-
     RH_ScopedVTInstall(0x863928, 22);
 
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
@@ -132,7 +107,7 @@ CEntity::~CEntity()
     CEntity::ResolveReferences();
 }
 
-void CEntity::Add()
+void CEntity::GetRectAdd()
 {
     auto rect = CRect();
     GetBoundRect(&rect);

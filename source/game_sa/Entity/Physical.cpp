@@ -28,32 +28,6 @@ void CPhysical::InjectHooks()
     RH_ScopedClass(CPhysical);
     RH_ScopedCategory("Entity");
 
-    //RH_ScopedVTInstall(0x863928,
-    //    RH_VTFDef("Destructor"),
-    //    RH_VTFDef("Add(CRect)"),
-    //    RH_VTFDef("Add"),
-    //    RH_VTFDef("Remove"),
-    //    RH_VTFDef("SetIsStatic"),
-    //    RH_VTFDef("SetModelIndex"),
-    //    RH_VTFDef("SetModelIndexNoCreate"),
-    //    RH_VTFDef("CreateRwObject"),
-    //    RH_VTFDef("DeleteRwObject"),
-    //    RH_VTFDef("GetBoundRect"),
-    //    RH_VTFDef("ProcessControl"),
-    //    RH_VTFDef("ProcessCollision"),
-    //    RH_VTFDef("ProcessShift"),
-    //    RH_VTFDef("TestCollision"),
-    //    RH_VTFDef("Teleport"),
-    //    RH_VTFDef("SpecialEntityPreCollisionStuff"),
-    //    RH_VTFDef("SpecialEntityCalcCollisionSteps"),
-    //    RH_VTFDef("PreRender"),
-    //    RH_VTFDef("Render"),
-    //    RH_VTFDef("SetupLighting"),
-    //    RH_VTFDef("RemoveLighting"),
-    //    RH_VTFDef("FlagToDestroyWhenNextProcessed"),
-    //    RH_VTFDef("ProcessEntityCollision"),
-    //);
-
     RH_ScopedVTInstall(0x863BA0, 23);
 
     RH_ScopedInstall(Constructor, 0x542260);
@@ -169,10 +143,10 @@ CPhysical::~CPhysical()
 }
 
 // 0x544A30
-void CPhysical::Add()
+void CPhysical::GetRectAdd()
 {
     if (m_bIsBIGBuilding) {
-        CEntity::Add();
+        CEntity::GetRectAdd();
         return;
     }
 
@@ -624,7 +598,7 @@ void CPhysical::RemoveAndAdd()
 {
     if (m_bIsBIGBuilding) {
         CEntity::Remove();
-        CEntity::Add();
+        CEntity::GetRectAdd();
         return;
     }
 

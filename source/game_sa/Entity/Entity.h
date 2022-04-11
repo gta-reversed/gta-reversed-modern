@@ -111,9 +111,8 @@ public:
     eEntityType   m_nType : 3;
     eEntityStatus m_nStatus : 5;
 
-public:
-    virtual void Add();                                             // VTab: 2 - Similar to previous, but using entity bound rect
     virtual void Add(const CRect& rect);                            // VTab: 1
+    virtual void GetRectAdd();                                      // VTab: 2 - Similar to previous, but using entity bound rect
     virtual void Remove();                                          // VTab: 3
     virtual void SetIsStatic(bool isStatic);                        // VTab: 4
     virtual void SetModelIndex(uint32 index);                       // VTab: 5

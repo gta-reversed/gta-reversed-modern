@@ -34,7 +34,7 @@ void FxSystem_c::PlayAndKill() {
 
 // 0x4AA3F0
 void FxSystem_c::Kill() {
-    ((void(__thiscall *)(FxSystem_c*))0x4AA3F0)(this);
+    plugin::CallMethod<0x4AA3F0>(this);
 }
 
 // 0x4AA400

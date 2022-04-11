@@ -156,7 +156,7 @@ public:
     ~CPhysical() override;
 
     // originally virtual functions
-    void Add() override;
+    void GetRectAdd() override;
     void Remove() override;
     CRect* GetBoundRect(CRect* rect) override;
     void ProcessControl() override;
@@ -248,7 +248,7 @@ private:
     CPhysical* Constructor() { this->CPhysical::CPhysical(); return this; }
     CPhysical* Destructor() { this->CPhysical::~CPhysical(); return this; }
 
-    void Add_Reversed() { CPhysical::Add(); }
+    void Add_Reversed() { CPhysical::GetRectAdd(); }
     void Remove_Reversed() { CPhysical::Remove(); }
     CRect* GetBoundRect_Reversed(CRect* rect) { return CPhysical::GetBoundRect(rect); }
     void ProcessControl_Reversed() { CPhysical::ProcessControl(); }
