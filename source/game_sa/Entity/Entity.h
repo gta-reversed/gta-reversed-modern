@@ -112,7 +112,7 @@ public:
     eEntityStatus m_nStatus : 5;
 
 public:
-    virtual void Add();                                             // VTab: 2, similar to previous, but with entity bound rect
+    virtual void Add();                                             // VTab: 2 - Similar to previous, but using entity bound rect
     virtual void Add(const CRect& rect);                            // VTab: 1
     virtual void Remove();                                          // VTab: 3
     virtual void SetIsStatic(bool isStatic);                        // VTab: 4
@@ -274,28 +274,6 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
-    void Add_Reversed();
-    void Add_Reversed(const CRect& rect);
-    void Remove_Reversed();
-    void SetIsStatic_Reversed(bool isStatic);
-    void SetModelIndex_Reversed(uint32 index);
-    void SetModelIndexNoCreate_Reversed(uint32 index);
-    void CreateRwObject_Reversed();
-    void DeleteRwObject_Reversed();
-    CRect* GetBoundRect_Reversed(CRect* pRect);
-    void ProcessControl_Reversed();
-    void ProcessCollision_Reversed();
-    void ProcessShift_Reversed();
-    bool TestCollision_Reversed(bool bApplySpeed);
-    void Teleport_Reversed(CVector destination, bool resetRotation);
-    void SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
-    void PreRender_Reversed();
-    void Render_Reversed();
-    bool SetupLighting_Reversed();
-    void RemoveLighting_Reversed(bool bRemove);
-    void FlagToDestroyWhenNextProcessed_Reversed();
 };
 
 VALIDATE_SIZE(CEntity, 0x38);
