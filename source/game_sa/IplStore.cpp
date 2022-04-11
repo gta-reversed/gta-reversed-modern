@@ -27,6 +27,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
+    RH_ScopedInstall(IncludeEntity, 0x404C90);
 }
 
 // 0x405EC0
@@ -96,7 +97,22 @@ bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
 
 // 0x404C90
 void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
-    plugin::Call<0x404C90, int32, CEntity*>(iplSlotIndex, entity);
+    const auto ipldef = ms_pPool->GetAt(iplSlotIndex);
+
+    switch (entity->GetType()) {
+    case ENTITY_TYPE_BUILDING: {
+        const auto buildingId = GetBuildingPool()->GetIndex(entity->AsBuilding());
+        ipldef->m_nMinBuildingId = std::min(ipldef->m_nMinBuildingId, (int16)buildingId);
+        ipldef->m_nMaxBuildingId = std::max(ipldef->m_nMinBuildingId, (int16)buildingId);
+        break;
+    }
+    case ENTITY_TYPE_DUMMY: {
+        const auto dummyId = GetDummyPool()->GetIndex(entity->AsDummy());
+        ipldef->m_nMinDummyId = std::min(ipldef->m_nMinDummyId, (int16)dummyId);
+        ipldef->m_nMaxDummyId = std::max(ipldef->m_nMaxDummyId, (int16)dummyId);
+        break;
+    }
+    }
 }
 
 // 0x5D5420
