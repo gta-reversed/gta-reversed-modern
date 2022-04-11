@@ -9,7 +9,7 @@
 #include "SimpleTransform.h"
 #include "MatrixLink.h"
 
-class CPlaceable {
+class NOTSA_EXPORT_VTABLE CPlaceable {
 protected:
     CPlaceable(plugin::dummy_func_t) {}
     CPlaceable();

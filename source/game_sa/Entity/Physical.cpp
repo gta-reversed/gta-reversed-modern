@@ -28,6 +28,34 @@ void CPhysical::InjectHooks()
     RH_ScopedClass(CPhysical);
     RH_ScopedCategory("Entity");
 
+    //RH_ScopedVTInstall(0x863928,
+    //    RH_VTFDef("Destructor"),
+    //    RH_VTFDef("Add(CRect)"),
+    //    RH_VTFDef("Add"),
+    //    RH_VTFDef("Remove"),
+    //    RH_VTFDef("SetIsStatic"),
+    //    RH_VTFDef("SetModelIndex"),
+    //    RH_VTFDef("SetModelIndexNoCreate"),
+    //    RH_VTFDef("CreateRwObject"),
+    //    RH_VTFDef("DeleteRwObject"),
+    //    RH_VTFDef("GetBoundRect"),
+    //    RH_VTFDef("ProcessControl"),
+    //    RH_VTFDef("ProcessCollision"),
+    //    RH_VTFDef("ProcessShift"),
+    //    RH_VTFDef("TestCollision"),
+    //    RH_VTFDef("Teleport"),
+    //    RH_VTFDef("SpecialEntityPreCollisionStuff"),
+    //    RH_VTFDef("SpecialEntityCalcCollisionSteps"),
+    //    RH_VTFDef("PreRender"),
+    //    RH_VTFDef("Render"),
+    //    RH_VTFDef("SetupLighting"),
+    //    RH_VTFDef("RemoveLighting"),
+    //    RH_VTFDef("FlagToDestroyWhenNextProcessed"),
+    //    RH_VTFDef("ProcessEntityCollision"),
+    //);
+
+    RH_ScopedVTInstall(0x863BA0, 23);
+
     RH_ScopedInstall(Constructor, 0x542260);
     RH_ScopedInstall(Destructor, 0x542450);
     RH_ScopedInstall(RemoveAndAdd, 0x542560);
@@ -40,14 +68,6 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
     RH_ScopedInstall(RemoveFromMovingList, 0x542860);
     RH_ScopedInstall(AddToMovingList, 0x542800);
-    RH_ScopedVirtualInstall(Add, 0x544A30);
-    RH_ScopedVirtualInstall(Remove, 0x5424C0);
-    RH_ScopedVirtualInstall(GetBoundRect, 0x5449B0);
-    RH_ScopedVirtualInstall(ProcessControl, 0x5485E0);
-    RH_ScopedVirtualInstall(ProcessCollision, 0x54DFB0);
-    RH_ScopedVirtualInstall(ProcessShift, 0x54DB10);
-    RH_ScopedVirtualInstall(TestCollision, 0x54DEC0);
-    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x546D00);
     RH_ScopedInstall(ApplyGravity, 0x542FE0);
     RH_ScopedInstall(ApplyFrictionMoveForce, 0x5430A0);
     RH_ScopedInstall(ApplyFrictionForce, 0x543220);

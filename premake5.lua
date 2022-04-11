@@ -32,14 +32,14 @@ solution "gta_reversed"
 	targetdir("bin/" .. "%{cfg.buildcfg}")
     implibdir("bin/" .. "%{cfg.buildcfg}")
     
+    symbols "On"
+
     configuration "Debug*"
-        flags { symbols ("On") }
         -- buildoptions {"/MDd"}
         staticruntime "off"
         runtime "Debug"
     configuration "Release*"
         defines { "NDEBUG" }
-        flags { symbols ("On") }
         -- buildoptions {"/MD"}
         staticruntime "off"
         runtime "Release"
@@ -171,7 +171,7 @@ group ""
             "libs/imgui", "libs/imgui/backends", "libs/imgui/misc/cpp",
             "libs/dxsdk"
         }
-        links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui" }
+        links { "ogg", "vorbis", "vorbisenc", "vorbisfile", "imgui", "Dbghelp" } -- todo add `Dbghelp` to CMake
         libdirs { 
             "%{cfg.targetdir}/ogg.lib", "%{cfg.targetdir}/vorbis.lib", "%{cfg.targetdir}/vorbisfile.lib", 
             "%{cfg.targetdir}/vorbisenc.lib",  "%{cfg.targetdir}/imgui.lib", "libs/dxsdk/d3d9.lib", "libs/dxsdk/dinput.lib"

@@ -54,7 +54,7 @@ public:
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
-        assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
+        // assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
 
         // Lexographically sorted insert 
         const auto& emplacedItem = *m_items.emplace(

@@ -22,8 +22,8 @@ private:
     };
 
     // These 2 arrays are indexed using the above enum
-    void** m_pvtbl[2]{};        // vtbl pointers
-    void*  m_pfn[2]{};          // Original function pointers
+    void** m_pvtbls[2]{};        // vtbl pointers
+    void*  m_pfns[2]{};          // Original function pointers
     //uint8  m_originalByte[2]{}; // We replace the beginning of both functions with a hardware break (`int3`). This here stores the original beginning.
     uint32 m_vtblIdx{};         // Index of this function in the vtable
 };

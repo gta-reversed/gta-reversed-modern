@@ -51,7 +51,7 @@ typedef uint32    bool32;
 // the whole class must be exported. (Along which the vtable is exported as well)
 // See `ReversibleHooks::detail::GetClassVTableAddress`
 // This should be added to every and all class with a vtable
-#define NOTSA_EXPORT_VTABLE __declspec(dllexport)
+#define NOTSA_EXPORT_VTABLE //__declspec(dllexport)
 
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
 #define UNUSED(x) (void)(x);

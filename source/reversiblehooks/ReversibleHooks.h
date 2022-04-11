@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
+#include <initializer_list>
+#include <string_view>
+
 #include "HookSystem.h"
 
 //
@@ -66,8 +69,8 @@
 #define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
-#define RH_VTFPure                          ReversibleHooks::detail::purevtblfn
-#define RH_ScopedVTInstall(pvtblGTA, ...)   ReversibleHooks::InstallVTable(RhCurrentCat.name, RHCurrentScopeName.name, reinterpret_cast<void**>(pvtblGTA), {__VA_ARGS__})
+#define RH_VTFDefPure()                     ReversibleHooks::detail::purevtblfn
+#define RH_ScopedVTInstall(pvtblGTA, numfns)   ReversibleHooks::InstallVTable(RhCurrentCat.name, RHCurrentScopeName.name, reinterpret_cast<void**>(pvtblGTA), numfns)
 #define RH_VTFDef(name)                     ReversibleHooks::detail::VTableFunction{name}
 
 namespace ReversibleHooks {
@@ -114,13 +117,10 @@ namespace ReversibleHooks {
         static constexpr VTableFunction purevtblfn{}; // Marking a pure vtable function
 
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false, int stackArguments = -1);
-        void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
-        /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
-        bool IsFunctionHooked(const std::string& category, const std::string& fnName);
-        std::shared_ptr<SReversibleHook> GetHook(const std::string& category, const std::string& fnName);*/
         void VirtualCopy(void* dst, void* src, size_t nbytes);
 
-        void** GetVTableAddress(std::string_view name);
+        void**           GetVTableAddress(std::string_view name);
+        std::string GetProcNameFromAddress(LPVOID pfn);
     };
 
     template <typename T>
@@ -129,18 +129,7 @@ namespace ReversibleHooks {
         detail::HookInstall(category, std::move(fnName), installAddress, ptr, iJmpCodeSize, bDisableByDefault, stackArguments);
     }
 
-    template <typename T>
-    static void InstallVirtual(std::string_view category, std::string_view className, std::string fnName, uint32 vtblIdx, void** pvtblGTA) {
-        auto ptr = FunctionPointerToVoidP(libVTableAddress);
-        detail::HookInstallVirtual(category, std::move(fnName), ptr, std::move(vecAddressesToHook));
-    }
-
-    static void InstallVTable(std::string category, std::string_view className, void** pvtblGTA, std::initializer_list<detail::VTableFunction> fns);
-
-    /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
-        detail::HookSwitch(pHook);
-    }*/
-
+    void InstallVTable(std::string_view baseCategory, std::string_view className, void** pvtblGTA, size_t numfns);
     void CheckAll();
 
     // Stuff called from InjectHooksMain()

@@ -13,6 +13,8 @@ void CPlaceable::InjectHooks()
     RH_ScopedClass(CPlaceable);
     RH_ScopedCategory("Entity");
 
+    RH_ScopedVTInstall(0x00863C40, 1);
+
     RH_ScopedOverloadedInstall(SetPosn, "xyz", 0x420B80, void(CPlaceable::*)(float, float, float));
     RH_ScopedOverloadedInstall(SetPosn, "vector", 0x4241C0, void(CPlaceable::*)(const CVector&));
     RH_ScopedInstall(SetOrientation, 0x439A80);

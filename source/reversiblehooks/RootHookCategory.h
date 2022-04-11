@@ -20,18 +20,27 @@ public:
     RootHookCategory(const RootHookCategory&) = delete;
     RootHookCategory(RootHookCategory&&)      = delete; 
 
-    // @categoryList - A `/` separated category list - Eg.: `Entity/Ped` (The hook should be added to the `Entity` category's `Ped` sub-category)
-    void AddItemToNamedCategory(std::string_view categoryList, Item hook) {
-        assert(!categoryList.empty()); // Should never be empty. To add to global category use `RH_ScopedCategoryGlobal()`
+    /*!
+    * @brief Get category (if it doesn't exist create it) according to \a categoryPath
+    * @returns The last category in \a categoryPath
+    * 
+    * @param categoryPath A `/` separated category list - Eg.: `Entity/Ped` (The hook should be added to the `Entity` category's `Ped` sub-category).
+    */
+    auto FindCategoryForItem(std::string_view categoryPath) {
+        assert(!categoryPath.empty()); // Should never be empty. To add to global category use `RH_ScopedCategoryGlobal()`
 
         HookCategory* cat = this; // Start with us (the root category)
 
-        for (auto&& catName : SplitStringView(categoryList, "/")) {
+        for (auto&& catName : SplitStringView(categoryPath, "/")) {
             cat = &cat->FindOrCreateSubcategory(catName);
         }
 
         assert(cat != this); // Make sure item doesn't get added into us (As the root category should have no items)
-        cat->AddItem(std::move(hook)); // The last category is where we add the item to
+        return cat;
+    }
+
+    void AddItemToNamedCategory(std::string_view categoryPath, Item hook) {
+        FindCategoryForItem(categoryPath)->AddItem(std::move(hook)); // The last category is where we add the item to
     }
 };
 

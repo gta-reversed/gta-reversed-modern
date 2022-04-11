@@ -6,15 +6,13 @@ namespace ReversibleHooks{
 namespace ReversibleHook{
 Virtual::Virtual(std::string fnName, void** pvtblGTA, void** pvtblOur, uint32 vtblIdx) :
     Base{ std::move(fnName), HookType::Virtual },
-    m_pvtbl{pvtblGTA, pvtblOur},
+    m_pvtbls{pvtblGTA, pvtblOur},
     m_vtblIdx{vtblIdx}
 {
-    // Make sure we have R/W access to the vtbl entry
-    detail::ScopedVirtualProtectAutoRollback svpm{ m_pvtbl[GTA][m_vtblIdx], sizeof(void*), PAGE_EXECUTE_READWRITE};
-
     // Store original fnptr's
-    for (auto [i, vtbl] : notsa::enumerate(m_pvtbl)) {
-        m_pfn[i] = vtbl[vtblIdx];
+    for (auto [i, vtbl] : notsa::enumerate(m_pvtbls)) {
+        // By default we should have read access to these pages, so no need to call `VirtualProtect`
+        m_pfns[i] = vtbl[vtblIdx];
     }
 
     // Attach hook
@@ -22,11 +20,10 @@ Virtual::Virtual(std::string fnName, void** pvtblGTA, void** pvtblOur, uint32 vt
 };
 
 void Virtual::Switch() {
-    detail::ScopedVirtualProtectAutoRollback svpm{ &m_pvtbl[GTA][m_vtblIdx], sizeof(void*), PAGE_EXECUTE_READWRITE};
-
     m_bIsHooked = !m_bIsHooked;
-    for (auto [i, vtbl] : notsa::enumerate(m_pvtbl)) {
-        vtbl[m_vtblIdx] = m_pfn[m_bIsHooked ? OUR : GTA];
+    for (auto [i, vtbl] : notsa::enumerate(m_pvtbls)) {
+        detail::ScopedVirtualProtectAutoRollback svpm{ &vtbl[m_vtblIdx], sizeof(void*), PAGE_EXECUTE_READWRITE}; // We really only need write access here
+        vtbl[m_vtblIdx] = m_pfns[m_bIsHooked ? OUR : GTA];
     }
 }
 
