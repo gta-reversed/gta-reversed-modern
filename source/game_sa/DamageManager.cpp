@@ -219,7 +219,7 @@ void CDamageManager::SetAeroplaneCompStatus(uint8 frame, ePanelDamageState statu
 }
 
 // 0x6C22C0
-uint8 CDamageManager::GetEngineStatus() {
+uint32 CDamageManager::GetEngineStatus() {
     return m_nEngineStatus;
 }
 
