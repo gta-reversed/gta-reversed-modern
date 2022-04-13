@@ -232,14 +232,6 @@ char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
 class CEventGlobalGroup* GetEventGlobalGroup();
-// dummy function
-void CreateDebugFont();
-// dummy function
-void DestroyDebugFont();
-// dummy function
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2);
-// dummy function
-void FlushObrsPrintfs();
 void DefinedState();
 void DefinedState2d();
 
