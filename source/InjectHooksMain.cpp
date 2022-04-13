@@ -105,6 +105,7 @@
 #include "LoadingScreen.h"
 #include "platform/win32/VideoPlayer/VideoPlayer.h"
 #include "Securom.h"
+#include "GridRef.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
