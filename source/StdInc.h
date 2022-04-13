@@ -60,6 +60,8 @@ namespace rng = std::ranges;
 #include "List_c.h"
 #include "SArray.h"
 
+#include "GxtChar.h"
+
 #include "game_sa\Enums\eCheats.h"
 #include "game_sa\Enums\AnimationEnums.h"
 #include "game_sa\Enums\eAnimBlendCallbackType.h"
@@ -228,7 +230,6 @@ namespace rng = std::ranges;
 #include "game_sa\IniFile.h"
 #include "game_sa\IplStore.h"
 #include "game_sa\LoadedCarGroup.h"
-#include "game_sa\LoadingScreen.h"
 #include "game_sa\Localisation.h"
 #include "game_sa\MenuManager.h"
 #include "game_sa\MenuSystem.h"
