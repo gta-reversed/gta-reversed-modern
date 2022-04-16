@@ -398,7 +398,7 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     CPickups::PictureTaken();
     bPhotographHasBeenTaken = true;
     ms_bTakePhoto = true;
-    CStats::IncrementStat(STAT_PHOTOGRAPHS_TAKEN, 1.0);
+    CStats::IncrementStat(STAT_PHOTOGRAPHS_TAKEN, 1.0f);
 
     // NOTSA - Optimization
     const auto& camMat = TheCamera.GetMatrix();
