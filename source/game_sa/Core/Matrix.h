@@ -56,8 +56,12 @@ public:
 
     inline CVector& GetRight() { return m_right; }
     inline CVector& GetForward() { return m_forward; }
+    inline const CVector& GetForward() const { return m_forward; }
+
     inline CVector& GetUp() { return m_up; }
+
     inline CVector& GetPosition() { return m_pos; }
+    inline const CVector& GetPosition() const { return m_pos; }
 
     void Attach(RwMatrix* matrix, bool bOwnsMatrix);
     void Detach();
