@@ -1550,7 +1550,7 @@ tHandlingData& CVehicleModelInfo::GetHandlingData() const {
 }
 
 tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
-    return gHandlingDataMgr.m_aFlyingHandling[m_nHandlingId];
+    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
