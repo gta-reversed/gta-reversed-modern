@@ -572,6 +572,8 @@ public:
     CAnimBlendClumpData& GetAnimBlendData() const;
 
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
+
+    CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }

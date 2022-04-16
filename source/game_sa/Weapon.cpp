@@ -47,6 +47,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(Initialise, 0x73B4A0);
     RH_ScopedInstall(DoWeaponEffect, 0x73E690);
     RH_ScopedInstall(FireSniper, 0x73AAC0);
+    RH_ScopedInstall(TakePhotograph, 0x73C1F0);
 }
 
 // 0x73B430
@@ -373,9 +374,110 @@ void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoin
     plugin::CallMethod<0x73B550, CWeapon*, CEntity*, CEntity*, CVector*, CVector*, CColPoint*, int32>(this, owner, victim, startPoint, endPoint, colPoint, arg5);
 }
 
-// 0x73C1F0
+/*!
+* @addr 0x73C1F0
+* @brief Marks all peds and objects that are in range (125 units) and in frame (on the screen - 0.1 relative border) as photographed.
+* 
+* @param owner Camera owner - unused.
+* @param point Pos of the camflash effect
+*/
 bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
-    return plugin::CallMethodAndReturn<bool, 0x73C1F0, CWeapon*, CEntity*, CVector*>(this, owner, point);
+    UNUSED(owner);
+
+    if (point) {
+        if (const auto fx = g_fxMan.CreateFxSystem("camflash", point, nullptr, false)) {
+            fx->PlayAndKill();
+        }
+    }
+
+    if (CCamera::GetActiveCamera().m_nMode != MODE_CAMERA) {
+        return false;
+    }
+
+    CPickups::PictureTaken();
+    bPhotographHasBeenTaken = true;
+    ms_bTakePhoto = true;
+    CStats::IncrementStat(STAT_PHOTOGRAPHS_TAKEN, 1.0);
+
+    // NOTSA - Optimization
+    const auto& camMat = TheCamera.GetMatrix();
+    const auto& camPos = camMat.GetPosition();
+
+    const auto IsPosInRange = [&](const CVector& worldPos) {
+        return (camPos - worldPos).SquaredMagnitude() >= 125.f * 125.f; // NOTSA: Using squared mag.
+    };
+
+    // Check is in position in camera's frame
+    const auto IsPosInCamFrame = [](const CVector& worldPos) {
+        CVector pedHeadPos_Screen;
+        if (float _w, _h; !CSprite::CalcScreenCoors(worldPos, &pedHeadPos_Screen, &_w, &_h, false, true)) {
+            return false; 
+        }
+
+        // TODO/BUG: Possibly buggy on bigger screens, because the border becomes too big (because of the relative multiplier) maybe?
+        if (   (SCREEN_WIDTH * 0.1f >= pedHeadPos_Screen.x || pedHeadPos_Screen.x >= SCREEN_WIDTH * 0.9f)
+            || (SCREEN_HEIGHT * 0.1f >= pedHeadPos_Screen.y || pedHeadPos_Screen.y >= SCREEN_HEIGHT * 0.9f)
+        ) {
+            return false;
+        }
+
+        return true;
+    };
+
+    const auto CheckIsLOSBlocked = [&, camFwd = camMat.GetForward()](const CVector& target, CEntity* ignore) {
+        CColPoint _cp; // Unused
+        CEntity* hitEntity{};
+        if (!CWorld::ProcessLineOfSight(
+            camPos + camFwd * 2.f,
+            target,
+            _cp,
+            hitEntity,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false
+        ) || hitEntity == ignore) { // TODO: Here we could set CWorld::pIgnoreEntity to `&ped`, instead of this check.
+            return false;
+        }
+        return true;
+    };
+
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (IsPosInRange(ped.GetPosition())) {
+            continue;
+        }
+
+        const auto pedHeadPos = ped.GetBonePosition(BONE_HEAD);
+
+        if (!IsPosInCamFrame(pedHeadPos)) {
+            continue;
+        }
+
+        if (!CheckIsLOSBlocked(
+            pedHeadPos + Normalized(camPos - pedHeadPos) * 1.5f, // Point from ped's head towards camera
+            &ped
+        )) {
+            ped.bHasBeenPhotographed = true;
+        }
+    }
+
+    for (auto& obj : GetObjectPool()->GetAllValid()) {
+        const auto& objPos = obj.GetPosition();
+
+        if (!IsPosInRange(objPos) || !IsPosInCamFrame(objPos)) {
+            continue;
+        }
+
+        if (!CheckIsLOSBlocked(objPos, &obj)) {
+            obj.objectFlags.bIsPhotographed = true;
+        }
+    }
+
+    return true;
 }
 
 // 0x73C710
