@@ -48,6 +48,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(DoWeaponEffect, 0x73E690);
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
+    RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
 }
 
 // 0x73B430
@@ -490,9 +491,59 @@ void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehi
     plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
 }
 
-// 0x73CDC0
+/*!
+* @addr 0x73CDC0
+* @brief Find closest entity in range that is visible to `owner` (Eg.: Is in [-PI/8, PI/8] angle) and modify `end->z` to be pointing at it. idk..
+*
+* @param end out Z axis is modified
+*/
 void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
-    plugin::Call<0x73CDC0, CEntity*, CVector*, CVector*>(owner, start, end);
+    int16 inRangeCount{};
+    std::array<CEntity*, 16> objInRange{};
+    CWorld::FindObjectsInRange(*start, (*start - *end).Magnitude(), true, &inRangeCount, (int16)objInRange.size(), objInRange.data(), false, true, true, false, false);
+
+    CEntity* closestEntity{};
+    float    closestDist{FLT_MAX}; // Originally 10 000
+    for (auto e : std::span{ objInRange.begin(), (size_t)inRangeCount }) {
+        if (e == owner || owner->AsPed()->CanSeeEntity(e, PI/8.f)) {
+            continue;
+        }
+
+        switch (e->GetStatus()) {
+        case STATUS_TRAIN_MOVING:
+        case STATUS_TRAIN_NOT_MOVING:
+        case STATUS_WRECKED:
+            continue;
+        }
+
+        const auto dir = e->GetPosition() - owner->GetPosition();
+        if (const auto dist2D = dir.Magnitude2D(); std::abs(dir.z) * 1.5f < dist2D) {
+            const auto dist3D = std::hypot(dist2D, dir.z);
+            if (dist3D < closestDist) {
+                closestEntity = e;
+                closestDist = dist3D;
+            }
+        }
+    }
+
+    if (closestDist < 9000.f) {
+        assert(closestEntity); // We should have one, because by default `closestDist` is FLT_MAX (originally 10 000)
+
+        {
+            CEntity*  _hitEntity{}; // Unused
+            CColPoint _cp;          // Unused
+            if (CWorld::ProcessLineOfSight(*start, closestEntity->GetPosition(), _cp, _hitEntity, true, false, false, false, false, false, false, true)) {
+                return;
+            }
+        }
+
+        float targetZ = closestEntity->GetPosition().z + 0.3f;
+        if (closestEntity->IsPed() && closestEntity->AsPed()->bIsDucking) {
+            targetZ -= 0.8f; // Effectively only -0.5 relative to the original Z
+        }
+        const auto t = (*start - *end).Magnitude2D() / (*start - closestEntity->GetPosition()).Magnitude2D();
+        end->z = start->z + (targetZ - start->z) * t; // Re-ordered a little
+    }
 }
 
 // 0x73D1E0
