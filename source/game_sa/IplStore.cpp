@@ -6,11 +6,7 @@
 */
 
 #include "StdInc.h"
-
 #include "IplStore.h"
-
-CQuadTreeNode *&CIplStore::ms_pQuadTree = *(CQuadTreeNode **)0x8E3FAC;
-CIplPool *&CIplStore::ms_pPool = *(CIplPool **)0x8E3FB0;
 
 uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 uint32 MAX_IPL_INSTANCES = 1000;
@@ -26,12 +22,58 @@ void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
+    //RH_ScopedGlobalInstall(AddIplsNeededAtPosn, 0x4045B0);
+    //RH_ScopedGlobalInstall(LoadIpl, 0x406080);
+    //RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
+    RH_ScopedGlobalInstall(Initialise, 0x405EC0);
+    //RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
+    //RH_ScopedGlobalInstall(RemoveIplSlot, 0x405B60);
+    //RH_ScopedGlobalInstall(AddIplSlot, 0x405AC0);
+    //RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
+    //RH_ScopedGlobalInstall(RemoveIplAndIgnore, 0x405890);
+    //RH_ScopedGlobalInstall(RequestIplAndIgnore, 0x405850);
+    //RH_ScopedGlobalInstall(LoadAllRemainingIpls, 0x405780);
+    //RH_ScopedGlobalInstall(RemoveAllIpls, 0x405720);
+    //RH_ScopedGlobalInstall(HaveIplsLoaded, 0x405600);
+    //RH_ScopedGlobalInstall(RequestIpls, 0x405520);
+    //RH_ScopedGlobalInstall(Save, 0x5D5420);
+    //RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
+    //RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
+    //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
+    //RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
+    //RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
+    //RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
+    //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
+    //RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
+    //RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
+    //RH_ScopedGlobalInstall(GetIplName, 0x404A60);
+    RH_ScopedGlobalInstall(GetIplEntityIndexArray, 0x4047B0);
+    //RH_ScopedGlobalInstall(GetNewIplEntityIndexArray, 0x404780);
+    //RH_ScopedGlobalInstall(SetIplsRequired, 0x404700);
+    //RH_ScopedGlobalInstall(ClearIplsNeededAtPosn, 0x4045E0);
+    //RH_ScopedGlobalInstall(LoadIpls, 0x405170);
+    //RH_ScopedGlobalInstall(Load, 0x5D54A0);
+
 }
 
-// 0x405EC0
+/*!
+* @addr 0x405EC0
+* @brief Allocate pool if it doesn't exist yet, allocate quad tree, etc..
+*/
 void CIplStore::Initialise() {
-    plugin::Call<0x405EC0>();
+    gbIplsNeededAtPosn = 0;
+
+    if (!ms_pPool) {
+        ms_pPool = new CPool<IplDef>(MAX_NUM_IPL_DEFS, "IPL Files");
+    }
+
+    AddIplSlot("generic");
+
+    NumIplEntityIndexArrays = 0;
+    ppCurrIplInstance = nullptr;
+
+    ms_pQuadTree = new CQuadTreeNode(WORLD_BOUNDS, 3);
+    assert(ms_pQuadTree);
 }
 
 // 0x405FA0
