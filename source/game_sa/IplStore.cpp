@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 #include "IplStore.h"
+#include "extensions/enumerate.hpp"
 
 uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 uint32 MAX_IPL_INSTANCES = 1000;
@@ -24,7 +25,7 @@ void CIplStore::InjectHooks() {
 
     //RH_ScopedGlobalInstall(AddIplsNeededAtPosn, 0x4045B0);
     //RH_ScopedGlobalInstall(LoadIpl, 0x406080);
-    //RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
+    RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
     RH_ScopedGlobalInstall(Initialise, 0x405EC0);
     //RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
     //RH_ScopedGlobalInstall(RemoveIplSlot, 0x405B60);
@@ -76,9 +77,26 @@ void CIplStore::Initialise() {
     assert(ms_pQuadTree);
 }
 
-// 0x405FA0
+/*!
+* @addr 0x405FA0
+*/
 void CIplStore::Shutdown() {
-    plugin::Call<0x405FA0>();
+    RemoveAllIpls();
+    for (auto i = 0; i < ms_pPool->GetSize(); i++) {
+        if (!ms_pPool->IsFreeSlotAtIndex(i)) {
+            RemoveIplSlot(i);
+        }
+    }
+    delete ms_pPool;
+    ms_pPool = nullptr;
+
+    for (auto a : std::span{ IplEntityIndexArrays, (size_t)NumIplEntityIndexArrays }) {
+        delete a;
+    }
+    NumIplEntityIndexArrays = 0;
+
+    delete ms_pQuadTree;
+    ms_pQuadTree = nullptr;
 }
 
 // 0x405AC0
