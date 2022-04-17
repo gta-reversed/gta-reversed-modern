@@ -51,7 +51,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(GetIplEntityIndexArray, 0x4047B0);
     //RH_ScopedGlobalInstall(GetNewIplEntityIndexArray, 0x404780);
     //RH_ScopedGlobalInstall(SetIplsRequired, 0x404700);
-    //RH_ScopedGlobalInstall(ClearIplsNeededAtPosn, 0x4045E0);
+    RH_ScopedGlobalInstall(ClearIplsNeededAtPosn, 0x4045E0);
     //RH_ScopedGlobalInstall(LoadIpls, 0x405170);
     //RH_ScopedGlobalInstall(Load, 0x5D54A0);
 
@@ -107,15 +107,19 @@ int32 CIplStore::AddIplSlot(const char* name) {
     return ms_pPool->GetIndex(def);
 }
 
-// 0x4045B0
+/*!
+* @addr 0x4045B0
+*/
 void CIplStore::AddIplsNeededAtPosn(const CVector& posn) {
     gvecIplsNeededAtPosn = posn;
     gbIplsNeededAtPosn = true;
 }
 
-// 0x4045E0
+/*!
+* @addr 0x4045E0
+*/
 void CIplStore::ClearIplsNeededAtPosn() {
-    plugin::Call<0x4045E0>();
+    gbIplsNeededAtPosn = false;
 }
 
 // 0x404D30
