@@ -43,7 +43,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
     //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
     RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
-    //RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
+    RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
     RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
     //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
     RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
