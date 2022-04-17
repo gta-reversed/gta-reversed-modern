@@ -19,8 +19,6 @@ public:
     static inline CQuadTreeNode*& ms_pQuadTree = *(CQuadTreeNode**)0x8E3FAC;
     static inline CIplPool*&      ms_pPool     = *(CIplPool**)0x8E3FB0;
 
-    static constexpr auto MAX_NUM_IPL_DEFS = 256u;
-
 public:
     static void InjectHooks();
 

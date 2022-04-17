@@ -29,7 +29,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(Initialise, 0x405EC0);
     //RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
     //RH_ScopedGlobalInstall(RemoveIplSlot, 0x405B60);
-    //RH_ScopedGlobalInstall(AddIplSlot, 0x405AC0);
+    RH_ScopedGlobalInstall(AddIplSlot, 0x405AC0);
     //RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
     //RH_ScopedGlobalInstall(RemoveIplAndIgnore, 0x405890);
     //RH_ScopedGlobalInstall(RequestIplAndIgnore, 0x405850);
@@ -65,7 +65,7 @@ void CIplStore::Initialise() {
     gbIplsNeededAtPosn = 0;
 
     if (!ms_pPool) {
-        ms_pPool = new CPool<IplDef>(MAX_NUM_IPL_DEFS, "IPL Files");
+        ms_pPool = new CPool<IplDef>(TOTAL_IPL_MODEL_IDS, "IPL Files");
     }
 
     AddIplSlot("generic");
@@ -99,9 +99,12 @@ void CIplStore::Shutdown() {
     ms_pQuadTree = nullptr;
 }
 
-// 0x405AC0
+/*!
+* @addr 0x405AC0
+*/
 int32 CIplStore::AddIplSlot(const char* name) {
-    return plugin::CallAndReturn<int32, 0x405AC0, const char*>(name);
+    const auto def = new(ms_pPool->New()) IplDef{name}; // MOTE: Seemingly they didn't overload `operator new` for it..
+    return ms_pPool->GetIndex(def);
 }
 
 // 0x4045B0
