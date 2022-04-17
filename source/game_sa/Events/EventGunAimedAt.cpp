@@ -10,24 +10,22 @@ void CEventGunAimedAt::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B0700);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4EE0);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B09E0);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B0810);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7630);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4EE0);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B09E0);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B0810);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7630);
 }
 
 // 0x4B0700
 CEventGunAimedAt::CEventGunAimedAt(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventGunAimedAt::~CEventGunAimedAt()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 

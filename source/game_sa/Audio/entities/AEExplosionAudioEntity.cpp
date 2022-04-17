@@ -77,7 +77,7 @@ void CAEExplosionAudioEntity::InjectHooks() {
 
     RH_ScopedInstall(StaticInitialise, 0x5B9A60);
     RH_ScopedInstall(AddAudioEvent, 0x4DCBE0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCB90);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCB90);
 }
 
 void CAEExplosionAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

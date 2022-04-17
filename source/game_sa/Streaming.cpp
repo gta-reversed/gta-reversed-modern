@@ -4,6 +4,8 @@
 #include "Radar.h"
 #include "CarCtrl.h"
 #include "PostEffects.h"
+#include "TheScripts.h"
+#include "LoadingScreen.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -49,8 +51,10 @@ CStreamingInfo*& CStreaming::ms_startLoadedList = *reinterpret_cast<CStreamingIn
 int32& CStreaming::ms_lastImageRead = *reinterpret_cast<int32*>(0x8E4C64);
 int32(&CStreaming::ms_imageOffsets)[6] = *(int32(*)[6])0x8E4C8C;
 bool& CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool*>(0x8E4CA4);
+
 uint32& CStreaming::ms_streamingBufferSize = *reinterpret_cast<uint32*>(0x8E4CA8);
 uint8** CStreaming::ms_pStreamingBuffer = reinterpret_cast<uint8**>(0x8E4CAC);
+
 uint32& CStreaming::ms_memoryUsed = *reinterpret_cast<uint32*>(0x8E4CB4);
 int32& CStreaming::ms_numModelsRequested = *reinterpret_cast<int32*>(0x8E4CB8);
 CStreamingInfo(&CStreaming::ms_aInfoForModel)[26316] = *(CStreamingInfo(*)[26316])0x8E4CC0;
@@ -1348,8 +1352,8 @@ void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
 // 0x409430
 // Load big buildings around `point`
 void CStreaming::RequestBigBuildings(const CVector& point) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding) {
             if (CRenderer::ShouldModelBeStreamed(building, point, TheCamera.m_pRwCamera->farPlane))
                 RequestModel(building->m_nModelIndex, 0);
@@ -1782,21 +1786,21 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
 
     // Make sure model isn't used anywhere by destroying all objects/peds using it.
     if (modelInfo->m_nRefCount > 0) {
-        for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CPed* ped = CPools::ms_pPedPool->GetAt(i);
+            CPed* ped = GetPedPool()->GetAt(i);
             if (ped && ped->m_nModelIndex == modelId && !ped->IsPlayer() && ped->CanBeDeletedEvenInVehicle()) {
                 CTheScripts::RemoveThisPed(ped);
             }
         }
 
-        for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (obj && obj->m_nModelIndex == modelId && obj->CanBeDeleted()) {
                 CWorld::Remove(obj);
                 CWorld::RemoveReferencesToDeletedObject(obj);
@@ -1996,7 +2000,7 @@ void CStreaming::ReInit() {
     const auto RemoveModelsInRange = [](auto base, auto count) {
         for (auto modelId = base; modelId < base + count; modelId++) {
             RemoveModel(modelId);
-            CModelInfo::GetModelInfo(modelId)->SetModelName(gta_empty_string);
+            CModelInfo::GetModelInfo(modelId)->SetModelName("");
         }
     };
     RemoveModelsInRange(SPECIAL_MODELS_RESOURCE_ID, TOTAL_SPECIAL_MODELS);
@@ -2008,69 +2012,69 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 void CStreaming::ReadIniFile() {
     bool bHasDevkitMemory = false;
-    auto file = CFileMgr::OpenFile("stream.ini", "r");
+    auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file))
     {
-        if (*line != '#' && *line)
+        if (*line == '#' || !*line)
+            continue;
+
+        char* attribute = strtok(line, " ,\t");
+        char* value = strtok(nullptr, " ,\t");
+        if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
         {
-            char* attribute = strtok(line, " ,\t");
-            char* value = strtok(nullptr, " ,\t");
-            if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
+            if (!_stricmp(attribute, "devkit_memory"))
             {
-                if (!_stricmp(attribute, "devkit_memory"))
-                {
-                    CStreaming::ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
-                    bHasDevkitMemory = true;
-                }
-                else if (!_stricmp(attribute, "vehicles"))
-                {
-                    CStreaming::desiredNumVehiclesLoaded = atoi(value);
-                }
-                else if (!_stricmp(attribute, "dontbuildpaths"))
-                {
-                    //bDontBuildPaths = 1; // unused
-                }
-                else if (!_stricmp(attribute, "pe_lightchangerate"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasecap"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasemult"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_leftx"))
-                {
-                    CPostEffects::m_colourLeftUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_rightx"))
-                {
-                    CPostEffects::m_colourRightUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_topy"))
-                {
-                    CPostEffects::m_colourTopVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bottomy"))
-                {
-                    CPostEffects::m_colourBottomVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bRadiosity"))
-                {
-                    CPostEffects::m_bRadiosity = atoi(value) != 0;
-                }
-                else if (!_stricmp(attribute, "def_brightness_pal"))
-                {
-                    FrontEndMenuManager.m_nBrightness = atoi(value);
-                }
+                ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
+                bHasDevkitMemory = true;
             }
-            else
+            else if (!_stricmp(attribute, "vehicles"))
             {
-                CStreaming::ms_memoryAvailable = atoi(value) << 10;
+                desiredNumVehiclesLoaded = atoi(value);
             }
+            else if (!_stricmp(attribute, "dontbuildpaths"))
+            {
+                //bDontBuildPaths = 1; // unused
+            }
+            else if (!_stricmp(attribute, "pe_lightchangerate"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasecap"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasemult"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_leftx"))
+            {
+                CPostEffects::m_colourLeftUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_rightx"))
+            {
+                CPostEffects::m_colourRightUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_topy"))
+            {
+                CPostEffects::m_colourTopVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bottomy"))
+            {
+                CPostEffects::m_colourBottomVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bRadiosity"))
+            {
+                CPostEffects::m_bRadiosity = atoi(value) != 0;
+            }
+            else if (!_stricmp(attribute, "def_brightness_pal"))
+            {
+                FrontEndMenuManager.m_nBrightness = atoi(value);
+            }
+        }
+        else
+        {
+            ms_memoryAvailable = atoi(value) << 10;
         }
     }
     CFileMgr::CloseFile(file);
@@ -2116,8 +2120,8 @@ void CStreaming::RemoveAllUnusedModels() {
 // 0x4093B0
 // Remove all BIG building's RW objects and models
 void CStreaming::RemoveBigBuildings() {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding && !building->m_bImBeingRendered) {
             building->DeleteRwObject();
             if (!CModelInfo::GetModelInfo(building->m_nModelIndex)->m_nRefCount)
@@ -2129,8 +2133,8 @@ void CStreaming::RemoveBigBuildings() {
 // 0x4094B0
 // Remove buildings, objects and dummies not in the current area (as in CWorld::currArea)
 void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_pRwObject) {
             if (!building->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!building->m_bImBeingRendered && !building->m_bIsBIGBuilding)
@@ -2138,8 +2142,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
-        CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+    for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
+        CObject* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->m_pRwObject) {
             if (obj->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!obj->m_bImBeingRendered && obj->m_nObjectType == eObjectType::OBJECT_GAME)
@@ -2147,8 +2151,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pDummyPool->GetSize() - 1; i >= 0; i--) {
-        CDummy* dummy = CPools::ms_pDummyPool->GetAt(i);
+    for (int32 i = GetDummyPool()->GetSize() - 1; i >= 0; i--) {
+        CDummy* dummy = GetDummyPool()->GetAt(i);
         if (dummy && dummy->m_pRwObject) {
             if (dummy->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!dummy->m_bImBeingRendered)
@@ -2476,8 +2480,9 @@ void CStreaming::RemoveModel(int32 modelId)
     streamingInfo.m_nLoadState = LOADSTATE_NOT_LOADED;
 }
 
+// 0x407AC0
 void CStreaming::RemoveUnusedModelsInLoadedList() {
-    // empty function
+    // NOP
 }
 
 // 0x40C180
@@ -2617,7 +2622,7 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             [[fallthrough]];
         }
         case eChannelState::IDLE: {
-            uint8* pBuffer = ms_pStreamingBuffer[chIdx];
+            auto* pBuffer = ms_pStreamingBuffer[chIdx];
             CdStreamRead(chIdx, pBuffer, ch.offsetAndHandle, ch.sectorCount);
             ch.LoadStatus = eChannelState::READING;
             ch.iLoadingLevel = -600;
@@ -2885,7 +2890,7 @@ void CStreaming::Init2()
 
     // Here, ms_streamingBufferSize * STREAMING_BLOCK_SIZE = maximum size in bytes that a streaming model can possibly have.
     const uint32 maximumModelSizeInBytes = ms_streamingBufferSize * STREAMING_SECTOR_SIZE;
-    ms_pStreamingBuffer[0] = CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_SECTOR_SIZE);
+    ms_pStreamingBuffer[0] = (uint8*)CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_SECTOR_SIZE);
     ms_streamingBufferSize /= 2;
     ms_pStreamingBuffer[1] = &ms_pStreamingBuffer[0][STREAMING_SECTOR_SIZE * ms_streamingBufferSize];
     ms_memoryAvailable = 512 * 1024 * 1024;
@@ -3768,8 +3773,9 @@ void CStreaming::Update() {
         CIplStore::EnsureIplsAreInMemory(playerPos);
     }
 
-    if (ms_bEnableRequestListPurge)
+    if (ms_bEnableRequestListPurge) {
         PurgeRequestList();
+    }
 }
 
 // unused
@@ -3787,4 +3793,27 @@ bool CStreaming::WeAreTryingToPhaseVehicleOut(int32 modelId) {
     if (streamingInfo.IsLoaded())
         return streamingInfo.m_nNextIndex >= 0 || streamingInfo.m_nPrevIndex >= 0;
     return false;
+}
+
+void CStreaming::UpdateMemoryUsed() {
+#ifdef MEMORY_MGR_USE_MEMORY_HEAP
+    ms_memoryUsed = 0;
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMING);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_8);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_TEXTURES);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_COLLISION);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_ANIMATION);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_32);
+#endif
+}
+
+// 0x407BF0
+void CStreaming::IHaveUsedStreamingMemory() {
+    CMemoryMgr::PopMemId();
+    UpdateMemoryUsed();
+}
+
+// 0x407BE0
+void CStreaming::ImGonnaUseStreamingMemory() {
+    CMemoryMgr::PushMemId(MEM_STREAMING);
 }

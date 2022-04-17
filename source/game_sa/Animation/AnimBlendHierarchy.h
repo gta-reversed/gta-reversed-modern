@@ -30,6 +30,9 @@ public:
     void SetName(const char* string);
     void Shutdown();
     void Uncompress();
+
+    // NOTSA Helpers
+    auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
 };
 
 VALIDATE_SIZE(CAnimBlendHierarchy, 0x18);

@@ -185,7 +185,9 @@ void CGlass::CarWindscreenShatters(CVehicle* vehicle) {
 
 bool IsGlassObjectWithCol(CEntity* entity) {
     if (entity->IsObject() && entity->m_bUsesCollision) {
-        return CModelInfo::GetModelInfo(entity->m_nModelIndex)->AsAtomicModelInfoPtr()->IsGlass();
+        if (const auto ami = entity->GetModelInfo()->AsAtomicModelInfoPtr()) {
+            return ami->IsGlass();
+        }
     }
     return false;
 }
@@ -534,8 +536,8 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
     if (CTimer::GetTimeInMS() < LastColCheckMS + 1000 && CTimer::GetTimeInMS() >= LastColCheckMS)
         return;
 
-    for (auto objIdx = 0; objIdx < CPools::ms_pObjectPool->GetSize(); objIdx++) {
-        if (auto object = CPools::ms_pObjectPool->GetAt(objIdx)) {
+    for (auto objIdx = 0; objIdx < GetObjectPool()->GetSize(); objIdx++) {
+        if (auto object = GetObjectPool()->GetAt(objIdx)) {
             if (!IsGlassObjectWithCol(object))
                 continue;
 
@@ -566,7 +568,7 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
                         continue;
                 }
 
-                LastColCheckMS = CTimer::m_snTimeInMilliseconds;
+                LastColCheckMS = CTimer::GetTimeInMS();
 
                 if (!object->objectFlags.bGlassBroken) {
                     AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, object->GetPosition());

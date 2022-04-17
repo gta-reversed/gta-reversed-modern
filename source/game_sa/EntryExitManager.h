@@ -15,6 +15,8 @@ class QuadTreeNode;
 class CEntryExit;
 class CEntity;
 
+typedef CPool<CEntryExit> CEntryExitsPool;
+
 class CEntryExitManager {
 public:
     static CEntryExit* (&ms_entryExitStack)[4]; // static CEntryExit *ms_entryExitStack[4]
@@ -26,7 +28,7 @@ public:
     static int32& ms_exitEnterState;
     static CQuadTreeNode*& mp_QuadTree;
     static CEntryExit*& mp_Active;
-    static CPool<CEntryExit>*& mp_poolEntryExits;
+    static CEntryExitsPool*& mp_poolEntryExits;
     static uint32& ms_numVisibleEntities;
 
 public:

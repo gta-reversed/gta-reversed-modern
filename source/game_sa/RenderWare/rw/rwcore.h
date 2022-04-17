@@ -2231,6 +2231,9 @@ struct RwObjectHasFrame
 };
 #endif /* (!defined(DOXYGEN)) */
 
+/* Frames */
+extern void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame);
+extern void _rwObjectHasFrameReleaseFrame(void *object);
 
 /* ObjectHASFRAME METHODS */
 #define rwObjectHasFrameInitialize(o, type, subtype, syncFunc)  \
@@ -2243,6 +2246,13 @@ MACRO_STOP
 
 #define rwObjectHasFrameSync(o) \
     ((RwObjectHasFrame *)(o))->sync(o)
+
+/* Compatibility macros */
+
+#define rwObjectHasFrameSetFrame(object, frame) \
+        _rwObjectHasFrameSetFrame(object, frame)
+#define rwObjectHasFrameReleaseFrame(object) \
+        _rwObjectHasFrameReleaseFrame(object)
 
 /*--- Automatically derived from: C:/daily/rwsdk/src/basync.h ---*/
 

@@ -228,7 +228,7 @@ void CColAccel::addIPLEntity(CEntity** ppEntities, int32 entitiesCount, int32 en
 
 void CColAccel::startCache()
 {
-    m_iCachingColSize = CPools::ms_pColModelPool->GetSize();
+    m_iCachingColSize = GetColModelPool()->GetSize();
     m_iSectionSize    = new int32[64];
     m_iplDefs         = new IplDef[TOTAL_IPL_MODEL_IDS]();
     m_colBounds       = new CColAccelColBound[TOTAL_IPL_MODEL_IDS]();

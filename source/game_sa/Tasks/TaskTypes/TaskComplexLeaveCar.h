@@ -30,6 +30,8 @@ public:
     char                          _pad3[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_LEAVE_CAR;
+
     CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
     ~CTaskComplexLeaveCar();
 

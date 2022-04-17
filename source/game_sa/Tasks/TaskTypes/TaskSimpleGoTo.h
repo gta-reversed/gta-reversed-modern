@@ -20,7 +20,6 @@ public:
         } gotoFlags;
         uint8 m_GoToFlags;
     };
-    char field_1D[3]; // padding
 
     static float& ms_fLookAtThresholdDotProduct;
 

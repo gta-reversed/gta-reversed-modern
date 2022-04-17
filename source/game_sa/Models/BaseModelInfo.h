@@ -45,6 +45,7 @@ class CLodTimeModelInfo;
 class CPedModelInfo;
 class CTimeModelInfo;
 class CVehicleModelInfo;
+struct RwObject;
 
 // originally an abstract class
 class CBaseModelInfo {
@@ -101,9 +102,9 @@ public:
     CColModel* m_pColModel;     // 20
     float      m_fDrawDistance; // 24
     union {
-        struct RwObject* m_pRwObject;
-        struct RpClump*  m_pRwClump;
-        struct RpAtomic* m_pRwAtomic;
+        RwObject* m_pRwObject;
+        RpClump*  m_pRwClump;
+        RpAtomic* m_pRwAtomic;
     };
 
 public:
@@ -119,8 +120,8 @@ public:
     virtual void Shutdown();
     virtual void DeleteRwObject() = 0;
     virtual uint32 GetRwModelType() = 0;
-    virtual struct RwObject* CreateInstance() = 0;
-    virtual struct RwObject* CreateInstance(RwMatrix* matrix) = 0;
+    virtual RwObject* CreateInstance() = 0;                 // todo: check order
+    virtual RwObject* CreateInstance(RwMatrix* matrix) = 0; // todo: check order
     virtual void SetAnimFile(const char* filename);
     virtual void ConvertAnimFileIndex();
     virtual int32 GetAnimFileIndex();
@@ -175,6 +176,13 @@ public:
     [[nodiscard]] bool IsCrane()               const { return nSpecialType == eModelInfoSpecialType::CRANE; }              // 0x4800
 
     void SetBaseModelInfoFlags(uint32 flags); // Wrapper for the static function. I honestly think this is how they did it..
+
+    // NOTSA helpers
+    auto CreateInstanceAddRef() {
+        auto* inst = CreateInstance();
+        AddRef();
+        return inst;
+    }
 
 private:
     friend void InjectHooksMain();

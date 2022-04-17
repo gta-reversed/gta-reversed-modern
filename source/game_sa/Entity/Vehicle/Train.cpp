@@ -36,7 +36,7 @@ void CTrain::InjectHooks()
     RH_ScopedClass(CTrain);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F86A0);
 }
 
 // 0x6F6030

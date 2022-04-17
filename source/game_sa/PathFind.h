@@ -13,7 +13,7 @@
 #define NUM_PATH_MAP_AREAS 64
 #define NUM_PATH_INTERIOR_AREAS 8
 
-enum ePathType {
+enum ePathType : uint8 {
     PATH_TYPE_CARS = 0,
     PATH_TYPE_BOATS
 };
@@ -23,7 +23,6 @@ public:
     float x1, x2, y1, y2, z1, z2;
     bool  bEnable;
     uint8 type;
-    char  _padding[2];
 };
 
 VALIDATE_SIZE(CForbiddenArea, 0x1C);
@@ -133,7 +132,6 @@ public:
     uint32                 m_dwNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[64];
     bool                   m_bForbiddenForScriptedCarsEnabled;
-    char                   _padding[3];
     float                  m_fForbiddenForScrCarsX1;
     float                  m_fForbiddenForScrCarsX2;
     float                  m_fForbiddenForScrCarsY1;
@@ -147,7 +145,7 @@ public:
     bool TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     bool TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress);
     CVector* TakeWidthIntoAccountForWandering(CVector* outPosition, CNodeAddress nodeAddress, uint16 randomSeed);
-    void FindNextNodeWandering(int32 pathType, float x, float y, float z, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint32 dir, int8* outDir);
+    void FindNextNodeWandering(ePathType pathType, CVector pos, CNodeAddress* startNodeAddress, CNodeAddress* targetNodeAddress, uint8 dir, uint8* outDir);
     void DoPathSearch(uint8 pathType, CVector origin, CNodeAddress originAddr, CVector target, CNodeAddress* pResultNodes, int16* pNodesCount, int32 maxNodesToFind,
                       float* pDistance, float maxSearchDistance, CNodeAddress* targetAddr, float maxUnkLimit, bool oneSideOnly, CNodeAddress forbiddenNodeAddr,
                       bool includeNodesWithoutLinks, bool waterPath);
@@ -171,7 +169,15 @@ public:
     CNodeAddress* FindNodeClosestToCoors(CNodeAddress* pathLink, float X, float Y, float Z, int32 _nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4,
                                          uint16 bBoatsOnly, int32 unk6);
 
+
+    CVector* FindNodeCoorsForScript(CVector& outPos, CNodeAddress nodeAddr, bool* outIsAddrValid);
+
     inline CCarPathLink& GetCarPathLink(const CCarPathLinkAddress& address) { return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId]; }
+
+    // Helpers - NOTSA
+    CNodeAddress FindNodeClosestToCoors(const CVector& pos, int32 nodeType = 0, float maxDist = 999999.88f, uint16 unk2 = 1, int32 unk3 = 1, uint16 unk4 = 0, uint16 bBoatsOnly = 0, int32 unk6 = 0);
+    bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
+
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

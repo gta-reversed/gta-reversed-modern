@@ -11,6 +11,8 @@
 
 class CTaskComplexKillPedFromBoat : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_KILL_PED_FROM_BOAT;
+
     CPed* m_pPed;
 
 public:

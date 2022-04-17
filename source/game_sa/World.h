@@ -17,15 +17,21 @@ class CVehicle;
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;
+
 constexpr int32 MAX_SECTORS_X = 120;
 constexpr int32 MAX_SECTORS_Y = 120;
 constexpr int32 MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
+
 constexpr int32 MAX_REPEAT_SECTORS_X = 16;
 constexpr int32 MAX_REPEAT_SECTORS_Y = 16;
 constexpr int32 MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
+
 constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
+
+const CRect WORLD_BOUNDS{ -3000.0F, -3000.0F, 3000.0F, 3000.0F };
+constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 
 class CWorld {
 public:
@@ -138,7 +144,7 @@ public:
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
     // returns entity
-    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* arg2, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
+    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
     static void ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows);
     static bool GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);

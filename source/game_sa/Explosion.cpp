@@ -121,23 +121,17 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+// NOTSA
 void CExplosion::SetCreator(CEntity* newCreator) noexcept {
-    if (m_pCreator)
-        m_pCreator->CleanUpOldReference(&m_pCreator);
-
-    if (newCreator)
-        newCreator->RegisterReference(&m_pCreator);
-
+    CEntity::SafeCleanUpRef(m_pCreator);
+    CEntity::SafeRegisterRef(newCreator);
     m_pCreator = newCreator;
 }
 
+// NOTSA
 void CExplosion::SetVictim(CEntity* newVictim) noexcept {
-    if (m_pVictim)
-        m_pVictim->CleanUpOldReference(&m_pVictim);
-
-    if (newVictim)
-        newVictim->RegisterReference(&m_pVictim);
-
+    CEntity::SafeCleanUpRef(m_pVictim);
+    CEntity::SafeRegisterRef(newVictim);
     m_pVictim = newVictim;
 }
 
@@ -279,7 +273,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fVisibleDistance = 200.0f;
             exp->m_fDamagePercentage = 0.2f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");

@@ -8,8 +8,8 @@ void CEventInWater::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1370);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B13D0);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B1420);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B13D0);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B1420);
 }
 
 CEventInWater::CEventInWater(float acceleration)

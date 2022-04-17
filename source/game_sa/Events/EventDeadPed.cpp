@@ -10,8 +10,8 @@ void CEventDeadPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ADEA0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4830);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6E70);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4830);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6E70);
 }
 
 CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
@@ -19,14 +19,12 @@ CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
     m_ped = ped;
     field_18 = bUnknown;
     m_deathTimeInMs = deathTimeInMs;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventDeadPed::~CEventDeadPed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4ADEA0

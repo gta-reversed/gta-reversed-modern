@@ -4,6 +4,8 @@
 
 class CTaskComplexGetUpAndStandStill : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_COMPLEX_GET_UP_AND_STAND_STILL;
+
     CTaskComplexGetUpAndStandStill() = default;
     ~CTaskComplexGetUpAndStandStill() override = default;
 

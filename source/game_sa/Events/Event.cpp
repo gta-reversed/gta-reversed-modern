@@ -18,7 +18,7 @@ void CEventRevived::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AEC50);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AECB0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AECB0);
 }
 
 void CEventEscalator::InjectHooks()
@@ -27,7 +27,7 @@ void CEventEscalator::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF820);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2580);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2580);
 }
 
 void CEventSexyVehicle::InjectHooks()
@@ -52,7 +52,7 @@ void CEventCopCarBeingStolen::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1740);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1860);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1860);
 }
 
 void CEventCarUpsideDown::InjectHooks()
@@ -61,7 +61,7 @@ void CEventCarUpsideDown::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1CC0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1DB0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1DB0);
 }
 
 void CEventPassObject::InjectHooks()
@@ -70,7 +70,7 @@ void CEventPassObject::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x65DC70);
-    RH_ScopedInstall(IsValid_Reversed, 0x4B1700);
+    RH_ScopedVirtualInstall(IsValid, 0x4B1700);
 }
 
 void CEventLeanOnVehicle::InjectHooks()
@@ -79,7 +79,7 @@ void CEventLeanOnVehicle::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x65DAF0);
-    RH_ScopedInstall(IsValid_Reversed, 0x4B16C0);
+    RH_ScopedVirtualInstall(IsValid, 0x4B16C0);
 }
 
 void CEventOnFire::InjectHooks()
@@ -88,7 +88,7 @@ void CEventOnFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5FF740);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1050);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1050);
 }
 
 CEvent::CEvent() {
@@ -182,14 +182,12 @@ bool CEventEscalator::AffectsPed_Reversed(CPed* ped)
 CEventSexyVehicle::CEventSexyVehicle(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventSexyVehicle::~CEventSexyVehicle()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventSexyVehicle* CEventSexyVehicle::Constructor(CVehicle* vehicle)
@@ -201,15 +199,13 @@ CEventSexyVehicle* CEventSexyVehicle::Constructor(CVehicle* vehicle)
 CEventChatPartner::CEventChatPartner(bool leadSpeaker, CPed* partner)
 {
     m_leadSpeaker = leadSpeaker;
-    m_partner = partner;
-    if (partner)
-        partner->RegisterReference(reinterpret_cast<CEntity**>(&m_partner));
+    m_partner     = partner;
+    CEntity::SafeRegisterRef(m_partner);
 }
 
 CEventChatPartner::~CEventChatPartner()
 {
-    if (m_partner)
-        m_partner->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_partner));
+    CEntity::SafeCleanUpRef(m_partner);
 }
 
 CEventChatPartner* CEventChatPartner::Constructor(bool leadSpeaker, CPed* partner)
@@ -221,19 +217,15 @@ CEventChatPartner* CEventChatPartner::Constructor(bool leadSpeaker, CPed* partne
 CEventCopCarBeingStolen::CEventCopCarBeingStolen(CPed* hijacker, CVehicle* vehicle)
 {
     m_hijacker = hijacker;
-    m_vehicle = vehicle;
-    if (hijacker)
-        hijacker->RegisterReference(reinterpret_cast<CEntity**>(&m_hijacker));
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    m_vehicle  = vehicle;
+    CEntity::SafeRegisterRef(m_hijacker);
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventCopCarBeingStolen::~CEventCopCarBeingStolen()
 {
-    if (m_hijacker)
-        m_hijacker->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_hijacker));
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_hijacker);
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventCopCarBeingStolen* CEventCopCarBeingStolen::Constructor(CPed* hijacker, CVehicle* vehicle)
@@ -260,14 +252,15 @@ bool CEventCopCarBeingStolen::AffectsPed_Reversed(CPed* ped)
 CEventCarUpsideDown::CEventCarUpsideDown(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
-CEventCarUpsideDown::~CEventCarUpsideDown()
-{
-    if (m_vehicle) // BUG: This should be CEntity::CleanUpOldReference
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+CEventCarUpsideDown::~CEventCarUpsideDown() {
+#if FIX_BUGS
+    CEntity::SafeCleanUpRef(m_vehicle);
+#else
+    CEntity::SafeRegisterRef(m_vehicle);
+#endif
 }
 
 CEventCarUpsideDown* CEventCarUpsideDown::Constructor(CVehicle* vehicle)
@@ -298,15 +291,13 @@ bool CEventCarUpsideDown::AffectsPed_Reversed(CPed* ped)
 CEventPassObject::CEventPassObject(CEntity* giver, bool dontPassObject)
 {
     m_giver = giver;
-    if (giver)
-        giver->RegisterReference(&m_giver);
+    CEntity::SafeRegisterRef(m_giver);
     m_dontPassObject = dontPassObject;
 }
 
 CEventPassObject::~CEventPassObject()
 {
-    if (m_giver)
-        m_giver->CleanUpOldReference(&m_giver);
+    CEntity::SafeCleanUpRef(m_giver);
 }
 
 CEventPassObject* CEventPassObject::Constructor(CEntity* giver, bool dontPassObject)
@@ -336,14 +327,12 @@ CEventLeanOnVehicle::CEventLeanOnVehicle(CVehicle* vehicle, int32 leanAnimDurati
 {
     m_vehicle = vehicle;
     m_leanAnimDurationInMs = leanAnimDurationInMs;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventLeanOnVehicle::~CEventLeanOnVehicle()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventLeanOnVehicle* CEventLeanOnVehicle::Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs)

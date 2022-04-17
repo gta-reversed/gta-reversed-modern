@@ -29,6 +29,8 @@ public:
     int32 nFallToDeathDir;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_DIE;
+
     CTaskComplexDie(
         eWeaponType nWeaponType /*=WEAPONTYPE_UNARMED*/,
         AssocGroupId animGroup /*ANIM_STD_PED*/,
