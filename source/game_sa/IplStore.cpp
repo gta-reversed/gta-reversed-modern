@@ -23,7 +23,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
     RH_ScopedCategoryGlobal();
 
-    //RH_ScopedGlobalInstall(AddIplsNeededAtPosn, 0x4045B0);
+    RH_ScopedGlobalInstall(AddIplsNeededAtPosn, 0x4045B0);
     //RH_ScopedGlobalInstall(LoadIpl, 0x406080);
     RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
     RH_ScopedGlobalInstall(Initialise, 0x405EC0);
@@ -109,7 +109,8 @@ int32 CIplStore::AddIplSlot(const char* name) {
 
 // 0x4045B0
 void CIplStore::AddIplsNeededAtPosn(const CVector& posn) {
-    plugin::Call<0x4045B0, const CVector&>(posn);
+    gvecIplsNeededAtPosn = posn;
+    gbIplsNeededAtPosn = true;
 }
 
 // 0x4045E0
