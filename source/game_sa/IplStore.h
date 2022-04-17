@@ -43,7 +43,7 @@ public:
     static void Save();
     static void Load();
     static void LoadAllRemainingIpls();
-    static bool LoadIpl(int32 iplSlotIndex, uint8* data, int32 dataSize);
+    static bool LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize); // Originally took `uchar*`, but for simplicity's sake we're going to use `char*`. Makes no difference.
     static bool LoadIplBoundingBox(int32 iplSlotIndex, uint8* data, int32 dataSize);
     static void LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection);
     static void RemoveAllIpls();

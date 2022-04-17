@@ -18,11 +18,11 @@ public:
     int16 m_nMaxDummyId{ SHRT_MIN };
     int16 m_nRelatedIpl{ -1 }; // entity arrays index
     bool  m_bInterior{};
-    char  field_2D{};
+    char  field_2D{}; // Seemingly something like `m_bIsLoaded`
     bool  m_bLoadRequest{};
     bool  m_bDisableDynamicStreaming{ true };
     char  field_30{};
-    char  field_31{};
+    char  field_31{}; // Makes bounding box bigger. (+350 vs +200 units). See `CIplStore::LoadIpl`
 
     constexpr IplDef() = default;
 

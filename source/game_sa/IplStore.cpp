@@ -7,6 +7,7 @@
 
 #include "StdInc.h"
 #include "IplStore.h"
+#include "tBinaryIplFile.h"
 #include "extensions/enumerate.hpp"
 
 uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
@@ -24,7 +25,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(AddIplsNeededAtPosn, 0x4045B0);
-    //RH_ScopedGlobalInstall(LoadIpl, 0x406080);
+    RH_ScopedGlobalInstall(LoadIpl, 0x406080);
     RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
     RH_ScopedGlobalInstall(Initialise, 0x405EC0);
     //RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
@@ -312,8 +313,95 @@ void CIplStore::LoadAllRemainingIpls() {
 /*!
 * @addr 0x406080
 */
-bool CIplStore::LoadIpl(int32 iplSlotIndex, uint8* data, int32 dataSize) {
-    return plugin::CallAndReturn<bool, 0x406080, int32, uint8*, int32>(iplSlotIndex, data, dataSize);
+bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
+    auto& def = *GetInSlot(iplSlotIndex);
+    def.field_2D = true; // We're setting this here, as it's set in all cases.
+
+    // First of all, load bounding box (if not loaded already)
+    if (def.m_boundBox.IsFlipped()) {
+        // def.field_2D = true; // Moved to top
+
+        if (!LoadIplBoundingBox(iplSlotIndex, (uint8*)data, dataSize)) {
+            return false;
+        }
+
+        if (def.field_31) {
+            def.m_boundBox.Resize(350.f, 350.f);
+        } else {
+            def.m_boundBox.Resize(200.f, 200.f);
+        }
+
+        CColAccel::setIplDef(iplSlotIndex, def);
+        ms_pQuadTree->AddItem(&def, def.m_boundBox);
+
+        return true;
+    }
+
+    // Load file.
+    // It might be either in text or binary.
+    // If in binary the data beings with `bnry`.
+
+    const auto pIPLLODEntities = def.m_nRelatedIpl != -1 ? IplEntityIndexArrays[def.m_nRelatedIpl] : nullptr;
+
+    // Anti copy-paste code helper.
+    // Finish loading an ObjectInstance
+    const auto FinishLoadObjInst = [&](CEntity* obj) {
+        obj->m_nIplIndex = (uint8)iplSlotIndex;
+
+        // Assign LOD to `obj` (if set)
+        if (obj->m_nLodIndex == -1) {
+            obj->m_pLod = nullptr;
+        } else {
+            assert(pIPLLODEntities);
+            obj->m_pLod = pIPLLODEntities[obj->m_nLodIndex];
+            obj->m_pLod->m_nNumLodChildren++;
+        }
+
+        obj->Add(); // Add it to the world
+
+        IncludeEntity(iplSlotIndex, obj);
+    };
+
+    if (strncmp((char*)data, "bnry", 4u)) { // IPL in text format
+        bool inSection{};
+        for (auto l = CFileLoader::LoadLine(data, dataSize); l; l = CFileLoader::LoadLine(data, dataSize)) {
+            switch (l[0]) {
+            case 0:   // Empty line
+            case '#': // Comment
+                continue;
+            }
+
+            const auto LineBeginsWith = [linesv = std::string_view{ l }](auto with) {
+                return linesv == with;
+            };
+
+            if (!inSection) {
+                inSection = LineBeginsWith("inst");
+                continue;
+            }
+
+            if (LineBeginsWith("end")) {
+                inSection = false;
+                continue;
+            }
+
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(l));
+        }
+    } else { // Binary IPL
+        auto ipl = reinterpret_cast<tBinaryIplFile*>(data);
+
+        for (auto& inst : ipl->GetObjInstances()) {
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(&inst, nullptr));
+        }
+
+        for (auto& cargen : ipl->GetCarGens()) {
+            CFileLoader::LoadCarGenerator(&cargen, iplSlotIndex);
+        }
+    }
+
+    // def.field_2D = true; // Moved to top
+
+    return true;
 }
 
 /*!

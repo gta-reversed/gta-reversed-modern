@@ -603,7 +603,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
         break;
     }
     case eModelType::IPL: {
-        if (!CIplStore::LoadIpl(ModelIdToIPL(modelId), fileBuffer, bufferSize)) {
+        if (!CIplStore::LoadIpl(ModelIdToIPL(modelId), (char*)fileBuffer, bufferSize)) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(stream, &rwStreamInitData);
