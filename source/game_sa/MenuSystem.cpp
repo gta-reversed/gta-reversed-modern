@@ -260,7 +260,7 @@ void CMenuSystem::Display(MenuId id, uint8 unk) {
 
 // 0x580E00
 void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/) {
-    // return plugin::Call<0x580E00, MenuId, bool>(id, bRightFont);
+    return plugin::Call<0x580E00, MenuId, bool>(id, bRightFont);
 
     auto menu = MenuNumber[id];
     uint8 titleDarkness = bRightFont ? 0 : 120;
@@ -473,12 +473,14 @@ void CMenuSystem::Process(int8 id) {
         return;
     }
 
-    // :thinking
+    // 0x58263F :thinking
     for (auto i = 0; i < MENU_COUNT; i++) {
-        if (id == MenuInUse[i])
+        if (i != CurrentMenuInUse && MenuInUse[i]) {
             Display(id, false);
+        }
     }
 
+    // 0x5826A4
     if (MenuInUse[CurrentMenuInUse]) {
         Display(CurrentMenuInUse, true);
 
@@ -501,7 +503,7 @@ void CMenuSystem::InsertOneMenuItem(MenuId id, uint8 column, uint8 row, char* te
     menu->m_aanNumberInRowTitle[column][row] = -1;
     menu->m_aadw2ndNumberInRowTitle[column][row] = -1;
 
-    CountNonEmptyRows(id);
+    CalcNonEmptyRows(id);
 }
 
 // 0x581D70
@@ -511,7 +513,7 @@ void CMenuSystem::InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row
     menu->m_aanNumberInRowTitle[column][row] = num1;
     menu->m_aadw2ndNumberInRowTitle[column][row] = num2;
 
-    CountNonEmptyRows(id);
+    CalcNonEmptyRows(id);
 }
 
 // 0x582300
@@ -575,7 +577,7 @@ void CMenuSystem::ActivateItems(MenuId id, bool b0, bool b1, bool b2, bool b3, b
     auto menu = MenuNumber[id];
 
     const bool rows[] = { b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11 };
-    for (auto rowId = 0; rowId < std::size(rows); rowId++) {
+    for (auto rowId = 0u; rowId < std::size(rows); rowId++) {
         menu->m_abRowSelectable[rowId] = rows[rowId];
     }
 
@@ -638,12 +640,12 @@ void CMenuSystem::FillGridWithCarColours(MenuId id) {
 // 0x581E00
 void CMenuSystem::InsertMenu(MenuId id, uint8 column, char* colHeader, char* row0, char* row1, char* row2, char* row3, char* row4, char* row5, char* row6, char* row7, char* row8, char* row9, char* row10, char* row11) {
     assert(column < MENU_COL_COUNT);
-    auto menu = MenuNumber[id];
+    auto& menu = MenuNumber[id];
 
     SetColumnHeader(id, column, colHeader);
 
     const auto rows = std::array{ row0, row1, row2, row3, row4, row5, row6, row7, row8, row9, row10, row11 };
-    for (auto rowId = 0; rowId < std::size(rows); rowId++) {
+    for (auto rowId = 0u; rowId < std::size(rows); rowId++) {
         SetRowTitle(id, column, rowId, rows[rowId]);
     }
 
@@ -657,7 +659,7 @@ void CMenuSystem::InsertMenu(MenuId id, uint8 column, char* colHeader, char* row
     if (column)
         return;
 
-    CountNonEmptyRows(id);
+    CalcNonEmptyRows(id);
 }
 
 // 0x580750
@@ -679,11 +681,11 @@ void CMenuSystem::SwitchOffMenu(MenuId id) {
 }
 
 // NOTSA
-void CMenuSystem::CountNonEmptyRows(MenuId id) {
+void CMenuSystem::CalcNonEmptyRows(MenuId id) {
     auto menu = MenuNumber[id];
     menu->m_nNumRows = 0;
-    for (auto row = (uint8)MENU_ROW_COUNT; row > 0; row--) {
-        if (menu->m_aaacRowTitles[0][row][0]) {
+    for (auto& row : menu->m_aaacRowTitles[0]) { // they used reverse loop from MENU_ROW_COUNT to 0
+        if (row[0]) {
             menu->m_nNumRows += 1;
         }
     }

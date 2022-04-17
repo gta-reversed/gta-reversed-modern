@@ -6,6 +6,10 @@
 */
 #pragma once
 
+#ifdef InsertMenu
+#undef InsertMenu
+#endif
+
 typedef uint8 MenuId;
 
 class CMenuSystem {
@@ -98,7 +102,7 @@ public:
     static MenuId GetNumMenusInUse() noexcept { return num_menus_in_use; } // 0x558DC0
 
 private:
-    static void CountNonEmptyRows(MenuId id);
+    static void CalcNonEmptyRows(MenuId id);
 };
 
 VALIDATE_SIZE(CMenuSystem::Menu, 0x418);
