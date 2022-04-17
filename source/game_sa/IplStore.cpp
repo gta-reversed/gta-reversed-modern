@@ -225,6 +225,24 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
 */
 bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
     return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
+    /*
+    for (auto& def : ms_pPool->GetAllValid() | rng::views::drop(1)) {
+        if (!def.m_bLoadRequest) {
+            continue;
+        }
+
+        if (def.m_boundBox.IsPointInside(coords, -190.f) && !def.field_2D && !def.m_bDisableDynamicStreaming) {
+            // Stuff from 0x4056B9 should go here
+            // Should probably use a lambad here
+            // Also should figure out what field_2D is, otherwise this doesn't make a lot of sense.
+
+            return false;
+        } else {
+            def.m_bLoadRequest = false;
+        }
+    }
+    return true;
+    */
 }
 
 /*!
