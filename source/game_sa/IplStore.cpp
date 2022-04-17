@@ -47,7 +47,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
     RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
     //RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
-    //RH_ScopedGlobalInstall(GetIplName, 0x404A60);
+    RH_ScopedGlobalInstall(GetIplName, 0x404A60);
     RH_ScopedGlobalInstall(GetIplEntityIndexArray, 0x4047B0);
     //RH_ScopedGlobalInstall(GetNewIplEntityIndexArray, 0x404780);
     //RH_ScopedGlobalInstall(SetIplsRequired, 0x404700);
@@ -207,8 +207,8 @@ CEntity** CIplStore::GetIplEntityIndexArray(int32 arrayIndex) {
 /*!
 * @addr 0x404A60
 */
-char* CIplStore::GetIplName(int32 iplSlotIndex) {
-    return plugin::CallAndReturn<char*, 0x404A60, int32>(iplSlotIndex);
+const char* CIplStore::GetIplName(int32 iplSlotIndex) { // No xrefs
+    return GetInSlot(iplSlotIndex)->m_szName;
 }
 
 /*!
