@@ -968,7 +968,8 @@ void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, co
 
         if (bb.IsPointWithin(entity->GetPosition())) {
             if (*outCount < maxCount) {
-                outEntities[*outCount++] = entity;
+                if (outEntities)
+                    outEntities[*outCount++] = entity;
             } else {
                 break; // NOTSA - But makes sense lol
             }
@@ -1167,7 +1168,7 @@ void CWorld::RemoveFallenPeds() {
             continue;
 
         const CVector& vecPedPos = ped->GetPosition();
-        if (vecPedPos.z > -100.0f)
+        if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
             CNodeAddress pathNodeAddress;
@@ -1192,7 +1193,7 @@ void CWorld::RemoveFallenCars() {
             continue;
 
         const CVector& vecPos = vehicle->GetPosition();
-        if (vecPos.z > -100.0f)
+        if (vecPos.z > MAP_Z_LOW_LIMIT)
             continue;
 
         const auto ShouldWeKeepIt = [vehicle]() {
@@ -1362,9 +1363,7 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
         { // see ClearExcitingStuffFromArea | inlined
         if (auto& driver = veh->m_pDriver) {
             CPopulation::RemovePed(driver);
-            if (driver) // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
-                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
-            driver = nullptr;
+            CEntity::ClearReference(driver); // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
         }
 
         for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
@@ -1876,7 +1875,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
-                    pedDamageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                    pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
                 } else {
                     eventDamage.m_damageResponse.m_bDamageCalculated = true;
                 }
@@ -1905,7 +1904,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, (uint8)pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
-                    pedDamageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                    pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
                 }
                 else {
                     eventDamage.m_damageResponse.m_bDamageCalculated = true;
@@ -2554,9 +2553,7 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
         { // todo: see ClearCarsFromArea | inlined
         if (auto& driver = veh->m_pDriver) {
             CPopulation::RemovePed(driver);
-            if (driver)
-                driver->CleanUpOldReference(reinterpret_cast<CEntity**>(&driver));
-            driver = nullptr;
+            CEntity::ClearReference(driver);
         }
 
         for (auto j = 0; j < veh->m_nMaxPassengers; j++) {

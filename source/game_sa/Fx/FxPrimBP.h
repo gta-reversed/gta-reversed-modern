@@ -8,7 +8,7 @@
 
 #include "RenderWare.h"
 #include "List_c.h"
-#include "FxInfoManager_c.h"
+#include "FxInfoManager.h"
 
 class FxPrim_c;
 

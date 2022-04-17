@@ -9,6 +9,7 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
+#include <extensions/ScriptCommands.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -72,7 +73,7 @@ void CDebugMenu::LoadMouseSprite() {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
         CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+        m_mouseSprite.SetTexture("mouse", "mousea");
     } else {
         printf("Failed to load fronten_pc.txd\n");
     }
@@ -303,6 +304,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
+                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
                 ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
@@ -320,33 +323,33 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
-    CPad* pad = CPad::GetPad(0);
-
-    static bool doGodMode{};
-    if (pad->IsStandardKeyJustPressed('2')) {
-        doGodMode = !doGodMode;
-        printf("God mode state: %i\n", (int)doGodMode);
-    }
-    if (doGodMode) {
-        CCheat::MoneyArmourHealthCheat();
-    }
+    CPad* pad = CPad::GetPad();
 
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
         CCheat::JetpackCheat();
     }
-
+    if (pad->IsStandardKeyJustPressed('2')) {
+        CCheat::MoneyArmourHealthCheat();
+    }
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
     if (pad->IsStandardKeyJustDown('4')) {
-        printf("");
-        TaskComplexUseGogglesTestCode();
+        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
+        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+    }
+    if (pad->IsStandardKeyJustDown('5')) {
+        CVector pos{};
+        Command<COMMAND_GET_PLAYER_COORDINATES>(0, &pos.x, &pos.y, &pos.z);
+        printf("%f %f %f\n", pos.x, pos.y, pos.z);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
     // CTRL + M or F7
     if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
@@ -356,7 +359,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();

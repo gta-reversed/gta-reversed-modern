@@ -262,7 +262,7 @@ void CFileLoader::LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox) {
 void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
     auto index = CTheCarGenerators::CreateCarGenerator(
         carGen->m_vecPosn,
-        RWRAD2DEG(carGen->m_fAngle),
+        RadiansToDegrees(carGen->m_fAngle),
         carGen->m_nModelId,
         carGen->m_nPrimaryColor,
         carGen->m_nSecondaryColor,

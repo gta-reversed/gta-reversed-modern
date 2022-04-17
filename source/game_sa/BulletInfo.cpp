@@ -116,8 +116,8 @@ void CBulletInfo::Update() {
                     if (hitPed->m_nPedState == PEDSTATE_DEAD) {
                         const auto anim = RpAnimBlendClumpGetFirstAssociation(hitPed->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
 
-                        if (CAnimBlendAssociation* assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, 0, anim, 8.0f)) {
-                            assoc->Start(0.0f);
+                        if (auto assoc = CAnimManager::BlendAnimation(hitPed->m_pRwClump, ANIM_GROUP_DEFAULT, anim, 8.0f)) {
+                            assoc->SetCurrentTime(0.0f);
                             assoc->SetFlag(ANIM_FLAG_UNLOCK_LAST_FRAME, false);
                             // std::cout << "Blood anim\n";
                         }
@@ -221,7 +221,7 @@ void CBulletInfo::Update() {
                 dir.Normalise();
                 const float dirDotColPointNorm = DotProduct(dir, colPoint.m_vecNormal);
                 if (dirDotColPointNorm < 0.0f) {
-                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RWRAD2DEG(asin(-dirDotColPointNorm)));
+                    AudioEngine.ReportBulletHit(hitEntity, colPoint.m_nSurfaceTypeB, colPoint.m_vecPoint, RadiansToDegrees(asin(-dirDotColPointNorm)));
                 }
             }
             CGlass::WasGlassHitByBullet(hitEntity, colPoint.m_vecPoint);

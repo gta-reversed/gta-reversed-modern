@@ -181,7 +181,7 @@ void CAEDoorAudioEntity::InjectHooks() {
     RH_ScopedOverloadedInstall(AddAudioEvent, "1", 0x4DC9F0, void (CAEDoorAudioEntity::*)(eAudioEvents, CPhysical*));
     RH_ScopedOverloadedInstall(AddAudioEvent, "2", 0x4DC860, void (CAEDoorAudioEntity::*)(eAudioEvents, CVector&, float, float));
     RH_ScopedInstall(PlayDoorSound, 0x4DC6D0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCA60);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCA60);
 }
 
 void CAEDoorAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {

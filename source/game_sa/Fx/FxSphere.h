@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "FxPlane_c.h"
+#include "FxPlane.h"
 
 class FxSphere_c {
 public:

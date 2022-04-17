@@ -173,7 +173,7 @@ void CStuntJumpManager::Update() {
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
+                    randomPassenger->Say(37);
             }
         }
 

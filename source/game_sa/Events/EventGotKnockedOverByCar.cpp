@@ -8,22 +8,20 @@ void CEventGotKnockedOverByCar::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1B60);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1C70);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7960);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1C70);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7960);
 }
 
 // 0x4B1B60
 CEventGotKnockedOverByCar::CEventGotKnockedOverByCar(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventGotKnockedOverByCar::~CEventGotKnockedOverByCar()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventGotKnockedOverByCar* CEventGotKnockedOverByCar::Constructor(CVehicle* vehicle)

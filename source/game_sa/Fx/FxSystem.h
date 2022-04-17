@@ -10,9 +10,9 @@
 #include "RenderWare.h"
 #include "Vector.h"
 #include "AEFireAudioEntity.h"
-#include "FxPrtMult_c.h"
-#include "FxSphere_c.h"
-#include "FxBox_c.h"
+#include "FxPrtMult.h"
+#include "FxSphere.h"
+#include "FxBox.h"
 
 enum eFxSystemKillStatus {
     FX_NOT_KILLED = 0,
@@ -96,4 +96,17 @@ public:
     void DoFxAudio(CVector posn);
     bool IsVisible();
     bool Update(RwCamera* camera, float timeDelta);
+
+    template<typename T>
+    static void KillAndClear(T*& fx) requires std::is_base_of_v<FxSystem_c, T> {
+        fx->Kill();
+        fx = nullptr;
+    }
+
+    template<typename T>
+    static void SafeKillAndClear(T*& fx) requires std::is_base_of_v<FxSystem_c, T> {
+        if (fx) {
+            KillAndClear(fx);
+        }
+    }
 };

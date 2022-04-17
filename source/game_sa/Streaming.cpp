@@ -4,6 +4,7 @@
 #include "Radar.h"
 #include "CarCtrl.h"
 #include "PostEffects.h"
+#include "TheScripts.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -1996,7 +1997,7 @@ void CStreaming::ReInit() {
     const auto RemoveModelsInRange = [](auto base, auto count) {
         for (auto modelId = base; modelId < base + count; modelId++) {
             RemoveModel(modelId);
-            CModelInfo::GetModelInfo(modelId)->SetModelName(gta_empty_string);
+            CModelInfo::GetModelInfo(modelId)->SetModelName("");
         }
     };
     RemoveModelsInRange(SPECIAL_MODELS_RESOURCE_ID, TOTAL_SPECIAL_MODELS);
@@ -2008,69 +2009,69 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 void CStreaming::ReadIniFile() {
     bool bHasDevkitMemory = false;
-    auto file = CFileMgr::OpenFile("stream.ini", "r");
+    auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file))
     {
-        if (*line != '#' && *line)
+        if (*line == '#' || !*line)
+            continue;
+
+        char* attribute = strtok(line, " ,\t");
+        char* value = strtok(nullptr, " ,\t");
+        if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
         {
-            char* attribute = strtok(line, " ,\t");
-            char* value = strtok(nullptr, " ,\t");
-            if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
+            if (!_stricmp(attribute, "devkit_memory"))
             {
-                if (!_stricmp(attribute, "devkit_memory"))
-                {
-                    CStreaming::ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
-                    bHasDevkitMemory = true;
-                }
-                else if (!_stricmp(attribute, "vehicles"))
-                {
-                    CStreaming::desiredNumVehiclesLoaded = atoi(value);
-                }
-                else if (!_stricmp(attribute, "dontbuildpaths"))
-                {
-                    //bDontBuildPaths = 1; // unused
-                }
-                else if (!_stricmp(attribute, "pe_lightchangerate"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasecap"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasemult"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_leftx"))
-                {
-                    CPostEffects::m_colourLeftUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_rightx"))
-                {
-                    CPostEffects::m_colourRightUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_topy"))
-                {
-                    CPostEffects::m_colourTopVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bottomy"))
-                {
-                    CPostEffects::m_colourBottomVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bRadiosity"))
-                {
-                    CPostEffects::m_bRadiosity = atoi(value) != 0;
-                }
-                else if (!_stricmp(attribute, "def_brightness_pal"))
-                {
-                    FrontEndMenuManager.m_nBrightness = atoi(value);
-                }
+                ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
+                bHasDevkitMemory = true;
             }
-            else
+            else if (!_stricmp(attribute, "vehicles"))
             {
-                CStreaming::ms_memoryAvailable = atoi(value) << 10;
+                desiredNumVehiclesLoaded = atoi(value);
             }
+            else if (!_stricmp(attribute, "dontbuildpaths"))
+            {
+                //bDontBuildPaths = 1; // unused
+            }
+            else if (!_stricmp(attribute, "pe_lightchangerate"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasecap"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasemult"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_leftx"))
+            {
+                CPostEffects::m_colourLeftUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_rightx"))
+            {
+                CPostEffects::m_colourRightUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_topy"))
+            {
+                CPostEffects::m_colourTopVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bottomy"))
+            {
+                CPostEffects::m_colourBottomVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bRadiosity"))
+            {
+                CPostEffects::m_bRadiosity = atoi(value) != 0;
+            }
+            else if (!_stricmp(attribute, "def_brightness_pal"))
+            {
+                FrontEndMenuManager.m_nBrightness = atoi(value);
+            }
+        }
+        else
+        {
+            ms_memoryAvailable = atoi(value) << 10;
         }
     }
     CFileMgr::CloseFile(file);

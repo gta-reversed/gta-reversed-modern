@@ -140,7 +140,17 @@ bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
 
 // 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+    return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+}
+
+uint16 CGeneral::GetRandomNumber()
+{
+    static_assert(RAND_MAX == 0x7FFF, "PC-generated random numbers should not exceed 32767");
+#ifdef BETTER_RNG
+    static_assert(false, "PC-generated random numbers should not exceed 32767");
+#else
+    return rand();
+#endif
 }
 
 /**

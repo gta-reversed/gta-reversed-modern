@@ -6,7 +6,7 @@
 */
 #include "StdInc.h"
 
-#include "FxManager_c.h"
+#include "FxManager.h"
 
 FxManager_c& g_fxMan = *(FxManager_c*)0xA9AE80;
 

@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "FxPrimBP_c.h"
+#include "FxPrimBP.h"
 
 class FxEmitterBP_c : public FxPrimBP_c {
 public:

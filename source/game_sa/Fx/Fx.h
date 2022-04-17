@@ -7,7 +7,7 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "FxManager_c.h"
+#include "FxManager.h"
 
 enum FxQuality_e : uint32 {
     FXQUALITY_LOW,

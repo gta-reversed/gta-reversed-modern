@@ -42,6 +42,10 @@
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
+// Install a hook on a virtual function
+#define RH_ScopedVirtualInstall(fn, fnAddr, ...) \
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn ## _Reversed __VA_OPT__(,) __VA_ARGS__)
+
 // Tip: If a member function is const just add the `const` keyword after the function arg list;
 // Eg.: `void(CRect::*)(float*, float*) const` (Notice the const at the end) (See function `CRect::GetCenter`)
 #define RH_ScopedOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
@@ -49,6 +53,9 @@
 
 #define RH_ScopedGlobalOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn) __VA_OPT__(,) __VA_ARGS__)
+
+#define RH_ScopedVirtualOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn ## _Reversed) __VA_OPT__(,) __VA_ARGS__)
 
 // Used in CCheat only - Install global `fn` as name `fnName`
 #define RH_ScopedNamedGlobalInstall(fn, fnName, fnAddr, ...) \
@@ -72,7 +79,7 @@ namespace ReversibleHooks {
     RootHookCategory& GetRootCategory();
 
     namespace detail {
-        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
+        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false, int stackArguments = -1);
         void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
         /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
         bool IsFunctionHooked(const std::string& category, const std::string& fnName);
@@ -81,9 +88,9 @@ namespace ReversibleHooks {
     };
 
     template <typename T>
-    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5) {
+    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5, int stackArguments = -1) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        detail::HookInstall(category, std::move(fnName), installAddress, ptr, iJmpCodeSize, bDisableByDefault);
+        detail::HookInstall(category, std::move(fnName), installAddress, ptr, iJmpCodeSize, bDisableByDefault, stackArguments);
     }
 
     template <typename T>

@@ -17,8 +17,7 @@ CTaskComplexLeaveCar::CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTarge
     m_fDieAnimSpeed                = 1.0f;
     m_bIsInAir                     = false;
 
-    if (targetVehicle)
-        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
 CTaskComplexLeaveCar::~CTaskComplexLeaveCar() {

@@ -92,8 +92,8 @@ void CFont::InjectHooks() {
 
 // 0x7187C0
 void CFont::LoadFontValues() {
-    CFileMgr::SetDir(gta_empty_string);
-    auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
+    CFileMgr::SetDir("");
+    auto* file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
     char attrib[32];
 

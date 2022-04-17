@@ -29,8 +29,6 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-const char gta_empty_string[4] = {0, 0, 0, 0};
-
 #define DEFAULT_SCREEN_WIDTH (640.0f)
 #define DEFAULT_SCREEN_HEIGHT (448.0f)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
@@ -66,6 +64,9 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+#define PUSH_RENDERGROUP(str) 0
+#define POP_RENDERGROUP() 0
+
 extern int32 gDefaultTaskTime;
 
 extern char *gString; // char gString[200]
@@ -85,14 +86,38 @@ extern uint32 &ClumpOffset;
 
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
-constexpr float TWO_PI = 6.28318530718f;
-constexpr float PI = 3.14159265358979323846f;
-constexpr float HALF_PI = PI / 2.0f;
-constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
-constexpr float SQRT_2 = 1.41421356237309504880f;
-constexpr float SQRT_3 = 1.73205080757f;
-constexpr float SIN_PI = 0.0f; // std::sin(PI);
-constexpr float COS_PI = -1.0f; // std::cos(PI);
+constexpr float E              = 2.71828f;          // e
+constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
+constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
+constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ
+constexpr float FRAC_2_PI      = 0.636619f;         // 2 / π
+constexpr float FRAC_2_SQRT_PI = 1.12837f;          // 2 / √π
+constexpr float FRAC_4_TAU     = 0.636619f;         // 4 / τ
+constexpr float FRAC_1_SQRT_2  = 0.707106f;         // 1 / √2
+constexpr float FRAC_PI_2      = 1.57079f;          // π / 2
+constexpr float FRAC_PI_3      = 1.04719f;          // π / 3
+constexpr float FRAC_PI_4      = 0.785398f;         // π / 4
+constexpr float FRAC_PI_6      = 0.523598f;         // π / 6
+constexpr float FRAC_PI_8      = 0.392699f;         // π / 8
+constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2
+constexpr float FRAC_TAU_3     = 2.09439f;          // τ / 3
+constexpr float FRAC_TAU_4     = 1.57079f;          // τ / 4
+constexpr float FRAC_TAU_6     = 1.04719f;          // τ / 6
+constexpr float FRAC_TAU_8     = 0.785398f;         // τ / 8
+constexpr float FRAC_TAU_12    = 0.523598f;         // τ / 12
+constexpr float LN_2           = 0.693147f;         // ln(2)
+constexpr float LN_10          = 2.30258f;          // ln(10)
+constexpr float LOG2_E         = 1.44269f;          // log2(e)
+constexpr float LOG10_E        = 0.434294f;         // log10(e)
+constexpr float LOG10_2        = 0.301029f;         // log10(2)
+constexpr float LOG2_10        = 3.32192f;          // log2(10)
+constexpr float PI             = 3.14159f;          // π
+constexpr float HALF_PI        = PI / 2.0f;         // π / 2
+constexpr float SQRT_2         = 1.41421f;          // √2
+constexpr float SQRT_3         = 1.73205f;          // √3
+constexpr float SIN_PI         = 0.0f;              // sin(π);
+constexpr float COS_PI         = -1.0f;             // cos(π);
+constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
 void InjectCommonHooks();
 
