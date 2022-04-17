@@ -220,6 +220,10 @@
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKPointArm.h"
 
+#include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/win.h"
+#include "platform/platform.h"
+
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
@@ -227,7 +231,6 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    Securom::InjectHooks();
     CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
@@ -726,6 +729,9 @@ void InjectHooksMain() {
 
     const auto App = []() {
         VideoPlayer::InjectHooks();
+        Securom::InjectHooks();
+        Win32InjectHooks();
+        RsInjectHooks();
     };
 
     App();
