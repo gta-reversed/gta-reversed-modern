@@ -43,7 +43,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
     RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
     //RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
-    //RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
+    RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
     //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
     RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
     //RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
@@ -188,9 +188,11 @@ int32 CIplStore::FindIplSlot(const char* name) {
     return -1;
 }
 
-// 0x404C70
-CRect* CIplStore::GetBoundingBox(int32 iplSlotIndex) {
-    return plugin::CallAndReturn<CRect*, 0x404C70, int32>(iplSlotIndex);
+/*!
+* @addr 0x404C70
+*/
+CRect* CIplStore::GetBoundingBox(int32 iplSlotIndex) { // No xrefs
+    return &GetInSlot(iplSlotIndex)->m_boundBox;
 }
 
 // 0x4047B0
