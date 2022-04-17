@@ -122,7 +122,9 @@ void CIplStore::ClearIplsNeededAtPosn() {
     gbIplsNeededAtPosn = false;
 }
 
-// 0x404D30
+/*!
+* @addr 0x404D30
+*/
 void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
     GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming = !enable;
 }
@@ -195,127 +197,177 @@ CRect* CIplStore::GetBoundingBox(int32 iplSlotIndex) { // No xrefs
     return &GetInSlot(iplSlotIndex)->m_boundBox;
 }
 
-// 0x4047B0
+/*!
+* @addr 0x4047B0
+*/
 CEntity** CIplStore::GetIplEntityIndexArray(int32 arrayIndex) {
     return IplEntityIndexArrays[arrayIndex];
 }
 
-// 0x404A60
+/*!
+* @addr 0x404A60
+*/
 char* CIplStore::GetIplName(int32 iplSlotIndex) {
     return plugin::CallAndReturn<char*, 0x404A60, int32>(iplSlotIndex);
 }
 
-// 0x404780
+/*!
+* @addr 0x404780
+*/
 int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
     return plugin::CallAndReturn<int32, 0x404780, int32>(entitiesCount);
 }
 
-// 0x405600
+/*!
+* @addr 0x405600
+*/
 bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
     return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
 }
 
-// 0x404C90
+/*!
+* @addr 0x404C90
+*/
 void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
     plugin::Call<0x404C90, int32, CEntity*>(iplSlotIndex, entity);
 }
 
-// 0x5D5420
+/*!
+* @addr 0x5D5420
+*/
 void CIplStore::Save() {
     plugin::Call<0x5D5420>();
 }
 
-// 0x5D54A0
+/*!
+* @addr 0x5D54A0
+*/
 void CIplStore::Load() {
     plugin::Call<0x5D54A0>();
 }
 
-// 0x405780
+/*!
+* @addr 0x405780
+*/
 void CIplStore::LoadAllRemainingIpls() {
     plugin::Call<0x405780>();
 }
 
-// 0x406080
+/*!
+* @addr 0x406080
+*/
 bool CIplStore::LoadIpl(int32 iplSlotIndex, uint8* data, int32 dataSize) {
     return plugin::CallAndReturn<bool, 0x406080, int32, uint8*, int32>(iplSlotIndex, data, dataSize);
 }
 
-// 0x405C00
+/*!
+* @addr 0x405C00
+*/
 bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, uint8* data, int32 dataSize) {
     return plugin::CallAndReturn<bool, 0x405C00, int32, uint8*, int32>(iplSlotIndex, data, dataSize);
 }
 
-// 0x405170
+/*!
+* @addr 0x405170
+*/
 void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
     plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
 }
 
-// 0x405720
+/*!
+* @addr 0x405720
+*/
 void CIplStore::RemoveAllIpls() {
     plugin::Call<0x405720>();
 }
 
-// 0x404B20
+/*!
+* @addr 0x404B20
+*/
 void CIplStore::RemoveIpl(int32 iplSlotIndex) {
     plugin::Call<0x404B20, int32>(iplSlotIndex);
 }
 
-// 0x405890
+/*!
+* @addr 0x405890
+*/
 void CIplStore::RemoveIplAndIgnore(int32 iplSlotIndex) {
     plugin::Call<0x405890, int32>(iplSlotIndex);
 }
 
-// 0x405B60
+/*!
+* @addr 0x405B60
+*/
 void CIplStore::RemoveIplSlot(int32 iplSlotIndex) {
     plugin::Call<0x405B60, int32>(iplSlotIndex);
 }
 
-// 0x4058D0
+/*!
+* @addr 0x4058D0
+*/
 void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
     plugin::Call<0x4058D0, int32>(iplSlotIndex);
 }
 
-// 0x405110
+/*!
+* @addr 0x405110
+*/
 void CIplStore::RemoveRelatedIpls(int32 entityArraysIndex) {
     plugin::Call<0x405110, int32>(entityArraysIndex);
 }
 
-// 0x405850
+/*!
+* @addr 0x405850
+*/
 void CIplStore::RequestIplAndIgnore(int32 iplSlotIndex) {
     plugin::Call<0x405850, int32>(iplSlotIndex);
 }
 
-// 0x405520
+/*!
+* @addr 0x405520
+*/
 void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
     plugin::Call<0x405520, const CVector&, int32>(posn, playerNumber);
 }
 
-// 0x404700
+/*!
+* @addr 0x404700
+*/
 void CIplStore::SetIplsRequired(const CVector& posn, int32 playerNumber) {
     plugin::Call<0x404700, const CVector&, int32>(posn, playerNumber);
 }
 
-// 0x404A90
+/*!
+* @addr 0x404A90
+*/
 void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
     plugin::Call<0x404A90, int32, bool>(iplSlotIndex, isInterior);
 }
 
-// 0x404DE0
+/*!
+* @addr 0x404DE0
+*/
 int32 CIplStore::SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances) {
     return plugin::CallAndReturn<int32, 0x404DE0, const char*, int32, CEntity**>(iplName, entityArraysIndex, instances);
 }
 
-// 0x4045F0
+/*!
+* @addr 0x4045F0
+*/
 void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
     plugin::Call<0x4045F0, const CVector2D&, void*>(posn, data);
 }
 
-// 0x404660
+/*!
+* @addr 0x404660
+*/
 void SetIfIplIsRequired(const CVector2D& posn, void* data) {
     plugin::Call<0x404660, const CVector2D&, void*>(posn, data);
 }
 
-// 0x404690
+/*!
+* @addr 0x404690
+*/
 void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
     plugin::Call<0x404690, const CVector2D&, void*>(posn, data);
 }
