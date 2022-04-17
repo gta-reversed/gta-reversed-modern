@@ -95,7 +95,7 @@ void CSkidmarks::RegisterOne(uint32 index, const CVector& posn, float dirX, floa
     if (bloodState)
         RegisterOne(index, posn, dirX, dirY, eSkidMarkType::BLOODY, bloodState, length);
     else
-        RegisterOne(index, posn, dirX, dirY, isSandy ? eSkidMarkType::SANDY : eSkidMarkType::DEFALT, bloodState, length);
+        RegisterOne(index, posn, dirX, dirY, isSandy ? eSkidMarkType::SANDY : eSkidMarkType::DEFAULT, bloodState, length);
 }
 
 // NOTSA

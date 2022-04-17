@@ -206,7 +206,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
         CVector creatorPos = FindPlayerCoors();
         CPad* creatorPad = CPad::GetPad(shooter->m_nPedType);
 
-        creatorPad->StartShake_Distance(240, 128, creatorPos.x, creatorPos.y, creatorPos.z);
+        creatorPad->StartShake_Distance(240, 128, creatorPos);
         CamShakeNoPos(&TheCamera, 0.2f);
     }
 
@@ -519,8 +519,10 @@ bool CWeapon::Fire(CEntity* firingEntity, CVector* origin, CVector* muzzlePosn, 
 }
 
 CWeaponInfo& CWeapon::GetWeaponInfo(CPed* owner) {
-    const eWeaponSkill skill = owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD;
+    return GetWeaponInfo(owner ? owner->GetWeaponSkill(m_nType) : eWeaponSkill::STD);
+}
 
+CWeaponInfo& CWeapon::GetWeaponInfo(eWeaponSkill skill) {
     return *CWeaponInfo::GetWeaponInfo(m_nType, skill);
 }
 

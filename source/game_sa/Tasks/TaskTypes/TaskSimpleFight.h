@@ -66,6 +66,8 @@ public:
     static CMeleeInfo* m_aComboData; // m_aComboData[12];
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_FIGHT_CTRL;
+
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;
 

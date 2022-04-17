@@ -4,13 +4,13 @@
 
 class CTaskComplexInAirAndLand : public CTaskComplex {
 public:
-    uint8 m_bUsingJumpGlide;
-    uint8 m_bUsingFallGlide;
-    uint8 m_bInvalidClimb;
-    uint8 _pad;
-
+    bool m_bUsingJumpGlide;
+    bool m_bUsingFallGlide;
+    bool m_bInvalidClimb;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_IN_AIR_AND_LAND;
+
     CTaskComplexInAirAndLand(bool bUsingJumpGlide, bool bUsingFallGlide);
     ~CTaskComplexInAirAndLand() override {}
 

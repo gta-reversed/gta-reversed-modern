@@ -8,6 +8,7 @@
 
 #include "AEUserRadioTrackManager.h"
 #include "AEAudioUtility.h"
+#include "LoadingScreen.h"
 
 CAudioEngine& AudioEngine = *(CAudioEngine*)0xB6BC90;
 
@@ -358,7 +359,7 @@ void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn
 }
 
 // 0x506EE0
-void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, CVector& posn) {
+void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn) {
     m_CollisionAE.ReportGlassCollisionEvent(glassSoundType, posn, 0);
 }
 

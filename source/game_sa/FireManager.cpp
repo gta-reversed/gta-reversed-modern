@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "FireManager.h"
+#include "TheScripts.h"
 
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
@@ -352,7 +353,7 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
 
     if (auto fire = GetNextFreeFire(true)) {
         fire->Start(pos, (float)nStrength, target, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
-        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), 5);
+        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), SCRIPT_THING_FIRE);
     }
     return -1;
 }

@@ -9,6 +9,8 @@ public:
     CPed* m_persecuted;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_POLICE_PURSUIT;
+
     CTaskComplexPolicePursuit();
     ~CTaskComplexPolicePursuit() override;
 

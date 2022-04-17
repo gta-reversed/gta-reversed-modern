@@ -296,8 +296,7 @@ public:
     static int32 GetNextFileOnCd(uint32 streamLastPosn, bool bNotPriority);
     static bool HasSpecialCharLoaded(int32 slot);
     static bool HasVehicleUpgradeLoaded(int32 modelId);
-    static void IHaveUsedStreamingMemory() {};
-    static void ImGonnaUseStreamingMemory() {};
+
     static void Init();
     static void Init2();
     static void InitImageList();
@@ -345,7 +344,6 @@ public:
     static bool RemoveLoadedZoneModel();
     static void RemoveModel(int32 modelId);
     static void RemoveTxdModel(int32 modelId);
-    //! does nothing (NOP)
     static void RemoveUnusedModelsInLoadedList();
     static void RenderEntity(CLink<CEntity*>* streamingLink);
     static void RequestBigBuildings(const CVector& point);
@@ -369,7 +367,6 @@ public:
     static void SetModelIsDeletable(int32 modelId);
     static void SetModelTxdIsDeletable(int32 modelId);
     static void SetModelAndItsTxdDeletable(int32 modelId);
-    //! unused
     static void SetSpecialCharIsDeletable(int32 slot);
     static void Shutdown();
     static void StartRenderEntities();
@@ -388,6 +385,10 @@ public:
     //! unused
     static void UpdateForAnimViewer();
     static bool WeAreTryingToPhaseVehicleOut(int32 modelId);
+
+    static void UpdateMemoryUsed();
+    static void IHaveUsedStreamingMemory();
+    static void ImGonnaUseStreamingMemory();
 
     // Inlined or NOTSA
     static bool IsModelLoaded(int32 model) { return ms_aInfoForModel[model].m_nLoadState == eStreamingLoadState::LOADSTATE_LOADED; }

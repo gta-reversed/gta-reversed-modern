@@ -1,7 +1,6 @@
 #include "StdInc.h"
 
 #include "CDebugMenu.h"
-#include "Utility.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -10,7 +9,7 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
-#include <sstream>
+#include <extensions/ScriptCommands.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -24,6 +23,9 @@
 #include "toolsmenu\DebugModules\HooksDebugModule.h"
 #include "toolsmenu\DebugModules\CTeleportDebugModule.h"
 #include "toolsmenu\DebugModules\FXDebugModule.h"
+#include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
+
+#include "TaskComplexUseGoggles.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -71,7 +73,7 @@ void CDebugMenu::LoadMouseSprite() {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
         CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+        m_mouseSprite.SetTexture("mouse", "mousea");
     } else {
         printf("Failed to load fronten_pc.txd\n");
     }
@@ -184,7 +186,7 @@ void CDebugMenu::ImGuiDrawMouse() {
 }
 
 bool showPlayerInfo;
-void CDebugMenu::ShowPlayerInfo() {
+void ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
 
@@ -192,16 +194,16 @@ void CDebugMenu::ShowPlayerInfo() {
     if (!player)
         return;
 
-    ImGui::Begin("Player Information");
+    ImGui::Begin("Player Information", &showPlayerInfo, ImGuiWindowFlags_NoTitleBar);
 
-    auto playerPos = player->GetPosition();
+    auto& playerPos = player->GetPosition();
     float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
     ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
 
     ImGui::End();
 }
 
-void CDebugMenu::ProcessRenderTool() {
+void ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
         FXDebugModule::ProcessImgui();
     }
@@ -213,7 +215,7 @@ void CDebugMenu::ProcessRenderTool() {
 #ifdef EXTRA_DEBUG_FEATURES
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlussion")) {
+        if (ImGui::BeginTabItem("Occlusion")) {
             COcclusionDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
@@ -238,10 +240,30 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
             ImGui::EndTabItem();
         }
 
+        if (ImGui::BeginTabItem("Pools")) {
+            PoolsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
         ImGui::EndTabBar();
     }
 }
 #endif
+
+void SpawnTab() {
+    if (ImGui::BeginTabBar("")) {
+        if (ImGui::BeginTabItem("Ped")) {
+            PedDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Vehicle")) {
+            VehicleDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+    }
+    ImGui::EndTabBar();
+}
 
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
@@ -261,13 +283,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
         }
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
-            if (ImGui::BeginTabItem("Peds")) {
-                //ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                PedDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Vehicles")) {
-                VehicleDebugModule::ProcessImgui();
+            if (ImGui::BeginTabItem("Spawn")) {
+                SpawnTab();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Cheats")) {
@@ -287,10 +304,11 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
+                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
-#ifdef EXTRA_DEBUG_FEATURES
+                ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
-#endif
                 if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }
@@ -305,21 +323,35 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
+
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+        return;
+
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
         CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
+    if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
+    }
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
+    if (pad->IsStandardKeyJustDown('4')) {
+        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
+        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+    }
+    if (pad->IsStandardKeyJustDown('5')) {
+        CVector pos{};
+        Command<COMMAND_GET_PLAYER_COORDINATES>(0, &pos.x, &pos.y, &pos.z);
+        printf("%f %f %f\n", pos.x, pos.y, pos.z);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
-    auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
-    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
+    CPad* pad = CPad::GetPad();
+    // CTRL + M or F7
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }
@@ -327,7 +359,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
@@ -337,6 +369,7 @@ void CDebugMenu::ImguiDrawLoop() {
     ImguiDisplayFramePerSecond();
     HooksDebugModule::ProcessRender();
     FXDebugModule::ProcessRender();
+    TeleportDebugModule::ProcessInput();
 
     ImGui::EndFrame();
     ImGui::Render();

@@ -14,7 +14,6 @@ public:
     int32  m_nInterval;
     bool   m_bStarted;
     bool   m_bStopped;
-    char   _pad[2];
 
 public:
     static void InjectHooks();

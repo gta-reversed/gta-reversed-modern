@@ -42,7 +42,7 @@ public:
     void RemoveAll();
 
     // Get number of items in the list
-    uint32 GetNumItems();
+    uint32 GetNumItems() const;
 
     // Append item to the list
     void AppendItem(ListItem_c* item);

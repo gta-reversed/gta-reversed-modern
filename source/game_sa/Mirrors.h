@@ -40,4 +40,5 @@ public:
 
     // NOTSA
     static bool IsEitherScreenVisibleToCam();
+    static bool ShouldRenderPeds();
 };

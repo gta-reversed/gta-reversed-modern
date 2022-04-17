@@ -30,14 +30,14 @@ bool WaterCreature_c::Init(int32 nType, CVector* vecPos, WaterCreature_c* parent
         vecPos->z = CGeneral::GetRandomNumberInRange(fMinZ, fMaxZ);
     }
 
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     m_pObject = new CObject(*info.m_pModelId, false);
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (!m_pObject)
         return false;
 
-    m_pObject->m_nAreaCode = CGame::currArea;
+    m_pObject->m_nAreaCode = static_cast<eAreaCodes>(CGame::currArea);
     m_pObject->SetIsStatic(true);
     m_pObject->m_bUnderwater = true;
     m_pObject->physicalFlags.bApplyGravity = false;

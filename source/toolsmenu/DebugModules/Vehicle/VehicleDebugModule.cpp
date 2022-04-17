@@ -232,31 +232,31 @@ void Initialise() {
 }
 
 static void Spawn_RC_Cars() {
-    CPad* pad = CPad::GetPad(0);
     auto player = FindPlayerPed();
-    if (player) {
-        int32_t vehicleId = -1;
+    if (!player)
+        return;
 
-        if (pad->IsStandardKeyJustDown('1'))
-            vehicleId = MODEL_RCBANDIT;
-        else if (pad->IsStandardKeyJustDown('2'))
-            vehicleId = MODEL_RCTIGER;
-        else if (pad->IsStandardKeyJustDown('3'))
-            vehicleId = MODEL_RCBARON;
+    CPad* pad = CPad::GetPad(0);
+    int32 vehicleId = MODEL_INVALID;
+    if (pad->IsStandardKeyJustDown('1'))
+        vehicleId = MODEL_RCBANDIT;
+    else if (pad->IsStandardKeyJustDown('2'))
+        vehicleId = MODEL_RCTIGER;
+    else if (pad->IsStandardKeyJustDown('3'))
+        vehicleId = MODEL_RCBARON;
 
-        if (vehicleId != -1) {
-            CStreaming::RequestModel(vehicleId, STREAMING_GAME_REQUIRED);
-            CStreaming::LoadAllRequestedModels(false);
-            CVector pos = player->GetPosition() + CVector(2.0f, 1.0f, 1.0f);
-            CRemote::GivePlayerRemoteControlledCar(pos, player->GetHeading(), vehicleId);
-            CVehicle::bDisableRemoteDetonation = true;
-            CVehicle::bDisableRemoteDetonationOnContact = true;
-            printf("spawned rc car\n");
-        }
+    if (vehicleId != MODEL_INVALID) {
+        CStreaming::RequestModel(vehicleId, STREAMING_GAME_REQUIRED);
+        CStreaming::LoadAllRequestedModels(false);
+        CVector pos = player->GetPosition() + CVector(2.0f, 1.0f, 1.0f);
+        CRemote::GivePlayerRemoteControlledCar(pos, player->GetHeading(), vehicleId);
+        CVehicle::bDisableRemoteDetonation = true;
+        CVehicle::bDisableRemoteDetonationOnContact = true;
+        printf("spawned rc car\n");
     }
 }
 
-void ProcessImgui() {
+void ProcessImGui() {
     ImGui::PushItemWidth(465.0f);
     bool reclaim_focus = false;
     ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
@@ -272,7 +272,7 @@ void ProcessImgui() {
 
     m_vehicleToolInput.Process();
 
-    ImGui::BeginChild("##vehiclestool", ImVec2(0, 310));
+    ImGui::BeginChild("##vehiclestool", ImVec2(0, 280));
     const auto w = ImGui::GetWindowWidth();
     static bool widthSet = false;
     ImGui::Columns(2);
@@ -286,10 +286,8 @@ void ProcessImgui() {
     ImGui::TextUnformatted("Name");
     ImGui::NextColumn();
     ImGui::Separator();
-    static int32 selectedId = -1;
-    for (const auto& x : m_vehicleToolInput.GetGridListMap()) {
-        const int32 id = x.first;
-        const std::string& name = x.second;
+    static int32 selectedId = MODEL_INVALID;
+    for (const auto& [id, name] : m_vehicleToolInput.GetGridListMap()) {
         ImGui::PushID(id);
 
         ImGui::Text("%i", id);
@@ -297,7 +295,7 @@ void ProcessImgui() {
         if (ImGui::Selectable(name.c_str(), selectedId == id, ImGuiSelectableFlags_SpanAllColumns)) {
             selectedId = id;
         }
-        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != -1)
+        if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(0) && selectedId != MODEL_INVALID)
             CCheat::VehicleCheat(static_cast<eModelID>(selectedId));
         ImGui::NextColumn();
         ImGui::PopID();
@@ -307,7 +305,7 @@ void ProcessImgui() {
     ImGui::Separator();
 
     ImGui::SetCursorPosX(117);
-    if (ImGui::Button("SPAWN VEHICLE", ImVec2(250, 0)) && selectedId != -1) {
+    if (ImGui::Button("SPAWN VEHICLE", ImVec2(250, 0)) && selectedId != MODEL_INVALID) {
         CCheat::VehicleCheat(static_cast<eModelID>(selectedId));
     }
 }

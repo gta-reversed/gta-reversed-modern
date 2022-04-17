@@ -10,10 +10,10 @@ void CEventGunShot::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC610);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2CD0);
-    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4AC810);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AC780);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B6B20);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2CD0);
+    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4AC810);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AC780);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6B20);
 }
 
 // 0x4AC610
@@ -23,14 +23,12 @@ CEventGunShot::CEventGunShot(CEntity* entity, CVector startPoint, CVector endPoi
     m_endPoint = endPoint;
     m_entity = entity;
     m_bHasNoSound = bHasNoSound;
-    if (m_entity)
-        m_entity->RegisterReference(&m_entity);
+    CEntity::SafeRegisterRef(m_entity);
 }
 
 CEventGunShot::~CEventGunShot()
 {
-    if (m_entity)
-        m_entity->CleanUpOldReference(&m_entity);
+    CEntity::SafeCleanUpRef(m_entity);
 }
 
 CEventGunShot* CEventGunShot::Constructor(CEntity* entity, CVector startPoint, CVector endPoint, bool bHasNoSound)

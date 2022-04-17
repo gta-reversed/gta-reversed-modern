@@ -16,6 +16,8 @@ class CTaskSimpleLand : public CTaskSimple {
     };
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_LAND;
+
     CTaskSimpleLand(AnimationId nAnimId);
     ~CTaskSimpleLand() override;
 

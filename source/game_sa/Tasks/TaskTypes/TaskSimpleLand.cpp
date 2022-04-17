@@ -10,8 +10,8 @@ void CTaskSimpleLand::InjectHooks()
     RH_ScopedInstall(LeftFootLanded, 0x679010);
     RH_ScopedInstall(RightFootLanded, 0x678FE0);
     RH_ScopedInstall(FinishAnimCB, 0x678FA0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x678F40);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67D380);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678F40);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67D380);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)

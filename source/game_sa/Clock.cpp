@@ -58,13 +58,13 @@ void CClock::Initialise(uint32 millisecondsPerGameMinute) {
  * @addr  0x52CF10
  */
 void CClock::Update() {
-    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK]) {
-        if (!CCheat::m_aCheatsActive[CHEAT_ALWAYS_MIDNIGHT] && !CCheat::m_aCheatsActive[CHEAT_STOP_GAME_CLOCK_ORANGE_SKY]) {
+    if (ms_nMillisecondsPerGameMinute < (CTimer::GetTimeInMS() - ms_nLastClockTick) || CCheat::IsActive(CHEAT_FASTER_CLOCK)) {
+        if (!CCheat::IsActive(CHEAT_ALWAYS_MIDNIGHT) && !CCheat::IsActive(CHEAT_STOP_GAME_CLOCK_ORANGE_SKY)) {
             // next minute
             ms_nGameClockMinutes++;
             ms_nLastClockTick += ms_nMillisecondsPerGameMinute;
 
-            if (CCheat::m_aCheatsActive[CHEAT_FASTER_CLOCK])
+            if (CCheat::IsActive(CHEAT_FASTER_CLOCK))
                 ms_nLastClockTick = CTimer::GetTimeInMS();
 
             // next hour
@@ -88,7 +88,7 @@ void CClock::Update() {
                     if (ms_nGameClockDays >= daysInMonth[ms_nGameClockMonth - 1]) {
                         ms_nGameClockDays = 1;
                         if (++ms_nGameClockMonth > 12u)
-                                ms_nGameClockMonth = 1;
+                            ms_nGameClockMonth = 1;
                     }
                 }
             }

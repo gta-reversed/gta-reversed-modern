@@ -11,7 +11,7 @@ bool& CEntryExitManager::ms_bDisabled = *reinterpret_cast<bool*>(0x96A7C8);
 int32& CEntryExitManager::ms_exitEnterState = *reinterpret_cast<int32*>(0x96A7CC);
 CQuadTreeNode*& CEntryExitManager::mp_QuadTree = *reinterpret_cast<CQuadTreeNode**>(0x96A7D0);
 CEntryExit*& CEntryExitManager::mp_Active = *reinterpret_cast<CEntryExit**>(0x96A7D4);
-CPool<CEntryExit>*& CEntryExitManager::mp_poolEntryExits = *reinterpret_cast<CPool<CEntryExit>**>(0x96A7D8);
+CEntryExitsPool*& CEntryExitManager::mp_poolEntryExits = *reinterpret_cast<CEntryExitsPool**>(0x96A7D8);
 uint32& CEntryExitManager::ms_numVisibleEntities = *reinterpret_cast<uint32*>(0x96A7DC);
 // ms_entryExitStack? 0x96A718 = a * 10.0f; float a = 1.0f / (50.0f * 50.0f);
 

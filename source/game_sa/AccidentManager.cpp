@@ -45,7 +45,7 @@ void CAccidentManager::ReportAccident(CPed* ped)
             m_Accidents[slotIndex].m_pPed = ped;
             m_Accidents[slotIndex].m_bIsTreated = false;
             m_Accidents[slotIndex].m_bIsRevived = false;
-            ped->RegisterReference(reinterpret_cast<CEntity * *>(&m_Accidents[slotIndex].m_pPed));
+            ped->RegisterReference(reinterpret_cast<CEntity**>(&m_Accidents[slotIndex].m_pPed));
         }
     }
 }

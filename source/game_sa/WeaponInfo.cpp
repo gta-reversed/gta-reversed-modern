@@ -39,7 +39,7 @@ void CWeaponInfo::Initialise() {
         info.m_eAnimGroup = ANIM_GROUP_DEFAULT;
         info.m_nAmmoClip = 0;
         info.m_nSkillLevel = 1;
-        info.m_fReqStatLevel = 0.0f;
+        info.m_nReqStatLevel = 0;
         info.m_fAccuracy = 1.0f;
         info.m_fMoveSpeed = 1.0f;
         info.m_fAnimLoopStart = 0.0f;
@@ -98,7 +98,7 @@ bool CWeaponInfo::WeaponHasSkillStats(eWeaponType type) {
 }
 
 uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skill) {
-    const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL);
+    const auto numWeaponsWithSkill = (WEAPON_TEC9 - WEAPON_PISTOL) + 1;
     switch (skill) {
     case eWeaponSkill::POOR:
         return (uint32)weaponType + 25u + 0 * numWeaponsWithSkill;
@@ -110,7 +110,7 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
         return (uint32)weaponType + 25u + 2 * numWeaponsWithSkill;
     }
     assert(0); // Something went wrong
-    return 47;
+    return WEAPON_LAST_WEAPON;
 }
 
 auto GetBaseComboByName(const char* name) {
@@ -205,7 +205,7 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nDamage = dmg;
             wi.m_vecFireOffset = offset;
             wi.m_nSkillLevel = (uint32)skillLevel;
-            wi.m_fReqStatLevel = reqStatLevelForSkill;
+            wi.m_nReqStatLevel = reqStatLevelForSkill;
             wi.m_fAccuracy = accuracy;
             wi.m_fMoveSpeed = moveSpeed;
             wi.m_fBreakoutTime = (float)breakoutTime / 30.f;
@@ -319,20 +319,22 @@ CWeaponInfo* CWeaponInfo::GetWeaponInfo(eWeaponType weaponID, eWeaponSkill skill
 }
 
 // 0x743CD0
-int32 CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
-    if (!WeaponHasSkillStats(weaponType))
-        return -1;
+eStats CWeaponInfo::GetSkillStatIndex(eWeaponType weaponType) {
+    if (!WeaponHasSkillStats(weaponType)) {
+        assert(0);
+        return (eStats)-1;
+    }
 
     if (weaponType <= WEAPON_M4)
-        return weaponType - WEAPON_PISTOL + STAT_PISTOL_SKILL;
+        return (eStats)(weaponType - WEAPON_PISTOL + STAT_PISTOL_SKILL);
 
     if (weaponType == WEAPON_TEC9)
-        return STAT_MACHINE_PISTOL_SKILL;
+        return (eStats)STAT_MACHINE_PISTOL_SKILL;
 
     if (weaponType == WEAPON_COUNTRYRIFLE)
-        return STAT_GAMBLING;
+        return (eStats)STAT_GAMBLING;
 
-    return weaponType + STAT_PISTOL_SKILL;
+    return (eStats)(weaponType + STAT_PISTOL_SKILL);
 }
 
 // 0x743D10

@@ -3,6 +3,7 @@
 #include "EventVehicleToSteal.h"
 
 #include "TaskComplexEnterCar.h"
+#include "TheScripts.h"
 
 void CEventVehicleToSteal::InjectHooks()
 {
@@ -10,20 +11,18 @@ void CEventVehicleToSteal::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF670);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AF760);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AF760);
 }
 
 CEventVehicleToSteal::CEventVehicleToSteal(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleToSteal::~CEventVehicleToSteal()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4AF670

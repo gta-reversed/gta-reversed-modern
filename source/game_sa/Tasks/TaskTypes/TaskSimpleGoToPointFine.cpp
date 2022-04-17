@@ -8,9 +8,9 @@ void CTaskSimpleGoToPointFine::InjectHooks()
     RH_ScopedClass(CTaskSimpleGoToPointFine);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x65EEB0);
-    RH_ScopedInstall(Clone_Reversed, 0x662040);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x663500);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x663540);
+    RH_ScopedVirtualInstall(Clone, 0x662040);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x663500);
+    RH_ScopedVirtualInstall(ProcessPed, 0x663540);
     RH_ScopedInstall(SetBlendedMoveAnim, 0x65EF80);
     RH_ScopedInstall(Finish, 0x65EF00);
     RH_ScopedInstall(SetTargetPos, 0x65F330);

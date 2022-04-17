@@ -25,10 +25,10 @@ public:
 };
 VALIDATE_SIZE(CAnimSequenceChildFrameCompressed, 0xA);
 
-class CAnimSequenceRootFrameUncompressed {
+class CAnimSequenceRootFrameUncompressed { // TODO: Should just inherit from `CAnimSequenceChildFrameUncompressed`
 public:
     CQuaternion m_quat;
-    float       m_fTime;
+    float       m_fTime; // Relative to previous key frame
     CVector     m_vecTranslation;
 };
 VALIDATE_SIZE(CAnimSequenceRootFrameUncompressed, 0x20);
@@ -36,6 +36,6 @@ VALIDATE_SIZE(CAnimSequenceRootFrameUncompressed, 0x20);
 class CAnimSequenceChildFrameUncompressed {
 public:
     CQuaternion m_quat;
-    float       m_fTime;
+    float       m_fTime; // Relative to previous key frame
 };
 VALIDATE_SIZE(CAnimSequenceChildFrameUncompressed, 0x14);

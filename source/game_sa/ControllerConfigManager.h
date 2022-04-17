@@ -114,7 +114,7 @@ class CControllerConfigManager {
 public:
     char              field_0;
     char              field_1;
-    char              field_2;
+    char              m_prev;
     char              field_3;
     DIJOYSTATE2       m_prevPadState;
     DIJOYSTATE2       m_currPadState;

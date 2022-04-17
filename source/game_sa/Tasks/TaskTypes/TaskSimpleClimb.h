@@ -57,6 +57,8 @@ public:
     static float& ms_fMinForStretchGrab;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CLIMB;
+
     CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb);
     ~CTaskSimpleClimb() override;
 

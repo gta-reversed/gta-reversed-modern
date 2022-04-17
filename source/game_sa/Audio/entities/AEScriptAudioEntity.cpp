@@ -67,7 +67,7 @@ void CAEScriptAudioEntity::PlayMissionBankSound(uint8 sampleId, CVector& posn, C
 
 // 0x4EC550
 void CAEScriptAudioEntity::PlayResidentSoundEvent(int16 a1, int16 a2, int16 a3, uint16 a4, CVector& posn, CPhysical* physical, float a7, float a8, int16 a9, float a10) {
-    plugin::CallMethod<0x4EC550, CAEScriptAudioEntity*, int16, int16, int16, uint16, CVector, CPhysical*, float, float, int16, float>(this, a1, a2, a3, a4, posn, physical, a7, a8, a9, a10);
+    plugin::CallMethod<0x4EC550, CAEScriptAudioEntity*, int16, int16, int16, uint16, CVector&, CPhysical*, float, float, int16, float>(this, a1, a2, a3, a4, posn, physical, a7, a8, a9, a10);
 }
 
 // 0x4EC270
@@ -131,7 +131,7 @@ void CAEScriptAudioEntity::InjectHooks() {
     // RH_ScopedInstall(ProcessMissionAudioEvent, 0x4ECCF0);
     // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "1", 0x4EE960, void (CAEScriptAudioEntity::*)(eAudioEvents, CPhysical*, float, float));
     // RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "2", 0x4EE940, void (CAEScriptAudioEntity::*)(eAudioEvents, CVector&));
-    // RH_ScopedInstall(UpdateParameters_Reversed, 0x4EC970);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x4EC970);
 }
 
 CAEScriptAudioEntity* CAEScriptAudioEntity::Constructor() {
