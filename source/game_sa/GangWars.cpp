@@ -71,7 +71,7 @@ void CGangWars::InjectHooks() {
     // RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
     // RH_ScopedInstall(TellGangMembersTo, 0x444530);
-    // RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
+    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
     // RH_ScopedInstall(Update, 0x446610);
     // RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0);
 }
@@ -358,7 +358,14 @@ void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
 // fix_bugs: originally has int32 type, but changed to unsigned due possible UB 
 // 0x443D50
 void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags) {
-    plugin::Call<0x443D50, uint32*>(GangsBitFlags);
+    if (State2 == NO_ATTACK)
+        return;
+
+    auto coors = FindPlayerCoors();
+    CVector2D delta = { coors.x - PointOfAttack.x, coors.y - PointOfAttack.y };
+
+    if (delta.Magnitude() < 150.0f)
+        *GangsBitFlags |= 1 << Gang1;
 }
 
 // 0x446610
