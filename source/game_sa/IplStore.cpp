@@ -41,7 +41,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
     //RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
     //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
-    //RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
+    RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
     //RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
     //RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
     //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
@@ -124,7 +124,7 @@ void CIplStore::ClearIplsNeededAtPosn() {
 
 // 0x404D30
 void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
-    plugin::Call<0x404D30, int32, bool>(iplSlotIndex, enable);
+    GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming = !enable;
 }
 
 // 0x4053F0

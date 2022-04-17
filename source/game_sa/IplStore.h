@@ -59,7 +59,10 @@ public:
     static int32 SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances);
 
     // 0x59EB20
-    inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return ms_pPool->GetAt(iplSlotIndex)->m_bDisableDynamicStreaming; }
+    inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming; }
+
+    // NOTSA
+    static IplDef* GetInSlot(int32 slot) { return *ms_pPool->GetAt(slot); }
 };
 
 extern uint32 MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
