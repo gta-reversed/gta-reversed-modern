@@ -213,6 +213,9 @@ const char* CIplStore::GetIplName(int32 iplSlotIndex) { // No xrefs
 
 /*!
 * @addr 0x404780
+* @brief Make a new `CEntity*[entitiesCount]` array
+* @returns The index of the array in `IplEntityIndexArrays`
+* @param entitiesCount Size of `CEntity*` array
 */
 int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
     const auto idx = NumIplEntityIndexArrays++;
