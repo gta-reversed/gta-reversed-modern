@@ -38,7 +38,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(HaveIplsLoaded, 0x405600);
     //RH_ScopedGlobalInstall(RequestIpls, 0x405520);
     //RH_ScopedGlobalInstall(Save, 0x5D5420);
-    //RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
+    RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
     //RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
     //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
     RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
@@ -127,9 +127,53 @@ void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
     GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming = !enable;
 }
 
-// 0x4053F0
+/*!
+* @addr 0x4053F0
+* @brief Make sure all IPls that requested around posn (in a 190 unit cirlce) are loaded.
+*/
 void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
-    plugin::Call<0x4053F0, const CVector&>(posn);
+    if (CStreaming::ms_disableStreaming) {
+        return;
+    }
+
+    // Simplified this bit a little.. Originally it was something like.. ((FindPlayerPed() ? FindPlayerPed().m_nAreaCode : CGame::currArea) == CGame::currArea)
+    // I suspect the function to get the area code was inlined..
+    if (const auto pp = FindPlayerPed()) {
+        if (pp->m_nAreaCode != CGame::currArea) {
+            return;
+        }
+    }
+
+    SetIplsRequired(posn);
+
+    for (auto slot = 1/*notice*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+        const auto def = GetInSlot(slot);
+        if (!def) {
+            continue;
+        }
+
+        if (def->m_bDisableDynamicStreaming || !def->m_bLoadRequest) {
+            continue;
+        }
+
+        if (!def->m_boundBox.IsPointInside(posn, -190.f) || CStreaming::IsModelLoaded(IPLToModelId(slot))) {
+            continue;
+        }
+
+        // Load IPL
+
+        CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
+
+        if (TheCamera.GetScreenFadeStatus() == 0) {
+            FrontEndMenuManager.MessageScreen("LOADCOL", false, false);
+        }
+
+        CTimer::Suspend();
+        CStreaming::LoadAllRequestedModels(true);
+        CTimer::Resume();
+
+        def->m_bLoadRequest = false;
+    }
 }
 
 // 0x404AC0

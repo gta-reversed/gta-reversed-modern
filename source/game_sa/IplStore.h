@@ -38,7 +38,7 @@ public:
     static char* GetIplName(int32 iplSlotIndex);
     // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
-    static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber);
+    static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber = -1);
     static void IncludeEntity(int32 iplSlotIndex, CEntity* entity);
     static void Save();
     static void Load();
@@ -53,8 +53,8 @@ public:
     static void RemoveIplWhenFarAway(int32 iplSlotIndex);
     static void RemoveRelatedIpls(int32 entityArraysIndex);
     static void RequestIplAndIgnore(int32 iplSlotIndex);
-    static void RequestIpls(const CVector& posn, int32 playerNumber);
-    static void SetIplsRequired(const CVector& posn, int32 playerNumber);
+    static void RequestIpls(const CVector& posn, int32 playerNumber = -1);
+    static void SetIplsRequired(const CVector& posn, int32 playerNumber = -1);
     static void SetIsInterior(int32 iplSlotIndex, bool isInterior);
     static int32 SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances);
 
@@ -62,7 +62,7 @@ public:
     inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming; }
 
     // NOTSA
-    static IplDef* GetInSlot(int32 slot) { return *ms_pPool->GetAt(slot); }
+    static IplDef* GetInSlot(int32 slot) { return ms_pPool->GetAt(slot); }
 };
 
 extern uint32 MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
