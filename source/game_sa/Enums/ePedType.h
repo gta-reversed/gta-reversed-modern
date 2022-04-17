@@ -16,7 +16,7 @@ enum ePedType : uint32 {
     PED_TYPE_GANG6,         // Mafia
     PED_TYPE_GANG7,         // Mountain Cloud Triad
     PED_TYPE_GANG8,         // Varrio Los Aztecas
-    PED_TYPE_GANG9,         // Russian Maffia
+    PED_TYPE_GANG9,         // Russian Mafia
     PED_TYPE_GANG10,        // Bikers
     PED_TYPE_DEALER,
     PED_TYPE_MEDIC,
