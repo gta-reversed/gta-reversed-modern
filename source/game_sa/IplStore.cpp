@@ -33,7 +33,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
     //RH_ScopedGlobalInstall(RemoveIplAndIgnore, 0x405890);
     //RH_ScopedGlobalInstall(RequestIplAndIgnore, 0x405850);
-    //RH_ScopedGlobalInstall(LoadAllRemainingIpls, 0x405780);
+    RH_ScopedGlobalInstall(LoadAllRemainingIpls, 0x405780);
     //RH_ScopedGlobalInstall(RemoveAllIpls, 0x405720);
     //RH_ScopedGlobalInstall(HaveIplsLoaded, 0x405600);
     //RH_ScopedGlobalInstall(RequestIpls, 0x405520);
@@ -268,7 +268,7 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
         break;
     }
     default: {
-        NOTSA_UNREACHABLE("Incorrect entity type");
+        NOTSA_UNREACHABLE(); // Incorrect entity type
     }
     }
 }
@@ -289,9 +289,24 @@ void CIplStore::Load() {
 
 /*!
 * @addr 0x405780
+* @brief Load remaining IPL defs (using the streamer)
 */
 void CIplStore::LoadAllRemainingIpls() {
-    plugin::Call<0x405780>();
+    for (auto&& [slot, def] : notsa::enumerate(ms_pPool->GetAllValid()) | rng::views::drop(1)) { // Skip first IPL
+        if (!def.m_boundBox.IsFlipped()) {
+            continue;
+        }
+
+        if (CColAccel::isCacheLoading()) {
+            def = CColAccel::getIplDef(slot);
+            def.field_2D = false;
+            ms_pQuadTree->AddItem(&def, def.m_boundBox);
+        } else {
+            CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
+            CStreaming::LoadAllRequestedModels(true);
+            CStreaming::RemoveModel(IPLToModelId(slot));
+        }
+    }
 }
 
 /*!
