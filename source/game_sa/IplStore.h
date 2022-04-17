@@ -35,7 +35,7 @@ public:
     static int32 FindIplSlot(const char* name);
     static CRect* GetBoundingBox(int32 iplSlotIndex);
     static CEntity** GetIplEntityIndexArray(int32 arrayIndex);
-    static char* GetIplName(int32 iplSlotIndex);
+    static const char* GetIplName(int32 iplSlotIndex);
     // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
     static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber = -1);
