@@ -18,7 +18,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(LoadIpl, 0x406080);
     RH_ScopedGlobalInstall(Shutdown, 0x405FA0);
     RH_ScopedGlobalInstall(Initialise, 0x405EC0);
-    //RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
+    RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
     //RH_ScopedGlobalInstall(RemoveIplSlot, 0x405B60);
     RH_ScopedGlobalInstall(AddIplSlot, 0x405AC0);
     //RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
@@ -311,7 +311,7 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
     if (def.m_boundBox.IsFlipped()) {
         // def.field_2D = true; // Moved to top
 
-        if (!LoadIplBoundingBox(iplSlotIndex, (uint8*)data, dataSize)) {
+        if (!LoadIplBoundingBox(iplSlotIndex, data, dataSize)) {
             return false;
         }
 
@@ -362,7 +362,7 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
             }
 
             const auto LineBeginsWith = [linesv = std::string_view{ l }](auto with) {
-                return linesv == with;
+                return linesv.starts_with(with);
             };
 
             if (!inSection) {
@@ -396,9 +396,77 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
 
 /*!
 * @addr 0x405C00
+* @brief Nearly 100% same as `LoadIpl`, but it modifies `ppCurrIplInstance`, and calculates bounding box of the IPL. Unsure honestly.
 */
-bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, uint8* data, int32 dataSize) {
-    return plugin::CallAndReturn<bool, 0x405C00, int32, uint8*, int32>(iplSlotIndex, data, dataSize);
+bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSize) {
+    auto& def = *GetInSlot(iplSlotIndex);
+
+    const auto pIPLLODEntities = def.m_nRelatedIpl != -1 ? IplEntityIndexArrays[def.m_nRelatedIpl] : nullptr;
+
+    // Anti copy-paste code helper.
+    // Finish loading an ObjectInstance
+    const auto FinishLoadObjInst = [&](CEntity* obj) {
+        obj->m_nIplIndex = (uint8)iplSlotIndex;
+
+        if (obj->m_nLodIndex == -1) {
+            obj->m_pLod = nullptr;
+        } else {
+            assert(pIPLLODEntities);
+            obj->m_pLod = pIPLLODEntities[obj->m_nLodIndex];
+            obj->m_pLod->m_nNumLodChildren++;
+
+            if (ppCurrIplInstance) {
+                *ppCurrIplInstance = obj;
+                ppCurrIplInstance++;
+            }
+        }
+
+        if (obj->GetModelInfo()->m_fDrawDistance > 150.f) {
+            def.field_31 = true;
+        }
+
+        obj->Add(); // Add it to the world
+
+        IncludeEntity(iplSlotIndex, obj);
+
+        CRect rect;
+        obj->GetBoundRect(&rect);
+        def.m_boundBox.Restrict(rect);
+    };
+
+    if (strncmp((char*)data, "bnry", 4u)) { // IPL in text format
+        bool inSection{};
+        for (auto l = CFileLoader::LoadLine(data, dataSize); l; l = CFileLoader::LoadLine(data, dataSize)) {
+            switch (l[0]) {
+            case 0:   // Empty line
+            case '#': // Comment
+                continue;
+            }
+
+            const auto LineBeginsWith = [linesv = std::string_view{ l }](auto with) {
+                return linesv.starts_with(with);
+            };
+
+            if (!inSection) {
+                inSection = LineBeginsWith("inst");
+                continue;
+            }
+
+            if (LineBeginsWith("end")) {
+                inSection = false;
+                continue;
+            }
+
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(l));     
+        }
+    } else { // Binary IPL
+        auto ipl = reinterpret_cast<tBinaryIplFile*>(data);
+        for (auto& inst : ipl->GetObjInstances()) {
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(&inst, nullptr));
+        }
+    }
+
+    return true;
 }
 
 /*!
