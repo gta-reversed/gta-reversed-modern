@@ -10,16 +10,6 @@
 #include "tBinaryIplFile.h"
 #include "extensions/enumerate.hpp"
 
-uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
-uint32 MAX_IPL_INSTANCES = 1000;
-
-CEntity** ppCurrIplInstance = (CEntity**)0x8E3EFC;
-uint32& NumIplEntityIndexArrays = *(uint32*)0x8E3F00;
-bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
-CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
-uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
-CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
-
 void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
     RH_ScopedCategoryGlobal();
@@ -91,7 +81,7 @@ void CIplStore::Shutdown() {
     delete ms_pPool;
     ms_pPool = nullptr;
 
-    for (auto a : std::span{ IplEntityIndexArrays, (size_t)NumIplEntityIndexArrays }) {
+    for (auto a : IplEntityIndexArrays | rng::views::take(NumIplEntityIndexArrays)) {
         delete a;
     }
     NumIplEntityIndexArrays = 0;

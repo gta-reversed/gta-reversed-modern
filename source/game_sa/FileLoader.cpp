@@ -2094,7 +2094,7 @@ void CFileLoader::LoadScene(const char* filename) {
     auto newIPLIndex{ -1 };
     if (gCurrIplInstancesCount > 0) {
         newIPLIndex = CIplStore::GetNewIplEntityIndexArray(gCurrIplInstancesCount);
-        std::ranges::copy(gCurrIplInstances, gCurrIplInstances + gCurrIplInstancesCount, CIplStore::GetIplEntityIndexArray(newIPLIndex));
+        rng::copy(gCurrIplInstances | std::views::take(gCurrIplInstancesCount), CIplStore::GetIplEntityIndexArray(newIPLIndex));
     }
     LinkLods(CIplStore::SetupRelatedIpls(filename, newIPLIndex, &gCurrIplInstances[gCurrIplInstancesCount]));
     CIplStore::RemoveRelatedIpls(newIPLIndex); // I mean this totally makes sense, doesn't it?

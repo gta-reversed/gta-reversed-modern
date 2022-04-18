@@ -65,16 +65,17 @@ public:
     static IplDef* GetInSlot(int32 slot) { return ms_pPool->GetAt(slot); }
 };
 
-extern uint32 MAX_IPL_ENTITY_INDEX_ARRAYS; // default 40
-extern uint32 MAX_IPL_INSTANCES;           // default 1000
+constexpr uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
+constexpr uint32 MAX_IPL_INSTANCES = 1000;
 
-extern CEntity** ppCurrIplInstance;
-extern uint32& NumIplEntityIndexArrays;
-static inline CEntity** (&IplEntityIndexArrays)[40] = *(CEntity * *(*)[40])0x8E3F08;
-extern bool& gbIplsNeededAtPosn;
-extern CVector& gvecIplsNeededAtPosn;
-extern uint32& gCurrIplInstancesCount;
-extern CEntity** gCurrIplInstances; // CEntity *gCurrIplInstances[1000]
+static inline CEntity**& ppCurrIplInstance = *(CEntity***)0x8E3EFC;
+static inline uint32& NumIplEntityIndexArrays = *(uint32*)0x8E3F00;
+static inline std::array<CEntity**, 40>& IplEntityIndexArrays = *(std::array<CEntity**, 40>*)0x8E3F08; // Array of CEntity* array pointers
+static inline bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
+static inline CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
+static inline uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
+static inline std::array<CEntity*, 1000>& gCurrIplInstances = *(std::array<CEntity*, 1000>*)0xBCC0E0;
+
 
 void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data);
 void SetIfIplIsRequired(const CVector2D& posn, void* data);
