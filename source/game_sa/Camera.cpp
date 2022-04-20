@@ -676,47 +676,49 @@ void CCamera::InitialiseScriptableComponents() {
 
 // 0x50B5D0
 void CCamera::ProcessFade() {
-    if (m_bFading) {
-        if (m_nFadeInOutFlag == 1) {
-            if (m_fFadeDuration == 0) {
-                m_fFadeAlpha = 0.0f;
-            } else {
-                m_fFadeAlpha -= CTimer::ms_fTimeStep * 0.02 / m_fFadeDuration * 255.0f;
-            }
+    if (!m_bFading) {
+        return;
+    }
 
-            if (m_fFadeAlpha > 0) {
-                CDraw::FadeValue = m_fFadeAlpha;
-                return;
-            }
-
-            m_bFading = false;
-            m_fFadeAlpha = 0;
+    if (m_nFadeInOutFlag == 1) {
+        if (m_fFadeDuration == 0) {
+            m_fFadeAlpha = 0.0f;
         } else {
-            if (m_nFadeInOutFlag) {
-                CDraw::FadeValue = m_fFadeAlpha;
-                return;
-            }
-
-            if (m_fFadeAlpha >= 255.0f) {
-                m_bFading = false;
-            }
-
-            if (m_fFadeDuration == 0) {
-                m_fFadeAlpha = 255.0f;
-            } else {
-                m_fFadeAlpha += CTimer::ms_fTimeStep * 0.02 / m_fFadeDuration * 255.0f;
-            }
-
-            if (m_fFadeAlpha < 255.0f) {
-                CDraw::FadeValue = m_fFadeAlpha;
-                return;
-            }
-
-            m_fFadeAlpha = 255.0f;
+            m_fFadeAlpha -= CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f;
         }
 
-        CDraw::FadeValue = m_fFadeAlpha;
+        if (m_fFadeAlpha > 0) {
+            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+            return;
+        }
+
+        m_bFading = false;
+        m_fFadeAlpha = 0;
+    } else {
+        if (m_nFadeInOutFlag) {
+            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+            return;
+        }
+
+        if (m_fFadeAlpha >= 255.0f) {
+            m_bFading = false;
+        }
+
+        if (m_fFadeDuration == 0) {
+            m_fFadeAlpha = 255.0f;
+        } else {
+            m_fFadeAlpha += CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f;
+        }
+
+        if (m_fFadeAlpha < 255.0f) {
+            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+            return;
+        }
+
+        m_fFadeAlpha = 255.0f;
     }
+
+    CDraw::FadeValue = (uint8) m_fFadeAlpha;
 }
 
 // 0x50B6D0
