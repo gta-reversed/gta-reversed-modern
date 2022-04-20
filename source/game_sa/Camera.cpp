@@ -348,10 +348,8 @@ void CCamera::RestoreWithJumpCut() {
 }
 
 // 0x50BD20
-void CCamera::SetCamCutSceneOffSet(const CVector* cutsceneOffset) {
-    m_vecCutSceneOffset.x = cutsceneOffset->x;
-    m_vecCutSceneOffset.y = cutsceneOffset->y;
-    m_vecCutSceneOffset.z = cutsceneOffset->z;
+void CCamera::SetCamCutSceneOffSet(const CVector& cutsceneOffset) {
+    m_vecCutSceneOffset = cutsceneOffset;
 }
 
 // 0x50BD40
