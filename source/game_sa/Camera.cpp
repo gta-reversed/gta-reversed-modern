@@ -73,7 +73,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0);
     RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
-//    RH_ScopedInstall(ProcessFade, 0x50B5D0);
+    RH_ScopedInstall(ProcessFade, 0x50B5D0);
 //    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
 //    RH_ScopedInstall(Restore, 0x50B930);
 //    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
@@ -676,7 +676,47 @@ void CCamera::InitialiseScriptableComponents() {
 
 // 0x50B5D0
 void CCamera::ProcessFade() {
-    plugin::CallMethod<0x50B5D0, CCamera*>(this);
+    if (m_bFading) {
+        if (m_nFadeInOutFlag == 1) {
+            if (m_fFadeDuration == 0) {
+                m_fFadeAlpha = 0.0f;
+            } else {
+                m_fFadeAlpha -= CTimer::ms_fTimeStep * 0.02 / m_fFadeDuration * 255.0f;
+            }
+
+            if (m_fFadeAlpha > 0) {
+                CDraw::FadeValue = m_fFadeAlpha;
+                return;
+            }
+
+            m_bFading = false;
+            m_fFadeAlpha = 0;
+        } else {
+            if (m_nFadeInOutFlag) {
+                CDraw::FadeValue = m_fFadeAlpha;
+                return;
+            }
+
+            if (m_fFadeAlpha >= 255.0f) {
+                m_bFading = false;
+            }
+
+            if (m_fFadeDuration == 0) {
+                m_fFadeAlpha = 255.0f;
+            } else {
+                m_fFadeAlpha += CTimer::ms_fTimeStep * 0.02 / m_fFadeDuration * 255.0f;
+            }
+
+            if (m_fFadeAlpha < 255.0f) {
+                CDraw::FadeValue = m_fFadeAlpha;
+                return;
+            }
+
+            m_fFadeAlpha = 255.0f;
+        }
+
+        CDraw::FadeValue = m_fFadeAlpha;
+    }
 }
 
 // 0x50B6D0
