@@ -58,8 +58,8 @@ void CCamera::InjectHooks() {
 
 //    RH_ScopedInstall(Constructor, 0x51A450);
 //    RH_ScopedInstall(Destructor, 0x50A870);
-//    RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
-//    RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
+    RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
+    RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
 //    RH_ScopedInstall(CamShake, 0x50A9F0);
 //    RH_ScopedInstall(GetScreenRect, 0x50AB50);
 //    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
@@ -162,12 +162,43 @@ CCamera* CCamera::Destructor() {
 
 // 0x50A3B0
 void CCamera::InitCameraVehicleTweaks() {
-    plugin::CallMethod<0x50A3B0, CCamera*>(this);
+    m_fCurrentTweakDistance = 1.0f;
+    m_fCurrentTweakAltitude = 1.0f;
+    m_fCurrentTweakAngle = 0.0f;
+    m_nCurrentTweakModelIndex = -1;
+
+    if (!m_bCameraVehicleTweaksInitialized) {
+        for (int8 i = 0; i < sizeof(m_aCamTweak) / sizeof(m_aCamTweak[0]); i++) {
+            m_aCamTweak[i].m_nModelIndex = -1;
+            m_aCamTweak[i].m_fDistance = 1.0f;
+            m_aCamTweak[i].m_fAltitude = 1.0f;
+            m_aCamTweak[i].m_fAngle = 0.0f;
+        }
+
+        m_aCamTweak[0].m_nModelIndex = 501;
+        m_aCamTweak[0].m_fDistance = 1.0f;
+        m_aCamTweak[0].m_fAltitude = 1.0f;
+        m_aCamTweak[0].m_fAngle = 0.178997f;
+
+        m_bCameraVehicleTweaksInitialized = true;
+    }
+    //plugin::CallMethod<0x50A3B0, CCamera*>(this);
 }
 
 // 0x50A480
 void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
-    plugin::CallMethod<0x50A480, CCamera*, CVehicle*>(this, vehicle);
+    if (vehicle->m_nModelIndex == m_nCurrentTweakModelIndex) {
+        return;
+    }
+
+    InitCameraVehicleTweaks();
+    for (int8 i = 0; i < sizeof(m_aCamTweak) / sizeof(m_aCamTweak[0]); i++) {
+        if (m_aCamTweak[i].m_nModelIndex == (int32)vehicle->m_nModelIndex) {
+            m_fCurrentTweakDistance = m_aCamTweak[i].m_fDistance;
+            m_fCurrentTweakAltitude = m_aCamTweak[i].m_fAltitude;
+            m_fCurrentTweakAngle = m_aCamTweak[i].m_fAngle;
+        }
+    }
 }
 
 // 0x50A9F0
