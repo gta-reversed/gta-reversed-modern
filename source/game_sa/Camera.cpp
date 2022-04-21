@@ -61,7 +61,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
     RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
     RH_ScopedInstall(CamShake, 0x50A9F0);
-//    RH_ScopedInstall(GetScreenRect, 0x50AB50);
+    RH_ScopedInstall(GetScreenRect, 0x50AB50);
 //    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
 //    RH_ScopedInstall(Fade, 0x50AC20);
 //    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
@@ -953,7 +953,16 @@ void CCamera::LoadPathSplines(FILE* file) {
 
 // 0x50AB50
 void CCamera::GetScreenRect(CRect* rect) {
-    return plugin::Call<0x50AB50>();
+    rect->left = 0;
+    rect->right = (float) RsGlobal.maximumWidth;
+
+    if (m_bWideScreenOn) {
+        rect->bottom = (float)(RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage * 0.01 - SCREEN_SCALE_Y(22.0f);
+        rect->top = (float)RsGlobal.maximumHeight - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage * 0.01 - SCREEN_SCALE_Y(14.0f);
+    } else {
+        rect->bottom = 0;
+        rect->top = RsGlobal.maximumHeight;
+    }
 }
 
 // unused
