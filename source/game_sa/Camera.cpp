@@ -182,7 +182,6 @@ void CCamera::InitCameraVehicleTweaks() {
 
         m_bCameraVehicleTweaksInitialized = true;
     }
-    //plugin::CallMethod<0x50A3B0, CCamera*>(this);
 }
 
 // 0x50A480
@@ -236,8 +235,6 @@ void CCamera::CamShake(float arg2, float x, float y, float z) {
         m_fCamShakeForce = toShakeForce;
         m_nCamShakeStart = CTimer::m_snTimeInMilliseconds;
     }
-
-    //plugin::CallMethod<0x50A9F0, CCamera*, float, float, float, float>(this, arg2, x, y, z);
 }
 
 // 0x50AB10
