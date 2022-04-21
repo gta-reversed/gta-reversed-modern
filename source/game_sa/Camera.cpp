@@ -60,7 +60,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(Destructor, 0x50A870);
     RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
     RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
-//    RH_ScopedInstall(CamShake, 0x50A9F0);
+    RH_ScopedInstall(CamShake, 0x50A9F0);
 //    RH_ScopedInstall(GetScreenRect, 0x50AB50);
 //    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
 //    RH_ScopedInstall(Fade, 0x50AC20);
@@ -203,7 +203,41 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 
 // 0x50A9F0
 void CCamera::CamShake(float arg2, float x, float y, float z) {
-    plugin::CallMethod<0x50A9F0, CCamera*, float, float, float, float>(this, arg2, x, y, z);
+    CVector distanceSourceAndPointer = {
+        m_aCams[m_nActiveCam].m_vecSource.x - x,
+        m_aCams[m_nActiveCam].m_vecSource.y - y,
+        m_aCams[m_nActiveCam].m_vecSource.z - z
+    };
+
+    float distanceXAndY = sqrt(distanceSourceAndPointer.x * distanceSourceAndPointer.x + distanceSourceAndPointer.y * distanceSourceAndPointer.y);
+    float distanceZAndXY = sqrt(distanceXAndY * distanceXAndY + distanceSourceAndPointer.z * distanceSourceAndPointer.z);
+
+    if (distanceZAndXY <= 100.0f) {
+        if (distanceZAndXY < 0.0f) {
+            distanceZAndXY = 0.0f;
+        }
+    } else {
+        distanceZAndXY = 100.0f;
+    }
+
+    float precentShakeForce = 1.0f - distanceZAndXY * 0.01f;
+    float ShakeForce = (m_fCamShakeForce - (CTimer::m_snTimeInMilliseconds - m_nCamShakeStart) * 0.001f) * precentShakeForce;
+
+    if (ShakeForce < 2.0f) {
+        if (ShakeForce < 0.0f) {
+            ShakeForce = 0.0f;
+        }
+    } else {
+        ShakeForce = 2.0f;
+    }
+
+    float toShakeForce = precentShakeForce * arg2 * 0.35f;
+    if (toShakeForce > ShakeForce) {
+        m_fCamShakeForce = toShakeForce;
+        m_nCamShakeStart = CTimer::m_snTimeInMilliseconds;
+    }
+
+    //plugin::CallMethod<0x50A9F0, CCamera*, float, float, float, float>(this, arg2, x, y, z);
 }
 
 // 0x50AB10
