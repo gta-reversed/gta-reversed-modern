@@ -63,7 +63,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(CamShake, 0x50A9F0);
     RH_ScopedInstall(GetScreenRect, 0x50AB50);
 //    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
-//    RH_ScopedInstall(Fade, 0x50AC20);
+    RH_ScopedInstall(Fade, 0x50AC20);
 //    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
     RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
     RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
@@ -243,7 +243,41 @@ void CCamera::Enable1rstPersonCamCntrlsScript() {
 
 // 0x50AC20
 void CCamera::Fade(float fadeDuration, eFadeFlag fadeInOutFlag) {
-    plugin::CallMethod<0x50AC20, CCamera*, float, eFadeFlag>(this, fadeDuration, fadeInOutFlag);
+    m_fFadeDuration = fadeDuration;
+    m_bFading = true;
+    m_nFadeInOutFlag = fadeInOutFlag;
+    m_nFadeStartTime = CTimer::GetTimeInMS();
+
+    if (!m_bIgnoreFadingStuffForMusic || fadeInOutFlag == eFadeFlag::FADE_OUT) {
+        m_bMusicFading = true;
+        m_nMusicFadingDirection = fadeInOutFlag;
+
+        float toTimeToFadeMusic = fadeDuration * 0.3f;
+        if (toTimeToFadeMusic < 0.3f) {
+            toTimeToFadeMusic = 0.3f;
+        }
+
+        if (toTimeToFadeMusic >= fadeDuration) {
+            m_fTimeToFadeMusic = fadeDuration;
+        } else if (toTimeToFadeMusic < 0.3f) {
+            m_fTimeToFadeMusic = 0.3f;
+        } else {
+            m_fTimeToFadeMusic = toTimeToFadeMusic;
+        }
+
+        if (fadeInOutFlag == eFadeFlag::FADE_OUT) {
+            m_fTimeToWaitToFadeMusic = 0.0f;
+            m_nFadeTimeStartedMusic = CTimer::GetTimeInMS();
+        } else {
+            m_fTimeToWaitToFadeMusic = fadeDuration - m_fTimeToFadeMusic;
+            if ((m_fTimeToFadeMusic - 0.1f) <= 0.0f) {
+                m_fTimeToFadeMusic = 0.0f;
+            } else {
+                m_fTimeToFadeMusic -= 0.1f;
+            }
+            m_nFadeTimeStartedMusic = CTimer::GetTimeInMS();
+        }
+    }
 }
 
 // 0x50AD20
@@ -662,7 +696,6 @@ void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMovin
 
 // 0x50C070
 void CCamera::SetPercentAlongCutScene(float percent) {
-    printf("SetPercentAlongCutScene\n");
     if (m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_FLYBY) {
         m_aCams[m_nActiveCam].m_fTimeElapsedFloat = m_aCams[m_nActiveCam].m_nFinishTime * percent * 0.01;
     }else if (m_aCams[(m_nActiveCam + 1) % 2].m_nMode == eCamMode::MODE_FLYBY) {

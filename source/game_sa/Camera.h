@@ -251,7 +251,7 @@ public:
     char            _padC32[2];
     int32           m_nModeObbeCamIsInForCar;
     eCamMode        m_nModeToGoTo;
-    int16           m_nMusicFadingDirection;
+    eFadeFlag       m_nMusicFadingDirection;
     int16           m_nTypeOfSwitch; // see eSwitchType
     char            _padC3E[2];
     uint32          m_nFadeStartTime;
