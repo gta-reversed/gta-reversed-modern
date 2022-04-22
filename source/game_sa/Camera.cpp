@@ -120,7 +120,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(CameraColDetAndReact, 0x520190);
 //    RH_ScopedInstall(CamControl, 0x527FA0);
 //    RH_ScopedInstall(Process, 0x52B730);
-//    RH_ScopedInstall(DeleteCutSceneCamDataMemory, 0x5B24A0);
+    RH_ScopedInstall(DeleteCutSceneCamDataMemory, 0x5B24A0);
 //    RH_ScopedInstall(LoadPathSplines, 0x5B24D0);
 //    RH_ScopedInstall(Init, 0x5BC520);
 
@@ -1142,7 +1142,13 @@ void CCamera::CamControl() {
 
 // 0x5B24A0
 void CCamera::DeleteCutSceneCamDataMemory() {
-    plugin::CallMethod<0x5B24A0, CCamera*>(this);
+    printf("DeleteCutSceneCamDataMemory\n");
+    for (auto& PathArray : m_aPathArray) {
+        if (PathArray.m_pArrPathData) {
+            delete PathArray.m_pArrPathData;
+            PathArray.m_pArrPathData = 0;
+        }
+    }
 }
 
 // 0x5B24D0
