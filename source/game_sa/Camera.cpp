@@ -75,7 +75,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
     RH_ScopedInstall(ProcessFade, 0x50B5D0);
 //    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
-//    RH_ScopedInstall(Restore, 0x50B930);
+    RH_ScopedInstall(Restore, 0x50B930);
 //    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
 //    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
@@ -407,7 +407,63 @@ void CCamera::RenderMotionBlur() {
 
 // 0x50B930
 void CCamera::Restore() {
-    return plugin::CallMethod<0x50B930, CCamera*>(this);
+    m_bLookingAtPlayer = true;
+    m_bLookingAtVector = false;
+    m_nTypeOfSwitch = true;
+    m_bUseNearClipScript = false;
+    m_nModeObbeCamIsInForCar = 30;
+    m_fPositionAlongSpline = 0.0f;
+    m_bStartingSpline = false;
+    m_bScriptParametersSetForInterPol = false;
+    m_nWhoIsInControlOfTheCamera = 0;
+
+    CVehicle* playerVeh = FindPlayerVehicle(-1, 0);
+
+    if (playerVeh) {
+        m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+
+        if (m_pTargetEntity) {
+            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
+        }
+        m_pTargetEntity = static_cast<CEntity*>(playerVeh);
+    } else {
+        m_nModeToGoTo = MODE_FOLLOWPED;
+        if (m_pTargetEntity) {
+            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
+        }
+        m_pTargetEntity = static_cast<CEntity*>(CWorld::Players[CWorld::PlayerInFocus].m_pPed);
+    }
+    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+
+    if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_ENTER_CAR ||
+        CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_CARJACK ||
+        CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_OPEN_DOOR) {
+        m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+    }
+
+    if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_EXIT_CAR) {
+        m_nModeToGoTo = MODE_FOLLOWPED;
+
+        if (m_pTargetEntity) {
+            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
+        }
+
+        m_pTargetEntity = static_cast<CEntity*>(CWorld::Players[CWorld::PlayerInFocus].m_pPed);
+        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    }
+
+    if (m_pAttachedEntity) {
+        m_pAttachedEntity->CleanUpOldReference(&m_pAttachedEntity);
+        m_pAttachedEntity = 0;
+    }
+
+    m_bEnable1rstPersonCamCntrlsScript = false;
+    m_bAllow1rstPersonWeaponsCamera = false;
+    m_bUseScriptZoomValuePed = false;
+    m_bUseScriptZoomValueCar = false;
+    m_fAvoidTheGeometryProbsTimer = 0.0f;
+    m_bStartInterScript = true;
+    m_bCameraJustRestored = true;
 }
 
 // 0x50BAB0
