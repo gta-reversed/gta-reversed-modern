@@ -82,7 +82,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
 //    RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
     RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
-//    RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
+    RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
 //    RH_ScopedInstall(SetZoomValueFollowPedScript, 0x50C160);
 //    RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
 //    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
@@ -418,7 +418,7 @@ void CCamera::Restore() {
     m_nWhoIsInControlOfTheCamera = 0;
 
     CVehicle* playerVeh = FindPlayerVehicle();
-    CPlayerPed* pPlayerInFocus = FindPlayerPed(CWorld::PlayerInFocus);
+    CPlayerPed* pPlayerInFocus = FindPlayerPed();
 
     if (playerVeh) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
@@ -471,7 +471,7 @@ void CCamera::RestoreWithJumpCut() {
     m_bScriptParametersSetForInterPol = 0;
 
     CVehicle* playerVeh = FindPlayerVehicle();
-    CPlayerPed* pPlayerInFocus = FindPlayerPed(CWorld::PlayerInFocus);
+    CPlayerPed* pPlayerInFocus = FindPlayerPed();
 
     if (playerVeh) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
@@ -504,13 +504,16 @@ void CCamera::RestoreWithJumpCut() {
         return;
     }
 
-    if (!CWorld::Players[0].m_pPed) {
+    CPlayerPed* player0 = FindPlayerPed(0);
+    CPlayerPed* player1 = FindPlayerPed(1);
+
+    if (!player0) {
         m_bUseScriptZoomValuePed = false;
         m_bUseScriptZoomValueCar = false;
         return;
     }
 
-    if (!CWorld::Players[1].m_pPed) {
+    if (!player1) {
         m_bUseScriptZoomValuePed = false;
         m_bUseScriptZoomValueCar = false;
         return;
@@ -518,9 +521,9 @@ void CCamera::RestoreWithJumpCut() {
 
     CEntity::SafeCleanUpRef(m_pTargetEntity);
 
-    if ((FindPlayerPed(0)->bInVehicle) == false || (FindPlayerPed(1)->bInVehicle) == false || FindPlayerPed(0)->m_pVehicle == 0 || FindPlayerPed(1)->m_pVehicle == 0) {
+    if ((player0->bInVehicle) == false || (player1->bInVehicle) == false || player0->m_pVehicle == 0 || player1->m_pVehicle == 0) {
         m_nModeToGoTo = m_nModeForTwoPlayersNotBothInCar;
-        m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0));
+        m_pTargetEntity = reinterpret_cast<CEntity*>(player0);
         CEntity::SafeRegisterRef(m_pTargetEntity);
         
 
@@ -529,7 +532,7 @@ void CCamera::RestoreWithJumpCut() {
         return;
     }
 
-    if (FindPlayerPed(0)->m_pVehicle == FindPlayerPed(1)->m_pVehicle) {
+    if (player0->m_pVehicle == player1->m_pVehicle) {
         if (m_bAllowShootingWith2PlayersInCar) {
             m_nModeToGoTo = m_nModeForTwoPlayersSameCarShootingAllowed;
         } else {
@@ -539,7 +542,7 @@ void CCamera::RestoreWithJumpCut() {
         m_nModeToGoTo = m_nModeForTwoPlayersSeparateCars;
     }
 
-    m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0)->m_pVehicle);
+    m_pTargetEntity = reinterpret_cast<CEntity*>(player0->m_pVehicle);
     CEntity::SafeRegisterRef(m_pTargetEntity);
     m_bUseScriptZoomValuePed = false;
     m_bUseScriptZoomValueCar = false;
@@ -584,10 +587,12 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
 
     m_bLookingAtPlayer = false;
     TheCamera.m_pTargetEntity = reinterpret_cast<CEntity*>(targetPed);
-    if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity) {
-        CEntity::SafeCleanUpRef(TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity);
-        TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity = reinterpret_cast<CEntity*>(targetPed);
-        CEntity::SafeRegisterRef(TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity);
+    CCam& pActiveCamera = GetActiveCamera();
+
+    if (pActiveCamera.m_pCamTargetEntity) {
+        CEntity::SafeCleanUpRef(pActiveCamera.m_pCamTargetEntity);
+        pActiveCamera.m_pCamTargetEntity = reinterpret_cast<CEntity*>(targetPed);
+        CEntity::SafeRegisterRef(pActiveCamera.m_pCamTargetEntity);
 
         m_bCamDirectlyInFront = true;
         m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(targetPed->m_matrix->GetUp().x, targetPed->m_matrix->GetUp().y);
@@ -657,7 +662,12 @@ void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMovin
 
 // 0x50C070
 void CCamera::SetPercentAlongCutScene(float percent) {
-    return plugin::CallMethod<0x50C070, CCamera*>(this, percent);
+    printf("SetPercentAlongCutScene\n");
+    if (m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_FLYBY) {
+        m_aCams[m_nActiveCam].m_fTimeElapsedFloat = m_aCams[m_nActiveCam].m_nFinishTime * percent * 0.01;
+    }else if (m_aCams[(m_nActiveCam + 1) % 2].m_nMode == eCamMode::MODE_FLYBY) {
+        m_aCams[(m_nActiveCam + 1) % 2].m_fTimeElapsedFloat = m_aCams[(m_nActiveCam + 1) % 2].m_nFinishTime * percent * 0.01;
+    }
 }
 
 // 0x50C100
