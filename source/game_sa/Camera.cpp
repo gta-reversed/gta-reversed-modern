@@ -79,7 +79,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
 //    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
-//    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
+    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
 //    RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
     RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
 //    RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
@@ -422,15 +422,14 @@ void CCamera::Restore() {
 
     if (playerVeh) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
-
-        CEntity::ClearReference(m_pTargetEntity);
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
         m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
     } else {
         m_nModeToGoTo = MODE_FOLLOWPED;
-        CEntity::ClearReference(m_pTargetEntity);
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
         m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
     }
-    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    CEntity::SafeRegisterRef(m_pTargetEntity);
 
     if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK || pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
@@ -439,10 +438,9 @@ void CCamera::Restore() {
     if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
         m_nModeToGoTo = MODE_FOLLOWPED;
 
-        CEntity::ClearReference(m_pTargetEntity);
-
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
         m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
-        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+        CEntity::SafeRegisterRef(m_pTargetEntity);
     }
 
     if (m_pAttachedEntity) {
@@ -477,15 +475,14 @@ void CCamera::RestoreWithJumpCut() {
 
     if (playerVeh) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
-
-        CEntity::ClearReference(m_pTargetEntity);
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
         m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
     } else {
         m_nModeToGoTo = MODE_FOLLOWPED;
-        CEntity::ClearReference(m_pTargetEntity);
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
         m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
     }
-    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    CEntity::SafeRegisterRef(m_pTargetEntity);
 
     if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK ||
         pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
@@ -495,10 +492,10 @@ void CCamera::RestoreWithJumpCut() {
     if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
         m_nModeToGoTo = MODE_FOLLOWPED;
 
-        CEntity::ClearReference(m_pTargetEntity);
+        CEntity::SafeCleanUpRef(m_pTargetEntity);
 
         m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
-        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+        CEntity::SafeRegisterRef(m_pTargetEntity);
     }
 
     if (!m_bCooperativeCamMode) {
@@ -519,12 +516,13 @@ void CCamera::RestoreWithJumpCut() {
         return;
     }
 
-    CEntity::ClearReference(m_pTargetEntity);
+    CEntity::SafeCleanUpRef(m_pTargetEntity);
 
     if ((FindPlayerPed(0)->bInVehicle) == false || (FindPlayerPed(1)->bInVehicle) == false || FindPlayerPed(0)->m_pVehicle == 0 || FindPlayerPed(1)->m_pVehicle == 0) {
         m_nModeToGoTo = m_nModeForTwoPlayersNotBothInCar;
         m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0));
-        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+        CEntity::SafeRegisterRef(m_pTargetEntity);
+        
 
         m_bUseScriptZoomValuePed = false;
         m_bUseScriptZoomValueCar = false;
@@ -542,7 +540,7 @@ void CCamera::RestoreWithJumpCut() {
     }
 
     m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0)->m_pVehicle);
-    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    CEntity::SafeRegisterRef(m_pTargetEntity);
     m_bUseScriptZoomValuePed = false;
     m_bUseScriptZoomValueCar = false;
 }
@@ -580,7 +578,20 @@ void CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString(CPed* tar
 
 // 0x50BE30
 void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* targetPed) {
-    return plugin::CallMethod<0x50BE30, CCamera*, CPed*>(this, targetPed);
+    if (!targetPed) {
+        return;
+    }
+
+    m_bLookingAtPlayer = false;
+    TheCamera.m_pTargetEntity = reinterpret_cast<CEntity*>(targetPed);
+    if (TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity) {
+        CEntity::SafeCleanUpRef(TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity);
+        TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity = reinterpret_cast<CEntity*>(targetPed);
+        CEntity::SafeRegisterRef(TheCamera.m_aCams[TheCamera.m_nActiveCam].m_pCamTargetEntity);
+
+        m_bCamDirectlyInFront = true;
+        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(targetPed->m_matrix->GetUp().x, targetPed->m_matrix->GetUp().y);
+    }
 }
 
 // 0x50BEC0
