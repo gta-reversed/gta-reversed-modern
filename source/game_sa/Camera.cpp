@@ -260,7 +260,6 @@ float CCamera::Find3rdPersonQuickAimPitch() {
 
 // 0x50AD90
 uint32 CCamera::GetCutSceneFinishTime() {
-    printf("GetCutSceneFinishTime\n");
     if (m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_FLYBY) {
         return m_aCams[m_nActiveCam].m_nFinishTime;
     }
@@ -270,7 +269,6 @@ uint32 CCamera::GetCutSceneFinishTime() {
     }
 
     return 0;
-    //return plugin::CallMethodAndReturn<uint32, 0x50AD90, CCamera*>(this);
 }
 
 // 0x50ADE0
