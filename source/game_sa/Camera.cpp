@@ -168,7 +168,7 @@ void CCamera::InitCameraVehicleTweaks() {
     m_nCurrentTweakModelIndex = -1;
 
     if (!m_bCameraVehicleTweaksInitialized) {
-        for (int8 i = 0; i < sizeof(m_aCamTweak) / sizeof(m_aCamTweak[0]); i++) {
+        for (int8 i = 0; i < 5; i++) {
             m_aCamTweak[i].m_nModelIndex = -1;
             m_aCamTweak[i].m_fDistance = 1.0f;
             m_aCamTweak[i].m_fAltitude = 1.0f;
@@ -191,7 +191,7 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
     }
 
     InitCameraVehicleTweaks();
-    for (int8 i = 0; i < sizeof(m_aCamTweak) / sizeof(m_aCamTweak[0]); i++) {
+    for (int8 i = 0; i < 5; i++) {
         if (m_aCamTweak[i].m_nModelIndex == (int32)vehicle->m_nModelIndex) {
             m_fCurrentTweakDistance = m_aCamTweak[i].m_fDistance;
             m_fCurrentTweakAltitude = m_aCamTweak[i].m_fAltitude;
@@ -202,38 +202,24 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 
 // 0x50A9F0
 void CCamera::CamShake(float arg2, float x, float y, float z) {
-    CVector distanceSourceAndPointer = {
-        m_aCams[m_nActiveCam].m_vecSource.x - x,
-        m_aCams[m_nActiveCam].m_vecSource.y - y,
-        m_aCams[m_nActiveCam].m_vecSource.z - z
-    };
+
+    CVector fromVector = {x, y, z};
+    CVector distanceSourceAndPointer = m_aCams[m_nActiveCam].m_vecSource - fromVector;
 
     float distanceXAndY = sqrt(distanceSourceAndPointer.x * distanceSourceAndPointer.x + distanceSourceAndPointer.y * distanceSourceAndPointer.y);
     float distanceZAndXY = sqrt(distanceXAndY * distanceXAndY + distanceSourceAndPointer.z * distanceSourceAndPointer.z);
 
-    if (distanceZAndXY <= 100.0f) {
-        if (distanceZAndXY < 0.0f) {
-            distanceZAndXY = 0.0f;
-        }
-    } else {
-        distanceZAndXY = 100.0f;
-    }
+    clamp(distanceZAndXY, 0.0f, 100.0f);
 
     float precentShakeForce = 1.0f - distanceZAndXY * 0.01f;
-    float ShakeForce = (m_fCamShakeForce - (CTimer::m_snTimeInMilliseconds - m_nCamShakeStart) * 0.001f) * precentShakeForce;
+    float ShakeForce = (m_fCamShakeForce - (CTimer::GetTimeInMS() - m_nCamShakeStart) * 0.001f) * precentShakeForce;
 
-    if (ShakeForce < 2.0f) {
-        if (ShakeForce < 0.0f) {
-            ShakeForce = 0.0f;
-        }
-    } else {
-        ShakeForce = 2.0f;
-    }
+    clamp(ShakeForce, 0.0f, 2.0f);
 
     float toShakeForce = precentShakeForce * arg2 * 0.35f;
     if (toShakeForce > ShakeForce) {
         m_fCamShakeForce = toShakeForce;
-        m_nCamShakeStart = CTimer::m_snTimeInMilliseconds;
+        m_nCamShakeStart = CTimer::GetTimeInMS();
     }
 }
 
@@ -742,7 +728,7 @@ void CCamera::ProcessFade() {
         return;
     }
 
-    if (m_nFadeInOutFlag == 1) {
+    if (m_nFadeInOutFlag == (uint16) eFadeFlag::FADE_OUT) {
         if (m_fFadeDuration == 0) {
             m_fFadeAlpha = 0.0f;
         } else {
