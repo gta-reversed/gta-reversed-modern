@@ -65,7 +65,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
 //    RH_ScopedInstall(Fade, 0x50AC20);
 //    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
-//    RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
+    RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
 //    RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
 //    RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
 //    RH_ScopedInstall(GetLookDirection, 0x50AE90);
@@ -260,7 +260,17 @@ float CCamera::Find3rdPersonQuickAimPitch() {
 
 // 0x50AD90
 uint32 CCamera::GetCutSceneFinishTime() {
-    return plugin::CallMethodAndReturn<uint32, 0x50AD90, CCamera*>(this);
+    printf("GetCutSceneFinishTime\n");
+    if (m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_FLYBY) {
+        return m_aCams[m_nActiveCam].m_nFinishTime;
+    }
+
+    if (m_aCams[(m_nActiveCam + 1) % 2].m_nMode == eCamMode::MODE_FLYBY) {
+        return m_aCams[(m_nActiveCam + 1) % 2].m_nFinishTime;
+    }
+
+    return 0;
+    //return plugin::CallMethodAndReturn<uint32, 0x50AD90, CCamera*>(this);
 }
 
 // 0x50ADE0
