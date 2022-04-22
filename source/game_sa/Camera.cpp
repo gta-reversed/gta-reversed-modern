@@ -67,7 +67,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
     RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
     RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
-//    RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
+    RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
 //    RH_ScopedInstall(GetLookDirection, 0x50AE90);
 //    RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
 //    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0);
@@ -309,7 +309,7 @@ CVector* CCamera::GetGameCamPosition() {
 
 // 0x50AE60
 bool CCamera::GetLookingLRBFirstPerson() {
-    return plugin::CallMethodAndReturn<bool, 0x50AE60, CCamera*>(this);
+    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON && m_aCams[m_nActiveCam].m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD;
 }
 
 // 0x50AE90
