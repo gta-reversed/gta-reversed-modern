@@ -98,7 +98,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
 //    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
 //    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
-//    RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
+    RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
 //    RH_ScopedInstall(ConsiderPedAsDucking, 0x50CEB0);
 //    RH_ScopedInstall(ResetDuckingSystem, 0x50CEF0);
 //    RH_ScopedInstall(HandleCameraMotionForDucking, 0x50CFA0);
@@ -862,7 +862,17 @@ void CCamera::CameraVehicleModeSpecialCases(CVehicle* vehicle) {
 
 // 0x50CE80
 bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x50CE80, CCamera*, CEntity*>(this, entity);
+    if (m_nExtraEntitiesCount <= 0) {
+        return false;
+    }
+
+    for (auto& pExtraEntity : m_pExtraEntity) {
+        if (pExtraEntity == entity) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // 0x420C40
