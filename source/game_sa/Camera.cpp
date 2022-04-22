@@ -168,11 +168,11 @@ void CCamera::InitCameraVehicleTweaks() {
     m_nCurrentTweakModelIndex = -1;
 
     if (!m_bCameraVehicleTweaksInitialized) {
-        for (int8 i = 0; i < 5; i++) {
-            m_aCamTweak[i].m_nModelIndex = -1;
-            m_aCamTweak[i].m_fDistance = 1.0f;
-            m_aCamTweak[i].m_fAltitude = 1.0f;
-            m_aCamTweak[i].m_fAngle = 0.0f;
+        for (auto& camTweak : m_aCamTweak) {
+            camTweak.m_nModelIndex = -1;
+            camTweak.m_fDistance = 1.0f;
+            camTweak.m_fAltitude = 1.0f;
+            camTweak.m_fAngle = 0.0f;
         }
 
         m_aCamTweak[0].m_nModelIndex = 501;
@@ -191,19 +191,17 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
     }
 
     InitCameraVehicleTweaks();
-    for (int8 i = 0; i < 5; i++) {
-        if (m_aCamTweak[i].m_nModelIndex == (int32)vehicle->m_nModelIndex) {
-            m_fCurrentTweakDistance = m_aCamTweak[i].m_fDistance;
-            m_fCurrentTweakAltitude = m_aCamTweak[i].m_fAltitude;
-            m_fCurrentTweakAngle = m_aCamTweak[i].m_fAngle;
+    for (auto& camTweak : m_aCamTweak) {
+        if (camTweak.m_nModelIndex == (int32)vehicle->m_nModelIndex) {
+            m_fCurrentTweakDistance = camTweak.m_fDistance;
+            m_fCurrentTweakAltitude = camTweak.m_fAltitude;
+            m_fCurrentTweakAngle = camTweak.m_fAngle;
         }
     }
 }
 
 // 0x50A9F0
-void CCamera::CamShake(float arg2, float x, float y, float z) {
-
-    CVector fromVector = {x, y, z};
+void CCamera::CamShake(float arg2, CVector fromVector) {
     CVector distanceSourceAndPointer = m_aCams[m_nActiveCam].m_vecSource - fromVector;
 
     float distanceXAndY = sqrt(distanceSourceAndPointer.x * distanceSourceAndPointer.x + distanceSourceAndPointer.y * distanceSourceAndPointer.y);
@@ -280,7 +278,7 @@ bool CCamera::GetFading() {
 // 0x50ADF0
 int32 CCamera::GetFadingDirection() {
     if (m_bFading)
-        return m_nFadeInOutFlag == 1;
+        return m_nFadeInOutFlag == eFadeFlag::FADE_OUT;
     else
         return 2;
 }
@@ -330,22 +328,22 @@ bool CCamera::GetLookingForwardFirstPerson() {
 }
 
 // 0x50AF00
-void CCamera::GetArrPosForVehicleType(eVehicleType type, int32* arrPos) {
+void CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
     switch (type) {
     case VEHICLE_TYPE_MTRUCK:
-        *arrPos = 0;
+        arrPos = 0;
         break;
     case VEHICLE_TYPE_QUAD:
-        *arrPos = 1;
+        arrPos = 1;
         break;
     case VEHICLE_TYPE_HELI:
-        *arrPos = 2;
+        arrPos = 2;
         break;
     case VEHICLE_TYPE_PLANE:
-        *arrPos = 4;
+        arrPos = 4;
         break;
     case VEHICLE_TYPE_BOAT:
-        *arrPos = 3;
+        arrPos = 3;
         break;
     default:
         break;
@@ -426,18 +424,20 @@ void CCamera::SetCamCutSceneOffSet(const CVector& cutsceneOffset) {
 void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
     m_bCamDirectlyBehind = true;
     CPed* player = FindPlayerPed();
-    if (player) {
-        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
-    }
+    if (!player)
+        return;
+
+    m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
 }
 
 // 0x50BD70
 void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     m_bCamDirectlyInFront = true;
     CPed* player = FindPlayerPed();
-    if (player) {
-        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
-    }
+    if (!player)
+        return;
+
+    m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
 }
 
 // unused
@@ -612,10 +612,8 @@ void CCamera::TakeControlWithSpline(eSwitchType switchType) {
 }
 
 // 0x50CB10
-void CCamera::UpdateAimingCoors(const CVector* aimingTargetCoors) {
-    m_vecAimingTargetCoors.x = aimingTargetCoors->x;
-    m_vecAimingTargetCoors.y = aimingTargetCoors->y;
-    m_vecAimingTargetCoors.z = aimingTargetCoors->z;
+void CCamera::UpdateAimingCoors(const CVector& aimingTargetCoors) {
+    m_vecAimingTargetCoors = aimingTargetCoors;
 }
 
 // unused
@@ -731,8 +729,8 @@ void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
 
 // 0x50D280
 void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase) {
-    m_fStartZoomTime = float(CTimer::GetTimeInMS());
-    m_fEndZoomTime = float(CTimer::GetTimeInMS()) + timeLimit;
+    m_fStartZoomTime = static_cast<float>(CTimer::GetTimeInMS());
+    m_fEndZoomTime = static_cast<float>(CTimer::GetTimeInMS()) + timeLimit;
 
     m_nZoomMode = bEase; // TODO: Rename
     m_fZoomInFactor = zoomInFactor;
@@ -750,7 +748,7 @@ void CCamera::ProcessFade() {
         return;
     }
 
-    if (m_nFadeInOutFlag == (uint16) eFadeFlag::FADE_OUT) {
+    if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
         if (m_fFadeDuration == 0) {
             m_fFadeAlpha = 0.0f;
         } else {
@@ -758,15 +756,15 @@ void CCamera::ProcessFade() {
         }
 
         if (m_fFadeAlpha > 0) {
-            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+            CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
 
         m_bFading = false;
         m_fFadeAlpha = 0;
     } else {
-        if (m_nFadeInOutFlag) {
-            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+        if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
+            CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
 
@@ -781,14 +779,14 @@ void CCamera::ProcessFade() {
         }
 
         if (m_fFadeAlpha < 255.0f) {
-            CDraw::FadeValue = (uint8) m_fFadeAlpha;
+            CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
 
         m_fFadeAlpha = 255.0f;
     }
 
-    CDraw::FadeValue = (uint8) m_fFadeAlpha;
+    CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
 }
 
 // 0x50B6D0

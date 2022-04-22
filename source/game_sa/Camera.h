@@ -247,7 +247,7 @@ public:
     float           m_fScriptPercentageInterToStopMoving;
     float           m_fScriptPercentageInterToCatchUp;
     uint32          m_nScriptTimeForInterpolation;
-    uint16          m_nFadeInOutFlag;
+    eFadeFlag       m_nFadeInOutFlag;
     char            _padC32[2];
     int32           m_nModeObbeCamIsInForCar;
     eCamMode        m_nModeToGoTo;
@@ -361,7 +361,7 @@ public:
     float CalculateGroundHeight(eGroundHeightType type);
     void CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix* camMatrix, CMatrix* mirrorMatrix);
     void CamControl();
-    void CamShake(float arg2, float x, float y, float z);
+    void CamShake(float arg2, CVector fromVector);
     void CameraColDetAndReact(CVector* source, CVector* target);
     void CameraGenericModeSpecialCases(CPed* targetPed);
     void CameraPedAimModeSpecialCases(CPed* ped);
@@ -381,7 +381,7 @@ public:
     float Find3rdPersonQuickAimPitch();
     float FindCamFOV();
     void FinishCutscene();
-    void GetArrPosForVehicleType(eVehicleType type, int32* arrPos);
+    void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
     uint32 GetCutSceneFinishTime();
     bool GetFading();
     int32 GetFadingDirection();
@@ -472,7 +472,7 @@ public:
 
     bool TryToStartNewCamMode(int32 camSequence);
 
-    void UpdateAimingCoors(const CVector* aimingTargetCoors);
+    void UpdateAimingCoors(const CVector& aimingTargetCoors);
     void UpdateSoundDistances();
     void UpdateTargetEntity();
     bool Using1stPersonWeaponMode();
