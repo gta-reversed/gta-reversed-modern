@@ -69,7 +69,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
     RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
     RH_ScopedInstall(GetLookDirection, 0x50AE90);
-//    RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
+    RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
 //    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0);
     RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
     RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
@@ -326,7 +326,7 @@ int32 CCamera::GetLookDirection() {
 
 // 0x50AED0
 bool CCamera::GetLookingForwardFirstPerson() {
-    return plugin::CallMethodAndReturn<bool, 0x50AED0, CCamera*>(this);
+    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON && m_aCams[m_nActiveCam].m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_FORWARD;
 }
 
 // 0x50AF00
