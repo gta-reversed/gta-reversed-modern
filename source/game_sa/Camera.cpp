@@ -66,7 +66,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(Fade, 0x50AC20);
 //    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
     RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
-//    RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
+    RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
 //    RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
 //    RH_ScopedInstall(GetLookDirection, 0x50AE90);
 //    RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
@@ -292,7 +292,14 @@ bool CCamera::Get_Just_Switched_Status() {
 
 // 0x50AE20
 int32 CCamera::GetScreenFadeStatus() {
-    return plugin::CallMethodAndReturn<int32, 0x50AE20, CCamera*>(this);
+    if (m_fFadeAlpha == 0.0f) {
+        return 0;
+    }
+    if (m_fFadeAlpha == 255.0f) {
+        return 2;
+    }
+
+    return 1;
 }
 
 // 0x50AE50
