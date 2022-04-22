@@ -95,10 +95,10 @@ public:
     bool            m_bCooperativeCamMode;
     bool            m_bAllowShootingWith2PlayersInCar;
     bool            m_bDisableFirstPersonInCar;
-    uint16          m_nModeForTwoPlayersSeparateCars;
-    uint16          m_nModeForTwoPlayersSameCarShootingAllowed;
-    uint16          m_nModeForTwoPlayersSameCarShootingNotAllowed;
-    uint16          m_nModeForTwoPlayersNotBothInCar;
+    eCamMode        m_nModeForTwoPlayersSeparateCars;
+    eCamMode        m_nModeForTwoPlayersSameCarShootingAllowed;
+    eCamMode        m_nModeForTwoPlayersSameCarShootingNotAllowed;
+    eCamMode        m_nModeForTwoPlayersNotBothInCar;
     bool            m_bGarageFixedCamPositionSet;
     bool            m_bDoingSpecialInterPolation;
     bool            m_bScriptParametersSetForInterPol;

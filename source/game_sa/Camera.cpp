@@ -76,7 +76,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(ProcessFade, 0x50B5D0);
 //    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
     RH_ScopedInstall(Restore, 0x50B930);
-//    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
+    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
     RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
 //    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
 //    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
@@ -417,38 +417,31 @@ void CCamera::Restore() {
     m_bScriptParametersSetForInterPol = false;
     m_nWhoIsInControlOfTheCamera = 0;
 
-    CVehicle* playerVeh = FindPlayerVehicle(-1, 0);
+    CVehicle* playerVeh = FindPlayerVehicle();
+    CPlayerPed* pPlayerInFocus = FindPlayerPed(CWorld::PlayerInFocus);
 
     if (playerVeh) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
 
-        if (m_pTargetEntity) {
-            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
-        }
-        m_pTargetEntity = static_cast<CEntity*>(playerVeh);
+        CEntity::ClearReference(m_pTargetEntity);
+        m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
     } else {
         m_nModeToGoTo = MODE_FOLLOWPED;
-        if (m_pTargetEntity) {
-            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
-        }
-        m_pTargetEntity = static_cast<CEntity*>(CWorld::Players[CWorld::PlayerInFocus].m_pPed);
+        CEntity::ClearReference(m_pTargetEntity);
+        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
     }
     m_pTargetEntity->RegisterReference(m_pTargetEntity);
 
-    if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_ENTER_CAR ||
-        CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_CARJACK ||
-        CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_OPEN_DOOR) {
+    if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK || pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
     }
 
-    if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->m_nPedState == PEDSTATE_EXIT_CAR) {
+    if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
         m_nModeToGoTo = MODE_FOLLOWPED;
 
-        if (m_pTargetEntity) {
-            m_pTargetEntity->CleanUpOldReference(&m_pTargetEntity);
-        }
+        CEntity::ClearReference(m_pTargetEntity);
 
-        m_pTargetEntity = static_cast<CEntity*>(CWorld::Players[CWorld::PlayerInFocus].m_pPed);
+        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
         m_pTargetEntity->RegisterReference(m_pTargetEntity);
     }
 
@@ -468,7 +461,90 @@ void CCamera::Restore() {
 
 // 0x50BAB0
 void CCamera::RestoreWithJumpCut() {
-    return plugin::CallMethod<0x50BAB0, CCamera*>(this);
+    m_bRestoreByJumpCut = true;
+    m_bLookingAtPlayer = true;
+    m_bLookingAtVector = false;
+    m_nTypeOfSwitch = eSwitchType::SWITCHTYPE_JUMPCUT;
+    m_nWhoIsInControlOfTheCamera = 0;
+    m_fPositionAlongSpline = 0.0f;
+    m_bStartingSpline = false;
+    m_bUseNearClipScript = 0;
+    m_nModeObbeCamIsInForCar = 30;
+    m_bScriptParametersSetForInterPol = 0;
+
+    CVehicle* playerVeh = FindPlayerVehicle();
+    CPlayerPed* pPlayerInFocus = FindPlayerPed(CWorld::PlayerInFocus);
+
+    if (playerVeh) {
+        m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+
+        CEntity::ClearReference(m_pTargetEntity);
+        m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
+    } else {
+        m_nModeToGoTo = MODE_FOLLOWPED;
+        CEntity::ClearReference(m_pTargetEntity);
+        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+    }
+    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+
+    if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK ||
+        pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
+        m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+    }
+
+    if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
+        m_nModeToGoTo = MODE_FOLLOWPED;
+
+        CEntity::ClearReference(m_pTargetEntity);
+
+        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    }
+
+    if (!m_bCooperativeCamMode) {
+        m_bUseScriptZoomValuePed = false;
+        m_bUseScriptZoomValueCar = false;
+        return;
+    }
+
+    if (!CWorld::Players[0].m_pPed) {
+        m_bUseScriptZoomValuePed = false;
+        m_bUseScriptZoomValueCar = false;
+        return;
+    }
+
+    if (!CWorld::Players[1].m_pPed) {
+        m_bUseScriptZoomValuePed = false;
+        m_bUseScriptZoomValueCar = false;
+        return;
+    }
+
+    CEntity::ClearReference(m_pTargetEntity);
+
+    if ((FindPlayerPed(0)->bInVehicle) == false || (FindPlayerPed(1)->bInVehicle) == false || FindPlayerPed(0)->m_pVehicle == 0 || FindPlayerPed(1)->m_pVehicle == 0) {
+        m_nModeToGoTo = m_nModeForTwoPlayersNotBothInCar;
+        m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0));
+        m_pTargetEntity->RegisterReference(m_pTargetEntity);
+
+        m_bUseScriptZoomValuePed = false;
+        m_bUseScriptZoomValueCar = false;
+        return;
+    }
+
+    if (FindPlayerPed(0)->m_pVehicle == FindPlayerPed(1)->m_pVehicle) {
+        if (m_bAllowShootingWith2PlayersInCar) {
+            m_nModeToGoTo = m_nModeForTwoPlayersSameCarShootingAllowed;
+        } else {
+            m_nModeToGoTo = m_nModeForTwoPlayersSameCarShootingNotAllowed;
+        }
+    } else {
+        m_nModeToGoTo = m_nModeForTwoPlayersSeparateCars;
+    }
+
+    m_pTargetEntity = reinterpret_cast<CEntity*>(FindPlayerPed(0)->m_pVehicle);
+    m_pTargetEntity->RegisterReference(m_pTargetEntity);
+    m_bUseScriptZoomValuePed = false;
+    m_bUseScriptZoomValueCar = false;
 }
 
 // 0x50BD20
