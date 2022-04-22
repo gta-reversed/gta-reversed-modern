@@ -1142,7 +1142,6 @@ void CCamera::CamControl() {
 
 // 0x5B24A0
 void CCamera::DeleteCutSceneCamDataMemory() {
-    printf("DeleteCutSceneCamDataMemory\n");
     for (auto& PathArray : m_aPathArray) {
         if (PathArray.m_pArrPathData) {
             delete PathArray.m_pArrPathData;
