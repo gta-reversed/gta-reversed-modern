@@ -39,7 +39,7 @@ CVector& CGangWars::PointOfAttack = *reinterpret_cast<CVector*>(0x96ABC8);
 void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
     RH_ScopedCategoryGlobal();
-  
+
     // RH_ScopedInstall(Load, 0x5D3EB0);
     // RH_ScopedInstall(Save, 0x5D5530);
     RH_ScopedInstall(InitAtStartOfGame, 0x443920);
@@ -61,7 +61,7 @@ void CGangWars::InjectHooks() {
     // RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
     RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);
     // RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
-    // RH_ScopedInstall(PickZoneToAttack, 0x443B00);
+    RH_ScopedInstall(PickZoneToAttack, 0x443B00);
     RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);
     // RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
     RH_ScopedInstall(SetGangWarsActive, 0x446570);
@@ -107,12 +107,12 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (NumSpecificZones == 0)
         Provocation += 1.0f;
 
-   for (auto i = 0u; i < NumSpecificZones; i++) {
-       uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
+    for (auto i = 0u; i < NumSpecificZones; i++) {
+        uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
 
-       if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
-           Provocation += 1.0f;
-   }
+        if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
+            Provocation += 1.0f;
+    }
 }
 
 // 0x445B30
@@ -134,10 +134,8 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
         return true;
 
     // inline?
-    for (auto i = 0u; i < NumSpecificZones; i++) {
-        uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
-
-        if (zoneInfo == &CTheZones::ZoneInfoArray[zoneInfIdx])
+    for (auto& zone : CTheZones::NavigationZoneArray) {
+        if (zoneInfo == &CTheZones::ZoneInfoArray[zone.m_nZoneExtraIndexInfo])
             return true;
     }
 
@@ -200,7 +198,7 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     CStats::IncrementStat(STAT_RESPECT, 45.0f);
     CTheZones::FillZonesWithGangColours(false);
 
-    TimeTillNextAttack = std::min(TimeTillNextAttack - 240000.0f, 30000.0f);
+    TimeTillNextAttack = std::min(TimeTillNextAttack - 240'000.0f, 30'000.0f);
 }
 
 // inlined
@@ -217,19 +215,20 @@ bool CGangWars::DontCreateCivilians() {
 }
 
 // 0x4464C0
-void CGangWars::EndGangWar(bool bEnd) {
+void CGangWars::EndGangWar(bool end) {
     State = NOT_IN_WAR;
 
     if (State2 == WAR_NOTIFIED) {
         State2 = NO_ATTACK;
         TimeTillNextAttack = CalculateTimeTillNextAttack();
-        uint32 nReleasedPeds = ReleasePedsInAttackWave(true, false);
-        MakeEnemyGainInfluenceInZone(Gang1, 3 * nReleasedPeds);
+
+        uint32 releasedPeds = ReleasePedsInAttackWave(true, false);
+        MakeEnemyGainInfluenceInZone(Gang1, 3 * releasedPeds);
     }
 
     Provocation = 0.0f;
     CTheZones::FillZonesWithGangColours(false);
-    ReleasePedsInAttackWave(true, bEnd);
+    ReleasePedsInAttackWave(true, end);
     ReleaseCarsInAttackWave();
 }
 
@@ -289,13 +288,58 @@ bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32* outPedId) {
 
 // 0x443B00
 bool CGangWars::PickZoneToAttack() {
-    return plugin::CallAndReturn<bool, 0x443B00>();
+    CCarCtrl::InitSequence(CTheZones::TotalNumberOfNavigationZones);
+    CZone* enemyGangZone = nullptr;
+
+    // choose a territory controlled that is by enemy gangs
+    for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+        auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
+        auto zoneInfo = CTheZones::GetZoneInfo(zone);
+
+        if (!zoneInfo)
+            continue;
+
+        if (zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS] >= 20) {
+            enemyGangZone = zone;
+            break;
+        }
+    }
+
+    // find a close territory that is controlled by the gsf
+    for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+        auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
+        auto zoneInfo = CTheZones::GetZoneInfo(zone);
+
+        if (!zoneInfo)
+            continue;
+
+        if ((float)zone->m_fX1 <= 2500.0f && (float)zone->m_fX2 >= 2500.0f && (float)zone->m_fY1 <= -1666.0f && (float)zone->m_fY2 >= -1666.0f)
+            continue;
+
+        if (zoneInfo->GangDensity[GANG_GROVE] <= 15)
+            continue;
+
+        if (CTheZones::Calc2DDistanceBetween2Zones(enemyGangZone, zone) < 10.0f) {
+            pZoneToFightOver = zone;
+            pZoneInfoToFightOver = zoneInfo;
+            PointOfAttack = CVector{(float)(zone->m_fX1 + zone->m_fX2) / 2.0f, (float)(zone->m_fY1 + zone->m_fY2) / 2.0f, 10.0f};
+
+            auto enemyGangZoneInfo = CTheZones::GetZoneInfo(enemyGangZone);
+            Gang1 = (enemyGangZoneInfo->GangDensity[GANG_BALLAS] > enemyGangZoneInfo->GangDensity[GANG_VAGOS]) ? GANG_BALLAS : GANG_VAGOS;
+
+            if (DistanceBetweenPoints2D(FindPlayerCoors(), PointOfAttack) > 60.0f)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         auto vehicle = GetVehiclePool()->GetAt(i);
+
         if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
             vehicle->vehicleFlags.bPartOfAttackWave = false;
             vehicle->SetVehicleCreatedBy(1);
@@ -351,13 +395,13 @@ void CGangWars::SwitchGangWarsActive() {
 }
 
 // 0x444530
-void CGangWars::TellGangMembersTo(bool bIsGangWarEnding) {
-    plugin::Call<0x444530, bool>(bIsGangWarEnding);
+void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
+    plugin::Call<0x444530, bool>(isGangWarEnding);
 }
 
 // fix_bugs: originally has int32 type, but changed to unsigned due possible UB 
 // 0x443D50
-void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags) {
+void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* gangsBitFlags) {
     if (State2 == NO_ATTACK)
         return;
 
@@ -365,7 +409,7 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags) {
     CVector2D delta = { coors.x - PointOfAttack.x, coors.y - PointOfAttack.y };
 
     if (delta.Magnitude() < 150.0f)
-        *GangsBitFlags |= 1 << Gang1;
+        *gangsBitFlags |= 1 << Gang1;
 }
 
 // 0x446610

@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include "CarCtrl.h"
+
 class CZone;
 class CZoneInfo;
 class CRadar;
@@ -100,7 +102,7 @@ public:
     static void StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser);
     static void SwitchGangWarsActive();
 
-    static void TellGangMembersTo(bool bIsGangWarEnding);
+    static void TellGangMembersTo(bool isGangWarEnding);
     static void TellStreamingWhichGangsAreNeeded(uint32* GangsBitFlags);
 
     static void Update();

@@ -14,12 +14,11 @@ eLevelName& CTheZones::m_CurrLevel = *(eLevelName*)0xBA6718;
 
 char* CTheZones::ZonesVisited = (char*)0xBA3730;
 int32& CTheZones::ZonesRevealed = *(int32*)0xBA372C;
-
 int16& CTheZones::TotalNumberOfMapZones = *(int16*)0xBA1900;
-CZone* CTheZones::NavigationZoneArray = (CZone*)0xBA3798;
+CZone (&CTheZones::NavigationZoneArray)[380] = *(CZone(*)[380])0xBA3798;
 
 int16& CTheZones::TotalNumberOfNavigationZones = *(int16*)0xBA3794;
-CZone* CTheZones::MapZoneArray = (CZone*)0xBA1908;
+CZone (&CTheZones::MapZoneArray)[39] = *(CZone(*)[39])0xBA1908;
 
 int16& CTheZones::TotalNumberOfZoneInfos = *(int16*)0xBA1DE8;
 CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
@@ -27,7 +26,6 @@ CZoneInfo* CTheZones::ZoneInfoArray = (CZoneInfo*)0xBA1DF0;
 void CTheZones::InjectHooks() {
     RH_ScopedClass(CTheZones);
     RH_ScopedCategoryGlobal();
-
     RH_ScopedInstall(ResetZonesRevealed, 0x572110);
     RH_ScopedInstall(GetCurrentZoneLockedOrUnlocked, 0x572130);
     RH_ScopedInstall(PointLiesWithinZone, 0x572270);
