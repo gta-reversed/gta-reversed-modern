@@ -305,6 +305,9 @@ bool CGangWars::PickZoneToAttack() {
         }
     }
 
+    if (!enemyGangZone) [[unlikely]]
+        return false;
+
     // find a close territory that is controlled by the gsf
     for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
         auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
