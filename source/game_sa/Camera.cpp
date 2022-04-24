@@ -12,6 +12,10 @@ bool& CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool*>(0xB6EC2D);
 CCamera& TheCamera = *reinterpret_cast<CCamera*>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
 char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
+int8& gCurCamColVars = *(int8*)0x8CCB80;
+int32& gCurDistForCam = *(int32*)0x8CCB84;
+int32& gpCamColVars = *(int32*)0xB6FE88;
+char (&gCamColVars)[672] = *(char (*)[672])0x8CC8E0;
 
 CCam& CCamera::GetActiveCamera() {
     return TheCamera.m_aCams[TheCamera.m_nActiveCam];
@@ -90,10 +94,10 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
 //    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
     RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
-//    RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
+    RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
 //    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90);
 //    RH_ScopedInstall(SetColVarsPed, 0x50CC50);
-//    RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
+    RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
 //    RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
 //    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
@@ -1166,12 +1170,40 @@ void CCamera::Enable1rstPersonWeaponsCamera() {
 
 // 0x50CB60
 void CCamera::SetCamCollisionVarDataSet(int32 index) {
-    plugin::Call<0x50CB60, int32>(index);
+    int8 byteIndex = (int8)(index);
+
+    if (byteIndex == gCurCamColVars) {
+        return;
+    }
+
+    gCurCamColVars = byteIndex;
+    gCurDistForCam = 0x3F800000;
+    gpCamColVars = (int32)&gCamColVars[index * 24];
 }
 
 // 0x50CCA0
 void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) {
-    plugin::Call<0x50CCA0, eVehicleType, int32>(vehicleType, camVehicleZoom);
+    switch (vehicleType) {
+        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
+        case eVehicleType::VEHICLE_TYPE_PLANE:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0x9);
+            return;
+        case eVehicleType::VEHICLE_TYPE_MTRUCK:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0xC);
+            return;
+        case eVehicleType::VEHICLE_TYPE_QUAD:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0xF);
+            return;
+        case eVehicleType::VEHICLE_TYPE_HELI:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0x12);
+            return;
+        case eVehicleType::VEHICLE_TYPE_BOAT:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0x15);
+            return;
+        case eVehicleType::VEHICLE_TYPE_TRAIN:
+            SetCamCollisionVarDataSet(camVehicleZoom + 0x18);
+            return;
+    }
 }
 
 // 0x50A970
