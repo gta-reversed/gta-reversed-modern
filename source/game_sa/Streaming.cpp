@@ -4,6 +4,7 @@
 #include "Radar.h"
 #include "CarCtrl.h"
 #include "PostEffects.h"
+#include "TheScripts.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -1348,8 +1349,8 @@ void CStreaming::RenderEntity(CLink<CEntity*>* streamingLink) {
 // 0x409430
 // Load big buildings around `point`
 void CStreaming::RequestBigBuildings(const CVector& point) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding) {
             if (CRenderer::ShouldModelBeStreamed(building, point, TheCamera.m_pRwCamera->farPlane))
                 RequestModel(building->m_nModelIndex, 0);
@@ -1782,21 +1783,21 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
 
     // Make sure model isn't used anywhere by destroying all objects/peds using it.
     if (modelInfo->m_nRefCount > 0) {
-        for (int32 i = CPools::ms_pPedPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CPed* ped = CPools::ms_pPedPool->GetAt(i);
+            CPed* ped = GetPedPool()->GetAt(i);
             if (ped && ped->m_nModelIndex == modelId && !ped->IsPlayer() && ped->CanBeDeletedEvenInVehicle()) {
                 CTheScripts::RemoveThisPed(ped);
             }
         }
 
-        for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
+        for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
             if (modelInfo->m_nRefCount <= 0)
                 break;
 
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (obj && obj->m_nModelIndex == modelId && obj->CanBeDeleted()) {
                 CWorld::Remove(obj);
                 CWorld::RemoveReferencesToDeletedObject(obj);
@@ -1996,7 +1997,7 @@ void CStreaming::ReInit() {
     const auto RemoveModelsInRange = [](auto base, auto count) {
         for (auto modelId = base; modelId < base + count; modelId++) {
             RemoveModel(modelId);
-            CModelInfo::GetModelInfo(modelId)->SetModelName(gta_empty_string);
+            CModelInfo::GetModelInfo(modelId)->SetModelName("");
         }
     };
     RemoveModelsInRange(SPECIAL_MODELS_RESOURCE_ID, TOTAL_SPECIAL_MODELS);
@@ -2008,69 +2009,69 @@ void CStreaming::ReInit() {
 // Loads `stream.ini` settings file
 void CStreaming::ReadIniFile() {
     bool bHasDevkitMemory = false;
-    auto file = CFileMgr::OpenFile("stream.ini", "r");
+    auto* file = CFileMgr::OpenFile("stream.ini", "r");
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file))
     {
-        if (*line != '#' && *line)
+        if (*line == '#' || !*line)
+            continue;
+
+        char* attribute = strtok(line, " ,\t");
+        char* value = strtok(nullptr, " ,\t");
+        if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
         {
-            char* attribute = strtok(line, " ,\t");
-            char* value = strtok(nullptr, " ,\t");
-            if (_stricmp(attribute, "memory") != 0 || bHasDevkitMemory)
+            if (!_stricmp(attribute, "devkit_memory"))
             {
-                if (!_stricmp(attribute, "devkit_memory"))
-                {
-                    CStreaming::ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
-                    bHasDevkitMemory = true;
-                }
-                else if (!_stricmp(attribute, "vehicles"))
-                {
-                    CStreaming::desiredNumVehiclesLoaded = atoi(value);
-                }
-                else if (!_stricmp(attribute, "dontbuildpaths"))
-                {
-                    //bDontBuildPaths = 1; // unused
-                }
-                else if (!_stricmp(attribute, "pe_lightchangerate"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasecap"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_lightingbasemult"))
-                {
-                    CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
-                }
-                else if (!_stricmp(attribute, "pe_leftx"))
-                {
-                    CPostEffects::m_colourLeftUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_rightx"))
-                {
-                    CPostEffects::m_colourRightUOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_topy"))
-                {
-                    CPostEffects::m_colourTopVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bottomy"))
-                {
-                    CPostEffects::m_colourBottomVOffset = (float)atoi(value);
-                }
-                else if (!_stricmp(attribute, "pe_bRadiosity"))
-                {
-                    CPostEffects::m_bRadiosity = atoi(value) != 0;
-                }
-                else if (!_stricmp(attribute, "def_brightness_pal"))
-                {
-                    FrontEndMenuManager.m_nBrightness = atoi(value);
-                }
+                ms_memoryAvailable = atoi(value) * 1024; // kB => bytes conversion
+                bHasDevkitMemory = true;
             }
-            else
+            else if (!_stricmp(attribute, "vehicles"))
             {
-                CStreaming::ms_memoryAvailable = atoi(value) << 10;
+                desiredNumVehiclesLoaded = atoi(value);
             }
+            else if (!_stricmp(attribute, "dontbuildpaths"))
+            {
+                //bDontBuildPaths = 1; // unused
+            }
+            else if (!_stricmp(attribute, "pe_lightchangerate"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_CHANGE_RATE = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasecap"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_CAP = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_lightingbasemult"))
+            {
+                CPostEffects::SCREEN_EXTRA_MULT_BASE_MULT = static_cast<float>(atof(value));
+            }
+            else if (!_stricmp(attribute, "pe_leftx"))
+            {
+                CPostEffects::m_colourLeftUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_rightx"))
+            {
+                CPostEffects::m_colourRightUOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_topy"))
+            {
+                CPostEffects::m_colourTopVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bottomy"))
+            {
+                CPostEffects::m_colourBottomVOffset = (float)atoi(value);
+            }
+            else if (!_stricmp(attribute, "pe_bRadiosity"))
+            {
+                CPostEffects::m_bRadiosity = atoi(value) != 0;
+            }
+            else if (!_stricmp(attribute, "def_brightness_pal"))
+            {
+                FrontEndMenuManager.m_nBrightness = atoi(value);
+            }
+        }
+        else
+        {
+            ms_memoryAvailable = atoi(value) << 10;
         }
     }
     CFileMgr::CloseFile(file);
@@ -2116,8 +2117,8 @@ void CStreaming::RemoveAllUnusedModels() {
 // 0x4093B0
 // Remove all BIG building's RW objects and models
 void CStreaming::RemoveBigBuildings() {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_bIsBIGBuilding && !building->m_bImBeingRendered) {
             building->DeleteRwObject();
             if (!CModelInfo::GetModelInfo(building->m_nModelIndex)->m_nRefCount)
@@ -2129,8 +2130,8 @@ void CStreaming::RemoveBigBuildings() {
 // 0x4094B0
 // Remove buildings, objects and dummies not in the current area (as in CWorld::currArea)
 void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
-    for (int32 i = CPools::ms_pBuildingPool->GetSize() - 1; i >= 0; i--) {
-        CBuilding* building = CPools::ms_pBuildingPool->GetAt(i);
+    for (int32 i = GetBuildingPool()->GetSize() - 1; i >= 0; i--) {
+        CBuilding* building = GetBuildingPool()->GetAt(i);
         if (building && building->m_pRwObject) {
             if (!building->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!building->m_bImBeingRendered && !building->m_bIsBIGBuilding)
@@ -2138,8 +2139,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) {
-        CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+    for (int32 i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
+        CObject* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->m_pRwObject) {
             if (obj->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!obj->m_bImBeingRendered && obj->m_nObjectType == eObjectType::OBJECT_GAME)
@@ -2147,8 +2148,8 @@ void CStreaming::RemoveBuildingsNotInArea(eAreaCodes areaCode) {
             }
         }
     }
-    for (int32 i = CPools::ms_pDummyPool->GetSize() - 1; i >= 0; i--) {
-        CDummy* dummy = CPools::ms_pDummyPool->GetAt(i);
+    for (int32 i = GetDummyPool()->GetSize() - 1; i >= 0; i--) {
+        CDummy* dummy = GetDummyPool()->GetAt(i);
         if (dummy && dummy->m_pRwObject) {
             if (dummy->IsInCurrentAreaOrBarberShopInterior()) {
                 if (!dummy->m_bImBeingRendered)
@@ -2946,22 +2947,22 @@ bool CStreaming::IsCarModelNeededInCurrentZone(int32 modelId) {
         return false;
 
     // Check cheats
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY])
+    if (CCheat::IsActive(CHEAT_BEACH_PARTY))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_BEACHFOLK, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_COUNTRY_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_FARMERS, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_CHEAP_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT1, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC])
+    if (CCheat::IsActive(CHEAT_FAST_TRAFFIC))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT2, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME])
+    if (CCheat::IsActive(CHEAT_NINJA_THEME))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT3, modelId);
 
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME])
+    if (CCheat::IsActive(CHEAT_FUNHOUSE_THEME))
         return CPopulation::DoesCarGroupHaveModelId(POPCYCLE_CARGROUP_CHEAT4, modelId);
 
     // Check in current popcycle
@@ -3202,27 +3203,27 @@ void CStreaming::StreamOneNewCar() {
 
     bool bCheatActive = false;
     int32 carGroupId = 0;
-    if (CCheat::m_aCheatsActive[CHEAT_BEACH_PARTY]) {
+    if (CCheat::IsActive(CHEAT_BEACH_PARTY)) {
         carGroupId = POPCYCLE_CARGROUP_BEACHFOLK;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_COUNTRY_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_COUNTRY_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_FARMERS;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_CHEAP_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_CHEAP_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT1;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FAST_TRAFFIC]) {
+    if (CCheat::IsActive(CHEAT_FAST_TRAFFIC)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT2;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_NINJA_THEME]) {
+    if (CCheat::IsActive(CHEAT_NINJA_THEME)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT3;
         bCheatActive = true;
     }
-    if (CCheat::m_aCheatsActive[CHEAT_FUNHOUSE_THEME]) {
+    if (CCheat::IsActive(CHEAT_FUNHOUSE_THEME)) {
         carGroupId = POPCYCLE_CARGROUP_CHEAT4;
         bCheatActive = true;
     }
@@ -3273,8 +3274,7 @@ void CStreaming::StreamOneNewCar() {
     }
 
     if (carModelId < 0) {
-        int32 carGroupId = CPopCycle::PickARandomGroupOfOtherPeds();
-        carModelId = CCarCtrl::ChooseCarModelToLoad(carGroupId);
+        carModelId = CCarCtrl::ChooseCarModelToLoad(CPopCycle::PickARandomGroupOfOtherPeds());
         if (carModelId < 0)
             return;
     }
@@ -3479,7 +3479,7 @@ void CStreaming::StreamVehiclesAndPeds() {
 
 // 0x40B650
 void CStreaming::StreamVehiclesAndPeds_Always(const CVector& unused) {
-    if (CVehicle* vehicle = FindPlayerVehicle(-1, false)) {
+    if (CVehicle* vehicle = FindPlayerVehicle()) {
         switch (vehicle->m_nVehicleSubType) {
         case VEHICLE_TYPE_PLANE:
             return;
@@ -3518,26 +3518,26 @@ void CStreaming::StreamZoneModels(const CVector& unused) {
            const auto slot = std::ranges::find_if(ms_pedsLoaded,
                 [](auto model) { return model == -1 || CModelInfo::GetModelInfo(model)->m_nRefCount == 0; }
             );
-            if (slot != std::end(ms_pedsLoaded)) {
-                int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
-                if (pedModelId != *slot && pedModelId >= 0) {
-                    RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
-                    GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED); // Ok???? Y?
+           if (slot != std::end(ms_pedsLoaded)) {
+               int32 pedModelId = CPopCycle::PickPedMIToStreamInForCurrentZone();
+               if (pedModelId != *slot && pedModelId >= 0) {
+                   RequestModel(pedModelId, STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
+                   GetInfo(pedModelId).ClearFlags(STREAMING_GAME_REQUIRED); // Ok???? Y?
 
-                    if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
-                        SetModelAndItsTxdDeletable(*slot);
-                       *slot = -1;
-                    } else {
-                        ++ms_numPedsLoaded;
-                    }
+                   if (ms_numPedsLoaded == TOTAL_LOADED_PEDS) {
+                       SetModelAndItsTxdDeletable(*slot);
+                      *slot = -1;
+                   } else {
+                       ++ms_numPedsLoaded;
+                   }
 
-                    int32 freeSlot = 0;
-                    for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
-                    ms_pedsLoaded[freeSlot] = pedModelId;
+                   int32 freeSlot = 0;
+                   for (; ms_pedsLoaded[freeSlot] >= 0; freeSlot++); // Find free slot
+                   ms_pedsLoaded[freeSlot] = pedModelId;
 
-                    timeBeforeNextLoad = 300;
-                }
-            }
+                   timeBeforeNextLoad = 300;
+               }
+           }
         }
     } else {
         int32 numPedsToLoad = ms_numPedsLoaded;
@@ -3623,7 +3623,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
         if (CPopCycle::m_pCurrZoneInfo->GangDensity[i] != 0)
             gangsNeeded |= (1 << i);
     }
-    if (CCheat::m_aCheatsActive[CHEAT_GANGS_CONTROLS_THE_STREETS])
+    if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS))
         gangsNeeded |= 0xFF; // All gangs basically
 
     CGangWars::TellStreamingWhichGangsAreNeeded(&gangsNeeded);

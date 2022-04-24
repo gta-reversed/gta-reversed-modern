@@ -38,7 +38,7 @@ float CVector::Magnitude() const
     return sqrt(x * x + y * y + z * z);
 }
 
-float CVector::Magnitude2D()
+float CVector::Magnitude2D() const
 {
     return sqrt(x * x + y * y);
 }
@@ -89,14 +89,6 @@ void CVector::Difference(const CVector& left, const CVector &right)
     x = left.x - right.x;
     y = left.y - right.y;
     z = left.z - right.z;
-}
-
-// Assigns value from other vector
-void CVector::operator= (const CVector& right)
-{
-    x = right.x;
-    y = right.y;
-    z = right.z;
 }
 
 // Adds value from the second vector.

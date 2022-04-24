@@ -8,22 +8,20 @@ void CEventVehicleOnFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B10C0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4FD0);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B7740);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4FD0);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B7740);
 }
 
 // 0x4B10C0
 CEventVehicleOnFire::CEventVehicleOnFire(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleOnFire::~CEventVehicleOnFire()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventVehicleOnFire* CEventVehicleOnFire::Constructor(CVehicle* vehicle)

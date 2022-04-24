@@ -17,10 +17,10 @@ public:
     bool operator==(CNodeAddress const&) const = default;
     bool operator!=(CNodeAddress const&) const = default;
 
-    inline bool IsAreaValid() {
+    inline bool IsAreaValid() const {
         return m_wAreaId != (uint16)-1;
     }
-    inline bool IsValid() {
+    inline bool IsValid() const {
         return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1;
     }
 };

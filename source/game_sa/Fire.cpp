@@ -180,21 +180,17 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
 }
 
 void CFire::SetTarget(CEntity* target) {
-    if (m_pEntityTarget)
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
+    CEntity::SafeCleanUpRef(m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
 
     m_pEntityTarget = target; /* assign, even if its null, to clear it */
-    if (target)
-        m_pEntityTarget->RegisterReference(&m_pEntityTarget); /* Assume caller set target->m_pFire */
+    CEntity::SafeRegisterRef(m_pEntityTarget); /* Assume caller set target->m_pFire */
 }
 
 void CFire::SetCreator(CEntity* creator) {
-    if (m_pEntityCreator)
-        m_pEntityCreator->CleanUpOldReference(&m_pEntityCreator);
+    CEntity::SafeCleanUpRef(m_pEntityCreator);
 
     m_pEntityCreator = creator; /* assign, even if its null, to clear it */
-    if (creator)
-        creator->RegisterReference(&m_pEntityCreator);
+    CEntity::SafeRegisterRef(m_pEntityCreator);
 }
 
 void CFire::DestroyFx() {
@@ -244,8 +240,7 @@ void CFire::Extinguish() {
             break;
         }
         }
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget);
-        m_pEntityTarget = nullptr;
+        CEntity::ClearReference(m_pEntityTarget);
     }
 }
 
@@ -328,8 +323,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 32 == 0) {
-        for (auto i = CPools::ms_pVehiclePool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i);
+        for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
                 continue;
 
@@ -347,8 +342,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 4 == 0) {
-        for (auto i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+        for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
                 continue;
 

@@ -9,6 +9,8 @@ public:
     int32      m_nTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_PAUSE;
+
     CTaskSimplePause(int32 time);
     ~CTaskSimplePause() = default;
 

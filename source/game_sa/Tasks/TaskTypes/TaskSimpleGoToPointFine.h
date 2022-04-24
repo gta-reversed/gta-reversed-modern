@@ -7,6 +7,8 @@ public:
     float m_fMoveRatio;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GO_TO_POINT_FINE;
+
     CTaskSimpleGoToPointFine(float moveRatio, CVector targetPoint, float fRadius, CEntity* entity);
     ~CTaskSimpleGoToPointFine() override = default;
 

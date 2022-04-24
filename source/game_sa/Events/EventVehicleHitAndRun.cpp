@@ -8,8 +8,8 @@ void CEventVehicleHitAndRun::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE990);
-    RH_ScopedInstall(Clone_Reversed, 0x4B7100);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B27D0);
+    RH_ScopedVirtualInstall(Clone, 0x4B7100);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B27D0);
 }
 
 CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
@@ -22,10 +22,8 @@ CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
 
 CEventVehicleHitAndRun::~CEventVehicleHitAndRun()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 // 0x4AE990

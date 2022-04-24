@@ -21,12 +21,12 @@ CBuilding::CBuilding() : CEntity()
 
 void* CBuilding::operator new(unsigned size)
 {
-    return CPools::ms_pBuildingPool->New();
+    return GetBuildingPool()->New();
 }
 
 void CBuilding::operator delete(void* data)
 {
-    CPools::ms_pBuildingPool->Delete(static_cast<CBuilding*>(data));
+    GetBuildingPool()->Delete(static_cast<CBuilding*>(data));
 }
 
 void CBuilding::ReplaceWithNewModel(int32 newModelIndex)
@@ -43,5 +43,5 @@ bool IsBuildingPointerValid(CBuilding* building)
     if (!building)
         return false;
 
-    return CPools::ms_pBuildingPool->IsObjectValid(building);
+    return GetBuildingPool()->IsObjectValid(building);
 }

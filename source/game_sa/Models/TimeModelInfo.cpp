@@ -6,8 +6,8 @@ void CTimeModelInfo::InjectHooks() {
     RH_ScopedClass(CTimeModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C5660);
-    RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C5670);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C5660);
+    RH_ScopedVirtualInstall(GetTimeInfo, 0x4C5670);
     // RH_ScopedInstall(FindOtherTimeModel, 0x4C47E0);
 }
 

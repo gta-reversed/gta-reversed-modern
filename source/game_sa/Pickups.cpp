@@ -87,6 +87,12 @@ void CPickups::AddToCollectedPickupsArray(int32 handle) {
 }
 
 // 0x458A80
+/*!
+* @addr 0x458A80
+* @brief Created a pickup close to pos (\r in_x, \r in_y, \r in_z)
+*
+* @param [out] out_x, out_y, out_z Created pickup's position
+*/
 void CPickups::CreatePickupCoorsCloseToCoors(float in_x, float in_y, float in_z, float* out_x, float* out_y, float* out_z) {
     plugin::Call<0x458A80, float, float, float, float*, float*, float*>(in_x, in_y, in_z, out_x, out_y, out_z);
 }
@@ -253,6 +259,22 @@ bool CPickups::Load() {
 // 0x5D3540
 bool CPickups::Save() {
     return plugin::CallAndReturn<bool, 0x5D3540>();
+}
+
+/*!
+* @brief Our custom Vector based overload
+* @copydocs CPickups::CreatePickupCoorsCloseToCoors
+*/
+void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos) {
+    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &createdAtPos.x, &createdAtPos.y, &createdAtPos.z);
+}
+
+/*!
+* @brief Our custom Vector based overload
+* @copydocs CPickups::CreatePickupCoorsCloseToCoors
+*/
+void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& out_x, float& out_y, float& out_z) {
+    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &out_x, &out_y, &out_z);
 }
 
 // 0x454B70

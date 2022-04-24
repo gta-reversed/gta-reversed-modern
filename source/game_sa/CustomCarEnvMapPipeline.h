@@ -35,7 +35,21 @@ struct CustomSpecMapPipeMaterialData {
 };
 VALIDATE_SIZE(CustomSpecMapPipeMaterialData, 0x8);
 
+typedef CPool<CustomEnvMapPipeMaterialData>  CustomEnvMapPipeMaterialDataPool;
+typedef CPool<CustomEnvMapPipeAtomicData>    CustomEnvMapPipeAtomicDataPool;
+typedef CPool<CustomSpecMapPipeMaterialData> CustomSpecMapPipeMaterialDataPool;
+
 class CCustomCarEnvMapPipeline {
+public:
+    static inline uint32& ms_envMapPluginOffset = *(uint32*)0x8D12C4;      // -1
+    static inline uint32& ms_envMapAtmPluginOffset = *(uint32*)0x8D12C8;   // -1
+    static inline uint32& ms_specularMapPluginOffset = *(uint32*)0x8D12CC; // -1
+    static inline CustomEnvMapPipeMaterialData& fakeEnvMapPipeMatData = *(CustomEnvMapPipeMaterialData*)0xC02D18;
+    static inline RxPipeline*& ObjPipeline = *(RxPipeline**)0xC02D24;
+    static inline CustomEnvMapPipeMaterialDataPool*& m_gEnvMapPipeMatDataPool = *(CustomEnvMapPipeMaterialDataPool**)0xC02D28;
+    static inline CustomEnvMapPipeAtomicDataPool*& m_gEnvMapPipeAtmDataPool = *(CustomEnvMapPipeAtomicDataPool**)0xC02D2C;
+    static inline CustomSpecMapPipeMaterialDataPool*& m_gSpecMapPipeMatDataPool = *(CustomSpecMapPipeMaterialDataPool**)0xC02D30;
+
 public:
     static int32 CustomPipeInstanceCB(int32 arg1, int32 arg2, int32(__cdecl* callback)(int32, int32, int32));
     static void PreRenderUpdate();
@@ -55,6 +69,7 @@ public:
     static void* pluginSpecMatDestructorCB(void* object);
     static void* pluginSpecMatCopyConstructorCB(void* object_dst, const void* object_src);
     static RwStream* pluginSpecMatStreamReadCB(RwStream* stream, int32 length, void* object);
+
     static int32 CustomPipeRenderCB(RwResEntry* atomic, void* object, uint8 flags1, uint32 flags2);
     static RxPipeline* CreateCustomOpenGLObjPipe();
     static char CreatePipe();
@@ -64,13 +79,4 @@ public:
     static RpMaterial* CustomPipeMaterialSetup(RpMaterial* arg0, void* arg1);
     static RpAtomic* CustomPipeAtomicSetup(RpAtomic* arg0);
     static RpAtomic* CustomCarPipeAtomicSetupCB(RpAtomic* atomic, void* data);
-
-    static int32& ms_envMapPluginOffset;
-    static int32& ms_envMapAtmPluginOffset;
-    static int32& ms_specularMapPluginOffset;
-    static CustomEnvMapPipeMaterialData& fakeEnvMapPipeMatData;
-    static RxPipeline*& ObjPipeline;
-    static CPool<CustomEnvMapPipeMaterialData>*& m_gEnvMapPipeMatDataPool;
-    static CPool<CustomEnvMapPipeAtomicData>*& m_gEnvMapPipeAtmDataPool;
-    static CPool<CustomSpecMapPipeMaterialData>*& m_gSpecMapPipeMatDataPool;
 };

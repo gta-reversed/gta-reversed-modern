@@ -221,7 +221,7 @@ void CPad::UpdatePads() {
         ControlsManager.AffectPadFromKeyBoard();
         ControlsManager.AffectPadFromMouse();
         GetPad(0)->Update(0);
-        GetPad(1)->Update(0);
+        GetPad(1)->Update(1);
     }
 
     OldKeyState = NewKeyState;
@@ -356,7 +356,7 @@ void CPad::StartShake(int16 time, uint8 freq, uint32 shakeDelayMs) {
                 ShakeDur = time;
                 ShakeFreq = freq;
             }
-            NoShakeBeforeThis = shakeDelayMs + CTimer::GetTimeInMS();
+            NoShakeBeforeThis = float(shakeDelayMs + CTimer::GetTimeInMS());
             NoShakeFreq = freq;
         }
     } else {
@@ -390,7 +390,7 @@ void CPad::StartShake_Train(const CVector2D& point) {
     if (!FrontEndMenuManager.m_PrefsUseVibration || CCutsceneMgr::ms_running)
         return;
 
-    if (FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->m_vehicleType == eVehicleType::VEHICLE_TRAIN)
+    if (FindPlayerVehicle(-1) && FindPlayerVehicle(-1)->IsTrain())
         return;
 
     auto fDistSq = DistanceBetweenPointsSquared(TheCamera.GetPosition(), point);
@@ -865,10 +865,11 @@ int16 CPad::GetDisplayVitalStats(CPed* ped) const {
     if (DisablePlayerControls || bDisablePlayerDisplayVitalStats)
         return false;
 
-    if (ped && ped->GetIntelligence()->IsUsingGun())
+    if (Mode <= 3) {
+        return ped && ped->GetIntelligence()->IsUsingGun() && NewState.LeftShoulder1;
+    } else {
         return false;
-
-    return Mode <= 3 && NewState.LeftShoulder1;
+    }
 }
 
 // 0x540A70
@@ -937,6 +938,7 @@ bool CPad::SniperZoomOut() const {
     return false;
 }
 
+// todo: Describe our modification
 // 0x540250
 bool CPad::WeaponJustDown(CPed* ped) const {
     if (DisablePlayerControls || bDisablePlayerDisplayVitalStats)
@@ -951,13 +953,11 @@ bool CPad::WeaponJustDown(CPed* ped) const {
         if (bDisablePlayerFireWeaponWithL1)
             return false;
 
-        if (!IsLeftShoulder1Pressed())
+        if (ped && (ped->m_pAttachedTo || ped->GetIntelligence()->IsUsingGun())) {
+            return IsLeftShoulder1Pressed();
+        } else {
             return false;
-
-        if (ped && (ped->m_pAttachedTo || ped->GetIntelligence()->IsUsingGun()))
-            return true;
-
-        break;
+        }
     }
     case 2:
         return IsCrossPressed();
@@ -1162,7 +1162,7 @@ bool CPad::sub_540530() const noexcept {
         if (OldState.Select == 0)
             return true;
 
-        break;
+        return sub_5404F0();
     }
     case 1: {
         if (NewState.DPadUp && OldState.DPadUp == 0)

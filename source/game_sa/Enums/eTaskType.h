@@ -14,6 +14,7 @@ enum eTaskType : int32 {
     TASK_SIMPLE_PLAYER_ON_FOOT = 0,
 
     TASK_SIMPLE_PLAYER_IN_CAR,
+    TASK_COMPLEX_WANDER_MEDIC,
 
     // emergency services tasks
     TASK_COMPLEX_MEDIC_TREAT_INJURED_PED = 100,
@@ -403,7 +404,7 @@ enum eTaskType : int32 {
     // new weapon/fight tasks
     TASK_SIMPLE_FIGHT,
     TASK_SIMPLE_USE_GUN,
-    TASK_SIMPLE_THROW,
+    TASK_SIMPLE_THROW_PROJECTILE,
     TASK_SIMPLE_FIGHT_CTRL,
     TASK_SIMPLE_GUN_CTRL,
     // SCRIPT_DECISION

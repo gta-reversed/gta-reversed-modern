@@ -570,7 +570,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->damageFlags.bDamageFlag8))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
@@ -979,7 +979,7 @@ void CRenderer::ConstructRenderList() {
         float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
         if (player->GetPosition().z - fGroundHeightZ > 50.0f) {
             float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);
-            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle(-1, false))
+            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle())
                 ms_bInTheSky = true;
         }
         const float fCameraZ = TheCamera.GetPosition().z;

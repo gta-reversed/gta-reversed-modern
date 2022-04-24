@@ -2,17 +2,14 @@
 
 #include "PedModelInfo.h"
 
-RwObjectNameIdAssocation(&CPedModelInfo::m_pPedIds)[NUM_PED_NAME_ID_ASSOC] = *(RwObjectNameIdAssocation(*)[NUM_PED_NAME_ID_ASSOC])0x8A6268;
-tPedColNodeInfo(&CPedModelInfo::m_pColNodeInfos)[NUM_PED_COL_NODE_INFOS] = *(tPedColNodeInfo(*)[NUM_PED_COL_NODE_INFOS])0x8A6308;
-
 void CPedModelInfo::InjectHooks()
 {
     RH_ScopedClass(CPedModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C7340);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C57C0);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C6C50);
+    RH_ScopedVirtualInstall(SetClump, 0x4C7340);
     RH_ScopedInstall(AddXtraAtomics, 0x4C6D40);
     RH_ScopedInstall(SetFaceTexture, 0x4C6D50);
     RH_ScopedInstall(CreateHitColModelSkinned, 0x4C6D90);
@@ -21,6 +18,7 @@ void CPedModelInfo::InjectHooks()
     RH_ScopedInstall(IncrementVoice, 0x4C7300);
 }
 
+// 0x4C57C0
 ModelInfoType CPedModelInfo::GetModelType()
 {
     return CPedModelInfo::GetModelType_Reversed();
@@ -30,6 +28,7 @@ ModelInfoType CPedModelInfo::GetModelType_Reversed()
     return ModelInfoType::MODEL_INFO_PED;
 }
 
+// 0x4C6C50
 void CPedModelInfo::DeleteRwObject()
 {
     CPedModelInfo::DeleteRwObject_Reversed();
@@ -37,12 +36,11 @@ void CPedModelInfo::DeleteRwObject()
 void CPedModelInfo::DeleteRwObject_Reversed()
 {
     CClumpModelInfo::DeleteRwObject();
-    if (m_pHitColModel)
-        delete m_pHitColModel;
-
+    delete m_pHitColModel;
     m_pHitColModel = nullptr;
 }
 
+// 0x4C7340
 void CPedModelInfo::SetClump(RpClump* clump)
 {
     CPedModelInfo::SetClump_Reversed(clump);
@@ -59,12 +57,17 @@ void CPedModelInfo::SetClump_Reversed(RpClump* clump)
     GetAnimHierarchyFromClump(m_pRwClump); //Unused? Or indirectly passes through EAX somehow?
 }
 
-void CPedModelInfo::AddXtraAtomics(RpClump* clump)
-{}
+// 0x4C6D40
+void CPedModelInfo::AddXtraAtomics(RpClump* clump) {
+    // NOP
+}
 
-void CPedModelInfo::SetFaceTexture(RwTexture* texture)
-{}
+// 0x4C6D50
+void CPedModelInfo::SetFaceTexture(RwTexture* texture) {
+    // NOP
+}
 
+// 0x4C6D90
 void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump)
 {
     auto hierarchy = GetAnimHierarchyFromSkinClump(clump);
@@ -96,6 +99,7 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump)
     m_pHitColModel = cm;
 }
 
+// 0x4C6F70
 CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* clump)
 {
     if (!m_pHitColModel) {
@@ -127,13 +131,14 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* clump)
     RwV3dTransformPoints(&vecSpine, &vecSpine, 1, CGame::m_pWorkingMatrix2);
     m_pHitColModel->m_boundSphere.Set(1.5F, vecSpine);
     m_pHitColModel->m_boundBox.Set(
-        CVector(vecSpine.x - 1.2F, vecSpine.y - 1.2F, vecSpine.z - 1.2F),
-        CVector(vecSpine.x + 1.2F, vecSpine.y + 1.2F, vecSpine.z + 1.2F)
+        { vecSpine.x - 1.2F, vecSpine.y - 1.2F, vecSpine.z - 1.2F },
+        { vecSpine.x + 1.2F, vecSpine.y + 1.2F, vecSpine.z + 1.2F }
     );
 
     return m_pHitColModel;
 }
 
+// 0x4C7170
 CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* clump)
 {
     if (!m_pHitColModel)
@@ -157,12 +162,15 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* clump)
     auto vecSpine = CVector(0.0F, 0.0F, 0.0F);
     RwV3dTransformPoints(&vecSpine, &vecSpine, 1, pAnimMat);
     m_pHitColModel->m_boundSphere.Set(1.5F, vecSpine);
-    m_pHitColModel->m_boundBox.Set(CVector(vecSpine.x - 1.2F, vecSpine.y - 1.2F, vecSpine.z - 1.2F),
-                                   CVector(vecSpine.x + 1.2F, vecSpine.y + 1.2F, vecSpine.z + 1.2F));
+    m_pHitColModel->m_boundBox.Set(
+        { vecSpine.x - 1.2F, vecSpine.y - 1.2F, vecSpine.z - 1.2F },
+        { vecSpine.x + 1.2F, vecSpine.y + 1.2F, vecSpine.z + 1.2F }
+    );
 
     return m_pHitColModel;
 }
 
+// 0x4C7300
 void CPedModelInfo::IncrementVoice()
 {
     if (m_nVoiceMin < 0 || m_nVoiceMax < 0) {

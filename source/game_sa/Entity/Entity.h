@@ -17,13 +17,22 @@
 #include "eModelID.h"
 #include "eAreaCodes.h"
 
+class CObject;
+class CVehicle;
 class CTrain;
 class CBike;
 class CBoat;
 class CAutomobile;
+class CBike;
+class CTrain;
+class CPed;
+class CObject;
+class CBuilding;
 class CDummy;
 class CBuilding;
+class CDummy;
 class CPhysical;
+class CBaseModelInfo;
 
 class CEntity : public CPlaceable {
 protected:
@@ -166,7 +175,7 @@ public:
     void UpdateAnim();
     bool IsVisible();
     float GetDistanceFromCentreOfMassToBaseOfModel();
-    void CleanUpOldReference(CEntity** entity);
+    void CleanUpOldReference(CEntity** entity); // See helper SafeCleanUpOldReference
     void ResolveReferences();
     void PruneReferences();
     void RegisterReference(CEntity** entity);
@@ -177,6 +186,53 @@ public:
     void UpdateRW();
     // Always returns a non-null value. In case there's no LOD object `this` is returned. NOTSA
     CEntity* FindLastLOD() noexcept;
+
+    // NOTSA
+    CBaseModelInfo* GetModelInfo() const;
+
+    // Wrapper around the mess called `CleanUpOldReference`
+    // Takes in `ref` (which is usually a member variable),
+    // calls `CleanUpOldReference` on it, then sets it to `nullptr`
+    // Used often in the code. 
+    template<typename T>
+    static void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        if (ref) {
+            ref->CleanUpOldReference(reinterpret_cast<CEntity**>(&ref));
+            ref = nullptr;
+        }
+    }
+
+    // Wrapper around the mess called "entity references"
+    // This one sets the given `inOutRef` member variable to `entity`
+    // + clears the old entity (if any)
+    // + set the new entity (if any)
+    template<typename T, typename Y>
+    static void ChangeEntityReference(T*& inOutRef, Y* entity) requires std::is_base_of_v<CEntity, T> && std::is_base_of_v<CEntity, Y> {
+        ClearReference(inOutRef); // Clear old
+        if (entity) { // Set new (if any)
+            inOutRef = entity;
+            inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
+        }
+    }
+
+    template<typename T>
+    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
+    template<typename T>
+    static void SafeRegisterRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->RegisterReference(reinterpret_cast<CEntity**>(&e));
+        }
+    }
+
+    template<typename T>
+    static void SafeCleanUpRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->CleanUpOldReference(reinterpret_cast<CEntity**>(&e));
+        }
+    }
 
 public:
     // Rw callbacks

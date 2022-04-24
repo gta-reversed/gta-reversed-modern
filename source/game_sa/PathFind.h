@@ -15,7 +15,7 @@ static constexpr auto NUM_PATH_MAP_AREAS{ 64 };
 static constexpr auto NUM_PATH_INTERIOR_AREAS{ 8 };
 static constexpr auto NUM_DYNAMIC_LINKS_PER_AREA{ 16 };
 
-enum ePathType {
+enum ePathType : uint8 {
     PATH_TYPE_CARS = 0,
     PATH_TYPE_BOATS
 };
@@ -279,6 +279,10 @@ public:
         assert(address.m_wAreaId < NUM_PATH_MAP_AREAS + NUM_PATH_INTERIOR_AREAS);
         return m_pNaviNodes[address.m_wAreaId][address.m_wCarPathLinkId];
     }
+
+    // Helpers - NOTSA
+    bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
+
 };
 
 VALIDATE_SIZE(CPathFind, 0x3C80);

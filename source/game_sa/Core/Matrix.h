@@ -29,27 +29,27 @@ class CMatrix {
 public:
     CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
-    CMatrix(RwMatrix* matrix, bool temporary); // like previous + attach
-    ~CMatrix();                                // destructor detaches matrix if attached
+    CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
         m_pAttachMatrix = nullptr;
         m_bOwnsAttachedMatrix = false;
     }
+    ~CMatrix();                                        // destructor detaches matrix if attached
 
 private:
     // RwV3d-like:
-    CVector m_right;
-    uint32  flags;
-    CVector m_forward;
-    uint32  pad1;
-    CVector m_up;
-    uint32  pad2;
-    CVector m_pos;
-    uint32  pad3;
+    CVector m_right;        // 0x0
+    uint32  flags;          // 0xC
+    CVector m_forward;      // 0x10
+    uint32  pad1;           // 0x1C
+    CVector m_up;           // 0x20
+    uint32  pad2;           // 0x2C
+    CVector m_pos;          // 0x30
+    uint32  pad3;           // 0x3C
 
 public:
-    RwMatrix* m_pAttachMatrix;
-    bool      m_bOwnsAttachedMatrix; // do we need to delete attaching matrix at detaching
+    RwMatrix* m_pAttachMatrix;       // 0x40
+    bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
 
 public:
     static void InjectHooks();
@@ -98,6 +98,16 @@ public:
 
     static uint8* EulerIndices1;
     static uint8* EulerIndices2;
+
+    void SetRotate(const CVector& rot) {
+        SetRotate(rot.x, rot.y, rot.z);
+    }
+
+    void SetRotateKeepPos(const CVector& rot) {
+        auto pos{ m_pos };
+        SetRotate(rot.x, rot.y, rot.z);
+        m_pos = pos;
+    }
 
     // operators and classes that aren't defined as part of class, but it's much easier to get them working with access to class private fields
 private:

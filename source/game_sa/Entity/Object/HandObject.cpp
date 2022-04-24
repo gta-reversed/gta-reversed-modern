@@ -5,9 +5,9 @@ void CHandObject::InjectHooks()
     RH_ScopedClass(CHandObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x59EC40);
-    RH_ScopedInstall(PreRender_Reversed, 0x59ECD0);
-    RH_ScopedInstall(Render_Reversed, 0x59EE80);
+    RH_ScopedVirtualInstall(ProcessControl, 0x59EC40);
+    RH_ScopedVirtualInstall(PreRender, 0x59ECD0);
+    RH_ScopedVirtualInstall(Render, 0x59EE80);
 }
 
 CHandObject::CHandObject(int32 handModelIndex, CPed* ped, bool bLeftHand) : CObject()
@@ -68,8 +68,7 @@ void CHandObject::PreRender_Reversed()
     m_pPed->m_bDontUpdateHierarchy = true;
 
     auto* matArr = RpHAnimHierarchyGetMatrixArray(animHierarchy);
-    const auto boneMat = CMatrix(&matArr[m_nBoneIndex], false);
-    *static_cast<CMatrix*>(m_matrix) = boneMat;
+    *static_cast<CMatrix*>(m_matrix) = CMatrix(&matArr[m_nBoneIndex], false);
 
     if (m_bUpdatedMatricesArray)
         m_bUpdatedMatricesArray = false;
@@ -79,12 +78,12 @@ void CHandObject::PreRender_Reversed()
         auto iStackCounter = 0;
         while (iStackCounter >= 0)
         {
-            auto* pBoneMat = &matArr[nBoneInd];
-            *RwMatrixGetAt(pBoneMat) = { 0.0F, 0.0F, 0.0F };
-            *RwMatrixGetUp(pBoneMat) = { 0.0F, 0.0F, 0.0F };
-            *RwMatrixGetRight(pBoneMat) = { 0.0F, 0.0F, 0.0F };
+            auto* boneMat = &matArr[nBoneInd];
+            *RwMatrixGetAt(boneMat) = { 0.0F, 0.0F, 0.0F };
+            *RwMatrixGetUp(boneMat) = { 0.0F, 0.0F, 0.0F };
+            *RwMatrixGetRight(boneMat) = { 0.0F, 0.0F, 0.0F };
 
-            const auto unFlags = static_cast<uint32>(animHierarchy->nodeInfo[nBoneInd].flags);
+            const auto unFlags = static_cast<uint32>(animHierarchy->pNodeInfo[nBoneInd].flags);
             if ((unFlags & rpHANIMPUSHPARENTMATRIX) != 0)
                 ++iStackCounter;
             else if ((unFlags & rpHANIMPOPPARENTMATRIX) != 0)

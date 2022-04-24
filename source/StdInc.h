@@ -9,11 +9,19 @@
 #include <map>
 #include <set>
 #include <string>
+#include <string_view>
 #include <functional>
 #include <iostream>
 #include <cassert>
 #include <array>
+#include <vector>
+#include <numeric>
+#include <cstring>
+#include <tuple>
+#include <initializer_list>
+
 #include <ranges>
+namespace rng = std::ranges;
 
 #include "Base.h"
 
@@ -76,6 +84,7 @@
 #include "game_sa\Enums\eStats.h"
 #include "game_sa\Enums\eStatsReactions.h"
 #include "game_sa\Enums\eSurfaceType.h"
+#include "game_sa\Enums\eTargetDoor.h"
 #include "game_sa\Enums\eTaskType.h"
 #include "game_sa\Enums\eVehicleClass.h"
 #include "game_sa\Enums\eVehicleHandlingFlags.h"
@@ -93,10 +102,8 @@
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\Glass.h"
 #include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
-#include "game_sa\PlayerRelationshipRecorder.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
 #include "game_sa\DecisionMakerTypes.h"
@@ -179,8 +186,6 @@
 #include "game_sa\CarAI.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
-#include "game_sa\Checkpoint.h"
-#include "game_sa\Checkpoints.h"
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
@@ -376,19 +381,19 @@
 #include "game_sa\Audio\config\eSFX.h"
 
 #include "game_sa\Fx\CarFXRenderer.h"
-#include "game_sa\Fx\FxBox_c.h"
-#include "game_sa\Fx\FxEmitterBP_c.h"
-#include "game_sa\Fx\FxFrustumInfo_c.h"
-#include "game_sa\Fx\FxInfoManager_c.h"
-#include "game_sa\Fx\FxManager_c.h"
-#include "game_sa\Fx\FxMemoryPool_c.h"
-#include "game_sa\Fx\FxPlane_c.h"
-#include "game_sa\Fx\FxPrimBP_c.h"
-#include "game_sa\Fx\FxPrtMult_c.h"
-#include "game_sa\Fx\FxSphere_c.h"
-#include "game_sa\Fx\FxSystemBP_c.h"
-#include "game_sa\Fx\FxSystem_c.h"
-#include "game_sa\Fx\Fx_c.h"
+#include "game_sa\Fx\FxBox.h"
+#include "game_sa\Fx\FxEmitterBP.h"
+#include "game_sa\Fx\FxFrustumInfo.h"
+#include "game_sa\Fx\FxInfoManager.h"
+#include "game_sa\Fx\FxManager.h"
+#include "game_sa\Fx\FxMemoryPool.h"
+#include "game_sa\Fx\FxPlane.h"
+#include "game_sa\Fx\FxPrimBP.h"
+#include "game_sa\Fx\FxPrtMult.h"
+#include "game_sa\Fx\FxSphere.h"
+#include "game_sa\Fx\FxSystemBP.h"
+#include "game_sa\Fx\FxSystem.h"
+#include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"
 #include "game_sa\Models\LodAtomicModelInfo.h"

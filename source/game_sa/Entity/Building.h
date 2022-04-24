@@ -11,7 +11,7 @@
 class CBuilding : public CEntity {
 public:
     CBuilding();
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void operator delete(void* data);
 
 public:

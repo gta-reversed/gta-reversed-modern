@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "OnscreenTimerEntry.h"
+#include "TheScripts.h"
 
 void COnscreenTimerEntry::Init() {
     m_nVarId = 0;

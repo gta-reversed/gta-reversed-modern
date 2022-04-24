@@ -24,11 +24,11 @@ enum eAnimationFlags {
     ANIM_FLAG_MOVEMENT           = 0x20,
     ANIM_FLAG_TRANLSATE_Y        = 0x40,
     ANIM_FLAG_TRANLSATE_X        = 0x80,
-    ANIM_FLAG_100                = 0x100,
+    ANIM_FLAG_WALK               = 0x100,  // See `CPed::PlayFootSteps()`
     ANIM_FLAG_200                = 0x200,
-    ANIM_FLAG_400                = 0x400,
+    ANIM_FLAG_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIM_FLAG_IDLE, see `CPed::PlayFootSteps()`
     ANIM_FLAG_800                = 0x800,
-    ANIM_FLAG_1000               = 0x1000,
+    ANIM_FLAG_SECONDARY_TASK_ANIM= 0x1000,
     ANIM_FLAG_FREEZE_TRANSLATION = 0x2000,
     ANIM_FLAG_BLOCK_REFERENCED   = 0x4000,
     ANIM_FLAG_INDESTRUCTIBLE     = 0x8000 // the animation is never destroyed if this flag is set, NO MATTER WHAT
@@ -54,7 +54,7 @@ struct SClumpAnimAssoc {
     float                m_fSpeed;
     float                m_fTimeStep;
     int16                m_nAnimId;
-    uint16               m_nFlags;
+    uint16               m_nFlags; // TODO: use bitfield
 };
 
 class CAnimBlendAssociation : public SClumpAnimAssoc {
@@ -64,7 +64,7 @@ public:
     void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
     void *m_pCallbackData;
 
-    void* operator new(uint32 size);
+    void* operator new(unsigned size);
     void operator delete(void* object);
 
     static void InjectHooks();

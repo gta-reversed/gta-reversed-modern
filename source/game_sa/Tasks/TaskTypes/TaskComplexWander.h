@@ -9,8 +9,7 @@
 #include "TaskComplex.h"
 #include "NodeAddress.h"
 
-enum eWanderType
-{
+enum eWanderType : int32 {
     WANDER_TYPE_STANDARD = 0,
     WANDER_TYPE_COP,
     WANDER_TYPE_MEDIC,
@@ -27,12 +26,12 @@ class CVector;
 
 class CTaskComplexWander : public CTaskComplex {
 public:
-    int32        m_nMoveState; // see eMoveState
+    eMoveState   m_nMoveState;
     uint8        m_nDir;
     float        m_fTargetRadius;
     CNodeAddress m_LastNode;
     CNodeAddress m_NextNode;
-    int32        m_nLastUpdateDirFrameCount;
+    uint32       m_nLastUpdateDirFrameCount;
     union
     {
         uint8 m_nFlags;
@@ -45,7 +44,8 @@ public:
     };
 
 public:
-    CTaskComplexWander(plugin::dummy_func_t) : CTaskComplex() { /* todo: Remove NOTSA */ }
+    static constexpr auto Type = TASK_COMPLEX_WANDER;
+
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
     ~CTaskComplexWander() override = default;
 
@@ -53,17 +53,17 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    virtual int32 GetWanderType() = 0;
+    virtual eWanderType GetWanderType() = 0;
     virtual void ScanForStuff(CPed* ped) = 0;
     virtual void UpdateDir(CPed* ped);
     virtual void UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 
     CTask* CreateSubTask(CPed* ped, int32 taskId);
-    void ComputeTargetPos(CPed* ped, CVector* pOutTargetPos, CNodeAddress* pTargetNodeAddress);
+    void ComputeTargetPos(const CPed* ped, CVector& foutTargetPos, const CNodeAddress& targetNodeAddress);
     float ComputeTargetHeading(CPed* ped);
-    bool ValidNodes();
+    bool ValidNodes() const;
     void ScanForBlockedNodes(CPed* ped);
-    bool ScanForBlockedNode(CPed* ped, CNodeAddress* targetNodeAddress);
+    bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
     bool ScanForBlockedNode(CVector* position, class CEntity* entity);
 
     static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
@@ -71,9 +71,7 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
     CTaskComplexWander* Constructor(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
-
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* ControlSubTask_Reversed(CPed* ped);

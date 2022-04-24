@@ -11,11 +11,11 @@ void CTaskSimpleHoldEntity::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "1", 0x6913A0, CTaskSimpleHoldEntity*(CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, bool));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x691470, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, const char*, const char*, eAnimationFlags));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x691550, CTaskSimpleHoldEntity * (CTaskSimpleHoldEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags));
-    RH_ScopedInstall(Clone_Reversed, 0x6929B0);
-    RH_ScopedInstall(GetId_Reversed, 0x691460);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x693BD0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x693C40);
-    RH_ScopedInstall(SetPedPosition_Reversed, 0x6940A0);
+    RH_ScopedVirtualInstall(Clone, 0x6929B0);
+    RH_ScopedVirtualInstall(GetId, 0x691460);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x693BD0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x693C40);
+    RH_ScopedVirtualInstall(SetPedPosition, 0x6940A0);
     RH_ScopedInstall(ReleaseEntity, 0x6916E0);
     RH_ScopedInstall(CanThrowEntity, 0x691700);
     RH_ScopedInstall(PlayAnim, 0x691720);
@@ -344,10 +344,7 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
 
 // 0x6916E0
 void CTaskSimpleHoldEntity::ReleaseEntity() {
-    if (m_pEntityToHold) {
-        m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-        m_pEntityToHold = nullptr;
-    }
+    CEntity::ClearReference(m_pEntityToHold);
 }
 
 // 0x691700
@@ -375,11 +372,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAs
     else
     {
         if (taskHoldEntity->GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY && animAssoc->m_fBlendAmount > 0.0f) {
-            CEntity* entityToHold = taskHoldEntity->m_pEntityToHold;
-            if (entityToHold) {
-                entityToHold->CleanUpOldReference(&taskHoldEntity->m_pEntityToHold);
-                taskHoldEntity->m_pEntityToHold = nullptr;
-            }
+            CEntity::ClearReference(taskHoldEntity->m_pEntityToHold);
         }
         taskHoldEntity->m_bEntityDropped = true;
         taskHoldEntity->m_pAnimBlendAssociation = nullptr;
@@ -389,7 +382,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAs
 // 0x692FF0
 void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
     if (m_pAnimBlendHierarchy) {
-        m_animFlags |= ANIM_FLAG_400 | ANIM_FLAG_FREEZE_LAST_FRAME | ANIM_FLAG_PARTIAL;
+        m_animFlags |= ANIM_FLAG_ADD_TO_BLEND | ANIM_FLAG_FREEZE_LAST_FRAME | ANIM_FLAG_PARTIAL;
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_pAnimBlendHierarchy, m_animFlags, 4.0f);
     }
     else {
@@ -407,7 +400,7 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAnimGroupId, m_nAnimId, 4.0f);
         m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
         if (GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
-            m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_400;
+            m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_ADD_TO_BLEND;
     }
     if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
         m_pAnimBlendAssociation->SetFinishCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
@@ -422,8 +415,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
     if (m_pEntityToHold) {
         m_pEntityToHold->m_bUsesCollision = true;
         if (!m_pEntityToHold->IsObject()) {
-            m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-            m_pEntityToHold = nullptr;
+            CEntity::ClearReference(m_pEntityToHold);
             return;
         }
         objectToHold = static_cast<CObject*>(m_pEntityToHold);
@@ -435,7 +427,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
                     if (objectType != OBJECT_TEMPORARY)
                         ++CObject::nNoTempObjects;
                     objectToHold->m_nObjectType = OBJECT_TEMPORARY;
-                    objectToHold->m_dwRemovalTime = 0;
+                    objectToHold->m_nRemovalTime = 0;
                     objectToHold->m_bUsesCollision = false;
                     objectToHold->m_bIsVisible = false;
                     bUpdateEntityPosition = false;
@@ -479,8 +471,7 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
             objectToHold->UpdateRW();
             objectToHold->UpdateRwFrame();
         }
-        m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-        m_pEntityToHold = nullptr;
+        CEntity::ClearReference(m_pEntityToHold);
         return;
     }
 }

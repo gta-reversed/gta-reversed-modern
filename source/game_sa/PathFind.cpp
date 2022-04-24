@@ -186,6 +186,12 @@ CPathNode *CPathFind::GetPathNode(CNodeAddress address)
     return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
 }
 
+bool CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr) {
+    bool valid{};
+    FindNodeCoorsForScript(addr, &valid);
+    return valid;
+}
+
 void CPathFind::LoadPathFindData(int32 areaId) {
     CTimer::Suspend();
     sprintf(gString, "data\\paths\\nodes%d.dat", areaId);
@@ -302,8 +308,10 @@ void CPathFind::StartNewInterior(int32 interiorNum) {
 
     // BUG: Possible endless loop if 8 interiors are loaded i think
     NewInteriorSlot = 0;
-    while (m_aInteriorNodes[NewInteriorSlot].IsValid())
+    while (m_aInteriorNodes[NewInteriorSlot].IsValid()) {
         NewInteriorSlot++;
+        assert(NewInteriorSlot < 8);
+    }
 }
 
 // 0x450E90

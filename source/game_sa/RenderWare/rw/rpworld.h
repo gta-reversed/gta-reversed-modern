@@ -1326,6 +1326,57 @@ struct RpLightTie
     RpWorldSector      *sect;               /**< A pointer to a world sector */
 };
 
+/****************************************************************************
+ <macro/inline functionality
+ */
+
+#define RpLightGetRadiusMacro(_light)                       \
+    ((_light)->radius)
+
+#define RpLightGetColorMacro(_light)                        \
+    (&((_light)->color))
+
+#define RpLightSetFrameMacro(_light, _frame)                \
+    (rwObjectHasFrameSetFrame((_light), (_frame)), (_light))
+
+#define RpLightGetFrameMacro(_light)                        \
+    ((RwFrame *)rwObjectGetParent((_light)))
+
+#define RpLightGetTypeMacro(_light)                         \
+    ((RpLightType)rwObjectGetSubType((_light)))
+
+#define RpLightSetFlagsMacro(_light, _flags)                \
+    ((rwObjectSetFlags((_light), (_flags))), (_light))
+
+#define RpLightGetFlagsMacro(_light)                        \
+    (rwObjectGetFlags((_light)))
+
+
+#if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
+
+#define RpLightGetRadius(_light)                            \
+    RpLightGetRadiusMacro(_light)
+
+#define RpLightGetColor(_light)                             \
+    RpLightGetColorMacro(_light)
+
+#define RpLightSetFrame(_light, _frame)                     \
+    RpLightSetFrameMacro(_light, _frame)
+
+#define RpLightGetFrame(_light)                             \
+    RpLightGetFrameMacro(_light)
+
+#define RpLightGetType(_light)                              \
+    RpLightGetTypeMacro(_light)
+
+#define RpLightSetFlags(_light, _flags)                     \
+    RpLightSetFlagsMacro(_light, _flags)
+
+#define RpLightGetFlags(_light)                             \
+    RpLightGetFlagsMacro(_light)
+
+#endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
+
 /*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/d3d9/D3D9lights.h ---*/
 /*
  * typedef for struct RpD3D9AttenuationParams

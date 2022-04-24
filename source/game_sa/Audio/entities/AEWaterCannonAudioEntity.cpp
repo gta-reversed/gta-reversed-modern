@@ -73,7 +73,7 @@ void CAEWaterCannonAudioEntity::InjectHooks() {
     // RH_ScopedInstall(Service, 0x5030D0);
     RH_ScopedInstall(SetSplashInfo, 0x502F50);
     RH_ScopedInstall(ClearSplashInfo, 0x502F20);
-    // RH_ScopedInstall(UpdateParameters_Reversed, 0x502EF0);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x502EF0);
 }
 
 CAEWaterCannonAudioEntity* CAEWaterCannonAudioEntity::Constructor() {
