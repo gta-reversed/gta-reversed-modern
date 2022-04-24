@@ -500,8 +500,8 @@ VALIDATE_SIZE(CCamera, 0xD78);
 extern CCamera& TheCamera;
 extern bool& gbModelViewer;
 extern char& gbCineyCamMessageDisplayed;
-extern int8& gCurCamColVars;
+extern uint8& gCurCamColVars;
 extern int32& gpCamColVars;
-extern char (&gCamColVars)[672];
+extern float (&gCamColVars)[28][6];
 
 void CamShakeNoPos(CCamera* camera, float strength);

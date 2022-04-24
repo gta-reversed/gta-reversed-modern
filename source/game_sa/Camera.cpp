@@ -12,10 +12,10 @@ bool& CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool*>(0xB6EC2D);
 CCamera& TheCamera = *reinterpret_cast<CCamera*>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
 char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
-int8& gCurCamColVars = *(int8*)0x8CCB80;
-int32& gCurDistForCam = *(int32*)0x8CCB84;
+uint8& gCurCamColVars = *(int8*)0x8CCB80;
+float& gCurDistForCam = *(float*)0x8CCB84;
 int32& gpCamColVars = *(int32*)0xB6FE88;
-char (&gCamColVars)[672] = *(char (*)[672])0x8CC8E0;
+float (&gCamColVars)[28][6] = *(float (*)[28][6])0x8CC8E0;
 
 CCam& CCamera::GetActiveCamera() {
     return TheCamera.m_aCams[TheCamera.m_nActiveCam];
@@ -136,7 +136,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(ProcessFOVLerp, 0x516500);
 //    RH_ScopedInstall(ProcessJiggle, 0x516560);
 
-    HookInstall(0x50A970, CamShakeNoPos);
+    RH_ScopedGlobalInstall(CamShakeNoPos, 0x50A970);
 }
 
 // 0x5BC520
@@ -1170,15 +1170,13 @@ void CCamera::Enable1rstPersonWeaponsCamera() {
 
 // 0x50CB60
 void CCamera::SetCamCollisionVarDataSet(int32 index) {
-    int8 byteIndex = static_cast<int8>(index);
-
-    if (byteIndex == gCurCamColVars) {
+    if (index == gCurCamColVars) {
         return;
     }
 
-    gCurCamColVars = byteIndex;
-    gCurDistForCam = 0x3F800000;
-    gpCamColVars = reinterpret_cast<int32>(&gCamColVars[index * 24]);
+    gCurCamColVars = index;
+    gCurDistForCam = 1.0f;
+    gpCamColVars = reinterpret_cast<int32>(&gCamColVars[index]);
 }
 
 // 0x50CCA0
