@@ -1170,7 +1170,7 @@ void CCamera::Enable1rstPersonWeaponsCamera() {
 
 // 0x50CB60
 void CCamera::SetCamCollisionVarDataSet(int32 index) {
-    int8 byteIndex = (int8)(index);
+    int8 byteIndex = static_cast<int8>(index);
 
     if (byteIndex == gCurCamColVars) {
         return;
@@ -1178,7 +1178,7 @@ void CCamera::SetCamCollisionVarDataSet(int32 index) {
 
     gCurCamColVars = byteIndex;
     gCurDistForCam = 0x3F800000;
-    gpCamColVars = (int32)&gCamColVars[index * 24];
+    gpCamColVars = reinterpret_cast<int32>(&gCamColVars[index * 24]);
 }
 
 // 0x50CCA0
