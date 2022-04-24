@@ -252,18 +252,9 @@ void CCamera::Fade(float fadeDuration, eFadeFlag fadeInOutFlag) {
         m_bMusicFading = true;
         m_nMusicFadingDirection = fadeInOutFlag;
 
-        float toTimeToFadeMusic = fadeDuration * 0.3f;
-        if (toTimeToFadeMusic < 0.3f) {
-            toTimeToFadeMusic = 0.3f;
-        }
+        float toTimeToFadeMusic = std::max(0.3f, fadeDuration * 0.3f);
 
-        if (toTimeToFadeMusic >= fadeDuration) {
-            m_fTimeToFadeMusic = fadeDuration;
-        } else if (toTimeToFadeMusic < 0.3f) {
-            m_fTimeToFadeMusic = 0.3f;
-        } else {
-            m_fTimeToFadeMusic = toTimeToFadeMusic;
-        }
+        m_fTimeToFadeMusic = clamp(toTimeToFadeMusic, 0.3f, fadeDuration);
 
         if (fadeInOutFlag == eFadeFlag::FADE_OUT) {
             m_fTimeToWaitToFadeMusic = 0.0f;
@@ -479,7 +470,7 @@ void CCamera::Restore() {
 
     if (m_pAttachedEntity) {
         m_pAttachedEntity->CleanUpOldReference(&m_pAttachedEntity);
-        m_pAttachedEntity = 0;
+        m_pAttachedEntity = nullptr;
     }
 
     m_bEnable1rstPersonCamCntrlsScript = false;
@@ -500,9 +491,9 @@ void CCamera::RestoreWithJumpCut() {
     m_nWhoIsInControlOfTheCamera = 0;
     m_fPositionAlongSpline = 0.0f;
     m_bStartingSpline = false;
-    m_bUseNearClipScript = 0;
+    m_bUseNearClipScript = false;
     m_nModeObbeCamIsInForCar = 30;
-    m_bScriptParametersSetForInterPol = 0;
+    m_bScriptParametersSetForInterPol = false;
 
     CVehicle* playerVeh = FindPlayerVehicle();
     CPlayerPed* pPlayerInFocus = FindPlayerPed();
@@ -957,7 +948,7 @@ void CCamera::ProcessFade() {
         }
 
         m_bFading = false;
-        m_fFadeAlpha = 0;
+        m_fFadeAlpha = 0.0f;
     } else {
         if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
             CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
@@ -1143,10 +1134,8 @@ void CCamera::CamControl() {
 // 0x5B24A0
 void CCamera::DeleteCutSceneCamDataMemory() {
     for (auto& PathArray : m_aPathArray) {
-        if (PathArray.m_pArrPathData) {
-            delete PathArray.m_pArrPathData;
-            PathArray.m_pArrPathData = 0;
-        }
+        delete PathArray.m_pArrPathData;
+        PathArray.m_pArrPathData = nullptr;
     }
 }
 
