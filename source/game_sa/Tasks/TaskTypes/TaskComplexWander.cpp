@@ -351,12 +351,12 @@ bool CTaskComplexWander::ScanForBlockedNode(CPed* ped, const CNodeAddress& targe
     auto outVec = ThePaths.TakeWidthIntoAccountForWandering(targetNodeAddress, ped->m_nRandomSeed);
     CVector2D distance = outVec - ped->GetPosition();
     if (3.0f * 3.0f >= distance.SquaredMagnitude()) {
-        CPed* closestPed = ped->m_pIntelligence->GetPedScanner().m_pClosestEntityInRange->AsPed();
+        CPed* closestPed = ped->GetIntelligence()->GetPedScanner().GetClosestPedInRange();
         if (ScanForBlockedNode(&outVec, closestPed)) {
             return true;
         }
 
-        CVehicle* closestVehicle = ped->GetIntelligence()->m_vehicleScanner.m_pClosestEntityInRange->AsVehicle();
+        CVehicle* closestVehicle = ped->GetIntelligence()->GetVehicleScanner().GetClosestVehicleInRange();
         if (ScanForBlockedNode(&outVec, closestVehicle)) {
             return true;
         }
