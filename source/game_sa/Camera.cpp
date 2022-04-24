@@ -132,7 +132,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(ProcessFOVLerp, 0x516500);
 //    RH_ScopedInstall(ProcessJiggle, 0x516560);
 
-//    RH_ScopedInstall(CamShakeNoPos, 0x50A970);
+    HookInstall(0x50A970, CamShakeNoPos);
 }
 
 // 0x5BC520
@@ -1176,5 +1176,11 @@ void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) 
 
 // 0x50A970
 void CamShakeNoPos(CCamera* camera, float strength) {
-    ((void(__cdecl*)(CCamera*, float))0x50A970)(camera, strength);
+    float oldShake = camera->m_fCamShakeForce - (CTimer::GetTimeInMS() - camera->m_nCamShakeStart) * 0.001f;
+    clamp(oldShake, 0.0f, 2.0f);
+
+    if (strength > oldShake) {
+        camera->m_fCamShakeForce = strength;
+        camera->m_nCamShakeStart = CTimer::GetTimeInMS();
+    }
 }
