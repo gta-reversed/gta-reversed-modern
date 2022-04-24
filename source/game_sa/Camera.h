@@ -502,6 +502,6 @@ extern bool& gbModelViewer;
 extern char& gbCineyCamMessageDisplayed;
 extern int8& gCurCamColVars;
 extern int32& gpCamColVars;
-extern char gCamColVars;
+extern char (&gCamColVars)[672];
 
 void CamShakeNoPos(CCamera* camera, float strength);
