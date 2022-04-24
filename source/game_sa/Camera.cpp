@@ -206,14 +206,10 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 
 // 0x50A9F0
 void CCamera::CamShake(float arg2, CVector fromVector) {
-    CVector distanceSourceAndPointer = m_aCams[m_nActiveCam].m_vecSource - fromVector;
+    auto dist = DistanceBetweenPoints(m_aCams[m_nActiveCam].m_vecSource, fromVector);
+    dist = clamp(dist, 0.0f, 100.0f);
 
-    float distanceXAndY = sqrt(distanceSourceAndPointer.x * distanceSourceAndPointer.x + distanceSourceAndPointer.y * distanceSourceAndPointer.y);
-    float distanceZAndXY = sqrt(distanceXAndY * distanceXAndY + distanceSourceAndPointer.z * distanceSourceAndPointer.z);
-
-    clamp(distanceZAndXY, 0.0f, 100.0f);
-
-    float precentShakeForce = 1.0f - distanceZAndXY * 0.01f;
+    float precentShakeForce = 1.0f - dist * 0.01f;
     float ShakeForce = (m_fCamShakeForce - (CTimer::GetTimeInMS() - m_nCamShakeStart) * 0.001f) * precentShakeForce;
 
     clamp(ShakeForce, 0.0f, 2.0f);
