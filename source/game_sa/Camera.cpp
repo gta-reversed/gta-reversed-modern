@@ -102,7 +102,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
     RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
-//    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
+    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
 //    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
     RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
 //    RH_ScopedInstall(ConsiderPedAsDucking, 0x50CEB0);
@@ -856,7 +856,13 @@ void CCamera::CameraPedModeSpecialCases() {
 
 // 0x50CDA0
 void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
-    plugin::CallMethod<0x50CDA0, CCamera*, CPed*>(this, ped);
+    CCollision::ms_bCamCollideWithVehicles = true;
+    CCollision::ms_bCamCollideWithObjects = true;
+    CCollision::ms_bCamCollideWithPeds = true;
+
+    if (ped->bInVehicle && ped->m_pVehicle) {
+        m_pExtraEntity[m_nExtraEntitiesCount++] = ped->m_pVehicle;
+    }
 }
 
 // 0x50CDE0

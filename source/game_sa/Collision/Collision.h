@@ -19,6 +19,9 @@ public:
     static CLinkList<CCollisionData*> &ms_colModelCache;
     static int32& ms_iProcessLineNumCrossings;
     static uint32& ms_collisionInMemory;
+    static bool& ms_bCamCollideWithVehicles;
+    static bool& ms_bCamCollideWithObjects;
+    static bool& ms_bCamCollideWithPeds;
 
 public:
     static void InjectHooks();
