@@ -2,6 +2,8 @@
 
 #include "Camera.h"
 
+#include "TaskSimpleHoldEntity.h"
+
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
@@ -98,7 +100,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90);
 //    RH_ScopedInstall(SetColVarsPed, 0x50CC50);
     RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
-//    RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
+    RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
 //    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
 //    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
@@ -829,7 +831,18 @@ void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
 
 // 0x50CD30
 void CCamera::CameraGenericModeSpecialCases(CPed* targetPed) {
-    plugin::CallMethod<0x50CD30, CCamera*, CPed*>(this, targetPed);
+    m_nExtraEntitiesCount = 0;
+
+    if (!targetPed) {
+        return;
+    }
+
+    CTaskSimpleHoldEntity* TaskHold = reinterpret_cast<CTaskSimpleHoldEntity*>(targetPed->GetIntelligence()->GetTaskHold(false));
+    if (!TaskHold || !TaskHold->m_pEntityToHold) {
+        return;
+    }
+
+    m_pExtraEntity[m_nExtraEntitiesCount++] = reinterpret_cast<CEntity*>(targetPed);
 }
 
 // unused
