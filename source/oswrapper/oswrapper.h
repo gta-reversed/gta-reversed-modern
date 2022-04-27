@@ -60,8 +60,8 @@ OSWAPI void* OS_ThreadLaunch(
     OS_ThreadRoutine  pfnStart,
     void*             pParam,
     uint32            nFlags,
-    const char*       pszName   = nullptr,
-    void*             hUnk      = nullptr,
+    const char*       name      = nullptr,
+    void*             unk       = nullptr,
     OSThreadPriority  nPriority = OS_THREAD_PRIORITY_NORMAL
 );
 

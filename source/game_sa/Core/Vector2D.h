@@ -99,6 +99,22 @@ constexpr inline CVector2D operator*(float multiplier, const CVector2D& vec) {
     return { vec.x * multiplier, vec.y * multiplier };
 }
 
+constexpr inline bool operator!=(const CVector2D& vecOne, const CVector2D& vecTwo) {
+    return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y;
+}
+
+constexpr inline bool operator!=(const CVector2D& vec, float notEqualTo) {
+    return vec.x != notEqualTo || vec.y != notEqualTo;
+}
+
+constexpr inline bool operator==(const CVector2D& vec, float equalTo) {
+    return vec.x == equalTo && vec.y == equalTo;
+}
+
+constexpr inline bool operator==(const CVector2D& vecLeft, const CVector2D& vecRight) {
+    return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y;
+}
+
 inline float DistanceBetweenPoints2D(const CVector2D& pointOne, const CVector2D& pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
