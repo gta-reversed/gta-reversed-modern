@@ -212,6 +212,8 @@ public:
     [[nodiscard]] bool IsLeftCtrlJustDown() const noexcept                  { return NewKeyState.lctrl && OldKeyState.lctrl; }                                               //
     [[nodiscard]] bool IsRightCtrlJustDown() const noexcept                 { return NewKeyState.rctrl && OldKeyState.rctrl; }                                               //
     [[nodiscard]] bool IsCtrlPressed() const noexcept                       { return IsLeftCtrlJustDown() || IsRightCtrlJustDown(); }                                        //
+    [[nodiscard]] static bool IsUpPressed() noexcept                        { return KEY_IS_PRESSED(up); }                                                                   //
+    [[nodiscard]] static bool IsDownPressed() noexcept                      { return KEY_IS_PRESSED(down); }                                                                 //
     static bool IsPadEnterJustPressed() noexcept                            { return KEY_IS_PRESSED(enter); }                                                                //
     static bool IsReturnJustPressed() noexcept                              { return KEY_IS_PRESSED(extenter); }                                                             //
     static bool IsEnterJustPressed() noexcept                               { return IsPadEnterJustPressed() || IsReturnJustPressed(); }                                     // 0x4D5980
@@ -302,10 +304,10 @@ public:
     bool sub_541150() const noexcept;
     static bool sub_540A40();
     static bool sub_540A10();
-    static bool sub_5409E0();
-    static bool sub_5409B0();
-    static bool sub_540980();
-    static bool sub_540950();
+    static bool GetAnaloguePadLeft();
+    static bool GetAnaloguePadUp();
+    static bool GetAnaloguePadRight();
+    static bool GetAnaloguePadDown();
     bool sub_540530() const noexcept;
     bool sub_5404F0() const noexcept { return Mode != 1 ? 0 : IsDPadDownPressed(); } // 0x5404F0
     bool IsPhaseEqual11() const noexcept { return Phase == 11; } // 0x53FB60

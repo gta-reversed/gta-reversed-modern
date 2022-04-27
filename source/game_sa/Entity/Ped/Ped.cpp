@@ -77,7 +77,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    RH_ScopedInstall(GetBonePosition, 0x5E4280);
+    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
@@ -3590,4 +3590,10 @@ int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 // NOTSA
 bool CPed::IsInVehicleAsPassenger() const noexcept {
     return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
+}
+
+CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
+    CVector pos;
+    GetBonePosition(pos, boneId, updateSkinBones);
+    return pos;
 }

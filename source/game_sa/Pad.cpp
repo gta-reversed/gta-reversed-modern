@@ -1045,6 +1045,7 @@ int16 CPad::AimWeaponUpDown(CPed* ped) const {
     return bInvertLook4Pad ? -GetRightStickY() : GetRightStickY();
 }
 
+// 0x541290
 int32 CPad::sub_541290() {
     if (DisablePlayerControls || bDisablePlayerFireWeapon) {
         AverageWeapon = 0;
@@ -1076,85 +1077,85 @@ int32 CPad::sub_541290() {
 
 // 0x540A40
 bool CPad::sub_540A40() {
-    static int16 word_B73704 = *(int16*)0xB73704;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
+    static int16 oldfStickX = 0; // 0xB73704
+    auto leftStickX = GetPad()->GetLeftStickX();
 
-    if (leftStickX || word_B73704 <= leftStickX) {
-        word_B73704 = leftStickX;
-        return false;
-    } else {
-        word_B73704 = leftStickX;
+    if (!leftStickX && oldfStickX > leftStickX) {
+        oldfStickX = leftStickX;
         return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
     }
 }
 
 // 0x540A10
 bool CPad::sub_540A10() {
-    static int16 word_B73700 = *(int16*)0xB73700;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
+    static int16 oldfStickX = 0; // 0xB73700
+    auto leftStickX = GetPad()->GetLeftStickX();
 
-    if (leftStickX || word_B73700 >= leftStickX) {
-        word_B73700 = leftStickX;
-        return false;
-    } else {
-        word_B73700 = leftStickX;
+    if (!leftStickX && oldfStickX < leftStickX) {
+        oldfStickX = leftStickX;
         return true;
-    }
-}
-
-// 0x5409E0
-bool CPad::sub_5409E0() {
-    static int16 word_B736FC = *(int16*)0xB736FC;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
-
-    if (leftStickX <= 15 || word_B736FC > 5) {
-        word_B736FC = leftStickX;
-        return false;
     } else {
-        word_B736FC = leftStickX;
-        return true;
-    }
-}
-
-// 0x5409B0
-bool CPad::sub_5409B0() {
-    static int16 word_B736F8 = *(int16*)0xB736F8;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
-
-    if (leftStickX >= -15 || word_B736F8 < -5) {
-        word_B736F8 = leftStickX;
+        oldfStickX = leftStickX;
         return false;
-    } else {
-        word_B736F8 = leftStickX;
-        return true;
-    }
-}
-
-// 0x540980
-bool CPad::sub_540980() {
-    static int16 word_B736F4 = *(int16*)0xB736F4;
-    auto leftStickY = GetPad(0)->GetLeftStickY();
-
-    if (leftStickY <= 15 || word_B736F4 > 5) {
-        word_B736F4 = leftStickY;
-        return false;
-    } else {
-        word_B736F4 = leftStickY;
-        return true;
     }
 }
 
 // 0x540950
-bool CPad::sub_540950() {
-    static int16 word_B736F0 = *(int16*)0xB736F0;
-    auto leftStickY = GetPad(0)->GetLeftStickY();
-
-    if (leftStickY >= -15 || word_B736F0 < -5) {
-        word_B736F0 = leftStickY;
-        return false;
-    } else {
-        word_B736F0 = leftStickY;
+bool CPad::GetAnaloguePadLeft() {
+    static int16 oldfStickY = 0; // 0xB736F0
+    auto leftStickY = GetPad()->GetLeftStickY();
+    
+    if (leftStickY < -15 && oldfStickY >= -5) {
+        oldfStickY = leftStickY;
         return true;
+    } else {
+        oldfStickY = leftStickY;
+        return false;
+    }
+}
+
+// 0x5409B0
+bool CPad::GetAnaloguePadUp() {
+    static int16 oldfStickX = 0; // 0xB736F8
+    auto leftStickX = GetPad()->GetLeftStickX();
+    
+    if (leftStickX < -15 && oldfStickX >= -5) {
+        oldfStickX = leftStickX;
+        return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
+    }
+}
+
+// 0x5409E0
+bool CPad::GetAnaloguePadRight() {
+    static int16 oldfStickX = 0; // 0xB736FC
+    auto leftStickX = GetPad()->GetLeftStickX();
+
+    if (leftStickX > 15 && oldfStickX <= 5) {
+        oldfStickX = leftStickX;
+        return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
+    }
+}
+
+// 0x540980
+bool CPad::GetAnaloguePadDown() {
+    static int16 oldfStickY = 0; // 0xB736F4
+    auto leftStickY = GetPad()->GetLeftStickY();
+
+    if (leftStickY > 15 && oldfStickY <= 5) {
+        oldfStickY = leftStickY;
+        return true;
+    } else {
+        oldfStickY = leftStickY;
+        return false;
     }
 }
 
