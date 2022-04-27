@@ -118,7 +118,8 @@ public:
     void StartShake(int16 time, uint8 frequency, uint32 arg2);
     void StartShake_Distance(int16 time, uint8 frequency, CVector pos);
     void StartShake_Train(const CVector2D& point);
-    void StopShaking(int16 arg0);
+    static void StopPadsShaking();
+    void StopShaking(int16 pad);
 
     [[nodiscard]] int16 GetCarGunLeftRight() const;
     [[nodiscard]] int16 GetCarGunUpDown() const;
@@ -345,7 +346,6 @@ LookAroundLeftRight(void)
 LookAroundUpDown(void)
 ProcessStoppie(void)
 ProcessWheelie(float)
-StopPadsShaking(void)
 SwimJumpJustDown(void)
 UpdatePadsTillStable(void)
 UseBomb(void)
