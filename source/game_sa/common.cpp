@@ -309,11 +309,6 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive) {
     return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
 }
 
-// 0x734610
-void CreateDebugFont() {
-    // NOP
-}
-
 // 0x4ABA50
 CEventGlobalGroup* GetEventGlobalGroup() {
     static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
@@ -323,22 +318,6 @@ CEventGlobalGroup* GetEventGlobalGroup() {
 
     globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
-}
-
-// 0x734620
-void DestroyDebugFont() {
-    // NOP
-}
-
-// unused
-// 0x734630
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2) {
-    // NOP
-}
-
-// 0x734640
-void FlushObrsPrintfs() {
-    // NOP
 }
 
 // 0x734650
