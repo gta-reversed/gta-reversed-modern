@@ -226,6 +226,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
