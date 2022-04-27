@@ -102,6 +102,7 @@
 #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
+#include "LoadingScreen.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
