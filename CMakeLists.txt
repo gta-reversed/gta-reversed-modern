@@ -107,13 +107,15 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Tasks/
     source/game_sa/Tasks/TaskTypes/
 
+    source/app/
     source/app/platform/
     source/app/platform/android/
-    source/app/platform/win32/
-    source/app/platform/win32/VideoPlayer/
+    source/app/platform/win/
+    source/app/platform/win/VideoPlayer/
     source/app/platform/linux/
     source/app/securom/
-    source/app/
+
+    source/oswrapper
 
     libs/imgui/
     libs/imgui/misc/cpp/
