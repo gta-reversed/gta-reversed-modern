@@ -5,6 +5,7 @@
 #include "CarCtrl.h"
 #include "PostEffects.h"
 #include "TheScripts.h"
+#include "LoadingScreen.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);

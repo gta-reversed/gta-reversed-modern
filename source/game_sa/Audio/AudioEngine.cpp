@@ -8,6 +8,7 @@
 
 #include "AEUserRadioTrackManager.h"
 #include "AEAudioUtility.h"
+#include "LoadingScreen.h"
 
 CAudioEngine& AudioEngine = *(CAudioEngine*)0xB6BC90;
 

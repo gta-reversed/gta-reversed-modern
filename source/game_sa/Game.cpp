@@ -9,8 +9,8 @@
 #include "MovingThings.h"
 #include "PlantMgr.h"
 #include "Occlusion.h"
-// todo: #include "InteriorManager_c.h"
-// todo: #include "ProcObjectMan_c.h"
+#include "InteriorManager_c.h"
+// #include "ProcObjectMan_c.h"
 #include "WaterCreatureManager_c.h"
 #include "MenuManager.h"
 #include "FireManager.h"
@@ -38,6 +38,7 @@
 #include "Ropes.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "LoadingScreen.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
