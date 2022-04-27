@@ -505,7 +505,7 @@ void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
     CEntity* closestEntity{};
     float    closestDist{ 10'000 };
     for (auto entity : std::span{ objInRange.begin(), (size_t)inRangeCount }) {
-        if (entity == owner || owner->AsPed()->CanSeeEntity(entity, PI / 8.f)) {
+        if (entity == owner || owner->AsPed()->CanSeeEntity(entity, PI / 8.f)) { // todo: add check owner->IsPed() NOTSA
             continue;
         }
 
