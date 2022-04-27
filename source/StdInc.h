@@ -33,6 +33,8 @@ namespace rng = std::ranges;
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+#include "debug.h"
+
 #include "EntryInfoNode.h"
 #include "EntryInfoList.h"
 #include "KeyGen.h"
