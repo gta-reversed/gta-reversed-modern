@@ -104,6 +104,7 @@
 #include "PedAttractorManager.h"
 #include "LoadingScreen.h"
 #include "platform/win32/VideoPlayer/VideoPlayer.h"
+#include "Securom.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -226,6 +227,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    Securom::InjectHooks();
     CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
