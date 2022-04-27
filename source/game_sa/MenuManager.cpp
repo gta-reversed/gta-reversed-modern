@@ -121,7 +121,7 @@ void CMenuManager::Initialise() {
     m_bDrawMouse = false;
 
     m_nSelectedRow = 3;
-    m_nSysMenu     = -99; // todo: UNDEFINED
+    m_nSysMenu     = MENU_UNDEFINED;
 
     m_fMapZoom = FRONTEND_MAP_RANGE_MAX;
 
