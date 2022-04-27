@@ -168,7 +168,7 @@ void* OS_ThreadLaunch(OS_ThreadRoutine pfnStart, void* param, uint32 nFlags, con
 
     DWORD dwThreadID = 0;
     HANDLE hThread = CreateThread(nullptr, 0, (LPTHREAD_START_ROUTINE)pfnStart, param, dwFlags, &dwThreadID);
-    VERIFY(INVALID_HANDLE_VALUE != hThread);
+    assert(hThread != INVALID_HANDLE_VALUE);
     switch (priority) {
     case OS_THREAD_PRIORITY_LOW:
         SetThreadPriority(hThread, THREAD_PRIORITY_LOWEST);
