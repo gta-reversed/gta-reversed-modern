@@ -103,9 +103,9 @@
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
 #include "LoadingScreen.h"
-#include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "Securom.h"
 #include "GridRef.h"
+#include "MenuSystem.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -232,6 +232,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CMenuSystem::InjectHooks();
     CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();

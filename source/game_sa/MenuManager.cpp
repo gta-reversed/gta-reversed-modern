@@ -88,8 +88,8 @@ void CMenuManager::MessageScreen(const char* pKey, bool bRenderBig, bool bWithin
     return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, pKey, bRenderBig, bWithinFrame);
 }
 
-void CMenuManager::DrawWindow(const CRect& coords, const char* pKey, uint8 nColour, CRGBA backColor, bool Unused, bool bBackground) {
-    ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, uint8, CRGBA, bool, bool))0x573EE0)(this, coords, pKey, nColour, backColor, Unused, bBackground);
+void CMenuManager::DrawWindow(const CRect& coords, const char* key, uint8 color, CRGBA backColor, bool Unused, bool bBackground) {
+    ((void(__thiscall*)(CMenuManager*, const CRect&, const char*, uint8, CRGBA, bool, uint32))0x573EE0)(this, coords, key, color, backColor, Unused, bBackground);
 }
 
 char CMenuManager::SwitchToNewScreen(char page) {
