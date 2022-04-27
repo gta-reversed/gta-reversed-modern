@@ -157,14 +157,15 @@ CPlane::~CPlane() {
         m_pGunParticles = nullptr;
     }
 
-    for (auto& particle : m_apJettrusParticles) {
-        FxSystem_c::KillAndClear(particle);
+    for (auto particle : m_apJettrusParticles) {
+        if (particle) {
+            FxSystem_c::KillAndClear(particle);
+        }
     }
 
     FxSystem_c::SafeKillAndClear(m_pSmokeParticle);
 
     m_vehicleAudio.Terminate();
-    CAutomobile::~CAutomobile();
 }
 
 // 0x6CAD90

@@ -8,17 +8,18 @@ public:
 public:
     static void InjectHooks();
 
+    static bool RegisterPlugins();
+
     static bool Initialise();
+    static void InitialiseDirtTexture();
     static void Shutdown();
     static void PreRenderUpdate();
 
-    static void RegisterPlugins();
     static bool IsCCPCPipelineAttached(RpAtomic* atomic);
 
     static void CustomCarPipeAtomicSetup(RpAtomic* atomic);
     static void CustomCarPipeClumpSetup(RpClump* clump);
 
-    static void InitialiseDirtTexture();
     static RpMaterial* MaterialRemapDirtCB(RpMaterial*, void*);
     static RpAtomic* AtomicRemapDirtCB(RpAtomic*, void*);
     static RpAtomic* SetCustomFXAtomicRenderPipelinesVMICB(RpAtomic* atomic, void* data);

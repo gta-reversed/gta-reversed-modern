@@ -98,3 +98,5 @@ public:
     static bool GetIsCodePaused() { return m_CodePause; }
     static void SetCodePause(bool pause) { m_CodePause = pause; }
 };
+
+uint64 GetMillisecondTime();

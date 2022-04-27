@@ -102,6 +102,10 @@
 #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
+#include "LoadingScreen.h"
+#include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "Securom.h"
+#include "GridRef.h"
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
@@ -217,6 +221,10 @@
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKPointArm.h"
 
+#include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/win.h"
+#include "platform/platform.h"
+
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
 
@@ -224,6 +232,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
@@ -719,6 +728,14 @@ void InjectHooksMain() {
         CScriptResourceManager::InjectHooks();
     };
 
+    const auto App = []() {
+        VideoPlayer::InjectHooks();
+        Securom::InjectHooks();
+        Win32InjectHooks();
+        RsInjectHooks();
+    };
+
+    App();
     Audio();
     Tasks();
     Events();
