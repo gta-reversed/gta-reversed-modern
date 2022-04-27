@@ -99,6 +99,7 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Events/
     source/game_sa/Fx/
     source/game_sa/Interior/
+    source/game_sa/Memory/
     source/game_sa/Models/
     source/game_sa/Plugins/
     source/game_sa/RenderWare/
