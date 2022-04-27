@@ -21,6 +21,8 @@ public:
     uint32                 m_nStartTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_THROW_PROJECTILE;
+
     CTaskSimpleThrowProjectile(CEntity* target, CVector posn);
     ~CTaskSimpleThrowProjectile() override;
 

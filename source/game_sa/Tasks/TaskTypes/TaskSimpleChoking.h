@@ -19,6 +19,8 @@ public:
     bool                   m_bIsFinished;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CHOKING;
+
     CTaskSimpleChoking(CPed* attacker, bool bIsTeargas);
     void UpdateChoke(CPed* victim, CPed* attacker, bool bIsTeargas);
 };

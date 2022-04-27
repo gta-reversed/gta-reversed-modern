@@ -5,6 +5,7 @@
 #include "TheCarGenerators.h"
 #include "Occlusion.h"
 #include "CarCtrl.h"
+#include "TheScripts.h"
 
 bool& CCarGenerator::m_bHotdogVendorPositionOffsetInitialized = *reinterpret_cast<bool*>(0xC2B974);
 CVector& CCarGenerator::m_HotdogVendorPositionOffset = *reinterpret_cast<CVector*>(0xC2B968);
@@ -195,14 +196,14 @@ void CCarGenerator::DoInternalProcessing()
 
         CVector posn = UncompressLargeVector(m_vecPosn);
         baseZ = posn.z;
-        if (baseZ <= -100.0f)
+        if (baseZ <= MAP_Z_LOW_LIMIT)
             baseZ = CWorld::FindGroundZForCoord(posn.x, posn.y);
         vehicle->m_nExtendedRemovalRange = 255;
     }
     else
     {
         CVector posn = UncompressLargeVector(m_vecPosn);
-        if (posn.z > -100.0f)
+        if (posn.z > MAP_Z_LOW_LIMIT)
             posn.z += 1.0f;
         else
             posn.z = 1000.0f;
@@ -339,6 +340,18 @@ void CCarGenerator::DoInternalProcessing()
     }
     CVisibilityPlugins::SetClumpAlpha(vehicle->m_pRwClump, 0);
     m_nVehicleHandle = GetVehiclePool()->GetRef(vehicle);
+
+    // Originally, R* did a signed comparison between unsigned \r m_nGenerateCount and signed 32bit constant -1.
+    // This made the generated code to always skip the decrementation.
+    // However, this bug does not affect the game at all because all cargens created by the script
+    // are either disabled or infinite.
+#ifdef FIX_BUGS
+    if (m_nGenerateCount < (uint16)-1)
+#else
+    if (m_nGenerateCount < -1)
+#endif
+        m_nGenerateCount--;
+
     m_nNextGenTime = CalcNextGen();
 }
 
@@ -412,7 +425,7 @@ void CCarGenerator::SwitchOff()
 // 0x6F32C0
 void CCarGenerator::SwitchOn()
 {
-    m_nGenerateCount = -1;
+    m_nGenerateCount = (uint16)-1;
     m_nNextGenTime = CalcNextGen();
 }
 

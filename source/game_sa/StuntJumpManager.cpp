@@ -173,7 +173,7 @@ void CStuntJumpManager::Update() {
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
+                    randomPassenger->Say(37);
             }
         }
 
@@ -201,7 +201,7 @@ void CStuntJumpManager::Update() {
         int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
-        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE, 0.0f, 1.0f);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
         char* bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
         if (bonusMessage)

@@ -78,3 +78,4 @@ enum eWeaponType : uint32
     WEAPON_ANYWEAPON,
     WEAPON_FLARE,
 };
+constexpr auto NUM_WEAPONS{ (size_t)WEAPON_LAST_WEAPON + 1 };

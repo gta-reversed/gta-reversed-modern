@@ -41,7 +41,7 @@ public:
     CColPoint m_aTrailerColPoints[2];
     float     m_fTrailerColPointValue1;
     float     m_fTrailerColPointValue2;
-    uint8     field_9E8[4];
+    float     m_fHeight; // 0x6CF3DC, 0x6CFC11
     float     m_fTrailerTowedRatio;
     float     m_fTrailerTowedRatio2;
 

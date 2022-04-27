@@ -27,12 +27,14 @@ struct Simple : Base {
     uint32       m_iLibHookedBytes{};
     uint32       m_iLibFunctionAddress{};
 
-    Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5);
+    Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, int stackArguments = -1);
 
     virtual ~Simple() override = default;
 
     bool CheckLibFnForChangesAndStore(void* expected);
     void ApplyJumpToGTACode();
+    void GenerateECXPreservationThunk(int stackArguments);
+
     virtual void Switch() override;
     virtual void Check() override;
 };

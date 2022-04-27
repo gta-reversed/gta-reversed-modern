@@ -18,8 +18,8 @@ void CMonsterTruck::InjectHooks() {
     RH_ScopedInstall(PreRender, 0x6C7DE0);
     // RH_ScopedInstall(ExtendSuspension, 0x6C7D80);
     // RH_ScopedInstall(ResetSuspension, 0x6C7D40);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C7D30);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C7D20);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6C7D30);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C7D20);
 }
 
 // 0x6C8D60
@@ -67,11 +67,11 @@ void CMonsterTruck::PreRender() {
     CMatrix mat;
     CVector pos;
 
-    mi->GetWheelPosn(CARWHEEL_FRONT_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CARWHEEL_FRONT_LEFT], m_wheelPosition[CARWHEEL_FRONT_RIGHT], pos, true);
+    mi->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CAR_WHEEL_FRONT_LEFT], m_wheelPosition[CAR_WHEEL_FRONT_RIGHT], pos, true);
 
-    mi->GetWheelPosn(CARWHEEL_REAR_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CARWHEEL_REAR_LEFT], m_wheelPosition[CARWHEEL_REAR_RIGHT], pos, false);
+    mi->GetWheelPosn(CAR_WHEEL_REAR_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CAR_WHEEL_REAR_LEFT], m_wheelPosition[CAR_WHEEL_REAR_RIGHT], pos, false);
 
     if (m_nModelIndex == MODEL_DUMPER) {
         if (auto node = m_aCarNodes[MONSTER_MISC_A]) {

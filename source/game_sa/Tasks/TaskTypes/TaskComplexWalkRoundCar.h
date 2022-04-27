@@ -35,6 +35,8 @@ public:
     CMatrix      m_matrix;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_WALK_ROUND_CAR;
+
     void SetNewVehicle(CVehicle* vehicle, uint8 flags);
 };
 

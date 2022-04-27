@@ -6,13 +6,13 @@ void CTaskComplexSequence::InjectHooks()
     RH_ScopedCategory("Tasks");
 
     RH_ScopedInstall(Constructor, 0x632BD0);
-    RH_ScopedInstall(Clone_Reversed, 0x5F6710);
-    RH_ScopedInstall(GetId_Reversed, 0x632C60);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x632C00);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x638A40);
+    RH_ScopedVirtualInstall(Clone, 0x5F6710);
+    RH_ScopedVirtualInstall(GetId, 0x632C60);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x632C00);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x638A40);
     RH_ScopedOverloadedInstall(CreateNextSubTask, "ped", 0x632C70, CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&));
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x638A60);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x632D00);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x638A60);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x632D00);
     RH_ScopedInstall(AddTask, 0x632D10);
     RH_ScopedInstall(Flush, 0x632C10);
 }

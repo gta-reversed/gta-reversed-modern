@@ -33,27 +33,27 @@ void CBike::InjectHooks() {
     // RH_ScopedInstall(FixHandsToBars, 0x6B7F90);
     // RH_ScopedInstall(PlaceOnRoadProperly, 0x6BEEB0);
     // RH_ScopedInstall(GetCorrectedWorldDoorPosition, 0x6BF230);
-    RH_ScopedInstall(Fix_Reversed, 0x6B7050);
-    // RH_ScopedInstall(BlowUpCar_Reversed, 0x6BEA10);
-    RH_ScopedInstall(ProcessDrivingAnims_Reversed, 0x6BF400);
-    // RH_ScopedInstall(BurstTyre_Reversed, 0x6BEB20);
-    // RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6BE310);
-    // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x6BDEA0);
-    RH_ScopedInstall(Render_Reversed, 0x6BDE20);
-    // RH_ScopedInstall(PreRender_Reversed, 0x6BD090);
-    RH_ScopedInstall(Teleport_Reversed, 0x6BCFC0);
-    // RH_ScopedInstall(ProcessControl_Reversed, 0x6B9250);
-    // RH_ScopedInstall(VehicleDamage_Reversed, 0x6B8EC0);
-    // RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6B89B0);
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x6B8970);
-    // RH_ScopedInstall(PlayCarHorn_Reversed, 0x6B7080);
-    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B7070);
-    // RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6B6950);
-    // RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6B67E0);
-    RH_ScopedInstall(RemoveRefsToVehicle_Reversed, 0x6B67B0);
-    // RH_ScopedInstall(ProcessControlCollisionCheck_Reversed, 0x6B6620);
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6B5990);
-    RH_ScopedInstall(ProcessOpenDoor_Reversed, 0x6B58D0);
+    RH_ScopedVirtualInstall(Fix, 0x6B7050);
+    // RH_ScopedVirtualInstall(BlowUpCar, 0x6BEA10);
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6BF400);
+    // RH_ScopedVirtualInstall(BurstTyre, 0x6BEB20);
+    // RH_ScopedVirtualInstall(ProcessControlInputs, 0x6BE310);
+    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x6BDEA0);
+    RH_ScopedVirtualInstall(Render, 0x6BDE20);
+    // RH_ScopedVirtualInstall(PreRender, 0x6BD090);
+    RH_ScopedVirtualInstall(Teleport, 0x6BCFC0);
+    // RH_ScopedVirtualInstall(ProcessControl, 0x6B9250);
+    // RH_ScopedVirtualInstall(VehicleDamage, 0x6B8EC0);
+    // RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6B89B0);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x6B8970);
+    // RH_ScopedVirtualInstall(PlayCarHorn, 0x6B7080);
+    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B7070);
+    // RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6B6950);
+    // RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6B67E0);
+    RH_ScopedVirtualInstall(RemoveRefsToVehicle, 0x6B67B0);
+    // RH_ScopedVirtualInstall(ProcessControlCollisionCheck, 0x6B6620);
+    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6B5990);
+    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6B58D0);
 }
 
 // 0x6BF430
@@ -166,7 +166,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
             auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(ped))
-                pedDamageResponseCalc.ComputeDamageResponse(ped, &damageEvent.m_damageResponse, true);
+                pedDamageResponseCalc.ComputeDamageResponse(ped, damageEvent.m_damageResponse, true);
             else
                 damageEvent.m_damageResponse.m_bDamageCalculated = true;
 

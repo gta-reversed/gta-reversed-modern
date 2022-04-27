@@ -46,7 +46,7 @@ void DrawTable(auto& pickups) {
         ImGui::TableNextColumn(); ImGui::TableHeader("Revenue Value");
         ImGui::TableNextColumn(); ImGui::TableHeader("Ammo");
 
-        for (const auto& [i, pickup] : enumerate(pickups)) {
+        for (const auto& [i, pickup] : notsa::enumerate(pickups)) {
             ImGui::PushID(i);
 
             ImGui::TableNextColumn(); Text("%d", i);

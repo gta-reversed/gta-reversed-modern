@@ -60,6 +60,6 @@ CRGBA CHudColours::GetRGB(eHudColours colorIndex) {
 // Get color RGBA. "color" parameter - index of color in the table.
 // 0x58FEE0
 CRGBA CHudColours::GetRGBA(eHudColours index, uint8 alpha) {
-    auto color = m_aColours[index];
+    auto& color = m_aColours[index];
     return CRGBA(color.r, color.g, color.b, alpha);
 }

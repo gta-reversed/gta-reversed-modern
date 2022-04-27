@@ -26,6 +26,8 @@ public:
     eFacialExpression m_nFacialExpression;
     int32 m_nDuration;
 
+    static constexpr auto Type = TASK_SIMPLE_FACIAL;
+
     CTaskSimpleFacial(eFacialExpression nFacialExpress,int32 nDuration);
 };
 
