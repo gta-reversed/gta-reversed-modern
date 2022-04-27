@@ -103,7 +103,7 @@
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
 #include "LoadingScreen.h"
-#include "platform/win32/VideoPlayer/VideoPlayer.h"
+#include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "Securom.h"
 #include "GridRef.h"
 

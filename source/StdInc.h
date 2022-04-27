@@ -33,6 +33,32 @@ namespace rng = std::ranges;
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
 
+// RenderWare
+#include "game_sa\RenderWare\D3DIndexDataBuffer.h"
+#include "game_sa\RenderWare\D3DResourceSystem.h"
+#include "game_sa\RenderWare\D3DTextureBuffer.h"
+#include "game_sa\RenderWare\rw\rpanisot.h"
+#include "game_sa\RenderWare\rw\rpcriter.h"
+#include "game_sa\RenderWare\rw\rperror.h"
+#include "game_sa\RenderWare\rw\rphanim.h"
+#include "game_sa\RenderWare\rw\rpmatfx.h"
+#include "game_sa\RenderWare\rw\rpskin.h"
+#include "game_sa\RenderWare\rw\rpuvanim.h"
+#include "game_sa\RenderWare\rw\rpworld.h"
+#include "game_sa\RenderWare\rw\rtanim.h"
+#include "game_sa\RenderWare\rw\rtbmp.h"
+#include "game_sa\RenderWare\rw\rtdict.h"
+#include "game_sa\RenderWare\rw\rtpng.h"
+#include "game_sa\RenderWare\rw\rtquat.h"
+#include "game_sa\RenderWare\rw\rwcore.h"
+#include "game_sa\RenderWare\rw\rwplcore.h"
+#include "game_sa\RenderWare\rw\rwtexdict.h"
+#include "game_sa\RenderWare\rw\skeleton.h"
+#include "game_sa\RenderWare\RenderWare.h"
+
+// oswrapper
+#include "oswrapper/oswrapper.h"
+
 #include "debug.h"
 
 #include "EntryInfoNode.h"
@@ -412,28 +438,6 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
-
-#include "game_sa\RenderWare\D3DIndexDataBuffer.h"
-#include "game_sa\RenderWare\D3DResourceSystem.h"
-#include "game_sa\RenderWare\D3DTextureBuffer.h"
-#include "game_sa\RenderWare\RenderWare.h"
-#include "game_sa\RenderWare\rw\rpanisot.h"
-#include "game_sa\RenderWare\rw\rpcriter.h"
-#include "game_sa\RenderWare\rw\rperror.h"
-#include "game_sa\RenderWare\rw\rphanim.h"
-#include "game_sa\RenderWare\rw\rpmatfx.h"
-#include "game_sa\RenderWare\rw\rpskin.h"
-#include "game_sa\RenderWare\rw\rpuvanim.h"
-#include "game_sa\RenderWare\rw\rpworld.h"
-#include "game_sa\RenderWare\rw\rtanim.h"
-#include "game_sa\RenderWare\rw\rtbmp.h"
-#include "game_sa\RenderWare\rw\rtdict.h"
-#include "game_sa\RenderWare\rw\rtpng.h"
-#include "game_sa\RenderWare\rw\rtquat.h"
-#include "game_sa\RenderWare\rw\rwcore.h"
-#include "game_sa\RenderWare\rw\rwplcore.h"
-#include "game_sa\RenderWare\rw\rwtexdict.h"
-#include "game_sa\RenderWare\rw\skeleton.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"
