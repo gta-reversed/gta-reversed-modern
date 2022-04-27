@@ -503,31 +503,31 @@ void CWeapon::DoDoomAiming(CEntity* owner, CVector* start, CVector* end) {
     CWorld::FindObjectsInRange(*start, (*start - *end).Magnitude(), true, &inRangeCount, (int16)objInRange.size(), objInRange.data(), false, true, true, false, false);
 
     CEntity* closestEntity{};
-    float    closestDist{FLT_MAX}; // Originally 10 000
-    for (auto e : std::span{ objInRange.begin(), (size_t)inRangeCount }) {
-        if (e == owner || owner->AsPed()->CanSeeEntity(e, PI/8.f)) {
+    float    closestDist{ 10'000 };
+    for (auto entity : std::span{ objInRange.begin(), (size_t)inRangeCount }) {
+        if (entity == owner || owner->AsPed()->CanSeeEntity(entity, PI / 8.f)) {
             continue;
         }
 
-        switch (e->GetStatus()) {
+        switch (entity->GetStatus()) {
         case STATUS_TRAIN_MOVING:
         case STATUS_TRAIN_NOT_MOVING:
         case STATUS_WRECKED:
             continue;
         }
 
-        const auto dir = e->GetPosition() - owner->GetPosition();
+        const auto dir = entity->GetPosition() - owner->GetPosition();
         if (const auto dist2D = dir.Magnitude2D(); std::abs(dir.z) * 1.5f < dist2D) {
             const auto dist3D = std::hypot(dist2D, dir.z);
             if (dist3D < closestDist) {
-                closestEntity = e;
+                closestEntity = entity;
                 closestDist = dist3D;
             }
         }
     }
 
     if (closestDist < 9000.f) {
-        assert(closestEntity); // We should have one, because by default `closestDist` is FLT_MAX (originally 10 000)
+        // assert(closestEntity); // We should have one, because by default `closestDist` is FLT_MAX (originally 10 000)
 
         {
             CEntity*  _hitEntity{}; // Unused
