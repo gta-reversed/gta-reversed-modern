@@ -9,6 +9,7 @@
 #include "Pad.h"
 
 #include "CDebugMenu.h"
+#include "ControllerConfigManager.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -400,6 +401,13 @@ void CPad::StartShake_Train(const CVector2D& point) {
     }
 }
 */
+
+// 0x541D70
+void CPad::StopPadsShaking() {
+    for (auto i = 0; i < std::size(Pads); i++) {
+        GetPad(i)->StopShaking(i);
+    }
+}
 
 // 0x53FB50
 void CPad::StopShaking(int16 arg0) {
