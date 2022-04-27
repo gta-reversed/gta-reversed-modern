@@ -219,6 +219,7 @@ public:
 
     static bool IsMenuKeyJustPressed() noexcept                             { return KEY_IS_PRESSED(lmenu); }                                                                // 0x744D50
     static bool IsTabJustPressed() noexcept                                 { return KEY_IS_PRESSED(tab); }                                                                  // 0x744D90
+    static bool IsEscJustPressed() noexcept                                 { return KEY_IS_PRESSED(esc); }                                                                  // 0x572DB0
 
     bool IsRadioTrackSkipPressed() { return BUTTON_IS_PRESSED(m_bRadioTrackSkip); } // 0x4E7F20
     static bool f0x57C360() { return NewKeyState.back && !OldKeyState.back; }       // 0x57C360
@@ -283,9 +284,9 @@ public:
     // PAD END
 
     // MOUSE
-    static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb;}           // 0x57C3C0
+    static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb; }          // 0x57C3C0
     static bool IsMouseLButtonPressed() noexcept   { return MOUSE_IS_PRESSED(lmb); }                                                // 0x4D5A00
-    static bool IsMouseRButtonJustDown() noexcept  { return !NewMouseControllerState.rmb && OldMouseControllerState.rmb;}           // 0x572E70
+    static bool IsMouseRButtonPressed() noexcept   { return MOUSE_IS_PRESSED(rmb); }                                                // 0x572E70
     static bool IsMouseMPressed() noexcept         { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
     static bool IsMouseWheelUpPressed() noexcept   { return MOUSE_IS_PRESSED(wheelUp); }                                            // 0x57C400
     static bool IsMouseWheelDownPressed() noexcept { return MOUSE_IS_PRESSED(wheelDown); }                                          // 0x57C420
@@ -334,7 +335,6 @@ EditString(char *,int)
 FixPadsAfterSave(void)
 GetAbortClimb(void)
 GetAutoClimb(void)
-GetEscapeJustDown(void)
 GetExitTargeting(void)
 GetLeftAnalogue(CVector2D *)
 GetNitroFired(void)

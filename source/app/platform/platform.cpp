@@ -184,8 +184,8 @@ void RsTerminate() {
 // 0x619600
 bool RsInitialize() {
     RsGlobal.appName        = "GTA: San Andreas";
-    RsGlobal.maximumWidth   = uint32(DEFAULT_SCREEN_WIDTH);
-    RsGlobal.maximumHeight  = uint32(DEFAULT_SCREEN_HEIGHT);
+    RsGlobal.maximumWidth   = DEFAULT_SCREEN_WIDTH;
+    RsGlobal.maximumHeight  = DEFAULT_SCREEN_HEIGHT;
     RsGlobal.frameLimit     = APP_MAX_FPS;
     RsGlobal.quit           = false;
 

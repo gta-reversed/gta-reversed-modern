@@ -29,8 +29,8 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-#define DEFAULT_SCREEN_WIDTH (640.0f)
-#define DEFAULT_SCREEN_HEIGHT (448.0f)
+#define DEFAULT_SCREEN_WIDTH  (640)
+#define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
 #define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
@@ -46,13 +46,13 @@ class CPedGroup;
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
-#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
-#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / DEFAULT_SCREEN_HEIGHT)
+#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH  / (float) DEFAULT_SCREEN_WIDTH) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / (float) DEFAULT_SCREEN_HEIGHT)
 #define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
 #define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
@@ -67,9 +67,16 @@ class CPedGroup;
 #define PUSH_RENDERGROUP(str) 0
 #define POP_RENDERGROUP() 0
 
+constexpr auto BUILD_NAME_FULL = "TEST";
+
 extern int32 gDefaultTaskTime;
 
-extern char *gString; // char gString[200]
+static inline char (&gString)[352] = *(char(*)[352])0xB71670;
+static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
+
+static inline char (&gGxtString)[552] = *(char(*)[552])0xC1B100;
+static inline char (&gGxtString2)[552] = *(char(*)[552])0xC1AED8;
+static inline char (&GxtErrorString)[32] = *(char(*)[32])0xC1AEB8;
 
 extern float &GAME_GRAVITY; // default 0.008f
 
@@ -87,6 +94,7 @@ extern uint32 &ClumpOffset;
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
 constexpr float E              = 2.71828f;          // e
+constexpr float E_CONST        = 0.577;             // Euler-Mascheroni constant
 constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
 constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
 constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ
@@ -118,6 +126,11 @@ constexpr float SQRT_3         = 1.73205f;          // √3
 constexpr float SIN_PI         = 0.0f;              // sin(π);
 constexpr float COS_PI         = -1.0f;             // cos(π);
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
+
+struct SpriteFileName {
+    const char* name;
+    const char* alpha;
+};
 
 void InjectCommonHooks();
 

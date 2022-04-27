@@ -6,106 +6,46 @@
 */
 #include "StdInc.h"
 
-#include "extensions/enumerate.hpp"
-#include <valarray>
+#include <extensions/enumerate.hpp>
 
 #include "MenuManager.h"
+#include "MenuManager_Internal.h"
+#include "AEAudioUtility.h"
+#include "Radar.h"
 #include "Gamma.h"
+#include "VideoMode.h"
+#include "C_PcSave.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
+bool& CMenuManager::bInvertMouseX = *(bool*)0xBA6744;
+bool& CMenuManager::bInvertMouseY = *(bool*)0xBA6745;
 
 CMenuManager& GetMenu() {
     return FrontEndMenuManager;
 }
 
-bool& CMenuManager::bInvertMouseX = *(bool*)0xBA6744;
-bool& CMenuManager::bInvertMouseY = *(bool*)0xBA6745;
-
-//int32& CMenuManager::nLastMenuPage = *(int32*)0x8CDFF0;
-
-struct SpriteFileName {
-    const char* name;
-    const char* alpha;
-};
-
-struct FrontEndFilenamesType {
-    union {
-        struct {
-            SpriteFileName Textures[25];
-        };
-        struct {
-            SpriteFileName Radio[13];
-            SpriteFileName Background[8];
-            SpriteFileName AdditionalBackground[2];
-            SpriteFileName Mouse[2];
-        };
-    };
-};
-
-#define BUILD_PC
-
-// 0x8CDF28
-SpriteFileName FrontEndFilenames[25] = {
-    { "arrow",              "arrowA" },        // 0
-    { "radio_playback",     "" },              // 1
-    { "radio_krose",        "" },              // 2
-    { "radio_KDST",         "" },              // 3
-    { "radio_bounce",       "" },              // 4
-    { "radio_SFUR",         "" },              // 5
-    { "radio_RLS",          "" },              // 6
-    { "radio_RADIOX",       "" },              // 7
-    { "radio_csr",          "" },              // 8
-    { "radio_kjah",         "" },              // 9
-    { "radio_mastersounds", "" },              // 10
-    { "radio_wctr",         "" },              // 11
-    { "radio_TPLAYER",      "" },              // 12
-# ifdef BUILD_XBOX
-    { "CONTROLLER_XBOX",    "CONTROLLER_XBOXM" },
-# endif
-
-    { "back2",              "" },              // 13
-    { "back3",              "" },              // 14
-    { "back4",              "" },              // 15
-    { "back5",              "" },              // 16
-    { "back6",              "" },              // 17
-    { "back7",              "" },              // 18
-    { "back8",              "" },              // 19
-    { "map",                "" },              // 20
-
-    { "back8_top",          "" },              // 21
-    { "back8_right",        "" },              // 22
-
-# ifdef BUILD_PC
-    { "mouse",              "mousea"     },    // 23
-    { "crosshair",          "crosshaira" },    // 24
-# endif
-};
-
-FrontEndFilenamesType FrontEndFilenamesX = reinterpret_cast<FrontEndFilenamesType&>(FrontEndFilenames); // w8 for your suggestions
-
-void CMenuManager::InjectHooks()
-{
+void CMenuManager::InjectHooks() {
     RH_ScopedClass(CMenuManager);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x5744D0);
+    RH_ScopedInstall(Initialise, 0x5744D0);
     RH_ScopedInstall(LoadAllTextures, 0x572EC0);
-    // RH_ScopedInstall(SwapTexturesRound, 0x5730A0);
-    // RH_ScopedInstall(UnloadTextures, 0x574630);
-    // RH_ScopedInstall(InitialiseChangedLanguageSettings, 0x573260);
-    // RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
-    // RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
-    // RH_ScopedInstall(StretchX, 0x5733E0);
-    // RH_ScopedInstall(StretchY, 0x573410);
-    // RH_ScopedInstall(SwitchToNewScreen, 0x573680);
+    RH_ScopedInstall(SwapTexturesRound, 0x5730A0);
+    RH_ScopedInstall(UnloadTextures, 0x574630);
+    RH_ScopedInstall(InitialiseChangedLanguageSettings, 0x573260);
+    RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
+    RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
+    RH_ScopedInstall(StretchX, 0x5733E0);
+    // ??? RH_ScopedInstall(StretchY, 0x573410);
+    // + RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
-    // RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
-    // RH_ScopedInstall(SetDefaultPreferences, 0x573AE0);
-    // RH_ScopedInstall(GetNumberOfMenuOptions, 0x573E70);
-    // RH_ScopedInstall(JumpToGenericMessageScreen, 0x576AE0);
+    RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
+    RH_ScopedInstall(SetDefaultPreferences, 0x573AE0);
+    RH_ScopedInstall(GetNumberOfMenuOptions, 0x573E70);
+    RH_ScopedInstall(JumpToGenericMessageScreen, 0x576AE0);
 
     // RH_ScopedInstall(DrawFrontEnd, 0x57C290);
-    // RH_ScopedInstall(DrawBackground, 0x57B750);
+    // + RH_ScopedInstall(DrawBackground, 0x57B750);
     // RH_ScopedInstall(DrawStandardMenus, 0x5794A0);
     RH_ScopedInstall(DrawWindow, 0x573EE0);
     // RH_ScopedInstall(DrawWindowedText, 0x578F50);
@@ -130,17 +70,17 @@ void CMenuManager::InjectHooks()
     // RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
     // RH_ScopedInstall(CheckCodesForControls, 0x57DB20);
 
-    // RH_ScopedInstall(DisplaySlider, 0x576860);
-    // RH_ScopedInstall(DisplayHelperText, 0x57E240);
+    RH_ScopedInstall(DisplaySlider, 0x576860);
+    RH_ScopedInstall(DisplayHelperText, 0x57E240);
     RH_ScopedInstall(SetHelperText, 0x57CD10);
     RH_ScopedInstall(ResetHelperText, 0x57CD30);
-    // RH_ScopedInstall(MessageScreen, 0x579330);
-    // RH_ScopedInstall(SmallMessageScreen, 0x574010);
+    // + RH_ScopedInstall(MessageScreen, 0x579330);
+    // + RH_ScopedInstall(SmallMessageScreen, 0x574010);
 
     // RH_ScopedInstall(PrintMap, 0x575130);
     // RH_ScopedInstall(PrintStats, 0x574900);
     // RH_ScopedInstall(PrintBriefs, 0x576320);
-    // RH_ScopedInstall(PrintRadioStationList, 0x5746F0);
+    RH_ScopedInstall(PrintRadioStationList, 0x5746F0);
 
     // RH_ScopedInstall(UserInput, 0x57FD70);
     // RH_ScopedInstall(AdditionalOptionInput, 0x5773D0);
@@ -148,11 +88,11 @@ void CMenuManager::InjectHooks()
     // RH_ScopedInstall(RedefineScreenUserInput, 0x57EF50);
 
     RH_ScopedInstall(Process, 0x57B440);
-    // RH_ScopedInstall(ProcessStreaming, 0x573CF0);
+    RH_ScopedInstall(ProcessStreaming, 0x573CF0);
     // RH_ScopedInstall(ProcessFileActions, 0x578D60);
     // RH_ScopedInstall(ProcessUserInput, 0x57B480);
-    // RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
-    // RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
+    // +- RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
+    // +- RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
     // RH_ScopedInstall(ProcessMissionPackNewGame, 0x57D520);
 }
 
@@ -163,12 +103,57 @@ CMenuManager::CMenuManager() {
 
 // 0x579440
 CMenuManager::~CMenuManager() {
-    plugin::CallMethod<0x579440>(this);
+    UnloadTextures();
 }
 
 // 0x5744D0
 void CMenuManager::Initialise() {
-    plugin::CallMethod<0x5744D0>(this);
+    m_nPlayerNumber = 0;
+    field_1B1C = 0;
+    m_nCurrentScreenItem = 0;
+    m_bSelectedSaveGame = 0;
+    if (m_bDoVideoModeUpdate) {
+        RwD3D9ChangeMultiSamplingLevels(m_nPrefsAntialiasing);
+        SetVideoMode(m_nPrefsVideoMode);
+        m_bDoVideoModeUpdate = false;
+    }
+    CentreMousePointer();
+    m_bDrawMouse = false;
+
+    m_nSelectedRow = 3;
+    m_nSysMenu     = -99; // todo: UNDEFINED
+
+    m_fMapZoom = FRONTEND_MAP_RANGE_MAX;
+
+    if (m_vMapOrigin.x - FRONTEND_MAP_RANGE_MAX > 0.0f) {
+        m_vMapOrigin.x = m_vMapOrigin.x - m_vMapOrigin.x - FRONTEND_MAP_RANGE_MAX;
+    }
+
+    if (m_vMapOrigin.x + FRONTEND_MAP_RANGE_MAX < DEFAULT_SCREEN_WIDTH) {
+        m_vMapOrigin.x = DEFAULT_SCREEN_WIDTH - m_vMapOrigin.x + FRONTEND_MAP_RANGE_MAX + m_vMapOrigin.x;
+    }
+
+    if (m_vMapOrigin.y - FRONTEND_MAP_RANGE_MAX > 0.0f) {
+        m_vMapOrigin.y = m_vMapOrigin.y - m_vMapOrigin.y - FRONTEND_MAP_RANGE_MAX;
+    }
+
+    if (m_vMapOrigin.y + FRONTEND_MAP_RANGE_MAX < DEFAULT_SCREEN_HEIGHT) {
+        m_vMapOrigin.y = DEFAULT_SCREEN_HEIGHT - m_vMapOrigin.y + FRONTEND_MAP_RANGE_MAX + m_vMapOrigin.y;
+    }
+
+    CRadar::SetMapCentreToPlayerCoords();
+    CPad::StopPadsShaking();
+    if (!field_F4) {
+        m_nCurrentScreen = SCREEN_INITIAL;
+        m_bMapLoaded = true;
+        field_1AF8 = 0;
+        field_1AFC = 0;
+        m_bDrawMouse = false;
+    }
+    m_nRadioStation = AudioEngine.GetCurrentRadioStationID();
+    CFileMgr::SetDir("");
+    C_PcSave::PopulateSlotInfo();
+    CTimer::StartUserPause();
 }
 
 // 0x572EC0
@@ -178,41 +163,82 @@ void CMenuManager::LoadAllTextures() {
 
     CTimer::Stop();
 
-    // TODO: FIGURE OUT WHY BREAKPOINT DOESN'T WORKS
-    const auto LoadTexture = [=](size_t memorySize, std::string_view slot, std::string_view txdName, auto& textureNames, auto& sprites) {
+    const auto LoadTexture = [=](unsigned memorySize, const char* slotName, const char* txdName, unsigned start, unsigned end) {
         CStreaming::MakeSpaceFor(memorySize);
         CStreaming::ImGonnaUseStreamingMemory();
         CGame::TidyUpMemory(false, true);
         CTxdStore::PushCurrentTxd();
-        auto txdSlot = CTxdStore::FindTxdSlot(slot.data());
-        if (txdSlot == -1)
-            txdSlot = CTxdStore::AddTxdSlot(slot.data());
-        CTxdStore::LoadTxd(txdSlot, txdName.data());
-        CTxdStore::AddRef(txdSlot);
-        CTxdStore::SetCurrentTxd(txdSlot);
+        auto slot = CTxdStore::FindTxdSlot(slotName);
+        if (slot == -1)
+            slot = CTxdStore::AddTxdSlot(slotName);
+        CTxdStore::LoadTxd(slot, txdName);
+        CTxdStore::AddRef(slot);
+        CTxdStore::SetCurrentTxd(slot);
 
-        for (auto [index, texture] : enumerate(textureNames)) {
-            // HERE, FOR EXAMPLE
-            CSprite2d& sprite = sprites[index];
-            sprite.SetTexture(texture.name, texture.alpha);
-            sprite.SetAddressing(rwTEXTUREADDRESSCLAMP);
+        for (auto i = start; i < end; i++) {
+            const auto t = FrontEndFilenames[i];
+            m_aFrontEndSprites[i].SetTexture(t.name, t.alpha);
+            m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSCLAMP);
         }
 
         CTxdStore::PopCurrentTxd();
         CStreaming::IHaveUsedStreamingMemory();
     };
 
-    LoadTexture(0x21000, "frontend1",   "MODELS\\FRONTEN1.TXD",   FrontEndFilenamesX.Radio, m_apRadioSprites);
-    LoadTexture(0x3000,  "frontend_pc", "MODELS\\FRONTEN_pc.TXD", FrontEndFilenamesX.Mouse, m_apMouseTextures); // originally they wrote "MODELS/FRONTEN_pc.TXD"
-    LoadTexture(0x4C000, "frontend2",   "MODELS\\FRONTEN2.TXD",   FrontEndFilenamesX.Background,  m_apBackgroundTextures);
+    LoadTexture(0x21000, "frontend1",   "MODELS\\FRONTEN1.TXD",   FRONTEND1_START, FRONTEND2_START);
+    LoadTexture(0x3000,  "frontend2",   "MODELS\\FRONTEN2.TXD",   FRONTEND2_START, FRONTEND3_START);
+    LoadTexture(0x6800,  "frontend3",   "MODELS\\FRONTEN3.TXD",   FRONTEND3_START, FRONTEND4_START);       // NOTSA (for SwapTexturesRound)
+    LoadTexture(0x4C000, "frontend_pc", "MODELS\\FRONTEN_pc.TXD", FRONTEND4_START, FRONTEND_SPRITE_COUNT); // OG: "MODELS/FRONTEN_pc.TXD"
 
     m_bTexturesLoaded = true;
     CTimer::Update();
 }
 
+// round always false;
 // 0x5730A0
-void CMenuManager::SwapTexturesRound(bool frontend) {
-    plugin::CallMethod<0x5730A0, CMenuManager*>(this, frontend);
+void CMenuManager::SwapTexturesRound(bool round) {
+    if (m_bTexturesRound == round)
+        return; // Swap doesn't needed
+
+    const auto LoadTexture = [](const char* txdName, const char* slotName, unsigned size) {
+        CStreaming::MakeSpaceFor(size);
+        CStreaming::ImGonnaUseStreamingMemory();
+        CTxdStore::PushCurrentTxd();
+        auto slot = CTxdStore::FindTxdSlot(slotName);
+        if (slot == -1)
+            slot = CTxdStore::AddTxdSlot(slotName);
+        CTxdStore::LoadTxd(slot, txdName);
+        CTxdStore::AddRef(slot);
+        CTxdStore::SetCurrentTxd(slot);
+    };
+
+    m_bTexturesRound = round;
+
+    if (round || !CTxdStore::FindTxdSlot("frontend3")) {
+        auto slot = CTxdStore::FindTxdSlot("frontend2");
+        std::ranges::for_each(m_apBackgroundTextures, [](auto& sprite) { sprite.Delete(); });
+
+        CTxdStore::RemoveTxd(slot);
+        LoadTexture("MODELS/FRONTEN3.TXD", "frontend3", 0x6800);
+
+        for (unsigned i = FRONTEND3_START; i < FRONTEND4_START; i++) {
+            m_aFrontEndSprites[i].SetTexture(FrontEndFilenames[i].name, FrontEndFilenames[i].alpha);
+            m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSCLAMP);
+        }
+    } else {
+        auto slot = CTxdStore::FindTxdSlot("frontend3");
+        std::ranges::for_each(m_apAdditionalBackgroundTextures, [](auto& sprite) { sprite.Delete(); });
+
+        CTxdStore::RemoveTxd(slot);
+        LoadTexture("MODELS/FRONTEN2.TXD", "frontend2", 0x4C000);
+
+        for (unsigned i = FRONTEND2_START; i < FRONTEND3_START; i++) {
+            m_aFrontEndSprites[i].SetTexture(FrontEndFilenames[i].name, FrontEndFilenames[i].alpha);
+            m_aFrontEndSprites[i].SetAddressing(rwTEXTUREADDRESSCLAMP);
+        }
+    }
+    CTxdStore::PopCurrentTxd();
+    CStreaming::IHaveUsedStreamingMemory();
 }
 
 // 0x574630
@@ -220,58 +246,192 @@ void CMenuManager::UnloadTextures() {
     if (m_bTexturesLoaded) {
         SwapTexturesRound(false);
 
-        const auto Remove = [](std::string_view slot, auto& sprites) {
+        const auto Unload = [](const char* slot, auto& sprites) {
             std::ranges::for_each(sprites, [](auto& sprite) { sprite.Delete(); });
-            CTxdStore::RemoveTxd(CTxdStore::FindTxdSlot(slot.data()));
+            CTxdStore::RemoveTxd(CTxdStore::FindTxdSlot(slot));
         };
 
-        Remove("frontend1",   m_apRadioSprites);
-        Remove("frontend_pc", m_apMouseTextures);
-        Remove("frontend2",   m_apBackgroundTextures);
-        // todo: R* missed m_apAdditionalBackgroundTextures?
+        Unload("frontend1",   m_apRadioSprites);
+        Unload("frontend2",   m_apBackgroundTextures);
+        Unload("frontend3",   m_apAdditionalBackgroundTextures); // NOTSA
+        Unload("frontend_pc", m_apMouseTextures);
 
         m_bTexturesLoaded = false;
     }
 }
 
 // 0x573260
-void CMenuManager::InitialiseChangedLanguageSettings() {
-    plugin::CallMethod<0x573260, CMenuManager*>(this);
+void CMenuManager::InitialiseChangedLanguageSettings(bool bReinitControls) {
+    if (!m_bLanguageChanged)
+        return;
+
+    m_bLanguageChanged = false;
+
+    CTimer::Stop();
+
+    char mission[8] = {0};
+    TheText.GetNameOfLoadedMissionText(mission);
+    TheText.Load(CGame::bMissionPackGame != 0);
+    if (mission[0]) {
+        TheText.LoadMissionText(mission);
+    }
+
+    CTimer::Update();
+
+    auto lang88 = static_cast<eLanguage>(m_nLanguageF0x88);
+    if (lang88 != eLanguage::FRENCH && lang88 != eLanguage::GERMAN) {
+        switch (m_nPrefsLanguage) {
+        case eLanguage::AMERICAN:
+        case eLanguage::GERMAN:
+        case eLanguage::ITALIAN:
+        case eLanguage::SPANISH:
+            CLocalisation::SetNormalGame();
+            break;
+        case eLanguage::FRENCH:
+            CLocalisation::SetFrenchGame();
+            break;
+        default:
+            break;
+        }
+    }
+
+    if (lang88 == eLanguage::FRENCH) {
+        CLocalisation::SetFrenchGame();
+    }
+
+    if (bReinitControls) {
+        ControlsManager.ReinitControls();
+    }
 }
 
 // 0x573CD0
 bool CMenuManager::HasLanguageChanged() {
-    if (m_nPreviousLanguage == m_nLanguage)
+    if (m_nPreviousLanguage == m_nPrefsLanguage)
         return false;
 
-    m_nPreviousLanguage = m_nLanguage;
+    m_nPreviousLanguage = m_nPrefsLanguage;
     return true;
 }
 
 // 0x573330
 void CMenuManager::DoSettingsBeforeStartingAGame() {
-    plugin::CallMethod<0x573330, CMenuManager*>(this);
+    std::ranges::fill(CStats::FavoriteRadioStationList, 0);
+    if (m_bMenuActive)
+        AudioEngine.Reset();
+
+    m_nRadioStation = static_cast<int8>(CAEAudioUtility::GetRandomNumberInRange(1, RADIO_COUNT - 1));
+    m_bDontDrawFrontEnd = true;
+    m_bStartGameLoading = true;
+
+    if (m_nTargetBlipIndex) {
+        CRadar::ClearBlip(m_nTargetBlipIndex);
+        m_nTargetBlipIndex = 0;
+    }
+
+    CStats::UpdateRespectStat(true);
+    CCheat::m_bHasPlayerCheated = false;
+    CHud::SetZoneName(nullptr, 1);
+    TheCamera.SetFadeColour(0, 0, 0);
+    TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
+    TheCamera.ProcessFade();
+    TheCamera.Fade(2.0f, eFadeFlag::FADE_OUT);
 }
 
 // 0x5733E0
 float CMenuManager::StretchX(float x) {
-    if (SCREEN_WIDTH != DEFAULT_SCREEN_WIDTH) {
-        return SCREEN_SCALE_X(x);
-    }
-    return x;
+    if (SCREEN_WIDTH == DEFAULT_SCREEN_WIDTH)
+        return x;
+    else
+        return SCREEN_STRETCH_X(x);
 }
 
 // 0x573410
 float CMenuManager::StretchY(float y) {
-    if (SCREEN_HEIGHT != DEFAULT_SCREEN_HEIGHT) {
-        return SCREEN_SCALE_Y(y);
-    }
-    return y;
+    return plugin::CallMethodAndReturn<float, 0x573410, CMenuManager*, float>(this, y);
+
+    // WTF is going with this method
+    if (SCREEN_HEIGHT == DEFAULT_SCREEN_HEIGHT)
+        return y;
+    else
+        return y / DEFAULT_SCREEN_HEIGHT * SCREEN_HEIGHT;
 }
 
 // 0x573680
-void CMenuManager::SwitchToNewScreen(int8 screen) {
-    plugin::CallMethod<0x573680, CMenuManager*, int8>(this, screen);
+void CMenuManager::SwitchToNewScreen(eMenuScreen screen) {
+    return plugin::CallMethod<0x573680, CMenuManager*, eMenuScreen>(this, screen);
+
+    // Works well, but needs more attention because of the trash gotos
+    m_nPrevScreen = m_nCurrentScreen;
+    m_nControllerError = 0;
+
+    ResetHelperText();
+
+    if (m_nCurrentScreen == SCREEN_DISPLAY_SETTINGS) {
+        m_nDisplayAntialiasing = m_nPrefsAntialiasing;
+        m_nDisplayVideoMode    = m_nPrefsVideoMode;
+    }
+
+    if (screen == SCREEN_GO_BACK) {
+        if (m_bMainMenuSwitch) {
+            switch (m_nCurrentScreen) {
+            case SCREEN_START_GAME:
+                m_nCurrentScreenItem = 0;
+                break;
+            case SCREEN_OPTIONS:
+                m_nCurrentScreenItem = 1;
+                break;
+            case SCREEN_QUIT_GAME_ASK:
+                m_nCurrentScreenItem = 2;
+                break;
+            default:
+                m_nCurrentScreenItem = aScreens[m_nCurrentScreen].m_nStartEntry;
+                break;
+            }
+        } else {
+            m_nCurrentScreenItem = aScreens[m_nCurrentScreen].m_nStartEntry;
+        }
+        m_nCurrentScreen = aScreens[m_nCurrentScreen].m_nParentMenu;
+    } else {
+        if (screen) {
+            m_nCurrentScreenItem = 0;
+            m_nCurrentScreen     = screen;
+        }
+        else {
+            m_nCurrentScreenItem = 0;
+            m_nCurrentScreen     = aScreens[m_nCurrentScreen].m_aItems[m_nCurrentScreenItem].m_nTargetMenu;
+        }
+    }
+
+    if (m_nCurrentScreen == SCREEN_GAME_SAVE) {
+        m_nCurrentScreenItem = 9;
+    }
+
+    if (m_nPrevScreen == SCREEN_AUDIO_SETTINGS) {
+        AudioEngine.StopRadio(nullptr, false);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
+    }
+
+    if (m_nCurrentScreen == SCREEN_AUDIO_SETTINGS) {
+        AudioEngine.StartRadio(m_nRadioStation, 0);
+    }
+
+    if (m_bMainMenuSwitch) {
+        switch (m_nCurrentScreen) {
+        case SCREEN_NEW_GAME_ASK:
+            CGame::bMissionPackGame = 0;
+            DoSettingsBeforeStartingAGame();
+            m_bDontDrawFrontEnd = true;
+            break;
+        case SCREEN_MISSION_PACK_LOADING_ASK:
+            CGame::bMissionPackGame = m_nMissionPackGameId;
+            DoSettingsBeforeStartingAGame();
+            m_bDontDrawFrontEnd = true;
+            break;
+        case SCREEN_LOAD_GAME_ASK:
+            m_nCurrentScreen = SCREEN_LOAD_FIRST_SAVE;
+            break;
+        }
+    }
 }
 
 // 0x573A00
@@ -279,8 +439,8 @@ void CMenuManager::ScrollRadioStations(int8 numStations) {
     if (!m_nRadioStation || CAudioEngine::IsCutsceneTrackActive()) {
         return;
     }
-    
-    m_nRadioStation = numStations + m_nRadioStation;
+
+    m_nRadioStation += numStations;
     if (m_nRadioStation <= 0) {
         m_nRadioStation = RADIO_COUNT - 1;
     }
@@ -288,18 +448,26 @@ void CMenuManager::ScrollRadioStations(int8 numStations) {
         m_nRadioStation = 1;
     }
     AudioEngine.RetuneRadio(m_nRadioStation);
-    CMenuManager::SaveSettings();
+    SaveSettings();
 }
 
 // 0x573A60
 void CMenuManager::SetFrontEndRenderStates() {
-    plugin::CallMethod<0x573A60, CMenuManager*>(this);
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER,     RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
 }
 
 // 0x573AE0
-void CMenuManager::SetDefaultPreferences(eMenuPage screen) {
+void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
     switch (screen) {
-    case MENUPAGE_AUDIO_SETTINGS:
+    case SCREEN_AUDIO_SETTINGS:
         m_nSfxVolume       = 64;
         m_nRadioVolume     = 64;
         field_4E           = 1;
@@ -307,123 +475,117 @@ void CMenuManager::SetDefaultPreferences(eMenuPage screen) {
         m_bRadioAutoSelect = true;
         m_bTracksAutoScan  = false;
         m_nRadioMode       = 0;
-        AudioEngine.SetMusicMasterVolume(GetMenu().m_nRadioVolume);
-        AudioEngine.SetEffectsMasterVolume(GetMenu().m_nSfxVolume);
-        AudioEngine.SetBassEnhanceOnOff(GetMenu().m_bRadioEq);
-        AudioEngine.SetRadioAutoRetuneOnOff(GetMenu().m_bRadioAutoSelect);
+        AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
+        AudioEngine.SetEffectsMasterVolume(m_nSfxVolume);
+        AudioEngine.SetBassEnhanceOnOff(m_bRadioEq);
+        AudioEngine.SetRadioAutoRetuneOnOff(m_bRadioAutoSelect);
         break;
-    case MENUPAGE_DISPLAY_SETTINGS:
-    case MENUPAGE_DISPLAY_ADVANCED:
+    case SCREEN_DISPLAY_SETTINGS:
+    case SCREEN_DISPLAY_ADVANCED:
         g_fx.SetFxQuality(FXQUALITY_HIGH);
         gamma.SetGamma(0.5f, true);
-        m_nBrightness                  = 256;
-        m_fDrawDistance                = 1.2f;
-        CRenderer::ms_lodDistScale     = 1.2f;
-        m_bFrameLimiterOn              = true;
-        m_bHudOn                       = true;
-        m_bSavePhotos                  = true;
-        m_bMipMapping                  = true;
-        m_nAppliedAntiAliasingLevel    = 1;
-        m_nAntiAliasingLevel           = 1;
-        m_bWidescreenOn                = false;
-        m_bMapLegend                   = false;
-        m_nRadarMode                   = 0;
-        m_nResolution                  = m_nAppliedResolution;
-        //field_45                       = 0x1010101;
-        field_49                       = 1;
-        m_bShowSubtitles               = false;
+        m_PrefsBrightness                = 256;
+        m_fDrawDistance                  = 1.2f;
+        CRenderer::ms_lodDistScale       = 1.2f;
+        m_bPrefsFrameLimiter             = true;
+        m_bHudOn                         = true;
+        m_bSavePhotos                    = true;
+        m_bPrefsMipMapping               = true;
+        m_nPrefsAntialiasing             = 1;
+        m_nDisplayAntialiasing           = 1;
+        m_bWidescreenOn                  = false;
+        m_bMapLegend                     = false;
+        m_nRadarMode                     = 0;
+        m_nDisplayVideoMode              = m_nPrefsVideoMode;
+        m_ShowLocationsBlips             = true;
+        m_ShowContactsBlips              = true;
+        m_ShowMissionBlips               = true;
+        m_ShowOtherBlips                 = true;
+        m_ShowGangAreaBlips              = true;
+        m_bShowSubtitles                 = true;
         break;
-    case MENUPAGE_CONTROLLER_SETUP:
-        m_nController                  = 0;
-        *(bool*)0xC1CC02               = false; // todo: CVehicle::m_bEnableMouseSteering
-        CVehicle::m_bEnableMouseFlying = true;
-        CCamera::m_fMouseAccelHorzntl  = 0.0025f;
-        CCamera::m_bUseMouse3rdPerson  = true;
-        bInvertMouseY                  = false;
-        m_bInvertPadX1                 = false;
-        m_bInvertPadY1                 = false;
-        m_bInvertPadX2                 = false;
-        m_bInvertPadY2                 = false;
-        m_bSwapPadAxis1                = false;
-        m_bSwapPadAxis2                = false;
+    case SCREEN_CONTROLLER_SETUP:
+        m_nController                    = 0;
+        CCamera::m_fMouseAccelHorzntl    = 0.0025f;
+        CCamera::m_bUseMouse3rdPerson    = true;
+        CVehicle::m_bEnableMouseFlying   = true;
+        CVehicle::m_bEnableMouseSteering = false;
+        bInvertMouseY                    = false;
+        m_bInvertPadX1                   = false;
+        m_bInvertPadY1                   = false;
+        m_bInvertPadX2                   = false;
+        m_bInvertPadY2                   = false;
+        m_bSwapPadAxis1                  = false;
+        m_bSwapPadAxis2                  = false;
         break;
+    default:
+        return;
     }
 }
 
 // 0x573E70
 uint32 CMenuManager::GetNumberOfMenuOptions() {
-    return plugin::CallMethodAndReturn<uint32, 0x573E70, CMenuManager*>(this);
+    // return plugin::CallMethodAndReturn<uint32, 0x573E70, CMenuManager*>(this);
+
+    static int32& s_PrevScreen = *(int32*)0x8CDFF0;
+
+    if (m_nCurrentScreen == SCREEN_MAP || m_nCurrentScreen == SCREEN_BRIEF) {
+        return 2;
+    }
+
+    // return previously calculated value (caching)
+    if (s_PrevScreen == m_nCurrentScreen) {
+        return m_nNumberOfMenuOptions;
+    }
+
+    const auto Calc = [=]() -> uint8 {
+        auto result = 0;
+        for (auto& item : aScreens[m_nCurrentScreen].m_aItems) {
+            const auto actionType = item.m_nActionType;
+            if (!actionType) {
+                break;
+            }
+            if (actionType != MENU_ACTION_TEXT && actionType != MENU_ACTION_SKIP) {
+                result++;
+            }
+        }
+        return result;
+    };
+
+    s_PrevScreen = m_nCurrentScreen;
+    m_nNumberOfMenuOptions = 0;
+    m_nNumberOfMenuOptions = Calc();
+
+    return m_nNumberOfMenuOptions;
 }
 
 // 0x576AE0
-void CMenuManager::JumpToGenericMessageScreen(eMenuPage screen, const char* titleKey, const char* textKey) {
-    plugin::CallMethod<0x576AE0, CMenuManager*, eMenuPage, const char*, const char*>(this, screen, titleKey, textKey);
-}
+void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* titleKey, const char* textKey) {
+    // plugin::CallMethod<0x576AE0, CMenuManager*, eMenuPage, const char*, const char*>(this, screen, titleKey, textKey);
 
-// 0x57C290
-void CMenuManager::DrawFrontEnd() {
-    plugin::CallMethod<0x57C290, CMenuManager*>(this);
-}
+    auto& mscreen = aScreens[m_nCurrentScreen];
 
-// 0x57B750
-void CMenuManager::DrawBackground() {
-    plugin::CallMethod<0x57B750, CMenuManager*>(this);
-}
-
-// 0x5794A0
-void CMenuManager::DrawStandardMenus(uint8) {
-    plugin::CallMethod<0x5794A0, CMenuManager*>(this);
-}
-
-// 0x573EE0
-void CMenuManager::DrawWindow(const CRect& coords, const char* key, uint8 color, CRGBA backColor, bool unused, bool background) {
-    if (background) {
-        CSprite2d::DrawRect(coords, backColor);
+    SwitchToNewScreen(screen);
+    if (screen == SCREEN_GAME_SAVED) {
+        mscreen.m_aItems[1].m_nTargetMenu = SCREEN_START_GAME;
+    } else if (screen == SCREEN_GAME_LOADED) {
+        mscreen.m_aItems[1].m_nTargetMenu = SCREEN_GAME_SAVE;
     }
-
-    if (key && *key) {
-        CFont::SetWrapx(coords.right);
-        CFont::SetColor(CRGBA(225 - color, 225 - color, 225 - color, 255));
-        CFont::SetDropColor(CRGBA(0, 0, 0, 255));
-        CFont::SetEdge(2);
-        CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
-        CFont::SetFontStyle(FONT_GOTHIC);
-        CFont::SetScale(SCREEN_SCALE_X(1), SCREEN_SCALE_Y(1.4f));
-
-        float fY = std::min(coords.top, coords.bottom) - SCREEN_SCALE_Y(16);
-        float fX = coords.left + SCREEN_SCALE_X(10);
-        CFont::PrintString(fX, fY, TheText.Get(const_cast<char *>(key)));
-    }
-}
-
-// 0x578F50
-void CMenuManager::DrawWindowedText(float a2, float a3, RwRGBA color, char *a5, char* key, float scaleY) {
-    plugin::CallMethod<0x578F50, CMenuManager*, float, float, RwRGBA, char*, char*, float>(this, a2, a3, color, a5, key, scaleY);
-}
-
-// 0x57D860
-void CMenuManager::DrawQuitGameScreen() {
-    plugin::CallMethod<0x57D860, CMenuManager*>(this);
-}
-
-// 0x57D8D0
-void CMenuManager::DrawControllerScreenExtraText(int32 a1) {
-    plugin::CallMethod<0x57D8D0, CMenuManager*, int32>(this, a1);
-}
-
-// 0x57E6E0
-void CMenuManager::DrawControllerBound(uint16 a1, bool a2) {
-    plugin::CallMethod<0x57E6E0, CMenuManager*, uint16, bool>(this, a1, a2);
-}
-
-// 0x57F300
-void CMenuManager::DrawControllerSetupScreen() {
-    plugin::CallMethod<0x57F300, CMenuManager*>(this);
+    strncpy(mscreen.m_szTitleName, titleKey, sizeof(mscreen.m_szTitleName));
+    strncpy(mscreen.m_aItems[0].m_szName, textKey, sizeof(mscreen.m_aItems[0].m_szName));
 }
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
     plugin::CallMethod<0x57C520, CMenuManager*>(this);
+    /*
+    CVector pos;
+    if (SCREEN_WIDTH / 2.0f SCREEN_HEIGHT / 2.0f) {
+        pos.x = SCREEN_WIDTH / 2.0f;
+        pos.y = SCREEN_HEIGHT / 2.0f;
+        RsMouseSetPos(&pos);
+    }
+    */
 }
 
 // 0x57C8F0
@@ -446,166 +608,204 @@ void CMenuManager::SaveLoadFileError_SetUpErrorScreen() {
     plugin::CallMethod<0x57C490, CMenuManager*>(this);
 }
 
-// 0x573440
-void CMenuManager::CheckSliderMovement(int8 unk) {
-    plugin::CallMethod<0x573440, CMenuManager*, int8>(this, unk);
-}
-
-// 0x573840
-bool CMenuManager::CheckFrontEndUpInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573840, CMenuManager*>(this);
-}
-
-// 0x5738B0
-bool CMenuManager::CheckFrontEndDownInput() {
-    return plugin::CallMethodAndReturn<bool, 0x5738B0, CMenuManager*>(this);
-}
-
-// 0x573920
-bool CMenuManager::CheckFrontEndLeftInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573920, CMenuManager*>(this);
-}
-
-// 0x573990
-bool CMenuManager::CheckFrontEndRightInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573990, CMenuManager*>(this);
-}
-
-// 0x576B70
-bool CMenuManager::CheckForMenuClosing() {
-    return plugin::CallMethodAndReturn<bool, 0x576B70, CMenuManager*>(this);
-}
-
-// 0x57C4F0
-bool CMenuManager::CheckHover(int32 left, int32 right, int32 top, int32 bottom) {
-    return (
-        m_nMousePosLeft > left && m_nMousePosLeft < right &&
-        m_nMousePosTop > top  && m_nMousePosTop < bottom
-    );
-}
-
-// 0x57D720
-bool CMenuManager::CheckMissionPackValidMenu() {
-    return plugin::CallMethodAndReturn<bool, 0x57D720, CMenuManager*>(this);
-}
-
-// 0x57DB20
-bool CMenuManager::CheckCodesForControls(int32 a1) {
-    return plugin::CallMethodAndReturn<bool, 0x57DB20, CMenuManager*>(this, a1);
-}
-
-// 0x576860
-void CMenuManager::DisplaySlider(float x, float y, float a3, float a4, float a5, float value, int32 size) {
-    plugin::CallMethod<0x576860, CMenuManager*, float, float, float, float, float, float, int32>(this, x, y, a3, a4, a5, value, size);
-}
-
 // 0x57E240
-void CMenuManager::DisplayHelperText(char* key) {
-    plugin::CallMethod<0x57E240, CMenuManager*, char*>(this, key);
+void CMenuManager::DisplayHelperText(const char* key) {
+    switch (m_nCurrentScreen) {
+    case SCREEN_MAP:
+        CFont::SetScale(StretchY(0.4f), StretchY(0.5f));
+        break;
+    default:
+        CFont::SetScale(StretchY(0.4f), StretchY(0.6f));
+        break;
+    }
+
+    CFont::SetFontStyle(eFontStyle::FONT_MENU);
+    CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+    CFont::SetEdge(0);
+
+    float x = 610.f;
+    float y = 10.f;
+
+    if (key) {
+        CFont::SetColor({ 255, 255, 255, 255 });
+        CFont::PrintStringFromBottom(StretchX(x), SCREEN_HEIGHT - StretchY(y), TheText.Get(key));
+        return;
+    }
+
+    uint8 alpha = 255;
+    if (m_nHelperText && m_nHelperText != 1) {
+        if (CTimer::GetTimeInMSPauseMode() - m_nTimeHelperTextUpdated > 10) {
+            m_nTimeHelperTextUpdated = CTimer::GetTimeInMSPauseMode();
+            m_nHelperTextFadingAlpha -= 2;
+        }
+        if (m_nHelperTextFadingAlpha < 1) {
+            ResetHelperText();
+        }
+        alpha = std::min(m_nHelperTextFadingAlpha, 255);
+    }
+
+    CFont::SetColor(CRGBA(255, 255, 255, alpha));
+
+    char* text;
+    switch (m_nHelperText) {
+    case FET_APP:
+        text = TheText.Get("FET_APP"); // CLICK LMB / RETURN - APPLY NEW SETTING
+        break;
+    case FET_HRD:
+        text = TheText.Get("FET_HRD"); // DEFAULT SETTINGS RESTORED
+        break;
+    case FET_RSO:
+        text = TheText.Get("FET_RSO"); // ORIGINAL SETTING RESTORED
+        break;
+    case FEA_SCF:
+        text = TheText.Get("FEA_SCF"); // FAILED TO SCAN USER TRACKS
+        break;
+    case FEA_SCS:
+        text = TheText.Get("FEA_SCS"); // USER TRACKS SCANNED SUCCESSFULLY
+        break;
+    case FEA_STS:
+        text = TheText.Get("FEA_STS"); // STATS SAVED TO 'STATS.HTML'
+        break;
+    default:
+        text = nullptr;
+        break;
+    }
+
+    if (text) {
+        CFont::PrintStringFromBottom(StretchX(x), SCREEN_HEIGHT - StretchY(y), text);
+        return;
+    }
+
+    switch (aScreens[m_nCurrentScreen].m_aItems[m_nCurrentScreenItem].m_nActionType) {
+    case MENU_ACTION_BACK:
+        text = TheText.Get("FEH_BPO"); // CLICK LMB / RETURN - BACK
+        break;
+    case MENU_ACTION_MENU:
+    case MENU_ACTION_CTRLS_JOYPAD:
+    case MENU_ACTION_CTRLS_FOOT:
+    case MENU_ACTION_CTRLS_CAR:
+        text = TheText.Get("FEH_JMP"); // CLICK LMB / RETURN - ENTER MENU
+        break;
+    case MENU_ACTION_USER_TRACKS_SCAN:
+        text = TheText.Get("FEH_SNC"); // CLICK LMB / RETURN - SCAN USER TRACKS
+        break;
+    case MENU_ACTION_RESOLUTION:
+        text = TheText.Get("FET_MIG"); // LEFT / RIGHT / MOUSEWHEEL - ADJUST
+        break;
+    default:
+        text = nullptr;
+        break;
+    }
+
+    if (text) {
+        CFont::PrintStringFromBottom(StretchX(x), SCREEN_HEIGHT - StretchY(y), text);
+        return;
+    }
+
+    switch (m_nCurrentScreen) {
+    case SCREEN_STATS:
+        text = TheText.Get("FEH_SSA"); // CURSORS - MOVE~n~S - SAVE TO FILE
+        break;
+    case SCREEN_MAP:
+        text = TheText.Get("FET_MIG"); // LEFT / RIGHT / MOUSEWHEEL - ADJUST
+        y = 2.0f;
+        break;
+    default:
+        text = TheText.Get("FET_MIG"); // LEFT / RIGHT / MOUSEWHEEL - ADJUST
+        break;
+    }
+
+    CFont::PrintStringFromBottom(StretchX(x), SCREEN_HEIGHT - StretchY(y), text);
 }
 
 // 0x57CD10
-void CMenuManager::SetHelperText(int32 messageId) {
-    m_nHelperText = messageId;
+void CMenuManager::SetHelperText(eHelperText messageId) {
+    m_nHelperText            = messageId;
     m_nHelperTextFadingAlpha = 300;
 }
 
 // 0x57CD30
 void CMenuManager::ResetHelperText() {
-    m_nHelperText = 0;
+    m_nHelperText            = HELPER_NONE;
     m_nHelperTextFadingAlpha = 300;
 }
 
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
-    // blackBackground -> bRenderBig
-    // cameraUpdateStarted -> bWithinFrame
     return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, key, blackBackground, cameraUpdateStarted);
+
+    const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+    /*
+    if (!cameraUpdateStarted) {
+        if (!RsCameraBeginUpdate(Scene.m_pRwCamera)) {
+            return;
+        }
+
+        if (blackBackground) {
+            CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
+        }
+    }
+    */
+
+    CSprite2d::SetRecipNearClip();
+    CSprite2d::InitPerFrame();
+    CFont::InitPerFrame();
+    DefinedState2d();
+
+    if (blackBackground) {
+        CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
+    }
+
+    SmallMessageScreen(key);
+    CFont::RenderFontBuffer();
 }
 
 // 0x574010
 void CMenuManager::SmallMessageScreen(const char* key) {
-    plugin::CallMethod<0x574010, CMenuManager*, const char*>(this, key);
-}
+    return plugin::CallMethod<0x574010, CMenuManager*, const char*>(this, key);
 
-// 0x575130
-void CMenuManager::PrintMap() {
-    plugin::CallMethod<0x575130, CMenuManager*>(this);
-}
+    CFont::SetBackground(false, false);
+    CFont::SetProportional(true);
+    CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
+    CFont::SetCentreSize(SCREEN_SCALE_X(430.0f));
+    CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+    CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
+    CFont::SetDropShadowPosition(0);
+    CFont::SetScale(
+        RsGlobal.maximumWidth  == 640 ? 0.56f : (float)RsGlobal.maximumWidth * 0.00087500003f,
+        RsGlobal.maximumHeight == 448 ? 1.00f : (float)RsGlobal.maximumHeight * 0.002232143f
+    );
 
-// 0x574900
-void CMenuManager::PrintStats() {
-    plugin::CallMethod<0x574900, CMenuManager*>(this);
-}
+    DrawWindow(
+        CRect(
+            StretchX(95.0f),
+            StretchY(125.0f),
+            SCREEN_WIDTH - StretchX(95.0f),
+            SCREEN_HEIGHT - StretchY(165.0f)
+        ),
+        nullptr,
+        0,
+        { 0, 0, 0, 255 },
+        false,
+        true
+    );
 
-// 0x576320
-void CMenuManager::PrintBriefs() {
-    plugin::CallMethod<0x576320, CMenuManager*>(this);
-}
+    float x = StretchX(320.0f);
+    float y = StretchY(190.0f);
 
-// 0x5746F0
-void CMenuManager::PrintRadioStationList() {
-    plugin::CallMethod<0x5746F0, CMenuManager*>(this);
-}
-
-// 0x57FD70
-void CMenuManager::UserInput() {
-    plugin::CallMethod<0x57FD70, CMenuManager*>(this);
-}
-
-// 0x5773D0
-void CMenuManager::AdditionalOptionInput(bool* upPressed, bool* downPressed) {
-    plugin::CallMethod<0x5773D0, CMenuManager*, bool*, bool*>(this, upPressed, downPressed);
-}
-
-// 0x57E4D0
-bool CMenuManager::CheckRedefineControlInput() {
-    return plugin::CallMethodAndReturn<bool, 0x57E4D0, CMenuManager*>(this);
-}
-
-// 0x57EF50
-void CMenuManager::RedefineScreenUserInput(bool* accept, bool* cancel) {
-    plugin::CallMethod<0x57EF50, CMenuManager*, bool*, bool*>(this, accept, cancel);
-}
-
-// 0x57B440
-void CMenuManager::Process() {
-    if (m_bMenuActive) {
-        ProcessStreaming(m_bAllStreamingStuffLoaded);
-        UserInput();
-        ProcessFileActions();
-        D3DResourceSystem::TidyUpD3DIndexBuffers(1);
-        D3DResourceSystem::TidyUpD3DTextures(1);
+    const auto lines = CFont::GetNumberLines(StretchX(320.0f), StretchX(135.0f), TheText.Get(key));
+    if (lines > 1) {
+        y = StretchY(float(200 - lines * 9));
     }
-    CheckForMenuClosing();
-}
 
-// 0x573CF0
-void CMenuManager::ProcessStreaming(bool streamAll) {
-    plugin::CallMethod<0x573CF0, CMenuManager*, bool>(this, streamAll); // TODO: streamAll -> bImmediately?
-}
-
-// 0x578D60
-void CMenuManager::ProcessFileActions() {
-    plugin::CallMethod<0x578D60, CMenuManager*>(this);
-}
-
-// 0x57B480
-void CMenuManager::ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR) {
-    plugin::CallMethod<0x57B480, CMenuManager*, bool, bool, bool, int8>(this, downPressed, upPressed, acceptPressed, cancelPressed, pressedLR);
-}
-
-// 0x576FE0
-void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed) {
-    plugin::CallMethod<0x576FE0, CMenuManager*, int8, bool*, bool>(this, pressedLR, cancelPressed, acceptPressed);
-}
-
-// 0x57CD50
-bool CMenuManager::ProcessPCMenuOptions(int8 a1, uint8 a2) {
-    return plugin::CallMethodAndReturn<bool, 0x57CD50, CMenuManager*, int8, uint8>(this, a1, a2);
-}
-
-// 0x57D520
-void CMenuManager::ProcessMissionPackNewGame() {
-    plugin::CallMethod<0x57D520, CMenuManager*>(this);
+    char* text = TheText.Get(key);
+    if (!TheText.m_bCdErrorLoaded) {
+        for (auto& k : { "NOCD", "OPENCD", "WRONGCD", "CDERROR" }) {
+            if (_stricmp(k, key) == 0) {
+                AsciiToGxtChar(TheText.m_szCdErrorText, text);
+            }
+        }
+    }
+    CFont::PrintString(x, y, text);
 }

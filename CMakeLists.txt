@@ -97,6 +97,7 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Entity/Vehicle/
     source/game_sa/Enums/
     source/game_sa/Events/
+    source/game_sa/Frontend/
     source/game_sa/Fx/
     source/game_sa/Interior/
     source/game_sa/Memory/

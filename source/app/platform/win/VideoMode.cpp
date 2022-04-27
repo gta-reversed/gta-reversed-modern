@@ -33,7 +33,7 @@ char** GetVideoModeList() {
     gVideoModes = (char**)CMemoryMgr::Calloc(numVidModes, sizeof(char*));
 
     RwVideoMode videoMode{};
-    for (auto modeId = 0; modeId < numVidModes; modeId++) {
+    for (auto modeId = 0u; modeId < numVidModes; modeId++) {
         VERIFY(RwEngineGetVideoModeInfo(&videoMode, modeId));
 
         gVideoModes[modeId] = nullptr;
