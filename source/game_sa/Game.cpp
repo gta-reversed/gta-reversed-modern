@@ -211,13 +211,18 @@ bool CGame::Init1(char const *datFile) {
     D3DResourceSystem::SetUseD3DResourceBuffering(false);
     CGame::currLevel = LEVEL_NAME_COUNTRY_SIDE;
     CGame::currArea = AREA_CODE_NORMAL_WORLD;
+
+    CMemoryMgr::PushMemId(MEM_TEXTURES);
     gameTxdSlot = CTxdStore::AddTxdSlot("generic");
     CTxdStore::Create(gameTxdSlot);
     CTxdStore::AddRef(gameTxdSlot);
+
     int32 slot = CTxdStore::AddTxdSlot("particle");
     CTxdStore::LoadTxd(slot, "MODELS\\PARTICLE.TXD");
     CTxdStore::AddRef(slot);
     CTxdStore::SetCurrentTxd(gameTxdSlot);
+    CMemoryMgr::PopMemId();
+
     CGameLogic::InitAtStartOfGame();
     CGangWars::InitAtStartOfGame();
     CConversations::Clear();
@@ -246,11 +251,23 @@ bool CGame::Init1(char const *datFile) {
     CMessages::ClearAllMessagesDisplayedByGame(0);
     CVehicleRecording::Init();
     CRestart::Initialise();
+
+    CMemoryMgr::PushMemId(MEM_WORLD);
     CWorld::Initialise();
+    CMemoryMgr::PopMemId();
+
+    CMemoryMgr::PushMemId(MEM_ANIMATION);
     CAnimManager::Initialise();
     CCutsceneMgr::Initialise();
+    CMemoryMgr::PopMemId();
+
+    CMemoryMgr::PushMemId(MEM_CARS);
     CCarCtrl::Init();
+    CMemoryMgr::PopMemId();
+
+    // CMemoryMgr::PushMemId(MEM_DEFAULT_MODELS);
     InitModelIndices();
+
     CModelInfo::Initialise();
     CPickups::Init();
     CTheCarGenerators::Init();
@@ -258,11 +275,19 @@ bool CGame::Init1(char const *datFile) {
     CAudioZones::Init();
     CStreaming::InitImageList();
     CStreaming::ReadIniFile();
+
+    CMemoryMgr::PushMemId(MEM_PATHS);
     ThePaths.Init();
     CPathFind::AllocatePathFindInfoMem();
+    CMemoryMgr::PopMemId();
+
     CTaskSimpleFight::LoadMeleeData();
     CCheat::ResetCheats();
+
+    CMemoryMgr::PushMemId(MEM_FX);
     g_fx.Init();
+    CMemoryMgr::PopMemId();
+
     return true;
 }
 
@@ -393,14 +418,15 @@ void CGame::InitialiseCoreDataAfterRW() {
 bool CGame::InitialiseEssentialsAfterRW() {
     return plugin::CallAndReturn<bool, 0x5BA160>();
 
-    /*
+    CMemoryMgr::PushMemId(MEM_30);
     TheText.Load(false);
-    if (!CCarFXRenderer::Initialise() || !CGrassRenderer::Initialise() || !CCustomBuildingRenderer::Initialise())
+    if (!CCarFXRenderer::Initialise() || /* !CGrassRenderer::Initialise() ||*/ !CCustomBuildingRenderer::Initialise()) {
         return false;
+    }
+    CMemoryMgr::PopMemId();
 
     CTimer::Initialise();
     return true;
-    */
 }
 
 // 0x53BB50
