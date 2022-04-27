@@ -152,7 +152,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
             ped->SetPosn(posn);
             ped->m_fAimingRotation = ped->m_fCurrentRotation - CTimer::GetTimeStep() * 0.05F;
             ped->m_vecMoveSpeed.z = -0.03f;
-            ped->Say(177, 0, 1.0F, false, false, false);
+            ped->Say(177);
         }
     }
 
@@ -165,12 +165,13 @@ CTask* CTaskComplexUseSwatRope::CreateSubTask(eTaskType taskType, CPed* ped) {
     case TASK_SIMPLE_ABSEIL:
         return new CTaskSimpleAbseil();
     case TASK_SIMPLE_PAUSE:
-        return new CTaskSimplePause(100000);
+        return new CTaskSimplePause(100'000);
     case TASK_NONE:
         return new CTaskSimpleNone();
     case TASK_FINISHED:
         ped->m_bUsesCollision = true;
         ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        return nullptr;
     default:
         return nullptr;
     }
