@@ -19,7 +19,6 @@
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
-char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
 

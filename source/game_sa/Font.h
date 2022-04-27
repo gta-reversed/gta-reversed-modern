@@ -75,7 +75,7 @@ enum eExtraFontSymbol : uint8 {
     EXSYMBOL_R3         = 14
 };
 
-enum class eFontStyle : uint8 {
+enum eFontStyle : uint8 {
     FONT_GOTHIC,
     FONT_SUBTITLES,
     FONT_MENU,

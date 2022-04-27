@@ -24,6 +24,7 @@
 namespace rng = std::ranges;
 
 #include "Base.h"
+#include "config.h"
 
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
@@ -87,6 +88,8 @@ namespace rng = std::ranges;
 #include "SArray.h"
 
 #include "GxtChar.h"
+
+#include "game_sa\common.h"
 
 #include "game_sa\Enums\eCheats.h"
 #include "game_sa\Enums\AnimationEnums.h"
@@ -264,7 +267,6 @@ namespace rng = std::ranges;
 #include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
 #include "game_sa\ObjectData.h"
-#include "game_sa\common.h"
 #include "game_sa\CustomRoadsignMgr.h"
 #include "game_sa\CompressedVector.h"
 #include "game_sa\CompressedMatrixNotAligned.h"

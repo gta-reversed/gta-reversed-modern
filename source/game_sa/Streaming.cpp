@@ -2069,7 +2069,7 @@ void CStreaming::ReadIniFile() {
             }
             else if (!_stricmp(attribute, "def_brightness_pal"))
             {
-                FrontEndMenuManager.m_nBrightness = atoi(value);
+                FrontEndMenuManager.m_PrefsBrightness = atoi(value);
             }
         }
         else
