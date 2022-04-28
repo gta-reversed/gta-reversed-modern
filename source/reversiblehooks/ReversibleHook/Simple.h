@@ -20,12 +20,12 @@ struct Simple : Base {
     SHookContent m_HookContent{};
     uint8        m_OriginalFunctionContent[sizeof(m_HookContent)]{};
     uint32       m_iHookedBytes{};
-    uint32       m_iRealHookedAddress{};
+    uint32       m_iRealHookedAddress{}; // Address of GTA function
 
     SHookContent m_LibHookContent{};
     uint8        m_LibOriginalFunctionContent[sizeof(m_LibHookContent)]{};
     uint32       m_iLibHookedBytes{};
-    uint32       m_iLibFunctionAddress{};
+    uint32       m_iLibFunctionAddress{}; // Address of our function
 
     Simple(std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, int stackArguments = -1);
 
