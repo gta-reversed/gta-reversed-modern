@@ -104,10 +104,12 @@ void CPathFind::ReleaseRequestedNodes() {
     m_bNodesLoadingRequested = false;
 }
 
+// 0x44D790
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
     return plugin::CallMethodAndReturn<bool, 0x44D790, CPathFind*, CNodeAddress, CNodeAddress>(this, startNodeAddress, targetNodeAddress);
 }
 
+// 0x44D480
 bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
     return plugin::CallMethodAndReturn<bool, 0x44D480, CPathFind*, CNodeAddress, CNodeAddress>(this, startNodeAddress, targetNodeAddress);
 }
@@ -168,23 +170,27 @@ void CPathFind::MarkRoadNodeAsDontWander(float x, float y, float z) {
     m_pPathNodes[node.m_wAreaId][node.m_wNodeId].m_bDontWander = true;
 }
 
+// 0x452820
 void CPathFind::SwitchRoadsOffInAreaForOneRegion(float xMin, float xMax, float yMin, float yMax, float zMin, float zMax, bool bLowTraffic, uint8 nodeType, int32 areaId,
                                                  uint8 bUnused) {
     return plugin::CallMethod<0x452820, CPathFind*, float, float, float, float, float, float, bool, char, int32, bool>(this, xMin, xMax, yMin, yMax, zMin, zMax, bLowTraffic,
                                                                                                                        nodeType, areaId, bUnused);
 }
 
+// NOTSA
 CPathNode* CPathFind::GetPathNode(CNodeAddress address) {
     assert(address.IsValid());
     return &m_pPathNodes[address.m_wAreaId][address.m_wNodeId];
 }
 
+// NOTSA
 bool CPathFind::FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr) {
     bool valid{};
     FindNodeCoorsForScript(addr, &valid);
     return valid;
 }
 
+// 0x452F40
 void CPathFind::LoadPathFindData(int32 areaId) {
     CTimer::Suspend();
     sprintf(gString, "data\\paths\\nodes%d.dat", areaId);
@@ -193,12 +199,13 @@ void CPathFind::LoadPathFindData(int32 areaId) {
     CTimer::Resume();
 }
 
+// 0x4529F0
 void CPathFind::LoadPathFindData(RwStream* stream, int32 areaId) {
-    RwStreamRead(stream, &m_anNumNodes[areaId], sizeof(uint32));
-    RwStreamRead(stream, &m_anNumVehicleNodes[areaId], sizeof(uint32));
-    RwStreamRead(stream, &m_anNumPedNodes[areaId], sizeof(uint32));
-    RwStreamRead(stream, &m_anNumCarPathLinks[areaId], sizeof(uint32));
-    RwStreamRead(stream, &m_anNumAddresses[areaId], sizeof(uint32));
+    RwStreamRead(stream, &m_anNumNodes[areaId],        sizeof(m_anNumNodes[areaId]));
+    RwStreamRead(stream, &m_anNumVehicleNodes[areaId], sizeof(m_anNumVehicleNodes[areaId]));
+    RwStreamRead(stream, &m_anNumPedNodes[areaId],     sizeof(m_anNumPedNodes[areaId]));
+    RwStreamRead(stream, &m_anNumCarPathLinks[areaId], sizeof(m_anNumCarPathLinks[areaId]));
+    RwStreamRead(stream, &m_anNumAddresses[areaId],    sizeof(m_anNumAddresses[areaId]));
 
     auto numNodes = m_anNumNodes[areaId];
     if (numNodes) {
@@ -250,6 +257,7 @@ void CPathFind::LoadPathFindData(RwStream* stream, int32 areaId) {
     }
 }
 
+// 0x44D0F0
 void CPathFind::UnLoadPathFindData(int32 index) {
     delete[] m_pPathNodes[index];
     delete[] m_pNaviNodes[index];
@@ -266,14 +274,17 @@ void CPathFind::UnLoadPathFindData(int32 index) {
     m_pPathIntersections[index] = nullptr;
 }
 
+// 0x44DE00
 void CPathFind::LoadSceneForPathNodes(CVector point) {
     plugin::CallMethod<0x44DE00, CPathFind*, CVector>(this, point);
 }
 
+// 0x450DE0
 bool CPathFind::IsWaterNodeNearby(CVector position, float radius) {
     return plugin::CallMethodAndReturn<bool, 0x450DE0, CPathFind*, CVector, float>(this, position, radius);
 }
 
+// 0x44F460
 CNodeAddress CPathFind::FindNodeClosestToCoors(CVector pos, int32 nodeType, float maxDistance, uint16 unk2, int32 unk3, uint16 unk4, uint16 bBoatsOnly, int32 unk6) {
     CNodeAddress tempAddress;
     plugin::CallMethodAndReturn<CNodeAddress*, 0x44F460, CPathFind*, CNodeAddress*, CVector, int32, float, uint16, int32, uint16, uint16, int32>(
@@ -345,7 +356,7 @@ void CPathFind::AddDynamicLinkBetween2Nodes_For1Node(CNodeAddress first, CNodeAd
     auto& firstPathInfo = m_pPathNodes[first.m_wAreaId][first.m_wNodeId];
     auto numAddresses = m_anNumAddresses[first.m_wAreaId];
 
-    uint32_t firstLinkId;
+    uint32 firstLinkId;
     if (firstPathInfo.m_wBaseLinkId >= numAddresses)
         firstLinkId = firstPathInfo.m_wBaseLinkId;
     else {

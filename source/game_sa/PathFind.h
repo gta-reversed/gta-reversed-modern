@@ -136,7 +136,7 @@ public:
     static void InjectHooks();
     CVector GetNodeCoors();
 
-    inline bool IsLowTrafficLevel() {
+    inline bool IsLowTrafficLevel() const {
         return m_nTrafficLevel == TRAFFIC_MEDIUM || m_nTrafficLevel == TRAFFIC_LOW;
     }
 };
@@ -163,7 +163,7 @@ public:
     CPathUnknClass         m_aDynamicLinksIds[NUM_PATH_MAP_AREAS];
     uint32                 m_dwTotalNumNodesInSearchList;
     CNodeAddress           m_aInteriorNodes[NUM_PATH_INTERIOR_AREAS];
-    uint32 m_nNumForbiddenAreas;
+    uint32                 m_nNumForbiddenAreas;
     CForbiddenArea         m_aForbiddenAreas[NUM_PATH_MAP_AREAS];
     bool                   m_bNodesLoadingRequested;
     float                  m_fForbiddenForScrCarsX1;
