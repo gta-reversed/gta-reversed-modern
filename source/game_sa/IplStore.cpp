@@ -220,7 +220,13 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
 bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
     return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
     /*
-    for (auto& def : ms_pPool->GetAllValid() | rng::views::drop(1)) {
+    // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
+    for (auto slot = 1; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+       auto def = ms_pPool->GetAt(slot);
+       if (!def) {
+           continue;
+       }
+
         if (!def.m_bLoadRequest) {
             continue;
         }
