@@ -20,7 +20,9 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
 }
 
 // 0x647FE0
-CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(CVehicle* vehicle, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) {
+CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(CVehicle* vehicle, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) : CTaskSimple() {
+    m_bAnimFinished        = false;
+    m_AnimAssoc            = nullptr;
     m_Vehicle              = vehicle;
     m_TargetDoor           = targetDoor;
     m_bWasPedStatic        = isPedStatic;
