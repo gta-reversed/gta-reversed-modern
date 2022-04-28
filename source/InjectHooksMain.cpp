@@ -136,6 +136,7 @@
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
 #include "TaskComplexFallAndGetUp.h"
+#include "TaskComplexFollowNodeRoute.h"
 #include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
@@ -431,6 +432,8 @@ void InjectHooksMain() {
     CAcquaintance::InjectHooks();
     CWeather::InjectHooks();
     CPathFind::InjectHooks();
+    CPathNode::InjectHooks();
+    CNodeRoute::InjectHooks();
     CLoadMonitor::InjectHooks();
     CPlantMgr::InjectHooks();
     CDecisionMakerTypes::InjectHooks();
@@ -534,6 +537,7 @@ void InjectHooksMain() {
         CTaskSimpleGetUp::InjectHooks();
         CTaskSimpleUninterruptable::InjectHooks();
         CTaskComplexFallAndGetUp::InjectHooks();
+        CTaskComplexFollowNodeRoute::InjectHooks();
         CTaskComplexFollowLeaderInFormation::InjectHooks();
         // CTaskSimpleTriggerLookAt::InjectHooks();
         CTaskSimpleHitHead::InjectHooks();

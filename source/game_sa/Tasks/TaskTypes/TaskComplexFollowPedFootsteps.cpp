@@ -22,8 +22,6 @@ CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTas
     CEntity::SafeRegisterRef(m_targetPed);
 
     m_pointRoute = new CPointRoute();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
 }
 
 CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed* ped) {

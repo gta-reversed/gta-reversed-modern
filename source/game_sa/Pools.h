@@ -49,7 +49,7 @@ typedef CPool<CEntryInfoNode>                 CEntryInfoNodePool;
 typedef CPool<CPointRoute>                    CPointRoutePool;
 typedef CPool<void*>                   CPatrolRoutePool; // todo: CPatrolRoute
 typedef CPool<CEvent>                         CEventPool;
-typedef CPool<void*>                     CNodeRoutePool; // todo: CNodeRoute
+typedef CPool<CNodeRoute>                     CNodeRoutePool;
 typedef CPool<CTaskAllocator>                 CTaskAllocatorPool;
 typedef CPool<CPedAttractor>                  CPedAttractorPool;
 

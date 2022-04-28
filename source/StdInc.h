@@ -266,6 +266,7 @@ namespace rng = std::ranges;
 #include "game_sa\MissionCleanup.h"
 #include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
+#include "game_sa\NodeRoute.h"
 #include "game_sa\ObjectData.h"
 #include "game_sa\CustomRoadsignMgr.h"
 #include "game_sa\CompressedVector.h"

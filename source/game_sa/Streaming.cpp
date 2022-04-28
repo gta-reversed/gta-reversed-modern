@@ -3781,7 +3781,7 @@ void CStreaming::Update() {
 // unused
 // 0x40E960
 void CStreaming::UpdateForAnimViewer() {
-    CVector position;
+    CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
     sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsed);
