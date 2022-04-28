@@ -18,8 +18,8 @@ public:
     CNodeAddress m_nodeAddress2;
     int32        unkn0;
     int32        m_nTime;
-    int32 m_nTimeStarted;
-    int32 m_nTimeStopped;
+    int32        m_nTimeStarted;
+    int32        m_nTimeStopped;
     bool         bUnkn1;
     bool         m_bStoppedMaybe;
     union {
@@ -60,7 +60,6 @@ public:
     bool CanGoStraightThere(CPed* ped, const CVector& from, const CVector& to, float maxDist);
     void ComputePathNodes(const CPed* ped);
     void SetTarget(CPed* ped, const CVector& target, float radius, float fUnkn1, float fUnkn2, bool bForce);
-
 
 private:
     friend void InjectHooksMain();
