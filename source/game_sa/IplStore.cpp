@@ -474,6 +474,29 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
 */
 void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
     plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
+    
+    /*if (CStreaming::ms_disableStreaming) {
+        return;
+    }
+
+    if (FindPlayerPed() && !bAvoidLoadInPlayerVehicleMovingDirection) {
+        if (const auto veh = FindPlayerVehicle()) {
+            const auto& velocity = veh->m_vecMoveSpeed;
+            posn.x += std::min(40.f, velocity.x * 80.f);
+            posn.y += std::min(40.f, velocity.y * 80.f);
+        }
+    }
+
+    SetIplsRequired(posn);
+    if (gbIplsNeededAtPosn) {
+        SetIplsRequired(&gvecIplsNeededAtPosn, CGame::currArea);
+    }
+
+    //
+    // Above code should be okay, but code below is a mess.
+    //
+
+    */
 }
 
 /*!
@@ -535,8 +558,8 @@ void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
 /*!
 * @addr 0x404700
 */
-void CIplStore::SetIplsRequired(const CVector& posn, int32 playerNumber) {
-    plugin::Call<0x404700, const CVector&, int32>(posn, playerNumber);
+void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
+    plugin::Call<0x404700, const CVector&, int32>(posn, gameArea);
 }
 
 /*!
