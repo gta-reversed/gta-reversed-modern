@@ -279,21 +279,19 @@ void CTaskManager::SetTask(CTask* task, int32 taskIndex, bool unused) {
 
 // 0x681B60
 void CTaskManager::SetTaskSecondary(CTask* task, int32 taskIndex) {
-    CTask* currentSecondaryTask = GetTaskSecondary(taskIndex);
-    if (currentSecondaryTask == task)
-        return;
-
-    if (currentSecondaryTask) {
-        delete currentSecondaryTask;
-        currentSecondaryTask = nullptr;
+    if (const auto current = GetTaskSecondary(taskIndex)) {
+        if (current == task) {
+            return;
+        }
+        delete current;
     }
 
     m_aSecondaryTasks[taskIndex] = task;
 
     AddSubTasks(task->AsComplex());
 
-    if (CTask* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
-        if (simplest && !simplest->IsSimple()) {
+    if (auto* simplest = GetSimplestTask(GetTaskSecondary(taskIndex))) {
+        if (!simplest->IsSimple()) {
             delete m_aSecondaryTasks[taskIndex];
             m_aSecondaryTasks[taskIndex] = nullptr;
         }

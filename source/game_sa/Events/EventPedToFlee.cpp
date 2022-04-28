@@ -8,20 +8,18 @@ void CEventPedToFlee::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AF240);
-    RH_ScopedInstall(Clone_Reversed, 0x4B73D0);
+    RH_ScopedVirtualInstall(Clone, 0x4B73D0);
 }
 
 CEventPedToFlee::CEventPedToFlee(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventPedToFlee::~CEventPedToFlee()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4AF240

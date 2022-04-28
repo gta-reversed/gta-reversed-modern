@@ -21,8 +21,6 @@ int32& CAnimManager::ms_numAnimations = *(int32*)0xB4EA2C;
 void CAnimManager::InjectHooks() {
     RH_ScopedClass(CAnimManager);
     RH_ScopedCategory("Animation");
-
-    CAnimBlendAssociation::InjectHooks();
 }
 
 // 0x5BF6B0
@@ -41,7 +39,7 @@ CAnimBlock* CAnimManager::GetAnimationBlock(const char* name) {
 }
 
 // 0x4D3990
-uint32 CAnimManager::GetAnimationBlockIndex(const char* name) {
+int32 CAnimManager::GetAnimationBlockIndex(const char* name) {
     return plugin::CallAndReturn<int32, 0x4D3990, const char*>(name);
 }
 

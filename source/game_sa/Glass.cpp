@@ -568,7 +568,7 @@ void CGlass::BreakGlassPhysically(CVector point, float radius) {
                         continue;
                 }
 
-                LastColCheckMS = CTimer::m_snTimeInMilliseconds;
+                LastColCheckMS = CTimer::GetTimeInMS();
 
                 if (!object->objectFlags.bGlassBroken) {
                     AudioEngine.ReportGlassCollisionEvent(AE_GLASS_HIT, object->GetPosition());

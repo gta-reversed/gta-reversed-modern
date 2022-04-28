@@ -2,6 +2,7 @@
 
 #include "PlayerInfo.h"
 #include "FireManager.h"
+#include "MenuSystem.h"
 
 void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
@@ -121,12 +122,9 @@ void CPlayerInfo::SetPlayerSkin(const char* name) {
 
 // 0x56DA80
 void CPlayerInfo::SetLastTargetVehicle(CVehicle* vehicle) {
-    if (m_pLastTargetVehicle)
-        m_pLastTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
-
+    CEntity::SafeCleanUpRef(m_pLastTargetVehicle);
     m_pLastTargetVehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pLastTargetVehicle));
+    CEntity::SafeRegisterRef(m_pLastTargetVehicle);
 }
 
 // 0x56F8D0
@@ -162,7 +160,7 @@ void CPlayerInfo::Clear() {
     m_bTryingToExitCar = 0;
     m_bTaxiTimerScore = 0;
     m_nTaxiTimer = 0;
-    m_nVehicleTimeCounter = CTimer::m_snTimeInMilliseconds;
+    m_nVehicleTimeCounter = CTimer::GetTimeInMS();
     m_nMaxArmour = 100;
     m_nMaxHealth = 100;
     m_bCanDoDriveBy = 1;
@@ -267,7 +265,7 @@ void CPlayerInfo::BlowUpRCBuggy(bool bExplode) {
     if (m_pRemoteVehicle && !m_pRemoteVehicle->m_bRemoveFromWorld) {
         CRemote::TakeRemoteControlledCarFromPlayer(bExplode);
         if (bExplode)
-            m_pRemoteVehicle->BlowUpCar(m_pPed, false); // todo: CWorld::Players[CWorld::PlayerInFocus].m_pPed instead m_pPed
+            m_pRemoteVehicle->BlowUpCar(FindPlayerPed(), false);
     }
 }
 

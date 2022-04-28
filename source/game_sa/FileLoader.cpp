@@ -16,6 +16,7 @@
 #include "StuntJumpManager.h"
 #include "EntryExitManager.h"
 #include "PedStats.h"
+#include "LoadingScreen.h"
 
 char(&CFileLoader::ms_line)[512] = *reinterpret_cast<char(*)[512]>(0xB71848);
 uint32& gAtomicModelId = *reinterpret_cast<uint32*>(0xB71840);
@@ -262,7 +263,7 @@ void CFileLoader::LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox) {
 void CFileLoader::LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId) {
     auto index = CTheCarGenerators::CreateCarGenerator(
         carGen->m_vecPosn,
-        RWRAD2DEG(carGen->m_fAngle),
+        RadiansToDegrees(carGen->m_fAngle),
         carGen->m_nModelId,
         carGen->m_nPrimaryColor,
         carGen->m_nSecondaryColor,

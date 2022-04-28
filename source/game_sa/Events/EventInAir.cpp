@@ -8,7 +8,7 @@ void CEventInAir::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B0CB0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B0C00);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B0C00);
 }
 
 CEventInAir* CEventInAir::Constructor()
@@ -52,22 +52,20 @@ void CEventStuckInAir::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1490);
-    RH_ScopedInstall(GetEventPriority_Reversed, 0x4B1600);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1580);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B15B0);
+    RH_ScopedVirtualInstall(GetEventPriority, 0x4B1600);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1580);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B15B0);
 }
 
 CEventStuckInAir::CEventStuckInAir(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventStuckInAir::~CEventStuckInAir()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)

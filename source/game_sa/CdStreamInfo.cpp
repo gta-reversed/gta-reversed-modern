@@ -154,7 +154,7 @@ eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId)
 // When CdStreamThread is done reading the model, then CdStreamThread will set `stream.nSectorsToRead` and `stream.bInUse` to 0,
 // so the main thread can call CdStreamRead again to read more models.
 // 0x406A20
-bool __cdecl CdStreamRead(int32 streamId, uint8* lpBuffer, uint32 offsetAndHandle, int32 sectorCount)
+bool __cdecl CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 sectorCount)
 {
     CdStream& stream = gCdStreams[streamId];
     gLastCdStreamPosn = sectorCount + offsetAndHandle;
@@ -283,7 +283,7 @@ void __cdecl CdStreamInit(int32 streamCount)
         gStreamFileCreateFlags |= FILE_FLAG_NO_BUFFERING;
     gOverlappedIO = 1;
     gStreamingInitialized = 0;
-    uint8* pAllocatedMemory = CMemoryMgr::MallocAlign(STREAMING_SECTOR_SIZE, bytesPerSector);
+    auto* pAllocatedMemory = CMemoryMgr::MallocAlign(STREAMING_SECTOR_SIZE, bytesPerSector);
     SetLastError(NO_ERROR);
     gOpenStreamCount = 0;
     gStreamCount = streamCount;

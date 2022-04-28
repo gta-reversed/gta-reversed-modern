@@ -8,9 +8,9 @@
 
 #include "RenderWare.h"
 
+// Fuck Rw Types
 struct RpHAnimBlendInterpFrame {
-    RtQuat orientation;
-    RwV3d  translation;
+    CQuaternion orientation;
+    CVector     translation;
 };
-
 VALIDATE_SIZE(RpHAnimBlendInterpFrame, 0x1C);

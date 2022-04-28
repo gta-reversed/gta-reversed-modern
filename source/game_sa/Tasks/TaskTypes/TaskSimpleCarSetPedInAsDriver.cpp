@@ -11,14 +11,12 @@ CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetV
     m_bWarpingInToCar = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (targetVehicle)
-        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
 CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver()
 {
-    if (m_pTargetVehicle)
-        m_pTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
 CTask* CTaskSimpleCarSetPedInAsDriver::Clone()

@@ -82,7 +82,7 @@ public:
     static void FindNearestWaterAndItsFlow();
     static bool GetWaterLevelNoWaves(float x, float y, float z, float * pOutWaterLevel, float * fUnkn1, float * fUnkn2);
     static void RenderWaterFog();
-    static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fLowFreqMult, float fMidHighFreqMult, float& fOutWave);
+    static void CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave, float& colorMult, float& glare, CVector& vecNormal);
     static void ScanThroughBlocks();
     static void SplitWaterTriangleAlongYLine(int32 a0, int32 a1, int32 a2, CRenPar a3, int32 a4, int32 a5, CRenPar a6, int32 a7, int32 a8, CRenPar a9);
     static void RenderWater();

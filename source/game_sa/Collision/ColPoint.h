@@ -25,19 +25,20 @@ VALIDATE_SIZE(tColLighting, 0x1);
 
 class CColPoint {
 public:
-    /* https://code.google.com/p/mtasa-blue/source/browse/tags/1.3.4/MTA10/game_sa/CColPointSA.h */
+    /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CColPointSA.h */
     CVector      m_vecPoint;      // 0
     float        field_C;         // 12
     CVector      m_vecNormal;     // 16
     float        field_1C;        // 28
                                   // col shape 1 info
-    uint8        m_nSurfaceTypeA; // see eSurfaceType      // 32
+    eSurfaceType m_nSurfaceTypeA; // 32
     uint8        m_nPieceTypeA;   // 33
     tColLighting m_nLightingA;    // 34
                                   // col shape 2 info
-    uint8        m_nSurfaceTypeB; // see eSurfaceType      // 35
+    eSurfaceType m_nSurfaceTypeB; // 35
     uint8        m_nPieceTypeB;   // 36
     tColLighting m_nLightingB;
+
     char         padding[2];
 
     float        m_fDepth;        // col depth

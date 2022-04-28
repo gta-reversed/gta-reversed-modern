@@ -10,10 +10,10 @@ void CEventVehicleDamage::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B18D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B1A00);
-    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4B1A90);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B50B0);
-    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4B1A70);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1A00);
+    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4B1A90);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B50B0);
+    RH_ScopedVirtualInstall(GetSourceEntity, 0x4B1A70);
 }
 
 // 0x4B18D0
@@ -22,18 +22,14 @@ CEventVehicleDamage::CEventVehicleDamage(CVehicle* vehicle, CEntity* attacker, e
     m_attacker = attacker;
     m_vehicle = vehicle;
     m_weaponType = weaponType;
-    if (m_vehicle)
-        m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_attacker)
-        m_attacker->RegisterReference(&m_attacker);
+    CEntity::SafeRegisterRef(m_vehicle);
+    CEntity::SafeRegisterRef(m_attacker);
 }
 
 CEventVehicleDamage::~CEventVehicleDamage()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_attacker)
-        m_attacker->CleanUpOldReference(&m_attacker);
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_attacker);
 }
 
 CEventVehicleDamage* CEventVehicleDamage::Constructor(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType)

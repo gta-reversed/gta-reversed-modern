@@ -9,8 +9,10 @@
 #include "TaskComplex.h"
 #include "PathFind.h"
 #include "TaskUtilityLineUpPedWithCar.h"
-#include "Enums/eTargetDoor.h"
+#include "eTargetDoor.h"
 
+// Note: This class is abstract, that is, it can't be directly constructed,
+// rather, use one of the derived classes.
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
@@ -23,7 +25,6 @@ public:
             uint8 m_bCarryOnAfterFallingOff : 1;
         };
     };
-    char  _pad[3];
     int32 m_nTargetDoor;
     int32 m_nTargetDoorOppositeToFlag;
     int32 m_nTargetSeat;

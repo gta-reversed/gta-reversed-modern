@@ -37,6 +37,7 @@ public:
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
+    static bool IsTaskPtr(CTask* task);
 
     CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }

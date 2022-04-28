@@ -44,7 +44,6 @@ public:
     static float& DUMPER_COL_ANGLEMULT; // 0.0002f
 
 public:
-    CMonsterTruck(plugin::dummy_func_t) : CAutomobile(plugin::dummy) { /* todo: remove NOTSA */ }
     CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CMonsterTruck() override = default; // 0x6C7D10, 0x6C7F90
 
