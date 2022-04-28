@@ -512,7 +512,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
-    int16 Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
+    int16 Say(uint16 phraseId, uint32 offset = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
     void RemoveBodyPart(ePedNode pedNode, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
     uint8 DoesLOSBulletHitPed(CColPoint& colPoint);
@@ -594,5 +594,5 @@ VALIDATE_SIZE(CPed, 0x79C);
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);
-inline bool SayJacked(CPed* jacked, CVehicle* veh, int a3 = 0) { return plugin::CallAndReturn<bool, 0x6497A0>(jacked, veh, a3); }
-inline bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* veh, int a3 = 0) { return plugin::CallAndReturn<bool, 0x6497F0>(jacker, jacked, veh, a3); }
+bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset = 0);
+bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset = 0);
