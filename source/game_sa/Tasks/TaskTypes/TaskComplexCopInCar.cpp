@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexCopInCar.h"
 #include "TaskSimpleCarDrive.h"
 #include "TaskComplexLeaveCar.h"
@@ -9,7 +10,7 @@
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexCarDrive.h"
 #include "TaskComplexCarDriveMission.h"
-#include "Enums/eCarDrivingStyle.h"
+#include "eCarDrivingStyle.h"
 
 void CTaskComplexCopInCar::InjectHooks() {
     RH_ScopedClass(CTaskComplexCopInCar);
@@ -28,75 +29,69 @@ void CTaskComplexCopInCar::InjectHooks() {
 }
 
 // 0x68C7F0
-CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop, CPed* suspect, bool flag_0x1) :
-    m_pVehicle{vehicle},
-    m_cop{cop},
-    m_suspect{suspect},
-    m_suspectDeadOrLost{flag_0x1}
+CTaskComplexCopInCar::CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop, CPed* suspect, bool bSuspectDeadOrLost) :
+    m_Vehicle{ vehicle },
+    m_Cop{ cop },
+    m_Suspect{ suspect },
+    m_bSuspectDeadOrLost{bSuspectDeadOrLost}
 {
-    CEntity::SafeRegisterRef(m_pVehicle);
-    CEntity::SafeRegisterRef(m_cop);
-    CEntity::SafeRegisterRef(m_suspect);
-}
-
-// NOTSA
-CTaskComplexCopInCar::CTaskComplexCopInCar(const CTaskComplexCopInCar& o) :
-    CTaskComplexCopInCar{o.m_pVehicle, o.m_cop, o.m_suspect, o.m_suspectDeadOrLost}
-{
+    m_flag0x4 = true;
+    CEntity::SafeRegisterRef(m_Vehicle);
+    CEntity::SafeRegisterRef(m_Cop);
+    CEntity::SafeRegisterRef(m_Suspect);
 }
 
 // 0x68C8C0
 CTaskComplexCopInCar::~CTaskComplexCopInCar() {
-    CEntity::SafeCleanUpRef(m_pVehicle);
-    CEntity::SafeCleanUpRef(m_cop);
-    CEntity::SafeCleanUpRef(m_suspect);
+    CEntity::SafeCleanUpRef(m_Vehicle);
+    CEntity::SafeCleanUpRef(m_Cop);
+    CEntity::SafeCleanUpRef(m_Suspect);
 }
  
 // 0x68C9E0
 CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
     switch (taskType) {
     case TASK_SIMPLE_CAR_DRIVE:
-        return new CTaskSimpleCarDrive{ m_pVehicle };
+        return new CTaskSimpleCarDrive{m_Vehicle};
     case TASK_COMPLEX_LEAVE_CAR: {
         copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_KNOCK_OFF_BIKE);
-        return new CTaskComplexLeaveCar{ m_pVehicle, 0, 0, true, false };
+        return new CTaskComplexLeaveCar{m_Vehicle, 0, 0, true, false };
     }
     case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: {
         copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
-        return new CTaskComplexEnterCarAsDriver{ m_pVehicle };
+        return new CTaskComplexEnterCarAsDriver{m_Vehicle};
     }
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill{ 1000, true, false, 8.f };
     case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: {
         copPed->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
-        return new CTaskComplexEnterCarAsPassenger{ m_pVehicle, 0, false };
+        return new CTaskComplexEnterCarAsPassenger{m_Vehicle, 0, false };
     }
     case TASK_COMPLEX_POLICE_PURSUIT:
         return new CTaskComplexPolicePursuit{};
     case TASK_COMPLEX_WANDER:
         return new CTaskComplexWanderCop{ PEDMOVE_WALK, (uint8)CGeneral::GetRandomNumberInRange(0, 8) };
     case TASK_COMPLEX_CAR_DRIVE_MISSION: {
-        const auto targetEntity = m_suspect->bInVehicle ? (CEntity*)m_suspect->m_pVehicle : (CEntity*)m_suspect;
-        if (m_suspect->IsPlayer()) {
-            return new CTaskComplexCarDriveMission{
-                m_pVehicle,
+        const auto targetEntity = m_Suspect->bInVehicle ? (CEntity*)m_Suspect->m_pVehicle : (CEntity*)m_Suspect;
+        if (m_Suspect->IsPlayer()) {
+            return new CTaskComplexCarDriveMission{m_Vehicle,
                 targetEntity,
-                m_suspect->bInVehicle ? (eCarMission)CCarAI::FindPoliceCarMissionForWantedLevel() : MISSION_POLICE_BIKE,
-                (eCarDrivingStyle)CCarAI::FindPoliceCarSpeedForWantedLevel(m_pVehicle), // TODO: This really doesn't add up.. How does this work?
+                m_Suspect->bInVehicle ? (eCarMission)CCarAI::FindPoliceCarMissionForWantedLevel() : MISSION_POLICE_BIKE,
+                (eCarDrivingStyle)CCarAI::FindPoliceCarSpeedForWantedLevel(m_Vehicle), // TODO: This really doesn't add up.. How does this work?
                 10.f
             };
         } else {
             const auto GetDrivingMission = [this] {
-                if (m_suspect->bInVehicle) {
-                    return rand() % 4 < 2 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
+                if (m_Suspect->bInVehicle) {
+                    return CGeneral::GetRandomNumber() % 4 < 2 ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_RAMPLAYER_FARAWAY;
                 }
                 return MISSION_37;
             };
             return new CTaskComplexCarDriveMission{
-                m_pVehicle,
+                m_Vehicle,
                 targetEntity,
                 GetDrivingMission(),
-                (eCarDrivingStyle)(this->m_pVehicle->m_pHandlingData->m_transmissionData.field_5C * 54.0), // TODO: This really doesn't add up.. How does this work?
+                (eCarDrivingStyle)(m_Vehicle->m_pHandlingData->m_transmissionData.field_5C * 54.0f), // TODO: This really doesn't add up.. How does this work?
                 10.f
             };
         }
@@ -120,18 +115,21 @@ bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
         return false;
     }
 
-    if (event && event->GetEventType() == EVENT_DAMAGE) {
-        const auto dmgEvent = (CEventDamage*)event;
-        if (dmgEvent->m_damageResponse.m_bHealthZero) {
-            if (dmgEvent->m_bAddToEventGroup && ped->bInVehicle) {
-                if (ped->m_pVehicle == m_pVehicle && m_pVehicle) {
-                    if (m_pVehicle->IsDriver(ped)) {
-                        m_pVehicle->m_nStatus = STATUS_ABANDONED;
-                        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
-                        m_pVehicle->m_autoPilot.m_nCruiseSpeed = 0;
-                    }
-                }
-            }
+    if (!event || event->GetEventType() != EVENT_DAMAGE)
+        return true;
+
+    const auto dmgEvent = (CEventDamage*)event;
+    if (!dmgEvent->m_damageResponse.m_bHealthZero)
+        return true;
+
+    if (!dmgEvent->m_bAddToEventGroup || !ped->bInVehicle)
+        return true;
+
+    if (ped->m_pVehicle == m_Vehicle && m_Vehicle) {
+        if (m_Vehicle->IsDriver(ped)) {
+            m_Vehicle->m_nStatus = STATUS_ABANDONED;
+            m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+            m_Vehicle->m_autoPilot.m_nCruiseSpeed = 0;
         }
     }
 
@@ -142,7 +140,7 @@ bool CTaskComplexCopInCar::MakeAbortable(CPed* ped, eAbortPriority priority, CEv
 CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
     // Ped is a CopPed*
 
-    if (!m_suspect || m_suspect->IsStateDead()) {
+    if (!m_Suspect || m_Suspect->IsStateDead()) {
         return CreateSubTask(TASK_FINISHED, ped);
     }
 
@@ -156,42 +154,43 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
             return CreateSubTask(TASK_FINISHED, ped);
         }
 
-        if (FindPlayerWanted()->CanCopJoinPursuit((CCopPed*)ped) && static_cast<CTaskComplexPolicePursuit*>(m_pSubTask)->m_nFlags & 4) {
+        assert(ped->m_nPedType == PED_TYPE_COP);
+        if (FindPlayerWanted()->CanCopJoinPursuit(ped->AsCop()) && static_cast<CTaskComplexPolicePursuit*>(m_pSubTask)->m_nFlags & 4) { // todo: flags
             // 0x68FBC6 - Inverted
-            if (m_suspect->bIsBeingArrested) {
+            if (m_Suspect->bIsBeingArrested) {
                 return CreateSubTask(TASK_FINISHED, ped);
             }
 
-            if (m_suspect->bInVehicle && m_pVehicle != m_suspect->m_pVehicle) {
-                if (m_pVehicle && m_suspectDeadOrLost) {
+            if (m_Suspect->bInVehicle && m_Vehicle != m_Suspect->m_pVehicle) {
+                if (m_Vehicle && m_bSuspectDeadOrLost) {
                     if (ped->bInVehicle) {
                         return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
-                    } else if ((m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() < 4.f * 4.f) {
+                    } else if ((m_Vehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() < 4.f * 4.f) {
                         return CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped);
                     }
                 }
             }
         }
 
-        m_timer2.m_nStartTime = CTimer::m_snTimeInMilliseconds;
-        m_timer2.m_nInterval = 3000;
-        m_timer2.m_bStarted = 1;
+        m_Timer2.m_nStartTime = CTimer::GetTimeInMS();
+        m_Timer2.m_nInterval = 3000;
+        m_Timer2.m_bStarted = true;
         return CreateSubTask(TASK_COMPLEX_WANDER, ped);
     }
     case TASK_SIMPLE_CAR_DRIVE: {
-        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+        m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
         return CreateSubTask(TASK_COMPLEX_LEAVE_CAR, ped);
     }
     case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER: // 0x68FA89
-    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER: // 0x68FA94
+    case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:    // 0x68FA94
     {
-        if (!ped->bInVehicle || !ped->m_pVehicle) { // TODO: Invert this, and use ped->IsInVehicle()
-            return CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped);
-        } else {
+        if (ped->IsInVehicle()) {
             ped->m_pVehicle->ChangeLawEnforcerState(true);
             m_flag0x4 = false;
-            m_isSuspectInCar = ped->bInVehicle;
+            m_bIsSuspectInCar = ped->bInVehicle;
             return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
+        } else {
+            return CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped);
         }
     }
     case TASK_COMPLEX_LEAVE_CAR: { // 0x68FAA0
@@ -205,78 +204,80 @@ CTask* CTaskComplexCopInCar::CreateNextSubTask(CPed* ped) {
 // 0x68FA10
 CTask* CTaskComplexCopInCar::CreateFirstSubTask(CPed* ped) {
     ped->GetIntelligence()->SetPedDecisionMakerType(DM_EVENT_SHOT_FIRED);
-    if (!m_cop) {
-        m_suspectDeadOrLost = true;
+    if (!m_Cop) {
+        m_bSuspectDeadOrLost = true;
     }
     return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
 }
 
 // 0x68FD50
 CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
-    if (!m_suspect || m_suspect->IsStateDead()) { // Inverted
+    if (!m_Suspect || m_Suspect->IsStateDead()) { // Inverted
         return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ? CreateSubTask(TASK_FINISHED, ped) : m_pSubTask; // Inverted
     }
 
     // 0x68FD7E
-    if (m_pVehicle && !m_pVehicle->m_pDriver && m_pVehicle->m_autoPilot.m_nCarMission != MISSION_NONE) {
-        m_pVehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
+    if (m_Vehicle && !m_Vehicle->m_pDriver && m_Vehicle->m_autoPilot.m_nCarMission != MISSION_NONE) {
+        m_Vehicle->m_autoPilot.m_nCarMission = MISSION_NONE;
     }
 
-    if (!m_suspectDeadOrLost && (!m_cop || m_cop->IsStateDead())) { // 0x68FDA7
-        m_suspectDeadOrLost = true;
+    if (!m_bSuspectDeadOrLost && (!m_Cop || m_Cop->IsStateDead())) { // 0x68FDA7
+        m_bSuspectDeadOrLost = true;
     }
 
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_POLICE_PURSUIT: { // 0x690061
-        if (!m_suspect->bInVehicle || !m_suspect->m_pVehicle) { // TODO: Use IsInVehicle()
+        if (!m_Suspect->IsInVehicle()) {
             return m_pSubTask;
         }
 
-        if (m_suspect->m_pVehicle == m_pVehicle) {
+        if (m_Suspect->m_pVehicle == m_Vehicle) {
             return m_pSubTask;
         }
 
-        if (!m_pVehicle) {
+        if (!m_Vehicle) {
             return m_pSubTask;
         }
 
-        if (m_suspectDeadOrLost) {
+        if (m_bSuspectDeadOrLost) {
             return m_pSubTask;
         }
 
-        if (m_pVehicle->m_fHealth <= 0.f) {
+        if (m_Vehicle->m_fHealth <= 0.f) {
             return m_pSubTask;
         }
 
-        if (m_pVehicle->m_pFire) {
+        if (m_Vehicle->m_pFire) {
             return m_pSubTask;
         }
 
-        if (m_pVehicle->IsOnItsSide()) {
+        if (m_Vehicle->IsOnItsSide()) {
             return m_pSubTask;
         }
 
-        if (m_suspect->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f) {
-            if ((m_suspect->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) {
+        if (m_Suspect->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f) {
+            if ((m_Suspect->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) {
                 return m_pSubTask;
             }
         }
 
-        if ((m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() >= 4.f * 4.f) {
+        if ((m_Vehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() >= 4.f * 4.f) {
             return m_pSubTask;
         }
 
-        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ?
-            CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped) : m_pSubTask;
+        return m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+                   ? CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped)
+                   : m_pSubTask;
     }
     case TASK_COMPLEX_WANDER: {
-        return m_timer2.IsOutOfTime() && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) ?
-            CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped) : m_pSubTask; // Inverted
+        return m_Timer2.IsOutOfTime() && m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)
+                   ? CreateSubTask(TASK_COMPLEX_POLICE_PURSUIT, ped)
+                   : m_pSubTask; // Inverted
     }
     case TASK_COMPLEX_CAR_DRIVE_MISSION: { // 0x68FDDE
-        if (m_isSuspectInCar != m_suspect->bInVehicle) {
+        if (m_bIsSuspectInCar != m_Suspect->bInVehicle) {
             if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
-                m_isSuspectInCar = m_suspect->bInVehicle;
+                m_bIsSuspectInCar = m_Suspect->bInVehicle;
                 return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
             }
         }
@@ -287,7 +288,7 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
             return m_pSubTask;
         }
 
-        if (!m_suspectDeadOrLost) {
+        if (!m_bSuspectDeadOrLost) {
             if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
                 m_flag0x2 = false;
                 return CreateNextSubTask(ped);
@@ -295,20 +296,19 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
             return m_pSubTask;
         }
 
-        if (!m_timer1.m_bStarted) {
-            m_timer1.Start(m_flag0x4 ? CGeneral::GetRandomNumberInRange(0, 2000) + 3000 : CGeneral::GetRandomNumberInRange(0, 1250) + 250);
+        if (!m_Timer1.m_bStarted) {
+            m_Timer1.Start(m_flag0x4 ? CGeneral::GetRandomNumberInRange(0, 2000) + 3000 : CGeneral::GetRandomNumberInRange(0, 1250) + 250);
             return m_pSubTask;
         }
 
-        if (   !m_suspect->bInVehicle || !m_suspect->m_pVehicle // TOOD: Use !m_pCop2->IsInVehicle()
-            || m_suspect->m_pVehicle == m_pVehicle
-            || (m_suspect->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f && (m_suspect->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) // Same code used above
+        if (   !m_Suspect->IsInVehicle()
+            || m_Suspect->m_pVehicle == m_Vehicle || (m_Suspect->m_pVehicle->m_vecMoveSpeed.SquaredMagnitude() * CTimer::GetTimeStep() * 50.f <= 1.f && (m_Suspect->m_pVehicle->GetPosition() - ped->GetPosition()).SquaredMagnitude() <= 10.f * 10.f) // Same code used above
             || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr) // This is really weird.. Here they check if its not abortable, then below check if its abortable..
         ) {
-            if (m_timer1.IsOutOfTime()) {
+            if (m_Timer1.IsOutOfTime()) {
                 if (m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr)) {
                     m_flag0x2 = false;
-                    m_timer1.m_bStarted = false;
+                    m_Timer1.m_bStarted = false;
                     return CreateNextSubTask(ped);
                 }
                 return m_pSubTask;
@@ -317,7 +317,7 @@ CTask* CTaskComplexCopInCar::ControlSubTask(CPed* ped) {
 
         m_flag0x2 = false;
         m_flag0x4 = false;
-        m_isSuspectInCar = ped->bInVehicle;
+        m_bIsSuspectInCar = ped->bInVehicle;
         return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_MISSION, ped);
     }
     default:
