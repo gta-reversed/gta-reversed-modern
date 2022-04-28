@@ -56,6 +56,11 @@ void CTaskSimpleCarSlowDragPedOut::FinishAnimCarSlowDragPedOutCB(CAnimBlendAssoc
     }
 }
 
+// 0x648100
+void CTaskSimpleCarSlowDragPedOut::ComputeAnimID_Wrapper(AssocGroupId& animGroup, AnimationId& animId) {
+    std::tie(animGroup, animId) = ComputeAnimID();
+}
+
 // Signature changed
 // 0x648100
 std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID() {
@@ -69,7 +74,7 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
         case TARGET_DOOR_REAR_LEFT:
             return ANIM_ID_CAR_PULLOUT_LHS;
 
-        case TARGET_DOOR_UNK: // TODO: Figure this out
+        case TARGET_DOOR_UNK: // TODO: Figure this out, see CVehicleAnimGroup::GetGroup
             return ANIM_ID_UNKNOWN_15;
 
         default:
@@ -81,7 +86,7 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
 }
 
 // 0x64C010
-void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
+void CTaskSimpleCarSlowDragPedOut::StartAnim(const CPed* ped) {
     const auto [groupId, animId] = ComputeAnimID();
     m_AnimAssoc = CAnimManager::BlendAnimation(ped->m_pRwClump, groupId, animId, 1000.f);
     m_AnimAssoc->SetFinishCallback(FinishAnimCarSlowDragPedOutCB, this);
@@ -91,7 +96,7 @@ void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
 * @notsa
 * @brief Return ped in the given seat (basically the ped we'll drag out)
 */
-CPed* CTaskSimpleCarSlowDragPedOut::GetJackedPed() {
+CPed* CTaskSimpleCarSlowDragPedOut::GetJackedPed() const {
     if (m_TargetDoor == TARGET_DOOR_DRIVER) {
         return m_Vehicle->m_pDriver;
     } else {
@@ -165,8 +170,4 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
 bool CTaskSimpleCarSlowDragPedOut::SetPedPosition(CPed* ped) {
     m_LineUpPedWithCarTask->ProcessPed(ped, m_Vehicle, m_AnimAssoc);
     return true;
-}
-
-void CTaskSimpleCarSlowDragPedOut::ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId) {
-    std::tie(animGrp, animId) = ComputeAnimID();
 }

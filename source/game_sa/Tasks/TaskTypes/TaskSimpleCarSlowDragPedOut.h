@@ -26,8 +26,8 @@ public:
     static void FinishAnimCarSlowDragPedOutCB(CAnimBlendAssociation* anim, void* task);
 
     std::pair<AssocGroupId, AnimationId> ComputeAnimID();
-    void StartAnim(CPed* ped);
-    CPed* GetJackedPed(); // NOTSA 
+    void StartAnim(const CPed* ped);
+    CPed* GetJackedPed() const; // NOTSA
 
     CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut(m_Vehicle, m_TargetDoor, m_LineUpPedWithCarTask, m_bWasPedStatic); } // 0x649FD0
     eTaskType GetTaskType() override { return Type; }
@@ -36,7 +36,7 @@ public:
     bool SetPedPosition(CPed* ped) override;
 
 private:
-    void ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId);
+    void ComputeAnimID_Wrapper(AssocGroupId& animGroup, AnimationId& animId);
 
 private:
     friend void InjectHooksMain();
