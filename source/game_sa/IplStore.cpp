@@ -514,9 +514,20 @@ void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirec
 
 /*!
 * @addr 0x405720
+* @brief Unload all loaded IPL's using `CStreaming::RemoveModel`
 */
 void CIplStore::RemoveAllIpls() {
-    plugin::Call<0x405720>();
+    // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
+    for (auto slot = 1/*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+        auto def = ms_pPool->GetAt(slot);
+        if (!def) {
+            continue;
+        }
+
+        if (!CStreaming::GetInfo(IPLToModelId(slot)).IsMissionOrGameRequired()) {
+            CStreaming::RemoveModel(IPLToModelId(slot));
+        }
+    }
 }
 
 /*!
