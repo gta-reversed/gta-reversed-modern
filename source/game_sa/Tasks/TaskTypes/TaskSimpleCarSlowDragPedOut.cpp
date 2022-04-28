@@ -20,54 +20,45 @@ void CTaskSimpleCarSlowDragPedOut::InjectHooks() {
 }
 
 // 0x647FE0
-CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) :
-    m_vehicle{veh},
-    m_targetDoor{targetDoor},
-    m_lineUpPedWithCarTask{lineUpPedWithCarTask},
-    m_wasPedStatic{isPedStatic}
-{
-    if (veh) {
-        veh->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    }
-}
-
-CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(const CTaskSimpleCarSlowDragPedOut& o) :
-    CTaskSimpleCarSlowDragPedOut{ o.m_vehicle, o.m_targetDoor, o.m_lineUpPedWithCarTask, o.m_wasPedStatic }
-{
+CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(CVehicle* vehicle, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) {
+    m_Vehicle              = vehicle;
+    m_TargetDoor           = targetDoor;
+    m_bWasPedStatic        = isPedStatic;
+    m_LineUpPedWithCarTask = lineUpPedWithCarTask;
+    CEntity::SafeRegisterRef(m_Vehicle);
 }
 
 // 0x648070
 CTaskSimpleCarSlowDragPedOut::~CTaskSimpleCarSlowDragPedOut() {
-    if (m_vehicle) {
-        CEntity::ClearReference(m_vehicle);
-    }
-    if (m_animAssoc) {
-        m_animAssoc->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    CEntity::SafeCleanUpRef(m_Vehicle);
+
+    if (m_AnimAssoc) {
+        m_AnimAssoc->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
 }
 
 // 0x648180
 void CTaskSimpleCarSlowDragPedOut::FinishAnimCarSlowDragPedOutCB(CAnimBlendAssociation* anim, void* taskPtr) {
     auto self = (CTaskSimpleCarSlowDragPedOut*)taskPtr; // `this` ptr of the instance that this anim belongs to
-    self->m_animFinished = true;
-    self->m_animAssoc = nullptr;
-    if (self->m_vehicle) {
+    self->m_bAnimFinished = true;
+    self->m_AnimAssoc = nullptr;
+    if (self->m_Vehicle) {
         // Open door
-        const auto [grp, id] = self->ComputeAnimID();
-        self->m_vehicle->ProcessOpenDoor(nullptr, self->m_targetDoor, grp, id, 1.f);
+        const auto [groupId, animId] = self->ComputeAnimID();
+        self->m_Vehicle->ProcessOpenDoor(nullptr, self->m_TargetDoor, groupId, animId, 1.f);
 
         // Mark door as opened (Not sure why it's done here, not in `ProcessOpenDoor`...)
-        if (self->m_vehicle->IsAutomobile()) {
-            self->m_vehicle->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)self->m_targetDoor);
+        if (self->m_Vehicle->IsAutomobile()) {
+            self->m_Vehicle->AsAutomobile()->m_damageManager.SetDoorOpen((eDoors)self->m_TargetDoor);
         }
     }
 }
 
+// Signature changed
 // 0x648100
 std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID() {
-    const auto id = [this] {
-        switch (m_targetDoor)
-        {
+    const auto animationId = [this] {
+        switch (m_TargetDoor) {
         case TARGET_DOOR_FRONT_RIGHT:
         case TARGET_DOOR_REAR_RIGHT:
             return ANIM_ID_CAR_PULLOUT_RHS;
@@ -84,14 +75,14 @@ std::pair<AssocGroupId, AnimationId> CTaskSimpleCarSlowDragPedOut::ComputeAnimID
             return ANIM_ID_UNDEFINED;
         }
     }();
-    return { (AssocGroupId)m_vehicle->GetAnimGroup().GetGroup(id), id };
+    return { (AssocGroupId)m_Vehicle->GetAnimGroup().GetGroup(animationId), animationId};
 }
 
 // 0x64C010
 void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
-    const auto [grp, id] = ComputeAnimID();
-    m_animAssoc = CAnimManager::BlendAnimation(ped->m_pRwClump, grp, id, 1000.f);
-    m_animAssoc->SetFinishCallback(FinishAnimCarSlowDragPedOutCB, this);
+    const auto [groupId, animId] = ComputeAnimID();
+    m_AnimAssoc = CAnimManager::BlendAnimation(ped->m_pRwClump, groupId, animId, 1000.f);
+    m_AnimAssoc->SetFinishCallback(FinishAnimCarSlowDragPedOutCB, this);
 }
 
 /*!
@@ -99,18 +90,22 @@ void CTaskSimpleCarSlowDragPedOut::StartAnim(CPed* ped) {
 * @brief Return ped in the given seat (basically the ped we'll drag out)
 */
 CPed* CTaskSimpleCarSlowDragPedOut::GetJackedPed() {
-    return m_targetDoor == TARGET_DOOR_DRIVER ? m_vehicle->m_pDriver : m_vehicle->m_apPassengers[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_vehicle, (int32)m_targetDoor)];
+    if (m_TargetDoor == TARGET_DOOR_DRIVER) {
+        return m_Vehicle->m_pDriver;
+    } else {
+        return m_Vehicle->m_apPassengers[CCarEnterExit::ComputePassengerIndexFromCarDoor(m_Vehicle, (int32)m_TargetDoor)];
+    }
 }
 
 // 0x64BFB0
 bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const*) {
     if (priority == eAbortPriority::ABORT_PRIORITY_IMMEDIATE) {
-        if (m_animAssoc) {
-            m_animAssoc->m_fBlendDelta = -1000.f;
+        if (m_AnimAssoc) {
+            m_AnimAssoc->m_fBlendDelta = -1000.f;
         }
-        if (m_vehicle) {
-            const auto [grp, id] = ComputeAnimID();
-            m_vehicle->ProcessOpenDoor(ped, m_targetDoor, grp, id, 1.f);
+        if (m_Vehicle) {
+            const auto [groupId, animId] = ComputeAnimID();
+            m_Vehicle->ProcessOpenDoor(ped, m_TargetDoor, groupId, animId, 1.f);
         }
         return true;
     }
@@ -119,17 +114,17 @@ bool CTaskSimpleCarSlowDragPedOut::MakeAbortable(CPed* ped, eAbortPriority prior
 
 // 0x64E060
 bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
-    if (m_animFinished || !m_vehicle) {
+    if (m_bAnimFinished || !m_Vehicle) {
         return true;
     }
 
     // Make sure we actually need to drag the ped out
-    switch (m_vehicle->GetAnimGroupId()) {
+    switch (m_Vehicle->GetAnimGroupId()) {
     case ANIM_GROUP_COACHCARANIMS:
     case ANIM_GROUP_TANKCARANIMS:
         return true;
     case ANIM_GROUP_BUSCARANIMS: {
-        if (m_targetDoor == TARGET_DOOR_FRONT_RIGHT) {
+        if (m_TargetDoor == TARGET_DOOR_FRONT_RIGHT) {
             return true;
         }
         break;
@@ -137,18 +132,18 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
     }
 
     // Play anim and make peds talk (if not already playing)
-    if (!m_animAssoc) {
+    if (!m_AnimAssoc) {
         StartAnim(ped);
 
         // Make peds say something
-        if (m_vehicle) { // Redundant check, maybe inlined?
+        if (m_Vehicle) { // Redundant check, maybe inlined?
             if (const auto jackedPed = GetJackedPed()) {
                 const auto DoTalk = [this](auto ped1, auto ped2) {
-                    if (!SayJacked(ped1, m_vehicle)) {
-                        SayJacking(ped2, ped1, m_vehicle);
+                    if (!SayJacked(ped1, m_Vehicle)) {
+                        SayJacking(ped2, ped1, m_Vehicle);
                     }
                 };
-                if (rand() % 1024 <= 512) {
+                if (CGeneral::GetRandomNumber() % 1024 <= 512) {
                     DoTalk(jackedPed, ped);
                 } else {
                     DoTalk(ped, jackedPed);
@@ -158,15 +153,15 @@ bool CTaskSimpleCarSlowDragPedOut::ProcessPed(CPed* ped) {
     }
 
     // Process door open ratio according to animation's current time
-    const auto [grp, id] = ComputeAnimID();
-    m_vehicle->ProcessOpenDoor(ped, m_targetDoor, grp, id, m_animAssoc->m_fCurrentTime);
+    const auto [groupId, animId] = ComputeAnimID();
+    m_Vehicle->ProcessOpenDoor(ped, m_TargetDoor, groupId, animId, m_AnimAssoc->m_fCurrentTime);
 
     return false;
 }
 
 // 0x6480E0
 bool CTaskSimpleCarSlowDragPedOut::SetPedPosition(CPed* ped) {
-    m_lineUpPedWithCarTask->ProcessPed(ped, m_vehicle, m_animAssoc);
+    m_LineUpPedWithCarTask->ProcessPed(ped, m_Vehicle, m_AnimAssoc);
     return true;
 }
 

@@ -2,7 +2,7 @@
 
 #include <utility>
 #include "TaskSimple.h"
-#include "Enums/eTargetDoor.h"
+#include "eTargetDoor.h"
 
 class CAnimBlendAssociation;
 class CVehicle;
@@ -10,21 +10,18 @@ class CTaskUtilityLineUpPedWithCar;
 
 class CTaskSimpleCarSlowDragPedOut : public CTaskSimple {
 public:
-    bool m_animFinished{};                                  // 0x8
-    CAnimBlendAssociation* m_animAssoc{};                   // 0xC
-    CVehicle* m_vehicle{};                                  // 0x10
-    eTargetDoor m_targetDoor{};                             // 0x14
-    CTaskUtilityLineUpPedWithCar* m_lineUpPedWithCarTask{}; // 0x18
-    bool m_wasPedStatic{};                                  // 0x1C
+    bool                          m_bAnimFinished;
+    CAnimBlendAssociation*        m_AnimAssoc;
+    CVehicle*                     m_Vehicle;
+    eTargetDoor                   m_TargetDoor;
+    CTaskUtilityLineUpPedWithCar* m_LineUpPedWithCarTask;
+    bool                          m_bWasPedStatic;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SLOW_DRAG_PED_OUT;
 
-    static void InjectHooks();
-
-    CTaskSimpleCarSlowDragPedOut(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic);
-    CTaskSimpleCarSlowDragPedOut(const CTaskSimpleCarSlowDragPedOut&); // NOTSA - Helper for `Clone()`
-    ~CTaskSimpleCarSlowDragPedOut();
+    CTaskSimpleCarSlowDragPedOut(CVehicle* vehicle, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic);
+    ~CTaskSimpleCarSlowDragPedOut() override;
 
     static void FinishAnimCarSlowDragPedOutCB(CAnimBlendAssociation* anim, void* task);
 
@@ -32,7 +29,7 @@ public:
     void StartAnim(CPed* ped);
     CPed* GetJackedPed(); // NOTSA 
 
-    CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut{ *this }; }
+    CTask* Clone() override { return new CTaskSimpleCarSlowDragPedOut(m_Vehicle, m_TargetDoor, m_LineUpPedWithCarTask, m_bWasPedStatic); } // 0x649FD0
     eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     bool ProcessPed(CPed* ped) override;
@@ -41,15 +38,12 @@ public:
 private:
     void ComputeAnimID_Wrapper(AssocGroupId& animGrp, AnimationId& animId);
 
-    CTaskSimpleCarSlowDragPedOut* Constructor(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) {
-        this->CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(veh, targetDoor, lineUpPedWithCarTask, isPedStatic);
-        return this;
-    }
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
 
-    CTaskSimpleCarSlowDragPedOut* Destructor() {
-        this->CTaskSimpleCarSlowDragPedOut::~CTaskSimpleCarSlowDragPedOut();
-        return this;
-    }
+    CTaskSimpleCarSlowDragPedOut* Constructor(CVehicle* veh, eTargetDoor targetDoor, CTaskUtilityLineUpPedWithCar* lineUpPedWithCarTask, bool isPedStatic) { this->CTaskSimpleCarSlowDragPedOut::CTaskSimpleCarSlowDragPedOut(veh, targetDoor, lineUpPedWithCarTask, isPedStatic); return this; }
+    CTaskSimpleCarSlowDragPedOut* Destructor() { this->CTaskSimpleCarSlowDragPedOut::~CTaskSimpleCarSlowDragPedOut(); return this; }
 
     CTask * Clone_Reversed() { return CTaskSimpleCarSlowDragPedOut::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleCarSlowDragPedOut::GetTaskType(); }

@@ -1807,7 +1807,7 @@ int32 CVehicle::GetRopeIndex() {
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
-    return CVehicleAnimGroupData::m_vehicleAnimGroups[m_pHandlingData->m_nAnimGroup];
+    return CVehicleAnimGroupData::GetVehicleAnimGroup(m_pHandlingData->m_nAnimGroup);
 }
 
 AssocGroupId CVehicle::GetAnimGroupId() const {
