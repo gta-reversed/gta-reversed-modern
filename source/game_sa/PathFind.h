@@ -11,7 +11,9 @@
 #include "NodeAddress.h"
 #include "NodeRoute.h"
 
-static constexpr auto NUM_PATH_MAP_AREAS{ 64 };
+static constexpr auto NUM_PATH_MAP_AREA_X{ 8 };
+static constexpr auto NUM_PATH_MAP_AREA_Y{ 8 };
+static constexpr auto NUM_PATH_MAP_AREAS{ NUM_PATH_MAP_AREA_X * NUM_PATH_MAP_AREA_Y };
 static constexpr auto NUM_PATH_INTERIOR_AREAS{ 8 };
 static constexpr auto NUM_DYNAMIC_LINKS_PER_AREA{ 16 };
 

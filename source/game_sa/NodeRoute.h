@@ -1,7 +1,7 @@
 #pragma once
 
 class CNodeRoute {
-    uint32 m_nNumAddresses;
+    uint32       m_nNumAddresses;
     CNodeAddress m_aAddresses[8];
 
 public:

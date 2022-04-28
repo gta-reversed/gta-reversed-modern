@@ -18,6 +18,7 @@ int32& CPathFind::NewInteriorSlot = *(int32*)0x96EF84;
 void CPathFind::InjectHooks() {
     RH_ScopedClass(CPathFind);
     RH_ScopedCategoryGlobal();
+
     RH_ScopedInstall(Init, 0x44D080);
     RH_ScopedInstall(ReInit, 0x44E4E0);
     RH_ScopedInstall(Shutdown, 0x450950);
@@ -71,11 +72,12 @@ void CPathFind::ReInit() {
 
 // 0x450950
 void CPathFind::Shutdown() {
-    for (auto i = 0u; i < 8; ++i) {
-        for (auto k = 0u; k < 8; ++k) {
-            auto modelIndex = RESOURCE_ID_DAT + i + (k * 8);
-            if (m_pPathNodes[k * 8 + i])
-                CStreaming::RemoveModel(modelIndex);
+    for (auto x = 0u; x < NUM_PATH_MAP_AREA_X; ++x) {
+        for (auto y = 0u; y < NUM_PATH_MAP_AREA_Y; ++y) {
+            auto relativeId = x + y * NUM_PATH_MAP_AREA_X;
+            if (m_pPathNodes[relativeId]) {
+                CStreaming::RemoveModel(DATToModelId(relativeId));
+            }
         }
     }
 }
