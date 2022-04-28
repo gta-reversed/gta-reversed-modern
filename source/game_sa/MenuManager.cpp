@@ -10,6 +10,7 @@
 
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
+#include "MenuSystem.h"
 #include "AEAudioUtility.h"
 #include "Radar.h"
 #include "Gamma.h"
@@ -121,7 +122,7 @@ void CMenuManager::Initialise() {
     m_bDrawMouse = false;
 
     m_nSelectedRow = 3;
-    m_nSysMenu     = MENU_UNDEFINED;
+    m_nSysMenu     = CMenuSystem::MENU_UNDEFINED;
 
     m_fMapZoom = FRONTEND_MAP_RANGE_MAX;
 
