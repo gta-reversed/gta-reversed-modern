@@ -8,7 +8,7 @@ void CEventGroupEvent::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4ADFD0);
-    RH_ScopedInstall(Clone_Reversed, 0x4B6EE0);
+    RH_ScopedVirtualInstall(Clone, 0x4B6EE0);
     RH_ScopedInstall(BaseEventTakesPriorityOverBaseEvent, 0x4AE100);
 }
 
@@ -16,14 +16,12 @@ CEventGroupEvent::CEventGroupEvent(CPed* ped, CEvent* event)
 {
     m_ped = ped;
     m_event = event;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventGroupEvent::~CEventGroupEvent()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 
     delete m_event;
 }

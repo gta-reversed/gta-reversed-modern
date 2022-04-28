@@ -7,9 +7,9 @@ void CPedModelInfo::InjectHooks()
     RH_ScopedClass(CPedModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C7340);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C57C0);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C6C50);
+    RH_ScopedVirtualInstall(SetClump, 0x4C7340);
     RH_ScopedInstall(AddXtraAtomics, 0x4C6D40);
     RH_ScopedInstall(SetFaceTexture, 0x4C6D50);
     RH_ScopedInstall(CreateHitColModelSkinned, 0x4C6D90);

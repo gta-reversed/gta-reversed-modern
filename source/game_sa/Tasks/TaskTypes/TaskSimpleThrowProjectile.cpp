@@ -12,8 +12,7 @@ CTaskSimpleThrowProjectile::~CTaskSimpleThrowProjectile() {
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;
     }
-    if (m_pTarget)
-        m_pTarget->CleanUpOldReference(&m_pTarget);
+    CEntity::SafeCleanUpRef(m_pTarget);
 }
 
 

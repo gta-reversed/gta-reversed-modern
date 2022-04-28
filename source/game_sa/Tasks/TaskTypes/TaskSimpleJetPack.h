@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "AnimBlendAssociation.h"
-#include "FxSystem_c.h"
+#include "FxSystem.h"
 
 class CPed;
 class CPlayerPed;
@@ -79,7 +79,7 @@ public:
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
 
-    void Process(CPed* ped); // AKA RenderJetPack
+    void RenderJetPack(CPed* ped);
     void ProcessThrust(CPed* ped);
     void ProcessAnims(CPed* ped);
     void ProcessControlInput(CPlayerPed* player);

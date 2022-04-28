@@ -75,7 +75,7 @@ void InjectCdStreamHooks();
 int32 __cdecl CdStreamOpen(const char* lpFileName);
 eCdStreamStatus __cdecl CdStreamSync(int32 streamId);
 eCdStreamStatus __cdecl CdStreamGetStatus(int32 streamId);
-bool __cdecl CdStreamRead(int32 streamId, uint8* lpBuffer, uint32 offsetAndHandle, int32 sectorCount);
+bool __cdecl CdStreamRead(int32 streamId, void* lpBuffer, uint32 offsetAndHandle, int32 sectorCount);
 static uint32 __cdecl CdStreamGetLastPosn() { return gLastCdStreamPosn; }
 [[noreturn]] DWORD WINAPI CdStreamThread(LPVOID lpParam);
 void __cdecl CdStreamInitThread();

@@ -66,11 +66,11 @@ void CTaskComplexPolicePursuit::InjectHooks() {
     // RH_ScopedInstall(SetPursuit, 0x68BBD0);
     // RH_ScopedInstall(PersistPursuit, 0x68BDC0);
     // RH_ScopedInstall(CreateSubTask, 0x68D910);
-    // RH_ScopedInstall(Clone_Reversed, 0x68CDD0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x68BAB0);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x68BAC0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6908E0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x690920);
+    // RH_ScopedVirtualInstall(Clone, 0x68CDD0);
+    // RH_ScopedVirtualInstall(MakeAbortable, 0x68BAB0);
+    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x68BAC0);
+    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6908E0);
+    // RH_ScopedVirtualInstall(ControlSubTask, 0x690920);
 }
 
 CTaskComplexPolicePursuit* CTaskComplexPolicePursuit::Constructor() {

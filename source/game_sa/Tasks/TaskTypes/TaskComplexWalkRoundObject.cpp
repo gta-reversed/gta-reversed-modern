@@ -20,16 +20,13 @@ CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const 
     field_2C      = 0;
     field_2D      = 0;
 
-    if (m_object)
-        m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 
     m_pointRoute = new CPointRoute();
-    m_pointRoute->field_0 = 0;
 }
 
 CTaskComplexWalkRoundObject::~CTaskComplexWalkRoundObject() {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 
     delete m_pointRoute;
     // todo: m_pointRoute = nullptr;

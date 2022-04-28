@@ -43,7 +43,7 @@ enum ePhysicalFlags {
     PHYSICAL_INVULNERABLE            = 0x400000,
     PHYSICAL_EXPLOSIONPROOF          = 0x800000,
 
-    PHYSICAL_25                      = 0x1000000,
+    PHYSICAL_DONTCOLLIDEWITHFLYERS   = 0x1000000,
     PHYSICAL_ATTACHEDTOENTITY        = 0x2000000,
     PHYSICAL_27                      = 0x4000000,
     PHYSICAL_TOUCHINGWATER           = 0x8000000,
@@ -123,7 +123,6 @@ public:
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
     uint8               m_nContactSurface;
-    char                field_BB;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;
@@ -131,7 +130,6 @@ public:
     CVector             m_vecLastCollisionImpactVelocity;
     CVector             m_vecLastCollisionPosn;
     uint16              m_nPieceType;
-    int16               field_FA;
     CPhysical*          m_pAttachedTo;
     CVector             m_vecAttachOffset;
     CVector             m_vecAttachedEntityRotation;

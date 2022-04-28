@@ -114,7 +114,7 @@ public:
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
     int16 GetSoundAndBankIDs(int16 phraseId, int16* a3);
     bool CanWePlayGlobalSpeechContext(int16 a2);
-    int16 AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
+    int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
     bool IsGlobalContextImportantForStreaming(int16 a1);

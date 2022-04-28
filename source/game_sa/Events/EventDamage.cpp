@@ -14,19 +14,19 @@ void CEventDamage::InjectHooks() {
 
     RH_ScopedOverloadedInstall(Constructor, "", 0x4B33B0, CEventDamage*(CEventDamage::*)(const CEventDamage&));
     RH_ScopedOverloadedInstall(Constructor, "1", 0x4AD830, CEventDamage * (CEventDamage::*)(CEntity*, uint32, eWeaponType, ePedPieceTypes, uint8, bool, bool));
-    RH_ScopedInstall(GetEventType_Reversed, 0x4AD910);
-    RH_ScopedInstall(GetEventPriority_Reversed, 0x4AD950);
-    RH_ScopedInstall(GetLifeTime_Reversed, 0x4AD920);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B35A0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B38D0);
-    RH_ScopedInstall(IsCriminalEvent_Reversed, 0x4ADA90);
-    RH_ScopedInstall(ReportCriminalEvent_Reversed, 0x4B3440);
-    RH_ScopedInstall(GetSourceEntity_Reversed, 0x4ADA70);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4ADB00);
-    RH_ScopedInstall(GetLocalSoundLevel_Reversed, 0x4AD930);
-    RH_ScopedInstall(DoInformVehicleOccupants_Reversed, 0x4ADAE0);
-    RH_ScopedInstall(CanBeInterruptedBySameEvent_Reversed, 0x4AD940);
-    RH_ScopedInstall(CloneEditable_Reversed, 0x4B5D40);
+    RH_ScopedVirtualInstall(GetEventType, 0x4AD910);
+    RH_ScopedVirtualInstall(GetEventPriority, 0x4AD950);
+    RH_ScopedVirtualInstall(GetLifeTime, 0x4AD920);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B35A0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B38D0);
+    RH_ScopedVirtualInstall(IsCriminalEvent, 0x4ADA90);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B3440);
+    RH_ScopedVirtualInstall(GetSourceEntity, 0x4ADA70);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4ADB00);
+    RH_ScopedVirtualInstall(GetLocalSoundLevel, 0x4AD930);
+    RH_ScopedVirtualInstall(DoInformVehicleOccupants, 0x4ADAE0);
+    RH_ScopedVirtualInstall(CanBeInterruptedBySameEvent, 0x4AD940);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B5D40);
     RH_ScopedInstall(From, 0x4AD9C0);
     RH_ScopedInstall(ProcessDamage, 0x4B3A20);
     RH_ScopedInstall(ComputeBodyPartToRemove, 0x4ADC10);
@@ -36,12 +36,6 @@ void CEventDamage::InjectHooks() {
 
 // 0x4B33B0
 CEventDamage::CEventDamage(const CEventDamage& event) : CEventEditableResponse() {
-    m_damageResponse.m_fDamageHealth      = 0.0f;
-    m_damageResponse.m_fDamageArmor       = 0.0f;
-    m_damageResponse.m_bHealthZero        = false;
-    m_damageResponse.m_bForceDeath        = false;
-    m_damageResponse.m_bDamageCalculated  = false;
-    m_damageResponse.m_bCheckIfAffectsPed = false;
     From(event);
 }
 
@@ -60,22 +54,12 @@ CEventDamage::CEventDamage(CEntity* source, uint32 startTime, eWeaponType weapon
     m_fAnimBlend    = 8.0f;
     m_fAnimSpeed    = 1.0f;
 
-    // todo: same as above, CPedDamageResponse.Init()?
-    m_damageResponse.m_fDamageHealth = 0.0f;
-    m_damageResponse.m_fDamageArmor = 0.0f;
-    m_damageResponse.m_bHealthZero = false;
-    m_damageResponse.m_bForceDeath = false;
-    m_damageResponse.m_bDamageCalculated = false;
-    m_damageResponse.m_bCheckIfAffectsPed = false;
-
-    if (m_pSourceEntity)
-        m_pSourceEntity->RegisterReference(&m_pSourceEntity);
+    CEntity::SafeRegisterRef(m_pSourceEntity);
     m_bPedInVehicle = true; // if we're setting this to true, then why do we have bPedInVehicle parameter in this constructor? bug?
 }
 
 CEventDamage::~CEventDamage() {
-    if (m_pSourceEntity)
-        m_pSourceEntity->CleanUpOldReference(&m_pSourceEntity);
+    CEntity::SafeCleanUpRef(m_pSourceEntity);
 }
 
 CEventDamage* CEventDamage::Constructor(const CEventDamage& event) {
@@ -257,8 +241,8 @@ bool CEventDamage::AffectsPedGroup_Reversed(CPedGroup* pedGroup) {
     if (activeTask->GetTaskType() != TASK_SIMPLE_STEALTH_KILL)
         return true;
 
-    for (auto memberId = 0; memberId < 8; memberId++) {
-        CPed* groupMember = pedGroup->m_groupMembership.GetMember(memberId);
+    for (auto memberId = 0; memberId < 8; memberId++) { // todo: magic number
+        CPed* groupMember = pedGroup->GetMembership().GetMember(memberId);
         if (groupMember) {
             CVector vecDirection = m_pSourceEntity->GetPosition() - groupMember->GetPosition();
             vecDirection.Normalise();
@@ -289,23 +273,19 @@ void CEventDamage::ReportCriminalEvent_Reversed(CPed* ped) {
     if (IsCriminalEvent() && m_pSourceEntity) {
         bool bPoliceCareAboutCrime = CPedType::PoliceDontCareAboutCrimesAgainstPedType(ped->m_nPedType);
         if (m_weaponType <= WEAPON_CHAINSAW) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_DAMAGED_PED;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_DAMAGED_COP;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_DAMAGED_COP : CRIME_DAMAGED_PED;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
+
         if (m_weaponType <= WEAPON_DETONATOR || m_weaponType == WEAPON_SPRAYCAN) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_DAMAGE_CAR;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_DAMAGE_COP_CAR;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_DAMAGE_COP_CAR : CRIME_DAMAGE_CAR;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
+
         if (m_weaponType == WEAPON_RAMMEDBYCAR || m_weaponType == WEAPON_RUNOVERBYCAR) {
-            enum eCrimeType crimeType = eCrimeType::CRIME_KILL_PED_WITH_CAR;
-            if (ped->m_nPedType == PED_TYPE_COP)
-                crimeType = eCrimeType::CRIME_KILL_COP_PED_WITH_CAR;
+            auto crimeType = ped->m_nPedType == PED_TYPE_COP ? CRIME_KILL_COP_PED_WITH_CAR : CRIME_KILL_PED_WITH_CAR;
             FindPlayerWanted()->RegisterCrime(crimeType, m_pSourceEntity->GetPosition(), ped, bPoliceCareAboutCrime);
             return;
         }
@@ -327,12 +307,14 @@ bool CEventDamage::TakesPriorityOver_Reversed(const CEvent& refEvent) {
         || refEvent.GetEventType() == EVENT_KNOCK_OFF_BIKE && m_damageResponse.m_bHealthZero && m_bAddToEventGroup) {
         return true;
     }
+
     auto* ped = m_pSourceEntity->AsPed();
     if (m_pSourceEntity && m_pSourceEntity->IsPed() && ped->IsPlayer() && refEvent.GetEventType() == EVENT_DAMAGE) {
         if (refEvent.GetSourceEntity() == m_pSourceEntity && (!m_damageResponse.m_bHealthZero || !m_bAddToEventGroup))
             return CEvent::TakesPriorityOver(refEvent);
         return true;
     }
+
     if (refEvent.GetEventType() == EVENT_DAMAGE) {
         if (GetSourceEntity() != refEvent.GetSourceEntity())
             return true;
@@ -356,8 +338,7 @@ CEventEditableResponse* CEventDamage::CloneEditable_Reversed() {
 // 0x4AD9C0
 void CEventDamage::From(const CEventDamage& event) {
     m_pSourceEntity = event.m_pSourceEntity;
-    if (event.m_pSourceEntity)
-        event.m_pSourceEntity->RegisterReference(&m_pSourceEntity);
+    CEntity::SafeRegisterRef(m_pSourceEntity);
 
     m_nStartTime     = event.m_nStartTime;
     m_weaponType     = event.m_weaponType;
@@ -858,7 +839,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f));
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f)); // todo: GetRandomNumberInRange(int)
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;
@@ -939,12 +920,11 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             m_fAnimBlend = 8.0f;
             m_nAnimID = m_ucDirection + ANIM_ID_SHOT_PARTIAL;
             if (ped->IsPlayer()) {
-              CPlayerPedData * pPedPlayerData = ped->m_pPlayerData;
-                if (CTimer::GetTimeInMS() > pPedPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
+                if (CTimer::GetTimeInMS() > ped->m_pPlayerData->m_nHitAnimDelayTimer && ped->m_nPedState != PEDSTATE_DRIVING) {
                     if (m_weaponType == WEAPON_M4)
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::GetTimeInMS() + 2500.0f);
+                        ped->m_pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(float(CTimer::GetTimeInMS()) + 2500.0f);
                     else
-                        pPedPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::GetTimeInMS() + 1500.0f);
+                        ped->m_pPlayerData->m_nHitAnimDelayTimer = static_cast<uint32>(float(CTimer::GetTimeInMS()) + 1500.0f);
                 }
                 else {
                     m_nAnimID = ANIM_ID_NO_ANIMATION_SET;
