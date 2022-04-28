@@ -688,7 +688,7 @@ public:
     // otherwise in model-space
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
-    bool HasDriver() const { return !!m_pDriver; }
+    [[nodiscard]] bool HasDriver() const { return !!m_pDriver; }
     auto GetPassengers() { return std::span(m_apPassengers, m_nMaxPassengers); }
 
 private:

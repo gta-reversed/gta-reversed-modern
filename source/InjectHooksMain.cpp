@@ -127,15 +127,19 @@
 #include "TaskComplexGetUpAndStandStill.h"
 #include "TaskComplexGoPickUpEntity.h"
 #include "TaskSimpleDie.h"
+#include "TaskSimpleDieInCar.h"
+#include "TaskSimpleDrown.h"
+#include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDuck.h"
 #include "TaskComplexPolicePursuit.h"
 #include "TaskSimpleFacial.h"
+#include "TaskComplexFallAndGetUp.h"
+#include "TaskComplexFallToDeath.h"
 #include "TaskComplexCopInCar.h"
 #include "TaskComplexFacial.h"
 #include "TaskComplexInAirAndLand.h"
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
-#include "TaskComplexFallAndGetUp.h"
 #include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
@@ -526,9 +530,11 @@ void InjectHooksMain() {
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();
         CTaskSimpleDie::InjectHooks();
+        CTaskSimpleDrown::InjectHooks();
+        CTaskSimpleDrownInCar::InjectHooks();
         CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
-        // CTaskSimpleFacial::InjectHooks();
+        CTaskSimpleFacial::InjectHooks();
         // CTaskComplexCopInCar::InjectHooks();
         CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
@@ -606,8 +612,9 @@ void InjectHooksMain() {
         CTaskSimpleIKManager::InjectHooks();
         CTaskSimpleIKPointArm::InjectHooks();
         CTaskSimpleIKLookAt::InjectHooks();
-        // CTaskComplexDie::InjectHooks();
+        CTaskComplexDie::InjectHooks();
         CTaskComplexDieInCar::InjectHooks();
+        CTaskComplexFallToDeath::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();

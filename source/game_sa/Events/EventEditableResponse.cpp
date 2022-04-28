@@ -102,7 +102,7 @@ void CEventEditableResponse::InformVehicleOccupants(CPed* ped) {
             driver->GetEventGroup().Add(clonedEvent, false);
             delete clonedEvent;
         }
-        for (auto& passenger : vehicle->GetPassengers()) {
+        for (const auto passenger : vehicle->GetPassengers()) {
             if (passenger && passenger != ped) {
                 auto clonedEvent = static_cast<CEventEditableResponse*>(Clone());
                 clonedEvent->m_taskId = TASK_NONE;

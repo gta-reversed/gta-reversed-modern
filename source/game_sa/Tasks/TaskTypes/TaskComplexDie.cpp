@@ -9,6 +9,24 @@
 #include "TaskComplexLeaveCar.h"
 #include "TaskSimpleDrownInCar.h"
 
+void CTaskComplexDie::InjectHooks() {
+    RH_ScopedClass(CTaskComplexDie);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x630040);
+    RH_ScopedInstall(Clone_Reversed, 0x636060);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x6300D0);
+    RH_ScopedInstall(SayDeathSample, 0x630100);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6301E0);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6302D0);
+}
+
+CTaskComplexDie* CTaskComplexDie::Constructor(eWeaponType nWeaponType, AssocGroupId animGroup, AnimationId animID, float fBlendDelta, float fAnimSpeed, bool bBeingKilledByStealth, bool bFallingToDeath, eFallDir nFallToDeathDir, bool bFallToDeathOverRailing) { this->CTaskComplexDie::CTaskComplexDie(nWeaponType, animGroup, animID, fBlendDelta, fAnimSpeed, bBeingKilledByStealth, bFallingToDeath, nFallToDeathDir, bFallToDeathOverRailing); return this; }
+bool CTaskComplexDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
+CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
+CTask* CTaskComplexDie::Clone() { return Clone_Reversed(); }
+
 // 0x630040
 CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
                                  AssocGroupId animGroup,
@@ -19,39 +37,45 @@ CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
                                  bool bFallingToDeath, eFallDir nFallToDeathDir,
                                  bool bFallToDeathOverRailing) : CTaskComplex()
 {
-    m_nWeaponType           = nWeaponType;
-    m_nAnimID               = animID;
-    m_fBlendDelta           = fBlendDelta;
-    m_nAnimGroup            = animGroup;
-    m_fAnimSpeed            = fAnimSpeed;
-    bBeingKilledByStealth   = bBeingKilledByStealth;
-    bFallingToDeath         = bFallingToDeath;
-    bFallToDeathOverRailing = bFallToDeathOverRailing;
-    m_nFallToDeathDir       = nFallToDeathDir;
+    m_nWeaponType             = nWeaponType;
+    m_nAnimID                 = animID;
+    m_fBlendDelta             = fBlendDelta;
+    m_nAnimGroup              = animGroup;
+    m_fAnimSpeed              = fAnimSpeed;
+    m_bBeingKilledByStealth   = bBeingKilledByStealth;
+    m_bFallingToDeath         = bFallingToDeath;
+    m_bFallToDeathOverRailing = bFallToDeathOverRailing;
+    m_nFallToDeathDir         = nFallToDeathDir;
 };
 
 // 0x636060
-CTask* CTaskComplexDie::Clone() {
+CTask* CTaskComplexDie::Clone_Reversed() {
     return new CTaskComplexDie(
         m_nWeaponType,
         m_nAnimGroup,
         m_nAnimID,
         m_fBlendDelta,
         m_fAnimSpeed,
-        bBeingKilledByStealth,
-        bFallingToDeath,
+        !m_bBeingKilledByStealth,
+        m_bFallingToDeath,
         m_nFallToDeathDir,
-        bFallToDeathOverRailing
+        m_bFallToDeathOverRailing
     );
 }
 
 // 0x6300D0
-bool CTaskComplexDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return (priority == ABORT_PRIORITY_URGENT || priority == ABORT_PRIORITY_IMMEDIATE) && m_pSubTask->MakeAbortable(ped, priority, event);
+bool CTaskComplexDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+    switch (priority) {
+    case ABORT_PRIORITY_URGENT:
+    case ABORT_PRIORITY_IMMEDIATE:
+        return m_pSubTask->MakeAbortable(ped, priority, event);
+    default:
+        return false;
+    }
 }
 
 // 0x630100
-void CTaskComplexDie::SayDeathSample(CPed* ped) {
+void CTaskComplexDie::SayDeathSample(CPed* ped) const {
     switch (m_nWeaponType) {
     case WEAPON_RAMMEDBYCAR:
     case WEAPON_RUNOVERBYCAR:
@@ -65,7 +89,7 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) {
     case WEAPON_FALL:
         ped->Say(342);
         if (CLocalisation::Blood())
-            ped->m_pedAudio.AddAudioEvent(119, 0.0f, 1.0, ped, 0, 0, 0);
+            ped->m_pedAudio.AddAudioEvent(119, 0.0f, 1.0f, ped);
         break;
     default:
         ped->Say(343);
@@ -74,7 +98,7 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) {
 }
 
 // 0x6301E0
-CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) {
+CTask* CTaskComplexDie::CreateNextSubTask_Reversed(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_DIE:
     case TASK_SIMPLE_DROWN:
@@ -86,12 +110,13 @@ CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) {
     case TASK_COMPLEX_LEAVE_CAR: {
         return ped->bInVehicle ? new CTaskSimpleDrownInCar() : CreateFirstSubTask(ped);
     }
+    default:
+        return nullptr;
     }
-    // todo: warning C4715: 'CTaskComplexDie::CreateNextSubTask': not all control paths return a value
 }
 
 // 0x6302D0
-CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
+CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     SayDeathSample(ped);
     if (m_nWeaponType != WEAPON_DROWNING
         || !ped->bInVehicle
@@ -108,7 +133,7 @@ CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
         {
             return new CTaskSimpleDrown();
         }
-        else if (bFallingToDeath)
+        else if (m_bFallingToDeath)
         {
             const auto GetFallDirection = [=]() -> CVector {
                 switch (m_nFallToDeathDir) {
@@ -126,7 +151,7 @@ CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) {
                     return {};
                 }
             };
-            return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), bFallToDeathOverRailing, false);
+            return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), m_bFallToDeathOverRailing, false);
         } else {
             return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);
         }

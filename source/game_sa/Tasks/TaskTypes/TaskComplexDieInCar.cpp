@@ -6,6 +6,23 @@
 #include "TaskSimpleDieInCar.h"
 #include "CarCtrl.h"
 
+void CTaskComplexDieInCar::InjectHooks() {
+    RH_ScopedClass(CTaskComplexDieInCar);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x6377B0);
+    RH_ScopedInstall(CreateSubTask, 0x62FD50);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6375F0);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x637850);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x62FCC0);
+    RH_ScopedInstall(PreparePedVehicleForPedDeath, 0x62FD00);
+}
+
+CTask* CTaskComplexDieInCar::ControlSubTask(CPed* ped) { return CTaskComplexDieInCar::ControlSubTask_Reversed(ped); }
+CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) { return CTaskComplexDieInCar::CreateFirstSubTask_Reversed(ped); }
+CTask* CTaskComplexDieInCar::CreateNextSubTask(CPed* ped) { return CTaskComplexDieInCar::CreateNextSubTask_Reversed(ped); }
+bool CTaskComplexDieInCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexDieInCar::MakeAbortable_Reversed(ped, priority, event); }
+
 // 0x62FC80
 CTaskComplexDieInCar::CTaskComplexDieInCar(eWeaponType weaponType) : CTaskComplex() {
     m_nWeaponType       = weaponType;
@@ -16,7 +33,7 @@ CTaskComplexDieInCar::CTaskComplexDieInCar(eWeaponType weaponType) : CTaskComple
 }
 
 // 0x6377B0
-CTask* CTaskComplexDieInCar::ControlSubTask(CPed* ped) {
+CTask* CTaskComplexDieInCar::ControlSubTask_Reversed(CPed* ped) {
     if (m_pSubTask->GetTaskType() != TASK_SIMPLE_CAR_DRIVE || !m_bPreparedForDeath)
         return m_pSubTask;
 
@@ -49,13 +66,13 @@ CTask* CTaskComplexDieInCar::CreateSubTask(eTaskType taskType, CPed* ped) {
 }
 
 // 0x6375F0
-CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) {
+CTask* CTaskComplexDieInCar::CreateFirstSubTask_Reversed(CPed* ped) {
     ped->SetPedState(PEDSTATE_DIE);
 
     auto currentEvent = ped->GetEventHandlerHistory().GetCurrentEvent();
     if (currentEvent) {
         if (currentEvent->GetEventType() == EVENT_DAMAGE) {
-            if (auto& driver = ped->m_pVehicle->m_pDriver) {
+            if (const auto driver = ped->m_pVehicle->m_pDriver) {
                 if (driver != ped) {
                     auto* event = static_cast<CEventDamage*>(currentEvent->Clone());
                     event->m_bAddToEventGroup = false;
@@ -64,7 +81,7 @@ CTask* CTaskComplexDieInCar::CreateFirstSubTask(CPed* ped) {
                 }
             }
 
-            for (auto& passenger : ped->m_pVehicle->GetPassengers()) {
+            for (const auto passenger : ped->m_pVehicle->GetPassengers()) {
                 if (!passenger)
                     continue;
 
@@ -114,7 +131,7 @@ void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle)
 }
 
 // 0x637850
-CTask* CTaskComplexDieInCar::CreateNextSubTask(CPed* ped) {
+CTask* CTaskComplexDieInCar::CreateNextSubTask_Reversed(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_DIE_IN_CAR:
         return CreateSubTask(TASK_FINISHED, ped);
@@ -126,11 +143,12 @@ CTask* CTaskComplexDieInCar::CreateNextSubTask(CPed* ped) {
 }
 
 // 0x62FCC0
-bool CTaskComplexDieInCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexDieInCar::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE:
         return m_pSubTask->MakeAbortable(ped, priority, event);
+    default:
+        return false;
     }
-    return false;
 }

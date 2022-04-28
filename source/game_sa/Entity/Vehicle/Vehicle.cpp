@@ -145,7 +145,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
 
     CCarCtrl::UpdateCarCount(this, false);
     m_nExtendedRemovalRange = 0;
-    m_fHealth = 1000.0;
+    m_fHealth = 1000.0f;
     m_pDriver = nullptr;
     m_nNumPassengers = 0;
     m_nMaxPassengers = 8;
@@ -153,8 +153,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nGettingInFlags = 0;
     m_nGettingOutFlags = 0;
 
-    for (auto& passenger : GetPassengers())
-        passenger = nullptr;
+    std::ranges::fill(GetPassengers(), nullptr);
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
@@ -232,7 +231,7 @@ CVehicle::~CVehicle()
     if (m_pDriver)
         m_pDriver->FlagToDestroyWhenNextProcessed();
 
-    for (auto& passenger : GetPassengers()) {
+    for (const auto passenger : GetPassengers()) {
         if (passenger) {
             passenger->FlagToDestroyWhenNextProcessed();
         }

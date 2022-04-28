@@ -665,7 +665,7 @@ void CAutomobile::ProcessControl()
                 m_pDriver->AsPlayer()->ResetPlayerBreath();
             }
             else {
-                for (auto& passenger : GetPassengers()) {
+                for (const auto passenger : GetPassengers()) {
                     if (passenger && passenger->IsPlayer()) {
                         passenger->AsPlayer()->ResetPlayerBreath();
                     }
@@ -4580,7 +4580,7 @@ void CAutomobile::ProcessBuoyancy()
         auto driver = m_pDriver->AsPed();
         ProcessPedInVehicleBuoyancy(driver, true);
 
-        for (auto& passenger : GetPassengers()) {
+        for (const auto passenger : GetPassengers()) {
             ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }

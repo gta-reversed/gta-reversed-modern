@@ -1366,7 +1366,7 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
             CEntity::ClearReference(driver); // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
         }
 
-        for (auto& passenger : veh->GetPassengers()) {
+        for (const auto passenger : veh->GetPassengers()) {
             if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);

@@ -26,23 +26,11 @@ public:
 
 private:
     friend void InjectHooksMain();
-    static void InjectHooks() {
-        RH_ScopedClass(CTaskComplexDieInCar);
-        RH_ScopedCategory("Tasks/TaskTypes");
+    static void InjectHooks();;
 
-        RH_ScopedInstall(Clone_Reversed, 0x635F90);
-        RH_ScopedInstall(ControlSubTask_Reversed, 0x6377B0);
-        RH_ScopedInstall(CreateSubTask, 0x62FD50);
-        RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6375F0);
-        RH_ScopedInstall(CreateNextSubTask_Reversed, 0x637850);
-        RH_ScopedInstall(MakeAbortable_Reversed, 0x62FCC0);
-        RH_ScopedInstall(PreparePedVehicleForPedDeath, 0x62FD00);
-    };
-
-    CTask* Clone_Reversed() { return CTaskComplexDieInCar::Clone(); }
-    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexDieInCar::ControlSubTask(ped); }
-    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexDieInCar::CreateFirstSubTask(ped); }
-    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexDieInCar::CreateNextSubTask(ped); }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskComplexDieInCar::MakeAbortable(ped, priority, event); }
+    CTask* ControlSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 VALIDATE_SIZE(CTaskComplexDieInCar, 0x1C);

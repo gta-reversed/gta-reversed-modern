@@ -14,7 +14,7 @@ public:
         struct {
             uint8 b0x1  : 1;
             uint8 b0x2  : 1;
-            uint8 b0x4  : 1;
+            uint8 bFallToDeathOverRailing : 1;
             uint8 b0x8  : 1;
             uint8 b0x10 : 1;
         };
@@ -35,5 +35,16 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* CreateNextSubTask(CPed* ped) override;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexFallToDeath* Constructor(int32 direction, const CVector& posn, bool a4, bool a5);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    CTask* ControlSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+
 };
 VALIDATE_SIZE(CTaskComplexFallToDeath, 0x24);

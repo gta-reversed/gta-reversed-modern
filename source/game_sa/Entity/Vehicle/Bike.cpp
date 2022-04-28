@@ -139,7 +139,7 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (auto& passenger : GetPassengers()) {
+        for (const auto passenger : GetPassengers()) {
             ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }
