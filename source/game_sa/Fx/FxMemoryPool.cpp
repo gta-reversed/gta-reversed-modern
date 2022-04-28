@@ -17,7 +17,7 @@ void FxMemoryPool_c::InjectHooks() {
 void FxMemoryPool_c::Init() {
     m_nSize     = 1024 * 1024; // 1 megabyte
     m_nPosition = 0;
-    m_pData     = static_cast<char*>(CMemoryMgr::Malloc(m_nSize));
+    m_pData     = static_cast<uint8*>(CMemoryMgr::Malloc(m_nSize));
 
     if (m_pData)
         memset(m_pData, 0, m_nSize);
@@ -45,6 +45,6 @@ void* FxMemoryPool_c::GetMem(int32 size, int32 align) {
 
 // 0x4A9CD0
 void FxMemoryPool_c::Optimise() {
-    m_pData = static_cast<char*>(CMemoryMgr::Realloc(m_pData, m_nPosition));
+    m_pData = static_cast<uint8*>(CMemoryMgr::Realloc(m_pData, m_nPosition));
     m_nSize = m_nPosition;
 }

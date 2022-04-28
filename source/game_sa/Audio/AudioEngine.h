@@ -85,7 +85,7 @@ public:
     void ReportMissionAudioEvent(uint16 eventId, CPed* ped);
     void ReportMissionAudioEvent(uint16 eventId, CVehicle* vehicle);
     void ReportMissionAudioEvent(uint16 eventId, CPhysical* physical, float a3, float a4);
-    void ReportFrontendAudioEvent(eAudioEvents eventId, float volumeChange, float speed);
+    void ReportFrontendAudioEvent(eAudioEvents eventId, float volumeChange = 0.0f, float speed = 1.0f);
 
     void InitialiseRadioStationID(RadioStationId id);
     void StartRadio(tVehicleAudioSettings* settings);
