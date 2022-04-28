@@ -109,6 +109,7 @@
 
 // Tasks
 #include "TaskComplexCarDriveMission.h"
+#include "TaskComplexBeInGroup.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -221,6 +222,7 @@
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKPointArm.h"
+#include "TaskSimpleCarSlowDragPedOut.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
@@ -506,6 +508,7 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
+        CTaskSimpleCarSlowDragPedOut::InjectHooks();
         CTaskManager::InjectHooks();
         CTaskSimpleCreateCarAndGetIn::InjectHooks();
         CTaskComplexEnterAnyCarAsDriver::InjectHooks();
