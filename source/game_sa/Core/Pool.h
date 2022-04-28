@@ -274,6 +274,12 @@ public:
              | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
              | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
     }
-};
 
+    // Similar to above, but gives back gives back a pair [index, object]
+    template<typename T = A>
+    auto GetAllValidWithIndex() {
+        return GetAllValid<T>()
+             | rng::views::transform([this](auto&& obj) { return std::make_pair(GetIndex(&obj), std::ref(obj)); });
+    }
+};
 VALIDATE_SIZE(CPool<int32>, 0x14);
