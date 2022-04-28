@@ -283,15 +283,22 @@ void CIplStore::Load() {
 * @brief Load remaining IPL defs (using the streamer)
 */
 void CIplStore::LoadAllRemainingIpls() {
-    for (auto&& [slot, def] : notsa::enumerate(ms_pPool->GetAllValid()) | rng::views::drop(1)) { // Skip first IPL
-        if (!def.m_boundBox.IsFlipped()) {
+    // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
+    for (auto slot = 1/*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+        auto def = ms_pPool->GetAt(slot);
+
+        if (!def) {
+            continue;
+        }
+
+        if (!def->m_boundBox.IsFlipped()) {
             continue;
         }
 
         if (CColAccel::isCacheLoading()) {
-            def = CColAccel::getIplDef(slot);
-            def.field_2D = false;
-            ms_pQuadTree->AddItem(&def, def.m_boundBox);
+            *def = CColAccel::getIplDef(slot);
+            def->field_2D = false;
+            ms_pQuadTree->AddItem(&def, def->m_boundBox);
         } else {
             CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
             CStreaming::LoadAllRequestedModels(true);
