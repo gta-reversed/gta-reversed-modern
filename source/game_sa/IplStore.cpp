@@ -276,7 +276,7 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
         break;
     }
     default: {
-        NOTSA_UNREACHABLE(); // Incorrect entity type
+        NOTSA_UNREACHABLE("Incorrect entity type");
     }
     }
 }
