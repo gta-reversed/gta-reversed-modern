@@ -604,28 +604,26 @@ void CCamera::RestoreWithJumpCut() {
 }
 
 // 0x50BD20
-void CCamera::SetCamCutSceneOffSet(const CVector& cutsceneOffset) {
-    m_vecCutSceneOffset = cutsceneOffset;
+void CCamera::SetCamCutSceneOffSet(const CVector& offset) {
+    m_vecCutSceneOffset = offset;
 }
 
 // 0x50BD40
 void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
     m_bCamDirectlyBehind = true;
     CPed* player = FindPlayerPed();
-    if (!player)
-        return;
-
-    m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
+    if (player) {
+        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y);
+    }
 }
 
 // 0x50BD70
 void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     m_bCamDirectlyInFront = true;
     CPed* player = FindPlayerPed();
-    if (!player)
-        return;
-
-    m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
+    if (player != nullptr) {
+        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->GetForward().x, player->GetForward().y);
+    }
 }
 
 // unused
@@ -641,17 +639,16 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
     }
 
     m_bLookingAtPlayer = false;
-    TheCamera.m_pTargetEntity = reinterpret_cast<CEntity*>(targetPed);
-    CCam& pActiveCamera = GetActiveCamera();
+    m_pTargetEntity = targetPed;
 
-    if (pActiveCamera.m_pCamTargetEntity) {
-        CEntity::SafeCleanUpRef(pActiveCamera.m_pCamTargetEntity);
-        pActiveCamera.m_pCamTargetEntity = reinterpret_cast<CEntity*>(targetPed);
-        CEntity::SafeRegisterRef(pActiveCamera.m_pCamTargetEntity);
+    CCam& camera = GetActiveCamera();
+    CEntity::SafeCleanUpRef(camera.m_pCamTargetEntity);
 
-        m_bCamDirectlyInFront = true;
-        m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(targetPed->m_matrix->GetUp().x, targetPed->m_matrix->GetUp().y);
-    }
+    camera.m_pCamTargetEntity = targetPed;
+    camera.m_pCamTargetEntity->RegisterReference(camera.m_pCamTargetEntity);
+
+    m_bCamDirectlyInFront = true;
+    m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(targetPed->GetForward().x, targetPed->GetForward().y);
 }
 
 // 0x50BEC0
