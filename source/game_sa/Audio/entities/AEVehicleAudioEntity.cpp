@@ -149,8 +149,9 @@ CAEVehicleAudioEntity::~CAEVehicleAudioEntity() {
         Terminate();
 }
 
+// 0x4FB6C0
 void CAEVehicleAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
-    UpdateParameters_Reversed(sound, curPlayPos);
+    CAEVehicleAudioEntity::UpdateParameters_Reversed(sound, curPlayPos);
 }
 
 // 0x5B99F0
@@ -171,18 +172,19 @@ void CAEVehicleAudioEntity::StaticInitialise() {
     s_HelicoptorsDisabled = false;
 }
 
+// 0x4F4ED0
 tVehicleAudioSettings* CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio() {
     return s_pVehicleAudioSettingsForRadio;
 }
 
 // 0x4F4EE0
 void CAEVehicleAudioEntity::EnableHelicoptors() {
-    s_HelicoptorsDisabled = false;
+    s_HelicoptorsDisabled = true;
 }
 
 // 0x4F4EF0
 void CAEVehicleAudioEntity::DisableHelicoptors() {
-    s_HelicoptorsDisabled = true;
+    s_HelicoptorsDisabled = false;
 }
 
 // 0x4F4E30
