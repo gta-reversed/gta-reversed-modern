@@ -25,6 +25,16 @@ void CheckAll() {
     });
 }
 
+void SwitchHook(std::string_view funcName) {
+    s_RootCategory.ForEachItem([=](auto& item) {
+        const auto name = item->Name();
+        if (name == funcName) {
+            item->Switch();
+            return;
+        }
+    });
+}
+
 void OnInjectionBegin() {
 #ifndef NDEBUG 
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine

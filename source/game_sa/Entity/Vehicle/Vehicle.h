@@ -28,6 +28,7 @@ class CPed;
 class CPlane;
 class CHeli;
 class CPedGroup;
+class CVehicleAnimGroup;
 
 enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,
@@ -689,7 +690,8 @@ public:
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
     bool HasDriver() const { return !!m_pDriver; }
-
+    CVehicleAnimGroup& GetAnimGroup() const;
+    AssocGroupId GetAnimGroupId() const;
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

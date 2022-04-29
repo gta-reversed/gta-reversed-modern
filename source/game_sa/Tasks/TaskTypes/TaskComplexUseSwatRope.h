@@ -8,7 +8,6 @@ public:
     uint32 m_nRopeId;
     float  m_fCoorAlongRope;
     uint8  m_bIsOnHeli;
-    uint8  _pad_15[3];
     CHeli* m_pHeli;
 
 public:

@@ -104,6 +104,7 @@ namespace ReversibleHooks {
     }*/
 
     void CheckAll();
+    void SwitchHook(std::string_view funcName);
 
     // Stuff called from InjectHooksMain()
 

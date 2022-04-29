@@ -41,6 +41,10 @@ typedef uint32    bool32;
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
 #define UNUSED(x) (void)(x);
 
+// Use for code that's unreachable.
+// Prefer this over assert(0)
+#define NOTSA_UNREACHABLE assert(0)
+
 #define _IGNORED_
 #define _CAN_BE_NULL_
 
