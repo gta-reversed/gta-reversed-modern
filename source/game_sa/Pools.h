@@ -35,23 +35,23 @@ class CPedAttractor;
 #undef GetObject
 #endif
 
-typedef CPool<CPed, CCopPed>                  CPedPool;
-typedef CPool<CVehicle, CHeli>                CVehiclePool;
-typedef CPool<CBuilding>                      CBuildingPool;
-typedef CPool<CObject, CCutsceneObject>       CObjectPool;
-typedef CPool<CDummy>                         CDummyPool;
-typedef CPool<CColModel>                      CColModelPool;
-typedef CPool<CTask, CTaskSimpleSlideToCoord> CTaskPool;
-typedef CPool<CPedIntelligence>               CPedIntelligencePool;
-typedef CPool<CPtrNodeSingleLink>             CPtrNodeSingleLinkPool;
-typedef CPool<CPtrNodeDoubleLink>             CPtrNodeDoubleLinkPool;
-typedef CPool<CEntryInfoNode>                 CEntryInfoNodePool;
-typedef CPool<CPointRoute>                    CPointRoutePool;
-typedef CPool<void*>                   CPatrolRoutePool; // todo: CPatrolRoute
-typedef CPool<CEvent>                         CEventPool;
-typedef CPool<void*>                     CNodeRoutePool; // todo: CNodeRoute
-typedef CPool<CTaskAllocator>                 CTaskAllocatorPool;
-typedef CPool<CPedAttractor>                  CPedAttractorPool;
+using CPedPool = CPool<CPed, CCopPed>;
+using CVehiclePool = CPool<CVehicle, CHeli>;
+using CBuildingPool = CPool<CBuilding>;
+using CObjectPool = CPool<CObject, CCutsceneObject>;
+using CDummyPool = CPool<CDummy>;
+using CColModelPool = CPool<CColModel>;
+using CTaskPool = CPool<CTask, CTaskSimpleSlideToCoord>;
+using CPedIntelligencePool = CPool<CPedIntelligence>;
+using CPtrNodeSingleLinkPool = CPool<CPtrNodeSingleLink>;
+using CPtrNodeDoubleLinkPool = CPool<CPtrNodeDoubleLink>;
+using CEntryInfoNodePool = CPool<CEntryInfoNode>;
+using CPointRoutePool = CPool<CPointRoute>;
+using CPatrolRoutePool = CPool<void*>; // todo: CPatrolRoute
+using CEventPool = CPool<CEvent>;
+using CNodeRoutePool = CPool<void*>; // todo: CNodeRoute
+using CTaskAllocatorPool = CPool<CTaskAllocator>;
+using CPedAttractorPool = CPool<CPedAttractor>;
 
 class CPools {
 public:

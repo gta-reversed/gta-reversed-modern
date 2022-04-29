@@ -41,6 +41,10 @@ VALIDATE_SIZE(tPoolObjectFlags, 1);
 
 template <class A, class B = A> class CPool {
 public:
+    // NOTSA typenames
+    using base_type = A;   // Common base of all these objects
+    using widest_type = B; // Type using the most memory (So each object takes this much memory basically)
+
     B*                m_pObjects;
     tPoolObjectFlags* m_byteMap;
     int32             m_nSize;

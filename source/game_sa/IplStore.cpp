@@ -9,6 +9,7 @@
 #include "IplStore.h"
 #include "tBinaryIplFile.h"
 #include "extensions/enumerate.hpp"
+#include "TheCarGenerators.h"
 
 void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
@@ -35,7 +36,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
     RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
     RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
-    //RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
+    RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
     RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
     //RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
     RH_ScopedGlobalInstall(GetIplName, 0x404A60);
@@ -534,7 +535,31 @@ void CIplStore::RemoveAllIpls() {
 * @addr 0x404B20
 */
 void CIplStore::RemoveIpl(int32 iplSlotIndex) {
-    plugin::Call<0x404B20, int32>(iplSlotIndex);
+    const auto& def = *ms_pPool->GetAt(iplSlotIndex);
+
+    const auto ProcessPool = [iplSlotIndex]<typename PoolT>(PoolT& pool, int32 minId, int32 maxId) {
+        for (auto i = minId; i < maxId; i++) {
+            if (const auto entity = pool.GetAt(i)) {
+                if (entity->m_nIplIndex == iplSlotIndex) {
+                    if constexpr (std::is_same_v<PoolT::base_type, CObject>) {
+                        if (entity->m_pDummyObject) {
+                            CWorld::Add(entity->m_pDummyObject);
+                        }
+                    }
+
+                    CWorld::Remove(entity);
+                    delete entity;
+                }
+            }
+        }
+    };
+
+    // In same order as originally
+    ProcessPool(*GetBuildingPool(), def.m_nMinBuildingId, def.m_nMaxBuildingId);
+    ProcessPool(*GetObjectPool(), 0, GetObjectPool()->GetSize());
+    ProcessPool(*GetDummyPool(), def.m_nMinDummyId, def.m_nMaxDummyId);
+
+    CTheCarGenerators::RemoveCarGenerators((uint8_t)iplSlotIndex);
 }
 
 /*!
