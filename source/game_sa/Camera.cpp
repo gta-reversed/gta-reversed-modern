@@ -16,7 +16,7 @@ bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
 char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
 uint8& gCurCamColVars = *(uint8*)0x8CCB80;
 float& gCurDistForCam = *(float*)0x8CCB84;
-int32& gpCamColVars = *(int32*)0xB6FE88;
+float*& gpCamColVars = *(float**)0xB6FE88;
 float (&gCamColVars)[28][6] = *(float (*)[28][6])0x8CC8E0;
 
 CCam& CCamera::GetActiveCamera() {
@@ -866,23 +866,21 @@ void CCamera::SetColVarsAimWeapon(int32 aimingType) {
 
 // 0x50CC50
 void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
-    int32 camColVars = 0;
-
-    switch (pedType) {
+    const int32 camColVars = [=] {
+        switch (pedType) {
         case PED_TYPE_PLAYER1:
-            camColVars = nCamPedZoom + 3;
-            break;
+            return nCamPedZoom + 3;
         case PED_TYPE_PLAYER2:
-            camColVars = nCamPedZoom + 6;
-            break;
+            return nCamPedZoom + 6;
         default:
-            return;
-    }
+            return 0;
+        }
+    }();
 
     if (camColVars != gCurCamColVars) {
         gCurCamColVars = camColVars;
         gCurDistForCam = 1.0f;
-        gpCamColVars = reinterpret_cast<int32>(&gCamColVars[camColVars]);
+        gpCamColVars = gCamColVars[camColVars];
     }
 }
 
@@ -1256,7 +1254,7 @@ void CCamera::SetCamCollisionVarDataSet(int32 index) {
 
     gCurCamColVars = index;
     gCurDistForCam = 1.0f;
-    gpCamColVars = reinterpret_cast<int32>(&gCamColVars[index]);
+    gpCamColVars   = gCamColVars[index];
 }
 
 // 0x50CCA0
