@@ -4,9 +4,11 @@
 
 void CTaskSimpleSetStayInSamePlace::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleSetStayInSamePlace", "Constructor", 0x62F590, &CTaskSimpleSetStayInSamePlace::Constructor);
+    RH_ScopedClass(CTaskSimpleSetStayInSamePlace);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x62F590);
     //VTABLE
-    ReversibleHooks::Install("CTaskSimpleSetStayInSamePlace", "ProcessPed", 0x62F5E0, &CTaskSimpleSetStayInSamePlace::ProcessPed_Reversed);
+    RH_ScopedVirtualInstall(ProcessPed, 0x62F5E0);
 }
 
 CTaskSimpleSetStayInSamePlace* CTaskSimpleSetStayInSamePlace::Constructor(bool bStayInSamePlace)

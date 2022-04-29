@@ -1,15 +1,16 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
 #include "Vector.h"
-#include "Ped.h"
-#include "Task.h"
+
+class CPed;
+class CVehicle;
+class CTask;
 
 class CCarEnterExit {
 public:
@@ -33,12 +34,12 @@ public:
     static bool CarHasPartiallyOpenDoor(const CVehicle* vehicle, int32 doorId);
     static int32 ComputeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType);
     static int32 ComputeOppositeDoorFlag(const CVehicle* vehicle, int32 doorId, bool bCheckVehicleType);
-    static signed int ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId);
+    static int32 ComputePassengerIndexFromCarDoor(const CVehicle* vehicle, int32 doorId);
     static int32 ComputeSlowJackedPed(const CVehicle* vehicle, int32 doorId);
-    static signed int ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum);
+    static int32 ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle, int32 nPassengerNum);
     static int32 ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped);
     static bool GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, CVector* outPos, int32 doorId);
-    static bool GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool flag1, bool flag2, bool flag3);
+    static bool GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool CheckIfOccupiedTandemSeat, bool CheckIfDoorIsEnterable, bool CheckIfRoomToGetIn);
     static CVector* GetPositionToOpenCarDoor(CVector* out, const CVehicle* vehicle, int32 doorId);
     static bool IsCarDoorInUse(const CVehicle* vehicle, int32 firstDoorId, int32 secondDoorId);
     static bool IsCarDoorReady(const CVehicle* vehicle, int32 doorId);

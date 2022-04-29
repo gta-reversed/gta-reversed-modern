@@ -6,10 +6,13 @@
 CWaterCannon (&CWaterCannons::aCannons)[3] = *(CWaterCannon (*)[3])0xC80740;
 
 void CWaterCannons::InjectHooks() {
-    ReversibleHooks::Install("CWaterCannons", "Init", 0x728C80, &CWaterCannons::Init);
-    ReversibleHooks::Install("CWaterCannons", "UpdateOne", 0x728CB0, &CWaterCannons::UpdateOne);
-    ReversibleHooks::Install("CWaterCannons", "Update", 0x72A3C0, &CWaterCannons::Update);
-    ReversibleHooks::Install("CWaterCannons", "Render", 0x729B30, &CWaterCannons::Render);
+    RH_ScopedClass(CWaterCannons);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x728C80);
+    RH_ScopedInstall(UpdateOne, 0x728CB0);
+    RH_ScopedInstall(Update, 0x72A3C0);
+    RH_ScopedInstall(Render, 0x729B30);
 }
 
 // 0x728C80
@@ -20,9 +23,9 @@ void CWaterCannons::Init() {
 }
 
 // 0x728CB0
-void CWaterCannons::UpdateOne(uint32 pVehicle, CVector* start, CVector* end) {
+void CWaterCannons::UpdateOne(uint32 vehicle, CVector* start, CVector* end) {
     for (auto& cannon : aCannons) {
-        if (cannon.m_nId == pVehicle) {
+        if (cannon.m_nId == vehicle) {
             cannon.Update_NewInput(start, end);
             return;
         }
@@ -37,7 +40,7 @@ void CWaterCannons::UpdateOne(uint32 pVehicle, CVector* start, CVector* end) {
 
     auto& cannon = aCannons[i];
     cannon.Init();
-    cannon.m_nId = pVehicle;
+    cannon.m_nId = vehicle;
     cannon.Update_NewInput(start, end);
 }
 

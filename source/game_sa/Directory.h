@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,13 +10,13 @@
     http://www.gtamodding.com/wiki/IMG_archive
 */
 
-class CDirectory {
+class CDirectory { // Also referred to as an img file
 public:
     struct DirectoryInfo {
-        uint32 m_nOffset;
-        uint16 m_nStreamingSize;
-        uint16 m_nSizeInArchive;
-        char   m_szName[24];
+        uint32 m_nOffset;           // Offset (in sectors)
+        uint16 m_nStreamingSize;    // Size (in sectors)
+        uint16 m_nSizeInArchive;    // Size in archive (in sectors) (always 0 when read)       
+        char   m_szName[24];        // Name of the file with extension (null terminated).
     };
 
     DirectoryInfo* m_pEntries{};

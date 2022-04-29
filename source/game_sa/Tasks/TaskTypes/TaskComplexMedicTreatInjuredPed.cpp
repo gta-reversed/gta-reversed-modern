@@ -15,15 +15,17 @@
 #include "TaskComplexGoToPointAndStandStill.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "Constructor", 0x658BA0, &CTaskComplexMedicTreatInjuredPed::Constructor);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateSubTask", 0x658DB0, &CTaskComplexMedicTreatInjuredPed::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateDealWithNextAccidentTask", 0x65A020, &CTaskComplexMedicTreatInjuredPed::CreateDealWithNextAccidentTask);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "FindNearestAccident", 0x658CC0, &CTaskComplexMedicTreatInjuredPed::FindNearestAccident);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "FindAccidentPosition", 0x658D20, &CTaskComplexMedicTreatInjuredPed::FindAccidentPosition);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "Clone", 0x659AF0, &CTaskComplexMedicTreatInjuredPed::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateFirstSubTask", 0x659FE0, &CTaskComplexMedicTreatInjuredPed::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "CreateNextSubTask", 0x65A990, &CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexMedicTreatInjuredPed", "ControlSubTask", 0x65ABF0, &CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexMedicTreatInjuredPed);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x658BA0);
+    RH_ScopedInstall(CreateSubTask, 0x658DB0);
+    RH_ScopedInstall(CreateDealWithNextAccidentTask, 0x65A020);
+    RH_ScopedInstall(FindNearestAccident, 0x658CC0);
+    RH_ScopedInstall(FindAccidentPosition, 0x658D20);
+    RH_ScopedVirtualInstall(Clone, 0x659AF0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x659FE0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A990);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65ABF0);
 }
 
 CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, bool isDriver) {
@@ -38,12 +40,8 @@ CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* veh
     m_bIsDriver     = isDriver;
     m_pAccident     = nullptr;
     m_bLeftCarOnce  = false;
-
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerMedic);
 }
 
 // 0x658C30
@@ -51,11 +49,8 @@ CTaskComplexMedicTreatInjuredPed::~CTaskComplexMedicTreatInjuredPed() {
     if (m_pAccident && m_pAccident->m_pPed && !m_pAccident->m_bIsRevived)
         m_pAccident->m_bIsTreated = false;
 
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerMedic);
 }
 
 // 0x658DB0
@@ -251,8 +246,8 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped) {
 
         auto subTask = reinterpret_cast<CTaskComplexGoToPointAndStandStill*>(m_pSubTask);
         if (subTask->m_moveState != PEDMOVE_WALK && DistanceBetweenPoints(m_vecAccidentPosition, ped->GetPosition()) < 25.0F) {
-            for (CEntity* pEntity : ped->GetIntelligence()->m_vehicleScanner.m_apEntities)
-                if (pEntity && CPedGeometryAnalyser::IsEntityBlockingTarget(pEntity, m_vecAccidentPosition, 0.125F))
+            for (CEntity* entity : ped->GetIntelligence()->m_vehicleScanner.m_apEntities)
+                if (entity && CPedGeometryAnalyser::IsEntityBlockingTarget(entity, m_vecAccidentPosition, 0.125F))
                     return CreateDealWithNextAccidentTask(ped, nullptr);
 
             FindAccidentPosition(ped, m_pAccident->m_pPed);

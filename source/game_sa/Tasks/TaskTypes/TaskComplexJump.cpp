@@ -8,12 +8,14 @@
 #include "TaskSimpleClimb.h"
 
 void CTaskComplexJump::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexJump", "Constructor", 0x67A030, &CTaskComplexJump::Constructor);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateSubTask", 0x67D980, &CTaskComplexJump::CreateSubTask);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateFirstSubTask", 0x67FD10, &CTaskComplexJump::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "CreateNextSubTask", 0x67FC00, &CTaskComplexJump::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "Clone", 0x67C5A0, &CTaskComplexJump::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexJump", "MakeAbortable", 0x67A070, &CTaskComplexJump::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskComplexJump);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x67A030);
+    RH_ScopedInstall(CreateSubTask, 0x67D980);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67FD10);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67FC00);
+    RH_ScopedVirtualInstall(Clone, 0x67C5A0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x67A070);
 }
 
 CTaskComplexJump* CTaskComplexJump::Constructor(eComplexJumpType jumpType) {
@@ -123,10 +125,10 @@ CTask* CTaskComplexJump::CreateSubTask(eTaskType taskType, CPed* ped) {
         ped->bIsInTheAir = false;
         return nullptr;
     case TASK_SIMPLE_JUMP: {
-        auto pTask = new CTaskSimpleJump(m_nType == COMPLEX_JUMP_TYPE_CLIMB);
+        auto task = new CTaskSimpleJump(m_nType == COMPLEX_JUMP_TYPE_CLIMB);
         if (m_bHighJump || CPedGroups::IsInPlayersGroup(ped))
-            pTask->m_bHighJump = true;
-        return pTask;
+            task->m_bHighJump = true;
+        return task;
     }
     case TASK_SIMPLE_CLIMB:
         if (m_pSubTask && m_pSubTask->GetTaskType() == TASK_SIMPLE_JUMP) {
@@ -145,12 +147,12 @@ CTask* CTaskComplexJump::CreateSubTask(eTaskType taskType, CPed* ped) {
             return new CTaskComplexInAirAndLand(true, false);
         }
     case TASK_COMPLEX_IN_AIR_AND_LAND: {
-        auto pNewTask = new CTaskComplexInAirAndLand(true, false);
+        auto newTask = new CTaskComplexInAirAndLand(true, false);
 
         if (m_pSubTask->GetTaskType() == TASK_SIMPLE_CLIMB && reinterpret_cast<CTaskSimpleClimb*>(m_pSubTask)->m_bInvalidClimb)
-            pNewTask->m_bInvalidClimb = true;
+            newTask->m_bInvalidClimb = true;
 
-        return pNewTask;
+        return newTask;
     }
     default:
         return nullptr;

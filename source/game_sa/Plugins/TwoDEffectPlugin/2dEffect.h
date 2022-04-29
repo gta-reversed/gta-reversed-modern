@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,16 +10,17 @@
 #include "RGBA.h"
 
 enum e2dEffectType : uint8 {
-    EFFECT_LIGHT,
-    EFFECT_PARTICLE,
-    EFFECT_ATTRACTOR = 3,
-    EFFECT_SUN_GLARE,
-    EFFECT_FURNITUR,
-    EFFECT_ENEX,
-    EFFECT_ROADSIGN,
-    EFFECT_SLOTMACHINE_WHEEL,
-    EFFECT_COVER_POINT,
-    EFFECT_ESCALATOR,
+    EFFECT_LIGHT         = 0,
+    EFFECT_PARTICLE      = 1,
+    EFFECT_MISSING_OR_UNK= 2,
+    EFFECT_ATTRACTOR     = 3,
+    EFFECT_SUN_GLARE     = 4,
+    EFFECT_FURNITURE     = 5,
+    EFFECT_ENEX          = 6,
+    EFFECT_ROADSIGN      = 7,
+    EFFECT_TRIGGER_POINT = 8, // todo: EFFECT_SLOTMACHINE_WHEEL?
+    EFFECT_COVER_POINT   = 9,
+    EFFECT_ESCALATOR     = 10,
 };
 
 // description from https://gtamods.com/wiki/2d_Effect_(RW_Section)#Entry_Type_3_-_Ped_attractor
@@ -150,6 +151,11 @@ struct tEffectRoadsign {
 };
 VALIDATE_SIZE(tEffectRoadsign, 0x20);
 
+struct tEffectSlotMachineWheel {
+    int32 m_nId;
+};
+VALIDATE_SIZE(tEffectSlotMachineWheel, 0x4);
+
 struct tEffectCoverPoint {
     RwV2d m_vecDirection;
     uint8 m_nType;
@@ -170,14 +176,14 @@ class C2dEffect {
     e2dEffectType m_nType;
     char          _pad0[3];
     union {
-        tEffectLight        light;
-        tEffectParticle     particle;
-        tEffectPedAttractor pedAttractor;
-        tEffectEnEx         enEx;
-        tEffectRoadsign     roadsign;
-        int32               iSlotMachineIndex;
-        tEffectCoverPoint   coverPoint;
-        tEffectEscalator    escalator;
+        tEffectLight            light;
+        tEffectParticle         particle;
+        tEffectPedAttractor     pedAttractor;
+        tEffectEnEx             enEx;
+        tEffectRoadsign         roadsign;
+        tEffectSlotMachineWheel slotMachineIndex;
+        tEffectCoverPoint       coverPoint;
+        tEffectEscalator        escalator;
     };
 
 public:
@@ -194,7 +200,7 @@ public:
     static int32 Roadsign_GetPaletteIDFromFlags(CRoadsignAttrFlags flags);
 
     static bool PluginAttach();
-    static void DestroyAtomic(RpAtomic* pAtomic);
+    static void DestroyAtomic(RpAtomic* atomic);
 };
 VALIDATE_SIZE(C2dEffect, 0x40);
 
@@ -215,8 +221,8 @@ VALIDATE_SIZE(t2dEffectPlugin, 0x4);
     (RWPLUGINOFFSETCONST(t2dEffectPlugin, geometry, C2dEffect::g2dEffectPluginOffset)->var)
 
 // Own function names, we don't seem to have symbols for those
-uint32 RpGeometryGet2dFxCount(RpGeometry* pGeometry);
-C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* pGeometry, int32 iEffectInd);
+uint32 RpGeometryGet2dFxCount(RpGeometry* geometry);
+C2dEffect* RpGeometryGet2dFxAtIndex(RpGeometry* geometry, int32 iEffectInd);
 
 void* t2dEffectPluginConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 void* t2dEffectPluginDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);

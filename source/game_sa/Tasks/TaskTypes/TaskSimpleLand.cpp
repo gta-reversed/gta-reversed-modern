@@ -4,13 +4,14 @@
 
 void CTaskSimpleLand::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleLand", "Constructor", 0x678E90, &CTaskSimpleLand::Constructor);
-    ReversibleHooks::Install("CTaskSimpleLand", "LeftFootLanded", 0x679010, &CTaskSimpleLand::LeftFootLanded);
-    ReversibleHooks::Install("CTaskSimpleLand", "RightFootLanded", 0x678FE0, &CTaskSimpleLand::RightFootLanded);
-    ReversibleHooks::Install("CTaskSimpleLand", "FinishAnimCB", 0x678FA0, &CTaskSimpleLand::FinishAnimCB);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleLand", "MakeAbortable", 0x678F40, &CTaskSimpleLand::MakeAbortable_Reversed);
-    ReversibleHooks::Install("CTaskSimpleLand", "ProcessPed", 0x67D380, &CTaskSimpleLand::ProcessPed_Reversed);
+    RH_ScopedClass(CTaskSimpleLand);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x678E90);
+    RH_ScopedInstall(LeftFootLanded, 0x679010);
+    RH_ScopedInstall(RightFootLanded, 0x678FE0);
+    RH_ScopedInstall(FinishAnimCB, 0x678FA0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678F40);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67D380);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)
@@ -79,7 +80,7 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
             ped->bIsLanding = true;
 
             if (ped->IsPlayer()) {
-                if (ped->m_nMoveState == PEDMOVE_SPRINT && ped->AsPlayerPed()->GetPadFromPlayer()->GetSprint())
+                if (ped->m_nMoveState == PEDMOVE_SPRINT && ped->AsPlayer()->GetPadFromPlayer()->GetSprint())
                     m_pAnim->m_fSpeed = 2.0F; // possible bug, m_pAnim can be null here
 
                 if (m_nAnimId != ANIM_ID_IDLE_TIRED)
@@ -126,15 +127,15 @@ bool CTaskSimpleLand::RightFootLanded()
 }
 
 // 0x678FA0
-void CTaskSimpleLand::FinishAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleLand::FinishAnimCB(CAnimBlendAssociation* anim, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleLand*>(data);
-    if (pTask)
+    auto task = reinterpret_cast<CTaskSimpleLand*>(data);
+    if (task)
     {
-        pTask->bIsFinished = true;
-        pTask->m_pAnim = nullptr;
+        task->bIsFinished = true;
+        task->m_pAnim = nullptr;
     }
 
-    if (pAnim && (pAnim->m_nAnimId == ANIM_ID_JUMP_LAND || pAnim->m_nAnimId == ANIM_ID_IDLE_TIRED))
-        pAnim->m_fBlendDelta = -100.0F;
+    if (anim && (anim->m_nAnimId == ANIM_ID_JUMP_LAND || anim->m_nAnimId == ANIM_ID_IDLE_TIRED))
+        anim->m_fBlendDelta = -100.0F;
 }

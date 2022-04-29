@@ -3,14 +3,16 @@
 #include "TaskSimplePickUpEntity.h"
 
 void CTaskSimplePickUpEntity::InjectHooks() {
-    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_1", 0x691870, (CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags, float)) & CTaskSimplePickUpEntity::Constructor);
-    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Constructor_2", 0x6917B0, (CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, float)) & CTaskSimplePickUpEntity::Constructor);
-    ReversibleHooks::Install("CTaskSimplePickUpEntity", "Clone", 0x692A90, &CTaskSimplePickUpEntity::Clone_Reversed);
-    ReversibleHooks::Install("CTaskSimplePickUpEntity", "GetTaskType", 0x691810, &CTaskSimplePickUpEntity::GetId_Reversed);
+    RH_ScopedClass(CTaskSimplePickUpEntity);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedOverloadedInstall(Constructor, "1", 0x691870, CTaskSimplePickUpEntity*(CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, CAnimBlock*, CAnimBlendHierarchy*, eAnimationFlags, float));
+    RH_ScopedOverloadedInstall(Constructor, "2", 0x6917B0, CTaskSimplePickUpEntity * (CTaskSimplePickUpEntity::*)(CEntity*, CVector*, uint8, uint8, AnimationId, AssocGroupId, float));
+    RH_ScopedVirtualInstall(Clone, 0x692A90);
+    RH_ScopedVirtualInstall(GetId, 0x691810);
 }
 
-CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress)
-    : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags)
+CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress)
+    : CTaskSimpleHoldEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, animHierarchy, animFlags)
 {
     m_fMovePedUntilAnimProgress = fMovePedUntilAnimProgress;
 } 
@@ -22,8 +24,8 @@ CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(CEntity* entityToHold, CVector*
 } 
 
 // 0x691870
-CTaskSimplePickUpEntity* CTaskSimplePickUpEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* pAnimHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress) {
-    this->CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, pAnimHierarchy, animFlags, fMovePedUntilAnimProgress);
+CTaskSimplePickUpEntity* CTaskSimplePickUpEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* pAnimBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress) {
+    this->CTaskSimplePickUpEntity::CTaskSimplePickUpEntity(entityToHold, posn, boneFrameId, boneFlags, pAnimBlock, animHierarchy, animFlags, fMovePedUntilAnimProgress);
     return this;
 }
 

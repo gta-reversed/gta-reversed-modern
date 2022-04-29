@@ -1,39 +1,43 @@
 #include "StdInc.h"
 
-void CVehicleSaveStructure::InjectHooks()
-{
-    ReversibleHooks::Install("CVehicleSaveStructure", "Construct", 0x5D2330, &CVehicleSaveStructure::Construct);
-    ReversibleHooks::Install("CVehicleSaveStructure", "Extract", 0x5D23B0, &CVehicleSaveStructure::Extract);
+#include "VehicleSaveStructure.h"
+
+void CVehicleSaveStructure::InjectHooks() {
+    RH_ScopedClass(CVehicleSaveStructure);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Construct, 0x5D2330);
+    RH_ScopedInstall(Extract, 0x5D23B0);
 }
 
-void CVehicleSaveStructure::Construct(CVehicle* pVeh)
-{
-    m_matrix = *pVeh->m_matrix;
-    m_nPrimaryColor      = pVeh->m_nPrimaryColor;
-    m_nSecondaryColor    = pVeh->m_nSecondaryColor;
-    m_nTertiaryColor     = pVeh->m_nTertiaryColor;
-    m_nQuaternaryColor   = pVeh->m_nQuaternaryColor;
-    m_nAlarmState        = pVeh->m_nAlarmState;
-    m_nMaxPassengers     = pVeh->m_nMaxPassengers;
-    m_fSteerAngle        = pVeh->m_fSteerAngle;
-    m_fGasPedal          = pVeh->m_fGasPedal;
-    m_fBrakePedal        = pVeh->m_fBreakPedal;
-    m_nVehicleUpperFlags = pVeh->m_nVehicleUpperFlags;
-    m_nVehicleLowerFlags = pVeh->m_nVehicleLowerFlags;
+// 0x5D2330
+void CVehicleSaveStructure::Construct(CVehicle* v) {
+    m_matrix = *v->m_matrix;
+    m_nPrimaryColor = v->m_nPrimaryColor;
+    m_nSecondaryColor = v->m_nSecondaryColor;
+    m_nTertiaryColor = v->m_nTertiaryColor;
+    m_nQuaternaryColor = v->m_nQuaternaryColor;
+    m_nAlarmState = v->m_nAlarmState;
+    m_nMaxPassengers = v->m_nMaxPassengers;
+    m_fSteerAngle = v->m_fSteerAngle;
+    m_fGasPedal = v->m_fGasPedal;
+    m_fBrakePedal = v->m_fBreakPedal;
+    m_nVehicleUpperFlags = v->m_nVehicleUpperFlags;
+    m_nVehicleLowerFlags = v->m_nVehicleLowerFlags;
 }
 
-void CVehicleSaveStructure::Extract(CVehicle* pVeh)
-{
-    pVeh->SetMatrix(m_matrix);
-    pVeh->m_nPrimaryColor      = m_nPrimaryColor;
-    pVeh->m_nSecondaryColor    = m_nSecondaryColor;
-    pVeh->m_nTertiaryColor     = m_nTertiaryColor;
-    pVeh->m_nQuaternaryColor   = m_nQuaternaryColor;
-    pVeh->m_nAlarmState        = m_nAlarmState;
-    pVeh->m_nMaxPassengers     = m_nMaxPassengers;
-    pVeh->m_fSteerAngle        = m_fSteerAngle;
-    pVeh->m_fGasPedal          = m_fGasPedal;
-    pVeh->m_fBreakPedal        = m_fBrakePedal;
-    pVeh->m_nVehicleUpperFlags = m_nVehicleUpperFlags;
-    pVeh->m_nVehicleLowerFlags = m_nVehicleLowerFlags;
+// 0x5D23B0
+void CVehicleSaveStructure::Extract(CVehicle* v) {
+    v->SetMatrix(m_matrix);
+    v->m_nPrimaryColor = m_nPrimaryColor;
+    v->m_nSecondaryColor = m_nSecondaryColor;
+    v->m_nTertiaryColor = m_nTertiaryColor;
+    v->m_nQuaternaryColor = m_nQuaternaryColor;
+    v->m_nAlarmState = m_nAlarmState;
+    v->m_nMaxPassengers = m_nMaxPassengers;
+    v->m_fSteerAngle = m_fSteerAngle;
+    v->m_fGasPedal = m_fGasPedal;
+    v->m_fBreakPedal = m_fBrakePedal;
+    v->m_nVehicleUpperFlags = m_nVehicleUpperFlags;
+    v->m_nVehicleLowerFlags = m_nVehicleLowerFlags;
 }

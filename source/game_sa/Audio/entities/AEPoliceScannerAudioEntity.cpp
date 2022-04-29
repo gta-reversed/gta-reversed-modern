@@ -140,7 +140,7 @@ void CAEPoliceScannerAudioEntity::StopScanner(bool bStopSound) {
 
 // 0x4E6C30
 void CAEPoliceScannerAudioEntity::FinishedPlayingScannerDialogue() {
-    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SCANNER_NOISE_STOP, 0.0f, 1.0f);
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SCANNER_NOISE_STOP);
     s_nScannerPlaybackState      = STATE_INITIAL;
     s_SlotState                  = 0x10001;
     dword_B61D18                 = 0x10001;
@@ -295,24 +295,26 @@ void CAEPoliceScannerAudioEntity::Service() {
 }
 
 void CAEPoliceScannerAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CAEPoliceScannerAudioEntity", "Constructor", 0x56DA00, &CAEPoliceScannerAudioEntity::Constructor);
-    Install("CAEPoliceScannerAudioEntity", "Destructor", 0x4E6E00, &CAEPoliceScannerAudioEntity::Destructor);
-    Install("CAEPoliceScannerAudioEntity", "StaticInitialise", 0x5B9C30, &CAEPoliceScannerAudioEntity::StaticInitialise);
-    Install("CAEPoliceScannerAudioEntity", "Reset", 0x4E6E90, &CAEPoliceScannerAudioEntity::Reset);
-    // Install("CAEPoliceScannerAudioEntity", "AddAudioEvent", 0x4E71E0, &CAEPoliceScannerAudioEntity::AddAudioEvent);
-    Install("CAEPoliceScannerAudioEntity", "PrepSlots", 0x4E6BC0, &CAEPoliceScannerAudioEntity::PrepSlots);
-    // Install("CAEPoliceScannerAudioEntity", "LoadSlots", 0x4E6CD0, &CAEPoliceScannerAudioEntity::LoadSlots);
-    Install("CAEPoliceScannerAudioEntity", "EnableScanner", 0x4E6DB0, &CAEPoliceScannerAudioEntity::EnableScanner);
-    Install("CAEPoliceScannerAudioEntity", "DisableScanner", 0x4E71B0, &CAEPoliceScannerAudioEntity::DisableScanner);
-    Install("CAEPoliceScannerAudioEntity", "StopScanner", 0x4E6DC0, &CAEPoliceScannerAudioEntity::StopScanner);
-    Install("CAEPoliceScannerAudioEntity", "FinishedPlayingScannerDialogue", 0x4E6C30, &CAEPoliceScannerAudioEntity::FinishedPlayingScannerDialogue);
-    // Install("CAEPoliceScannerAudioEntity", "PlayLoadedDialogue", 0x4E6F60, &CAEPoliceScannerAudioEntity::PlayLoadedDialogue);
-    Install("CAEPoliceScannerAudioEntity", "PopulateScannerDialogueLists", 0x4E6B60, &CAEPoliceScannerAudioEntity::PopulateScannerDialogueLists);
-    Install("CAEPoliceScannerAudioEntity", "CanWePlayNewScannerDialogue", 0x4E6C00, &CAEPoliceScannerAudioEntity::CanWePlayNewScannerDialogue);
-    Install("CAEPoliceScannerAudioEntity", "PlayPoliceScannerDialogue", 0x4E6ED0, &CAEPoliceScannerAudioEntity::PlayPoliceScannerDialogue);
-    Install("CAEPoliceScannerAudioEntity", "UpdateParameters", 0x4E7590, &CAEPoliceScannerAudioEntity::UpdateParameters_Reversed);
-    // Install("CAEPoliceScannerAudioEntity", "Service", 0x4E7630, &CAEPoliceScannerAudioEntity::Service);
+    RH_ScopedClass(CAEPoliceScannerAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    RH_ScopedInstall(Constructor, 0x56DA00);
+    RH_ScopedInstall(Destructor, 0x4E6E00);
+    RH_ScopedInstall(StaticInitialise, 0x5B9C30);
+    RH_ScopedInstall(Reset, 0x4E6E90);
+    // RH_ScopedInstall(AddAudioEvent, 0x4E71E0);
+    RH_ScopedInstall(PrepSlots, 0x4E6BC0);
+    // RH_ScopedInstall(LoadSlots, 0x4E6CD0);
+    RH_ScopedInstall(EnableScanner, 0x4E6DB0);
+    RH_ScopedInstall(DisableScanner, 0x4E71B0);
+    RH_ScopedInstall(StopScanner, 0x4E6DC0);
+    RH_ScopedInstall(FinishedPlayingScannerDialogue, 0x4E6C30);
+    // RH_ScopedInstall(PlayLoadedDialogue, 0x4E6F60);
+    RH_ScopedInstall(PopulateScannerDialogueLists, 0x4E6B60);
+    RH_ScopedInstall(CanWePlayNewScannerDialogue, 0x4E6C00);
+    RH_ScopedInstall(PlayPoliceScannerDialogue, 0x4E6ED0);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4E7590);
+    // RH_ScopedInstall(Service, 0x4E7630);
 }
 
 CAEPoliceScannerAudioEntity* CAEPoliceScannerAudioEntity::Constructor() {

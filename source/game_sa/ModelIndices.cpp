@@ -170,8 +170,12 @@ namespace ModelIndices {
 }
 
 void ModelIndices::InjectHooks() {
-    ReversibleHooks::Install("ModelIndices", "InitModelIndices", 0x5BCA10, &InitModelIndices);
-    ReversibleHooks::Install("ModelIndices", "MatchAllModelStrings", 0x5B57C0, &MatchAllModelStrings);
+    RH_ScopedNamespace(ModelIndices);
+    RH_ScopedCategoryGlobal();
+
+    // TODO: Move functions into ModelIndices namespace
+    RH_ScopedGlobalInstall(InitModelIndices, 0x5BCA10);
+    RH_ScopedGlobalInstall(MatchAllModelStrings, 0x5B57C0);
 }
 
 // 0x5BCA10

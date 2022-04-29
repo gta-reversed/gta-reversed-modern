@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -20,7 +20,7 @@ public:
 
     CTask* GetSubTask() override;
     bool IsSimple() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override; // Seems like priority defaults to `ABORT_PRIORITY_URGENT` and `event = nullptr`
 
     virtual void SetSubTask(CTask* subTask);
     virtual CTask* CreateNextSubTask(CPed* ped) = 0;

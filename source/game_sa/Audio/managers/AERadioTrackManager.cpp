@@ -45,50 +45,52 @@ uint8& CAERadioTrackManager::m_nSpecialDJBanterIndex = *(uint8*)0xB62C72;
 uint8& CAERadioTrackManager::m_nSpecialDJBanterPending = *(uint8*)0xB62C73;
 
 void CAERadioTrackManager::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAERadioTrackManager", "Load", 0x5D40E0, &CAERadioTrackManager::Load);
-    // Install("CAERadioTrackManager", "Save", 0x5D3EE0, &CAERadioTrackManager::Save);
-    // Install("CAERadioTrackManager", "Initialise", 0x5B9390, &CAERadioTrackManager::Initialise);
-    // Install("CAERadioTrackManager", "Service", 0x4EB9A0, &CAERadioTrackManager::Service);
-    Install("CAERadioTrackManager", "DisplayRadioStationName", 0x4E9E50, &CAERadioTrackManager::DisplayRadioStationName);
-    // Install("CAERadioTrackManager", "CheckForStationRetune", 0x4EB660, &CAERadioTrackManager::CheckForStationRetune);
-    Install("CAERadioTrackManager", "CheckForPause", 0x4EA590, &CAERadioTrackManager::CheckForPause);
-    // Install("CAERadioTrackManager", "IsVehicleRadioActive", 0x4E9800, &CAERadioTrackManager::IsVehicleRadioActive);
-    // Install("CAERadioTrackManager", "AddDJBanterIndexToHistory", 0x4E97B0, &CAERadioTrackManager::AddDJBanterIndexToHistory);
-    // Install("CAERadioTrackManager", "AddAdvertIndexToHistory", 0x4E9760, &CAERadioTrackManager::AddAdvertIndexToHistory);
-    // Install("CAERadioTrackManager", "AddIdentIndexToHistory", 0x4E9720, &CAERadioTrackManager::AddIdentIndexToHistory);
-    // Install("CAERadioTrackManager", "StartRadio", 0x4EB3C0, static_cast<void (CAERadioTrackManager::*)(int8, int8, float, uint8)>(&CAERadioTrackManager::StartRadio));
-    // Install("CAERadioTrackManager", "StartRadio", 0x4EB550, static_cast<void (CAERadioTrackManager::*)(tVehicleAudioSettings*)>(&CAERadioTrackManager::StartRadio));
-    // Install("CAERadioTrackManager", "CheckForStationRetuneDuringPause", 0x4EB890, &CAERadioTrackManager::CheckForStationRetuneDuringPause);
-    // Install("CAERadioTrackManager", "TrackRadioStation", 0x4EAC30, &CAERadioTrackManager::TrackRadioStation);
-    Install("CAERadioTrackManager", "ChooseTracksForStation", 0x4EB180, &CAERadioTrackManager::ChooseTracksForStation);
-    // Install("CAERadioTrackManager", "AddMusicTrackIndexToHistory", 0x4E96C0, &CAERadioTrackManager::AddMusicTrackIndexToHistory);
-    // Install("CAERadioTrackManager", "CheckForTrackConcatenation", 0x4EA930, &CAERadioTrackManager::CheckForTrackConcatenation);
-    // Install("CAERadioTrackManager", "QueueUpTracksForStation", 0x4EA670, &CAERadioTrackManager::QueueUpTracksForStation);
-    // Install("CAERadioTrackManager", "ChooseDJBanterIndex", 0x4EA2D0, &CAERadioTrackManager::ChooseDJBanterIndex);
-    // Install("CAERadioTrackManager", "ChooseDJBanterIndexFromList", 0x4E95E0, &CAERadioTrackManager::ChooseDJBanterIndexFromList);
-    // Install("CAERadioTrackManager", "ChooseAdvertIndex", 0x4E9570, &CAERadioTrackManager::ChooseAdvertIndex);
-    // Install("CAERadioTrackManager", "ChooseIdentIndex", 0x4E94C0, &CAERadioTrackManager::ChooseIdentIndex);
-    // Install("CAERadioTrackManager", "ChooseMusicTrackIndex", 0x4EA270, &CAERadioTrackManager::ChooseMusicTrackIndex);
-    // Install("CAERadioTrackManager", "ChooseTalkRadioShow", 0x4E8E40, &CAERadioTrackManager::ChooseTalkRadioShow);
-    Install("CAERadioTrackManager", "CheckForMissionStatsChanges", 0x4E8410, &CAERadioTrackManager::CheckForMissionStatsChanges);
-    Install("CAERadioTrackManager", "StartTrackPlayback", 0x4EA640, &CAERadioTrackManager::StartTrackPlayback);
-    // Install("CAERadioTrackManager", "UpdateRadioVolumes", 0x4EA010, &CAERadioTrackManager::UpdateRadioVolumes);
-    // Install("CAERadioTrackManager", "PlayRadioAnnouncement", 0x4E8400, &CAERadioTrackManager::PlayRadioAnnouncement);
-    Install("CAERadioTrackManager", "GetCurrentRadioStationID", 0x4E83F0, &CAERadioTrackManager::GetCurrentRadioStationID);
-    Install("CAERadioTrackManager", "GetRadioStationListenTimes", 0x4E83E0, &CAERadioTrackManager::GetRadioStationListenTimes);
-    Install("CAERadioTrackManager", "GetRadioStationName", 0x4E9E10, &CAERadioTrackManager::GetRadioStationName);
-    Install("CAERadioTrackManager", "GetRadioStationNameKey", 0x4E8380, &CAERadioTrackManager::GetRadioStationNameKey);
-    Install("CAERadioTrackManager", "HasRadioRetuneJustStarted", 0x4E8370, &CAERadioTrackManager::HasRadioRetuneJustStarted);
-    // Install("CAERadioTrackManager", "StopRadio", 0x4E9820, &CAERadioTrackManager::StopRadio);
-    // Install("CAERadioTrackManager", "IsRadioOn", 0x4E8350, &CAERadioTrackManager::IsRadioOn);
-    Install("CAERadioTrackManager", "InitialiseRadioStationID", 0x4E8330, &CAERadioTrackManager::InitialiseRadioStationID);
-    Install("CAERadioTrackManager", "SetBassEnhanceOnOff", 0x4E9DB0, &CAERadioTrackManager::SetBassEnhanceOnOff);
-    Install("CAERadioTrackManager", "SetBassSetting", 0x4E82F0, &CAERadioTrackManager::SetBassSetting);
-    Install("CAERadioTrackManager", "SetRadioAutoRetuneOnOff", 0x4E82E0, &CAERadioTrackManager::SetRadioAutoRetuneOnOff);
-    // Install("CAERadioTrackManager", "RetuneRadio", 0x4E8290, &CAERadioTrackManager::RetuneRadio);
-    Install("CAERadioTrackManager", "ResetStatistics", 0x4E8200, &CAERadioTrackManager::ResetStatistics);
-    // Install("CAERadioTrackManager", "Reset", 0x4E7F80, &CAERadioTrackManager::Reset);
+    RH_ScopedClass(CAERadioTrackManager);
+    RH_ScopedCategory("Audio/Managers");
+
+    // RH_ScopedInstall(Load, 0x5D40E0);
+    // RH_ScopedInstall(Save, 0x5D3EE0);
+    // RH_ScopedInstall(Initialise, 0x5B9390);
+    // RH_ScopedInstall(Service, 0x4EB9A0);
+    RH_ScopedInstall(DisplayRadioStationName, 0x4E9E50);
+    // RH_ScopedInstall(CheckForStationRetune, 0x4EB660);
+    RH_ScopedInstall(CheckForPause, 0x4EA590);
+    // RH_ScopedInstall(IsVehicleRadioActive, 0x4E9800);
+    // RH_ScopedInstall(AddDJBanterIndexToHistory, 0x4E97B0);
+    // RH_ScopedInstall(AddAdvertIndexToHistory, 0x4E9760);
+    // RH_ScopedInstall(AddIdentIndexToHistory, 0x4E9720);
+    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB3C0, void (CAERadioTrackManager::*)(int8, int8, float, uint8));
+    // RH_ScopedOverloadedInstall(StartRadio, "", 0x4EB550, void (CAERadioTrackManager::*)(tVehicleAudioSettings*));
+    // RH_ScopedInstall(CheckForStationRetuneDuringPause, 0x4EB890);
+    // RH_ScopedInstall(TrackRadioStation, 0x4EAC30);
+    RH_ScopedInstall(ChooseTracksForStation, 0x4EB180);
+    // RH_ScopedInstall(AddMusicTrackIndexToHistory, 0x4E96C0);
+    // RH_ScopedInstall(CheckForTrackConcatenation, 0x4EA930);
+    // RH_ScopedInstall(QueueUpTracksForStation, 0x4EA670);
+    // RH_ScopedInstall(ChooseDJBanterIndex, 0x4EA2D0);
+    // RH_ScopedInstall(ChooseDJBanterIndexFromList, 0x4E95E0);
+    // RH_ScopedInstall(ChooseAdvertIndex, 0x4E9570);
+    // RH_ScopedInstall(ChooseIdentIndex, 0x4E94C0);
+    // RH_ScopedInstall(ChooseMusicTrackIndex, 0x4EA270);
+    // RH_ScopedInstall(ChooseTalkRadioShow, 0x4E8E40);
+    RH_ScopedInstall(CheckForMissionStatsChanges, 0x4E8410);
+    RH_ScopedInstall(StartTrackPlayback, 0x4EA640);
+    // RH_ScopedInstall(UpdateRadioVolumes, 0x4EA010);
+    // RH_ScopedInstall(PlayRadioAnnouncement, 0x4E8400);
+    RH_ScopedInstall(GetCurrentRadioStationID, 0x4E83F0);
+    RH_ScopedInstall(GetRadioStationListenTimes, 0x4E83E0);
+    RH_ScopedInstall(GetRadioStationName, 0x4E9E10);
+    RH_ScopedInstall(GetRadioStationNameKey, 0x4E8380);
+    RH_ScopedInstall(HasRadioRetuneJustStarted, 0x4E8370);
+    // RH_ScopedInstall(StopRadio, 0x4E9820);
+    // RH_ScopedInstall(IsRadioOn, 0x4E8350);
+    RH_ScopedInstall(InitialiseRadioStationID, 0x4E8330);
+    RH_ScopedInstall(SetBassEnhanceOnOff, 0x4E9DB0);
+    RH_ScopedInstall(SetBassSetting, 0x4E82F0);
+    RH_ScopedInstall(SetRadioAutoRetuneOnOff, 0x4E82E0);
+    // RH_ScopedInstall(RetuneRadio, 0x4E8290);
+    RH_ScopedInstall(ResetStatistics, 0x4E8200);
+    // RH_ScopedInstall(Reset, 0x4E7F80);
 }
 
 // 0x5B9390
@@ -204,7 +206,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (TheCamera.m_bWideScreenOn)
         return;
 
-    if (!FindPlayerVehicle(-1, false))
+    if (!FindPlayerVehicle())
         return;
 
     if (CReplay::Mode == 1)
@@ -399,8 +401,8 @@ void CAERadioTrackManager::UpdateRadioVolumes() {
             }
 
             volumea = fEffectsScalingFactor;
-            if (__FYL2X__(volumea / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f >= 0.0) {
-                v4 = 0.0;
+            if (__FYL2X__(volumea / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f >= 0.0f) {
+                v4 = 0.0f;
             } else {
                 volumeb = fEffectsScalingFactor;
                 v4 = __FYL2X__(volumeb / fMusicScalingFactor, 0.30102999566398119802) * 20.0f - 9.0f;
@@ -593,12 +595,13 @@ void CAERadioTrackManager::CheckForPause() {
     } else {
         // todo: See CAEVehicleAudioEntity::Terminate:437 m_nRadioType.
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
+        // todo: Comparison of different enumeration types
         if (settings && (settings->m_nRadioType == RADIO_EMERGENCY_AA || settings->m_nRadioType == RADIO_CLASSIC_ROCK || settings->m_nRadioType == RADIO_COUNTRY) || AudioEngine.IsAmbienceRadioActive()) {
             m_bPauseMode = false;
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, 0, 1.0f);
         } else {
             StopRadio(nullptr, false);
-            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
             m_bPauseMode = false;
         }
     }

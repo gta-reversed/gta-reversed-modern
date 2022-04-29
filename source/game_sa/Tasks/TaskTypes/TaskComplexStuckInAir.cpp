@@ -23,11 +23,12 @@ CTask* CTaskComplexStuckInAir::CreateSubTask(eTaskType taskType, CPed* ped) {
 }
 
 void CTaskComplexStuckInAir::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskComplexStuckInAir", "ControlSubTask", 0x67BE50, &CTaskComplexStuckInAir::ControlSubTask_Reversed);
-    Install("CTaskComplexStuckInAir", "CreateFirstSubTask", 0x67BE20, &CTaskComplexStuckInAir::CreateFirstSubTask_Reversed);
-    Install("CTaskComplexStuckInAir", "CreateNextSubTask", 0x67BD10, &CTaskComplexStuckInAir::CreateNextSubTask_Reversed);
-    Install("CTaskComplexStuckInAir", "CreateSubTask", 0x67BA80, &CTaskComplexStuckInAir::CreateSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexStuckInAir);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    // RH_ScopedVirtualInstall(ControlSubTask, 0x67BE50);
+    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67BE20);
+    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x67BD10);
+    // RH_ScopedVirtualInstall(CreateSubTask, 0x67BA80);
 }
 
 CTask* CTaskComplexStuckInAir::ControlSubTask_Reversed(CPed* ped) {

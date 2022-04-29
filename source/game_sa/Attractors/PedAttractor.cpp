@@ -3,38 +3,40 @@
 #include "PedAttractor.h"
 
 void CPedAttractor::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CPedAttractor", "CPedAttractor", 0x5EDFB0, &CPedAttractor::Constructor);
-    // Install("CPedAttractor", "~CPedAttractor", 0x5EC410, &CPedAttractor::Destructor);
-    // Install("CPedAttractor", "SetTaskForPed", 0x5EECA0, &CPedAttractor::SetTaskForPed);
-    // Install("CPedAttractor", "RegisterPed", 0x5EEE30, &CPedAttractor::RegisterPed);
-    // Install("CPedAttractor", "DeRegisterPed", 0x5EC5B0, &CPedAttractor::DeRegisterPed);
-    // Install("CPedAttractor", "IsRegisteredWithPed", 0x5EB4C0, &CPedAttractor::IsRegisteredWithPed);
-    // Install("CPedAttractor", "IsAtHeadOfQueue", 0x5EB530, &CPedAttractor::IsAtHeadOfQueue);
-    // Install("CPedAttractor", "GetTaskForPed", 0x5EC500, &CPedAttractor::GetTaskForPed);
-    // Install("CPedAttractor", "GetTailOfQueue", 0x5EB5B0, &CPedAttractor::GetTailOfQueue);
-    // Install("CPedAttractor", "GetQueueSlot", 0x5EB550, &CPedAttractor::GetQueueSlot);
-    // Install("CPedAttractor", "GetNoOfRegisteredPeds", 0x5EAF10, &CPedAttractor::GetNoOfRegisteredPeds);
-    // Install("CPedAttractor", "GetHeadOfQueue", 0x5EB590, &CPedAttractor::GetHeadOfQueue);
-    // Install("CPedAttractor", "ComputeFreeSlot", 0x0, &CPedAttractor::ComputeFreeSlot);
-    Install("CPedAttractor", "ComputeDeltaPos", 0x5E9600, &CPedAttractor::ComputeDeltaPos);
-    Install("CPedAttractor", "ComputeDeltaHeading", 0x5E9640, &CPedAttractor::ComputeDeltaHeading);
-    Install("CPedAttractor", "ComputeAttractTime", 0x5E95E0, &CPedAttractor::ComputeAttractTime);
-    Install("CPedAttractor", "ComputeAttractPos", 0x5EA110, &CPedAttractor::ComputeAttractPos);
-    Install("CPedAttractor", "ComputeAttractHeading", 0x5EA1C0, &CPedAttractor::ComputeAttractHeading);
-    // Install("CPedAttractor", "BroadcastDeparture", 0x5EF160, &CPedAttractor::BroadcastDeparture);
-    // Install("CPedAttractor", "BroadcastArrival", 0x5EEF80, &CPedAttractor::BroadcastArrival);
-    // Install("CPedAttractor", "AbortPedTasks", 0x5EAF60, &CPedAttractor::AbortPedTasks);
+    RH_ScopedClass(CPedAttractor);
+    RH_ScopedCategory("Attractors");
+
+    // RH_ScopedInstall(Constructor, 0x5EDFB0);
+    // RH_ScopedInstall(Destructor, 0x5EC410);
+    // RH_ScopedInstall(SetTaskForPed, 0x5EECA0);
+    // RH_ScopedInstall(RegisterPed, 0x5EEE30);
+    // RH_ScopedInstall(DeRegisterPed, 0x5EC5B0);
+    // RH_ScopedInstall(IsRegisteredWithPed, 0x5EB4C0);
+    // RH_ScopedInstall(IsAtHeadOfQueue, 0x5EB530);
+    // RH_ScopedInstall(GetTaskForPed, 0x5EC500);
+    // RH_ScopedInstall(GetTailOfQueue, 0x5EB5B0);
+    // RH_ScopedInstall(GetQueueSlot, 0x5EB550);
+    // RH_ScopedInstall(GetNoOfRegisteredPeds, 0x5EAF10);
+    // RH_ScopedInstall(GetHeadOfQueue, 0x5EB590);
+    // RH_ScopedInstall(ComputeFreeSlot, 0x0);
+    RH_ScopedInstall(ComputeDeltaPos, 0x5E9600);
+    RH_ScopedInstall(ComputeDeltaHeading, 0x5E9640);
+    RH_ScopedInstall(ComputeAttractTime, 0x5E95E0);
+    RH_ScopedInstall(ComputeAttractPos, 0x5EA110);
+    RH_ScopedInstall(ComputeAttractHeading, 0x5EA1C0);
+    // RH_ScopedInstall(BroadcastDeparture, 0x5EF160);
+    // RH_ScopedInstall(BroadcastArrival, 0x5EEF80);
+    // RH_ScopedInstall(AbortPedTasks, 0x5EAF60);
 }
 
 // 0x5EAFD0
-void* CPedAttractor::operator new(uint32 size) {
-    return plugin::CallAndReturn<void*, 0x5EAFD0, uint32>(size);
+void* CPedAttractor::operator new(unsigned size) {
+    return GetPedAttractorPool()->New();
 }
 
 // 0x5EAFE0
 void CPedAttractor::operator delete(void* object) {
-    plugin::Call<0x5EAFE0>(object);
+    GetPedAttractorPool()->Delete(static_cast<CPedAttractor*>(object));
 }
 
 // 0x5EDFB0
@@ -122,13 +124,13 @@ void CPedAttractor::ComputeAttractTime(int32 unused, bool time1_or_time2, float&
 }
 
 // 0x5EA110
-void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPosn) {
+void CPedAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
     if (m_pEffect) {
-        outPosn = m_vecAttractorPosn - queueMp * (float)pedId * m_vecQueueDir;
+        outPos = m_vecAttractorPosn - queueMp * (float)pedId * m_vecQueueDir;
 
         if (pedId) {
-            outPosn.x += ComputeDeltaPos();
-            outPosn.y += ComputeDeltaPos();
+            outPos.x += ComputeDeltaPos();
+            outPos.y += ComputeDeltaPos();
         }
     }
 }

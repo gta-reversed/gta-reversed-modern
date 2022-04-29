@@ -3,7 +3,9 @@
 #include "TaskComplexKillPedOnFoot.h"
 
 void CTaskComplexKillPedOnFoot::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexKillPedOnFoot", "CTaskComplexKillPedOnFoot", 0x620E30, &CTaskComplexKillPedOnFoot::Constructor);
+    RH_ScopedClass(CTaskComplexKillPedOnFoot);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x620E30);
 }
 
 CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) : CTaskComplex() {
@@ -22,16 +24,14 @@ CTaskComplexKillPedOnFoot::CTaskComplexKillPedOnFoot(CPed* target, int32 time, i
     field_20       = a7;
     m_time         = time;
 
-    if (m_target)
-        m_target->RegisterReference(reinterpret_cast<CEntity**>(&m_target));
+    CEntity::SafeRegisterRef(m_target);
 
     m_startTime = CTimer::GetTimeInMS();
 }
 
 CTaskComplexKillPedOnFoot::~CTaskComplexKillPedOnFoot()
 {
-    if (m_target)
-        m_target->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_target));
+    CEntity::SafeCleanUpRef(m_target);
 }
 
 CTaskComplexKillPedOnFoot* CTaskComplexKillPedOnFoot::Constructor(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7) {

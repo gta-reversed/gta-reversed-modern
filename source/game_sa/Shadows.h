@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -176,7 +176,7 @@ public:
     static void StoreShadowToBeRendered(uint8 type, RwTexture* texture, CVector* posn, float topX, float topY, float rightX, float rightY, int16 intensity, uint8 red, uint8 green, uint8 blue, float zDistance, bool drawOnWater, float scale, CRealTimeShadow* realTimeShadow, bool drawOnBuildings);
     static void SetRenderModeForShadowType(uint8 shadowType);
     static void RemoveOilInArea(float x1, float y1, float x2, float y2);
-    static void GunShotSetsOilOnFire(CVector const*shotOrigin, CVector const*shotTarget);
+    static void GunShotSetsOilOnFire(const CVector*shotOrigin, const CVector*shotTarget);
     static void PrintDebugPoly(CVector* a, CVector* b, CVector* c); // dummy function
     static void CalcPedShadowValues(CVector sunPosn, float* displacementX, float* displacementY, float* frontX, float* frontY, float* sideX, float* sideY);
     static void TidyUpShadows();

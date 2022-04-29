@@ -1,137 +1,173 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
 #include "PluginBase.h" // !!!
 
 #include "RenderWare.h"
+#include <numeric>
+
+class CMatrix;
 
 class CVector : public RwV3d {
 public:
-    CVector();
-    CVector(float X, float Y, float Z);
-    CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
-
+    constexpr CVector() = default;
+    constexpr CVector(float X, float Y, float Z) : RwV3d{X, Y, Z} {}
+    constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
+    constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
+    
 public:
     static void InjectHooks();
+
+    static CVector Random(float min, float max);
 
     // Returns length of vector
     float Magnitude() const;
 
     // Returns length of 2d vector
-    float Magnitude2D();
+    float Magnitude2D() const;
 
     // Normalises a vector
     void Normalise();
 
-    // Normalises a vector and returns length
+    // Normalises a vector and returns length (in-place)
     float NormaliseAndMag();
 
     // Performs cross calculation
-    void Cross(const CVector& left, const CVector &right);
- 
+    void Cross(const CVector& left, const CVector& right);
+
     // Adds left + right and stores result
-    void Sum(const CVector& left, const CVector &right);
+    void Sum(const CVector& left, const CVector& right);
 
     // Subtracts left - right and stores result
-    void Difference(const CVector& left, const CVector &right);
+    void Difference(const CVector& left, const CVector& right);
 
-    void operator=(const RwV3d& right)
-    {
-        x = right.x; y = right.y; z = right.z;
+    CVector& operator=(const RwV3d& right) {
+        x = right.x;
+        y = right.y;
+        z = right.z;
+        return *this;
     }
-
-    void operator=(const CVector& right);
+    CVector& operator=(const CVector& right) {
+        x = right.x;
+        y = right.y;
+        z = right.z;
+        return *this;
+    }
     void operator+=(const CVector& right);
     void operator-=(const CVector& right);
     void operator*=(const CVector& right);
-    void operator *= (float multiplier);
-    void operator /= (float divisor);
+    void operator*=(float multiplier);
+    void operator/=(float divisor);
 
     // matrix * vector multiplication
-    void FromMultiply(class CMatrix  const& matrix, CVector const& vector);
-    void FromMultiply3x3(class CMatrix  const& matrix, CVector const& vector);
+    void FromMultiply(const CMatrix& matrix, const CVector& vector);
+    void FromMultiply3x3(const CMatrix& matrix, const CVector& vector);
 
     inline void Set(float X, float Y, float Z) {
-        x = X; y = Y; z = Z;
+        x = X;
+        y = Y;
+        z = Z;
+    }
+
+    void Reset() {
+        Set(0.f, 0.f, 0.f);
     }
 
     inline RwV3d ToRwV3d() {
-        return{ x, y, z };
+        return { x, y, z };
     }
 
-    inline void FromRwV3d(RwV3d &rwvec) {
-        x = rwvec.x; y = rwvec.y; z = rwvec.z;
+    inline void FromRwV3d(RwV3d& vec) {
+        x = vec.x;
+        y = vec.y;
+        z = vec.z;
     }
 
-    inline float SquaredMagnitude()
-    {
-        return x*x + y*y + z*z;
+    [[nodiscard]] inline float ComponentwiseSum() const {
+        return x + y + z;
     }
 
-    inline float SquaredMagnitude2D()
-    {
+    [[nodiscard]] inline float SquaredMagnitude() const {
+        return x * x + y * y + z * z;
+    }
+
+    inline float SquaredMagnitude2D() {
         return x * x + y * y;
     }
 
-    inline bool IsZero() const
-    {
+    [[nodiscard]] inline bool IsZero() const {
         return x == 0.0F && y == 0.0F && z == 0.0F;
+    }
+
+    float operator[](size_t i) const {
+        return (&x)[i];
+    }
+
+    float& operator[](size_t i) {
+        return (&x)[i];
+    }
+
+    // Calculate the average position
+    static CVector Average(const CVector* begin, const CVector* end);
+
+    static CVector AverageN(const CVector* begin, size_t n) {
+        return Average(begin, begin + n);
     }
 };
 
-inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z);
+constexpr inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z };
 }
 
-inline CVector operator+(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x + vecTwo.x, vecOne.y + vecTwo.y, vecOne.z + vecTwo.z);
+constexpr inline CVector operator+(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x + vecTwo.x, vecOne.y + vecTwo.y, vecOne.z + vecTwo.z };
 }
 
-inline CVector operator*(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x * vecTwo.x, vecOne.y * vecTwo.y, vecOne.z * vecTwo.z);
-
+constexpr inline CVector operator*(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y, vecOne.z * vecTwo.z };
 }
-inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
+
+constexpr inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
     return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y || vecOne.z != vecTwo.z;
 }
 
-inline bool operator!=(const CVector& vec, float notEqualTo) {
+constexpr inline bool operator!=(const CVector& vec, float notEqualTo) {
     return vec.x != notEqualTo || vec.y != notEqualTo || vec.z != notEqualTo;
 }
 
-inline bool operator==(const CVector& vec, float equalTo) {
+constexpr inline bool operator==(const CVector& vec, float equalTo) {
     return vec.x == equalTo && vec.y == equalTo && vec.z == equalTo;
 }
 
-inline bool operator==(const CVector& vecLeft, const CVector& vecRight)
-{
+constexpr inline bool operator==(const CVector& vecLeft, const CVector& vecRight) {
     return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
 }
 
-inline CVector operator*(const CVector& vec, float multiplier) {
-    return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
+constexpr inline CVector operator*(const CVector& vec, float multiplier) {
+    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
 }
 
-inline CVector operator/(const CVector& vec, float dividend) {
-    return CVector(vec.x / dividend, vec.y / dividend, vec.z / dividend);
+constexpr inline CVector operator/(const CVector& vec, float dividend) {
+    return { vec.x / dividend, vec.y / dividend, vec.z / dividend };
 }
 
-inline CVector operator*(float multiplier, const CVector& vec) {
-    return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
+constexpr inline CVector operator*(float multiplier, const CVector& vec) {
+    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
 }
 
-inline CVector operator-(const CVector& vec) {
-    return CVector(-vec.x, -vec.y, -vec.z);
+constexpr inline CVector operator-(const CVector& vec) {
+    return { -vec.x, -vec.y, -vec.z };
 }
 
-inline float DistanceBetweenPoints(const CVector &pointOne, const CVector &pointTwo) {
+inline float DistanceBetweenPoints(const CVector& pointOne, const CVector& pointTwo) {
     return (pointTwo - pointOne).Magnitude();
 }
+
 inline float DistanceBetweenPointsSquared(const CVector& pointOne, const CVector& pointTwo) {
     return (pointTwo - pointOne).SquaredMagnitude();
 }
@@ -141,7 +177,7 @@ inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgres
 }
 
 inline CVector Pow(const CVector& vec, float fPow) {
-    return CVector(pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow));
+    return { pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow) };
 }
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
@@ -150,4 +186,7 @@ CVector CrossProduct(const CVector& a, const CVector& b);
 float DotProduct(const CVector& v1, const CVector& v2);
 float DotProduct2D(const CVector& v1, const CVector& v2);
 static CVector Normalized(CVector v) { v.Normalise(); return v; }
+static CVector ProjectVector(const CVector& what, const CVector& onto) {
+    return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
+}
 VALIDATE_SIZE(CVector, 0xC);

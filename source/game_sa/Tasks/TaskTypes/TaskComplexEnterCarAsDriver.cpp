@@ -3,7 +3,7 @@
 #include "TaskComplexEnterCarAsDriver.h"
 
 // 0x6402F0
-CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* pTargetVehicle) : CTaskComplexEnterCar(pTargetVehicle, true, false, false, false) {
+CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle) : CTaskComplexEnterCar(targetVehicle, true, false, false, false) {
     // empty
 }
 

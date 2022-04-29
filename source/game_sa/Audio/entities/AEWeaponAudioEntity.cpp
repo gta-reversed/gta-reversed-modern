@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,6 +31,11 @@ void CAEWeaponAudioEntity::Initialise() {
     m_nChainsawSoundState = 4;
     if (!AudioEngine.IsLoadingTuneActive())
         AEAudioHardware.LoadSoundBank(143, 5);
+}
+
+// 0x4E6AA0
+void CAEWeaponAudioEntity::Initialise(CPed* ped) {
+    plugin::CallMethod<0x4E6AA0>(this, ped);
 }
 
 void CAEWeaponAudioEntity::AddAudioEvent(int32 audioEventId) {
@@ -81,7 +86,7 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, int32
         return PlayGunSounds(entity, 33, 53, 3, 4, 5, audioEventId, 0.0f, 1.0f, 1.0f);
 
     case WEAPON_TEC9:
-        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992, 1.0f);
+        return PlayGunSounds(entity, 29, 30, 0, 1, 2, audioEventId, 0.0f, 1.25992f, 1.0f);
 
     case WEAPON_COUNTRYRIFLE:
         return PlayGunSounds(entity, 52, 53, 26, 27, 23, audioEventId, 0.0f, 0.89f, 1.0f);
@@ -254,27 +259,30 @@ void CAEWeaponAudioEntity::UpdateParameters(CAESound *sound, int16 curPlayPos) {
 }
 
 void CAEWeaponAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAEWeaponAudioEntity", "CAEWeaponAudioEntity", 0x5DE990, &CAEWeaponAudioEntity::Constructor);
-    // Install("CAEWeaponAudioEntity", "~CAEWeaponAudioEntity", 0x507560, &CAEWeaponAudioEntity::Destructor);
-    Install("CAEWeaponAudioEntity", "Initialise", 0x503450, &CAEWeaponAudioEntity::Initialise);
-    Install("CAEWeaponAudioEntity", "Reset", 0x503490, &CAEWeaponAudioEntity::Reset);
-    // Install("CAEWeaponAudioEntity", "Terminate", 0x503480, &CAEWeaponAudioEntity::Terminate);
-    Install("CAEWeaponAudioEntity", "WeaponFire", 0x504F80, &CAEWeaponAudioEntity::WeaponFire);
-    Install("CAEWeaponAudioEntity", "WeaponReload", 0x503690, &CAEWeaponAudioEntity::WeaponReload);
-    // Install("CAEWeaponAudioEntity", "PlayChainsawStopSound", 0x504AA0, &CAEWeaponAudioEntity::PlayChainsawStopSound);
-    // Install("CAEWeaponAudioEntity", "PlayMiniGunStopSound", 0x504960, &CAEWeaponAudioEntity::PlayMiniGunStopSound);
-    // Install("CAEWeaponAudioEntity", "PlayMiniGunFireSounds", 0x5047C0, &CAEWeaponAudioEntity::PlayMiniGunFireSounds);
-    // Install("CAEWeaponAudioEntity", "PlayCameraSound", 0x5046F0, &CAEWeaponAudioEntity::PlayCameraSound);
-    // Install("CAEWeaponAudioEntity", "PlayWeaponLoopSound", 0x504610, &CAEWeaponAudioEntity::PlayWeaponLoopSound);
-    // Install("CAEWeaponAudioEntity", "PlayFlameThrowerSounds", 0x504470, &CAEWeaponAudioEntity::PlayFlameThrowerSounds);
-    // Install("CAEWeaponAudioEntity", "PlayGunSounds", 0x503CE0, &CAEWeaponAudioEntity::PlayGunSounds);
-    // Install("CAEWeaponAudioEntity", "ReportStealthKill", 0x503B20, &CAEWeaponAudioEntity::ReportStealthKill);
-    // Install("CAEWeaponAudioEntity", "ReportChainsawEvent", 0x503910, &CAEWeaponAudioEntity::ReportChainsawEvent);
-    // Install("CAEWeaponAudioEntity", "PlayFlameThrowerIdleGasLoop", 0x503870, &CAEWeaponAudioEntity::PlayFlameThrowerIdleGasLoop);
-    // Install("CAEWeaponAudioEntity", "PlayGoggleSound", 0x503500, &CAEWeaponAudioEntity::PlayGoggleSound);
-    // Install("CAEWeaponAudioEntity", "StopFlameThrowerIdleGasLoop", 0x5034E0, &CAEWeaponAudioEntity::StopFlameThrowerIdleGasLoop);
-    // Install("CAEWeaponAudioEntity", "UpdateParameters", 0x504B70, &CAEWeaponAudioEntity::UpdateParameters);
+    RH_ScopedClass(CAEWeaponAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    // RH_ScopedInstall(Constructor, 0x5DE990);
+    // RH_ScopedInstall(Destructor, 0x507560);
+    RH_ScopedOverloadedInstall(Initialise, "void", 0x503450, void(CAEWeaponAudioEntity::*)());
+    //RH_ScopedOverloadedInstall(Initialise, "CPed*", 0x4E6AA0, void(CAEWeaponAudioEntity::*)(CPed*));
+    RH_ScopedInstall(Reset, 0x503490);
+    // RH_ScopedInstall(Terminate, 0x503480);
+    RH_ScopedInstall(WeaponFire, 0x504F80);
+    RH_ScopedInstall(WeaponReload, 0x503690);
+    // RH_ScopedInstall(PlayChainsawStopSound, 0x504AA0);
+    // RH_ScopedInstall(PlayMiniGunStopSound, 0x504960);
+    // RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0);
+    // RH_ScopedInstall(PlayCameraSound, 0x5046F0);
+    // RH_ScopedInstall(PlayWeaponLoopSound, 0x504610);
+    // RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470);
+    // RH_ScopedInstall(PlayGunSounds, 0x503CE0);
+    // RH_ScopedInstall(ReportStealthKill, 0x503B20);
+    // RH_ScopedInstall(ReportChainsawEvent, 0x503910);
+    // RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
+    // RH_ScopedInstall(PlayGoggleSound, 0x503500);
+    // RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
+    // RH_ScopedInstall(UpdateParameters, 0x504B70);
 
 }
 

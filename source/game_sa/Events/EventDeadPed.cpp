@@ -6,9 +6,12 @@
 
 void CEventDeadPed::InjectHooks()
 {
-    ReversibleHooks::Install("CEventDeadPed", "Constructor", 0x4ADEA0, &CEventDeadPed::Constructor);
-    ReversibleHooks::Install("CEventDeadPed", "AffectsPed_Reversed", 0x4B4830, &CEventDeadPed::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventDeadPed", "CloneEditable_Reversed", 0x4B6E70, &CEventDeadPed::CloneEditable_Reversed);
+    RH_ScopedClass(CEventDeadPed);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4ADEA0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4830);
+    RH_ScopedVirtualInstall(CloneEditable, 0x4B6E70);
 }
 
 CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
@@ -16,14 +19,12 @@ CEventDeadPed::CEventDeadPed(CPed* ped, bool bUnknown, uint32 deathTimeInMs)
     m_ped = ped;
     field_18 = bUnknown;
     m_deathTimeInMs = deathTimeInMs;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventDeadPed::~CEventDeadPed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4ADEA0
@@ -48,7 +49,7 @@ CEventEditableResponse* CEventDeadPed::CloneEditable()
 bool CEventDeadPed::AffectsPed_Reversed(CPed* ped)
 {
     if (m_ped && ped != m_ped && ped->IsAlive()) {
-        if(!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
+        if (!g_ikChainMan.IsLooking(ped) || g_ikChainMan.GetLookAtEntity(ped) != m_ped) {
             if (!m_ped->physicalFlags.bSubmergedInWater) {
                 CVector distance = m_ped->GetPosition() - ped->GetPosition();
                 if (m_ped->bKilledByStealth) {

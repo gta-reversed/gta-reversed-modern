@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,24 +7,27 @@
 #pragma once
 
 #include "RenderWare.h"
-#include "BoundingBox.h"
-#include "ColModel.h"
-#include "Entity.h"
-#include "FileObjectInstance.h"
+
 #include "FileMgr.h"
 
+class CColModel;
+class CBoundingBox;
+class CFileCarGenerator;
+class CEntity;
+class CFileObjectInstance;
+
 enum eSection : uint8 {
-    UNDEFINED = 0,
-    OBJECT = 1,
-    TIME_OBJECT = 3,
-    WEAPON_OBJECT = 4,
-    CLUMP_OBJECT = 5,
+    UNDEFINED             = 0,
+    OBJECT                = 1,
+    TIME_OBJECT           = 3,
+    WEAPON_OBJECT         = 4,
+    CLUMP_OBJECT          = 5,
     ANIMATED_CLUMP_OBJECT = 6,
-    VEHICLE_OBJECT = 7,
-    PED_OBJECT = 8,
-    PATH_NODE = 9,
-    TWO_D_EFFECT = 10,
-    TXD_PARENT = 11,
+    VEHICLE_OBJECT        = 7,
+    PED_OBJECT            = 8,
+    PATH_NODE             = 9,
+    TWO_D_EFFECT          = 10,
+    TXD_PARENT            = 11,
 };
 
 enum eIDE : uint8 {
@@ -62,7 +65,7 @@ enum eIPL : uint8 {
 
 class CFileLoader {
 public:
-    static char (&ms_line)[512]; // static char ms_line[512]
+    static char (&ms_line)[512];
 
 public:
     static void InjectHooks();
@@ -76,12 +79,12 @@ public:
     static void LoadAtomicFile(const char* filename);
     static RpClump* LoadAtomicFile2Return(const char* filename);
 
-    static char* LoadLine(FILESTREAM file);
-    static char* LoadLine(char** outLine, int32& outSize);
+    static char* LoadLine(auto file);
+    static char* LoadLine(char*& outLine, int32& outSize);
 
     static void LoadAudioZone(const char* line);
     static void LoadBoundingBox(uint8* data, CBoundingBox& outBoundBox);
-    static void LoadCarGenerator(struct CFileCarGenerator* carGen, int32 iplId);
+    static void LoadCarGenerator(CFileCarGenerator* carGen, int32 iplId);
     static void LoadCarGenerator(const char* line, int32 iplId);
     static void LoadCarPathNode(const char* line, int32 objModelIndex, int32 pathEntryIndex, bool a4);
 
@@ -92,12 +95,12 @@ public:
     static int32 LoadClumpObject(const char* line);
 
     static bool LoadCollisionFile(uint8* data, uint32 dataSize, uint8 colId);
-    static bool LoadCollisionFile(const char* filename, uint8 colId);
+    static void LoadCollisionFile(const char* filename, uint8 colId);
     static bool LoadCollisionFileFirstTime(uint8* data, uint32 dataSize, uint8 colId);
     static void LoadCollisionModel(uint8* data, CColModel& outColModel);
-    static void LoadCollisionModelVer2(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer3(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
-    static void LoadCollisionModelVer4(uint8* data, uint32 dataSize, CColModel& outColModel, const char* modelName);
+    static void LoadCollisionModelVer2(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
+    static void LoadCollisionModelVer3(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
+    static void LoadCollisionModelVer4(uint8* buffer, uint32 fileSize, CColModel& cm, const char* modelName);
 
     static void LoadCullZone(const char* line);
     static void LoadEntryExit(const char* line);

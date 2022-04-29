@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Camera.h"
+
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
 float& CCamera::m_fMouseAccelVertical = *reinterpret_cast<float*>(0xB6EC18);
@@ -16,118 +18,121 @@ CCam& CCamera::GetActiveCamera() {
 }
 
 void CCamera::InjectHooks() {
-    ReversibleHooks::Install("CCamera", "GetArrPosForVehicleType", 0x50AF00, &CCamera::GetArrPosForVehicleType);
-    ReversibleHooks::Install("CCamera", "GetPositionAlongSpline", 0x50AF80, &CCamera::GetPositionAlongSpline);
-    ReversibleHooks::Install("CCamera", "InitialiseCameraForDebugMode", 0x50AF90, &CCamera::InitialiseCameraForDebugMode);
-    ReversibleHooks::Install("CCamera", "ProcessObbeCinemaCameraPed", 0x50B880, &CCamera::ProcessObbeCinemaCameraPed);
-    ReversibleHooks::Install("CCamera", "ProcessWideScreenOn", 0x50B890, &CCamera::ProcessWideScreenOn);
-    ReversibleHooks::Install("CCamera", "RenderMotionBlur", 0x50B8F0, &CCamera::RenderMotionBlur);
-    ReversibleHooks::Install("CCamera", "SetCameraDirectlyBehindForFollowPed_CamOnAString", 0x50BD40, &CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString);
-    ReversibleHooks::Install("CCamera", "SetCameraDirectlyInFrontForFollowPed_CamOnAString", 0x50BD70, &CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString);
-    ReversibleHooks::Install("CCamera", "SetCamPositionForFixedMode", 0x50BEC0, &CCamera::SetCamPositionForFixedMode);
-    ReversibleHooks::Install("CCamera", "SetFadeColour", 0x50BF00, &CCamera::SetFadeColour);
-    ReversibleHooks::Install("CCamera", "SetMotionBlur", 0x50BF40, &CCamera::SetMotionBlur);
-    ReversibleHooks::Install("CCamera", "SetMotionBlurAlpha", 0x50BF80, &CCamera::SetMotionBlurAlpha);
-    ReversibleHooks::Install("CCamera", "SetNearClipScript", 0x50BF90, &CCamera::SetNearClipScript);
-    ReversibleHooks::Install("CCamera", "SetNewPlayerWeaponMode", 0x50BFB0, &CCamera::SetNewPlayerWeaponMode);
-    ReversibleHooks::Install("CCamera", "SetRwCamera", 0x50C100, &CCamera::SetRwCamera);
-    ReversibleHooks::Install("CCamera", "SetWideScreenOn", 0x50C140, &CCamera::SetWideScreenOn);
-    ReversibleHooks::Install("CCamera", "SetWideScreenOff", 0x50C150, &CCamera::SetWideScreenOff);
-    ReversibleHooks::Install("CCamera", "StartCooperativeCamMode", 0x50C260, &CCamera::StartCooperativeCamMode);
-    ReversibleHooks::Install("CCamera", "StopCooperativeCamMode", 0x50C270, &CCamera::StopCooperativeCamMode);
-    ReversibleHooks::Install("CCamera", "AllowShootingWith2PlayersInCar", 0x50C280, &CCamera::AllowShootingWith2PlayersInCar);
-    ReversibleHooks::Install("CCamera", "StoreValuesDuringInterPol", 0x50C290, &CCamera::StoreValuesDuringInterPol);
-    ReversibleHooks::Install("CCamera", "ProcessScriptedCommands", 0x516AE0, &CCamera::ProcessScriptedCommands);
-    ReversibleHooks::Install("CCamera", "FinishCutscene", 0x514950, &CCamera::FinishCutscene);
-    ReversibleHooks::Install("CCamera", "LerpFOV", 0x50D280, &CCamera::LerpFOV);
-    ReversibleHooks::Install("CCamera", "UpdateAimingCoors", 0x50CB10, &CCamera::UpdateAimingCoors);
-    ReversibleHooks::Install("CCamera", "SetColVarsAimWeapon", 0x50CBF0, &CCamera::SetColVarsAimWeapon);
-    ReversibleHooks::Install("CCamera", "ClearPlayerWeaponMode", 0x50AB10, &CCamera::ClearPlayerWeaponMode);
-    ReversibleHooks::Install("CCamera", "DontProcessObbeCinemaCamera", 0x50AB40, &CCamera::DontProcessObbeCinemaCamera);
-    ReversibleHooks::Install("CCamera", "Enable1rstPersonCamCntrlsScript", 0x50AC00, &CCamera::Enable1rstPersonCamCntrlsScript);
-    ReversibleHooks::Install("CCamera", "FindCamFOV", 0x50AD20, &CCamera::FindCamFOV);
-    ReversibleHooks::Install("CCamera", "GetFading", 0x50ADE0, &CCamera::GetFading);
-    ReversibleHooks::Install("CCamera", "GetFadingDirection", 0x50ADF0, &CCamera::GetFadingDirection);
-    ReversibleHooks::Install("CCamera", "Get_Just_Switched_Status", 0x50AE10, &CCamera::Get_Just_Switched_Status);
-    ReversibleHooks::Install("CCamera", "GetGameCamPosition", 0x50AE50, &CCamera::GetGameCamPosition);
+    RH_ScopedClass(CCamera);
+    RH_ScopedCategoryGlobal();
 
-//    ReversibleHooks::Install("CCamera", "Constructor", 0x51A450, &CCamera::Constructor);
-//    ReversibleHooks::Install("CCamera", "Destructor", 0x50A870, &CCamera::Destructor);
-//    ReversibleHooks::Install("CCamera", "InitCameraVehicleTweaks", 0x50A3B0, &CCamera::InitCameraVehicleTweaks);
-//    ReversibleHooks::Install("CCamera", "ApplyVehicleCameraTweaks", 0x50A480, &CCamera::ApplyVehicleCameraTweaks);
-//    ReversibleHooks::Install("CCamera", "CamShake", 0x50A9F0, &CCamera::CamShake);
-//    ReversibleHooks::Install("CCamera", "GetScreenRect", 0x50AB50, &CCamera::GetScreenRect);
-//    ReversibleHooks::Install("CCamera", "Enable1rstPersonWeaponsCamera", 0x50AC10, &CCamera::Enable1rstPersonWeaponsCamera);
-//    ReversibleHooks::Install("CCamera", "Fade", 0x50AC20, &CCamera::Fade);
-//    ReversibleHooks::Install("CCamera", "Find3rdPersonQuickAimPitch", 0x50AD40, &CCamera::Find3rdPersonQuickAimPitch);
-//    ReversibleHooks::Install("CCamera", "GetCutSceneFinishTime", 0x50AD90, &CCamera::GetCutSceneFinishTime);
-//    ReversibleHooks::Install("CCamera", "GetScreenFadeStatus", 0x50AE20, &CCamera::GetScreenFadeStatus);
-//    ReversibleHooks::Install("CCamera", "GetLookingLRBFirstPerson", 0x50AE60, &CCamera::GetLookingLRBFirstPerson);
-//    ReversibleHooks::Install("CCamera", "GetLookDirection", 0x50AE90, &CCamera::GetLookDirection);
-//    ReversibleHooks::Install("CCamera", "GetLookingForwardFirstPerson", 0x50AED0, &CCamera::GetLookingForwardFirstPerson);
-//    ReversibleHooks::Install("CCamera", "CopyCameraMatrixToRWCam", 0x50AFA0, &CCamera::CopyCameraMatrixToRWCam);
-//    ReversibleHooks::Install("CCamera", "CalculateMirroredMatrix", 0x50B380, &CCamera::CalculateMirroredMatrix);
-//    ReversibleHooks::Install("CCamera", "DealWithMirrorBeforeConstructRenderList", 0x50B510, &CCamera::DealWithMirrorBeforeConstructRenderList);
-//    ReversibleHooks::Install("CCamera", "ProcessFade", 0x50B5D0, &CCamera::ProcessFade);
-//    ReversibleHooks::Install("CCamera", "ProcessMusicFade", 0x50B6D0, &CCamera::ProcessMusicFade);
-//    ReversibleHooks::Install("CCamera", "Restore", 0x50B930, &CCamera::Restore);
-//    ReversibleHooks::Install("CCamera", "RestoreWithJumpCut", 0x50BAB0, &CCamera::RestoreWithJumpCut);
-//    ReversibleHooks::Install("CCamera", "SetCamCutSceneOffSet", 0x50BD20, &CCamera::SetCamCutSceneOffSet);
-//    ReversibleHooks::Install("CCamera", "SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString", 0x50BDA0, &CCamera::SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString);
-//    ReversibleHooks::Install("CCamera", "SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString", 0x50BE30, &CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString);
-//    ReversibleHooks::Install("CCamera", "Using1stPersonWeaponMode", 0x50BFF0, &CCamera::Using1stPersonWeaponMode);
-    ReversibleHooks::Install("CCamera", "SetParametersForScriptInterpolation", 0x50C030, &CCamera::SetParametersForScriptInterpolation);
-//    ReversibleHooks::Install("CCamera", "SetPercentAlongCutScene", 0x50C070, &CCamera::SetPercentAlongCutScene);
-//    ReversibleHooks::Install("CCamera", "SetZoomValueFollowPedScript", 0x50C160, &CCamera::SetZoomValueFollowPedScript);
-//    ReversibleHooks::Install("CCamera", "SetZoomValueCamStringScript", 0x50C1B0, &CCamera::SetZoomValueCamStringScript);
-//    ReversibleHooks::Install("CCamera", "UpdateTargetEntity", 0x50C360, &CCamera::UpdateTargetEntity);
-//    ReversibleHooks::Install("CCamera", "TakeControl", 0x50C7C0, &CCamera::TakeControl);
-//    ReversibleHooks::Install("CCamera", "TakeControlNoEntity", 0x50C8B0, &CCamera::TakeControlNoEntity);
-//    ReversibleHooks::Install("CCamera", "TakeControlAttachToEntity", 0x50C910, &CCamera::TakeControlAttachToEntity);
-    ReversibleHooks::Install("CCamera", "TakeControlWithSpline", 0x50CAE0, &CCamera::TakeControlWithSpline);
-//    ReversibleHooks::Install("CCamera", "SetCamCollisionVarDataSet", 0x50CB60, &CCamera::SetCamCollisionVarDataSet);
-//    ReversibleHooks::Install("CCamera", "SetNearClipBasedOnPedCollision", 0x50CB90, &CCamera::SetNearClipBasedOnPedCollision);
-//    ReversibleHooks::Install("CCamera", "SetColVarsPed", 0x50CC50, &CCamera::SetColVarsPed);
-//    ReversibleHooks::Install("CCamera", "SetColVarsVehicle", 0x50CCA0, &CCamera::SetColVarsVehicle);
-//    ReversibleHooks::Install("CCamera", "CameraGenericModeSpecialCases", 0x50CD30, &CCamera::CameraGenericModeSpecialCases);
-//    ReversibleHooks::Install("CCamera", "CameraPedModeSpecialCases", 0x50CD80, &CCamera::CameraPedModeSpecialCases);
-//    ReversibleHooks::Install("CCamera", "CameraPedAimModeSpecialCases", 0x50CDA0, &CCamera::CameraPedAimModeSpecialCases);
-//    ReversibleHooks::Install("CCamera", "CameraVehicleModeSpecialCases", 0x50CDE0, &CCamera::CameraVehicleModeSpecialCases);
-//    ReversibleHooks::Install("CCamera", "IsExtraEntityToIgnore", 0x50CE80, &CCamera::IsExtraEntityToIgnore);
-//    ReversibleHooks::Install("CCamera", "ConsiderPedAsDucking", 0x50CEB0, &CCamera::ConsiderPedAsDucking);
-//    ReversibleHooks::Install("CCamera", "ResetDuckingSystem", 0x50CEF0, &CCamera::ResetDuckingSystem);
-//    ReversibleHooks::Install("CCamera", "HandleCameraMotionForDucking", 0x50CFA0, &CCamera::HandleCameraMotionForDucking);
-//    ReversibleHooks::Install("CCamera", "HandleCameraMotionForDuckingDuringAim", 0x50D090, &CCamera::HandleCameraMotionForDuckingDuringAim);
-//    ReversibleHooks::Install("CCamera", "VectorMoveLinear", 0x50D160, &CCamera::VectorMoveLinear);
-//    ReversibleHooks::Install("CCamera", "VectorTrackLinear", 0x50D1D0, &CCamera::VectorTrackLinear);
-//    ReversibleHooks::Install("CCamera", "AddShakeSimple", 0x50D240, &CCamera::AddShakeSimple);
-//    ReversibleHooks::Install("CCamera", "InitialiseScriptableComponents", 0x50D2D0, &CCamera::InitialiseScriptableComponents);
-//    ReversibleHooks::Install("CCamera", "DrawBordersForWideScreen", 0x514860, &CCamera::DrawBordersForWideScreen);
-//    ReversibleHooks::Install("CCamera", "Find3rdPersonCamTargetVector", 0x514970, &CCamera::Find3rdPersonCamTargetVector);
-//    ReversibleHooks::Install("CCamera", "CalculateGroundHeight", 0x514B80, &CCamera::CalculateGroundHeight);
-//    ReversibleHooks::Install("CCamera", "CalculateFrustumPlanes", 0x514D60, &CCamera::CalculateFrustumPlanes);
-//    ReversibleHooks::Install("CCamera", "CalculateDerivedValues", 0x5150E0, &CCamera::CalculateDerivedValues);
-//    ReversibleHooks::Install("CCamera", "ImproveNearClip", 0x516B20, &CCamera::ImproveNearClip);
-//    ReversibleHooks::Install("CCamera", "SetCameraUpForMirror", 0x51A560, &CCamera::SetCameraUpForMirror);
-//    ReversibleHooks::Install("CCamera", "RestoreCameraAfterMirror", 0x51A5A0, &CCamera::RestoreCameraAfterMirror);
-//    ReversibleHooks::Install("CCamera", "ConeCastCollisionResolve", 0x51A5D0, &CCamera::ConeCastCollisionResolve);
-//    ReversibleHooks::Install("CCamera", "TryToStartNewCamMode", 0x51E560, &CCamera::TryToStartNewCamMode);
-//    ReversibleHooks::Install("CCamera", "CameraColDetAndReact", 0x520190, &CCamera::CameraColDetAndReact);
-//    ReversibleHooks::Install("CCamera", "CamControl", 0x527FA0, &CCamera::CamControl);
-//    ReversibleHooks::Install("CCamera", "Process", 0x52B730, &CCamera::Process);
-//    ReversibleHooks::Install("CCamera", "DeleteCutSceneCamDataMemory", 0x5B24A0, &CCamera::DeleteCutSceneCamDataMemory);
-//    ReversibleHooks::Install("CCamera", "LoadPathSplines", 0x5B24D0, &CCamera::LoadPathSplines);
-//    ReversibleHooks::Install("CCamera", "Init", 0x5BC520, &CCamera::Init);
+    RH_ScopedInstall(GetArrPosForVehicleType, 0x50AF00);
+    RH_ScopedInstall(GetPositionAlongSpline, 0x50AF80);
+    RH_ScopedInstall(InitialiseCameraForDebugMode, 0x50AF90);
+    RH_ScopedInstall(ProcessObbeCinemaCameraPed, 0x50B880);
+    RH_ScopedInstall(ProcessWideScreenOn, 0x50B890);
+    RH_ScopedInstall(RenderMotionBlur, 0x50B8F0);
+    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_CamOnAString, 0x50BD40);
+    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_CamOnAString, 0x50BD70);
+    RH_ScopedInstall(SetCamPositionForFixedMode, 0x50BEC0);
+    RH_ScopedInstall(SetFadeColour, 0x50BF00);
+    RH_ScopedInstall(SetMotionBlur, 0x50BF40);
+    RH_ScopedInstall(SetMotionBlurAlpha, 0x50BF80);
+    RH_ScopedInstall(SetNearClipScript, 0x50BF90);
+    RH_ScopedInstall(SetNewPlayerWeaponMode, 0x50BFB0);
+    RH_ScopedInstall(SetRwCamera, 0x50C100);
+    RH_ScopedInstall(SetWideScreenOn, 0x50C140);
+    RH_ScopedInstall(SetWideScreenOff, 0x50C150);
+    RH_ScopedInstall(StartCooperativeCamMode, 0x50C260);
+    RH_ScopedInstall(StopCooperativeCamMode, 0x50C270);
+    RH_ScopedInstall(AllowShootingWith2PlayersInCar, 0x50C280);
+    RH_ScopedInstall(StoreValuesDuringInterPol, 0x50C290);
+    RH_ScopedInstall(ProcessScriptedCommands, 0x516AE0);
+    RH_ScopedInstall(FinishCutscene, 0x514950);
+    RH_ScopedInstall(LerpFOV, 0x50D280);
+    RH_ScopedInstall(UpdateAimingCoors, 0x50CB10);
+    RH_ScopedInstall(SetColVarsAimWeapon, 0x50CBF0);
+    RH_ScopedInstall(ClearPlayerWeaponMode, 0x50AB10);
+    RH_ScopedInstall(DontProcessObbeCinemaCamera, 0x50AB40);
+    RH_ScopedInstall(Enable1rstPersonCamCntrlsScript, 0x50AC00);
+    RH_ScopedInstall(FindCamFOV, 0x50AD20);
+    RH_ScopedInstall(GetFading, 0x50ADE0);
+    RH_ScopedInstall(GetFadingDirection, 0x50ADF0);
+    RH_ScopedInstall(Get_Just_Switched_Status, 0x50AE10);
+    RH_ScopedInstall(GetGameCamPosition, 0x50AE50);
 
-//    ReversibleHooks::Install("CCamera", "ProcessVectorTrackLinear", 0x50D350, &CCamera::ProcessVectorTrackLinear);
-//    ReversibleHooks::Install("CCamera", "ProcessVectorTrackLinear", 0x516440, &CCamera::ProcessVectorTrackLinear);
-//    ReversibleHooks::Install("CCamera", "ProcessVectorMoveLinear", 0x50D430, &CCamera::ProcessVectorMoveLinear);
-//    ReversibleHooks::Install("CCamera", "ProcessVectorMoveLinear", 0x5164A0, &CCamera::ProcessVectorMoveLinear);
-//    ReversibleHooks::Install("CCamera", "ProcessFOVLerp", 0x50D510, &CCamera::ProcessFOVLerp);
-//    ReversibleHooks::Install("CCamera", "ProcessFOVLerp", 0x516500, &CCamera::ProcessFOVLerp);
-//    ReversibleHooks::Install("CCamera", "ProcessJiggle", 0x516560, &CCamera::ProcessJiggle);
+//    RH_ScopedInstall(Constructor, 0x51A450);
+//    RH_ScopedInstall(Destructor, 0x50A870);
+//    RH_ScopedInstall(InitCameraVehicleTweaks, 0x50A3B0);
+//    RH_ScopedInstall(ApplyVehicleCameraTweaks, 0x50A480);
+//    RH_ScopedInstall(CamShake, 0x50A9F0);
+//    RH_ScopedInstall(GetScreenRect, 0x50AB50);
+//    RH_ScopedInstall(Enable1rstPersonWeaponsCamera, 0x50AC10);
+//    RH_ScopedInstall(Fade, 0x50AC20);
+//    RH_ScopedInstall(Find3rdPersonQuickAimPitch, 0x50AD40);
+//    RH_ScopedInstall(GetCutSceneFinishTime, 0x50AD90);
+//    RH_ScopedInstall(GetScreenFadeStatus, 0x50AE20);
+//    RH_ScopedInstall(GetLookingLRBFirstPerson, 0x50AE60);
+//    RH_ScopedInstall(GetLookDirection, 0x50AE90);
+//    RH_ScopedInstall(GetLookingForwardFirstPerson, 0x50AED0);
+//    RH_ScopedInstall(CopyCameraMatrixToRWCam, 0x50AFA0);
+    RH_ScopedInstall(CalculateMirroredMatrix, 0x50B380);
+    RH_ScopedInstall(DealWithMirrorBeforeConstructRenderList, 0x50B510);
+//    RH_ScopedInstall(ProcessFade, 0x50B5D0);
+//    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
+//    RH_ScopedInstall(Restore, 0x50B930);
+//    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
+    RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
+//    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
+//    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
+//    RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
+    RH_ScopedInstall(SetParametersForScriptInterpolation, 0x50C030);
+//    RH_ScopedInstall(SetPercentAlongCutScene, 0x50C070);
+//    RH_ScopedInstall(SetZoomValueFollowPedScript, 0x50C160);
+//    RH_ScopedInstall(SetZoomValueCamStringScript, 0x50C1B0);
+//    RH_ScopedInstall(UpdateTargetEntity, 0x50C360);
+//    RH_ScopedInstall(TakeControl, 0x50C7C0);
+//    RH_ScopedInstall(TakeControlNoEntity, 0x50C8B0);
+//    RH_ScopedInstall(TakeControlAttachToEntity, 0x50C910);
+    RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
+//    RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
+//    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90);
+//    RH_ScopedInstall(SetColVarsPed, 0x50CC50);
+//    RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
+//    RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
+//    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
+//    RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
+//    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
+//    RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
+//    RH_ScopedInstall(ConsiderPedAsDucking, 0x50CEB0);
+//    RH_ScopedInstall(ResetDuckingSystem, 0x50CEF0);
+//    RH_ScopedInstall(HandleCameraMotionForDucking, 0x50CFA0);
+//    RH_ScopedInstall(HandleCameraMotionForDuckingDuringAim, 0x50D090);
+//    RH_ScopedInstall(VectorMoveLinear, 0x50D160);
+//    RH_ScopedInstall(VectorTrackLinear, 0x50D1D0);
+//    RH_ScopedInstall(AddShakeSimple, 0x50D240);
+//    RH_ScopedInstall(InitialiseScriptableComponents, 0x50D2D0);
+//    RH_ScopedInstall(DrawBordersForWideScreen, 0x514860);
+//    RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970);
+//    RH_ScopedInstall(CalculateGroundHeight, 0x514B80);
+//    RH_ScopedInstall(CalculateFrustumPlanes, 0x514D60);
+//    RH_ScopedInstall(CalculateDerivedValues, 0x5150E0);
+//    RH_ScopedInstall(ImproveNearClip, 0x516B20);
+//    RH_ScopedInstall(SetCameraUpForMirror, 0x51A560);
+//    RH_ScopedInstall(RestoreCameraAfterMirror, 0x51A5A0);
+//    RH_ScopedInstall(ConeCastCollisionResolve, 0x51A5D0);
+//    RH_ScopedInstall(TryToStartNewCamMode, 0x51E560);
+//    RH_ScopedInstall(CameraColDetAndReact, 0x520190);
+//    RH_ScopedInstall(CamControl, 0x527FA0);
+//    RH_ScopedInstall(Process, 0x52B730);
+//    RH_ScopedInstall(DeleteCutSceneCamDataMemory, 0x5B24A0);
+//    RH_ScopedInstall(LoadPathSplines, 0x5B24D0);
+//    RH_ScopedInstall(Init, 0x5BC520);
 
-//    ReversibleHooks::Install("CCamera", "CamShakeNoPos", 0x50A970, &CGeneral::CamShakeNoPos);
+//    RH_ScopedInstall(ProcessVectorTrackLinear, 0x50D350);
+//    RH_ScopedInstall(ProcessVectorTrackLinear, 0x516440);
+//    RH_ScopedInstall(ProcessVectorMoveLinear, 0x50D430);
+//    RH_ScopedInstall(ProcessVectorMoveLinear, 0x5164A0);
+//    RH_ScopedInstall(ProcessFOVLerp, 0x50D510);
+//    RH_ScopedInstall(ProcessFOVLerp, 0x516500);
+//    RH_ScopedInstall(ProcessJiggle, 0x516560);
+
+//    RH_ScopedInstall(CamShakeNoPos, 0x50A970);
 }
 
 // 0x5BC520
@@ -245,8 +250,8 @@ bool CCamera::GetLookingLRBFirstPerson() {
 }
 
 // 0x50AE90
-signed int CCamera::GetLookDirection() {
-    return plugin::CallMethodAndReturn<signed int, 0x50AE90, CCamera*>(this);
+int32 CCamera::GetLookDirection() {
+    return plugin::CallMethodAndReturn<int32, 0x50AE90, CCamera*>(this);
 }
 
 // 0x50AED0
@@ -257,19 +262,19 @@ bool CCamera::GetLookingForwardFirstPerson() {
 // 0x50AF00
 void CCamera::GetArrPosForVehicleType(eVehicleType type, int32* arrPos) {
     switch (type) {
-    case VEHICLE_MTRUCK:
+    case VEHICLE_TYPE_MTRUCK:
         *arrPos = 0;
         break;
-    case VEHICLE_QUAD:
+    case VEHICLE_TYPE_QUAD:
         *arrPos = 1;
         break;
-    case VEHICLE_HELI:
+    case VEHICLE_TYPE_HELI:
         *arrPos = 2;
         break;
-    case VEHICLE_PLANE:
+    case VEHICLE_TYPE_PLANE:
         *arrPos = 4;
         break;
-    case VEHICLE_BOAT:
+    case VEHICLE_TYPE_BOAT:
         *arrPos = 3;
         break;
     default:
@@ -293,13 +298,35 @@ void CCamera::CopyCameraMatrixToRWCam(bool bUpdateMatrix) {
 }
 
 // 0x50B380
-void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix* camMatrix, CMatrix* mirrorMatrix) {
-    return plugin::CallMethod<0x50B380, CCamera*, CVector, float, CMatrix*, CMatrix*>(this, posn, mirrorV, camMatrix, mirrorMatrix);
+void CCamera::CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix *camMatrix, CMatrix* mirrorMatrix) {
+    mirrorMatrix->GetPosition() = camMatrix->GetPosition() - posn * 2 * (DotProduct(posn, camMatrix->GetPosition()) - mirrorV);
+
+    const CVector fwd = camMatrix->GetForward() - posn * 2 * DotProduct(posn, camMatrix->GetForward());
+    mirrorMatrix->GetForward() = fwd;
+
+    const CVector up = camMatrix->GetUp() - posn * 2 * DotProduct(posn, camMatrix->GetUp());
+    mirrorMatrix->GetUp() = up;
+
+    mirrorMatrix->GetRight() = CVector{
+        up.y * fwd.z - up.z * fwd.y,
+        up.z * fwd.x - up.x * fwd.z,
+        up.x * fwd.y - up.y * fwd.x
+    };
 }
 
 // 0x50B510
 void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror) {
-    plugin::CallMethod<0x50B380, CCamera*, bool, CVector, float, CMatrix*>(this, bActiveMirror, mirrorNormal, mirrorV, matMirror);
+    m_bMirrorActive = bActiveMirror;
+
+    if (!bActiveMirror)
+        return;
+
+    if (matMirror)
+        m_mMatMirror = *matMirror;
+    else
+        CalculateMirroredMatrix(mirrorNormal, mirrorV, &m_mCameraMatrix, &m_mMatMirror);
+
+    m_mMatMirrorInverse = Invert(m_mMatMirror);
 }
 
 // 0x50B8F0
@@ -321,14 +348,14 @@ void CCamera::RestoreWithJumpCut() {
 }
 
 // 0x50BD20
-void CCamera::SetCamCutSceneOffSet(const CVector* cutsceneOffset) {
-    return plugin::CallMethod<0x50BAB0, CCamera*, CVector const*>(this, cutsceneOffset);
+void CCamera::SetCamCutSceneOffSet(const CVector& cutsceneOffset) {
+    m_vecCutSceneOffset = cutsceneOffset;
 }
 
 // 0x50BD40
 void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
     m_bCamDirectlyBehind = true;
-    CPed* player = FindPlayerPed(-1);
+    CPed* player = FindPlayerPed();
     if (player) {
         m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
@@ -337,7 +364,7 @@ void CCamera::SetCameraDirectlyBehindForFollowPed_CamOnAString() {
 // 0x50BD70
 void CCamera::SetCameraDirectlyInFrontForFollowPed_CamOnAString() {
     m_bCamDirectlyInFront = true;
-    CPed* player = FindPlayerPed(-1);
+    CPed* player = FindPlayerPed();
     if (player) {
         m_fPedOrientForBehindOrInFront = CGeneral::GetATanOfXY(player->m_matrix->GetForward().x, player->m_matrix->GetForward().y);
     }
@@ -355,7 +382,7 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
 }
 
 // 0x50BEC0
-void CCamera::SetCamPositionForFixedMode(CVector const* fixedModeSource, CVector const* fixedModeUpOffset) {
+void CCamera::SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset) {
     m_vecFixedModeSource = *fixedModeSource;
     m_vecFixedModeUpOffSet = *fixedModeUpOffset;
     m_bGarageFixedCamPositionSet = false;
@@ -395,7 +422,7 @@ void CCamera::SetNearClipScript(float nearClip) {
 }
 
 // 0x50BFB0
-void CCamera::SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom) {
+void CCamera::SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom, int16 minZoom) {
     m_PlayerWeaponMode.m_nMode     = mode;
     m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_nMinZoom  = minZoom;
@@ -455,7 +482,7 @@ void CCamera::StartCooperativeCamMode() {
     CGameLogic::n2PlayerPedInFocus = 2;
 }
 
-//! unused
+// unused
 // 0x50C270
 void CCamera::StopCooperativeCamMode() {
     m_bCooperativeCamMode = false;
@@ -495,8 +522,8 @@ void CCamera::TakeControl(CEntity* target, eCamMode modeToGoTo, eSwitchType swit
 }
 
 // 0x50C8B0
-void CCamera::TakeControlNoEntity(CVector const* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
-    plugin::CallMethod<0x50C8B0, CCamera*, CVector const*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
+void CCamera::TakeControlNoEntity(const CVector* fixedModeVector, eSwitchType switchType, int32 whoIsInControlOfTheCamera) {
+    plugin::CallMethod<0x50C8B0, CCamera*, const CVector*, eSwitchType, int32>(this, fixedModeVector, switchType, whoIsInControlOfTheCamera);
 }
 
 // 0x50C910
@@ -515,7 +542,7 @@ void CCamera::TakeControlWithSpline(eSwitchType switchType) {
 }
 
 // 0x50CB10
-void CCamera::UpdateAimingCoors(CVector const* aimingTargetCoors) {
+void CCamera::UpdateAimingCoors(const CVector* aimingTargetCoors) {
     m_vecAimingTargetCoors.x = aimingTargetCoors->x;
     m_vecAimingTargetCoors.y = aimingTargetCoors->y;
     m_vecAimingTargetCoors.z = aimingTargetCoors->z;
@@ -585,13 +612,13 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
 }
 
 // 0x420C40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius, RwMatrixTag* transformMatrix) {
-    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, CVector const&, float, RwMatrixTag*>(this, origin, radius, transformMatrix);
+bool CCamera::IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix) {
+    return plugin::CallMethodAndReturn<bool, 0x420C40, CCamera*, const CVector&, float, RwMatrix*>(this, origin, radius, transformMatrix);
 }
 
 // 0x420D40
-bool CCamera::IsSphereVisible(CVector const& origin, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, CVector const&, float>(this, origin, radius);
+bool CCamera::IsSphereVisible(const CVector& origin, float radius) {
+    return plugin::CallMethodAndReturn<bool, 0x420D40, CCamera*, const CVector&, float>(this, origin, radius);
 }
 
 // unused
@@ -741,7 +768,7 @@ void CCamera::DrawBordersForWideScreen() {
 // 0x514950
 void CCamera::FinishCutscene() {
     TheCamera.SetPercentAlongCutScene(100.0f);
-    m_fPositionAlongSpline = 1.0;
+    m_fPositionAlongSpline = 1.0f;
     m_bCutsceneFinished = true;
 }
 
@@ -766,18 +793,25 @@ void CCamera::CalculateDerivedValues(bool bForMirror, bool bOriented) {
 }
 
 // 0x516B20
-void CCamera::ImproveNearClip(CVehicle* pVehicle, CPed* pPed, CVector* source, CVector* targPosn) {
-    return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, pVehicle, pPed, source, targPosn);
+void CCamera::ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn) {
+    return plugin::CallMethod<0x516B20, CCamera*, CVehicle*, CPed*, CVector*, CVector*>(this, vehicle, ped, source, targPosn);
 }
+
+static CMatrix& preMirrorMat = *(CMatrix*)0xB6FE40;
 
 // 0x51A560
 void CCamera::SetCameraUpForMirror() {
-    plugin::CallMethod<0x51A560, CCamera*>(this);
+    preMirrorMat = m_mCameraMatrix;
+    m_mCameraMatrix = m_mMatMirror;
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(true, false);
 }
 
 // 0x51A5A0
 void CCamera::RestoreCameraAfterMirror() {
-    plugin::CallMethod<0x51A5A0, CCamera*>(this);
+    SetMatrix(preMirrorMat);
+    CopyCameraMatrixToRWCam(true);
+    CalculateDerivedValues(false, false);
 }
 
 // 0x51A5D0

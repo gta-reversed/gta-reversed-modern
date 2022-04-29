@@ -1,18 +1,20 @@
 #include "StdInc.h"
 
 #include "TaskSimpleGoToPointFine.h"
+#include "TaskSimpleDuck.h"
 
 void CTaskSimpleGoToPointFine::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CTaskSimpleGoToPointFine", "CTaskSimpleGoToPointFine", 0x65EEB0, &CTaskSimpleGoToPointFine::Constructor);
-    Install("CTaskSimpleGoToPointFine", "Clone", 0x662040, &CTaskSimpleGoToPointFine::Clone_Reversed);
-    Install("CTaskSimpleGoToPointFine", "MakeAbortable", 0x663500, &CTaskSimpleGoToPointFine::MakeAbortable_Reversed);
-    Install("CTaskSimpleGoToPointFine", "ProcessPed", 0x663540, &CTaskSimpleGoToPointFine::ProcessPed_Reversed);
-    Install("CTaskSimpleGoToPointFine", "SetBlendedMoveAnim", 0x65EF80, &CTaskSimpleGoToPointFine::SetBlendedMoveAnim);
-    Install("CTaskSimpleGoToPointFine", "Finish", 0x65EF00, &CTaskSimpleGoToPointFine::Finish);
-    Install("CTaskSimpleGoToPointFine", "SetTargetPos", 0x65F330, &CTaskSimpleGoToPointFine::SetTargetPos);
-    Install("CTaskSimpleGoToPointFine", "BaseRatio", 0x65EF30, &CTaskSimpleGoToPointFine::BaseRatio);
+    RH_ScopedClass(CTaskSimpleGoToPointFine);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x65EEB0);
+    RH_ScopedVirtualInstall(Clone, 0x662040);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x663500);
+    RH_ScopedVirtualInstall(ProcessPed, 0x663540);
+    RH_ScopedInstall(SetBlendedMoveAnim, 0x65EF80);
+    RH_ScopedInstall(Finish, 0x65EF00);
+    RH_ScopedInstall(SetTargetPos, 0x65F330);
+    RH_ScopedInstall(BaseRatio, 0x65EF30);
 }
 
 // 0x65EEB0

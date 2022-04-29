@@ -17,6 +17,8 @@ public:
     float m_fInitialHealth;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GIVE_CPR;
+
     CTaskSimpleGiveCPR(CAccident* pAccident);
     ~CTaskSimpleGiveCPR() override;
 
@@ -27,7 +29,7 @@ public:
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     void ReviveDeadPed(CPed* ped);
-    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* pAnim, void* priv);
+    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* priv);
 
 private:
     friend void InjectHooksMain();

@@ -1,22 +1,25 @@
 #include "StdInc.h"
 
+#include "EventPedToFlee.h"
+
 void CEventPedToFlee::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedToFlee", "Constructor", 0x4AF240, &CEventPedToFlee::Constructor);
-    ReversibleHooks::Install("CEventPedToFlee", "Clone_Reversed", 0x4B73D0, &CEventPedToFlee::Clone_Reversed);
+    RH_ScopedClass(CEventPedToFlee);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF240);
+    RH_ScopedVirtualInstall(Clone, 0x4B73D0);
 }
 
 CEventPedToFlee::CEventPedToFlee(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventPedToFlee::~CEventPedToFlee()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 // 0x4AF240

@@ -9,7 +9,7 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
-#include <sstream>
+#include <extensions/ScriptCommands.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -18,6 +18,14 @@
 #include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
 #include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
+#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
+#include "toolsmenu\DebugModules\CPickupsDebugModule.h"
+#include "toolsmenu\DebugModules\HooksDebugModule.h"
+#include "toolsmenu\DebugModules\CTeleportDebugModule.h"
+#include "toolsmenu\DebugModules\FXDebugModule.h"
+#include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
+
+#include "TaskComplexUseGoggles.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -28,23 +36,15 @@ ImGuiIO* CDebugMenu::io = {};
 
 static ImVec2 m_MousePos;
 
-// https://stackoverflow.com/a/19839371
-bool findStringCaseInsensitive(const std::string& strHaystack, const std::string& strNeedle) {
-    auto it = std::search(
-      strHaystack.begin(), strHaystack.end(),
-      strNeedle.begin(), strNeedle.end(),
-      [](char ch1, char ch2) { return std::toupper(ch1) == std::toupper(ch2); }
-    );
-    return (it != strHaystack.end());
-}
-
 void CDebugMenu::ImguiInitialise() {
     if (m_imguiInitialised) {
         return;
     }
 
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+
+    auto& ctx = *ImGui::CreateContext();
+
     io = &ImGui::GetIO();
     io->WantCaptureMouse = true;
     io->WantCaptureKeyboard = true;
@@ -59,9 +59,11 @@ void CDebugMenu::ImguiInitialise() {
 
     LoadMouseSprite();
 
+    TeleportDebugModule::Initialise(ctx);
     VehicleDebugModule::Initialise();
     PedDebugModule::Initialise();
     MissionDebugModule::Initialise();
+    FXDebugModule::Initialise();
     m_imguiInitialised = true;
 }
 
@@ -71,7 +73,7 @@ void CDebugMenu::LoadMouseSprite() {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
         CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+        m_mouseSprite.SetTexture("mouse", "mousea");
     } else {
         printf("Failed to load fronten_pc.txd\n");
     }
@@ -115,7 +117,6 @@ void CDebugMenu::ImguiInputUpdate() {
             } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
                 io->KeysDown[i] = false;
         }
-
         io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
         io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
         io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
@@ -123,14 +124,14 @@ void CDebugMenu::ImguiInputUpdate() {
     };
 
     const auto UpdateMouse = []() {
-        CPad* pad = CPad::GetPad(0);
+        CPad* pad = CPad::GetPad();
         pad->DisablePlayerControls = true;
 
         m_MousePos.x += CPad::NewMouseControllerState.X;
         m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-        m_MousePos.x = clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
-        m_MousePos.y = clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
+        m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
+        m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
 
         io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
 
@@ -180,167 +181,72 @@ void CDebugMenu::ImGuiDrawMouse() {
     if (!m_showMenu || !m_mouseSprite.m_pTexture)
         return;
 
-    CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
-    m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
+    m_mouseSprite.Draw(
+        io->MousePos.x,
+        io->MousePos.y,
+        FrontEndMenuManager.StretchX(12.0f),
+        FrontEndMenuManager.StretchY(12.0f),
+        { 255, 255, 255, 255 }
+    );
 }
 
 bool showPlayerInfo;
-void CDebugMenu::ShowPlayerInfo() {
+void ShowPlayerInfo() {
     if (!showPlayerInfo)
         return;
-    CPlayerPed* pLocalPlayer = FindPlayerPed();
-    if (pLocalPlayer != nullptr) {
-        ImGui::Begin("Player Information");
 
-        float pos[3] = {pLocalPlayer->GetPosition().x, pLocalPlayer->GetPosition().y, pLocalPlayer->GetPosition().z};
-        ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+    CPlayerPed* player = FindPlayerPed();
+    if (!player)
+        return;
 
-        ImGui::End();
-    }
+    ImGui::Begin("Player Information", &showPlayerInfo, ImGuiWindowFlags_NoTitleBar);
+
+    auto& playerPos = player->GetPosition();
+    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
+    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
+
+    ImGui::End();
 }
 
-void CDebugMenu::PostFxTool() {
-    ImGui::Checkbox("In Cutscene",            &CPostEffects::m_bInCutscene);
-    ImGui::Checkbox("Skip Post Process",      &CPostEffects::m_bDisableAllPostEffect);
-    ImGui::Checkbox("Save Photo From Script", &CPostEffects::m_bSavePhotoFromScript);
-    ImGui::Checkbox("Radiosity",              &CPostEffects::m_bRadiosity);
-    ImGui::Checkbox("Night Vision",           &CPostEffects::m_bNightVision);
-    ImGui::Checkbox("Infrared Vision",        &CPostEffects::m_bInfraredVision);
-    ImGui::Checkbox("Grain",                  &CPostEffects::m_bGrainEnable);
-    ImGui::Checkbox("Heat Haze FX",           &CPostEffects::m_bHeatHazeFX);
-    ImGui::Checkbox("Darkness Filter",        &CPostEffects::m_bDarknessFilter);
-    ImGui::Checkbox("CCTV",                   &CPostEffects::m_bCCTV);
-    ImGui::Checkbox("SpeedFX Test Mode",      &CPostEffects::m_bSpeedFXTestMode);
-    ImGui::Checkbox("Fog",                    &CPostEffects::m_bFog);
-    ImGui::Checkbox("Water Depth Darkness",   &CPostEffects::m_bWaterDepthDarkness);
-    ImGui::Checkbox("Color Correction",       &CPostEffects::m_bColorEnable);
-}
-
-void CDebugMenu::ProcessRenderTool() {
+void ProcessRenderTool() {
     if (ImGui::CollapsingHeader("Post Processing")) {
-        PostFxTool();
+        FXDebugModule::ProcessImgui();
     }
     if (ImGui::CollapsingHeader("Collision")) {
         CollisionDebugModule::ProcessImgui();
     }
 }
 
-// TODO: The code is a mess, clean it up
-void CDebugMenu::ProcessHooksTool() {
-    static std::string HooksFilterContent;
-
-    ImGui::PushItemWidth(465.0f);
-    bool reclaim_focus = false;
-    ImGuiInputTextFlags input_text_flags = ImGuiInputTextFlags_EnterReturnsTrue;
-    if (ImGui::InputText(" ", &HooksFilterContent, input_text_flags)) {
-        reclaim_focus = true;
-    }
-    ImGui::PopItemWidth();
-
-    // Auto-focus on window apparition
-    ImGui::SetItemDefaultFocus();
-    if (reclaim_focus)
-        ImGui::SetKeyboardFocusHere(-1); // Auto focus previous widget
-
-    ImGui::BeginChild("##hookstool", ImVec2(0, 0));
-    ImGui::SetNextItemOpen(true);
-    ImGui::AlignTextToFramePadding();
-    if (ImGui::TreeNode("Reversible Hooks")) {
-        const auto& allHooks = ReversibleHooks::GetAllHooks();
-        // Handle disabling/enabling of all hooks at once
-        ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-        std::string disabledAllStr = "all_disabled";
-        ImGui::PushID(disabledAllStr.c_str());
-        if (ImGui::Button("-")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Disable all");
-        ImGui::PopID();
-
-        ImGui::SameLine();
-        std::string enableAllStr = "all_enabled";
-        ImGui::PushID(enableAllStr.c_str());
-        if (ImGui::Button("+")) {
-            for (auto& classHooks : allHooks)
-                for (auto& hook : classHooks.second)
-                    if (!hook->m_bIsHooked)
-                        hook->Switch();
-        }
-        if (ImGui::IsItemHovered())
-            ImGui::SetTooltip("Enable all");
-        ImGui::PopID();
-        // End of disabling/enabling of all hooks at once
-
-        for (auto& classHooks : allHooks) {
-            if (!HooksFilterContent.empty() && !findStringCaseInsensitive(classHooks.first, HooksFilterContent))
-                continue;
-
-            ImGui::AlignTextToFramePadding();
-            bool treeOpen = ImGui::TreeNodeEx(classHooks.first.c_str(), ImGuiTreeNodeFlags_AllowItemOverlap);
-            ImGui::SameLine(ImGui::GetWindowContentRegionMax().x - 40);
-
-            std::string disabledStr = classHooks.first + "_disabled";
-            ImGui::PushID(disabledStr.c_str());
-            if (ImGui::Button("-")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = false;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Disable all");
-            ImGui::PopID();
-
-            ImGui::SameLine();
-            std::string enableStr = classHooks.first + "_enabled";
-            ImGui::PushID(enableStr.c_str());
-            if (ImGui::Button("+")) {
-                for (auto& hook : classHooks.second)
-                    hook->m_bImguiHooked = true;
-            }
-            if (ImGui::IsItemHovered())
-                ImGui::SetTooltip("Enable all");
-            ImGui::PopID();
-
-            for (auto& hook : classHooks.second)
-                if (hook->m_bIsHooked != hook->m_bImguiHooked)
-                    ReversibleHooks::Switch(hook);
-
-            if (treeOpen) {
-                for (auto& hook : classHooks.second) {
-                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
-                    ImGui::AlignTextToFramePadding();
-                    ImGui::Text(hook->m_eHookType == eReversibleHookType::Simple ? "S" : "V");
-                    ImGui::PopStyleVar();
-                    ImGui::SameLine();
-                    ImGui::Checkbox(hook->m_sFunctionName.c_str(), &hook->m_bImguiHooked);
-                }
-                ImGui::TreePop();
-            }
-        }
-        ImGui::TreePop();
-    }
-    ImGui::EndChild();
-}
-
 #ifdef EXTRA_DEBUG_FEATURES
 void CDebugMenu::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlussion")) {
-            COcclusionDebugModule::ProcessImgui();
+        if (ImGui::BeginTabItem("Occlusion")) {
+            COcclusionDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Audio")) {
             ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImgui();
+            CutsceneTrackManagerDebugModule::ProcessImGui();
 
             ImGui::NewLine();
             ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImgui();
+            AmbienceTrackManagerDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Streaming")) {
+            CStreamingDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Pickups")) {
+            CPickupsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Pools")) {
+            PoolsDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 
@@ -349,12 +255,29 @@ void CDebugMenu::ProcessExtraDebugFeatures() {
 }
 #endif
 
+void SpawnTab() {
+    if (ImGui::BeginTabBar("")) {
+        if (ImGui::BeginTabItem("Ped")) {
+            PedDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Vehicle")) {
+            VehicleDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+    }
+    ImGui::EndTabBar();
+}
+
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
         return;
     }
 
     if (m_showMenu && FindPlayerPed()) {
+        TeleportDebugModule::ProcessImGui();
+
         ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
         ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
         if (ImGui::BeginMenuBar()) {
@@ -365,13 +288,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
         }
 
         if (ImGui::BeginTabBar("Debug Tabs")) {
-            if (ImGui::BeginTabItem("Peds")) {
-                // ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                PedDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Vehicles")) {
-                VehicleDebugModule::ProcessImgui();
+            if (ImGui::BeginTabItem("Spawn")) {
+                SpawnTab();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Cheats")) {
@@ -387,14 +305,18 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Hooks")) {
-                ProcessHooksTool();
+                HooksDebugModule::ProcessImGui();
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
+                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
-#ifdef EXTRA_DEBUG_FEATURES
+                ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
-#endif
+                if (ImGui::Button("Streamer: ReInit")) {
+                    CStreaming::ReInit();
+                }
                 ImGui::EndTabItem();
             }
 
@@ -406,20 +328,33 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
+
+    if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
+        return;
+
     if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
-        CCheat::TankerCheat();
+        CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
+    if (pad->IsStandardKeyJustPressed('2')) {
+        CCheat::MoneyArmourHealthCheat();
+    }
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
+    if (pad->IsStandardKeyJustDown('4')) {
+        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
+        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+    }
+    if (pad->IsStandardKeyJustDown('5')) {
+        FrontEndMenuManager.DisplayHelperText(nullptr);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
-    auto bF7JustPressed = (CPad::NewKeyState.FKeys[6] && !CPad::OldKeyState.FKeys[6]);
-    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustDown('M')) || bF7JustPressed) {
+    CPad* pad = CPad::GetPad();
+    // CTRL + M or F7
+    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
         pad->bPlayerSafe = m_showMenu;
     }
@@ -427,7 +362,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
@@ -435,6 +370,9 @@ void CDebugMenu::ImguiDrawLoop() {
     CDebugMenu::ImguiDisplayExtraDebugFeatures();
     ImguiDisplayPlayerInfo();
     ImguiDisplayFramePerSecond();
+    HooksDebugModule::ProcessRender();
+    FXDebugModule::ProcessRender();
+    TeleportDebugModule::ProcessInput();
 
     ImGui::EndFrame();
     ImGui::Render();

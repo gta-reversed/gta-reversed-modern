@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -15,18 +15,19 @@ public:
     bool                   m_bIsAborting;
     bool                   m_bFinished;
     bool                   m_bStarted;
-    char                   _pad;
     CAnimBlendAssociation* m_pAnim;
     CEntity*               m_pTarget;
     CVector                m_vecPosition;
     uint32                 m_nStartTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_THROW_PROJECTILE;
+
     CTaskSimpleThrowProjectile(CEntity* target, CVector posn);
     ~CTaskSimpleThrowProjectile() override;
 
     CTask* Clone() override { return new CTaskSimpleThrowProjectile(m_pTarget, m_vecPosition); }; // 0x623030
-    eTaskType GetTaskType() { return TASK_SIMPLE_THROW; }; // 0x61F6F0
+    eTaskType GetTaskType() override { return TASK_SIMPLE_THROW_PROJECTILE; };                    // 0x61F6F0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 

@@ -1,7 +1,9 @@
 #include "StdInc.h"
 
-CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
-{
+#include "AutoPilot.h"
+
+// 0x6D5E20
+CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
     _smthNext = 1;
     _smthCurr = 1;
 
@@ -11,7 +13,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_nSpeedScaleFactor = 1000;
     m_nNextLane = 0;
     m_nCurrentLane = 0;
-    m_nCarDrivingStyle = eCarDrivingStyle::DRIVINGSTYLE_STOP_FOR_CARS;
+    m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     m_nCarMission = eCarMission::MISSION_NONE;
     m_nTempAction = 0;
     m_nCruiseSpeed = 10;
@@ -27,7 +29,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucTempActionMode = 0;
     m_ucCarMissionModeCounter = 0;
     field_41 = 0;
-    field_44 = 1.0;
+    field_44 = 1.0f;
     m_ucHeliSpeedMult = 0;   
     movementFlags.bIsStopped = false;
     movementFlags.bIsParked = false;
@@ -36,7 +38,16 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_ucHeliTargetDist2 = 10;
     field_50 = rand() % 8 + 2;
     m_vehicleRecordingId = -1;
-    m_bPlaneDogfightSomething = 0;
+    m_bPlaneDogfightSomething = false;
     m_pCarWeMakingSlowDownFor = nullptr;
     m_fMaxTrafficSpeed = 0.0F;
+}
+
+void CAutoPilot::ModifySpeed(float target) {
+    plugin::CallMethod<0x41B980, CAutoPilot*, float>(this, target);
+}
+
+// 0x41B950
+void CAutoPilot::RemoveOnePathNode() {
+    plugin::CallMethod<0x41B950, CAutoPilot*>(this);
 }

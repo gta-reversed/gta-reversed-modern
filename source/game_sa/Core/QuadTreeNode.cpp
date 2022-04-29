@@ -1,25 +1,29 @@
 #include "StdInc.h"
 
-CPool<CQuadTreeNode>*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CPool<CQuadTreeNode>**)0xB745BC;
+#include "QuadTreeNode.h"
+
+CQuadTreeNodePool*& CQuadTreeNode::ms_pQuadTreeNodePool = *(CQuadTreeNodePool**)0xB745BC;
 
 void CQuadTreeNode::InjectHooks()
 {
-    using namespace ReversibleHooks;
-    Install("CQuadTreeNode", "InitPool", 0x552C00, &CQuadTreeNode::InitPool);
-    Install("CQuadTreeNode", "FindSector_rect", 0x5525A0, (int32(CQuadTreeNode::*)(const CRect&))&CQuadTreeNode::FindSector);
-    Install("CQuadTreeNode", "FindSector_vec", 0x552640, (int32(CQuadTreeNode::*)(const CVector2D&)) & CQuadTreeNode::FindSector);
-    Install("CQuadTreeNode", "InSector", 0x5526A0, &CQuadTreeNode::InSector);
-    Install("CQuadTreeNode", "DeleteItem", 0x552A40, (void(CQuadTreeNode::*)(void*))&CQuadTreeNode::DeleteItem);
-    Install("CQuadTreeNode", "DeleteItem_rect", 0x552A90, (void(CQuadTreeNode::*)(void*, const CRect&))&CQuadTreeNode::DeleteItem);
-    Install("CQuadTreeNode", "AddItem", 0x552CD0, &CQuadTreeNode::AddItem);
-    Install("CQuadTreeNode", "GetAll", 0x552870, &CQuadTreeNode::GetAll);
-    Install("CQuadTreeNode", "GetAllMatching_rect", 0x5528C0, (void(CQuadTreeNode::*)(const CRect&, CPtrListSingleLink&))&CQuadTreeNode::GetAllMatching);
-    Install("CQuadTreeNode", "GetAllMatching_vec", 0x552930, (void(CQuadTreeNode::*)(const CVector2D&, CPtrListSingleLink&))&CQuadTreeNode::GetAllMatching);
-    Install("CQuadTreeNode", "ForAllMatching_rect", 0x552980, (void(CQuadTreeNode::*)(const CRect&, CQuadTreeNodeRectCallBack))&CQuadTreeNode::ForAllMatching);
-    Install("CQuadTreeNode", "ForAllMatching_vec", 0x5529F0, (void(CQuadTreeNode::*)(const CVector2D&, CQuadTreeNodeVec2DCallBack))&CQuadTreeNode::ForAllMatching);
+    RH_ScopedClass(CQuadTreeNode);
+    RH_ScopedCategory("Core");
+
+    RH_ScopedInstall(InitPool, 0x552C00);
+    RH_ScopedOverloadedInstall(FindSector, "rect", 0x5525A0, int32(CQuadTreeNode::*)(const CRect&));
+    RH_ScopedOverloadedInstall(FindSector, "vec", 0x552640, int32(CQuadTreeNode::*)(const CVector2D&));
+    RH_ScopedInstall(InSector, 0x5526A0);
+    RH_ScopedOverloadedInstall(DeleteItem, "", 0x552A40, void(CQuadTreeNode::*)(void*));
+    RH_ScopedOverloadedInstall(DeleteItem, "rect", 0x552A90, void(CQuadTreeNode::*)(void*, const CRect&));
+    RH_ScopedInstall(AddItem, 0x552CD0);
+    RH_ScopedInstall(GetAll, 0x552870);
+    RH_ScopedOverloadedInstall(GetAllMatching, "rect", 0x5528C0, void(CQuadTreeNode::*)(const CRect&, CPtrListSingleLink&));
+    RH_ScopedOverloadedInstall(GetAllMatching, "vec", 0x552930, void(CQuadTreeNode::*)(const CVector2D&, CPtrListSingleLink&));
+    RH_ScopedOverloadedInstall(ForAllMatching, "rect", 0x552980, void(CQuadTreeNode::*)(const CRect&, CQuadTreeNodeRectCallBack));
+    RH_ScopedOverloadedInstall(ForAllMatching, "vec", 0x5529F0, void(CQuadTreeNode::*)(const CVector2D&, CQuadTreeNodeVec2DCallBack));
 }
 
-void* CQuadTreeNode::operator new(uint32 size)
+void* CQuadTreeNode::operator new(unsigned size)
 {
     return CQuadTreeNode::ms_pQuadTreeNodePool->New();
 }
@@ -54,12 +58,12 @@ void CQuadTreeNode::AddItem(void* item, const CRect& rect)
 
     for (auto sector = 0; sector < 4; ++sector)
     {
-        if (!CQuadTreeNode::InSector(rect, sector))
+        if (!InSector(rect, sector))
             continue;
 
         if (!m_apChildren[sector])
         {
-            const CRect sectorRect = CQuadTreeNode::GetSectorRect(sector);
+            const CRect sectorRect = GetSectorRect(sector);
             m_apChildren[sector] = new CQuadTreeNode(sectorRect, m_nLevel - 1);
         }
 
@@ -83,7 +87,7 @@ void CQuadTreeNode::DeleteItem(void* item, const CRect& rect)
     m_ItemList.DeleteItem(item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->DeleteItem(item);
 }
 
@@ -143,7 +147,7 @@ void CQuadTreeNode::ForAllMatching(const CRect& rect, CQuadTreeNodeRectCallBack 
         callback(rect, node->m_item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->ForAllMatching(rect, callback);
 }
 
@@ -152,7 +156,7 @@ void CQuadTreeNode::ForAllMatching(const CVector2D& posn, CQuadTreeNodeVec2DCall
     for (auto* node = m_ItemList.GetNode(); node; node = node->m_next)
         callback(posn, node->m_item);
 
-    const auto sector = CQuadTreeNode::FindSector(posn);
+    const auto sector = FindSector(posn);
     if (sector == -1 || !m_apChildren[sector])
         return;
 
@@ -176,7 +180,7 @@ void CQuadTreeNode::GetAllMatching(const CRect& rect, CPtrListSingleLink& list)
         list.AddItem(node->m_item);
 
     for (auto sector = 0; sector < 4; ++sector)
-        if (m_apChildren[sector] && CQuadTreeNode::InSector(rect, sector))
+        if (m_apChildren[sector] && InSector(rect, sector))
             m_apChildren[sector]->GetAllMatching(rect, list);
 }
 
@@ -185,7 +189,7 @@ void CQuadTreeNode::GetAllMatching(const CVector2D& posn, CPtrListSingleLink& li
     for (auto* node = m_ItemList.GetNode(); node; node = node->m_next)
         list.AddItem(node->m_item);
 
-    const auto sector = CQuadTreeNode::FindSector(posn);
+    const auto sector = FindSector(posn);
     if (sector == -1 || !m_apChildren[sector])
         return;
 
@@ -198,7 +202,7 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
     if (!m_nLevel)
         return false;
 
-    const CRect sectorRect = CQuadTreeNode::GetSectorRect(sector);
+    const CRect sectorRect = GetSectorRect(sector);
 
     if (   sectorRect.left <= rect.right // LinesInside???
         && sectorRect.right >= rect.left
@@ -214,10 +218,10 @@ bool CQuadTreeNode::InSector(const CRect& rect, int32 sector) const
 
 // 0x552C00
 void CQuadTreeNode::InitPool() {
-    if (CQuadTreeNode::ms_pQuadTreeNodePool)
+    if (ms_pQuadTreeNodePool)
         return;
 
-    CQuadTreeNode::ms_pQuadTreeNodePool = new CPool<CQuadTreeNode>(400, "QuadTreeNodes");
+    ms_pQuadTreeNodePool = new CQuadTreeNodePool(400, "QuadTreeNodes");
 }
 
 CRect CQuadTreeNode::GetSectorRect(int32 sector) const

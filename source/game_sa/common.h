@@ -1,25 +1,36 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
 #include <string>
+#include <RenderWare.h>
 
 #include "Vector.h"
-#include "Entity.h"
-#include "PlayerPed.h"
-#include "Vehicle.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "AnimBlendClumpData.h"
+#include "Vector2D.h"
+#include "Matrix.h"
+#include "Draw.h"
 
-const char gta_empty_string[4] = {0, 0, 0, 0};
+class CAnimBlendClumpData;
+class CEntity;
+class CPlayerPed;
+class CWanted;
+class CPlayerInfo;
+class CVehicle;
+class CTrain;
+class CSimpleTransform;
+class AnimBlendFrameData;
+class CAnimBlendAssociation;
+class CAnimBlendHierarchy;
+class CEventGlobalGroup;
+struct RtAnimAnimation;
+class CPedGroup;
 
-#define DEFAULT_SCREEN_WIDTH (640.0f)
-#define DEFAULT_SCREEN_HEIGHT (448.0f)
+#define DEFAULT_SCREEN_WIDTH  (640)
+#define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
 #define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
@@ -35,14 +46,14 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
-#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
-#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / DEFAULT_SCREEN_HEIGHT)
+#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH  / (float) DEFAULT_SCREEN_WIDTH) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / (float) DEFAULT_SCREEN_HEIGHT)
 #define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
 #define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
-#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)
+#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
 
@@ -53,30 +64,73 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+#define PUSH_RENDERGROUP(str) 0
+#define POP_RENDERGROUP() 0
+
+constexpr auto BUILD_NAME_FULL = "TEST";
+
 extern int32 gDefaultTaskTime;
 
-extern char *gString; // char gString[200]
+static inline char (&gString)[352] = *(char(*)[352])0xB71670;
+static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
 
-extern float &GAME_GRAVITY; // default 0.0080000004
+static inline char (&gGxtString)[552] = *(char(*)[552])0xC1B100;
+static inline char (&gGxtString2)[552] = *(char(*)[552])0xC1AED8;
+static inline char (&GxtErrorString)[32] = *(char(*)[32])0xC1AEB8;
+
+extern float &GAME_GRAVITY; // default 0.008f
 
 extern char(&PC_Scratch)[16384];
 
 extern float& gfLaRiotsLightMult;
 
-const uint32 rwVENDORID_ROCKSTAR = 0x0253F2;
+// taken from rpplugin.h
+#define rwVENDORID_DEVELOPER 0x0253F2
+
 extern uint32 &ClumpOffset;
 
 #define RpClumpGetAnimBlendClumpData(clump) (*(CAnimBlendClumpData **)(((uint32)(clump) + ClumpOffset)))
 
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
-constexpr float TWO_PI = 6.28318530718f;
-constexpr float PI = 3.14159265358979323846f;
-constexpr float HALF_PI = PI / 2.0f;
-constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
-constexpr float SQRT_2 = 1.41421356237309504880f;
-constexpr float SIN_PI = 0.0f; // std::sin(PI);
-constexpr float COS_PI = -1.0f; // std::cos(PI);
+constexpr float E              = 2.71828f;          // e
+constexpr float E_CONST        = 0.577;             // Euler-Mascheroni constant
+constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
+constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
+constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ
+constexpr float FRAC_2_PI      = 0.636619f;         // 2 / π
+constexpr float FRAC_2_SQRT_PI = 1.12837f;          // 2 / √π
+constexpr float FRAC_4_TAU     = 0.636619f;         // 4 / τ
+constexpr float FRAC_1_SQRT_2  = 0.707106f;         // 1 / √2
+constexpr float FRAC_PI_2      = 1.57079f;          // π / 2
+constexpr float FRAC_PI_3      = 1.04719f;          // π / 3
+constexpr float FRAC_PI_4      = 0.785398f;         // π / 4
+constexpr float FRAC_PI_6      = 0.523598f;         // π / 6
+constexpr float FRAC_PI_8      = 0.392699f;         // π / 8
+constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2
+constexpr float FRAC_TAU_3     = 2.09439f;          // τ / 3
+constexpr float FRAC_TAU_4     = 1.57079f;          // τ / 4
+constexpr float FRAC_TAU_6     = 1.04719f;          // τ / 6
+constexpr float FRAC_TAU_8     = 0.785398f;         // τ / 8
+constexpr float FRAC_TAU_12    = 0.523598f;         // τ / 12
+constexpr float LN_2           = 0.693147f;         // ln(2)
+constexpr float LN_10          = 2.30258f;          // ln(10)
+constexpr float LOG2_E         = 1.44269f;          // log2(e)
+constexpr float LOG10_E        = 0.434294f;         // log10(e)
+constexpr float LOG10_2        = 0.301029f;         // log10(2)
+constexpr float LOG2_10        = 3.32192f;          // log2(10)
+constexpr float PI             = 3.14159f;          // π
+constexpr float HALF_PI        = PI / 2.0f;         // π / 2
+constexpr float SQRT_2         = 1.41421f;          // √2
+constexpr float SQRT_3         = 1.73205f;          // √3
+constexpr float SIN_PI         = 0.0f;              // sin(π);
+constexpr float COS_PI         = -1.0f;             // cos(π);
+constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
+
+struct SpriteFileName {
+    const char* name;
+    const char* alpha;
+};
 
 void InjectCommonHooks();
 
@@ -103,15 +157,27 @@ CPlayerPed * FindPlayerPed(int32 playerId = -1);
 CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
 // returns player wanted
 CWanted * FindPlayerWanted(int32 playerId = -1);
-
+// returns player's group
+CPedGroup& FindPlayerGroup(int32 playerId = -1); // NOTSA
 CPlayerInfo& FindPlayerInfo(int playerId = -1);
 
-CVector Multiply3x3(CMatrix& m, CVector& v);
-CVector Multiply3x3(CVector& v, CMatrix& m);
+CVector Multiply3x3(const CMatrix& m, const CVector& v);
+CVector Multiply3x3(const CVector& v, const CMatrix& m);
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);
 
-void TransformPoint(RwV3d& point, CSimpleTransform const& placement, RwV3d const& vecPos);
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CMatrix const& matrix, RwV3d const* vecsin);
-void TransformVectors(RwV3d* vecsOut, int32 numVectors, CSimpleTransform const& transform, RwV3d const* vecsin);
+void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin);
+void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin);
+
+// Check point is within 2D rectangle
+static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
+    return point.x >= min.x && point.x <= max.x &&
+           point.y >= min.y && point.y <= max.y;
+}
+
+static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
+    return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+}
 
 // Converts degrees to radians
 // keywords: 0.017453292 flt_8595EC
@@ -127,6 +193,10 @@ template <typename T>
 T clamp(T value, T low, T high)
 {
     return std::min(std::max(value, low), high);
+}
+
+inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
+    return fMin * (1.0F - fProgress) + fMax * fProgress;
 }
 
 inline const float lerp(float fMin, float fMax, float fProgress) {
@@ -174,15 +244,7 @@ AnimBlendFrameData *RpAnimBlendClumpFindFrame(RpClump *clump, char *name);
 char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
-class CEventGroup* GetEventGlobalGroup();
-// dummy function
-void CreateDebugFont();
-// dummy function
-void DestroyDebugFont();
-// dummy function
-void ObrsPrintfString(char const* arg0, int16 arg1, int16 arg2);
-// dummy function
-void FlushObrsPrintfs();
+class CEventGlobalGroup* GetEventGlobalGroup();
 void DefinedState();
 void DefinedState2d();
 
@@ -217,21 +279,16 @@ void SkinGetBonePositions(RpClump* clump);
 void SkinSetBonePositions(RpClump* clump);
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
 void SetLightsWithTimeOfDayColour(RpWorld* world);
-// dummy function
 void LightsEnable(int32 arg0);
+void LightsCreate(RpWorld* world);
 void LightsDestroy(RpWorld* world);
-// lighting = [0.0f;1.0f]
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting);
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world);
 void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float red, float green, float blue);
 void RemoveExtraDirectionalLights(RpWorld* world);
-// lighting = [0.0f;1.0f]
-void SetAmbientAndDirectionalColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours(float lighting);
-// lighting = [0.0f;1.0f]
-void SetFlashyColours_Mild(float lighting);
-// lighting = [0.0f;1.0f], unused
+void SetAmbientAndDirectionalColours(float fMult);
+void SetFlashyColours(float fMult);
+void SetFlashyColours_Mild(float fMult);
 void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
@@ -241,8 +298,7 @@ void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
 void SetDirectionalColours(RwRGBAReal* color);
-// lighting = [0.0f;1.0f]
-void SetLightColoursForPedsCarsAndObjects(float lighting);
+void SetLightColoursForPedsCarsAndObjects(float fMult);
 void SetLightsForInfraredVisionHeatObjects();
 void StoreAndSetLightsForInfraredVisionHeatObjects();
 void RestoreLightsForInfraredVisionHeatObjects();
@@ -253,17 +309,17 @@ float GetDayNightBalance();
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
 
-bool IsGlassModel(CEntity* pEntity);
+bool IsGlassModel(CEntity* entity);
 
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);
 CAnimBlendAssociation* RpAnimBlendClumpExtractAssociations(RpClump* clump);
 void RpAnimBlendClumpFillFrameArray(RpClump* clump, AnimBlendFrameData** frameData);
 AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
-AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, char const* name);
+AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name);
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1, CAnimBlendHierarchy* hierarchy);
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, char const* name);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags);
@@ -291,13 +347,15 @@ CAnimBlendAssociation* RpAnimBlendGetNextAssociation(CAnimBlendAssociation* asso
 void RpAnimBlendKeyFrameInterpolate(void* voidOut, void* voidIn1, void* voidIn2, float time, void* customData);
 bool RpAnimBlendPluginAttach();
 
+bool GraphicsLowQuality();
+
 /**
  * Writes given raster to PNG file using RtPNGImageWrite
  */
 void Render2dStuff();
-void WriteRaster(RwRaster* raster, char const* path);
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos, float* pScreenX, float* pScreenY);
-bool CalcScreenCoors(CVector const& vecPoint, CVector* pVecOutPos);
+void WriteRaster(RwRaster* raster, const char* path);
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX, float* screenY);
+bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos);
 bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir);
 bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance);
 

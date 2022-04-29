@@ -8,14 +8,16 @@
 #include "TaskSimpleStandStill.h"
 
 void CTaskComplexGoToPointAndStandStill::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CTaskComplexGoToPointAndStandStill", 0x668120, &CTaskComplexGoToPointAndStandStill::Constructor);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "Clone", 0x66CEA0, &CTaskComplexGoToPointAndStandStill::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateNextSubTask", 0x66DBA0, &CTaskComplexGoToPointAndStandStill::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateFirstSubTask", 0x66DC40, &CTaskComplexGoToPointAndStandStill::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "CreateFirstSubTask_ped", 0x6682D0, (CTask * (CTaskComplexGoToPointAndStandStill::*)(int32, CPed*)) & CTaskComplexGoToPointAndStandStill::CreateFirstSubTask);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "ControlSubTask", 0x668570, &CTaskComplexGoToPointAndStandStill::ControlSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "GoToPoint", 0x46FE60, &CTaskComplexGoToPointAndStandStill::GoToPoint);
-    ReversibleHooks::Install("CTaskComplexGoToPointAndStandStill", "SelectMoveState", 0x668250, &CTaskComplexGoToPointAndStandStill::SelectMoveState);
+    RH_ScopedClass(CTaskComplexGoToPointAndStandStill);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x668120);
+    RH_ScopedVirtualInstall(Clone, 0x66CEA0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x66DBA0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x66DC40);
+    RH_ScopedOverloadedInstall(CreateFirstSubTask, "ped", 0x6682D0, CTask * (CTaskComplexGoToPointAndStandStill::*)(int32, CPed*));
+    RH_ScopedVirtualInstall(ControlSubTask, 0x668570);
+    RH_ScopedInstall(GoToPoint, 0x46FE60);
+    RH_ScopedInstall(SelectMoveState, 0x668250);
 }
 
 // 0x668120

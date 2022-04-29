@@ -1,13 +1,13 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "ZoneInfo.h"
-#include "Zone.h"
+class CZoneInfo;
+class CZone;
 
 enum ePedType : uint32;
 
@@ -198,10 +198,10 @@ public:
     static uint8*      m_nMaxNumPeds;    // uint8 m_nMaxNumPeds[480];
     static float&      m_NumDealers_Peds;
 
-    static bool  FindNewPedType(ePedType* arg1, int32* modelindex, bool arg3, bool arg4);
+    static bool  FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4);
     static float GetCurrentPercOther_Peds();
     static void  Initialise();
-    static bool  IsPedAppropriateForCurrentZone(int32 modelindex);
+    static bool  IsPedAppropriateForCurrentZone(int32 modelIndex);
     static bool  IsPedInGroup(int32 modelIndex, int32 PopCycle_Group);
     static bool  PedIsAcceptableInCurrentZone(int32 modelIndex);
     static int32 PickARandomGroupOfOtherPeds();
@@ -213,5 +213,9 @@ public:
     static void  UpdatePercentages();
     static char  GetCurrentPercTypeGroup(int32 groupId, uint8 zonePopulationType) {
         return m_nPercTypeGroup[720 * m_nCurrentTimeIndex + 360 * m_nCurrentTimeOfWeek + 18 * zonePopulationType + groupId];
+    }
+
+    static bool IsPedInGroupTheseGroups(int32 modelIndex, std::initializer_list<ePopcycleGroup> groups) {
+        return rng::any_of(groups, [=](auto grp) { return IsPedInGroup(modelIndex, grp); });
     }
 };

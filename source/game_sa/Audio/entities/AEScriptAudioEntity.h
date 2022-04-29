@@ -1,6 +1,7 @@
 #pragma once
 
 #include "eAudioEvents.h"
+#include "AEExplosionAudioEntity.h"
 
 class CEntity;
 class CVector;
@@ -65,8 +66,8 @@ public:
     void PlayLoadedMissionAudio(uint8);
     void PreloadMissionAudio(uint8, int32);
 
-    void ProcessMissionAudioEvent(eAudioEvents eventId, CVector& posn, CPhysical* physical, float a6, float a7);
-    void ReportMissionAudioEvent(eAudioEvents eventId, CPhysical* physical, float a4, float a5);
+    void ProcessMissionAudioEvent(eAudioEvents eventId, CVector& coords, CPhysical* physical, float volume = 0.0f, float speed = 1.0f);
+    void ReportMissionAudioEvent(eAudioEvents eventId, CPhysical* physical, float volume = 0.0f, float speed = 1.0f);
     void ReportMissionAudioEvent(eAudioEvents eventId, CVector& posn);
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;

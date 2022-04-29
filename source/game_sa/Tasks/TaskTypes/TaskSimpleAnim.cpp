@@ -4,7 +4,9 @@
 
 void CTaskSimpleAnim::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleAnim", "MakeAbortable", 0x61A790, &CTaskSimpleAnim::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskSimpleAnim);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedVirtualInstall(MakeAbortable, 0x61A790);
 }
 
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple()
@@ -21,7 +23,7 @@ CTaskSimpleAnim::~CTaskSimpleAnim()
         return;
 
     m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-    m_pAnim->m_nFlags |= eAnimationFlags::ANIM_FLAG_FREEZE_LAST_FRAME;
+    m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
     if (!m_bHoldLastFrame)
     {
         if (m_pAnim->m_fBlendAmount > 0.0F && m_pAnim->m_fBlendDelta >= 0.0F)
@@ -53,10 +55,10 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     {
         if (event->GetEventType() == eEventType::EVENT_SCRIPT_COMMAND)
         {
-            const auto* pEvent = static_cast<const CEventScriptCommand*>(event);
-            if (pEvent->m_task)
+            const auto* scriptCommand = static_cast<const CEventScriptCommand*>(event);
+            if (scriptCommand->m_task)
             {
-                if (pEvent->m_task->GetTaskType() == eTaskType::TASK_SIMPLE_NAMED_ANIM)
+                if (scriptCommand->m_task->GetTaskType() == TASK_SIMPLE_NAMED_ANIM)
                 {
                     if (m_pAnim)
                         m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
@@ -77,7 +79,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
                 if (m_pAnim->m_nFlags & ANIM_FLAG_PARTIAL)
                     m_pAnim->m_fBlendDelta = fBlend;
                 else
-                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, AnimationId::ANIM_ID_IDLE, -fBlend);
+                    CAnimManager::BlendAnimation(ped->m_pRwClump, ped->m_nAnimGroup, ANIM_ID_IDLE, -fBlend);
             }
         }
     }
@@ -99,7 +101,7 @@ bool CTaskSimpleAnim::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     return true;
 }
 
-void CTaskSimpleAnim::FinishRunAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data)
+void CTaskSimpleAnim::FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data)
 {
     static_cast<CTaskSimpleAnim*>(data)->m_bIsFinished = true;
     static_cast<CTaskSimpleAnim*>(data)->m_pAnim = nullptr;

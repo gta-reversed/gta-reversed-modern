@@ -1,5 +1,7 @@
 #pragma once
 
+#include "AnimationEnums.h"
+
 // based on https://projectcerbera.com/gta/sa/tutorials/handling#animation
 
 // If the flags are true, second anim group is used, otherwise first

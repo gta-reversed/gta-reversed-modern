@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,29 +7,29 @@
 #pragma once
 
 #include "Vector.h"
+#include <rwplcore.h>
 
-#define MAX_MOVING_FOG 350
-#define MAX_VOLUMETRIC_CLOUDS 180
+constexpr auto MAX_MOVING_FOG = 350;
+constexpr auto MAX_VOLUMETRIC_CLOUDS = 180;
 
-#define SKYP_WIDTH_MULT 1.4f
-#define SKYP_CAM_DIST 30.f
+constexpr auto SKYP_WIDTH_MULT = 1.4f;
+constexpr auto SKYP_CAM_DIST = 30.f;
 
-#define SKYP_ABOVE_HORIZON_Z 0.5f
-#define SKYP_HORIZON_Z 0.0f
-#define SKYP_SEA_HORIZON_Z -0.1f
-#define SKYP_BELOW_HORIZON_Z -0.3f
+constexpr auto SKYP_ABOVE_HORIZON_Z = 0.5f;
+constexpr auto SKYP_HORIZON_Z = 0.0f;
+constexpr auto SKYP_SEA_HORIZON_Z = -0.1f;
+constexpr auto SKYP_BELOW_HORIZON_Z = -0.3f;
 
 struct tMovingFog {
     bool    m_bFogSlots[MAX_MOVING_FOG];
-    char    _pad15E[2];
     CVector m_vecPosn[MAX_MOVING_FOG];
     float   m_fSize[MAX_MOVING_FOG];
     float   m_fIntensity[MAX_MOVING_FOG];
     float   m_fMaxIntensity[MAX_MOVING_FOG];
     CVector m_vecWind;
     float   m_fSpeed[MAX_MOVING_FOG];
-    int32   field_27B4[12];
-    uint32  m_nPrimIndices[6];
+    int     field_27B4[12];
+    std::array<uint32, 6> m_nPrimIndices;
 };
 
 struct tVolumetricClouds {
@@ -103,8 +103,8 @@ extern float* STARS_Z_POSITIONS;                 // STARS_Z_POSITIONS[9] = { 0.0
 extern float* STARS_SIZES;                       // STARS_SIZES[9] = { 1.0f, 1.4f, 0.9f, 1.0f, 0.6f, 1.5f, 1.3f, 1.0f, 0.8f }
 extern float& CurrentFogIntensity;               // default 1.0f
 extern RwTexture*& gpMoonMask;
-extern RwTexture* (&gpCloudTex)[2]; // RwTexture *gpCloudTex[2]
-
+extern RwTexture*& gpCloudTex;
+extern RwTexture*& gpCloudMaskTex;
 extern float& flt_C6E954;
 extern float& flt_C6E970;
 

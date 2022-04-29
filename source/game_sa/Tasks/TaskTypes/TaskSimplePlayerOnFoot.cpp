@@ -9,6 +9,9 @@
 #include "TaskComplexUseGoggles.h"
 #include "TaskSimpleStealthKill.h"
 #include "IKChainManager_c.h"
+#include "TaskSimpleHoldEntity.h"
+#include "TaskSimpleFight.h"
+#include "TaskSimpleDuck.h"
 
 int32& gLastRandomNumberForIdleAnimationID = *reinterpret_cast<int32*>(0x8D2FEC);
 uint32& gLastTouchTimeDelta = *reinterpret_cast<uint32*>(0xC19664);
@@ -48,7 +51,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
 
             if (event->GetEventType() == EVENT_DAMAGE) {
                 auto secondary = ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK);
-                if (secondary->GetTaskType() == TASK_SIMPLE_THROW || eventDamage->m_bKnockOffPed) {
+                if (secondary->GetTaskType() == TASK_SIMPLE_THROW_PROJECTILE || eventDamage->m_bKnockOffPed) {
                     ped->GetTaskManager().GetTaskSecondary(TASK_SECONDARY_ATTACK)->MakeAbortable(ped, ABORT_PRIORITY_URGENT, event);
                 }
                 goto LABEL_12;
@@ -80,10 +83,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
                 ) {
                     TheCamera.ClearPlayerWeaponMode();
                     CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                    if (ped->m_pTargetedObject) {
-                        ped->m_pTargetedObject->CleanUpOldReference(&ped->m_pTargetedObject);
-                    }
-                    ped->m_pTargetedObject = nullptr;
+                    CEntity::ClearReference(ped->m_pTargetedObject);
                 }
             }
         }
@@ -265,7 +265,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                     targetEntity = player->m_p3rdPersonMouseTarget;
                 }
             } else {
-                if (player->m_pTargetedObject->m_nType == ENTITY_TYPE_PED) {
+                if (player->m_pTargetedObject->IsPed()) {
                     targetEntity = reinterpret_cast<CPed*>(player->m_pTargetedObject);
                 }
             }
@@ -309,10 +309,10 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 taskManager->SetTask(pTaskSimpleStealthKill, 3, false);
 
                 eWeaponType activeWeaponType = player->GetActiveWeapon().m_nType;
-                CPedDamageResponseCalculator damageCalculator(player, 0.0, activeWeaponType, PED_PIECE_TORSO, false);
+                CPedDamageResponseCalculator damageCalculator(player, 0.0f, activeWeaponType, PED_PIECE_TORSO, false);
                 CEventDamage eventDamage(player, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, targetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(targetEntity)) {
-                    damageCalculator.ComputeDamageResponse(targetEntity, &eventDamage.m_damageResponse, false);
+                    damageCalculator.ComputeDamageResponse(targetEntity, eventDamage.m_damageResponse, false);
                     targetEntity->GetEventGroup().Add(&eventDamage, false);
                     CCrime::ReportCrime(eCrimeType::CRIME_SEALTH_KILL_PED_WITH_KNIFE, targetEntity, player);
                     player->m_weaponAudio.AddAudioEvent(AE_WEAPON_STEALTH_KILL);
@@ -602,7 +602,7 @@ PED_WEAPON_AIMING_CODE:
                 || targetedEntity == (CPed*)nullptr
                 || CCamera::m_bUseMouse3rdPerson == true
                 || targetedEntity
-                && targetedEntity->m_nType == ENTITY_TYPE_PED
+                && targetedEntity->IsPed()
                 && (
                       !CPlayerPed::PedCanBeTargettedVehicleWise(targetedEntity)
                    || !CLocalisation::KickingWhenDown()
@@ -628,18 +628,18 @@ PED_WEAPON_AIMING_CODE:
 
             if (CWeaponInfo::GetWeaponInfo(activeWeapon->m_nType, eWeaponSkill::WEAPSKILL_STD)->m_nWeaponFire == WEAPON_FIRE_INSTANT_HIT) {
                 targetedEntity = (CPed*)player->m_pTargetedObject;
-                if (targetedEntity && targetedEntity->m_nType == ENTITY_TYPE_PED && intelligence->IsInSeeingRange(player->GetPosition())) {
+                if (targetedEntity && targetedEntity->IsPed() && intelligence->IsInSeeingRange(player->GetPosition())) {
                     CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                     if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
                         if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
-                            player->Say(176, 0, 1.0f, 0, 0, 0);
+                            player->Say(176);
                         }
-                        CPedGroup* pPedGroup = CPedGroups::GetPedsGroup(targetedEntity);
-                        if (pPedGroup) {
+                        CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
+                        if (pedGroup) {
                             if (!CPedGroups::AreInSameGroup(targetedEntity, player)) {
                                 auto* eventGunAimedAt = new CEventGunAimedAt(player);
                                 CEventGroupEvent eventGroupEvent(targetedEntity, eventGunAimedAt);
-                                pPedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
+                                pedGroup->m_groupIntelligence.AddEvent(&eventGroupEvent);
                             }
                         } else {
                             CEventGunAimedAt eventGunAimedAt(player);
@@ -712,7 +712,7 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
     }
 
     bool bTargetedPedDead = false;
-    if (targetedObject->m_nType == ENTITY_TYPE_PED && (targetedObject->bFallenDown || targetedObject->m_nPedState == PEDSTATE_DEAD)) {
+    if (targetedObject->IsPed() && (targetedObject->bFallenDown || targetedObject->m_nPedState == PEDSTATE_DEAD)) {
         bTargetedPedDead = true;
     }
 
@@ -728,7 +728,7 @@ MAKE_PLAYER_LOOK_AT_ENTITY:
         return AbortLookingIfPossible();
     } else if (!g_ikChainMan.IsLooking(player) || (g_ikChainMan.GetLookAtEntity(player) != (CEntity*)targetedObject)) {
         auto pedBoneId = BONE_UNKNOWN;
-        if (targetedObject->m_nType == ENTITY_TYPE_PED) {
+        if (targetedObject->IsPed()) {
             pedBoneId = BONE_HEAD;
         }
         g_ikChainMan.LookAt("ProcPlyrWeapon", player, targetedObject, gDefaultTaskTime, pedBoneId, nullptr, false, 0.25f, 500, 3, false);
@@ -762,7 +762,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     uint32      touchTimeDelta = pad->GetTouchedTimeDelta();
     if (touchTimeDelta <= 10000) {
         if (animBlock->bLoaded) {
-            CStreaming::SetModelIsDeletable(m_nAnimationBlockIndex + RESOURCE_ID_IFP);
+            CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
                 if (animAssoc->m_nFlags & ANIM_FLAG_200) {
@@ -774,7 +774,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         return;
     }
 
-    CStreaming::RequestModel(m_nAnimationBlockIndex + RESOURCE_ID_IFP, LOADSTATE_REQUESTED);
+    CStreaming::RequestModel(IFPToModelId(m_nAnimationBlockIndex), STREAMING_GAME_REQUIRED);
     if (!animBlock->bLoaded)
         return;
 
@@ -800,7 +800,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             animNewAssoc->m_nFlags |= ANIM_FLAG_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
-            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0 && CTimer::GetTimeInMS() > 1200000) {
+            if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
                 player->Say(336, 0, 0.2f, 0, 0, 0);
             }
         }
@@ -872,12 +872,12 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
                     moveBlendRatio = 0.0f;
                 }
                 CMatrixLink* pedMatrix = player->m_matrix;
-                moveSpeed.x = (cosRadian * pedMatrix->GetRight().y + negativeSinRadian * pedMatrix->GetRight().x + pedMatrix->GetRight().z * 0.0) * moveBlendRatio;
-                moveSpeed.y = -((cosRadian * pedMatrix->GetForward().y + negativeSinRadian * pedMatrix->GetForward().x + pedMatrix->GetForward().z * 0.0) * moveBlendRatio);
+                moveSpeed.x = (cosRadian * pedMatrix->GetRight().y + negativeSinRadian * pedMatrix->GetRight().x + pedMatrix->GetRight().z * 0.0f) * moveBlendRatio;
+                moveSpeed.y = -((cosRadian * pedMatrix->GetForward().y + negativeSinRadian * pedMatrix->GetForward().x + pedMatrix->GetForward().z * 0.0f) * moveBlendRatio);
             } else {
                 player->m_fAimingRotation = limitedRadianAngle;
                 float moveSpeedY = 0.0f;
-                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, negativeSinRadian, cosRadian, 0.0, 0.0)) {
+                if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, negativeSinRadian, cosRadian, 0.0f, 0.0f)) {
                     moveSpeedY = moveBlendRatio;
                 }
                 moveSpeed.x = 0.0f;
@@ -934,7 +934,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         player->GetIntelligence()->ClearTaskDuckSecondary();
         auto useGunTask = player->GetIntelligence()->GetTaskUseGun();
         if (!useGunTask || useGunTask->m_pWeaponInfo->flags.bAimWithArm) {
-            int32 pedMoveState = PEDMOVE_NONE;
+            auto pedMoveState = PEDMOVE_NONE;
             if (pad->GetSprint()) {
                 if (pedMoveBlendRatio <= 0.5f) {
                     return;
@@ -982,14 +982,14 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         if (CGameLogic::IsPlayerUse2PlayerControls(player)) {
             float   radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float   limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-            CVector moveDirection(0.0, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+            CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
             if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, moveDirection.x, moveDirection.y, 0.0f, 0.0f)) {
                 pedMoveBlendRatio = 0.0f;
             }
-            CMatrix* pMatrix = player->m_matrix;
+            CMatrix* matrix = player->m_matrix;
             CEntity* targetedObject = player->m_pTargetedObject;
-            moveSpeed.x = (moveDirection.y * pMatrix->GetRight().y + moveDirection.x * pMatrix->GetRight().x + pMatrix->GetRight().z * 0.0f) * pedMoveBlendRatio;
-            moveSpeed.y = -((moveDirection.y * pMatrix->GetForward().y + pMatrix->GetForward().z * 0.0f + moveDirection.x * pMatrix->GetForward().x) * pedMoveBlendRatio);
+            moveSpeed.x = (moveDirection.y * matrix->GetRight().y + moveDirection.x * matrix->GetRight().x + matrix->GetRight().z * 0.0f) * pedMoveBlendRatio;
+            moveSpeed.y = -((moveDirection.y * matrix->GetForward().y + matrix->GetForward().z * 0.0f + moveDirection.x * matrix->GetForward().x) * pedMoveBlendRatio);
             if (targetedObject) {
                 CVector distance = targetedObject->GetPosition() - player->GetPosition();
                 player->m_fAimingRotation = atan2(-distance.x, distance.y);
@@ -1036,14 +1036,16 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - playerData->m_fMoveBlendRatio)
                 playerData->m_fMoveBlendRatio = pedMoveBlendRatio;
             else
-                playerData->m_fMoveBlendRatio = playerData->m_fMoveBlendRatio - fMaximumMoveBlendRatio;
+                playerData->m_fMoveBlendRatio -= fMaximumMoveBlendRatio;
         } else {
             playerData->m_fMoveBlendRatio = fMaximumMoveBlendRatio + playerData->m_fMoveBlendRatio;
         }
+    } else {
+        player->m_pPlayerData->m_fMoveBlendRatio = 0.0f;
     }
 
 DONT_MODIFY_MOVE_BLEND_RATIO:
-    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy)) {
+    if (!(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy)) {
         if (!player->m_standingOnEntity || !player->m_standingOnEntity->m_bIsStatic || player->m_standingOnEntity->m_bHasContacted) {
             if (!player->GetIntelligence()->GetTaskHold(false) || !((CTaskSimpleHoldEntity*)player->GetIntelligence()->GetTaskHold(false))->m_pAnimBlendAssociation) {
                 CAnimBlendHierarchy*  animHierarchy = nullptr;
@@ -1079,7 +1081,7 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 
     if (
         !player->bIsInTheAir
-        && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::WEAPSKILL_STD)->flags.bHeavy)
+        && !(CWeaponInfo::GetWeaponInfo(player->GetActiveWeapon().m_nType, eWeaponSkill::STD)->flags.bHeavy)
         && pad->JumpJustDown()
         && !pad->GetTarget()
         && !player->m_pAttachedTo
@@ -1103,16 +1105,17 @@ DONT_MODIFY_MOVE_BLEND_RATIO:
 }
 
 void CTaskSimplePlayerOnFoot::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskSimplePlayerOnFoot", "CTaskSimplePlayerOnFoot", 0x685750, &CTaskSimplePlayerOnFoot::Constructor);
-    Install("CTaskSimplePlayerOnFoot", "~CTaskSimplePlayerOnFoot", 0x6857D0, &CTaskSimplePlayerOnFoot::Destructor);
-    Install("CTaskSimplePlayerOnFoot", "ProcessPed_Reversed", 0x688810, &CTaskSimplePlayerOnFoot::ProcessPed_Reversed);
-    Install("CTaskSimplePlayerOnFoot", "MakeAbortable_Reversed", 0x6857E0, &CTaskSimplePlayerOnFoot::MakeAbortable_Reversed);
-    // Install("CTaskSimplePlayerOnFoot", "ProcessPlayerWeapon", 0x6859A0, &CTaskSimplePlayerOnFoot::ProcessPlayerWeapon);
-    Install("CTaskSimplePlayerOnFoot", "PlayIdleAnimations", 0x6872C0, &CTaskSimplePlayerOnFoot::PlayIdleAnimations);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlZeldaWeapon", 0x687C20, &CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlDucked", 0x687F30, &CTaskSimplePlayerOnFoot::PlayerControlDucked);
-    Install("CTaskSimplePlayerOnFoot", "PlayerControlZelda", 0x6883D0, &CTaskSimplePlayerOnFoot::PlayerControlZelda);
+    RH_ScopedClass(CTaskSimplePlayerOnFoot);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x685750);
+    RH_ScopedInstall(Destructor, 0x6857D0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x688810);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0);
+    // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
+    RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
+    RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);
+    RH_ScopedInstall(PlayerControlDucked, 0x687F30);
+    RH_ScopedInstall(PlayerControlZelda, 0x6883D0);
 }
 
 // 0x685750

@@ -1,5 +1,5 @@
-    /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+/*
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -31,7 +31,6 @@ public:
 
     uint8 m_nNextCommand; // 0x1 reloading - 0x2 firing
     uint8 m_nLastCommand; // active command - 0x1 reloading - 0x2 firing
-    char _pad[3];
     CVector2D m_vecMoveCommand;
     CEntity* m_pTarget;
     CVector m_vecTarget;
@@ -48,6 +47,8 @@ public:
     bool m_bAimImmediate;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_USE_GUN;
+
     CTaskSimpleUseGun(CEntity* targetEntity, CVector vecTarget, uint8 nCommand, uint16 nBurstLength = 1, bool bAimImmediate = false);
     ~CTaskSimpleUseGun() override;
 

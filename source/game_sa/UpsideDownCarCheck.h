@@ -1,34 +1,43 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
-
-#define UPSIDE_DOWN_CAR_CHECK_SIZE 6
+class CVehicle;
 
 struct UpsideDownCar {
-    int32 m_nCarHandle;
-    int32 m_nTime;
+    int32  m_nHandle;
+    uint32 m_nTime;
+
+    UpsideDownCar() { // 0x468DE0
+        Clear();
+    };
+
+    void Clear() {
+        m_nHandle = -1;
+        m_nTime   = 0;
+    }
 };
 
 class CUpsideDownCarCheck {
 public:
-    UpsideDownCar m_aUpsideDownCars[UPSIDE_DOWN_CAR_CHECK_SIZE];
+    static constexpr auto UPSIDE_DOWN_CAR_MIN_TIME{ 2000u };
+    std::array<UpsideDownCar, 6> m_aUpsideDownCars;
 
 public:
     static void InjectHooks();
 
-    void        Init();
-    static bool IsCarUpsideDown(CVehicle const* vehicle);
-    bool        AreAnyCarsUpsideDown();
-    void        UpdateTimers();
-    void        AddCarToCheck(int32 carHandle);
-    void        RemoveCarFromCheck(int32 carHandle);
-    bool        HasCarBeenUpsideDownForAWhile(int32 carHandle);
+    void Init();
+    bool IsCarUpsideDown(int32 carHandle);
+    bool IsCarUpsideDown(CVehicle* vehicle);
+    bool AreAnyCarsUpsideDown();
+    void UpdateTimers();
+    void AddCarToCheck(int32 car);
+    void RemoveCarFromCheck(int32 carHandle);
+    bool HasCarBeenUpsideDownForAWhile(int32 car);
 };
 
 VALIDATE_SIZE(CUpsideDownCarCheck, 0x30);

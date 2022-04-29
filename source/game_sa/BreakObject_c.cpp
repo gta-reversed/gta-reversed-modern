@@ -3,16 +3,18 @@
 #include "BreakObject_c.h"
 
 void BreakObject_c::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("BreakObject_c", "CalcGroupCenter", 0x59D190, &BreakObject_c::CalcGroupCenter);
-    Install("BreakObject_c", "SetGroupData", 0x59D570, &BreakObject_c::SetGroupData);
-    Install("BreakObject_c", "SetBreakInfo", 0x59D7F0, &BreakObject_c::SetBreakInfo);
-    Install("BreakObject_c", "Exit", 0x59DDD0, &BreakObject_c::Exit);
-    Install("BreakObject_c", "DoCollisionResponse", 0x59DE40, &BreakObject_c::DoCollisionResponse);
-    Install("BreakObject_c", "DoCollision", 0x59E1F0, &BreakObject_c::DoCollision);
-    Install("BreakObject_c", "Update", 0x59E220, &BreakObject_c::Update);
-    Install("BreakObject_c", "Render", 0x59E480, &BreakObject_c::Render);
-    Install("BreakObject_c", "Init", 0x59E750, &BreakObject_c::Init);
+    RH_ScopedClass(BreakObject_c);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(CalcGroupCenter, 0x59D190);
+    RH_ScopedInstall(SetGroupData, 0x59D570);
+    RH_ScopedInstall(SetBreakInfo, 0x59D7F0);
+    RH_ScopedInstall(Exit, 0x59DDD0);
+    RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
+    RH_ScopedInstall(DoCollision, 0x59E1F0);
+    RH_ScopedInstall(Update, 0x59E220);
+    RH_ScopedInstall(Render, 0x59E480);
+    RH_ScopedInstall(Init, 0x59E750);
 }
 
 // 0x59D170
@@ -40,7 +42,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
 // Methods
 // 0x59D570
 void BreakObject_c::SetGroupData(RwMatrix* matrix, CVector* posn, float a5) {
-    plugin::CallMethod<0x59D570, BreakObject_c*, RwMatrixTag*, CVector*, float>(this, matrix, posn, a5);
+    plugin::CallMethod<0x59D570, BreakObject_c*, RwMatrix*, CVector*, float>(this, matrix, posn, a5);
 }
 
 // 0x59D7F0
@@ -65,5 +67,5 @@ void BreakObject_c::Update(float timeStep) {
 
 // 0x59E480
 void BreakObject_c::Render(bool a1) {
-    plugin::CallMethod<0x59E480, BreakObject_c*, uint8>(this, a1);
+    plugin::CallMethod<0x59E480, BreakObject_c*>(this, a1);
 }

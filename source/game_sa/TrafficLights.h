@@ -9,7 +9,6 @@ enum eTrafficLightsState {
     LIGHT_OFF = 3
 };
 
-//1 - North-South, 2 - West-East cycle
 enum eTrafficLightsDirection {
     DIR_NORTH_SOUTH = 1,
     DIR_WEST_EAST = 2
@@ -17,9 +16,9 @@ enum eTrafficLightsDirection {
 
 class CTrafficLights {
 private:
-    static uint8(&aTrafficLightColoursR)[3];
-    static uint8(&aTrafficLightColoursG)[3];
-    static uint8(&aTrafficLightColoursB)[3];
+    static uint8 (&aTrafficLightColoursR)[3];
+    static uint8 (&aTrafficLightColoursG)[3];
+    static uint8 (&aTrafficLightColoursB)[3];
     static float& fLightMult;
 
     static CVector& vecTrafficLights5_1;
@@ -32,9 +31,9 @@ public:
     static void InjectHooks();
 
 public:
-    static bool ShouldCarStopForLight(CVehicle* pVehicle, bool bUnkn);
-    static bool ShouldCarStopForBridge(CVehicle* pVehicle);
-    static void DisplayActualLight(CEntity* pEntity);
+    static bool ShouldCarStopForLight(CVehicle* vehicle, bool bUnkn);
+    static bool ShouldCarStopForBridge(CVehicle* vehicle);
+    static void DisplayActualLight(CEntity* entity);
     static bool IsMITrafficLight(int32 modelIndex);
     static uint8 LightForPeds();
 
@@ -43,7 +42,7 @@ private:
     static uint8 LightForCars2();
     static uint8 LightForCars1_Visual();
     static uint8 LightForCars2_Visual();
-    static int32 FindTrafficLightType(CEntity* pEntity);
-    static float FindOrientationForTrafficLightType(CEntity* pEntity);
+    static int32 FindTrafficLightType(CEntity* entity);
+    static float FindOrientationForTrafficLightType(CEntity* entity);
     static int32 FindTrafficLightTypeFromOrientation(float fOrientation);
 };

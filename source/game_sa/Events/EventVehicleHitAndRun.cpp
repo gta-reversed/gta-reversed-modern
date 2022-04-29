@@ -1,26 +1,29 @@
 #include "StdInc.h"
 
+#include "EventVehicleHitAndRun.h"
+
 void CEventVehicleHitAndRun::InjectHooks()
 {
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Constructor", 0x4AE990, &CEventVehicleHitAndRun::Constructor);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "Clone_Reversed", 0x4B7100, &CEventVehicleHitAndRun::Clone_Reversed);
-    ReversibleHooks::Install("CEventVehicleHitAndRun", "ReportCriminalEvent_Reversed", 0x4B27D0, &CEventVehicleHitAndRun::ReportCriminalEvent_Reversed);
+    RH_ScopedClass(CEventVehicleHitAndRun);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AE990);
+    RH_ScopedVirtualInstall(Clone, 0x4B7100);
+    RH_ScopedVirtualInstall(ReportCriminalEvent, 0x4B27D0);
 }
 
 CEventVehicleHitAndRun::CEventVehicleHitAndRun(CPed* victim, CVehicle* vehicle)
 {
     m_victim = victim;
     m_vehicle = vehicle;
-    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    m_victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));
+    m_vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle)); // *
+    m_victim->RegisterReference(reinterpret_cast<CEntity**>(&m_victim));   // ** todo: possible nullptr
 }
 
 CEventVehicleHitAndRun::~CEventVehicleHitAndRun()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
-    if (m_victim)
-        m_victim->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_victim));
+    CEntity::SafeCleanUpRef(m_vehicle);
+    CEntity::SafeCleanUpRef(m_victim);
 }
 
 // 0x4AE990
@@ -51,8 +54,8 @@ void CEventVehicleHitAndRun::ReportCriminalEvent_Reversed(CPed* ped)
 {
     if (IsCriminalEvent()) {
         if (m_victim->m_nPedType == PED_TYPE_COP)
-            FindPlayerWanted(-1)->RegisterCrime(eCrimeType::CRIME_KILL_COP_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
+            FindPlayerWanted()->RegisterCrime(eCrimeType::CRIME_KILL_COP_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
         else
-            FindPlayerWanted(-1)->RegisterCrime(eCrimeType::CRIME_KILL_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
+            FindPlayerWanted()->RegisterCrime(eCrimeType::CRIME_KILL_PED_WITH_CAR, m_vehicle->GetPosition(), m_vehicle->m_pDriver, false);
     }
 }

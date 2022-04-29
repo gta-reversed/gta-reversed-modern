@@ -2,23 +2,21 @@
 
 #include "TaskSimpleCarSetPedInAsDriver.h"
 
-CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* pTargetVehicle, CTaskUtilityLineUpPedWithCar* pUtility)
+CTaskSimpleCarSetPedInAsDriver::CTaskSimpleCarSetPedInAsDriver(CVehicle* targetVehicle, CTaskUtilityLineUpPedWithCar* utility)
 {
     m_bIsFinished = 0;
     m_pAnim = 0;
-    m_pTargetVehicle = pTargetVehicle;
-    m_pUtility = pUtility;
+    m_pTargetVehicle = targetVehicle;
+    m_pUtility = utility;
     m_bWarpingInToCar = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (pTargetVehicle)
-        pTargetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
 CTaskSimpleCarSetPedInAsDriver::~CTaskSimpleCarSetPedInAsDriver()
 {
-    if (m_pTargetVehicle)
-        m_pTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
 CTask* CTaskSimpleCarSetPedInAsDriver::Clone()

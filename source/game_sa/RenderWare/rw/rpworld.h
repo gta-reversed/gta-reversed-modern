@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -496,7 +496,7 @@ struct RpMeshHeader
  */
 typedef RpMesh     *(*RpMeshCallBack) (RpMesh * mesh,
                                        RpMeshHeader * meshHeader,
-                                       void *pData);
+                                       void *data);
 
 /*--- Automatically derived from: C:/daily/rwsdk/world/bameshop.h ---*/
 
@@ -1325,6 +1325,57 @@ struct RpLightTie
     RwLLLink            WorldSectorInLight; /**< Atomic sectors HOLDING this Light */
     RpWorldSector      *sect;               /**< A pointer to a world sector */
 };
+
+/****************************************************************************
+ <macro/inline functionality
+ */
+
+#define RpLightGetRadiusMacro(_light)                       \
+    ((_light)->radius)
+
+#define RpLightGetColorMacro(_light)                        \
+    (&((_light)->color))
+
+#define RpLightSetFrameMacro(_light, _frame)                \
+    (rwObjectHasFrameSetFrame((_light), (_frame)), (_light))
+
+#define RpLightGetFrameMacro(_light)                        \
+    ((RwFrame *)rwObjectGetParent((_light)))
+
+#define RpLightGetTypeMacro(_light)                         \
+    ((RpLightType)rwObjectGetSubType((_light)))
+
+#define RpLightSetFlagsMacro(_light, _flags)                \
+    ((rwObjectSetFlags((_light), (_flags))), (_light))
+
+#define RpLightGetFlagsMacro(_light)                        \
+    (rwObjectGetFlags((_light)))
+
+
+#if !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE))
+
+#define RpLightGetRadius(_light)                            \
+    RpLightGetRadiusMacro(_light)
+
+#define RpLightGetColor(_light)                             \
+    RpLightGetColorMacro(_light)
+
+#define RpLightSetFrame(_light, _frame)                     \
+    RpLightSetFrameMacro(_light, _frame)
+
+#define RpLightGetFrame(_light)                             \
+    RpLightGetFrameMacro(_light)
+
+#define RpLightGetType(_light)                              \
+    RpLightGetTypeMacro(_light)
+
+#define RpLightSetFlags(_light, _flags)                     \
+    RpLightSetFlagsMacro(_light, _flags)
+
+#define RpLightGetFlags(_light)                             \
+    RpLightGetFlagsMacro(_light)
+
+#endif /* !(defined(RWDEBUG) || defined(RWSUPPRESSINLINE)) */
 
 /*--- Automatically derived from: C:/daily/rwsdk/world/pipe/p2/d3d9/D3D9lights.h ---*/
 /*
@@ -2358,7 +2409,7 @@ RpBuildMesh* _rpBuildMeshCreate(RwUInt32 bufferSize); // 0x758A90
 RwBool _rpBuildMeshDestroy(RpBuildMesh* mesh); // 0x758B80
 RwBool _rpMeshDestroy(RpMeshHeader* mesh); // 0x758BC0
 RpBuildMesh* _rpBuildMeshAddTriangle(RpBuildMesh* mesh, RpMaterial* material, RwInt32 vert1, RwInt32 vert2, RwInt32 vert3, RwUInt16 matIndex, RwUInt16 textureIndex, RwUInt16 rasterIndex, RwUInt16 pipelineIndex); // 0x758C00
-RpMeshHeader* _rpMeshHeaderForAllMeshes(RpMeshHeader* meshHeader, RpMeshCallBack fpCallBack, void* pData); // 0x758D30
+RpMeshHeader* _rpMeshHeaderForAllMeshes(RpMeshHeader* meshHeader, RpMeshCallBack fpCallBack, void* data); // 0x758D30
 RwStream* _rpMeshWrite(const RpMeshHeader* meshHeader, const void* object, RwStream* stream, const RpMaterialList* matList); // 0x758D70
 RpMeshHeader* _rpMeshRead(RwStream* stream, const void* object, const RpMaterialList* matList); // 0x758EC0
 RwInt32 _rpMeshSize(const RpMeshHeader* meshHeader, const void* object); // 0x759090
@@ -2390,10 +2441,10 @@ const RpGeometry* RpGeometryTriangleSetVertexIndices(const RpGeometry* geometry,
 RpGeometry* RpGeometryTriangleSetMaterial(RpGeometry* geometry, RpTriangle* triangle, RpMaterial* material); // 0x74C6C0
 const RpGeometry* RpGeometryTriangleGetVertexIndices(const RpGeometry* geometry, const RpTriangle* triangle, RwUInt16* vert1, RwUInt16* vert2, RwUInt16* vert3); // 0x74C720
 RpMaterial* RpGeometryTriangleGetMaterial(const RpGeometry* geometry, const RpTriangle* triangle); // 0x74C760
-RpGeometry* RpGeometryForAllMaterials(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* pData); // 0x74C790
+RpGeometry* RpGeometryForAllMaterials(RpGeometry* geometry, RpMaterialCallBack fpCallBack, void* data); // 0x74C790
 RpGeometry* RpGeometryLock(RpGeometry* geometry, RwInt32 lockMode); // 0x74C7D0
 RpGeometry* RpGeometryUnlock(RpGeometry* geometry); // 0x74C800
-const RpGeometry* RpGeometryForAllMeshes(const RpGeometry* geometry, RpMeshCallBack fpCallBack, void* pData); // 0x74CA60
+const RpGeometry* RpGeometryForAllMeshes(const RpGeometry* geometry, RpMeshCallBack fpCallBack, void* data); // 0x74CA60
 RpGeometry* RpGeometryCreate(RwInt32 numVert, RwInt32 numTriangles, RwUInt32 format); // 0x74CA90
 RwBool RpGeometryDestroy(RpGeometry* geometry); // 0x74CCC0
 RwInt32 RpGeometryRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x74CD70
@@ -2406,7 +2457,7 @@ const RpGeometry* RpGeometryStreamWrite(const RpGeometry* geometry, RwStream* st
 RpGeometry* RpGeometryStreamRead(RwStream* stream); // 0x74D190
 RpGeometryChunkInfo* _rpGeometryChunkInfoRead(RwStream* stream, RpGeometryChunkInfo* geometryChunkInfo, RwInt32* bytesRead); // 0x74D750
 RpWorldSector* RpWorldSectorRender(RpWorldSector* worldSector); // 0x761C50
-const RpWorldSector* RpWorldSectorForAllMeshes(const RpWorldSector* sector, RpMeshCallBack fpCallBack, void* pData); // 0x761C60
+const RpWorldSector* RpWorldSectorForAllMeshes(const RpWorldSector* sector, RpMeshCallBack fpCallBack, void* data); // 0x761C60
 RwInt32 RpWorldSectorRegisterPlugin(RwInt32 size, RwUInt32 pluginID, RwPluginObjectConstructor constructCB, RwPluginObjectDestructor destructCB, RwPluginObjectCopy copyCB); // 0x761C90
 RwInt32 RpWorldSectorRegisterPluginStream(RwUInt32 pluginID, RwPluginDataChunkReadCallBack readCB, RwPluginDataChunkWriteCallBack writeCB, RwPluginDataChunkGetSizeCallBack getSizeCB); // 0x761CC0
 RwInt32 RpWorldSectorSetStreamAlwaysCallBack(RwUInt32 pluginID, RwPluginDataChunkAlwaysCallBack alwaysCB); // 0x761CF0
@@ -2442,9 +2493,9 @@ RpAtomic* AtomicDefaultRenderCallBack(RpAtomic* atomic); // 0x7491C0
 void _rpAtomicResyncInterpolatedSphere(RpAtomic* atomic); // 0x7491F0
 const RwSphere* RpAtomicGetWorldBoundingSphere(RpAtomic* atomic); // 0x749330
 void RpClumpGtaCancelStream();
-RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* pData); // 0x749B70
-RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* pData); // 0x749C00
-RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* pData); // 0x749BB0
+RpClump* RpClumpForAllAtomics(RpClump* clump, RpAtomicCallBack callback, void* data); // 0x749B70
+RpClump* RpClumpForAllLights(RpClump* clump, RpLightCallBack callback, void* data); // 0x749C00
+RpClump* RpClumpForAllCameras(RpClump* clump, RwCameraCallBack callback, void* data); // 0x749BB0
 RpAtomic* RpAtomicSetFrame(RpAtomic* atomic, RwFrame* frame); // 0x74BF20
 RpClump* RpClumpCreateSpace(const RwV3d* position, RwReal radius); // 0x749970
 RpClump* RpClumpRender(RpClump* clump); // 0x749B20
@@ -2491,18 +2542,18 @@ RwBool _rpWorldFindBBox(RpWorld* world, RwBBox* boundingBox); // 0x74EFA0
 RpWorld* _rpWorldSetupSectorBoundingBoxes(RpWorld* world); // 0x74F020
 void _rpWorldSectorDeinstanceAll(RpSector* sector); // 0x74ECA0
 void _rpWorldSectorDestroyRecurse(RpSector* sector); // 0x74ED50
-RwBool _rpWorldForAllGlobalLights(RpLightCallBack callBack, void* pData); // 0x74EF10
-RpWorldSector* _rpWorldSectorForAllLocalLights(RpWorldSector* sector, RpLightCallBack callBack, void* pData); // 0x74EF60
+RwBool _rpWorldForAllGlobalLights(RpLightCallBack callBack, void* data); // 0x74EF10
+RpWorldSector* _rpWorldSectorForAllLocalLights(RpWorldSector* sector, RpLightCallBack callBack, void* data); // 0x74EF60
 RpWorldSector* _rpSectorDefaultRenderCallBack(RpWorldSector* sector); // 0x74EEC0
 RpWorld* RpWorldLock(RpWorld* world); // 0x74F1A0
 RpWorld* RpWorldUnlock(RpWorld* world); // 0x74F210
 void _rpWorldRegisterWorld(RpWorld* world, RwUInt32 memorySize); // 0x74F0C0
 void _rpWorldUnregisterWorld(RpWorld* world); // 0x74F140
 RwBool RpWorldPluginAttach(); // 0x74FDA0
-RpWorld* RpWorldForAllClumps(RpWorld* world, RpClumpCallBack fpCallBack, void* pData); // 0x74FB80
-RpWorld* RpWorldForAllMaterials(RpWorld* world, RpMaterialCallBack fpCallBack, void* pData); // 0x74FBC0
-RpWorld* RpWorldForAllLights(RpWorld* world, RpLightCallBack fpCallBack, void* pData); // 0x74FC00
-RpWorld* RpWorldForAllWorldSectors(RpWorld* world, RpWorldSectorCallBack fpCallBack, void* pData); // 0x74FC70
+RpWorld* RpWorldForAllClumps(RpWorld* world, RpClumpCallBack fpCallBack, void* data); // 0x74FB80
+RpWorld* RpWorldForAllMaterials(RpWorld* world, RpMaterialCallBack fpCallBack, void* data); // 0x74FBC0
+RpWorld* RpWorldForAllLights(RpWorld* world, RpLightCallBack fpCallBack, void* data); // 0x74FC00
+RpWorld* RpWorldForAllWorldSectors(RpWorld* world, RpWorldSectorCallBack fpCallBack, void* data); // 0x74FC70
 RpWorld* RpWorldRender(RpWorld* world); // 0x74F570
 RwBool RpWorldDestroy(RpWorld* world); // 0x74F610
 RpWorld* RpWorldCreate(RwBBox* boundingBox); // 0x74F760
@@ -2567,7 +2618,7 @@ RpWorld* RpWorldRemoveLight(RpWorld* world, RpLight* light); // 0x751960
 RpWorld* RpLightGetWorld(const RpLight* light); // 0x7519E0
 RwCamera* RwCameraForAllClumpsInFrustum(RwCamera* camera, void* data); // 0x7516C0
 RwCamera* RwCameraForAllAtomicsInFrustum(RwCamera* camera, RpAtomicCallBack callback, void* data); // 0x7517F0
-RwCamera* RwCameraForAllSectorsInFrustum(RwCamera* camera, RpWorldSectorCallBack callBack, void* pData); // 0x751660
+RwCamera* RwCameraForAllSectorsInFrustum(RwCamera* camera, RpWorldSectorCallBack callBack, void* data); // 0x751660
 RpLight* RpLightForAllWorldSectors(RpLight* light, RpWorldSectorCallBack callback, void* data); // 0x7519F0
 RpAtomic* RpAtomicForAllWorldSectors(RpAtomic* atomic, RpWorldSectorCallBack callback, void* data); // 0x751060
 RpWorldSector* RpWorldSectorForAllAtomics(RpWorldSector* sector, RpAtomicCallBack callback, void* data); // 0x7510A0

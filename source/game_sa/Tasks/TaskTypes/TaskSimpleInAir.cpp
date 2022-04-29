@@ -3,17 +3,20 @@
 #include "TaskSimpleInAir.h"
 
 #include "TaskComplexInAirAndLand.h"
+#include "TaskSimpleClimb.h"
 
 float CTaskSimpleInAir::ms_fSlowFallThreshold = -0.05F;
 uint32 CTaskSimpleInAir::ms_nMaxSlowFallFrames = 10;
 
 void CTaskSimpleInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleInAir", "Constructor", 0x678CD0, &CTaskSimpleInAir::Constructor);
-    ReversibleHooks::Install("CTaskSimpleInAir", "DeleteAnimCB", 0x678E60, &CTaskSimpleInAir::DeleteAnimCB);
-    //VTABLE
-    ReversibleHooks::Install("CTaskSimpleInAir", "ProcessPed", 0x680600, &CTaskSimpleInAir::ProcessPed_Reversed);
-    ReversibleHooks::Install("CTaskSimpleInAir", "MakeAbortable", 0x678DC0, &CTaskSimpleInAir::MakeAbortable_Reversed);
+    RH_ScopedClass(CTaskSimpleInAir);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x678CD0);
+    RH_ScopedInstall(DeleteAnimCB, 0x678E60);
+    RH_ScopedVirtualInstall(ProcessPed, 0x680600);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)
@@ -25,9 +28,9 @@ CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsin
 // 0x678CD0
 CTaskSimpleInAir::CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump) : m_timer()
 {
-    this->bUsingJumpGlide = bUsingJumpGlide;
-    this->bUsingFallGlide = bUsingFallGlide;
-    this->bUsingClimbJump = bUsingClimbJump;
+    this->m_bUsingJumpGlide = bUsingJumpGlide;
+    this->m_bUsingFallGlide = bUsingFallGlide;
+    this->m_bUsingClimbJump = bUsingClimbJump;
 
     m_pAnim = nullptr;
     m_fMinZSpeed = 0.0F;
@@ -43,8 +46,7 @@ CTaskSimpleInAir::~CTaskSimpleInAir()
     if (m_pAnim)
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
-    if (m_pClimbEntity)
-        m_pClimbEntity->CleanUpOldReference(&m_pClimbEntity);
+    CEntity::SafeCleanUpRef(m_pClimbEntity);
 }
 
 // 0x680600
@@ -61,8 +63,8 @@ bool CTaskSimpleInAir::MakeAbortable(CPed* ped, eAbortPriority priority, const C
 
 bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 {
-    CColPoint colPoint;
-    CEntity* pColEntity;
+    CColPoint colPoint{}; // default initialization is NOTSA
+    CEntity* colEntity;
 
     CVector originalPosn = ped->m_matrix->GetPosition();
     float fColDistance = originalPosn.z - 4.0F;
@@ -79,7 +81,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
     if (!m_pAnim)
     {
         ped->bIsInTheAir = true;
-        if (bUsingJumpGlide)
+        if (m_bUsingJumpGlide)
         {
             m_pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_JUMP_GLIDE);
             if (!m_pAnim)
@@ -87,7 +89,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (!m_pAnim || m_pAnim->m_fBlendAmount < 1.0F && m_pAnim->m_fBlendDelta <= 0.0F)
                 CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_JUMP_GLIDE, 4.0F);
         }
-        else if (bUsingFallGlide)
+        else if (m_bUsingFallGlide)
         {
             if (ped->m_vecMoveSpeed.z <= 0.0F)
             {
@@ -100,7 +102,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         {
             m_pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, ANIM_ID_CLIMB_JUMP);
             if (!m_pAnim || m_pAnim->m_fBlendAmount < 1.0F && m_pAnim->m_fBlendDelta <= 0.0F)
-                CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_FALL_GLIDE, 4.0F);
+                m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_FALL_GLIDE, 4.0F);
         }
 
         if (m_pAnim)
@@ -117,10 +119,10 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         ped->ApplyMoveForce(0.0F, 0.0F, CTimer::GetTimeStep() * ped->m_fMass * 0.35F * GAME_GRAVITY);
     }
     else if (ped->m_vecMoveSpeed.z > 0.0F && !ped->m_vecMoveSpeed.IsZero()
-        || !bUsingFallGlide && (ped->m_nPedState == PEDSTATE_DIE || ped->m_nPedState == PEDSTATE_DEAD)
+        || !m_bUsingFallGlide && (ped->m_nPedState == PEDSTATE_DIE || ped->m_nPedState == PEDSTATE_DEAD)
         )
     {
-        if (!bUsingFallGlide)
+        if (!m_bUsingFallGlide)
         {
             if (m_pParentTask && m_pParentTask->m_pParentTask && m_pParentTask->m_pParentTask->GetTaskType() == TASK_COMPLEX_JUMP)
             {
@@ -140,9 +142,9 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
 
         bool bStopFalling = ped->bIsStanding;
         if (!bStopFalling)
-            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, pColEntity, true, true, false, true, false, false, 0);
+            bStopFalling = CWorld::ProcessVerticalLine(originalPosn, fColDistance, colPoint, colEntity, true, true, false, true, false, false, 0);
 
-        if (bUsingFallGlide)
+        if (m_bUsingFallGlide)
         {
             if (ms_fSlowFallThreshold < ped->m_vecMoveSpeed.z && ped->m_vecMoveSpeed.z <= 0.0F)
             {
@@ -168,12 +170,16 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 }
             }
         }
+        /*
+        * Run-Time Check Failure #3 - The variable 'colPoint' is being used without being initialized.
+        * Until *colPoint* will not be initialized in CWorld::ProcessVerticalLine we will be drop here
+        */
         else if (ped->m_matrix->GetPosition().z - colPoint.m_vecPoint.z < 1.3F
             || ped->bIsStanding
             || ped->m_pAttachedTo
             )
         {
-            if (m_pAnim && bUsingFallGlide)
+            if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_fBlendDelta = -1000.0F;
                 m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
@@ -185,12 +191,10 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
         }
     }
 
-    if (bUsingJumpGlide
-        && !m_pClimbEntity
-        && ped->m_nPedState != PEDSTATE_DIE
-        && ped->m_nPedState != PEDSTATE_DEAD
+    if (m_bUsingJumpGlide && !m_pClimbEntity
+        && ped->IsAlive()
         && ped->IsPlayer()
-        && CGame::currArea == AREA_CODE_NORMAL_WORLD
+        && CGame::CanSeeOutSideFromCurrArea()
         && ped->m_vecMoveSpeed.z > -0.2F
         && ped->m_vecMoveSpeed.Magnitude2D() > 0.05F)
     {
@@ -234,9 +238,9 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x678E60
-void CTaskSimpleInAir::DeleteAnimCB(CAnimBlendAssociation* pAnim, void* data)
+void CTaskSimpleInAir::DeleteAnimCB(CAnimBlendAssociation* anim, void* data)
 {
-    auto pTask = reinterpret_cast<CTaskSimpleInAir*>(data);
-    if (pTask && pTask->m_pAnim && pTask->m_pAnim == pAnim)
-        pTask->m_pAnim = nullptr;
+    auto task = reinterpret_cast<CTaskSimpleInAir*>(data);
+    if (task && task->m_pAnim && task->m_pAnim == anim)
+        task->m_pAnim = nullptr;
 }

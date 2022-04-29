@@ -1,21 +1,28 @@
 #include "StdInc.h"
 
+#include "CollisionData.h"
+#include "ColHelpers.h"
+
 void CCollisionData::InjectHooks()
 {
-    ReversibleHooks::Install("CCollisionData", "RemoveCollisionVolumes", 0x40F070, &CCollisionData::RemoveCollisionVolumes);
-    ReversibleHooks::Install("CCollisionData", "RemoveTrianglePlanes", 0x40F6A0, &CCollisionData::RemoveTrianglePlanes);
-    ReversibleHooks::Install("CCollisionData", "Copy", 0x40F120, &CCollisionData::Copy);
-    ReversibleHooks::Install("CCollisionData", "GetTrianglePoint", 0x40F5E0, &CCollisionData::GetTrianglePoint);
-    ReversibleHooks::Install("CCollisionData", "GetShadTrianglePoint", 0x40F640, &CCollisionData::GetShadTrianglePoint);
-    ReversibleHooks::Install("CCollisionData", "CalculateTrianglePlanes", 0x40F590, &CCollisionData::CalculateTrianglePlanes);
-    ReversibleHooks::Install("CCollisionData", "SetLinkPtr", 0x40F6C0, &CCollisionData::SetLinkPtr);
-    ReversibleHooks::Install("CCollisionData", "GetLinkPtr", 0x40F6E0, &CCollisionData::GetLinkPtr);
+    RH_ScopedClass(CCollisionData);
+    RH_ScopedCategory("Collision");
+
+    RH_ScopedInstall(RemoveCollisionVolumes, 0x40F070);
+    RH_ScopedInstall(RemoveTrianglePlanes, 0x40F6A0);
+    RH_ScopedInstall(Copy, 0x40F120);
+    RH_ScopedInstall(GetTrianglePoint, 0x40F5E0);
+    RH_ScopedInstall(GetShadTrianglePoint, 0x40F640);
+    RH_ScopedInstall(CalculateTrianglePlanes, 0x40F590);
+    RH_ScopedInstall(SetLinkPtr, 0x40F6C0);
+    RH_ScopedInstall(GetLinkPtr, 0x40F6E0);
 }
 
+// 0x40F030
 CCollisionData::CCollisionData()
 {
     bUsesDisks = false;
-    bNotEmpty = false;
+    bHasFaceGroups = false;
     bHasShadowInfo = false;
 
     m_nNumSpheres = 0;
@@ -34,8 +41,12 @@ CCollisionData::CCollisionData()
     m_nNumShadowVertices = 0;
     m_pShadowTriangles = nullptr;
     m_pShadowVertices = nullptr;
+    /*
+     * todo: initialize bHasFaceGroups, bHasShadow, m_pDisks as NOTSA or something
+     * */
 }
 
+// 0x40F070
 void CCollisionData::RemoveCollisionVolumes()
 {
     CMemoryMgr::Free(m_pSpheres);
@@ -61,8 +72,11 @@ void CCollisionData::RemoveCollisionVolumes()
     m_pShadowVertices = nullptr;
 }
 
-void CCollisionData::Copy(CCollisionData const& src)
+// 0x40F120
+void CCollisionData::Copy(const CCollisionData& src)
 {
+    assert(!bHasFaceGroups); // Avoid possible random bugs - See header for more info.
+
 // ----- SPHERES -----
     if (m_nNumSpheres != src.m_nNumSpheres || !src.m_nNumSpheres)
     {
@@ -184,6 +198,7 @@ void CCollisionData::Copy(CCollisionData const& src)
 }
 
 // Memory layout: | CColTrianglePlane[] | (4 Byte aligned)CLink<CCollisionData*>* |
+// 0x40F590
 void CCollisionData::CalculateTrianglePlanes()
 {
     m_pTrianglePlanes = static_cast<CColTrianglePlane*>(CMemoryMgr::Malloc((m_nNumTriangles + 1) * sizeof(CColTrianglePlane)));
@@ -191,40 +206,69 @@ void CCollisionData::CalculateTrianglePlanes()
         m_pTrianglePlanes[i].Set(m_pVertices, m_pTriangles[i]);
 }
 
+// 0x40F6A0
 void CCollisionData::RemoveTrianglePlanes()
 {
     CMemoryMgr::Free(m_pTrianglePlanes);
     m_pTrianglePlanes = nullptr;
 }
 
+// 0x40F5E0
 void CCollisionData::GetTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pVertices[vertId]);
 }
 
+// 0x40F640
 void CCollisionData::GetShadTrianglePoint(CVector& outVec, int32 vertId)
 {
     outVec = UncompressVector(m_pShadowVertices[vertId]);
 }
 
+// 0x40F6C0
 void CCollisionData::SetLinkPtr(CLink<CCollisionData*>* link)
 {
     // Original calculation method:
     // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
-    auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
+    auto* linkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);
-    auto* pAlignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), pLinkPtr, space);// 4 bytes aligned address
-    *static_cast<CLink<CCollisionData*>**>(pAlignedAddress) = link;
+    auto* alignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), linkPtr, space);// 4 bytes aligned address
+    *static_cast<CLink<CCollisionData*>**>(alignedAddress) = link;
 }
 
+// 0x40F6E0
 CLink<CCollisionData*>* CCollisionData::GetLinkPtr()
 {
     // Original calculation method:
     // const auto dwLinkAddress = (reinterpret_cast<uint32>(&m_pTrianglePlanes[m_nNumTriangles]) + 3) & 0xFFFFFFFC; // 4 bytes aligned address
 
-    auto* pLinkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
+    auto* linkPtr = static_cast<void*>(&m_pTrianglePlanes[m_nNumTriangles]);
     auto space = sizeof(CColTrianglePlane);
-    auto* pAlignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), pLinkPtr, space);// 4 bytes aligned address
-    return *static_cast<CLink<CCollisionData*>**>(pAlignedAddress);
+    auto* alignedAddress = std::align(4, sizeof(CLink<CCollisionData*>*), linkPtr, space);// 4 bytes aligned address
+    return *static_cast<CLink<CCollisionData*>**>(alignedAddress);
+}
+
+auto CCollisionData::GetNumFaceGroups() const -> uint32 {
+    // See `CCollisionData` header for explanation :)
+    return bHasFaceGroups ? *(uint32*)((char*)m_pTriangles - sizeof(uint32)) : 0u;
+}
+
+auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> {
+    using namespace ColHelpers;
+
+    if (bHasFaceGroups) {
+        // See `CCollisionData` header for explanation :)
+        return std::span{
+            (TFaceGroup*)((char*)m_pTriangles - sizeof(uint32) - sizeof(TFaceGroup) * GetNumFaceGroups()),
+            GetNumFaceGroups()
+        };
+    }
+    return {};
+}
+
+// NOTSA
+void CCollisionData::AllocateLines(uint32 num) {
+    m_nNumLines = num;
+    m_pLines = (CColLine*)CMemoryMgr::Malloc(sizeof(CColLine) * num);
 }

@@ -1,11 +1,4 @@
-/*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
-
 
 #include "TaskComplexWander.h"
 #include "TaskTimer.h"
@@ -13,9 +6,20 @@
 class CTaskComplexWanderStandard : public CTaskComplexWander {
 public:
     CTaskTimer m_TaskTimer;
-    int32 m_nMinNextScanTime;
+    uint32     m_nMinNextScanTime;
 
-    CTaskComplexWanderStandard* Constructor(int32 MoveState, uint8 Dir, bool bWanderSensibly = true);
+public:
+    CTaskComplexWanderStandard(int32 MoveState, uint8 Dir, bool bWanderSensibly = true);
+
+    CTask* Clone() override { return new CTaskComplexWanderStandard(m_nMoveState, m_nDir); } // 0x48E530
+    eWanderType GetWanderType() override { return WANDER_TYPE_STANDARD; } // 0x48E5D0
+    void ScanForStuff(CPed* ped) override;
+
+    bool WillChat(const CPed& first, const CPed& second);
+    void SetNextMinScanTime(CPed* ped);
+    bool LookForSexyCars(CPed* ped);
+    bool LookForChatPartners(CPed* ped);
+    bool LookForGangMembers(CPed* ped);
 };
 
 VALIDATE_SIZE(CTaskComplexWanderStandard, 0x38);

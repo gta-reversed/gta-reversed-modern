@@ -6,22 +6,24 @@
 #include "AEAudioUtility.h"
 
 void CAECollisionAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAECollisionAudioEntity", "Initialise", 0x5B9BD0, &CAECollisionAudioEntity::Initialise);
-    Install("CAECollisionAudioEntity", "InitialisePostLoading", 0x4DA050, &CAECollisionAudioEntity::InitialisePostLoading);
-    // Install("CAECollisionAudioEntity", "AddCollisionSoundToList", 0x4DAAC0, &CAECollisionAudioEntity::AddCollisionSoundToList);
-    // Install("CAECollisionAudioEntity", "Reset", 0x4DA320, &CAECollisionAudioEntity::Reset);
-    // Install("CAECollisionAudioEntity", "ReportGlassCollisionEvent", 0x4DA070, &CAECollisionAudioEntity::ReportGlassCollisionEvent);
-    // Install("CAECollisionAudioEntity", "ReportWaterSplash", 0x4DA190, &CAECollisionAudioEntity::ReportWaterSplash);
-    // Install("CAECollisionAudioEntity", "UpdateLoopingCollisionSound", 0x4DA540, &CAECollisionAudioEntity::UpdateLoopingCollisionSound);
-    // Install("CAECollisionAudioEntity", "GetCollisionSoundStatus", 0x4DA830, &CAECollisionAudioEntity::GetCollisionSoundStatus);
-    // Install("CAECollisionAudioEntity", "ReportObjectDestruction", 0x4DAB60, &CAECollisionAudioEntity::ReportObjectDestruction);
-    // Install("CAECollisionAudioEntity", "ReportWaterSplash", 0x4DAE40, &CAECollisionAudioEntity::ReportWaterSplash);
-    // Install("CAECollisionAudioEntity", "PlayOneShotCollisionSound", 0x4DB150, &CAECollisionAudioEntity::PlayOneShotCollisionSound);
-    // Install("CAECollisionAudioEntity", "PlayLoopingCollisionSound", 0x4DB450, &CAECollisionAudioEntity::PlayLoopingCollisionSound);
-    // Install("CAECollisionAudioEntity", "PlayBulletHitCollisionSound", 0x4DB7C0, &CAECollisionAudioEntity::PlayBulletHitCollisionSound);
-    // Install("CAECollisionAudioEntity", "ReportCollision", 0x4DBA10, &CAECollisionAudioEntity::ReportCollision);
-    Install("CAECollisionAudioEntity", "ReportBulletHit", 0x4DBDF0, &CAECollisionAudioEntity::ReportBulletHit);
+    RH_ScopedClass(CAECollisionAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    // RH_ScopedInstall(Initialise, 0x5B9BD0);
+    RH_ScopedInstall(InitialisePostLoading, 0x4DA050);
+    // RH_ScopedInstall(AddCollisionSoundToList, 0x4DAAC0);
+    // RH_ScopedInstall(Reset, 0x4DA320);
+    // RH_ScopedInstall(ReportGlassCollisionEvent, 0x4DA070);
+    // RH_ScopedInstall(ReportWaterSplash, 0x4DA190);
+    // RH_ScopedInstall(UpdateLoopingCollisionSound, 0x4DA540);
+    // RH_ScopedInstall(GetCollisionSoundStatus, 0x4DA830);
+    // RH_ScopedInstall(ReportObjectDestruction, 0x4DAB60);
+    // RH_ScopedInstall(ReportWaterSplash, 0x4DAE40);
+    // RH_ScopedInstall(PlayOneShotCollisionSound, 0x4DB150);
+    // RH_ScopedInstall(PlayLoopingCollisionSound, 0x4DB450);
+    // RH_ScopedInstall(PlayBulletHitCollisionSound, 0x4DB7C0);
+    // RH_ScopedInstall(ReportCollision, 0x4DBA10);
+    RH_ScopedInstall(ReportBulletHit, 0x4DBDF0);
 }
 
 // 0x5B9BD0
@@ -66,7 +68,7 @@ void CAECollisionAudioEntity::UpdateLoopingCollisionSound() {
 }
 
 // 0x4DB7C0
-void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float a3) {
+void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector& posn, float angleWithColPointNorm) {
     if (surface >= 195)
         return;
 
@@ -95,7 +97,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector
     }
     else if (g_surfaceInfos->IsAudioMetal(surface))
     {
-        float probability = (90.0f - a3) * 0.0055555557f; // see BoneNode_c::EulerToQuat
+        float probability = (90.0f - angleWithColPointNorm) * 0.0055555557f; // see BoneNode_c::EulerToQuat
         if (CAEAudioUtility::ResolveProbability(probability))
         {
             do
@@ -134,8 +136,8 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector
 }
 
 // 0x4DA070
-void CAECollisionAudioEntity::ReportGlassCollisionEvent(int32 glassSoundType, CVector& posn, uint32 time) {
-    plugin::CallMethod<0x4DA070, CAECollisionAudioEntity*, int32, CVector&, uint32>(this, glassSoundType, posn, time);
+void CAECollisionAudioEntity::ReportGlassCollisionEvent(int32 glassSoundType, Const CVector& posn, uint32 time) {
+    plugin::CallMethod<0x4DA070, CAECollisionAudioEntity*, int32, const CVector&, uint32>(this, glassSoundType, posn, time);
 }
 
 // 0x4DA190
@@ -159,12 +161,12 @@ void CAECollisionAudioEntity::ReportCollision(CEntity* entity1, CEntity* entity2
 }
 
 // 0x4DBDF0
-void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float colPoint) {
-    if (AEAudioHardware.IsSoundBankLoaded(0x1B, 3)) {
-        if (entity && entity->m_nType == ENTITY_TYPE_VEHICLE)
-            surface = entity->AsVehicle()->m_vehicleSubType == VEHICLE_BMX ? SURFACE_HAY_BALE | SURFACE_GRASS_SHORT_DRY : SURFACE_CAR;
+void CAECollisionAudioEntity::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
+    if (AEAudioHardware.IsSoundBankLoaded(27, 3)) {
+        if (entity && entity->IsVehicle())
+            surface = entity->AsVehicle()->IsSubBMX() ? SURFACE_HAY_BALE | SURFACE_GRASS_SHORT_DRY : SURFACE_CAR; // ? -68 : 63;
 
-        PlayBulletHitCollisionSound(surface, posn, colPoint);
+        PlayBulletHitCollisionSound(surface, posn, angleWithColPointNorm);
     }
 }
 

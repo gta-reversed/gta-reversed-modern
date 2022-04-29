@@ -5,12 +5,18 @@
 #include "TaskSimpleFall.h"
 #include "TaskSimpleLand.h"
 #include "TaskSimpleClimb.h"
+#include "TaskSimpleInAir.h"
+
+#include "PedClothesDesc.h"
 
 void CTaskComplexInAirAndLand::InjectHooks() {
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CTaskComplexInAirAndLand", 0x678C80, &CTaskComplexInAirAndLand::Constructor);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateFirstSubTask", 0x67CC30, &CTaskComplexInAirAndLand::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "CreateNextSubTask", 0x67CCB0, &CTaskComplexInAirAndLand::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexInAirAndLand", "ControlSubTask", 0x67D230, &CTaskComplexInAirAndLand::ControlSubTask_Reversed);
+    RH_ScopedClass(CTaskComplexInAirAndLand);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor, 0x678C80);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67CC30);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67CCB0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {
@@ -65,12 +71,12 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
             return new CTaskSimpleLand(ped->m_vecMoveSpeed.z < -0.1F ? ANIM_ID_KO_SKID_BACK : (AnimationId)-1);
         } else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_FALL_FALL) {
-            CTask* pNewTask;
+            CTask* newTask;
 
             if (subTask->m_fMinZSpeed < -0.4F)
-                pNewTask = new CTaskSimpleFall(ANIM_ID_KO_SKID_BACK, ANIM_GROUP_DEFAULT, 700);
+                newTask = new CTaskSimpleFall(ANIM_ID_KO_SKID_BACK, ANIM_GROUP_DEFAULT, 700);
             else
-                pNewTask = new CTaskSimpleLand(ANIM_ID_FALL_COLLAPSE);
+                newTask = new CTaskSimpleLand(ANIM_ID_FALL_COLLAPSE);
 
             ped->m_pedAudio.AddAudioEvent(59, 0.0F, 1.0F, 0, 0, 0, 0);
 
@@ -80,7 +86,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
                 GetEventGlobalGroup()->Add(&eventSound, false);
             }
 
-            return pNewTask;
+            return newTask;
         } else {
             AnimationId landAnimId;
 
@@ -89,14 +95,14 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
             else if (subTask->m_pAnim && subTask->m_pAnim->m_nAnimId == ANIM_ID_IDLE_HBHB_1)
                 landAnimId = ANIM_ID_IDLE_TIRED;
             else {
-                auto pad = ped->AsPlayerPed()->GetPadFromPlayer();
+                auto pad = ped->AsPlayer()->GetPadFromPlayer();
                 if (ped->m_pPlayerData->m_fMoveBlendRatio > 1.5F && pad && (pad->GetPedWalkUpDown() != 0.0F || pad->GetPedWalkLeftRight() != 0.0F))
                     landAnimId = ANIM_ID_JUMP_LAND;
                 else
                     landAnimId = ANIM_ID_FALL_LAND;
             }
 
-            auto pNewTask = new CTaskSimpleLand(landAnimId);
+            auto newTask = new CTaskSimpleLand(landAnimId);
 
             ped->m_pedAudio.AddAudioEvent(58, 0.0F, 1.0F, 0, 0, 0, 0);
 
@@ -106,7 +112,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
                 GetEventGlobalGroup()->Add(&eventSound, false);
             }
 
-            return pNewTask;
+            return newTask;
         }
     }
     default:
