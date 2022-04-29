@@ -20,9 +20,7 @@ CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(CPed* ped, CVec
     m_Pos{ pos },
     m_bIsNotGoingTowardsPos{ true }
 {
-    if (m_PedToWaitFor) {
-        m_PedToWaitFor->RegisterReference(reinterpret_cast<CEntity**>(&m_PedToWaitFor));
-    }
+    CEntity::SafeRegisterRef(m_PedToWaitFor);
 }
 
 // 0x6494F0
