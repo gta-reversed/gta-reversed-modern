@@ -900,20 +900,16 @@ void CCamera::CameraGenericModeSpecialCases(CPed* targetPed) {
     m_pExtraEntity[m_nExtraEntitiesCount++] = targetPed;
 }
 
-// unused
 // 0x50CD80
 void CCamera::CameraPedModeSpecialCases() {
-    plugin::CallMethod<0x50CD80, CCamera*>(this);
-    //    CCollision::m_bCamCollideWithVehicles = true;
-    //    CCollision::m_bCamCollideWithObjects = true;
-    //    CCollision::m_bCamCollideWithPeds = true;
+    CCollision::bCamCollideWithVehicles = true;
+    CCollision::bCamCollideWithObjects  = true;
+    CCollision::bCamCollideWithPeds     = true;
 }
 
 // 0x50CDA0
 void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
-    CCollision::ms_bCamCollideWithVehicles = true;
-    CCollision::ms_bCamCollideWithObjects = true;
-    CCollision::ms_bCamCollideWithPeds = true;
+    CameraPedModeSpecialCases();
 
     if (ped->bInVehicle && ped->m_pVehicle) {
         m_pExtraEntity[m_nExtraEntitiesCount++] = ped->m_pVehicle;
@@ -922,13 +918,13 @@ void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
 
 // 0x50CDE0
 void CCamera::CameraVehicleModeSpecialCases(CVehicle* vehicle) {
-    float speed = (vehicle->m_vecMoveSpeed).Magnitude();
+    float speed = vehicle->m_vecMoveSpeed.Magnitude();
 
     const auto slow = speed <= 0.2f;
-    CCollision::ms_relVelCamCollisionVehiclesSqr = slow ? 0.1f : 1.0f;
-    CCollision::ms_bCamCollideWithVehicles = true;
-    CCollision::ms_bCamCollideWithPeds = slow;
-    CCollision::ms_bCamCollideWithObjects = slow;
+    CCollision::relVelCamCollisionVehiclesSqr = slow ? 0.1f : 1.0f;
+    CCollision::bCamCollideWithVehicles = true;
+    CCollision::bCamCollideWithPeds     = slow;
+    CCollision::bCamCollideWithObjects  = slow;
 
     if (vehicle->m_pTrailer) {
         m_pExtraEntity[m_nExtraEntitiesCount++] = vehicle->m_pTrailer;
