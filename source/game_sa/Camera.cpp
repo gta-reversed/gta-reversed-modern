@@ -198,10 +198,11 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 
     InitCameraVehicleTweaks();
     for (auto& camTweak : m_aCamTweak) {
-        if (camTweak.m_nModelIndex == (int32)vehicle->m_nModelIndex) {
+        if (camTweak.m_nModelIndex == (int32)vehicle->m_nModelIndex) { // todo: vehicle->m_nModelIndex -> int16?
             m_fCurrentTweakDistance = camTweak.m_fDistance;
             m_fCurrentTweakAltitude = camTweak.m_fAltitude;
-            m_fCurrentTweakAngle = camTweak.m_fAngle;
+            m_fCurrentTweakAngle    = camTweak.m_fAngle;
+            return;
         }
     }
 }
