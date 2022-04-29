@@ -111,7 +111,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(HandleCameraMotionForDuckingDuringAim, 0x50D090);
 //    RH_ScopedInstall(VectorMoveLinear, 0x50D160);
 //    RH_ScopedInstall(VectorTrackLinear, 0x50D1D0);
-//    RH_ScopedInstall(AddShakeSimple, 0x50D240);
+    RH_ScopedInstall(AddShakeSimple, 0x50D240);
 //    RH_ScopedInstall(InitialiseScriptableComponents, 0x50D2D0);
 //    RH_ScopedInstall(DrawBordersForWideScreen, 0x514860);
 //    RH_ScopedInstall(Find3rdPersonCamTargetVector, 0x514970);
@@ -964,7 +964,10 @@ void CCamera::VectorTrackLinear(CVector* trackLinearStartPoint, CVector* trackLi
 
 // 0x50D240
 void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
-    plugin::CallMethod<0x50D240, CCamera*, float, int32, float>(this, duration, type, intensity);
+    m_fShakeIntensity = intensity;
+    m_nShakeType = type;
+    m_fStartShakeTime = CTimer::GetTimeInMS();
+    m_fEndShakeTime = m_fStartShakeTime + duration;
 }
 
 // 0x50D280
