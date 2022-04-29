@@ -269,12 +269,12 @@ public:
         assert(IsIndexInBounds(idx));
         return idx;
     }
-    
+
     // NOTSA - Get all valid objects - Useful for iteration
     template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
     auto GetAllValid() {
         using namespace std;
-        return span{ m_pObjects, (size_t)m_nSize}
+        return span{ m_pObjects, (size_t)m_nSize }
              | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
              | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
     }
