@@ -9,16 +9,17 @@
 
 #define FLOAT_AT(adr) (*(float*)(adr))
 
-CPed*& CAEVehicleAudioEntity::s_pPlayerAttachedForRadio = *(CPed**)0xB6B98C;
-CPed*& CAEVehicleAudioEntity::s_pPlayerDriver = *(CPed**)0xB6B990;
-bool& CAEVehicleAudioEntity::s_HelicoptorsDisabled = *(bool*)0xB6B994;
-int16& CAEVehicleAudioEntity::s_NextDummyEngineSlot = *(int16*)0xB6B998;
+CPed*&                  CAEVehicleAudioEntity::s_pPlayerAttachedForRadio = *(CPed**)0xB6B98C;
+CPed*&                  CAEVehicleAudioEntity::s_pPlayerDriver = *(CPed**)0xB6B990;
+bool&                   CAEVehicleAudioEntity::s_HelicoptorsDisabled = *(bool*)0xB6B994;
+int16&                  CAEVehicleAudioEntity::s_NextDummyEngineSlot = *(int16*)0xB6B998;
 tVehicleAudioSettings*& CAEVehicleAudioEntity::s_pVehicleAudioSettingsForRadio = *reinterpret_cast<tVehicleAudioSettings**>(0xB6B99C);
 tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_SLOTS] = *reinterpret_cast<tEngineDummySlot (*)[NUM_DUMMY_ENGINE_SLOTS]>(0xB6B9A0);
 
+
 const tVehicleAudioSettings (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<const tVehicleAudioSettings (*)[232]>(0x860AF0);
 
-bool IsSurfaceAudioGrass(char surface) {
+bool IsSurfaceAudioGrass(uint8 surface) {
     return g_surfaceInfos->IsAudioGrass(surface) || g_surfaceInfos->IsAudioLongGrass(surface);
 }
 
@@ -27,122 +28,114 @@ bool IsSurfaceAudioEitherGravelWaterSand(char surface) {
 }
 
 void CAEVehicleAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CAEVehicleAudioEntity", "CAEVehicleAudioEntity", 0x4F63E0, &CAEVehicleAudioEntity::Constructor, true);
-    Install("CAEVehicleAudioEntity", "~CAEVehicleAudioEntity", 0x6D0A10, &CAEVehicleAudioEntity::Destructor, true);
-    Install("CAEVehicleAudioEntity", "UpdateParameters", 0x4FB6C0, &CAEVehicleAudioEntity::UpdateParameters_Reversed, true);
-    Install("CAEVehicleAudioEntity", "Initialise", 0x4F7670, &CAEVehicleAudioEntity::Initialise, true);
-    Install("CAEVehicleAudioEntity", "StaticInitialise", 0x5B99F0, &CAEVehicleAudioEntity::StaticInitialise, true);
-    Install("CAEVehicleAudioEntity", "Terminate", 0x4FB8C0, &CAEVehicleAudioEntity::Terminate, true);
-    Install("CAEVehicleAudioEntity", "GetAircraftNearPosition", 0x4F96A0, &CAEVehicleAudioEntity::GetAircraftNearPosition, true);
-    Install("CAEVehicleAudioEntity", "GetFlyingMetalVolume", 0x4F6150, &CAEVehicleAudioEntity::GetFlyingMetalVolume, true);
-    Install("CAEVehicleAudioEntity", "GetVehicleAudioSettings", 0x4F5C10, &CAEVehicleAudioEntity::GetVehicleAudioSettings, true);
-    Install("CAEVehicleAudioEntity", "RequestBankSlot", 0x4F4D10, &CAEVehicleAudioEntity::RequestBankSlot, true);
-    Install("CAEVehicleAudioEntity", "DemandBankSlot", 0x4F4E60, &CAEVehicleAudioEntity::DemandBankSlot, true);
-    Install("CAEVehicleAudioEntity", "DoesBankSlotContainThisBank", 0x4F4E30, &CAEVehicleAudioEntity::DoesBankSlotContainThisBank, true);
-    Install("CAEVehicleAudioEntity", "StoppedUsingBankSlot", 0x4F4DF0, &CAEVehicleAudioEntity::StoppedUsingBankSlot, true);
-    Install("CAEVehicleAudioEntity", "EnableHelicoptors", 0x4F4EF0, &CAEVehicleAudioEntity::EnableHelicoptors, true);
-    Install("CAEVehicleAudioEntity", "DisableHelicoptors", 0x4F4EE0, &CAEVehicleAudioEntity::DisableHelicoptors, true);
-    Install("CAEVehicleAudioEntity", "StaticGetPlayerVehicleAudioSettingsForRadio", 0x4F4ED0, &CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio, true);
-    // Install("CAEVehicleAudioEntity", "StaticService", 0x4F4EC0, &CAEVehicleAudioEntity::StaticService);
-    // Install("CAEVehicleAudioEntity", "GetVehicleTypeForAudio", 0x4F4F00, &CAEVehicleAudioEntity::GetVehicleTypeForAudio);
-    // Install("CAEVehicleAudioEntity", "IsAccInhibited", 0x4F4F70, &CAEVehicleAudioEntity::IsAccInhibited);
-    // Install("CAEVehicleAudioEntity", "IsAccInhibitedBackwards", 0x4F4FC0, &CAEVehicleAudioEntity::IsAccInhibitedBackwards);
-    // Install("CAEVehicleAudioEntity", "IsAccInhibitedForLowSpeed", 0x4F4FF0, &CAEVehicleAudioEntity::IsAccInhibitedForLowSpeed);
-    // Install("CAEVehicleAudioEntity", "IsAccInhibitedForTime", 0x4F5020, &CAEVehicleAudioEntity::IsAccInhibitedForTime);
+    RH_ScopedClass(CAEVehicleAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
 
-    Install("CAEVehicleAudioEntity", "InhibitAccForTime", 0x4F5030, &CAEVehicleAudioEntity::InhibitAccForTime);
-    Install("CAEVehicleAudioEntity", "IsCrzInhibitedForTime", 0x4F5050, &CAEVehicleAudioEntity::IsCrzInhibitedForTime);
-    Install("CAEVehicleAudioEntity", "GetAccelAndBrake", 0x4F5080, &CAEVehicleAudioEntity::GetAccelAndBrake, true);
-    Install("CAEVehicleAudioEntity", "GetVolumeForDummyIdle", 0x4F51F0, &CAEVehicleAudioEntity::GetVolumeForDummyIdle, true);
-    Install("CAEVehicleAudioEntity", "GetFrequencyForDummyIdle", 0x4F5310, &CAEVehicleAudioEntity::GetFrequencyForDummyIdle, true);
-    // Install("CAEVehicleAudioEntity", "GetVolumeForDummyRev", 0x4F53D0, &CAEVehicleAudioEntity::GetVolumeForDummyRev, true);
-    // Install("CAEVehicleAudioEntity", "GetFrequencyForDummyRev", 0x4F54F0, &CAEVehicleAudioEntity::GetFrequencyForDummyRev, true);
-    // Install("CAEVehicleAudioEntity", "CancelVehicleEngineSound", 0x4F55C0, &CAEVehicleAudioEntity::CancelVehicleEngineSound, true);
-    Install("CAEVehicleAudioEntity", "UpdateVehicleEngineSound", 0x4F56D0, &CAEVehicleAudioEntity::UpdateVehicleEngineSound, true);
-    Install("CAEVehicleAudioEntity", "JustGotInVehicleAsDriver", 0x4F5700, &CAEVehicleAudioEntity::JustGotInVehicleAsDriver, true);
-    Install("CAEVehicleAudioEntity", "TurnOnRadioForVehicle", 0x4F5B20, &CAEVehicleAudioEntity::TurnOnRadioForVehicle, true);
-    Install("CAEVehicleAudioEntity", "TurnOffRadioForVehicle", 0x4F5B60, &CAEVehicleAudioEntity::TurnOffRadioForVehicle, true);
-    Install("CAEVehicleAudioEntity", "PlayerAboutToExitVehicleAsDriver", 0x4F5BA0, &CAEVehicleAudioEntity::PlayerAboutToExitVehicleAsDriver, true);
-    Install("CAEVehicleAudioEntity", "CopHeli", 0x4F5C40, &CAEVehicleAudioEntity::CopHeli, true);
-    Install("CAEVehicleAudioEntity", "GetFreqForIdle", 0x4F5C60, &CAEVehicleAudioEntity::GetFreqForIdle, true);
-    Install("CAEVehicleAudioEntity", "GetVolForPlayerEngineSound", 0x4F5D00, &CAEVehicleAudioEntity::GetVolForPlayerEngineSound, true);
-    Install("CAEVehicleAudioEntity", "JustFinishedAccelerationLoop", 0x4F5E50, &CAEVehicleAudioEntity::JustFinishedAccelerationLoop, true);
-    Install("CAEVehicleAudioEntity", "UpdateGasPedalAudio", 0x4F5EB0, &CAEVehicleAudioEntity::UpdateGasPedalAudio, true); // crash
-    Install("CAEVehicleAudioEntity", "GetVehicleDriveWheelSkidValue", 0x4F5F30, &CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue, true);
-    Install("CAEVehicleAudioEntity", "GetVehicleNonDriveWheelSkidValue", 0x4F6000, &CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue, true); // crash
-    Install("CAEVehicleAudioEntity", "GetBaseVolumeForBicycleTyre", 0x4F60B0, &CAEVehicleAudioEntity::GetBaseVolumeForBicycleTyre, true);
-    // Install("CAEVehicleAudioEntity", "GetHornState", 0x4F61E0, &CAEVehicleAudioEntity::GetHornState, true);
-    Install("CAEVehicleAudioEntity", "GetSirenState", 0x4F62A0, &CAEVehicleAudioEntity::GetSirenState, true); // because NOTSA
-    Install("CAEVehicleAudioEntity", "StopGenericEngineSound", 0x4F6320, &CAEVehicleAudioEntity::StopGenericEngineSound, true);
-    // Install("CAEVehicleAudioEntity", "AddAudioEvent", 0x4F6420, &CAEVehicleAudioEntity::AddAudioEvent, true);
-    // Install("CAEVehicleAudioEntity", "AddAudioEvent", 0x4F7580, &CAEVehicleAudioEntity::AddAudioEvent, true);
-    // Install("CAEVehicleAudioEntity", "RequestNewPlayerCarEngineSound", 0x4F7A50, &CAEVehicleAudioEntity::RequestNewPlayerCarEngineSound, true);
-    // Install("CAEVehicleAudioEntity", "StartVehicleEngineSound", 0x4F7F20, &CAEVehicleAudioEntity::StartVehicleEngineSound, true);
-    // Install("CAEVehicleAudioEntity", "GetFreqForPlayerEngineSound", 0x4F8070, &CAEVehicleAudioEntity::GetFreqForPlayerEngineSound, true);
-    // Install("CAEVehicleAudioEntity", "PlaySkidSound", 0x4F8360, &CAEVehicleAudioEntity::PlaySkidSound, true);
-    Install("CAEVehicleAudioEntity", "PlayRoadNoiseSound", 0x4F84D0, &CAEVehicleAudioEntity::PlayRoadNoiseSound, true);
-    Install("CAEVehicleAudioEntity", "PlayFlatTyreSound", 0x4F8650, &CAEVehicleAudioEntity::PlayFlatTyreSound, true);
-    // Install("CAEVehicleAudioEntity", "PlayReverseSound", 0x4F87D0, &CAEVehicleAudioEntity::PlayReverseSound, true);
-    // Install("CAEVehicleAudioEntity", "ProcessVehicleFlatTyre", 0x4F8940, &CAEVehicleAudioEntity::ProcessVehicleFlatTyre, true);
-    Install("CAEVehicleAudioEntity", "ProcessVehicleRoadNoise", 0x4F8B00, &CAEVehicleAudioEntity::ProcessVehicleRoadNoise, true);
-    Install("CAEVehicleAudioEntity", "ProcessReverseGear", 0x4F8DF0, &CAEVehicleAudioEntity::ProcessReverseGear, true);
-    Install("CAEVehicleAudioEntity", "ProcessVehicleSkidding", 0x4F8F10, &CAEVehicleAudioEntity::ProcessVehicleSkidding, true);
-    Install("CAEVehicleAudioEntity", "ProcessRainOnVehicle", 0x4F92C0, &CAEVehicleAudioEntity::ProcessRainOnVehicle, true);
-    // Install("CAEVehicleAudioEntity", "PlayAircraftSound", 0x4F93C0, &CAEVehicleAudioEntity::PlayAircraftSound, true);
-    // Install("CAEVehicleAudioEntity", "PlayBicycleSound", 0x4F9710, &CAEVehicleAudioEntity::PlayBicycleSound, true);
-    // Install("CAEVehicleAudioEntity", "PlayHornOrSiren", 0x4F99D0, &CAEVehicleAudioEntity::PlayHornOrSiren, true);
-    Install("CAEVehicleAudioEntity", "UpdateBoatSound", 0x4F9E90, &CAEVehicleAudioEntity::UpdateBoatSound, true);
-    Install("CAEVehicleAudioEntity", "ProcessBoatMovingOverWater", 0x4FA0C0, &CAEVehicleAudioEntity::ProcessBoatMovingOverWater, true);
-    Install("CAEVehicleAudioEntity", "UpdateTrainSound", 0x4FA1C0, &CAEVehicleAudioEntity::UpdateTrainSound, true);
-    // Install("CAEVehicleAudioEntity", "ProcessTrainTrackSound", 0x4FA3F0, &CAEVehicleAudioEntity::ProcessTrainTrackSound, true);
-    // Install("CAEVehicleAudioEntity", "PlayTrainBrakeSound", 0x4FA630, &CAEVehicleAudioEntity::PlayTrainBrakeSound, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyRCPlane", 0x4FA7C0, &CAEVehicleAudioEntity::ProcessDummyRCPlane, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyRCHeli", 0x4FAA80, &CAEVehicleAudioEntity::ProcessDummyRCHeli, true);
-    // Install("CAEVehicleAudioEntity", "UpdateGenericVehicleSound", 0x4FAD40, &CAEVehicleAudioEntity::UpdateGenericVehicleSound, true);
-    // Install("CAEVehicleAudioEntity", "ProcessEngineDamage", 0x4FAE20, &CAEVehicleAudioEntity::ProcessEngineDamage, true);
-    // Install("CAEVehicleAudioEntity", "ProcessNitro", 0x4FB070, &CAEVehicleAudioEntity::ProcessNitro, true);
-    Install("CAEVehicleAudioEntity", "ProcessMovingParts", 0x4FB260, &CAEVehicleAudioEntity::ProcessMovingParts, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerVehicleEngine", 0x4FBB10, &CAEVehicleAudioEntity::ProcessPlayerVehicleEngine, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyStateTransition", 0x4FCA10, &CAEVehicleAudioEntity::ProcessDummyStateTransition, true);
-    // Install("CAEVehicleAudioEntity", "JustGotOutOfVehicleAsDriver", 0x4FCF40, &CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver, true);
-    // Install("CAEVehicleAudioEntity", "JustWreckedVehicle", 0x4FD0B0, &CAEVehicleAudioEntity::JustWreckedVehicle, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerProp", 0x4FD290, &CAEVehicleAudioEntity::ProcessPlayerProp, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyProp", 0x4FD8F0, &CAEVehicleAudioEntity::ProcessDummyProp, true);
-    // Install("CAEVehicleAudioEntity", "ProcessAIProp", 0x4FDFD0, &CAEVehicleAudioEntity::ProcessAIProp, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerHeli", 0x4FE420, &CAEVehicleAudioEntity::ProcessPlayerHeli, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyHeli", 0x4FE940, &CAEVehicleAudioEntity::ProcessDummyHeli, true);
-    // Install("CAEVehicleAudioEntity", "ProcessAIHeli", 0x4FEE20, &CAEVehicleAudioEntity::ProcessAIHeli, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerSeaPlane", 0x4FF320, &CAEVehicleAudioEntity::ProcessPlayerSeaPlane, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummySeaPlane", 0x4FF7C0, &CAEVehicleAudioEntity::ProcessDummySeaPlane, true);
-    // Install("CAEVehicleAudioEntity", "ProcessGenericJet", 0x4FF900, &CAEVehicleAudioEntity::ProcessGenericJet, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyBicycle", 0x4FFDC0, &CAEVehicleAudioEntity::ProcessDummyBicycle, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerBicycle", 0x500040, &CAEVehicleAudioEntity::ProcessPlayerBicycle, true);
-    Install("CAEVehicleAudioEntity", "ProcessVehicleSirenAlarmHorn", 0x5002C0, &CAEVehicleAudioEntity::ProcessVehicleSirenAlarmHorn, true);
-    // Install("CAEVehicleAudioEntity", "ProcessBoatEngine", 0x5003A0, &CAEVehicleAudioEntity::ProcessBoatEngine, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyTrainEngine", 0x500710, &CAEVehicleAudioEntity::ProcessDummyTrainEngine, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerTrainBrakes", 0x500AB0, &CAEVehicleAudioEntity::ProcessPlayerTrainBrakes, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerCombine", 0x500CE0, &CAEVehicleAudioEntity::ProcessPlayerCombine, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyRCCar", 0x500DC0, &CAEVehicleAudioEntity::ProcessDummyRCCar, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyHovercraft", 0x500F50, &CAEVehicleAudioEntity::ProcessDummyHovercraft, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyGolfCart", 0x501270, &CAEVehicleAudioEntity::ProcessDummyGolfCart, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyVehicleEngine", 0x501480, &CAEVehicleAudioEntity::ProcessDummyVehicleEngine, true);
-    // Install("CAEVehicleAudioEntity", "ProcessPlayerJet", 0x501650, &CAEVehicleAudioEntity::ProcessPlayerJet, true);
-    // Install("CAEVehicleAudioEntity", "ProcessDummyJet", 0x501960, &CAEVehicleAudioEntity::ProcessDummyJet, true);
-    Install("CAEVehicleAudioEntity", "ProcessSpecialVehicle", 0x501AB0, &CAEVehicleAudioEntity::ProcessSpecialVehicle, true);
-    Install("CAEVehicleAudioEntity", "ProcessAircraft", 0x501C50, &CAEVehicleAudioEntity::ProcessAircraft, true);
-    // Install("CAEVehicleAudioEntity", "ProcessVehicle", 0x501E10, &CAEVehicleAudioEntity::ProcessVehicle, true);
-    // Install("CAEVehicleAudioEntity", "Service", 0x502280, &CAEVehicleAudioEntity::Service, true);
-}
+    RH_ScopedInstall(Constructor, 0x4F63E0);
+    RH_ScopedInstall(Destructor, 0x6D0A10);
+    RH_ScopedInstall(UpdateParameters, 0x4FB6C0);
+    RH_ScopedInstall(Initialise, 0x4F7670);
+    RH_ScopedInstall(StaticInitialise, 0x5B99F0);
+    RH_ScopedInstall(Terminate, 0x4FB8C0);
+    RH_ScopedInstall(GetAircraftNearPosition, 0x4F96A0);
+    RH_ScopedInstall(GetFlyingMetalVolume, 0x4F6150);
+    RH_ScopedInstall(GetVehicleAudioSettings, 0x4F5C10);
+    RH_ScopedInstall(RequestBankSlot, 0x4F4D10);
+    RH_ScopedInstall(DemandBankSlot, 0x4F4E60);
+    RH_ScopedInstall(DoesBankSlotContainThisBank, 0x4F4E30);
+    RH_ScopedInstall(StoppedUsingBankSlot, 0x4F4DF0);
+    RH_ScopedInstall(EnableHelicoptors, 0x4F4EF0);
+    RH_ScopedInstall(DisableHelicoptors, 0x4F4EE0);
+    RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
+    // RH_ScopedInstall(StaticService,0x4F4EC0);
+    // RH_ScopedInstall(GetVehicleTypeForAudio,0x4F4F00);
+    // RH_ScopedInstall(IsAccInhibited,0x4F4F70);
+    // RH_ScopedInstall(IsAccInhibitedBackwards,0x4F4FC0);
+    // RH_ScopedInstall(IsAccInhibitedForLowSpeed,0x4F4FF0);
+    // RH_ScopedInstall(IsAccInhibitedForTime,0x4F5020);
 
-CAEVehicleAudioEntity* CAEVehicleAudioEntity::Constructor() {
-    this->CAEVehicleAudioEntity::CAEVehicleAudioEntity();
-    return this;
-}
-
-CAEVehicleAudioEntity* CAEVehicleAudioEntity::Destructor() {
-    this->CAEVehicleAudioEntity::~CAEVehicleAudioEntity();
-    return this;
+    RH_ScopedInstall(InhibitAccForTime, 0x4F5030);
+    RH_ScopedInstall(IsCrzInhibitedForTime, 0x4F5050);
+    RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);
+    RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);
+    RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310);
+    // RH_ScopedInstall(GetVolumeForDummyRev,0x4F53D0);
+    // RH_ScopedInstall(GetFrequencyForDummyRev,0x4F54F0);
+    // RH_ScopedInstall(CancelVehicleEngineSound,0x4F55C0);
+    RH_ScopedInstall(UpdateVehicleEngineSound, 0x4F56D0);
+    RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);
+    RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);
+    RH_ScopedInstall(TurnOffRadioForVehicle, 0x4F5B60);
+    RH_ScopedInstall(PlayerAboutToExitVehicleAsDriver, 0x4F5BA0);
+    RH_ScopedInstall(CopHeli, 0x4F5C40);
+    RH_ScopedInstall(GetFreqForIdle, 0x4F5C60);
+    RH_ScopedInstall(GetVolForPlayerEngineSound, 0x4F5D00);
+    RH_ScopedInstall(JustFinishedAccelerationLoop, 0x4F5E50);
+    RH_ScopedInstall(UpdateGasPedalAudio, 0x4F5EB0);
+    RH_ScopedInstall(GetVehicleDriveWheelSkidValue, 0x4F5F30);
+    RH_ScopedInstall(GetVehicleNonDriveWheelSkidValue, 0x4F6000);
+    RH_ScopedInstall(GetBaseVolumeForBicycleTyre, 0x4F60B0);
+    // RH_ScopedInstall(GetHornState,0x4F61E0);
+    RH_ScopedInstall(GetSirenState, 0x4F62A0);
+    RH_ScopedInstall(StopGenericEngineSound, 0x4F6320);
+    // RH_ScopedInstall(AddAudioEvent,0x4F6420);
+    // RH_ScopedInstall(AddAudioEvent,0x4F7580);
+    // RH_ScopedInstall(RequestNewPlayerCarEngineSound,0x4F7A50);
+    // RH_ScopedInstall(StartVehicleEngineSound,0x4F7F20);
+    // RH_ScopedInstall(GetFreqForPlayerEngineSound,0x4F8070);
+    // RH_ScopedInstall(PlaySkidSound,0x4F8360);
+    RH_ScopedInstall(PlayRoadNoiseSound, 0x4F84D0);
+    RH_ScopedInstall(PlayFlatTyreSound, 0x4F8650);
+    // RH_ScopedInstall(PlayReverseSound,0x4F87D0);
+    // RH_ScopedInstall(ProcessVehicleFlatTyre,0x4F8940);
+    RH_ScopedInstall(ProcessVehicleRoadNoise, 0x4F8B00);
+    RH_ScopedInstall(ProcessReverseGear, 0x4F8DF0);
+    RH_ScopedInstall(ProcessVehicleSkidding, 0x4F8F10);
+    RH_ScopedInstall(ProcessRainOnVehicle, 0x4F92C0);
+    // RH_ScopedInstall(PlayAircraftSound,0x4F93C0);
+    // RH_ScopedInstall(PlayBicycleSound,0x4F9710);
+    // RH_ScopedInstall(PlayHornOrSiren,0x4F99D0);
+    RH_ScopedInstall(UpdateBoatSound, 0x4F9E90);
+    RH_ScopedInstall(ProcessBoatMovingOverWater, 0x4FA0C0);
+    RH_ScopedInstall(UpdateTrainSound, 0x4FA1C0);
+    // RH_ScopedInstall(ProcessTrainTrackSound,0x4FA3F0);
+    // RH_ScopedInstall(PlayTrainBrakeSound,0x4FA630);
+    // RH_ScopedInstall(ProcessDummyRCPlane,0x4FA7C0);
+    // RH_ScopedInstall(ProcessDummyRCHeli,0x4FAA80);
+    // RH_ScopedInstall(UpdateGenericVehicleSound,0x4FAD40);
+    // RH_ScopedInstall(ProcessEngineDamage,0x4FAE20);
+    // RH_ScopedInstall(ProcessNitro,0x4FB070);
+    RH_ScopedInstall(ProcessMovingParts, 0x4FB260);
+    // RH_ScopedInstall(ProcessPlayerVehicleEngine,0x4FBB10);
+    // RH_ScopedInstall(ProcessDummyStateTransition,0x4FCA10);
+    // RH_ScopedInstall(JustGotOutOfVehicleAsDriver,0x4FCF40);
+    // RH_ScopedInstall(JustWreckedVehicle,0x4FD0B0);
+    // RH_ScopedInstall(ProcessPlayerProp,0x4FD290);
+    // RH_ScopedInstall(ProcessDummyProp,0x4FD8F0);
+    // RH_ScopedInstall(ProcessAIProp,0x4FDFD0);
+    // RH_ScopedInstall(ProcessPlayerHeli,0x4FE420);
+    // RH_ScopedInstall(ProcessDummyHeli,0x4FE940);
+    // RH_ScopedInstall(ProcessAIHeli,0x4FEE20);
+    // RH_ScopedInstall(ProcessPlayerSeaPlane,0x4FF320);
+    // RH_ScopedInstall(ProcessDummySeaPlane,0x4FF7C0);
+    // RH_ScopedInstall(ProcessGenericJet,0x4FF900);
+    // RH_ScopedInstall(ProcessDummyBicycle,0x4FFDC0);
+    // RH_ScopedInstall(ProcessPlayerBicycle,0x500040);
+    RH_ScopedInstall(ProcessVehicleSirenAlarmHorn, 0x5002C0);
+    // RH_ScopedInstall(ProcessBoatEngine,0x5003A0);
+    // RH_ScopedInstall(ProcessDummyTrainEngine,0x500710);
+    // RH_ScopedInstall(ProcessPlayerTrainBrakes,0x500AB0);
+    // RH_ScopedInstall(ProcessPlayerCombine,0x500CE0);
+    // RH_ScopedInstall(ProcessDummyRCCar,0x500DC0);
+    // RH_ScopedInstall(ProcessDummyHovercraft,0x500F50);
+    // RH_ScopedInstall(ProcessDummyGolfCart,0x501270);
+    // RH_ScopedInstall(ProcessDummyVehicleEngine,0x501480);
+    // RH_ScopedInstall(ProcessPlayerJet,0x501650);
+    // RH_ScopedInstall(ProcessDummyJet,0x501960);
+    RH_ScopedInstall(ProcessSpecialVehicle, 0x501AB0);
+    RH_ScopedInstall(ProcessAircraft, 0x501C50);
+    // RH_ScopedInstall(ProcessVehicle,0x501E10);
+    // RH_ScopedInstall(Service,0x502280);
 }
 
 // 0x4F63E0
@@ -1688,7 +1681,7 @@ void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
     static constexpr float SPEED_MULT = 0.2f;   // 0x8CBD28
     static constexpr float BASE_VOLUME = -6.0f; // 0x8CBD28
 
-    const auto vehicle = static_cast<CAutomobile*>(params.m_pVehicle);
+    const auto vehicle = params.m_pVehicle->AsAutomobile();
     if (vehicle->vehicleFlags.bEngineOn && (vehicle->m_fGasPedal < 0.0f || !vehicle->m_nCurrentGear)) { // Check if we are reversing
 
         float fReverseGearVelocityProgress = 0.0f;
@@ -1728,7 +1721,7 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     case VEHICLE_TYPE_AUTOMOBILE: {
         nWheels = 4;
 
-        auto vehicle = static_cast<CAutomobile*>(params.m_pVehicle);
+        auto vehicle = params.m_pVehicle->AsAutomobile();
         fUnk = vehicle->m_fSomeGasPedalStuff;
 
         bAreRearWheelsNotSkidding = vehicle->m_aWheelState[CAR_WHEEL_REAR_LEFT] != WHEEL_STATE_SKIDDING && vehicle->m_aWheelState[CAR_WHEEL_REAR_RIGHT] != WHEEL_STATE_SKIDDING;
@@ -1924,7 +1917,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         return;
     }
 
-    auto vehicle = static_cast<CAutomobile*>(params.m_pVehicle);
+    auto vehicle = params.m_pVehicle->AsAutomobile();
 
     float fComponentMoveProgress = (float)(vehicle->m_wMiscComponentAngle - vehicle->m_wMiscComponentAnglePrev) / 30.0f;
     fComponentMoveProgress = clamp<float>(fabs(fComponentMoveProgress), 0.0f, 1.0f);

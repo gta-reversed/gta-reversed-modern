@@ -347,8 +347,8 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CAEVehicleAudioEntity* Constructor();
-    CAEVehicleAudioEntity* Destructor();
+    CAEVehicleAudioEntity* Constructor() { this->CAEVehicleAudioEntity::CAEVehicleAudioEntity(); return this; }
+    CAEVehicleAudioEntity* Destructor() { this->CAEVehicleAudioEntity::~CAEVehicleAudioEntity(); return this; }
     void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 VALIDATE_SIZE(CAEVehicleAudioEntity, 0x24C);
