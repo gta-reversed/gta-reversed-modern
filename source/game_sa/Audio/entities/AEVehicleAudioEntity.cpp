@@ -676,7 +676,7 @@ void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& vehParams) {
             vehParams.m_nGasState = 0;
             vehParams.m_nBreakState = 0;
         } else {
-            CPad* pad = static_cast<CPlayerPed*>(s_pPlayerDriver)->GetPadFromPlayer();
+            CPad* pad = s_pPlayerDriver->AsPlayer()->GetPadFromPlayer();
             vehParams.m_nGasState = pad->GetAccelerate();
             vehParams.m_nBreakState = pad->GetBrake();
         }
@@ -782,12 +782,12 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
             AEAudioHardware.LoadSoundBank(m_nEngineAccelerateSoundBankId, 40);
 
         if (m_nEngineState != 1 || m_nEngineBankSlotId == -1) {
-            for (auto i = 0; i < 12; ++i) {
+            for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
                 CancelVehicleEngineSound(i);
             }
             m_nEngineState = 0;
         } else {
-            for (auto i = 0; i < 12; ++i) {
+            for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
                 if (i != 2)
                     CancelVehicleEngineSound(i);
             }
@@ -798,7 +798,7 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
     case VEHICLE_SOUND_PLANE:
     case VEHICLE_SOUND_HELI:
     case VEHICLE_SOUND_NON_VEH: {
-        for (auto i = 0; i < 12; ++i) {
+        for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
             CancelVehicleEngineSound(i);
         }
 
@@ -819,7 +819,7 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
         if (AESoundManager.AreSoundsPlayingInBankSlot(40))
             AESoundManager.CancelSoundsInBankSlot(40, false);
 
-        for (auto i = 0; i < 12; ++i) {
+        for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
             CancelVehicleEngineSound(i);
         }
 
@@ -848,9 +848,11 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
         break;
     }
     case VEHICLE_SOUND_TRAILER: {
-        if (AESoundManager.AreSoundsPlayingInBankSlot(40))
+        if (AESoundManager.AreSoundsPlayingInBankSlot(40)) {
             AESoundManager.CancelSoundsInBankSlot(40, false);
-        for (auto i = 0; i < 12; ++i) {
+        }
+
+        for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
             CancelVehicleEngineSound(i);
         }
         if (m_nEngineDecelerateSoundBankId != -1 && m_nEngineBankSlotId == -1) {
@@ -1487,13 +1489,13 @@ void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
         field_240 = 1.0f;
 
         if (m_nEngineState == 6) {
-            for (auto i = 0; i < 12; i++) {
+            for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
                 if (i != 2)
                     CancelVehicleEngineSound(i);
             }
             m_nEngineState = 1;
         } else {
-            for (auto i = 0; i < 12; i++) {
+            for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
                 CancelVehicleEngineSound(i);
             }
             if (m_nEngineState != 0)
@@ -1517,7 +1519,7 @@ void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
     case eVehicleSoundType::VEHICLE_SOUND_PLANE:
     case eVehicleSoundType::VEHICLE_SOUND_HELI:
     case eVehicleSoundType::VEHICLE_SOUND_NON_VEH: {
-        for (auto i = 0; i < 12; i++) {
+        for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
             CancelVehicleEngineSound(i);
         }
         m_fPlaneSoundSpeed = -1.0f;
@@ -1556,7 +1558,7 @@ void CAEVehicleAudioEntity::JustWreckedVehicle() {
     case VEHICLE_SOUND_NON_VEH:
     case VEHICLE_SOUND_TRAIN:
     case VEHICLE_SOUND_TRAILER: {
-        for (auto i = 0; i < 12; i++)
+        for (auto i = 0; i < std::size(m_aEngineSounds); i++)
             CancelVehicleEngineSound(i);
         break;
     }
@@ -1618,13 +1620,13 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
     /* Izzotop: bad
     switch (params.m_vehicleType) {
     case VEHICLE_AUTOMOBILE: {
-        if (!static_cast<CAutomobile*>(vehicle)->m_nNumContactWheels) {
+        if (!vehicle->AsAutomobile()->m_nNumContactWheels) {
             CancelRoadNoise();
             return;
         }
     }
     case VEHICLE_BIKE: {
-        if (!static_cast<CBike*>(vehicle)->m_nNumContactWheels) {
+        if (!vehicle->AsBike()->m_nNumContactWheels) {
             CancelRoadNoise();
             return;
         }
@@ -1863,7 +1865,7 @@ void CAEVehicleAudioEntity::ProcessRainOnVehicle(cVehicleParams& params) {
 // 0x4FA0C0
 void CAEVehicleAudioEntity::ProcessBoatMovingOverWater(cVehicleParams& params) {
     // plugin::CallMethod<0x4FA0C0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
-    auto* boat = static_cast<CBoat*>(params.m_pVehicle);
+    auto* boat = params.m_pVehicle->AsBoat();
 
     // Originally there was a multiply by 1.33, that's the recp. of 0.75, which makes sense
     // because the abs. velocity is clamped to 0,75
