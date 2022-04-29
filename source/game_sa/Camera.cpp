@@ -1280,10 +1280,9 @@ void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) 
 
 // 0x50A970
 void CamShakeNoPos(CCamera* camera, float strength) {
-    float oldShake = camera->m_fCamShakeForce - (CTimer::GetTimeInMS() - camera->m_nCamShakeStart) * 0.001f;
-    clamp(oldShake, 0.0f, 2.0f);
+    float oldShake = camera->m_fCamShakeForce - float(CTimer::GetTimeInMS() - camera->m_nCamShakeStart) / 1000.f;
 
-    if (strength > oldShake) {
+    if (strength > std::clamp(oldShake, 0.0f, 2.0f)) {
         camera->m_fCamShakeForce = strength;
         camera->m_nCamShakeStart = CTimer::GetTimeInMS();
     }
