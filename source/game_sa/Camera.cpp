@@ -461,7 +461,7 @@ void CCamera::RenderMotionBlur() {
 void CCamera::Restore() {
     m_bLookingAtPlayer = true;
     m_bLookingAtVector = false;
-    m_nTypeOfSwitch = true;
+    m_nTypeOfSwitch = eSwitchType::SWITCHTYPE_INTERPOLATION;
     m_bUseNearClipScript = false;
     m_nModeObbeCamIsInForCar = 30;
     m_fPositionAlongSpline = 0.0f;
@@ -523,31 +523,33 @@ void CCamera::RestoreWithJumpCut() {
     m_nModeObbeCamIsInForCar = 30;
     m_bScriptParametersSetForInterPol = false;
 
-    CVehicle* playerVeh = FindPlayerVehicle();
-    CPlayerPed* pPlayerInFocus = FindPlayerPed();
+    CVehicle* vehicle = FindPlayerVehicle();
+    CPlayerPed* player = FindPlayerPed();
 
-    if (playerVeh) {
+    if (vehicle) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-        m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
+        m_pTargetEntity = vehicle;
     } else {
         m_nModeToGoTo = MODE_FOLLOWPED;
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+        m_pTargetEntity = player;
     }
     CEntity::SafeRegisterRef(m_pTargetEntity);
 
-    if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK ||
-        pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
+    switch (player->m_nPedState) {
+    case PEDSTATE_ENTER_CAR:
+    case PEDSTATE_CARJACK:
+    case PEDSTATE_OPEN_DOOR:
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+        break;
     }
 
-    if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
+    if (player->m_nPedState == PEDSTATE_EXIT_CAR) {
         m_nModeToGoTo = MODE_FOLLOWPED;
 
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-
-        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+        m_pTargetEntity = player;
         CEntity::SafeRegisterRef(m_pTargetEntity);
     }
 
@@ -574,11 +576,10 @@ void CCamera::RestoreWithJumpCut() {
 
     CEntity::SafeCleanUpRef(m_pTargetEntity);
 
-    if ((player0->bInVehicle) == false || (player1->bInVehicle) == false || player0->m_pVehicle == 0 || player1->m_pVehicle == 0) {
+    if (!player0->bInVehicle || !player1->bInVehicle || !player0->m_pVehicle || !player1->m_pVehicle) {
         m_nModeToGoTo = m_nModeForTwoPlayersNotBothInCar;
-        m_pTargetEntity = reinterpret_cast<CEntity*>(player0);
+        m_pTargetEntity = player0;
         CEntity::SafeRegisterRef(m_pTargetEntity);
-        
 
         m_bUseScriptZoomValuePed = false;
         m_bUseScriptZoomValueCar = false;
@@ -595,8 +596,9 @@ void CCamera::RestoreWithJumpCut() {
         m_nModeToGoTo = m_nModeForTwoPlayersSeparateCars;
     }
 
-    m_pTargetEntity = reinterpret_cast<CEntity*>(player0->m_pVehicle);
+    m_pTargetEntity = player0->m_pVehicle;
     CEntity::SafeRegisterRef(m_pTargetEntity);
+
     m_bUseScriptZoomValuePed = false;
     m_bUseScriptZoomValueCar = false;
 }
