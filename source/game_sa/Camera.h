@@ -42,12 +42,19 @@ enum eLookingDirection {
 
 enum class eGroundHeightType : int32 {
     ENTITY_BOUNDINGBOX_BOTTOM = 0, // ground height + boundingBoxMin.z of colliding entity
-    EXACT_GROUND_HEIGHT = 1, // ignores height of colliding entity at position
-    ENTITY_BOUNDINGBOX_TOP = 2 // ground height + boundingBoxMax.z of colliding entity
+    EXACT_GROUND_HEIGHT = 1,       // ignores height of colliding entity at position
+    ENTITY_BOUNDINGBOX_TOP = 2     // ground height + boundingBoxMax.z of colliding entity
 };
 
+struct CamTweak {
+    int32 m_nModelIndex;
+    float m_fDistance;
+    float m_fAltitude;
+    float m_fAngle;
+};
+VALIDATE_SIZE(CamTweak, 0x10);
+
 class CCamera : public CPlaceable {
-    //PLUGIN_NO_DEFAULT_CONSTRUCTION(CCamera)
 public:
     bool            m_bAboveGroundTrainNodesLoaded;
     bool            m_bBelowGroundTrainNodesLoaded;
@@ -111,7 +118,6 @@ public:
     bool            m_bTransitionJUSTStarted;
     bool            m_bTransitionState;
     uint8           m_nActiveCam;
-    char            _pad5A[2];
     uint32          m_nCamShakeStart;
     uint32          m_nFirstPersonCamLastInputTime;
     uint32          m_nLongestTimeInMill;
@@ -180,7 +186,6 @@ public:
     float           m_fSoundDistUpAsReadOld;
     float           m_fAvoidTheGeometryProbsTimer;
     uint16          m_nAvoidTheGeometryProbsDirn;
-    char            _pad16A[2];
     float           m_fWideScreenReductionAmount;
     float           m_fStartingFOVForInterPol;
     CCam            m_aCams[3];
@@ -304,14 +309,7 @@ public:
     char            field_CF1;
     char            field_CF2;
     char            field_CF3;
-
-    struct {
-        int32 m_nModelIndex;
-        float m_fDistance;
-        float m_fAltitude;
-        float m_fAngle;
-    } m_aCamTweak[5];
-
+    CamTweak        m_aCamTweak[5];
     bool            m_bCameraVehicleTweaksInitialized;
     char            _padD45[3];
     float           m_fCurrentTweakDistance;
@@ -335,11 +333,6 @@ public:
     static bool &m_bUseMouse3rdPerson;
     static bool &bDidWeProcessAnyCinemaCam;
 
-    /* virtual functions */
-
-    // vtable function #0 (destructor)
-
-    /* virtual functions - end */
 public:
     static void InjectHooks();
 
@@ -383,17 +376,17 @@ public:
     void FinishCutscene();
     void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
     uint32 GetCutSceneFinishTime();
-    bool GetFading();
-    int32 GetFadingDirection();
+    bool GetFading() const;
+    int32 GetFadingDirection() const;
     CVector* GetGameCamPosition();
     int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
     float GetPositionAlongSpline();
     float GetRoughDistanceToGround();
-    int32 GetScreenFadeStatus();
+    int32 GetScreenFadeStatus() const;
     void GetScreenRect(CRect* rect);
-    bool Get_Just_Switched_Status();
+    bool Get_Just_Switched_Status() const;
 
     void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
     void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
@@ -419,7 +412,7 @@ public:
     void ProcessMusicFade();
     void ProcessScriptedCommands();
     void ProcessShake();
-    RwV3d* ProcessShake(float shakeIntensity);
+    CVector* ProcessShake(float intensity);
     void ProcessVectorMoveLinear();
     void ProcessVectorMoveLinear(float ratio);
     void ProcessVectorTrackLinear();

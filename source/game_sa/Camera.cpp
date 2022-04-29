@@ -295,13 +295,13 @@ uint32 CCamera::GetCutSceneFinishTime() {
 }
 
 // 0x50ADE0
-bool CCamera::GetFading() {
+bool CCamera::GetFading() const {
     return m_bFading;
 }
 
 // TODO: eFadingDirection
 // 0x50ADF0
-int32 CCamera::GetFadingDirection() {
+int32 CCamera::GetFadingDirection() const {
     if (m_bFading)
         return m_nFadeInOutFlag == eFadeFlag::FADE_OUT;
     else
@@ -309,12 +309,12 @@ int32 CCamera::GetFadingDirection() {
 }
 
 // 0x50AE10
-bool CCamera::Get_Just_Switched_Status() {
+bool CCamera::Get_Just_Switched_Status() const {
     return m_bJust_Switched;
 }
 
 // 0x50AE20
-int32 CCamera::GetScreenFadeStatus() {
+int32 CCamera::GetScreenFadeStatus() const {
     if (m_fFadeAlpha == 0.0f) {
         return 0;
     }
@@ -332,19 +332,23 @@ CVector* CCamera::GetGameCamPosition() {
 
 // 0x50AE60
 bool CCamera::GetLookingLRBFirstPerson() {
-    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON && m_aCams[m_nActiveCam].m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD;
+    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON
+        && m_aCams[m_nActiveCam].m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD;
 }
 
 // 0x50AE90
 int32 CCamera::GetLookDirection() {
-    if (m_aCams[m_nActiveCam].m_nMode != eCamMode::MODE_CAM_ON_A_STRING &&
-        m_aCams[m_nActiveCam].m_nMode != eCamMode::MODE_1STPERSON &&
-            m_aCams[m_nActiveCam].m_nMode != eCamMode::MODE_BEHINDBOAT && m_aCams[m_nActiveCam].m_nMode != eCamMode::MODE_FOLLOWPED ||
-        (m_aCams[m_nActiveCam].m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_FORWARD)) {
+    const auto& cam = m_aCams[m_nActiveCam];
+    if (cam.m_nMode != eCamMode::MODE_CAM_ON_A_STRING &&
+        cam.m_nMode != eCamMode::MODE_1STPERSON &&
+        cam.m_nMode != eCamMode::MODE_BEHINDBOAT &&
+        cam.m_nMode != eCamMode::MODE_FOLLOWPED ||
+        (cam.m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_FORWARD)
+    ) {
         return eLookingDirection::LOOKING_DIRECTION_FORWARD;
     }
 
-    return m_aCams[m_nActiveCam].m_nDirectionWasLooking;
+    return cam.m_nDirectionWasLooking; // todo: unsigned/signed
 }
 
 // 0x50AED0
@@ -1087,8 +1091,8 @@ void CCamera::ProcessShake() {
 
 // shakeIntensity not used
 // 0x516560
-RwV3d* CCamera::ProcessShake(float shakeIntensity) {
-    return plugin::CallMethodAndReturn<RwV3d*, 0x516560, CCamera*, float>(this, shakeIntensity);
+CVector* CCamera::ProcessShake(float intensity) {
+    return plugin::CallMethodAndReturn<CVector*, 0x516560, CCamera*, float>(this, intensity);
 }
 
 // unused
