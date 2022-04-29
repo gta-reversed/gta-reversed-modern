@@ -846,23 +846,21 @@ void CCamera::SetNearClipBasedOnPedCollision(float arg2) {
 // TODO: eAimingType
 // 0x50CBF0
 void CCamera::SetColVarsAimWeapon(int32 aimingType) {
-    if (aimingType <= 3) {
-        switch (aimingType) {
-        case 0u:
-            CCamera::SetCamCollisionVarDataSet(0);
-            break;
-        case 1u:
-            CCamera::SetCamCollisionVarDataSet(1);
-            break;
-        case 2u:
-            CCamera::SetCamCollisionVarDataSet(2);
-            break;
-        case 3u:
-            CCamera::SetCamCollisionVarDataSet(3);
-            break;
-        default:
-            return;
-        }
+    switch (aimingType) {
+    case 0:
+        CCamera::SetCamCollisionVarDataSet(0);
+        break;
+    case 1:
+        CCamera::SetCamCollisionVarDataSet(1);
+        break;
+    case 2:
+        CCamera::SetCamCollisionVarDataSet(2);
+        break;
+    case 3:
+        CCamera::SetCamCollisionVarDataSet(3);
+        break;
+    default:
+        return;
     }
 }
 
