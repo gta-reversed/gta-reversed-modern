@@ -207,17 +207,15 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 }
 
 // 0x50A9F0
-void CCamera::CamShake(float arg2, CVector fromVector) {
-    auto dist = DistanceBetweenPoints(m_aCams[m_nActiveCam].m_vecSource, fromVector);
-    dist = clamp(dist, 0.0f, 100.0f);
+void CCamera::CamShake(float strength, CVector from) {
+    auto dist = DistanceBetweenPoints(GetActiveCamera().m_vecSource, from);
+    dist = std::clamp(dist, 0.0f, 100.0f);
 
-    float precentShakeForce = 1.0f - dist * 0.01f;
-    float ShakeForce = (m_fCamShakeForce - (CTimer::GetTimeInMS() - m_nCamShakeStart) * 0.001f) * precentShakeForce;
+    float percentShakeForce = 1.0f - dist / 100.f;
+    float shakeForce = (m_fCamShakeForce - float(CTimer::GetTimeInMS() - m_nCamShakeStart) / 1000.f) * percentShakeForce;
 
-    clamp(ShakeForce, 0.0f, 2.0f);
-
-    float toShakeForce = precentShakeForce * arg2 * 0.35f;
-    if (toShakeForce > ShakeForce) {
+    float toShakeForce = percentShakeForce * strength * 0.35f;
+    if (toShakeForce > std::clamp(shakeForce, 0.0f, 2.0f)) {
         m_fCamShakeForce = toShakeForce;
         m_nCamShakeStart = CTimer::GetTimeInMS();
     }
