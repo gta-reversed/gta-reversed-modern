@@ -2,23 +2,15 @@
 
 #include "Acquaintance.h"
 
-enum {
-    ACQUAINTANCE_RESPECT,
-    ACQUAINTANCE_LIKE,
-    ACQUAINTANCE_IGNORE,
-    ACQUAINTANCE_DISLIKE,
-    ACQUAINTANCE_HATE,
-};
-
 void CAcquaintance::InjectHooks() {
     RH_ScopedClass(CAcquaintance);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(GetAcquaintances, 0x608970);
-    // RH_ScopedInstall(SetAcquaintances, 0x608960);
-    // RH_ScopedInstall(ClearAcquaintances, 0x6089A0);
-    // RH_ScopedInstall(SetAsAcquaintance, 0x608DA0);
-    // RH_ScopedInstall(ClearAsAcquaintance, 0x608980);
+    RH_ScopedInstall(GetAcquaintances, 0x608970);
+    RH_ScopedInstall(SetAcquaintances, 0x608960);
+    RH_ScopedInstall(ClearAcquaintances, 0x6089A0);
+    RH_ScopedInstall(SetAsAcquaintance, 0x608DA0);
+    RH_ScopedInstall(ClearAsAcquaintance, 0x608980);
 }
 
 // 0x608AE0
@@ -30,33 +22,40 @@ CAcquaintance::CAcquaintance() {
     m_nHate    = 0;
 }
 
-// 0x608780
-CAcquaintance::~CAcquaintance() {
-    // NOP
-}
-
 // 0x608970
 uint32 CAcquaintance::GetAcquaintances(AcquaintanceId id) {
-    return plugin::CallMethodAndReturn<uint32, 0x608970, CAcquaintance*, AcquaintanceId>(this, id);
+    return m_acquaintances[id];
 }
 
 // 0x608960
 void CAcquaintance::SetAcquaintances(AcquaintanceId id, uint32 value) {
-    plugin::CallMethod<0x608960, CAcquaintance*, AcquaintanceId, uint32>(this, id, value);
+    m_acquaintances[id] = value;
 }
 
 // 0x6089A0
 void CAcquaintance::ClearAcquaintances(AcquaintanceId id) {
-    plugin::CallMethod<0x6089A0, CAcquaintance*, AcquaintanceId>(this, id);
+    m_acquaintances[id] = 0;
 }
 
 // 0x608DA0
 void CAcquaintance::SetAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum) {
-    plugin::CallMethod<0x608DA0, CAcquaintance*, AcquaintanceId, uint32>(this, id, pedTypeBitNum);
-}
+    auto acquaintances = GetAcquaintances(id);
+    if ((acquaintances & pedTypeBitNum) != 0)
+        return;
 
+    SetAcquaintances(id, pedTypeBitNum | acquaintances);
+
+    for (auto i = 0; i < ACQUAINTANCE_NUM; i++) {
+        if (id != i) {
+            ClearAsAcquaintance(i, pedTypeBitNum);
+        }
+    }
+}
 
 // 0x608980
 void CAcquaintance::ClearAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum) {
-    plugin::CallMethod<0x608980>(this, id, pedTypeBitNum);
+    auto acquaintances = GetAcquaintances(id);
+    if ((acquaintances & pedTypeBitNum) != 0) {
+        SetAcquaintances(id, acquaintances & ~pedTypeBitNum);
+    }
 }

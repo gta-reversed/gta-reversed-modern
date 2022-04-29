@@ -9,9 +9,9 @@ void CTaskSimpleGiveCPR::InjectHooks()
     RH_ScopedInstall(Constructor, 0x658860);
     RH_ScopedInstall(ReviveDeadPed, 0x658900);
     RH_ScopedInstall(FinishGiveCPRAnimCB, 0x658910);
-    RH_ScopedInstall(Clone_Reversed, 0x659A10);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x65A7C0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6589B0);
+    RH_ScopedVirtualInstall(Clone, 0x659A10);
+    RH_ScopedVirtualInstall(ProcessPed, 0x65A7C0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6589B0);
 }
 
 CTaskSimpleGiveCPR* CTaskSimpleGiveCPR::Constructor(CAccident* pAccident)

@@ -17,12 +17,12 @@ void CPtrNodeDoubleLink::InjectHooks() {
     RH_ScopedInstall(AddToList, 0x5329A0);
 }
 
-void* CPtrNodeDoubleLink::operator new(uint32 size) {
-    return CPools::ms_pPtrNodeDoubleLinkPool->New();
+void* CPtrNodeDoubleLink::operator new(unsigned size) {
+    return GetPtrNodeDoubleLinkPool()->New();
 }
 
 void CPtrNodeDoubleLink::operator delete(void* ptr, size_t sz) {
-    CPools::ms_pPtrNodeDoubleLinkPool->Delete(static_cast<CPtrNodeDoubleLink*>(ptr));
+    GetPtrNodeDoubleLinkPool()->Delete(static_cast<CPtrNodeDoubleLink*>(ptr));
 }
 
 // 0x5329A0

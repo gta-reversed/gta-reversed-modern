@@ -145,11 +145,7 @@ CAESound& CAESound::operator=(const CAESound& sound) {
 }
 
 void CAESound::UnregisterWithPhysicalEntity() {
-    if (!m_pPhysicalEntity)
-        return;
-
-    m_pPhysicalEntity->CleanUpOldReference(&m_pPhysicalEntity);
-    m_pPhysicalEntity = nullptr;
+    CEntity::ClearReference(m_pPhysicalEntity);
 }
 
 void CAESound::StopSound() {

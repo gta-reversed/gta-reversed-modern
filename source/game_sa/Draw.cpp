@@ -25,8 +25,8 @@ void CDraw::InjectHooks() {
 }
 
 // 0x6FF410
-void CDraw::SetFOV(float fovValue) {
-    ms_fFOV = fovValue;
+void CDraw::SetFOV(float fov) {
+    ms_fFOV = fov;
 }
 
 // 0x6FF420
@@ -75,6 +75,10 @@ void DoFade() {
             );
         }
 
-        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
+        #if FIX_BUGS
+        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f}, color);
+        #else
+        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f}, color);
+        #endif
     }
 }

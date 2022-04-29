@@ -206,7 +206,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (TheCamera.m_bWideScreenOn)
         return;
 
-    if (!FindPlayerVehicle(-1, false))
+    if (!FindPlayerVehicle())
         return;
 
     if (CReplay::Mode == 1)
@@ -601,7 +601,7 @@ void CAERadioTrackManager::CheckForPause() {
             AEAudioHardware.SetChannelFrequencyScalingFactor(m_nChannel, 0, 1.0f);
         } else {
             StopRadio(nullptr, false);
-            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+            AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
             m_bPauseMode = false;
         }
     }

@@ -21,8 +21,6 @@ int32& CAnimManager::ms_numAnimations = *(int32*)0xB4EA2C;
 void CAnimManager::InjectHooks() {
     RH_ScopedClass(CAnimManager);
     RH_ScopedCategory("Animation");
-
-    CAnimBlendAssociation::InjectHooks();
 }
 
 // 0x5BF6B0
@@ -41,7 +39,7 @@ CAnimBlock* CAnimManager::GetAnimationBlock(const char* name) {
 }
 
 // 0x4D3990
-uint32 CAnimManager::GetAnimationBlockIndex(const char* name) {
+int32 CAnimManager::GetAnimationBlockIndex(const char* name) {
     return plugin::CallAndReturn<int32, 0x4D3990, const char*>(name);
 }
 
@@ -68,6 +66,16 @@ char* CAnimManager::GetAnimGroupName(AssocGroupId groupId) {
 // 0x4D3A30
 char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
     return plugin::CallAndReturn<char*, 0x4D3A30, AssocGroupId>(groupId);
+}
+
+// NOTSA
+AssocGroupId CAnimManager::GetAnimationGroupId(const char* name) {
+    for (auto i = 0; i < ms_numAnimAssocDefinitions; i++) {
+        if (std::string_view{ name } == GetAnimGroupName((AssocGroupId)i)) {
+            return (AssocGroupId)i;
+        }
+    }
+    return (AssocGroupId)ms_numAnimAssocDefinitions;
 }
 
 // 0x4D3A40

@@ -13,7 +13,7 @@
 enum eModelID	// Number of entries: 14832
 {
     MODEL_INVALID = -1,
-    MODEL_NULL = 0,
+    MODEL_PLAYER = 0,
     MODEL_CSPLAY = 1,
     MODEL_MALE01 = 7,
     MODEL_BFORI = 9,

@@ -31,6 +31,8 @@ typedef uint8_t   uint8;
 typedef uint16_t  uint16;
 typedef uint32_t  uint32;
 typedef uint64_t  uint64;
+typedef intptr_t  intptr;
+typedef uintptr_t uintptr;
 
 typedef uint8     bool8;
 typedef uint16    bool16;
@@ -38,6 +40,10 @@ typedef uint32    bool32;
 
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
 #define UNUSED(x) (void)(x);
+
+// Use for code that's unreachable.
+// Prefer this over assert(0)
+#define NOTSA_UNREACHABLE assert(0)
 
 #define _IGNORED_
 #define _CAN_BE_NULL_

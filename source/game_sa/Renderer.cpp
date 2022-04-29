@@ -9,6 +9,7 @@
 #include "Renderer.h"
 
 #include "Occlusion.h"
+#include "PostEffects.h"
 
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
@@ -569,7 +570,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->damageFlags.bDamageFlag8))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;
@@ -888,7 +889,7 @@ void CRenderer::ScanSectorList(int32 sectorX, int32 sectorY) {
 
 // 0x554B10
 void CRenderer::ScanBigBuildingList(int32 sectorX, int32 sectorY) {
-    if (sectorX < 0 && sectorY < 0 && sectorX > MAX_LOD_PTR_LISTS_X && sectorY > MAX_LOD_PTR_LISTS_Y)
+    if (sectorX < 0 || sectorY < 0 || sectorX >= MAX_LOD_PTR_LISTS_X || sectorY >= MAX_LOD_PTR_LISTS_Y)
         return;
 
     bool bRequestModel = false;
@@ -978,7 +979,7 @@ void CRenderer::ConstructRenderList() {
         float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
         if (player->GetPosition().z - fGroundHeightZ > 50.0f) {
             float fGroundHeightZ = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_TOP);
-            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle(-1, false))
+            if (player->GetPosition().z - fGroundHeightZ > 10.0f && FindPlayerVehicle())
                 ms_bInTheSky = true;
         }
         const float fCameraZ = TheCamera.GetPosition().z;

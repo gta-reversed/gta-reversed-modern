@@ -9,7 +9,6 @@ enum eTrafficLightsState {
     LIGHT_OFF = 3
 };
 
-//1 - North-South, 2 - West-East cycle
 enum eTrafficLightsDirection {
     DIR_NORTH_SOUTH = 1,
     DIR_WEST_EAST = 2
@@ -17,9 +16,9 @@ enum eTrafficLightsDirection {
 
 class CTrafficLights {
 private:
-    static uint8(&aTrafficLightColoursR)[3];
-    static uint8(&aTrafficLightColoursG)[3];
-    static uint8(&aTrafficLightColoursB)[3];
+    static uint8 (&aTrafficLightColoursR)[3];
+    static uint8 (&aTrafficLightColoursG)[3];
+    static uint8 (&aTrafficLightColoursB)[3];
     static float& fLightMult;
 
     static CVector& vecTrafficLights5_1;

@@ -14,18 +14,18 @@ class CPed;
 class CVehicle;
 
 class CPedGroup {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroup)
-
 public:
     CPed*                 m_pPed;
     bool                  m_bMembersEnterLeadersVehicle;
     CPedGroupMembership   m_groupMembership;
-    float                 m_fSeparationRange;
     CPedGroupIntelligence m_groupIntelligence;
     bool                  m_bIsMissionGroup;
     char                  field_2D1[3];
 
 public:
+    CPedGroup();
+    ~CPedGroup();
+
     float FindDistanceToFurthestMember();
     float FindDistanceToNearestMember(CPed** ppOutNearestMember);
     void  Flush();
@@ -37,6 +37,7 @@ public:
     void  RemoveAllFollowers();
     void  Teleport(const CVector* pos);
 
+    // NOTSA
     inline CPedGroupIntelligence& GetIntelligence() { return m_groupIntelligence; }
 
     inline auto& GetMembership() const { return m_groupMembership; }

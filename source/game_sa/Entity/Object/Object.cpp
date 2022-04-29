@@ -11,6 +11,9 @@
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
 #include "ObjectSaveStructure.h"
+#include "Rope.h"
+#include "Ropes.h"
+#include "TheScripts.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -22,16 +25,16 @@ void CObject::InjectHooks()
     RH_ScopedClass(CObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
-    RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5A2130);
-    RH_ScopedInstall(Teleport_Reversed, 0x5A17B0);
-    RH_ScopedInstall(PreRender_Reversed, 0x59FD50);
-    RH_ScopedInstall(Render_Reversed, 0x59F180);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x554FA0);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x553E10);
-    RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x59FEE0);
-    RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5A02E0);
+    RH_ScopedVirtualInstall(SetIsStatic, 0x5A0760);
+    RH_ScopedVirtualInstall(CreateRwObject, 0x59F110);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5A2130);
+    RH_ScopedVirtualInstall(Teleport, 0x5A17B0);
+    RH_ScopedVirtualInstall(PreRender, 0x59FD50);
+    RH_ScopedVirtualInstall(Render, 0x59F180);
+    RH_ScopedVirtualInstall(SetupLighting, 0x554FA0);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x553E10);
+    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x59FEE0);
+    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5A02E0);
     RH_ScopedInstall(Init, 0x59F840);
     RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
     RH_ScopedInstall(CanBeDeleted, 0x59F120);
@@ -132,7 +135,7 @@ CObject::~CObject()
         CColStore::RemoveRef(colModel->m_nColSlot);
     }
 
-    CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, CPools::ms_pObjectPool->GetRef(this));
+    CRadar::ClearBlipForEntity(eBlipType::BLIP_OBJECT, GetObjectPool()->GetRef(this));
 
     if (m_nRefModelIndex != -1)
         CModelInfo::GetModelInfo(m_nRefModelIndex)->RemoveRef();
@@ -154,19 +157,25 @@ CObject::~CObject()
         m_pFire->Extinguish();
 }
 
-void* CObject::operator new(uint32 size)
+void* CObject::operator new(unsigned size)
 {
-    return CPools::ms_pObjectPool->New();
+    return GetObjectPool()->New();
 }
 
-void* CObject::operator new(uint32 size, int32 iPoolRef)
+void* CObject::operator new(unsigned size, int32 poolRef)
 {
-    return CPools::ms_pObjectPool->New(iPoolRef);
+    return GetObjectPool()->New(poolRef);
 }
 
 void CObject::operator delete(void* obj)
 {
-    CPools::ms_pObjectPool->Delete(static_cast<CObject*>(obj));
+    GetObjectPool()->Delete(static_cast<CObject*>(obj));
+}
+
+// NOTSA
+void CObject::operator delete(void* obj, int32 poolRef)
+{
+    GetObjectPool()->Delete(static_cast<CObject*>(obj));
 }
 
 // 0x5A0760
@@ -740,7 +749,8 @@ bool CObject::CanBeDeleted() {
 // 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
     m_pDummyObject = relatedDummy;
-    relatedDummy->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
+    assert(m_pDummyObject);
+    m_pDummyObject->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
 }
 
 // 0x59F2D0
@@ -758,12 +768,12 @@ bool CObject::TryToExplode() {
 
 // 0x59F300
 void CObject::SetObjectTargettable(bool targetable) {
-    objectFlags.bIsTargatable = targetable;
+    objectFlags.bIsTargetable = targetable;
 }
 
 // 0x59F320
 bool CObject::CanBeTargetted() {
-    return objectFlags.bIsTargatable;
+    return objectFlags.bIsTargetable;
 }
 
 // 0x59F330
@@ -783,13 +793,13 @@ void CObject::SetRemapTexture(RwTexture* remapTexture, int16 txdIndex) {
 // 0x59F380
 float CObject::GetRopeHeight() {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32>(this));
-    return CRopes::GetRope(ropeIndex).m_fRopeSegmentLength;
+    return CRopes::GetRope(ropeIndex).m_fSegmentLength;
 }
 
 // 0x59F3A0
 void CObject::SetRopeHeight(float height) {
     const auto ropeIndex = CRopes::FindRope(reinterpret_cast<uint32>(this));
-    CRopes::GetRope(ropeIndex).m_fRopeSegmentLength = height;
+    CRopes::GetRope(ropeIndex).m_fSegmentLength = height;
 }
 
 // 0x59F3C0
@@ -884,7 +894,7 @@ void CObject::Init() {
 
     m_fHealth = 1000.0F;
     m_fDoorStartAngle = -1001.0F;
-    m_dwRemovalTime = 0;
+    m_nRemovalTime = 0;
     m_nBonusValue = 0;
     m_wCostValue = 0;
     for (auto& col : m_nCarColor)
@@ -918,7 +928,7 @@ void CObject::Init() {
         objectFlags.bIsLampPost = false;
     }
 
-    objectFlags.bIsTargatable = false;
+    objectFlags.bIsTargetable = false;
     physicalFlags.bAttachedToEntity = false;
 
     m_nAreaCode = eAreaCodes::AREA_CODE_13;
@@ -1098,7 +1108,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
     m_fHealth -= damage * m_pObjectInfo->m_fColDamageMultiplier;
     m_fHealth = std::max(0.0F, m_fHealth);
 
-    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle(-1, false))
+    if (!m_nColDamageEffect || physicalFlags.bInvulnerable && damager != FindPlayerPed() && damager != FindPlayerVehicle())
         return;
 
     // Big Smoke crack palace wall break checks
@@ -1354,7 +1364,7 @@ void CObject::ObjectFireDamage(float damage, CEntity* damager) {
 
 // 0x5A1840
 void CObject::TryToFreeUpTempObjects(int32 numObjects) {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
@@ -1362,7 +1372,7 @@ void CObject::TryToFreeUpTempObjects(int32 numObjects) {
         if (numObjects <= 0)
             return;
 
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary() && !obj->IsVisible()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1373,12 +1383,12 @@ void CObject::TryToFreeUpTempObjects(int32 numObjects) {
 
 // 0x5A18B0
 void CObject::DeleteAllTempObjects() {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i) {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsTemporary()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1388,12 +1398,12 @@ void CObject::DeleteAllTempObjects() {
 
 // 0x5A1910
 void CObject::DeleteAllMissionObjects() {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i)  {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (obj && obj->IsMissionObject()) {
             CWorld::Remove(obj);
             delete obj;
@@ -1403,12 +1413,12 @@ void CObject::DeleteAllMissionObjects() {
 
 // 0x5A1980
 void CObject::DeleteAllTempObjectsInArea(CVector point, float radius) {
-    const auto poolSize = CPools::ms_pObjectPool->GetSize();
+    const auto poolSize = GetObjectPool()->GetSize();
     if (!poolSize)
         return;
 
     for (auto i = 0; i < poolSize; ++i) {
-        auto* obj = CPools::ms_pObjectPool->GetAt(i);
+        auto* obj = GetObjectPool()->GetAt(i);
         if (!obj || !obj->IsTemporary())
             continue;
 
@@ -1425,7 +1435,8 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
     auto& rope = CRopes::GetRope(iRopeInd);
     rope.ReleasePickedUpObject();
     rope.m_pAttachedEntity = attachTo;
-    attachTo->RegisterReference(&rope.m_pAttachedEntity);
+    assert(rope.m_pAttachedEntity);
+    rope.m_pAttachedEntity->RegisterReference(&rope.m_pAttachedEntity);
 
     auto vecRopePoint = CVector();
     vecRopePoint.z = CRopes::FindPickupHeight(attachTo);
@@ -1456,9 +1467,9 @@ bool CObject::CanBeUsedToTakeCoverBehind() {
 
 // 0x5A1F60
 CObject* CObject::Create(int32 modelIndex, bool bUnused) {
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     auto* obj = new CObject(modelIndex, false); //BUG? most likely the unused parameter was supposed to be passed to the constructor
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (obj)
         return obj;
@@ -1471,9 +1482,9 @@ CObject* CObject::Create(int32 modelIndex, bool bUnused) {
 
 // 0x5A2070
 CObject* CObject::Create(CDummyObject* dummyObject) {
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     auto* obj = new CObject(dummyObject);
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (obj)
         return obj;
@@ -1514,19 +1525,19 @@ void CObject::ProcessControlLogic() {
         if (iRopeInd >= 0)
         {
             auto& rope = CRopes::GetRope(iRopeInd);
-            nSegments = static_cast<uint8>(rope.m_fRopeSegmentLength * 32.0F);
-            fRopeLengthChange = rope.m_fMass * rope.m_fRopeSegmentLength - static_cast<float>(nSegments) * rope.m_fRopeTotalLength;
+            nSegments = static_cast<uint8>(rope.m_fSegmentLength * 32.0F);
+            fRopeLengthChange = rope.m_fMass * rope.m_fSegmentLength - static_cast<float>(nSegments) * rope.m_fTotalLength;
         }
 
         if (m_nModelIndex == ModelIndices::MI_MAGNOCRANE)
         {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 36.64F, -1.69F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, 4, vecRopePoint, false, nSegments, 1u, this, 20000u);
+            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::CRANE_MAGNO), vecRopePoint, false, nSegments, 1u, this, 20000u);
         }
         else if (m_nModelIndex == ModelIndices::MI_CRANETROLLEY)
         {
-            const auto nRopeType = GetPosition().x >= 0 ? 7 : 5;
+            const auto nRopeType = static_cast<const uint32>(GetPosition().x >= 0 ? eRopeType::CRANE_TROLLEY : eRopeType::WRECKING_BALL);
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 0.0F);
             vecRopePoint.z += fRopeLengthChange;
             CRopes::RegisterRope(this, nRopeType, vecRopePoint, false, nSegments, 1u, this, 20000u);
@@ -1535,7 +1546,7 @@ void CObject::ProcessControlLogic() {
         {
             auto vecRopePoint = *m_matrix * CVector(0.0F, 0.0F, 59.0F);
             vecRopePoint.z += fRopeLengthChange;
-            CRopes::RegisterRope(this, 6, vecRopePoint, false, nSegments, 1u, this, 20000u);
+            CRopes::RegisterRope(this, static_cast<uint32>(eRopeType::QUARRY_CRANE_ARM), vecRopePoint, false, nSegments, 1u, this, 20000u);
         }
     }
 
@@ -1545,12 +1556,12 @@ void CObject::ProcessControlLogic() {
 
 // 0x5A2B90
 bool IsObjectPointerValid_NotInWorld(CObject* object) {
-    return CPools::ms_pObjectPool->IsObjectValid(object);
+    return GetObjectPool()->IsObjectValid(object);
 }
 
 // 0x5A2C20
 bool IsObjectPointerValid(CObject* object) {
-    if (!CPools::ms_pObjectPool->IsObjectValid(object))
+    if (!GetObjectPool()->IsObjectValid(object))
         return false;
 
     if (object->m_bIsBIGBuilding)

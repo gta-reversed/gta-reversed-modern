@@ -30,26 +30,38 @@ public:
     }
 
     // Accessors
-    auto OverallState()           const { return m_overallState; }
+    auto OverallState()         const { return m_overallState; }
+                                
+    auto ItemsState()           const { return m_itemsState; }
+                                
+    auto SubcategoriesState()   const { return m_subcatsState; }
+                                
+    const auto& Name()          const { return m_name; }
+                                
+    const auto& SubCategories() const { return m_subCategories; }
+    auto&       SubCategories()       { return m_subCategories; }
+                                
+    const auto& Items()         const { return m_items; }
+    auto&       Items()               { return m_items; }
+                                
+    auto Parent()               const { return m_parent; }
 
-    auto ItemsState()             const { return m_itemsState; }
+    bool Visible()              const { return m_isVisible; }
+    void Visible(bool visible)        { m_isVisible = visible; }
 
-    auto SubcategoriesState()     const { return m_subcatsState; }
-
-    const auto& Name()            const { return m_name; }
-
-    const auto& SubCategories()   const { return m_subCategories; }
-    auto&       SubCategories()         { return m_subCategories; }
-
-    const auto& Items()           const { return m_items; }
-    auto&       Items()                 { return m_items; }
+    bool Open()                 const { return m_isOpen; }
+    void Open(bool open)              { m_isOpen = open; }
 
     // Adds one item to this category and deals with possible state change
     void AddItem(Item item) {
         assert(!FindItem(item->Name())); // Make sure there are no duplicate names :D
 
-        auto& emplaced = m_items.emplace_back(std::move(item));
-        OnOneItemStateChange(); // Deal with possible state change introduced by item
+        // Lexographically sorted insert 
+        const auto& emplacedItem = *m_items.emplace(
+            rng::upper_bound(m_items, item->Name(), {}, [](auto&& v) { return v->Name(); }),
+            std::move(item)
+        );
+        OnOneItemStateChange(emplacedItem); // Deal with possible state change introduced by item
     }
 
     // Enable/disable all items at once (subcategories' items included)
@@ -71,7 +83,7 @@ public:
     void SetItemEnabled(Item& item, bool enabled) {
         if (enabled != item->Hooked()) {
             item->State(enabled);
-            OnOneItemStateChange();
+            OnOneItemStateChange(item);
         }
     }
 
@@ -81,30 +93,44 @@ public:
         return it == m_items.end() ? nullptr : *it;
     }
 
-    // Find subcategory by name - Only checks for children
+    // Find subcategory by name - Only checks for top-level children
     HookCategory* FindSubcategory(std::string_view name) {
         const auto it = rng::find_if(m_subCategories, [&](const auto& c) { return c.Name() == name; });
         return it == m_subCategories.end() ? nullptr : &*it;
     }
 
-    // Find subcategory by name - Only checks for children
-    // If none found a category will be created with the given name.
+    // Find subcategory by name - Only checks for top-level children
+    // If none found a sub-category will be created with the given name.
     auto& FindOrCreateSubcategory(std::string_view name) {
-        if (auto cat = FindSubcategory(name))
+        if (auto* cat = FindSubcategory(name))
             return *cat; // Return found
-        return m_subCategories.emplace_back(std::string{ name }, this); // Create it
+
+        // Insert it - It will be sorted later
+        return m_subCategories.emplace_back(std::string{ name }, this);
     }
 
     // Iterates over all items, including those in all subcategories
     // NOTE: Make sure the function doesn't add/remove items/subcategories!
     //       (Underlaying storages are vectors, which don't like being modifies while they're being iterated over)
     template<typename Fn>
-    void ForEachItem(Fn fn) {
+    void ForEachItem(Fn&& fn) {
         for (auto& item : m_items) {
             std::invoke(fn, item);
         }
         for (auto& cat : m_subCategories) {
             cat.ForEachItem(fn);
+        }
+    }
+
+    // Called when `InjectHooksMain` has finished - That is, all hooks have been injected.
+    // From this point on no items/categories should be added/removed.
+    void OnInjectionEnd() {
+        // Re-sort all categories (uses operator<=> defined below)
+        m_subCategories.sort();
+
+        // Propagte to all child
+        for (auto&& cat : m_subCategories) {
+            cat.OnInjectionEnd();
         }
     }
 
@@ -117,13 +143,13 @@ private:
         }
 
         for (auto& cat : m_subCategories) {
-            cat.SetAllItemsEnabled_Internal(enabled, true);
+            cat.SetAllItemsEnabled_Internal(enabled, false); // No need to notify parents as we'll do that ourselves
         }
 
         const auto state = enabled ? HooksState::ALL : HooksState::NONE;
         m_itemsState = state;
         m_subcatsState = state;
-        ReCalculateOverallStateAndMaybeNotify(notifyParent);
+        ReCalculateOverallStateAndMaybeNotify(notifyParent); // It's enough if only we notify our parent
     }
 
     // Recalculates overall state, and if changed, notifies parent.
@@ -159,40 +185,85 @@ private:
         return changed;
     }
 
+    // Helper function to recaulcate new state of collection when one item's state changes
+    template<rng::input_range R, typename Fn>
+    static HooksState CalculateCollectionOverallStateOnEntryChange(R&& collection, HooksState currentCollectiveState, HooksState itemState, Fn&& isHookedPredicate) {
+        assert(!collection.empty()); // Logically impossible for the collection to be empty (It has to contain at least the entry whose state just changed)
+
+        if (itemState == currentCollectiveState) {
+            return currentCollectiveState; // No changes
+
+        }
+
+        // The collection consists of this entry alone,
+        // so overall state is decided by it alone
+        if (collection.size() == 1) {
+            return itemState;
+        }
+
+        // Multiple entries at this point
+        switch (currentCollectiveState) {
+        case HooksState::ALL:
+        case HooksState::NONE: {
+            return HooksState::SOME; // At this point the state of the collection and item differ
+        }
+        case HooksState::SOME: { // Has to calculate it all again - TODO: Check if this is slow - If so, it can be optimized further
+            const auto hookedCount = rng::count_if(collection, isHookedPredicate);
+            if (hookedCount == 0) {
+                return HooksState::NONE;
+            } else if (hookedCount == collection.size()) {
+                return HooksState::ALL;
+            } else {
+                return HooksState::SOME;
+            }
+        }
+        }
+
+        assert(0);
+        return HooksState::SOME; // Theoritically unreachable - Had to put it here to avoid compiler warnings :D
+    }
+
     // Called when a sub-category's overall state changes
     // (Will propagate to parent if it affected this category's overall state)
     void OnSubcategoryStateChanged(HookCategory& cat) {
-        using enum HooksState;
-
-        const auto fullyHookedCount = rng::count_if(m_subCategories, [](const auto& v) -> bool { return v.OverallState() == HooksState::ALL; });
-        m_subcatsState =
-            fullyHookedCount == 0                      ? NONE :
-            fullyHookedCount == m_subCategories.size() ? ALL  :
-                                                         SOME;
+        m_subcatsState = CalculateCollectionOverallStateOnEntryChange(
+            m_subCategories,
+            m_subcatsState,
+            cat.OverallState(),
+            [](const auto& v) { return v.OverallState() == HooksState::ALL; }
+        );
         ReCalculateOverallStateAndMaybeNotify();
     }
 
     // Not always called - Only when an individual item's state changes
     // Also not called if item is modified from the outside
     // (Currently only called by `AddItem` and `SetItemEnabled`, but not from `SetAllItemsEnabled`)
-    void OnOneItemStateChange() {
-        using enum HooksState;
-
-        const auto hookedCount = rng::count_if(m_items, [](const auto& v) -> bool { return v->Hooked(); });
-        m_itemsState =
-            hookedCount == 0              ? HooksState::NONE :
-            hookedCount == m_items.size() ? HooksState::ALL :
-                                            HooksState::SOME;
-
+    void OnOneItemStateChange(const Item& item) {
+        m_itemsState = CalculateCollectionOverallStateOnEntryChange(
+            m_items,
+            m_itemsState,
+            item->Hooked() ? HooksState::ALL : HooksState::NONE,
+            [](const auto& v) { return v->Hooked(); }
+        );
         ReCalculateOverallStateAndMaybeNotify();
     }
 
+    // Main ordering criteria is the no. of top-level sub categories
+    // Secondary criteria is the name
+    friend std::weak_ordering operator<=>(const HookCategory& lhs, const HookCategory& rhs) {
+        const auto numSubCatOrder = rhs.SubCategories().size() <=> lhs.SubCategories().size();
+        if (std::is_eq(numSubCatOrder)) 
+            return rhs.Name() <=> lhs.Name(); // Same number of sub-categories, order by name
+        return numSubCatOrder; // Order by no. of sub-categories
+    }
 public:
     // Stuff required for the Hooks tool
-    HooksState                m_itemsState{ HooksState::ALL };    // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
-    HooksState                m_subcatsState{ HooksState::ALL };  // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
-    HooksState                m_overallState{ HooksState::ALL };  // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
-    bool                      m_isVisible{true};                  // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
+    HooksState                m_itemsState{ HooksState::ALL };            // Collective state of all items (Can be ignored if `m_items.empty()` (In this case it's always NONE))
+    HooksState                m_subcatsState{ HooksState::ALL };          // Collective state of all subcategories (Can be ignored if `m_subCategories.empty()` (In this case it's always NONE))
+    HooksState                m_overallState{ HooksState::ALL };          // Overall state - Combination of the above 2 - Calculated by `ReCalculateOverallStateAndMaybeNotify`
+    bool                      m_isVisible{true};                          // Updated each time the search box is updated. Indicates whenever we should be visible in the GUI.
+    bool                      m_isOpen{};                                 // Is our tree currently open
+    bool                      m_anyItemsVisible{};                        // Used when searching 
 private:
 
     HookCategory*             m_parent{};        // Category we belong to - In case of `RootHookCategory` this is always `nullptr`.

@@ -77,7 +77,7 @@ void CCamera::InjectHooks() {
 //    RH_ScopedInstall(ProcessMusicFade, 0x50B6D0);
 //    RH_ScopedInstall(Restore, 0x50B930);
 //    RH_ScopedInstall(RestoreWithJumpCut, 0x50BAB0);
-//    RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
+    RH_ScopedInstall(SetCamCutSceneOffSet, 0x50BD20);
 //    RH_ScopedInstall(SetCameraDirectlyBehindForFollowPed_ForAPed_CamOnAString, 0x50BDA0);
 //    RH_ScopedInstall(SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString, 0x50BE30);
 //    RH_ScopedInstall(Using1stPersonWeaponMode, 0x50BFF0);
@@ -348,8 +348,8 @@ void CCamera::RestoreWithJumpCut() {
 }
 
 // 0x50BD20
-void CCamera::SetCamCutSceneOffSet(const CVector* cutsceneOffset) {
-    return plugin::CallMethod<0x50BAB0, CCamera*, const CVector*>(this, cutsceneOffset);
+void CCamera::SetCamCutSceneOffSet(const CVector& cutsceneOffset) {
+    m_vecCutSceneOffset = cutsceneOffset;
 }
 
 // 0x50BD40
@@ -422,7 +422,7 @@ void CCamera::SetNearClipScript(float nearClip) {
 }
 
 // 0x50BFB0
-void CCamera::SetNewPlayerWeaponMode(int16 mode, int16 maxZoom, int16 minZoom) {
+void CCamera::SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom, int16 minZoom) {
     m_PlayerWeaponMode.m_nMode     = mode;
     m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_nMinZoom  = minZoom;

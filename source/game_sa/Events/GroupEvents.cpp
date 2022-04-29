@@ -8,7 +8,7 @@ void CEventPlayerCommandToGroup::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B23D0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B24D0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B24D0);
 }
 
 void CEventPlayerCommandToGroupAttack::InjectHooks()
@@ -17,7 +17,7 @@ void CEventPlayerCommandToGroupAttack::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x5F6340);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B2530);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B2530);
 }
 
 void CEventPlayerCommandToGroupGather::InjectHooks()
@@ -48,14 +48,12 @@ CEventPlayerCommandToGroup::CEventPlayerCommandToGroup(ePlayerGroupCommand comma
 {
     m_command = command;
     m_target = target;
-    if (target)
-        target->RegisterReference(reinterpret_cast<CEntity**>(&m_target));
+    CEntity::SafeRegisterRef(m_target);
 }
 
 CEventPlayerCommandToGroup::~CEventPlayerCommandToGroup()
 {
-    if (m_target)
-        m_target->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_target));
+    CEntity::SafeCleanUpRef(m_target);
 }
 
 CEventPlayerCommandToGroup* CEventPlayerCommandToGroup::Constructor(ePlayerGroupCommand command, CPed* target)
@@ -118,14 +116,12 @@ CEventPlayerCommandToGroupGather* CEventPlayerCommandToGroupGather::Constructor(
 CEventDontJoinPlayerGroup::CEventDontJoinPlayerGroup(CPed* player)
 {
     m_player = player;
-    if (player)
-        player->RegisterReference(reinterpret_cast<CEntity**>(&m_player));
+    CEntity::SafeRegisterRef(m_player);
 }
 
 CEventDontJoinPlayerGroup::~CEventDontJoinPlayerGroup()
 {
-    if (m_player)
-        m_player->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_player));
+    CEntity::SafeCleanUpRef(m_player);
 }
 
 CEventDontJoinPlayerGroup* CEventDontJoinPlayerGroup::Constructor(CPed* player)
@@ -137,14 +133,12 @@ CEventDontJoinPlayerGroup* CEventDontJoinPlayerGroup::Constructor(CPed* player)
 CEventNewGangMember::CEventNewGangMember(CPed* member)
 {
     m_member = member;
-    if (member)
-        member->RegisterReference(reinterpret_cast<CEntity**>(&m_member));
+    CEntity::SafeRegisterRef(m_member);
 }
 
 CEventNewGangMember::~CEventNewGangMember()
 {
-    if (m_member)
-        m_member->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_member));
+    CEntity::SafeCleanUpRef(m_member);
 }
 
 CEventNewGangMember* CEventNewGangMember::Constructor(CPed* member)

@@ -12,10 +12,12 @@
 
 class CEntity;
 
+typedef CPool<IplDef> CIplPool;
+
 class CIplStore {
 public:
+    static CIplPool*&      ms_pPool;
     static CQuadTreeNode*& ms_pQuadTree;
-    static CPool<IplDef>*& ms_pPool;
 
 public:
     static void InjectHooks();

@@ -4863,6 +4863,13 @@ typedef void        (*RwDebugHandler) (RwDebugType type,
 #define RWPLUGINOFFSETCONST(_type, _base, _offset)              \
    ((const _type *)((const RwUInt8 *)(_base) + (_offset)))
 
+/* macro used to access global data structure (the root type is RwGlobals) */
+#define RWSRCGLOBAL(variable) \
+   (((RwGlobals *)RwEngineInstance)->variable)
+
+#define RWASSERTISTYPE(_f, _t) \
+   RWASSERT((((const RwObject *)(_f))->type)==(_t))
+
 /****************************************************************************
  Global Types
  */

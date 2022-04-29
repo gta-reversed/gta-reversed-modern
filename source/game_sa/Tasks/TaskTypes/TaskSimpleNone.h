@@ -1,11 +1,12 @@
 #pragma once
+
 #include "TaskSimple.h"
 
-class CTaskSimpleNone : public CTaskSimple
-{
+class CTaskSimpleNone : public CTaskSimple {
 public:
-    CTaskSimpleNone() : CTaskSimple() {}
-    ~CTaskSimpleNone() override {}
+    CTaskSimpleNone() = default;
+    ~CTaskSimpleNone() override = default;
+
     CTask* Clone() override { return new CTaskSimpleNone(); }
     eTaskType GetTaskType() override { return TASK_NONE; }
     bool ProcessPed(CPed* ped) override { return true; }

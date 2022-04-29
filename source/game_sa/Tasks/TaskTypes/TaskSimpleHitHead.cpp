@@ -9,8 +9,8 @@ void CTaskSimpleHitHead::InjectHooks()
 
     RH_ScopedInstall(Constructor, 0x653060);
     RH_ScopedInstall(FinishAnimCB, 0x653150);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6530F0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x657A10);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6530F0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x657A10);
 }
 
 CTaskSimpleHitHead* CTaskSimpleHitHead::Constructor()

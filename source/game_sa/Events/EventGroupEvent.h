@@ -19,7 +19,7 @@ public:
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return false; }
-    bool AffectsPedGroup(CPedGroup* pedGroup) override { return pedGroup->m_groupMembership.IsMember(m_ped); }
+    bool AffectsPedGroup(CPedGroup* pedGroup) override { return pedGroup->GetMembership().IsMember(m_ped); }
     float GetLocalSoundLevel() override { return 100.0f; }
 
     CEvent* Clone_Reversed();

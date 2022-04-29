@@ -20,29 +20,29 @@ enum eAudioPedType {
 
 class CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
-    char      field_7C[20];
-    bool      f90;
-    char      field_91;
-    int16     m_nVoiceType; // see eAudioPedType
-    int16     m_nVoiceId;
-    int16     m_nVoiceGender;
-    bool      m_bTalking;
-    bool      m_bSpeechDisabled;
-    bool      m_bSpeechForScriptsDisabled;
-    int8      m_nVocalEnableFlag;
-    char      field_9C;
-    char      field_9D;
-    char      field_9E;
-    char      field_9F;
-    CAESound* m_pSound;
-    int16     m_nSoundId;
-    int16     m_nBankId;
-    int16     m_nPedSpeechSlotIndex;
-    int16     field_AA;
-    float     m_fVoiceVolume;
-    int16     m_nCurrentPhraseId;
-    int16     field_B2;
-    int32     field_B4[19];
+    char      field_7C[20]{};
+    bool      f90{};
+    char      field_91{};
+    int16     m_nVoiceType{}; // see eAudioPedType
+    int16     m_nVoiceId{};
+    int16     m_nVoiceGender{};
+    bool      m_bTalking{};
+    bool      m_bSpeechDisabled{};
+    bool      m_bSpeechForScriptsDisabled{};
+    int8      m_nVocalEnableFlag{};
+    char      field_9C{};
+    char      field_9D{};
+    char      field_9E{};
+    char      field_9F{};
+    CAESound* m_pSound{};
+    int16     m_nSoundId{};
+    int16     m_nBankId{};
+    int16     m_nPedSpeechSlotIndex{};
+    int16     field_AA{};
+    float     m_fVoiceVolume{};
+    int16     m_nCurrentPhraseId{};
+    int16     field_B2{};
+    int32     field_B4[19]{};
 
 public:
     static int16& s_nCJWellDressed;
@@ -114,7 +114,7 @@ public:
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
     int16 GetSoundAndBankIDs(int16 phraseId, int16* a3);
     bool CanWePlayGlobalSpeechContext(int16 a2);
-    int16 AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
+    int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
     bool IsGlobalContextImportantForStreaming(int16 a1);
@@ -126,7 +126,7 @@ public:
     bool GetPedTalking();
     int8 GetVoiceAndTypeForSpecialPed(uint32 modelNameHash);
 
-    virtual void UpdateParameters(CAESound* sound, int16 curPlayPos);
+    void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
     virtual void AddScriptSayEvent(int32, int32, uint8, uint8, uint8);
     virtual void Terminate();
     virtual void PlayLoadedSound();

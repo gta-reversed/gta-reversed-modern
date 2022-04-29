@@ -2,8 +2,9 @@
 
 namespace VehicleDebugModule {
 
+void Spawn_RC_Cars();
 void Initialise();
-void ProcessImgui();
+void ProcessImGui();
 void ProcessRender();
 
 } // namespace VehicleDebugModule

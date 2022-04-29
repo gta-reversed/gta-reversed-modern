@@ -28,17 +28,7 @@ _D3DMATRIX *GetD3DProjTransform() {
 
 void _rpMaterialSetDefaultSurfaceProperties(RwSurfaceProperties *surfProps);
 
-void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame);
-void _rwObjectHasFrameReleaseFrame(void *object);
-
 void _rpMaterialSetDefaultSurfaceProperties(RwSurfaceProperties *surfProps) {
     ((void(__cdecl *)(RwSurfaceProperties*))0x74D870)(surfProps);
 }
 
-void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame) {
-    plugin::Call<0x804EF0, void *, RwFrame *>(object, frame);
-}
-
-void _rwObjectHasFrameReleaseFrame(void *object) {
-    plugin::Call<0x804F40, void *>(object);
-}
