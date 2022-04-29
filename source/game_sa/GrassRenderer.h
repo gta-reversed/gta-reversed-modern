@@ -32,5 +32,5 @@ public:
     static void SetGlobalCameraPos(const CVector& cameraPosn);
     static void SetGlobalWindBending(float bending);
 
-    static void sub_5DAB00(CVector& outPosn, CVector* startMin, CVector* startMax, CVector* endMin, float randA, float randB);
+    static void sub_5DAB00(CVector& outPosn, const CVector& startMin, const CVector& startMax, const CVector& endMin, float randA, float randB);
 };

@@ -6,50 +6,50 @@
 RwTexture*& RenderGrassTexture = *(RwTexture**)0xC02DC0;
 
 void CPPTriPlantBuffer::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CPPTriPlantBuffer", "Flush", 0x5DB0C0, &CPPTriPlantBuffer::Flush);
-    Install("CPPTriPlantBuffer", "GetPPTriPlantPtr", 0x5DB140, &CPPTriPlantBuffer::GetPPTriPlantPtr);
-    Install("CPPTriPlantBuffer", "ChangeCurrentPlantModelsSet", 0x5DB170, &CPPTriPlantBuffer::ChangeCurrentPlantModelsSet);
-    Install("CPPTriPlantBuffer", "IncreaseBufferIndex", 0x5DB1A0, &CPPTriPlantBuffer::IncreaseBufferIndex);
-    Install("CPPTriPlantBuffer", "GetPlantModelsTab", 0x5DACA0, &CPPTriPlantBuffer::GetPlantModelsTab);
-    Install("CPPTriPlantBuffer", "SetPlantModelsTab", 0x5DAC80, &CPPTriPlantBuffer::SetPlantModelsTab);
+    RH_ScopedClass(CPPTriPlantBuffer);
+    RH_ScopedCategoryGlobal();
 
-    Install("CPPTriPlantBuffer", "SetGrassMaterialCB", 0x5DAC10, &CPPTriPlantBuffer::SetGrassMaterialCB);
+    return;
+    RH_ScopedInstall(Flush, 0x5DB0C0);
+    RH_ScopedInstall(GetPPTriPlantPtr, 0x5DB140);
+    RH_ScopedInstall(ChangeCurrentPlantModelsSet, 0x5DB170);
+    RH_ScopedInstall(IncreaseBufferIndex, 0x5DB1A0);
+    RH_ScopedInstall(GetPlantModelsTab, 0x5DACA0);
+    RH_ScopedInstall(SetPlantModelsTab, 0x5DAC80);
+    RH_ScopedInstall(SetGrassMaterialCB, 0x5DAC10);
 }
 
 // 0x5DB090
 CPPTriPlantBuffer::CPPTriPlantBuffer() {
     m_nNumActive = 0;
     m_nType = 0;
-    std::fill(std::begin(m_aAtomics), std::end(m_aAtomics), nullptr);
+    std::ranges::fill(m_aAtomics, nullptr);
 }
 
 // 0x5DB0C0
 void CPPTriPlantBuffer::Flush() {
-    if (m_nNumActive > 0) {
-        RpAtomic** atomics;
+    if (m_nNumActive <= 0)
+        return;
+
+    auto atomics = [this] {
         switch (m_nType) {
         case 0:
-            atomics = &m_aAtomics[0];
-            break;
+            return m_aAtomics[0];
         case 1:
-            atomics = &m_aAtomics[1];
-            break;
+            return m_aAtomics[1];
         case 2:
-            atomics = &m_aAtomics[2];
-            break;
+            return m_aAtomics[2];
         case 3:
-            atomics = &m_aAtomics[3];
-            break;
+            return m_aAtomics[3];
         default:
-            atomics = nullptr;
-            break;
+            return (RpAtomic**)nullptr; // todo: ?
         }
-        int32 random = rand();
-        CGrassRenderer::DrawTriPlants(m_aPlants, m_nNumActive, atomics);
-        m_nNumActive = 0;
-        srand(random);
-    }
+    }();
+
+    int32 random = CGeneral::GetRandomNumber();
+    CGrassRenderer::DrawTriPlants(m_aPlants, m_nNumActive, atomics);
+    m_nNumActive = 0;
+    srand(random);
 }
 
 // 0x5DB140
@@ -62,10 +62,11 @@ PPTriPlant* CPPTriPlantBuffer::GetPPTriPlantPtr(int32 nIncrease) {
 
 // 0x5DB170
 void CPPTriPlantBuffer::ChangeCurrentPlantModelsSet(int32 type) {
-    if (m_nType != type) {
-        Flush();
-        m_nType = type;
-    }
+    if (m_nType == type)
+        return;
+
+    Flush();
+    m_nType = type;
 }
 
 // 0x5DB1A0
@@ -79,7 +80,7 @@ void CPPTriPlantBuffer::IncreaseBufferIndex(int32 type, int32 nIncrease) {
 
 // 0x5DACA0
 void* CPPTriPlantBuffer::GetPlantModelsTab(uint32 type) {
-    if (type < 4)
+    if (type < std::size(m_aAtomics))
         return m_aAtomics[type];
     else
         return nullptr;
@@ -87,14 +88,14 @@ void* CPPTriPlantBuffer::GetPlantModelsTab(uint32 type) {
 
 // 0x5DAC80
 void CPPTriPlantBuffer::SetPlantModelsTab(uint32 type, RpAtomic** atomics) {
-    if (type < 4)
-        m_aAtomics[type] = *atomics;
+    if (type < std::size(m_aAtomics))
+        m_aAtomics[type] = atomics;
 }
 
 // 'data' is a pointer to RwRGBA
 // 0x5DAC10
 RpMaterial* CPPTriPlantBuffer::SetGrassMaterialCB(RpMaterial* material, void* data) {
-    auto color = *reinterpret_cast<RwRGBA*>(data);
+    const auto color = *reinterpret_cast<RwRGBA*>(data);
     RpMaterialSetColor(material, &color);
     if (RpMaterialGetTexture(material) != RenderGrassTexture) {
         RpMaterialSetTexture(material, RenderGrassTexture);

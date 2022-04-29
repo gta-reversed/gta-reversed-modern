@@ -10,6 +10,7 @@
 
 #include <Windows.h>
 #include <extensions/ScriptCommands.h>
+#include <ProcObjectMan.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -273,6 +274,38 @@ void SpawnTab() {
     ImGui::EndTabBar();
 }
 
+void ProcedureObjectManager() {
+    ImGui::Text("Proc Obj Info Count: %d", g_procObjMan.m_ProcObjInfoCount);
+    if (ImGui::BeginTable("PoolsDebugModule", 4, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody)) {
+        ImGui::TableSetupColumn("Model Index");
+        ImGui::TableSetupColumn("Distance");
+        ImGui::TableSetupColumn("Min Scale Z");
+        ImGui::TableSetupColumn("Max Scale Z");
+        ImGui::TableHeadersRow();
+
+        for (auto it = g_procObjMan.m_ObjectsList.GetTail(); it; it = g_procObjMan.m_ObjectsList.GetPrev(it)) {
+            if (!it->m_Obj)
+                continue;
+
+            ImGui::TableNextRow();
+            ImGui::PushID(&it);
+
+            ImGui::TableNextColumn();
+            ImGui::Text("%d", 1);
+
+            ImGui::TableNextColumn();
+            if (ImGui::Button("TP")) {
+                // FindPlayerPed()->Teleport(it.m_Obj->GetPosition(), false);
+                // TeleportDebugModule::TeleportTo({});
+            }
+
+            ImGui::PopID();
+        }
+
+        ImGui::EndTable();
+    }
+}
+
 void CDebugMenu::ImguiDisplayPlayerInfo() {
     if (CTimer::GetIsPaused()) {
         return;
@@ -320,6 +353,7 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 if (ImGui::Button("Streamer: ReInit")) {
                     CStreaming::ReInit();
                 }
+                ProcedureObjectManager();
                 ImGui::EndTabItem();
             }
 
@@ -336,7 +370,7 @@ static void DebugCode() {
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    if (pad->IsStandardKeyJustDown('1')) {
+    if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustPressed('2')) {
@@ -345,12 +379,17 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('3')) {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
-    if (pad->IsStandardKeyJustDown('4')) {
-        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
-        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+    if (pad->IsStandardKeyJustPressed('4')) {
+        auto& pos = FindPlayerPed()->GetPosition();
+        pos = CVector(-1979.61731f, 109.055717f, 39.8510475f);
     }
-    if (pad->IsStandardKeyJustDown('5')) {
-        FrontEndMenuManager.DisplayHelperText(nullptr);
+    if (pad->IsStandardKeyJustPressed('5')) {
+        CClock::ms_nGameClockMinutes = 15;
+        CClock::ms_nGameClockHours = 9;
+    }
+    if (pad->IsStandardKeyJustPressed('E')) {
+        ReversibleHooks::SwitchHook("DrawTriPlants");
+        // CFont::PrintString(200, 200, "HOOK");
     }
 }
 

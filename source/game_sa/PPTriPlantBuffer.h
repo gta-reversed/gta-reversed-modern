@@ -2,20 +2,20 @@
 
 class CVector;
 class CRGBA;
-class RwTexture;
+struct RwTexture;
 
 class PPTriPlant {
 public:
     CBoundingBox start;
     CBoundingBox end;
-    int16        type;
+    uint16       type;
     int16        field_32;
     float        field_34;
     float        field_38;
-    RwTexture*   texture;
+    RwTexture*   m_Texture;
     CRGBA        color;
-    uint16       colorIntensity;
-    int8         surface; // eSurfaceType?
+    uint8        m_nColorIntensity;
+    uint8        m_Surface; // eSurfaceType?
     int8         field_47;
     uint32       randomSeed;
     float        field_4C;
@@ -23,17 +23,16 @@ public:
     float        m_fWindBendingModifier;
     float        field_58;
 };
-
 VALIDATE_SIZE(PPTriPlant, 0x5C);
 
-constexpr unsigned MAX_PLANTS = 32;
+constexpr auto MAX_PLANTS = 32u;
 
 class CPPTriPlantBuffer {
 public:
     int32      m_nNumActive;
     PPTriPlant m_aPlants[MAX_PLANTS];
     int32      m_nType;
-    RpAtomic*  m_aAtomics[4];
+    RpAtomic** m_aAtomics[4];
 
 public:
     static void InjectHooks();
@@ -51,8 +50,7 @@ public:
 
     static RpMaterial* SetGrassMaterialCB(RpMaterial* material, void* data);
 
-    // original name unknown
-    int32 GetType() const { return m_nType; }; // 0x5DAAF0
+    int32 GetType() const    { return m_nType; }; // 0x5DAAF0
     void SetType(int32 type) { m_nType = type; }; // 0x5DAAE0
 
     // NOTSA

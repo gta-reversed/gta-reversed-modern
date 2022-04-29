@@ -2,63 +2,27 @@
 
 #include "PlantSurfPropMgr.h"
 
-int32* (&CPlantSurfPropMgr::m_SurfPropPtrTab)[MAX_SURFACE_PROPERTIES] = *(int32* (*)[MAX_SURFACE_PROPERTIES])0xC38070;
-int32& CPlantSurfPropMgr::m_countSurfPropsAllocated = *(int32*)0xC39ED4;
-int32*& CPlantSurfPropMgr::m_SurfPropTab = *(int32**)0xC38338;
-
-enum class ePlantField {
-    NAME,                   // Name
-    PCD_ID,                 // PCDid
-    SLOT_ID,                // SlotID
-    MODEL_ID,               // ModelID
-    UV_OFFSET,              // UVoff
-    COLOR_R,                // R
-    COLOR_G,                // G
-    COLOR_B,                // B
-    INTENSITY,              // I
-    INTENSITY_VARIATION,    // VarI
-    COLOR_ALPHA,            // A
-    SCALE_XY,               // SclXY
-    SCALE_Z,                // SclZ
-    SCALE_VARIATION_XY,     // SclVarXY
-    SCALE_VARIATION_Z,      // SclVarZ
-    WIND_BENDING_SCALE,     // WBendScl
-    WIND_BENDING_VARIATION, // WBendVar
-    DENSITY,                // Density
-
-    ALL_FIELDS_READED
-};
-
-struct Plant {
-    uint16 model_id;
-    uint16 uv_offset;
-    CRGBA  color{ 255, 255, 255, 255 };
-    uint8  intensity = 255;
-    uint8  intensity_variation = 0;
-    float  scale_xy = 1.0f;
-    float  scale_z = 1.0f;
-    float  scale_variation_xy = 0.0f;
-    float  scale_variation_z;
-    float  density;
-    float  wind_blending_scale = 0.0f;
-    float  wind_blending_variation;
-};
-
-VALIDATE_SIZE(Plant, 0x28);
-
 void CPlantSurfPropMgr::InjectHooks() {
+    RH_ScopedClass(CPlantSurfPropMgr);
+    RH_ScopedCategoryGlobal();
 
+    RH_ScopedInstall(Initialise, 0x5DD6C0);
+    RH_ScopedInstall(AllocSurfProperties, 0x5DD370);
+    RH_ScopedInstall(GetSurfProperties, 0x6F9DE0);
+    RH_ScopedInstall(LoadPlantsDat, 0x5DD3B0);
 }
 
 // 0x5DD6C0
 bool CPlantSurfPropMgr::Initialise() {
     m_countSurfPropsAllocated = 0;
     std::ranges::fill(m_SurfPropPtrTab, nullptr);
-//    for (auto& props : m_SurfPropTab) {
-//
-//    }
+    for (auto& props : m_SurfPropTab) {
+        for (auto& plant : props.m_Plants) {
+            plant = {};
+        }
+    }
 
-    return LoadPlantsDat("PLANTS.DAT") != false;
+    return LoadPlantsDat("PLANTS.DAT");
 }
 
 void CPlantSurfPropMgr::Shutdown() {
@@ -66,22 +30,23 @@ void CPlantSurfPropMgr::Shutdown() {
 }
 
 // 0x5DD370
-int32* CPlantSurfPropMgr::AllocSurfProperties(uint16 surfaceId, bool clearAllocCount) {
+tSurfPropTab* CPlantSurfPropMgr::AllocSurfProperties(uint16 surfaceId, bool clearAllocCount) {
     if (clearAllocCount) {
         m_countSurfPropsAllocated = 0;
         return nullptr;
     }
-    if (m_countSurfPropsAllocated >= 57)
+
+    if (m_countSurfPropsAllocated >= MAX_SURFACE_PROPERTIES) {
         return nullptr;
+    }
 
-    m_SurfPropPtrTab[surfaceId] = reinterpret_cast<int32*>(&m_SurfPropTab + 124 * m_countSurfPropsAllocated++);
-
+    m_SurfPropPtrTab[surfaceId] = &m_SurfPropTab[m_countSurfPropsAllocated++];
     return m_SurfPropPtrTab[surfaceId];
 }
 
 // 0x6F9DE0
-int32* CPlantSurfPropMgr::GetSurfProperties(uint16 index) {
-    if (index >= MAX_SURFACE_PROPERTIES)
+tSurfPropTab* CPlantSurfPropMgr::GetSurfProperties(uint16 index) {
+    if (index >= MAX_SURFACE_PTR_PROPERTIES)
         return nullptr;
     else
         return m_SurfPropPtrTab[index];
@@ -90,13 +55,12 @@ int32* CPlantSurfPropMgr::GetSurfProperties(uint16 index) {
 // 0x5DD3B0
 bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
     char errorMsg[128];
-    char* v9;
     uint16 pcdId;
     uint32 surfaceId;
 
     CFileMgr::SetDir("DATA");
     auto file = CFileMgr::OpenFile(filename, "r");
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
     int32 lineId = 0;
     for (char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         ++lineId;
@@ -107,7 +71,7 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
             continue;
 
         ePlantField field = ePlantField::NAME;
-        int32* surfProperties = nullptr;
+        tSurfPropTab* surfProperties = nullptr;
 
         char* surfaceName = strtok(line, " \t");
 
@@ -131,10 +95,10 @@ bool CPlantSurfPropMgr::LoadPlantsDat(const char* filename) {
                 if (pcdId > 2) {
                     pcdId = 0;
                 }
-                plant = reinterpret_cast<Plant*>(&surfProperties[20 * pcdId + 2]);
+                plant = &surfProperties->m_Plants[pcdId];
                 break;
             case ePlantField::SLOT_ID:
-                surfProperties = reinterpret_cast<int32*>(atoi(surfaceName));
+                surfProperties->m_SlotId = atoi(surfaceName);
                 break;
             case ePlantField::MODEL_ID:
                 plant->model_id = atoi(surfaceName);

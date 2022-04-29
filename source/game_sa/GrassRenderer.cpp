@@ -12,20 +12,22 @@ CPPTriPlantBuffer& gTriPlantBuf = *(CPPTriPlantBuffer*)0xC02DE8;
 uint16& g_GrassCurrentScanCode = *(uint16*)0x8D1330; // 65535 or -1
 
 void CGrassRenderer::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CGrassRenderer", "Initialise", 0x5DD6B0, &CGrassRenderer::Initialise);
-    Install("CGrassRenderer", "Shutdown", 0x5DABA0, &CGrassRenderer::Shutdown);
-    Install("CGrassRenderer", "AddTriPlant", 0x5DB1D0, &CGrassRenderer::AddTriPlant);
-    // Install("CGrassRenderer", "DrawTriPlants", 0x5DAD00, &CGrassRenderer::DrawTriPlants);
-    Install("CGrassRenderer", "FlushTriPlantBuffer", 0x5DB250, &CGrassRenderer::FlushTriPlantBuffer);
-    Install("CGrassRenderer", "GetPlantModelsTab", 0x5DACE0, &CGrassRenderer::GetPlantModelsTab);
-    Install("CGrassRenderer", "SetPlantModelsTab", 0x5DACC0, &CGrassRenderer::SetPlantModelsTab);
-    Install("CGrassRenderer", "SetCloseFarAlphaDist", 0x5DABE0, &CGrassRenderer::SetCloseFarAlphaDist);
-    Install("CGrassRenderer", "SetCurrentScanCode", 0x5DABB0, &CGrassRenderer::SetCurrentScanCode);
-    Install("CGrassRenderer", "SetGlobalCameraPos", 0x5DABC0, &CGrassRenderer::SetGlobalCameraPos);
-    Install("CGrassRenderer", "SetGlobalWindBending", 0x5DAC00, &CGrassRenderer::SetGlobalWindBending);
+    RH_ScopedClass(CGrassRenderer);
+    RH_ScopedCategoryGlobal();
 
-    Install("CGrassRenderer", "sub_5DAB00", 0x5DAB00, &CGrassRenderer::sub_5DAB00);
+    RH_ScopedInstall(Initialise, 0x5DD6B0);
+    RH_ScopedInstall(Shutdown, 0x5DABA0);
+    RH_ScopedInstall(AddTriPlant, 0x5DB1D0);
+    RH_ScopedInstall(DrawTriPlants, 0x5DAD00);
+    RH_ScopedInstall(FlushTriPlantBuffer, 0x5DB250);
+    RH_ScopedInstall(GetPlantModelsTab, 0x5DACE0);
+    RH_ScopedInstall(SetPlantModelsTab, 0x5DACC0);
+    RH_ScopedInstall(SetCloseFarAlphaDist, 0x5DABE0);
+    RH_ScopedInstall(SetCurrentScanCode, 0x5DABB0);
+    RH_ScopedInstall(SetGlobalCameraPos, 0x5DABC0);
+    RH_ScopedInstall(SetGlobalWindBending, 0x5DAC00);
+
+    RH_ScopedInstall(sub_5DAB00, 0x5DAB00);
 }
 
 // 0x5DD6B0
@@ -50,77 +52,85 @@ void CGrassRenderer::AddTriPlant(PPTriPlant* plant, uint32 type) {
 }
 
 // 0x5DAD00
-void CGrassRenderer::DrawTriPlants(PPTriPlant* plant, int32 count, RpAtomic** atomics) {
-    return plugin::Call<0x5DAD00, PPTriPlant*, int32, RpAtomic**>(plant, count, atomics);
+void CGrassRenderer::DrawTriPlants(PPTriPlant* plants, int32 count, RpAtomic** atomics) {
+    // return plugin::Call<0x5DAD00, PPTriPlant*, int32, RpAtomic**>(plant, count, atomics);
+    CFont::InitPerFrame();
+    char buf[32]{};
+    sprintf(buf, "hook %d", count);
+    CFont::PrintString(100, 200, buf);
+
+    const auto GetFarDist = []() -> float {
+        switch (g_fx.GetFxQuality()) {
+        case FXQUALITY_LOW:
+        case FXQUALITY_MEDIUM:
+            return m_farDist / 2.0f;
+        case FXQUALITY_HIGH:
+        case FXQUALITY_VERY_HIGH:
+            return m_farDist;
+        }
+    };
 
     for (auto i = 0; i < count; i++) {
-        const auto magnitude = CVector({plant->end.m_vecMax - m_vecCameraPos}).Magnitude();
-        float distance = g_fx.GetFxQuality() < FXQUALITY_HIGH ? m_farDist / 2 : m_farDist;
+        const auto& plant = plants[i];
 
-        RwRGBA colorIntensity;
-        float colorIntensityVal = distance + 20.0f;
-        memcpy(&colorIntensity, &colorIntensityVal, sizeof(float));
-
-        RwRGBA newColorIntensity;
-
-        if (magnitude >= distance) {
-            newColorIntensity.alpha = std::clamp(floor((plant->color.a - magnitude) * plant->color.a * 0.05f), 0.0f, 255.0f);
-        } else {
-            newColorIntensity.alpha = plant->color.a;
+        const auto farDist = GetFarDist();
+        const auto nearDist = (plant.end.m_vecMax - m_vecCameraPos).Magnitude();
+        if (nearDist > farDist + 20.0f) {
+            continue;
         }
 
-        // colorIntensity = plant->colorIntensity;
-        auto mult = std::min<uint8>(plant->colorIntensity, 255.0f);
-
-        newColorIntensity.red   = (mult * plant->color.r) >> 8;
-        newColorIntensity.green = (mult * plant->color.g) >> 8;
-        newColorIntensity.blue  = (mult * plant->color.b) >> 8;
-
-        const auto atomic = atomics[plant->type];
+        const auto atomic = atomics[plant.type];
         auto frame = RpAtomicGetFrame(atomic);
-        srand(plant->randomSeed);
+        srand(plant.randomSeed);
 
-        { // 0x5DAC40
-        RenderGrassTexture = plant->texture;
+        RwRGBA newColorIntensity{};
+        if (nearDist >= farDist) {
+            const auto alpha = std::floor((farDist + 20.0f - nearDist) * plant.color.a / 20.0f);
+            newColorIntensity.alpha = std::clamp(alpha, 0.0f, 255.0f);
+        } else {
+            newColorIntensity.alpha = plant.color.a;
+        }
+
+        // 0x5DAE61
+        auto mult = std::min(float(plant.m_nColorIntensity), 255.0f);
+        newColorIntensity.red   = uint16(mult * plant.color.r) / 256;
+        newColorIntensity.green = uint16(mult * plant.color.g) / 256;
+        newColorIntensity.blue  = uint16(mult * plant.color.b) / 256;
+
+        // 0x5DAC40
+        RenderGrassTexture = plant.m_Texture;
         RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CPPTriPlantBuffer::SetGrassMaterialCB, &newColorIntensity);
+
+        for (auto j = 0; j < plant.field_32; j++) {
+            CVector posn;
+            sub_5DAB00(
+                posn,
+                &plant.start.m_vecMin,
+                &plant.start.m_vecMax,
+                &plant.end.m_vecMin,
+                CGeneral::GetRandomNumberInRange(0.0f, 1.0f),
+                CGeneral::GetRandomNumberInRange(0.0f, 1.0f)
+            );
+
+            if (m_closeDist - 2.0f <= (posn - m_vecCameraPos).Magnitude()) {
+                RwFrameTranslate(frame, &posn, rwCOMBINEREPLACE);
+
+                const auto xy = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_4C + plant.field_34;
+                frame->modelling.right.x *= xy;
+                frame->modelling.up.y *= xy;
+                frame->modelling.at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_50 + plant.field_38) * frame->modelling.at.z;
+                const auto xy1 = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_58 + 1.0f) * (m_windBending * plant.m_fWindBendingModifier);
+                frame->modelling.at.x = xy1;
+                frame->modelling.at.y = xy1;
+
+                RwMatrixUpdate(&frame->modelling);
+                atomic->renderCallBack(atomic);
+            } else {
+                CGeneral::GetRandomNumber();
+                CGeneral::GetRandomNumber();
+                CGeneral::GetRandomNumber();
+            }
         }
-
-        if (plant->field_32) {
-            auto f32 = plant->field_32;
-            do {
-                CVector posn;
-                sub_5DAB00(
-                    posn,
-                    &plant->start.m_vecMin,
-                    &plant->start.m_vecMax,
-                    &plant->end.m_vecMin,
-                    (float)rand() * RAND_MAX_FLOAT_RECIPROCAL,
-                    (float)rand() * RAND_MAX_FLOAT_RECIPROCAL
-                );
-
-                if (m_closeDist - 2.0f <= CVector({posn - m_vecCameraPos}).Magnitude()) {
-                    RwFrameTranslate(frame, &posn, rwCOMBINEREPLACE);
-
-                    const auto xy = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant->field_4C + plant->field_34;
-                    frame->modelling.right.x *= xy;
-                    frame->modelling.up.y *= xy;
-                    frame->modelling.at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant->field_50 + plant->field_38) * frame->modelling.at.z;
-                    const auto xy1 = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant->field_58 + 1.0) * (m_windBending * plant->m_fWindBendingModifier);
-                    frame->modelling.at.x = xy1;
-                    frame->modelling.at.y = xy1;
-
-                    RwMatrixUpdate(&frame->modelling);
-                    atomic->renderCallBack(atomic);
-                } else {
-                    rand();
-                    rand();
-                    rand();
-                }
-                f32 -= 1;
-            } while (f32);
-        }
-
-        plant++;
     }
 }
 
@@ -160,7 +170,7 @@ void CGrassRenderer::SetGlobalWindBending(float bending) {
     m_windBending = bending;
 }
 
-void CGrassRenderer::sub_5DAB00(CVector& outPosn, CVector* startMin, CVector* startMax, CVector* endMin, float randA, float randB) {
+void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& startMin, const CVector& startMax, const CVector& endMin, float randA, float randB) {
     float f1 = randA;
     float f2 = randB;
     if (randA + randB > 1.0f) {
@@ -169,7 +179,5 @@ void CGrassRenderer::sub_5DAB00(CVector& outPosn, CVector* startMin, CVector* st
     }
     float f3 = 1.0f - f1 - f2;
 
-    outPosn.x = f3 * startMin->x + f1 * startMax->x + f2 * endMin->x;
-    outPosn.y = f3 * startMin->y + f1 * startMax->y + f2 * endMin->y;
-    outPosn.z = f3 * startMin->z + f1 * startMax->z + f2 * endMin->z;
+    outPosn = f3 * startMin + f1 * startMax + f2 * endMin;
 }

@@ -1,0 +1,120 @@
+#include "StdInc.h"
+
+#include "ProcObjectMan.h"
+#include "PlantLocTri.h"
+
+#define EntityItem_c void*
+
+void ProcObjectMan_c::InjectHooks() {
+    RH_ScopedClass(ProcObjectMan_c);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x5A3EA0);
+    RH_ScopedInstall(Update, 0x5A3110);
+    RH_ScopedInstall(Exit, 0x5A3EE0);
+    // RH_ScopedInstall(LoadDataFile, 0x5A3140);
+    RH_ScopedInstall(GetEntityFromPool, 0x5A3120);
+    RH_ScopedInstall(ReturnEntityToPool, 0x5A3130);
+    // RH_ScopedInstall(ProcessTriangleAdded, 0x5A3F20);
+    // RH_ScopedInstall(ProcessTriangleRemoved, 0x5A3F70);
+}
+
+// 0x5A3EA0
+void ProcObjectMan_c::Init() {
+    for (auto& obj : m_Objects) {
+        m_ObjectsList.AddItem(&obj);
+    }
+    m_ProcObjInfoCount = 0;
+    LoadDataFile();
+    m_nNumAligned = 0;
+}
+
+// 0x5A3110
+void ProcObjectMan_c::Update() {
+    // NOP
+}
+
+// 0x5A3EE0
+void ProcObjectMan_c::Exit() {
+    for (auto& info : std::span{ m_ProcObjSurfaceInfos, m_ProcObjInfoCount }) {
+        info.Exit();
+    }
+    m_ObjectsList.RemoveAll();
+}
+
+// 0x5A3140
+void ProcObjectMan_c::LoadDataFile() {
+    return plugin::CallMethod<0x5A3140, ProcObjectMan_c*>(this);
+
+    // todo: fix stack corruption
+    auto file = CFileMgr::OpenFile("data\\procobj.dat", "r");
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (!*line || line[0] == '#')
+            continue;
+
+        char surfaceType[16]{};
+        char objectName[16]{};
+        float spacing;
+        float minDist;
+        int32 minRot, maxRot;
+        float minScale, maxScale;
+        float minScaleZ, maxScaleZ;
+        float zOffsetMin, zOffsetMax;
+        int32 align;
+        int32 useGrid;
+
+        (void)sscanf(
+            line, "%s %s %f %f %d %d %f %f %f %f %f %f %d %d",
+            surfaceType,
+            objectName,
+            &spacing,
+            &minDist,
+            &minRot, &maxRot,
+            &minScale, &maxScale,
+            &minScaleZ, &maxScaleZ,
+            &zOffsetMin, &zOffsetMax,
+            &align, &useGrid
+        );
+        m_ProcObjSurfaceInfos[m_ProcObjInfoCount].Init(
+            surfaceType,
+            objectName,
+            spacing,
+            minDist,
+            minRot, maxRot,
+            minScale, maxScale,
+            minScaleZ, maxScaleZ,
+            zOffsetMin, zOffsetMax,
+            align, useGrid
+        );
+        m_ProcObjInfoCount++;
+    }
+    CFileMgr::CloseFile(file);
+}
+
+// 0x5A3120
+ProcObjectListItem* ProcObjectMan_c::GetEntityFromPool() {
+    return m_ObjectsList.RemoveHead();
+}
+
+// 0x5A3130
+void ProcObjectMan_c::ReturnEntityToPool(ListItem_c* item) { // todo: EntityItem_c
+    m_ObjectsList.AddItem(item);
+}
+
+// 0x5A3F20
+int32 ProcObjectMan_c::ProcessTriangleAdded(CPlantLocTri* plant) {
+    // return plugin::CallMethodAndReturn<int32, 0x5A3F20, ProcObjectMan_c*, CPlantLocTri*>(this, plant);
+
+    uint8 count = 0;
+    for (auto& info : std::span{ m_ProcObjSurfaceInfos, m_ProcObjInfoCount }) {
+        if (m_ProcObjSurfaceInfos->m_SurfaceId == plant->m_SurfaceId) {
+            count += info.AddObjects(plant);
+        }
+    }
+    return count;
+}
+
+// 0x5A3F70
+void ProcObjectMan_c::ProcessTriangleRemoved(CPlantLocTri* plant) {
+    plugin::CallMethod<0x5A3F70, ProcObjectMan_c*, CPlantLocTri*>(this, plant);
+}
