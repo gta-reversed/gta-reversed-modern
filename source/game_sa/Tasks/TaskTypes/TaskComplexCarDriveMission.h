@@ -15,7 +15,7 @@ public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_MISSION;
 
     CTaskComplexCarDriveMission(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed);
-    ~CTaskComplexCarDriveMission() override = default;
+    ~CTaskComplexCarDriveMission() override;
 
     CTask* Clone() override { return new CTaskComplexCarDriveMission(m_pVehicle, m_pTargetVehicle, m_nCarMission, (eCarDrivingStyle)m_nCarDrivingStyle, m_fSpeed); }
     eTaskType GetTaskType() override { return Type; }
@@ -25,7 +25,7 @@ private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskComplexCarDriveMission* Constructor(CVehicle * vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) { this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(pVehicle, targetEntity, carDriveMission, carDrivingStyle, fSpeed); return this; }
+    CTaskComplexCarDriveMission* Constructor(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) { this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(vehicle, targetVehicle, carDriveMission, carDrivingStyle, fSpeed); return this; }
     CTaskComplexCarDriveMission* Destructor() { this->CTaskComplexCarDriveMission::~CTaskComplexCarDriveMission(); return this; }
 
     CTask* Clone_Reversed() { return CTaskComplexCarDriveMission::Clone(); }
