@@ -9,31 +9,14 @@ class CPhysical;
 
 class CPointRoute {
 public:
-    int32 field_0;
-    int32 field_4;
-    int32 field_8;
-    int32 field_C;
-    int32 field_10;
-    int32 field_14;
-    int32 field_18;
-    int32 field_1C;
-    int32 field_20;
-    int32 field_24;
-    int32 field_28;
-    int32 field_2C;
-    int32 field_30;
-    int32 field_34;
-    int32 field_38;
-    int32 field_3C;
-    int32 field_40;
-    int32 field_44;
-    int32 field_48;
-    int32 field_4C;
-    int32 field_50;
-    int32 field_54;
-    int32 field_58;
-    int32 field_5C;
-    int32 field_60;
+    uint32  m_nNumPoints;
+    CVector m_vecPoints[8];
+
+    CPointRoute() : m_nNumPoints(0) {}
+    CPointRoute(CPointRoute* from);
+
+    static void* operator new(uint32 size);
+    static void operator delete(void* ptr, size_t sz);
 };
 
 VALIDATE_SIZE(CPointRoute, 0x64);

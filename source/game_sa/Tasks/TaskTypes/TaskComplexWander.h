@@ -6,7 +6,6 @@
 */
 #pragma once
 
-
 #include "TaskComplex.h"
 #include "NodeAddress.h"
 
@@ -48,7 +47,7 @@ public:
     static constexpr auto Type = TASK_COMPLEX_WANDER;
 
     CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderSensibly = true, float fTargetRadius = 0.5f);
-    ~CTaskComplexWander() override = default; // 0x6726F0
+    ~CTaskComplexWander() override = default;
 
     eTaskType GetTaskType() override { return TASK_COMPLEX_WANDER; } // 0x460CD0
     CTask* CreateNextSubTask(CPed* ped) override;

@@ -5,6 +5,7 @@
 #include "CarCtrl.h"
 #include "PostEffects.h"
 #include "TheScripts.h"
+#include "LoadingScreen.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -50,8 +51,10 @@ CStreamingInfo*& CStreaming::ms_startLoadedList = *reinterpret_cast<CStreamingIn
 int32& CStreaming::ms_lastImageRead = *reinterpret_cast<int32*>(0x8E4C64);
 int32(&CStreaming::ms_imageOffsets)[6] = *(int32(*)[6])0x8E4C8C;
 bool& CStreaming::ms_bEnableRequestListPurge = *reinterpret_cast<bool*>(0x8E4CA4);
+
 uint32& CStreaming::ms_streamingBufferSize = *reinterpret_cast<uint32*>(0x8E4CA8);
 uint8** CStreaming::ms_pStreamingBuffer = reinterpret_cast<uint8**>(0x8E4CAC);
+
 uint32& CStreaming::ms_memoryUsed = *reinterpret_cast<uint32*>(0x8E4CB4);
 int32& CStreaming::ms_numModelsRequested = *reinterpret_cast<int32*>(0x8E4CB8);
 CStreamingInfo(&CStreaming::ms_aInfoForModel)[26316] = *(CStreamingInfo(*)[26316])0x8E4CC0;
@@ -2066,7 +2069,7 @@ void CStreaming::ReadIniFile() {
             }
             else if (!_stricmp(attribute, "def_brightness_pal"))
             {
-                FrontEndMenuManager.m_nBrightness = atoi(value);
+                FrontEndMenuManager.m_PrefsBrightness = atoi(value);
             }
         }
         else
@@ -2477,8 +2480,9 @@ void CStreaming::RemoveModel(int32 modelId)
     streamingInfo.m_nLoadState = LOADSTATE_NOT_LOADED;
 }
 
+// 0x407AC0
 void CStreaming::RemoveUnusedModelsInLoadedList() {
-    // empty function
+    // NOP
 }
 
 // 0x40C180
@@ -2618,7 +2622,7 @@ void CStreaming::RetryLoadFile(int32 chIdx) {
             [[fallthrough]];
         }
         case eChannelState::IDLE: {
-            uint8* pBuffer = ms_pStreamingBuffer[chIdx];
+            auto* pBuffer = ms_pStreamingBuffer[chIdx];
             CdStreamRead(chIdx, pBuffer, ch.offsetAndHandle, ch.sectorCount);
             ch.LoadStatus = eChannelState::READING;
             ch.iLoadingLevel = -600;
@@ -2886,7 +2890,7 @@ void CStreaming::Init2()
 
     // Here, ms_streamingBufferSize * STREAMING_BLOCK_SIZE = maximum size in bytes that a streaming model can possibly have.
     const uint32 maximumModelSizeInBytes = ms_streamingBufferSize * STREAMING_SECTOR_SIZE;
-    ms_pStreamingBuffer[0] = CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_SECTOR_SIZE);
+    ms_pStreamingBuffer[0] = (uint8*)CMemoryMgr::MallocAlign(maximumModelSizeInBytes, STREAMING_SECTOR_SIZE);
     ms_streamingBufferSize /= 2;
     ms_pStreamingBuffer[1] = &ms_pStreamingBuffer[0][STREAMING_SECTOR_SIZE * ms_streamingBufferSize];
     ms_memoryAvailable = 512 * 1024 * 1024;
@@ -3769,14 +3773,15 @@ void CStreaming::Update() {
         CIplStore::EnsureIplsAreInMemory(playerPos);
     }
 
-    if (ms_bEnableRequestListPurge)
+    if (ms_bEnableRequestListPurge) {
         PurgeRequestList();
+    }
 }
 
 // unused
 // 0x40E960
 void CStreaming::UpdateForAnimViewer() {
-    CVector position;
+    CVector position{};
     AddModelsToRequestList(position, 0);
     LoadRequestedModels();
     sprintf(gString, "Requested %d, memory size %dK\n", ms_numModelsRequested, 2 * ms_memoryUsed);
@@ -3788,4 +3793,27 @@ bool CStreaming::WeAreTryingToPhaseVehicleOut(int32 modelId) {
     if (streamingInfo.IsLoaded())
         return streamingInfo.m_nNextIndex >= 0 || streamingInfo.m_nPrevIndex >= 0;
     return false;
+}
+
+void CStreaming::UpdateMemoryUsed() {
+#ifdef MEMORY_MGR_USE_MEMORY_HEAP
+    ms_memoryUsed = 0;
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMING);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_8);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_TEXTURES);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_COLLISION);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_STREAMED_ANIMATION);
+    ms_memoryUsed += CMemoryMgr::GetMemoryUsed(MEM_32);
+#endif
+}
+
+// 0x407BF0
+void CStreaming::IHaveUsedStreamingMemory() {
+    CMemoryMgr::PopMemId();
+    UpdateMemoryUsed();
+}
+
+// 0x407BE0
+void CStreaming::ImGonnaUseStreamingMemory() {
+    CMemoryMgr::PushMemId(MEM_STREAMING);
 }

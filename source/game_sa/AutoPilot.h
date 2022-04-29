@@ -72,7 +72,7 @@ public:
             uint8 bIsParked : 1;
         } movementFlags;
     };
-    char            m_nStraightLineDistance;
+    uint8           m_nStraightLineDistance;
     uint8           m_ucCarFollowDist;
     uint8           m_ucHeliTargetDist2;
     char            field_50;

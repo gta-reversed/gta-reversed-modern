@@ -373,8 +373,8 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
         const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
         const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accuracyProg;
         if (bIsDucking)
-            return radius / 2.0f;
-        return radius;
+            return std::max(0.2f, radius / 2.0f);
+        return std::max(0.2f, radius);
     }
     }
 }

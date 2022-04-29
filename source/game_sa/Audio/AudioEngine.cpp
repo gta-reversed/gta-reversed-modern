@@ -8,6 +8,7 @@
 
 #include "AEUserRadioTrackManager.h"
 #include "AEAudioUtility.h"
+#include "LoadingScreen.h"
 
 CAudioEngine& AudioEngine = *(CAudioEngine*)0xB6BC90;
 
@@ -162,7 +163,7 @@ bool CAudioEngine::Initialise() {
 
 // 0x5078F0
 void CAudioEngine::InitialisePostLoading() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_STOP);
     AudioEngine.Service();
     CAECollisionAudioEntity::InitialisePostLoading();
 
@@ -197,8 +198,8 @@ void CAudioEngine::Shutdown() {
     }
     m_CollisionAE.Reset();
     AERadioTrackManager.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     CAEWeatherAudioEntity::StaticReset();
@@ -271,7 +272,7 @@ void CAudioEngine::PreloadBeatTrack(int16 trackId) {
         m_nCurrentRadioStationId = AERadioTrackManager.GetCurrentRadioStationID();
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
         AERadioTrackManager.StopRadio(settings, true);
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
         while (AERadioTrackManager.IsRadioOn()) {
             AERadioTrackManager.Service(AEAudioHardware.GetTrackPlayTime());
             AEAudioHardware.Service();
@@ -384,7 +385,7 @@ void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CPed* ped) {
 
 // 0x507390
 void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CVehicle* vehicle) {
-    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle, 0.0f, 1.0f);
+    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle);
 }
 
 // 0x5073B0
@@ -408,7 +409,7 @@ void CAudioEngine::PreloadCutsceneTrack(int16 trackId, bool wait) {
         m_nCurrentRadioStationId = AERadioTrackManager.GetCurrentRadioStationID();
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
         AERadioTrackManager.StopRadio(settings, true);
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
         while (AERadioTrackManager.IsRadioOn()) {
             AERadioTrackManager.Service(AEAudioHardware.GetTrackPlayTime());
             AEAudioHardware.Service();
@@ -589,7 +590,7 @@ void CAudioEngine::StopPoliceScanner(uint8 a1) {
 
 // 0x507410
 void CAudioEngine::StartLoadingTune() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_START, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_START);
     AESoundManager.Service();
 }
 
@@ -605,9 +606,9 @@ void CAudioEngine::ResumeAllSounds() {
 
 // 0x507750
 void CAudioEngine::Service() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_WAKEUP_AMPLIFIER, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_WAKEUP_AMPLIFIER);
     if (!CTimer::GetIsPaused())
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
 
     int32 trackPlayTime = AEAudioHardware.GetTrackPlayTime();
     AEAudioHardware.GetChannelPlayTimes(m_nBackgroundAudioChannel, nullptr);
@@ -699,8 +700,8 @@ void CAudioEngine::Reset() {
     m_CollisionAE.Reset();
     AERadioTrackManager.Reset();
     AEAmbienceTrackManager.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     if (m_GlobalWeaponAE)
@@ -720,8 +721,8 @@ void CAudioEngine::Reset() {
 void CAudioEngine::ResetSoundEffects() {
     AESoundManager.Service();
     m_CollisionAE.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     CAEWeatherAudioEntity::StaticReset();

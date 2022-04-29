@@ -938,6 +938,8 @@ void CWorld::FindObjectsIntersectingAngledCollisionBoxSectorList(CPtrList& ptrLi
 // Man, sometimes I wonder whoever wrote this code was just drunk
 // Also, seems like namespaces weren't a thing in C++03.. Well, at least to R*.
 void CWorld::FindMissionEntitiesIntersectingCubeSectorList(CPtrList& ptrList, const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehiclesList, bool pedsList, bool objectsList) {
+    assert(outEntities);
+
     // NOTSA - Easier to do it this way..
     const CBoundingBox bb{ cornerA, cornerB };
     for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
@@ -1170,9 +1172,8 @@ void CWorld::RemoveFallenPeds() {
         if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
-            CNodeAddress pathNodeAddress;
-            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPedPos.x, vecPedPos.y, vecPedPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.m_wAreaId != (uint16)-1) {
+            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, 1, 1000000.0f, 0, 0, 0, 0, 0);            
+            if (pathNodeAddress.IsAreaValid()) {
                 CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 pathNodePos.z += 2.0f;
                 ped->Teleport(pathNodePos, false);
@@ -1206,9 +1207,8 @@ void CWorld::RemoveFallenCars() {
         };
 
         if (ShouldWeKeepIt()) {
-            CNodeAddress pathNodeAddress;
-            ThePaths.FindNodeClosestToCoors(&pathNodeAddress, vecPos.x, vecPos.y, vecPos.z, 1, 1000000.0f, 0, 0, 0, 0, 0);
-            if (pathNodeAddress.m_wAreaId != (uint16)-1) {
+            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
+            if (pathNodeAddress.IsAreaValid()) {
                 const auto pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 vehicle->Teleport(pathNodePos + CVector(0, 0, 3), true);
             } else

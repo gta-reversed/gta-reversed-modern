@@ -24,8 +24,10 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-    CTaskComplexCarDriveMission* Constructor(CVehicle * pVehicle, CVehicle* pTargetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) { this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(pVehicle, pTargetVehicle, carDriveMission, carDrivingStyle, fSpeed); return this; }
+
+    CTaskComplexCarDriveMission* Constructor(CVehicle* vehicle, CEntity* targetVehicle, eCarMission carDriveMission, eCarDrivingStyle carDrivingStyle, float fSpeed) { this->CTaskComplexCarDriveMission::CTaskComplexCarDriveMission(vehicle, targetVehicle, carDriveMission, carDrivingStyle, fSpeed); return this; }
     CTaskComplexCarDriveMission* Destructor() { this->CTaskComplexCarDriveMission::~CTaskComplexCarDriveMission(); return this; }
+
     CTask* Clone_Reversed() { return CTaskComplexCarDriveMission::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskComplexCarDriveMission::GetTaskType(); }
     void SetUpCar_Reversed() { return CTaskComplexCarDriveMission::SetUpCar(); }
