@@ -28,9 +28,10 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(RemoveIplAndIgnore, 0x405890);
     RH_ScopedInstall(RequestIplAndIgnore, 0x405850);
     RH_ScopedInstall(LoadAllRemainingIpls, 0x405780);
-    //RH_ScopedInstall(RemoveAllIpls, 0x405720);
+    RH_ScopedInstall(RemoveAllIpls, 0x405720);
     //RH_ScopedInstall(HaveIplsLoaded, 0x405600);
     RH_ScopedInstall(RequestIpls, 0x405520);
+    //RH_ScopedInstall(Load, 0x5D54A0);
     //RH_ScopedInstall(Save, 0x5D5420);
     RH_ScopedInstall(EnsureIplsAreInMemory, 0x4053F0);
     RH_ScopedInstall(RemoveRelatedIpls, 0x405110);
@@ -47,7 +48,6 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(SetIplsRequired, 0x404700);
     RH_ScopedInstall(ClearIplsNeededAtPosn, 0x4045E0);
     //RH_ScopedInstall(LoadIpls, 0x405170);
-    //RH_ScopedInstall(Load, 0x5D54A0);
     RH_ScopedGlobalInstall(SetIfInteriorIplIsRequired, 0x4045F0);
     RH_ScopedGlobalInstall(SetIfIplIsRequired, 0x404660);
     RH_ScopedGlobalInstall(SetIfIplIsRequiredReducedBB, 0x404690);
