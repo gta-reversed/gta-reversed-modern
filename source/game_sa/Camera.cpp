@@ -576,7 +576,7 @@ void CCamera::RestoreWithJumpCut() {
 
     CEntity::SafeCleanUpRef(m_pTargetEntity);
 
-    if (!player0->bInVehicle || !player1->bInVehicle || !player0->m_pVehicle || !player1->m_pVehicle) {
+    if (!player0->IsInVehicle() || !player1->IsInVehicle()) {
         m_nModeToGoTo = m_nModeForTwoPlayersNotBothInCar;
         m_pTargetEntity = player0;
         CEntity::SafeRegisterRef(m_pTargetEntity);
