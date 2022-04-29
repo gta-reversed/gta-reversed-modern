@@ -141,11 +141,6 @@ void CCamera::InjectHooks() {
     RH_ScopedGlobalInstall(CamShakeNoPos, 0x50A970);
 }
 
-// 0x5BC520
-void CCamera::Init() {
-    plugin::CallMethod<0x5BC520, CCamera*>(this);
-}
-
 // 0x51A450
 CCamera::CCamera() {
     plugin::CallMethod<0x51A450, CCamera*>(this);
@@ -164,6 +159,11 @@ CCamera::~CCamera() {
 CCamera* CCamera::Destructor() {
     this->CCamera::~CCamera();
     return this;
+}
+
+// 0x5BC520
+void CCamera::Init() {
+    plugin::CallMethod<0x5BC520, CCamera*>(this);
 }
 
 // 0x50A3B0
@@ -188,6 +188,34 @@ void CCamera::InitCameraVehicleTweaks() {
 
         m_bCameraVehicleTweaksInitialized = true;
     }
+}
+
+// 0x50D2D0
+void CCamera::InitialiseScriptableComponents() {
+    m_fTrackLinearStartTime    = -1.0f;
+    m_fTrackLinearEndTime      = -1.0f;
+    m_fStartShakeTime          = -1.0f;
+    m_fEndShakeTime            = -1.0f;
+    m_fEndZoomTime             = -1.0f;
+    m_fStartZoomTime           = -1.0f;
+    m_fZoomInFactor            = +0.0f;
+    m_fZoomOutFactor           = +0.0f;
+    m_bTrackLinearWithEase     = true;
+    m_nZoomMode                = 1;
+    m_bMoveLinearWithEase      = true;
+    m_fMoveLinearStartTime     = -1.0f;
+    m_fMoveLinearEndTime       = -1.0f;
+    m_bBlockZoom               = false;
+    m_bCameraPersistPosition   = false;
+    m_bCameraPersistTrack      = false;
+    m_bVecTrackLinearProcessed = false;
+    m_bVecMoveLinearProcessed  = false;
+    m_bFOVLerpProcessed        = false;
+}
+
+// 0x50AF90
+void CCamera::InitialiseCameraForDebugMode() {
+    // NOP
 }
 
 // 0x50A480
@@ -381,13 +409,8 @@ void CCamera::GetArrPosForVehicleType(eVehicleType type, int32& arrPos) {
 }
 
 // 0x50AF80
-float CCamera::GetPositionAlongSpline() {
+float CCamera::GetPositionAlongSpline() const {
     return m_fPositionAlongSpline;
-}
-
-// 0x50AF90
-void CCamera::InitialiseCameraForDebugMode() {
-    // NOP
 }
 
 // 0x50AFA0
@@ -974,11 +997,6 @@ void CCamera::LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, 
     m_nZoomMode = bEase; // TODO: Rename
     m_fZoomInFactor = zoomInFactor;
     m_fZoomOutFactor = zoomOutFactor;
-}
-
-// 0x50D2D0
-void CCamera::InitialiseScriptableComponents() {
-    plugin::CallMethod<0x50D2D0, CCamera*>(this);
 }
 
 // 0x50B5D0

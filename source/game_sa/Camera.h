@@ -382,7 +382,7 @@ public:
     int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
-    float GetPositionAlongSpline();
+    float GetPositionAlongSpline() const;
     float GetRoughDistanceToGround();
     int32 GetScreenFadeStatus() const;
     void GetScreenRect(CRect* rect);
@@ -396,6 +396,7 @@ public:
     void InitCameraVehicleTweaks();
     void InitialiseScriptableComponents();
     void InitialiseCameraForDebugMode();
+
     bool IsExtraEntityToIgnore(CEntity *entity);
     bool IsItTimeForNewCamera(int32 camSequence, int32 startTime);
     bool IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix);
