@@ -1256,24 +1256,24 @@ void CCamera::SetCamCollisionVarDataSet(int32 index) {
 // 0x50CCA0
 void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) {
     switch (vehicleType) {
-        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
-        case eVehicleType::VEHICLE_TYPE_PLANE:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0x9);
+        case VEHICLE_TYPE_AUTOMOBILE:
+        case VEHICLE_TYPE_PLANE:
+            SetCamCollisionVarDataSet(camVehicleZoom + 9);
             return;
-        case eVehicleType::VEHICLE_TYPE_MTRUCK:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0xC);
+        case VEHICLE_TYPE_MTRUCK:
+            SetCamCollisionVarDataSet(camVehicleZoom + 12);
             return;
-        case eVehicleType::VEHICLE_TYPE_QUAD:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0xF);
+        case VEHICLE_TYPE_QUAD:
+            SetCamCollisionVarDataSet(camVehicleZoom + 15);
             return;
-        case eVehicleType::VEHICLE_TYPE_HELI:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0x12);
+        case VEHICLE_TYPE_HELI:
+            SetCamCollisionVarDataSet(camVehicleZoom + 18);
             return;
-        case eVehicleType::VEHICLE_TYPE_BOAT:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0x15);
+        case VEHICLE_TYPE_BOAT:
+            SetCamCollisionVarDataSet(camVehicleZoom + 21);
             return;
-        case eVehicleType::VEHICLE_TYPE_TRAIN:
-            SetCamCollisionVarDataSet(camVehicleZoom + 0x18);
+        case VEHICLE_TYPE_TRAIN:
+            SetCamCollisionVarDataSet(camVehicleZoom + 24);
             return;
     }
 }
