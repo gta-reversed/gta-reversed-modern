@@ -9,6 +9,15 @@
 #include "Base.h"
 
 typedef int32 AcquaintanceId;
+enum {
+    ACQUAINTANCE_RESPECT = 0,
+    ACQUAINTANCE_LIKE    = 1,
+    ACQUAINTANCE_IGNORE  = 2,
+    ACQUAINTANCE_DISLIKE = 3,
+    ACQUAINTANCE_HATE    = 4,
+
+    ACQUAINTANCE_NUM
+};
 
 // This structure stores information about how a ped of given pedtype (each entry in PedRelationship[32]
 // is separate pedtype, starting from 0 (PLAYER1) to 31 (MISSION8)) behaves toward any ped of other type.
@@ -24,17 +33,22 @@ typedef int32 AcquaintanceId;
 // https://gtamods.com/wiki/Saves_(GTA_SA)#Block_19:_Ped_Relationships
 class CAcquaintance {
 public:
-    uint32 m_nRespect;
-    uint32 m_nLike;
-    uint32 m_nIgnore;
-    uint32 m_nDislike;
-    uint32 m_nHate;
+    union {
+        struct {
+            uint32 m_nRespect;
+            uint32 m_nLike;
+            uint32 m_nIgnore;
+            uint32 m_nDislike;
+            uint32 m_nHate;
+        };
+        std::array<uint32, 5> m_acquaintances;
+    };
 
 public:
     static void InjectHooks();
 
     CAcquaintance();
-    ~CAcquaintance();
+    ~CAcquaintance() = default; // 0x608780
 
     uint32 GetAcquaintances(AcquaintanceId id);
     void   SetAcquaintances(AcquaintanceId id, uint32 value);
@@ -42,6 +56,12 @@ public:
 
     void   SetAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum);
     void   ClearAsAcquaintance(AcquaintanceId id, uint32 pedTypeBitNum);
+
+    [[nodiscard]] auto GetRespect() const { return m_nRespect; }
+    [[nodiscard]] auto GetLike()    const { return m_nLike;    }
+    [[nodiscard]] auto GetIgnore()  const { return m_nIgnore;  }
+    [[nodiscard]] auto GetDislike() const { return m_nDislike; }
+    [[nodiscard]] auto GetHate()    const { return m_nHate;    }
 };
 
 VALIDATE_SIZE(CAcquaintance, 0x14);

@@ -82,11 +82,11 @@ void CAEPedlessSpeechAudioEntity::InjectHooks() {
     // RH_ScopedInstall(Initialise, 0x4E4E10);
     // RH_ScopedInstall(StopCurrentSpeech, 0x4E4E80);
     // RH_ScopedInstall(AddSayEvent, 0x4E60D0);
-    // RH_ScopedInstall(UpdateParameters_Reversed, 0x4E4D10);
-    // RH_ScopedInstall(Terminate_Reversed, 0x4E6300);
-    // RH_ScopedInstall(PlayLoadedSound_Reversed, 0x4E6380);
-    RH_ScopedInstall(GetAllocatedVoice_Reversed, 0x4E6090);
-    RH_ScopedInstall(WillPedChatAboutTopic_Reversed, 0x4E60A0);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x4E4D10);
+    // RH_ScopedVirtualInstall(Terminate, 0x4E6300);
+    // RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E6380);
+    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E6090);
+    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E60A0);
 }
 
 // 0x4E6070

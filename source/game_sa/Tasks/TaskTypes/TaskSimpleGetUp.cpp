@@ -12,8 +12,8 @@ void CTaskSimpleGetUp::InjectHooks()
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67FA80);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x677FE0);
 }
 
 CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()
@@ -183,7 +183,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     CEventDamage eventDamage(vehicle, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
-        damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+        damageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
     else
         eventDamage.m_damageResponse.m_bDamageCalculated = true;
 

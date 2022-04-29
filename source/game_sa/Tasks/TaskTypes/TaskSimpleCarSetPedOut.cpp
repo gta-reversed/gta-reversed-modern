@@ -12,14 +12,12 @@ CTaskSimpleCarSetPedOut::CTaskSimpleCarSetPedOut(CVehicle* targetVehicle, int32 
     m_bKnockedOffBike = 0;
     m_nDoorFlagsToClear = 0;
     m_nNumGettingInToClear = 0;
-    if (targetVehicle)
-        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
 CTaskSimpleCarSetPedOut::~CTaskSimpleCarSetPedOut()
 {
-    if (m_pTargetVehicle)
-        m_pTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeCleanUpRef(m_pTargetVehicle);
 }
 
 CTask* CTaskSimpleCarSetPedOut::Clone()

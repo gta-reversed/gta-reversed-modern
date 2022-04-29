@@ -28,12 +28,13 @@
 #include "ePedStats.h"
 #include "ePedType.h"
 
-
 class CPedGroup;
 class CCivilianPed;
 class CEmergencyPed;
 class CCoverPoint;
 class CEntryExit;
+class CAnimBlendClumpData;
+struct RpHAnimHierarchy;
 
 static bool IsPedTypeGang(ePedType type) {
     switch (type) {
@@ -93,7 +94,7 @@ enum ePedCreatedBy : uint8 {
     PED_MISSION = 2,
 };
 
-enum eMoveState {
+enum eMoveState : uint32 {
     PEDMOVE_NONE = 0,
     PEDMOVE_STILL,
     PEDMOVE_TURN_L,
@@ -123,13 +124,13 @@ class CPed : public CPhysical {
 public:
     static inline int32 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
-    CAEPedAudioEntity       m_pedAudio{};
-    CAEPedSpeechAudioEntity m_pedSpeech{};
-    CAEWeaponAudioEntity    m_weaponAudio{};
-    char                    field_43C[36]{};
-    CPed*                   field_460{};
-    char                    field_464[4]{};
-    int32                   field_468{};
+    CAEPedAudioEntity       m_pedAudio;
+    CAEPedSpeechAudioEntity m_pedSpeech;
+    CAEWeaponAudioEntity    m_weaponAudio;
+    char                    field_43C[36];
+    CPed*                   field_460;
+    char                    field_464[4];
+    int32                   field_468;
 
     /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/game_sa/CPedSA.h */
     struct {
@@ -270,92 +271,92 @@ public:
         uint32 bTestForShotInVehicle : 1 = false;
         uint32 bUsedForReplay : 1 = false; // This ped is controlled by replay and should be removed when replay is done.
     };
-    CPedIntelligence*   m_pIntelligence{};
-    CPlayerPedData*     m_pPlayerData{};
-    ePedCreatedBy       m_nCreatedBy{ PED_GAME };
+    CPedIntelligence*   m_pIntelligence;
+    CPlayerPedData*     m_pPlayerData;
+    ePedCreatedBy       m_nCreatedBy;
     std::array<AnimBlendFrameData*, TOTAL_PED_NODES> m_apBones; // for Index, see ePedNode - TODO: Name incorrect, should be `m_apNodes` instead.
-    AssocGroupId        m_nAnimGroup{};
-    CVector2D           m_vecAnimMovingShiftLocal{};
-    CAcquaintance       m_acquaintance{};
-    RpClump*            m_pWeaponObject{};
-    RwFrame*            m_pGunflashObject{}; // A frame in the Clump `m_pWeaponObject`
-    RpClump*            m_pGogglesObject{};
-    bool*               m_pGogglesState{};           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
-    int16               m_nWeaponGunflashAlphaMP1{}; // AKA m_nWeaponGunflashStateLeftHand
-    int16               nm_fWeaponGunFlashAlphaProgMP1{};
-    int16               m_nWeaponGunflashAlphaMP2{}; // AKA m_nWeaponGunflashStateRightHand
-    int16               nm_fWeaponGunFlashAlphaProgMP2{};
-    CPedIK              m_pedIK{this};
-    int32               field_52C{};
-    ePedState           m_nPedState{ PEDSTATE_IDLE };
-    int32               m_nMoveState{ PEDMOVE_STILL };
-    int32               m_nSwimmingMoveState{}; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
-    int32               field_53C{};
-    float               m_fHealth{100.f};
-    float               m_fMaxHealth{100.f};
-    float               m_fArmour{};
-    uint32              m_nTimeTillWeNeedThisPed{};
-    CVector2D           m_vecAnimMovingShift{};
-    float               m_fCurrentRotation{};
-    float               m_fAimingRotation{}; // In radians
-    float               m_fHeadingChangeRate{15.f};
-    float               m_fMoveAnim{0.1f}; // not sure about the name here
-    CEntity*            m_standingOnEntity{};
-    CVector             field_56C{};
-    CVector             field_578{0.f, 0.f, 1.f};
-    CEntity*            m_pContactEntity{};
-    float               field_588{ 99999.992f };
-    CVehicle*           m_pVehicle{};
-    int32               field_590{};
-    int32               field_594{};
-    ePedType            m_nPedType{};
-    CPedStat*           m_pStats{};
+    AssocGroupId        m_nAnimGroup;
+    CVector2D           m_vecAnimMovingShiftLocal;
+    CAcquaintance       m_acquaintance;
+    RpClump*            m_pWeaponObject;
+    RwFrame*            m_pGunflashObject; // A frame in the Clump `m_pWeaponObject`
+    RpClump*            m_pGogglesObject;
+    bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
+    int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
+    int16               nm_fWeaponGunFlashAlphaProgMP1;
+    int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
+    int16               nm_fWeaponGunFlashAlphaProgMP2;
+    CPedIK              m_pedIK;
+    int32               field_52C;
+    ePedState           m_nPedState;
+    eMoveState          m_nMoveState;
+    int32               m_nSwimmingMoveState; // type is eMoveState and used for swimming in CTaskSimpleSwim::ProcessPed
+    int32               field_53C;
+    float               m_fHealth;
+    float               m_fMaxHealth;
+    float               m_fArmour;
+    uint32              m_nTimeTillWeNeedThisPed;
+    CVector2D           m_vecAnimMovingShift;
+    float               m_fCurrentRotation;
+    float               m_fAimingRotation;
+    float               m_fHeadingChangeRate;
+    float               m_fMoveAnim; // not sure about the name here
+    CEntity*            m_standingOnEntity;
+    CVector             field_56C;
+    CVector             field_578;
+    CEntity*            m_pContactEntity;
+    float               field_588;
+    CVehicle*           m_pVehicle;
+    int32               field_590;
+    int32               field_594;
+    ePedType            m_nPedType;
+    CPedStat*           m_pStats;
     std::array<CWeapon, 13> m_aWeapons;
-    eWeaponType         m_nSavedWeapon{ WEAPON_UNIDENTIFIED };   // when we need to hide ped weapon, we save it temporary here
-    eWeaponType         m_nDelayedWeapon{ WEAPON_UNIDENTIFIED }; // 'delayed' weapon is like an additional weapon, f.e., simple cop has a nitestick as current and pistol as delayed weapons
-    uint32              m_nDelayedWeaponAmmo{};
-    uint8               m_nActiveWeaponSlot{};
-    uint8               m_nWeaponShootingRate{40};
-    uint8               m_nWeaponAccuracy{60};
-    CEntity*            m_pTargetedObject{};
-    int32               field_720{};
-    int32               field_724{};
-    int32               field_728{};
-    eWeaponSkill        m_nWeaponSkill{ eWeaponSkill::STD };
-    eFightingStyle      m_nFightingStyle{ STYLE_STANDARD };
-    char                m_nAllowedAttackMoves{};
-    char                field_72F{};
-    CFire*              m_pFire{};
-    float               field_734{1.f};
-    CEntity*            m_pLookTarget{};
-    float               m_fLookDirection{}; // In RAD
-    int32               m_nWeaponModelId{-1};
-    int32               field_744{};
-    uint32              m_nLookTime{};
-    int32               field_74C{};
-    int32               m_nDeathTime{};
-    char                m_nBodypartToRemove{-1};
-    char                field_755{};
-    int16               m_nMoneyCount{}; // Used for money pickup when ped is killed
-    int32               field_758{};
-    int32               field_75C{};
-    char                m_nLastWeaponDamage{-1};
-    CEntity*            m_pLastEntityDamage{};
-    int32               field_768{};
+    eWeaponType         m_nSavedWeapon;   // when we need to hide ped weapon, we save it temporary here
+    eWeaponType         m_nDelayedWeapon; // 'delayed' weapon is like an additional weapon, f.e., simple cop has a nitestick as current and pistol as delayed weapons
+    uint32              m_nDelayedWeaponAmmo;
+    uint8               m_nActiveWeaponSlot;
+    uint8               m_nWeaponShootingRate;
+    uint8               m_nWeaponAccuracy;
+    CEntity*            m_pTargetedObject;
+    int32               field_720;
+    int32               field_724;
+    int32               field_728;
+    eWeaponSkill        m_nWeaponSkill;
+    eFightingStyle      m_nFightingStyle;
+    char                m_nAllowedAttackMoves;
+    uint8               field_72F; // taskId related? 0x4B5C47
+    CFire*              m_pFire;
+    float               field_734;
+    CEntity*            m_pLookTarget;
+    float               m_fLookDirection; // In RAD
+    int32               m_nWeaponModelId;
+    int32               field_744;
+    uint32              m_nLookTime;
+    int32               field_74C;
+    int32               m_nDeathTime;
+    char                m_nBodypartToRemove;
+    char                field_755;
+    int16               m_nMoneyCount; // Used for money pickup when ped is killed
+    int32               field_758;
+    int32               field_75C;
+    char                m_nLastWeaponDamage;
+    CEntity*            m_pLastEntityDamage;
+    int32               field_768;
 
     // TODO: Not turret, but rather attached entity, see `AttachPedToEntity` and `AttachPedToBike`
-    CVector             m_vecTurretOffset{};
-    uint16              m_fTurretAngleA{};
-    float               m_fTurretAngleB{};
-    float               m_nTurretPosnMode{};
-    int32               m_nTurretAmmo{};
+    CVector             m_vecTurretOffset;
+    uint16              m_fTurretAngleA;
+    float               m_fTurretAngleB;
+    float               m_nTurretPosnMode;
+    int32               m_nTurretAmmo;
     // **
 
-    CCoverPoint*        m_pCoverPoint{};            // CCoverPoint *
-    CEntryExit*         m_pEnex{};                  // CEnEx *
-    float               m_fRemovalDistMultiplier{1.f};
-    int16               m_nSpecialModelIndex{-1};
-    int32               field_798{-1};
+    CCoverPoint*        m_pCoverPoint;
+    CEntryExit*         m_pEnex; // CEnEx *
+    float               m_fRemovalDistMultiplier;
+    int16               m_nSpecialModelIndex;
+    int32               field_798;
 
 public:
     void SetModelIndex(uint32 modelIndex) override;
@@ -384,8 +385,7 @@ public:
     static void* operator new(unsigned size);
     static void operator delete(void* data);
 
-    CPed(plugin::dummy_func_t) : CPhysical(), m_aWeapons{} {}
-    CPed(ePedType);
+    CPed(ePedType pedType);
     ~CPed();
 
     bool PedIsInvolvedInConversation();
@@ -423,7 +423,7 @@ public:
     bool DoGunFlash(int32 arg0, bool arg1);
     void SetGunFlashAlpha(bool rightHand);
     void ResetGunFlashAlpha();
-    float GetBikeRidingSkill();
+    float GetBikeRidingSkill() const;
     static void ShoulderBoneRotation(RpClump* clump);
     void SetLookTimer(uint32 time);
     bool IsPlayer() const;
@@ -466,7 +466,7 @@ public:
     void ClearLook();
     bool TurnBody();
     bool IsPointerValid();
-    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones);
+    void GetBonePosition(RwV3d& outPosition, ePedBones boneId, bool updateSkinBones = false);
     void GiveObjectToPedToHold(int32 modelIndex, uint8 replace);
     void SetPedState(ePedState pedState);
     //1 = default, 2 = scm/mission script
@@ -512,7 +512,7 @@ public:
     void EnablePedSpeechForScriptSpeech();
     bool CanPedHoldConversation();
     void SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3);
-    void Say(uint16 arg0, uint32 arg1 = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
+    int16 Say(uint16 phraseId, uint32 offset = 0, float arg2 = 1.0f, uint8 arg3 = 0, uint8 arg4 = 0, uint8 arg5 = 0);
     void RemoveBodyPart(ePedNode pedNode, char localDir);
     void SpawnFlyingComponent(int32 arg0, char arg1);
     uint8 DoesLOSBulletHitPed(CColPoint& colPoint);
@@ -525,26 +525,34 @@ public:
     void SetStayInSamePlace(bool enable) { bStayInSamePlace = enable; }
     bool IsWearingGoggles() const { return !!m_pGogglesObject; }
 
+    // NOTSA helpers
     void SetArmour(float v) { m_fArmour = v; }
     void SetWeaponShootingRange(uint8 r) { m_nWeaponShootingRate = r; }
     void SetWeaponAccuracy(uint8 acc) { m_nWeaponAccuracy = acc; }
 
+    CAcquaintance& GetAcquaintance() { return m_acquaintance; }
     CVehicle* GetVehicleIfInOne() { return bInVehicle ? m_pVehicle : nullptr; }
+
     uint8 GetCreatedBy() { return m_nCreatedBy; }
     bool IsCreatedBy(ePedCreatedBy v) const noexcept { return v == m_nCreatedBy; }
     bool IsCreatedByMission() const noexcept { return IsCreatedBy(ePedCreatedBy::PED_MISSION); }
-    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
     CTaskManager& GetTaskManager() { return m_pIntelligence->m_TaskMgr; }
+    CTaskManager& GetTaskManager() const { return m_pIntelligence->m_TaskMgr; }
     CEventGroup& GetEventGroup() { return m_pIntelligence->m_eventGroup; }
     CEventHandler& GetEventHandler() { return m_pIntelligence->m_eventHandler; }
     CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
+    CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
+
     CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
+
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
@@ -555,14 +563,17 @@ public:
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
-    // NOTSA helpers
-
     bool IsFollowerOfGroup(const CPedGroup& group);
 
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
     void CreateDeadPedPickupCoors(CVector& pickupPos);
+    RpHAnimHierarchy& GetAnimHierarchy() const;
+    CAnimBlendClumpData& GetAnimBlendData() const;
 
+    bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
+
+    CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
@@ -579,6 +590,9 @@ private:
     void Save_Reversed() { CPed::Save(); }
     void Load_Reversed() { CPed::Load(); }
 };
+VALIDATE_SIZE(CPed, 0x79C);
 
 RwObject* SetPedAtomicVisibilityCB(RwObject* rwObject, void* data);
 bool IsPedPointerValid(CPed* ped);
+bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset = 0);
+bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset = 0);

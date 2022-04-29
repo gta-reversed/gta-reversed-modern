@@ -9,25 +9,40 @@
 class CRunningScript;
 
 enum eScriptResourceType {
-    RESOURCETYPE_ANIMATION = 1,
-    RESOURCETYPE_MODEL_OR_SPECIAL_CHAR,
-    RESOURCETYPE_DECISION_MAKER
+    RESOURCE_TYPE_DEFAULT               = 0,
+    RESOURCE_TYPE_ANIMATION             = 1,
+    RESOURCE_TYPE_MODEL_OR_SPECIAL_CHAR = 2,
+    RESOURCE_TYPE_DECISION_MAKER        = 3
+};
+
+struct tScriptResource {
+    int32               m_nModelId;
+    void*               m_pThread;
+    eScriptResourceType m_nType;
+
+    tScriptResource() {
+        m_nModelId = -1;
+        m_nType    = RESOURCE_TYPE_DEFAULT;
+        m_pThread  = nullptr;
+    }
 };
 
 class CScriptResourceManager {
 public:
-    struct {
-        int32  m_nModelId;
-        void*  m_pThread;
-        uint16 type; // see eScriptResourceType
-    } m_aScriptResources[75];
+    std::array<tScriptResource, 75> m_aScriptResources;
 
-    //! see eScriptResourceType
-    void AddToResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
-    //! see eScriptResourceType
-    bool HasResourceBeenRequested(int32 ModelId, uint32 a4);
-    //! see eScriptResourceType
-    bool RemoveFromResourceManager(int32 modelID, uint32 ResourceType, CRunningScript* pScript);
+public:
+    static void InjectHooks();
+
+    CScriptResourceManager() = delete;
+
+    void Initialise();
+    void AddToResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script);
+    bool RemoveFromResourceManager(int32 modelId, eScriptResourceType type, CRunningScript* script);
+    bool HasResourceBeenRequested(int32 modelId, eScriptResourceType type);
+    bool Load();
+    bool Save();
 };
 
 VALIDATE_SIZE(CScriptResourceManager, 0x384);
+VALIDATE_SIZE(tScriptResource, 0xC);

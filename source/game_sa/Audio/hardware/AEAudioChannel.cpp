@@ -19,7 +19,7 @@ void CAEAudioChannel::InjectHooks() {
     RH_ScopedInstall(SetFrequency, 0x4D7A50);
     RH_ScopedInstall(SetVolume, 0x4D7C60);
     RH_ScopedInstall(SetOriginalFrequency, 0x4D7A70);
-    RH_ScopedInstall(SetFrequencyScalingFactor_Reversed, 0x4D7D00);
+    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4D7D00);
     RH_ScopedInstall(GetCurrentPlaybackPosition, 0x4D79A0);
 }
 

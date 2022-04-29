@@ -1,44 +1,171 @@
 #include "StdInc.h"
 
 #include "TaskComplexCarDrive.h"
+#include "TaskComplexEnterCarAsPassenger.h"
+#include "TaskComplexEnterCarAsDriver.h"
+#include "TaskSimpleCarDrive.h"
+#include "TaskComplexWander.h"
+
+void CTaskComplexCarDrive::InjectHooks() {
+    RH_ScopedClass(CTaskComplexCarDrive);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedInstall(Constructor_0, 0x63C9D0);
+    RH_ScopedInstall(Constructor_1, 0x63C940);
+    RH_ScopedInstall(Destructor, 0x63CA40);
+    RH_ScopedVirtualInstall(Clone, 0x63DC90);
+    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x644E20);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x645100);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x645240);
+    RH_ScopedVirtualInstall(SetUpCar, 0x63CAE0);
+    RH_ScopedVirtualInstall(CreateSubTaskCannotGetInCar, 0x643200);
+    RH_ScopedVirtualInstall(Drive, 0x63CAD0);
+    // RH_ScopedVirtualInstall(CreateSubTask, 0x642FA0);
+}
 
 // 0x63C9D0
 CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle) : CTaskComplex() {
-    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C9D0, CTaskComplexCarDrive*, CVehicle*>(this, vehicle);
+    m_pVehicle              = vehicle;
+    m_fSpeed                = 0.0f;
+    m_carModelIndexToCreate = -1;
+    m_nCarDrivingStyle      = DRIVING_STYLE_STOP_FOR_CARS;
+    field_1C                = 1;
+    m_bSavedVehicleBehavior = false;
+    CEntity::SafeRegisterRef(m_pVehicle);
 }
 
+// 0x63C940
 CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32 carModelIndexToCreate, eCarDrivingStyle carDrivingStyle) : CTaskComplex() {
-    plugin::CallMethodAndReturn<CTaskComplexCarDrive*, 0x63C940, CTaskComplexCarDrive*, CVehicle*, float, int32, eCarDrivingStyle>(this, vehicle, speed, carModelIndexToCreate, carDrivingStyle);
+    m_fSpeed                = speed;
+    m_carModelIndexToCreate = carModelIndexToCreate;
+    m_pVehicle              = vehicle;
+    m_nCarDrivingStyle      = carDrivingStyle;
+    field_1C                = 1;
+    m_bSavedVehicleBehavior = false;
+    CEntity::SafeRegisterRef(m_pVehicle);
 }
 
+// 0x63CA40
 CTaskComplexCarDrive::~CTaskComplexCarDrive() {
-    plugin::CallMethod<0x63CA40, CTaskComplexCarDrive*>(this);
+    if (m_pVehicle) {
+        if (m_bSavedVehicleBehavior) {
+            m_pVehicle->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(m_nOldCarDrivingStyle);
+            m_pVehicle->m_autoPilot.m_nCarMission      = static_cast<eCarMission>(m_nCarMission);
+            m_pVehicle->m_autoPilot.m_nCruiseSpeed     = m_nSpeed;
+        }
+        CEntity::SafeCleanUpRef(m_pVehicle);
+    }
 }
 
+// 0x63DC90
 CTask* CTaskComplexCarDrive::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x63DC90, CTaskComplexCarDrive*>(this);
+    auto* task = new CTaskComplexCarDrive(m_pVehicle, m_fSpeed, m_carModelIndexToCreate, static_cast<eCarDrivingStyle>(m_nCarDrivingStyle));
+    task->field_1C = field_1C;
+    return task;
 }
 
+// 0x644E20
 CTask* CTaskComplexCarDrive::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x644E20, CTaskComplexCarDrive*, CPed*>(this, ped);
 }
 
+// 0x645100
 CTask* CTaskComplexCarDrive::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x645100, CTaskComplexCarDrive*, CPed*>(this, ped);
+    if (!m_pVehicle) {
+        if (ped->m_pVehicle && ped->bInVehicle) {
+            m_pVehicle = ped->m_pVehicle;
+            m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pVehicle));
+            return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
+        }
+        return field_1C ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+    }
+
+    if (ped->m_pVehicle && ped->bInVehicle) {
+        if (ped->m_pVehicle == m_pVehicle)
+            return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
+        else
+            return CreateSubTask(TASK_COMPLEX_LEAVE_ANY_CAR, ped);
+    } else {
+        if (!m_pVehicle->IsBike()) {
+            CUpsideDownCarCheck carCheck;
+            if (carCheck.IsCarUpsideDown(m_pVehicle) == 0) {
+                return CreateSubTask(field_1C ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+            }
+            return field_1C ? CreateSubTask(TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER, ped) : nullptr;
+        }
+        return CreateSubTask(field_1C ? TASK_COMPLEX_ENTER_CAR_AS_DRIVER : TASK_COMPLEX_ENTER_CAR_AS_PASSENGER, ped);
+    }
 }
 
+// 0x645240
 CTask* CTaskComplexCarDrive::ControlSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x645240, CTaskComplexCarDrive*, CPed*>(this, ped);
+    if (ped->m_pVehicle && ped->bInVehicle) {
+        switch (m_pSubTask->GetTaskType()) {
+        case TASK_SIMPLE_CAR_DRIVE:
+            return Drive(ped);
+        case TASK_COMPLEX_GO_TO_POINT_ANY_MEANS:
+            if (ped->m_pVehicle && ped->bInVehicle) {
+                m_pVehicle = ped->m_pVehicle;
+                m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(m_pVehicle));
+                return CreateSubTask(TASK_SIMPLE_CAR_DRIVE, ped);
+            }
+        }
+    }
+    return m_pSubTask;
 }
 
+// 0x63CAE0
 void CTaskComplexCarDrive::SetUpCar() {
-    plugin::CallMethod<0x63CAE0, CTaskComplexCarDrive*>(this);
+    m_nOldCarDrivingStyle   = m_pVehicle->m_autoPilot.m_nCarDrivingStyle;
+    m_nCarMission           = m_pVehicle->m_autoPilot.m_nCarMission;
+    m_nSpeed                = m_pVehicle->m_autoPilot.m_nCruiseSpeed;
+    m_bSavedVehicleBehavior = true;
 }
 
+// 0x643200
 CTask* CTaskComplexCarDrive::CreateSubTaskCannotGetInCar(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x643200, CTaskComplexCarDrive*, CPed*>(this, ped);
+    return CreateSubTask(TASK_FINISHED, ped);
 }
 
+// 0x63CAD0
 CTask* CTaskComplexCarDrive::Drive(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x63CAD0, CTaskComplexCarDrive*, CPed*>(this, ped);
+    return m_pSubTask;
+}
+
+// 0x642FA0
+CTask* CTaskComplexCarDrive::CreateSubTask(eTaskType taskType, CPed* ped) {
+    return plugin::CallMethodAndReturn<CTask*, 0x642FA0, CTaskComplexCarDrive*, eTaskType, CPed*>(this, taskType, ped);
+
+    /*
+    if (taskType <= TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER) {
+        if (taskType != TASK_COMPLEX_ENTER_ANY_CAR_AS_DRIVER) {
+            switch (taskType) {
+            case TASK_COMPLEX_ENTER_CAR_AS_PASSENGER:
+                return new CTaskComplexEnterCarAsPassenger(m_pVehicle, 0, false);
+            case TASK_COMPLEX_ENTER_CAR_AS_DRIVER:
+                return new CTaskComplexEnterCarAsDriver(m_pVehicle);
+            case TASK_SIMPLE_CAR_DRIVE:
+                SetUpCar();
+                return new CTaskSimpleCarDrive(m_pVehicle, nullptr, false);
+            case TASK_COMPLEX_LEAVE_ANY_CAR:
+                return new CTaskComplexLeaveAnyCar(0, true, false); // todo:
+            default:
+                return nullptr;
+            }
+            return nullptr;
+        }
+        return new CTaskComplexEnterAnyCarAsDriver(); // todo:
+    }
+    return nullptr;
+
+    switch (taskType) {
+    case TASK_SIMPLE_CREATE_CAR_AND_GET_IN:
+        return new CTaskSimpleCreateCarAndGetIn(&ped->GetPosition(), m_carModelIndexToCreate); // todo:
+    case TASK_COMPLEX_WANDER:
+        return CTaskComplexWander::GetWanderTaskByPedType(ped);
+    case TASK_FINISHED:
+        return nullptr;
+    }
+    return nullptr;
+    */
 }

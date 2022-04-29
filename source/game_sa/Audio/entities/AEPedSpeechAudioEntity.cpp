@@ -285,8 +285,8 @@ bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(int16 a2) {
 }
 
 // 0x4E6550
-int16 CAEPedSpeechAudioEntity::AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
-    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, a2, phraseId, a4, a5, a6, a7, a8);
+int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
+    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, audioEvent, phraseId, a4, a5, a6, a7, a8);
 }
 
 // 0x4E68D0
@@ -463,14 +463,14 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     // RH_ScopedInstall(GetSexFromModel, 0x4E4200);
     // RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     // RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170);
-    // RH_ScopedInstall(UpdateParameters_Reversed, 0x4E3520);
-    // RH_ScopedInstall(AddScriptSayEvent_Reversed, 0x4E4F70);
-    // RH_ScopedInstall(Terminate_Reversed, 0x4E5670);
-    // RH_ScopedInstall(PlayLoadedSound_Reversed, 0x4E5CD0);
-    RH_ScopedInstall(GetAllocatedVoice_Reversed, 0x4E4120);
-    RH_ScopedInstall(WillPedChatAboutTopic_Reversed, 0x4E5800);
-    RH_ScopedInstall(GetPedType_Reversed, 0x4E4130);
-    RH_ScopedInstall(IsPedFemaleForAudio_Reversed, 0x4E4150);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x4E3520);
+    // RH_ScopedVirtualInstall(AddScriptSayEvent, 0x4E4F70);
+    // RH_ScopedVirtualInstall(Terminate, 0x4E5670);
+    // RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E5CD0);
+    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E4120);
+    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E5800);
+    RH_ScopedVirtualInstall(GetPedType, 0x4E4130);
+    RH_ScopedVirtualInstall(IsPedFemaleForAudio, 0x4E4150);
 }
 
 // 0x4E4F10

@@ -19,7 +19,6 @@
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
-char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
 
@@ -309,11 +308,6 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive) {
     return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
 }
 
-// 0x734610
-void CreateDebugFont() {
-    // NOP
-}
-
 // 0x4ABA50
 CEventGlobalGroup* GetEventGlobalGroup() {
     static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
@@ -323,22 +317,6 @@ CEventGlobalGroup* GetEventGlobalGroup() {
 
     globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
-}
-
-// 0x734620
-void DestroyDebugFont() {
-    // NOP
-}
-
-// unused
-// 0x734630
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2) {
-    // NOP
-}
-
-// 0x734640
-void FlushObrsPrintfs() {
-    // NOP
 }
 
 // 0x734650
@@ -1221,8 +1199,23 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
     return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
 }
 
+// 0x53E160
+void RenderDebugShit() {
+    PUSH_RENDERGROUP("RenderDebugShit");
+    CTheScripts::RenderTheScriptDebugLines();
+#ifndef FINAL
+    // if(gbShowCollisionLines) CRenderer::RenderCollisionLines();
+    // ThePaths.DisplayPathData();
+    // CDebug::DrawLines();
+    DefinedState();
+#endif
+    POP_RENDERGROUP();
+}
+
 // 0x53E230
 void Render2dStuff() {
+    RenderDebugShit(); // NOTSA, temp
+
     const auto DrawOuterZoomBox = []() {
         CPed* player = FindPlayerPed();
         eWeaponType weaponType = WEAPON_UNARMED;

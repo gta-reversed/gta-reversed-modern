@@ -6,6 +6,7 @@
 */
 #pragma once
 
+#include "RepeatSector.h"
 class CEntity;
 class CPed;
 
@@ -14,21 +15,20 @@ class CPed;
 // Maybe it was templated? Like: `template<class Entity_t, size_t MaxCount>` ?
 
 class CEntityScanner {
-protected:
-    void* vtable;
-
 public:
     int32    field_4;
-    uint32   m_nCount{16};
-    CEntity* m_apEntities[16]{};
+    uint32   m_nCount;
+    CEntity* m_apEntities[16];
     CEntity* m_pClosestEntityInRange;
 
 public:
     static void InjectHooks();
 
-    void     Clear();
-    void     ScanForEntitiesInRange(int32 arg2, CPed* ped);
-    CEntity* GetClosestPedInRange();
+    CEntityScanner();
+    ~CEntityScanner();
+
+    void Clear();
+    virtual void ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped);
 };
 
 VALIDATE_SIZE(CEntityScanner, 0x50);

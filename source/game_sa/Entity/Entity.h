@@ -191,7 +191,7 @@ public:
     CBaseModelInfo* GetModelInfo() const;
 
     // Wrapper around the mess called `CleanUpOldReference`
-    // Takes in `ref` (which is usally a member variable),
+    // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`
     // Used often in the code. 
     template<typename T>
@@ -213,6 +213,11 @@ public:
             inOutRef = entity;
             inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
         }
+    }
+
+    template<typename T>
+    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        RegisterReference(reinterpret_cast<CEntity**>(&ref));
     }
 
     template<typename T>

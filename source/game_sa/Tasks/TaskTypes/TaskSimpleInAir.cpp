@@ -15,8 +15,8 @@ void CTaskSimpleInAir::InjectHooks()
 
     RH_ScopedInstall(Constructor, 0x678CD0);
     RH_ScopedInstall(DeleteAnimCB, 0x678E60);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x680600);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x678DC0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x680600);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678DC0);
 }
 
 CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump)
@@ -46,8 +46,7 @@ CTaskSimpleInAir::~CTaskSimpleInAir()
     if (m_pAnim)
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
-    if (m_pClimbEntity)
-        m_pClimbEntity->CleanUpOldReference(&m_pClimbEntity);
+    CEntity::SafeCleanUpRef(m_pClimbEntity);
 }
 
 // 0x680600

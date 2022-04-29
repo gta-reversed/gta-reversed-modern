@@ -8,15 +8,18 @@ void CAEPedAudioEntity::StaticInitialise() {
     AEAudioHardware.LoadSoundBank(128, 32);
 }
 
+// (CEntity* entity)
+// 0x4E0E80
 void CAEPedAudioEntity::Initialise(CPed* ped) {
     plugin::CallMethod<0x4E0E80>(this, ped);
 }
 
+// 0x4E1360
 void CAEPedAudioEntity::Terminate() {
     plugin::CallMethod<0x4E1360>(this);
     /*
     field_7C = 0;
-    m_pPed = 0;
+    m_pPed   = nullptr;
     StopJetPackSound();
     AESoundManager.CancelSoundsOwnedByAudioEntity(this, true);
     if (m_sTwinLoopSoundEntity.m_bIsInitialised)

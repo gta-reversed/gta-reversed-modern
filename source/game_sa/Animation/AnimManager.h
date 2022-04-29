@@ -35,7 +35,7 @@ public:
     static CAnimBlock* GetAnimationBlock(int32 animGroup) { return ms_aAnimAssocGroups[animGroup].m_pAnimBlock; }
     static uint32 GetAnimationBlockIndex(uint32 animGroup) { return GetAnimationBlock(animGroup) - ms_aAnimBlocks; }
     static CAnimBlock* GetAnimationBlock(const char* name);
-    static uint32 GetAnimationBlockIndex(const char* name);
+    static int32 GetAnimationBlockIndex(const char* name);
     static int32 GetFirstAssocGroup(const char* basename);
     static CAnimBlendHierarchy* GetAnimation(uint32 hash, const CAnimBlock* ifp);
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* ifp);

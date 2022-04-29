@@ -28,8 +28,8 @@ void CPlayerPed::InjectHooks() {
     RH_ScopedInstall(SetWantedLevelNoDrop, 0x609F30);
     RH_ScopedInstall(CheatWantedLevel, 0x609F50);
     RH_ScopedInstall(DoStuffToGoOnFire, 0x60A020);
-    // RH_ScopedInstall(Load_Reversed, 0x5D46E0);
-    // RH_ScopedInstall(Save_Reversed, 0x5D57E0);
+    // RH_ScopedVirtualInstall(Load, 0x5D46E0);
+    // RH_ScopedVirtualInstall(Save, 0x5D57E0);
     RH_ScopedInstall(DeactivatePlayerPed, 0x609520);
     RH_ScopedInstall(ReactivatePlayerPed, 0x609540);
     RH_ScopedInstall(GetPadFromPlayer, 0x609560);
@@ -122,8 +122,46 @@ bool CPlayerPed::Save_Reversed() {
 }
 
 // 0x60D5B0
-CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(plugin::dummy) {
-    plugin::CallMethod<0x60D5B0, CPlayerPed *, int32, bool>(this, playerId, bGroupCreated);
+CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYER1) {
+    m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
+    m_pPlayerData->AllocateData();
+
+    SetModelIndex(MODEL_PLAYER);
+
+    CPlayerPed::SetInitialState(bGroupCreated);
+
+    CEntity::ClearReference(m_pTargetedObject);
+
+    SetPedState(PEDSTATE_IDLE);
+
+    gPlayIdlesAnimBlockIndex = CAnimManager::GetAnimationBlockIndex("playidles");
+
+    if (!bGroupCreated) {
+        m_pPlayerData->m_nPlayerGroup = CPedGroups::AddGroup();
+
+        auto& group = CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup);
+        group.GetIntelligence().SetDefaultTaskAllocatorType(5);
+        group.m_bIsMissionGroup = true;
+        group.m_groupMembership.SetLeader(this);
+        group.Process();
+
+        m_pPlayerData->m_bGroupStuffDisabled = false; // m_pPlayerData->m_nPlayerFlags &= ~0x100u;
+        m_pPlayerData->m_bGroupAlwaysFollow  = false; // m_pPlayerData->m_nPlayerFlags &= ~0x200u;
+        m_pPlayerData->m_bGroupNeverFollow   = false; // m_pPlayerData->m_nPlayerFlags &= ~0x400u;
+    }
+
+    m_fMaxHealth = CStats::GetFatAndMuscleModifier(STAT_MOD_MAX_HEALTH);
+    m_fHealth    = m_fMaxHealth;
+
+    m_nFightingStyle      = STYLE_GRAB_KICK;
+    m_nAllowedAttackMoves = 15;
+
+    m_p3rdPersonMouseTarget = nullptr;
+    field_7A0 = 0;
+    m_pedSpeech.Initialise(this);
+    m_pIntelligence->m_fDmRadius = 30.0f;
+    m_pIntelligence->m_nDmNumPedsToScan = 2;
+    bUsedForReplay = true;
 }
 
 // 0x6094A0
@@ -310,9 +348,7 @@ void CPlayerPed::ProcessAnimGroups() {
 // 0x609C80
 void CPlayerPed::ClearWeaponTarget() {
     if (IsPlayer()) {
-        if (m_pTargetedObject)
-            m_pTargetedObject->CleanUpOldReference(&m_pTargetedObject);
-        m_pTargetedObject = nullptr;
+        CEntity::ClearReference(m_pTargetedObject);
         TheCamera.ClearPlayerWeaponMode();
         CWeaponEffects::ClearCrossHair(m_nPedType);
     }
@@ -337,8 +373,8 @@ float CPlayerPed::GetWeaponRadiusOnScreen() {
         const float rangeProg = std::min(1.0f, 15.0f / wepInfo.m_fWeaponRange);
         const float radius = (m_pPlayerData->m_fAttackButtonCounter * 0.5f + 1.0f) * rangeProg * accuracyProg;
         if (bIsDucking)
-            return radius / 2.0f;
-        return radius;
+            return std::max(0.2f, radius / 2.0f);
+        return std::max(0.2f, radius);
     }
     }
 }
@@ -398,10 +434,7 @@ float CPlayerPed::FindTargetPriority(CEntity* entity) {
 
 // 0x609ED0
 void CPlayerPed::Clear3rdPersonMouseTarget() {
-    if (m_p3rdPersonMouseTarget) {
-        m_p3rdPersonMouseTarget->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_p3rdPersonMouseTarget));
-        m_p3rdPersonMouseTarget = nullptr;
-    }
+    CEntity::ClearReference(m_p3rdPersonMouseTarget);
 }
 
 // 0x609EF0
@@ -494,7 +527,7 @@ void CPlayerPed::DisbandPlayerGroup() {
     CPedGroupMembership& membership = GetGroupMembership();
     const uint32 nMembers = membership.CountMembersExcludingLeader();
     if (nMembers > 0)
-        Say(nMembers > 1 ? 149 : 150, 0, 1.0f, 0, 0, 0);
+        Say(nMembers > 1 ? 149 : 150);
     else
         membership.RemoveAllFollowers(true);
 }
@@ -898,7 +931,7 @@ void CPlayerPed::EvaluateTarget(CEntity* target, CEntity *& outTarget, float & o
     if (DoesTargetHaveToBeBroken(target, &GetActiveWeapon()))
         return;
 
-    const float targetAngleDeg = fabs(RWRAD2DEG(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
+    const float targetAngleDeg = std::fabs(RadiansToDegrees(CGeneral::LimitRadianAngle(CGeneral::GetATanOf(dir) - compensationRotRad)));
 
     float viewAngleMultiplier = 1.0f - targetAngleDeg / PLAYER_MAX_TARGET_VIEW_ANGLE;
     if (dist > 1.0f)
