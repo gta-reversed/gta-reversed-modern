@@ -674,12 +674,12 @@ void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
 * @addr 0x404DE0
 */
 int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysIndex, CEntity** pIPLInsts) {
-    char iplName[32];
+    char iplName[32]{};
 
     // Extract name of IPL from path
     if (const auto pPathsep = strrchr(iplFilePath, '\\')) { // Find last path separator
         if (const auto pDot = strchr(pPathsep, '.')) {
-            memcpy_s(iplName, sizeof(iplName), pPathsep + 1, pDot - pPathsep + 1); // They used a manual loop, but this is better.
+            memcpy_s(iplName, sizeof(iplName), pPathsep + 1, pDot - (pPathsep + 1)); // They used a manual loop, but this is better.
         } else {
             return 0;
         }
