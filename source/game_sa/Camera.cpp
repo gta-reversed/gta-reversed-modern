@@ -725,10 +725,16 @@ void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMovin
 
 // 0x50C070
 void CCamera::SetPercentAlongCutScene(float percent) {
-    if (m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_FLYBY) {
-        m_aCams[m_nActiveCam].m_fTimeElapsedFloat = m_aCams[m_nActiveCam].m_nFinishTime * percent * 0.01;
-    }else if (m_aCams[(m_nActiveCam + 1) % 2].m_nMode == eCamMode::MODE_FLYBY) {
-        m_aCams[(m_nActiveCam + 1) % 2].m_fTimeElapsedFloat = m_aCams[(m_nActiveCam + 1) % 2].m_nFinishTime * percent * 0.01;
+    auto& cam = m_aCams[m_nActiveCam];
+    if (cam.m_nMode == eCamMode::MODE_FLYBY) {
+        cam.m_fTimeElapsedFloat = cam.m_nFinishTime * percent / 100.0f;
+        return;
+    }
+
+    cam = m_aCams[(m_nActiveCam + 1) % 2];
+    if (cam.m_nMode == eCamMode::MODE_FLYBY) {
+        cam.m_fTimeElapsedFloat = cam.m_nFinishTime * percent / 100.0f;
+        return;
     }
 }
 
