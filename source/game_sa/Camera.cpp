@@ -937,8 +937,8 @@ bool CCamera::IsExtraEntityToIgnore(CEntity* entity) {
         return false;
     }
 
-    for (auto& pExtraEntity : m_pExtraEntity) {
-        if (pExtraEntity == entity) {
+    for (auto& extraEntity : m_pExtraEntity) {
+        if (extraEntity == entity) {
             return true;
         }
     }
@@ -1211,9 +1211,9 @@ void CCamera::CamControl() {
 
 // 0x5B24A0
 void CCamera::DeleteCutSceneCamDataMemory() {
-    for (auto& PathArray : m_aPathArray) {
-        delete PathArray.m_pArrPathData;
-        PathArray.m_pArrPathData = nullptr;
+    for (auto& splines : m_aPathArray) {
+        delete splines.m_pArrPathData;
+        splines.m_pArrPathData = nullptr;
     }
 }
 
@@ -1224,15 +1224,15 @@ void CCamera::LoadPathSplines(FILE* file) {
 
 // 0x50AB50
 void CCamera::GetScreenRect(CRect* rect) {
-    rect->left = 0;
-    rect->right = (float) RsGlobal.maximumWidth;
+    rect->left = 0.0f;
+    rect->right = SCREEN_WIDTH;
 
     if (m_bWideScreenOn) {
-        rect->bottom = (float)(RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage * 0.01 - SCREEN_SCALE_Y(22.0f);
-        rect->top = (float)RsGlobal.maximumHeight - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage * 0.01 - SCREEN_SCALE_Y(14.0f);
+        rect->bottom = (float)(RsGlobal.maximumHeight / 2)          * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(22.0f);
+        rect->top    = SCREEN_HEIGHT - (RsGlobal.maximumHeight / 2) * m_fScreenReductionPercentage / 100.f - SCREEN_SCALE_Y(14.0f);
     } else {
-        rect->bottom = 0;
-        rect->top = RsGlobal.maximumHeight;
+        rect->bottom = 0.0f;
+        rect->top    = SCREEN_HEIGHT;
     }
 }
 
