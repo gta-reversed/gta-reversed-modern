@@ -22,6 +22,7 @@ public:
     static bool& ms_bCamCollideWithVehicles;
     static bool& ms_bCamCollideWithObjects;
     static bool& ms_bCamCollideWithPeds;
+    static float& ms_relVelCamCollisionVehiclesSqr;
 
 public:
     static void InjectHooks();

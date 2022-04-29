@@ -103,7 +103,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
     RH_ScopedInstall(CameraPedAimModeSpecialCases, 0x50CDA0);
-//    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
+    RH_ScopedInstall(CameraVehicleModeSpecialCases, 0x50CDE0);
     RH_ScopedInstall(IsExtraEntityToIgnore, 0x50CE80);
 //    RH_ScopedInstall(ConsiderPedAsDucking, 0x50CEB0);
 //    RH_ScopedInstall(ResetDuckingSystem, 0x50CEF0);
@@ -867,7 +867,25 @@ void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
 
 // 0x50CDE0
 void CCamera::CameraVehicleModeSpecialCases(CVehicle* vehicle) {
-    plugin::CallMethod<0x50CDE0, CCamera*, CVehicle*>(this, vehicle);
+    CCollision::ms_bCamCollideWithObjects = false;
+
+    float speed = (vehicle->m_vecMoveSpeed).Magnitude();
+
+    if (speed <= 0.2f) {
+        CCollision::ms_relVelCamCollisionVehiclesSqr = 0.1f;
+        CCollision::ms_bCamCollideWithVehicles = true;
+        CCollision::ms_bCamCollideWithPeds = true;
+        CCollision::ms_bCamCollideWithObjects = true;
+    } else {
+        CCollision::ms_relVelCamCollisionVehiclesSqr = 1.0f;
+        CCollision::ms_bCamCollideWithVehicles = true;
+        CCollision::ms_bCamCollideWithPeds = false;
+        CCollision::ms_bCamCollideWithObjects = false;
+    }
+
+    if (vehicle->m_pTrailer) {
+        m_pExtraEntity[m_nExtraEntitiesCount++] = vehicle->m_pTrailer;
+    }
 }
 
 // 0x50CE80
