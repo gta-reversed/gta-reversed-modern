@@ -665,18 +665,18 @@ void CCamera::SetFadeColour(uint8 red, uint8 green, uint8 blue) {
         m_bFadeTargetIsSplashScreen = true;
     }
 
+    CDraw::FadeRed   = red;
     CDraw::FadeGreen = green;
-    CDraw::FadeRed = red;
-    CDraw::FadeBlue = blue;
+    CDraw::FadeBlue  = blue;
 }
 
 // TODO: eBlurType
 // 0x50BF40
 void CCamera::SetMotionBlur(uint8 red, uint8 green, uint8 blue, int32 value, uint32 blurType) {
-    m_nBlurRed = red;
-    m_nBlurGreen = green;
-    m_nBlurBlue = blue;
-    m_nBlurType = blurType;
+    m_nBlurRed    = red;
+    m_nBlurGreen  = green;
+    m_nBlurBlue   = blue;
+    m_nBlurType   = blurType;
     m_nMotionBlur = value;
 }
 
@@ -694,14 +694,25 @@ void CCamera::SetNearClipScript(float nearClip) {
 // 0x50BFB0
 void CCamera::SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom, int16 minZoom) {
     m_PlayerWeaponMode.m_nMode     = mode;
-    m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_nMinZoom  = minZoom;
+    m_PlayerWeaponMode.m_nMaxZoom  = maxZoom;
     m_PlayerWeaponMode.m_fDuration = 0.0f;
 }
 
 // 0x50BFF0
 bool CCamera::Using1stPersonWeaponMode() {
-    return plugin::CallMethodAndReturn<bool, 0x50BFF0, CCamera*>(this);
+    switch (m_PlayerWeaponMode.m_nMode) {
+    case MODE_SNIPER:
+    case MODE_M16_1STPERSON:
+    case MODE_ROCKETLAUNCHER:
+    case MODE_ROCKETLAUNCHER_HS:
+    case MODE_HELICANNON_1STPERSON:
+    case MODE_CAMERA:
+    case MODE_AIMWEAPON_ATTACHED:
+        return true;
+    default:
+        return false;
+    }
 }
 
 // 0x50C030
