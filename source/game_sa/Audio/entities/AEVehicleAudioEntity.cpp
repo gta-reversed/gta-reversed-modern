@@ -335,6 +335,10 @@ void CAEVehicleAudioEntity::Service() {
     plugin::CallMethod<0x502280, CAEVehicleAudioEntity*>(this);
 }
 
+void CAEVehicleAudioEntity::StaticService() {
+    // NOP
+}
+
 // 0x4F7670
 void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     assert(entity);
@@ -377,13 +381,15 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     field_234 = -1.0f;
     m_fPlaneSoundSpeed = -1.0f;
     field_248 = -1.0f;
-    m_pSkidSoundMaybe = nullptr;
-    m_pRoadNoiseSound = nullptr;
-    m_pFlatTyreSound = nullptr;
+
+    m_pSkidSoundMaybe   = nullptr;
+    m_pRoadNoiseSound   = nullptr;
+    m_pFlatTyreSound    = nullptr;
     m_pReverseGearSound = nullptr;
-    m_pHornTonSound = nullptr;
-    m_pSirenSound = nullptr;
+    m_pHornTonSound     = nullptr;
+    m_pSirenSound       = nullptr;
     m_pPoliceSirenSound = nullptr;
+
     field_238 = 0.0f;
     field_23C = 1.0f;
     field_240 = 0;
@@ -682,7 +688,7 @@ float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float
     if (m_pEntity->m_nModelIndex == MODEL_CADDY)
         return -3.0f - 30.0f;
 
-    auto* vehicle = static_cast<CVehicle*>(m_pEntity);
+    auto* vehicle = m_pEntity->AsVehicle();
     const auto fGearRevToMaxProgress = clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
 
     float fVolume = 3.0f * fGearRevToMaxProgress - 3.0f;
@@ -706,7 +712,7 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyIdle(float fGearRevProgress, fl
     if (m_pEntity->m_nModelIndex == MODEL_CADDY)
         return 1.0f;
 
-    auto* vehicle = static_cast<CVehicle*>(m_pEntity);
+    auto* vehicle = m_pEntity->AsVehicle();
     const auto fGearRevToMaxProgress = clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
 
     float fFreq = 0.35f * fGearRevToMaxProgress + 0.85f;
@@ -751,7 +757,7 @@ void CAEVehicleAudioEntity::UpdateVehicleEngineSound(int16 engineState, float sp
 
 // 0x4F5700
 void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
-    s_pPlayerDriver = static_cast<CVehicle*>(m_pEntity)->m_pDriver;
+    s_pPlayerDriver = m_pEntity->AsVehicle()->m_pDriver;
 
     m_fGeneralVehicleSoundVolume = (float)CAEAudioEntity::m_pAudioEventVolumes[AE_GENERAL_VEHICLE_SOUND];
 
@@ -876,9 +882,9 @@ void CAEVehicleAudioEntity::TurnOffRadioForVehicle() {
     s_pVehicleAudioSettingsForRadio = nullptr;
     s_pPlayerAttachedForRadio = nullptr;
     switch (m_settings.m_nRadioType) {
-    case 0:
-    case 1:
-    case 2: {
+    case RADIO_CIVILIAN:
+    case RADIO_SPECIAL:
+    case RADIO_UNKNOWN: {
         AudioEngine.StopRadio(&m_settings, false);
         break;
     }
@@ -934,7 +940,7 @@ float CAEVehicleAudioEntity::GetVolForPlayerEngineSound(cVehicleParams& vehParam
         if (m_bInhibitAccForLowSpeed)
             fVolume = fLowSpeedVol;
         else
-            fVolume = 0.4f * m_nGearRelatedStuff + fLowSpeedVol;
+            fVolume = 0.4f * float(m_nGearRelatedStuff) + fLowSpeedVol;
         break;
     }
     case 5:
@@ -946,10 +952,13 @@ float CAEVehicleAudioEntity::GetVolForPlayerEngineSound(cVehicleParams& vehParam
     fVolume += m_settings.m_fHornVolumeDelta;
     if (vehicle->vehicleFlags.bIsDrowning)
         fVolume -= 6.0f;
+
     if (vehicle->m_pTrailer)
         fVolume += 6.0f;
+
     if (m_bNitroSoundPresent && field_248 <= 1.0f && field_248 >= 0.0f)
         fVolume += 3.0f * field_248;
+
     return fVolume;
 }
 
@@ -1094,7 +1103,7 @@ void CAEVehicleAudioEntity::PlaySkidSound(int16 newSkidSoundType, float speed, f
     const float volume = m_fGeneralVehicleSoundVolume + volumeDelta;
     if (m_nSkidSoundType == newSkidSoundType) {
         if (m_nSkidSoundType != -1) {
-            auto posn = m_pEntity->GetPosition();
+            const auto& posn = m_pEntity->GetPosition();
             m_twinSkidSound.UpdateTwinLoopSound(posn, volumeDelta, speed);
         }
     } else {
@@ -1103,7 +1112,7 @@ void CAEVehicleAudioEntity::PlaySkidSound(int16 newSkidSoundType, float speed, f
         m_nSkidSoundType = newSkidSoundType;
         if (newSkidSoundType != -1) {
             m_twinSkidSound.Initialise(19, newSkidSoundType, newSkidSoundType + 1, this, 200, 1000, -1, -1);
-            auto posn = m_pEntity->GetPosition();
+            const auto& posn = m_pEntity->GetPosition();
             m_twinSkidSound.PlayTwinLoopSound(posn, volumeDelta, speed, 2.5f, 1.0f, (eSoundEnvironment)0);
         }
     }
@@ -1526,9 +1535,9 @@ void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
 void CAEVehicleAudioEntity::JustWreckedVehicle() {
     if (m_bPlayerDriver) {
         switch (m_settings.m_nRadioType) {
-        case 0:
-        case 2:
-        case 3: {
+        case RADIO_CIVILIAN:
+        case RADIO_UNKNOWN:
+        case RADIO_EMERGENCY: {
             AudioEngine.StopRadio(&m_settings, false);
             break;
         }
@@ -1538,22 +1547,22 @@ void CAEVehicleAudioEntity::JustWreckedVehicle() {
     }
 
     switch (m_settings.m_nVehicleSoundType) {
-    case eVehicleSoundType::VEHICLE_SOUND_CAR:
-    case eVehicleSoundType::VEHICLE_SOUND_MOTORCYCLE:
-    case eVehicleSoundType::VEHICLE_SOUND_BICYCLE:
-    case eVehicleSoundType::VEHICLE_SOUND_BOAT:
-    case eVehicleSoundType::VEHICLE_SOUND_HELI:
-    case eVehicleSoundType::VEHICLE_SOUND_PLANE:
-    case eVehicleSoundType::VEHICLE_SOUND_NON_VEH:
-    case eVehicleSoundType::VEHICLE_SOUND_TRAIN:
-    case eVehicleSoundType::VEHICLE_SOUND_TRAILER: {
+    case VEHICLE_SOUND_CAR:
+    case VEHICLE_SOUND_MOTORCYCLE:
+    case VEHICLE_SOUND_BICYCLE:
+    case VEHICLE_SOUND_BOAT:
+    case VEHICLE_SOUND_HELI:
+    case VEHICLE_SOUND_PLANE:
+    case VEHICLE_SOUND_NON_VEH:
+    case VEHICLE_SOUND_TRAIN:
+    case VEHICLE_SOUND_TRAILER: {
         for (auto i = 0; i < 12; i++)
             CancelVehicleEngineSound(i);
         break;
     }
     }
 
-    PlaySkidSound(-1u, 1.0, -100.0f);
+    PlaySkidSound(-1, 1.0f, -100.0f);
 
     // Originally copied and pasted code, but this is way more readable
     struct {
@@ -1679,8 +1688,8 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
 void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
     // plugin::CallMethod<0x4F8DF0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
-    static constexpr float BASE_SPEED = 0.75f;  // 0x8CBD24
-    static constexpr float SPEED_MULT = 0.2f;   // 0x8CBD28
+    static constexpr float BASE_SPEED  = 0.75f;  // 0x8CBD24
+    static constexpr float SPEED_MULT  = 0.2f;   // 0x8CBD28
     static constexpr float BASE_VOLUME = -6.0f; // 0x8CBD28
 
     const auto vehicle = params.m_pVehicle->AsAutomobile();
@@ -1691,7 +1700,7 @@ void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
             fReverseGearVelocityProgress = params.m_fVelocity / params.m_pTransmission->m_maxReverseGearVelocity;
         } else {
             if (vehicle->m_wheelsOnGrounPrev)
-                vehicle->m_fSomeGasPedalStuff *= 0.4;
+                vehicle->m_fSomeGasPedalStuff *= 0.4f;
             fReverseGearVelocityProgress = vehicle->m_fSomeGasPedalStuff;
         }
         fReverseGearVelocityProgress = fabs(fReverseGearVelocityProgress);
@@ -1937,7 +1946,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         bankSlot = 19;
         bank = 138;
         sfxId = 15;
-        if (fComponentMoveProgress <= 0.0) {
+        if (fComponentMoveProgress <= 0.0f) {
             fSpeed = 0.9f;
             fVolume = 14.0f;
         } else {
@@ -1950,7 +1959,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         bankSlot = 19;
         bank = 138;
         sfxId = 15;
-        if (fComponentMoveProgress <= 0.0) {
+        if (fComponentMoveProgress <= 0.0f) {
             fSpeed = 0.8f;
             fVolume = 3.0f;
         } else {
@@ -1963,7 +1972,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         bankSlot = 19;
         bank = 138;
         sfxId = 15;
-        if (fComponentMoveProgress <= 0.0) {
+        if (fComponentMoveProgress <= 0.0f) {
             fSpeed = 0.9f;
             fVolume = 2.0f;
         } else {
@@ -1976,7 +1985,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         bankSlot = m_nEngineBankSlotId;
         bank = 57;
         sfxId = 2;
-        if (fComponentMoveProgress <= 0.0) {
+        if (fComponentMoveProgress <= 0.0f) {
             fSpeed = 0.8f;
             fVolume = -18.0f;
         } else {
@@ -1989,7 +1998,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
         bankSlot = 19;
         bank = 138;
         sfxId = 15;
-        if (fComponentMoveProgress <= 0.0) {
+        if (fComponentMoveProgress <= 0.0f) {
             fSpeed = 0.8f;
             fVolume = 21.0f;
         } else {

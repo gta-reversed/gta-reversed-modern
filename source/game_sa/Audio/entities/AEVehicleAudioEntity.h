@@ -128,7 +128,7 @@ public:
     bool                   m_bVehicleRadioPaused;
     bool                   m_bSoundsStopped;
     char                   m_nEngineState;
-    int8                   m_nGearRelatedStuff;
+    uint8                  m_nGearRelatedStuff;
     char                   field_AB;
     float                  field_AC;
     bool                   m_bInhibitAccForLowSpeed;
@@ -220,7 +220,7 @@ public:
     void AddAudioEvent(eAudioEvents soundId, CVehicle* vehicle);
 
     void Service();
-    static void StaticService() { /* Empty on purpose */ }
+    static void StaticService();
 
     uint32 GetVehicleTypeForAudio();
 
