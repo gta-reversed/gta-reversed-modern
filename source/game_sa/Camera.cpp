@@ -98,7 +98,7 @@ void CCamera::InjectHooks() {
     RH_ScopedInstall(TakeControlWithSpline, 0x50CAE0);
     RH_ScopedInstall(SetCamCollisionVarDataSet, 0x50CB60);
 //    RH_ScopedInstall(SetNearClipBasedOnPedCollision, 0x50CB90);
-//    RH_ScopedInstall(SetColVarsPed, 0x50CC50);
+    RH_ScopedInstall(SetColVarsPed, 0x50CC50);
     RH_ScopedInstall(SetColVarsVehicle, 0x50CCA0);
     RH_ScopedInstall(CameraGenericModeSpecialCases, 0x50CD30);
 //    RH_ScopedInstall(CameraPedModeSpecialCases, 0x50CD80);
@@ -826,7 +826,23 @@ void CCamera::SetColVarsAimWeapon(int32 aimingType) {
 
 // 0x50CC50
 void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
-    plugin::Call<0x50CC50, ePedType, int32>(pedType, nCamPedZoom);
+    if (pedType != PED_TYPE_PLAYER1 && pedType != PED_TYPE_PLAYER2) {
+        return;
+    }
+
+    int32 camColVars = 0;
+
+    if (pedType == PED_TYPE_PLAYER2) {
+        camColVars = nCamPedZoom + 6;
+    } else if (pedType == PED_TYPE_PLAYER1) {
+        camColVars = nCamPedZoom + 3;
+    }
+
+    if (camColVars != gCurCamColVars) {
+        gCurCamColVars = camColVars;
+        gCurDistForCam = 1.0f;
+        gpCamColVars = reinterpret_cast<int32>(&gCamColVars[camColVars]);
+    }
 }
 
 // 0x50CD30
