@@ -671,8 +671,55 @@ void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
 /*!
 * @addr 0x404DE0
 */
-int32 CIplStore::SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances) {
-    return plugin::CallAndReturn<int32, 0x404DE0, const char*, int32, CEntity**>(iplName, entityArraysIndex, instances);
+int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysIndex, CEntity** pIPLInsts) {
+    char iplName[32];
+
+    // Extract name of IPL from path
+    if (const auto pPathsep = strrchr(iplFilePath, '\\')) { // Find last path separator
+        if (const auto pDot = strchr(pPathsep, '.')) {
+            memcpy_s(iplName, sizeof(iplName), pPathsep + 1, pDot - pPathsep + 1); // They used a manual loop, but this is better.
+        } else {
+            return 0;
+        }
+    } else {
+        return 0;
+    }
+
+    const bool isIPLAnInterior = rng::any_of(
+        std::to_array({ "gen_int1", "gen_int2", "gen_int3", "gen_int4", "gen_int5", "gen_intb", "savehous", "stadint", "int_la", "int_sf", "int_veg", "int_cont", "levelmap" }),
+        [&](auto v) { return !_stricmp(v, iplName); }
+    );
+
+    strcat_s(iplName, "_stream");
+    const auto iplNameLen = strlen(iplName);
+
+    ppCurrIplInstance = pIPLInsts;
+
+    if (CColAccel::isCacheLoading()) { // NOTSA: Inverted conditional
+        for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
+            if (!_strnicmp(iplName, def.m_szName, iplNameLen/*they used strlen(iplName), but we optimized it*/)) {
+                def = CColAccel::getIplDef(slot);
+                def.m_nRelatedIpl = entityArraysIndex;
+                def.m_bInterior = isIPLAnInterior;
+                def.field_2D = false;
+                ms_pQuadTree->AddItem(&def, def.m_boundBox);
+            }
+        }
+    } else {
+        for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
+            if (!_strnicmp(iplName, def.m_szName, iplNameLen/*they used strlen(iplName), but we optimized it*/)) {
+                def.m_nRelatedIpl = entityArraysIndex;
+                def.m_bInterior = isIPLAnInterior;
+                def.m_bDisableDynamicStreaming = false; // NOTE: Inlined function was used to set this.
+                CStreaming::RequestModel(IPLToModelId(slot), STREAMING_KEEP_IN_MEMORY);
+            }
+        }
+        CStreaming::LoadAllRequestedModels(false);
+    }
+
+    const auto ret = ppCurrIplInstance - pIPLInsts; // NOTE: `ppCurrIplInstance` is set to `pIPLInsts` at the beginning.. And I doubt it's changed in-between. But who knows.
+    ppCurrIplInstance = nullptr;
+    return ret;
 }
 
 /*!
