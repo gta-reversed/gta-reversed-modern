@@ -8,7 +8,6 @@ void CTaskSimpleWaitUntilPedIsOutCar::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x649450);
     RH_ScopedInstall(Destructor, 0x6494F0);
-
     RH_ScopedInstall(Clone_Reversed, 0x64A4B0);
     RH_ScopedInstall(GetTaskType_Reversed, 0x6494D0);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x6494E0);
@@ -16,39 +15,35 @@ void CTaskSimpleWaitUntilPedIsOutCar::InjectHooks() {
 }
 
 // 0x649450
-CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(CPed* ped, CVector const& pos) :
-    m_pedToWaitFor{ped},
-    m_pos{pos}
+CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(CPed* ped, CVector const& pos) : CTaskSimple(),
+    m_PedToWaitFor{ ped },
+    m_Pos{ pos },
+    m_bIsNotGoingTowardsPos{ true }
 {
-    if (m_pedToWaitFor) {
-        m_pedToWaitFor->RegisterReference(reinterpret_cast<CEntity**>(&m_pedToWaitFor));
+    if (m_PedToWaitFor) {
+        m_PedToWaitFor->RegisterReference(reinterpret_cast<CEntity**>(&m_PedToWaitFor));
     }
-}
-
-CTaskSimpleWaitUntilPedIsOutCar::CTaskSimpleWaitUntilPedIsOutCar(const CTaskSimpleWaitUntilPedIsOutCar&) :
-    CTaskSimpleWaitUntilPedIsOutCar{m_pedToWaitFor, m_pos}
-{
 }
 
 // 0x6494F0
 CTaskSimpleWaitUntilPedIsOutCar::~CTaskSimpleWaitUntilPedIsOutCar() {
-    CEntity::ClearReference(m_pedToWaitFor);
+    CEntity::SafeCleanUpRef(m_PedToWaitFor);
 }
 
 // 0x649550
 bool CTaskSimpleWaitUntilPedIsOutCar::ProcessPed(CPed* ped) {
-    if (!m_pedToWaitFor) {
+    if (!m_PedToWaitFor) {
         return true;
     }
 
-    if (m_isNotGoingTowardsPos) {
-        m_isNotGoingTowardsPos = false;
+    if (m_bIsNotGoingTowardsPos) {
+        m_bIsNotGoingTowardsPos = false;
 
-        CTaskSimpleStandStill standStillTask{};
+        CTaskSimpleStandStill standStillTask;
         standStillTask.ProcessPed(ped);
 
-        ped->m_fAimingRotation = CGeneral::LimitRadianAngle(CGeneral::GetAngleBetweenPoints(m_pos.x, m_pos.y, 0.f, 0.f));
+        ped->m_fAimingRotation = CGeneral::LimitRadianAngle(CGeneral::GetAngleBetweenPoints(m_Pos.x, m_Pos.y, 0.f, 0.f));
     }
 
-    return !m_pedToWaitFor->bInVehicle;
+    return !m_PedToWaitFor->bInVehicle;
 }
