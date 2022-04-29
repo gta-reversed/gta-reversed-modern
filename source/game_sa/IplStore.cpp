@@ -40,7 +40,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(GetBoundingBox, 0x404C70);
     RH_ScopedGlobalInstall(RemoveIpl, 0x404B20);
     RH_ScopedGlobalInstall(FindIplSlot, 0x404AC0);
-    //RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
+    RH_ScopedGlobalInstall(SetIsInterior, 0x404A90);
     RH_ScopedGlobalInstall(GetIplName, 0x404A60);
     RH_ScopedGlobalInstall(GetIplEntityIndexArray, 0x4047B0);
     RH_ScopedGlobalInstall(GetNewIplEntityIndexArray, 0x404780);
@@ -665,7 +665,7 @@ void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
 * @addr 0x404A90
 */
 void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
-    plugin::Call<0x404A90, int32, bool>(iplSlotIndex, isInterior);
+    GetInSlot(iplSlotIndex)->m_bInterior = isInterior;
 }
 
 /*!
