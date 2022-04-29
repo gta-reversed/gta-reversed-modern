@@ -94,13 +94,12 @@ bool CEventPedCollisionWithPed::TakesPriorityOver_Reversed(const CEvent& refEven
     return CEvent::TakesPriorityOver(refEvent);
 }
 
-bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped)
-{
-    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim)) {
+bool CEventPedCollisionWithPed::AffectsPed_Reversed(CPed* ped) {
+    if (!ped->IsAlive() || ped->m_pAttachedTo || ped->bInVehicle) {
         return false;
     }
 
-    if (!m_victim || m_victim->bInVehicle || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
+    if (!m_victim || m_victim->bInVehicle || ped->GetIntelligence()->IsThreatenedBy(*m_victim) || m_victim->GetIntelligence()->m_AnotherStaticCounter > 30) {
         return false;
     }
 
