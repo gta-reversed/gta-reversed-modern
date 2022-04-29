@@ -168,23 +168,23 @@ CCamera* CCamera::Destructor() {
 
 // 0x50A3B0
 void CCamera::InitCameraVehicleTweaks() {
-    m_fCurrentTweakDistance = 1.0f;
-    m_fCurrentTweakAltitude = 1.0f;
-    m_fCurrentTweakAngle = 0.0f;
+    m_fCurrentTweakDistance   = 1.0f;
+    m_fCurrentTweakAltitude   = 1.0f;
+    m_fCurrentTweakAngle      = 0.0f;
     m_nCurrentTweakModelIndex = -1;
 
     if (!m_bCameraVehicleTweaksInitialized) {
         for (auto& camTweak : m_aCamTweak) {
             camTweak.m_nModelIndex = -1;
-            camTweak.m_fDistance = 1.0f;
-            camTweak.m_fAltitude = 1.0f;
-            camTweak.m_fAngle = 0.0f;
+            camTweak.m_fDistance   = 1.0f;
+            camTweak.m_fAltitude   = 1.0f;
+            camTweak.m_fAngle      = 0.0f;
         }
 
-        m_aCamTweak[0].m_nModelIndex = 501;
+        m_aCamTweak[0].m_nModelIndex = MODEL_RCGOBLIN;
         m_aCamTweak[0].m_fDistance = 1.0f;
         m_aCamTweak[0].m_fAltitude = 1.0f;
-        m_aCamTweak[0].m_fAngle = 0.178997f;
+        m_aCamTweak[0].m_fAngle    = 0.178997f; // todo: magic number
 
         m_bCameraVehicleTweaksInitialized = true;
     }
