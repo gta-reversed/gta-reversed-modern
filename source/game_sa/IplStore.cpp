@@ -22,7 +22,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(LoadIplBoundingBox, 0x405C00);
     RH_ScopedGlobalInstall(RemoveIplSlot, 0x405B60);
     RH_ScopedGlobalInstall(AddIplSlot, 0x405AC0);
-    //RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
+    RH_ScopedGlobalInstall(RemoveIplWhenFarAway, 0x4058D0);
     RH_ScopedGlobalInstall(RemoveIplAndIgnore, 0x405890);
     //RH_ScopedGlobalInstall(RequestIplAndIgnore, 0x405850);
     RH_ScopedGlobalInstall(LoadAllRemainingIpls, 0x405780);
@@ -590,7 +590,9 @@ void CIplStore::RemoveIplSlot(int32 iplSlotIndex) {
 * @addr 0x4058D0
 */
 void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
-    plugin::Call<0x4058D0, int32>(iplSlotIndex);
+    auto& def = *ms_pPool->GetAt(iplSlotIndex);
+    def.m_bDisableDynamicStreaming = false;
+    def.field_30 = true;
 }
 
 /*!
