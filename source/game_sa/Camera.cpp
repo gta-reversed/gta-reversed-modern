@@ -453,8 +453,7 @@ void CCamera::DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVecto
 // 0x50B8F0
 void CCamera::RenderMotionBlur() {
     if (m_nBlurType) {
-//        CMBlur::MotionBlurRender is NOP, 0x71D700
-//        CMBlur::MotionBlurRender();
+        // CMBlur::MotionBlurRender(); // todo: Add CMBlur::MotionBlurRender is NOP, 0x71D700
     }
 }
 
@@ -470,36 +469,37 @@ void CCamera::Restore() {
     m_bScriptParametersSetForInterPol = false;
     m_nWhoIsInControlOfTheCamera = 0;
 
-    CVehicle* playerVeh = FindPlayerVehicle();
-    CPlayerPed* pPlayerInFocus = FindPlayerPed();
+    CVehicle* vehicle = FindPlayerVehicle();
+    CPlayerPed* player = FindPlayerPed();
 
-    if (playerVeh) {
+    if (vehicle) {
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-        m_pTargetEntity = reinterpret_cast<CEntity*>(playerVeh);
+        m_pTargetEntity = vehicle;
     } else {
         m_nModeToGoTo = MODE_FOLLOWPED;
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+        m_pTargetEntity = player;
     }
     CEntity::SafeRegisterRef(m_pTargetEntity);
 
-    if (pPlayerInFocus->m_nPedState == PEDSTATE_ENTER_CAR || pPlayerInFocus->m_nPedState == PEDSTATE_CARJACK || pPlayerInFocus->m_nPedState == PEDSTATE_OPEN_DOOR) {
+    switch (player->m_nPedState) {
+    case PEDSTATE_ENTER_CAR:
+    case PEDSTATE_CARJACK:
+    case PEDSTATE_OPEN_DOOR:
         m_nModeToGoTo = MODE_CAM_ON_A_STRING;
+        break;
     }
 
-    if (pPlayerInFocus->m_nPedState == PEDSTATE_EXIT_CAR) {
+    if (player->m_nPedState == PEDSTATE_EXIT_CAR) {
         m_nModeToGoTo = MODE_FOLLOWPED;
 
         CEntity::SafeCleanUpRef(m_pTargetEntity);
-        m_pTargetEntity = reinterpret_cast<CEntity*>(pPlayerInFocus);
+        m_pTargetEntity = player;
         CEntity::SafeRegisterRef(m_pTargetEntity);
     }
 
-    if (m_pAttachedEntity) {
-        m_pAttachedEntity->CleanUpOldReference(&m_pAttachedEntity);
-        m_pAttachedEntity = nullptr;
-    }
+    CEntity::ClearReference(m_pAttachedEntity);
 
     m_bEnable1rstPersonCamCntrlsScript = false;
     m_bAllow1rstPersonWeaponsCamera = false;
