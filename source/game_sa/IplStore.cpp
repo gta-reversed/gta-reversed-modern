@@ -11,6 +11,8 @@
 #include "extensions/enumerate.hpp"
 #include "TheCarGenerators.h"
 
+int32& ms_currentIPLAreaCode = *(int32*)0x8E3EF8;
+
 void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
     RH_ScopedCategoryGlobal();
@@ -42,7 +44,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(GetIplName, 0x404A60);
     RH_ScopedGlobalInstall(GetIplEntityIndexArray, 0x4047B0);
     RH_ScopedGlobalInstall(GetNewIplEntityIndexArray, 0x404780);
-    //RH_ScopedGlobalInstall(SetIplsRequired, 0x404700);
+    RH_ScopedGlobalInstall(SetIplsRequired, 0x404700);
     RH_ScopedGlobalInstall(ClearIplsNeededAtPosn, 0x4045E0);
     //RH_ScopedGlobalInstall(LoadIpls, 0x405170);
     //RH_ScopedGlobalInstall(Load, 0x5D54A0);
@@ -121,6 +123,16 @@ void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
     GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming = !enable;
 }
 
+eAreaCodes ResolveAreaCode(int32 ec) {
+    if (ec == -1) {
+        if (const auto pp = FindPlayerPed()) {
+            return pp->m_nAreaCode;
+        }
+        return (eAreaCodes)CGame::currArea;
+    }
+    return (eAreaCodes)ec;
+}
+
 /*!
 * @addr 0x4053F0
 * @brief Make sure all IPls that requested around posn (in a 190 unit cirlce) are loaded.
@@ -130,12 +142,8 @@ void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
         return;
     }
 
-    // Simplified this bit a little.. Originally it was something like.. ((FindPlayerPed() ? FindPlayerPed().m_nAreaCode : CGame::currArea) == CGame::currArea)
-    // I suspect the function to get the area code was inlined..
-    if (const auto pp = FindPlayerPed()) {
-        if (pp->m_nAreaCode != CGame::currArea) {
-            return;
-        }
+    if (ResolveAreaCode(-1) != CGame::currArea) {
+        return;
     }
 
     SetIplsRequired(posn);
@@ -639,7 +647,18 @@ void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
 * @addr 0x404700
 */
 void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
-    plugin::Call<0x404700, const CVector&, int32>(posn, gameArea);
+    ms_currentIPLAreaCode = ResolveAreaCode(gameArea);
+
+    const auto GetCallback = [&] {
+        if (ms_currentIPLAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD && posn.z >= 900.f) {
+            return SetIfIplIsRequired;
+        } else if (ms_currentIPLAreaCode == CGame::currArea) {
+            return SetIfInteriorIplIsRequired;
+        } else {
+            return SetIfIplIsRequiredReducedBB;
+        }
+    };
+    ms_pQuadTree->ForAllMatching(posn, GetCallback());
 }
 
 /*!
@@ -658,6 +677,7 @@ int32 CIplStore::SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, 
 
 /*!
 * @addr 0x4045F0
+* @brief Callback used in `SetIplsRequired`
 */
 void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
     plugin::Call<0x4045F0, const CVector2D&, void*>(posn, data);
@@ -665,6 +685,7 @@ void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
 
 /*!
 * @addr 0x404660
+* @brief Callback used in `SetIplsRequired`
 */
 void SetIfIplIsRequired(const CVector2D& posn, void* data) {
     plugin::Call<0x404660, const CVector2D&, void*>(posn, data);
@@ -672,6 +693,7 @@ void SetIfIplIsRequired(const CVector2D& posn, void* data) {
 
 /*!
 * @addr 0x404690
+* @brief Callback used in `SetIplsRequired`
 */
 void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
     plugin::Call<0x404690, const CVector2D&, void*>(posn, data);
