@@ -31,7 +31,7 @@ void CIplStore::InjectHooks() {
     //RH_ScopedGlobalInstall(RequestIpls, 0x405520);
     //RH_ScopedGlobalInstall(Save, 0x5D5420);
     RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
-    //RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
+    RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
     //RH_ScopedGlobalInstall(SetupRelatedIpls, 0x404DE0);
     RH_ScopedGlobalInstall(EnableDynamicStreaming, 0x404D30);
     RH_ScopedGlobalInstall(IncludeEntity, 0x404C90);
@@ -598,8 +598,12 @@ void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
 /*!
 * @addr 0x405110
 */
-void CIplStore::RemoveRelatedIpls(int32 entityArraysIndex) {
-    plugin::Call<0x405110, int32>(entityArraysIndex);
+void CIplStore::RemoveRelatedIpls(int32 iplSlotIndex) {
+    for (auto&& [idx, def] : ms_pPool->GetAllValidWithIndex()) {
+        if (def.m_nRelatedIpl == iplSlotIndex) {
+            CStreaming::RemoveModel(IPLToModelId(idx));
+        }
+    }
 }
 
 /*!
