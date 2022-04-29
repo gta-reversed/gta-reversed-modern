@@ -892,12 +892,12 @@ void CCamera::CameraGenericModeSpecialCases(CPed* targetPed) {
         return;
     }
 
-    CTaskSimpleHoldEntity* TaskHold = reinterpret_cast<CTaskSimpleHoldEntity*>(targetPed->GetIntelligence()->GetTaskHold(false));
-    if (!TaskHold || !TaskHold->m_pEntityToHold) {
+    auto* taskHold = static_cast<CTaskSimpleHoldEntity*>(targetPed->GetIntelligence()->GetTaskHold(false));
+    if (!taskHold || !taskHold->m_pEntityToHold) {
         return;
     }
 
-    m_pExtraEntity[m_nExtraEntitiesCount++] = reinterpret_cast<CEntity*>(targetPed);
+    m_pExtraEntity[m_nExtraEntitiesCount++] = targetPed;
 }
 
 // unused
