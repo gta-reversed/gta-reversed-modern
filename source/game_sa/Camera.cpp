@@ -336,6 +336,12 @@ bool CCamera::GetLookingLRBFirstPerson() {
         && m_aCams[m_nActiveCam].m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_FORWARD;
 }
 
+// 0x50AED0
+bool CCamera::GetLookingForwardFirstPerson() {
+    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON
+           && m_aCams[m_nActiveCam].m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_FORWARD;
+}
+
 // 0x50AE90
 int32 CCamera::GetLookDirection() {
     const auto& cam = m_aCams[m_nActiveCam];
@@ -349,11 +355,6 @@ int32 CCamera::GetLookDirection() {
     }
 
     return cam.m_nDirectionWasLooking; // todo: unsigned/signed
-}
-
-// 0x50AED0
-bool CCamera::GetLookingForwardFirstPerson() {
-    return m_aCams[m_nActiveCam].m_nMode == eCamMode::MODE_1STPERSON && m_aCams[m_nActiveCam].m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_FORWARD;
 }
 
 // 0x50AF00
