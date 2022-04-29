@@ -28,7 +28,7 @@ void CIplStore::InjectHooks() {
     RH_ScopedGlobalInstall(LoadAllRemainingIpls, 0x405780);
     //RH_ScopedGlobalInstall(RemoveAllIpls, 0x405720);
     //RH_ScopedGlobalInstall(HaveIplsLoaded, 0x405600);
-    //RH_ScopedGlobalInstall(RequestIpls, 0x405520);
+    RH_ScopedGlobalInstall(RequestIpls, 0x405520);
     //RH_ScopedGlobalInstall(Save, 0x5D5420);
     RH_ScopedGlobalInstall(EnsureIplsAreInMemory, 0x4053F0);
     RH_ScopedGlobalInstall(RemoveRelatedIpls, 0x405110);
@@ -140,7 +140,7 @@ void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
 
     SetIplsRequired(posn);
 
-    for (auto slot = 1/*notice*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+    for (auto slot = 1/*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         const auto def = GetInSlot(slot);
         if (!def) {
             continue;
@@ -620,7 +620,19 @@ void CIplStore::RequestIplAndIgnore(int32 iplSlotIndex) {
 * @addr 0x405520
 */
 void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
-    plugin::Call<0x405520, const CVector&, int32>(posn, playerNumber);
+    for (auto slot = 1/*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+        const auto def = GetInSlot(slot);
+        if (!def) {
+            continue;
+        }
+
+        if (def->m_bLoadRequest) {
+            if (def->m_boundBox.IsPointInside(posn, -190.f)) {
+                CStreaming::RequestModel(IPLToModelId(slot), STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY);
+            }
+            def->m_bLoadRequest = false;
+        }
+    }
 }
 
 /*!
