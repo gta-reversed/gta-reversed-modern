@@ -826,16 +826,17 @@ void CCamera::SetColVarsAimWeapon(int32 aimingType) {
 
 // 0x50CC50
 void CCamera::SetColVarsPed(ePedType pedType, int32 nCamPedZoom) {
-    if (pedType != PED_TYPE_PLAYER1 && pedType != PED_TYPE_PLAYER2) {
-        return;
-    }
-
     int32 camColVars = 0;
 
-    if (pedType == PED_TYPE_PLAYER2) {
-        camColVars = nCamPedZoom + 6;
-    } else if (pedType == PED_TYPE_PLAYER1) {
-        camColVars = nCamPedZoom + 3;
+    switch (pedType) {
+        case PED_TYPE_PLAYER1:
+            camColVars = nCamPedZoom + 3;
+            break;
+        case PED_TYPE_PLAYER2:
+            camColVars = nCamPedZoom + 6;
+            break;
+        default:
+            return;
     }
 
     if (camColVars != gCurCamColVars) {
@@ -883,21 +884,13 @@ void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
 
 // 0x50CDE0
 void CCamera::CameraVehicleModeSpecialCases(CVehicle* vehicle) {
-    CCollision::ms_bCamCollideWithObjects = false;
-
     float speed = (vehicle->m_vecMoveSpeed).Magnitude();
 
-    if (speed <= 0.2f) {
-        CCollision::ms_relVelCamCollisionVehiclesSqr = 0.1f;
-        CCollision::ms_bCamCollideWithVehicles = true;
-        CCollision::ms_bCamCollideWithPeds = true;
-        CCollision::ms_bCamCollideWithObjects = true;
-    } else {
-        CCollision::ms_relVelCamCollisionVehiclesSqr = 1.0f;
-        CCollision::ms_bCamCollideWithVehicles = true;
-        CCollision::ms_bCamCollideWithPeds = false;
-        CCollision::ms_bCamCollideWithObjects = false;
-    }
+    const auto slow = speed <= 0.2f;
+    CCollision::ms_relVelCamCollisionVehiclesSqr = slow ? 0.1f : 1.0f;
+    CCollision::ms_bCamCollideWithVehicles = true;
+    CCollision::ms_bCamCollideWithPeds = slow;
+    CCollision::ms_bCamCollideWithObjects = slow;
 
     if (vehicle->m_pTrailer) {
         m_pExtraEntity[m_nExtraEntitiesCount++] = vehicle->m_pTrailer;
@@ -966,7 +959,7 @@ void CCamera::VectorTrackLinear(CVector* trackLinearStartPoint, CVector* trackLi
 void CCamera::AddShakeSimple(float duration, int32 type, float intensity) {
     m_fShakeIntensity = intensity;
     m_nShakeType = type;
-    m_fStartShakeTime = CTimer::GetTimeInMS();
+    m_fStartShakeTime = static_cast<float>(CTimer::GetTimeInMS());
     m_fEndShakeTime = m_fStartShakeTime + duration;
 }
 
