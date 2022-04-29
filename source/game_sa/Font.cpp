@@ -481,7 +481,7 @@ void CFont::SetScale(float w, float h)
 // 0x7193A0
 void CFont::SetScaleForCurrentLanguage(float w, float h)
 {
-    switch (FrontEndMenuManager.m_nLanguage) {
+    switch (FrontEndMenuManager.m_nPrefsLanguage) {
     case eLanguage::FRENCH:
     case eLanguage::GERMAN:
     case eLanguage::ITALIAN:

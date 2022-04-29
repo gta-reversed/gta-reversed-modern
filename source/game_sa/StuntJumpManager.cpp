@@ -201,7 +201,7 @@ void CStuntJumpManager::Update() {
         int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
-        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE, 0.0f, 1.0f);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
         char* bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
         if (bonusMessage)

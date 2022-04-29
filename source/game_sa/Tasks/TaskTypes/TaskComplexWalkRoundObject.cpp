@@ -23,7 +23,6 @@ CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const 
     CEntity::SafeRegisterRef(m_object);
 
     m_pointRoute = new CPointRoute();
-    m_pointRoute->field_0 = 0;
 }
 
 CTaskComplexWalkRoundObject::~CTaskComplexWalkRoundObject() {

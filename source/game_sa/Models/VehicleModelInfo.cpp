@@ -8,6 +8,7 @@
 
 #include "VehicleModelInfo.h"
 #include "CustomCarPlateMgr.h"
+#include "LoadingScreen.h"
 
 CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
 RwTexture* &CVehicleModelInfo::ms_pRemapTexture = *(RwTexture**)0xB4E47C;
@@ -1550,7 +1551,7 @@ tHandlingData& CVehicleModelInfo::GetHandlingData() const {
 }
 
 tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
-    return gHandlingDataMgr.m_aFlyingHandling[m_nHandlingId];
+    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)

@@ -22,8 +22,8 @@ enum eAnimationFlags {
     ANIM_FLAG_UNLOCK_LAST_FRAME  = 0x8, // Animation will be stuck on last frame, if not set
     ANIM_FLAG_PARTIAL            = 0x10,
     ANIM_FLAG_MOVEMENT           = 0x20,
-    ANIM_FLAG_TRANLSATE_Y        = 0x40,
-    ANIM_FLAG_TRANLSATE_X        = 0x80,
+    ANIM_FLAG_TRANSLATE_Y        = 0x40,
+    ANIM_FLAG_TRANSLATE_X        = 0x80,
     ANIM_FLAG_WALK               = 0x100,  // See `CPed::PlayFootSteps()`
     ANIM_FLAG_200                = 0x200,
     ANIM_FLAG_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIM_FLAG_IDLE, see `CPed::PlayFootSteps()`
@@ -36,7 +36,7 @@ enum eAnimationFlags {
 
 class CDefaultAnimCallback {
 public:
-    static void DefaultAnimCB(class CAnimBlendAssociation* pAnimAssoc, void* something) {
+    static void DefaultAnimCB(class CAnimBlendAssociation* animAssoc, void* something) {
         // nothing here
     }
 };
@@ -60,25 +60,27 @@ struct SClumpAnimAssoc {
 class CAnimBlendAssociation : public SClumpAnimAssoc {
 public:
     eAnimBlendCallbackType m_nCallbackType;
+    void (*m_pCallbackFunc)(CAnimBlendAssociation*, void*);
+    void* m_pCallbackData;
 
-    void(*m_pCallbackFunc)(CAnimBlendAssociation *, void *);
-    void *m_pCallbackData;
-
+public:
     void* operator new(unsigned size);
     void operator delete(void* object);
 
-    static void InjectHooks();
+    CAnimBlendAssociation();
     CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
+    explicit CAnimBlendAssociation(CAnimBlendAssociation& assoc);
+    explicit CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc);
     virtual ~CAnimBlendAssociation();
-private:
-    CAnimBlendAssociation* Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
-public:
+
     void AllocateAnimBlendNodeArray(int32 count);
     void FreeAnimBlendNodeArray();
     CAnimBlendNode* GetNode(int32 nodeIndex);
+
     void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
     void Init(CAnimBlendAssociation& source);
-    //void Init(CAnimBlendStaticAssociation &source);
+    void Init(CAnimBlendStaticAssociation& source);
+
     void ReferenceAnimBlock();
     void SetBlend(float blendAmount, float blendDelta);
     void SetBlendTo(float blendAmount, float blendDelta);
@@ -99,7 +101,12 @@ public:
         else
             m_nFlags &= ~(int)flag;
     }
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CAnimBlendAssociation* Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
 };
 
-//VTABLE_DESC(CAnimBlendAssociation, 0x85C6D0, 1);
 VALIDATE_SIZE(CAnimBlendAssociation, 0x3C);

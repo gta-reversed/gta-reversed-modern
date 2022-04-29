@@ -204,7 +204,7 @@ void CAEUserRadioTrackManager::DeleteUserTracksInfo() {
 // 0x4f3340
 void CAEUserRadioTrackManager::SetUserTrackIndex(int32 index) {
     if (index != -1)
-        FrontEndMenuManager.field_AC = index;
+        FrontEndMenuManager.m_nUserTrackIndex = index;
 }
 
 // 0x4f3250
@@ -214,19 +214,19 @@ int32 CAEUserRadioTrackManager::SelectUserTrackIndex() const {
         case USER_TRACK_PLAY_RADIO:
         case USER_TRACK_PLAY_RANDOM: {
             if (m_nUserTracksCount == 1)
-                return FrontEndMenuManager.field_AC = 1;
+                return FrontEndMenuManager.m_nUserTrackIndex = 1;
             else {
                 int32 index;
 
                 do
                     index = static_cast<int32>(CAEAudioUtility::GetRandomNumberInRange(0, m_nUserTracksCount - 1));
-                while (index == FrontEndMenuManager.field_AC);
+                while (index == FrontEndMenuManager.m_nUserTrackIndex);
 
-                return FrontEndMenuManager.field_AC = index;
+                return FrontEndMenuManager.m_nUserTrackIndex = index;
             }
         }
         case USER_TRACK_PLAY_SEQUENTAL: {
-            return FrontEndMenuManager.field_AC = (FrontEndMenuManager.field_AC + 1) % m_nUserTracksCount;
+            return FrontEndMenuManager.m_nUserTrackIndex = (FrontEndMenuManager.m_nUserTrackIndex + 1) % m_nUserTracksCount;
         }
         }
     }
@@ -298,7 +298,7 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
 
             CFileMgr::CloseFile(file);
 
-            FrontEndMenuManager.field_AC = 0;
+            FrontEndMenuManager.m_nUserTrackIndex = 0;
             self->m_nUserTracksScanState = USER_TRACK_SCAN_COMPLETE;
         }
     }

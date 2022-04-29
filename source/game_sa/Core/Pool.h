@@ -269,7 +269,7 @@ public:
         assert(IsIndexInBounds(idx));
         return idx;
     }
-
+    
     // NOTSA - Get all valid objects - Useful for iteration
     template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
     auto GetAllValid() {

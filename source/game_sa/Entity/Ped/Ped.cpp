@@ -77,7 +77,7 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    RH_ScopedInstall(GetBonePosition, 0x5E4280);
+    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
@@ -3128,11 +3128,13 @@ void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3) {
 
 /*!
 * @addr 0x5EFFE0
+* @returns Played soundID - TODO: I'm not sure about this..
 */
-void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
-{
-    if (arg0) {
-        m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5);
+int16 CPed::Say(uint16 phraseId, uint32 offset, float arg2, uint8 arg3, uint8 arg4, uint8 arg5) {
+    if (phraseId) {
+        return m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, phraseId, offset, arg2, arg3, arg4, arg5);
+    } else {
+        return -1;
     }
 }
 
@@ -3590,4 +3592,32 @@ int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 // NOTSA
 bool CPed::IsInVehicleAsPassenger() const noexcept {
     return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
+}
+
+CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
+    CVector pos;
+    GetBonePosition(pos, boneId, updateSkinBones);
+    return pos;
+}
+
+// 0x6497A0
+bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
+        return jacked->Say(119u, offset) != -1;
+    else
+        return jacked->Say(118u, offset) != -1;
+}
+
+// 0x6497F0
+bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset) {
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio() == 1)
+        return jacker->Say(121u, offset) != -1;
+
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
+        return jacker->Say(124u, offset) != -1;
+
+    if (jacked->m_pedSpeech.IsPedFemaleForAudio())
+        return jacker->Say(122u, offset) != -1;
+
+    return jacker->Say(123u, offset) != -1;
 }

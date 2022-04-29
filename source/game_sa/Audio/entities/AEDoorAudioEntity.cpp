@@ -28,7 +28,7 @@ void CAEDoorAudioEntity::Reset() {
 void CAEDoorAudioEntity::AddAudioEvent(eAudioEvents event, CPhysical* physical) {
     if (event == AE_ENTRY_EXIT_DOOR_MOVING && !AESoundManager.AreSoundsOfThisEventPlayingForThisEntity(AE_ENTRY_EXIT_DOOR_MOVING, this) &&
         CTimer::GetTimeInMS() > m_nMovingDoorTime + 4000) {
-        PlayDoorSound(1, AE_ENTRY_EXIT_DOOR_MOVING, physical->GetPosition(), 0.0f, 1.0f);
+        PlayDoorSound(1, AE_ENTRY_EXIT_DOOR_MOVING, physical->GetPosition());
         m_nMovingDoorTime = CTimer::GetTimeInMS();
     }
 }
@@ -119,7 +119,7 @@ void CAEDoorAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 
             return;
         }
-        AddAudioEvent(AE_GARAGE_DOOR_OPENED, sound->m_vecCurrPosn, 0.0f, 1.0f);
+        AddAudioEvent(AE_GARAGE_DOOR_OPENED, sound->m_vecCurrPosn);
         return sound->StopSoundAndForget();
     }
 
