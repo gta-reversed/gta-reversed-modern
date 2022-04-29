@@ -48,6 +48,9 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(ClearIplsNeededAtPosn, 0x4045E0);
     //RH_ScopedInstall(LoadIpls, 0x405170);
     //RH_ScopedInstall(Load, 0x5D54A0);
+    RH_ScopedGlobalInstall(SetIfInteriorIplIsRequired, 0x4045F0);
+    RH_ScopedGlobalInstall(SetIfIplIsRequired, 0x404660);
+    RH_ScopedGlobalInstall(SetIfIplIsRequiredReducedBB, 0x404690);
 }
 
 /*!
@@ -726,7 +729,20 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
 * @brief Callback used in `SetIplsRequired`
 */
 void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
-    plugin::Call<0x4045F0, const CVector2D&, void*>(posn, data);
+    auto& def = *static_cast<IplDef*>(data);
+
+    if (def.m_bInterior) {
+        if (!ms_currentIPLAreaCode) {
+            return;
+        }
+        if (def.m_boundBox.IsPointInside(posn, -140.f)) {
+            def.m_bLoadRequest = true;
+        }
+    } else {
+        if (def.m_boundBox.IsPointInside(posn)) {
+            def.m_bLoadRequest = true;
+        }
+    }
 }
 
 /*!
@@ -734,7 +750,11 @@ void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
 * @brief Callback used in `SetIplsRequired`
 */
 void SetIfIplIsRequired(const CVector2D& posn, void* data) {
-    plugin::Call<0x404660, const CVector2D&, void*>(posn, data);
+    auto& def = *static_cast<IplDef*>(data);
+
+    if (def.m_bInterior && def.m_boundBox.IsPointInside(posn, -140.f)) {
+        def.m_bLoadRequest = true;
+    }
 }
 
 /*!
@@ -742,5 +762,16 @@ void SetIfIplIsRequired(const CVector2D& posn, void* data) {
 * @brief Callback used in `SetIplsRequired`
 */
 void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
-    plugin::Call<0x404690, const CVector2D&, void*>(posn, data);
+    auto& def = *static_cast<IplDef*>(data);
+
+    if (def.m_boundBox.IsPointInside(posn, -160.f)) {
+        if (ms_currentIPLAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+            if (!def.m_bInterior) {
+                return;
+            }
+        } else if (def.m_bInterior) {
+            return;
+        }
+        def.m_bLoadRequest = true;
+    }
 }
