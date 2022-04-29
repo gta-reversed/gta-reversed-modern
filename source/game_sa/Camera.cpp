@@ -230,7 +230,6 @@ void CCamera::ClearPlayerWeaponMode() {
     m_PlayerWeaponMode.m_fDuration = 0.0f;
 }
 
-// unused
 // 0x50AB40
 void CCamera::DontProcessObbeCinemaCamera() {
     bDidWeProcessAnyCinemaCam = false;
@@ -243,26 +242,26 @@ void CCamera::Enable1rstPersonCamCntrlsScript() {
 }
 
 // 0x50AC20
-void CCamera::Fade(float fadeDuration, eFadeFlag fadeInOutFlag) {
-    m_fFadeDuration = fadeDuration;
+void CCamera::Fade(float duration, eFadeFlag direction) {
+    m_fFadeDuration = duration;
     m_bFading = true;
-    m_nFadeInOutFlag = fadeInOutFlag;
+    m_nFadeInOutFlag = direction;
     m_nFadeStartTime = CTimer::GetTimeInMS();
 
-    if (!m_bIgnoreFadingStuffForMusic || fadeInOutFlag == eFadeFlag::FADE_OUT) {
+    if (!m_bIgnoreFadingStuffForMusic || direction == eFadeFlag::FADE_OUT) {
         m_bMusicFading = true;
-        m_nMusicFadingDirection = fadeInOutFlag;
+        m_nMusicFadingDirection = direction;
 
-        float toTimeToFadeMusic = std::max(0.3f, fadeDuration * 0.3f);
+        float toTimeToFadeMusic = std::max(0.3f, duration * 0.3f);
 
-        m_fTimeToFadeMusic = clamp(toTimeToFadeMusic, 0.3f, fadeDuration);
+        m_fTimeToFadeMusic = std::clamp(toTimeToFadeMusic, 0.3f, duration);
 
-        if (fadeInOutFlag == eFadeFlag::FADE_OUT) {
+        if (direction == eFadeFlag::FADE_OUT) {
             m_fTimeToWaitToFadeMusic = 0.0f;
             m_nFadeTimeStartedMusic = CTimer::GetTimeInMS();
         } else {
-            m_fTimeToWaitToFadeMusic = fadeDuration - m_fTimeToFadeMusic;
-            if ((m_fTimeToFadeMusic - 0.1f) <= 0.0f) {
+            m_fTimeToWaitToFadeMusic = duration - m_fTimeToFadeMusic;
+            if (m_fTimeToFadeMusic - 0.1f <= 0.0f) {
                 m_fTimeToFadeMusic = 0.0f;
             } else {
                 m_fTimeToFadeMusic -= 0.1f;

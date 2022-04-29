@@ -376,7 +376,7 @@ public:
     void DrawBordersForWideScreen();
     void Enable1rstPersonCamCntrlsScript();
     void Enable1rstPersonWeaponsCamera();
-    void Fade(float fadeDuration, eFadeFlag fadeInOutFlag);
+    void Fade(float duration, eFadeFlag direction);
     void Find3rdPersonCamTargetVector(float range, CVector source, CVector* pCamera, CVector* pPoint);
     float Find3rdPersonQuickAimPitch();
     float FindCamFOV();
