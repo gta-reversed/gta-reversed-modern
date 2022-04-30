@@ -10,7 +10,7 @@
 #include "IplStore.h"
 
 CQuadTreeNode *&CIplStore::ms_pQuadTree = *(CQuadTreeNode **)0x8E3FAC;
-CPool<IplDef> *&CIplStore::ms_pPool = *(CPool<IplDef> **)0x8E3FB0;
+CIplPool *&CIplStore::ms_pPool = *(CIplPool **)0x8E3FB0;
 
 uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 uint32 MAX_IPL_INSTANCES = 1000;

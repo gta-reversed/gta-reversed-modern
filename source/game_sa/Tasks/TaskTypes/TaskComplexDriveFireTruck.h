@@ -11,6 +11,8 @@ public:
     CFire*    m_pFire;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_DRIVE_FIRE_TRUCK;
+
     CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver);
     ~CTaskComplexDriveFireTruck() override;
 

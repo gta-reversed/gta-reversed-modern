@@ -12,28 +12,26 @@ void CEventVehicleCollision::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AC840);
-    RH_ScopedInstall(Clone_Reversed, 0x4B6BC0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2EE0);
+    RH_ScopedVirtualInstall(Clone, 0x4B6BC0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2EE0);
 }
 
 CEventVehicleCollision::CEventVehicleCollision(int16 pieceType, float damageIntensity, CVehicle* vehicle, const CVector& collisionImpactVelocity, const CVector& collisionPosition, int8 moveState, int16 evadeType)
 {
-    m_pieceType = pieceType;
-    m_evadeType = evadeType;
-    m_fDamageIntensity = damageIntensity;
-    m_vehicle = vehicle;
+    m_pieceType               = pieceType;
+    m_evadeType               = evadeType;
+    m_fDamageIntensity        = damageIntensity;
+    m_vehicle                 = vehicle;
     m_collisionImpactVelocity = collisionImpactVelocity;
-    m_collisionPosition = collisionPosition;
-    m_moveState = moveState;
-    field_31 = 0;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(m_vehicle));
+    m_collisionPosition       = collisionPosition;
+    m_moveState               = moveState;
+    field_31                  = 0;
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventVehicleCollision::~CEventVehicleCollision()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 // 0x4AC840

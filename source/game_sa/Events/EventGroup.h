@@ -21,12 +21,11 @@ public:
 public:
     static void InjectHooks();
 
-    CEventGroup(CPed* ped);
+    explicit CEventGroup(CPed* ped);
     virtual ~CEventGroup();
-private:
     CEventGroup* Constructor(CPed* ped);
 public:
-    CEvent * Add(CEvent* event, bool bValid);
+    CEvent * Add(CEvent* event, bool bValid = false);
     bool HasScriptCommandOfTaskType(eTaskType taskId);
     bool HasEventOfType(CEvent* event);
     bool HasEvent(CEvent* event);

@@ -8,10 +8,10 @@ void CTaskSimplePlayHandSignalAnim::InjectHooks() {
     RH_ScopedClass(CTaskSimplePlayHandSignalAnim);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Clone_Reversed, 0x61B980);
-    RH_ScopedInstall(GetId_Reversed, 0x61AEA0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x61AF50);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x61BDA0);
+    RH_ScopedVirtualInstall(Clone, 0x61B980);
+    RH_ScopedVirtualInstall(GetId, 0x61AEA0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x61AF50);
+    RH_ScopedVirtualInstall(ProcessPed, 0x61BDA0);
     RH_ScopedInstall(StartAnim, 0x61AF60);
 }
 

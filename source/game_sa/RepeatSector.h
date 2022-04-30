@@ -8,10 +8,10 @@
 
 #include "PtrListDoubleLink.h"
 
-enum eRepeatSectorList {
+enum eRepeatSectorList : int32 {
     REPEATSECTOR_VEHICLES = 0,
-    REPEATSECTOR_PEDS = 1,
-    REPEATSECTOR_OBJECTS = 2
+    REPEATSECTOR_PEDS     = 1,
+    REPEATSECTOR_OBJECTS  = 2
 };
 
 class CRepeatSector {

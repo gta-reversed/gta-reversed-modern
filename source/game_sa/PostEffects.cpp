@@ -669,7 +669,7 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     auto blue  = m_fInfraredVisionHeatObjectCol.blue;
     auto alpha = m_fInfraredVisionHeatObjectCol.alpha;
 
-    // here we go to fuck cold carbon
+    // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
         auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
@@ -758,11 +758,6 @@ void CPostEffects::ColourFilter(RwRGBA pass1, RwRGBA pass2) {
 // 0x702080
 void CPostEffects::Radiosity(int32 a1, int32 a2, int32 a3, int32 a4) {
     plugin::Call<0x702080>();
-}
-
-//0x619450
-bool RsCameraBeginUpdate(RwCamera* camera) {
-    return plugin::CallAndReturn<bool, 0x619450, RwCamera*>(camera);
 }
 
 // 0x7046E0

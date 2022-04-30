@@ -201,7 +201,7 @@ public:
     void    Service();
     void    Initialise(CEntity* entity);
     void    Terminate();
-    void    GetVehicleTypeForAudio();
+    uint32    GetVehicleTypeForAudio();
     void    IsAccInhibited(cVehicleParams& params);
     void    IsAccInhibitedBackwards(cVehicleParams& params);
     void    IsAccInhibitedForLowSpeed(cVehicleParams& params);
@@ -264,7 +264,7 @@ public:
     void    ProcessPlayerBicycle(cVehicleParams& params);
     void    ProcessDummyBicycle(cVehicleParams& params);
     float   GetFlyingMetalVolume(CPhysical*);
-    void    AddAudioEvent(int32, CEntity*);
+    void    AddAudioEvent(eAudioEvents eventId, CEntity* entity);
     void    GetHornState(uint8*, cVehicleParams& params);
     void    GetSirenState(uint8*, uint8*, cVehicleParams& params);
     void    PlayHornOrSiren(uint8, uint8, uint8, cVehicleParams& params);

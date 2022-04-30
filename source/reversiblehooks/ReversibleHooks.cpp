@@ -25,6 +25,16 @@ void CheckAll() {
     });
 }
 
+void SwitchHook(std::string_view funcName) {
+    s_RootCategory.ForEachItem([=](auto& item) {
+        const auto name = item->Name();
+        if (name == funcName) {
+            item->Switch();
+            return;
+        }
+    });
+}
+
 void OnInjectionBegin() {
 #ifndef NDEBUG 
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
@@ -37,14 +47,16 @@ void OnInjectionEnd() {
     s_HookedAddresses.clear();
     s_HookedAddresses = {};
 #endif
+    s_RootCategory.OnInjectionEnd();
+
 }
 
 namespace detail {
-void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault) {
+void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault, int stackArguments) {
     // Functions with the same name are asserted in `HookCategory::AddItem()`
     assert(s_HookedAddresses.insert(installAddress).second); // If this asserts that means the address was hooked once already - Thats bad!
 
-    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize);
+    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize, stackArguments);
     item->State(!bDisableByDefault);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }

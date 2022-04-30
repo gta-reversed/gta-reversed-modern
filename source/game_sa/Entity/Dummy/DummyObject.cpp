@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "DummyObject.h"
+#include "TheScripts.h"
 
 void CDummyObject::InjectHooks() {
     RH_ScopedClass(CDummyObject);

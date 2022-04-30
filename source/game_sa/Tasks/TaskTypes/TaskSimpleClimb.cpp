@@ -41,8 +41,8 @@ void CTaskSimpleClimb::InjectHooks()
     RH_ScopedInstall(Constructor, 0x67A110);
     RH_ScopedInstall(GetCameraStickModifier, 0x67A5D0);
     RH_ScopedInstall(GetCameraTargetPos, 0x67A390);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x680DC0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x67A280);
+    //RH_ScopedVirtualInstall(ProcessPed, 0x680DC0);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x67A280);
 }
 
 CTaskSimpleClimb* CTaskSimpleClimb::Constructor(CEntity* pClimbEnt, const CVector& vecTarget, float fHeading, uint8 nSurfaceType, eClimbHeights nHeight, bool bForceClimb)
@@ -68,16 +68,13 @@ CTaskSimpleClimb::CTaskSimpleClimb(CEntity* pClimbEnt, const CVector& vecTarget,
     m_nGetToPosCounter = 0;
     m_bForceClimb = bForceClimb;
     m_nFallAfterVault = -1;
-
-    if (m_pClimbEnt)
-        m_pClimbEnt->RegisterReference(&m_pClimbEnt);
+    CEntity::SafeRegisterRef(m_pClimbEnt);
 }
 
 // 0x67A1D0
 CTaskSimpleClimb::~CTaskSimpleClimb()
 {
-    if (m_pClimbEnt)
-        m_pClimbEnt->CleanUpOldReference(&m_pClimbEnt);
+    CEntity::SafeCleanUpRef(m_pClimbEnt);
 
     if (m_pAnim) {
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
@@ -814,9 +811,9 @@ void CTaskSimpleClimb::StartSpeech(CPed* ped)
     if (ped->IsPlayer())
     {
         if (m_nHeightForAnim == CLIMB_PULLUP)
-            ped->Say(354, 0, 1.0F, 0, 0, 0);
+            ped->Say(354);
         else if (m_nHeightForAnim == CLIMB_STANDUP)
-            ped->Say(355, 0, 1.0F, 0, 0, 0);
+            ped->Say(355);
     }
 }
 

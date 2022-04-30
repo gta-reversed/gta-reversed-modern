@@ -11,7 +11,7 @@
 
 #define STUCK_CAR_CHECK_SIZE 16
 
-struct StuckCar {
+struct tStuckCar {
     int32   m_nCarHandle;
     CVector m_vCarPos;
     int32   m_nStartTime;
@@ -22,13 +22,12 @@ struct StuckCar {
     bool    m_bStuck;
     bool    m_bFlipped;
     bool    m_bbWarp;
-    char    m_pathID;
-    char    __pad[2];
+    int8    m_nPathId;
 };
 
 class CStuckCarCheck {
 public:
-    StuckCar m_aStuckCars[STUCK_CAR_CHECK_SIZE];
+    std::array<tStuckCar, STUCK_CAR_CHECK_SIZE> m_aStuckCars;
 
     static void InjectHooks();
 
@@ -40,7 +39,8 @@ public:
     bool IsCarInStuckCarArray(int32 carHandle);
     void Process();
     void RemoveCarFromCheck(int32 carHandle);
-    void ResetArrayElement(StuckCar& car);
+    void ResetArrayElement(uint16 carHandle);
+    void ResetArrayElement(tStuckCar& car);
 };
 
 VALIDATE_SIZE(CStuckCarCheck, 0x240);

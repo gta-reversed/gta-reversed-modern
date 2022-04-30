@@ -16,6 +16,8 @@ public:
     char       _pad2[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_MEDIC_TREAT_INJURED_PED;
+
     CTaskComplexMedicTreatInjuredPed(CVehicle* vehicle, CPed* ped, bool isDriver);
     ~CTaskComplexMedicTreatInjuredPed();
 

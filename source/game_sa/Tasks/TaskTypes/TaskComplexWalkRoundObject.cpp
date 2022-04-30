@@ -1,13 +1,16 @@
 #include "StdInc.h"
 
 #include "TaskComplexWalkRoundObject.h"
+// #include "PointRoute.h"
 
 void CTaskComplexWalkRoundObject::InjectHooks() {
     RH_ScopedClass(CTaskComplexWalkRoundObject);
     RH_ScopedCategory("Tasks/TaskTypes");
+
     RH_ScopedInstall(Constructor, 0x655020);
 }
 
+// 0x655020
 CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const CVector& targetPoint, CEntity* object) : CTaskComplex() {
     m_moveState   = moveState;
     m_targetPoint = targetPoint;
@@ -17,20 +20,16 @@ CTaskComplexWalkRoundObject::CTaskComplexWalkRoundObject(int32 moveState, const 
     field_2C      = 0;
     field_2D      = 0;
 
-    if (m_object)
-        m_object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 
-    m_pointRoute = CPools::ms_pPointRoutePool->New();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
+    m_pointRoute = new CPointRoute();
 }
 
 CTaskComplexWalkRoundObject::~CTaskComplexWalkRoundObject() {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 
-    if (m_pointRoute)
-        CPools::ms_pPointRoutePool->Delete(m_pointRoute);
+    delete m_pointRoute;
+    // todo: m_pointRoute = nullptr;
 }
 
 CTaskComplexWalkRoundObject* CTaskComplexWalkRoundObject::Constructor(int32 moveState, const CVector& targetPoint, CEntity* object) {

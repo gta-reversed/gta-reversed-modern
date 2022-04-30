@@ -14,7 +14,7 @@ public:
 public:
     static void InjectHooks();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void  operator delete(void* data);
 
     CPtrNodeSingleLink(void* item) : m_item(item) {}
