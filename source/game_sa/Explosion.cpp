@@ -400,11 +400,11 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
     }
 
     if (type == eExplosionType::EXPLOSION_MOLOTOV) {
-        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos);
     } else {
         if (cameraShake == -1.0f)
             cameraShake = 0.6f;
-        TheCamera.CamShake(cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake, pos);
 
         CPad::GetPad(0)->StartShake_Distance(300, 128, pos);
         if (CGameLogic::IsCoopGameGoingOn())

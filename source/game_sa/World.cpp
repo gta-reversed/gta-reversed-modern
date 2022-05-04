@@ -34,7 +34,6 @@ CVector& CWorld::SnookerTableMax = *(CVector*)0x8CDEF4;
 CVector& CWorld::SnookerTableMin = *(CVector*)0x8CDF00;
 uint32& FilledColPointIndex = *(uint32*)0xB7CD7C;
 int16& TAG_SPRAYING_INCREMENT_VAL = *(int16*)0x8CDEF0;
-int8& gCurCamColVars = *(int8*)0x8CCB80;
 
 void CWorld::InjectHooks() {
     RH_ScopedClass(CWorld);
