@@ -13,7 +13,7 @@ bool& CCamera::bDidWeProcessAnyCinemaCam = *reinterpret_cast<bool*>(0xB6EC2D);
 
 CCamera& TheCamera = *reinterpret_cast<CCamera*>(0xB6F028);
 bool& gbModelViewer = *reinterpret_cast<bool*>(0xBA6728);
-char& gbCineyCamMessageDisplayed = *(char*)0x8CC381; // 2
+int8& gbCineyCamMessageDisplayed = *(int8*)0x8CC381; // 2
 uint8& gCurCamColVars = *(uint8*)0x8CCB80;
 float& gCurDistForCam = *(float*)0x8CCB84;
 float*& gpCamColVars = *(float**)0xB6FE88;
@@ -461,12 +461,12 @@ void CCamera::RenderMotionBlur() {
 void CCamera::Restore() {
     m_bLookingAtPlayer = true;
     m_bLookingAtVector = false;
-    m_nTypeOfSwitch = eSwitchType::SWITCHTYPE_INTERPOLATION;
+    m_nTypeOfSwitch = eSwitchType::INTERPOLATION;
     m_bUseNearClipScript = false;
     m_nModeObbeCamIsInForCar = 30;
     m_fPositionAlongSpline = 0.0f;
     m_bStartingSpline = false;
-    m_bScriptParametersSetForInterPol = false;
+    m_bScriptParametersSetForInterp = false;
     m_nWhoIsInControlOfTheCamera = 0;
 
     CVehicle* vehicle = FindPlayerVehicle();
@@ -515,13 +515,13 @@ void CCamera::RestoreWithJumpCut() {
     m_bRestoreByJumpCut = true;
     m_bLookingAtPlayer = true;
     m_bLookingAtVector = false;
-    m_nTypeOfSwitch = eSwitchType::SWITCHTYPE_JUMPCUT;
+    m_nTypeOfSwitch = eSwitchType::JUMPCUT;
     m_nWhoIsInControlOfTheCamera = 0;
     m_fPositionAlongSpline = 0.0f;
     m_bStartingSpline = false;
     m_bUseNearClipScript = false;
     m_nModeObbeCamIsInForCar = 30;
-    m_bScriptParametersSetForInterPol = false;
+    m_bScriptParametersSetForInterp = false;
 
     CVehicle* vehicle = FindPlayerVehicle();
     CPlayerPed* player = FindPlayerPed();
@@ -700,7 +700,7 @@ void CCamera::SetNewPlayerWeaponMode(eCamMode mode, int16 maxZoom, int16 minZoom
 }
 
 // 0x50BFF0
-bool CCamera::Using1stPersonWeaponMode() {
+bool CCamera::Using1stPersonWeaponMode() const {
     switch (m_PlayerWeaponMode.m_nMode) {
     case MODE_SNIPER:
     case MODE_M16_1STPERSON:
@@ -718,7 +718,7 @@ bool CCamera::Using1stPersonWeaponMode() {
 // 0x50C030
 void CCamera::SetParametersForScriptInterpolation(float interpolationToStopMoving, float interpolationToCatchUp, uint32 timeForInterpolation) {
     m_nScriptTimeForInterpolation = timeForInterpolation;
-    m_bScriptParametersSetForInterPol = true;
+    m_bScriptParametersSetForInterp = true;
     m_fScriptPercentageInterToStopMoving = interpolationToStopMoving * 0.01f;
     m_fScriptPercentageInterToCatchUp = interpolationToCatchUp * 0.01f;
 }
@@ -911,7 +911,7 @@ void CCamera::CameraPedModeSpecialCases() {
 void CCamera::CameraPedAimModeSpecialCases(CPed* ped) {
     CameraPedModeSpecialCases();
 
-    if (ped->bInVehicle && ped->m_pVehicle) {
+    if (ped->IsInVehicle()) {
         m_pExtraEntity[m_nExtraEntitiesCount++] = ped->m_pVehicle;
     }
 }
@@ -1013,22 +1013,21 @@ void CCamera::ProcessFade() {
         return;
     }
 
-    if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
-        if (m_fFadeDuration == 0) {
-            m_fFadeAlpha = 0.0f;
-        } else {
-            m_fFadeAlpha -= CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f;
-        }
+    float fadeAlpha = 0.0f;
 
-        if (m_fFadeAlpha > 0) {
+    if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
+        m_fFadeDuration == 0.0f
+            ? (m_fFadeAlpha += 0.0f)
+            : (m_fFadeAlpha -= CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f);
+
+        if (m_fFadeAlpha > 0.0f) {
             CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
 
         m_bFading = false;
-        m_fFadeAlpha = 0.0f;
     } else {
-        if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) {
+        if (m_nFadeInOutFlag == eFadeFlag::FADE_OUT) { // stupid, why not use a switch instead?
             CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
@@ -1037,20 +1036,19 @@ void CCamera::ProcessFade() {
             m_bFading = false;
         }
 
-        if (m_fFadeDuration == 0) {
-            m_fFadeAlpha = 255.0f;
-        } else {
-            m_fFadeAlpha += CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f;
-        }
+        fadeAlpha = 255.0f;
+
+        m_fFadeDuration == 0.0f
+            ? (m_fFadeAlpha += 255.0f)
+            : (m_fFadeAlpha += CTimer::GetTimeStepInSeconds() / m_fFadeDuration * 255.0f);
 
         if (m_fFadeAlpha < 255.0f) {
             CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
             return;
         }
-
-        m_fFadeAlpha = 255.0f;
     }
 
+    m_fFadeAlpha = fadeAlpha;
     CDraw::FadeValue = static_cast<uint8>(m_fFadeAlpha);
 }
 

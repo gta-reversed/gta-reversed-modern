@@ -27,10 +27,10 @@ enum class eFadeFlag : uint16 {
     FADE_OUT
 };
 
-enum eSwitchType : uint16 {
-    SWITCHTYPE_NONE,
-    SWITCHTYPE_INTERPOLATION,
-    SWITCHTYPE_JUMPCUT
+enum class eSwitchType : uint16 {
+    NONE,
+    INTERPOLATION,
+    JUMPCUT
 };
 
 enum eLookingDirection {
@@ -73,7 +73,7 @@ public:
     bool            m_bPlayerIsInGarage;
     bool            m_bPlayerWasOnBike;
     bool            m_bJustCameOutOfGarage;
-    bool            m_bJustInitalised;
+    bool            m_bJustInitialized;
     bool            m_bJust_Switched;
     bool            m_bLookingAtPlayer;
     bool            m_bLookingAtVector;
@@ -107,8 +107,8 @@ public:
     eCamMode        m_nModeForTwoPlayersSameCarShootingNotAllowed;
     eCamMode        m_nModeForTwoPlayersNotBothInCar;
     bool            m_bGarageFixedCamPositionSet;
-    bool            m_bDoingSpecialInterPolation;
-    bool            m_bScriptParametersSetForInterPol;
+    bool            m_bDoingSpecialInterp;
+    bool            m_bScriptParametersSetForInterp;
     bool            m_bFading;
     bool            m_bMusicFading;
     bool            m_bMusicFadedOut;
@@ -223,7 +223,6 @@ public:
     CCamPathSplines m_aPathArray[4];
     bool            m_bMirrorActive;
     bool            m_bResetOldMatrix;
-    char            _pad972[2];
     CMatrix         m_mCameraMatrix;
     CMatrix         m_mCameraMatrixOld;
     CMatrix         m_mViewMatrix;
@@ -253,12 +252,11 @@ public:
     float           m_fScriptPercentageInterToCatchUp;
     uint32          m_nScriptTimeForInterpolation;
     eFadeFlag       m_nFadeInOutFlag;
-    char            _padC32[2];
     int32           m_nModeObbeCamIsInForCar;
     eCamMode        m_nModeToGoTo;
     eFadeFlag       m_nMusicFadingDirection;
-    int16           m_nTypeOfSwitch; // see eSwitchType
-    char            _padC3E[2];
+    eSwitchType     m_nTypeOfSwitch;
+    char            _alignC40[2];
     uint32          m_nFadeStartTime;
     uint32          m_nFadeTimeStartedMusic;
     int32           m_nExtraEntitiesCount;
@@ -270,14 +268,8 @@ public:
     CVector         m_vecTrackLinearEndPoint;
     CVector         m_vecTrackLinearStartPoint;
     bool            m_bTrackLinearWithEase;
-    char            field_C7D;
-    char            field_C7E;
-    char            field_C7F;
     CVector         m_vecTrackLinear;
     bool            m_bVecTrackLinearProcessed;
-    char            field_C8D;
-    char            field_C8E;
-    char            field_C8F;
     float           m_fShakeIntensity;
     float           m_fStartShakeTime;
     float           m_fEndShakeTime;
@@ -289,29 +281,20 @@ public:
     float           m_fZoomOutFactor;
     uint8           m_nZoomMode;
     bool            m_bFOVLerpProcessed;
-    char            field_CB6;
-    char            field_CB7;
     float           m_fFOVNew;
     float           m_fMoveLinearStartTime;
     float           m_fMoveLinearEndTime;
     CVector         m_vecMoveLinearPosnStart;
     CVector         m_vecMoveLinearPosnEnd;
     bool            m_bMoveLinearWithEase;
-    char            field_CDD;
-    char            field_CDE;
-    char            field_CDF;
     CVector         m_vecMoveLinear;
     bool            m_bVecMoveLinearProcessed;
     bool            m_bBlockZoom;
     bool            m_bCameraPersistPosition;
     bool            m_bCameraPersistTrack;
     bool            m_bCinemaCamera;
-    char            field_CF1;
-    char            field_CF2;
-    char            field_CF3;
     CamTweak        m_aCamTweak[5];
     bool            m_bCameraVehicleTweaksInitialized;
-    char            _padD45[3];
     float           m_fCurrentTweakDistance;
     float           m_fCurrentTweakAltitude;
     float           m_fCurrentTweakAngle;
@@ -337,73 +320,24 @@ public:
     static void InjectHooks();
 
     CCamera();
+    ~CCamera() override;
     CCamera* Constructor();
-
-    ~CCamera();
     CCamera* Destructor();
-
-    static CCam& GetActiveCamera();
-
-    void AddShakeSimple(float duration, int32 type, float intensity);
-    void AllowShootingWith2PlayersInCar(bool bAllow);
-    void ApplyVehicleCameraTweaks(CVehicle* vehicle);
-    void AvoidTheGeometry(const CVector* arg2, const CVector* arg3, CVector* arg4, float FOV);
-
-    void CalculateDerivedValues(bool bForMirror, bool bOriented);
-    void CalculateFrustumPlanes(bool bForMirror);
-    float CalculateGroundHeight(eGroundHeightType type);
-    void CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix* camMatrix, CMatrix* mirrorMatrix);
-    void CamControl();
-    void CamShake(float strength, CVector from);
-    void CameraColDetAndReact(CVector* source, CVector* target);
-    void CameraGenericModeSpecialCases(CPed* targetPed);
-    void CameraPedAimModeSpecialCases(CPed* ped);
-    void CameraPedModeSpecialCases();
-    void CameraVehicleModeSpecialCases(CVehicle* vehicle);
-    void ClearPlayerWeaponMode();
-    bool ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut);
-    bool ConsiderPedAsDucking(CPed* ped);
-    void CopyCameraMatrixToRWCam(bool bUpdateMatrix);
-    void DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror);
-    void DeleteCutSceneCamDataMemory();
-    void DrawBordersForWideScreen();
-    void Enable1rstPersonCamCntrlsScript();
-    void Enable1rstPersonWeaponsCamera();
-    void Fade(float duration, eFadeFlag direction);
-    void Find3rdPersonCamTargetVector(float range, CVector source, CVector* pCamera, CVector* pPoint);
-    float Find3rdPersonQuickAimPitch();
-    float FindCamFOV();
-    void FinishCutscene();
-    void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
-    uint32 GetCutSceneFinishTime();
-    bool GetFading() const;
-    int32 GetFadingDirection() const;
-    CVector* GetGameCamPosition();
-    int32 GetLookDirection();
-    bool GetLookingForwardFirstPerson();
-    bool GetLookingLRBFirstPerson();
-    float GetPositionAlongSpline() const;
-    float GetRoughDistanceToGround();
-    int32 GetScreenFadeStatus() const;
-    void GetScreenRect(CRect* rect);
-    bool Get_Just_Switched_Status() const;
-
-    void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
-    void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
-    void ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn);
 
     void Init();
     void InitCameraVehicleTweaks();
     void InitialiseScriptableComponents();
     void InitialiseCameraForDebugMode();
 
+    void LoadPathSplines(FILE* file);
+
+    bool IsTargetingActive();
     bool IsExtraEntityToIgnore(CEntity *entity);
-    bool IsItTimeForNewCamera(int32 camSequence, int32 startTime);
+    bool IsItTimeForNewCamera(int32 camSequence, int32 startTime); // IsItTimeForNewcam
     bool IsSphereVisible(const CVector& origin, float radius, RwMatrix* transformMatrix);
     bool IsSphereVisible(const CVector& origin, float radius);
     bool IsSphereVisible(const CSphere& sphere) { return IsSphereVisible(sphere.m_vecCenter, sphere.m_fRadius); }
     void LerpFOV(float zoomInFactor, float zoomOutFactor, float timeLimit, bool bEase);
-    void LoadPathSplines(FILE* file);
 
     void Process();
     void ProcessWideScreenOn();
@@ -424,6 +358,7 @@ public:
     void ProcessObbeCinemaCameraPed();
     void ProcessObbeCinemaCameraPlane();
     void ProcessObbeCinemaCameraTrain();
+    static void DontProcessObbeCinemaCamera();
 
     void Restore();
     void RestoreCameraAfterMirror();
@@ -452,6 +387,11 @@ public:
     void SetZoomValueCamStringScript(int16 zoomMode);
     void SetZoomValueFollowPedScript(int16 zoomMode);
 
+    static void SetCamCollisionVarDataSet(int32 index);
+    static void SetColVarsAimWeapon(int32 aimingType);
+    static void SetColVarsPed(ePedType pedType, int32 nCamPedZoom);
+    static void SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom);
+
     void StartCooperativeCamMode();
     void StopCooperativeCamMode();
     void StartTransition(eCamMode currentCamMode);
@@ -469,19 +409,73 @@ public:
     void UpdateAimingCoors(const CVector& aimingTargetCoors);
     void UpdateSoundDistances();
     void UpdateTargetEntity();
-    bool Using1stPersonWeaponMode();
+    bool Using1stPersonWeaponMode() const;
 
     bool VectorMoveRunning();
     void VectorMoveLinear(CVector* moveLinearPosnEnd, CVector* moveLinearPosnStart, float duration, bool bMoveLinearWithEase);
     bool VectorTrackRunning();
     void VectorTrackLinear(CVector* trackLinearStartPoint, CVector* trackLinearEndPoint, float duration, bool bEase);
 
+    void AllowShootingWith2PlayersInCar(bool bAllow);
+    void ApplyVehicleCameraTweaks(CVehicle* vehicle);
+    void AvoidTheGeometry(const CVector* arg2, const CVector* arg3, CVector* arg4, float FOV);
+
+    void CalculateDerivedValues(bool bForMirror, bool bOriented);
+    void CalculateFrustumPlanes(bool bForMirror);
+    float CalculateGroundHeight(eGroundHeightType type);
+    void CalculateMirroredMatrix(CVector posn, float mirrorV, CMatrix* camMatrix, CMatrix* mirrorMatrix);
+    void CamControl();
+
+    void AddShake(float duration, float a2, float a3, float a4, float a5);
+    void AddShakeSimple(float duration, int32 type, float intensity);
+    void CamShake(float strength, CVector from);
+    void CameraColDetAndReact(CVector* source, CVector* target);
+    void CameraGenericModeSpecialCases(CPed* targetPed);
+    void CameraPedAimModeSpecialCases(CPed* ped);
+    void CameraPedModeSpecialCases();
+    void CameraVehicleModeSpecialCases(CVehicle* vehicle);
+    void ClearPlayerWeaponMode();
+    bool ConeCastCollisionResolve(CVector* source, CVector* center, CVector* pVecOut, float radius, float arg5, float* pFloatOut);
+    bool ConsiderPedAsDucking(CPed* ped);
+    void CopyCameraMatrixToRWCam(bool bUpdateMatrix);
+    void DealWithMirrorBeforeConstructRenderList(bool bActiveMirror, CVector mirrorNormal, float mirrorV, CMatrix* matMirror);
+    void DeleteCutSceneCamDataMemory();
+    void DrawBordersForWideScreen();
+
+    void Enable1rstPersonCamCntrlsScript();
+    void Enable1rstPersonWeaponsCamera();
+
+    void Fade(float duration, eFadeFlag direction);
+    void Find3rdPersonCamTargetVector(float range, CVector source, CVector* pCamera, CVector* pPoint);
+    float Find3rdPersonQuickAimPitch();
+    float FindCamFOV();
+    void FinishCutscene();
+
+    void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
+    uint32 GetCutSceneFinishTime();
+    bool GetFading() const;
+    int32 GetFadingDirection() const;
+    CVector* GetGameCamPosition();
+    int32 GetLookDirection();
+    bool GetLookingForwardFirstPerson();
+    bool GetLookingLRBFirstPerson();
+    float GetPositionAlongSpline() const;
+    float GetRoughDistanceToGround();
+    int32 GetScreenFadeStatus() const;
+    void GetScreenRect(CRect* rect);
+    bool Get_Just_Switched_Status() const;
+
+    void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
+    void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
+    void ImproveNearClip(CVehicle* vehicle, CPed* ped, CVector* source, CVector* targPosn);
+
+    bool ShouldPedControlsBeRelative();
+    void SetToSphereMap(float);
+    float GetCutsceneBarHeight();
+    int32 GetCamDirectlyBehind();
+
 public:
-    static void DontProcessObbeCinemaCamera();
-    static void SetCamCollisionVarDataSet(int32 index);
-    static void SetColVarsAimWeapon(int32 aimingType);
-    static void SetColVarsPed(ePedType pedType, int32 nCamPedZoom);
-    static void SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom);
+    static CCam& GetActiveCamera();
 
     RwMatrix* GetRwMatrix() { return RwFrameGetMatrix(RwCameraGetFrame(m_pRwCamera)); }
     CMatrix& GetViewMatrix() { return m_mViewMatrix; }
@@ -493,7 +487,8 @@ VALIDATE_SIZE(CCamera, 0xD78);
 
 extern CCamera& TheCamera;
 extern bool& gbModelViewer;
-extern char& gbCineyCamMessageDisplayed;
+extern int8& gbCineyCamMessageDisplayed;
+extern bool& gPlayerPedVisible;
 extern uint8& gCurCamColVars;
 extern float*& gpCamColVars;
 extern float (&gCamColVars)[28][6];
