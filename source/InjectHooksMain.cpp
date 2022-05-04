@@ -234,6 +234,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CShadows::InjectHooks();
     CCam::InjectHooks();
     CCarAI::InjectHooks();
     CMenuSystem::InjectHooks();
