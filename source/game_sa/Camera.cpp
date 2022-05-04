@@ -286,26 +286,24 @@ void CCamera::Fade(float duration, eFadeFlag direction) {
     m_nFadeInOutFlag = direction;
     m_nFadeStartTime = CTimer::GetTimeInMS();
 
-    if (!m_bIgnoreFadingStuffForMusic || direction == eFadeFlag::FADE_OUT) {
-        m_bMusicFading = true;
-        m_nMusicFadingDirection = direction;
+    if (m_bIgnoreFadingStuffForMusic && direction != eFadeFlag::FADE_OUT)
+        return;
 
-        float toTimeToFadeMusic = std::max(0.3f, duration * 0.3f);
+    m_bMusicFading = true;
+    m_nMusicFadingDirection = direction;
 
-        m_fTimeToFadeMusic = std::clamp(toTimeToFadeMusic, 0.3f, duration);
+    m_fTimeToFadeMusic = std::clamp(duration * 0.3f, duration * 0.3f, duration);
 
-        if (direction == eFadeFlag::FADE_OUT) {
-            m_fTimeToWaitToFadeMusic = 0.0f;
-            m_nFadeTimeStartedMusic = CTimer::GetTimeInMS();
-        } else {
-            m_fTimeToWaitToFadeMusic = duration - m_fTimeToFadeMusic;
-            if (m_fTimeToFadeMusic - 0.1f <= 0.0f) {
-                m_fTimeToFadeMusic = 0.0f;
-            } else {
-                m_fTimeToFadeMusic -= 0.1f;
-            }
-            m_nFadeTimeStartedMusic = CTimer::GetTimeInMS();
-        }
+    switch (direction) {
+    case eFadeFlag::FADE_IN:
+        m_fTimeToWaitToFadeMusic = duration - m_fTimeToFadeMusic;
+        m_fTimeToFadeMusic       = std::max(0.0f, m_fTimeToFadeMusic - 0.1f);
+        m_nFadeTimeStartedMusic  = CTimer::GetTimeInMS();
+        break;
+    case eFadeFlag::FADE_OUT:
+        m_fTimeToWaitToFadeMusic = 0.0f;
+        m_nFadeTimeStartedMusic  = CTimer::GetTimeInMS();
+        break;
     }
 }
 
