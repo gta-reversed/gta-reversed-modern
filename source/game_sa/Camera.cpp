@@ -250,6 +250,16 @@ void CCamera::CamShake(float strength, CVector from) {
     }
 }
 
+// 0x50A970
+void CamShakeNoPos(CCamera* camera, float strength) {
+    float oldShake = camera->m_fCamShakeForce - float(CTimer::GetTimeInMS() - camera->m_nCamShakeStart) / 1000.f;
+
+    if (strength > std::clamp(oldShake, 0.0f, 2.0f)) {
+        camera->m_fCamShakeForce = strength;
+        camera->m_nCamShakeStart = CTimer::GetTimeInMS();
+    }
+}
+
 // 0x50AB10
 void CCamera::ClearPlayerWeaponMode() {
     m_PlayerWeaponMode.m_nMode = 0;
@@ -1273,15 +1283,5 @@ void CCamera::SetColVarsVehicle(eVehicleType vehicleType, int32 camVehicleZoom) 
         case VEHICLE_TYPE_TRAIN:
             SetCamCollisionVarDataSet(camVehicleZoom + 24);
             return;
-    }
-}
-
-// 0x50A970
-void CamShakeNoPos(CCamera* camera, float strength) {
-    float oldShake = camera->m_fCamShakeForce - float(CTimer::GetTimeInMS() - camera->m_nCamShakeStart) / 1000.f;
-
-    if (strength > std::clamp(oldShake, 0.0f, 2.0f)) {
-        camera->m_fCamShakeForce = strength;
-        camera->m_nCamShakeStart = CTimer::GetTimeInMS();
     }
 }
