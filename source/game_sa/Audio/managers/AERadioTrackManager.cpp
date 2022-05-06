@@ -209,7 +209,7 @@ void CAERadioTrackManager::DisplayRadioStationName() {
     if (!FindPlayerVehicle())
         return;
 
-    if (CReplay::Mode == 1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     if (m_bDisplayStationName && IsVehicleRadioActive()) {

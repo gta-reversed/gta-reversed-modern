@@ -110,6 +110,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\ePedModel.h"
 #include "game_sa\Enums\ePedState.h"
 #include "game_sa\Enums\eRadioID.h"
+#include "game_sa\Enums\eReplay.h"
 #include "game_sa\Enums\eScriptCommands.h"
 #include "game_sa\Enums\eSoundID.h"
 #include "game_sa\Enums\eSprintType.h"
