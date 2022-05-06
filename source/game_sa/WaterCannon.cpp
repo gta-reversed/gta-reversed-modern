@@ -41,51 +41,52 @@ void CWaterCannon::Init() {
     m_nId = 0;
     m_nSectionsCount = 0;
     m_nCreationTime = CTimer::GetTimeInMS();
-    std::ranges::fill(m_anSectionState, false);
+    std::ranges::fill(m_abUsed, false);
     m_auRenderIndices = { 0, 1, 2, 1, 3, 2, 4, 5, 6, 5, 7, 6, 8, 9, 10, 9, 11, 10 };
-    m_audio.Initialise(this);
-}
-
-bool CWaterCannon::HasActiveSection() const {
-    const auto end = std::end(m_anSectionState);
-    return std::find(std::begin(m_anSectionState), end, true) != end;
+    m_Audio.Initialise(this);
 }
 
 // 0x72A280
-void CWaterCannon::Update_OncePerFrame(int16 a1) {
-    if (CTimer::GetTimeInMS() > m_nCreationTime + 150) {
+void CWaterCannon::Update_OncePerFrame(int16 index) {
+    const auto LIFETIME = 150;
+
+    if (CTimer::GetTimeInMS() > m_nCreationTime + LIFETIME) {
         const auto section = (m_nSectionsCount + 1) % SECTIONS_COUNT;
         m_nSectionsCount = section;
-        m_anSectionState[section] = false;
+        m_abUsed[section] = false;
     }
 
-    for (int i = 0; i < SECTIONS_COUNT; i++) {
-        if (m_anSectionState[i]) {
+    for (auto i = 0u; i < SECTIONS_COUNT; i++) {
+        if (m_abUsed[i]) {
             CVector& speed = m_sectionMoveSpeed[i];
             speed.z -= CTimer::GetTimeStep() / 250.0f;
 
             CVector& point = m_sectionPoint[i];
             point += speed * CTimer::GetTimeStep();
 
-            // Originally done in a seprate loop, but we do it here
+            // Originally done in a separate loop, but we do it here
             gFireManager.ExtinguishPointWithWater(point, 2.0f, 0.5f);
         }
     }
 
-    if ((uint8_t)(CTimer::m_FrameCounter + a1) % 4 == 0) { // Notice cast to byte
+    if ((uint8)(CTimer::GetFrameCounter() + index) % 4 == 0) { // Notice cast to byte
         PushPeds();
     }
 
-    if (!HasActiveSection()) {
-        m_nId = 0;
+    // free if unused
+    for (auto& used : m_abUsed) {
+        if (used) {
+            return;
+        }
     }
+    m_nId = 0;
 }
 
 // 0x728C20
 void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
     m_sectionPoint[m_nSectionsCount]     = *start;
     m_sectionMoveSpeed[m_nSectionsCount] = *end;
-    m_anSectionState[m_nSectionsCount]   = 1;
+    m_abUsed[m_nSectionsCount]           = true;
 }
 
 // NOTSA
@@ -93,7 +94,7 @@ CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
     // Ik, ik junk code, can't do better
 
     // R* originally used 10000 here, but thats bug prone (if map size gets increased)
-    CVector min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ FLT_MIN, FLT_MIN, FLT_MIN };  
+    CVector min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ FLT_MIN, FLT_MIN, FLT_MIN };
     for (size_t i = 0; i < SECTIONS_COUNT; i++) {
         if (!IsSectionActive(i))
             continue;
@@ -126,7 +127,7 @@ void CWaterCannon::PushPeds() {
         if (ped->physicalFlags.bMakeMassTwiceAsBig)
             continue;
 
-        for (int i = 0; i < SECTIONS_COUNT; i++) {
+        for (auto i = 0u; i < SECTIONS_COUNT; i++) {
             const CVector secPosn = GetSectionPosn(i);
 
             if ((pedPosn - secPosn).SquaredMagnitude() >= 5.0f)
@@ -149,9 +150,9 @@ void CWaterCannon::PushPeds() {
                 const CVector2D applyableMoveSpeed = (secMoveSpeed / 10.0f - ped->m_vecMoveSpeed) / 10.0f;
 
                 // Check if directions are the same (eg, + / +, - / -),
-                // differring sign bits will always yield a negativ result
+                // differring sign bits will always yield a negative result
                 /// (unless 0, but that is handled by > (instead of >=))
-                if (secMoveSpeed.x * applyableMoveSpeed.x > 0.0f) 
+                if (secMoveSpeed.x * applyableMoveSpeed.x > 0.0f)
                     ped->m_vecMoveSpeed.x = applyableMoveSpeed.x + secMoveSpeed.x;
 
                 if (secMoveSpeed.y * applyableMoveSpeed.y > 0.0f)
@@ -191,9 +192,9 @@ void CWaterCannon::Render() {
 
     CVector right{}, fwd{}, up{};
 
-    m_audio.ClearSplashInfo();
+    m_Audio.ClearSplashInfo();
 
-    for (int i = 0; i < SECTIONS_COUNT; i++) {
+    for (auto i = 0u; i < SECTIONS_COUNT; i++) {
         if (IsSectionActive(prevIdx) && IsSectionActive(currIdx)) {
             const CVector prevPosn = GetSectionPosn(prevIdx);
             const CVector currPosn = GetSectionPosn(currIdx);
@@ -257,7 +258,7 @@ void CWaterCannon::Render() {
                         g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &retadedSignature, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
                     }
 
-                    m_audio.SetSplashInfo(colPoint.m_vecPoint, direction.Magnitude());
+                    m_Audio.SetSplashInfo(colPoint.m_vecPoint, direction.Magnitude());
 
                     break;
                 }
@@ -285,9 +286,8 @@ void CWaterCannon::Render() {
     RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
 }
 
-// NOTSA
 bool CWaterCannon::IsSectionActive(size_t idx) const {
-    return m_anSectionState[idx];
+    return m_abUsed[idx];
 }
 
 CVector CWaterCannon::GetSectionPosn(size_t idx) const {

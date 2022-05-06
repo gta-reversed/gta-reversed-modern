@@ -13,8 +13,8 @@ public:
     uint32                    m_nCreationTime;
     CVector                   m_sectionPoint[SECTIONS_COUNT];
     CVector                   m_sectionMoveSpeed[SECTIONS_COUNT];
-    char                      m_anSectionState[SECTIONS_COUNT];
-    CAEWaterCannonAudioEntity m_audio;
+    bool                      m_abUsed[SECTIONS_COUNT];
+    CAEWaterCannonAudioEntity m_Audio;
     char                      field_3BC[16];
 
     static inline std::array<RxVertexIndex, 18>& m_auRenderIndices = *(std::array<RxVertexIndex, 18>*)0xC80700;
@@ -29,7 +29,6 @@ public:
     CWaterCannon* Destructor();
 
     void Init();
-    bool HasActiveSection() const;
     void Update_OncePerFrame(int16);
     void Update_NewInput(CVector* start, CVector* end);
     void PushPeds();

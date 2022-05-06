@@ -3,7 +3,7 @@
 #include "TaskComplex.h"
 #include "PathFind.h"
 
-struct CPointRoute;
+class CPointRoute;
 
 class CTaskComplexFollowNodeRoute : public CTaskComplex {
 public:
