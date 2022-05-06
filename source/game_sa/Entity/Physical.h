@@ -226,17 +226,21 @@ public:
     bool CheckCollision();
     bool CheckCollision_SimpleCar();
 
+    CVector& GetMoveSpeed() { return m_vecMoveSpeed; }
     void ResetMoveSpeed() { m_vecMoveSpeed = CVector(); }
+
+    CVector& GetTurnSpeed() { return m_vecTurnSpeed; }
     void ResetTurnSpeed() { m_vecTurnSpeed = CVector(); }
+
     void ResetFrictionMoveSpeed() { m_vecFrictionMoveSpeed = CVector(); }
     void ResetFrictionTurnSpeed() { m_vecFrictionTurnSpeed = CVector(); }
 
-    float GetMass(const CVector& pos, const CVector& dir) {
+    [[nodiscard]] float GetMass(const CVector& pos, const CVector& dir) const {
         return 1.0f / (CrossProduct(pos, dir).SquaredMagnitude() / m_fTurnMass + 1.0f / m_fMass);
     }
 
 // HELPERS
-    bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
+    [[nodiscard]] bool IsImmovable() const { return physicalFlags.bDisableZ || physicalFlags.bInfiniteMass || physicalFlags.bDisableMoveForce; }
 
     auto GetCollidingEntities() const { return std::span{ m_apCollidedEntities, m_nNumEntitiesCollided }; }
 

@@ -46,15 +46,15 @@ public:
 
     union {
         struct {
-            uint16 unk1 : 1; // eCamMode::MODE_1STPERSON leftover?
-            uint16 unk2 : 1; // unused
+            uint16 bCamera : 1;
+            uint16 unk2 : 1;
             uint16 bPlayerAwaitsInGarage : 1;
             uint16 bPlayerOnInteriorTransition : 1;
-            uint16 unk3 : 1; // unused
+            uint16 unk3 : 1;                        // 0x10 unused
             uint16 bPlayerSafe : 1;
-            uint16 bPlayerTalksOnPhone : 1; // bPlayerSafeForPhoneCall?
+            uint16 bPlayerTalksOnPhone : 1;         // bPlayerSafeForPhoneCall?
             uint16 bPlayerSafeForCutscene : 1;
-            uint16 bPlayerSkipsToDestination : 1; // bPlayerSafeForDestination?
+            uint16 bPlayerSkipsToDestination : 1;   // bPlayerSafeForDestination?
         };
         uint16 DisablePlayerControls;
     };
@@ -318,6 +318,7 @@ public:
 
     // 0x541A60
     static bool UpdatePadsTillStable() { return true; }
+    bool ArePlayerControlsDisabled() { return DisablePlayerControls != 0; }
 };
 
 VALIDATE_SIZE(CPad, 0x134);
