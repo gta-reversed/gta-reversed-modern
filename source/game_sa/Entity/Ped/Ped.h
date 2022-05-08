@@ -122,7 +122,7 @@ class CPedStats;
 
 class CPed : public CPhysical {
 public:
-    static inline int32 m_sGunFlashBlendStart = 10'000; // 0x8D1370
+    static inline int16 m_sGunFlashBlendStart = 10'000; // 0x8D1370
 
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
@@ -278,14 +278,17 @@ public:
     AssocGroupId        m_nAnimGroup;
     CVector2D           m_vecAnimMovingShiftLocal;
     CAcquaintance       m_acquaintance;
+
     RpClump*            m_pWeaponObject;
     RwFrame*            m_pGunflashObject; // A frame in the Clump `m_pWeaponObject`
     RpClump*            m_pGogglesObject;
     bool*               m_pGogglesState;           // Stores a pointer to either `CPostEffects::m_bInfraredVision` or `m_bNightVision`, see \r PutOnGoggles and \r AddGogglesModel
+
     int16               m_nWeaponGunflashAlphaMP1; // AKA m_nWeaponGunflashStateLeftHand
-    int16               nm_fWeaponGunFlashAlphaProgMP1;
+    int16               m_nWeaponGunFlashAlphaProgMP1;
     int16               m_nWeaponGunflashAlphaMP2; // AKA m_nWeaponGunflashStateRightHand
-    int16               nm_fWeaponGunFlashAlphaProgMP2;
+    int16               m_nWeaponGunFlashAlphaProgMP2;
+
     CPedIK              m_pedIK;
     int32               field_52C;
     ePedState           m_nPedState;
@@ -338,8 +341,8 @@ public:
     char                m_nBodypartToRemove;
     char                field_755;
     int16               m_nMoneyCount; // Used for money pickup when ped is killed
-    int32               field_758;
-    int32               field_75C;
+    float               field_758;
+    float               field_75C;
     char                m_nLastWeaponDamage;
     CEntity*            m_pLastEntityDamage;
     int32               field_768;
@@ -420,7 +423,7 @@ public:
     void GrantAmmo(eWeaponType weaponType, uint32 ammo);
     void SetAmmo(eWeaponType weaponType, uint32 ammo);
     bool DoWeHaveWeaponAvailable(eWeaponType weaponType);
-    bool DoGunFlash(int32 arg0, bool arg1);
+    void DoGunFlash(int32 lifetime, bool bRightHand);
     void SetGunFlashAlpha(bool rightHand);
     void ResetGunFlashAlpha();
     float GetBikeRidingSkill() const;
@@ -459,7 +462,7 @@ public:
     void ProcessBuoyancy();
     bool IsPedInControl() const;
     void RemoveWeaponModel(int32 modelIndex = MODEL_INVALID);
-    void AddGogglesModel(int32 modelIndex, bool & inOutGogglesState);
+    void AddGogglesModel(int32 modelIndex, bool& inOutGogglesState);
     void PutOnGoggles();
     eWeaponSkill GetWeaponSkill(eWeaponType weaponType);
     void SetWeaponSkill(eWeaponType weaponType, eWeaponSkill skill);

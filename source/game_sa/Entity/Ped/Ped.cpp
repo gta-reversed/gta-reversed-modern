@@ -269,14 +269,17 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     field_72F = 0;
     m_nTimeTillWeNeedThisPed = 0;
     field_590 = 0;
+
     m_pWeaponObject = nullptr;
     m_pGunflashObject = nullptr;
     m_pGogglesObject = nullptr;
     m_pGogglesState = nullptr;
+
     m_nWeaponGunflashAlphaMP1 = 0;
-    nm_fWeaponGunFlashAlphaProgMP1 = 0;
+    m_nWeaponGunFlashAlphaProgMP1 = 0;
     m_nWeaponGunflashAlphaMP2 = 0;
-    nm_fWeaponGunFlashAlphaProgMP2 = 0;
+    m_nWeaponGunFlashAlphaProgMP2 = 0;
+
     m_pCoverPoint = nullptr;
     m_pEnex = nullptr;
     field_798 = -1;
@@ -1108,25 +1111,22 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 /*!
 * @addr 0x5DF340
 * @brief Do gun flash by resetting it's alpha to max
-* @returns Always true
 */
-bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
+void CPed::DoGunFlash(int32 lifetime, bool bRightHand) {
     if (!m_pGunflashObject || !m_pWeaponObject) {
-        return false;
+        return;
     }
 
     // Really elegant.. ;D
     if (bRightHand) {
-        m_nWeaponGunflashAlphaMP2      = m_sGunFlashBlendStart;
-        nm_fWeaponGunFlashAlphaProgMP2 = m_sGunFlashBlendStart / arg0;
+        m_nWeaponGunflashAlphaMP2     = m_sGunFlashBlendStart;
+        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / lifetime;
     } else {
-        m_nWeaponGunflashAlphaMP1      = m_sGunFlashBlendStart;
-        nm_fWeaponGunFlashAlphaProgMP1 = m_sGunFlashBlendStart / arg0;
+        m_nWeaponGunflashAlphaMP1     = m_sGunFlashBlendStart;
+        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / lifetime;
     }
-    const auto angle = CGeneral::GetRandomNumberInRange(-360.f, 360.f);
-    RwMatrixRotate(RwFrameGetMatrix(RpClumpGetFrame(m_pGunflashObject)), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
-
-    return true;
+    const auto angle = CGeneral::GetRandomNumberInRange(-360.0f, 360.0f);
+    RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
 }
 
 /*!
@@ -1147,7 +1147,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
     if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
         // They used a clever trick to not have to convert to float..
         // Then they converted to a float to check if the number is higher than 255.. XDDD
-        if (gunFlashAlphaInHand < 0) {
+        if (gunFlashAlphaInHand <= 0) {
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         } else {
             CVehicle::SetComponentAtomicAlpha(atomic, std::min(255, 350 * gunFlashAlphaInHand / m_sGunFlashBlendStart));
@@ -2539,7 +2539,7 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
     GiveWeapon(WEAPON_RLAUNCHER, 200, true);
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
-    GiveWeapon(WEAPON_INFRARED, 200, true);
+    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
 }
 
 /*!
@@ -2555,7 +2555,7 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
     GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
-    GiveWeapon(WEAPON_NIGHTVISION, 200, true);
+    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
 }
 
 /*!

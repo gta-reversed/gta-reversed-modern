@@ -1952,23 +1952,23 @@ bool CAutomobile::SetUpWheelColModel(CColModel* wheelCol)
 
     CMatrix mat;
 
-    mat.Attach(&m_aCarNodes[CAR_WHEEL_LF]->modelling, false);
+    mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]), false);
     cd->m_pSpheres[0].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xD, 255);
 
-    mat.Attach(&m_aCarNodes[CAR_WHEEL_LB]->modelling, false);
+    mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]), false);
     cd->m_pSpheres[1].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF, 255);
 
-    mat.Attach(&m_aCarNodes[CAR_WHEEL_RF]->modelling, false);
+    mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]), false);
     cd->m_pSpheres[2].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xE, 255);
 
-    mat.Attach(&m_aCarNodes[CAR_WHEEL_RB]->modelling, false);
+    mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]), false);
     cd->m_pSpheres[3].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10, 255);
 
     if (m_aCarNodes[CAR_WHEEL_LM] && m_aCarNodes[CAR_WHEEL_RM]) {
-        mat.Attach(&m_aCarNodes[CAR_WHEEL_LM]->modelling, false);
+        mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]), false);
         cd->m_pSpheres[4].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF, 255);
 
-        mat.Attach(&m_aCarNodes[CAR_WHEEL_RM]->modelling, false);
+        mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]), false);
         cd->m_pSpheres[5].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10, 255);
 
         cd->m_nNumSpheres = 6;
@@ -5658,7 +5658,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
             doomVerticalRotation += TWO_PI;
 
         float doomVerticalRotDiff = doomVerticalRotation - m_fDoomVerticalRotation;
-        float timeStep = CTimer::GetTimeStep() * 0.01f;
+        float timeStep = CTimer::GetTimeStep() / 100.0f;
         if (std::fabs(doomVerticalRotDiff) >= timeStep) {
             if (doomVerticalRotDiff <= 0.0f)
                 m_fDoomVerticalRotation -= timeStep;
@@ -5672,13 +5672,13 @@ void CAutomobile::FireTruckControl(CFire* fire)
         if (activeCam.m_nMode != MODE_CAM_ON_A_STRING)
         {
             CPad* pad = CPad::GetPad();
-            m_fDoomVerticalRotation -= ((float)pad->GetCarGunLeftRight() * CTimer::GetTimeStep() * 0.05f) / 128.0f;
-            m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown() * CTimer::GetTimeStepInSeconds()) / 128.0f;
+            m_fDoomVerticalRotation   -= ((float)pad->GetCarGunLeftRight() * CTimer::GetTimeStep() / 20.0f) / 128.0f;
+            m_fDoomHorizontalRotation += ((float)pad->GetCarGunUpDown()    * CTimer::GetTimeStepInSeconds()) / 128.0f;
         }
         else {
             CVector frontDot = Multiply3x3(activeCam.m_vecFront, GetMatrix());
             float doomVerticalRotation   = std::atan2(-frontDot.x, frontDot.y);
-            float doomHorizontalRotation = std::atan2(frontDot.z, frontDot.Magnitude2D());
+            float doomHorizontalRotation = std::atan2(+frontDot.z, frontDot.Magnitude2D());
 
             if (ModelIndices::IsSwatVan(m_nModelIndex))
                 doomHorizontalRotation += DegreesToRadians(22);
@@ -5691,7 +5691,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
                 doomVerticalRotation += TWO_PI;
 
             float doomVerticalRotDiff = doomVerticalRotation - m_fDoomVerticalRotation;
-            float timeStep = CTimer::GetTimeStep() * 0.05f;
+            float timeStep = CTimer::GetTimeStep() / 20.0f;
             if (doomVerticalRotDiff > timeStep)
                 m_fDoomVerticalRotation += timeStep;
             else if (doomVerticalRotDiff < -timeStep)
