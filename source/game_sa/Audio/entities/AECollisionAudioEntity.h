@@ -2,34 +2,24 @@
 
 #include "AEAudioEntity.h"
 
-struct tCollisionAudioEntry_field_4 {
-    int32 dword0;
-    int32 dword4;
-    int32 dword8;
-    bool  byteC;
-    bool  byteD;
-    bool  byteE;
-};
-
-// VALIDATE_SIZE(tCollisionAudioEntry_field_4, 0xF); // 0x14
-
 struct tCollisionAudioEntry {
-    int32                         field_0;
-    tCollisionAudioEntry_field_4* field_4; // length: 300
-    int32                         field_8;
-    int32                         field_C;
-    int32                         field_10;
+    CEntity*  m_Entity1;
+    CEntity*  m_Entity2;
+    CAESound* m_Sound;
+    int32     m_nTime;
+    uint8     m_nStatus;
+    uint8     m_nSurface1;
+    uint8     m_nSurface2;
 };
-
-// VALIDATE_SIZE(tCollisionAudioEntry, 0x14);
+VALIDATE_SIZE(tCollisionAudioEntry, 0x14);
 
 class CAECollisionAudioEntity : public CAEAudioEntity {
 public:
-    char                 field_7C[388];
+    int16                field_7C[194];
     int16                field_200;
     int16                m_nRandom;
-    int32                field_204;
-    tCollisionAudioEntry field_208[300];
+    int32                m_nCurrentId;
+    tCollisionAudioEntry m_Entries[300];
 
 public:
     static void InjectHooks();
