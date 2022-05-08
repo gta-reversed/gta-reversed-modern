@@ -51,12 +51,11 @@ void CWaterCannon::Update_OncePerFrame(int16 index) {
     const auto LIFETIME = 150;
 
     if (CTimer::GetTimeInMS() > m_nCreationTime + LIFETIME) {
-        const auto section = (m_nSectionsCount + 1) % SECTIONS_COUNT;
-        m_nSectionsCount = section;
-        m_abUsed[section] = false;
+        m_nSectionsCount = (m_nSectionsCount + 1) % SECTIONS_COUNT;
+        m_abUsed[m_nSectionsCount] = false;
     }
 
-    for (auto i = 0u; i < SECTIONS_COUNT; i++) {
+    for (auto i = 0; i < SECTIONS_COUNT; i++) {
         if (m_abUsed[i]) {
             CVector& speed = m_sectionMoveSpeed[i];
             speed.z -= CTimer::GetTimeStep() / 250.0f;
@@ -89,46 +88,38 @@ void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
     m_abUsed[m_nSectionsCount]           = true;
 }
 
-// NOTSA
-CBoundingBox CWaterCannon::GetSectionsBoundingBox() const {
-    // Ik, ik junk code, can't do better
-
-    // R* originally used 10000 here, but thats bug prone (if map size gets increased)
+// 0x7295E0
+void CWaterCannon::PushPeds() {
+    // FIX_BUGS: R* originally used 10'000.f here, but thats bug prone (if map size gets increased)
     CVector min{ FLT_MAX, FLT_MAX, FLT_MAX }, max{ FLT_MIN, FLT_MIN, FLT_MIN };
-    for (size_t i = 0; i < SECTIONS_COUNT; i++) {
+    CBoundingBox bbox(min, max);
+
+    for (auto i = 0; i < SECTIONS_COUNT; i++) {
         if (!IsSectionActive(i))
             continue;
 
-        const auto Do = [posn = GetSectionPosn(i)](CVector& out, auto pr) {
-            out = CVector{
-                pr(out.x, posn.x),
-                pr(out.y, posn.y),
-                pr(out.z, posn.z)
-            };
-        };
-        Do(min, [](float a, float b) { return std::min(a, b); });
-        Do(max, [](float a, float b) { return std::max(a, b); });
+        auto& secPos = GetSectionPosn(i);
+
+        bbox.m_vecMin.x = std::min(bbox.m_vecMin.x, secPos.x);
+        bbox.m_vecMax.x = std::max(bbox.m_vecMax.x, secPos.x);
+
+        bbox.m_vecMin.y = std::min(bbox.m_vecMin.y, secPos.y);
+        bbox.m_vecMax.y = std::max(bbox.m_vecMax.y, secPos.y);
+
+        bbox.m_vecMin.z = std::min(bbox.m_vecMin.z, secPos.z);
+        bbox.m_vecMax.z = std::max(bbox.m_vecMax.z, secPos.z);
     }
-    return { min, max };
-}
 
-// 0x7295E0
-void CWaterCannon::PushPeds() {
-    const auto sectionsBounding = GetSectionsBoundingBox();
-    for (int pedIdx = 0; pedIdx < GetPedPool()->m_nSize; pedIdx++) {
-        CPed* ped = GetPedPool()->GetAt(pedIdx);
-        if (!ped)
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        CVector pedPosn = ped.GetPosition();
+        if (!bbox.IsPointWithin(pedPosn))
             continue;
 
-        CVector pedPosn = ped->GetPosition();
-        if (!sectionsBounding.IsPointWithin(pedPosn))
+        if (ped.physicalFlags.bMakeMassTwiceAsBig)
             continue;
 
-        if (ped->physicalFlags.bMakeMassTwiceAsBig)
-            continue;
-
-        for (auto i = 0u; i < SECTIONS_COUNT; i++) {
-            const CVector secPosn = GetSectionPosn(i);
+        for (auto i = 0; i < SECTIONS_COUNT; i++) {
+            const CVector& secPosn = GetSectionPosn(i);
 
             if ((pedPosn - secPosn).SquaredMagnitude() >= 5.0f)
                 continue;
@@ -137,34 +128,34 @@ void CWaterCannon::PushPeds() {
 
             {
                 CEventHitByWaterCannon event(secPosn, secMoveSpeed);
-                ped->GetEventGroup().Add(&event, false);
+                ped.GetEventGroup().Add(&event, false);
             }
 
-            ped->bWasStanding = false;
-            ped->bIsStanding = false;
+            ped.bWasStanding = false;
+            ped.bIsStanding = false;
 
-            ped->ApplyMoveForce({ 0.0f, 0.0f, CTimer::GetTimeStep() });
+            ped.ApplyMoveForce({ 0.0f, 0.0f, CTimer::GetTimeStep() });
 
             {
                 // TODO: Refactor... Ugly code
-                const CVector2D applyableMoveSpeed = (secMoveSpeed / 10.0f - ped->m_vecMoveSpeed) / 10.0f;
+                const CVector2D applyableMoveSpeed = (secMoveSpeed / 10.0f - ped.m_vecMoveSpeed) / 10.0f;
 
                 // Check if directions are the same (eg, + / +, - / -),
-                // differring sign bits will always yield a negative result
+                // differing sign bits will always yield a negative result
                 /// (unless 0, but that is handled by > (instead of >=))
                 if (secMoveSpeed.x * applyableMoveSpeed.x > 0.0f)
-                    ped->m_vecMoveSpeed.x = applyableMoveSpeed.x + secMoveSpeed.x;
+                    ped.m_vecMoveSpeed.x = applyableMoveSpeed.x + secMoveSpeed.x;
 
                 if (secMoveSpeed.y * applyableMoveSpeed.y > 0.0f)
-                    ped->m_vecMoveSpeed.y = applyableMoveSpeed.y + secMoveSpeed.y;
+                    ped.m_vecMoveSpeed.y = applyableMoveSpeed.y + secMoveSpeed.y;
             }
 
             FxPrtMult_c prtInfo{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.2f };
 
-            CVector particleVelocity = ped->m_vecMoveSpeed * 0.3f;
+            CVector particleVelocity = ped.m_vecMoveSpeed * +0.3f;
             g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
-            CVector particleVelocity2 = ped->m_vecMoveSpeed * -0.3f;
+            CVector particleVelocity2 = ped.m_vecMoveSpeed * -0.3f;
             particleVelocity2.z += 0.5f;
             g_fx.m_pPrtSmokeII3expand->AddParticle(&pedPosn, &particleVelocity2, 0.0f, &prtInfo, -1.0f, 1.2f, 0.6f, false);
 
@@ -194,10 +185,10 @@ void CWaterCannon::Render() {
 
     m_Audio.ClearSplashInfo();
 
-    for (auto i = 0u; i < SECTIONS_COUNT; i++) {
+    for (auto i = 0; i < SECTIONS_COUNT; i++) {
         if (IsSectionActive(prevIdx) && IsSectionActive(currIdx)) {
-            const CVector prevPosn = GetSectionPosn(prevIdx);
-            const CVector currPosn = GetSectionPosn(currIdx);
+            const CVector& prevPosn = GetSectionPosn(prevIdx);
+            const CVector& currPosn = GetSectionPosn(currIdx);
 
             const CVector currToPrevDir = prevPosn - currPosn;
             if (currToPrevDir.SquaredMagnitude() < 25.0f) {
@@ -211,14 +202,14 @@ void CWaterCannon::Render() {
 
                 const float size = (float)(i * i) / (float)SECTIONS_COUNT + 3.0f;
 
-                RxObjSpace3DVertex vertices[12];
+                static RxObjSpace3DVertex vertices[12]{}; // 0xC80550
 
                 // Set alpha depending on current `i`. The higher, the lower the alpha.
                 const float progress = (float)i / (float)SECTIONS_COUNT;
                 const auto  alpha = (RwUInt8)(64.0f * (1.0f - progress));
                 RwRGBA color{ 200, 200, 255, alpha };
-                for (auto& v : vertices) {
-                    RxObjSpace3DVertexSetPreLitColor(&v, &color);
+                for (auto& vertice : vertices) {
+                    RxObjSpace3DVertexSetPreLitColor(&vertice, &color);
                 }
 
                 const CVector thisUp = up * size, thisRight = right * size, thisFwd = fwd * size;
@@ -247,18 +238,17 @@ void CWaterCannon::Render() {
                 const bool hasSectionHit = CWorld::ProcessLineOfSight(prevPosn, currPosn, colPoint, hitEntity, true, true, false, false, false, false, false, false);
                 if (hasSectionHit) {
                     FxPrtMult_c prtinfo{ 1.0f, 1.0f, 1.0f, 0.15f, 0.75f, 1.0f, 0.2f };
-                    CVector direction = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
+                    CVector velocity0 = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
 
-                    for (int n = 0; n < 2; n++) {
+                    for (auto n = 0; n < 2; n++) {
                         const auto unk = (float)(n / CTimer::GetTimeStepInMS());
 
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &direction, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
-
-                        CVector retadedSignature = direction * 0.6f;
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &retadedSignature, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity0, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        CVector velocity1 = velocity0 * 0.6f;
+                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity1, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
                     }
 
-                    m_Audio.SetSplashInfo(colPoint.m_vecPoint, direction.Magnitude());
+                    m_Audio.SetSplashInfo(colPoint.m_vecPoint, velocity0.Magnitude());
 
                     break;
                 }
@@ -269,9 +259,6 @@ void CWaterCannon::Render() {
                     RwIm3DRenderIndexedPrimitive(rwPRIMTYPETRILIST, m_auRenderIndices.data(), m_auRenderIndices.size());
                     RwIm3DEnd();
                 }
-
-                if (hasSectionHit)
-                    break;
             }
         }
         currIdx = prevIdx;
@@ -290,10 +277,10 @@ bool CWaterCannon::IsSectionActive(size_t idx) const {
     return m_abUsed[idx];
 }
 
-CVector CWaterCannon::GetSectionPosn(size_t idx) const {
+CVector& CWaterCannon::GetSectionPosn(size_t idx) {
     return m_sectionPoint[idx];
 }
 
-CVector CWaterCannon::GetSectionMoveSpeed(size_t idx) const {
+CVector& CWaterCannon::GetSectionMoveSpeed(size_t idx) {
     return m_sectionMoveSpeed[idx];
 }

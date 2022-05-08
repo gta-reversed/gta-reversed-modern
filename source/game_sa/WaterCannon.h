@@ -6,7 +6,7 @@ class CVector;
 
 class CWaterCannon {
 public:
-    static constexpr uint32 SECTIONS_COUNT = 32;
+    static constexpr auto SECTIONS_COUNT = 32;
 
     uint32                    m_nId;
     int32                     m_nSectionsCount;
@@ -15,7 +15,6 @@ public:
     CVector                   m_sectionMoveSpeed[SECTIONS_COUNT];
     bool                      m_abUsed[SECTIONS_COUNT];
     CAEWaterCannonAudioEntity m_Audio;
-    char                      field_3BC[16];
 
     static inline std::array<RxVertexIndex, 18>& m_auRenderIndices = *(std::array<RxVertexIndex, 18>*)0xC80700;
 
@@ -36,10 +35,9 @@ public:
 
 private:
     // NOTSA
-    bool IsSectionActive(size_t idx) const;
-    CVector GetSectionPosn(size_t idx) const;
-    CVector GetSectionMoveSpeed(size_t idx) const;
-    CBoundingBox GetSectionsBoundingBox() const;
+    [[nodiscard]] bool IsSectionActive(size_t idx) const;
+    CVector& GetSectionPosn(size_t idx);
+    CVector& GetSectionMoveSpeed(size_t idx);
 };
 
 VALIDATE_SIZE(CWaterCannon, 0x3CC);
