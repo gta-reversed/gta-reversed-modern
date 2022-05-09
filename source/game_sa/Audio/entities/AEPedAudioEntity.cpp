@@ -78,7 +78,7 @@ void CAEPedAudioEntity::Terminate() {
 }
 
 // 0x4E2BB0
-void CAEPedAudioEntity::AddAudioEvent(int32 event, float volume, float speed, CPhysical* ped, uint8 surfaceId, int32 a7, uint32 maxVol) {
+void CAEPedAudioEntity::AddAudioEvent(eAudioEvents event, float volume, float speed, CPhysical* ped, uint8 surfaceId, int32 a7, uint32 maxVol) {
     if (!m_bCanAddEvent)
         return;
 
@@ -131,7 +131,7 @@ void CAEPedAudioEntity::AddAudioEvent(int32 event, float volume, float speed, CP
 
         const auto vol = (float)CAEAudioEntity::m_pAudioEventVolumes[AE_PED_CRUNCH] + volume;
         CAESound sound;
-        sound.Initialise(2, 29, this, ped->GetPosition(), vol, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+        sound.Initialise(2, 29, this, ped->GetPosition(), vol, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
         sound.m_fSpeed = speed;
         sound.m_fSpeedVariability = 0.06f;
         sound.m_fSoundDistance = 1.5f;
@@ -142,7 +142,7 @@ void CAEPedAudioEntity::AddAudioEvent(int32 event, float volume, float speed, CP
             break;
 
         auto RandomNumberInRange = CAEAudioUtility::GetRandomNumberInRange(47, 49);
-        sound.Initialise(2, RandomNumberInRange, this, ped->GetPosition(), vol, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+        sound.Initialise(2, RandomNumberInRange, this, ped->GetPosition(), vol, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
         sound.m_fSpeed = speed;
         sound.m_fSpeedVariability = 0.06f;
         sound.m_fSoundDistance = 1.5f;
@@ -170,17 +170,17 @@ void CAEPedAudioEntity::TurnOnJetPack() {
 
     m_bJetPackPlaying = true;
 
-    m_tempSound.Initialise(19, 26, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+    m_tempSound.Initialise(19, 26, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
     m_tempSound.m_fSpeed = 1.0f;
     m_tempSound.m_nEnvironmentFlags = SOUND_REQUEST_UPDATES;
     m_JetPackSound0 = AESoundManager.RequestNewSound(&m_tempSound);
 
-    m_tempSound.Initialise(5, 10, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+    m_tempSound.Initialise(5, 10, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
     m_tempSound.m_fSpeed = 1.0f;
     m_tempSound.m_nEnvironmentFlags = SOUND_REQUEST_UPDATES;
     m_JetPackSound1 = AESoundManager.RequestNewSound(&m_tempSound);
 
-    m_tempSound.Initialise(0, 0, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+    m_tempSound.Initialise(0, 0, this, m_pPed->GetPosition(), -100.0f, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
     m_tempSound.m_fSpeed = 1.0f;
     m_tempSound.m_nEnvironmentFlags = SOUND_REQUEST_UPDATES;
     m_JetPackSound2 = AESoundManager.RequestNewSound(&m_tempSound);
@@ -342,12 +342,12 @@ void CAEPedAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 }
 
 // 0x4E13A0
-void CAEPedAudioEntity::HandleFootstepEvent(int32 event, float volume, float speed, uint8 surfaceId) {
+void CAEPedAudioEntity::HandleFootstepEvent(eAudioEvents event, float volume, float speed, uint8 surfaceId) {
     plugin::CallMethod<0x4E13A0, CAEPedAudioEntity*, int32, float, float, uint8>(this, event, volume, speed, surfaceId);
 }
 
 // 0x4E17E0
-void CAEPedAudioEntity::HandleSkateEvent(int32 event, float volume, float speed) {
+void CAEPedAudioEntity::HandleSkateEvent(eAudioEvents event, float volume, float speed) {
     if (m_pPed->bIsInTheAir)
         return;
 
@@ -368,7 +368,7 @@ void CAEPedAudioEntity::HandleSkateEvent(int32 event, float volume, float speed)
 }
 
 // 0x4E18E0
-void CAEPedAudioEntity::HandleLandingEvent(int32 event) {
+void CAEPedAudioEntity::HandleLandingEvent(eAudioEvents event) {
     if (m_pPed->bIsInTheAir)
         return;
 
@@ -405,22 +405,22 @@ void CAEPedAudioEntity::HandleLandingEvent(int32 event) {
 }
 
 // 0x4E1A40
-void CAEPedAudioEntity::HandlePedSwing(int32 event, int32 a3, uint32 volume) {
+void CAEPedAudioEntity::HandlePedSwing(eAudioEvents event, int32 a3, uint32 volume) {
     plugin::CallMethod<0x4E1A40, CAEPedAudioEntity*, int32, int32, uint32>(this, event, a3, volume);
 }
 
 // 0x4E1CC0
-void CAEPedAudioEntity::HandlePedHit(int32 event, CPhysical* physical, uint8 surfaceId, float volume, uint32 maxVol) {
+void CAEPedAudioEntity::HandlePedHit(eAudioEvents event, CPhysical* physical, uint8 surfaceId, float volume, uint32 maxVol) {
     plugin::CallMethod<0x4E1CC0, CAEPedAudioEntity*, int32, CPhysical*, uint8, float, uint32>(this, event, physical, surfaceId, volume, maxVol);
 }
 
 // 0x4E2350
-void CAEPedAudioEntity::HandlePedJacked(int32 event) {
+void CAEPedAudioEntity::HandlePedJacked(eAudioEvents event) {
     plugin::CallMethod<0x4E2350, CAEPedAudioEntity*, int32>(this, event);
 }
 
 // 0x4E26A0
-void CAEPedAudioEntity::HandleSwimSplash(int32 event) {
+void CAEPedAudioEntity::HandleSwimSplash(eAudioEvents event) {
     if (!AEAudioHardware.IsSoundBankLoaded(128, 32)) {
         AEAudioHardware.LoadSoundBank(128, 32);
         return;
@@ -428,7 +428,7 @@ void CAEPedAudioEntity::HandleSwimSplash(int32 event) {
 
     const auto volume = (float)CAEAudioEntity::m_pAudioEventVolumes[event];
     m_nSfxId = std::max(0, m_nSfxId + 1);
-    m_tempSound.Initialise(32, m_nSfxId, this, m_pPed->GetPosition(), volume, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+    m_tempSound.Initialise(32, m_nSfxId, this, m_pPed->GetPosition(), volume, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
     m_tempSound.m_fSpeedVariability = 0.0588f;
     m_tempSound.SetIndividualEnvironment(SOUND_PLAY_PHYSICALLY | SOUND_START_PERCENTAGE | SOUND_UNDUCKABLE, true);
     m_tempSound.RegisterWithPhysicalEntity(m_pPed);
@@ -436,7 +436,7 @@ void CAEPedAudioEntity::HandleSwimSplash(int32 event) {
 }
 
 // 0x4E2790
-void CAEPedAudioEntity::HandleSwimWake(int32 event) {
+void CAEPedAudioEntity::HandleSwimWake(eAudioEvents event) {
     if (AESoundManager.AreSoundsOfThisEventPlayingForThisEntityAndPhysical(event, this, m_pPed)) {
         m_nTimeInMS = CTimer::GetTimeInMS();
         return;
@@ -444,7 +444,7 @@ void CAEPedAudioEntity::HandleSwimWake(int32 event) {
 
     if (AEAudioHardware.IsSoundBankLoaded(39u, 2)) {
         auto volume = (float)CAEAudioEntity::m_pAudioEventVolumes[event] - 20.0f;
-        m_tempSound.Initialise(2, 3, this, m_pPed->GetPosition(), volume, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+        m_tempSound.Initialise(2, 3, this, m_pPed->GetPosition(), volume, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
         m_tempSound.m_fSpeed = 0.75f;
         m_tempSound.m_nEnvironmentFlags = SOUND_REQUEST_UPDATES | SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY;
         m_tempSound.m_nEvent = event;
@@ -465,7 +465,7 @@ void CAEPedAudioEntity::PlayShirtFlap(float volume, float speed) {
         m_sTwinLoopSoundEntity.UpdateTwinLoopSound(m_pPed->GetPosition(), volume, speed);
     } else {
         m_sTwinLoopSoundEntity.Initialise(5, 19, 20, this, 200, 1000, -1, -1);
-        m_sTwinLoopSoundEntity.PlayTwinLoopSound(m_pPed->GetPosition(), volume, speed, 2.0f, 1.0f, (eSoundEnvironment)0);
+        m_sTwinLoopSoundEntity.PlayTwinLoopSound(m_pPed->GetPosition(), volume, speed, 2.0f, 1.0f, SOUND_DEFAULT);
     }
 }
 

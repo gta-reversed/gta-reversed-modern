@@ -6,7 +6,8 @@
 */
 #pragma once
 
-enum eAudioEvents {
+enum eAudioEvents : int32 {
+    AE_UNDEFINED = -1,
     AE_FRONTEND_START = 0x0,
     AE_FRONTEND_SELECT = 0x1,
     AE_FRONTEND_BACK = 0x2,

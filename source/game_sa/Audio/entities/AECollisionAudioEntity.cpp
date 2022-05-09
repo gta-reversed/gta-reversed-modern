@@ -129,7 +129,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(uint8 surface, CVector
 
     if (iRand >= 0) {
         CAESound sound;
-        sound.Initialise(3, iRand, this, posn, volume, maxDistance, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.02f, 0);
+        sound.Initialise(3, iRand, this, posn, volume, maxDistance, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.02f, 0);
         AESoundManager.RequestNewSound(&sound);
         m_nRandom = iRand;
     }

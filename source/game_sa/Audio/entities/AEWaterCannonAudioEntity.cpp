@@ -75,7 +75,7 @@ void CAEWaterCannonAudioEntity::UpdateGenericWaterCannonSound(bool splashInfoEna
             sound->m_fSpeed = speed;
             sound->SetPosition(posn);
         } else {
-            m_tempSound.Initialise(bankSlotId, sfxId, this, posn, volume, 1.0f, 1.0f, 1.0f, 0, (eSoundEnvironment)0, 0.0f, 0);
+            m_tempSound.Initialise(bankSlotId, sfxId, this, posn, volume, 1.0f, 1.0f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
             m_tempSound.m_fVolume = volume;
             m_tempSound.m_fSoundDistance = soundDistance;
             m_tempSound.m_fSpeed = speed;

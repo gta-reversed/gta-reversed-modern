@@ -43,7 +43,7 @@ public:
     static void StaticInitialise();
     void Terminate();
 
-    void AddAudioEvent(int32 event, float volume, float speed, CPhysical* ped = nullptr, uint8 surfaceId = 0, int32 a7 = 0, uint32 maxVol = 0);
+    void AddAudioEvent(eAudioEvents event, float volume, float speed, CPhysical* ped = nullptr, uint8 surfaceId = 0, int32 a7 = 0, uint32 maxVol = 0);
 
     void TurnOnJetPack();
     void TurnOffJetPack();
@@ -52,14 +52,14 @@ public:
     void PlayWindRush(float, float);
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
-    void HandleFootstepEvent(int32 event, float volume, float speed, uint8 surfaceId);
-    void HandleSkateEvent(int32 event, float volume, float speed);
-    void HandleLandingEvent(int32 event);
-    void HandlePedSwing(int32 event, int32 a3, uint32 volume);
-    void HandlePedHit(int32 event, CPhysical* physical, uint8 surfaceId, float volume, uint32 maxVol);
-    void HandlePedJacked(int32 event) ;
-    void HandleSwimSplash(int32 event);
-    void HandleSwimWake(int32 event);
+    void HandleFootstepEvent(eAudioEvents event, float volume, float speed, uint8 surfaceId);
+    void HandleSkateEvent(eAudioEvents event, float volume, float speed);
+    void HandleLandingEvent(eAudioEvents event);
+    void HandlePedSwing(eAudioEvents event, int32 a3, uint32 volume);
+    void HandlePedHit(eAudioEvents event, CPhysical* physical, uint8 surfaceId, float volume, uint32 maxVol);
+    void HandlePedJacked(eAudioEvents event) ;
+    void HandleSwimSplash(eAudioEvents event);
+    void HandleSwimWake(eAudioEvents event);
 
     void PlayShirtFlap(float volume, float speed);
     void Service();
