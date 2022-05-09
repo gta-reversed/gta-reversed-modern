@@ -72,8 +72,8 @@ public:
     static void EnableEffectsLoading();
     static void DisableEffectsLoading();
 
-    void ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
-    void ReportBulletHit(CEntity* entity, uint8 a3, CVector& posn, float angleWithColPointNorm);
+    void ReportCollision(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown);
+    void ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm);
     void ReportObjectDestruction(CEntity* entity);
     void ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn);
     void ReportWaterSplash(CVector posn, float volume);

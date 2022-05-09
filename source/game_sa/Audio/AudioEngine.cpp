@@ -224,8 +224,8 @@ void CAudioEngine::Shutdown() {
 }
 
 // 0x506EB0
-void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
-    m_CollisionAE.ReportCollision(entity1, entity2, surface1, surface2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
+void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
+    m_CollisionAE.ReportCollision(entity1, entity2, surf1, surf2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
 }
 
 // 0x507350
@@ -362,7 +362,7 @@ void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents eventId, float volumeCh
 }
 
 // 0x506EC0
-void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
+void CAudioEngine::ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
     m_CollisionAE.ReportBulletHit(entity, surface, posn, angleWithColPointNorm);
 }
 
