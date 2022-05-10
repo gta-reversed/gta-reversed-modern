@@ -4,15 +4,15 @@ char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[
 
 void CCutsceneObject::InjectHooks()
 {
-// VIRTUAL
-    ReversibleHooks::Install("CCutsceneObject", "SetModelIndex", 0x5B1B20, &CCutsceneObject::SetModelIndex_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "SetupLighting", 0x553F40, &CCutsceneObject::SetupLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "RemoveLighting", 0x5533F0, &CCutsceneObject::RemoveLighting_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "ProcessControl", 0x5B1B90, &CCutsceneObject::ProcessControl_Reversed);
-    ReversibleHooks::Install("CCutsceneObject", "PreRender", 0x5B1E00, &CCutsceneObject::PreRender_Reversed);
+    RH_ScopedClass(CCutsceneObject);
+    RH_ScopedCategory("Entity/Object");
 
-// HELPER
-    ReversibleHooks::Install("CCutsceneObject", "SetupCarPipeAtomicsForClump", 0x5B1AB0, &CCutsceneObject::SetupCarPipeAtomicsForClump);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x5B1B20);
+    RH_ScopedVirtualInstall(SetupLighting, 0x553F40);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x5533F0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5B1B90);
+    RH_ScopedVirtualInstall(PreRender, 0x5B1E00);
+    RH_ScopedInstall(SetupCarPipeAtomicsForClump, 0x5B1AB0);
 }
 
 CCutsceneObject::CCutsceneObject() : CObject()
@@ -42,9 +42,9 @@ void CCutsceneObject::SetModelIndex_Reversed(unsigned index)
     if (RwObjectGetType(m_pRwObject) == rpCLUMP)
     {
         RpAnimBlendClumpInit(m_pRwClump);
-        auto* pAnimData = RpClumpGetAnimBlendClumpData(m_pRwClump);
-        pAnimData->m_pvecPedPosition = &m_vecMoveSpeed;
-        pAnimData->m_pFrames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
+        auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
+        animData->m_PedPosition = &m_vecMoveSpeed;
+        animData->m_Frames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
         CCutsceneObject::SetupCarPipeAtomicsForClump(index, m_pRwClump);
     }
     CModelInfo::GetModelInfo(index)->m_nAlpha = 0xFF;
@@ -67,9 +67,9 @@ void CCutsceneObject::ProcessControl_Reversed()
     {
         if (m_pAttachmentObject)
         {
-            auto* pHierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
-            auto* pMatArr = RpHAnimHierarchyGetMatrixArray(pHierarchy);
-            const auto boneMat = CMatrix(&pMatArr[m_nAttachBone], false);
+            auto* hierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
+            auto* matArr = RpHAnimHierarchyGetMatrixArray(hierarchy);
+            const auto boneMat = CMatrix(&matArr[m_nAttachBone], false);
             *static_cast<CMatrix*>(m_matrix) = boneMat;
         }
         else
@@ -106,9 +106,9 @@ void CCutsceneObject::PreRender_Reversed()
     {
         if (m_pAttachmentObject)
         {
-            auto* pHierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
-            auto* pMatArr = RpHAnimHierarchyGetMatrixArray(pHierarchy);
-            const auto boneMat = CMatrix(&pMatArr[m_nAttachBone], false);
+            auto* hierarchy = GetAnimHierarchyFromClump(m_pAttachmentObject->m_pRwClump);
+            auto* matArr = RpHAnimHierarchyGetMatrixArray(hierarchy);
+            const auto boneMat = CMatrix(&matArr[m_nAttachBone], false);
             *static_cast<CMatrix*>(m_matrix) = boneMat;
         }
         else
@@ -120,15 +120,15 @@ void CCutsceneObject::PreRender_Reversed()
 
         if (RwObjectGetType(m_pRwObject) == rpCLUMP)
         {
-            const auto* pFirstAtomic = GetFirstAtomic(m_pRwClump);
-            if (pFirstAtomic)
+            const auto* firstAtomic = GetFirstAtomic(m_pRwClump);
+            if (firstAtomic)
             {
-                if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(pFirstAtomic)))
+                if (RpSkinGeometryGetSkin(RpAtomicGetGeometry(firstAtomic)))
                 {
-                    auto* pAnimData = RpClumpGetAnimBlendClumpData(m_pRwClump);
-                    auto* pMorpthTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(pFirstAtomic), 0);
-                    auto* pSphere = RpMorphTargetGetBoundingSphere(pMorpthTarget);
-                    pSphere->center = pAnimData->m_pFrames->m_pIFrame->translation;
+                    auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
+                    auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
+                    auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
+                    sphere->center = animData->m_Frames->m_pIFrame->translation;
                 }
             }
         }
@@ -140,16 +140,18 @@ void CCutsceneObject::PreRender_Reversed()
     g_realTimeShadowMan.DoShadowThisFrame(this);
     if (!m_pShadowData)
     {
-        CShadows::StoreShadowForPedObject(this,
-                                          CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
-                                          CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
-                                          CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],
-                                          CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
-                                          CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue],
-                                          CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]);
+        CShadows::StoreShadowForPedObject(
+            this,
+            CTimeCycle::m_fShadowDisplacementX[CTimeCycle::m_CurrentStoredValue],
+            CTimeCycle::m_fShadowDisplacementY[CTimeCycle::m_CurrentStoredValue],
+            CTimeCycle::m_fShadowFrontX[CTimeCycle::m_CurrentStoredValue],
+            CTimeCycle::m_fShadowFrontY[CTimeCycle::m_CurrentStoredValue],
+            CTimeCycle::m_fShadowSideX[CTimeCycle::m_CurrentStoredValue],
+            CTimeCycle::m_fShadowSideY[CTimeCycle::m_CurrentStoredValue]
+        );
     }
 
-    if (m_nModelIndex == eModelID::MODEL_CSPLAY)
+    if (m_nModelIndex == MODEL_CSPLAY)
     {
         CPed::ShoulderBoneRotation(m_pRwClump);
         m_bDontUpdateHierarchy = true;
@@ -159,12 +161,8 @@ void CCutsceneObject::PreRender_Reversed()
     vecPos.z += 0.5F;
     const auto fHeight = vecPos.z - 5.0F;
     CColPoint colPoint;
-    CEntity* pEntity = nullptr;
-    if (CWorld::ProcessVerticalLine(vecPos, fHeight, colPoint,
-                                    pEntity, true, false,
-                                    false, false, false,
-                                    false, nullptr))
-    {
+    CEntity* entity = nullptr;
+    if (CWorld::ProcessVerticalLine(vecPos, fHeight, colPoint, entity, true, false, false, false, false, false, nullptr)) {
         const auto fDayNight = colPoint.m_nLightingB.GetCurrentLighting();
         m_fContactSurfaceBrightness = lerp(m_fContactSurfaceBrightness, fDayNight, CTimer::GetTimeStep() / 10.0F);
     }
@@ -193,30 +191,30 @@ void CCutsceneObject::RemoveLighting_Reversed(bool bRemove)
     DeActivateDirectional();
 }
 
-void CCutsceneObject::SetupCarPipeAtomicsForClump(unsigned modelId, RpClump* pClump)
+void CCutsceneObject::SetupCarPipeAtomicsForClump(unsigned modelId, RpClump* clump)
 {
-    static bool bCarPipeAtomicsInitialized = false;
-    static uint32 anHashKeys[NUM_CUTSCENE_VEHS];
+    static bool& bCarPipeAtomicsInitialized = *(bool*)0xBC4058; // TODO | STATICREF // = false;
+    static uint32(&anHashKeys)[NUM_CUTSCENE_VEHS] = *(uint32(*)[NUM_CUTSCENE_VEHS])0xBC4040; // TODO | STATICREF
 
     if (!bCarPipeAtomicsInitialized)
     {
         bCarPipeAtomicsInitialized = true;
         for (auto i = 0; i < NUM_CUTSCENE_VEHS; ++i)
-            anHashKeys[i] = CKeyGen::GetUppercaseKey(CCutsceneObject::ms_sCutsceneVehNames[i]);
+            anHashKeys[i] = CKeyGen::GetUppercaseKey(ms_sCutsceneVehNames[i]);
     }
 
     for (auto anHashKey : anHashKeys)
     {
         if (CModelInfo::GetModelInfo(modelId)->m_nKey == anHashKey)
         {
-            RpClumpForAllAtomics(pClump, CCutsceneObject::SetupCarPipeAtomicCB, nullptr);
+            RpClumpForAllAtomics(clump, SetupCarPipeAtomicCB, nullptr);
             return;
         }
     }
 }
 
-RpAtomic* CCutsceneObject::SetupCarPipeAtomicCB(RpAtomic* pAtomic, void* data)
+RpAtomic* CCutsceneObject::SetupCarPipeAtomicCB(RpAtomic* atomic, void* data)
 {
-    CCarFXRenderer::CustomCarPipeAtomicSetup(pAtomic);
-    return pAtomic;
+    CCarFXRenderer::CustomCarPipeAtomicSetup(atomic);
+    return atomic;
 }

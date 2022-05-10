@@ -5,12 +5,14 @@
 #include "CreepingFire.h"
 
 void CFire::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CFire", "Constructor", 0x539D90, &CFire::Constructor);
-    Install("CFire", "Initialise", 0x538B30, &CFire::Initialise);
-    Install("CFire", "CreateFxSysForStrength", 0x539360, &CFire::CreateFxSysForStrength);
-    Install("CFire", "Extinguish", 0x5393F0, &CFire::Extinguish);
-    Install("CFire", "ProcessFire", 0x53A570, &CFire::ProcessFire);
+    RH_ScopedClass(CFire);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Constructor, 0x539D90);
+    RH_ScopedInstall(Initialise, 0x538B30);
+    RH_ScopedInstall(CreateFxSysForStrength, 0x539360);
+    RH_ScopedInstall(Extinguish, 0x5393F0);
+    RH_ScopedInstall(ProcessFire, 0x53A570);
 }
 
 // 0x539D90
@@ -76,6 +78,7 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
     }
 }
 
+// see 0x539F00 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens) {
     active = true;
     createdByScript = false;
@@ -95,30 +98,31 @@ void CFire::Start(CEntity* creator, CVector pos, uint32 nTimeToBurn, uint8 nGens
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A050 CFireManager::StartFire
 void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 nGens) {
     switch (target->m_nType) {
-    case eEntityType::ENTITY_TYPE_PED: {
-        auto targetPed = static_cast<CPed*>(target);
+    case ENTITY_TYPE_PED: {
+        auto targetPed = target->AsPed();
         targetPed->m_pFire = this;
         CCrime::ReportCrime(
-            targetPed->m_nPedType == ePedType::PED_TYPE_COP ? eCrimeType::CRIME_SET_COP_PED_ON_FIRE : eCrimeType::CRIME_SET_PED_ON_FIRE,
+            targetPed->m_nPedType == PED_TYPE_COP ? eCrimeType::CRIME_SET_COP_PED_ON_FIRE : eCrimeType::CRIME_SET_PED_ON_FIRE,
             targetPed,
-            static_cast<CPed*>(creator)
+            creator->AsPed()
         );
         break;
     }
-    case eEntityType::ENTITY_TYPE_VEHICLE: {
-        auto targetVehicle = static_cast<CVehicle*>(target);
+    case ENTITY_TYPE_VEHICLE: {
+        auto targetVehicle = target->AsVehicle();
         targetVehicle->m_pFire = this;
         CCrime::ReportCrime(
             eCrimeType::CRIME_SET_CAR_ON_FIRE,
-            reinterpret_cast<CPed*>(targetVehicle), // TODO: Change ReportCrime's signature to take CEntity* here..
-            static_cast<CPed*>(creator)
+            targetVehicle,
+            creator->AsPed()
         );
         break;
     }
-    case eEntityType::ENTITY_TYPE_OBJECT: {
-        static_cast<CObject*>(target)->m_pFire = this;
+    case ENTITY_TYPE_OBJECT: {
+        target->AsObject()->m_pFire = this;
         break;
     }
     }
@@ -133,7 +137,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 n
     m_fStrength = 1.0f;
     m_vecPosition = target->GetPosition();
 
-    if (target->IsPed() && static_cast<CPed*>(target)->IsPlayer())
+    if (target->IsPed() && target->AsPed()->IsPlayer())
         m_nTimeToBurn = CTimer::GetTimeInMS() + 2333;
     else if (target->IsVehicle())
         m_nTimeToBurn = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(0, 1000) + 3000;
@@ -146,6 +150,7 @@ void CFire::Start(CEntity* creator, CEntity* target, uint32 nTimeToBurn, uint8 n
     CreateFxSysForStrength(m_vecPosition, nullptr);
 }
 
+// see 0x53A270 CFireManager::StartScriptFire
 void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
     SetTarget(target);
     SetCreator(nullptr);
@@ -162,34 +167,30 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
 
     if (target) {
         switch (target->m_nType) { /* Set target's `m_pFire` to `this` */
-        case eEntityType::ENTITY_TYPE_PED:
-            static_cast<CPed*>(target)->m_pFire = this;
+        case ENTITY_TYPE_PED:
+            target->AsPed()->m_pFire = this;
             break;
-        case eEntityType::ENTITY_TYPE_VEHICLE:
-            static_cast<CVehicle*>(target)->m_pFire = this;
+        case ENTITY_TYPE_VEHICLE:
+            target->AsVehicle()->m_pFire = this;
             break;
         }
     }
 
-    CreateFxSysForStrength(target ? pos : target->GetPosition(), nullptr);
+    CreateFxSysForStrength(target ? target->GetPosition() : pos, nullptr);
 }
 
 void CFire::SetTarget(CEntity* target) {
-    if (m_pEntityTarget)
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
+    CEntity::SafeCleanUpRef(m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
 
     m_pEntityTarget = target; /* assign, even if its null, to clear it */
-    if (target)
-        m_pEntityTarget->RegisterReference(&m_pEntityTarget); /* Assume caller set target->m_pFire */
+    CEntity::SafeRegisterRef(m_pEntityTarget); /* Assume caller set target->m_pFire */
 }
 
 void CFire::SetCreator(CEntity* creator) {
-    if (m_pEntityCreator)
-        m_pEntityCreator->CleanUpOldReference(&m_pEntityCreator);
+    CEntity::SafeCleanUpRef(m_pEntityCreator);
 
     m_pEntityCreator = creator; /* assign, even if its null, to clear it */
-    if (creator)
-        creator->RegisterReference(&m_pEntityCreator);
+    CEntity::SafeRegisterRef(m_pEntityCreator);
 }
 
 void CFire::DestroyFx() {
@@ -207,7 +208,7 @@ auto CFire::GetFireParticleNameForStrength() const {
 };
 
 // 0x539360
-void CFire::CreateFxSysForStrength(const CVector& point, RwMatrixTag* matrix) {
+void CFire::CreateFxSysForStrength(const CVector& point, RwMatrix* matrix) {
     DestroyFx();
     m_pFxSystem = g_fxMan.CreateFxSystem(GetFireParticleNameForStrength(), const_cast<CVector*>(&point), matrix, true); // TODO: Make CreateFxSys take const CVector&
     if (m_pFxSystem)
@@ -230,17 +231,16 @@ void CFire::Extinguish() {
 
     if (m_pEntityTarget) {
         switch (m_pEntityTarget->m_nType) {
-        case eEntityType::ENTITY_TYPE_PED: {
-            static_cast<CPed*>(m_pEntityTarget)->m_pFire = nullptr;
+        case ENTITY_TYPE_PED: {
+            m_pEntityTarget->AsPed()->m_pFire = nullptr;
             break;
         }
-        case eEntityType::ENTITY_TYPE_VEHICLE: {
-            static_cast<CVehicle*>(m_pEntityTarget)->m_pFire = nullptr;
+        case ENTITY_TYPE_VEHICLE: {
+            m_pEntityTarget->AsVehicle()->m_pFire = nullptr;
             break;
         }
         }
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget);
-        m_pEntityTarget = nullptr;
+        CEntity::ClearReference(m_pEntityTarget);
     }
 }
 
@@ -256,8 +256,8 @@ void CFire::ProcessFire() {
         m_vecPosition = m_pEntityTarget->GetPosition();
 
         switch (m_pEntityTarget->m_nType) {
-        case eEntityType::ENTITY_TYPE_PED: {
-            auto targetPed = static_cast<CPed*>(m_pEntityTarget);
+        case ENTITY_TYPE_PED: {
+            auto targetPed = m_pEntityTarget->AsPed();
 
             if (targetPed->m_pFire != this) {
                 Extinguish();
@@ -265,8 +265,8 @@ void CFire::ProcessFire() {
             }
 
             switch (targetPed->m_nPedState) {
-            case ePedState::PEDSTATE_DIE:
-            case ePedState::PEDSTATE_DEAD: {
+            case PEDSTATE_DIE:
+            case PEDSTATE_DEAD: {
                 m_vecPosition.z -= 1.0f; /* probably because ped is laying on the ground */
                 break;
             }
@@ -282,8 +282,8 @@ void CFire::ProcessFire() {
 
             break;
         }
-        case eEntityType::ENTITY_TYPE_VEHICLE: {
-            auto targetVehicle = static_cast<CVehicle*>(m_pEntityTarget);
+        case ENTITY_TYPE_VEHICLE: {
+            auto targetVehicle = m_pEntityTarget->AsVehicle();
 
             if (targetVehicle->m_pFire != this) {
                 Extinguish();
@@ -302,7 +302,7 @@ void CFire::ProcessFire() {
         }
 
         if (m_pFxSystem) {
-            auto targetPhysical = static_cast<CPhysical*>(m_pEntityTarget);
+            auto targetPhysical = m_pEntityTarget->AsPhysical();
             m_pFxSystem->SetOffsetPos(m_vecPosition + CTimer::GetTimeStep() * 2.0f * targetPhysical->m_vecMoveSpeed);
         }
     }
@@ -323,15 +323,15 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 32 == 0) {
-        for (auto i = CPools::ms_pVehiclePool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CVehicle* vehicle = CPools::ms_pVehiclePool->GetAt(i);
+        for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
                 continue;
 
             if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
                 continue;
 
-            if (vehicle->IsBMX()) {
+            if (vehicle->IsSubBMX()) {
                 player->DoStuffToGoOnFire();
                 gFireManager.StartFire(player, m_pEntityCreator, 0.8f, true, 7000, 100);
                 vehicle->BurstTyre(vehicle->FindTyreNearestPoint(m_vecPosition.x, m_vecPosition.y) + 13, false); // TODO: What's this 13?
@@ -342,8 +342,8 @@ void CFire::ProcessFire() {
     }
 
     if (rand() % 4 == 0) {
-        for (auto i = CPools::ms_pObjectPool->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
-            CObject* obj = CPools::ms_pObjectPool->GetAt(i);
+        for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
+            CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
                 continue;
 

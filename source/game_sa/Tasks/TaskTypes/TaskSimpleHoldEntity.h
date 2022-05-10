@@ -17,7 +17,7 @@ public:
     CEntity*               m_pEntityToHold;
     CVector                m_vecPosition;
     uint8                  m_nBoneFrameId; // see ePedNode
-    uint8                  m_bBoneFlags;
+    uint8                  m_bBoneFlags;   // See eHoldEntityBoneFlags
     bool                   field_1A[2];
     float                  m_fRotation;
     AnimationId            m_nAnimId;
@@ -32,7 +32,18 @@ public:
     CAnimBlendAssociation* m_pAnimBlendAssociation;
 
 public:
-    CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd);
+    static constexpr auto Type = TASK_SIMPLE_HOLD_ENTITY;
+
+    CTaskSimpleHoldEntity(
+        CEntity* entityToHold,
+        CVector* posn,
+        uint8 boneFrameId,
+        uint8 boneFlags = HOLD_ENTITY_UPDATE_TRANSLATION_ONLY,
+        AnimationId animId = AnimationId::ANIM_ID_NO_ANIMATION_SET,
+        AssocGroupId groupId = AssocGroupId::ANIM_GROUP_DEFAULT,
+        bool bDisAllowDroppingOnAnimEnd = true
+    );
+
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, const char* animName, const char* animBlockName, eAnimationFlags animFlags);
     CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags);
     ~CTaskSimpleHoldEntity();
@@ -47,7 +58,7 @@ public:
     void ReleaseEntity();
     bool CanThrowEntity();
     void PlayAnim(AnimationId groupId, AssocGroupId animId);
-    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* pData);
+    static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);
     void DropEntity(CPed* ped, bool bAddEventSoundQuiet);
     void ChoosePutDownHeight(CPed* ped);

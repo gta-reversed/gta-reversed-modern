@@ -7,7 +7,6 @@ CAEPedlessSpeechAudioEntity::CAEPedlessSpeechAudioEntity() : CAEPedSpeechAudioEn
     // NOP
 }
 
-
 // 0x4E4E10
 void CAEPedlessSpeechAudioEntity::Initialise() {
     m_pEntity                  = nullptr;
@@ -50,7 +49,7 @@ void CAEPedlessSpeechAudioEntity::Terminate() {
 
 // 0x4E6380
 void CAEPedlessSpeechAudioEntity::PlayLoadedSound() {
-    plugin::CallMethod<0x4E6380, CAEPedlessSpeechAudioEntity*>(this);;
+    plugin::CallMethod<0x4E6380, CAEPedlessSpeechAudioEntity*>(this);
 }
 
 // 0x4E6090
@@ -74,18 +73,20 @@ bool CAEPedlessSpeechAudioEntity::IsPedFemaleForAudio() {
 }
 
 void CAEPedlessSpeechAudioEntity::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAEPedlessSpeechAudioEntity", "CAEPedlessSpeechAudioEntity", 0x4E6070, &CAEPedlessSpeechAudioEntity::Constructor);
-    Install("CAEPedlessSpeechAudioEntity", "GetPedType", 0x4E60B0, &CAEPedlessSpeechAudioEntity::GetPedType);
-    Install("CAEPedlessSpeechAudioEntity", "IsPedFemaleForAudio", 0x4E60C0, &CAEPedlessSpeechAudioEntity::IsPedFemaleForAudio);
-    // Install("CAEPedlessSpeechAudioEntity", "Initialise", 0x4E4E10, &CAEPedlessSpeechAudioEntity::Initialise);
-    // Install("CAEPedlessSpeechAudioEntity", "StopCurrentSpeech", 0x4E4E80, &CAEPedlessSpeechAudioEntity::StopCurrentSpeech);
-    // Install("CAEPedlessSpeechAudioEntity", "AddSayEvent", 0x4E60D0, &CAEPedlessSpeechAudioEntity::AddSayEvent);
-    // Install("CAEPedlessSpeechAudioEntity", "UpdateParameters", 0x4E4D10, &CAEPedlessSpeechAudioEntity::UpdateParameters_Reversed);
-    // Install("CAEPedlessSpeechAudioEntity", "Terminate", 0x4E6300, &CAEPedlessSpeechAudioEntity::Terminate_Reversed);
-    // Install("CAEPedlessSpeechAudioEntity", "PlayLoadedSound", 0x4E6380, &CAEPedlessSpeechAudioEntity::PlayLoadedSound_Reversed);
-    Install("CAEPedlessSpeechAudioEntity", "GetAllocatedVoice", 0x4E6090, &CAEPedlessSpeechAudioEntity::GetAllocatedVoice_Reversed);
-    Install("CAEPedlessSpeechAudioEntity", "WillPedChatAboutTopic", 0x4E60A0, &CAEPedlessSpeechAudioEntity::WillPedChatAboutTopic_Reversed);
+    RH_ScopedClass(CAEPedlessSpeechAudioEntity);
+    RH_ScopedCategory("Audio/Entities");
+
+    // RH_ScopedInstall(Constructor, 0x4E6070);
+    RH_ScopedInstall(GetPedType, 0x4E60B0);
+    RH_ScopedInstall(IsPedFemaleForAudio, 0x4E60C0);
+    // RH_ScopedInstall(Initialise, 0x4E4E10);
+    // RH_ScopedInstall(StopCurrentSpeech, 0x4E4E80);
+    // RH_ScopedInstall(AddSayEvent, 0x4E60D0);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x4E4D10);
+    // RH_ScopedVirtualInstall(Terminate, 0x4E6300);
+    // RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E6380);
+    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E6090);
+    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E60A0);
 }
 
 // 0x4E6070

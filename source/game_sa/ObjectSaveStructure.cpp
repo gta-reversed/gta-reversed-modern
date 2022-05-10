@@ -1,65 +1,70 @@
 #include "StdInc.h"
 
+#include "ObjectSaveStructure.h"
+
 void CObjectSaveStructure::InjectHooks()
 {
-    ReversibleHooks::Install("CObjectSaveStructure", "Construct", 0x5D2160, &CObjectSaveStructure::Construct);
-    ReversibleHooks::Install("CObjectSaveStructure", "Extract", 0x5D2220, &CObjectSaveStructure::Extract);
+    RH_ScopedClass(CObjectSaveStructure);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Construct, 0x5D2160);
+    RH_ScopedInstall(Extract, 0x5D2220);
 }
 
-void CObjectSaveStructure::Construct(CObject* pObject)
+void CObjectSaveStructure::Construct(CObject* obj)
 {
-    m_matrix.CompressFromFullMatrix(*pObject->m_matrix);
-    m_nBonusValue  = pObject->m_nBonusValue;
-    m_nCostValue   = pObject->m_wCostValue;
-    m_nRemovalTime = pObject->m_dwRemovalTime;
-    m_nEntityFlags = pObject->m_nFlags;
-    m_nObjectFlags = pObject->m_nObjectFlags;
-    m_nObjectType  = pObject->m_nObjectType;
-    m_nColDamageEffect = pObject->m_nColDamageEffect;
-    m_nSpecialColResponseCase = pObject->m_nSpecialColResponseCase;
+    m_matrix.CompressFromFullMatrix(*obj->m_matrix);
+    m_nBonusValue  = obj->m_nBonusValue;
+    m_nCostValue   = obj->m_wCostValue;
+    m_nRemovalTime = obj->m_nRemovalTime;
+    m_nEntityFlags = obj->m_nFlags;
+    m_nObjectFlags = obj->m_nObjectFlags;
+    m_nObjectType  = obj->m_nObjectType;
+    m_nColDamageEffect = obj->m_nColDamageEffect;
+    m_nSpecialColResponseCase = obj->m_nSpecialColResponseCase;
     m_nUnused = 0;
 
     m_nPhysicalFlags = 0;
 
-    if (pObject->physicalFlags.bDisableCollisionForce)
+    if (obj->physicalFlags.bDisableCollisionForce)
         m_bDisableCollisionForce = true;
 
-    if (pObject->physicalFlags.bDontApplySpeed)
+    if (obj->physicalFlags.bDontApplySpeed)
         m_bDontApplySpeed = true;
 
-    if (pObject->physicalFlags.bBulletProof)
+    if (obj->physicalFlags.bBulletProof)
         m_bBulletProof = true;
 
-    if (pObject->physicalFlags.bFireProof)
+    if (obj->physicalFlags.bFireProof)
         m_bFireProof = true;
 
-    if (pObject->physicalFlags.bCollisionProof)
+    if (obj->physicalFlags.bCollisionProof)
         m_bCollisionProof = true;
 
-    if (pObject->physicalFlags.bMeeleProof)
+    if (obj->physicalFlags.bMeeleProof)
         m_bMeeleProof = true;
 
-    if (pObject->physicalFlags.bExplosionProof)
+    if (obj->physicalFlags.bExplosionProof)
         m_bExplosionProof = true;
 }
 
-void CObjectSaveStructure::Extract(CObject* pObject)
+void CObjectSaveStructure::Extract(CObject* obj)
 {
-    m_matrix.DecompressIntoFullMatrix(*pObject->m_matrix);
-    pObject->m_nBonusValue = m_nBonusValue;
-    pObject->m_wCostValue = m_nCostValue;
-    pObject->m_dwRemovalTime = m_nRemovalTime;
-    pObject->m_nFlags = m_nEntityFlags;
-    pObject->m_nObjectFlags = m_nObjectFlags;
-    pObject->m_nObjectType = m_nObjectType;
-    pObject->m_nColDamageEffect = m_nColDamageEffect;
-    pObject->m_nSpecialColResponseCase = m_nSpecialColResponseCase;
+    m_matrix.DecompressIntoFullMatrix(*obj->m_matrix);
+    obj->m_nBonusValue = m_nBonusValue;
+    obj->m_wCostValue = m_nCostValue;
+    obj->m_nRemovalTime = m_nRemovalTime;
+    obj->m_nFlags = m_nEntityFlags;
+    obj->m_nObjectFlags = m_nObjectFlags;
+    obj->m_nObjectType = m_nObjectType;
+    obj->m_nColDamageEffect = m_nColDamageEffect;
+    obj->m_nSpecialColResponseCase = m_nSpecialColResponseCase;
 
-    pObject->physicalFlags.bDisableCollisionForce = m_bDisableCollisionForce;
-    pObject->physicalFlags.bDontApplySpeed = m_bDontApplySpeed;
-    pObject->physicalFlags.bBulletProof = m_bBulletProof;
-    pObject->physicalFlags.bFireProof = m_bFireProof;
-    pObject->physicalFlags.bCollisionProof = m_bCollisionProof;
-    pObject->physicalFlags.bMeeleProof = m_bMeeleProof;
-    pObject->physicalFlags.bExplosionProof = m_bExplosionProof;
+    obj->physicalFlags.bDisableCollisionForce = m_bDisableCollisionForce;
+    obj->physicalFlags.bDontApplySpeed = m_bDontApplySpeed;
+    obj->physicalFlags.bBulletProof = m_bBulletProof;
+    obj->physicalFlags.bFireProof = m_bFireProof;
+    obj->physicalFlags.bCollisionProof = m_bCollisionProof;
+    obj->physicalFlags.bMeeleProof = m_bMeeleProof;
+    obj->physicalFlags.bExplosionProof = m_bExplosionProof;
 }

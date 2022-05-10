@@ -1,6 +1,8 @@
 #pragma once
 
-#include "Ped.h"
+#include "Base.h"
+
+class CPed;
 
 class CAccident {
 public:
@@ -24,5 +26,4 @@ public:
                && !m_pPed->physicalFlags.bSubmergedInWater;
     }
 };
-
 VALIDATE_SIZE(CAccident, 0x8);

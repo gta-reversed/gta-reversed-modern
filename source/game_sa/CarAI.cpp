@@ -1,88 +1,216 @@
+/*
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
+*/
 #include "StdInc.h"
 
-/*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
-*/
+#include "CarAI.h"
+#include "CarCtrl.h"
 
-// 0x41BFA0
-void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* pVehicle) {
-	plugin::Call<0x41BFA0, CVehicle*>(pVehicle);
-}
+void CCarAI::InjectHooks() {
+    RH_ScopedClass(CCarAI);
+    RH_ScopedCategory("AI");
 
-// 0x41C050
-void CCarAI::CarHasReasonToStop(CVehicle* pVehicle) {
-	plugin::Call<0x41C050, CVehicle*>(pVehicle);
-}
-
-// 0x41C070
-void CCarAI::AddPoliceCarOccupants(CVehicle* pVehicle, bool arg2) {
-	plugin::Call<0x41C070, CVehicle*, bool>(pVehicle, arg2);
+    // RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0);
+    // RH_ScopedInstall(AddFiretruckOccupants, 0x41C600);
+    // RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070);
+    // RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0);
+    // RH_ScopedInstall(CarHasReasonToStop, 0x41C050);
+    // RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00);
+    RH_ScopedInstall(FindPoliceBikeMissionForWantedLevel, 0x41CA40);
+    RH_ScopedInstall(FindPoliceBoatMissionForWantedLevel, 0x41CA50);
+    // RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0);
+    RH_ScopedInstall(FindPoliceCarSpeedForWantedLevel, 0x41CAA0);
+    // RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50);
+    // RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70);
+    // RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30);
+    // RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0);
+    // RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210);
+    // RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
+    // RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350);
+    // RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660);
+    // RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0);
+    RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
+    // RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900);
+    // RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960);
+    // RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0);
+    // RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
+    // RH_ScopedInstall(UpdateCarAI, 0x41DA30);
 }
 
 // 0x41C4A0
-void CCarAI::AddAmbulanceOccupants(CVehicle* pVehicle) {
-	plugin::Call<0x41C4A0, CVehicle*>(pVehicle);
+void CCarAI::AddAmbulanceOccupants(CVehicle* vehicle) {
+    plugin::Call<0x41C4A0, CVehicle*>(vehicle);
 }
 
 // 0x41C600
-void CCarAI::AddFiretruckOccupants(CVehicle* pVehicle) {
-	plugin::Call<0x41C600, CVehicle*>(pVehicle);
+void CCarAI::AddFiretruckOccupants(CVehicle* vehicle) {
+    plugin::Call<0x41C600, CVehicle*>(vehicle);
 }
 
-// 0x41C760
-void CCarAI::TellOccupantsToLeaveCar(CVehicle* pVehicle) {
-	plugin::Call<0x41C760, CVehicle*>(pVehicle);
+// 0x41C070
+void CCarAI::AddPoliceCarOccupants(CVehicle* vehicle, bool arg2) {
+    plugin::Call<0x41C070, CVehicle*, bool>(vehicle, arg2);
 }
 
-// 0x41C960
-void CCarAI::TellCarToFollowOtherCar(CVehicle* pVehicle1, CVehicle* pVehicle2, float radius) {
-	plugin::Call<0x41C960, CVehicle*, CVehicle*, float>(pVehicle1, pVehicle2, radius);
+// 0x41BFA0
+void CCarAI::BackToCruisingIfNoWantedLevel(CVehicle* vehicle) {
+    plugin::Call<0x41BFA0, CVehicle*>(vehicle);
 }
 
-// 0x2B
-char CCarAI::FindPoliceBikeMissionForWantedLevel() {
-	return plugin::CallAndReturn<char, 0x41CA40>();
+// 0x41C050
+void CCarAI::CarHasReasonToStop(CVehicle* vehicle) {
+    plugin::Call<0x41C050, CVehicle*>(vehicle);
+}
+
+// 0x41CD00
+void CCarAI::EntitiesGoHeadOn(CEntity* entity1, CEntity* entity2) {
+    plugin::Call<0x41CD00, CEntity*, CEntity*>(entity1, entity2);
+}
+
+// 0x41CA40
+eCarMission CCarAI::FindPoliceBikeMissionForWantedLevel() {
+    return MISSION_POLICE_BIKE;
 }
 
 // 0x41CA50
-char CCarAI::FindPoliceBoatMissionForWantedLevel() {
-	return plugin::CallAndReturn<char, 0x41CA50>();
+eCarMission CCarAI::FindPoliceBoatMissionForWantedLevel() {
+    const auto& wantedLevel = FindPlayerWanted()->m_nWantedLevel;
+    if (wantedLevel < 2 || wantedLevel > 6)
+        return FindPlayerVehicle() ? MISSION_BLOCKPLAYER_FARAWAY : MISSION_BOAT_CIRCLING_PLAYER;
+    else
+        return FindPlayerVehicle() ? MISSION_ATTACKPLAYER : MISSION_BOAT_CIRCLING_PLAYER;
+}
+
+// rtype eCarMission ?
+// 0x41C9D0
+int8 CCarAI::FindPoliceCarMissionForWantedLevel() {
+    return plugin::CallAndReturn<int8, 0x41C9D0>();
 }
 
 // 0x41CAA0
-int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* pVehicle) {
-	return plugin::CallAndReturn<int32, 0x41CAA0, CVehicle*>(pVehicle);
+int32 CCarAI::FindPoliceCarSpeedForWantedLevel(CVehicle* vehicle) {
+    const auto& maxVelocity = vehicle->m_pHandlingData->m_transmissionData.m_fMaxVelocity;
+    switch (FindPlayerWanted()->m_nWantedLevel) {
+    case 0:
+        return (int32)CGeneral::GetRandomNumberInRange(12.0f, 16.0f);
+    case 1:
+        return 25;
+    case 2:
+        return 34;
+    case 3:
+        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 0.90f);
+    case 4:
+        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.20f);
+    case 5:
+        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.25f);
+    case 6:
+        return int32(maxVelocity * GAME_SPEED_TO_CAR_AI_SPEED * 1.30f);
+    default:
+        return 0;
+    }
+}
+
+// 0x41BF50
+float CCarAI::FindSwitchDistanceClose(CVehicle* vehicle) {
+    return (float)vehicle->m_autoPilot.m_nStraightLineDistance;
+}
+
+// 0x41BF70
+float CCarAI::FindSwitchDistanceFar(CVehicle* vehicle) {
+    if (vehicle->vehicleFlags.bIsLawEnforcer)
+        return 50.0f;
+    else
+        return FindSwitchDistanceClose(vehicle) + 5.0f;
 }
 
 // 0x41CE30
-float CCarAI::GetCarToGoToCoors(CVehicle* pVehicle1, CVector* pVector, int32 drivingStyle, bool bSpeedLimit20) {
-	return plugin::CallAndReturn<float, 0x41CE30, CVehicle*, CVector*, int32, bool>(pVehicle1, pVector, drivingStyle, bSpeedLimit20);
+float CCarAI::GetCarToGoToCoors(CVehicle* vehicle, CVector* vec, int32 drivingStyle, bool bSpeedLimit20) {
+    return plugin::CallAndReturn<float, 0x41CE30, CVehicle*, CVector*, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
+}
+
+// 0x41D0E0
+float CCarAI::GetCarToGoToCoorsAccurate(CVehicle* vehicle, CVector* vec, int32 drivingStyle, bool bSpeedLimit20) {
+    return plugin::CallAndReturn<float, 0x41D0E0, CVehicle*, CVector*, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
+}
+
+// 0x41D210
+float CCarAI::GetCarToGoToCoorsRacing(CVehicle* vehicle, CVector* vec, int32 drivingStyle, bool bSpeedLimit20) {
+    return plugin::CallAndReturn<float, 0x41D210, CVehicle*, CVector*, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
+}
+
+// 0x41CFB0
+float CCarAI::GetCarToGoToCoorsStraightLine(CVehicle* vehicle, CVector* vec, int32 drivingStyle, bool bSpeedLimit20) {
+    return plugin::CallAndReturn<float, 0x41CFB0, CVehicle*, CVector*, int32, bool>(vehicle, vec, drivingStyle, bSpeedLimit20);
 }
 
 // 0x41D350
-float CCarAI::GetCarToParkAtCoors(CVehicle* pVehicle, CVector* pVector) {
-	return plugin::CallAndReturn<float, 0x41D350, CVehicle*, CVector*>(pVehicle, pVector);
-}
-
-// 0x41D3D0
-void CCarAI::MellowOutChaseSpeed(CVehicle* pVehicle) {
-	plugin::Call<0x41D3D0, CVehicle*>(pVehicle);
+float CCarAI::GetCarToParkAtCoors(CVehicle* vehicle, CVector* vec) {
+    return plugin::CallAndReturn<float, 0x41D350, CVehicle*, CVector*>(vehicle, vec);
 }
 
 // 0x41D660
-void CCarAI::MakeWayForCarWithSiren(CVehicle* pVehicle) {
-	plugin::Call<0x41D660, CVehicle*>(pVehicle);
+void CCarAI::MakeWayForCarWithSiren(CVehicle* vehicle) {
+    plugin::Call<0x41D660, CVehicle*>(vehicle);
+}
+
+// 0x41D3D0
+void CCarAI::MellowOutChaseSpeed(CVehicle* vehicle) {
+    plugin::Call<0x41D3D0, CVehicle*>(vehicle);
+}
+
+// 0x41CB70
+void CCarAI::MellowOutChaseSpeedBoat(CVehicle* vehicle) {
+    switch (FindPlayerWanted()->m_nWantedLevel) {
+    case 0:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 8;
+        break;
+    case 1:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 10;
+        break;
+    case 2:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 15;
+        break;
+    case 3:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 20;
+        break;
+    case 4:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 25;
+        break;
+    case 5:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 30;
+        break;
+    case 6:
+        vehicle->m_autoPilot.m_nCruiseSpeed = 40;
+        break;
+    default:
+        return;
+    }
+}
+
+// 0x41C900
+void CCarAI::TellCarToBlockOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
+    plugin::Call<0x41C900, CVehicle*, CVehicle*>(vehicle1, vehicle2);
+}
+
+// 0x41C960
+void CCarAI::TellCarToFollowOtherCar(CVehicle* vehicle1, CVehicle* vehicle2, float radius) {
+    plugin::Call<0x41C960, CVehicle*, CVehicle*, float>(vehicle1, vehicle2, radius);
+}
+
+// 0x41C8A0
+void CCarAI::TellCarToRamOtherCar(CVehicle* vehicle1, CVehicle* vehicle2) {
+    plugin::Call<0x41C8A0, CVehicle*, CVehicle*>(vehicle1, vehicle2);
+}
+
+// 0x41C760
+void CCarAI::TellOccupantsToLeaveCar(CVehicle* vehicle) {
+    plugin::Call<0x41C760, CVehicle*>(vehicle);
 }
 
 // 0x41DA30
-void CCarAI::UpdateCarAI(CVehicle* pVehicle) {
-	plugin::Call<0x41DA30, CVehicle*>(pVehicle);
-}
-
-// 0x41C9D0
-char CCarAI::FindPoliceCarMissionForWantedLevel() {
-	return plugin::CallAndReturn<char, 0x41C9D0>();
+void CCarAI::UpdateCarAI(CVehicle* vehicle) {
+    plugin::Call<0x41DA30, CVehicle*>(vehicle);
 }

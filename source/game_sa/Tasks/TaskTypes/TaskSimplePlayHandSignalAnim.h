@@ -12,6 +12,8 @@ public:
     CHandObject* m_pRightHandObject; // always 0
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_HANDSIGNAL_ANIM;
+
     CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame);
     ~CTaskSimplePlayHandSignalAnim();
 
@@ -20,7 +22,7 @@ public:
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
-    void StartAnim(CPed* pPed);
+    void StartAnim(CPed* ped);
 
 private:
     friend void InjectHooksMain();

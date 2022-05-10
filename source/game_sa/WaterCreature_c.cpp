@@ -1,38 +1,43 @@
 #include "StdInc.h"
 
+#include "WaterCreature_c.h"
+
 void WaterCreature_c::InjectHooks()
 {
-    ReversibleHooks::Install("WaterCreature_c", "Init", 0x6E4160, &WaterCreature_c::Init);
-    ReversibleHooks::Install("WaterCreature_c", "Exit", 0x6E3E60, &WaterCreature_c::Exit);
-    ReversibleHooks::Install("WaterCreature_c", "Update", 0x6E4670, &WaterCreature_c::Update);
+    RH_ScopedClass(WaterCreature_c);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x6E4160);
+    RH_ScopedInstall(Exit, 0x6E3E60);
+    RH_ScopedInstall(Update, 0x6E4670);
 }
 
-bool WaterCreature_c::Init(int32 nType, CVector* pVecPos, WaterCreature_c* pParent, float fWaterLevel, float fWaterDepth)
+bool WaterCreature_c::Init(int32 nType, CVector* vecPos, WaterCreature_c* parent, float fWaterLevel, float fWaterDepth)
 {
     if (CObject::nNoTempObjects >= 150)
         return false;
 
-    const auto& pInfo = WaterCreatureManager_c::GetCreatureInfo(nType);
-    if (!pParent)
+    const auto& info = WaterCreatureManager_c::GetCreatureInfo(nType);
+    if (!parent)
     {
-        auto fMaxZ = fWaterLevel - pInfo.m_fMinSpawnDepth;
+        auto fMaxZ = fWaterLevel - info.m_fMinSpawnDepth;
         auto fMinZ = fWaterLevel - fWaterDepth + 2.0F;
         fMinZ = std::max(fMinZ, fWaterLevel - 50.0F);
 
         if (fMaxZ < fMinZ)
             return false;
 
-        pVecPos->z = CGeneral::GetRandomNumberInRange(fMinZ, fMaxZ);
+        vecPos->z = CGeneral::GetRandomNumberInRange(fMinZ, fMaxZ);
     }
 
-    CPools::ms_pObjectPool->m_bIsLocked = true;
-    m_pObject = new CObject(*pInfo.m_pModelId, false);
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = true;
+    m_pObject = new CObject(*info.m_pModelId, false);
+    GetObjectPool()->m_bIsLocked = false;
 
     if (!m_pObject)
         return false;
 
-    m_pObject->m_nAreaCode = CGame::currArea;
+    m_pObject->m_nAreaCode = static_cast<eAreaCodes>(CGame::currArea);
     m_pObject->SetIsStatic(true);
     m_pObject->m_bUnderwater = true;
     m_pObject->physicalFlags.bApplyGravity = false;
@@ -40,30 +45,30 @@ bool WaterCreature_c::Init(int32 nType, CVector* pVecPos, WaterCreature_c* pPare
     m_pObject->m_nObjectType = eObjectType::OBJECT_TYPE_DECORATION;
     
     m_nCreatureType = nType;
-    m_pFollowedCreature = pParent;
+    m_pFollowedCreature = parent;
     m_bShouldBeDeleted = false;
-    if (WaterCreature_c::IsJellyfish())
+    if (IsJellyfish())
         m_pObject->m_bDrawLast = true;
 
-    if (pParent)
+    if (parent)
     {
         CVector vecDirection;
         vecDirection.x = CGeneral::GetRandomNumberInRange(-1.0F, 1.0F);
         vecDirection.y = CGeneral::GetRandomNumberInRange(-1.0F, 1.0F);
         vecDirection.z = CGeneral::GetRandomNumberInRange(-0.5F, 0.5F);
-        const auto fDist = CGeneral::GetRandomNumberInRange(pInfo.m_fMinDistFromFollowed, pInfo.m_fMaxDistFromFollowed);
+        const auto fDist = CGeneral::GetRandomNumberInRange(info.m_fMinDistFromFollowed, info.m_fMaxDistFromFollowed);
 
         m_vecOffsetFromFollowed = vecDirection * fDist;
-        m_pObject->SetPosn(*pVecPos + m_vecOffsetFromFollowed);
-        m_fHeading = pParent->GetObject()->GetHeading();
-        m_fDefaultSpeed = CGeneral::GetRandomNumberInRange(pInfo.m_fMinSpeed, pParent->m_fDefaultSpeed);
+        m_pObject->SetPosn(*vecPos + m_vecOffsetFromFollowed);
+        m_fHeading = parent->GetObject()->GetHeading();
+        m_fDefaultSpeed = CGeneral::GetRandomNumberInRange(info.m_fMinSpeed, parent->m_fDefaultSpeed);
     }
     else
     {
         m_vecOffsetFromFollowed.Set(0.0F, 0.0F, 0.0F);
-        m_pObject->SetPosn(*pVecPos);
+        m_pObject->SetPosn(*vecPos);
         m_fHeading = CGeneral::GetRandomNumberInRange(-PI, PI);
-        m_fDefaultSpeed = CGeneral::GetRandomNumberInRange(pInfo.m_fMinSpeed, pInfo.m_fMaxSpeed);
+        m_fDefaultSpeed = CGeneral::GetRandomNumberInRange(info.m_fMinSpeed, info.m_fMaxSpeed);
     }
 
     m_ucTargetSwimSpeed = 0;
@@ -148,20 +153,8 @@ void WaterCreature_c::Update(float fTimeStep)
             {
                 const auto vecTargetPos = vecPos + m_pObject->GetForwardVector() * pInfo.m_fSpeed;
                 CColPoint colPoint;
-                CEntity* pEntity;
-                if (CWorld::ProcessLineOfSight(vecPos,
-                                               vecTargetPos,
-                                               colPoint,
-                                               pEntity,
-                                               true,
-                                               false,
-                                               false,
-                                               false,
-                                               false,
-                                               false,
-                                               false,
-                                               false))
-                {
+                CEntity* entity;
+                if (CWorld::ProcessLineOfSight(vecPos, vecTargetPos, colPoint, entity, true, false, false, false, false, false, false, false)) {
                     const auto fHeading = CGeneral::GetRadianAngleBetweenPoints(colPoint.m_vecNormal.x, colPoint.m_vecNormal.y, 0.0F, 0.0F);
                     m_fHeading = CGeneral::LimitRadianAngle(fHeading);
                     m_bChangedDir = true;
@@ -204,8 +197,8 @@ void WaterCreature_c::Update(float fTimeStep)
         }
         else
         {
-            auto* pPlayer = FindPlayerPed(0);
-            auto& vecPlayerPos = pPlayer->GetPosition();
+            auto* player = FindPlayerPed(0);
+            auto& vecPlayerPos = player->GetPosition();
             auto vecSwimDir = vecPos - vecPlayerPos;
             if (vecSwimDir.NormaliseAndMag() < 5.0F) // Swim away from player
             {
@@ -215,7 +208,7 @@ void WaterCreature_c::Update(float fTimeStep)
 
                 const auto fNewHeading = CGeneral::GetRadianAngleBetweenPoints(vecSwimDir.x, vecSwimDir.y, 0.0F, 0.0F);
                 m_fHeading = CGeneral::LimitRadianAngle(fNewHeading);
-                if (WaterCreature_c::IsSmallFish())
+                if (IsSmallFish())
                     m_pObject->SetHeading(m_fHeading);
             }
         }
@@ -237,7 +230,7 @@ void WaterCreature_c::Update(float fTimeStep)
         m_pObject->SetPosn(vecNewPos);
     }
 
-    if (WaterCreature_c::IsJellyfish())
+    if (IsJellyfish())
     {
         auto& vecJellyPos = m_pObject->GetPosition();
         float fWaterLevel;

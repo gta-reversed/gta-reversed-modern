@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) source file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -7,22 +7,26 @@
 
 #include "StdInc.h"
 
+#include "AtomicModelInfo.h"
+#include "TagManager.h"
+
 void CAtomicModelInfo::InjectHooks()
 {
-// VTABLE
-    ReversibleHooks::Install("CAtomicModelInfo", "AsAtomicModelInfoPtr", 0x4C5560, &CAtomicModelInfo::AsAtomicModelInfoPtr_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetModelType", 0x4C5570, &CAtomicModelInfo::GetModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "Init", 0x4C4430, &CAtomicModelInfo::Init_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "DeleteRwObject", 0x4C4440, &CAtomicModelInfo::DeleteRwObject_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "GetRwModelType", 0x4C5580, &CAtomicModelInfo::GetRwModelType_Reversed);
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_void", 0x4C4530, (RwObject * (CAtomicModelInfo::*)())(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "CreateInstance_rwmat", 0x4C44D0, (RwObject * (CAtomicModelInfo::*)(RwMatrix*))(&CAtomicModelInfo::CreateInstance_Reversed));
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomic", 0x4C4360, &CAtomicModelInfo::SetAtomic_Reversed);
+    RH_ScopedClass(CAtomicModelInfo);
+    RH_ScopedCategory("Models");
 
-// OTHER
-    ReversibleHooks::Install("CAtomicModelInfo", "GetAtomicFromDistance", 0x4C44B0, &CAtomicModelInfo::GetAtomicFromDistance);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetupVehicleUpgradeFlags", 0x4C4570, &CAtomicModelInfo::SetupVehicleUpgradeFlags);
-    ReversibleHooks::Install("CAtomicModelInfo", "SetAtomicModelInfoFlags", 0x5B3B20, &SetAtomicModelInfoFlags);
+    RH_ScopedVirtualInstall(AsAtomicModelInfoPtr, 0x4C5560);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C5570);
+    RH_ScopedVirtualInstall(Init, 0x4C4430);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C4440);
+    RH_ScopedVirtualInstall(GetRwModelType, 0x4C5580);
+    RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4530, RwObject * (CAtomicModelInfo::*)());
+    RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C44D0, RwObject * (CAtomicModelInfo::*)(RwMatrix*));
+    RH_ScopedVirtualInstall(SetAtomic, 0x4C4360);
+
+    RH_ScopedInstall(GetAtomicFromDistance, 0x4C44B0);
+    RH_ScopedInstall(SetupVehicleUpgradeFlags, 0x4C4570);
+    RH_ScopedGlobalInstall(SetAtomicModelInfoFlags, 0x5B3B20);
 }
 
 CAtomicModelInfo* CAtomicModelInfo::AsAtomicModelInfoPtr()
@@ -64,9 +68,9 @@ void CAtomicModelInfo::DeleteRwObject_Reversed()
     auto uiEffectsCount = RpGeometryGet2dFxCount(RpAtomicGetGeometry(m_pRwAtomic));
     m_n2dfxCount -= uiEffectsCount;
 
-    auto pFrame = RpAtomicGetFrame(m_pRwAtomic);
+    auto frame = RpAtomicGetFrame(m_pRwAtomic);
     RpAtomicDestroy(m_pRwAtomic);
-    RwFrameDestroy(pFrame);
+    RwFrameDestroy(frame);
     m_pRwObject = nullptr;
 
     CBaseModelInfo::RemoveTexDictionaryRef();
@@ -94,12 +98,12 @@ RwObject* CAtomicModelInfo::CreateInstance_Reversed()
         return nullptr;
 
     CBaseModelInfo::AddRef();
-    auto pClonedAtomic = RpAtomicClone(m_pRwAtomic);
-    auto pFrame = RwFrameCreate();
-    RpAtomicSetFrame(pClonedAtomic, pFrame);
+    auto clonedAtomic = RpAtomicClone(m_pRwAtomic);
+    auto frame = RwFrameCreate();
+    RpAtomicSetFrame(clonedAtomic, frame);
     CBaseModelInfo::RemoveRef();
 
-    return reinterpret_cast<RwObject*>(pClonedAtomic);
+    return reinterpret_cast<RwObject*>(clonedAtomic);
 }
 
 RwObject* CAtomicModelInfo::CreateInstance(RwMatrix* matrix)
@@ -112,13 +116,13 @@ RwObject* CAtomicModelInfo::CreateInstance_Reversed(RwMatrix* matrix)
         return nullptr;
 
     CBaseModelInfo::AddRef();
-    auto pClonedAtomic = RpAtomicClone(m_pRwAtomic);
-    auto pFrame = RwFrameCreate();
-    memcpy(RwFrameGetMatrix(pFrame), matrix, sizeof(RwMatrix));
-    RpAtomicSetFrame(pClonedAtomic, pFrame);
+    auto clonedAtomic = RpAtomicClone(m_pRwAtomic);
+    auto frame = RwFrameCreate();
+    memcpy(RwFrameGetMatrix(frame), matrix, sizeof(RwMatrix));
+    RpAtomicSetFrame(clonedAtomic, frame);
     CBaseModelInfo::RemoveRef();
 
-    return reinterpret_cast<RwObject*>(pClonedAtomic);
+    return reinterpret_cast<RwObject*>(clonedAtomic);
 }
 
 void CAtomicModelInfo::SetAtomic(RpAtomic* atomic)
@@ -160,38 +164,38 @@ RpAtomic* CAtomicModelInfo::GetAtomicFromDistance(float distance)
     return m_pRwAtomic;
 }
 
-void CAtomicModelInfo::SetupVehicleUpgradeFlags(char const* name)
+void CAtomicModelInfo::SetupVehicleUpgradeFlags(const char* name)
 {
     if (bUseCommonVehicleDictionary)
         return;
 
     const tVehicleComponentFlag aDummyComps[] = {
-        {"chss_",   0x1},
-        {"wheel_",  0x2},
-        {"exh_",    0x13},
-        {"fbmp_",   0xC},
-        {"rbmp_",   0xD},
-        {"misc_a_", 0x14},
-        {"misc_b_", 0x15},
-        {"misc_c_", 0x16},
-        {nullptr, 0}
+        { "chss_",   0x1  },
+        { "wheel_",  0x2  },
+        { "exh_",    0x13 },
+        { "fbmp_",   0xC  },
+        { "rbmp_",   0xD  },
+        { "misc_a_", 0x14 },
+        { "misc_b_", 0x15 },
+        { "misc_c_", 0x16 },
+        { nullptr,   0x0  }
     };
 
     const tVehicleComponentFlag aChassisComps[] = {
-        {"bnt_",      0x0},
-        {"bntl_",     0x1},
-        {"bntr_",     0x2},
-        {"spl_",      0x6},
-        {"wg_l_",     0x8},
-        {"wg_r",      0x9},
-        {"fbb_",      0xA},
-        {"bbb_",      0xB},
-        {"lgt_",      0xC},
-        {"rf_",       0xE},
-        {"nto_",      0xF},
-        {"hydralics", 0x10},
-        {"stereo",    0x11},
-        {nullptr, 0}
+        { "bnt_",      0x0  },
+        { "bntl_",     0x1  },
+        { "bntr_",     0x2  },
+        { "spl_",      0x6  },
+        { "wg_l_",     0x8  },
+        { "wg_r",      0x9  },
+        { "fbb_",      0xA  },
+        { "bbb_",      0xB  },
+        { "lgt_",      0xC  },
+        { "rf_",       0xE  },
+        { "nto_",      0xF  },
+        { "hydralics", 0x10 },
+        { "stereo",    0x11 },
+        { nullptr,     0x0  }
     };
 
     auto pChassis = aChassisComps;

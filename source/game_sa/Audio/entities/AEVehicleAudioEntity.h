@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -72,9 +72,15 @@ public:
 };
 VALIDATE_SIZE(cVehicleParams, 0x4C);
 
-struct tVehicleSound {
+class tVehicleSound {
+public:
     uint32    m_nIndex;
     CAESound* m_pSound;
+
+    void Init(auto index) {
+        m_nIndex = index;
+        m_pSound = nullptr;
+    }
 };
 VALIDATE_SIZE(tVehicleSound, 0x8);
 
@@ -195,7 +201,7 @@ public:
     void    Service();
     void    Initialise(CEntity* entity);
     void    Terminate();
-    void    GetVehicleTypeForAudio();
+    uint32    GetVehicleTypeForAudio();
     void    IsAccInhibited(cVehicleParams& params);
     void    IsAccInhibitedBackwards(cVehicleParams& params);
     void    IsAccInhibitedForLowSpeed(cVehicleParams& params);
@@ -258,7 +264,7 @@ public:
     void    ProcessPlayerBicycle(cVehicleParams& params);
     void    ProcessDummyBicycle(cVehicleParams& params);
     float   GetFlyingMetalVolume(CPhysical*);
-    void    AddAudioEvent(int32, CEntity*);
+    void    AddAudioEvent(eAudioEvents eventId, CEntity* entity);
     void    GetHornState(uint8*, cVehicleParams& params);
     void    GetSirenState(uint8*, uint8*, cVehicleParams& params);
     void    PlayHornOrSiren(uint8, uint8, uint8, cVehicleParams& params);

@@ -1,14 +1,16 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) source file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 
 #include "StdInc.h"
 
+#include "IplStore.h"
+
 CQuadTreeNode *&CIplStore::ms_pQuadTree = *(CQuadTreeNode **)0x8E3FAC;
-CPool<IplDef> *&CIplStore::ms_pPool = *(CPool<IplDef> **)0x8E3FB0;
+CIplPool *&CIplStore::ms_pPool = *(CIplPool **)0x8E3FB0;
 
 uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 uint32 MAX_IPL_INSTANCES = 1000;
@@ -21,7 +23,10 @@ uint32& gCurrIplInstancesCount = *(uint32*)0xBCC0D8;
 CEntity** gCurrIplInstances = (CEntity**)0xBCC0E0;
 
 void CIplStore::InjectHooks() {
-    ReversibleHooks::Install("CIplStore", "GetIplEntityIndexArray", 0x4047B0, &CIplStore::GetIplEntityIndexArray);
+    RH_ScopedClass(CIplStore);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(GetIplEntityIndexArray, 0x4047B0);
 }
 
 // 0x405EC0
@@ -35,13 +40,13 @@ void CIplStore::Shutdown() {
 }
 
 // 0x405AC0
-int32 CIplStore::AddIplSlot(char const* name) {
-    return plugin::CallAndReturn<int32, 0x405AC0, char const*>(name);
+int32 CIplStore::AddIplSlot(const char* name) {
+    return plugin::CallAndReturn<int32, 0x405AC0, const char*>(name);
 }
 
 // 0x4045B0
-void CIplStore::AddIplsNeededAtPosn(CVector const& posn) {
-    plugin::Call<0x4045B0, CVector const&>(posn);
+void CIplStore::AddIplsNeededAtPosn(const CVector& posn) {
+    plugin::Call<0x4045B0, const CVector&>(posn);
 }
 
 // 0x4045E0
@@ -55,13 +60,13 @@ void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
 }
 
 // 0x4053F0
-void CIplStore::EnsureIplsAreInMemory(CVector const& posn) {
-    plugin::Call<0x4053F0, CVector const&>(posn);
+void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
+    plugin::Call<0x4053F0, const CVector&>(posn);
 }
 
 // 0x404AC0
-int32 CIplStore::FindIplSlot(char const* name) {
-    return plugin::CallAndReturn<int32, 0x404AC0, char const*>(name);
+int32 CIplStore::FindIplSlot(const char* name) {
+    return plugin::CallAndReturn<int32, 0x404AC0, const char*>(name);
 }
 
 // 0x404C70
@@ -85,8 +90,8 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
 }
 
 // 0x405600
-bool CIplStore::HaveIplsLoaded(CVector const& coords, int32 playerNumber) {
-    return plugin::CallAndReturn<bool, 0x405600, CVector const&, int32>(coords, playerNumber);
+bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
+    return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
 }
 
 // 0x404C90
@@ -160,13 +165,13 @@ void CIplStore::RequestIplAndIgnore(int32 iplSlotIndex) {
 }
 
 // 0x405520
-void CIplStore::RequestIpls(CVector const& posn, int32 playerNumber) {
-    plugin::Call<0x405520, CVector const&, int32>(posn, playerNumber);
+void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
+    plugin::Call<0x405520, const CVector&, int32>(posn, playerNumber);
 }
 
 // 0x404700
-void CIplStore::SetIplsRequired(CVector const& posn, int32 playerNumber) {
-    plugin::Call<0x404700, CVector const&, int32>(posn, playerNumber);
+void CIplStore::SetIplsRequired(const CVector& posn, int32 playerNumber) {
+    plugin::Call<0x404700, const CVector&, int32>(posn, playerNumber);
 }
 
 // 0x404A90
@@ -175,21 +180,21 @@ void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
 }
 
 // 0x404DE0
-int32 CIplStore::SetupRelatedIpls(char const* iplName, int32 entityArraysIndex, CEntity** instances) {
-    return plugin::CallAndReturn<int32, 0x404DE0, char const*, int32, CEntity**>(iplName, entityArraysIndex, instances);
+int32 CIplStore::SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances) {
+    return plugin::CallAndReturn<int32, 0x404DE0, const char*, int32, CEntity**>(iplName, entityArraysIndex, instances);
 }
 
 // 0x4045F0
-void SetIfInteriorIplIsRequired(CVector2D const& posn, void* data) {
-    plugin::Call<0x4045F0, CVector2D const&, void*>(posn, data);
+void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
+    plugin::Call<0x4045F0, const CVector2D&, void*>(posn, data);
 }
 
 // 0x404660
-void SetIfIplIsRequired(CVector2D const& posn, void* data) {
-    plugin::Call<0x404660, CVector2D const&, void*>(posn, data);
+void SetIfIplIsRequired(const CVector2D& posn, void* data) {
+    plugin::Call<0x404660, const CVector2D&, void*>(posn, data);
 }
 
 // 0x404690
-void SetIfIplIsRequiredReducedBB(CVector2D const& posn, void* data) {
-    plugin::Call<0x404690, CVector2D const&, void*>(posn, data);
+void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
+    plugin::Call<0x404690, const CVector2D&, void*>(posn, data);
 }

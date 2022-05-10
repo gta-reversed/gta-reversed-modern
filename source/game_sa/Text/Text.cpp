@@ -15,11 +15,8 @@
 
 CText& TheText = *(CText*)0xC1B340;
 
-// 0xC1AEB8
-char GxtErrorString[32];
-
-// 0x8D2FB8
-static constexpr uint8 UpperCaseTable[] = {
+// 0x56D3A4
+static constexpr uint8 FrenchUpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x41, 0x41, 0x41, 0x41, 0x84, 0x85, 0x45, 0x45, 0x45,
     0x45, 0x49, 0x49, 0x49, 0x49, 0x4F, 0x4F, 0x4F, 0x4F, 0x55, 0x55, 0x55, 0x55, 0xAD, 0xAD, 0xAF,
@@ -42,49 +39,48 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
 };
 
-static constexpr uint8 UpperCaseTableX[128] = {
-    128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
-    144, 145, 146, 147, 148, 149, 150, 128, 129, 130, 131, 132, 133, 134, 135, 136,
-    137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 148, 149, 173, 173, 175,
-    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-    192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-    208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-    224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
-};
-
-static constexpr uint8 FrenchUpperCaseTableX[128] = {
-    128, 129, 130, 131, 132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143,
-    144, 145, 146, 147, 148, 149, 150, 65,  65,  65,  65,  132, 133, 69,  69,  69,
-    69,  73,  73,  73,  73,  79,  79,  79,  79,  85,  85,  85,  85,  173, 173, 175,
-    176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191,
-    192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207,
-    208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223,
-    224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239,
-    240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
-};
-
 void CText::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CMissionTextOffsets", "Load", 0x69F670, &CMissionTextOffsets::Load);
+    RH_ScopedClass(CText);
+    RH_ScopedCategory("Text");
 
-    Install("CData", "Unload", 0x69F640, &CData::Unload);
-    // Install("CData", "Load", 0x69F5D0, &CData::Load);
 
-    Install("CKeyArray", "Unload", 0x69F510, &CKeyArray::Unload);
-    // Install("CKeyArray", "Load", 0x69F490, &CKeyArray::Load);
-    Install("CKeyArray", "BinarySearch", 0x69F570, &CKeyArray::BinarySearch);
-    Install("CKeyArray", "Search", 0x6A0000, &CKeyArray::Search);
+    RH_ScopedInstall(Constructor, 0x6A00F0);
+    RH_ScopedInstall(Destructor, 0x6A0140);
+    RH_ScopedInstall(Get, 0x6A0050);
+    RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
+    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
+    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
+    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(Load, 0x6A01A0);
+    RH_ScopedInstall(Unload, 0x69FF20);
 
-    Install("CText", "CText", 0x6A00F0, &CText::Constructor);
-    Install("CText", "~CText", 0x6A0140, &CText::Destructor);
-    Install("CText", "Get", 0x6A0050, &CText::Get);
-    Install("CText", "GetNameOfLoadedMissionText", 0x69FBD0, &CText::GetNameOfLoadedMissionText);
-    // Install("CText", "ReadChunkHeader", 0x69F940, &CText::ReadChunkHeader);
-    // Install("CText", "LoadMissionPackText", 0x69F9A0, &CText::LoadMissionPackText);
-    // Install("CText", "LoadMissionText", 0x69FBF0, &CText::LoadMissionText);
-    Install("CText", "Load", 0x6A01A0, &CText::Load);
-    Install("CText", "Unload", 0x69FF20, &CText::Unload);
+    //
+    // TODO: These should be moved to their respective files...
+    //
+
+    {
+        RH_ScopedClass(CMissionTextOffsets);
+        //    RH_ScopedInstall(Load, 0x69F670);
+    }
+
+    {
+        RH_ScopedClass(CData);
+        RH_ScopedInstall(Unload, 0x69F640);
+        //    RH_ScopedInstall(Load, 0x69F5D0);
+
+
+    }
+
+    {
+        RH_ScopedClass(CKeyArray);
+
+        RH_ScopedCategory("Text");
+        RH_ScopedInstall(Unload, 0x69F510);
+
+        RH_ScopedInstall(BinarySearch, 0x69F570);
+        RH_ScopedInstall(Search, 0x6A0000);
+        //    RH_ScopedInstall(Load, 0x69F490);
+    }
 }
 
 // 0x6A00F0
@@ -135,7 +131,7 @@ void CText::Load(bool bKeepMissionPack) {
     Unload(bKeepMissionPack);
 
     char filename[32] = {0};
-    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nLanguage)) {
+    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nPrefsLanguage)) {
     case eLanguage::AMERICAN:
         sprintf(filename, "AMERICAN.GXT");
         break;
@@ -162,7 +158,7 @@ void CText::Load(bool bKeepMissionPack) {
     }
 
     CFileMgr::SetDir("TEXT");
-    FILESTREAM file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(filename, "rb");
 
     uint16 version = 0;
     uint16 encoding = 0;
@@ -203,7 +199,7 @@ void CText::Load(bool bKeepMissionPack) {
     strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
     m_bCdErrorLoaded = true;
 
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
     if (bKeepMissionPack)
         return;
@@ -212,7 +208,7 @@ void CText::Load(bool bKeepMissionPack) {
         if (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CTimer::Suspend();
             LoadMissionPackText();
-            CFileMgr::SetDir(gta_empty_string);
+            CFileMgr::SetDir("");
             CTimer::Resume();
         }
     }

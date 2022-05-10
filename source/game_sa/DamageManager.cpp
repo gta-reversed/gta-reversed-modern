@@ -3,34 +3,42 @@
 #include "DamageManager.h"
 
 void CDamageManager::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CDamageManager", "Init", 0x6A0520, &CDamageManager::Init);
-    Install("CDamageManager", "ResetDamageStatusAndWheelDamage", 0x6A04E0, &CDamageManager::ResetDamageStatusAndWheelDamage);
-    Install("CDamageManager", "FuckCarCompletely", 0x6C25D0, &CDamageManager::FuckCarCompletely); 
-    Install("CDamageManager", "ApplyDamage", 0x6C24B0, &CDamageManager::ApplyDamage); 
-    Install("CDamageManager", "ProgressAeroplaneDamage", 0x6C2460, &CDamageManager::ProgressAeroplaneDamage); 
-    Install("CDamageManager", "ProgressWheelDamage", 0x6C2440, &CDamageManager::ProgressWheelDamage); 
-    Install("CDamageManager", "ProgressPanelDamage", 0x6C23C0, &CDamageManager::ProgressPanelDamage); 
-    Install("CDamageManager", "ProgressEngineDamage", 0x6C23B0, &CDamageManager::ProgressEngineDamage); 
-    Install("CDamageManager", "ProgressDoorDamage", 0x6C2320, &CDamageManager::ProgressDoorDamage); 
-    Install("CDamageManager", "GetAeroplaneCompStatus", 0x6C2300, &CDamageManager::GetAeroplaneCompStatus); 
-    Install("CDamageManager", "SetAeroplaneCompStatus", 0x6C22D0, &CDamageManager::SetAeroplaneCompStatus); 
-    Install("CDamageManager", "GetEngineStatus", 0x6C22C0, &CDamageManager::GetEngineStatus); 
-    Install("CDamageManager", "SetEngineStatus", 0x6C22A0, &CDamageManager::SetEngineStatus); 
-    Install("CDamageManager", "GetCarNodeIndexFromPanel", 0x6C26A0, &CDamageManager::GetCarNodeIndexFromPanel); 
-    Install("CDamageManager", "GetDoorStatus_Component", 0x6C2250, &CDamageManager::GetDoorStatus_Component); 
-    Install("CDamageManager", "GetDoorStatus", 0x6C2230, &CDamageManager::GetDoorStatus); 
-    Install("CDamageManager", "SetDoorStatus_Component", 0x6C21E0, &CDamageManager::SetDoorStatus_Component); 
-    Install("CDamageManager", "SetDoorStatus", 0x6C21C0, &CDamageManager::SetDoorStatus); 
-    Install("CDamageManager", "GetWheelStatus", 0x6C21B0, &CDamageManager::GetWheelStatus); 
-    Install("CDamageManager", "SetWheelStatus", 0x6C21A0, &CDamageManager::SetWheelStatus); 
-    Install("CDamageManager", "GetPanelStatus", 0x6C2180, &CDamageManager::GetPanelStatus); 
-    Install("CDamageManager", "SetPanelStatus", 0x6C2150, &CDamageManager::SetPanelStatus); 
-    Install("CDamageManager", "GetLightStatus", 0x6C2130, &CDamageManager::GetLightStatus); 
-    Install("CDamageManager", "SetLightStatus", 0x6C2100, &CDamageManager::SetLightStatus); 
-    Install("CDamageManager", "ResetDamageStatus", 0x6C20E0, &CDamageManager::ResetDamageStatus); 
-    Install("CDamageManager", "GetComponentGroup", 0x6C2040, &CDamageManager::GetComponentGroup); 
-    Install("CDamageManager", "GetCarNodeIndexFromDoor", 0x6C26F0, &CDamageManager::GetCarNodeIndexFromDoor);
+    RH_ScopedClass(CDamageManager);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x6A0520);
+    RH_ScopedInstall(ResetDamageStatusAndWheelDamage, 0x6A04E0);
+    RH_ScopedInstall(FuckCarCompletely, 0x6C25D0); 
+    RH_ScopedInstall(ApplyDamage, 0x6C24B0); 
+    RH_ScopedInstall(ProgressAeroplaneDamage, 0x6C2460); 
+    RH_ScopedInstall(ProgressWheelDamage, 0x6C2440); 
+    RH_ScopedInstall(ProgressPanelDamage, 0x6C23C0); 
+    RH_ScopedInstall(ProgressEngineDamage, 0x6C23B0); 
+    RH_ScopedInstall(ProgressDoorDamage, 0x6C2320); 
+    RH_ScopedInstall(GetAeroplaneCompStatus, 0x6C2300); 
+    RH_ScopedInstall(SetAeroplaneCompStatus, 0x6C22D0); 
+    RH_ScopedInstall(GetEngineStatus, 0x6C22C0); 
+    RH_ScopedInstall(SetEngineStatus, 0x6C22A0); 
+    RH_ScopedInstall(GetCarNodeIndexFromPanel, 0x6C26A0); 
+    RH_ScopedInstall(GetDoorStatus_Component, 0x6C2250); 
+    RH_ScopedInstall(GetDoorStatus, 0x6C2230); 
+    RH_ScopedInstall(SetDoorStatus_Component, 0x6C21E0); 
+    RH_ScopedOverloadedInstall(SetDoorStatus, "", 0x6C21C0, void(CDamageManager::*)(eDoors, eDoorStatus));
+    RH_ScopedInstall(SetWheelStatus, 0x6C21A0); 
+    RH_ScopedInstall(GetPanelStatus, 0x6C2180); 
+    RH_ScopedInstall(SetPanelStatus, 0x6C2150); 
+    RH_ScopedInstall(GetLightStatus, 0x6C2130); 
+    RH_ScopedInstall(SetLightStatus, 0x6C2100); 
+    RH_ScopedInstall(ResetDamageStatus, 0x6C20E0); 
+    RH_ScopedInstall(GetComponentGroup, 0x6C2040); 
+    RH_ScopedInstall(GetCarNodeIndexFromDoor, 0x6C26F0);
+    RH_ScopedNamedInstall(GetWheelStatus_Hooked, "GetWheelStatus", 0x6C21B0);
+}
+
+CDamageManager::CDamageManager(float wheelDamageEffect) :
+    m_fWheelDamageEffect{ wheelDamageEffect }
+{
+    ResetDamageStatus();
 }
 
 // 0x6A0520
@@ -76,7 +84,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     uint8 relCompIdx{};
     GetComponentGroup(compId, group, relCompIdx);
 
-    static constexpr float afPanelDamageMultByGroup[] = { 2.5, 1.25, 3.2, 1.4, 2.5, 2.8, 0.5, 1.2, 0.87, 0.2 };
+    static constexpr float afPanelDamageMultByGroup[] = { 2.5f, 1.25f, 3.2f, 1.4f, 2.5f, 2.8f, 0.5f, 1.2f, 0.87f, 0.2f };
     fIntensity *= afPanelDamageMultByGroup[(size_t)group];
     if (compId == tComponent::COMPONENT_WINDSCREEN)
         fIntensity *= 0.6f;
@@ -92,7 +100,7 @@ bool CDamageManager::ApplyDamage(CAutomobile* vehicle, tComponent compId, float 
     }
     case tComponentGroup::COMPGROUP_WHEEL: {
         ProgressWheelDamage((eCarWheel)relCompIdx);
-        break;
+        return true;
     }
     case tComponentGroup::COMPGROUP_DOOR:
     case tComponentGroup::COMPGROUP_BONNET:
@@ -117,6 +125,7 @@ bool CDamageManager::ProgressAeroplaneDamage(uint8 nFrameId) {
     const auto current = (ePanelDamageState)GetAeroplaneCompStatus(nFrameId);
     if (current == ePanelDamageState::DAMSTATE_DAMAGED)
         return false;
+
     SetAeroplaneCompStatus(nFrameId, (ePanelDamageState)((unsigned)current + 1));
     return true;
 }
@@ -126,7 +135,9 @@ bool CDamageManager::ProgressWheelDamage(eCarWheel wheel) {
     const eCarWheelStatus current = GetWheelStatus(wheel);
     if (current == eCarWheelStatus::WHEEL_STATUS_MISSING)
         return false;
+
     SetWheelStatus(wheel, (eCarWheelStatus)((unsigned)current + 1));
+    return true;
 }
 
 // 0x6C23C0
@@ -208,7 +219,7 @@ void CDamageManager::SetAeroplaneCompStatus(uint8 frame, ePanelDamageState statu
 }
 
 // 0x6C22C0
-uint8 CDamageManager::GetEngineStatus() {
+uint32 CDamageManager::GetEngineStatus() {
     return m_nEngineStatus;
 }
 
@@ -236,7 +247,7 @@ eCarNodes CDamageManager::GetCarNodeIndexFromPanel(ePanels panel) {
 }
 
 // 0x6C2250
-eDoorStatus CDamageManager::GetDoorStatus_Component(tComponent doorComp) {
+eDoorStatus CDamageManager::GetDoorStatus_Component(tComponent doorComp) const {
     /* Enums don't seem to match up... */
     switch (doorComp) {
     case tComponent::COMPONENT_DOOR_RF:
@@ -285,7 +296,7 @@ void CDamageManager::SetDoorStatus(eDoors door, eDoorStatus status) {
 }
 
 // 0x6C21B0
-eCarWheelStatus CDamageManager::GetWheelStatus(eCarWheel wheel) {
+eCarWheelStatus CDamageManager::GetWheelStatus(eCarWheel wheel) const {
     return m_anWheelsStatus[(unsigned)wheel];
 }
 
@@ -295,7 +306,7 @@ void CDamageManager::SetWheelStatus(eCarWheel wheel, eCarWheelStatus status) {
 }
 
 // 0x6C2180
-ePanelDamageState CDamageManager::GetPanelStatus(ePanels panel) {
+ePanelDamageState CDamageManager::GetPanelStatus(ePanels panel) const {
     return (ePanelDamageState)((m_nPanelsStatus >> (4 * (unsigned)panel)) & 0xF);
 }
 
@@ -305,7 +316,7 @@ void CDamageManager::SetPanelStatus(ePanels panel, ePanelDamageState status) {
 }
 
 // 0x6C2130
-eLightsState CDamageManager::GetLightStatus(eLights light) {
+eLightsState CDamageManager::GetLightStatus(eLights light) const {
     return (eLightsState)((m_nLightsStatus >> (2 * (unsigned)light)) & 3);
 }
 
@@ -385,8 +396,120 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
     return false;
 }
 
+// NOTSA
+void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
+    constexpr eCarWheel wheels[]{CAR_WHEEL_FRONT_LEFT, CAR_WHEEL_REAR_LEFT, CAR_WHEEL_FRONT_RIGHT, CAR_WHEEL_REAR_RIGHT};
+    for (auto&& wheel : wheels) {
+        SetWheelStatus(wheel, state);
+    }
+}
+
+// NOTSA
+void CDamageManager::SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
+    for (auto&& door : doors) {
+        SetDoorStatus(door, status);
+    }
+}
+
+auto CDamageManager::GetAllLightsState() const->std::array<eLightsState, 4> {
+    return {
+        GetLightStatus(eLights::LIGHT_FRONT_LEFT),
+        GetLightStatus(eLights::LIGHT_FRONT_RIGHT),
+        GetLightStatus(eLights::LIGHT_REAR_LEFT),
+        GetLightStatus(eLights::LIGHT_REAR_RIGHT)
+    };
+}
+
+/*!
+* @notsa
+* @brief Should only be called if the door is present (asserts in debug)
+* @returns If door's state is either \r DAMSTATE_OPENED or \r DAMSTATE_OPENED_DAMAGED
+*/
+bool CDamageManager::IsDoorOpen(eDoors door) const {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OPENED:
+    case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
+        return true;
+    case eDoorStatus::DAMSTATE_NOTPRESENT:
+        assert(0 && "Door not present @ IsDoorOpen"); // Otherwise `!IsDoorOpen() == IsDoorClosed()` may not always be true which may cause bugs :D
+        return false;
+    }
+    return false;
+}
+
+/*!
+* @notsa
+* @brief Should only be called if the door is present (asserts in debug)
+* @returns If door's state is either \r DAMSTATE_OK` or \r DAMSTATE_DAMAGED
+*/
+bool CDamageManager::IsDoorClosed(eDoors door) const {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OK:
+    case eDoorStatus::DAMSTATE_DAMAGED:
+        return true;
+    case eDoorStatus::DAMSTATE_NOTPRESENT:
+        assert(0 && "Door not present @ IsDoorClosed"); // Otherwise `!IsDoorOpen() == IsDoorClosed()` may not always be true which may cause bugs :D
+        return false;
+    }
+    return false;
+}
+
+bool CDamageManager::IsDoorPresent(eDoors door) const {
+    return GetDoorStatus(door) != DAMSTATE_NOTPRESENT;
+}
+
+/*!
+* @notsa
+* @brief   Checks if door is damaged.
+* @returns Returns if door's state is neither \r DAMSTATE_OK or \r DAMSTATE_OPENED
+*/
+bool CDamageManager::IsDoorDamaged(eDoors door) const {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OK:
+    case eDoorStatus::DAMSTATE_OPENED:
+        return false;
+    }
+    return true;
+}
+
+/*!
+* @notsa
+* @brief Sets door open. Shouldn't be called if door isn't present (will assert in debug).
+*/
+void CDamageManager::SetDoorOpen(eDoors door) {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OK:
+        SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED);
+        break;
+    case eDoorStatus::DAMSTATE_DAMAGED:
+        SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
+        break;
+    case eDoorStatus::DAMSTATE_NOTPRESENT:
+        //assert(0 && "Door should be present @ SetDoorOpen");
+        break;
+    }
+}
+
+/*!
+* @notsa
+* @brief Sets door closed. Shouldn't be called if door isn't present (will assert in debug).
+*/
+void CDamageManager::SetDoorClosed(eDoors door) {
+    switch (GetDoorStatus(door)) {
+    case eDoorStatus::DAMSTATE_OPENED:
+        SetDoorStatus(door, eDoorStatus::DAMSTATE_OK);
+        break;
+    case eDoorStatus::DAMSTATE_OPENED_DAMAGED:
+        SetDoorStatus(door, eDoorStatus::DAMSTATE_DAMAGED);
+        break;
+    case eDoorStatus::DAMSTATE_NOTPRESENT:
+        assert(0 && "Door should be present @ SetDoorClosed");
+        break;
+    }
+}
+
 // 0x6C2230
-eDoorStatus CDamageManager::GetDoorStatus(eDoors nDoorIdx) {
+eDoorStatus CDamageManager::GetDoorStatus(eDoors nDoorIdx) const {
     switch (nDoorIdx) {
     case eDoors::DOOR_BONNET:
     case eDoors::DOOR_BOOT:

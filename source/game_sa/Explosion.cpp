@@ -3,24 +3,27 @@
 #include "Explosion.h"
 #include "CreepingFire.h"
 #include "FireManager.h"
+#include "InterestingEvents.h"
 
 CAEExplosionAudioEntity& CExplosion::m_ExplosionAudioEntity = *(CAEExplosionAudioEntity*)0xC888D0;
 CExplosion (&CExplosion::aExplosions)[16] = *(CExplosion(*)[16])0xC88950;
 
 void CExplosion::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CExplosion", "ClearAllExplosions", 0x736840, &CExplosion::ClearAllExplosions);
-    Install("CExplosion", "Shutdown", 0x7368F0, &CExplosion::Shutdown);
-    Install("CExplosion", "GetExplosionActiveCounter", 0x736900, &CExplosion::GetExplosionActiveCounter);
-    Install("CExplosion", "ResetExplosionActiveCounter", 0x736910, &CExplosion::ResetExplosionActiveCounter);
-    Install("CExplosion", "DoesExplosionMakeSound", 0x736920, &CExplosion::DoesExplosionMakeSound);
-    Install("CExplosion", "GetExplosionType", 0x736930, &CExplosion::GetExplosionType);
-    Install("CExplosion", "GetExplosionPosition", 0x736940, &CExplosion::GetExplosionPosition);
-    Install("CExplosion", "TestForExplosionInArea", 0x736950, &CExplosion::TestForExplosionInArea);
-    Install("CExplosion", "RemoveAllExplosionsInArea", 0x7369E0, &CExplosion::RemoveAllExplosionsInArea);
-    Install("CExplosion", "Initialise", 0x736A40, &CExplosion::Initialise);
-    Install("CExplosion", "AddExplosion", 0x736A50, &CExplosion::AddExplosion);
-    Install("CExplosion", "Update", 0x737620, &CExplosion::Update);
+    RH_ScopedClass(CExplosion);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(ClearAllExplosions, 0x736840);
+    RH_ScopedInstall(Shutdown, 0x7368F0);
+    RH_ScopedInstall(GetExplosionActiveCounter, 0x736900);
+    RH_ScopedInstall(ResetExplosionActiveCounter, 0x736910);
+    RH_ScopedInstall(DoesExplosionMakeSound, 0x736920);
+    RH_ScopedInstall(GetExplosionType, 0x736930);
+    RH_ScopedInstall(GetExplosionPosition, 0x736940);
+    RH_ScopedInstall(TestForExplosionInArea, 0x736950);
+    RH_ScopedInstall(RemoveAllExplosionsInArea, 0x7369E0);
+    RH_ScopedInstall(Initialise, 0x736A40);
+    RH_ScopedInstall(AddExplosion, 0x736A50);
+    RH_ScopedInstall(Update, 0x737620);
 }
 
 // 0x736A40
@@ -41,13 +44,13 @@ void CExplosion::ClearAllExplosions() {
         exp.m_fRadius = 1.0f;
         exp.m_fVisibleDistance = 0.0f;
         exp.m_fPropagationRate = 0.0f;
-        exp.m_fGroundZ = 0.0;
-        exp.m_pCreator = 0;
-        exp.m_pVictim = 0;
+        exp.m_fGroundZ = 0.0f;
+        exp.m_pCreator = nullptr;
+        exp.m_pVictim = nullptr;
         exp.m_nExpireTime = 0.0f;
         exp.m_nActiveCounter = 0;
         exp.m_nCreatedTime = 0.0f;
-        exp.m_bMakeSound = 1;
+        exp.m_bMakeSound = true;
         exp.m_nFuelTimer = 0;
 
         for (auto i = 0; i < 3; i++) {
@@ -119,6 +122,20 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+// NOTSA
+void CExplosion::SetCreator(CEntity* newCreator) noexcept {
+    CEntity::SafeCleanUpRef(m_pCreator);
+    CEntity::SafeRegisterRef(newCreator);
+    m_pCreator = newCreator;
+}
+
+// NOTSA
+void CExplosion::SetVictim(CEntity* newVictim) noexcept {
+    CEntity::SafeCleanUpRef(m_pVictim);
+    CEntity::SafeRegisterRef(newVictim);
+    m_pVictim = newVictim;
+}
+
 bool DoesNeedToVehProcessBombTimer(eExplosionType type) {
     switch (type) {
     case eExplosionType::EXPLOSION_ROCKET:
@@ -188,9 +205,9 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         FxSystem_c* fx{nullptr};
         if (exp->m_pVictim) {
             if (RwObject* pRwObj = exp->m_pVictim->m_pRwObject) {
-                if (RwMatrix* pMatrix = exp->m_pVictim->GetModellingMatrix()) {
+                if (RwMatrix* matrix = exp->m_pVictim->GetModellingMatrix()) {
                     CVector expToVictimDir = pos - exp->m_pVictim->GetPosition();
-                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, pMatrix, false);
+                    fx = g_fxMan.CreateFxSystem(name, &expToVictimDir, matrix, false);
                 }
             }
         } else {
@@ -257,10 +274,11 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fVisibleDistance = 200.0f;
             exp->m_fDamagePercentage = 0.2f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
+        break;
     }
     case eExplosionType::EXPLOSION_CAR:
     case eExplosionType::EXPLOSION_QUICK_CAR: {
@@ -268,14 +286,15 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fRadius = 9.0f;
             exp->m_fVisibleDistance = 300.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 4250);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 4250);
         exp->m_fPropagationRate = 0.5f;
-        exp->m_nCreatedTime = (float)CTimer::m_snTimeInMilliseconds;
+        exp->m_nCreatedTime = (float)CTimer::GetTimeInMS();
 
         if (exp->m_pVictim) {
             CCrime::ReportCrime(eCrimeType::CRIME_EXPLOSION, exp->m_pVictim->AsPed(), nullptr); /* won't do anything as second ped is nullptr */
         }
         CreateAndPlayFxWithSound("explosion_medium");
+        break;
     }
     case eExplosionType::EXPLOSION_BOAT:
     case eExplosionType::EXPLOSION_AIRCRAFT: {
@@ -283,21 +302,33 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fRadius = 25.0f;
             exp->m_fVisibleDistance = 600.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 3000);
-        exp->m_nCreatedTime = (float)CTimer::m_snTimeInMilliseconds;
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 3000);
+        exp->m_nCreatedTime = (float)CTimer::GetTimeInMS();
 
         CreateAndPlayFxWithSound("explosion_large");
+        break;
     }
     case eExplosionType::EXPLOSION_MINE: {
         if (!bInvisible) {
             exp->m_fRadius = 10.0f;
             exp->m_fVisibleDistance = 150.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         PlaySoundIfEnabled();
         /* No fx for this */
+        break;
+    }
+    case eExplosionType::EXPLOSION_OBJECT: {
+        if (!bInvisible) {
+            exp->m_fRadius = 10.0f;
+            exp->m_fVisibleDistance = 150.0f;
+        }
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
+        exp->m_fPropagationRate = 0.5f;
+        if (exp->m_bMakeSound)
+            m_ExplosionAudioEntity.AddAudioEvent(AE_EXPLOSION, exp->m_vecPosition, 0.0f);
         break;
     }
     case eExplosionType::EXPLOSION_TANK_FIRE: {
@@ -305,7 +336,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fRadius = 10.0f;
             exp->m_fVisibleDistance = 150.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_large");
@@ -316,7 +347,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fRadius = 3.0f;
             exp->m_fVisibleDistance = 90.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
@@ -327,7 +358,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fRadius = 3.0f;
             exp->m_fVisibleDistance = 90.0f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_tiny");
@@ -370,15 +401,15 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
     }
 
     if (type == eExplosionType::EXPLOSION_MOLOTOV) {
-        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos);
     } else {
         if (cameraShake == -1.0f)
             cameraShake = 0.6f;
-        TheCamera.CamShake(cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake, pos);
 
-        CPad::GetPad(0)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+        CPad::GetPad(0)->StartShake_Distance(300, 128, pos);
         if (CGameLogic::IsCoopGameGoingOn())
-            CPad::GetPad(1)->StartShake_Distance(300, 128, pos.x, pos.y, pos.z);
+            CPad::GetPad(1)->StartShake_Distance(300, 128, pos);
     }
 }
 
@@ -389,7 +420,7 @@ void CExplosion::Update() {
             continue;
 
         if (exp.m_nParticlesExpireTime) {
-            if (CTimer::GetTimeInMS() > (uint32)exp.m_nParticlesExpireTime) {
+            if (CTimer::GetTimeInMS() > exp.m_nParticlesExpireTime) {
                 exp.m_nParticlesExpireTime = 0;
                 if (exp.m_fVisibleDistance != 0.0f) {
                     CWorld::TriggerExplosion(
@@ -457,29 +488,30 @@ void CExplosion::Update() {
             else
                 exp.m_nActiveCounter++;
 
-            exp.m_nFuelTimer -= -CTimer::GetTimeStepInMS();
+            exp.m_nFuelTimer = exp.m_nFuelTimer - (-CTimer::GetTimeStepInMS()); // todo: hello guys, it's warning C4146
 
-            if (exp.m_nFuelTimer <= 200) {
-                switch (exp.m_nType) {
-                case eExplosionType::EXPLOSION_CAR:
-                case eExplosionType::EXPLOSION_QUICK_CAR:
-                case eExplosionType::EXPLOSION_BOAT:
-                case eExplosionType::EXPLOSION_AIRCRAFT: {
-                    const float fFuelTimerProgress = exp.m_nFuelTimer / 1000.0f;
-                    for (auto i = 0; i < 3; i++) {
-                        const float fOffsetDistance = exp.m_fFuelOffsetDistance[i];
-                        if (fOffsetDistance > 0.0f) {
-                            const float fFuelSpeed = exp.m_fFuelSpeed[i];
-                            const CVector& vecDir = exp.m_vecFuelDirection[i];
+            if (exp.m_nFuelTimer > 200)
+                continue;
 
-                            CVector fxPos = exp.m_vecPosition + vecDir * (fOffsetDistance + fFuelTimerProgress * fFuelSpeed);
-                            if (auto fx = g_fxMan.CreateFxSystem("explosion_fuel_car", &fxPos, nullptr, false))
-                                fx->PlayAndKill();
-                        }
+            switch (exp.m_nType) {
+            case eExplosionType::EXPLOSION_CAR:
+            case eExplosionType::EXPLOSION_QUICK_CAR:
+            case eExplosionType::EXPLOSION_BOAT:
+            case eExplosionType::EXPLOSION_AIRCRAFT: {
+                const float fFuelTimerProgress = exp.m_nFuelTimer / 1000.0f;
+                for (auto i = 0; i < 3; i++) {
+                    const float fOffsetDistance = exp.m_fFuelOffsetDistance[i];
+                    if (fOffsetDistance > 0.0f) {
+                        const float fFuelSpeed = exp.m_fFuelSpeed[i];
+                        const CVector& vecDir = exp.m_vecFuelDirection[i];
+
+                        CVector fxPos = exp.m_vecPosition + vecDir * (fOffsetDistance + fFuelTimerProgress * fFuelSpeed);
+                        if (auto fx = g_fxMan.CreateFxSystem("explosion_fuel_car", &fxPos, nullptr, false))
+                            fx->PlayAndKill();
                     }
-                    break;
                 }
-                }
+                break;
+            }
             }
         }
     }

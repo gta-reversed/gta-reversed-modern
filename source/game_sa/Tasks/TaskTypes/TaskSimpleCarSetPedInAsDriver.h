@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -13,21 +13,18 @@
 
 class CTaskSimpleCarSetPedInAsDriver : public CTaskSimple {
 public:
-    bool m_bIsFinished;
-private:
-    char _pad[3];
-public:
-    CAnimBlendAssociation* m_pAnim;
-    CVehicle * m_pTargetVehicle;
+    bool                          m_bIsFinished;
+    CAnimBlendAssociation*        m_pAnim;
+    CVehicle*                     m_pTargetVehicle;
     CTaskUtilityLineUpPedWithCar* m_pUtility;
-    bool m_bWarpingInToCar;
-    uint8 m_nDoorFlagsToClear;
-    uint8 m_nNumGettingInToClear;
-private:
-    char _pad2[1];
-public:
+    bool                          m_bWarpingInToCar;
+    uint8                         m_nDoorFlagsToClear;
+    uint8                         m_nNumGettingInToClear;
 
-    CTaskSimpleCarSetPedInAsDriver(CVehicle *pTargetVehicle, CTaskUtilityLineUpPedWithCar *pUtility);
+public:
+    static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_DRIVER;
+
+    CTaskSimpleCarSetPedInAsDriver(CVehicle *targetVehicle, CTaskUtilityLineUpPedWithCar *utility);
     ~CTaskSimpleCarSetPedInAsDriver();
 
     CTask* Clone() override;

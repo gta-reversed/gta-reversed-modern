@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,6 +9,8 @@
 #include "Rect.h"
 #include "PtrListSingleLink.h"
 #include "Pool.h"
+
+class CQuadTreeNode;
 
 /*
 node level 2
@@ -31,6 +33,7 @@ node level 2
 
 typedef void(*CQuadTreeNodeRectCallBack) (const CRect& rect, void* item);
 typedef void(*CQuadTreeNodeVec2DCallBack) (const CVector2D& rect, void* item);
+typedef CPool<CQuadTreeNode> CQuadTreeNodePool;
 
 class CQuadTreeNode {
 public:
@@ -39,12 +42,13 @@ public:
     CQuadTreeNode*     m_apChildren[4];
     uint32             m_nLevel; // 0 - last level
 
-    static CPool<CQuadTreeNode> *&ms_pQuadTreeNodePool;
+    static CQuadTreeNodePool*& ms_pQuadTreeNodePool;
 
+public:
     CQuadTreeNode(const CRect& size, int32 startLevel);
     ~CQuadTreeNode();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void operator delete(void* data);
 
 public:

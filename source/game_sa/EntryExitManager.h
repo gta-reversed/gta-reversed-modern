@@ -1,16 +1,21 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "EntryExit.h"
 #include "Vector.h"
 #include "Vector2D.h"
-#include "Entity.h"
-#include "QuadTreeNode.h"
+
+#include "Pool.h"
+
+class QuadTreeNode;
+class CEntryExit;
+class CEntity;
+
+typedef CPool<CEntryExit> CEntryExitsPool;
 
 class CEntryExitManager {
 public:
@@ -23,7 +28,7 @@ public:
     static int32& ms_exitEnterState;
     static CQuadTreeNode*& mp_QuadTree;
     static CEntryExit*& mp_Active;
-    static CPool<CEntryExit>*& mp_poolEntryExits;
+    static CEntryExitsPool*& mp_poolEntryExits;
     static uint32& ms_numVisibleEntities;
 
 public:
@@ -40,8 +45,8 @@ public:
     static int32 AddOne(float entranceX, float entranceY, float entranceZ, float entranceAngle, float entranceRangeX, float entranceRangeY, float fUnused, float exitX, float exitY, float exitZ, float exitAngle, int32 area, int32 flags, int32 skyColor, int32 timeOn, int32 timeOff, int32 numberOfPeds, const char* name);
     static void DeleteOne(int32 index);
     static void EnableBurglaryHouses(bool enable);
-    static CEntity* FindNearestDoor(CEntryExit const& entryExit, float range);
-    static int32 FindNearestEntryExit(CVector2D const& position, float range, int32 ignoreArea);
+    static CEntity* FindNearestDoor(const CEntryExit& entryExit, float range);
+    static int32 FindNearestEntryExit(const CVector2D& position, float range, int32 ignoreArea);
     static CEntryExit* GetEntryExit(int32 index);
     static int32 GetEntryExitIndex(const char* name, uint16 enabledFlags, uint16 disabledFlags);
     static void GetPositionRelativeToOutsideWorld(CVector& positionInOut);

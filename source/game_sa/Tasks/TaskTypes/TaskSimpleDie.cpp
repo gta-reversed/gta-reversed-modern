@@ -52,7 +52,7 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANLSATE_X | ANIM_FLAG_TRANLSATE_Y
+    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANSLATE_X | ANIM_FLAG_TRANSLATE_Y
                                    | ANIM_FLAG_MOVEMENT
                                    | ANIM_FLAG_PARTIAL
                                    | ANIM_FLAG_FREEZE_LAST_FRAME
@@ -78,7 +78,7 @@ CTask* CTaskSimpleDie::Clone() {
 }
 
 // 0x62FBA0
-bool CTaskSimpleDie::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_animAssociation)
             m_animAssociation->m_fBlendDelta = -1000.0f;
@@ -135,17 +135,18 @@ void CTaskSimpleDie::FinishAnimDieCB(CAnimBlendAssociation* association, void* d
 }
 
 void CTaskSimpleDie::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CTaskSimpleDie", "CTaskSimpleDie_1", 0x62FA00, static_cast<CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float)>(&CTaskSimpleDie::Constructor));
-    Install("CTaskSimpleDie", "CTaskSimpleDie_2", 0x62FA60, static_cast<CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float)>(&CTaskSimpleDie::Constructor));
-    Install("CTaskSimpleDie", "CTaskSimpleDie_3", 0x62FAF0, static_cast<CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float)>(&CTaskSimpleDie::Constructor));
-    Install("CTaskSimpleDie", "~CTaskSimpleDie", 0x62FB40, &CTaskSimpleDie::Destructor);
-    Install("CTaskSimpleDie", "FinishAnimDieCB", 0x62FC10, &CTaskSimpleDie::FinishAnimDieCB);
-    Install("CTaskSimpleDie", "StartAnim", 0x637520, &CTaskSimpleDie::StartAnim);
-    Install("CTaskSimpleDie", "Clone", 0x635DA0, static_cast< CTask *(CTaskSimpleDie::*)()>(&CTaskSimpleDie::Clone_Reversed));
-    Install("CTaskSimpleDie", "GetTaskType", 0x62FA50, &CTaskSimpleDie::GetTaskType_Reversed);
-    Install("CTaskSimpleDie", "MakeAbortable", 0x62FBA0, &CTaskSimpleDie::MakeAbortable_Reversed);
-    Install("CTaskSimpleDie", "ProcessPed", 0x6397E0, &CTaskSimpleDie::ProcessPed_Reversed);
+    RH_ScopedClass(CTaskSimpleDie);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
+    RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
+    RH_ScopedOverloadedInstall(Constructor, "3", 0x62FAF0, CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float));
+    RH_ScopedInstall(Destructor, 0x62FB40);
+    RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
+    RH_ScopedInstall(StartAnim, 0x637520);
+    RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
+    RH_ScopedVirtualInstall(GetTaskType, 0x62FA50);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
 }
 
 // 0x62FA00
@@ -181,7 +182,7 @@ eTaskType CTaskSimpleDie::GetTaskType_Reversed() {
 }
 
 // 0x62FBA0
-bool CTaskSimpleDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return CTaskSimpleDie::MakeAbortable(ped, priority, event);
 }
 

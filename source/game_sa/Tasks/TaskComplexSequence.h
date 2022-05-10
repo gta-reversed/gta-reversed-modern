@@ -3,26 +3,22 @@
 #include "TaskComplex.h"
 
 class CTask;
-    
+
 class CTaskComplexSequence : public CTaskComplex {
 public:
     int32    m_nCurrentTaskIndex;      // Used in m_aTasks
     CTask*   m_aTasks[8];
-    int32    m_bRepeatSequence;        // it's either 1 or 0. Sequence will loop if set to 1
+    bool     m_bRepeatSequence;        // Sequence will loop if set to 1
     int32    m_nSequenceRepeatedCount; // m_nSequenceRepeatedCount simply tells us how many times the sequence has been repeated.
                                        // If m_bRepeatSequence is true, this can be greater than 1,
                                        // otherwise it's set to 1 when the sequence is done executing tasks.
     bool     m_bFlushTasks;
-    char     field_39;
-    char     field_3A;
-    char     field_3B;
-    uint8    m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
+    uint32   m_nReferenceCount; // count of how many CTaskComplexUseSequence instances are using this sequence
 
 public:
     CTaskComplexSequence();
-    ~CTaskComplexSequence();
+    ~CTaskComplexSequence() override;
 
-    // original virtual functions
     CTask* Clone() override;
     eTaskType GetTaskType() override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
@@ -30,9 +26,12 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
-    void AddTask(CTask* pTask);
+    void AddTask(CTask* task);
     CTask* CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount);
     void Flush();
+    bool Contains(eTaskType taskType);
+    void f0x463610(bool flush);
+    void f0x636BC0();
 
 private:
     friend void InjectHooksMain();

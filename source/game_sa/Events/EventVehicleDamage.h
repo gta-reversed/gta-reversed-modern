@@ -29,7 +29,7 @@ public:
 
     bool AffectsPed_Reversed(CPed* ped);
     bool IsCriminalEvent_Reversed();
-    void ReportCriminalEvent_Reversed(CPed* ped);;
+    void ReportCriminalEvent_Reversed(CPed* ped);
     CEntity* GetSourceEntity_Reversed() const;
 };
 

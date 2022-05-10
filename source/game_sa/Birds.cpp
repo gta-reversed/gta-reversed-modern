@@ -1,5 +1,8 @@
 #include "StdInc.h"
 
+#include "Birds.h"
+#include "Clouds.h"
+
 bool& CBirds::bHasBirdBeenShot = *(bool*)0xC6A8A0;
 uint32& CBirds::uiNumberOfBirds = *(uint32*)0xC6A8A4;
 CBird* CBirds::aBirds = (CBird*)0xC6A8B0;
@@ -15,12 +18,15 @@ uint32* CBirds::auRenderIndices = (uint32*)0x8D52F8; // Size: 30
 
 void CBirds::InjectHooks()
 {
-    ReversibleHooks::Install("CBirds", "Init", 0x711EC0, &CBirds::Init);
-    ReversibleHooks::Install("CBirds", "Shutdown", 0x712300, &CBirds::Shutdown);
-    ReversibleHooks::Install("CBirds", "HandleGunShot", 0x712E40, &CBirds::HandleGunShot);
-    ReversibleHooks::Install("CBirds", "Update", 0x712330, &CBirds::Update);
-    ReversibleHooks::Install("CBirds", "CreateNumberOfBirds", 0x711EF0, &CBirds::CreateNumberOfBirds);
-    ReversibleHooks::Install("CBirds", "Render", 0x712810, &CBirds::Render);
+    RH_ScopedClass(CBirds);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x711EC0);
+    RH_ScopedInstall(Shutdown, 0x712300);
+    RH_ScopedInstall(HandleGunShot, 0x712E40);
+    RH_ScopedInstall(Update, 0x712330);
+    RH_ScopedInstall(CreateNumberOfBirds, 0x711EF0);
+    RH_ScopedInstall(Render, 0x712810);
 }
 
 // 0x711EC0
@@ -388,19 +394,19 @@ void CBirds::Render()
     }
 
     if (uiTempBufferVerticesStored) {
-        RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    (void*)rwTEXTUREADDRESSCLAMP);
-        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)FALSE);
-        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)gpCloudTex[1]->raster);
+        RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS,    RWRSTATE(rwTEXTUREADDRESSCLAMP));
+        RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(gpCloudMaskTex->raster));
         CBrightLights::RenderOutGeometryBuffer();
     }
 }
 
 // 0x712E40
 void CBirds::HandleGunShot(const CVector* pointA, const CVector* pointB) {
-    CColLine colLine();
+    CColLine colLine{};
 
     for (int32 i = 0; i < MAX_BIRDS; ++i) {
         auto& bird = aBirds[i];

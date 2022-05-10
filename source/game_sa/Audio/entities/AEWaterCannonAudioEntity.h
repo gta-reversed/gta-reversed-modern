@@ -7,25 +7,25 @@ class CWaterCannon;
 
 class CAEWaterCannonAudioEntity : public CAEAudioEntity {
 public:
-    bool    m_bInitialized;
-    bool    m_bSplashInfoEnabled;
-    char    f7E[2];
-    CVector m_vecPosn;
-    float   m_nSplashMagnitude;
+    bool      m_bInitialized;
+    bool      m_bSplashInfoEnabled;
+    CVector   m_vecPosn;
+    float     m_fSplashMagnitude;
+    CAESound* m_Sounds[4];
 
 public:
     CAEWaterCannonAudioEntity();
-    // 0x728AB0 ~CAEWaterCannonAudioEntity();
+    ~CAEWaterCannonAudioEntity();
 
     void Initialise(CWaterCannon* waterCannon);
     void Terminate();
-    void StaticInitialise();
+    static void StaticInitialise();
 
-    void AddAudioEvent(int32, CVector&);
+    void AddAudioEvent(eAudioEvents event, CVector& posn);
     void SetSplashInfo(CVector posn, float magnitude);
     void ClearSplashInfo();
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
-    void UpdateGenericWaterCannonSound(bool splashInfoEnabled, int16 a3, int16 bankSlotId, int16 sfxId, float speed, float volume, CVector posn, float soundDistance);
+    void UpdateGenericWaterCannonSound(bool splashInfoEnabled, int16 id, int16 bankSlotId, int16 sfxId, float speed, float volume, CVector posn, float soundDistance);
     void Service();
 
 private:
@@ -37,4 +37,4 @@ private:
     void UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos);
 };
 
-VALIDATE_SIZE(CAEWaterCannonAudioEntity, 0x90);
+VALIDATE_SIZE(CAEWaterCannonAudioEntity, 0xA0);

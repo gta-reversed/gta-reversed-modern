@@ -24,6 +24,8 @@ public:
     char _pad_25[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
+
     CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
     ~CTaskComplexGoToPointAndStandStill() override;
 
@@ -39,7 +41,7 @@ public:
     CTask* ControlSubTask_Reversed(CPed* ped);
 
     void   GoToPoint(const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUpdateTargetEvenIfItsTheSame);
-    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* pPed, float fMoveStateRadius, float fRunOrSprintRadius);
+    void   SelectMoveState(CTaskSimpleGoToPoint* pGotoPointTask, CPed* ped, float fMoveStateRadius, float fRunOrSprintRadius);
     CTask* CreateFirstSubTask(int32 taskId, CPed* ped);
 
 private:

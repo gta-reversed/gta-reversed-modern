@@ -4,12 +4,13 @@
 
 class CTaskSimpleGetUp : public CTaskSimple {
 public:
-    uint8 m_bIsFinished;
-    uint8 m_bAnimFinished;
-    uint8 _pad_A[2];
+    uint8                  m_bIsFinished;
+    uint8                  m_bAnimFinished;
     CAnimBlendAssociation* m_pAnim;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GET_UP;
+
     CTaskSimpleGetUp();
     ~CTaskSimpleGetUp() override;
 
@@ -28,7 +29,7 @@ private:
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool StartAnim(CPed* ped);
 
-    static void FinishGetUpAnimCB(CAnimBlendAssociation* pBlendAssoc, void* data); //data is CTaskSimpleGetUp
+    static void FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data); //data is CTaskSimpleGetUp
 
     static CColPoint(&m_aColPoints)[32];
 };

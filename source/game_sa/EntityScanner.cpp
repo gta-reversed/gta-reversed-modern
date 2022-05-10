@@ -1,25 +1,35 @@
 #include "StdInc.h"
 
+#include "EntityScanner.h"
+
 void CEntityScanner::InjectHooks() {
-//    ReversibleHooks::Install("CEntityScanner", "Clear", 0x5FF9D0, &CEntityScanner::Clear);
-//    ReversibleHooks::Install("CEntityScanner", "ScanForEntitiesInRange", 0x5FFA20, &CEntityScanner::ScanForEntitiesInRange);
-    ReversibleHooks::Install("CEntityScanner", "GetClosestPedInRange", 0x5FFF20, &CEntityScanner::GetClosestPedInRange);
+    RH_ScopedClass(CEntityScanner);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(Clear, 0x5FF9D0);
+    // RH_ScopedInstall(ScanForEntitiesInRange, 0x5FFA20);
+}
+
+// 0x5FF990
+CEntityScanner::CEntityScanner() {
+    field_4 = 0;
+    m_nCount = 0;
+    std::ranges::fill(m_apEntities, nullptr);
+    m_pClosestEntityInRange = nullptr;
+    m_nCount = 16;
+}
+
+// 0x603480
+CEntityScanner::~CEntityScanner() {
+    Clear();
 }
 
 // 0x5FF9D0
-void CEntityScanner::Clear()
-{
+void CEntityScanner::Clear() {
     plugin::CallMethod<0x5FF9D0, CEntityScanner*>(this);
 }
 
 // 0x5FFA20
-void CEntityScanner::ScanForEntitiesInRange(int32 arg2, CPed* pPed)
-{
-    plugin::CallMethod<0x5FFA20, CEntityScanner*, int32, CPed*>(this, arg2, pPed);
-}
-
-// 0x5FFF20
-CEntity* CEntityScanner::GetClosestPedInRange()
-{
-    return m_pClosestEntityInRange;
+void CEntityScanner::ScanForEntitiesInRange(eRepeatSectorList sectorList, const CPed& ped) {
+    plugin::CallMethod<0x5FFA20, CEntityScanner*, eRepeatSectorList, const CPed&>(this, sectorList, ped);
 }

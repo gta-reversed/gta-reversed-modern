@@ -8,6 +8,8 @@ public:
     float m_fTargetHeading;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS_AND_ACHIEVE_HEADING;
+
     CTaskComplexObserveTrafficLightsAndAchieveHeading(int32 durationInMs, float targetHeading);
     ~CTaskComplexObserveTrafficLightsAndAchieveHeading() override = default; // 0x631980
 
@@ -23,12 +25,14 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks() {
-        using namespace ReversibleHooks;
-        Install("CTaskComplexObserveTrafficLightsAndAchieveHeading", "Clone", 0x636490, &CTaskComplexObserveTrafficLightsAndAchieveHeading::Clone_Reversed);
-        Install("CTaskComplexObserveTrafficLightsAndAchieveHeading", "ControlSubTask", 0x631AD0, &CTaskComplexObserveTrafficLightsAndAchieveHeading::ControlSubTask_Reversed);
-        Install("CTaskComplexObserveTrafficLightsAndAchieveHeading", "CreateFirstSubTask", 0x631AC0, &CTaskComplexObserveTrafficLightsAndAchieveHeading::CreateFirstSubTask_Reversed);
-        Install("CTaskComplexObserveTrafficLightsAndAchieveHeading", "CreateNextSubTask", 0x631A70, &CTaskComplexObserveTrafficLightsAndAchieveHeading::CreateNextSubTask_Reversed);
-        Install("CTaskComplexObserveTrafficLightsAndAchieveHeading", "MakeAbortable", 0x631950, &CTaskComplexObserveTrafficLightsAndAchieveHeading::MakeAbortable_Reversed);
+        RH_ScopedClass(CTaskComplexObserveTrafficLightsAndAchieveHeading);
+        RH_ScopedCategory("Tasks/TaskTypes");
+
+        RH_ScopedVirtualInstall(Clone, 0x636490);
+        RH_ScopedVirtualInstall(ControlSubTask, 0x631AD0);
+        RH_ScopedVirtualInstall(CreateFirstSubTask, 0x631AC0);
+        RH_ScopedVirtualInstall(CreateNextSubTask, 0x631A70);
+        RH_ScopedVirtualInstall(MakeAbortable, 0x631950);
     }
 
     CTaskComplexObserveTrafficLightsAndAchieveHeading* Constructor(int32 durationInMs, float fTargetHeading) {

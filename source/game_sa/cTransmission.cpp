@@ -1,17 +1,21 @@
 #include "StdInc.h"
 
+#include "cTransmission.h"
+#include "CarCtrl.h"
+
 void cTransmission::InjectHooks()
 {
-    ReversibleHooks::Install("cTransmission", "DisplayGearRatios", 0x6D0590, &cTransmission::DisplayGearRatios);
-    ReversibleHooks::Install("cTransmission", "InitGearRatios", 0x6D0460, &cTransmission::InitGearRatios);
-    ReversibleHooks::Install("cTransmission", "CalculateGearForSimpleCar", 0x6D0530, &cTransmission::CalculateGearForSimpleCar);
-    ReversibleHooks::Install("cTransmission", "CalculateDriveAcceleration", 0x6D05E0, &cTransmission::CalculateDriveAcceleration);
+    RH_ScopedClass(cTransmission);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(DisplayGearRatios, 0x6D0590);
+    RH_ScopedInstall(InitGearRatios, 0x6D0460);
+    RH_ScopedInstall(CalculateGearForSimpleCar, 0x6D0530);
+    RH_ScopedInstall(CalculateDriveAcceleration, 0x6D05E0);
 }
 
-// unused
-//
 // Usage:
-//     auto vehicle = FindPlayerVehicle(-1, false);
+//     auto vehicle = FindPlayerVehicle();
 //     if (vehicle) {
 //         vehicle->m_pHandlingData->GetTransmission().DisplayGearRatios();
 //     }
@@ -44,8 +48,8 @@ void cTransmission::InitGearRatios()
     float maxGearVelocity = m_fMaxGearVelocity - averageHalfGearVelocity;
     for (uint8 i = 1; i <= m_nNumberOfGears; i++)
     {
-        static tTransmissionGear* gear = nullptr;
-        static tTransmissionGear* previousGear = nullptr;
+        static tTransmissionGear*& gear = *(tTransmissionGear**)0xC1CB34; // TODO | STATICREF // = nullptr;
+        static tTransmissionGear*& previousGear = *(tTransmissionGear**)0xC1CB30; // TODO | STATICREF // = nullptr;
         gear = &m_aGears[i];
         previousGear = &m_aGears[i - 1];
         gear->m_maxVelocity = (static_cast<float>(i) * maxGearVelocity / m_nNumberOfGears) + averageHalfGearVelocity;
@@ -70,7 +74,7 @@ void cTransmission::InitGearRatios()
 // 0x6D0530
 void cTransmission::CalculateGearForSimpleCar(float speed, uint8& currentGear)
 {
-    m_currentVelocity = speed;
+    m_fCurrentVelocity = speed;
     tTransmissionGear& gear = m_aGears[currentGear];
     if (speed > gear.m_changeUpVelocity)
     {
@@ -85,18 +89,18 @@ void cTransmission::CalculateGearForSimpleCar(float speed, uint8& currentGear)
 }
 
 // 0x6D05E0
-float cTransmission::CalculateDriveAcceleration(float const& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingCheat)
+float cTransmission::CalculateDriveAcceleration(const float& gasPedal, uint8& currentGear, float& gearChangeCount, float& velocity, float* a6, float* a7, uint8 allWheelsOnGround, uint8 handlingCheat)
 {
-    static float cheatMultiplier = 0.0f;
-    static float driveAcceleration = 0.0f;
-    static float currentVelocity = 0.0f;
+    static float& cheatMultiplier = *(float*)0xC1CB3C;      // TODO | STATICREF // = 0.0f;
+    static float& driveAcceleration = *(float*)0xC1CB38;    // TODO | STATICREF // = 0.0f;
+    static float& currentVelocity = *(float*)0xC1CB40;      // TODO | STATICREF // = 0.0f;
     currentVelocity = velocity;
     if (currentVelocity < m_maxReverseGearVelocity)
         return 0.0f;
 
     while (currentVelocity <= m_fMaxGearVelocity)
     {
-        m_currentVelocity = currentVelocity;
+        m_fCurrentVelocity = currentVelocity;
         tTransmissionGear& gear = m_aGears[currentGear];
         bool accelerate = false;
         bool shiftToLowerGear = false;

@@ -5,8 +5,11 @@
 CGamma& gamma = *(CGamma*)0xC92134;
 
 void CGamma::InjectHooks() {
-    // ReversibleHooks::Install("CGamma", "Init", 0x747180, &CGamma::Init);
-    // ReversibleHooks::Install("CGamma", "SetGamma", 0x747200, &CGamma::SetGamma);
+    RH_ScopedClass(CGamma);
+    RH_ScopedCategoryGlobal();
+
+    // RH_ScopedInstall(Init, 0x747180);
+    // RH_ScopedInstall(SetGamma, 0x747200);
 }
 
 // 0x747180

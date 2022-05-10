@@ -5,96 +5,99 @@
 #include "AEAudioHardware.h"
 #include "AEAmbienceTrackManager.h"
 #include "AECutsceneTrackManager.h"
-
 #include "AEUserRadioTrackManager.h"
 #include "AEAudioUtility.h"
+#include "AEWaterCannonAudioEntity.h"
+#include "LoadingScreen.h"
 
 CAudioEngine& AudioEngine = *(CAudioEngine*)0xB6BC90;
 
 void CAudioEngine::InjectHooks() {
-    using namespace ReversibleHooks;
-    // Install("CAudioEngine", "CAudioEngine", 0x507670, &CAudioEngine::CAudioEngine);   default
+    RH_ScopedClass(CAudioEngine);
+    RH_ScopedCategory("Audio");
+
+    // RH_ScopedInstall(CAudioEngine, 0x507670);   default
     // Install("CAudioEngine", "~CAudioEngine", 0x506CD0, &CAudioEngine::~CAudioEngine); default
-    Install("CAudioEngine", "Initialise", 0x5B9C60, &CAudioEngine::Initialise);
-    Install("CAudioEngine", "Shutdown", 0x507CB0, &CAudioEngine::Shutdown);
-    Install("CAudioEngine", "Restart", 0x506DB0, &CAudioEngine::Restart);
-    Install("CAudioEngine", "ResetStatistics", 0x506DA0, &CAudioEngine::ResetStatistics);
-    Install("CAudioEngine", "ResetSoundEffects", 0x507C30, &CAudioEngine::ResetSoundEffects);
-    Install("CAudioEngine", "Reset", 0x507A90, &CAudioEngine::Reset);
-    Install("CAudioEngine", "IsAmbienceRadioActive", 0x507280, &CAudioEngine::IsAmbienceRadioActive);
-    Install("CAudioEngine", "DoesAmbienceTrackOverrideRadio", 0x507270, &CAudioEngine::DoesAmbienceTrackOverrideRadio);
-    Install("CAudioEngine", "StopAmbienceTrack", 0x507220, &CAudioEngine::StopAmbienceTrack);
-    Install("CAudioEngine", "IsAmbienceTrackActive", 0x507210, &CAudioEngine::IsAmbienceTrackActive);
-    Install("CAudioEngine", "PauseBeatTrack", 0x507200, &CAudioEngine::PauseBeatTrack);
-    Install("CAudioEngine", "RetuneRadio", 0x507E10, &CAudioEngine::RetuneRadio);
-    Install("CAudioEngine", "StartRadio", 0x507DF0, static_cast<void (CAudioEngine::*)(tVehicleAudioSettings*)>(&CAudioEngine::StartRadio));
-    Install("CAudioEngine", "StartRadio_1", 0x507DC0, static_cast<void (CAudioEngine::*)(RadioStationId, int8)>(&CAudioEngine::StartRadio));
-    Install("CAudioEngine", "ServiceLoadingTune", 0x5078A0, &CAudioEngine::ServiceLoadingTune);
-    Install("CAudioEngine", "ResumeAllSounds", 0x507440, &CAudioEngine::ResumeAllSounds);
-    Install("CAudioEngine", "PauseAllSounds", 0x507430, &CAudioEngine::PauseAllSounds);
-    Install("CAudioEngine", "EnableEffectsLoading", 0x506E90, &CAudioEngine::EnableEffectsLoading);
-    Install("CAudioEngine", "DisableEffectsLoading", 0x506E80, &CAudioEngine::DisableEffectsLoading);
-    Install("CAudioEngine", "SetNonStreamFaderScalingFactor", 0x506E60, &CAudioEngine::SetNonStreamFaderScalingFactor);
-    Install("CAudioEngine", "SetEffectsFaderScalingFactor", 0x506E50, &CAudioEngine::SetEffectsFaderScalingFactor);
-    Install("CAudioEngine", "SetMusicFaderScalingFactor", 0x506E40, &CAudioEngine::SetMusicFaderScalingFactor);
-    Install("CAudioEngine", "SetEffectsMasterVolume", 0x506E10, &CAudioEngine::SetEffectsMasterVolume);
-    Install("CAudioEngine", "SetMusicMasterVolume", 0x506DE0, &CAudioEngine::SetMusicMasterVolume);
-    Install("CAudioEngine", "SetStreamFaderScalingFactor", 0x506E70, &CAudioEngine::SetStreamFaderScalingFactor);
-    Install("CAudioEngine", "SetRadioAutoRetuneOnOff", 0x506F80, &CAudioEngine::SetRadioAutoRetuneOnOff);
-    Install("CAudioEngine", "SetRadioBassSetting", 0x506FA0, &CAudioEngine::SetRadioBassSetting);
-    Install("CAudioEngine", "SetBassEnhanceOnOff", 0x506F90, &CAudioEngine::SetBassEnhanceOnOff);
-    Install("CAudioEngine", "SetMissionAudioPosition", 0x507300, &CAudioEngine::SetMissionAudioPosition);
-    Install("CAudioEngine", "GetBeatTrackStatus", 0x507170, &CAudioEngine::GetBeatTrackStatus);
-    Install("CAudioEngine", "GetCutsceneTrackStatus", 0x507160, &CAudioEngine::GetCutsceneTrackStatus);
-    Install("CAudioEngine", "IsCutsceneTrackActive", 0x507150, &CAudioEngine::IsCutsceneTrackActive);
-    Install("CAudioEngine", "PlayPreloadedCutsceneTrack", 0x507070, &CAudioEngine::PlayPreloadedCutsceneTrack);
-    Install("CAudioEngine", "IsVehicleRadioActive", 0x507050, &CAudioEngine::IsVehicleRadioActive);
-    Install("CAudioEngine", "GetCurrentRadioStationID", 0x507040, &CAudioEngine::GetCurrentRadioStationID);
-    Install("CAudioEngine", "StopRadio", 0x506F70, &CAudioEngine::StopRadio);
-    Install("CAudioEngine", "DisplayRadioStationName", 0x507030, &CAudioEngine::DisplayRadioStationName);
-    Install("CAudioEngine", "GetRadioStationNameKey", 0x507010, &CAudioEngine::GetRadioStationNameKey);
-    Install("CAudioEngine", "GetRadioStationName", 0x507000, &CAudioEngine::GetRadioStationName);
-    Install("CAudioEngine", "HasRadioRetuneJustStarted", 0x506FE0, &CAudioEngine::HasRadioRetuneJustStarted);
-    Install("CAudioEngine", "IsRadioOn", 0x506FD0, &CAudioEngine::IsRadioOn);
-    Install("CAudioEngine", "InitialiseRadioStationID", 0x506FC0, &CAudioEngine::InitialiseRadioStationID);
-    Install("CAudioEngine", "GetRadioStationListenTimes", 0x507020, &CAudioEngine::GetRadioStationListenTimes);
-    Install("CAudioEngine", "AttachMissionAudioToPhysical", 0x507330, &CAudioEngine::AttachMissionAudioToPhysical);
-    Install("CAudioEngine", "AttachMissionAudioToObject", 0x507320, &CAudioEngine::AttachMissionAudioToObject);
-    Install("CAudioEngine", "AttachMissionAudioToPed", 0x507310, &CAudioEngine::AttachMissionAudioToPed);
-    Install("CAudioEngine", "ClearMissionAudio", 0x5072F0, &CAudioEngine::ClearMissionAudio);
-    Install("CAudioEngine", "GetMissionAudioPosition", 0x5072E0, &CAudioEngine::GetMissionAudioPosition);
-    Install("CAudioEngine", "GetMissionAudioEvent", 0x5072D0, &CAudioEngine::GetMissionAudioEvent);
-    Install("CAudioEngine", "IsMissionAudioSampleFinished", 0x5072C0, &CAudioEngine::IsMissionAudioSampleFinished);
-    Install("CAudioEngine", "PlayLoadedMissionAudio", 0x5072B0, &CAudioEngine::PlayLoadedMissionAudio);
-    Install("CAudioEngine", "GetMissionAudioLoadingStatus", 0x5072A0, &CAudioEngine::GetMissionAudioLoadingStatus);
-    Install("CAudioEngine", "PreloadMissionAudio", 0x507290, &CAudioEngine::PreloadMissionAudio);
-    Install("CAudioEngine", "PreloadCutsceneTrack", 0x507E30, &CAudioEngine::PreloadCutsceneTrack);
-    Install("CAudioEngine", "InitialisePostLoading", 0x5078F0, &CAudioEngine::InitialisePostLoading);
-    Install("CAudioEngine", "IsBeatInfoPresent", 0x5071D0, &CAudioEngine::IsBeatInfoPresent);
-    Install("CAudioEngine", "StartLoadingTune", 0x507410, &CAudioEngine::StartLoadingTune);
-    Install("CAudioEngine", "SayPedless", 0x5073C0, &CAudioEngine::SayPedless);
-    Install("CAudioEngine", "Service", 0x507750, &CAudioEngine::Service);
-    Install("CAudioEngine", "GetBeatInfo", 0x5071B0, &CAudioEngine::GetBeatInfo);
-    Install("CAudioEngine", "StopBeatTrack", 0x5071A0, &CAudioEngine::StopBeatTrack);
-    Install("CAudioEngine", "PlayPreloadedBeatTrack", 0x507180, &CAudioEngine::PlayPreloadedBeatTrack);
-    Install("CAudioEngine", "ReportWaterSplash_vec", 0x506F10, static_cast<void (CAudioEngine::*)(CVector, float)>(&CAudioEngine::ReportWaterSplash));
-    Install("CAudioEngine", "ReportWaterSplash_phs", 0x506F00, static_cast<void (CAudioEngine::*)(CPhysical*, float, bool)>(&CAudioEngine::ReportWaterSplash));
-    Install("CAudioEngine", "ReportGlassCollisionEvent", 0x506EE0, &CAudioEngine::ReportGlassCollisionEvent);
-    Install("CAudioEngine", "ReportObjectDestruction", 0x506ED0, &CAudioEngine::ReportObjectDestruction);
-    Install("CAudioEngine", "ReportBulletHit", 0x506EC0, &CAudioEngine::ReportBulletHit);
-    Install("CAudioEngine", "ReportCollision", 0x506EB0, &CAudioEngine::ReportCollision);
-    Install("CAudioEngine", "ReportFrontendAudioEvent", 0x506EA0, &CAudioEngine::ReportFrontendAudioEvent);
-    Install("CAudioEngine", "ReportWeaponEvent", 0x506F40, &CAudioEngine::ReportWeaponEvent);
-    Install("CAudioEngine", "ReportDoorMovement", 0x506F50, &CAudioEngine::ReportDoorMovement);
-    Install("CAudioEngine", "ReportMissionAudioEvent_vec", 0x507340, static_cast<void (CAudioEngine::*)(uint16, CVector&)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_obj", 0x507350, static_cast<void (CAudioEngine::*)(uint16, CObject*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_ped", 0x507370, static_cast<void (CAudioEngine::*)(uint16, CPed*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_veh", 0x507390, static_cast<void (CAudioEngine::*)(uint16, CVehicle*)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "ReportMissionAudioEvent_phs", 0x5073B0, static_cast<void (CAudioEngine::*)(uint16, CPhysical*, float, float)>(&CAudioEngine::ReportMissionAudioEvent));
-    Install("CAudioEngine", "IsLoadingTuneActive", 0x506D90, &CAudioEngine::IsLoadingTuneActive);
-    Install("CAudioEngine", "PreloadBeatTrack", 0x507F40, &CAudioEngine::PreloadBeatTrack);
-    Install("CAudioEngine", "StopCutsceneTrack", 0x507080, &CAudioEngine::StopCutsceneTrack);
-    Install("CAudioEngine", "IsRadioRetuneInProgress", 0x506FF0, &CAudioEngine::IsRadioRetuneInProgress);
+    RH_ScopedInstall(Initialise, 0x5B9C60);
+    RH_ScopedInstall(Shutdown, 0x507CB0);
+    RH_ScopedInstall(Restart, 0x506DB0);
+    RH_ScopedInstall(ResetStatistics, 0x506DA0);
+    RH_ScopedInstall(ResetSoundEffects, 0x507C30);
+    RH_ScopedInstall(Reset, 0x507A90);
+    RH_ScopedInstall(IsAmbienceRadioActive, 0x507280);
+    RH_ScopedInstall(DoesAmbienceTrackOverrideRadio, 0x507270);
+    RH_ScopedInstall(StopAmbienceTrack, 0x507220);
+    RH_ScopedInstall(IsAmbienceTrackActive, 0x507210);
+    RH_ScopedInstall(PauseBeatTrack, 0x507200);
+    RH_ScopedInstall(RetuneRadio, 0x507E10);
+    RH_ScopedOverloadedInstall(StartRadio, "", 0x507DF0, void (CAudioEngine::*)(tVehicleAudioSettings*));
+    RH_ScopedOverloadedInstall(StartRadio, "1", 0x507DC0, void (CAudioEngine::*)(RadioStationId, int8));
+    RH_ScopedInstall(ServiceLoadingTune, 0x5078A0);
+    RH_ScopedInstall(ResumeAllSounds, 0x507440);
+    RH_ScopedInstall(PauseAllSounds, 0x507430);
+    RH_ScopedInstall(EnableEffectsLoading, 0x506E90);
+    RH_ScopedInstall(DisableEffectsLoading, 0x506E80);
+    RH_ScopedInstall(SetNonStreamFaderScalingFactor, 0x506E60);
+    RH_ScopedInstall(SetEffectsFaderScalingFactor, 0x506E50);
+    RH_ScopedInstall(SetMusicFaderScalingFactor, 0x506E40);
+    RH_ScopedInstall(SetEffectsMasterVolume, 0x506E10);
+    RH_ScopedInstall(SetMusicMasterVolume, 0x506DE0);
+    RH_ScopedInstall(SetStreamFaderScalingFactor, 0x506E70);
+    RH_ScopedInstall(SetRadioAutoRetuneOnOff, 0x506F80);
+    RH_ScopedInstall(SetRadioBassSetting, 0x506FA0);
+    RH_ScopedInstall(SetBassEnhanceOnOff, 0x506F90);
+    RH_ScopedInstall(SetMissionAudioPosition, 0x507300);
+    RH_ScopedInstall(GetBeatTrackStatus, 0x507170);
+    RH_ScopedInstall(GetCutsceneTrackStatus, 0x507160);
+    RH_ScopedInstall(IsCutsceneTrackActive, 0x507150);
+    RH_ScopedInstall(PlayPreloadedCutsceneTrack, 0x507070);
+    RH_ScopedInstall(IsVehicleRadioActive, 0x507050);
+    RH_ScopedInstall(GetCurrentRadioStationID, 0x507040);
+    RH_ScopedInstall(StopRadio, 0x506F70);
+    RH_ScopedInstall(DisplayRadioStationName, 0x507030);
+    RH_ScopedInstall(GetRadioStationNameKey, 0x507010);
+    RH_ScopedInstall(GetRadioStationName, 0x507000);
+    RH_ScopedInstall(HasRadioRetuneJustStarted, 0x506FE0);
+    RH_ScopedInstall(IsRadioOn, 0x506FD0);
+    RH_ScopedInstall(InitialiseRadioStationID, 0x506FC0);
+    RH_ScopedInstall(GetRadioStationListenTimes, 0x507020);
+    RH_ScopedInstall(AttachMissionAudioToPhysical, 0x507330);
+    RH_ScopedInstall(AttachMissionAudioToObject, 0x507320);
+    RH_ScopedInstall(AttachMissionAudioToPed, 0x507310);
+    RH_ScopedInstall(ClearMissionAudio, 0x5072F0);
+    RH_ScopedInstall(GetMissionAudioPosition, 0x5072E0);
+    RH_ScopedInstall(GetMissionAudioEvent, 0x5072D0);
+    RH_ScopedInstall(IsMissionAudioSampleFinished, 0x5072C0);
+    RH_ScopedInstall(PlayLoadedMissionAudio, 0x5072B0);
+    RH_ScopedInstall(GetMissionAudioLoadingStatus, 0x5072A0);
+    RH_ScopedInstall(PreloadMissionAudio, 0x507290);
+    RH_ScopedInstall(PreloadCutsceneTrack, 0x507E30);
+    RH_ScopedInstall(InitialisePostLoading, 0x5078F0);
+    RH_ScopedInstall(IsBeatInfoPresent, 0x5071D0);
+    RH_ScopedInstall(StartLoadingTune, 0x507410);
+    RH_ScopedInstall(SayPedless, 0x5073C0);
+    RH_ScopedInstall(Service, 0x507750);
+    RH_ScopedInstall(GetBeatInfo, 0x5071B0);
+    RH_ScopedInstall(StopBeatTrack, 0x5071A0);
+    RH_ScopedInstall(PlayPreloadedBeatTrack, 0x507180);
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "vec", 0x506F10, void (CAudioEngine::*)(CVector, float));
+    RH_ScopedOverloadedInstall(ReportWaterSplash, "phs", 0x506F00, void (CAudioEngine::*)(CPhysical*, float, bool));
+    RH_ScopedInstall(ReportGlassCollisionEvent, 0x506EE0);
+    RH_ScopedInstall(ReportObjectDestruction, 0x506ED0);
+    RH_ScopedInstall(ReportBulletHit, 0x506EC0);
+    RH_ScopedInstall(ReportCollision, 0x506EB0);
+    RH_ScopedInstall(ReportFrontendAudioEvent, 0x506EA0);
+    RH_ScopedInstall(ReportWeaponEvent, 0x506F40);
+    RH_ScopedInstall(ReportDoorMovement, 0x506F50);
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "vec", 0x507340, void (CAudioEngine::*)(uint16, CVector&));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "obj", 0x507350, void (CAudioEngine::*)(uint16, CObject*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "ped", 0x507370, void (CAudioEngine::*)(uint16, CPed*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "veh", 0x507390, void (CAudioEngine::*)(uint16, CVehicle*));
+    RH_ScopedOverloadedInstall(ReportMissionAudioEvent, "phs", 0x5073B0, void (CAudioEngine::*)(uint16, CPhysical*, float, float));
+    RH_ScopedInstall(IsLoadingTuneActive, 0x506D90);
+    RH_ScopedInstall(PreloadBeatTrack, 0x507F40);
+    RH_ScopedInstall(StopCutsceneTrack, 0x507080);
+    RH_ScopedInstall(IsRadioRetuneInProgress, 0x506FF0);
 }
 
 // 0x5B9C60
@@ -102,40 +105,47 @@ bool CAudioEngine::Initialise() {
     CLoadingScreen::Pause();
 
     if (!AEAudioHardware.Initialise()) {
+        DEV_LOG("[AudioEngine] Failed to initialise Audio Hardware")
         return false;
     }
 
     m_nBackgroundAudioChannel = AEAudioHardware.AllocateChannels(1);
 
     if (!AERadioTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Radio Track Manager")
         return false;
     }
 
     if (!AECutsceneTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Cutscene Track Manager")
         return false;
     }
 
     if (!AEAmbienceTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Ambience Track Manager")
         return false;
     }
 
     if (!AESoundManager.Initialise()) {
+        DEV_LOG("[AudioEngine] Failed to initialise Sound Manager")
         return false;
     }
 
     CAEAudioEntity::m_pAudioEventVolumes = new int8[45401];
-    FILESTREAM file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
+    auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
     if (!file) {
+        DEV_LOG("[AudioEngine] Failed to open EVENTVOL.DAT");
         return false;
     }
     if (CFileMgr::Read(file, CAEAudioEntity::m_pAudioEventVolumes, 45401) != 45401) {
+        DEV_LOG("[AudioEngine] Failed to read EVENTVOL.DAT");
         CFileMgr::CloseFile(file);
         return false;
     }
     CFileMgr::CloseFile(file);
 
     m_FrontendAE.Initialise();
-    CAudioEngine::SetEffectsFaderScalingFactor(0.0);
+    CAudioEngine::SetEffectsFaderScalingFactor(0.0f);
     CAEAudioUtility::StaticInitialise();
     CAEPedAudioEntity::StaticInitialise();
     CAEPedSpeechAudioEntity::StaticInitialise();
@@ -144,6 +154,7 @@ bool CAudioEngine::Initialise() {
     CAEWeatherAudioEntity::StaticInitialise();
     CAEDoorAudioEntity::StaticInitialise();
     CAEFireAudioEntity::StaticInitialise();
+    CAEWaterCannonAudioEntity::StaticInitialise();
     CAEPoliceScannerAudioEntity::StaticInitialise();
     m_ScriptAE.Initialise();
     m_PedlessSpeechAE.Initialise();
@@ -160,7 +171,7 @@ bool CAudioEngine::Initialise() {
 
 // 0x5078F0
 void CAudioEngine::InitialisePostLoading() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_STOP);
     AudioEngine.Service();
     CAECollisionAudioEntity::InitialisePostLoading();
 
@@ -195,8 +206,8 @@ void CAudioEngine::Shutdown() {
     }
     m_CollisionAE.Reset();
     AERadioTrackManager.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     CAEWeatherAudioEntity::StaticReset();
@@ -213,8 +224,8 @@ void CAudioEngine::Shutdown() {
 }
 
 // 0x506EB0
-void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
-    m_CollisionAE.ReportCollision(entity1, entity2, surface1, surface2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
+void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
+    m_CollisionAE.ReportCollision(entity1, entity2, surf1, surf2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
 }
 
 // 0x507350
@@ -269,7 +280,7 @@ void CAudioEngine::PreloadBeatTrack(int16 trackId) {
         m_nCurrentRadioStationId = AERadioTrackManager.GetCurrentRadioStationID();
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
         AERadioTrackManager.StopRadio(settings, true);
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
         while (AERadioTrackManager.IsRadioOn()) {
             AERadioTrackManager.Service(AEAudioHardware.GetTrackPlayTime());
             AEAudioHardware.Service();
@@ -351,12 +362,12 @@ void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents eventId, float volumeCh
 }
 
 // 0x506EC0
-void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
+void CAudioEngine::ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
     m_CollisionAE.ReportBulletHit(entity, surface, posn, angleWithColPointNorm);
 }
 
 // 0x506EE0
-void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, CVector& posn) {
+void CAudioEngine::ReportGlassCollisionEvent(eAudioEvents glassSoundType, Const CVector& posn) {
     m_CollisionAE.ReportGlassCollisionEvent(glassSoundType, posn, 0);
 }
 
@@ -382,7 +393,7 @@ void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CPed* ped) {
 
 // 0x507390
 void CAudioEngine::ReportMissionAudioEvent(uint16 eventId, CVehicle* vehicle) {
-    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle, 0.0, 1.0f);
+    m_ScriptAE.ReportMissionAudioEvent(static_cast<eAudioEvents>(eventId), vehicle);
 }
 
 // 0x5073B0
@@ -406,7 +417,7 @@ void CAudioEngine::PreloadCutsceneTrack(int16 trackId, bool wait) {
         m_nCurrentRadioStationId = AERadioTrackManager.GetCurrentRadioStationID();
         tVehicleAudioSettings* settings = CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio();
         AERadioTrackManager.StopRadio(settings, true);
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
         while (AERadioTrackManager.IsRadioOn()) {
             AERadioTrackManager.Service(AEAudioHardware.GetTrackPlayTime());
             AEAudioHardware.Service();
@@ -587,7 +598,7 @@ void CAudioEngine::StopPoliceScanner(uint8 a1) {
 
 // 0x507410
 void CAudioEngine::StartLoadingTune() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_START, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_LOADING_TUNE_START);
     AESoundManager.Service();
 }
 
@@ -603,9 +614,9 @@ void CAudioEngine::ResumeAllSounds() {
 
 // 0x507750
 void CAudioEngine::Service() {
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_WAKEUP_AMPLIFIER, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_WAKEUP_AMPLIFIER);
     if (!CTimer::GetIsPaused())
-        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
+        m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
 
     int32 trackPlayTime = AEAudioHardware.GetTrackPlayTime();
     AEAudioHardware.GetChannelPlayTimes(m_nBackgroundAudioChannel, nullptr);
@@ -697,8 +708,8 @@ void CAudioEngine::Reset() {
     m_CollisionAE.Reset();
     AERadioTrackManager.Reset();
     AEAmbienceTrackManager.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     if (m_GlobalWeaponAE)
@@ -718,8 +729,8 @@ void CAudioEngine::Reset() {
 void CAudioEngine::ResetSoundEffects() {
     AESoundManager.Service();
     m_CollisionAE.Reset();
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED, 0.0f, 1.0f);
-    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP, 0.0f, 1.0f);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP_PAUSED);
+    m_FrontendAE.AddAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
     m_FrontendAE.Reset();
     m_ScriptAE.Reset();
     CAEWeatherAudioEntity::StaticReset();

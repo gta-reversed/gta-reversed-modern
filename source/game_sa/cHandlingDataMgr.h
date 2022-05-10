@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -50,4 +50,5 @@ public:
 
 VALIDATE_SIZE(cHandlingDataMgr, 0xC624);
 
-extern cHandlingDataMgr& gHandlingDataMgr;
+// If you're searching for `mod_HandlingManager`, you can use this:
+static inline cHandlingDataMgr& gHandlingDataMgr = *(cHandlingDataMgr*)0xC2B9C8;

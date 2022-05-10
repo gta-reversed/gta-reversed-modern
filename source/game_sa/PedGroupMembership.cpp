@@ -1,9 +1,36 @@
 #include "StdInc.h"
 
+#include "PedGroupMembership.h"
+
+// 0x5F6930
+CPedGroupMembership::CPedGroupMembership() {
+    std::ranges::fill(m_apMembers, nullptr);
+    m_fSeparationRange = 60.0f;
+}
+
+// 0x5FB140
+CPedGroupMembership::CPedGroupMembership(const CPedGroupMembership& obj) {
+    From(obj);
+}
+
+CPedGroupMembership::~CPedGroupMembership() {
+    Flush();
+}
+
+// 0x5F7FE0
+void CPedGroupMembership::From(const CPedGroupMembership& obj) {
+    for (auto i = 0; i < TOTAL_PED_GROUP_MEMBERS; i++) {
+        AddMember(obj.m_apMembers[i], i);
+    }
+    m_pPedGroup        = obj.m_pPedGroup;
+    m_fSeparationRange = obj.m_fSeparationRange;
+}
+
 void CPedGroupMembership::AddFollower(CPed* ped) {
     plugin::CallMethod<0x5F8020, CPedGroupMembership*, CPed*>(this, ped);
 }
 
+// 0x5F6AE0
 void CPedGroupMembership::AddMember(CPed* member, int32 memberID) {
     plugin::CallMethod<0x5F6AE0, CPedGroupMembership*, CPed*, int32>(this, member, memberID);
 }
@@ -20,54 +47,63 @@ int32 CPedGroupMembership::CountMembersExcludingLeader() {
     return plugin::CallMethodAndReturn<int32, 0x5F6AA0, CPedGroupMembership*>(this);
 }
 
+// 0x5FB160
 void CPedGroupMembership::Flush() {
-    plugin::CallMethod<0x5FB160, CPedGroupMembership*>(this);
-}
-
-void CPedGroupMembership::From(CPedGroupMembership const* obj) {
-    plugin::CallMethod<0x5F7FE0, CPedGroupMembership*, CPedGroupMembership const*>(this, obj);
+    for (auto i = 0u; i < m_apMembers.size(); i++) {
+        RemoveMember(i);
+    }
 }
 
 CPed* CPedGroupMembership::GetLeader() {
-    return plugin::CallMethodAndReturn<CPed*, 0x5F69A0, CPedGroupMembership*>(this);
+    return m_apMembers[7];
 }
 
+// 0x5F69B0
 CPed* CPedGroupMembership::GetMember(int32 memberId) {
-    return plugin::CallMethodAndReturn<CPed*, 0x5F69B0, CPedGroupMembership*, int32>(this, memberId);
+    return m_apMembers[memberId];
 }
 
-bool CPedGroupMembership::IsFollower(CPed const* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x5F69E0, CPedGroupMembership*, CPed const*>(this, ped);
+// 0x5F69E0
+bool CPedGroupMembership::IsFollower(const CPed* ped) const {
+    return plugin::CallMethodAndReturn<bool, 0x5F69E0, const CPedGroupMembership*, const CPed*>(this, ped);
 }
 
-bool CPedGroupMembership::IsLeader(CPed const* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x5F69C0, CPedGroupMembership*, CPed const*>(this, ped);
+// 0x5F69C0
+bool CPedGroupMembership::IsLeader(const CPed* ped) {
+    return ped && GetLeader() == ped;
 }
 
-bool CPedGroupMembership::IsMember(CPed const* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x5F6A10, CPedGroupMembership*, CPed const*>(this, ped);
+// 0x5F6A10
+bool CPedGroupMembership::IsMember(const CPed* ped) {
+    return plugin::CallMethodAndReturn<bool, 0x5F6A10, CPedGroupMembership*, const CPed*>(this, ped);
 }
 
+// 0x5FBA60
 void CPedGroupMembership::Process() {
     plugin::CallMethod<0x5FBA60, CPedGroupMembership*>(this);
 }
 
+// 0x5FB190
 void CPedGroupMembership::RemoveAllFollowers(bool bCreatedByGameOnly) {
     plugin::CallMethod<0x5FB190, CPedGroupMembership*, bool>(this, bCreatedByGameOnly);
 }
 
+// 0x5F80D0
 void CPedGroupMembership::RemoveMember(int32 memberID) {
     plugin::CallMethod<0x5F80D0, CPedGroupMembership*, int32>(this, memberID);
 }
 
+// 0x5FB1D0
 char CPedGroupMembership::RemoveNFollowers(int32 count) {
     return plugin::CallMethodAndReturn<char, 0x5FB1D0, CPedGroupMembership*, int32>(this, count);
 }
 
+// 0x5FB9C0
 void CPedGroupMembership::SetLeader(CPed* ped) {
     plugin::CallMethod<0x5FB9C0, CPedGroupMembership*, CPed*>(this, ped);
 }
 
-signed int CPedGroupMembership::GetObjectForPedToHold() {
-    return plugin::CallAndReturn<signed int, 0x5F6950>();
+// 0x5F6950
+int32 CPedGroupMembership::GetObjectForPedToHold() {
+    return plugin::CallAndReturn<int32, 0x5F6950>();
 }

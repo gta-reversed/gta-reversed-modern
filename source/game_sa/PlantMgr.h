@@ -2,6 +2,7 @@
 
 #include "Vector.h"
 
+class CEntity;
 class CPlantColEntEntry;
 class CPlantLocTri;
 

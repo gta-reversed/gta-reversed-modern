@@ -1,14 +1,14 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Vehicle.h"
-#include "BaseModelInfo.h"
-#include "PtrListDoubleLink.h"
+class CVehicle;
+class CBaseModelInfo;
+class CPtrListDoubleLink;
 
 enum eRendererVisibility {
     RENDERER_INVISIBLE = 0,
@@ -23,21 +23,39 @@ struct tScanLists {
     CPtrListDoubleLink* vehiclesList;
     CPtrListDoubleLink* pedsList;
     CPtrListDoubleLink* dummiesList;
+
+    inline CPtrListDoubleLink* GetList(uint32 index) const {
+        switch (index) {
+            case 0:
+                return buildingsList;
+            case 1:
+                return objectsList;
+            case 2:
+                return vehiclesList;
+            case 3:
+                return pedsList;
+            case 4:
+                return dummiesList;
+            default:
+                assert(false); // Shouldn't ever happen
+                return nullptr;
+        }
+    }
 };
 
 VALIDATE_SIZE(tScanLists, 0x14);
 
 struct tRenderListEntry {
-    CEntity* pEntity;
+    CEntity* entity;
     float distance;
 };
 
 VALIDATE_SIZE(tRenderListEntry, 8);
 
-extern int32 MAX_INVISIBLE_ENTITY_PTRS; // default 150
-extern int32 MAX_VISIBLE_ENTITY_PTRS;   // default 1000
-extern int32 MAX_VISIBLE_LOD_PTRS;      // default 1000
-extern int32 MAX_VISIBLE_SUPERLOD_PTRS; // default 50
+constexpr auto MAX_INVISIBLE_ENTITY_PTRS = 150u;
+constexpr auto MAX_VISIBLE_ENTITY_PTRS   = 1000u;
+constexpr auto MAX_VISIBLE_LOD_PTRS      = 1000u;
+constexpr auto MAX_VISIBLE_SUPERLOD_PTRS = 50u;
 
 class CWorldScan {
 public:
@@ -53,10 +71,10 @@ public:
     static tRenderListEntry*& ms_pLodDontRenderList;
     static tRenderListEntry*& ms_pLodRenderList;
     static CVehicle*& m_pFirstPersonVehicle;
-    static CEntity** ms_aInVisibleEntityPtrs; // static CEntity *ms_aInVisibleEntityPtrs[MAX_INVISIBLE_ENTITY_PTRS];
-    static CEntity** ms_aVisibleSuperLodPtrs; // static CEntity *ms_aVisibleSuperLodPtrs[MAX_VISIBLE_SUPERLOD_PTRS];
-    static CEntity** ms_aVisibleLodPtrs;      // static CEntity *ms_aVisibleLodPtrs[MAX_VISIBLE_LOD_PTRS];
-    static CEntity** ms_aVisibleEntityPtrs;   // static CEntity *ms_aVisibleEntityPtrs[MAX_VISIBLE_ENTITY_PTRS];
+    static CEntity* (&ms_aInVisibleEntityPtrs)[MAX_INVISIBLE_ENTITY_PTRS];
+    static CEntity* (&ms_aVisibleSuperLodPtrs)[MAX_VISIBLE_SUPERLOD_PTRS];
+    static CEntity* (&ms_aVisibleLodPtrs)[MAX_VISIBLE_LOD_PTRS];
+    static CEntity* (&ms_aVisibleEntityPtrs)[MAX_VISIBLE_ENTITY_PTRS];
     static int32& ms_nNoOfVisibleSuperLods;
     static int32& ms_nNoOfInVisibleEntities;
     static int32& ms_nNoOfVisibleLods;
@@ -101,7 +119,7 @@ public:
     static void ScanSectorList_ListModelsVisible(int32 sectorX, int32 sectorY);
     static void ScanSectorList(int32 sectorX, int32 sectorY);
     static void ScanBigBuildingList(int32 sectorX, int32 sectorY);
-    static bool ShouldModelBeStreamed(CEntity* entity, CVector const& origin, float farClip);
+    static bool ShouldModelBeStreamed(CEntity* entity, const CVector& origin, float farClip);
     static void ScanPtrList_RequestModels(CPtrList& list);
     static void ConstructRenderList();
     static void ScanSectorList_RequestModels(int32 sectorX, int32 sectorY);
@@ -109,7 +127,7 @@ public:
     // returns objects count
     static int32 GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
     static void RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags);
-    static void RequestObjectsInDirection(CVector const& posn, float angle, int32 modelRequestFlags);
+    static void RequestObjectsInDirection(const CVector& posn, float angle, int32 modelRequestFlags);
     static void SetupScanLists(int32 sectorX, int32 sectorY);
 
     static void SetLoadingPriority(int8 priority) noexcept { m_loadingPriority = priority; } // 0x407370

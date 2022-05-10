@@ -1,9 +1,14 @@
 #include "StdInc.h"
 
+#include "EventInAir.h"
+
 void CEventInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CEventInAir", "Constructor", 0x4B0CB0, &CEventInAir::Constructor);
-    ReversibleHooks::Install("CEventInAir", "AffectsPed", 0x4B0C00, &CEventInAir::AffectsPed_Reversed);
+    RH_ScopedClass(CEventInAir);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B0CB0);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B0C00);
 }
 
 CEventInAir* CEventInAir::Constructor()
@@ -43,23 +48,24 @@ bool CEventInAir::AffectsPed_Reversed(CPed* ped)
 
 void CEventStuckInAir::InjectHooks()
 {
-    ReversibleHooks::Install("CEventStuckInAir", "Constructor", 0x4B1490, &CEventStuckInAir::Constructor);
-    ReversibleHooks::Install("CEventStuckInAir", "GetEventPriority", 0x4B1600, &CEventStuckInAir::GetEventPriority_Reversed);
-    ReversibleHooks::Install("CEventStuckInAir", "AffectsPed", 0x4B1580, &CEventStuckInAir::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventStuckInAir", "TakesPriorityOver", 0x4B15B0, &CEventStuckInAir::TakesPriorityOver_Reversed);
+    RH_ScopedClass(CEventStuckInAir);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4B1490);
+    RH_ScopedVirtualInstall(GetEventPriority, 0x4B1600);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B1580);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B15B0);
 }
 
 CEventStuckInAir::CEventStuckInAir(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventStuckInAir::~CEventStuckInAir()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventStuckInAir* CEventStuckInAir::Constructor(CPed* ped)

@@ -1,13 +1,12 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
-#include "Ped.h"
-
+class CPed;
 class CPedGroup;
 
 const int32 TOTAL_PED_GROUP_MEMBERS = 8;
@@ -15,36 +14,38 @@ const int32 TOTAL_PED_GROUP_MEMBERS = 8;
 const int32 TOTAL_PED_GROUP_FOLLOWERS = TOTAL_PED_GROUP_MEMBERS - 1;
 
 class CPedGroupMembership {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CPedGroupMembership)
-
 public:
     CPedGroup* m_pPedGroup;
-    CPed*      m_apMembers[TOTAL_PED_GROUP_MEMBERS]; //!< m_apMembers[7] is a leader
+    std::array<CPed*, TOTAL_PED_GROUP_MEMBERS> m_apMembers; // m_apMembers[7] is a leader
+    float m_fSeparationRange;
 
-    static float const& ms_fMaxSeparation;
-    static float const& ms_fPlayerGroupMaxSeparation;
+    static const float& ms_fMaxSeparation;
+    static const float& ms_fPlayerGroupMaxSeparation;
 
 public:
+    CPedGroupMembership();
+    CPedGroupMembership(const CPedGroupMembership& from);
+    ~CPedGroupMembership();
+
     void  AddFollower(CPed* ped);
     void  AddMember(CPed* member, int32 memberID);
     void  AppointNewLeader();
     int32 CountMembers();
     int32 CountMembersExcludingLeader();
     void  Flush();
-    //! copy constructor subfunction
-    void  From(CPedGroupMembership const* obj);
+    void  From(const CPedGroupMembership& obj);
     CPed* GetLeader();
     CPed* GetMember(int32 memberId);
-    bool  IsFollower(CPed const* ped);
-    bool  IsLeader(CPed const* ped);
-    bool  IsMember(CPed const* ped);
+    bool  IsFollower(const CPed* ped) const;
+    bool  IsLeader(const CPed* ped);
+    bool  IsMember(const CPed* ped);
     void  Process();
     void  RemoveAllFollowers(bool bCreatedByGameOnly);
     void  RemoveMember(int32 memberID);
     char  RemoveNFollowers(int32 count);
     void  SetLeader(CPed* ped);
 
-    static signed int GetObjectForPedToHold();
+    static int32 GetObjectForPedToHold();
 };
 
-VALIDATE_SIZE(CPedGroupMembership, 0x24);
+VALIDATE_SIZE(CPedGroupMembership, 0x28);

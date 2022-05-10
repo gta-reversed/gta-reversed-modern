@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,15 +8,21 @@
 
 class CNodeAddress {
 public:
-    int16 m_wAreaId;
-    int16 m_wNodeId;
+    uint16 m_wAreaId{(uint16)-1u};
+    uint16 m_wNodeId{(uint16)-1u};
 
-    CNodeAddress() : m_wAreaId(-1), m_wNodeId(-1) {}
+    constexpr CNodeAddress() = default;
+    constexpr CNodeAddress(uint16 areaId, uint16 nodeId) : m_wAreaId(areaId), m_wNodeId(nodeId) {}
 
-    bool operatorEqual(CNodeAddress* rhs);
+    bool operator==(CNodeAddress const&) const = default;
+    bool operator!=(CNodeAddress const&) const = default;
 
-    bool operator==(CNodeAddress const& rhs) const;
-    bool operator!=(CNodeAddress const& rhs) const;
+    inline bool IsAreaValid() const {
+        return m_wAreaId != (uint16)-1;
+    }
+    inline bool IsValid() const {
+        return m_wAreaId != (uint16)-1 || m_wNodeId != (uint16)-1;
+    }
 };
 
 VALIDATE_SIZE(CNodeAddress, 0x4);

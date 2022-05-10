@@ -1,5 +1,7 @@
 #include "StdInc.h"
 
+#include "Darkel.h"
+
 char*& CDarkel::pStartMessage = *reinterpret_cast<char**>(0x96A6D0);
 uint32& CDarkel::AmmoInterruptedWeapon = *reinterpret_cast<uint32*>(0x96A6D4);
 eWeaponType& CDarkel::InterruptedWeaponType = *reinterpret_cast<eWeaponType*>(0x96A6D8);
@@ -9,34 +11,37 @@ uint32& CDarkel::TimeOfFrenzyStart = *reinterpret_cast<uint32*>(0x96A6E0);
 eWeaponType& CDarkel::WeaponType = *reinterpret_cast<eWeaponType*>(0x96A700);
 
 void CDarkel::InjectHooks() {
-    ReversibleHooks::Install("CDarkel", "FrenzyOnGoing", 0x43D1F0, &CDarkel::FrenzyOnGoing);
-    ReversibleHooks::Install("CDarkel", "Init", 0x43CEB0, &CDarkel::Init);
-//    ReversibleHooks::Install("CDarkel", "DrawMessages", 0x43CEC0, &CDarkel::DrawMessages);
-    ReversibleHooks::Install("CDarkel", "ReadStatus", 0x43D1E0, &CDarkel::ReadStatus);
-//    ReversibleHooks::Install("CDarkel", "RegisterKillNotByPlayer", 0x43D210, &CDarkel::RegisterKillNotByPlayer);
-//    ReversibleHooks::Install("CDarkel", "ThisPedShouldBeKilledForFrenzy", 0x43D2F0, &CDarkel::ThisPedShouldBeKilledForFrenzy);
-//    ReversibleHooks::Install("CDarkel", "ThisVehicleShouldBeKilledForFrenzy", 0x0, &CDarkel::ThisVehicleShouldBeKilledForFrenzy);
-//    ReversibleHooks::Install("CDarkel", "StartFrenzy", 0x43D3B0, &CDarkel::StartFrenzy);
-//    ReversibleHooks::Install("CDarkel", "ResetModelsKilledByPlayer", 0x43D6A0, &CDarkel::ResetModelsKilledByPlayer);
-//    ReversibleHooks::Install("CDarkel", "QueryModelsKilledByPlayer", 0x0, &CDarkel::QueryModelsKilledByPlayer);
-//    ReversibleHooks::Install("CDarkel", "FindTotalPedsKilledByPlayer", 0x0, &CDarkel::FindTotalPedsKilledByPlayer);
-//    ReversibleHooks::Install("CDarkel", "DealWithWeaponChangeAtEndOfFrenzy", 0x43D7A0, &CDarkel::DealWithWeaponChangeAtEndOfFrenzy);
-    ReversibleHooks::Install("CDarkel", "CheckDamagedWeaponType", 0x43D9E0, &CDarkel::CheckDamagedWeaponType);
-//    ReversibleHooks::Install("CDarkel", "Update", 0x43DAC0, &CDarkel::Update);
-    ReversibleHooks::Install("CDarkel", "ResetOnPlayerDeath", 0x43DC10, &CDarkel::ResetOnPlayerDeath);
-    ReversibleHooks::Install("CDarkel", "FailKillFrenzy", 0x43DC60, &CDarkel::FailKillFrenzy);
-//    ReversibleHooks::Install("CDarkel", "RegisterKillByPlayer", 0x43DCD0, &CDarkel::RegisterKillByPlayer);
-//    ReversibleHooks::Install("CDarkel", "RegisterCarBlownUpByPlayer", 0x43DF20, &CDarkel::RegisterCarBlownUpByPlayer);
-}
+    RH_ScopedClass(CDarkel);
+    RH_ScopedCategoryGlobal();
 
-// 0x43D1F0
-bool CDarkel::FrenzyOnGoing() {
-    return CDarkel::Status == DARKEL_STATUS_1 || CDarkel::Status == DARKEL_STATUS_4;
+    RH_ScopedInstall(FrenzyOnGoing, 0x43D1F0);
+    RH_ScopedInstall(Init, 0x43CEB0);
+//    RH_ScopedInstall(DrawMessages, 0x43CEC0);
+    RH_ScopedInstall(ReadStatus, 0x43D1E0);
+//    RH_ScopedInstall(RegisterKillNotByPlayer, 0x43D210);
+//    RH_ScopedInstall(ThisPedShouldBeKilledForFrenzy, 0x43D2F0);
+//    RH_ScopedInstall(ThisVehicleShouldBeKilledForFrenzy, 0x0);
+//    RH_ScopedInstall(StartFrenzy, 0x43D3B0);
+//    RH_ScopedInstall(ResetModelsKilledByPlayer, 0x43D6A0);
+//    RH_ScopedInstall(QueryModelsKilledByPlayer, 0x0);
+//    RH_ScopedInstall(FindTotalPedsKilledByPlayer, 0x0);
+//    RH_ScopedInstall(DealWithWeaponChangeAtEndOfFrenzy, 0x43D7A0);
+    RH_ScopedInstall(CheckDamagedWeaponType, 0x43D9E0);
+//    RH_ScopedInstall(Update, 0x43DAC0);
+    RH_ScopedInstall(ResetOnPlayerDeath, 0x43DC10);
+    RH_ScopedInstall(FailKillFrenzy, 0x43DC60);
+//    RH_ScopedInstall(RegisterKillByPlayer, 0x43DCD0);
+//    RH_ScopedInstall(RegisterCarBlownUpByPlayer, 0x43DF20);
 }
 
 // 0x43CEB0
 void CDarkel::Init() {
-    CDarkel::Status = DARKEL_STATUS_0;
+    Status = DARKEL_STATUS_0;
+}
+
+// 0x43D1F0
+bool CDarkel::FrenzyOnGoing() {
+    return Status == DARKEL_STATUS_1 || Status == DARKEL_STATUS_4;
 }
 
 // 0x43CEC0
@@ -46,22 +51,22 @@ void CDarkel::DrawMessages() {
 
 // 0x43D1E0
 eDarkelStatus CDarkel::ReadStatus() {
-    return CDarkel::Status;
+    return Status;
 }
 
 // 0x43D210
-void CDarkel::RegisterKillNotByPlayer(const CPed* pKilledPed) {
-    plugin::Call<0x43D210, const CPed*>(pKilledPed);
+void CDarkel::RegisterKillNotByPlayer(const CPed* killedPed) {
+    plugin::Call<0x43D210, const CPed*>(killedPed);
 }
 
 // 0x43D2F0
-bool CDarkel::ThisPedShouldBeKilledForFrenzy(const CPed* pPed) {
-    return plugin::CallAndReturn<bool, 0x43D2F0, const CPed*>(pPed);
+bool CDarkel::ThisPedShouldBeKilledForFrenzy(const CPed* ped) {
+    return plugin::CallAndReturn<bool, 0x43D2F0, const CPed*>(ped);
 }
 
 // 0x
-bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle* pVehicle) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*>(pVehicle);
+bool CDarkel::ThisVehicleShouldBeKilledForFrenzy(const CVehicle* vehicle) {
+    return plugin::CallAndReturn<bool, 0x0, const CVehicle*>(vehicle);
 }
 
 // 0x43D3B0
@@ -185,35 +190,35 @@ void CDarkel::Update() {
 // 0x43DC10
 void CDarkel::ResetOnPlayerDeath() {
     CHud::SetHelpMessage(nullptr, true, false, false);
-    if (CDarkel::Status == DARKEL_STATUS_1 || CDarkel::Status == DARKEL_STATUS_4) {
-        CDarkel::Status = DARKEL_STATUS_3;
+    if (FrenzyOnGoing()) {
+        Status = DARKEL_STATUS_3;
         CPopulation::m_AllRandomPedsThisType = -1;
-        CDarkel::TimeOfFrenzyStart = CTimer::GetTimeInMS();
-        CDarkel::DealWithWeaponChangeAtEndOfFrenzy();
+        TimeOfFrenzyStart = CTimer::GetTimeInMS();
+        DealWithWeaponChangeAtEndOfFrenzy();
     }
 }
 
 // 0x43DC60
 void CDarkel::FailKillFrenzy() {
-    if (CDarkel::Status == DARKEL_STATUS_4) {
+    if (Status == DARKEL_STATUS_4) {
         CGameLogic::GameState = GAME_STATE_TITLE;
         CGameLogic::TimeOfLastEvent = CTimer::GetTimeInMS();
     }
     CHud::SetHelpMessage(nullptr, true, false, false);
-    if (CDarkel::Status == DARKEL_STATUS_1 || CDarkel::Status == DARKEL_STATUS_4) {
-        CDarkel::Status = DARKEL_STATUS_3;
+    if (FrenzyOnGoing()) {
+        Status = DARKEL_STATUS_3;
         CPopulation::m_AllRandomPedsThisType = -1;
-        CDarkel::TimeOfFrenzyStart = CTimer::GetTimeInMS();
-        CDarkel::DealWithWeaponChangeAtEndOfFrenzy();
+        TimeOfFrenzyStart = CTimer::GetTimeInMS();
+        DealWithWeaponChangeAtEndOfFrenzy();
     }
 }
 
 // 0x43DCD0
-void CDarkel::RegisterKillByPlayer(CPed const* pKilledPed, eWeaponType damageWeaponID, bool bHeadShotted, int32 arg4) {
-    plugin::Call<0x43DCD0, CPed const*, eWeaponType, bool, int32>(pKilledPed, damageWeaponID, bHeadShotted, arg4);
+void CDarkel::RegisterKillByPlayer(const CPed* killedPed, eWeaponType damageWeaponID, bool bHeadShotted, int32 arg4) {
+    plugin::Call<0x43DCD0, const CPed*, eWeaponType, bool, int32>(killedPed, damageWeaponID, bHeadShotted, arg4);
 }
 
 // 0x43DF20
-void CDarkel::RegisterCarBlownUpByPlayer(CVehicle* pVehicle, int32 arg2) {
-    plugin::Call<0x43DF20, CVehicle*, int32>(pVehicle, arg2);
+void CDarkel::RegisterCarBlownUpByPlayer(CVehicle* vehicle, int32 arg2) {
+    plugin::Call<0x43DF20, CVehicle*, int32>(vehicle, arg2);
 }

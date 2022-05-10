@@ -30,7 +30,7 @@ public:
 public:
     static void InjectHooks();
 
-    void* operator new(uint32 size);
+    void* operator new(unsigned size);
     void  operator delete(void* object);
 
     CPedAttractor(C2dEffect* effect, CEntity* entity, int32 a3, int32 a4, float a5, float time2, float time1, float a8, float a9, float range, float a11, float a12);
@@ -61,7 +61,7 @@ public:
 
     void ComputeAttractTime(int32 unused, bool time1_or_time2, float& outTime) const;
 
-    virtual void ComputeAttractPos(int32 pedId, CVector& outPosn);
+    virtual void ComputeAttractPos(int32 pedId, CVector& outPos);
     virtual void ComputeAttractHeading(int32 bQueue, float& heading);
     virtual void BroadcastDeparture(CPed* ped);
 

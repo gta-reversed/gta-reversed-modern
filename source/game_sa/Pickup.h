@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -8,6 +8,10 @@
 
 #include "CompressedVector.h"
 #include "Vector.h"
+
+class CObject;
+class CVehicle;
+class CPlayerPed;
 
 enum ePickupType : uint8 {
     PICKUP_NONE = 0,
@@ -41,10 +45,6 @@ enum ePickupPropertyText {
     PICKUP_PROPERTYTEXT_CAN_BUY = 2   // "Press TAB to buy ..."
 };
 
-class CObject;
-class CVehicle;
-class CPlayerPed;
-
 class CPickup {
 public:
     float            m_fRevenueValue;
@@ -63,7 +63,6 @@ public:
         uint8 bVisible : 1;
         uint8 nPropertyTextIndex : 3; // see enum ePickupPropertyText
     } m_nFlags;
-    char _pad1E[2];
 
 public:
     static void InjectHooks();

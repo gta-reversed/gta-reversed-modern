@@ -4,7 +4,9 @@
 
 void CTaskSimpleUninterruptable::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskSimpleUninterruptable", "Constructor", 0x43E2E0, &CTaskSimpleUninterruptable::Constructor);
+    RH_ScopedClass(CTaskSimpleUninterruptable);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x43E2E0);
 }
 
 CTaskSimpleUninterruptable* CTaskSimpleUninterruptable::Constructor()

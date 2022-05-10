@@ -1,41 +1,38 @@
 #include "StdInc.h"
 
+#include "EventPedToChase.h"
+
 void CEventPedToChase::InjectHooks()
 {
-    ReversibleHooks::Install("CEventPedToChase", "Constructor", 0x4AF130, &CEventPedToChase::Constructor);
-    ReversibleHooks::Install("CEventPedToChase", "Clone_Reversed", 0x4B7360, &CEventPedToChase::Clone_Reversed);
+    RH_ScopedClass(CEventPedToChase);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x4AF130);
+    RH_ScopedVirtualInstall(Clone, 0x4B7360);
 }
 
+// 0x4AF130
 CEventPedToChase::CEventPedToChase(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventPedToChase::~CEventPedToChase()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventPedToChase* CEventPedToChase::Constructor(CPed* ped)
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn< CEventPedToChase*, 0x4AF130, CEventPedToChase*, CPed*>(this, ped);
-#else
     this->CEventPedToChase::CEventPedToChase(ped);
     return this;
-#endif
 }
 
+// 0x4B7360
 CEvent* CEventPedToChase::Clone()
 {
-#ifdef USE_DEFAULT_FUNCTIONS
-    return plugin::CallMethodAndReturn<CEvent*, 0x4B7360, CEvent*>(this);
-#else
     return CEventPedToChase::Clone_Reversed();
-#endif
 }
 
 CEvent* CEventPedToChase::Clone_Reversed()

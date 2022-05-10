@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -28,7 +28,7 @@ public:
     char                     pad[3];
     CVector                  m_vecOffset;
     RpHAnimBlendInterpFrame* m_pIFrame;
-    uint32                   m_nNodeId;
+    uint32                   m_nNodeId; // In case of peds it's ePedBone (NOTE: I might be wrong, see `IsPedHeadAbovePos`)
 };
 
 VALIDATE_SIZE(AnimBlendFrameData, 0x18);

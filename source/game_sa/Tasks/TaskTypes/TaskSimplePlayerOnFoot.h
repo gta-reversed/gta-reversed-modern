@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -25,6 +25,8 @@ public:
     CEntity* m_pLookingAtEntity; // always 0
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_PLAYER_ON_FOOT;
+
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 

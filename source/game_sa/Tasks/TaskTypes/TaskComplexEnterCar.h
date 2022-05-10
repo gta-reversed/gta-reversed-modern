@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -9,15 +9,10 @@
 #include "TaskComplex.h"
 #include "PathFind.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+#include "eTargetDoor.h"
 
-enum eTargetDoor {
-    TARGET_DOOR_FRONT_LEFT  = 0,
-    TARGET_DOOR_FRONT_RIGHT = 8,
-    TARGET_DOOR_REAR_RIGHT  = 9,
-    TARGET_DOOR_DRIVER      = 10,
-    TARGET_DOOR_REAR_LEFT   = 11
-};
-
+// Note: This class is abstract, that is, it can't be directly constructed,
+// rather, use one of the derived classes.
 class CTaskComplexEnterCar : public CTaskComplex {
 public:
     CVehicle* m_pTargetVehicle;
@@ -30,7 +25,6 @@ public:
             uint8 m_bCarryOnAfterFallingOff : 1;
         };
     };
-    char  _pad[3];
     int32 m_nTargetDoor;
     int32 m_nTargetDoorOppositeToFlag;
     int32 m_nTargetSeat;
@@ -61,6 +55,8 @@ public:
     CTask*         ControlSubTask(CPed* ped) override;
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
+
+    auto GetVehicle() const { return m_pTargetVehicle; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);

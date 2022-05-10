@@ -1,8 +1,8 @@
 /*
-Plugin-SDK (Grand Theft Auto San Andreas) header file
-Authors: GTA Community. See more here
-https://github.com/DK22Pac/plugin-sdk
-Do not delete this comment block. Respect others' work!
+    Plugin-SDK file
+    Authors: GTA Community. See more here
+    https://github.com/DK22Pac/plugin-sdk
+    Do not delete this comment block. Respect others' work!
 */
 #pragma once
 
@@ -12,12 +12,13 @@ Do not delete this comment block. Respect others' work!
 class CTaskSimpleRunAnim : public CTaskSimpleAnim {
 public:
     AssocGroupId m_nAnimGroup;
-    AnimationId m_nAnimId;
-    float m_fBlendDelta;
-    uint16 m_nTaskType;
-    char _pad[2];
+    AnimationId  m_nAnimId;
+    float        m_fBlendDelta;
+    uint16       m_nTaskType;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_NAMED_ANIM;
+
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, bool bHoldLastFrame);
     CTaskSimpleRunAnim(AssocGroupId animGroup, AnimationId animId, float fBlendDelta, int32 nTaskType, const char* taskName _IGNORED_, bool bHoldLastFrame);
 

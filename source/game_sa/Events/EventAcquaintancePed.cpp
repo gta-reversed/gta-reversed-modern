@@ -1,31 +1,37 @@
 #include "StdInc.h"
 
+#include "EventAcquaintancePed.h"
+
 void CEventAcquaintancePed::InjectHooks()
 {
+    RH_ScopedClass(CEventAcquaintancePed);
+    RH_ScopedCategory("Events");
+
     CEventAcquaintancePedHate::InjectHooks();
     CEventAcquaintancePedHateBadlyLit::InjectHooks();
-    ReversibleHooks::Install("CEventAcquaintancePed", "Constructor", 0x4AF820, &CEventAcquaintancePed::Constructor);
-    ReversibleHooks::Install("CEventAcquaintancePed", "AffectsPed_Reversed", 0x4AFA30, &CEventAcquaintancePed::AffectsPed_Reversed);
-    ReversibleHooks::Install("CEventAcquaintancePed", "AffectsPedGroup_Reversed", 0x4AF970, &CEventAcquaintancePed::AffectsPedGroup_Reversed);
-    ReversibleHooks::Install("CEventAcquaintancePed", "TakesPriorityOver_Reversed", 0x4AF8F0, &CEventAcquaintancePed::TakesPriorityOver_Reversed);
+    RH_ScopedInstall(Constructor, 0x4AF820);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA30);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4AF970);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AF8F0);
 }
 
 void CEventSeenCop::InjectHooks()
 {
-    ReversibleHooks::Install("CEventSeenCop", "CEventSeenCop", 0x5FF380, &CEventSeenCop::Constructor);
+    RH_ScopedClass(CEventSeenCop);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF380);
 }
 
 CEventAcquaintancePed::CEventAcquaintancePed(CPed* ped)
 {
     m_ped = ped;
-    if (m_ped)
-        m_ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAcquaintancePed::~CEventAcquaintancePed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAcquaintancePed* CEventAcquaintancePed::Constructor(CPed* ped)
@@ -64,7 +70,7 @@ bool CEventAcquaintancePed::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
     if (m_ped) {
         CPedGroupMembership& membership = pedGroup->GetMembership();
         if (!membership.IsMember(m_ped)
-            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_ped != pedGroup->field_0))
+            && (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE || m_ped != pedGroup->m_pPed))
         {
             if (GetEventType() != EVENT_ACQUAINTANCE_PED_RESPECT && GetEventType() != EVENT_ACQUAINTANCE_PED_LIKE)
                 return true;
@@ -91,7 +97,10 @@ bool CEventAcquaintancePed::TakesPriorityOver_Reversed(const CEvent& refEvent)
 
 void CEventAcquaintancePedHate::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAcquaintancePedHate", "CEventAcquaintancePedHate", 0x420E70, &CEventAcquaintancePedHate::Constructor);
+    RH_ScopedClass(CEventAcquaintancePedHate);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x420E70);
 }
 
 CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
@@ -103,8 +112,11 @@ CEventAcquaintancePedHate* CEventAcquaintancePedHate::Constructor(CPed* ped)
 
 void CEventAcquaintancePedHateBadlyLit::InjectHooks()
 {
-    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "CEventAcquaintancePedHateBadlyLit", 0x5FF250, &CEventAcquaintancePedHateBadlyLit::Constructor);
-    ReversibleHooks::Install("CEventAcquaintancePedHateBadlyLit", "AffectsPed", 0x4AFA90, &CEventAcquaintancePedHateBadlyLit::AffectsPed_Reversed);
+    RH_ScopedClass(CEventAcquaintancePedHateBadlyLit);
+    RH_ScopedCategory("Events");
+
+    RH_ScopedInstall(Constructor, 0x5FF250);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AFA90);
 }
 
 CEventAcquaintancePedHateBadlyLit::CEventAcquaintancePedHateBadlyLit(CPed* ped, int32 startTimeInMs, const CVector& point) : CEventAcquaintancePed(ped)

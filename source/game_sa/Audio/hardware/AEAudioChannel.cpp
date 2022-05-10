@@ -8,16 +8,19 @@
 uint32& g_numSoundChannelsUsed = *(uint32*)0xB5F898;
 
 void CAEAudioChannel::InjectHooks() {
-    ReversibleHooks::Install("CAEAudioChannel", "SetPosition", 0x4D7950, &CAEAudioChannel::SetPosition);
-    ReversibleHooks::Install("CAEAudioChannel", "UpdateStatus", 0x4D7BD0, &CAEAudioChannel::UpdateStatus);
-    ReversibleHooks::Install("CAEAudioChannel", "Lost", 0x4D7A10, &CAEAudioChannel::Lost);
-    ReversibleHooks::Install("CAEAudioChannel", "ConvertFromBytesToMS", 0x4D79D0, &CAEAudioChannel::ConvertFromBytesToMS);
-    ReversibleHooks::Install("CAEAudioChannel", "ConvertFromMsToBytes", 0x4D79F0, &CAEAudioChannel::ConvertFromMsToBytes);
-    ReversibleHooks::Install("CAEAudioChannel", "SetFrequency", 0x4D7A50, &CAEAudioChannel::SetFrequency);
-    ReversibleHooks::Install("CAEAudioChannel", "SetVolume", 0x4D7C60, &CAEAudioChannel::SetVolume);
-    ReversibleHooks::Install("CAEAudioChannel", "SetOriginalFrequency", 0x4D7A70, &CAEAudioChannel::SetOriginalFrequency);
-    ReversibleHooks::Install("CAEAudioChannel", "SetFrequencyScalingFactor", 0x4D7D00, &CAEAudioChannel::SetFrequencyScalingFactor_Reversed);
-    ReversibleHooks::Install("CAEAudioChannel", "GetCurrentPlaybackPosition", 0x4D79A0, &CAEAudioChannel::GetCurrentPlaybackPosition);
+    RH_ScopedClass(CAEAudioChannel);
+    RH_ScopedCategory("Audio/Hardware");
+
+    RH_ScopedInstall(SetPosition, 0x4D7950);
+    RH_ScopedInstall(UpdateStatus, 0x4D7BD0);
+    RH_ScopedInstall(Lost, 0x4D7A10);
+    RH_ScopedInstall(ConvertFromBytesToMS, 0x4D79D0);
+    RH_ScopedInstall(ConvertFromMsToBytes, 0x4D79F0);
+    RH_ScopedInstall(SetFrequency, 0x4D7A50);
+    RH_ScopedInstall(SetVolume, 0x4D7C60);
+    RH_ScopedInstall(SetOriginalFrequency, 0x4D7A70);
+    RH_ScopedVirtualInstall(SetFrequencyScalingFactor, 0x4D7D00);
+    RH_ScopedInstall(GetCurrentPlaybackPosition, 0x4D79A0);
 }
 
 CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample) {

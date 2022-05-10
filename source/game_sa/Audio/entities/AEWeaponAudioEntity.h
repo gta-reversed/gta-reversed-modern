@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -16,27 +16,28 @@ class CPed;
 
 class CAEWeaponAudioEntity : public CAEAudioEntity {
 public:
-    bool       m_bPlayedMiniGunFireSound;
-    bool       field_7D; // see PlayMiniGunFireSounds
-    uint8      field_7E; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
-    int8       m_nState;
-    int8       m_nChainsawSoundState;
-    char       _pad81[3];
-    uint32     m_nFlameThrowerLastPlayedTime;
-    uint32     m_nSpraycanLastPlayedTime;
-    uint32     m_nExtinguisherLastPlayedTime;
-    uint32     m_nMiniGunFireSoundPlayedTime;
-    uint32     m_nTimeChainsaw;
-    uint32     m_nTimeLastFired;
-    CAESound*  m_pSounds;
-    CPhysical* m_Physical;
-    CPed*      m_pPed;
+    bool       m_bPlayedMiniGunFireSound{};
+    bool       field_7D{}; // see PlayMiniGunFireSounds
+    uint8      field_7E{}; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
+    int8       m_nState{};
+    int8       m_nChainsawSoundState{};
+    char       _pad81[3]{};
+    uint32     m_nFlameThrowerLastPlayedTime{};
+    uint32     m_nSpraycanLastPlayedTime{};
+    uint32     m_nExtinguisherLastPlayedTime{};
+    uint32     m_nMiniGunFireSoundPlayedTime{};
+    uint32     m_nTimeChainsaw{};
+    uint32     m_nTimeLastFired{};
+    CAESound*  m_pSounds{};
+    CPhysical* m_Physical{};
+    CPed*      m_pPed{};
 
 public:
     CAEWeaponAudioEntity();
     ~CAEWeaponAudioEntity();
 
     void Initialise();
+    void Initialise(CPed* ped);
     void Terminate();
     void Reset();
 

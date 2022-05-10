@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -10,9 +10,9 @@
 
 class CDummy : public CEntity {
 public:
-    CDummy() : CEntity() { m_nType = eEntityType::ENTITY_TYPE_DUMMY; }
-    static void* operator new(uint32 size);
-    static void  operator delete(void* pObj);
+    CDummy() : CEntity() { m_nType = ENTITY_TYPE_DUMMY; }
+    static void* operator new(unsigned size);
+    static void  operator delete(void* obj);
 
 public:
     static void InjectHooks();

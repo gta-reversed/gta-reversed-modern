@@ -7,12 +7,14 @@
 
 void CTaskComplexUseWaterCannon::InjectHooks()
 {
-    ReversibleHooks::Install("CTaskComplexUseWaterCannon", "Constructor", 0x659780, &CTaskComplexUseWaterCannon::Constructor);
+    RH_ScopedClass(CTaskComplexUseWaterCannon);
+    RH_ScopedCategory("Tasks/TaskTypes");
+    RH_ScopedInstall(Constructor, 0x659780);
     //VTABLE
-    ReversibleHooks::Install("CTaskComplexUseWaterCannon", "Clone", 0x659D10, &CTaskComplexUseWaterCannon::Clone_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseWaterCannon", "CreateFirstSubTask", 0x6597D0, &CTaskComplexUseWaterCannon::CreateFirstSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseWaterCannon", "CreateNextSubTask", 0x6597C0, &CTaskComplexUseWaterCannon::CreateNextSubTask_Reversed);
-    ReversibleHooks::Install("CTaskComplexUseWaterCannon", "ControlSubTask", 0x65A640, &CTaskComplexUseWaterCannon::ControlSubTask_Reversed);
+    RH_ScopedVirtualInstall(Clone, 0x659D10);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6597D0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x6597C0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65A640);
 }
 
 CTaskComplexUseWaterCannon* CTaskComplexUseWaterCannon::Constructor(CFire* pFire)

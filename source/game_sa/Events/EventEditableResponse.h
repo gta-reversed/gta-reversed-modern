@@ -12,13 +12,13 @@ public:
 
 public:
     CEventEditableResponse();
-    ~CEventEditableResponse();
+    ~CEventEditableResponse() override = default; // 0x4AC480
 
     CEvent* Clone() override;
     bool HasEditableResponse() const override;
     virtual CEventEditableResponse* CloneEditable() = 0;
 
-    bool WillRespond();
+    bool WillRespond() const;
     void InformVehicleOccupants(CPed* ped);
     void InformRespectedFriends(CPed* ped);
     void InformGroup(CPed* ped);
@@ -30,7 +30,6 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
     CEventEditableResponse* Constructor();
     CEvent* Clone_Reversed();
     bool HasEditableResponse_Reversed() const { return true; }
@@ -40,19 +39,18 @@ VALIDATE_SIZE(CEventEditableResponse, 0x14);
 
 class CEventSpecial : public CEventEditableResponse {
 public:
-    CEventSpecial() {}
-    ~CEventSpecial() {}
+    CEventSpecial() = default; // 0x4B1AE0
+    ~CEventSpecial() override = default; // 0x4B6750 ?
 
     eEventType GetEventType() const override { return EVENT_SPECIAL; }
     int32 GetEventPriority() const override { return 52; }
     int32 GetLifeTime() override { return 0; }
     bool AffectsPed(CPed* ped) override { return true; }
     CEventSpecial* CloneEditable() override { return new CEventSpecial(); }
-    
+
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
     CEventSpecial* Constructor();
 };
 
@@ -62,13 +60,10 @@ class CEventFireNearby : public CEventEditableResponse {
 public:
     CVector m_position;
 
-    static void InjectHooks();
-
-    CEventFireNearby(CVector const& position);
-    ~CEventFireNearby() {}
-private:
-    CEventFireNearby* Constructor(CVector const& position);
 public:
+    explicit CEventFireNearby(const CVector& position);
+    ~CEventFireNearby() override = default; // 0x4B1F80
+
     eEventType GetEventType() const override { return EVENT_FIRE_NEARBY; }
     int32 GetEventPriority() const override { return 17; }
     int32 GetLifeTime() override { return 0; }
@@ -77,9 +72,10 @@ public:
     CEventFireNearby* CloneEditable() override { return new CEventFireNearby(m_position); }
 
 private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CEventFireNearby* Constructor(const CVector& position);
     bool AffectsPed_Reversed(CPed* ped);
-public:
-
 };
 
 VALIDATE_SIZE(CEventFireNearby, 0x20);
@@ -89,13 +85,10 @@ public:
     CEntity* m_dangerFrom;
     float m_dangerRadius;
 
-    static void InjectHooks();
-
-    CEventDanger(CEntity* dangerFrom, float dangerRadius);
-    ~CEventDanger();
-private:
-    CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
 public:
+    CEventDanger(CEntity* dangerFrom, float dangerRadius);
+    ~CEventDanger() override;
+
     eEventType GetEventType() const override { return EVENT_DANGER; }
     int32 GetEventPriority() const override { return 20; }
     int32 GetLifeTime() override { return 0; }
@@ -103,7 +96,11 @@ public:
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEntity* GetSourceEntity() const override;
     CEventDanger* CloneEditable() override { return new CEventDanger(m_dangerFrom, m_dangerRadius); }
+
 private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CEventDanger* Constructor(CEntity* dangerFrom, float dangerRadius);
     bool AffectsPed_Reversed(CPed* ped);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
     CEntity* GetSourceEntity_Reversed() const;
@@ -116,8 +113,8 @@ public:
     CPed* m_ped;
 
 public:
-    CEventSeenPanickedPed(CPed* ped);
-    ~CEventSeenPanickedPed();
+    explicit CEventSeenPanickedPed(CPed* ped);
+    ~CEventSeenPanickedPed() override;
 
     eEventType GetEventType() const override { return EVENT_SEEN_PANICKED_PED; }
     int32 GetEventPriority() const override { return 13; }
@@ -129,9 +126,7 @@ public:
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
-
     CEventSeenPanickedPed* Constructor(CPed* ped);
-
     bool AffectsPed_Reversed(CPed* ped);
 };
 

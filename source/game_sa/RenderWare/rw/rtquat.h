@@ -1,5 +1,5 @@
 /*
-    Plugin-SDK (Grand Theft Auto San Andreas) header file
+    Plugin-SDK file
     Authors: GTA Community. See more here
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
@@ -74,7 +74,7 @@ struct RtQuat
 typedef RtQuat RpQuat;
 
 void RtQuatConvertToMatrix(const RtQuat* const qpQuat, RwMatrix* const mpMatrix);
-RwBool RtQuatConvertFromMatrix(RtQuat * const qpQuat, const RwMatrix * const mpMatrix); // 0x7EB5C0
+RwBool RtQuatConvertFromMatrix(RtQuat * qpQuat, const RwMatrix * const mpMatrix); // 0x7EB5C0
 RtQuat* RtQuatRotate(RtQuat* quat, const RwV3d* axis, RwReal angle, RwOpCombineType combineOp); // 0x7EB7C0
 const RtQuat* RtQuatQueryRotate(const RtQuat* quat, RwV3d* unitAxis, RwReal* angle); // 0x7EBA80
 RwV3d* RtQuatTransformVectors(RwV3d* vectorsOut, const RwV3d* vectorsIn, const RwInt32 numPoints, const RtQuat* quat); // 0x7EBBB0

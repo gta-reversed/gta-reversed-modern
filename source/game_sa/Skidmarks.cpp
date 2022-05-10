@@ -7,14 +7,16 @@ RwTexture*& CSkidmarks::m_pTexture = *reinterpret_cast<RwTexture**>(0xC79A88);
 CSkidmark (&CSkidmarks::m_aSkidmarks)[SKIDMARKS_COUNT] = *reinterpret_cast<CSkidmark (*)[SKIDMARKS_COUNT]>(0xC79AA8);
 
 void CSkidmarks::InjectHooks() {
-    using namespace ReversibleHooks;
-    Install("CSkidmarks", "Init", 0x7204E0, &CSkidmarks::Init);
-    Install("CSkidmarks", "Shutdown", 0x720570, &CSkidmarks::Shutdown);
-    Install("CSkidmarks", "Clear", 0x720590, &CSkidmarks::Clear);
-    Install("CSkidmarks", "Update", 0x7205C0, &CSkidmarks::Update);
-    Install("CSkidmarks", "Render", 0x720640, &CSkidmarks::Render);
-    Install("CSkidmarks", "RegisterOne_EC0", 0x720EC0, (void (*)(uint32, const CVector&, float, float, bool*, bool*, float))(&CSkidmarks::RegisterOne));
-    Install("CSkidmarks", "RegisterOne", 0x720930, (void (*)(uint32, const CVector&, float, float, eSkidMarkType, bool*, float))(&CSkidmarks::RegisterOne));
+    RH_ScopedClass(CSkidmarks);
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x7204E0);
+    RH_ScopedInstall(Shutdown, 0x720570);
+    RH_ScopedInstall(Clear, 0x720590);
+    RH_ScopedInstall(Update, 0x7205C0);
+    RH_ScopedInstall(Render, 0x720640);
+    RH_ScopedOverloadedInstall(RegisterOne, "EC0", 0x720EC0, void (*)(uint32, const CVector&, float, float, bool*, bool*, float));
+    RH_ScopedOverloadedInstall(RegisterOne, "", 0x720930, void (*)(uint32, const CVector&, float, float, eSkidMarkType, bool*, float));
 }
 
 // 0x7204E0
@@ -59,25 +61,25 @@ void CSkidmarks::Update() {
 
 // 0x720640
 void CSkidmarks::Render() {
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATESRCBLEND,          (void*)rwBLENDSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         (void*)rwBLENDINVSRCALPHA);
-    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     (void*)RwTextureGetRaster(m_pTexture));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATESRCBLEND,          RWRSTATE(rwBLENDSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
+    RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(RwTextureGetRaster(m_pTexture)));
 
     for (CSkidmark& mark : m_aSkidmarks) {
         mark.Render();
     }
 
-    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, (void*)FALSE);
-    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      (void*)TRUE);
-    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       (void*)TRUE);
+    RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
+    RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(TRUE));
+    RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(TRUE));
 }
 
 // 0x720930
 void CSkidmarks::RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool* bloodState, float length) {
-    if (CReplay::Mode == REPLAY_MODE_1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     if (CSkidmark* markById = FindById(index)) {
@@ -93,7 +95,7 @@ void CSkidmarks::RegisterOne(uint32 index, const CVector& posn, float dirX, floa
     if (bloodState)
         RegisterOne(index, posn, dirX, dirY, eSkidMarkType::BLOODY, bloodState, length);
     else
-        RegisterOne(index, posn, dirX, dirY, isSandy ? eSkidMarkType::SANDY : eSkidMarkType::DEFALT, bloodState, length);
+        RegisterOne(index, posn, dirX, dirY, isSandy ? eSkidMarkType::SANDY : eSkidMarkType::DEFAULT, bloodState, length);
 }
 
 // NOTSA

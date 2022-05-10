@@ -1,67 +1,72 @@
 #include "StdInc.h"
 
+#include "PedGeometryAnalyser.h"
+
 void CPedGeometryAnalyser::InjectHooks() {
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "CanPedJumpObstacle", 0x0, &CPedGeometryAnalyser::CanPedJumpObstacle);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "CanPedJumpObstacle", 0x0, &CPedGeometryAnalyser::CanPedJumpObstacle);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "CanPedTargetPed", 0x5F1C40, &CPedGeometryAnalyser::CanPedTargetPed);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "CanPedTargetPoint", 0x5F1B70, &CPedGeometryAnalyser::CanPedTargetPoint);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeBuildingHitPoints", 0x5F1E30, &CPedGeometryAnalyser::ComputeBuildingHitPoints);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeClearTarget", 0x0, &CPedGeometryAnalyser::ComputeClearTarget);
-    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x5F3B70, static_cast<bool (*)(const CPed& ped, CEntity& entity, CVector& point)>(CPedGeometryAnalyser::ComputeClosestSurfacePoint));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x0, &CPedGeometryAnalyser::ComputeClosestSurfacePoint);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeClosestSurfacePoint", 0x0, &CPedGeometryAnalyser::ComputeClosestSurfacePoint);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCentre", 0x0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCentre);
-    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCentreUncached", 0x5F1600, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCentreUncached);
-    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCentreUncachedAll", 0x5F3B40, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCentreUncachedAll);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCorners", 0x0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCorners);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxCornersUncached", 0x5F1FA0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxCornersUncached);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxPlanes", 0x5F3660, &CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanes);
-    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxPlanesUncached", 0x5F1670, &CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxPlanesUncachedAll", 0x0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxSegmentPlanes", 0x0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanes);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxSegmentPlanesUncached", 0x5F1750, &CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanesUncached);
-    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingBoxSegmentPlanesUncachedAll", 0x5F2BC0, &CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanesUncachedAll);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityBoundingSphere", 0x5F3C20, &CPedGeometryAnalyser::ComputeEntityBoundingSphere);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeMoveDirToAvoidEntity", 0x0, &CPedGeometryAnalyser::ComputeMoveDirToAvoidEntity);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityDirs", 0x5F1500, &CPedGeometryAnalyser::ComputeEntityDirs);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeEntityHitSide", 0x0, static_cast<int32 (*)()>(&CPedGeometryAnalyser::ComputeEntityHitSide));
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedHitSide", 0x0, &CPedGeometryAnalyser::ComputePedHitSide);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputePedShotSide", 0x5F13F0, &CPedGeometryAnalyser::ComputePedShotSide);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeRouteRoundEntityBoundingBox", 0x0, &CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeRouteRoundEntityBoundingBox", 0x0, &CPedGeometryAnalyser::ComputeRouteRoundEntityBoundingBox);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "ComputeRouteRoundSphere", 0x5F1890, &CPedGeometryAnalyser::ComputeRouteRoundSphere);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "GetIsLineOfSightClear", 0x0, &CPedGeometryAnalyser::GetIsLineOfSightClear);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "GetIsLineOfSightClear", 0x0, &CPedGeometryAnalyser::GetIsLineOfSightClear);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "GetNearestPed", 0x5F3590, &CPedGeometryAnalyser::GetNearestPed);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "IsEntityBlockingTarget", 0x5F3970, &CPedGeometryAnalyser::IsEntityBlockingTarget);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "IsInAir", 0x5F1CB0, &CPedGeometryAnalyser::IsInAir);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "IsWanderPathClear", 0x5F2F70, &CPedGeometryAnalyser::IsWanderPathClear);
-//    ReversibleHooks::Install("CPedGeometryAnalyser", "LiesInsideBoundingBox", 0x5F3880, &CPedGeometryAnalyser::LiesInsideBoundingBox);
+    RH_ScopedClass(CPedGeometryAnalyser);
+    RH_ScopedCategoryGlobal();
+
+//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
+//    RH_ScopedInstall(CanPedJumpObstacle, 0x0);
+//    RH_ScopedInstall(CanPedTargetPed, 0x5F1C40);
+//    RH_ScopedInstall(CanPedTargetPoint, 0x5F1B70);
+//    RH_ScopedInstall(ComputeBuildingHitPoints, 0x5F1E30);
+//    RH_ScopedInstall(ComputeClearTarget, 0x0);
+    RH_ScopedOverloadedInstall(ComputeClosestSurfacePoint, "", 0x5F3B70, bool (*)(const CPed& ped, CEntity& entity, CVector& point));
+//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
+//    RH_ScopedInstall(ComputeClosestSurfacePoint, 0x0);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxCentre, 0x0);
+    RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncached, 0x5F1600);
+    RH_ScopedInstall(ComputeEntityBoundingBoxCentreUncachedAll, 0x5F3B40);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxCorners, 0x0);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxCornersUncached, 0x5F1FA0);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanes, 0x5F3660);
+    RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncached, 0x5F1670);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxPlanesUncachedAll, 0x0);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanes, 0x0);
+//    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncached, 0x5F1750);
+    RH_ScopedInstall(ComputeEntityBoundingBoxSegmentPlanesUncachedAll, 0x5F2BC0);
+//    RH_ScopedInstall(ComputeEntityBoundingSphere, 0x5F3C20);
+//    RH_ScopedInstall(ComputeMoveDirToAvoidEntity, 0x0);
+//    RH_ScopedInstall(ComputeEntityDirs, 0x5F1500);
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+//    RH_ScopedOverloadedInstall(ComputeEntityHitSide, "", 0x0, int32 (*)());
+//    RH_ScopedInstall(ComputePedHitSide, 0x0);
+//    RH_ScopedInstall(ComputePedHitSide, 0x0);
+//    RH_ScopedInstall(ComputePedShotSide, 0x5F13F0);
+//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
+//    RH_ScopedInstall(ComputeRouteRoundEntityBoundingBox, 0x0);
+//    RH_ScopedInstall(ComputeRouteRoundSphere, 0x5F1890);
+//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
+//    RH_ScopedInstall(GetIsLineOfSightClear, 0x0);
+//    RH_ScopedInstall(GetNearestPed, 0x5F3590);
+//    RH_ScopedInstall(IsEntityBlockingTarget, 0x5F3970);
+//    RH_ScopedInstall(IsInAir, 0x5F1CB0);
+//    RH_ScopedInstall(IsWanderPathClear, 0x5F2F70);
+//    RH_ScopedInstall(LiesInsideBoundingBox, 0x5F3880);
 }
 
 // 0x5F1B00
 void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity) {
-
+    assert(false);
 }
 
 // 0x5F32D0
 void CPedGeometryAnalyser::CanPedJumpObstacle(const CPed& ped, const CEntity& entity, const CVector&, const CVector&) {
-
+    assert(false);
 }
 
 // 0x5F1C40
 // unused
 void CPedGeometryAnalyser::CanPedTargetPed(CPed& ped, CPed& targetPed, bool a3) {
-
+    assert(false);
 }
 
 // 0x5F1B70
 // unused
 void CPedGeometryAnalyser::CanPedTargetPoint(const CPed& ped, const CVector& a2, bool a3) {
-
+    assert(false);
 }
 
 // 0x5F1E30
@@ -75,7 +80,7 @@ int32 CPedGeometryAnalyser::ComputeBuildingHitPoints(const CVector& a1, const CV
 }
 
 void CPedGeometryAnalyser::ComputeClearTarget(const CPed& ped, const CVector&, CVector&) {
-
+    assert(false);
 }
 
 // 0x5F3B70
@@ -165,11 +170,11 @@ void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncached(float zPos, co
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxPlanesUncachedAll(float zPos, CEntity& entity, CVector* posn, float* a4) {
-
+    assert(false);
 }
 
 void CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanes(float zPos, CEntity& entity, CVector*, float*) {
-
+    assert(false);
 }
 
 // 0x5F1750
@@ -189,7 +194,7 @@ CVector* CPedGeometryAnalyser::ComputeEntityBoundingBoxSegmentPlanesUncachedAll(
 
 // 0x5F3C20
 void CPedGeometryAnalyser::ComputeEntityBoundingSphere(const CPed& ped, CEntity& entity, CColSphere&) {
-
+    assert(false);
 }
 
 // 0x5F3730
@@ -281,4 +286,12 @@ bool CPedGeometryAnalyser::IsWanderPathClear(const CVector& a1, const CVector& a
 // 0x5F3880
 bool CPedGeometryAnalyser::LiesInsideBoundingBox(const CPed& ped, const CVector& posn, CEntity& entity) {
     return plugin::CallAndReturn<bool, 0x5F3880, const CPed&, const CVector&, CEntity&>(ped, posn, entity);
+}
+
+void* CPointRoute::operator new(uint32 size) {
+    return CPools::ms_pPointRoutePool->New();
+}
+
+void CPointRoute::operator delete(void* ptr, size_t sz) {
+    CPools::ms_pPointRoutePool->Delete(reinterpret_cast<CPointRoute*>(ptr));
 }
