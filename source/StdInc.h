@@ -143,7 +143,6 @@ namespace rng = std::ranges;
 #include "game_sa\DecisionMakerTypes.h"
 #include "game_sa\InformGroupEventQueue.h"
 #include "game_sa\InformFriendsEventQueue.h"
-#include "game_sa\InterestingEvents.h"
 #include "game_sa\Events\GroupEventHandler.h"
 #include "game_sa\Events\EventInAir.h"
 #include "game_sa\Events\EventAcquaintancePed.h"

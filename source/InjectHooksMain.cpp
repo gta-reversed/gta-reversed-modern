@@ -107,6 +107,7 @@
 #include "Securom.h"
 #include "GridRef.h"
 #include "MenuSystem.h"
+#include "InterestingEvents.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -235,6 +236,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CInterestingEvents::InjectHooks();
     CShadows::InjectHooks();
     CCam::InjectHooks();
     CCarAI::InjectHooks();
