@@ -13,6 +13,8 @@
 #include "eAudioEvents.h"
 #include "eRadioID.h"
 
+class CVehicle;
+
 enum eVehicleSoundType : int8 {
     VEHICLE_SOUND_CAR              = 0x0,
     VEHICLE_SOUND_MOTORCYCLE       = 0x1,
@@ -38,16 +40,19 @@ enum eRadioType : int8 {
 struct tEngineDummySlot {
     int16 m_nBankId;
     int16 m_nUsageCount;
-};
 
-class CVehicle;
+    void Reset() {
+        m_nBankId     = -1;
+        m_nUsageCount = 0;
+    }
+};
+VALIDATE_SIZE(tEngineDummySlot, 0x4);
 
 class cVehicleParams {
 public:
-    uint32         m_vehicleSubType;
-    uint32         m_vehicleType;
+    uint32         m_nVehicleSubType;
+    uint32         m_nVehicleType;
     char           field_8;
-    char           pad1[3];
     int32          field_C;
     CVehicle*      m_pVehicle;
     cTransmission* m_pTransmission;
@@ -60,9 +65,8 @@ public:
     float          m_fVelocityPercentage;
     int32          field_30;
     float          field_34;
-    char           m_nCurrentGear;
+    int8           m_nCurrentGear;
     bool           m_bHandbrakeOn;
-    char           pad2[2];
     float          m_fVelocityChangingPercentage;
     float          m_fWheelSpinForAudio;
     uint16         m_nNumberOfGears;
@@ -86,22 +90,18 @@ VALIDATE_SIZE(tVehicleSound, 0x8);
 
 struct tVehicleAudioSettings {
     eVehicleSoundType m_nVehicleSoundType;
-    char              _pad;
     int16             m_nEngineOnSoundBankId;
     int16             m_nEngineOffSoundBankId;
-    char              m_nBassSetting; // m_nStereo
-    char              _pad1;
+    int8              m_nBassSetting; // m_nStereo
     float             m_fBassEq;
     float             field_C;
-    char              m_nHornToneSoundInBank; // sfx id
-    char              _pad2[3];
+    int8              m_nHornToneSoundInBank; // sfx id
     float             m_fHornHigh;
     char              m_nDoorSound;
     char              field_19;
     eRadioID          m_nRadioID;
     eRadioType        m_nRadioType;
-    char              vehTypeForAudio;
-    char              _pad4[3];
+    int8              m_nVehTypeForAudio;
     float             m_fHornVolumeDelta;
 
 public:
@@ -138,11 +138,13 @@ public:
     int32                  field_B8;
     char                   field_BC;
     bool                   m_bDisableHeliEngineSounds;
+
     bool                   m_bPlayHornTone;
     bool                   m_bSirenOrAlarmPlaying;
     bool                   m_bHornPlaying;
     float                  m_fHornVolume;
     bool                   m_bModelWithSiren;
+
     uint32                 m_nBoatHitWaveLastPlayedTime;
     uint32                 m_nTimeToInhibitAcc;
     uint32                 m_nTimeToInhibitCrz;
@@ -152,21 +154,27 @@ public:
     int16                  m_nEngineBankSlotId;
     int16                  field_E2;
     tVehicleSound          m_aEngineSounds[12];
-    int32                  field_144;
+    int32                  m_nTime144;
+
     int16                  m_nEngineSoundPlayPos;
     int16                  m_nEngineSoundLastPlayedPos;
     int16                  m_nAcclLoopCounter;
-    int16                  field_14E;
-    int32                  field_150;
-    int16                  field_154;
+    int16                  field_14E; // CancelVehicleEngineSound
+    uint32                 field_150; // CancelVehicleEngineSound
+    int16                  field_154; // CancelVehicleEngineSound m_nPrevEngineSoundPlayPos
+
     int16                  m_nSkidSoundType;
     CAESound*              m_pSkidSoundMaybe;
+
     int16                  m_nRoadNoiseSoundType;
     CAESound*              m_pRoadNoiseSound;
+
     int16                  m_nFlatTyreSoundType;
     CAESound*              m_pFlatTyreSound;
+
     int16                  m_nReverseGearSoundType;
     CAESound*              m_pReverseGearSound;
+
     int32                  _pad_174;
     CAESound*              m_pHornTonSound;
     CAESound*              m_pSirenSound;
@@ -179,7 +187,6 @@ public:
     float                  field_23C;
     int32                  field_240;
     bool                   m_bNitroSoundPresent;
-    char                   field_245[3];
     float                  field_248;
 
 public:
@@ -231,7 +238,7 @@ public:
     void PlayerAboutToExitVehicleAsDriver();
     bool CopHeli();
     bool JustFinishedAccelerationLoop();
-    void PlaySkidSound(int16 soundType, float speed, float volumeDelta);
+    void PlaySkidSound(int16 soundType, float speed, float volume);
     void JustWreckedVehicle();
     CVector GetAircraftNearPosition();
     float GetFlyingMetalVolume(CPhysical* physical);
@@ -270,12 +277,12 @@ public:
     void  GetHornState(bool* out, cVehicleParams& params);
     void  GetAccelAndBrake(cVehicleParams& params);
 
-    void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volumeDelta);
-    void PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed, float volume);
-    void PlayFlatTyreSound(int16 soundType, float speed, float volume);
-    void PlayReverseSound(int16 soundType, float speed, float volume);
+    void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
+    void PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed = 1.0f, float volume = -100.0f);
+    void PlayFlatTyreSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
+    void PlayReverseSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void PlayHornOrSiren(bool hornState, char sirenOrAlarm, bool mrWhoopie, cVehicleParams& params);
-    void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float fVolume);
+    void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
 
     void ProcessVehicleFlatTyre(cVehicleParams& params);
     void ProcessVehicleRoadNoise(cVehicleParams& params);
