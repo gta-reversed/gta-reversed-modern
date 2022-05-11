@@ -210,8 +210,8 @@ public:
     static void StoppedUsingBankSlot(int16 bankSlot);
     static tVehicleAudioSettings GetVehicleAudioSettings(int16 vehId);
 
-    void AddAudioEvent(eAudioEvents audioEvent, float fVolume);
-    void AddAudioEvent(eAudioEvents soundId, CVehicle* vehicle);
+    void AddAudioEvent(eAudioEvents event, float fVolume);
+    void AddAudioEvent(eAudioEvents event, CVehicle* vehicle);
 
     void Service();
     static void StaticService();
@@ -234,14 +234,14 @@ public:
     void PlaySkidSound(int16 soundType, float speed, float volumeDelta);
     void JustWreckedVehicle();
     CVector GetAircraftNearPosition();
-    float GetFlyingMetalVolume(CPhysical*);
-    void GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVehicleParams& a4);
+    float GetFlyingMetalVolume(CPhysical* physical);
+    void GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVehicleParams& params);
     void PlayTrainBrakeSound(int16 soundType, float speed, float volume);
     void JustGotOutOfVehicleAsDriver();
 
     void InhibitCrzForTime(uint32);
 
-    void CancelVehicleEngineSound(int16);
+    void CancelVehicleEngineSound(int16 engineSoundStateId);
     void RequestNewPlayerCarEngineSound(int16 vehicleSoundId, float speed, float changeSound);
 
     void StartVehicleEngineSound(int16, float, float);
@@ -253,9 +253,8 @@ public:
     void UpdateGenericVehicleSound(int16 soundId, int16 bankSlotId, int16 bankId, int16 sfxId, float speed, float volume, float distance);
 
     static void EnableHelicoptors();
-    void EnableHelicoptor();
-
     static void DisableHelicoptors();
+    void EnableHelicoptor();
     void DisableHelicoptor();
 
     float GetVolumeForDummyIdle(float, float);

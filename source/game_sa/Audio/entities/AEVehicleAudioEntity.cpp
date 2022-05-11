@@ -44,6 +44,8 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(StoppedUsingBankSlot, 0x4F4DF0);
     RH_ScopedInstall(EnableHelicoptors, 0x4F4EF0);
     RH_ScopedInstall(DisableHelicoptors, 0x4F4EE0);
+    RH_ScopedInstall(EnableHelicoptor, 0x4F5C00);
+    RH_ScopedInstall(DisableHelicoptor, 0x4F5BF0);
     RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
     // RH_ScopedInstall(StaticService,0x4F4EC0);
     // RH_ScopedInstall(GetVehicleTypeForAudio,0x4F4F00);
@@ -445,6 +447,16 @@ void CAEVehicleAudioEntity::DisableHelicoptors() {
     s_HelicoptorsDisabled = false;
 }
 
+// 0x4F5C00
+void CAEVehicleAudioEntity::EnableHelicoptor() {
+    m_bDisableHeliEngineSounds = false;
+}
+
+// 0x4F5BF0
+void CAEVehicleAudioEntity::DisableHelicoptor() {
+    m_bDisableHeliEngineSounds = true;
+}
+
 // 0x4F4E30
 bool CAEVehicleAudioEntity::DoesBankSlotContainThisBank(int16 bankSlot, int16 bankId) {
     const auto usedSlot = bankSlot - 7;
@@ -584,13 +596,13 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
 }
 
 // 0x4F6420
-void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents audioEvent, float fVolume) {
-    plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, eAudioEvents, float>(this, audioEvent, fVolume);
+void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents event, float fVolume) {
+    plugin::CallMethod<0x4F6420, CAEVehicleAudioEntity*, eAudioEvents, float>(this, event, fVolume);
 }
 
 // 0x4F7580
-void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents soundId, CVehicle* vehicle) {
-    plugin::CallMethod<0x4F7580, CAEVehicleAudioEntity*, eAudioEvents, CVehicle*>(this, soundId, vehicle);
+void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents event, CVehicle* vehicle) {
+    plugin::CallMethod<0x4F7580, CAEVehicleAudioEntity*, eAudioEvents, CVehicle*>(this, event, vehicle);
 }
 
 void CAEVehicleAudioEntity::Service() {
@@ -749,7 +761,7 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyRev(float a, float b) {
 
 // 0x4F55C0
 void CAEVehicleAudioEntity::CancelVehicleEngineSound(int16 engineSoundStateId) {
-    plugin::Call<0x4F55C0, int16>(engineSoundStateId);
+    plugin::CallMethod<0x4F55C0, CAEVehicleAudioEntity*, int16>(this, engineSoundStateId);
 }
 
 // 0x4F56D0
