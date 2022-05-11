@@ -227,10 +227,10 @@ public:
 
     void InhibitAccForTime(uint32 time);
     bool IsAccInhibited(cVehicleParams& params);
-    bool IsAccInhibitedBackwards(cVehicleParams& params);
-    bool IsAccInhibitedForLowSpeed(cVehicleParams& params);
-    bool IsAccInhibitedForTime();
-    bool IsCrzInhibitedForTime();
+    bool IsAccInhibitedBackwards(cVehicleParams& params) const;
+    bool IsAccInhibitedForLowSpeed(cVehicleParams& params) const;
+    bool IsAccInhibitedForTime() const;
+    bool IsCrzInhibitedForTime() const;
 
     void JustGotInVehicleAsDriver();
     void TurnOnRadioForVehicle();

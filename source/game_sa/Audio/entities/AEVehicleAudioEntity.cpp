@@ -669,23 +669,26 @@ uint32 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
 
 // 0x4F4F70
 bool CAEVehicleAudioEntity::IsAccInhibited(cVehicleParams& params) {
-    return !AEAudioHardware.IsSoundBankLoaded(m_nEngineAccelerateSoundBankId, 40) || params.m_nBreakState > 0 || params.m_bHandbrakeOn || IsAccInhibitedBackwards(params);
+    return !AEAudioHardware.IsSoundBankLoaded(m_nEngineAccelerateSoundBankId, 40)
+        || params.m_nBreakState > 0
+        || params.m_bHandbrakeOn
+        || IsAccInhibitedBackwards(params);
 }
 
 // inlined?
 // 0x4F4FC0
-bool CAEVehicleAudioEntity::IsAccInhibitedBackwards(cVehicleParams& params) {
+bool CAEVehicleAudioEntity::IsAccInhibitedBackwards(cVehicleParams& params) const {
     return params.m_fWheelSpinForAudio > 5.0f || !params.m_nWheelsOnGround;
 }
 
 // 0x4F4FF0
-bool CAEVehicleAudioEntity::IsAccInhibitedForLowSpeed(cVehicleParams& params) {
+bool CAEVehicleAudioEntity::IsAccInhibitedForLowSpeed(cVehicleParams& params) const {
     return !m_bInhibitAccForLowSpeed && params.m_fVelocity < 0.1f; // 0.1f is static
 }
 
 // inlined?
 // 0x4F5020
-bool CAEVehicleAudioEntity::IsAccInhibitedForTime() {
+bool CAEVehicleAudioEntity::IsAccInhibitedForTime() const {
     return m_nTimeToInhibitAcc < CTimer::GetTimeInMS();
 }
 
@@ -698,7 +701,7 @@ void CAEVehicleAudioEntity::InhibitAccForTime(uint32 time) {
 
 // inlined?
 // 0x4F5050
-bool CAEVehicleAudioEntity::IsCrzInhibitedForTime() {
+bool CAEVehicleAudioEntity::IsCrzInhibitedForTime() const {
     return m_nTimeToInhibitCrz < CTimer::GetTimeInMS();
 }
 
