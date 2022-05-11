@@ -160,22 +160,22 @@ public:
     int16                  field_154; // CancelVehicleEngineSound m_nPrevEngineSoundPlayPos
 
     int16                  m_nSkidSoundType;
-    CAESound*              m_pSkidSoundMaybe;
+    CAESound*              m_SkidSoundMaybe;
 
     int16                  m_nRoadNoiseSoundType;
-    CAESound*              m_pRoadNoiseSound;
+    CAESound*              m_RoadNoiseSound;
 
     int16                  m_nFlatTyreSoundType;
-    CAESound*              m_pFlatTyreSound;
+    CAESound*              m_FlatTyreSound;
 
     int16                  m_nReverseGearSoundType;
-    CAESound*              m_pReverseGearSound;
+    CAESound*              m_ReverseGearSound;
 
     int32                  _pad_174;
-    CAESound*              m_pHornTonSound;
-    CAESound*              m_pSirenSound;
-    CAESound*              m_pPoliceSirenSound;
-    CAETwinLoopSoundEntity m_twinSkidSound;
+    CAESound*              m_HornTonSound;
+    CAESound*              m_SirenSound;
+    CAESound*              m_PoliceSirenSound;
+    CAETwinLoopSoundEntity m_TwinSkidSound;
 
     float                  m_fPlaneSoundSpeed;
     float                  m_fPlaneSoundVolume_Probably;

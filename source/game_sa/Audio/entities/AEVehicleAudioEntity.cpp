@@ -139,7 +139,7 @@ void CAEVehicleAudioEntity::InjectHooks() {
 }
 
 // 0x4F63E0
-CAEVehicleAudioEntity::CAEVehicleAudioEntity() : CAEAudioEntity(), m_twinSkidSound() {
+CAEVehicleAudioEntity::CAEVehicleAudioEntity() : CAEAudioEntity(), m_TwinSkidSound() {
     m_bEnabled = false;
 }
 
@@ -194,13 +194,13 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     m_fPlaneSoundSpeed = -1.0f;
     field_248 = -1.0f;
 
-    m_pSkidSoundMaybe   = nullptr;
-    m_pRoadNoiseSound   = nullptr;
-    m_pFlatTyreSound    = nullptr;
-    m_pReverseGearSound = nullptr;
-    m_pHornTonSound     = nullptr;
-    m_pSirenSound       = nullptr;
-    m_pPoliceSirenSound = nullptr;
+    m_SkidSoundMaybe   = nullptr;
+    m_RoadNoiseSound   = nullptr;
+    m_FlatTyreSound    = nullptr;
+    m_ReverseGearSound = nullptr;
+    m_HornTonSound     = nullptr;
+    m_SirenSound       = nullptr;
+    m_PoliceSirenSound = nullptr;
 
     field_238 = 0.0f;
     field_23C = 1.0f;
@@ -348,47 +348,47 @@ void CAEVehicleAudioEntity::Terminate() {
     PlaySkidSound(-1);
     PlayTrainBrakeSound(-1);
 
-    if (m_pSkidSoundMaybe) {
-        m_pSkidSoundMaybe->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
-        m_pSkidSoundMaybe->StopSound();
-        m_pSkidSoundMaybe = nullptr;
+    if (m_SkidSoundMaybe) {
+        m_SkidSoundMaybe->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+        m_SkidSoundMaybe->StopSound();
+        m_SkidSoundMaybe = nullptr;
         m_nSkidSoundType = -1;
     }
 
-    if (m_pRoadNoiseSound) {
-        m_pRoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
-        m_pRoadNoiseSound->StopSound();
-        m_pRoadNoiseSound = nullptr;
+    if (m_RoadNoiseSound) {
+        m_RoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+        m_RoadNoiseSound->StopSound();
+        m_RoadNoiseSound = nullptr;
         m_nRoadNoiseSoundType = -1;
     }
 
-    if (m_pFlatTyreSound) {
-        m_pFlatTyreSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
-        m_pFlatTyreSound->StopSound();
-        m_pFlatTyreSound = nullptr;
+    if (m_FlatTyreSound) {
+        m_FlatTyreSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+        m_FlatTyreSound->StopSound();
+        m_FlatTyreSound = nullptr;
         m_nFlatTyreSoundType = -1;
     }
 
-    if (m_pReverseGearSound) {
-        m_pReverseGearSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
-        m_pReverseGearSound->StopSound();
-        m_pReverseGearSound = nullptr;
+    if (m_ReverseGearSound) {
+        m_ReverseGearSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+        m_ReverseGearSound->StopSound();
+        m_ReverseGearSound = nullptr;
         m_nReverseGearSoundType = -1;
     }
 
-    if (m_pHornTonSound) {
-        m_pHornTonSound->StopSoundAndForget();
-        m_pHornTonSound = nullptr;
+    if (m_HornTonSound) {
+        m_HornTonSound->StopSoundAndForget();
+        m_HornTonSound = nullptr;
     }
 
-    if (m_pSirenSound) {
-        m_pSirenSound->StopSoundAndForget();
-        m_pSirenSound = nullptr;
+    if (m_SirenSound) {
+        m_SirenSound->StopSoundAndForget();
+        m_SirenSound = nullptr;
     }
 
-    if (m_pPoliceSirenSound) {
-        m_pPoliceSirenSound->StopSoundAndForget();
-        m_pPoliceSirenSound = nullptr;
+    if (m_PoliceSirenSound) {
+        m_PoliceSirenSound->StopSoundAndForget();
+        m_PoliceSirenSound = nullptr;
     }
 
     if (m_bPlayerDriver) {
@@ -455,7 +455,7 @@ void CAEVehicleAudioEntity::DisableHelicoptor() {
 
 // 0x4F4E30
 bool CAEVehicleAudioEntity::DoesBankSlotContainThisBank(int16 bankSlot, int16 bankId) {
-    const auto usedSlot = bankSlot - 7;
+    const auto usedSlot = bankSlot - 7; // magic number
     if (usedSlot < 0 || usedSlot > NUM_DUMMY_ENGINE_SLOTS)
         return false;
 
@@ -487,7 +487,7 @@ int16 CAEVehicleAudioEntity::RequestBankSlot(int16 bankId) {
         auto& dummyEng = s_DummyEngineSlots[i];
         if (dummyEng.m_nBankId == bankId) {
             dummyEng.m_nUsageCount++;
-            return i + 7;
+            return i + 7; // todo: magic number
         }
 
         if (dummyEng.m_nUsageCount <= 0)
@@ -509,6 +509,7 @@ int16 CAEVehicleAudioEntity::RequestBankSlot(int16 bankId) {
         break;
     }
 
+    // todo: magic number
     AESoundManager.CancelSoundsInBankSlot(freeSlot + 7, true);
     AEAudioHardware.LoadSoundBank(bankId, freeSlot + 7);
     s_DummyEngineSlots[freeSlot].m_nBankId = bankId;
@@ -517,7 +518,7 @@ int16 CAEVehicleAudioEntity::RequestBankSlot(int16 bankId) {
 }
 
 void CAEVehicleAudioEntity::StoppedUsingBankSlot(int16 bankSlot) {
-    const auto usedSlot = bankSlot - 7;
+    const auto usedSlot = bankSlot - 7; // todo: magic number
     if (usedSlot < 0 || usedSlot > NUM_DUMMY_ENGINE_SLOTS)
         return;
 
@@ -538,38 +539,39 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
     if (!sound)
         return;
 
-    if (sound->m_nEvent == eAudioEvents::AE_BONNET_FLUBBER_FLUBBER) {
+    if (sound->m_nEvent == AE_BONNET_FLUBBER_FLUBBER) {
         if (!sound->m_pPhysicalEntity)
             return;
 
-        const auto fBaseVolume = static_cast<float>(m_pAudioEventVolumes[eAudioEvents::AE_BONNET_FLUBBER_FLUBBER]);
+        const auto fBaseVolume = static_cast<float>(m_pAudioEventVolumes[AE_BONNET_FLUBBER_FLUBBER]);
         sound->m_fVolume = fBaseVolume + CAEVehicleAudioEntity::GetFlyingMetalVolume(sound->m_pPhysicalEntity->AsPhysical());
     }
 
-    if (sound->m_nEvent == eAudioEvents::AE_BOAT_HIT_WAVE) {
+    if (sound->m_nEvent == AE_BOAT_HIT_WAVE) {
         if (curPlayPos == -1)
             return;
 
         sound->SetPosition(m_pEntity->GetPosition());
-        if (CWeather::UnderWaterness >= 0.5F)
+        if (CWeather::UnderWaterness >= 0.5F) {
             sound->StopSound();
+        }
     }
 
     if (curPlayPos == -1) {
-        if (sound == m_pSkidSoundMaybe)
-            m_pSkidSoundMaybe = nullptr;
-        else if (sound == m_pRoadNoiseSound)
-            m_pRoadNoiseSound = nullptr;
-        else if (sound == m_pFlatTyreSound)
-            m_pFlatTyreSound = nullptr;
-        else if (sound == m_pReverseGearSound)
-            m_pReverseGearSound = nullptr;
-        else if (sound == m_pHornTonSound)
-            m_pHornTonSound = nullptr;
-        else if (sound == m_pSirenSound)
-            m_pSirenSound = nullptr;
-        else if (sound == m_pPoliceSirenSound)
-            m_pPoliceSirenSound = nullptr;
+        if (sound == m_SkidSoundMaybe)
+            m_SkidSoundMaybe = nullptr;
+        else if (sound == m_RoadNoiseSound)
+            m_RoadNoiseSound = nullptr;
+        else if (sound == m_FlatTyreSound)
+            m_FlatTyreSound = nullptr;
+        else if (sound == m_ReverseGearSound)
+            m_ReverseGearSound = nullptr;
+        else if (sound == m_HornTonSound)
+            m_HornTonSound = nullptr;
+        else if (sound == m_SirenSound)
+            m_SirenSound = nullptr;
+        else if (sound == m_PoliceSirenSound)
+            m_PoliceSirenSound = nullptr;
         else {
             for (auto& engSound : m_aEngineSounds) {
                 if (engSound.m_pSound == sound) {
@@ -610,6 +612,7 @@ void CAEVehicleAudioEntity::StaticService() {
     // NOP
 }
 
+// 0x4F96A0
 CVector CAEVehicleAudioEntity::GetAircraftNearPosition() {
     static const int16 snHeliAudioComponent = tComponent::COMPONENT_WING_RR;
 
@@ -1158,17 +1161,17 @@ void CAEVehicleAudioEntity::PlaySkidSound(int16 newSkidSoundType, float speed, f
     if (m_nSkidSoundType == newSkidSoundType) {
         if (m_nSkidSoundType != -1) {
             const auto& posn = m_pEntity->GetPosition();
-            m_twinSkidSound.UpdateTwinLoopSound(posn, vol, speed);
+            m_TwinSkidSound.UpdateTwinLoopSound(posn, vol, speed);
         }
     } else {
-        if (m_twinSkidSound.m_bIsInitialised) {
-            m_twinSkidSound.StopSoundAndForget();
+        if (m_TwinSkidSound.m_bIsInitialised) {
+            m_TwinSkidSound.StopSoundAndForget();
         }
         m_nSkidSoundType = newSkidSoundType;
         if (newSkidSoundType != -1) {
-            m_twinSkidSound.Initialise(19, newSkidSoundType, newSkidSoundType + 1, this, 200, 1000, -1, -1);
+            m_TwinSkidSound.Initialise(19, newSkidSoundType, newSkidSoundType + 1, this, 200, 1000, -1, -1);
             const auto& posn = m_pEntity->GetPosition();
-            m_twinSkidSound.PlayTwinLoopSound(posn, vol, speed, 2.5f, 1.0f, SOUND_DEFAULT);
+            m_TwinSkidSound.PlayTwinLoopSound(posn, vol, speed, 2.5f, 1.0f, SOUND_DEFAULT);
         }
     }
 }
@@ -1177,10 +1180,10 @@ void CAEVehicleAudioEntity::PlaySkidSound(int16 newSkidSoundType, float speed, f
 void CAEVehicleAudioEntity::PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed, float volumeDelta) {
     const float volume = m_fGeneralVehicleSoundVolume + volumeDelta;
     if (m_nRoadNoiseSoundType != newRoadNoiseSoundType) {
-        if (m_pRoadNoiseSound) {
-            m_pRoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
-            m_pRoadNoiseSound->StopSound();
-            m_pRoadNoiseSound = nullptr;
+        if (m_RoadNoiseSound) {
+            m_RoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+            m_RoadNoiseSound->StopSound();
+            m_RoadNoiseSound = nullptr;
         }
 
         // Create new sound
@@ -1191,12 +1194,12 @@ void CAEVehicleAudioEntity::PlayRoadNoiseSound(int16 newRoadNoiseSoundType, floa
             sound.Initialise(19, newRoadNoiseSoundType, this, pos, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
             sound.m_fSpeed = speed;
             sound.m_fSoundDistance = 3.0f;
-            m_pRoadNoiseSound = AESoundManager.RequestNewSound(&sound);
+            m_RoadNoiseSound = AESoundManager.RequestNewSound(&sound);
         }
-    } else if (m_nRoadNoiseSoundType != -1 && m_pRoadNoiseSound) {
+    } else if (m_nRoadNoiseSoundType != -1 && m_RoadNoiseSound) {
         // Same sound type already initialised, just set speed and volume
-        m_pRoadNoiseSound->m_fSpeed = speed;
-        m_pRoadNoiseSound->m_fVolume = volume;
+        m_RoadNoiseSound->m_fSpeed = speed;
+        m_RoadNoiseSound->m_fVolume = volume;
     }
 }
 
@@ -1204,10 +1207,10 @@ void CAEVehicleAudioEntity::PlayRoadNoiseSound(int16 newRoadNoiseSoundType, floa
 void CAEVehicleAudioEntity::PlayFlatTyreSound(int16 newFlatTyreSoundType, float speed, float volumeDelta) {
     const float volume = m_fGeneralVehicleSoundVolume + volumeDelta;
     if (m_nFlatTyreSoundType != newFlatTyreSoundType) {
-        if (m_pFlatTyreSound) {
-            m_pFlatTyreSound->SetIndividualEnvironment(4, false);
-            m_pFlatTyreSound->StopSound();
-            m_pFlatTyreSound = nullptr;
+        if (m_FlatTyreSound) {
+            m_FlatTyreSound->SetIndividualEnvironment(4, false);
+            m_FlatTyreSound->StopSound();
+            m_FlatTyreSound = nullptr;
         }
 
         // Create new sound
@@ -1218,12 +1221,12 @@ void CAEVehicleAudioEntity::PlayFlatTyreSound(int16 newFlatTyreSoundType, float 
             sound.Initialise(19, newFlatTyreSoundType, this, pos, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
             sound.m_fSpeed = speed;
             sound.m_fSoundDistance = 2.0f;
-            m_pFlatTyreSound = AESoundManager.RequestNewSound(&sound);
+            m_FlatTyreSound = AESoundManager.RequestNewSound(&sound);
         }
-    } else if (m_nFlatTyreSoundType != -1 && m_pFlatTyreSound) {
+    } else if (m_nFlatTyreSoundType != -1 && m_FlatTyreSound) {
         // Same sound type already initialised, just set speed and volume
-        m_pFlatTyreSound->m_fSpeed = speed;
-        m_pFlatTyreSound->m_fVolume = volume;
+        m_FlatTyreSound->m_fSpeed = speed;
+        m_FlatTyreSound->m_fVolume = volume;
     }
 }
 
@@ -1231,10 +1234,10 @@ void CAEVehicleAudioEntity::PlayFlatTyreSound(int16 newFlatTyreSoundType, float 
 void CAEVehicleAudioEntity::PlayReverseSound(int16 newReverseGearSoundType, float speed, float volumeDelta) {
     const float volume = m_fGeneralVehicleSoundVolume + volumeDelta;
     if (m_nReverseGearSoundType != newReverseGearSoundType) {
-        if (m_pReverseGearSound) {
-            m_pReverseGearSound->SetIndividualEnvironment(4, false);
-            m_pReverseGearSound->StopSound();
-            m_pReverseGearSound = nullptr;
+        if (m_ReverseGearSound) {
+            m_ReverseGearSound->SetIndividualEnvironment(4, false);
+            m_ReverseGearSound->StopSound();
+            m_ReverseGearSound = nullptr;
         }
 
         // Create new sound
@@ -1244,12 +1247,12 @@ void CAEVehicleAudioEntity::PlayReverseSound(int16 newReverseGearSoundType, floa
             CAESound sound;
             sound.Initialise(19, newReverseGearSoundType, this, posn, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
             sound.m_fSpeed = speed;
-            m_pReverseGearSound = AESoundManager.RequestNewSound(&sound);
+            m_ReverseGearSound = AESoundManager.RequestNewSound(&sound);
         }
-    } else if (m_nReverseGearSoundType != -1 && m_pReverseGearSound) {
+    } else if (m_nReverseGearSoundType != -1 && m_ReverseGearSound) {
         // Same sound type already initialised, just set speed and volume
-        m_pReverseGearSound->m_fSpeed = speed;
-        m_pReverseGearSound->m_fVolume = volume;
+        m_ReverseGearSound->m_fSpeed = speed;
+        m_ReverseGearSound->m_fVolume = volume;
     }
 }
 
@@ -1409,9 +1412,9 @@ void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId
 void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenOrAlarm, bool bPlayHorn, cVehicleParams& params) {
     const auto nHornToneSoundInBank = m_Settings.m_nHornToneSoundInBank;
     const auto DoTryStopHornSound = [&] {
-        if (m_pHornTonSound) {
-            m_pHornTonSound->StopSoundAndForget();
-            m_pHornTonSound = nullptr;
+        if (m_HornTonSound) {
+            m_HornTonSound->StopSoundAndForget();
+            m_HornTonSound = nullptr;
         }
     };
     if (!m_bPlayHornTone && bPlayHornTone) {
@@ -1419,7 +1422,7 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
         const auto DoPlayHornSound = [&](float fSpeed) {
             const auto& posn = m_pEntity->GetPosition();
             m_tempSound.Initialise(17, nHornToneSoundInBank, this, posn, m_fHornVolume, 2.5f, fSpeed, 0.17f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
-            m_pHornTonSound = AESoundManager.RequestNewSound(&m_tempSound);
+            m_HornTonSound = AESoundManager.RequestNewSound(&m_tempSound);
             return true;
         };
 
@@ -1430,7 +1433,7 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
                 return;
             DoPlayHornSound(1.0f);
         } else {
-            if (m_pHornTonSound)
+            if (m_HornTonSound)
                 return;
 
             if (nHornToneSoundInBank <= 0 || nHornToneSoundInBank > 9)
@@ -1447,8 +1450,8 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
             m_fHornVolume = std::max(m_fHornVolume - 1.5f, -100.0f);
             if (m_fHornVolume <= -100.0f)
                 DoTryStopHornSound();
-            else if (m_pHornTonSound)
-                m_pHornTonSound->m_fVolume = m_fHornVolume; // Just modify speed
+            else if (m_HornTonSound)
+                m_HornTonSound->m_fVolume = m_fHornVolume; // Just modify speed
         }
     }
 
@@ -1458,28 +1461,28 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
             // horn was playing and siren should've been playing, but couldn't have been
             // because the horn was playing (and not it isn't)
 
-            if (m_pSirenSound || !AEAudioHardware.IsSoundBankLoaded(74u, 17))
+            if (m_SirenSound || !AEAudioHardware.IsSoundBankLoaded(74u, 17))
                 return;
 
             const bool bIsWhoopieModel = params.m_pVehicle->m_nModelIndex == MODEL_MRWHOOP;
             if (bIsWhoopieModel)
                 if (!AEAudioHardware.IsSoundBankLoaded(79u, 40))
                     return;
-            m_pSirenSound = PlaySound(bIsWhoopieModel ? 40 : 17, bIsWhoopieModel ? 3 : 10, (float)m_pAudioEventVolumes[AE_SIREN], 1.0f, 3.0f, 0.25f);
+            m_SirenSound = PlaySound(bIsWhoopieModel ? 40 : 17, bIsWhoopieModel ? 3 : 10, (float)m_pAudioEventVolumes[AE_SIREN], 1.0f, 3.0f, 0.25f);
         }
-    } else if (m_bSirenOrAlarmPlaying && !m_bHornPlaying && m_pSirenSound) {
-        m_pSirenSound->StopSoundAndForget();
-        m_pSirenSound = nullptr;
+    } else if (m_bSirenOrAlarmPlaying && !m_bHornPlaying && m_SirenSound) {
+        m_SirenSound->StopSoundAndForget();
+        m_SirenSound = nullptr;
     }
 
     if (bPlayHorn) {
-        if (!m_bHornPlaying && !m_pPoliceSirenSound && AEAudioHardware.IsSoundBankLoaded(74u, 17)) {
-            m_pPoliceSirenSound = PlaySound(17, 11, (float)m_pAudioEventVolumes[AE_SIREN], 1.0f, 3.0f, 0.25f);
+        if (!m_bHornPlaying && !m_PoliceSirenSound && AEAudioHardware.IsSoundBankLoaded(74u, 17)) {
+            m_PoliceSirenSound = PlaySound(17, 11, (float)m_pAudioEventVolumes[AE_SIREN], 1.0f, 3.0f, 0.25f);
         }
     } else if (m_bHornPlaying) {
-        if (m_pPoliceSirenSound) {
-            m_pPoliceSirenSound->StopSoundAndForget();
-            m_pPoliceSirenSound = nullptr;
+        if (m_PoliceSirenSound) {
+            m_PoliceSirenSound->StopSoundAndForget();
+            m_PoliceSirenSound = nullptr;
         }
     }
 }
@@ -1573,13 +1576,13 @@ void CAEVehicleAudioEntity::JustWreckedVehicle() {
         CAESound** ppSound;
         int16*     pnSoundType;
     } SoundsToStop[] = {
-        { &m_pSkidSoundMaybe,   &m_nSkidSoundType        },
-        { &m_pRoadNoiseSound,   &m_nRoadNoiseSoundType   },
-        { &m_pFlatTyreSound,    &m_nFlatTyreSoundType    },
-        { &m_pReverseGearSound, &m_nReverseGearSoundType },
-        { &m_pHornTonSound,     nullptr                  },
-        { &m_pSirenSound,       nullptr                  },
-        { &m_pPoliceSirenSound, nullptr                  }
+        { &m_SkidSoundMaybe,   &m_nSkidSoundType        },
+        { &m_RoadNoiseSound,   &m_nRoadNoiseSoundType   },
+        { &m_FlatTyreSound,    &m_nFlatTyreSoundType    },
+        { &m_ReverseGearSound, &m_nReverseGearSoundType },
+        { &m_HornTonSound,     nullptr                  },
+        { &m_SirenSound,       nullptr                  },
+        { &m_PoliceSirenSound, nullptr                  }
     };
 
     // Stop sounds, and reset member variables (that's why we use float pointers)
