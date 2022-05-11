@@ -334,11 +334,11 @@ void CAEVehicleAudioEntity::Terminate() {
     if (!m_bEnabled)
         return;
 
-    for (auto& engSound : m_aEngineSounds) {
-        if (engSound.m_pSound) {
-            engSound.m_pSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-            engSound.m_pSound->StopSound();
-            engSound.m_pSound = nullptr;
+    for (auto& sound : m_aEngineSounds) {
+        if (sound.m_pSound) {
+            sound.m_pSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
+            sound.m_pSound->StopSound();
+            sound.m_pSound = nullptr;
         }
     }
 
@@ -346,28 +346,28 @@ void CAEVehicleAudioEntity::Terminate() {
     PlayTrainBrakeSound(-1, 1.0F, -100.0F);
 
     if (m_pSkidSoundMaybe) {
-        m_pSkidSoundMaybe->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pSkidSoundMaybe->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
         m_pSkidSoundMaybe->StopSound();
         m_pSkidSoundMaybe = nullptr;
         m_nSkidSoundType = -1;
     }
 
     if (m_pRoadNoiseSound) {
-        m_pRoadNoiseSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pRoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
         m_pRoadNoiseSound->StopSound();
         m_pRoadNoiseSound = nullptr;
         m_nRoadNoiseSoundType = -1;
     }
 
     if (m_pFlatTyreSound) {
-        m_pFlatTyreSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pFlatTyreSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
         m_pFlatTyreSound->StopSound();
         m_pFlatTyreSound = nullptr;
         m_nFlatTyreSoundType = -1;
     }
 
     if (m_pReverseGearSound) {
-        m_pReverseGearSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pReverseGearSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
         m_pReverseGearSound->StopSound();
         m_pReverseGearSound = nullptr;
         m_nReverseGearSoundType = -1;
@@ -388,15 +388,22 @@ void CAEVehicleAudioEntity::Terminate() {
         m_pPoliceSirenSound = nullptr;
     }
 
-    const auto radioType = m_settings.m_nRadioType;
-    if (m_bPlayerDriver && (radioType == RADIO_CIVILIAN || radioType == RADIO_UNKNOWN || radioType == RADIO_EMERGENCY))
-        AudioEngine.StopRadio(&m_settings, false);
+    if (m_bPlayerDriver) {
+        switch (m_settings.m_nRadioType) {
+        case RADIO_CIVILIAN:
+        case RADIO_UNKNOWN:
+        case RADIO_EMERGENCY:
+            AudioEngine.StopRadio(&m_settings, false);
+            break;
+        }
+    }
 
     if (m_nEngineBankSlotId != -1) {
         const auto usedSlot = m_nEngineBankSlotId - 7;
         auto&      dummyEng = s_DummyEngineSlots[usedSlot];
-        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS && dummyEng.m_nBankId == m_nEngineDecelerateSoundBankId)
+        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS && dummyEng.m_nBankId == m_nEngineDecelerateSoundBankId) {
             dummyEng.m_nUsageCount = std::max(0, dummyEng.m_nUsageCount - 1);
+        }
 
         m_nEngineBankSlotId = -1;
     }
