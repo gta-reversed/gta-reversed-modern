@@ -1028,10 +1028,10 @@ float CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue(CVehicle* vehicle, in
 
 // 0x4F6000
 float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float fVelocity) {
-    /* useless
-    if (!*(bool*)0x8CBD81)
+    static bool s_bUnknown = true; // 0x8CBD81
+    if (!s_bUnknown) {
         return 0.0f;
-    */
+    }
 
     switch (wheelState) {
     case WHEEL_STATE_SKIDDING: {
@@ -1047,8 +1047,9 @@ float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle,
             return std::min(fAbsVelocity * 5.0f, 1.0f) * 1.2f;
         break;
     }
+    default:
+        return 0.0f;
     }
-    return 0.0f;
 }
 
 // 0x4F60B0
@@ -1064,8 +1065,8 @@ float CAEVehicleAudioEntity::GetBaseVolumeForBicycleTyre(float fGearVelocityProg
 }
 
 // 0x4F61E0
-void CAEVehicleAudioEntity::GetHornState(bool* pbOut, cVehicleParams& vehParams) {
-    plugin::CallMethod<0x4F61E0, CAEVehicleAudioEntity*, bool*, cVehicleParams&>(this, pbOut, vehParams);
+void CAEVehicleAudioEntity::GetHornState(bool* out, cVehicleParams& params) {
+    plugin::CallMethod<0x4F61E0, CAEVehicleAudioEntity*, bool*, cVehicleParams&>(this, out, params);
 }
 
 // 0x4F62A0
@@ -1074,8 +1075,14 @@ void CAEVehicleAudioEntity::GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVeh
     bSirenOrAlarm = false;
     bHorn = false;
 
+    if (m_bSoundsStopped)
+        return;
+
+    if (!m_bModelWithSiren)
+        return;
+
     CVehicle* vehicle = params.m_pVehicle;
-    if (!m_bSoundsStopped && m_bModelWithSiren && vehicle->vehicleFlags.bSirenOrAlarm && vehicle->m_nStatus != STATUS_ABANDONED) {
+    if (vehicle->vehicleFlags.bSirenOrAlarm != 0 && vehicle->m_nStatus != STATUS_ABANDONED) {
         bHorn = vehicle->m_nModelIndex != MODEL_MRWHOOP && vehicle->m_nHornCounter;
         bSirenOrAlarm = true;
     }

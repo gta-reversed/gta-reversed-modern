@@ -274,7 +274,7 @@ public:
     float GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fUnk, cTransmission& transmission, float fVelocity);
     float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float fVelocity);
     float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress);
-    void  GetHornState(bool* pbOut, cVehicleParams& vehParams);
+    void  GetHornState(bool* out, cVehicleParams& params);
     void  GetAccelAndBrake(cVehicleParams& params);
 
     void PlayAircraftSound(int16, int16, int16, float, float);
