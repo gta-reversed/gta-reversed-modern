@@ -1127,7 +1127,7 @@ void CAEVehicleAudioEntity::PlaySkidSound(int16 newSkidSoundType, float speed, f
         if (newSkidSoundType != -1) {
             m_twinSkidSound.Initialise(19, newSkidSoundType, newSkidSoundType + 1, this, 200, 1000, -1, -1);
             const auto& posn = m_pEntity->GetPosition();
-            m_twinSkidSound.PlayTwinLoopSound(posn, volumeDelta, speed, 2.5f, 1.0f, (eSoundEnvironment)0);
+            m_twinSkidSound.PlayTwinLoopSound(posn, volumeDelta, speed, 2.5f, 1.0f, SOUND_DEFAULT);
         }
     }
 }
@@ -1137,7 +1137,7 @@ void CAEVehicleAudioEntity::PlayRoadNoiseSound(int16 newRoadNoiseSoundType, floa
     const float volume = m_fGeneralVehicleSoundVolume + volumeDelta;
     if (m_nRoadNoiseSoundType != newRoadNoiseSoundType) {
         if (m_pRoadNoiseSound) {
-            m_pRoadNoiseSound->SetIndividualEnvironment(4, false);
+            m_pRoadNoiseSound->SetIndividualEnvironment(SOUND_REQUEST_UPDATES, false);
             m_pRoadNoiseSound->StopSound();
             m_pRoadNoiseSound = nullptr;
         }
@@ -1145,25 +1145,12 @@ void CAEVehicleAudioEntity::PlayRoadNoiseSound(int16 newRoadNoiseSoundType, floa
         // Create new sound
         m_nRoadNoiseSoundType = newRoadNoiseSoundType;
         if (newRoadNoiseSoundType != -1) {
-            CVector pos = m_pEntity->GetPosition();
-            CAESound toRequest;
-            toRequest.Initialise(
-                19,
-                newRoadNoiseSoundType,
-                this,
-                pos,
-                volume,
-                1.0f,
-                1.0f,
-                1.0f,
-                false,
-                SOUND_REQUEST_UPDATES,
-                0.0f,
-                0
-            );
-            toRequest.m_fSpeed = speed;
-            toRequest.m_fSoundDistance = 3.0f;
-            m_pRoadNoiseSound = AESoundManager.RequestNewSound(&toRequest);
+            const auto& pos = m_pEntity->GetPosition();
+            CAESound sound;
+            sound.Initialise(19, newRoadNoiseSoundType, this, pos, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
+            sound.m_fSpeed = speed;
+            sound.m_fSoundDistance = 3.0f;
+            m_pRoadNoiseSound = AESoundManager.RequestNewSound(&sound);
         }
     } else if (m_nRoadNoiseSoundType != -1 && m_pRoadNoiseSound) {
         // Same sound type already initialised, just set speed and volume
@@ -1185,25 +1172,12 @@ void CAEVehicleAudioEntity::PlayFlatTyreSound(int16 newFlatTyreSoundType, float 
         // Create new sound
         m_nFlatTyreSoundType = newFlatTyreSoundType;
         if (newFlatTyreSoundType != -1) {
-            CVector pos = m_pEntity->GetPosition();
-            CAESound toRequest;
-            toRequest.Initialise(
-                19,
-                newFlatTyreSoundType,
-                this,
-                pos,
-                volume,
-                1.0f,
-                1.0f,
-                1.0f,
-                false,
-                SOUND_REQUEST_UPDATES,
-                0.0f,
-                0
-            );
-            toRequest.m_fSpeed = speed;
-            toRequest.m_fSoundDistance = 2.0f;
-            m_pFlatTyreSound = AESoundManager.RequestNewSound(&toRequest);
+            const auto& pos = m_pEntity->GetPosition();
+            CAESound sound;
+            sound.Initialise(19, newFlatTyreSoundType, this, pos, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
+            sound.m_fSpeed = speed;
+            sound.m_fSoundDistance = 2.0f;
+            m_pFlatTyreSound = AESoundManager.RequestNewSound(&sound);
         }
     } else if (m_nFlatTyreSoundType != -1 && m_pFlatTyreSound) {
         // Same sound type already initialised, just set speed and volume
@@ -1225,23 +1199,11 @@ void CAEVehicleAudioEntity::PlayReverseSound(int16 newReverseGearSoundType, floa
         // Create new sound
         m_nReverseGearSoundType = newReverseGearSoundType;
         if (newReverseGearSoundType != -1) {
-            CAESound toRequest;
-            toRequest.Initialise(
-                19,
-                newReverseGearSoundType,
-                this,
-                m_pEntity->GetPosition(),
-                volume,
-                1.0f,
-                1.0f,
-                1.0f,
-                false,
-                SOUND_REQUEST_UPDATES,
-                0.0f,
-                0
-            );
-            toRequest.m_fSpeed = speed;
-            m_pReverseGearSound = AESoundManager.RequestNewSound(&toRequest);
+            const auto& posn = m_pEntity->GetPosition();
+            CAESound sound;
+            sound.Initialise(19, newReverseGearSoundType, this, posn, volume, 1.0f, 1.0f, 1.0f, false, SOUND_REQUEST_UPDATES, 0.0f, 0);
+            sound.m_fSpeed = speed;
+            m_pReverseGearSound = AESoundManager.RequestNewSound(&sound);
         }
     } else if (m_nReverseGearSoundType != -1 && m_pReverseGearSound) {
         // Same sound type already initialised, just set speed and volume
