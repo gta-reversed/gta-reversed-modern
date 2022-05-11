@@ -616,13 +616,13 @@ void CAEVehicleAudioEntity::StaticService() {
 CVector CAEVehicleAudioEntity::GetAircraftNearPosition() {
     static const int16 snHeliAudioComponent = tComponent::COMPONENT_WING_RR;
 
-    CVector result;
-    if (m_Settings.IsHeli())
-        m_pEntity->AsVehicle()->GetComponentWorldPosition(snHeliAudioComponent, result);
-    else
-        result = m_pEntity->GetPosition();
-
-    return result;
+    if (m_Settings.IsHeli()) {
+        CVector pos;
+        m_pEntity->AsVehicle()->GetComponentWorldPosition(snHeliAudioComponent, pos);
+        return pos;
+    } else {
+        return m_pEntity->GetPosition();
+    }
 }
 
 // 0x4F6150
