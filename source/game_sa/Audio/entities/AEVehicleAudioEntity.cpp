@@ -47,8 +47,8 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(EnableHelicoptor, 0x4F5C00);
     RH_ScopedInstall(DisableHelicoptor, 0x4F5BF0);
     RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
-    // RH_ScopedInstall(StaticService,0x4F4EC0);
-    // RH_ScopedInstall(GetVehicleTypeForAudio,0x4F4F00);
+    RH_ScopedInstall(StaticService,0x4F4EC0);
+    RH_ScopedInstall(GetVehicleTypeForAudio,0x4F4F00);
     // RH_ScopedInstall(IsAccInhibited,0x4F4F70);
     // RH_ScopedInstall(IsAccInhibitedBackwards,0x4F4FC0);
     // RH_ScopedInstall(IsAccInhibitedForLowSpeed,0x4F4FF0);
@@ -168,7 +168,7 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     field_7C = 0;
     field_B4 = 0;
     field_B8 = 0;
-    field_BC = 0;
+    field_BC = false;
     m_nBoatHitWaveLastPlayedTime = 0;
     m_nTimeToInhibitAcc = 0;
     m_nTimeToInhibitCrz = 0;
@@ -206,10 +206,10 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
     field_23C = 1.0f;
     field_240 = 0;
 
-    m_settings = GetVehicleAudioSettings(entity->m_nModelIndex);
+    m_Settings = GetVehicleAudioSettings(entity->m_nModelIndex);
     m_bModelWithSiren = entity->AsVehicle()->UsesSiren();
-    if (m_settings.m_nRadioType == eRadioType::RADIO_UNKNOWN) {
-        m_settings.m_nRadioID = eRadioID::RADIO_OFF;
+    if (m_Settings.m_nRadioType == eRadioType::RADIO_UNKNOWN) {
+        m_Settings.m_nRadioID = eRadioID::RADIO_OFF;
     }
 
     m_fGeneralVehicleSoundVolume = CAEAudioEntity::GetDefaultVolume(AE_GENERAL_VEHICLE_SOUND);
@@ -232,16 +232,16 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
         break;
     }
 
-    switch (m_settings.m_nVehicleSoundType) {
+    switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_CAR:
         m_fGeneralVehicleSoundVolume -= 1.5F;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
         if (m_bEnabled)
             return;
 
-        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129) {
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+        if (m_Settings.m_nEngineOffSoundBankId != -1 && m_Settings.m_nEngineOffSoundBankId != 129) {
+            m_nEngineBankSlotId = RequestBankSlot(m_Settings.m_nEngineOffSoundBankId);
         }
 
         m_bEnabled = true;
@@ -249,63 +249,63 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
 
     case VEHICLE_SOUND_MOTORCYCLE:
     case VEHICLE_SOUND_BICYCLE:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
 
-        if (m_settings.IsMotorcycle())
+        if (m_Settings.IsMotorcycle())
             m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
 
         if (m_bEnabled)
             return;
 
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
         if (m_nEngineDecelerateSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+            m_nEngineBankSlotId = RequestBankSlot(m_Settings.m_nEngineOffSoundBankId);
 
         m_bEnabled = true;
         return;
 
     case VEHICLE_SOUND_BOAT:
     case VEHICLE_SOUND_TRAIN:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
         if (m_bEnabled)
             return;
 
-        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+        if (m_Settings.m_nEngineOffSoundBankId != -1 && m_Settings.m_nEngineOffSoundBankId != 129)
+            m_nEngineBankSlotId = RequestBankSlot(m_Settings.m_nEngineOffSoundBankId);
 
         m_bEnabled = true;
         return;
 
     case VEHICLE_SOUND_HELI:
     case VEHICLE_SOUND_NON_VEH:
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
 
         m_bEnabled = true;
         return;
 
     case VEHICLE_SOUND_PLANE:
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
         if (m_bEnabled)
             return;
 
-        if (m_settings.m_nEngineOffSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+        if (m_Settings.m_nEngineOffSoundBankId != -1)
+            m_nEngineBankSlotId = RequestBankSlot(m_Settings.m_nEngineOffSoundBankId);
 
         m_bEnabled = true;
         return;
 
     case VEHICLE_SOUND_TRAILER:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_Settings.m_nEngineOnSoundBankId;
         m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
         if (m_bEnabled)
             return;
 
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_Settings.m_nEngineOffSoundBankId;
         if (m_nEngineDecelerateSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+            m_nEngineBankSlotId = RequestBankSlot(m_Settings.m_nEngineOffSoundBankId);
 
         m_bEnabled = true;
         return;
@@ -579,13 +579,13 @@ void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 cur
             }
         }
     } else {
-        if ((m_settings.IsFlyingVehicle() || m_settings.IsNonVeh()) && m_aEngineSounds[3].m_pSound)
+        if ((m_Settings.IsFlyingVehicle() || m_Settings.IsNonVeh()) && m_aEngineSounds[3].m_pSound)
             sound->SetPosition(CAEVehicleAudioEntity::GetAircraftNearPosition());
         else
             sound->SetPosition(m_pEntity->GetPosition());
     }
 
-    if ((m_settings.IsCar() || m_settings.IsMotorcycle()) && sound == m_aEngineSounds[4].m_pSound) {
+    if ((m_Settings.IsCar() || m_Settings.IsMotorcycle()) && sound == m_aEngineSounds[4].m_pSound) {
         m_nEngineSoundLastPlayedPos = m_nEngineSoundPlayPos;
         m_nEngineSoundPlayPos = curPlayPos;
     }
@@ -613,7 +613,7 @@ CVector CAEVehicleAudioEntity::GetAircraftNearPosition() {
     static const int16 snHeliAudioComponent = tComponent::COMPONENT_WING_RR;
 
     CVector result;
-    if (m_settings.IsHeli())
+    if (m_Settings.IsHeli())
         m_pEntity->AsVehicle()->GetComponentWorldPosition(snHeliAudioComponent, result);
     else
         result = m_pEntity->GetPosition();
@@ -641,7 +641,30 @@ void CAEVehicleAudioEntity::PlayTrainBrakeSound(int16 soundType, float speed, fl
 
 // 0x4F4F00
 uint32 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
-    return plugin::CallMethodAndReturn<uint32, 0x4F4F00, CAEVehicleAudioEntity*>(this);
+    if (!m_bEnabled || !m_pEntity)
+        return 2;
+
+    switch (m_Settings.m_nVehTypeForAudio) {
+    case 0:
+    case 1:
+    case 2:
+    case 4:
+    case 5:
+    case 9:
+    case 10:
+    case 14:
+    case 22:
+    case 23:
+    case 31:
+    case 38:
+        return 0;
+    case 25:
+    case 29:
+    case 30:
+        return 1;
+    default:
+        return 2;
+    }
 }
 
 // 0x4F4F70
@@ -709,7 +732,7 @@ float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float
         fVolume -= 6.0f;
     if (vehicle->m_pTrailer)
         fVolume += 6.0f;
-    fVolume += m_settings.m_fHornVolumeDelta;
+    fVolume += m_Settings.m_fHornVolumeDelta;
 
     if (m_nEngineState == 2) {
         static float afVolumePoints[5][2] = { {0.0f, 1.0f}, {0.3f, 1.0f}, {0.5f, 1.0f}, {0.7f, 0.7f}, {1.0f, 0.0f} };
@@ -774,7 +797,7 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
 
     m_fGeneralVehicleSoundVolume = (float)CAEAudioEntity::m_pAudioEventVolumes[AE_GENERAL_VEHICLE_SOUND];
 
-    switch (m_settings.m_nVehicleSoundType) {
+    switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_CAR:
     case VEHICLE_SOUND_MOTORCYCLE: {
         m_nGearRelatedStuff = 0;
@@ -884,12 +907,12 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
 // 0x4F5B20
 void CAEVehicleAudioEntity::TurnOnRadioForVehicle() {
     s_pPlayerAttachedForRadio = m_pEntity->AsVehicle()->m_pDriver;
-    s_pVehicleAudioSettingsForRadio = &m_settings;
-    switch (m_settings.m_nRadioType) {
+    s_pVehicleAudioSettingsForRadio = &m_Settings;
+    switch (m_Settings.m_nRadioType) {
     case RADIO_CIVILIAN:
     case RADIO_SPECIAL:
     case RADIO_UNKNOWN: {
-        AudioEngine.StartRadio(&m_settings);
+        AudioEngine.StartRadio(&m_Settings);
         break;
     }
     }
@@ -897,11 +920,11 @@ void CAEVehicleAudioEntity::TurnOnRadioForVehicle() {
 
 // 0x4F5B60
 void CAEVehicleAudioEntity::TurnOffRadioForVehicle() {
-    switch (m_settings.m_nRadioType) {
+    switch (m_Settings.m_nRadioType) {
     case RADIO_CIVILIAN:
     case RADIO_SPECIAL:
     case RADIO_UNKNOWN: {
-        AudioEngine.StopRadio(&m_settings, false);
+        AudioEngine.StopRadio(&m_Settings, false);
         break;
     }
     }
@@ -971,7 +994,7 @@ float CAEVehicleAudioEntity::GetVolForPlayerEngineSound(cVehicleParams& vehParam
 
     CVehicle* vehicle = m_pEntity->AsVehicle();
 
-    fVolume += m_settings.m_fHornVolumeDelta;
+    fVolume += m_Settings.m_fHornVolumeDelta;
     if (vehicle->vehicleFlags.bIsDrowning)
         fVolume -= 6.0f;
 
@@ -1049,7 +1072,7 @@ float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle,
     switch (wheelState) {
     case WHEEL_STATE_SKIDDING: {
         const float fAbsVelocity = std::min(1.0f, std::fabs(fVelocity)); // at most 1.0f
-        if (m_settings.m_nVehicleSoundType == VEHICLE_SOUND_BICYCLE)
+        if (m_Settings.m_nVehicleSoundType == VEHICLE_SOUND_BICYCLE)
             return fAbsVelocity * 0.75f * 0.2f;
         else
             return fAbsVelocity * 0.75f;
@@ -1228,7 +1251,7 @@ void CAEVehicleAudioEntity::PlayReverseSound(int16 newReverseGearSoundType, floa
 
 // 0x4F9E90
 void CAEVehicleAudioEntity::UpdateBoatSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volumeDelta) {
-    if (m_settings.m_nVehicleSoundType != VEHICLE_SOUND_NON_VEH)
+    if (m_Settings.m_nVehicleSoundType != VEHICLE_SOUND_NON_VEH)
         if (engineState != 6 && m_nEngineBankSlotId == -1)
             return;
 
@@ -1380,7 +1403,7 @@ void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId
 
 // 0x4F99D0
 void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenOrAlarm, bool bPlayHorn, cVehicleParams& params) {
-    const auto nHornToneSoundInBank = m_settings.m_nHornToneSoundInBank;
+    const auto nHornToneSoundInBank = m_Settings.m_nHornToneSoundInBank;
     const auto DoTryStopHornSound = [&] {
         if (m_pHornTonSound) {
             m_pHornTonSound->StopSoundAndForget();
@@ -1409,11 +1432,11 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
             if (nHornToneSoundInBank <= 0 || nHornToneSoundInBank > 9)
                 return;
 
-            m_fHornVolume = m_settings.m_fHornVolumeDelta + (float)m_pAudioEventVolumes[AE_CAR_HORN];
+            m_fHornVolume = m_Settings.m_fHornVolumeDelta + (float)m_pAudioEventVolumes[AE_CAR_HORN];
             if (!bBanksLoaded)
                 return;
 
-            DoPlayHornSound(m_settings.m_fHornHigh);
+            DoPlayHornSound(m_Settings.m_fHornHigh);
         }
     } else {
         if (nHornToneSoundInBank == 0) {
@@ -1461,7 +1484,7 @@ void CAEVehicleAudioEntity::PlayHornOrSiren(bool bPlayHornTone, char bPlaySirenO
 void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
     // return plugin::CallMethod<0x4FCF40, CAEVehicleAudioEntity*>(this);
     m_bVehicleRadioPaused = false;
-    switch (m_settings.m_nVehicleSoundType) {
+    switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_CAR:
     case VEHICLE_SOUND_MOTORCYCLE: {
         m_fGeneralVehicleSoundVolume = m_pAudioEventVolumes[AE_GENERAL_VEHICLE_SOUND] - 1.5f;
@@ -1521,7 +1544,7 @@ void CAEVehicleAudioEntity::JustWreckedVehicle() {
         TurnOffRadioForVehicle();
     }
 
-    switch (m_settings.m_nVehicleSoundType) {
+    switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_CAR:
     case VEHICLE_SOUND_MOTORCYCLE:
     case VEHICLE_SOUND_BICYCLE:
@@ -1762,7 +1785,7 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     int16 soundId = -1;
     float fBaseVolume = 0.0f, fSpeed = 1.0f;
 
-    if (m_settings.m_nVehicleSoundType == VEHICLE_SOUND_BICYCLE) {
+    if (m_Settings.m_nVehicleSoundType == VEHICLE_SOUND_BICYCLE) {
         soundId = 0;
         fBaseVolume = -12.0f;
         fSpeed = 0.9f + fTotalSkidValue * 0.25f;
@@ -1779,12 +1802,12 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
             soundId = 24;
             fSpeed = 0.125f * fTotalSkidValue + 0.8f;
 
-            if (m_settings.IsMotorcycle()) {
+            if (m_Settings.IsMotorcycle()) {
                 fSpeed *= 1.2f;
             }
         }
 
-        switch (m_settings.m_nVehicleSoundType) {
+        switch (m_Settings.m_nVehicleSoundType) {
         case VEHICLE_SOUND_PLANE:
         case VEHICLE_SOUND_HELI: {
             fBaseVolume += 12.0f;
@@ -1838,7 +1861,7 @@ void CAEVehicleAudioEntity::ProcessBoatMovingOverWater(cVehicleParams& params) {
     float fVolume = -100.0f;
     if (boat->m_nBoatFlags.bOnWater && fVelocityProgress >= 0.00001f) {
         fVolume = CAEAudioUtility::AudioLog10(fVelocityProgress) * 20.0f;
-        fVolume += (m_settings.m_nVehicleSoundType == VEHICLE_SOUND_NON_VEH) ? 12.0f : 3.0f;
+        fVolume += (m_Settings.m_nVehicleSoundType == VEHICLE_SOUND_NON_VEH) ? 12.0f : 3.0f;
     }
 
     float fSpeed = 0.8f + fVelocityProgress * 0.2f;
@@ -2164,7 +2187,7 @@ void CAEVehicleAudioEntity::ProcessAircraft(cVehicleParams& vehParams) {
         return;
 
     auto* vehicle = vehParams.m_pVehicle;
-    switch (m_settings.m_nVehicleSoundType) {
+    switch (m_Settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_HELI: {
         if (s_HelicoptorsDisabled || m_bDisableHeliEngineSounds)
             JustWreckedVehicle();

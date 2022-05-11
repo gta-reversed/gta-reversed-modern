@@ -120,8 +120,7 @@ class CPed;
 class CAEVehicleAudioEntity : public CAEAudioEntity {
 public:
     int16                  field_7C;
-    char                   field_7E[2];
-    tVehicleAudioSettings  m_settings;
+    tVehicleAudioSettings  m_Settings;
     bool                   m_bEnabled;
     bool                   m_bPlayerDriver;
     bool                   m_bPlayerPassenger;
@@ -129,14 +128,12 @@ public:
     bool                   m_bSoundsStopped;
     char                   m_nEngineState;
     uint8                  m_nGearRelatedStuff;
-    char                   field_AB;
     float                  field_AC;
     bool                   m_bInhibitAccForLowSpeed;
-    char                   field_B1;
     int16                  m_nRainDropCounter;
     int16                  field_B4;
     int32                  field_B8;
-    char                   field_BC;
+    bool                   field_BC; // ProcessPlayerProp
     bool                   m_bDisableHeliEngineSounds;
 
     bool                   m_bPlayHornTone;
@@ -152,7 +149,6 @@ public:
     int16                  m_nEngineDecelerateSoundBankId;
     int16                  m_nEngineAccelerateSoundBankId;
     int16                  m_nEngineBankSlotId;
-    int16                  field_E2;
     tVehicleSound          m_aEngineSounds[12];
     int32                  m_nTime144;
 
@@ -180,12 +176,16 @@ public:
     CAESound*              m_pSirenSound;
     CAESound*              m_pPoliceSirenSound;
     CAETwinLoopSoundEntity m_twinSkidSound;
+
     float                  m_fPlaneSoundSpeed;
     float                  m_fPlaneSoundVolume_Probably;
-    float                  field_234;
-    float                  field_238;
+
+    float                  field_234; // speed ?
+    float                  field_238; // volume ?
+
     float                  field_23C;
-    int32                  field_240;
+    float                  field_240;
+
     bool                   m_bNitroSoundPresent;
     float                  field_248;
 
