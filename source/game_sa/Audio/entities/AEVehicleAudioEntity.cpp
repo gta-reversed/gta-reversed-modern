@@ -925,11 +925,15 @@ bool CAEVehicleAudioEntity::CopHeli() {
 }
 
 // 0x4F5C60
-float CAEVehicleAudioEntity::GetFreqForIdle(float paramVelocityPercentage) {
+float CAEVehicleAudioEntity::GetFreqForIdle(float velocityPercentage) {
     static float points[][2] = {
-        {0.0f, 0.0f}, {0.075f, 0.7f}, {0.15f, 1.1f}, {0.25f, 1.25f}, {1.0001f, 1.7f},
+        { 0.000f, 0.00f },
+        { 0.075f, 0.70f },
+        { 0.150f, 1.10f },
+        { 0.250f, 1.25f },
+        { 1.000f, 1.70f }, // 1.0001f?
     };
-    return CAEAudioUtility::GetPiecewiseLinear(paramVelocityPercentage, 5, points);
+    return CAEAudioUtility::GetPiecewiseLinear(velocityPercentage, std::size(points), points);
 }
 
 // 0x4F5D00

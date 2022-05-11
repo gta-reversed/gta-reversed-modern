@@ -257,25 +257,25 @@ public:
     void EnableHelicoptor();
     void DisableHelicoptor();
 
-    float GetVolumeForDummyIdle(float, float);
-    float GetFrequencyForDummyIdle(float, float);
+    float GetVolumeForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
+    float GetFrequencyForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
     float GetVolumeForDummyRev(float, float);
     float GetFrequencyForDummyRev(float, float);
-    float GetFreqForIdle(float);
-    float GetFreqForPlayerEngineSound(cVehicleParams&, int16);
-    float GetVolForPlayerEngineSound(cVehicleParams&, int16);
+    float GetFreqForIdle(float velocityPercentage);
+    float GetFreqForPlayerEngineSound(cVehicleParams& vehParams, int16 engineState_QuestionMark);
+    float GetVolForPlayerEngineSound(cVehicleParams& vehParams, int16 gear);
     float GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fUnk, cTransmission& transmission, float fVelocity);
     float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float fVelocity);
     float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress);
     void  GetHornState(bool* out, cVehicleParams& params);
     void  GetAccelAndBrake(cVehicleParams& params);
 
-    void PlayAircraftSound(int16, int16, int16, float, float);
+    void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volumeDelta);
     void PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed, float volume);
     void PlayFlatTyreSound(int16 soundType, float speed, float volume);
     void PlayReverseSound(int16 soundType, float speed, float volume);
     void PlayHornOrSiren(bool hornState, char sirenOrAlarm, bool mrWhoopie, cVehicleParams& params);
-    void PlayBicycleSound(int16, int16, int16, float, float);
+    void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float fVolume);
 
     void ProcessVehicleFlatTyre(cVehicleParams& params);
     void ProcessVehicleRoadNoise(cVehicleParams& params);
@@ -296,7 +296,7 @@ public:
     void ProcessAircraft(cVehicleParams& params);
     void ProcessPlayerBicycle(cVehicleParams& params);
     void ProcessDummyBicycle(cVehicleParams& params);
-    void ProcessDummyStateTransition(int16, float, cVehicleParams&);
+    void ProcessDummyStateTransition(int16, float, cVehicleParams& params);
     void ProcessDummyVehicleEngine(cVehicleParams& params);
     void ProcessPlayerVehicleEngine(cVehicleParams& params);
     void ProcessVehicleSirenAlarmHorn(cVehicleParams& params);
