@@ -1085,7 +1085,7 @@ float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle,
         const float fAbsVelocity = std::fabs(fVelocity);
         if (fAbsVelocity > 0.04f)
             return std::min(fAbsVelocity * 5.0f, 1.0f) * 1.2f;
-        break;
+        return 0.0f;
     }
     default:
         return 0.0f;
