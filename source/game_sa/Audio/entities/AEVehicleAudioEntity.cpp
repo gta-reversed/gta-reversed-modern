@@ -53,8 +53,8 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(IsAccInhibitedBackwards, 0x4F4FC0);
     RH_ScopedInstall(IsAccInhibitedForLowSpeed, 0x4F4FF0);
     RH_ScopedInstall(IsAccInhibitedForTime, 0x4F5020);
-
     RH_ScopedInstall(InhibitAccForTime, 0x4F5030);
+    RH_ScopedInstall(InhibitCrzForTime, 0x4F5060);
     RH_ScopedInstall(IsCrzInhibitedForTime, 0x4F5050);
     RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);
     RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);
@@ -672,7 +672,7 @@ uint32 CAEVehicleAudioEntity::GetVehicleTypeForAudio() {
 }
 
 // 0x4F4F70
-bool CAEVehicleAudioEntity::IsAccInhibited(cVehicleParams& params) {
+bool CAEVehicleAudioEntity::IsAccInhibited(cVehicleParams& params) const {
     return !AEAudioHardware.IsSoundBankLoaded(m_nEngineAccelerateSoundBankId, 40)
         || params.m_nBreakState > 0
         || params.m_bHandbrakeOn
@@ -701,6 +701,11 @@ bool CAEVehicleAudioEntity::IsAccInhibitedForTime() const {
 // 0x4F5030
 void CAEVehicleAudioEntity::InhibitAccForTime(uint32 time) {
     m_nTimeToInhibitAcc = time + CTimer::GetTimeInMS();
+}
+
+// 0x4F5060
+void CAEVehicleAudioEntity::InhibitCrzForTime(uint32 time) {
+    m_nTimeToInhibitCrz = time + CTimer::GetTimeInMS();
 }
 
 // inlined?

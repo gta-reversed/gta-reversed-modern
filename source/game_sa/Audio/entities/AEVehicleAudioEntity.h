@@ -226,10 +226,12 @@ public:
     uint32 GetVehicleTypeForAudio();
 
     void InhibitAccForTime(uint32 time);
-    bool IsAccInhibited(cVehicleParams& params);
+    bool IsAccInhibited(cVehicleParams& params) const;
     bool IsAccInhibitedBackwards(cVehicleParams& params) const;
     bool IsAccInhibitedForLowSpeed(cVehicleParams& params) const;
     bool IsAccInhibitedForTime() const;
+
+    void InhibitCrzForTime(uint32 time);
     bool IsCrzInhibitedForTime() const;
 
     void JustGotInVehicleAsDriver();
@@ -245,8 +247,6 @@ public:
     void GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVehicleParams& params);
     void PlayTrainBrakeSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void JustGotOutOfVehicleAsDriver();
-
-    void InhibitCrzForTime(uint32);
 
     void CancelVehicleEngineSound(int16 engineSoundStateId);
     void RequestNewPlayerCarEngineSound(int16 vehicleSoundId, float speed, float changeSound);
