@@ -51,8 +51,8 @@ void CAEGlobalWeaponAudioEntity::AddAudioEvent(eAudioEvents audioId, eWeaponType
 }
 
 // 0x4DF060
-void CAEGlobalWeaponAudioEntity::ProjectileFire(eWeaponType weaponType, CPhysical* physical, int32 audioId) {
-    return plugin::CallMethod<0x4DF060, CAEGlobalWeaponAudioEntity*, eWeaponType, CPhysical*, int32>(this, weaponType, physical, audioId);
+void CAEGlobalWeaponAudioEntity::ProjectileFire(eWeaponType weaponType, CPhysical* physical, eAudioEvents event) {
+    return plugin::CallMethod<0x4DF060, CAEGlobalWeaponAudioEntity*, eWeaponType, CPhysical*, int32>(this, weaponType, physical, event);
 
     if (weaponType != WEAPON_ROCKET || weaponType != WEAPON_ROCKET_HS)
         return;
@@ -65,7 +65,7 @@ void CAEGlobalWeaponAudioEntity::ProjectileFire(eWeaponType weaponType, CPhysica
     if (!AEAudioHardware.IsSoundBankLoaded(143, 5) && !AudioEngine.IsLoadingTuneActive()) {
         AEAudioHardware.LoadSoundBank(143, 5);
     }
-    const auto volume = CAEAudioEntity::m_pAudioEventVolumes[audioId];
+    const auto volume = GetDefaultVolume(event);
     const auto speed = 0.f; // todo
     const auto speed0 = 1.08f + speed;
     const auto speed1 = speed0 * 1.25f;

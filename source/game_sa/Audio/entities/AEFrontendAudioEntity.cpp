@@ -46,7 +46,7 @@ void CAEFrontendAudioEntity::AddAudioEvent(eAudioEvents event, float fVolumeBoos
     CVector XVECM = { -1.0f, 0.0f, 0.0f };
     CVector YVECP = { +0.0f, 1.0f, 0.0f };
 
-    float volume = (float)CAEAudioEntity::m_pAudioEventVolumes[event] + fVolumeBoost;
+    float volume = GetDefaultVolume(event) + fVolumeBoost;
     switch (event) {
     case AE_FRONTEND_START:
         if (AEAudioHardware.IsSoundBankLoaded(59u, 0)) {
