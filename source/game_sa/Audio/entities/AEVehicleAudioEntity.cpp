@@ -49,19 +49,19 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
     RH_ScopedInstall(StaticService,0x4F4EC0);
     RH_ScopedInstall(GetVehicleTypeForAudio,0x4F4F00);
-    // RH_ScopedInstall(IsAccInhibited,0x4F4F70);
-    // RH_ScopedInstall(IsAccInhibitedBackwards,0x4F4FC0);
-    // RH_ScopedInstall(IsAccInhibitedForLowSpeed,0x4F4FF0);
-    // RH_ScopedInstall(IsAccInhibitedForTime,0x4F5020);
+    RH_ScopedInstall(IsAccInhibited, 0x4F4F70);
+    RH_ScopedInstall(IsAccInhibitedBackwards, 0x4F4FC0);
+    RH_ScopedInstall(IsAccInhibitedForLowSpeed, 0x4F4FF0);
+    RH_ScopedInstall(IsAccInhibitedForTime, 0x4F5020);
 
     RH_ScopedInstall(InhibitAccForTime, 0x4F5030);
     RH_ScopedInstall(IsCrzInhibitedForTime, 0x4F5050);
     RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);
     RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);
     RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310);
-    // RH_ScopedInstall(GetVolumeForDummyRev,0x4F53D0);
-    // RH_ScopedInstall(GetFrequencyForDummyRev,0x4F54F0);
-    // RH_ScopedInstall(CancelVehicleEngineSound,0x4F55C0);
+    // RH_ScopedInstall(GetVolumeForDummyRev, 0x4F53D0);
+    // RH_ScopedInstall(GetFrequencyForDummyRev, 0x4F54F0);
+    // RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0);
     RH_ScopedInstall(UpdateVehicleEngineSound, 0x4F56D0);
     RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);
     RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);
@@ -75,67 +75,67 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(GetVehicleDriveWheelSkidValue, 0x4F5F30);
     RH_ScopedInstall(GetVehicleNonDriveWheelSkidValue, 0x4F6000);
     RH_ScopedInstall(GetBaseVolumeForBicycleTyre, 0x4F60B0);
-    // RH_ScopedInstall(GetHornState,0x4F61E0);
+    // RH_ScopedInstall(GetHornState, 0x4F61E0);
     RH_ScopedInstall(GetSirenState, 0x4F62A0);
     RH_ScopedInstall(StopGenericEngineSound, 0x4F6320);
-    // RH_ScopedInstall(AddAudioEvent,0x4F6420);
-    // RH_ScopedInstall(AddAudioEvent,0x4F7580);
-    // RH_ScopedInstall(RequestNewPlayerCarEngineSound,0x4F7A50);
-    // RH_ScopedInstall(StartVehicleEngineSound,0x4F7F20);
-    // RH_ScopedInstall(GetFreqForPlayerEngineSound,0x4F8070);
-    // RH_ScopedInstall(PlaySkidSound,0x4F8360);
+    // RH_ScopedInstall(AddAudioEvent, 0x4F6420);
+    // RH_ScopedInstall(AddAudioEvent, 0x4F7580);
+    // RH_ScopedInstall(RequestNewPlayerCarEngineSound, 0x4F7A50);
+    // RH_ScopedInstall(StartVehicleEngineSound, 0x4F7F20);
+    // RH_ScopedInstall(GetFreqForPlayerEngineSound, 0x4F8070);
+    // RH_ScopedInstall(PlaySkidSound, 0x4F8360);
     RH_ScopedInstall(PlayRoadNoiseSound, 0x4F84D0);
     RH_ScopedInstall(PlayFlatTyreSound, 0x4F8650);
-    // RH_ScopedInstall(PlayReverseSound,0x4F87D0);
-    // RH_ScopedInstall(ProcessVehicleFlatTyre,0x4F8940);
+    RH_ScopedInstall(PlayReverseSound, 0x4F87D0);
+    // RH_ScopedInstall(ProcessVehicleFlatTyre, 0x4F8940);
     RH_ScopedInstall(ProcessVehicleRoadNoise, 0x4F8B00);
     RH_ScopedInstall(ProcessReverseGear, 0x4F8DF0);
     RH_ScopedInstall(ProcessVehicleSkidding, 0x4F8F10);
     RH_ScopedInstall(ProcessRainOnVehicle, 0x4F92C0);
-    // RH_ScopedInstall(PlayAircraftSound,0x4F93C0);
-    // RH_ScopedInstall(PlayBicycleSound,0x4F9710);
-    // RH_ScopedInstall(PlayHornOrSiren,0x4F99D0);
+    RH_ScopedInstall(PlayAircraftSound, 0x4F93C0);
+    RH_ScopedInstall(PlayBicycleSound, 0x4F9710);
+    RH_ScopedInstall(PlayHornOrSiren, 0x4F99D0);
     RH_ScopedInstall(UpdateBoatSound, 0x4F9E90);
     RH_ScopedInstall(ProcessBoatMovingOverWater, 0x4FA0C0);
     RH_ScopedInstall(UpdateTrainSound, 0x4FA1C0);
-    // RH_ScopedInstall(ProcessTrainTrackSound,0x4FA3F0);
-    // RH_ScopedInstall(PlayTrainBrakeSound,0x4FA630);
-    // RH_ScopedInstall(ProcessDummyRCPlane,0x4FA7C0);
-    // RH_ScopedInstall(ProcessDummyRCHeli,0x4FAA80);
-    // RH_ScopedInstall(UpdateGenericVehicleSound,0x4FAD40);
+    // RH_ScopedInstall(ProcessTrainTrackSound, 0x4FA3F0);
+    // RH_ScopedInstall(PlayTrainBrakeSound, 0x4FA630);
+    // RH_ScopedInstall(ProcessDummyRCPlane, 0x4FA7C0);
+    // RH_ScopedInstall(ProcessDummyRCHeli, 0x4FAA80);
+    RH_ScopedInstall(UpdateGenericVehicleSound, 0x4FAD40);
     // RH_ScopedInstall(ProcessEngineDamage,0x4FAE20);
     // RH_ScopedInstall(ProcessNitro,0x4FB070);
     RH_ScopedInstall(ProcessMovingParts, 0x4FB260);
     // RH_ScopedInstall(ProcessPlayerVehicleEngine,0x4FBB10);
     // RH_ScopedInstall(ProcessDummyStateTransition,0x4FCA10);
-    // RH_ScopedInstall(JustGotOutOfVehicleAsDriver,0x4FCF40);
-    // RH_ScopedInstall(JustWreckedVehicle,0x4FD0B0);
-    // RH_ScopedInstall(ProcessPlayerProp,0x4FD290);
-    // RH_ScopedInstall(ProcessDummyProp,0x4FD8F0);
-    // RH_ScopedInstall(ProcessAIProp,0x4FDFD0);
-    // RH_ScopedInstall(ProcessPlayerHeli,0x4FE420);
-    // RH_ScopedInstall(ProcessDummyHeli,0x4FE940);
-    // RH_ScopedInstall(ProcessAIHeli,0x4FEE20);
-    // RH_ScopedInstall(ProcessPlayerSeaPlane,0x4FF320);
-    // RH_ScopedInstall(ProcessDummySeaPlane,0x4FF7C0);
-    // RH_ScopedInstall(ProcessGenericJet,0x4FF900);
-    // RH_ScopedInstall(ProcessDummyBicycle,0x4FFDC0);
-    // RH_ScopedInstall(ProcessPlayerBicycle,0x500040);
+    RH_ScopedInstall(JustGotOutOfVehicleAsDriver, 0x4FCF40);
+    RH_ScopedInstall(JustWreckedVehicle, 0x4FD0B0);
+    // RH_ScopedInstall(ProcessPlayerProp, 0x4FD290);
+    // RH_ScopedInstall(ProcessDummyProp, 0x4FD8F0);
+    // RH_ScopedInstall(ProcessAIProp, 0x4FDFD0);
+    // RH_ScopedInstall(ProcessPlayerHeli, 0x4FE420);
+    // RH_ScopedInstall(ProcessDummyHeli, 0x4FE940);
+    // RH_ScopedInstall(ProcessAIHeli, 0x4FEE20);
+    // RH_ScopedInstall(ProcessPlayerSeaPlane, 0x4FF320);
+    // RH_ScopedInstall(ProcessDummySeaPlane, 0x4FF7C0);
+    // RH_ScopedInstall(ProcessGenericJet, 0x4FF900);
+    // RH_ScopedInstall(ProcessDummyBicycle, 0x4FFDC0);
+    // RH_ScopedInstall(ProcessPlayerBicycle, 0x500040);
     RH_ScopedInstall(ProcessVehicleSirenAlarmHorn, 0x5002C0);
-    // RH_ScopedInstall(ProcessBoatEngine,0x5003A0);
-    // RH_ScopedInstall(ProcessDummyTrainEngine,0x500710);
-    // RH_ScopedInstall(ProcessPlayerTrainBrakes,0x500AB0);
-    // RH_ScopedInstall(ProcessPlayerCombine,0x500CE0);
-    // RH_ScopedInstall(ProcessDummyRCCar,0x500DC0);
-    // RH_ScopedInstall(ProcessDummyHovercraft,0x500F50);
-    // RH_ScopedInstall(ProcessDummyGolfCart,0x501270);
-    // RH_ScopedInstall(ProcessDummyVehicleEngine,0x501480);
-    // RH_ScopedInstall(ProcessPlayerJet,0x501650);
-    // RH_ScopedInstall(ProcessDummyJet,0x501960);
+    // RH_ScopedInstall(ProcessBoatEngine, 0x5003A0);
+    // RH_ScopedInstall(ProcessDummyTrainEngine, 0x500710);
+    // RH_ScopedInstall(ProcessPlayerTrainBrakes, 0x500AB0);
+    // RH_ScopedInstall(ProcessPlayerCombine, 0x500CE0);
+    // RH_ScopedInstall(ProcessDummyRCCar, 0x500DC0);
+    // RH_ScopedInstall(ProcessDummyHovercraft, 0x500F50);
+    // RH_ScopedInstall(ProcessDummyGolfCart, 0x501270);
+    // RH_ScopedInstall(ProcessDummyVehicleEngine, 0x501480);
+    // RH_ScopedInstall(ProcessPlayerJet, 0x501650);
+    // RH_ScopedInstall(ProcessDummyJet, 0x501960);
     RH_ScopedInstall(ProcessSpecialVehicle, 0x501AB0);
     RH_ScopedInstall(ProcessAircraft, 0x501C50);
-    // RH_ScopedInstall(ProcessVehicle,0x501E10);
-    // RH_ScopedInstall(Service,0x502280);
+    // RH_ScopedInstall(ProcessVehicle, 0x501E10);
+    // RH_ScopedInstall(Service, 0x502280);
 }
 
 // 0x4F63E0
@@ -601,6 +601,7 @@ void CAEVehicleAudioEntity::AddAudioEvent(eAudioEvents event, CVehicle* vehicle)
     plugin::CallMethod<0x4F7580, CAEVehicleAudioEntity*, eAudioEvents, CVehicle*>(this, event, vehicle);
 }
 
+// 0x502280
 void CAEVehicleAudioEntity::Service() {
     plugin::CallMethod<0x502280, CAEVehicleAudioEntity*>(this);
 }
@@ -1518,7 +1519,7 @@ void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
         break;
     }
     case VEHICLE_SOUND_TRAILER: {
-        m_fGeneralVehicleSoundVolume = m_pAudioEventVolumes[AE_GENERAL_VEHICLE_SOUND] - 1.5f;
+        m_fGeneralVehicleSoundVolume = (float)m_pAudioEventVolumes[AE_GENERAL_VEHICLE_SOUND] - 1.5f;
         s_pPlayerDriver = nullptr;
         break;
     }
