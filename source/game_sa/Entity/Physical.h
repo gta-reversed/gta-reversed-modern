@@ -122,7 +122,7 @@ public:
     CPtrNodeDoubleLink* m_pMovingList;
     uint8               m_nFakePhysics;
     uint8               m_nNumEntitiesCollided;
-    uint8               m_nContactSurface;
+    eSurfaceType        m_nContactSurface;
     CEntity*            m_apCollidedEntities[6];
     float               m_fMovingSpeed; // ref @ CTheScripts::IsVehicleStopped
     float               m_fDamageIntensity;

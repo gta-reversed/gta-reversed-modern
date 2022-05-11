@@ -430,11 +430,6 @@ void CAEVehicleAudioEntity::Terminate() {
     m_bEnabled = false;
 }
 
-// 0x4FB6C0
-void CAEVehicleAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
-    CAEVehicleAudioEntity::UpdateParameters_Reversed(sound, curPlayPos);
-}
-
 // 0x4F4ED0
 tVehicleAudioSettings* CAEVehicleAudioEntity::StaticGetPlayerVehicleAudioSettingsForRadio() {
     return s_pVehicleAudioSettingsForRadio;
@@ -527,6 +522,10 @@ tVehicleAudioSettings CAEVehicleAudioEntity::GetVehicleAudioSettings(int16 vehId
     return gVehicleAudioSettings[vehId - 400];
 }
 
+void CAEVehicleAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
+    CAEVehicleAudioEntity::UpdateParameters_Reversed(sound, curPlayPos);
+}
+// 0x4FB6C0
 void CAEVehicleAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
     if (!sound)
         return;
@@ -1675,10 +1674,10 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
     float fVolumeBase = -12.0f;
     if (IsSurfaceAudioGrass(vehicle->m_nContactSurface)) {
         fSpeed *= 1.3f;
-        fVolumeBase += *(float*)0xB6B9E4; // TODO: Insert value of var. here
+        fVolumeBase += 0.0f; // 0xB6B9E4
         nRoadNoiseSound = 21;
     } else if (IsSurfaceAudioEitherGravelWaterSand(vehicle->m_nContactSurface)) {
-        fVolumeBase += 4.5f; // TODO: Insert value of var. here
+        fVolumeBase += 4.5f;
         nRoadNoiseSound = 22;
     }
 
@@ -1696,8 +1695,8 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
 void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
     // plugin::CallMethod<0x4F8DF0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
-    static constexpr float BASE_SPEED  = 0.75f;  // 0x8CBD24
-    static constexpr float SPEED_MULT  = 0.2f;   // 0x8CBD28
+    static constexpr float BASE_SPEED  = 0.75f; // 0x8CBD24
+    static constexpr float SPEED_MULT  = 0.2f;  // 0x8CBD28
     static constexpr float BASE_VOLUME = -6.0f; // 0x8CBD28
 
     const auto vehicle = params.m_pVehicle->AsAutomobile();
@@ -2165,7 +2164,7 @@ void CAEVehicleAudioEntity::ProcessAircraft(cVehicleParams& vehParams) {
     if (!AEAudioHardware.IsSoundBankLoaded(138u, 19))
         return;
 
-    auto vehicle = vehParams.m_pVehicle;
+    auto* vehicle = vehParams.m_pVehicle;
     switch (m_settings.m_nVehicleSoundType) {
     case VEHICLE_SOUND_HELI: {
         if (s_HelicoptorsDisabled || m_bDisableHeliEngineSounds)
