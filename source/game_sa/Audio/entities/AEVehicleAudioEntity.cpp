@@ -702,7 +702,7 @@ float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float
         return -3.0f - 30.0f;
 
     auto* vehicle = m_pEntity->AsVehicle();
-    const auto fGearRevToMaxProgress = clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
+    const auto fGearRevToMaxProgress = std::clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
 
     float fVolume = 3.0f * fGearRevToMaxProgress - 3.0f;
     if (vehicle->vehicleFlags.bIsDrowning)
@@ -726,7 +726,7 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyIdle(float fGearRevProgress, fl
         return 1.0f;
 
     auto* vehicle = m_pEntity->AsVehicle();
-    const auto fGearRevToMaxProgress = clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
+    const auto fGearRevToMaxProgress = std::clamp<float>(fGearRevProgress / 0.2f, 0.0f, 1.0f);
 
     float fFreq = 0.35f * fGearRevToMaxProgress + 0.85f;
     if (vehicle->vehicleFlags.bIsDrowning)
@@ -1007,8 +1007,8 @@ bool CAEVehicleAudioEntity::JustFinishedAccelerationLoop() {
 
 // 0x4F5EB0
 void CAEVehicleAudioEntity::UpdateGasPedalAudio(CVehicle* vehicle, int32 vehicleType) {
-    const float fAbsGasPedal = fabs(vehicle->m_fGasPedal);
-    float& fSomeGasPedalStuff = ((eVehicleType)vehicleType == VEHICLE_TYPE_BIKE) ? vehicle->AsBike()->m_fGasPedalAudio : vehicle->AsAutomobile()->m_fSomeGasPedalStuff;
+    const float fAbsGasPedal = std::fabs(vehicle->m_fGasPedal);
+    float& fSomeGasPedalStuff = vehicleType == VEHICLE_TYPE_BIKE ? vehicle->AsBike()->m_fGasPedalAudio : vehicle->AsAutomobile()->m_fSomeGasPedalStuff;
     if (fAbsGasPedal <= fSomeGasPedalStuff)
         fSomeGasPedalStuff = std::max(fAbsGasPedal, fSomeGasPedalStuff - 0.07f);
     else
@@ -1029,10 +1029,10 @@ float CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue(CVehicle* vehicle, in
         break;
     }
     case WHEEL_STATE_SKIDDING: {
-        return std::min(1.0f, fabs(fVelocity)) * 0.75f;
+        return std::min(1.0f, std::fabs(fVelocity)) * 0.75f;
     }
     case WHEEL_STATE_FIXED: {
-        const float fAbsVelocity = fabs(fVelocity);
+        const float fAbsVelocity = std::fabs(fVelocity);
         if (fAbsVelocity > 0.04f)
             return std::min(fAbsVelocity * 5.0f, 1.0f) * 1.2f;
         break;
@@ -1050,14 +1050,14 @@ float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle,
 
     switch (wheelState) {
     case WHEEL_STATE_SKIDDING: {
-        const float fAbsVelocity = std::min(1.0f, fabs(fVelocity)); // at most 1.0f
+        const float fAbsVelocity = std::min(1.0f, std::fabs(fVelocity)); // at most 1.0f
         if (m_settings.m_nVehicleSoundType == VEHICLE_SOUND_BICYCLE)
             return fAbsVelocity * 0.75f * 0.2f;
         else
             return fAbsVelocity * 0.75f;
     }
     case WHEEL_STATE_FIXED: {
-        const float fAbsVelocity = fabs(fVelocity);
+        const float fAbsVelocity = std::fabs(fVelocity);
         if (fAbsVelocity > 0.04f)
             return std::min(fAbsVelocity * 5.0f, 1.0f) * 1.2f;
         break;
@@ -1626,7 +1626,7 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
     }
     }
 
-    const float fAbsVelocity = fabs(params.m_fVelocity);
+    const float fAbsVelocity = std::fabs(params.m_fVelocity);
     if (fAbsVelocity <= 0.0f) {
         CancelRoadNoise();
         return;
@@ -1683,7 +1683,7 @@ void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
                 vehicle->m_fSomeGasPedalStuff *= 0.4f;
             fReverseGearVelocityProgress = vehicle->m_fSomeGasPedalStuff;
         }
-        fReverseGearVelocityProgress = fabs(fReverseGearVelocityProgress);
+        fReverseGearVelocityProgress = std::fabs(fReverseGearVelocityProgress);
 
         PlayReverseSound(
             vehicle->m_fGasPedal >= 0.0f ? 20 : 19,                 // soundType
@@ -1837,7 +1837,7 @@ void CAEVehicleAudioEntity::ProcessBoatMovingOverWater(cVehicleParams& params) {
 
     // Originally there was a multiply by 1.33, that's the recp. of 0.75, which makes sense
     // because the abs. velocity is clamped to 0,75
-    const float fVelocityProgress = std::min(0.75f, fabs(params.m_fVelocity)) / 0.75f;
+    const float fVelocityProgress = std::min(0.75f, std::fabs(params.m_fVelocity)) / 0.75f;
 
     float fVolume = -100.0f;
     if (boat->m_nBoatFlags.bOnWater && fVelocityProgress >= 0.00001f) {
@@ -1931,7 +1931,7 @@ void CAEVehicleAudioEntity::ProcessMovingParts(cVehicleParams& params) {
     auto vehicle = params.m_pVehicle->AsAutomobile();
 
     float fComponentMoveProgress = (float)(vehicle->m_wMiscComponentAngle - vehicle->m_wMiscComponentAnglePrev) / 30.0f;
-    fComponentMoveProgress = clamp<float>(fabs(fComponentMoveProgress), 0.0f, 1.0f);
+    fComponentMoveProgress = std::clamp<float>(std::fabs(fComponentMoveProgress), 0.0f, 1.0f);
     if (fComponentMoveProgress <= field_238)
         fComponentMoveProgress = std::max(field_238 - 0.2f, fComponentMoveProgress);
     else
