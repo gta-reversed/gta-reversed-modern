@@ -1644,7 +1644,7 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
         const CVector camPos = TheCamera.GetPosition();
         const CVector vehAudioPos = m_pEntity->GetPosition();
 
-        const float someDistance = 72.0f // 0x8CBD10
+        const float someDistance = 72.0f; // 0x8CBD10
         const float distanceProgress = (vehAudioPos - camPos).Magnitude() / someDistance;
 
         fSpeed = 0.75f + std::max(1.0f, distanceProgress) / 2.0f;
@@ -1866,14 +1866,44 @@ void CAEVehicleAudioEntity::ProcessTrainTrackSound(cVehicleParams& params) {
     plugin::CallMethod<0x4FA3F0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 }
 
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerTrainEngine(cVehicleParams& params) {
+    // NOP
+}
+
 // 0x4FA7C0
 void CAEVehicleAudioEntity::ProcessDummyRCPlane(cVehicleParams& params) {
     plugin::CallMethod<0x4FA7C0, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 }
 
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerRCPlane(cVehicleParams& params) {
+    // NOP
+}
+
 // 0x4FAA80
 void CAEVehicleAudioEntity::ProcessDummyRCHeli(cVehicleParams& params) {
     plugin::CallMethod<0x4FAA80, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
+}
+
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerRCHeli(cVehicleParams& params) {
+    // NOP
+}
+
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerRCCar(cVehicleParams& params) {
+    // NOP
+}
+
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerHovercraft(cVehicleParams& params) {
+    // NOP
+}
+
+// Android
+void CAEVehicleAudioEntity::ProcessPlayerGolfCart(cVehicleParams& params) {
+    // NOP
 }
 
 // 0x4FAE20
