@@ -7,34 +7,28 @@
 namespace TextDebugModule {
 
 void ProcessImgui() {
-    static ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
+    const auto flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody;
     if (ImGui::BeginTable("PoolsDebugModule", 2, flags)) {
         ImGui::TableSetupColumn("Key");
         ImGui::TableSetupColumn("Str");
         ImGui::TableHeadersRow();
 
 
-        for (auto i = 0; i < TheText.m_MainKeyArray.m_size; i++) {
-            const CKeyEntry* str = &TheText.m_MainKeyArray.m_data[i];
-
+        for (const auto& entry : TheText.GetKeys()) {
             ImGui::TableNextRow();
-            ImGui::PushID(i);
+            ImGui::PushID(&entry);
 
             ImGui::TableNextColumn();
-            ImGui::Text("%d", str->hash);
+            ImGui::Text("%u", entry.hash);
 
             ImGui::TableNextColumn();
-            ImGui::Text("%s", str->string);
+            ImGui::Text("%s", entry.string);
 
             ImGui::PopID();
         }
 
         ImGui::EndTable();
     }
-}
-
-void ProcessRender() {
-
 }
 
 } // namespace TextDebugModule

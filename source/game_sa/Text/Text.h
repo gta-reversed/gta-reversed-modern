@@ -16,7 +16,6 @@ struct ChunkHeader {
     char  magic[4];
     int32 size;
 };
-
 VALIDATE_SIZE(ChunkHeader, 0x8);
 
 enum eTextLangCode : char {
@@ -38,7 +37,7 @@ public:
     char* Get(const char* key);
     void GetNameOfLoadedMissionText(char* outStr);
 
-    void LoadMissionText(char* mission);
+    void LoadMissionText(const char* mission);
     void LoadMissionPackText();
 
 private:
@@ -48,6 +47,7 @@ private:
     CKeyArray           m_MissionKeyArray;
     CData               m_MissionText;
 
+public:
     uint8               m_nLangCode;
     bool                m_bIsMissionTextOffsetsLoaded;
     bool                m_bCdErrorLoaded;
@@ -59,6 +59,10 @@ private:
 private:
     bool ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown);
     char GetUpperCase(char c) const;
+
+public:
+    auto GetKeys() { return std::span{ m_MainKeyArray.m_data, m_MainKeyArray.m_size }; }
+    auto GetMissionKeys() { return std::span{ m_MissionKeyArray.m_data, m_MissionKeyArray.m_size }; }
 
 private:
     friend void InjectHooksMain();
@@ -72,4 +76,4 @@ private:
 
 VALIDATE_SIZE(CText, 0xA90);
 
-extern CText& TheText;
+static inline CText& TheText = *(CText*)0xC1B340;

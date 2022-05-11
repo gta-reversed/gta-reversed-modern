@@ -9,14 +9,12 @@
 
 #include "eLanguage.h"
 
-#define CHUNK_TKEY "TKEY"
-#define CHUNK_TDAT "TDAT"
-#define CHUNK_TABL "TABL"
+constexpr auto CHUNK_TKEY = "TKEY";
+constexpr auto CHUNK_TDAT = "TDAT";
+constexpr auto CHUNK_TABL = "TABL";
+constexpr auto GAME_ENCODING = (sizeof(GxtChar) << 3);
 
-CText& TheText = *(CText*)0xC1B340;
-
-// 0x56D3A4
-static constexpr uint8 FrenchUpperCaseTable[] = {
+static constexpr uint8 UpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x41, 0x41, 0x41, 0x41, 0x84, 0x85, 0x45, 0x45, 0x45,
     0x45, 0x49, 0x49, 0x49, 0x49, 0x4F, 0x4F, 0x4F, 0x4F, 0x55, 0x55, 0x55, 0x55, 0xAD, 0xAD, 0xAF,
@@ -27,7 +25,6 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
 };
 
-// 0x8D3038
 static constexpr uint8 FrenchUpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
     0x90, 0x91, 0x92, 0x93, 0x94, 0x95, 0x96, 0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88,
@@ -43,43 +40,34 @@ void CText::InjectHooks() {
     RH_ScopedClass(CText);
     RH_ScopedCategory("Text");
 
-
     RH_ScopedInstall(Constructor, 0x6A00F0);
     RH_ScopedInstall(Destructor, 0x6A0140);
     RH_ScopedInstall(Get, 0x6A0050);
     RH_ScopedInstall(GetNameOfLoadedMissionText, 0x69FBD0);
-    //    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
-    //    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
-    //    RH_ScopedInstall(LoadMissionText, 0x69FBF0);
+    RH_ScopedInstall(ReadChunkHeader, 0x69F940);
+    RH_ScopedInstall(LoadMissionPackText, 0x69F9A0);
+    // RH_ScopedInstall(LoadMissionText, 0x69FBF0);
     RH_ScopedInstall(Load, 0x6A01A0);
     RH_ScopedInstall(Unload, 0x69FF20);
 
-    //
-    // TODO: These should be moved to their respective files...
-    //
-
     {
         RH_ScopedClass(CMissionTextOffsets);
-        //    RH_ScopedInstall(Load, 0x69F670);
+        RH_ScopedInstall(Load, 0x69F670);
     }
 
     {
         RH_ScopedClass(CData);
         RH_ScopedInstall(Unload, 0x69F640);
-        //    RH_ScopedInstall(Load, 0x69F5D0);
-
-
+        RH_ScopedInstall(Load, 0x69F5D0);
     }
 
     {
         RH_ScopedClass(CKeyArray);
-
         RH_ScopedCategory("Text");
         RH_ScopedInstall(Unload, 0x69F510);
-
         RH_ScopedInstall(BinarySearch, 0x69F570);
         RH_ScopedInstall(Search, 0x6A0000);
-        //    RH_ScopedInstall(Load, 0x69F490);
+        RH_ScopedInstall(Load, 0x69F490);
     }
 }
 
@@ -124,41 +112,29 @@ void CText::Unload(bool bUnloadMissionData) {
     }
 }
 
+// NOTSA
+const char* GetGxtName() {
+    switch (FrontEndMenuManager.m_nPrefsLanguage) {
+    case eLanguage::AMERICAN:    return "AMERICAN.GXT";
+    case eLanguage::FRENCH:      return "FRENCH.GXT";
+    case eLanguage::GERMAN:      return "GERMAN.GXT";
+    case eLanguage::ITALIAN:     return "ITALIAN.GXT";
+    case eLanguage::SPANISH:     return "SPANISH.GXT";
+#ifdef MORE_LANGUAGES
+    case eLanguage::RUSSIAN:     return "RUSSIAN.GXT";
+    case eLanguage::JAPANESE:    return "JAPANESE.GXT";
+#endif
+    }
+}
+
 // Loads GXT file
 // 0x6A01A0
 void CText::Load(bool bKeepMissionPack) {
     m_bIsMissionTextOffsetsLoaded = false;
     Unload(bKeepMissionPack);
 
-    char filename[32] = {0};
-    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nPrefsLanguage)) {
-    case eLanguage::AMERICAN:
-        sprintf(filename, "AMERICAN.GXT");
-        break;
-    case eLanguage::FRENCH:
-        sprintf(filename, "FRENCH.GXT");
-        break;
-    case eLanguage::GERMAN:
-        sprintf(filename, "GERMAN.GXT");
-        break;
-    case eLanguage::ITALIAN:
-        sprintf(filename, "ITALIAN.GXT");
-        break;
-    case eLanguage::SPANISH:
-        sprintf(filename, "SPANISH.GXT");
-        break;
-#ifdef MORE_LANGUAGES
-    case eLanguage::RUSSIAN:
-        sprintf(filename, "RUSSIAN.GXT");
-        break;
-    case eLanguage::JAPANESE:
-        sprintf(filename, "JAPANESE.GXT");
-        break;
-#endif
-    }
-
     CFileMgr::SetDir("TEXT");
-    auto file = CFileMgr::OpenFile(filename, "rb");
+    auto file = CFileMgr::OpenFile(GetGxtName(), "rb");
 
     uint16 version = 0;
     uint16 encoding = 0;
@@ -177,25 +153,29 @@ void CText::Load(bool bKeepMissionPack) {
         if (strncmp(header.magic, CHUNK_TABL, sizeof(header.magic)) == 0) {
             m_MissionTextOffsets.Load(header.size, file, &offset, 0x58000); // todo: magic. Android have different value 0x64000
             m_bIsMissionTextOffsetsLoaded = true;
+            continue;
         }
-        else if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
+
+        if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
             m_MainKeyArray.Load(header.size, file, &offset, false);
             bTKEY = true;
+            continue;
         }
-        else if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
+
+        if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
             m_MainText.Load(header.size, file, &offset, false);
             bTDAT = true;
+            continue;
         }
-        else {
-            CFileMgr::Seek(file, header.size, SEEK_CUR);
-            offset += header.size;
-        }
+
+        CFileMgr::Seek(file, header.size, SEEK_CUR);
+        offset += header.size;
     }
 
     m_MainKeyArray.Update(m_MainText.m_data);
     CFileMgr::CloseFile(file);
 
-    const auto text = TheText.Get("CDERROR");
+    const auto text = Get("CDERROR");
     strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
     m_bCdErrorLoaded = true;
 
@@ -215,14 +195,152 @@ void CText::Load(bool bKeepMissionPack) {
 }
 
 // 0x69FBF0
-void CText::LoadMissionText(char* mission) {
-    plugin::CallMethod<0x69FBF0, CText*, char*>(this, mission);
+void CText::LoadMissionText(const char* mission) {
+    // plugin::CallMethod<0x69FBF0, CText*, char*>(this, mission);
+
+    if (CGame::bMissionPackGame != 0)
+        return;
+
+    CMessages::ClearAllMessagesDisplayedByGame(true);
+
+    m_MissionKeyArray.Unload();
+    m_MissionText.Unload();
+
+    m_bIsMissionPackLoaded = false;
+    std::memset(m_szMissionName, '\0', sizeof(m_szMissionName));
+
+    if (m_MissionTextOffsets.GetSize() == 0) {
+        return;
+    }
+
+    auto v21 = 0;
+    auto offsetId = 0;
+    while (!v21) {
+        if (strlen(mission) == strlen(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName) &&
+            !strncmp(m_MissionTextOffsets.GetTextOffset(offsetId).szMissionName, mission, strlen(mission))
+        ) {
+            v21 = 1;
+        } else {
+            ++offsetId;
+        }
+
+        if (offsetId >= m_MissionTextOffsets.GetSize()) {
+            if (!v21)
+                return;
+            break;
+        }
+    }
+
+    CFileMgr::SetDir("TEXT");
+
+    CTimer::Suspend();
+
+    auto textOffset = m_MissionTextOffsets.GetTextOffset(offsetId);
+    auto file = CFileMgr::OpenFile(GetGxtName(), "rb");
+    CFileMgr::Seek(file, textOffset.offset, 0);
+
+    char buf[8];
+    CFileMgr::Read(file, buf, sizeof(buf)); // OG: CFileMgr::Read(file, buf++, 1u);
+    strncmp(buf, mission, sizeof(buf));     // ?
+
+    uint32 offset = sizeof(uint16) * 2; // skip version and encoding
+    auto missionKeyArrayLoaded = false;
+    auto missionTextLoaded = false;
+    ChunkHeader header{};
+    while (!missionKeyArrayLoaded || !missionTextLoaded) {
+        ReadChunkHeader(&header, file, &offset, false);
+        if (header.size == 0)
+            continue;
+
+        if (strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic)) == 0) {
+            m_MissionKeyArray.Load(header.size, file, &offset, 0);
+            missionKeyArrayLoaded = true;
+            continue;
+        }
+
+        if (strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic)) == 0) {
+            m_MissionText.Load(header.size, file, &offset, 0);
+            missionTextLoaded = true;
+            continue;
+        }
+
+        CFileMgr::Seek(file, header.size, SEEK_CUR);
+        offset += header.size;
+    }
+
+    m_MissionKeyArray.Update(m_MissionText.m_data);
+    CFileMgr::CloseFile(file);
+    CTimer::Resume();
+    CFileMgr::SetDir("");
+
+    strncpy(m_szMissionName, mission, sizeof(m_szMissionName));
+    m_bIsMissionPackLoaded = true;
 }
 
 // Loads mission table from GXT file
 // 0x69F9A0
 void CText::LoadMissionPackText() {
-    return plugin::CallMethod<0x69F9A0, CText*>(this);
+    CMessages::ClearAllMessagesDisplayedByGame(true);
+    CFileMgr::SetDir("");
+
+    m_MissionKeyArray.Unload();
+    m_MissionText.Unload();
+
+    m_bIsMissionPackLoaded = false;
+    std::memset(m_szMissionName, '\0', sizeof(m_szMissionName));
+
+    CFileMgr::SetDirMyDocuments();
+    char filename[64];
+    sprintf(filename, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
+
+    auto* file = CFileMgr::OpenFile(filename, "rb");
+    if (!file) {
+        return;
+    }
+
+    uint16 version = 0, encoding = 0;
+    CFileMgr::Read(file, &version, sizeof(version));
+    CFileMgr::Read(file, &encoding, sizeof(encoding));
+
+    DEV_LOG("[CText]: Loading '%s' version=%02d (%d-bit)\n", filename, version, encoding);
+    assert(GAME_ENCODING == encoding && ("File %s was compiled with %d-bit char but %d-bit is required.", filename, encoding, GAME_ENCODING));
+
+    uint32 offset = sizeof(uint16) * 2;
+    bool bkey = false, btext = false;
+    ChunkHeader header{};
+    while (!bkey && !btext) {
+        if (ReadChunkHeader(&header, file, &offset, false)) {
+            m_bIsMissionPackLoaded = false;
+            CFileMgr::CloseFile(file);
+            return;
+        }
+
+        if (!strncmp(header.magic, CHUNK_TKEY, sizeof(header.magic))) {
+            m_MissionKeyArray.Load(header.size, file, &offset, false);
+            bkey = true;
+            continue;
+        }
+
+        if (!strncmp(header.magic, CHUNK_TDAT, sizeof(header.magic))) {
+            m_MissionText.Load(header.size, file, &offset, false);
+            btext = true;
+            continue;
+        }
+
+        // Skip any other data
+        int8 bTmp;
+        for (auto i = 0; i < header.size; ++i) {
+            if (!CFileMgr::Read(file, &bTmp, sizeof(int8))) {
+                m_bIsMissionPackLoaded = false;
+                CFileMgr::CloseFile(file);
+                return;
+            }
+        }
+    }
+    m_MainKeyArray.Update(m_MissionText.m_data);
+    m_bIsMissionPackLoaded = true;
+    strcpy(m_szMissionName, "MPNAME");
+    CFileMgr::CloseFile(file);
 }
 
 // Returns text pointer by GXT key
@@ -259,34 +377,15 @@ void CText::GetNameOfLoadedMissionText(char* outStr) {
 
 // 0x69F940
 bool CText::ReadChunkHeader(ChunkHeader* header, FILESTREAM file, uint32* offset, uint8 unknown) {
-    for (uint32 i = 0; i < sizeof(ChunkHeader); ++i) {
-        if (sizeof(uint8) != CFileMgr::Read(file, (uint8 *)header + i, sizeof(uint8))) {
-            return false;
-        }
-        ++*offset;
-    }
-    return true;
-
-#ifdef USE_ORIGINAL_CODE
-    // Taken from re3. That not same as original, but do same thing
-    char* _header = (char*)header;
-    for (int i = 0; i < sizeof(ChunkHeader); i++) {
-        CFileMgr::Read(file, &_header[i], 1);
-        (*offset)++;
-    }
-    delete _header;
-    return true;
-#else
-    // re3: original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
+    // ***: original code loops 8 times to read 1 byte with CFileMgr::Read, that's retarded
     // Same as in Android 2.0
-    CFileMgr::Read(file, header, sizeof(ChunkHeader));
+    if (!CFileMgr::Read(file, header, sizeof(ChunkHeader))) {
+        return false;
+    }
     *offset += sizeof(ChunkHeader);
-
     return true;
-#endif
 }
 
-// unused
 // 0x69F750
 char CText::GetUpperCase(char c) const {
     switch (m_nLangCode) {

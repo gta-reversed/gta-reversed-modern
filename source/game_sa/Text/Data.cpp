@@ -22,7 +22,7 @@ void CData::Unload() {
 // unknown always 0
 // 0x69F5D0
 bool CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown) {
-#ifdef USE_ORIGINAL_CODE
+#if 0
     uint32 temp = 0;
 
     if (!length)
@@ -36,12 +36,13 @@ bool CData::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown) 
         m_data[i] = (GxtChar)temp;
         ++*offset;
     }
-#else
+#endif
+
     m_size = length / sizeof(char);
     m_data = new char[m_size];
 
     CFileMgr::Read(file, m_data, length);
     *offset += length;
-#endif
+
     return true;
 }

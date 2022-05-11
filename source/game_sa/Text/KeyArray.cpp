@@ -22,27 +22,14 @@ void CKeyArray::Unload() {
 // unknown always 0
 // 0x69F490
 bool CKeyArray::Load(uint32 length, FILESTREAM file, uint32* offset, uint8 unknown) {
-#ifdef USE_ORIGINAL_CODE
-    uint32 temp = 0;
-
-    m_size = length / sizeof(CKeyEntry);
-    m_data = new CKeyEntry[m_size];
-
-    if (length) {
-        if (length != CFileMgr::Read(file, m_data, length)) {
-            return false;
-        }
-
-        *offset += length;
-    }
-#else
-    // taken from re3
+    // todo: add OG code
+    // taken from ***
     m_size = length / sizeof(CKeyEntry);
     m_data = new CKeyEntry[m_size];
 
     CFileMgr::Read(file, m_data, length);
     *offset += length;
-#endif
+
     return true;
 }
 
