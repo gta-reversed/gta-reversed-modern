@@ -9,6 +9,9 @@ typedef uint32 SurfaceId;
 class SurfaceInfos_c {
 public:
     float m_adhesiveLimits[6][6];
+    // fuck c*, they did shit
+    // sizeof of this class exactly 0x8F4, but then they enable *magic*
+    // and do m_surfaces[id < 195]
     // todo: std::array<SurfaceInfo_c, TOTAL_NUM_SURFACE_TYPES> m_surfaces;
     SurfaceInfo_c m_surfaces[TOTAL_NUM_SURFACE_TYPES];
 

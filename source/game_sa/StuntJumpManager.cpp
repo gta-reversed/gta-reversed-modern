@@ -84,7 +84,7 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
-    if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
+    if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 
     CPlayerPed* playerPed = FindPlayerPed();
@@ -127,7 +127,7 @@ void CStuntJumpManager::Update() {
                 CTimer::SetTimeScale(0.3f);
                 CVector rotation{0.0f, 0.0f, 0.0f};
                 TheCamera.SetCamPositionForFixedMode(&mp_Active->camera, &rotation);
-                TheCamera.TakeControl(playerVehicle, MODE_FIXED, SWITCHTYPE_JUMPCUT, 1);
+                TheCamera.TakeControl(playerVehicle, MODE_FIXED, eSwitchType::JUMPCUT, 1);
             }
         }
         break;

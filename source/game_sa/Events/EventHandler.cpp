@@ -7,6 +7,9 @@
 #include "TaskComplexStuckInAir.h"
 // #include "TaskComplexSmartFleeEntity.h"
 
+#include "InterestingEvents.h"
+#include "IKChainManager_c.h"
+
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);
     RH_ScopedCategory("Events");
@@ -492,7 +495,12 @@ void CEventHandler::ComputeSexyPedResponse(CEvent* event, CTask* task1, CTask* t
 
 // 0x4B9AA0
 void CEventHandler::ComputeSexyVehicleResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x4B9AA0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+    auto evnt = reinterpret_cast<CEventSexyVehicle*>(event);
+    if (evnt->m_vehicle) {
+        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_8, evnt->m_vehicle);
+        m_eventResponseTask = new CTaskSimpleStandStill(5000, false, false, 8.0f);
+        g_ikChainMan.LookAt("CompSexyVhclResp", m_ped, evnt->m_vehicle, 5000, BONE_UNKNOWN, nullptr, true, 0.25f, 500, 3, false);
+    }
 }
 
 // task1 TASK_COMPLEX_CAR_DRIVE_WANDER 711 911 912 911 1204
@@ -534,9 +542,9 @@ void CEventHandler::ComputeVehicleDiedResponse(CEvent* event, CTask* task1, CTas
     plugin::CallMethod<0x4BA8B0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
 }
 
-// TODO: 0x?
+// 0x?
 void CEventHandler::ComputeVehicleHitAndRunResponse(CEvent* event, CTask* task1, CTask* task2) {
-    plugin::CallMethod<0x0, CEventHandler*, CEvent*, CTask*, CTask*>(this, event, task1, task2);
+    // NOP
 }
 
 // 0x4BB2E0
@@ -566,9 +574,8 @@ void CEventHandler::ComputeWaterCannonResponse(CEvent* event, CTask* task1, CTas
 
 // 0x4C3870
 void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
-    plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
+    return plugin::CallMethod<0x4C3870, CEventHandler*, CEvent*, CTask*>(this, event, task);
 
-    /*
     m_physicalResponseTask = nullptr;
     m_eventResponseTask = nullptr;
     m_attackTask = nullptr;
@@ -663,7 +670,7 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
         ComputeScriptCommandResponse(event, task1, task2);
         break;
     case EVENT_IN_AIR:
-        if ((m_ped->m_nPedFlags & 1) == 0) { // !m_ped->bIsStanding
+        if (!m_ped->bIsStanding) {
             m_eventResponseTask = new CTaskComplexInAirAndLand(false, false);
         }
         break;
@@ -775,7 +782,6 @@ void CEventHandler::ComputeEventResponseTask(CEvent* event, CTask* task) {
     default:
         return;
     }
-    */
 }
 
 // should be (const CPed& ped, const CEvent& event);

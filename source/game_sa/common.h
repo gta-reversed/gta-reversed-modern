@@ -94,7 +94,7 @@ extern uint32 &ClumpOffset;
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
 constexpr float E              = 2.71828f;          // e
-constexpr float E_CONST        = 0.577;             // Euler-Mascheroni constant
+constexpr float E_CONST        = 0.577f;            // Euler-Mascheroni constant
 constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
 constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
 constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ

@@ -122,16 +122,16 @@ void CMirrors::RenderMirrorBuffer() {
         RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
         RwRenderStateSet(rwRENDERSTATEFOGENABLE,         RWRSTATE(TRUE));
 
-        for (int x = 0; x < 2; x++) {
+        for (auto x = 0; x < 2; x++) {
             constexpr CVector2D uvs[4]{
-                {0.0f, 0.0f},
-                {1.0f, 0.0f},
-                {1.0f, 1.0f},
-                {0.0f, 1.0f},
+                { 0.0f, 0.0f },
+                { 1.0f, 0.0f },
+                { 1.0f, 1.0f },
+                { 0.0f, 1.0f },
             };
 
             RxObjSpace3DVertex vertices[4];
-            for (int i = 0; i < std::size(vertices); i++) {
+            for (auto i = 0u; i < std::size(vertices); i++) {
                 RwIm3DVertexSetRGBA(&vertices[i], 255, 255, 255, 255);
                 RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &Screens8Track[x][i]);
                 RwIm3DVertexSetU(&vertices[i], uvs[i].x);
@@ -159,7 +159,7 @@ void CMirrors::RenderMirrorBuffer() {
         };
 
         RwIm2DVertex vertices[4];
-        for (int i = 0; i < std::size(vertices); i++) {
+        for (auto i = 0u; i < std::size(vertices); i++) {
             RwIm2DVertexSetRecipCameraZ(&vertices[i], 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera));
             RwIm2DVertexSetIntRGBA(&vertices[i], 255, 255, 255, 255);
 
@@ -192,7 +192,7 @@ void CMirrors::RenderMirrorBuffer() {
         // Make a function out of it.
 
         RxObjSpace3DVertex vertices[4];
-        for (int i = 0; i < std::size(vertices); i++) {
+        for (auto i = 0u; i < std::size(vertices); i++) {
             RwIm3DVertexSetRGBA(&vertices[i], 255, 255, 255, 255);
             RwV3dAssign(RwIm3DVertexGetPos(&vertices[i]), &pos[i]);
             RwIm3DVertexSetU(&vertices[i], uvs[i].x);

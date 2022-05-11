@@ -29,7 +29,7 @@ void CPedList::BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership)
 
 // 0x69A4C0
 void CPedList::ExtractPedsWithGuns(CPedList& from) {
-    for (auto i = 0; i < from.m_count; i++) {
+    for (auto i = 0u; i < from.m_count; i++) {
         if (!from.Get(i)->GetActiveWeapon().IsTypeMelee()) {
             AddMember(from.Get(i));
             from.RemoveMemberNoFill(i);

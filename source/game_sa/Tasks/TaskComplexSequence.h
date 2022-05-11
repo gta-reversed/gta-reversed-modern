@@ -3,12 +3,12 @@
 #include "TaskComplex.h"
 
 class CTask;
-    
+
 class CTaskComplexSequence : public CTaskComplex {
 public:
     int32    m_nCurrentTaskIndex;      // Used in m_aTasks
     CTask*   m_aTasks[8];
-    int32    m_bRepeatSequence;        // Sequence will loop if set to 1
+    bool     m_bRepeatSequence;        // Sequence will loop if set to 1
     int32    m_nSequenceRepeatedCount; // m_nSequenceRepeatedCount simply tells us how many times the sequence has been repeated.
                                        // If m_bRepeatSequence is true, this can be greater than 1,
                                        // otherwise it's set to 1 when the sequence is done executing tasks.
