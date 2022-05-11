@@ -17,11 +17,11 @@ tEngineDummySlot (&CAEVehicleAudioEntity::s_DummyEngineSlots)[NUM_DUMMY_ENGINE_S
 
 const tVehicleAudioSettings (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS] = *reinterpret_cast<const tVehicleAudioSettings (*)[232]>(0x860AF0);
 
-bool IsSurfaceAudioGrass(uint8 surface) {
+bool IsSurfaceAudioGrass(eSurfaceType surface) {
     return g_surfaceInfos->IsAudioGrass(surface) || g_surfaceInfos->IsAudioLongGrass(surface);
 }
 
-bool IsSurfaceAudioEitherGravelWaterSand(char surface) {
+bool IsSurfaceAudioEitherGravelWaterSand(eSurfaceType surface) {
     return g_surfaceInfos->IsAudioGravel(surface) || g_surfaceInfos->IsAudioSand(surface) || g_surfaceInfos->IsAudioWater(surface);
 }
 
@@ -143,13 +143,172 @@ CAEVehicleAudioEntity::CAEVehicleAudioEntity() : CAEAudioEntity(), m_twinSkidSou
 
 // 0x6D0A10
 CAEVehicleAudioEntity::~CAEVehicleAudioEntity() {
-    if (m_bEnabled)
+    if (m_bEnabled) {
         Terminate();
+    }
 }
 
-// 0x4FB6C0
-void CAEVehicleAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
-    CAEVehicleAudioEntity::UpdateParameters_Reversed(sound, curPlayPos);
+// 0x4F7670
+void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
+    assert(entity);
+
+    field_144 = 0;
+    m_pEntity = entity;
+    m_bPlayerDriver = false;
+    m_bPlayerPassenger = false;
+    m_bVehicleRadioPaused = false;
+    m_bSoundsStopped = false;
+    m_nEngineState = 0;
+    m_nGearRelatedStuff = 0;
+    field_AC = 0;
+    m_nEngineBankSlotId = -1;
+    m_nRainDropCounter = 0;
+    field_7C = 0;
+    field_B4 = 0;
+    field_B8 = 0;
+    field_BC = 0;
+    m_nBoatHitWaveLastPlayedTime = 0;
+    m_nTimeToInhibitAcc = 0;
+    m_nTimeToInhibitCrz = 0;
+    m_bNitroSoundPresent = false;
+    m_bDisableHeliEngineSounds = false;
+    m_nEngineSoundPlayPos = -1;
+    m_nEngineSoundLastPlayedPos = -1;
+    field_154 = 0;
+    field_14E = 0;
+    m_nAcclLoopCounter = 0;
+
+    for (auto i = 0; auto& sound : m_aEngineSounds) {
+        sound.Init(i++);
+    }
+
+    m_fHornVolume = -100.0f;
+    m_fPlaneSoundVolume_Probably = -100.0f;
+    m_nSkidSoundType = -1;
+    m_nRoadNoiseSoundType = -1;
+    m_nFlatTyreSoundType = -1;
+    m_nReverseGearSoundType = -1;
+    field_234 = -1.0f;
+    m_fPlaneSoundSpeed = -1.0f;
+    field_248 = -1.0f;
+
+    m_pSkidSoundMaybe   = nullptr;
+    m_pRoadNoiseSound   = nullptr;
+    m_pFlatTyreSound    = nullptr;
+    m_pReverseGearSound = nullptr;
+    m_pHornTonSound     = nullptr;
+    m_pSirenSound       = nullptr;
+    m_pPoliceSirenSound = nullptr;
+
+    field_238 = 0.0f;
+    field_23C = 1.0f;
+    field_240 = 0;
+
+    m_settings = GetVehicleAudioSettings(entity->m_nModelIndex);
+    m_bModelWithSiren = entity->AsVehicle()->UsesSiren();
+    if (m_settings.m_nRadioType == eRadioType::RADIO_UNKNOWN)
+        m_settings.m_nRadioID = eRadioID::RADIO_OFF;
+
+    m_fGeneralVehicleSoundVolume = CAEAudioEntity::GetDefaultVolume(eAudioEvents::AE_GENERAL_VEHICLE_SOUND);
+
+    switch (entity->m_nModelIndex) {
+    case MODEL_PIZZABOY:
+    case MODEL_CADDY:
+    case MODEL_FAGGIO:
+    case MODEL_BAGGAGE:
+    case MODEL_FORKLIFT:
+    case MODEL_VORTEX:
+    case MODEL_KART:
+    case MODEL_MOWER:
+    case MODEL_SWEEPER:
+    case MODEL_TUG:
+        m_bInhibitAccForLowSpeed = true;
+        break;
+    default:
+        m_bInhibitAccForLowSpeed = false;
+        break;
+    }
+
+    switch (m_settings.m_nVehicleSoundType) {
+    case VEHICLE_SOUND_CAR:
+        m_fGeneralVehicleSoundVolume -= 1.5F;
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        if (m_bEnabled)
+            return;
+
+        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129)
+            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+
+        m_bEnabled = true;
+        return;
+
+    case VEHICLE_SOUND_MOTORCYCLE:
+    case VEHICLE_SOUND_BICYCLE:
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+
+        if (m_settings.IsMotorcycle())
+            m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
+
+        if (m_bEnabled)
+            return;
+
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        if (m_nEngineDecelerateSoundBankId != -1)
+            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+
+        m_bEnabled = true;
+        return;
+
+    case VEHICLE_SOUND_BOAT:
+    case VEHICLE_SOUND_TRAIN:
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        if (m_bEnabled)
+            return;
+
+        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129)
+            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+
+        m_bEnabled = true;
+        return;
+
+    case VEHICLE_SOUND_HELI:
+    case VEHICLE_SOUND_NON_VEH:
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+
+        m_bEnabled = true;
+        return;
+
+    case VEHICLE_SOUND_PLANE:
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        if (m_bEnabled)
+            return;
+
+        if (m_settings.m_nEngineOffSoundBankId != -1)
+            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+
+        m_bEnabled = true;
+        return;
+
+    case VEHICLE_SOUND_TRAILER:
+        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
+        m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
+        if (m_bEnabled)
+            return;
+
+        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
+        if (m_nEngineDecelerateSoundBankId != -1)
+            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
+
+        m_bEnabled = true;
+        return;
+
+    default:
+        return;
+    }
 }
 
 // 0x5B99F0
@@ -168,6 +327,105 @@ void CAEVehicleAudioEntity::StaticInitialise() {
     s_pPlayerDriver = nullptr;
     s_NextDummyEngineSlot = 0;
     s_HelicoptorsDisabled = false;
+}
+
+// 0x4FB8C0
+void CAEVehicleAudioEntity::Terminate() {
+    if (!m_bEnabled)
+        return;
+
+    for (auto& engSound : m_aEngineSounds) {
+        if (engSound.m_pSound) {
+            engSound.m_pSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+            engSound.m_pSound->StopSound();
+            engSound.m_pSound = nullptr;
+        }
+    }
+
+    PlaySkidSound(-1, 1.0F, -100.0F);
+    PlayTrainBrakeSound(-1, 1.0F, -100.0F);
+
+    if (m_pSkidSoundMaybe) {
+        m_pSkidSoundMaybe->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pSkidSoundMaybe->StopSound();
+        m_pSkidSoundMaybe = nullptr;
+        m_nSkidSoundType = -1;
+    }
+
+    if (m_pRoadNoiseSound) {
+        m_pRoadNoiseSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pRoadNoiseSound->StopSound();
+        m_pRoadNoiseSound = nullptr;
+        m_nRoadNoiseSoundType = -1;
+    }
+
+    if (m_pFlatTyreSound) {
+        m_pFlatTyreSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pFlatTyreSound->StopSound();
+        m_pFlatTyreSound = nullptr;
+        m_nFlatTyreSoundType = -1;
+    }
+
+    if (m_pReverseGearSound) {
+        m_pReverseGearSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
+        m_pReverseGearSound->StopSound();
+        m_pReverseGearSound = nullptr;
+        m_nReverseGearSoundType = -1;
+    }
+
+    if (m_pHornTonSound) {
+        m_pHornTonSound->StopSoundAndForget();
+        m_pHornTonSound = nullptr;
+    }
+
+    if (m_pSirenSound) {
+        m_pSirenSound->StopSoundAndForget();
+        m_pSirenSound = nullptr;
+    }
+
+    if (m_pPoliceSirenSound) {
+        m_pPoliceSirenSound->StopSoundAndForget();
+        m_pPoliceSirenSound = nullptr;
+    }
+
+    const auto radioType = m_settings.m_nRadioType;
+    if (m_bPlayerDriver && (radioType == RADIO_CIVILIAN || radioType == RADIO_UNKNOWN || radioType == RADIO_EMERGENCY))
+        AudioEngine.StopRadio(&m_settings, false);
+
+    if (m_nEngineBankSlotId != -1) {
+        const auto usedSlot = m_nEngineBankSlotId - 7;
+        auto&      dummyEng = s_DummyEngineSlots[usedSlot];
+        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS && dummyEng.m_nBankId == m_nEngineDecelerateSoundBankId)
+            dummyEng.m_nUsageCount = std::max(0, dummyEng.m_nUsageCount - 1);
+
+        m_nEngineBankSlotId = -1;
+    }
+
+    m_nEngineDecelerateSoundBankId = -1;
+    m_nEngineAccelerateSoundBankId = -1;
+    m_pEntity = nullptr;
+    m_nEngineState = 0;
+
+    if (m_bPlayerDriver) {
+        m_bPlayerDriver = false;
+        s_pPlayerDriver = nullptr;
+    } else if (m_bPlayerPassenger) {
+        m_bPlayerPassenger = false;
+    } else {
+        m_bVehicleRadioPaused = false;
+        m_bEnabled = false;
+        return;
+    }
+
+    s_pPlayerAttachedForRadio = nullptr;
+    s_pVehicleAudioSettingsForRadio = nullptr;
+    m_bVehicleRadioPaused = false;
+    m_bEnabled = false;
+}
+
+// 0x4FB6C0
+void CAEVehicleAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
+    CAEVehicleAudioEntity::UpdateParameters_Reversed(sound, curPlayPos);
 }
 
 // 0x4F4ED0
@@ -335,262 +593,6 @@ void CAEVehicleAudioEntity::Service() {
 
 void CAEVehicleAudioEntity::StaticService() {
     // NOP
-}
-
-// 0x4F7670
-void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
-    assert(entity);
-
-    field_144 = 0;
-    m_pEntity = entity;
-    m_bPlayerDriver = false;
-    m_bPlayerPassenger = false;
-    m_bVehicleRadioPaused = false;
-    m_bSoundsStopped = false;
-    m_nEngineState = 0;
-    m_nGearRelatedStuff = 0;
-    field_AC = 0;
-    m_nEngineBankSlotId = -1;
-    m_nRainDropCounter = 0;
-    field_7C = 0;
-    field_B4 = 0;
-    field_B8 = 0;
-    field_BC = 0;
-    m_nBoatHitWaveLastPlayedTime = 0;
-    m_nTimeToInhibitAcc = 0;
-    m_nTimeToInhibitCrz = 0;
-    m_bNitroSoundPresent = false;
-    m_bDisableHeliEngineSounds = false;
-    m_nEngineSoundPlayPos = -1;
-    m_nEngineSoundLastPlayedPos = -1;
-    field_154 = 0;
-    field_14E = 0;
-    m_nAcclLoopCounter = 0;
-
-    for (auto i = 0; auto& sound : m_aEngineSounds)
-        sound.Init(i++);
-
-    m_fHornVolume = -100.0f;
-    m_fPlaneSoundVolume_Probably = -100.0f;
-    m_nSkidSoundType = -1;
-    m_nRoadNoiseSoundType = -1;
-    m_nFlatTyreSoundType = -1;
-    m_nReverseGearSoundType = -1;
-    field_234 = -1.0f;
-    m_fPlaneSoundSpeed = -1.0f;
-    field_248 = -1.0f;
-
-    m_pSkidSoundMaybe   = nullptr;
-    m_pRoadNoiseSound   = nullptr;
-    m_pFlatTyreSound    = nullptr;
-    m_pReverseGearSound = nullptr;
-    m_pHornTonSound     = nullptr;
-    m_pSirenSound       = nullptr;
-    m_pPoliceSirenSound = nullptr;
-
-    field_238 = 0.0f;
-    field_23C = 1.0f;
-    field_240 = 0;
-
-    m_settings = GetVehicleAudioSettings(entity->m_nModelIndex);
-    m_bModelWithSiren = entity->AsVehicle()->UsesSiren();
-    if (m_settings.m_nRadioType == eRadioType::RADIO_UNKNOWN)
-        m_settings.m_nRadioID = eRadioID::RADIO_OFF;
-
-    m_fGeneralVehicleSoundVolume = CAEAudioEntity::GetDefaultVolume(eAudioEvents::AE_GENERAL_VEHICLE_SOUND);
-
-    switch (entity->m_nModelIndex) {
-    case MODEL_PIZZABOY:
-    case MODEL_CADDY:
-    case MODEL_FAGGIO:
-    case MODEL_BAGGAGE:
-    case MODEL_FORKLIFT:
-    case MODEL_VORTEX:
-    case MODEL_KART:
-    case MODEL_MOWER:
-    case MODEL_SWEEPER:
-    case MODEL_TUG:
-        m_bInhibitAccForLowSpeed = true;
-        break;
-    default:
-        m_bInhibitAccForLowSpeed = false;
-        break;
-    }
-
-    switch (m_settings.m_nVehicleSoundType) {
-    case VEHICLE_SOUND_CAR:
-        m_fGeneralVehicleSoundVolume -= 1.5F;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        if (m_bEnabled)
-            return;
-
-        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
-
-        m_bEnabled = true;
-        return;
-
-    case VEHICLE_SOUND_MOTORCYCLE:
-    case VEHICLE_SOUND_BICYCLE:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-
-        if (m_settings.IsMotorcycle())
-            m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
-
-        if (m_bEnabled)
-            return;
-
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        if (m_nEngineDecelerateSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
-
-        m_bEnabled = true;
-        return;
-
-    case VEHICLE_SOUND_BOAT:
-    case VEHICLE_SOUND_TRAIN:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        if (m_bEnabled)
-            return;
-
-        if (m_settings.m_nEngineOffSoundBankId != -1 && m_settings.m_nEngineOffSoundBankId != 129)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
-
-        m_bEnabled = true;
-        return;
-
-    case VEHICLE_SOUND_HELI:
-    case VEHICLE_SOUND_NON_VEH:
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-
-        m_bEnabled = true;
-        return;
-
-    case VEHICLE_SOUND_PLANE:
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        if (m_bEnabled)
-            return;
-
-        if (m_settings.m_nEngineOffSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
-
-        m_bEnabled = true;
-        return;
-
-    case VEHICLE_SOUND_TRAILER:
-        m_nEngineAccelerateSoundBankId = m_settings.m_nEngineOnSoundBankId;
-        m_fGeneralVehicleSoundVolume = m_fGeneralVehicleSoundVolume - 1.5F;
-        if (m_bEnabled)
-            return;
-
-        m_nEngineDecelerateSoundBankId = m_settings.m_nEngineOffSoundBankId;
-        if (m_nEngineDecelerateSoundBankId != -1)
-            m_nEngineBankSlotId = RequestBankSlot(m_settings.m_nEngineOffSoundBankId);
-
-        m_bEnabled = true;
-        return;
-
-    default:
-        return;
-    }
-}
-
-// 0x4FB8C0
-void CAEVehicleAudioEntity::Terminate() {
-    if (!m_bEnabled)
-        return;
-
-    for (auto& engSound : m_aEngineSounds) {
-        if (engSound.m_pSound) {
-            engSound.m_pSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-            engSound.m_pSound->StopSound();
-            engSound.m_pSound = nullptr;
-        }
-    }
-
-    PlaySkidSound(-1, 1.0F, -100.0F);
-    PlayTrainBrakeSound(-1, 1.0F, -100.0F);
-
-    if (m_pSkidSoundMaybe) {
-        m_pSkidSoundMaybe->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-        m_pSkidSoundMaybe->StopSound();
-        m_pSkidSoundMaybe = nullptr;
-        m_nSkidSoundType = -1;
-    }
-
-    if (m_pRoadNoiseSound) {
-        m_pRoadNoiseSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-        m_pRoadNoiseSound->StopSound();
-        m_pRoadNoiseSound = nullptr;
-        m_nRoadNoiseSoundType = -1;
-    }
-
-    if (m_pFlatTyreSound) {
-        m_pFlatTyreSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-        m_pFlatTyreSound->StopSound();
-        m_pFlatTyreSound = nullptr;
-        m_nFlatTyreSoundType = -1;
-    }
-
-    if (m_pReverseGearSound) {
-        m_pReverseGearSound->SetIndividualEnvironment(eSoundEnvironment::SOUND_REQUEST_UPDATES, false);
-        m_pReverseGearSound->StopSound();
-        m_pReverseGearSound = nullptr;
-        m_nReverseGearSoundType = -1;
-    }
-
-    if (m_pHornTonSound) {
-        m_pHornTonSound->StopSoundAndForget();
-        m_pHornTonSound = nullptr;
-    }
-
-    if (m_pSirenSound) {
-        m_pSirenSound->StopSoundAndForget();
-        m_pSirenSound = nullptr;
-    }
-
-    if (m_pPoliceSirenSound) {
-        m_pPoliceSirenSound->StopSoundAndForget();
-        m_pPoliceSirenSound = nullptr;
-    }
-
-    const auto radioType = m_settings.m_nRadioType;
-    if (m_bPlayerDriver && (radioType == RADIO_CIVILIAN || radioType == RADIO_UNKNOWN || radioType == RADIO_EMERGENCY))
-        AudioEngine.StopRadio(&m_settings, false);
-
-    if (m_nEngineBankSlotId != -1) {
-        const auto usedSlot = m_nEngineBankSlotId - 7;
-        auto&      dummyEng = s_DummyEngineSlots[usedSlot];
-        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS && dummyEng.m_nBankId == m_nEngineDecelerateSoundBankId)
-            dummyEng.m_nUsageCount = std::max(0, dummyEng.m_nUsageCount - 1);
-
-        m_nEngineBankSlotId = -1;
-    }
-
-    m_nEngineDecelerateSoundBankId = -1;
-    m_nEngineAccelerateSoundBankId = -1;
-    m_pEntity = nullptr;
-    m_nEngineState = 0;
-
-    if (m_bPlayerDriver) {
-        m_bPlayerDriver = false;
-        s_pPlayerDriver = nullptr;
-    } else if (m_bPlayerPassenger) {
-        m_bPlayerPassenger = false;
-    } else {
-        m_bVehicleRadioPaused = false;
-        m_bEnabled = false;
-        return;
-    }
-
-    s_pPlayerAttachedForRadio = nullptr;
-    s_pVehicleAudioSettingsForRadio = nullptr;
-    m_bVehicleRadioPaused = false;
-    m_bEnabled = false;
 }
 
 CVector CAEVehicleAudioEntity::GetAircraftNearPosition() {
