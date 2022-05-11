@@ -392,13 +392,7 @@ void CAEVehicleAudioEntity::Terminate() {
     }
 
     if (m_bPlayerDriver) {
-        switch (m_settings.m_nRadioType) {
-        case RADIO_CIVILIAN:
-        case RADIO_UNKNOWN:
-        case RADIO_EMERGENCY:
-            AudioEngine.StopRadio(&m_settings, false); // inlined
-            break;
-        }
+        TurnOffRadioForVehicle();
     }
 
     if (m_nEngineBankSlotId != -1) {
@@ -427,8 +421,9 @@ void CAEVehicleAudioEntity::Terminate() {
         return;
     }
 
-    s_pPlayerAttachedForRadio = nullptr;
-    s_pVehicleAudioSettingsForRadio = nullptr;
+    // s_pPlayerAttachedForRadio = nullptr;
+    // s_pVehicleAudioSettingsForRadio = nullptr;
+
     m_bVehicleRadioPaused = false;
     m_bEnabled = false;
 }
@@ -503,12 +498,12 @@ int16 CAEVehicleAudioEntity::RequestBankSlot(int16 bankId) {
         return -1;
 
     for (auto i = 0; i < NUM_DUMMY_ENGINE_SLOTS; ++i) {
-        const auto iSlot = (s_NextDummyEngineSlot + i) % NUM_DUMMY_ENGINE_SLOTS;
-        auto& dummyEng = s_DummyEngineSlots[iSlot];
+        const auto slot = (s_NextDummyEngineSlot + i) % NUM_DUMMY_ENGINE_SLOTS;
+        auto& dummyEng = s_DummyEngineSlots[slot];
         if (dummyEng.m_nUsageCount > 0)
             continue;
 
-        freeSlot = iSlot;
+        freeSlot = slot;
         ++dummyEng.m_nUsageCount;
         s_NextDummyEngineSlot = (freeSlot + 1) % NUM_DUMMY_ENGINE_SLOTS;
         break;
@@ -821,8 +816,9 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
         }
 
         if (m_nEngineAccelerateSoundBankId != -1 && !AEAudioHardware.IsSoundBankLoaded(m_nEngineAccelerateSoundBankId, 40)) {
-            if (AESoundManager.AreSoundsPlayingInBankSlot(40))
+            if (AESoundManager.AreSoundsPlayingInBankSlot(40)) {
                 AESoundManager.CancelSoundsInBankSlot(40, false);
+            }
             AEAudioHardware.LoadSoundBank(m_nEngineAccelerateSoundBankId, 40);
         }
 
@@ -834,8 +830,9 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
         break;
     }
     case VEHICLE_SOUND_BICYCLE: {
-        if (AESoundManager.AreSoundsPlayingInBankSlot(40))
+        if (AESoundManager.AreSoundsPlayingInBankSlot(40)) {
             AESoundManager.CancelSoundsInBankSlot(40, false);
+        }
 
         for (auto i = 0; i < std::size(m_aEngineSounds); i++) {
             CancelVehicleEngineSound(i);
@@ -854,8 +851,9 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
         break;
     }
     case VEHICLE_SOUND_TRAIN: {
-        if (AESoundManager.AreSoundsPlayingInBankSlot(40))
+        if (AESoundManager.AreSoundsPlayingInBankSlot(40)) {
             AESoundManager.CancelSoundsInBankSlot(40, false);
+        }
 
         if (m_nEngineBankSlotId == -1)
             m_nEngineBankSlotId = DemandBankSlot(m_nEngineDecelerateSoundBankId);
@@ -885,12 +883,12 @@ void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
 
 // 0x4F5B20
 void CAEVehicleAudioEntity::TurnOnRadioForVehicle() {
-    s_pVehicleAudioSettingsForRadio = &m_settings;
     s_pPlayerAttachedForRadio = m_pEntity->AsVehicle()->m_pDriver;
+    s_pVehicleAudioSettingsForRadio = &m_settings;
     switch (m_settings.m_nRadioType) {
-    case 0:
-    case 1:
-    case 2: {
+    case RADIO_CIVILIAN:
+    case RADIO_SPECIAL:
+    case RADIO_UNKNOWN: {
         AudioEngine.StartRadio(&m_settings);
         break;
     }
@@ -899,16 +897,16 @@ void CAEVehicleAudioEntity::TurnOnRadioForVehicle() {
 
 // 0x4F5B60
 void CAEVehicleAudioEntity::TurnOffRadioForVehicle() {
-    s_pVehicleAudioSettingsForRadio = nullptr;
-    s_pPlayerAttachedForRadio = nullptr;
     switch (m_settings.m_nRadioType) {
     case RADIO_CIVILIAN:
     case RADIO_SPECIAL:
     case RADIO_UNKNOWN: {
-        AudioEngine.StopRadio(&m_settings, false); // inlined
+        AudioEngine.StopRadio(&m_settings, false);
         break;
     }
     }
+    s_pVehicleAudioSettingsForRadio = nullptr;
+    s_pPlayerAttachedForRadio = nullptr;
 }
 
 // 0x4F5BA0
@@ -1520,16 +1518,9 @@ void CAEVehicleAudioEntity::JustGotOutOfVehicleAsDriver() {
 // 0x4FD0B0
 void CAEVehicleAudioEntity::JustWreckedVehicle() {
     if (m_bPlayerDriver) {
-        switch (m_settings.m_nRadioType) {
-        case RADIO_CIVILIAN:
-        case RADIO_UNKNOWN:
-        case RADIO_EMERGENCY: {
-            AudioEngine.StopRadio(&m_settings, false); // inlined TurnOffRadioForVehicle
-            break;
-        }
-        }
-        s_pVehicleAudioSettingsForRadio = nullptr;
-        s_pPlayerAttachedForRadio = nullptr;
+        // FIX_BUGS? RADIO_EMERGENCY
+        // todo: NOTSA, they don't free s_pVehicleAudioSettingsForRadio and s_pPlayerAttachedForRadio
+        TurnOffRadioForVehicle();
     }
 
     switch (m_settings.m_nVehicleSoundType) {

@@ -30,10 +30,10 @@ enum eVehicleSoundType : int8 {
 };
 
 enum eRadioType : int8 {
-    RADIO_CIVILIAN  = 0x0,
-    RADIO_SPECIAL   = 0x1,
-    RADIO_UNKNOWN   = 0x2,
-    RADIO_EMERGENCY = 0x3,
+    RADIO_CIVILIAN  = 0,
+    RADIO_SPECIAL   = 1,
+    RADIO_UNKNOWN   = 2,
+    RADIO_EMERGENCY = 3,
     RADIO_DISABLED  = -1,
 };
 
@@ -238,12 +238,12 @@ public:
     void PlayerAboutToExitVehicleAsDriver();
     bool CopHeli();
     bool JustFinishedAccelerationLoop();
-    void PlaySkidSound(int16 soundType, float speed, float volume);
+    void PlaySkidSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void JustWreckedVehicle();
     CVector GetAircraftNearPosition();
     float GetFlyingMetalVolume(CPhysical* physical);
     void GetSirenState(bool& bSirenOrAlarm, bool& bHorn, cVehicleParams& params);
-    void PlayTrainBrakeSound(int16 soundType, float speed, float volume);
+    void PlayTrainBrakeSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void JustGotOutOfVehicleAsDriver();
 
     void InhibitCrzForTime(uint32);
