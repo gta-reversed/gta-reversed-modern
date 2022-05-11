@@ -337,11 +337,11 @@ public:
     bool UpdateGenericEngineSound(int16 index, float fVolume = 1.0f, float fSpeed = 1.0f);
     bool PlayGenericEngineSound(int16 index, int16 bank, int16 slotInBank,
                                 float fVolume = 1.0f, float fSpeed = 1.0f, float fSoundDistance = 1.0f,
-                                float fTimeScale = 1.0f, eSoundEnvironment individualEnvironment = eSoundEnvironment::SOUND_REQUEST_UPDATES, int16 playPos = 0);
+                                float fTimeScale = 1.0f, eSoundEnvironment individualEnvironment = SOUND_REQUEST_UPDATES, int16 playPos = 0);
 #undef PlaySound
     CAESound* PlaySound(int16 bank, int16 slotInBank,
                         float fVolume = 1.0f, float fSpeed = 1.0f, float fSoundDistance = 1.0f,
-                        float fTimeScale = 1.0f, eSoundEnvironment individualEnvironment = eSoundEnvironment::SOUND_REQUEST_UPDATES, int16 playPos = 0);
+                        float fTimeScale = 1.0f, eSoundEnvironment individualEnvironment = SOUND_REQUEST_UPDATES, int16 playPos = 0);
 
 private:
     friend void InjectHooksMain();
@@ -353,6 +353,10 @@ private:
 };
 VALIDATE_SIZE(CAEVehicleAudioEntity, 0x24C);
 
-// indexes = (Vehicles modelid - 400)
+// indexes = (Vehicles modelId - 400)
 static constexpr int32 NUM_VEH_AUDIO_SETTINGS = 232;
 extern tVehicleAudioSettings const (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS];
+
+// OG debug stuff
+static bool s_bVehicleDriveWheelSkidEnabled = true; // 0x8CBD80
+static bool s_bVehicleNonDriveWheelSkidValueEnabled = true; // 0x8CBD81

@@ -1017,10 +1017,9 @@ void CAEVehicleAudioEntity::UpdateGasPedalAudio(CVehicle* vehicle, int32 vehicle
 
 // 0x4F5F30
 float CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fSomeGasPedalAudioStuff, cTransmission& transmission, float fVelocity) {
-    /* useless
-    if (!*(bool*)0x8CBD80)
+    if (!s_bVehicleDriveWheelSkidEnabled) {
         return 0.0f;
-    */
+    }
 
     switch (wheelState) {
     case WHEEL_STATE_SPINNING: {
@@ -1043,8 +1042,7 @@ float CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue(CVehicle* vehicle, in
 
 // 0x4F6000
 float CAEVehicleAudioEntity::GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float fVelocity) {
-    static bool s_bUnknown = true; // 0x8CBD81
-    if (!s_bUnknown) {
+    if (!s_bVehicleNonDriveWheelSkidValueEnabled) {
         return 0.0f;
     }
 
@@ -1708,7 +1706,7 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     float fUnk = 0.0f;
     auto nWheels = 0;
 
-    switch (params.m_vehicleType) {
+    switch (params.m_nVehicleType) {
     case VEHICLE_TYPE_AUTOMOBILE: {
         nWheels = 4;
 
@@ -1744,10 +1742,8 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
             continue;
         if (aWheelTimers[i] == 0.0f)
             continue;
-        if (bAreRearWheelsNotSkidding)
-            if (bIsFrontWheel)
-                if (thisWheelState == WHEEL_STATE_SKIDDING)
-                    continue;
+        if (bAreRearWheelsNotSkidding && bIsFrontWheel && thisWheelState == WHEEL_STATE_SKIDDING)
+            continue;
 
         const auto dt = params.m_pTransmission->m_nDriveType;
         if (dt == '4' || dt == 'F' && bIsFrontWheel || dt == 'R' && !bIsFrontWheel) {
@@ -1758,7 +1754,7 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     }
 
     const auto StopSkidSound = [&] { PlaySkidSound(-1, 0.0f, 0.0f); };
-    if (fTotalSkidValue <= 0.0) {
+    if (fTotalSkidValue <= 0.0f) {
         StopSkidSound();
         return;
     }
@@ -1777,7 +1773,7 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
             fSpeed = 0.2f * fTotalSkidValue + 0.9f;
         } else if (IsSurfaceAudioEitherGravelWaterSand(params.m_pVehicle->m_nContactSurface)) {
             soundId = 8;
-            fBaseVolume = -9.0;
+            fBaseVolume = -9.0f;
             fSpeed = 0.2f * fTotalSkidValue + 0.9f;
         } else {
             soundId = 24;
