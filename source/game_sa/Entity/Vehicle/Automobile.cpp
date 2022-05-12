@@ -341,7 +341,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
 
     // 0x6B10B5
     m_fRotationBalance        = 0.0f;
-    m_fAircraftGoToHeading = 0.0f;
+    m_fAircraftGoToHeading    = 0.0f;
     m_nBusDoorTimerEnd        = 0;
     m_nBusDoorTimerStart      = 0;
     m_fSteerAngle             = 0.0f;
@@ -416,18 +416,8 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
 
 // 0x6A61E0
 CAutomobile::~CAutomobile() {
-    if (m_pFireParticle) {
-        m_pFireParticle->Kill();
-        m_pFireParticle = nullptr;
-    }
-
-    for (auto& fx : m_exhaustNitroFxSystem) {
-        if (fx) {
-            fx->Kill();
-            fx = nullptr;
-        }
-    }
-
+    FxSystem_c::SafeKillAndClear(m_pFireParticle);
+    StopNitroEffect();
     m_vehicleAudio.Terminate();
 }
 
@@ -622,14 +612,8 @@ void CAutomobile::ProcessControl()
     }
     if (handlingFlags.bNosInst) {
         NitrousControl(0);
-    }
-    else {
-        for (auto& fx : m_exhaustNitroFxSystem) {
-            if (fx) {
-                fx->Kill();
-                fx = nullptr;
-            }
-        }
+    } else {
+        StopNitroEffect();
     }
 
     if (FindPlayerVehicle() == this && CPad::GetPad()->CarGunJustDown())
@@ -3776,77 +3760,82 @@ void CAutomobile::DoNitroEffect(float power)
 // 0x6A3E60
 void CAutomobile::StopNitroEffect() {
     for (auto&& fx : m_exhaustNitroFxSystem) {
-        if (fx) {
-            fx->Kill();
-            fx = nullptr;
-        }
+        FxSystem_c::SafeKillAndClear(fx);
     }
 }
 
 // 0x6A3EA0
 void CAutomobile::NitrousControl(int8 boost)
 {
-    if (boost != 0) {
-        if (boost > 0) {
-            handlingFlags.bNosInst = true;
-            m_fTireTemperature = 1.f;
-            m_nNitroBoosts = boost;
-        } else if (boost < 0) {
-            handlingFlags.bNosInst = false;
-            m_fTireTemperature = 0.f;
-            m_nNitroBoosts = 0;
-        }
+    CPad* pad = nullptr;
+    if (m_nStatus == STATUS_PLAYER && m_pDriver->IsPlayer()) {
+        pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
+    }
+
+    if (boost > 0) {
+        handlingFlags.bNosInst = true;
+        m_fTireTemperature = 1.0f;
+        m_nNitroBoosts = boost;
         StopNitroEffect();
-    } else {
-        // m_bIsVisible || m_bWasPostponed || m_bIsInSafePosition || m_bIsStuck || m_bHasContacted
-        bool flag = m_nFlags & 0xf8;
+        return;
+    }
 
-        CPad* driverPad = nullptr;
-        if (!flag && m_pDriver->IsPlayer())
-            driverPad = m_pDriver->AsPlayer()->GetPadFromPlayer();
+    if (boost < 0) {
+        handlingFlags.bNosInst = false;
+        m_fTireTemperature = 1.0f; // todo: FIX_BUGS: 0.0f?
+        m_nNitroBoosts = 0;
+        StopNitroEffect();
+        return;
+    }
 
-        if (m_fTireTemperature == 1.f && m_nNitroBoosts > 0) {
-            if (m_nStatus == STATUS_PHYSICS) {
-                if (   !driverPad
-                    || !driverPad->GetCarGunFired()
-                    || driverPad->GetLookLeft()
-                    || driverPad->GetLookRight()
-                    || driverPad->GetLookBehindForCar()
-                ) {
-                    StopNitroEffect();
-                    return;
-                }
-            }
-
-            m_fTireTemperature = -0.000001f; // Just set some small negative value
-
-            if (m_nNitroBoosts >= 101) {
+    if (m_fTireTemperature == 1.0f && m_nNitroBoosts > 0) {
+        if (m_nStatus != STATUS_PHYSICS) {
+            if (   !pad
+                || !pad->GetCarGunFired()
+                || pad->GetLookLeft()
+                || pad->GetLookRight()
+                || pad->GetLookBehindForCar()
+            ) {
                 StopNitroEffect();
                 return;
             }
+        }
 
-            m_nNitroBoosts -= 1;
+        m_fTireTemperature = -0.000001f; // Just set some small negative value
+
+        if (m_nNitroBoosts >= 101) { // todo: magic number
             StopNitroEffect();
             return;
         }
 
-        if (m_fTireTemperature >= 0.f) {
-            m_fTireTemperature = std::min(1.f, m_fTireTemperature + std::max(0.25f, 1.f - m_fGasPedal) * (CTimer::GetTimeStep() / 100.f));
-            DoNitroEffect((1.f - m_fTireTemperature) / 2.f);
-        } else {
-            m_fTireTemperature = m_fTireTemperature - CTimer::GetTimeStep() / 100.f;
-            if (m_fTireTemperature < -1.f) {
-                m_fTireTemperature = 0.000001f; // Just set some small positive value.
-                if (!m_nNitroBoosts) {
-                    handlingFlags.bNosInst = false;
-                    RemoveUpgrade(eVehicleUpgradePosn::UPGRADE_NITRO);
-                    m_fTireTemperature = 1.f;
-                }
-            }
+        m_nNitroBoosts -= 1;
+        StopNitroEffect();
+        return;
+    }
 
-            DoNitroEffect(m_fGasPedal <= 0.f ? 0.5f : m_fGasPedal * 0.5f + 0.5f);
+    if (m_fTireTemperature >= 0.f) {
+        const auto a = std::max(0.25f, 1.f - m_fGasPedal);
+        const auto b = a * (CTimer::GetTimeStep() / 100.f) + m_fTireTemperature;
+        m_fTireTemperature = std::min(1.0f, b);
+        const auto power = (1.0f - m_fTireTemperature) / 2.f;
+        DoNitroEffect(power);
+        return;
+    }
+
+    m_fTireTemperature -= CTimer ::GetTimeStep() / 1000.f;
+    if (m_fTireTemperature < -1.f) {
+        m_fTireTemperature = 0.000001f; // Just set some small positive value.
+        if (!m_nNitroBoosts) {
+            handlingFlags.bNosInst = false;
+            RemoveUpgrade(eVehicleUpgradePosn::UPGRADE_NITRO);
+            m_fTireTemperature = 1.0f;
         }
     }
+
+    const auto power = m_fGasPedal <= 0.0f
+                           ? 0.5f
+                           : std::abs(m_fGasPedal) / 2.0f + 0.5f;
+    DoNitroEffect(power);
 }
 
 // 0x6A40F0
