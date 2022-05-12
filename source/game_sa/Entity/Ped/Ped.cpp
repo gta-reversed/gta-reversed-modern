@@ -368,7 +368,7 @@ void CPed::operator delete(void* data) {
 * @addr 0x5E4A00
 */
 void CPed::SetMoveAnim() {
-    if (!IsAlive() || bIsDucking || m_pAttachedTo) {
+    if (CanUseTorsoWhenLooking() || m_pAttachedTo) {
         return;
     }
 
@@ -3556,6 +3556,7 @@ void CPed::RemoveLighting(bool bRemove) {
 * @addr 0x5E7B70
 */
 void CPed::FlagToDestroyWhenNextProcessed() {
+    m_bRemoveFromWorld = true;
     if (!bInVehicle) {
         return;
     }
@@ -3575,7 +3576,7 @@ void CPed::FlagToDestroyWhenNextProcessed() {
     bInVehicle = false;
 
     if (IsVehiclePointerValid(m_pVehicle)) {
-        ClearReference(m_pVehicle);
+        SafeCleanUpRef(m_pVehicle);
     }
     m_pVehicle = nullptr;
 
