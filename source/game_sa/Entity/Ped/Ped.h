@@ -404,7 +404,7 @@ public:
     void SetMoveAnimSpeed(CAnimBlendAssociation* association);
     void StopNonPartialAnims();
     void RestartNonPartialAnims();
-    bool CanUseTorsoWhenLooking();
+    bool CanUseTorsoWhenLooking() const;
     void SetLookFlag(float lookHeading, bool likeUnused, bool arg2);
     void SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2);
     void SetAimFlag(CEntity* aimingTo);
@@ -581,7 +581,7 @@ private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
     auto Destructor() { this->CPed::~CPed(); return this; }
-    void SetModelIndex_Reversed(int32 model) { CPed::SetModelIndex(model); }
+    void SetModelIndex_Reversed(uint32 model) { CPed::SetModelIndex(model); }
     void DeleteRwObject_Reversed() { CPed::DeleteRwObject(); }
     void Teleport_Reversed(CVector dest, bool resetRot) { CPed::Teleport(dest, resetRot); }
     void PreRender_Reversed() { CPed::PreRender(); }

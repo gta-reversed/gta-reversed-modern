@@ -722,7 +722,7 @@ void CPed::RestartNonPartialAnims() {
 /*!
 * @addr 0x5DED90
 */
-bool CPed::CanUseTorsoWhenLooking() {
+bool CPed::CanUseTorsoWhenLooking() const {
     switch (m_nPedState) {
     case PEDSTATE_DRIVING:
     case PEDSTATE_DRAGGED_FROM_CAR:
@@ -1167,7 +1167,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 void CPed::ResetGunFlashAlpha() {
     if (m_pGunflashObject) {
         if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
-            RpAtomicSetFlags(atomic, rpATOMICRENDER);
+            RpAtomicSetFlags(atomic, 0);
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         }
     }
@@ -3321,38 +3321,38 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     RpAnimBlendClumpInit(m_pRwClump);
     RpAnimBlendClumpFillFrameArray(m_pRwClump, m_apBones.data());
 
-    auto& mi = *(CPedModelInfo*)GetModelInfo();
+    auto* mi = GetModelInfo()->AsPedModelInfoPtr();
 
-    SetPedStats(mi.m_nStatType);
+    SetPedStats(mi->m_nStatType);
     RestoreHeadingRate();
 
     SetPedDefaultDecisionMaker();
 
     // Set random money count
-    const auto GetRandomMoneyCount = [this] {
+    const auto GetRandomMoneyCount = [this]() -> int16 {
         if (CGeneral::GetRandomNumberInRange(0.f, 100.f) < 3.f) { // Moved up here
             return 400;
         } else if (CPopCycle::IsPedInGroupTheseGroups(m_nModelIndex, { POPCYCLE_GROUP_BUSINESS, POPCYCLE_GROUP_CASUAL_RICH })) {
-            return rand() % 50 + 20;
+            return CGeneral::GetRandomNumber() % 50 + 20;
         } else {
-            return rand() % 25;
+            return CGeneral::GetRandomNumber() % 25;
         }
     };
     m_nMoneyCount = GetRandomMoneyCount();
 
-    m_nAnimGroup = mi.m_nAnimType;
+    m_nAnimGroup = mi->m_nAnimType;
     CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, ANIM_ID_IDLE);
 
-    if (CanUseTorsoWhenLooking()) {
+    if (!CanUseTorsoWhenLooking()) {
         m_pedIK.bTorsoUsed = true;
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
+    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
 
     // Create hit col model
-    if (!mi.m_pHitColModel) {
-        mi.CreateHitColModelSkinned(m_pRwClump);
+    if (!mi->m_pHitColModel) {
+        mi->CreateHitColModelSkinned(m_pRwClump);
     }
 
     // And finally update our rph anim
@@ -3390,6 +3390,7 @@ void CPed::Teleport(CVector destination, bool resetRotation) {
     SetPosn(destination);
     bIsStanding = false;
     ClearReference(m_pDamageEntity);
+    // todo: m_pDamageEntity = nullptr;
     CWorld::Add(this);
 
     m_vecMoveSpeed.Reset();
