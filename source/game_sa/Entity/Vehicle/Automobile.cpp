@@ -2197,10 +2197,11 @@ void CAutomobile::SetupDamageAfterLoad()
 void CAutomobile::DoBurstAndSoftGroundRatios()
 {
     const auto& mi = *GetVehicleModelInfo();
-    const auto speedToFwdRatio = DotProduct(m_vecMoveSpeed, m_matrix->GetForward()); // Remember: Dot product is 0 when the two vectors are perpendicular
+    const auto speedToFwdRatio = std::fabs(DotProduct(m_vecMoveSpeed, m_matrix->GetForward())); // Remember: Dot product is 0 when the two vectors are perpendicular
 
-    for (auto i = 0u; i < 4u; i++) {
+    for (auto i = 0u; i < 4; i++) {
         const auto& wheelCP = m_wheelColPoint[i];
+        auto& wheelCompression = m_fWheelsSuspensionCompression[i];
 
         const auto GetRemainingSuspensionCompression = [&, i] {
             return (m_aSuspensionLineLength[i] - m_aSuspensionSpringLength[i]) / m_aSuspensionLineLength[i];
@@ -2208,23 +2209,21 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
 
         switch (m_damageManager.GetWheelStatus((eCarWheel)i)) {
         case eCarWheelStatus::WHEEL_STATUS_MISSING:
-            m_fWheelsSuspensionCompression[i] = 1.f;
+            wheelCompression = 1.f;
             break;
         case eCarWheelStatus::WHEEL_STATUS_BURST: {
             // The more opposite the speed is to the forward vector the bigger chance
             // The highest chance is when the speed is opposite to forward (ie.: It's backwards)
-            if ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * (speedToFwdRatio * 40.f + 98.f) < 100.f) {
-                m_fWheelsSuspensionCompression[i] =
-                    std::min(1.f, m_fWheelsSuspensionCompression[i] + GetRemainingSuspensionCompression() / 4.f);
+            const auto val = (float)CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL * (speedToFwdRatio * 40.f + 98.f); // todo: rename, use GetRandomNumberInRange
+            if (val < 100.f) {
+                const auto compression = wheelCompression + GetRemainingSuspensionCompression() / 4.f;
+                wheelCompression = std::min(1.f, compression);
             }
             break;
         }
         default: {
-            if (m_fWheelsSuspensionCompression[i] >= 1.f) {
-                break;
-            }
-
-            if (   g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != eAdhesionGroup::ADHESION_GROUP_SAND
+            if (   wheelCompression >= 1.f
+                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != eAdhesionGroup::ADHESION_GROUP_SAND
                 || ModelIndices::IsRhino(m_nModelIndex)
             ) {
                 if (wheelCP.m_nSurfaceTypeB == eSurfaceType::SURFACE_RAILTRACK) {
@@ -2242,18 +2241,19 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
                     if (   m_wheelSpeed[i] > 0.f && timeSpeedRotFactorFract < wheelRotFactorFract
                         || m_wheelSpeed[i] < 0.f && timeSpeedRotFactorFract > wheelRotFactorFract
                     ) {
-                        m_fWheelsSuspensionCompression[i] =
-                            std::max(0.2f, m_fWheelsSuspensionCompression[i] - GetRemainingSuspensionCompression() * 0.3f);
+                        const auto compression = wheelCompression - GetRemainingSuspensionCompression() * 0.3f;
+                        wheelCompression = std::max(0.2f, compression);
                     }
                 }
             } else {
                 const auto offroadFactor = handlingFlags.bOffroadAbility2 ? 0.15f :
                                            handlingFlags.bOffroadAbility ? 0.2f : 0.3f;
 
-                const auto adhesionFactor = std::max(0.4f, 1.f - speedToFwdRatio / 0.3f * 0.7f - CWeather::WetRoads * 0.7f);
+                auto adhesionFactor = 1.0f - speedToFwdRatio / 0.3f * 0.7f - CWeather::WetRoads * 0.7f;
+                adhesionFactor = std::max(0.4f, adhesionFactor);
 
-                m_fWheelsSuspensionCompression[i] =
-                    std::min(1.f, m_fWheelsSuspensionCompression[i] + GetRemainingSuspensionCompression() * adhesionFactor);
+                const auto compression = offroadFactor * GetRemainingSuspensionCompression() * adhesionFactor + wheelCompression;
+                wheelCompression = std::min(compression, 1.0f);
             }
             break;
         }
