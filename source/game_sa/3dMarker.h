@@ -65,7 +65,7 @@ public:
         m_bIsUsed                  = false;
         m_bMustBeRenderedThisFrame = false;
         m_nIdentifier              = 0;
-        m_colour                   = CRGBA(-1, -1, -1, -1);
+        m_colour                   = CRGBA(255, 255, 255, 255);
         m_nPulsePeriod             = 1024;
         m_nRotateRate              = 5;
         m_nStartTime               = 0;

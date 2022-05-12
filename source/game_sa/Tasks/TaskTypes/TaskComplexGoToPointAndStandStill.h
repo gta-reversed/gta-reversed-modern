@@ -24,6 +24,8 @@ public:
     char _pad_25[3];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL;
+
     CTaskComplexGoToPointAndStandStill(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, bool bUnknown, bool bGoToPoint);
     ~CTaskComplexGoToPointAndStandStill() override;
 

@@ -33,6 +33,11 @@ void CAEWeaponAudioEntity::Initialise() {
         AEAudioHardware.LoadSoundBank(143, 5);
 }
 
+// 0x4E6AA0
+void CAEWeaponAudioEntity::Initialise(CPed* ped) {
+    plugin::CallMethod<0x4E6AA0>(this, ped);
+}
+
 void CAEWeaponAudioEntity::AddAudioEvent(int32 audioEventId) {
     plugin::CallMethod<0x4E69F0, CAEWeaponAudioEntity*, int32>(this, audioEventId);
 }
@@ -259,7 +264,8 @@ void CAEWeaponAudioEntity::InjectHooks() {
 
     // RH_ScopedInstall(Constructor, 0x5DE990);
     // RH_ScopedInstall(Destructor, 0x507560);
-    RH_ScopedInstall(Initialise, 0x503450);
+    RH_ScopedOverloadedInstall(Initialise, "void", 0x503450, void(CAEWeaponAudioEntity::*)());
+    //RH_ScopedOverloadedInstall(Initialise, "CPed*", 0x4E6AA0, void(CAEWeaponAudioEntity::*)(CPed*));
     RH_ScopedInstall(Reset, 0x503490);
     // RH_ScopedInstall(Terminate, 0x503480);
     RH_ScopedInstall(WeaponFire, 0x504F80);

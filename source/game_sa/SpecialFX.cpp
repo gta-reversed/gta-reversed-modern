@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "SpecialFX.h"
+#include "3dMarkers.h"
 
 extern RwTexture*& gpFinishFlagTex;
 

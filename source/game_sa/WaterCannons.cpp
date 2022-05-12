@@ -48,7 +48,7 @@ void CWaterCannons::UpdateOne(uint32 vehicle, CVector* start, CVector* end) {
 void CWaterCannons::Update() {
     int16 index = 0;
     for (auto& cannon : aCannons) {
-        cannon.m_audio.Service();
+        cannon.m_Audio.Service();
         if (cannon.m_nId > 0) {
             cannon.Update_OncePerFrame(index);
         }

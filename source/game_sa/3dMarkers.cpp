@@ -125,7 +125,7 @@ void C3dMarkers::Render() {
 // Returns slot index; -1 if not found
 // 0x721120
 int32 C3dMarkers::DirectionArrowFindFirstFreeSlot() {
-    for (const auto& [index, arrow] : enumerate(ms_directionArrows)) {
+    for (const auto& [index, arrow] : notsa::enumerate(ms_directionArrows)) {
         if (!arrow.m_bIsUsed) {
             return index;
         }
@@ -301,7 +301,7 @@ void C3dMarkers::User3dMarkerDeleteAll() {
 // Returns slot index; -1 if not found
 // 0x720FB0
 int32 C3dMarkers::User3dMarkerFindFirstFreeSlot() {
-    for (const auto& [index, marker] : enumerate(ms_user3dMarkers)) {
+    for (const auto& [index, marker] : notsa::enumerate(ms_user3dMarkers)) {
         if (!marker.m_bIsUsed) {
             return index;
         }

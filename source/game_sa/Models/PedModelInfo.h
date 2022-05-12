@@ -19,19 +19,19 @@ struct tPedColNodeInfo {
 
 class CPedModelInfo : public CClumpModelInfo {
 public:
-    int32      m_nAnimType;
-    ePedType   m_nPedType;
-    ePedStats  m_nStatType;
-    uint16     m_nCarsCanDriveMask;
-    uint16     m_nPedFlags;
-    CColModel* m_pHitColModel;
-    uint8      m_nRadio1;
-    uint8      m_nRadio2;
-    uint8      m_nRace;
-    int16      m_nPedAudioType;
-    int16      m_nVoiceMin; // Also called voice1
-    int16      m_nVoiceMax; // Also called voice2
-    int16      m_nVoiceId;  // In `LoadPedObject` this is set to be the same as `m_nVoiceMin` (Which doesn't mean it will always be the same)
+    AssocGroupId m_nAnimType;
+    ePedType     m_nPedType;
+    ePedStats    m_nStatType;
+    uint16       m_nCarsCanDriveMask;
+    uint16       m_nPedFlags;
+    CColModel*   m_pHitColModel;
+    eRadioID     m_nRadio1;
+    eRadioID     m_nRadio2;
+    uint8        m_nRace;
+    int16        m_nPedAudioType;
+    int16        m_nVoiceMin; // Also called voice1
+    int16        m_nVoiceMax; // Also called voice2
+    int16        m_nVoiceId;  // In `LoadPedObject` this is set to be the same as `m_nVoiceMin` (Which doesn't mean it will always be the same)
 
     static constexpr int32 NUM_PED_NAME_ID_ASSOC = 13;
     static constexpr int32 NUM_PED_COL_NODE_INFOS = 12;

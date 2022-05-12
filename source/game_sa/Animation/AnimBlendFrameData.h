@@ -28,7 +28,7 @@ public:
     char                     pad[3];
     CVector                  m_vecOffset;
     RpHAnimBlendInterpFrame* m_pIFrame;
-    uint32                   m_nNodeId;
+    uint32                   m_nNodeId; // In case of peds it's ePedBone (NOTE: I might be wrong, see `IsPedHeadAbovePos`)
 };
 
 VALIDATE_SIZE(AnimBlendFrameData, 0x18);

@@ -22,6 +22,8 @@ public:
     uint8                         m_nNumGettingInToClear;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER;
+
     CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* utility);
     ~CTaskSimpleCarSetPedInAsPassenger();
 

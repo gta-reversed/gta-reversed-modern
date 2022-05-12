@@ -81,6 +81,7 @@ public:
 public:
     static void InjectHooks();
 
+
     void RemoveCollisionVolumes();
     void Copy(const CCollisionData& src);
     void CalculateTrianglePlanes();
@@ -101,7 +102,6 @@ public:
     auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
 
     void AllocateLines(uint32 num);
-
 private:
     // HELPERS
     template <typename T> T* GetPointerToColArray(uint32 byteOffset) {

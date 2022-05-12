@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <execution>
+
 #define INVALID_POOL_SLOT (-1)
 
 /*
@@ -213,14 +215,12 @@ public:
         return GetAt(GetIndexFromRef(ref));
     }
 
-    // 0x54F6B0
-    auto GetNoOfUsedSpaces() {
-        int32 counter = 0;
-        for (auto i = 0; i < m_nSize; ++i) {
-            if (!IsFreeSlotAtIndex(i))
-                ++counter;
-        }
-        return counter;
+    /*!
+    * @addr 0x54F6B0
+    * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
+    */
+    size_t GetNoOfUsedSpaces() {
+        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {
@@ -264,6 +264,15 @@ public:
         const auto idx = ref >> 8;
         assert(IsIndexInBounds(idx));
         return idx;
+    }
+
+    // NOTSA - Get all valid objects - Useful for iteration
+    template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
+    auto GetAllValid() {
+        using namespace std;
+        return span{ m_pObjects, (size_t)m_nSize}
+             | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
+             | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
     }
 };
 

@@ -68,7 +68,7 @@ class CAERadioTrackManager {
 public:
     bool           m_bInitialised;
     bool           m_bDisplayStationName;
-    char           field_2;
+    char           m_prev;
     bool           m_bEnabledInPauseMode;
     bool           m_bBassEnhance;
     bool           m_bPauseMode;

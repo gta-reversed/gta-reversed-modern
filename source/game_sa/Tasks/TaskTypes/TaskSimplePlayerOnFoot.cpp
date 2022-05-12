@@ -83,10 +83,7 @@ bool CTaskSimplePlayerOnFoot::MakeAbortable(CPed* ped, eAbortPriority priority, 
                 ) {
                     TheCamera.ClearPlayerWeaponMode();
                     CWeaponEffects::ClearCrossHair(ped->m_nPedType);
-                    if (ped->m_pTargetedObject) {
-                        ped->m_pTargetedObject->CleanUpOldReference(&ped->m_pTargetedObject);
-                    }
-                    ped->m_pTargetedObject = nullptr;
+                    CEntity::ClearReference(ped->m_pTargetedObject);
                 }
             }
         }
@@ -315,7 +312,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
                 CPedDamageResponseCalculator damageCalculator(player, 0.0f, activeWeaponType, PED_PIECE_TORSO, false);
                 CEventDamage eventDamage(player, CTimer::GetTimeInMS(), activeWeaponType, PED_PIECE_TORSO, 0, false, targetEntity->bInVehicle);
                 if (eventDamage.AffectsPed(targetEntity)) {
-                    damageCalculator.ComputeDamageResponse(targetEntity, &eventDamage.m_damageResponse, false);
+                    damageCalculator.ComputeDamageResponse(targetEntity, eventDamage.m_damageResponse, false);
                     targetEntity->GetEventGroup().Add(&eventDamage, false);
                     CCrime::ReportCrime(eCrimeType::CRIME_SEALTH_KILL_PED_WITH_KNIFE, targetEntity, player);
                     player->m_weaponAudio.AddAudioEvent(AE_WEAPON_STEALTH_KILL);
@@ -635,7 +632,7 @@ PED_WEAPON_AIMING_CODE:
                     CTask* activePrimaryTask = intelligence->GetActivePrimaryTask();
                     if (!activePrimaryTask || activePrimaryTask->GetTaskType() != TASK_COMPLEX_REACT_TO_GUN_AIMED_AT) {
                         if (activeWeapon->m_nType != WEAPON_PISTOL_SILENCED) {
-                            player->Say(176, 0, 1.0f, 0, 0, 0);
+                            player->Say(176);
                         }
                         CPedGroup* pedGroup = CPedGroups::GetPedsGroup(targetedEntity);
                         if (pedGroup) {
@@ -789,7 +786,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
                 randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
             } while (gLastRandomNumberForIdleAnimationID == randomNumber);
 
-            constexpr struct {
+            static constexpr struct {
                 AnimationId  animId;
                 AssocGroupId assoc;
             } animations[] = {
@@ -937,7 +934,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         player->GetIntelligence()->ClearTaskDuckSecondary();
         auto useGunTask = player->GetIntelligence()->GetTaskUseGun();
         if (!useGunTask || useGunTask->m_pWeaponInfo->flags.bAimWithArm) {
-            int32 pedMoveState = PEDMOVE_NONE;
+            auto pedMoveState = PEDMOVE_NONE;
             if (pad->GetSprint()) {
                 if (pedMoveBlendRatio <= 0.5f) {
                     return;
@@ -1112,8 +1109,8 @@ void CTaskSimplePlayerOnFoot::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x685750);
     RH_ScopedInstall(Destructor, 0x6857D0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x688810);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6857E0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x688810);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6857E0);
     // RH_ScopedInstall(ProcessPlayerWeapon, 0x6859A0);
     RH_ScopedInstall(PlayIdleAnimations, 0x6872C0);
     RH_ScopedInstall(PlayerControlZeldaWeapon, 0x687C20);

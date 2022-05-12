@@ -14,7 +14,6 @@ public:
     int32  m_nInterval;
     bool   m_bStarted;
     bool   m_bStopped;
-    char   _pad[2];
 
 public:
     static void InjectHooks();
@@ -33,10 +32,10 @@ public:
         m_bStopped = false;
     }
 
-    inline bool Start(int32 time) {
-        if (time >= 0) {
+    inline bool Start(int32 interval) {
+        if (interval >= 0) {
             m_nStartTime = CTimer::GetTimeInMS();
-            m_nInterval = time;
+            m_nInterval = interval;
             m_bStarted = true;
             return true;
         }

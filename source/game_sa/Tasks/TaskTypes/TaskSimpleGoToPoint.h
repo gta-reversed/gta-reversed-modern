@@ -17,6 +17,8 @@ public:
     CVector m_vecLastPedPos;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GO_TO_POINT;
+
     CTaskSimpleGoToPoint(int32 moveState, const CVector& targetPoint, float fRadius, bool bMoveTowardsTargetPoint, bool a6);
     ~CTaskSimpleGoToPoint() override = default;
 

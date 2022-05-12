@@ -114,7 +114,7 @@ class CControllerConfigManager {
 public:
     char              field_0;
     char              field_1;
-    char              field_2;
+    char              m_prev;
     char              field_3;
     DIJOYSTATE2       m_prevPadState;
     DIJOYSTATE2       m_currPadState;
@@ -132,12 +132,12 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
-    static void LoadSettings(FILE* file);
-    static void SaveSettings(FILE* file);
+    bool LoadSettings(FILE* file);
+    void SaveSettings(FILE* file);
 
     void InitDefaultControlConfiguration();
     void InitialiseControllerActionNameArray();
-    static void ReInitControls();
+    void ReinitControls();
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);

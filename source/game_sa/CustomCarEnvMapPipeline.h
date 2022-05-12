@@ -72,11 +72,11 @@ public:
 
     static int32 CustomPipeRenderCB(RwResEntry* atomic, void* object, uint8 flags1, uint32 flags2);
     static RxPipeline* CreateCustomOpenGLObjPipe();
-    static char CreatePipe();
+    static bool CreatePipe();
     static void DestroyPipe();
     static void SetFxEnvTexture(RpMaterial* material, RwTexture* texture);
-    static char RegisterPlugin();
+    static bool RegisterPlugin();
     static RpMaterial* CustomPipeMaterialSetup(RpMaterial* arg0, void* arg1);
-    static RpAtomic* CustomPipeAtomicSetup(RpAtomic* arg0);
+    static RpAtomic* CustomPipeAtomicSetup(RpAtomic* atomic);
     static RpAtomic* CustomCarPipeAtomicSetupCB(RpAtomic* atomic, void* data);
 };

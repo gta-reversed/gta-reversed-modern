@@ -9,6 +9,7 @@
 #include <imgui_internal.h>
 
 #include <Windows.h>
+#include <extensions/ScriptCommands.h>
 
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
 #include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
@@ -24,6 +25,8 @@
 #include "toolsmenu\DebugModules\FXDebugModule.h"
 #include "toolsmenu\DebugModules\C3dMarkersDebugModule.h"
 #include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
+
+#include "TaskComplexUseGoggles.h"
 
 bool CDebugMenu::m_imguiInitialised = false;
 bool CDebugMenu::m_showMenu = false;
@@ -71,7 +74,7 @@ void CDebugMenu::LoadMouseSprite() {
         CTxdStore::AddRef(txd);
         CTxdStore::PushCurrentTxd();
         CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture((char*)"mouse", (char*)"mousea");
+        m_mouseSprite.SetTexture("mouse", "mousea");
     } else {
         printf("Failed to load fronten_pc.txd\n");
     }
@@ -122,14 +125,14 @@ void CDebugMenu::ImguiInputUpdate() {
     };
 
     const auto UpdateMouse = []() {
-        CPad* pad = CPad::GetPad(0);
+        CPad* pad = CPad::GetPad();
         pad->DisablePlayerControls = true;
 
         m_MousePos.x += CPad::NewMouseControllerState.X;
         m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-        m_MousePos.x = clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
-        m_MousePos.y = clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
+        m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
+        m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
 
         io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
 
@@ -183,8 +186,13 @@ void CDebugMenu::ImGuiDrawMouse() {
     if (!m_showMenu || !m_mouseSprite.m_pTexture)
         return;
 
-    CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
-    m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
+    m_mouseSprite.Draw(
+        io->MousePos.x,
+        io->MousePos.y,
+        FrontEndMenuManager.StretchX(12.0f),
+        FrontEndMenuManager.StretchY(12.0f),
+        { 255, 255, 255, 255 }
+    );
 }
 
 bool showPlayerInfo;
@@ -311,6 +319,8 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
                 ImGui::EndTabItem();
             }
             if (ImGui::BeginTabItem("Other")) {
+                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
+                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
                 ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
                 ImGui::Checkbox("Show Player Information", &showPlayerInfo);
                 ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
@@ -328,26 +338,37 @@ void CDebugMenu::ImguiDisplayPlayerInfo() {
 }
 
 static void DebugCode() {
+    CPad* pad = CPad::GetPad();
+
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    CPad* pad = CPad::GetPad(0);
-    if (pad->IsStandardKeyJustDown('1')) {
-        printf("");
+    if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
-    if (pad->IsStandardKeyJustDown('2')) {
-        printf("");
+    if (pad->IsStandardKeyJustPressed('2')) {
         CCheat::MoneyArmourHealthCheat();
     }
-    if (pad->IsStandardKeyJustDown('4')) {
-        printf("");
-        PedDebugModule::SpawnRandomPed();
+    if (pad->IsStandardKeyJustPressed('3')) {
+        CCheat::VehicleCheat(MODEL_INFERNUS);
+    }
+
+    if (pad->IsStandardKeyJustPressed('4')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
+    }
+    if (pad->IsStandardKeyJustPressed('5')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
+    }
+    if (pad->IsStandardKeyJustPressed('6')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+    }
+    if (pad->IsStandardKeyJustPressed('7')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
 }
 
 void CDebugMenu::ImguiDrawLoop() {
-    CPad* pad = CPad::GetPad(0);
+    CPad* pad = CPad::GetPad();
     // CTRL + M or F7
     if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
         m_showMenu = !m_showMenu;
@@ -357,7 +378,7 @@ void CDebugMenu::ImguiDrawLoop() {
     DebugCode();
     ReversibleHooks::CheckAll();
 
-    io->DeltaTime = CTimer::GetTimeStep() * 0.02f;
+    io->DeltaTime = CTimer::GetTimeStepInSeconds();
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
