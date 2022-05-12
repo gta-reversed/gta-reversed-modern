@@ -161,7 +161,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     }
 
     field_804 = 20.0f;
-    m_fSomeGasPedalStuff = 0.0f;
+    m_fGasPedalAudio = 0.0f;
     m_fIntertiaValue1 = 0.0f;
     m_fIntertiaValue2 = 0.0f;
 
@@ -348,7 +348,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     m_fGasPedal               = 0.0f;
     m_fBreakPedal             = 0.0f;
     m_pExplosionVictim        = nullptr;
-    m_fSomeGasPedalStuff      = 0.0f;
+    m_fGasPedalAudio      = 0.0f;
     m_fMoveDirection          = 0.0f;
     m_wMiscComponentAngle     = 0;
     m_wMiscComponentAnglePrev = 0;

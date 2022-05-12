@@ -111,7 +111,7 @@ public:
     uint8 m_nWheelsOnGround;
     uint8 m_wheelsOnGrounPrev;
     char  field_963;
-    float m_fSomeGasPedalStuff;
+    float m_fGasPedalAudio;
 
     std::array<tWheelState, 4> m_aWheelState;
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;

@@ -82,7 +82,7 @@ public:
     bool          m_bPedLeftHandFixed;
     bool          m_bPedRightHandFixed;
     char          field_7B6[2];
-    int32         field_7B8; // sued float m_fVelocityChangeForAudio
+    cTransmission* field_7B8; // sued float m_fVelocityChangeForAudio
     float         m_fFireBlowUpTimer;
     CEntity*      m_apWheelCollisionEntity[4];  // sued m_aGroundPhysical
     CVector       m_avTouchPointsLocalSpace[4]; // sued m_aGroundOffset
@@ -129,14 +129,14 @@ public:
     bool IsDoorFullyOpen(uint32 door) override { return false; } // 0x6B5930
     bool IsDoorClosed(uint32 door) override { return false; }    // 0x6B5940
     bool IsDoorMissing(uint32 door) override { return true; }    // 0x6B5950
-    
+
     bool IsRoomForPedToLeaveCar(uint32 a1, CVector* a2) override { return true; }                        // 0x6B7270
     inline bool IsComponentPresent(int32 componentId) override { return m_aBikeNodes[componentId] != nullptr; } // 0x6B59E0
     CRideAnimData* GetRideAnimData() override { return &m_rideAnimData; }                                // 0x6B58C0
     float GetHeightAboveRoad() override { return m_fHeightAboveRoad; }                                   // 0x6B58B0
     int32 GetNumContactWheels() override { return m_nNumContactWheels; }                                 // 0x6B58A0
     float FindWheelWidth(bool bRear) override { return 0.15f; }                                          // 0x6B8940
-    
+
     virtual bool ProcessAI(uint32& extraHandlingFlags);
 
     void SetupModelNodes();

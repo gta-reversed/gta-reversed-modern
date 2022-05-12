@@ -73,6 +73,26 @@ public:
     uint8          m_nWheelsOnGround;
     char           field_47;
     int32          field_48;
+
+    cVehicleParams() {
+        m_nVehicleSubType = -1;
+        m_nVehicleType = -1;
+        field_8 = 0;
+        field_C = 0;
+        m_pTransmission = nullptr;
+        m_nModelType = 0;
+        m_fVelocity = 0.0f;
+        m_nGasState = 0;
+        m_nBreakState = 0;
+        m_fVelocityAbsolute = 0.0f;
+        m_fVelocityPercentage = 0.0f;
+        field_30 = 0;
+        field_34 = 0;
+        m_nCurrentGear = 0;
+        m_bHandbrakeOn = false;
+        m_fVelocityChangingPercentage = 0.0f;
+        m_fWheelSpinForAudio = 0.0f;
+    }
 };
 VALIDATE_SIZE(cVehicleParams, 0x4C);
 
@@ -223,16 +243,16 @@ public:
     void Service();
     static void StaticService();
 
-    uint32 GetVehicleTypeForAudio();
+    int16 GetVehicleTypeForAudio();
 
     void InhibitAccForTime(uint32 time);
     bool IsAccInhibited(cVehicleParams& params) const;
     bool IsAccInhibitedBackwards(cVehicleParams& params) const;
     bool IsAccInhibitedForLowSpeed(cVehicleParams& params) const;
-    bool IsAccInhibitedForTime() const;
+    [[nodiscard]] bool IsAccInhibitedForTime() const;
 
     void InhibitCrzForTime(uint32 time);
-    bool IsCrzInhibitedForTime() const;
+    [[nodiscard]] bool IsCrzInhibitedForTime() const;
 
     void JustGotInVehicleAsDriver();
     void TurnOnRadioForVehicle();
@@ -248,10 +268,11 @@ public:
     void PlayTrainBrakeSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void JustGotOutOfVehicleAsDriver();
 
+    void StartVehicleEngineSound(int16, float, float);
     void CancelVehicleEngineSound(int16 engineSoundStateId);
     void RequestNewPlayerCarEngineSound(int16 vehicleSoundId, float speed, float changeSound);
-
-    void StartVehicleEngineSound(int16, float, float);
+    float GetFreqForPlayerEngineSound(cVehicleParams& vehParams, int16 engineState_QuestionMark);
+    float GetVolForPlayerEngineSound(cVehicleParams& vehParams, int16 gear);
 
     void UpdateVehicleEngineSound(int16, float, float);
     static void UpdateGasPedalAudio(CVehicle* vehicle, int32 vehType);
@@ -266,22 +287,23 @@ public:
 
     float GetVolumeForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
     float GetFrequencyForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
+    float GetFreqForIdle(float velocityPercentage) const;
+
     float GetVolumeForDummyRev(float, float);
     float GetFrequencyForDummyRev(float, float);
-    float GetFreqForIdle(float velocityPercentage);
-    float GetFreqForPlayerEngineSound(cVehicleParams& vehParams, int16 engineState_QuestionMark);
-    float GetVolForPlayerEngineSound(cVehicleParams& vehParams, int16 gear);
+
     float GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fUnk, cTransmission& transmission, float fVelocity);
-    float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float fVelocity);
-    float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress);
-    void  GetHornState(bool* out, cVehicleParams& params);
-    void  GetAccelAndBrake(cVehicleParams& params);
+    float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float velocity);
+
+    float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress) const;
+    void GetHornState(bool* out, cVehicleParams& params);
+    void GetAccelAndBrake(cVehicleParams& params);
 
     void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
     void PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed = 1.0f, float volume = -100.0f);
     void PlayFlatTyreSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void PlayReverseSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
-    void PlayHornOrSiren(bool hornState, char sirenOrAlarm, bool mrWhoopie, cVehicleParams& params);
+    void PlayHornOrSiren(bool bPlayHornTone, bool bPlaySirenOrAlarm, bool bPlayHorn, cVehicleParams& params);
     void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
 
     void ProcessVehicleFlatTyre(cVehicleParams& params);
@@ -325,10 +347,10 @@ public:
     void ProcessDummyRCCar(cVehicleParams& params);
     void ProcessPlayerCombine(cVehicleParams& params);
     void ProcessEngineDamage(cVehicleParams& params);
-    void ProcessSpecialVehicle(cVehicleParams& params);
     void ProcessNitro(cVehicleParams& params);
     void ProcessMovingParts(cVehicleParams& params);
     void ProcessVehicle(CPhysical* vehicle);
+    void ProcessSpecialVehicle(cVehicleParams& params);
 
     // Seems to be inlined, so whenever you see something similar, replace it with a call
     void StopGenericEngineSound(int16 index);
@@ -358,5 +380,5 @@ static constexpr int32 NUM_VEH_AUDIO_SETTINGS = 232;
 extern tVehicleAudioSettings const (&gVehicleAudioSettings)[NUM_VEH_AUDIO_SETTINGS];
 
 // OG debug stuff
-static bool s_bVehicleDriveWheelSkidEnabled = true; // 0x8CBD80
-static bool s_bVehicleNonDriveWheelSkidValueEnabled = true; // 0x8CBD81
+static bool& s_bVehicleDriveWheelSkidEnabled = *(bool*)0x8CBD80; // true
+static bool& s_bVehicleNonDriveWheelSkidValueEnabled = *(bool*)0x8CBD81; // true
