@@ -74,7 +74,7 @@ public:
         uint8 bLostTraction : 1 ;
         uint8 bSoftSuspension : 1 ;
     } npcFlags;
-
+    int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
     uint16 m_wMiscComponentAngle;                   // 0x86C
     uint16 m_wMiscComponentAnglePrev;               // 0x86E
@@ -372,8 +372,6 @@ public:
         return false;
     }
 
-    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -439,6 +437,11 @@ private:
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);
+VALIDATE_OFFSET(CAutomobile, m_damageManager, 0x5A0);
+VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
+VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
+VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
+VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
 
 extern CColPoint *aAutomobileColPoints;
 

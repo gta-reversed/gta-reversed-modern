@@ -32,8 +32,6 @@ static constexpr CVector TANK_SHOT_DOOM_DISTANCE_TO_DEFAULT_TARGET = TANK_SHOT_D
 static constexpr uint32 TIGER_GUNFIRE_RATE = 60;
 static constexpr CVector TIGER_GUN_POS(0.0f, 0.5f, 0.2f); // 0xC1C208
 
-constexpr uint16 TOW_MISC_ANGLE_MAX = 20'000;
-
 void CAutomobile::InjectHooks()
 {
     RH_ScopedClass(CAutomobile);
@@ -82,7 +80,6 @@ void CAutomobile::InjectHooks()
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6A62B0);
     RH_ScopedVirtualInstall(GetNumContactWheels, 0x6A62A0);
     RH_ScopedVirtualInstall(Teleport, 0x6A9CA0);
-    // Install("CAutomobile", "GetTowHitchPos, 0x6AF1D0, &CAutomobile::GetTowHitchPos);
     RH_ScopedVirtualInstall(Save, 0x5D47E0);
     RH_ScopedVirtualInstall(Load, 0x5D2980);
     RH_ScopedInstall(ReduceHornCounter, 0x6A29A0);
@@ -104,7 +101,6 @@ void CAutomobile::InjectHooks()
     RH_ScopedInstall(BoostJumpControl, 0x6A3A60);
     RH_ScopedInstall(StopNitroEffect, 0x6A3E60);
     RH_ScopedInstall(NitrousControl, 0x6A3EA0);
-    RH_ScopedInstall(TowTruckControl, 0x6A40F0);
     RH_ScopedInstall(KnockPedOutCar, 0x6A44C0);
     RH_ScopedInstall(PopBootUsingPhysics, 0x6A44D0);
     RH_ScopedInstall(CloseAllDoors, 0x6A4520);
@@ -130,6 +126,8 @@ void CAutomobile::InjectHooks()
     RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6A47F0);
     RH_ScopedVirtualInstall(PlayCarHorn, 0x6A3770);
     RH_ScopedVirtualInstall(VehicleDamage, 0x6A7650);
+    // todo: fix/review Tow funcs
+    RH_ScopedInstall(TowTruckControl, 0x6A40F0);
     RH_ScopedVirtualInstall(GetTowHitchPos, 0x6AF1D0);
     RH_ScopedVirtualInstall(GetTowBarPos, 0x6AF250);
     RH_ScopedVirtualInstall(SetTowLink, 0x6B4410);
@@ -1519,7 +1517,7 @@ void CAutomobile::DoHoverSuspensionRatios()
             CColLine& line = colData->m_pLines[i];
             CVector start = *m_matrix * line.m_vecStart;
             CVector end = *m_matrix * line.m_vecEnd;
-            float colPointZ = -100.0f;
+            float colPointZ = MAP_Z_LOW_LIMIT;
             if (m_fWheelsSuspensionCompression[i] < 1.0f) {
                 colPointZ = m_wheelColPoint[i].m_vecPoint.z;
             }
@@ -2711,16 +2709,15 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 }
 
 //0x6AF1D0
-bool CAutomobile::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh)
-{
-    if (bCheckModelInfo) {
-        outPos = MultiplyMatrixWithVector(*m_matrix, {
-            0.f,
-            GetColModel()->m_boundBox.m_vecMax.y - 0.5f,
-            0.5f - m_fFrontHeightAboveRoad
-        });
+bool CAutomobile::GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* attachTo) {
+    if (!bCheckModelInfo) {
+        return false;
     }
-    return false;
+    outPos.x = 0.0f;
+    outPos.y = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->m_boundBox.m_vecMax.y - 0.5f;
+    outPos.z = 0.5f - m_fFrontHeightAboveRoad;
+    outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
+    return true;
 }
 
 // 0x6AF250
@@ -2728,7 +2725,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
     switch (m_nModelIndex) {
     case eModelID::MODEL_TOWTRUCK:
     case eModelID::MODEL_TRACTOR: {
-        float baseY{ -1.05f };
+        float baseY = -1.05f;
         if (m_nModelIndex == MODEL_TRACTOR) {
             if (attachTo && attachTo->IsSubTrailer() && attachTo->m_nModelIndex != MODEL_FARMTR1) {
                 return false;
@@ -2738,11 +2735,10 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
             return false;
         }
 
-        outPos = MultiplyMatrixWithVector(*m_matrix, {
-            0.f,
-            baseY + GetColModel()->m_boundBox.m_vecMin.y,
-            (1.f - (float)m_wMiscComponentAngle / (float)TOW_MISC_ANGLE_MAX) / 2.f + 0.5f
-        });
+        outPos.x = 0.0f;
+        outPos.y = baseY + CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->m_boundBox.m_vecMin.y;
+        outPos.z = ((1.0f - m_wMiscComponentAngle / TOWTRUCK_HOIST_DOWN_LIMIT) / 2.0f + 0.5f) - m_fFrontHeightAboveRoad;
+        outPos = MultiplyMatrixWithVector(*m_matrix, outPos);
         return true;
     }
     default: {
@@ -2750,21 +2746,17 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
             break;
         }
 
-        const auto GetMiscAPos = [this] {
-            return *RwMatrixGetPos(RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]));
-        };
-
         switch (m_nModelIndex) {
         case eModelID::MODEL_PETRO:
         case eModelID::MODEL_RDTRAIN:
         case eModelID::MODEL_LINERUN:
         case eModelID::MODEL_ARTICT3: {
-            outPos = GetMiscAPos();
+            outPos = *RwMatrixGetPos(RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]));
             return true;
         }
         case eModelID::MODEL_UTILITY: {
             if (attachTo && attachTo->m_nModelIndex == MODEL_UTILTR1) {
-                outPos = GetMiscAPos();
+                outPos = *RwMatrixGetPos(RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]));
                 return true;
             }
             break;
@@ -2778,7 +2770,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
                 case eModelID::MODEL_BAGBOXA:
                 case eModelID::MODEL_BAGBOXB:
                 case eModelID::MODEL_TUGSTAIR:
-                    outPos = GetMiscAPos();
+                    outPos = *RwMatrixGetPos(RwFrameGetLTM(m_aCarNodes[CAR_MISC_A]));
                     return true;
                 }
             }
@@ -2789,16 +2781,7 @@ bool CAutomobile::GetTowBarPos(CVector& outPos, bool ignoreModelType, CVehicle* 
     }
     }
 
-    if (ignoreModelType) {
-        outPos = MultiplyMatrixWithVector(*m_matrix, {
-            0.f,
-            GetColModel()->m_boundBox.m_vecMin.y - 0.5f,
-            0.5f - m_fFrontHeightAboveRoad
-        });
-        return true;
-    }
-
-    return false;
+    return GetTowHitchPos(outPos, ignoreModelType, attachTo);
 }
 
 // 0x6B4410
@@ -2827,12 +2810,12 @@ bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
     m_nStatus = STATUS_REMOTE_CONTROLLED;
 
     m_pTractor = tractor;
-    tractor->RegisterReference(reinterpret_cast<CEntity**>(&m_pTractor));
+    tractor->RegisterReference(m_pTractor);
 
     m_pTractor->m_pTrailer = this;
-    RegisterReference(reinterpret_cast<CEntity**>(&m_pTractor->m_pTrailer));
+    RegisterReference(m_pTractor->m_pTrailer);
 
-    for (auto&& entity : { AsVehicle(), tractor}) {
+    for (auto&& entity : { AsVehicle(), tractor }) {
         entity->RemoveFromMovingList();
         entity->AddToMovingList();
     }
@@ -2841,14 +2824,15 @@ bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
         switch (tractor->m_nModelIndex) {
         case eModelID::MODEL_TOWTRUCK:
         case eModelID::MODEL_TRACTOR: {
-            tractor->AsAutomobile()->m_wMiscComponentAngle = 10'000;
+            tractor->AsAutomobile()->m_wMiscComponentAngle = TOWTRUCK_HOIST_UP_LIMIT;
             break;
         }
         }
 
         SetHeading(tractor->GetHeading());
 
-        if (CVector towHitchPos{}, towBarPos{}; GetTowHitchPos(towHitchPos, true, this) && tractor->GetTowBarPos(towBarPos, true, this)) {
+        CVector towHitchPos{}, towBarPos{};
+        if (GetTowHitchPos(towHitchPos, true, this) && tractor->GetTowBarPos(towBarPos, true, this)) {
             SetPosn(towBarPos - (towHitchPos - GetPosition()));
             PlaceOnRoadProperly();
             return true;
@@ -2884,7 +2868,7 @@ bool CAutomobile::BreakTowLink() {
 // 0x6A6090
 float CAutomobile::FindWheelWidth(bool bRear)
 {
-    constexpr struct { eVehicleHandlingFlags flag; float mult; } mapping[2][4]{
+    static constexpr struct { eVehicleHandlingFlags flag; float mult; } mapping[2][4]{
         { // Rear wheel
             { VEHICLE_HANDLING_WHEEL_R_NARROW2, 0.65f },
             { VEHICLE_HANDLING_WHEEL_R_NARROW,  0.8f  },
@@ -3196,7 +3180,7 @@ void CAutomobile::HydraulicControl()
     }
 }
 
-static constexpr int16 DEFAULT_COLLISION_EXTENDLIMIT = 2500; // 0x8D314C
+static constexpr uint16 DEFAULT_COLLISION_EXTENDLIMIT = 2500; // 0x8D314C
 
 // 0x6A1460
 bool CAutomobile::UpdateMovingCollision(float angle)
@@ -3245,7 +3229,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
             }
 
             m_wMiscComponentAngle += static_cast<uint16>(((float)pad->GetCarGunUpDown() / 128.0f) * colAngleMult * CTimer::GetTimeStep());
-            m_wMiscComponentAngle = std::clamp<int16>(m_wMiscComponentAngle, 0, DEFAULT_COLLISION_EXTENDLIMIT);
+            m_wMiscComponentAngle = std::clamp<uint16>(m_wMiscComponentAngle, 0, DEFAULT_COLLISION_EXTENDLIMIT);
         }
 
         CMatrix rotMatrix;
@@ -3340,7 +3324,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
 
     if ((float)pad->GetCarGunUpDown() < -10.0f) {
         m_wMiscComponentAngle -= static_cast<uint16>(2 * ((float)pad->GetCarGunUpDown() / 128.0f) * 10.0f * CTimer::GetTimeStep());
-        m_wMiscComponentAngle = std::min(static_cast<int16>(m_wMiscComponentAngle), DEFAULT_COLLISION_EXTENDLIMIT);
+        m_wMiscComponentAngle = std::min(m_wMiscComponentAngle, DEFAULT_COLLISION_EXTENDLIMIT);
         return false;
     }
 
@@ -3641,9 +3625,9 @@ void CAutomobile::ProcessAutoBusDoors() {
 
     if (m_nBusDoorTimerEnd <= time) {
         if (m_nBusDoorTimerStart) {
-            constexpr struct { eDoors door; tComponent comp; uint32 flagMask; } doors[]{
-                {eDoors::DOOR_LEFT_FRONT, tComponent::COMPONENT_DOOR_RR, 1}, // TODO: `COMPONENT_DOOR_RR` doesn't match up with `DOOR_LEFT_FRONT`
-                {eDoors::DOOR_RIGHT_FRONT, tComponent::COMPONENT_DOOR_RF, 4}
+            static constexpr struct { eDoors door; tComponent comp; uint32 flagMask; } doors[]{
+                { eDoors::DOOR_LEFT_FRONT,  tComponent::COMPONENT_DOOR_RR, 1 }, // TODO: `COMPONENT_DOOR_RR` doesn't match up with `DOOR_LEFT_FRONT`
+                { eDoors::DOOR_RIGHT_FRONT, tComponent::COMPONENT_DOOR_RF, 4 }
             };
 
             for (auto&& [door, comp, flagMask] : doors) {
@@ -3837,10 +3821,19 @@ void CAutomobile::NitrousControl(int8 boost)
                            : std::abs(m_fGasPedal) / 2.0f + 0.5f;
     DoNitroEffect(power);
 }
+template<typename T>
+auto Get(CEntity** entities, size_t numEntities) requires std::is_base_of_v<CEntity, T> {
+    return (
+        std::span{ entities, numEntities }
+      | std::views::transform([](auto&& entity) { return reinterpret_cast<T*>(entity); })
+    );
+};
 
 // 0x6A40F0
-void CAutomobile::TowTruckControl()
-{
+void CAutomobile::TowTruckControl() {
+    const auto UP_SPEED   = 6.0f;
+    const auto DOWN_SPEED = 2.0f;
+
     if (m_nStatus != STATUS_PLAYER) {
         return;
     }
@@ -3855,41 +3848,61 @@ void CAutomobile::TowTruckControl()
     }
 
     // Update misc comp. angle
-    if (const auto carUpDown{ (float)driversPad->GetCarGunUpDown() }; std::abs(carUpDown) > 10.f) {
-        if (carUpDown > 0.f) {
-            m_wMiscComponentAngle = std::max(
-                m_pTrailer ? TOW_MISC_ANGLE_MAX / 2 : 0, // Minimum angle
-                m_wMiscComponentAngle - (uint16)(carUpDown * 2.f * CTimer::GetTimeStep()) // New angle
-            );
-        } else {
-            if (m_wMiscComponentAngle < TOW_MISC_ANGLE_MAX) {
-                m_wMiscComponentAngle = std::min<uint16>(
-                    TOW_MISC_ANGLE_MAX,
-                    m_wMiscComponentAngle + (uint16)(std::abs(carUpDown) * 6.f * CTimer::GetTimeStep())
+    const auto carUpDown = driversPad->GetCarGunUpDown();
+    if (std::fabs(carUpDown) > 10.f) {
+        const auto speed = carUpDown > 0 ? DOWN_SPEED : UP_SPEED;
+        const auto step = (uint16)(float(carUpDown) * speed * CTimer::GetTimeStep());
+
+        while (true) {
+            // up
+            if (carUpDown > 0) {
+                m_wMiscComponentAngle = std::max(
+                    m_pTrailer ? TOWTRUCK_HOIST_UP_LIMIT : 0,
+                    m_wMiscComponentAngle - step
                 );
+
+                break;
             }
+
+            // down
+            if (m_wMiscComponentAngle < TOWTRUCK_HOIST_DOWN_LIMIT) {
+                m_wMiscComponentAngle = std::min<uint16>(
+                    TOWTRUCK_HOIST_DOWN_LIMIT,
+                    m_wMiscComponentAngle - step
+                );
+                break;
+            }
+            break;
         }
     }
 
     // Attach a suitable vehicle in range if we don't already have a trailer
-    if (m_wMiscComponentAngle == TOW_MISC_ANGLE_MAX && !m_pTrailer) {
-        if (CVector towBarPos{}; GetTowBarPos(towBarPos, false, this)) {
-            CEntity* entitiesInRange[16]{};
-            int16 numEntitiesInRange{};
-            CWorld::FindObjectsInRange(towBarPos, 10.f, true, &numEntitiesInRange, (int16)std::size(entitiesInRange), entitiesInRange, false, true, false, false, false);
-            for (CVehicle* vehInRange : std::span{ entitiesInRange , (size_t)numEntitiesInRange } | std::views::transform([](auto&& e) { return e->AsVehicle(); })) {
-                if (vehInRange != this) {
-                    if (CVector hitchPos{}; vehInRange->AsVehicle()->GetTowHitchPos(hitchPos, true, this)) {
-                        if (!vehInRange->vehicleFlags.bIsLocked) {
-                            if (std::abs(hitchPos.z - towBarPos.z) < 1.f && (hitchPos - towBarPos).SquaredMagnitude2D() < 0.5f * 0.5f) {
-                                vehInRange->SetTowLink(this, false);
-                                m_wMiscComponentAngle -= 100;
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
+    if (m_wMiscComponentAngle != TOWTRUCK_HOIST_DOWN_LIMIT || m_pTrailer)
+        return;
+
+    CVector towBarPos{};
+    if (!GetTowBarPos(towBarPos, false, this))
+        return;
+
+    CEntity* entitiesInRange[16]{};
+    int16 numEntitiesInRange{};
+    CVector hitchPos{};
+    CWorld::FindObjectsInRange(towBarPos, 10.f, true, &numEntitiesInRange, (int16)std::size(entitiesInRange), entitiesInRange, false, true, false, false, false);
+
+    for (auto* vehicle : Get<CVehicle>(entitiesInRange, numEntitiesInRange)) {
+        if (vehicle == this)
+            continue;
+
+        if (!vehicle->GetTowHitchPos(hitchPos, true, this))
+            continue;
+
+        if (vehicle->vehicleFlags.bIsLocked != 0u)
+            continue;
+
+        if (std::fabs(hitchPos.z - towBarPos.z) < 1.0f && (hitchPos - towBarPos).SquaredMagnitude2D() < 0.5f * 0.5f) {
+            vehicle->SetTowLink(this, false);
+            m_wMiscComponentAngle -= 100; // "hide" hoist
+            break;
         }
     }
 }
@@ -5605,7 +5618,7 @@ bool CAutomobile::RcbanditCheck1CarWheels(CPtrList& ptrList)
 
 bool CAutomobile::RcbanditCheckHitWheels()
 {
-    const CVector point = GetPosition();
+    const auto& point = GetPosition();
     float fRadius = 2.0f;
     const float minX = point.x - fRadius;
     const float maxX = point.x + fRadius;
