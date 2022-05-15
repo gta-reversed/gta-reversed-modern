@@ -40,13 +40,13 @@ void CMenuManager::ProcessStreaming(bool streamAll) {
     if (m_bStreamingDisabled)
         return;
 
-    const float tileSizeX = (m_fMapZoom * 2.0f) / float(MAX_RADAR_WIDTH_TILES);
-    const float tileSizeY = (m_fMapZoom * 2.0f) / float(MAX_RADAR_HEIGHT_TILES);
+    const float tileSizeX = (m_fMapZoom * 2.0f) / float(CRadar::MAX_RADAR_WIDTH_TILES);
+    const float tileSizeY = (m_fMapZoom * 2.0f) / float(CRadar::MAX_RADAR_HEIGHT_TILES);
     const float left      = m_vMapOrigin.x - m_fMapZoom;
     const float top       = m_vMapOrigin.y - m_fMapZoom;
 
-    for (auto x = 0; x < MAX_RADAR_WIDTH_TILES; x++) {
-        for (auto y = 0; y < MAX_RADAR_HEIGHT_TILES; y++) {
+    for (auto x = 0; x < CRadar::MAX_RADAR_WIDTH_TILES; x++) {
+        for (auto y = 0; y < CRadar::MAX_RADAR_HEIGHT_TILES; y++) {
 
             auto fx = float(x);
             auto fy = float(y);
