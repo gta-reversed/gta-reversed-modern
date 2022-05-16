@@ -2329,10 +2329,11 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         }
 
         // 0x6A7780
-        if (m_fDamageIntensity == 0.f
-            || physicalFlags.bCollisionProof
-            || IsSubQuad()
-        ) {
+        if (m_fDamageIntensity == 0.f || physicalFlags.bCollisionProof) {
+            return;
+        }
+
+        if (IsSubQuad()) {
             if (CBike::DamageKnockOffRider(this, m_fDamageIntensity, m_nPieceType, m_pDamageEntity, m_vecLastCollisionPosn, m_vecLastCollisionImpactVelocity)) {
                 return;
             }
