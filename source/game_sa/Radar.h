@@ -16,7 +16,7 @@ class CSprite2d;
 enum eBlipAppearance : uint8 {
     BLIP_FLAG_FRIEND, // It selects BLIP_COLOUR_BLUE. If unset together with BLIP_FLAG_THREAT, any color.
     BLIP_FLAG_THREAT,  // It selects BLIP_COLOUR_RED. If unset together with BLIP_FLAG_FRIEND, any color.
-    BLIP_FLAH_UNK,
+    BLIP_FLAG_UNK,
 
     BLIP_FLAG_NUM // Add above this
 };
@@ -227,7 +227,7 @@ public:
     static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y);
     static void CalculateCachedSinCos();
     static int32 SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName);
-    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, char* scriptName);
+    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName);
     static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
     static void ChangeBlipColour(int32 blipIndex, uint32 color);
     static bool HasThisBlipBeenRevealed(int32 blipIndex);
