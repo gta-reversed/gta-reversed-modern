@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "GangWars.h"
+#include "GangWarsSaveStructure.h"
 
 int32& CGangWars::ZoneInfoForTraining = *reinterpret_cast<int32*>(0x8A5F40); // -1
 int32(&CGangWars::GangRatingStrength)[3] = *reinterpret_cast<int32(*)[3]>(0x96AB2C);
@@ -78,12 +79,23 @@ void CGangWars::InjectHooks() {
 
 // 0x5D3EB0
 void CGangWars::Load() {
-    plugin::Call<0x5D3EB0>();
+    /*plugin::Call<0x5D3EB0>();
+
+    size_t size;
+    CGangWarsSaveStructure gwss;
+    CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(size_t));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&gwss, sizeof(CGangWarsSaveStructure));
+    gwss.Extract();*/
 }
 
 // 0x5D5530
 void CGangWars::Save() {
-    plugin::Call<0x5D5530>();
+    /*plugin::Call<0x5D5530>();
+
+    CGangWarsSaveStructure gwss;
+    gwss.Construct();
+    CGenericGameStorage::SaveDataToWorkBuffer((void*)sizeof(CGangWarsSaveStructure), sizeof(size_t));
+    CGenericGameStorage::SaveDataToWorkBuffer(&gwss, sizeof(CGangWarsSaveStructure));*/
 }
 
 // 0x443920
