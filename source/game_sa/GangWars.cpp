@@ -49,7 +49,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);
     RH_ScopedInstall(CheerVictory, 0x444040);
     RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);
-    // RH_ScopedInstall(ClearTheStreets, 0x4444B0);
+    RH_ScopedInstall(ClearTheStreets, 0x4444B0);
     // RH_ScopedInstall(CreateAttackWave, 0x444810);
     // RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
     RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);
@@ -58,7 +58,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);
     RH_ScopedInstall(GangWarGoingOn, 0x443AA0);
     RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);
-    // RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
+    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
     RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);
     // RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);
@@ -271,9 +271,33 @@ void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncr
         CStats::IncrementStat(STAT_TERRITORIES_LOST, 1.0f);
 }
 
-// 0x445E80
+// 0x445E80, untested
 bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
-    return plugin::CallAndReturn<bool, 0x445E80, float>(removeMult);
+    bool doesControlInitial = DoesPlayerControlThisZone(pZoneInfoToFightOver);
+    uint8 totalEnemyDensity = 0u;
+
+    for (auto i = 0u; i < 10u; i++) { // for all gangs except grove
+        if (i != GANG_GROVE) {
+            auto& density = pZoneInfoToFightOver->GangDensity[i];
+            auto densityInitial = density;
+
+            density *= 1.0f - removeMult;
+
+            if (density < 4u) {
+                density = 0u;
+            }
+
+            pZoneInfoToFightOver->GangDensity[GANG_GROVE] += densityInitial - density;
+
+            totalEnemyDensity += density;
+        }
+    }
+
+    if (!doesControlInitial && DoesPlayerControlThisZone(pZoneInfoToFightOver)) {
+        CStats::IncrementStat(STAT_TERRITORIES_TAKEN_OVER, 1.0f);
+    }
+
+    return totalEnemyDensity == 0u;
 }
 
 // 0x4439D0
