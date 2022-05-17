@@ -7,6 +7,7 @@
 #pragma once
 
 #include "CarCtrl.h"
+#include "Tasks/TaskTypes/TaskComplexWander.h"
 
 class CZone;
 class CZoneInfo;

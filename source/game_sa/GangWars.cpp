@@ -170,9 +170,20 @@ void CGangWars::ClearSpecificZonesToTriggerGangWar() {
     CTheZones::FillZonesWithGangColours(false);
 }
 
-// 0x4444B0
+// 0x4444B0, untested
 void CGangWars::ClearTheStreets() {
-    plugin::Call<0x4444B0>();
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        auto ped = GetPedPool()->GetAt(i);
+
+        if (ped && !ped->IsPlayer()) {
+            auto type = ped->m_nPedType;
+
+            if (type == PED_TYPE_CIVMALE || type == PED_TYPE_CIVFEMALE) {
+                if (auto task = ped->GetTaskManager().Find<CTaskComplexWander>())
+                    task->m_nMoveState = PEDMOVE_SPRINT;
+            }
+        }
+    }
 }
 
 // 0x444810
