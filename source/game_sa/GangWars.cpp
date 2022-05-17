@@ -119,7 +119,7 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (NumSpecificZones == 0)
         Provocation += 1.0f;
 
-    for (auto i = 0u; i < NumSpecificZones; i++) {
+    for (auto i = 0; i < NumSpecificZones; i++) {
         uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
 
         if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
@@ -171,8 +171,10 @@ void CGangWars::CheerVictory() {
     };
 
     for (auto i = 0u; i < std::size(zoneNames); i++) {
-        if (!stricmp(pZoneToFightOver->m_szTextKey, zoneNames[i]))
-            return nearestMember->Say(208 + i);
+        if (!_stricmp(pZoneToFightOver->m_szTextKey, zoneNames[i])) {
+            nearestMember->Say(208 + i);
+            break;
+        }
     }
 }
 
@@ -293,7 +295,7 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
             auto& density = pZoneInfoToFightOver->GangDensity[i];
             auto densityInitial = density;
 
-            density *= 1.0f - removeMult;
+            density = static_cast<uint8>((1.0f - removeMult) * density);
 
             if (density < 4u) {
                 density = 0u;
@@ -320,7 +322,7 @@ bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
     if (numPeds <= 0)
         return false;
 
-    for (auto i = 0u; i < numPeds; i++) {
+    for (auto i = 0; i < numPeds; i++) {
         if (!CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).IsLoaded())
             return true;
     }
@@ -339,7 +341,7 @@ bool CGangWars::PickZoneToAttack() {
     CZone* enemyGangZone = nullptr;
 
     // choose a territory controlled that is by enemy gangs
-    for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+    for (auto i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
         auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
         auto zoneInfo = CTheZones::GetZoneInfo(zone);
 
@@ -356,7 +358,7 @@ bool CGangWars::PickZoneToAttack() {
         return false;
 
     // find a close territory that is controlled by the gsf
-    for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+    for (auto i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
         auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
         auto zoneInfo = CTheZones::GetZoneInfo(zone);
 
