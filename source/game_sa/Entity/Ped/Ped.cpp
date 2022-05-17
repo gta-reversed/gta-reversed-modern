@@ -368,7 +368,7 @@ void CPed::operator delete(void* data) {
 * @addr 0x5E4A00
 */
 void CPed::SetMoveAnim() {
-    if (CanUseTorsoWhenLooking() || m_pAttachedTo) {
+    if (!IsAlive() || bIsDucking || m_pAttachedTo) {
         return;
     }
 
