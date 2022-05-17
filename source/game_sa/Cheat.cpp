@@ -1065,13 +1065,11 @@ bool CCheat::IsZoneStreamingAllowed() {
 // Activates the cheat without changing statistics
 // unknown name
 // 0x438370
-void CCheat::EnableLegitimateCheat(eCheats cheat)
-{
-    void (*pFunction)();
-
-    pFunction = m_aCheatFunctions[cheat];
-    if (pFunction)
-        return pFunction();
-
-    Toggle(cheat);
+void CCheat::EnableLegitimateCheat(eCheats cheat) {
+    auto func = m_aCheatFunctions[cheat];
+    if (func) {
+        return func();
+    } else {
+        return Toggle(cheat);
+    }
 }

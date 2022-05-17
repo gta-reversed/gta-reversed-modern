@@ -9,37 +9,49 @@
 
 #include "LoadingScreen.h"
 
-int32& CLoadingScreen::m_currDisplayedSplash = *(int32*)0x8D093C;
-int32& CLoadingScreen::m_numChunksLoaded = *(int32*)0x8D0940;
-int32& CLoadingScreen::m_chunkBarAppeared = *(int32*)0x8D0944;
-char* CLoadingScreen::m_PopUpMessage = (char*)0xBAB268;
-char* CLoadingScreen::m_LoadingGxtMsg2 = (char*)0xBAB278;
-char* CLoadingScreen::m_LoadingGxtMsg1 = (char*)0xBAB2C8;
-bool& CLoadingScreen::m_bActive = *(bool*)0xBAB318;
-bool& CLoadingScreen::m_bWantToPause = *(bool*)0xBAB319;
-bool& CLoadingScreen::m_bPaused = *(bool*)0xBAB31A;
-bool& CLoadingScreen::m_bFading = *(bool*)0xBAB31C;
-bool& CLoadingScreen::m_bLegalScreen = *(bool*)0xBAB31D;
-bool& CLoadingScreen::m_bFadeInNextSplashFromBlack = *(bool*)0xBAB31E;
-bool& CLoadingScreen::m_bFadeOutCurrSplashToBlack = *(bool*)0xBAB31F;
-char& CLoadingScreen::m_FadeAlpha = *(char*)0xBAB320;
-float& CLoadingScreen::m_StartFadeTime = *(float*)0xBAB324;
-float& CLoadingScreen::m_ClockTimeOnPause = *(float*)0xBAB328;
-float& CLoadingScreen::m_PauseTime = *(float*)0xBAB32C;
-bool& CLoadingScreen::m_bReadyToDelete = *(bool*)0xBAB33D;
-float& CLoadingScreen::m_timeSinceLastScreen = *(float*)0xBAB340;
-CSprite2d* CLoadingScreen::m_aSplashes = (CSprite2d*)0xBAB35C;  // CSprite2d CLoadingScreen::m_aSplashes[7]
+// temp
+void RsCameraShowRaster(RwCamera* camera) {
+    plugin::Call<0x619440, RwCamera*>(camera);
+}
 
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
     RH_ScopedCategoryGlobal();
+
+    RH_ScopedInstall(Init, 0x5902B0);
+    // RH_ScopedInstall(Shutdown, 0x58FF10);
+    // RH_ScopedInstall(RenderSplash, 0x58FF60);
+    // RH_ScopedInstall(LoadSplashes, 0x5900B0);
+    RH_ScopedInstall(DisplayMessage, 0x590220);
+    RH_ScopedInstall(SetLoadingBarMsg, 0x590240);
+    RH_ScopedInstall(GetClockTime, 0x590280);
+    RH_ScopedInstall(Pause, 0x590310);
+    RH_ScopedInstall(Continue, 0x590320);
+    // RH_ScopedInstall(RenderLoadingBar, 0x590370);
+    RH_ScopedInstall(DisplayNextSplash, 0x5904D0);
+    RH_ScopedInstall(StartFading, 0x590530);
+    RH_ScopedInstall(DisplayPCScreen, 0x590570);
+    // RH_ScopedInstall(Update, 0x5905E0);
+    RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
+    RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
+    // RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
+    // RH_ScopedInstall(NewChunkLoaded, 0x590D00);
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
 
 // 0x5902B0
 void CLoadingScreen::Init(bool unusedFlag, bool bLoaded) {
-    plugin::Call<0x5902B0, bool, bool>(unusedFlag, bLoaded);
+    if (m_bActive)
+        return;
+
+    if (!bLoaded) {
+        LoadSplashes(false, false);
+    }
+
+    m_currDisplayedSplash = -1;
+    m_bActive = true;
+    m_timeSinceLastScreen = GetClockTime();
 }
 
 // 0x58FF10
@@ -59,17 +71,26 @@ void CLoadingScreen::LoadSplashes(bool bStarting, bool bNvidia) {
 
 // 0x590220
 void CLoadingScreen::DisplayMessage(const char* message) {
-    plugin::Call<0x590220, const char*>(message);
+    strcpy(m_PopUpMessage, message);
 }
 
 // 0x590240
 void CLoadingScreen::SetLoadingBarMsg(const char* msg1, const char* msg2) {
-    plugin::Call<0x590240, const char*, const char*>(msg1, msg2);
+    if (msg1)
+        AsciiToGxtChar(msg1, m_LoadingGxtMsg1);
+    else
+        m_LoadingGxtMsg1[0] = 0;
+
+    if (msg2)
+        AsciiToGxtChar(msg2, m_LoadingGxtMsg2);
+    else
+        m_LoadingGxtMsg2[0] = 0;
 }
 
 // 0x590280
 float CLoadingScreen::GetClockTime(bool bIgnorePauseTime) {
-    return plugin::CallAndReturn<float, 0x590280, bool>(bIgnorePauseTime);
+    float time = (float)GetMillisecondTime() / 1000.0f;
+    return bIgnorePauseTime ? time : time - m_PauseTime;
 }
 
 // 0x590310
@@ -79,7 +100,13 @@ void CLoadingScreen::Pause() {
 
 // 0x590320
 void CLoadingScreen::Continue() {
-    plugin::Call<0x590320>();
+    if (m_bActive) {
+        m_bWantToPause = false;
+        if (m_bPaused) {
+            m_bPaused = false;
+            m_PauseTime = GetClockTime() - m_ClockTimeOnPause + m_PauseTime;
+        }
+    }
 }
 
 // 0x590370
@@ -89,17 +116,38 @@ void CLoadingScreen::RenderLoadingBar() {
 
 // 0x5904D0
 void CLoadingScreen::DisplayNextSplash() {
-    plugin::Call<0x5904D0>();
+    if (m_currDisplayedSplash != 6 && !m_bFading) {
+        m_FadeAlpha = -1;
+        if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
+            DefinedState2d();
+            RenderSplash();
+            RenderLoadingBar();
+            RwCameraEndUpdate(Scene.m_pRwCamera);
+            RsCameraShowRaster(Scene.m_pRwCamera);
+        }
+        m_currDisplayedSplash++;
+    }
 }
 
 // 0x590530
 void CLoadingScreen::StartFading() {
-    plugin::Call<0x590530>();
+    m_bFading = true;
+    m_FadeAlpha = 0;
+    m_StartFadeTime = GetClockTime(false);
 }
 
 // 0x590570
 void CLoadingScreen::DisplayPCScreen() {
-    plugin::Call<0x590570>();
+    if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
+        DefinedState2d();
+        RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+        RenderSplash();
+        if (m_currDisplayedSplash > 0 && (!m_bFading || m_currDisplayedSplash != 1)) {
+            RenderLoadingBar();
+        }
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+        RsCameraShowRaster(Scene.m_pRwCamera);
+    }
 }
 
 // 0x5905E0
@@ -109,12 +157,37 @@ void CLoadingScreen::Update() {
 
 // 0x590860
 void CLoadingScreen::DoPCTitleFadeOut() {
-    plugin::Call<0x590860>();
+    m_bFadeInNextSplashFromBlack = true;
+    m_currDisplayedSplash = 0;
+    m_bFading = true;
+
+    for (auto i = 0; i < 50; i++) {
+        m_FadeAlpha = (uint32)((float)i * 5.0f);
+        DisplayPCScreen();
+    }
+
+    m_FadeAlpha = -1;
+    DisplayPCScreen();
+    m_bFading = false;
 }
 
 // 0x590990
 void CLoadingScreen::DoPCTitleFadeIn() {
-    plugin::Call<0x590990>();
+    m_bFadeInNextSplashFromBlack = true;
+    m_currDisplayedSplash = 0;
+    m_bFading = true;
+
+    for (auto i = 200; i > 0; i--) {
+        m_FadeAlpha = 255;
+        DisplayPCScreen();
+    }
+
+    for (auto i = 50; i > 0; i--) {
+        m_FadeAlpha = (uint32)((float)i * 5.0f);
+        DisplayPCScreen();
+    }
+
+    m_bFadeInNextSplashFromBlack = true;
 }
 
 // 0x590AC0
@@ -128,7 +201,7 @@ void CLoadingScreen::NewChunkLoaded() {
 }
 
 // 0x53DED0
-void LoadingScreen(const char* msg1, const char* msg2) {
+void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
         CLoadingScreen::SetLoadingBarMsg(msg1, msg2);
     }

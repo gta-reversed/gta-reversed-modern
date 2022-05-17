@@ -44,7 +44,7 @@ public:
 
     CTaskSimpleCarDrive() = delete;
 
-    CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
+    CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
 
     eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
     CTask* Clone() override;

@@ -124,14 +124,14 @@ void CDebugMenu::ImguiInputUpdate() {
     };
 
     const auto UpdateMouse = []() {
-        CPad* pad = CPad::GetPad(0);
+        CPad* pad = CPad::GetPad();
         pad->DisablePlayerControls = true;
 
         m_MousePos.x += CPad::NewMouseControllerState.X;
         m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-        m_MousePos.x = clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
-        m_MousePos.y = clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
+        m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
+        m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
 
         io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
 
@@ -181,8 +181,13 @@ void CDebugMenu::ImGuiDrawMouse() {
     if (!m_showMenu || !m_mouseSprite.m_pTexture)
         return;
 
-    CRect mouseRect = CRect(io->MousePos.x, io->MousePos.y, (float)CMenuManager::StretchX(18.0f) + io->MousePos.x, (float)CMenuManager::StretchX(18.0f) + io->MousePos.y);
-    m_mouseSprite.Draw(mouseRect, CRGBA(255, 255, 255, 255));
+    m_mouseSprite.Draw(
+        io->MousePos.x,
+        io->MousePos.y,
+        FrontEndMenuManager.StretchX(12.0f),
+        FrontEndMenuManager.StretchY(12.0f),
+        { 255, 255, 255, 255 }
+    );
 }
 
 bool showPlayerInfo;
@@ -328,7 +333,7 @@ static void DebugCode() {
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    if (pad->IsStandardKeyJustDown('1')) {
+    if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustPressed('2')) {
@@ -337,14 +342,18 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('3')) {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
-    if (pad->IsStandardKeyJustDown('4')) {
-        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
-        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+
+    if (pad->IsStandardKeyJustPressed('4')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
     }
-    if (pad->IsStandardKeyJustDown('5')) {
-        CVector pos{};
-        Command<COMMAND_GET_PLAYER_COORDINATES>(0, &pos.x, &pos.y, &pos.z);
-        printf("%f %f %f\n", pos.x, pos.y, pos.z);
+    if (pad->IsStandardKeyJustPressed('5')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
+    }
+    if (pad->IsStandardKeyJustPressed('6')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+    }
+    if (pad->IsStandardKeyJustPressed('7')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
 }
 

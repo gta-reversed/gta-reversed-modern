@@ -99,6 +99,135 @@ void CVehicle::InjectHooks()
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
     RH_ScopedInstall(DoHeadLightBeam, 0x6E0E20);
     RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30);
+
+    // RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
+    // RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
+    // RH_ScopedInstall(CanBeDeleted, 0x6D1180);
+    // RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
+    // RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
+    // RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
+    // RH_ScopedInstall(AddPassenger, 0x6D13A0);
+    // RH_ScopedInstall(AddPassenger, 0x6D14D0);
+    // RH_ScopedInstall(RemovePassenger, 0x6D1610);
+    // RH_ScopedInstall(SetDriver, 0x6D16A0);
+    // RH_ScopedInstall(RemoveDriver, 0x6D1950);
+    // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
+    // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
+    // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
+    // RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
+    // RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
+    // RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
+    // RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
+    // RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
+    // RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
+    // RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
+    // RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
+    // RH_ScopedInstall(IsLawEnforcementVehicle, 0x6D2370);
+    // RH_ScopedInstall(ExtinguishCarFire, 0x6D2460);
+    // RH_ScopedInstall(ActivateBomb, 0x6D24F0);
+    // RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
+    // RH_ScopedInstall(CarHasRoof, 0x6D25D0);
+    // RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
+    // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
+    // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
+    // RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
+    // RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
+    // RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
+    // RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
+    // RH_ScopedInstall(AddDamagedVehicleParticles, 0x6D2A80);
+    // RH_ScopedInstall(MakeDirty, 0x6D2BF0);
+    // RH_ScopedInstall(AddWheelDirtAndWater, 0x6D2D50);
+    // RH_ScopedInstall(SetGettingInFlags, 0x6D3000);
+    // RH_ScopedInstall(SetGettingOutFlags, 0x6D3020);
+    // RH_ScopedInstall(ClearGettingInFlags, 0x6D3040);
+    // RH_ScopedInstall(ClearGettingOutFlags, 0x6D3060);
+    // RH_ScopedInstall(SetWindowOpenFlag, 0x6D3080);
+    // RH_ScopedInstall(ClearWindowOpenFlag, 0x6D30B0);
+    // RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
+    // RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
+    // RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
+    // RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
+    // RH_ScopedInstall(GetUpgrade, 0x6D3650);
+    // RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
+    // RH_ScopedInstall(AddReplacementUpgrade, 0x6D3830);
+    // RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
+    // RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
+    // RH_ScopedInstall(RemoveAllUpgrades, 0x6D3AB0);
+    // RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
+    // RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
+    // RH_ScopedInstall(InitWinch, 0x6D3B60);
+    // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
+    // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
+    // RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
+    // RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
+    // RH_ScopedInstall(GetPlaneGunsAutoAimAngle, 0x6D3E00);
+    // RH_ScopedInstall(SetFiringRateMultiplier, 0x6D4010);
+    // RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
+    // RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
+    // RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
+    // RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
+    // RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
+    // RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
+    // RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
+    // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
+    // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
+    // RH_ScopedInstall(CanBeDriven, 0x6D5400);
+    // RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
+    // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
+    // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
+    // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
+    // RH_ScopedInstall(SetupRender, 0x6D64F0);
+    // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
+    // RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0);
+    // RH_ScopedInstall(InflictDamage, 0x6D7C90);
+    // RH_ScopedInstall(KillPedsGettingInVehicle, 0x6D82F0);
+    // RH_ScopedInstall(UsesSiren, 0x6D8470);
+    // RH_ScopedInstall(IsSphereTouchingVehicle, 0x6D84D0);
+    // RH_ScopedInstall(FlyingControl, 0x6D85F0);
+    // RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
+    // RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
+    // RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
+    // RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
+    // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
+    // RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
+    // RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
+    // RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880);
+    // RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0);
+    // RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930);
+    // RH_ScopedInstall(AddUpgrade, 0x6DFA20);
+    // RH_ScopedInstall(UpdateTrailerLink, 0x6DFC50);
+    // RH_ScopedInstall(UpdateTractorLink, 0x6E0050);
+    // RH_ScopedInstall(ScanAndMarkTargetForHeatSeekingMissile, 0x6E0400);
+    // RH_ScopedInstall(FireHeatSeakingMissile, 0x6E05C0);
+    // RH_ScopedInstall(PossiblyDropFreeFallBombForPlayer, 0x6E07E0);
+    // RH_ScopedInstall(ProcessSirenAndHorn, 0x6E0950);
+    // RH_ScopedInstall(DoHeadLightEffect, 0x6E0A50);
+    // RH_ScopedInstall(DoHeadLightReflectionSingle, 0x6E1440);
+    // RH_ScopedInstall(DoHeadLightReflectionTwin, 0x6E1600);
+    // RH_ScopedInstall(DoHeadLightReflection, 0x6E1720);
+    // RH_ScopedInstall(DoTailLightEffect, 0x6E1780);
+    // RH_ScopedInstall(DoVehicleLights, 0x6E1A60);
+    // RH_ScopedInstall(FillVehicleWithPeds, 0x6E2900);
+    // RH_ScopedInstall(DoBladeCollision, 0x6E2E50);
+    // RH_ScopedInstall(AddVehicleUpgrade, 0x6E3290);
+    // RH_ScopedInstall(SetupUpgradesAfterLoad, 0x6E3400);
+    // RH_ScopedInstall(GetPlaneWeaponFiringStatus, 0x6E38A0);
+    // RH_ScopedInstall(ProcessWeapons, 0x6E3950);
+    // RH_ScopedInstall(DoFixedMachineGuns, 0x73F400);
+    // RH_ScopedInstall(FireFixedMachineGuns, 0x73DF00);
+    // RH_ScopedInstall(DoDriveByShootings, 0x741FD0);
+
+    // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
+    // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
+    // RH_ScopedGlobalInstall(SetCompAlphaCB, 0x6D2950);
+    // RH_ScopedGlobalInstall(IsVehiclePointerValid, 0x6E38F0);
+    // RH_ScopedGlobalInstall(RemoveUpgradeCB, 0x6D3300);
+    // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
+    // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D33B0);
+    // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D3420);
+    // RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
+    // RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490);
+    // RH_ScopedGlobalInstall(RemoveAllUpgradesCB, 0x6D34D0);
 }
 
 // 0x6D5F10
@@ -1460,6 +1589,7 @@ bool CVehicle::IsVehicleNormal()
     return ((bool(__thiscall*)(CVehicle*))0x6D22F0)(this);
 }
 
+// 0x6D2330
 void CVehicle::ChangeLawEnforcerState(bool bIsEnforcer)
 {
     if (bIsEnforcer) {
@@ -1804,6 +1934,14 @@ void CVehicle::RemoveWinch()
 // NOTSA
 int32 CVehicle::GetRopeIndex() {
     return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
+}
+
+CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
+    return CVehicleAnimGroupData::GetVehicleAnimGroup(m_pHandlingData->m_nAnimGroup);
+}
+
+AssocGroupId CVehicle::GetAnimGroupId() const {
+    return (AssocGroupId)((int32)ANIM_GROUP_STDCARAMIMS + (int32)m_pHandlingData->m_nAnimGroup);
 }
 
 // 0x6D3CB0
@@ -2814,16 +2952,19 @@ void CVehicle::ProcessWeapons()
     ((void(__thiscall*)(CVehicle*))0x6E3950)(this);
 }
 
+// 0x73F400
 void CVehicle::DoFixedMachineGuns()
 {
     plugin::CallMethod<0x73F400, CVehicle*>(this);
 }
 
+// 0x73DF00
 void CVehicle::FireFixedMachineGuns()
 {
     plugin::CallMethod<0x73DF00, CVehicle*>(this);
 }
 
+// 0x741FD0
 void CVehicle::DoDriveByShootings()
 {
     plugin::CallMethod<0x741FD0, CVehicle*>(this);

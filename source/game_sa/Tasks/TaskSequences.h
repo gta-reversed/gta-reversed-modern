@@ -17,6 +17,7 @@ public:
     static void CleanUpForShutdown();
     static int32 GetAvailableSlot(uint8 slot);
 
+    static CTaskComplexSequence& GetActiveSequence() { return ms_taskSequence[ms_iActiveSequence]; }
     static inline void AddTaskToActiveSequence(CTask* task) {
         ms_taskSequence[ms_iActiveSequence].AddTask(task);
     }

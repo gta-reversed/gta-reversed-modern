@@ -28,6 +28,7 @@ class CPed;
 class CPlane;
 class CHeli;
 class CPedGroup;
+class CVehicleAnimGroup;
 
 enum eCarWeapon : uint8 {
     CAR_WEAPON_NOT_USED,
@@ -689,7 +690,8 @@ public:
     CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
     bool HasDriver() const { return !!m_pDriver; }
-
+    CVehicleAnimGroup& GetAnimGroup() const;
+    AssocGroupId GetAnimGroupId() const;
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -745,3 +747,5 @@ void CVehicle::GetGasTankPosition();
 void CVehicle::SetTappedGasTankVehicle(CEntity* entity);
 bool CVehicle::GetHasDualExhausts() { return (m_pHandlingData->m_nModelFlags >> 13) & 1; // m_bNoExhaust }
 */
+static constexpr uint16 TOWTRUCK_HOIST_DOWN_LIMIT = 20'000; // 0x8D313C
+static constexpr uint16 TOWTRUCK_HOIST_UP_LIMIT   = 10'000; // 0x8D3140

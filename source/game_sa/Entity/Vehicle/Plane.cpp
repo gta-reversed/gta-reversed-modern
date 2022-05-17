@@ -202,7 +202,7 @@ void CPlane::OpenDoor(CPed* ped, int32 componentId, eDoors door, float doorOpenR
     // Unfinished code R*, which removed in Android
     if (false) // byte_C1CAFC
     {
-        CMatrix matrix(&m_aCarNodes[componentId]->modelling, false);
+        CMatrix matrix(RwFrameGetMatrix(m_aCarNodes[componentId]), false);
         const auto y = m_doors[door].m_fAngle - m_doors[door].m_fPrevAngle + matrix.GetPosition().y;
         matrix.SetTranslate({matrix.GetPosition().x, y, matrix.GetPosition().z});
         matrix.UpdateRW();
