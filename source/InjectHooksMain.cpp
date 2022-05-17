@@ -25,6 +25,7 @@
 #include "AECutsceneTrackManager.h"
 #include "AECollisionAudioEntity.h"
 #include "AEGlobalWeaponAudioEntity.h"
+#include "AEPedAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
@@ -106,6 +107,7 @@
 #include "Securom.h"
 #include "GridRef.h"
 #include "MenuSystem.h"
+#include "InterestingEvents.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -234,6 +236,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CInterestingEvents::InjectHooks();
     CShadows::InjectHooks();
     CCam::InjectHooks();
     CCarAI::InjectHooks();
@@ -502,6 +505,7 @@ void InjectHooksMain() {
         CAECutsceneTrackManager::InjectHooks();
         CAECollisionAudioEntity::InjectHooks();
         CAEGlobalWeaponAudioEntity::InjectHooks();
+        CAEPedAudioEntity::InjectHooks();
         CAEPedlessSpeechAudioEntity::InjectHooks();
         CAEPoliceScannerAudioEntity::InjectHooks();
         CAudioEngine::InjectHooks();

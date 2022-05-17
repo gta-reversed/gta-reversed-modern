@@ -238,7 +238,7 @@ void CWorld::ProcessForAnimViewer() {
 // 0x563430
 void CWorld::ProcessPedsAfterPreRender() {
     if (CTimer::bSkipProcessThisFrame)
-        return; 
+        return;
 
     for (CPtrNode* it = ms_listMovingEntityPtrs.m_node, *next{}; it; it = next) {
         next = it->GetNext();
@@ -371,7 +371,7 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
 
         if (FilledColPointIndex < std::size(gaTempSphereColPoints)) { // TODO: Perhaps break if it's full?
             if (originalLineGoingUpwards == IsDirectionPointingUpwards(cp.m_vecPoint.z, localColLine.m_vecEnd.z) // Still pointing in the same direction
-            ) { 
+            ) {
                 entity->m_nScanCode = ms_nCurrentScanCode - 1;
                 dontGoToNextNode = true;
                 gaTempSphereColPoints[FilledColPointIndex++] = cp;
@@ -894,11 +894,11 @@ void CWorld::FindObjectsIntersectingCubeSectorList(CPtrList& ptrList, const CVec
         if (pos.x + fBoundRadius >= min.x &&
             pos.x - fBoundRadius <= max.x &&
 
-            pos.y + fBoundRadius >= min.y && 
+            pos.y + fBoundRadius >= min.y &&
             pos.y - fBoundRadius <= max.y &&
 
-            pos.z + fBoundRadius >= min.z && 
-            pos.z - fBoundRadius <= max.z 
+            pos.z + fBoundRadius >= min.z &&
+            pos.z - fBoundRadius <= max.z
         ) {
             if (*outCount < maxCount) {
                 if (outEntities)
@@ -1091,7 +1091,7 @@ void CWorld::SetPedsChoking(float x, float y, float z, float radius, CEntity* ga
                     1,
                     PED_PIECE_TORSO,
                     ped->GetLocalDirection(ped->GetPosition2D() - CVector2D{x, y})
-                );   
+                );
             }
         }
     }
@@ -1172,7 +1172,7 @@ void CWorld::RemoveFallenPeds() {
         if (vecPedPos.z > MAP_Z_LOW_LIMIT)
             continue;
         if (!ped->IsCreatedBy(ePedCreatedBy::PED_GAME) || ped->IsPlayer()) {
-            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, 1, 1000000.0f, 0, 0, 0, 0, 0);            
+            CNodeAddress pathNodeAddress = ThePaths.FindNodeClosestToCoors(vecPedPos, 1, 1000000.0f, 0, 0, 0, 0, 0);
             if (pathNodeAddress.IsAreaValid()) {
                 CVector pathNodePos = ThePaths.GetPathNode(pathNodeAddress)->GetNodeCoors();
                 pathNodePos.z += 2.0f;
@@ -1516,7 +1516,7 @@ CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
 bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& minTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck) {
     if (!ptrList.m_node)
         return false;
-     
+
     float localMinTouchDist = minTouchDistance;
 
     for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
@@ -1619,7 +1619,7 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
 
             if (bIncludeCarTyres)
                 break;
-            
+
             // Do car tyre test
 
             CColModel wheelCol{};
@@ -1643,7 +1643,7 @@ bool CWorld::ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& col
                         outEntity = entity;
                     } else {
                         // Since this col check consists only of checking the wheels
-                        // if `colLine.start` is at the opposite side to the col point 
+                        // if `colLine.start` is at the opposite side to the col point
                         // will mean that the `line` went thru the vehicle body
                         // which means there must be a direct hit somewhere with the vehicle's body
 
@@ -1768,7 +1768,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                             object->objectFlags.bIsExploded = true;
                         }
                     }
-                }        
+                }
             }
 
             if (entity->m_nModelIndex == ModelIndices::MI_ATM && creator == FindPlayerPed()) {
@@ -1871,7 +1871,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
             const auto pedLocalDir = ped->GetLocalDirection(impactVelocity);
             if (const auto attachedTo = ped->m_pAttachedTo; attachedTo && attachedTo->IsVehicle() && attachedTo->m_nStatus == STATUS_WRECKED) {
                 CPedDamageResponseCalculator pedDamageResponseCalculator{ creator, 1000.f, WEAPON_EXPLOSION, PED_PIECE_TORSO, false};
-                
+
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
                     pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
@@ -1900,7 +1900,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 }
 
                 CPedDamageResponseCalculator pedDamageResponseCalculator{ creator, entityRelDistToRadiusEnd_Doubled * 250.f, WEAPON_EXPLOSION, PED_PIECE_TORSO, false };
-                
+
                 CEventDamage eventDamage{ creator, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, (uint8)pedLocalDir, false, !!ped->bIsTalking };
                 if (eventDamage.AffectsPed(ped)) {
                     pedDamageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
@@ -1931,7 +1931,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                 impactVelocity *= std::min(1.f, entity->m_fTurnMass / entity->m_fMass);
                 entity->ApplyTurnForce(impactVelocity, {0.f, 0.f, entity->GetColModel()->m_boundSphere.m_fRadius / 2.f});
             }
-                
+
             entity->AsObject()->ObjectDamage(entityRelDistToRadiusEnd_Doubled * 300.f, nullptr, nullptr, creator, WEAPON_EXPLOSION);
             break;
         }
@@ -1992,7 +1992,7 @@ void CWorld::Process() {
                 if (entity->IsPed()) {
                     if (FindPlayerPed() == entity) {
                         Remove(entity);
-                    } else { 
+                    } else {
                         CPopulation::RemovePed(entity->AsPed());
                     }
                 } else {
@@ -2023,7 +2023,7 @@ void CWorld::Process() {
     }
 
     g_LoadMonitor.StartTimer(true);
-    if (CReplay::Mode == REPLAY_MODE_1) {
+    if (CReplay::Mode == MODE_PLAYBACK) {
         IterateMovingList([&](CEntity* entity) {
             entity->m_bIsInSafePosition = true;
             entity->UpdateRW();
@@ -2419,7 +2419,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
         MI_TELPOLE02,
         MI_PARKBENCH,
         MI_BARRIER1
-    })) { 
+    })) {
         RecalcZPosAtPoint(object->GetPosition());
     } else if (IsObjectModelAnyOf({
         MI_SINGLESTREETLIGHTS1,
@@ -2601,7 +2601,7 @@ bool CWorld::GetIsLineOfSightClear(const CVector& origin, const CVector& target,
     };
 
     if (originSectorX == targetSectorX && originSectorY == targetSectorY) { // Both in the same sector
-        return ProcessSector(originSectorX, originSectorY); 
+        return ProcessSector(originSectorX, originSectorY);
     }
     else if (originSectorX == targetSectorX) { // Same X for both, iterate on Y
         if (originSectorY >= targetSectorY) { // origin => target on Y axis

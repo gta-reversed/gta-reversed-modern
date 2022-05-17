@@ -137,12 +137,7 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int3
             repeatCount = repeatCount + 1;
         }
 
-        // Value of bRepeatSequence can be 0 or 1, this means that if we are
-        // within this code block, then `pNextSubTask = m_aTasks[*pTaskIndex]->Clone()`
-        // will always execute.
-        int32 bRepeatSequence = m_bRepeatSequence;
-        assert(m_bRepeatSequence > 1); // todo (Izzotop): Call me if it happens. (change to bool)
-        if (bRepeatSequence == 1 || repeatCount != bRepeatSequence) {
+        if (m_bRepeatSequence || repeatCount != m_bRepeatSequence) {
             nextSubTask = m_aTasks[taskIndex]->Clone();
         }
     } else if (incrementedTaskIndex != std::size(m_aTasks)) {

@@ -747,3 +747,5 @@ void CVehicle::GetGasTankPosition();
 void CVehicle::SetTappedGasTankVehicle(CEntity* entity);
 bool CVehicle::GetHasDualExhausts() { return (m_pHandlingData->m_nModelFlags >> 13) & 1; // m_bNoExhaust }
 */
+static constexpr uint16 TOWTRUCK_HOIST_DOWN_LIMIT = 20'000; // 0x8D313C
+static constexpr uint16 TOWTRUCK_HOIST_UP_LIMIT   = 10'000; // 0x8D3140

@@ -5,9 +5,9 @@
 #include "AEAudioHardware.h"
 #include "AEAmbienceTrackManager.h"
 #include "AECutsceneTrackManager.h"
-
 #include "AEUserRadioTrackManager.h"
 #include "AEAudioUtility.h"
+#include "AEWaterCannonAudioEntity.h"
 #include "LoadingScreen.h"
 
 CAudioEngine& AudioEngine = *(CAudioEngine*)0xB6BC90;
@@ -105,33 +105,40 @@ bool CAudioEngine::Initialise() {
     CLoadingScreen::Pause();
 
     if (!AEAudioHardware.Initialise()) {
+        DEV_LOG("[AudioEngine] Failed to initialise Audio Hardware")
         return false;
     }
 
     m_nBackgroundAudioChannel = AEAudioHardware.AllocateChannels(1);
 
     if (!AERadioTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Radio Track Manager")
         return false;
     }
 
     if (!AECutsceneTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Cutscene Track Manager")
         return false;
     }
 
     if (!AEAmbienceTrackManager.Initialise(m_nBackgroundAudioChannel)) {
+        DEV_LOG("[AudioEngine] Failed to initialise Ambience Track Manager")
         return false;
     }
 
     if (!AESoundManager.Initialise()) {
+        DEV_LOG("[AudioEngine] Failed to initialise Sound Manager")
         return false;
     }
 
     CAEAudioEntity::m_pAudioEventVolumes = new int8[45401];
     auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
     if (!file) {
+        DEV_LOG("[AudioEngine] Failed to open EVENTVOL.DAT");
         return false;
     }
     if (CFileMgr::Read(file, CAEAudioEntity::m_pAudioEventVolumes, 45401) != 45401) {
+        DEV_LOG("[AudioEngine] Failed to read EVENTVOL.DAT");
         CFileMgr::CloseFile(file);
         return false;
     }
@@ -147,6 +154,7 @@ bool CAudioEngine::Initialise() {
     CAEWeatherAudioEntity::StaticInitialise();
     CAEDoorAudioEntity::StaticInitialise();
     CAEFireAudioEntity::StaticInitialise();
+    CAEWaterCannonAudioEntity::StaticInitialise();
     CAEPoliceScannerAudioEntity::StaticInitialise();
     m_ScriptAE.Initialise();
     m_PedlessSpeechAE.Initialise();
@@ -216,8 +224,8 @@ void CAudioEngine::Shutdown() {
 }
 
 // 0x506EB0
-void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, uint8 surface1, uint8 surface2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
-    m_CollisionAE.ReportCollision(entity1, entity2, surface1, surface2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
+void CAudioEngine::ReportCollision(CEntity* entity1, CEntity* entity2, eSurfaceType surf1, eSurfaceType surf2, CVector& point, CVector* normal, float fCollisionImpact1, float fCollisionImpact2, bool playOnlyOneShotCollisionSound, bool unknown) {
+    m_CollisionAE.ReportCollision(entity1, entity2, surf1, surf2, point, normal, fCollisionImpact1, fCollisionImpact2, playOnlyOneShotCollisionSound, unknown);
 }
 
 // 0x507350
@@ -354,7 +362,7 @@ void CAudioEngine::ReportFrontendAudioEvent(eAudioEvents eventId, float volumeCh
 }
 
 // 0x506EC0
-void CAudioEngine::ReportBulletHit(CEntity* entity, uint8 surface, CVector& posn, float angleWithColPointNorm) {
+void CAudioEngine::ReportBulletHit(CEntity* entity, eSurfaceType surface, CVector& posn, float angleWithColPointNorm) {
     m_CollisionAE.ReportBulletHit(entity, surface, posn, angleWithColPointNorm);
 }
 

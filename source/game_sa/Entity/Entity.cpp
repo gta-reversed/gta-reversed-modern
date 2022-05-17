@@ -601,7 +601,7 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == MODEL_MISSILE) {
-            if (CReplay::Mode != REPLAY_MODE_1) {
+            if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(

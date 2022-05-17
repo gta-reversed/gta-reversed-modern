@@ -13,6 +13,7 @@
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexGoToPointAndStandStill.h"
+#include "InterestingEvents.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     RH_ScopedClass(CTaskComplexMedicTreatInjuredPed);
@@ -168,7 +169,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed(CPed* ped) {
         return CreateSubTask(ped->bInVehicle ? TASK_SIMPLE_CAR_DRIVE : TASK_COMPLEX_WANDER);
 
     if (subTaskId == TASK_COMPLEX_LEAVE_CAR) {
-        g_InterestingEvents.Add((CInterestingEvents::EType)12, ped);
+        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_12, ped);
         if (m_bIsDriver && m_pAccident->m_pPed && m_pAccident->m_bIsTreated) {
             FindAccidentPosition(ped, m_pAccident->m_pPed);
             return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL);

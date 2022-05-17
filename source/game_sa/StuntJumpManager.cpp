@@ -84,7 +84,7 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
-    if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
+    if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 
     CPlayerPed* playerPed = FindPlayerPed();
