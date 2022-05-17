@@ -7,11 +7,12 @@
 #pragma once
 
 #include "CarCtrl.h"
+#include "Radar.h"
+#include "PedType.h"
 #include "Tasks/TaskTypes/TaskComplexWander.h"
 
 class CZone;
 class CZoneInfo;
-class CRadar;
 
 enum eGangAttackState {
     NO_ATTACK          = 0,

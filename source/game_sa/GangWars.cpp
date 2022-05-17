@@ -63,7 +63,7 @@ void CGangWars::InjectHooks() {
     // RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);
     RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);
-    // RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
+    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
     RH_ScopedInstall(SetGangWarsActive, 0x446570);
     RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
     // RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
@@ -386,9 +386,38 @@ void CGangWars::ReleaseCarsInAttackWave() {
 }
 
 // Returns num of released peds
-// 0x445C30
+// 0x445C30, untested
 uint32 CGangWars::ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance) {
-    return plugin::CallAndReturn<uint32, 0x445C30, bool, bool>(isEndOfWar, restoreGangPedsAcquaintance);
+    auto numReleasedPeds = 0u;
+
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        CPed* ped = GetPedPool()->GetAt(i);
+
+        if (!ped)
+            continue;
+
+        if (ped->bPartOfAttackWave) {
+            ped->bPartOfAttackWave = false;
+            ped->SetCharCreatedBy(PED_GAME);
+            numReleasedPeds++;
+            CRadar::ClearBlipForEntity(BLIP_CHAR, i);
+            ped->bClearRadarBlipOnDeath = false;
+
+            if (restoreGangPedsAcquaintance) {
+                auto taskWander = CTaskComplexWander::GetWanderTaskByPedType(ped);
+                CEventScriptCommand esc(3, taskWander, false);
+                ped->GetEventGroup().Add(&esc);
+                ped->m_acquaintance = CPedType::GetPedTypeAcquaintances(ped->m_nPedType);
+            }
+        }
+
+        if (isEndOfWar && ped->bClearRadarBlipOnDeath) {
+            CRadar::ClearBlipForEntity(BLIP_CHAR, i);
+            ped->bClearRadarBlipOnDeath = false;
+        }
+    }
+
+    return numReleasedPeds;
 }
 
 // 0x446570
