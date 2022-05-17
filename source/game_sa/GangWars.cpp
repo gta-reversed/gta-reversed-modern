@@ -120,9 +120,9 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
         Provocation += 1.0f;
 
     for (auto i = 0; i < NumSpecificZones; i++) {
-        uint16 zoneInfIdx = CTheZones::GetNavigationZone(aSpecificZones[i])->m_nZoneExtraIndexInfo;
+        auto zoneInfo = CTheZones::GetZoneInfo(CTheZones::GetNavigationZone(aSpecificZones[i]));
 
-        if (CTheZones::ZoneInfoArray[zoneInfIdx].GangDensity[pedType - PED_TYPE_GANG1] != 0)
+        if (zoneInfo->GangDensity[pedType - PED_TYPE_GANG1] != 0)
             Provocation += 1.0f;
     }
 }
@@ -147,7 +147,7 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
 
     // inline?
     for (auto& zone : CTheZones::NavigationZoneArray) {
-        if (zoneInfo == &CTheZones::ZoneInfoArray[zone.m_nZoneExtraIndexInfo])
+        if (zoneInfo == CTheZones::GetZoneInfo(&zone))
             return true;
     }
 
@@ -184,7 +184,7 @@ void CGangWars::ClearSpecificZonesToTriggerGangWar() {
     CTheZones::FillZonesWithGangColours(false);
 }
 
-// 0x4444B0, untested
+// 0x4444B0
 void CGangWars::ClearTheStreets() {
     for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
         auto ped = GetPedPool()->GetAt(i);
@@ -267,7 +267,7 @@ bool CGangWars::GangWarGoingOn() {
     return State != NOT_IN_WAR || State2 == WAR_NOTIFIED;
 }
 
-// 0x445FD0, untested
+// 0x445FD0
 void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncreaser) {
     if (!pZoneInfoToFightOver)
         return;
@@ -285,7 +285,7 @@ void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncr
         CStats::IncrementStat(STAT_TERRITORIES_LOST, 1.0f);
 }
 
-// 0x445E80, untested
+// 0x445E80
 bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
     bool doesControlInitial = DoesPlayerControlThisZone(pZoneInfoToFightOver);
     uint8 totalEnemyDensity = 0u;
@@ -400,7 +400,7 @@ void CGangWars::ReleaseCarsInAttackWave() {
 }
 
 // Returns num of released peds
-// 0x445C30, untested
+// 0x445C30
 uint32 CGangWars::ReleasePedsInAttackWave(bool isEndOfWar, bool restoreGangPedsAcquaintance) {
     auto numReleasedPeds = 0u;
 
