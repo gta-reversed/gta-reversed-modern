@@ -368,7 +368,7 @@ void CPed::operator delete(void* data) {
 * @addr 0x5E4A00
 */
 void CPed::SetMoveAnim() {
-    if (CanUseTorsoWhenLooking() || m_pAttachedTo) {
+    if (!IsAlive() || bIsDucking || m_pAttachedTo) {
         return;
     }
 
@@ -3557,27 +3557,26 @@ void CPed::RemoveLighting(bool bRemove) {
 */
 void CPed::FlagToDestroyWhenNextProcessed() {
     m_bRemoveFromWorld = true;
-    if (!bInVehicle) {
-        return;
-    }
 
-    if (!m_pVehicle) {
+    if (!IsInVehicle()) {
         return;
     }
 
     if (m_pVehicle->IsDriver(this)) {
         ClearReference(m_pVehicle->m_pDriver);
-        if (IsPlayer() || m_pVehicle->m_nStatus != STATUS_WRECKED) {
+        if (IsPlayer() && m_pVehicle->m_nStatus != STATUS_WRECKED) {
             m_pVehicle->m_nStatus = STATUS_ABANDONED;
         }
     } else {
         m_pVehicle->RemovePassenger(this);
     }
+
     bInVehicle = false;
 
     if (IsVehiclePointerValid(m_pVehicle)) {
         SafeCleanUpRef(m_pVehicle);
     }
+
     m_pVehicle = nullptr;
 
     SetPedState(IsCreatedByMission() ? PEDSTATE_DEAD : PEDSTATE_NONE);
