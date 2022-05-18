@@ -149,7 +149,7 @@ CVector& FindPlayerSpeed(int32 playerId) {
 // 0x56E120
 CEntity* FindPlayerEntity(int32 playerId) {
     if (auto player = FindPlayerPed(playerId)) {
-        if (player->bInVehicle && player->m_pVehicle) 
+        if (player->bInVehicle && player->m_pVehicle)
             return player->m_pVehicle;
         return player;
     }
@@ -206,7 +206,7 @@ float FindPlayerHeight() {
 
 // 0x56E210
 CPlayerPed* FindPlayerPed(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
+    return FindPlayerInfo(playerId).m_pPed;
 }
 
 // Returns player vehicle
@@ -227,7 +227,7 @@ CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
 
 // 0x56E230
 CWanted* FindPlayerWanted(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
+    return FindPlayerInfo(playerId).m_PlayerData.m_pWanted;
 }
 
 

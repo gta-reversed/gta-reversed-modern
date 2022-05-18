@@ -4309,6 +4309,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
     ((void(__thiscall*)(CAutomobile*, uint8))0x6A7090)(this, bExplodeImmediately);
 }
 
+// todo: nodeIndex one of { eBikeNodes eBmxNodes eBoatNodes eHeliNodes eMonsterTruckNodes ePlaneNodes eQuadBikeNodes eTrailerNodes eTrainNodes eCarNodes }
 // 0x6A8580
 CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType)
 {

@@ -577,6 +577,9 @@ public:
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
 
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+
+    int32 GetPadNumber() const;
+
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }
