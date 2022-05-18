@@ -284,7 +284,7 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
     flags.bFireProof = enable;
     flags.bExplosionProof = enable;
     flags.bCollisionProof = enable;
-    flags.bMeeleProof = enable;
+    flags.bMeleeProof = enable;
     m_PlayerData.m_bCanBeDamaged = !enable;
     m_PlayerData.m_pWanted->m_bEverybodyBackOff = enable;
     m_pPed->GetPadFromPlayer()->bPlayerSafe = enable;
