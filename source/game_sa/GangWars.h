@@ -32,33 +32,33 @@ enum eGangWarState {
 
 class CGangWars {
 public:
-    static int32& ZoneInfoForTraining;
-    static int32 (&GangRatingStrength)[3]; // static int32 GangRatingStrength[3]
-    static int32 (&GangRatings)[3];        // static int32 GangRatings[3]
-    static int32& FightTimer;
-    static float& TimeTillNextAttack;
-    static eGangAttackState& State2;
-    static int32& Gang2;
-    static uint32& LastTimeInArea;
-    static int32& WarFerocity;
-    static float& Provocation;
-    static uint32& TimeStarted;
-    static eGangWarState& State;
-    static int32 (&aSpecificZones)[6]; // static int32 aSpecificZones[6]
-    static float& Difficulty;
-    static int32& Gang1;
-    static CZone*& pZoneToFightOver;
-    static CZoneInfo*& pZoneInfoToFightOver;
-    static bool& bGangWarsActive;
-    static bool& bTrainingMission;
-    static bool& bPlayerIsCloseby;
-    static bool& bCanTriggerGangWarWhenOnAMission;
-    static int32& NumSpecificZones;
-    static CRadar*& RadarBlip; // TODO/BUG: No way this is correct
-    static float& TerritoryUnderControlPercentage;
-    static bool& bIsPlayerOnAMission;
-    static CVector& CoorsOfPlayerAtStartOfWar;
-    static CVector& PointOfAttack;
+    static inline int32& ZoneInfoForTraining = *reinterpret_cast<int32*>(0x8A5F40); // -1
+    static inline std::array<int32, 3>& GangRatingStrength = *reinterpret_cast<std::array<int32, 3>*>(0x96AB2C);
+    static inline std::array<int32, 3>& GangRatings = *reinterpret_cast<std::array<int32, 3>*>(0x96AB38);
+    static inline int32& FightTimer = *reinterpret_cast<int32*>(0x96AB44);
+    static inline float& TimeTillNextAttack = *reinterpret_cast<float*>(0x96AB48);
+    static inline int32& Gang2 = *reinterpret_cast<int32*>(0x96AB50);
+    static inline uint32& LastTimeInArea = *reinterpret_cast<uint32*>(0x96AB54);
+    static inline int32& WarFerocity = *reinterpret_cast<int32*>(0x96AB58);
+    static inline float& Provocation = *reinterpret_cast<float*>(0x96AB5C);
+    static inline uint32& TimeStarted = *reinterpret_cast<uint32*>(0x96AB60);
+    static inline eGangWarState& State = *reinterpret_cast<eGangWarState*>(0x96AB64);
+    static inline eGangAttackState& State2 = *reinterpret_cast<eGangAttackState*>(0x96AB4C);
+    static inline std::array<int32, 6> aSpecificZones = *reinterpret_cast<std::array<int32, 6>*>(0x96AB68);
+    static inline float& Difficulty = *reinterpret_cast<float*>(0x96AB80);
+    static inline int32& Gang1 = *reinterpret_cast<int32*>(0x96AB84);
+    static inline CZone*& pZoneToFightOver = *reinterpret_cast<CZone**>(0x96AB88);
+    static inline CZoneInfo*& pZoneInfoToFightOver = *reinterpret_cast<CZoneInfo**>(0x96AB8C);
+    static inline bool& bGangWarsActive = *reinterpret_cast<bool*>(0x96AB90);
+    static inline bool& bTrainingMission = *reinterpret_cast<bool*>(0x96AB91);
+    static inline bool& bPlayerIsCloseby = *reinterpret_cast<bool*>(0x96AB92);
+    static inline bool& bCanTriggerGangWarWhenOnAMission = *reinterpret_cast<bool*>(0x96AB93);
+    static inline int32& NumSpecificZones = *reinterpret_cast<int32*>(0x96AB94);
+    static inline CRadar*& RadarBlip = *reinterpret_cast<CRadar**>(0x96AB98);
+    static inline float& TerritoryUnderControlPercentage = *reinterpret_cast<float*>(0x96AB9C);
+    static inline bool& bIsPlayerOnAMission = *reinterpret_cast<bool*>(0x96ABA0);
+    static inline CVector& CoorsOfPlayerAtStartOfWar = *reinterpret_cast<CVector*>(0x96ABBC);
+    static inline CVector& PointOfAttack = *reinterpret_cast<CVector*>(0x96ABC8);
 
 public:
     static void InjectHooks();
