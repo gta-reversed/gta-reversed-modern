@@ -14,6 +14,7 @@
 #include "VehicleSaveStructure.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "IKChainManager_c.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
@@ -98,7 +99,7 @@ void CVehicle::InjectHooks()
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
     RH_ScopedInstall(DoHeadLightBeam, 0x6E0E20);
-    RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30);
+    // RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30); register problem?
 
     // RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
     // RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
@@ -158,12 +159,12 @@ void CVehicle::InjectHooks()
     // RH_ScopedInstall(InitWinch, 0x6D3B60);
     // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
     // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
-    // RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
-    // RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
-    // RH_ScopedInstall(GetPlaneGunsAutoAimAngle, 0x6D3E00);
-    // RH_ScopedInstall(SetFiringRateMultiplier, 0x6D4010);
-    // RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
-    // RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
+    RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
+    RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
+    RH_ScopedInstall(GetPlaneGunsAutoAimAngle, 0x6D3E00);
+    RH_ScopedInstall(SetFiringRateMultiplier, 0x6D4010);
+    RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
+    RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
     // RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
     // RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
     // RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
@@ -172,7 +173,7 @@ void CVehicle::InjectHooks()
     // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
     // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     // RH_ScopedInstall(CanBeDriven, 0x6D5400);
-    // RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
+    // + RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
     // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
     // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
     // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
@@ -216,6 +217,11 @@ void CVehicle::InjectHooks()
     // RH_ScopedInstall(DoFixedMachineGuns, 0x73F400);
     // RH_ScopedInstall(FireFixedMachineGuns, 0x73DF00);
     // RH_ScopedInstall(DoDriveByShootings, 0x741FD0);
+    RH_ScopedInstall(ReleasePickedUpEntityWithWinch, 0x6D3CB0);
+    RH_ScopedInstall(PickUpEntityWithWinch, 0x6D3CD0);
+    RH_ScopedInstall(QueryPickedUpEntityWithWinch, 0x6D3CF0);
+    RH_ScopedInstall(GetRopeHeightForHeli, 0x6D3D10);
+    RH_ScopedInstall(SetRopeHeightForHeli, 0x6D3D30);
 
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D2690);
     // RH_ScopedGlobalInstall(SetVehicleAtomicVisibilityCB, 0x6D26D0);
@@ -1977,24 +1983,60 @@ void CVehicle::SetRopeHeightForHeli(float height)
 // 0x6D3D60
 void CVehicle::RenderDriverAndPassengers()
 {
-    ((void(__thiscall*)(CVehicle*))0x6D3D60)(this);
+    if (m_pDriver && m_pDriver->m_nPedState == PEDSTATE_DRIVING) {
+        m_pDriver->Render();
+    }
+
+    for (auto& passenger : m_apPassengers) {
+        if (passenger && passenger->m_nPedState == PEDSTATE_DRIVING) {
+            passenger->Render();
+        }
+    }
 }
 
 // 0x6D3DB0
-void CVehicle::PreRenderDriverAndPassengers()
-{
-    ((void(__thiscall*)(CVehicle*))0x6D3DB0)(this);
+void CVehicle::PreRenderDriverAndPassengers() {
+    if (m_pDriver && m_pDriver->m_nPedState == PEDSTATE_DRIVING) {
+        m_pDriver->PreRenderAfterTest();
+    }
+
+    for (auto& passenger : m_apPassengers) {
+        if (passenger && passenger->m_nPedState == PEDSTATE_DRIVING) {
+            passenger->PreRenderAfterTest();
+        }
+    }
 }
 
 // 0x6D3E00
-float CVehicle::GetPlaneGunsAutoAimAngle()
-{
-    return ((float(__thiscall*)(CVehicle*))0x6D3E00)(this);
+float CVehicle::GetPlaneGunsAutoAimAngle() {
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+        return 25.0f;
+    case MODEL_SEASPAR:
+        return 10.0f;
+    case MODEL_RCBARON:
+        return 30.0f;
+    case MODEL_RUSTLER:
+        return 15.0f;
+    case MODEL_MAVERICK:
+        return 15.0f;
+    case MODEL_POLMAV:
+        return 15.0f;
+    case MODEL_HYDRA:
+        return 15.0f;
+    case MODEL_CARGOBOB:
+        return 15.0f;
+    case MODEL_RCTIGER:
+        return 20.0f;
+    case MODEL_TORNADO:
+        return 15.0f;
+    default:
+        return 0.0f;
+    }
 }
 
 // 0x6D3F30
-int32 CVehicle::GetPlaneNumGuns()
-{
+int32 CVehicle::GetPlaneNumGuns() {
     switch (m_nModelIndex) {
     case MODEL_HUNTER:
     case MODEL_SEASPAR:
@@ -2014,21 +2056,48 @@ int32 CVehicle::GetPlaneNumGuns()
 }
 
 // 0x6D4010
-void CVehicle::SetFiringRateMultiplier(float multiplier)
-{
-    ((void(__thiscall*)(CVehicle*, float))0x6D4010)(this, multiplier);
+void CVehicle::SetFiringRateMultiplier(float multiplier) {
+    multiplier = std::clamp(multiplier, 0.0f, 15.9375f);
+    switch (m_nVehicleSubType) {
+    case VEHICLE_TYPE_PLANE:
+        AsPlane()->m_nFiringMultiplier = uint8(multiplier / 16.0f);
+        break;
+    case VEHICLE_TYPE_HELI:
+        AsHeli()->m_nFiringMultiplier = uint8(multiplier / 16.0f);
+        break;
+    }
 }
 
 // 0x6D4090
-float CVehicle::GetFiringRateMultiplier()
-{
-    return ((float(__thiscall*)(CVehicle*))0x6D4090)(this);
+float CVehicle::GetFiringRateMultiplier() {
+    switch (m_nVehicleSubType) {
+    case VEHICLE_TYPE_PLANE:
+        return float(AsPlane()->m_nFiringMultiplier) / 16.0f;
+    case VEHICLE_TYPE_HELI:
+        return float(AsHeli()->m_nFiringMultiplier) / 16.0f;
+    default:
+        return 1.0f;
+    }
 }
 
 // 0x6D40E0
-uint32 CVehicle::GetPlaneGunsRateOfFire()
-{
-    return ((uint32(__thiscall*)(CVehicle*))0x6D40E0)(this);
+uint32 CVehicle::GetPlaneGunsRateOfFire() {
+    const auto mult = GetFiringRateMultiplier();
+    switch (m_nModelIndex) {
+    case MODEL_SEASPAR:
+    case MODEL_RCBARON:
+        return uint32(40.0f / mult);
+    case MODEL_RUSTLER:
+        return uint32(80.0f / mult);
+    case MODEL_HYDRA:
+        return uint32(17.0f / mult);
+    case MODEL_CARGOBOB:
+        return uint32(100.0f / mult);
+    case MODEL_TORNADO:
+        return uint32(45.0f / mult);
+    default:
+        return uint32(60.0f / mult);
+    }
 }
 
 // 0x6D4290
@@ -2040,23 +2109,74 @@ CVector CVehicle::GetPlaneGunsPosition(int32 gunId)
 }
 
 // 0x6D4590
-uint32 CVehicle::GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType)
+uint32 CVehicle::GetPlaneOrdnanceRateOfFire(eOrdnanceType type)
 {
-    return ((uint32(__thiscall*)(CVehicle*, eOrdnanceType))0x6D4590)(this, ordnanceType);
+    const auto mult = GetFiringRateMultiplier();
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+        return (uint32)((float)500 / mult);
+    case MODEL_SEASPAR:
+    case MODEL_RUSTLER:
+        return (uint32)((float)1000 / mult);
+    case MODEL_HYDRA:
+        return (uint32)((float)(type != 1 ? 1000 : 500) / mult); // todo: heat trap / missile?
+    default:
+        return (uint32)((float)350 / mult);
+    }
 }
 
+// signature changed?
 // 0x6D46E0
-CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType ordnanceType)
+CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type)
 {
-    CVector result;
-    ((void(__thiscall*)(CVehicle*, CVector*, eOrdnanceType))0x6D46E0)(this, &result, ordnanceType);
-    return result;
+    // CVector result;
+    // ((void(__thiscall*)(CVehicle*, CVector*, eOrdnanceType))0x6D46E0)(this, &result, type);
+    // return result;
+
+    const auto pos = GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_VEH_GUN);
+    if (!pos->IsZero()) {
+        return pos;
+    }
+
+    constexpr CVector HUNTER_ORDNANCE_POS  = { 2.17f, 1.00f, -0.80f }; // 0x8D3640
+    constexpr CVector RUSTLER_ORDNANCE_POS = { 2.19f, 1.50f, -0.58f }; // 0x8D364C
+    constexpr CVector HYDRA_1_ORDNANCE_POS = { 3.70f, 0.98f, -1.02f }; // 0x8D3658
+    constexpr CVector HYDRA_2_ORDNANCE_POS = { 3.92f, 0.98f, -1.02f }; // 0x8D3664
+
+    constexpr CVector SEASPAR_ORDNANCE_POS = { }; // 0xC1CC38;
+    constexpr CVector RCBARON_ORDNANCE_POS = { }; // 0xC1CC50;
+    constexpr CVector TORNADO_ORDNANCE_POS = { }; // 0xC1CC44;
+
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+        return HUNTER_ORDNANCE_POS;
+    case MODEL_SEASPAR:
+        return SEASPAR_ORDNANCE_POS;
+    case MODEL_RCBARON:
+        return RCBARON_ORDNANCE_POS;
+        break;
+    case MODEL_RUSTLER:
+        return RUSTLER_ORDNANCE_POS;
+    case MODEL_HYDRA:
+        if (type == 1) {
+            return HYDRA_1_ORDNANCE_POS;
+        } else if (type == 2) {
+            return HYDRA_2_ORDNANCE_POS;
+        }
+        return pos;
+    case MODEL_TORNADO:
+        return TORNADO_ORDNANCE_POS;
+    default:
+        return {};
+        break;
+    }
 }
 
+// see gists
 // 0x6D4900
-void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType ordnanceType)
+void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type)
 {
-    ((void(__thiscall*)(CVehicle*, bool, eOrdnanceType))0x6D4900)(this, bChange, ordnanceType);
+    ((void(__thiscall*)(CVehicle*, bool, eOrdnanceType))0x6D4900)(this, bChange, type);
 }
 
 // 0x6D4AD0
@@ -2072,9 +2192,9 @@ void CVehicle::FirePlaneGuns()
 }
 
 // 0x6D5110
-void CVehicle::FireUnguidedMissile(eOrdnanceType ordnanceType, bool bCheckTime)
+void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime)
 {
-    ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6D5110)(this, ordnanceType, bCheckTime);
+    ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6D5110)(this, type, bCheckTime);
 }
 
 // 0x6D5400
@@ -2086,7 +2206,32 @@ bool CVehicle::CanBeDriven()
 // 0x6D5490
 void CVehicle::ReactToVehicleDamage(CPed* ped)
 {
-    ((void(__thiscall*)(CVehicle*, CPed*))0x6D5490)(this, ped);
+    return ((void(__thiscall*)(CVehicle*, CPed*))0x6D5490)(this, ped);
+
+    const auto React = [=](CPed* ped, CEntity* target, int32 time) {
+        g_ikChainMan.LookAt("ReactToVhclDam", ped, target, time, BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
+    };
+
+    // FIX_BUGS ?
+    int32 t1 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    if (m_pDriver) {
+        if (m_apPassengers[0]) {
+            if (rand() >= 0x3FFF)
+                React(m_pDriver, ped, t1);
+            else
+                React(m_pDriver, m_apPassengers[0], t1);
+        } else {
+            React(m_pDriver, ped, t1);
+        }
+    }
+
+    int32 t2 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    if (m_apPassengers[0]) {
+        if (rand() >= 0x3FFF)
+            React(m_apPassengers[0], ped, t2);
+        else
+            React(m_apPassengers[0], m_pDriver, t2);
+    }
 }
 
 // 0x6D55C0
@@ -2794,15 +2939,15 @@ CEntity* CVehicle::ScanAndMarkTargetForHeatSeekingMissile(CEntity* entity)
 }
 
 // 0x6E05C0
-void CVehicle::FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType ordnanceType, bool arg2)
+void CVehicle::FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType type, bool arg2)
 {
-    ((void(__thiscall*)(CVehicle*, CEntity*, eOrdnanceType, bool))0x6E05C0)(this, targetEntity, ordnanceType, arg2);
+    ((void(__thiscall*)(CVehicle*, CEntity*, eOrdnanceType, bool))0x6E05C0)(this, targetEntity, type, arg2);
 }
 
 // 0x6E07E0
-void CVehicle::PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1)
+void CVehicle::PossiblyDropFreeFallBombForPlayer(eOrdnanceType type, bool arg1)
 {
-    ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6E07E0)(this, ordnanceType, arg1);
+    ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6E07E0)(this, type, arg1);
 }
 
 // 0x6E0950

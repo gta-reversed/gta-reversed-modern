@@ -31,11 +31,11 @@ class CPedGroup;
 class CVehicleAnimGroup;
 
 enum eCarWeapon : uint8 {
-    CAR_WEAPON_NOT_USED,
-    CAR_WEAPON_HEAVY_GUN,
-    CAR_WEAPON_FREEFALL_BOMB,
-    CAR_WEAPON_LOCK_ON_ROCKET,
-    CAR_WEAPON_DOUBLE_ROCKET
+    CAR_WEAPON_NOT_USED       = 0,
+    CAR_WEAPON_HEAVY_GUN      = 1,
+    CAR_WEAPON_FREEFALL_BOMB  = 2,
+    CAR_WEAPON_LOCK_ON_ROCKET = 3,
+    CAR_WEAPON_DOUBLE_ROCKET  = 4,
 };
 
 enum eCarLock : uint32 {
@@ -564,12 +564,12 @@ public:
     float GetFiringRateMultiplier();
     uint32 GetPlaneGunsRateOfFire();
     CVector GetPlaneGunsPosition(int32 gunId);
-    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType);
-    CVector GetPlaneOrdnancePosition(eOrdnanceType ordnanceType);
-    void SelectPlaneWeapon(bool bChange, eOrdnanceType ordnanceType);
+    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType type);
+    CVector GetPlaneOrdnancePosition(eOrdnanceType type);
+    void SelectPlaneWeapon(bool bChange, eOrdnanceType type);
     void DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex);
     void FirePlaneGuns();
-    void FireUnguidedMissile(eOrdnanceType ordnanceType, bool bCheckTime);
+    void FireUnguidedMissile(eOrdnanceType type, bool bCheckTime);
     bool CanBeDriven();
     void ReactToVehicleDamage(CPed* ped);
     bool GetVehicleLightsStatus();

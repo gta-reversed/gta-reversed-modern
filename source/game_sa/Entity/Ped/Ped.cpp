@@ -3622,3 +3622,16 @@ bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset) {
 
     return jacker->Say(123u, offset) != -1;
 }
+
+// NOTSA
+int32 CPed::GetPadNumber() const {
+    switch (m_nPedType) {
+    case PED_TYPE_PLAYER1:
+        return 0;
+    case PED_TYPE_PLAYER2:
+        return 1;
+    default:
+        assert(true && "Inappropriate usage of GetPadNumber");
+        return 0;
+    }
+}
