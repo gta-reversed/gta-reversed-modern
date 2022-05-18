@@ -165,9 +165,9 @@ void CSimpleVariablesSaveStructure::Extract(uint32& versionId) const {
 
     CCheat::m_bHasPlayerCheated = m_bHasPlayerCheated;
     if (m_bAllTaxisNitro) {
-        CCheat::EnableLegitimateCheat(CHEAT_ALL_TAXIS_NITRO);
+        CCheat::ApplyCheat(CHEAT_ALL_TAXIS_NITRO);
     }
     if (m_bProstitutesPayYou) {
-        CCheat::EnableLegitimateCheat(CHEAT_PROSTITUTES_PAY_YOU);
+        CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
     }
 }

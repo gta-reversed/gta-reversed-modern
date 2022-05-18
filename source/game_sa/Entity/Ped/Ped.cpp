@@ -2042,7 +2042,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
     }
 
     if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
-        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questinable whenever that's needed at all..)
+        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
@@ -2539,7 +2539,6 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
     GiveWeapon(WEAPON_RLAUNCHER, 200, true);
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
-    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
 }
 
 /*!
@@ -2555,7 +2554,6 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
     GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
-    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
 }
 
 /*!
@@ -2569,6 +2567,16 @@ void CPed::GiveWeaponSet3() {
     GiveWeapon(WEAPON_MP5, 100, true);
     GiveWeapon(WEAPON_M4, 150, true);
     GiveWeapon(WEAPON_RLAUNCHER_HS, 200, true);
+}
+
+/*!
+ * @notsa
+ */
+void CPed::GiveWeaponSet4() {
+    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
+    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
+    GiveWeapon(WEAPON_MINIGUN, 500, true);
+    GiveWeapon(WEAPON_DILDO2, 0, true);
 }
 
 /*!
@@ -3473,6 +3481,9 @@ void CPed::Render() {
         }
     }
 
+    RenderBigHead();
+    RenderThinBody();
+
     // 0x5E77E3
     // Render us (And any extra FX)
     if (CPostEffects::IsVisionFXActive()) {
@@ -3530,9 +3541,47 @@ void CPed::Render() {
     }
 }
 
+// https://github.com/gennariarmando/bobble-heads
+// NOTSA
+void CPed::RenderBigHead() const {
+    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+        return;
+
+    auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
+    auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
+
+    const float scale = 3.0f;
+    const CVector s = { scale, scale, scale };
+    CVector t = { 0.0f, -(scale / 6.0f) / 10.0f, 0.0f };
+
+    for (auto& bone : { BONE_L_BROW, BONE_R_BROW, BONE_JAW }) {
+        auto index = RpHAnimIDGetIndex(hier, bone);
+        if (RwMatrix* mat = &matrices[index]) {
+            RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+            if (bone == BONE_JAW) {
+                t.x = ((scale / 8.0f) / 10.0f) / 8.0f;
+                t.y /= 8.0f;
+            }
+            RwMatrixTranslate(mat, &t, rwCOMBINEPRECONCAT);
+        }
+    }
+
+    auto index = RpHAnimIDGetIndex(hier, BONE_HEAD);
+    if (RwMatrix* mat = &matrices[index]) {
+        RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+    }
+}
+
+// NOTSA
+void CPed::RenderThinBody() const {
+    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+        return;
+
+}
+
 /*!
-* @addr 0x553F00
-*/
+ * @addr 0x553F00
+ */
 bool CPed::SetupLighting() {
   ActivateDirectional();
   return CRenderer::SetupLightingForEntity(this);
