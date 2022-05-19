@@ -35,7 +35,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     RH_ScopedInstall(PassTime, 0x455200);
-    // RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
+    RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     // RH_ScopedInstall(PickedUpOyster, 0x4552D0);
     // RH_ScopedInstall(PictureTaken, 0x456A70);
     // RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
@@ -260,7 +260,19 @@ void CPickups::PassTime(uint32 time) {
 
 // 0x455390
 void CPickups::PickedUpHorseShoe() {
-    plugin::Call<0x455390>();
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_COLLECTABLE1);
+
+    CStats::IncrementStat(STAT_HORSESHOES_COLLECTED);
+    CStats::IncrementStat(STAT_LUCK, 1000.f / CStats::GetStatValue(STAT_TOTAL_HORSESHOES)); // TODO: Is this some inlined stuff? (The divion part)
+
+    FindPlayerInfo(0).m_nMoney += 100;
+
+    if (CStats::GetStatValue(STAT_TOTAL_HORSESHOES) == CStats::GetStatValue(STAT_HORSESHOES_COLLECTED)) { // Check if there's more to collect or not
+        CGarages::TriggerMessage("HO_ALL");
+        FindPlayerInfo(0).m_nMoney += 1000;
+    } else {
+        CGarages::TriggerMessage("HO_ONE", (int16)CStats::GetStatValue(STAT_TOTAL_HORSESHOES), 5000u, (int16)CStats::GetStatValue(STAT_HORSESHOES_COLLECTED));
+    }
 }
 
 // 0x4552D0
