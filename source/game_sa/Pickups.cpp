@@ -336,8 +336,18 @@ void CPickups::RemovePickUp(int32 pickupHandle) {
 }
 
 // 0x456D30
-void CPickups::RemovePickUpsInArea(float cornerA_x, float cornerA_y, float cornerA_z, float cornerB_x, float cornerB_y, float cornerB_z) {
-    plugin::Call<0x456D30, float, float, float, float, float, float>(cornerA_x, cornerA_y, cornerA_z, cornerB_x, cornerB_y, cornerB_z);
+void CPickups::RemovePickUpsInArea(float min_x,float max_x, float min_y, float max_y, float min_z, float max_z) {
+    CBoundingBox bb{ {min_x, min_y, min_z}, {max_x, max_y, max_z} }; // They didn't use a bounding box, but it's nicer to do so.
+    for (auto& p : aPickUps) {
+        switch (p.m_nPickupType) {
+        case PICKUP_NONE:
+            continue;
+        }
+
+        if (bb.IsPointWithin(p.GetPosn())) {
+            p.Remove();
+        }
+    }
 }
 
 // 0x455470
