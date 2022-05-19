@@ -31,19 +31,19 @@ void CAEVehicleAudioEntity::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x4F63E0);
     RH_ScopedInstall(Destructor, 0x6D0A10);
-    RH_ScopedVirtualInstall(UpdateParameters, 0x4FB6C0);                     // +
-    RH_ScopedInstall(Initialise, 0x4F7670);                                  // +
-    RH_ScopedInstall(StaticInitialise, 0x5B99F0);                            // +
-    RH_ScopedInstall(Terminate, 0x4FB8C0);                                   // +
-    RH_ScopedInstall(GetAircraftNearPosition, 0x4F96A0);                     // +
-    RH_ScopedInstall(GetFlyingMetalVolume, 0x4F6150);                        // +
-    RH_ScopedInstall(GetVehicleAudioSettings, 0x4F5C10);                     // +
-    RH_ScopedInstall(RequestBankSlot, 0x4F4D10);                             // +
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4FB6C0);
+    RH_ScopedInstall(Initialise, 0x4F7670);
+    RH_ScopedInstall(StaticInitialise, 0x5B99F0);
+    RH_ScopedInstall(Terminate, 0x4FB8C0);
+    RH_ScopedInstall(GetAircraftNearPosition, 0x4F96A0);
+    RH_ScopedInstall(GetFlyingMetalVolume, 0x4F6150);
+    RH_ScopedInstall(GetVehicleAudioSettings, 0x4F5C10);
+    RH_ScopedInstall(RequestBankSlot, 0x4F4D10);
     RH_ScopedInstall(DemandBankSlot, 0x4F4E60);
     RH_ScopedInstall(DoesBankSlotContainThisBank, 0x4F4E30);
-    RH_ScopedInstall(StoppedUsingBankSlot, 0x4F4DF0);                        // +
-    RH_ScopedInstall(EnableHelicoptors, 0x4F4EF0);                           // +
-    RH_ScopedInstall(DisableHelicoptors, 0x4F4EE0);                          // +
+    RH_ScopedInstall(StoppedUsingBankSlot, 0x4F4DF0);
+    RH_ScopedInstall(EnableHelicoptors, 0x4F4EF0);
+    RH_ScopedInstall(DisableHelicoptors, 0x4F4EE0);
     RH_ScopedInstall(EnableHelicoptor, 0x4F5C00);
     RH_ScopedInstall(DisableHelicoptor, 0x4F5BF0);
     RH_ScopedInstall(StaticGetPlayerVehicleAudioSettingsForRadio, 0x4F4ED0);
@@ -63,9 +63,9 @@ void CAEVehicleAudioEntity::InjectHooks() {
     // + RH_ScopedInstall(GetFrequencyForDummyRev, 0x4F54F0);
     // + RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0);
     RH_ScopedInstall(UpdateVehicleEngineSound, 0x4F56D0);
-    // RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);                 // -
-    RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);                       // -
-    RH_ScopedInstall(TurnOffRadioForVehicle, 0x4F5B60);                      // -
+    // - RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);
+    RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);  // -
+    RH_ScopedInstall(TurnOffRadioForVehicle, 0x4F5B60); // -
     RH_ScopedInstall(PlayerAboutToExitVehicleAsDriver, 0x4F5BA0);
     RH_ScopedInstall(CopHeli, 0x4F5C40);
     // crashes on hook switch RH_ScopedInstall(GetFreqForIdle, 0x4F5C60);
@@ -204,7 +204,7 @@ void CAEVehicleAudioEntity::Initialise(CEntity* entity) {
 
     field_238 = 0.0f;
     field_23C = 1.0f;
-    field_240 = 0;
+    field_240 = 0.0f;
 
     m_Settings = GetVehicleAudioSettings(entity->m_nModelIndex);
     m_bModelWithSiren = entity->AsVehicle()->UsesSiren();
@@ -483,15 +483,16 @@ int16 CAEVehicleAudioEntity::DemandBankSlot(int16 bankId) {
 // 0x4F4D10
 int16 CAEVehicleAudioEntity::RequestBankSlot(int16 bankId) {
     int16 freeSlot = -1;
-    for (auto i = 0; i < NUM_DUMMY_ENGINE_SLOTS; ++i) {
+    for (int16 i = 0; i < NUM_DUMMY_ENGINE_SLOTS; ++i) {
         auto& dummyEng = s_DummyEngineSlots[i];
         if (dummyEng.m_nBankId == bankId) {
             dummyEng.m_nUsageCount++;
             return i + 7; // todo: magic number
         }
 
-        if (dummyEng.m_nUsageCount <= 0)
+        if (dummyEng.m_nUsageCount <= 0) {
             freeSlot = i;
+        }
     }
 
     if (freeSlot == -1)
@@ -1198,13 +1199,14 @@ float CAEVehicleAudioEntity::GetVehicleDriveWheelSkidValue(CVehicle* vehicle, in
         return std::min(1.0f, std::fabs(fVelocity)) * 0.75f;
     }
     case WHEEL_STATE_FIXED: {
-        const float fAbsVelocity = std::fabs(fVelocity);
-        if (fAbsVelocity > 0.04f)
-            return std::min(fAbsVelocity * 5.0f, 1.0f) * 1.2f;
-        break;
+        const float velocity = std::fabs(fVelocity);
+        if (velocity > 0.04f)
+            return std::min(velocity * 5.0f, 1.0f) * 1.2f;
+        return 0.0f;
     }
+    default:
+        return 0.0f;
     }
-    return 0.0f;
 }
 
 // 0x4F6000
@@ -1392,8 +1394,8 @@ void CAEVehicleAudioEntity::PlayReverseSound(int16 newReverseGearSoundType, floa
 }
 
 // 0x4F9E90
-void CAEVehicleAudioEntity::UpdateBoatSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volumeDelta) {
-    return plugin::CallMethod<0x4F9E90, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volumeDelta);
+void CAEVehicleAudioEntity::UpdateBoatSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume) {
+    return plugin::CallMethod<0x4F9E90, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volume);
 
     if (m_Settings.m_nVehicleSoundType != VEHICLE_SOUND_NON_VEH) {
         if (engineState != 6 && m_nEngineBankSlotId == -1) {
@@ -1401,7 +1403,7 @@ void CAEVehicleAudioEntity::UpdateBoatSound(int16 engineState, int16 bankSlotId,
         }
     }
 
-    const float fVolume = m_fGeneralVehicleSoundVolume + volumeDelta;
+    const float fVolume = m_fGeneralVehicleSoundVolume + volume;
     if (UpdateGenericEngineSound(engineState, fVolume, speed))
         return;
 
@@ -1425,17 +1427,19 @@ void CAEVehicleAudioEntity::UpdateBoatSound(int16 engineState, int16 bankSlotId,
             DoPlaySound(5.0f);
         break;
     }
+    default:
+        break;
     }
 }
 
 // 0x4FA1C0
-void CAEVehicleAudioEntity::UpdateTrainSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volumeDelta) {
-    return plugin::CallMethod<0x4FA1C0, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volumeDelta);
+void CAEVehicleAudioEntity::UpdateTrainSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume) {
+    return plugin::CallMethod<0x4FA1C0, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volume);
 
     if (m_nEngineBankSlotId == -1)
         return;
 
-    const float fVolume = m_fGeneralVehicleSoundVolume + volumeDelta;
+    const float fVolume = m_fGeneralVehicleSoundVolume + volume;
 
     if (UpdateGenericEngineSound(engineState, fVolume, speed))
         return;
@@ -1460,12 +1464,14 @@ void CAEVehicleAudioEntity::UpdateTrainSound(int16 engineState, int16 bankSlotId
             DoPlaySound(4.5f);
         break;
     }
+    default:
+        break;
     }
 }
 
 // 0x4F93C0
-void CAEVehicleAudioEntity::PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume) {
-    return plugin::CallMethod<0x4F93C0, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volume);
+void CAEVehicleAudioEntity::PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float volume, float speed) {
+    return plugin::CallMethod<0x4F93C0, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, volume, speed);
 
     const float fVolume = m_fGeneralVehicleSoundVolume + volume;
     if (CAESound* sound = m_aEngineSounds[engineState].m_pSound) {
@@ -1496,12 +1502,14 @@ void CAEVehicleAudioEntity::PlayAircraftSound(int16 engineState, int16 bankSlotI
     case 7:
         DoPlaySound(5.0f);
         break;
+    default:
+        break;
     }
 }
 
 // 0x4F9710
-void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume) {
-    return plugin::CallMethod<0x4F9710, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, speed, volume);
+void CAEVehicleAudioEntity::PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float volume, float speed) {
+    return plugin::CallMethod<0x4F9710, CAEVehicleAudioEntity*, int16, int16, int16, float, float>(this, engineState, bankSlotId, sfxId, volume, speed);
 
     if (m_nEngineBankSlotId == -1)
         return;
@@ -1810,8 +1818,8 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
     }
     }
 
-    const float fAbsVelocity = std::fabs(params.m_fVelocity);
-    if (fAbsVelocity <= 0.0f) {
+    const float velocity = std::fabs(params.m_fVelocity);
+    if (velocity <= 0.0f) {
         CancelRoadNoise();
         return;
     }
@@ -1838,7 +1846,7 @@ void CAEVehicleAudioEntity::ProcessVehicleRoadNoise(cVehicleParams& params) {
         nRoadNoiseSound = 22;
     }
 
-    const float logarithmicVolume = std::min(1.0f, 2 * fAbsVelocity);
+    const float logarithmicVolume = std::min(1.0f, 2.0f * velocity);
     float fVolume = -100.0f;
     if (logarithmicVolume > 0.0008f) {
         fVolume = fVolumeBase + CAEAudioUtility::AudioLog10(logarithmicVolume) * 20.0f;
@@ -2623,6 +2631,6 @@ bool CAEVehicleAudioEntity::PlayGenericEngineSound(int16 index, int16 bankSlotId
 
 // NOTSA
 CAESound* CAEVehicleAudioEntity::PlaySound(int16 bankSlotId, int16 sfxId, float fVolume, float fSpeed, float fSoundDistance, float fTimeScale, eSoundEnvironment individualEnvironment, int16 playPos) {
-    m_tempSound.Initialise(bankSlotId, sfxId, this, m_pEntity->GetPosition(), fVolume, fSoundDistance, fSpeed, fTimeScale, false, individualEnvironment, 0.0, playPos);
+    m_tempSound.Initialise(bankSlotId, sfxId, this, m_pEntity->GetPosition(), fVolume, fSoundDistance, fSpeed, fTimeScale, false, individualEnvironment, 0.0f, playPos);
     return AESoundManager.RequestNewSound(&m_tempSound);
 }

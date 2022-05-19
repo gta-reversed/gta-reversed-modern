@@ -191,7 +191,7 @@ public:
     int16                  m_nReverseGearSoundType;
     CAESound*              m_ReverseGearSound;
 
-    int32                  _pad_174;
+    int32                  _align_174;
     CAESound*              m_HornTonSound;
     CAESound*              m_SirenSound;
     CAESound*              m_PoliceSirenSound;
@@ -276,8 +276,8 @@ public:
 
     void UpdateVehicleEngineSound(int16, float, float);
     static void UpdateGasPedalAudio(CVehicle* vehicle, int32 vehType);
-    void UpdateBoatSound(int16 engineState, int16 bankSlotId, int16 soundId, float speed, float volumeDelta);
-    void UpdateTrainSound(int16, int16, int16, float, float);
+    void UpdateBoatSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume);
+    void UpdateTrainSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed, float volume);
     void UpdateGenericVehicleSound(int16 soundId, int16 bankSlotId, int16 bankId, int16 sfxId, float speed, float volume, float distance);
 
     static void EnableHelicoptors();
@@ -299,12 +299,12 @@ public:
     void GetHornState(bool* out, cVehicleParams& params);
     void GetAccelAndBrake(cVehicleParams& params);
 
-    void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
+    void PlayAircraftSound(int16 engineState, int16 bankSlotId, int16 sfxId, float volume = -100.0f, float speed = 1.0f);
     void PlayRoadNoiseSound(int16 newRoadNoiseSoundType, float speed = 1.0f, float volume = -100.0f);
     void PlayFlatTyreSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void PlayReverseSound(int16 soundType, float speed = 1.0f, float volume = -100.0f);
     void PlayHornOrSiren(bool bPlayHornTone, bool bPlaySirenOrAlarm, bool bPlayHorn, cVehicleParams& params);
-    void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float speed = 1.0f, float volume = -100.0f);
+    void PlayBicycleSound(int16 engineState, int16 bankSlotId, int16 sfxId, float volume = -100.0f, float speed = 1.0f);
 
     void ProcessVehicleFlatTyre(cVehicleParams& params);
     void ProcessVehicleRoadNoise(cVehicleParams& params);
