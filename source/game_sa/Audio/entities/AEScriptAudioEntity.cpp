@@ -2,6 +2,8 @@
 
 #include "AEScriptAudioEntity.h"
 #include "AESoundManager.h"
+#include "AEAudioUtility.h"
+#include "AEAudioHardware.h"
 
 // 0x5074D0
 CAEScriptAudioEntity::CAEScriptAudioEntity() {
@@ -65,9 +67,41 @@ void CAEScriptAudioEntity::PlayMissionBankSound(uint8 sampleId, CVector& posn, C
     plugin::CallMethod<0x4EC6D0, CAEScriptAudioEntity*, uint8, CVector&, CPhysical*, int16, uint8, uint8, float, float, float>(this, sampleId, posn, physical, a4, a5, a6, a7, a8, a9);
 }
 
+// event eAudioEvents
 // 0x4EC550
-void CAEScriptAudioEntity::PlayResidentSoundEvent(int16 a1, int16 a2, int16 a3, uint16 a4, CVector& posn, CPhysical* physical, float a7, float a8, int16 a9, float a10) {
-    plugin::CallMethod<0x4EC550, CAEScriptAudioEntity*, int16, int16, int16, uint16, CVector&, CPhysical*, float, float, int16, float>(this, a1, a2, a3, a4, posn, physical, a7, a8, a9, a10);
+void CAEScriptAudioEntity::PlayResidentSoundEvent(int16 bankSlotId, int16 bankId, int16 sfxId, uint16 event, CVector& posn, CPhysical* physical, float vol, float speed, int16 playPosn, float maxDistance) {
+    return plugin::CallMethod<0x4EC550, CAEScriptAudioEntity*, int16, int16, int16, uint16, CVector&, CPhysical*, float, float, int16, float>(this, bankSlotId, bankId, sfxId, event, posn, physical, vol, speed, playPosn, maxDistance);
+
+    // untested
+    bool bFrontend = false;
+    if (!AEAudioHardware.IsSoundBankLoaded(bankId, bankSlotId))
+        return;
+
+    auto volume = GetDefaultVolume(static_cast<eAudioEvents>(event)) + vol;
+
+    CVector pos;
+    if (physical) {
+        pos = physical->GetPosition();
+    } else if (posn == -1000.0f || posn.IsZero()) {
+        pos.x = 0.0f;
+        pos.y = 1.0f;
+        pos.z = 0.0f;
+        bFrontend = true;
+    } else {
+        pos.x = posn.x;
+        pos.y = posn.y;
+        pos.z = posn.z;
+    }
+    m_tempSound.Initialise(bankSlotId, sfxId, this, pos, volume, maxDistance, speed, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+    m_tempSound.m_nCurrentPlayPosition = playPosn;
+    m_tempSound.m_nEnvironmentFlags = SOUND_START_PERCENTAGE | SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE;
+    m_tempSound.SetIndividualEnvironment(SOUND_FRONT_END, bFrontend);
+    if (physical) {
+        m_tempSound.SetIndividualEnvironment(SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY, true);
+        m_tempSound.RegisterWithPhysicalEntity(physical);
+    }
+    m_tempSound.m_nEvent = static_cast<eAudioEvents>(event);
+    AESoundManager.RequestNewSound(&m_tempSound);
 }
 
 // 0x4EC270
@@ -76,8 +110,8 @@ void CAEScriptAudioEntity::PlayLoadedMissionAudio(uint8 sampleId) {
 }
 
 // 0x4EC190
-void CAEScriptAudioEntity::PreloadMissionAudio(uint8 sampleId, int32 a2) {
-    plugin::CallMethod<0x4EC190, CAEScriptAudioEntity*>(this, sampleId, a2);
+void CAEScriptAudioEntity::PreloadMissionAudio(uint8 slotId, int32 sampleId) {
+    plugin::CallMethod<0x4EC190, CAEScriptAudioEntity*>(this, sampleId, sampleId);
 }
 
 // 0x4ECCF0
