@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eWeaponType.h"
+#include <array>
 
 class CEntity;
 class CPickup;
@@ -22,16 +23,16 @@ constexpr uint16 AmmoForWeapon_OnStreet[NUM_WEAPONS]{ 0u, 1u, 1u, 1u, 1u, 1u, 1u
 
 class CPickups {
 public:
-    static uint8&         DisplayHelpMessage;
-    static int32&         PlayerOnWeaponPickup;
-    static int32&         StaticCamStartTime;
-    static CVector*       StaticCamCoors;
-    static CVehicle*&     pPlayerVehicle;
-    static bool&          bPickUpcamActivated;
-    static uint16&        CollectedPickUpIndex;
-    static int32          (&aPickUpsCollected)[MAX_COLLECTED_PICKUPS];
-    static uint16&        NumMessages;
-    static tPickupMessage (&aMessages)[MAX_PICKUP_MESSAGES];
+    static inline uint8& DisplayHelpMessage = *(uint8*)0x8A5F48;
+    static inline int32& PlayerOnWeaponPickup = *(int32*)0x97D640;
+    static inline int32& StaticCamStartTime = *(int32*)0x978618;
+    static inline CVector* StaticCamCoors = (CVector*)0x97D660;
+    static inline CVehicle*& pPlayerVehicle = *(CVehicle**)0x97861C;
+    static inline bool& bPickUpcamActivated = *(bool*)0x978620;
+    static inline uint16& CollectedPickUpIndex = *(uint16*)0x978624;
+    static inline std::array<int32, MAX_COLLECTED_PICKUPS>& aPickUpsCollected = *(std::array<int32, MAX_COLLECTED_PICKUPS>*)0x978628;
+    static inline uint16& NumMessages = *(uint16*)0x978678;
+    static inline std::array<tPickupMessage, MAX_PICKUP_MESSAGES>& aMessages = *(std::array<tPickupMessage, MAX_PICKUP_MESSAGES>*)0x978680;
     static inline std::array<CPickup, MAX_NUM_PICKUPS>& aPickUps = *(std::array<CPickup, MAX_NUM_PICKUPS>*)0x9788C0;
 
 public:

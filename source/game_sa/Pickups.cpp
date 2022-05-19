@@ -9,16 +9,6 @@
 #include "Pickups.h"
 #include "TaskSimpleJetPack.h"
 
-uint8& CPickups::DisplayHelpMessage = *(uint8*)0x8A5F48;
-int32& CPickups::PlayerOnWeaponPickup = *(int32*)0x97D640;
-int32& CPickups::StaticCamStartTime = *(int32*)0x978618;
-CVector* CPickups::StaticCamCoors = (CVector*)0x97D660;
-CVehicle*& CPickups::pPlayerVehicle = *(CVehicle * *)0x97861C;
-bool& CPickups::bPickUpcamActivated = *(bool*)0x978620;
-uint16& CPickups::CollectedPickUpIndex = *(uint16*)0x978624;
-int32 (&CPickups::aPickUpsCollected)[MAX_COLLECTED_PICKUPS] = *(int32(*)[MAX_COLLECTED_PICKUPS])0x978628;
-uint16& CPickups::NumMessages = *(uint16*)0x978678;
-tPickupMessage (&CPickups::aMessages)[MAX_PICKUP_MESSAGES] = *(tPickupMessage(*)[MAX_PICKUP_MESSAGES])0x978680;
 int32& CollectPickupBuffer = *(int32*)0x97D644;
 
 void CPickups::InjectHooks() {
