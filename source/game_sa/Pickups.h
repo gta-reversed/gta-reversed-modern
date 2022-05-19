@@ -92,6 +92,7 @@ public:
     // Helpers NOTSA
     static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos);
     static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& out_x, float& out_y, float& out_z);
+    static auto GetAllActivePickups() { return aPickUps | std::views::filter([](auto&& p) { return p.m_nPickupType != PICKUP_NONE; }); }
 };
 
 extern int32 &CollectPickupBuffer;

@@ -43,7 +43,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
     // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
-    // RH_ScopedInstall(RemovePickupObjects, 0x455470);
+    RH_ScopedInstall(RemovePickupObjects, 0x455470);
     // RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
     // RH_ScopedInstall(RenderPickUpText, 0x455000);
     // RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
@@ -315,9 +315,7 @@ void CPickups::RemoveMissionPickUps() {
             CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i));
 
             if (p.m_pObject) {
-                CWorld::Remove(p.m_pObject);
-                delete p.m_pObject; // There is a redudant `if` check in the original code. They probably used a macro for deleting, like `SAFE_DELETE`. But `delete` allows `NULL` anyways, so...
-                p.m_pObject = nullptr;
+                p.RemoveObject();
             }
 
             p.m_nFlags.bDisabled = true;
@@ -352,7 +350,12 @@ void CPickups::RemovePickUpsInArea(float min_x,float max_x, float min_y, float m
 
 // 0x455470
 void CPickups::RemovePickupObjects() {
-    plugin::Call<0x455470>();
+    for (auto& p : GetAllActivePickups()) {
+        if (p.m_pObject) {
+            p.RemoveObject();
+            p.m_nFlags.bVisible = false;
+        }
+    }
 }
 
 // 0x4563A0

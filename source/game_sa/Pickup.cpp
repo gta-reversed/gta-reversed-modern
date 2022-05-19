@@ -32,6 +32,16 @@ const char* CPickup::FindStringForTextIndex(int32 index) {
     return "FESZ_CA";
 }
 
+/*!
+* @notsa
+* @brief Remove object belonging 1with this pickup.
+*/
+void CPickup::RemoveObject() {
+    CWorld::Remove(m_pObject);
+    delete m_pObject;
+    m_pObject = nullptr;
+}
+
 // 0x455500
 int32 CPickup::FindTextIndexForString(char* message) {
     if (!message) return 0;

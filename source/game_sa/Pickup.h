@@ -94,6 +94,9 @@ public:
     // message = GXT key
     static int32 FindTextIndexForString(char* message);
     static const char* FindStringForTextIndex(int32 index);
+
+    // Helper NOTSA
+    void RemoveObject();
 };
 
 VALIDATE_SIZE(CPickup, 0x20);
