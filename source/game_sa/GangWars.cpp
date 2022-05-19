@@ -102,9 +102,28 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     }
 }
 
-// 0x445B30
+// 0x445B30, untested
 bool CGangWars::AttackWaveOvercome() {
-    return plugin::CallAndReturn<bool, 0x445B30>();
+    auto pedsNearPlayer = 0u, pedsLiving = 0u;
+
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        auto ped = GetPedPool()->GetAt(i);
+
+        if (ped && ped->bPartOfAttackWave) {
+            if (ped->IsStateDying()) {
+                ped->bPartOfAttackWave = false;
+                ped->SetCharCreatedBy(PED_GAME);
+
+                continue;
+            }
+
+            pedsLiving++;
+            if (DistanceBetweenPoints2D(ped->GetPosition2D(), FindPlayerCoors()) < 45.0f)
+                pedsNearPlayer++;
+        }
+    }
+
+    return pedsLiving <= 1 && pedsNearPlayer == 0;
 }
 
 // 0x443DB0
