@@ -58,20 +58,20 @@ void CAEVehicleAudioEntity::InjectHooks() {
     RH_ScopedInstall(InhibitCrzForTime, 0x4F5060);                           // +
     RH_ScopedInstall(IsCrzInhibitedForTime, 0x4F5050);                       // +
 
-    RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);                            // -
-    RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);                       // -
-    RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310);                    // -
+    // RH_ScopedInstall(GetAccelAndBrake, 0x4F5080);                            // -
+    // RH_ScopedInstall(GetVolumeForDummyIdle, 0x4F51F0);                       // -
+    // RH_ScopedInstall(GetFrequencyForDummyIdle, 0x4F5310);                    // -
     // RH_ScopedInstall(GetVolumeForDummyRev, 0x4F53D0);                     // wip
     // RH_ScopedInstall(GetFrequencyForDummyRev, 0x4F54F0);                  // wip
-    RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0);                    // -
+    // RH_ScopedInstall(CancelVehicleEngineSound, 0x4F55C0);                    // -
     RH_ScopedInstall(UpdateVehicleEngineSound, 0x4F56D0);                    // +
-    RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);                    // -
+    // RH_ScopedInstall(JustGotInVehicleAsDriver, 0x4F5700);                    // -
     RH_ScopedInstall(TurnOnRadioForVehicle, 0x4F5B20);                       // -
     RH_ScopedInstall(TurnOffRadioForVehicle, 0x4F5B60);                      // -
     RH_ScopedInstall(PlayerAboutToExitVehicleAsDriver, 0x4F5BA0);            // +
     RH_ScopedInstall(CopHeli, 0x4F5C40);                                     // +
-    RH_ScopedInstall(GetFreqForIdle, 0x4F5C60);                              // -
-    RH_ScopedInstall(GetVolForPlayerEngineSound, 0x4F5D00);                  // -
+    RH_ScopedInstall(GetFreqForIdle, 0x4F5C60);
+    RH_ScopedInstall(GetVolForPlayerEngineSound, 0x4F5D00);
     RH_ScopedInstall(JustFinishedAccelerationLoop, 0x4F5E50);                // +
     RH_ScopedInstall(UpdateGasPedalAudio, 0x4F5EB0);                         // +
     RH_ScopedInstall(GetVehicleDriveWheelSkidValue, 0x4F5F30);               // +?
@@ -716,10 +716,12 @@ bool CAEVehicleAudioEntity::IsCrzInhibitedForTime() const {
 }
 
 // 0x4F5080
-void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& vehParams) {
+void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& params) {
+    return plugin::CallMethod<0x4F5080, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
+
     if (CReplay::Mode == MODE_PLAYBACK) {
-        vehParams.m_nGasState   = (int16)(std::clamp(vehParams.m_pVehicle->m_fGasPedal, 0.0f, 1.0f) * 255.0f);
-        vehParams.m_nBreakState = (int16)(std::clamp(vehParams.m_pVehicle->m_fBreakPedal, 0.0f, 1.0f) * 255.0f);
+        params.m_nGasState   = (int16)(std::clamp(params.m_pVehicle->m_fGasPedal,   0.0f, 1.0f) * 255.0f);
+        params.m_nBreakState = (int16)(std::clamp(params.m_pVehicle->m_fBreakPedal, 0.0f, 1.0f) * 255.0f);
         return;
     }
 
@@ -729,17 +731,19 @@ void CAEVehicleAudioEntity::GetAccelAndBrake(cVehicleParams& vehParams) {
         && s_pPlayerDriver->IsAlive()
     ) {
         CPad* pad = s_pPlayerDriver->AsPlayer()->GetPadFromPlayer();
-        vehParams.m_nGasState   = pad->GetAccelerate();
-        vehParams.m_nBreakState = pad->GetBrake();
+        params.m_nGasState   = pad->GetAccelerate();
+        params.m_nBreakState = pad->GetBrake();
         return;
     }
 
-    vehParams.m_nGasState   = 0;
-    vehParams.m_nBreakState = 0;
+    params.m_nGasState   = 0;
+    params.m_nBreakState = 0;
 }
 
 // 0x4F51F0
 float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float fRevProgressBaseline) {
+    return plugin::CallMethodAndReturn<float, 0x4F51F0, CAEVehicleAudioEntity*, float, float>(this, fGearRevProgress, fRevProgressBaseline);
+
     if (m_pEntity->m_nModelIndex == MODEL_CADDY)
         return -3.0f - 30.0f;
 
@@ -756,12 +760,12 @@ float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float
     volume += m_Settings.m_fHornVolumeDelta;
 
     if (m_nEngineState == 2) {
-        static float afVolumePoints[5][2] = {
-            { 0.0f, 1.0f },
-            { 0.3f, 1.0f },
-            { 0.5f, 1.0f },
-            { 0.7f, 0.7f },
-            { 1.0f, 0.0f }
+        static float afVolumePoints[5][2] = { // 0x8CC0C4
+            { 0.0000f, 1.000f },
+            { 0.3000f, 1.000f },
+            { 0.5000f, 1.000f },
+            { 0.7000f, 0.707f },
+            { 1.0001f, 0.000f }
         };
         const auto p = CAEAudioUtility::GetPiecewiseLinear(fRevProgressBaseline, std::size(afVolumePoints), afVolumePoints);
         volume += CAEAudioUtility::AudioLog10(p) * 20.0f;
@@ -773,6 +777,8 @@ float CAEVehicleAudioEntity::GetVolumeForDummyIdle(float fGearRevProgress, float
 
 // 0x4F5310
 float CAEVehicleAudioEntity::GetFrequencyForDummyIdle(float fGearRevProgress, float fRevProgressBaseline) {
+    return plugin::CallMethodAndReturn<float, 0x4F5310, CAEVehicleAudioEntity*, float, float>(this, fGearRevProgress, fRevProgressBaseline);
+
     if (m_pEntity->m_nModelIndex == MODEL_CADDY)
         return 1.0f;
 
@@ -784,12 +790,12 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyIdle(float fGearRevProgress, fl
         freq *= 0.7f;
 
     if (m_nEngineState == 2) {
-        static float afFreqPoints[5][2] = {
-            { 0.0f, 1.00f },
-            { 0.3f, 1.00f },
-            { 0.5f, 0.85f },
-            { 0.7f, 0.85f },
-            { 1.0f, 0.85f },
+        static float afFreqPoints[5][2] = { // 0x8CC0EC
+            { 0.0000f, 1.00f },
+            { 0.3000f, 1.00f },
+            { 0.5000f, 0.85f },
+            { 0.7000f, 0.85f },
+            { 1.0001f, 0.85f },
         };
         freq *= CAEAudioUtility::GetPiecewiseLinear(fRevProgressBaseline, std::size(afFreqPoints), afFreqPoints);
     }
@@ -867,7 +873,8 @@ float CAEVehicleAudioEntity::GetFrequencyForDummyRev(float a, float b) {
 
 // 0x4F55C0
 void CAEVehicleAudioEntity::CancelVehicleEngineSound(int16 soundId) {
-    // plugin::CallMethod<0x4F55C0, CAEVehicleAudioEntity*, int16>(this, engineSoundStateId);
+    return plugin::CallMethod<0x4F55C0, CAEVehicleAudioEntity*, int16>(this, soundId);
+
     auto& sound = m_aEngineSounds[soundId].m_pSound;
     const auto soundLength = sound ? sound->m_nSoundLength : -1;
 
@@ -907,6 +914,8 @@ void CAEVehicleAudioEntity::UpdateVehicleEngineSound(int16 engineState, float sp
 
 // 0x4F5700
 void CAEVehicleAudioEntity::JustGotInVehicleAsDriver() {
+    return plugin::CallMethod<0x4F5700, CAEVehicleAudioEntity*>(this);
+
     s_pPlayerDriver = m_pEntity->AsVehicle()->m_pDriver;
 
     m_fGeneralVehicleSoundVolume = GetDefaultVolume(AE_GENERAL_VEHICLE_SOUND);
@@ -1062,7 +1071,7 @@ bool CAEVehicleAudioEntity::CopHeli() {
 
 // 0x4F5C60
 float CAEVehicleAudioEntity::GetFreqForIdle(float velocityPercentage) const {
-    static float points[][2] = { // maybe wrong
+    static float points[][2] = {
         { 0.0000f, 0.00f },
         { 0.0750f, 0.70f },
         { 0.1500f, 1.10f },
@@ -1074,12 +1083,12 @@ float CAEVehicleAudioEntity::GetFreqForIdle(float velocityPercentage) const {
 
 // 0x4F60B0
 float CAEVehicleAudioEntity::GetBaseVolumeForBicycleTyre(float fGearVelocityProgress) const {
-    static float points[][2] = { // maybe wrong
+    static float points[][2] = {
         { 0.0000f, 0.00f },
-        { 0.0750f, 0.70f },
-        { 0.1500f, 1.10f },
-        { 0.2500f, 1.25f },
-        { 1.0001f, 1.70f },
+        { 0.1000f, 0.30f },
+        { 0.2000f, 0.45f },
+        { 0.5000f, 0.85f },
+        { 1.0001f, 1.00f },
     };
     return CAEAudioUtility::GetPiecewiseLinear(fGearVelocityProgress, std::size(points), points);
 }
@@ -2518,8 +2527,7 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
 
 // 0x501AB0
 void CAEVehicleAudioEntity::ProcessSpecialVehicle(cVehicleParams& params) {
-    plugin::CallMethod<0x501AB0, CAEVehicleAudioEntity*, cVehicleParams*>(this, &params);
-    return;
+    return plugin::CallMethod<0x501AB0, CAEVehicleAudioEntity*, cVehicleParams*>(this, &params);
 
     switch (params.m_pVehicle->m_nModelIndex) {
     case MODEL_ARTICT1:
