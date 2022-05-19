@@ -20,7 +20,7 @@ void CGangWars::InjectHooks() {
     // RH_ScopedInstall(Save, 0x5D5530);
     RH_ScopedInstall(InitAtStartOfGame, 0x443920);
     RH_ScopedInstall(AddKillToProvocation, 0x443950);
-    // RH_ScopedInstall(AttackWaveOvercome, 0x445B30);
+    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);
     RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);
     RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);
     RH_ScopedInstall(CheerVictory, 0x444040);
@@ -49,7 +49,7 @@ void CGangWars::InjectHooks() {
     // RH_ScopedInstall(TellGangMembersTo, 0x444530);
     RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
     // RH_ScopedInstall(Update, 0x446610);
-    // RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0);
+    RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0);
 }
 
 // 0x5D3EB0
@@ -611,7 +611,62 @@ void CGangWars::Update() {
     plugin::Call<0x446610>();
 }
 
-// 0x443DE0
+// 0x443DE0, untested, did some assumptions that might be incorrect as hell
 void CGangWars::UpdateTerritoryUnderControlPercentage() {
-    plugin::Call<0x443DE0>();
+    auto groveZones = 0u, vagosZones = 0u, ballasZones = 0u;
+    if (CTheZones::TotalNumberOfNavigationZones) {
+        for (auto& zone : CTheZones::NavigationZoneArray) {
+            auto zoneInfo = CTheZones::GetZoneInfo(&zone);
+            if (!zoneInfo)
+                continue;
+
+            auto ballasDensity = zoneInfo->GangDensity[GANG_BALLAS],
+                 groveDensity = zoneInfo->GangDensity[GANG_GROVE],
+                 vagosDensity = zoneInfo->GangDensity[GANG_VAGOS];
+
+            // there should be one liner solution for this, no?
+            if (groveDensity > ballasDensity + vagosDensity) {
+                groveZones++;
+            } else if (ballasDensity > vagosDensity) {
+                ballasZones++;
+            } else {
+                vagosZones++;
+            }
+        }
+    }
+
+    CStats::SetStatValue(STAT_TERRITORIES_HELD, static_cast<float>(groveZones));
+    CStats::SetNewRecordStat(STAT_HIGHEST_NUMBER_OF_TERRITORIES_HELD, static_cast<float>(groveZones));
+
+    auto allGangZones = groveZones + ballasZones + vagosZones;
+    if (allGangZones) {
+        GangRatings[GANG_BALLAS] = 1;
+        GangRatings[GANG_GROVE] = 0;
+        GangRatings[GANG_VAGOS] = 2;
+
+        // indices are ranks
+        GangRatingStrength[0] = groveZones;
+        GangRatingStrength[1] = ballasZones;
+        GangRatingStrength[2] = vagosZones;
+
+        TerritoryUnderControlPercentage = static_cast<float>(groveZones / allGangZones);
+
+        // NOTSA code
+        if (ballasZones > groveZones) {
+            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_GROVE]);
+            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_GROVE]);
+        }
+
+        if (vagosZones > ballasZones) {
+            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_VAGOS]);
+            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_VAGOS]);
+        }
+
+        if (vagosZones > groveZones) {
+            std::swap(GangRatings[GANG_VAGOS], GangRatings[GANG_VAGOS]);
+            std::swap(GangRatingStrength[GANG_VAGOS], GangRatingStrength[GANG_VAGOS]);
+        }
+    } else {
+        TerritoryUnderControlPercentage = 0.0f;
+    }
 }
