@@ -36,7 +36,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     RH_ScopedInstall(PassTime, 0x455200);
     RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
-    // RH_ScopedInstall(PickedUpOyster, 0x4552D0);
+    RH_ScopedInstall(PickedUpOyster, 0x4552D0);
     // RH_ScopedInstall(PictureTaken, 0x456A70);
     // RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     // RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
@@ -277,7 +277,18 @@ void CPickups::PickedUpHorseShoe() {
 
 // 0x4552D0
 void CPickups::PickedUpOyster() {
-    plugin::Call<0x4552D0>();
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_COLLECTABLE1);
+
+    CStats::IncrementStat(STAT_OYSTERS_COLLECTED);
+
+    FindPlayerInfo(0).m_nMoney += 100;
+
+    if (CStats::GetStatValue(STAT_TOTAL_OYSTERS) == CStats::GetStatValue(STAT_OYSTERS_COLLECTED)) { // Check if there's more to collect or not
+        CGarages::TriggerMessage("OY_ALL");
+        FindPlayerInfo(0).m_nMoney += 100'000;
+    } else {
+        CGarages::TriggerMessage("OY_ONE", (int16)CStats::GetStatValue(STAT_TOTAL_OYSTERS), 5000u, (int16)CStats::GetStatValue(STAT_OYSTERS_COLLECTED));
+    }
 }
 
 // 0x456A70
