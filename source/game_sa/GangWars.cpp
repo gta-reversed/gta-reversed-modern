@@ -651,19 +651,19 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
         TerritoryUnderControlPercentage = static_cast<float>(groveZones / allGangZones);
 
         // NOTSA code
-        if (ballasZones > groveZones) {
+        if (groveZones > ballasZones) {
             std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_GROVE]);
             std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_GROVE]);
         }
 
-        if (vagosZones > ballasZones) {
+        if (ballasZones > vagosZones) {
             std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_VAGOS]);
             std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_VAGOS]);
         }
 
-        if (vagosZones > groveZones) {
-            std::swap(GangRatings[GANG_VAGOS], GangRatings[GANG_VAGOS]);
-            std::swap(GangRatingStrength[GANG_VAGOS], GangRatingStrength[GANG_VAGOS]);
+        if (groveZones > ballasZones) {
+            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_GROVE]);
+            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_GROVE]);
         }
     } else {
         TerritoryUnderControlPercentage = 0.0f;
