@@ -44,7 +44,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(RemovePickUp, 0x4573D0);
     // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
-    // RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
+    RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
     // RH_ScopedInstall(RenderPickUpText, 0x455000);
     // RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
     // RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
@@ -360,7 +360,17 @@ void CPickups::RemovePickupObjects() {
 
 // 0x4563A0
 void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
-    plugin::Call<0x4563A0, const CVector&, float>(posn, radius);
+    for (auto& p : aPickUps) {
+        switch (p.m_nPickupType) {
+        case PICKUP_ONCE_TIMEOUT:
+        case PICKUP_MONEY: {
+            if (IsPointInCircle3D(p.GetPosn(), posn, radius)) {
+                p.Remove();
+            }
+            break;
+        }
+        }
+    }
 }
 
 // 0x455000
