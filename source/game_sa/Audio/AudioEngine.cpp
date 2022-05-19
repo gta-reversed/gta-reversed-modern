@@ -518,13 +518,13 @@ bool CAudioEngine::IsAmbienceRadioActive() {
 }
 
 // 0x507290
-void CAudioEngine::PreloadMissionAudio(uint8 sampleId, int32 a3) {
-    m_ScriptAE.PreloadMissionAudio(sampleId, a3);
+void CAudioEngine::PreloadMissionAudio(uint8 slotId, int32 sampleId) {
+    m_ScriptAE.PreloadMissionAudio(slotId, sampleId);
 }
 
 // 0x5072B0
-void CAudioEngine::PlayLoadedMissionAudio(uint8 sampleId) {
-    m_ScriptAE.PlayLoadedMissionAudio(sampleId);
+void CAudioEngine::PlayLoadedMissionAudio(uint8 slotId) {
+    m_ScriptAE.PlayLoadedMissionAudio(slotId);
 }
 
 // 0x5072D0

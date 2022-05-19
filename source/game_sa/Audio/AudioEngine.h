@@ -117,9 +117,9 @@ public:
     void PreloadBeatTrack(int16 trackId);
     void StopAmbienceTrack(bool a1);
     static bool DoesAmbienceTrackOverrideRadio();
-    void PreloadMissionAudio(uint8 sampleId, int32 a3);
+    void PreloadMissionAudio(uint8 slotId, int32 sampleId);
     int8 GetMissionAudioLoadingStatus(uint8 sampleId);
-    void PlayLoadedMissionAudio(uint8 sampleId);
+    void PlayLoadedMissionAudio(uint8 slotId);
     int32 GetMissionAudioEvent(uint8 sampleId);
     CVector* GetMissionAudioPosition(uint8 sampleId);
     void ClearMissionAudio(uint8 sampleId);

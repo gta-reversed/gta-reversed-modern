@@ -90,7 +90,7 @@ public:
             uint32 bBulletProof : 1;
             uint32 bFireProof : 1;
             uint32 bCollisionProof : 1;
-            uint32 bMeeleProof : 1;
+            uint32 bMeleeProof : 1;
             uint32 bInvulnerable : 1;
             uint32 bExplosionProof : 1;
 

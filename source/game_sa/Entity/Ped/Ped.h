@@ -485,6 +485,7 @@ public:
     void GiveWeaponSet1();
     void GiveWeaponSet2();
     void GiveWeaponSet3();
+    void GiveWeaponSet4();
     void SetCurrentWeapon(int32 slot);
     void SetCurrentWeapon(eWeaponType weaponType);
     void ClearWeapon(eWeaponType weaponType);
@@ -542,6 +543,7 @@ public:
 
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+    CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
@@ -577,6 +579,13 @@ public:
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
 
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+
+    int32 GetPadNumber() const;
+
+private:
+    void RenderThinBody() const;
+    void RenderBigHead() const;
+
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }

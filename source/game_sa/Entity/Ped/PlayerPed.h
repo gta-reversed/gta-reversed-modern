@@ -23,6 +23,11 @@ public:
     // did we display "JCK_HLP" message
     static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
 
+    // Android
+    static bool bDebugPlayerInvincible;
+    static bool bDebugTargeting;
+    static bool bDebugTapToTarget;
+
 public:
     static void InjectHooks();
 

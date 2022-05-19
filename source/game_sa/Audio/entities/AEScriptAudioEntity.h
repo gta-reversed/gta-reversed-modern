@@ -62,9 +62,9 @@ public:
     CVector* GetMissionAudioPosition(uint8);
 
     void PlayMissionBankSound(uint8 sampleId, CVector& posn, CPhysical* physical, int16 a4, uint8 a5, uint8 a6, float a7, float a8, float a9);
-    void PlayResidentSoundEvent(int16 a1, int16 a2, int16 a3, uint16 a4, CVector& posn, CPhysical* physical, float a7, float a8, int16 a9, float a10);
+    void PlayResidentSoundEvent(int16 bankSlotId, int16 bankId, int16 sfxId, uint16 event, CVector& posn, CPhysical* physical, float vol, float speed, int16 playPosn, float maxDistance);
     void PlayLoadedMissionAudio(uint8);
-    void PreloadMissionAudio(uint8, int32);
+    void PreloadMissionAudio(uint8 slotId, int32 sampleId);
 
     void ProcessMissionAudioEvent(eAudioEvents eventId, CVector& coords, CPhysical* physical, float volume = 0.0f, float speed = 1.0f);
     void ReportMissionAudioEvent(eAudioEvents eventId, CPhysical* physical, float volume = 0.0f, float speed = 1.0f);

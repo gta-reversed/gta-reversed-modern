@@ -704,6 +704,8 @@ void InjectHooksMain() {
         CEventChatPartner::InjectHooks();
         CEventCopCarBeingStolen::InjectHooks();
         CEventHandler::InjectHooks();
+        CEventAcquaintancePedHate::InjectHooks();
+        CEventAcquaintancePedHateBadlyLit::InjectHooks();
     };
 
     const auto Fx = []() {
