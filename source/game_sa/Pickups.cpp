@@ -34,7 +34,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
     RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     RH_ScopedInstall(ModelForWeapon, 0x454AC0);
-    // RH_ScopedInstall(PassTime, 0x455200);
+    RH_ScopedInstall(PassTime, 0x455200);
     // RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     // RH_ScopedInstall(PickedUpOyster, 0x4552D0);
     // RH_ScopedInstall(PictureTaken, 0x456A70);
@@ -238,9 +238,24 @@ int32 CPickups::ModelForWeapon(eWeaponType weaponType) {
     return CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1;
 }
 
-// 0x455200
+/*!
+* @brief Update each pickup's (except if of type NONE or ASSET_REVENUE) `nRegenerationTime` field.
+* @addr 0x455200
+*/
 void CPickups::PassTime(uint32 time) {
-    plugin::Call<0x455200, uint32>(time);
+    for (auto& p : aPickUps) {
+        switch (p.m_nPickupType) {
+        case ePickupType::PICKUP_NONE:
+        case ePickupType::PICKUP_ASSET_REVENUE:
+            continue;
+        }
+
+        if (p.m_nRegenerationTime <= time) {
+            p.m_nRegenerationTime = 0;
+        } else {
+            p.m_nRegenerationTime -= time;
+        }
+    }
 }
 
 // 0x455390
