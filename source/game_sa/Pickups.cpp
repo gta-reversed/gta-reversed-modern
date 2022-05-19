@@ -46,7 +46,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(RemovePickupObjects, 0x455470);
     RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
     // RH_ScopedInstall(RenderPickUpText, 0x455000);
-    // RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
+    RH_ScopedInstall(TestForPickupsInBubble, 0x456450);
     // RH_ScopedInstall(TryToMerge_WeaponType, 0x4555A0);
     // RH_ScopedInstall(Update, 0x458DE0);
     // RH_ScopedInstall(UpdateMoneyPerDay, 0x455680);
@@ -364,7 +364,7 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
         switch (p.m_nPickupType) {
         case PICKUP_ONCE_TIMEOUT:
         case PICKUP_MONEY: {
-            if (IsPointInCircle3D(p.GetPosn(), posn, radius)) {
+            if (IsPointInSphere(p.GetPosn(), posn, radius)) {
                 p.Remove();
             }
             break;
@@ -380,7 +380,10 @@ void CPickups::RenderPickUpText() {
 
 // 0x456450
 bool CPickups::TestForPickupsInBubble(CVector posn, float radius) {
-    return plugin::CallAndReturn<bool, 0x456450, CVector, float>(posn, radius);
+    // NOTE: (Possible bug) - They dont check if the pickup is active (eg: type != NONE)
+    return rng::any_of(aPickUps, [sp = CSphere{ posn, radius }](const CPickup& p) {
+        return sp.IsPointWithin(p.GetPosn()); // They obviously didn't use `CSphere` here, but it's nicer.
+    });
 }
 
 // 0x4555A0

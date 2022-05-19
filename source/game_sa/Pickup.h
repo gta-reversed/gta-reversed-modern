@@ -68,10 +68,10 @@ public:
     static void InjectHooks();
 
     void SetPosn(float x, float y, float z);
-    CVector GetPosn();
-    float GetXCoord() { return m_vecPos.x / 8.0f; } // 0x4549F0
-    float GetYCoord() { return m_vecPos.y / 8.0f; } // 0x454A10
-    float GetZCoord() { return m_vecPos.z / 8.0f; } // 0x454A30
+    CVector GetPosn() const;
+    float GetXCoord() const { return m_vecPos.x / 8.0f; } // 0x4549F0
+    float GetYCoord() const { return m_vecPos.y / 8.0f; } // 0x454A10
+    float GetZCoord() const { return m_vecPos.z / 8.0f; } // 0x454A30
     void SetXCoord(float coord) { m_vecPos.x = static_cast<int16>(coord * 8.0f); }
     void SetYCoord(float coord) { m_vecPos.y = static_cast<int16>(coord * 8.0f); }
     void SetZCoord(float coord) { m_vecPos.z = static_cast<int16>(coord * 8.0f); }

@@ -51,7 +51,7 @@ int32 CPickup::FindTextIndexForString(char* message) {
 }
 
 // 0x4549A0
-CVector CPickup::GetPosn() {
+CVector CPickup::GetPosn() const {
     return UncompressLargeVector(m_vecPos);
 }
 
