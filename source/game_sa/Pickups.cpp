@@ -41,7 +41,7 @@ void CPickups::InjectHooks() {
     // RH_ScopedInstall(PictureTaken, 0x456A70);
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
-    // RH_ScopedInstall(RemovePickUp, 0x4573D0);
+    RH_ScopedInstall(RemovePickUp, 0x4573D0);
     // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
     // RH_ScopedInstall(RemovePickupObjects, 0x455470);
     // RH_ScopedInstall(RemoveUnnecessaryPickups, 0x4563A0);
@@ -330,7 +330,9 @@ void CPickups::RemoveMissionPickUps() {
 
 // 0x4573D0
 void CPickups::RemovePickUp(int32 pickupHandle) {
-    plugin::Call<0x4573D0, int32>(pickupHandle);
+    if (const auto i = GetActualPickupIndex(pickupHandle); i != -1) {
+        aPickUps[i].Remove();
+    }
 }
 
 // 0x456D30
