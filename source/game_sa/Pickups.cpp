@@ -38,7 +38,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     RH_ScopedInstall(PickedUpOyster, 0x4552D0);
     // RH_ScopedInstall(PictureTaken, 0x456A70);
-    // RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
+    RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
     // RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     // RH_ScopedInstall(RemovePickUp, 0x4573D0);
     // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
@@ -298,7 +298,12 @@ void CPickups::PictureTaken() {
 
 // 0x4554C0
 bool CPickups::PlayerCanPickUpThisWeaponTypeAtThisMoment(eWeaponType weaponType) {
-    return plugin::CallAndReturn<bool, 0x4554C0, eWeaponType>(weaponType);
+    if (!CWeaponInfo::GetWeaponInfo(weaponType)->flags.bAimWithArm) {
+        if (FindPlayerPed()->GetIntelligence()->GetTaskJetPack()) {
+            return false;
+        }
+    }
+    return true;
 }
 
 // 0x456DE0
