@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include "Pickups.h"
+#include "TaskSimpleJetPack.h"
 
 uint8& CPickups::DisplayHelpMessage = *(uint8*)0x8A5F48;
 int32& CPickups::PlayerOnWeaponPickup = *(int32*)0x97D640;
@@ -40,7 +41,7 @@ void CPickups::InjectHooks() {
     // RH_ScopedInstall(GetActualPickupIndex, 0x4552A0);
     // RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
     // RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
-    // RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
+    RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
     // RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     // RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     // RH_ScopedInstall(PassTime, 0x455200);
@@ -159,7 +160,72 @@ int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
 
 // 0x4564F0
 bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
-    return plugin::CallAndReturn<bool, 0x4564F0, uint16, int32>(modelId, playerId);
+    auto* ped = FindPlayerPed(playerId);
+
+    if (modelId == ModelIndices::MI_PICKUP_ADRENALINE) {
+        ped->m_pPlayerData->m_bAdrenaline = true;
+        ped->m_pPlayerData->m_nAdrenalineEndTime = CTimer::GetTimeInMS() + 20'000;
+        ped->ResetSprintEnergy();
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_ADRENALINE);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_BODYARMOUR) {
+        ped->m_fArmour = (float)FindPlayerInfo(playerId).m_nMaxArmour;
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_BODY_ARMOUR);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_INFO) {
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_HEALTH) {
+        auto maxHealth = FindPlayerInfo(playerId).m_nMaxHealth;
+        CStats::UpdateStatsAddToHealth((uint32)((float)maxHealth - ped->m_fHealth));
+        ped->m_fHealth = (float)maxHealth;
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_HEALTH);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_BONUS) {
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_BRIBE) {
+        auto wantedLevel = std::max(0u, FindPlayerPed()->GetWantedLevel() - 1);
+        FindPlayerPed(0)->SetWantedLevel(wantedLevel);
+        CStats::IncrementStat(STAT_NUMBER_OF_POLICE_BRIBES, 1.0f);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_PICKUP_KILLFRENZY) {
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+        return true;
+    }
+
+    if (modelId == MODEL_JETPACK) {
+        auto* task = new CTaskSimpleJetPack(nullptr, 10.0f, 0, nullptr);
+        CEventScriptCommand event(3, task, 0);
+        ped->GetEventGroup().Add(&event, false);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_INFO);
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_OYSTER) {
+        PickedUpOyster();
+        return true;
+    }
+
+    if (modelId == ModelIndices::MI_HORSESHOE) {
+        PickedUpHorseShoe();
+        return true;
+    }
+
+    return false;
 }
 
 // 0x454B40
