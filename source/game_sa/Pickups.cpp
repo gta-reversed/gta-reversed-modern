@@ -33,7 +33,7 @@ void CPickups::InjectHooks() {
     // RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
     RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
     RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
-    // RH_ScopedInstall(ModelForWeapon, 0x454AC0);
+    RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     // RH_ScopedInstall(PassTime, 0x455200);
     // RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
     // RH_ScopedInstall(PickedUpOyster, 0x4552D0);
@@ -230,9 +230,12 @@ bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
     return false;
 }
 
-// 0x454AC0
+/*!
+* @addr 0x454AC0
+* @returns The `nModelId1` of the given weapon type.
+*/
 int32 CPickups::ModelForWeapon(eWeaponType weaponType) {
-    return plugin::CallAndReturn<int32, 0x454AC0, eWeaponType>(weaponType);
+    return CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1;
 }
 
 // 0x455200
