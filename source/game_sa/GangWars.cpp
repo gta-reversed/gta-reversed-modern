@@ -640,14 +640,13 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
 
     auto allGangZones = groveZones + ballasZones + vagosZones;
     if (allGangZones) {
-        GangRatings[GANG_BALLAS] = 1;
         GangRatings[GANG_GROVE] = 0;
+        GangRatings[GANG_BALLAS] = 1;
         GangRatings[GANG_VAGOS] = 2;
 
-        // indices are ranks
-        GangRatingStrength[0] = groveZones;
-        GangRatingStrength[1] = ballasZones;
-        GangRatingStrength[2] = vagosZones;
+        GangRatingStrength[GangRatings[GANG_GROVE]] = groveZones;
+        GangRatingStrength[GangRatings[GANG_BALLAS]] = ballasZones;
+        GangRatingStrength[GangRatings[GANG_VAGOS]] = vagosZones;
 
         TerritoryUnderControlPercentage = static_cast<float>(groveZones / allGangZones);
 
