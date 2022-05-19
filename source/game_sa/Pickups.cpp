@@ -32,7 +32,7 @@ void CPickups::InjectHooks() {
     // RH_ScopedInstall(GetNewUniquePickupIndex, 0x456A30);
     // RH_ScopedInstall(GetUniquePickupIndex, 0x455280);
     RH_ScopedInstall(GivePlayerGoodiesWithPickUpMI, 0x4564F0);
-    // RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
+    RH_ScopedInstall(IsPickUpPickedUp, 0x454B40);
     // RH_ScopedInstall(ModelForWeapon, 0x454AC0);
     // RH_ScopedInstall(PassTime, 0x455200);
     // RH_ScopedInstall(PickedUpHorseShoe, 0x455390);
@@ -218,9 +218,16 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
     return false;
 }
 
-// 0x454B40
+/*!
+* @brief Check if pickup was picked up, and then mark it as not picked up.
+* @addr 0x454B40
+*/
 bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
-    return plugin::CallAndReturn<bool, 0x454B40, int32>(pickupHandle);
+    if (const auto it = rng::find(aPickUpsCollected, pickupHandle); it != aPickUpsCollected.end()) {
+        *it = NULL; // Reset 
+        return true;
+    }
+    return false;
 }
 
 // 0x454AC0
