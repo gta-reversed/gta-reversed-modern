@@ -381,7 +381,7 @@ void CFireManager::Update() {
 
         CEntity* hitEntity{};
         bool bHit{};
-        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &hitEntity);
+        point.z = CWorld::FindGroundZFor3DCoord(point, &bHit, &hitEntity);
 
         CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
         pointToCamDirNorm.Normalise();

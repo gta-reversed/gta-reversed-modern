@@ -297,7 +297,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
     // printf("Panes: %u x %u (%.3f x %.3f) \n", countX, countY, sizeX, sizeY);
 
     bool hitGround{};
-    float groundZ = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &hitGround, nullptr);
+    float groundZ = CWorld::FindGroundZFor3DCoord(point, &hitGround, nullptr);
     if (!hitGround)
         groundZ = point.z - 2.f;
 

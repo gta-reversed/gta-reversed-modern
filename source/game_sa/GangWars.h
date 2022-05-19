@@ -9,7 +9,6 @@
 #include "CarCtrl.h"
 #include "Radar.h"
 #include "PedType.h"
-#include "Tasks/TaskTypes/TaskComplexWander.h"
 
 class CZone;
 class CZoneInfo;

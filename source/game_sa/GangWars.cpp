@@ -8,6 +8,9 @@
 
 #include "GangWars.h"
 #include "GangWarsSaveStructure.h"
+#include "ModelIndices.h"
+#include "Tasks/TaskTypes/TaskComplexWander.h"
+#include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
 
 void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
@@ -24,7 +27,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);
     RH_ScopedInstall(ClearTheStreets, 0x4444B0);
     // RH_ScopedInstall(CreateAttackWave, 0x444810);
-    // RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
+    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
     RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);
     RH_ScopedInstall(DontCreateCivilians, 0x4439C0);
     RH_ScopedInstall(EndGangWar, 0x4464C0);
@@ -179,7 +182,126 @@ bool CGangWars::CreateAttackWave(int32 warFerocity, int32 waveID) {
 
 // 0x4453D0
 bool CGangWars::CreateDefendingGroup(int32 unused) {
-    return plugin::CallAndReturn<bool, 0x4453D0, int32>(unused);
+    if (!PedStreamedInForThisGang(Gang1)) {
+        auto group = CPopulation::GetPedGroupId((ePopcycleGroup)Gang1, 0);
+        CStreaming::RequestModel(CPopulation::GetPedGroupModelId(group, 0), STREAMING_KEEP_IN_MEMORY);
+
+        return false;
+    }
+
+    if (!ThePaths.AreNodesLoadedForArea(PointOfAttack.x, PointOfAttack.x, PointOfAttack.y, PointOfAttack.y))
+        return false;
+
+    auto node = ThePaths.FindNodeClosestToCoors(PointOfAttack, 0, 400.0f, 0, 0, 0, 0, 1);
+    if (!node.IsAreaValid())
+        return false;
+
+    auto nodePos = ThePaths.GetPathNode(node)->GetNodeCoors();
+    auto playerPos = FindPlayerCoors();
+    if (DistanceBetweenPoints2D(nodePos, playerPos) <= 40.0f)
+        return false;
+
+    auto pedCount = static_cast<uint32>(10.0f * (0.4f * Difficulty + 0.6f));
+
+    int32 outPedId;
+    for (auto i = 0u; i < pedCount; i++) {
+        if (!PickStreamedInPedForThisGang(Gang1, &outPedId))
+            continue;
+
+        auto angle = i * TWO_PI / pedCount;
+
+        auto some_coors = nodePos;
+        some_coors.x += sin(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f);
+        some_coors.y += cos(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f);
+        some_coors.z += 2.0f;
+
+        some_coors.z = CWorld::FindGroundZFor3DCoord(some_coors, nullptr, nullptr);
+
+        auto ped = new CCivilianPed(static_cast<ePedType>(Gang1 + 7), outPedId);
+        ped->SetPosn(some_coors);
+        ped->m_fAimingRotation = angle;
+        ped->m_fCurrentRotation = angle;
+        ped->SetHeading(angle);
+        ped->SetCharCreatedBy(PED_MISSION);
+        CWorld::Add(ped);
+
+        auto task = new CTaskComplexKillPedOnFoot(FindPlayerPed(), -1, 0, 0, 0, 2);
+        CEventScriptCommand esc(3, task, false);
+        ped->GetEventGroup().Add(&esc);
+
+        ped->SetWeaponAccuracy(static_cast<uint8_t>(90.0f - Difficulty * 60.0f));
+        ped->GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(PED_TYPE_PLAYER1));
+
+        eWeaponType weaponToGive{};
+        switch (i % 4) {
+        case 0:
+            weaponToGive = WEAPON_PISTOL;
+            break;
+        case 1:
+            weaponToGive = WEAPON_MICRO_UZI;
+            break;
+        case 2:
+            weaponToGive = WEAPON_SHOTGUN;
+            break;
+        case 3:
+            weaponToGive = WEAPON_MP5;
+            break;
+        }
+
+        ped->GiveDelayedWeapon(weaponToGive, 5000);
+        ped->SetCurrentWeapon(weaponToGive);
+        ped->bPartOfAttackWave = true;
+        ped->bClearRadarBlipOnDeath = true;
+
+        // some kinda color shit going on, todo: check values of it
+        auto col1 = ((uint8_t*)(0x8D1344))[Gang1];
+        auto col2 = ((uint8_t*)(0x8D1350))[Gang1];
+        auto col3 = ((uint8_t*)(0x8D135C))[Gang1];
+        auto color = ((col3 | (((col1 << 8) | col2) << 8)) << 8) | 0xFF;
+
+        auto blip = CRadar::SetEntityBlip(BLIP_CHAR, CPools::GetPedRef(ped), color, BLIP_DISPLAY_BLIPONLY);
+        CRadar::ChangeBlipScale(blip, 2);
+        CRadar::ChangeBlipColour(blip, color);
+    }
+
+    for (auto i = 0u; i < 3u; i++) {
+        auto carNode = ThePaths.FindNthNodeClosestToCoors(PointOfAttack, 0, 100.0f, false, false, i, false, true, nullptr);
+        auto carNodePos = ThePaths.GetPathNode(carNode)->GetNodeCoors();
+
+        if (DistanceBetweenPoints2D(carNodePos, playerPos) <= 25.0f)
+            continue;
+
+        auto gangCarModel = CPopulation::PickGangCar(Gang1);
+        if (gangCarModel >= 0 && CStreaming::GetInfo(gangCarModel).IsLoaded()) {
+            auto fwd = carNodePos - nodePos;
+            fwd.z = 0.0f;
+            fwd.Normalise();
+
+            auto car = CCarCtrl::CreateCarForScript(gangCarModel, carNodePos, false);
+            car->m_matrix->GetForward() = fwd;
+            car->m_matrix->GetRight() = CVector{fwd.y, -fwd.x, 0.0f};
+
+            car->AsAutomobile()->PlaceOnRoadProperly();
+            car->vehicleFlags.bIsLocked = false;
+            car->SetVehicleCreatedBy(MISSION_VEHICLE);
+            car->vehicleFlags.bPartOfAttackWave = true;
+        }
+    }
+
+    auto pickupCoors = CVector{
+        (rand() / 32767.0f) * 4.0f + nodePos.x - 2.0f,
+        (rand() / 32767.0f) * 4.0f + nodePos.y - 2.0f,
+        nodePos.z + 1.0f
+    };
+    pickupCoors.z = CWorld::FindGroundZFor3DCoord(pickupCoors, nullptr, nullptr) + 0.75f;
+
+    ModelIndex pickupModel = ModelIndices::MI_PICKUP_BODYARMOUR;
+    if (CGeneral::GetRandomNumberInRange(0, 2) == 1) {
+        pickupModel = ModelIndices::MI_PICKUP_HEALTH;
+    }
+
+    CPickups::GenerateNewOne(pickupCoors, pickupModel, 5, 0, 0, false, nullptr);
+    return true;
 }
 
 // 0x446400
