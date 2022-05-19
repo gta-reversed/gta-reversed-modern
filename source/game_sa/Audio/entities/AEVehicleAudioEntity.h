@@ -271,8 +271,8 @@ public:
     void StartVehicleEngineSound(int16, float, float);
     void CancelVehicleEngineSound(int16 engineSoundStateId);
     void RequestNewPlayerCarEngineSound(int16 vehicleSoundId, float speed, float changeSound);
-    float GetFreqForPlayerEngineSound(cVehicleParams& vehParams, int16 engineState_QuestionMark);
-    float GetVolForPlayerEngineSound(cVehicleParams& vehParams, int16 gear);
+    float GetFreqForPlayerEngineSound(cVehicleParams& params, int16 engineState_QuestionMark);
+    float GetVolForPlayerEngineSound(cVehicleParams& params, int16 gear);
 
     void UpdateVehicleEngineSound(int16, float, float);
     static void UpdateGasPedalAudio(CVehicle* vehicle, int32 vehType);
@@ -287,7 +287,7 @@ public:
 
     float GetVolumeForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
     float GetFrequencyForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
-    float GetFreqForIdle(float velocityPercentage) const;
+    [[nodiscard]] float GetFreqForIdle(float velocityPercentage) const;
 
     float GetVolumeForDummyRev(float, float);
     float GetFrequencyForDummyRev(float, float);
@@ -295,7 +295,7 @@ public:
     float GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fUnk, cTransmission& transmission, float fVelocity);
     float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float velocity);
 
-    float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress) const;
+    [[nodiscard]] float GetBaseVolumeForBicycleTyre(float fGearVelocityProgress) const;
     void GetHornState(bool* out, cVehicleParams& params);
     void GetAccelAndBrake(cVehicleParams& params);
 
@@ -355,7 +355,6 @@ public:
     // Seems to be inlined, so whenever you see something similar, replace it with a call
     void StopGenericEngineSound(int16 index);
 
-    // NOTSA, Custom (Most likely originally existed, but got inlined):
     bool UpdateGenericEngineSound(int16 index, float fVolume = 1.0f, float fSpeed = 1.0f);
     bool PlayGenericEngineSound(int16 index, int16 bank, int16 slotInBank,
                                 float fVolume = 1.0f, float fSpeed = 1.0f, float fSoundDistance = 1.0f,

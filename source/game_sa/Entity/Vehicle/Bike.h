@@ -204,3 +204,4 @@ private:
 };
 
 VALIDATE_SIZE(CBike, 0x814);
+VALIDATE_OFFSET(CBike, m_fGasPedalAudio, 0x808);
