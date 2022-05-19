@@ -5,8 +5,9 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
-
+#include "extensions/enumerate.hpp"
 #include "Pickups.h"
+#include "Radar.h"
 #include "TaskSimpleJetPack.h"
 
 int32& CollectPickupBuffer = *(int32*)0x97D644;
@@ -39,7 +40,7 @@ void CPickups::InjectHooks() {
     RH_ScopedInstall(PickedUpOyster, 0x4552D0);
     // RH_ScopedInstall(PictureTaken, 0x456A70);
     RH_ScopedInstall(PlayerCanPickUpThisWeaponTypeAtThisMoment, 0x4554C0);
-    // RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
+    RH_ScopedInstall(RemoveMissionPickUps, 0x456DE0);
     // RH_ScopedInstall(RemovePickUp, 0x4573D0);
     // RH_ScopedInstall(RemovePickUpsInArea, 0x456D30);
     // RH_ScopedInstall(RemovePickupObjects, 0x455470);
@@ -308,7 +309,23 @@ bool CPickups::PlayerCanPickUpThisWeaponTypeAtThisMoment(eWeaponType weaponType)
 
 // 0x456DE0
 void CPickups::RemoveMissionPickUps() {
-    plugin::Call<0x456DE0>();
+    for (auto&& [i, p] : notsa::enumerate(aPickUps)) {
+        switch (p.m_nPickupType) {
+        case PICKUP_ONCE_FOR_MISSION: {
+            CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i));
+
+            if (p.m_pObject) {
+                CWorld::Remove(p.m_pObject);
+                delete p.m_pObject; // There is a redudant `if` check in the original code. They probably used a macro for deleting, like `SAFE_DELETE`. But `delete` allows `NULL` anyways, so...
+                p.m_pObject = nullptr;
+            }
+
+            p.m_nFlags.bDisabled = true;
+            p.m_nPickupType = PICKUP_NONE;
+            break;
+        }
+        }
+    }
 }
 
 // 0x4573D0
