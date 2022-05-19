@@ -210,15 +210,15 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
         auto angle = i * TWO_PI / pedCount;
 
-        auto some_coors = nodePos;
-        some_coors.x += sin(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f);
-        some_coors.y += cos(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f);
-        some_coors.z += 2.0f;
-
-        some_coors.z = CWorld::FindGroundZFor3DCoord(some_coors, nullptr, nullptr);
+        auto pedPos = CVector{
+            nodePos.x + sin(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f),
+            nodePos.y + cos(angle) * ((rand() / 32767.0f) * 3.0f + 2.0f),
+            nodePos.z + 2.0f
+        };
+        pedPos.z = CWorld::FindGroundZFor3DCoord(pedPos, nullptr, nullptr);
 
         auto ped = new CCivilianPed(static_cast<ePedType>(Gang1 + 7), outPedId);
-        ped->SetPosn(some_coors);
+        ped->SetPosn(pedPos);
         ped->m_fAimingRotation = angle;
         ped->m_fCurrentRotation = angle;
         ped->SetHeading(angle);
