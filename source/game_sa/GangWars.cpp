@@ -11,6 +11,7 @@
 #include "ModelIndices.h"
 #include "Tasks/TaskTypes/TaskComplexWander.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
+#include <extensions/enumerate.hpp>
 
 void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
@@ -611,9 +612,9 @@ void CGangWars::Update() {
     plugin::Call<0x446610>();
 }
 
-// 0x443DE0, untested, did some assumptions that might be incorrect as hell
+// 0x443DE0
 void CGangWars::UpdateTerritoryUnderControlPercentage() {
-    auto groveZones = 0u, vagosZones = 0u, ballasZones = 0u;
+    auto ballasZones = 0u, groveZones = 0u, vagosZones = 0u;
     if (CTheZones::TotalNumberOfNavigationZones) {
         for (auto& zone : CTheZones::NavigationZoneArray) {
             auto zoneInfo = CTheZones::GetZoneInfo(&zone);
@@ -629,7 +630,7 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
                 groveZones++;
             } else if (ballasDensity > vagosDensity) {
                 ballasZones++;
-            } else {
+            } else if (vagosDensity > ballasDensity) {
                 vagosZones++;
             }
         }
@@ -644,26 +645,26 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
         GangRatings[GANG_BALLAS] = 1;
         GangRatings[GANG_VAGOS] = 2;
 
-        GangRatingStrength[GangRatings[GANG_GROVE]] = groveZones;
-        GangRatingStrength[GangRatings[GANG_BALLAS]] = ballasZones;
-        GangRatingStrength[GangRatings[GANG_VAGOS]] = vagosZones;
+        GangRatingStrength[0] = groveZones;
+        GangRatingStrength[1] = ballasZones;
+        GangRatingStrength[2] = vagosZones;
 
-        TerritoryUnderControlPercentage = static_cast<float>(groveZones / allGangZones);
+        TerritoryUnderControlPercentage = static_cast<float>(groveZones) / static_cast<float>(allGangZones);
 
         // NOTSA code
-        if (groveZones > ballasZones) {
-            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_GROVE]);
-            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_GROVE]);
-        }
+        struct GangRanking {
+            eGangID gang;
+            uint32 controlled;
+        } ranking[3] = {
+            {GANG_BALLAS, ballasZones},
+            {GANG_GROVE, groveZones},
+            {GANG_VAGOS, vagosZones}
+        };
+        std::sort(ranking, ranking + 3, [&](GangRanking a, GangRanking b) { return a.controlled > b.controlled; });
 
-        if (ballasZones > vagosZones) {
-            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_VAGOS]);
-            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_VAGOS]);
-        }
-
-        if (groveZones > ballasZones) {
-            std::swap(GangRatings[GANG_BALLAS], GangRatings[GANG_GROVE]);
-            std::swap(GangRatingStrength[GANG_BALLAS], GangRatingStrength[GANG_GROVE]);
+        for (auto&& [i, e] : notsa::enumerate(ranking)) {
+            GangRatings[e.gang] = i;
+            GangRatingStrength[i] = e.controlled;
         }
     } else {
         TerritoryUnderControlPercentage = 0.0f;
