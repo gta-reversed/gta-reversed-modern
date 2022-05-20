@@ -111,7 +111,7 @@ public:
     uint8 m_nWheelsOnGround;
     uint8 m_wheelsOnGrounPrev;
     char  field_963;
-    float m_fSomeGasPedalStuff;
+    float m_fGasPedalAudio;
 
     std::array<tWheelState, 4> m_aWheelState;
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
@@ -442,6 +442,7 @@ VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
 VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
 VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
 VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
+VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
 
 extern CColPoint *aAutomobileColPoints;
 

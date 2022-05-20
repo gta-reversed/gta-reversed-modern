@@ -159,7 +159,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     }
 
     field_804 = 20.0f;
-    m_fSomeGasPedalStuff = 0.0f;
+    m_fGasPedalAudio = 0.0f;
     m_fIntertiaValue1 = 0.0f;
     m_fIntertiaValue2 = 0.0f;
 
@@ -346,7 +346,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     m_fGasPedal               = 0.0f;
     m_fBreakPedal             = 0.0f;
     m_pExplosionVictim        = nullptr;
-    m_fSomeGasPedalStuff      = 0.0f;
+    m_fGasPedalAudio      = 0.0f;
     m_fMoveDirection          = 0.0f;
     m_wMiscComponentAngle     = 0;
     m_wMiscComponentAnglePrev = 0;
@@ -4828,7 +4828,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
         if (   door.m_nDoorState == DAMSTATE_OPENED                      // Still open (couldn't close it) ; todo: Comparison of different enumeration types ('eDoorState' and 'ePanelDamageState') is deprecated
             && DotProduct(m_vecMoveSpeed, m_matrix->GetForward()) > 0.4f // Speed's direction is kinda forwards
         ) {
-            auto flyingObj = SpawnFlyingComponent(CAR_BONNET, 2);
+            auto* flyingObj = SpawnFlyingComponent(CAR_BONNET, 2)->AsVehicle();
 
             m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, flyingObj);
             SetComponentVisibility(m_aCarNodes[CAR_BONNET], ATOMIC_IS_NOT_PRESENT);
@@ -4867,8 +4867,8 @@ CObject* CAutomobile::RemoveBonnetInPedCollision() {
         return nullptr; // Not open enough
     }
 
-    auto flyingComp = SpawnFlyingComponent(eCarNodes::CAR_BONNET, 2u);
-    m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, flyingComp);
+    auto* flyingComp = SpawnFlyingComponent(eCarNodes::CAR_BONNET, 2u);
+    m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, flyingComp->AsVehicle());
     SetComponentVisibility(m_aCarNodes[eCarNodes::CAR_BONNET], ATOMIC_IS_NOT_PRESENT);
     m_damageManager.SetDoorStatus(eDoors::DOOR_BONNET, eDoorStatus::DAMSTATE_NOTPRESENT);
     return flyingComp;
@@ -4891,7 +4891,7 @@ void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffe
         if (nodeIdx != eCarNodes::CAR_NODE_NONE) {
             SpawnFlyingComponent(nodeIdx, nodeIdx == eCarNodes::CAR_CHASSIS ? 4u : 2u);
         } else {
-            const auto obj = SpawnFlyingComponent(CAR_NODE_NONE, 3u);
+            const auto obj = SpawnFlyingComponent(CAR_NODE_NONE, 3u)->AsVehicle();
             m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, obj);
         }
     }
@@ -5560,7 +5560,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
     case DAMSTATE_NOTPRESENT: { // 0x6B17F0
         if (!withoutVisualEffect) {
             if (doorIdx == eDoors::DOOR_BONNET) { // Inverted
-                const auto obj = SpawnFlyingComponent(nodeIdx, 3u);
+                const auto obj = SpawnFlyingComponent(nodeIdx, 3u)->AsVehicle();
                 m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, obj);
             } else {
                 SpawnFlyingComponent(nodeIdx, doorIdx == eDoors::DOOR_BOOT ? 4u : 2u);
