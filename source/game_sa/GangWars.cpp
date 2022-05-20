@@ -11,6 +11,9 @@
 #include "ModelIndices.h"
 #include "Tasks/TaskTypes/TaskComplexWander.h"
 #include "Tasks/TaskTypes/TaskComplexKillPedOnFoot.h"
+//#include "Tasks/TaskTypes/TaskComplexCarDriveWander.h"
+#include "Tasks/TaskTypes/TaskSimpleCarDrive.h"
+//#include "Tasks/TaskTypes/TaskComplexWanderGang.h"
 #include <extensions/enumerate.hpp>
 
 void CGangWars::InjectHooks() {
@@ -590,8 +593,47 @@ void CGangWars::SwitchGangWarsActive() {
 }
 
 // 0x444530
+// TODO: CTaskComplexCarDriveWander, CTaskComplexCarDriveWander to be stubbed
 void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
     plugin::Call<0x444530, bool>(isGangWarEnding);
+
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        auto ped = GetPedPool()->GetAt(i);
+
+        if (ped && !ped->IsPlayer()) {
+            if (!ped->IsGangster() || ped->m_nPedType == PED_TYPE_GANG2)
+                continue;
+
+            if (!isGangWarEnding) {
+                auto player = FindPlayerPed();
+                auto task = new CTaskComplexKillPedOnFoot(player, -1, 0, 0, 0, 2);
+                CEventScriptCommand esc(3, task, false);
+                ped->GetEventGroup().Add(&esc);
+
+                continue;
+            }
+
+            if (ped->IsInVehicle()) {
+                CTask* task;
+                if (!ped->IsInVehicleAsPassenger()) {
+                    /*
+                    task = new CTaskComplexCarDriveWander(ped->GetVehicleIfInOne(), 0, 10.0f);
+                    */
+                } else {
+                    task = new CTaskSimpleCarDrive(ped->GetVehicleIfInOne());
+                }
+
+                CEventScriptCommand esc(3, task, false);
+                ped->GetEventGroup().Add(&esc);
+            }
+
+            /*
+            task = new CTaskComplexCarDriveWander(4, CGeneral::GetRandomNumberInRange(0, 8), 5000, 1, 0.5f);
+            CEventScriptCommand esc(3, task, false);
+            ped->GetEventGroup().Add(&esc);
+            */
+        }
+    }
 }
 
 // fix_bugs: originally has int32 type, but changed to unsigned due possible UB 

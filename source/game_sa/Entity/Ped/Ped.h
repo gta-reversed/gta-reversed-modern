@@ -562,6 +562,8 @@ public:
     bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
 
+    bool IsGangster() const noexcept { return m_nPedType >= PED_TYPE_GANG1 && m_nPedType <= PED_TYPE_GANG10; }
+
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
     CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
