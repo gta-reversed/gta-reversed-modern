@@ -94,7 +94,7 @@ void CWeaponEffects::ClearCrossHairImmediately(CrossHairId id) {
 
 // 0x742CC0
 void CWeaponEffects::ClearCrossHairsImmediately() {
-    for (auto i = 0; i < gCrossHair.size(); i++) {
+    for (auto i = 0u; i < gCrossHair.size(); i++) {
         ClearCrossHair(i);
     }
 }

@@ -25,6 +25,7 @@
 #include "AECutsceneTrackManager.h"
 #include "AECollisionAudioEntity.h"
 #include "AEGlobalWeaponAudioEntity.h"
+#include "AEPedAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
@@ -106,6 +107,7 @@
 #include "Securom.h"
 #include "GridRef.h"
 #include "MenuSystem.h"
+#include "InterestingEvents.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -235,6 +237,9 @@ void InjectHooksMain() {
     CFileMgr::InjectHooks();
 
     CHud::InjectHooks();
+    CInterestingEvents::InjectHooks();
+    CShadows::InjectHooks();
+    CCam::InjectHooks();
     CCarAI::InjectHooks();
     CMenuSystem::InjectHooks();
     CCarFXRenderer::InjectHooks();
@@ -501,6 +506,7 @@ void InjectHooksMain() {
         CAECutsceneTrackManager::InjectHooks();
         CAECollisionAudioEntity::InjectHooks();
         CAEGlobalWeaponAudioEntity::InjectHooks();
+        CAEPedAudioEntity::InjectHooks();
         CAEPedlessSpeechAudioEntity::InjectHooks();
         CAEPoliceScannerAudioEntity::InjectHooks();
         CAudioEngine::InjectHooks();
@@ -699,6 +705,8 @@ void InjectHooksMain() {
         CEventChatPartner::InjectHooks();
         CEventCopCarBeingStolen::InjectHooks();
         CEventHandler::InjectHooks();
+        CEventAcquaintancePedHate::InjectHooks();
+        CEventAcquaintancePedHateBadlyLit::InjectHooks();
     };
 
     const auto Fx = []() {

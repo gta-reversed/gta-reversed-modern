@@ -18,10 +18,10 @@ public:
     IKChain_c() = default;
     ~IKChain_c() = default;
 
-    bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float a11, int8 priority);
+    bool Init(const char* name, int32 indexInList, CPed* ped, ePedBones bone, RwV3d bonePosn, ePedBones bone2, CEntity* entity, int32 offsetBoneTag, RwV3d posn, float speed, int8 priority);
     void Exit();
-    void Update(float unused);
-    bool IsAtTarget(float maxDist, float* outDist);
+    void Update(float timeStep);
+    bool IsAtTarget(float maxDist, float* outDist) const;
     bool IsFacingTarget();
     void UpdateTarget(bool target);
     void UpdateOffset(int32 offsetBoneTag, CVector offsetPosn);
@@ -51,7 +51,7 @@ public:
     int32        m_OffsetBoneTag; // ePedBones.. Just that we have to use int32 here... :D
     CVector      m_OffsetPos;
     float        m_Speed;
-    CVector      m_Offset; //< `m_offsetPos` transformed with `m_entity`'s modelling matrix. See `MoveBonesToTarget`
+    CVector      m_Offset;   //< `m_offsetPos` transformed with `m_entity`'s modelling matrix. See `MoveBonesToTarget`
     bool         m_TargetMB; // Mouse Button
     uint8        m_IndexInList;
     int8         m_Priority;

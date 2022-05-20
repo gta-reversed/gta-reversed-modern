@@ -7,7 +7,7 @@
 class CEntity;
 class CPed;
 class Interior_c;
-class InteriorInfo_t;
+struct InteriorInfo_t;
 
 class InteriorGroup_c : public ListItem_c {
     CEntity*    m_pEntity;             // 0x8

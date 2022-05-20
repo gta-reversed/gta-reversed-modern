@@ -404,7 +404,7 @@ void CPad::StartShake_Train(const CVector2D& point) {
 
 // 0x541D70
 void CPad::StopPadsShaking() {
-    for (auto i = 0; i < std::size(Pads); i++) {
+    for (auto i = 0u; i < std::size(Pads); i++) {
         GetPad(i)->StopShaking(i);
     }
 }

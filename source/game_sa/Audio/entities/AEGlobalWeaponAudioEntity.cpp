@@ -51,60 +51,36 @@ void CAEGlobalWeaponAudioEntity::AddAudioEvent(eAudioEvents audioId, eWeaponType
 }
 
 // 0x4DF060
-void CAEGlobalWeaponAudioEntity::ProjectileFire(eWeaponType weaponType, CPhysical* physical, int32 audioId) {
-    plugin::CallMethod<0x4DF060, CAEGlobalWeaponAudioEntity*, eWeaponType, CPhysical*, int32>(this, weaponType, physical, audioId);
+void CAEGlobalWeaponAudioEntity::ProjectileFire(eWeaponType weaponType, CPhysical* physical, eAudioEvents event) {
+    return plugin::CallMethod<0x4DF060, CAEGlobalWeaponAudioEntity*, eWeaponType, CPhysical*, int32>(this, weaponType, physical, event);
 
-    /*
     if (weaponType != WEAPON_ROCKET || weaponType != WEAPON_ROCKET_HS)
         return;
 
-    ???
-    auto speed = (SLOBYTE(this->parent.m_pPed) + 1) % 3;
-    LOBYTE(this->parent.m_pPed) = speed;
-    ???
+    // ???
+    // auto speed = (SLOBYTE(this->parent.m_pPed) + 1) % 3;
+    // LOBYTE(this->parent.m_pPed) = speed;
+    // ???
 
-    if (AEAudioHardware.IsSoundBankLoaded(143, 5)) {
-        m_tempSound.Initialise(
-            5,
-            68,
-            this,
-            physical->GetPosition(),
-            CAEAudioEntity::m_pAudioEventVolumes[audioId] - 8.0f,
-            3.0f,
-            1.08f + speed,
-            1.0f,
-            0,
-            SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY,
-            0.02f,
-            0
-        );
-        m_tempSound.RegisterWithPhysicalEntity(physical);
-        AESoundManager.RequestNewSound(&m_tempSound);
-
-        if (AEAudioHardware.IsSoundBankLoaded(138, 19)) {
-            m_tempSound.Initialise(
-                19,
-                26,
-                this,
-                physical->GetPosition(),
-                CAEAudioEntity::m_pAudioEventVolumes[audioId],
-                3.0f,
-                (1.08f + speed) * 1.25f,
-                1.0f,
-                0,
-                SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY,
-                0.02f,
-                0
-            );
-            m_tempSound.RegisterWithPhysicalEntity(physical);
-            AESoundManager.RequestNewSound(&m_tempSound);
-        } else {
-            AEAudioHardware.LoadSoundBank(138, 19);
-        }
-    } else if (!AudioEngine.IsLoadingTuneActive()) {
+    if (!AEAudioHardware.IsSoundBankLoaded(143, 5) && !AudioEngine.IsLoadingTuneActive()) {
         AEAudioHardware.LoadSoundBank(143, 5);
     }
-    */
+    const auto volume = GetDefaultVolume(event);
+    const auto speed = 0.f; // todo
+    const auto speed0 = 1.08f + speed;
+    const auto speed1 = speed0 * 1.25f;
+
+    m_tempSound.Initialise(5, 68, this, physical->GetPosition(), volume - 8.0f, 3.0f, speed0, 1.0f, 0, SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY, 0.02f, 0);
+    m_tempSound.RegisterWithPhysicalEntity(physical);
+    AESoundManager.RequestNewSound(&m_tempSound);
+
+    if (!AEAudioHardware.IsSoundBankLoaded(138, 19)) {
+        AEAudioHardware.LoadSoundBank(138, 19);
+        return;
+    }
+    m_tempSound.Initialise(19, 26, this, physical->GetPosition(), volume, 3.0f, speed1, 1.0f, 0, SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY, 0.02f, 0);
+    m_tempSound.RegisterWithPhysicalEntity(physical);
+    AESoundManager.RequestNewSound(&m_tempSound);
 }
 
 // 0x4DF210
