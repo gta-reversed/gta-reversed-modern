@@ -421,6 +421,7 @@ void CAEVehicleAudioEntity::Terminate() {
         return;
     }
 
+    // OG | Replaced by TurnOffRadioForVehicle
     // s_pPlayerAttachedForRadio = nullptr;
     // s_pVehicleAudioSettingsForRadio = nullptr;
 
