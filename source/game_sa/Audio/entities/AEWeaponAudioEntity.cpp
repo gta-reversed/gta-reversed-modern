@@ -133,7 +133,7 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, int32
 }
 
 // 0x503690
-void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, int32 audioEventId) {
+void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, eAudioEvents event) {
     if (!entity)
         return;
 
@@ -151,41 +151,41 @@ void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, int
     switch (type) {
     case WEAPON_PISTOL:
     case WEAPON_PISTOL_SILENCED:
-        soundType = audioEventId != AE_WEAPON_RELOAD_A ? 66 : 55;
+        soundType = event != AE_WEAPON_RELOAD_A ? 66 : 55;
         break;
     case WEAPON_DESERT_EAGLE:
-        soundType = 4 * (audioEventId == AE_WEAPON_RELOAD_A) + 51;
+        soundType = 4 * (event == AE_WEAPON_RELOAD_A) + 51;
         break;
     case WEAPON_SHOTGUN:
     case WEAPON_SPAS12_SHOTGUN:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 71;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 71;
         break;
     case WEAPON_SAWNOFF_SHOTGUN:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 69;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 69;
         break;
     case WEAPON_MICRO_UZI:
     case WEAPON_MP5:
     case WEAPON_TEC9:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 84;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 84;
         break;
     case WEAPON_AK47:
     case WEAPON_M4:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 31;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 31;
         break;
     case WEAPON_COUNTRYRIFLE:
-        if (audioEventId != AE_WEAPON_RELOAD_A)
+        if (event != AE_WEAPON_RELOAD_A)
             return;
         soundType = 32;
         volumeOffset = -6.0f;
         break;
     case WEAPON_SNIPERRIFLE:
-        soundType = audioEventId != AE_WEAPON_RELOAD_A ? 32 : 55;
+        soundType = event != AE_WEAPON_RELOAD_A ? 32 : 55;
         break;
     default:
         return;
     }
 
-    auto volume = CAEAudioEntity::m_pAudioEventVolumes[audioEventId] + volumeOffset;
+    const auto volume = GetDefaultVolume(event) + volumeOffset;
 
     m_tempSound.Initialise(5, soundType, this, entity->GetPosition(), volume, 0.66f, 1.0f, 1.0f, 0, SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY, 0.0f, 0);
     m_tempSound.RegisterWithPhysicalEntity(entity);

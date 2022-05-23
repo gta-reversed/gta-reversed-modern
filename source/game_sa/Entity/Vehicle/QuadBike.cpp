@@ -81,30 +81,30 @@ void CQuadBike::PreRender() {
             false
         );
     }
-    
+
     CVector wheelFrontLeftPos;
     modelInfo->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
-    
+
     // Original code saves position of each matrix (because calls to SetRotation set the pos. to 0), then restores it
     // We just use SetRotateYOnly which doesn't modify the position
-    
+
     if (auto suspensionLF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_LF]) {
         CMatrix mat;
-        mat.Attach(&suspensionLF->modelling, false);
+        mat.Attach(RwFrameGetMatrix(suspensionLF), false);
         mat.SetRotateYOnly(atan2(m_wheelPosition[CAR_WHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
-    
+
     if (auto suspensionRF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_RF]) {
         CMatrix mat;
-        mat.Attach(&suspensionRF->modelling, false);
+        mat.Attach(RwFrameGetMatrix(suspensionRF), false);
         mat.SetRotateYOnly(-atan2(m_wheelPosition[eCarWheel::CAR_WHEEL_FRONT_RIGHT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
-    
+
     if (auto handlebars = m_aCarNodes[eQuadBikeNodes::QUAD_HANDLEBARS]) {
         CMatrix mat;
-        mat.Attach(&handlebars->modelling, false);
+        mat.Attach(RwFrameGetMatrix(handlebars), false);
         mat.SetRotateZOnly(QUAD_HBSTEER_ANIM_MULT * m_sRideAnimData.m_fHandlebarsAngle);
         mat.UpdateRW();
     }
@@ -125,7 +125,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
         return false;
     }
     m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
-    if (m_pDriver && m_pDriver->IsPlayer()) {    
+    if (m_pDriver && m_pDriver->IsPlayer()) {
         PruneReferences();
         if (m_pDriver->m_nPedState == PEDSTATE_ARRESTED ||
             m_pDriver->GetTaskManager().HasAnyOf<TASK_SIMPLE_CAR_WAIT_TO_SLOW_DOWN, TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT, TASK_COMPLEX_CAR_QUICK_BE_DRAGGED_OUT>()
@@ -136,7 +136,7 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
         } else {
             ProcessControlInputs((uint8)m_pDriver->m_nPedType);
             CPad* pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
-            
+
             float fTurnForcePerTimeStep = 0.0f;
             const float fLeanDirection = DotProduct(m_vecTurnSpeed, m_matrix->GetRight());
             if (m_sRideAnimData.dword10 >= 0.0f || fLeanDirection >= m_pHandling->m_fLeanBakCOM) {
@@ -194,14 +194,14 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
             }
             const float fValue = std::pow(m_pHandling->m_fDesLean, CTimer::GetTimeStep()); // TODO: Name this variable properly
             m_sRideAnimData.m_fAnimLean = fValue * m_sRideAnimData.m_fAnimLean - m_pHandling->m_fFullAnimLean * m_fSteerAngle / DegreesToRadians(m_pHandlingData->m_fSteeringLock) * (1.0f - fValue);
-                
+
             DoDriveByShootings();
 
             if (CCheat::IsActive(CHEAT_CARS_ON_WATER)) {
                 Remove();
             }
         }
-        
+
     }
     return false;
 }

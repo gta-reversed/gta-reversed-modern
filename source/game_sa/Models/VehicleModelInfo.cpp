@@ -8,6 +8,7 @@
 
 #include "VehicleModelInfo.h"
 #include "CustomCarPlateMgr.h"
+#include "LoadingScreen.h"
 #include "CarFXRenderer.h"
 
 CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
@@ -1332,7 +1333,7 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
             uint32 red, green, blue;
-            sscanf(buffer, "%d %d %d", &red, &green, &blue);
+            (void)sscanf(buffer, "%d %d %d", &red, &green, &blue);
             curColor->Set(red, green, blue, 255);
             auto pLineEnd = pLineStart;
             while (*pLineEnd != '#') // Seems redundant(?)
@@ -1513,8 +1514,8 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
-            sscanf(line, "%d", &iWheelSet);
-            strtok(line, " \t,");
+            (void)sscanf(line, "%d", &iWheelSet);
+            (void)strtok(line, " \t,");
             char* token;
             while ((token = strtok(nullptr, " \t,"))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));
@@ -1551,7 +1552,7 @@ tHandlingData& CVehicleModelInfo::GetHandlingData() const {
 }
 
 tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
-    return gHandlingDataMgr.m_aFlyingHandling[m_nHandlingId];
+    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)

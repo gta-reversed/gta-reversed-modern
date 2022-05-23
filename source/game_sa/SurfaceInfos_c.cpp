@@ -63,7 +63,7 @@ void SurfaceInfos_c::InjectHooks()
 // 0x55D220
 SurfaceId SurfaceInfos_c::GetSurfaceIdFromName(Const char* cName)
 {
-    constexpr struct { const char* name; const eSurfaceType type; } mapping[] = {
+    static constexpr struct { const char* name; const eSurfaceType type; } mapping[] = {
         { cDefaultName,             SURFACE_DEFAULT                },
         { "TARMAC",                 SURFACE_TARMAC                 },
         { "TARMAC_FUCKED",          SURFACE_TARMAC_FUCKED          },
@@ -244,9 +244,9 @@ SurfaceId SurfaceInfos_c::GetSurfaceIdFromName(Const char* cName)
         { "GORE",                   SURFACE_GORE                   },
         { "RAILTRACK",              SURFACE_RAILTRACK              }
     };
-    for (const auto& e : mapping) {
-        if (strcmp(cName, e.name) == 0)
-            return e.type;
+    for (const auto& [name, type] : mapping) {
+        if (strcmp(cName, name) == 0)
+            return type;
     }
     return SURFACE_DEFAULT;
 }
@@ -258,6 +258,13 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
 
     CFileMgr::SetDir("");
     auto* file = CFileMgr::OpenFile("data\\surface.dat", "rb");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surface.dat");
+        CFileMgr::CloseFile(file);
+        return;
+    }
+#endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == ';' || !*line)
             continue;
@@ -276,6 +283,13 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
 void SurfaceInfos_c::LoadSurfaceInfos()
 {
     auto* file = CFileMgr::OpenFile("data\\surfinfo.dat", "r");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surfinfo.dat");
+        CFileMgr::CloseFile(file);
+        return;
+    }
+#endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;
@@ -346,6 +360,13 @@ void SurfaceInfos_c::LoadSurfaceInfos()
 void SurfaceInfos_c::LoadSurfaceAudioInfos()
 {
     auto* file = CFileMgr::OpenFile("data\\surfaud.dat", "r");
+#if FIX_BUGS
+    if (!file) {
+        DEV_LOG("[SurfaceInfos_c] Failed to open surfaud.dat");
+        CFileMgr::CloseFile(file);
+        return;;
+    }
+#endif
     for (const char* line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
         if (*line == '#' || !*line)
             continue;

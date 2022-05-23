@@ -45,15 +45,16 @@ bool BoneNode_c::Init(int32 boneTag, RpHAnimBlendInterpFrame* interpFrame) {
 // 0x617490
 void BoneNode_c::InitLimits() {
     const auto id = GetIdFromBoneTag(m_BoneTag);
-    const auto boneInfo = BoneNodeManager_c::ms_boneInfos[id]; // Possible out of bounds when `id` = -1 (they don't check for -1)
+    assert(id != -1);
+    const auto& boneInfo = BoneNodeManager_c::ms_boneInfos[id]; // Possible out of bounds when `id` = -1 (they don't check for -1) | unnecessary copying
 
-    m_LimitMin.x = boneInfo.m_Min.x - boneInfo.m_Max.x;
-    m_LimitMin.y = boneInfo.m_Min.y - boneInfo.m_Max.z;
-    m_LimitMin.z = boneInfo.m_Min.z - boneInfo.m_ABC.z;
+    m_LimitMin.x = boneInfo.m_Max.x - boneInfo.m_Min.x;
+    m_LimitMin.y = boneInfo.m_Max.y - boneInfo.m_Min.z;
+    m_LimitMin.z = boneInfo.m_Max.z - boneInfo.m_ABC.y;
 
-    m_LimitMax.x = boneInfo.m_Max.y + boneInfo.m_Min.x;
-    m_LimitMax.y = boneInfo.m_ABC.x + boneInfo.m_Min.y;
-    m_LimitMax.z = boneInfo.m_ABC.y + boneInfo.m_Min.z;
+    m_LimitMax.x = boneInfo.m_Min.y + boneInfo.m_Max.x;
+    m_LimitMax.y = boneInfo.m_ABC.x + boneInfo.m_Max.y;
+    m_LimitMax.z = boneInfo.m_ABC.z + boneInfo.m_Max.z;
 }
 
 // 0x6171F0

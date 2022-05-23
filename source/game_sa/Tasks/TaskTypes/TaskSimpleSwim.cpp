@@ -683,7 +683,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped) {
         }
         g_fx.TriggerWaterSplash(vecParticlePosition);
         m_bTriggerWaterSplash = true;
-        ped->m_pedAudio.AddAudioEvent(75, 0.0f, 1.0f);
+        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_DIVE_SPLASH, 0.0f, 1.0f);
         break;
     }
     case SWIM_UNDERWATER_SPRINTING: {

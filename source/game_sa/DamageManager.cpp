@@ -219,7 +219,7 @@ void CDamageManager::SetAeroplaneCompStatus(uint8 frame, ePanelDamageState statu
 }
 
 // 0x6C22C0
-uint8 CDamageManager::GetEngineStatus() {
+uint32 CDamageManager::GetEngineStatus() {
     return m_nEngineStatus;
 }
 
@@ -485,7 +485,7 @@ void CDamageManager::SetDoorOpen(eDoors door) {
         SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
         break;
     case eDoorStatus::DAMSTATE_NOTPRESENT:
-        assert(0 && "Door should be present @ SetDoorOpen");
+        //assert(0 && "Door should be present @ SetDoorOpen");
         break;
     }
 }

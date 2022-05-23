@@ -11,7 +11,16 @@ OpcodeResult CRunningScript::ProcessCommands1600To1699(int32 commandId) {
     case COMMAND_IS_CHAR_AT_SCRIPTED_ATTRACTOR: // 0x642
         break;
     case COMMAND_SET_SEQUENCE_TO_REPEAT: // 0x643
-        break;
+    {
+        CollectParameters(2);
+        auto index = CTheScripts::GetActualScriptThingIndex(ScriptParams[0].iParam, SCRIPT_THING_SEQUENCE_TASK);
+        if (index < 0 || index >= 64) {
+            DEV_LOG("COMMAND_SET_SEQUENCE_TO_REPEAT: Index should be in [0, 64]");
+            return OR_CONTINUE;
+        }
+        CTaskSequences::GetActiveSequence().m_bRepeatSequence = ScriptParams[1].bParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_CREATE_PED_GENERATOR: // 0x644
         break;
     case COMMAND_SWITCH_PED_GENERATOR: // 0x645

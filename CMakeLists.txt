@@ -97,10 +97,12 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Entity/Vehicle/
     source/game_sa/Enums/
     source/game_sa/Events/
+    source/game_sa/Frontend/
     source/game_sa/Fx/
     source/game_sa/Fx/Blueprints/
     source/game_sa/Fx/Blueprints/Interp
     source/game_sa/Interior/
+    source/game_sa/Memory/
     source/game_sa/Models/
     source/game_sa/Plugins/
     source/game_sa/RenderWare/
@@ -108,6 +110,17 @@ target_include_directories(gta_reversed PRIVATE
     source/game_sa/Scripts/
     source/game_sa/Tasks/
     source/game_sa/Tasks/TaskTypes/
+
+    source/app/
+    source/app/platform/
+    source/app/platform/android/
+    source/app/platform/win/
+    source/app/platform/win/VideoPlayer/
+    source/app/platform/linux/
+    source/app/securom/
+
+    source/oswrapper
+
     libs/imgui/
     libs/imgui/misc/cpp/
 )

@@ -16,6 +16,10 @@ namespace rng = std::ranges;
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
 int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
 uint32& CCollision::ms_collisionInMemory = *(uint32*)0x9655D4;
+bool& CCollision::bCamCollideWithVehicles = *(bool*)0x8A5B14;
+bool& CCollision::bCamCollideWithObjects = *(bool*)0x8A5B15;
+bool& CCollision::bCamCollideWithPeds = *(bool*)0x8A5B17;
+float& CCollision::relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18;
 
 void CCollision::InjectHooks()
 {

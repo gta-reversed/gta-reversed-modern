@@ -74,7 +74,7 @@ public:
         uint8 bLostTraction : 1 ;
         uint8 bSoftSuspension : 1 ;
     } npcFlags;
-
+    int8   _align;
     bool   m_bDoingBurnout;                         // 0x86A
     uint16 m_wMiscComponentAngle;                   // 0x86C
     uint16 m_wMiscComponentAnglePrev;               // 0x86E
@@ -111,7 +111,7 @@ public:
     uint8 m_nWheelsOnGround;
     uint8 m_wheelsOnGrounPrev;
     char  field_963;
-    float m_fSomeGasPedalStuff;
+    float m_fGasPedalAudio;
 
     std::array<tWheelState, 4> m_aWheelState;
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;
@@ -372,8 +372,6 @@ public:
         return false;
     }
 
-    bool IsRealHeli() { return !!(m_pHandlingData->m_nModelFlags & VEHICLE_HANDLING_MODEL_IS_HELI); }
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
@@ -439,6 +437,12 @@ private:
 };
 
 VALIDATE_SIZE(CAutomobile, 0x988);
+VALIDATE_OFFSET(CAutomobile, m_damageManager, 0x5A0);
+VALIDATE_OFFSET(CAutomobile, m_wheelColPoint, 0x724);
+VALIDATE_OFFSET(CAutomobile, npcFlags, 0x868);
+VALIDATE_OFFSET(CAutomobile, m_bDoingBurnout, 0x86A);
+VALIDATE_OFFSET(CAutomobile, m_wMiscComponentAngle, 0x86C);
+VALIDATE_OFFSET(CAutomobile, m_fGasPedalAudio, 0x964);
 
 extern CColPoint *aAutomobileColPoints;
 

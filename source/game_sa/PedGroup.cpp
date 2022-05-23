@@ -13,7 +13,7 @@ CPedGroup::CPedGroup() {
 
 // 0x5FC190
 CPedGroup::~CPedGroup() {
-    for (auto i = 0; i < m_groupMembership.m_apMembers.size(); i++) {
+    for (auto i = 0u; i < m_groupMembership.m_apMembers.size(); i++) {
         m_groupMembership.RemoveMember(i);
     }
 }

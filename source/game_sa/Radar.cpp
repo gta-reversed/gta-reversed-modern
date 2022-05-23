@@ -163,7 +163,7 @@ void CRadar::Initialise()
     airstrip_blip = 0;
     airstrip_location = 0;
 
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         ClearActualBlip(i);
     }
 
@@ -188,7 +188,7 @@ void CRadar::Initialise()
 
     m_radarRange = 350.0f;
 
-    for (auto i = 0; i < gRadarTextures.size(); i++) {
+    for (auto i = 0u; i < gRadarTextures.size(); i++) {
         char txdName[16] = { 0 };
         sprintf(txdName, "radar%02d", i);
         gRadarTextures[i] = CTxdStore::FindTxdSlot(txdName);
@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    char* blipName;
+    char* blipName{};
 
     switch (blipType) {
     case (eRadarSprite)-5:
@@ -542,7 +542,7 @@ float CRadar::LimitRadarPoint(CVector2D& point)
 {
     float mag = point.Magnitude();
 
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         return mag;
 
     if (mag > 1.0f)
@@ -554,21 +554,21 @@ float CRadar::LimitRadarPoint(CVector2D& point)
 // 0x583350
 void CRadar::LimitToMap(float* pX, float* pY)
 {
-    float zoom = (FrontEndMenuManager.field_78) ? FrontEndMenuManager.m_fMapZoom : 140.0f;
+    float zoom = (FrontEndMenuManager.m_bMapLoaded) ? FrontEndMenuManager.m_fMapZoom : 140.0f;
 
-    float xMin = (FrontEndMenuManager.m_fMapBaseX - zoom) * SCREEN_WIDTH_UNIT;
-    float xMax = (FrontEndMenuManager.m_fMapBaseX + zoom) * SCREEN_WIDTH_UNIT;
+    float xMin = (FrontEndMenuManager.m_vMapOrigin.x - zoom) * SCREEN_WIDTH_UNIT;
+    float xMax = (FrontEndMenuManager.m_vMapOrigin.x + zoom) * SCREEN_WIDTH_UNIT;
     *pX = clamp(*pX, xMin, xMax);
 
-    float yMin = (FrontEndMenuManager.m_fMapBaseY - zoom) * SCREEN_HEIGHT_UNIT;
-    float yMax = (FrontEndMenuManager.m_fMapBaseY + zoom) * SCREEN_HEIGHT_UNIT;
+    float yMin = (FrontEndMenuManager.m_vMapOrigin.y - zoom) * SCREEN_HEIGHT_UNIT;
+    float yMax = (FrontEndMenuManager.m_vMapOrigin.y + zoom) * SCREEN_HEIGHT_UNIT;
     *pY = clamp(*pY, yMin, yMax);
 }
 
 // 0x583420
 uint8 CRadar::CalculateBlipAlpha(float distance)
 {
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         return 255;
 
     auto distAlpha = 255 - (int32)(distance * 1.0f / 60.0f * 255.0f);
@@ -579,9 +579,9 @@ uint8 CRadar::CalculateBlipAlpha(float distance)
 // 0x583480
 void CRadar::TransformRadarPointToScreenSpace(CVector2D& out, const CVector2D& in)
 {
-    if (FrontEndMenuManager.drawRadarOrMap) {
-        out.x = FrontEndMenuManager.m_fMapBaseX + FrontEndMenuManager.m_fMapZoom * in.x;
-        out.y = FrontEndMenuManager.m_fMapBaseY - FrontEndMenuManager.m_fMapZoom * in.y;
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
+        out.x = FrontEndMenuManager.m_vMapOrigin.x + FrontEndMenuManager.m_fMapZoom * in.x;
+        out.y = FrontEndMenuManager.m_vMapOrigin.y - FrontEndMenuManager.m_fMapZoom * in.y;
     } else {
         out.x = SCREEN_STRETCH_X(94.0f) / 2.0f + SCREEN_STRETCH_X(40.0f) + SCREEN_STRETCH_X(94.0f * in.x) / 2.0f;
         out.y = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) + SCREEN_STRETCH_Y(76.0f) / 2.0f - SCREEN_STRETCH_Y(76.0f * in.y) / 2.0f;
@@ -625,7 +625,7 @@ void CRadar::TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& 
 // 0x583670
 void CRadar::CalculateCachedSinCos()
 {
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         cachedSin = 0.0f;
         cachedCos = 1.0f;
 
@@ -664,8 +664,7 @@ void CRadar::CalculateCachedSinCos()
         in.Normalise();
     }
     else {
-        auto entityPosn = targetEntity->GetPosition();
-        in = entityPosn - activeCam.m_vecSourceBeforeLookBehind;
+        in = targetEntity->GetPosition() - activeCam.m_vecSourceBeforeLookBehind;
     }
 
     float angle = atan2(-in.x, in.y);
@@ -675,9 +674,9 @@ void CRadar::CalculateCachedSinCos()
 }
 
 // 0x583820
-int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ uint32 color, eBlipDisplay blipDisplay, _IGNORED_ char* scriptName)
+int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, _IGNORED_ uint32 color, eBlipDisplay blipDisplay, Const char* scriptName)
 {
-    return ((int32(__cdecl*)(eBlipType, CVector, uint32, eBlipDisplay, char*))0x583820)(type, posn, color, blipDisplay, scriptName);
+    return ((int32(__cdecl*)(eBlipType, CVector, uint32, eBlipDisplay, const char*))0x583820)(type, posn, color, blipDisplay, scriptName);
 }
 
 // 0x583920
@@ -713,7 +712,7 @@ bool CRadar::HasThisBlipBeenRevealed(int32 blipIndex)
 {
     CVector blipPos = ms_RadarTrace[blipIndex].m_vPosition;
 
-    if (!FrontEndMenuManager.drawRadarOrMap || !ms_RadarTrace[blipIndex].m_bShortRange
+    if (!FrontEndMenuManager.m_bDrawRadarOrMap || !ms_RadarTrace[blipIndex].m_bShortRange
     || CTheZones::ZonesRevealed > 80 || CTheZones::GetCurrentZoneLockedOrUnlocked(blipPos.x, blipPos.y))
         return true;
 
@@ -744,7 +743,7 @@ void CRadar::ChangeBlipScale(int32 blipIndex, int32 size)
     if (index == -1)
         return;
 
-    if (FrontEndMenuManager.drawRadarOrMap)
+    if (FrontEndMenuManager.m_bDrawRadarOrMap)
         size = 1;
 
     ms_RadarTrace[index].m_nBlipSize = size;
@@ -885,14 +884,14 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
 {
     CVector2D verts[4];
 
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         x *= SCREEN_WIDTH_UNIT;
         y *= SCREEN_HEIGHT_UNIT;
 
         LimitToMap(&x, &y);
     }
 
-    for (int32 i = 0; i < std::size(verts); i++) {
+    for (auto i = 0u; i < std::size(verts); i++) {
         float theta = (float)i * HALF_PI + (angle - PI / 4.0f);
 
         verts[i].x = std::sin(theta) * (float)width + x;
@@ -1112,7 +1111,7 @@ void CRadar::SetMapCentreToPlayerCoords()
     if (FindPlayerPed() == nullptr)
         return;
 
-    FrontEndMenuManager.drawRadarOrMap = true;
+    FrontEndMenuManager.m_bDrawRadarOrMap = true;
 
     InitFrontEndMap();
 
@@ -1126,9 +1125,9 @@ void CRadar::SetMapCentreToPlayerCoords()
     LimitRadarPoint(posRadar);
 
     FrontEndMenuManager.m_vMousePos = posReal;
-    FrontEndMenuManager.m_fMapBaseX = DEFAULT_SCREEN_WIDTH / 2.0f - FrontEndMenuManager.m_fMapZoom * posRadar.x;
-    FrontEndMenuManager.drawRadarOrMap = 0;
-    FrontEndMenuManager.m_fMapBaseY = DEFAULT_SCREEN_HEIGHT / 2.0f + FrontEndMenuManager.m_fMapZoom * posRadar.y;
+    FrontEndMenuManager.m_vMapOrigin.x = DEFAULT_SCREEN_WIDTH  / 2.0f - FrontEndMenuManager.m_fMapZoom * posRadar.x;
+    FrontEndMenuManager.m_vMapOrigin.y = DEFAULT_SCREEN_HEIGHT / 2.0f + FrontEndMenuManager.m_fMapZoom * posRadar.y;
+    FrontEndMenuManager.m_bDrawRadarOrMap = false;
 }
 
 // 0x585BF0
@@ -1166,7 +1165,7 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag)
 // 0x585FF0
 void CRadar::DrawRadarSprite(uint16 spriteId, float x, float y, uint8 alpha)
 {
-    if (FrontEndMenuManager.drawRadarOrMap) {
+    if (FrontEndMenuManager.m_bDrawRadarOrMap) {
         x *= SCREEN_WIDTH_UNIT;
         y *= SCREEN_HEIGHT_UNIT;
 
@@ -1383,7 +1382,7 @@ void CRadar::ClearActualBlip(int32 blipIndex)
 // 0x587C60
 void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle)
 {
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         if (ms_RadarTrace[i].m_nBlipType != blipType || ms_RadarTrace[i].m_nEntityHandle != entityHandle)
             continue;
 
@@ -1420,7 +1419,7 @@ bool CRadar::Load()
 {
     Initialise();
 
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         auto& trace = ms_RadarTrace[i];
         CGenericGameStorage::LoadDataFromWorkBuffer(&trace, sizeof(trace));
         if (trace.m_pEntryExit) {

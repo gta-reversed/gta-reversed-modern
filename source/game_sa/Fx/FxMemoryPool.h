@@ -11,7 +11,7 @@
 
 class FxMemoryPool_c {
 public:
-    char*  m_pData;
+    uint8* m_pData;
     uint32 m_nSize;
     uint32 m_nPosition;
 

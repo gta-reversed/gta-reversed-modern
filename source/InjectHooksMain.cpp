@@ -25,6 +25,7 @@
 #include "AECutsceneTrackManager.h"
 #include "AECollisionAudioEntity.h"
 #include "AEGlobalWeaponAudioEntity.h"
+#include "AEPedAudioEntity.h"
 #include "AEPedlessSpeechAudioEntity.h"
 #include "AEPoliceScannerAudioEntity.h"
 #include "AudioEngine.h"
@@ -116,9 +117,14 @@
 #include "Scripted2dEffects.h"
 #include "ScriptResourceManager.h"
 #include "PedAttractorManager.h"
+#include "LoadingScreen.h"
+#include "Securom.h"
+#include "GridRef.h"
+#include "MenuSystem.h"
+#include "InterestingEvents.h"
+#include "CarFXRenderer.h"
 
 // Tasks
-#include "TaskComplexCarDriveMission.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -146,6 +152,7 @@
 #include "TaskSimpleGetUp.h"
 #include "TaskSimpleUninterruptable.h"
 #include "TaskComplexFallAndGetUp.h"
+#include "TaskComplexFollowNodeRoute.h"
 #include "TaskComplexFollowLeaderInFormation.h"
 #include "TaskSimpleTriggerLookAt.h"
 #include "TaskSimpleHitHead.h"
@@ -230,6 +237,12 @@
 #include "TaskSimpleIKLookAt.h"
 #include "TaskSimpleIKManager.h"
 #include "TaskSimpleIKPointArm.h"
+#include "TaskSimpleCarSlowDragPedOut.h"
+#include "TaskSimpleWaitUntilPedIsOutCar.h"
+
+#include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/win.h"
+#include "platform/platform.h"
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
@@ -238,7 +251,12 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    const auto Unsorted = []() {
+    CInterestingEvents::InjectHooks();
+    CShadows::InjectHooks();
+    CCam::InjectHooks();
+    CCarAI::InjectHooks();
+    CMenuSystem::InjectHooks();
+    CCarFXRenderer::InjectHooks();
     CPedAttractorManager::InjectHooks();
     BoneNode_c::InjectHooks();
     BoneNodeManager_c::InjectHooks();
@@ -435,6 +453,8 @@ void InjectHooksMain() {
     CAcquaintance::InjectHooks();
     CWeather::InjectHooks();
     CPathFind::InjectHooks();
+    CPathNode::InjectHooks();
+    CNodeRoute::InjectHooks();
     CLoadMonitor::InjectHooks();
     CPlantMgr::InjectHooks();
     CDecisionMakerTypes::InjectHooks();
@@ -468,7 +488,6 @@ void InjectHooksMain() {
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
-    };
 
     const auto Audio = []() {
         CAEVehicleAudioEntity::InjectHooks();
@@ -500,6 +519,7 @@ void InjectHooksMain() {
         CAECutsceneTrackManager::InjectHooks();
         CAECollisionAudioEntity::InjectHooks();
         CAEGlobalWeaponAudioEntity::InjectHooks();
+        CAEPedAudioEntity::InjectHooks();
         CAEPedlessSpeechAudioEntity::InjectHooks();
         CAEPoliceScannerAudioEntity::InjectHooks();
         CAudioEngine::InjectHooks();
@@ -508,6 +528,9 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
+        CTaskSimpleWaitUntilPedIsOutCar::InjectHooks();
+        CTaskComplexSequence::InjectHooks();
+        CTaskSimpleCarSlowDragPedOut::InjectHooks();
         CTaskManager::InjectHooks();
         CTaskSimpleCreateCarAndGetIn::InjectHooks();
         CTaskComplexEnterAnyCarAsDriver::InjectHooks();
@@ -533,12 +556,13 @@ void InjectHooksMain() {
         CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
-        // CTaskComplexCopInCar::InjectHooks();
+        CTaskComplexCopInCar::InjectHooks();
         CTaskComplexFacial::InjectHooks();
         CTaskComplexInAirAndLand::InjectHooks();
         CTaskSimpleGetUp::InjectHooks();
         CTaskSimpleUninterruptable::InjectHooks();
         CTaskComplexFallAndGetUp::InjectHooks();
+        CTaskComplexFollowNodeRoute::InjectHooks();
         CTaskComplexFollowLeaderInFormation::InjectHooks();
         // CTaskSimpleTriggerLookAt::InjectHooks();
         CTaskSimpleHitHead::InjectHooks();
@@ -694,6 +718,8 @@ void InjectHooksMain() {
         CEventChatPartner::InjectHooks();
         CEventCopCarBeingStolen::InjectHooks();
         CEventHandler::InjectHooks();
+        CEventAcquaintancePedHate::InjectHooks();
+        CEventAcquaintancePedHateBadlyLit::InjectHooks();
     };
 
     const auto Fx = []() {
@@ -742,13 +768,20 @@ void InjectHooksMain() {
         CScriptResourceManager::InjectHooks();
     };
 
-    // Unsorted();
-    // Audio();
-    // Tasks();
-    // Events();
+    const auto App = []() {
+        VideoPlayer::InjectHooks();
+        Securom::InjectHooks();
+        Win32InjectHooks();
+        RsInjectHooks();
+    };
+
+    App();
+    Audio();
+    Tasks();
+    Events();
     Fx();
-    // Vehicle();
-    // Scripts();
+    Vehicle();
+    Scripts();
 
     ReversibleHooks::OnInjectionEnd();
 }

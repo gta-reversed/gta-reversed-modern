@@ -786,7 +786,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
                 randomNumber = CGeneral::GetRandomNumberInRange(0, 4);
             } while (gLastRandomNumberForIdleAnimationID == randomNumber);
 
-            constexpr struct {
+            static constexpr struct {
                 AnimationId  animId;
                 AssocGroupId assoc;
             } animations[] = {
