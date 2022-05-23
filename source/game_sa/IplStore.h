@@ -25,26 +25,23 @@ public:
     static void Initialise();
     static void Shutdown();
 
-    // returns slot index
     static int32 AddIplSlot(const char* name);
     static void AddIplsNeededAtPosn(const CVector& posn);
     static void ClearIplsNeededAtPosn();
     static void EnableDynamicStreaming(int32 iplSlotIndex, bool enable);
     static void EnsureIplsAreInMemory(const CVector& posn);
-    // returns -1 if slot not found
     static int32 FindIplSlot(const char* name);
     static CRect* GetBoundingBox(int32 iplSlotIndex);
     static CEntity** GetIplEntityIndexArray(int32 arrayIndex);
     static const char* GetIplName(int32 iplSlotIndex);
-    // returns array index
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
     static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber = -1);
     static void IncludeEntity(int32 iplSlotIndex, CEntity* entity);
-    static void Save();
-    static void Load();
+    static bool Save();
+    static bool Load();
     static void LoadAllRemainingIpls();
-    static bool LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize); // Originally took `uchar*`, but for simplicity's sake we're going to use `char*`. Makes no difference.
-    static bool LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSize); // Originally took `uchar*`, but for simplicity's sake we're going to use `char*`. Makes no difference.
+    static bool LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize);
+    static bool LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSize);
     static void LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection);
     static void RemoveAllIpls();
     static void RemoveIpl(int32 iplSlotIndex);

@@ -12,10 +12,13 @@ class IplDef {
 public:
     CRect m_boundBox{};
     char  m_szName[18]; // Changed to 18 (from 16) (also had to remove padding after it).. Unsure what the actual length was, but `strcpy_s` asserts if it's 16
+
     int16 m_nMinBuildingId{ SHRT_MAX };
     int16 m_nMaxBuildingId{ SHRT_MIN };
+
     int16 m_nMinDummyId{ SHRT_MAX };
     int16 m_nMaxDummyId{ SHRT_MIN };
+
     int16 m_nRelatedIpl{ -1 }; // entity arrays index
     bool  m_bInterior{};
     char  field_2D{}; // Seemingly something like `m_bIsLoaded`

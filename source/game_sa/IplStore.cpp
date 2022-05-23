@@ -29,13 +29,13 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(RequestIplAndIgnore, 0x405850);
     RH_ScopedInstall(LoadAllRemainingIpls, 0x405780);
     RH_ScopedInstall(RemoveAllIpls, 0x405720);
-    //RH_ScopedInstall(HaveIplsLoaded, 0x405600);
+    // RH_ScopedInstall(HaveIplsLoaded, 0x405600);
     RH_ScopedInstall(RequestIpls, 0x405520);
-    //RH_ScopedInstall(Load, 0x5D54A0);
-    //RH_ScopedInstall(Save, 0x5D5420);
+    // RH_ScopedInstall(Load, 0x5D54A0);
+    // RH_ScopedInstall(Save, 0x5D5420);
     RH_ScopedInstall(EnsureIplsAreInMemory, 0x4053F0);
     RH_ScopedInstall(RemoveRelatedIpls, 0x405110);
-    //RH_ScopedInstall(SetupRelatedIpls, 0x404DE0);
+    // RH_ScopedInstall(SetupRelatedIpls, 0x404DE0);
     RH_ScopedInstall(EnableDynamicStreaming, 0x404D30);
     RH_ScopedInstall(IncludeEntity, 0x404C90);
     RH_ScopedInstall(GetBoundingBox, 0x404C70);
@@ -47,18 +47,18 @@ void CIplStore::InjectHooks() {
     RH_ScopedInstall(GetNewIplEntityIndexArray, 0x404780);
     RH_ScopedInstall(SetIplsRequired, 0x404700);
     RH_ScopedInstall(ClearIplsNeededAtPosn, 0x4045E0);
-    //RH_ScopedInstall(LoadIpls, 0x405170);
+    // RH_ScopedInstall(LoadIpls, 0x405170);
     RH_ScopedGlobalInstall(SetIfInteriorIplIsRequired, 0x4045F0);
     RH_ScopedGlobalInstall(SetIfIplIsRequired, 0x404660);
     RH_ScopedGlobalInstall(SetIfIplIsRequiredReducedBB, 0x404690);
 }
 
 /*!
-* @addr 0x405EC0
-* @brief Allocate pool if it doesn't exist yet, allocate quad tree, etc..
-*/
+ * @addr 0x405EC0
+ * @brief Allocate pool if it doesn't exist yet, allocate quad tree, etc..
+ */
 void CIplStore::Initialise() {
-    gbIplsNeededAtPosn = 0;
+    gbIplsNeededAtPosn = false;
 
     if (!ms_pPool) {
         ms_pPool = new CPool<IplDef>(TOTAL_IPL_MODEL_IDS, "IPL Files");
@@ -74,8 +74,8 @@ void CIplStore::Initialise() {
 }
 
 /*!
-* @addr 0x405FA0
-*/
+ * @addr 0x405FA0
+ */
 void CIplStore::Shutdown() {
     RemoveAllIpls();
     for (auto i = 0; i < ms_pPool->GetSize(); i++) {
@@ -86,8 +86,8 @@ void CIplStore::Shutdown() {
     delete ms_pPool;
     ms_pPool = nullptr;
 
-    for (auto a : IplEntityIndexArrays | rng::views::take(NumIplEntityIndexArrays)) {
-        delete a;
+    for (auto array : IplEntityIndexArrays | rng::views::take(NumIplEntityIndexArrays)) {
+        delete array;
     }
     NumIplEntityIndexArrays = 0;
 
@@ -96,31 +96,32 @@ void CIplStore::Shutdown() {
 }
 
 /*!
-* @addr 0x405AC0
-*/
+ * @addr 0x405AC0
+ * @returns Slot index
+ */
 int32 CIplStore::AddIplSlot(const char* name) {
-    const auto def = new(ms_pPool->New()) IplDef{name}; // MOTE: Seemingly they didn't overload `operator new` for it..
+    const auto def = new (ms_pPool->New()) IplDef{ name }; // MOTE: Seemingly they didn't overload `operator new` for it..
     return ms_pPool->GetIndex(def);
 }
 
 /*!
-* @addr 0x4045B0
-*/
+ * @addr 0x4045B0
+ */
 void CIplStore::AddIplsNeededAtPosn(const CVector& posn) {
     gvecIplsNeededAtPosn = posn;
     gbIplsNeededAtPosn = true;
 }
 
 /*!
-* @addr 0x4045E0
-*/
+ * @addr 0x4045E0
+ */
 void CIplStore::ClearIplsNeededAtPosn() {
     gbIplsNeededAtPosn = false;
 }
 
 /*!
-* @addr 0x404D30
-*/
+ * @addr 0x404D30
+ */
 void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
     GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming = !enable;
 }
@@ -136,9 +137,9 @@ eAreaCodes ResolveAreaCode(int32 ec) {
 }
 
 /*!
-* @addr 0x4053F0
-* @brief Make sure all IPls that requested around posn (in a 190 unit cirlce) are loaded.
-*/
+ * @addr 0x4053F0
+ * @brief Make sure all IPls that requested around posn (in a 190 unit circle) are loaded.
+ */
 void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
     if (CStreaming::ms_disableStreaming) {
         return;
@@ -150,7 +151,7 @@ void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
 
     SetIplsRequired(posn);
 
-    for (auto slot = 1/*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+    for (auto slot = 1 /*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         const auto def = GetInSlot(slot);
         if (!def) {
             continue;
@@ -181,8 +182,9 @@ void CIplStore::EnsureIplsAreInMemory(const CVector& posn) {
 }
 
 /*!
-* @addr 0x404AC0
-*/
+ * @addr 0x404AC0
+ * @returns -1 if slot not found
+ */
 int32 CIplStore::FindIplSlot(const char* name) {
     for (auto& def : ms_pPool->GetAllValid()) {
         if (!_stricmp(name, def.m_szName)) {
@@ -193,32 +195,32 @@ int32 CIplStore::FindIplSlot(const char* name) {
 }
 
 /*!
-* @addr 0x404C70
-*/
+ * @addr 0x404C70
+ */
 CRect* CIplStore::GetBoundingBox(int32 iplSlotIndex) { // No xrefs
     return &GetInSlot(iplSlotIndex)->m_boundBox;
 }
 
 /*!
-* @addr 0x4047B0
-*/
+ * @addr 0x4047B0
+ */
 CEntity** CIplStore::GetIplEntityIndexArray(int32 arrayIndex) {
     return IplEntityIndexArrays[arrayIndex];
 }
 
 /*!
-* @addr 0x404A60
-*/
+ * @addr 0x404A60
+ */
 const char* CIplStore::GetIplName(int32 iplSlotIndex) { // No xrefs
     return GetInSlot(iplSlotIndex)->m_szName;
 }
 
 /*!
-* @addr 0x404780
-* @brief Make a new `CEntity*[entitiesCount]` array
-* @returns The index of the array in `IplEntityIndexArrays`
-* @param entitiesCount Size of `CEntity*` array
-*/
+ * @addr 0x404780
+ * @brief Make a new `CEntity*[entitiesCount]` array
+ * @returns The index of the array in `IplEntityIndexArrays`
+ * @param entitiesCount Size of `CEntity*` array
+ */
 int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
     const auto idx = NumIplEntityIndexArrays++;
     IplEntityIndexArrays[idx] = new CEntity*[entitiesCount];
@@ -226,8 +228,8 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
 }
 
 /*!
-* @addr 0x405600
-*/
+ * @addr 0x405600
+ */
 bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
     return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
     /*
@@ -257,8 +259,8 @@ bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
 }
 
 /*!
-* @addr 0x404C90
-*/
+ * @addr 0x404C90
+ */
 void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
     const auto ipldef = ms_pPool->GetAt(iplSlotIndex);
 
@@ -282,26 +284,26 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
 }
 
 /*!
-* @addr 0x5D5420
-*/
-void CIplStore::Save() {
+ * @addr 0x5D5420
+ */
+bool CIplStore::Save() {
     plugin::Call<0x5D5420>();
 }
 
 /*!
-* @addr 0x5D54A0
-*/
-void CIplStore::Load() {
+ * @addr 0x5D54A0
+ */
+bool CIplStore::Load() {
     plugin::Call<0x5D54A0>();
 }
 
 /*!
-* @addr 0x405780
-* @brief Load remaining IPL defs (using the streamer)
-*/
+ * @addr 0x405780
+ * @brief Load remaining IPL defs (using the streamer)
+ */
 void CIplStore::LoadAllRemainingIpls() {
     // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
-    for (auto slot = 1/*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+    for (auto slot = 1 /*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         auto def = ms_pPool->GetAt(slot);
 
         if (!def) {
@@ -325,8 +327,9 @@ void CIplStore::LoadAllRemainingIpls() {
 }
 
 /*!
-* @addr 0x406080
-*/
+ * @addr 0x406080
+ * @NOTSA Originally took `uchar*`, but for simplicity's sake we're going to use `char*`. Makes no difference.
+ */
 bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
     auto& def = *GetInSlot(iplSlotIndex);
     def.field_2D = true; // We're setting this here, as it's set in all cases.
@@ -376,16 +379,16 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
         IncludeEntity(iplSlotIndex, obj);
     };
 
-    if (strncmp((char*)data, "bnry", 4u)) { // IPL in text format
+    if (strncmp((char*)data, "bnry", 4u) != 0) { // IPL in text format
         bool inSection{};
-        for (auto l = CFileLoader::LoadLine(data, dataSize); l; l = CFileLoader::LoadLine(data, dataSize)) {
-            switch (l[0]) {
+        for (auto line = CFileLoader::LoadLine(data, dataSize); line; line = CFileLoader::LoadLine(data, dataSize)) {
+            switch (line[0]) {
             case 0:   // Empty line
             case '#': // Comment
                 continue;
             }
 
-            const auto LineBeginsWith = [linesv = std::string_view{ l }](auto with) {
+            const auto LineBeginsWith = [linesv = std::string_view{ line }](auto with) {
                 return linesv.starts_with(with);
             };
 
@@ -399,7 +402,7 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
                 continue;
             }
 
-            FinishLoadObjInst(CFileLoader::LoadObjectInstance(l));
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(line));
         }
     } else { // Binary IPL
         auto ipl = reinterpret_cast<tBinaryIplFile*>(data);
@@ -419,9 +422,11 @@ bool CIplStore::LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize) {
 }
 
 /*!
-* @addr 0x405C00
-* @brief Nearly 100% same as `LoadIpl`, but it modifies `ppCurrIplInstance`, and calculates bounding box of the IPL. Unsure honestly.
-*/
+ * @addr 0x405C00
+ * @brief Nearly 100% same as `LoadIpl`, but it modifies `ppCurrIplInstance`, and calculates bounding box of the IPL. Unsure honestly.
+ * @returns Always true
+ * @NOTSA Originally took `uchar*`, but for simplicity's sake we're going to use `char*`. Makes no difference.
+ */
 bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSize) {
     auto& def = *GetInSlot(iplSlotIndex);
 
@@ -458,16 +463,16 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
         def.m_boundBox.Restrict(rect);
     };
 
-    if (strncmp((char*)data, "bnry", 4u)) { // IPL in text format
+    if (strncmp((char*)data, "bnry", 4u) != 0) { // IPL in text format
         bool inSection{};
-        for (auto l = CFileLoader::LoadLine(data, dataSize); l; l = CFileLoader::LoadLine(data, dataSize)) {
-            switch (l[0]) {
+        for (auto line = CFileLoader::LoadLine(data, dataSize); line; line = CFileLoader::LoadLine(data, dataSize)) {
+            switch (line[0]) {
             case 0:   // Empty line
             case '#': // Comment
                 continue;
             }
 
-            const auto LineBeginsWith = [linesv = std::string_view{ l }](auto with) {
+            const auto LineBeginsWith = [linesv = std::string_view{ line }](auto with) {
                 return linesv.starts_with(with);
             };
 
@@ -481,7 +486,7 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
                 continue;
             }
 
-            FinishLoadObjInst(CFileLoader::LoadObjectInstance(l));     
+            FinishLoadObjInst(CFileLoader::LoadObjectInstance(line));
         }
     } else { // Binary IPL
         auto ipl = reinterpret_cast<tBinaryIplFile*>(data);
@@ -494,11 +499,11 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
 }
 
 /*!
-* @addr 0x405170
-*/
+ * @addr 0x405170
+ */
 void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
     plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
-    
+
     /*if (CStreaming::ms_disableStreaming) {
         return;
     }
@@ -524,12 +529,12 @@ void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirec
 }
 
 /*!
-* @addr 0x405720
-* @brief Unload all loaded IPL's using `CStreaming::RemoveModel`
-*/
+ * @addr 0x405720
+ * @brief Unload all loaded IPL's using `CStreaming::RemoveModel`
+ */
 void CIplStore::RemoveAllIpls() {
     // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
-    for (auto slot = 1/*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+    for (auto slot = 1 /*skip 1st*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         auto def = ms_pPool->GetAt(slot);
         if (!def) {
             continue;
@@ -542,8 +547,8 @@ void CIplStore::RemoveAllIpls() {
 }
 
 /*!
-* @addr 0x404B20
-*/
+ * @addr 0x404B20
+ */
 void CIplStore::RemoveIpl(int32 iplSlotIndex) {
     const auto& def = *ms_pPool->GetAt(iplSlotIndex);
 
@@ -566,15 +571,15 @@ void CIplStore::RemoveIpl(int32 iplSlotIndex) {
 
     // In same order as originally
     ProcessPool(*GetBuildingPool(), def.m_nMinBuildingId, def.m_nMaxBuildingId);
-    ProcessPool(*GetObjectPool(), 0, GetObjectPool()->GetSize());
-    ProcessPool(*GetDummyPool(), def.m_nMinDummyId, def.m_nMaxDummyId);
+    ProcessPool(*GetObjectPool(),   0,                    GetObjectPool()->GetSize());
+    ProcessPool(*GetDummyPool(),    def.m_nMinDummyId,    def.m_nMaxDummyId);
 
     CTheCarGenerators::RemoveCarGenerators((uint8_t)iplSlotIndex);
 }
 
 /*!
-* @addr 0x405890
-*/
+ * @addr 0x405890
+ */
 void CIplStore::RemoveIplAndIgnore(int32 iplSlotIndex) {
     auto& def = *ms_pPool->GetAt(iplSlotIndex);
 
@@ -585,20 +590,20 @@ void CIplStore::RemoveIplAndIgnore(int32 iplSlotIndex) {
 }
 
 /*!
-* @addr 0x405B60
-*/
+ * @addr 0x405B60
+ */
 void CIplStore::RemoveIplSlot(int32 iplSlotIndex) {
     auto& def = *ms_pPool->GetAt(iplSlotIndex);
     if (def.field_2D) {
         RemoveIpl(iplSlotIndex);
     }
     ms_pQuadTree->DeleteItem(&def);
-    ms_pPool->Delete(&def); 
+    ms_pPool->Delete(&def);
 }
 
 /*!
-* @addr 0x4058D0
-*/
+ * @addr 0x4058D0
+ */
 void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
     auto& def = *ms_pPool->GetAt(iplSlotIndex);
     def.m_bDisableDynamicStreaming = false;
@@ -606,8 +611,8 @@ void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
 }
 
 /*!
-* @addr 0x405110
-*/
+ * @addr 0x405110
+ */
 void CIplStore::RemoveRelatedIpls(int32 iplSlotIndex) {
     for (auto&& [idx, def] : ms_pPool->GetAllValidWithIndex()) {
         if (def.m_nRelatedIpl == iplSlotIndex) {
@@ -617,8 +622,8 @@ void CIplStore::RemoveRelatedIpls(int32 iplSlotIndex) {
 }
 
 /*!
-* @addr 0x405850
-*/
+ * @addr 0x405850
+ */
 void CIplStore::RequestIplAndIgnore(int32 iplSlotIndex) {
     auto& def = *ms_pPool->GetAt(iplSlotIndex);
     CStreaming::RequestModel(IPLToModelId(iplSlotIndex), STREAMING_KEEP_IN_MEMORY);
@@ -627,10 +632,10 @@ void CIplStore::RequestIplAndIgnore(int32 iplSlotIndex) {
 }
 
 /*!
-* @addr 0x405520
-*/
+ * @addr 0x405520
+ */
 void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
-    for (auto slot = 1/*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
+    for (auto slot = 1 /*skip first*/; slot < TOTAL_IPL_MODEL_IDS; slot++) {
         const auto def = GetInSlot(slot);
         if (!def) {
             continue;
@@ -646,8 +651,8 @@ void CIplStore::RequestIpls(const CVector& posn, int32 playerNumber) {
 }
 
 /*!
-* @addr 0x404700
-*/
+ * @addr 0x404700
+ */
 void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
     ms_currentIPLAreaCode = ResolveAreaCode(gameArea);
 
@@ -664,22 +669,22 @@ void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
 }
 
 /*!
-* @addr 0x404A90
-*/
+ * @addr 0x404A90
+ */
 void CIplStore::SetIsInterior(int32 iplSlotIndex, bool isInterior) {
     GetInSlot(iplSlotIndex)->m_bInterior = isInterior;
 }
 
 /*!
-* @addr 0x404DE0
-*/
+ * @addr 0x404DE0
+ */
 int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysIndex, CEntity** pIPLInsts) {
     char iplName[32]{};
 
     // Extract name of IPL from path
-    if (const auto pPathsep = strrchr(iplFilePath, '\\')) { // Find last path separator
-        if (const auto pDot = strchr(pPathsep, '.')) {
-            memcpy_s(iplName, sizeof(iplName), pPathsep + 1, pDot - (pPathsep + 1)); // They used a manual loop, but this is better.
+    if (const auto pathSep = strrchr(iplFilePath, '\\')) { // Find last path separator
+        if (const auto dot = strchr(pathSep, '.')) {
+            memcpy_s(iplName, sizeof(iplName), pathSep + 1, dot - (pathSep + 1)); // They used a manual loop, but this is better.
         } else {
             return 0;
         }
@@ -687,10 +692,12 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
         return 0;
     }
 
-    const bool isIPLAnInterior = rng::any_of(
-        std::to_array({ "gen_int1", "gen_int2", "gen_int3", "gen_int4", "gen_int5", "gen_intb", "savehous", "stadint", "int_la", "int_sf", "int_veg", "int_cont", "levelmap" }),
-        [&](auto v) { return !_stricmp(v, iplName); }
-    );
+    constexpr auto interiors = std::to_array({
+        "gen_int1", "gen_int2", "gen_int3", "gen_int4",
+        "gen_int5", "gen_intb", "savehous", "stadint",
+        "int_la", "int_sf", "int_veg", "int_cont", "levelmap"
+    });
+    const bool isIPLAnInterior = rng::any_of(interiors, [&](auto v) { return !_stricmp(v, iplName); });
 
     strcat_s(iplName, "_stream");
     const auto iplNameLen = strlen(iplName);
@@ -699,7 +706,7 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
 
     if (CColAccel::isCacheLoading()) { // NOTSA: Inverted conditional
         for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
-            if (!_strnicmp(iplName, def.m_szName, iplNameLen/*they used strlen(iplName), but we optimized it*/)) {
+            if (!_strnicmp(iplName, def.m_szName, iplNameLen /*they used strlen(iplName), but we optimized it*/)) {
                 def = CColAccel::getIplDef(slot);
                 def.m_nRelatedIpl = entityArraysIndex;
                 def.m_bInterior = isIPLAnInterior;
@@ -709,7 +716,7 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
         }
     } else {
         for (auto&& [slot, def] : ms_pPool->GetAllValidWithIndex()) {
-            if (!_strnicmp(iplName, def.m_szName, iplNameLen/*they used strlen(iplName), but we optimized it*/)) {
+            if (!_strnicmp(iplName, def.m_szName, iplNameLen /*they used strlen(iplName), but we optimized it*/)) {
                 def.m_nRelatedIpl = entityArraysIndex;
                 def.m_bInterior = isIPLAnInterior;
                 def.m_bDisableDynamicStreaming = false; // NOTE: Inlined function was used to set this.
@@ -725,9 +732,9 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
 }
 
 /*!
-* @addr 0x4045F0
-* @brief Callback used in `SetIplsRequired`
-*/
+ * @addr 0x4045F0
+ * @brief Callback used in `SetIplsRequired`
+ */
 void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
     auto& def = *static_cast<IplDef*>(data);
 
@@ -746,9 +753,9 @@ void SetIfInteriorIplIsRequired(const CVector2D& posn, void* data) {
 }
 
 /*!
-* @addr 0x404660
-* @brief Callback used in `SetIplsRequired`
-*/
+ * @addr 0x404660
+ * @brief Callback used in `SetIplsRequired`
+ */
 void SetIfIplIsRequired(const CVector2D& posn, void* data) {
     auto& def = *static_cast<IplDef*>(data);
 
@@ -758,9 +765,9 @@ void SetIfIplIsRequired(const CVector2D& posn, void* data) {
 }
 
 /*!
-* @addr 0x404690
-* @brief Callback used in `SetIplsRequired`
-*/
+ * @addr 0x404690
+ * @brief Callback used in `SetIplsRequired`
+ */
 void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
     auto& def = *static_cast<IplDef*>(data);
 
