@@ -140,7 +140,7 @@ void CAEPoliceScannerAudioEntity::StopScanner(bool bStopSound) {
 
 // 0x4E6C30
 void CAEPoliceScannerAudioEntity::FinishedPlayingScannerDialogue() {
-    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SCANNER_NOISE_STOP, 0.0f, 1.0f);
+    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SCANNER_NOISE_STOP);
     s_nScannerPlaybackState      = STATE_INITIAL;
     s_SlotState                  = 0x10001;
     dword_B61D18                 = 0x10001;

@@ -132,12 +132,12 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
-    static void LoadSettings(FILE* file);
-    static void SaveSettings(FILE* file);
+    bool LoadSettings(FILE* file);
+    void SaveSettings(FILE* file);
 
     void InitDefaultControlConfiguration();
     void InitialiseControllerActionNameArray();
-    static void ReInitControls();
+    void ReinitControls();
 
     void StoreMouseButtonState(eMouseButtons button, bool state);
     void UpdateJoyInConfigMenus_ButtonDown(ePadButton button, int32 padNumber);

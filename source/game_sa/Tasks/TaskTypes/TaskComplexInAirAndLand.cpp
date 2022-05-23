@@ -78,7 +78,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
             else
                 newTask = new CTaskSimpleLand(ANIM_ID_FALL_COLLAPSE);
 
-            ped->m_pedAudio.AddAudioEvent(59, 0.0F, 1.0F, 0, 0, 0, 0);
+            ped->m_pedAudio.AddAudioEvent(AE_PED_COLLAPSE_AFTER_FALL, 0.0F, 1.0F, 0, 0, 0, 0);
 
             if (ped->m_pPlayerData) {
                 CVector          empty{};
@@ -104,7 +104,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
             auto newTask = new CTaskSimpleLand(landAnimId);
 
-            ped->m_pedAudio.AddAudioEvent(58, 0.0F, 1.0F, 0, 0, 0, 0);
+            ped->m_pedAudio.AddAudioEvent(AE_PED_LAND_ON_FEET_AFTER_FALL, 0.0F, 1.0F, 0, 0, 0, 0);
 
             if (ped->m_pPlayerData) {
                 CVector          empty{};

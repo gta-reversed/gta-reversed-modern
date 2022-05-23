@@ -69,7 +69,7 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
     case COMMAND_ACTIVATE_PIMP_CHEAT: // 0xA3D
         CollectParameters(1);
         if (ScriptParams[0].iParam)
-            CCheat::EnableLegitimateCheat(CHEAT_PROSTITUTES_PAY_YOU);
+            CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
         else
             CCheat::Disable(CHEAT_PROSTITUTES_PAY_YOU);
         return OR_CONTINUE;

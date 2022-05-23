@@ -29,7 +29,7 @@ CScriptedEffectPairs* CScripted2dEffects::GetEffectPairs(const C2dEffect* effect
 int32 CScripted2dEffects::GetIndex(const C2dEffect* effect) {
     return plugin::CallAndReturn<int32, 0x6F9F60, const C2dEffect*>(effect);
 
-    for (auto i = 0; i < ms_effects.size(); i++) {
+    for (auto i = 0u; i < ms_effects.size(); i++) {
         if (&ms_effects[i] == effect) {
             return i;
         }

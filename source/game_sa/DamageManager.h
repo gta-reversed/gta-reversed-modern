@@ -158,7 +158,7 @@ public:
     uint8 GetAeroplaneCompStatus(uint8 frame);
     void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
 
-    uint8 GetEngineStatus();
+    uint32 GetEngineStatus();
     void SetEngineStatus(uint8 status);
 
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.

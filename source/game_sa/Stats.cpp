@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Stats.h"
+#include "MenuSystem.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;

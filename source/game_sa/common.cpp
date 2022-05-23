@@ -19,7 +19,6 @@
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
-char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
 
@@ -150,7 +149,7 @@ CVector& FindPlayerSpeed(int32 playerId) {
 // 0x56E120
 CEntity* FindPlayerEntity(int32 playerId) {
     if (auto player = FindPlayerPed(playerId)) {
-        if (player->bInVehicle && player->m_pVehicle) 
+        if (player->bInVehicle && player->m_pVehicle)
             return player->m_pVehicle;
         return player;
     }
@@ -207,7 +206,7 @@ float FindPlayerHeight() {
 
 // 0x56E210
 CPlayerPed* FindPlayerPed(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
+    return FindPlayerInfo(playerId).m_pPed;
 }
 
 // Returns player vehicle
@@ -228,7 +227,7 @@ CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
 
 // 0x56E230
 CWanted* FindPlayerWanted(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
+    return FindPlayerInfo(playerId).m_PlayerData.m_pWanted;
 }
 
 
@@ -309,11 +308,6 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive) {
     return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
 }
 
-// 0x734610
-void CreateDebugFont() {
-    // NOP
-}
-
 // 0x4ABA50
 CEventGlobalGroup* GetEventGlobalGroup() {
     static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
@@ -323,22 +317,6 @@ CEventGlobalGroup* GetEventGlobalGroup() {
 
     globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
-}
-
-// 0x734620
-void DestroyDebugFont() {
-    // NOP
-}
-
-// unused
-// 0x734630
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2) {
-    // NOP
-}
-
-// 0x734640
-void FlushObrsPrintfs() {
-    // NOP
 }
 
 // 0x734650

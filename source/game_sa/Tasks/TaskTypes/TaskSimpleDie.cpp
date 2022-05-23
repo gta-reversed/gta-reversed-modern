@@ -52,7 +52,7 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANLSATE_X | ANIM_FLAG_TRANLSATE_Y
+    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANSLATE_X | ANIM_FLAG_TRANSLATE_Y
                                    | ANIM_FLAG_MOVEMENT
                                    | ANIM_FLAG_PARTIAL
                                    | ANIM_FLAG_FREEZE_LAST_FRAME
