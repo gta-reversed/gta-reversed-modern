@@ -46,7 +46,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
     RH_ScopedInstall(SetGangWarsActive, 0x446570);
     RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
-    // RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
+    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
     // RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
     RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
@@ -276,12 +276,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
         ped->bPartOfAttackWave = true;
         ped->bClearRadarBlipOnDeath = true;
 
-        // some kinda color shit going on, todo: check values of it
-        auto col1 = ((uint8_t*)(0x8D1344))[Gang1];
-        auto col2 = ((uint8_t*)(0x8D1350))[Gang1];
-        auto col3 = ((uint8_t*)(0x8D135C))[Gang1];
-        auto color = ((col3 | (((col1 << 8) | col2) << 8)) << 8) | 0xFF;
-
+        auto color = GetGangColor(Gang1);
         auto blip = CRadar::SetEntityBlip(BLIP_CHAR, CPools::GetPedRef(ped), color, BLIP_DISPLAY_BLIPONLY);
         CRadar::ChangeBlipScale(blip, 2);
         CRadar::ChangeBlipColour(blip, color);
@@ -571,9 +566,37 @@ void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
     CTheZones::FillZonesWithGangColours(false);
 }
 
-// 0x444300
+// 0x444300, untested
 void CGangWars::StartDefensiveGangWar() {
-    plugin::Call<0x444300>();
+    if (PickZoneToAttack()) {
+        Difficulty = TerritoryUnderControlPercentage;
+        CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
+        State2 = WAR_NOTIFIED;
+        FightTimer = DistanceBetweenPoints2D(FindPlayerCoors(), PointOfAttack) * 200.0f + 240000.0f;
+        RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
+        
+        switch (Gang1) {
+        case GANG_BALLAS:
+            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGP);
+            break;
+        case GANG_VAGOS:
+        case GANG_DANANGBOYS:
+            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGY);
+            break;
+        case GANG_RIFA:
+            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGB);
+            break;
+        default:
+            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_ENEMYATTACK);
+            break;
+        }
+
+        bPlayerIsCloseby = false;
+        pZoneInfoToFightOver->Flags1 = CGangWars::pZoneInfoToFightOver->Flags1 & 0x9F | 0x40;
+        pZoneInfoToFightOver->ZoneColor = CRGBA{255, 0, 0, 160};
+    } else {
+        TimeTillNextAttack = (rand() / 32767.0f) * 0.9f * 1080000.0f + 648000.0f;
+    }
 }
 
 // 0x446050

@@ -53,7 +53,7 @@ public:
     static inline bool& bPlayerIsCloseby = *reinterpret_cast<bool*>(0x96AB92);
     static inline bool& bCanTriggerGangWarWhenOnAMission = *reinterpret_cast<bool*>(0x96AB93);
     static inline int32& NumSpecificZones = *reinterpret_cast<int32*>(0x96AB94);
-    static inline CRadar*& RadarBlip = *reinterpret_cast<CRadar**>(0x96AB98);
+    static inline int32& RadarBlip = *reinterpret_cast<int32*>(0x96AB98);
     static inline float& TerritoryUnderControlPercentage = *reinterpret_cast<float*>(0x96AB9C);
     static inline bool& bIsPlayerOnAMission = *reinterpret_cast<bool*>(0x96ABA0);
     static inline CVector& CoorsOfPlayerAtStartOfWar = *reinterpret_cast<CVector*>(0x96ABBC);
@@ -108,4 +108,15 @@ public:
 
     static void Update();
     static void UpdateTerritoryUnderControlPercentage();
+
+    // NOTSA
+private:
+    static uint32 GetGangColor(int32 gang) {
+        assert(gang >= GANG_BALLAS && gang <= GANG_VAGOS);
+        auto col1 = ((uint8_t*)(0x8D1344))[gang];
+        auto col2 = ((uint8_t*)(0x8D1350))[gang];
+        auto col3 = ((uint8_t*)(0x8D135C))[gang];
+
+        return ((col3 | (((col1 << 8) | col2) << 8)) << 8) | 0xFF;
+    }
 };
