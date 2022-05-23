@@ -11,14 +11,14 @@ void CGangWarsSaveStructure::Construct() {
     GangWarZoneInfoIndex = -1;
 
     if (CGangWars::pZoneInfoToFightOver) {
-        for (auto i = 0u; i < CTheZones::TotalNumberOfZoneInfos; i++) {
+        for (auto i = 0; i < CTheZones::TotalNumberOfZoneInfos; i++) {
             if (CGangWars::pZoneInfoToFightOver == &CTheZones::ZoneInfoArray[i]) {
                 GangWarZoneInfoIndex = i;
                 break;
             }
         }
         
-        for (auto i = 0u; i < CTheZones::TotalNumberOfNavigationZones; i++) {
+        for (auto i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
             if (CGangWars::pZoneToFightOver == &CTheZones::NavigationZoneArray[i]) {
                 GangWarNavigationZoneIndex = i;
                 break;

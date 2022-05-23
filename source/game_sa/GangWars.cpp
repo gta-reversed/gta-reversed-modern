@@ -572,7 +572,7 @@ void CGangWars::StartDefensiveGangWar() {
         Difficulty = TerritoryUnderControlPercentage;
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
         State2 = WAR_NOTIFIED;
-        FightTimer = DistanceBetweenPoints2D(FindPlayerCoors(), PointOfAttack) * 200.0f + 240000.0f;
+        FightTimer = static_cast<int32>(DistanceBetweenPoints2D(FindPlayerCoors(), PointOfAttack) * 200.0f + 240000.0f);
         RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
         
         switch (Gang1) {

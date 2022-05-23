@@ -24,7 +24,7 @@ public:
     float            TimeTillNextAttack;
     CVector          PointOfAttack;
     uint32           FightTimer;
-    CRadar*          RadarBlip;
+    int32            RadarBlip;
     bool             bPlayerIsCloseby;
     float            TerritoryUnderControlPercentage;
     float            Difficulty;
