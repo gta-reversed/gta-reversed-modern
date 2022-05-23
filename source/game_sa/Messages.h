@@ -57,7 +57,7 @@ public:
     static void CutString(int32 count, char* str, char** dest);
     static void ClearMessages(bool flag);
     static void ClearSmallMessagesOnly();
-    static void AddToPreviousBriefArray(char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string);
+    static void AddToPreviousBriefArray(char* text, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* string = nullptr);
     static void ClearPreviousBriefArray();
     static void InsertNumberInString(char* src, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* dst);
     static void InsertStringInString(char* src, char* string);

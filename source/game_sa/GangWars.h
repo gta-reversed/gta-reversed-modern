@@ -32,6 +32,7 @@ enum eGangWarState {
 class CGangWars {
 public:
     static inline int32& ZoneInfoForTraining = *reinterpret_cast<int32*>(0x8A5F40); // -1
+    static inline CVehicle*& pDriveByCar = *reinterpret_cast<CVehicle**>(0x96AB28);
     static inline std::array<int32, 3>& GangRatingStrength = *reinterpret_cast<std::array<int32, 3>*>(0x96AB2C);
     static inline std::array<int32, 3>& GangRatings = *reinterpret_cast<std::array<int32, 3>*>(0x96AB38);
     static inline int32& FightTimer = *reinterpret_cast<int32*>(0x96AB44);

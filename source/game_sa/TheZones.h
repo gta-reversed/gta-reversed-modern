@@ -11,8 +11,6 @@
 #include "Zone.h"
 #include "ZoneInfo.h"
 
-class CZoneExtraInfo;
-
 class CTheZones {
 public:
     static eLevelName& m_CurrLevel;
@@ -39,7 +37,7 @@ public:
     static eLevelName GetLevelFromPosition(const CVector& point);
     // Returns pointer to zone by a point
     static CZone* FindSmallestZoneForPosition(const CVector& point, bool FindOnlyZonesType0);
-    static CZoneExtraInfo* GetZoneInfo(const CVector& point, CZone** outZone);
+    static CZoneInfo* GetZoneInfo(const CVector& point, CZone** outZone);
     static void FillZonesWithGangColours(bool disableRadarGangColors);
     // Returns pointer to zone by index
     static CZone* GetNavigationZone(uint16 index);

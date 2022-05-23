@@ -46,8 +46,8 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
     RH_ScopedInstall(SetGangWarsActive, 0x446570);
     RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
-    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
-    // RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
+    //RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
+    //RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
     RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
     // RH_ScopedInstall(TellGangMembersTo, 0x444530);
@@ -566,8 +566,11 @@ void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
     CTheZones::FillZonesWithGangColours(false);
 }
 
-// 0x444300, untested
+// 0x444300, broken
 void CGangWars::StartDefensiveGangWar() {
+    plugin::Call<0x444300>();
+    return;
+
     if (PickZoneToAttack()) {
         Difficulty = TerritoryUnderControlPercentage;
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
@@ -592,16 +595,74 @@ void CGangWars::StartDefensiveGangWar() {
         }
 
         bPlayerIsCloseby = false;
-        pZoneInfoToFightOver->Flags1 = CGangWars::pZoneInfoToFightOver->Flags1 & 0x9F | 0x40;
+        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40;
         pZoneInfoToFightOver->ZoneColor = CRGBA{255, 0, 0, 160};
     } else {
         TimeTillNextAttack = (rand() / 32767.0f) * 0.9f * 1080000.0f + 648000.0f;
     }
 }
 
-// 0x446050
+// 0x446050, broken
 void CGangWars::StartOffensiveGangWar() {
     plugin::Call<0x446050>();
+    return;
+
+    CoorsOfPlayerAtStartOfWar = FindPlayerCoors();
+    CZone* playerZone;
+    pZoneInfoToFightOver = CTheZones::GetZoneInfo(CoorsOfPlayerAtStartOfWar, &playerZone);
+    Difficulty = TerritoryUnderControlPercentage;
+
+    if (!CanPlayerStartAGangWarHere(pZoneInfoToFightOver)) {
+        Provocation = 0.0f;
+        return;
+    }
+
+    // it should be 'correct', don't know about if it's 100% correct.
+    auto biggestGangIdx = std::max_element(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10) - pZoneInfoToFightOver->GangDensity;
+    auto gang1Density = pZoneInfoToFightOver->GangDensity[biggestGangIdx];
+    pZoneInfoToFightOver->GangDensity[biggestGangIdx] = 0; // to find the second biggest gang
+    Gang1 = biggestGangIdx;
+
+    biggestGangIdx = std::max_element(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10) - pZoneInfoToFightOver->GangDensity;
+    auto gang2Density = pZoneInfoToFightOver->GangDensity[biggestGangIdx];
+    Gang2 = gang2Density;
+
+    pZoneInfoToFightOver->GangDensity[biggestGangIdx] = gang1Density; // restore
+
+    Provocation = 0.0f;
+
+    auto densitySum = std::accumulate(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10, 0u);
+    if (densitySum && (Gang1 == GANG_BALLAS || Gang1 == GANG_VAGOS)) {
+        if (State2 != NO_ATTACK)
+            return;
+
+        CMessages::AddMessage(TheText.Get("GW_PROV"), 4500, 1, true);
+        CMessages::AddToPreviousBriefArray(TheText.Get("GW_PROV"));
+        TimeStarted = CTimer::GetTimeInMS();
+        State = PREFIRST_WAVE;
+        ClearTheStreets();
+        WarFerocity = std::min(densitySum / 15u, 2u);
+
+        if (CStats::GetStatValue(STAT_CITY_UNLOCKED) < 0.0f) {
+            if (TerritoryUnderControlPercentage > 0.4f) {
+                if (TerritoryUnderControlPercentage > 0.5f)
+                    WarFerocity = 5;
+                else
+                    WarFerocity = 0;
+            }
+        }
+        if (bIsPlayerOnAMission)
+            WarFerocity = 0;
+
+        if (gang1Density > gang2Density / 3)
+            Gang2 = Gang1;
+
+        TellGangMembersTo(false);
+        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40;
+        pZoneInfoToFightOver->ZoneColor = CRGBA{255, 0, 0, 160};
+        pDriveByCar = nullptr;
+    }
+
 }
 
 // 0x445F50, untested

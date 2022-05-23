@@ -87,8 +87,8 @@ CZone* CTheZones::FindSmallestZoneForPosition(const CVector& point, bool FindOnl
 }
 
 // 0x572400
-CZoneExtraInfo* CTheZones::GetZoneInfo(const CVector& point, CZone** outZone) {
-    return ((CZoneExtraInfo * (__cdecl*)(const CVector&, CZone**))0x572400)(point, outZone);
+CZoneInfo* CTheZones::GetZoneInfo(const CVector& point, CZone** outZone) {
+    return ((CZoneInfo * (__cdecl*)(const CVector&, CZone**))0x572400)(point, outZone);
 }
 
 // 0x572440
