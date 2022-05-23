@@ -170,11 +170,15 @@ OpcodeResult CRunningScript::ProcessCommands900To999(int32 commandId) {
     case COMMAND_IS_CAR_STUCK: // 0x3CE
         break;
     case COMMAND_LOAD_MISSION_AUDIO: // 0x3CF
-        break;
+        CollectParameters(2);
+        AudioEngine.PreloadMissionAudio(ScriptParams[0].u8Param - 1, ScriptParams[1].iParam);
+        return OR_CONTINUE;
     case COMMAND_HAS_MISSION_AUDIO_LOADED: // 0x3D0
         break;
     case COMMAND_PLAY_MISSION_AUDIO: // 0x3D1
-        break;
+        CollectParameters(1);
+        AudioEngine.PlayLoadedMissionAudio(ScriptParams[0].u8Param - 1);
+        return OR_CONTINUE;
     case COMMAND_HAS_MISSION_AUDIO_FINISHED: // 0x3D2
         break;
     case COMMAND_GET_CLOSEST_CAR_NODE_WITH_HEADING: // 0x3D3
