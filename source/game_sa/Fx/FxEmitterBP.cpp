@@ -4,7 +4,7 @@
 #include "FxEmitter.h"
 #include "FxPrimBP.h"
 #include "FxEmitterPrt.h"
-#include "FxInfo.h"
+// #include "FxInfo.h"
 #include "FxInfoManager.h"
 
 #include "Particle.h"
@@ -57,7 +57,8 @@ void FxEmitterBP_c::Update_Reversed(float time) {
     plugin::CallMethod<0x4A2BC0, FxEmitterBP_c*, float>(this, time);
     return;
 
-    /*for (auto it = m_Particles.GetHead(); it; it = m_Particles.GetNext(it)) {
+    /*
+    for (auto it = m_Particles.GetHead(); it; it = m_Particles.GetNext(it)) {
         if (it->m_System->m_nKillStatus == eFxSystemKillStatus::FX_3) {
             it->m_System->m_nKillStatus = eFxSystemKillStatus::FX_KILLED;
         }
@@ -66,7 +67,8 @@ void FxEmitterBP_c::Update_Reversed(float time) {
             m_Particles.RemoveItem(it);
             g_fxMan.ReturnParticle(it);
         }
-    }*/
+    }
+    */
 }
 
 // 0x5C25F0
@@ -126,6 +128,8 @@ bool FxEmitterBP_c::FreePrtFromPrim_Reversed(FxSystem_c* system) {
 // todo: eFxInfo
 // 0x4A24D0
 bool FxEmitterBP_c::IsFxInfoPresent(int32 type) const {
+    return plugin::CallMethodAndReturn<bool, 0x4A24D0, const FxEmitterBP_c*, int32>(this, type);
+    /*
     if (m_FxInfoManager.m_nNumInfos <= 0)
         return false;
 
@@ -135,4 +139,5 @@ bool FxEmitterBP_c::IsFxInfoPresent(int32 type) const {
         }
     }
     return false;
+    */
 }
