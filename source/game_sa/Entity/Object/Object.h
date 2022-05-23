@@ -10,13 +10,13 @@
 #include "ObjectData.h"
 
 enum eObjectType {
-    OBJECT_UNKNOWN = 0,
-    OBJECT_GAME = 1,
-    OBJECT_MISSION = 2,
-    OBJECT_TEMPORARY = 3,
-    OBJECT_TYPE_CUTSCENE = 4,
+    OBJECT_UNKNOWN         = 0,
+    OBJECT_GAME            = 1,
+    OBJECT_MISSION         = 2,
+    OBJECT_TEMPORARY       = 3, // AKA OBJECT_TYPE_FLYING_COMPONENT
+    OBJECT_TYPE_CUTSCENE   = 4,
     OBJECT_TYPE_DECORATION = 5, // Hand object, projectiles, escalator step, water creatures, no clue what this enum value should be called
-    OBJECT_MISSION2 = 6
+    OBJECT_MISSION2        = 6
 };
 
 class CDummyObject;
@@ -24,33 +24,23 @@ class CFire;
 
 class CObject : public CPhysical {
 public:
-    CObject();
-    CObject(int32 modelId, bool bCreate);
-    CObject(CDummyObject* pDummyObj);
-    ~CObject() override;
-
-    static void* operator new(uint32 size);
-    static void* operator new(uint32 size, int32 iPoolRef);
-    static void  operator delete(void* obj);
-
-public:
     CPtrNodeDoubleLink* m_pControlCodeList;
     uint8               m_nObjectType; // see enum eObjectType
     uint8               m_nBonusValue;
     uint16              m_wCostValue;
     union {
         struct {
-            uint32 bIsPickup : 1;
-            uint32 b0x02 : 1;
-            uint32 bPickupPropertyForSale : 1;
-            uint32 bPickupInShopOutOfStock : 1;
-            uint32 bGlassBroken : 1;
-            uint32 b0x20 : 1;
-            uint32 bIsExploded : 1;
-            uint32 bChangesVehColor : 1;
+            uint32 bIsPickup : 1;               // 0x1
+            uint32 b0x02 : 1;                   // 0x2
+            uint32 bPickupPropertyForSale : 1;  // 0x4
+            uint32 bPickupInShopOutOfStock : 1; // 0x8
+            uint32 bGlassBroken : 1;            // 0x10
+            uint32 b0x20 : 1;                   // 0x20 - Something glass related, see `WindowRespondsToCollision`
+            uint32 bIsExploded : 1;             // 0x40
+            uint32 bChangesVehColor : 1;        // 0x80
 
             uint32 bIsLampPost : 1;
-            uint32 bIsTargatable : 1;
+            uint32 bIsTargetable : 1;
             uint32 bIsBroken : 1;
             uint32 bTrainCrossEnabled : 1;
             uint32 bIsPhotographed : 1;
@@ -67,7 +57,7 @@ public:
             uint32 bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
             uint32 bAffectedByColBrightness : 1;
 
-            uint32 b0x01000000 : 1;
+            uint32 b0x1000000 : 1;
             uint32 bDoNotRender : 1;
             uint32 bFadingIn2 : 1;
             uint32 b0x08000000 : 1;
@@ -86,7 +76,7 @@ public:
     tColLighting  m_nColLighting;
     int16         m_nRefModelIndex;
     uint8         m_nCarColor[4];  // this is used for detached car parts
-    int32         m_dwRemovalTime; // time when this object must be deleted
+    uint32        m_nRemovalTime;  // time when this object must be deleted
     float         m_fHealth;
     float         m_fDoorStartAngle; // this is used for door objects
     float         m_fScale;
@@ -105,9 +95,16 @@ public:
     static bool&   bArea51SamSiteDisabled;
 
 public:
-    static void InjectHooks();
+    CObject();
+    CObject(int32 modelId, bool bCreate);
+    explicit CObject(CDummyObject* dummyObj);
+    ~CObject() override;
 
-    // Virtual
+    static void* operator new(unsigned size);
+    static void* operator new(unsigned size, int32 poolRef);
+    static void operator delete(void* obj);
+    static void operator delete(void* obj, int32 poolRef);
+
     void  SetIsStatic(bool isStatic) override;
     void  CreateRwObject() override;
     void  ProcessControl() override;
@@ -119,20 +116,6 @@ public:
     bool  SetupLighting() override;
     void  RemoveLighting(bool bRemove) override;
 
-private:
-    // Virtual implementations
-    void  SetIsStatic_Reversed(bool isStatic);
-    void  CreateRwObject_Reversed();
-    void  ProcessControl_Reversed();
-    void  Teleport_Reversed(CVector destination, bool resetRotation);
-    void  SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
-    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
-    void  PreRender_Reversed();
-    void  Render_Reversed();
-    bool  SetupLighting_Reversed();
-    void  RemoveLighting_Reversed(bool bRemove);
-
-public:
     bool Load();
     bool Save();
 
@@ -165,10 +148,8 @@ public:
     bool CanBeUsedToTakeCoverBehind();
     void ProcessControlLogic();
 
-    // Static
-public:
-    static class CObject* Create(int32 modelIndex, bool bUnused);
-    static class CObject* Create(CDummyObject* dummyObject);
+    static CObject* Create(int32 modelIndex, bool bUnused);
+    static CObject* Create(CDummyObject* dummyObject);
 
     static void SetMatrixForTrainCrossing(CMatrix* matrix, float fAngle);
     static void TryToFreeUpTempObjects(int32 numObjects);
@@ -177,17 +158,32 @@ public:
     static void DeleteAllTempObjectsInArea(CVector point, float radius);
 
     // Helpers
-    inline bool IsTemporary() const { return m_nObjectType == eObjectType::OBJECT_TEMPORARY; }
-    inline bool IsMissionObject() const { return m_nObjectType == eObjectType::OBJECT_MISSION || m_nObjectType == eObjectType::OBJECT_MISSION2; }
-    inline bool IsCraneMovingPart() const {
+    [[nodiscard]] bool IsTemporary() const     { return m_nObjectType == OBJECT_TEMPORARY; }
+    [[nodiscard]] bool IsMissionObject() const { return m_nObjectType == OBJECT_MISSION || m_nObjectType == OBJECT_MISSION2; }
+    [[nodiscard]] bool IsCraneMovingPart() const {
         return m_nModelIndex == ModelIndices::MI_CRANE_MAGNET
             || m_nModelIndex == ModelIndices::MI_CRANE_HARNESS
             || m_nModelIndex == ModelIndices::MI_MINI_MAGNET
             || m_nModelIndex == ModelIndices::MI_WRECKING_BALL;
     }
-    inline bool IsFallenLampPost() const { return objectFlags.bIsLampPost && m_matrix->GetUp().z < 0.66F; }
-    inline bool IsExploded() const { return objectFlags.bIsExploded; }
-    inline bool CanBeSmashed() const { return m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY; }
+    [[nodiscard]] bool IsFallenLampPost() const { return objectFlags.bIsLampPost && m_matrix->GetUp().z < 0.66F; }
+    [[nodiscard]] bool IsExploded() const       { return objectFlags.bIsExploded; }
+    [[nodiscard]] bool CanBeSmashed() const     { return m_nColDamageEffect >= COL_DAMAGE_EFFECT_SMASH_COMPLETELY; }
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    void  SetIsStatic_Reversed(bool isStatic);
+    void  CreateRwObject_Reversed();
+    void  ProcessControl_Reversed();
+    void  Teleport_Reversed(CVector destination, bool resetRotation);
+    void  SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck);
+    uint8 SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2);
+    void  PreRender_Reversed();
+    void  Render_Reversed();
+    bool  SetupLighting_Reversed();
+    void  RemoveLighting_Reversed(bool bRemove);
 };
 VALIDATE_SIZE(CObject, 0x17C);
 

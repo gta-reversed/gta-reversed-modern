@@ -7,11 +7,11 @@ void CCutsceneObject::InjectHooks()
     RH_ScopedClass(CCutsceneObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x5B1B20);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x553F40);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x5533F0);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5B1B90);
-    RH_ScopedInstall(PreRender_Reversed, 0x5B1E00);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x5B1B20);
+    RH_ScopedVirtualInstall(SetupLighting, 0x553F40);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x5533F0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5B1B90);
+    RH_ScopedVirtualInstall(PreRender, 0x5B1E00);
     RH_ScopedInstall(SetupCarPipeAtomicsForClump, 0x5B1AB0);
 }
 
@@ -43,8 +43,8 @@ void CCutsceneObject::SetModelIndex_Reversed(unsigned index)
     {
         RpAnimBlendClumpInit(m_pRwClump);
         auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
-        animData->m_pvecPedPosition = &m_vecMoveSpeed;
-        animData->m_pFrames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
+        animData->m_PedPosition = &m_vecMoveSpeed;
+        animData->m_Frames->m_bUpdateSkinnedWith3dVelocityExtraction = true;
         CCutsceneObject::SetupCarPipeAtomicsForClump(index, m_pRwClump);
     }
     CModelInfo::GetModelInfo(index)->m_nAlpha = 0xFF;
@@ -128,7 +128,7 @@ void CCutsceneObject::PreRender_Reversed()
                     auto* animData = RpClumpGetAnimBlendClumpData(m_pRwClump);
                     auto* morphTarget = RpGeometryGetMorphTarget(RpAtomicGetGeometry(firstAtomic), 0);
                     auto* sphere = RpMorphTargetGetBoundingSphere(morphTarget);
-                    sphere->center = animData->m_pFrames->m_pIFrame->translation;
+                    sphere->center = animData->m_Frames->m_pIFrame->translation;
                 }
             }
         }

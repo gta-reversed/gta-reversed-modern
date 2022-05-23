@@ -88,7 +88,7 @@ void CGarages::Shutdown() {
 
 // 0x44C8C0
 void CGarages::Update() {
-    if (CReplay::Mode == eReplayMode::REPLAY_MODE_1 || CGameLogic::IsCoopGameGoingOn())
+    if (CReplay::Mode == eReplayMode::MODE_PLAYBACK || CGameLogic::IsCoopGameGoingOn())
         return;
 
     bCamShouldBeOutside = false;
@@ -525,7 +525,7 @@ void CGarages::StopCarFromBlowingUp(CAutomobile* vehicle) {
     return plugin::Call<0x448890, CVehicle*>(vehicle);
 
     // untested
-    vehicle->m_nBurnTimer = 0;
+    vehicle->m_fBurnTimer = 0.0f;
     vehicle->m_fHealth = vehicle->m_fHealth <= 300.0f ? 300.0f : vehicle->m_fHealth;
 
     auto& manager = vehicle->m_damageManager;

@@ -4,7 +4,6 @@
     https://github.com/DK22Pac/plugin-sdk
     Do not delete this comment block. Respect others' work!
 */
-
 #include "StdInc.h"
 
 #include "Train.h"
@@ -18,23 +17,98 @@ uint8& CTrain::GenTrain_Direction = *(uint8*)0xC38004;
 uint32& CTrain::GenTrain_GenerationNode = *(uint32*)0xC38008;
 uint32& CTrain::GenTrain_Status = *(uint32*)0xC3800C;
 bool& CTrain::bDisableRandomTrains = *(bool*)0xC38010;
-CVector* CTrain::aStationCoors = (CVector*)0x8D48F8;
-uint32* NumTrackNodes = (uint32*)0xC38014;
-float* arrTotalTrackLength = (float*)0xC37FEC;
-CTrainNode** trackNodes = (CTrainNode * *)0xC38024;
-float* StationDist = (float*)0xC38034;
+CVector (&CTrain::aStationCoors)[6] = *(CVector(*)[6])0x8D48F8; /*{ // 0x8D48F8
+    CVector{ 1741.0f, -1954.0f, 15.0f },
+    CVector{ 1297.0f, -1898.0f, 3.0f  },
+    CVector{ -1945.0f, 128.0f,  29.0f },
+    CVector{ 1434.0f,  2632.0f, 13.0f },
+    CVector{ 2783.0f,  1758.0f, 12.0f },
+    CVector{ 2865.0f,  1281.0f, 12.0  }
+};*/
+
+uint32 (&NumTrackNodes)[4] = *(uint32(*)[4])0xC38014;
+float (&arrTotalTrackLength)[4] = *(float (*)[4])0xC37FEC;
+CTrainNode* (&trackNodes)[4] = *(CTrainNode*(*)[4])0xC38024;
+float (&StationDist)[6] = *(float (*)[6])0xC38034;
 
 void CTrain::InjectHooks()
 {
     RH_ScopedClass(CTrain);
-    RH_ScopedCategory("Vehicle/Ped");
+    RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F86A0);
 }
 
 // 0x6F6030
-CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
+CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy) {
     plugin::CallMethod<0x6F6030, CTrain*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+    return;
+
+    const auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
+
+    memset(&m_aDoors, 0, sizeof(m_aDoors));
+    m_nVehicleSubType = VEHICLE_TYPE_TRAIN;
+    m_nVehicleType = VEHICLE_TYPE_TRAIN;
+    // m_pHandlingData = &handling.mod_HandlingManager.vehicleHandling[mi->m_nHandlingId];
+    // m_nHandlingFlags = m_pHandlingData->m_handlingFlags;
+    CVehicle::SetModelIndex(modelIndex);
+
+    // todo: add as NOTSA add SetupModelNodes
+    std::ranges::fill(m_aTrainNodes, nullptr);
+    CClumpModelInfo::FillFrameArray(m_pRwClump, m_aTrainNodes);
+    //
+
+    m_aDoors[2].m_nDirn = 20;
+    m_aDoors[2].m_nAxis = 2;
+    if (m_nModelIndex == MODEL_STREAKC) {
+        m_aDoors[2].m_fOpenAngle = 1.25f;
+        m_aDoors[2].m_fClosedAngle = 0.25f;
+        m_aDoors[3].m_fOpenAngle = 1.25f;
+        m_aDoors[3].m_fClosedAngle = 0.25f;
+    } else {
+        m_aDoors[2].m_fOpenAngle = -1.2566371f;
+        m_aDoors[2].m_fClosedAngle = 0.0f;
+        m_aDoors[3].m_fOpenAngle = 1.2566371f;
+        m_aDoors[3].m_fClosedAngle = 0.0f;
+    }
+    m_aDoors[3].m_nAxis = 2;
+    m_aDoors[3].m_nDirn = 20;
+
+    // m_nTrainFlags = m_nTrainFlags & (CLOCKWISE_DIRECTION | IS_LAST_CARRIAGE | IS_FRONT_CARRIAGE) | TF_80 | TF_1;
+    // m_nTrainFlags = m_nTrainFlags & 0xF8 | 2;
+
+    m_nPassengersGenerationState = 0;
+    // m_nPassengerFlags = m_nPassengerFlags & 0xF0 | rand() & 3;
+    // m_nPassengerFlags = m_nPassengerFlags & 0xF | (16 * ((rand() & 3) + 1));
+    m_pTemporaryPassenger = nullptr;
+    m_nMaxPassengers = 5;
+    m_nPhysicalFlags = m_nPhysicalFlags | 0x20000; // b18;
+    m_nFlags = m_nFlags | 1;                       // uses collision
+    m_nTimeWhenCreated = CTimer::GetTimeInMS();
+    field_5C8 = 0;
+    m_nTrackId = 0;
+    m_fCurrentRailDistance = 0.0f;
+    m_fTrainSpeed = 0.0f;
+    m_nTimeWhenStoppedAtStation = 0;
+    mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
+    m_fMass = m_pHandlingData->m_fMass;
+    m_fTurnMass = m_pHandlingData->m_fTurnMass;
+    m_vecCentreOfMass = (CVector)m_pHandlingData->m_vecCentreOfMass;
+    m_fElasticity = 0.05f;
+    m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
+    if (m_pHandlingData->m_fDragMult <= 0.01f)
+        m_fAirResistance = m_pHandlingData->m_fDragMult;
+    else
+        m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0f * 0.5f; // pattern: see CPlane::SetGearDown
+
+    m_nPhysicalFlags = m_nPhysicalFlags & 0xFFFFFFF3 | 4; // bDisableCollisionForce
+    m_nFlags = m_nFlags | 0x80000000;                     // m_bTunnelTransition
+    m_pPrevCarriage = nullptr;
+    m_pNextCarriage = nullptr;
+    // m_nType = (m_nType & 7) | 0x30;
+    m_autoPilot.m_speed = 0.0f;
+    m_autoPilot.m_nCruiseSpeed = 0;
+    m_vehicleAudio.Initialise(this);
 }
 
 // 0x6F55D0
@@ -84,22 +158,22 @@ void TrainHitStuff(CPtrList& ptrList, CEntity* entity) {
 
 // 0x6F5D80
 void CTrain::OpenTrainDoor(float state) {
-    ((void(__thiscall*)(CTrain*, float))0x6F5D80)(this, state);
+    // NOP
 }
 
 // 0x6F5D90
 void CTrain::AddPassenger(CPed* ped) {
-    ((void(__thiscall*)(CTrain*, CPed*))0x6F5D90)(this, ped);
+    // NOP
 }
 
 // 0x6F5DA0
 void CTrain::RemovePassenger(CPed* ped) {
-    ((void(__thiscall*)(CTrain*, CPed*))0x6F5DA0)(this, ped);
+    // NOP
 }
 
 // 0x6F5DB0
 void CTrain::DisableRandomTrains(bool disable) {
-    ((void(__cdecl*)(bool))0x6F5DB0)(disable);
+    bDisableRandomTrains = disable;
 }
 
 // 0x6F5DC0
@@ -230,11 +304,6 @@ void CTrain::AddNearbyPedAsRandomPassenger() {
 // 0x6F86A0
 void CTrain::ProcessControl()
 {
-    CTrain::ProcessControl_Reversed();
-}
-
-void CTrain::ProcessControl_Reversed()
-{
     vehicleFlags.bWarnedPeds = 0;
     m_vehicleAudio.Service();
     if (gbModelViewer)
@@ -336,7 +405,7 @@ void CTrain::ProcessControl_Reversed()
             if (m_nStatus)
             {
                 bool bIsStreakModel = trainFlags.bIsStreakModel;
-                float fStopAtStationSpeed = static_cast<float>(m_autoPilot.m_nCruiseSpeed);
+                auto fStopAtStationSpeed = static_cast<float>(m_autoPilot.m_nCruiseSpeed);
 
                 uint32 timeInMilliSeconds = CTimer::GetTimeInMS();
                 uint32 timeAtStation = CTimer::GetTimeInMS() - m_nTimeWhenStoppedAtStation;
@@ -524,11 +593,10 @@ void CTrain::ProcessControl_Reversed()
                 {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
-                if (fTheTrainSpeed > 1.0 * 0.94999999)
+                if (fTheTrainSpeed > 1.0f * 0.95f)
                 {
-                    CPad::GetPad(0)->StartShake(300, 0x46u, 0);
-                    CVector vecVehiclePosition = GetPosition();
-                    TheCamera.CamShake(0.1f, vecVehiclePosition.x, vecVehiclePosition.y, vecVehiclePosition.z);
+                    CPad::GetPad()->StartShake(300, 70, 0);
+                    TheCamera.CamShake(0.1f, GetPosition());
                 }
 
                 fTheTrainSpeed = m_fTrainSpeed;

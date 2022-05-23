@@ -10,9 +10,6 @@
 #include "KeyArray.h"
 #include "MissionTextOffsets.h"
 
-static inline char(&gGxtString2)[552] = *(char(*)[552])0xC1AED8;
-static inline char (&gGxtString)[552] = *(char(*)[552])0xC1B100;
-
 struct ChunkHeader {
     char  magic[4];
     int32 size;

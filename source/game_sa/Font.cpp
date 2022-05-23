@@ -92,8 +92,8 @@ void CFont::InjectHooks() {
 
 // 0x7187C0
 void CFont::LoadFontValues() {
-    CFileMgr::SetDir(gta_empty_string);
-    auto file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
+    CFileMgr::SetDir("");
+    auto* file = CFileMgr::OpenFile("DATA\\FONTS.DAT", "rb");
 
     char attrib[32];
 
@@ -481,7 +481,7 @@ void CFont::SetScale(float w, float h)
 // 0x7193A0
 void CFont::SetScaleForCurrentLanguage(float w, float h)
 {
-    switch (FrontEndMenuManager.m_nLanguage) {
+    switch (FrontEndMenuManager.m_nPrefsLanguage) {
     case eLanguage::FRENCH:
     case eLanguage::GERMAN:
     case eLanguage::ITALIAN:

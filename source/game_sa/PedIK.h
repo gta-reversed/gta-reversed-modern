@@ -19,6 +19,13 @@ struct LimbOrientation {
 public:
     float m_fYaw;
     float m_fPitch;
+
+    LimbOrientation() {
+        m_fYaw    = 0.0f;
+        m_fPitch  = 0.0f;
+    }
+
+    LimbOrientation(float yaw, float pitch) : m_fYaw(yaw), m_fPitch(pitch) { }
 };
 VALIDATE_SIZE(LimbOrientation, 0x8);
 
@@ -46,6 +53,7 @@ public:
             uint32 bTorsoUsed : 1;
             uint32 bUseArm : 1;
             uint32 bSlopePitch : 1;
+            uint32 bUnk : 1;
         };
     };
 
@@ -53,11 +61,13 @@ public:
     static RwV3d& YaxisIK;
     static RwV3d& ZaxisIK;
 
-    // funcs
+public:
+    explicit CPedIK(CPed* ped);
+
     void                RotateTorso(AnimBlendFrameData* bone, LimbOrientation& orientation, bool flag);
     bool                PointGunInDirection(float Z_angle, float arg2, bool flag, float arg4);
     void                PointGunAtPosition(const CVector& posn, float arg2);
-    static RwMatrix* GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
+    static RwMatrix*    GetWorldMatrix(RwFrame* frame, RwMatrix* transformMat);
 
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo);
     static MoveLimbResult MoveLimb(LimbOrientation& TorsoOrien, float yaw, float pitch, LimbMovementInfo& LimbMoveInfo, float fNormalize);

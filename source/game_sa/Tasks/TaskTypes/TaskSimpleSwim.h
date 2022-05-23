@@ -8,7 +8,7 @@
 
 #include "TaskSimple.h"
 #include "Vector.h"
-#include "FxSystem_c.h"
+#include "FxSystem.h"
 
 enum eSwimState : uint16 {
     SWIM_TREAD                = 0,
@@ -50,6 +50,8 @@ public:
     static float &SWIM_STOP_TIME;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_SWIM;
+
     CTaskSimpleSwim(CVector* pos, CPed* ped);
     ~CTaskSimpleSwim() override;
 

@@ -81,6 +81,7 @@ public:
 public:
     static void InjectHooks();
 
+
     void RemoveCollisionVolumes();
     void Copy(const CCollisionData& src);
     void CalculateTrianglePlanes();
@@ -90,7 +91,7 @@ public:
     void SetLinkPtr(CLink<CCollisionData*>* link);
     CLink<CCollisionData*>* GetLinkPtr();
 
-    // NOTSA
+    // NOTSA section
     auto GetNumFaceGroups() const -> uint32;
 
     auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
@@ -100,6 +101,7 @@ public:
 
     auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
 
+    void AllocateLines(uint32 num);
 private:
     // HELPERS
     template <typename T> T* GetPointerToColArray(uint32 byteOffset) {

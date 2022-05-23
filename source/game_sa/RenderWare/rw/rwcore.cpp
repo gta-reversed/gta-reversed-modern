@@ -1141,3 +1141,11 @@ const RwCamera* RwCameraStreamWrite(const RwCamera* camera, RwStream* stream) {
 RwCameraChunkInfo* RwCameraChunkInfoRead(RwStream* stream, RwCameraChunkInfo* cameraChunkInfo, RwInt32* bytesRead) {
     return ((RwCameraChunkInfo*(__cdecl *)(RwStream*, RwCameraChunkInfo*, RwInt32*))0x808EF0)(stream, cameraChunkInfo, bytesRead);
 }
+
+void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame) {
+    plugin::Call<0x804EF0, void*, RwFrame*>(object, frame);
+}
+
+void _rwObjectHasFrameReleaseFrame(void *object) {
+    plugin::Call<0x804F40, void*>(object);
+}

@@ -20,20 +20,23 @@ struct ColDef {
     bool   m_bProcedural;
     bool   m_bInterior;
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void  operator delete(void* data);
 };
 VALIDATE_SIZE(ColDef, 0x2C);
 
-class CColStore
-{
+typedef CPool<ColDef> CColPool;
+
+class CQuadTreeNode;
+
+class CColStore {
 public:
-    static CPool<ColDef>*& ms_pColPool;
-    static class CQuadTreeNode*& ms_pQuadTree;
+    static CColPool*& ms_pColPool;
+    static CQuadTreeNode*& ms_pQuadTree;
 
     static CVector& ms_vecCollisionNeeded;
-    static bool& ms_bCollisionNeeded;
-    static int32 ms_nRequiredCollisionArea;
+    static bool&    ms_bCollisionNeeded;
+    static int32    ms_nRequiredCollisionArea;
 
 public:
     static void InjectHooks();

@@ -10,6 +10,8 @@ public:
     int8  byte15;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS;
+
     CTaskComplexObserveTrafficLights();
     ~CTaskComplexObserveTrafficLights() override = default; // 0x6317C0
 

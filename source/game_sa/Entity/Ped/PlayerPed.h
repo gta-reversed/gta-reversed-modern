@@ -23,6 +23,11 @@ public:
     // did we display "JCK_HLP" message
     static bool& bHasDisplayedPlayerQuitEnterCarHelpText;
 
+    // Android
+    static bool bDebugPlayerInvincible;
+    static bool bDebugTargeting;
+    static bool bDebugTapToTarget;
+
 public:
     static void InjectHooks();
 
@@ -31,15 +36,14 @@ public:
     bool Load_Reversed();
     bool Save_Reversed();
 
-    bool Load() override { return Load_Reversed(); }
-    bool Save() override { return Save_Reversed(); }
+    bool Load() override;
+    bool Save() override;
 
     CPad* GetPadFromPlayer();
     bool CanPlayerStartMission();
     bool IsHidden();
     void ReApplyMoveAnims();
     bool DoesPlayerWantNewWeapon(eWeaponType weaponType, bool arg1);
-    // dummy function
     void ProcessPlayerWeapon(CPad* pad);
     void PickWeaponAllowedFor2Player();
     void UpdateCameraWeaponModes(CPad* pad);

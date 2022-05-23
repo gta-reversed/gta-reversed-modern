@@ -21,9 +21,11 @@ struct CStuntJump {
 
 VALIDATE_SIZE(CStuntJump, 0x44);
 
+typedef CPool<CStuntJump> CStuntJumpsPool;
+
 class CStuntJumpManager {
 public:
-    static inline CPool<CStuntJump>*& mp_poolStuntJumps = *(CPool<CStuntJump>**)0xA9A888;
+    static inline CStuntJumpsPool*&  mp_poolStuntJumps = *(CStuntJumpsPool**)0xA9A888;
     static inline CStuntJump*&        mp_Active = *(CStuntJump**)0xA9A88C; // nullptr
     static inline bool&               m_bActive = *(bool*)0xA9A890;
     static inline bool&               m_bHitReward = *(bool*)0xA9A891;

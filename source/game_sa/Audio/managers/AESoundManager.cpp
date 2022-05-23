@@ -111,7 +111,7 @@ void CAESoundManager::Service() {
     AEAudioHardware.GetVirtualChannelSoundLengths(m_aSoundLengths);
     AEAudioHardware.GetVirtualChannelSoundLoopStartTimes(m_aSoundLoopStartTimes);
 
-    // Initialize sounds that are using percentage specified start positions
+    // Initialize sounds that are using percentage specified start positions 0x4F011C
     for (auto i = 0; i < MAX_NUM_SOUNDS; ++i) {
         auto& sound = m_aSounds[i];
         if (!sound.IsUsed() || !sound.WasServiced() || !sound.GetStartPercentage())
@@ -121,7 +121,7 @@ void CAESoundManager::Service() {
         if (sound.m_nHasStarted)
             continue;
 
-        sound.m_nCurrentPlayPosition *= static_cast<float>(m_aSoundLengths[i]) / 100.0F;
+        sound.m_nCurrentPlayPosition *= uint16(static_cast<float>(m_aSoundLengths[i]) / 100.0F);
     }
 
     // Stop sounds that turned inactive

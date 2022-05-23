@@ -32,6 +32,8 @@ public:
     CTaskTimer m_timer;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_KILL_PED_ON_FOOT;
+
     CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7);
     ~CTaskComplexKillPedOnFoot();
 

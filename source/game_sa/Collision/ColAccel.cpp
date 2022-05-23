@@ -35,22 +35,22 @@ void CColAccel::InjectHooks()
 
 bool CColAccel::isCacheLoading()
 {
-    return CColAccel::m_iCacheState == eColAccelState::COLACCEL_LOADING;
+    return m_iCacheState == eColAccelState::COLACCEL_LOADING;
 }
 
 void CColAccel::endCache()
 {
     if (m_iCacheState == eColAccelState::COLACCEL_STARTED) {
         auto* file = CFileMgr::OpenFileForWriting(mp_cCacheName);
-        CFileMgr::Write(file, &m_iNumColItems, sizeof(int32));
-        CFileMgr::Write(file, mp_caccColItems, sizeof(CColAccelColEntry) * m_iNumColItems);
-        CFileMgr::Write(file, &m_iNumSections, sizeof(int32));
-        CFileMgr::Write(file, m_iSectionSize, sizeof(int32) * m_iNumSections);
-        CFileMgr::Write(file, m_iplDefs, sizeof(IplDef) * TOTAL_IPL_MODEL_IDS);
-        CFileMgr::Write(file, &m_iNumColBounds, sizeof(int32));
-        CFileMgr::Write(file, m_colBounds, sizeof(CColAccelColBound) * m_iNumColBounds);
-        CFileMgr::Write(file, &m_iNumIPLItems, sizeof(int32));
-        CFileMgr::Write(file, mp_caccIPLItems, sizeof(CColAccelIPLEntry) * m_iNumIPLItems);
+        CFileMgr::Write(file, &m_iNumColItems,  sizeof(m_iNumColItems));
+        CFileMgr::Write(file, mp_caccColItems,  sizeof(CColAccelColEntry) * m_iNumColItems);
+        CFileMgr::Write(file, &m_iNumSections,  sizeof(m_iNumSections));
+        CFileMgr::Write(file, m_iSectionSize,   sizeof(m_iSectionSize) * m_iNumSections);
+        CFileMgr::Write(file, m_iplDefs,        sizeof(IplDef) * TOTAL_IPL_MODEL_IDS);
+        CFileMgr::Write(file, &m_iNumColBounds, sizeof(m_iNumColBounds));
+        CFileMgr::Write(file, m_colBounds,      sizeof(CColAccelColBound) * m_iNumColBounds);
+        CFileMgr::Write(file, &m_iNumIPLItems,  sizeof(m_iNumIPLItems));
+        CFileMgr::Write(file, mp_caccIPLItems,  sizeof(CColAccelIPLEntry) * m_iNumIPLItems);
         CFileMgr::CloseFile(file);
     }
 
@@ -93,11 +93,10 @@ void CColAccel::cacheLoadCol()
     if (!isCacheLoading())
         return;
 
-    for (auto i = 0; i < m_iNumColItems; ++i) {
-        auto& colEntry = mp_caccColItems[i];
+    for (auto& colEntry : std::span{ mp_caccColItems, (size_t)m_iNumColItems }) {
         auto* mi = CModelInfo::GetModelInfo(colEntry.m_wModelStart);
+        auto* cm = new CColModel();
 
-        auto cm = new CColModel();
         cm->m_boundBox = colEntry.m_boundBox;
         cm->m_boundSphere = colEntry.m_boundSphere;
         cm->m_nColSlot = colEntry.m_nColSlot;
@@ -228,7 +227,7 @@ void CColAccel::addIPLEntity(CEntity** ppEntities, int32 entitiesCount, int32 en
 
 void CColAccel::startCache()
 {
-    m_iCachingColSize = CPools::ms_pColModelPool->GetSize();
+    m_iCachingColSize = GetColModelPool()->GetSize();
     m_iSectionSize    = new int32[64];
     m_iplDefs         = new IplDef[TOTAL_IPL_MODEL_IDS]();
     m_colBounds       = new CColAccelColBound[TOTAL_IPL_MODEL_IDS]();

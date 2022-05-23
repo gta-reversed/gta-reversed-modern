@@ -33,6 +33,11 @@ void CAEWeaponAudioEntity::Initialise() {
         AEAudioHardware.LoadSoundBank(143, 5);
 }
 
+// 0x4E6AA0
+void CAEWeaponAudioEntity::Initialise(CPed* ped) {
+    plugin::CallMethod<0x4E6AA0>(this, ped);
+}
+
 void CAEWeaponAudioEntity::AddAudioEvent(int32 audioEventId) {
     plugin::CallMethod<0x4E69F0, CAEWeaponAudioEntity*, int32>(this, audioEventId);
 }
@@ -128,7 +133,7 @@ void CAEWeaponAudioEntity::WeaponFire(eWeaponType type, CPhysical* entity, int32
 }
 
 // 0x503690
-void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, int32 audioEventId) {
+void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, eAudioEvents event) {
     if (!entity)
         return;
 
@@ -146,41 +151,41 @@ void CAEWeaponAudioEntity::WeaponReload(eWeaponType type, CPhysical* entity, int
     switch (type) {
     case WEAPON_PISTOL:
     case WEAPON_PISTOL_SILENCED:
-        soundType = audioEventId != AE_WEAPON_RELOAD_A ? 66 : 55;
+        soundType = event != AE_WEAPON_RELOAD_A ? 66 : 55;
         break;
     case WEAPON_DESERT_EAGLE:
-        soundType = 4 * (audioEventId == AE_WEAPON_RELOAD_A) + 51;
+        soundType = 4 * (event == AE_WEAPON_RELOAD_A) + 51;
         break;
     case WEAPON_SHOTGUN:
     case WEAPON_SPAS12_SHOTGUN:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 71;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 71;
         break;
     case WEAPON_SAWNOFF_SHOTGUN:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 69;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 69;
         break;
     case WEAPON_MICRO_UZI:
     case WEAPON_MP5:
     case WEAPON_TEC9:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 84;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 84;
         break;
     case WEAPON_AK47:
     case WEAPON_M4:
-        soundType = (audioEventId != AE_WEAPON_RELOAD_A) + 31;
+        soundType = (event != AE_WEAPON_RELOAD_A) + 31;
         break;
     case WEAPON_COUNTRYRIFLE:
-        if (audioEventId != AE_WEAPON_RELOAD_A)
+        if (event != AE_WEAPON_RELOAD_A)
             return;
         soundType = 32;
         volumeOffset = -6.0f;
         break;
     case WEAPON_SNIPERRIFLE:
-        soundType = audioEventId != AE_WEAPON_RELOAD_A ? 32 : 55;
+        soundType = event != AE_WEAPON_RELOAD_A ? 32 : 55;
         break;
     default:
         return;
     }
 
-    auto volume = CAEAudioEntity::m_pAudioEventVolumes[audioEventId] + volumeOffset;
+    const auto volume = GetDefaultVolume(event) + volumeOffset;
 
     m_tempSound.Initialise(5, soundType, this, entity->GetPosition(), volume, 0.66f, 1.0f, 1.0f, 0, SOUND_LIFESPAN_TIED_TO_PHYSICAL_ENTITY, 0.0f, 0);
     m_tempSound.RegisterWithPhysicalEntity(entity);
@@ -259,7 +264,8 @@ void CAEWeaponAudioEntity::InjectHooks() {
 
     // RH_ScopedInstall(Constructor, 0x5DE990);
     // RH_ScopedInstall(Destructor, 0x507560);
-    RH_ScopedInstall(Initialise, 0x503450);
+    RH_ScopedOverloadedInstall(Initialise, "void", 0x503450, void(CAEWeaponAudioEntity::*)());
+    //RH_ScopedOverloadedInstall(Initialise, "CPed*", 0x4E6AA0, void(CAEWeaponAudioEntity::*)(CPed*));
     RH_ScopedInstall(Reset, 0x503490);
     // RH_ScopedInstall(Terminate, 0x503480);
     RH_ScopedInstall(WeaponFire, 0x504F80);

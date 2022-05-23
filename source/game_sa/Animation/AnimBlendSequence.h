@@ -8,6 +8,7 @@
 
 #include "AnimSequenceFrames.h"
 
+// The sequence of key frames of one animated node
 class CAnimBlendSequence {
 public:
     CAnimBlendSequence();
@@ -44,7 +45,7 @@ public:
         uint16 m_nFlags;
     };
     uint16 m_nFrameCount;
-    void*  m_pFrames;
+    void*  m_pFrames;     // Either `CAnimSequenceRootFrameUncompressed` or `CAnimSequenceRootFrameCompressed` depending on `m_isCompressed` (TODO: Im not 99% sure)
 
 public:
     static void InjectHooks();

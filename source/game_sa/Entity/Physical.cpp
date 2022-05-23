@@ -8,7 +8,7 @@
 
 #include "Physical.h"
 #include "CarCtrl.h"
-
+#include "Glass.h"
 #include "TaskSimpleClimb.h"
 
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
@@ -28,7 +28,8 @@ void CPhysical::InjectHooks()
     RH_ScopedClass(CPhysical);
     RH_ScopedCategory("Entity");
 
-    using namespace ReversibleHooks;
+    RH_ScopedInstall(Constructor, 0x542260);
+    RH_ScopedInstall(Destructor, 0x542450);
     RH_ScopedInstall(RemoveAndAdd, 0x542560);
     RH_ScopedInstall(ApplyTurnForce, 0x542A50);
     RH_ScopedInstall(ApplyForce, 0x542B50);
@@ -39,14 +40,14 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
     RH_ScopedInstall(RemoveFromMovingList, 0x542860);
     RH_ScopedInstall(AddToMovingList, 0x542800);
-    RH_ScopedInstall(Add_Reversed, 0x544A30);
-    RH_ScopedInstall(Remove_Reversed, 0x5424C0); 
-    RH_ScopedInstall(GetBoundRect_Reversed, 0x5449B0);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5485E0);
-    RH_ScopedInstall(ProcessCollision_Reversed, 0x54DFB0);
-    RH_ScopedInstall(ProcessShift_Reversed, 0x54DB10);
-    RH_ScopedInstall(TestCollision_Reversed, 0x54DEC0);
-    RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x546D00);
+    RH_ScopedVirtualInstall(Add, 0x544A30);
+    RH_ScopedVirtualInstall(Remove, 0x5424C0);
+    RH_ScopedVirtualInstall(GetBoundRect, 0x5449B0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5485E0);
+    RH_ScopedVirtualInstall(ProcessCollision, 0x54DFB0);
+    RH_ScopedVirtualInstall(ProcessShift, 0x54DB10);
+    RH_ScopedVirtualInstall(TestCollision, 0x54DEC0);
+    RH_ScopedVirtualInstall(ProcessEntityCollision, 0x546D00);
     RH_ScopedInstall(ApplyGravity, 0x542FE0);
     RH_ScopedInstall(ApplyFrictionMoveForce, 0x5430A0);
     RH_ScopedInstall(ApplyFrictionForce, 0x543220);
@@ -72,7 +73,7 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(ProcessShiftSectorList, 0x546670);
     RH_ScopedInstall(ApplySpeed, 0x547B80);
     RH_ScopedInstall(UnsetIsInSafePosition, 0x548320);
-    Install("CPhysical", "ApplyFriction_void", 0x5483D0, (void(CPhysical::*)()) & CPhysical::ApplyFriction);
+    RH_ScopedOverloadedInstall(ApplyFriction, "void", 0x5483D0, void(CPhysical::*)());
     RH_ScopedOverloadedInstall(ApplyCollision, "2", 0x548680, bool(CPhysical::*)(CEntity*, CColPoint&, float&, float&));
     RH_ScopedOverloadedInstall(ApplySoftCollision, "2", 0x54A2C0, bool(CPhysical::*)(CPhysical*, CColPoint&, float&, float&));
     RH_ScopedInstall(ProcessCollisionSectorList, 0x54BA60);
@@ -134,6 +135,7 @@ CPhysical::CPhysical() : CEntity()
     m_nPhysicalFlags = 0;
     physicalFlags.bApplyGravity = true;
 
+    m_nContactSurface = SURFACE_DEFAULT; // NOTSA; If not initialize, it will go out of bounds in the SurfaceInfos_c
     m_fContactSurfaceBrightness = 1.0f;
 }
 
@@ -148,11 +150,6 @@ CPhysical::~CPhysical()
 
 // 0x544A30
 void CPhysical::Add()
-{
-    CPhysical::Add_Reversed();
-}
-
-void CPhysical::Add_Reversed()
 {
     if (m_bIsBIGBuilding) {
         CEntity::Add();
@@ -196,11 +193,6 @@ void CPhysical::Add_Reversed()
 // 0x5424C0
 void CPhysical::Remove()
 {
-    CPhysical::Remove_Reversed();
-}
-
-void CPhysical::Remove_Reversed()
-{
     if (m_bIsBIGBuilding) {
         CEntity::Remove();
         return;
@@ -219,11 +211,6 @@ void CPhysical::Remove_Reversed()
 // 0x5449B0
 CRect* CPhysical::GetBoundRect(CRect* rect)
 {
-    return CPhysical::GetBoundRect_Reversed(rect);
-}
-
-CRect* CPhysical::GetBoundRect_Reversed(CRect* rect)
-{
     CVector boundCentre;
     CEntity::GetBoundCentre(&boundCentre);
     float fRadius = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel()->GetBoundRadius();
@@ -233,11 +220,6 @@ CRect* CPhysical::GetBoundRect_Reversed(CRect* rect)
 
 // 0x5485E0
 void CPhysical::ProcessControl()
-{
-    CPhysical::ProcessControl_Reversed();
-}
-
-void CPhysical::ProcessControl_Reversed()
 {
     if (!IsPed())
         physicalFlags.bSubmergedInWater = false;
@@ -254,8 +236,7 @@ void CPhysical::ProcessControl_Reversed()
         m_nNumEntitiesCollided = 0;
         m_nPieceType = 0;
         m_fDamageIntensity = 0.0f;
-        if (m_pDamageEntity)
-            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
+        CEntity::SafeCleanUpRef(m_pDamageEntity);
         m_pDamageEntity = nullptr;
         ApplyFriction();
         if (!m_pAttachedTo || physicalFlags.bInfiniteMass)
@@ -268,11 +249,6 @@ void CPhysical::ProcessControl_Reversed()
 
 // 0x54DFB0
 void CPhysical::ProcessCollision()
-{
-    ProcessCollision_Reversed();
-}
-
-void CPhysical::ProcessCollision_Reversed()
 {
     auto* vehicle    = AsVehicle();
     auto* automobile = AsAutomobile();
@@ -303,18 +279,20 @@ void CPhysical::ProcessCollision_Reversed()
                 bike->m_apWheelCollisionEntity[1] = nullptr;
                 bike->m_apWheelCollisionEntity[2] = nullptr;
                 bike->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = bike->m_anWheelColPoint;
+                wheelsColPoints = bike->m_aWheelColPoint;
                 pfWheelsSuspensionCompression = bike->m_fWheelsSuspensionCompression;
                 wheelsCollisionPositions = bike->m_avTouchPointsLocalSpace;
             }
             else {
-                automobile->m_pWheelCollisionEntity[0] = nullptr;
-                automobile->m_pWheelCollisionEntity[1] = nullptr;
-                automobile->m_pWheelCollisionEntity[2] = nullptr;
-                automobile->m_pWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = automobile->m_wheelColPoint;
-                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression;
-                wheelsCollisionPositions = automobile->m_vWheelCollisionPos;
+                automobile->m_apWheelCollisionEntity[0] = nullptr;
+                automobile->m_apWheelCollisionEntity[1] = nullptr;
+                automobile->m_apWheelCollisionEntity[2] = nullptr;
+                automobile->m_apWheelCollisionEntity[3] = nullptr;
+
+                // TODO: Use std::array<> for these local variables
+                wheelsColPoints = automobile->m_wheelColPoint.data();
+                pfWheelsSuspensionCompression = automobile->m_fWheelsSuspensionCompression.data();
+                wheelsCollisionPositions = automobile->m_vWheelCollisionPos.data();
             }
             CCollisionData* colData = GetColModel()->m_pColData;
             int32 collisionIndex = 0;
@@ -337,31 +315,31 @@ void CPhysical::ProcessCollision_Reversed()
                     return;
                 }
 
-                CColPoint* pWheelColPoint = &wheelsColPoints[collisionIndex];
-                CColLine* pColLine = &colData->m_pLines[collisionIndex];
-                CVector vecColLinePosStart = *m_matrix * pColLine->m_vecStart;
-                CVector vecColLinePosEnd = *m_matrix * pColLine->m_vecEnd;
-                pWheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
-                pWheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
-                pWheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
-                pWheelColPoint->m_fDepth = 0.0f;
+                CColPoint* wheelColPoint = &wheelsColPoints[collisionIndex];
+                CColLine* colLine = &colData->m_pLines[collisionIndex];
+                CVector vecColLinePosStart = *m_matrix * colLine->m_vecStart;
+                CVector vecColLinePosEnd = *m_matrix * colLine->m_vecEnd;
+                wheelColPoint->m_vecNormal = CVector(0.0f, 0.0f, 1.0f);
+                wheelColPoint->m_nSurfaceTypeA = SURFACE_WHEELBASE;
+                wheelColPoint->m_nSurfaceTypeB = SURFACE_TARMAC;
+                wheelColPoint->m_fDepth = 0.0f;
                 float fGhostRoadHeight = CCarCtrl::FindGhostRoadHeight(vehicle);
                 if (fGhostRoadHeight <= vecColLinePosStart.z) {
                     if (fGhostRoadHeight > vecColLinePosEnd.z) {
                         float fWheelSuspensionCompression = (vecColLinePosStart.z - fGhostRoadHeight) / (vecColLinePosStart.z - vecColLinePosEnd.z);
                         pfWheelsSuspensionCompression[collisionIndex] = fWheelSuspensionCompression;
-                        pWheelColPoint->m_vecPoint = (vecColLinePosEnd - vecColLinePosStart) * fWheelSuspensionCompression + vecColLinePosStart;
+                        wheelColPoint->m_vecPoint = (vecColLinePosEnd - vecColLinePosStart) * fWheelSuspensionCompression + vecColLinePosStart;
                     }
                     else {
                         pfWheelsSuspensionCompression[collisionIndex] = 1.0f;
-                        pWheelColPoint->m_vecPoint = vecColLinePosEnd;
+                        wheelColPoint->m_vecPoint = vecColLinePosEnd;
                     }
                 }
                 else {
                     pfWheelsSuspensionCompression[collisionIndex] = 0.0f;
-                    pWheelColPoint->m_vecPoint = vecColLinePosStart;
+                    wheelColPoint->m_vecPoint = vecColLinePosStart;
                 }
-                wheelsCollisionPositions[collisionIndex] = pWheelColPoint->m_vecPoint - GetPosition();
+                wheelsCollisionPositions[collisionIndex] = wheelColPoint->m_vecPoint - GetPosition();
                 collisionIndex++;
             }
         }
@@ -485,58 +463,6 @@ void CPhysical::ProcessCollision_Reversed()
 // 0x54DB10
 void CPhysical::ProcessShift()
 {
-    CPhysical::ProcessShift_Reversed();
-}
-
-// 0x54DEC0
-bool CPhysical::TestCollision(bool bApplySpeed) {
-   return CPhysical::TestCollision_Reversed(bApplySpeed);
-}
-
-bool CPhysical::TestCollision_Reversed(bool bApplySpeed) {
-    CMatrix entityMatrix(*m_matrix);
-    physicalFlags.b17 = true;
-    physicalFlags.b13 = true;
-    bool bOldUsesCollision = m_bUsesCollision;
-    m_bUsesCollision = false;
-    bool bTestForBlockedPositions = false;
-    CPed* ped = AsPed();
-    if (IsPed() && ped->bTestForBlockedPositions) {
-        bTestForBlockedPositions = true;
-        ped->bTestForBlockedPositions = false;
-    }
-    if (bApplySpeed)
-        ApplySpeed();
-    bool bCheckCollision = CheckCollision();
-    m_bUsesCollision = bOldUsesCollision;
-    physicalFlags.b17 = false;
-    physicalFlags.b13 = false;
-    *(CMatrix*)m_matrix = entityMatrix;
-    if (bTestForBlockedPositions)
-        ped->bTestForBlockedPositions = true;
-    return bCheckCollision;
-}
-
-// 0x546D00
-int32 CPhysical::ProcessEntityCollision(CPhysical* entity, CColPoint* colpoint) {
-    return CPhysical::ProcessEntityCollision_Reversed(entity, colpoint);
-}
-
-int32 CPhysical::ProcessEntityCollision_Reversed(CPhysical* entity, CColPoint* colpoint) {
-    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(CColPoint(*)[32])colpoint/*should be okay for now*/, nullptr, nullptr, false);
-    if (totalColPointsToProcess > 0) {
-        AddCollisionRecord(entity);
-        if (!entity->IsBuilding())
-            entity->AddCollisionRecord(this);
-        if (entity->IsBuilding() || entity->IsStatic())
-            m_bHasHitWall = true;
-    }
-    return totalColPointsToProcess;
-}
-
-void CPhysical::ProcessShift_Reversed()
-{
     CRect boundingBox;
     GetBoundRect(&boundingBox);
     m_fMovingSpeed = 0.0f;
@@ -615,7 +541,7 @@ void CPhysical::ProcessShift_Reversed()
                         bShifted2 = true;
                     }
                 }
-            } 
+            }
             if (bShifted2)
             {
                 *(CMatrix*)m_matrix = oldEntityMatrix;
@@ -627,6 +553,50 @@ void CPhysical::ProcessShift_Reversed()
         m_fMovingSpeed = (GetPosition() - oldEntityMatrix.GetPosition()).Magnitude();
         RemoveAndAdd();
     }
+}
+
+// 0x54DEC0
+bool CPhysical::TestCollision(bool bApplySpeed) {
+    CMatrix entityMatrix(*m_matrix);
+    physicalFlags.b17 = true;
+    physicalFlags.b13 = true;
+    bool bOldUsesCollision = m_bUsesCollision;
+    m_bUsesCollision = false;
+    bool bTestForBlockedPositions = false;
+
+    CPed* ped = AsPed();
+    if (IsPed() && ped->bTestForBlockedPositions) {
+        bTestForBlockedPositions = true;
+        ped->bTestForBlockedPositions = false;
+    }
+
+    if (bApplySpeed)
+        ApplySpeed();
+
+    bool bCheckCollision = CheckCollision();
+    m_bUsesCollision = bOldUsesCollision;
+    physicalFlags.b17 = false;
+    physicalFlags.b13 = false;
+    *(CMatrix*)m_matrix = entityMatrix;
+    if (bTestForBlockedPositions)
+        ped->bTestForBlockedPositions = true;
+
+    return bCheckCollision;
+}
+
+// 0x546D00
+int32 CPhysical::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) {
+    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+    int32 totalColPointsToProcess = CCollision::ProcessColModels(*m_matrix, *colModel, entity->GetMatrix(), *entity->GetColModel(), *(CColPoint(*)[32])colPoint/*should be okay for now*/, nullptr, nullptr, false);
+    if (totalColPointsToProcess > 0) {
+        AddCollisionRecord(entity);
+        if (!entity->IsBuilding())
+            entity->AsPhysical()->AddCollisionRecord(this);
+
+        if (entity->IsBuilding() || entity->IsStatic())
+            m_bHasHitWall = true;
+    }
+    return totalColPointsToProcess;
 }
 
 // 0x542560
@@ -727,10 +697,13 @@ void CPhysical::SetDamagedPieceRecord(float fDamageIntensity, CEntity* entity, C
     if (fDamageIntensity > m_fDamageIntensity) {
         m_fDamageIntensity = fDamageIntensity;
         m_nPieceType = colPoint.m_nPieceTypeA;
+
+        // CEntity::ChangeEntityReference?
         if (m_pDamageEntity)
             m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
         m_pDamageEntity = entity;
         entity->RegisterReference(&m_pDamageEntity);
+
         m_vecLastCollisionPosn = colPoint.m_vecPoint;
         m_vecLastCollisionImpactVelocity = fDistanceMult * colPoint.m_vecNormal;
         if (IsObject() && colPoint.m_nSurfaceTypeB == SURFACE_CAR_MOVINGCOMPONENT)
@@ -787,7 +760,7 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
     if (physicalFlags.bDisableZ)
         vecMoveSpeedForce.z = 0.0f;
 
-    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) 
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
         m_vecMoveSpeed += vecMoveSpeedForce / m_fMass;
 
     if (!physicalFlags.bDisableTurnForce && bUpdateTurnSpeed) {
@@ -824,9 +797,9 @@ CVector CPhysical::GetSpeed(CVector point)
 
 /*
     The code for this function is fine, but it will crash if we hook it. This function should be
-    only hooked after reversing all references to this function: 
+    only hooked after reversing all references to this function:
     CPhysical::ApplySpeed (done)
-    CWorld::Process
+    CWorld::Process (done)
     CAutoMobile::ProcessControlCollisionCheck
     CBike::ProcessControlCollisionCheck
     CTrain::ProcessControl (Done)
@@ -953,9 +926,7 @@ void CPhysical::SkipPhysics()
         m_nNumEntitiesCollided = 0;
         m_nPieceType = 0;
         m_fDamageIntensity = 0.0f;
-        if (m_pDamageEntity)
-            m_pDamageEntity->CleanUpOldReference(&m_pDamageEntity);
-        m_pDamageEntity = nullptr;
+        CEntity::ClearReference(m_pDamageEntity);
         ResetFrictionTurnSpeed();
         ResetFrictionMoveSpeed();
     }
@@ -987,7 +958,7 @@ void CPhysical::AddCollisionRecord(CEntity* collidedEntity)
                 return;
         }
 
-        if (m_nNumEntitiesCollided < 6) {
+        if (m_nNumEntitiesCollided < std::size(m_apCollidedEntities)) {
             m_apCollidedEntities[m_nNumEntitiesCollided] = collidedEntity;
             m_nNumEntitiesCollided++;
         }
@@ -1410,7 +1381,7 @@ bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFire
     case WEAPON_VIBE2:
     case WEAPON_FLOWERS:
     case WEAPON_CANE:
-        if (!physicalFlags.bMeeleProof)
+        if (!physicalFlags.bMeleeProof)
             return true;
         return false;
     case WEAPON_GRENADE:
@@ -1479,7 +1450,7 @@ bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFire
 // 0x544C40
 void CPhysical::ApplyAirResistance()
 {
-    if (m_fAirResistance <= 0.1f || m_nType  == ENTITY_TYPE_VEHICLE)
+    if (m_fAirResistance <= 0.1f || IsVehicle())
     {
         float fSpeedMagnitude = m_vecMoveSpeed.Magnitude() * m_fAirResistance;
         if (CCullZones::DoExtraAirResistanceForPlayer())
@@ -2377,12 +2348,12 @@ void CPhysical::PositionAttachedEntity()
                 m_pAttachedTo->ApplyForce(vecForce * -1.0f, vecDistance, true);
             }
             float fRotationInRadians = m_pAttachedTo->GetHeading() - GetHeading();
-            if (fRotationInRadians > PI) 
+            if (fRotationInRadians > PI)
                 fRotationInRadians -= PI * 2;
             else if (fRotationInRadians < -PI)
                 fRotationInRadians += PI * 2;
             fRotationInRadians = clamp<float>(fRotationInRadians, -0.5f, 0.5f);
-            m_vecTurnSpeed.z += fRotationInRadians * 0.00001f * m_fMass;
+            m_vecTurnSpeed.z += fRotationInRadians / 100'000.0f * m_fMass;
         }
     }
     else {
@@ -2426,7 +2397,7 @@ void CPhysical::ApplySpeed()
         else {
             fTimeStepX = (CWorld::SnookerTableMax.x - GetPosition().x) / m_vecMoveSpeed.x;
         }
-        
+
         float fNewPositionY = CTimer::GetTimeStep() * m_vecMoveSpeed.y + GetPosition().y;
         if (fNewPositionY <= CWorld::SnookerTableMax.y || m_vecMoveSpeed.y <= 0.0f) {
             if (fNewPositionY >= CWorld::SnookerTableMin.y || m_vecMoveSpeed.y >= 0.0f) {
@@ -2629,10 +2600,10 @@ void CPhysical::ApplyFriction()
 
     auto* vehicle = AsVehicle();
     if (IsVehicle() && vehicle->IsBike()
-        && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED 
+        && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED
         && fabs(GetUp().z) < 0.707f
         && 0.05f * 0.05f > m_vecMoveSpeed.SquaredMagnitude() && 0.01f * 0.01f > m_vecTurnSpeed.SquaredMagnitude())
-    {                                    
+    {
         m_vecMoveSpeed *= pow(0.5f, CTimer::GetTimeStep());
     }
 }
@@ -2640,7 +2611,7 @@ void CPhysical::ApplyFriction()
 // 0x548680
 bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& thisDamageIntensity, float& entityDamageIntensity)
 {
-    auto* entity = static_cast<CPhysical*>(theEntity);
+    auto* entity = theEntity->AsPhysical();
     auto* entityObject = entity->AsObject();
     auto* entityVehicle = entity->AsVehicle();
 
@@ -2683,7 +2654,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
             {
                 fTheEntityMass = 0.0f;
             }
-            fEntityMassFactor = 1.0f / (fTheEntityMass * 0.0002f + 1.0f);
+            fEntityMassFactor = 1.0f / (fTheEntityMass / 5000.0f + 1.0f);
         }
         else if (!entity->physicalFlags.bDisableMoveForce)
         {
@@ -2778,7 +2749,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                         {
                             entity->SetIsStatic(false);
                             CWorld::Players[CWorld::PlayerInFocus].m_nHavocCaused += 2;
-                            CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(rand() % 30 + 30));
+                            CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(CGeneral::GetRandomNumberInRange(30, 60)));
                         }
                     }
                 }
@@ -2804,7 +2775,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
 
                     entity->SetIsStatic(false);
                     CWorld::Players[CWorld::PlayerInFocus].m_nHavocCaused += 2;
-                    CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(rand() % 30 + 30));
+                    CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(CGeneral::GetRandomNumberInRange(30, 60)));
                 }
                 else
                 {
@@ -3343,7 +3314,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
             }
         }
 
-        if (CCheat::m_aCheatsActive[CHEAT_CARS_FLOAT_AWAY_WHEN_HIT])
+        if (CCheat::IsActive(CHEAT_CARS_FLOAT_AWAY_WHEN_HIT))
         {
             if (FindPlayerVehicle() == thisVehicle
                 && entity->IsVehicle() && entityVehicle->m_nCreatedBy != MISSION_VEHICLE)
@@ -3488,7 +3459,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
             {
                 physical->SetIsStatic(false);
                 CWorld::Players[CWorld::PlayerInFocus].m_nHavocCaused += 2;
-                CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(rand() % 30 + 30));
+                CStats::IncrementStat(STAT_COST_OF_PROPERTY_DAMAGED, static_cast<float>(CGeneral::GetRandomNumberInRange(30, 60)));
             }
         }
         else
@@ -4196,8 +4167,8 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                                         fThisMaxDamageIntensity = fThisDamageIntensity;
                                     }
 
-                                    float fSurfaceFirction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
-                                    float fFriction = fSurfaceFirction / totalColPointsToProcess;
+                                    float fSurfaceFriction = g_surfaceInfos->GetAdhesiveLimit(colPoint);
+                                    float fFriction = fSurfaceFriction / totalColPointsToProcess;
                                     if (!IsVehicle()) {
                                         fFriction *= 150.0f * fThisDamageIntensity;
                                         SetDamagedPieceRecord(fThisDamageIntensity, entity, *colPoint, 1.0f);
@@ -4558,7 +4529,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     {
         return false;
     }
-  
+
     CVector vecBoundingCentre;
     GetBoundCentre(&vecBoundingCentre);
 
@@ -4663,7 +4634,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
                         entity->m_bHasContacted = true;
                     }
                 }
-            } 
+            }
         }
 
         if (!m_bHasContacted)
@@ -4729,7 +4700,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
             }
         }
     }
-  
+
     if (entity->m_nStatus == STATUS_SIMPLE)
     {
         entity->m_nStatus = STATUS_PHYSICS;
@@ -4738,7 +4709,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
             CCarCtrl::SwitchVehicleToRealPhysics(entity->AsVehicle());
         }
     }
-    return true; 
+    return true;
 }
 
 // 0x54D570
@@ -4749,11 +4720,12 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
 
     CEntity* oldEntityAttachedTo = m_pAttachedTo;
     m_pAttachedTo = entityAttachTo;
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
     m_vecAttachOffset = vecAttachOffset;
-    if (physicalFlags.bInfiniteMass) 
+    if (physicalFlags.bInfiniteMass)
         m_vecAttachedEntityRotation = GetPosition();
-    else 
+    else
         m_vecAttachedEntityRotation = vecAttachRotation;
     m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = oldEntityAttachedTo;
@@ -4763,7 +4735,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
     }
     else {
         if (m_pAttachedTo->IsPhysical()
-            && m_pAttachedTo->physicalFlags.bDisableCollisionForce 
+            && m_pAttachedTo->physicalFlags.bDisableCollisionForce
             && IsObject() && !physicalFlags.bInfiniteMass)
         {
             physicalFlags.bDisableCollisionForce = true;
@@ -4782,6 +4754,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector* vecAtta
 
     CPhysical* oldEntityAttachedTo = m_pAttachedTo;
     m_pAttachedTo = entityAttachTo;
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
     CMatrix entityAttachedtoMatrix(m_pAttachedTo->GetMatrix());
     auto* attachedToAutoMobile = m_pAttachedTo->AsAutomobile();
@@ -4878,7 +4851,7 @@ bool CPhysical::CheckCollision()
                 return true;
         }
     }
-    return false;  
+    return false;
 }
 
 // 0x54DAB0

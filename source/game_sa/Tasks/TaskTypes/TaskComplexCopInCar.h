@@ -1,27 +1,52 @@
-/*
-    Plugin-SDK file
-    Authors: GTA Community. See more here
-    https://github.com/DK22Pac/plugin-sdk
-    Do not delete this comment block. Respect others' work!
-*/
 #pragma once
 
 #include "TaskComplex.h"
-#include "Vehicle.h"
-#include "Ped.h"
+#include "TaskTimer.h"
+
+class CPed;
+class CVehicle;
 
 class CTaskComplexCopInCar : public CTaskComplex {
 public:
-    CVehicle*  m_pVehicle;
-    CPed*      m_pCop1;
-    CPed*      m_pCop2;
-    CTaskTimer m_timer1;
-    CTaskTimer m_timer2;
-    uint8      m_nFlags;
-    char       _flags[3];
+    CVehicle*  m_Vehicle;
+    CPed*      m_Cop;     // Same as `ped` that's passed to all functions (So basically the ped this task belongs to)
+    CPed*      m_Suspect;
+
+    CTaskTimer m_Timer1;
+    CTaskTimer m_Timer2;
+
+    uint8 m_bSuspectDeadOrLost : 1; // 0st bit - Seems to be related to cop1's existence, something like `isCop1Alive`
+    uint8 m_flag0x2 : 1;            // 1nd bit
+    uint8 m_flag0x4 : 1;            // 2rd bit
+    uint8 m_bIsSuspectInCar : 1;    // 3th bit
 
 public:
-    CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool arg3);
-};
+    static constexpr auto Type = TASK_COMPLEX_COP_IN_CAR;
 
+    CTaskComplexCopInCar(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool bSuspectDeadOrLost);
+    ~CTaskComplexCopInCar() override;
+
+    CTask* CreateSubTask(eTaskType taskType, CPed* copPed);
+
+    CTask* Clone() override { return new CTaskComplexCopInCar{ *this }; }
+    eTaskType GetTaskType() override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexCopInCar* Constructor(CVehicle* vehicle, CPed* cop1, CPed* cop2, bool flag_0x1) { this->CTaskComplexCopInCar::CTaskComplexCopInCar(vehicle, cop1, cop2, flag_0x1); return this; }
+    CTaskComplexCopInCar* Destructor() { this->CTaskComplexCopInCar::~CTaskComplexCopInCar(); return this; }
+
+    CTask* Clone_Reversed() { return CTaskComplexCopInCar::Clone(); }
+    eTaskType GetTaskType_Reversed() { return CTaskComplexCopInCar::GetTaskType(); }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskComplexCopInCar::MakeAbortable(ped, priority, event); }
+    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::CreateNextSubTask(ped); }
+    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::CreateFirstSubTask(ped); }
+    CTask* ControlSubTask_Reversed(CPed* ped) { return CTaskComplexCopInCar::ControlSubTask(ped); }
+};
 VALIDATE_SIZE(CTaskComplexCopInCar, 0x34);

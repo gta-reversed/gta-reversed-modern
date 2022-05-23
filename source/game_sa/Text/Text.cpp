@@ -15,9 +15,6 @@
 
 CText& TheText = *(CText*)0xC1B340;
 
-// 0xC1AEB8
-char GxtErrorString[32];
-
 // 0x56D3A4
 static constexpr uint8 FrenchUpperCaseTable[] = {
     0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
@@ -37,7 +34,7 @@ static constexpr uint8 FrenchUpperCaseTable[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
-    };
+};
 
 void CText::InjectHooks() {
     RH_ScopedClass(CText);
@@ -131,7 +128,7 @@ void CText::Load(bool bKeepMissionPack) {
     Unload(bKeepMissionPack);
 
     char filename[32] = {0};
-    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nLanguage)) {
+    switch (static_cast<eLanguage>(FrontEndMenuManager.m_nPrefsLanguage)) {
     case eLanguage::AMERICAN:
         sprintf(filename, "AMERICAN.GXT");
         break;
@@ -199,7 +196,7 @@ void CText::Load(bool bKeepMissionPack) {
     strcpy(m_szCdErrorText, GxtCharToAscii(text, 0));
     m_bCdErrorLoaded = true;
 
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
     if (bKeepMissionPack)
         return;
@@ -208,7 +205,7 @@ void CText::Load(bool bKeepMissionPack) {
         if (FrontEndMenuManager.CheckMissionPackValidMenu()) {
             CTimer::Suspend();
             LoadMissionPackText();
-            CFileMgr::SetDir(gta_empty_string);
+            CFileMgr::SetDir("");
             CTimer::Resume();
         }
     }

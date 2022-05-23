@@ -1,6 +1,7 @@
 #include <ranges>
 #include <iterator>
 
+namespace notsa{
 namespace detail {
 template <std::input_iterator ItType> class enumerate_iterator {
 public:
@@ -125,3 +126,4 @@ template <std::input_iterator S, std::sentinel_for<S> E> auto enumerate(S begin,
 template <std::ranges::input_range R> auto enumerate(R&& r, ptrdiff_t start = 0) {
     return detail::enumerate_object{std::ranges::begin(r), std::ranges::end(r), start};
 }
+}; // namespace notsa

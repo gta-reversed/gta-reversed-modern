@@ -18,32 +18,34 @@
 #include "WindModifiers.h"
 #include "EntryExitManager.h"
 #include "TrafficLights.h"
+#include "Glass.h"
+#include "TheScripts.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    RH_ScopedOverloadedInstall(Add_Reversed, "void", 0x533020, void(CEntity::*)());
-    RH_ScopedOverloadedInstall(Add_Reversed, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
-    RH_ScopedInstall(Remove_Reversed, 0x534AE0);
-    RH_ScopedInstall(SetIsStatic_Reversed, 0x403E20);
-    RH_ScopedInstall(SetModelIndexNoCreate_Reversed, 0x533700);
-    RH_ScopedInstall(CreateRwObject_Reversed, 0x533D30);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x534030);
-    RH_ScopedInstall(GetBoundRect_Reversed, 0x534120);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x403E40);
-    RH_ScopedInstall(ProcessCollision_Reversed, 0x403E50);
-    RH_ScopedInstall(ProcessShift_Reversed, 0x403E60);
-    RH_ScopedInstall(TestCollision_Reversed, 0x403E70);
-    RH_ScopedInstall(Teleport_Reversed, 0x403E80);
-    RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x403E90);
-    RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x403EA0);
-    RH_ScopedInstall(PreRender_Reversed, 0x535FA0);
-    RH_ScopedInstall(Render_Reversed, 0x534310);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x553DC0);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x553370);
-    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x403EB0);
+    RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
+    RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
+    RH_ScopedVirtualInstall(Remove, 0x534AE0);
+    RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
+    RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);
+    RH_ScopedVirtualInstall(CreateRwObject, 0x533D30);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x534030);
+    RH_ScopedVirtualInstall(GetBoundRect, 0x534120);
+    RH_ScopedVirtualInstall(ProcessControl, 0x403E40);
+    RH_ScopedVirtualInstall(ProcessCollision, 0x403E50);
+    RH_ScopedVirtualInstall(ProcessShift, 0x403E60);
+    RH_ScopedVirtualInstall(TestCollision, 0x403E70);
+    RH_ScopedVirtualInstall(Teleport, 0x403E80);
+    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x403E90);
+    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x403EA0);
+    RH_ScopedVirtualInstall(PreRender, 0x535FA0);
+    RH_ScopedVirtualInstall(Render, 0x534310);
+    RH_ScopedVirtualInstall(SetupLighting, 0x553DC0);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x553370);
+    RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x403EB0);
     RH_ScopedInstall(UpdateRwFrame, 0x532B00);
     RH_ScopedInstall(UpdateRpHAnim, 0x532B20);
     RH_ScopedInstall(HasPreRenderEffects, 0x532B70);
@@ -79,7 +81,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(CleanUpOldReference, 0x571A00);
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
-    RH_ScopedInstall(RegisterReference, 0x571B70);
+    RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ProcessLightsForEntity, 0x6FC7A0);
     RH_ScopedInstall(RemoveEscalatorsForEntity, 0x717900);
     RH_ScopedInstall(IsEntityOccluded, 0x71FAE0);
@@ -349,7 +351,7 @@ void CEntity::CreateRwObject_Reversed()
     case rpCLUMP: {
         if (!mi->bIsRoad)
             break;
-        
+
         if (IsObject()) {
             auto obj = AsObject();
             if (!obj->m_pMovingList) {
@@ -368,7 +370,7 @@ void CEntity::CreateRwObject_Reversed()
                 if (pAssoc)
                     pAssoc->SetCurrentTime(pLodAssoc->m_fCurrentTime);
             }
-        } 
+        }
         break;
     }
     }
@@ -599,11 +601,11 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == MODEL_MISSILE) {
-            if (CReplay::Mode != REPLAY_MODE_1) {
+            if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(
-                    eShadowTextureType::SHADOWTEX_PED,
+                    eShadowTextureType::SHADOW_TEX_PED,
                     gpShadowExplosionTex,
                     &vecPos,
                     8.0F,
@@ -664,7 +666,7 @@ void CEntity::PreRender_Reversed()
             auto fRand = static_cast<float>(rand() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
-                eShadowTextureType::SHADOWTEX_PED,
+                eShadowTextureType::SHADOW_TEX_PED,
                 gpShadowExplosionTex,
                 &vecPos,
                 8.0F,
@@ -1118,7 +1120,7 @@ CVector* CEntity::FindTriggerPointCoors(CVector* outVec, int32 triggerIndex)
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
     for (int32 iFxInd = 0; iFxInd < mi->m_n2dfxCount; ++iFxInd) {
         auto effect = mi->Get2dEffect(iFxInd);
-        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->iSlotMachineIndex == triggerIndex) {
+        if (effect->m_nType == e2dEffectType::EFFECT_TRIGGER_POINT && effect->slotMachineIndex.m_nId == triggerIndex) {
             *outVec = GetMatrix() * effect->m_vecPosn;
             return outVec;
         }
@@ -1360,7 +1362,7 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
             CWorld::ms_listMovingEntityPtrs.AddItem(this);
         }
     }
-    
+
     mi->AddRef();
     m_pStreamingLink = CStreaming::AddEntity(this);
     CreateEffects();
@@ -1491,13 +1493,13 @@ bool CEntity::GetIsBoundingBoxOnScreen()
     for (int32 i = 0; i < 2; ++i) {
         #define ChooseComponent(c) vecNormals[i].c < 0 ? cm->m_boundBox.m_vecMax.c : cm->m_boundBox.m_vecMin.c
         CVector vecWorld = TransformFromObjectSpace(CVector{
-            ChooseComponent(x), 
-            ChooseComponent(y), 
+            ChooseComponent(x),
+            ChooseComponent(y),
             ChooseComponent(z)
         });
         #undef ChooseComponent
         if (DotProduct(vecWorld, TheCamera.m_avecFrustumWorldNormals[i]) > TheCamera.m_fFrustumPlaneOffsets[i]) {
-            if (!TheCamera.m_bMirrorActive 
+            if (!TheCamera.m_bMirrorActive
                 || DotProduct(vecWorld, TheCamera.m_avecFrustumWorldNormals_Mirror[i]) > TheCamera.m_fFrustumPlaneOffsets_Mirror[i]
             ) {
                 ++numBBFailed;
@@ -1535,7 +1537,7 @@ void CEntity::ModifyMatrixForTreeInWind()
     }
     else {
         auto uiTimeOffset = (reinterpret_cast<uint32>(this) + CTimer::GetTimeInMS()) & 0xFFF;
-        
+
         fWindOffset = sin(uiTimeOffset * 0.0015332032F) * 0.005F;
         if (CWeather::Wind >= 0.2F)
             fWindOffset *= 1.6F;
@@ -1545,7 +1547,7 @@ void CEntity::ModifyMatrixForTreeInWind()
     if (CModelInfo::GetModelInfo(m_nModelIndex)->IsSwayInWind2())
         at->x += CWeather::Wind * 0.03F;
 
-    at->y = at->x;    
+    at->y = at->x;
     at->x *= CWeather::WindDir.x;
     at->y *= CWeather::WindDir.y;
 
@@ -1593,12 +1595,12 @@ void CEntity::ModifyMatrixForBannerInWind()
     UpdateRwFrame();
 }
 
-RwMatrix* CEntity::GetModellingMatrix()
-{
+// 0x46A2D0
+RwMatrix* CEntity::GetModellingMatrix() {
     if (!m_pRwObject)
         return nullptr;
 
-    return RwFrameGetMatrix((RwFrame*)rwObjectGetParent(m_pRwObject));
+    return RwFrameGetMatrix(RwFrameGetParent(m_pRwObject));
 }
 
 // 0x535300
@@ -1852,9 +1854,9 @@ void CEntity::RegisterReference(CEntity** entity)
     }
 
     if (!m_pReferences && !CReferences::pEmptyList) {
-        auto iPedsSize = CPools::ms_pPedPool->GetSize();
+        auto iPedsSize = GetPedPool()->GetSize();
         for (int32 i = 0; i < iPedsSize; ++i) {
-            auto ped = CPools::ms_pPedPool->GetAt(i);
+            auto ped = GetPedPool()->GetAt(i);
             if (ped) {
                 ped->PruneReferences();
                 if (CReferences::pEmptyList)
@@ -1864,9 +1866,9 @@ void CEntity::RegisterReference(CEntity** entity)
         }
 
         if (!CReferences::pEmptyList) {
-            auto iVehsSize = CPools::ms_pVehiclePool->GetSize();
+            auto iVehsSize = GetVehiclePool()->GetSize();
             for (int32 i = 0; i < iVehsSize; ++i) {
-                auto vehicle = CPools::ms_pVehiclePool->GetAt(i);
+                auto vehicle = GetVehiclePool()->GetAt(i);
                 if (vehicle) {
                     vehicle->PruneReferences();
                     if (CReferences::pEmptyList)
@@ -1877,9 +1879,9 @@ void CEntity::RegisterReference(CEntity** entity)
         }
 
         if (!CReferences::pEmptyList) {
-            auto iObjectsSize = CPools::ms_pObjectPool->GetSize();
+            auto iObjectsSize = GetObjectPool()->GetSize();
             for (int32 i = 0; i < iObjectsSize; ++i) {
-                auto obj = CPools::ms_pObjectPool->GetAt(i);
+                auto obj = GetObjectPool()->GetAt(i);
                 if (obj) {
                     obj->PruneReferences();
                     if (CReferences::pEmptyList)
@@ -2510,6 +2512,7 @@ bool CEntity::IsInCurrentAreaOrBarberShopInterior()
     return m_nAreaCode == CGame::currArea || m_nAreaCode == AREA_CODE_13;
 }
 
+// 0x446F90
 void CEntity::UpdateRW() {
     if (!m_pRwObject)
         return;
@@ -2525,6 +2528,10 @@ CEntity* CEntity::FindLastLOD() noexcept {
     CEntity* it = this;
     for (; it->m_pLod; it = it->m_pLod);
     return it;
+}
+
+CBaseModelInfo* CEntity::GetModelInfo() const {
+    return CModelInfo::GetModelInfo(m_nModelIndex);
 }
 
 RpAtomic* CEntity::SetAtomicAlphaCB(RpAtomic* atomic, void* data)

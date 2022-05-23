@@ -16,6 +16,10 @@ namespace rng = std::ranges;
 CLinkList<CCollisionData*>& CCollision::ms_colModelCache = *(CLinkList<CCollisionData*>*)0x96592C;
 int32& CCollision::ms_iProcessLineNumCrossings = *(int32*)0x9655D0;
 uint32& CCollision::ms_collisionInMemory = *(uint32*)0x9655D4;
+bool& CCollision::bCamCollideWithVehicles = *(bool*)0x8A5B14;
+bool& CCollision::bCamCollideWithObjects = *(bool*)0x8A5B15;
+bool& CCollision::bCamCollideWithPeds = *(bool*)0x8A5B17;
+float& CCollision::relVelCamCollisionVehiclesSqr = *(float*)0x8A5B18;
 
 void CCollision::InjectHooks()
 {
@@ -331,7 +335,6 @@ bool CCollision::ProcessLineOfSight(const CColLine& line, const CMatrix& transfo
         }
     }
 
-    //localMinTouchDist = maxTouchDistance;
     if (localMinTouchDist < maxTouchDistance) {
         colPoint.m_vecPoint = MultiplyMatrixWithVector(transform, colPoint.m_vecPoint);
         colPoint.m_vecNormal = Multiply3x3(transform, colPoint.m_vecNormal);
@@ -459,7 +462,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
 
     // Test `spheres` against bounding box `bb` and store all colliding sphere's indices in `collidedIdxs`
     const auto TestSpheresAgainstBB = []<size_t N>(auto&& spheres, const auto& bb, uint32& numCollided, uint32 (&collidedIdxs)[N]) {
-        for (const auto& [i, sp] : enumerate(spheres)) {
+        for (const auto& [i, sp] : notsa::enumerate(spheres)) {
             if (TestSphereBox(sp, bb)) {
                 assert(numCollided < N); // Avoid out-of-bounds (Game originally didn't check)
                 collidedIdxs[numCollided++] = (uint32)i;
@@ -504,7 +507,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
     // Test B's boxes against A's bounding sphere
     static uint32 collBoxB[MAX_BOXES]; // Indices of B's boxes colliding with A's bounding sphere
     uint32 numCollBoxB{};
-    for (auto&& [i, box] : enumerate(cdB.GetBoxes())) {
+    for (auto&& [i, box] : notsa::enumerate(cdB.GetBoxes())) {
         if (TestSphereBox(colABoundSphereSpaceB, box)) {
             collBoxB[numCollBoxB++] = i;
             if (numCollBoxB >= MAX_BOXES) {
@@ -601,7 +604,7 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     cp,
                     minTouchDist)
                 ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nSurfaceTypeA = static_cast<eSurfaceType>(box.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeA = box.m_nFlags;
                     cp.m_nLightingA = box.m_nLighting;
 
@@ -813,11 +816,11 @@ int32 CCollision::ProcessColModels(const CMatrix& transformA, CColModel& cmA, co
                     cp,
                     minTouchDist)
                 ) {
-                    cp.m_nSurfaceTypeA = box.m_nMaterial;
+                    cp.m_nSurfaceTypeA = static_cast<eSurfaceType>(box.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeA = box.m_nFlags; // Presumably box.m_nFlags aren't actually flags.
                     cp.m_nLightingA = box.m_nLighting;
 
-                    cp.m_nSurfaceTypeB = sphere.m_nMaterial;
+                    cp.m_nSurfaceTypeB = static_cast<eSurfaceType>(sphere.m_nMaterial); // todo: remove? static_cast
                     cp.m_nPieceTypeB = sphere.m_nFlags;
                     cp.m_nLightingB = sphere.m_nLighting;
 

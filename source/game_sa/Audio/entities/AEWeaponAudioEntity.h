@@ -16,34 +16,35 @@ class CPed;
 
 class CAEWeaponAudioEntity : public CAEAudioEntity {
 public:
-    bool       m_bPlayedMiniGunFireSound;
-    bool       field_7D; // see PlayMiniGunFireSounds
-    uint8      field_7E; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
-    int8       m_nState;
-    int8       m_nChainsawSoundState;
-    char       _pad81[3];
-    uint32     m_nFlameThrowerLastPlayedTime;
-    uint32     m_nSpraycanLastPlayedTime;
-    uint32     m_nExtinguisherLastPlayedTime;
-    uint32     m_nMiniGunFireSoundPlayedTime;
-    uint32     m_nTimeChainsaw;
-    uint32     m_nTimeLastFired;
-    CAESound*  m_pSounds;
-    CPhysical* m_Physical;
-    CPed*      m_pPed;
+    bool       m_bPlayedMiniGunFireSound{};
+    bool       field_7D{}; // see PlayMiniGunFireSounds
+    uint8      field_7E{}; // see PlayGunSounds, gfWeaponPlaneFrequencyVariations
+    int8       m_nState{};
+    int8       m_nChainsawSoundState{};
+    char       _pad81[3]{};
+    uint32     m_nFlameThrowerLastPlayedTime{};
+    uint32     m_nSpraycanLastPlayedTime{};
+    uint32     m_nExtinguisherLastPlayedTime{};
+    uint32     m_nMiniGunFireSoundPlayedTime{};
+    uint32     m_nTimeChainsaw{};
+    uint32     m_nTimeLastFired{};
+    CAESound*  m_pSounds{};
+    CPhysical* m_Physical{};
+    CPed*      m_pPed{};
 
 public:
     CAEWeaponAudioEntity();
     ~CAEWeaponAudioEntity();
 
     void Initialise();
+    void Initialise(CPed* ped);
     void Terminate();
     void Reset();
 
     void AddAudioEvent(int32 audioEventId);
 
     void WeaponFire(eWeaponType type, CPhysical* entity, int32 audioEventId);
-    void WeaponReload(eWeaponType type, CPhysical* entity, int32 audioEventId);
+    void WeaponReload(eWeaponType type, CPhysical* entity, eAudioEvents event);
 
     void PlayGunSounds(CPhysical* entity, int16 emptySfxId, int16 farSfxId2, int16 highPitchSfxId3, int16 lowPitchSfxId4, int16 echoSfxId5, int32 audioEventId, float volumeChange, float speed1, float speed2);
     void PlayGoggleSound(int16 sfxId, int32 audioEventId);

@@ -10,11 +10,13 @@
 #include "TaskManager.h"
 #include "EventHandler.h"
 #include "EventGroup.h"
-#include "EntityScanner.h"
 #include "TaskTimer.h"
 #include "EventScanner.h"
 #include "PedStuckChecker.h"
 #include "VehicleScanner.h"
+#include "PedScanner.h"
+#include "MentalHealth.h"
+#include "PedScanner.h"
 
 class CPed;
 class CEntity;
@@ -42,22 +44,17 @@ public:
     float            m_fSeeingRange;
     uint32           m_nDmNumPedsToScan;
     float            m_fDmRadius;
-    int32            field_CC;
+    float            field_CC;
     char             field_D0;
     uint8            m_nEventId;
     uint8            m_nEventPriority;
     char             field_D3;
     CVehicleScanner  m_vehicleScanner;
-    CEntityScanner   m_entityScanner;
-    char             field_174;
-    char             gap_175[3];
-    CTaskTimer       field_178;
-    int32            field_184;
+    CPedScanner      m_pedScanner;
+    CMentalState     m_mentalState;
     char             field_188;
-    char             gap_189[3];
     CEventScanner    m_eventScanner;
     bool             field_260;
-    char             field_261[3];
     CPedStuckChecker m_pedStuckChecker;
     int32            m_AnotherStaticCounter;
     int32            m_StaticCounter;
@@ -72,10 +69,12 @@ public:
 public:
     static void InjectHooks();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void operator delete(void* object);
 
-    CEntity** GetPedEntities();
+    CPedIntelligence(CPed* ped);
+    ~CPedIntelligence();
+
     void SetPedDecisionMakerType(int32 newType);
     auto GetPedDecisionMakerType() const { return m_nDecisionMakerType; }
     void SetPedDecisionMakerTypeInGroup(int32 newType);
@@ -83,7 +82,7 @@ public:
     void SetHearingRange(float range);
     void SetSeeingRange(float range);
     bool IsInHearingRange(const CVector& posn);
-    bool IsInSeeingRange(const CVector& posn);
+    bool IsInSeeingRange(const CVector& posn) const;
     bool FindRespectedFriendInInformRange();
     bool IsRespondingToEvent(eEventType eventType);
     void AddTaskPhysResponse(CTask* task, int32 unUsed);
@@ -112,7 +111,7 @@ public:
     void ProcessEventHandler();
     bool IsFriendlyWith(const CPed& ped) const;
     bool IsThreatenedBy(const CPed& ped) const;
-    bool Respects(CPed* ped);
+    bool Respects(CPed* ped) const;
     bool IsInACarOrEnteringOne();
     static bool AreFriends(const CPed& ped1, const CPed& ped2);
     bool IsPedGoingSomewhereOnFoot();
@@ -130,10 +129,34 @@ public:
     void ProcessFirst();
     void Process();
     CTask* GetActivePrimaryTask();
-    float GetPedFOVRange();
+    float GetPedFOVRange() const;
 
     void SetDmRadius(float r) { m_fDmRadius = r; }
     void SetNumPedsToScan(uint32 n) { m_nDmNumPedsToScan = n; }
+
+    // NOTSA
+    bool IsUsingGun() {
+        if (GetTaskUseGun()) {
+            return true;
+        }
+        if (auto simplestTask = m_TaskMgr.GetSimplestActiveTask()) {
+            if (simplestTask->GetTaskType() == TASK_SIMPLE_GANG_DRIVEBY) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    CEventScanner&   GetEventScanner()    { return m_eventScanner; }
+    CPedScanner&     GetPedScanner()      { return m_pedScanner; }
+    CVehicleScanner& GetVehicleScanner()  { return m_vehicleScanner; }
+    CEntity**        GetPedEntities()     { return m_pedScanner.m_apEntities; }     // 0x4893E0
+    CEntity*         GetPedEntity(uint32 index) { return GetPedEntities()[index]; } // todo: GetPedEntity or degrades readability?
+    CEntity**        GetVehicleEntities() { return m_vehicleScanner.m_apEntities; }
+
+private:
+    CPedIntelligence* Constructor(CPed* ped);
+    CPedIntelligence* Destructor();
 };
 
 VALIDATE_SIZE(CPedIntelligence, 0x294);

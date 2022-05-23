@@ -8,6 +8,8 @@
 
 #include "Pool.h"
 
+typedef CPool<class COctTree> COctTreePool;
+
 class COctTree {
 public:
     uint32 m_nLevel;
@@ -20,13 +22,13 @@ public:
 public:
     static bool&            ms_bFailed;
     static uint32&          ms_level;
-    static CPool<COctTree>& ms_octTreePool;
+    static COctTreePool&    ms_octTreePool;
 
 public:
     COctTree();
     ~COctTree();
 
-    static void* operator new(uint32 size);
+    static void* operator new(unsigned size);
     static void  operator delete(void* data);
 
     //vtable

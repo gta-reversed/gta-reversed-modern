@@ -13,9 +13,9 @@ void CTaskSimpleJump::InjectHooks()
     RH_ScopedInstall(StartLaunchAnim, 0x67D7A0);
     RH_ScopedInstall(JumpAnimFinishCB, 0x67A020);
     //VTABLE
-    RH_ScopedInstall(Clone_Reversed, 0x67C510);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x679B60);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x680C60);
+    RH_ScopedVirtualInstall(Clone, 0x67C510);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x679B60);
+    RH_ScopedVirtualInstall(ProcessPed, 0x680C60);
 }
 
 CTaskSimpleJump* CTaskSimpleJump::Constructor(bool bCanClimb)
@@ -43,8 +43,7 @@ CTaskSimpleJump::~CTaskSimpleJump()
     if (m_pAnim)
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 
-    if (m_pClimbEntity)
-        m_pClimbEntity->CleanUpOldReference(&m_pClimbEntity);
+    CEntity::SafeCleanUpRef(m_pClimbEntity);
 }
 
 // 0x67C510
@@ -172,7 +171,7 @@ void CTaskSimpleJump::Launch(CPed* ped)
         fJumpForce *= modifier;
     }
 
-    if (ped->IsPlayer() && CCheat::m_aCheatsActive[CHEAT_MEGAJUMP])
+    if (ped->IsPlayer() && CCheat::IsActive(CHEAT_MEGAJUMP))
         fJumpForce *= 10.0F;
 
     ped->ApplyMoveForce(0.0F, 0.0F, fJumpForce);
