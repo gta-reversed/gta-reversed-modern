@@ -44,7 +44,7 @@ public:
     void AddAudioEvent(int32 audioEventId);
 
     void WeaponFire(eWeaponType type, CPhysical* entity, int32 audioEventId);
-    void WeaponReload(eWeaponType type, CPhysical* entity, int32 audioEventId);
+    void WeaponReload(eWeaponType type, CPhysical* entity, eAudioEvents event);
 
     void PlayGunSounds(CPhysical* entity, int16 emptySfxId, int16 farSfxId2, int16 highPitchSfxId3, int16 lowPitchSfxId4, int16 echoSfxId5, int32 audioEventId, float volumeChange, float speed1, float speed2);
     void PlayGoggleSound(int16 sfxId, int32 audioEventId);

@@ -79,7 +79,7 @@ void CSkidmarks::Render() {
 
 // 0x720930
 void CSkidmarks::RegisterOne(uint32 index, const CVector& posn, float dirX, float dirY, eSkidMarkType type, bool* bloodState, float length) {
-    if (CReplay::Mode == REPLAY_MODE_1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     if (CSkidmark* markById = FindById(index)) {

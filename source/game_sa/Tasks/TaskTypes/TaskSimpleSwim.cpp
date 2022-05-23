@@ -767,7 +767,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
         FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.2f, 0.4f, 0.0f, 0.5f);
         CVector vecParticleVelocity;
         g_fx.m_pPrtWake->AddParticle((RwV3d*)& vecParticlePosition, (RwV3d*)& vecParticleVelocity, 0.0f, (FxPrtMult_c*)& fxPrtMult, fLimitedRadianAngle, 1.2f, 0.6f, 0);
-        ped->m_pedAudio.AddAudioEvent(76, 0.0f, 1.0f, nullptr, 0, 0, 0);
+        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_WAKE, 0.0f, 1.0f, nullptr, 0, 0, 0);
 
         if (m_nSwimState == SWIM_SPRINTING)
         {
@@ -788,7 +788,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
-                    ped->m_pedAudio.AddAudioEvent(74, 0.0f, 1.0f, nullptr, 0, 0, 0);
+                    ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f, nullptr, 0, 0, 0);
                 }
             }
 
@@ -798,7 +798,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
-                    ped->m_pedAudio.AddAudioEvent(74, 0.0f, 1.0f, nullptr, 0, 0, 0);
+                    ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f, nullptr, 0, 0, 0);
                 }
             }
             if (fabs(pBoneRFootPos->z - fPedPosZ) < 0.05f)
@@ -807,7 +807,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
-                    ped->m_pedAudio.AddAudioEvent(74, 0.0f, 1.0f, nullptr, 0, 0, 0);
+                    ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f, nullptr, 0, 0, 0);
                 }
             }
             if (fabs(pBoneLFootPos->z - fPedPosZ) < 0.05f)
@@ -816,7 +816,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
                 if (pFxSystem)
                 {
                     pFxSystem->PlayAndKill();
-                    ped->m_pedAudio.AddAudioEvent(74, 0.0f, 1.0f, nullptr, 0, 0, 0);
+                    ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_STROKE_SPLASH, 0.0f, 1.0f, nullptr, 0, 0, 0);
                     return;
                 }
             }
@@ -831,7 +831,7 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
         }
         g_fx.TriggerWaterSplash(vecParticlePosition);
         m_bTriggerWaterSplash = true;
-        ped->m_pedAudio.AddAudioEvent(75, 0.0f, 1.0f, nullptr, 0, 0, 0);
+        ped->m_pedAudio.AddAudioEvent(AE_PED_SWIM_DIVE_SPLASH, 0.0f, 1.0f, nullptr, 0, 0, 0);
         return;
     }
     case SWIM_UNDERWATER_SPRINTING:

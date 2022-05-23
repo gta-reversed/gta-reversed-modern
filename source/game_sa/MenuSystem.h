@@ -75,17 +75,17 @@ public:
     static void DisplayStandardMenu(MenuId id, bool bRightFont);
     static void DisplayGridMenu(MenuId id, bool bFade);
 
-    static MenuId CreateNewMenu(eMenuType type, char* title, float x, float y, float width, uint8 columns, bool interactive, bool background, eFontAlignment alignment);
+    static MenuId CreateNewMenu(eMenuType type, const char* title, float x, float y, float width, uint8 columns, bool interactive, bool background, eFontAlignment alignment);
     static void ActivateItems(MenuId id, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7, bool b8, bool b9, bool b10, bool b11, bool b12);
-    static void ActivateOneItem(uint8 panelId, uint8 rowId, bool enable);
+    static void ActivateOneItem(MenuId id, uint8 rowId, bool enable);
     static void InsertMenu(MenuId id, uint8 column, char* colHeader, char* row0 = nullptr, char* row1 = nullptr, char* row2 = nullptr, char* row3 = nullptr,
                            char* row4 = nullptr, char* row5 = nullptr, char* row6 = nullptr, char* row7 = nullptr, char* row8 = nullptr, char* row9 = nullptr,
                            char* row10 = nullptr, char* row11 = nullptr);
     static void FillGridWithCarColours(MenuId id);
 
     static void HighlightOneItem(MenuId id, uint8 item, bool bought);
-    static void InsertOneMenuItem(MenuId id, uint8 column, uint8 row, char* text);
-    static void InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row, char* text, int32 num1, int32 num2);
+    static void InsertOneMenuItem(MenuId id, uint8 column, uint8 row, const char* text);
+    static void InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row, const char* text, int32 num1, int32 num2);
     static void SwitchOffMenu(MenuId id);
 
     static void SetActiveMenuItem(MenuId id, int8 item);

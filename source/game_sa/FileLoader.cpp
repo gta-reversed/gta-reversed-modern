@@ -466,7 +466,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
     assert(buffSize >= sizeof(FileHeader) && "LoadCollisionFileFirstTime called with not enough data"); // Buffer should be big enough to have at least 1 col header in it
 
     auto fileTotalSize{0u};
-    for (auto buffPos = 0; buffPos < buffSize; buffPos += fileTotalSize) {
+    for (auto buffPos = 0u; buffPos < buffSize; buffPos += fileTotalSize) {
         const auto buffRemainingSize = buffSize - buffPos;
         const auto buffIt            = &buff[buffPos];
 

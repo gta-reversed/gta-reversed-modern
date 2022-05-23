@@ -333,7 +333,7 @@ static void DebugCode() {
     if (CDebugMenu::Visible() || CPad::NewKeyState.lctrl || CPad::NewKeyState.rctrl)
         return;
 
-    if (pad->IsStandardKeyJustDown('1')) {
+    if (pad->IsStandardKeyJustPressed('1')) {
         CCheat::JetpackCheat();
     }
     if (pad->IsStandardKeyJustPressed('2')) {
@@ -342,12 +342,18 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('3')) {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
-    if (pad->IsStandardKeyJustDown('4')) {
-        const auto pos = FindPlayerCoors() - CVector{ 0.f, 0.f, 0.175f };
-        Command<COMMAND_ADD_BIG_GUN_FLASH>(pos, pos);
+
+    if (pad->IsStandardKeyJustPressed('4')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_FRONT);
     }
-    if (pad->IsStandardKeyJustDown('5')) {
-        FrontEndMenuManager.DisplayHelperText(nullptr);
+    if (pad->IsStandardKeyJustPressed('5')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_LEFT_REAR);
+    }
+    if (pad->IsStandardKeyJustPressed('6')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+    }
+    if (pad->IsStandardKeyJustPressed('7')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
 }
 

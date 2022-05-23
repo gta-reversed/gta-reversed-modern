@@ -263,7 +263,7 @@ uint8 CAEUserRadioTrackManager::GetUserTrackPlayMode() {
 
 // 0x4f4a20
 DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager* self) {
-    CoInitialize(nullptr);
+    VERIFY(CoInitialize(nullptr));
 
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
