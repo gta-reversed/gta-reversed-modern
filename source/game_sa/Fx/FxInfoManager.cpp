@@ -7,58 +7,56 @@
 #include "MovementInfo.h"
 #include "RenderInfo.h"
 
-// #include "FxInfoEmRate.h"
-// #include "FxInfoEmSize.h"
-// #include "FxInfoEmSpeed.h"
-// #include "FxInfoEmDir.h"
-// #include "FxInfoEmAngle.h"
-// #include "FxInfoEmLife.h"
-// #include "FxInfoEmPos.h"
-// #include "FxInfoEmWeather.h"
-// #include "FxInfoEmRotation.h"
-// #include "FxInfoNoise.h"
-// #include "FxInfoForce.h"
-// #include "FxInfoFriction.h"
-// #include "FxInfoAttractPt.h"
-// #include "FxInfoAttractLine.h"
-// #include "FxInfoGroundCollide.h"
-// #include "FxInfoWind.h"
-// #include "FxInfoJitter.h"
-// #include "FxInfoRotSpeed.h"
-// #include "FxInfoFloat.h"
-// #include "FxInfoUnderwater.h"
-// #include "FxInfoColour.h"
-// #include "FxInfoSize.h"
-// #include "FxInfoSpriteRect.h"
-// #include "FxInfoHeatHaze.h"
-// #include "FxInfoTrail.h"
-// #include "FxInfoFlat.h"
-// #include "FxInfoDir.h"
-// #include "FxInfoAnimTexture.h"
-// #include "FxInfoColourRange.h"
-// #include "FxInfoSelfLit.h"
-// #include "FxInfoColourBright.h"
-// #include "FxInfoSmoke.h"
-// #include "FxInfoRotate.h"
-// #include "FxInfoTexCoords.h"
-// #include "FxInfoRotateOffset.h"
+#include "FxInfoEmRate.h"
+#include "FxInfoEmSize.h"
+#include "FxInfoEmSpeed.h"
+#include "FxInfoEmDir.h"
+#include "FxInfoEmAngle.h"
+#include "FxInfoEmLife.h"
+#include "FxInfoEmPos.h"
+#include "FxInfoEmWeather.h"
+#include "FxInfoEmRotation.h"
+#include "FxInfoNoise.h"
+#include "FxInfoForce.h"
+#include "FxInfoFriction.h"
+#include "FxInfoAttractPt.h"
+#include "FxInfoAttractLine.h"
+#include "FxInfoGroundCollide.h"
+#include "FxInfoWind.h"
+#include "FxInfoJitter.h"
+#include "FxInfoRotSpeed.h"
+#include "FxInfoFloat.h"
+#include "FxInfoUnderwater.h"
+#include "FxInfoColour.h"
+#include "FxInfoSize.h"
+#include "FxInfoSpriteRect.h"
+#include "FxInfoHeatHaze.h"
+#include "FxInfoTrail.h"
+#include "FxInfoFlat.h"
+#include "FxInfoDir.h"
+#include "FxInfoAnimTexture.h"
+#include "FxInfoColourRange.h"
+#include "FxInfoSelfLit.h"
+#include "FxInfoColourBright.h"
+#include "FxInfoSmoke.h"
+#include "FxInfoRotate.h"
+#include "FxInfoTexCoords.h"
+#include "FxInfoRotateOffset.h"
 
 
 void FxInfoManager_c::InjectHooks() {
     RH_ScopedClass(FxInfoManager_c);
     RH_ScopedCategory("Fx");
 
-    // RH_ScopedInstall(AddFxInfo, 0x4A7B00);
+    RH_ScopedInstall(AddFxInfo, 0x4A7B00);
     // RH_ScopedInstall(Load, 0x5C0B70);
-    // RH_ScopedInstall(ProcessEmissionInfo, 0x4A4960);
-    // RH_ScopedInstall(ProcessMovementInfo, 0x4A4A10);
-    // RH_ScopedInstall(ProcessRenderInfo, 0x4A4A80);
+    RH_ScopedInstall(ProcessEmissionInfo, 0x4A4960);
+    RH_ScopedInstall(ProcessMovementInfo, 0x4A4A10);
+    RH_ScopedInstall(ProcessRenderInfo, 0x4A4A80);
 }
 
 // 0x4A7B00
 FxInfo_c* FxInfoManager_c::AddFxInfo(int32 info) {
-    return plugin::CallMethodAndReturn<FxInfo_c*, 0x4A7B00, FxInfoManager_c*, int32>(this, info);
-    /*
     switch (info) {
     case FX_INFO_EMRATE_DATA:        return new FxInfoEmRate_c();
     case FX_INFO_EMSIZE_DATA:        return new FxInfoEmSize_c();
@@ -97,7 +95,6 @@ FxInfo_c* FxInfoManager_c::AddFxInfo(int32 info) {
     // NOTSA case FX_INFO_ROTATEOFFSET_DATA:  return new FxInfoRotateOffset_c();
     default:                         return nullptr;
     };
-    */
 }
 
 constexpr struct { int32 type; const char* name; } mapping[] = {
@@ -140,9 +137,9 @@ constexpr struct { int32 type; const char* name; } mapping[] = {
 
 // 0x5C0B70
 void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
-    return plugin::CallMethod<0x5C0B70, FxInfoManager_c*, FILESTREAM, int32>(this, file, version);
+    plugin::CallMethod<0x5C0B70, FxInfoManager_c*, FILESTREAM, int32>(this, file, version);
+    return;
 
-    /*
     ReadField<void>(file);
     m_nNumInfos = ReadField<int32>(file, "NUM_INFOS:");
     m_nFirstMovementInfo = -1;
@@ -186,7 +183,6 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
 
     if (m_nFirstMovementInfo == -1)
         m_nFirstMovementInfo = m_nFirstRenderInfo;
-    */
 }
 
 /* todo:
@@ -197,8 +193,6 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
 
 // 0x4A4960
 void FxInfoManager_c::ProcessEmissionInfo(float currentTime, float mult, float totalTime, bool bConstTimeSet, EmissionInfo_t* emission) {
-    return plugin::CallMethod<0x4A4960, FxInfoManager_c*, float, float, float, bool, EmissionInfo_t*>(this, currentTime, mult, totalTime, bConstTimeSet, emission);
-    /*
     emission->Process(mult);
 
     for (auto i = 0; i < m_nFirstMovementInfo; i++) {
@@ -207,14 +201,11 @@ void FxInfoManager_c::ProcessEmissionInfo(float currentTime, float mult, float t
             info->GetValue(currentTime, 0.0f, mult, totalTime, bConstTimeSet, emission);
         }
     }
-     */
 }
 
 // a6 - always false
 // 0x4A4A10
 void FxInfoManager_c::ProcessMovementInfo(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, MovementInfo_t* movementInfo) {
-    return plugin::CallMethod<0x4A4A10, FxInfoManager_c*, float, float, float, float, bool, MovementInfo_t*>(this, currentTime, mult, totalTime, length, bConstTimeSet, movementInfo);
-    /*
     movementInfo->Process();
 
     for (auto i = m_nFirstMovementInfo; i < m_nFirstRenderInfo; i++) {
@@ -223,14 +214,11 @@ void FxInfoManager_c::ProcessMovementInfo(float currentTime, float mult, float t
             info->GetValue(currentTime, mult, totalTime, length, bConstTimeSet, movementInfo);
         }
     }
-     */
 }
 
 // a6 - always false
 // 0x4A4A80
 void FxInfoManager_c::ProcessRenderInfo(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, RenderInfo_t* renderInfo) {
-    return plugin::CallMethod<0x4A4A80, FxInfoManager_c*, float, float, float, float, bool, RenderInfo_t*>(this, currentTime, mult, totalTime, length, bConstTimeSet, renderInfo);
-    /*
     renderInfo->Process();
 
     for (auto i = m_nFirstRenderInfo; i < m_nNumInfos; i++) {
@@ -239,5 +227,4 @@ void FxInfoManager_c::ProcessRenderInfo(float currentTime, float mult, float tot
             info->GetValue(currentTime, mult, totalTime, length, bConstTimeSet, renderInfo);
         }
     }
-     */
 }
