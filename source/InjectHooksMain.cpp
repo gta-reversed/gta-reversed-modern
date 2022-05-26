@@ -706,6 +706,16 @@ void InjectHooksMain() {
         CEventHandler::InjectHooks();
         CEventAcquaintancePedHate::InjectHooks();
         CEventAcquaintancePedHateBadlyLit::InjectHooks();
+        // + CEventInteriorUseInfo
+        // + CEventLowAngerAtPlayer
+        // + CEventPedEnteredMyVehicle
+        // + CEventPotentialGetRunOver
+        // + CEventPotentialWalkIntoBuilding::InjectHooks();
+        // + CEventSexyPed
+        // + CEventSignalAtPed
+        // + CEventSoundLoud
+        // - CEventSource::InjectHooks();
+        // - CEventScanner::InjectHooks();
     };
 
     const auto Fx = []() {
