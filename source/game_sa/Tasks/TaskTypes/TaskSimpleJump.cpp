@@ -2,6 +2,7 @@
 
 #include "TaskSimpleJump.h"
 #include "TaskSimpleClimb.h"
+#include "Shadows.h"
 
 void CTaskSimpleJump::InjectHooks()
 {

@@ -17,6 +17,7 @@
 #include "Fx.h"
 #include "BreakManager_c.h"
 #include "BoneNodeManager_c.h"
+#include "Shadows.h"
 // todo: #include "ShadowManager.h"
 #include "PedType.h"
 #include "IKChainManager_c.h"
@@ -41,6 +42,7 @@
 #include "LoadingScreen.h"
 #include "GridRef.h"
 #include "MenuSystem.h"
+#include "RealTimeShadowManager.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
@@ -152,7 +154,7 @@ void CGame::ShutDownForRestart() {
     for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
         CWorld::Players[i].Clear();
     }
-    
+
     memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
@@ -475,7 +477,7 @@ void CGame::ReInitGameObjectVariables() {
     CHud::ReInitialise();
     CRadar::Initialise();
     CCarCtrl::ReInit();
-    // todo: ThePaths.ReInit();
+    ThePaths.ReInit();
     CTimeCycle::Initialise();
     CPopCycle::Initialise();
     CDraw::SetFOV(120.0f);

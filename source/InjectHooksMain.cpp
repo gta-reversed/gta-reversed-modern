@@ -108,6 +108,8 @@
 #include "GridRef.h"
 #include "MenuSystem.h"
 #include "InterestingEvents.h"
+#include "Shadows.h"
+#include "ShadowCamera.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"
@@ -239,6 +241,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CShadowCamera::InjectHooks();
     CInterestingEvents::InjectHooks();
     CShadows::InjectHooks();
     CCam::InjectHooks();

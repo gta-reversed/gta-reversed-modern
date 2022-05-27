@@ -20,6 +20,7 @@
 #include "TrafficLights.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 void CEntity::InjectHooks()
 {
