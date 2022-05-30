@@ -16,6 +16,7 @@
 #include "CTeleportDebugModule.h"
 #include "FXDebugModule.h"
 #include "Pools\PoolsDebugModule.h"
+#include "TimecycEditor.h"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
@@ -160,6 +161,11 @@ void DebugModules::ProcessExtraDebugFeatures() {
 
         if (ImGui::BeginTabItem("Pools")) {
             PoolsDebugModule::ProcessImGui();
+            ImGui::EndTabItem();
+        }
+
+        if (ImGui::BeginTabItem("Timecyc")) {
+            TimeCycleDebugModule::ProcessImGui();
             ImGui::EndTabItem();
         }
 

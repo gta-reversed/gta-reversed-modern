@@ -16,9 +16,9 @@ public:
     float  m_fAmbientGreen_Obj;
     float  m_fAmbientBlue_Obj;
 
-    float  m_fDirectionalRed; // todo: before brightness
-    float  m_fDirectionalGreen;
-    float  m_fDirectionalBlue;
+    float m_fAmbientBeforeBrightnessRed; // m_fDirectional
+    float m_fAmbientBeforeBrightnessGreen;
+    float m_fAmbientBeforeBrightnessBlue;
 
     uint16 m_nSkyTopRed;
     uint16 m_nSkyTopGreen;
@@ -70,7 +70,7 @@ public:
     float  m_fPostFx2Alpha;
 
     float  m_fCloudAlpha;
-    uint32 m_nHighLightMinIntensity; // todo: int32
+    int32 m_nHighLightMinIntensity;
     uint16 m_nWaterFogAlpha;
     float  m_fIllumination;
     float  m_fLodDistMult;

@@ -78,9 +78,9 @@ CColourSet::CColourSet(int32 weatherId, int32 timeId) {
     m_fIllumination             = (float)CTimeCycle::m_nDirectionalMult[timeId][weatherId] / 100.0f;
 
     // Originally not initialized
-    m_fDirectionalRed   = 0.0f;
-    m_fDirectionalGreen = 0.0f;
-    m_fDirectionalBlue  = 0.0f;
+    m_fAmbientBeforeBrightnessRed = 0.0f;
+    m_fAmbientBeforeBrightnessGreen = 0.0f;
+    m_fAmbientBeforeBrightnessBlue  = 0.0f;
 }
 
 /*!
