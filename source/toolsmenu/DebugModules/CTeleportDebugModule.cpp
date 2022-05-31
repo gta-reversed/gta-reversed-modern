@@ -72,9 +72,6 @@ void DoTeleportTo(CVector pos, eAreaCodes areaCode = eAreaCodes::AREA_CODE_NORMA
 }
 
 void ProcessImGui() {
-    ImGui::SetNextWindowSize({ 400.f, 350.f }, ImGuiCond_FirstUseEver);
-    ImGui::Begin("Teleporter Window", &s_windowOpen);
-
     const auto& AlignRight = [&](float pad) {
         return GetWindowContentRegionMax().x - pad;
     };
@@ -235,8 +232,6 @@ void ProcessImGui() {
             }
         }
     }
-
-    End();
 }
 
 void ProcessInput() {

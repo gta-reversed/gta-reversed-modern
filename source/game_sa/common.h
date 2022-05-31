@@ -295,7 +295,7 @@ void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
 void ActivateDirectional();
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0);
+void SetAmbientColoursToIndicateRoadGroup(int32 idx);
 void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
