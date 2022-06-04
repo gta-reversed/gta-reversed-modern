@@ -15,7 +15,6 @@ class CSprite2d;
 // todo: move
 struct CFontChar {
     uint8     m_cLetter;
-    char      _pad0[3];
     CVector2D m_vPosn;
     float     m_fWidth;
     float     m_fHeight;
@@ -26,10 +25,8 @@ struct CFontChar {
     bool      m_bContainImages;
     uint8     m_nFontStyle;
     bool      m_bPropOn;
-    char      _pad1;
     uint16    m_wFontTexture;
     uint8     m_nOutline;
-    char      _pad2;
 
 public:
     // 0x718E50
@@ -119,15 +116,11 @@ public:
     static uint8& m_nFontOutline;
     static uint8& m_nFontOutlineOrShadow;
 
-    // static functions
+public:
     static void InjectHooks();
 
-    // CFont initialisation
     static void Initialise();
-
     static void LoadFontValues();
-
-    // CFont closing
     static void Shutdown();
     // this adds a single character into rendering buffer
     static void PrintChar(float x, float y, char character);
@@ -172,6 +165,7 @@ public:
     static void InitPerFrame();
     // draw text we have in buffer
     static void RenderFontBuffer();
+    static float GetHeight(bool a1 = false);
     static float GetStringWidth(char* string, bool unk1, bool unk2);
     static void DrawFonts();
     static int16 ProcessCurrentString(bool print, float x, float y, const char* text);
