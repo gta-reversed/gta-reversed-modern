@@ -190,7 +190,6 @@ namespace rng = std::ranges;
 #include "game_sa\SurfaceInfo_c.h"
 #include "game_sa\SurfaceInfos_c.h"
 #include "game_sa\Replay.h"
-#include "game_sa\VehicleRecording.h"
 #include "game_sa\VehicleAnimGroupData.h"
 #include "game_sa\Collision\ColStore.h"
 #include "game_sa\Collision\ColAccel.h"

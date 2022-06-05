@@ -110,6 +110,7 @@
 #include "InterestingEvents.h"
 #include "Shadows.h"
 #include "ShadowCamera.h"
+#include "VehicleRecording.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

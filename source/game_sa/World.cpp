@@ -14,6 +14,7 @@
 #include "Glass.h"
 #include "Shadows.h"
 #include "CustomBuildingDNPipeline.h"
+#include "VehicleRecording.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
