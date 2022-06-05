@@ -13,6 +13,7 @@
 #include "TagManager.h"
 #include "Glass.h"
 #include "Shadows.h"
+#include "CustomBuildingDNPipeline.h"
 
 int32 CWorld::TOTAL_PLAYERS = 2;
 int32& CWorld::ms_iProcessLineNumCrossings = *(int32*)0xB7CD60;
@@ -44,8 +45,6 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(ShutDown, 0x564050);
     RH_ScopedInstall(Add, 0x563220);
     RH_ScopedInstall(Remove, 0x563280);
-
-    // RH_ScopedInstall(hasCollisionBeenLoaded, 0x410CE0);
     RH_ScopedInstall(StopAllLawEnforcersInTheirTracks, 0x566C10);
     RH_ScopedInstall(CallOffChaseForArea, 0x566A60);
     RH_ScopedInstall(ExtinguishAllCarFiresInArea, 0x566950);
@@ -129,6 +128,7 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
     RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
     RH_ScopedInstall(ClearForRestart, 0x564360);
+    RH_ScopedGlobalInstall(ScaleLighting, 0x59F0C0);
 }
 
 // 0x5631C0
@@ -386,8 +386,6 @@ bool CWorld::ProcessVerticalLineSectorList_FillGlobeColPoints(CPtrList& ptrList,
 
 // 0x563840
 void CWorld::RemoveStaticObjects() {
-    // TODO Add Flush() to the lists
-
     const auto ProcessList = [](const CPtrList& list) {
         for (CPtrNode* node = list.GetNode(), *next{}; node; node = next) {
             next = node->GetNext();
@@ -400,9 +398,11 @@ void CWorld::RemoveStaticObjects() {
 
     for (auto y = 0; y < MAX_SECTORS_Y; y++) {
         for (auto x = 0; x < MAX_SECTORS_X; x++) {
-            const auto& sector = *GetSector(x, y);
+            auto& sector = *GetSector(x, y);
             ProcessList(sector.m_buildings);
             ProcessList(sector.m_dummies);
+            sector.m_buildings.Flush();
+            sector.m_dummies.Flush();
         }
     }
 
@@ -415,8 +415,10 @@ void CWorld::RemoveStaticObjects() {
 
 // 0x563950
 void CWorld::TestForBuildingsOnTopOfEachOther(CPtrList& ptrList) {
-    // todo: add code
-    /* nothing meaningful */
+    for (CPtrNode* node = ptrList.GetNode(), *next{}; node; node = next) {
+        next = node->GetNext();
+        // NOP
+    }
 }
 
 // 0x5639D0
@@ -449,8 +451,8 @@ void CWorld::RemoveEntityInsteadOfProcessingIt(CEntity* entity) {
 }
 
 // 0x563A80
-void CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8) {
-    plugin::Call<0x563A80, CPtrList&, float, float, float, float, float, float, float, float>(ptrList, x1, y1, x2, y2, arg5, arg6, arg7, arg8);
+void CWorld::CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY) {
+    plugin::Call<0x563A80, CPtrList&, float, float, float, float, float, float, float, float>(ptrList, x1, y1, x2, y2, minX, minY, maxX, maxY);
 }
 
 // 0x563D00
@@ -530,6 +532,7 @@ bool CWorld::CameraToIgnoreThisObject(CEntity* entity) {
     }
 }
 
+// Returns player ID (0 or 1), -1 - not found
 // 0x563FA0
 int32 CWorld::FindPlayerSlotWithPedPointer(void* ped) {
     for (int32 i = 0; i < MAX_PLAYERS; i++) {
@@ -539,6 +542,7 @@ int32 CWorld::FindPlayerSlotWithPedPointer(void* ped) {
     return -1;
 }
 
+// Returns player ID (0 or 1), -1 - not found
 // 0x563FD0
 int32 CWorld::FindPlayerSlotWithRemoteVehiclePointer(void* vehicle) {
     for (int32 i = 0; i < MAX_PLAYERS; i++) {
@@ -548,6 +552,7 @@ int32 CWorld::FindPlayerSlotWithRemoteVehiclePointer(void* vehicle) {
     return -1;
 }
 
+// Returns player ID (0 or 1), -1 - not found
 // 0x564000
 int32 CWorld::FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr) {
     for (int32 i = 0; i < MAX_PLAYERS; i++) {
@@ -1297,10 +1302,28 @@ CEntity* CWorld::TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCe
     return nullptr;
 }
 
+// untested
 // 0x566420
-// Unused - Probably a debug function
 void CWorld::PrintCarChanges() {
-    plugin::Call<0x566420>();
+    static int32 s_aModelIndexes[110];
+
+    const auto poolSize = GetVehiclePool()->GetSize();
+    for (auto i = 0; i < poolSize; i++) {
+        const auto vehicle = GetVehiclePool()->GetAt(i);
+
+        uint16 modelIndex;
+        if (!vehicle || vehicle->m_nVehicleType) {
+            modelIndex = 0;
+        } else {
+            modelIndex = vehicle->m_nModelIndex;
+        }
+
+        auto prevModelIndex = s_aModelIndexes[poolSize];
+        if (modelIndex != prevModelIndex) {
+            printf("Car ModelIndex (slot:%d) has changed from %d into %d\n", poolSize, prevModelIndex, modelIndex);
+            s_aModelIndexes[poolSize] = modelIndex;
+        }
+    }
 }
 
 // 0x5664A0
@@ -2993,8 +3016,8 @@ uint16 GetCurrentScanCode() {
 
 // 0x407260
 CSector* GetSector(int32 x, int32 y) {
-    const auto x1 = clamp<int32>(x, 0, MAX_SECTORS_X - 1);
-    const auto y1 = clamp<int32>(y, 0, MAX_SECTORS_Y - 1);
+    const auto x1 = std::clamp<int32>(x, 0, MAX_SECTORS_X - 1);
+    const auto y1 = std::clamp<int32>(y, 0, MAX_SECTORS_Y - 1);
     return &CWorld::ms_aSectors[y1][x1];
 }
 
@@ -3011,7 +3034,8 @@ CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
     return ms_aLodPtrLists[y][x];
 }
 
-float ScaleLighting(uint8 lighting, float fScale)
-{
-    return plugin::CallAndReturn<float, 0x59F0C0, uint8, float> (lighting, fScale);
+// 0x59F0C0
+float ScaleLighting(uint8 lighting, float scale) {
+    return (float)(lighting & 15) * scale / 15.0f * (1.0f - CCustomBuildingDNPipeline::m_fDNBalanceParam)
+         + (float)(lighting >> 4) * scale / 15.0f * (1.0f * CCustomBuildingDNPipeline::m_fDNBalanceParam);
 }
