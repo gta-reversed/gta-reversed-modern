@@ -562,16 +562,15 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
             return true; // Finished reading all data, but there's some padding left.
         }
 
-        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
-        fileTotalSize = h.GetTotalSize();
+        auto& header = *reinterpret_cast<FileHeader*>(buffIt);
+        fileTotalSize = header.GetTotalSize();
+        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data");
 
-        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data"); // NOTSA
-
-        auto modelId = (int32)h.modelId;
+        auto modelId = (int32)header.modelId;
 
         auto mi = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
-        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(h.modelName)) {
-            mi = CModelInfo::GetModelInfo(h.modelName, &modelId);
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(header.modelName)) {
+            mi = CModelInfo::GetModelInfo(header.modelName, &modelId);
         }
 
         if (!mi) {
@@ -585,11 +584,11 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
         }
 
         auto& cm = *new CColModel;
-        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
+        LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
         mi->SetColModel(&cm, true);
-        CColAccel::addCacheCol((PackedModelStartEnd)modelId, cm);  // NOTE/TODO: This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
+        CColAccel::addCacheCol(PackedModelStartEnd{ .modelId = modelId }, cm);
     }
 
     return true;

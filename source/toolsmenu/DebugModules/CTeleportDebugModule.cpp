@@ -23,10 +23,17 @@ struct SavedLocation {
     eAreaCodes  areaCode{ eAreaCodes::AREA_CODE_NORMAL_WORLD };
     bool        findGround{ true };
     bool        selected{};
+
+    SavedLocation() = default;
+    SavedLocation(const char* iName, CVector vec, eAreaCodes code, bool bFindGround) : name(iName), pos(vec), areaCode(code), findGround(bFindGround) {}
+    SavedLocation(const char* iName, CVector vec) : name(iName), pos(vec) {}
+
+    static constexpr size_t GetSaveSize() {
+        return /*name*/30 + sizeof(pos) + sizeof(areaCode) + sizeof(findGround) + sizeof(selected);
+    }
 };
 
 static std::vector<SavedLocation> s_SavedLocations{};
-static bool                       s_windowOpen{ true };
 static bool                       s_findZGround{ true };
 static SavedLocation              s_prevLocation{};
 static char                       s_nameFilter[1024]{};
@@ -212,7 +219,7 @@ void ProcessImGui() {
                     Text("%.2f %.2f", v.pos.x, v.pos.y);
                 else
                     Text("%.2f %.2f %.2f", v.pos.x, v.pos.y, v.pos.z);
-                
+
                 // Area code ID text
                 TableNextColumn(); Text("%d %s", v.areaCode, (v.areaCode == AREA_CODE_NORMAL_WORLD) ? "(outside)" : "");
 
@@ -278,6 +285,7 @@ namespace SettingsHandler {
     // Called after every read entry line
     // `entry` is a pointer returned from `ReadOpenFn` (we don't use it in this case)
     void ReadLine(ImGuiContext* ctx, ImGuiSettingsHandler* handler, void* entry, const char* line) {
+        UNUSED(ctx);
         UNUSED(handler);
 
         const auto version = reinterpret_cast<int>(entry);
@@ -290,17 +298,18 @@ namespace SettingsHandler {
             int findGround{1};
 
             // [^\t\n] -> https://stackoverflow.com/questions/2854488
-            if (sscanf(line, "%f, %f, %f, %d, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, &findGround, name) == 6)
+            if (sscanf(line, "%f, %f, %f, %d, %d, %[^\t\n]", &pos.x, &pos.y, &pos.z, &area, &findGround, name) == 6) {
                 s_SavedLocations.emplace_back(name, pos, static_cast<eAreaCodes>(area), static_cast<bool>(findGround));
-            else if (line[0] && line[0] != '\n') // Report failed reads on non-empty lines only
+            } else if (line[0] && line[0] != '\n') { // Report failed reads on non-empty lines only
                 std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
-            break;
-        }
+            }
+        } break;
         case 1: {
-            if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4)
+            if (sscanf(line, "%f, %f, %f, %[^\t\n]", &pos.x, &pos.y, &pos.z, name) == 4) {
                 s_SavedLocations.emplace_back(name, pos);
-            else if (line[0] && line[0] != '\n')
+            } else if (line[0] && line[0] != '\n') {
                 std::cerr << "Failed to load saved location from ini: `" << line << "`\n";
+            }
             break;
         }
         default:
@@ -311,11 +320,10 @@ namespace SettingsHandler {
 
     // Write all settings to buffer (ini file)
     void WriteAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf) {
-        (void)ctx;
+        UNUSED(ctx);
+        UNUSED(handler);
 
-        // Estimate. 3 * 10 for position + 3 for area code + 30 for name
-        out_buf->reserve(s_SavedLocations.size() * (3 * 10 + 3 + 30));
-
+        out_buf->reserve(s_SavedLocations.size() * SavedLocation::GetSaveSize());
         out_buf->append("[SavedLocations][Version 2]\n");
         for (const auto& l : s_SavedLocations) {
             out_buf->appendf("%.3f, %.3f, %.3f, %d, %d, %s\n", l.pos.x, l.pos.y, l.pos.z, l.areaCode, l.findGround, l.name.c_str());
@@ -332,14 +340,14 @@ namespace SettingsHandler {
     }
 
     void ApplyAll(ImGuiContext* ctx, ImGuiSettingsHandler* handler) {
-        (void)ctx;
-        (void)handler;
+        UNUSED(ctx);
+        UNUSED(handler);
 
         if (s_SavedLocations.empty()) {
             s_SavedLocations = {
-                { "Map centre", { 0.f,     0.f,      0.f   }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true },
-                { "CJ's House", { 2495.2f, -1686.0f, 13.6f }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true },
-                { "SF Airport", { 2495.1f, 1658.2f,  13.5f }, eAreaCodes::AREA_CODE_NORMAL_WORLD, true }
+                { "Map centre", { 0.f,     0.f,      0.f   }, AREA_CODE_NORMAL_WORLD, true },
+                { "CJ's House", { 2495.2f, -1686.0f, 13.6f }, AREA_CODE_NORMAL_WORLD, true },
+                { "SF Airport", { 2495.1f, 1658.2f,  13.5f }, AREA_CODE_NORMAL_WORLD, true }
             };
         }
     }

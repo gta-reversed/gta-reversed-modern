@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "renderware.h"
+#include "RenderWare.h"
 
 class CEntity;
 class CObject;
