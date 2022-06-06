@@ -243,6 +243,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CEscalator::InjectHooks();
     CShadowCamera::InjectHooks();
     CInterestingEvents::InjectHooks();
     CShadows::InjectHooks();
