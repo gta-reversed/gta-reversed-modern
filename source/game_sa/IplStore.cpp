@@ -553,17 +553,19 @@ void CIplStore::RemoveIpl(int32 iplSlotIndex) {
 
     const auto ProcessPool = [iplSlotIndex]<typename PoolT>(PoolT& pool, int32 minId, int32 maxId) {
         for (auto i = minId; i < maxId; i++) {
-            if (const auto entity = pool.GetAt(i)) {
-                if (entity->m_nIplIndex == iplSlotIndex) {
-                    if constexpr (std::is_same_v<PoolT::base_type, CObject>) {
-                        if (entity->m_pDummyObject) {
-                            CWorld::Add(entity->m_pDummyObject);
-                        }
-                    }
+            const auto entity = pool.GetAt(i);
+            if (!entity)
+                continue;
 
-                    CWorld::Remove(entity);
-                    delete entity;
+            if (entity->m_nIplIndex == iplSlotIndex) {
+                if constexpr (std::is_same_v<PoolT::base_type, CObject>) {
+                    if (entity->m_pDummyObject) {
+                        CWorld::Add(entity->m_pDummyObject);
+                    }
                 }
+
+                CWorld::Remove(entity);
+                delete entity;
             }
         }
     };
