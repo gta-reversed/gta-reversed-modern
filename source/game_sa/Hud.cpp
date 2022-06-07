@@ -154,11 +154,11 @@ void CHud::Initialise() {
 // 0x588880
 void CHud::ReInitialise() {
     memset(m_pHelpMessageToPrint, 0, sizeof(m_pHelpMessageToPrint));
-    memset(m_pLastHelpMessage, 0, sizeof(m_pLastHelpMessage));
-    memset(m_pHelpMessage, 0, sizeof(m_pHelpMessage));
-    memset(m_Message, 0, sizeof(m_Message));
-    memset(m_BigMessage, 0, sizeof(m_BigMessage));
-    memset(BigMessageX, 0.0f, sizeof(m_pHelpMessage));
+    memset(m_pLastHelpMessage, 0,    sizeof(m_pLastHelpMessage));
+    memset(m_pHelpMessage, 0,        sizeof(m_pHelpMessage));
+    memset(m_Message, 0,             sizeof(m_Message));
+    memset(m_BigMessage, 0,          sizeof(m_BigMessage));
+    memset(BigMessageX, 0.0f,        sizeof(m_pHelpMessage));
 
     OddJob2On       = 0;
     OddJob2Timer    = 0;
@@ -171,7 +171,7 @@ void CHud::ReInitialise() {
     TimerMainCounterWasDisplayed = false;
     TimerMainCounterHideState = 0;
 
-    CPlayerInfo& playerInfo         = CWorld::Players[CWorld::PlayerInFocus];
+    CPlayerInfo& playerInfo         = FindPlayerInfo();
     m_LastTimeEnergyLost            = playerInfo.m_nLastTimeEnergyLost;
     m_LastDisplayScore              = playerInfo.m_nDisplayMoney;
     m_fHelpMessageStatUpdateValue   = 0.0f;
@@ -221,8 +221,9 @@ void CHud::ReInitialise() {
 
 // 0x588850
 void CHud::Shutdown() {
-    for (auto& sprite : Sprites)
+    for (auto& sprite : Sprites) {
         sprite.Delete();
+    }
 
     CTxdStore::RemoveTxdSlot(CTxdStore::FindTxdSlot("hud"));
 }
@@ -241,7 +242,11 @@ bool CHud::HelpMessageDisplayed() {
 
 // 0x589070
 void CHud::ResetWastedText() {
-    plugin::Call<0x589070>();
+    BigMessageX[2] = 0.0f;
+    m_BigMessage[2][0] = 0;
+
+    BigMessageX[0] = 0.0f;
+    m_BigMessage[0][0] = 0;
 }
 
 // 0x588FC0
@@ -349,8 +354,9 @@ void CHud::SetVehicleName(char* name) {
 
 // 0x588BB0
 void CHud::SetZoneName(char* name, uint8 displayState) {
-    if ( displayState || !CGame::currArea && m_ZoneState == NAME_DONT_SHOW )
+    if (displayState || !CGame::currArea && m_ZoneState == NAME_DONT_SHOW) {
         m_pZoneName = name;
+    }
 }
 
 // called each frame from Render2dStuff()
@@ -386,7 +392,7 @@ void CHud::Draw() {
 
     if (!bScriptDontDisplayRadar && !TheCamera.m_bWideScreenOn) {
         CPed* player = FindPlayerPed();
-        CPad* pad = CPad::GetPad(0);
+        CPad* pad = CPad::GetPad();
         if (!pad->GetDisplayVitalStats(player) || FindPlayerVehicle()) {
             bDrawingVitalStats = false;
             DrawRadar();
@@ -413,7 +419,7 @@ void CHud::Draw() {
     if (!CTimer::GetIsUserPaused()) {
         if (!m_BigMessage[0][0]) {
             if (CMenuSystem::GetNumMenusInUse()) {
-                CMenuSystem::Process(-99);
+                CMenuSystem::Process(CMenuSystem::MENU_UNDEFINED);
             }
             DrawScriptText(1);
         }
@@ -439,20 +445,22 @@ void CHud::DrawAfterFade() {
     auto vehicle = FindPlayerVehicle();
     if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli()) {
         if (!CCutsceneMgr::ms_cutsceneProcessing) {
-            if (!FrontEndMenuManager.m_bMenuActive && !TheCamera.m_bWideScreenOn && !CHud::bScriptDontDisplayAreaName) {
-                CHud::DrawAreaName();
+            if (!FrontEndMenuManager.m_bMenuActive && !TheCamera.m_bWideScreenOn && !bScriptDontDisplayAreaName) {
+                DrawAreaName();
             }
         }
     }
 
-    if (!CHud::m_BigMessage[0][0])
-        CHud::DrawScriptText(0);
+    if (!m_BigMessage[0][0]) {
+        DrawScriptText(0);
+    }
 
-    if (!CTheScripts::bDrawSubtitlesBeforeFade)
-        CHud::DrawSubtitles();
+    if (!CTheScripts::bDrawSubtitlesBeforeFade) {
+        DrawSubtitles();
+    }
 
-    CHud::DrawMissionTitle();
-    CHud::DrawOddJobMessage(0);
+    DrawMissionTitle();
+    DrawOddJobMessage(0);
 }
 
 // 0x58AA50
@@ -497,6 +505,13 @@ void CHud::DrawOddJobMessage(uint8 priority) {
 
 // 0x58A330
 void CHud::DrawRadar() {
+    CRect rect;
+    rect.left   = SCREEN_STRETCH_X(54.0f);
+    rect.top    = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
+    rect.right  = SCREEN_STRETCH_X(64.0f) + SCREEN_STRETCH_X(54.0f);
+    rect.bottom = SCREEN_STRETCH_Y(64.0f) + SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
+    Sprites[5].Draw(rect, CRGBA(255, 255, 255, 255));
+
     plugin::Call<0x58A330>();
 }
 
@@ -540,8 +555,9 @@ void CHud::DrawVehicleName() {
             m_VehicleNameTimer = 0;
             m_VehicleFadeTimer = 0;
             m_pVehicleNameToPrint = m_pVehicleName;
-            if (m_ZoneState == NAME_SHOW || m_ZoneState == NAME_FADE_IN)
+            if (m_ZoneState == NAME_SHOW || m_ZoneState == NAME_FADE_IN) {
                 m_ZoneState = NAME_FADE_OUT;
+            }
         }
         savedLastVehicleName = m_pVehicleName;
         m_pLastVehicleName = m_pVehicleName;
@@ -627,9 +643,9 @@ void CHud::GetRidOfAllHudMessages(uint8 arg0) {
 // 0x5893B0
 void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     const auto& weapon = ped->GetActiveWeapon();
-    const auto totalAmmo = weapon.m_nTotalAmmo;
-    const auto ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
-    const auto ammoInClip = weapon.m_nAmmoInClip;
+    const auto& totalAmmo = weapon.m_nTotalAmmo;
+    const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
+    const auto& ammoInClip = weapon.m_nAmmoInClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
         sprintf(gString, "%d", totalAmmo);
@@ -693,7 +709,7 @@ void CHud::DrawTripSkip() {
     rect.top    = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
     rect.right  = SCREEN_STRETCH_X(64.0f) + SCREEN_STRETCH_X(54.0f);
     rect.bottom = SCREEN_STRETCH_Y(64.0f) + SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
-    CHud::Sprites[5].Draw(rect, CRGBA(255, 255, 255, 255));
+    Sprites[5].Draw(rect, CRGBA(255, 255, 255, 255));
 
     CFont::SetBackground(false, false);
     CFont::SetScale(RsGlobal.maximumWidth * 0.0015625 * 0.3f, RsGlobal.maximumHeight * 0.002232143 * 0.7f);
@@ -737,9 +753,9 @@ void CHud::DrawWeaponIcon(CPed* ped, int32 x, int32 y, float alpha) {
         rect.right  = width  + x0;
         rect.bottom = height + y0;
 
-        CHud::Sprites[0].Draw(rect, CRGBA(255, 255, 255, alpha));
+        Sprites[0].Draw(rect, CRGBA(255, 255, 255, alpha));
     } else {
-        auto mi = CModelInfo::ms_modelInfoPtrs[modelId];
+        auto mi = CModelInfo::GetModelInfo(modelId);
         auto txd = CTxdStore::ms_pTxdPool->GetAt(mi->m_nTxdIndex);
 
         if (!txd)
@@ -782,7 +798,7 @@ void CHud::RenderBreathBar(int32 playerId, int32 x, int32 y) {
     if (m_ItemToFlash == 10 && (CTimer::GetFrameCounter() & 8) == 0)
         return;
 
-    CPlayerPed* player = FindPlayerPed(playerId);
+    auto* player = FindPlayerPed(playerId);
     CSprite2d::DrawBarChart(
         (float)x,
         (float)y,
@@ -806,7 +822,7 @@ void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
     if (m_ItemToFlash == 4 && (CTimer::GetFrameCounter() & 8) == 0)
         return;
 
-    if (player->m_fHealth < 10 && (CTimer::GetFrameCounter() & 8) == 0)
+    if ((int16)player->m_fHealth < 10 && (CTimer::GetFrameCounter() & 8) == 0)
         return;
 
     auto totalWidth = SCREEN_STRETCH_X((float)playerInfo->m_nMaxHealth * 109.0f) / CStats::GetFatAndMuscleModifier(STAT_MOD_10);
