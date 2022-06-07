@@ -72,29 +72,3 @@ Ret CallVirtualMethodAndReturn(C _this, Args... args) requires std::is_class_v<s
 }
 
 } // namespace plugin
-
-// vtable description - macro
-
-#define VTABLE_DESC(className, vtAddr, vtSize)                                                                                                                                     \
-    namespace plugin {                                                                                                                                                             \
-    template <> struct vtable_meta<className> {                                                                                                                                    \
-        static const unsigned int address = vtAddr;                                                                                                                                \
-        static const unsigned int size = vtSize;                                                                                                                                   \
-    };                                                                                                                                                                             \
-    }
-
-// custom object construction
-
-#define PLUGIN_NO_DEFAULT_CONSTRUCTION(className)                                                                                                                                  \
-    className() = delete;                                                                                                                                                          \
-    className(className const&) = delete;                                                                                                                                          \
-    className(className&&) = delete;                                                                                                                                               \
-    ~className() = delete;                                                                                                                                                         \
-    className& operator=(className&&) = delete;
-
-#define PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(className)                                                                                                                      \
-    className() = delete;                                                                                                                                                          \
-    className(className const&) = delete;                                                                                                                                          \
-    className(className&&) = delete;                                                                                                                                               \
-    virtual ~className() = delete;                                                                                                                                                 \
-    className& operator=(className&&) = delete;

@@ -14,6 +14,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;

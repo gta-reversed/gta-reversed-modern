@@ -319,6 +319,7 @@ public:
     // 0x541A60
     static bool UpdatePadsTillStable() { return true; }
     bool ArePlayerControlsDisabled() { return DisablePlayerControls != 0; }
+    bool DebugMenuJustPressed();
 };
 
 VALIDATE_SIZE(CPad, 0x134);

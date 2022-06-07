@@ -143,7 +143,7 @@ void CTaskSimpleDie::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x62FB40);
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
-    RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
     RH_ScopedVirtualInstall(GetTaskType, 0x62FA50);
     RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
     RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
