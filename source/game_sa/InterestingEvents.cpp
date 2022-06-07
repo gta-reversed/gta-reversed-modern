@@ -11,8 +11,8 @@ void CInterestingEvents::InjectHooks() {
     RH_ScopedClass(CInterestingEvents);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Constructor, 0x6023A0);
-    RH_ScopedInstall(Destructor, 0x856880);
+    // RH_ScopedInstall(Constructor, 0x6023A0);
+    // bad RH_ScopedInstall(Destructor, 0x856880);
     // RH_ScopedInstall(Add, 0x602590);
     // RH_ScopedInstall(ScanForNearbyEntities, 0x605A30);
     // RH_ScopedInstall(GetInterestingEvent, 0x6028A0);

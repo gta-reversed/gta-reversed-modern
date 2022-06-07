@@ -41,16 +41,7 @@ void CSpecialFX::Shutdown() {
         RwTextureDestroy(gpFinishFlagTex);
         gpFinishFlagTex = nullptr;
     }
-    if (CMirrors::pBuffer) {
-        RwRasterDestroy(CMirrors::pBuffer);
-        CMirrors::pBuffer = nullptr;
-    }
-    if (CMirrors::pZBuffer) {
-        RwRasterDestroy(CMirrors::pZBuffer);
-        CMirrors::pZBuffer = nullptr;
-    }
-    CMirrors::TypeOfMirror = 0;
-    CMirrors::MirrorFlags = 0;
+    CMirrors::ShutDown();
 }
 
 // unused function

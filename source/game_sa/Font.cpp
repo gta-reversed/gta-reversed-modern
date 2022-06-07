@@ -10,7 +10,7 @@
 
 #include "eLanguage.h"
 
-CFontChar (&setup)[9] = *(CFontChar(*)[9])0xC716B0;
+CFontChar (&FontRenderStateBuf)[9] = *(CFontChar(*)[9])0xC716B0;
 CFontChar* pEmptyChar = (CFontChar*)0xC716A8;
 
 CFontChar& CFont::RenderState = *(CFontChar*)0xC71AA0;
@@ -199,14 +199,15 @@ void CFont::Initialise() {
 // 0x7189B0
 void CFont::Shutdown()
 {
-    Sprite[0].Delete();
-    Sprite[1].Delete();
+    for (CSprite2d& sprite : Sprite) {
+        sprite.Delete();
+    }
 
     auto fontSlot = CTxdStore::FindTxdSlot("fonts");
     CTxdStore::RemoveTxdSlot(fontSlot);
 
-    for (CSprite2d& bs : ButtonSprite) {
-        bs.Delete();
+    for (CSprite2d& sprite : ButtonSprite) {
+        sprite.Delete();
     }
 
     auto buttonSlot = CTxdStore::FindTxdSlot("ps2btns");
@@ -234,7 +235,6 @@ void CFont::PrintChar(float x, float y, char character)
             17.0f * RenderState.m_fHeight + x,
             19.0f * RenderState.m_fHeight + y
         };
-            
 
         ButtonSprite[PS2Symbol].Draw(rt, { 255, 255, 255, RenderState.m_color.a });
 
@@ -505,14 +505,13 @@ void CFont::SetSlant(float value)
     m_fSlant = value;
 }
 
-// TODO: const CRGBA& color
 // 0x719430
 void CFont::SetColor(CRGBA color)
 {
     m_Color = color;
 
     if (m_fFontAlpha < 255.0f) {
-        m_Color.a = (uint8)((color.a * m_fFontAlpha) / 255.0f);
+        m_Color.a = (uint8)(float(color.a) * m_fFontAlpha / 255.0f);
     }
 }
 
@@ -558,14 +557,14 @@ void CFont::SetAlphaFade(float alpha)
     m_fFontAlpha = alpha;
 }
 
-// TODO: const CRGBA& color
 // 0x719510
 void CFont::SetDropColor(CRGBA color)
 {
     m_FontDropColor = color;
 
-    if (m_fFontAlpha < 255.0f)
-        m_FontDropColor.a = (uint8)(m_Color.a * m_fFontAlpha);
+    if (m_fFontAlpha < 255.0f) {
+        m_FontDropColor.a = (uint8)(float(m_Color.a) * m_fFontAlpha);
+    }
 }
 
 // 0x719570
@@ -596,7 +595,6 @@ void CFont::SetBackground(bool enable, bool includeWrap)
     m_bEnlargeBackgroundBox = includeWrap;
 }
 
-// TODO: const CRGBA& color
 // 0x7195E0
 void CFont::SetBackgroundColor(CRGBA color)
 {
@@ -624,8 +622,8 @@ void CFont::InitPerFrame()
     m_nFontShadow = 0;
     m_bNewLine = false;
     PS2Symbol = EXSYMBOL_NONE;
-    RenderState.m_wFontTexture = 0;
-    pEmptyChar = &setup[0];
+    RenderState.m_wFontTexture = 0; // todo: -1
+    pEmptyChar = &FontRenderStateBuf[0]; // FontRenderStatePointer.pRenderState
 
     CSprite::InitSpriteBuffer();
 }
@@ -731,7 +729,7 @@ void CFont::GetTextRect(CRect* rect, float x, float y, const char* text)
     }
 
     rect->bottom = y - 4.0f;
-    rect->top = y + 4.0f + (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
+    rect->top = y + 4.0f + GetHeight() * (float)GetNumberLines(x, y, text);
 }
 
 // 0x71A700
@@ -765,7 +763,7 @@ void CFont::PrintString(float x, float y, const char* text)
 // 0x71A820
 void CFont::PrintStringFromBottom(float x, float y, const char* text)
 {
-    float drawY = y - (m_Scale.y * 32.0f / 2.0f + m_Scale.y + m_Scale.y) * (float)GetNumberLines(x, y, text); // TODO: CFont::GetHeight
+    float drawY = y - GetHeight() * (float)GetNumberLines(x, y, text);
 
     if (m_fSlant != 0.0f)
         drawY -= (m_fSlantRefPoint.x - x) * m_fSlant + m_fSlantRefPoint.y;
@@ -795,6 +793,13 @@ float CFont::GetCharacterSize(uint8 letterId)
     } else {
         return ((float)gFontData[m_FontTextureId].m_unpropValue + (float)m_nFontOutlineSize) * m_Scale.x;
     }
+}
+
+// Android
+float CFont::GetHeight(bool a1) {
+    assert(a1 == false && "NOT IMPLEMENTED");
+    const float y = a1 ? 0.0f : m_Scale.y;
+    return y * 32.0f / 2.0f + y + y;
 }
 
 // 0x719670, original name unknown

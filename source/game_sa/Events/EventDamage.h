@@ -36,7 +36,7 @@ public:
 public:
     CEventDamage(const CEventDamage& event);
     CEventDamage(CEntity* source, uint32 startTime, eWeaponType weaponType, ePedPieceTypes pieceHit, uint8 direction, bool a7, bool bPedInVehicle);
-    ~CEventDamage();
+    ~CEventDamage() override;
 
     eEventType GetEventType() const override;
     int32 GetEventPriority() const override;

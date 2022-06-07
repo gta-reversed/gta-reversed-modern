@@ -692,9 +692,6 @@ public:
     bool HasDriver() const { return !!m_pDriver; }
     CVehicleAnimGroup& GetAnimGroup() const;
     AssocGroupId GetAnimGroupId() const;
-
-    bool IsAnyOfPassengersFollowerOfGroup(CPedGroup& group);
-
 private:
     friend void InjectHooksMain();
     static void InjectHooks();

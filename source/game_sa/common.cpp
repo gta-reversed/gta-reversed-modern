@@ -54,8 +54,6 @@ void InjectCommonHooks() {
     RH_ScopedNamespaceName("Common");
     RH_ScopedCategory("Common");
 
-    HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
-
     RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
     RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
     RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
@@ -133,6 +131,18 @@ void InjectCommonHooks() {
 
     RH_ScopedGlobalInstall(RemoveRefsCB, 0x7226D0);
     RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
+}
+
+void MessageLoop() {
+    tagMSG msg;
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+        if (msg.message == WM_QUIT) {
+            RsGlobal.quit = true;
+        } else {
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
 }
 
 // 0x56E010
@@ -827,15 +837,16 @@ void DeActivateDirectional() {
     RpLightSetFlags(pDirect, 0x0);
 }
 
-// unused
-// 0x735C90
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0) {
-    // used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
-    float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
+/*!
+ * @addr 0x735C90
+ * @param idx Color index 0..8
+ */
+void SetAmbientColoursToIndicateRoadGroup(int32 idx) {
+    // used to convert 0-255 to 0.0f-1.0f
 
-    AmbientLightColour.red   = IndicateR[arg0 % 7] * 1.0f / 255.0f;
-    AmbientLightColour.green = IndicateG[arg0 % 7] * 1.0f / 255.0f;
-    AmbientLightColour.blue  = IndicateB[arg0 % 7] * 1.0f / 255.0f;
+    AmbientLightColour.red   = (float)IndicateR[idx % 7] * 255.0f;
+    AmbientLightColour.green = (float)IndicateG[idx % 7] * 255.0f;
+    AmbientLightColour.blue  = (float)IndicateB[idx % 7] * 255.0f;
     RpLightSetColor(pAmbient, &AmbientLightColour);
 }
 
@@ -1273,8 +1284,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::ImguiDrawLoop();
-    CDebugMenu::ImGuiDrawMouse();
+    CDebugMenu::ImGuiDrawLoop();
 }
 
 // NOTSA
