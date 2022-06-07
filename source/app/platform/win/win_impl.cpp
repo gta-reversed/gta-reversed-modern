@@ -49,8 +49,10 @@ RwCamera* psCameraShowRaster(RwCamera* camera) {
     return RwCameraShowRaster(camera, PSGLOBAL(window), flags);
 }
 
+// our bug: Loading screens not displaying correctly when loading a game for the first time
 // 0x745270
 uint32 psTimer() {
+    return plugin::CallAndReturn<uint32, 0x745270>();
     return OS_TimeMS();
 }
 

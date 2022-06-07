@@ -132,6 +132,18 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
+void MessageLoop() {
+    tagMSG msg;
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+        if (msg.message == WM_QUIT) {
+            RsGlobal.quit = true;
+        } else {
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
+}
+
 // 0x56E010
 CVector FindPlayerCoors(int32 playerId) {
     if (CEntity* e = FindPlayerEntity(playerId))
