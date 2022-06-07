@@ -54,13 +54,13 @@ void CFileLoader::InjectHooks() {
 
     RH_ScopedOverloadedInstall(LoadCollisionFile, "Buffer", 0x538440, bool(*)(uint8*, uint32, uint8));
     RH_ScopedOverloadedInstall(LoadCollisionFile, "File", 0x5B4E60, void(*)(const char*, uint8));
-    RH_ScopedInstall(LoadCollisionFileFirstTime, 0x5B5000); 
+    RH_ScopedInstall(LoadCollisionFileFirstTime, 0x5B5000);
     RH_ScopedInstall(LoadCollisionModel, 0x537580);
     RH_ScopedInstall(LoadCollisionModelVer2, 0x537EE0);
     RH_ScopedInstall(LoadCollisionModelVer3, 0x537CE0);
     RH_ScopedInstall(LoadCollisionModelVer4, 0x537AE0);
 
-    RH_ScopedInstall(LoadAnimatedClumpObject, 0x5B40C0); 
+    RH_ScopedInstall(LoadAnimatedClumpObject, 0x5B40C0);
     RH_ScopedOverloadedInstall(LoadLine, "File", 0x536F80, char* (*)(FILESTREAM));
     RH_ScopedOverloadedInstall(LoadLine, "Bufer", 0x536FE0, char* (*)(char*&, int32&));
     RH_ScopedInstall(LoadCarPathNode, 0x5B4380);
@@ -217,7 +217,7 @@ char* CFileLoader::LoadLine(auto file) {
 // 0x536FE0
 // Load line from a text buffer
 // bufferIt - Iterator into buffer. It is modified by this function to point after the last character of this line
-// buffSize - Size of buffer. It is modified to repesent the size of the buffer remaining after the end of this line
+// buffSize - Size of buffer. It is modified to represent the size of the buffer remaining after the end of this line
 char* CFileLoader::LoadLine(char*& bufferIt, int32& buffSize) {
     if (buffSize <= 0 || !*bufferIt)
         return nullptr;
@@ -485,7 +485,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 
         auto mi = IsModelDFF(h.modelId) ? CModelInfo::GetModelInfo(h.modelId) : nullptr;
         if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(h.modelName)) {
-            auto colDef = CColStore::ms_pColPool->GetAt(colId); 
+            auto colDef = CColStore::ms_pColPool->GetAt(colId);
             mi = CModelInfo::GetModelInfo(h.modelName, colDef->m_nModelIdStart, colDef->m_nModelIdEnd);
         }
 
@@ -512,7 +512,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
 // 0x5B4E60
 void CFileLoader::LoadCollisionFile(const char* filename, uint8 colId) {
     uint8 (&buffer)[0x8000] = *(uint8(*)[0x8000])0xBC40D8; // 32 kB
-    
+
     using namespace ColHelpers;
 
     FileHeader header{};
@@ -562,16 +562,15 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
             return true; // Finished reading all data, but there's some padding left.
         }
 
-        auto& h = *reinterpret_cast<FileHeader*>(buffIt);
-        fileTotalSize = h.GetTotalSize();
+        auto& header = *reinterpret_cast<FileHeader*>(buffIt);
+        fileTotalSize = header.GetTotalSize();
+        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data");
 
-        assert(fileTotalSize <= buffRemainingSize && "Not enough data in buffer for col data"); // NOTSA
-
-        auto modelId = (int32)h.modelId;
+        auto modelId = (int32)header.modelId;
 
         auto mi = IsModelDFF(modelId) ? CModelInfo::GetModelInfo(modelId) : nullptr;
-        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(h.modelName)) {
-            mi = CModelInfo::GetModelInfo(h.modelName, &modelId);
+        if (!mi || mi->m_nKey != CKeyGen::GetUppercaseKey(header.modelName)) {
+            mi = CModelInfo::GetModelInfo(header.modelName, &modelId);
         }
 
         if (!mi) {
@@ -585,11 +584,11 @@ bool CFileLoader::LoadCollisionFileFirstTime(uint8* buff, uint32 buffSize, uint8
         }
 
         auto& cm = *new CColModel;
-        LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
+        LoadCollisionModelAnyVersion(header, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
         mi->SetColModel(&cm, true);
-        CColAccel::addCacheCol((PackedModelStartEnd)modelId, cm);  // NOTE/TODO: This cast looks weird, but there's a note about it above `PackedModelStartEnd`s definition.
+        CColAccel::addCacheCol(PackedModelStartEnd{ .modelId = modelId }, cm);
     }
 
     return true;
@@ -721,9 +720,9 @@ void CFileLoader::LoadCollisionModelVer2(uint8* buffer, uint32 dataSize, CColMod
                 p
                 + sizeof(CCollisionData)                // Must offset by this (See memory layout above)
                 + fileOffset
-                + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compnensate for it.
+                + sizeof(FileHeader::FileInfo::fourcc)  // All offsets are relative to this, but since it is already included in the header's size, so we gotta compensate for it.
                 - sizeof(FileHeader)                    // Offset includes these headers, but we haven't copied them into our memory
-                - sizeof(Header)     
+                - sizeof(Header)
             );
         };
         colDataPtr = fileOffset ? GetDataPtr() : nullptr;
@@ -1018,12 +1017,16 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
 
     if (objInstance->m_bUnderwater)
         newEntity->m_bUnderwater = true;
+
     if (objInstance->m_bTunnel)
         newEntity->m_bTunnel = true;
+
     if (objInstance->m_bTunnelTransition)
         newEntity->m_bTunnelTransition = true;
+
     if (objInstance->m_bRedundantStream)
         newEntity->m_bUnimportantStream = true;
+
     newEntity->m_nAreaCode = static_cast<eAreaCodes>(objInstance->m_nAreaCode);
     newEntity->m_nLodIndex = objInstance->m_nLodInstanceIndex;
 
@@ -1336,16 +1339,16 @@ void CFileLoader::LoadLevel(const char* levelFileName) {
             // us to use `std::function` which is just overkill in this case.
 
             using FnType = void(*)(const char*);
-            const struct { std::string_view id;  FnType fn; } functions[]{
-                {"IMG", [](const char* path) {
+            const struct { std::string_view id;  FnType fn; } functions[] {
+                { "IMG", [](const char* path) {
                     if (path != std::string_view{ "MODELS\\GTA_INT.IMG" }) {
                         CStreaming::AddImageToList(path, true);
                     }
                 }},
-                {"COLFILE", [](const char* path) { LoadCollisionFile(path + 2, 0); }}, // Gotta add 3 to the path, because we have to skip the `0` before the actual path
-                {"MODELFILE", LoadAtomicFile},
-                {"HIERFILE", LoadClumpFile},
-                {"IDE", LoadObjectTypes},
+                { "COLFILE", [](const char* path) { LoadCollisionFile(path + 2, 0); }}, // Gotta add 3 to the path, because we have to skip the `0` before the actual path
+                { "MODELFILE", LoadAtomicFile},
+                { "HIERFILE", LoadClumpFile},
+                { "IDE", LoadObjectTypes},
                 //{"SPLASH", [](const char*) {}} - Unused
             };
             for (const auto& v : functions) {
@@ -1749,6 +1752,8 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
         case 3:
             (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
             break;
+        default:
+            NOTSA_UNREACHABLE;
         }
     }
 
@@ -1825,7 +1830,7 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     // They've used strcmp all the way, and.. It's bad.
 
     const auto GetVehicleType = [&] {
-        constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
+        static constexpr struct { std::string_view name; eVehicleType type; } mapping[] = {
             { "car",     VEHICLE_TYPE_AUTOMOBILE },
             { "mtruck",  VEHICLE_TYPE_MTRUCK     },
             { "quad",    VEHICLE_TYPE_QUAD       },
@@ -1840,9 +1845,9 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
             { "trailer", VEHICLE_TYPE_TRAILER    },
         };
 
-        for (const auto& pair : mapping) {
-            if (pair.name == type) {
-                return pair.type;
+        for (const auto& [name, vtype] : mapping) {
+            if (name == type) {
+                return vtype;
             }
         }
 
@@ -1878,8 +1883,8 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
     mi->SetHandlingId(handlingName);
     mi->m_nWheelUpgradeClass = wheelUpgradeCls;
 
-    const auto GetVehicleClass = [&]{
-        constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
+    const auto GetVehicleClass = [&] {
+        static constexpr struct { std::string_view name; eVehicleClass cls; } mapping[] = {
             { "normal",      VEHICLE_CLASS_NORMAL      },
             { "poorfamily",  VEHICLE_CLASS_POORFAMILY  },
             { "richfamily",  VEHICLE_CLASS_RICHFAMILY  },
@@ -1895,9 +1900,9 @@ int32 CFileLoader::LoadVehicleObject(const char* line) {
             { "ignore",      VEHICLE_CLASS_IGNORE      },
         };
 
-        for (const auto& pair : mapping) {
-            if (pair.name == vehCls) {
-                return pair.cls;
+        for (const auto& [name, cls] : mapping) {
+            if (name == vehCls) {
+                return cls;
             }
         }
 
@@ -2062,7 +2067,7 @@ void CFileLoader::LoadScene(const char* filename) {
 
         } else {
             const auto FindSectionID = [&] {
-                const struct { std::string_view name; SectionID id; } mapping[]{
+                static const struct { std::string_view name; SectionID id; } mapping[]{
                     { "path", SectionID::PATH },
                     { "inst", SectionID::INST },
                     { "mult", SectionID::MULT },
@@ -2207,7 +2212,7 @@ void CFileLoader::LoadObjectTypes(const char* filename) {
             // Find out next section
 
             const auto FindSectionID = [&] {
-                const struct { std::string_view name; SectionID id; } mapping[]{
+                static const struct { std::string_view name; SectionID id; } mapping[]{
                     { "objs", SectionID::OBJS },
                     { "tobj", SectionID::TOBJ },
                     { "weap", SectionID::WEAP },

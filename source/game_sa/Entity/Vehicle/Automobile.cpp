@@ -16,6 +16,7 @@
 #include "Glass.h"
 #include "ModelIndices.h"
 #include "InterestingEvents.h"
+#include "VehicleRecording.h"
 #include "FxPrtMult.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
@@ -65,16 +66,16 @@ void CAutomobile::InjectHooks()
 
     RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6A2210);
     RH_ScopedVirtualInstall(IsComponentPresent, 0x6A2250);
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
     RH_ScopedVirtualInstall(IsOpenTopCar, 0x6A2350);
     RH_ScopedVirtualInstall(IsRoomForPedToLeaveCar, 0x6A3850);
     RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B3E90);
@@ -2184,59 +2185,66 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
 
     for (auto i = 0u; i < 4; i++) {
         const auto& wheelCP = m_wheelColPoint[i];
-        auto& wheelCompression = m_fWheelsSuspensionCompression[i];
+        const auto& springLen = m_aSuspensionSpringLength[i];
+        const auto& lineLen = m_aSuspensionLineLength[i];
+        auto& compression = m_fWheelsSuspensionCompression[i];
+        auto& rotation = m_wheelRotation[i];
 
-        const auto GetRemainingSuspensionCompression = [&, i] {
-            return (m_aSuspensionLineLength[i] - m_aSuspensionSpringLength[i]) / m_aSuspensionLineLength[i];
+        const auto GetRemainingSuspensionCompression = [&] {
+            return (lineLen - springLen) / lineLen;
         };
 
         switch (m_damageManager.GetWheelStatus((eCarWheel)i)) {
         case eCarWheelStatus::WHEEL_STATUS_MISSING:
-            wheelCompression = 1.f;
+            compression = 1.0f;
             break;
         case eCarWheelStatus::WHEEL_STATUS_BURST: {
             // The more opposite the speed is to the forward vector the bigger chance
             // The highest chance is when the speed is opposite to forward (ie.: It's backwards)
-            const auto val = (float)CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL * (speedToFwdRatio * 40.f + 98.f); // todo: rename, use GetRandomNumberInRange
-            if (val < 100.f) {
-                const auto compression = wheelCompression + GetRemainingSuspensionCompression() / 4.f;
-                wheelCompression = std::min(1.f, compression);
+            const auto val = CGeneral::GetRandomNumberInRange(0, int32(speedToFwdRatio * 40.0f) + 98);
+            if (val < 100) {
+                compression += GetRemainingSuspensionCompression() / 4.f;
+                compression = std::min(1.0f, compression);
             }
             break;
         }
         default: {
-            if (   wheelCompression >= 1.f
-                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != eAdhesionGroup::ADHESION_GROUP_SAND
+            if (   compression >= 1.0f
+                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != ADHESION_GROUP_SAND
                 || ModelIndices::IsRhino(m_nModelIndex)
             ) {
-                if (wheelCP.m_nSurfaceTypeB == eSurfaceType::SURFACE_RAILTRACK) {
-                    float wheelSizeFactor = 1.5f / (mi.GetSizeOfWheel((eCarWheel)i) / 2.f);
-                    if (wheelSizeFactor > 0.3f) { // Basically if wheelSize > 0.9
+                if (compression < 1.0f && wheelCP.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
+                    auto wheelSizeFactor = 1.5f / (mi.GetSizeOfWheel((eCarWheel)i) / 2.0f);
+                    if (speedToFwdRatio > 0.3f) {
                         wheelSizeFactor *= speedToFwdRatio / 0.3f;
                     }
 
-                    const auto wheelRotFactor      = m_wheelRotation[i] / wheelSizeFactor; // Some kind of contact surface factor perhaps?
-                    const auto wheelRotFactorFract = wheelRotFactor - std::floor(wheelRotFactor);
+                    auto wheelSizeInv = 1.0f / wheelSizeFactor;
+                    auto wheelRotFactor = wheelSizeInv * rotation;
+                    auto wheelRotFactorFract = wheelRotFactor - std::floor(wheelRotFactor);
 
-                    const auto timeSpeedRotFactor      = (CTimer::GetTimeStep() * m_wheelSpeed[i] + m_wheelRotation[i]) / wheelSizeFactor;
-                    const auto timeSpeedRotFactorFract = timeSpeedRotFactor - std::floor(timeSpeedRotFactor);
+                    auto timeSpeedRotFactor = (CTimer::GetTimeStep() * m_wheelSpeed[i] + rotation) * wheelSizeInv;
+                    auto timeSpeedRotFactorFract = timeSpeedRotFactor - std::floor(timeSpeedRotFactor);
 
-                    if (   m_wheelSpeed[i] > 0.f && timeSpeedRotFactorFract < wheelRotFactorFract
-                        || m_wheelSpeed[i] < 0.f && timeSpeedRotFactorFract > wheelRotFactorFract
+                    if (   m_wheelSpeed[i] > 0.0f && timeSpeedRotFactorFract < wheelRotFactorFract
+                        || m_wheelSpeed[i] < 0.0f && timeSpeedRotFactorFract > wheelRotFactorFract
                     ) {
-                        const auto compression = wheelCompression - GetRemainingSuspensionCompression() * 0.3f;
-                        wheelCompression = std::max(0.2f, compression);
+                        compression = std::max(0.2f, compression - GetRemainingSuspensionCompression() * 0.3f);
                     }
                 }
             } else {
-                const auto offroadFactor = handlingFlags.bOffroadAbility2 ? 0.15f :
-                                           handlingFlags.bOffroadAbility ? 0.2f : 0.3f;
+                float offroadFactor = 0.3f;
+                if (handlingFlags.bOffroadAbility2) {
+                    offroadFactor = 0.15f;
+                } else if (handlingFlags.bOffroadAbility) {
+                    offroadFactor = 0.2f;
+                }
 
                 auto adhesionFactor = 1.0f - speedToFwdRatio / 0.3f * 0.7f - CWeather::WetRoads * 0.7f;
                 adhesionFactor = std::max(0.4f, adhesionFactor);
 
-                const auto compression = offroadFactor * GetRemainingSuspensionCompression() * adhesionFactor + wheelCompression;
-                wheelCompression = std::min(compression, 1.0f);
+                compression += offroadFactor * GetRemainingSuspensionCompression() * adhesionFactor;
+                compression = std::min(compression, 1.0f);
             }
             break;
         }
@@ -4077,14 +4085,14 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
-                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_BURST);
+                    leftWheel, &m_fWheelBurnoutSpeed[leftWheel], &wheelState, WHEEL_STATUS_BURST);
             }
             else {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[leftWheel], contactPoints[leftWheel], m_nNumContactWheels,
                     thrust,
                     brake * brakeBias,
                     adhesion * tractionBias,
-                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_OK);
+                    leftWheel, &m_fWheelBurnoutSpeed[leftWheel], &wheelState, WHEEL_STATUS_OK);
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)
                 m_aWheelState[leftWheel] = WHEEL_STATE_NORMAL;
@@ -4127,7 +4135,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
-                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_BURST
+                    rightWheel, &m_fWheelBurnoutSpeed[rightWheel], &wheelState, WHEEL_STATUS_BURST
                );
             }
             else {
@@ -4135,7 +4143,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * tractionBias,
-                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_OK
+                    rightWheel, &m_fWheelBurnoutSpeed[rightWheel], &wheelState, WHEEL_STATUS_OK
                );
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)

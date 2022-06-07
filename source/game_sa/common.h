@@ -127,6 +127,8 @@ constexpr float SIN_PI         = 0.0f;              // sin(π);
 constexpr float COS_PI         = -1.0f;             // cos(π);
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
 
+constexpr float sq(float x) { return x * x; }
+
 struct SpriteFileName {
     const char* name;
     const char* alpha;
@@ -295,7 +297,7 @@ void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
 void ActivateDirectional();
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0);
+void SetAmbientColoursToIndicateRoadGroup(int32 idx);
 void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);

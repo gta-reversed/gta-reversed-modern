@@ -12,8 +12,6 @@ class CAnimBlendSequence;
 class CAnimBlendHierarchy;
 
 class CAnimBlendStaticAssociation {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION_VIRTUALBASE(CAnimBlendStaticAssociation)
-
 public:
     uint16               m_nNumBlendNodes;
     int16                m_nAnimId;
@@ -22,14 +20,17 @@ public:
     CAnimBlendSequence** m_pSequenceArray;
     CAnimBlendHierarchy* m_pHierarchy;
 
-    // vtable function #0 (destructor)
+public:
+    static void InjectHooks();
 
+    CAnimBlendStaticAssociation();
+    CAnimBlendStaticAssociation(RpClump* clump, CAnimBlendHierarchy* hier);
+    virtual ~CAnimBlendStaticAssociation();
+
+    void Init(RpClump* clump, CAnimBlendHierarchy* hier);
     void AllocateSequenceArray(int32 count);
     void FreeSequenceArray();
-    void Init(RpClump* clump, CAnimBlendHierarchy* hierarchy);
 
     auto GetHashKey() const noexcept { return m_pHierarchy->m_hashKey; }
 };
-
-VTABLE_DESC(CAnimBlendStaticAssociation, 0x85C6CC, 1);
 VALIDATE_SIZE(CAnimBlendStaticAssociation, 0x14);

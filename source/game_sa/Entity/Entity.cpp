@@ -20,14 +20,15 @@
 #include "TrafficLights.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
-    RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedVirtualInstall(Remove, 0x534AE0);
     RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
     RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);

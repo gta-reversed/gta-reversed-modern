@@ -49,7 +49,7 @@ public:
     void ResetStatistics();
     void ResetSoundEffects();
 
-    static void Restart();
+    void Restart();
 
     bool IsLoadingTuneActive();
     static bool IsRadioOn();

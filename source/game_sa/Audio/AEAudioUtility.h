@@ -18,10 +18,10 @@ public:
 
     static bool      GetBankAndSoundFromScriptSlotAudioEvent(int32* a1, int32* a2, int32* a3, int32 a4);
     static float     GetPiecewiseLinear(float x, int16 dataCount, float (*data)[2]);
-    static int64     GetCurrentTimeInMilliseconds();
+    static uint64    GetCurrentTimeInMilliseconds();
 
 private:
-    static int64& startTimeMs;
+    static uint64& startTimeMs;
     static float (&m_sfLogLookup)[50][2];
 
 private:

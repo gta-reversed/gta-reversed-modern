@@ -10,6 +10,7 @@
 
 #include "Occlusion.h"
 #include "PostEffects.h"
+#include "Shadows.h"
 #include "CarFXRenderer.h"
 
 #ifdef EXTRA_DEBUG_FEATURES

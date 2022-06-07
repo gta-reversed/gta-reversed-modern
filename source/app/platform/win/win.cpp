@@ -33,7 +33,7 @@ void Win32InjectHooks() {
     RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
     // RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
     RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    RH_ScopedGlobalInstall(psTimer, 0x745270);
+    // - RH_ScopedGlobalInstall(psTimer, 0x745270);
     // RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
     RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
     RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);

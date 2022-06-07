@@ -12,6 +12,7 @@
 #include "CreepingFire.h"
 #include "BulletInfo.h"
 #include "InterestingEvents.h"
+#include "Shadows.h"
 #include "FxPrtMult.h"
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
