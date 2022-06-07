@@ -66,7 +66,7 @@ constexpr uint32 MAX_IPL_ENTITY_INDEX_ARRAYS = 40;
 constexpr uint32 MAX_IPL_INSTANCES = 1000;
 
 static inline CEntity**& ppCurrIplInstance = *(CEntity***)0x8E3EFC;
-static inline uint32& NumIplEntityIndexArrays = *(uint32*)0x8E3F00;
+static inline int32& NumIplEntityIndexArrays = *(int32*)0x8E3F00;
 static inline std::array<CEntity**, 40>& IplEntityIndexArrays = *(std::array<CEntity**, 40>*)0x8E3F08; // Array of CEntity* array pointers
 static inline bool& gbIplsNeededAtPosn = *(bool*)0x8E3FA8;
 static inline CVector& gvecIplsNeededAtPosn = *(CVector*)0x8E3FD0;
