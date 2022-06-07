@@ -41,7 +41,7 @@ enum class eChannelState
     ERR = 3,
 };
 
-enum eResourceFirstID : uint32 {
+enum eResourceFirstID : int32 {
     // First ID of the resource
     RESOURCE_ID_DFF = 0,                                            // default: 0
     RESOURCE_ID_TXD = RESOURCE_ID_DFF + TOTAL_DFF_MODEL_IDS,        // default: 20000
@@ -77,14 +77,14 @@ enum class eModelType {
 // Helper functions to deal with modelID's
 
 
-inline bool IsModelDFF(uint32 model) { return eResourceFirstID::RESOURCE_ID_DFF <= model && model < eResourceFirstID::RESOURCE_ID_TXD; }
-inline bool IsModelTXD(uint32 model) { return eResourceFirstID::RESOURCE_ID_TXD <= model && model < eResourceFirstID::RESOURCE_ID_COL; }
-inline bool IsModelCOL(uint32 model) { return eResourceFirstID::RESOURCE_ID_COL <= model && model < eResourceFirstID::RESOURCE_ID_IPL; }
-inline bool IsModelIPL(uint32 model) { return eResourceFirstID::RESOURCE_ID_IPL <= model && model < eResourceFirstID::RESOURCE_ID_DAT; }
-inline bool IsModelDAT(uint32 model) { return eResourceFirstID::RESOURCE_ID_DAT <= model && model < eResourceFirstID::RESOURCE_ID_IFP; }
-inline bool IsModelIFP(uint32 model) { return eResourceFirstID::RESOURCE_ID_IFP <= model && model < eResourceFirstID::RESOURCE_ID_RRR; }
-inline bool IsModelRRR(uint32 model) { return eResourceFirstID::RESOURCE_ID_RRR <= model && model < eResourceFirstID::RESOURCE_ID_SCM; }
-inline bool IsModelSCM(uint32 model) { return eResourceFirstID::RESOURCE_ID_SCM <= model && model < eResourceFirstID::RESOURCE_ID_INTERNAL_1; }
+inline bool IsModelDFF(uint32 model) { return RESOURCE_ID_DFF <= model && model < RESOURCE_ID_TXD; }
+inline bool IsModelTXD(uint32 model) { return RESOURCE_ID_TXD <= model && model < RESOURCE_ID_COL; }
+inline bool IsModelCOL(uint32 model) { return RESOURCE_ID_COL <= model && model < RESOURCE_ID_IPL; }
+inline bool IsModelIPL(uint32 model) { return RESOURCE_ID_IPL <= model && model < RESOURCE_ID_DAT; }
+inline bool IsModelDAT(uint32 model) { return RESOURCE_ID_DAT <= model && model < RESOURCE_ID_IFP; }
+inline bool IsModelIFP(uint32 model) { return RESOURCE_ID_IFP <= model && model < RESOURCE_ID_RRR; }
+inline bool IsModelRRR(uint32 model) { return RESOURCE_ID_RRR <= model && model < RESOURCE_ID_SCM; }
+inline bool IsModelSCM(uint32 model) { return RESOURCE_ID_SCM <= model && model < RESOURCE_ID_INTERNAL_1; }
 
 inline eModelType GetModelType(uint32 model) {
     if (IsModelDFF(model))
@@ -118,24 +118,24 @@ inline eModelType GetModelType(uint32 model) {
 }
 
 // Turn relative IDs into absolute ones.
-inline uint32 DFFToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DFF + relativeId; }
-inline uint32 TXDToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_TXD + relativeId; }
-inline uint32 COLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_COL + relativeId; }
-inline uint32 IPLToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IPL + relativeId; }
-inline uint32 DATToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_DAT + relativeId; }
-inline uint32 IFPToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_IFP + relativeId; }
-inline uint32 RRRToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_RRR + relativeId; }
-inline uint32 SCMToModelId(uint32 relativeId) { return (uint32)eResourceFirstID::RESOURCE_ID_SCM + relativeId; }
+inline int32 DFFToModelId(int32 relativeId) { return RESOURCE_ID_DFF + relativeId; }
+inline int32 TXDToModelId(int32 relativeId) { return RESOURCE_ID_TXD + relativeId; }
+inline int32 COLToModelId(int32 relativeId) { return RESOURCE_ID_COL + relativeId; }
+inline int32 IPLToModelId(int32 relativeId) { return RESOURCE_ID_IPL + relativeId; }
+inline int32 DATToModelId(int32 relativeId) { return RESOURCE_ID_DAT + relativeId; }
+inline int32 IFPToModelId(int32 relativeId) { return RESOURCE_ID_IFP + relativeId; }
+inline int32 RRRToModelId(int32 relativeId) { return RESOURCE_ID_RRR + relativeId; }
+inline int32 SCMToModelId(int32 relativeId) { return RESOURCE_ID_SCM + relativeId; }
 
 // Turn absolute IDs into relative ones
-inline uint32 ModelIdToDFF(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DFF; }
-inline uint32 ModelIdToTXD(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_TXD; }
-inline uint32 ModelIdToCOL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_COL; }
-inline uint32 ModelIdToIPL(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IPL; }
-inline uint32 ModelIdToDAT(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_DAT; }
-inline uint32 ModelIdToIFP(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_IFP; }
-inline uint32 ModelIdToRRR(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_RRR; }
-inline uint32 ModelIdToSCM(uint32 absId) { return absId - (uint32)eResourceFirstID::RESOURCE_ID_SCM; }
+inline int32 ModelIdToDFF(int32 absId) { return absId - RESOURCE_ID_DFF; }
+inline int32 ModelIdToTXD(int32 absId) { return absId - RESOURCE_ID_TXD; }
+inline int32 ModelIdToCOL(int32 absId) { return absId - RESOURCE_ID_COL; }
+inline int32 ModelIdToIPL(int32 absId) { return absId - RESOURCE_ID_IPL; }
+inline int32 ModelIdToDAT(int32 absId) { return absId - RESOURCE_ID_DAT; }
+inline int32 ModelIdToIFP(int32 absId) { return absId - RESOURCE_ID_IFP; }
+inline int32 ModelIdToRRR(int32 absId) { return absId - RESOURCE_ID_RRR; }
+inline int32 ModelIdToSCM(int32 absId) { return absId - RESOURCE_ID_SCM; }
 
 struct tRwStreamInitializeData {
     uint8* m_pBuffer;

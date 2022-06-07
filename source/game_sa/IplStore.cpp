@@ -13,6 +13,8 @@
 
 int32& ms_currentIPLAreaCode = *(int32*)0x8E3EF8;
 
+// Izzotop: tested, but not reviewed
+
 void CIplStore::InjectHooks() {
     RH_ScopedClass(CIplStore);
     RH_ScopedCategoryGlobal();
@@ -128,8 +130,8 @@ void CIplStore::EnableDynamicStreaming(int32 iplSlotIndex, bool enable) {
 
 eAreaCodes ResolveAreaCode(int32 ec) {
     if (ec == -1) {
-        if (const auto pp = FindPlayerPed()) {
-            return pp->m_nAreaCode;
+        if (const auto player = FindPlayerPed()) {
+            return player->m_nAreaCode;
         }
         return (eAreaCodes)CGame::currArea;
     }
@@ -280,20 +282,6 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
         NOTSA_UNREACHABLE("Incorrect entity type");
     }
     }
-}
-
-/*!
- * @addr 0x5D5420
- */
-bool CIplStore::Save() {
-    return plugin::CallAndReturn<bool, 0x5D5420>();
-}
-
-/*!
- * @addr 0x5D54A0
- */
-bool CIplStore::Load() {
-    return plugin::CallAndReturn<bool, 0x5D54A0>();
 }
 
 /*!
@@ -501,9 +489,9 @@ bool CIplStore::LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSiz
  * @addr 0x405170
  */
 void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirection) {
-    plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
+    return plugin::Call<0x405170, CVector, bool>(posn, bAvoidLoadInPlayerVehicleMovingDirection);
 
-    /*if (CStreaming::ms_disableStreaming) {
+    if (CStreaming::ms_disableStreaming) {
         return;
     }
 
@@ -523,8 +511,6 @@ void CIplStore::LoadIpls(CVector posn, bool bAvoidLoadInPlayerVehicleMovingDirec
     //
     // Above code should be okay, but code below is a mess.
     //
-
-    */
 }
 
 /*!
@@ -549,7 +535,8 @@ void CIplStore::RemoveAllIpls() {
  * @addr 0x404B20
  */
 void CIplStore::RemoveIpl(int32 iplSlotIndex) {
-    const auto& def = *ms_pPool->GetAt(iplSlotIndex);
+    auto def = ms_pPool->GetAt(iplSlotIndex);
+    def->field_2D = false;
 
     const auto ProcessPool = [iplSlotIndex]<typename PoolT>(PoolT& pool, int32 minId, int32 maxId) {
         for (auto i = minId; i < maxId; i++) {
@@ -558,7 +545,7 @@ void CIplStore::RemoveIpl(int32 iplSlotIndex) {
                 continue;
 
             if (entity->m_nIplIndex == iplSlotIndex) {
-                if constexpr (std::is_same_v<PoolT::base_type, CObject>) {
+                if constexpr (std::is_same_v<PoolT, CObjectPool>) {
                     if (entity->m_pDummyObject) {
                         CWorld::Add(entity->m_pDummyObject);
                     }
@@ -571,11 +558,11 @@ void CIplStore::RemoveIpl(int32 iplSlotIndex) {
     };
 
     // In same order as originally
-    ProcessPool(*GetBuildingPool(), def.m_nMinBuildingId, def.m_nMaxBuildingId);
-    ProcessPool(*GetObjectPool(),   0,                    GetObjectPool()->GetSize());
-    ProcessPool(*GetDummyPool(),    def.m_nMinDummyId,    def.m_nMaxDummyId);
+    ProcessPool(*GetBuildingPool(), def->m_nMinBuildingId, def->m_nMaxBuildingId);
+    ProcessPool(*GetObjectPool(),   0,                     GetObjectPool()->GetSize());
+    ProcessPool(*GetDummyPool(),    def->m_nMinDummyId,    def->m_nMaxDummyId);
 
-    CTheCarGenerators::RemoveCarGenerators((uint8_t)iplSlotIndex);
+    CTheCarGenerators::RemoveCarGenerators((uint8)iplSlotIndex);
 }
 
 /*!
@@ -594,21 +581,21 @@ void CIplStore::RemoveIplAndIgnore(int32 iplSlotIndex) {
  * @addr 0x405B60
  */
 void CIplStore::RemoveIplSlot(int32 iplSlotIndex) {
-    auto& def = *ms_pPool->GetAt(iplSlotIndex);
-    if (def.field_2D) {
+    auto def = ms_pPool->GetAt(iplSlotIndex);
+    if (def->field_2D) {
         RemoveIpl(iplSlotIndex);
     }
-    ms_pQuadTree->DeleteItem(&def);
-    ms_pPool->Delete(&def);
+    ms_pQuadTree->DeleteItem(def);
+    ms_pPool->Delete(def);
 }
 
 /*!
  * @addr 0x4058D0
  */
 void CIplStore::RemoveIplWhenFarAway(int32 iplSlotIndex) {
-    auto& def = *ms_pPool->GetAt(iplSlotIndex);
-    def.m_bDisableDynamicStreaming = false;
-    def.field_30 = true;
+    auto def = ms_pPool->GetAt(iplSlotIndex);
+    def->m_bDisableDynamicStreaming = false;
+    def->field_30 = true;
 }
 
 /*!
@@ -658,7 +645,7 @@ void CIplStore::SetIplsRequired(const CVector& posn, int32 gameArea) {
     ms_currentIPLAreaCode = ResolveAreaCode(gameArea);
 
     const auto GetCallback = [&] {
-        if (ms_currentIPLAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD && posn.z >= 900.f) {
+        if (ms_currentIPLAreaCode != AREA_CODE_NORMAL_WORLD && posn.z >= 900.f) {
             return SetIfIplIsRequired;
         } else if (ms_currentIPLAreaCode == CGame::currArea) {
             return SetIfInteriorIplIsRequired;
@@ -733,6 +720,20 @@ int32 CIplStore::SetupRelatedIpls(const char* iplFilePath, int32 entityArraysInd
 }
 
 /*!
+ * @addr 0x5D5420
+ */
+bool CIplStore::Save() {
+    return plugin::CallAndReturn<bool, 0x5D5420>();
+}
+
+/*!
+ * @addr 0x5D54A0
+ */
+bool CIplStore::Load() {
+    return plugin::CallAndReturn<bool, 0x5D54A0>();
+}
+
+/*!
  * @addr 0x4045F0
  * @brief Callback used in `SetIplsRequired`
  */
@@ -773,7 +774,7 @@ void SetIfIplIsRequiredReducedBB(const CVector2D& posn, void* data) {
     auto& def = *static_cast<IplDef*>(data);
 
     if (def.m_boundBox.IsPointInside(posn, -160.f)) {
-        if (ms_currentIPLAreaCode != eAreaCodes::AREA_CODE_NORMAL_WORLD) {
+        if (ms_currentIPLAreaCode != AREA_CODE_NORMAL_WORLD) {
             if (!def.m_bInterior) {
                 return;
             }

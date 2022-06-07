@@ -37,8 +37,6 @@ public:
     static int32 GetNewIplEntityIndexArray(int32 entitiesCount);
     static bool HaveIplsLoaded(const CVector& coords, int32 playerNumber = -1);
     static void IncludeEntity(int32 iplSlotIndex, CEntity* entity);
-    static bool Save();
-    static bool Load();
     static void LoadAllRemainingIpls();
     static bool LoadIpl(int32 iplSlotIndex, char* data, int32 dataSize);
     static bool LoadIplBoundingBox(int32 iplSlotIndex, char* data, int32 dataSize);
@@ -54,9 +52,10 @@ public:
     static void SetIplsRequired(const CVector& posn, int32 playerNumber = -1);
     static void SetIsInterior(int32 iplSlotIndex, bool isInterior);
     static int32 SetupRelatedIpls(const char* iplName, int32 entityArraysIndex, CEntity** instances);
+    static bool Save();
+    static bool Load();
 
-    // 0x59EB20
-    inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming; }
+    inline static bool HasDynamicStreamingDisabled(int32 iplSlotIndex) { return GetInSlot(iplSlotIndex)->m_bDisableDynamicStreaming; } // 0x59EB20
 
     // NOTSA
     static IplDef* GetInSlot(int32 slot) { return ms_pPool->GetAt(slot); }
