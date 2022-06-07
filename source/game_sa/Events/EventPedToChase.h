@@ -16,14 +16,5 @@ public:
     int32 GetLifeTime() override { return 0; }
     CEvent* Clone() override;
     bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventPedToChase* Constructor(CPed* ped);
-
-    CEvent* Clone_Reversed();
 };
-
 VALIDATE_SIZE(CEventPedToChase, 0x10);

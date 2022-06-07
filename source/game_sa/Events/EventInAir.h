@@ -4,8 +4,8 @@
 
 class CEventInAir : public CEvent {
 public:
-    CEventInAir() {};
-    ~CEventInAir() {};
+    CEventInAir() = default;
+    ~CEventInAir() override = default;
 
     eEventType GetEventType() const override { return EVENT_IN_AIR; }
     int32 GetEventPriority() const override { return 61; }
@@ -28,7 +28,7 @@ public:
 
 public:
     CEventStuckInAir(CPed* ped);
-    ~CEventStuckInAir();
+    ~CEventStuckInAir() override;
 
     eEventType GetEventType() const override { return EVENT_STUCK_IN_AIR; }
     int32 GetEventPriority() const override;

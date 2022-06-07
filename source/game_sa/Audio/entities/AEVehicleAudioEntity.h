@@ -22,7 +22,7 @@ enum eVehicleSoundType : int8 {
     VEHICLE_SOUND_BOAT             = 0x3,
     VEHICLE_SOUND_HELI             = 0x4,
     VEHICLE_SOUND_PLANE            = 0x5,
-    VEHICLE_SOUND_NON_VEH          = 0x6,
+    VEHICLE_SOUND_NON_VEH          = 0x6, // SEA_PLANE
     VEHICLE_SOUND_USED_BY_NONE_VEH = 0x7,
     VEHICLE_SOUND_TRAIN            = 0x8,
     VEHICLE_SOUND_TRAILER          = 0x9,

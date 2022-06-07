@@ -17,6 +17,7 @@
 #include "Fx.h"
 #include "BreakManager_c.h"
 #include "BoneNodeManager_c.h"
+#include "Shadows.h"
 // todo: #include "ShadowManager.h"
 #include "PedType.h"
 #include "IKChainManager_c.h"
@@ -41,6 +42,10 @@
 #include "LoadingScreen.h"
 #include "GridRef.h"
 #include "MenuSystem.h"
+#include "RealTimeShadowManager.h"
+#include "VehicleRecording.h"
+#include "ColAccel.h"
+#include "app.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
 int32& CGame::currLevel = *reinterpret_cast<int32*>(0xB7290C);
@@ -67,7 +72,7 @@ void CGame::InjectHooks() {
     // RH_ScopedInstall(InitialiseEssentialsAfterRW, 0x5BA160);
     RH_ScopedInstall(InitialiseOnceBeforeRW, 0x53BB50);
     // RH_ScopedInstall(InitialiseRenderWare, 0x5BD600);
-    // RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
+    RH_ScopedInstall(InitialiseWhenRestarting, 0x53C680);
     // RH_ScopedInstall(Process, 0x53BEE0);
     // RH_ScopedInstall(ReInitGameObjectVariables, 0x53BCF0);
     // RH_ScopedInstall(ReloadIPLs, 0x53BED0);
@@ -152,7 +157,7 @@ void CGame::ShutDownForRestart() {
     for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
         CWorld::Players[i].Clear();
     }
-    
+
     memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
@@ -446,7 +451,60 @@ bool CGame::InitialiseRenderWare() {
 
 // 0x53C680
 void CGame::InitialiseWhenRestarting() {
-    plugin::Call<0x53C680>();
+    const auto color = CRGBA(255, 255, 255, 255); // unused
+
+    CTimer::Initialise();
+    CEventScanner::m_sDeadPedWalkingTimer = 0;
+
+    if (FrontEndMenuManager.m_bLoadingData) {
+        FrontEndMenuManager.MessageScreen("FELD_WR", true, false);
+        if (FrontEndMenuManager.m_bLoadingData) {
+            CGenericGameStorage::RestoreForStartLoad();
+            CStreaming::RemoveBigBuildings();
+        }
+    }
+
+    CGame::ReInitGameObjectVariables();
+    CTimeCycle::InitForRestart();
+    CWeaponEffects::Init();
+    CPlane::InitPlaneGenerationAndRemoval();
+
+    if (FrontEndMenuManager.m_bLoadingData) {
+        FrontEndMenuManager.m_bLoadingData = false;
+        CGenericGameStorage::InitRadioStationPositionList();
+        bool loaded = false;
+        if (CGenericGameStorage::GenericLoad(loaded)) {
+            CTrain::InitTrains();
+        } else {
+            for (auto i = 50; i > 0; --i) {
+                MessageLoop();
+                if (loaded) {
+                    FrontEndMenuManager.MessageScreen("FES_LOC", true, false);
+                } else {
+                    FrontEndMenuManager.MessageScreen("FED_LFL", true, false);
+                }
+            }
+            TheCamera.SetFadeColour(0, 0, 0);
+            CGame::ShutDownForRestart();
+            CTimer::Stop();
+            CTimer::Initialise();
+            FrontEndMenuManager.m_bLoadingData = false;
+            CGame::ReInitGameObjectVariables();
+            CGame::currLevel = 0;
+            CGame::bMissionPackGame = 0;
+            CCollision::SortOutCollisionAfterLoad();
+        }
+    }
+    CTimer::Update();
+
+    AudioEngine.ResetSoundEffects();
+    AudioEngine.Restart();
+    AudioEngine.SetMusicMasterVolume(FrontEndMenuManager.m_nRadioVolume);
+    AudioEngine.SetEffectsMasterVolume(FrontEndMenuManager.m_nSfxVolume);
+    AudioEngine.SetBassEnhanceOnOff(FrontEndMenuManager.m_bRadioEq);
+    AudioEngine.SetRadioAutoRetuneOnOff(FrontEndMenuManager.m_bRadioAutoSelect);
+    AudioEngine.InitialiseRadioStationID(FrontEndMenuManager.m_nRadioStation);
+    D3DResourceSystem::SetUseD3DResourceBuffering(true);
 }
 
 // 0x53BEE0
@@ -475,7 +533,7 @@ void CGame::ReInitGameObjectVariables() {
     CHud::ReInitialise();
     CRadar::Initialise();
     CCarCtrl::ReInit();
-    // todo: ThePaths.ReInit();
+    ThePaths.ReInit();
     CTimeCycle::Initialise();
     CPopCycle::Initialise();
     CDraw::SetFOV(120.0f);
