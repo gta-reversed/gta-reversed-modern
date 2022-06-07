@@ -232,7 +232,7 @@ int32 CIplStore::GetNewIplEntityIndexArray(int32 entitiesCount) {
  */
 bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
     return plugin::CallAndReturn<bool, 0x405600, const CVector&, int32>(coords, playerNumber);
-    /*
+
     // Can't use `ms_pPool->GetAllValid()` here, because we must ignore the first slot (whenever it's valid or not).
     for (auto slot = 1; slot < TOTAL_IPL_MODEL_IDS; slot++) {
        auto def = ms_pPool->GetAt(slot);
@@ -240,22 +240,21 @@ bool CIplStore::HaveIplsLoaded(const CVector& coords, int32 playerNumber) {
            continue;
        }
 
-        if (!def.m_bLoadRequest) {
+        if (!def->m_bLoadRequest) {
             continue;
         }
 
-        if (def.m_boundBox.IsPointInside(coords, -190.f) && !def.field_2D && !def.m_bDisableDynamicStreaming) {
+        if (def->m_boundBox.IsPointInside(coords, -190.f) && !def->field_2D && !def->m_bDisableDynamicStreaming) {
             // Stuff from 0x4056B9 should go here
-            // Should probably use a lambad here
+            // Should probably use a lambda here
             // Also should figure out what field_2D is, otherwise this doesn't make a lot of sense.
 
             return false;
         } else {
-            def.m_bLoadRequest = false;
+            def->m_bLoadRequest = false;
         }
     }
     return true;
-    */
 }
 
 /*!
@@ -287,14 +286,14 @@ void CIplStore::IncludeEntity(int32 iplSlotIndex, CEntity* entity) {
  * @addr 0x5D5420
  */
 bool CIplStore::Save() {
-    plugin::Call<0x5D5420>();
+    return plugin::CallAndReturn<bool, 0x5D5420>();
 }
 
 /*!
  * @addr 0x5D54A0
  */
 bool CIplStore::Load() {
-    plugin::Call<0x5D54A0>();
+    return plugin::CallAndReturn<bool, 0x5D54A0>();
 }
 
 /*!

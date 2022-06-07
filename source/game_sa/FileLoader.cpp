@@ -1753,7 +1753,7 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
             (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
             break;
         default:
-            NOTSA_UNREACHABLE;
+            NOTSA_UNREACHABLE();
         }
     }
 

@@ -140,7 +140,7 @@ CRGBA tBrightLight::GetColorRGBA() const {
         return { 255, rnd, rnd, GetAlpha() };
 
     default: { // NOTSA
-        NOTSA_UNREACHABLE;
+        NOTSA_UNREACHABLE();
         return { 255, 255, 255, 255 }; // Shouldn't reach this point.. in theory that is..
     }
     }
