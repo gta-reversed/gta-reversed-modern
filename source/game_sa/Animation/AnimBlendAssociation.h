@@ -41,9 +41,40 @@ public:
     }
 };
 
+class CAnimBlendLink {
+public:
+    CAnimBlendLink* next{};
+    CAnimBlendLink* prev{};
+
+    CAnimBlendLink() = default;
+
+    void Init() {
+        next = nullptr;
+        prev = nullptr;
+    }
+
+    void Prepend(CAnimBlendLink* link) {
+        if (next) {
+            next->prev = link;
+        }
+        link->next = next;
+        link->prev = this;
+        next = link;
+    }
+
+    void Remove() {
+        if (prev) {
+            prev->next = next;
+        }
+        if (next) {
+            next->prev = prev;
+        }
+        Init();
+    }
+};
+
 struct SClumpAnimAssoc {
-    SClumpAnimAssoc*     m_pNext;
-    SClumpAnimAssoc*     m_pPrevious;
+    CAnimBlendLink       m_Link;
     uint16               m_nNumBlendNodes;
     int16                m_nAnimGroup;
     CAnimBlendNode*      m_pNodeArray;
@@ -100,6 +131,18 @@ public:
             m_nFlags |= (int)flag;
         else
             m_nFlags &= ~(int)flag;
+    }
+
+    [[nodiscard]] bool IsRunning()        const { return (m_nFlags & ANIMATION_STARTED) != 0; }
+    [[nodiscard]] bool IsRepeating()      const { return (m_nFlags & ANIMATION_LOOPED) != 0; }
+    [[nodiscard]] bool IsPartial()        const { return (m_nFlags & ANIMATION_PARTIAL) != 0; }
+    [[nodiscard]] bool IsMovement()       const { return (m_nFlags & ANIMATION_MOVEMENT) != 0; }
+    [[nodiscard]] bool HasTranslation()   const { return (m_nFlags & ANIMATION_TRANSLATE_X) != 0; }
+    [[nodiscard]] bool HasXTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_Y) != 0; }
+    [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
+
+    static CAnimBlendAssociation* FromLink(CAnimBlendLink* link) {
+        return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
     }
 
 private:

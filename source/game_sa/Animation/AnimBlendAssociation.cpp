@@ -31,14 +31,12 @@ CAnimBlendAssociation::CAnimBlendAssociation() {
     m_fTimeStep = 0.0f;
     m_nAnimId = -1;
     m_nFlags = 0;
-    m_nCallbackType = ANIMBLENDCALLBACK_NONE;
-    m_pNext = nullptr;
-    m_pPrevious = nullptr;
+    m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
+    m_pCallbackFunc, m_pCallbackData = nullptr; // NOTSA
 }
 
 // 0x4CEFC0
-CAnimBlendAssociation::CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {
-    CAnimBlendAssociation();
+CAnimBlendAssociation::CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy) : CAnimBlendAssociation() {
     Init(clump, animHierarchy);
 }
 
@@ -50,9 +48,7 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation& assoc) {
     m_fCurrentTime = 0.0f;
     m_fSpeed = 1.0f;
     m_fTimeStep = 0.0f;
-    m_nCallbackType = ANIMBLENDCALLBACK_NONE;
-    m_pNext = nullptr;
-    m_pPrevious = nullptr;
+    m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
     Init(assoc);
     if ((m_nFlags & ANIMATION_BLOCK_REFERENCED) == 0) {
         CAnimManager::AddAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
@@ -68,9 +64,7 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc)
     m_fCurrentTime = 0.0f;
     m_fSpeed = 1.0f;
     m_fTimeStep = 0.0f;
-    m_nCallbackType = ANIMBLENDCALLBACK_NONE;
-    m_pNext = nullptr;
-    m_pPrevious = nullptr;
+    m_nCallbackType = ANIM_BLEND_CALLBACK_NONE;
     Init(assoc);
     if ((m_nFlags & ANIMATION_BLOCK_REFERENCED) == 0) {
         CAnimManager::AddAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
@@ -82,12 +76,14 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc)
 CAnimBlendAssociation::~CAnimBlendAssociation() {
     if (m_pNodeArray)
         CMemoryMgr::FreeAlign(m_pNodeArray);
-    if (m_pPrevious)
-        m_pPrevious->m_pNext = m_pNext;
-    if (m_pNext)
-        m_pNext->m_pPrevious = m_pPrevious;
-    m_pNext = nullptr;
-    m_pPrevious = nullptr;
+    if (m_Link.prev) {
+        m_Link.prev->next = m_Link.next;
+    }
+    if (m_Link.next) {
+        m_Link.next->prev = m_Link.prev;
+    }
+    m_Link.next = nullptr;
+    m_Link.prev = nullptr;
     if (m_nFlags & ANIMATION_BLOCK_REFERENCED) {
         CAnimManager::RemoveAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
     }
@@ -157,6 +153,13 @@ void CAnimBlendAssociation::AllocateAnimBlendNodeArray(int32 count) {
     plugin::CallMethod<0x4CE9F0, CAnimBlendAssociation*, int32>(this, count);
 }
 
+// 0x4CEA40
+void CAnimBlendAssociation::FreeAnimBlendNodeArray() {
+    if (m_pNodeArray) {
+        CMemoryMgr::FreeAlign(m_pNodeArray);
+    }
+}
+
 // 0x4CEBA0
 void CAnimBlendAssociation::SetBlend(float blendAmount, float blendDelta) {
     m_fBlendAmount = blendAmount;
@@ -175,14 +178,14 @@ void CAnimBlendAssociation::SetCurrentTime(float currentTime) {
 
 // 0x4CEBC0
 void CAnimBlendAssociation::SetDeleteCallback(void (*callback)(CAnimBlendAssociation*, void*), void* data) {
-    m_nCallbackType = ANIMBLENDCALLBACK_DELETE;
+    m_nCallbackType = ANIM_BLEND_CALLBACK_DELETE;
     m_pCallbackFunc = callback;
     m_pCallbackData = data;
 }
 
 // 0x4CEBE0
 void CAnimBlendAssociation::SetFinishCallback(void (*callback)(CAnimBlendAssociation*, void*), void* data) {
-    m_nCallbackType = ANIMBLENDCALLBACK_FINISH;
+    m_nCallbackType = ANIM_BLEND_CALLBACK_FINISH;
     m_pCallbackFunc = callback;
     m_pCallbackData = data;
 }
