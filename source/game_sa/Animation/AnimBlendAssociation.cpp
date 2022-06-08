@@ -54,9 +54,9 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendAssociation& assoc) {
     m_pNext = nullptr;
     m_pPrevious = nullptr;
     Init(assoc);
-    if ((m_nFlags & ANIM_FLAG_BLOCK_REFERENCED) == 0) {
+    if ((m_nFlags & ANIMATION_BLOCK_REFERENCED) == 0) {
         CAnimManager::AddAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
-        m_nFlags |= ANIM_FLAG_BLOCK_REFERENCED;
+        m_nFlags |= ANIMATION_BLOCK_REFERENCED;
     }
 }
 
@@ -72,9 +72,9 @@ CAnimBlendAssociation::CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc)
     m_pNext = nullptr;
     m_pPrevious = nullptr;
     Init(assoc);
-    if ((m_nFlags & ANIM_FLAG_BLOCK_REFERENCED) == 0) {
+    if ((m_nFlags & ANIMATION_BLOCK_REFERENCED) == 0) {
         CAnimManager::AddAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
-        m_nFlags |= ANIM_FLAG_BLOCK_REFERENCED;
+        m_nFlags |= ANIMATION_BLOCK_REFERENCED;
     }
 }
 
@@ -88,8 +88,9 @@ CAnimBlendAssociation::~CAnimBlendAssociation() {
         m_pNext->m_pPrevious = m_pPrevious;
     m_pNext = nullptr;
     m_pPrevious = nullptr;
-    if (m_nFlags & ANIM_FLAG_BLOCK_REFERENCED)
+    if (m_nFlags & ANIMATION_BLOCK_REFERENCED) {
         CAnimManager::RemoveAnimBlockRef(m_pHierarchy->m_nAnimBlockId);
+    }
 }
 
 CAnimBlendAssociation* CAnimBlendAssociation::Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy) {

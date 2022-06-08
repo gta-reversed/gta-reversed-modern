@@ -159,7 +159,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
     ) {
         player->PlayerHasJustAttackedSomeone();
     }
-    
+
     if (player->m_pFire || !weaponInfo->flags.b1stPerson) {
         if (!pad->GetTarget() && weaponType == WEAPON_RLAUNCHER_HS) {
             playerData->m_nFireHSMissilePressedTime = 0;
@@ -616,7 +616,7 @@ PED_WEAPON_AIMING_CODE:
                 player->ClearWeaponTarget();
                 playerData->m_bFreeAiming = 1;
             }
-            
+
             if (player->m_pTargetedObject) {
                 if (pad->ShiftTargetLeftJustDown()) {
                     player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
@@ -765,7 +765,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
-                if (animAssoc->m_nFlags & ANIM_FLAG_200) {
+                if (animAssoc->m_nFlags & ANIMATION_200) {
                     animAssoc->m_fBlendDelta = -8.0f;
                 }
             }
@@ -797,7 +797,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             };
             auto                   animation = animations[randomNumber];
             CAnimBlendAssociation* animNewAssoc = CAnimManager::BlendAnimation(player->m_pRwClump, animation.assoc, animation.animId, 8.0f);
-            animNewAssoc->m_nFlags |= ANIM_FLAG_200;
+            animNewAssoc->m_nFlags |= ANIMATION_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
             if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
@@ -940,7 +940,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_RUN, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_RUN;
             } else {
@@ -948,7 +948,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_WALK, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_WALK;
             }
@@ -956,7 +956,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             player->m_nSwimmingMoveState = pedMoveState;
         } else if (pedMoveBlendRatio > 0.5f) {
             auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
-            pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+            pNewAnimation->m_nFlags |= ANIMATION_STARTED;
             player->m_pPlayerData->m_fMoveBlendRatio = 1.0f;
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;

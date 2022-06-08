@@ -382,7 +382,7 @@ void CTaskSimpleHoldEntity::FinishAnimHoldEntityCB(CAnimBlendAssociation* animAs
 // 0x692FF0
 void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
     if (m_pAnimBlendHierarchy) {
-        m_animFlags |= ANIM_FLAG_ADD_TO_BLEND | ANIM_FLAG_FREEZE_LAST_FRAME | ANIM_FLAG_PARTIAL;
+        m_animFlags |= ANIMATION_ADD_TO_BLEND | ANIMATION_FREEZE_LAST_FRAME | ANIMATION_PARTIAL;
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_pAnimBlendHierarchy, m_animFlags, 4.0f);
     }
     else {
@@ -398,9 +398,9 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
             m_pAnimBlock = animBlock;
         }
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAnimGroupId, m_nAnimId, 4.0f);
-        m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+        m_pAnimBlendAssociation->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
         if (GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
-            m_pAnimBlendAssociation->m_nFlags |= ANIM_FLAG_ADD_TO_BLEND;
+            m_pAnimBlendAssociation->m_nFlags |= ANIMATION_ADD_TO_BLEND;
     }
     if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
         m_pAnimBlendAssociation->SetFinishCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);

@@ -408,10 +408,10 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_WALK:
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
-            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIM_FLAG_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIM_FLAG_PARTIAL)) {
-                if ((assoc->m_nFlags & ANIM_FLAG_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
+                if ((assoc->m_nFlags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                     assoc->m_fBlendDelta = -2.f;
-                    assoc->SetFlag(ANIM_FLAG_FREEZE_LAST_FRAME, true);
+                    assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
                 }
             }
 
@@ -702,8 +702,8 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, false);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, false);
         }
     }
 }
@@ -713,8 +713,8 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, true);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, true);
         }
     }
 }
@@ -2200,13 +2200,13 @@ void CPed::PlayFootSteps() {
     CAnimBlendAssociation* walkAssoc{};
     auto* lastAssoc = &anim;
     do { // 0x5E58A1
-        if (lastAssoc->m_nFlags & ANIM_FLAG_WALK) {
+        if (lastAssoc->m_nFlags & ANIMATION_WALK) {
             walkBlendTotal += lastAssoc->m_fBlendAmount;
             walkAssoc = lastAssoc;
         } else {
-            if ((lastAssoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+            if ((lastAssoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
-                    if (lastAssoc->m_nFlags & ANIM_FLAG_PARTIAL || bIsDucking) {
+                    if (lastAssoc->m_nFlags & ANIMATION_PARTIAL || bIsDucking) {
                         idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
@@ -3218,8 +3218,8 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
-            if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL)) {
+            assoc->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((assoc->m_nFlags & ANIMATION_PARTIAL)) {
                 assoc->m_fBlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;

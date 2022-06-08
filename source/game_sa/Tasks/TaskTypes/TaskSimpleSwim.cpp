@@ -158,7 +158,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped)
         if (animAssociation)
         {
             if (animAssociation->m_nAnimId == ANIM_ID_CLIMB_JUMP)
-                animAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+                animAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
             else
                 animAssociation->m_fBlendDelta = -4.0f;
             if (m_AnimID == ANIM_ID_SWIM_BREAST)
@@ -509,7 +509,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped)
                     if (animAssociation->m_pHierarchy->m_fTotalTime * 0.25f <= animAssociation->m_fTimeStep
                         + animAssociation->m_fCurrentTime) {
                         animAssociation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                        animAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+                        animAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
                         m_AnimID = ANIM_ID_CLIMB_JUMP;
                     }
                     break;

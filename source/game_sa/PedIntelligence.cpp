@@ -380,7 +380,7 @@ bool CPedIntelligence::GetUsingParachute() {
         return false;
     }
 
-    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIM_FLAG_PARTIAL);
+    auto animAssoc = RpAnimBlendClumpGetFirstAssociation(m_pPed->m_pRwClump, ANIMATION_PARTIAL);
     if (!animAssoc) {
         return false;
     }
@@ -1006,7 +1006,7 @@ void CPedIntelligence::ProcessFirst() {
     {
         // Yes, this is very awkward. field_260 is just a boolean, and we are passing its address as a class instance,.
         // ScanForCollisionEvents might set it to false. The calling convention of the function was probably __cdecl,
-        // but the compiler messed up and used ecx for it. The code works though. Just remember that 
+        // but the compiler messed up and used ecx for it. The code works though. Just remember that
         // CPedIntelligence::field_260 is just a boolean, not a class instance. Let's keep it this way for now.
         auto* ppCollisionEventScanner = (CCollisionEventScanner*)& field_260;
         ppCollisionEventScanner->ScanForCollisionEvents(m_pPed, &m_eventGroup);

@@ -15,23 +15,23 @@ class CAnimBlendHierarchy;
 class CAnimBlendStaticAssociation;
 
 enum eAnimationFlags {
-    ANIM_FLAG_DEFAULT            = 0x0,
-    ANIM_FLAG_STARTED            = 0x1,
-    ANIM_FLAG_LOOPED             = 0x2,
-    ANIM_FLAG_FREEZE_LAST_FRAME  = 0x4,
-    ANIM_FLAG_UNLOCK_LAST_FRAME  = 0x8, // Animation will be stuck on last frame, if not set
-    ANIM_FLAG_PARTIAL            = 0x10,
-    ANIM_FLAG_MOVEMENT           = 0x20,
-    ANIM_FLAG_TRANSLATE_Y        = 0x40,
-    ANIM_FLAG_TRANSLATE_X        = 0x80,
-    ANIM_FLAG_WALK               = 0x100,  // See `CPed::PlayFootSteps()`
-    ANIM_FLAG_200                = 0x200,
-    ANIM_FLAG_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIM_FLAG_IDLE, see `CPed::PlayFootSteps()`
-    ANIM_FLAG_800                = 0x800,
-    ANIM_FLAG_SECONDARY_TASK_ANIM= 0x1000,
-    ANIM_FLAG_FREEZE_TRANSLATION = 0x2000,
-    ANIM_FLAG_BLOCK_REFERENCED   = 0x4000,
-    ANIM_FLAG_INDESTRUCTIBLE     = 0x8000 // the animation is never destroyed if this flag is set, NO MATTER WHAT
+    ANIMATION_DEFAULT            = 0x0,
+    ANIMATION_STARTED            = 0x1,
+    ANIMATION_LOOPED             = 0x2,
+    ANIMATION_FREEZE_LAST_FRAME  = 0x4,
+    ANIMATION_UNLOCK_LAST_FRAME  = 0x8,  // Animation will be stuck on last frame, if not set
+    ANIMATION_PARTIAL            = 0x10,
+    ANIMATION_MOVEMENT           = 0x20,
+    ANIMATION_TRANSLATE_Y        = 0x40,
+    ANIMATION_TRANSLATE_X        = 0x80,
+    ANIMATION_WALK               = 0x100,
+    ANIMATION_200                = 0x200,
+    ANIMATION_ADD_TO_BLEND       = 0x400, // Possibly should be renamed to ANIMATION_IDLE, see `CPed::PlayFootSteps()`
+    ANIMATION_800                = 0x800,
+    ANIMATION_SECONDARY_TASK_ANIM= 0x1000,
+    ANIMATION_FREEZE_TRANSLATION = 0x2000,
+    ANIMATION_BLOCK_REFERENCED   = 0x4000,
+    ANIMATION_INDESTRUCTIBLE     = 0x8000 // The animation is never destroyed if this flag is set, NO MATTER WHAT
 };
 
 class CDefaultAnimCallback {

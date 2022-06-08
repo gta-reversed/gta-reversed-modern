@@ -196,7 +196,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
                     CVector vecDirection = m_pSourceEntity->GetPosition() - ped->GetPosition();
                     vecDirection.Normalise();
                     if (ped->m_pIntelligence->CanSeeEntityWithLights(m_pSourceEntity, 0) <= 0.0f
-                        || DotProduct(&vecDirection, &ped->GetForward()) < CPedAcquaintanceScanner::ms_fThresholdDotProduct) 
+                        || DotProduct(&vecDirection, &ped->GetForward()) < CPedAcquaintanceScanner::ms_fThresholdDotProduct)
                     {
                         return false;
                     }
@@ -206,7 +206,7 @@ bool CEventDamage::AffectsPed_Reversed(CPed* ped) {
     }
     if (m_pSourceEntity) {
         if (    m_pSourceEntity->IsPed()
-            && !pedSourceEntity->IsPlayer() 
+            && !pedSourceEntity->IsPlayer()
             && CPedGroups::AreInSameGroup(ped, pedSourceEntity)
             && m_weaponType != WEAPON_EXPLOSION
         ) {
@@ -488,7 +488,7 @@ void CEventDamage::ComputeDeathAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             && pSimplestActiveTask && (pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_FALL || pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_GET_UP))
         {
             m_bKnockOffPed = true;
-            m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
+            m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
         }
         else
         {
@@ -726,7 +726,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
             }
         }
     }
-    
+
     CTask* pSimplestActiveTask = ped->GetTaskManager().GetSimplestActiveTask();
     CVector bonePosition;
     ped->GetBonePosition(*(RwV3d*)&bonePosition, BONE_HEAD, false);
@@ -735,7 +735,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
         && (pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_FALL|| pSimplestActiveTask->GetTaskType() == TASK_SIMPLE_GET_UP))
     {
         m_bKnockOffPed = true;
-        m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
+        m_nAnimID = RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_800) ? ANIM_ID_FLOOR_HIT_F : ANIM_ID_FLOOR_HIT;
     }
     else if (m_pedPieceType == PED_PIECE_TORSO) {
         bool bMultiplyForceWithPedStrength = false;
@@ -784,7 +784,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 m_nAnimID = sourceEntityTaskFight->m_nCurrentMove + ANIM_ID_FIGHT_HIT_1;
                 m_fAnimBlend = 16.0f;
                 if (sourceEntityTaskFight->IsComboSet())
-                    m_bKnockOffPed = true; 
+                    m_bKnockOffPed = true;
                 bPlayHitAnim = false;
             }
             else if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->m_nLastCommand == 5) {
