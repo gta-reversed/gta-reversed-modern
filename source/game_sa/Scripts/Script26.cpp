@@ -2,6 +2,7 @@
 
 #include "RunningScript.h"
 #include "TaskSimpleSwim.h"
+#include "TaskComplexProstituteSolicit.h"
 
 // 0x479DA0
 OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
@@ -33,15 +34,27 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         return OR_CONTINUE;
     }
     case COMMAND_DRAW_SUBTITLES_BEFORE_FADE: // 0xA2C
-        break;
+        CollectParameters(1);
+        CTheScripts::bDrawSubtitlesBeforeFade = ScriptParams[0].u8Param;
+        return OR_CONTINUE;
     case COMMAND_DRAW_ODDJOB_TITLE_BEFORE_FADE: // 0xA2D
-        break;
+        CollectParameters(1);
+        CTheScripts::bDrawOddJobTitleBeforeFade = ScriptParams[0].u8Param;
+        return OR_CONTINUE;
     case COMMAND_TASK_FOLLOW_PATH_NODES_TO_COORD_WITH_RADIUS: // 0xA2E
         break;
     case COMMAND_SET_PHOTO_CAMERA_EFFECT: // 0xA2F
-        break;
+        CollectParameters(1);
+        CTheScripts::bDrawCrossHair = ScriptParams[0].uParam != 0 ? 2 : 0;
+        return OR_CONTINUE;
     case COMMAND_FIX_CAR: // 0xA30
-        break;
+    {
+        CollectParameters(1);
+        auto vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        vehicle->Fix();
+        vehicle->m_fHealth = 1000.0f;
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_PLAYER_GROUP_TO_FOLLOW_NEVER: // 0xA31
         break;
     case COMMAND_IS_CHAR_ATTACHED_TO_ANY_CAR: // 0xA32
@@ -68,43 +81,73 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         break;
     case COMMAND_ACTIVATE_PIMP_CHEAT: // 0xA3D
         CollectParameters(1);
-        if (ScriptParams[0].iParam)
+        if (ScriptParams[0].iParam) {
             CCheat::ApplyCheat(CHEAT_PROSTITUTES_PAY_YOU);
-        else
+        } else {
             CCheat::Disable(CHEAT_PROSTITUTES_PAY_YOU);
+        }
         return OR_CONTINUE;
     case COMMAND_GET_RANDOM_CHAR_IN_AREA_OFFSET_NO_SAVE: // 0xA3E
         break;
     case COMMAND_SET_SCRIPT_COOP_GAME: // 0xA3F
         break;
     case COMMAND_CREATE_USER_3D_MARKER: // 0xA40
-        break;
+        CollectParameters(4);
+        ScriptParams[0].uParam = C3dMarkers::User3dMarkerSet(ScriptParams[0].fParam, ScriptParams[1].fParam, ScriptParams[2].fParam, ScriptParams[3].iParam);
+        StoreParameters(1);
+        return OR_CONTINUE;
     case COMMAND_REMOVE_USER_3D_MARKER: // 0xA41
-        break;
-    case COMMAND_REMOVE_ALLUSER_3D_MARKERS: // 0xA42
+        CollectParameters(1);
+        C3dMarkers::User3dMarkerDelete(ScriptParams[0].iParam);
+        return OR_CONTINUE;
+    case COMMAND_REMOVE_ALLUSER_3D_MARKERS: // 0xA42 NOTSA
         break;
     case COMMAND_GET_RID_OF_PLAYER_PROSTITUTE: // 0xA43
-        break;
+        CTaskComplexProstituteSolicit::GetRidOfPlayerProstitute();
+        return OR_CONTINUE;
     case COMMAND_DISPLAY_NON_MINIGAME_HELP_MESSAGES: // 0xA44
-        break;
+        CollectParameters(1);
+        CTheScripts::bDisplayNonMiniGameHelpMessages = ScriptParams[0].uParam != 0;
+        return OR_CONTINUE;
     case COMMAND_SET_RAILTRACK_RESISTANCE_MULT: // 0xA45
-        break;
+        CollectParameters(1);
+        if (ScriptParams[0].fParam <= 0.0f) {
+            CVehicle::ms_fRailTrackResistance = CVehicle::ms_fRailTrackResistanceDefault;
+        } else {
+            CVehicle::ms_fRailTrackResistance = CVehicle::ms_fRailTrackResistanceDefault * ScriptParams[0].fParam;
+        }
+        return OR_CONTINUE;
     case COMMAND_SWITCH_OBJECT_BRAINS: // 0xA46
-        break;
+        CollectParameters(2);
+        if (ScriptParams[1].uParam) {
+            CTheScripts::ScriptsForBrains.SwitchAllObjectBrainsWithThisID(ScriptParams[0].i8Param, true);
+        } else {
+            CTheScripts::ScriptsForBrains.SwitchAllObjectBrainsWithThisID(ScriptParams[0].i8Param, false);
+        }
+        return OR_CONTINUE;
     case COMMAND_FINISH_SETTING_UP_CONVERSATION_NO_SUBTITLES: // 0xA47
         break;
+        // todo: CConversations::DoneSettingUpConversation(1);
+        return OR_CONTINUE;
     case COMMAND_ALLOW_PAUSE_IN_WIDESCREEN: // 0xA48
-        break;
+        CollectParameters(1);
+        FrontEndMenuManager.m_bMenuAccessWidescreen = ScriptParams[0].uParam != 0;
+        return OR_CONTINUE;
     case COMMAND_IS_XBOX_VERSION: // 0xA49
-        break;
-    case COMMAND_GET_PC_MOUSE_MOVEMENT: // 0xA4A
-        break;
-    case COMMAND_IS_PC_USING_JOYPAD: // 0xA4B
-        break;
-    case COMMAND_IS_MOUSE_USING_VERTICAL_INVERSION: // 0xA4C
-        break;
     case COMMAND_IS_JAPANESE_VERSION: // 0xA4D
-        break;
+        UpdateCompareFlag(0);
+        return OR_CONTINUE;
+    case COMMAND_GET_PC_MOUSE_MOVEMENT: // 0xA4A
+        ScriptParams[0].fParam = CPad::NewMouseControllerState.X; // todo: check ASM
+        ScriptParams[1].fParam = CPad::NewMouseControllerState.Y;
+        StoreParameters(2);
+        return OR_CONTINUE;
+    case COMMAND_IS_PC_USING_JOYPAD: // 0xA4B
+        UpdateCompareFlag(FrontEndMenuManager.m_nController != 0);
+        return OR_CONTINUE;
+    case COMMAND_IS_MOUSE_USING_VERTICAL_INVERSION: // 0xA4C
+        UpdateCompareFlag(CMenuManager::bInvertMouseY != 0);
+        return OR_CONTINUE;
     case COMMAND_IS_XBOX_PLAYER2_PRESSING_START: // 0xA4E
         break;
     case COMMAND_FINISHED_WITH_XBOX_PLAYER2: // 0xA4F
