@@ -6,21 +6,21 @@ jobs:
     runs-on: windows-2022
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           fetch-depth: 1
           submodules: recursive
 
       - name: Configure
         shell: cmd
-        run: cmake -Bbuild -H. -A Win32 -DGTASA_UNITY_BUILD=1
+        run: cmake -Bbuild -H. -A Win32
 
       - name: Build Debug
         shell: cmd
         run: cmake --build build --config Debug
 
       - name: Artifact Debug
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: gta_reversed-debug
           path: bin/Debug
@@ -29,7 +29,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Artifact Release
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: gta_reversed-release
           path: bin/Release
