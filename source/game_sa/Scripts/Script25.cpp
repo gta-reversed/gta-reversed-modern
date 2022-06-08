@@ -152,7 +152,7 @@ OpcodeResult CRunningScript::ProcessCommands2500To2599(int32 commandId) {
         UpdateCompareFlag(CPad::GetPad(0)->JustOutOfFrontEnd == 1);
         return OR_CONTINUE;
     case COMMAND_GET_CURRENT_LANGUAGE: // 0x9FB
-        ScriptParams[0].uParam = static_cast<uint8>(FrontEndMenuManager.m_nLanguage);
+        ScriptParams[0].uParam = static_cast<uint8>(FrontEndMenuManager.m_nPrefsLanguage);
         StoreParameters(1);
         return OR_CONTINUE;
     case COMMAND_IS_OBJECT_INTERSECTING_WORLD: // 0x9FC
