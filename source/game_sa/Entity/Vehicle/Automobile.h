@@ -62,7 +62,7 @@ public:
             float m_fHeliWheelSpeed4;
         };
     };
-    std::array<float, 4> m_wheelRotationUnused; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
+    std::array<float, 4> m_fWheelBurnoutSpeed; // 0x858 - Passed to CVehicle::ProcessWheel as last 3rd parameter, but it's not used
 
     struct {
         uint8 bTaxiLightOn : 1 { m_sAllTaxiLights };
@@ -110,8 +110,7 @@ public:
     uint8 m_nNumContactWheels;
     uint8 m_nWheelsOnGround;
     uint8 m_wheelsOnGrounPrev;
-    char  field_963;
-    float m_fGasPedalAudio;
+    float m_fGasPedalAudio; // [0; 1] adjusts the speed of playback of the skiding sound
 
     std::array<tWheelState, 4> m_aWheelState;
     std::array<FxSystem_c*, 2> m_exhaustNitroFxSystem;

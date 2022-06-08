@@ -952,9 +952,9 @@ bool CPed::CanSetPedState() {
     case PEDSTATE_ENTER_CAR:
     case PEDSTATE_CARJACK:
     case PEDSTATE_STEAL_CAR:
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 /*!

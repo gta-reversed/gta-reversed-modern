@@ -110,3 +110,6 @@ extern void SetLightsForInfraredVisionDefaultObjects();
 extern void SetLightsForNightVision();
 
 float GetDayNightBalance();
+
+// 0x746870
+void MessageLoop();

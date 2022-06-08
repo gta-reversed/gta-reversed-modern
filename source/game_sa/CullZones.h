@@ -138,8 +138,7 @@ public:
     static bool DoExtraAirResistanceForPlayer();
 
     static eZoneAttributes FindTunnelAttributesForCoors(CVector point);
-    static CCullZoneReflection* FindMirrorAttributesForCoors_(CVector cameraPosition);
-    static CCullZoneReflection* FindMirrorAttributesForCoors(float x, float y, float z);
+    static CCullZoneReflection* FindMirrorAttributesForCoors(CVector cameraPosition);
     static CCullZone* FindZoneWithStairsAttributeForPlayer();
     static eZoneAttributes FindAttributesForCoors(CVector pos);
 };

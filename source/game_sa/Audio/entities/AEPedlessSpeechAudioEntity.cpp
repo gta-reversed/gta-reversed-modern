@@ -37,6 +37,11 @@ int16 CAEPedlessSpeechAudioEntity::AddSayEvent(int32 a1, int16 a2, CEntity* enti
     return plugin::CallMethodAndReturn<int16, 0x4E60D0, CAEPedlessSpeechAudioEntity*, int32, int16, CEntity*, uint32, float, bool, bool, bool>(this, a1, a2, entity, playOffset, a6, a3, a8, a9);
 }
 
+// 0x4E6080
+void CAEPedlessSpeechAudioEntity::AddScriptSayEvent(int32, int32, uint8, uint8, uint8) {
+    // NOP
+}
+
 // 0x4E4D10
 void CAEPedlessSpeechAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
     plugin::CallMethod<0x4E4D10, CAEPedlessSpeechAudioEntity*, CAESound*, int16>(this, sound, curPlayPos);
@@ -89,42 +94,32 @@ void CAEPedlessSpeechAudioEntity::InjectHooks() {
     RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E60A0);
 }
 
-// 0x4E6070
 CAEPedlessSpeechAudioEntity* CAEPedlessSpeechAudioEntity::Constructor() {
     this->CAEPedlessSpeechAudioEntity::CAEPedlessSpeechAudioEntity();
     return this;
 }
 
-//
-CAEPedlessSpeechAudioEntity::~CAEPedlessSpeechAudioEntity() {}
-
-//
 CAEPedlessSpeechAudioEntity* CAEPedlessSpeechAudioEntity::Destructor() {
     this->CAEPedlessSpeechAudioEntity::~CAEPedlessSpeechAudioEntity();
     return this;
 }
 
-// 0x4E4D10
 void CAEPedlessSpeechAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
     CAEPedlessSpeechAudioEntity::UpdateParameters(sound, curPlayPos);
 }
 
-// 0x4E6300
 void CAEPedlessSpeechAudioEntity::Terminate_Reversed() {
     CAEPedlessSpeechAudioEntity::Terminate();
 }
 
-// 0x4E6380
 void CAEPedlessSpeechAudioEntity::PlayLoadedSound_Reversed() {
     CAEPedlessSpeechAudioEntity::PlayLoadedSound();
 }
 
-// 0x4E6090
 int16 CAEPedlessSpeechAudioEntity::GetAllocatedVoice_Reversed() {
     return CAEPedlessSpeechAudioEntity::GetAllocatedVoice();
 }
 
-// 0x4E60A0
 bool CAEPedlessSpeechAudioEntity::WillPedChatAboutTopic_Reversed(int16 topic) {
     return CAEPedlessSpeechAudioEntity::WillPedChatAboutTopic(topic);
 }
