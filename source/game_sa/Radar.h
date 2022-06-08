@@ -140,12 +140,10 @@ struct tBlipHandle {
 VALIDATE_SIZE(tBlipHandle, 4);
 
 struct airstrip_info {
-    float x;
-    float y;
-    float direction; // angle
-    float radius; // not sure
+    CVector2D position;
+    float     direction; // angle
+    float     radius; // not sure
 };
-
 VALIDATE_SIZE(airstrip_info, 0x10);
 
 class CEntryExit;
@@ -196,7 +194,7 @@ public:
     static inline eRadarTraceHeight& legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
     static inline uint32& legendTraceTimer = *(uint32*)0xBAA354;
 
-    static const char* RadarBlipFileNames[][2];
+    static SpriteFileName RadarBlipFileNames[];
 
     static inline float& m_radarRange = *(float*)0xBA8314; // 2990.0 by default
     static inline std::array<uint16, MAX_RADAR_TRACES>& MapLegendList = *(std::array<uint16, MAX_RADAR_TRACES>*)0xBA8318;
@@ -206,6 +204,10 @@ public:
     static inline CVector2D& vec2DRadarOrigin = *(CVector2D*)0xBAA248;
     static inline std::array<CSprite2d, MAX_RADAR_SPRITES>& RadarBlipSprites = *(std::array<CSprite2d, MAX_RADAR_SPRITES>*)0xBAA250;
     static inline CRect& m_radarRect = *(CRect*)0x8D0920; // { 1000000.0f, -1000000.0f, -1000000.0f, 1000000.0f }
+
+    static inline uint8& airstrip_location = *(uint8*)0xBA8300; // current airstrip index in airstrip_table
+    static inline int32& airstrip_blip = *(int32*)0xBA8304;     // blip handle
+
 public:
     static void InjectHooks();
 
@@ -226,8 +228,8 @@ public:
     static void TransformRadarPointToRealWorldSpace(CVector2D& out, const CVector2D& in);
     static void TransformRealWorldToTexCoordSpace(CVector2D& out, const CVector2D& in, int32 x, int32 y);
     static void CalculateCachedSinCos();
-    static int32 SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName);
-    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName);
+    static int32 SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
+    static int32 SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName = nullptr);
     static int32 SetEntityBlip(eBlipType type, int32 entityHandle, uint32 arg2, eBlipDisplay blipDisplay);
     static void ChangeBlipColour(int32 blipIndex, uint32 color);
     static bool HasThisBlipBeenRevealed(int32 blipIndex);

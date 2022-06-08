@@ -17,11 +17,11 @@ static inline float& cachedSin = *(float*)0xBA830c;
 static inline uint8& airstrip_location = *(uint8*)0xBA8300; // current airstrip index in airstrip_table
 static inline int32& airstrip_blip = *(int32*)0xBA8304;     // blip handle
 
-constexpr std::array<airstrip_info, 4> airstrip_table = { // 0x8D06E0
-    airstrip_info{ +1750.0f,  -2494.0f, 180.0f, 1000.0f },
-    airstrip_info{ -1373.0f,  +120.00f, 315.0f, 1500.0f },
-    airstrip_info{ +1478.0f,  +1461.0f, 90.0f,  1200.0f },
-    airstrip_info{ +175.00f,  +2502.0f, 180.0f, 1000.0f }
+constexpr std::array<airstrip_info, CRadar::MAX_AIRSTRIP_INFOS> airstrip_table = { // 0x8D06E0
+    airstrip_info{ { +1750.0f,  -2494.0f }, 180.0f, 1000.0f },
+    airstrip_info{ { -1373.0f,  +120.00f }, 315.0f, 1500.0f },
+    airstrip_info{ { +1478.0f,  +1461.0f }, 90.0f,  1200.0f },
+    airstrip_info{ { +175.00f,  +2502.0f }, 180.0f, 1000.0f }
 };
 
 // Array of TXD slot indices for each radar section's texture
@@ -29,71 +29,71 @@ static std::array<std::array<int32, MAX_RADAR_WIDTH_TILES>, MAX_RADAR_HEIGHT_TIL
 
 // name, maskName
 // 0x8d0720
-const char* CRadar::RadarBlipFileNames[][2] = {
-    nullptr,               nullptr,
-    nullptr,               nullptr,
-    "radar_centre",        nullptr,
-    "arrow",               nullptr,
-    "radar_north",         nullptr,
-    "radar_airYard",       nullptr,
-    "radar_ammugun",       nullptr,
-    "radar_barbers",       nullptr,
-    "radar_BIGSMOKE",      nullptr,
-    "radar_boatyard",      nullptr,
-    "radar_burgerShot",    nullptr,
-    "radar_bulldozer",     nullptr,
-    "radar_CATALINAPINK",  nullptr,
-    "radar_CESARVIAPANDO", nullptr,
-    "radar_chicken",       nullptr,
-    "radar_CJ",            nullptr,
-    "radar_CRASH1",        nullptr,
-    "radar_diner",         nullptr,
-    "radar_emmetGun",      nullptr,
-    "radar_enemyAttack",   nullptr,
-    "radar_fire",          nullptr,
-    "radar_girlfriend",    nullptr,
-    "radar_hostpitaL",     nullptr,
-    "radar_LocoSyndicate", nullptr,
-    "radar_MADDOG",        nullptr,
-    "radar_mafiaCasino",   nullptr,
-    "radar_MCSTRAP",       nullptr,
-    "radar_modGarage",     nullptr,
-    "radar_OGLOC",         nullptr,
-    "radar_pizza",         nullptr,
-    "radar_police",        nullptr,
-    "radar_propertyG",     nullptr,
-    "radar_propertyR",     nullptr,
-    "radar_race",          nullptr,
-    "radar_RYDER",         nullptr,
-    "radar_saveGame",      nullptr,
-    "radar_school",        nullptr,
-    "radar_qmark",         nullptr,
-    "radar_SWEET",         nullptr,
-    "radar_tattoo",        nullptr,
-    "radar_THETRUTH",      nullptr,
-    "radar_waypoint",      nullptr,
-    "radar_TorenoRanch",   nullptr,
-    "radar_triads",        nullptr,
-    "radar_triadsCasino",  nullptr,
-    "radar_tshirt",        nullptr,
-    "radar_WOOZIE",        nullptr,
-    "radar_ZERO",          nullptr,
-    "radar_dateDisco",     nullptr,
-    "radar_dateDrink",     nullptr,
-    "radar_dateFood",      nullptr,
-    "radar_truck",         nullptr,
-    "radar_cash",          nullptr,
-    "radar_flag",          nullptr,
-    "radar_gym",           nullptr,
-    "radar_impound",       nullptr,
-    "radar_light",         nullptr,
-    "radar_runway",        nullptr,
-    "radar_gangB",         nullptr,
-    "radar_gangP",         nullptr,
-    "radar_gangY",         nullptr,
-    "radar_gangN",         nullptr,
-    "radar_gangG",         nullptr,
-    "radar_spray",         nullptr,
+SpriteFileName CRadar::RadarBlipFileNames[] = {
+    { nullptr,               nullptr },
+    { nullptr,               nullptr },
+    { "radar_centre",        nullptr },
+    { "arrow",               nullptr },
+    { "radar_north",         nullptr },
+    { "radar_airYard",       nullptr },
+    { "radar_ammugun",       nullptr },
+    { "radar_barbers",       nullptr },
+    { "radar_BIGSMOKE",      nullptr },
+    { "radar_boatyard",      nullptr },
+    { "radar_burgerShot",    nullptr },
+    { "radar_bulldozer",     nullptr },
+    { "radar_CATALINAPINK",  nullptr },
+    { "radar_CESARVIAPANDO", nullptr },
+    { "radar_chicken",       nullptr },
+    { "radar_CJ",            nullptr },
+    { "radar_CRASH1",        nullptr },
+    { "radar_diner",         nullptr },
+    { "radar_emmetGun",      nullptr },
+    { "radar_enemyAttack",   nullptr },
+    { "radar_fire",          nullptr },
+    { "radar_girlfriend",    nullptr },
+    { "radar_hostpitaL",     nullptr },
+    { "radar_LocoSyndicate", nullptr },
+    { "radar_MADDOG",        nullptr },
+    { "radar_mafiaCasino",   nullptr },
+    { "radar_MCSTRAP",       nullptr },
+    { "radar_modGarage",     nullptr },
+    { "radar_OGLOC",         nullptr },
+    { "radar_pizza",         nullptr },
+    { "radar_police",        nullptr },
+    { "radar_propertyG",     nullptr },
+    { "radar_propertyR",     nullptr },
+    { "radar_race",          nullptr },
+    { "radar_RYDER",         nullptr },
+    { "radar_saveGame",      nullptr },
+    { "radar_school",        nullptr },
+    { "radar_qmark",         nullptr },
+    { "radar_SWEET",         nullptr },
+    { "radar_tattoo",        nullptr },
+    { "radar_THETRUTH",      nullptr },
+    { "radar_waypoint",      nullptr },
+    { "radar_TorenoRanch",   nullptr },
+    { "radar_triads",        nullptr },
+    { "radar_triadsCasino",  nullptr },
+    { "radar_tshirt",        nullptr },
+    { "radar_WOOZIE",        nullptr },
+    { "radar_ZERO",          nullptr },
+    { "radar_dateDisco",     nullptr },
+    { "radar_dateDrink",     nullptr },
+    { "radar_dateFood",      nullptr },
+    { "radar_truck",         nullptr },
+    { "radar_cash",          nullptr },
+    { "radar_flag",          nullptr },
+    { "radar_gym",           nullptr },
+    { "radar_impound",       nullptr },
+    { "radar_light",         nullptr },
+    { "radar_runway",        nullptr },
+    { "radar_gangB",         nullptr },
+    { "radar_gangP",         nullptr },
+    { "radar_gangY",         nullptr },
+    { "radar_gangN",         nullptr },
+    { "radar_gangG",         nullptr },
+    { "radar_spray",         nullptr }
 };
 
 eRadarTraceHeight& CRadar::legendTraceHeight = *(eRadarTraceHeight*)0xBAA350;
@@ -232,8 +232,10 @@ void CRadar::LoadTextures() {
     CTxdStore::PushCurrentTxd();
     CTxdStore::SetCurrentTxd(CTxdStore::FindTxdSlot("hud"));
 
-    for (auto i = 0; i < MAX_RADAR_SPRITES; i++)
-        RadarBlipSprites[i].SetTexture(RadarBlipFileNames[i][0]);
+    for (auto i = 0; i < MAX_RADAR_SPRITES; i++) {
+        const auto [texture, mask] = RadarBlipFileNames[i];
+        RadarBlipSprites[i].SetTexture(texture); // mask unused
+    }
 
     CTxdStore::PopCurrentTxd();
 }
@@ -494,6 +496,7 @@ void CRadar::CalculateCachedSinCos() {
     m_fRadarOrientation = angle;
 }
 
+// param *scriptName* from Android
 // 0x583820
 int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
     auto index = FindTraceNotTrackingBlipIndex();
@@ -517,6 +520,7 @@ int32 CRadar::SetCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBli
     return GetNewUniqueBlipIndex(index);
 }
 
+// param *scriptName* from Android
 // 0x583920
 int32 CRadar::SetShortRangeCoordBlip(eBlipType type, CVector posn, eBlipColour color, eBlipDisplay blipDisplay, const char* scriptName) {
     int32 index = SetCoordBlip(type, posn, color, blipDisplay, scriptName);
@@ -728,14 +732,16 @@ void CRadar::SetBlipFade(int32 blipIndex, bool fade) {
 // 0x583E50
 void CRadar::SetCoordBlipAppearance(int32 blipIndex, eBlipAppearance appearance) {
     const auto index = GetActualBlipArrayIndex(blipIndex);
-    if (index == -1)
+    if (index == -1) {
         return;
+    }
 
     auto& trace = ms_RadarTrace[index];
-    if (trace.m_nBlipType != eBlipType::BLIP_CAR)
+    if (trace.m_nBlipType != eBlipType::BLIP_CAR) {
         return;
+    }
 
-    switch (appearance) { // Seems like there's a 3rd appereance type?
+    switch (appearance) { // Seems like there's a 3rd appearance type?
     case BLIP_FLAG_FRIEND:
     case BLIP_FLAG_THREAT:
     case BLIP_FLAG_UNK:
@@ -902,7 +908,7 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
     Limit(x, y);
     CVector2D verts[4];
     for (auto i = 0u; i < std::size(verts); i++) {
-        float theta = (float)i * HALF_PI + (angle - PI / 4.0f);
+        float theta = (float)i * HALF_PI + (angle - FRAC_PI_4);
 
         verts[i].x = std::sin(theta) * (float)width + x;
         verts[i].y = std::cos(theta) * (float)height + y;
@@ -1024,17 +1030,18 @@ void GetTextureCorners(int32 x, int32 y, CVector2D* corners) {
 // Returns number of intersections
 // 0x584E00
 int32 LineRadarBoxCollision(CVector2D& result, const CVector2D& lineStart, const CVector2D& lineEnd) {
-    return ((int32(__cdecl*)(CVector2D&, const CVector2D&, const CVector2D&))0x584E00)(result, lineStart, lineEnd);
+    return plugin::CallAndReturn<int32, 0x584E00, CVector2D&, const CVector2D&, const CVector2D&>(result, lineStart, lineEnd);
 }
 
 // 0x585040
 int32 CRadar::ClipRadarPoly(CVector2D* out, const CVector2D* in) {
-    return ((int32(__cdecl*)(CVector2D*, const CVector2D*))0x585040)(out, in);
+    return plugin::CallAndReturn<int32, 0x585040, CVector2D*, const CVector2D*>(out, in);
 }
 
 // 0x5853D0
 void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA&  color, bool inMenu) {
-    /*
+    return plugin::Call<0x5853D0, const CRect&, const CRGBA&, bool>(rect, color, inMenu);
+
     if (!m_radarRect.IsRectInside(rect)) {
         return;
     }
@@ -1063,12 +1070,7 @@ void CRadar::DrawAreaOnRadar(const CRect& rect, const CRGBA&  color, bool inMenu
     //RwTexCoords texCoords[4];
     //if (nVerticesInsideRadar) {
     //    for (auto i = 0; i < nVerticesInsideRadar; i++) {
-
-    //    }
     //}
-    */
-
-    plugin::Call<0x5853D0, CRect const&, CRGBA const&, bool>(rect, color, inMenu);
 }
 
 // 0x585700
@@ -1102,8 +1104,8 @@ void CRadar::DrawRadarMask() {
 
         // Then generate a quarter of the circle
         for (auto j = 0; j < 7; j++) {
-            in.x = corner.x * std::cos(float(j) * (PI / 2.0f / 6.0f));
-            in.y = corner.y * std::sin(float(j) * (PI / 2.0f / 6.0f));
+            in.x = corner.x * std::cos(float(j) * (FRAC_PI_2 / 6.0f));
+            in.y = corner.y * std::sin(float(j) * (FRAC_PI_2 / 6.0f));
             TransformRadarPointToScreenSpace(out[j + 1], in);
         };
 
@@ -1126,7 +1128,7 @@ void CRadar::StreamRadarSections(const CVector& worldPosn) {
 
 // 0x584C50
 void CRadar::StreamRadarSections(int32 x, int32 y) {
-    ((void(__cdecl*)(int32, int32))0x584C50)(x, y);
+    plugin::Call<0x584C50, int32, int32>(x, y);
 }
 
 // 0x585960
@@ -1143,7 +1145,7 @@ void CRadar::InitFrontEndMap() {
 
 // 0x5859F0
 void CRadar::AddBlipToLegendList(uint8 arg0, int32 blipIndex) {
-    ((void(__cdecl*)(uint8, int32))0x5859F0)(arg0, blipIndex);
+    plugin::Call<0x5859F0, uint8, int32>(arg0, blipIndex);
 }
 
 // 0x585B20
@@ -1172,7 +1174,7 @@ void CRadar::SetMapCentreToPlayerCoords() {
 
 // 0x585BF0
 void CRadar::Draw3dMarkers() {
-    ((void(__cdecl*)())0x585BF0)();
+    plugin::Call<0x585BF0>();
 }
 
 // unused
@@ -1195,8 +1197,9 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag) {
         }
     };
 
-    if (auto* entity = GetEntity())
+    if (auto* entity = GetEntity()) {
         entity->bHasBlip = flag;
+    }
     */
 }
 
@@ -1204,6 +1207,7 @@ void CRadar::SetRadarMarkerState(int32 counter, bool flag) {
 void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alpha) {
     Limit(x, y);
 
+    // todo: SCREEN_STRETCH_X
     const float width  = std::floor(SCREEN_WIDTH_UNIT * 8.f);  // uint32 width  = 8 * SCREEN_WIDTH_UNIT;  original math with warnings, NOTSA
     const float height = std::floor(SCREEN_HEIGHT_UNIT * 8.f); // uint32 height = 8 * SCREEN_HEIGHT_UNIT;
 
@@ -1218,17 +1222,17 @@ void CRadar::DrawRadarSprite(eRadarSprite spriteId, float x, float y, uint8 alph
 
 // 0x586110
 void CRadar::DrawRadarSection(int32 x, int32 y) {
-    ((void(__cdecl*)(int32, int32))0x586110)(x, y);
+    plugin::Call<0x586110, int32, int32>(x, y);
 }
 
 // 0x586520
 void CRadar::DrawRadarSectionMap(int32 x, int32 y, CRect rect) {
-    ((void(__cdecl*)(int32, int32, CRect))0x586520)(x, y, rect);
+    plugin::Call<0x586520, int32, int32, CRect>(x, y, rect);
 }
 
 // 0x586650
 void CRadar::DrawRadarGangOverlay(bool inMenu) {
-    ((void(__cdecl*)(bool))0x586650)(inMenu);
+    plugin::Call<0x586650, bool>(inMenu);
 }
 
 // 0x586880
@@ -1422,7 +1426,7 @@ void CRadar::DrawCoordBlip(int32 blipIndex, bool isSprite) {
 
 // 0x587000
 void CRadar::DrawEntityBlip(int32 blipIndex, uint8 arg1) {
-    ((void(__cdecl*)(int32, uint8))0x587000)(blipIndex, arg1);
+    plugin::Call<0x587000, int32, uint8>(blipIndex, arg1);
 }
 
 // 0x587C10
@@ -1469,14 +1473,76 @@ void CRadar::ClearBlip(int32 blipIndex) {
     }
 }
 
+CVector GetAirStripLocation(int location) {
+    return { airstrip_table[location].position.x, airstrip_table[location].position.y, 0.0f };
+}
+
 // 0x587D20
 void CRadar::SetupAirstripBlips() {
-    ((void(__cdecl*)())0x587D20)();
+    return plugin::Call<0x587D20>();
+
+    // WIP
+    auto* vehicle = FindPlayerVehicle();
+    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
+        if ((CTimer::GetFrameCounter() & 4) == 0) {
+            if (airstrip_blip) {
+                return;
+            }
+
+            CVector pos = GetAirStripLocation(airstrip_location);
+            airstrip_blip = SetCoordBlip(BLIP_AIRSTRIP, pos, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY);
+            return;
+        }
+
+        for (auto& table : airstrip_table) {
+            auto distance = DistanceBetweenPoints2D(table.position, vehicle->GetPosition());
+            // todo add condition
+        }
+
+        int location = 0;
+        /*
+        if (distanceTo1 >= (double)distanceTo2 ||
+            distanceTo1 >= (double)distanceTo3 ||
+            distanceTo1 >= (double)distanceTo4
+        ) {
+            location = 1;
+        }
+        if (distanceTo2 >= (double)distanceTo1 ||
+            distanceTo2 >= (double)distanceTo3 ||
+            distanceTo2 >= (double)distanceTo4
+        ) {
+            if (distanceTo3 >= (double)distanceTo1 ||
+                distanceTo3 >= (double)distanceTo2 ||
+                (location = 2, distanceTo3 >= (double)distanceTo4)
+            ) {
+                location = 3;
+            }
+        }
+        */
+
+        if (airstrip_location == location) {
+            if (airstrip_blip) {
+                return;
+            }
+        } else if (airstrip_blip) {
+            ClearBlip(airstrip_blip);
+            airstrip_location = location;
+        }
+
+        CVector pos = GetAirStripLocation(airstrip_location);
+        airstrip_blip = SetCoordBlip(BLIP_AIRSTRIP, pos, BLIP_COLOUR_RED, BLIP_DISPLAY_BLIPONLY);
+        return;
+    }
+
+    if (airstrip_blip) {
+        ClearBlip(airstrip_blip);
+        airstrip_blip = 0;
+    }
 }
 
 // 0x588050
 void CRadar::DrawBlips() {
-    ((void(__cdecl*)())0x588050)();
+    plugin::Call<0x588050>();
 }
 
 /*! Load radar blips from save file
@@ -1542,6 +1608,7 @@ const char* CRadar::GetBlipName(eRadarSprite blipType) {
     case RADAR_SPRITE_WHITE:            break;
     case RADAR_SPRITE_CENTRE:           break;
     case RADAR_SPRITE_MAP_HERE:         return TheText.Get("LG_01");
+    case RADAR_SPRITE_NORTH:            break; // NOTSA
     case RADAR_SPRITE_AIRYARD:          return TheText.Get("LG_02");
     case RADAR_SPRITE_AMMUGUN:          return TheText.Get("LG_03");
     case RADAR_SPRITE_BARBERS:          return TheText.Get("LG_04");
@@ -1602,10 +1669,11 @@ const char* CRadar::GetBlipName(eRadarSprite blipType) {
     case RADAR_SPRITE_GANGG:            return TheText.Get("LG_62");
     case RADAR_SPRITE_SPRAY:            return TheText.Get("LG_34");
     case RADAR_SPRITE_TORENO:           break;
+    default:
+        break;
     }
-
-    assert(0);
-    return "Bug in GetBlipName";
+    NOTSA_UNREACHABLE("Bug in GetBlipName");
+    return nullptr;
 }
 
 int32 CRadar::FindTraceNotTrackingBlipIndex() {
