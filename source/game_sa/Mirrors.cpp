@@ -99,7 +99,7 @@ void CMirrors::CreateBuffer() {
         RwRasterDestroy(pBuffer);
         pBuffer = nullptr;
     default:
-        NOTSA_UNREACHABLE;
+        NOTSA_UNREACHABLE();
         break;
     }
 }
