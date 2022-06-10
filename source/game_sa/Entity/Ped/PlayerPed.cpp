@@ -717,6 +717,7 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
         else
             CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), PED_PIECE_TORSO, 0);
     }
+    m_pPlayerData->m_bRequireHandleBreath = false;
 }
 
 // 0x60A9C0
