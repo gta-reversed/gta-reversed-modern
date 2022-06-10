@@ -43,11 +43,13 @@ public:
     void MoveMemory();
     void Print();
 
-    // NOTSA Helpers
     auto GetSequences() const { return std::span{ m_pSequences, (size_t)m_nSeqCount }; }
-    void InjectHooks();
-    CAnimBlendHierarchy* Constructor();
-    CAnimBlendHierarchy* Destructor();
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CAnimBlendHierarchy* Constructor() { this->CAnimBlendHierarchy::CAnimBlendHierarchy(); return this; }
+    CAnimBlendHierarchy* Destructor() { this->CAnimBlendHierarchy::~CAnimBlendHierarchy(); return this; }
 };
 
 VALIDATE_SIZE(CAnimBlendHierarchy, 0x18);

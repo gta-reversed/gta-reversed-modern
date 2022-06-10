@@ -24,9 +24,6 @@ void CAnimBlendHierarchy::InjectHooks() {
     RH_ScopedInstall(Print, 0x4CF8A0);
 }
 
-CAnimBlendHierarchy* CAnimBlendHierarchy::Constructor() { this->CAnimBlendHierarchy::CAnimBlendHierarchy(); return this; }
-CAnimBlendHierarchy* CAnimBlendHierarchy::Destructor() { this->CAnimBlendHierarchy::~CAnimBlendHierarchy(); return this; }
-
 // 0x4CF270
 CAnimBlendHierarchy::CAnimBlendHierarchy() {
     m_pSequences = nullptr;

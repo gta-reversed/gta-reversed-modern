@@ -86,6 +86,15 @@ struct SClumpAnimAssoc {
     float                m_fTimeStep;
     int16                m_nAnimId;
     uint16               m_nFlags; // TODO: use bitfield
+
+    float GetBlendAmount(float weight) { return IsPartial() ? m_fBlendAmount : m_fBlendAmount * weight; }
+    [[nodiscard]] bool IsRunning()        const { return (m_nFlags & ANIMATION_STARTED) != 0; }
+    [[nodiscard]] bool IsRepeating()      const { return (m_nFlags & ANIMATION_LOOPED) != 0; }
+    [[nodiscard]] bool IsPartial()        const { return (m_nFlags & ANIMATION_PARTIAL) != 0; }
+    [[nodiscard]] bool IsMoving()         const { return (m_nFlags & ANIMATION_MOVEMENT) != 0; }
+    [[nodiscard]] bool HasYTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_X) != 0; }
+    [[nodiscard]] bool HasXTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_Y) != 0; }
+    [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
 };
 
 class CAnimBlendAssociation : public SClumpAnimAssoc {
@@ -95,12 +104,9 @@ public:
     void* m_pCallbackData;
 
 public:
-    void* operator new(unsigned size);
-    void operator delete(void* object);
-
     CAnimBlendAssociation();
     CAnimBlendAssociation(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
-    explicit CAnimBlendAssociation(CAnimBlendAssociation& assoc);
+    CAnimBlendAssociation(CAnimBlendAssociation& assoc);
     explicit CAnimBlendAssociation(CAnimBlendStaticAssociation& assoc);
     virtual ~CAnimBlendAssociation();
 
@@ -120,10 +126,10 @@ public:
     void SetFinishCallback(void(*callback)(CAnimBlendAssociation*, void*), void* data);
     void Start(float currentTime);
     void SyncAnimation(CAnimBlendAssociation* syncWith);
-    bool UpdateBlend(float blendDeltaMult);
-    bool UpdateTime(float unused1, float unused2);
+    bool UpdateBlend(float mult);
+    bool UpdateTime(float a1, float a2);
     void UpdateTimeStep(float speedMult, float timeMult);
-    uint32 GetHashKey() const noexcept;
+    [[nodiscard]] uint32 GetHashKey() const noexcept;
 
     // NOTSA
     void SetFlag(eAnimationFlags flag, bool value) {
@@ -133,23 +139,19 @@ public:
             m_nFlags &= ~(int)flag;
     }
 
-    [[nodiscard]] bool IsRunning()        const { return (m_nFlags & ANIMATION_STARTED) != 0; }
-    [[nodiscard]] bool IsRepeating()      const { return (m_nFlags & ANIMATION_LOOPED) != 0; }
-    [[nodiscard]] bool IsPartial()        const { return (m_nFlags & ANIMATION_PARTIAL) != 0; }
-    [[nodiscard]] bool IsMovement()       const { return (m_nFlags & ANIMATION_MOVEMENT) != 0; }
-    [[nodiscard]] bool HasTranslation()   const { return (m_nFlags & ANIMATION_TRANSLATE_X) != 0; }
-    [[nodiscard]] bool HasXTranslation()  const { return (m_nFlags & ANIMATION_TRANSLATE_Y) != 0; }
-    [[nodiscard]] bool IsIndestructible() const { return (m_nFlags & ANIMATION_INDESTRUCTIBLE) != 0; }
-
     static CAnimBlendAssociation* FromLink(CAnimBlendLink* link) {
         return (CAnimBlendAssociation*)((byte*)link - offsetof(CAnimBlendAssociation, m_Link));
     }
+
+    auto GetNodes() { return std::span{ &m_pNodeArray, m_nNumBlendNodes }; }
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CAnimBlendAssociation* Constructor(RpClump* clump, CAnimBlendHierarchy* animHierarchy);
+    CAnimBlendAssociation* Constructor0()  { this->CAnimBlendAssociation::CAnimBlendAssociation(); return this; }
+    CAnimBlendAssociation* Constructor1(RpClump* clump, CAnimBlendHierarchy* animHierarchy) { this->CAnimBlendAssociation::CAnimBlendAssociation(clump, animHierarchy); return this; }
+    CAnimBlendAssociation* Constructor2(CAnimBlendAssociation& assoc) { this->CAnimBlendAssociation::CAnimBlendAssociation(assoc); return this; }
+    CAnimBlendAssociation* Constructor3(CAnimBlendStaticAssociation& assoc) { this->CAnimBlendAssociation::CAnimBlendAssociation(assoc); return this; }
 };
-
 VALIDATE_SIZE(CAnimBlendAssociation, 0x3C);
