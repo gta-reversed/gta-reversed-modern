@@ -840,15 +840,15 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
         if (ped->IsPlayer())
         {
             oxygen = static_cast<uint32>(
-                ((100.0f - playerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) * 1.0f / 3.0f));
+                ((100.0f - playerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
         {
-            RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
-            RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;
+            RpHAnimHierarchy* hier = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
+            RwV3d* bonePos = &RpHAnimHierarchyGetMatrixArray(hier)[BONE_JAW].pos; // FIX_BUGS: Air bubbles from ass :D (BONE_SPINE1)
             static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.3f, 0.0f, 0.5f);
             RwV3d vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
-            g_fx.m_pPrtBubble->AddParticle(pBoneSpine1Pos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, 0);
+            g_fx.m_pPrtBubble->AddParticle(bonePos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, 0);
         }
         break;
     }
