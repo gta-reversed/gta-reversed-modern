@@ -24,13 +24,11 @@ CTaskComplexEnterCar::CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriv
     m_fCruiseSpeed                = -1.0f;
     // m_nEnterCarStartTime          = 0; // NOTSA
 
-    if (targetVehicle)
-        targetVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeRegisterRef(m_pTargetVehicle);
 }
 
 CTaskComplexEnterCar::~CTaskComplexEnterCar() {
-    if (m_pTargetVehicle)
-        m_pTargetVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pTargetVehicle));
+    CEntity::SafeCleanUpRef(m_pTargetVehicle);
 
     delete m_pTaskUtilityLineUpPedWithCar;
     if (!m_pTargetVehicle)

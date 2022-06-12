@@ -13,6 +13,8 @@
 #include "ObjectSaveStructure.h"
 #include "Rope.h"
 #include "Ropes.h"
+#include "TheScripts.h"
+#include "Shadows.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -24,16 +26,16 @@ void CObject::InjectHooks()
     RH_ScopedClass(CObject);
     RH_ScopedCategory("Entity/Object");
 
-    RH_ScopedInstall(SetIsStatic_Reversed, 0x5A0760);
-    RH_ScopedInstall(CreateRwObject_Reversed, 0x59F110);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x5A2130);
-    RH_ScopedInstall(Teleport_Reversed, 0x5A17B0);
-    RH_ScopedInstall(PreRender_Reversed, 0x59FD50);
-    RH_ScopedInstall(Render_Reversed, 0x59F180);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x554FA0);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x553E10);
-    RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x59FEE0);
-    RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5A02E0);
+    RH_ScopedVirtualInstall(SetIsStatic, 0x5A0760);
+    RH_ScopedVirtualInstall(CreateRwObject, 0x59F110);
+    RH_ScopedVirtualInstall(ProcessControl, 0x5A2130);
+    RH_ScopedVirtualInstall(Teleport, 0x5A17B0);
+    RH_ScopedVirtualInstall(PreRender, 0x59FD50);
+    RH_ScopedVirtualInstall(Render, 0x59F180);
+    RH_ScopedVirtualInstall(SetupLighting, 0x554FA0);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x553E10);
+    RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x59FEE0);
+    RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5A02E0);
     RH_ScopedInstall(Init, 0x59F840);
     RH_ScopedInstall(ProcessGarageDoorBehaviour, 0x44A4D0);
     RH_ScopedInstall(CanBeDeleted, 0x59F120);
@@ -748,7 +750,8 @@ bool CObject::CanBeDeleted() {
 // 0x59F160
 void CObject::SetRelatedDummy(CDummyObject* relatedDummy) {
     m_pDummyObject = relatedDummy;
-    relatedDummy->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
+    assert(m_pDummyObject);
+    m_pDummyObject->RegisterReference(reinterpret_cast<CEntity**>(&m_pDummyObject));
 }
 
 // 0x59F2D0
@@ -766,12 +769,12 @@ bool CObject::TryToExplode() {
 
 // 0x59F300
 void CObject::SetObjectTargettable(bool targetable) {
-    objectFlags.bIsTargatable = targetable;
+    objectFlags.bIsTargetable = targetable;
 }
 
 // 0x59F320
 bool CObject::CanBeTargetted() {
-    return objectFlags.bIsTargatable;
+    return objectFlags.bIsTargetable;
 }
 
 // 0x59F330
@@ -892,7 +895,7 @@ void CObject::Init() {
 
     m_fHealth = 1000.0F;
     m_fDoorStartAngle = -1001.0F;
-    m_dwRemovalTime = 0;
+    m_nRemovalTime = 0;
     m_nBonusValue = 0;
     m_wCostValue = 0;
     for (auto& col : m_nCarColor)
@@ -926,7 +929,7 @@ void CObject::Init() {
         objectFlags.bIsLampPost = false;
     }
 
-    objectFlags.bIsTargatable = false;
+    objectFlags.bIsTargetable = false;
     physicalFlags.bAttachedToEntity = false;
 
     m_nAreaCode = eAreaCodes::AREA_CODE_13;
@@ -1433,7 +1436,8 @@ void CObject::GrabObjectToCarryWithRope(CPhysical* attachTo) {
     auto& rope = CRopes::GetRope(iRopeInd);
     rope.ReleasePickedUpObject();
     rope.m_pAttachedEntity = attachTo;
-    attachTo->RegisterReference(&rope.m_pAttachedEntity);
+    assert(rope.m_pAttachedEntity);
+    rope.m_pAttachedEntity->RegisterReference(&rope.m_pAttachedEntity);
 
     auto vecRopePoint = CVector();
     vecRopePoint.z = CRopes::FindPickupHeight(attachTo);

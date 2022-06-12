@@ -36,7 +36,7 @@ void CTrain::InjectHooks()
     RH_ScopedClass(CTrain);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F86A0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F86A0);
 }
 
 // 0x6F6030
@@ -66,9 +66,9 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
         m_aDoors[3].m_fOpenAngle = 1.25f;
         m_aDoors[3].m_fClosedAngle = 0.25f;
     } else {
-        m_aDoors[2].m_fOpenAngle = -1.2566371;
+        m_aDoors[2].m_fOpenAngle = -1.2566371f;
         m_aDoors[2].m_fClosedAngle = 0.0f;
-        m_aDoors[3].m_fOpenAngle = 1.2566371;
+        m_aDoors[3].m_fOpenAngle = 1.2566371f;
         m_aDoors[3].m_fClosedAngle = 0.0f;
     }
     m_aDoors[3].m_nAxis = 2;
@@ -593,11 +593,10 @@ void CTrain::ProcessControl()
                 {
                     fTheTrainSpeed = -fTheTrainSpeed;
                 }
-                if (fTheTrainSpeed > 1.0 * 0.94999999)
+                if (fTheTrainSpeed > 1.0f * 0.95f)
                 {
-                    CPad::GetPad(0)->StartShake(300, 0x46u, 0);
-                    CVector vecVehiclePosition = GetPosition();
-                    TheCamera.CamShake(0.1f, vecVehiclePosition.x, vecVehiclePosition.y, vecVehiclePosition.z);
+                    CPad::GetPad()->StartShake(300, 70, 0);
+                    TheCamera.CamShake(0.1f, GetPosition());
                 }
 
                 fTheTrainSpeed = m_fTrainSpeed;
@@ -816,8 +815,8 @@ void CTrain::ProcessControl()
         uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
         uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
 
-        auto fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
-        auto fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
+        auto fTrainNodeLighting = ScaleLighting(trainNodeLighting, 0.5f);
+        auto fTrainNextNodeLighting = ScaleLighting(trainNextNodeLighting, 0.5f);
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;

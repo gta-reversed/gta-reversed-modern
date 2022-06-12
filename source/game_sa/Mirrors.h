@@ -9,14 +9,20 @@
 #include "Matrix.h"
 #include "Vector.h"
 
+enum eMirrorType : uint8 {
+    MIRROR_TYPE_0 = 0,
+    MIRROR_TYPE_1 = 1,
+    MIRROR_TYPE_2 = 2,
+};
+
 class CMirrors {
 public:
     static RwRaster*& pBuffer;
     static RwRaster*& pZBuffer;
     static bool&      bRenderingReflection;
     static bool&      d3dRestored;
-    static int8&      TypeOfMirror;
-    static int8&      MirrorFlags;
+    static eMirrorType& TypeOfMirror;
+    static uint8&     MirrorFlags;
     static float&     MirrorV;
     static CVector&   MirrorNormal;
 
@@ -38,7 +44,5 @@ public:
     static void RenderReflBuffer(bool);
     static void RenderReflections();
 
-    // NOTSA
-    static bool IsEitherScreenVisibleToCam();
     static bool ShouldRenderPeds();
 };

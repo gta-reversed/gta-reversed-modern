@@ -23,6 +23,9 @@ void ProcessImgui() {
         if (ImGui::RadioButton("Weapon 3", false)) {
             CCheat::WeaponCheat3();
         }
+        if (ImGui::RadioButton("Weapon 4", false)) {
+            CCheat::WeaponCheat4();
+        }
         if (ImGui::RadioButton("Weapon Skills", false)) {
             CCheat::WeaponSkillsCheat();
         }
@@ -55,6 +58,12 @@ void ProcessImgui() {
         }
         if (ImGui::RadioButton("Vehicle Skills", false)) {
             CCheat::VehicleSkillsCheat();
+        }
+        if (ImGui::RadioButton("Big Head aka Jimmy Neutron", false)) {
+            CCheat::BigHeadCheat();
+        }
+        if (ImGui::RadioButton("Thin Body", false)) {
+            CCheat::ThinBodyCheat();
         }
     }
 
@@ -214,6 +223,12 @@ void ProcessImgui() {
         }
         if (ImGui::RadioButton("Village People", false)) {
             CCheat::VillagePeopleCheat();
+        }
+        if (ImGui::RadioButton("Time Travel", false)) {
+            CCheat::TimeTravelCheat();
+        }
+        if (ImGui::RadioButton("The Gambler", false)) {
+            CCheat::TheGamblerCheat();
         }
     }
 

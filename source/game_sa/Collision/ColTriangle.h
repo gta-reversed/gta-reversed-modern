@@ -16,7 +16,7 @@ public:
         };
         uint16 m_vertIndices[3];
     };
-    uint8 m_nMaterial;
+    uint8 m_nMaterial; // todo: material aka eSurfaceType
     uint8 m_nLight;
 
     CColTriangle() = default;

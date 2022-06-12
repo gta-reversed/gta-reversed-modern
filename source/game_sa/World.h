@@ -17,15 +17,21 @@ class CVehicle;
 
 constexpr int32 MAX_PLAYERS = 2;
 constexpr int32 MAX_WORLD_UNITS = 6000;
+
 constexpr int32 MAX_SECTORS_X = 120;
 constexpr int32 MAX_SECTORS_Y = 120;
 constexpr int32 MAX_SECTORS = MAX_SECTORS_X * MAX_SECTORS_Y;
+
 constexpr int32 MAX_REPEAT_SECTORS_X = 16;
 constexpr int32 MAX_REPEAT_SECTORS_Y = 16;
 constexpr int32 MAX_REPEAT_SECTORS = MAX_REPEAT_SECTORS_X * MAX_REPEAT_SECTORS_Y;
+
 constexpr int32 MAX_LOD_PTR_LISTS_X = 30;
 constexpr int32 MAX_LOD_PTR_LISTS_Y = 30;
 constexpr int32 MAX_LOD_PTR_LISTS = MAX_LOD_PTR_LISTS_X * MAX_LOD_PTR_LISTS_Y;
+
+const CRect WORLD_BOUNDS{ -3000.0F, -3000.0F, 3000.0F, 3000.0F };
+constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 
 class CWorld {
 public:
@@ -60,10 +66,12 @@ public:
 
     static void InjectHooks();
 
-    static void ResetLineTestOptions();
     static void Initialise();
+    static void ShutDown();
+    static void ClearForRestart();
     static void Add(CEntity* entity);
     static void Remove(CEntity* entity);
+    static void ResetLineTestOptions();
     static bool ProcessVerticalLineSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& colPoint, float& maxTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, CStoredCollPoly* collPoly);
     static void CastShadowSectorList(CPtrList& ptrList, float arg1, float arg2, float arg3, float arg4);
     static void ProcessForAnimViewer();
@@ -76,17 +84,12 @@ public:
     static void TestForBuildingsOnTopOfEachOther(CPtrList& ptrList);
     static void TestForUnusedModels(CPtrList& ptrList, int32* models);
     static void RemoveEntityInsteadOfProcessingIt(CEntity* entity);
-    static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float arg5, float arg6, float arg7, float arg8);
+    static void CallOffChaseForAreaSectorListVehicles(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY);
     static void CallOffChaseForAreaSectorListPeds(CPtrList& ptrList, float x1, float y1, float x2, float y2, float minX, float minY, float maxX, float maxY);
     static bool CameraToIgnoreThisObject(CEntity* entity);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithPedPointer(void* ptr);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithRemoteVehiclePointer(void* ptr);
-    // returns player ID (0 or 1), -1 - not found
     static int32 FindPlayerSlotWithVehiclePointer(CEntity* vehiclePtr);
-    static void ShutDown();
-    static void ClearForRestart();
     static bool ProcessVerticalLineSector_FillGlobeColPoints(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static bool ProcessVerticalLineSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void CastShadow(float x1, float y1, float x2, float y2);
@@ -108,7 +111,7 @@ public:
     static void RemoveFallenPeds();
     static void RemoveFallenCars();
     static void UseDetonator(CPed* creator);
-    // returns entity
+    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
     static CEntity* TestSphereAgainstSectorList(CPtrList& ptrList, CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool doCameraIgnoreCheck);
     static void PrintCarChanges();
     static void TestForBuildingsOnTopOfEachOther();
@@ -137,8 +140,6 @@ public:
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
-    // returns entity
-    static CEntity* TestSphereAgainstWorld(CVector sphereCenter, float sphereRadius, CEntity* ignoreEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doCameraIgnoreCheck);
     static void ClearExcitingStuffFromArea(const CVector& point, float radius, uint8 bRemoveProjectilesAndShadows);
     static bool GetIsLineOfSightClear(const CVector& origin, const CVector& target, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck);
     static bool ProcessLineOfSightSector(CSector& sector, CRepeatSector& repeatSector, const CColLine& colLine, CColPoint& outColPoint, float& maxTouchDistance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, bool doCameraIgnoreCheck, bool doShootThroughCheck);
@@ -159,7 +160,7 @@ public:
     static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + (MAX_SECTORS_X / 2); }
     static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + (MAX_SECTORS_Y / 2); }
 
-    // returns sector index in range 0 to 120 (covers full map) 
+    // returns sector index in range 0 to 120 (covers full map)
     static int32 GetSectorX(float x) { return static_cast<int32>(std::floor(GetSectorfX(x))); }
     static int32 GetSectorY(float y) { return static_cast<int32>(std::floor(GetSectorfY(y))); }
 
@@ -179,12 +180,12 @@ public:
 
     static CVector2D GetSectorPos(int32 sector) { return { GetSectorPosX(sector), GetSectorPosY(sector) }; }
 
-    // returns sector index in range 0 to 15 (covers half of the map) 
+    // returns sector index in range 0 to 15 (covers half of the map)
     static float GetHalfMapLodSectorX(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
     static float GetHalfMapLodSectorY(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
     static float GetLodSectorfX(float fSector) { return GetHalfMapLodSectorX(fSector) + (MAX_LOD_PTR_LISTS_X / 2); }
     static float GetLodSectorfY(float fSector) { return GetHalfMapLodSectorY(fSector) + (MAX_LOD_PTR_LISTS_Y / 2); }
-    // returns sector index in range 0 to 30 (covers full map) 
+    // returns sector index in range 0 to 30 (covers full map)
     static int32 GetLodSectorX(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfX(fSector))); }
     static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector)));  }
     static float GetLodSectorPosX(int32 sector)
@@ -213,4 +214,4 @@ uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
 
-float ScaleLighting(uint8 lighting, float fScale);
+float ScaleLighting(uint8 lighting, float scale);

@@ -2,8 +2,8 @@
 
 #include "AutoPilot.h"
 
-CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
-{
+// 0x6D5E20
+CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
     _smthNext = 1;
     _smthCurr = 1;
 
@@ -13,7 +13,7 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
     m_nSpeedScaleFactor = 1000;
     m_nNextLane = 0;
     m_nCurrentLane = 0;
-    m_nCarDrivingStyle = eCarDrivingStyle::DRIVINGSTYLE_STOP_FOR_CARS;
+    m_nCarDrivingStyle = DRIVING_STYLE_STOP_FOR_CARS;
     m_nCarMission = eCarMission::MISSION_NONE;
     m_nTempAction = 0;
     m_nCruiseSpeed = 10;
@@ -45,4 +45,9 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo()
 
 void CAutoPilot::ModifySpeed(float target) {
     plugin::CallMethod<0x41B980, CAutoPilot*, float>(this, target);
+}
+
+// 0x41B950
+void CAutoPilot::RemoveOnePathNode() {
+    plugin::CallMethod<0x41B950, CAutoPilot*>(this);
 }

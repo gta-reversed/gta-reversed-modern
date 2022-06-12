@@ -11,11 +11,11 @@ void CTaskComplexGoToPointAndStandStill::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToPointAndStandStill);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x668120);
-    RH_ScopedInstall(Clone_Reversed, 0x66CEA0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x66DBA0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x66DC40);
+    RH_ScopedVirtualInstall(Clone, 0x66CEA0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x66DBA0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x66DC40);
     RH_ScopedOverloadedInstall(CreateFirstSubTask, "ped", 0x6682D0, CTask * (CTaskComplexGoToPointAndStandStill::*)(int32, CPed*));
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x668570);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x668570);
     RH_ScopedInstall(GoToPoint, 0x46FE60);
     RH_ScopedInstall(SelectMoveState, 0x668250);
 }

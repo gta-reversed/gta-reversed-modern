@@ -6,8 +6,8 @@ void CTaskSimplePutDownEntity::InjectHooks() {
     RH_ScopedClass(CTaskSimplePutDownEntity);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x691990);
-    RH_ScopedInstall(Clone_Reversed, 0x692B70);
-    RH_ScopedInstall(GetId_Reversed, 0x691900);
+    RH_ScopedVirtualInstall(Clone, 0x692B70);
+    RH_ScopedVirtualInstall(GetId, 0x691900);
 }
 
 CTaskSimplePutDownEntity::CTaskSimplePutDownEntity() : CTaskSimpleHoldEntity(nullptr, nullptr, PED_NODE_RIGHT_HAND, HOLD_ENTITY_FLAG_1, ANIM_ID_NO_ANIMATION_SET, ANIM_GROUP_DEFAULT, false) {
@@ -61,17 +61,14 @@ CTask* CTaskSimplePutDownEntity::Clone_Reversed() {
             m_fPutDownHeightZ
         );
     }
-    else {
-        return new CTaskSimplePutDownEntity(
-            m_pEntityToHold,
-            &m_vecPosition,
-            m_nBoneFrameId,
-            m_bBoneFlags,
-            m_nAnimId,
-            m_nAnimGroupId,
-            false,
-            m_fPutDownHeightZ
-        );
-    }
-    return nullptr;
+    return new CTaskSimplePutDownEntity(
+        m_pEntityToHold,
+        &m_vecPosition,
+        m_nBoneFrameId,
+        m_bBoneFlags,
+        m_nAnimId,
+        m_nAnimGroupId,
+        false,
+        m_fPutDownHeightZ
+    );
 }

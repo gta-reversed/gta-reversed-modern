@@ -204,7 +204,7 @@ void CAEUserRadioTrackManager::DeleteUserTracksInfo() {
 // 0x4f3340
 void CAEUserRadioTrackManager::SetUserTrackIndex(int32 index) {
     if (index != -1)
-        FrontEndMenuManager.field_AC = index;
+        FrontEndMenuManager.m_nUserTrackIndex = index;
 }
 
 // 0x4f3250
@@ -214,19 +214,19 @@ int32 CAEUserRadioTrackManager::SelectUserTrackIndex() const {
         case USER_TRACK_PLAY_RADIO:
         case USER_TRACK_PLAY_RANDOM: {
             if (m_nUserTracksCount == 1)
-                return FrontEndMenuManager.field_AC = 1;
+                return FrontEndMenuManager.m_nUserTrackIndex = 1;
             else {
                 int32 index;
 
                 do
                     index = static_cast<int32>(CAEAudioUtility::GetRandomNumberInRange(0, m_nUserTracksCount - 1));
-                while (index == FrontEndMenuManager.field_AC);
+                while (index == FrontEndMenuManager.m_nUserTrackIndex);
 
-                return FrontEndMenuManager.field_AC = index;
+                return FrontEndMenuManager.m_nUserTrackIndex = index;
             }
         }
         case USER_TRACK_PLAY_SEQUENTAL: {
-            return FrontEndMenuManager.field_AC = (FrontEndMenuManager.field_AC + 1) % m_nUserTracksCount;
+            return FrontEndMenuManager.m_nUserTrackIndex = (FrontEndMenuManager.m_nUserTrackIndex + 1) % m_nUserTracksCount;
         }
         }
     }
@@ -263,7 +263,7 @@ uint8 CAEUserRadioTrackManager::GetUserTrackPlayMode() {
 
 // 0x4f4a20
 DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager* self) {
-    CoInitialize(nullptr);
+    VERIFY(CoInitialize(nullptr));
 
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
@@ -298,7 +298,7 @@ DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrac
 
             CFileMgr::CloseFile(file);
 
-            FrontEndMenuManager.field_AC = 0;
+            FrontEndMenuManager.m_nUserTrackIndex = 0;
             self->m_nUserTracksScanState = USER_TRACK_SCAN_COMPLETE;
         }
     }
@@ -392,8 +392,9 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     IShellLinkW*  shellLink = nullptr;
     IPersistFile* persistFile = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink)))
-        throw std::runtime_error{"CoCreateInstance failed"};
+    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink))) {
+        assert(true && "CoCreateInstance failed");
+    }
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
@@ -405,7 +406,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))) {
         persistFile->Release();
         shellLink->Release();
-        throw std::runtime_error{"Load or GetPath failed"};
+        assert(true && "Load or GetPath failed");
     }
 
     persistFile->Release();

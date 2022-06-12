@@ -13,25 +13,28 @@ public:
     RwCamera*  m_pRwCamera;
     RwTexture* m_pRwRenderTexture;
 
+public:
+    static void InjectHooks();
+
     CShadowCamera();
     ~CShadowCamera();
 
+    void       Destroy();
     void       CreateTexture();
-    RwCamera*  SetFrustum(float viewWindow);
-    RwCamera*  SetLight(RpLight* light);
-    RwCamera*  SetCenter(RwV3d* center);
+    void       SetFrustum(float viewWindow);
+    void       SetLight(RpLight* light);
+    void       SetCenter(const CVector& center);
     void       InvertRaster();
-    RwRaster*  GetRwRenderRaster();
-    RwTexture* GetRwRenderTexture();
+    RwRaster*  GetRwRenderRaster() const;
+    RwTexture* GetRwRenderTexture() const;
     RwRaster*  DrawOutlineBorder(const RwRGBA& color);
     RwCamera*  Create(int32 rasterSize);
-    RwCamera*  Update(RpClump* object);
-    RwCamera*  Update(RpAtomic* object);
+    RwCamera*  Update(RpClump* clump);
+    RwCamera*  Update(RpAtomic* atomic);
     void       MakeGradientRaster();
     RwImage*   CreateRwImage();
     RwRaster*  DrawBlurInRect(RwRect* rect);
-    void       RasterResample(RwRaster* raster);
-    void       RasterBlur(RwRaster* raster, int32 numPasses);
+    RwRaster*  RasterResample(RwRaster* raster);
+    RwRaster*  RasterBlur(RwRaster* raster, int32 numPasses);
 };
-
-VALIDATE_SIZE(CShadowCamera, 8);
+VALIDATE_SIZE(CShadowCamera, 0x8);

@@ -3,6 +3,8 @@
 #include "Explosion.h"
 #include "CreepingFire.h"
 #include "FireManager.h"
+#include "InterestingEvents.h"
+#include "Shadows.h"
 
 CAEExplosionAudioEntity& CExplosion::m_ExplosionAudioEntity = *(CAEExplosionAudioEntity*)0xC888D0;
 CExplosion (&CExplosion::aExplosions)[16] = *(CExplosion(*)[16])0xC88950;
@@ -121,23 +123,17 @@ CExplosion* CExplosion::GetFree() {
     return nullptr;
 }
 
+// NOTSA
 void CExplosion::SetCreator(CEntity* newCreator) noexcept {
-    if (m_pCreator)
-        m_pCreator->CleanUpOldReference(&m_pCreator);
-
-    if (newCreator)
-        newCreator->RegisterReference(&m_pCreator);
-
+    CEntity::SafeCleanUpRef(m_pCreator);
+    CEntity::SafeRegisterRef(newCreator);
     m_pCreator = newCreator;
 }
 
+// NOTSA
 void CExplosion::SetVictim(CEntity* newVictim) noexcept {
-    if (m_pVictim)
-        m_pVictim->CleanUpOldReference(&m_pVictim);
-
-    if (newVictim)
-        newVictim->RegisterReference(&m_pVictim);
-
+    CEntity::SafeCleanUpRef(m_pVictim);
+    CEntity::SafeRegisterRef(newVictim);
     m_pVictim = newVictim;
 }
 
@@ -279,7 +275,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
             exp->m_fVisibleDistance = 200.0f;
             exp->m_fDamagePercentage = 0.2f;
         }
-        exp->m_nExpireTime = (float)(CTimer::m_snTimeInMilliseconds + lifetime + 750);
+        exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 750);
         exp->m_fPropagationRate = 0.5f;
 
         CreateAndPlayFxWithSound("explosion_small");
@@ -406,11 +402,11 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
     }
 
     if (type == eExplosionType::EXPLOSION_MOLOTOV) {
-        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake == -1.0f ? 0.2f : cameraShake, pos);
     } else {
         if (cameraShake == -1.0f)
             cameraShake = 0.6f;
-        TheCamera.CamShake(cameraShake, pos.x, pos.y, pos.z);
+        TheCamera.CamShake(cameraShake, pos);
 
         CPad::GetPad(0)->StartShake_Distance(300, 128, pos);
         if (CGameLogic::IsCoopGameGoingOn())

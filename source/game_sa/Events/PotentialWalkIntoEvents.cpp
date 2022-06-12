@@ -15,7 +15,7 @@ void CEventPotentialWalkIntoVehicle::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE320);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE420);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE420);
 }
 
 void CEventPotentialWalkIntoObject::InjectHooks()
@@ -24,7 +24,7 @@ void CEventPotentialWalkIntoObject::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE5D0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B4950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B4950);
 }
 
 void CEventPotentialWalkIntoFire::InjectHooks()
@@ -33,7 +33,7 @@ void CEventPotentialWalkIntoFire::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B1E20);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B6890);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B6890);
 }
 
 void CEventPotentialWalkIntoPed::InjectHooks()
@@ -42,23 +42,21 @@ void CEventPotentialWalkIntoPed::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4AE6E0);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4AE800);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4AE950);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4AE800);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4AE950);
 }
 
 CEventPotentialWalkIntoVehicle::CEventPotentialWalkIntoVehicle(CVehicle* vehicle, int32 moveState)
 {
     m_vehicle = vehicle;
     m_moveState = moveState;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 // 0x4AE3C0
 CEventPotentialWalkIntoVehicle::~CEventPotentialWalkIntoVehicle()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventPotentialWalkIntoVehicle* CEventPotentialWalkIntoVehicle::Constructor(CVehicle* vehicle, int32 moveState)
@@ -125,14 +123,12 @@ CEventPotentialWalkIntoObject::CEventPotentialWalkIntoObject(CObject* object, in
 {
     m_object = object;
     m_moveState = moveState;
-    if (object)
-        object->RegisterReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeRegisterRef(m_object);
 }
 
 CEventPotentialWalkIntoObject::~CEventPotentialWalkIntoObject()
 {
-    if (m_object)
-        m_object->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_object));
+    CEntity::SafeCleanUpRef(m_object);
 }
 
 CEventPotentialWalkIntoObject* CEventPotentialWalkIntoObject::Constructor(CObject* object, int32 moveState)
@@ -233,8 +229,7 @@ CEventPotentialWalkIntoPed::CEventPotentialWalkIntoPed(CPed* ped, const CVector&
 
 CEventPotentialWalkIntoPed::~CEventPotentialWalkIntoPed()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventPotentialWalkIntoPed* CEventPotentialWalkIntoPed::Constructor(CPed* ped, const CVector& targetPoint, int32 moveState)

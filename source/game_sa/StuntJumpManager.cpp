@@ -84,7 +84,7 @@ void CStuntJumpManager::AddOne(const CBoundingBox& start, const CBoundingBox& en
 
 // 0x49C490
 void CStuntJumpManager::Update() {
-    if (!mp_poolStuntJumps || CReplay::Mode == REPLAY_MODE_1)
+    if (!mp_poolStuntJumps || CReplay::Mode == MODE_PLAYBACK)
         return;
 
     CPlayerPed* playerPed = FindPlayerPed();
@@ -127,7 +127,7 @@ void CStuntJumpManager::Update() {
                 CTimer::SetTimeScale(0.3f);
                 CVector rotation{0.0f, 0.0f, 0.0f};
                 TheCamera.SetCamPositionForFixedMode(&mp_Active->camera, &rotation);
-                TheCamera.TakeControl(playerVehicle, MODE_FIXED, SWITCHTYPE_JUMPCUT, 1);
+                TheCamera.TakeControl(playerVehicle, MODE_FIXED, eSwitchType::JUMPCUT, 1);
             }
         }
         break;
@@ -173,7 +173,7 @@ void CStuntJumpManager::Update() {
             if (vehicle) {
                 CPed* randomPassenger = vehicle->PickRandomPassenger();
                 if (randomPassenger)
-                    randomPassenger->Say(37, 0, 1.0f, 0, 0, 0);
+                    randomPassenger->Say(37);
             }
         }
 
@@ -201,7 +201,7 @@ void CStuntJumpManager::Update() {
         int32 reward = m_iNumCompleted == m_iNumJumps ? 10000 : mp_Active->reward;
         playerInfo->m_nMoney += reward;
 
-        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE, 0.0f, 1.0f);
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PART_MISSION_COMPLETE);
 
         char* bonusMessage = TheText.Get("USJ"); // UNIQUE STUNT BONUS!
         if (bonusMessage)

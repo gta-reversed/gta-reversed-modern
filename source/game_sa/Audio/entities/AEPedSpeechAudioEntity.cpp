@@ -3,6 +3,7 @@
 #include "StdInc.h"
 
 #include "AEPedSpeechAudioEntity.h"
+#include "AEAudioUtility.h"
 
 int16& CAEPedSpeechAudioEntity::s_nCJWellDressed = *(int16*)0xB613D0;
 int16& CAEPedSpeechAudioEntity::s_nCJFat = *(int16*)0xB613D4;
@@ -13,7 +14,7 @@ bool& CAEPedSpeechAudioEntity::s_bForceAudible = *(bool*)0xB613E4;
 bool& CAEPedSpeechAudioEntity::s_bAPlayerSpeaking = *(bool*)0xB613E5;
 bool& CAEPedSpeechAudioEntity::s_bAllSpeechDisabled = *(bool*)0xB613E6;
 int16& CAEPedSpeechAudioEntity::s_ConversationLength = *(int16*)0xB613E8;
-// int16[int8]& CAEPedSpeechAudioEntity::s_Conversation = *(int16[int8]*)0xB613EC;
+int16 (&CAEPedSpeechAudioEntity::s_Conversation)[8] = *(int16(*)[8])0xB613EC;
 bool& CAEPedSpeechAudioEntity::s_bPlayerConversationHappening = *(bool*)0xB613FC;
 bool& CAEPedSpeechAudioEntity::s_bPedConversationHappening = *(bool*)0xB613FD;
 CPed*& CAEPedSpeechAudioEntity::s_pPlayerConversationPed = *(CPed**)0xB61400;
@@ -24,6 +25,7 @@ CPed*& CAEPedSpeechAudioEntity::s_pConversationPed1 = *(CPed**)0xB61410;
 int16& CAEPedSpeechAudioEntity::s_NextSpeechSlot = *(int16*)0xB61414;
 int16& CAEPedSpeechAudioEntity::s_PhraseMemory = *(int16*)0xB61418;
 // CAEPedSpeechAudioEntity::Slot (&CAEPedSpeechAudioEntity::s_PedSpeechSlots)[6] = *(CAEPedSpeechAudioEntity::Slot(*)[6])0xB61C38;
+uint32 (&gGlobalSpeechContextNextPlayTime)[360] = *(uint32(*)[360])0xB61670;
 
 // 0x4E4F10
 CAEPedSpeechAudioEntity::CAEPedSpeechAudioEntity() : CAEAudioEntity() {
@@ -102,7 +104,10 @@ void CAEPedSpeechAudioEntity::Service() {
 
 // 0x4E37B0
 void CAEPedSpeechAudioEntity::Reset() {
-    plugin::Call<0x4E37B0>();
+    for (auto& time : gGlobalSpeechContextNextPlayTime) {
+        time = CTimer::GetTimeInMS() + CAEAudioUtility::GetRandomNumberInRange(3000, 7000);
+    }
+    s_nCJMoodOverrideTime = 0;
 }
 
 // 0x4E37F0
@@ -120,12 +125,16 @@ bool CAEPedSpeechAudioEntity::RequestPlayerConversation(CPed* ped) {
     if (s_bAllSpeechDisabled)
         return false;
 
-    if (   ped->m_pedSpeech.m_bSpeechForScriptsDisabled
-        || ped->m_pedSpeech.m_bSpeechDisabled
-        || !FindPlayerPed()
-        || FindPlayerPed()->m_pedSpeech.m_bSpeechDisabled
-        || FindPlayerPed()->m_pedSpeech.m_bSpeechForScriptsDisabled
-        || s_bPedConversationHappening
+    if (ped->m_pedSpeech.m_bSpeechForScriptsDisabled || ped->m_pedSpeech.m_bSpeechDisabled) {
+        return false;
+    }
+
+    const auto player = FindPlayerPed();
+    if (!player || player->m_pedSpeech.m_bSpeechDisabled || player->m_pedSpeech.m_bSpeechForScriptsDisabled) {
+        return false;
+    }
+
+    if (   s_bPedConversationHappening
         || s_bPlayerConversationHappening
         || ped->GetPedTalking()
         || !CAEPedSpeechAudioEntity::ReservePlayerConversationSpeechSlot()
@@ -150,7 +159,7 @@ void CAEPedSpeechAudioEntity::SetUpConversation() {
 
 // 0x4E3C60
 int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
-    constexpr const char* aAudioPedTypeNames[] = { // 0x8C8108
+    static constexpr const char* aAudioPedTypeNames[] = { // 0x8C8108
         "PED_TYPE_GEN",
         "PED_TYPE_EMG",
         "PED_TYPE_PLAYER",
@@ -159,7 +168,7 @@ int16 CAEPedSpeechAudioEntity::GetAudioPedType(Const char* name) {
         "PED_TYPE_SPC"
     };
 
-    for (auto index = 0; const auto& pedName : aAudioPedTypeNames) {
+    for (int16 index = 0; const auto& pedName : aAudioPedTypeNames) {
         if (!strcmp(name, pedName)) {
             return index;
         }
@@ -285,8 +294,8 @@ bool CAEPedSpeechAudioEntity::CanWePlayGlobalSpeechContext(int16 a2) {
 }
 
 // 0x4E6550
-int16 CAEPedSpeechAudioEntity::AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
-    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, a2, phraseId, a4, a5, a6, a7, a8);
+int16 CAEPedSpeechAudioEntity::AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8) {
+    return plugin::CallMethodAndReturn<int16, 0x4E6550, CAEPedSpeechAudioEntity*, int32, int16, uint32, float, uint8, uint8>(this, audioEvent, phraseId, a4, a5, a6, a7, a8);
 }
 
 // 0x4E68D0
@@ -426,7 +435,7 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     // RH_ScopedInstall(StaticInitialise, 0x5B98C0);
     // RH_ScopedInstall(GetSpecificSpeechContext, 0x4E4470);
     // RH_ScopedInstall(Service, 0x4E3710);
-    // RH_ScopedInstall(Reset, 0x4E37B0);
+    RH_ScopedInstall(Reset, 0x4E37B0);
     // RH_ScopedInstall(ReservePedConversationSpeechSlots, 0x4E37F0);
     // RH_ScopedInstall(ReservePlayerConversationSpeechSlot, 0x4E3870);
     RH_ScopedInstall(RequestPlayerConversation, 0x4E38C0);
@@ -463,14 +472,14 @@ void CAEPedSpeechAudioEntity::InjectHooks() {
     // RH_ScopedInstall(GetSexFromModel, 0x4E4200);
     // RH_ScopedInstall(GetPedTalking, 0x4E3F50);
     // RH_ScopedInstall(GetVoiceAndTypeForSpecialPed, 0x4E4170);
-    // RH_ScopedInstall(UpdateParameters_Reversed, 0x4E3520);
-    // RH_ScopedInstall(AddScriptSayEvent_Reversed, 0x4E4F70);
-    // RH_ScopedInstall(Terminate_Reversed, 0x4E5670);
-    // RH_ScopedInstall(PlayLoadedSound_Reversed, 0x4E5CD0);
-    RH_ScopedInstall(GetAllocatedVoice_Reversed, 0x4E4120);
-    RH_ScopedInstall(WillPedChatAboutTopic_Reversed, 0x4E5800);
-    RH_ScopedInstall(GetPedType_Reversed, 0x4E4130);
-    RH_ScopedInstall(IsPedFemaleForAudio_Reversed, 0x4E4150);
+    // RH_ScopedVirtualInstall(UpdateParameters, 0x4E3520);
+    // RH_ScopedVirtualInstall(AddScriptSayEvent, 0x4E4F70);
+    // RH_ScopedVirtualInstall(Terminate, 0x4E5670);
+    // RH_ScopedVirtualInstall(PlayLoadedSound, 0x4E5CD0);
+    RH_ScopedVirtualInstall(GetAllocatedVoice, 0x4E4120);
+    RH_ScopedVirtualInstall(WillPedChatAboutTopic, 0x4E5800);
+    RH_ScopedVirtualInstall(GetPedType, 0x4E4130);
+    RH_ScopedVirtualInstall(IsPedFemaleForAudio, 0x4E4150);
 }
 
 // 0x4E4F10

@@ -19,11 +19,16 @@ CPlayerPedData::CPlayerPedData() {
     m_pPedClothesDesc = nullptr;
     m_nMeleeWeaponAnimReferenced = 0;
     m_nMeleeWeaponAnimReferencedExtra = 0;
+
     SetInitialState();
+
     m_pSpecialAtomic = nullptr;
+
     m_nFireHSMissilePressedTime = 0;
     m_LastHSMissileTarget = nullptr;
-    m_bLastHSMissileLOS = 0;
+
+    m_nLastHSMissileLOSTime = 0;
+    m_bLastHSMissileLOS = true;
 }
 
 CPlayerPedData *CPlayerPedData::Constructor() {
@@ -98,11 +103,18 @@ void CPlayerPedData::SetInitialState() {
     m_fTimeCanRun = CStats::GetFatAndMuscleModifier(STAT_MOD_TIME_CAN_RUN);
     m_fMoveSpeed = 0.0f;
     m_fBreath = CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG);
+
     m_nFireHSMissilePressedTime = 0;
     m_LastHSMissileTarget = nullptr;
+
     m_pCurrentProstitutePed = nullptr;
     m_pLastProstituteShagged = nullptr;
-    m_nPlayerFlags |= 0x1010;
-    m_bLastHSMissileLOS = 0;
+
+    m_bCanBeDamaged = true;
+    m_bRenderWeapon = true;
+
+    m_nLastHSMissileLOSTime = 0;
+    m_bLastHSMissileLOS = true;
+
     m_nModelIndexOfLastBuildingShot = -1;
 }

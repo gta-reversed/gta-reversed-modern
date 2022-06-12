@@ -77,9 +77,8 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(ClearLook, 0x5E3FF0);
     RH_ScopedInstall(TurnBody, 0x5E4000);
     RH_ScopedInstall(IsPointerValid, 0x5E4220);
-    RH_ScopedInstall(GetBonePosition, 0x5E4280);
+    RH_ScopedOverloadedInstall(GetBonePosition, "", 0x5E4280, void(CPed::*)(RwV3d&, ePedBones, bool));
     RH_ScopedInstall(PutOnGoggles, 0x5E3AE0);
-    // RH_ScopedInstall(SortPeds, 0x5E17E0);
     RH_ScopedInstall(ReplaceWeaponWhenExitingVehicle, 0x5E6490);
     // RH_ScopedInstall(KillPedWithCar, 0x5F0360);
     RH_ScopedInstall(IsPedHeadAbovePos, 0x5F02C0);
@@ -165,59 +164,143 @@ void CPed::InjectHooks() {
     RH_ScopedInstall(SetRadioStation, 0x5DFD90);
     // RH_ScopedInstall(PositionAttachedPed, 0x5DFDF0);
     RH_ScopedInstall(ResetGunFlashAlpha, 0x5DF4E0);
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x5E4880);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x5DEBF0);
-    // RH_ScopedInstall(ProcessControl_Reversed, 0x5E8CD0);
-    RH_ScopedInstall(Teleport_Reversed, 0x5E4110);
-    // RH_ScopedInstall(SpecialEntityPreCollisionStuff_Reversed, 0x5E3C30);
-    // RH_ScopedInstall(SpecialEntityCalcCollisionSteps_Reversed, 0x5E3E90);
-    RH_ScopedInstall(PreRender_Reversed, 0x5E8A20);
-    RH_ScopedInstall(Render_Reversed, 0x5E7680);
-    RH_ScopedInstall(SetupLighting_Reversed, 0x553F00);
-    RH_ScopedInstall(RemoveLighting_Reversed, 0x5533B0);
-    RH_ScopedInstall(FlagToDestroyWhenNextProcessed_Reversed, 0x5E7B70);
-    // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x5E2530);
-    RH_ScopedInstall(SetMoveAnim_Reversed, 0x5E4A00);
-    RH_ScopedInstall(Save_Reversed, 0x5D5730);
-    RH_ScopedInstall(Load_Reversed, 0x5D4640);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x5E4880);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x5DEBF0);
+    // RH_ScopedVirtualInstall(ProcessControl, 0x5E8CD0);
+    RH_ScopedVirtualInstall(Teleport, 0x5E4110);
+    // RH_ScopedVirtualInstall(SpecialEntityPreCollisionStuff, 0x5E3C30);
+    // RH_ScopedVirtualInstall(SpecialEntityCalcCollisionSteps, 0x5E3E90);
+    RH_ScopedVirtualInstall(PreRender, 0x5E8A20);
+    RH_ScopedVirtualInstall(Render, 0x5E7680);
+    RH_ScopedVirtualInstall(SetupLighting, 0x553F00);
+    RH_ScopedVirtualInstall(RemoveLighting, 0x5533B0);
+    RH_ScopedVirtualInstall(FlagToDestroyWhenNextProcessed, 0x5E7B70);
+    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x5E2530);
+    RH_ScopedVirtualInstall(SetMoveAnim, 0x5E4A00);
+    RH_ScopedVirtualInstall(Save, 0x5D5730);
+    RH_ScopedVirtualInstall(Load, 0x5D4640);
 
     RH_ScopedGlobalInstall(SetPedAtomicVisibilityCB, 0x5F0060);
 }
 
-// Most of the variable/flag setting is done in the header
-CPed::CPed(ePedType pedType) : CPhysical{},
-    m_acquaintance{*CPedType::GetPedTypeAcquaintances(pedType)},
-    m_nPedType{ pedType }
-{
-    // Has to be here for now, because it's inited before `m_nPedType` (Which is used in CPedIntel's ctor)
-    m_pIntelligence = new CPedIntelligence{ this };
+// 0x5E8030
+CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
+    m_vecAnimMovingShiftLocal = CVector2D();
 
-    m_fMass = 70.0;
-    m_fTurnMass = 100.0;
-    m_fAirResistance = 1.f / 175.f;
-    m_fElasticity = 0.05f;
+    m_fHealth = 100.0f;
+    m_fMaxHealth = 100.0f;
+    m_fArmour = 0.0f;
 
+    m_nPedType = pedType;
     m_nType = ENTITY_TYPE_PED;
 
     // 0x5E8196
     physicalFlags.bCanBeCollidedWith = true;
     physicalFlags.bDisableTurnForce = true;
 
+    m_nCreatedBy = PED_GAME;
+    m_pVehicle = nullptr;
+    field_52C = 0;
+    field_744 = 0;
+    field_74C = 0;
+    m_nLookTime = 0;
+    m_nDeathTime = 0;
+
+    m_vecAnimMovingShift = CVector2D();
+    field_56C = CVector();
+    field_578 = CVector(0.0f, 0.0f, 1.0f);
+
+    m_nPedState = PEDSTATE_IDLE;
+    m_nMoveState = PEDMOVE_STILL;
+    m_fCurrentRotation = 0.0f;
+    m_fHeadingChangeRate = 15.0f;
+    m_fMoveAnim = 0.1f;
+    m_fAimingRotation = 0.0f;
+    m_standingOnEntity = nullptr;
+    m_nWeaponShootingRate = 40;
+    field_594 = 0;
+    m_pEntityIgnoredCollision = nullptr;
+    m_nSwimmingMoveState = 0;
+    m_pFire = nullptr;
+    field_734 = 1.0f;
+    m_pTargetedObject = nullptr;
+    m_pLookTarget = nullptr;
+    m_fLookDirection = 0.0f;
+    m_pContactEntity = nullptr;
+    field_588 = 99999.992f;
+    m_fMass = 70.0f;
+    m_fTurnMass = 100.0f;
+    m_fAirResistance = 1.f / 175.f;
+    m_fElasticity = 0.05f;
+    m_nBodypartToRemove = -1;
+
     m_weaponAudio.Initialise(this);
     m_pedAudio.Initialise(this);
 
+    m_acquaintance = CPedType::GetPedTypeAcquaintances(m_nPedType);
+    m_nSavedWeapon = WEAPON_UNIDENTIFIED;
+    m_nDelayedWeapon = WEAPON_UNIDENTIFIED;
+    m_nActiveWeaponSlot = 0;
+
+    for (auto& weapon : m_aWeapons ) {
+        weapon.m_nType = WEAPON_UNARMED;
+        weapon.m_nState = WEAPONSTATE_READY;
+        weapon.m_nAmmoInClip = 0;
+        weapon.m_nTotalAmmo = 0;
+        weapon.m_nTimeForNextShot = 0;
+    }
+
+    m_nWeaponSkill = eWeaponSkill::STD;
+    m_nFightingStyle = STYLE_STANDARD;
+    m_nAllowedAttackMoves = 0;
+
     GiveWeapon(WEAPON_UNARMED, 0, true);
+
+    m_nWeaponAccuracy = 60;
+    m_nLastWeaponDamage = -1;
+    m_pLastEntityDamage = nullptr;
+    field_768 = 0;
+    m_pAttachedTo = nullptr;
+    m_nTurretAmmo = 0;
+    field_460 = nullptr;
+    field_468 = 0;
+    m_nWeaponModelId = -1;
+    m_nMoneyCount = 0;
+    field_72F = 0;
+    m_nTimeTillWeNeedThisPed = 0;
+    field_590 = 0;
+
+    m_pWeaponObject = nullptr;
+    m_pGunflashObject = nullptr;
+    m_pGogglesObject = nullptr;
+    m_pGogglesState = nullptr;
+
+    m_nWeaponGunflashAlphaMP1 = 0;
+    m_nWeaponGunFlashAlphaProgMP1 = 0;
+    m_nWeaponGunflashAlphaMP2 = 0;
+    m_nWeaponGunFlashAlphaProgMP2 = 0;
+
+    m_pCoverPoint = nullptr;
+    m_pEnex = nullptr;
+    field_798 = -1;
+
+    m_pIntelligence = new CPedIntelligence(this);
+    m_pPlayerData = nullptr;
 
     if (!IsPlayer()) {
         GetTaskManager().SetTaskSecondary(new CTaskComplexFacial{}, TASK_SECONDARY_FACIAL_COMPLEX);
     }
     GetTaskManager().SetTask(new CTaskSimpleStandStill{ 0, true, false, 8.0 }, TASK_PRIMARY_DEFAULT, false);
 
+    field_758 = 0;
+    m_fRemovalDistMultiplier = 1.0f;
+    m_nSpecialModelIndex = -1;
+
     CPopulation::UpdatePedCount(this, 0);
 
     if (CCheat::IsActive(CHEAT_HAVE_ABOUNTY_ON_YOUR_HEAD)) {
         if (!IsPlayer()) {
-            m_acquaintance.SetAsAcquaintance((AcquaintanceId)4, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
+            GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(ePedType::PED_TYPE_PLAYER1));
 
             CEventAcquaintancePedHate event(FindPlayerPed());
             GetEventGroup().Add(&event);
@@ -297,15 +380,15 @@ void CPed::SetMoveAnim() {
 
     if (m_nSwimmingMoveState == m_nMoveState) {
         switch (m_nMoveState) {
-        case eMoveState::PEDMOVE_WALK:
-        case eMoveState::PEDMOVE_JOG:
-        case eMoveState::PEDMOVE_RUN:
-        case eMoveState::PEDMOVE_SPRINT: {
+        case PEDMOVE_WALK:
+        case PEDMOVE_JOG:
+        case PEDMOVE_RUN:
+        case PEDMOVE_SPRINT: {
             const auto GetAnimId = [this] {
                 switch (m_nMoveState) {
-                case eMoveState::PEDMOVE_RUN:
+                case PEDMOVE_RUN:
                     return ANIM_ID_RUN;
-                case eMoveState::PEDMOVE_SPRINT:
+                case PEDMOVE_SPRINT:
                     return ANIM_ID_SPRINT;
                 }
                 return ANIM_ID_WALK;
@@ -318,17 +401,17 @@ void CPed::SetMoveAnim() {
             break;
         }
         }
-    } else if (m_nMoveState != eMoveState::PEDMOVE_NONE) {
+    } else if (m_nMoveState != PEDMOVE_NONE) {
         m_nSwimmingMoveState = m_nMoveState;
 
         switch (m_nMoveState) { // TODO: What's happening here?
-        case eMoveState::PEDMOVE_WALK:
-        case eMoveState::PEDMOVE_RUN:
-        case eMoveState::PEDMOVE_SPRINT: {
-            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIM_FLAG_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIM_FLAG_PARTIAL)) {
-                if ((assoc->m_nFlags & ANIM_FLAG_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+        case PEDMOVE_WALK:
+        case PEDMOVE_RUN:
+        case PEDMOVE_SPRINT: {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
+                if ((assoc->m_nFlags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                     assoc->m_fBlendDelta = -2.f;
-                    assoc->SetFlag(ANIM_FLAG_FREEZE_LAST_FRAME, true);
+                    assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
                 }
             }
 
@@ -345,35 +428,35 @@ void CPed::SetMoveAnim() {
                 DoUpdateMoveAnim(assoc);
             }
         };
-        
+
         switch (m_nMoveState) {
-        case eMoveState::PEDMOVE_STILL:
+        case PEDMOVE_STILL:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_IDLE, 4.f);
             return;
 
-        case eMoveState::PEDMOVE_TURN_L:
+        case PEDMOVE_TURN_L:
             DoBlendAnim(ANIM_GROUP_DEFAULT, ANIM_ID_TURN_L, 16.f);
             return;
 
-        case eMoveState::PEDMOVE_TURN_R:
+        case PEDMOVE_TURN_R:
             DoBlendAnim(ANIM_GROUP_DEFAULT, ANIM_ID_TURN_R, 16.f);
             return;
 
-        case eMoveState::PEDMOVE_WALK:
+        case PEDMOVE_WALK:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_WALK, 1.f);
             return;
 
-        case eMoveState::PEDMOVE_RUN:
+        case PEDMOVE_RUN:
             DoBlendAnim(m_nAnimGroup, ANIM_ID_RUN, m_nPedState == PEDSTATE_FLEE_ENTITY ? 3.f : 1.f);
             return;
 
-        case eMoveState::PEDMOVE_SPRINT: {
+        case PEDMOVE_SPRINT: {
             // If we're in a group, and our leader is sprinting as well sprinting should be played with a different anim group
             if (CPedGroups::IsInPlayersGroup(this)) {
                 if (const auto leader = CPedGroups::GetPedsGroup(this)->GetMembership().GetLeader()) {
                     switch (leader->m_nMoveState) {
-                    case eMoveState::PEDMOVE_RUN:
-                    case eMoveState::PEDMOVE_SPRINT: {
+                    case PEDMOVE_RUN:
+                    case PEDMOVE_SPRINT: {
                         DoBlendAnim(ANIM_GROUP_PLAYER, ANIM_ID_SPRINT, 1.f);
                         return;
                     }
@@ -385,7 +468,7 @@ void CPed::SetMoveAnim() {
         }
         }
     } else {
-        m_nSwimmingMoveState = eMoveState::PEDMOVE_NONE;
+        m_nSwimmingMoveState = PEDMOVE_NONE;
     }
 }
 
@@ -397,7 +480,7 @@ bool CPed::Load() {
     uint32 size{};
     CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(size));
     CGenericGameStorage::LoadDataFromWorkBuffer(&save, sizeof(save));
-    
+
     assert(size == sizeof(save));
     save.Extract(this);
 
@@ -433,16 +516,16 @@ bool CPed::PedIsReadyForConversation(bool checkLocalPlayerWantedLevel) {
     if (bInVehicle || GetIntelligence()->GetTaskFighting()) {
         return false;
     }
-    
+
     if (checkLocalPlayerWantedLevel && FindPlayerPed()->GetWanted()->m_nWantedLevel) {
         return false;
     }
 
     // If we're doing any of these we don't have the mental power to chat...
     switch (m_nMoveState) {
-    case eMoveState::PEDMOVE_JOG:
-    case eMoveState::PEDMOVE_RUN:
-    case eMoveState::PEDMOVE_SPRINT:
+    case PEDMOVE_JOG:
+    case PEDMOVE_RUN:
+    case PEDMOVE_SPRINT:
         return false;
     }
 
@@ -514,6 +597,17 @@ void CPed::CreateDeadPedPickupCoors(CVector& pickupPos) {
 }
 
 /*!
+* @notsa
+*/
+RpHAnimHierarchy& CPed::GetAnimHierarchy() const {
+    return *GetAnimHierarchyFromSkinClump(m_pRwClump);
+}
+
+CAnimBlendClumpData& CPed::GetAnimBlendData() const {
+    return *RpClumpGetAnimBlendClumpData(m_pRwClump);
+}
+
+/*!
 * @addr 0x4591D0
 * @brief Create weapon/ammo pickups for dead ped
 */
@@ -528,8 +622,8 @@ void CPed::CreateDeadPedWeaponPickups() {
         case WEAPON_DETONATOR:
             continue;
         }
-        
-        if (!wep.m_nTotalAmmo && !wep.IsTypeMelee()) { 
+
+        if (!wep.m_nTotalAmmo && !wep.IsTypeMelee()) {
             continue; // Has no ammo, but isn't a melee weapon.. so it's a weapon with no ammo :D
         }
 
@@ -588,7 +682,7 @@ void CPed::Update()
 * @addr 0x5DEC00
 */
 void CPed::SetMoveState(eMoveState moveState) {
-    m_nMoveState = (int32)moveState;
+    m_nMoveState = moveState;
 }
 
 /*!
@@ -608,8 +702,8 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, false);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, false);
         }
     }
 }
@@ -619,8 +713,8 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, true);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, true);
         }
     }
 }
@@ -628,7 +722,7 @@ void CPed::RestartNonPartialAnims() {
 /*!
 * @addr 0x5DED90
 */
-bool CPed::CanUseTorsoWhenLooking() {
+bool CPed::CanUseTorsoWhenLooking() const {
     switch (m_nPedState) {
     case PEDSTATE_DRIVING:
     case PEDSTATE_DRAGGED_FROM_CAR:
@@ -721,15 +815,15 @@ void CPed::ClearAimFlag() {
 */
 uint8 CPed::GetLocalDirection(const CVector2D& point) {
     float angle;
-    for (angle = point.Heading() - m_fCurrentRotation + RWDEG2RAD(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
-    return ((uint8)RWRAD2DEG(angle) / 90) % 4; // See original code below:
+    for (angle = point.Heading() - m_fCurrentRotation + RadiansToDegrees(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
+    return ((uint8)RadiansToDegrees(angle) / 90) % 4; // See original code below:
 
     // Original R* code - Kinda stupid, we just use modulo instead.
     // int32 dir;
     //for (dir = (int)RWRAD2DEG(angle) / 90; angle > 3; angle -= 4);
     // 0-forward, 1-left, 2-backward, 3-right.
     //return angle;
-} 
+}
 
 /*!
 * @addr 0x5DEFD0
@@ -858,9 +952,9 @@ bool CPed::CanSetPedState() {
     case PEDSTATE_ENTER_CAR:
     case PEDSTATE_CARJACK:
     case PEDSTATE_STEAL_CAR:
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 /*!
@@ -972,7 +1066,7 @@ void CPed::GrantAmmo(eWeaponType weaponType, uint32 ammo) {
     const auto wepSlot = GetWeaponSlot(weaponType);
     if (wepSlot != -1) {
         auto& wepInSlot = GetWeaponInSlot(wepSlot);
-        
+
         wepInSlot.m_nTotalAmmo = std::min(ammo, 99'999u); // Clamp upper
 
         // TODO: Inlined
@@ -1017,25 +1111,22 @@ bool CPed::DoWeHaveWeaponAvailable(eWeaponType weaponType) {
 /*!
 * @addr 0x5DF340
 * @brief Do gun flash by resetting it's alpha to max
-* @returns Always true
 */
-bool CPed::DoGunFlash(int32 arg0, bool bRightHand) {
+void CPed::DoGunFlash(int32 lifetime, bool bRightHand) {
     if (!m_pGunflashObject || !m_pWeaponObject) {
-        return false;
+        return;
     }
 
     // Really elegant.. ;D
     if (bRightHand) {
-        m_nWeaponGunflashAlphaMP2      = m_sGunFlashBlendStart;
-        nm_fWeaponGunFlashAlphaProgMP2 = m_sGunFlashBlendStart / arg0;
+        m_nWeaponGunflashAlphaMP2     = m_sGunFlashBlendStart;
+        m_nWeaponGunFlashAlphaProgMP2 = (uint16)m_sGunFlashBlendStart / lifetime;
     } else {
-        m_nWeaponGunflashAlphaMP1      = m_sGunFlashBlendStart;
-        nm_fWeaponGunFlashAlphaProgMP1 = m_sGunFlashBlendStart / arg0;
+        m_nWeaponGunflashAlphaMP1     = m_sGunFlashBlendStart;
+        m_nWeaponGunFlashAlphaProgMP1 = (uint16)m_sGunFlashBlendStart / lifetime;
     }
-    const auto angle = CGeneral::GetRandomNumberInRange(-360.f, 360.f);
-    RwMatrixRotate(RwFrameGetMatrix(RpClumpGetFrame(m_pGunflashObject)), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
-
-    return true;
+    const auto angle = CGeneral::GetRandomNumberInRange(-360.0f, 360.0f);
+    RwMatrixRotate(RwFrameGetMatrix(m_pGunflashObject), &CPedIK::XaxisIK, angle, rwCOMBINEPRECONCAT);
 }
 
 /*!
@@ -1056,7 +1147,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
     if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
         // They used a clever trick to not have to convert to float..
         // Then they converted to a float to check if the number is higher than 255.. XDDD
-        if (gunFlashAlphaInHand < 0) {
+        if (gunFlashAlphaInHand <= 0) {
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         } else {
             CVehicle::SetComponentAtomicAlpha(atomic, std::min(255, 350 * gunFlashAlphaInHand / m_sGunFlashBlendStart));
@@ -1076,7 +1167,7 @@ void CPed::SetGunFlashAlpha(bool rightHand) {
 void CPed::ResetGunFlashAlpha() {
     if (m_pGunflashObject) {
         if (auto atomic = (RpAtomic*)GetFirstObject(m_pGunflashObject)) {
-            RpAtomicSetFlags(atomic, rpATOMICRENDER);
+            RpAtomicSetFlags(atomic, 0);
             CVehicle::SetComponentAtomicAlpha(atomic, 0);
         }
     }
@@ -1086,7 +1177,7 @@ void CPed::ResetGunFlashAlpha() {
 * @addr 0x5DF510
 * @returns If ped is a player returns stat value BIKE_SKILL, otherwise 1 for mission peds and 0 for all others.
 */
-float CPed::GetBikeRidingSkill() {
+float CPed::GetBikeRidingSkill() const {
     if (m_pPlayerData) {
         return std::min(1000.f, CStats::GetStatValue(eStats::STAT_BIKE_SKILL) / 1000.f);
     }
@@ -1134,7 +1225,7 @@ void CPed::ShoulderBoneRotation(RpClump* clump) {
         breastMat = clavicleMat * breastMat;
 
         // Finally, update it's RW associated matrix
-        breastMat.UpdateRW();      
+        breastMat.UpdateRW();
     }
 }
 
@@ -1198,7 +1289,7 @@ void CPed::SetRadioStation()
 
     if (m_pVehicle->m_pDriver == this) {
         const auto& mi = *(CPedModelInfo*)GetModelInfo();
-        m_pVehicle->m_vehicleAudio.m_settings.m_nRadioID = (rand() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
+        m_pVehicle->m_vehicleAudio.m_Settings.m_nRadioID = (rand() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
     }
 }
 
@@ -1301,7 +1392,7 @@ void CPed::ReleaseCoverPoint() {
 * @returns Any active task of type HOLD_ENTITY, PICKUP_ENTITY, PUTDOWN_ENTITY.
 */
 CTaskSimpleHoldEntity* CPed::GetHoldingTask() {
-    // Man programming in C++03 must've been a pain.. if, if, if, if, if, if... IF. 
+    // Man programming in C++03 must've been a pain.. if, if, if, if, if, if... IF.
     if (const auto task = GetTaskManager().FindActiveTaskFromList({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
         return task->As<CTaskSimpleHoldEntity>();
     }
@@ -1393,11 +1484,11 @@ float CPed::GetWalkAnimSpeed() {
     //       It won't work correctly if first frame is not a root frame, nor if the animation happens on any other axis than Y, etc..
 
     const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
-    const auto lastFrameY = firstSequence.m_isRoot ? 
-        lastFrame->m_vecTranslation.y :
-        ((CAnimSequenceChildFrameUncompressed*)lastFrame)->m_quat.imag.y;
+    const auto lastFrameY = firstSequence.m_isRoot
+                                ? lastFrame->translation.y
+                                : ((KeyFrame*)lastFrame)->rotation.imag.y;
 
-    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->m_vecTranslation.y) / hier->m_fTotalTime;
+    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->translation.y) / hier->m_fTotalTime;
 }
 
 /*!
@@ -1517,7 +1608,7 @@ bool CPed::OurPedCanSeeThisEntity(CEntity* entity, bool isSpotted) {
     if (entity->IsPed()) {
         target.z += 1.f; // Adjust for head pos?
     }
-    
+
     // Seems like they explicitly use this one instead of `IsLineOfSightClear` because of the `shootThru` check.
     CColPoint cp{};
     CEntity* hitEntity{};
@@ -1580,7 +1671,7 @@ void CPed::ProcessBuoyancy()
     CVector vecBuoyancyForce;
     if (!mod_Buoyancy.ProcessBuoyancy(this, fBuoyancy, &vecBuoyancyTurnPoint, &vecBuoyancyForce)) {
         physicalFlags.bTouchingWater = false;
-        auto swimTask = m_pIntelligence->GetTaskSwim();
+        auto swimTask = GetIntelligence()->GetTaskSwim();
         if (swimTask)
             swimTask->m_fSwimStopTime = 1000.0F;
 
@@ -1593,7 +1684,7 @@ void CPed::ProcessBuoyancy()
             auto pStandingOnVehicle = standingOnEntity->AsVehicle();
             if (pStandingOnVehicle->IsBoat() && !pStandingOnVehicle->physicalFlags.bDestroyed) {
                 physicalFlags.bSubmergedInWater = false;
-                auto swimTask = m_pIntelligence->GetTaskSwim();
+                auto swimTask = GetIntelligence()->GetTaskSwim();
                 if (!swimTask)
                     return;
 
@@ -1660,12 +1751,12 @@ void CPed::ProcessBuoyancy()
             GetEventGroup().Add(&cEvent, false);
         }
         else {
-            auto swimTask = m_pIntelligence->GetTaskSwim();
+            auto swimTask = GetIntelligence()->GetTaskSwim();
             if (swimTask) {
                 swimTask->m_fSwimStopTime = 0.0F;
                 bPlayerSwimmingOrClimbing = true;
             }
-            else if (m_pIntelligence->GetTaskClimb()) {
+            else if (GetIntelligence()->GetTaskClimb()) {
                 bPlayerSwimmingOrClimbing = true;
             }
             else {
@@ -1687,7 +1778,7 @@ void CPed::ProcessBuoyancy()
         return;
     }
 
-    auto swimTask = m_pIntelligence->GetTaskSwim();
+    auto swimTask = GetIntelligence()->GetTaskSwim();
     if (bIsStanding && swimTask)
     {
         swimTask->m_fSwimStopTime += CTimer::GetTimeStep();
@@ -1733,7 +1824,7 @@ void CPed::RemoveWeaponModel(int32 modelIndex) {
             || CModelInfo::GetModelInfo(modelIndex) == CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)
         ) {
             // Release model info
-            CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef(); 
+            CVisibilityPlugins::GetClumpModelInfo(m_pWeaponObject)->RemoveRef();
 
             // Remove atomics anim from skin
             if (const auto atomic = GetFirstAtomic(m_pWeaponObject)) {
@@ -1776,13 +1867,13 @@ void CPed::AddGogglesModel(int32 modelIndex, bool& inOutGogglesState) {
 void CPed::PutOnGoggles() {
     auto& wepInSlot = GetWeaponInSlot(GetWeaponSlot(WEAPON_INFRARED));
 
-    // Game checks if wepInSlot.m_nType != UNARMED here, not sure why? Probably compiler mistake on switch case codegen.. 
+    // Game checks if wepInSlot.m_nType != UNARMED here, not sure why? Probably compiler mistake on switch case codegen..
 
     switch (wepInSlot.m_nType) {
     case WEAPON_INFRARED:
     case WEAPON_NIGHTVISION: {
 
-        // Add(load) googles model and enable PostFX 
+        // Add(load) googles model and enable PostFX
         const auto DoAddGogglesModel = [&, this](bool& state) {
             AddGogglesModel(wepInSlot.GetWeaponInfo().m_nModelId1, state);
         };
@@ -1951,11 +2042,11 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
     }
 
     if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
-        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questinable whenever that's needed at all..)
+        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
-        assert(0); // Let's see if this is possible at all. 
+        assert(0); // Let's see if this is possible at all.
     }
 }
 
@@ -2031,7 +2122,7 @@ void CPed::CalculateNewVelocity()
 * @addr 0x5E52E0
 */
 void CPed::CalculateNewOrientation() {
-    if (CReplay::Mode != REPLAY_MODE_1 && IsPedInControl()) {
+    if (CReplay::Mode != MODE_PLAYBACK && IsPedInControl()) {
         SetOrientation(0.f, 0.f, m_fCurrentRotation);
     }
 }
@@ -2045,7 +2136,7 @@ void CPed::ClearAll() {
         bHitSteepSlope = false;
         bCrouchWhenScared = false;
         m_nPedState = PEDSTATE_NONE;
-        m_nMoveState = eMoveState::PEDMOVE_NONE;
+        m_nMoveState = PEDMOVE_NONE;
         m_pEntityIgnoredCollision = nullptr;
     }
 }
@@ -2109,13 +2200,13 @@ void CPed::PlayFootSteps() {
     CAnimBlendAssociation* walkAssoc{};
     auto* lastAssoc = &anim;
     do { // 0x5E58A1
-        if (lastAssoc->m_nFlags & ANIM_FLAG_WALK) {
+        if (lastAssoc->m_nFlags & ANIMATION_WALK) {
             walkBlendTotal += lastAssoc->m_fBlendAmount;
             walkAssoc = lastAssoc;
         } else {
-            if ((lastAssoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+            if ((lastAssoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
-                    if (lastAssoc->m_nFlags & ANIM_FLAG_PARTIAL || bIsDucking) {
+                    if (lastAssoc->m_nFlags & ANIMATION_PARTIAL || bIsDucking) {
                         idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
@@ -2218,10 +2309,10 @@ void CPed::PlayFootSteps() {
                 };
 
                 switch (m_nMoveState) {
-                case eMoveState::PEDMOVE_RUN:
+                case PEDMOVE_RUN:
                     DoAddMovingFootStepAE(-6.f, 1.1f);
                     break;
-                case eMoveState::PEDMOVE_SPRINT:
+                case PEDMOVE_SPRINT:
                     DoAddMovingFootStepAE(0.f, 1.2f);
                     break;
                 default:
@@ -2258,8 +2349,8 @@ void CPed::PlayFootSteps() {
 
             const auto isWearingBalaclava = pd->m_pPedClothesDesc->GetIsWearingBalaclava();
             switch (m_nMoveState) {
-            case eMoveState::PEDMOVE_JOG:   // 0x5E5BAD -- hehehe, 0x 5E5 - BAD
-            case eMoveState::PEDMOVE_RUN: { // 0x5E5BB6
+            case PEDMOVE_JOG:   // 0x5E5BAD -- hehehe, 0x 5E5 - BAD
+            case PEDMOVE_RUN: { // 0x5E5BB6
                 // 0x5E5BDD
                 if (pd->m_fMoveBlendRatio >= 2.f) {
                     DoEventSoundQuiet(isWearingBalaclava ? 55.f : 45.f);
@@ -2280,7 +2371,7 @@ void CPed::PlayFootSteps() {
                 }
                 break;
             }
-            case eMoveState::PEDMOVE_SPRINT: { // 0x5E5BBB 
+            case PEDMOVE_SPRINT: { // 0x5E5BBB
                 DoEventSoundQuiet(isWearingBalaclava ? 65.f : 55.f);
                 break;
             }
@@ -2448,7 +2539,6 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
     GiveWeapon(WEAPON_RLAUNCHER, 200, true);
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
-    GiveWeapon(WEAPON_INFRARED, 200, true);
 }
 
 /*!
@@ -2464,7 +2554,6 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
     GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
-    GiveWeapon(WEAPON_NIGHTVISION, 200, true);
 }
 
 /*!
@@ -2478,6 +2567,16 @@ void CPed::GiveWeaponSet3() {
     GiveWeapon(WEAPON_MP5, 100, true);
     GiveWeapon(WEAPON_M4, 150, true);
     GiveWeapon(WEAPON_RLAUNCHER_HS, 200, true);
+}
+
+/*!
+ * @notsa
+ */
+void CPed::GiveWeaponSet4() {
+    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
+    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
+    GiveWeapon(WEAPON_MINIGUN, 500, true);
+    GiveWeapon(WEAPON_DILDO2, 0, true);
 }
 
 /*!
@@ -2552,8 +2651,8 @@ void CPed::ClearWeapon(eWeaponType weaponType)
 */
 void CPed::ClearWeapons()
 {
-    CPed::RemoveWeaponModel(MODEL_INVALID);
-    CPed::RemoveGogglesModel();
+    RemoveWeaponModel(MODEL_INVALID);
+    RemoveGogglesModel();
     for (auto& m_aWeapon : m_aWeapons) {
         m_aWeapon.Shutdown();
     }
@@ -2638,7 +2737,7 @@ void CPed::RemoveWeaponForScriptedCutscene()
 {
     if (m_nSavedWeapon != WEAPON_UNIDENTIFIED) {
         CWeaponInfo* weaponInfo = CWeaponInfo::GetWeaponInfo(m_nSavedWeapon, eWeaponSkill::STD);
-        CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
+        SetCurrentWeapon(weaponInfo->m_nSlot);
         m_nSavedWeapon = WEAPON_UNIDENTIFIED;
     }
 }
@@ -2730,6 +2829,7 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
 
     // BUG/NOTE: ClearReference not called here?
     m_pAttachedTo = entity->AsPhysical();
+    assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
 
     m_vecTurretOffset = offset;
@@ -2760,7 +2860,7 @@ CEntity* CPed::AttachPedToEntity(CEntity* entity, CVector offset, uint16 turretA
         }
 
         m_pPlayerData->m_nChosenWeapon = weaponType;
-        
+
         if (weaponType == WEAPON_CAMERA) {
             TheCamera.SetNewPlayerWeaponMode(eCamMode::MODE_CAMERA);
         } else {
@@ -2977,10 +3077,10 @@ void CPed::GiveWeaponWhenJoiningGang()
                 weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_RLAUNCHER, eWeaponSkill::STD);
             }
             else {
-                CPed::GiveDelayedWeapon(WEAPON_PISTOL, 200);
+                GiveDelayedWeapon(WEAPON_PISTOL, 200);
                 weaponInfo = CWeaponInfo::GetWeaponInfo(WEAPON_PISTOL, eWeaponSkill::STD);
             }
-            CPed::SetCurrentWeapon(weaponInfo->m_nSlot);
+            SetCurrentWeapon(weaponInfo->m_nSlot);
         }
     }
 }
@@ -3036,11 +3136,13 @@ void CPed::SayScript(int32 arg0, uint8 arg1, uint8 arg2, uint8 arg3) {
 
 /*!
 * @addr 0x5EFFE0
+* @returns Played soundID - TODO: I'm not sure about this..
 */
-void CPed::Say(uint16 arg0, uint32 arg1, float arg2, uint8 arg3, uint8 arg4, uint8 arg5)
-{
-    if (arg0) {
-        m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, arg0, arg1, arg2, arg3, arg4, arg5);
+int16 CPed::Say(uint16 phraseId, uint32 offset, float arg2, uint8 arg3, uint8 arg4, uint8 arg5) {
+    if (phraseId) {
+        return m_pedSpeech.AddSayEvent(eAudioEvents::AE_SPEECH_PED, phraseId, offset, arg2, arg3, arg4, arg5);
+    } else {
+        return -1;
     }
 }
 
@@ -3096,7 +3198,7 @@ uint8 CPed::DoesLOSBulletHitPed(CColPoint& colPoint) {
     // TODO: Doesn't this just return the position of the matrix? Eg.: `BoneMatrix.pos` ?
     RwV3dTransformPoint(&headPos, &zero, &GetBoneMatrix((ePedBones)m_apBones[ePedNode::PED_NODE_HEAD]->m_nNodeId));
 
-    if (m_nPedState == PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust 
+    if (m_nPedState == PEDSTATE_FALL || colPoint.m_vecPoint.z < headPos.z) { // Ped falling, adjust
         return 1;
     } else if (headPos.z + 0.2f <= colPoint.m_vecPoint.z) {
         return 0;
@@ -3116,8 +3218,8 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
-            if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL)) {
+            assoc->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((assoc->m_nFlags & ANIMATION_PARTIAL)) {
                 assoc->m_fBlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;
@@ -3188,7 +3290,7 @@ void CPed::DeadPedMakesTyresBloody() {
 
 /*!
 * @notsa
-* @returns If player is in a vehicle that has a driver as a passenger 
+* @returns If player is in a vehicle that has a driver as a passenger
 */
 bool CPed::IsInVehicleThatHasADriver() {
     if (bInVehicle) { // todo: IsInVehicleAsPassenger - Before refactoring check if `IsPassanger` returns true if `this` is the driver.
@@ -3210,7 +3312,7 @@ bool CPed::IsFollowerOfGroup(const CPedGroup& group) {
 * @notsa
 * @returns Bone transformation matrix in object space. To transform to world space ped's matrix must be used as well.
 */
-RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const { 
+RwMatrix& CPed::GetBoneMatrix(ePedBones bone) const {
     const auto hierarchy = GetAnimHierarchyFromClump(m_pRwClump);
     return RpHAnimHierarchyGetMatrixArray(hierarchy)[RpHAnimIDGetIndex(hierarchy, (size_t)bone)];
 }
@@ -3227,38 +3329,38 @@ void CPed::SetModelIndex(uint32 modelIndex) {
     RpAnimBlendClumpInit(m_pRwClump);
     RpAnimBlendClumpFillFrameArray(m_pRwClump, m_apBones.data());
 
-    auto& mi = *(CPedModelInfo*)GetModelInfo();
+    auto* mi = GetModelInfo()->AsPedModelInfoPtr();
 
-    SetPedStats(mi.m_nStatType);
+    SetPedStats(mi->m_nStatType);
     RestoreHeadingRate();
 
     SetPedDefaultDecisionMaker();
 
     // Set random money count
-    const auto GetRandomMoneyCount = [this] {
+    const auto GetRandomMoneyCount = [this]() -> int16 {
         if (CGeneral::GetRandomNumberInRange(0.f, 100.f) < 3.f) { // Moved up here
             return 400;
         } else if (CPopCycle::IsPedInGroupTheseGroups(m_nModelIndex, { POPCYCLE_GROUP_BUSINESS, POPCYCLE_GROUP_CASUAL_RICH })) {
-            return rand() % 50 + 20;
+            return CGeneral::GetRandomNumber() % 50 + 20;
         } else {
-            return rand() % 25;
+            return CGeneral::GetRandomNumber() % 25;
         }
     };
     m_nMoneyCount = GetRandomMoneyCount();
 
-    m_nAnimGroup = mi.m_nAnimType;
+    m_nAnimGroup = mi->m_nAnimType;
     CAnimManager::AddAnimation(m_pRwClump, m_nAnimGroup, ANIM_ID_IDLE);
 
-    if (CanUseTorsoWhenLooking()) {
+    if (!CanUseTorsoWhenLooking()) {
         m_pedIK.bTorsoUsed = true;
     }
 
     // Deal with animation stuff once again
-    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_pvecPedPosition = (CVector*)&m_vecAnimMovingShiftLocal; // TODO: Is this correct?
+    RpClumpGetAnimBlendClumpData(m_pRwClump)->m_PedPosition = (CVector*)&m_vecAnimMovingShiftLocal;
 
     // Create hit col model
-    if (!mi.m_pHitColModel) {
-        mi.CreateHitColModelSkinned(m_pRwClump);
+    if (!mi->m_pHitColModel) {
+        mi->CreateHitColModelSkinned(m_pRwClump);
     }
 
     // And finally update our rph anim
@@ -3296,6 +3398,7 @@ void CPed::Teleport(CVector destination, bool resetRotation) {
     SetPosn(destination);
     bIsStanding = false;
     ClearReference(m_pDamageEntity);
+    // todo: m_pDamageEntity = nullptr;
     CWorld::Add(this);
 
     m_vecMoveSpeed.Reset();
@@ -3378,6 +3481,9 @@ void CPed::Render() {
         }
     }
 
+    RenderBigHead();
+    RenderThinBody();
+
     // 0x5E77E3
     // Render us (And any extra FX)
     if (CPostEffects::IsVisionFXActive()) {
@@ -3423,7 +3529,7 @@ void CPed::Render() {
     // 0x5E7927
     // Render JetPack (if any)
     if (const auto task = GetIntelligence()->GetTaskJetPack()) {
-        task->Process(this);
+        task->RenderJetPack(this);
     }
 
     bHasBeenRendered = true;
@@ -3435,9 +3541,47 @@ void CPed::Render() {
     }
 }
 
+// https://github.com/gennariarmando/bobble-heads
+// NOTSA
+void CPed::RenderBigHead() const {
+    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+        return;
+
+    auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
+    auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
+
+    const float scale = 3.0f;
+    const CVector s = { scale, scale, scale };
+    CVector t = { 0.0f, -(scale / 6.0f) / 10.0f, 0.0f };
+
+    for (auto& bone : { BONE_L_BROW, BONE_R_BROW, BONE_JAW }) {
+        auto index = RpHAnimIDGetIndex(hier, bone);
+        if (RwMatrix* mat = &matrices[index]) {
+            RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+            if (bone == BONE_JAW) {
+                t.x = ((scale / 8.0f) / 10.0f) / 8.0f;
+                t.y /= 8.0f;
+            }
+            RwMatrixTranslate(mat, &t, rwCOMBINEPRECONCAT);
+        }
+    }
+
+    auto index = RpHAnimIDGetIndex(hier, BONE_HEAD);
+    if (RwMatrix* mat = &matrices[index]) {
+        RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+    }
+}
+
+// NOTSA
+void CPed::RenderThinBody() const {
+    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+        return;
+
+}
+
 /*!
-* @addr 0x553F00
-*/
+ * @addr 0x553F00
+ */
 bool CPed::SetupLighting() {
   ActivateDirectional();
   return CRenderer::SetupLightingForEntity(this);
@@ -3461,27 +3605,27 @@ void CPed::RemoveLighting(bool bRemove) {
 * @addr 0x5E7B70
 */
 void CPed::FlagToDestroyWhenNextProcessed() {
-    if (!bInVehicle) {
-        return;
-    }
+    m_bRemoveFromWorld = true;
 
-    if (!m_pVehicle) {
+    if (!IsInVehicle()) {
         return;
     }
 
     if (m_pVehicle->IsDriver(this)) {
         ClearReference(m_pVehicle->m_pDriver);
-        if (IsPlayer() || m_pVehicle->m_nStatus != STATUS_WRECKED) {
+        if (IsPlayer() && m_pVehicle->m_nStatus != STATUS_WRECKED) {
             m_pVehicle->m_nStatus = STATUS_ABANDONED;
         }
     } else {
         m_pVehicle->RemovePassenger(this);
     }
+
     bInVehicle = false;
 
     if (IsVehiclePointerValid(m_pVehicle)) {
-        ClearReference(m_pVehicle);
+        SafeCleanUpRef(m_pVehicle);
     }
+
     m_pVehicle = nullptr;
 
     SetPedState(IsCreatedByMission() ? PEDSTATE_DEAD : PEDSTATE_NONE);
@@ -3498,4 +3642,45 @@ int32 CPed::ProcessEntityCollision(CEntity* entity, CColPoint* colPoint)
 // NOTSA
 bool CPed::IsInVehicleAsPassenger() const noexcept {
     return bInVehicle && m_pVehicle && m_pVehicle->m_pDriver != this;
+}
+
+CVector CPed::GetBonePosition(ePedBones boneId, bool updateSkinBones) {
+    CVector pos;
+    GetBonePosition(pos, boneId, updateSkinBones);
+    return pos;
+}
+
+// 0x6497A0
+bool SayJacked(CPed* jacked, CVehicle* vehicle, uint32 offset) {
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
+        return jacked->Say(119u, offset) != -1;
+    else
+        return jacked->Say(118u, offset) != -1;
+}
+
+// 0x6497F0
+bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset) {
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio() == 1)
+        return jacker->Say(121u, offset) != -1;
+
+    if (vehicle->m_vehicleAudio.GetVehicleTypeForAudio())
+        return jacker->Say(124u, offset) != -1;
+
+    if (jacked->m_pedSpeech.IsPedFemaleForAudio())
+        return jacker->Say(122u, offset) != -1;
+
+    return jacker->Say(123u, offset) != -1;
+}
+
+// NOTSA
+int32 CPed::GetPadNumber() const {
+    switch (m_nPedType) {
+    case PED_TYPE_PLAYER1:
+        return 0;
+    case PED_TYPE_PLAYER2:
+        return 1;
+    default:
+        assert(true && "Inappropriate usage of GetPadNumber");
+        return 0;
+    }
 }

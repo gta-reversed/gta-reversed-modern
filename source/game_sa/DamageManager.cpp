@@ -219,7 +219,7 @@ void CDamageManager::SetAeroplaneCompStatus(uint8 frame, ePanelDamageState statu
 }
 
 // 0x6C22C0
-uint8 CDamageManager::GetEngineStatus() {
+uint32 CDamageManager::GetEngineStatus() {
     return m_nEngineStatus;
 }
 
@@ -398,17 +398,13 @@ bool CDamageManager::GetComponentGroup(tComponent nComp, tComponentGroup& outCom
 
 // NOTSA
 void CDamageManager::SetAllWheelsState(eCarWheelStatus state) {
-    constexpr eCarWheel wheels[]{
-        CARWHEEL_FRONT_LEFT,
-        CARWHEEL_REAR_LEFT,
-        CARWHEEL_FRONT_RIGHT,
-        CARWHEEL_REAR_RIGHT
-    };
+    constexpr eCarWheel wheels[]{CAR_WHEEL_FRONT_LEFT, CAR_WHEEL_REAR_LEFT, CAR_WHEEL_FRONT_RIGHT, CAR_WHEEL_REAR_RIGHT};
     for (auto&& wheel : wheels) {
         SetWheelStatus(wheel, state);
     }
 }
 
+// NOTSA
 void CDamageManager::SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status) {
     for (auto&& door : doors) {
         SetDoorStatus(door, status);
@@ -489,7 +485,7 @@ void CDamageManager::SetDoorOpen(eDoors door) {
         SetDoorStatus(door, eDoorStatus::DAMSTATE_OPENED_DAMAGED);
         break;
     case eDoorStatus::DAMSTATE_NOTPRESENT:
-        assert(0 && "Door should be present @ SetDoorOpen");
+        //assert(0 && "Door should be present @ SetDoorOpen");
         break;
     }
 }

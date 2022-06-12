@@ -14,9 +14,9 @@ void CTaskComplexInAirAndLand::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x678C80);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x67CC30);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x67CCB0);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x67D230);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x67CC30);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x67CCB0);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x67D230);
 }
 
 CTaskComplexInAirAndLand* CTaskComplexInAirAndLand::Constructor(bool bUsingJumpGlide, bool bUsingFallGlide) {
@@ -63,7 +63,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
         if (m_bUsingFallGlide) {
             if (subTask->m_pAnim) {
-                subTask->m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                subTask->m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 subTask->m_pAnim->m_fBlendDelta = -8.0F;
                 subTask->m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 subTask->m_pAnim = nullptr;
@@ -78,7 +78,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
             else
                 newTask = new CTaskSimpleLand(ANIM_ID_FALL_COLLAPSE);
 
-            ped->m_pedAudio.AddAudioEvent(59, 0.0F, 1.0F, 0, 0, 0, 0);
+            ped->m_pedAudio.AddAudioEvent(AE_PED_COLLAPSE_AFTER_FALL, 0.0F, 1.0F, 0, 0, 0, 0);
 
             if (ped->m_pPlayerData) {
                 CVector          empty{};
@@ -104,7 +104,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
             auto newTask = new CTaskSimpleLand(landAnimId);
 
-            ped->m_pedAudio.AddAudioEvent(58, 0.0F, 1.0F, 0, 0, 0, 0);
+            ped->m_pedAudio.AddAudioEvent(AE_PED_LAND_ON_FEET_AFTER_FALL, 0.0F, 1.0F, 0, 0, 0, 0);
 
             if (ped->m_pPlayerData) {
                 CVector          empty{};

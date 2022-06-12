@@ -29,10 +29,8 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-const char gta_empty_string[4] = {0, 0, 0, 0};
-
-#define DEFAULT_SCREEN_WIDTH (640.0f)
-#define DEFAULT_SCREEN_HEIGHT (448.0f)
+#define DEFAULT_SCREEN_WIDTH  (640)
+#define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
 #define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
 #define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
@@ -48,13 +46,13 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
-#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH / DEFAULT_SCREEN_WIDTH)
-#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / DEFAULT_SCREEN_HEIGHT)
+#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH  / (float) DEFAULT_SCREEN_WIDTH) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / (float) DEFAULT_SCREEN_HEIGHT)
 #define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
 #define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
 
 // This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)) // RsGlobal.maximumWidth * 0.0015625 * value
+#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
 #define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
 #define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
 #define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
@@ -66,9 +64,19 @@ const char gta_empty_string[4] = {0, 0, 0, 0};
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+#define PUSH_RENDERGROUP(str) 0
+#define POP_RENDERGROUP() 0
+
+constexpr auto BUILD_NAME_FULL = "TEST";
+
 extern int32 gDefaultTaskTime;
 
-extern char *gString; // char gString[200]
+static inline char (&gString)[352] = *(char(*)[352])0xB71670;
+static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
+
+static inline char (&gGxtString)[552] = *(char(*)[552])0xC1B100;
+static inline char (&gGxtString2)[552] = *(char(*)[552])0xC1AED8;
+static inline char (&GxtErrorString)[32] = *(char(*)[32])0xC1AEB8;
 
 extern float &GAME_GRAVITY; // default 0.008f
 
@@ -85,14 +93,46 @@ extern uint32 &ClumpOffset;
 
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
-constexpr float TWO_PI = 6.28318530718f;
-constexpr float PI = 3.14159265358979323846f;
-constexpr float HALF_PI = PI / 2.0f;
-constexpr float LOG10_2 = 0.30102999566398119802f; // log10(2)
-constexpr float SQRT_2 = 1.41421356237309504880f;
-constexpr float SQRT_3 = 1.73205080757f;
-constexpr float SIN_PI = 0.0f; // std::sin(PI);
-constexpr float COS_PI = -1.0f; // std::cos(PI);
+constexpr float E              = 2.71828f;          // e
+constexpr float E_CONST        = 0.577f;            // Euler-Mascheroni constant
+constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
+constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
+constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ
+constexpr float FRAC_2_PI      = 0.636619f;         // 2 / π
+constexpr float FRAC_2_SQRT_PI = 1.12837f;          // 2 / √π
+constexpr float FRAC_4_TAU     = 0.636619f;         // 4 / τ
+constexpr float FRAC_1_SQRT_2  = 0.707106f;         // 1 / √2
+constexpr float FRAC_PI_2      = 1.57079f;          // π / 2
+constexpr float FRAC_PI_3      = 1.04719f;          // π / 3
+constexpr float FRAC_PI_4      = 0.785398f;         // π / 4
+constexpr float FRAC_PI_6      = 0.523598f;         // π / 6
+constexpr float FRAC_PI_8      = 0.392699f;         // π / 8
+constexpr float FRAC_TAU_2     = 3.14159f;          // τ / 2
+constexpr float FRAC_TAU_3     = 2.09439f;          // τ / 3
+constexpr float FRAC_TAU_4     = 1.57079f;          // τ / 4
+constexpr float FRAC_TAU_6     = 1.04719f;          // τ / 6
+constexpr float FRAC_TAU_8     = 0.785398f;         // τ / 8
+constexpr float FRAC_TAU_12    = 0.523598f;         // τ / 12
+constexpr float LN_2           = 0.693147f;         // ln(2)
+constexpr float LN_10          = 2.30258f;          // ln(10)
+constexpr float LOG2_E         = 1.44269f;          // log2(e)
+constexpr float LOG10_E        = 0.434294f;         // log10(e)
+constexpr float LOG10_2        = 0.301029f;         // log10(2)
+constexpr float LOG2_10        = 3.32192f;          // log2(10)
+constexpr float PI             = 3.14159f;          // π
+constexpr float HALF_PI        = PI / 2.0f;         // π / 2
+constexpr float SQRT_2         = 1.41421f;          // √2
+constexpr float SQRT_3         = 1.73205f;          // √3
+constexpr float SIN_PI         = 0.0f;              // sin(π);
+constexpr float COS_PI         = -1.0f;             // cos(π);
+constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
+
+constexpr float sq(float x) { return x * x; }
+
+struct SpriteFileName {
+    const char* name;
+    const char* alpha;
+};
 
 void InjectCommonHooks();
 
@@ -207,14 +247,6 @@ char *MakeUpperCase(char *dest, const char *src);
 bool EndsWith(const char* str, const char* with, bool caseSensitive = true);
 
 class CEventGlobalGroup* GetEventGlobalGroup();
-// dummy function
-void CreateDebugFont();
-// dummy function
-void DestroyDebugFont();
-// dummy function
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2);
-// dummy function
-void FlushObrsPrintfs();
 void DefinedState();
 void DefinedState2d();
 
@@ -263,7 +295,7 @@ void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
 void ActivateDirectional();
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0);
+void SetAmbientColoursToIndicateRoadGroup(int32 idx);
 void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);
