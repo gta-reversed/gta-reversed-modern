@@ -15,7 +15,7 @@ void CTaskSimpleCarDrive::InjectHooks() {
     //RH_ScopedInstall(StartBopping, 0x642760);
     //RH_ScopedInstall(ProcessHeadBopping, 0x6428C0);
     //RH_ScopedInstall(ProcessArmBopping, 0x642AE0);
-    //RH_ScopedInstall(ProcessBopping, 0x642E70);
+    RH_ScopedInstall(ProcessBopping, 0x642E70);
     //RH_ScopedInstall(Clone_Reversed, 0x63DC20);
     RH_ScopedInstall(GetTaskType_Reversed, 0x63C450);
     //RH_ScopedInstall(MakeAbortable_Reversed, 0x63C670);
@@ -48,7 +48,7 @@ void CTaskSimpleCarDrive::TriggerIK(CPed* ped) {
     case MISSION_RAMPLAYER_CLOSE:
     case MISSION_BLOCKPLAYER_FARAWAY:
     case MISSION_BLOCKPLAYER_CLOSE:
-    case MISSION_BLOCKPLAYER_HANDBRAKESTOP: { // Make ped look at player ped 
+    case MISSION_BLOCKPLAYER_HANDBRAKESTOP: { // Make ped look at player ped
         g_ikChainMan.LookAt("DriveCar", ped, FindPlayerPed(), 3000, BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
         break;
     }
@@ -86,13 +86,32 @@ void CTaskSimpleCarDrive::ProcessHeadBopping(CPed* ped, uint8 a3, float a4) {
 }
 
 // 0x642AE0
-void CTaskSimpleCarDrive::ProcessArmBopping(CPed* pPed, uint8 a3, float a4) {
-    plugin::CallMethod<0x642AE0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, pPed, a3, a4);
+void CTaskSimpleCarDrive::ProcessArmBopping(CPed* ped, uint8 a3, float a4) {
+    plugin::CallMethod<0x642AE0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, ped, a3, a4);
 }
 
 // 0x642E70
-void CTaskSimpleCarDrive::ProcessBopping(CPed* a2, uint8 a3) {
-    plugin::CallMethod<0x642E70, CTaskSimpleCarDrive*, CPed*, uint8>(this, a2, a3);
+void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, uint8 a3) {
+    if (ped->m_pVehicle->m_pDriver == FindPlayerPed(0)
+        || ped->m_nPedType == PED_TYPE_COP
+        || ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP)
+    ) {
+        return;
+    }
+
+    auto* vehicle = ped->m_pVehicle;
+    if (vehicle->IsAutomobile() && !vehicle->IsSubQuad() && !ped->IsCreatedByMission()) {
+        if (m_nBoppingStartTime != -1) { // IsBopping
+            UpdateBopping();
+        }
+
+        auto dist = (ped->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude();
+        ProcessHeadBopping(ped, a3, dist);
+        ProcessArmBopping(ped, a3, dist);
+        if (m_nBoppingStartTime != -1 && !m_b01 && !m_b02) {
+            m_nBoppingStartTime = -1;
+        }
+    }
 }
 
 // 0x63DC20
@@ -114,4 +133,3 @@ bool CTaskSimpleCarDrive::ProcessPed(CPed* ped) {
 bool CTaskSimpleCarDrive::SetPedPosition(CPed* ped) {
     return plugin::CallMethodAndReturn<bool, 0x63C770, CTaskSimpleCarDrive*, CPed*>(this, ped);
 }
-

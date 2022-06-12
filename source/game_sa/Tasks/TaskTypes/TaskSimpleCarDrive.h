@@ -58,23 +58,14 @@ public:
     void ProcessArmBopping(CPed* pPed, uint8 a3, float a4);
     void ProcessBopping(CPed* ped, uint8 a3);
 
-    auto GetVehicle() const { return m_pVehicle; }
+    [[nodiscard]] auto GetVehicle() const { return m_pVehicle; }
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskSimpleCarDrive* Constructor(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle);
-    CTaskSimpleCarDrive* Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, int8_t bUpdateCurrentVehicle) {
-        this->CTaskSimpleCarDrive::CTaskSimpleCarDrive(pVehicle, pUtilityTask, bUpdateCurrentVehicle);
-        return this;
-    }
-
-    CTaskSimpleCarDrive* Destructor() {
-        this->CTaskSimpleCarDrive::~CTaskSimpleCarDrive();
-        return this;
-    }
-
+    CTaskSimpleCarDrive* Constructor(CVehicle* pVehicle, CTaskUtilityLineUpPedWithCar* pUtilityTask, int8_t bUpdateCurrentVehicle) { this->CTaskSimpleCarDrive::CTaskSimpleCarDrive(pVehicle, pUtilityTask, bUpdateCurrentVehicle); return this; }
+    CTaskSimpleCarDrive* Destructor() { this->CTaskSimpleCarDrive::~CTaskSimpleCarDrive(); return this; }
     CTask* Clone_Reversed() { return CTaskSimpleCarDrive::Clone(); }
     eTaskType GetTaskType_Reversed() { return CTaskSimpleCarDrive::GetTaskType(); }
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, CEvent const* event) { return CTaskSimpleCarDrive::MakeAbortable(ped, priority, event); }
