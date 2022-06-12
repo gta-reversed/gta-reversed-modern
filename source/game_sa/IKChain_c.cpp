@@ -2,9 +2,13 @@
 #include "IKChain_c.h"
 #include "BoneNodeManager_c.h"
 
+// CHANGES:
+// They used RwV3d stuff, but that's ugly.
+// todo: Get rid off RwV3d, RtQuat
+
 void IKChain_c::InjectHooks() {
     RH_ScopedClass(IKChain_c);
-    RH_ScopedCategoryGlobal(); // TODO: Change this to the appropriate category! Animation?
+    RH_ScopedCategory("Animation");
 
     RH_ScopedInstall(Init, 0x618370);
     RH_ScopedInstall(Exit, 0x617870);
@@ -50,9 +54,10 @@ bool IKChain_c::Init(const char* name,
         return false;
     }
 
-    // Check if frame of this bone has non-zero translation 
+    // Check if frame of this bone has non-zero translation
     {
-        const auto& boneFrame = frames[RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)bone)].m_pIFrame;
+        const auto index = RpHAnimIDGetIndex(&m_Ped->GetAnimHierarchy(), (RwInt32)bone);
+        const auto& boneFrame = frames[index].m_pIFrame;
         if (boneFrame->translation.IsZero()) {
             return false;
         }
@@ -80,7 +85,7 @@ bool IKChain_c::Init(const char* name,
 
 // 0x617870
 void IKChain_c::Exit() {
-    for (auto& bone : GetBones()) {
+    for (auto&& bone : GetBones()) {
         g_boneNodeMan.ReturnBoneNode(bone);
     }
     delete[] m_Bones;
@@ -100,8 +105,7 @@ void IKChain_c::Update(float timeStep) {
 }
 
 // 0x617F30
-bool IKChain_c::IsAtTarget(float maxDist, float* outDist) {
-    // They used RwV3d stuff, but that's ugly.
+bool IKChain_c::IsAtTarget(float maxDist, float* outDist) const {
     const auto dist = (m_Offset - m_Bones[0]->GetPosition()).Magnitude();
     if (outDist) {
         *outDist = dist;
@@ -178,7 +182,6 @@ void IKChain_c::SetBlend(float value) {
     m_Blend = value;
 }
 
-// todo: Get rid off RwV3d, RtQuat
 // 0x6178B0
 void IKChain_c::MoveBonesToTarget() {
     if (m_TargetMB) {
@@ -193,7 +196,7 @@ void IKChain_c::MoveBonesToTarget() {
                 if (mat) {
                     RwV3d transformed;
                     RwV3dTransformVector(&transformed, &m_OffsetPos, mat);
-                    RwV3dAdd(&m_Offset, &transformed, &m_Offset);
+                    m_Offset += transformed;
                 }
             }
         } else {
@@ -213,22 +216,19 @@ void IKChain_c::MoveBonesToTarget() {
         RwV3d transformedBonePos;
         RwV3dTransformVector(&transformedBonePos, &m_BonePosn, &root->GetMatrix()); // Not sure why it's transformed every iteration..
 
-        RwV3d dirBoneToRoot; // = transformedBonePos + root->pos - bone->pos
-        RwV3dAdd(&dirBoneToRoot, &transformedBonePos, &root->GetPosition());
-        RwV3dSub(&dirBoneToRoot, &dirBoneToRoot, &bone->GetPosition());
-        if (RwV3dLength(&dirBoneToRoot) <= DIST_TOLERANCE) {
+        CVector dirBoneToRoot = transformedBonePos + root->GetPosition() - bone->GetPosition();
+        if (dirBoneToRoot.Magnitude() <= DIST_TOLERANCE) {
             continue;
         }
         RwV3dNormalize(&dirBoneToRoot, &dirBoneToRoot);
 
-        RwV3d dirBoneToOffset; // = m_offset - bone->pos
-        RwV3dSub(&dirBoneToOffset, &m_Offset, &bone->GetPosition());
-        if (RwV3dLength(&dirBoneToOffset) <= DIST_TOLERANCE) {
+        CVector dirBoneToOffset = m_Offset - bone->GetPosition();
+        if (dirBoneToOffset.Magnitude() <= DIST_TOLERANCE) {
             continue;
         }
         RwV3dNormalize(&dirBoneToOffset, &dirBoneToOffset);
 
-        const auto dot = RwV3dDotProduct(&dirBoneToOffset, &dirBoneToRoot);
+        const auto dot = DotProduct(&dirBoneToOffset, &dirBoneToRoot);
         if (dot >= 0.997f) { // Make sure they don't point in the same direction
             continue;
         }
@@ -247,9 +247,8 @@ void IKChain_c::MoveBonesToTarget() {
                 RwV3dScale(&quat.imag, &quat.imag, -recp);
             }
         }
-        
-        RwV3d cross;
-        RwV3dCrossProduct(&cross, &dirBoneToRoot, &dirBoneToOffset);
+
+        CVector cross = CrossProduct(dirBoneToRoot, dirBoneToOffset);
 
         RwV3d axis;
         RtQuatTransformVectors(&axis, &cross, 1, &quat);
@@ -269,14 +268,16 @@ void IKChain_c::SetupBones(ePedBones boneTag, CVector posn, ePedBones bone, Anim
     BoneNode_c* bones[32]; // TODO: Magic number, BoneNodeManager_c::ms_boneInfos.size()
     m_Count = 0;
     for (auto boneIt = boneTag; boneIt != bone; boneIt = BoneNodeManager_c::ms_boneInfos[BoneNode_c::GetIdFromBoneTag(boneIt)].m_prev) {
-        auto node = g_boneNodeMan.GetBoneNode();
-        node->Init(boneIt, frames[RpHAnimIDGetIndex(&hier, (RwInt32)boneIt)].m_pIFrame);
+        auto* node = g_boneNodeMan.GetBoneNode();
+        const auto index = RpHAnimIDGetIndex(&hier, (RwInt32)boneIt);
+        node->Init(boneIt, frames[index].m_pIFrame);
         bones[m_Count++] = node;
     }
 
-    assert(m_Count); // Doesn't really make a whole lot of sense if theres not a single bone
     m_Bones = new BoneNode_c*[m_Count];
-    rng::copy(bones, m_Bones);
+    for (auto i = 0; i < m_Count; i++) {
+        m_Bones[i] = bones[i];
+    }
 
     // Link bones together
     for (auto&& bonex : GetBones()) {

@@ -263,7 +263,7 @@ uint8 CAEUserRadioTrackManager::GetUserTrackPlayMode() {
 
 // 0x4f4a20
 DWORD __stdcall CAEUserRadioTrackManager::WriteUserTracksThread(CAEUserRadioTrackManager* self) {
-    CoInitialize(nullptr);
+    VERIFY(CoInitialize(nullptr));
 
     // Open sa-ufiles.dat
     CFileMgr::SetDirMyDocuments();
@@ -392,8 +392,9 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     IShellLinkW*  shellLink = nullptr;
     IPersistFile* persistFile = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink)))
-        throw std::runtime_error{"CoCreateInstance failed"};
+    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink))) {
+        assert(true && "CoCreateInstance failed");
+    }
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
@@ -405,7 +406,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))) {
         persistFile->Release();
         shellLink->Release();
-        throw std::runtime_error{"Load or GetPath failed"};
+        assert(true && "Load or GetPath failed");
     }
 
     persistFile->Release();

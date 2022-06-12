@@ -46,8 +46,8 @@ RwRGBA CFallingGlassPane::CalculateHiLightPolyColor() {
     const auto alpha       = (float)CGlass::CalcAlphaWithNormal(Normalized(m_Matrix.GetForward()));
     const auto delta       = (float)std::clamp(CTimer::GetTimeInMS() - m_nCreatedTime, 0u, 500u);
     const auto scaledAlpha = (unsigned)(alpha * delta / 500.f);
-    const uint8 final      = m_f6F ? std::max(64u, scaledAlpha) : scaledAlpha;
-    return { final, final, final, final};
+    const uint8 color      = m_f6F ? std::max(64u, scaledAlpha) : scaledAlpha;
+    return { color, color, color, color };
 }
 
 RwRGBA CFallingGlassPane::CalculateShatterPolyColor() {

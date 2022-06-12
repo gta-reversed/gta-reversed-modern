@@ -16,12 +16,9 @@ static constexpr auto TopLineEmptyFile{ "THIS FILE IS NOT VALID YET" };
 
 class CFileMgr {
 public:
-    // variables
-    // length: 128
-    static char* ms_dirName;
-    // length: 128
-    static char* ms_rootDirName;
-    // functions
+    static char (&ms_dirName)[128];
+    static char (&ms_rootDirName)[128];
+
     static void Initialise();
     static int32 ChangeDir(const char* path);
     static int32 SetDir(const char* path);

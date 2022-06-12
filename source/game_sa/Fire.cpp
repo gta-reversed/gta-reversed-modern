@@ -295,7 +295,7 @@ void CFire::ProcessFire() {
             }
 
             if (targetVehicle->IsAutomobile()) {
-                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummies::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
+                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummy::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
             }
             break;
         }

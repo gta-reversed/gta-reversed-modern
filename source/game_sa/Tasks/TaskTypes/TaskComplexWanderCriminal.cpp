@@ -16,7 +16,7 @@ void CTaskComplexWanderCriminal::ScanForStuff(CPed* ped) {
                m_TaskTimer.m_nStartTime = CTimer::GetTimeInMS(),
                m_TaskTimer.m_nInterval = 50,
                m_TaskTimer.m_bStarted = true,
-               m_nMinNextScanTime = CTimer::GetTimeInMS() - ((float)rand() * RAND_MAX_INT_RECIPROCAL * -30000.0f),
+               m_nMinNextScanTime = CTimer::GetTimeInMS() - (uint32)CGeneral::GetRandomNumberInRange(0.0f, -30000.0f),
                m_TaskTimer.m_bStarted
            )
     ) {

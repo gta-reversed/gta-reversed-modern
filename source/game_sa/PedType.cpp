@@ -3,6 +3,7 @@
 #include "PedType.h"
 
 CAcquaintance*& CPedType::ms_apPedTypes = *(CAcquaintance**)0xC0BBE8;
+CAcquaintance* CPedType::ms_apPedTypesOld = {}; // NOTSA
 
 void CPedType::InjectHooks() {
     RH_ScopedClass(CPedType);
@@ -26,12 +27,14 @@ void CPedType::InjectHooks() {
 // 0x608E40
 void CPedType::Initialise() {
     ms_apPedTypes = new CAcquaintance[PED_TYPE_COUNT]();
+    ms_apPedTypesOld = new CAcquaintance[PED_TYPE_COUNT](); // NOTSA
     LoadPedData();
 }
 
 // 0x608B00
 void CPedType::Shutdown() {
     delete[] ms_apPedTypes;
+    delete[] ms_apPedTypesOld; // NOTSA
 }
 
 // 0x608B30

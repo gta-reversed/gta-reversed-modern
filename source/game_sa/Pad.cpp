@@ -10,6 +10,7 @@
 
 #include "CDebugMenu.h"
 #include "ControllerConfigManager.h"
+#include "app.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -32,8 +33,6 @@ static char& byte_B73401 = *(char*)0xB73401; // unused, unknown
 void CPad::InjectHooks() {
     RH_ScopedClass(CPad);
     RH_ScopedCategoryGlobal();
-
-    HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
     // CPad", 0x541D80, &CPad::Constructor);
     // CPad~", 0x53ED60, &CPad::Destructor);
@@ -228,8 +227,8 @@ void CPad::UpdatePads() {
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
 
-    CDebugMenu::ImguiInitialise();
-    CDebugMenu::ImguiInputUpdate();
+    CDebugMenu::ImGuiInitialise();
+    CDebugMenu::ImGuiInputUpdate();
 }
 
 // 0x53F3C0
@@ -404,7 +403,7 @@ void CPad::StartShake_Train(const CVector2D& point) {
 
 // 0x541D70
 void CPad::StopPadsShaking() {
-    for (auto i = 0; i < std::size(Pads); i++) {
+    for (auto i = 0u; i < std::size(Pads); i++) {
         GetPad(i)->StopShaking(i);
     }
 }
@@ -1107,7 +1106,7 @@ bool CPad::sub_540A10() {
 bool CPad::GetAnaloguePadLeft() {
     static int16 oldfStickY = 0; // 0xB736F0
     auto leftStickY = GetPad()->GetLeftStickY();
-    
+
     if (leftStickY < -15 && oldfStickY >= -5) {
         oldfStickY = leftStickY;
         return true;
@@ -1121,7 +1120,7 @@ bool CPad::GetAnaloguePadLeft() {
 bool CPad::GetAnaloguePadUp() {
     static int16 oldfStickX = 0; // 0xB736F8
     auto leftStickX = GetPad()->GetLeftStickX();
-    
+
     if (leftStickX < -15 && oldfStickX >= -5) {
         oldfStickX = leftStickX;
         return true;
@@ -1182,4 +1181,11 @@ bool CPad::sub_540530() const noexcept {
     default:
         return false;
     }
+}
+
+/*!
+ * CTRL + M or F7
+ */
+bool CPad::DebugMenuJustPressed() {
+    return (IsCtrlPressed() && IsStandardKeyJustPressed('M')) || IsF7JustPressed();
 }

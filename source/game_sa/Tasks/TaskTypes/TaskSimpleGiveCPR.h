@@ -19,7 +19,7 @@ public:
 public:
     static constexpr auto Type = TASK_SIMPLE_GIVE_CPR;
 
-    CTaskSimpleGiveCPR(CAccident* pAccident);
+    CTaskSimpleGiveCPR(CAccident* accident);
     ~CTaskSimpleGiveCPR() override;
 
     eTaskType GetTaskType() override { return TASK_SIMPLE_GIVE_CPR; }
@@ -29,7 +29,7 @@ public:
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     void ReviveDeadPed(CPed* ped);
-    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* priv);
+    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* ptask);
 
 private:
     friend void InjectHooksMain();

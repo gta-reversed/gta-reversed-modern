@@ -20,14 +20,15 @@
 #include "TrafficLights.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
-    RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedVirtualInstall(Remove, 0x534AE0);
     RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
     RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);
@@ -351,7 +352,7 @@ void CEntity::CreateRwObject_Reversed()
     case rpCLUMP: {
         if (!mi->bIsRoad)
             break;
-        
+
         if (IsObject()) {
             auto obj = AsObject();
             if (!obj->m_pMovingList) {
@@ -370,7 +371,7 @@ void CEntity::CreateRwObject_Reversed()
                 if (pAssoc)
                     pAssoc->SetCurrentTime(pLodAssoc->m_fCurrentTime);
             }
-        } 
+        }
         break;
     }
     }
@@ -601,11 +602,11 @@ void CEntity::PreRender_Reversed()
             }
         }
         else if (m_nModelIndex == MODEL_MISSILE) {
-            if (CReplay::Mode != REPLAY_MODE_1) {
+            if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
                 auto fRand = static_cast<float>(rand() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(
-                    eShadowTextureType::SHADOWTEX_PED,
+                    eShadowTextureType::SHADOW_TEX_PED,
                     gpShadowExplosionTex,
                     &vecPos,
                     8.0F,
@@ -666,7 +667,7 @@ void CEntity::PreRender_Reversed()
             auto fRand = static_cast<float>(rand() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
-                eShadowTextureType::SHADOWTEX_PED,
+                eShadowTextureType::SHADOW_TEX_PED,
                 gpShadowExplosionTex,
                 &vecPos,
                 8.0F,
@@ -1362,7 +1363,7 @@ void CEntity::AttachToRwObject(RwObject* object, bool updateEntityMatrix)
             CWorld::ms_listMovingEntityPtrs.AddItem(this);
         }
     }
-    
+
     mi->AddRef();
     m_pStreamingLink = CStreaming::AddEntity(this);
     CreateEffects();
@@ -1493,13 +1494,13 @@ bool CEntity::GetIsBoundingBoxOnScreen()
     for (int32 i = 0; i < 2; ++i) {
         #define ChooseComponent(c) vecNormals[i].c < 0 ? cm->m_boundBox.m_vecMax.c : cm->m_boundBox.m_vecMin.c
         CVector vecWorld = TransformFromObjectSpace(CVector{
-            ChooseComponent(x), 
-            ChooseComponent(y), 
+            ChooseComponent(x),
+            ChooseComponent(y),
             ChooseComponent(z)
         });
         #undef ChooseComponent
         if (DotProduct(vecWorld, TheCamera.m_avecFrustumWorldNormals[i]) > TheCamera.m_fFrustumPlaneOffsets[i]) {
-            if (!TheCamera.m_bMirrorActive 
+            if (!TheCamera.m_bMirrorActive
                 || DotProduct(vecWorld, TheCamera.m_avecFrustumWorldNormals_Mirror[i]) > TheCamera.m_fFrustumPlaneOffsets_Mirror[i]
             ) {
                 ++numBBFailed;
@@ -1537,7 +1538,7 @@ void CEntity::ModifyMatrixForTreeInWind()
     }
     else {
         auto uiTimeOffset = (reinterpret_cast<uint32>(this) + CTimer::GetTimeInMS()) & 0xFFF;
-        
+
         fWindOffset = sin(uiTimeOffset * 0.0015332032F) * 0.005F;
         if (CWeather::Wind >= 0.2F)
             fWindOffset *= 1.6F;
@@ -1547,7 +1548,7 @@ void CEntity::ModifyMatrixForTreeInWind()
     if (CModelInfo::GetModelInfo(m_nModelIndex)->IsSwayInWind2())
         at->x += CWeather::Wind * 0.03F;
 
-    at->y = at->x;    
+    at->y = at->x;
     at->x *= CWeather::WindDir.x;
     at->y *= CWeather::WindDir.y;
 

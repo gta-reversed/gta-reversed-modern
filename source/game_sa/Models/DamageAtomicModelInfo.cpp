@@ -12,8 +12,8 @@ void CDamageAtomicModelInfo::InjectHooks()
     RH_ScopedVirtualInstall(Init, 0x4C48B0);
     RH_ScopedVirtualInstall(AsDamageAtomicModelInfoPtr, 0x4C55C0);
     RH_ScopedVirtualInstall(DeleteRwObject, 0x4C49D0);
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4960, RwObject * (CDamageAtomicModelInfo::*)());
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4960, RwObject * (CDamageAtomicModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
 
     RH_ScopedInstall(SetDamagedAtomic, 0x4C48D0);
 }

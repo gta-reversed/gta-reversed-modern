@@ -7,11 +7,15 @@
 #pragma once
 
 class CGangInfo {
-    PLUGIN_NO_DEFAULT_CONSTRUCTION(CGangInfo)
-
 public:
     int8  m_nPedModelOverride;
-    int32 m_nGangWeapons[3];
+    std::array<int32, 3> m_nGangWeapons;
+
+    CGangInfo() { // 0x5DE520
+        m_nPedModelOverride = -1;
+        m_nGangWeapons.fill(0);
+    };
+    ~CGangInfo() = default; // 0x5DE540
 };
 
 VALIDATE_SIZE(CGangInfo, 0x10);

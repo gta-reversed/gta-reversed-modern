@@ -11,6 +11,8 @@
 #include "WeaponInfo.h"
 #include "CreepingFire.h"
 #include "BulletInfo.h"
+#include "InterestingEvents.h"
+#include "Shadows.h"
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
@@ -49,6 +51,7 @@ void CWeapon::InjectHooks() {
     RH_ScopedInstall(FireSniper, 0x73AAC0);
     RH_ScopedInstall(TakePhotograph, 0x73C1F0);
     RH_ScopedInstall(DoDoomAiming, 0x73CDC0);
+    // untested RH_ScopedInstall(FireInstantHitFromCar2, 0x73CBA0);
 }
 
 // 0x73B430
@@ -68,7 +71,6 @@ CWeapon::CWeapon(eWeaponType weaponType, int32 ammo) {
 
 CWeapon* CWeapon::Constructor(eWeaponType weaponType, int32 ammo) {
     this->CWeapon::CWeapon(weaponType, ammo);
-
     return this;
 }
 
@@ -120,14 +122,13 @@ void CWeapon::ShutdownWeapons() {
 }
 
 // 0x73A380
-void CWeapon::Shutdown() 
-{
+void CWeapon::Shutdown() {
     int32 weaponModelID1 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId1;
     int32 weaponModelID2 = CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD)->m_nModelId2;
 
     if (weaponModelID1 != -1)
         CModelInfo::GetModelInfo(weaponModelID1)->RemoveRef();
-    
+
     if (weaponModelID2 != -1)
         CModelInfo::GetModelInfo(weaponModelID2)->RemoveRef();
 
@@ -172,7 +173,7 @@ bool CWeapon::LaserScopeDot(CVector* outCoord, float* outSize) {
 
 // 0x73AAC0
 bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
-    CCam& activeCam = TheCamera.GetActiveCamera();
+    const CCam& activeCam = CCamera::GetActiveCamera();
 
     if (FindPlayerPed() == shooter) {
         switch (activeCam.m_nMode) {
@@ -227,7 +228,7 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
     CEventGunShotWhizzedBy gsw(shooter, activeCam.m_vecSource, targetPoint, hasNoSound);
     eventGroup->Add(static_cast<CEvent*>(&gsw), false);
 
-    g_InterestingEvents.Add((CInterestingEvents::EType)22, shooter); // todo: enum
+    g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, shooter);
 
     return true;
 }
@@ -378,7 +379,7 @@ void CWeapon::DoBulletImpact(CEntity* owner, CEntity* victim, CVector* startPoin
 /*!
 * @addr 0x73C1F0
 * @brief Marks all peds and objects that are in range (125 units) and in frame (on the screen - 0.1 relative border) as photographed.
-* 
+*
 * @param owner Camera owner - unused.
 * @param point Pos of the camflash effect
 */
@@ -412,7 +413,7 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     const auto IsPosInCamFrame = [](const CVector& worldPos) {
         CVector pedHeadPos_Screen;
         if (float _w, _h; !CSprite::CalcScreenCoors(worldPos, &pedHeadPos_Screen, &_w, &_h, false, true)) {
-            return false; 
+            return false;
         }
 
         // TODO/BUG: Possibly buggy on bigger screens, because the border becomes too big (because of the relative multiplier) maybe?
@@ -488,7 +489,34 @@ void CWeapon::SetUpPelletCol(int32 numPellets, CEntity* owner, CEntity* victim, 
 
 // 0x73CBA0
 void CWeapon::FireInstantHitFromCar2(CVector startPoint, CVector endPoint, CVehicle* vehicle, CEntity* owner) {
-    plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
+    return plugin::CallMethod<0x73CBA0, CWeapon*, CVector, CVector, CVehicle*, CEntity*>(this, startPoint, endPoint, vehicle, owner);
+
+    const auto player = FindPlayerPed();
+    CWeaponInfo::GetWeaponInfo(m_nType, eWeaponSkill::STD);
+    CCrime::ReportCrime(CRIME_FIRE_WEAPON, player, player);
+
+    CEntity* entity;
+    if (owner) {
+        entity = owner;
+    } else {
+        entity = vehicle;
+    }
+    CEventGunShot event(entity, startPoint, endPoint, m_nType == WEAPON_PISTOL_SILENCED || m_nType == WEAPON_TEARGAS);
+    GetEventGlobalGroup()->Add(&event);
+    g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_22, owner);
+
+    CVector direction{};
+    CPointLights::AddLight(PLTYPE_POINTLIGHT, startPoint, direction, 3.0f, 0.25f, 0.22f, 0.0f, 0, false, nullptr);
+    CWorld::bIncludeBikers = true;
+    CWorld::pIgnoreEntity = vehicle;
+    CBirds::HandleGunShot(&startPoint, &endPoint);
+    CShadows::GunShotSetsOilOnFire(&startPoint, &endPoint);
+
+    CEntity* victim{};
+    CColPoint outColPoint{};
+    CWorld::ProcessLineOfSight(&startPoint, &endPoint, outColPoint, victim, true, true, true, true, true, false, false, true);
+    CWorld::ResetLineTestOptions();
+    DoBulletImpact(owner, victim, &startPoint, &endPoint, &outColPoint, 0);
 }
 
 /*!

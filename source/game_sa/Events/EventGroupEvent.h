@@ -12,7 +12,7 @@ public:
 
 public:
     CEventGroupEvent(CPed* ped, CEvent* event);
-    ~CEventGroupEvent();
+    ~CEventGroupEvent() override;
 
     eEventType GetEventType() const override { return EVENT_GROUP_EVENT; }
     int32 GetEventPriority() const override { return 41; }
@@ -27,12 +27,6 @@ public:
 
 private:
     bool IsPriorityEvent() const;
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CEventGroupEvent* Constructor(CPed* ped, CEvent* event);
 };
 
 VALIDATE_SIZE(CEventGroupEvent, 0x14);

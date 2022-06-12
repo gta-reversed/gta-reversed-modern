@@ -876,7 +876,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
     m_wBombTimer = 0;
 
     const auto& vecPos = GetPosition();
-    TheCamera.CamShake(0.4F, vecPos.x, vecPos.y, vecPos.z);
+    TheCamera.CamShake(0.4F, vecPos);
     CVehicle::KillPedsInVehicle();
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
     vehicleFlags.bEngineOn = false;

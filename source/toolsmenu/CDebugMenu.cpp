@@ -10,358 +10,104 @@
 
 #include <Windows.h>
 #include <extensions/ScriptCommands.h>
-#include <ProcObjectMan.h>
+#include "DebugModules/DebugModules.h"
 
-#include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
-#include "toolsmenu\DebugModules\Cheat\CheatDebugModule.h"
-#include "toolsmenu\DebugModules\Vehicle\VehicleDebugModule.h"
-#include "toolsmenu\DebugModules\Ped\PedDebugModule.h"
-#include "toolsmenu\DebugModules\Script\MissionDebugModule.h"
-#include "toolsmenu\DebugModules\Audio\CutsceneTrackManagerDebugModule.h"
-#include "toolsmenu\DebugModules\Audio\AmbienceTrackManagerDebugModule.h"
-#include "toolsmenu\DebugModules\CStreamingDebugModule.h"
-#include "toolsmenu\DebugModules\CPickupsDebugModule.h"
-#include "toolsmenu\DebugModules\HooksDebugModule.h"
-#include "toolsmenu\DebugModules\CTeleportDebugModule.h"
-#include "toolsmenu\DebugModules\FXDebugModule.h"
-#include "toolsmenu\DebugModules\Pools\PoolsDebugModule.h"
+bool CDebugMenu::m_Initialised = false;
+bool CDebugMenu::m_ShowMenu = false;
+ImGuiIO* io;
 
-#include "TaskComplexUseGoggles.h"
-#include "GrassRenderer.h"
-
-bool CDebugMenu::m_imguiInitialised = false;
-bool CDebugMenu::m_showMenu = false;
-bool CDebugMenu::m_showFPS = false;
-bool CDebugMenu::m_showExtraDebugFeatures = false;
-CSprite2d CDebugMenu::m_mouseSprite;
-ImGuiIO* CDebugMenu::io = {};
-
-static ImVec2 m_MousePos;
-
-void CDebugMenu::ImguiInitialise() {
-    if (m_imguiInitialised) {
+void CDebugMenu::ImGuiInitialise() {
+    if (m_Initialised) {
         return;
     }
 
     IMGUI_CHECKVERSION();
-
-    auto& ctx = *ImGui::CreateContext();
-
+    ImGuiContext* ctx = ImGui::CreateContext();
     io = &ImGui::GetIO();
     io->WantCaptureMouse = true;
     io->WantCaptureKeyboard = true;
     io->WantSetMousePos = true;
+    io->MouseDrawCursor = false;
     io->ConfigFlags = ImGuiConfigFlags_NavEnableSetMousePos;
     io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    ImGui_ImplWin32_Init(*(HWND*)0xC97C1C);
+    ImGui_ImplWin32_Init(PSGLOBAL(window));
     ImGui_ImplDX9_Init(GetD3DDevice());
 
-    printf("Imgui initialized\n");
+    DebugModules::Initialise(ctx);
 
-    LoadMouseSprite();
-
-    TeleportDebugModule::Initialise(ctx);
-    VehicleDebugModule::Initialise();
-    PedDebugModule::Initialise();
-    MissionDebugModule::Initialise();
-    FXDebugModule::Initialise();
-    m_imguiInitialised = true;
-}
-
-void CDebugMenu::LoadMouseSprite() {
-    auto txd = CTxdStore::AddTxdSlot("imgui_mouse");
-    if (CTxdStore::LoadTxd(txd, "models\\fronten_pc.txd")) {
-        CTxdStore::AddRef(txd);
-        CTxdStore::PushCurrentTxd();
-        CTxdStore::SetCurrentTxd(txd);
-        m_mouseSprite.SetTexture("mouse", "mousea");
-    } else {
-        printf("Failed to load fronten_pc.txd\n");
-    }
-    CTxdStore::PopCurrentTxd();
+    m_Initialised = true;
+    printf("ImGui initialized\n");
 }
 
 void CDebugMenu::Shutdown() {
     printf("CDebugMenu::Shutdown\n");
-    m_showMenu = false;
-    if (m_imguiInitialised)
-        ImGui::DestroyContext();
 
-    m_mouseSprite.Delete();
-    int32 slot = CTxdStore::FindTxdSlot("imgui_mouse");
-    if (slot != -1)
-        CTxdStore::RemoveTxdSlot(slot);
+    ImGui_ImplDX9_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
-void CDebugMenu::ImguiInputUpdate() {
-    if (!m_showMenu)
-        return;
+void UpdateKeyboard() {
+    static BYTE KeyStates[256];
 
-    // Update display size, in case of window resize after imgui was already initialized
-    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT);
+    //VERIFY(SUCCEEDED());
+    GetKeyboardState(KeyStates);
 
-    // Partially taken from https://github.com/GTAModding/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
+    for (auto i = 0; i < 256; i++) {
+        if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
+            io->KeysDown[i] = true;
 
-    const auto UpdateKeyboard = []() {
-        static BYTE KeyStates[256];
-
-        GetKeyboardState(KeyStates);
-
-        for (int i = 0; i < 256; i++) {
-            if (KeyStates[i] & 0x80 && !io->KeysDown[i]) {
-                io->KeysDown[i] = true;
-
-                char res[2] = {0};
-                if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
-                    io->AddInputCharactersUTF8(res);
-                }
-            } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i])
-                io->KeysDown[i] = false;
+            char res[2] = {0};
+            if (ToAscii(i, MapVirtualKey(i, 0), (const BYTE*)KeyStates, (LPWORD)res, 0) == 1) {
+                io->AddInputCharactersUTF8(res);
+            }
+        } else if (!(KeyStates[i] & 0x80) && io->KeysDown[i]) {
+            io->KeysDown[i] = false;
         }
-        io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
-        io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
-        io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
-        io->KeySuper = false;
-    };
+    }
+    io->KeyCtrl = (GetKeyState(VK_CONTROL) & 0x8000) != 0;
+    io->KeyShift = (GetKeyState(VK_SHIFT) & 0x8000) != 0;
+    io->KeyAlt = (GetKeyState(VK_MENU) & 0x8000) != 0;
+    io->KeySuper = false;
+};
 
-    const auto UpdateMouse = []() {
-        CPad* pad = CPad::GetPad();
-        pad->DisablePlayerControls = true;
+void UpdateMouse() {
+    static ImVec2 m_MousePos;
 
-        m_MousePos.x += CPad::NewMouseControllerState.X;
-        m_MousePos.y -= CPad::NewMouseControllerState.Y;
+    const auto WHEEL_SPEED = 20.0f;
 
-        m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
-        m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
+    CPad::GetPad()->DisablePlayerControls = true;
 
-        io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
+    m_MousePos.x += CPad::NewMouseControllerState.X;
+    m_MousePos.y -= CPad::NewMouseControllerState.Y;
 
-        if (CPad::NewMouseControllerState.wheelDown)
-            io->MouseWheel -= (20.0F * io->DeltaTime);
+    m_MousePos.x = std::clamp(m_MousePos.x, 0.0f, SCREEN_WIDTH);
+    m_MousePos.y = std::clamp(m_MousePos.y, 0.0f, SCREEN_HEIGHT);
 
-        if (CPad::NewMouseControllerState.wheelUp)
-            io->MouseWheel += (20.0F * io->DeltaTime);
+    io->MousePos = ImVec2(m_MousePos.x, m_MousePos.y);
 
-        io->MouseDown[0] = CPad::NewMouseControllerState.lmb;
-        io->MouseDown[1] = CPad::NewMouseControllerState.mmb;
-        io->MouseDown[2] = CPad::NewMouseControllerState.rmb;
+    if (CPad::NewMouseControllerState.wheelDown)
+        io->MouseWheel -= (WHEEL_SPEED * io->DeltaTime);
 
-        CPad::NewMouseControllerState.X = 0.0f;
-        CPad::NewMouseControllerState.Y = 0.0f;
-    };
+    if (CPad::NewMouseControllerState.wheelUp)
+        io->MouseWheel += (WHEEL_SPEED * io->DeltaTime);
+
+    io->MouseDown[ImGuiMouseButton_Left]   = CPad::NewMouseControllerState.lmb;
+    io->MouseDown[ImGuiMouseButton_Right]  = CPad::NewMouseControllerState.mmb;
+    io->MouseDown[ImGuiMouseButton_Middle] = CPad::NewMouseControllerState.rmb;
+
+    CPad::NewMouseControllerState.X = 0.0f;
+    CPad::NewMouseControllerState.Y = 0.0f;
+};
+
+// Partially taken from https://github.com/GTAModding/re3/blob/f1a7aeaa0f574813ed3cec8a085e2f310aa3a366/src/imgui/ImGuiIII.cpp
+void CDebugMenu::ImGuiInputUpdate() {
+    if (!m_ShowMenu)
+        return;
 
     UpdateKeyboard();
     UpdateMouse();
-}
-
-void CDebugMenu::ImguiDisplayFramePerSecond() {
-    if (!m_showFPS)
-        return;
-
-    // Top-left framerate display overlay window.
-    ImGui::SetNextWindowPos(ImVec2(10, 10));
-    ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
-    ImGui::End();
-}
-
-void CDebugMenu::ImguiDisplayExtraDebugFeatures() {
-    if (!m_showExtraDebugFeatures)
-        return;
-
-#ifdef EXTRA_DEBUG_FEATURES
-    ImGui::SetNextWindowCollapsed(true, ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Extra debug", nullptr);
-    ProcessExtraDebugFeatures();
-    ImGui::End();
-#endif
-}
-
-void CDebugMenu::ImGuiDrawMouse() {
-    if (!m_showMenu || !m_mouseSprite.m_pTexture)
-        return;
-
-    m_mouseSprite.Draw(
-        io->MousePos.x,
-        io->MousePos.y,
-        FrontEndMenuManager.StretchX(12.0f),
-        FrontEndMenuManager.StretchY(12.0f),
-        { 255, 255, 255, 255 }
-    );
-}
-
-bool showPlayerInfo;
-void ShowPlayerInfo() {
-    if (!showPlayerInfo)
-        return;
-
-    CPlayerPed* player = FindPlayerPed();
-    if (!player)
-        return;
-
-    ImGui::Begin("Player Information", &showPlayerInfo, ImGuiWindowFlags_NoTitleBar);
-
-    auto& playerPos = player->GetPosition();
-    float pos[3] = { playerPos.x, playerPos.y, playerPos.z};
-    ImGui::InputFloat3("position", pos, "%.4f", ImGuiInputTextFlags_ReadOnly);
-
-    ImGui::End();
-}
-
-void ProcessRenderTool() {
-    if (ImGui::CollapsingHeader("Post Processing")) {
-        FXDebugModule::ProcessImgui();
-    }
-    if (ImGui::CollapsingHeader("Collision")) {
-        CollisionDebugModule::ProcessImgui();
-    }
-    ImGui::SliderFloat("Close Dist", &CGrassRenderer::m_closeDist, 0.0f, 255.0f);
-    ImGui::SliderFloat("Far Dist", &CGrassRenderer::m_farDist, 0.0f, 255.0f);
-}
-
-#ifdef EXTRA_DEBUG_FEATURES
-void CDebugMenu::ProcessExtraDebugFeatures() {
-    if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlusion")) {
-            COcclusionDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Audio")) {
-            ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImGui();
-
-            ImGui::NewLine();
-            ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Streaming")) {
-            CStreamingDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Pickups")) {
-            CPickupsDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Pools")) {
-            PoolsDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        ImGui::EndTabBar();
-    }
-}
-#endif
-
-void SpawnTab() {
-    if (ImGui::BeginTabBar("")) {
-        if (ImGui::BeginTabItem("Ped")) {
-            PedDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-
-        if (ImGui::BeginTabItem("Vehicle")) {
-            VehicleDebugModule::ProcessImGui();
-            ImGui::EndTabItem();
-        }
-    }
-    ImGui::EndTabBar();
-}
-
-void ProcedureObjectManager() {
-    ImGui::Text("Proc Obj Info Count: %d", g_procObjMan.m_ProcObjInfoCount);
-    if (ImGui::BeginTable("PoolsDebugModule", 4, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Resizable | ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersV | ImGuiTableFlags_ContextMenuInBody)) {
-        ImGui::TableSetupColumn("Model Index");
-        ImGui::TableSetupColumn("Distance");
-        ImGui::TableSetupColumn("Min Scale Z");
-        ImGui::TableSetupColumn("Max Scale Z");
-        ImGui::TableHeadersRow();
-
-        for (auto it = g_procObjMan.m_ObjectsList.GetTail(); it; it = g_procObjMan.m_ObjectsList.GetPrev(it)) {
-            if (!it->m_Obj)
-                continue;
-
-            ImGui::TableNextRow();
-            ImGui::PushID(&it);
-
-            ImGui::TableNextColumn();
-            ImGui::Text("%d", 1);
-
-            ImGui::TableNextColumn();
-            if (ImGui::Button("TP")) {
-                // FindPlayerPed()->Teleport(it.m_Obj->GetPosition(), false);
-                // TeleportDebugModule::TeleportTo({});
-            }
-
-            ImGui::PopID();
-        }
-
-        ImGui::EndTable();
-    }
-}
-
-void CDebugMenu::ImguiDisplayPlayerInfo() {
-    if (CTimer::GetIsPaused()) {
-        return;
-    }
-
-    if (m_showMenu && FindPlayerPed()) {
-        TeleportDebugModule::ProcessImGui();
-
-        ImGui::SetNextWindowSize(ImVec2(484, 420), ImGuiCond_FirstUseEver);
-        ImGui::Begin("Debug Window", &m_showMenu, ImGuiWindowFlags_NoResize);
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                ImGui::EndMenu();
-            }
-            ImGui::EndMenuBar();
-        }
-
-        if (ImGui::BeginTabBar("Debug Tabs")) {
-            if (ImGui::BeginTabItem("Spawn")) {
-                SpawnTab();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Cheats")) {
-                CheatDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Missions")) {
-                MissionDebugModule::ProcessImgui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Rendering")) {
-                ProcessRenderTool();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Hooks")) {
-                HooksDebugModule::ProcessImGui();
-                ImGui::EndTabItem();
-            }
-            if (ImGui::BeginTabItem("Other")) {
-                ImGui::Checkbox("Debug Scripts", &CTheScripts::DbgFlag);
-                if (ImGui::Button("[CTheScripts] Print List Sizes")) { CTheScripts::PrintListSizes(); }
-                ImGui::Checkbox("Display FPS window", &CDebugMenu::m_showFPS);
-                ImGui::Checkbox("Show Player Information", &showPlayerInfo);
-                ImGui::Checkbox("Display Debug modules window", &CDebugMenu::m_showExtraDebugFeatures);
-                if (ImGui::Button("Streamer: ReInit")) {
-                    CStreaming::ReInit();
-                }
-                ProcedureObjectManager();
-                ImGui::EndTabItem();
-            }
-
-            ImGui::EndTabBar();
-        }
-        ImGui::End();
-    }
-    ShowPlayerInfo();
 }
 
 static void DebugCode() {
@@ -379,44 +125,42 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('3')) {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
+
     if (pad->IsStandardKeyJustPressed('4')) {
-        auto& pos = FindPlayerPed()->GetPosition();
-        pos = CVector(-1979.61731f, 109.055717f, 39.8510475f);
+        CTimer::Suspend();
     }
     if (pad->IsStandardKeyJustPressed('5')) {
-        CClock::ms_nGameClockMinutes = 15;
-        CClock::ms_nGameClockHours = 9;
+        CTimer::Resume();
     }
-    if (pad->IsStandardKeyJustPressed('E')) {
-        ReversibleHooks::SwitchHook("DrawTriPlants");
-        // CFont::PrintString(200, 200, "HOOK");
+    if (pad->IsStandardKeyJustPressed('6')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_FRONT);
+    }
+    if (pad->IsStandardKeyJustPressed('7')) {
+        AudioEngine.m_FrontendAE.AddAudioEvent(AE_FRONTEND_BULLET_PASS_RIGHT_REAR);
     }
 }
 
-void CDebugMenu::ImguiDrawLoop() {
+void CDebugMenu::ImGuiDrawLoop() {
     CPad* pad = CPad::GetPad();
-    // CTRL + M or F7
-    if ((pad->IsCtrlPressed() && pad->IsStandardKeyJustPressed('M')) || pad->IsF7JustPressed()) {
-        m_showMenu = !m_showMenu;
-        pad->bPlayerSafe = m_showMenu;
+    if (pad->DebugMenuJustPressed()) {
+        m_ShowMenu = !m_ShowMenu;
+        io->MouseDrawCursor = m_ShowMenu;
+        pad->bPlayerSafe = m_ShowMenu;
     }
 
     DebugCode();
-    ReversibleHooks::CheckAll();
+    ReversibleHooks::CheckAll(); // Hot Code Reloading
 
     io->DeltaTime = CTimer::GetTimeStepInSeconds();
+    io->DisplaySize = ImVec2(SCREEN_WIDTH, SCREEN_HEIGHT); // Update display size, in case of window resize after imgui was already initialized
 
     ImGui_ImplDX9_NewFrame();
     ImGui::NewFrame();
 
-    CDebugMenu::ImguiDisplayExtraDebugFeatures();
-    ImguiDisplayPlayerInfo();
-    ImguiDisplayFramePerSecond();
-    HooksDebugModule::ProcessRender();
-    FXDebugModule::ProcessRender();
-    TeleportDebugModule::ProcessInput();
+    DebugModules::Display(m_ShowMenu);
 
     ImGui::EndFrame();
     ImGui::Render();
     ImGui_ImplDX9_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplDX9_InvalidateDeviceObjects();
 }
