@@ -10,8 +10,9 @@ void CTaskSimpleAnim::InjectHooks()
 }
 
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed) :
-    m_bHoldLastFrame{bHoldLastFrame},
+    CTaskSimple(),
     m_bDontInterrupt{bDontInterrupt},
+    m_bHoldLastFrame{bHoldLastFrame},
     m_bRunInSequence{bRunInSequence},
     m_bOffsetAvailable{bOffsetPed}
 {
