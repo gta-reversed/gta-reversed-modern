@@ -11,32 +11,25 @@
 
 class CTaskUtilityLineUpPedWithCar {
 public:
-    CVector m_offset{};
-    float m_doorOpenPosZ{-999.99f};
-    int32_t m_time{};
-    int32_t m_doorOpenPosType{};
-    int32_t m_doorIdx{};
+    CVector m_Offset;
+    float   m_fDoorOpenPosZ;
+    int32   m_fTime;
+    int32   m_nDoorOpenPosType;
+    int32   m_nDoorIdx;
 
 public:
     CTaskUtilityLineUpPedWithCar(const CVector& offset, int32 time, int32 doorOpenPosType, int32 doorIdx);
     ~CTaskUtilityLineUpPedWithCar() = default;
 
-    CVector GetLocalPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc);
-    CVector GetPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* animAssoc);
-    bool ProcessPed(CPed* pPed, CVehicle* pVehicle, CAnimBlendAssociation* pAnimAssoc);
+    CVector GetLocalPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* assoc);
+    CVector GetPositionToOpenCarDoor(CVehicle* vehicle, float animProgress, CAnimBlendAssociation* assoc);
+    bool ProcessPed(CPed* ped, CVehicle* vehicle, CAnimBlendAssociation* assoc);
 
-private: // Wrappers for hooks
+private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
-    CTaskUtilityLineUpPedWithCar* Constructor(CVector* offsets, int32 nTime, int32 doorOpenPosType, int32 doorIdx) {
-        this->CTaskUtilityLineUpPedWithCar::CTaskUtilityLineUpPedWithCar(offsets, nTime, doorOpenPosType, doorIdx);
-        return this;
-    }
-
-    CTaskUtilityLineUpPedWithCar* Destructor() {
-        this->CTaskUtilityLineUpPedWithCar::~CTaskUtilityLineUpPedWithCar();
-        return this;
-    }
+    CTaskUtilityLineUpPedWithCar* Constructor(const CVector& offsets, int32 nTime, int32 doorOpenPosType, int32 doorIdx) { this->CTaskUtilityLineUpPedWithCar::CTaskUtilityLineUpPedWithCar(offsets, nTime, doorOpenPosType, doorIdx); return this; }
+    CTaskUtilityLineUpPedWithCar* Destructor() { this->CTaskUtilityLineUpPedWithCar::~CTaskUtilityLineUpPedWithCar(); return this; }
 };
 VALIDATE_SIZE(CTaskUtilityLineUpPedWithCar, 0x1C);
