@@ -18,7 +18,7 @@ constexpr auto NUM_ANIM_BLOCKS = 180;
 class CAnimManager {
 public:
     static std::array<AnimAssocDefinition, NUM_ANIM_ASSOC_GROUPS> ms_aAnimAssocDefinitionsX; // replacement
-    static inline std::array<AnimAssocDefinition, NUM_ANIM_ASSOC_GROUPS>& ms_aAnimAssocDefinitions = *(std::array<AnimAssocDefinition, NUM_ANIM_ASSOC_GROUPS>*)0x8AA5A8;
+    static inline AnimAssocDefinition (&ms_aAnimAssocDefinitions)[NUM_ANIM_ASSOC_GROUPS] = *(AnimAssocDefinition(*)[NUM_ANIM_ASSOC_GROUPS])0x8AA5A8; // std::array - see SurfaceInfos_c
     static inline int32& ms_numAnimAssocDefinitions = *(int32*)0xB4EA28;
 
     static inline CAnimBlendAssocGroup*& ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0xB4EA34;
@@ -40,11 +40,13 @@ public:
     static void LoadAnimFile(RwStream* stream, bool loadCompressed, const char (*uncompressedAnimations)[32] = nullptr);
     static void ReadAnimAssociationDefinitions();
 
-    static CAnimBlock* GetAnimationBlock(int32 animGroup) { return ms_aAnimAssocGroups[animGroup].m_pAnimBlock; }
-    static int32 GetAnimationBlockIndex(uint32 animGroup) { return GetAnimationBlock(animGroup) - ms_aAnimBlocks.data(); }
-    static int32 GetAnimationBlockIndex(CAnimBlock* animBlock) { return animBlock - ms_aAnimBlocks.data(); }
+    static CAnimBlock* GetAnimationBlock(AssocGroupId animGroup);
     static CAnimBlock* GetAnimationBlock(const char* name);
+
+    static int32 GetAnimationBlockIndex(AssocGroupId animGroup);
+    static int32 GetAnimationBlockIndex(CAnimBlock* animBlock);
     static int32 GetAnimationBlockIndex(const char* name);
+
     static AssocGroupId GetFirstAssocGroup(const char* name);
     static CAnimBlendHierarchy* GetAnimation(uint32 hash, const CAnimBlock* animBlock);
     static CAnimBlendHierarchy* GetAnimation(const char* animName, const CAnimBlock* animBlock);
@@ -78,5 +80,4 @@ public:
 private:
     static inline void LoadAnimFile_ANPK(RwStream* stream, bool compress, const char (*uncompressedAnims)[32]);
     static inline void LoadAnimFile_ANP23(RwStream* stream, bool compress, bool isANP3);
-    static inline void LoadAnimFileStream(const char* filename);
 };

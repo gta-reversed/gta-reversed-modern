@@ -788,7 +788,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                 bPlayHitAnim = false;
             }
             else if (sourceEntityTaskUseGun && sourceEntityTaskUseGun->m_nLastCommand == 5) {
-                m_nAnimGroup = CTaskSimpleFight::m_aComboData[0].m_dwAnimGroup;
+                m_nAnimGroup = CTaskSimpleFight::m_aComboData[0].m_nAnimGroup;
                 m_nAnimID = ANIM_ID_FIGHT_HIT_2;
                 m_fAnimBlend = 16.0f;
                 bPlayHitAnim = false;
