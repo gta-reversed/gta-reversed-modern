@@ -1753,7 +1753,7 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
             (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
             break;
         default:
-            NOTSA_UNREACHABLE;
+            NOTSA_UNREACHABLE();
         }
     }
 
@@ -2100,7 +2100,7 @@ void CFileLoader::LoadScene(const char* filename) {
     auto newIPLIndex{ -1 };
     if (gCurrIplInstancesCount > 0) {
         newIPLIndex = CIplStore::GetNewIplEntityIndexArray(gCurrIplInstancesCount);
-        std::ranges::copy(gCurrIplInstances, gCurrIplInstances + gCurrIplInstancesCount, CIplStore::GetIplEntityIndexArray(newIPLIndex));
+        rng::copy(gCurrIplInstances | std::views::take(gCurrIplInstancesCount), CIplStore::GetIplEntityIndexArray(newIPLIndex));
     }
     LinkLods(CIplStore::SetupRelatedIpls(filename, newIPLIndex, &gCurrIplInstances[gCurrIplInstancesCount]));
     CIplStore::RemoveRelatedIpls(newIPLIndex); // I mean this totally makes sense, doesn't it?

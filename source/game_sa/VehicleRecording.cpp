@@ -21,7 +21,10 @@ void CVehicleRecording::Init() {
     bPlaybackPaused.fill(false);
     pPlaybackBuffer.fill(nullptr);
     pVehicleForPlayback.fill(nullptr);
-    StreamingArray.fill(CPath());
+    for (auto& path : StreamingArray) {
+        path.m_pData = nullptr;
+        path.m_nRefCount = 0;
+    }
 }
 
 // 0x45A1B0

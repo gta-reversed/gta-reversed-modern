@@ -83,28 +83,22 @@ void CAEScriptAudioEntity::PlayMissionBankSound(uint8 sampleId, CVector& posn, C
 // event eAudioEvents
 // 0x4EC550
 void CAEScriptAudioEntity::PlayResidentSoundEvent(int16 bankSlotId, int16 bankId, int16 sfxId, uint16 event, CVector& posn, CPhysical* physical, float vol, float speed, int16 playPosn, float maxDistance) {
-    return plugin::CallMethod<0x4EC550, CAEScriptAudioEntity*, int16, int16, int16, uint16, CVector&, CPhysical*, float, float, int16, float>(this, bankSlotId, bankId, sfxId, event, posn, physical, vol, speed, playPosn, maxDistance);
-
-    // untested
-    bool bFrontend = false;
     if (!AEAudioHardware.IsSoundBankLoaded(bankId, bankSlotId))
         return;
 
-    auto volume = GetDefaultVolume(static_cast<eAudioEvents>(event)) + vol;
+    bool bFrontend = false;
+    const auto volume = GetDefaultVolume(static_cast<eAudioEvents>(event)) + vol;
+    CVector pos = [&] {
+        if (physical) {
+            return physical->GetPosition();
+        } else if (posn == -1000.0f || posn.IsZero()) {
+            bFrontend = true;
+            return CVector{0.0f, 1.0f, 0.0f};
+        } else {
+            return posn;
+        }
+    }();
 
-    CVector pos;
-    if (physical) {
-        pos = physical->GetPosition();
-    } else if (posn == -1000.0f || posn.IsZero()) {
-        pos.x = 0.0f;
-        pos.y = 1.0f;
-        pos.z = 0.0f;
-        bFrontend = true;
-    } else {
-        pos.x = posn.x;
-        pos.y = posn.y;
-        pos.z = posn.z;
-    }
     m_tempSound.Initialise(bankSlotId, sfxId, this, pos, volume, maxDistance, speed, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
     m_tempSound.m_nCurrentPlayPosition = playPosn;
     m_tempSound.m_nEnvironmentFlags = SOUND_START_PERCENTAGE | SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE;

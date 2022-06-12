@@ -10,7 +10,7 @@ CTaskSimpleDie::CTaskSimpleDie(AssocGroupId animGroupId, AnimationId animId, flo
     m_blendDelta      = blendDelta;
     m_animHierarchy   = nullptr;
     m_animAssociation = nullptr;
-    m_animFlags       = ANIM_FLAG_DEFAULT;
+    m_animFlags       = ANIMATION_DEFAULT;
     m_nFlags          = 0; // here and below should be &= ~3
 }
 
@@ -52,12 +52,12 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANSLATE_X | ANIM_FLAG_TRANSLATE_Y
-                                   | ANIM_FLAG_MOVEMENT
-                                   | ANIM_FLAG_PARTIAL
-                                   | ANIM_FLAG_FREEZE_LAST_FRAME
-                                   | ANIM_FLAG_LOOPED
-                                   | ANIM_FLAG_STARTED;
+    m_animAssociation->m_nFlags &=   ANIMATION_TRANSLATE_X | ANIMATION_TRANSLATE_Y
+                                   | ANIMATION_MOVEMENT
+                                   | ANIMATION_PARTIAL
+                                   | ANIMATION_FREEZE_LAST_FRAME
+                                   | ANIMATION_LOOPED
+                                   | ANIMATION_STARTED;
 
     if (m_animSpeed > 0.0f)
         m_animAssociation->m_fSpeed = m_animSpeed;

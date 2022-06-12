@@ -104,7 +104,7 @@ bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     if (m_pAnim)
     {
         m_pAnim->m_fBlendDelta = -1000.0F;
-        m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); //doesn't make sense, since there is only one callback function
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;
