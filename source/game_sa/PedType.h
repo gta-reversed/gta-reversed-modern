@@ -5,6 +5,7 @@
 class CPedType {
 public:
     static CAcquaintance*& ms_apPedTypes;
+    static CAcquaintance*  ms_apPedTypesOld;
 
 public:
     static void InjectHooks();

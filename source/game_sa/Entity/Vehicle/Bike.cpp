@@ -317,7 +317,7 @@ void CBike::Render() {
 
     if (m_renderLights.m_bRightFront) {
         CalculateLeanMatrix();
-        CVehicle::DoHeadLightBeam(0, m_mLeanMatrix, true);
+        CVehicle::DoHeadLightBeam(DUMMY_LIGHT_FRONT_MAIN, m_mLeanMatrix, true);
     }
 
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(savedRef));

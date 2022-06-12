@@ -3,6 +3,8 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
+#include "reversiblehooks/ReversibleHook/Base.h"
+#include "reversiblehooks/ReversibleHook/Simple.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -393,6 +395,23 @@ void RenderCategory(RH::HookCategory& cat) {
                             cat.SetItemEnabled(item, hooked);
                         }
                         PopID(); // State checkbox
+                    }
+
+                    if (IsItemHovered()) {
+                        switch (item->Type()) {
+                        case RH::ReversibleHook::Base::HookType::Simple: {
+                            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
+
+                            SetTooltip("GTA: %#x | Our: %#x", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
+
+                            if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                                SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());
+                            } else if (IsItemClicked(ImGuiMouseButton_Right)) {
+                                SetClipboardText(std::format("{:#x}", s->m_iLibFunctionAddress).c_str());
+                            }
+                            break;
+                        }
+                        }
                     }
 
                     PopID(); // This hook

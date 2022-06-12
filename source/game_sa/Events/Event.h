@@ -59,8 +59,8 @@ VALIDATE_SIZE(CEvent, 0xC);
 
 class CEventRevived : public CEvent {
 public:
-    CEventRevived() {}
-    ~CEventRevived() {}
+    CEventRevived() = default;
+    ~CEventRevived() override = default;
 
     eEventType GetEventType() const override { return EVENT_REVIVE; }
     int32 GetEventPriority() const override { return 74; }
@@ -81,7 +81,7 @@ VALIDATE_SIZE(CEventRevived, 0xC);
 
 class CEventEscalator : public CEvent {
 public:
-    CEventEscalator() {}
+    CEventEscalator() = default;
     ~CEventEscalator() override = default;
 
     eEventType GetEventType() const override { return EVENT_ON_ESCALATOR; }
@@ -129,7 +129,6 @@ VALIDATE_SIZE(CEventSexyVehicle, 0x10);
 class CEventChatPartner : public CEvent {
 public:
     bool  m_leadSpeaker;
-    char  _pad[3];
     CPed* m_partner;
 
 public:
@@ -282,6 +281,3 @@ private:
 };
 
 VALIDATE_SIZE(CEventOnFire, 0xC);
-
-
-

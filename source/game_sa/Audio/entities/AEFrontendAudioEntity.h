@@ -23,7 +23,7 @@ public:
     void Initialise();
     void Reset();
 
-    void AddAudioEvent(int32 eventCode, float fVolumeBoost = 0.0f, float fSpeed = 1.0f);
+    void AddAudioEvent(eAudioEvents event, float fVolumeBoost = 0.0f, float fSpeed = 1.0f);
 
     bool IsRadioTuneSoundActive();
     bool IsLoadingTuneActive();

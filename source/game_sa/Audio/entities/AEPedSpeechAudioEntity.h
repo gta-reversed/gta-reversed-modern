@@ -9,7 +9,7 @@
 #include "AEAudioEntity.h"
 #include "AESound.h"
 
-enum eAudioPedType {
+enum eAudioPedType : int16 {
     PED_TYPE_GEN    = 0,
     PED_TYPE_EMG    = 1,
     PED_TYPE_PLAYER = 2,
@@ -20,29 +20,29 @@ enum eAudioPedType {
 
 class CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
-    char      field_7C[20]{};
-    bool      f90{};
-    char      field_91{};
-    int16     m_nVoiceType{}; // see eAudioPedType
-    int16     m_nVoiceId{};
-    int16     m_nVoiceGender{};
-    bool      m_bTalking{};
-    bool      m_bSpeechDisabled{};
-    bool      m_bSpeechForScriptsDisabled{};
-    int8      m_nVocalEnableFlag{};
-    char      field_9C{};
-    char      field_9D{};
-    char      field_9E{};
-    char      field_9F{};
-    CAESound* m_pSound{};
-    int16     m_nSoundId{};
-    int16     m_nBankId{};
-    int16     m_nPedSpeechSlotIndex{};
-    int16     field_AA{};
-    float     m_fVoiceVolume{};
-    int16     m_nCurrentPhraseId{};
-    int16     field_B2{};
-    int32     field_B4[19]{};
+    char      field_7C[20];
+    bool      f90;
+    char      field_91;
+    int16     m_nVoiceType;
+    int16     m_nVoiceId;
+    int16     m_nVoiceGender;
+    bool      m_bTalking;
+    bool      m_bSpeechDisabled;
+    bool      m_bSpeechForScriptsDisabled;
+    int8      m_nVocalEnableFlag;
+    char      field_9C;
+    char      field_9D;
+    char      field_9E;
+    char      field_9F;
+    CAESound* m_pSound;
+    int16     m_nSoundId;
+    int16     m_nBankId;
+    int16     m_nPedSpeechSlotIndex;
+    int16     field_AA;
+    float     m_fVoiceVolume;
+    int16     m_nCurrentPhraseId;
+    int16     field_B2;
+    int32     field_B4[19];
 
 public:
     static int16& s_nCJWellDressed;
@@ -54,7 +54,7 @@ public:
     static bool& s_bAPlayerSpeaking;
     static bool& s_bAllSpeechDisabled;
     static int16& s_ConversationLength;
-    // static int16[int8]& s_Conversation;
+    static int16 (&s_Conversation)[8];
     static bool& s_bPlayerConversationHappening;
     static bool& s_bPedConversationHappening;
     static CPed*& s_pPlayerConversationPed;
@@ -114,7 +114,7 @@ public:
     int8 GetVoiceAndTypeFromModel(eModelID modelId);
     int16 GetSoundAndBankIDs(int16 phraseId, int16* a3);
     bool CanWePlayGlobalSpeechContext(int16 a2);
-    int16 AddSayEvent(int32 a2, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
+    int16 AddSayEvent(eAudioEvents audioEvent, int16 phraseId, uint32 a4, float a5, uint8 a6, uint8 a7, uint8 a8);
     void Initialise(CEntity* ped);
     bool CanPedHoldConversation();
     bool IsGlobalContextImportantForStreaming(int16 a1);

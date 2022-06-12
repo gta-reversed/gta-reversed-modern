@@ -163,7 +163,7 @@ void CRadar::Initialise()
     airstrip_blip = 0;
     airstrip_location = 0;
 
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         ClearActualBlip(i);
     }
 
@@ -188,7 +188,7 @@ void CRadar::Initialise()
 
     m_radarRange = 350.0f;
 
-    for (auto i = 0; i < gRadarTextures.size(); i++) {
+    for (auto i = 0u; i < gRadarTextures.size(); i++) {
         char txdName[16] = { 0 };
         sprintf(txdName, "radar%02d", i);
         gRadarTextures[i] = CTxdStore::FindTxdSlot(txdName);
@@ -241,7 +241,7 @@ int32 CRadar::GetActualBlipArrayIndex(int32 blipIndex)
 // 0x5828A0
 void CRadar::DrawLegend(int32 x, int32 y, eRadarSprite blipType)
 {
-    char* blipName;
+    char* blipName{};
 
     switch (blipType) {
     case (eRadarSprite)-5:
@@ -891,7 +891,7 @@ void CRadar::DrawRotatingRadarSprite(CSprite2d* sprite, float x, float y, float 
         LimitToMap(&x, &y);
     }
 
-    for (int32 i = 0; i < std::size(verts); i++) {
+    for (auto i = 0u; i < std::size(verts); i++) {
         float theta = (float)i * HALF_PI + (angle - PI / 4.0f);
 
         verts[i].x = std::sin(theta) * (float)width + x;
@@ -1382,7 +1382,7 @@ void CRadar::ClearActualBlip(int32 blipIndex)
 // 0x587C60
 void CRadar::ClearBlipForEntity(eBlipType blipType, int32 entityHandle)
 {
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         if (ms_RadarTrace[i].m_nBlipType != blipType || ms_RadarTrace[i].m_nEntityHandle != entityHandle)
             continue;
 
@@ -1419,7 +1419,7 @@ bool CRadar::Load()
 {
     Initialise();
 
-    for (auto i = 0; i < ms_RadarTrace.size(); i++) {
+    for (auto i = 0u; i < ms_RadarTrace.size(); i++) {
         auto& trace = ms_RadarTrace[i];
         CGenericGameStorage::LoadDataFromWorkBuffer(&trace, sizeof(trace));
         if (trace.m_pEntryExit) {

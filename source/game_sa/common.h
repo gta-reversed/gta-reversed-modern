@@ -94,7 +94,7 @@ extern uint32 &ClumpOffset;
 #define RpGeometryGetMesh(_geometry, _index) (&((RpMesh*)(((char*)(_geometry)->mesh) + sizeof(RpMeshHeader) + ((_geometry)->mesh->firstMeshOffset)))[_index])
 
 constexpr float E              = 2.71828f;          // e
-constexpr float E_CONST        = 0.577;             // Euler-Mascheroni constant
+constexpr float E_CONST        = 0.577f;            // Euler-Mascheroni constant
 constexpr float FRAC_1_TAU     = 0.159154f;         // 1 / τ
 constexpr float FRAC_1_PI      = 0.318309f;         // 1 / π
 constexpr float FRAC_2_TAU     = 0.318309f;         // 2 / τ
@@ -126,6 +126,8 @@ constexpr float SQRT_3         = 1.73205f;          // √3
 constexpr float SIN_PI         = 0.0f;              // sin(π);
 constexpr float COS_PI         = -1.0f;             // cos(π);
 constexpr float TWO_PI         = 6.28318f;          // τ (TAU)
+
+constexpr float sq(float x) { return x * x; }
 
 struct SpriteFileName {
     const char* name;
@@ -293,7 +295,7 @@ void SetBrightMarkerColours(float lighting);
 void ReSetAmbientAndDirectionalColours();
 void DeActivateDirectional();
 void ActivateDirectional();
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0);
+void SetAmbientColoursToIndicateRoadGroup(int32 idx);
 void SetFullAmbient();
 void SetAmbientColours();
 void SetAmbientColours(RwRGBAReal* color);

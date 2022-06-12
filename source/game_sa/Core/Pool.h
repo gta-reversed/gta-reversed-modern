@@ -41,6 +41,10 @@ VALIDATE_SIZE(tPoolObjectFlags, 1);
 
 template <class A, class B = A> class CPool {
 public:
+    // NOTSA typenames
+    using base_type = A;   // Common base of all these objects
+    using widest_type = B; // Type using the most memory (So each object takes this much memory basically)
+
     B*                m_pObjects;
     tPoolObjectFlags* m_byteMap;
     int32             m_nSize;
@@ -270,10 +274,16 @@ public:
     template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
     auto GetAllValid() {
         using namespace std;
-        return span{ m_pObjects, (size_t)m_nSize}
+        return span{ m_pObjects, (size_t)m_nSize }
              | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
              | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
     }
-};
 
+    // Similar to above, but gives back gives back a pair [index, object]
+    template<typename T = A>
+    auto GetAllValidWithIndex() {
+        return GetAllValid<T>()
+             | rng::views::transform([this](auto&& obj) { return std::make_pair(GetIndex(&obj), std::ref(obj)); });
+    }
+};
 VALIDATE_SIZE(CPool<int32>, 0x14);

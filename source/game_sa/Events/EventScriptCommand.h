@@ -12,7 +12,7 @@ public:
 
 public:
     CEventScriptCommand(int32 primaryTaskIndex, CTask* task, bool affectsDeadPeds);
-    ~CEventScriptCommand();
+    ~CEventScriptCommand() override;
 
     eEventType GetEventType() const override { return EVENT_SCRIPT_COMMAND; }
     int32 GetEventPriority() const override;

@@ -7,6 +7,7 @@
 #pragma once
 
 /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/TaskTypes.h */
+#include "Base.h"
 
 enum eTaskType : int32 {
     // player tasks

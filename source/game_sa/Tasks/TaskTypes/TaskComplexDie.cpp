@@ -89,7 +89,7 @@ void CTaskComplexDie::SayDeathSample(CPed* ped) const {
     case WEAPON_FALL:
         ped->Say(342);
         if (CLocalisation::Blood())
-            ped->m_pedAudio.AddAudioEvent(119, 0.0f, 1.0f, ped);
+            ped->m_pedAudio.AddAudioEvent(AE_PED_CRUNCH, 0.0f, 1.0f, ped);
         break;
     default:
         ped->Say(343);
@@ -121,7 +121,7 @@ CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     if (m_nWeaponType != WEAPON_DROWNING
         || !ped->bInVehicle
         || ped->bForceDieInCar
-        || ped->m_pVehicle && (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli())
+        || (ped->m_pVehicle && (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli()))
     ) {
         ped->SetPedState(PEDSTATE_DIE);
         ped->GetIntelligence()->ClearTasks(false, true);

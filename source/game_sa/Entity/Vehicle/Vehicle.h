@@ -28,13 +28,14 @@ class CPed;
 class CPlane;
 class CHeli;
 class CPedGroup;
+class CVehicleAnimGroup;
 
 enum eCarWeapon : uint8 {
-    CAR_WEAPON_NOT_USED,
-    CAR_WEAPON_HEAVY_GUN,
-    CAR_WEAPON_FREEFALL_BOMB,
-    CAR_WEAPON_LOCK_ON_ROCKET,
-    CAR_WEAPON_DOUBLE_ROCKET
+    CAR_WEAPON_NOT_USED       = 0,
+    CAR_WEAPON_HEAVY_GUN      = 1,
+    CAR_WEAPON_FREEFALL_BOMB  = 2,
+    CAR_WEAPON_LOCK_ON_ROCKET = 3,
+    CAR_WEAPON_DOUBLE_ROCKET  = 4,
 };
 
 enum eCarLock : uint32 {
@@ -360,7 +361,7 @@ public:
     char            field_512;             // initialised, but not used?
     eCarWeapon      m_nVehicleWeaponInUse;
     uint32          m_nHornCounter;
-    char            field_518;       // random id related to siren
+    int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
     char            m_comedyControlState;
     char            m_nHasslePosId;
@@ -563,12 +564,12 @@ public:
     float GetFiringRateMultiplier();
     uint32 GetPlaneGunsRateOfFire();
     CVector GetPlaneGunsPosition(int32 gunId);
-    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType ordnanceType);
-    CVector GetPlaneOrdnancePosition(eOrdnanceType ordnanceType);
-    void SelectPlaneWeapon(bool bChange, eOrdnanceType ordnanceType);
+    uint32 GetPlaneOrdnanceRateOfFire(eOrdnanceType type);
+    CVector GetPlaneOrdnancePosition(eOrdnanceType type);
+    void SelectPlaneWeapon(bool bChange, eOrdnanceType type);
     void DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex);
     void FirePlaneGuns();
-    void FireUnguidedMissile(eOrdnanceType ordnanceType, bool bCheckTime);
+    void FireUnguidedMissile(eOrdnanceType type, bool bCheckTime);
     bool CanBeDriven();
     void ReactToVehicleDamage(CPed* ped);
     bool GetVehicleLightsStatus();
@@ -605,8 +606,8 @@ public:
     void FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType ordnanceType, bool arg2);
     void PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1);
     void ProcessSirenAndHorn(bool arg0);
-    bool DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
-    void DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2);
+    bool DoHeadLightEffect(eVehicleDummy dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
+    void DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2);
     void DoHeadLightReflectionSingle(CMatrix& matrix, uint8 lightId);
     void DoHeadLightReflectionTwin(CMatrix& matrix);
     void DoHeadLightReflection(CMatrix& matrix, uint32 flags, uint8 left, uint8 right);
@@ -686,9 +687,11 @@ public:
 
     // if bWorldSpace is true, returns the position in world-space
     // otherwise in model-space
-    CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
+    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
-    [[nodiscard]] bool HasDriver() const { return !!m_pDriver; }
+    bool HasDriver() const { return !!m_pDriver; }
+    CVehicleAnimGroup& GetAnimGroup() const;
+    AssocGroupId GetAnimGroupId() const;
     auto GetPassengers() { return std::span(m_apPassengers, m_nMaxPassengers); }
 
 private:
@@ -746,3 +749,5 @@ void CVehicle::GetGasTankPosition();
 void CVehicle::SetTappedGasTankVehicle(CEntity* entity);
 bool CVehicle::GetHasDualExhausts() { return (m_pHandlingData->m_nModelFlags >> 13) & 1; // m_bNoExhaust }
 */
+static constexpr uint16 TOWTRUCK_HOIST_DOWN_LIMIT = 20'000; // 0x8D313C
+static constexpr uint16 TOWTRUCK_HOIST_UP_LIMIT   = 10'000; // 0x8D3140
