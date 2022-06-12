@@ -35,6 +35,7 @@ public:
 
     bool ProcessPed(CPed* ped) override;
     eTaskType GetTaskType() override { return Type; }
+    void OffsetPedPosition(CPed* ped);
 
 private: // Wrappers for hooks
     CTaskSimpleRunNamedAnim* Constructor(char const* pAnimName, char const* pAnimGroupName, int32 animFlags, float blendDelta, int32 endTime, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed, bool bHoldLastFrame) { this->CTaskSimpleRunNamedAnim::CTaskSimpleRunNamedAnim(pAnimName, pAnimGroupName, animFlags, blendDelta, endTime, bDontInterrupt, bRunInSequence, bOffsetPed, bHoldLastFrame); return this; }
