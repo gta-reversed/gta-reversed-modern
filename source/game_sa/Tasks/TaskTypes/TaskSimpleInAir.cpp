@@ -182,7 +182,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_fBlendDelta = -1000.0F;
-                m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim = nullptr;
             }
@@ -227,7 +227,7 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         if (m_pAnim)
         {
             m_pAnim->m_fBlendDelta = -8.0F;
-            m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+            m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }

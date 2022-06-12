@@ -606,8 +606,8 @@ public:
     void FireHeatSeakingMissile(CEntity* targetEntity, eOrdnanceType ordnanceType, bool arg2);
     void PossiblyDropFreeFallBombForPlayer(eOrdnanceType ordnanceType, bool arg1);
     void ProcessSirenAndHorn(bool arg0);
-    bool DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
-    void DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2);
+    bool DoHeadLightEffect(eVehicleDummy dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState);
+    void DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2);
     void DoHeadLightReflectionSingle(CMatrix& matrix, uint8 lightId);
     void DoHeadLightReflectionTwin(CMatrix& matrix);
     void DoHeadLightReflection(CMatrix& matrix, uint32 flags, uint8 left, uint8 right);
@@ -687,7 +687,7 @@ public:
 
     // if bWorldSpace is true, returns the position in world-space
     // otherwise in model-space
-    CVector GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace = true);
+    CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
     bool HasDriver() const { return !!m_pDriver; }
     CVehicleAnimGroup& GetAnimGroup() const;

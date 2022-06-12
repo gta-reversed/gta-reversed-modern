@@ -1720,7 +1720,7 @@ CVehicleModelInfo* CVehicle::GetVehicleModelInfo() {
     return CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
 }
 
-CVector CVehicle::GetDummyPosition(eVehicleDummies dummy, bool bWorldSpace) {
+CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
     CVector pos = GetVehicleModelInfo()->GetModelDummyPosition(dummy);
     if (bWorldSpace)
         pos = GetMatrix() * pos; // transform to world-space
@@ -2133,7 +2133,7 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type)
     // ((void(__thiscall*)(CVehicle*, CVector*, eOrdnanceType))0x6D46E0)(this, &result, type);
     // return result;
 
-    const auto pos = GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_VEH_GUN);
+    const auto pos = GetVehicleModelInfo()->GetModelDummyPosition(DUMMY_VEHICLE_GUN);
     if (!pos->IsZero()) {
         return pos;
     }
@@ -2957,17 +2957,15 @@ void CVehicle::ProcessSirenAndHorn(bool arg0)
 }
 
 // 0x6E0A50
-bool CVehicle::DoHeadLightEffect(int32 dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState)
-{
+bool CVehicle::DoHeadLightEffect(eVehicleDummy dummyId, CMatrix& vehicleMatrix, uint8 lightId, uint8 lightState) {
     return ((bool(__thiscall*)(CVehicle*, int32, CMatrix&, uint8, uint8))0x6E0A50)(this, dummyId, vehicleMatrix, lightId, lightState);
 }
 
 // 0x6E0E20
-void CVehicle::DoHeadLightBeam(int32 dummyId, CMatrix& matrix, bool arg2)
-{
+void CVehicle::DoHeadLightBeam(eVehicleDummy dummyId, CMatrix& matrix, bool arg2) {
     const auto* mi = GetVehicleModelInfo();
-    CVector pointModelSpace = mi->GetModelDummyPosition(static_cast<eVehicleDummies>(2 * dummyId));
-    if (dummyId == 1 && pointModelSpace.IsZero())
+    CVector pointModelSpace = mi->GetModelDummyPosition(static_cast<eVehicleDummy>(2 * dummyId));
+    if (dummyId == DUMMY_LIGHT_REAR_MAIN && pointModelSpace.IsZero())
         return;
 
     CVector point = matrix.GetPosition() + Multiply3x3(matrix, pointModelSpace);

@@ -54,8 +54,8 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple() {
 
 CTaskSimpleSwim::~CTaskSimpleSwim() {
     if (m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        CAnimManager::RemoveAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+        const auto blockIndex = CAnimManager::GetAnimationBlockIndex(ANIM_GROUP_SWIM);
+        CAnimManager::RemoveAnimBlockRef(blockIndex);
     }
 
     CEntity::SafeCleanUpRef(m_pEntity);
@@ -158,7 +158,7 @@ bool CTaskSimpleSwim::ProcessPed_Reversed(CPed* ped)
         if (animAssociation)
         {
             if (animAssociation->m_nAnimId == ANIM_ID_CLIMB_JUMP)
-                animAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+                animAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
             else
                 animAssociation->m_fBlendDelta = -4.0f;
             if (m_AnimID == ANIM_ID_SWIM_BREAST)
@@ -312,17 +312,19 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped)
     }
 
     if (!m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        if (!pAnimBlock) {
-            char* pBlockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
-            pAnimBlock = CAnimManager::GetAnimationBlock(pBlockName);
+        CAnimBlock* animBlock = CAnimManager::GetAnimationBlock(ANIM_GROUP_SWIM);
+
+        if (!animBlock) {
+            const char* blockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
+            animBlock = CAnimManager::GetAnimationBlock(blockName);
         }
-        if (pAnimBlock->bLoaded) {
-            CAnimManager::AddAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+
+        const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
+        if (animBlock->bLoaded) {
+            CAnimManager::AddAnimBlockRef(blockIndex);
             m_bAnimBlockRefAdded = true;
-        }
-        else {
-            CStreaming::RequestModel(IFPToModelId(pAnimBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
+        } else {
+            CStreaming::RequestModel(IFPToModelId(blockIndex), STREAMING_KEEP_IN_MEMORY);
         }
     }
 
@@ -509,7 +511,7 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped)
                     if (animAssociation->m_pHierarchy->m_fTotalTime * 0.25f <= animAssociation->m_fTimeStep
                         + animAssociation->m_fCurrentTime) {
                         animAssociation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0f);
-                        animAssociation->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+                        animAssociation->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
                         m_AnimID = ANIM_ID_CLIMB_JUMP;
                     }
                     break;
@@ -840,15 +842,15 @@ void CTaskSimpleSwim::ProcessEffects(CPed* ped)
         if (ped->IsPlayer())
         {
             oxygen = static_cast<uint32>(
-                ((100.0f - playerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) * 1.0f / 3.0f));
+                ((100.0f - playerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f) / 3.0f));
         }
         if ((unsigned)CGeneral::GetRandomNumberInRange(0, 100) < oxygen)
         {
-            RpHAnimHierarchy* pRwAnimHierarchy = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
-            RwV3d* pBoneSpine1Pos = &RpHAnimHierarchyGetMatrixArray(pRwAnimHierarchy)[BONE_SPINE1].pos;
+            RpHAnimHierarchy* hier = GetAnimHierarchyFromSkinClump(ped->m_pRwClump);
+            RwV3d* bonePos = &RpHAnimHierarchyGetMatrixArray(hier)[BONE_JAW].pos; // FIX_BUGS: Air bubbles from ass :D (BONE_SPINE1)
             static FxPrtMult_c fxPrtMult(1.0f, 1.0f, 1.0f, 0.25f, 0.3f, 0.0f, 0.5f);
             RwV3d vecParticleVelocity = { 0.0f, 0.0f, 2.0f };
-            g_fx.m_pPrtBubble->AddParticle(pBoneSpine1Pos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, 0);
+            g_fx.m_pPrtBubble->AddParticle(bonePos, &vecParticleVelocity, 0.0f, &fxPrtMult, -1.0f, 1.2f, 0.6f, 0);
         }
         break;
     }
