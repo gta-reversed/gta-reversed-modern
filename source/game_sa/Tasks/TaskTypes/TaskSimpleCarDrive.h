@@ -43,7 +43,7 @@ public:
     static constexpr auto Type = TASK_SIMPLE_CAR_DRIVE;
 
     CTaskSimpleCarDrive() = delete;
-    CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
+    explicit CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
 
     eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
     CTask* Clone() override;
@@ -51,12 +51,12 @@ public:
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool SetPedPosition(CPed* ped) override;
 
-    void TriggerIK(CPed* ped);
+    void TriggerIK(CPed* ped) const;
     void UpdateBopping();
     void StartBopping(CPed* ped);
-    void ProcessHeadBopping(CPed* ped, uint8 a3, float a4);
-    void ProcessArmBopping(CPed* pPed, uint8 a3, float a4);
-    void ProcessBopping(CPed* ped, uint8 a3);
+    void ProcessHeadBopping(CPed* ped, bool a3, float a4);
+    void ProcessArmBopping(CPed* pPed, bool a3, float a4);
+    void ProcessBopping(CPed* ped, bool a3);
 
     [[nodiscard]] auto GetVehicle() const { return m_pVehicle; }
 

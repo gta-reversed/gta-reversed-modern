@@ -16,7 +16,7 @@ void CTaskSimpleCarDrive::InjectHooks() {
     //RH_ScopedInstall(ProcessHeadBopping, 0x6428C0);
     //RH_ScopedInstall(ProcessArmBopping, 0x642AE0);
     RH_ScopedInstall(ProcessBopping, 0x642E70);
-    //RH_ScopedInstall(Clone_Reversed, 0x63DC20);
+    RH_ScopedInstall(Clone_Reversed, 0x63DC20);
     RH_ScopedInstall(GetTaskType_Reversed, 0x63C450);
     //RH_ScopedInstall(MakeAbortable_Reversed, 0x63C670);
     //RH_ScopedInstall(ProcessPed_Reversed, 0x644470);
@@ -24,16 +24,32 @@ void CTaskSimpleCarDrive::InjectHooks() {
 }
 
 // 0x63C340
-CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle) :
-    m_pVehicle{vehicle},
-    m_bUpdateCurrentVehicle{updateCurrentVehicle},
-    m_pTaskUtilityLineUpPedWithCar{ utilityTask ? new CTaskUtilityLineUpPedWithCar{CVector{}, 0, utilityTask->m_doorOpenPosType, utilityTask->m_doorIdx} : nullptr}
-{
+CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask, bool updateCurrentVehicle) : CTaskSimple() {
+    m_pVehicle = vehicle;
+    m_pAnimCloseDoorRolling = nullptr;
+    m_pTaskUtilityLineUpPedWithCar = nullptr;
+    field_14 = 0;
+    field_18 = 0;
+    field_1C = 0;
+    field_1D = 0;
+    m_nTimePassedSinceCarUpSideDown = 0;
+    m_bUpdateCurrentVehicle = updateCurrentVehicle;
+
     CEntity::SafeRegisterRef(m_pVehicle);
+
+    if (utilityTask) {
+        m_pTaskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar(CVector{}, 0, utilityTask->m_doorOpenPosType, utilityTask->m_doorIdx);
+    }
+    m_b01 = false;
+    m_b02 = false;
+    m_fHeadBoppingFactor = 0.0f;
+    m_fHeadBoppingOrientation = 0.0f;
+    m_fRandomHeadBoppingMultiplier = 0.0f;
+    m_nBoppingStartTime = -1;
 }
 
 // 0x63C500
-void CTaskSimpleCarDrive::TriggerIK(CPed* ped) {
+void CTaskSimpleCarDrive::TriggerIK(CPed* ped) const {
     if (!m_pVehicle) {
         return;
     }
@@ -49,7 +65,7 @@ void CTaskSimpleCarDrive::TriggerIK(CPed* ped) {
     case MISSION_BLOCKPLAYER_FARAWAY:
     case MISSION_BLOCKPLAYER_CLOSE:
     case MISSION_BLOCKPLAYER_HANDBRAKESTOP: { // Make ped look at player ped
-        g_ikChainMan.LookAt("DriveCar", ped, FindPlayerPed(), 3000, BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
+        g_ikChainMan.LookAt("DriveCar", ped, FindPlayerPed(0), 3000, BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
         break;
     }
     case MISSION_RAMCAR_FARAWAY:
@@ -81,17 +97,17 @@ void CTaskSimpleCarDrive::StartBopping(CPed* ped) {
 }
 
 // 0x6428C0
-void CTaskSimpleCarDrive::ProcessHeadBopping(CPed* ped, uint8 a3, float a4) {
-    plugin::CallMethod<0x6428C0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, ped, a3, a4);
+void CTaskSimpleCarDrive::ProcessHeadBopping(CPed* ped, bool a3, float a4) {
+    plugin::CallMethod<0x6428C0, CTaskSimpleCarDrive*, CPed*, bool, float>(this, ped, a3, a4);
 }
 
 // 0x642AE0
-void CTaskSimpleCarDrive::ProcessArmBopping(CPed* ped, uint8 a3, float a4) {
-    plugin::CallMethod<0x642AE0, CTaskSimpleCarDrive*, CPed*, uint8, float>(this, ped, a3, a4);
+void CTaskSimpleCarDrive::ProcessArmBopping(CPed* ped, bool a3, float a4) {
+    plugin::CallMethod<0x642AE0, CTaskSimpleCarDrive*, CPed*, bool, float>(this, ped, a3, a4);
 }
 
 // 0x642E70
-void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, uint8 a3) {
+void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, bool a3) {
     if (ped->m_pVehicle->m_pDriver == FindPlayerPed(0)
         || ped->m_nPedType == PED_TYPE_COP
         || ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_CAR_SLOW_BE_DRAGGED_OUT_AND_STAND_UP)
@@ -116,7 +132,9 @@ void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, uint8 a3) {
 
 // 0x63DC20
 CTask* CTaskSimpleCarDrive::Clone() {
-    return plugin::CallMethodAndReturn< CTask*, 0x63DC20, CTaskSimpleCarDrive*>(this);
+    auto task = new CTaskSimpleCarDrive(m_pVehicle);
+    task->m_bUpdateCurrentVehicle ^= true;
+    return task;
 }
 
 // 0x63C670
