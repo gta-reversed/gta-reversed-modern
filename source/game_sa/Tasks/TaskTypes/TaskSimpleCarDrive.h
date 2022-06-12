@@ -29,21 +29,20 @@ public:
     CTaskTimer                    m_copCarStolenTimer;
 
     // Inited according to: 0x63C3AE
-    union {
-        struct {
-            uint8 m_b01 : 1;
-            uint8 m_b02 : 1;
-            uint8 m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
-            uint8 m_b04 : 1;
-        };
-        uint8 m_nFlags;
-    };
+    uint8 m_b01 : 1;
+    uint8 m_b02 : 1;
+    uint8 m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
+    uint8 m_b04 : 1;
+    uint8 m_b08 : 1;
+    uint8 m_b10 : 1;
+    uint8 m_b20 : 1;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_CAR_DRIVE;
 
     CTaskSimpleCarDrive() = delete;
     explicit CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
+    ~CTaskSimpleCarDrive() override;
 
     eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
     CTask* Clone() override;

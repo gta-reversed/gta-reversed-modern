@@ -38,14 +38,30 @@ CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPe
     CEntity::SafeRegisterRef(m_pVehicle);
 
     if (utilityTask) {
-        m_pTaskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar(CVector{}, 0, utilityTask->m_doorOpenPosType, utilityTask->m_doorIdx);
+        m_pTaskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar(CVector{}, 0, utilityTask->m_nDoorOpenPosType, utilityTask->m_nDoorIdx);
     }
-    m_b01 = false;
-    m_b02 = false;
+
+    m_b08 = true;
     m_fHeadBoppingFactor = 0.0f;
     m_fHeadBoppingOrientation = 0.0f;
     m_fRandomHeadBoppingMultiplier = 0.0f;
     m_nBoppingStartTime = -1;
+}
+
+CTaskSimpleCarDrive::~CTaskSimpleCarDrive() {
+    CEntity::SafeCleanUpRef(m_pVehicle);
+
+    if (m_pTaskUtilityLineUpPedWithCar) {
+        delete m_pTaskUtilityLineUpPedWithCar;
+        m_pTaskUtilityLineUpPedWithCar = nullptr;
+    }
+
+    if (m_b20) {
+        m_pAnimCloseDoorRolling->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+        if (m_pVehicle) {
+            m_pVehicle->ClearGettingOutFlags(1);
+        }
+    }
 }
 
 // 0x63C500
