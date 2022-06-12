@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Stats.h"
+#include "MenuSystem.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;
@@ -297,12 +298,12 @@ void CStats::LoadStatUpdateConditions() {
 
 // 0x5599B0
 void CStats::LoadActionReactionStats() {
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
-    FILESTREAM fp = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
+    auto* file = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
     char statName[64] = {}; // unused
 
-    for (char* line = CFileLoader::LoadLine(fp); line != nullptr; line = CFileLoader::LoadLine(fp)) {
+    for (char* line = CFileLoader::LoadLine(file); line != nullptr; line = CFileLoader::LoadLine(file)) {
         int32 reactId;
         float reactValue;
 
@@ -313,7 +314,7 @@ void CStats::LoadActionReactionStats() {
         }
     }
 
-    CFileMgr::CloseFile(fp);
+    CFileMgr::CloseFile(file);
 }
 
 // 0x559A50

@@ -10,11 +10,13 @@
 
 class CEmergencyPed : public CPed {
 public:
-    CEmergencyPed(uint32 pedType, uint32 modelIndex);
+    CEmergencyPed(ePedType pedType, uint32 modelIndex);
+    ~CEmergencyPed() override = default;
 
+    void MedicAI();
+    void FiremanAI();
+    void ProcessControl() override;
     bool InRange(CPed* ped);
-
-    void ProcessControl();
 };
 
 VALIDATE_SIZE(CEmergencyPed, 0x79C);

@@ -13,15 +13,15 @@ void CBaseModelInfo::InjectHooks()
     RH_ScopedClass(CBaseModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(AsAtomicModelInfoPtr_Reversed, 0x4C4A80);
-    RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C4A90);
-    RH_ScopedInstall(AsLodAtomicModelInfoPtr_Reversed, 0x4C4AA0);
-    RH_ScopedInstall(GetTimeInfo_Reversed, 0x4C4AB0);
-    RH_ScopedInstall(Init_Reversed, 0x4C4B10);
-    RH_ScopedInstall(Shutdown_Reversed, 0x4C4D50);
-    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C4AC0);
-    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C4AD0);
-    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C4AE0);
+    RH_ScopedVirtualInstall(AsAtomicModelInfoPtr, 0x4C4A80);
+    RH_ScopedVirtualInstall(AsDamageAtomicModelInfoPtr, 0x4C4A90);
+    RH_ScopedVirtualInstall(AsLodAtomicModelInfoPtr, 0x4C4AA0);
+    RH_ScopedVirtualInstall(GetTimeInfo, 0x4C4AB0);
+    RH_ScopedVirtualInstall(Init, 0x4C4B10);
+    RH_ScopedVirtualInstall(Shutdown, 0x4C4D50);
+    RH_ScopedVirtualInstall(SetAnimFile, 0x4C4AC0);
+    RH_ScopedVirtualInstall(ConvertAnimFileIndex, 0x4C4AD0);
+    RH_ScopedVirtualInstall(GetAnimFileIndex, 0x4C4AE0);
     RH_ScopedInstall(SetTexDictionary, 0x4C4B40);
     RH_ScopedInstall(ClearTexDictionary, 0x4C4B70);
     RH_ScopedInstall(AddTexDictionaryRef, 0x4C4B80);

@@ -7,15 +7,7 @@
 #include "StdInc.h"
 
 #include "Sprite2d.h"
-
 #include "GxtChar.h"
-
-// static variables
-int32& CSprite2d::nextBufferIndex = *(int32*)0xC80458;
-int32& CSprite2d::nextBufferVertex = *(int32*)0xC8045C;
-float& CSprite2d::NearScreenZ = *(float*)0xC80460;
-float& CSprite2d::RecipNearClip = *(float*)0xC80464;
-RwIm2DVertex* CSprite2d::maVertices = (RwIm2DVertex*)0xC80468;
 
 void CSprite2d::InjectHooks() {
     RH_ScopedClass(CSprite2d);
@@ -142,13 +134,14 @@ void CSprite2d::Draw(const CRect& posn, const CRGBA& color)
     Draw(posn, color, color, color, color);
 }
 
+// 0x7283B0
 void CSprite2d::DrawWithBilinearOffset(const CRect& posn, const CRGBA& color)
 {
     SetVertices(posn, color, color, color, color);
     RwRaster* raster = RwTextureGetRaster(m_pTexture);
     OffsetTexCoordForBilinearFiltering(static_cast<float>(RwRasterGetWidth(raster)), static_cast<float>(RwRasterGetHeight(raster)));
     SetRenderState();
-    RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, CSprite2d::maVertices, 4);
+    RwIm2DRenderPrimitive(rwPRIMTYPETRIFAN, maVertices, 4);
 }
 
 void CSprite2d::Draw(const CRect& posn, const CRGBA& color, float u1, float v1, float u2, float v2, float u3, float v3, float u4, float v4)
@@ -386,7 +379,7 @@ void CSprite2d::DrawAnyRect(float x1, float y1, float x2, float y2, float x3, fl
 void CSprite2d::DrawCircleAtNearClip(const CVector2D& posn, float size, const CRGBA& color, int32 angle)
 {
     ((void(__cdecl*)(const CVector2D&, float, const CRGBA&, int32))0x727D60)(posn, size, color, angle);
-    
+
     /* NOT TESTED
     RwIm2DVertexSetScreenX(&maVertices[0], posn.x);
     RwIm2DVertexSetScreenY(&maVertices[0], posn.y);
@@ -467,13 +460,14 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     const float endX = x + (float)width;
     const float unclampedCurrX = x + (float)width * progress / 100.0f;
     const float currX = std::min(unclampedCurrX, endX);
+    const auto fheight = (float)height;
 
     // Progress rect
     DrawRect({
         x,
         y,
         currX,
-        y + height
+        y + fheight
     }, color);
 
     // Background (from currX to endX)
@@ -483,27 +477,27 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
         currX,
         y,
         endX,
-        y + height
+        y + fheight
     }, loadingBarBgColor);
 
     if (progressAdd) {
         addColor.a = color.a;
         DrawRect({
-            std::max<float>(x - 1.0f, currX - progressAdd),
+            std::max<float>(x - 1.0f, currX - progressAdd < 0 ? 127.0f : progressAdd), // FIX_BUGS: Because of the progressAdd overflow, the green bar is out of bounds.
             y,
             currX,
-            y + height
+            y + fheight
         }, addColor);
     }
 
     if (drawBlackBorder) {
-        const float w = 2 * SCREEN_WIDTH_UNIT, h = 2 * SCREEN_HEIGHT_UNIT;
+        const float w = SCREEN_SCALE_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
         const CRect rects[] = {
             //left,     top,              right,    bottom
-            { x,        y,                endX,     y + h      },       // Top
-            { x,        y + height - h,   endX,     y + height },       // Bottom
-            { x,        y,                x + w,    y + height },       // Left
-            { endX - w, y,                endX,     y + height }        // Right
+            { x,        y,                endX,     y + h       },       // Top
+            { x,        y + fheight - h,  endX,     y + fheight },       // Bottom
+            { x,        y,                x + w,    y + fheight },       // Left
+            { endX - w, y,                endX,     y + fheight }        // Right
         };
 
         for (const CRect& rect : rects) {
@@ -515,7 +509,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     if (drawPercentage) {
         char text[12];
         sprintf(text, "%d%%", (unsigned)progress);
-        
+
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);
 
@@ -524,7 +518,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
         CFont::SetColor({ 0, 0, 0, color.a });
         CFont::SetEdge(0);
         CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
-        CFont::SetScale(height * 0.03f, height / 0.04f);
+        CFont::SetScale(fheight * 0.03f, fheight / 0.04f);
 
         auto textX = (uint16)unclampedCurrX;
         if (x + 50.0f <= (float)textX) {

@@ -11,7 +11,7 @@ public:
     static void InjectHooks();
 
     CEventGlobalGroup(CPed* ped) : CEventGroup(ped) {};
-    ~CEventGlobalGroup() {}
+    ~CEventGlobalGroup() override = default;
 
     float GetSoundLevel(CEntity* entity, CVector& position);
     void AddEventsToPed(CPed* ped);

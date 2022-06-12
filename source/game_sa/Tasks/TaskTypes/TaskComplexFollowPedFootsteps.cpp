@@ -19,12 +19,9 @@ CTaskComplexFollowPedFootsteps::CTaskComplexFollowPedFootsteps(CPed* ped) : CTas
     m_pointRoute              = nullptr;
     m_moveState               = PEDMOVE_WALK;
 
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_targetPed));
+    CEntity::SafeRegisterRef(m_targetPed);
 
     m_pointRoute = new CPointRoute();
-    if (m_pointRoute)
-        m_pointRoute->field_0 = 0;
 }
 
 CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed* ped) {
@@ -33,8 +30,7 @@ CTaskComplexFollowPedFootsteps* CTaskComplexFollowPedFootsteps::Constructor(CPed
 }
 
 CTaskComplexFollowPedFootsteps::~CTaskComplexFollowPedFootsteps() {
-    if (m_targetPed)
-        m_targetPed->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_targetPed));
+    CEntity::SafeCleanUpRef(m_targetPed);
 
     delete m_pointRoute;
     m_pointRoute = nullptr;

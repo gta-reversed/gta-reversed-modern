@@ -16,8 +16,8 @@ public:
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
     void AddAudioEvent(eAudioEvents event, CPhysical* physical);
-    void AddAudioEvent(eAudioEvents event, CVector& posn, float volume, float speed);
-    void PlayDoorSound(int16 sfxId, eAudioEvents event, CVector& posn, float volumeDelta, float speed);
+    void AddAudioEvent(eAudioEvents event, CVector& posn, float volume = 0.0f, float speed = 1.0f);
+    void PlayDoorSound(int16 sfxId, eAudioEvents event, CVector& posn, float volumeDelta = 0.0f, float speed = 1.0f);
 
 private:
     friend void InjectHooksMain();

@@ -47,16 +47,16 @@ class CWeaponInfo;
 
 class CWeapon {
 public:
-    eWeaponType  m_nType{ WEAPON_UNARMED };
-    eWeaponState m_nState{};
-    uint32       m_nAmmoInClip{};
-    uint32       m_nTotalAmmo{};
-    uint32       m_nTimeForNextShot{};
+    eWeaponType  m_nType;
+    eWeaponState m_nState;
+    uint32       m_nAmmoInClip;
+    uint32       m_nTotalAmmo;
+    uint32       m_nTimeForNextShot;
     uint8        field_14;
-    uint8        m_bNoModel{}; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
+    uint8        m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
     uint8        field_16;
     uint8        field_17;
-    FxSystem_c*  m_pFxSystem{}; // flamethrower, spraycan, extinguisher particle
+    FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
 
     static float&     ms_fExtinguisherAimAngle; // default -0.34907 rad. (-pi/8)
     static bool&      bPhotographHasBeenTaken;
@@ -64,8 +64,11 @@ public:
     static CColModel& ms_PelletTestCol;
 
 public:
-    CWeapon() = default;
-    CWeapon(plugin::dummy_func_t) {}
+    CWeapon() { // 0x441E00
+        field_14    = 0;
+        m_bNoModel  = false;
+        m_pFxSystem = nullptr;
+    };
     CWeapon(eWeaponType weaponType, int32 ammo);
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);

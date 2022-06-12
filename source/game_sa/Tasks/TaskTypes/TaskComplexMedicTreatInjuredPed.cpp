@@ -13,6 +13,7 @@
 #include "TaskComplexGoToPointAndStandStill.h"
 #include "TaskComplexWanderMedic.h"
 #include "TaskComplexGoToPointAndStandStill.h"
+#include "InterestingEvents.h"
 
 void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     RH_ScopedClass(CTaskComplexMedicTreatInjuredPed);
@@ -22,10 +23,10 @@ void CTaskComplexMedicTreatInjuredPed::InjectHooks() {
     RH_ScopedInstall(CreateDealWithNextAccidentTask, 0x65A020);
     RH_ScopedInstall(FindNearestAccident, 0x658CC0);
     RH_ScopedInstall(FindAccidentPosition, 0x658D20);
-    RH_ScopedInstall(Clone_Reversed, 0x659AF0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x659FE0);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65A990);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65ABF0);
+    RH_ScopedVirtualInstall(Clone, 0x659AF0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x659FE0);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65A990);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65ABF0);
 }
 
 CTaskComplexMedicTreatInjuredPed* CTaskComplexMedicTreatInjuredPed::Constructor(CVehicle* vehicle, CPed* ped, bool isDriver) {
@@ -40,12 +41,8 @@ CTaskComplexMedicTreatInjuredPed::CTaskComplexMedicTreatInjuredPed(CVehicle* veh
     m_bIsDriver     = isDriver;
     m_pAccident     = nullptr;
     m_bLeftCarOnce  = false;
-
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerMedic);
 }
 
 // 0x658C30
@@ -53,11 +50,8 @@ CTaskComplexMedicTreatInjuredPed::~CTaskComplexMedicTreatInjuredPed() {
     if (m_pAccident && m_pAccident->m_pPed && !m_pAccident->m_bIsRevived)
         m_pAccident->m_bIsTreated = false;
 
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerMedic)
-        m_pPartnerMedic->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerMedic));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerMedic);
 }
 
 // 0x658DB0
@@ -175,7 +169,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateNextSubTask_Reversed(CPed* ped) {
         return CreateSubTask(ped->bInVehicle ? TASK_SIMPLE_CAR_DRIVE : TASK_COMPLEX_WANDER);
 
     if (subTaskId == TASK_COMPLEX_LEAVE_CAR) {
-        g_InterestingEvents.Add((CInterestingEvents::EType)12, ped);
+        g_InterestingEvents.Add(CInterestingEvents::EType::INTERESTING_EVENT_12, ped);
         if (m_bIsDriver && m_pAccident->m_pPed && m_pAccident->m_bIsTreated) {
             FindAccidentPosition(ped, m_pAccident->m_pPed);
             return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL);

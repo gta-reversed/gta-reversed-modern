@@ -35,8 +35,7 @@ CTaskSimpleJetPack::CTaskSimpleJetPack(const CVector* pVecTargetPos, float fCrui
     m_fLegSwingSideSpeed = 0.0f;
     m_fLegTwistSpeed = 0.0f;
 
-    if (entity)
-        entity->RegisterReference(&m_pTargetEnt);
+    CEntity::SafeRegisterRef(m_pTargetEnt);
 
     if (pVecTargetPos)
         m_vecTargetPos = *pVecTargetPos;
@@ -79,7 +78,7 @@ bool CTaskSimpleJetPack::ProcessPed(CPed* ped) {
 }
 
 // 0x67F6A0
-void CTaskSimpleJetPack::Process(CPed* ped) {
+void CTaskSimpleJetPack::RenderJetPack(CPed* ped) {
     plugin::CallMethod<0x67F6A0, CTaskSimpleJetPack*>(this, ped);
 }
 

@@ -56,7 +56,7 @@ public:
     bool SetPedPosition(CPed* ped) override;
 
     void ReleaseEntity();
-    bool CanThrowEntity();
+    bool CanThrowEntity() const;
     void PlayAnim(AnimationId groupId, AssocGroupId animId);
     static void FinishAnimHoldEntityCB(CAnimBlendAssociation* pAnimAssoc, void* data);
     void StartAnim(CPed* ped);

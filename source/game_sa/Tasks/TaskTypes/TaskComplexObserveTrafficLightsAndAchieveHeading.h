@@ -28,11 +28,11 @@ private:
         RH_ScopedClass(CTaskComplexObserveTrafficLightsAndAchieveHeading);
         RH_ScopedCategory("Tasks/TaskTypes");
 
-        RH_ScopedInstall(Clone_Reversed, 0x636490);
-        RH_ScopedInstall(ControlSubTask_Reversed, 0x631AD0);
-        RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x631AC0);
-        RH_ScopedInstall(CreateNextSubTask_Reversed, 0x631A70);
-        RH_ScopedInstall(MakeAbortable_Reversed, 0x631950);
+        RH_ScopedVirtualInstall(Clone, 0x636490);
+        RH_ScopedVirtualInstall(ControlSubTask, 0x631AD0);
+        RH_ScopedVirtualInstall(CreateFirstSubTask, 0x631AC0);
+        RH_ScopedVirtualInstall(CreateNextSubTask, 0x631A70);
+        RH_ScopedVirtualInstall(MakeAbortable, 0x631950);
     }
 
     CTaskComplexObserveTrafficLightsAndAchieveHeading* Constructor(int32 durationInMs, float fTargetHeading) {

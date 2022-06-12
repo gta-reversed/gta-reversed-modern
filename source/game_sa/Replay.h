@@ -1,9 +1,6 @@
 #pragma once
 
-enum eReplayMode : int32 {
-    REPLAY_MODE_0,
-    REPLAY_MODE_1
-};
+#include "eReplay.h"
 
 class CReplay {
 public:

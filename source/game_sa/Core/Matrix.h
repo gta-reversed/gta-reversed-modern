@@ -54,10 +54,17 @@ public:
 public:
     static void InjectHooks();
 
-    inline CVector& GetRight() { return m_right; }
-    inline CVector& GetForward() { return m_forward; }
-    inline CVector& GetUp() { return m_up; }
-    inline CVector& GetPosition() { return m_pos; }
+    CVector& GetRight() { return m_right; }
+    const CVector& GetRight() const { return m_right; }
+
+    CVector& GetForward() { return m_forward; }
+    const CVector& GetForward() const { return m_forward; }
+
+    CVector& GetUp() { return m_up; }
+    const CVector& GetUp() const { return m_up; }
+
+    CVector& GetPosition() { return m_pos; }
+    const CVector& GetPosition() const { return m_pos; }
 
     void Attach(RwMatrix* matrix, bool bOwnsMatrix);
     void Detach();

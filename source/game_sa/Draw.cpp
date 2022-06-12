@@ -75,6 +75,10 @@ void DoFade() {
             );
         }
 
-        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f }, color);
+        #if FIX_BUGS
+        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f}, color);
+        #else
+        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f}, color);
+        #endif
     }
 }

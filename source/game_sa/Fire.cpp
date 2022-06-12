@@ -180,21 +180,17 @@ void CFire::Start(CVector pos, float fStrength, CEntity* target, uint8 nGens) {
 }
 
 void CFire::SetTarget(CEntity* target) {
-    if (m_pEntityTarget)
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
+    CEntity::SafeCleanUpRef(m_pEntityTarget); /* Assume old target's m_pFire is not pointing to `*this` */
 
     m_pEntityTarget = target; /* assign, even if its null, to clear it */
-    if (target)
-        m_pEntityTarget->RegisterReference(&m_pEntityTarget); /* Assume caller set target->m_pFire */
+    CEntity::SafeRegisterRef(m_pEntityTarget); /* Assume caller set target->m_pFire */
 }
 
 void CFire::SetCreator(CEntity* creator) {
-    if (m_pEntityCreator)
-        m_pEntityCreator->CleanUpOldReference(&m_pEntityCreator);
+    CEntity::SafeCleanUpRef(m_pEntityCreator);
 
     m_pEntityCreator = creator; /* assign, even if its null, to clear it */
-    if (creator)
-        creator->RegisterReference(&m_pEntityCreator);
+    CEntity::SafeRegisterRef(m_pEntityCreator);
 }
 
 void CFire::DestroyFx() {
@@ -244,8 +240,7 @@ void CFire::Extinguish() {
             break;
         }
         }
-        m_pEntityTarget->CleanUpOldReference(&m_pEntityTarget);
-        m_pEntityTarget = nullptr;
+        CEntity::ClearReference(m_pEntityTarget);
     }
 }
 
@@ -300,7 +295,7 @@ void CFire::ProcessFire() {
             }
 
             if (targetVehicle->IsAutomobile()) {
-                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummies::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
+                m_vecPosition = targetVehicle->GetDummyPosition(eVehicleDummy::DUMMY_LIGHT_FRONT_MAIN) + CVector{0.0f, 0.0f, 0.15f};
             }
             break;
         }

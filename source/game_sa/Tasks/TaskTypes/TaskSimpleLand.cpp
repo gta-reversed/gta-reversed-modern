@@ -10,8 +10,8 @@ void CTaskSimpleLand::InjectHooks()
     RH_ScopedInstall(LeftFootLanded, 0x679010);
     RH_ScopedInstall(RightFootLanded, 0x678FE0);
     RH_ScopedInstall(FinishAnimCB, 0x678FA0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x678F40);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67D380);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678F40);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67D380);
 }
 
 CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)
@@ -104,7 +104,7 @@ bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
     if (m_pAnim)
     {
         m_pAnim->m_fBlendDelta = -1000.0F;
-        m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); //doesn't make sense, since there is only one callback function
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;

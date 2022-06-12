@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "ColStore.h"
+#include "TheScripts.h"
 
 CVector& CColStore::ms_vecCollisionNeeded = *(CVector*)0x965580;
 bool& CColStore::ms_bCollisionNeeded = *(bool*)0x965558;

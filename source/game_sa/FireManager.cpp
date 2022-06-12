@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "FireManager.h"
+#include "TheScripts.h"
+#include "Shadows.h"
 
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
@@ -254,7 +256,7 @@ CFire* CFireManager::GetNextFreeFire(bool bMayExtinguish) {
     if (!bMayExtinguish)
         return nullptr;
 
-    // At this point there are no inactive fires in the pool 
+    // At this point there are no inactive fires in the pool
     // So try to extinguish a script / first generation fire
     for (CFire& fire : m_aFires) {
         if (fire.IsFirstGen() || fire.IsScript()) {
@@ -352,14 +354,14 @@ int32 CFireManager::StartScriptFire(const CVector& pos, CEntity* target, float _
 
     if (auto fire = GetNextFreeFire(true)) {
         fire->Start(pos, (float)nStrength, target, std::min<uint8>((uint8)m_nMaxFireGenerationsAllowed, nGenerations));
-        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), 5);
+        return CTheScripts::GetNewUniqueScriptThingIndex(GetIndexOf(fire), SCRIPT_THING_FIRE);
     }
     return -1;
 }
 
 // 0x53AF00
 void CFireManager::Update() {
-    if (CReplay::Mode == REPLAY_MODE_1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     for (CFire& fire : m_aFires) {
@@ -402,8 +404,8 @@ void CFireManager::Update() {
     auto nFires = (int32)GetNumOfFires();
     bool firesVisited[MAX_NUM_FIRES] = { false }; // Lookup table to see if a fire's strength was already included into a group of fires
     while (nFires > 0) {
-        // Repeat until there are no active fires left 
-        // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it 
+        // Repeat until there are no active fires left
+        // Find strongest un-visited fire, and sum of the strength of all fires within 6.0 units of it
         // Based on this strength possibly create a shadow (if combined strength > 4), and coronas (combined strength > 6)
 
         // Find the strongest fire, which hasn't yet been visited
@@ -479,7 +481,7 @@ void CFireManager::Update() {
                     camToPointDirNorm.Normalise();
                     point += camToPointDirNorm * 3.5f;
                 }
-                
+
                 auto strongestId = reinterpret_cast<uint32>(strongest);
                 // Wrapper lambda for code readability
                 const auto RegisterCorona = [&](auto idx, CVector pos, eCoronaFlareType flare = eCoronaFlareType::FLARETYPE_NONE) {
