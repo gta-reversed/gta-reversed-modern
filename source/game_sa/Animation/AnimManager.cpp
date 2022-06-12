@@ -9,15 +9,6 @@
 
 #include "AnimManager.h"
 
-CAnimationStyleDescriptor* CAnimManager::ms_aAnimAssocDefinitions = (CAnimationStyleDescriptor*)0x8AA5A8;
-CAnimBlendAssocGroup*& CAnimManager::ms_aAnimAssocGroups = *(CAnimBlendAssocGroup**)0xB4EA34;
-CAnimBlendHierarchy* CAnimManager::ms_aAnimations = (CAnimBlendHierarchy*)0xB4EA40;
-CAnimBlock* CAnimManager::ms_aAnimBlocks = (CAnimBlock*)0xB5D4A0;
-CAnimBlendHierarchy* CAnimManager::ms_animCache = (CAnimBlendHierarchy*)0xB5EB20;
-int32& CAnimManager::ms_numAnimAssocDefinitions = *(int32*)0xB4EA28;
-int32& CAnimManager::ms_numAnimBlocks = *(int32*)0xB4EA30;
-int32& CAnimManager::ms_numAnimations = *(int32*)0xB4EA2C;
-
 void CAnimManager::InjectHooks() {
     RH_ScopedClass(CAnimManager);
     RH_ScopedCategory("Animation");
@@ -44,8 +35,8 @@ int32 CAnimManager::GetAnimationBlockIndex(const char* name) {
 }
 
 // 0x4D39B0
-int32 CAnimManager::GetFirstAssocGroup(const char* basename) {
-    return plugin::CallAndReturn<int32, 0x4D39B0, const char*>(basename);
+AssocGroupId CAnimManager::GetFirstAssocGroup(const char* basename) {
+    return plugin::CallAndReturn<AssocGroupId, 0x4D39B0, const char*>(basename);
 }
 
 // 0x4D39F0
@@ -59,12 +50,12 @@ CAnimBlendHierarchy* CAnimManager::GetAnimation(const char* animName, const CAni
 }
 
 // 0x4D3A20
-char* CAnimManager::GetAnimGroupName(AssocGroupId groupId) {
+const char* CAnimManager::GetAnimGroupName(AssocGroupId groupId) {
     return plugin::CallAndReturn<char*, 0x4D3A20, AssocGroupId>(groupId);
 }
 
 // 0x4D3A30
-char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
+const char* CAnimManager::GetAnimBlockName(AssocGroupId groupId) {
     return plugin::CallAndReturn<char*, 0x4D3A30, AssocGroupId>(groupId);
 }
 
@@ -109,13 +100,13 @@ CAnimBlendAssociation* CAnimManager::AddAnimationAndSync(RpClump* clump, CAnimBl
 }
 
 // 0x4D3BA0
-CAnimationStyleDescriptor* CAnimManager::AddAnimAssocDefinition(const char* groupName, const char* blockName, uint32 arg3, uint32 animsCount, void* pAnimDescriptor) {
-    return plugin::CallAndReturn<CAnimationStyleDescriptor*, 0x4D3BA0, const char*, const char*, uint32, uint32, void*>(groupName, blockName, arg3, animsCount, pAnimDescriptor);
+AnimAssocDefinition* CAnimManager::AddAnimAssocDefinition(const char* groupName, const char* blockName, uint32 modelIndex, uint32 animsCount, AnimDescriptor* descriptor) {
+    return plugin::CallAndReturn<AnimAssocDefinition*, 0x4D3BA0, const char*, const char*, uint32, uint32, AnimDescriptor*>(groupName, blockName, modelIndex, animsCount, descriptor);
 }
 
 // 0x4D3C80
-void* CAnimManager::AddAnimToAssocDefinition(void* pAnimAssocDefinition, const char* arg2) {
-    return plugin::CallAndReturn<void*, 0x4D3C80, void*, const char*>(pAnimAssocDefinition, arg2);
+void CAnimManager::AddAnimToAssocDefinition(AnimAssocDefinition* pAnimAssocDefinition, const char* arg2) {
+    plugin::Call<0x4D3C80, AnimAssocDefinition*, const char*>(pAnimAssocDefinition, arg2);
 }
 
 // 0x4D3CC0

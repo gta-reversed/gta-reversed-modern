@@ -70,7 +70,7 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* pos
     m_animFlags = animFlags;
     m_pAnimBlock = CAnimManager::GetAnimationBlock(animBlockName);
     m_pAnimBlendHierarchy = CAnimManager::GetAnimation(animName, m_pAnimBlock);
-    CAnimManager::AddAnimBlockRef(m_pAnimBlock - CAnimManager::ms_aAnimBlocks);
+    CAnimManager::AddAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_pAnimBlock));
 }
 
 // 0x691550
@@ -97,22 +97,22 @@ CTaskSimpleHoldEntity::CTaskSimpleHoldEntity(CEntity* entityToHold, CVector* pos
     m_animFlags = animFlags;
     m_pAnimBlock = animBlock;
     m_pAnimBlendHierarchy = animHierarchy;
-    CAnimManager::AddAnimBlockRef(animBlock - CAnimManager::ms_aAnimBlocks);
+    CAnimManager::AddAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_pAnimBlock));
 }
 
 CTaskSimpleHoldEntity::~CTaskSimpleHoldEntity() {
-    if (!m_bEntityRequiresProcessing) {
-        if (m_pEntityToHold) {
-            m_pEntityToHold->m_bStreamingDontDelete = false;
-            m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
-            m_pEntityToHold->m_bRemoveFromWorld = true;
-            m_pEntityToHold = nullptr;
-        }
+    if (!m_bEntityRequiresProcessing && m_pEntityToHold) {
+        m_pEntityToHold->m_bStreamingDontDelete = false;
+        m_pEntityToHold->CleanUpOldReference(&m_pEntityToHold);
+        m_pEntityToHold->m_bRemoveFromWorld = true;
+        m_pEntityToHold = nullptr;
     }
-    if (m_pAnimBlendAssociation)
+    if (m_pAnimBlendAssociation) {
         m_pAnimBlendAssociation->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-    if (m_pAnimBlock)
-        CAnimManager::RemoveAnimBlockRef(m_pAnimBlock - CAnimManager::ms_aAnimBlocks);
+    }
+    if (m_pAnimBlock) {
+        CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex(m_pAnimBlock));
+    }
 }
 
 CTaskSimpleHoldEntity* CTaskSimpleHoldEntity::Constructor(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, bool bDisAllowDroppingOnAnimEnd)
@@ -213,7 +213,7 @@ bool CTaskSimpleHoldEntity::ProcessPed_Reversed(CPed* ped) {
         else {
             entityToHold->m_bUsesCollision = false;
             if (entityToHold->IsObject()) {
-                CObject* objectToHold = (CObject*)entityToHold;
+                auto* objectToHold = entityToHold->AsObject();
                 if (objectToHold->IsStatic()) {
                     objectToHold->SetIsStatic(false);
                     objectToHold->AddToMovingList();
@@ -290,8 +290,9 @@ bool CTaskSimpleHoldEntity::SetPedPosition_Reversed(CPed* ped) {
     else {
         auto pPutDownEntityTask = static_cast<CTaskSimplePutDownEntity*>(this);
         if (GetTaskType() != TASK_SIMPLE_PUTDOWN_ENTITY || m_bEntityRequiresProcessing
-            || m_pAnimBlendAssociation && pPutDownEntityTask->m_fPutDownHeightZ >= m_pAnimBlendAssociation->m_fCurrentTime)
-        {
+            || m_pAnimBlendAssociation
+            && pPutDownEntityTask->m_fPutDownHeightZ >= m_pAnimBlendAssociation->m_fCurrentTime
+        ) {
             bUpdateEntityToHoldPosition = true;
         }
     }
@@ -348,13 +349,12 @@ void CTaskSimpleHoldEntity::ReleaseEntity() {
 }
 
 // 0x691700
-bool CTaskSimpleHoldEntity::CanThrowEntity() {
+bool CTaskSimpleHoldEntity::CanThrowEntity() const {
     return    m_pEntityToHold
            && m_bBoneFlags == HOLD_ENTITY_UPDATE_TRANSLATION_ONLY
            && m_nBoneFrameId == PED_NODE_RIGHT_HAND;
 }
 
-// TODO: FIX THAT
 // 0x691720
 void CTaskSimpleHoldEntity::PlayAnim(AnimationId groupId, AssocGroupId animId) {
     m_nAnimId = groupId;
@@ -384,24 +384,28 @@ void CTaskSimpleHoldEntity::StartAnim(CPed* ped) {
     if (m_pAnimBlendHierarchy) {
         m_animFlags |= ANIMATION_ADD_TO_BLEND | ANIMATION_FREEZE_LAST_FRAME | ANIMATION_PARTIAL;
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_pAnimBlendHierarchy, m_animFlags, 4.0f);
-    }
-    else {
+    } else {
         if (m_nAnimGroupId && !m_pAnimBlock) {
-            CAnimBlock* animBlock = CAnimManager::ms_aAnimAssocGroups[m_nAnimGroupId].m_pAnimBlock;
-            if (!animBlock)
+            CAnimBlock* animBlock = CAnimManager::GetAnimationBlock(m_nAnimGroupId);
+            const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
+
+            if (!animBlock) {
                 animBlock = CAnimManager::GetAnimationBlock(CAnimManager::GetAnimBlockName(m_nAnimGroupId));
+            }
             if (!animBlock->bLoaded) {
-                CStreaming::RequestModel(IFPToModelId(animBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
+                CStreaming::RequestModel(IFPToModelId(blockIndex), STREAMING_KEEP_IN_MEMORY);
                 return;
             }
-            CAnimManager::AddAnimBlockRef(animBlock - CAnimManager::ms_aAnimBlocks);
+            CAnimManager::AddAnimBlockRef(blockIndex);
             m_pAnimBlock = animBlock;
         }
         m_pAnimBlendAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_nAnimGroupId, m_nAnimId, 4.0f);
         m_pAnimBlendAssociation->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
-        if (GetTaskType() == TASK_SIMPLE_HOLD_ENTITY)
+        if (GetTaskType() == TASK_SIMPLE_HOLD_ENTITY) {
             m_pAnimBlendAssociation->m_nFlags |= ANIMATION_ADD_TO_BLEND;
+        }
     }
+
     if (GetTaskType() == TASK_SIMPLE_PICKUP_ENTITY)
         m_pAnimBlendAssociation->SetFinishCallback(CTaskSimpleHoldEntity::FinishAnimHoldEntityCB, this);
     else
@@ -418,14 +422,15 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
             CEntity::ClearReference(m_pEntityToHold);
             return;
         }
-        objectToHold = static_cast<CObject*>(m_pEntityToHold);
+        objectToHold = m_pEntityToHold->AsObject();
         objectToHold->m_pEntityIgnoredCollision = ped;
         if (objectToHold->physicalFlags.bDisableCollisionForce && bAddEventSoundQuiet) {
             if (!objectToHold->objectFlags.bIsLiftable) {
                 uint8 objectType = objectToHold->m_nObjectType;
                 if (objectType != OBJECT_MISSION && objectType != OBJECT_MISSION2) {
-                    if (objectType != OBJECT_TEMPORARY)
+                    if (objectType != OBJECT_TEMPORARY) {
                         ++CObject::nNoTempObjects;
+                    }
                     objectToHold->m_nObjectType = OBJECT_TEMPORARY;
                     objectToHold->m_nRemovalTime = 0;
                     objectToHold->m_bUsesCollision = false;
@@ -444,14 +449,13 @@ void CTaskSimpleHoldEntity::DropEntity(CPed* ped, bool bAddEventSoundQuiet) {
                     objectToHold->SetIsStatic(false);
                     objectToHold->AddToMovingList();
                 }
-                auto* physicalEntity = static_cast<CPhysical*>(m_pEntityToHold);
-                const float randomSpeedUp = rand() * 4.6566e-10f * 0.03f + 0.03f;    // todo: math
-                const float randomSpeedRight = rand() * 4.6566e-10f * 0.06f - 0.03f;
-                physicalEntity->m_vecMoveSpeed += randomSpeedUp * ped->GetForward();
-                physicalEntity->m_vecMoveSpeed += randomSpeedRight * ped->GetRight();
-                physicalEntity->m_vecMoveSpeed += 0.01f * ped->GetUp();
-                if (!objectToHold->TestCollision(false))
+                auto* entity = m_pEntityToHold->AsPhysical();
+                entity->m_vecMoveSpeed += CGeneral::GetRandomNumberInRange(+0.03f, 0.06f) * ped->GetForward();
+                entity->m_vecMoveSpeed += CGeneral::GetRandomNumberInRange(-0.03f, 0.03f) * ped->GetRight();
+                entity->m_vecMoveSpeed += 0.01f * ped->GetUp();
+                if (!objectToHold->TestCollision(false)) {
                     bUpdateEntityPosition = false;
+                }
             }
         }
 
@@ -502,7 +506,7 @@ void CTaskSimpleHoldEntity::ChoosePutDownHeight(CPed* ped) {
         if (m_nAnimGroupId == ANIM_GROUP_CARRY105)
             taskPutDownEntity->m_fPutDownHeightZ = 0.433333f; // todo: math
         else if (m_nAnimGroupId == ANIM_GROUP_CARRY05)
-            taskPutDownEntity->m_fPutDownHeightZ = 0.366667f; // todo: math
+            taskPutDownEntity->m_fPutDownHeightZ = 0.366667f;
         else
             taskPutDownEntity->m_fPutDownHeightZ = 0.6f;
     }

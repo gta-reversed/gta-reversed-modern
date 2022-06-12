@@ -54,8 +54,8 @@ CTaskSimpleSwim::CTaskSimpleSwim(CVector* pos, CPed* ped) : CTaskSimple() {
 
 CTaskSimpleSwim::~CTaskSimpleSwim() {
     if (m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        CAnimManager::RemoveAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+        const auto blockIndex = CAnimManager::GetAnimationBlockIndex(ANIM_GROUP_SWIM);
+        CAnimManager::RemoveAnimBlockRef(blockIndex);
     }
 
     CEntity::SafeCleanUpRef(m_pEntity);
@@ -312,17 +312,19 @@ void CTaskSimpleSwim::ProcessSwimAnims(CPed* ped)
     }
 
     if (!m_bAnimBlockRefAdded) {
-        CAnimBlock* pAnimBlock = CAnimManager::ms_aAnimAssocGroups[ANIM_GROUP_SWIM].m_pAnimBlock;
-        if (!pAnimBlock) {
-            char* pBlockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
-            pAnimBlock = CAnimManager::GetAnimationBlock(pBlockName);
+        CAnimBlock* animBlock = CAnimManager::GetAnimationBlock(ANIM_GROUP_SWIM);
+
+        if (!animBlock) {
+            const char* blockName = CAnimManager::GetAnimBlockName(ANIM_GROUP_SWIM);
+            animBlock = CAnimManager::GetAnimationBlock(blockName);
         }
-        if (pAnimBlock->bLoaded) {
-            CAnimManager::AddAnimBlockRef(pAnimBlock - CAnimManager::ms_aAnimBlocks);
+
+        const auto blockIndex = CAnimManager::GetAnimationBlockIndex(animBlock);
+        if (animBlock->bLoaded) {
+            CAnimManager::AddAnimBlockRef(blockIndex);
             m_bAnimBlockRefAdded = true;
-        }
-        else {
-            CStreaming::RequestModel(IFPToModelId(pAnimBlock - CAnimManager::ms_aAnimBlocks), STREAMING_KEEP_IN_MEMORY);
+        } else {
+            CStreaming::RequestModel(IFPToModelId(blockIndex), STREAMING_KEEP_IN_MEMORY);
         }
     }
 

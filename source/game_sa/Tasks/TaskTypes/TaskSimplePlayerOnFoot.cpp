@@ -679,7 +679,7 @@ PED_WEAPON_AIMING_CODE:
 
         firingPoint.x = firingPoint.x * 5.0f;
         firingPoint.y = firingPoint.y * 5.0f;
-        firingPoint.z = (sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
+        firingPoint.z = (std::sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
 
         firingPoint += player->GetPosition();
         TheCamera.UpdateAimingCoors(&firingPoint);
@@ -753,7 +753,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         || player->GetIntelligence()->GetTaskHold(false)
         || pad->DisablePlayerControls
         || player->m_nMoveState > PEDMOVE_STILL
-        || (animGroupID = player->m_nAnimGroup, animGroupID != ANIM_GROUP_PLAYER) && animGroupID != ANIM_GROUP_FAT && animGroupID != ANIM_GROUP_MUSCULAR
+        || (animGroupID = player->m_nAnimGroup, animGroupID != ANIM_GROUP_PLAYER) && animGroupID != ANIM_GROUP_FAT && animGroupID != ANIM_GROUP_MUSCULAR // todo: bad
     ) {
         pad->SetTouched();
     }
@@ -809,9 +809,9 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
     if (animAssoc1) {
         while (true) {
-            uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations;
-            animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 0x1f) >> 2;
-            animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 0x1f);
+            uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
+            animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 31) >> 2;
+            animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
 
             int32 animBlockFirstAnimIndex = animBlock->startAnimation;
             if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->animationCount) {
@@ -865,8 +865,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
         if (moveBlendRatio > 0.0f) {
             float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-            float negativeSinRadian = -sin(limitedRadianAngle);
-            float cosRadian = cos(limitedRadianAngle);
+            float negativeSinRadian = -std::sin(limitedRadianAngle);
+            float cosRadian = std::cos(limitedRadianAngle);
             if (targetedObject) {
                 if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, negativeSinRadian, cosRadian, 0.0f, 0.0f)) {
                     moveBlendRatio = 0.0f;
@@ -968,7 +968,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
             player->m_fAimingRotation = limitedRadianAngle;
-            CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+            CVector moveDirection(0.0f, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle));
             if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, moveDirection.x, moveDirection.y, 0.0f, 0.0f)) {
                 pedMoveBlendRatio = 0.0f;
             }
@@ -982,7 +982,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         if (CGameLogic::IsPlayerUse2PlayerControls(player)) {
             float   radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float   limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-            CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+            CVector moveDirection(0.0f, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle));
             if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, moveDirection.x, moveDirection.y, 0.0f, 0.0f)) {
                 pedMoveBlendRatio = 0.0f;
             }
@@ -1030,7 +1030,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
 
     player->m_fAimingRotation = limitedRadianAngle;
 
-    if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, -sin(limitedRadianAngle), cos(limitedRadianAngle), 0.0f, 0.0f)) {
+    if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle), 0.0f, 0.0f)) {
         float fMaximumMoveBlendRatio = CTimer::GetTimeStep() * 0.07f;
         if (pedMoveBlendRatio - playerData->m_fMoveBlendRatio <= fMaximumMoveBlendRatio) {
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - playerData->m_fMoveBlendRatio)
