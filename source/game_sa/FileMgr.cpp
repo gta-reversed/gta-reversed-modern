@@ -301,7 +301,7 @@ int32 CFileMgr::CloseFile(FILESTREAM file)
 }
 
 // 0x5389e0
-int32 CFileMgr::GetFileLength(FILESTREAM file)
+int32 CFileMgr::GetTotalSize(FILESTREAM file)
 {
     int32 currentPos, size;
     // MikuAuahDark: The actual implementation uses RwOsGetFileInterface
@@ -358,7 +358,7 @@ void CFileMgr::InjectHooks()
     RH_ScopedInstall(Seek, 0x538990);
     RH_ScopedInstall(ReadLine, 0x5389b0);
     RH_ScopedInstall(CloseFile, 0x5389d0);
-    RH_ScopedInstall(GetFileLength, 0x5389e0);
+    RH_ScopedInstall(GetTotalSize, 0x5389e0);
     RH_ScopedInstall(Tell, 0x538a20);
     RH_ScopedInstall(GetErrorReadWrite, 0x538a50);
     RH_ScopedGlobalInstall(InitUserDirectories, 0x744fb0);
