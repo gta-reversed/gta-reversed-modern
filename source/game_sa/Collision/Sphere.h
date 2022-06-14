@@ -18,6 +18,9 @@ public:
     CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius) {};
 
     void Set(float radius, const CVector& center);
+
+    // NOTSA
+    bool IsPointWithin(const CVector& p) const;
 };
 
 VALIDATE_SIZE(CSphere, 0x10);

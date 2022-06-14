@@ -20,6 +20,7 @@ void CPickup::InjectHooks() {
     // RH_ScopedInstall(Update, 0x457410);
 }
 
+// Give player an ammo from weapon pickup
 // 0x454BE0
 void CPickup::ExtractAmmoFromPickup(CPlayerPed* player) {
     plugin::CallMethod<0x454BE0, CPickup*, CPlayerPed*>(this, player);
@@ -32,6 +33,7 @@ const char* CPickup::FindStringForTextIndex(int32 index) {
     return "FESZ_CA";
 }
 
+// message = GXT key
 // 0x455500
 int32 CPickup::FindTextIndexForString(char* message) {
     if (!message) return 0;
@@ -41,10 +43,11 @@ int32 CPickup::FindTextIndexForString(char* message) {
 }
 
 // 0x4549A0
-CVector CPickup::GetPosn() {
+CVector CPickup::GetPosn() const {
     return UncompressLargeVector(m_vecPos);
 }
 
+// Delete pickup's object (CObject)
 // 0x454CF0
 void CPickup::GetRidOfObjects() {
     if (m_pObject) {
@@ -54,11 +57,13 @@ void CPickup::GetRidOfObjects() {
     }
 }
 
+// Creates an object (CObject) for pickup. slotIndex - object to replace; use -1 to create a new object
 // 0x4567E0
 void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
     plugin::CallMethod<0x4567E0, CPickup*, CObject**, int32>(this, obj, slotIndex);
 }
 
+// Is pickup visible (checks if distance between pickup and camera is shorter than 100 units)
 // 0x454C70
 bool CPickup::IsVisible() {
     return plugin::CallMethodAndReturn<bool, 0x454C70, CPickup*>(this);
@@ -70,6 +75,7 @@ bool CPickup::PickUpShouldBeInvisible() {
     return plugin::CallMethodAndReturn<bool, 0x454D20, CPickup*>(this);
 }
 
+// Checks if pickup collides with line (origin;target), removes pickup and creates an explosion. Used in previous GTA games for mine pickup
 // 0x4588B0
 void CPickup::ProcessGunShot(CVector* start, CVector* end) {
     if (!m_pObject)
@@ -99,6 +105,7 @@ void CPickup::SetPosn(float x, float y, float z) {
     m_vecPos = CompressLargeVector({x, y, z});
 }
 
+// Updates the pickup. Returns TRUE if pickup was removed/disabled
 // 0x457410
 void CPickup::Update(CPlayerPed* player, CVehicle* vehicle, int32 playerId) {
     plugin::CallMethod<0x457410, CPickup*, CPlayerPed*, CVehicle*, int32>(this, player, vehicle, playerId);

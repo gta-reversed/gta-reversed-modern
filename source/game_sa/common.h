@@ -181,6 +181,10 @@ static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
     return DistanceBetweenPointsSquared2D(point, center) <= r * r;
 }
 
+static bool IsPointInSphere(const CVector& point, const CVector& center, float r) {
+    return DistanceBetweenPointsSquared(point, center) <= r * r;
+}
+
 // Converts degrees to radians
 // keywords: 0.017453292 flt_8595EC
 constexpr float DegreesToRadians(float angleInDegrees) {
