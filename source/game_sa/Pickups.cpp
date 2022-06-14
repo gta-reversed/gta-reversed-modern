@@ -5,8 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+
 #include "extensions/enumerate.hpp"
+
 #include "Pickups.h"
+#include "tPickupMessage.h"
 #include "Radar.h"
 #include "TaskSimpleJetPack.h"
 
@@ -63,7 +66,7 @@ void CPickups::Init() {
         pickup.m_nReferenceIndex = 1;
         pickup.m_pObject = nullptr;
     }
-    std::ranges::fill(aPickUpsCollected, 0);
+    aPickUpsCollected.fill(0);
     CollectedPickUpIndex = 0;
     DisplayHelpMessage = 10;
 }
@@ -78,15 +81,14 @@ void CPickups::AddToCollectedPickupsArray(int32 handle) {
     plugin::Call<0x455240, int32>(handle);
 }
 
-// 0x458A80
 /*!
-* @addr 0x458A80
-* @brief Created a pickup close to pos (\r in_x, \r in_y, \r in_z)
-*
-* @param [out] out_x, out_y, out_z Created pickup's position
-*/
-void CPickups::CreatePickupCoorsCloseToCoors(float in_x, float in_y, float in_z, float* out_x, float* out_y, float* out_z) {
-    plugin::Call<0x458A80, float, float, float, float*, float*, float*>(in_x, in_y, in_z, out_x, out_y, out_z);
+ * @addr 0x458A80
+ * @brief Created a pickup close to pos (\r inX, \r inY, \r inZ)
+ *
+ * @param [out] outX, outY, outZ Created pickup's position
+ */
+void CPickups::CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float* outX, float* outY, float* outZ) {
+    plugin::Call<0x458A80, float, float, float, float*, float*, float*>(inX, inY, inZ, outX, outY, outZ);
 }
 
 // 0x458970
@@ -124,17 +126,32 @@ CPickup* CPickups::FindPickUpForThisObject(CObject* object) {
     return plugin::CallAndReturn<CPickup*, 0x4551C0, CObject*>(object);
 }
 
+// returns pickup handle
 // 0x456F20
 int32 CPickups::GenerateNewOne(CVector coors, uint32 modelId, uint8 pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message) {
     return plugin::CallAndReturn<int32, 0x456F20, CVector, uint32, uint8, uint32, uint32, bool, char*>(coors, modelId, pickupType, ammo, moneyPerDay, isEmpty, message);
 }
 
-// 0x457380
+/*!
+ *
+ * @param coors Position of new pickup
+ * @param weaponType Weapon type
+ * @param pickupType Pickup type
+ * @param ammo
+ * @param isEmpty
+ * @param message
+ * @return Pickup handle
+ * @addr 0x457380
+ */
 int32 CPickups::GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool isEmpty, char* message) {
     return plugin::CallAndReturn<int32, 0x457380, CVector, eWeaponType, uint8, uint32, bool, char*>(coors, weaponType, pickupType, ammo, isEmpty, message);
 }
 
-// 0x4552A0
+/*!
+ * @param pickupIndex Index of pickup
+ * @return -1 if this index is not actual
+ * @addr 0x4552A0
+ */
 int32 CPickups::GetActualPickupIndex(int32 pickupIndex) {
     return plugin::CallAndReturn<int32, 0x4552A0, int32>(pickupIndex);
 }
@@ -144,11 +161,13 @@ int32 CPickups::GetNewUniquePickupIndex(int32 pickupIndex) {
     return plugin::CallAndReturn<int32, 0x456A30, int32>(pickupIndex);
 }
 
+// returns pickup handle
 // 0x455280
 int32 CPickups::GetUniquePickupIndex(int32 pickupIndex) {
     return plugin::CallAndReturn<int32, 0x455280, int32>(pickupIndex);
 }
 
+// returns TRUE if player got goodies
 // 0x4564F0
 bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
     auto* ped = FindPlayerPed(playerId);
@@ -220,41 +239,41 @@ bool CPickups::GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId) {
 }
 
 /*!
-* @brief Check if pickup was picked up, and then mark it as not picked up.
-* @addr 0x454B40
-*/
+ * @brief Check if pickup was picked up, and then mark it as not picked up.
+ * @addr 0x454B40
+ */
 bool CPickups::IsPickUpPickedUp(int32 pickupHandle) {
     if (const auto it = rng::find(aPickUpsCollected, pickupHandle); it != aPickUpsCollected.end()) {
-        *it = NULL; // Reset 
+        *it = 0; // Reset
         return true;
     }
     return false;
 }
 
 /*!
-* @addr 0x454AC0
-* @returns The `nModelId1` of the given weapon type.
-*/
+ * @addr 0x454AC0
+ * @returns The `nModelId1` of the given weapon type.
+ */
 int32 CPickups::ModelForWeapon(eWeaponType weaponType) {
     return CWeaponInfo::GetWeaponInfo(weaponType)->m_nModelId1;
 }
 
 /*!
-* @brief Update each pickup's (except if of type NONE or ASSET_REVENUE) `nRegenerationTime` field.
-* @addr 0x455200
-*/
+ * @brief Update each pickup's (except if of type NONE or ASSET_REVENUE) `nRegenerationTime` field.
+ * @addr 0x455200
+ */
 void CPickups::PassTime(uint32 time) {
-    for (auto& p : aPickUps) {
-        switch (p.m_nPickupType) {
-        case ePickupType::PICKUP_NONE:
-        case ePickupType::PICKUP_ASSET_REVENUE:
+    for (auto& pickup : aPickUps) {
+        switch (pickup.m_nPickupType) {
+        case PICKUP_NONE:
+        case PICKUP_ASSET_REVENUE:
             continue;
         }
 
-        if (p.m_nRegenerationTime <= time) {
-            p.m_nRegenerationTime = 0;
+        if (pickup.m_nRegenerationTime <= time) {
+            pickup.m_nRegenerationTime = 0;
         } else {
-            p.m_nRegenerationTime -= time;
+            pickup.m_nRegenerationTime -= time;
         }
     }
 }
@@ -264,7 +283,7 @@ void CPickups::PickedUpHorseShoe() {
     AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_PICKUP_COLLECTABLE1);
 
     CStats::IncrementStat(STAT_HORSESHOES_COLLECTED);
-    CStats::IncrementStat(STAT_LUCK, 1000.f / CStats::GetStatValue(STAT_TOTAL_HORSESHOES)); // TODO: Is this some inlined stuff? (The divion part)
+    CStats::IncrementStat(STAT_LUCK, 1000.f / CStats::GetStatValue(STAT_TOTAL_HORSESHOES)); // TODO: Is this some inlined stuff? (The division part)
 
     FindPlayerInfo(0).m_nMoney += 100;
 
@@ -309,17 +328,17 @@ bool CPickups::PlayerCanPickUpThisWeaponTypeAtThisMoment(eWeaponType weaponType)
 
 // 0x456DE0
 void CPickups::RemoveMissionPickUps() {
-    for (auto&& [i, p] : notsa::enumerate(aPickUps)) {
-        switch (p.m_nPickupType) {
+    for (auto&& [i, pickup] : notsa::enumerate(aPickUps)) {
+        switch (pickup.m_nPickupType) {
         case PICKUP_ONCE_FOR_MISSION: {
             CRadar::ClearBlipForEntity(BLIP_PICKUP, GetUniquePickupIndex(i));
 
-            if (p.m_pObject) {
-                p.RemoveObject();
+            if (pickup.m_pObject) {
+                pickup.GetRidOfObjects();
             }
 
-            p.m_nFlags.bDisabled = true;
-            p.m_nPickupType = PICKUP_NONE;
+            pickup.m_nFlags.bDisabled = true;
+            pickup.m_nPickupType = PICKUP_NONE;
             break;
         }
         }
@@ -334,38 +353,39 @@ void CPickups::RemovePickUp(int32 pickupHandle) {
 }
 
 // 0x456D30
-void CPickups::RemovePickUpsInArea(float min_x,float max_x, float min_y, float max_y, float min_z, float max_z) {
-    CBoundingBox bb{ {min_x, min_y, min_z}, {max_x, max_y, max_z} }; // They didn't use a bounding box, but it's nicer to do so.
-    for (auto& p : aPickUps) {
-        switch (p.m_nPickupType) {
+void CPickups::RemovePickUpsInArea(float minX, float maxX, float minY, float maxY, float minZ, float maxZ) {
+    CBoundingBox bb{ { minX, minY, minZ }, { maxX, maxY, maxZ } }; // They didn't use a bounding box, but it's nicer to do so.
+    for (auto& pickup : aPickUps) {
+        switch (pickup.m_nPickupType) {
         case PICKUP_NONE:
             continue;
         }
 
-        if (bb.IsPointWithin(p.GetPosn())) {
-            p.Remove();
+        if (bb.IsPointWithin(pickup.GetPosn())) {
+            pickup.Remove();
         }
     }
 }
 
 // 0x455470
 void CPickups::RemovePickupObjects() {
-    for (auto& p : GetAllActivePickups()) {
-        if (p.m_pObject) {
-            p.RemoveObject();
-            p.m_nFlags.bVisible = false;
+    for (auto& pickup : GetAllActivePickups()) {
+        if (pickup.m_pObject) {
+            pickup.GetRidOfObjects();
+            pickup.m_nFlags.bVisible = false;
         }
     }
 }
 
+// remove pickups with types PICKUP_ONCE_TIMEOUT and PICKUP_MONEY in area
 // 0x4563A0
 void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
-    for (auto& p : aPickUps) {
-        switch (p.m_nPickupType) {
+    for (auto& pickup : aPickUps) {
+        switch (pickup.m_nPickupType) {
         case PICKUP_ONCE_TIMEOUT:
         case PICKUP_MONEY: {
-            if (IsPointInSphere(p.GetPosn(), posn, radius)) {
-                p.Remove();
+            if (IsPointInSphere(pickup.GetPosn(), posn, radius)) {
+                pickup.Remove();
             }
             break;
         }
@@ -376,18 +396,62 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 // 0x455000
 void CPickups::RenderPickUpText() {
     plugin::Call<0x455000>();
+
+    for (auto& message : std::span{ aMessages.data(), NumMessages }) {
+        if (!message.price) {
+            continue;
+        }
+
+        if (!message.text) {
+            continue;
+        }
+
+        if (message.flags & 2) {
+            CMessages::InsertNumberInString(message.text, 0, 0, 0, 0, 0, 0, gString);
+        }
+
+        sprintf(gString, "$%d", message.price);
+        AsciiToGxtChar(gString, message.text);
+
+        float scaleX, scaleY;
+
+        const auto width = message.width / 30.0f;
+        if (SCREEN_WIDTH_UNIT >= width)
+            scaleX = width;
+        else
+            scaleX = SCREEN_WIDTH_UNIT;
+
+        const auto height = message.height / 30.0f;
+        if (SCREEN_WIDTH_UNIT >= height)
+            scaleY = height;
+        else
+            scaleY = SCREEN_WIDTH_UNIT;
+
+        CFont::SetProportional(true);
+        CFont::SetBackground(false, false);
+        CFont::SetScale(scaleX, scaleY);
+        CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+        CFont::SetCentreSize(SCREEN_WIDTH);
+        CFont::SetColor(message.color);
+        CFont::SetFontStyle(eFontStyle::FONT_PRICEDOWN);
+        CFont::PrintString(message.pos.x, message.pos.y, message.text);
+    }
+    NumMessages = 0;
 }
 
+// check for pickups in area
 // 0x456450
-bool CPickups::TestForPickupsInBubble(CVector posn, float radius) {
+bool CPickups::TestForPickupsInBubble(const CVector posn, float radius) {
     // NOTE: (Possible bug) - They dont check if the pickup is active (eg: type != NONE)
     return rng::any_of(aPickUps, [sp = CSphere{ posn, radius }](const CPickup& p) {
         return sp.IsPointWithin(p.GetPosn()); // They obviously didn't use `CSphere` here, but it's nicer.
     });
 }
 
+// search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
 // 0x4555A0
-bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool _IGNORED_ arg4) {
+bool CPickups::TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool arg4) {
+    UNUSED(arg4);
     return plugin::CallAndReturn<bool, 0x4555A0, CVector, eWeaponType, uint8, uint32, bool>(posn, weaponType, pickupType, ammo, arg4);
 }
 
@@ -416,19 +480,19 @@ bool CPickups::Save() {
 }
 
 /*!
-* @brief Our custom Vector based overload
-* @copydocs CPickups::CreatePickupCoorsCloseToCoors
-*/
+ * @brief Our custom Vector based overload
+ * @copydocs CPickups::CreatePickupCoorsCloseToCoors
+ */
 void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos) {
     return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &createdAtPos.x, &createdAtPos.y, &createdAtPos.z);
 }
 
 /*!
-* @brief Our custom Vector based overload
-* @copydocs CPickups::CreatePickupCoorsCloseToCoors
-*/
-void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& out_x, float& out_y, float& out_z) {
-    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &out_x, &out_y, &out_z);
+ * @brief Our custom Vector based overload
+ * @copydocs CPickups::CreatePickupCoorsCloseToCoors
+ */
+void CPickups::CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, float& outY, float& outZ) {
+    return CreatePickupCoorsCloseToCoors(pos.x, pos.y, pos.z, &outX, &outY, &outZ);
 }
 
 // 0x454B70
