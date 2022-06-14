@@ -9,7 +9,7 @@
 #include "Physical.h"
 #include "AEPedAudioEntity.h"
 #include "AEPedSpeechAudioEntity.h"
-#include "AEWeaponAudioEntity.h"
+#include "AEPedWeaponAudioEntity.h"
 #include "PedIntelligence.h"
 #include "PlayerPedData.h"
 #include "AnimBlendFrameData.h"
@@ -126,7 +126,7 @@ public:
 
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
-    CAEWeaponAudioEntity    m_weaponAudio;
+    CAEPedWeaponAudioEntity m_weaponAudio;
     char                    field_43C[36];
     CPed*                   field_460;
     char                    field_464[4];

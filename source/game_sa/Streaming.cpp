@@ -6,6 +6,7 @@
 #include "PostEffects.h"
 #include "TheScripts.h"
 #include "LoadingScreen.h"
+#include "VehicleRecording.h"
 
 uint32& CStreaming::ms_memoryAvailable = *reinterpret_cast<uint32*>(0x8A5A80);
 int32& CStreaming::desiredNumVehiclesLoaded = *reinterpret_cast<int32*>(0x8A5A84);
@@ -606,7 +607,7 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
         break;
     }
     case eModelType::IPL: {
-        if (!CIplStore::LoadIpl(ModelIdToIPL(modelId), fileBuffer, bufferSize)) {
+        if (!CIplStore::LoadIpl(ModelIdToIPL(modelId), (char*)fileBuffer, bufferSize)) {
             RemoveModel(modelId);
             RequestModel(modelId, streamingInfo.GetFlags());
             RwStreamClose(stream, &rwStreamInitData);

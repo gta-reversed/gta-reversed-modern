@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TrafficLights.h"
+#include "Shadows.h"
 
 uint8(&CTrafficLights::aTrafficLightColoursR)[3] = *(uint8(*)[3])0x8A6214;
 uint8(&CTrafficLights::aTrafficLightColoursG)[3] = *(uint8(*)[3])0x8A6218;

@@ -769,14 +769,91 @@ void CCheat::TankerCheat() {
     auto* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
     trailer->SetPosn(vehicle->GetPosition());
     trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
-    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
+    trailer->m_nStatus = STATUS_ABANDONED;
     CWorld::Add(trailer);
     trailer->SetTowLink(vehicle, true);
 }
 
 // 0x43A0B0
-CVehicle* CCheat::VehicleCheat(eModelID vehicleModelId) {
-    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(vehicleModelId); // CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+CVehicle* CCheat::VehicleCheat(eModelID modelId) {
+    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(modelId);
+
+    const auto player = FindPlayerPed();
+    if (player->m_nAreaCode != AREA_CODE_NORMAL_WORLD) {
+        return nullptr;
+    }
+
+    //    for (auto i = 0; i < 50; ++i) {
+    //        auto vehicle = CPools::ms_pVehiclePool->GetAtRef(i);
+    //        if (vehicle)
+    //    }
+
+    CStreaming::RequestModel(modelId, STREAMING_GAME_REQUIRED);
+    CStreaming::LoadAllRequestedModels(false);
+    if (!CStreaming::IsModelLoaded(modelId)) {
+        return nullptr;
+    }
+
+    if (!CStreaming::GetInfo(modelId).IsGameRequired()) {
+        CStreaming::SetModelIsDeletable(modelId);
+        CStreaming::SetModelTxdIsDeletable(modelId);
+    }
+
+    const auto GetVehicle = [](auto modelId) -> CVehicle* {
+        const auto* mi = CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr();
+        switch (mi->m_nVehicleType) {
+        case VEHICLE_TYPE_MTRUCK:
+            return new CMonsterTruck(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_QUAD:
+            return new CQuadBike(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_HELI:
+            return new CHeli(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_PLANE:
+            return new CPlane(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BOAT:
+            return new CBoat(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BIKE: {
+            auto* vehicle = new CBike(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bIsStanding = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_BMX: {
+            auto* vehicle = new CBmx(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bIsStanding = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_TRAILER:
+            return new CTrailer(modelId, RANDOM_VEHICLE);
+        default:
+            return new CAutomobile(modelId, RANDOM_VEHICLE, true);
+        }
+    };
+    auto* vehicle = GetVehicle(modelId);
+
+    const float radius      = vehicle->GetModelInfo()->GetColModel()->GetBoundRadius();
+    const auto  rotZ        = player->m_fCurrentRotation + HALF_PI;
+    const auto  vehiclePosn = player->GetPosition() + (radius + 2.0f) * player->GetForward();
+
+    vehicle->SetPosn(vehiclePosn);
+    vehicle->SetOrientation(0.0f, 0.0f, rotZ);
+    vehicle->m_nStatus = STATUS_ABANDONED;
+    vehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+    CWorld::Add(vehicle);
+    CTheScripts::ClearSpaceForMissionEntity(vehiclePosn, vehicle);
+
+    switch (vehicle->m_nVehicleType) {
+    case VEHICLE_TYPE_BOAT:
+        break;
+    case VEHICLE_TYPE_BIKE:
+        vehicle->AsBike()->PlaceOnRoadProperly();
+        break;
+    default:
+        // todo: CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+        vehicle->AsAutomobile()->PlaceOnRoadProperly();
+        break;
+    }
+
+    return vehicle;
 }
 
 // 0x43a550

@@ -46,7 +46,7 @@ void CAEFrontendAudioEntity::AddAudioEvent(eAudioEvents event, float fVolumeBoos
     CVector XVECM = { -1.0f, 0.0f, 0.0f };
     CVector YVECP = { +0.0f, 1.0f, 0.0f };
 
-    float volume = (float)CAEAudioEntity::m_pAudioEventVolumes[event] + fVolumeBoost;
+    float volume = GetDefaultVolume(event) + fVolumeBoost;
     switch (event) {
     case AE_FRONTEND_START:
         if (AEAudioHardware.IsSoundBankLoaded(59u, 0)) {
@@ -191,11 +191,11 @@ void CAEFrontendAudioEntity::AddAudioEvent(eAudioEvents event, float fVolumeBoos
     case AE_FRONTEND_CAR_ALREADY_RIGGED:
         if (AEAudioHardware.IsSoundBankLoaded(59u, 0) && CTimer::GetFrameCounter() >= m_nLastFrameGeneral_or_nFrameCount + 5) {
             m_nLastFrameGeneral_or_nFrameCount = CTimer::GetFrameCounter();
-            sound.Initialise(0, 27, this, XVECM, volume, 1.0f, 0.841f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+            sound.Initialise(0, 27, this, XVECM, volume, 1.0f, 0.841f);
             sound.m_nEnvironmentFlags = SOUND_FORCED_FRONT | SOUND_UNDUCKABLE | SOUND_UNPAUSABLE | SOUND_PLAY_PHYSICALLY | SOUND_UNCANCELLABLE | SOUND_FRONT_END;
             AESoundManager.RequestNewSound(&sound);
 
-            sound.Initialise(0, 28, this, XVECP, volume, 1.0f, 0.841f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+            sound.Initialise(0, 28, this, XVECP, volume, 1.0f, 0.841f);
             sound.m_nEnvironmentFlags = SOUND_FORCED_FRONT | SOUND_UNDUCKABLE | SOUND_UNPAUSABLE | SOUND_PLAY_PHYSICALLY | SOUND_UNCANCELLABLE | SOUND_FRONT_END;
             AESoundManager.RequestNewSound(&sound);
         }
@@ -213,12 +213,12 @@ void CAEFrontendAudioEntity::AddAudioEvent(eAudioEvents event, float fVolumeBoos
             speed0 = 1.0f;
             speed1 = 1.1892101f;
         }
-        sound.Initialise(5, 28, this, XVECM, volume, 1.0f, speed0, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+        sound.Initialise(5, 28, this, XVECM, volume, 1.0f, speed0);
         sound.m_nEnvironmentFlags = SOUND_FORCED_FRONT | SOUND_UNDUCKABLE | SOUND_PLAY_PHYSICALLY | SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE | SOUND_FRONT_END;
         sound.m_nEvent = AE_FRONTEND_CAR_RESPRAY;
         AESoundManager.RequestNewSound(&sound);
 
-        sound.Initialise(5, 28, this, XVECP, volume, 1.0f, speed1, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+        sound.Initialise(5, 28, this, XVECP, volume, 1.0f, speed1);
         sound.m_nEnvironmentFlags = SOUND_FORCED_FRONT | SOUND_UNDUCKABLE | SOUND_PLAY_PHYSICALLY | SOUND_REQUEST_UPDATES | SOUND_UNCANCELLABLE | SOUND_FRONT_END;
         sound.m_nEvent = AE_FRONTEND_CAR_RESPRAY;
         AESoundManager.RequestNewSound(&sound);
@@ -393,7 +393,7 @@ void CAEFrontendAudioEntity::AddAudioEvent(eAudioEvents event, float fVolumeBoos
         return;
     case AE_FRONTEND_RADIO_CLICK_OFF:
         if (AEAudioHardware.IsSoundBankLoaded(59u, 0)) {
-            sound.Initialise(0, 23, this, YVECP, volume, 1.0f, 0.8909f, 1.0f, 0, SOUND_DEFAULT, 0.0f, 0);
+            sound.Initialise(0, 23, this, YVECP, volume, 1.0f, 0.8909f);
             sound.m_nEnvironmentFlags = SOUND_UNDUCKABLE | SOUND_UNPAUSABLE | SOUND_PLAY_PHYSICALLY | SOUND_UNCANCELLABLE | SOUND_FRONT_END;;
             AESoundManager.RequestNewSound(&sound);
         }

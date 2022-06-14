@@ -2,6 +2,7 @@
 
 #include "TaskSimpleJump.h"
 #include "TaskSimpleClimb.h"
+#include "Shadows.h"
 
 void CTaskSimpleJump::InjectHooks()
 {
@@ -75,7 +76,7 @@ bool CTaskSimpleJump::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 {
     if (m_pAnim)
     {
-        m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
         m_pAnim->m_fBlendDelta = -4.0F;
     }
 
@@ -201,7 +202,7 @@ void CTaskSimpleJump::Launch(CPed* ped)
         if (m_bClimbJump)
         {
             auto anim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_JUMP, 8.0F);
-            anim->m_nFlags |= ANIM_FLAG_UNLOCK_LAST_FRAME;
+            anim->m_nFlags |= ANIMATION_UNLOCK_LAST_FRAME;
         }
         else
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_JUMP_GLIDE, 8.0F);

@@ -185,7 +185,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
 
                 ped->m_vecMoveSpeed += vecClimbEntSpeed;
 
-                if (!(m_pAnim->m_nFlags & ANIM_FLAG_STARTED) || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE)
+                if (!(m_pAnim->m_nFlags & ANIMATION_STARTED) || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE)
                 {
                     m_nGetToPosCounter += CTimer::GetTimeStepInMS();
                     if (m_nGetToPosCounter > 1000 || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE && m_nGetToPosCounter > 500)
@@ -202,7 +202,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
                 ped->m_vecMoveSpeed = relPosn / CTimer::GetTimeStep();
                 ped->m_vecMoveSpeed += vecClimbEntSpeed;
 
-                if (!(m_pAnim->m_nFlags & ANIM_FLAG_STARTED) && m_nHeightForAnim == CLIMB_STANDUP)
+                if (!(m_pAnim->m_nFlags & ANIMATION_STARTED) && m_nHeightForAnim == CLIMB_STANDUP)
                 {
                     if (TestForVault(ped, &posn, fAngle))
                     {
@@ -210,7 +210,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
                         m_bChangeAnimation = true;
                     }
                     else
-                        m_pAnim->m_nFlags |= ANIM_FLAG_STARTED;
+                        m_pAnim->m_nFlags |= ANIMATION_STARTED;
                 }
             }
         }
@@ -309,7 +309,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped)
     {
         MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);
     }
-    else if (m_nHeightForPos != CLIMB_STANDUP && m_nHeightForPos != CLIMB_VAULT || !m_pAnim || !(m_pAnim->m_nFlags & ANIM_FLAG_STARTED))
+    else if (m_nHeightForPos != CLIMB_STANDUP && m_nHeightForPos != CLIMB_VAULT || !m_pAnim || !(m_pAnim->m_nFlags & ANIMATION_STARTED))
     {
         if (m_nHeightForAnim == CLIMB_STANDUP && m_nHeightForPos < CLIMB_STANDUP && TestForVault(ped, &posn, fAngle))
             m_nHeightForAnim = CLIMB_VAULT;
@@ -751,7 +751,7 @@ void CTaskSimpleClimb::StartAnim(CPed* ped)
             m_nHeightForAnim = CLIMB_STANDUP;
             m_nHeightForPos = CLIMB_STANDUP;
             m_pAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CLIMB_STAND, 4.0F);
-            m_pAnim->m_nFlags &= ~ANIM_FLAG_STARTED;
+            m_pAnim->m_nFlags &= ~ANIMATION_STARTED;
         }
         else
         {
@@ -797,7 +797,7 @@ void CTaskSimpleClimb::StartAnim(CPed* ped)
     {
         m_pAnim->SetDeleteCallback(DeleteAnimCB, this);
         if (ped->m_pPlayerData
-            && m_pAnim->m_nFlags & ANIM_FLAG_STARTED
+            && m_pAnim->m_nFlags & ANIMATION_STARTED
             && (m_pAnim->m_nAnimId == ANIM_ID_CLIMB_PULL || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_STAND || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_JUMP_B))
         {
             m_pAnim->m_fSpeed = CStats::GetFatAndMuscleModifier(STAT_MOD_1);

@@ -815,8 +815,8 @@ void CTrain::ProcessControl()
         uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
         uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
 
-        auto fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
-        auto fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
+        auto fTrainNodeLighting = ScaleLighting(trainNodeLighting, 0.5f);
+        auto fTrainNextNodeLighting = ScaleLighting(trainNextNodeLighting, 0.5f);
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;

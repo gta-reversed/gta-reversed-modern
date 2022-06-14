@@ -173,7 +173,7 @@ OpcodeResult CRunningScript::ProcessCommands600To699(int32 commandId) {
     case COMMAND_SET_CHAR_PROOFS: // 0x2AB
     {
         CollectParameters(6);
-        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam >> 8);
         assert(ped);
         ped->physicalFlags.bBulletProof    = ScriptParams[1].uParam;
         ped->physicalFlags.bFireProof      = ScriptParams[2].uParam;
@@ -185,7 +185,7 @@ OpcodeResult CRunningScript::ProcessCommands600To699(int32 commandId) {
     case COMMAND_SET_CAR_PROOFS: // 0x2AC
     {
         CollectParameters(6);
-        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam >> 8);
         assert(vehicle);
         vehicle->physicalFlags.bBulletProof    = ScriptParams[1].uParam;
         vehicle->physicalFlags.bFireProof      = ScriptParams[2].uParam;
