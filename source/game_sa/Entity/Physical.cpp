@@ -10,6 +10,7 @@
 #include "CarCtrl.h"
 #include "Glass.h"
 #include "TaskSimpleClimb.h"
+#include "RealTimeShadowManager.h"
 
 float& CPhysical::DAMPING_LIMIT_IN_FRAME = *(float*)0x8CD7A0;
 float& CPhysical::DAMPING_LIMIT_OF_SPRING_FORCE = *(float*)0x8CD7A4;
@@ -760,7 +761,7 @@ void CPhysical::ApplyForce(CVector vecForce, CVector point, bool bUpdateTurnSpee
     if (physicalFlags.bDisableZ)
         vecMoveSpeedForce.z = 0.0f;
 
-    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce) 
+    if (!physicalFlags.bInfiniteMass && !physicalFlags.bDisableMoveForce)
         m_vecMoveSpeed += vecMoveSpeedForce / m_fMass;
 
     if (!physicalFlags.bDisableTurnForce && bUpdateTurnSpeed) {
@@ -797,7 +798,7 @@ CVector CPhysical::GetSpeed(CVector point)
 
 /*
     The code for this function is fine, but it will crash if we hook it. This function should be
-    only hooked after reversing all references to this function: 
+    only hooked after reversing all references to this function:
     CPhysical::ApplySpeed (done)
     CWorld::Process (done)
     CAutoMobile::ProcessControlCollisionCheck
@@ -1381,7 +1382,7 @@ bool CPhysical::CanPhysicalBeDamaged(eWeaponType weapon, bool* bDamagedDueToFire
     case WEAPON_VIBE2:
     case WEAPON_FLOWERS:
     case WEAPON_CANE:
-        if (!physicalFlags.bMeeleProof)
+        if (!physicalFlags.bMeleeProof)
             return true;
         return false;
     case WEAPON_GRENADE:
@@ -2348,7 +2349,7 @@ void CPhysical::PositionAttachedEntity()
                 m_pAttachedTo->ApplyForce(vecForce * -1.0f, vecDistance, true);
             }
             float fRotationInRadians = m_pAttachedTo->GetHeading() - GetHeading();
-            if (fRotationInRadians > PI) 
+            if (fRotationInRadians > PI)
                 fRotationInRadians -= PI * 2;
             else if (fRotationInRadians < -PI)
                 fRotationInRadians += PI * 2;
@@ -2397,7 +2398,7 @@ void CPhysical::ApplySpeed()
         else {
             fTimeStepX = (CWorld::SnookerTableMax.x - GetPosition().x) / m_vecMoveSpeed.x;
         }
-        
+
         float fNewPositionY = CTimer::GetTimeStep() * m_vecMoveSpeed.y + GetPosition().y;
         if (fNewPositionY <= CWorld::SnookerTableMax.y || m_vecMoveSpeed.y <= 0.0f) {
             if (fNewPositionY >= CWorld::SnookerTableMin.y || m_vecMoveSpeed.y >= 0.0f) {
@@ -2600,10 +2601,10 @@ void CPhysical::ApplyFriction()
 
     auto* vehicle = AsVehicle();
     if (IsVehicle() && vehicle->IsBike()
-        && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED 
+        && !physicalFlags.b32 && m_nStatus == STATUS_ABANDONED
         && fabs(GetUp().z) < 0.707f
         && 0.05f * 0.05f > m_vecMoveSpeed.SquaredMagnitude() && 0.01f * 0.01f > m_vecTurnSpeed.SquaredMagnitude())
-    {                                    
+    {
         m_vecMoveSpeed *= pow(0.5f, CTimer::GetTimeStep());
     }
 }
@@ -4529,7 +4530,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
     {
         return false;
     }
-  
+
     CVector vecBoundingCentre;
     GetBoundCentre(&vecBoundingCentre);
 
@@ -4634,7 +4635,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
                         entity->m_bHasContacted = true;
                     }
                 }
-            } 
+            }
         }
 
         if (!m_bHasContacted)
@@ -4700,7 +4701,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
             }
         }
     }
-  
+
     if (entity->m_nStatus == STATUS_SIMPLE)
     {
         entity->m_nStatus = STATUS_PHYSICS;
@@ -4709,7 +4710,7 @@ bool CPhysical::ProcessCollisionSectorList_SimpleCar(CRepeatSector* repeatSector
             CCarCtrl::SwitchVehicleToRealPhysics(entity->AsVehicle());
         }
     }
-    return true; 
+    return true;
 }
 
 // 0x54D570
@@ -4723,9 +4724,9 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
     assert(m_pAttachedTo);
     m_pAttachedTo->RegisterReference(reinterpret_cast<CEntity**>(&m_pAttachedTo));
     m_vecAttachOffset = vecAttachOffset;
-    if (physicalFlags.bInfiniteMass) 
+    if (physicalFlags.bInfiniteMass)
         m_vecAttachedEntityRotation = GetPosition();
-    else 
+    else
         m_vecAttachedEntityRotation = vecAttachRotation;
     m_qAttachedEntityRotation = CQuaternion(0.0f, 0.0f, 0.0f, 0.0f);
     m_pEntityIgnoredCollision = oldEntityAttachedTo;
@@ -4735,7 +4736,7 @@ void CPhysical::AttachEntityToEntity(CPhysical* entityAttachTo, CVector vecAttac
     }
     else {
         if (m_pAttachedTo->IsPhysical()
-            && m_pAttachedTo->physicalFlags.bDisableCollisionForce 
+            && m_pAttachedTo->physicalFlags.bDisableCollisionForce
             && IsObject() && !physicalFlags.bInfiniteMass)
         {
             physicalFlags.bDisableCollisionForce = true;
@@ -4851,7 +4852,7 @@ bool CPhysical::CheckCollision()
                 return true;
         }
     }
-    return false;  
+    return false;
 }
 
 // 0x54DAB0

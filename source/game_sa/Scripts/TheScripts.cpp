@@ -8,7 +8,7 @@
 #include "Checkpoint.h"
 #include "Checkpoints.h"
 // #include "Scripted2dEffects.h"
-
+#include "Shadows.h"
 
 void CTheScripts::InjectHooks() {
     // Has to have these, because there seems to be something going on with the variable init order

@@ -171,9 +171,29 @@ OpcodeResult CRunningScript::ProcessCommands600To699(int32 commandId) {
     case COMMAND_SET_CAR_ONLY_DAMAGED_BY_PLAYER: // 0x2AA
         break;
     case COMMAND_SET_CHAR_PROOFS: // 0x2AB
-        break;
+    {
+        CollectParameters(6);
+        auto* ped = GetPedPool()->GetAt(ScriptParams[0].iParam >> 8);
+        assert(ped);
+        ped->physicalFlags.bBulletProof    = ScriptParams[1].uParam;
+        ped->physicalFlags.bFireProof      = ScriptParams[2].uParam;
+        ped->physicalFlags.bExplosionProof = ScriptParams[3].uParam;
+        ped->physicalFlags.bCollisionProof = ScriptParams[4].uParam;
+        ped->physicalFlags.bMeleeProof     = ScriptParams[5].uParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_SET_CAR_PROOFS: // 0x2AC
-        break;
+    {
+        CollectParameters(6);
+        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam >> 8);
+        assert(vehicle);
+        vehicle->physicalFlags.bBulletProof    = ScriptParams[1].uParam;
+        vehicle->physicalFlags.bFireProof      = ScriptParams[2].uParam;
+        vehicle->physicalFlags.bExplosionProof = ScriptParams[3].uParam;
+        vehicle->physicalFlags.bCollisionProof = ScriptParams[4].uParam;
+        vehicle->physicalFlags.bMeleeProof     = ScriptParams[5].uParam;
+        return OR_CONTINUE;
+    }
     case COMMAND_IS_PLAYER_IN_ANGLED_AREA_2D: // 0x2AD
         break;
     case COMMAND_IS_PLAYER_IN_ANGLED_AREA_ON_FOOT_2D: // 0x2AE

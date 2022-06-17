@@ -195,7 +195,7 @@ OpcodeResult CRunningScript::ProcessCommands1300To1399(int32 commandId) {
     case COMMAND_SET_ALL_TAXIS_HAVE_NITRO: // 0x572
         CollectParameters(1);
         if (ScriptParams[0].iParam) {
-            CCheat::EnableLegitimateCheat(CHEAT_ALL_TAXIS_NITRO);
+            CCheat::ApplyCheat(CHEAT_ALL_TAXIS_NITRO);
         } else {
             CCheat::Disable(CHEAT_ALL_TAXIS_NITRO);
         }

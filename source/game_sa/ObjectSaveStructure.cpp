@@ -41,8 +41,8 @@ void CObjectSaveStructure::Construct(CObject* obj)
     if (obj->physicalFlags.bCollisionProof)
         m_bCollisionProof = true;
 
-    if (obj->physicalFlags.bMeeleProof)
-        m_bMeeleProof = true;
+    if (obj->physicalFlags.bMeleeProof)
+        m_bMeleeProof = true;
 
     if (obj->physicalFlags.bExplosionProof)
         m_bExplosionProof = true;
@@ -65,6 +65,6 @@ void CObjectSaveStructure::Extract(CObject* obj)
     obj->physicalFlags.bBulletProof = m_bBulletProof;
     obj->physicalFlags.bFireProof = m_bFireProof;
     obj->physicalFlags.bCollisionProof = m_bCollisionProof;
-    obj->physicalFlags.bMeeleProof = m_bMeeleProof;
+    obj->physicalFlags.bMeleeProof = m_bMeleeProof;
     obj->physicalFlags.bExplosionProof = m_bExplosionProof;
 }
