@@ -42,7 +42,9 @@ public:
     static inline int32& WarFerocity = *reinterpret_cast<int32*>(0x96AB58);
     static inline float& Provocation = *reinterpret_cast<float*>(0x96AB5C);
     static inline uint32& TimeStarted = *reinterpret_cast<uint32*>(0x96AB60);
+    // State of defending gang war (i.e. fighting for enemy zone)
     static inline eGangWarState& State = *reinterpret_cast<eGangWarState*>(0x96AB64);
+    // State of attacking gang war (i.e. fighting for own zone)
     static inline eGangAttackState& State2 = *reinterpret_cast<eGangAttackState*>(0x96AB4C);
     static inline std::array<int32, 6> aSpecificZones = *reinterpret_cast<std::array<int32, 6>*>(0x96AB68);
     static inline float& Difficulty = *reinterpret_cast<float*>(0x96AB80);
