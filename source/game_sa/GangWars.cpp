@@ -40,7 +40,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);
     RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
     RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);
-    // RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
+    RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);
     RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);
     RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
@@ -106,7 +106,7 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     }
 }
 
-// 0x445B30, untested
+// 0x445B30
 bool CGangWars::AttackWaveOvercome() {
     auto pedsNearPlayer = 0u, pedsLiving = 0u;
 
@@ -228,7 +228,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
     int32 outPedId;
     for (auto i = 0u; i < pedCount; i++) {
-        if (!PickStreamedInPedForThisGang(Gang1, &outPedId))
+        if (!PickStreamedInPedForThisGang(Gang1, outPedId))
             continue;
 
         auto angle = i * TWO_PI / pedCount;
@@ -443,8 +443,27 @@ bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
 }
 
 // 0x443A20
-bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32* outPedId) {
-    return plugin::CallAndReturn<bool, 0x443A20, int32, int32*>(gangId, outPedId);
+bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32& outPedId) {
+    auto groupId = CPopulation::GetPedGroupId((ePopcycleGroup)(gangId + 18), 0);
+    auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
+
+    if (groupId <= 0)
+        return false;
+
+    uint32 x = CGarages::aCarsInSafeHouse[0][0].m_vPosn.x; // ?
+    for (auto i = 0u; i < numPeds; i++) {
+        x = (x + 1) % numPeds;
+        outPedId = CPopulation::GetPedGroupModelId(groupId, x);
+
+        if (CStreaming::IsModelLoaded(outPedId)) {
+            CGarages::aCarsInSafeHouse[0][0].m_vPosn.x = x;
+
+            return true;
+        }
+    }
+
+    CGarages::aCarsInSafeHouse[0][0].m_vPosn.x = x;
+    return false;
 }
 
 // 0x443B00
