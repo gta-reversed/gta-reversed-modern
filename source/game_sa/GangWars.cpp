@@ -46,8 +46,8 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
     RH_ScopedInstall(SetGangWarsActive, 0x446570);
     RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
-    //RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
-    //RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
+    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
+    RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
     RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
     // RH_ScopedInstall(TellGangMembersTo, 0x444530);
@@ -566,11 +566,8 @@ void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
     CTheZones::FillZonesWithGangColours(false);
 }
 
-// 0x444300, broken
+// 0x444300
 void CGangWars::StartDefensiveGangWar() {
-    plugin::Call<0x444300>();
-    return;
-
     if (PickZoneToAttack()) {
         Difficulty = TerritoryUnderControlPercentage;
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
@@ -602,14 +599,11 @@ void CGangWars::StartDefensiveGangWar() {
     }
 }
 
-// 0x446050, broken
+// 0x446050
 void CGangWars::StartOffensiveGangWar() {
-    plugin::Call<0x446050>();
-    return;
-
     CoorsOfPlayerAtStartOfWar = FindPlayerCoors();
-    CZone* playerZone;
-    pZoneInfoToFightOver = CTheZones::GetZoneInfo(CoorsOfPlayerAtStartOfWar, &playerZone);
+    auto zoneInfo = CTheZones::GetZoneInfo(CoorsOfPlayerAtStartOfWar, &pZoneToFightOver);
+    pZoneInfoToFightOver = zoneInfo;
     Difficulty = TerritoryUnderControlPercentage;
 
     if (!CanPlayerStartAGangWarHere(pZoneInfoToFightOver)) {
@@ -617,27 +611,24 @@ void CGangWars::StartOffensiveGangWar() {
         return;
     }
 
-    // it should be 'correct', don't know about if it's 100% correct.
-    auto biggestGangIdx = std::max_element(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10) - pZoneInfoToFightOver->GangDensity;
-    auto gang1Density = pZoneInfoToFightOver->GangDensity[biggestGangIdx];
-    pZoneInfoToFightOver->GangDensity[biggestGangIdx] = 0; // to find the second biggest gang
-    Gang1 = biggestGangIdx;
+    // NOTSA
+    Gang1 = std::max_element(zoneInfo->GangDensity, zoneInfo->GangDensity + 10) - zoneInfo->GangDensity;
+    auto gang1Density = zoneInfo->GangDensity[Gang1];
+    zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
-    biggestGangIdx = std::max_element(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10) - pZoneInfoToFightOver->GangDensity;
-    auto gang2Density = pZoneInfoToFightOver->GangDensity[biggestGangIdx];
-    Gang2 = gang2Density;
-
-    pZoneInfoToFightOver->GangDensity[biggestGangIdx] = gang1Density; // restore
+    Gang2 = std::max_element(zoneInfo->GangDensity, zoneInfo->GangDensity + 10) - zoneInfo->GangDensity;
+    auto gang2Density = zoneInfo->GangDensity[Gang2];
+    zoneInfo->GangDensity[Gang1] = gang1Density; // to restore
 
     Provocation = 0.0f;
-
-    auto densitySum = std::accumulate(pZoneInfoToFightOver->GangDensity, pZoneInfoToFightOver->GangDensity + 10, 0u);
+    auto densitySum = std::accumulate(zoneInfo->GangDensity, zoneInfo->GangDensity + 10, 0u);
     if (densitySum && (Gang1 == GANG_BALLAS || Gang1 == GANG_VAGOS)) {
         if (State2 != NO_ATTACK)
             return;
 
-        CMessages::AddMessage(TheText.Get("GW_PROV"), 4500, 1, true);
-        CMessages::AddToPreviousBriefArray(TheText.Get("GW_PROV"));
+        auto provText = TheText.Get("GW_PROV");
+        CMessages::AddMessage(provText, 4500, 1, true);
+        CMessages::AddToPreviousBriefArray(provText);
         TimeStarted = CTimer::GetTimeInMS();
         State = PREFIRST_WAVE;
         ClearTheStreets();
@@ -658,11 +649,10 @@ void CGangWars::StartOffensiveGangWar() {
             Gang2 = Gang1;
 
         TellGangMembersTo(false);
-        pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40;
-        pZoneInfoToFightOver->ZoneColor = CRGBA{255, 0, 0, 160};
+        zoneInfo->Flags1 = zoneInfo->Flags1 & 0x9F | 0x40;
+        zoneInfo->ZoneColor = CRGBA{255, 0, 0, 160};
         pDriveByCar = nullptr;
     }
-
 }
 
 // 0x445F50, untested
