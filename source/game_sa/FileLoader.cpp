@@ -501,7 +501,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
-        if (mi->GetModelType() == MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
+        if (mi->GetModelType() == MODEL_INFO_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }

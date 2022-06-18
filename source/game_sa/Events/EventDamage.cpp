@@ -809,7 +809,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                     bPlayBodyPartHitAnim = false;
                 }
                 else {
-                    playerData->m_nHitAnimDelayTimer = static_cast<uint32>(CTimer::GetTimeInMS() + 2500.0f);
+                    playerData->m_nHitAnimDelayTimer = CTimer::GetTimeInMS() + 2500; // originally 2500.0f
                 }
             }
             if (bPlayBodyPartHitAnim) {
@@ -839,7 +839,7 @@ void CEventDamage::ComputeDamageAnim(CPed* ped, bool bMakeActiveTaskAbortable) {
                             m_nAnimID = ANIM_ID_DAM_ARML_FRMFT;
                         if (m_nAnimID == currentEventAnimId) {
                             do {
-                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - static_cast<uint32>((rand() * 0.000030517578f * -3.0f)); // todo: GetRandomNumberInRange(int)
+                                m_nAnimID = ANIM_ID_DAM_ARML_FRMBK - CGeneral::GetRandomNumberInRange(0, -3);
                             } while (m_nAnimID == currentEventAnimId);
                         }
                         break;

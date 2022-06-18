@@ -147,14 +147,14 @@ public:
         uint32 bInVehicle : 1 = false;             // is in a vehicle
         uint32 bIsInTheAir : 1 = false;            // is in the air
         uint32 bIsLanding : 1 = false;             // is landing after being in the air
-        uint32 bHitSomethingLastFrame : 1 = false; // has been in a collision last fram
-        uint32 bIsNearCar : 1 = false;             // has been in a collision last fram
-        uint32 bRenderPedInCar : 1 = true;         // has been in a collision last fram
+        uint32 bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
+        uint32 bIsNearCar : 1 = false;             // has been in a collision last frame
+        uint32 bRenderPedInCar : 1 = true;         // has been in a collision last frame
         uint32 bUpdateAnimHeading : 1 = false;     // update ped heading due to heading change during anim sequence
         uint32 bRemoveHead : 1 = false;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
         uint32 bFiringWeapon : 1 = false;         // is pulling trigger
-        uint32 bHasACamera : 1 = rand() % 4 != 0; // does ped possess a camera to document accidents
+        uint32 bHasACamera : 1;                   // does ped possess a camera to document accidents
         uint32 bPedIsBleeding : 1 = false;        // Ped loses a lot of blood if true
         uint32 bStopAndShoot : 1 = false;         // Ped cannot reach target to attack with fist, need to use gun
         uint32 bIsPedDieAnimPlaying : 1 = false;  // is ped die animation finished so can dead now

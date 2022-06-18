@@ -54,9 +54,9 @@ void CFire::ExtinguishWithWater(float fWaterStrength) {
         CGeneral::GetRandomNumberInRange(-1.28f, 1.28f),
         CGeneral::GetRandomNumberInRange(-0.64f, 0.64f)
         /* Original code:
-        (float)((rand() % 256) - 128) / 100.0f,
-        (float)((rand() % 256) - 128) / 100.0f,
-        (float)((rand() % 256) - 128) / 200.0f
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 100.0f,
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 100.0f,
+        (float)((CGeneral::GetRandomNumber() % 256) - 128) / 200.0f
         */
     };
     FxPrtMult_c prtMult{ 1.0f, 1.0f, 1.0f, 0.6f, 0.75f, 0.0f, 0.4f };
@@ -322,7 +322,7 @@ void CFire::ProcessFire() {
         }
     }
 
-    if (rand() % 32 == 0) {
+    if (CGeneral::GetRandomNumber() % 32 == 0) {
         for (auto i = GetVehiclePool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
             CVehicle* vehicle = GetVehiclePool()->GetAt(i);
             if (!vehicle)
@@ -341,7 +341,7 @@ void CFire::ProcessFire() {
         }
     }
 
-    if (rand() % 4 == 0) {
+    if (CGeneral::GetRandomNumber() % 4 == 0) {
         for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) { /* backwards loop, like original code */
             CObject* obj = GetObjectPool()->GetAt(i);
             if (!obj)
@@ -354,14 +354,14 @@ void CFire::ProcessFire() {
         }
     }
 
-    if (m_nNumGenerationsAllowed > 0 && rand() % 128 == 0) {
+    if (m_nNumGenerationsAllowed > 0 && CGeneral::GetRandomNumber() % 128 == 0) {
         if (gFireManager.GetNumOfFires() < 25) {
             const CVector dir{ CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), CGeneral::GetRandomNumberInRange(-1.0f, 1.0f), 0.0f };
             CCreepingFire::TryToStartFireAtCoors(m_vecPosition + dir * CGeneral::GetRandomNumberInRange(2.0f, 3.0f), m_nNumGenerationsAllowed, false, IsScript(), 10.0f);
         }
     }
 
-    if (m_fStrength <= 2.0f && m_nNumGenerationsAllowed && rand() % 16 == 0) {
+    if (m_fStrength <= 2.0f && m_nNumGenerationsAllowed && CGeneral::GetRandomNumber() % 16 == 0) {
         CFire& nearby = gFireManager.GetRandomFire();
         if (&nearby != this && nearby.active && !nearby.createdByScript && nearby.m_fStrength <= 1.0f) {
             if (DistanceBetweenPoints(nearby.m_vecPosition, m_vecPosition) < 3.5f) {
@@ -382,7 +382,7 @@ void CFire::ProcessFire() {
     }
 
     if (createdByScript || (HasTimeToBurn() && IsNotInRemovalDistance())) {
-        const float fColorRG = (float)(rand() % 128) / 512.0f; // todo: GetRandomNumberInRange
+        const float fColorRG = (float)(CGeneral::GetRandomNumber() % 128) / 512.0f; // todo: GetRandomNumberInRange
         CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, m_vecPosition, CVector{}, 8.0f, fColorRG, fColorRG, 0.0f, 0, false, nullptr);
     } else {
         if (m_fStrength <= 1.0f) {

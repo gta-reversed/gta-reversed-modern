@@ -206,7 +206,6 @@ namespace rng = std::ranges;
 #include "game_sa\AccidentManager.h"
 #include "game_sa\AttractorScanner.h"
 #include "game_sa\AutoPilot.h"
-#include "game_sa\Birds.h"
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
