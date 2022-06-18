@@ -275,8 +275,8 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     vehicleFlags.bNeverUseSmallerRemovalRange = false;
     vehicleFlags.bDriverLastFrame = false;
 
-    auto fRand = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-    vehicleFlags.bCanPark = fRand < 0.0F; //BUG: Seemingly never true, rand() strips the sign bit to always be 0
+    auto fRand = static_cast<float>(CGeneral::GetRandomNumber()) / static_cast<float>(RAND_MAX);
+    vehicleFlags.bCanPark = fRand < 0.0F; //BUG: Seemingly never true, CGeneral::GetRandomNumber() strips the sign bit to always be 0
 
     CCarCtrl::UpdateCarCount(this, false);
     m_nExtendedRemovalRange = 0;
@@ -351,7 +351,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
     m_nNitroBoosts = 0;
     m_nHasslePosId = 0;
     m_nVehicleWeaponInUse = CAR_WEAPON_NOT_USED;
-    m_fDirtLevel = (float)((rand() % 15));
+    m_fDirtLevel = (float)((CGeneral::GetRandomNumber() % 15));
     m_nCreationTime = CTimer::GetTimeInMS();
     SetCollisionLighting(0x48);
 }
@@ -1169,7 +1169,7 @@ bool CVehicle::CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright)
     {
         if (fabs(m_vecMoveSpeed.z) > 0.05F
             || m_vecMoveSpeed.Magnitude2D() > 0.01F
-            || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F * 0.02F
+            || m_vecTurnSpeed.SquaredMagnitude() > 0.0004F) { // 0.02F / 50.0f
 
             return false;
         }
@@ -2216,7 +2216,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped)
     int32 t1 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
     if (m_pDriver) {
         if (m_apPassengers[0]) {
-            if (rand() >= 0x3FFF)
+            if (CGeneral::GetRandomNumber() >= 0x3FFF)
                 React(m_pDriver, ped, t1);
             else
                 React(m_pDriver, m_apPassengers[0], t1);
@@ -2227,7 +2227,7 @@ void CVehicle::ReactToVehicleDamage(CPed* ped)
 
     int32 t2 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
     if (m_apPassengers[0]) {
-        if (rand() >= 0x3FFF)
+        if (CGeneral::GetRandomNumber() >= 0x3FFF)
             React(m_apPassengers[0], ped, t2);
         else
             React(m_apPassengers[0], m_pDriver, t2);
@@ -2869,7 +2869,7 @@ void CVehicle::AddExhaustParticles()
                 }
 
                 if (m_fGasPedal > 0.5f && m_nCurrentGear < 3) {
-                    if (rand() % 2) {
+                    if (CGeneral::GetRandomNumber() % 2) {
                         FxSystem_c* secondaryExhaustFxSystem = g_fx.m_pPrtSmokeII3expand;
                         if (bFirstExhaustSubmergedInWater)
                         {

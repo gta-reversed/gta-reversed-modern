@@ -233,6 +233,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_fAirResistance = 1.f / 175.f;
     m_fElasticity = 0.05f;
     m_nBodypartToRemove = -1;
+    bHasACamera = CGeneral::GetRandomNumber() % 4 != 0;
 
     m_weaponAudio.Initialise(this);
     m_pedAudio.Initialise(this);
@@ -1289,7 +1290,7 @@ void CPed::SetRadioStation()
 
     if (m_pVehicle->m_pDriver == this) {
         const auto& mi = *(CPedModelInfo*)GetModelInfo();
-        m_pVehicle->m_vehicleAudio.m_Settings.m_nRadioID = (rand() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
+        m_pVehicle->m_vehicleAudio.m_Settings.m_nRadioID = (CGeneral::GetRandomNumber() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
     }
 }
 
@@ -1718,7 +1719,7 @@ void CPed::ProcessBuoyancy()
     CTimeCycle::GetAmbientRed();
     CTimeCycle::GetAmbientGreen();
     CTimeCycle::GetAmbientBlue();
-    rand();
+    CGeneral::GetRandomNumber();
     */
 
     // Add splash particle if it's the first frame we're touching water, and
@@ -2240,7 +2241,7 @@ void CPed::PlayFootSteps() {
         float adhesionMult{ 1.f };
         switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
-            if (rand() % 64) {
+            if (CGeneral::GetRandomNumber() % 64) {
                 m_vecAnimMovingShiftLocal *= 0.2f;
             }
 
@@ -2253,7 +2254,7 @@ void CPed::PlayFootSteps() {
             return;
         }
         case eAdhesionGroup::ADHESION_GROUP_LOOSE: { // 0x5E5A25
-            if (rand() % 128) {
+            if (CGeneral::GetRandomNumber() % 128) {
                 m_vecAnimMovingShiftLocal *= 0.5f;
             }
             adhesionMult = 0.5f;

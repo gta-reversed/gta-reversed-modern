@@ -660,8 +660,8 @@ bool CStreaming::ConvertBufferToObject(uint8* fileBuffer, int32 modelId)
     case eModelType::DFF: {
         // Model is a DFF
         switch (baseModelInfo->GetModelType()) {
-        case MODEL_INFO_TYPE_VEHICLE:
-        case MODEL_INFO_TYPE_PED:
+        case MODEL_INFO_VEHICLE:
+        case MODEL_INFO_PED:
             break;
         default: {
             if (CBaseModelInfo* atomicModelInfo = baseModelInfo->AsAtomicModelInfoPtr()) {
@@ -1336,7 +1336,7 @@ void CStreaming::LoadZoneVehicle(const CVector& point) {
 // 0x40BA70
 void CStreaming::PossiblyStreamCarOutAfterCreation(int32 modelId) {
     if (CModelInfo::GetModelInfo(modelId)->m_nFlags & STREAMING_UNKNOWN_1) {
-        if (rand() % 2)
+        if (CGeneral::GetRandomNumber() % 2)
             SetModelIsDeletable(modelId);
     }
 }
@@ -1425,8 +1425,8 @@ void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
             info.RemoveFromList();
             if (IsModelDFF(modelId)) {
                 switch (CModelInfo::GetModelInfo(modelId)->GetModelType()) {
-                case MODEL_INFO_TYPE_PED:
-                case MODEL_INFO_TYPE_VEHICLE: {
+                case MODEL_INFO_PED:
+                case MODEL_INFO_VEHICLE: {
                     return;
                 }
                 }
@@ -3245,7 +3245,7 @@ void CStreaming::StreamOneNewCar() {
     // Load a boat if less than 2. If there's exactly 2 maybe load one.
     if (m_bBoatsNeeded && (
             CPopulation::m_LoadedBoats.CountMembers() < 2 ||                    // Load one
-            CPopulation::m_LoadedBoats.CountMembers() <= 2 && (rand() % 8) == 3 // Maybe load one (1 in 8 chance)
+            CPopulation::m_LoadedBoats.CountMembers() <= 2 && (CGeneral::GetRandomNumber() % 8) == 3 // Maybe load one (1 in 8 chance)
         )
     ) {
         int32 boatModelId = CCarCtrl::ChooseCarModelToLoad(POPCYCLE_CARGROUP_BOATS);
@@ -3292,7 +3292,7 @@ void CStreaming::StreamOneNewCar() {
 void CStreaming::StreamPedsForInterior(int32 interiorType) {
     switch (interiorType) {
     case 0: { // Household?
-        const int32 rndHusband = rand() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_HUSBANDS, 0); // Choose a random husband
+        const int32 rndHusband = CGeneral::GetRandomNumber() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_HUSBANDS, 0); // Choose a random husband
 
         const int32 numWives = CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_WIVES, 0);
         int32 randomWife = std::max(0, rndHusband - CGeneral::GetRandomNumberInRange(3, 9));
@@ -3319,7 +3319,7 @@ void CStreaming::StreamPedsForInterior(int32 interiorType) {
     }
     case 1: { // Shop?
         ePopcyclePedGroup groupId = CPopulation::GetPedGroupId(POPCYCLE_GROUP_SHOPKEEPERS, CPopulation::CurrentWorldZone);
-        int32 modelId = CPopulation::GetPedGroupModelId(groupId, rand() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0));
+        int32 modelId = CPopulation::GetPedGroupModelId(groupId, CGeneral::GetRandomNumber() % CPopulation::GetNumPedsInGroup(POPCYCLE_GROUP_SHOPKEEPERS, 0));
         ClearSlots(1);
         RequestModel(modelId, STREAMING_KEEP_IN_MEMORY);
         ms_pedsLoaded[0] = modelId;
@@ -3710,7 +3710,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
             } else /*gang is needed but not loaded*/ {
                 const int32 carGroupId = gangId + POPCYCLE_CARGROUP_BALLAS;
                 const uint16 numCars = CPopulation::m_nNumCarsInGroup[carGroupId];
-                const int32 modelId = CPopulation::m_CarGroups[carGroupId][rand() % numCars];
+                const int32 modelId = CPopulation::m_CarGroups[carGroupId][CGeneral::GetRandomNumber() % numCars];
                 if (!GetInfo(modelId).IsLoaded())
                     RequestModel(modelId, STREAMING_KEEP_IN_MEMORY); // Load 1 random car model
             }

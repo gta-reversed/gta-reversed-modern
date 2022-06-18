@@ -384,14 +384,15 @@ void CBoat::ProcessControl_Reversed() {
 
     auto wanted = FindPlayerPed()->m_pPlayerData->m_pWanted;
     if (wanted->m_nWantedLevel > 0 && m_nModelIndex == MODEL_PREDATOR) {
-        auto pPlayerVeh = FindPlayerVehicle();
-        if (pPlayerVeh && pPlayerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BOAT) {
+        auto vehicle = FindPlayerVehicle();
+        if (vehicle && vehicle->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BOAT) {
             auto iCarMission = m_autoPilot.m_nCarMission;
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER ||
                 (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
 
-                if (static_cast<uint32>(CTimer::GetTimeInMS()) > m_nAttackPlayerTime)
-                    m_nAttackPlayerTime = rand() % 4096 + CTimer::GetTimeInMS() + 4500;
+                if (static_cast<uint32>(CTimer::GetTimeInMS()) > m_nAttackPlayerTime) {
+                    m_nAttackPlayerTime = CGeneral::GetRandomNumber() % 4096 + CTimer::GetTimeInMS() + 4500;
+                }
             }
         }
     }

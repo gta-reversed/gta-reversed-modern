@@ -2318,10 +2318,10 @@ void CPhysical::PositionAttachedEntity()
             CMatrix& attachedToEntityMatrix = attachedTo->GetMatrix(); // todo: shadow var
             CVector randomRight = attachedToEntityMatrix.GetRight() * randomNumber;
             CVector randomForward = attachedToEntityMatrix.GetForward() * randomNumber;
-            CVector force = (randomRight + randomForward) * (m_fMass * 0.02f);
+            CVector force = (randomRight + randomForward) * (m_fMass / 50.0f);
             ApplyMoveForce(force);
             if (attachedToAuto->m_wMiscComponentAngle > attachedToAuto->m_wMiscComponentAnglePrev)
-                ApplyMoveForce(attachedTo->GetMatrix().GetUp() * m_fMass * 0.02f);
+                ApplyMoveForce(attachedTo->GetMatrix().GetUp() * m_fMass / 50.0f);
         }
         return;
     }
@@ -2867,7 +2867,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                                 entityObject->objectFlags.bIsExploded = true;
                             }
                         } else {
-                            CPickups::CreateSomeMoney(entity->GetPosition(), rand() % 100);
+                            CPickups::CreateSomeMoney(entity->GetPosition(), CGeneral::GetRandomNumber() % 100);
                             entityObject->objectFlags.bIsExploded = true;
                         }
                     }
@@ -3527,7 +3527,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
                     }
                     else
                     {
-                        CPickups::CreateSomeMoney(physical->GetPosition(), rand() % 100);
+                        CPickups::CreateSomeMoney(physical->GetPosition(), CGeneral::GetRandomNumber() % 100);
                         entityObject->objectFlags.bIsExploded = true;
                     }
                 }

@@ -200,7 +200,7 @@ void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
 
     const auto object = entity->AsObject();
     if (object->objectFlags.bGlassBroken) {
-        if (rand() % 4 == 2) {
+        if (CGeneral::GetRandomNumber() % 4 == 2) {
             WindowRespondsToCollision(entity, 0.0f, {}, hitPos, false);
         }
     } else {
@@ -327,7 +327,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
                     + Normalized(right) * paneCenterPos.x;
 
                 {
-                    constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                    constexpr auto RandomFactor = [] {return (float)((CGeneral::GetRandomNumber() % 128) - 64) * 0.0015f; };
                     pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
                 }
 
@@ -336,7 +336,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
                 }
 
                 {
-                    constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
+                    constexpr auto RandomFactor = [] { return (float)((CGeneral::GetRandomNumber() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
                     pane->m_RandomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
                 }
 

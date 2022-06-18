@@ -179,7 +179,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         float& fFuelSpeed = exp->m_fFuelSpeed[i];
         CVector& vecFuelDir = exp->m_vecFuelDirection[i];
 
-        if (i && rand() >= RAND_MAX / 2) {
+        if (i && CGeneral::GetRandomNumber() >= RAND_MAX / 2) {
             fOffsetDistance = 0.0f;
         } else {
             vecFuelDir = CVector{
@@ -373,7 +373,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         case eExplosionType::EXPLOSION_ROCKET:
         case eExplosionType::EXPLOSION_WEAK_ROCKET:
         case eExplosionType::EXPLOSION_OBJECT: {
-            const auto numFires = (type == eExplosionType::EXPLOSION_MOLOTOV) ? (rand() - 2) % 4 : (rand() + 1) % 4;
+            const auto numFires = (type == eExplosionType::EXPLOSION_MOLOTOV) ? (CGeneral::GetRandomNumber() - 2) % 4 : (CGeneral::GetRandomNumber() + 1) % 4;
 
             if (numFires) {
                 for (auto i = 0; i < numFires; i++) {
@@ -471,7 +471,7 @@ void CExplosion::Update() {
             case eExplosionType::EXPLOSION_CAR:
             case eExplosionType::EXPLOSION_QUICK_CAR:
             case eExplosionType::EXPLOSION_BOAT: {
-                if (exp.m_pVictim && rand() % 32 == 0) {
+                if (exp.m_pVictim && CGeneral::GetRandomNumber() % 32 == 0) {
                     CVector rndOffset = {CGeneral::GetRandomNumberInRange(-0.5f, 0.5f), CGeneral::GetRandomNumberInRange(-0.5f, 0.5f), 0.0f};
                     rndOffset.Normalise();
                     rndOffset *= CGeneral::GetRandomNumberInRange(1.0f, 2.0f);
