@@ -2,6 +2,7 @@
 
 #include "FireManager.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 

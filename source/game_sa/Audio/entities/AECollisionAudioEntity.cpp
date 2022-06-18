@@ -74,7 +74,7 @@ void CAECollisionAudioEntity::PlayBulletHitCollisionSound(eSurfaceType surface, 
 
     int32 iRand;
     float maxDistance = 1.5f;
-    float volume = CAEAudioEntity::m_pAudioEventVolumes[AE_BULLET_HIT];
+    float volume = GetDefaultVolume(AE_BULLET_HIT);
     if (surface == SURFACE_PED)
     {
         do

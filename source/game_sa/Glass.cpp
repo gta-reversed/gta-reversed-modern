@@ -2,6 +2,7 @@
 
 #include "Glass.h"
 #include "FallingGlassPane.h"
+#include "Shadows.h"
 
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
@@ -20,7 +21,7 @@ uint32& CGlass::LastColCheckMS = *(uint32*)0xC72FA8;
 void CGlass::InjectHooks() {
     RH_ScopedClass(CGlass);
     RH_ScopedCategoryGlobal();
-    
+
     RH_ScopedInstall(Init, 0x71A8D0);
     RH_ScopedInstall(HasGlassBeenShatteredAtCoors, 0x71CB70);
     RH_ScopedInstall(CarWindscreenShatters, 0x71C2B0);

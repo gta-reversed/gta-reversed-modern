@@ -17,6 +17,7 @@ public:
     CEntity* m_pEntity;
     CAESound m_tempSound;
 
+private:
     static int8*& m_pAudioEventVolumes;
 
 protected:
@@ -24,10 +25,11 @@ protected:
     ~CAEAudioEntity() = default;
 
 public:
-    // VTABLE
     virtual void UpdateParameters(CAESound* sound, int16 curPlayPos) { /* Empty on purpose */ };
 
-    static float GetDefaultVolume(eAudioEvents audioEvent) { return static_cast<float>(m_pAudioEventVolumes[audioEvent]); }
+    static bool StaticInitialise();
+    static void Shutdown();
+    static float GetDefaultVolume(eAudioEvents event) { return static_cast<float>(m_pAudioEventVolumes[event]); }
 };
 
 VALIDATE_SIZE(CAEAudioEntity, 0x7C);

@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "QuadBike.h"
+#include "VehicleRecording.h"
 
 bool& bDoQuadDamping = *(bool*)0x8D3450; // true 0x8D3450
 float& QUAD_HBSTEER_ANIM_MULT = *(float*)0x8D3454; // -0.4f 0x8D3454

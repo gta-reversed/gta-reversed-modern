@@ -6,7 +6,7 @@
 */
 #pragma once
 
-#include "renderware.h"
+#include "RenderWare.h"
 
 class CEntity;
 class CObject;
@@ -127,6 +127,7 @@ public:
     static void Update();
     static void Update_overlay();
 
+    static bool IsRunning() { return ms_running; }
     static bool IsCutsceneProcessing() { return ms_cutsceneProcessing; }
 };
 

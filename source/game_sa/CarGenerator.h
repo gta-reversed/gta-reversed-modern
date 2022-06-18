@@ -29,7 +29,6 @@ public:
     int32 m_nMinDelay;
     int32 m_nMaxDelay;
 };
-
 VALIDATE_SIZE(CFileCarGenerator, 0x30);
 
 class CCarGenerator {

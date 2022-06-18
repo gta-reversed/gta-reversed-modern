@@ -7,11 +7,27 @@
 #include "TaskSimpleJetPack.h"
 #include "PostEffects.h"
 
+/*
+ * Interesting links:
+ *
+ * https://youtube.com/watch?v=W_eFZ4HzU7Q GTA SA - Alternative Cheats - Feat. Badger Goodger
+ * https://youtube.com/watch?v=MVpMTw0rWoc GTA SA - New Secret Cheats - Feat. Spoofer
+ * https://youtube.com/watch?v=L97xXbFnFWM GTA SA - Bugs that break your save game - Feat. BadgerGoodger
+ *
+ */
+
 void (*(&CCheat::m_aCheatFunctions)[TOTAL_CHEATS])() = *reinterpret_cast<void (*(*)[TOTAL_CHEATS])()>(0x8A5B58);
 int32 (&CCheat::m_aCheatHashKeys)[TOTAL_CHEATS] = *reinterpret_cast<int32 (*)[TOTAL_CHEATS]>(0x8A5CC8);
-char (&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char (*)[CHEAT_STRING_SIZE]>(0x969110);
 bool (&CCheat::m_aCheatsActive)[TOTAL_CHEATS] = *reinterpret_cast<bool (*)[TOTAL_CHEATS]>(0x969130);
+
+char (&CCheat::m_CheatString)[CHEAT_STRING_SIZE] = *reinterpret_cast<char (*)[CHEAT_STRING_SIZE]>(0x969110);
 bool& CCheat::m_bHasPlayerCheated = *reinterpret_cast<bool*>(0x96918C);
+
+bool CCheat::m_bShowMappings;
+uint32 CCheat::m_nLastScriptBypassTime;
+
+bool G_CHEAT_BIG_HEAD = false;  // temp
+bool G_CHEAT_THIN_BODY = false; // temp
 
 // NOTSA
 struct Cheat {
@@ -126,7 +142,7 @@ void CCheat::InjectHooks() {
     RH_ScopedInstall(DoCheats, 0x439AF0);
     RH_ScopedInstall(ResetCheats, 0x438450);
     RH_ScopedInstall(IsZoneStreamingAllowed, 0x407410);
-    RH_ScopedInstall(EnableLegitimateCheat, 0x438370);
+    RH_ScopedInstall(ApplyCheat, 0x438370);
 
     for (auto& cheat: cheats) {
         if (cheat.installAddress == 0x0) {
@@ -149,6 +165,7 @@ void CCheat::AddToCheatString(char LastPressedKey) {
         return;
     }
 
+    // Shift stuff to the right
     for (auto i = CHEAT_STRING_SIZE - 1 - 1; i >= 1; --i) {
         m_CheatString[i] = m_CheatString[i - 1];
     }
@@ -179,23 +196,30 @@ void CCheat::AddToCheatString(char LastPressedKey) {
 
         if (m_aCheatsActive[hashIndex]) {
             // deactivated
-            CHud::SetHelpMessage(TheText.Get((char*)"CHEAT8"), true, false, false);
+            CHud::SetHelpMessage(TheText.Get("CHEAT8"), true, false, false);
         } else {
             // activated
-            CHud::SetHelpMessage(TheText.Get((char*)"CHEAT1"), true, false, false);
+            CHud::SetHelpMessage(TheText.Get("CHEAT1"), true, false, false);
         }
 
         CStats::IncrementStat(STAT_TIMES_CHEATED, 1.0f);
 
-        auto cheatFunc = m_aCheatFunctions[hashIndex];
+        ApplyCheat(static_cast<eCheats>(hashIndex));
         m_bHasPlayerCheated = true;
-        if (cheatFunc) {
-            cheatFunc();
-        } else {
-            m_aCheatsActive[hashIndex] ^= true;
-        }
         m_CheatString[0] = '\0';
         return;
+    }
+}
+
+// Activates the cheat without changing statistics
+// unknown name
+// 0x438370
+void CCheat::ApplyCheat(eCheats cheat) {
+    auto func = m_aCheatFunctions[cheat];
+    if (func) {
+        return func();
+    } else {
+        return Toggle(cheat);
     }
 }
 
@@ -210,20 +234,20 @@ void CCheat::ResetCheats() {
 
 // 0x439AF0
 void CCheat::DoCheats() {
-    for (auto key = 0; key < 256; ++key)
-        if (CPad::GetPad(0)->IsStandardKeyJustPressed(key))
-                AddToCheatString(key);
+    for (auto key = 0; key < 256; ++key) {
+        if (CPad::GetPad(0)->IsStandardKeyJustPressed(key)) {
+            AddToCheatString(key);
+        }
+    }
 }
 
 // 0x439880
 void CCheat::AdrenalineCheat() {
-    CPlayerPedData* playerData = FindPlayerPed()->m_pPlayerData;
-
     Toggle(CHEAT_ADRENALINE_MODE);
     if (IsActive(CHEAT_ADRENALINE_MODE)) {
-        playerData->m_bAdrenaline = false;
+        CPickups::GivePlayerGoodiesWithPickUpMI(ModelIndices::MI_PICKUP_ADRENALINE, 0);
     } else {
-        CPickups::GivePlayerGoodiesWithPickUpMI(MODEL_ADRENALINE, 0);
+        FindPlayerPed()->ClearAdrenaline(); // FIX_BUGS
     }
 }
 
@@ -245,11 +269,6 @@ void CCheat::AllCarsAreShitCheat() {
     }
 }
 
-// 0x43a550
-void CCheat::ApacheCheat() {
-    VehicleCheat(MODEL_HUNTER);
-}
-
 // 0x439230
 void CCheat::BeachPartyCheat() {
     Toggle(CHEAT_BEACH_PARTY);
@@ -267,19 +286,18 @@ void CCheat::BeachPartyCheat() {
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
         CPlayerPed* player = FindPlayerPed();
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("torso", nullptr, CLOTHES_TEXTURE_TORSO);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("shortskhaki", "shorts", CLOTHES_TEXTURE_LEGS);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("flipflop", "flipflop", CLOTHES_TEXTURE_SHOES);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("glasses04dark", "glasses04", CLOTHES_TEXTURE_GLASSES);
+        player->GetClothesDesc()->SetTextureAndModel(nullptr, nullptr, CLOTHES_TEXTURE_SPECIAL); // FIX_BUGS
+        player->GetClothesDesc()->SetTextureAndModel("torso", nullptr, CLOTHES_TEXTURE_TORSO);
+        player->GetClothesDesc()->SetTextureAndModel("shortskhaki", "shorts", CLOTHES_TEXTURE_LEGS);
+        player->GetClothesDesc()->SetTextureAndModel("flipflop", "flipflop", CLOTHES_TEXTURE_SHOES);
+        player->GetClothesDesc()->SetTextureAndModel("glasses04dark", "glasses04", CLOTHES_TEXTURE_GLASSES);
 
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
         }
 
-        CWeather::ForceWeatherNow(WEATHER_EXTRASUNNY_LA);
-
+        ExtraSunnyWeatherCheat();
         HandleSpecialCheats(CHEAT_BEACH_PARTY);
-
         CStreaming::ReclassifyLoadedCars();
     }
 }
@@ -302,11 +320,6 @@ void CCheat::BlowUpCarsCheat() {
     }
 }
 
-// 0x438f60
-void CCheat::CloudyWeatherCheat() {
-    CWeather::ForceWeatherNow(WEATHER_CLOUDY_LA);
-}
-
 // 0x439f60
 void CCheat::CountrysideInvasionCheat() {
     Toggle(CHEAT_COUNTRY_TRAFFIC);
@@ -324,9 +337,9 @@ void CCheat::CountrysideInvasionCheat() {
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
         CPlayerPed *player = FindPlayerPed();
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("timberfawn", "bask1", CLOTHES_TEXTURE_SHOES);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("captruck", "captruck", CLOTHES_TEXTURE_HATS);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("countrytr", "countrytr", CLOTHES_TEXTURE_SPECIAL);
+        player->GetClothesDesc()->SetTextureAndModel("timberfawn", "bask1", CLOTHES_TEXTURE_SHOES);
+        player->GetClothesDesc()->SetTextureAndModel("captruck", "captruck", CLOTHES_TEXTURE_HATS);
+        player->GetClothesDesc()->SetTextureAndModel("countrytr", "countrytr", CLOTHES_TEXTURE_SPECIAL);
 
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
@@ -346,11 +359,6 @@ void CCheat::CountrysideInvasionCheat() {
 
         CStreaming::ReclassifyLoadedCars();
     }
-}
-
-// 0x43a660
-void CCheat::DozerCheat() {
-    VehicleCheat(MODEL_DOZER);
 }
 
 // 0x4398d0
@@ -412,11 +420,6 @@ void CCheat::EverybodyAttacksPlayerCheat() {
     }
 }
 
-// 0x438f50
-void CCheat::ExtraSunnyWeatherCheat() {
-    CWeather::ForceWeatherNow(WEATHER_EXTRASUNNY_LA);
-}
-
 // 0x438f90
 void CCheat::FastTimeCheat() {
     if (CTimer::GetTimeScale() < 4.0f) {
@@ -441,16 +444,6 @@ void CCheat::FatCheat() {
     }
 }
 
-// 0x43a530
-void CCheat::FlyboyCheat() {
-    VehicleCheat(MODEL_HYDRA);
-}
-
-// 0x438f80
-void CCheat::FoggyWeatherCheat() {
-    CWeather::ForceWeatherNow(WEATHER_FOGGY_SF);
-}
-
 // 0x439720
 void CCheat::FunhouseCheat() {
     Toggle(CHEAT_FUNHOUSE_THEME);
@@ -470,22 +463,20 @@ void CCheat::FunhouseCheat() {
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
         CPlayerPed *player = FindPlayerPed();
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("torso", "torso", CLOTHES_TEXTURE_TORSO);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("legsheart", "legs", CLOTHES_TEXTURE_LEGS);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("timberhike", "bask1", CLOTHES_TEXTURE_SHOES);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("groucho", "grouchos", CLOTHES_TEXTURE_GLASSES);
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("hairpink", "head", CLOTHES_TEXTURE_HEAD);
+        player->GetClothesDesc()->SetTextureAndModel(nullptr, nullptr, CLOTHES_TEXTURE_SPECIAL); // FIX_BUGS
+        player->GetClothesDesc()->SetTextureAndModel("torso", "torso", CLOTHES_TEXTURE_TORSO);
+        player->GetClothesDesc()->SetTextureAndModel("legsheart", "legs", CLOTHES_TEXTURE_LEGS);
+        player->GetClothesDesc()->SetTextureAndModel("timberhike", "bask1", CLOTHES_TEXTURE_SHOES);
+        player->GetClothesDesc()->SetTextureAndModel("groucho", "grouchos", CLOTHES_TEXTURE_GLASSES);
+        player->GetClothesDesc()->SetTextureAndModel("hairpink", "head", CLOTHES_TEXTURE_HEAD);
 
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
         }
 
         HandleSpecialCheats(CHEAT_FUNHOUSE_THEME);
-
         CStreaming::ReclassifyLoadedCars();
-
-        CWeather::ForceWeatherNow(WEATHER_EXTRASUNNY_LA);
-
+        ExtraSunnyWeatherCheat();
         CPostEffects::m_bHeatHazeFX = true;
     }
 }
@@ -514,11 +505,6 @@ void CCheat::GangsCheat() {
     }
 }
 
-// 0x43a520
-void CCheat::GolfcartCheat() {
-    VehicleCheat(MODEL_CADDY);
-}
-
 // Handles BeachParty, Funhouse, AllCarsAreGreat, AllCarsAreCheap cheats toggling
 // 0x439A10
 void CCheat::HandleSpecialCheats(eCheats cheat) {
@@ -534,10 +520,8 @@ void CCheat::HandleSpecialCheats(eCheats cheat) {
     if (IsActive(CHEAT_FUNHOUSE_THEME) && cheat != CHEAT_FUNHOUSE_THEME) {
         FunhouseCheat();
     }
-    if (IsActive(CHEAT_COUNTRY_TRAFFIC)) {
-        if (cheat != CHEAT_COUNTRY_TRAFFIC) {
-            CountrysideInvasionCheat();
-        }
+    if (IsActive(CHEAT_COUNTRY_TRAFFIC) && cheat != CHEAT_COUNTRY_TRAFFIC) {
+        CountrysideInvasionCheat();
     }
 }
 
@@ -553,18 +537,12 @@ void CCheat::HealthCheat() {
 
     vehicle->m_fHealth = 1000.0f;
     if (vehicle->IsBike()) {
-        CBike* bike = vehicle->AsBike();
-        bike->m_fFireBlowUpTimer = 0.0f;
-        bike->Fix();
+        vehicle->AsBike()->m_fFireBlowUpTimer = 0.0f;
+        vehicle->AsBike()->Fix();
     } else if (vehicle->IsAutomobile()) {
-        vehicle->m_apCollidedEntities[5] = nullptr; // todo: magic number
-        vehicle->Fix();
+        vehicle->AsAutomobile()->m_fBurnTimer = 0.0f;
+        vehicle->AsAutomobile()->Fix();
     }
-}
-
-// 0x43a4f0
-void CCheat::HearseCheat() {
-    VehicleCheat(MODEL_ROMERO);
 }
 
 // 0x439600
@@ -595,50 +573,51 @@ void CCheat::LoveConquersAllCheat() {
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
         CPlayerPed *player = FindPlayerPed();
-        player->m_pPlayerData->m_pPedClothesDesc->SetTextureAndModel("gimpleg", "gimpleg", CLOTHES_TEXTURE_SPECIAL);
+        player->GetClothesDesc()->SetTextureAndModel("gimpleg", "gimpleg", CLOTHES_TEXTURE_SPECIAL);
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
         }
     }
 }
 
-// 0x43a500
-void CCheat::LovefistCheat() {
-    VehicleCheat(MODEL_STRETCH);
-}
-
 // 0x439B20
 void CCheat::MayhemCheat() {
     Toggle(CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB);
     if (IsActive(CHEAT_PEDS_ATTACK_OTHER_WITH_GOLFCLUB)) {
+        std::swap(CPedType::ms_apPedTypesOld, CPedType::ms_apPedTypes); // NOTSA
+
         for (uint32 pedType = PED_TYPE_CIVMALE; pedType <= PED_TYPE_PROSTITUTE; pedType++) {
-            CPedType::SetPedTypeAsAcquaintance(4, static_cast<ePedType>(pedType), 0xFFFFF);
+            CPedType::SetPedTypeAsAcquaintance(ACQUAINTANCE_HATE, static_cast<ePedType>(pedType), 0xFFFFF);
         }
 
-        auto pedPool = GetPedPool();
-        if (!pedPool->m_nSize) {
-            return;
-        }
-
-        for (int32 pedIndex = 0; pedIndex < pedPool->m_nSize; pedIndex++) {
-            CPed* ped = pedPool->GetAt(pedIndex);
-            if (!ped || ped->IsPlayer())
+        for (auto& ped : GetPedPool()->GetAllValid()) {
+            if (ped.IsPlayer())
                 continue;
 
             for (uint32 pedType_1 = PED_TYPE_CIVMALE; pedType_1 <= PED_TYPE_PROSTITUTE; ++pedType_1) {
-                ped->GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
+                ped.GetAcquaintance().SetAsAcquaintance(ACQUAINTANCE_HATE, CPedType::GetPedFlag(static_cast<ePedType>(pedType_1)));
             }
-            CPed* closestPed = ped->GetIntelligence()->GetPedScanner().GetClosestPedInRange();
-            if (closestPed) {
+            if (CPed* closestPed = ped.GetIntelligence()->GetPedScanner().GetClosestPedInRange()) {
                 CEventAcquaintancePedHate event(closestPed);
                 event.m_taskId = TASK_COMPLEX_KILL_PED_ON_FOOT;
-                ped->GetEventGroup().Add(&event, false);
+                ped.GetEventGroup().Add(&event, false);
             }
         }
     } else {
-        return;
-        // Proper deactivation
-        // https://youtu.be/L97xXbFnFWM?t=90
+        // FIX_BUGS https://youtu.be/L97xXbFnFWM?t=90
+        // todo: currently fixes only save game
+        std::swap(CPedType::ms_apPedTypes, CPedType::ms_apPedTypesOld); // straightforward solution
+
+        for (auto& ped : GetPedPool()->GetAllValid()) {
+            if (ped.IsPlayer())
+                continue;
+
+            if (CPed* closestPed = ped.GetIntelligence()->GetPedScanner().GetClosestPedInRange()) {
+                CEventAcquaintancePedHate event(closestPed);
+                event.m_taskId = TASK_NONE;
+                ped.GetEventGroup().Remove(&event);
+            }
+        }
     }
 }
 
@@ -660,11 +639,6 @@ void CCheat::MoneyArmourHealthCheat() {
     playerInfo->m_nMoney += 250000;
     player->m_fArmour = playerInfo->m_nMaxArmour;
     HealthCheat();
-}
-
-// 0x43a680
-void CCheat::MonsterTruckCheat() {
-    VehicleCheat(MODEL_MONSTERA);
 }
 
 // 0x439150
@@ -752,29 +726,9 @@ void CCheat::PinkCarsCheat() {
     }
 }
 
-// unused
-// 0x4395a0
-void CCheat::PredatorCheat() {
-    VehicleCheat(MODEL_PREDATOR);
-}
-
-// 0x43a560
-void CCheat::QuadCheat() {
-    VehicleCheat(MODEL_QUAD);
-}
-
-void CCheat::RainyWeatherCheat() {
-    CWeather::ForceWeatherNow(WEATHER_RAINY_COUNTRYSIDE);
-}
-
 // 0x439710
 void CCheat::RiotCheat() {
     Toggle(CHEAT_RIOT_MODE);
-}
-
-// 0x439590
-void CCheat::SandstormCheat() {
-    CWeather::ForceWeatherNow(WEATHER_SANDSTORM_DESERT);
 }
 
 // 0x439190
@@ -793,6 +747,160 @@ void CCheat::StaminaCheat() {
     CStats::SetStatValue(STAT_STAMINA, 1000.0f);
 }
 
+// 0x439570
+void CCheat::StormCheat() {
+    RainyWeatherCheat();
+    CWeather::Rain = 1.0f;
+    CWeather::Wind = 1.0f;
+}
+
+// 0x43a570
+void CCheat::TankerCheat() {
+    CVehicle* vehicle = VehicleCheat(MODEL_PETRO);
+    if (!vehicle)
+        return;
+
+    CStreaming::RequestModel(MODEL_PETROTR, 0);
+    CStreaming::LoadAllRequestedModels(false);
+
+    if (!CStreaming::GetInfo(MODEL_PETROTR).IsLoaded())
+        return;
+
+    auto* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
+    trailer->SetPosn(vehicle->GetPosition());
+    trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
+    trailer->m_nStatus = STATUS_ABANDONED;
+    CWorld::Add(trailer);
+    trailer->SetTowLink(vehicle, true);
+}
+
+// 0x43A0B0
+CVehicle* CCheat::VehicleCheat(eModelID modelId) {
+    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(modelId);
+
+    const auto player = FindPlayerPed();
+    if (player->m_nAreaCode != AREA_CODE_NORMAL_WORLD) {
+        return nullptr;
+    }
+
+    //    for (auto i = 0; i < 50; ++i) {
+    //        auto vehicle = CPools::ms_pVehiclePool->GetAtRef(i);
+    //        if (vehicle)
+    //    }
+
+    CStreaming::RequestModel(modelId, STREAMING_GAME_REQUIRED);
+    CStreaming::LoadAllRequestedModels(false);
+    if (!CStreaming::IsModelLoaded(modelId)) {
+        return nullptr;
+    }
+
+    if (!CStreaming::GetInfo(modelId).IsGameRequired()) {
+        CStreaming::SetModelIsDeletable(modelId);
+        CStreaming::SetModelTxdIsDeletable(modelId);
+    }
+
+    const auto GetVehicle = [](auto modelId) -> CVehicle* {
+        const auto* mi = CModelInfo::GetModelInfo(modelId)->AsVehicleModelInfoPtr();
+        switch (mi->m_nVehicleType) {
+        case VEHICLE_TYPE_MTRUCK:
+            return new CMonsterTruck(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_QUAD:
+            return new CQuadBike(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_HELI:
+            return new CHeli(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_PLANE:
+            return new CPlane(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BOAT:
+            return new CBoat(modelId, RANDOM_VEHICLE);
+        case VEHICLE_TYPE_BIKE: {
+            auto* vehicle = new CBike(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bIsStanding = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_BMX: {
+            auto* vehicle = new CBmx(modelId, RANDOM_VEHICLE);
+            vehicle->bikeFlags.bIsStanding = true;
+            return vehicle;
+        }
+        case VEHICLE_TYPE_TRAILER:
+            return new CTrailer(modelId, RANDOM_VEHICLE);
+        default:
+            return new CAutomobile(modelId, RANDOM_VEHICLE, true);
+        }
+    };
+    auto* vehicle = GetVehicle(modelId);
+
+    const float radius      = vehicle->GetModelInfo()->GetColModel()->GetBoundRadius();
+    const auto  rotZ        = player->m_fCurrentRotation + HALF_PI;
+    const auto  vehiclePosn = player->GetPosition() + (radius + 2.0f) * player->GetForward();
+
+    vehicle->SetPosn(vehiclePosn);
+    vehicle->SetOrientation(0.0f, 0.0f, rotZ);
+    vehicle->m_nStatus = STATUS_ABANDONED;
+    vehicle->m_nDoorLock = CARLOCK_UNLOCKED;
+    CWorld::Add(vehicle);
+    CTheScripts::ClearSpaceForMissionEntity(vehiclePosn, vehicle);
+
+    switch (vehicle->m_nVehicleType) {
+    case VEHICLE_TYPE_BOAT:
+        break;
+    case VEHICLE_TYPE_BIKE:
+        vehicle->AsBike()->PlaceOnRoadProperly();
+        break;
+    default:
+        // todo: CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+        vehicle->AsAutomobile()->PlaceOnRoadProperly();
+        break;
+    }
+
+    return vehicle;
+}
+
+// 0x43a550
+void CCheat::ApacheCheat() {
+    VehicleCheat(MODEL_HUNTER);
+}
+
+// 0x43a660
+void CCheat::DozerCheat() {
+    VehicleCheat(MODEL_DOZER);
+}
+
+// 0x43a530
+void CCheat::FlyboyCheat() {
+    VehicleCheat(MODEL_HYDRA);
+}
+
+// 0x43a520
+void CCheat::GolfcartCheat() {
+    VehicleCheat(MODEL_CADDY);
+}
+
+// 0x43a4f0
+void CCheat::HearseCheat() {
+    VehicleCheat(MODEL_ROMERO);
+}
+
+// 0x43a500
+void CCheat::LovefistCheat() {
+    VehicleCheat(MODEL_STRETCH);
+}
+
+// 0x43a680
+void CCheat::MonsterTruckCheat() {
+    VehicleCheat(MODEL_MONSTERA);
+}
+
+// unused
+// 0x4395a0
+void CCheat::PredatorCheat() {
+    VehicleCheat(MODEL_PREDATOR);
+}
+
+// 0x43a560
+void CCheat::QuadCheat() {
+    VehicleCheat(MODEL_QUAD);
+}
 // 0x43a4b0
 void CCheat::StockCarCheat() {
     VehicleCheat(MODEL_BLOODRA);
@@ -813,21 +921,9 @@ void CCheat::StockCar4Cheat() {
     VehicleCheat(MODEL_HOTRINB);
 }
 
-// 0x439570
-void CCheat::StormCheat() {
-    CWeather::ForceWeatherNow(WEATHER_RAINY_COUNTRYSIDE);
-    CWeather::Rain = 1.0f;
-    CWeather::Wind = 1.0f;
-}
-
 // 0x43a670
 void CCheat::StuntPlaneCheat() {
     VehicleCheat(MODEL_STUNT);
-}
-
-// 0x438f40
-void CCheat::SunnyWeatherCheat() {
-    CWeather::ForceWeatherNow(WEATHER_SUNNY_LA);
 }
 
 // 0x43a4a0
@@ -835,34 +931,14 @@ void CCheat::TankCheat() {
     VehicleCheat(MODEL_RHINO);
 }
 
-// 0x43a570
-void CCheat::TankerCheat() {
-    CVehicle* vehicle = VehicleCheat(MODEL_PETRO);
-    if (!vehicle)
-        return;
-
-    CStreaming::RequestModel(MODEL_PETROTR, 0);
-    CStreaming::LoadAllRequestedModels(false);
-
-    if (!CStreaming::GetInfo(MODEL_PETROTR).IsLoaded())
-        return;
-
-    CTrailer* trailer = new CTrailer(MODEL_PETROTR, RANDOM_VEHICLE);
-    trailer->SetPosn(vehicle->GetPosition());
-    trailer->SetOrientation(0.0f, 0.0f, DegreesToRadians(200));
-    trailer->m_nStatus = static_cast<eEntityStatus>(trailer->m_nStatus & STATUS_TRAIN_MOVING);
-    CWorld::Add(trailer);
-    trailer->SetTowLink(vehicle, true);
-}
-
 // 0x43a510
 void CCheat::TrashmasterCheat() {
     VehicleCheat(MODEL_TRASH);
 }
 
-// 0x43A0B0
-CVehicle* CCheat::VehicleCheat(eModelID vehicleModelId) {
-    return plugin::CallAndReturn<CVehicle*, 0x43A0B0, eModelID>(vehicleModelId); // CAutomobile::PlaceOnRoadProperly Places skimmer incorrectly, it's placed at millions units underground
+// 0x43a540
+void CCheat::VortexCheat() {
+    VehicleCheat(MODEL_VORTEX);
 }
 
 // 0x4399d0
@@ -896,11 +972,6 @@ void CCheat::VillagePeopleCheat() {
     }
 }
 
-// 0x43a540
-void CCheat::VortexCheat() {
-    VehicleCheat(MODEL_VORTEX);
-}
-
 // 0x4396f0
 void CCheat::WantedCheat() {
     CPlayerPed* player = FindPlayerPed();
@@ -924,22 +995,18 @@ void CCheat::WantedLevelUpCheat() {
     player->CheatWantedLevel(std::min(level + 2, 6));
 }
 
+// refactored
 // 0x4385b0
 void CCheat::WeaponCheat1() {
-    CStreaming::RequestModel(MODEL_BRASSKNUCKLE, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_BAT, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_MOLOTOV, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_COLT45, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_CHROMEGUN, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_MICRO_UZI, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_AK47, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_CUNTGUN, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_ROCKETLA, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SPRAYCAN, STREAMING_GAME_REQUIRED);
-
+    static constexpr eModelID weapons[] = {
+        MODEL_BRASSKNUCKLE, MODEL_BAT,       MODEL_MOLOTOV, MODEL_COLT45,
+        MODEL_CHROMEGUN,    MODEL_MICRO_UZI, MODEL_AK47,    MODEL_CUNTGUN,
+        MODEL_ROCKETLA,     MODEL_SPRAYCAN
+    };
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::RequestModel(model, STREAMING_GAME_REQUIRED); });
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed();
+    CPlayerPed* player = FindPlayerPed(0);
     player->GiveWeaponSet1();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -947,33 +1014,21 @@ void CCheat::WeaponCheat1() {
         player->GiveWeaponSet1();
     }
 
-    CStreaming::SetModelIsDeletable(MODEL_BRASSKNUCKLE);
-    CStreaming::SetModelIsDeletable(MODEL_MICRO_UZI);
-    CStreaming::SetModelIsDeletable(MODEL_BAT);
-    CStreaming::SetModelIsDeletable(MODEL_MOLOTOV);
-    CStreaming::SetModelIsDeletable(MODEL_COLT45);
-    CStreaming::SetModelIsDeletable(MODEL_CHROMEGUN);
-    CStreaming::SetModelIsDeletable(MODEL_AK47);
-    CStreaming::SetModelIsDeletable(MODEL_CUNTGUN);
-    CStreaming::SetModelIsDeletable(MODEL_ROCKETLA);
-    CStreaming::SetModelIsDeletable(MODEL_SPRAYCAN);
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::SetModelIsDeletable(model); });
 }
 
+// refactored
 // 0x438890
 void CCheat::WeaponCheat2() {
-    CStreaming::RequestModel(MODEL_KNIFECUR, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_GRENADE, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_DESERT_EAGLE, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SAWNOFF, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_TEC9, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_M4, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SNIPER, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_FLAME, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_FIRE_EX, STREAMING_GAME_REQUIRED);
-
+    static constexpr eModelID weapons[] = {
+        MODEL_KNIFECUR, MODEL_GRENADE, MODEL_DESERT_EAGLE, MODEL_SAWNOFF,
+        MODEL_TEC9,     MODEL_M4,      MODEL_SNIPER,       MODEL_FLAME,
+        MODEL_FIRE_EX
+    };
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::RequestModel(model, STREAMING_GAME_REQUIRED); });
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed();
+    CPlayerPed* player = FindPlayerPed(0);
     player->GiveWeaponSet2();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -981,31 +1036,20 @@ void CCheat::WeaponCheat2() {
         player1->GiveWeaponSet2();
     }
 
-    CStreaming::SetModelIsDeletable(MODEL_KNIFECUR);
-    CStreaming::SetModelIsDeletable(MODEL_GRENADE);
-    CStreaming::SetModelIsDeletable(MODEL_DESERT_EAGLE);
-    CStreaming::SetModelIsDeletable(MODEL_SAWNOFF);
-    CStreaming::SetModelIsDeletable(MODEL_TEC9);
-    CStreaming::SetModelIsDeletable(MODEL_M4);
-    CStreaming::SetModelIsDeletable(MODEL_SNIPER);
-    CStreaming::SetModelIsDeletable(MODEL_FLAME);
-    CStreaming::SetModelIsDeletable(MODEL_FIRE_EX);
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::SetModelIsDeletable(model); });
 }
 
+// refactored
 // 0x438b30
 void CCheat::WeaponCheat3() {
-    CStreaming::RequestModel(MODEL_CHNSAW, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SILENCED, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SHOTGSPA, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_MP5LNG, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_M4, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_HEATSEEK, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_SATCHEL, STREAMING_GAME_REQUIRED);
-    CStreaming::RequestModel(MODEL_BOMB, STREAMING_GAME_REQUIRED);
-
+    static constexpr eModelID weapons[] = {
+        MODEL_CHNSAW, MODEL_SILENCED, MODEL_SHOTGSPA, MODEL_MP5LNG,
+        MODEL_M4,     MODEL_HEATSEEK, MODEL_SATCHEL,  MODEL_BOMB
+    };
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::RequestModel(model, STREAMING_GAME_REQUIRED); });
     CStreaming::LoadAllRequestedModels(false);
 
-    CPlayerPed* player = FindPlayerPed();
+    CPlayerPed* player = FindPlayerPed(0);
     player->GiveWeaponSet3();
 
     CPlayerPed* player1 = FindPlayerPed(1);
@@ -1013,14 +1057,27 @@ void CCheat::WeaponCheat3() {
         player1->GiveWeaponSet3();
     }
 
-    CStreaming::SetModelIsDeletable(MODEL_CHNSAW);
-    CStreaming::SetModelIsDeletable(MODEL_SILENCED);
-    CStreaming::SetModelIsDeletable(MODEL_SHOTGSPA);
-    CStreaming::SetModelIsDeletable(MODEL_MP5LNG);
-    CStreaming::SetModelIsDeletable(MODEL_M4);
-    CStreaming::SetModelIsDeletable(MODEL_HEATSEEK);
-    CStreaming::SetModelIsDeletable(MODEL_SATCHEL);
-    CStreaming::SetModelIsDeletable(MODEL_BOMB);
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::SetModelIsDeletable(model); });
+}
+
+// todo: add WEAPON_NIGHTVISION, WEAPON_INFRARED
+// Android
+void CCheat::WeaponCheat4() {
+    const eModelID weapons[] = { MODEL_MINIGUN, MODEL_GUN_DILDO2 };
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::RequestModel(model, STREAMING_GAME_REQUIRED); });
+    CStreaming::LoadAllRequestedModels(false);
+
+    auto* player = FindPlayerPed(0);
+    player->GiveWeapon(WEAPON_MINIGUN, 500, true);
+    player->GiveWeapon(WEAPON_DILDO2, 0, true);
+
+    auto* player1 = FindPlayerPed(1);
+    if (player1) {
+        player->GiveWeapon(WEAPON_MINIGUN, 500, true);
+        player->GiveWeapon(WEAPON_DILDO2, 0, true);
+    }
+
+    std::ranges::for_each(weapons, [](auto model) { CStreaming::SetModelIsDeletable(model); });
 }
 
 // 0x439940
@@ -1036,6 +1093,36 @@ void CCheat::WeaponSkillsCheat() {
     CStats::SetStatValue(STAT_AK_47_SKILL, 1000.0f);
     CStats::SetStatValue(STAT_M4_SKILL, 1000.0f);
     CStats::SetStatValue(STAT_RIFLE_SKILL, 1000.0f);
+}
+
+// 0x438f60
+void CCheat::CloudyWeatherCheat() {
+    CWeather::ForceWeatherNow(WEATHER_CLOUDY_LA);
+}
+
+// 0x438f50
+void CCheat::ExtraSunnyWeatherCheat() {
+    CWeather::ForceWeatherNow(WEATHER_EXTRASUNNY_LA);
+}
+
+// 0x438f80
+void CCheat::FoggyWeatherCheat() {
+    CWeather::ForceWeatherNow(WEATHER_FOGGY_SF);
+}
+
+// 0x438f70
+void CCheat::RainyWeatherCheat() {
+    CWeather::ForceWeatherNow(WEATHER_RAINY_COUNTRYSIDE);
+}
+
+// 0x439590
+void CCheat::SandstormCheat() {
+    CWeather::ForceWeatherNow(WEATHER_SANDSTORM_DESERT);
+}
+
+// 0x438f40
+void CCheat::SunnyWeatherCheat() {
+    CWeather::ForceWeatherNow(WEATHER_SUNNY_LA);
 }
 
 // 0x438ff0
@@ -1062,14 +1149,146 @@ bool CCheat::IsZoneStreamingAllowed() {
         || IsActive(CHEAT_COUNTRY_TRAFFIC);
 }
 
-// Activates the cheat without changing statistics
-// unknown name
-// 0x438370
-void CCheat::EnableLegitimateCheat(eCheats cheat) {
-    auto func = m_aCheatFunctions[cheat];
-    if (func) {
-        return func();
-    } else {
-        return Toggle(cheat);
+// Android
+void CCheat::TimeTravelCheat() {
+    CClock::SetGameClock(CClock::GetGameClockHours() + 4, CClock::GetGameClockMinutes(), CClock::GetGameClockDays());
+}
+
+// Android
+void CCheat::TheGamblerCheat() {
+    CStats::SetStatValue(eStats::STAT_GAMBLING, 1000.0f);
+}
+
+void CCheat::BigHeadCheat() {
+    G_CHEAT_BIG_HEAD ^= true; // Toggle(CHEAT_BIG_HEAD);
+}
+
+void CCheat::ThinBodyCheat() {
+    G_CHEAT_THIN_BODY ^= true; // Toggle(CHEAT_THIN_BODY);
+}
+
+
+// **** DEBUG STUFF ****
+
+// Android
+void CCheat::TogglePlayerInvincibility() {
+    CPlayerPed::bDebugPlayerInvincible ^= true;
+}
+
+// Android
+void CCheat::ToggleShowTargeting() {
+    CPlayerPed::bDebugTargeting ^= true;
+}
+
+// Android
+void CCheat::ToggleShowTapToTarget() {
+    CPlayerPed::bDebugTapToTarget ^= true;
+}
+
+// Android
+void CCheat::ShowMappingsCheat() {
+    m_bShowMappings ^= true;
+}
+
+// Android
+void CCheat::ScriptBypassCheat() {
+    m_nLastScriptBypassTime = CTimer::GetTimeInMS();
+}
+
+void CCheat::ProcessAllCheats() {
+    ProcessDebugCarCheats();
+    ProcessDebugMissionSkip();
+    ProcessCheats();
+    ProcessCheatMenu();
+    ProcessWeaponSlotCheats();
+}
+
+void CCheat::ProcessDebugCarCheats() {
+
+}
+
+void CCheat::ProcessDebugMissionSkip() {
+
+}
+
+void CCheat::ProcessCheats() {
+
+}
+
+void CCheat::ProcessCheatMenu() {
+
+}
+
+enum eCheatWeaponSlot {
+    SLOT_MELEE,
+    SLOT_HANDGUN,
+    SLOT_SMG,
+    SLOT_SHOTGUN,
+    SLOT_ASSAULT_RIFLES,
+    SLOT_LONG_RIFLES,
+    SLOT_THROWN,
+    SLOT_HEAVY_ARTILLERY,
+    SLOT_EQUIPMENT,
+    SLOT_OTHER,
+};
+
+static int32 g_CheatWeaponSlot = -1;
+static bool  g_bDisplayCheatWeaponSlot = true;
+
+// Android
+void CCheat::ProcessWeaponSlotCheats() {
+    if (!g_bDisplayCheatWeaponSlot)
+        return;
+
+    CTimer::StartUserPause();
+    switch (g_CheatWeaponSlot) {
+    case SLOT_MELEE:
+        // HandleSlotMelee();
+        break;
+    case SLOT_HANDGUN:
+        // HandleSlotHandguns();
+        break;
+    case SLOT_SMG:
+        // HandleSlotSubmachineGuns();
+        break;
+    case SLOT_SHOTGUN:
+        // HandleSlotShotguns();
+        break;
+    case SLOT_ASSAULT_RIFLES:
+        // HandleSlotAssaultRifles();
+        break;
+    case SLOT_LONG_RIFLES:
+        // HandleSlotLongRifles();
+        break;
+    case SLOT_THROWN:
+        // HandleSlotThrow();
+        break;
+    case SLOT_HEAVY_ARTILLERY:
+        // HandleSlotArtillery();
+        break;
+    case SLOT_EQUIPMENT:
+        // HandleSlotEquipment();
+        break;
+    case SLOT_OTHER:
+        // HandleSlotOther();
+        break;
+    default:
+        break;
     }
+    CTimer::EndUserPause();
+}
+
+// Can be realized through CMenuSystem
+// Android
+void CCheat::WeaponSlotCheat() {
+    // SLOT_MELEE           "NIGHTSTICK" "BRASS KNUCKLES" "POOL CUE" "BASEBALL BAT" "CHAINSAW" "KATANA" "GOLF CLUB" "SHOVEL" "KNIFE"
+    // SLOT_HANDGUN         "DESERT EAGLE" "SLIENCED 9MM"
+    // SLOT_SMG             "TEC-9" "MICRO SMG"
+    // SLOT_SHOTGUN         "SHOTGUN" "SPAS"
+    // SLOT_ASSAULT_RIFLES  "AK47" "M4"
+    // SLOT_LONG_RIFLES     "RIFLE" "SNIPER RIFLE"
+    // SLOT_THROWN          "GRENADE" "MOLOTOV COCKTAIL" "C4" "TEAR GAS"
+    // SLOT_HEAVY_ARTILLERY "MINI GUN" "FLAME THROWER" "HS ROCKET LAUNCHER" "ROCKET LAUNCHER"
+    // SLOT_EQUIPMENT       "NIGHT-VISION GOGGLES" "FIRE EXTINGUISHER" "SPRAY CAN" "PARACHUTE" "CAMERA" "THERMAL GOGGLES"
+    // SLOT_OTHER           "VIBRA2" "DILDO1" "CANE" "DILDO2" "FLOWERS" "VIBRA1"
 }

@@ -20,13 +20,14 @@ public:
     ~CTaskComplexSequence() override;
 
     CTask* Clone() override;
-    eTaskType GetTaskType() override;
+    eTaskType GetTaskType() override { return TASK_COMPLEX_SEQUENCE; } // 0x632C60
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
     void AddTask(CTask* task);
+    void AddTask(int32 id, CTask* task);
     CTask* CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount);
     void Flush();
     bool Contains(eTaskType taskType);
@@ -40,7 +41,6 @@ private:
     CTaskComplexSequence* Constructor();
 
     CTask* Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_COMPLEX_SEQUENCE; }
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

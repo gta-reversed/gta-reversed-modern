@@ -23,6 +23,7 @@ void CAEAudioChannel::InjectHooks() {
     RH_ScopedInstall(GetCurrentPlaybackPosition, 0x4D79A0);
 }
 
+// 0x4D7890
 CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample) {
     m_wBitsPerSample      = bitsPerSample;
     m_pDirectSound        = directSound;
@@ -45,6 +46,7 @@ CAEAudioChannel::CAEAudioChannel(IDirectSound* directSound, uint16 channelId, ui
     field_45              = 0;
 }
 
+// 0x4D7910
 CAEAudioChannel::~CAEAudioChannel() {
     if (m_pDirectSoundBuffer) {
         --g_numSoundChannelsUsed;
@@ -58,6 +60,7 @@ CAEAudioChannel::~CAEAudioChannel() {
     }
 }
 
+// 0x4D7D00
 void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
     if (factor == 0.0F) {
         if (m_pDirectSoundBuffer &&
@@ -72,7 +75,7 @@ void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
         return;
     }
 
-    const auto newFreq = static_cast<uint32>(m_nOriginalFrequency * factor);
+    const auto newFreq = static_cast<uint32>(float(m_nOriginalFrequency) * factor);
     SetFrequency(newFreq);
 
     if (m_bNoScalingFactor) {
@@ -103,7 +106,9 @@ void CAEAudioChannel::SetPosition(CVector* vecPos) const {
     if (!m_pDirectSound3DBuffer)
         return;
 
+#ifdef USE_DSOUND
     m_pDirectSound3DBuffer->SetPosition(vecPos->x, vecPos->y, vecPos->z, DS3D_DEFERRED);
+#endif
 }
 
 // 0x4D7C60
@@ -128,11 +133,11 @@ void CAEAudioChannel::SetVolume(float volume) {
 }
 
 // 0x4D79A0
-int32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
+uint32 CAEAudioChannel::GetCurrentPlaybackPosition() const {
     if (!m_pDirectSoundBuffer)
         return 0;
 
-    uint32 outPos;
+    uint32 outPos = 0;
     m_pDirectSoundBuffer->GetCurrentPosition(reinterpret_cast<LPDWORD>(&outPos), nullptr);
     return outPos;
 }
@@ -153,8 +158,12 @@ void CAEAudioChannel::SetFrequency(uint32 freq) {
         return;
 
     m_nFrequency = freq;
-    if (m_pDirectSoundBuffer)
-        m_pDirectSoundBuffer->SetFrequency(freq);
+
+    #ifdef USE_DSOUND
+    if (m_pDirectSoundBuffer) {
+        VERIFY(SUCCEEDED(m_pDirectSoundBuffer->SetFrequency(freq)));
+    }
+    #endif
 }
 
 // 0x4D7A70
@@ -165,15 +174,21 @@ void CAEAudioChannel::SetOriginalFrequency(uint32 freq) {
 
 // 0x4D7BD0
 void CAEAudioChannel::UpdateStatus() {
+#ifdef USE_DSOUND
     m_pDirectSoundBuffer->GetStatus(reinterpret_cast<LPDWORD>(&m_nBufferStatus));
-    if (m_nBufferStatus & DSBSTATUS_BUFFERLOST)
+    if (m_nBufferStatus & DSBSTATUS_BUFFERLOST) {
         Lost();
+    }
+#endif
 }
 
 // 0x4D7A10
 bool CAEAudioChannel::Lost() const {
-    while (m_pDirectSoundBuffer->Restore() == DSERR_BUFFERLOST) // BUG: Infinite loop if we don't restore
-        Sleep(10);
+#ifdef USE_DSOUND
+    while (m_pDirectSoundBuffer->Restore() == DSERR_BUFFERLOST) { // BUG: Infinite loop if we don't restore
+        OS_ThreadSleep(10);
+    }
+#endif
 
     return true;
 }

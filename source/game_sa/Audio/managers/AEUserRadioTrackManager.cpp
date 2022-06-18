@@ -154,7 +154,7 @@ bool CAEUserRadioTrackManager::ReadUserTracks() {
     if (file == nullptr)
         return false;
 
-    size_t size = static_cast<size_t>(CFileMgr::GetFileLength(file));
+    auto size = CFileMgr::GetTotalSize(file);
     if (size == 0) {
         CFileMgr::CloseFile(file);
         return false;
@@ -162,8 +162,9 @@ bool CAEUserRadioTrackManager::ReadUserTracks() {
 
     m_nUserTracksCount = size / sizeof(tUserTracksInfo);
 
-    if (m_pUserTracksInfo)
+    if (m_pUserTracksInfo) {
         CMemoryMgr::Free(m_pUserTracksInfo);
+    }
     m_pUserTracksInfo = (tUserTracksInfo*)CMemoryMgr::Malloc(size);
 
     CFileMgr::Read(file, m_pUserTracksInfo, size);
@@ -392,8 +393,9 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     IShellLinkW*  shellLink = nullptr;
     IPersistFile* persistFile = nullptr;
 
-    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink)))
-        throw std::runtime_error{"CoCreateInstance failed"};
+    if (FAILED(CoCreateInstance(CLSID_ShellLink, nullptr, CLSCTX_INPROC_SERVER, IID_IShellLinkW, (void**)&shellLink))) {
+        assert(true && "CoCreateInstance failed");
+    }
 
     if (FAILED(shellLink->QueryInterface(IID_IPersistFile, (void**)&persistFile))) {
         shellLink->Release();
@@ -405,7 +407,7 @@ std::wstring CAEUserRadioTrackManager::ResolveShortcut(const std::wstring& path)
     if (FAILED(persistFile->Load(path.c_str(), STGM_READ)) || FAILED(shellLink->GetPath(target, MAX_PATH, &findData, 0))) {
         persistFile->Release();
         shellLink->Release();
-        throw std::runtime_error{"Load or GetPath failed"};
+        assert(true && "Load or GetPath failed");
     }
 
     persistFile->Release();

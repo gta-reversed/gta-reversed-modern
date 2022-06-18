@@ -7,6 +7,7 @@
 #pragma once
 
 #include "eWeaponType.h"
+#include <array>
 
 class CEntity;
 class CPickup;
@@ -22,16 +23,16 @@ constexpr uint16 AmmoForWeapon_OnStreet[NUM_WEAPONS]{ 0u, 1u, 1u, 1u, 1u, 1u, 1u
 
 class CPickups {
 public:
-    static uint8&         DisplayHelpMessage;
-    static int32&         PlayerOnWeaponPickup;
-    static int32&         StaticCamStartTime;
-    static CVector*       StaticCamCoors;
-    static CVehicle*&     pPlayerVehicle;
-    static bool&          bPickUpcamActivated;
-    static uint16&        CollectedPickUpIndex;
-    static int32          (&aPickUpsCollected)[MAX_COLLECTED_PICKUPS];
-    static uint16&        NumMessages;
-    static tPickupMessage (&aMessages)[MAX_PICKUP_MESSAGES];
+    static inline uint8& DisplayHelpMessage = *(uint8*)0x8A5F48;
+    static inline int32& PlayerOnWeaponPickup = *(int32*)0x97D640;
+    static inline int32& StaticCamStartTime = *(int32*)0x978618;
+    static inline CVector* StaticCamCoors = (CVector*)0x97D660;
+    static inline CVehicle*& pPlayerVehicle = *(CVehicle**)0x97861C;
+    static inline bool& bPickUpcamActivated = *(bool*)0x978620;
+    static inline uint16& CollectedPickUpIndex = *(uint16*)0x978624;
+    static inline std::array<int32, MAX_COLLECTED_PICKUPS>& aPickUpsCollected = *(std::array<int32, MAX_COLLECTED_PICKUPS>*)0x978628;
+    static inline uint16& NumMessages = *(uint16*)0x978678;
+    static inline std::array<tPickupMessage, MAX_PICKUP_MESSAGES>& aMessages = *(std::array<tPickupMessage, MAX_PICKUP_MESSAGES>*)0x978680;
     static inline std::array<CPickup, MAX_NUM_PICKUPS>& aPickUps = *(std::array<CPickup, MAX_NUM_PICKUPS>*)0x9788C0;
 
 public:
@@ -41,7 +42,7 @@ public:
     static void ReInit();
 
     static void AddToCollectedPickupsArray(int32 handle);
-    static void CreatePickupCoorsCloseToCoors(float in_x, float in_y, float in_z, float* out_x, float* out_y, float* out_z);
+    static void CreatePickupCoorsCloseToCoors(float inX, float inY, float inZ, float* outX, float* outY, float* outZ);
     static void CreateSomeMoney(CVector coors, int32 amount);
     static void DetonateMinesHitByGunShot(CVector* shotOrigin, CVector* shotTarget);
 
@@ -51,19 +52,13 @@ public:
     static void DoPickUpEffects(CEntity* entity);
 
     static CPickup* FindPickUpForThisObject(CObject* object);
-    // returns pickup handle
     static int32 GenerateNewOne(CVector coors, uint32 modelId, uint8 pickupType, uint32 ammo, uint32 moneyPerDay, bool isEmpty, char* message);
-    // returns pickup handle
     static int32 GenerateNewOne_WeaponType(CVector coors, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool isEmpty, char* message);
-    // returns -1 if this index is not actual
     static int32 GetActualPickupIndex(int32 pickupIndex);
     static int32 GetNewUniquePickupIndex(int32 pickupIndex);
-    // returns pickup handle
     static int32 GetUniquePickupIndex(int32 pickupIndex);
-    // returns TRUE if player got goodies
     static bool GivePlayerGoodiesWithPickUpMI(uint16 modelId, int32 playerId);
     static bool IsPickUpPickedUp(int32 pickupHandle);
-    // returns model id
     static int32 ModelForWeapon(eWeaponType weaponType);
     static void PassTime(uint32 time);
     static void PickedUpHorseShoe();
@@ -72,15 +67,12 @@ public:
     static bool PlayerCanPickUpThisWeaponTypeAtThisMoment(eWeaponType weaponType);
     static void RemoveMissionPickUps();
     static void RemovePickUp(int32 pickupHandle);
-    static void RemovePickUpsInArea(float cornerA_x, float cornerA_y, float cornerA_z, float cornerB_x, float cornerB_y, float cornerB_z);
+    static void RemovePickUpsInArea(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     static void RemovePickupObjects();
-    // remove pickups with types PICKUP_ONCE_TIMEOUT and PICKUP_MONEY in area
     static void RemoveUnnecessaryPickups(const CVector& posn, float radius);
     static void RenderPickUpText();
-    // check for pickups in area
-    static bool TestForPickupsInBubble(CVector posn, float radius);
-    // search for pickup in area (radius = 5.5 units) with this weapon model and pickup type and add ammo to this pickup; returns TRUE if merged
-    static bool TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool _IGNORED_ arg4);
+    static bool TestForPickupsInBubble(const CVector posn, float radius);
+    static bool TryToMerge_WeaponType(CVector posn, eWeaponType weaponType, uint8 pickupType, uint32 ammo, bool arg4);
     static void Update();
     static void UpdateMoneyPerDay(int32 pickupHandle, uint16 money);
     // returns weapon type (see eWeaponType)
@@ -90,7 +82,8 @@ public:
 
     // Helpers NOTSA
     static void CreatePickupCoorsCloseToCoors(const CVector& pos, CVector& createdAtPos);
-    static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& out_x, float& out_y, float& out_z);
+    static void CreatePickupCoorsCloseToCoors(const CVector& pos, float& outX, float& outY, float& outZ);
+    static auto GetAllActivePickups() { return aPickUps | std::views::filter([](auto&& p) { return p.m_nPickupType != PICKUP_NONE; }); }
 };
 
 extern int32 &CollectPickupBuffer;
