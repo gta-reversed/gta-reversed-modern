@@ -116,10 +116,10 @@ public:
 private:
     static uint32 GetGangColor(int32 gang) {
         assert(gang >= GANG_BALLAS && gang <= GANG_VAGOS);
-        auto col1 = ((uint8_t*)(0x8D1344))[gang];
-        auto col2 = ((uint8_t*)(0x8D1350))[gang];
-        auto col3 = ((uint8_t*)(0x8D135C))[gang];
+        auto r = ((uint8*)(0x8D1344))[gang];
+        auto g = ((uint8*)(0x8D1350))[gang];
+        auto b = ((uint8*)(0x8D135C))[gang];
 
-        return ((col3 | (((col1 << 8) | col2) << 8)) << 8) | 0xFF;
+        return ((b | (((r << 8) | g) << 8)) << 8) | 0xFF;
     }
 };

@@ -39,7 +39,6 @@ public:
     static void SetGangWeapons(int16 gangId, int32 weapId1, int32 weapId2, int32 weapId3);
     static int32 ChooseGangPedModel(int16 gangId);
 
-    // unused
     static bool GetWillAttackPlayerWithCops(ePedType pedType);
     static void SetWillAttackPlayerWithCops(ePedType pedType, bool bAttackPlayerWithCops);
     static void SetGangPedModelOverride(int16 gangId, int8 PedModelOverride);
