@@ -43,7 +43,6 @@ CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderS
     m_fTargetRadius = fTargetRadius;
     m_LastNode.m_wAreaId = (uint16)-1;
     m_NextNode.m_wAreaId = (uint16)-1;
-    m_nFlags = 0xF0;
     m_bWanderSensibly = bWanderSensibly;
     m_nLastUpdateDirFrameCount = 0;
 }
