@@ -11,7 +11,7 @@ class CGangInfo {
 
 public:
     int8  m_nPedModelOverride;
-    int32 m_nGangWeapons[3];
+    std::array<int32, 3> m_nGangWeapons;
 };
 
 VALIDATE_SIZE(CGangInfo, 0x10);
