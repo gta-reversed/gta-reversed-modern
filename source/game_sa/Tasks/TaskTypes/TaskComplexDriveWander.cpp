@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "TaskComplexDriveWander.h"
+#include "CarCtrl.h"
 
 // 0x63CB10
 CTaskComplexCarDriveWander::CTaskComplexCarDriveWander(CVehicle* vehicle, eCarDrivingStyle carDrivingStyle, float fSpeed)

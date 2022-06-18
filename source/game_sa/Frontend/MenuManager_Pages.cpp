@@ -147,7 +147,7 @@ void CMenuManager::PrintRadioStationList() {
     }
 
     // highlight current radio station
-    if (m_nRadioStation > 0 && m_nRadioStation < std::size(m_apRadioSprites)) {
+    if (m_nRadioStation > 0 && m_nRadioStation < (int8)std::size(m_apRadioSprites)) {
         m_apRadioSprites[m_nRadioStation].Draw(
             StretchX((float)(47 * m_nRadioStation - 15)),
             StretchY(290.0f),
