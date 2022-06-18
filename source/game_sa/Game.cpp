@@ -6,6 +6,7 @@
 #include "TheCarGenerators.h"
 #include "Radar.h"
 #include "Credits.h"
+#include "Birds.h"
 #include "MovingThings.h"
 #include "PlantMgr.h"
 #include "Occlusion.h"

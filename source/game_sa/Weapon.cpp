@@ -13,6 +13,7 @@
 #include "BulletInfo.h"
 #include "InterestingEvents.h"
 #include "Shadows.h"
+#include "Birds.h"
 
 float& CWeapon::ms_fExtinguisherAimAngle = *(float*)0x8D610C;
 bool& CWeapon::bPhotographHasBeenTaken = *(bool*)0xC8A7C0;
