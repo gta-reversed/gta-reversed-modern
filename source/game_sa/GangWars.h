@@ -20,13 +20,13 @@ enum eGangAttackState {
 };
 
 enum eGangWarState {
-    NOT_IN_WAR     = 0,
-    PREFIRST_WAVE  = 1,
-    FIRST_WAVE     = 2,
-    PRESECOND_WAVE = 3,
-    SECOND_WAVE    = 4,
-    PRETHIRD_WAVE  = 5,
-    THIRD_WAVE     = 6
+    NOT_IN_WAR      = 0,
+    PRE_FIRST_WAVE  = 1,
+    FIRST_WAVE      = 2,
+    PRE_SECOND_WAVE = 3,
+    SECOND_WAVE     = 4,
+    PRE_THIRD_WAVE  = 5,
+    THIRD_WAVE      = 6
 };
 
 class CGangWars {
@@ -35,7 +35,7 @@ public:
     static inline CVehicle*& pDriveByCar = *reinterpret_cast<CVehicle**>(0x96AB28);
     static inline std::array<int32, 3>& GangRatingStrength = *reinterpret_cast<std::array<int32, 3>*>(0x96AB2C);
     static inline std::array<int32, 3>& GangRatings = *reinterpret_cast<std::array<int32, 3>*>(0x96AB38);
-    static inline int32& FightTimer = *reinterpret_cast<int32*>(0x96AB44);
+    static inline uint32& FightTimer = *reinterpret_cast<uint32*>(0x96AB44);
     static inline float& TimeTillNextAttack = *reinterpret_cast<float*>(0x96AB48);
     static inline int32& Gang2 = *reinterpret_cast<int32*>(0x96AB50);
     static inline uint32& LastTimeInArea = *reinterpret_cast<uint32*>(0x96AB54);
@@ -67,8 +67,8 @@ public:
 
     static void InitAtStartOfGame();
 
-    static void Load();
-    static void Save();
+    static bool Load();
+    static bool Save();
 
     static void AddKillToProvocation(ePedType pedType);
     static bool AttackWaveOvercome();
@@ -87,7 +87,7 @@ public:
     static bool GangWarFightingGoingOn();
     static bool GangWarGoingOn();
 
-    static void MakeEnemyGainInfluenceInZone(int32 gangId, int32 gangDensityIncreaser);
+    static void MakeEnemyGainInfluenceInZone(int32 gangId, int32 density);
     static bool MakePlayerGainInfluenceInZone(float removeMult);
 
     static bool PedStreamedInForThisGang(int32 gangId);
@@ -103,7 +103,7 @@ public:
     static void StartDefensiveGangWar();
     static void StartOffensiveGangWar();
 
-    static void StrengthenPlayerInfluenceInZone(int32 groveDensityIncreaser);
+    static void StrengthenPlayerInfluenceInZone(int32 density);
     static void SwitchGangWarsActive();
 
     static void TellGangMembersTo(bool isGangWarEnding);
@@ -112,14 +112,6 @@ public:
     static void Update();
     static void UpdateTerritoryUnderControlPercentage();
 
-    // NOTSA
 private:
-    static uint32 GetGangColor(int32 gang) {
-        assert(gang >= GANG_BALLAS && gang <= GANG_VAGOS);
-        auto r = ((uint8*)(0x8D1344))[gang];
-        auto g = ((uint8*)(0x8D1350))[gang];
-        auto b = ((uint8*)(0x8D135C))[gang];
-
-        return ((b | (((r << 8) | g) << 8)) << 8) | 0xFF;
-    }
+    static uint32 GetGangColor(int32 gang);
 };

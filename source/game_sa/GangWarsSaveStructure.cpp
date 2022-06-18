@@ -4,7 +4,6 @@
 
 // 0x5D2620
 void CGangWarsSaveStructure::Construct() {
-    assert(0);
     bGangWarsActive = CGangWars::bGangWarsActive;
     State = CGangWars::State;
     TimeStarted = CGangWars::TimeStarted;
@@ -17,7 +16,7 @@ void CGangWarsSaveStructure::Construct() {
                 break;
             }
         }
-        
+
         for (auto i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
             if (CGangWars::pZoneToFightOver == &CTheZones::NavigationZoneArray[i]) {
                 GangWarNavigationZoneIndex = i;
@@ -42,7 +41,6 @@ void CGangWarsSaveStructure::Construct() {
 
 // 0x5D2740
 void CGangWarsSaveStructure::Extract() {
-    assert(0);
     CGangWars::bGangWarsActive = bGangWarsActive;
     CGangWars::State = State;
     CGangWars::TimeStarted = TimeStarted;
