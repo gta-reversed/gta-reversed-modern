@@ -59,8 +59,8 @@ bool gRenderStencil() {
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE,        RWRSTATE(TRUE));
     RwRenderStateSet(rwRENDERSTATESRCBLEND,                 RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATEDESTBLEND,                RWRSTATE(2u));
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(-1u)); // todo: check conversion to void* C4146
-    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(-1u));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONMASK,      RWRSTATE(uint32(-1)));
+    RwRenderStateSet(rwRENDERSTATESTENCILFUNCTIONWRITEMASK, RWRSTATE(uint32(-1)));
     RwRenderStateSet(rwRENDERSTATESTENCILFUNCTION,          RWRSTATE(8u));
     RwRenderStateSet(rwRENDERSTATESTENCILFAIL,              RWRSTATE(1u));
     RwRenderStateSet(rwRENDERSTATESTENCILZFAIL,             RWRSTATE(1u));

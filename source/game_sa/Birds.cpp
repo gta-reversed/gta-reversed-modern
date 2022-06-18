@@ -64,12 +64,12 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int3
 
     for (auto i = 0; i < iBirdCount; ++i) {
         auto iFreeBirdIndex = 0;
-        while (iFreeBirdIndex < std::size(aBirds)) {
+        while (iFreeBirdIndex < (int32)std::size(aBirds)) {
             if (!aBirds[iFreeBirdIndex].m_bCreated)
                 break;
             ++iFreeBirdIndex;
         }
-        if (iFreeBirdIndex >= std::size(aBirds))
+        if (iFreeBirdIndex >= (int32)std::size(aBirds))
             return;
 
         auto& bird = aBirds[iFreeBirdIndex];
@@ -81,7 +81,7 @@ void CBirds::CreateNumberOfBirds(CVector vecStartPos, CVector vecTargetPos, int3
         if (bCheckObstacles && !CWorld::GetIsLineOfSightClear(bird.m_vecPosn, vecCheckPos, true, false, false, false, false, false, false))
             continue;
 
-        assert(i < std::size(faCreationCoorsX));
+        assert(i < (int32)std::size(faCreationCoorsX));
 
         ++uiNumberOfBirds;
         bird.m_bCreated = true;
@@ -295,7 +295,7 @@ void CBirds::Render() {
             matBirdTransform.GetUp().Set(0.0F, 0.0F, bird.m_fSize);
 
             if (bird.m_eBirdMode == eBirdMode::BIRD_DRAW_NOUPDATE || bird.m_eBirdMode == eBirdMode::BIRD_DRAW_UPDATE) {
-                for (int32 index = 0u; index < std::size(auRenderIndices); ++index) {
+                for (auto index = 0u; index < std::size(auRenderIndices); ++index) {
                     auto uiVertInd = static_cast<RxVertexIndex>(uiTempBufferVerticesStored + auRenderIndices[index]);
                     aTempBufferIndices[uiTempBufferIndicesStored + index] = uiVertInd;
                     aTempBufferIndices[uiTempBufferIndicesStored + index + std::size(auRenderIndices)] = uiVertInd + 8;
