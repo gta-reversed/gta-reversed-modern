@@ -112,7 +112,7 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
 bool CGangWars::AttackWaveOvercome() {
     auto pedsNearPlayer = 0u, pedsLiving = 0u;
 
-    for (auto ped : GetPedPool()->GetAllValid()) {
+    for (auto&& ped : GetPedPool()->GetAllValid()) {
         if (!ped.bPartOfAttackWave)
             continue;
 
@@ -184,7 +184,7 @@ void CGangWars::ClearSpecificZonesToTriggerGangWar() {
 
 // 0x4444B0
 void CGangWars::ClearTheStreets() {
-    for (auto ped : GetPedPool()->GetAllValid()) {
+    for (auto&& ped : GetPedPool()->GetAllValid()) {
         if (ped.IsPlayer() || !ped.IsCivilian())
             continue;
 
@@ -506,7 +506,7 @@ bool CGangWars::PickZoneToAttack() {
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
-    for (auto vehicle : GetVehiclePool()->GetAllValid()) {
+    for (auto&& vehicle : GetVehiclePool()->GetAllValid()) {
         if (vehicle.vehicleFlags.bPartOfAttackWave) {
             vehicle.vehicleFlags.bPartOfAttackWave = false;
             vehicle.SetVehicleCreatedBy(1);
@@ -682,7 +682,7 @@ void CGangWars::SwitchGangWarsActive() {
 void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
     // return plugin::Call<0x444530, bool>(isGangWarEnding);
 
-    for (auto ped : GetPedPool()->GetAllValid()) {
+    for (auto&& ped : GetPedPool()->GetAllValid()) {
         if (ped.IsPlayer())
             continue;
 
@@ -905,7 +905,7 @@ void CGangWars::Update() {
                     TimeTillNextAttack = CalculateTimeTillNextAttack();
                     ReleasePedsInAttackWave(true, false);
                 } else {
-                    FightTimer -= (float)CTimer::GetTimeStepInMS();
+                    FightTimer -= CTimer::GetTimeStepInMS();
 
                     if (FightTimer < 0) {
                         auto slow = TheText.Get("GW_SLOW");
