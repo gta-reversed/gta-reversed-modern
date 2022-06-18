@@ -45,23 +45,46 @@ bool CGangs::Save() {
 // 0x5DE550
 void CGangs::SetGangWeapons(int16 gangId, int32 weapId1, int32 weapId2, int32 weapId3) {
     assert(weapId1 >= 0 && weapId2 >= 0 && weapId3 >= 0);
-    Gang[gangId].m_nGangWeapons = {weapId1, weapId2, weapId3};
+    Gang[gangId].m_nGangWeapons = { weapId1, weapId2, weapId3 };
 }
 
 // 0x5DE5A0
 int32 CGangs::ChooseGangPedModel(int16 gangId) {
-    return plugin::CallAndReturn<int32, 0x5DE5A0, int16>(gangId);
+    // return plugin::CallAndReturn<int32, 0x5DE5A0, int16>(gangId);
+
+    if (Gang[gangId].m_nPedModelOverride != -1) {
+        return CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[18].pedGroupIds[2 * gangId + CPopulation::CurrentWorldZone + gangId]];
+    }
+
+    CCarCtrl::InitSequence(CPopulation::m_nNumPedsInGroup[CPopulation::m_TranslationArray[gangId + 18].pedGroupIds[0]]);
+    if (CPopulation::m_nNumPedsInGroup[CPopulation::m_TranslationArray[gangId + 18].pedGroupIds[0]] <= 0) {
+        return -1;
+    }
+
+    int v1 = 0;
+    int v2 = gangId;
+    int SequenceElement;
+    while (1) {
+        SequenceElement = CCarCtrl::FindSequenceElement(v1);
+        auto id = CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[v2 + 18].pedGroupIds[CPopulation::CurrentWorldZone] + SequenceElement];
+        if (CStreaming::GetInfo(id).IsLoaded())
+            break;
+
+        if (++v1 >= CPopulation::m_nNumPedsInGroup[CPopulation::m_TranslationArray[gangId + 18].pedGroupIds[0]])
+            return -1;
+    }
+    return CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[18].pedGroupIds[CPopulation::CurrentWorldZone + v2 * 3] + SequenceElement];
 }
 
 // unused (0x5DE500)
 bool CGangs::GetWillAttackPlayerWithCops(ePedType pedType) {
-    assert(pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10);
+    assert(CPed::IsGangster(pedType));
     return GangAttackWithCops[pedType - PED_TYPE_GANG1];
 }
 
 // unused (0x5DE4E0)
 void CGangs::SetWillAttackPlayerWithCops(ePedType pedType, bool attackPlayerWithCops) {
-    assert(pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10);
+    assert(CPed::IsGangster(pedType));
     GangAttackWithCops[pedType - PED_TYPE_GANG1] = attackPlayerWithCops;
 }
 

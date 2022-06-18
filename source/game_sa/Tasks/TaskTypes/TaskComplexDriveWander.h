@@ -2,6 +2,8 @@
 
 #include "TaskComplexCarDrive.h"
 
+// todo: rename -> TaskComplexCarDriveWander.h
+
 class CTaskComplexCarDriveWander : public CTaskComplexCarDrive {
 public:
     static constexpr auto Type = TASK_COMPLEX_CAR_DRIVE_WANDER;
