@@ -450,19 +450,15 @@ bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32& outPedId) {
     if (groupId <= 0)
         return false;
 
-    uint32 x = CGarages::aCarsInSafeHouse[0][0].m_vPosn.x; // ?
-    for (auto i = 0u; i < numPeds; i++) {
+    uint32& x = *reinterpret_cast<uint32_t*>(&CGarages::aCarsInSafeHouse[0][0].m_vPosn.x); // ?
+    for (auto i = 0; i < numPeds; i++) {
         x = (x + 1) % numPeds;
         outPedId = CPopulation::GetPedGroupModelId(groupId, x);
 
-        if (CStreaming::IsModelLoaded(outPedId)) {
-            CGarages::aCarsInSafeHouse[0][0].m_vPosn.x = x;
-
+        if (CStreaming::IsModelLoaded(outPedId))
             return true;
-        }
     }
 
-    CGarages::aCarsInSafeHouse[0][0].m_vPosn.x = x;
     return false;
 }
 
