@@ -159,7 +159,7 @@ void CTaskSimplePlayerOnFoot::ProcessPlayerWeapon(CPlayerPed* player)
     ) {
         player->PlayerHasJustAttackedSomeone();
     }
-    
+
     if (player->m_pFire || !weaponInfo->flags.b1stPerson) {
         if (!pad->GetTarget() && weaponType == WEAPON_RLAUNCHER_HS) {
             playerData->m_nFireHSMissilePressedTime = 0;
@@ -616,7 +616,7 @@ PED_WEAPON_AIMING_CODE:
                 player->ClearWeaponTarget();
                 playerData->m_bFreeAiming = 1;
             }
-            
+
             if (player->m_pTargetedObject) {
                 if (pad->ShiftTargetLeftJustDown()) {
                     player->FindNextWeaponLockOnTarget(player->m_pTargetedObject, true);
@@ -679,7 +679,7 @@ PED_WEAPON_AIMING_CODE:
 
         firingPoint.x = firingPoint.x * 5.0f;
         firingPoint.y = firingPoint.y * 5.0f;
-        firingPoint.z = (sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
+        firingPoint.z = (std::sin(player->m_pPlayerData->m_fLookPitch) + firingPoint.z) * 5.0f;
 
         firingPoint += player->GetPosition();
         TheCamera.UpdateAimingCoors(&firingPoint);
@@ -753,7 +753,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
         || player->GetIntelligence()->GetTaskHold(false)
         || pad->DisablePlayerControls
         || player->m_nMoveState > PEDMOVE_STILL
-        || (animGroupID = player->m_nAnimGroup, animGroupID != ANIM_GROUP_PLAYER) && animGroupID != ANIM_GROUP_FAT && animGroupID != ANIM_GROUP_MUSCULAR
+        || (animGroupID = player->m_nAnimGroup, animGroupID != ANIM_GROUP_PLAYER) && animGroupID != ANIM_GROUP_FAT && animGroupID != ANIM_GROUP_MUSCULAR // todo: bad
     ) {
         pad->SetTouched();
     }
@@ -765,7 +765,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             CStreaming::SetModelIsDeletable(IFPToModelId(m_nAnimationBlockIndex));
             CAnimBlendAssociation* animAssoc = nullptr;
             for (animAssoc = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump); animAssoc; animAssoc = RpAnimBlendGetNextAssociation(animAssoc)) {
-                if (animAssoc->m_nFlags & ANIM_FLAG_200) {
+                if (animAssoc->m_nFlags & ANIMATION_200) {
                     animAssoc->m_fBlendDelta = -8.0f;
                 }
             }
@@ -797,7 +797,7 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
             };
             auto                   animation = animations[randomNumber];
             CAnimBlendAssociation* animNewAssoc = CAnimManager::BlendAnimation(player->m_pRwClump, animation.assoc, animation.animId, 8.0f);
-            animNewAssoc->m_nFlags |= ANIM_FLAG_200;
+            animNewAssoc->m_nFlags |= ANIMATION_200;
             gLastTouchTimeDelta = touchTimeDelta;
             gLastRandomNumberForIdleAnimationID = randomNumber;
             if (CStats::GetStatValue(STAT_MANAGEMENT_ISSUES_MISSION_ACCOMPLISHED) != 0.0f && CTimer::GetTimeInMS() > 1200000) {
@@ -809,9 +809,9 @@ void CTaskSimplePlayerOnFoot::PlayIdleAnimations(CPlayerPed* player) {
     CAnimBlendAssociation* animAssoc1 = RpAnimBlendClumpGetFirstAssociation(player->m_pRwClump);
     if (animAssoc1) {
         while (true) {
-            uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations;
-            animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 0x1f) >> 2;
-            animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 0x1f);
+            uint32 animHierarchyIndex = (uint32)animAssoc1->m_pHierarchy - (uint32)CAnimManager::ms_aAnimations.data();
+            animHierarchyIndex = animHierarchyIndex / 6 + (animHierarchyIndex >> 31) >> 2;
+            animHierarchyIndex = animHierarchyIndex + (animHierarchyIndex >> 31);
 
             int32 animBlockFirstAnimIndex = animBlock->startAnimation;
             if (animHierarchyIndex >= animBlockFirstAnimIndex && animHierarchyIndex < animBlockFirstAnimIndex + animBlock->animationCount) {
@@ -865,8 +865,8 @@ void CTaskSimplePlayerOnFoot::PlayerControlZeldaWeapon(CPlayerPed* player) {
         if (moveBlendRatio > 0.0f) {
             float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-            float negativeSinRadian = -sin(limitedRadianAngle);
-            float cosRadian = cos(limitedRadianAngle);
+            float negativeSinRadian = -std::sin(limitedRadianAngle);
+            float cosRadian = std::cos(limitedRadianAngle);
             if (targetedObject) {
                 if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, negativeSinRadian, cosRadian, 0.0f, 0.0f)) {
                     moveBlendRatio = 0.0f;
@@ -940,7 +940,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_RUN, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_RUN;
             } else {
@@ -948,7 +948,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
                     return;
                 }
                 auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, player->m_nAnimGroup, ANIM_ID_WALK, gDuckAnimBlendData);
-                pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+                pNewAnimation->m_nFlags |= ANIMATION_STARTED;
                 player->m_pPlayerData->m_fMoveBlendRatio = 1.5f;
                 pedMoveState = PEDMOVE_WALK;
             }
@@ -956,7 +956,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             player->m_nSwimmingMoveState = pedMoveState;
         } else if (pedMoveBlendRatio > 0.5f) {
             auto pNewAnimation = CAnimManager::BlendAnimation(player->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_GUNMOVE_FWD, gDuckAnimBlendData);
-            pNewAnimation->m_nFlags |= ANIM_FLAG_STARTED;
+            pNewAnimation->m_nFlags |= ANIMATION_STARTED;
             player->m_pPlayerData->m_fMoveBlendRatio = 1.0f;
             moveSpeed.x = 1.0f;
             moveSpeed.y = 0.0f;
@@ -968,7 +968,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
             float radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
             player->m_fAimingRotation = limitedRadianAngle;
-            CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+            CVector moveDirection(0.0f, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle));
             if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, moveDirection.x, moveDirection.y, 0.0f, 0.0f)) {
                 pedMoveBlendRatio = 0.0f;
             }
@@ -982,7 +982,7 @@ void CTaskSimplePlayerOnFoot::PlayerControlDucked(CPlayerPed* player) {
         if (CGameLogic::IsPlayerUse2PlayerControls(player)) {
             float   radianAngle = CGeneral::GetRadianAngleBetweenPoints(0.0f, 0.0f, -moveSpeed.x, moveSpeed.y) - TheCamera.m_fOrientation;
             float   limitedRadianAngle = CGeneral::LimitRadianAngle(radianAngle);
-            CVector moveDirection(0.0f, -sin(limitedRadianAngle), cos(limitedRadianAngle));
+            CVector moveDirection(0.0f, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle));
             if (!CGameLogic::IsPlayerAllowedToGoInThisDirection(player, moveDirection.x, moveDirection.y, 0.0f, 0.0f)) {
                 pedMoveBlendRatio = 0.0f;
             }
@@ -1030,7 +1030,7 @@ int32 CTaskSimplePlayerOnFoot::PlayerControlZelda(CPlayerPed* player, bool bAvoi
 
     player->m_fAimingRotation = limitedRadianAngle;
 
-    if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, -sin(limitedRadianAngle), cos(limitedRadianAngle), 0.0f, 0.0f)) {
+    if (CGameLogic::IsPlayerAllowedToGoInThisDirection(player, -std::sin(limitedRadianAngle), std::cos(limitedRadianAngle), 0.0f, 0.0f)) {
         float fMaximumMoveBlendRatio = CTimer::GetTimeStep() * 0.07f;
         if (pedMoveBlendRatio - playerData->m_fMoveBlendRatio <= fMaximumMoveBlendRatio) {
             if (-fMaximumMoveBlendRatio <= pedMoveBlendRatio - playerData->m_fMoveBlendRatio)

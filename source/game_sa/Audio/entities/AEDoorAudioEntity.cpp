@@ -93,7 +93,7 @@ void CAEDoorAudioEntity::PlayDoorSound(int16 sfxId, eAudioEvents event, CVector&
             position = posn;
         }
 
-        const float eventVolume = CAEAudioEntity::m_pAudioEventVolumes[event];
+        const float eventVolume = GetDefaultVolume(event);
         const float volume = eventVolume + volumeDelta;
         CAESound    sound;
         sound.Initialise(31, sfxId, this, position, volume, 2.0f, speed, 1.0f, 0, SOUND_REQUEST_UPDATES, 0.0f, 0);

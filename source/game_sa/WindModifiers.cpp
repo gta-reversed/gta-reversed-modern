@@ -63,7 +63,7 @@ bool CWindModifiers::FindWindModifier(CVector vecPos, float* outX, float* outY) 
     if (!appliedAny)
         return false;
 
-    const float rnd = 1.0f + (float)(rand() % 32 - 16) / 2000.f;
+    const float rnd = 1.0f + (float)(CGeneral::GetRandomNumber() % 32 - 16) / 2000.f;
     *outX += posX * rnd;
     *outY += posY * rnd;
 

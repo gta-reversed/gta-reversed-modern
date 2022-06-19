@@ -170,10 +170,11 @@ int32 CStats::FindCriminalRatingNumber() {
         + GetStatValue(STAT_PLANES_HELICOPTERS_DESTROYED) * 30.0f
         + GetStatValue(STAT_TOTAL_FIRES_EXTINGUISHED)
         + GetStatValue(STAT_CRIMINALS_KILLED_ON_VIGILANTE_MISSION)
-        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE));
+        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE)
+    );
 
-    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED)) {
-        value -= 10 * GetStatValue(STAT_TIMES_CHEATED);
+    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED) > 0.0f) {
+        value -= 10 * (int32)GetStatValue(STAT_TIMES_CHEATED);
 
         value = std::max(value, -10000);
     } else {

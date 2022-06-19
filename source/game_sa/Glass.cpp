@@ -2,6 +2,7 @@
 
 #include "Glass.h"
 #include "FallingGlassPane.h"
+#include "Shadows.h"
 
 CVector2D (&CGlass::PanePolyPositions)[4][3] = *(CVector2D(*)[4][3])0x8D5CD8;
 int32& CGlass::ReflectionPolyVertexBaseIdx = *(int32*)0xC71B18;
@@ -20,7 +21,7 @@ uint32& CGlass::LastColCheckMS = *(uint32*)0xC72FA8;
 void CGlass::InjectHooks() {
     RH_ScopedClass(CGlass);
     RH_ScopedCategoryGlobal();
-    
+
     RH_ScopedInstall(Init, 0x71A8D0);
     RH_ScopedInstall(HasGlassBeenShatteredAtCoors, 0x71CB70);
     RH_ScopedInstall(CarWindscreenShatters, 0x71C2B0);
@@ -199,7 +200,7 @@ void CGlass::WasGlassHitByBullet(CEntity* entity, CVector hitPos) {
 
     const auto object = entity->AsObject();
     if (object->objectFlags.bGlassBroken) {
-        if (rand() % 4 == 2) {
+        if (CGeneral::GetRandomNumber() % 4 == 2) {
             WindowRespondsToCollision(entity, 0.0f, {}, hitPos, false);
         }
     } else {
@@ -326,7 +327,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
                     + Normalized(right) * paneCenterPos.x;
 
                 {
-                    constexpr auto RandomFactor = [] {return (float)((rand() % 128) - 64) * 0.0015f; };
+                    constexpr auto RandomFactor = [] {return (float)((CGeneral::GetRandomNumber() % 128) - 64) * 0.0015f; };
                     pane->m_Velocity = velocity + CVector{ RandomFactor(), RandomFactor(), 0.f };
                 }
 
@@ -335,7 +336,7 @@ void CGlass::GeneratePanesForWindow(ePaneType type, CVector point, CVector fwd, 
                 }
 
                 {
-                    constexpr auto RandomFactor = [] { return (float)((rand() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
+                    constexpr auto RandomFactor = [] { return (float)((CGeneral::GetRandomNumber() % 128) - 64) / 500.f; }; // Random number in range (-0.128, 0.128)
                     pane->m_RandomNumbers = CVector{ RandomFactor(), RandomFactor(), RandomFactor() };
                 }
 

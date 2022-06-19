@@ -20,14 +20,15 @@
 #include "TrafficLights.h"
 #include "Glass.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 void CEntity::InjectHooks()
 {
     RH_ScopedClass(CEntity);
     RH_ScopedCategory("Entity");
 
-    RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
-    RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "void", 0x533020, void(CEntity::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Add, "rect", 0x5347D0, void(CEntity::*)(const CRect&));
     RH_ScopedVirtualInstall(Remove, 0x534AE0);
     RH_ScopedVirtualInstall(SetIsStatic, 0x403E20);
     RH_ScopedVirtualInstall(SetModelIndexNoCreate, 0x533700);
@@ -107,7 +108,7 @@ CEntity::CEntity() : CPlaceable()
     m_nModelIndex = 0xFFFF;
     m_pRwObject = nullptr;
     m_nIplIndex = 0;
-    m_nRandomSeed = rand();
+    m_nRandomSeed = CGeneral::GetRandomNumber();
     m_pReferences = nullptr;
     m_pStreamingLink = nullptr;
     m_nNumLodChildren = 0;
@@ -603,7 +604,7 @@ void CEntity::PreRender_Reversed()
         else if (m_nModelIndex == MODEL_MISSILE) {
             if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
-                auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+                auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(
                     eShadowTextureType::SHADOW_TEX_PED,
                     gpShadowExplosionTex,
@@ -663,7 +664,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
             CVector vecPos = GetPosition();
-            auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+            auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
                 eShadowTextureType::SHADOW_TEX_PED,
@@ -1098,15 +1099,15 @@ bool IsEntityPointerValid(CEntity* entity)
 
     switch (entity->m_nType) {
     case ENTITY_TYPE_BUILDING:
-        return IsBuildingPointerValid(reinterpret_cast<CBuilding*>(entity));
+        return IsBuildingPointerValid(entity->AsBuilding());
     case ENTITY_TYPE_VEHICLE:
-        return IsVehiclePointerValid(reinterpret_cast<CVehicle*>(entity));
+        return IsVehiclePointerValid(entity->AsVehicle());
     case ENTITY_TYPE_PED:
         return IsPedPointerValid(entity->AsPed());
     case ENTITY_TYPE_OBJECT:
-        return IsObjectPointerValid(reinterpret_cast<CObject*>(entity));
+        return IsObjectPointerValid(entity->AsObject());
     case ENTITY_TYPE_DUMMY:
-        return IsDummyPointerValid(reinterpret_cast<CDummy*>(entity));
+        return IsDummyPointerValid(entity->AsDummy());
     case ENTITY_TYPE_NOTINPOOLS:
         return true;
     }
@@ -2177,7 +2178,7 @@ void CEntity::ProcessLightsForEntity()
                 bSkipCoronaChecks = true;
                 auto fBrightness = fIntensity;
                 if (effect->light.m_bBlinking1)
-                    fBrightness = (1.0F - (rand() % 32) * 0.012F) * fIntensity;
+                    fBrightness = (1.0F - (CGeneral::GetRandomNumber() % 32) * 0.012F) * fIntensity;
 
                 if (effect->light.m_bBlinking2 && (CTimer::GetFrameCounter() + uiRand) & 3)
                     fBrightness = 0.0F;

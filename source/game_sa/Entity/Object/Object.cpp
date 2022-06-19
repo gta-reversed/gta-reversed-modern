@@ -14,6 +14,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 uint16& CObject::nNoTempObjects = *(uint16*)(0xBB4A70);
 float& CObject::fDistToNearestTree = *(float*)0x8D0A20;
@@ -266,7 +267,7 @@ void CObject::ProcessControl_Reversed()
                 {
                     m_nFakePhysics = 10;
                     if (!bIsAnimated)
-                        this->SetIsStatic(true);
+                        SetIsStatic(true);
 
                     m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
                     m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
@@ -282,14 +283,14 @@ void CObject::ProcessControl_Reversed()
         CPhysical::ProcessControl();
 
     if (bIsAnimated)
-        this->SetIsStatic(false);
+        SetIsStatic(false);
 
     CVector vecBuoyancyTurnPoint, vecBuoyancyForce;
     if (mod_Buoyancy.ProcessBuoyancy(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce))
     {
         physicalFlags.bTouchingWater = true;
         physicalFlags.bSubmergedInWater = true;
-        this->SetIsStatic(false);
+        SetIsStatic(false);
 
         CPhysical::ApplyMoveForce(vecBuoyancyForce);
         CPhysical::ApplyTurnForce(vecBuoyancyForce, vecBuoyancyTurnPoint);
@@ -297,13 +298,14 @@ void CObject::ProcessControl_Reversed()
         m_vecMoveSpeed *= fTimeStep;
         m_vecTurnSpeed *= fTimeStep;
     }
-    else if (m_nModelIndex != ModelIndices::MI_BUOY)
+    else if (m_nModelIndex != ModelIndices::MI_BUOY) {
         physicalFlags.bTouchingWater = false; // Not clearing bSubmergedInWater, BUG?
+    }
 
     if (m_pObjectInfo->m_bCausesExplosion
         && objectFlags.bIsExploded
         && m_bIsVisible
-        && (rand() % 32) == 10)
+        && (CGeneral::GetRandomNumber() % 32) == 10)
     {
         m_bUsesCollision = false;
         m_bIsVisible = false;
@@ -352,7 +354,7 @@ void CObject::ProcessControl_Reversed()
             && fabs(fDiff) < 0.01F
             && (objectFlags.bIsDoorMoving || fabs(m_vecTurnSpeed.z) < 0.01F))
         {
-            this->SetIsStatic(true);
+            SetIsStatic(true);
             m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
             m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
             m_vecFrictionMoveSpeed.Set(0.0F, 0.0F, 0.0F);
@@ -834,7 +836,7 @@ void CObject::ResetDoorAngle() {
         return;
 
     CPlaceable::SetHeading(m_fDoorStartAngle);
-    this->SetIsStatic(true);
+    SetIsStatic(true);
     m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
     m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
     m_vecFrictionMoveSpeed.Set(0.0F, 0.0F, 0.0F);
@@ -858,7 +860,7 @@ void CObject::Init() {
     m_nColDamageEffect = COL_DAMAGE_EFFECT_NONE;
     m_nSpecialColResponseCase = COL_SPECIAL_RESPONSE_NONE;
     m_nObjectType = eObjectType::OBJECT_GAME;
-    this->SetIsStatic(true);
+    SetIsStatic(true);
 
     m_nObjectFlags &= 0x0FC040000;
     objectFlags.bCanBeAttachedToMagnet = true;
@@ -1283,7 +1285,7 @@ void CObject::Explode() {
 
         if (IsStatic())
         {
-            this->SetIsStatic(false);
+            SetIsStatic(false);
             CPhysical::AddToMovingList();
         }
     }

@@ -25,7 +25,7 @@ CTaskSimpleGangDriveBy::CTaskSimpleGangDriveBy(CEntity* target, const CVector* t
     m_nLOSBlocked = true;
     m_pAnimAssoc = nullptr;
     m_nRequiredAnimID = ANIM_ID_NO_ANIMATION_SET;
-    m_nRequiredAnimGroup = 0;
+    m_nRequiredAnimGroup = ANIM_GROUP_DEFAULT;
     m_pWeaponInfo = nullptr;
     CEntity::SafeRegisterRef(m_pTargetEntity);
     if (targetPos)

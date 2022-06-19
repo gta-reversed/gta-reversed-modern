@@ -78,8 +78,8 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
     // m_nTrainFlags = m_nTrainFlags & 0xF8 | 2;
 
     m_nPassengersGenerationState = 0;
-    // m_nPassengerFlags = m_nPassengerFlags & 0xF0 | rand() & 3;
-    // m_nPassengerFlags = m_nPassengerFlags & 0xF | (16 * ((rand() & 3) + 1));
+    // m_nPassengerFlags = m_nPassengerFlags & 0xF0 | CGeneral::GetRandomNumber() & 3;
+    // m_nPassengerFlags = m_nPassengerFlags & 0xF | (16 * ((CGeneral::GetRandomNumber() & 3) + 1));
     m_pTemporaryPassenger = nullptr;
     m_nMaxPassengers = 5;
     m_nPhysicalFlags = m_nPhysicalFlags | 0x20000; // b18;
@@ -347,7 +347,7 @@ void CTrain::ProcessControl()
                     }
                     else
                     {
-                        m_nNumPassengersToLeave = (rand() & 3) + 1; // rand(1, 4)
+                        m_nNumPassengersToLeave = (CGeneral::GetRandomNumber() & 3) + 1; // [1, 4]
                     }
                     m_nPassengersGenerationState = TRAIN_PASSENGERS_TELL_PASSENGERS_TO_LEAVE;
                 }
@@ -369,7 +369,7 @@ void CTrain::ProcessControl()
                     }
                     else
                     {
-                        m_nNumPassengersToEnter = rand() % 4 + 1; // rand(1, 4)
+                        m_nNumPassengersToEnter = CGeneral::GetRandomNumber() % 4 + 1; // rand(1, 4)
                     }
                     m_nPassengersGenerationState = TRAIN_PASSENGERS_TELL_PASSENGERS_TO_ENTER;
                 }
@@ -474,7 +474,7 @@ void CTrain::ProcessControl()
                     }
                 }
 
-                fStopAtStationSpeed = fStopAtStationSpeed * 0.02f - m_fTrainSpeed;
+                fStopAtStationSpeed = fStopAtStationSpeed / 50.0f - m_fTrainSpeed;
                 if (fStopAtStationSpeed > 0.0f)
                 {
                     m_fTrainGas = fStopAtStationSpeed * 30.0f;
@@ -629,9 +629,7 @@ void CTrain::ProcessControl()
                     vecDifference1.Normalise();
                     vecDifference2.Normalise();
 
-                    if (vecDifference1.x * vecDifference2.x +
-                        vecDifference1.y * vecDifference2.y +
-                        vecDifference1.z * vecDifference2.z < 0.99599999f)
+                    if (DotProduct(vecDifference1, vecDifference2) < 0.996f)
                     {
                         CTrain* carriage = this;
                         bool bIsInTunnel = false;
@@ -815,8 +813,8 @@ void CTrain::ProcessControl()
         uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
         uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
 
-        auto fTrainNodeLighting = static_cast<float>(ScaleLighting(trainNodeLighting, 0.5f));
-        auto fTrainNextNodeLighting = static_cast<float>(ScaleLighting(trainNextNodeLighting, 0.5f));
+        auto fTrainNodeLighting = ScaleLighting(trainNodeLighting, 0.5f);
+        auto fTrainNextNodeLighting = ScaleLighting(trainNextNodeLighting, 0.5f);
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;
@@ -955,7 +953,7 @@ void CTrain::ProcessControl()
         if (!m_bIsStuck)
         {
             float fMaxForce = 0.003f;
-            float fMaxTorque = 0.00090000004f;
+            float fMaxTorque = 0.0009f;
             float fMaxMovingSpeed = 0.005f;
 
             if (m_nStatus != STATUS_PLAYER)

@@ -209,7 +209,7 @@ void CHeli::TestSniperCollision(CVector* origin, CVector* target) {
         const auto mat = (CMatrix*)heli->m_matrix;
         auto out = MultiplyMatrixWithVector(*mat, { -0.43f, 1.49f, 1.5f });
         if (CCollision::DistToLine(origin, target, &out) < 0.8f) {
-            heli->m_fRotationBalance = (float)(rand() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383 [-0.05, 0.05]
+            heli->m_fRotationBalance = (float)(CGeneral::GetRandomNumber() < pow(2, 14) - 1) * 0.1f - 0.05f; // 2^14 - 1 = 16383 [-0.05, 0.05]
             heli->BlowUpCar(FindPlayerPed(), false);
             heli->m_nNumSwatOccupants = 0;
         };

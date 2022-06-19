@@ -233,6 +233,7 @@ CPed::CPed(ePedType pedType) : CPhysical(), m_pedIK{CPedIK(this)} {
     m_fAirResistance = 1.f / 175.f;
     m_fElasticity = 0.05f;
     m_nBodypartToRemove = -1;
+    bHasACamera = CGeneral::GetRandomNumber() % 4 != 0;
 
     m_weaponAudio.Initialise(this);
     m_pedAudio.Initialise(this);
@@ -368,7 +369,7 @@ void CPed::operator delete(void* data) {
 * @addr 0x5E4A00
 */
 void CPed::SetMoveAnim() {
-    if (CanUseTorsoWhenLooking() || m_pAttachedTo) {
+    if (!IsAlive() || bIsDucking || m_pAttachedTo) {
         return;
     }
 
@@ -408,10 +409,10 @@ void CPed::SetMoveAnim() {
         case PEDMOVE_WALK:
         case PEDMOVE_RUN:
         case PEDMOVE_SPRINT: {
-            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIM_FLAG_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIM_FLAG_PARTIAL)) {
-                if ((assoc->m_nFlags & ANIM_FLAG_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+            for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump, ANIMATION_PARTIAL); assoc; assoc = RpAnimBlendGetNextAssociation(assoc, ANIMATION_PARTIAL)) {
+                if ((assoc->m_nFlags & ANIMATION_UNLOCK_LAST_FRAME) == 0 && (assoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                     assoc->m_fBlendDelta = -2.f;
-                    assoc->SetFlag(ANIM_FLAG_FREEZE_LAST_FRAME, true);
+                    assoc->SetFlag(ANIMATION_FREEZE_LAST_FRAME, true);
                 }
             }
 
@@ -702,8 +703,8 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
 */
 void CPed::StopNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, false);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, false);
         }
     }
 }
@@ -713,8 +714,8 @@ void CPed::StopNonPartialAnims() {
 */
 void CPed::RestartNonPartialAnims() {
     for (auto assoc = RpAnimBlendClumpGetFirstAssociation(m_pRwClump); assoc; assoc = RpAnimBlendGetNextAssociation(assoc)) {
-        if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL) == 0) {
-            assoc->SetFlag(ANIM_FLAG_STARTED, true);
+        if ((assoc->m_nFlags & ANIMATION_PARTIAL) == 0) {
+            assoc->SetFlag(ANIMATION_STARTED, true);
         }
     }
 }
@@ -952,9 +953,9 @@ bool CPed::CanSetPedState() {
     case PEDSTATE_ENTER_CAR:
     case PEDSTATE_CARJACK:
     case PEDSTATE_STEAL_CAR:
-        return true;
+        return false;
     }
-    return false;
+    return true;
 }
 
 /*!
@@ -1289,7 +1290,7 @@ void CPed::SetRadioStation()
 
     if (m_pVehicle->m_pDriver == this) {
         const auto& mi = *(CPedModelInfo*)GetModelInfo();
-        m_pVehicle->m_vehicleAudio.m_settings.m_nRadioID = (rand() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
+        m_pVehicle->m_vehicleAudio.m_Settings.m_nRadioID = (CGeneral::GetRandomNumber() <= RAND_MAX / 2) ? mi.m_nRadio1 : mi.m_nRadio2;
     }
 }
 
@@ -1485,10 +1486,10 @@ float CPed::GetWalkAnimSpeed() {
 
     const auto lastFrame = firstSequence.GetUncompressedFrame(firstSequence.m_nFrameCount - 1);
     const auto lastFrameY = firstSequence.m_isRoot
-                                ? lastFrame->m_vecTranslation.y
-                                : ((CAnimSequenceChildFrameUncompressed*)lastFrame)->m_quat.imag.y;
+                                ? lastFrame->translation.y
+                                : ((KeyFrame*)lastFrame)->rotation.imag.y;
 
-    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->m_vecTranslation.y) / hier->m_fTotalTime;
+    return (lastFrameY - firstSequence.GetUncompressedFrame(0)->translation.y) / hier->m_fTotalTime;
 }
 
 /*!
@@ -1718,7 +1719,7 @@ void CPed::ProcessBuoyancy()
     CTimeCycle::GetAmbientRed();
     CTimeCycle::GetAmbientGreen();
     CTimeCycle::GetAmbientBlue();
-    rand();
+    CGeneral::GetRandomNumber();
     */
 
     // Add splash particle if it's the first frame we're touching water, and
@@ -2042,7 +2043,7 @@ void CPed::GetBonePosition(RwV3d& outPosition, ePedBones bone, bool updateSkinBo
     }
 
     if (const auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump)) { // Use position of bone matrix from anim hierarchy (if any)
-        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questinable whenever that's needed at all..)
+        // NOTE: Can't use `GetBoneMatrix` here, because it doesn't check for `hier`'s validity. (It's questionable whenever that's needed at all..)
         RwV3dAssign(&outPosition, RwMatrixGetPos(&RpHAnimHierarchyGetMatrixArray(hier)[RpHAnimIDGetIndex(hier, (size_t)bone)]));
     } else { // Not sure when can this happen.. GetTransformedBonePosition doesn't check this case.
         outPosition = GetPosition(); // Return something close to valid..
@@ -2200,13 +2201,13 @@ void CPed::PlayFootSteps() {
     CAnimBlendAssociation* walkAssoc{};
     auto* lastAssoc = &anim;
     do { // 0x5E58A1
-        if (lastAssoc->m_nFlags & ANIM_FLAG_WALK) {
+        if (lastAssoc->m_nFlags & ANIMATION_WALK) {
             walkBlendTotal += lastAssoc->m_fBlendAmount;
             walkAssoc = lastAssoc;
         } else {
-            if ((lastAssoc->m_nFlags & ANIM_FLAG_ADD_TO_BLEND) == 0) {
+            if ((lastAssoc->m_nFlags & ANIMATION_ADD_TO_BLEND) == 0) {
                 if (lastAssoc->m_nAnimId != ANIM_ID_FIGHT_IDLE) {
-                    if (lastAssoc->m_nFlags & ANIM_FLAG_PARTIAL || bIsDucking) {
+                    if (lastAssoc->m_nFlags & ANIMATION_PARTIAL || bIsDucking) {
                         idleBlendTotal += lastAssoc->m_fBlendAmount;
                     }
                 }
@@ -2240,7 +2241,7 @@ void CPed::PlayFootSteps() {
         float adhesionMult{ 1.f };
         switch (g_surfaceInfos->GetAdhesionGroup(m_nContactSurface)) {
         case eAdhesionGroup::ADHESION_GROUP_SAND: { // 0X5E599F
-            if (rand() % 64) {
+            if (CGeneral::GetRandomNumber() % 64) {
                 m_vecAnimMovingShiftLocal *= 0.2f;
             }
 
@@ -2253,7 +2254,7 @@ void CPed::PlayFootSteps() {
             return;
         }
         case eAdhesionGroup::ADHESION_GROUP_LOOSE: { // 0x5E5A25
-            if (rand() % 128) {
+            if (CGeneral::GetRandomNumber() % 128) {
                 m_vecAnimMovingShiftLocal *= 0.5f;
             }
             adhesionMult = 0.5f;
@@ -2539,7 +2540,6 @@ void CPed::GiveWeaponSet1() {
     GiveWeapon(WEAPON_COUNTRYRIFLE, 25, true);
     GiveWeapon(WEAPON_RLAUNCHER, 200, true);
     GiveWeapon(WEAPON_SPRAYCAN, 200, true);
-    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
 }
 
 /*!
@@ -2555,7 +2555,6 @@ void CPed::GiveWeaponSet2() {
     GiveWeapon(WEAPON_SNIPERRIFLE, 21, true);
     GiveWeapon(WEAPON_FLAMETHROWER, 500, true);
     GiveWeapon(WEAPON_EXTINGUISHER, 200, true);
-    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
 }
 
 /*!
@@ -2569,6 +2568,16 @@ void CPed::GiveWeaponSet3() {
     GiveWeapon(WEAPON_MP5, 100, true);
     GiveWeapon(WEAPON_M4, 150, true);
     GiveWeapon(WEAPON_RLAUNCHER_HS, 200, true);
+}
+
+/*!
+ * @notsa
+ */
+void CPed::GiveWeaponSet4() {
+    // todo: GiveWeapon(WEAPON_INFRARED, 200, true);
+    // todo: GiveWeapon(WEAPON_NIGHTVISION, 200, true);
+    GiveWeapon(WEAPON_MINIGUN, 500, true);
+    GiveWeapon(WEAPON_DILDO2, 0, true);
 }
 
 /*!
@@ -3210,8 +3219,8 @@ void CPed::RemoveWeaponAnims(int32 likeUnused, float blendDelta) {
     bool bFoundNotPartialAnim{};
     for (auto i = 0; i < 34; i++) { // TODO: Magic number `34`
         if (const auto assoc = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE)) {
-            assoc->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
-            if ((assoc->m_nFlags & ANIM_FLAG_PARTIAL)) {
+            assoc->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+            if ((assoc->m_nFlags & ANIMATION_PARTIAL)) {
                 assoc->m_fBlendDelta = blendDelta;
             } else {
                 bFoundNotPartialAnim = true;
@@ -3473,6 +3482,9 @@ void CPed::Render() {
         }
     }
 
+    RenderBigHead();
+    RenderThinBody();
+
     // 0x5E77E3
     // Render us (And any extra FX)
     if (CPostEffects::IsVisionFXActive()) {
@@ -3530,9 +3542,47 @@ void CPed::Render() {
     }
 }
 
+// https://github.com/gennariarmando/bobble-heads
+// NOTSA
+void CPed::RenderBigHead() const {
+    if (!G_CHEAT_BIG_HEAD) // todo: !CCheat::IsActive(CHEAT_BIG_HEAD)
+        return;
+
+    auto hier = GetAnimHierarchyFromSkinClump(m_pRwClump);
+    auto* matrices = RpHAnimHierarchyGetMatrixArray(hier);
+
+    const float scale = 3.0f;
+    const CVector s = { scale, scale, scale };
+    CVector t = { 0.0f, -(scale / 6.0f) / 10.0f, 0.0f };
+
+    for (auto& bone : { BONE_L_BROW, BONE_R_BROW, BONE_JAW }) {
+        auto index = RpHAnimIDGetIndex(hier, bone);
+        if (RwMatrix* mat = &matrices[index]) {
+            RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+            if (bone == BONE_JAW) {
+                t.x = ((scale / 8.0f) / 10.0f) / 8.0f;
+                t.y /= 8.0f;
+            }
+            RwMatrixTranslate(mat, &t, rwCOMBINEPRECONCAT);
+        }
+    }
+
+    auto index = RpHAnimIDGetIndex(hier, BONE_HEAD);
+    if (RwMatrix* mat = &matrices[index]) {
+        RwMatrixScale(mat, &s, rwCOMBINEPRECONCAT);
+    }
+}
+
+// NOTSA
+void CPed::RenderThinBody() const {
+    if (!G_CHEAT_THIN_BODY) // todo: !CCheat::IsActive(CHEAT_THIN_BODY)
+        return;
+
+}
+
 /*!
-* @addr 0x553F00
-*/
+ * @addr 0x553F00
+ */
 bool CPed::SetupLighting() {
   ActivateDirectional();
   return CRenderer::SetupLightingForEntity(this);
@@ -3621,4 +3671,17 @@ bool SayJacking(CPed* jacker, CPed* jacked, CVehicle* vehicle, uint32 offset) {
         return jacker->Say(122u, offset) != -1;
 
     return jacker->Say(123u, offset) != -1;
+}
+
+// NOTSA
+int32 CPed::GetPadNumber() const {
+    switch (m_nPedType) {
+    case PED_TYPE_PLAYER1:
+        return 0;
+    case PED_TYPE_PLAYER2:
+        return 1;
+    default:
+        assert(true && "Inappropriate usage of GetPadNumber");
+        return 0;
+    }
 }

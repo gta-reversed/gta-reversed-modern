@@ -276,12 +276,7 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
         width  = width;
         height = SCREEN_STRETCH_Y(height) + SCREEN_STRETCH_Y(float(menu->m_nNumRows) * 16.f);
 
-        CRect rect(
-            menu->m_vPosn.x,
-            menu->m_vPosn.y + height,
-            menu->m_vPosn.x + width,
-            menu->m_vPosn.y
-        );
+        CRect rect(menu->m_vPosn.x, menu->m_vPosn.y, menu->m_vPosn.x + width, menu->m_vPosn.y + height);
         FrontEndMenuManager.DrawWindow(rect, menu->m_szTitle, titleDarkness, CRGBA(0, 0, 0, 190), false, true);
     }
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
@@ -299,31 +294,24 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
         CFont::SetOrientation(alignment);
         CFont::SetColor(CRGBA(225 - titleDarkness, 225 - titleDarkness, 225 - titleDarkness, 255));
 
-        float x, y;
-        auto width = 0.f;
-        if (column) {
-           width += menu->m_afColumnWidth[column];
-        }
-
+        float width = column ? menu->m_afColumnWidth[column] : 0.0f;
+        float x = SCREEN_STRETCH_X(10.0f) + menu->m_vPosn.x + width;
         switch (alignment) {
         case eFontAlignment::ALIGN_CENTER: {
-            x = menu->m_afColumnWidth[column] / 2.0f + SCREEN_STRETCH_X(10.0f) + menu->m_vPosn.x + width;
-            y = SCREEN_STRETCH_Y(20.0f) + menu->m_vPosn.y;
+            x += menu->m_afColumnWidth[column] / 2.0f;
             break;
         }
         case eFontAlignment::ALIGN_LEFT: {
-            x = SCREEN_STRETCH_X(10.0f) + menu->m_vPosn.x + width;
-            y = SCREEN_STRETCH_Y(20.0f) + menu->m_vPosn.y;
             break;
         }
         case eFontAlignment::ALIGN_RIGHT: {
-            x = menu->m_afColumnWidth[column] + SCREEN_STRETCH_X(10.0f) + menu->m_vPosn.x + width;
-            y = SCREEN_STRETCH_Y(20.0f) + menu->m_vPosn.y;
+            x += menu->m_afColumnWidth[column];
             break;
         }
         default:
-            assert(0);
+            NOTSA_UNREACHABLE();
         }
+        float y = SCREEN_STRETCH_Y(20.0f) + menu->m_vPosn.y;
 
         const auto columnText = menu->m_aacColumnHeaders[column];
         const auto text = TheText.Get(columnText);
@@ -332,47 +320,35 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
 
     auto fBaseY = SCREEN_STRETCH_Y(20.0f);
 
+    const auto GetColor = [=](auto row) -> CRGBA {
+        if (menu->m_abColumnInteractive[INTERACTIVE_DEFAULT]) {
+            if (row == menu->m_nSelectedRow && menu->m_abRowSelectable[row]) {
+                return HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE);
+            } else if (menu->m_abRowAlreadyBought[row]) {
+                return HudColour.GetRGB(HUD_COLOUR_GREEN);
+            } else if (menu->m_abRowSelectable[row]) {
+                return HudColour.GetRGB(HUD_COLOUR_NIGHT_BLUE);
+            }
+            return HudColour.GetRGB(HUD_COLOUR_DARK_GRAY);
+        }
+
+        if (menu->m_abRowAlreadyBought[row]) {
+            return HudColour.GetRGB(HUD_COLOUR_GREEN);
+        } else if (menu->m_abRowSelectable[row]) {
+            return HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE);
+        }
+        return HudColour.GetRGB(HUD_COLOUR_NIGHT_BLUE);
+    };
+
+    // 0x581216
+    char buffer[400];
     // draw rows
     for (auto row = 0; row < menu->m_nNumRows; row++) {
         for (auto column = 0; column < menu->m_nNumColumns; column++) {
             if (!menu->m_aaacRowTitles[0][row][0])
                 continue;
 
-            CRGBA color;
-            if (menu->m_abColumnInteractive[INTERACTIVE_DEFAULT]) {
-                if (row == menu->m_nSelectedRow && menu->m_abRowSelectable[row])
-                {
-                    color = HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE);// - titleDarkness;
-                }
-                else if (menu->m_abRowAlreadyBought[row])
-                {
-                    color = HudColour.GetRGB(HUD_COLOUR_GREEN); // - titleDarkness;
-                }
-                else if (menu->m_abRowSelectable[row])
-                {
-                    color = HudColour.GetRGB(HUD_COLOUR_NIGHT_BLUE); // - titleDarkness;
-                }
-                else
-                {
-                    color = HudColour.GetRGB(HUD_COLOUR_DARK_GRAY); // - titleDarkness;
-                }
-            }
-            else if (menu->m_abRowAlreadyBought[row])
-            {
-                color = HudColour.GetRGB(HUD_COLOUR_GREEN); // - titleDarkness;
-            }
-            else if (menu->m_abRowSelectable[row])
-            {
-                color = HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE); // - titleDarkness;
-            }
-            else
-            {
-                color = HudColour.GetRGB(HUD_COLOUR_NIGHT_BLUE); // - titleDarkness;
-            }
-
-            char buffer[400];
-
-            CFont::SetColor(CRGBA(color.r, color.g, color.b, 255));
+            CFont::SetColor(GetColor(row)); // NOTSA | optimized
             // formatting numbers in row titles
             CMessages::InsertNumberInString(TheText.Get(menu->m_aaacRowTitles[0][row]), menu->m_aanNumberInRowTitle[0][row], menu->m_aadw2ndNumberInRowTitle[0][row], -1, -1, -1, -1, buffer);
             CFont::SetOrientation(menu->m_anColumnAlignment[row]);
@@ -400,21 +376,22 @@ void CMenuSystem::DisplayStandardMenu(MenuId id, bool bRightFont /*bBrightFont*/
             */
             fBaseY += SCREEN_STRETCH_Y(16.0f);
             float x1, y2;
-            float v41 = menu->m_afColumnWidth[column];
 
             switch (menu->m_anColumnAlignment[row]) {
             case eFontAlignment::ALIGN_CENTER:
-                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_afColumnWidth[row] + menu->m_vPosn.x + v41;
+                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_afColumnWidth[row] + menu->m_vPosn.x + menu->m_afColumnWidth[column];
                 y2 = fBaseY + menu->m_vPosn.y;
                 break;
             case eFontAlignment::ALIGN_LEFT:
-                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_vPosn.x + v41;
+                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_afColumnWidth[column] + menu->m_vPosn.x;
                 y2 = fBaseY + menu->m_vPosn.y;
                 break;
             case eFontAlignment::ALIGN_RIGHT:
-                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_afColumnWidth[row] / 2.0f + menu->m_vPosn.x + v41;
+                x1 = SCREEN_STRETCH_X(10.0f) + menu->m_afColumnWidth[row] / 2.0f + menu->m_vPosn.x + menu->m_afColumnWidth[column];
                 y2 = fBaseY + menu->m_vPosn.y;
                 break;
+            default:
+                NOTSA_UNREACHABLE();
             }
             CFont::PrintString(x1, y2, buffer);
         }
@@ -497,8 +474,8 @@ void CMenuSystem::HighlightOneItem(MenuId id, uint8 item, bool bought) {
 }
 
 // 0x581CE0, unused
-void CMenuSystem::InsertOneMenuItem(MenuId id, uint8 column, uint8 row, char* text) {
-    auto menu = MenuNumber[id];
+void CMenuSystem::InsertOneMenuItem(MenuId id, uint8 column, uint8 row, const char* text) {
+    auto* menu = MenuNumber[id];
     SetRowTitle(id, column, row, text);
     menu->m_aanNumberInRowTitle[column][row] = -1;
     menu->m_aadw2ndNumberInRowTitle[column][row] = -1;
@@ -507,8 +484,8 @@ void CMenuSystem::InsertOneMenuItem(MenuId id, uint8 column, uint8 row, char* te
 }
 
 // 0x581D70
-void CMenuSystem::InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row, char* text, int32 num1, int32 num2) {
-    auto menu = MenuNumber[id];
+void CMenuSystem::InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row, const char* text, int32 num1, int32 num2) {
+    auto* menu = MenuNumber[id];
     SetRowTitle(id, column, row, text);
     menu->m_aanNumberInRowTitle[column][row] = num1;
     menu->m_aadw2ndNumberInRowTitle[column][row] = num2;
@@ -517,7 +494,7 @@ void CMenuSystem::InsertOneMenuItemWithNumber(MenuId id, uint8 column, uint8 row
 }
 
 // 0x582300
-MenuId CMenuSystem::CreateNewMenu(eMenuType type, char* title, float x, float y, float width, uint8 columns, bool interactive, bool background, eFontAlignment alignment) {
+MenuId CMenuSystem::CreateNewMenu(eMenuType type, const char* title, float x, float y, float width, uint8 columns, bool interactive, bool background, eFontAlignment alignment) {
     assert(num_menus_in_use < MENU_COUNT);
 
     MenuId menuId = GetNumMenusInUse();
@@ -574,7 +551,7 @@ MenuId CMenuSystem::CreateNewMenu(eMenuType type, char* title, float x, float y,
 
 // 0x581990
 void CMenuSystem::ActivateItems(MenuId id, bool b0, bool b1, bool b2, bool b3, bool b4, bool b5, bool b6, bool b7, bool b8, bool b9, bool b10, bool b11) {
-    auto menu = MenuNumber[id];
+    auto* menu = MenuNumber[id];
 
     const bool rows[] = { b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, b10, b11 };
     for (auto rowId = 0u; rowId < std::size(rows); rowId++) {
@@ -601,7 +578,7 @@ void CMenuSystem::ActivateItems(MenuId id, bool b0, bool b1, bool b2, bool b3, b
 void CMenuSystem::ActivateOneItem(MenuId id, uint8 row, bool enable) {
     // plugin::Call<0x581B30, MenuId, uint8, uint8>(id, row, enable);
 
-    auto menu = MenuNumber[id];
+    auto* menu = MenuNumber[id];
 
     menu->m_abRowSelectable[row] = enable;
     while (true) {
@@ -640,7 +617,7 @@ void CMenuSystem::FillGridWithCarColours(MenuId id) {
 // 0x581E00
 void CMenuSystem::InsertMenu(MenuId id, uint8 column, char* colHeader, char* row0, char* row1, char* row2, char* row3, char* row4, char* row5, char* row6, char* row7, char* row8, char* row9, char* row10, char* row11) {
     assert(column < MENU_COL_COUNT);
-    auto& menu = MenuNumber[id];
+    auto* menu = MenuNumber[id];
 
     SetColumnHeader(id, column, colHeader);
 
@@ -682,7 +659,7 @@ void CMenuSystem::SwitchOffMenu(MenuId id) {
 
 // NOTSA
 void CMenuSystem::CalcNonEmptyRows(MenuId id) {
-    auto menu = MenuNumber[id];
+    auto* menu = MenuNumber[id];
     menu->m_nNumRows = 0;
     for (auto& row : menu->m_aaacRowTitles[0]) { // they used reverse loop from MENU_ROW_COUNT to 0
         if (row[0]) {

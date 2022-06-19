@@ -24,8 +24,8 @@ public:
 public:
     static void InjectHooks();
 
-    CQuaternion() {};
-    CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
+    constexpr CQuaternion() {};
+    constexpr CQuaternion(float x, float y, float z, float w) : x(x), y(y), z(z), w(w) {}
 
     // Quat to matrix
     void Get(RwMatrix* out);
@@ -104,6 +104,37 @@ public:
         z *= multiplier;
         w *= multiplier;
     }
+
+    CQuaternion operator-() const {
+        return { -x, -y, -z, -w };
+    }
 };
 
 VALIDATE_SIZE(CQuaternion, 0x10);
+
+constexpr float DotProduct(const CQuaternion& q1, const CQuaternion& q2) {
+    return q1.x * q2.x +
+           q1.y * q2.y +
+           q1.z * q2.z +
+           q1.w * q2.w;
+}
+
+constexpr CQuaternion operator+(const CQuaternion& left, const CQuaternion& right) {
+    return { left.x + right.x, left.y + right.y, left.z + right.z, left.w + right.w };
+}
+
+constexpr CQuaternion operator-(const CQuaternion& left, const CQuaternion& right) {
+    return { left.x - right.x, left.y - right.y, left.z - right.z, left.w - right.w };
+}
+
+constexpr CQuaternion operator*(const CQuaternion& left, float right) {
+    return { left.x * right, left.y * right, left.z * right, left.w * right };
+}
+
+constexpr CQuaternion operator*(float left, const CQuaternion& right) {
+    return { left * right.x, left * right.y, left * right.z, left * right.w };
+}
+
+constexpr CQuaternion operator/(const CQuaternion& left, float right) {
+    return { left.x / right, left.y / right, left.z / right, left.w / right };
+}

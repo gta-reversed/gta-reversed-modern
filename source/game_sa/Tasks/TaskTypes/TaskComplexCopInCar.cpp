@@ -103,7 +103,7 @@ CTask* CTaskComplexCopInCar::CreateSubTask(eTaskType taskType, CPed* copPed) {
         return nullptr;
 
     default:
-        NOTSA_UNREACHABLE;
+        NOTSA_UNREACHABLE();
         return nullptr;
     }
 }

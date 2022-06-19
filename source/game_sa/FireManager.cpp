@@ -2,6 +2,7 @@
 
 #include "FireManager.h"
 #include "TheScripts.h"
+#include "Shadows.h"
 
 CFireManager& gFireManager = *reinterpret_cast<CFireManager*>(0xB71F80);
 
@@ -391,7 +392,7 @@ void CFireManager::Update() {
         // Android values used here, and on the PC version the array access isn't
         // a 100% clear to me.
         // TODO: Use the array here
-        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
+        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || CGeneral::GetRandomNumber() < RAND_MAX / 2) {
             auto fx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
             if (fx)
                 fx->PlayAndKill();

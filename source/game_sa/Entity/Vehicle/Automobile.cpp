@@ -16,6 +16,7 @@
 #include "Glass.h"
 #include "ModelIndices.h"
 #include "InterestingEvents.h"
+#include "VehicleRecording.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;
@@ -64,16 +65,16 @@ void CAutomobile::InjectHooks()
 
     RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6A2210);
     RH_ScopedVirtualInstall(IsComponentPresent, 0x6A2250);
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
-    RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "enum", 0x6A2270, float (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(GetDooorAngleOpenRatio, "uint", 0x6A62C0, float (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "enum", 0x6A2290, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorReady, "uint", 0x6A6350, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "enum", 0x6A22D0, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorFullyOpen, "uint", 0x6A63E0, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "enum", 0x6A2310, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorClosed, "uint", 0x6A6470, bool (CAutomobile::*)(uint32));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "enum", 0x6A2330, bool (CAutomobile::*)(eDoors));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(IsDoorMissing, "uint", 0x6A6500, bool (CAutomobile::*)(uint32));
     RH_ScopedVirtualInstall(IsOpenTopCar, 0x6A2350);
     RH_ScopedVirtualInstall(IsRoomForPedToLeaveCar, 0x6A3850);
     RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B3E90);
@@ -154,12 +155,12 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     m_pHandlingData = &mi.GetHandlingData(); // For now this has to be here, because the model index is not set in the member init list
     m_pFlyingHandlingData = &mi.GetFlyingHandlingData(); // Moved this over here
 
-    if (m_pHandlingData->m_bHydraulicGeom && rand() % 4 == 0) { // 0x6B0BD7
+    if (m_pHandlingData->m_bHydraulicGeom && CGeneral::GetRandomNumber() % 4 == 0) { // 0x6B0BD7
         AddVehicleUpgrade(ModelIndices::MI_HYDRAULICS);
     }
 
     field_804 = 20.0f;
-    m_fSomeGasPedalStuff = 0.0f;
+    m_fGasPedalAudio = 0.0f;
     m_fIntertiaValue1 = 0.0f;
     m_fIntertiaValue2 = 0.0f;
 
@@ -275,7 +276,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     // Init this field which is never used
     for (auto& v : field_8CC) {
         constexpr auto magic = -0.15f;
-        v = (0.15f - magic) * rand() * RAND_MAX_FLOAT_RECIPROCAL + magic; // Becomes: 0.3f * rand() * RAND_MAX_FLOAT_RECIPROCAL + magic
+        v = (0.15f - magic) * CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL + magic; // Becomes: 0.3f * CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL + magic
     }
 
     // 0x6B0EE6
@@ -346,7 +347,7 @@ CAutomobile::CAutomobile(int32 modelIndex, eVehicleCreatedBy createdBy, bool set
     m_fGasPedal               = 0.0f;
     m_fBreakPedal             = 0.0f;
     m_pExplosionVictim        = nullptr;
-    m_fSomeGasPedalStuff      = 0.0f;
+    m_fGasPedalAudio      = 0.0f;
     m_fMoveDirection          = 0.0f;
     m_wMiscComponentAngle     = 0;
     m_wMiscComponentAnglePrev = 0;
@@ -1254,7 +1255,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         m_nNumContactWheels = 4;
         m_wheelsOnGrounPrev = m_nWheelsOnGround;
         m_nWheelsOnGround = 4;
-        float speed = m_autoPilot.m_speed * 0.02f;
+        float speed = m_autoPilot.m_speed / 50.0f;
         m_pHandlingData->GetTransmission().CalculateGearForSimpleCar(speed, m_nCurrentGear);
         float wheelRot = CVehicle::ProcessWheelRotation(WHEEL_STATE_NORMAL, GetForward(), m_vecMoveSpeed, 0.35f);
         for (float& rotation : m_wheelRotation) {
@@ -1448,8 +1449,8 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
     float steerLeftRight = (float)pad->GetSteeringLeftRight() / 128.0f;
     float steerUpDown    = (float)pad->GetSteeringUpDown() / 128.0f;
     if (CCamera::m_bUseMouse3rdPerson && std::fabs(steerLeftRight) < 0.05f && std::fabs(steerUpDown) < 0.05f) {
-        steerLeftRight = std::clamp<float>(CPad::NewMouseControllerState.X * 0.02f, -1.5f, 1.5f);
-        steerUpDown    = std::clamp<float>(CPad::NewMouseControllerState.Y * 0.02f, -1.5f, 1.5f);
+        steerLeftRight = std::clamp<float>(CPad::NewMouseControllerState.X / 50.0f, -1.5f, 1.5f);
+        steerUpDown    = std::clamp<float>(CPad::NewMouseControllerState.Y / 50.0f, -1.5f, 1.5f);
     }
 
     // 0x6B4F69
@@ -2183,59 +2184,66 @@ void CAutomobile::DoBurstAndSoftGroundRatios()
 
     for (auto i = 0u; i < 4; i++) {
         const auto& wheelCP = m_wheelColPoint[i];
-        auto& wheelCompression = m_fWheelsSuspensionCompression[i];
+        const auto& springLen = m_aSuspensionSpringLength[i];
+        const auto& lineLen = m_aSuspensionLineLength[i];
+        auto& compression = m_fWheelsSuspensionCompression[i];
+        auto& rotation = m_wheelRotation[i];
 
-        const auto GetRemainingSuspensionCompression = [&, i] {
-            return (m_aSuspensionLineLength[i] - m_aSuspensionSpringLength[i]) / m_aSuspensionLineLength[i];
+        const auto GetRemainingSuspensionCompression = [&] {
+            return (lineLen - springLen) / lineLen;
         };
 
         switch (m_damageManager.GetWheelStatus((eCarWheel)i)) {
         case eCarWheelStatus::WHEEL_STATUS_MISSING:
-            wheelCompression = 1.f;
+            compression = 1.0f;
             break;
         case eCarWheelStatus::WHEEL_STATUS_BURST: {
             // The more opposite the speed is to the forward vector the bigger chance
             // The highest chance is when the speed is opposite to forward (ie.: It's backwards)
-            const auto val = (float)CGeneral::GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL * (speedToFwdRatio * 40.f + 98.f); // todo: rename, use GetRandomNumberInRange
-            if (val < 100.f) {
-                const auto compression = wheelCompression + GetRemainingSuspensionCompression() / 4.f;
-                wheelCompression = std::min(1.f, compression);
+            const auto val = CGeneral::GetRandomNumberInRange(0, int32(speedToFwdRatio * 40.0f) + 98);
+            if (val < 100) {
+                compression += GetRemainingSuspensionCompression() / 4.f;
+                compression = std::min(1.0f, compression);
             }
             break;
         }
         default: {
-            if (   wheelCompression >= 1.f
-                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != eAdhesionGroup::ADHESION_GROUP_SAND
+            if (   compression >= 1.0f
+                || g_surfaceInfos->GetAdhesionGroup(wheelCP.m_nSurfaceTypeB) != ADHESION_GROUP_SAND
                 || ModelIndices::IsRhino(m_nModelIndex)
             ) {
-                if (wheelCP.m_nSurfaceTypeB == eSurfaceType::SURFACE_RAILTRACK) {
-                    float wheelSizeFactor = 1.5f / (mi.GetSizeOfWheel((eCarWheel)i) / 2.f);
-                    if (wheelSizeFactor > 0.3f) { // Basically if wheelSize > 0.9
+                if (compression < 1.0f && wheelCP.m_nSurfaceTypeB == SURFACE_RAILTRACK) {
+                    auto wheelSizeFactor = 1.5f / (mi.GetSizeOfWheel((eCarWheel)i) / 2.0f);
+                    if (speedToFwdRatio > 0.3f) {
                         wheelSizeFactor *= speedToFwdRatio / 0.3f;
                     }
 
-                    const auto wheelRotFactor      = m_wheelRotation[i] / wheelSizeFactor; // Some kind of contact surface factor perhaps?
-                    const auto wheelRotFactorFract = wheelRotFactor - std::floor(wheelRotFactor);
+                    auto wheelSizeInv = 1.0f / wheelSizeFactor;
+                    auto wheelRotFactor = wheelSizeInv * rotation;
+                    auto wheelRotFactorFract = wheelRotFactor - std::floor(wheelRotFactor);
 
-                    const auto timeSpeedRotFactor      = (CTimer::GetTimeStep() * m_wheelSpeed[i] + m_wheelRotation[i]) / wheelSizeFactor;
-                    const auto timeSpeedRotFactorFract = timeSpeedRotFactor - std::floor(timeSpeedRotFactor);
+                    auto timeSpeedRotFactor = (CTimer::GetTimeStep() * m_wheelSpeed[i] + rotation) * wheelSizeInv;
+                    auto timeSpeedRotFactorFract = timeSpeedRotFactor - std::floor(timeSpeedRotFactor);
 
-                    if (   m_wheelSpeed[i] > 0.f && timeSpeedRotFactorFract < wheelRotFactorFract
-                        || m_wheelSpeed[i] < 0.f && timeSpeedRotFactorFract > wheelRotFactorFract
+                    if (   m_wheelSpeed[i] > 0.0f && timeSpeedRotFactorFract < wheelRotFactorFract
+                        || m_wheelSpeed[i] < 0.0f && timeSpeedRotFactorFract > wheelRotFactorFract
                     ) {
-                        const auto compression = wheelCompression - GetRemainingSuspensionCompression() * 0.3f;
-                        wheelCompression = std::max(0.2f, compression);
+                        compression = std::max(0.2f, compression - GetRemainingSuspensionCompression() * 0.3f);
                     }
                 }
             } else {
-                const auto offroadFactor = handlingFlags.bOffroadAbility2 ? 0.15f :
-                                           handlingFlags.bOffroadAbility ? 0.2f : 0.3f;
+                float offroadFactor = 0.3f;
+                if (handlingFlags.bOffroadAbility2) {
+                    offroadFactor = 0.15f;
+                } else if (handlingFlags.bOffroadAbility) {
+                    offroadFactor = 0.2f;
+                }
 
                 auto adhesionFactor = 1.0f - speedToFwdRatio / 0.3f * 0.7f - CWeather::WetRoads * 0.7f;
                 adhesionFactor = std::max(0.4f, adhesionFactor);
 
-                const auto compression = offroadFactor * GetRemainingSuspensionCompression() * adhesionFactor + wheelCompression;
-                wheelCompression = std::min(compression, 1.0f);
+                compression += offroadFactor * GetRemainingSuspensionCompression() * adhesionFactor;
+                compression = std::min(compression, 1.0f);
             }
             break;
         }
@@ -2255,7 +2263,7 @@ void CAutomobile::PlayCarHorn()
         return;
     }
 
-    m_nCarHornTimer = rand() % 128 - 106;
+    m_nCarHornTimer = CGeneral::GetRandomNumber() % 128 - 106;
     if (const auto r = m_nCarHornTimer % 8; r < 4) {
         if (r >= 2) {
             if (m_pDriver && m_autoPilot.carCtrlFlags.bHonkAtCar) {
@@ -2458,7 +2466,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 
         // 0x6A7B63
         const auto moveSpeedMagSq = m_vecMoveSpeed.SquaredMagnitude();
-        if (moveSpeedMagSq > 0.02f * 0.02f) {
+        if (moveSpeedMagSq > 0.02f / 50.0f) {
             dmgDrawCarCollidingParticles(vecCollisionCoors, calcDmgIntensity * collForceMult, weapon);
         }
 
@@ -2517,7 +2525,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
 
                 // Possibly apply bonnet damage if front bumper is not `ok`
                 if (   m_damageManager.GetPanelStatus(ePanels::FRONT_BUMPER) != DAMSTATE_OK && m_fMass * 0.2f < calcDmgIntensity
-                    || weapon < WEAPON_LAST_WEAPON && (rand() % 3 == 0) // If it was a weapon, apply damage by randomly
+                    || weapon < WEAPON_LAST_WEAPON && (CGeneral::GetRandomNumber() % 3 == 0) // If it was a weapon, apply damage by randomly
                 ) {
                     ApplyDamageToComponent(tComponent::COMPONENT_BONNET);
                 }
@@ -4076,14 +4084,14 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
-                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_BURST);
+                    leftWheel, &m_fWheelBurnoutSpeed[leftWheel], &wheelState, WHEEL_STATUS_BURST);
             }
             else {
                 CVehicle::ProcessWheel(wheelFwd, wheelRight, contactSpeeds[leftWheel], contactPoints[leftWheel], m_nNumContactWheels,
                     thrust,
                     brake * brakeBias,
                     adhesion * tractionBias,
-                    leftWheel, &m_wheelRotationUnused[leftWheel], &wheelState, WHEEL_STATUS_OK);
+                    leftWheel, &m_fWheelBurnoutSpeed[leftWheel], &wheelState, WHEEL_STATUS_OK);
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)
                 m_aWheelState[leftWheel] = WHEEL_STATE_NORMAL;
@@ -4126,7 +4134,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * m_damageManager.m_fWheelDamageEffect * tractionBias,
-                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_BURST
+                    rightWheel, &m_fWheelBurnoutSpeed[rightWheel], &wheelState, WHEEL_STATUS_BURST
                );
             }
             else {
@@ -4134,7 +4142,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
                     thrust,
                     brake * brakeBias,
                     adhesion * tractionBias,
-                    rightWheel, &m_wheelRotationUnused[rightWheel], &wheelState, WHEEL_STATUS_OK
+                    rightWheel, &m_fWheelBurnoutSpeed[rightWheel], &wheelState, WHEEL_STATUS_OK
                );
             }
             if (driveWheels && m_fGasPedal < 0.0f && wheelState == WHEEL_STATE_SPINNING)
@@ -4309,6 +4317,7 @@ void CAutomobile::ProcessCarOnFireAndExplode(bool bExplodeImmediately)
     ((void(__thiscall*)(CAutomobile*, uint8))0x6A7090)(this, bExplodeImmediately);
 }
 
+// todo: nodeIndex one of { eBikeNodes eBmxNodes eBoatNodes eHeliNodes eMonsterTruckNodes ePlaneNodes eQuadBikeNodes eTrailerNodes eTrainNodes eCarNodes }
 // 0x6A8580
 CObject* CAutomobile::SpawnFlyingComponent(eCarNodes nodeIndex, uint32 collisionType)
 {
@@ -4477,7 +4486,7 @@ void CAutomobile::ProcessBuoyancy()
     CTimeCycle::GetAmbientRed_Obj();
     CTimeCycle::GetAmbientGreen_Obj();
     CTimeCycle::GetAmbientBlue_Obj();
-    rand();
+    CGeneral::GetRandomNumber();
     */
 
     CVector vecBuoyancyTurnPoint;
@@ -4827,7 +4836,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
         if (   door.m_nDoorState == DAMSTATE_OPENED                      // Still open (couldn't close it) ; todo: Comparison of different enumeration types ('eDoorState' and 'ePanelDamageState') is deprecated
             && DotProduct(m_vecMoveSpeed, m_matrix->GetForward()) > 0.4f // Speed's direction is kinda forwards
         ) {
-            auto flyingObj = SpawnFlyingComponent(CAR_BONNET, 2);
+            auto* flyingObj = SpawnFlyingComponent(CAR_BONNET, 2)->AsVehicle();
 
             m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, flyingObj);
             SetComponentVisibility(m_aCarNodes[CAR_BONNET], ATOMIC_IS_NOT_PRESENT);
@@ -4837,7 +4846,7 @@ void CAutomobile::ProcessSwingingDoor(eCarNodes nodeIdx, eDoors doorIdx)
             if (flyingObj) {
                 // Apply move speed (with some randomness in up/down direction)
                 flyingObj->m_vecMoveSpeed = m_vecMoveSpeed * 0.4f + m_matrix->GetRight() * 0.1f;
-                if (rand() % 2) {
+                if (CGeneral::GetRandomNumber() % 2) {
                     flyingObj->m_vecMoveSpeed += m_matrix->GetUp() / 2.f;
                 } else {
                     flyingObj->m_vecMoveSpeed -= m_matrix->GetUp() / 2.f;
@@ -4866,8 +4875,8 @@ CObject* CAutomobile::RemoveBonnetInPedCollision() {
         return nullptr; // Not open enough
     }
 
-    auto flyingComp = SpawnFlyingComponent(eCarNodes::CAR_BONNET, 2u);
-    m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, flyingComp);
+    auto* flyingComp = SpawnFlyingComponent(eCarNodes::CAR_BONNET, 2u);
+    m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, flyingComp->AsVehicle());
     SetComponentVisibility(m_aCarNodes[eCarNodes::CAR_BONNET], ATOMIC_IS_NOT_PRESENT);
     m_damageManager.SetDoorStatus(eDoors::DOOR_BONNET, eDoorStatus::DAMSTATE_NOTPRESENT);
     return flyingComp;
@@ -4890,7 +4899,7 @@ void CAutomobile::PopDoor(eCarNodes nodeIdx, eDoors doorIdx, bool showVisualEffe
         if (nodeIdx != eCarNodes::CAR_NODE_NONE) {
             SpawnFlyingComponent(nodeIdx, nodeIdx == eCarNodes::CAR_CHASSIS ? 4u : 2u);
         } else {
-            const auto obj = SpawnFlyingComponent(CAR_NODE_NONE, 3u);
+            const auto obj = SpawnFlyingComponent(CAR_NODE_NONE, 3u)->AsVehicle();
             m_vehicleAudio.AddAudioEvent(eAudioEvents::AE_BONNET_FLUBBER_FLUBBER, obj);
         }
     }
@@ -5559,7 +5568,7 @@ void CAutomobile::SetDoorDamage(eDoors doorIdx, bool withoutVisualEffect)
     case DAMSTATE_NOTPRESENT: { // 0x6B17F0
         if (!withoutVisualEffect) {
             if (doorIdx == eDoors::DOOR_BONNET) { // Inverted
-                const auto obj = SpawnFlyingComponent(nodeIdx, 3u);
+                const auto obj = SpawnFlyingComponent(nodeIdx, 3u)->AsVehicle();
                 m_vehicleAudio.AddAudioEvent(AE_BONNET_FLUBBER_FLUBBER, obj);
             } else {
                 SpawnFlyingComponent(nodeIdx, doorIdx == eDoors::DOOR_BOOT ? 4u : 2u);
@@ -5748,7 +5757,7 @@ void CAutomobile::FireTruckControl(CFire* fire)
         newTurretPosition += GetSpeed(newTurretPosition - GetPosition()) * CTimer::GetTimeStep();
     }
 
-    point.z += float(rand() % 16) / 1000.0f;
+    point.z += float(CGeneral::GetRandomNumber() % 16) / 1000.0f;
     CVector endPoint = m_vecMoveSpeed * CVector(1.0f, 1.0f, 0.3f);
     if (ModelIndices::IsSwatVan(m_nModelIndex))
         endPoint += point * 0.4f;
