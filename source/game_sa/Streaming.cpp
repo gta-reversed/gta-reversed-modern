@@ -3631,7 +3631,7 @@ void CStreaming::StreamZoneModels_Gangs(const CVector& unused) {
     if (CCheat::IsActive(CHEAT_GANGS_CONTROLS_THE_STREETS))
         gangsNeeded |= 0xFF; // All gangs basically
 
-    CGangWars::TellStreamingWhichGangsAreNeeded(&gangsNeeded);
+    CGangWars::TellStreamingWhichGangsAreNeeded(gangsNeeded);
     if (gangsNeeded == ms_loadedGangs && gangsNeeded == ms_loadedGangCars)
         return; // Everything loaded already
 

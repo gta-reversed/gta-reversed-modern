@@ -719,7 +719,7 @@ void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
 
 // FIX_BUGS: originally has int32 type, but changed to unsigned due possible UB
 // 0x443D50
-void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* gangsBitFlags) {
+void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
     if (State2 == NO_ATTACK)
         return;
 
@@ -727,7 +727,7 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32* gangsBitFlags) {
     CVector2D delta = { coors.x - PointOfAttack.x, coors.y - PointOfAttack.y };
 
     if (delta.Magnitude() < 150.0f) {
-        *gangsBitFlags |= 1 << Gang1;
+        gangsBitFlags |= 1 << Gang1;
     }
 }
 
