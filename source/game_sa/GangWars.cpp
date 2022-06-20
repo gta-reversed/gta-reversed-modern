@@ -274,7 +274,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
         CRadar::ChangeBlipColour(blip, color);
     }
 
-    for (auto i = 0u; i < 3u; i++) {
+    for (auto i = 0; i < 3; i++) { // todo: magic number
         auto carNode = ThePaths.FindNthNodeClosestToCoors(PointOfAttack, 0, 100.0f, false, false, i, false, true, nullptr);
         auto carNodePos = ThePaths.GetPathNode(carNode)->GetNodeCoors();
 
@@ -350,7 +350,7 @@ void CGangWars::EndGangWar(bool end) {
         State2 = NO_ATTACK;
         TimeTillNextAttack = CalculateTimeTillNextAttack();
 
-        uint32 releasedPeds = ReleasePedsInAttackWave(true, false);
+        auto releasedPeds = ReleasePedsInAttackWave(true, false);
         MakeEnemyGainInfluenceInZone(Gang1, 3 * releasedPeds);
     }
 
@@ -442,7 +442,7 @@ bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32& outPedId) {
     if (groupId <= 0)
         return false;
 
-    uint32& x = *reinterpret_cast<uint32_t*>(&CGarages::aCarsInSafeHouse[0][0].m_vPosn.x); // ?
+    auto& x = *reinterpret_cast<int32*>(&CGarages::aCarsInSafeHouse[0][0].m_vPosn.x); // ?
     for (auto i = 0; i < numPeds; i++) {
         x = (x + 1) % numPeds;
         outPedId = CPopulation::GetPedGroupModelId(groupId, x);
@@ -625,7 +625,7 @@ void CGangWars::StartOffensiveGangWar() {
     zoneInfo->GangDensity[Gang1] = gang1Density; // to restore
 
     Provocation = 0.0f;
-    auto densitySum = std::accumulate(zoneInfo->GangDensity, zoneInfo->GangDensity + 10, 0u);
+    auto densitySum = std::accumulate(zoneInfo->GangDensity, zoneInfo->GangDensity + 10, 0);
     if (densitySum && (Gang1 == GANG_BALLAS || Gang1 == GANG_VAGOS)) {
         if (State2 != NO_ATTACK)
             return;
@@ -636,7 +636,7 @@ void CGangWars::StartOffensiveGangWar() {
         TimeStarted = CTimer::GetTimeInMS();
         State = PRE_FIRST_WAVE;
         ClearTheStreets();
-        WarFerocity = std::min(densitySum / 15u, 2u);
+        WarFerocity = std::min(densitySum / 15, 2);
 
         if (CStats::GetStatValue(STAT_CITY_UNLOCKED) < 0.0f) {
             if (TerritoryUnderControlPercentage > 0.4f) {
@@ -717,7 +717,7 @@ void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
     }
 }
 
-// FIX_BUGS: originally has int32 type, but changed to unsigned due possible UB
+// FIX_BUGS: originally has int32* type, but changed to unsigned due possible UB
 // 0x443D50
 void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
     if (State2 == NO_ATTACK)
