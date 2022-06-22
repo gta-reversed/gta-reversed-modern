@@ -21,45 +21,45 @@ void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Load, 0x5D3EB0);
-    // RH_ScopedInstall(Save, 0x5D5530);
-    RH_ScopedInstall(InitAtStartOfGame, 0x443920);
-    RH_ScopedInstall(AddKillToProvocation, 0x443950);
-    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);
-    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);
-    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);
-    RH_ScopedInstall(CheerVictory, 0x444040);
-    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);
-    RH_ScopedInstall(ClearTheStreets, 0x4444B0);
-    // RH_ScopedInstall(CreateAttackWave, 0x444810);
-    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
-    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);
-    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);
-    RH_ScopedInstall(EndGangWar, 0x4464C0);
-    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);
-    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);
-    RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);
-    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
-    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);
-    RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);
-    RH_ScopedInstall(PickZoneToAttack, 0x443B00);
-    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);
-    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
-    RH_ScopedInstall(SetGangWarsActive, 0x446570);
-    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
-    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
-    RH_ScopedInstall(StartOffensiveGangWar, 0x446050);
-    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
-    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
-    RH_ScopedInstall(TellGangMembersTo, 0x444530);
-    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
-    // RH_ScopedInstall(Update, 0x446610);
-    RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0);
+    RH_ScopedInstall(InitAtStartOfGame, 0x443920);                     // +
+    RH_ScopedInstall(AddKillToProvocation, 0x443950);                  // ?
+    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);                    //
+    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);           //
+    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);            //
+    RH_ScopedInstall(CheerVictory, 0x444040);                          //
+    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);    //
+    RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       //
+    // RH_ScopedInstall(CreateAttackWave, 0x444810);                   //
+    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);                  //
+    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);           //
+    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);                   //
+    RH_ScopedInstall(EndGangWar, 0x4464C0);                            //
+    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);                //
+    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);                        //
+    RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);          //
+    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);         //
+    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);              //
+    RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);          //
+    RH_ScopedInstall(PickZoneToAttack, 0x443B00);                      //
+    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);               //
+    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);               //
+    RH_ScopedInstall(SetGangWarsActive, 0x446570);                     //
+    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);       //
+    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);                 //
+    RH_ScopedInstall(StartOffensiveGangWar, 0x446050);                 //
+    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);       //
+    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);                  //
+    RH_ScopedInstall(TellGangMembersTo, 0x444530);                     //
+    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);      //
+    // RH_ScopedInstall(Update, 0x446610);                             //
+    RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0); //
+    RH_ScopedInstall(Load, 0x5D3EB0);                                  //
+    RH_ScopedInstall(Save, 0x5D5530);                                  //
 }
 
 // 0x5D3EB0
 bool CGangWars::Load() {
-    return plugin::CallAndReturn<bool, 0x5D3EB0>();
+    // return plugin::CallAndReturn<bool, 0x5D3EB0>();
 
     size_t size;
     CGangWarsSaveStructure gwss{};
@@ -71,7 +71,7 @@ bool CGangWars::Load() {
 
 // 0x5D5530
 bool CGangWars::Save() {
-    return plugin::CallAndReturn<bool, 0x5D5530>();
+    // return plugin::CallAndReturn<bool, 0x5D5530>();
 
     size_t size = sizeof(CGangWarsSaveStructure);
     CGangWarsSaveStructure gwss{};
@@ -99,14 +99,18 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
     if (pedType != PED_TYPE_GANG1 && pedType != PED_TYPE_GANG3)
         return;
 
-    if (NumSpecificZones == 0)
+    if (NumSpecificZones == 0) {
         Provocation += 1.0f;
+        return;
+    }
 
-    for (auto i = 0; i < NumSpecificZones; i++) {
-        auto zoneInfo = CTheZones::GetZoneInfo(CTheZones::GetNavigationZone(aSpecificZones[i]));
+    for (auto& zone : std::span { aSpecificZones.data(), (size_t)NumSpecificZones }) {
+        auto zoneInfo = CTheZones::GetZoneInfo(CTheZones::GetNavigationZone(zone));
 
-        if (zoneInfo->GangDensity[pedType - PED_TYPE_GANG1] != 0)
+        if (zoneInfo->GangDensity[pedType - PED_TYPE_GANG1] != 0) {
             Provocation += 1.0f;
+            return;
+        }
     }
 }
 
@@ -114,18 +118,19 @@ void CGangWars::AddKillToProvocation(ePedType pedType) {
 bool CGangWars::AttackWaveOvercome() {
     auto pedsNearPlayer = 0u, pedsLiving = 0u;
 
-    for (auto&& ped : GetPedPool()->GetAllValid()) {
-        if (!ped.bPartOfAttackWave)
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        auto ped = GetPedPool()->GetAt(i);
+        if (ped && !ped->bPartOfAttackWave)
             continue;
 
-        if (ped.IsStateDying()) {
-            ped.bPartOfAttackWave = false;
-            ped.SetCharCreatedBy(PED_GAME);
+        if (ped->IsStateDying()) {
+            ped->bPartOfAttackWave = false;
+            ped->SetCharCreatedBy(PED_GAME);
             continue;
         }
 
         pedsLiving++;
-        if (DistanceBetweenPoints2D(ped.GetPosition2D(), FindPlayerCoors()) < 45.0f) {
+        if (DistanceBetweenPoints2D(ped->GetPosition2D(), FindPlayerCoors()) < 45.0f) {
             pedsNearPlayer++;
         }
     }
@@ -186,11 +191,12 @@ void CGangWars::ClearSpecificZonesToTriggerGangWar() {
 
 // 0x4444B0
 void CGangWars::ClearTheStreets() {
-    for (auto&& ped : GetPedPool()->GetAllValid()) {
-        if (ped.IsPlayer() || !ped.IsCivilian())
+    for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
+        auto ped = GetPedPool()->GetAt(i);
+        if (!ped || ped->IsPlayer() || !ped->IsCivilian())
             continue;
 
-        if (auto task = ped.GetTaskManager().Find<CTaskComplexWander>()) {
+        if (auto task = ped->GetTaskManager().Find<CTaskComplexWander>()) {
             task->m_nMoveState = PEDMOVE_SPRINT;
         }
     }
@@ -484,7 +490,7 @@ bool CGangWars::PickZoneToAttack() {
         if (!zoneInfo)
             continue;
 
-        if ((float)zone->m_fX1 <= 2500.0f && (float)zone->m_fX2 >= 2500.0f && (float)zone->m_fY1 <= -1666.0f && (float)zone->m_fY2 >= -1666.0f)
+        if ((float)zone->m_fX1 <= 2500.0f && (float)zone->m_fX2 >= 2500.0f && (float)zone->m_fY1 <= -1666.0f && (float)zone->m_fY2 >= -1666.0f) // todo:
             continue;
 
         if (zoneInfo->GangDensity[GANG_GROVE] <= 15)
@@ -493,7 +499,11 @@ bool CGangWars::PickZoneToAttack() {
         if (CTheZones::Calc2DDistanceBetween2Zones(enemyGangZone, zone) < 10.0f) {
             pZoneToFightOver = zone;
             pZoneInfoToFightOver = zoneInfo;
-            PointOfAttack = CVector{(float)(zone->m_fX1 + zone->m_fX2) / 2.0f, (float)(zone->m_fY1 + zone->m_fY2) / 2.0f, 10.0f};
+            PointOfAttack = CVector{
+                (float)(zone->m_fX1 + zone->m_fX2) / 2.0f,
+                (float)(zone->m_fY1 + zone->m_fY2) / 2.0f,
+                10.0f
+            };
 
             auto enemyGangZoneInfo = CTheZones::GetZoneInfo(enemyGangZone);
             Gang1 = (enemyGangZoneInfo->GangDensity[GANG_BALLAS] > enemyGangZoneInfo->GangDensity[GANG_VAGOS]) ? GANG_BALLAS : GANG_VAGOS;
@@ -508,10 +518,11 @@ bool CGangWars::PickZoneToAttack() {
 
 // 0x445E20
 void CGangWars::ReleaseCarsInAttackWave() {
-    for (auto&& vehicle : GetVehiclePool()->GetAllValid()) {
-        if (vehicle.vehicleFlags.bPartOfAttackWave) {
-            vehicle.vehicleFlags.bPartOfAttackWave = false;
-            vehicle.SetVehicleCreatedBy(1);
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); ++i) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
+            vehicle->vehicleFlags.bPartOfAttackWave = false;
+            vehicle->SetVehicleCreatedBy(1);
         }
     }
 }
@@ -684,36 +695,37 @@ void CGangWars::SwitchGangWarsActive() {
 void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
     // return plugin::Call<0x444530, bool>(isGangWarEnding);
 
-    for (auto&& ped : GetPedPool()->GetAllValid()) {
-        if (ped.IsPlayer())
+    for (auto i = 0; i < GetPedPool()->GetSize(); ++i) {
+        auto ped = GetPedPool()->GetAt(i);
+        if (ped->IsPlayer())
             continue;
 
-        if (!ped.IsGangster() || ped.m_nPedType == PED_TYPE_GANG2)
+        if (!ped->IsGangster() || ped->m_nPedType == PED_TYPE_GANG2)
             continue;
 
         if (!isGangWarEnding) {
             auto player = FindPlayerPed();
             auto task = new CTaskComplexKillPedOnFoot(player, -1, 0, 0, 0, 2);
             CEventScriptCommand esc(TASK_PRIMARY_PRIMARY, task, false);
-            ped.GetEventGroup().Add(&esc);
+            ped->GetEventGroup().Add(&esc);
 
             continue;
         }
 
-        if (ped.IsInVehicle()) {
+        if (ped->IsInVehicle()) {
             CTask* task;
-            if (!ped.IsInVehicleAsPassenger()) {
-                task = new CTaskComplexCarDriveWander(ped.GetVehicleIfInOne(), DRIVING_STYLE_STOP_FOR_CARS, 10.0f);
+            if (!ped->IsInVehicleAsPassenger()) {
+                task = new CTaskComplexCarDriveWander(ped->GetVehicleIfInOne(), DRIVING_STYLE_STOP_FOR_CARS, 10.0f);
             } else {
-                task = new CTaskSimpleCarDrive(ped.GetVehicleIfInOne());
+                task = new CTaskSimpleCarDrive(ped->GetVehicleIfInOne());
             }
             CEventScriptCommand event(TASK_PRIMARY_PRIMARY, task, false);
-            ped.GetEventGroup().Add(&event);
+            ped->GetEventGroup().Add(&event);
         }
 
         auto task = new CTaskComplexWanderGang(PEDMOVE_WALK, CGeneral::GetRandomNumberInRange(0, 8), 5000, true, 0.5f);
         CEventScriptCommand event(TASK_PRIMARY_PRIMARY, task, false);
-        ped.GetEventGroup().Add(&event);
+        ped->GetEventGroup().Add(&event);
     }
 }
 
