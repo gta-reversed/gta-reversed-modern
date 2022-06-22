@@ -228,7 +228,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
     auto nodePos = ThePaths.GetPathNode(node)->GetNodeCoors();
     auto playerPos = FindPlayerCoors();
-    if (DistanceBetweenPoints2D(nodePos, playerPos) <= 40.0f)
+    if (DistanceBetweenPoints2D(playerPos, nodePos) <= 40.0f)
         return false;
 
     auto pedCount = static_cast<uint32>(10.0f * (0.4f * Difficulty + 0.6f));
@@ -588,7 +588,7 @@ void CGangWars::StartDefensiveGangWar() {
         Difficulty = TerritoryUnderControlPercentage;
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
         State2 = WAR_NOTIFIED;
-        FightTimer = static_cast<int32>(DistanceBetweenPoints2D(FindPlayerCoors(), PointOfAttack) * 200.0f + 240'000.0f);
+        FightTimer = static_cast<int32>(DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) * 200.0f + 240'000.0f);
         RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
 
         switch (Gang1) {
@@ -883,7 +883,7 @@ void CGangWars::Update() {
         if (State2 != NO_ATTACK) {
             switch (State2) {
             case WAR_NOTIFIED:
-                if (DistanceBetweenPoints2D(playerPos, PointOfAttack) >= 70.0f) {
+                if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 70.0f) {
                     FightTimer -= CTimer::GetTimeStepInMS();
 
                     if (FightTimer < 0) {
@@ -967,7 +967,7 @@ void CGangWars::Update() {
         }
 
         if (State2 != NO_ATTACK) {
-            if (DistanceBetweenPoints2D(playerPos, PointOfAttack) >= 150.0f) {
+            if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 150.0f) {
                 bPlayerIsCloseby = false;
             } else if (!bPlayerIsCloseby) {
                 CVector unused;
