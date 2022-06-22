@@ -121,7 +121,7 @@ bool CGangWars::AttackWaveOvercome() {
 
     for (auto i = 0; i < GetPedPool()->GetSize(); i++) {
         auto ped = GetPedPool()->GetAt(i);
-        if (ped && !ped->bPartOfAttackWave)
+        if (!ped || !ped->bPartOfAttackWave)
             continue;
 
         if (ped->IsStateDying()) {
@@ -696,7 +696,7 @@ void CGangWars::TellGangMembersTo(bool isGangWarEnding) {
 
     for (auto i = 0; i < GetPedPool()->GetSize(); ++i) {
         auto ped = GetPedPool()->GetAt(i);
-        if (ped->IsPlayer())
+        if (!ped || ped->IsPlayer())
             continue;
 
         if (!ped->IsGangster() || ped->m_nPedType == PED_TYPE_GANG2)
