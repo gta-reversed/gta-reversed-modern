@@ -23,9 +23,9 @@ void CGangWars::InjectHooks() {
 
     RH_ScopedInstall(InitAtStartOfGame, 0x443920);                     // +
     RH_ScopedInstall(AddKillToProvocation, 0x443950);                  // ?
-    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);                    //
-    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);           //
-    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);            //
+    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);                    // +
+    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);           // +
+    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);            // +
     RH_ScopedInstall(CheerVictory, 0x444040);                          //
     RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);    //
     RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       //
@@ -124,6 +124,7 @@ bool CGangWars::AttackWaveOvercome() {
             continue;
 
         if (ped->IsStateDying()) {
+            ped->bDonePositionOutOfCollision = false;
             ped->bPartOfAttackWave = false;
             ped->SetCharCreatedBy(PED_GAME);
             continue;
@@ -152,9 +153,10 @@ bool CGangWars::CanPlayerStartAGangWarHere(CZoneInfo* zoneInfo) {
         return true;
 
     // inline?
-    for (auto& zone : CTheZones::NavigationZoneArray) {
-        if (zoneInfo == CTheZones::GetZoneInfo(&zone))
+    for (auto& zone : std::span{ CTheZones::NavigationZoneArray, (size_t)NumSpecificZones }) {
+        if (zoneInfo == CTheZones::GetZoneInfo(&zone)) {
             return true;
+        }
     }
 
     return false;
