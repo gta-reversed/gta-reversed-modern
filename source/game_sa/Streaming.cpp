@@ -177,14 +177,6 @@ uint32 GetModelFromInfo(CStreamingInfo* info) {
     return info - CStreaming::ms_aInfoForModel;
 }
 
-CStreamingInfo& CStreaming::GetInfo(uint32 modelId) {
-    return ms_aInfoForModel[modelId];
-}
-
-bool CStreaming::IsRequestListEmpty() {
-    return ms_pEndRequestedList->GetPrev() == ms_pStartRequestedList;
-}
-
 // 0x409650
 CLink<CEntity*>* CStreaming::AddEntity(CEntity* entity) {
     switch (entity->GetType()) {
@@ -227,7 +219,7 @@ uint32 CStreaming::AddImageToList(const char* fileName, bool bNotPlayerImg) {
 }
 
 // 0x40C520
-void CStreaming::AddLodsToRequestList(const CVector& point, uint32 streamingFlags) {
+void CStreaming::AddLodsToRequestList(const CVector& point, int32 streamingFlags) {
     CWorld::IncrementCurrentScanCode();
 
     const float minX = point.x - CRenderer::ms_fFarClipPlane;
@@ -248,7 +240,7 @@ void CStreaming::AddLodsToRequestList(const CVector& point, uint32 streamingFlag
 }
 
 // 0x40D3F0
-void CStreaming::AddModelsToRequestList(const CVector& point, uint32 streamingFlags) {
+void CStreaming::AddModelsToRequestList(const CVector& point, int32 streamingFlags) {
     CWorld::IncrementCurrentScanCode();
 
     const float fRadius = CGame::CanSeeOutSideFromCurrArea() ? 80.0f : 40.0f;
@@ -721,7 +713,7 @@ void CStreaming::DeleteAllRwObjects() {
 
 // 0x409760
 // Function name is a little misleading, as it deletes the first entity it can.
-bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, uint32 streamingFlags) {
+bool CStreaming::DeleteLeastUsedEntityRwObject(bool bNotOnScreen, int32 streamingFlags) {
     const float fCameraFarPlane = RwCameraGetFarClipPlane(TheCamera.m_pRwCamera);
     CPlayerPed* player = FindPlayerPed();
 
@@ -1364,7 +1356,7 @@ void CStreaming::RequestBigBuildings(const CVector& point) {
 
 // 0x40A080
 // Request model @ `posn` with size `size` in the img `imgId`.
-void CStreaming::RequestFile(uint32 modelId, int32 posn, uint32 size, int32 imgId, uint32 streamingFlags) {
+void CStreaming::RequestFile(uint32 modelId, int32 posn, uint32 size, int32 imgId, int32 streamingFlags) {
     auto& info = GetInfo(modelId);
     const uint32 blockOffset = (imgId << 24) | posn;
     if (info.GetCdSize() && info.GetCdPosn() == blockOffset && info.GetCdSize() == size) {
@@ -1391,7 +1383,7 @@ void CStreaming::RequestFilesInChannel(int32 chIdx) {
 // 0x4087E0
 // Request a given model to be loaded.
 // Can be called on an already requested model to add `PRIORITY_REQUEST` flag
-void CStreaming::RequestModel(int32 modelId, uint32 streamingFlags)
+void CStreaming::RequestModel(int32 modelId, int32 streamingFlags)
 {
     CStreamingInfo& info = GetInfo(modelId);
 
@@ -1480,7 +1472,7 @@ void CStreaming::RequestTxdModel(int32 slot, int32 streamingFlags) {
 }
 
 // 0x408C70
-void CStreaming::RequestVehicleUpgrade(int32 modelId, uint32 streamingFlags)
+void CStreaming::RequestVehicleUpgrade(int32 modelId, int32 streamingFlags)
 {
     RequestModel(modelId, streamingFlags);
     if (const auto other = CVehicleModelInfo::ms_linkedUpgrades.FindOtherUpgrade(modelId); other != -1)
@@ -2256,7 +2248,7 @@ void CStreaming::RemoveInappropriatePedModels() {
 
 // 0x40CFD0
 // The name is misleading: It just removes the first model with no references.
-bool CStreaming::RemoveLeastUsedModel(uint32 streamingFlags) {
+bool CStreaming::RemoveLeastUsedModel(int32 streamingFlags) {
     auto streamingInfo = ms_pEndLoadedList->GetPrev();
     for (; streamingInfo != ms_startLoadedList; streamingInfo = streamingInfo->GetPrev()) {
         const auto modelId = GetModelFromInfo(streamingInfo);

@@ -90,8 +90,8 @@ public:
     static void MakeEnemyGainInfluenceInZone(int32 gangId, int32 density);
     static bool MakePlayerGainInfluenceInZone(float removeMult);
 
-    static bool PedStreamedInForThisGang(int32 gangId);
-    static bool PickStreamedInPedForThisGang(int32 gangId, int32& outPedId);
+    static bool PedStreamedInForThisGang(eGangID gangId);
+    static bool PickStreamedInPedForThisGang(eGangID gangId, int32& outPedId);
     static bool PickZoneToAttack();
 
     static void ReleaseCarsInAttackWave();

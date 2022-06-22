@@ -26,20 +26,21 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(AttackWaveOvercome, 0x445B30);                    // +
     RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);           // +
     RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);            // +
-    RH_ScopedInstall(CheerVictory, 0x444040);                          //
-    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);    //
-    RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       //
+    RH_ScopedInstall(CheerVictory, 0x444040);                          // +
+    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);    // +
+    RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       // +
     // RH_ScopedInstall(CreateAttackWave, 0x444810);                   //
-    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);                  //
-    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);           //
-    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);                   //
-    RH_ScopedInstall(EndGangWar, 0x4464C0);                            //
-    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);                //
-    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);                        //
+    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);                  // +
+    RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);             // ?
+    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);           // +
+    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);                   // +
+    RH_ScopedInstall(EndGangWar, 0x4464C0);                            // +
+    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);                // +
+    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);                        // +
     RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);          //
-    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);         //
-    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);              //
-    RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);          //
+    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);         // +
+    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);              // +
+    RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);          // +-
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);                      //
     RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);               //
     RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);               //
@@ -211,8 +212,8 @@ bool CGangWars::CreateAttackWave(int32 warFerocity, int32 waveID) {
 
 // 0x4453D0
 bool CGangWars::CreateDefendingGroup(int32 unused) {
-    if (!PedStreamedInForThisGang(Gang1)) {
-        auto group = CPopulation::GetPedGroupId((ePopcycleGroup)Gang1, 0);
+    if (!PedStreamedInForThisGang(static_cast<eGangID>(Gang1))) {
+        auto group = CPopulation::GetGangGroupId(static_cast<eGangID>(Gang1));
         CStreaming::RequestModel(CPopulation::GetPedGroupModelId(group, 0), STREAMING_KEEP_IN_MEMORY);
 
         return false;
@@ -234,7 +235,7 @@ bool CGangWars::CreateDefendingGroup(int32 unused) {
 
     int32 outPedId;
     for (auto i = 0u; i < pedCount; i++) {
-        if (!PickStreamedInPedForThisGang(Gang1, outPedId))
+        if (!PickStreamedInPedForThisGang(static_cast<eGangID>(Gang1), outPedId))
             continue;
 
         auto angle = (float)i * TWO_PI / (float)pedCount;
@@ -338,11 +339,11 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
     TimeTillNextAttack = std::min(TimeTillNextAttack - 240'000.0f, 30'000.0f);
 }
 
-// inlined
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
     auto enemyDensity = zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS];
-    return zoneInfo->GangDensity[GANG_GROVE] > enemyDensity;
+    auto playerDensity = zoneInfo->GangDensity[GANG_GROVE];
+    return playerDensity > enemyDensity;
 }
 
 // 0x4439C0
@@ -392,8 +393,9 @@ void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 density) {
 
     pZoneInfoToFightOver->GangDensity[gangId] += density;
 
-    if (!DoesPlayerControlThisZone(pZoneInfoToFightOver))
+    if (!DoesPlayerControlThisZone(pZoneInfoToFightOver)) {
         CStats::IncrementStat(STAT_TERRITORIES_LOST, 1.0f);
+    }
 }
 
 // 0x445E80
@@ -401,13 +403,12 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
     bool doesControlInitial = DoesPlayerControlThisZone(pZoneInfoToFightOver);
     uint8 totalEnemyDensity = 0u;
 
-    // Suggestion (Izzotop): What you think?
     // for all gangs except grove
-    auto OPG = {
+    static constexpr eGangID gangs[] = {
         GANG_BALLAS, GANG_VAGOS, GANG_RIFA, GANG_DANANGBOYS, GANG_MAFIA, GANG_TRIAD, GANG_AZTECAS,
         GANG_UNUSED1, GANG_UNUSED2
     };
-    for (auto gang : OPG) {
+    for (auto gang : gangs) {
         auto& density = pZoneInfoToFightOver->GangDensity[gang];
         auto densityInitial = density;
 
@@ -427,26 +428,25 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
 }
 
 // 0x4439D0
-bool CGangWars::PedStreamedInForThisGang(int32 gangId) {
-    auto groupId = CPopulation::GetPedGroupId((ePopcycleGroup)gangId, 0);
+bool CGangWars::PedStreamedInForThisGang(eGangID gangId) {
+    auto groupId = CPopulation::GetGangGroupId(gangId, 0);
     auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-
     if (numPeds <= 0)
         return false;
 
-    for (auto i = 0; i < numPeds; i++) {
-        if (!CStreaming::GetInfo(*CPopulation::m_PedGroups[i]).IsLoaded())
+    for (auto group : std::span{ CPopulation::m_PedGroups, (size_t)numPeds }) {
+        if (!CStreaming::GetInfo(*group).IsLoaded()) {
             return true;
+        }
     }
 
     return false;
 }
 
 // 0x443A20
-bool CGangWars::PickStreamedInPedForThisGang(int32 gangId, int32& outPedId) {
-    auto groupId = CPopulation::GetPedGroupId((ePopcycleGroup)(gangId + 18), 0); // todo: magic number
+bool CGangWars::PickStreamedInPedForThisGang(eGangID gangId, int32& outPedId) {
+    auto groupId = CPopulation::GetGangGroupId(gangId);
     auto numPeds = CPopulation::GetNumPedsInGroup(groupId);
-
     if (groupId <= 0)
         return false;
 

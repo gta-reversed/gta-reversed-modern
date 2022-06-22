@@ -13,7 +13,6 @@ float& CPopulation::PedDensityMultiplier = *(float*)0x8D2530;
 int32& CPopulation::m_AllRandomPedsThisType = *(int32*)0x8D2534;
 uint32& CPopulation::MaxNumberOfPedsInUse = *(uint32*)0x8D2538;
 uint32& CPopulation::NumberOfPedsInUseInterior = *(uint32*)0x8D253C;
-tPedGroupTranslationData* CPopulation::m_TranslationArray = (tPedGroupTranslationData*)0x8D2540;
 CLoadedCarGroup& CPopulation::m_LoadedBoats = *(CLoadedCarGroup*)0xC0E998;
 CLoadedCarGroup& CPopulation::m_InAppropriateLoadedCars = *(CLoadedCarGroup*)0xC0E9C8;
 CLoadedCarGroup& CPopulation::m_AppropriateLoadedCars = *(CLoadedCarGroup*)0xC0E9F8;
