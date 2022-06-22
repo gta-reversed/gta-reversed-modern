@@ -49,9 +49,9 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(StartDefensiveGangWar, 0x444300);                 // +
     RH_ScopedInstall(StartOffensiveGangWar, 0x446050);                 //
     RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);       // +
-    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);                  //
+    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);                  // +
     RH_ScopedInstall(TellGangMembersTo, 0x444530);                     //
-    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);      //
+    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);      // +
     // RH_ScopedInstall(Update, 0x446610);                             //
     RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0); //
     RH_ScopedInstall(Load, 0x5D3EB0);                                  //
@@ -685,7 +685,7 @@ void CGangWars::StrengthenPlayerInfluenceInZone(int32 density) {
     }
 }
 
-// unused (0x4465F0)
+// 0x4465F0
 void CGangWars::SwitchGangWarsActive() {
     SetGangWarsActive(!bGangWarsActive);
 }
@@ -734,10 +734,7 @@ void CGangWars::TellStreamingWhichGangsAreNeeded(uint32& gangsBitFlags) {
     if (State2 == NO_ATTACK)
         return;
 
-    auto coors = FindPlayerCoors();
-    CVector2D delta = { coors.x - PointOfAttack.x, coors.y - PointOfAttack.y };
-
-    if (delta.Magnitude() < 150.0f) {
+    if (DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) < 150.0f) {
         gangsBitFlags |= 1 << Gang1;
     }
 }
