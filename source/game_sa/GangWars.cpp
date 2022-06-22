@@ -31,7 +31,7 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       // +
     // RH_ScopedInstall(CreateAttackWave, 0x444810);                   //
     RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);                  // +
-    RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);             // ?
+    RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);             // +
     RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);           // +
     RH_ScopedInstall(DontCreateCivilians, 0x4439C0);                   // +
     RH_ScopedInstall(EndGangWar, 0x4464C0);                            // +
@@ -42,13 +42,13 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);              // +
     RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);          // +-
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);                      //
-    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);               //
-    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);               //
-    RH_ScopedInstall(SetGangWarsActive, 0x446570);                     //
-    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);       //
-    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);                 //
+    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);               // +
+    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);               // +
+    RH_ScopedInstall(SetGangWarsActive, 0x446570);                     // +
+    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);       // +
+    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);                 // +
     RH_ScopedInstall(StartOffensiveGangWar, 0x446050);                 //
-    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);       //
+    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);       // +
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);                  //
     RH_ScopedInstall(TellGangMembersTo, 0x444530);                     //
     RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);      //
@@ -342,8 +342,8 @@ void CGangWars::DoStuffWhenPlayerVictorious() {
 // 0x443AE0
 bool CGangWars::DoesPlayerControlThisZone(CZoneInfo* zoneInfo) {
     auto enemyDensity = zoneInfo->GangDensity[GANG_BALLAS] + zoneInfo->GangDensity[GANG_VAGOS];
-    auto playerDensity = zoneInfo->GangDensity[GANG_GROVE];
-    return playerDensity > enemyDensity;
+    auto groveDensity = zoneInfo->GangDensity[GANG_GROVE];
+    return groveDensity != 0 && groveDensity >= enemyDensity;
 }
 
 // 0x4439C0
@@ -400,7 +400,7 @@ void CGangWars::MakeEnemyGainInfluenceInZone(int32 gangId, int32 density) {
 
 // 0x445E80
 bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
-    bool doesControlInitial = DoesPlayerControlThisZone(pZoneInfoToFightOver);
+    bool controlledBefore = DoesPlayerControlThisZone(pZoneInfoToFightOver);
     uint8 totalEnemyDensity = 0u;
 
     // for all gangs except grove
@@ -420,7 +420,7 @@ bool CGangWars::MakePlayerGainInfluenceInZone(float removeMult) {
         totalEnemyDensity += density;
     }
 
-    if (!doesControlInitial && DoesPlayerControlThisZone(pZoneInfoToFightOver)) {
+    if (!controlledBefore && DoesPlayerControlThisZone(pZoneInfoToFightOver)) {
         CStats::IncrementStat(STAT_TERRITORIES_TAKEN_OVER, 1.0f);
     }
 
@@ -579,7 +579,6 @@ void CGangWars::SetGangWarsActive(bool active) {
 void CGangWars::SetSpecificZoneToTriggerGangWar(int32 zoneId) {
     aSpecificZones[NumSpecificZones] = zoneId;
     NumSpecificZones++;
-
     CTheZones::FillZonesWithGangColours(false);
 }
 
@@ -674,16 +673,14 @@ void CGangWars::StartOffensiveGangWar() {
 
 // 0x445F50
 void CGangWars::StrengthenPlayerInfluenceInZone(int32 density) {
-    auto& groveDensity = pZoneInfoToFightOver->GangDensity[GANG_GROVE]; // ref
-    auto enemyDensity = pZoneInfoToFightOver->GangDensity[GANG_BALLAS] + pZoneInfoToFightOver->GangDensity[GANG_VAGOS];
+    bool controlledBefore = DoesPlayerControlThisZone(pZoneInfoToFightOver);
 
-    bool controlledBefore = groveDensity != 0 && groveDensity > enemyDensity;
-
+    auto& groveDensity = pZoneInfoToFightOver->GangDensity[GANG_GROVE];
     if (groveDensity < 55u) { // todo: magic number
         groveDensity = std::min(groveDensity + density, 55);
     }
 
-    if (!controlledBefore && groveDensity != 0 && groveDensity > enemyDensity) {
+    if (!controlledBefore && DoesPlayerControlThisZone(pZoneInfoToFightOver)) {
         CStats::IncrementStat(STAT_TERRITORIES_TAKEN_OVER, 1.0f);
     }
 }
