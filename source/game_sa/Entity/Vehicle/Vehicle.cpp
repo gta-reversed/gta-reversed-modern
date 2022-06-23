@@ -212,7 +212,7 @@ void CVehicle::InjectHooks()
     // RH_ScopedInstall(DoBladeCollision, 0x6E2E50);
     // RH_ScopedInstall(AddVehicleUpgrade, 0x6E3290);
     // RH_ScopedInstall(SetupUpgradesAfterLoad, 0x6E3400);
-    // RH_ScopedInstall(GetPlaneWeaponFiringStatus, 0x6E38A0);
+    // RH_ScopedInstall(GetPlaneWeaponFiringStatus, 0x6E3440);
     // RH_ScopedInstall(ProcessWeapons, 0x6E3950);
     // RH_ScopedInstall(DoFixedMachineGuns, 0x73F400);
     // RH_ScopedInstall(FireFixedMachineGuns, 0x73DF00);
@@ -3078,7 +3078,7 @@ void CVehicle::SetupUpgradesAfterLoad()
     ((void(__thiscall*)(CVehicle*))0x6E3400)(this);
 }
 
-// 0x6E38A0
+// 0x6E3440
 void CVehicle::GetPlaneWeaponFiringStatus(bool& status, eOrdnanceType& ordnanceType)
 {
     ((void(__thiscall*)(CVehicle*, bool&, eOrdnanceType&))0x6E3440)(this, status, ordnanceType);
