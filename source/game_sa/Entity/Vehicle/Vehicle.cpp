@@ -2446,63 +2446,66 @@ void CVehicle::SetTransmissionRotation(RwFrame* component, float arg1, float arg
 // 0x6DBCE0
 void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastWaterImmersionDepth, bool bCollidedWithWorld, bool bPostCollision)
 {
-    CVector vecBuoyancyTurnPoint;
-    CVector vecBuoyancyForce;
+    CVector vecBuoyancyTurnPoint{};
+    CVector vecBuoyancyForce{};
     if (!mod_Buoyancy.ProcessBuoyancyBoat(this, m_fBuoyancyConstant, &vecBuoyancyTurnPoint, &vecBuoyancyForce, bCollidedWithWorld)) {
         physicalFlags.bSubmergedInWater = false;
-        if (IsSubBoat())
+        if (IsSubBoat()) {
             AsBoat()->m_nBoatFlags.bOnWater = false;
-
+        }
         return;
     }
 
     bool bOnWater = false;
-    vehicleFlags.bIsDrowning = false;
+    // FIX_BUGS ? vehicleFlags.bIsDrowning = false;
     if (CTimer::GetTimeStep() * m_fMass * 0.0008F >= vecBuoyancyForce.z) {
         physicalFlags.bSubmergedInWater = false;
-    }
-    else {
+    } else {
         physicalFlags.bSubmergedInWater = true;
         bOnWater = true;
 
         if (GetUp().z < -0.6F
-            && fabs(m_vecMoveSpeed.x) < 0.05F
-            && fabs(m_vecMoveSpeed.y) < 0.05F) {
-
+            && std::fabs(m_vecMoveSpeed.x) < 0.05F
+            && std::fabs(m_vecMoveSpeed.y) < 0.05F
+        ) {
             vehicleFlags.bIsDrowning = true;
             if (m_pDriver) {
                 m_pDriver->physicalFlags.bTouchingWater = true;
-                if (m_pDriver->IsPlayer())
+                if (m_pDriver->IsPlayer()) {
                     m_pDriver->AsPlayer()->HandlePlayerBreath(true, 1.0F);
-                else
-                {
-                    auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
+                } else {
                     auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
-                    if (damageEvent.AffectsPed(m_pDriver))
+                    if (damageEvent.AffectsPed(m_pDriver)) {
+                        auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
                         pedDamageResponseCalc.ComputeDamageResponse(m_pDriver, damageEvent.m_damageResponse, true);
-                    else
+                    } else {
                         damageEvent.m_damageResponse.m_bDamageCalculated = true;
+                    }
 
                     m_pDriver->GetEventGroup().Add(&damageEvent, false);
                 }
             }
         }
     }
+    vehicleFlags.bIsDrowning = false; // see above
 
+    // 0x6DBF0A
     auto vecUsedBuoyancyForce = vecBuoyancyForce;
     auto fImmersionDepth = mod_Buoyancy.m_fEntityWaterImmersion;
     if (m_nModelIndex == MODEL_SKIMMER
         && GetUp().z < -0.5F
-        && fabs(m_vecMoveSpeed.x) < 0.2F
-        && fabs(m_vecMoveSpeed.y) < 0.2F) {
-
+        && std::fabs(m_vecMoveSpeed.x) < 0.2F
+        && std::fabs(m_vecMoveSpeed.y) < 0.2F
+    ) {
         vecUsedBuoyancyForce *= 0.03F;
     }
     CPhysical::ApplyMoveForce(vecUsedBuoyancyForce);
 
-    if (bCollidedWithWorld)
+    if (bCollidedWithWorld) {
         CPhysical::ApplyTurnForce(vecBuoyancyForce * 0.4F, vecBuoyancyTurnPoint);
+    }
 
+    // 0x6DC00B
     if (m_nModelIndex == MODEL_SKIMMER) {
         auto fCheckedMass = CTimer::GetTimeStep() * m_fMass;
         if (m_f2ndSteerAngle != 0.0F
@@ -2515,24 +2518,21 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
             bOnWater = false;
 
             auto fTurnForceMult = GetForward().z * m_fTurnMass * -0.00017F * vecBuoyancyForce.z;
-            auto vecTurnForceUsed = GetForward();
-            vecTurnForceUsed *= fTurnForceMult;
-            CPhysical::ApplyTurnForce(vecTurnForceUsed, GetUp());
+            CPhysical::ApplyTurnForce(GetForward() * fTurnForceMult, GetUp());
 
-            auto fMoveForceMult = DotProduct(m_vecMoveSpeed, GetForward()) * -0.5F * m_fMass;
-            auto vecMoveForceUsed = GetForward();
-            vecMoveForceUsed *= fMoveForceMult;
-            CPhysical::ApplyMoveForce(vecMoveForceUsed);
+            auto fMoveForceMult = DotProduct(m_vecMoveSpeed, GetForward()) / -2.0f * m_fMass;
+            CPhysical::ApplyMoveForce(GetForward() * fMoveForceMult);
 
-            if (m_f2ndSteerAngle == 0.0F) {
-                m_f2ndSteerAngle = CTimer::GetTimeInMS() + 300.0F;
+            if (m_f2ndSteerAngle == 0.0F) { // todo: missing checks for CTimer 0x6DC195 ?
+                m_f2ndSteerAngle = (float)CTimer::GetTimeInMS() + 300.0F;
             }
-            else if (m_f2ndSteerAngle <= CTimer::GetTimeInMS()) {
+            else if (m_f2ndSteerAngle <= (float)CTimer::GetTimeInMS()) {
                 m_f2ndSteerAngle = 0.0F;
             }
         }
     }
 
+    // 0x6DC1E2
     if (!bPostCollision && bOnWater && GetUp().z > 0.0F) {
         auto fMoveForce = m_vecMoveSpeed.SquaredMagnitude() * boatHandling->m_fAqPlaneForce * CTimer::GetTimeStep() * vecBuoyancyForce.z * 0.5F;
         if (m_nModelIndex == MODEL_SKIMMER)
@@ -2558,12 +2558,14 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
         pad = m_pDriver->AsPlayer()->GetPadFromPlayer();
     }
 
+    // 0x6DC3AF
     if (GetUp().z > -0.6F) {
         float fMoveSpeed = 1.0F;
-        if (fabs(m_fGasPedal) <= 0.05F)
-            fMoveSpeed = CVector2D(m_vecMoveSpeed).Magnitude();
+        if (std::fabs(m_fGasPedal) <= 0.05F) {
+            fMoveSpeed = m_vecMoveSpeed.Magnitude2D();
+        }
 
-        if (fabs(m_fGasPedal) > 0.05F || fMoveSpeed > 0.01F) {
+        if (std::fabs(m_fGasPedal) > 0.05F || fMoveSpeed > 0.01F) {
             if (IsSubBoat() && bOnWater && fMoveSpeed > 0.05F) {
                 //GetColModel(); Unused call
                 AsBoat()->AddWakePoint(GetPosition());
@@ -2576,12 +2578,12 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     fTractionLoss *= 0.5F;
 
                 fTraction = 1.0F - fTractionLoss;
-                fTraction = clamp(fTraction, 0.0F, 1.0F);
+                fTraction = std::clamp(fTraction, 0.0F, 1.0F);
             }
 
             auto fSteerAngleChange = -(fTraction * m_fSteerAngle);
-            auto fSteerAngleSin = sin(fSteerAngleChange);
-            auto fSteerAngleCos = cos(fSteerAngleChange);
+            auto fSteerAngleSin = std::sin(fSteerAngleChange);
+            auto fSteerAngleCos = std::cos(fSteerAngleChange);
 
             const auto& vecBoundingMin = CEntity::GetColModel()->m_boundBox.m_vecMin;
             CVector vecThrustPoint(0.0F, vecBoundingMin.y * boatHandling->m_fThrustY, vecBoundingMin.z * boatHandling->m_fThrustZ);
@@ -2589,20 +2591,20 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
 
             auto vecWorldThrustPos = GetPosition() + vecTransformedThrustPoint;
             float fWaterLevel;
-            CWaterLevel::GetWaterLevel(vecWorldThrustPos.x, vecWorldThrustPos.y, vecWorldThrustPos.z, &fWaterLevel, 1, nullptr);
+            CWaterLevel::GetWaterLevel(vecWorldThrustPos, fWaterLevel, true); // warn: result not checked
             if (vecWorldThrustPos.z - 0.5F >= fWaterLevel) {
                 if (IsSubBoat())
                     AsBoat()->m_nBoatFlags.bMovingOnWater = false;
             }
             else {
                 auto fThrustDepth = fWaterLevel - vecWorldThrustPos.z + 0.5F;
-                fThrustDepth = std::min(fThrustDepth * fThrustDepth, 1.0F);
+                fThrustDepth = std::min(sq(fThrustDepth), 1.0F);
 
                 if (IsSubBoat())
                     AsBoat()->m_nBoatFlags.bMovingOnWater = true;
 
                 bool bIsSlowingDown = false;
-                auto fGasState = fabs(m_fGasPedal);
+                auto fGasState = std::fabs(m_fGasPedal);
                 if (fGasState < 0.01F || m_nModelIndex == MODEL_SKIMMER) {
                     bIsSlowingDown = true;
                 }
@@ -2610,7 +2612,7 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     if (fGasState < 0.5F)
                         bIsSlowingDown = true;
 
-                    auto fSteerAngle = fabs(m_fSteerAngle);
+                    auto fSteerAngle = std::fabs(m_fSteerAngle);
                     CVector vecSteer(-fSteerAngleSin, fSteerAngleCos, -fSteerAngle);
                     CVector vecSteerMoveForce = Multiply3x3(GetMatrix(), vecSteer);
                     vecSteerMoveForce *= fThrustDepth * m_fGasPedal * 40.0F * m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_fMass;
@@ -2649,7 +2651,6 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                     auto fTractionLoss = DotProduct(m_vecMoveSpeed, GetForward()) * m_pHandlingData->m_fTractionLoss;
                     fTractionLoss = std::min(fTractionLoss, m_fTurnMass * 0.01F);
 
-                    auto fGasState = fabs(m_fGasPedal);
                     if (fGasState > 0.01F) {
                         fTractionLoss *= (0.55F - fGasState);
                         if (m_nStatus == eEntityStatus::STATUS_PLAYER)
@@ -2658,9 +2659,9 @@ void CVehicle::ProcessBoatControl(tBoatHandlingData* boatHandling, float* fLastW
                             fTractionLoss *= 5.0F;
                     }
 
-                    if (m_fGasPedal < 0.0F && fTractionLoss > 0.0F
-                        || m_fGasPedal > 0.0F && fTractionLoss < 0.0F) {
-
+                    if (m_fGasPedal < 0.0f && fTractionLoss > 0.0f ||
+                        m_fGasPedal > 0.0f && fTractionLoss < 0.0f
+                    ) {
                         fTractionLoss *= -1.0F;
                     }
 
