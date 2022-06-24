@@ -328,7 +328,7 @@ void CFire::ProcessFire() {
             if (!vehicle)
                 continue;
 
-            if (DistanceBetweenPoints(vehicle->GetPosition(), m_vecPosition) >= 2.0f)
+            if (DistanceBetweenPoints(m_vecPosition, vehicle->GetPosition()) >= 2.0f)
                 continue;
 
             if (vehicle->IsSubBMX()) {
@@ -347,7 +347,7 @@ void CFire::ProcessFire() {
             if (!obj)
                 continue;
 
-            if (DistanceBetweenPoints(obj->GetPosition(), m_vecPosition) >= 3.0f)
+            if (DistanceBetweenPoints(m_vecPosition, obj->GetPosition()) >= 3.0f)
                 continue;
 
             obj->ObjectFireDamage(CTimer::GetTimeStep() * 8.0f, m_pEntityCreator);
@@ -378,7 +378,7 @@ void CFire::ProcessFire() {
     if (m_pFxSystem) {
         float unused;
         const float fFractPart = std::modf(m_fStrength, &unused); // R* way: m_fStrength - (float)(int)m_fStrength
-        m_pFxSystem->SetConstTime(true, std::min(CTimer::GetTimeInMS() / 3500.0f, fFractPart));
+        m_pFxSystem->SetConstTime(true, std::min((float)CTimer::GetTimeInMS() / 3500.0f, fFractPart));
     }
 
     if (createdByScript || (HasTimeToBurn() && IsNotInRemovalDistance())) {

@@ -237,7 +237,7 @@ void CCamera::ApplyVehicleCameraTweaks(CVehicle* vehicle) {
 
 // 0x50A9F0
 void CCamera::CamShake(float strength, CVector from) {
-    auto dist = DistanceBetweenPoints(GetActiveCamera().m_vecSource, from);
+    auto dist = DistanceBetweenPoints(from, GetActiveCamera().m_vecSource);
     dist = std::clamp(dist, 0.0f, 100.0f);
 
     float percentShakeForce = 1.0f - dist / 100.f;
