@@ -2,6 +2,7 @@
 
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
+#include "Gamma.h"
 
 /*!
  * @addr 0x57FD70
@@ -49,7 +50,7 @@ bool CMenuManager::CheckRedefineControlInput() {
 // value: -1 or 1
 // 0x573440
 void CMenuManager::CheckSliderMovement(int8 value) {
-    return plugin::CallMethod<0x573440, CMenuManager*, int8>(this, value);
+    //return plugin::CallMethod<0x573440, CMenuManager*, int8>(this, value);
 
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];
@@ -62,6 +63,8 @@ void CMenuManager::CheckSliderMovement(int8 value) {
         m_PrefsBrightness += value * 24.19f;
 #endif
         m_PrefsBrightness = std::clamp(m_PrefsBrightness, 0, 384);
+
+        gamma.SetGamma(m_PrefsBrightness / 512.0f, false);
         break;
     case MENU_ACTION_RADIO_VOL: {
         m_nRadioVolume += 4 * value;
@@ -86,14 +89,20 @@ void CMenuManager::CheckSliderMovement(int8 value) {
         SaveSettings();
         break;
     }
-    case MENU_ACTION_MOUSE_SENS:
-        // todo: [0.00813f; 0.0055f]
-        CCamera::m_fMouseAccelHorzntl;
+    case MENU_ACTION_MOUSE_SENS: {
+        // todo: [0.00813f; 0.0055f]; min value is changed by 0x84ED80.
+
+        static float& minMouseAccel = *reinterpret_cast<float*>(0xBA672C);
+
+        float val = (value / 3000.0f) + CCamera::m_fMouseAccelHorzntl;
+        CCamera::m_fMouseAccelHorzntl = std::clamp(val, minMouseAccel, 0.005f);
+
 #ifdef FIX_BUGS
         CCamera::m_fMouseAccelVertical = CCamera::m_fMouseAccelHorzntl;
 #endif
         SaveSettings();
         break;
+    }
     default:
         return;
     }
