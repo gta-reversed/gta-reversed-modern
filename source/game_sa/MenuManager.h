@@ -201,7 +201,7 @@ public:
     char   field_1B29;
     int16  field_1B2A;
     int32  field_1B2C;
-    int32  field_1B30;
+    int32  m_nBriefsArrowBlinkTimeMs;
     int16  field_1B34;
     int16  field_1B36;
     int32  field_1B38;

@@ -127,7 +127,58 @@ void CMenuManager::PrintStats() {
 
 // 0x576320
 void CMenuManager::PrintBriefs() {
-    plugin::CallMethod<0x576320, CMenuManager*>(this);
+    CFont::SetColor({255, 255, 255, 255});
+    CFont::SetDropColor({0, 0, 0, 255});
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetFontStyle(FONT_SUBTITLES);
+    CFont::SetScaleForCurrentLanguage(StretchX(0.49f), StretchY(0.7f));
+    CFont::SetDropShadowPosition(1);
+    CFont::SetJustify(false);
+
+    static constexpr size_t BRIEFS_MAX_LINES_ON_SCREEN = 4u;
+
+    // underflow check
+    if (m_nSelectedRow >= m_nSelectedRow - (BRIEFS_MAX_LINES_ON_SCREEN - 1)) {
+        float h = 100.0f;
+        for (auto i = 0u; i < BRIEFS_MAX_LINES_ON_SCREEN; i++) {
+            auto& brief = CMessages::PreviousBriefs[m_nSelectedRow - i];
+            if (!brief.m_pText)
+                continue;
+
+            CMessages::InsertNumberInString(brief.m_pText, brief.m_nNumber, gGxtString);
+            CMessages::InsertStringInString(gGxtString, brief.m_pString);
+            CMessages::InsertPlayerControlKeysInString(gGxtString);
+            CFont::PrintString(StretchX(70.0f), StretchY(h), gGxtString);
+
+            h += 70.0f; // 210 / (BRIEFS_MAX_LINES_ON_SCREEN - 1)
+        }
+    }
+    CFont::SetJustify(false); // redundant
+
+    static bool& drawArrows = *reinterpret_cast<bool*>(0x8CDFF9);
+
+    if (!m_bMapLoaded)
+        return;
+
+    if (CTimer::GetTimeInMSPauseMode() - FrontEndMenuManager.m_nBriefsArrowBlinkTimeMs > 700) {
+        FrontEndMenuManager.m_nBriefsArrowBlinkTimeMs = CTimer::GetTimeInMSPauseMode();
+        drawArrows = !drawArrows;
+    }
+
+    if (!drawArrows)
+        return;
+
+    // up arrow
+    if (m_nSelectedRow < 19u && CMessages::PreviousBriefs[m_nSelectedRow + 1].m_pText) {
+        CSprite2d::Draw2DPolygon(StretchX(50.0f), StretchY(100.0f), StretchX(55.0f), StretchY(110.0f),
+            StretchX(45.0f), StretchY(110.0f), StretchX(50.0f), StretchY(100.0f), {225, 225, 225, 255});
+    }
+
+    // down arrow
+    if (m_nSelectedRow > 3u) {
+        CSprite2d::Draw2DPolygon(StretchX(50.0f), StretchY(348.0f), StretchX(55.0f), StretchY(338.0f),
+            StretchX(45.0f), StretchY(338.0f), StretchX(50.0f), StretchY(348.0f), {225, 225, 225, 255});
+    }
 }
 
 // 0x5746F0
