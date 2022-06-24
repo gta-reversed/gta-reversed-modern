@@ -231,7 +231,7 @@ public:
             uint32 bLowVehicle : 1;                  // Need this for sporty type cars to use low getting-in/out anims
             uint32 bComedyControls : 1;              // Will make the car hard to control (hopefully in a funny way)
             uint32 bWarnedPeds : 1;                  // Has scan and warn peds of danger been processed?
-            uint32 bCraneMessageDone : 1;            // A crane message has been printed for this car allready
+            uint32 bCraneMessageDone : 1;            // A crane message has been printed for this car already
             uint32 bTakeLessDamage : 1;              // This vehicle is stronger (takes about 1/4 of damage)
 
             uint32 bIsDamaged : 1;                   // This vehicle has been damaged and is displaying all its components
@@ -263,7 +263,7 @@ public:
 
             uint32 bAlwaysSkidMarks : 1;             // This vehicle leaves skidmarks regardless of the wheels' states.
             uint32 bEngineBroken : 1;                // Engine doesn't work. Player can get in but the vehicle won't drive
-            uint32 bVehicleCanBeTargetted : 1;       // The ped driving this vehicle can be targetted, (for Torenos plane mission)
+            uint32 bVehicleCanBeTargetted : 1;       // The ped driving this vehicle can be targeted, (for Torenos plane mission)
             uint32 bPartOfAttackWave : 1;            // This car is used in an attack during a gang war
             uint32 bWinchCanPickMeUp : 1;            // This car cannot be picked up by any ropes.
             uint32 bImpounded : 1;                   // Has this vehicle been in a police impounding garage
@@ -276,7 +276,7 @@ public:
             uint32 bMadDriver : 1;                   // This vehicle is driving like a lunatic
             uint32 bUpgradedStereo : 1;              // This vehicle has an upgraded stereo
             uint32 bConsideredByPlayer : 1;          // This vehicle is considered by the player to enter
-            uint32 bPetrolTankIsWeakPoint : 1;       // If false shootong the petrol tank will NOT Blow up the car
+            uint32 bPetrolTankIsWeakPoint : 1;       // If false shooting the petrol tank will NOT Blow up the car
             uint32 bDisableParticles : 1;            // Disable particles from this car. Used in garage.
 
             uint32 bHasBeenResprayed : 1;            // Has been resprayed in a respray garage. Reset after it has been checked.
@@ -291,8 +291,8 @@ public:
     uint8             m_nSecondaryColor;
     uint8             m_nTertiaryColor;
     uint8             m_nQuaternaryColor;
-    char              m_anExtras[2];
-    int16             m_anUpgrades[15];
+    uint8             m_anExtras[2]; // bool?
+    std::array<int16, 15> m_anUpgrades;
     float             m_fWheelScale;
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
@@ -323,8 +323,8 @@ public:
                                                       // 5 = On ignition has been activated
     uint8            m_nOverrideLights : 2;           // uses enum NO_CAR_LIGHT_OVERRIDE, FORCE_CAR_LIGHTS_OFF, FORCE_CAR_LIGHTS_ON
     uint8            m_nWinchType : 2;                // Does this vehicle use a winch?
-    uint8            m_nGunsCycleIndex : 2;           // Cycle through alternate gun hardpoints on planes/helis
-    uint8            m_nOrdnanceCycleIndex : 2;       // Cycle through alternate ordnance hardpoints on planes/helis
+    uint8            m_nGunsCycleIndex : 2;           // Cycle through alternate gun hard-points on planes/helis
+    uint8            m_nOrdnanceCycleIndex : 2;       // Cycle through alternate ordnance hard-points on planes/helis
     uint8            m_nUsedForCover;                 // Has n number of cops hiding/attempting to hid behind it
     uint8            m_nAmmoInClip;                   // Used to make the guns on boat do a reload (20 by default).
     uint8            m_nPacMansCollected;             // initialised, but not used?
@@ -466,8 +466,8 @@ public:
     virtual void VehicleDamage(float damageIntensity, eVehicleCollisionComponent collisionComponent, CEntity* damager, CVector* vecCollisionCoors, CVector* vecCollisionDirection, eWeaponType weapon) { /* Do nothing */ }
     virtual bool CanPedStepOutCar(bool bIgnoreSpeedUpright);
     virtual bool CanPedJumpOutCar(CPed* ped);
-    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
-    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    virtual bool GetTowHitchPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
+    virtual bool GetTowBarPos(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     virtual bool SetTowLink(CVehicle* tractor, bool setMyPosToTowBar) { return false; }
     virtual bool BreakTowLink() { return false; }
     virtual float FindWheelWidth(bool bRear) { return 0.25F; }
@@ -489,7 +489,7 @@ public:
     void CustomCarPlate_TextureDestroy();
     bool CanBeDeleted();
     float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
-    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, uint8& arg2);
+    bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, bool& bDamagedDueToFireOrExplosionOrBullet);
     void ProcessDelayedExplosion();
     bool AddPassenger(CPed* passenger);
     bool AddPassenger(CPed* passenger, uint8 seatNumber);
@@ -544,7 +544,7 @@ public:
     void AddReplacementUpgrade(int32 modelIndex, int32 nodeId);
     void RemoveReplacementUpgrade(int32 nodeId);
     // return upgrade model id or -1 if not present
-    void GetReplacementUpgrade(int32 nodeId);
+    int32 GetReplacementUpgrade(int32 nodeId);
     void RemoveAllUpgrades();
     int32 GetSpareHasslePosId();
     void SetHasslePosId(int32 hasslePos, bool enable);
@@ -714,8 +714,8 @@ private:
     float GetHeightAboveRoad_Reversed();
     bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
     bool CanPedJumpOutCar_Reversed(CPed* ped);
-    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
-    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* veh);
+    bool GetTowHitchPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
+    bool GetTowBarPos_Reversed(CVector& outPos, bool bCheckModelInfo, CVehicle* vehicle);
     bool Save_Reversed();
     bool Load_Reversed();
 };

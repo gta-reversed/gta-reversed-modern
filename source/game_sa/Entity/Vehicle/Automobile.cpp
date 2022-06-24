@@ -2387,7 +2387,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         }
     } else {
         // 0x6A7BE5
-        if (uint8 unused{}; !CanVehicleBeDamaged(damager, weapon, unused)) {
+        if (bool unused{}; !CanVehicleBeDamaged(damager, weapon, unused)) {
             return;
         }
 
