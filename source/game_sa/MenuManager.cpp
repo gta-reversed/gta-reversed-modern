@@ -76,8 +76,8 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(DisplayHelperText, 0x57E240);
     RH_ScopedInstall(SetHelperText, 0x57CD10);
     RH_ScopedInstall(ResetHelperText, 0x57CD30);
-    // + RH_ScopedInstall(MessageScreen, 0x579330);
-    // + RH_ScopedInstall(SmallMessageScreen, 0x574010);
+    RH_ScopedInstall(MessageScreen, 0x579330);
+    RH_ScopedInstall(SmallMessageScreen, 0x574010);
 
     // RH_ScopedInstall(PrintMap, 0x575130);
     // RH_ScopedInstall(PrintStats, 0x574900);
@@ -905,21 +905,16 @@ void CMenuManager::ResetHelperText() {
 
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
-    return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, key, blackBackground, cameraUpdateStarted);
+    const CRect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 
-    const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-    /*
     if (!cameraUpdateStarted) {
-        if (!RsCameraBeginUpdate(Scene.m_pRwCamera)) {
+        if (!RsCameraBeginUpdate(Scene.m_pRwCamera))
             return;
-        }
 
         if (blackBackground) {
-            CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
+            CSprite2d::DrawRect(fullscreen, {0, 0, 0, 255});
         }
     }
-    */
 
     CSprite2d::SetRecipNearClip();
     CSprite2d::InitPerFrame();
@@ -927,7 +922,7 @@ void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cam
     DefinedState2d();
 
     if (blackBackground) {
-        CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
+        CSprite2d::DrawRect(fullscreen, {0, 0, 0, 255});
     }
 
     SmallMessageScreen(key);
@@ -936,8 +931,6 @@ void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cam
 
 // 0x574010
 void CMenuManager::SmallMessageScreen(const char* key) {
-    return plugin::CallMethod<0x574010, CMenuManager*, const char*>(this, key);
-
     CFont::SetBackground(false, false);
     CFont::SetProportional(true);
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
@@ -945,21 +938,18 @@ void CMenuManager::SmallMessageScreen(const char* key) {
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
     CFont::SetDropShadowPosition(0);
-    CFont::SetScale(
-        RsGlobal.maximumWidth  == 640 ? 0.56f : (float)RsGlobal.maximumWidth * 0.00087500003f,
-        RsGlobal.maximumHeight == 448 ? 1.00f : (float)RsGlobal.maximumHeight * 0.002232143f
-    );
+    CFont::SetScale(StretchX(0.56f), StretchY(1.0f));
 
     DrawWindow(
-        CRect(
+        CRect{
             StretchX(95.0f),
             StretchY(125.0f),
             SCREEN_WIDTH - StretchX(95.0f),
             SCREEN_HEIGHT - StretchY(165.0f)
-        ),
+        },
         nullptr,
         0,
-        { 0, 0, 0, 255 },
+        {0, 0, 0, 255},
         false,
         true
     );
@@ -975,7 +965,7 @@ void CMenuManager::SmallMessageScreen(const char* key) {
     char* text = TheText.Get(key);
     if (!TheText.m_bCdErrorLoaded) {
         for (auto& k : { "NOCD", "OPENCD", "WRONGCD", "CDERROR" }) {
-            if (_stricmp(k, key) == 0) {
+            if (!_stricmp(k, key)) {
                 AsciiToGxtChar(TheText.m_szCdErrorText, text);
             }
         }
