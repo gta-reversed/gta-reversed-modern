@@ -69,7 +69,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(CheckFrontEndRightInput, 0x573990);
     // RH_ScopedInstall(CheckForMenuClosing, 0x576B70);
     RH_ScopedInstall(CheckHover, 0x57C4F0);
-    // RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
+    RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);
     // RH_ScopedInstall(CheckCodesForControls, 0x57DB20);
 
     RH_ScopedInstall(DisplaySlider, 0x576860);

@@ -3,6 +3,7 @@
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
 #include "Gamma.h"
+#include <app/app.h>
 
 /*!
  * @addr 0x57FD70
@@ -146,7 +147,50 @@ bool CMenuManager::CheckHover(int32 left, int32 right, int32 top, int32 bottom) 
 
 // 0x57D720
 bool CMenuManager::CheckMissionPackValidMenu() {
-    return plugin::CallMethodAndReturn<bool, 0x57D720, CMenuManager*>(this);
+    CFileMgr::SetDirMyDocuments();
+
+    sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+    auto scr = CFileMgr::OpenFile(gString, "rb");
+    sprintf(gString, "MPACK//MPACK%d//TEXT.GXT", CGame::bMissionPackGame);
+    auto gxt = CFileMgr::OpenFile(gString, "rb");
+
+    CFileMgr::SetDir("");
+
+    if (!scr) {
+        if (gxt) {
+            CFileMgr::CloseFile(gxt);
+        }
+        CTimer::StartUserPause();
+
+        while (true) {
+            MessageLoop();
+            CPad::UpdatePads();
+
+            //                 Load failed!
+            //  The current Mission Pack is not available.
+            // Please recheck that the current Mission Pack
+            //          is installed correctly!
+            //
+            //   Press RETURN to start a new standard game.
+            CMenuManager::MessageScreen("NO_PAK", true, false);
+
+            DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 0);
+            DoRWStuffEndOfFrame();
+            auto pad = CPad::GetPad();
+
+            if (CPad::IsEnterJustPressed() || CPad::IsReturnJustPressed() || pad->IsCrossPressed())
+                break;
+        }
+        CTimer::EndUserPause();
+        CGame::bMissionPackGame = 0;
+        FrontEndMenuManager.DoSettingsBeforeStartingAGame();
+        m_bActivateMenuNextFrame = false;
+
+        return false;
+    }
+
+    CFileMgr::CloseFile(scr);
+    return true;
 }
 
 // 0x57DB20
