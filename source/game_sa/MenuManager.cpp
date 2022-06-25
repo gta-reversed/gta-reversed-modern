@@ -63,10 +63,10 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
 
     RH_ScopedInstall(CheckSliderMovement, 0x573440);
-    // RH_ScopedInstall(CheckFrontEndUpInput, 0x573840);
-    // RH_ScopedInstall(CheckFrontEndDownInput, 0x5738B0);
-    // RH_ScopedInstall(CheckFrontEndLeftInput, 0x573920);
-    // RH_ScopedInstall(CheckFrontEndRightInput, 0x573990);
+    RH_ScopedInstall(CheckFrontEndUpInput, 0x573840);
+    RH_ScopedInstall(CheckFrontEndDownInput, 0x5738B0);
+    RH_ScopedInstall(CheckFrontEndLeftInput, 0x573920);
+    RH_ScopedInstall(CheckFrontEndRightInput, 0x573990);
     // RH_ScopedInstall(CheckForMenuClosing, 0x576B70);
     RH_ScopedInstall(CheckHover, 0x57C4F0);
     RH_ScopedInstall(CheckMissionPackValidMenu, 0x57D720);

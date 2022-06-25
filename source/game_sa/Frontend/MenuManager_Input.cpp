@@ -111,22 +111,26 @@ void CMenuManager::CheckSliderMovement(int8 value) {
 
 // 0x573840
 bool CMenuManager::CheckFrontEndUpInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573840, CMenuManager*>(this);
+    auto pad = CPad::GetPad(m_nPlayerNumber);
+    return CPad::IsUpPressed() || CPad::GetAnaloguePadUp() || pad->IsDPadUpPressed();
 }
 
 // 0x5738B0
 bool CMenuManager::CheckFrontEndDownInput() {
-    return plugin::CallMethodAndReturn<bool, 0x5738B0, CMenuManager*>(this);
+    auto pad = CPad::GetPad(m_nPlayerNumber);
+    return CPad::IsDownPressed() || CPad::GetAnaloguePadDown() || pad->IsDPadDownPressed();
 }
 
 // 0x573920
 bool CMenuManager::CheckFrontEndLeftInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573920, CMenuManager*>(this);
+    auto pad = CPad::GetPad(m_nPlayerNumber);
+    return CPad::IsLeftPressed() || CPad::GetAnaloguePadLeft() || pad->IsDPadLeftPressed();
 }
 
 // 0x573990
 bool CMenuManager::CheckFrontEndRightInput() {
-    return plugin::CallMethodAndReturn<bool, 0x573990, CMenuManager*>(this);
+    auto pad = CPad::GetPad(m_nPlayerNumber);
+    return CPad::IsRightPressed() || CPad::GetAnaloguePadRight() || pad->IsDPadRightPressed();
 }
 
 // 0x576B70
