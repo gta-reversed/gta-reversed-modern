@@ -132,6 +132,7 @@ void CMenuManager::PrintBriefs() {
     CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
     CFont::SetFontStyle(FONT_SUBTITLES);
     CFont::SetScaleForCurrentLanguage(StretchX(0.49f), StretchY(0.7f));
+    CFont::SetWrapx(StretchX(560.0f));
     CFont::SetDropShadowPosition(1);
     CFont::SetJustify(false);
 
