@@ -351,7 +351,7 @@ void CMenuManager::DrawWindowedText(float a2, float a3, float a4, Const char* st
 // 0x57D860
 void CMenuManager::DrawQuitGameScreen() {
     m_bDrawMouse = false;
-    CRect coords{0.0f, 0.0f, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT};
+    CRect coords(0.0f, 0.0f, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
 
     CSprite2d::DrawRect(coords, {0, 0, 0, 255});
     SaveSettings();
