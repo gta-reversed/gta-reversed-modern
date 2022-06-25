@@ -656,7 +656,7 @@ void CMenuManager::SaveStatsToFile() {
     char date[12]{0};
     _strdate_s(date, 12u);
 
-    char* lastMissionPassed = TheText.Get("ITBEG"); // In the Beginning
+    char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
     if (CStats::LastMissionPassedName[0]) {
         lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
     }
@@ -673,15 +673,15 @@ void CMenuManager::SaveStatsToFile() {
                       "size=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
         fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
 
-        fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA")));
+        fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA"))); // Stats
         fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
 
         fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
                       "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
 
         fprintf(file, "<td height=\"40\" colspan=\"2\"> <p><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><stro");
-        fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u));
-        fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));
+        fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
+        fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u)); // LAST MISSION PASSED
 
         fprintf(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
 
@@ -690,7 +690,7 @@ void CMenuManager::SaveStatsToFile() {
                       "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
 
         fprintf(file, "<td height=\"20\" colspan=\"2\"><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\">");
-        fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u));
+        fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
 
         GxtCharStrcpy(gGxtString, CStats::FindCriminalRatingString());
         fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
