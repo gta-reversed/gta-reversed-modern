@@ -580,7 +580,7 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
     CVector2D pos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
-    if (!pos.IsZero()) {
+    if (pos.x != 0.0f && pos.y != 0.0f) {
         RsMouseSetPos(&pos);
     }
 }
