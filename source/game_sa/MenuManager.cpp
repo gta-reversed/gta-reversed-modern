@@ -51,7 +51,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(DrawStandardMenus, 0x5794A0);
     RH_ScopedInstall(DrawWindow, 0x573EE0);
     // RH_ScopedInstall(DrawWindowedText, 0x578F50);
-    // RH_ScopedInstall(DrawQuitGameScreen, 0x57D860);
+    RH_ScopedInstall(DrawQuitGameScreen, 0x57D860);
     // RH_ScopedInstall(DrawControllerScreenExtraText, 0x57D8D0);
     // RH_ScopedInstall(DrawControllerBound, 0x57E6E0);
     // RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300);

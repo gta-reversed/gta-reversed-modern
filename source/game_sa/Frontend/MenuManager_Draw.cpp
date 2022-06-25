@@ -8,6 +8,7 @@
 #include "Pad.h"
 #include "MenuSystem.h"
 #include "PostEffects.h"
+#include <app/platform/platform.h>
 
 // 0x57C290
 void CMenuManager::DrawFrontEnd() {
@@ -349,14 +350,12 @@ void CMenuManager::DrawWindowedText(float a2, float a3, float a4, Const char* st
 
 // 0x57D860
 void CMenuManager::DrawQuitGameScreen() {
-    plugin::CallMethod<0x57D860, CMenuManager*>(this);
-    /*
     m_bDrawMouse = false;
-    CRect coords(0.0, 0.0f, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT);
-    CSprite2d::DrawRect(coords, { 0, 0, 0, 255 });
+    CRect coords{0.0, 0.0f, DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT};
+
+    CSprite2d::DrawRect(coords, {0, 0, 0, 255});
     SaveSettings();
     RsEventHandler(rsQUITAPP, 0);
-     */
 }
 
 // 0x57D8D0

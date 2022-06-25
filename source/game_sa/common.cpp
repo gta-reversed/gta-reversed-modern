@@ -385,6 +385,12 @@ void DoRWStuffEndOfFrame() {
     plugin::Call<0x53D840>();
 }
 
+// todo: move
+// 0x53EC10
+RsEventStatus AppEventHandler(RsEvent nEvent, void* param) {
+    return plugin::CallAndReturn<RsEventStatus, 0x53EC10, RsEvent, void*>(nEvent, param);
+}
+
 // TODO: Check `outName` size (to avoid buffer overflow)
 // 0x5370A0
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
