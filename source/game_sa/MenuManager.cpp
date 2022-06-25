@@ -16,6 +16,7 @@
 #include "Gamma.h"
 #include "VideoMode.h"
 #include "C_PcSave.h"
+#include <app/platform/platform.h>
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 bool& CMenuManager::bInvertMouseX = *(bool*)0xBA6744;
@@ -55,7 +56,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(DrawControllerBound, 0x57E6E0);
     // RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300);
 
-    // RH_ScopedInstall(CentreMousePointer, 0x57C520);
+    RH_ScopedInstall(CentreMousePointer, 0x57C520);
     // RH_ScopedInstall(LoadSettings, 0x57C8F0);
     // RH_ScopedInstall(SaveSettings, 0x57C660);
     // RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
@@ -578,15 +579,10 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
-    plugin::CallMethod<0x57C520, CMenuManager*>(this);
-    /*
-    CVector pos;
-    if (SCREEN_WIDTH / 2.0f SCREEN_HEIGHT / 2.0f) {
-        pos.x = SCREEN_WIDTH / 2.0f;
-        pos.y = SCREEN_HEIGHT / 2.0f;
+    CVector2D pos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+    if (!pos.IsZero()) {
         RsMouseSetPos(&pos);
     }
-    */
 }
 
 // 0x57C8F0
