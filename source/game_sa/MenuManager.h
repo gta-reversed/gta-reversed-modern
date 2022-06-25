@@ -255,7 +255,7 @@ public:
     void SwapTexturesRound(bool slot);
     void UnloadTextures();
 
-    void InitialiseChangedLanguageSettings(bool bReinitControls);
+    void InitialiseChangedLanguageSettings(bool reinitControls);
     bool HasLanguageChanged();
 
     void DoSettingsBeforeStartingAGame();

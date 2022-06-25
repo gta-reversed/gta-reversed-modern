@@ -38,7 +38,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
-    // ??? RH_ScopedInstall(StretchY, 0x573410);
+    RH_ScopedInstall(StretchY, 0x573410);
     // + RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
@@ -263,7 +263,7 @@ void CMenuManager::UnloadTextures() {
 }
 
 // 0x573260
-void CMenuManager::InitialiseChangedLanguageSettings(bool bReinitControls) {
+void CMenuManager::InitialiseChangedLanguageSettings(bool reinitControls) {
     if (!m_bLanguageChanged)
         return;
 
@@ -301,7 +301,7 @@ void CMenuManager::InitialiseChangedLanguageSettings(bool bReinitControls) {
         CLocalisation::SetFrenchGame();
     }
 
-    if (bReinitControls) {
+    if (reinitControls) {
         ControlsManager.ReinitControls();
     }
 }
@@ -349,13 +349,10 @@ float CMenuManager::StretchX(float x) {
 
 // 0x573410
 float CMenuManager::StretchY(float y) {
-    return plugin::CallMethodAndReturn<float, 0x573410, CMenuManager*, float>(this, y);
-
-    // WTF is going with this method
     if (SCREEN_HEIGHT == DEFAULT_SCREEN_HEIGHT)
         return y;
     else
-        return y / DEFAULT_SCREEN_HEIGHT * SCREEN_HEIGHT;
+        return SCREEN_STRETCH_Y(y);
 }
 
 // 0x573680
