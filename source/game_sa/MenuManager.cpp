@@ -58,7 +58,7 @@ void CMenuManager::InjectHooks() {
 
     RH_ScopedInstall(CentreMousePointer, 0x57C520);
     // RH_ScopedInstall(LoadSettings, 0x57C8F0);
-    // RH_ScopedInstall(SaveSettings, 0x57C660);
+    RH_ScopedInstall(SaveSettings, 0x57C660);
     RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
     RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
 
@@ -592,7 +592,65 @@ void CMenuManager::LoadSettings() {
 
 // 0x57C660
 void CMenuManager::SaveSettings() {
-    plugin::CallMethod<0x57C660, CMenuManager*>(this);
+    CFileMgr::SetDirMyDocuments();
+
+    static const uint32 SETTINGS_FILE_HEADER = 6u;
+
+    uint8 constant = 0u; // do not convert this to auto!!!
+    if (auto file = CFileMgr::OpenFile("gta_sa.set", "w+b")) {
+#define WriteSet(x) CFileMgr::Write(file, &x, sizeof(x));
+        // kinda ugly but can't be more uglier than the original version
+
+        WriteSet(SETTINGS_FILE_HEADER);
+        ControlsManager.SaveSettings(file);
+        WriteSet(CCamera::m_fMouseAccelHorzntl);
+        WriteSet(bInvertMouseY);
+        WriteSet(CVehicle::m_bEnableMouseSteering);
+        WriteSet(CVehicle::m_bEnableMouseFlying);
+        WriteSet(m_nSfxVolume);
+        WriteSet(m_nRadioVolume);
+        WriteSet(m_nRadioStation);
+        WriteSet(m_bRadioAutoSelect);
+        WriteSet(m_bRadioEq);
+        WriteSet(m_PrefsBrightness);
+        WriteSet(m_bPrefsMipMapping);
+        WriteSet(m_bTracksAutoScan);
+        WriteSet(m_nPrefsAntialiasing);
+        auto fxQual = g_fx.GetFxQuality();
+        WriteSet(fxQual);
+        constant = 84u;
+        WriteSet(constant);
+        WriteSet(m_fDrawDistance);
+        WriteSet(m_bShowSubtitles);
+        WriteSet(m_bWidescreenOn);
+        WriteSet(m_bPrefsFrameLimiter);
+        WriteSet(m_nPrefsVideoMode);
+        WriteSet(m_nController);
+        WriteSet(m_nPrefsLanguage);
+        WriteSet(m_bHudOn);
+        WriteSet(m_nRadarMode);
+        WriteSet(m_nRadioMode);
+        WriteSet(m_bSavePhotos);
+        constant = 29u;
+        WriteSet(constant);
+        WriteSet(m_bInvertPadX1);
+        WriteSet(m_bInvertPadY1);
+        WriteSet(m_bInvertPadX2);
+        WriteSet(m_bInvertPadY2);
+        WriteSet(m_bSwapPadAxis1);
+        WriteSet(m_bSwapPadAxis2);
+        WriteSet(m_bMapLegend);
+        WriteSet(m_nUserTrackIndex);
+        auto currentSubSystem = RwEngineGetCurrentSubSystem();
+        WriteSet(currentSubSystem);
+        constant = 95u;
+        WriteSet(constant);
+#undef WriteSet
+
+        CFileMgr::CloseFile(file);
+    }
+
+    CFileMgr::SetDir("");
 }
 
 // 0x57DDE0
