@@ -60,7 +60,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(LoadSettings, 0x57C8F0);
     // RH_ScopedInstall(SaveSettings, 0x57C660);
     // RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
-    // RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
+    RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
 
     RH_ScopedInstall(CheckSliderMovement, 0x573440);
     // RH_ScopedInstall(CheckFrontEndUpInput, 0x573840);
@@ -601,8 +601,30 @@ void CMenuManager::SaveStatsToFile() {
 }
 
 // 0x57C490
+// PS2 leftover?
 void CMenuManager::SaveLoadFileError_SetUpErrorScreen() {
-    plugin::CallMethod<0x57C490, CMenuManager*>(this);
+    switch (*(int32*)&s_PcSaveHelper) {
+    case 1:
+    case 2:
+    case 3:
+        SwitchToNewScreen(SCREEN_SAVE_GAME_FAILED);
+        break;
+    case 4:
+    case 5:
+    case 6:
+        SwitchToNewScreen(SCREEN_SAVE_WRITE_FAILED);
+        break;
+    case 7:
+        SwitchToNewScreen(SCREEN_SAVE_FAILED_FILE_ERROR);
+        break;
+    case 8:
+    case 9:
+    case 10:
+        SwitchToNewScreen(SCREEN_SAVE_GAME_DONE);
+        break;
+    default:
+        return;
+    }
 }
 
 // 0x57E240
