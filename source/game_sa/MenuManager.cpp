@@ -59,7 +59,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(CentreMousePointer, 0x57C520);
     // RH_ScopedInstall(LoadSettings, 0x57C8F0);
     // RH_ScopedInstall(SaveSettings, 0x57C660);
-    // RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
+    RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
     RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
 
     RH_ScopedInstall(CheckSliderMovement, 0x573440);
@@ -597,7 +597,106 @@ void CMenuManager::SaveSettings() {
 
 // 0x57DDE0
 void CMenuManager::SaveStatsToFile() {
-    plugin::CallMethod<0x57DDE0, CMenuManager*>(this);
+    CFileMgr::SetDirMyDocuments();
+    char date[12]{0};
+    _strdate_s(date, 12u);
+
+    char* lastMissionPassed = TheText.Get("ITBEG"); // In the Beginning
+    if (CStats::LastMissionPassedName[0]) {
+        lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
+    }
+
+    if (auto file = fopen("stats.html", "w")) {
+        fprintf(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
+        fprintf(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
+
+        fprintf(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
+                      "<tr align=\"center\" valign=\"top\"> \n"
+                      "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
+
+        fprintf(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \n"
+                      "size=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
+        fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
+
+        fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA")));
+        fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
+
+        fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
+                      "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+
+        fprintf(file, "<td height=\"40\" colspan=\"2\"> <p><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><stro");
+        fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u));
+        fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));
+
+        fprintf(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
+
+        fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"ce"
+                      "nter\" valign=\"top\" bgcolor=\"#000000\"> \n"
+                      "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+
+        fprintf(file, "<td height=\"20\" colspan=\"2\"><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\">");
+        fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u));
+
+        GxtCharStrcpy(gGxtString, CStats::FindCriminalRatingString());
+        fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
+        fprintf(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
+
+        for (auto menuItem = 0u; menuItem < 8u; menuItem++) {
+            auto numStatLines = CStats::ConstructStatLine(99999, menuItem);
+
+            fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"25\" cols"
+                          "pan=\"2\"></td> </tr>\n"
+                          "<tr align=\"left\" valign=\"top\"><td height=\"30\" bgcolor=\"#000000\"><font color=\"#009900\" size=\"4\" face="
+                          "\"Arial, Helvetica, sans-serif\"><strong>\n");
+
+            static constexpr const char* strToPrint[] = {
+                "FES_PLA", "FES_MON", "FES_WEA", "FES_GAN", "FES_CRI", "FES_ACH", "FES_MIS", "FES_MSC"
+            };
+            fprintf(file, "%s", GxtCharToAscii(TheText.Get(strToPrint[menuItem]), 0u));
+
+            fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#000000\"> <div align=\"righ"
+                          "t\"><strong><font color=\"#FF0CCC\">\n");
+            if (numStatLines <= 0)
+                continue;
+
+            for (auto stat = 0; stat < numStatLines; stat++) {
+                CStats::ConstructStatLine(stat, menuItem);
+
+                auto str = GxtCharToAscii(gGxtString, 0u);
+                if (*str) {
+                    fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"10\""
+                                    " colspan=\"2\"></td> </tr>\n");
+                }
+
+                fprintf(file, "<tr align=\"left\" valign=\"top\"><td width=\"500\" height=\"22\" bgcolor=\"#555555\"><font color=\"#FFFFFF\""
+                                " size=\"2\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
+
+                fprintf(file, "%s", (*str) ? str : " ");
+
+                fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#555555\"> <div align=\""
+                                "right\"><strong><font color=\"#FFFFFF\">\n");
+                auto val = GxtCharToAscii(gGxtString2, 0u);
+                auto valFormatted = (char*)val;
+
+                // todo. xref: CStats::ConstructStatLine, PrintStats
+                static uint16& unk = *reinterpret_cast<uint16*>(0xB794CC);
+                if (unk) { // stat line formatted in percents?
+                    sprintf(valFormatted, "%0.0f%%", std::min(atoi(val) / 10.0f, 100.0f));
+                }
+
+                for (auto v = valFormatted; *v; v++) {
+                    if (*v == '|') {
+                        *v = -70; // double verticle bar
+                    }
+                }
+                fprintf(file, "%s", valFormatted);
+            }
+        }
+    }
+
+    CFileMgr::SetDir("");
+    m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
+    m_nHelperTextFadingAlpha = 300;
 }
 
 // 0x57C490
