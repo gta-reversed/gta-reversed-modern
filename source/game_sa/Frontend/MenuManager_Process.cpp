@@ -162,7 +162,7 @@ void CMenuManager::ProcessFileActions() {
 }
 
 // 0x576FE0
-void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed) {
+void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed) {
     if (ProcessPCMenuOptions(pressedLR, acceptPressed))
         return;
 
@@ -171,7 +171,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
 
     switch (item->m_nActionType) {
     case MENU_ACTION_BACK:
-        *cancelPressed = true;
+        cancelPressed = true;
         return;
     case MENU_ACTION_YES:
     case MENU_ACTION_NO:

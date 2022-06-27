@@ -331,7 +331,7 @@ public:
     void ProcessStreaming(bool streamAll);
     void ProcessFileActions();
     void ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR);
-    void ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed);
+    void ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed);
     bool ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed);
     void ProcessMissionPackNewGame();
 };
