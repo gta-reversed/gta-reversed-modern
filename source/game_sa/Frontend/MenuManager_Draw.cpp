@@ -12,7 +12,27 @@
 
 // 0x57C290
 void CMenuManager::DrawFrontEnd() {
-    plugin::CallMethod<0x57C290, CMenuManager*>(this);
+    if (m_bDontDrawFrontEnd)
+        return;
+
+    CFont::SetAlphaFade(255.0f);
+    CSprite2d::InitPerFrame();
+    CFont::InitPerFrame();
+    DefinedState2d();
+    SetFrontEndRenderStates();
+
+    m_bRadioAvailable = !AudioEngine.IsRadioRetuneInProgress();
+
+    if (m_nCurrentScreen == SCREEN_INITIAL) {
+        m_nCurrentScreen = (m_bMainMenuSwitch) ? SCREEN_MAIN_MENU : SCREEN_PAUSE_MENU;
+    }
+
+    auto menu = aScreens[m_nCurrentScreen];
+    if (m_nCurrentScreen == SCREEN_NOP && menu.m_aItems[0].m_nActionType == MENU_ACTION_TEXT) {
+        m_nCurrentScreen == SCREEN_START_GAME;
+    }
+
+    DrawBackground();
 }
 
 // NOTSA

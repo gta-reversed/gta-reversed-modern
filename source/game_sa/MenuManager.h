@@ -165,7 +165,7 @@ public:
     int32 field_1AE0;
     int32 field_1AE4;
     char  field_1AE8;
-    char  field_1AE9;
+    char  m_bRadioAvailable; // field_1AE9
     uint8 m_nControllerError;
     bool  m_bScanningUserTracks;
     int32 m_nHelperTextFadingAlpha;
