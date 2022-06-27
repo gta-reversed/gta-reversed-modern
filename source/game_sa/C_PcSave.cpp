@@ -38,7 +38,7 @@ void C_PcSave::PopulateSlotInfo() {
     s_PcSaveHelper.error = eErrorCode::NONE;
 
     for (auto i = 0u; i < std::size(CGenericGameStorage::ms_Slots); ++i) {
-        CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::EMPTY;
+        CGenericGameStorage::ms_Slots[i] = eSlotState::EMPTY;
         CGenericGameStorage::ms_SlotFileName[i][0] = 0;
         CGenericGameStorage::ms_SlotSaveDate[i][0] = 0;
     }
@@ -55,13 +55,13 @@ void C_PcSave::PopulateSlotInfo() {
 
             if (std::string_view{TopLineEmptyFile} != vars.m_szSaveName) {
                 memcpy(CGenericGameStorage::ms_SlotFileName[i], vars.m_szSaveName, 48); // TODO: why 48?
-                CGenericGameStorage::ms_Slots[i] = CGenericGameStorage::eSlotState::IN_USE;
+                CGenericGameStorage::ms_Slots[i] = eSlotState::IN_USE;
                 CGenericGameStorage::ms_SlotFileName[i][24] = 0; // TODO: Why 24?
             }
             CFileMgr::CloseFile(file);
         }
 
-        if (CGenericGameStorage::ms_Slots[i] != CGenericGameStorage::eSlotState::IN_USE) {
+        if (CGenericGameStorage::ms_Slots[i] != eSlotState::IN_USE) {
             continue;
         }
 

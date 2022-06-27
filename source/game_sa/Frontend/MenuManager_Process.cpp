@@ -118,7 +118,6 @@ void CMenuManager::ProcessFileActions() {
         break;
 
     case SCREEN_SAVE_DONE_1:
-        // todo: test saving on MPACKs.
         if (field_1B3E) {
             if (CGame::bMissionPackGame) {
                 CFileMgr::SetDirMyDocuments();
@@ -164,8 +163,6 @@ void CMenuManager::ProcessFileActions() {
 
 // 0x576FE0
 void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed) {
-    return plugin::CallMethod<0x576FE0, CMenuManager*, int8, bool*, bool>(this, pressedLR, cancelPressed, acceptPressed);
-
     if (ProcessPCMenuOptions(pressedLR, acceptPressed))
         return;
 
@@ -193,7 +190,16 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         DoSettingsBeforeStartingAGame();
         return;
     case MENU_ACTION_SAVE_SLOT:
-        // todo:
+        if (item->m_X >= 1 && item->m_X <= 8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem];
+            m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
+
+            if (m_nCurrentScreen == SCREEN_DELETE_GAME && slot != eSlotState::EMPTY) {
+                 SwitchToNewScreen(SCREEN_DELETE_GAME_ASK);
+            } else if (slot == eSlotState::IN_USE) {
+                 SwitchToNewScreen(SCREEN_LOAD_GAME_ASK);
+            }
+        }
         return;
     case MENU_ACTION_STANDARD_GAME:
         CGame::bMissionPackGame = 0;
@@ -204,10 +210,49 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         m_bDontDrawFrontEnd = true;
         return;
     case MENU_ACTION_SAVE_GAME:
-        // todo:
+        if (item->m_X >= 1 && item->m_X <= 8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem];
+            m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
+
+            SwitchToNewScreen(SCREEN_SAVE_WRITE_ASK);
+        }
         return;
     case MENU_ACTION_STAT:
-        // todo:
+        // todo: refactor
+        if (pressedLR != 1) {
+            if (m_nStatsScrollDirection) {
+                if (m_fStatsScrollSpeed != 0.0) {
+                    m_fStatsScrollSpeed = 0.0;
+                    m_nStatsScrollDirection = 0;
+                }
+            } else if (m_fStatsScrollSpeed != 0.0) {
+                if (m_fStatsScrollSpeed == 150.0f) {
+                    m_fStatsScrollSpeed = 20.0;
+                }
+                m_nStatsScrollDirection = 0;
+            } else {
+                m_fStatsScrollSpeed = 150.0;
+                m_nStatsScrollDirection = 0;
+            }
+        } else if (m_nStatsScrollDirection) {
+            if (m_fStatsScrollSpeed == 0.0) {
+                m_fStatsScrollSpeed = 150.0;
+                m_nStatsScrollDirection = 1;
+            } else {
+                if (m_fStatsScrollSpeed == 150.0f) {
+                    m_fStatsScrollSpeed = 20.0;
+                }
+                m_nStatsScrollDirection = 1;
+            }
+        } else {
+            if (m_fStatsScrollSpeed == 0.0) {
+                m_fStatsScrollSpeed = 150.0;
+                m_nStatsScrollDirection = 1;
+            } else {
+                m_fStatsScrollSpeed = 0.0;
+                m_nStatsScrollDirection = 1;
+            }
+        }
         break;
     case MENU_ACTION_INVERT_PAD:
         CPad::bInvertLook4Pad ^= true;
@@ -256,9 +301,21 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         m_bHudOn ^= true;
         SaveSettings();
         return;
-    case MENU_ACTION_LANGUAGE:
-        // todo:
+    case MENU_ACTION_LANGUAGE: {
+        // todo: MORE_LANGUAGES; does this ever execute?
+        auto prevLanguage = m_nPrefsLanguage;
+        if (pressedLR <= 0 && prevLanguage == eLanguage::AMERICAN) {
+            m_nPrefsLanguage = eLanguage::SPANISH;
+        } else if (prevLanguage == eLanguage::SPANISH) {
+            m_nPrefsLanguage = eLanguage::AMERICAN;
+        }
+
+        m_nPreviousLanguage = (eLanguage)-99; // what the fuck
+        m_bLanguageChanged = true;
+        InitialiseChangedLanguageSettings(0);
+        SaveSettings();
         return;
+    }
     default:
         return;
     }
@@ -266,8 +323,6 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
 
 // 0x57CD50
 bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
-    return plugin::CallMethodAndReturn<bool, 0x57CD50, CMenuManager*, int8, uint8>(this, pressedLR, acceptPressed);
-
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];
 
