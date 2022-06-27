@@ -25,10 +25,10 @@ public:
     static void InjectHooks();
 
     static void SetSaveDirectory(const char* path);
-    static void GenerateGameFilename(int32 slot, char* out);
-    static void PopulateSlotInfo();
-    static uint32 SaveSlot(int32 slot);
-    static bool DeleteSlot(int32 slot);
+    void GenerateGameFilename(int32 slot, char* out);
+    void PopulateSlotInfo();
+    uint32 SaveSlot(int32 slot);
+    bool DeleteSlot(int32 slot);
 
 public:
     eErrorCode error;

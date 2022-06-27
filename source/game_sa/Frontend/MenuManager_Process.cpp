@@ -74,7 +74,92 @@ void CMenuManager::ProcessStreaming(bool streamAll) {
 
 // 0x578D60
 void CMenuManager::ProcessFileActions() {
-    plugin::CallMethod<0x578D60, CMenuManager*>(this);
+    switch (m_nCurrentScreen) {
+    case SCREEN_LOAD_FIRST_SAVE:
+        if (field_1B3C) {
+            if (CGenericGameStorage::CheckSlotDataValid(m_bSelectedSaveGame)) {
+                if (!m_bMainMenuSwitch) {
+                    DoSettingsBeforeStartingAGame();
+                }
+
+                m_bDontDrawFrontEnd = true;
+                CGame::bMissionPackGame = false;
+                m_bLoadingData = true;
+            } else {
+                // Load Game
+                //
+                // Load Failed! There was an error while loading the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_SAVED, "FET_LG", "FES_LCE");
+            }
+            field_1B3C = false;
+        } else {
+            field_1B3C = true;
+        }
+        break;
+
+    case SCREEN_DELETE_FINISHED:
+        if (field_1B3D) {
+            if (s_PcSaveHelper.DeleteSlot(m_bSelectedSaveGame)) {
+                s_PcSaveHelper.PopulateSlotInfo();
+                SwitchToNewScreen(SCREEN_DELETE_SUCCESSFUL);
+                m_nCurrentScreenItem = true;
+            } else {
+                // Delete Game
+                //
+                // Deleting Failed! There was an error while deleting the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_SAVED, "FES_DEL", "FES_DEE");
+            }
+            field_1B3D = false;
+        } else {
+            field_1B3D = true;
+        }
+        break;
+
+    case SCREEN_SAVE_DONE_1:
+        // todo: test saving on MPACKs.
+        if (field_1B3E) {
+            if (CGame::bMissionPackGame) {
+                CFileMgr::SetDirMyDocuments();
+                sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+                auto file = CFileMgr::OpenFile(gString, "rb");
+                CFileMgr::SetDir(""); // FIX_BUGS
+
+                if (!file) {
+                    // Save Game
+                    //
+                    // Save failed! The current Mission Pack is not available.
+                    // Please recheck that the current Mission Pack is installed correctly.
+                    return JumpToGenericMessageScreen(SCREEN_GAME_LOADED, "FET_SG", "FES_NIM");
+                } else {
+                    CFileMgr::CloseFile(file);
+                }
+            }
+
+            if (s_PcSaveHelper.SaveSlot(m_bSelectedSaveGame)) {
+                // Save Game
+                //
+                // Save failed! There was an error while saving the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_LOADED, "FET_SG", "FES_CMP");
+            } else {
+                // Save Game
+                //
+                // Save Successful. Select OK to continue.
+                SwitchToNewScreen(SCREEN_SAVE_DONE_2);
+            }
+            s_PcSaveHelper.PopulateSlotInfo();
+
+            field_1B3E = false;
+        } else {
+            field_1B3E = true;
+        }
+        break;
+
+    default:
+        return;
+    }
 }
 
 // 0x576FE0

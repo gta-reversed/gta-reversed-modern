@@ -91,7 +91,7 @@ void CMenuManager::InjectHooks() {
 
     RH_ScopedInstall(Process, 0x57B440);
     RH_ScopedInstall(ProcessStreaming, 0x573CF0);
-    // RH_ScopedInstall(ProcessFileActions, 0x578D60);
+    RH_ScopedInstall(ProcessFileActions, 0x578D60);
     // RH_ScopedInstall(ProcessUserInput, 0x57B480);
     // +- RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
     // +- RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
@@ -154,7 +154,7 @@ void CMenuManager::Initialise() {
     }
     m_nRadioStation = AudioEngine.GetCurrentRadioStationID();
     CFileMgr::SetDir("");
-    C_PcSave::PopulateSlotInfo();
+    s_PcSaveHelper.PopulateSlotInfo();
     CTimer::StartUserPause();
 }
 
@@ -845,7 +845,6 @@ void CMenuManager::SaveStatsToFile() {
             }
         }
     }
-
     CFileMgr::SetDir("");
     m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
     m_nHelperTextFadingAlpha = 300;

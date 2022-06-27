@@ -209,7 +209,7 @@ public:
     int32  field_1B38;
     char   field_1B3C;
     char   field_1B3D;
-    char   field_1B3E;
+    char   field_1B3E; // mpack related
     char   field_1B3F;
     uint32 m_nUserTrackScanningTimeMs;
     char   field_1B44;
