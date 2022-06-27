@@ -40,6 +40,8 @@ class CMenuManager {
     };
 
 public:
+    static constexpr uint32 SETTINGS_FILE_VERSION = 6u;
+
     int8      m_nStatsScrollDirection;
     float     m_fStatsScrollSpeed;
     uint8     m_nSelectedRow; // CMenuSystem
@@ -132,7 +134,7 @@ public:
     int8      m_nController;
     int32     m_nPrefsVideoMode;
     int32     m_nDisplayVideoMode;
-    int32     field_DC; // initialized | not used
+    int32     m_nCurrentRwSubsystem; // initialized | not used
 
     int32     m_nMousePosWinX; // xPos = GET_X_LPARAM(lParam); 0x748323
     int32     m_nMousePosWinY; // yPos = GET_Y_LPARAM(lParam);

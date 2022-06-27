@@ -57,7 +57,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(DrawControllerSetupScreen, 0x57F300);
 
     RH_ScopedInstall(CentreMousePointer, 0x57C520);
-    // RH_ScopedInstall(LoadSettings, 0x57C8F0);
+    RH_ScopedInstall(LoadSettings, 0x57C8F0);
     RH_ScopedInstall(SaveSettings, 0x57C660);
     RH_ScopedInstall(SaveStatsToFile, 0x57DDE0);
     RH_ScopedInstall(SaveLoadFileError_SetUpErrorScreen, 0x57C490);
@@ -584,14 +584,124 @@ void CMenuManager::CentreMousePointer() {
 
 // 0x57C8F0
 void CMenuManager::LoadSettings() {
-    plugin::CallMethod<0x57C8F0, CMenuManager*>(this);
+    CFileMgr::SetDirMyDocuments();
+
+    const auto SetToDefault = [&]() {
+        SetDefaultPreferences(SCREEN_AUDIO_SETTINGS);
+        SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
+        SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
+        SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
+        m_nPrefsVideoMode = 0;
+        m_nPrefsLanguage = eLanguage::AMERICAN;
+        m_nRadioStation = 1;
+    };
+
+    if (auto file = CFileMgr::OpenFile("gta_sa.set", "rb")) {
+        const auto ReadFromFile = [&](auto& ref, size_t size = 0u) {
+            CFileMgr::Read(file, &ref, (!size) ? sizeof(ref) : size);
+        };
+
+        {
+            char buf[29]{0};
+            ReadFromFile(buf, 29u);
+            if (!strncmp(buf, "THIS FILE IS NOT VALID YET", 26u)) {
+                SetToDefault();
+                CFileMgr::CloseFile(file);
+                CFileMgr::SetDir("");
+                return;
+            }
+
+            CFileMgr::Seek(file, 0, 0);
+        }
+
+        uint32 version = 0u;
+        uint8 constants[4]{0u};
+        FxQuality_e fxQuality = FXQUALITY_HIGH;
+        auto previousLang = m_nPrefsLanguage;
+
+        ReadFromFile(version);
+        if (version < SETTINGS_FILE_VERSION || !ControlsManager.LoadSettings(file)) {
+            SetToDefault();
+            CFileMgr::CloseFile(file);
+            CFileMgr::SetDir("");
+            return;
+        }
+
+        ReadFromFile(CCamera::m_fMouseAccelHorzntl);
+        ReadFromFile(bInvertMouseY);
+        ReadFromFile(CVehicle::m_bEnableMouseSteering);
+        ReadFromFile(CVehicle::m_bEnableMouseFlying);
+        ReadFromFile(m_nSfxVolume);
+        ReadFromFile(m_nRadioVolume);
+        ReadFromFile(m_nRadioStation);
+        ReadFromFile(m_bRadioAutoSelect);
+        ReadFromFile(m_bRadioEq);
+        ReadFromFile(m_PrefsBrightness);
+        ReadFromFile(m_bPrefsMipMapping);
+        ReadFromFile(m_bTracksAutoScan);
+        ReadFromFile(m_nDisplayAntialiasing);
+        ReadFromFile(fxQuality);
+        ReadFromFile(constants[0]);
+        ReadFromFile(m_fDrawDistance);
+        ReadFromFile(m_bShowSubtitles);
+        ReadFromFile(m_bWidescreenOn);
+        ReadFromFile(m_bPrefsFrameLimiter);
+        ReadFromFile(m_nDisplayVideoMode);
+        ReadFromFile(m_nController);
+        ReadFromFile(m_nPrefsLanguage);
+        ReadFromFile(m_bHudOn);
+        ReadFromFile(m_nRadarMode);
+        ReadFromFile(m_nRadioMode);
+        ReadFromFile(m_bSavePhotos);
+        ReadFromFile(constants[1]);
+        ReadFromFile(m_bInvertPadX1);
+        ReadFromFile(m_bInvertPadY1);
+        ReadFromFile(m_bInvertPadX2);
+        ReadFromFile(m_bInvertPadY2);
+        ReadFromFile(m_bSwapPadAxis1);
+        ReadFromFile(m_bSwapPadAxis2);
+        ReadFromFile(m_bMapLegend);
+        ReadFromFile(m_nUserTrackIndex);
+        ReadFromFile(m_nCurrentRwSubsystem);
+        ReadFromFile(constants[2]);
+
+        if (constants[0] != 84u || constants[1] != 29u || constants[2] != 95u) {
+            SetToDefault();
+            CFileMgr::CloseFile(file);
+            CFileMgr::SetDir("");
+            return;
+        }
+
+        CCamera::m_bUseMouse3rdPerson = m_nController == 0;
+        CRenderer::ms_lodDistScale = m_fDrawDistance;
+        g_fx.SetFxQuality(fxQuality);
+        gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
+        m_nPrefsAntialiasing = m_nDisplayAntialiasing;
+        m_bDoVideoModeUpdate = true;
+        AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
+        AudioEngine.SetEffectsMasterVolume(m_nSfxVolume);
+        AudioEngine.SetBassEnhanceOnOff(m_bRadioEq);
+        AudioEngine.SetRadioAutoRetuneOnOff(m_bRadioAutoSelect);
+        AudioEngine.RetuneRadio(m_nRadioStation);
+
+        if (previousLang != m_nPrefsLanguage) {
+            field_8C = true;
+            TheText.Load(false);
+            m_bLanguageChanged = true;
+            InitialiseChangedLanguageSettings(false);
+            OutputDebugStringA("The previously saved language is now in use"); // SA
+        } else {
+            field_8C = false;
+        }
+
+        CFileMgr::CloseFile(file);
+    }
+    CFileMgr::SetDir("");
 }
 
 // 0x57C660
 void CMenuManager::SaveSettings() {
     CFileMgr::SetDirMyDocuments();
-
-    static const uint32 SETTINGS_FILE_HEADER = 6u;
 
     if (auto file = CFileMgr::OpenFile("gta_sa.set", "w+b")) {
         // kinda ugly but can't be more uglier than the original version
@@ -599,7 +709,7 @@ void CMenuManager::SaveSettings() {
             CFileMgr::Write(file, &v, (!size) ? sizeof(v) : size);
         };
 
-        WriteToFile(SETTINGS_FILE_HEADER);
+        WriteToFile(SETTINGS_FILE_VERSION);
         ControlsManager.SaveSettings(file);
         WriteToFile(CCamera::m_fMouseAccelHorzntl);
         WriteToFile(bInvertMouseY);
