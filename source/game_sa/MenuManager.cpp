@@ -586,17 +586,20 @@ void CMenuManager::CentreMousePointer() {
 void CMenuManager::LoadSettings() {
     CFileMgr::SetDirMyDocuments();
 
-    const auto SetToDefault = [&]() {
-        SetDefaultPreferences(SCREEN_AUDIO_SETTINGS);
-        SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
-        SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
-        SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
-        m_nPrefsVideoMode = 0;
-        m_nPrefsLanguage = eLanguage::AMERICAN;
-        m_nRadioStation = 1;
-    };
-
     if (auto file = CFileMgr::OpenFile("gta_sa.set", "rb")) {
+        const auto SetToDefaultSettings = [&]() {
+            SetDefaultPreferences(SCREEN_AUDIO_SETTINGS);
+            SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
+            SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
+            SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
+            m_nPrefsVideoMode = 0;
+            m_nPrefsLanguage = eLanguage::AMERICAN;
+            m_nRadioStation = 1;
+
+            CFileMgr::CloseFile(file);
+            CFileMgr::SetDir("");
+        };
+
         const auto ReadFromFile = [&](auto& ref, size_t size = 0u) {
             CFileMgr::Read(file, &ref, (!size) ? sizeof(ref) : size);
         };
@@ -605,10 +608,7 @@ void CMenuManager::LoadSettings() {
             char buf[29]{0};
             ReadFromFile(buf, 29u);
             if (!strncmp(buf, "THIS FILE IS NOT VALID YET", 26u)) {
-                SetToDefault();
-                CFileMgr::CloseFile(file);
-                CFileMgr::SetDir("");
-                return;
+                return SetToDefaultSettings();
             }
 
             CFileMgr::Seek(file, 0, 0);
@@ -621,10 +621,7 @@ void CMenuManager::LoadSettings() {
 
         ReadFromFile(version);
         if (version < SETTINGS_FILE_VERSION || !ControlsManager.LoadSettings(file)) {
-            SetToDefault();
-            CFileMgr::CloseFile(file);
-            CFileMgr::SetDir("");
-            return;
+            return SetToDefaultSettings();
         }
 
         ReadFromFile(CCamera::m_fMouseAccelHorzntl);
@@ -666,10 +663,7 @@ void CMenuManager::LoadSettings() {
         ReadFromFile(constants[2]);
 
         if (constants[0] != 84u || constants[1] != 29u || constants[2] != 95u) {
-            SetToDefault();
-            CFileMgr::CloseFile(file);
-            CFileMgr::SetDir("");
-            return;
+            return SetToDefaultSettings();
         }
 
         CCamera::m_bUseMouse3rdPerson = m_nController == 0;
@@ -704,7 +698,6 @@ void CMenuManager::SaveSettings() {
     CFileMgr::SetDirMyDocuments();
 
     if (auto file = CFileMgr::OpenFile("gta_sa.set", "w+b")) {
-        // kinda ugly but can't be more uglier than the original version
         const auto WriteToFile = [&](auto&& v, size_t size = 0u) {
             CFileMgr::Write(file, &v, (!size) ? sizeof(v) : size);
         };
