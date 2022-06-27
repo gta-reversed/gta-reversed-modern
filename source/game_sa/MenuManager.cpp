@@ -789,7 +789,7 @@ void CMenuManager::SaveStatsToFile() {
         fprintf(file, "<td height=\"20\" colspan=\"2\"><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\">");
         fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
 
-        GxtCharStrcpy(gGxtString, CStats::FindCriminalRatingString());
+        TextCopy(gGxtString, CStats::FindCriminalRatingString());
         fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
         fprintf(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
 

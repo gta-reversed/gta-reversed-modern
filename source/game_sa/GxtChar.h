@@ -44,16 +44,6 @@ GxtChar* GxtCharStrcat(GxtChar* dst, GxtChar* src);
  */
 uint32 GxtCharStrlen(const GxtChar* str);
 
-
-/**
- * Copy GXT null terminated strings
- *
- * @param   dst    pointer to destination buffer containing null-terminated string
- * @param   src    pointer to null-terminated string you wanna copy to destination
- * @return   string pointer to destination buffer //
- */
-GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src);
-
 /**
  * Lowercase null terminated string
  * NOTE: this function does NOT use locale.
@@ -69,3 +59,12 @@ void MakeLowerCase(char* str);
  * @param   src    pointer to null-terminated string you wanna copy
  */
 void TextCopy(GxtChar* dst, const GxtChar* src);
+
+/**
+ * Copy GXT null terminated strings
+ *
+ * @param   dst    pointer to destination buffer containing null-terminated string
+ * @param   src    pointer to null-terminated string you wanna copy to destination
+ * @return  pointer to destination buffer
+ */
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src);

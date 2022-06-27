@@ -81,20 +81,6 @@ uint32 GxtCharStrlen(const GxtChar* str) {
     return len;
 }
 
-// todo: refactor
-GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src) {
-    char v3;      // dl
-    char* i;      // ecx
-
-    v3 = *src;
-    for (i = dst; v3; ++i) {
-        *i = v3;
-        v3 = i[src - dst + 1];
-    }
-    *i = 0;
-    return dst;
-}
-
 void MakeLowerCase(char* str) {
     char* start = str;
     while (*start) {
@@ -113,4 +99,10 @@ void TextCopy(GxtChar* dst, const GxtChar* src) {
         ++dst;
     }
     *dst = '\0';
+}
+
+// 0x718660
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src) {
+    TextCopy(dst, src);
+    return dst;
 }
