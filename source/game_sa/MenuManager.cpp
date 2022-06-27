@@ -38,7 +38,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
-    RH_ScopedInstall(StretchY, 0x573410);
+    RH_ScopedInstall(StretchY, 0x573410, true);
     // + RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
