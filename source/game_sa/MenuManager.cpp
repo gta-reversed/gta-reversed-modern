@@ -593,56 +593,51 @@ void CMenuManager::SaveSettings() {
 
     static const uint32 SETTINGS_FILE_HEADER = 6u;
 
-    uint8 constant = 0u; // do not convert this to auto!!!
     if (auto file = CFileMgr::OpenFile("gta_sa.set", "w+b")) {
-#define WriteSet(x) CFileMgr::Write(file, &x, sizeof(x));
         // kinda ugly but can't be more uglier than the original version
+        const auto WriteToFile = [&](auto&& v, size_t size = 0u) {
+            CFileMgr::Write(file, &v, (!size) ? sizeof(v) : size);
+        };
 
-        WriteSet(SETTINGS_FILE_HEADER);
+        WriteToFile(SETTINGS_FILE_HEADER);
         ControlsManager.SaveSettings(file);
-        WriteSet(CCamera::m_fMouseAccelHorzntl);
-        WriteSet(bInvertMouseY);
-        WriteSet(CVehicle::m_bEnableMouseSteering);
-        WriteSet(CVehicle::m_bEnableMouseFlying);
-        WriteSet(m_nSfxVolume);
-        WriteSet(m_nRadioVolume);
-        WriteSet(m_nRadioStation);
-        WriteSet(m_bRadioAutoSelect);
-        WriteSet(m_bRadioEq);
-        WriteSet(m_PrefsBrightness);
-        WriteSet(m_bPrefsMipMapping);
-        WriteSet(m_bTracksAutoScan);
-        WriteSet(m_nPrefsAntialiasing);
-        auto fxQual = g_fx.GetFxQuality();
-        WriteSet(fxQual);
-        constant = 84u;
-        WriteSet(constant);
-        WriteSet(m_fDrawDistance);
-        WriteSet(m_bShowSubtitles);
-        WriteSet(m_bWidescreenOn);
-        WriteSet(m_bPrefsFrameLimiter);
-        WriteSet(m_nPrefsVideoMode);
-        WriteSet(m_nController);
-        WriteSet(m_nPrefsLanguage);
-        WriteSet(m_bHudOn);
-        WriteSet(m_nRadarMode);
-        WriteSet(m_nRadioMode);
-        WriteSet(m_bSavePhotos);
-        constant = 29u;
-        WriteSet(constant);
-        WriteSet(m_bInvertPadX1);
-        WriteSet(m_bInvertPadY1);
-        WriteSet(m_bInvertPadX2);
-        WriteSet(m_bInvertPadY2);
-        WriteSet(m_bSwapPadAxis1);
-        WriteSet(m_bSwapPadAxis2);
-        WriteSet(m_bMapLegend);
-        WriteSet(m_nUserTrackIndex);
-        auto currentSubSystem = RwEngineGetCurrentSubSystem();
-        WriteSet(currentSubSystem);
-        constant = 95u;
-        WriteSet(constant);
-#undef WriteSet
+        WriteToFile(CCamera::m_fMouseAccelHorzntl);
+        WriteToFile(bInvertMouseY);
+        WriteToFile(CVehicle::m_bEnableMouseSteering);
+        WriteToFile(CVehicle::m_bEnableMouseFlying);
+        WriteToFile(m_nSfxVolume);
+        WriteToFile(m_nRadioVolume);
+        WriteToFile(m_nRadioStation);
+        WriteToFile(m_bRadioAutoSelect);
+        WriteToFile(m_bRadioEq);
+        WriteToFile(m_PrefsBrightness);
+        WriteToFile(m_bPrefsMipMapping);
+        WriteToFile(m_bTracksAutoScan);
+        WriteToFile(m_nPrefsAntialiasing);
+        WriteToFile(g_fx.GetFxQuality());
+        WriteToFile(84u, 1u);
+        WriteToFile(m_fDrawDistance);
+        WriteToFile(m_bShowSubtitles);
+        WriteToFile(m_bWidescreenOn);
+        WriteToFile(m_bPrefsFrameLimiter);
+        WriteToFile(m_nPrefsVideoMode);
+        WriteToFile(m_nController);
+        WriteToFile(m_nPrefsLanguage);
+        WriteToFile(m_bHudOn);
+        WriteToFile(m_nRadarMode);
+        WriteToFile(m_nRadioMode);
+        WriteToFile(m_bSavePhotos);
+        WriteToFile(29u, 1u);
+        WriteToFile(m_bInvertPadX1);
+        WriteToFile(m_bInvertPadY1);
+        WriteToFile(m_bInvertPadX2);
+        WriteToFile(m_bInvertPadY2);
+        WriteToFile(m_bSwapPadAxis1);
+        WriteToFile(m_bSwapPadAxis2);
+        WriteToFile(m_bMapLegend);
+        WriteToFile(m_nUserTrackIndex);
+        WriteToFile(RwEngineGetCurrentSubSystem());
+        WriteToFile(95u, 1u);
 
         CFileMgr::CloseFile(file);
     }
