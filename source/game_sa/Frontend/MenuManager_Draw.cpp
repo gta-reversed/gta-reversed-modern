@@ -363,9 +363,44 @@ void CMenuManager::DrawWindow(const CRect& coords, const char* key, uint8 color,
     }
 }
 
-// 0x578F50
-void CMenuManager::DrawWindowedText(float a2, float a3, float a4, Const char* str, Const char* str1, eFontAlignment alignment) {
-    plugin::CallMethod<0x578F50, CMenuManager*, float, float, float, Const char*, Const char*, eFontAlignment>(this, a2, a3, a4, str, str1, alignment);
+// 0x578F50, untested
+void CMenuManager::DrawWindowedText(float x, float y, float a4, Const char* str, Const char* str2, eFontAlignment alignment) {
+    //CFont::SetWrapx(x + a4 - StretchX(10.0f));
+    CFont::SetRightJustifyWrap(StretchX(10.0f) + a4);
+    CFont::SetCentreSize(a4 - 2.0f * StretchX(10.0f));
+    //CFont::SetFontStyle(FONT_SUBTITLES);
+    //CFont::SetOrientation(alignment);
+    //CFont::SetScale(StretchX(0.7f), StretchY(1.0f));
+
+    CRect rt;
+    CFont::GetTextRect(&rt, x, y, TheText.Get(str2));
+    rt.left -= 4.0f;
+    rt.top += StretchY(22.0f);
+    CSprite2d::DrawRect(rt, {0, 0, 0, 255});
+    CFont::SetColor({225, 225, 225, 255});
+    CFont::SetDropColor({0, 0, 0, 255});
+    CFont::SetEdge(2);
+    CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
+    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetScaleForCurrentLanguage(StretchX(1.1f), StretchY(1.4f));
+    CFont::SetWrapx(rt.right);
+
+    if (str && *str) {
+        CFont::PrintString(rt.left + StretchX(20.0f), rt.bottom - StretchY(16.0f), TheText.Get(str));
+    }
+
+    if (str2 && *str2) {
+        CFont::SetWrapx(x + a4 - StretchX(10.0f));
+        CFont::SetRightJustifyWrap(StretchX(10.0f) + a4);
+        CFont::SetCentreSize(a4 - 2.0f * StretchX(10.0f));
+        CFont::SetFontStyle(FONT_SUBTITLES);
+        CFont::SetOrientation(alignment);
+        CFont::SetScale(StretchX(0.7f), StretchY(1.0f));
+
+        CFont::SetDropShadowPosition(2);
+        CFont::SetDropColor({0, 0, 0, 255});
+        CFont::PrintString(x, y + StretchY(15.0f), TheText.Get(str2));
+    }
 }
 
 // 0x57D860
