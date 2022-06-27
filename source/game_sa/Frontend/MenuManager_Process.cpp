@@ -182,6 +182,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         ProcessMissionPackNewGame();
         return;
     case MENU_ACTION_MPACK:
+        // -1 for 0-based index, additional -1 for skipping the standard game opt?
         m_nMissionPackGameId = m_MissionPacks[m_nCurrentScreenItem - 2].m_Id; // todo: maybe wrong
         SwitchToNewScreen(SCREEN_MISSION_PACK_LOADING_ASK);
         return;
@@ -190,8 +191,8 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         DoSettingsBeforeStartingAGame();
         return;
     case MENU_ACTION_SAVE_SLOT:
-        if (item->m_X >= 1 && item->m_X <= 8) {
-            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem];
+        if (item->m_nType >= 1 && item->m_nType <= 8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem - 1];
             m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
 
             if (m_nCurrentScreen == SCREEN_DELETE_GAME && slot != eSlotState::EMPTY) {
@@ -210,8 +211,8 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         m_bDontDrawFrontEnd = true;
         return;
     case MENU_ACTION_SAVE_GAME:
-        if (item->m_X >= 1 && item->m_X <= 8) {
-            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem];
+        if (item->m_nType >= 1 && item->m_nType <= 8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem - 1];
             m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
 
             SwitchToNewScreen(SCREEN_SAVE_WRITE_ASK);
