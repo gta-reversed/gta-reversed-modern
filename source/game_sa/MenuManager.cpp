@@ -837,7 +837,7 @@ void CMenuManager::DisplayHelperText(const char* key) {
         text = TheText.Get("FEA_SCS"); // USER TRACKS SCANNED SUCCESSFULLY
         break;
     case FEA_STS:
-        text = TheText.Get("FEA_STS"); // STATS SAVED TO 'STATS.HTML'
+        text = TheText.Get("FET_STS"); // STATS SAVED TO 'STATS.HTML'
         break;
     default:
         text = nullptr;
