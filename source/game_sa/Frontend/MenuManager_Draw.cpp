@@ -28,8 +28,8 @@ void CMenuManager::DrawFrontEnd() {
     }
 
     auto menu = aScreens[m_nCurrentScreen];
-    if (m_nCurrentScreen == SCREEN_NOP && menu.m_aItems[0].m_nActionType == MENU_ACTION_TEXT) {
-        m_nCurrentScreen == SCREEN_START_GAME;
+    if (m_nCurrentScreenItem == 0 && menu.m_aItems[0].m_nActionType == MENU_ACTION_TEXT) {
+        m_nCurrentScreenItem = 1;
     }
 
     DrawBackground();
