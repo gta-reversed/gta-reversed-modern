@@ -144,7 +144,7 @@ public:
     int8      m_nPlayerNumber;
     bool      m_bLanguageChanged; // useless?
     int32     field_EC;
-    int32     field_F0;
+    int32*    m_pPressedKey; // any pressed key, in order of CKeyboardState; 1056 means no key pressed
     bool      field_F4; // m_bPreInitialised
 
     union {
@@ -164,8 +164,8 @@ public:
     uint8 m_nMissionPackGameId;
     MPack m_MissionPacks[25];
     bool  m_bDoVideoModeUpdate;
-    int32 field_1AE0;
-    int32 field_1AE4;
+    int32 m_nPressedMouseButton; // used in redefine controls
+    int32 m_nJustDownJoyButton; // used in redefine controls; set via CControllerConfigManager::GetJoyButtonJustDown
     char  field_1AE8;
     char  m_bRadioAvailable; // field_1AE9
     uint8 m_nControllerError;
@@ -180,8 +180,8 @@ public:
     int32 field_1AFC; // m_nOldMousePosY ?
     int32 field_1B00;
     int32 field_1B04;
-    char  field_1B08;
-    char  field_1B09;
+    char  m_bJustOpenedControlRedefWindow;
+    char  field_1B09; // controller
     char  field_1B0A;
     char  field_1B0B;
     int32 field_1B0C;

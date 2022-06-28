@@ -428,9 +428,9 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     case MENU_ACTION_45:
         field_1B14 = 1;
         field_1B09 = 1;
-        field_1B08 = 1;
+        m_bJustOpenedControlRedefWindow = true;
         field_1B0C = m_nCurrentScreenItem;
-        field_F0 = (int32)&field_38;
+        m_pPressedKey = &field_38;
         return true;
     case MENU_ACTION_CONTROLS_MOUSE_INVERT_Y:
         bInvertMouseY = bInvertMouseY == 0;

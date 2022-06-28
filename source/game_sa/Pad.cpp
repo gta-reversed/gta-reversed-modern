@@ -1190,6 +1190,11 @@ bool CPad::DebugMenuJustPressed() {
     return (IsCtrlPressed() && IsStandardKeyJustPressed('M')) || IsF7JustPressed();
 }
 
+// 0x541490
+int GetCurrentKeyPressed(int& keys) {
+    return plugin::CallAndReturn<int, 0x541490, int&>(keys);
+}
+
 IDirectInputDevice8* DIReleaseMouse() {
     return plugin::CallAndReturn<IDirectInputDevice8*, 0x746F70>();
 }

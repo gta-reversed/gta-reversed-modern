@@ -47,7 +47,58 @@ void CMenuManager::RedefineScreenUserInput(bool* accept, bool* cancel) {
  * @addr 0x57E4D0
  */
 bool CMenuManager::CheckRedefineControlInput() {
-    return plugin::CallMethodAndReturn<bool, 0x57E4D0, CMenuManager*>(this);
+    if (field_1B09) {
+        if (m_bJustOpenedControlRedefWindow) {
+            m_bJustOpenedControlRedefWindow = false;
+        } else {
+            GetCurrentKeyPressed(*m_pPressedKey);
+            m_nPressedMouseButton = 0;
+            m_nJustDownJoyButton = 0;
+
+            auto pad = CPad::GetPad();
+            if (pad->IsMouseLButtonPressed()) {
+                m_nPressedMouseButton = 1;
+            } else if (pad->IsMouseRButtonPressed()) {
+                m_nPressedMouseButton = 3;
+            } else if (pad->IsMouseMButtonPressed()) {
+                m_nPressedMouseButton = 2;
+            } else if (pad->IsMouseWheelUpPressed()) {
+                m_nPressedMouseButton = 4;
+            } else if (pad->IsMouseWheelDownPressed()) {
+                m_nPressedMouseButton = 5;
+            } else if (pad->IsMouseBmx1Pressed()) {
+                m_nPressedMouseButton = 6;
+            } else if (pad->IsMouseBmx2Pressed()) {
+                m_nPressedMouseButton = 7;
+            }
+            m_nJustDownJoyButton = ControlsManager.GetJoyButtonJustDown();
+
+            auto code = 0; // todo: enum?
+            if (m_nPressedMouseButton && *m_pPressedKey == 1056) {
+                code = 2;
+            }
+
+            if (field_1B14) {
+                if (field_1B0A) {
+                    AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_SELECT);
+                    field_1B14 = 0;
+                    field_1B0B = 1;
+                    field_1B0A = 0;
+                } else {
+                    if (*m_pPressedKey != 1056 || m_nPressedMouseButton || m_nJustDownJoyButton) {
+                        CheckCodesForControls(code);
+                    }
+                    field_1B15 = 1;
+                }
+            } else {
+                m_pPressedKey = 0;
+                field_1B09 = 0;
+                field_38 = -1;
+                m_bJustOpenedControlRedefWindow = false;
+            }
+        }
+    }
+    return field_EC || m_pPressedKey;
 }
 
 // value: -1 or 1
@@ -235,7 +286,7 @@ void CMenuManager::CheckForMenuClosing() {
 
                 m_fStatsScrollSpeed = 150.0f;
                 SaveSettings();
-                field_F0 = 0;
+                m_pPressedKey = nullptr;
                 field_EC = 0;
                 field_1AE8 = 0;
                 m_bDontDrawFrontEnd = false;

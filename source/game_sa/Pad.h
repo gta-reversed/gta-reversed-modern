@@ -291,7 +291,7 @@ public:
     static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb; }          // 0x57C3C0
     static bool IsMouseLButtonPressed() noexcept   { return MOUSE_IS_PRESSED(lmb); }                                                // 0x4D5A00
     static bool IsMouseRButtonPressed() noexcept   { return MOUSE_IS_PRESSED(rmb); }                                                // 0x572E70
-    static bool IsMouseMPressed() noexcept         { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
+    static bool IsMouseMButtonPressed() noexcept         { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
     static bool IsMouseWheelUpPressed() noexcept   { return MOUSE_IS_PRESSED(wheelUp); }                                            // 0x57C400
     static bool IsMouseWheelDownPressed() noexcept { return MOUSE_IS_PRESSED(wheelDown); }                                          // 0x57C420
     static bool IsMouseBmx1Pressed() noexcept      { return MOUSE_IS_PRESSED(bmx1); }                                               // 0x57C440
@@ -325,6 +325,9 @@ public:
 };
 
 VALIDATE_SIZE(CPad, 0x134);
+
+// return all pressed keys
+int GetCurrentKeyPressed(int& keys);
 
 // todo: move these fucks out
 IDirectInputDevice8* DIReleaseMouse();
