@@ -212,7 +212,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
         m_bDontDrawFrontEnd = true;
         return;
     case MENU_ACTION_SAVE_GAME:
-        if (item->m_nType >= MENU_ENTRY_SAVE_1 && item->m_nType <= MENU_ENTRY_SAVE_1) {
+        if (item->m_nType >= MENU_ENTRY_SAVE_1 && item->m_nType <= MENU_ENTRY_SAVE_8) {
             auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem - 1];
             m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
 
