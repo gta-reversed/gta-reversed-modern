@@ -3,7 +3,9 @@
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
 #include "Gamma.h"
+#include "MenuSystem.h"
 #include <app/app.h>
+#include <app/platform/win/VideoMode.h> // todo
 
 /*!
  * @addr 0x57FD70
@@ -134,8 +136,171 @@ bool CMenuManager::CheckFrontEndRightInput() {
 }
 
 // 0x576B70
-bool CMenuManager::CheckForMenuClosing() {
-    return plugin::CallMethodAndReturn<bool, 0x576B70, CMenuManager*>(this);
+void CMenuManager::CheckForMenuClosing() {
+    const auto CanActivateMenu = [&]() -> bool {
+        if (m_bDontDrawFrontEnd || m_bActivateMenuNextFrame) {
+            return true;
+        }
+
+        if (m_bMenuActive) {
+            switch (m_nCurrentScreen) {
+            case SCREEN_PAUSE_MENU:
+            case SCREEN_GAME_SAVE:
+            case SCREEN_GAME_WARNING_DONT_SAVE:
+                break;
+            default:
+                return false;
+            }
+        }
+
+        if (!CPad::IsEscJustPressed()) {
+            return false;
+        }
+
+        if (CReplay::Mode == MODE_PLAYBACK) {
+            return false;
+        }
+
+        if (TheCamera.m_bWideScreenOn && !m_bMenuAccessWidescreen) {
+            return false;
+        }
+    };
+
+    if (CanActivateMenu()) {
+        if (!AudioEngine.IsRadioRetuneInProgress()) {
+            switch (m_nCurrentScreen) {
+            case SCREEN_SAVE_DONE_1:
+            case SCREEN_DELETE_FINISHED:
+                m_bDontDrawFrontEnd = false;
+                return;
+            default:
+                break;
+            }
+
+            if ((!field_35 || !m_bActivateMenuNextFrame) && !m_bLoadingData) {
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
+                AudioEngine.Service();
+            }
+
+            m_bMenuActive = !m_bMenuActive;
+
+            if (m_bDontDrawFrontEnd) {
+                m_bMenuActive = false;
+            }
+
+            if (m_bActivateMenuNextFrame) {
+                m_bMenuActive = true;
+            }
+
+            if (m_bMenuActive) {
+                if (!field_F4) {
+                    // enter menu
+                    DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+                    DoRWStuffEndOfFrame();
+                    DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+                    DoRWStuffEndOfFrame();
+
+                    auto pad = CPad::GetPad(m_nPlayerNumber);
+                    field_1B34 = pad->DisablePlayerControls;
+                    pad->Clear(false, true);
+                    pad->ClearKeyBoardHistory();
+                    pad->ClearMouseHistory();
+
+                    if (IsVideoModeExclusive()) {
+                        DIReleaseMouse();
+                        InitialiseMouse(false);
+                    }
+                    Initialise();
+                    LoadAllTextures();
+
+                    gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
+                }
+            } else {
+                AudioEngine.StopRadio(nullptr, false);
+                AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_RADIO_RETUNE_STOP);
+                if (m_nSysMenu >= 0u) {
+                    CMenuSystem::SwitchOffMenu(0);
+                    m_nSysMenu = 157;
+                }
+
+                auto pad = CPad::GetPad(m_nPlayerNumber);
+                pad->Clear(false, true);
+                pad->ClearKeyBoardHistory();
+                pad->ClearMouseHistory();
+
+                if (IsVideoModeExclusive()) {
+                    DIReleaseMouse();
+                    InitialiseMouse(true);
+                }
+
+                m_fStatsScrollSpeed = 150.0f;
+                SaveSettings();
+                field_F0 = 0;
+                field_EC = 0;
+                field_1AE8 = 0;
+                m_bDontDrawFrontEnd = false;
+                m_bActivateMenuNextFrame = false;
+                field_1B09 = 0;
+                m_bIsSaveDone = false;
+                UnloadTextures();
+
+                CTimer::EndUserPause();
+                CTimer::Update();
+
+                pad->JustOutOfFrontEnd = true;
+                pad->LastTimeTouched = 0;
+                CPad::GetPad(1)->LastTimeTouched = 0;
+
+                gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
+
+                if (field_F4) {
+                    auto player = FindPlayerPed();
+
+                    if (player->GetActiveWeapon().m_nType != WEAPON_CAMERA
+                        || CTimer::GetTimeInMS() >= player->GetActiveWeapon().m_nTimeForNextShot) {
+                        TheCamera.SetFadeColour(0u, 0u, 0u);
+                        TheCamera.Fade(0.0f, eFadeFlag::FADE_IN);
+                        TheCamera.ProcessFade();
+                        TheCamera.Fade(0.2f, eFadeFlag::FADE_OUT);
+                    }
+                }
+                field_F4 = false;
+                pad->DisablePlayerControls = field_1B34;
+            }
+        }
+    }
+    if (m_bIsSaveDone) {
+        // enter menu 2
+        DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+        DoRWStuffEndOfFrame();
+        DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
+        DoRWStuffEndOfFrame();
+
+        AudioEngine.ReportFrontendAudioEvent(AE_FRONTEND_START);
+        AudioEngine.Service();
+
+        auto pad = CPad::GetPad(m_nPlayerNumber);
+        field_1B34 = pad->DisablePlayerControls;
+        pad->DisablePlayerControls = true;
+        m_bIsSaveDone = false;
+        m_bMenuActive = true;
+        field_F4 = true;
+
+        if (IsVideoModeExclusive()) {
+            DIReleaseMouse();
+            InitialiseMouse(false);
+        }
+
+        Initialise();
+        LoadAllTextures();
+
+        m_nCurrentScreenItem = 0;
+
+        m_nCurrentScreen = (!CCheat::m_bHasPlayerCheated) ? SCREEN_GAME_SAVE : SCREEN_GAME_WARNING_DONT_SAVE;
+    }
+
+    m_bActivateMenuNextFrame = false;
+    m_bDontDrawFrontEnd = false;
 }
 
 // 0x57C4F0

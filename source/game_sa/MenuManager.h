@@ -204,7 +204,7 @@ public:
     int16  field_1B2A;
     int32  field_1B2C;
     int32  m_nBriefsArrowBlinkTimeMs;
-    int16  field_1B34;
+    int16  field_1B34; // CPad::DisablePlayerControls
     int16  field_1B36;
     int32  field_1B38;
     char   field_1B3C;
@@ -298,7 +298,7 @@ public:
     bool CheckFrontEndDownInput();
     bool CheckFrontEndLeftInput();
     bool CheckFrontEndRightInput();
-    bool CheckForMenuClosing();
+    void CheckForMenuClosing();
     bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
     bool CheckMissionPackValidMenu();
     bool CheckCodesForControls(int32);

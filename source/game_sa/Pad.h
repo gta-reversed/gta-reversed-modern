@@ -326,6 +326,10 @@ public:
 
 VALIDATE_SIZE(CPad, 0x134);
 
+// todo: move these fucks out
+IDirectInputDevice8* DIReleaseMouse();
+void InitialiseMouse(bool exclusive);
+
 /*
 Android has 99 funcs
 
