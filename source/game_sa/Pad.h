@@ -326,7 +326,7 @@ public:
 
 VALIDATE_SIZE(CPad, 0x134);
 
-// return all pressed keys
+// return pressed key, in order of CKeyboardState
 int GetCurrentKeyPressed(int& keys);
 
 // todo: move these fucks out
