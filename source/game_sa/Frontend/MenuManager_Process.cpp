@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include <cinttypes>
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
 #include "AudioEngine.h"
@@ -564,5 +565,44 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
 
 // 0x57D520
 void CMenuManager::ProcessMissionPackNewGame() {
-    plugin::CallMethod<0x57D520, CMenuManager*>(this);
+    for (auto mpack : m_MissionPacks) {
+        mpack.m_Id = 0u;
+    }
+
+    auto isAnyAvailable = false;
+    CFileMgr::SetDirMyDocuments();
+    for (auto i = 0u; i < 25u; i++) {
+        sprintf(gString, "MPACK//MPACK%d//MPACK.DAT", i);
+        if (auto file = CFileMgr::OpenFile(gString, "rb")) {
+            // MPACK.DAT file format:
+            //
+            // <ID>#<NAME OF THE MPACK>#
+            // Ex.: '5#Design Your Own Mission#'
+
+            if (!isAnyAvailable) {
+                isAnyAvailable = true;
+            }
+
+            // NOTSA
+            RET_IGNORED(fscanf(file, "%" PRIu8 "#%[^\n\r#]#", &m_MissionPacks[i].m_Id, m_MissionPacks[i].m_Name));
+            CFileMgr::CloseFile(file);
+        }
+    }
+
+    if (isAnyAvailable) {
+        SwitchToNewScreen(SCREEN_SELECT_GAME);
+    } else {
+        SwitchToNewScreen(SCREEN_NEW_GAME_ASK);
+
+        tMenuScreen* screen = &aScreens[m_nCurrentScreen];
+        if (CGame::bMissionPackGame) {
+            // Are you sure you want to start a new standard game?
+            // All current game progress in this Mission Pack will be lost. Proceed?
+            strncpy(screen->m_aItems[0].m_szName, "FESZ_MR", 8u);
+        } else {
+            // Are you sure you want to start a new game?
+            // All current game progress will be lost. Proceed?
+            strncpy(screen->m_aItems[0].m_szName, "FESZ_QR", 8u);
+        }
+    }
 }

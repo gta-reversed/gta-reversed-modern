@@ -95,7 +95,7 @@ void CMenuManager::InjectHooks() {
     // RH_ScopedInstall(ProcessUserInput, 0x57B480);
     RH_ScopedInstall(ProcessMenuOptions, 0x576FE0);
     RH_ScopedInstall(ProcessPCMenuOptions, 0x57CD50);
-    // RH_ScopedInstall(ProcessMissionPackNewGame, 0x57D520);
+    RH_ScopedInstall(ProcessMissionPackNewGame, 0x57D520);
 }
 
 // 0x574350
