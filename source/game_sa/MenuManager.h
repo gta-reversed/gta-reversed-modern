@@ -25,6 +25,12 @@ enum eHelperText : int32 {
     FEA_STS = 6, // STATS SAVED TO 'STATS.HTML'
 };
 
+enum eRadarMode : int32 {
+    MAPS_AND_BLIPS,
+    BLIPS_ONLY,
+    OFF
+};
+
 struct MPack {
     uint8 m_Id;
     char  m_Name[260];
@@ -49,7 +55,7 @@ public:
     bool      m_PrefsUseVibration;
     bool      m_bHudOn;
     char      field_22[2]; // pad
-    int32     m_nRadarMode;
+    eRadarMode m_nRadarMode;
     char      field_28[4];
     int32     m_nTargetBlipIndex; // blip script handle
     uint8     m_nSysMenu; // CMenuSystem

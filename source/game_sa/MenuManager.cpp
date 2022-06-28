@@ -494,7 +494,7 @@ void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
         m_nDisplayAntialiasing           = 1;
         m_bWidescreenOn                  = false;
         m_bMapLegend                     = false;
-        m_nRadarMode                     = 0;
+        m_nRadarMode                     = eRadarMode::MAPS_AND_BLIPS;
         m_nDisplayVideoMode              = m_nPrefsVideoMode;
         m_ShowLocationsBlips             = true;
         m_ShowContactsBlips              = true;

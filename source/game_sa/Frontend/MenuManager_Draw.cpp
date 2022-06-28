@@ -52,7 +52,7 @@ void CMenuManager::DrawBuildInfo() {
     strcpy(buf + strlen(buf), version);
 
     CFont::SetProportional(true);
-    CFont::SetScale(SCREEN_STRETCH_X(0.25f), StretchY(0.5f));
+    CFont::SetScale(StretchX(0.25f), StretchY(0.5f));
     CFont::SetColor({ 255, 255, 255, 100 });
     CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);

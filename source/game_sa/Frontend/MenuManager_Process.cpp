@@ -163,6 +163,10 @@ void CMenuManager::ProcessFileActions() {
 }
 
 // 0x576FE0
+// \param pressedLR Arrow button pressed. <0 for left, >0 for right
+// \param cancelPressed Returns true to go back.
+// \param acceptPressed Is enter pressed. Used for AA mode and resolution
+// \addr 0x57CD50
 void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed) {
     if (ProcessPCMenuOptions(pressedLR, acceptPressed))
         return;
@@ -287,16 +291,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
         m_bMapLegend ^= true;
         return;
     case MENU_ACTION_RADAR_MODE:
-        m_nRadarMode += pressedLR; // todo: refactor
-
-        if (m_nRadarMode < 0) {
-            m_nRadarMode = 2;
-        }
-
-        if (m_nRadarMode > 2) {
-            m_nRadarMode = 0;
-        }
-
+        m_nRadarMode = (eRadarMode)((m_nRadarMode + pressedLR) % 3);
         SaveSettings();
         return;
     case MENU_ACTION_HUD_MODE:
@@ -323,7 +318,9 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
     }
 }
 
-// 0x57CD50
+// \param pressedLR Arrow button pressed. <0 for left, >0 for right
+// \param acceptPressed Is enter pressed. Used for AA mode and resolution
+// \addr 0x57CD50
 bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];
@@ -350,9 +347,16 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         SaveSettings();
         return true;
     case MENU_ACTION_RADAR_MODE:
-        // todo: ?
-        if (++m_nRadarMode > 2) {
-            m_nRadarMode = 0;
+        switch (m_nRadarMode) {
+        case eRadarMode::MAPS_AND_BLIPS:
+            m_nRadarMode = eRadarMode::BLIPS_ONLY;
+            break;
+        case eRadarMode::BLIPS_ONLY:
+            m_nRadarMode = eRadarMode::OFF;
+            break;
+        case eRadarMode::OFF:
+            m_nRadarMode = eRadarMode::MAPS_AND_BLIPS;
+            break;
         }
         SaveSettings();
         return true;
