@@ -403,7 +403,7 @@ bool CMenuManager::CheckMissionPackValidMenu() {
         }
         CTimer::EndUserPause();
         CGame::bMissionPackGame = 0;
-        FrontEndMenuManager.DoSettingsBeforeStartingAGame();
+        DoSettingsBeforeStartingAGame();
         m_bActivateMenuNextFrame = false;
 
         return false;

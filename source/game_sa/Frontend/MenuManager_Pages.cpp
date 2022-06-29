@@ -66,7 +66,7 @@ void CMenuManager::RadarZoomIn() {
     auto x = v5 * v103;
     auto y = v5 * v115;
 
-    if (CTimer::GetTimeInMSPauseMode() - FrontEndMenuManager.field_1B38 <= 20)
+    if (CTimer::GetTimeInMSPauseMode() - field_1B38 <= 20)
         return;
 
     if (m_fMapZoom >= FRONTEND_MAP_RANGE_MAX) {
@@ -161,8 +161,8 @@ void CMenuManager::PrintBriefs() {
     if (!m_bMapLoaded)
         return;
 
-    if (CTimer::GetTimeInMSPauseMode() - FrontEndMenuManager.m_nBriefsArrowBlinkTimeMs > 700) {
-        FrontEndMenuManager.m_nBriefsArrowBlinkTimeMs = CTimer::GetTimeInMSPauseMode();
+    if (CTimer::GetTimeInMSPauseMode() - m_nBriefsArrowBlinkTimeMs > 700) {
+        m_nBriefsArrowBlinkTimeMs = CTimer::GetTimeInMSPauseMode();
         drawArrows = !drawArrows;
     }
 
