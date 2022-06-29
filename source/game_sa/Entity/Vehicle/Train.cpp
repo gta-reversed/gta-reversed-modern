@@ -810,11 +810,8 @@ void CTrain::ProcessControl()
 
         CrossProduct(&GetUp(), &GetRight(), &GetForward());
 
-        uint8 trainNodeLighting = theTrainNode->GetLightingFromCollision();
-        uint8 trainNextNodeLighting = nextTrainNode->GetLightingFromCollision();
-
-        auto fTrainNodeLighting = ScaleLighting(trainNodeLighting, 0.5f);
-        auto fTrainNextNodeLighting = ScaleLighting(trainNextNodeLighting, 0.5f);
+        auto fTrainNodeLighting = theTrainNode->GetLightingFromCollision().GetCurrentLighting();
+        auto fTrainNextNodeLighting = nextTrainNode->GetLightingFromCollision().GetCurrentLighting();
 
         fTrainNodeLighting += (fTrainNextNodeLighting - fTrainNodeLighting) * fTheDistance;
         m_fContactSurfaceBrightness = fTrainNodeLighting;

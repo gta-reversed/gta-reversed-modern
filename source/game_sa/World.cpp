@@ -129,7 +129,6 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
     RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
     RH_ScopedInstall(ClearForRestart, 0x564360);
-    RH_ScopedGlobalInstall(ScaleLighting, 0x59F0C0);
 }
 
 // 0x5631C0
@@ -3034,10 +3033,4 @@ CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
     assert(y < MAX_LOD_PTR_LISTS_Y);
 
     return ms_aLodPtrLists[y][x];
-}
-
-// 0x59F0C0
-float ScaleLighting(uint8 lighting, float scale) {
-    return (float)(lighting & 15) * scale / 15.0f * (1.0f - CCustomBuildingDNPipeline::m_fDNBalanceParam)
-         + (float)(lighting >> 4) * scale / 15.0f * (1.0f * CCustomBuildingDNPipeline::m_fDNBalanceParam);
 }

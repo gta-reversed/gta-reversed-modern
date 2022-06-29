@@ -18,8 +18,7 @@ struct tColLighting {
         night = (ucLighting >> 4) & 0xF;
     }
 
-    // 0x59F0C0
-    float GetCurrentLighting(float fScale = 0.5F) const;
+    [[nodiscard]] float GetCurrentLighting(float fScale = 0.5F) const;
 };
 VALIDATE_SIZE(tColLighting, 0x1);
 
