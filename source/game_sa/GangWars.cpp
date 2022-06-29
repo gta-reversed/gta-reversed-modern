@@ -21,37 +21,37 @@ void CGangWars::InjectHooks() {
     RH_ScopedClass(CGangWars);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(InitAtStartOfGame, 0x443920);                     // +
-    RH_ScopedInstall(AddKillToProvocation, 0x443950);                  // ?
-    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);                    // +
-    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);           // +
-    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);            // +
-    RH_ScopedInstall(CheerVictory, 0x444040);                          // +
-    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);    // +
-    RH_ScopedInstall(ClearTheStreets, 0x4444B0);                       // +
+    RH_ScopedInstall(InitAtStartOfGame, 0x443920);
+    // RH_ScopedInstall(AddKillToProvocation, 0x443950);                  // ?
+    RH_ScopedInstall(AttackWaveOvercome, 0x445B30);
+    RH_ScopedInstall(CalculateTimeTillNextAttack, 0x443DB0);
+    RH_ScopedInstall(CanPlayerStartAGangWarHere, 0x443F80);
+    RH_ScopedInstall(CheerVictory, 0x444040);
+    RH_ScopedInstall(ClearSpecificZonesToTriggerGangWar, 0x443FF0);
+    RH_ScopedInstall(ClearTheStreets, 0x4444B0);
     // RH_ScopedInstall(CreateAttackWave, 0x444810);                   //
-    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);                  // +
-    RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);             // +
-    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);           // +
-    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);                   // +
-    RH_ScopedInstall(EndGangWar, 0x4464C0);                            // +
-    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);                // +
-    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);                        // +
+    RH_ScopedInstall(CreateDefendingGroup, 0x4453D0);
+    RH_ScopedInstall(DoesPlayerControlThisZone, 0x443AE0);
+    RH_ScopedInstall(DoStuffWhenPlayerVictorious, 0x446400);
+    RH_ScopedInstall(DontCreateCivilians, 0x4439C0);
+    RH_ScopedInstall(EndGangWar, 0x4464C0);
+    RH_ScopedInstall(GangWarFightingGoingOn, 0x443AC0);
+    RH_ScopedInstall(GangWarGoingOn, 0x443AA0);
     RH_ScopedInstall(MakeEnemyGainInfluenceInZone, 0x445FD0);          //
-    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);         // +
-    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);              // +
+    RH_ScopedInstall(MakePlayerGainInfluenceInZone, 0x445E80);
+    RH_ScopedInstall(PedStreamedInForThisGang, 0x4439D0);
     RH_ScopedInstall(PickStreamedInPedForThisGang, 0x443A20);          // +-
     RH_ScopedInstall(PickZoneToAttack, 0x443B00);                      //
-    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);               // +
-    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);               // +
-    RH_ScopedInstall(SetGangWarsActive, 0x446570);                     // +
-    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);       // +
-    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);                 // +
+    RH_ScopedInstall(ReleaseCarsInAttackWave, 0x445E20);
+    RH_ScopedInstall(ReleasePedsInAttackWave, 0x445C30);
+    RH_ScopedInstall(SetGangWarsActive, 0x446570);
+    RH_ScopedInstall(SetSpecificZoneToTriggerGangWar, 0x444010);
+    RH_ScopedInstall(StartDefensiveGangWar, 0x444300);
     RH_ScopedInstall(StartOffensiveGangWar, 0x446050);                 //
-    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);       // +
-    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);                  // +
+    RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
+    RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
     RH_ScopedInstall(TellGangMembersTo, 0x444530);                     //
-    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);      // +
+    RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
     // RH_ScopedInstall(Update, 0x446610);                             //
     RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0); //
     RH_ScopedInstall(Load, 0x5D3EB0);                                  //
@@ -983,6 +983,7 @@ void CGangWars::Update() {
     }
 }
 
+// todo (Izzotop): make more original
 // 0x443DE0
 void CGangWars::UpdateTerritoryUnderControlPercentage() {
     auto ballasZones = 0, groveZones = 0, vagosZones = 0;
@@ -1042,6 +1043,7 @@ void CGangWars::UpdateTerritoryUnderControlPercentage() {
     }
 }
 
+// todo: Use macro for color conversion
 // 0x44582F NOTSA
 uint32 CGangWars::GetGangColor(int32 gang) {
     // 0x8D1344 0x8D1350 0x8D135C
