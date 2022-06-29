@@ -5,7 +5,7 @@
 #include "Gamma.h"
 #include "MenuSystem.h"
 #include "app/app.h"
-#include <app/platform/win/VideoMode.h> // todo
+#include "app/platform/win/VideoMode.h" // todo
 
 /*!
  * @addr 0x57FD70

@@ -245,7 +245,6 @@ RwMemoryFunctions* psGetMemoryFunctions() {
     // return &g_objMemFunctions;
 }
 
-/*
 // 0x619C90
 bool RsRwInitialize(void* param) {
     return plugin::CallAndReturn<bool, 0x619C90, void*>(param);
