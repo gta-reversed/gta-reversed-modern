@@ -47,7 +47,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(JumpToGenericMessageScreen, 0x576AE0);
 
     RH_ScopedInstall(DrawFrontEnd, 0x57C290);
-    // + RH_ScopedInstall(DrawBackground, 0x57B750);
+    RH_ScopedInstall(DrawBackground, 0x57B750);
     // RH_ScopedInstall(DrawStandardMenus, 0x5794A0);
     RH_ScopedInstall(DrawWindow, 0x573EE0);
     RH_ScopedInstall(DrawWindowedText, 0x578F50);

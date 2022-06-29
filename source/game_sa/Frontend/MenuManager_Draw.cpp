@@ -61,9 +61,6 @@ void CMenuManager::DrawBuildInfo() {
 
 // 0x57B750
 void CMenuManager::DrawBackground() {
-    return plugin::CallMethod<0x57B750, CMenuManager*>(this);
-    // todo: fix 0x57BC19 pressing esc, test more
-
     if (!m_bTexturesLoaded) {
         return;
     }
@@ -183,7 +180,7 @@ void CMenuManager::DrawBackground() {
     }
 
     auto pad = CPad::GetPad(m_nPlayerNumber);
-    // 0x57BA6B untested
+    // 0x57BA6B
     if (m_nControllerError) {
         if (!field_1B4C_b1) {
             field_1B4C_b1 = true;
@@ -213,7 +210,7 @@ void CMenuManager::DrawBackground() {
         }
         CFont::RenderFontBuffer();
         auto time = CTimer::GetTimeInMSPauseMode() - field_1B48;
-        if (time > 7000 || (CPad::IsEscJustPressed() && time > 1000)) {
+        if (time > 7000 || (pad->IsEscJustPressed() && time > 1000)) {
             m_nControllerError = 0;
             field_1B44 = true;
         }
@@ -273,27 +270,26 @@ void CMenuManager::DrawBackground() {
             s_bUpdateScanningTime = false;
         }
 
-        if (AEUserRadioTrackManager.ScanUserTracks() || CPad::IsEscJustPressed()) {
-            if (CTimer::GetTimeInMSPauseMode() - m_nUserTrackScanningTimeMs > 3000 || CPad::IsEscJustPressed()) {
+        if (AEUserRadioTrackManager.ScanUserTracks() || pad->IsEscJustPressed()) {
+            if (CTimer::GetTimeInMSPauseMode() - m_nUserTrackScanningTimeMs > 3000 || pad->IsEscJustPressed()) {
                 auto helperText = HELPER_NONE;
                 switch (AEUserRadioTrackManager.m_nUserTracksScanState) {
                 case USER_TRACK_SCAN_COMPLETE:
                     AEUserRadioTrackManager.m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
-                    if (!CPad::IsEscJustPressed()) {
+                    if (!pad->IsEscJustPressed()) {
                         AEUserRadioTrackManager.Initialise();
                         helperText = FEA_SCS;
                     }
                     break;
                 case USER_TRACK_SCAN_ERROR:
                     AEUserRadioTrackManager.m_nUserTracksScanState = USER_TRACK_SCAN_OFF;
-                    if (!CPad::IsEscJustPressed()) {
+                    if (!pad->IsEscJustPressed()) {
                         helperText = FEA_SCF;
                     }
                     break;
-                default:
-                    if (CPad::IsEscJustPressed()) {
-                        helperText = FEA_SCF;
-                    }
+                }
+                if (pad->IsEscJustPressed()) {
+                    helperText = FEA_SCF;
                 }
 
                 if (helperText) {
