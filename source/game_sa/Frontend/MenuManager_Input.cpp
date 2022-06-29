@@ -74,7 +74,7 @@ bool CMenuManager::CheckRedefineControlInput() {
             m_nJustDownJoyButton = ControlsManager.GetJoyButtonJustDown();
 
             auto code = 0; // todo: enum?
-            if (m_nPressedMouseButton && *m_pPressedKey == 1056) {
+            if (m_nPressedMouseButton && *m_pPressedKey == 1056) { // // todo: 1056 means no key pressed
                 code = 2;
             }
 
@@ -161,25 +161,25 @@ void CMenuManager::CheckSliderMovement(int8 value) {
 }
 
 // 0x573840
-bool CMenuManager::CheckFrontEndUpInput() {
+bool CMenuManager::CheckFrontEndUpInput() const {
     auto pad = CPad::GetPad(m_nPlayerNumber);
     return CPad::IsUpPressed() || CPad::GetAnaloguePadUp() || pad->IsDPadUpPressed();
 }
 
 // 0x5738B0
-bool CMenuManager::CheckFrontEndDownInput() {
+bool CMenuManager::CheckFrontEndDownInput() const {
     auto pad = CPad::GetPad(m_nPlayerNumber);
     return CPad::IsDownPressed() || CPad::GetAnaloguePadDown() || pad->IsDPadDownPressed();
 }
 
 // 0x573920
-bool CMenuManager::CheckFrontEndLeftInput() {
+bool CMenuManager::CheckFrontEndLeftInput() const {
     auto pad = CPad::GetPad(m_nPlayerNumber);
     return CPad::IsLeftPressed() || CPad::GetAnaloguePadLeft() || pad->IsDPadLeftPressed();
 }
 
 // 0x573990
-bool CMenuManager::CheckFrontEndRightInput() {
+bool CMenuManager::CheckFrontEndRightInput() const {
     auto pad = CPad::GetPad(m_nPlayerNumber);
     return CPad::IsRightPressed() || CPad::GetAnaloguePadRight() || pad->IsDPadRightPressed();
 }
@@ -262,7 +262,7 @@ void CMenuManager::CheckForMenuClosing() {
                     Initialise();
                     LoadAllTextures();
 
-                    gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
+                    gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true); // todo: inlined
                 }
             } else {
                 AudioEngine.StopRadio(nullptr, false);
@@ -300,7 +300,7 @@ void CMenuManager::CheckForMenuClosing() {
                 pad->LastTimeTouched = 0;
                 CPad::GetPad(1)->LastTimeTouched = 0;
 
-                gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
+                gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true); // todo: inlined x3
 
                 if (field_F4) {
                     auto player = FindPlayerPed();
@@ -318,6 +318,7 @@ void CMenuManager::CheckForMenuClosing() {
             }
         }
     }
+
     if (m_bIsSaveDone) {
         // enter menu 2
         DoRWStuffStartOfFrame(0, 0, 0, 0, 0, 0, 255);
@@ -354,7 +355,7 @@ void CMenuManager::CheckForMenuClosing() {
 
 // 0x57C4F0
 bool CMenuManager::CheckHover(int32 left, int32 right, int32 top, int32 bottom) const {
-    // CSprite2d::DrawRect(CRect(left, top, right, bottom), CRGBA(255, 0, 0, 255));
+    // debug: CSprite2d::DrawRect(CRect(left, top, right, bottom), CRGBA(255, 0, 0, 255));
     return (
         m_nMousePosX > left  &&
         m_nMousePosX < right &&
@@ -400,7 +401,7 @@ bool CMenuManager::CheckMissionPackValidMenu() {
                 break;
         }
         CTimer::EndUserPause();
-        CGame::bMissionPackGame = 0;
+        CGame::bMissionPackGame = false;
         DoSettingsBeforeStartingAGame();
         m_bActivateMenuNextFrame = false;
 

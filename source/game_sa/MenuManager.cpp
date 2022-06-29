@@ -36,7 +36,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(HasLanguageChanged, 0x573CD0);
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
-    RH_ScopedInstall(StretchY, 0x573410, true);
+    // bad registers RH_ScopedInstall(StretchY, 0x573410, true);
     RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
@@ -574,7 +574,7 @@ void CMenuManager::JumpToGenericMessageScreen(eMenuScreen screen, const char* ti
 
 // 0x57C520
 void CMenuManager::CentreMousePointer() {
-    CVector2D pos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+    CVector2D pos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
     if (pos.x != 0.0f && pos.y != 0.0f) {
         RsMouseSetPos(&pos);
     }
@@ -584,110 +584,117 @@ void CMenuManager::CentreMousePointer() {
 void CMenuManager::LoadSettings() {
     CFileMgr::SetDirMyDocuments();
 
-    if (auto file = CFileMgr::OpenFile("gta_sa.set", "rb")) {
-        const auto SetToDefaultSettings = [&]() {
-            SetDefaultPreferences(SCREEN_AUDIO_SETTINGS);
-            SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
-            SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
-            SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
-            m_nPrefsVideoMode = 0;
-            m_nPrefsLanguage = eLanguage::AMERICAN;
-            m_nRadioStation = 1;
+    auto file = CFileMgr::OpenFile("gta_sa.set", "rb");
+    if (!file) {
+        CFileMgr::SetDir("");
+        return;
+    }
 
-            CFileMgr::CloseFile(file);
-            CFileMgr::SetDir("");
-        };
-
-        const auto ReadFromFile = [&](auto& ref, size_t size = 0u) {
-            CFileMgr::Read(file, &ref, (!size) ? sizeof(ref) : size);
-        };
-
-        {
-            char buf[29]{0};
-            ReadFromFile(buf, 29u);
-            if (!strncmp(buf, "THIS FILE IS NOT VALID YET", 26u)) {
-                return SetToDefaultSettings();
-            }
-
-            CFileMgr::Seek(file, 0, 0);
-        }
-
-        uint32 version = 0u;
-        uint8 constants[4]{0u};
-        FxQuality_e fxQuality = FXQUALITY_HIGH;
-        auto previousLang = m_nPrefsLanguage;
-
-        ReadFromFile(version);
-        if (version < SETTINGS_FILE_VERSION || !ControlsManager.LoadSettings(file)) {
-            return SetToDefaultSettings();
-        }
-
-        ReadFromFile(CCamera::m_fMouseAccelHorzntl);
-        ReadFromFile(bInvertMouseY);
-        ReadFromFile(CVehicle::m_bEnableMouseSteering);
-        ReadFromFile(CVehicle::m_bEnableMouseFlying);
-        ReadFromFile(m_nSfxVolume);
-        ReadFromFile(m_nRadioVolume);
-        ReadFromFile(m_nRadioStation);
-        ReadFromFile(m_bRadioAutoSelect);
-        ReadFromFile(m_bRadioEq);
-        ReadFromFile(m_PrefsBrightness);
-        ReadFromFile(m_bPrefsMipMapping);
-        ReadFromFile(m_bTracksAutoScan);
-        ReadFromFile(m_nDisplayAntialiasing);
-        ReadFromFile(fxQuality);
-        ReadFromFile(constants[0]);
-        ReadFromFile(m_fDrawDistance);
-        ReadFromFile(m_bShowSubtitles);
-        ReadFromFile(m_bWidescreenOn);
-        ReadFromFile(m_bPrefsFrameLimiter);
-        ReadFromFile(m_nDisplayVideoMode);
-        ReadFromFile(m_nController);
-        ReadFromFile(m_nPrefsLanguage);
-        ReadFromFile(m_bHudOn);
-        ReadFromFile(m_nRadarMode);
-        ReadFromFile(m_nRadioMode);
-        ReadFromFile(m_bSavePhotos);
-        ReadFromFile(constants[1]);
-        ReadFromFile(m_bInvertPadX1);
-        ReadFromFile(m_bInvertPadY1);
-        ReadFromFile(m_bInvertPadX2);
-        ReadFromFile(m_bInvertPadY2);
-        ReadFromFile(m_bSwapPadAxis1);
-        ReadFromFile(m_bSwapPadAxis2);
-        ReadFromFile(m_bMapLegend);
-        ReadFromFile(m_nUserTrackIndex);
-        ReadFromFile(m_nCurrentRwSubsystem);
-        ReadFromFile(constants[2]);
-
-        if (constants[0] != 84u || constants[1] != 29u || constants[2] != 95u) {
-            return SetToDefaultSettings();
-        }
-
-        CCamera::m_bUseMouse3rdPerson = m_nController == 0;
-        CRenderer::ms_lodDistScale = m_fDrawDistance;
-        g_fx.SetFxQuality(fxQuality);
-        gamma.SetGamma(m_PrefsBrightness / 512.0f, true);
-        m_nPrefsAntialiasing = m_nDisplayAntialiasing;
-        m_bDoVideoModeUpdate = true;
-        AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
-        AudioEngine.SetEffectsMasterVolume(m_nSfxVolume);
-        AudioEngine.SetBassEnhanceOnOff(m_bRadioEq);
-        AudioEngine.SetRadioAutoRetuneOnOff(m_bRadioAutoSelect);
-        AudioEngine.RetuneRadio(m_nRadioStation);
-
-        if (previousLang != m_nPrefsLanguage) {
-            field_8C = true;
-            TheText.Load(false);
-            m_bLanguageChanged = true;
-            InitialiseChangedLanguageSettings(false);
-            OutputDebugStringA("The previously saved language is now in use"); // SA
-        } else {
-            field_8C = false;
-        }
+    const auto SetToDefaultSettings = [&]() {
+        SetDefaultPreferences(SCREEN_AUDIO_SETTINGS);
+        SetDefaultPreferences(SCREEN_DISPLAY_SETTINGS);
+        SetDefaultPreferences(SCREEN_DISPLAY_ADVANCED);
+        SetDefaultPreferences(SCREEN_CONTROLLER_SETUP);
+        m_nPrefsVideoMode = 0;
+        m_nPrefsLanguage = eLanguage::AMERICAN;
+        m_nRadioStation = 1;
 
         CFileMgr::CloseFile(file);
+        CFileMgr::SetDir("");
+    };
+
+    const auto ReadFromFile = [&](auto& ref, size_t size = 0u) {
+        CFileMgr::Read(file, &ref, size != 0 ? size : sizeof(ref));
+    };
+
+    {
+        char buf[29]{0};
+        ReadFromFile(buf, 29u);
+        if (!strncmp(buf, TopLineEmptyFile, 26u)) {
+            return SetToDefaultSettings();
+        }
+
+        CFileMgr::Seek(file, 0, 0);
     }
+
+    uint32 version = 0u;
+    struct { uint8 m_unk; uint8 m_separator; uint8 m_underscore; uint8 _align; } constants;
+    FxQuality_e fxQuality = FXQUALITY_HIGH;
+    auto previousLang = m_nPrefsLanguage;
+
+    ReadFromFile(version);
+    if (version < SETTINGS_FILE_VERSION || !ControlsManager.LoadSettings(file)) {
+        return SetToDefaultSettings();
+    }
+
+    ReadFromFile(CCamera::m_fMouseAccelHorzntl);
+    ReadFromFile(bInvertMouseY);
+    ReadFromFile(CVehicle::m_bEnableMouseSteering);
+    ReadFromFile(CVehicle::m_bEnableMouseFlying);
+    ReadFromFile(m_nSfxVolume);
+    ReadFromFile(m_nRadioVolume);
+    ReadFromFile(m_nRadioStation);
+    ReadFromFile(m_bRadioAutoSelect);
+    ReadFromFile(m_bRadioEq);
+    ReadFromFile(m_PrefsBrightness);
+    ReadFromFile(m_bPrefsMipMapping);
+    ReadFromFile(m_bTracksAutoScan);
+    ReadFromFile(m_nDisplayAntialiasing);
+    ReadFromFile(fxQuality);
+    ReadFromFile(constants.m_unk);
+    ReadFromFile(m_fDrawDistance);
+    ReadFromFile(m_bShowSubtitles);
+    ReadFromFile(m_bWidescreenOn);
+    ReadFromFile(m_bPrefsFrameLimiter);
+    ReadFromFile(m_nDisplayVideoMode);
+    ReadFromFile(m_nController);
+    ReadFromFile(m_nPrefsLanguage);
+    ReadFromFile(m_bHudOn);
+    ReadFromFile(m_nRadarMode);
+    ReadFromFile(m_nRadioMode);
+    ReadFromFile(m_bSavePhotos);
+    ReadFromFile(constants.m_separator);
+    ReadFromFile(m_bInvertPadX1);
+    ReadFromFile(m_bInvertPadY1);
+    ReadFromFile(m_bInvertPadX2);
+    ReadFromFile(m_bInvertPadY2);
+    ReadFromFile(m_bSwapPadAxis1);
+    ReadFromFile(m_bSwapPadAxis2);
+    ReadFromFile(m_bMapLegend);
+    ReadFromFile(m_nUserTrackIndex);
+    ReadFromFile(m_nCurrentRwSubsystem);
+    ReadFromFile(constants.m_underscore);
+
+    if (constants.m_unk != 'T' ||
+        constants.m_separator != 0x1D || // ASCII GS - Group Separator
+        constants.m_underscore != '_'
+    ) {
+        return SetToDefaultSettings();
+    }
+
+    CCamera::m_bUseMouse3rdPerson = m_nController == 0;
+    CRenderer::ms_lodDistScale = m_fDrawDistance;
+    g_fx.SetFxQuality(fxQuality);
+    gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true);
+    m_nPrefsAntialiasing = m_nDisplayAntialiasing;
+    m_bDoVideoModeUpdate = true;
+    AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
+    AudioEngine.SetEffectsMasterVolume(m_nSfxVolume);
+    AudioEngine.SetBassEnhanceOnOff(m_bRadioEq);
+    AudioEngine.SetRadioAutoRetuneOnOff(m_bRadioAutoSelect);
+    AudioEngine.RetuneRadio(m_nRadioStation);
+
+    if (previousLang == m_nPrefsLanguage) {
+        field_8C = false;
+    } else {
+        field_8C = true;
+        TheText.Load(false);
+        m_bLanguageChanged = true;
+        InitialiseChangedLanguageSettings(false);
+        OutputDebugStringA("The previously saved language is now in use"); // SA
+    }
+
+    CFileMgr::CloseFile(file);
     CFileMgr::SetDir("");
 }
 
@@ -695,60 +702,64 @@ void CMenuManager::LoadSettings() {
 void CMenuManager::SaveSettings() {
     CFileMgr::SetDirMyDocuments();
 
-    if (auto file = CFileMgr::OpenFile("gta_sa.set", "w+b")) {
-        const auto WriteToFile = [&](auto&& v, size_t size = 0u) {
-            CFileMgr::Write(file, &v, (!size) ? sizeof(v) : size);
-        };
-
-        WriteToFile(SETTINGS_FILE_VERSION);
-        ControlsManager.SaveSettings(file);
-        WriteToFile(CCamera::m_fMouseAccelHorzntl);
-        WriteToFile(bInvertMouseY);
-        WriteToFile(CVehicle::m_bEnableMouseSteering);
-        WriteToFile(CVehicle::m_bEnableMouseFlying);
-        WriteToFile(m_nSfxVolume);
-        WriteToFile(m_nRadioVolume);
-        WriteToFile(m_nRadioStation);
-        WriteToFile(m_bRadioAutoSelect);
-        WriteToFile(m_bRadioEq);
-        WriteToFile(m_PrefsBrightness);
-        WriteToFile(m_bPrefsMipMapping);
-        WriteToFile(m_bTracksAutoScan);
-        WriteToFile(m_nPrefsAntialiasing);
-        WriteToFile(g_fx.GetFxQuality());
-        WriteToFile(84u, 1u);
-        WriteToFile(m_fDrawDistance);
-        WriteToFile(m_bShowSubtitles);
-        WriteToFile(m_bWidescreenOn);
-        WriteToFile(m_bPrefsFrameLimiter);
-        WriteToFile(m_nPrefsVideoMode);
-        WriteToFile(m_nController);
-        WriteToFile(m_nPrefsLanguage);
-        WriteToFile(m_bHudOn);
-        WriteToFile(m_nRadarMode);
-        WriteToFile(m_nRadioMode);
-        WriteToFile(m_bSavePhotos);
-        WriteToFile(29u, 1u);
-        WriteToFile(m_bInvertPadX1);
-        WriteToFile(m_bInvertPadY1);
-        WriteToFile(m_bInvertPadX2);
-        WriteToFile(m_bInvertPadY2);
-        WriteToFile(m_bSwapPadAxis1);
-        WriteToFile(m_bSwapPadAxis2);
-        WriteToFile(m_bMapLegend);
-        WriteToFile(m_nUserTrackIndex);
-        WriteToFile(RwEngineGetCurrentSubSystem());
-        WriteToFile(95u, 1u);
-
-        CFileMgr::CloseFile(file);
+    auto file = CFileMgr::OpenFile("gta_sa.set", "w+b");
+    if (!file) {
+        CFileMgr::SetDir("");
+        return;
     }
+
+    const auto WriteToFile = [&](auto&& v, size_t size = 0u) {
+        CFileMgr::Write(file, &v, size != 0 ? size : sizeof(v));
+    };
+
+    WriteToFile(SETTINGS_FILE_VERSION);
+    ControlsManager.SaveSettings(file);
+    WriteToFile(CCamera::m_fMouseAccelHorzntl);
+    WriteToFile(bInvertMouseY);
+    WriteToFile(CVehicle::m_bEnableMouseSteering);
+    WriteToFile(CVehicle::m_bEnableMouseFlying);
+    WriteToFile(m_nSfxVolume);
+    WriteToFile(m_nRadioVolume);
+    WriteToFile(m_nRadioStation);
+    WriteToFile(m_bRadioAutoSelect);
+    WriteToFile(m_bRadioEq);
+    WriteToFile(m_PrefsBrightness);
+    WriteToFile(m_bPrefsMipMapping);
+    WriteToFile(m_bTracksAutoScan);
+    WriteToFile(m_nPrefsAntialiasing);
+    WriteToFile(g_fx.GetFxQuality());
+    WriteToFile(int8(84)); // T
+    WriteToFile(m_fDrawDistance);
+    WriteToFile(m_bShowSubtitles);
+    WriteToFile(m_bWidescreenOn);
+    WriteToFile(m_bPrefsFrameLimiter);
+    WriteToFile(m_nPrefsVideoMode);
+    WriteToFile(m_nController);
+    WriteToFile(m_nPrefsLanguage);
+    WriteToFile(m_bHudOn);
+    WriteToFile(m_nRadarMode);
+    WriteToFile(m_nRadioMode);
+    WriteToFile(m_bSavePhotos);
+    WriteToFile(int8(29)); // GS - Group Separator
+    WriteToFile(m_bInvertPadX1);
+    WriteToFile(m_bInvertPadY1);
+    WriteToFile(m_bInvertPadX2);
+    WriteToFile(m_bInvertPadY2);
+    WriteToFile(m_bSwapPadAxis1);
+    WriteToFile(m_bSwapPadAxis2);
+    WriteToFile(m_bMapLegend);
+    WriteToFile(m_nUserTrackIndex);
+    WriteToFile(RwEngineGetCurrentSubSystem());
+    WriteToFile(int8(95)); // _ underscore
+
+    CFileMgr::CloseFile(file);
     CFileMgr::SetDir("");
 }
 
 // 0x57DDE0
 void CMenuManager::SaveStatsToFile() {
     CFileMgr::SetDirMyDocuments();
-    char date[12]{0};
+    char date[12]{};
     _strdate_s(date, 12u);
 
     char* lastMissionPassed = TheText.Get("ITBEG"); // In the beginning
@@ -756,93 +767,81 @@ void CMenuManager::SaveStatsToFile() {
         lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
     }
 
-    if (auto file = fopen("stats.html", "w")) {
-        fprintf(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
-        fprintf(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
+    auto file = fopen("stats.html", "w");
+    if (!file) {
+        CFileMgr::SetDir("");
+        m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
+        m_nHelperTextFadingAlpha = 300;
+        return;
+    }
 
-        fprintf(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
-                      "<tr align=\"center\" valign=\"top\"> \n"
-                      "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
+    fprintf(file, "<title>Grand Theft Auto San Andreas Stats</title>\n");
+    fprintf(file, "<body bgcolor=\"#000000\" leftmargin=\"10\" topmargin=\"10\" marginwidth=\"10\" marginheight=\"10\">\n");
+    fprintf(file, "<table width=\"560\" align=\"center\" border=\"0\" cellpadding=\"5\" cellspacing=\"0\">\n"
+                  "<tr align=\"center\" valign=\"top\"> \n"
+                  "<td height=\"59\" colspan=\"2\" bgcolor=\"#000000\"><div align=\"center\"><font color=\"#FFFFFF\" size=\"5\" face=\"Arial, \n");
+    fprintf(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \nsize=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
+    fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
+    fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA"))); // Stats
+    fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
+    fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
+                  "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+    fprintf(file, R"(<td height="40" colspan="2"> <p><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif"><stro)");
+    fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
+    fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u));     // LAST MISSION PASSED
+    fprintf(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
+    fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n"
+                  "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+    fprintf(file, R"(<td height="20" colspan="2"><font color="#F0000C" size="2" face="Arial, Helvetica, sans-serif">)");
+    fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
+    TextCopy(gGxtString, CStats::FindCriminalRatingString());
+    fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
+    fprintf(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
 
-        fprintf(file, "Helvetica, sans-serif\">-------------------------------------------------------------------</font><font \n"
-                      "size=\"5\" face=\"Arial, Helvetica, sans-serif\"><br>\n");
-        fprintf(file, "<strong><font color=\"#FFFFFF\">GRAND THEFT AUTO SAN ANDREAS ");
+    static constexpr const char* strToPrint[] = {
+        "FES_PLA", "FES_MON", "FES_WEA", "FES_GAN",
+        "FES_CRI", "FES_ACH", "FES_MIS", "FES_MSC"
+    };
+    for (auto menuItem = 0u; menuItem < 8u; menuItem++) {
+        auto numStatLines = CStats::ConstructStatLine(99'999, menuItem);
 
-        fprintf(file, "%s</font></strong><br><font\n", _strupr(TheText.Get("FEH_STA"))); // Stats
-        fprintf(file, "color=\"#FFFFFF\">-------------------------------------------------------------------</font></font></div></td> </tr>\n");
+        fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"25\" colspan=\"2\"></td> </tr>\n"
+                      "<tr align=\"left\" valign=\"top\"><td height=\"30\" bgcolor=\"#000000\"><font color=\"#009900\" size=\"4\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
 
-        fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\">     <td height=\"22\" colspan=\"2\">&nbsp;</td>  </tr>\n"
-                      "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
+        fprintf(file, "%s", GxtCharToAscii(TheText.Get(strToPrint[menuItem]), 0u));
+        fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#000000\"> <div align=\"right\"><strong><font color=\"#FF0CCC\">\n");
+        if (numStatLines <= 0)
+            continue;
 
-        fprintf(file, "<td height=\"40\" colspan=\"2\"> <p><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><stro");
-        fprintf(file, "ng><font color=\"#F0000C\" size=\"1\">%s: \n", GxtCharToAscii(TheText.Get("FES_DAT"), 0u)); // DATE
-        fprintf(file, "%s</font><br>        %s: </strong>", date, GxtCharToAscii(TheText.Get("FES_CMI"), 0u)); // LAST MISSION PASSED
+        for (auto stat = 0; stat < numStatLines; stat++) {
+            CStats::ConstructStatLine(stat, menuItem);
 
-        fprintf(file, "%s<strong><br></strong> </font></p></td></tr>\n", _strupr((char*)GxtCharToAscii(lastMissionPassed, 0u)));
-
-        fprintf(file, "<tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> <td height=\"5\" colspan=\"2\"></td> </tr> <tr align=\"ce"
-                      "nter\" valign=\"top\" bgcolor=\"#000000\"> \n"
-                      "<td height=\"10\" colspan=\"2\"></td> </tr> <tr align=\"center\" valign=\"top\" bgcolor=\"#000000\"> \n");
-
-        fprintf(file, "<td height=\"20\" colspan=\"2\"><font color=\"#F0000C\" size=\"2\" face=\"Arial, Helvetica, sans-serif\">");
-        fprintf(file, "<strong> %s</strong>\n ", GxtCharToAscii(TheText.Get("CRIMRA"), 0u)); // Criminal rating:
-
-        TextCopy(gGxtString, CStats::FindCriminalRatingString());
-        fprintf(file, "%s (%d)</font></td>  </tr>", GxtCharToAscii(gGxtString, 0u), CStats::FindCriminalRatingNumber());
-        fprintf(file, "<tr align=\"left\" valign=\"top\" bgcolor=\"#000000\"><td height=\"10\" colspan=\"2\"></td>  </tr>\n");
-
-        for (auto menuItem = 0u; menuItem < 8u; menuItem++) {
-            auto numStatLines = CStats::ConstructStatLine(99999, menuItem);
-
-            fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"25\" cols"
-                          "pan=\"2\"></td> </tr>\n"
-                          "<tr align=\"left\" valign=\"top\"><td height=\"30\" bgcolor=\"#000000\"><font color=\"#009900\" size=\"4\" face="
-                          "\"Arial, Helvetica, sans-serif\"><strong>\n");
-
-            static constexpr const char* strToPrint[] = {
-                "FES_PLA", "FES_MON", "FES_WEA", "FES_GAN", "FES_CRI", "FES_ACH", "FES_MIS", "FES_MSC"
-            };
-            fprintf(file, "%s", GxtCharToAscii(TheText.Get(strToPrint[menuItem]), 0u));
-
-            fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#000000\"> <div align=\"righ"
-                          "t\"><strong><font color=\"#FF0CCC\">\n");
-            if (numStatLines <= 0)
-                continue;
-
-            for (auto stat = 0; stat < numStatLines; stat++) {
-                CStats::ConstructStatLine(stat, menuItem);
-
-                auto str = GxtCharToAscii(gGxtString, 0u);
-                if (*str) {
-                    fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"10\""
-                                    " colspan=\"2\"></td> </tr>\n");
-                }
-
-                fprintf(file, "<tr align=\"left\" valign=\"top\"><td width=\"500\" height=\"22\" bgcolor=\"#555555\"><font color=\"#FFFFFF\""
-                                " size=\"2\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
-
-                fprintf(file, "%s", (*str) ? str : " ");
-
-                fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#555555\"> <div align=\""
-                                "right\"><strong><font color=\"#FFFFFF\">\n");
-                auto val = GxtCharToAscii(gGxtString2, 0u);
-                auto valFormatted = (char*)val;
-
-                // todo. xref: CStats::ConstructStatLine, PrintStats
-                static uint16& unk = *reinterpret_cast<uint16*>(0xB794CC);
-                if (unk) { // stat line formatted in percents?
-                    sprintf(valFormatted, "%0.0f%%", std::min(atoi(val) / 10.0f, 100.0f));
-                }
-
-                for (auto v = valFormatted; *v; v++) {
-                    if (*v == '|') {
-                        *v = -70; // double verticle bar
-                    }
-                }
-                fprintf(file, "%s", valFormatted);
+            auto str = GxtCharToAscii(gGxtString, 0u);
+            if (*str) {
+                fprintf(file, "</font></strong></div></td> </tr> <tr align=\"left\" valign=\"top\" bgcolor=\"#000000\">  <td height=\"10\" colspan=\"2\"></td> </tr>\n");
             }
+
+            fprintf(file, "<tr align=\"left\" valign=\"top\"><td width=\"500\" height=\"22\" bgcolor=\"#555555\"><font color=\"#FFFFFF\" size=\"2\" face=\"Arial, Helvetica, sans-serif\"><strong>\n");
+            fprintf(file, "%s", (*str) ? str : " ");
+            fprintf(file, "</strong></font></td> <td width=\"500\" align=\"right\" valign=\"middle\" bgcolor=\"#555555\"> <div align=\"right\"><strong><font color=\"#FFFFFF\">\n");
+            auto val = GxtCharToAscii(gGxtString2, 0u);
+            auto valFormatted = (char*)val;
+
+            // todo. xref: CStats::ConstructStatLine, PrintStats
+            static uint16& unk = *reinterpret_cast<uint16*>(0xB794CC);
+            if (unk) { // stat line formatted in percents?
+                sprintf(valFormatted, "%0.0f%%", std::min(atoi(val) / 10.0f, 100.0f));
+            }
+
+            for (auto v = valFormatted; *v; v++) {
+                if (*v == '|') {
+                    *v = -70; // double vertical bar
+                }
+            }
+            fprintf(file, "%s", valFormatted);
         }
     }
+
     CFileMgr::SetDir("");
     m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
     m_nHelperTextFadingAlpha = 300;
@@ -999,14 +998,14 @@ void CMenuManager::ResetHelperText() {
 
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
-    const CRect fullscreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    const CRect fullscreen(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if (!cameraUpdateStarted) {
         if (!RsCameraBeginUpdate(Scene.m_pRwCamera))
             return;
 
         if (blackBackground) {
-            CSprite2d::DrawRect(fullscreen, {0, 0, 0, 255});
+            CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
         }
     }
 
@@ -1016,7 +1015,7 @@ void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cam
     DefinedState2d();
 
     if (blackBackground) {
-        CSprite2d::DrawRect(fullscreen, {0, 0, 0, 255});
+        CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
     }
 
     SmallMessageScreen(key);
@@ -1043,7 +1042,7 @@ void CMenuManager::SmallMessageScreen(const char* key) {
         ),
         nullptr,
         0,
-        {0, 0, 0, 255},
+        { 0, 0, 0, 255 },
         false,
         true
     );

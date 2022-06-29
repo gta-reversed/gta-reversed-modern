@@ -127,7 +127,7 @@ void CMenuManager::PrintStats() {
 
 // 0x576320
 void CMenuManager::PrintBriefs() {
-    CFont::SetColor({255, 255, 255, 255});
+    CFont::SetColor({ 255, 255, 255, 255 });
     CFont::SetDropColor({0, 0, 0, 255});
     CFont::SetOrientation(eFontAlignment::ALIGN_LEFT);
     CFont::SetFontStyle(FONT_SUBTITLES);
@@ -169,14 +169,24 @@ void CMenuManager::PrintBriefs() {
     if (drawArrows) {
         // up arrow
         if (m_nSelectedRow < 19u && CMessages::PreviousBriefs[m_nSelectedRow + 1].m_pText) {
-            CSprite2d::Draw2DPolygon(StretchX(50.0f), StretchY(100.0f), StretchX(55.0f), StretchY(110.0f),
-                StretchX(45.0f), StretchY(110.0f), StretchX(50.0f), StretchY(100.0f), {225, 225, 225, 255});
+            CSprite2d::Draw2DPolygon(
+                StretchX(50.0f), StretchY(100.0f),
+                StretchX(55.0f), StretchY(110.0f),
+                StretchX(45.0f), StretchY(110.0f),
+                StretchX(50.0f), StretchY(100.0f),
+                { 225, 225, 225, 255 }
+            );
         }
 
         // down arrow
         if (m_nSelectedRow > 3u) {
-            CSprite2d::Draw2DPolygon(StretchX(50.0f), StretchY(348.0f), StretchX(55.0f), StretchY(338.0f),
-                StretchX(45.0f), StretchY(338.0f), StretchX(50.0f), StretchY(348.0f), {225, 225, 225, 255});
+            CSprite2d::Draw2DPolygon(
+                StretchX(50.0f), StretchY(348.0f),
+                StretchX(55.0f), StretchY(338.0f),
+                StretchX(45.0f), StretchY(338.0f),
+                StretchX(50.0f), StretchY(348.0f),
+                { 225, 225, 225, 255 }
+            );
         }
     }
 }

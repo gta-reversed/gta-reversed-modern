@@ -209,7 +209,7 @@ public:
     char   field_1B29;
     int16  field_1B2A;
     int32  field_1B2C;
-    int32  m_nBriefsArrowBlinkTimeMs;
+    uint32 m_nBriefsArrowBlinkTimeMs;
     int16  field_1B34; // CPad::DisablePlayerControls
     int16  field_1B36;
     int32  field_1B38;
@@ -235,7 +235,7 @@ public:
     char  field_1B51;
     int16 field_1B52;
     int32 field_1B54;
-    int32 m_nTimeHelperTextUpdated;
+    uint32 m_nTimeHelperTextUpdated;
     char  field_1B5C;
     char  field_1B5D;
     int16 field_1B5E;
@@ -300,12 +300,12 @@ public:
     void SaveLoadFileError_SetUpErrorScreen();
 
     void CheckSliderMovement(int8 value);
-    bool CheckFrontEndUpInput();
-    bool CheckFrontEndDownInput();
-    bool CheckFrontEndLeftInput();
-    bool CheckFrontEndRightInput();
+    [[nodiscard]] bool CheckFrontEndUpInput() const;
+    [[nodiscard]] bool CheckFrontEndDownInput() const;
+    [[nodiscard]] bool CheckFrontEndLeftInput() const;
+    [[nodiscard]] bool CheckFrontEndRightInput() const;
     void CheckForMenuClosing();
-    bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
+    [[nodiscard]] bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
     bool CheckMissionPackValidMenu();
     bool CheckCodesForControls(int32);
 
