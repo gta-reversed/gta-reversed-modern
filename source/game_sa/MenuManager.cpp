@@ -1001,7 +1001,7 @@ void CMenuManager::ResetHelperText() {
 
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
-    const CRect fullscreen = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+    const CRect fullscreen(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     if (!cameraUpdateStarted) {
         if (!RsCameraBeginUpdate(Scene.m_pRwCamera))
@@ -1037,12 +1037,12 @@ void CMenuManager::SmallMessageScreen(const char* key) {
     CFont::SetScale(StretchX(0.56f), StretchY(1.0f));
 
     DrawWindow(
-        CRect{
+        CRect(
             StretchX(95.0f),
             StretchY(125.0f),
             SCREEN_WIDTH - StretchX(95.0f),
             SCREEN_HEIGHT - StretchY(165.0f)
-        },
+        ),
         nullptr,
         0,
         {0, 0, 0, 255},
