@@ -125,7 +125,7 @@ public:
     static CVehicle* FindUnsuspectingTargetCar(CVector point, CVector playerPosn);
     static CPed* FindUnsuspectingTargetPed(CVector point, CVector playerPosn);
     static bool ProcessLineOfSightSectorList(CPtrList& ptrList, const CColLine& colLine, CColPoint& outColPoint, float& minTouchDistance, CEntity*& outEntity, bool doSeeThroughCheck, bool doIgnoreCameraCheck, bool doShootThroughCheck);
-    static bool ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
+    static bool ProcessVerticalLine(const CVector& origin, float distance, CColPoint& outColPoint, CEntity*& outEntity, bool buildings = false, bool vehicles = false, bool peds = false, bool objects = false, bool dummies = false, bool doSeeThroughCheck = false, CStoredCollPoly* outCollPoly = nullptr);
     static bool ProcessVerticalLine_FillGlobeColPoints(const CVector& origin, float distance, CEntity*& outEntity, bool buildings, bool vehicles, bool peds, bool objects, bool dummies, bool doSeeThroughCheck, CStoredCollPoly* outCollPoly);
     static void TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point, float radius, float visibleDistance, CEntity* victim, CEntity* creator, bool processVehicleBombTimer, float damage);
     static void Process();
@@ -136,7 +136,7 @@ public:
     static void FindMissionEntitiesIntersectingCube(const CVector& cornerA, const CVector& cornerB, int16* outCount, int16 maxCount, CEntity** outEntities, bool vehicles, bool peds, bool objects);
     static CEntity* FindNearestObjectOfType(int32 modelId, const CVector& point, float radius, bool b2D, bool buildings, bool vehicles, bool peds, bool objects, bool dummies);
     static float FindGroundZForCoord(float x, float y);
-    static float FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity);
+    static float FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity);
     static float FindRoofZFor3DCoord(float x, float y, float z, bool* outResult);
     static float FindLowestZForCoord(float x, float y);
     static void RepositionOneObject(CEntity* object);
@@ -213,5 +213,3 @@ extern int16 &TAG_SPRAYING_INCREMENT_VAL; // default 8
 uint16 GetCurrentScanCode();
 CSector* GetSector(int32 x, int32 y);
 CRepeatSector* GetRepeatSector(int32 x, int32 y);
-
-float ScaleLighting(uint8 lighting, float scale);

@@ -128,7 +128,7 @@ void CTrailer::ScanForTowLink() {
             continue;
         }
 
-        const auto dist = DistanceBetweenPoints2D(towHitchPos, towBarPos);
+        const auto dist = DistanceBetweenPoints2D(towBarPos, towHitchPos);
         if (dist < RELINK_TRAILER_DIFF_LIMIT_XY && std::fabs(towHitchPos.z - towBarPos.z) < RELINK_TRAILER_DIFF_LIMIT_Z) {
             SetTowLink(vehicle, false);
             return;

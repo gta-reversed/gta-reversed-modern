@@ -562,9 +562,7 @@ void CEntity::PreRender_Reversed()
         && ami->SwaysInWind()
         && (!IsObject() || !AsObject()->objectFlags.bIsExploded)
     ) {
-        auto vecCamPos = CVector2D(TheCamera.GetPosition());
-        auto vecEntPos = CVector2D(GetPosition());
-        auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
+        auto fDist = DistanceBetweenPoints2D(GetPosition(), TheCamera.GetPosition());
         CObject::fDistToNearestTree = std::min(CObject::fDistToNearestTree, fDist);
         ModifyMatrixForTreeInWind();
     }

@@ -59,7 +59,7 @@ public:
     static void AddBigMessageWithNumber(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
     static void AddBigMessageWithNumberQ(const char* text, uint32 time, eMessageStyle style, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6);
 
-    static void AddToPreviousBriefArray(const char* text, int32 n1, int32 n2, int32 n3, int32 n4, int32 n5, int32 n6, char* string);
+    static void AddToPreviousBriefArray(const char* text, int32 n1 = -1, int32 n2 = -1, int32 n3 = -1, int32 n4 = -1, int32 n5 = -1, int32 n6 = -1, char* string = nullptr);
 
     static void ClearMessages(bool flag);
     static void ClearSmallMessagesOnly();

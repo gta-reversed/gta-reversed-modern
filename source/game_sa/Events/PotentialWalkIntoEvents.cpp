@@ -204,13 +204,12 @@ bool CEventPotentialWalkIntoFire::AffectsPed(CPed* ped)
     return CEventPotentialWalkIntoFire::AffectsPed_Reversed(ped);
 }
 
-bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped)
-{
+bool CEventPotentialWalkIntoFire::AffectsPed_Reversed(CPed* ped) {
     if (ped->IsAlive() && m_moveState != PEDMOVE_STILL) {
         auto goToTask = static_cast<CTaskSimpleGoTo*>(ped->GetTaskManager().GetSimplestActiveTask());
         if (goToTask && CTask::IsGoToTask(goToTask)) {
             CColSphere colSphere;
-            colSphere.Set(m_radius, m_firePos, 0, 0, 255u);
+            colSphere.Set(m_radius, m_firePos, SURFACE_DEFAULT, 0, tColLighting(0xFF));
             CVector intersectPoint2;
             CVector intersectPoint1;
             return colSphere.IntersectEdge(ped->GetPosition(), goToTask->m_vecTargetPoint, intersectPoint1, intersectPoint2);

@@ -1937,23 +1937,23 @@ bool CAutomobile::SetUpWheelColModel(CColModel* wheelCol)
     CMatrix mat;
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LF]), false);
-    cd->m_pSpheres[0].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xD, 255);
+    cd->m_pSpheres[0].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xD);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LB]), false);
-    cd->m_pSpheres[1].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF, 255);
+    cd->m_pSpheres[1].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RF]), false);
-    cd->m_pSpheres[2].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xE, 255);
+    cd->m_pSpheres[2].Set(mi->m_fWheelSizeFront / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xE);
 
     mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RB]), false);
-    cd->m_pSpheres[3].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10, 255);
+    cd->m_pSpheres[3].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
 
     if (m_aCarNodes[CAR_WHEEL_LM] && m_aCarNodes[CAR_WHEEL_RM]) {
         mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_LM]), false);
-        cd->m_pSpheres[4].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF, 255);
+        cd->m_pSpheres[4].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0xF);
 
         mat.Attach(RwFrameGetMatrix(m_aCarNodes[CAR_WHEEL_RM]), false);
-        cd->m_pSpheres[5].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10, 255);
+        cd->m_pSpheres[5].Set(mi->m_fWheelSizeRear / 2.0f, mat.GetPosition(), SURFACE_RUBBER, 0x10);
 
         cd->m_nNumSpheres = 6;
     } else {
@@ -2387,7 +2387,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
         }
     } else {
         // 0x6A7BE5
-        if (uint8 unused{}; !CanVehicleBeDamaged(damager, weapon, unused)) {
+        if (bool unused{}; !CanVehicleBeDamaged(damager, weapon, unused)) {
             return;
         }
 
@@ -3070,11 +3070,8 @@ void CAutomobile::HydraulicControl()
             }
         }
 
-        if (!suspensionTriggered)
-        {
-            for (float& suspension : suspensionChange) {
-                suspension = 1.0f;
-            }
+        if (!suspensionTriggered) {
+            std::ranges::fill(suspensionChange, 1.0f);
 
             if (m_nStatus == STATUS_PHYSICS) {
                 for (int32 i = 0; i < 4; i++) {
@@ -3111,9 +3108,7 @@ void CAutomobile::HydraulicControl()
                 }
                 else {
                     if (m_wMiscComponentAngle == 0) {
-                        for (float& suspension : suspensionChange) {
-                            suspension = 0.0f;
-                        }
+                        std::ranges::fill(suspensionChange, 0.0f);
                     }
                     m_wMiscComponentAngle = 60;
                 }
@@ -3139,8 +3134,9 @@ void CAutomobile::HydraulicControl()
                 }
             }
             else {
-                if (m_wMiscComponentAngle < 504u)
+                if (m_wMiscComponentAngle < 504u) {
                     m_wMiscComponentAngle++;
+                }
 
                 for (int32 i = 0; i < 4; i++) {
                     CColLine& line = colData->m_pLines[i];
@@ -3165,7 +3161,7 @@ void CAutomobile::HydraulicControl()
             float limitDiff = extendedLowerLimit - normalLowerLimit;
             if (limitDiff != 0.0f && std::fabs(maxDelta / limitDiff) > 0.01f) {
                 float f = (limitDiff + maxDelta) * 0.5f / limitDiff;
-                f = clamp<float>(f, 0.0f, 1.0f);
+                f = std::clamp(f, 0.0f, 1.0f);
                 if (f < 0.4f || f > 0.6f)
                     setPrevRatio = true;
                 if (f < 0.5f - CTimer::GetTimeStep() * 0.05f)
@@ -3183,9 +3179,7 @@ void CAutomobile::HydraulicControl()
                 m_fWheelsSuspensionCompressionPrev[i] = (m_fWheelsSuspensionCompression[i] - wheelRadius) / (1.0f - wheelRadius);
             }
         }
-        for (float& suspension : hydraulicData.m_aWheelSuspension) {
-            suspension = 0.0f;
-        }
+        std::ranges::fill(hydraulicData.m_aWheelSuspension, 0.0f);
     }
 }
 
@@ -3303,7 +3297,7 @@ bool CAutomobile::UpdateMovingCollision(float angle)
 
         for (uint16 i = 0; i < specialColData->m_nNumSpheres; i++) {
             CColSphere& specialColSphere = specialColData->m_pSpheres[i];
-            if (specialColSphere.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
+            if (specialColSphere.m_Surface.m_nMaterial == SURFACE_CAR_MOVINGCOMPONENT) {
                 CColSphere& colSphere = colData->m_pSpheres[i];
                 CVector distance = colSphere.m_vecCenter - componentPos;
                 specialColSphere.m_vecCenter = (rotMatrix * distance) + componentPos;

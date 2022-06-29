@@ -16,7 +16,7 @@ void CWindModifiers::InjectHooks() {
 // 0x72C8B0
 void CWindModifiers::RegisterOne(CVector vecPos, int32 iActive, float fPower) {
     if (Number < MAX_NUM_MODIFIERS) {
-        if (DistanceBetweenPoints(vecPos, TheCamera.GetPosition()) < 200.0f) {
+        if (DistanceBetweenPoints(TheCamera.GetPosition(), vecPos) < 200.0f) {
             Array[Number] = {
                 .m_vecPos = vecPos,
                 .m_iActive = iActive,

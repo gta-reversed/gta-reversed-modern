@@ -12,7 +12,7 @@ void CPickup::InjectHooks() {
     RH_ScopedInstall(GetPosn, 0x4549A0);
     RH_ScopedInstall(GetRidOfObjects, 0x454CF0);
     // RH_ScopedInstall(GiveUsAPickUpObject, 0x4567E0);
-    // RH_ScopedInstall(IsVisible, 0x454C70);
+    RH_ScopedInstall(IsVisible, 0x454C70);
     // RH_ScopedInstall(PickUpShouldBeInvisible, 0x454D20);
     RH_ScopedInstall(ProcessGunShot, 0x4588B0);
     // RH_ScopedInstall(Remove, 0x4556C0);
@@ -66,8 +66,7 @@ void CPickup::GiveUsAPickUpObject(CObject** obj, int32 slotIndex) {
 // Is pickup visible (checks if distance between pickup and camera is shorter than 100 units)
 // 0x454C70
 bool CPickup::IsVisible() {
-    return plugin::CallMethodAndReturn<bool, 0x454C70, CPickup*>(this);
-    return DistanceBetweenPoints(TheCamera.GetPosition(), {GetXCoord(), GetYCoord(), 0.0f}) < 100.0f; // maybe not same
+    return DistanceBetweenPoints2D({ GetXCoord(), GetYCoord() }, TheCamera.GetPosition()) < 100.0f;
 }
 
 // 0x454D20

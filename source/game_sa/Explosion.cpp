@@ -248,7 +248,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 3000);
 
         bool bHit = false;
-        const float fGroundPos = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 3.0f, &bHit, nullptr);
+        const float fGroundPos = CWorld::FindGroundZFor3DCoord({pos.x, pos.y, pos.z + 3.0f}, &bHit, nullptr);
         if (bHit)
             pos.z = fGroundPos;
 
@@ -379,7 +379,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
                 for (auto i = 0; i < numFires; i++) {
                     const CVector firePos = exp->m_vecPosition + CVector{CGeneral::GetRandomNumberInRange(-4.0f, 4.0f), CGeneral::GetRandomNumberInRange(-4.0f, 4.0f), 0.0f};
                     bool bHitGround{};
-                    const float fGroundZ = CWorld::FindGroundZFor3DCoord(firePos.x, firePos.y, firePos.z + 3.0f, &bHitGround, nullptr);
+                    const float fGroundZ = CWorld::FindGroundZFor3DCoord({firePos.x, firePos.y, firePos.z + 3.0f}, &bHitGround, nullptr);
                     if (bHitGround && fabs(firePos.z - exp->m_vecPosition.z) < 10.0f) {
                         gFireManager.StartFire(firePos, 0.8f, 0, exp->m_pCreator, (uint32)(CGeneral::GetRandomNumberInRange(5600.0f, 12600.0f) * 0.4f), 3, 1);
                     }
