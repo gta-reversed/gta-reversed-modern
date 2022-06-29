@@ -39,7 +39,7 @@ void CMenuManager::InjectHooks() {
     RH_ScopedInstall(DoSettingsBeforeStartingAGame, 0x573330);
     RH_ScopedInstall(StretchX, 0x5733E0);
     RH_ScopedInstall(StretchY, 0x573410, true);
-    // + RH_ScopedInstall(SwitchToNewScreen, 0x573680);
+    RH_ScopedInstall(SwitchToNewScreen, 0x573680);
     RH_ScopedInstall(ScrollRadioStations, 0x573A00);
     RH_ScopedInstall(SetFrontEndRenderStates, 0x573A60);
     RH_ScopedInstall(SetDefaultPreferences, 0x573AE0);
@@ -357,7 +357,7 @@ float CMenuManager::StretchY(float y) {
 
 // 0x573680
 void CMenuManager::SwitchToNewScreen(eMenuScreen screen) {
-    return plugin::CallMethod<0x573680, CMenuManager*, eMenuScreen>(this, screen);
+    //return plugin::CallMethod<0x573680, CMenuManager*, eMenuScreen>(this, screen);
 
     // Works well, but needs more attention because of the trash gotos
     m_nPrevScreen = m_nCurrentScreen;
@@ -417,7 +417,7 @@ void CMenuManager::SwitchToNewScreen(eMenuScreen screen) {
     if (m_bMainMenuSwitch) {
         switch (m_nCurrentScreen) {
         case SCREEN_NEW_GAME_ASK:
-            CGame::bMissionPackGame = 0;
+            CGame::bMissionPackGame = false;
             DoSettingsBeforeStartingAGame();
             m_bDontDrawFrontEnd = true;
             break;
