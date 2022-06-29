@@ -561,7 +561,12 @@ public:
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
+    bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
+
+    bool IsGangster() const noexcept { return m_nPedType >= PED_TYPE_GANG1 && m_nPedType <= PED_TYPE_GANG10; }
+    static bool IsGangster(ePedType pedType) noexcept { return pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10; }
+    bool IsCivilian() const noexcept { return m_nPedType == PED_TYPE_CIVMALE || m_nPedType == PED_TYPE_CIVFEMALE; }
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
     CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }

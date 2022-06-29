@@ -70,6 +70,11 @@ void CPathFind::ReInit() {
     m_bNodesLoadingRequested = false;
 }
 
+// 0x44DD10
+bool CPathFind::AreNodesLoadedForArea(float minX, float maxX, float minY, float maxY) {
+    return plugin::CallMethodAndReturn<bool, 0x44DD10, CPathFind*, float, float, float, float>(this, minX, maxX, minY, maxY);
+}
+
 // 0x450950
 void CPathFind::Shutdown() {
     for (auto x = 0u; x < NUM_PATH_MAP_AREA_X; ++x) {
