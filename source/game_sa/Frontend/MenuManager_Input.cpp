@@ -4,7 +4,7 @@
 #include "MenuManager_Internal.h"
 #include "Gamma.h"
 #include "MenuSystem.h"
-#include <app/app.h>
+#include "app/app.h"
 #include <app/platform/win/VideoMode.h> // todo
 
 /*!
@@ -112,7 +112,7 @@ void CMenuManager::CheckSliderMovement(int8 value) {
     switch (item->m_nActionType) {
     case MENU_ACTION_BRIGHTNESS:
 #ifdef FIX_BUGS
-        m_PrefsBrightness += value * (384 / 16); // todo: 
+        m_PrefsBrightness += value * (384 / 16); // todo:
 #else
         m_PrefsBrightness += value * 24.19f;
 #endif

@@ -2,7 +2,7 @@
 
 #include "platform.h"
 #include "VideoMode.h"
-#include <app/app.h>
+#include "app/app.h"
 
 #define RSEVENT_SUCCEED(x) ((x) ? rsEVENTPROCESSED : rsEVENTERROR)
 
@@ -136,56 +136,6 @@ bool rsPreInitCommandLine(RwChar* arg) {
         return true;
     }
     return false;
-}
-
-// 0x619B60
-RsEventStatus RsEventHandler(RsEvent event, void* param) {
-    return plugin::CallAndReturn<RsEventStatus, 0x619B60, RsEvent, void*>(event, param);
-
-    /*
-    auto result = AppEventHandler(event, param);
-
-    if (event == rsQUITAPP)
-        RsGlobal.quit = true;
-
-    if (result != rsEVENTNOTPROCESSED)
-        return result;
-
-    switch (event) {
-    case rsCOMMANDLINE:
-        RsEventHandler(rsFILELOAD, param);
-        return rsEVENTPROCESSED;
-
-    case rsINITDEBUG:
-    case rsREGISTERIMAGELOADER:
-        return rsEVENTPROCESSED;
-
-    case rsRWINITIALIZE:
-        return RSEVENT_SUCCEED(RsRwInitialize(param));
-
-    case rsRWTERMINATE:
-        RsRwTerminate();
-        return rsEVENTPROCESSED;
-
-    case rsSELECTDEVICE:
-        return RSEVENT_SUCCEED(psSelectDevice());
-
-    case rsINITIALIZE:
-        return RSEVENT_SUCCEED(RsInitialize());
-
-    case rsTERMINATE:
-        psTerminate();
-        return rsEVENTPROCESSED;
-
-    case rsPREINITCOMMANDLINE:
-        return RSEVENT_SUCCEED(rsPreInitCommandLine((RwChar*)param));
-
-    default:
-        break;
-    }
-
-    return rsEVENTNOTPROCESSED;
-    */
 }
 
 // 0x619560
@@ -346,40 +296,51 @@ bool RsRwInitialize(void* param) {
 
 // 0x619B60
 RsEventStatus RsEventHandler(RsEvent event, void* param) {
-    // return plugin::CallAndReturn<RsEventStatus, 0x619B60, RsEvent, void*>(event, param);
+    return plugin::CallAndReturn<RsEventStatus, 0x619B60, RsEvent, void*>(event, param);
 
-    RsEventStatus es = AppEventHandler(event, param);
-    if (event == rsQUITAPP) {
+    RsEventStatus result = AppEventHandler(event, param);
+
+    if (event == rsQUITAPP)
         RsGlobal.quit = true;
-    }
+
+    if (result != rsEVENTNOTPROCESSED)
+        return result;
 
     switch (event) {
     case rsCOMMANDLINE:
         RsEventHandler(rsFILELOAD, param);
         return rsEVENTPROCESSED;
+
     case rsINITDEBUG:
-        return rsEVENTPROCESSED;
     case rsREGISTERIMAGELOADER:
-        return RsRegisterImageLoader() ? rsEVENTPROCESSED : rsEVENTERROR;
+        return rsEVENTPROCESSED;
+
     case rsRWINITIALIZE:
-        return RsRwInitialize(param) ? rsEVENTPROCESSED : rsEVENTERROR;
+        return RSEVENT_SUCCEED(RsRwInitialize(param));
+
     case rsRWTERMINATE:
         RsRwTerminate();
         return rsEVENTPROCESSED;
+
     case rsSELECTDEVICE:
-        return RsSelectDevice() ? rsEVENTPROCESSED : rsEVENTERROR;
+        return RSEVENT_SUCCEED(psSelectDevice());
+
     case rsINITIALIZE:
-        return RsInitialize() ? rsEVENTPROCESSED : rsEVENTERROR;
+        return RSEVENT_SUCCEED(RsInitialize());
+
     case rsTERMINATE:
-        RsTerminate();
+        psTerminate();
         return rsEVENTPROCESSED;
+
     case rsPREINITCOMMANDLINE:
-        return rsPreInitCommandLine((RwChar*)param) ? rsEVENTPROCESSED : rsEVENTERROR;
+        return RSEVENT_SUCCEED(rsPreInitCommandLine((RwChar*)param));
+
     default:
-        return rsEVENTNOTPROCESSED;
+        break;
     }
+
+    return rsEVENTNOTPROCESSED;
 }
-*/
 
 float IsWideScreenRatio(float ratio) {
     return ratio == 0.6f || ratio == 10.0f / 16.0f || ratio == 9.0f / 16.0f;
