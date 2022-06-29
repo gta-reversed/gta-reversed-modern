@@ -37,7 +37,6 @@ public:
     bool  m_b831;
 
 public:
-    CBmx(plugin::dummy_func_t) : CBike(plugin::dummy) { /* todo: remove NOTSA */ }
     CBmx(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBmx() override;
 
@@ -70,5 +69,4 @@ private:
     void PreRender_Reversed() { CBmx::PreRender(); }
     bool ProcessAI_Reversed(uint32& extraHandlingFlags) { return CBmx::ProcessAI(extraHandlingFlags); }
 };
-
 VALIDATE_SIZE(CBmx, 0x838);

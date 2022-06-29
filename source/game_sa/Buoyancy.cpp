@@ -46,7 +46,7 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* entity, float fBuoyancy, CVector* vec
         {
             m_fEntityWaterImmersion = 1.0F;
         }
-        else if (m_fEntityWaterImmersion < 0.0F) 
+        else if (m_fEntityWaterImmersion < 0.0F)
         {
             m_fEntityWaterImmersion = 0.0F;
             m_bInWater = false;
@@ -59,11 +59,11 @@ bool cBuoyancy::ProcessBuoyancy(CPhysical* entity, float fBuoyancy, CVector* vec
             CVector forward = entity->GetForwardVector();
             cBuoyancy::AddSplashParticles
                 (entity, CVector(0.0F, 0.0F, fDistanceZ),
-                    CVector(0.0F, 0.0F, fDistanceZ), 
+                    CVector(0.0F, 0.0F, fDistanceZ),
                     CVector(-forward.x, -forward.y,-forward.z), true);
         }
     }
-    else 
+    else
     {
         SimpleCalcBuoyancy(entity);
     }
@@ -275,6 +275,7 @@ void cBuoyancy::PreCalcSetup(CPhysical* entity, float fBuoyancy)
     m_fBuoyancy = fBuoyancy;
 }
 
+// 0x6C34E0
 void cBuoyancy::AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector vecTo, CVector vecSplashDir, uint8 bReduceParticleSize)
 {
     auto fDistBetweenPoints = DistanceBetweenPoints(vecFrom, vecTo);
@@ -327,7 +328,7 @@ void cBuoyancy::AddSplashParticles(CPhysical* entity, CVector vecFrom, CVector v
             curParticle = FxPrtMult_c(1.0F, 1.0F, 1.0F, 0.2F, 0.4F, 0.0F, 0.5F);
             auto vecPedVelocity = CVector(0.0F, 0.0F, 0.0F);
             auto vecPedParticlePos = entity->GetPosition() + (vecPedForward * 0.4F);
-        
+
             if (ped->m_pPlayerData)
                 vecPedParticlePos.z = ped->m_pPlayerData->m_fWaterHeight;
             else

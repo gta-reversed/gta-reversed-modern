@@ -336,13 +336,12 @@ void CPlane::SetGearDown() {
 // 0x6CCA50
 uint32 CPlane::CountPlanesAndHelis() {
     uint32 counter = 0;
-
-    for (auto& vehicle : GetVehiclePool()->GetAllValid()) {
-        if (vehicle.IsSubHeli() || vehicle.IsSubPlane()) {
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (vehicle && (vehicle->IsSubHeli() || vehicle->IsSubPlane())) {
             counter++;
         }
     }
-
     return counter;
 }
 
@@ -351,19 +350,17 @@ bool CPlane::AreWeInNoPlaneZone() {
     const auto& camPos = TheCamera.GetPosition();
     constexpr CVector vec1 = { -1073.0f, -675.0f, 50.0f };
 
-    return DistanceBetweenPoints(camPos, vec1) < 200.0f
-           || camPos.x > -2743.0f && camPos.x < -2626.0f && camPos.y > 1300.0f && camPos.y < 2200.0f
-           || camPos.x > -1668.0f && camPos.x < -1122.0f && camPos.y > 541.0f && camPos.y < 1118.0f;
+    return DistanceBetweenPoints(vec1, camPos) < 200.0f ||
+           camPos.x > -2743.0f && camPos.x < -2626.0f && camPos.y > 1300.0f && camPos.y < 2200.0f || // todo: Is point inside
+           camPos.x > -1668.0f && camPos.x < -1122.0f && camPos.y > 541.0f && camPos.y < 1118.0f;
 }
 
 // 0x6CCBB0
 bool CPlane::AreWeInNoBigPlaneZone() {
     // untested
     const auto& camPos = TheCamera.GetPosition();
-    constexpr CVector2D vec1 = { +1522.0f, -1237.0f };
-    constexpr CVector2D vec2 = { -1836.0f, +659.0f  };
-
-    return DistanceBetweenPoints2D(camPos, vec1) < 800.0f || DistanceBetweenPoints2D(camPos, vec2) < 800.0f;
+    return DistanceBetweenPoints2D({ +1522.0f, -1237.0f }, camPos) < 800.0f ||
+           DistanceBetweenPoints2D({ -1836.0f, +659.0f }, camPos) < 800.0f;
 }
 
 // 0x6CCC50

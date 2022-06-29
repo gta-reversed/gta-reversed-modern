@@ -146,7 +146,7 @@ void CWeapon::AddGunshell(CEntity* creator, CVector& position, const CVector2D& 
         return;
 
     // originally squared
-    if (DistanceBetweenPoints(TheCamera.GetPosition(), creator->GetPosition()) > 10.0f)
+    if (DistanceBetweenPoints(creator->GetPosition(), TheCamera.GetPosition()) > 10.0f)
         return;
 
     CVector velocity(direction.x, direction.y, CGeneral::GetRandomNumberInRange(0.4f, 1.6f));
