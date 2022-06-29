@@ -173,7 +173,7 @@ public:
     int32 m_nPressedMouseButton; // used in redefine controls
     int32 m_nJustDownJoyButton; // used in redefine controls; set via CControllerConfigManager::GetJoyButtonJustDown
     char  field_1AE8;
-    char  m_bRadioAvailable; // field_1AE9
+    bool  m_bRadioAvailable;
     uint8 m_nControllerError;
     bool  m_bScanningUserTracks;
     int32 m_nHelperTextFadingAlpha;
