@@ -1,6 +1,5 @@
 #include "StdInc.h"
 
-#include <cinttypes>
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
 #include "AudioEngine.h"
@@ -598,7 +597,7 @@ void CMenuManager::ProcessMissionPackNewGame() {
     } else {
         SwitchToNewScreen(SCREEN_NEW_GAME_ASK);
 
-        tMenuScreen* screen = &aScreens[m_nCurrentScreen];
+        auto screen = &aScreens[m_nCurrentScreen];
         if (CGame::bMissionPackGame) {
             // Are you sure you want to start a new standard game?
             // All current game progress in this Mission Pack will be lost. Proceed?

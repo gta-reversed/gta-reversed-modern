@@ -16,11 +16,9 @@
 #include "Gamma.h"
 #include "VideoMode.h"
 #include "C_PcSave.h"
-#include "app/platform/platform.h"
+#include "platform.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
-bool& CMenuManager::bInvertMouseX = *(bool*)0xBA6744;
-bool& CMenuManager::bInvertMouseY = *(bool*)0xBA6745;
 
 CMenuManager& GetMenu() {
     return FrontEndMenuManager;

@@ -5,7 +5,7 @@
 #include "Gamma.h"
 #include "MenuSystem.h"
 #include "app/app.h"
-#include "app/platform/win/VideoMode.h" // todo
+#include "VideoMode.h" // todo
 
 /*!
  * @addr 0x57FD70
@@ -104,8 +104,6 @@ bool CMenuManager::CheckRedefineControlInput() {
 // value: -1 or 1
 // 0x573440
 void CMenuManager::CheckSliderMovement(int8 value) {
-    //return plugin::CallMethod<0x573440, CMenuManager*, int8>(this, value);
-
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];
 

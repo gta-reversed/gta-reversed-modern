@@ -248,8 +248,8 @@ public:
 
     static int32& nLastMenuPage;
 
-    static bool& bInvertMouseX;
-    static bool& bInvertMouseY;
+    static inline bool& bInvertMouseX = *(bool*)0xBA6744;
+    static inline bool& bInvertMouseY = *(bool*)0xBA6745;
 
 public:
     static void InjectHooks();
