@@ -13,10 +13,10 @@ void CMouseControllerState::InjectHooks() {
 
 // 0x53F220
 CMouseControllerState::CMouseControllerState() {
-    this->Z = 0.0f;
-    this->X = 0.0f;
-    this->Y = 0.0f;
-    this->Clear();
+    Z = 0.0f;
+    X = 0.0f;
+    Y = 0.0f;
+    Clear();
 }
 
 CMouseControllerState* CMouseControllerState::Constructor() {
@@ -36,7 +36,7 @@ void CMouseControllerState::Clear() {
 }
 
 // 0x53F270
-bool CMouseControllerState::CheckForInput() {
+bool CMouseControllerState::CheckForInput() const {
     return (
         lmb
         || rmb
@@ -49,5 +49,3 @@ bool CMouseControllerState::CheckForInput() {
         || Y != 0.0f
     );
 }
-
-
