@@ -328,7 +328,7 @@ RsEventStatus RsEventHandler(RsEvent event, void* param) {
         return RSEVENT_SUCCEED(RsInitialize());
 
     case rsTERMINATE:
-        psTerminate();
+        RsTerminate();
         return rsEVENTPROCESSED;
 
     case rsPREINITCOMMANDLINE:
