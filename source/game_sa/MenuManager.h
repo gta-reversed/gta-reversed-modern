@@ -150,7 +150,7 @@ public:
     int8      m_nPlayerNumber;
     bool      m_bLanguageChanged; // useless?
     int32     field_EC;
-    int32*    m_pPressedKey; // any pressed key, in order of CKeyboardState; 1056 means no key pressed
+    int32*    m_pPressedKey; // any pressed key, in order of CKeyboardState; rsNULL means no key pressed
     bool      field_F4; // m_bPreInitialised
 
     union {

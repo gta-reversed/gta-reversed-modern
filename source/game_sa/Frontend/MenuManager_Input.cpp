@@ -74,7 +74,7 @@ bool CMenuManager::CheckRedefineControlInput() {
             m_nJustDownJoyButton = ControlsManager.GetJoyButtonJustDown();
 
             auto code = 0; // todo: enum?
-            if (m_nPressedMouseButton && *m_pPressedKey == 1056) { // // todo: 1056 means no key pressed
+            if (m_nPressedMouseButton && *m_pPressedKey == rsNULL) {
                 code = 2;
             }
 
@@ -85,7 +85,7 @@ bool CMenuManager::CheckRedefineControlInput() {
                     field_1B0B = 1;
                     field_1B0A = 0;
                 } else {
-                    if (*m_pPressedKey != 1056 || m_nPressedMouseButton || m_nJustDownJoyButton) {
+                    if (*m_pPressedKey != rsNULL || m_nPressedMouseButton || m_nJustDownJoyButton) {
                         CheckCodesForControls(code);
                     }
                     field_1B15 = 1;
