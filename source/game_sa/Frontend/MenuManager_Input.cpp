@@ -213,6 +213,7 @@ void CMenuManager::CheckForMenuClosing() {
         if (TheCamera.m_bWideScreenOn && !m_bMenuAccessWidescreen) {
             return false;
         }
+        return true;
     };
 
     if (CanActivateMenu()) {

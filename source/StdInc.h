@@ -1,7 +1,7 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
-#include <windows.h>
+#include <Windows.h>
 #include <cstdio>
 #include <cmath>
 #include <cinttypes>
