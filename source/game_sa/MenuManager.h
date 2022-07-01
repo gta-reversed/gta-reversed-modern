@@ -65,7 +65,7 @@ public:
     bool      m_bMenuAccessWidescreen;
     char      field_35;
     char      field_36[2];
-    int32     field_38;
+    RsKeyCodes field_38;
     int32     m_PrefsBrightness;
     float     m_fDrawDistance;
 
@@ -150,7 +150,7 @@ public:
     int8      m_nPlayerNumber;
     bool      m_bLanguageChanged; // useless?
     int32     field_EC;
-    int32*    m_pPressedKey; // any pressed key, in order of CKeyboardState; rsNULL means no key pressed
+    RsKeyCodes* m_pPressedKey; // any pressed key, in order of CKeyboardState; rsNULL means no key pressed
     bool      field_F4; // m_bPreInitialised
 
     union {
@@ -170,7 +170,7 @@ public:
     uint8 m_nMissionPackGameId;
     MPack m_MissionPacks[25];
     bool  m_bDoVideoModeUpdate;
-    int32 m_nPressedMouseButton; // used in redefine controls
+    RsKeyCodes m_nPressedMouseButton; // used in redefine controls
     int32 m_nJustDownJoyButton; // used in redefine controls; set via CControllerConfigManager::GetJoyButtonJustDown
     char  field_1AE8;
     bool  m_bRadioAvailable;
@@ -307,7 +307,7 @@ public:
     void CheckForMenuClosing();
     [[nodiscard]] bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
     bool CheckMissionPackValidMenu();
-    bool CheckCodesForControls(int32);
+    bool CheckCodesForControls(RsInputDeviceType type);
 
     int32 DisplaySlider(float x, float y, float h1, float h2, float length, float value, int32 spacing);
 

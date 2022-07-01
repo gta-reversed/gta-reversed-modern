@@ -154,7 +154,7 @@ struct RsMouseStatus
 #endif /* defined(macintosh) */
 };
 
-enum RsKeyCodes
+enum RsKeyCodes : int32
 {
     rsESC            = 1000,
 

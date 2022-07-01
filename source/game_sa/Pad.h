@@ -325,7 +325,7 @@ public:
 VALIDATE_SIZE(CPad, 0x134);
 
 // return pressed key, in order of CKeyboardState
-int GetCurrentKeyPressed(int& keys);
+int GetCurrentKeyPressed(RsKeyCodes& keys);
 
 // todo: move these fucks out
 IDirectInputDevice8* DIReleaseMouse();

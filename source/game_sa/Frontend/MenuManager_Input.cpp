@@ -52,30 +52,30 @@ bool CMenuManager::CheckRedefineControlInput() {
             m_bJustOpenedControlRedefWindow = false;
         } else {
             GetCurrentKeyPressed(*m_pPressedKey);
-            m_nPressedMouseButton = 0;
+            m_nPressedMouseButton = (RsKeyCodes)0;
             m_nJustDownJoyButton = 0;
 
             auto pad = CPad::GetPad();
             if (pad->IsMouseLButtonPressed()) {
-                m_nPressedMouseButton = 1;
+                m_nPressedMouseButton = rsMOUSELEFTBUTTON;
             } else if (pad->IsMouseRButtonPressed()) {
-                m_nPressedMouseButton = 3;
+                m_nPressedMouseButton = rsMOUSERIGHTBUTTON;
             } else if (pad->IsMouseMButtonPressed()) {
-                m_nPressedMouseButton = 2;
+                m_nPressedMouseButton = rsMOUSMIDDLEBUTTON;
             } else if (pad->IsMouseWheelUpPressed()) {
-                m_nPressedMouseButton = 4;
+                m_nPressedMouseButton = rsMOUSEWHEELUPBUTTON;
             } else if (pad->IsMouseWheelDownPressed()) {
-                m_nPressedMouseButton = 5;
+                m_nPressedMouseButton = rsMOUSEWHEELDOWNBUTTON;
             } else if (pad->IsMouseBmx1Pressed()) {
-                m_nPressedMouseButton = 6;
+                m_nPressedMouseButton = rsMOUSEX1BUTTON;
             } else if (pad->IsMouseBmx2Pressed()) {
-                m_nPressedMouseButton = 7;
+                m_nPressedMouseButton = rsMOUSEX2BUTTON;
             }
             m_nJustDownJoyButton = ControlsManager.GetJoyButtonJustDown();
 
-            auto code = 0; // todo: enum?
+            auto type = rsKEYBOARD;
             if (m_nPressedMouseButton && *m_pPressedKey == rsNULL) {
-                code = 2;
+                type = rsPAD;
             }
 
             if (field_1B14) {
@@ -86,14 +86,14 @@ bool CMenuManager::CheckRedefineControlInput() {
                     field_1B0A = 0;
                 } else {
                     if (*m_pPressedKey != rsNULL || m_nPressedMouseButton || m_nJustDownJoyButton) {
-                        CheckCodesForControls(code);
+                        CheckCodesForControls(type);
                     }
                     field_1B15 = 1;
                 }
             } else {
                 m_pPressedKey = 0;
                 field_1B09 = 0;
-                field_38 = -1;
+                field_38 = (RsKeyCodes)-1;
                 m_bJustOpenedControlRedefWindow = false;
             }
         }
@@ -414,6 +414,6 @@ bool CMenuManager::CheckMissionPackValidMenu() {
 }
 
 // 0x57DB20
-bool CMenuManager::CheckCodesForControls(int32 a1) {
-    return plugin::CallMethodAndReturn<bool, 0x57DB20, CMenuManager*>(this, a1);
+bool CMenuManager::CheckCodesForControls(RsInputDeviceType type) {
+    return plugin::CallMethodAndReturn<bool, 0x57DB20, CMenuManager*, RsInputDeviceType>(this, type);
 }

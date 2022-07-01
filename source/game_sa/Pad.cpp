@@ -1191,8 +1191,8 @@ bool CPad::DebugMenuJustPressed() {
 }
 
 // 0x541490
-int GetCurrentKeyPressed(int& keys) {
-    return plugin::CallAndReturn<int, 0x541490, int&>(keys);
+int GetCurrentKeyPressed(RsKeyCodes& keys) {
+    return plugin::CallAndReturn<int, 0x541490, RsKeyCodes&>(keys);
 }
 
 IDirectInputDevice8* DIReleaseMouse() {
