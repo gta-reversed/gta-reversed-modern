@@ -2,7 +2,6 @@
 
 #include "MenuManager.h"
 #include "MenuManager_Internal.h"
-#include "Gamma.h"
 #include "MenuSystem.h"
 #include "app/app.h"
 #include "VideoMode.h" // todo
@@ -116,7 +115,7 @@ void CMenuManager::CheckSliderMovement(int8 value) {
 #endif
         m_PrefsBrightness = std::clamp(m_PrefsBrightness, 0, 384);
 
-        gamma.SetGamma(m_PrefsBrightness / 512.0f, false);
+        SetBrightness(m_PrefsBrightness, false);
         break;
     case MENU_ACTION_RADIO_VOL: {
         m_nRadioVolume += 4 * value;
@@ -263,7 +262,7 @@ void CMenuManager::CheckForMenuClosing() {
                     Initialise();
                     LoadAllTextures();
 
-                    gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true); // todo: inlined
+                    SetBrightness(m_PrefsBrightness, true);
                 }
             } else {
                 AudioEngine.StopRadio(nullptr, false);
@@ -301,7 +300,7 @@ void CMenuManager::CheckForMenuClosing() {
                 pad->LastTimeTouched = 0;
                 CPad::GetPad(1)->LastTimeTouched = 0;
 
-                gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true); // todo: inlined x3
+                SetBrightness(m_PrefsBrightness, true);
 
                 if (field_F4) {
                     auto player = FindPlayerPed();

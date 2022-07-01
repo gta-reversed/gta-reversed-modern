@@ -12,6 +12,7 @@
 #include "Sprite2d.h"
 #include "Vector2D.h"
 #include "eLanguage.h"
+#include "Gamma.h"
 
 class CRect;
 
@@ -340,6 +341,12 @@ public:
     void ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed);
     bool ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed);
     void ProcessMissionPackNewGame();
+
+    // NOTSA
+private:
+    void SetBrightness(float brightness, bool arg2) {
+        gamma.SetGamma(brightness / 512.0f, arg2);
+    }
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

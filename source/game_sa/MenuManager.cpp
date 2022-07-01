@@ -13,7 +13,6 @@
 #include "MenuSystem.h"
 #include "AEAudioUtility.h"
 #include "Radar.h"
-#include "Gamma.h"
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "platform.h"
@@ -480,7 +479,7 @@ void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
     case SCREEN_DISPLAY_SETTINGS:
     case SCREEN_DISPLAY_ADVANCED:
         g_fx.SetFxQuality(FXQUALITY_HIGH);
-        gamma.SetGamma(0.5f, true);
+        SetBrightness(256.0f, true);
         m_PrefsBrightness                = 256;
         m_fDrawDistance                  = 1.2f;
         CRenderer::ms_lodDistScale       = 1.2f;
@@ -675,7 +674,7 @@ void CMenuManager::LoadSettings() {
     CCamera::m_bUseMouse3rdPerson = m_nController == 0;
     CRenderer::ms_lodDistScale = m_fDrawDistance;
     g_fx.SetFxQuality(fxQuality);
-    gamma.SetGamma((float)m_PrefsBrightness / 512.0f, true);
+    SetBrightness(m_PrefsBrightness, true);
     m_nPrefsAntialiasing = m_nDisplayAntialiasing;
     m_bDoVideoModeUpdate = true;
     AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
