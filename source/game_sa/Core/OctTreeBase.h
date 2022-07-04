@@ -14,15 +14,16 @@ public:
     bool32 m_bHasTransparentPixels;
 
 public:
-    COctTreeBase();
+    COctTreeBase() = default;  // 0x5A7570
     ~COctTreeBase() = default; // 0x856690
 
-    bool InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue) override;
+    bool InsertTree(uint8 red, uint8 green, uint8 blue) override;
     void FillPalette(uint8* colors) override;
 
     void Init(int32 numBranches);
-    bool Insert(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    bool Insert(uint8 red, uint8 green, uint8 blue);
     void ReduceBranches(int32 newBranchesCount);
+    void Reduce();
 };
 
 extern COctTreeBase& gOctTreeBase;
