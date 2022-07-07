@@ -154,8 +154,7 @@ struct RsMouseStatus
 #endif /* defined(macintosh) */
 };
 
-enum RsKeyCodes : int32
-{
+enum RsKeyCodes : int32 {
     rsESC            = 1000,
 
     rsF1             = 1001,
@@ -221,13 +220,13 @@ enum RsKeyCodes : int32
 
     rsNULL           = 1056,
 
-    rsMOUSELEFTBUTTON      = 1,
-    rsMOUSMIDDLEBUTTON     = 2,
-    rsMOUSERIGHTBUTTON     = 3,
-    rsMOUSEWHEELUPBUTTON   = 4,
-    rsMOUSEWHEELDOWNBUTTON = 5,
-    rsMOUSEX1BUTTON        = 6,
-    rsMOUSEX2BUTTON        = 7,
+    rsMOUSE_LEFT_BUTTON       = 1,
+    rsMOUSE_MIDDLE_BUTTON     = 2,
+    rsMOUSE_RIGHT_BUTTON      = 3,
+    rsMOUSE_WHEEL_UP_BUTTON   = 4,
+    rsMOUSE_WHEEL_DOWN_BUTTON = 5,
+    rsMOUSE_X1_BUTTON         = 6,
+    rsMOUSE_X2_BUTTON         = 7,
 };
 typedef enum RsKeyCodes RsKeyCodes;
 
