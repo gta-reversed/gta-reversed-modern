@@ -324,7 +324,6 @@ void InjectHooksMain() {
     CReferences::InjectHooks();
     CPopulation::InjectHooks();
     CModelInfo::InjectHooks();
-    CModelInfoAccelerator::InjectHooks();
     CBaseModelInfo::InjectHooks();
     CAtomicModelInfo::InjectHooks();
     CLodAtomicModelInfo::InjectHooks();

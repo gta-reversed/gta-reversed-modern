@@ -13,7 +13,7 @@ public:
     CVector m_vecCenter;
     float   m_fRadius;
 
-    constexpr CSphere(){};
+    constexpr CSphere() = default;
     constexpr CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius){};
     constexpr CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius){};
 

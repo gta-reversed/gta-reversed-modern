@@ -104,7 +104,7 @@ void CFont::LoadFontValues() {
         if (*line == '\0' || *line == '#')
             continue;
 
-        if (sscanf(line, "%s", &attrib) == EOF)
+        if (sscanf(line, "%31s", attrib) == EOF) // FIX_BUGS: buffer overflow
             continue;
 
         if (!memcmp(attrib, "[TOTAL_FONTS]", 14)) {

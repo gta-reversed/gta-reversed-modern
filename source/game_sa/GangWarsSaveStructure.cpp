@@ -37,18 +37,16 @@ void CGangWarsSaveStructure::Construct() {
     RadarBlip = CGangWars::RadarBlip;
     bPlayerIsCloseby = CGangWars::bPlayerIsCloseby;
     TerritoryUnderControlPercentage = CGangWars::TerritoryUnderControlPercentage;
+    Difficulty = CGangWars::Difficulty;
 }
 
 // 0x5D2740
-void CGangWarsSaveStructure::Extract() {
+void CGangWarsSaveStructure::Extract() const {
     CGangWars::bGangWarsActive = bGangWarsActive;
     CGangWars::State = State;
     CGangWars::TimeStarted = TimeStarted;
-
-    auto zoneInfoIdx = GangWarZoneInfoIndex, navZoneIdx = GangWarNavigationZoneIndex;
-    CGangWars::pZoneInfoToFightOver = (zoneInfoIdx != -1) ? &CTheZones::ZoneInfoArray[zoneInfoIdx] : nullptr;
-    CGangWars::pZoneToFightOver = (navZoneIdx != -1) ? &CTheZones::NavigationZoneArray[navZoneIdx] : nullptr;
-
+    CGangWars::pZoneInfoToFightOver = (GangWarZoneInfoIndex != -1) ? &CTheZones::ZoneInfoArray[GangWarZoneInfoIndex] : nullptr;
+    CGangWars::pZoneToFightOver = (GangWarNavigationZoneIndex != -1) ? &CTheZones::NavigationZoneArray[GangWarNavigationZoneIndex] : nullptr;
     CGangWars::CoorsOfPlayerAtStartOfWar = CoorsOfPlayerAtStartOfWar;
     CGangWars::Gang1 = Gang1;
     CGangWars::Gang2 = Gang2;

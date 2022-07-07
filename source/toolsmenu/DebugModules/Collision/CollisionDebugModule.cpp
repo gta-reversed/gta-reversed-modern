@@ -231,25 +231,6 @@ void ProcessImgui() {
 }
 
 void ProcessRender() {
-    const auto& mat = FindPlayerPed()->GetMatrix();
-
-    auto mat1 = mat;
-    mat1.GetPosition() += CVector(1.0f, 0.0f, 1.0f);
-
-    auto mat2 = mat;
-    mat2.GetPosition() += CVector(2.0f, 0.0f, 0.0f);
-
-    auto mat3 = mat;
-    mat3.GetPosition() += CVector(3.0f, 0.0f, 1.0f);
-
-    auto mat4 = mat;
-    mat4.GetPosition() += CVector(4.0f, 0.0f, 0.0f);
-
-    DrawColModel(mat1, CTaskSimpleClimb::ms_ClimbColModel);
-    DrawColModel(mat2, CTaskSimpleClimb::ms_StandUpColModel);
-    DrawColModel(mat3, CTaskSimpleClimb::ms_VaultColModel);
-    DrawColModel(mat4, CTaskSimpleClimb::ms_FindEdgeColModel);
-
     if (!gDrawCollisionModule.enabled)
         return;
 

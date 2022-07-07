@@ -7,33 +7,11 @@ void CWaterCannon::InjectHooks() {
     RH_ScopedClass(CWaterCannon);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Constructor, 0x728B10);
-    RH_ScopedInstall(Destructor, 0x728B30);
     RH_ScopedInstall(Init, 0x728B40);
     RH_ScopedInstall(Update_OncePerFrame, 0x72A280);
     RH_ScopedInstall(Update_NewInput, 0x728C20);
     RH_ScopedInstall(PushPeds, 0x7295E0);
     RH_ScopedInstall(Render, 0x728DA0);
-}
-
-// 0x728B10
-CWaterCannon::CWaterCannon() {
-    // NOP
-}
-
-CWaterCannon* CWaterCannon::Constructor() {
-    this->CWaterCannon::CWaterCannon();
-    return this;
-}
-
-// 0x728B30
-CWaterCannon::~CWaterCannon() {
-    // NOP
-}
-
-CWaterCannon* CWaterCannon::Destructor() {
-    CWaterCannon::~CWaterCannon();
-    return this;
 }
 
 // 0x728B40
@@ -82,7 +60,7 @@ void CWaterCannon::Update_OncePerFrame(int16 index) {
 }
 
 // 0x728C20
-void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
+void CWaterCannon::Update_NewInput(const CVector* start, const CVector* end) {
     m_sectionPoint[m_nSectionsCount]     = *start;
     m_sectionMoveSpeed[m_nSectionsCount] = *end;
     m_abUsed[m_nSectionsCount]           = true;

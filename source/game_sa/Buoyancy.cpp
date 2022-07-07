@@ -27,62 +27,49 @@ void cBuoyancy::InjectHooks()
     RH_ScopedInstall(FindWaterLevelNorm, 0x6C28C0);
 }
 
-bool cBuoyancy::ProcessBuoyancy(CPhysical* entity, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce)
-{
+// 0x6C3EF0
+bool cBuoyancy::ProcessBuoyancy(CPhysical* entity, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce) {
     CVector& entityPosition = entity->GetPosition();
-    if (!CWaterLevel::GetWaterLevel(entityPosition.x, entityPosition.y, entityPosition.z,
-        &m_fWaterLevel, entity->physicalFlags.bTouchingWater, nullptr))
+    if (!CWaterLevel::GetWaterLevel(entityPosition, m_fWaterLevel, entity->physicalFlags.bTouchingWater)) {
         return false;
+    }
 
     m_EntityMatrix = *entity->m_matrix;
     PreCalcSetup(entity, fBuoyancy);
-    if (entity->IsPed())
-    {
+    if (entity->IsPed()) {
         entity->GetColModel(); // for some reason, this is here?
 
         m_bInWater = true;
         m_fEntityWaterImmersion = (m_fWaterLevel - entityPosition.z + 1.0F) / 1.9F;
-        if (m_fEntityWaterImmersion > 1.0F)
-        {
+        if (m_fEntityWaterImmersion > 1.0F) { // clamp
             m_fEntityWaterImmersion = 1.0F;
-        }
-        else if (m_fEntityWaterImmersion < 0.0F)
-        {
+        } else if (m_fEntityWaterImmersion < 0.0F) {
             m_fEntityWaterImmersion = 0.0F;
             m_bInWater = false;
         }
 
-        m_vecTurnPoint = CVector(0.0F, 0.0F, 0.0F);
-        if (m_fEntityWaterImmersion > 0.0F && m_fEntityWaterImmersion < 1.0F)
-        {
-            float fDistanceZ = m_fWaterLevel - entityPosition.z;
-            CVector forward = entity->GetForwardVector();
-            cBuoyancy::AddSplashParticles
-                (entity, CVector(0.0F, 0.0F, fDistanceZ),
-                    CVector(0.0F, 0.0F, fDistanceZ),
-                    CVector(-forward.x, -forward.y,-forward.z), true);
+        m_vecTurnPoint = CVector{};
+        if (m_fEntityWaterImmersion > 0.0F && m_fEntityWaterImmersion < 1.0F) {
+            const CVector dir = -entity->GetForwardVector();
+            const CVector vec = CVector(0.0F, 0.0F, m_fWaterLevel - entityPosition.z);
+            cBuoyancy::AddSplashParticles(entity, vec, vec, dir, true);
         }
-    }
-    else
-    {
+    } else {
         SimpleCalcBuoyancy(entity);
     }
 
     bool bCalcBuoyancyForce = CalcBuoyancyForce(entity, vecBuoyancyTurnPoint, vecBuoyancyForce);
-    if (m_bProcessingBoat || bCalcBuoyancyForce)
-    {
+    if (m_bProcessingBoat || bCalcBuoyancyForce) {
         return true;
     }
 
     return false;
 }
 
-bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* vehicle, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce, bool bUnderwater)
-{
+// 0x6C3030
+bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* vehicle, float fBuoyancy, CVector* vecBuoyancyTurnPoint, CVector* vecBuoyancyForce, bool bUnderwater) {
     const CVector& entityPosition = vehicle->GetPosition();
-    if (!CWaterLevel::GetWaterLevel(entityPosition.x, entityPosition.y, entityPosition.z,
-        &m_fWaterLevel, vehicle->physicalFlags.bTouchingWater, nullptr)) {
-
+    if (!CWaterLevel::GetWaterLevel(entityPosition, m_fWaterLevel, vehicle->physicalFlags.bTouchingWater)) {
         return false;
     }
 
@@ -110,17 +97,17 @@ bool cBuoyancy::ProcessBuoyancyBoat(CVehicle* vehicle, float fBuoyancy, CVector*
             case MODEL_SPEEDER:
             case MODEL_JETMAX:
             case MODEL_LAUNCH:
-                cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionSpeed[iYMult][iXMult];
+                fPointVolMultiplier = afBoatVolumeDistributionSpeed[iYMult][iXMult];
                 break;
             case MODEL_COASTG:
             case MODEL_DINGHY:
-                cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionDinghy[iYMult][iXMult];
+                fPointVolMultiplier = afBoatVolumeDistributionDinghy[iYMult][iXMult];
                 break;
             case MODEL_MARQUIS:
-                cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistributionSail[iYMult][iXMult];
+                fPointVolMultiplier = afBoatVolumeDistributionSail[iYMult][iXMult];
                 break;
             default:
-                cBuoyancy::fPointVolMultiplier = cBuoyancy::afBoatVolumeDistribution[iYMult][iXMult];
+                fPointVolMultiplier = afBoatVolumeDistribution[iYMult][iXMult];
                 break;
             }
 

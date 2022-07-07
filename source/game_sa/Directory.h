@@ -25,7 +25,7 @@ public:
     bool           m_bOwnsEntries{};
 
 public:
-    CDirectory();
+    CDirectory() = default; // 0x532290
     CDirectory(size_t capacity);
     ~CDirectory();
 

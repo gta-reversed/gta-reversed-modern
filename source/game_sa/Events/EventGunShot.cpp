@@ -114,9 +114,9 @@ bool CEventGunShot::TakesPriorityOver_Reversed(const CEvent& refEvent)
         bool bIsPlayer = false;
         bool otherPedIsPlayer = false;
         const auto refEventGunShot = static_cast<const CEventGunShot*>(&refEvent);
-        CPed* ped = m_entity->AsPed();
-        if (m_entity && m_entity->IsPed())
-            bIsPlayer = ped->IsPlayer();
+        if (m_entity && m_entity->AsPed()->IsPed()) {
+            bIsPlayer = m_entity->AsPed()->IsPlayer();
+        }
 
         CPed* otherPed = refEventGunShot->m_entity->AsPed();
         if (otherPed && otherPed->IsPed())

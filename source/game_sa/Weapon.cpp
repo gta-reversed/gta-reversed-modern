@@ -214,10 +214,11 @@ bool CWeapon::FireSniper(CPed* shooter, CEntity* victim, CVector* target) {
         CamShakeNoPos(&TheCamera, 0.2f);
     }
 
-    if (shooter->m_nType == PED_TYPE_PLAYER_UNUSED) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
+    if (shooter->m_nType == ENTITY_TYPE_PED) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter);
-    else if (shooter->m_nType == PED_TYPE_PLAYER_NETWORK && shooter->field_460) // todo: Comparison of different enumeration types ('eEntityType' and 'ePedType') is deprecated
+    } else if (shooter->m_nType == ENTITY_TYPE_VEHICLE && shooter->field_460) {
         CCrime::ReportCrime(CRIME_FIRE_WEAPON, shooter, shooter->field_460);
+    }
 
     CVector targetPoint = velocity * 40.0f + activeCam.m_vecSource;
     bool hasNoSound = m_nType == eWeaponType::WEAPON_PISTOL_SILENCED || m_nType == eWeaponType::WEAPON_TEARGAS;
@@ -407,7 +408,7 @@ bool CWeapon::TakePhotograph(CEntity* owner, CVector* point) {
     const auto& camPos = camMat.GetPosition();
 
     const auto IsPosInRange = [&](const CVector& worldPos) {
-        return (camPos - worldPos).SquaredMagnitude() >= 125.f * 125.f; // NOTSA: Using squared mag.
+        return (camPos - worldPos).SquaredMagnitude() >= sq(125.f); // NOTSA: Using squared mag.
     };
 
     // Check is in position in camera's frame
@@ -615,8 +616,7 @@ float CWeapon::EvaluateTargetForHeatSeekingMissile(CEntity* entity, CVector& pos
 
 // 0x73E690
 void CWeapon::DoWeaponEffect(CVector origin, CVector target) {
-    char fxName[32];
-
+    char fxName[32]{};
     switch (m_nType) {
     case eWeaponType::WEAPON_FLAMETHROWER:
         strcpy(fxName, "flamethrower");

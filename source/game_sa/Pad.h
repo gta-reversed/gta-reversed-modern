@@ -280,10 +280,6 @@ public:
     [[nodiscard]] int16 GetRightStickY() const noexcept                     { return BUTTON_IS_DOWN(RightStickY); }
 
     bool IsSteeringInAnyDirection() { return GetSteeringLeftRight() || GetSteeringUpDown(); }
-    void f0x45AF90() {
-        NewState.LeftStickX = NewMouseControllerState.X;
-        NewState.RightStickX = NewMouseControllerState.Y;
-    }
 
     // PAD END
 

@@ -131,7 +131,7 @@ void CEventEditableResponse::InformRespectedFriends(CPed* ped) {
             continue;
 
         CPed* entityPed = entity->AsPed();
-        if (entityPed->m_nPedType == PED_TYPE_COP) { // todo: strange comparison; equal PED_TYPE_COP and then not equal PED_TYPE_COP 🥴
+        if (ped->m_nPedType == PED_TYPE_COP) {
             if (entityPed->m_nPedType != PED_TYPE_COP)
                 continue;
 

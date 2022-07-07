@@ -40,7 +40,7 @@ CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(
     if (m_nModelIndex == MODEL_BAGBOXA || m_nModelIndex == MODEL_BAGBOXB)
         m_fTrailerTowedRatio = -1000.0f;
 
-    SetupSuspensionLines();
+    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
 
     m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }

@@ -4,8 +4,8 @@
 
 // 0x5DE340
 CEmergencyPed::CEmergencyPed(ePedType pedType, uint32 modelIndex) : CPed(pedType) {
-  SetModelIndex(modelIndex);
-  m_pedSpeech.Initialise(this);
+    SetModelIndex(modelIndex); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
+    m_pedSpeech.Initialise(this);
 }
 
 void CEmergencyPed::MedicAI() {
@@ -22,11 +22,11 @@ void CEmergencyPed::ProcessControl() {
     if (m_bWasPostponed || m_nPedState == PEDSTATE_DEAD)
         return;
 
-    auto weapon = GetActiveWeapon();
+    auto& weapon = GetActiveWeapon();
     weapon.Update(nullptr);
     if (m_nPedState != PEDSTATE_DIE) {
         weapon.Update(nullptr);
-        if (m_nPedType != PED_TYPE_MEDIC && m_nPedType == PED_TYPE_FIREMAN) {
+        if (m_nPedType != PED_TYPE_MEDIC && m_nPedType == PED_TYPE_FIREMAN) { // todo: bad OG expression
             CPed::IsPedInControl();
         }
     }

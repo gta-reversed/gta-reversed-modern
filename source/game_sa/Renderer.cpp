@@ -559,7 +559,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
     CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
     CBaseModelInfo* baseAtomicModelInfo = baseModelInfo->AsAtomicModelInfoPtr();
     if (entity->IsVehicle() && !entity->m_bTunnelTransition) {
-        if ((!ms_bRenderTunnels && entity->m_bTunnel || !ms_bRenderOutsideTunnels && !entity->m_bTunnel))
+        if (!ms_bRenderTunnels && entity->m_bTunnel || !ms_bRenderOutsideTunnels && !entity->m_bTunnel)
             return RENDERER_INVISIBLE;
     }
 
