@@ -13,6 +13,7 @@
 #include "MenuSystem.h"
 #include "AEAudioUtility.h"
 #include "Radar.h"
+#include "Gamma.h"
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "platform.h"
@@ -996,6 +997,7 @@ void CMenuManager::ResetHelperText() {
 
 // 0x579330
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
+    const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     if (!cameraUpdateStarted) {
         if (!RsCameraBeginUpdate(Scene.m_pRwCamera))
             return;
@@ -1011,7 +1013,6 @@ void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cam
     DefinedState2d();
 
     if (blackBackground) {
-        const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
     }
 
@@ -1061,4 +1062,9 @@ void CMenuManager::SmallMessageScreen(const char* key) {
         }
     }
     CFont::PrintString(x, y, text);
+}
+
+// NOTSA
+void CMenuManager::SetBrightness(float brightness, bool arg2) {
+    gamma.SetGamma(brightness / 512.0f, arg2);
 }

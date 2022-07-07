@@ -56,19 +56,19 @@ bool CMenuManager::CheckRedefineControlInput() {
 
             auto pad = CPad::GetPad();
             if (pad->IsMouseLButtonPressed()) {
-                m_nPressedMouseButton = rsMOUSELEFTBUTTON;
+                m_nPressedMouseButton = rsMOUSE_LEFT_BUTTON;
             } else if (pad->IsMouseRButtonPressed()) {
-                m_nPressedMouseButton = rsMOUSERIGHTBUTTON;
+                m_nPressedMouseButton = rsMOUSE_RIGHT_BUTTON;
             } else if (pad->IsMouseMButtonPressed()) {
-                m_nPressedMouseButton = rsMOUSMIDDLEBUTTON;
+                m_nPressedMouseButton = rsMOUSE_MIDDLE_BUTTON;
             } else if (pad->IsMouseWheelUpPressed()) {
-                m_nPressedMouseButton = rsMOUSEWHEELUPBUTTON;
+                m_nPressedMouseButton = rsMOUSE_WHEEL_UP_BUTTON;
             } else if (pad->IsMouseWheelDownPressed()) {
-                m_nPressedMouseButton = rsMOUSEWHEELDOWNBUTTON;
+                m_nPressedMouseButton = rsMOUSE_WHEEL_DOWN_BUTTON;
             } else if (pad->IsMouseBmx1Pressed()) {
-                m_nPressedMouseButton = rsMOUSEX1BUTTON;
+                m_nPressedMouseButton = rsMOUSE_X1_BUTTON;
             } else if (pad->IsMouseBmx2Pressed()) {
-                m_nPressedMouseButton = rsMOUSEX2BUTTON;
+                m_nPressedMouseButton = rsMOUSE_X2_BUTTON;
             }
             m_nJustDownJoyButton = ControlsManager.GetJoyButtonJustDown();
 
@@ -115,7 +115,7 @@ void CMenuManager::CheckSliderMovement(int8 value) {
 #endif
         m_PrefsBrightness = std::clamp(m_PrefsBrightness, 0, 384);
 
-        SetBrightness(m_PrefsBrightness, false);
+        SetBrightness((float)m_PrefsBrightness, false);
         break;
     case MENU_ACTION_RADIO_VOL: {
         m_nRadioVolume += 4 * value;
