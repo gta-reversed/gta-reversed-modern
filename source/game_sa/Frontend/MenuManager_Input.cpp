@@ -25,7 +25,7 @@ void CMenuManager::UserInput() {
  * @addr 0x57B480
  */
 void CMenuManager::ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR) {
-    plugin::CallMethod<0x57B480, CMenuManager*, bool, bool, bool, int8>(this, downPressed, upPressed, acceptPressed, cancelPressed, pressedLR);
+    plugin::CallMethod<0x57B480, CMenuManager*, bool, bool, bool, bool, int8>(this, downPressed, upPressed, acceptPressed, cancelPressed, pressedLR);
 }
 
 /*!
@@ -90,7 +90,7 @@ bool CMenuManager::CheckRedefineControlInput() {
                     field_1B15 = 1;
                 }
             } else {
-                m_pPressedKey = 0;
+                m_pPressedKey = nullptr;
                 field_1B09 = 0;
                 field_38 = (RsKeyCodes)-1;
                 m_bJustOpenedControlRedefWindow = false;
@@ -118,14 +118,14 @@ void CMenuManager::CheckSliderMovement(int8 value) {
         SetBrightness((float)m_PrefsBrightness, false);
         break;
     case MENU_ACTION_RADIO_VOL: {
-        m_nRadioVolume += 4 * value;
+        m_nRadioVolume += int8(4) * value;
         m_nRadioVolume = std::clamp<int8>(m_nRadioVolume, 0, 64);
         AudioEngine.SetMusicMasterVolume(m_nRadioVolume);
         SaveSettings();
         break;
     }
     case MENU_ACTION_SFX_VOL: {
-        m_nSfxVolume += 4 * value;
+        m_nSfxVolume += int8(4) * value;
         m_nSfxVolume = std::clamp<int8>(m_nSfxVolume, 0, 64);
         AudioEngine.SetEffectsMasterVolume(m_nSfxVolume);
         SaveSettings();
@@ -145,7 +145,7 @@ void CMenuManager::CheckSliderMovement(int8 value) {
 
         static float& minMouseAccel = *reinterpret_cast<float*>(0xBA672C);
 
-        float val = (value / 3000.0f) + CCamera::m_fMouseAccelHorzntl;
+        float val = (float)value / 3000.0f + CCamera::m_fMouseAccelHorzntl;
         CCamera::m_fMouseAccelHorzntl = std::clamp(val, minMouseAccel, 0.005f);
 
 #ifdef FIX_BUGS
@@ -262,7 +262,7 @@ void CMenuManager::CheckForMenuClosing() {
                     Initialise();
                     LoadAllTextures();
 
-                    SetBrightness(m_PrefsBrightness, true);
+                    SetBrightness((float)m_PrefsBrightness, true);
                 }
             } else {
                 AudioEngine.StopRadio(nullptr, false);
@@ -300,7 +300,7 @@ void CMenuManager::CheckForMenuClosing() {
                 pad->LastTimeTouched = 0;
                 CPad::GetPad(1)->LastTimeTouched = 0;
 
-                SetBrightness(m_PrefsBrightness, true);
+                SetBrightness((float)m_PrefsBrightness, true);
 
                 if (field_F4) {
                     auto player = FindPlayerPed();

@@ -850,23 +850,23 @@ void CMenuManager::SaveStatsToFile() {
 // 0x57C490
 // PS2 leftover?
 void CMenuManager::SaveLoadFileError_SetUpErrorScreen() {
-    switch (*(int32*)&s_PcSaveHelper) {
-    case 1:
-    case 2:
-    case 3:
+    switch (s_PcSaveHelper.error) {
+    case C_PcSave::eErrorCode::E1:
+    case C_PcSave::eErrorCode::E2:
+    case C_PcSave::eErrorCode::E3:
         SwitchToNewScreen(SCREEN_SAVE_GAME_FAILED);
         break;
-    case 4:
-    case 5:
-    case 6:
+    case C_PcSave::eErrorCode::FAILED_TO_OPEN:
+    case C_PcSave::eErrorCode::FAILED_TO_READ:
+    case C_PcSave::eErrorCode::FAILED_TO_CLOSE:
         SwitchToNewScreen(SCREEN_SAVE_WRITE_FAILED);
         break;
-    case 7:
+    case C_PcSave::eErrorCode::SLOT_INVALID:
         SwitchToNewScreen(SCREEN_SAVE_FAILED_FILE_ERROR);
         break;
-    case 8:
-    case 9:
-    case 10:
+    case C_PcSave::eErrorCode::E8:
+    case C_PcSave::eErrorCode::E9:
+    case C_PcSave::eErrorCode::E10:
         SwitchToNewScreen(SCREEN_SAVE_GAME_DONE);
         break;
     default:
