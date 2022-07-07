@@ -409,13 +409,13 @@ public:
     void SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2);
     void SetAimFlag(CEntity* aimingTo);
     void ClearAimFlag();
-    uint8 GetLocalDirection(const CVector2D& arg0);
-    bool IsPedShootable();
-    bool UseGroundColModel();
-    bool CanPedReturnToState();
-    bool CanSetPedState();
-    bool CanBeArrested();
-    bool CanStrafeOrMouseControl();
+    uint8 GetLocalDirection(const CVector2D& point) const;
+    bool IsPedShootable() const;
+    bool UseGroundColModel() const;
+    bool CanPedReturnToState() const;
+    bool CanSetPedState() const;
+    bool CanBeArrested() const;
+    bool CanStrafeOrMouseControl() const;
     bool CanBeDeleted();
     bool CanBeDeletedEvenInVehicle() const;
     void RemoveGogglesModel();
@@ -554,7 +554,7 @@ public:
     CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
 
-    CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
 
@@ -573,7 +573,7 @@ public:
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
-    bool IsFollowerOfGroup(const CPedGroup& group);
+    bool IsFollowerOfGroup(const CPedGroup& group) const;
 
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 

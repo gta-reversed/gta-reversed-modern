@@ -358,7 +358,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
 CVehicle::~CVehicle() {
     CReplay::RecordVehicleDeleted(this);
     m_nAlarmState = 0;
-    DeleteRwObject();
+    DeleteRwObject(); // V1053 Calling the 'DeleteRwObject' virtual function in the destructor may lead to unexpected result at runtime.
     CRadar::ClearBlipForEntity(eBlipType::BLIP_CAR, GetVehiclePool()->GetRef(this));
 
     if (m_pDriver) {
@@ -1039,8 +1039,8 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) {
         return;
     }
 
-    auto fUsedAngle = fabs(m_fSteerAngle / 0.61F);
-    fUsedAngle = clamp(fUsedAngle, 0.0F, 1.0F);
+    auto fUsedAngle = std::fabs(m_fSteerAngle / 0.61F);
+    fUsedAngle = std::clamp(fUsedAngle, 0.0F, 1.0F);
 
     if (m_fSteerAngle < 0)
     {

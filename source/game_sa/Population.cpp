@@ -346,27 +346,32 @@ void CPopulation::ConvertToRealObject(CDummyObject* dummyObject) {
 
 // 0x614670
 void CPopulation::ConvertToDummyObject(CObject* object) {
-    auto* pDummy = object->m_pDummyObject;
-    if (pDummy)
-    {
-        if (!CPopulation::TestRoomForDummyObject(object))
+    auto* dummy = object->m_pDummyObject;
+    if (dummy) {
+        if (!CPopulation::TestRoomForDummyObject(object)) {
             return;
+        }
 
-        pDummy->m_bIsVisible = true;
-        pDummy->UpdateFromObject(object);
+        dummy->m_bIsVisible = true;
+        dummy->UpdateFromObject(object);
     }
 
-    if (object->IsObject())
-    {
-        auto* mi = CModelInfo::GetModelInfo(object->m_nModelIndex)->AsAtomicModelInfoPtr();
-        if (mi && mi->IsGlassType1())
-            pDummy->m_bIsVisible = false;
+    if (object->IsObject()) {
+        auto* mi = object->GetModelInfo()->AsAtomicModelInfoPtr();
+        if (mi && mi->IsGlassType1()) {
+            if (dummy) {
+                dummy->m_bIsVisible = false;
+            } else {
+                assert(false && "FIX_BUGS: dummy == nullptr");
+            }
+        }
     }
 
     CWorld::Remove(object);
     delete object;
-    if (pDummy)
-        CWorld::Add(pDummy);
+    if (dummy) {
+        CWorld::Add(dummy);
+    }
 }
 
 // 0x614720

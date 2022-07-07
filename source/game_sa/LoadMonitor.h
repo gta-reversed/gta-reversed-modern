@@ -73,7 +73,7 @@ public:
     CLoadMonitor();
     CLoadMonitor* Constructor();
 
-    ~CLoadMonitor();
+    ~CLoadMonitor() = default; // 0x856430-
     CLoadMonitor*  Destructor();
 
     void BeginFrame();

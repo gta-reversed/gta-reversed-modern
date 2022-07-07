@@ -50,35 +50,31 @@ void CGangWars::InjectHooks() {
     RH_ScopedInstall(StartOffensiveGangWar, 0x446050);                 //
     RH_ScopedInstall(StrengthenPlayerInfluenceInZone, 0x445F50);
     RH_ScopedInstall(SwitchGangWarsActive, 0x4465F0);
-    RH_ScopedInstall(TellGangMembersTo, 0x444530);                     //
+    RH_ScopedInstall(TellGangMembersTo, 0x444530);                     // ?
     RH_ScopedInstall(TellStreamingWhichGangsAreNeeded, 0x443D50);
     // RH_ScopedInstall(Update, 0x446610);                             //
     RH_ScopedInstall(UpdateTerritoryUnderControlPercentage, 0x443DE0); //
-    RH_ScopedInstall(Load, 0x5D3EB0);                                  //
-    RH_ScopedInstall(Save, 0x5D5530);                                  //
+    RH_ScopedInstall(Load, 0x5D3EB0);
+    RH_ScopedInstall(Save, 0x5D5530);
 }
 
 // 0x5D3EB0
 bool CGangWars::Load() {
-    // return plugin::CallAndReturn<bool, 0x5D3EB0>();
-
     size_t size;
-    CGangWarsSaveStructure gwss{};
+    CGangWarsSaveStructure data{};
     CGenericGameStorage::LoadDataFromWorkBuffer(&size, sizeof(size_t));
-    CGenericGameStorage::LoadDataFromWorkBuffer(&gwss, sizeof(CGangWarsSaveStructure));
-    gwss.Extract();
+    CGenericGameStorage::LoadDataFromWorkBuffer(&data, sizeof(CGangWarsSaveStructure));
+    data.Extract();
     return true;
 }
 
 // 0x5D5530
 bool CGangWars::Save() {
-    // return plugin::CallAndReturn<bool, 0x5D5530>();
-
     size_t size = sizeof(CGangWarsSaveStructure);
-    CGangWarsSaveStructure gwss{};
-    gwss.Construct();
+    CGangWarsSaveStructure data{};
+    data.Construct();
     CGenericGameStorage::SaveDataToWorkBuffer(&size, sizeof(size_t));
-    CGenericGameStorage::SaveDataToWorkBuffer(&gwss, sizeof(CGangWarsSaveStructure));
+    CGenericGameStorage::SaveDataToWorkBuffer(&data, sizeof(CGangWarsSaveStructure));
     return true;
 }
 

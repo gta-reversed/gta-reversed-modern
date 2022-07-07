@@ -1,6 +1,7 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
+#include <WinSock2.h>
 #include <Windows.h>
 #include <cstdio>
 #include <cmath>
@@ -262,7 +263,6 @@ namespace rng = std::ranges;
 #include "game_sa\Messages.h"
 #include "game_sa\Mirrors.h"
 #include "game_sa\MissionCleanup.h"
-#include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
 #include "game_sa\NodeRoute.h"
 #include "game_sa\ObjectData.h"

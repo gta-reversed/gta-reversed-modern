@@ -105,7 +105,7 @@ public:
 
 private:
     // HELPERS
-    template <typename T> T* GetPointerToColArray(uint32 byteOffset) {
+    template <typename T> T* GetPointerToColArray(size_t byteOffset) {
         return reinterpret_cast<T*>(&reinterpret_cast<uint8*>(this)[byteOffset]);
     }
 

@@ -647,7 +647,7 @@ void CMenuManager::DisplayHelperText(const char* key) {
 
     CFont::SetColor(CRGBA(255, 255, 255, alpha));
 
-    char* text;
+    char* text{};
     switch (m_nHelperText) {
     case FET_APP:
         text = TheText.Get("FET_APP"); // CLICK LMB / RETURN - APPLY NEW SETTING
@@ -694,7 +694,6 @@ void CMenuManager::DisplayHelperText(const char* key) {
         text = TheText.Get("FET_MIG"); // LEFT / RIGHT / MOUSEWHEEL - ADJUST
         break;
     default:
-        text = nullptr;
         break;
     }
 
@@ -735,7 +734,6 @@ void CMenuManager::ResetHelperText() {
 void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cameraUpdateStarted) {
     return plugin::CallMethod<0x579330, CMenuManager*, const char*, bool, bool>(this, key, blackBackground, cameraUpdateStarted);
 
-    const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
     /*
     if (!cameraUpdateStarted) {
@@ -755,6 +753,7 @@ void CMenuManager::MessageScreen(const char* key, bool blackBackground, bool cam
     DefinedState2d();
 
     if (blackBackground) {
+        const CRect fullscreen = CRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         CSprite2d::DrawRect(fullscreen, { 0, 0, 0, 255 });
     }
 

@@ -19,11 +19,6 @@ void CDirectory::InjectHooks() {
 }
 
 // 0x532290
-CDirectory::CDirectory() {
-    /* done by the compiler */
-}
-
-// 0x532290
 CDirectory* CDirectory::Constructor() {
     this->CDirectory::CDirectory();
     return this;

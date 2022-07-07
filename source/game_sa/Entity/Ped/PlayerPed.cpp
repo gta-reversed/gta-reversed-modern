@@ -130,7 +130,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
     m_pPlayerData->AllocateData();
 
-    SetModelIndex(MODEL_PLAYER);
+    SetModelIndex(MODEL_PLAYER); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
 
     CPlayerPed::SetInitialState(bGroupCreated);
 

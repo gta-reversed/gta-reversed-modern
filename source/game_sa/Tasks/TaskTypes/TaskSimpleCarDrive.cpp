@@ -57,6 +57,7 @@ CTaskSimpleCarDrive::~CTaskSimpleCarDrive() {
     }
 
     if (m_b20) {
+        assert(m_pAnimCloseDoorRolling);
         m_pAnimCloseDoorRolling->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         if (m_pVehicle) {
             m_pVehicle->ClearGettingOutFlags(1);

@@ -123,15 +123,8 @@ static void DebugCode() {
         CCheat::MoneyArmourHealthCheat();
     }
     if (pad->IsStandardKeyJustPressed('3')) {
-        //CCheat::VehicleCheat(MODEL_INFERNUS);
-        FindPlayerPed()->GiveWeapon(WEAPON_MINIGUN, 9999, false);
-        FindPlayerPed()->SetCurrentWeapon(WEAPON_MINIGUN);
-        CCheat::MoneyArmourHealthCheat();
-        CCheat::m_aCheatsActive[CHEAT_INFINITE_HEALTH] = true;
-        CCheat::m_aCheatsActive[CHEAT_INFINITE_AMMO] = true;
-        CCheat::m_aCheatsActive[CHEAT_I_DO_AS_I_PLEASE] = true;
+        CCheat::VehicleCheat(MODEL_INFERNUS);
     }
-
     if (pad->IsStandardKeyJustPressed('4')) {
         CTimer::Suspend();
     }

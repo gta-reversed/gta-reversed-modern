@@ -41,6 +41,7 @@ CCopPed::CCopPed(uint32_t copTypeOrModelID) :
     CPed{ PED_TYPE_COP },
     m_nCopTypeOrModelID{ copTypeOrModelID }
 {
+    // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
     SetModelIndex(ResolveModelForCopType(copTypeOrModelID)); /* R* originally seem to have used this switch to set the model as well, but this is nicer */
 
     switch (copTypeOrModelID) {

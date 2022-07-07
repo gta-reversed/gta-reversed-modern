@@ -318,10 +318,10 @@ bool CTrain::IsInTunnel() const {
 
 // 0x6F6640
 void MarkSurroundingEntitiesForCollisionWithTrain(CVector pos, float radius, CEntity* entity, bool bOnlyVehicles) {
-    int32 startSectorX = CWorld::GetSectorX(pos.x - radius);
-    int32 startSectorY = CWorld::GetSectorY(pos.y - radius);
-    int32 endSectorX   = CWorld::GetSectorX(pos.x + radius);
-    int32 endSectorY   = CWorld::GetSectorY(pos.y + radius);
+    int32 startSectorX = std::max(CWorld::GetSectorX(pos.x - radius), 0);
+    int32 startSectorY = std::max(CWorld::GetSectorY(pos.y - radius), 0);
+    int32 endSectorX   = std::min(CWorld::GetSectorX(pos.x + radius), MAX_SECTORS_X - 1);
+    int32 endSectorY   = std::min(CWorld::GetSectorY(pos.y + radius), MAX_SECTORS_Y - 1);
 
     CWorld::IncrementCurrentScanCode();
 

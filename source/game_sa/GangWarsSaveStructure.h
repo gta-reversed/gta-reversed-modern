@@ -31,7 +31,6 @@ public:
 
 public:
      void Construct();
-     void Extract();
+     void Extract() const;
 };
-
 VALIDATE_SIZE(CGangWarsSaveStructure, 0x58);

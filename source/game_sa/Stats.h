@@ -73,7 +73,7 @@ public:
     static char* GetStatID(eStats stat);
     static bool GetStatType(eStats stat);
     static float GetStatValue(eStats stat);
-    static char GetTimesMissionAttempted(uint8 missionId);
+    static int8 GetTimesMissionAttempted(uint8 missionId);
     static void RegisterMissionAttempted(uint8 missionId);
     static void RegisterMissionPassed(uint8 missionId);
     static bool PopulateFavoriteRadioStationList();

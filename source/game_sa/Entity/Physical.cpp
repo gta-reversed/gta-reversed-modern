@@ -1575,6 +1575,8 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
         }
     }
 
+    // todo: switch case should be used
+    // 0x5450A1
     float fCollisionImpact2 = 1.0f;
     bool bUseElasticity = false;
     if (entityAltCol == ALT_ENITY_COL_OBJECT)
@@ -1599,7 +1601,6 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
                     && fabs(m_vecMoveSpeed.y) < fMoveSpeedLimit
                     && fMoveSpeedLimit + fMoveSpeedLimit > fabs(m_vecMoveSpeed.z))
                 {
-                    damageIntensity = damageIntensity;
                     fCollisionImpact2 = 0.0f;
                     damageIntensity = -0.95f * fCollisionMass * fSpeedDotProduct;
                 }

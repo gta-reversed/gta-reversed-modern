@@ -491,7 +491,7 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
         if (LoadDataFromWorkBuffer(data, maxSize)) {
             if (LoadWorkBuffer()) {
                 pos = ms_WorkBufferPos;
-                data = (byte*)data + maxSize;
+                data = (uint8*)data + maxSize;
                 size -= maxSize;
             }
         }
