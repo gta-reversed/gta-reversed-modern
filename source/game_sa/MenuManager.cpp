@@ -767,11 +767,15 @@ void CMenuManager::SaveStatsToFile() {
         lastMissionPassed = TheText.Get(CStats::LastMissionPassedName);
     }
 
-    auto file = fopen("stats.html", "w");
-    if (!file) {
+    auto file = CFileMgr::OpenFile("stats.html", "w");
+    const auto End = [&]() {
         CFileMgr::SetDir("");
+        CFileMgr::CloseFile(file); // FIX_BUGS
         m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
         m_nHelperTextFadingAlpha = 300;
+    };
+    if (!file) {
+        End();
         return;
     }
 
@@ -842,9 +846,7 @@ void CMenuManager::SaveStatsToFile() {
         }
     }
 
-    CFileMgr::SetDir("");
-    m_nHelperText = FEA_STS; // STATS SAVED TO 'STATS.HTML'
-    m_nHelperTextFadingAlpha = 300;
+    End();
 }
 
 // 0x57C490
