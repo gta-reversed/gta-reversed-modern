@@ -755,8 +755,8 @@ void CTrain::ProcessControl() {
         CVector vecPosition1 = theTrainNode->GetPosn() * (1.0f - fTheDistance) + nextTrainNode->GetPosn() * fTheDistance;
 
         CColModel* vehicleColModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
-        CBoundingBox* pBoundingBox = &vehicleColModel->GetBoundingBox();
-        float fTotalCurrentRailDistance = pBoundingBox->m_vecMax.y - pBoundingBox->m_vecMin.y + m_fCurrentRailDistance;
+        const CBoundingBox& bbox = vehicleColModel->GetBoundingBox();
+        float fTotalCurrentRailDistance = bbox.GetLength() + m_fCurrentRailDistance;
         if (fTotalCurrentRailDistance > fTotalTrackLength) {
             fTotalCurrentRailDistance -= fTotalTrackLength;
         }
@@ -798,7 +798,7 @@ void CTrain::ProcessControl() {
         {
             CVector& vecVehiclePosition = GetPosition();
             vecVehiclePosition = (vecPosition1 + vecPosition2) / 2.0f;
-            vecVehiclePosition.z += m_pHandlingData->m_fSuspensionLowerLimit - pBoundingBox->m_vecMin.z;
+            vecVehiclePosition.z += m_pHandlingData->m_fSuspensionLowerLimit - bbox.m_vecMin.z;
         }
 
         GetForward() = vecPosition2 - vecPosition1;
@@ -862,7 +862,7 @@ void CTrain::ProcessControl() {
         m_fMovingSpeed = DistanceBetweenPoints(GetPosition(), vecOldTrainPosition);
 
         if (trainFlags.bIsFrontCarriage || trainFlags.bIsLastCarriage) {
-            CVector vecPoint = pBoundingBox->m_vecMax.y * GetForward();
+            CVector vecPoint = bbox.m_vecMax.y * GetForward();
             vecPoint += GetPosition();
             vecPoint += CTimer::GetTimeStep() * m_vecMoveSpeed;
 

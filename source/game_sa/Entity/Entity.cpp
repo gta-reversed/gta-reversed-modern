@@ -2445,8 +2445,8 @@ bool CEntity::IsEntityOccluded()
             auto vecMin = GetMatrix() * bounding.m_vecMin;
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2454,8 +2454,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2463,8 +2463,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2472,15 +2472,15 @@ bool CEntity::IsEntityOccluded()
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)) {
-
-                if (bounding.m_vecMax.x - bounding.m_vecMin.x <= 60.0F)
+                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)
+            ) {
+                if (bounding.GetWidth() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.y - bounding.m_vecMin.y <= 60.0F)
+                if (bounding.GetLength() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.z - bounding.m_vecMin.z <= 30.0F)
+                if (bounding.GetHeight() <= 30.0F)
                     return true;
 
                 auto vecDiag3 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
@@ -2495,8 +2495,8 @@ bool CEntity::IsEntityOccluded()
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)) {
-
+                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)
+                ) {
                     return true;
                 }
             }
