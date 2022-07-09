@@ -267,8 +267,7 @@ void __cdecl CdStreamInitThread()
 }
 
 // 0x406B70
-void __cdecl CdStreamInit(int32 streamCount)
-{
+void CdStreamInit(int32 streamCount) {
     for (int32 i = 0; i < MAX_CD_STREAM_HANDLES; i++) {
         gStreamFileHandles[i] = nullptr;
         gCdImageNames[i][0] = 0;
@@ -277,10 +276,15 @@ void __cdecl CdStreamInit(int32 streamCount)
     DWORD totalNumberOfClusters = 0;
     DWORD numberOfFreeClusters = 0;
     DWORD sectorsPerCluster = 0;
-    GetDiskFreeSpaceA(nullptr, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters);
+    GetDiskFreeSpace(nullptr, &sectorsPerCluster, &bytesPerSector, &numberOfFreeClusters, &totalNumberOfClusters);
+
     gStreamFileCreateFlags = FILE_FLAG_OVERLAPPED;
-    if (bytesPerSector <= STREAMING_SECTOR_SIZE)
+#ifndef FIX_BUGS // this just slows down streaming
+    if (bytesPerSector <= STREAMING_SECTOR_SIZE) {
         gStreamFileCreateFlags |= FILE_FLAG_NO_BUFFERING;
+    }
+#endif
+
     gOverlappedIO = 1;
     gStreamingInitialized = 0;
     auto* pAllocatedMemory = CMemoryMgr::MallocAlign(STREAMING_SECTOR_SIZE, bytesPerSector);
