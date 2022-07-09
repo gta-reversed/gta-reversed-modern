@@ -94,10 +94,9 @@ void CEntity::InjectHooks()
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
 }
 
-CEntity::CEntity() : CPlaceable()
-{
-    m_nStatus = eEntityStatus::STATUS_PLAYER;
-    m_nType = ENTITY_TYPE_BUILDING;
+CEntity::CEntity() : CPlaceable() {
+    m_nStatus = STATUS_ABANDONED;
+    m_nType = ENTITY_TYPE_NOTHING;
 
     m_nFlags = 0;
     m_bIsVisible = true;
