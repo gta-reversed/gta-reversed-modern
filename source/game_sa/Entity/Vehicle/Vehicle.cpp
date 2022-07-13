@@ -10,8 +10,9 @@
 
 #include "Buoyancy.h"
 #include "CarCtrl.h"
-#include "Radar.h"
 #include "VehicleSaveStructure.h"
+#include "Radar.h"
+#include "RideAnims.h"
 #include "Rope.h"
 #include "Ropes.h"
 #include "IKChainManager_c.h"
@@ -929,23 +930,22 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
 }
 
 // 0x6DF4A0
-void CVehicle::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
-    CVehicle::ProcessDrivingAnims_Reversed(driver, bBlend);
+void CVehicle::ProcessDrivingAnims(CPed* driver, bool blend) {
+    CVehicle::ProcessDrivingAnims_Reversed(driver, blend);
 }
-void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) {
+void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, bool blend) {
     if (m_bOffscreen || !driver->IsPlayer())
         return;
 
     auto* radioTuneAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_CAR_TUNE_RADIO);
-    if (bBlend)
+    if (blend) {
         radioTuneAnim = CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_CAR_TUNE_RADIO, 4.0F);
+    }
 
     if (radioTuneAnim)
         return;
 
     CRideAnims* usedAnims;
-    auto const fSpeed = m_vecMoveSpeed.Magnitude();
-
     if (vehicleFlags.bLowVehicle)
         usedAnims = &aDriveAnimIdsLow;
     else if (IsBoat() && !m_pHandlingData->m_bSitInBoat)
@@ -954,42 +954,27 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) {
         usedAnims = &aDriveAnimIdsKart;
     else if (CVehicleAnimGroupData::UsesTruckDrivingAnims(static_cast<AssocGroupId>(m_pHandlingData->m_nAnimGroup)))
         usedAnims = &aDriveAnimIdsTruck;
-    else
-    {
+    else {
         const auto fDrivingSkill = CStats::GetStatValue(eStats::STAT_DRIVING_SKILL);
-        if (fDrivingSkill < 50.0F)
-        {
-            if (fSpeed <= 0.4F)
-                usedAnims = &aDriveAnimIdsBadSlow;
-            else
-                usedAnims = &aDriveAnimIdsBad;
-        }
-        else if (fDrivingSkill < 100.0F)
-        {
-            if (fSpeed <= 0.4F)
-                usedAnims = &aDriveAnimIdsStdSlow;
-            else
-                usedAnims = &aDriveAnimIdsStd;
-        }
-        else
-        {
-            if (fSpeed <= 0.4F)
-                usedAnims = &aDriveAnimIdsProSlow;
-            else
-                usedAnims = &aDriveAnimIdsPro;
+        const auto fSpeed = m_vecMoveSpeed.Magnitude();
+        if (fDrivingSkill < 50.0F) {
+            usedAnims = fSpeed <= 0.4F ? &aDriveAnimIdsBadSlow : &aDriveAnimIdsBad;
+        } else if (fDrivingSkill < 100.0F) {
+            usedAnims = fSpeed <= 0.4F ? &aDriveAnimIdsStdSlow : &aDriveAnimIdsStd;
+        } else {
+            usedAnims = fSpeed <= 0.4F ? &aDriveAnimIdsProSlow : &aDriveAnimIdsPro;
         }
     }
 
-    auto* idleAnim      = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE]);
-    auto* lookLeftAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT]);
-    auto* lookRightAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT]);
-    auto* lookBackAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK]);
+    // 0x6DF620
+    auto* idleAnim      = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->idle);
+    auto* lookLeftAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->left);
+    auto* lookRightAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->right);
+    auto* lookBackAnim  = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, usedAnims->back);
 
-    if (!idleAnim)
-    {
-        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_CAR_SIT))
-        {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_IDLE], 4.0F);
+    if (!idleAnim) {
+        if (RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_CAR_SIT)) {
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->idle, 4.0F);
         }
         return;
     }
@@ -999,82 +984,69 @@ void CVehicle::ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) {
 
     if (lookBackAnim
         && CCamera::GetActiveCamera().m_nMode == eCamMode::MODE_1STPERSON
-        && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND)
-    {
+        && CCamera::GetActiveCamera().m_nDirectionWasLooking == eLookingDirection::LOOKING_DIRECTION_BEHIND
+    ) {
         lookBackAnim->m_fBlendDelta = -1000.0F;
     }
 
+    // 0x6DF6DA
     auto* driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_L);
-    if (!driveByAnim)
-        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_R);
-    if (!driveByAnim)
-        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_L);
-    if (!driveByAnim)
-        driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_R);
+    if (!driveByAnim) driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBY_R);
+    if (!driveByAnim) driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_L);
+    if (!driveByAnim) driveByAnim = RpAnimBlendClumpGetAssociation(driver->m_pRwClump, ANIM_ID_DRIVEBYL_R);
 
     if (!vehicleFlags.bLowVehicle
         && m_fGasPedal < 0.0F
         && !driveByAnim
         && GetVehicleAppearance() != VEHICLE_APPEARANCE_HELI
-        && GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE)
-    {
+        && GetVehicleAppearance() != VEHICLE_APPEARANCE_PLANE
+    ) {
         if ((CCamera::GetActiveCamera().m_nMode != eCamMode::MODE_1STPERSON
             || CCamera::GetActiveCamera().m_nDirectionWasLooking != eLookingDirection::LOOKING_DIRECTION_BEHIND)
-            && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F))
-        {
-            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_BACK], 4.0F);
+            && (!lookBackAnim || lookBackAnim->m_fBlendAmount < 1.0F && lookBackAnim->m_fBlendDelta <= 0.0F)
+        ) {
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->back, 4.0F);
         }
         return;
     }
 
-    if (m_fSteerAngle == 0.0F || driveByAnim)
-    {
-        if (lookLeftAnim)
-            lookLeftAnim->m_fBlendDelta = -4.0F;
-        if (lookRightAnim)
-            lookRightAnim->m_fBlendDelta = -4.0F;
-        if (lookBackAnim)
-            lookBackAnim->m_fBlendDelta = -4.0F;
-
+    if (m_fSteerAngle == 0.0F || driveByAnim) {
+        if (lookLeftAnim)  lookLeftAnim->m_fBlendDelta  = -4.0F;
+        if (lookRightAnim) lookRightAnim->m_fBlendDelta = -4.0F;
+        if (lookBackAnim)  lookBackAnim->m_fBlendDelta  = -4.0F;
         return;
     }
 
     auto fUsedAngle = std::fabs(m_fSteerAngle / 0.61F);
     fUsedAngle = std::clamp(fUsedAngle, 0.0F, 1.0F);
 
-    if (m_fSteerAngle < 0)
-    {
-        if (lookLeftAnim)
-        {
+    if (m_fSteerAngle < 0) {
+        if (lookLeftAnim) {
             lookLeftAnim->m_fBlendAmount = 0.0F;
-            lookLeftAnim->m_fBlendDelta = 0.0F;
+            lookLeftAnim->m_fBlendDelta  = 0.0F;
         }
-        if (lookRightAnim)
-        {
+        if (lookRightAnim) {
             lookRightAnim->m_fBlendAmount = fUsedAngle;
+            lookRightAnim->m_fBlendDelta  = 0.0F;
+        } else {
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->right, 4.0F);
+        }
+    } else {
+        if (lookRightAnim) {
+            lookRightAnim->m_fBlendAmount = 0.0f;
             lookRightAnim->m_fBlendDelta = 0.0F;
         }
-        else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_RIGHT], 4.0F);
-    }
-    else
-    {
-        if (lookLeftAnim)
-        {
+        if (lookLeftAnim) {
             lookLeftAnim->m_fBlendAmount = fUsedAngle;
             lookLeftAnim->m_fBlendDelta = 0.0F;
+        } else {
+            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->left, 4.0F);
         }
-        if (lookRightAnim)
-        {
-            lookRightAnim->m_fBlendAmount = 0.0F;
-            lookRightAnim->m_fBlendDelta = 0.0F;
-        }
-        else
-            CAnimManager::BlendAnimation(driver->m_pRwClump, ANIM_GROUP_DEFAULT, usedAnims->m_aAnims[eRideAnim::RIDE_LOOK_LEFT], 4.0F);
     }
 
-    if (lookBackAnim)
+    if (lookBackAnim) {
         lookBackAnim->m_fBlendDelta = -4.0F;
+    }
 }
 
 // 0x871F54

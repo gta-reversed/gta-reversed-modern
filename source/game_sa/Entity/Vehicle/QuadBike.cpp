@@ -278,7 +278,7 @@ void CQuadBike::ProcessControlInputs(uint8 playerNum) {
 }
 
 // 0x6CE280
-void CQuadBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
+void CQuadBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (!m_bOffscreen) { // see CBike::ProcessDrivingAnims
         CBike::ProcessRiderAnims(driver, this, &m_sRideAnimData, m_pHandling, 0);
     }

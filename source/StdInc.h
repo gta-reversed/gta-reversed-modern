@@ -305,7 +305,6 @@ namespace rng = std::ranges;
 #include "game_sa\RepeatSector.h"
 #include "game_sa\Restart.h"
 #include "game_sa\RGBA.h"
-#include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
 #include "game_sa\Scene.h"
