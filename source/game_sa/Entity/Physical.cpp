@@ -95,8 +95,8 @@ CPhysical::CPhysical() : CEntity()
     CPlaceable::AllocateStaticMatrix();
     m_matrix->SetUnity();
 
-    m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
-    m_vecTurnSpeed.Set(0.0f, 0.0f, 0.0f);
+    ResetMoveSpeed();
+    ResetTurnSpeed();
     m_vecFrictionMoveSpeed.Set(0.0f, 0.0f, 0.0f);
     m_vecFrictionTurnSpeed.Set(0.0f, 0.0f, 0.0f);
     m_vecForce.Set(0.0f, 0.0f, 0.0f);

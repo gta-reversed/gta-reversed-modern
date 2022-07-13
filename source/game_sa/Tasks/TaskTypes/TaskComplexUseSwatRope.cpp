@@ -96,11 +96,10 @@ bool CTaskComplexUseSwatRope::MakeAbortable_Reversed(CPed* ped, eAbortPriority p
         || ped->m_fHealth <= 20.0F
         )
         && m_pSubTask->MakeAbortable(ped, priority, event)
-        )
-    {
+    ) {
         ped->bIsStanding = false;
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
         return true;
     }
     else
@@ -134,7 +133,7 @@ CTask* CTaskComplexUseSwatRope::ControlSubTask_Reversed(CPed* ped) {
     ) {
         ped->bIsStanding = false;
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
         return nullptr;
     }
 
@@ -170,7 +169,7 @@ CTask* CTaskComplexUseSwatRope::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskSimpleNone();
     case TASK_FINISHED:
         ped->m_bUsesCollision = true;
-        ped->m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
+        ped->ResetMoveSpeed();
         return nullptr;
     default:
         return nullptr;

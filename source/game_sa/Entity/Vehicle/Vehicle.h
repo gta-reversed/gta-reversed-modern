@@ -452,7 +452,7 @@ public:
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
     virtual bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) { return false; }
     virtual bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) { return false; }
-    virtual void ProcessDrivingAnims(CPed* driver, uint8 bBlend);
+    virtual void ProcessDrivingAnims(CPed* driver, bool blend);
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData() { return nullptr; }
     virtual void SetupSuspensionLines() { /* Do nothing */ }
@@ -707,7 +707,7 @@ private:
     bool SetupLighting_Reversed();
     void RemoveLighting_Reversed(bool bRemove);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime);
-    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend);
+    void ProcessDrivingAnims_Reversed(CPed* driver, bool blend);
     float GetHeightAboveRoad_Reversed();
     bool CanPedStepOutCar_Reversed(bool bIgnoreSpeedUpright);
     bool CanPedJumpOutCar_Reversed(CPed* ped);

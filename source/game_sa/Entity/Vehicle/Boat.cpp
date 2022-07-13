@@ -431,8 +431,8 @@ void CBoat::ProcessControl_Reversed() {
 
         auto fDist = (GetPosition() - FindPlayerCentreOfWorld_NoSniperShift(0)).Magnitude();
         if (fDist > 150.0F) {
-            m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
-            m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+            ResetMoveSpeed();
+            ResetTurnSpeed();
             return;
         }
         break;
@@ -556,8 +556,8 @@ void CBoat::Teleport_Reversed(CVector destination, bool resetRotation) {
     if (resetRotation)
         SetOrientation(0.0F, 0.0F, 0.0F);
 
-    m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
-    m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+    ResetMoveSpeed();
+    ResetTurnSpeed();
     CWorld::Add(this);
 }
 

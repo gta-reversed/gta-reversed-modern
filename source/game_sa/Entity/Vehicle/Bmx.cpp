@@ -71,8 +71,8 @@ void CBmx::ProcessControl() {
 }
 
 // 0x6BFB50
-void CBmx::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
-    plugin::CallMethod<0x6BFB50, CBmx*, CPed*, uint8>(this, driver, bBlend);
+void CBmx::ProcessDrivingAnims(CPed* driver, bool blend) {
+    plugin::CallMethod<0x6BFB50, CBmx*, CPed*, uint8>(this, driver, blend);
 }
 
 // 0x6C0390
