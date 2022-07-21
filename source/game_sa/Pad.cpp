@@ -1189,3 +1189,16 @@ bool CPad::sub_540530() const noexcept {
 bool CPad::DebugMenuJustPressed() {
     return (IsCtrlPressed() && IsStandardKeyJustPressed('M')) || IsF7JustPressed();
 }
+
+// 0x541490
+int GetCurrentKeyPressed(RsKeyCodes& keys) {
+    return plugin::CallAndReturn<int, 0x541490, RsKeyCodes&>(keys);
+}
+
+IDirectInputDevice8* DIReleaseMouse() {
+    return plugin::CallAndReturn<IDirectInputDevice8*, 0x746F70>();
+}
+
+void InitialiseMouse(bool exclusive) {
+    plugin::Call<0x7469A0, bool>(exclusive);
+}

@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include <cstdio>
 #include <cmath>
+#include <cinttypes>
 #include <algorithm>
 #include <list>
 #include <map>

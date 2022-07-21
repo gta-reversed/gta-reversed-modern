@@ -81,4 +81,9 @@ public:
 
     static void Process();
     static void Display(bool flag);
+
+    // NOTSA helpers
+    static void InsertNumberInString(char* text, int32* n, char* dst) {
+        InsertNumberInString(text, n[0], n[1], n[2], n[3], n[4], n[5], dst);
+    }
 };

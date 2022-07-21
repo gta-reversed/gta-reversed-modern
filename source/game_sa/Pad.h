@@ -214,6 +214,8 @@ public:
     [[nodiscard]] bool IsCtrlPressed() const noexcept                       { return IsLeftCtrlJustDown() || IsRightCtrlJustDown(); }                                        //
     [[nodiscard]] static bool IsUpPressed() noexcept                        { return KEY_IS_PRESSED(up); }                                                                   //
     [[nodiscard]] static bool IsDownPressed() noexcept                      { return KEY_IS_PRESSED(down); }                                                                 //
+    [[nodiscard]] static bool IsLeftPressed() noexcept                      { return KEY_IS_PRESSED(left); }                                                                 //
+    [[nodiscard]] static bool IsRightPressed() noexcept                     { return KEY_IS_PRESSED(right); }                                                                //
     static bool IsPadEnterJustPressed() noexcept                            { return KEY_IS_PRESSED(enter); }                                                                //
     static bool IsReturnJustPressed() noexcept                              { return KEY_IS_PRESSED(extenter); }                                                             //
     static bool IsEnterJustPressed() noexcept                               { return IsPadEnterJustPressed() || IsReturnJustPressed(); }                                     // 0x4D5980
@@ -317,6 +319,13 @@ public:
 };
 
 VALIDATE_SIZE(CPad, 0x134);
+
+// return pressed key, in order of CKeyboardState
+int GetCurrentKeyPressed(RsKeyCodes& keys);
+
+// todo: move these fucks out
+IDirectInputDevice8* DIReleaseMouse();
+void InitialiseMouse(bool exclusive);
 
 /*
 Android has 99 funcs
