@@ -162,10 +162,10 @@ void CMenuManager::ProcessFileActions() {
 }
 
 // 0x576FE0
-// \param pressedLR Arrow button pressed. <0 for left, >0 for right
-// \param cancelPressed Returns true to go back.
-// \param acceptPressed Is enter pressed. Used for AA mode and resolution
-// \addr 0x57CD50
+// @param pressedLR Arrow button pressed. <0 for left, >0 for right
+// @param cancelPressed Returns true to go back.
+// @param acceptPressed Is enter pressed. Used for AA mode and resolution
+// @addr 0x57CD50
 void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed) {
     if (ProcessPCMenuOptions(pressedLR, acceptPressed))
         return;
@@ -226,35 +226,35 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
         // todo: refactor
         if (pressedLR != 1) {
             if (m_nStatsScrollDirection) {
-                if (m_fStatsScrollSpeed != 0.0) {
-                    m_fStatsScrollSpeed = 0.0;
+                if (m_fStatsScrollSpeed != 0.0f) {
+                    m_fStatsScrollSpeed = 0.0f;
                     m_nStatsScrollDirection = 0;
                 }
-            } else if (m_fStatsScrollSpeed != 0.0) {
+            } else if (m_fStatsScrollSpeed != 0.0f) {
                 if (m_fStatsScrollSpeed == 150.0f) {
-                    m_fStatsScrollSpeed = 20.0;
+                    m_fStatsScrollSpeed = 20.0f;
                 }
                 m_nStatsScrollDirection = 0;
             } else {
-                m_fStatsScrollSpeed = 150.0;
+                m_fStatsScrollSpeed = 150.0f;
                 m_nStatsScrollDirection = 0;
             }
         } else if (m_nStatsScrollDirection) {
-            if (m_fStatsScrollSpeed == 0.0) {
-                m_fStatsScrollSpeed = 150.0;
+            if (m_fStatsScrollSpeed == 0.0f) {
+                m_fStatsScrollSpeed = 150.0f;
                 m_nStatsScrollDirection = 1;
             } else {
                 if (m_fStatsScrollSpeed == 150.0f) {
-                    m_fStatsScrollSpeed = 20.0;
+                    m_fStatsScrollSpeed = 20.0f;
                 }
                 m_nStatsScrollDirection = 1;
             }
         } else {
-            if (m_fStatsScrollSpeed == 0.0) {
-                m_fStatsScrollSpeed = 150.0;
+            if (m_fStatsScrollSpeed == 0.0f) {
+                m_fStatsScrollSpeed = 150.0f;
                 m_nStatsScrollDirection = 1;
             } else {
-                m_fStatsScrollSpeed = 0.0;
+                m_fStatsScrollSpeed = 0.0f;
                 m_nStatsScrollDirection = 1;
             }
         }
@@ -294,7 +294,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
         SaveSettings();
         return;
     case MENU_ACTION_HUD_MODE:
-        m_bHudOn ^= true;
+        m_bHudOn = !m_bHudOn;
         SaveSettings();
         return;
     case MENU_ACTION_LANGUAGE: {
@@ -317,9 +317,9 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool 
     }
 }
 
-// \param pressedLR Arrow button pressed. <0 for left, >0 for right
-// \param acceptPressed Is enter pressed. Used for AA mode and resolution
-// \addr 0x57CD50
+// @param pressedLR Arrow button pressed. <0 for left, >0 for right
+// @param acceptPressed Is enter pressed. Used for AA mode and resolution
+// @addr 0x57CD50
 bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];

@@ -116,21 +116,21 @@ void CMenuManager::DrawBackground() {
         case SCREEN_DELETE_SUCCESSFUL:
         case SCREEN_SAVE_WRITE_ASK:
             return {
-                SCREEN_WIDTH - StretchX(256.0),
+                SCREEN_WIDTH - StretchX(256.0f),
                 0.0f,
                 SCREEN_WIDTH,
-                StretchY(256.0),
+                StretchY(256.0f),
             };
         case SCREEN_GAME_SAVE:
             return {
-                SCREEN_WIDTH / 2.0f - StretchX(128.0),
+                SCREEN_WIDTH / 2.0f - StretchX(128.0f),
                 0.0f,
-                StretchX(128.0) + SCREEN_WIDTH / 2.0f,
-                StretchY(256.0),
+                StretchX(128.0f) + SCREEN_WIDTH / 2.0f,
+                StretchY(256.0f),
             };
         case SCREEN_SAVE_DONE_2:
             return {
-                SCREEN_WIDTH - StretchX(300.0),
+                SCREEN_WIDTH - StretchX(300.0f),
                 0.0f,
                 SCREEN_WIDTH,
                 StretchY(200.0f),
@@ -323,7 +323,7 @@ void CMenuManager::DrawBackground() {
             m_aFrontEndSprites[spriteId].Draw(rect, { 255, 255, 255, 255 });
         };
 
-        CRect mapRect(StretchX(60.0f), StretchY(60.0f), SCREEN_WIDTH - StretchX(60.0), SCREEN_HEIGHT - StretchY(60.0));
+        CRect mapRect(StretchX(60.0f), StretchY(60.0f), SCREEN_WIDTH - StretchX(60.0f), SCREEN_HEIGHT - StretchY(60.0f));
 
         if (m_nCurrentScreen == SCREEN_MAP && CPad::NewMouseControllerState.lmb && mapRect.IsPointInside(CVector2D(x, y))) {
             DrawCursor(FRONTEND_SPRITE_CROSS_HAIR);
