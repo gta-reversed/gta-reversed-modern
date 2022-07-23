@@ -71,9 +71,6 @@ RwImage* psGrabScreen(RwCamera* camera) {
     D3DLOCKED_RECT lockedRect{};
 #ifndef FIX_BUGS
     // It's not needed as ClientToScreen func works with fullscreen mode.
-    //
-    // TODO: Test with dual monitors, older than Windows 10 setups, that doesn't
-    // have fullscreen optimizations (i.e. borderless fullscreen instead of FSE mode)
     if (PSGLOBAL(fullScreen)) { // todo: Doesn't work properly with III.VC.SA.WindowedMode.asi
         VERIFY(SUCCEEDED(surface->LockRect(&lockedRect, nullptr, D3DLOCK_READONLY)));
     } else {
@@ -84,6 +81,9 @@ RwImage* psGrabScreen(RwCamera* camera) {
         //
         // BUG: There should be bugs for older versions of Windows IIRC.
         // One example would be Vista version of the func doesn't count Aero effects of windows.
+        //
+        // TODO: Test with dual monitors, older than Windows 10 setups, that doesn't
+        // have fullscreen optimizations (i.e. borderless fullscreen instead of FSE mode)
 
         GetClientRect(PSGLOBAL(window), &rect);
 
