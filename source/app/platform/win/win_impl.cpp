@@ -69,15 +69,38 @@ RwImage* psGrabScreen(RwCamera* camera) {
     VERIFY(SUCCEEDED(device->GetFrontBufferData(0, surface)));
 
     D3DLOCKED_RECT lockedRect{};
+#ifndef FIX_BUGS
+    // It's not needed as ClientToScreen func works with fullscreen mode.
+    //
+    // TODO: Test with dual monitors, older than Windows 10 setups, that doesn't
+    // have fullscreen optimizations (i.e. borderless fullscreen instead of FSE mode)
     if (PSGLOBAL(fullScreen)) { // todo: Doesn't work properly with III.VC.SA.WindowedMode.asi
         VERIFY(SUCCEEDED(surface->LockRect(&lockedRect, nullptr, D3DLOCK_READONLY)));
     } else {
+#endif
         RECT rect;
+#ifdef FIX_BUGS
+        // SA code gets the whole window of the game, which includes the titlebar etc.
+        //
+        // BUG: There should be bugs for older versions of Windows IIRC.
+        // One example would be Vista version of the func doesn't count Aero effects of windows.
+
+        GetClientRect(PSGLOBAL(window), &rect);
+
+        // GetClientRect returns relative positions unlike GetWindowRect.
+        // i.e. will return { 0, 0, width, height }.
+        ClientToScreen(PSGLOBAL(window), (POINT*)(&rect)); // kinda hacky but should work.
+        rect.right += rect.left;
+        rect.bottom += rect.top;
+#else
         GetWindowRect(PSGLOBAL(window), &rect);
+#endif
         displayMode.Height = rect.bottom - rect.top;
         displayMode.Width = rect.right - rect.left;
         VERIFY(SUCCEEDED(surface->LockRect(&lockedRect, &rect, D3DLOCK_READONLY)));
+#ifndef FIX_BUGS
     }
+#endif
 
     RwImage* image = RwImageCreate(int32(displayMode.Width), int32(displayMode.Height), 32);
     if (image) {
