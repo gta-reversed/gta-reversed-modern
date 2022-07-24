@@ -158,9 +158,6 @@ void CMenuManager::DrawBackground() {
         auto zoom   = m_fMapZoom;
 
         PrintMap();
-        assert(m_fMapZoom == zoom);
-        assert(m_vMapOrigin.x == origin.x);
-        assert(m_vMapOrigin.y == origin.y);
 
         m_fMapZoom   = zoom;
         m_vMapOrigin = origin;
