@@ -872,11 +872,8 @@ int16 CPad::GetDisplayVitalStats(CPed* ped) const {
     if (DisablePlayerControls || bDisablePlayerDisplayVitalStats)
         return false;
 
-    if (Mode <= 3) {
-        return ped && ped->GetIntelligence()->IsUsingGun() && NewState.LeftShoulder1;
-    } else {
-        return false;
-    }
+    bool isUsingGun = ped && ped->GetIntelligence()->IsUsingGun();
+    return Mode <= 3u && !isUsingGun && NewState.LeftShoulder1 != 0;
 }
 
 // 0x540A70
