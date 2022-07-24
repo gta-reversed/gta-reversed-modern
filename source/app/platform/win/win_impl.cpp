@@ -82,8 +82,7 @@ RwImage* psGrabScreen(RwCamera* camera) {
         // BUG: There should be bugs for older versions of Windows IIRC.
         // One example would be Vista version of the func doesn't count Aero effects of windows.
         //
-        // TODO: Test with dual monitors, older than Windows 10 setups, that doesn't
-        // have fullscreen optimizations (i.e. borderless fullscreen instead of FSE mode)
+        // TODO: Test with dual monitors etc.
 
         GetClientRect(PSGLOBAL(window), &rect);
 
