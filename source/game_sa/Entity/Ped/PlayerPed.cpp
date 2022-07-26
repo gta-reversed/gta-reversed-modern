@@ -710,7 +710,8 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
     if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
-        breath += decreaseAmount * 2.0f;
+    	if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > breath)
+        	breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
