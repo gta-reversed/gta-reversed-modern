@@ -21,6 +21,7 @@
 #include "Glass.h"
 #include "TheScripts.h"
 #include "Shadows.h"
+#include "CustomBuildingRenderer.h"
 
 void CEntity::InjectHooks()
 {

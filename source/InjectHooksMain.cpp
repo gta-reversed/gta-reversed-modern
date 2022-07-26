@@ -45,6 +45,7 @@
 #include "Gamma.h"
 #include "CustomBuildingPipeline.h"
 #include "CustomBuildingDNPipeline.h"
+#include "CustomBuildingRenderer.h"
 #include "PlantMgr.h"
 #include "PedType.h"
 #include "Occlusion.h"
@@ -479,6 +480,7 @@ void InjectHooksMain() {
     CSprite::InjectHooks();
     CPlaneTrail::InjectHooks();
     CPlaneTrails::InjectHooks();
+
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
