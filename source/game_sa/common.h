@@ -382,3 +382,6 @@ constexpr int32 TOTAL_TEMP_BUFFER_VERTICES = 2048;
 extern RxObjSpace3DVertex (&aTempBufferVertices)[TOTAL_TEMP_BUFFER_VERTICES];
 constexpr int32 TOTAL_RADIOSITY_VERTEX_BUFFER = 1532;
 extern RwD3D9Vertex (&aRadiosityVertexBuffer)[TOTAL_RADIOSITY_VERTEX_BUFFER];
+
+
+#define ARRAY_SIZE(array) (sizeof(array)/sizeof(array[0]))

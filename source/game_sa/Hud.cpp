@@ -5,8 +5,11 @@
     Do not delete this comment block. Respect others' work!
 */
 #include "StdInc.h"
+#include "common.h"
+#include "HudColours.h"
+#include "Sprite2d.h"
 
-char(*CHud::m_BigMessage)[128] = (char(*)[128])0xBAACC0;
+char (*CHud::m_BigMessage)[128] = (char (*)[128])0xBAACC0;
 bool& CHud::bScriptDontDisplayAreaName = *(bool*)0xBAA3F8;
 bool& CHud::bScriptDontDisplayVehicleName = *(bool*)0xBAA3F9;
 bool& CHud::bScriptForceDisplayWithCounters = *(bool*)0xBAA3FA;
@@ -70,9 +73,54 @@ int32& OddJob2Timer = *(int32*)0xBAA3A0;
 float* BigMessageAlpha = (float*)0xBAA3A4;
 float* BigMessageInUse = (float*)0xBAA3C0;
 float* BigMessageX = (float*)0xBAA3DC;
-char* LastBigMessage = (char*)0xBAABC0;
+char (*CHud::LastBigMessage)[128] = (char (*)[128])0xBAABC0;
 uint16& OddJob2On = *(uint16*)0xBAB1E0;
 float& PagerXOffset = *(float*)0x8D0938;
+
+void CHud::InjectHooks() {
+    RH_ScopedClass(CHud);
+    RH_ScopedCategoryGlobal();
+
+    /* RH_ScopedInstall(Draw, 0x58FAE0);
+    RH_ScopedInstall(DrawAfterFade, 0x58D490);
+    RH_ScopedInstall(DrawAreaName, 0x58AA50);
+    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
+    RH_ScopedInstall(DrawCrossHairs, 0x58E020);
+    RH_ScopedInstall(DrawFadeState, 0x58D580);
+    RH_ScopedInstall(DrawHelpText, 0x58B6E0);
+    RH_ScopedInstall(DrawMissionTimers, 0x58B180);
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);
+    RH_ScopedInstall(DrawRadar, 0x58A330);
+    RH_ScopedInstall(DrawScriptText, 0x58C080);
+    RH_ScopedInstall(DrawSubtitles, 0x58C250);
+    RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);
+    RH_ScopedInstall(DrawVehicleName, 0x58AEA0);
+    RH_ScopedInstall(DrawVitalStats, 0x589650);
+    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);
+    RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);
+    RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);
+    RH_ScopedInstall(Initialise, 0x5BA850);
+    RH_ScopedInstall(ReInitialise, 0x588880);
+    RH_ScopedInstall(ResetWastedText, 0x589070);
+    RH_ScopedInstall(SetBigMessage, 0x588FC0);
+    RH_ScopedInstall(SetHelpMessage, 0x588BE0);
+    RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);
+    RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);
+    RH_ScopedInstall(SetMessage, 0x588F60);
+    RH_ScopedInstall(SetVehicleName, 0x588F50);
+    RH_ScopedInstall(SetZoneName, 0x588BB0);
+    RH_ScopedInstall(Shutdown, 0x588850);
+    RH_ScopedInstall(DrawAmmo, 0x58AEA0);
+    RH_ScopedInstall(DrawVehicleName, 0x5893B0);
+    RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);
+    RH_ScopedInstall(DrawTripSkip, 0x58A160);
+    RH_ScopedInstall(DrawWanted, 0x58D9A0);
+    RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);*/
+    RH_ScopedInstall(RenderArmorBar, 0x5890A0);
+    RH_ScopedInstall(RenderBreathBar, 0x589190);
+    RH_ScopedInstall(RenderHealthBar, 0x589270);
+}
 
 // 0x58FAE0
 void CHud::Draw() {
@@ -249,15 +297,29 @@ void CHud::DrawWeaponIcon(CPed* ped, int32 x, int32 y, float alpha) {
 
 // 0x5890A0
 void CHud::RenderArmorBar(int32 playerId, int32 x, int32 y) {
-    plugin::Call<0x5890A0, int32, int32, int32>(playerId, x, y);
+    // plugin::Call<0x5890A0, int32, int32, int32>(playerId, x, y);
+    if ((CHud::m_ItemToFlash != 3 || (CTimer::GetFrameCounter() & 8) != 0) && CWorld::Players[playerId].m_pPed->m_fArmour > 1.0) {
+        float progress = CWorld::Players[playerId].m_pPed->m_fArmour / (double)CWorld::Players[playerId].m_nMaxArmour * 100.0;
+        CSprite2d::DrawBarChart(x, y, SCREEN_STRETCH_X(62), SCREEN_SCALE_Y(9.0), progress, 0, 0, 1, HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY), CRGBA::CRGBA(0, 0, 0, 0));
+    }
 }
 
 // 0x589190
 void CHud::RenderBreathBar(int32 playerId, int32 x, int32 y) {
-    plugin::Call<0x589190, int32, int32, int32>(playerId, x, y);
+    // plugin::Call<0x589190, int32, int32, int32>(playerId, x, y);
+    if (CHud::m_ItemToFlash != 10 || (CTimer::GetFrameCounter() & 8) != 0) {
+        float progress = CWorld::Players[playerId].m_pPed->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0;
+        CSprite2d::DrawBarChart(x, y, SCREEN_STRETCH_X(62.0), SCREEN_SCALE_Y(9.0), progress, 0, 0, 1, HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE), CRGBA::CRGBA(0, 0, 0, 0));
+    }
 }
 
 // 0x589270
 void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
-    plugin::Call<0x589270, int32, int32, int32>(playerId, x, y);
+    // plugin::Call<0x589270, int32, int32, int32>(playerId, x, y);
+    if ((CHud::m_ItemToFlash != 4 || (CTimer::GetFrameCounter() & 8) != 0) && (CWorld::Players[playerId].m_pPed->m_fHealth >= 10 || (CTimer::GetFrameCounter() & 8) != 0)) {
+        int totalWidth = (SCREEN_STRETCH_X(CWorld::Players[playerId].m_nMaxHealth * 109.0) / 176.0);
+        float progress = CWorld::Players[playerId].m_pPed->m_fHealth * 100.0 / (double)CWorld::Players[playerId].m_nMaxHealth;
+        CSprite2d::DrawBarChart(SCREEN_STRETCH_X(109.0) + x - totalWidth, y, totalWidth, SCREEN_SCALE_Y(9.0), progress, 0, 0, 1, HudColour.GetRGB(HUD_COLOUR_RED),
+                                CRGBA::CRGBA(0, 0, 0, 0));
+    }
 }

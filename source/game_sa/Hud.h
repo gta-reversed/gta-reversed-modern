@@ -34,6 +34,7 @@ class CPed;
 class CHud {
 public:
     static char(*m_BigMessage)[128]; // static char m_BigMessage[7][128]
+    static char (*LastBigMessage)[128]; // static char LastBigMessage[7][128]
     static bool &bScriptDontDisplayAreaName;
     static bool &bScriptDontDisplayVehicleName;
     static bool &bScriptForceDisplayWithCounters;
@@ -88,6 +89,7 @@ public:
     static bool &bDrawingVitalStats;
     static CSprite2d *Sprites; // static CSprite2d Sprites[6]
 
+    static void InjectHooks();
     static void Draw(); // called each frame from Render2dStuff()
     static void DrawAfterFade();
     static void DrawAreaName();
