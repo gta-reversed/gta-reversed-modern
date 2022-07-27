@@ -333,7 +333,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
     m_nHelpMessageStatId = statId;
     m_fHelpMessageStatUpdateValue = diff;
     m_nHelpMessageMaxStatValue = (uint32)max;
-    *(short *)gString = 2 * (state == STAT_UPDATE_DECREASE) + '+';
+    *(short*)gString = state == STAT_UPDATE_INCREASE ? '+' : '-';
     AsciiToGxtChar(gString, m_pHelpMessage);
 }
 
