@@ -11,6 +11,7 @@
 #include "MenuSystem.h"
 #include "Radar.h"
 #include "GxtChar.h"
+#include "EntryExitManager.h"
 
 char (&CHud::m_BigMessage)[7][128] = *(char(*)[7][128])0xBAACC0;
 bool& CHud::bScriptDontDisplayAreaName = *(bool*)0xBAA3F8;
@@ -109,7 +110,7 @@ void CHud::InjectHooks() {
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);
     // RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);
-    // RH_ScopedInstall(DrawRadar, 0x58A330);
+    RH_ScopedInstall(DrawRadar, 0x58A330);
     // RH_ScopedInstall(DrawScriptText, 0x58C080);
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);
     // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);
@@ -585,14 +586,100 @@ void CHud::DrawOddJobMessage(uint8 priority) {
 
 // 0x58A330
 void CHud::DrawRadar() {
-    CRect rect;
-    rect.left   = SCREEN_STRETCH_X(54.0f);
-    rect.top    = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
-    rect.right  = SCREEN_STRETCH_X(64.0f) + SCREEN_STRETCH_X(54.0f);
-    rect.bottom = SCREEN_STRETCH_Y(64.0f) + SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f);
-    Sprites[5].Draw(rect, CRGBA(255, 255, 255, 255));
+    if (CEntryExitManager::ms_exitEnterState == 1 ||
+        CEntryExitManager::ms_exitEnterState == 2 ||
+        FrontEndMenuManager.m_nRadarMode == 2 ||
+        (m_ItemToFlash == 8 && (CTimer::m_FrameCounter & 8) == 0)){
+        return;
+    }
+    RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+    RwRenderStateSet(rwRENDERSTATESHADEMODE, RWRSTATE(rwFILTERNEAREST));
+    
+    CRadar::DrawMap();
 
-    plugin::Call<0x58A330>();
+    CRect rect;
+    CVehicle* playerVehicle= FindPlayerVehicle(-1, 0);
+    CPlayerPed* PlayerPed = FindPlayerPed(-1);
+
+    // todo Use eRadarMode::BLIPS_ONLY in new commits
+    if (FrontEndMenuManager.m_nRadarMode != 1) {
+        if (playerVehicle &&
+            (FindPlayerVehicle(-1, 0)->m_nVehicleSubType == VEHICLE_TYPE_PLANE &&
+            FindPlayerVehicle(-1, 0)->m_nModelIndex != MODEL_VORTEX)) {
+            if (PlayerPed->m_aWeapons[PlayerPed->m_nActiveWeaponSlot].m_nType != WEAPON_PARACHUTE) {
+                // Non reverse code
+                float angle = FindPlayerHeading(0) - (CRadar::m_fRadarOrientation + M_PI);
+                // printf("angle %f\n",angle);
+                // CMatrixLink m_matrix = playerVehicle->GetMatrix();
+                // vector_constructor_403D60((char*)&rect, 8, 4, (int(__thiscall*)(_DWORD))CVector2D::CVector2D);
+
+                // long double v2 = -atan2(-m_matrix.GetRight().z, m_matrix.GetUp().z) - 0.78539819;
+                /* for (int i = 0; i < 4; i++) {
+                     *(&v66 + 2 * i) = sin(i * 1.5707964 + v2) * SCREEN_STRETCH_X(76.0) + SCREEN_STRETCH_X(87.0);
+                    *(&v67 + 2 * i) = cos(i * 1.5707964 + v2) * SCREEN_SCALE_Y(76.0) + SCREEN_STRETCH_FROM_BOTTOM(84.0f);
+                 }*/
+                CRadar::DrawRotatingRadarSprite(
+                    &Sprites[4],
+                    SCREEN_STRETCH_X(86.0f),
+                    SCREEN_STRETCH_FROM_BOTTOM(67.0f),
+                    angle,
+                    SCREEN_STRETCH_X(76.0f),
+                    SCREEN_STRETCH_Y(63.0f),
+                    CRGBA(255, 255, 255, 255)
+                );
+            }
+            /*if (!playerVehicle || playerVehicle->m_nVehicleSubType != VEHICLE_TYPE_PLANE &&
+                playerVehicle->m_nVehicleSubType != VEHICLE_TYPE_HELI ||
+                playerVehicle->m_nModelIndex == MODEL_VORTEX) {
+            }*/
+
+            // Padding from my head
+            rect.left = SCREEN_STRETCH_X(20.0);
+            rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0);
+            rect.right = SCREEN_STRETCH_X(30.0);
+            rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0);
+            CSprite2d::DrawRect(rect, CRGBA(10, 10, 10, 100));
+        }
+    }
+    // ring orig padding +/- 3.0f
+
+
+    // top left
+    rect.left = SCREEN_STRETCH_X(36.0);
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0);
+    rect.right = SCREEN_STRETCH_X(87.0);
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
+    Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
+
+
+    // top right
+    rect.left = SCREEN_STRETCH_X(138.0);
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0);
+    rect.right = SCREEN_STRETCH_X(87.0);
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
+    Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
+
+
+    // bottom left
+    rect.left = SCREEN_STRETCH_X(36.0);
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0);
+    rect.right = SCREEN_STRETCH_X(87.0);
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
+    Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
+
+    // bottom right
+    rect.left = SCREEN_STRETCH_X(138.0);
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0);
+    rect.right = SCREEN_STRETCH_X(87.0);
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
+    Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
+
+    
+
+    CRadar::DrawBlips();
+    
+
+       
 }
 
 // 0x58C080
@@ -692,7 +779,7 @@ LABEL_25:
         m_VehicleNameTimer += CTimer::GetTimeStepInMS();
         CFont::SetProportional(true);
         CFont::SetBackground(false, false);
-        CFont::SetScaleForCurrentLanguage(SCREEN_WIDTH * 0.0015625f, SCREEN_HEIGHT * 1.5f);
+        CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.0f), SCREEN_HEIGHT * 1.5f);
         CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
         CFont::SetRightJustifyWrap(0.0f);
         CFont::SetFontStyle(eFontStyle::FONT_MENU);
@@ -701,7 +788,7 @@ LABEL_25:
         CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
         if (CTheScripts::bDisplayHud) {
             CFont::PrintString(
-                SCREEN_WIDTH - 0.0015625f * SCREEN_WIDTH * 32.0f,
+                SCREEN_STRETCH_FROM_RIGHT(32.0f),
                 RsGlobal.maximumHeight - SCREEN_HEIGHT * 104.0f,
                 m_pVehicleNameToPrint
             );
@@ -847,7 +934,7 @@ void CHud::DrawTripSkip() {
     Sprites[5].Draw(rect, CRGBA(255, 255, 255, 255));
 
     CFont::SetBackground(false, false);
-    CFont::SetScale(RsGlobal.maximumWidth * 0.0015625 * 0.3f, RsGlobal.maximumHeight * 0.002232143 * 0.7f);
+    CFont::SetScale(SCREEN_STRETCH_X(0.3f), SCREEN_SCALE_Y(0.7f));
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetCentreSize(RsGlobal.maximumWidth);
     CFont::SetProportional(true);
