@@ -251,12 +251,11 @@ void CHud::ResetWastedText() {
 
 // 0x588FC0
 void CHud::SetBigMessage(char* message, uint16 style) {
-    int i = 0;
-    if (BigMessageX[style] != 0.0) {
+    if (BigMessageX[style] != 0.0f) {
         return;
     }
     if (style == 5) {
-        for (i = 0; i < 128; i++) {
+        for (int i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;
             if (message[i] != LastBigMessage[5][i]) {
@@ -267,14 +266,14 @@ void CHud::SetBigMessage(char* message, uint16 style) {
             LastBigMessage[5][i] = message[i];
         }
     } else {
-        for (i = 0; i < 128; i++) {
+        for (int i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;
             m_BigMessage[style][i] = message[i];
         }
     }
-    LastBigMessage[0][i] = 0;
-    m_BigMessage[0][i] = 0;
+    LastBigMessage[0][0] = '\0';
+    m_BigMessage[0][0] = '\0';
 }
 
 // 0x588BE0
@@ -545,13 +544,13 @@ void CHud::DrawMissionTitle() {
             CFont::SetRightJustifyWrap(0.0);
             CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
             CFont::SetFontStyle(FONT_PRICEDOWN);
-            CFont::SetScale(SCREEN_STRETCH_X(1.0), SCREEN_SCALE_Y(1.3));
+            CFont::SetScale(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.3f));
 
             if (BigMessageX[1] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
-                BigMessageX[1] += CTimer::ms_fTimeStep;
+                BigMessageX[1] += CTimer::GetTimeStep();
                 if (BigMessageX[1] >= 120.0) {
                     BigMessageX[1] = 120.0;
-                    BigMessageAlpha[1] -= CTimer::ms_fTimeStep * 1000.0 * 0.02;
+                    BigMessageAlpha[1] -= CTimer::GetTimeStep() * 1000.0 * 0.02f;
                 }
                 if (BigMessageAlpha[1] <= 0.0) {
                     BigMessageAlpha[1] = 0.0;
@@ -560,12 +559,12 @@ void CHud::DrawMissionTitle() {
                 }
             } else {
                 BigMessageAlpha[1] = 255.0;
-                BigMessageInUse[1] += CTimer::ms_fTimeStep * 1000.0 * 0.0060000002;
+                BigMessageInUse[1] += CTimer::GetTimeStep() * 1000.0 * 0.006f;
             }
             CFont::SetEdge(2);
             CFont::SetDropColor(CRGBA(0, 0, 0, BigMessageAlpha[1]));
             CFont::SetColor(CRGBA(144, 98, 16, BigMessageAlpha[1])); // Hud Gold Color
-            CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0), m_BigMessage[1]);
+            CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0f), m_BigMessage[1]);
             CFont::SetEdge(0);
         } else {
             BigMessageInUse[1] = -60.0;
@@ -741,8 +740,9 @@ void CHud::GetRidOfAllHudMessages(uint8 arg0) {
     m_VehicleFadeTimer = 0;
     m_VehicleState = 0;
 
-    for (int i = 0; i < std::size(m_Message); i++) {
-        m_Message[i] = 0;
+    for (auto& m_Message : m_Message) {
+        m_Message = 0;
+        // TODO or '\0' ?
     }
 
     for (int i = 0; i < bScriptDontDisplayAreaName; i++) {
