@@ -103,7 +103,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(SetZoneName, 0x588BB0);
     RH_ScopedInstall(DrawAfterFade, 0x58D490);
     // RH_ScopedInstall(DrawAreaName, 0x58AA50);
-    // RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
+    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
     // RH_ScopedInstall(DrawCrossHairs, 0x58E020);
     // RH_ScopedInstall(DrawFadeState, 0x58D580);
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);
@@ -513,7 +513,35 @@ void CHud::DrawAreaName() {
 
 // 0x58CA50
 void CHud::DrawBustedWastedMessage() {
-    plugin::Call<0x58CA50>();
+    // plugin::Call<0x58CA50>();
+    if (!m_BigMessage[2][0]) {
+        BigMessageX[2] = '\0';
+        return;
+    }
+    if (BigMessageX[2] == 0.0) {
+        BigMessageX[2] = 1.0;
+        BigMessageAlpha[2] = 0.0;
+        if (m_VehicleState)
+            m_VehicleState = 0;
+        if (m_ZoneState)
+            m_ZoneState = NAME_DONT_SHOW;
+        return;
+    }
+
+    BigMessageAlpha[2] += CTimer::GetTimeStepInMS() * 0.4f;
+    if (BigMessageAlpha[2] > 255.0)
+        BigMessageAlpha[2] = 255.0;
+    CFont::SetBackground(0, 0);
+    CFont::SetScale(SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(2.0f));
+    CFont::SetProportional(1);
+    CFont::SetJustify(0);
+    CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetEdge(3);
+    CFont::SetDropColor(CRGBA(0, 0, 0,BigMessageAlpha[2]));
+    CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, BigMessageAlpha[2]));
+    printf("set busted text %s\n", m_BigMessage[2]);
+    CFont::PrintStringFromBottom(RsGlobal.maximumWidth * 0.5, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), m_BigMessage[2]);
 }
 
 // 0x58E020
@@ -1002,8 +1030,8 @@ void CHud::RenderArmorBar(int32 playerId, int32 x, int32 y) {
 
     auto playerInfo = player->GetPlayerInfoForThisPlayerPed();
     CSprite2d::DrawBarChart(
-        x,
-        y,
+        (float)x,
+        (float)y,
         SCREEN_STRETCH_X(62.0f),
         SCREEN_STRETCH_Y(9.0f),
         player->m_fArmour / (float)playerInfo->m_nMaxArmour * 100.0f,
