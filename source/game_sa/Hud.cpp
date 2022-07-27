@@ -250,11 +250,11 @@ void CHud::ResetWastedText() {
 }
 
 // 0x588FC0
-void CHud::SetBigMessage(char* message, uint16 style) {
+void CHud::SetBigMessage(char* message, eBigMessageStyle style) {
     if (BigMessageX[style] != 0.0f) {
         return;
     }
-    if (style == 5) {
+    if (style == BIG_MESSAGE_STYLE_5) {
         for (int i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;

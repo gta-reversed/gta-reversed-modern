@@ -33,6 +33,18 @@ enum eHudSprites {
     HUDSPRITE_SKIPICON
 };
 
+
+// TODO test uint16
+enum eBigMessageStyle {
+    BIG_MESSAGE_STYLE_0,
+    BIG_MESSAGE_STYLE_1,
+    BIG_MESSAGE_STYLE_2,
+    BIG_MESSAGE_STYLE_3,
+    BIG_MESSAGE_STYLE_4,
+    BIG_MESSAGE_STYLE_5,
+    BIG_MESSAGE_STYLE_6
+};
+
 class CPed;
 
 class CHud {
@@ -105,7 +117,7 @@ public:
 
     static void ResetWastedText();
 
-    static void SetBigMessage(char* text, uint16 style);
+    static void SetBigMessage(char* text, eBigMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
