@@ -45,6 +45,7 @@
 #include "Gamma.h"
 #include "CustomBuildingPipeline.h"
 #include "CustomBuildingDNPipeline.h"
+#include "CustomCarEnvMapPipeline.h"
 #include "CustomBuildingRenderer.h"
 #include "PlantMgr.h"
 #include "PedType.h"
@@ -246,6 +247,7 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CCustomCarEnvMapPipeline::InjectHooks();
     CEscalator::InjectHooks();
     CShadowCamera::InjectHooks();
     CInterestingEvents::InjectHooks();
