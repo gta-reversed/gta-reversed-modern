@@ -833,7 +833,7 @@ void CHud::DrawRadar() {
         if (vehicle && (vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX)) {
             if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
                 // Non reverse code
-                float angle = FindPlayerHeading(0) - (CRadar::m_fRadarOrientation + M_PI);
+                float angle = FindPlayerHeading(0) - CRadar::m_fRadarOrientation + PI;
                 // printf("angle %f\n",angle);
                 // CMatrixLink m_matrix = playerVehicle->GetMatrix();
                 // vector_constructor_403D60((char*)&rect, 8, 4, (int(__thiscall*)(_DWORD))CVector2D::CVector2D);

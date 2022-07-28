@@ -8,7 +8,6 @@
 
 #include "Stats.h"
 
-#define M_PI 3.14159265358979323846 // pi
 class CSprite2d;
 
 enum DRAW_FADE_STATE {
