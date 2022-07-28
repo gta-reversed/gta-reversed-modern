@@ -247,7 +247,6 @@ void InjectHooksMain() {
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    CCustomCarEnvMapPipeline::InjectHooks();
     CEscalator::InjectHooks();
     CShadowCamera::InjectHooks();
     CInterestingEvents::InjectHooks();
@@ -486,6 +485,7 @@ void InjectHooksMain() {
     CCustomBuildingPipeline::InjectHooks();
     CCustomBuildingRenderer::InjectHooks();
     CCustomBuildingDNPipeline::InjectHooks();
+    CCustomCarEnvMapPipeline::InjectHooks();
 
     const auto Audio = []() {
         CAEVehicleAudioEntity::InjectHooks();

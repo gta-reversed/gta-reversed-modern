@@ -547,12 +547,14 @@ void CEntity::PreRender_Reversed()
 
         mi->IncreaseAlpha();
 
+        // PC Only
         if (ami) {
             CCustomBuildingDNPipeline::PreRenderUpdate(ami->m_pRwAtomic, false);
         }
         else if (mi->GetModelType() == MODEL_INFO_CLUMP) {
             RpClumpForAllAtomics(mi->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
         }
+        // PC Only
     }
 
     if (!m_bHasPreRenderEffects)
