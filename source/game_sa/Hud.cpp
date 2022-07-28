@@ -630,9 +630,8 @@ void CHud::DrawBustedWastedMessage() {
     }
 
     BigMessageAlpha[2] += CTimer::GetTimeStepInMS() * 0.4f;
-    if (BigMessageAlpha[2] > 255.0f) {
-        BigMessageAlpha[2] = 255.0f;
-    }
+    BigMessageAlpha[2] = std::min(BigMessageAlpha[2], 255.0f);
+
     CFont::SetBackground(0, 0);
     CFont::SetScale(SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(2.0f));
     CFont::SetProportional(1);
