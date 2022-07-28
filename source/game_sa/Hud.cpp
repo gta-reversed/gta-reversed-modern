@@ -521,6 +521,7 @@ void CHud::DrawAreaName() {
         case NAME_FADE_OUT:
             m_ZoneState = NAME_SWITCH;
             m_ZoneNameTimer = 0;
+            break;
         case NAME_SWITCH:
             m_ZoneNameTimer = 0;
             break;
