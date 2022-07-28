@@ -17,6 +17,7 @@
 #include "ModelIndices.h"
 #include "InterestingEvents.h"
 #include "VehicleRecording.h"
+#include "EventDanger.h"
 
 bool& CAutomobile::m_sAllTaxiLights = *(bool*)0xC1BFD0;
 CVector& CAutomobile::vecHunterGunPos = *(CVector*)0x8D3394;

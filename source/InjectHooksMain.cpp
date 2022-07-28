@@ -232,6 +232,15 @@
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
 #include "TaskComplexAvoidEntity.h"
 
+#include "EventSeenPanickedPed.h"
+#include "EventCarUpsideDown.h"
+#include "EventPassObject.h"
+#include "EventLeanOnVehicle.h"
+#include "EventOnFire.h"
+#include "EventEscalator.h"
+#include "EventCopCarBeingStolen.h"
+#include "EventDanger.h"
+
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
@@ -853,7 +862,7 @@ void InjectHooksMain() {
         CEventLeanOnVehicle::InjectHooks();
         CEventSeenCop::InjectHooks();
         CEventOnFire::InjectHooks();
-        CEventRevived::InjectHooks();
+        // + CEventRevived::InjectHooks();
         CEventHandlerHistory::InjectHooks();
         CEventEditableResponse::InjectHooks();
         CEventDamage::InjectHooks();
@@ -899,8 +908,8 @@ void InjectHooksMain() {
         CEventLeaderQuitEnteringCarAsDriver::InjectHooks();
         CEventAreaCodes::InjectHooks();
         CEventLeaderEntryExit::InjectHooks();
-        CEventSpecial::InjectHooks();
-        CEventFireNearby::InjectHooks();
+        // + CEventSpecial::InjectHooks();
+        // + CEventFireNearby::InjectHooks();
         // + CEventGroupEvent::InjectHooks();
         CEventGroup::InjectHooks();
         CEventGlobalGroup::InjectHooks();
@@ -911,8 +920,8 @@ void InjectHooksMain() {
         CEventNewGangMember::InjectHooks();
         CEventEscalator::InjectHooks();
         CEventDanger::InjectHooks();
-        CEventSexyVehicle::InjectHooks();
-        CEventChatPartner::InjectHooks();
+        // + CEventSexyVehicle::InjectHooks();
+        // + CEventChatPartner::InjectHooks();
         CEventCopCarBeingStolen::InjectHooks();
         CEventHandler::InjectHooks();
         CEventAcquaintancePedHate::InjectHooks();

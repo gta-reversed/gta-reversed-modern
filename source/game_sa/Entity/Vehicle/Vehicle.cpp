@@ -1314,7 +1314,7 @@ bool CVehicle::CanBeDeleted() {
 
     for (auto passenger : m_apPassengers) {
         if (passenger) {
-            if (passenger->m_nCreatedBy == PED_MISSION)
+            if (passenger->IsCreatedByMission())
                 return false;
 
             if (!passenger->IsStateDriving() && !passenger->IsStateDead()) // OG: checked twice
