@@ -200,8 +200,8 @@ void CGameLogic::RestorePedsWeapons(CPed* ped) {
     for (auto& weapon : s_SavedWeapons) {
         auto modelId1 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId1;
         auto modelId2 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId2;
-        if (   (modelId1 == -1 || CStreaming::GetInfo(modelId1).IsLoaded())
-            && (modelId2 == -1 || CStreaming::GetInfo(modelId2).IsLoaded()) // FIX_BUGS: they checked modelId1 twice
+        if (   (modelId1 == MODEL_INVALID || CStreaming::GetInfo(modelId1).IsLoaded())
+            && (modelId2 == MODEL_INVALID || CStreaming::GetInfo(modelId2).IsLoaded()) // FIX_BUGS: They checked modelId1 twice
         ) {
             ped->GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, true);
         }
