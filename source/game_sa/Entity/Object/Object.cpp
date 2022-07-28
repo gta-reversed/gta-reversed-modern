@@ -10,6 +10,7 @@
 #include "Radar.h"
 #include "BreakManager_c.h"
 #include "Buoyancy.h"
+#include "CustomBuildingRenderer.h"
 #include "ObjectSaveStructure.h"
 #include "Rope.h"
 #include "Ropes.h"
