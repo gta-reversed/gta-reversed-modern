@@ -382,7 +382,7 @@ void CFireManager::Update() {
 
         CEntity* hitEntity{};
         bool bHit{};
-        point.z = CWorld::FindGroundZFor3DCoord(point.x, point.y, point.z, &bHit, &hitEntity);
+        point.z = CWorld::FindGroundZFor3DCoord(point, &bHit, &hitEntity);
 
         CVector pointToCamDirNorm = (TheCamera.GetPosition() - point);
         pointToCamDirNorm.Normalise();
@@ -392,7 +392,7 @@ void CFireManager::Update() {
         // Android values used here, and on the PC version the array access isn't
         // a 100% clear to me.
         // TODO: Use the array here
-        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || rand() < RAND_MAX / 2) {
+        if (DotProduct(TheCamera.GetForward(), pointToCamDirNorm) > 0.2f || CGeneral::GetRandomNumber() < RAND_MAX / 2) {
             auto fx = g_fxMan.CreateFxSystem("riot_smoke", &point, nullptr, true);
             if (fx)
                 fx->PlayAndKill();

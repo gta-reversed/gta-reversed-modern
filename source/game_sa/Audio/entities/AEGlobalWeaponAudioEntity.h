@@ -5,7 +5,7 @@
 class CAEGlobalWeaponAudioEntity : public CAEWeaponAudioEntity {
 public:
     CAEGlobalWeaponAudioEntity();
-    ~CAEGlobalWeaponAudioEntity() = default; // 0x506C50
+    ~CAEGlobalWeaponAudioEntity();
 
     void UpdateParameters(CAESound* sound, int16 curPlayPos) override;
 
@@ -14,11 +14,14 @@ public:
     void ServiceAmbientGunFire();
 
 private:
+    CPhysical* m_Physical;
+    int8       m_FrequencyVariation;
+
+private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
     CAEGlobalWeaponAudioEntity* Constructor();
     CAEGlobalWeaponAudioEntity* Destructor();
 };
-
 VALIDATE_SIZE(CAEGlobalWeaponAudioEntity, 0xA8);

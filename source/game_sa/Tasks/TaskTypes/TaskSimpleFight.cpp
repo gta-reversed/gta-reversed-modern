@@ -2,8 +2,6 @@
 
 #include "TaskSimpleFight.h"
 
-CMeleeInfo* CTaskSimpleFight::m_aComboData = (CMeleeInfo*)0xC170D0;
-
 CTaskSimpleFight::CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod) : CTaskSimple() {
     plugin::CallMethod<0x61C470, CTaskSimpleFight*, CEntity*, int32, uint32>(this, entity, nCommand, nIdlePeriod);
 }

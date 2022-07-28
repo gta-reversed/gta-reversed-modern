@@ -1,9 +1,11 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
+#include <WinSock2.h>
 #include <Windows.h>
 #include <cstdio>
 #include <cmath>
+#include <cinttypes>
 #include <algorithm>
 #include <list>
 #include <map>
@@ -206,7 +208,6 @@ namespace rng = std::ranges;
 #include "game_sa\AccidentManager.h"
 #include "game_sa\AttractorScanner.h"
 #include "game_sa\AutoPilot.h"
-#include "game_sa\Birds.h"
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
@@ -227,7 +228,6 @@ namespace rng = std::ranges;
 #include "game_sa\CoverPoint.h"
 #include "game_sa\Cranes.h"
 #include "game_sa\CrimeBeingQd.h"
-#include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CutsceneMgr.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
@@ -263,7 +263,6 @@ namespace rng = std::ranges;
 #include "game_sa\Messages.h"
 #include "game_sa\Mirrors.h"
 #include "game_sa\MissionCleanup.h"
-#include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
 #include "game_sa\NodeRoute.h"
 #include "game_sa\ObjectData.h"
@@ -302,11 +301,9 @@ namespace rng = std::ranges;
 #include "game_sa\RegisteredCorona.h"
 #include "game_sa\RegisteredMotionBlurStreak.h"
 #include "game_sa\Renderer.h"
-#include "game_sa\CustomBuildingRenderer.h"
 #include "game_sa\RepeatSector.h"
 #include "game_sa\Restart.h"
 #include "game_sa\RGBA.h"
-#include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
 #include "game_sa\Scene.h"

@@ -12,10 +12,11 @@ void CAEAudioEnvironment::InjectHooks() {
     RH_ScopedInstall(GetDistanceAttenuation, 0x4D7F20);
     RH_ScopedInstall(GetDirectionalMikeAttenuation, 0x4D7F60);
     RH_ScopedInstall(GetReverbEnvironmentAndDepth, 0x4D8010);
-    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "vec", 0x4D80B0, void(*)(CVector*, CVector*));
+    RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "vec", 0x4D80B0, void(*)(CVector*, const CVector*));
     RH_ScopedOverloadedInstall(GetPositionRelativeToCamera, "placeable", 0x4D8340, void(*)(CVector*, CPlaceable*));
 }
 
+// 0x4D7E40
 float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float curDist, uint32 prevTime, uint32 curTime, float timeScale) {
     const auto fDistDiff = curDist - prevDist;
     if (TheCamera.Get_Just_Switched_Status())
@@ -25,21 +26,23 @@ float CAEAudioEnvironment::GetDopplerRelativeFrequency(float prevDist, float cur
         return 1.0F;
 
     const auto fDoppler = fDistDiff * 1000.0F / static_cast<float>(curTime - prevTime) * timeScale;
-    if (fabs(fDoppler) >= 340.0F)
+    if (std::fabs(fDoppler) >= 340.0F)
         return 1.0F;
 
-    const auto fClamped = clamp(fDoppler, -35.0F, 35.0F);
+    const auto fClamped = std::clamp(fDoppler, -35.0F, 35.0F);
     return 340.0F / (fClamped + 340.0F);
 }
 
+// 0x4D7F20
 float CAEAudioEnvironment::GetDistanceAttenuation(float dist) {
     if (dist >= 128.0F)
         return -100.0F;
 
-    auto iArrIndex = static_cast<uint32>(floor(dist * 10.0F));
+    auto iArrIndex = static_cast<uint32>(std::floor(dist * 10.0F));
     return gSoundDistAttenuationTable[iArrIndex];
 }
 
+// 0x4D7F60
 float CAEAudioEnvironment::GetDirectionalMikeAttenuation(const CVector& soundDir) {
     // https://en.wikipedia.org/wiki/Cutoff_frequency
     static constexpr float fCutoffFrequency = 0.70710678118F; // sqrt(0.5F);
@@ -60,9 +63,10 @@ float CAEAudioEnvironment::GetDirectionalMikeAttenuation(const CVector& soundDir
     return (1.0F - invLerp(-fCutoffFrequency, fCutoffFrequency, freq)) * fAttenuationMult;
 }
 
+// 0x4D8010
 void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* depth) {
     if (CWeather::UnderWaterness >= 0.5F) {
-        *reverbEnv = 22;
+        *reverbEnv = 22; // todo: EAX_ENVIRONMENT_UNDERWATER
         *depth = -12;
         return;
     }
@@ -75,31 +79,32 @@ void CAEAudioEnvironment::GetReverbEnvironmentAndDepth(int8* reverbEnv, int32* d
     else if (CGame::currArea)
         nZone = 14;
     else {
-        *reverbEnv = 23;
+        *reverbEnv = 23; // todo: EAX_ENVIRONMENT_DRUGGED
         *depth = -100;
         return;
     }
 
     if (nZone != -1) {
         *reverbEnv = gAudioZoneToReverbEnvironmentMap[nZone].m_nEnvironment;
-        *depth = gAudioZoneToReverbEnvironmentMap[nZone].m_nDepth;
+        *depth     = gAudioZoneToReverbEnvironmentMap[nZone].m_nDepth;
         return;
     }
 
-    *reverbEnv = 23;
+    *reverbEnv = 23; // todo: EAX_ENVIRONMENT_DRUGGED
     *depth = -100;
 }
 
-void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector* vecOut, CVector* vecPos) {
+// 0x4D80B0
+void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector* vecOut, const CVector* vecPos) {
     static const float fFirstPersonMult = 2.0F;
     if (!vecPos)
         return;
 
     const auto camMode = CCamera::GetActiveCamera().m_nMode;
     if (camMode == eCamMode::MODE_SNIPER || camMode == eCamMode::MODE_ROCKETLAUNCHER || camMode == eCamMode::MODE_1STPERSON) {
-        CMatrix    tempMat = TheCamera.m_mCameraMatrix;
-        auto&      vecCamPos = TheCamera.GetPosition();
-        const auto vecOffset = *vecPos - (vecCamPos - tempMat.GetForward() * fFirstPersonMult);
+        const auto& tempMat = TheCamera.m_mCameraMatrix;
+        const auto& vecCamPos = TheCamera.GetPosition();
+        const auto  vecOffset = *vecPos - (vecCamPos - tempMat.GetForward() * fFirstPersonMult);
 
         vecOut->x = -DotProduct(vecOffset, tempMat.GetRight());
         vecOut->y = DotProduct(vecOffset, tempMat.GetForward());
@@ -110,17 +115,18 @@ void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector* vecOut, CVector* 
     auto  fMult = 0.0F;
     auto* player = FindPlayerPed();
     if (player)
-        fMult = clamp(DistanceBetweenPoints(player->GetPosition(), TheCamera.GetPosition()), 0.0F, 0.5F);
+        fMult = std::clamp(DistanceBetweenPoints(TheCamera.GetPosition(), player->GetPosition()), 0.0F, 0.5F);
 
-    CMatrix    tempMat = TheCamera.m_mCameraMatrix;
-    auto&      vecCamPos = TheCamera.GetPosition();
-    const auto vecOffset = *vecPos - (vecCamPos + tempMat.GetForward() * fMult);
+    const auto& tempMat = TheCamera.m_mCameraMatrix;
+    const auto& vecCamPos = TheCamera.GetPosition();
+    const auto  vecOffset = *vecPos - (vecCamPos + tempMat.GetForward() * fMult);
 
     vecOut->x = -DotProduct(vecOffset, tempMat.GetRight());
     vecOut->y = DotProduct(vecOffset, tempMat.GetForward());
     vecOut->z = DotProduct(vecOffset, tempMat.GetUp());
 }
 
+// 0x4D8340
 void CAEAudioEnvironment::GetPositionRelativeToCamera(CVector* vecOut, CPlaceable* placeable) {
     return CAEAudioEnvironment::GetPositionRelativeToCamera(vecOut, &placeable->GetPosition());
 }

@@ -5,6 +5,7 @@
 int8 CTaskCategories::ComputeTaskCategory(const CTask* task) {
     int8 category = task != nullptr;
 
+    // todo: FIX_BUGS?
     auto type = const_cast<CTask*>(task)->GetTaskType();
     if (type >= TASK_SIMPLE_FIGHT_CTRL && type <= TASK_SIMPLE_THROW_CTRL)
         category = 4;

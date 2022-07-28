@@ -179,7 +179,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         float& fFuelSpeed = exp->m_fFuelSpeed[i];
         CVector& vecFuelDir = exp->m_vecFuelDirection[i];
 
-        if (i && rand() >= RAND_MAX / 2) {
+        if (i && CGeneral::GetRandomNumber() >= RAND_MAX / 2) {
             fOffsetDistance = 0.0f;
         } else {
             vecFuelDir = CVector{
@@ -248,7 +248,7 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         exp->m_nExpireTime = (float)(CTimer::GetTimeInMS() + lifetime + 3000);
 
         bool bHit = false;
-        const float fGroundPos = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 3.0f, &bHit, nullptr);
+        const float fGroundPos = CWorld::FindGroundZFor3DCoord({pos.x, pos.y, pos.z + 3.0f}, &bHit, nullptr);
         if (bHit)
             pos.z = fGroundPos;
 
@@ -373,13 +373,13 @@ void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType 
         case eExplosionType::EXPLOSION_ROCKET:
         case eExplosionType::EXPLOSION_WEAK_ROCKET:
         case eExplosionType::EXPLOSION_OBJECT: {
-            const auto numFires = (type == eExplosionType::EXPLOSION_MOLOTOV) ? (rand() - 2) % 4 : (rand() + 1) % 4;
+            const auto numFires = (type == eExplosionType::EXPLOSION_MOLOTOV) ? (CGeneral::GetRandomNumber() - 2) % 4 : (CGeneral::GetRandomNumber() + 1) % 4;
 
             if (numFires) {
                 for (auto i = 0; i < numFires; i++) {
                     const CVector firePos = exp->m_vecPosition + CVector{CGeneral::GetRandomNumberInRange(-4.0f, 4.0f), CGeneral::GetRandomNumberInRange(-4.0f, 4.0f), 0.0f};
                     bool bHitGround{};
-                    const float fGroundZ = CWorld::FindGroundZFor3DCoord(firePos.x, firePos.y, firePos.z + 3.0f, &bHitGround, nullptr);
+                    const float fGroundZ = CWorld::FindGroundZFor3DCoord({firePos.x, firePos.y, firePos.z + 3.0f}, &bHitGround, nullptr);
                     if (bHitGround && fabs(firePos.z - exp->m_vecPosition.z) < 10.0f) {
                         gFireManager.StartFire(firePos, 0.8f, 0, exp->m_pCreator, (uint32)(CGeneral::GetRandomNumberInRange(5600.0f, 12600.0f) * 0.4f), 3, 1);
                     }
@@ -471,7 +471,7 @@ void CExplosion::Update() {
             case eExplosionType::EXPLOSION_CAR:
             case eExplosionType::EXPLOSION_QUICK_CAR:
             case eExplosionType::EXPLOSION_BOAT: {
-                if (exp.m_pVictim && rand() % 32 == 0) {
+                if (exp.m_pVictim && CGeneral::GetRandomNumber() % 32 == 0) {
                     CVector rndOffset = {CGeneral::GetRandomNumberInRange(-0.5f, 0.5f), CGeneral::GetRandomNumberInRange(-0.5f, 0.5f), 0.0f};
                     rndOffset.Normalise();
                     rndOffset *= CGeneral::GetRandomNumberInRange(1.0f, 2.0f);

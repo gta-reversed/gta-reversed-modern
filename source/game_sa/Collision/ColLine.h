@@ -18,7 +18,7 @@ public:
 public:
     static void InjectHooks();
 
-    CColLine() {};
+    CColLine() = default;
     CColLine(const CVector& start, const CVector& end);
 
     void Set(const CVector& start, const CVector& end);

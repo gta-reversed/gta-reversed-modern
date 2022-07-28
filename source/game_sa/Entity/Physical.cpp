@@ -95,8 +95,8 @@ CPhysical::CPhysical() : CEntity()
     CPlaceable::AllocateStaticMatrix();
     m_matrix->SetUnity();
 
-    m_vecMoveSpeed.Set(0.0f, 0.0f, 0.0f);
-    m_vecTurnSpeed.Set(0.0f, 0.0f, 0.0f);
+    ResetMoveSpeed();
+    ResetTurnSpeed();
     m_vecFrictionMoveSpeed.Set(0.0f, 0.0f, 0.0f);
     m_vecFrictionTurnSpeed.Set(0.0f, 0.0f, 0.0f);
     m_vecForce.Set(0.0f, 0.0f, 0.0f);
@@ -1575,6 +1575,8 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
         }
     }
 
+    // todo: switch case should be used
+    // 0x5450A1
     float fCollisionImpact2 = 1.0f;
     bool bUseElasticity = false;
     if (entityAltCol == ALT_ENITY_COL_OBJECT)
@@ -1599,7 +1601,6 @@ bool CPhysical::ApplyCollisionAlt(CPhysical* entity, CColPoint& colPoint, float&
                     && fabs(m_vecMoveSpeed.y) < fMoveSpeedLimit
                     && fMoveSpeedLimit + fMoveSpeedLimit > fabs(m_vecMoveSpeed.z))
                 {
-                    damageIntensity = damageIntensity;
                     fCollisionImpact2 = 0.0f;
                     damageIntensity = -0.95f * fCollisionMass * fSpeedDotProduct;
                 }
@@ -2318,10 +2319,10 @@ void CPhysical::PositionAttachedEntity()
             CMatrix& attachedToEntityMatrix = attachedTo->GetMatrix(); // todo: shadow var
             CVector randomRight = attachedToEntityMatrix.GetRight() * randomNumber;
             CVector randomForward = attachedToEntityMatrix.GetForward() * randomNumber;
-            CVector force = (randomRight + randomForward) * (m_fMass * 0.02f);
+            CVector force = (randomRight + randomForward) * (m_fMass / 50.0f);
             ApplyMoveForce(force);
             if (attachedToAuto->m_wMiscComponentAngle > attachedToAuto->m_wMiscComponentAnglePrev)
-                ApplyMoveForce(attachedTo->GetMatrix().GetUp() * m_fMass * 0.02f);
+                ApplyMoveForce(attachedTo->GetMatrix().GetUp() * m_fMass / 50.0f);
         }
         return;
     }
@@ -2867,7 +2868,7 @@ bool CPhysical::ApplyCollision(CEntity* theEntity, CColPoint& colPoint, float& t
                                 entityObject->objectFlags.bIsExploded = true;
                             }
                         } else {
-                            CPickups::CreateSomeMoney(entity->GetPosition(), rand() % 100);
+                            CPickups::CreateSomeMoney(entity->GetPosition(), CGeneral::GetRandomNumber() % 100);
                             entityObject->objectFlags.bIsExploded = true;
                         }
                     }
@@ -3527,7 +3528,7 @@ bool CPhysical::ApplySoftCollision(CPhysical* physical, CColPoint& colPoint, flo
                     }
                     else
                     {
-                        CPickups::CreateSomeMoney(physical->GetPosition(), rand() % 100);
+                        CPickups::CreateSomeMoney(physical->GetPosition(), CGeneral::GetRandomNumber() % 100);
                         entityObject->objectFlags.bIsExploded = true;
                     }
                 }

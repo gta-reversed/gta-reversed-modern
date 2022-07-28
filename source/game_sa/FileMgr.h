@@ -32,7 +32,7 @@ public:
     static bool Seek(FILESTREAM file, long offset, int32 origin);
     static bool ReadLine(FILESTREAM file, char* str, int32 num);
     static int32 CloseFile(FILESTREAM file);
-    static int32 GetFileLength(FILESTREAM file);
+    static int32 GetTotalSize(FILESTREAM file);
     static int32 Tell(FILESTREAM file);
     static bool GetErrorReadWrite(FILESTREAM file);
 

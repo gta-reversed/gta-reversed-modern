@@ -19,29 +19,21 @@ CAnimBlendClumpData::CAnimBlendClumpData() {
     m_NumFrames   = 0;
     m_PedPosition = nullptr;
     m_Frames      = nullptr;
-    rwLLLinkInitialize(&m_Associations.link);
 }
 
 // 0x4CF100
 CAnimBlendClumpData::~CAnimBlendClumpData() {
-    if (auto& prev = rwLLLinkGetPrevious(&m_Associations.link))
-        prev->next = m_Associations.link.next;
-
-    if (auto& next = rwLLLinkGetNext(&m_Associations.link))
-        next->prev = m_Associations.link.prev;
-
-    m_Associations.link.next = nullptr;
-    m_Associations.link.prev = nullptr;
-
-    if (m_Frames)
+    m_Associations.Remove();
+    if (m_Frames) {
         CMemoryMgr::FreeAlign(&m_Frames);
+    }
 }
 
 // 0x4CF140
 void CAnimBlendClumpData::SetNumberOfBones(int32 numBones) {
-    if (m_Frames)
+    if (m_Frames) {
         CMemoryMgr::FreeAlign(&m_Frames);
-
+    }
     m_NumFrames = numBones;
     m_Frames = reinterpret_cast<AnimBlendFrameData*>(CMemoryMgr::MallocAlign(sizeof(AnimBlendFrameData) * numBones, 64));
 }

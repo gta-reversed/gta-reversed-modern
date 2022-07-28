@@ -126,7 +126,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexDriveFireTruck::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
-        return new CTaskComplexCarDriveWander(m_pVehicle, 0, 10.0F);
+        return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_STOP_FOR_CARS, 10.0F);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
         return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, 2);
     case TASK_COMPLEX_USE_WATER_CANNON:

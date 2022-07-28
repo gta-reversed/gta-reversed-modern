@@ -19,7 +19,7 @@ void CPedShelterAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
 
 // 0x5E9690
 void CPedShelterAttractor::ComputeAttractHeading(int32 bQueue, float& heading) {
-    heading = rand() * RAND_MAX_FLOAT_RECIPROCAL * TWO_PI;
+    heading = CGeneral::GetRandomNumberInRange(0.0f, TWO_PI);
 }
 
 // 0x5EF570

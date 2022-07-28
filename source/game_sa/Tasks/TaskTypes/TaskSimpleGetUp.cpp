@@ -151,8 +151,9 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
             m_pAnim = CAnimManager::BlendAnimation(
                 ped->m_pRwClump,
                 ANIM_GROUP_DEFAULT,
-                RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_GETUP_FRONT : ANIM_ID_GETUP_0,
-                1000.0F);
+                RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_800) ? ANIM_ID_GETUP_FRONT : ANIM_ID_GETUP_0,
+                1000.0F
+            );
 
             m_pAnim->SetFinishCallback(FinishGetUpAnimCB, this);
             ped->SetPedState(PEDSTATE_IDLE);

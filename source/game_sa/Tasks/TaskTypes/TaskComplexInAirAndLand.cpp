@@ -63,7 +63,7 @@ CTask* CTaskComplexInAirAndLand::CreateNextSubTask_Reversed(CPed* ped) {
 
         if (m_bUsingFallGlide) {
             if (subTask->m_pAnim) {
-                subTask->m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                subTask->m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 subTask->m_pAnim->m_fBlendDelta = -8.0F;
                 subTask->m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 subTask->m_pAnim = nullptr;
