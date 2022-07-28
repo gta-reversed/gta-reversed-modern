@@ -95,7 +95,7 @@ public:
     static char      (&m_pHelpMessageToPrint)[400];
     static char      (&m_pLastHelpMessage)[400];
     static char      (&m_pHelpMessage)[400];
-    static int32&    m_ZoneState; // see eNameState
+    static eNameState& m_ZoneState; // see eNameState
     static int32&    m_ZoneFadeTimer;
     static int32&    m_ZoneNameTimer;
     static char      (&m_Message)[400];

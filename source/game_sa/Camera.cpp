@@ -350,15 +350,15 @@ bool CCamera::Get_Just_Switched_Status() const {
 }
 
 // 0x50AE20
-int32 CCamera::GetScreenFadeStatus() const {
+eNameState CCamera::GetScreenFadeStatus() const {
     if (m_fFadeAlpha == 0.0f) {
-        return 0;
+        return NAME_DONT_SHOW;
     }
     if (m_fFadeAlpha == 255.0f) {
-        return 2;
+        return NAME_FADE_IN;
     }
 
-    return 1;
+    return NAME_SHOW;
 }
 
 // 0x50AE50

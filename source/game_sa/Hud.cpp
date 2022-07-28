@@ -57,7 +57,7 @@ int32& CHud::m_nHelpMessageTimer = *(int32*)0xBAA47C;
 char (&CHud::m_pHelpMessageToPrint)[400] = *(char(*)[400])0xBAA480;
 char (&CHud::m_pLastHelpMessage)[400] = *(char(*)[400])0xBAA610;
 char (&CHud::m_pHelpMessage)[400] = *(char(*)[400])0xBAA7A0;
-int32& CHud::m_ZoneState = *(int32*)0xBAA930;
+eNameState& CHud::m_ZoneState = *(eNameState*)0xBAA930;
 int32& CHud::m_ZoneFadeTimer = *(int32*)0xBAA934;
 int32& CHud::m_ZoneNameTimer = *(int32*)0xBAA938;
 char  (&CHud::m_Message)[400] = *(char(*)[400])0xBAB040;
@@ -102,7 +102,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(SetVehicleName, 0x588F50);
     RH_ScopedInstall(SetZoneName, 0x588BB0);
     RH_ScopedInstall(DrawAfterFade, 0x58D490);
-    // RH_ScopedInstall(DrawAreaName, 0x58AA50);
+    RH_ScopedInstall(DrawAreaName, 0x58AA50);
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
     // RH_ScopedInstall(DrawCrossHairs, 0x58E020);
     // RH_ScopedInstall(DrawFadeState, 0x58D580);
@@ -181,7 +181,7 @@ void CHud::ReInitialise() {
     m_ZoneNameTimer                 = 0;
     m_pZoneName                     = nullptr;
     m_pLastZoneName                 = nullptr;
-    m_ZoneState                     = 0;
+    m_ZoneState                     = NAME_DONT_SHOW;
     m_nHelpMessageTimer             = 0;
     m_nHelpMessageFadeTimer         = 0;
     m_nHelpMessageState             = 0;
@@ -504,7 +504,118 @@ void CHud::DrawAfterFade() {
 
 // 0x58AA50
 void CHud::DrawAreaName() {
-    plugin::Call<0x58AA50>();
+    if (!m_pZoneName) {
+        return;
+    }
+
+    
+    if (m_pZoneName != m_pLastZoneName) {
+        switch (m_ZoneState) {
+        case NAME_DONT_SHOW:
+            if (!CTheScripts::bPlayerIsOffTheMap && CTheScripts::bDisplayHud ||
+                CEntryExitManager::ms_exitEnterState == 1 ||
+                CEntryExitManager::ms_exitEnterState == 2) {
+                m_ZoneState = NAME_FADE_IN;
+                m_ZoneNameTimer = 0;
+                m_ZoneFadeTimer = 0;
+                m_ZoneToPrint = m_pZoneName;
+                if (m_VehicleState == NAME_SHOW ||
+                    m_VehicleState == NAME_FADE_IN)
+                    m_VehicleState = NAME_FADE_OUT;
+            }
+            break;
+        case NAME_SHOW:
+        case NAME_FADE_IN:
+        case NAME_FADE_OUT:
+            m_ZoneState = NAME_SWITCH;
+            m_ZoneNameTimer = 0;
+        case NAME_SWITCH:
+            m_ZoneNameTimer = 0;
+            break;
+        default:
+            break;
+        }
+        m_pLastZoneName = m_pZoneName;
+    }
+    float alpha = 255.0f;
+    if (m_ZoneState) {
+        switch (m_ZoneState) {
+        case NAME_SHOW:
+            alpha = 255.0f;
+            m_ZoneFadeTimer = 1000;
+            if (m_ZoneNameTimer > 3000) {
+                m_ZoneState = NAME_FADE_OUT;
+                m_ZoneFadeTimer = 1000;
+            }
+            break;
+        case NAME_FADE_IN:
+            if (!TheCamera.GetFading() && TheCamera.GetScreenFadeStatus() != NAME_FADE_IN)
+                m_ZoneFadeTimer += CTimer::GetTimeStepInMS();
+            if (m_ZoneFadeTimer > 1000) {
+                m_ZoneFadeTimer = 1000;
+                m_ZoneState = NAME_SHOW;
+            }
+            if (TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
+                alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+                break;
+            }
+            alpha = 255.0f;
+            m_ZoneState = NAME_FADE_OUT;
+            m_ZoneFadeTimer = 1000;
+            break;
+        case NAME_FADE_OUT:
+            if (!TheCamera.GetFading() && TheCamera.GetScreenFadeStatus() != NAME_FADE_IN)
+                m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
+            if (m_ZoneFadeTimer < 0.0) {
+                m_ZoneFadeTimer = 0;
+                m_ZoneState = NAME_DONT_SHOW;
+            }
+            if (TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
+                alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+                break;
+            }
+            m_ZoneFadeTimer = 1000;
+            alpha = 255.0f;
+            break;
+        case NAME_SWITCH:
+            m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
+            if (m_ZoneFadeTimer < 0.0) {
+                m_ZoneFadeTimer = 0;
+                m_ZoneState = NAME_FADE_IN;
+                m_ZoneToPrint = m_pLastZoneName;
+            }
+            alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+            break;
+        default:
+            break;
+        }
+        if (!m_Message[0] && BigMessageX[1] == 0.0 && BigMessageX[2] == 0.0) {
+            m_ZoneNameTimer += CTimer::GetTimeStepInMS();
+            CFont::SetProportional(true);
+            CFont::SetBackground(false, false);
+            CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.2f), SCREEN_SCALE_Y(1.9f));
+            CFont::SetEdge(2);
+            CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+            CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(180.0));
+            CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
+            CFont::SetFontStyle(FONT_GOTHIC);
+            CZoneInfo* m_Info = CPopCycle::m_pCurrZoneInfo;
+            if (CGangWars::bGangWarsActive &&
+                m_Info &&
+                m_Info->ZoneColor.red &&
+                m_Info->ZoneColor.green &&
+                m_Info->ZoneColor.blue) {
+                // Untested
+                CFont::SetColor(CRGBA(m_Info->ZoneColor.red, m_Info->ZoneColor.green, m_Info->ZoneColor.blue, alpha));
+            } else {
+                CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_BLUE, alpha));
+            }
+            CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0), SCREEN_SCALE_FROM_BOTTOM(28.0), m_ZoneToPrint);
+            CFont::SetSlant(0.0);
+        } else {
+            m_ZoneState = NAME_FADE_OUT;
+        }
+    }
 }
 
 // 0x58CA50
