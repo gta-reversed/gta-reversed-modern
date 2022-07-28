@@ -37,7 +37,7 @@ int32& CHud::m_EnergyLostFadeTimer = *(int32*)0xBAA438;
 int32& CHud::m_EnergyLostTimer = *(int32*)0xBAA43C;
 int32& CHud::m_LastTimeEnergyLost = *(int32*)0xBAA440;
 char*& CHud::m_pVehicleNameToPrint = *(char**)0xBAA444;
-int32& CHud::m_VehicleState = *(int32*)0xBAA448;
+eNameState& CHud::m_VehicleState = *(eNameState*)0xBAA448;
 int32& CHud::m_VehicleFadeTimer = *(int32*)0xBAA44C;
 int32& CHud::m_VehicleNameTimer = *(int32*)0xBAA450;
 char*& CHud::m_pLastVehicleName = *(char**)0xBAA454;
@@ -196,7 +196,7 @@ void CHud::ReInitialise() {
     m_pVehicleNameToPrint           = nullptr;
     m_VehicleNameTimer              = 0;
     m_VehicleFadeTimer              = 0;
-    m_VehicleState                  = 0;
+    m_VehicleState                  = NAME_DONT_SHOW;
     bScriptDontDisplayRadar         = false;
     bScriptForceDisplayWithCounters = false;
     bScriptDontDisplayVehicleName   = false;
@@ -629,7 +629,7 @@ void CHud::DrawBustedWastedMessage() {
         BigMessageAlpha[2] = 0.0;
 
         if (m_VehicleState)
-            m_VehicleState = 0;
+            m_VehicleState = NAME_DONT_SHOW;
         if (m_ZoneState)
             m_ZoneState = NAME_DONT_SHOW;
         return;
@@ -932,7 +932,7 @@ void CHud::DrawSuccessFailedMessage() {
 // 0x58AEA0
 void CHud::DrawVehicleName() {
     if (!m_pVehicleName) {
-        m_VehicleState = 0;
+        m_VehicleState = NAME_DONT_SHOW;
         m_VehicleNameTimer = 0;
         m_VehicleFadeTimer = 0;
         m_pLastVehicleName = nullptr;
@@ -941,8 +941,8 @@ void CHud::DrawVehicleName() {
 
     if (m_pVehicleName != m_pLastVehicleName) {
         switch (m_VehicleState) {
-        case 0:
-            m_VehicleState = 2;
+        case NAME_DONT_SHOW:
+            m_VehicleState = NAME_FADE_IN;
             m_VehicleNameTimer = 0;
             m_VehicleFadeTimer = 0;
             m_pVehicleNameToPrint = m_pVehicleName;
@@ -950,11 +950,11 @@ void CHud::DrawVehicleName() {
                 m_ZoneState = NAME_FADE_OUT;
             }
             break;
-        case 1:
-        case 2:
-        case 3:
-        case 4:
-            m_VehicleState = 4;
+        case NAME_SHOW:
+        case NAME_FADE_IN:
+        case NAME_FADE_OUT:
+        case NAME_SWITCH:
+            m_VehicleState = NAME_SWITCH;
             m_VehicleNameTimer = 0;
             break;
         default:
@@ -969,34 +969,34 @@ void CHud::DrawVehicleName() {
     float alpha = 0.0f;
    
     switch (m_VehicleState) {
-    case 1:
+    case NAME_SHOW:
         if (m_VehicleNameTimer > 3000) {
-            m_VehicleState = 3;
+            m_VehicleState = NAME_FADE_OUT;
             m_VehicleFadeTimer = 1000;
         } 
         alpha = 255.0f;
         break;
-    case 2:
+    case NAME_FADE_IN:
         m_VehicleFadeTimer += CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer > 1000) {
             m_VehicleFadeTimer = 1000;
-            m_VehicleState = 1;
+            m_VehicleState = NAME_SHOW;
         }
         alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
         break;
-    case 3:
+    case NAME_FADE_OUT:
         m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer < 0) {
-            m_VehicleState = 0;
+            m_VehicleState = NAME_DONT_SHOW;
             m_VehicleFadeTimer = 0;
         } 
         alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
         break;
-    case 4:
+    case NAME_SWITCH:
         m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer < 0) {
             m_VehicleNameTimer = 0;
-            m_VehicleState = 2;
+            m_VehicleState = NAME_FADE_IN;
             m_VehicleFadeTimer = 0;
             m_pVehicleNameToPrint = m_pLastVehicleName;
         }
@@ -1056,7 +1056,7 @@ void CHud::GetRidOfAllHudMessages(uint8 arg0) {
     m_pVehicleNameToPrint = 0;
     m_VehicleNameTimer = 0;
     m_VehicleFadeTimer = 0;
-    m_VehicleState = 0;
+    m_VehicleState = NAME_DONT_SHOW;
 
     for (auto& m_Message : m_Message) {
         m_Message = 0;

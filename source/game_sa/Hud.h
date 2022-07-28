@@ -75,7 +75,7 @@ public:
     static int32&    m_EnergyLostTimer;
     static int32&    m_LastTimeEnergyLost;
     static char*&    m_pVehicleNameToPrint;
-    static int32&    m_VehicleState;
+    static eNameState& m_VehicleState;
     static int32&   m_VehicleFadeTimer;
     static int32&   m_VehicleNameTimer;
     static char*&    m_pLastVehicleName;
