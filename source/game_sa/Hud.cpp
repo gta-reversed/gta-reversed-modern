@@ -77,7 +77,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(ReInitialise, 0x588880);
     RH_ScopedInstall(Shutdown, 0x588850);
     RH_ScopedInstall(Draw, 0x58FAE0);
-    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);
+    // RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);
     RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);
     RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);
     RH_ScopedInstall(ResetWastedText, 0x589070);
@@ -234,14 +234,14 @@ bool CHud::HelpMessageDisplayed() {
 // 0x589070
 void CHud::ResetWastedText() {
     BigMessageX[2] = 0.0f;
-    m_BigMessage[2][0] = '\0';
+    m_BigMessage[BIG_MESSAGE_STYLE_2][0] = '\0';
 
     BigMessageX[0] = 0.0f;
-    m_BigMessage[0][0] = '\0';
+    m_BigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
 }
 
 // 0x588FC0
-void CHud::SetBigMessage(char* message, eBigMessageStyle style) {
+void CHud::SetBigMessage(const char* message, eBigMessageStyle style) {
     if (BigMessageX[style] != 0.0f) {
         return;
     }
@@ -253,7 +253,7 @@ void CHud::SetBigMessage(char* message, eBigMessageStyle style) {
                 OddJob2On = 0;
                 OddJob2OffTimer = 0.0f;
             }
-            m_BigMessage[5][i] = message[i];
+            m_BigMessage[BIG_MESSAGE_STYLE_5][i] = message[i];
             LastBigMessage[5][i] = message[i];
         }
     } else {
@@ -264,12 +264,12 @@ void CHud::SetBigMessage(char* message, eBigMessageStyle style) {
         }
     }
     LastBigMessage[0][0] = '\0';
-    m_BigMessage[0][0] = '\0';
+    m_BigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
 }
 
 // 0x588BE0
 void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, bool addToBrief) {
-    if (m_BigMessage[4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsRunning()) {
+    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsRunning()) {
         return;
     }
 
@@ -308,7 +308,7 @@ void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, b
 
 // 0x588D40
 void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max) {
-    if (m_BigMessage[4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
+    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
         return;
     }
 
@@ -332,7 +332,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
 
 // 0x588E30
 void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMessage, bool permanent) {
-    if (m_BigMessage[4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
+    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
         return;
     }
 
@@ -448,7 +448,7 @@ void CHud::Draw() {
     }
 
     if (!CTimer::GetIsUserPaused()) {
-        if (!m_BigMessage[0][0]) {
+        if (!m_BigMessage[BIG_MESSAGE_STYLE_0][0]) {
             if (CMenuSystem::GetNumMenusInUse()) {
                 CMenuSystem::Process(CMenuSystem::MENU_UNDEFINED);
             }
@@ -482,7 +482,7 @@ void CHud::DrawAfterFade() {
         }
     }
 
-    if (!m_BigMessage[0][0]) {
+    if (!m_BigMessage[BIG_MESSAGE_STYLE_0][0]) {
         DrawScriptText(0);
     }
 
@@ -500,13 +500,13 @@ void CHud::DrawAreaName() {
         return;
     }
 
-    
     if (m_pZoneName != m_pLastZoneName) {
         switch (m_ZoneState) {
         case NAME_DONT_SHOW:
             if (!CTheScripts::bPlayerIsOffTheMap && CTheScripts::bDisplayHud ||
                 CEntryExitManager::ms_exitEnterState == 1 ||
-                CEntryExitManager::ms_exitEnterState == 2) {
+                CEntryExitManager::ms_exitEnterState == 2
+            ) {
                 m_ZoneState = NAME_FADE_IN;
                 m_ZoneNameTimer = 0;
                 m_ZoneFadeTimer = 0;
@@ -529,6 +529,7 @@ void CHud::DrawAreaName() {
         }
         m_pLastZoneName = m_pZoneName;
     }
+
     float alpha = 255.0f;
     if (m_ZoneState) {
         switch (m_ZoneState) {
@@ -571,7 +572,7 @@ void CHud::DrawAreaName() {
             break;
         case NAME_SWITCH:
             m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
-            if (m_ZoneFadeTimer < 0.0) {
+            if (m_ZoneFadeTimer < 0.0f) {
                 m_ZoneFadeTimer = 0;
                 m_ZoneState = NAME_FADE_IN;
                 m_ZoneToPrint = m_pLastZoneName;
@@ -581,7 +582,7 @@ void CHud::DrawAreaName() {
         default:
             break;
         }
-        if (!m_Message[0] && BigMessageX[1] == 0.0 && BigMessageX[2] == 0.0) {
+        if (!m_Message[0] && BigMessageX[1] == 0.0f && BigMessageX[2] == 0.0f) {
             m_ZoneNameTimer += CTimer::GetTimeStepInMS();
             CFont::SetProportional(true);
             CFont::SetBackground(false, false);
@@ -594,11 +595,12 @@ void CHud::DrawAreaName() {
             CZoneInfo* m_Info = CPopCycle::m_pCurrZoneInfo;
             if (CGangWars::bGangWarsActive &&
                 m_Info &&
-                m_Info->ZoneColor.red &&
-                m_Info->ZoneColor.green &&
-                m_Info->ZoneColor.blue) {
+                m_Info->ZoneColor.r &&
+                m_Info->ZoneColor.g &&
+                m_Info->ZoneColor.b
+            ) {
                 // Untested
-                CFont::SetColor(CRGBA(m_Info->ZoneColor.red, m_Info->ZoneColor.green, m_Info->ZoneColor.blue, alpha));
+                CFont::SetColor(CRGBA(m_Info->ZoneColor.r, m_Info->ZoneColor.g, m_Info->ZoneColor.b, alpha));
             } else {
                 CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_BLUE, alpha));
             }
@@ -612,13 +614,13 @@ void CHud::DrawAreaName() {
 
 // 0x58CA50
 void CHud::DrawBustedWastedMessage() {
-    if (!m_BigMessage[2][0]) {
+    if (!m_BigMessage[BIG_MESSAGE_STYLE_2][0]) {
         BigMessageX[2] = '\0';
         return;
     }
-    if (BigMessageX[2] == 0.0) {
-        BigMessageX[2] = 1.0;
-        BigMessageAlpha[2] = 0.0;
+    if (BigMessageX[2] == 0.0f) {
+        BigMessageX[2] = 1.0f;
+        BigMessageAlpha[2] = 0.0f;
 
         if (m_VehicleState)
             m_VehicleState = NAME_DONT_SHOW;
@@ -628,8 +630,9 @@ void CHud::DrawBustedWastedMessage() {
     }
 
     BigMessageAlpha[2] += CTimer::GetTimeStepInMS() * 0.4f;
-    if (BigMessageAlpha[2] > 255.0)
-        BigMessageAlpha[2] = 255.0;
+    if (BigMessageAlpha[2] > 255.0f) {
+        BigMessageAlpha[2] = 255.0f;
+    }
     CFont::SetBackground(0, 0);
     CFont::SetScale(SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(2.0f));
     CFont::SetProportional(1);
@@ -639,7 +642,7 @@ void CHud::DrawBustedWastedMessage() {
     CFont::SetEdge(3);
     CFont::SetDropColor(CRGBA(0, 0, 0,BigMessageAlpha[2]));
     CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, BigMessageAlpha[2]));
-    CFont::PrintStringFromBottom(RsGlobal.maximumWidth * 0.5, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), m_BigMessage[2]);
+    CFont::PrintStringFromBottom(RsGlobal.maximumWidth * 0.5f, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), m_BigMessage[BIG_MESSAGE_STYLE_2]);
 }
 
 // 0x58E020
@@ -747,7 +750,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
         break;
     }
 
-    return clamp(alpha, 0.0f, 255.0f);
+    return std::clamp(alpha, 0.0f, 255.0f);
 }
 
 // 0x58B6E0
@@ -762,38 +765,38 @@ void CHud::DrawMissionTimers() {
 
 // 0x58D240
 void CHud::DrawMissionTitle() {
-    if (m_BigMessage[1][0]) {
-        if (BigMessageX[1] != 0.0) {
+    if (m_BigMessage[BIG_MESSAGE_STYLE_1][0]) {
+        if (BigMessageX[1] != 0.0f) {
             CFont::SetBackground(0, 0);
             CFont::SetProportional(1);
-            CFont::SetRightJustifyWrap(0.0);
+            CFont::SetRightJustifyWrap(0.0f);
             CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
             CFont::SetFontStyle(FONT_PRICEDOWN);
             CFont::SetScale(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.3f));
 
             if (BigMessageX[1] >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
                 BigMessageX[1] += CTimer::GetTimeStep();
-                if (BigMessageX[1] >= 120.0) {
-                    BigMessageX[1] = 120.0;
-                    BigMessageAlpha[1] -= CTimer::GetTimeStep() * 1000.0 * 0.02f;
+                if (BigMessageX[1] >= 120.0f) {
+                    BigMessageX[1] = 120.0f;
+                    BigMessageAlpha[1] -= CTimer::GetTimeStepInMS();
                 }
-                if (BigMessageAlpha[1] <= 0.0) {
-                    BigMessageAlpha[1] = 0.0;
-                    m_BigMessage[1][0] = 0;
-                    BigMessageX[1] = 0.0;
+                if (BigMessageAlpha[1] <= 0.0f) {
+                    BigMessageAlpha[1] = 0.0f;
+                    m_BigMessage[BIG_MESSAGE_STYLE_1][0] = 0;
+                    BigMessageX[1] = 0.0f;
                 }
             } else {
-                BigMessageAlpha[1] = 255.0;
-                BigMessageInUse[1] += CTimer::GetTimeStep() * 1000.0 * 0.006f;
+                BigMessageAlpha[1] = 255.0f;
+                BigMessageInUse[1] += CTimer::GetTimeStep() * 1000.0f * 0.006f;
             }
             CFont::SetEdge(2);
             CFont::SetDropColor(CRGBA(0, 0, 0, BigMessageAlpha[1]));
             CFont::SetColor(CRGBA(144, 98, 16, BigMessageAlpha[1])); // Hud Gold Color
-            CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0f), m_BigMessage[1]);
+            CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0f), m_BigMessage[BIG_MESSAGE_STYLE_1]);
             CFont::SetEdge(0);
         } else {
-            BigMessageInUse[1] = -60.0;
-            BigMessageX[1] = 1.0;
+            BigMessageInUse[1] = -60.0f;
+            BigMessageX[1] = 1.0f;
             m_ZoneState = NAME_DONT_SHOW;
             m_ZoneFadeTimer = 0;
             SetHelpMessage(0, 1, 0, 0);
@@ -813,24 +816,22 @@ void CHud::DrawRadar() {
     if (CEntryExitManager::ms_exitEnterState == 1 ||
         CEntryExitManager::ms_exitEnterState == 2 ||
         FrontEndMenuManager.m_nRadarMode == 2 ||
-        (m_ItemToFlash == 8 && (CTimer::m_FrameCounter & 8) == 0)){
+        (m_ItemToFlash == 8 && (CTimer::m_FrameCounter & 8) == 0)
+    ) {
         return;
     }
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwRenderStateSet(rwRENDERSTATESHADEMODE, RWRSTATE(rwFILTERNEAREST));
-    
+
     CRadar::DrawMap();
 
     CRect rect;
-    CVehicle* playerVehicle= FindPlayerVehicle(-1, 0);
-    CPlayerPed* PlayerPed = FindPlayerPed(-1);
+    CVehicle* vehicle = FindPlayerVehicle();
+    CPlayerPed* player = FindPlayerPed();
 
-    // todo Use eRadarMode::BLIPS_ONLY in new commits
-    if (FrontEndMenuManager.m_nRadarMode != 1) {
-        if (playerVehicle &&
-            (FindPlayerVehicle(-1, 0)->m_nVehicleSubType == VEHICLE_TYPE_PLANE &&
-            FindPlayerVehicle(-1, 0)->m_nModelIndex != MODEL_VORTEX)) {
-            if (PlayerPed->m_aWeapons[PlayerPed->m_nActiveWeaponSlot].m_nType != WEAPON_PARACHUTE) {
+    if (FrontEndMenuManager.m_nRadarMode != eRadarMode::BLIPS_ONLY) {
+        if (vehicle && (vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX)) {
+            if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
                 // Non reverse code
                 float angle = FindPlayerHeading(0) - (CRadar::m_fRadarOrientation + M_PI);
                 // printf("angle %f\n",angle);
@@ -875,7 +876,6 @@ void CHud::DrawRadar() {
     rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
     Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
 
-
     // top right
     rect.left = SCREEN_STRETCH_X(138.0);
     rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0);
@@ -898,12 +898,7 @@ void CHud::DrawRadar() {
     rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
     Sprites[3].Draw(rect, CRGBA(0, 0, 0, 255));
 
-    
-
     CRadar::DrawBlips();
-    
-
-       
 }
 
 // 0x58C080
@@ -959,13 +954,13 @@ void CHud::DrawVehicleName() {
         return;
 
     float alpha = 0.0f;
-   
+
     switch (m_VehicleState) {
     case NAME_SHOW:
         if (m_VehicleNameTimer > 3000) {
             m_VehicleState = NAME_FADE_OUT;
             m_VehicleFadeTimer = 1000;
-        } 
+        }
         alpha = 255.0f;
         break;
     case NAME_FADE_IN:
@@ -981,7 +976,7 @@ void CHud::DrawVehicleName() {
         if (m_VehicleFadeTimer < 0) {
             m_VehicleState = NAME_DONT_SHOW;
             m_VehicleFadeTimer = 0;
-        } 
+        }
         alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
         break;
     case NAME_SWITCH:
@@ -1026,8 +1021,8 @@ void CHud::DrawVitalStats() {
 }
 
 // 0x588A50
-void CHud::GetRidOfAllHudMessages(uint8 arg0) {
-    // plugin::Call<0x588A50, uint8>(arg0);
+void CHud::GetRidOfAllHudMessages(bool arg0) {
+    return plugin::Call<0x588A50, uint8>(arg0);
 
     memset(m_pHelpMessageToPrint, 0, sizeof(m_pHelpMessageToPrint));
     memset(m_pLastHelpMessage, 0, sizeof(m_pLastHelpMessage));
@@ -1041,48 +1036,25 @@ void CHud::GetRidOfAllHudMessages(uint8 arg0) {
     m_bHelpMessageQuick = 0;
     m_nHelpMessageMaxStatValue = 1000;
     m_nHelpMessageStatId = 0;
-    m_fHelpMessageStatUpdateValue = 0.0;
+    m_fHelpMessageStatUpdateValue = 0.0f;
     m_bHelpMessagePermanent = 0;
-    m_fHelpMessageTime = 1.0;
+    m_fHelpMessageTime = 1.0f;
     m_pVehicleName = 0;
     m_pVehicleNameToPrint = 0;
     m_VehicleNameTimer = 0;
     m_VehicleFadeTimer = 0;
     m_VehicleState = NAME_DONT_SHOW;
 
-    for (auto& m_Message : m_Message) {
-        m_Message = 0;
-        // TODO or '\0' ?
-    }
+    std::ranges::fill(m_Message, '\0');
 
     for (int i = 0; i < bScriptDontDisplayAreaName; i++) {
-        if (BigMessageX[i] != 0.0)
+        if (BigMessageX[i] != 0.0f)
             return;
         if (arg0 && (i == 1 || i == 4)) {
             return;
         }
         memset(m_BigMessage[i], 0, sizeof(char[128]));
     }
-
-    /* from reVC
-    for (int i = 0; i < 6; i++) {
-        BigMessageInUse[i] = 0.0f;
-
-        for (int j = 0; j < 128; j++)
-            m_BigMessage[i][j] = 0;
-    }
-    */
-
-    /* from ida
-    char(*arrayv1)[128] = m_BigMessage;
-    float* v2 = BigMessageX;
-    do {
-        if (*v2 == 0.0 && (!arg0 || v2 != &BigMessageX[1] && v2 != &BigMessageX[4])) {
-            memset(arrayv1, 0, sizeof(char[128]));
-        }
-        ++v2;
-        ++arrayv1;
-    } while ((int)v2 < (int)&bScriptDontDisplayAreaName);*/
 }
 
 // 0x5893B0

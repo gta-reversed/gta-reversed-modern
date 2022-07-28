@@ -35,9 +35,7 @@ enum eHudSprite {
     SPRITE_SKIP_ICON
 };
 
-
-// TODO test uint16
-enum eBigMessageStyle {
+enum eBigMessageStyle : uint16 {
     BIG_MESSAGE_STYLE_0,
     BIG_MESSAGE_STYLE_1,
     BIG_MESSAGE_STYLE_2,
@@ -126,13 +124,13 @@ public:
     static void ReInitialise();
     static void Shutdown();
 
-    static void  GetRidOfAllHudMessages(uint8 arg0);
+    static void  GetRidOfAllHudMessages(bool arg0);
     static float GetYPosBasedOnHealth(uint8 playerId, float pos, int8 offset);
     static bool HelpMessageDisplayed();
 
     static void ResetWastedText();
 
-    static void SetBigMessage(char* text, eBigMessageStyle style);
+    static void SetBigMessage(const char* message, eBigMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
