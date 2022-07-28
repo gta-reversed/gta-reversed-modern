@@ -30,21 +30,17 @@ enum eUpdatePedCounterState {
 // for the most part, pedGroupIds[0] is used, but in some cases
 // it's used like this: pedGroupIds[CPopulation::CurrentWorldZone]
 struct tPedGroupTranslationData {
-    int32 pedGroupIds[3]; // see ePopcyclePedGroup
+    ePopcyclePedGroup pedGroupIds[3]{};
 };
-
 VALIDATE_SIZE(tPedGroupTranslationData, 0xC);
 
 class CPopulation {
 public:
-    // static variables
-
     static float&  PedDensityMultiplier;
     static int32&  m_AllRandomPedsThisType;
     static uint32& MaxNumberOfPedsInUse;
     static uint32& NumberOfPedsInUseInterior;
-    // static tPedGroupTranslationData m_TranslationArray[33]
-    static tPedGroupTranslationData* m_TranslationArray; // see ePopcycleGroup
+    static inline tPedGroupTranslationData (&m_TranslationArray)[33] = *(tPedGroupTranslationData(*)[33])0x8D2540;
     static CLoadedCarGroup&          m_LoadedBoats;
     static CLoadedCarGroup&          m_InAppropriateLoadedCars;
     static CLoadedCarGroup&          m_AppropriateLoadedCars;
@@ -179,7 +175,8 @@ public:
     static void Update(bool generatePeds);
     static bool DoesCarGroupHaveModelId(int32 carGroupId, int32 modelId);
 
-    static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, int32 worldZone) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
+    static ePopcyclePedGroup GetPedGroupId(ePopcycleGroup popcycleGroup, size_t worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[popcycleGroup].pedGroupIds[worldZone]); }
+    static ePopcyclePedGroup GetGangGroupId(eGangID gang, int32 worldZone = 0) { return static_cast<ePopcyclePedGroup>(m_TranslationArray[gang + POPCYCLE_GROUP_BALLAS].pedGroupIds[worldZone]); }
     static int32 GetNumPedsInGroup(ePopcycleGroup popcycleGroup, int32 worldZone) { return m_nNumPedsInGroup[GetPedGroupId(popcycleGroup, worldZone)]; }
     static int32 GetNumPedsInGroup(ePopcyclePedGroup pedGroup) { return m_nNumPedsInGroup[pedGroup]; }
     static int32 GetPedGroupModelId(ePopcyclePedGroup pedGroup, int32 slot) { return m_PedGroups[pedGroup][slot]; }

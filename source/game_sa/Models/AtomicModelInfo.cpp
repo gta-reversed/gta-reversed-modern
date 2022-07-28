@@ -9,6 +9,7 @@
 
 #include "AtomicModelInfo.h"
 #include "TagManager.h"
+#include "CustomBuildingRenderer.h"
 
 void CAtomicModelInfo::InjectHooks()
 {

@@ -16,7 +16,7 @@ public:
     static void InjectHooks();
 
     CScriptedBrainTaskEntry();
-    ~CScriptedBrainTaskEntry() {}
+    ~CScriptedBrainTaskEntry() = default;
 
 private:
     CScriptedBrainTaskEntry* Constructor();
@@ -24,8 +24,7 @@ private:
 
 VALIDATE_SIZE(CScriptedBrainTaskEntry, 0x10);
 
-class CScriptedBrainTaskStore
-{
+class CScriptedBrainTaskStore {
 public:
     static CScriptedBrainTaskEntry(&ms_entries)[TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES];
 

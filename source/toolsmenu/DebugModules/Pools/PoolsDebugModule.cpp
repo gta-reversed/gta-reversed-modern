@@ -7,6 +7,7 @@
 // #include "Attractors\PedAttractor.h"
 #include "EntryExitManager.h"
 #include "StuntJumpManager.h"
+#include "CustomCarEnvMapPipeline.h"
 
 namespace PoolsDebugModule {
 

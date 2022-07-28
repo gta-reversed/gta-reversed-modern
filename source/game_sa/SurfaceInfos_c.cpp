@@ -270,7 +270,7 @@ void SurfaceInfos_c::LoadAdhesiveLimits()
             continue;
 
         char value[4];
-        sscanf(line, "%s", &value);
+        sscanf(line, "%3s", value); // FIX_BUGS: buffer overflow
         for (auto i = *line; i != ' '; i = *++line) {
             if (i == '\t')
                 break;
@@ -372,16 +372,8 @@ void SurfaceInfos_c::LoadSurfaceAudioInfos()
             continue;
 
         char  name[64];
-        int32 concrete;
-        int32 grass;
-        int32 sand;
-        int32 gravel;
-        int32 wood;
-        int32 water;
-        int32 metal;
-        int32 longGrass;
-        int32 tile;
-        (void)sscanf(line, "%s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile);
+        int32 concrete, grass, sand, gravel, wood, water, metal, longGrass, tile;
+        (void)sscanf(line, "%31s %d %d %d %d %d %d %d %d %d", name, &concrete, &grass, &sand, &gravel, &wood, &water, &metal, &longGrass, &tile); // FIX_BUGS: buffer overflow
 
         auto id = GetSurfaceIdFromName(name);
         auto& surface = m_surfaces[id];

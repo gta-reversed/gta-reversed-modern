@@ -162,18 +162,19 @@ int32 CStats::FindLeastFavoriteRadioStation() {
 int32 CStats::FindCriminalRatingNumber() {
     CPlayerInfo* playerInfo = FindPlayerPed()->GetPlayerInfoForThisPlayerPed();
 
-    int32 value = (int32)(
+    auto value = (int32)(
         GetStatValue(STAT_TOTAL_LEGITIMATE_KILLS)
         - (GetStatValue(STAT_TIMES_BUSTED) - GetStatValue(STAT_NUMBER_OF_HOSPITAL_VISITS)) * 3.0f
         + (GetStatValue(STAT_HIGHEST_FIREFIGHTER_MISSION_LEVEL) + GetStatValue(STAT_HIGHEST_PARAMEDIC_MISSION_LEVEL)) * 10.0f
-        + playerInfo->m_nMoney / 5000.0f
+        + int32((float)playerInfo->m_nMoney / 5000.0f)
         + GetStatValue(STAT_PLANES_HELICOPTERS_DESTROYED) * 30.0f
         + GetStatValue(STAT_TOTAL_FIRES_EXTINGUISHED)
         + GetStatValue(STAT_CRIMINALS_KILLED_ON_VIGILANTE_MISSION)
-        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE));
+        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE)
+    );
 
-    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED)) {
-        value -= 10 * GetStatValue(STAT_TIMES_CHEATED);
+    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED) > 0.0f) {
+        value -= 10 * (int32)GetStatValue(STAT_TIMES_CHEATED);
 
         value = std::max(value, -10000);
     } else {
@@ -301,14 +302,14 @@ void CStats::LoadActionReactionStats() {
     CFileMgr::SetDir("");
 
     auto* file = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
-    char statName[64] = {}; // unused
+    char statName[64]{}; // unused
 
     for (char* line = CFileLoader::LoadLine(file); line != nullptr; line = CFileLoader::LoadLine(file)) {
         int32 reactId;
         float reactValue;
 
         if (line[0] != '#' && line[0] != NULL) {
-            sscanf(line, "%d %s %f", &reactId, &statName, &reactValue);
+            sscanf(line, "%d %s %f", &reactId, statName, &reactValue);
 
             StatReactionValue[reactId] = reactValue;
         }
@@ -678,11 +679,10 @@ bool CStats::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(LastMissionPassedName,    sizeof(LastMissionPassedName));
     CGenericGameStorage::SaveDataToWorkBuffer(FavoriteRadioStationList, sizeof(FavoriteRadioStationList));
     CGenericGameStorage::SaveDataToWorkBuffer(TimesMissionAttempted,    sizeof(TimesMissionAttempted));
-
+    // todo: CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage,             sizeof(StatMessage));
     for (int32 i = 0; i < sizeof(StatMessage); i++) {
-        CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage[i].displayed, sizeof(bool));
+        CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage[i].displayed, 1);
     }
-
     return true;
 }
 
@@ -694,15 +694,15 @@ bool CStats::Load() {
     CGenericGameStorage::LoadDataFromWorkBuffer(LastMissionPassedName,    sizeof(LastMissionPassedName));
     CGenericGameStorage::LoadDataFromWorkBuffer(FavoriteRadioStationList, sizeof(FavoriteRadioStationList));
     CGenericGameStorage::LoadDataFromWorkBuffer(TimesMissionAttempted,    sizeof(TimesMissionAttempted));
-
+    // todo: CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage,             sizeof(StatMessage));
     for (int32 i = 0; i < sizeof(StatMessage); i++) {
-        CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage[i].displayed, sizeof(uint8));
+        CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage[i].displayed, 1);
     }
-
     return true;
 }
 
 // Unused
+// 0x558DE0
 char* CStats::GetStatID(eStats stat) {
     if (!GetStatType(stat)) // int32
         sprintf(gString, "stat_i_%d", stat);
@@ -713,17 +713,21 @@ char* CStats::GetStatID(eStats stat) {
 }
 
 // Unused
-char CStats::GetTimesMissionAttempted(uint8 missionId) {
+// 0x558E70
+int8 CStats::GetTimesMissionAttempted(uint8 missionId) {
     return TimesMissionAttempted[missionId];
 }
 
 // Unused
+// 0x558E80
 void CStats::RegisterMissionAttempted(uint8 missionId) {
-    if (TimesMissionAttempted[missionId] != -1)
+    if (TimesMissionAttempted[missionId] != -1) {
         TimesMissionAttempted[missionId]++;
+    }
 }
 
 // Unused
+// 0x558EA0
 void CStats::RegisterMissionPassed(uint8 missionId) {
     TimesMissionAttempted[missionId] = -1;
 }

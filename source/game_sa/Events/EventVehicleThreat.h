@@ -13,6 +13,6 @@ public:
     eEventType GetEventType() const override { return EVENT_VEHICLE_THREAT; }
     int32 GetEventPriority() const override { return 19; }
     int32 GetLifeTime() override { return 0; }
-    bool AffectsPed(CPed* ped) override { return ped->IsAlive(); }
+    bool AffectsPed(CPed* ped) override;
     CEventEditableResponse* CloneEditable() override { return new CEventVehicleThreat(m_Vehicle); }
 };

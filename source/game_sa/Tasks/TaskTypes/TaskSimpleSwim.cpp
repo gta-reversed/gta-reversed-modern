@@ -867,7 +867,7 @@ void CTaskSimpleSwim::ProcessControlAI(CPed* ped)
         vecPosition.Normalise();
         if (m_fRandomMoveBlendRatio == 0.0f)
         {
-            m_fRandomMoveBlendRatio = (rand() % 4) * 0.5f + 1.5f;
+            m_fRandomMoveBlendRatio = (CGeneral::GetRandomNumber() % 4) * 0.5f + 1.5f;
         }
 
         vecPosition *= m_fRandomMoveBlendRatio;

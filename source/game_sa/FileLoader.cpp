@@ -111,7 +111,7 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    auto   objID{ MODEL_INVALID };
+    int32  objID{ MODEL_INVALID };
     char   modelName[24]{};
     char   txdName[24]{};
     char   animName[16]{ "null" };
@@ -157,7 +157,7 @@ bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
         RpClumpDestroy(pReadClump);
     }
 
-    if (!mi->m_pRwObject) // todo: missing guard here by R* (mi && !mi->m_pRwObject)
+    if (mi && !mi->m_pRwObject) // FIX_BUGS: V1004 The 'mi' pointer was used unsafely after it was verified against nullptr.
         return false;
 
     if (bUseCommonVehicleTexDictionary)
@@ -501,7 +501,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
-        if (mi->GetModelType() == MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
+        if (mi->GetModelType() == MODEL_INFO_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }
@@ -1192,14 +1192,14 @@ void CFileLoader::LoadEntryExit(const char* line) {
     assert(enex);
 
     enum Flags {
-        UNKNOWN_INTERIOR,
-        UNKNOWN_PAIRING,
-        CREATE_LINKED_PAIR,
-        REWARD_INTERIOR,
-        USED_REWARD_ENTRANCE,
-        CARS_AND_AIRCRAFT,
-        BIKES_AND_MOTORCYCLES,
-        DISABLE_ONFOOT
+        UNKNOWN_INTERIOR      = 1 << 0,
+        UNKNOWN_PAIRING       = 1 << 1,
+        CREATE_LINKED_PAIR    = 1 << 2,
+        REWARD_INTERIOR       = 1 << 3,
+        USED_REWARD_ENTRANCE  = 1 << 4,
+        CARS_AND_AIRCRAFT     = 1 << 5,
+        BIKES_AND_MOTORCYCLES = 1 << 6,
+        DISABLE_ONFOOT        = 1 << 7,
     };
 
     if (flags & UNKNOWN_INTERIOR)

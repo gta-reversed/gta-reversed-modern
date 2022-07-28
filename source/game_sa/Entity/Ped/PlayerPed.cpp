@@ -130,7 +130,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
     m_pPlayerData->AllocateData();
 
-    SetModelIndex(MODEL_PLAYER);
+    SetModelIndex(MODEL_PLAYER); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
 
     CPlayerPed::SetInitialState(bGroupCreated);
 
@@ -710,7 +710,8 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
     if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
-        breath += decreaseAmount * 2.0f;
+        if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > breath)
+            breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);

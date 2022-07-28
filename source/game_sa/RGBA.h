@@ -20,7 +20,7 @@ public:
     CRGBA(const CRGBA& rhs);
     CRGBA(uint32 intValue);
     CRGBA(const RwRGBA& rhs);
-    CRGBA();
+    CRGBA() = default;
 
     void Set(uint8 red, uint8 green, uint8 blue);
     void Set(uint8 red, uint8 green, uint8 blue, uint8 alpha);
@@ -59,5 +59,6 @@ public:
 
     CRGBA& operator*=(float mult) {
         *this = *this * mult;
+        return *this;
     }
 };

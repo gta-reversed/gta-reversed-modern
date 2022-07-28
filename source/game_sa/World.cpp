@@ -129,7 +129,6 @@ void CWorld::InjectHooks() {
     RH_ScopedInstall(CameraToIgnoreThisObject, 0x563F40);
     RH_ScopedInstall(RemoveReferencesToDeletedObject, 0x565510);
     RH_ScopedInstall(ClearForRestart, 0x564360);
-    RH_ScopedGlobalInstall(ScaleLighting, 0x59F0C0);
 }
 
 // 0x5631C0
@@ -863,10 +862,10 @@ void CWorld::FindObjectsKindaCollidingSectorList(CPtrList& ptrList, const CVecto
 
         const float fRadiusToCheck = CModelInfo::GetModelInfo(entity->m_nModelIndex)->GetColModel()->GetBoundRadius() + radius;
         if (b2D) {
-            if (DistanceBetweenPoints2D(CVector2D{ point }, entity->GetBoundCentre()) >= fRadiusToCheck)
+            if (DistanceBetweenPoints2D(entity->GetBoundCentre(), point) >= fRadiusToCheck)
                 continue;
         } else {
-            if (DistanceBetweenPoints(point, entity->GetBoundCentre()) >= fRadiusToCheck)
+            if (DistanceBetweenPoints(entity->GetBoundCentre(), point) >= fRadiusToCheck)
                 continue;
         }
 
@@ -995,9 +994,10 @@ void CWorld::FindNearestObjectOfTypeSectorList(int32 modelId, CPtrList& ptrList,
         entity->SetCurrentScanCode();
 
         const auto GetDistance = [&] {
-            if (b2D)
-                return DistanceBetweenPoints2D({ point }, { entity->GetPosition() });
-            return DistanceBetweenPoints(point, entity->GetPosition());
+            if (b2D) {
+                return DistanceBetweenPoints2D(entity->GetPosition(), point);
+            }
+            return DistanceBetweenPoints(entity->GetPosition(), point);
         };
 
         if (const float dist = GetDistance(); dist <= radius) {
@@ -1488,7 +1488,7 @@ CVehicle* CWorld::FindUnsuspectingTargetCar(CVector point, CVector playerPosn) {
             continue;
         }
 
-        const float dist2D = DistanceBetweenPoints2D(point, veh->GetPosition());
+        const float dist2D = DistanceBetweenPoints2D(veh->GetPosition(), point);
         if (dist2D >= nearestDist2D)
             continue;
 
@@ -1522,7 +1522,7 @@ CPed* CWorld::FindUnsuspectingTargetPed(CVector point, CVector playerPosn) {
                 continue;
 
         const CVector pedPos = ped->GetPosition();
-        const float dist2D = DistanceBetweenPoints2D(point, pedPos);
+        const float dist2D = DistanceBetweenPoints2D(pedPos, point);
         if (dist2D >= nearestDist2D)
             continue;
 
@@ -2350,10 +2350,10 @@ float CWorld::FindGroundZForCoord(float x, float y) {
 }
 
 // 0x5696C0
-float CWorld::FindGroundZFor3DCoord(float x, float y, float z, bool* outResult, CEntity** outEntity) {
+float CWorld::FindGroundZFor3DCoord(CVector coord, bool* outResult, CEntity** outEntity) {
     CEntity* localOutEntity{};
     CColPoint colPoint{};
-    if (ProcessVerticalLine({ x, y, z }, -1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
+    if (ProcessVerticalLine(coord, -1000.0f, colPoint, localOutEntity, true, false, false, false, true, false, nullptr)) {
         if (outResult)
             *outResult = true;
         if (outEntity)
@@ -2415,7 +2415,7 @@ void CWorld::RepositionOneObject(CEntity* object) {
     // Recalculate position to be on ground level where is `point`
     const auto RecalcZPosAtPoint = [&](const CVector2D& point) {
         auto& pos = object->GetMatrix().GetPosition();
-        pos.z = FindGroundZFor3DCoord(point.x, point.y, pos.z + std::max(2.f, colModel->m_boundBox.GetHeight()), nullptr, nullptr) - colModel->m_boundBox.m_vecMin.z;
+        pos.z = FindGroundZFor3DCoord({point.x, point.y, pos.z + std::max(2.f, colModel->m_boundBox.GetHeight())}, nullptr, nullptr) - colModel->m_boundBox.m_vecMin.z;
         object->UpdateRW();
         object->UpdateRwFrame();
     };
@@ -3033,10 +3033,4 @@ CPtrListSingleLink& CWorld::GetLodPtrList(int32 x, int32 y) {
     assert(y < MAX_LOD_PTR_LISTS_Y);
 
     return ms_aLodPtrLists[y][x];
-}
-
-// 0x59F0C0
-float ScaleLighting(uint8 lighting, float scale) {
-    return (float)(lighting & 15) * scale / 15.0f * (1.0f - CCustomBuildingDNPipeline::m_fDNBalanceParam)
-         + (float)(lighting >> 4) * scale / 15.0f * (1.0f * CCustomBuildingDNPipeline::m_fDNBalanceParam);
 }
