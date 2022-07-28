@@ -78,8 +78,8 @@ public:
 
     static char*&    m_pVehicleNameToPrint;
     static eNameState& m_VehicleState;
-    static int32&   m_VehicleFadeTimer;
-    static int32&   m_VehicleNameTimer;
+    static uint32&   m_VehicleFadeTimer;
+    static uint32&   m_VehicleNameTimer;
     static char*&    m_pLastVehicleName;
     static char*&    m_pVehicleName;
 

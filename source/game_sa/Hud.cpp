@@ -23,8 +23,8 @@ bool& CHud::bDrawClock = *(bool*)0xBAA400;
 
 char*& CHud::m_pVehicleNameToPrint = *(char**)0xBAA444;
 eNameState& CHud::m_VehicleState = *(eNameState*)0xBAA448;
-int32& CHud::m_VehicleFadeTimer = *(int32*)0xBAA44C;
-int32& CHud::m_VehicleNameTimer = *(int32*)0xBAA450;
+uint32& CHud::m_VehicleFadeTimer = *(uint32*)0xBAA44C;
+uint32& CHud::m_VehicleNameTimer = *(uint32*)0xBAA450;
 char*& CHud::m_pLastVehicleName = *(char**)0xBAA454;
 char*& CHud::m_pVehicleName = *(char**)0xBAA458;
 
