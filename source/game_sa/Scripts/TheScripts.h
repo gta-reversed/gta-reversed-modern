@@ -363,7 +363,7 @@ public:
     static inline bool& bScriptHasFadedOut = *reinterpret_cast<bool*>(0xA4448A);
     static inline bool& bAddNextMessageToPreviousBriefs = *reinterpret_cast<bool*>(0xA4448B);
     static inline int32& ForceRandomCarModel = *reinterpret_cast<int32*>(0xA4448C);
-    static inline bool& bDrawCrossHair = *reinterpret_cast<bool*>(0xA44490);
+    static inline uint32& bDrawCrossHair = *reinterpret_cast<uint32*>(0xA44490);
     static inline bool& bEnableCraneRelease = *reinterpret_cast<bool*>(0xA44494);
     static inline bool& bEnableCraneLower = *reinterpret_cast<bool*>(0xA44495);
     static inline bool& bEnableCraneRaise = *reinterpret_cast<bool*>(0xA44496);
