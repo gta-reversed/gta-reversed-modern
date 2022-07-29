@@ -1134,6 +1134,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
 // 0x58EAF0
 void CHud::DrawPlayerInfo() {
     // plugin::Call<0x58EAF0>();
+    // return;
 
     if (bDrawClock) {
         DrawClock();
@@ -1261,8 +1262,8 @@ LABEL_31:
 /*
 LABEL_59:
     float alpha = 255.0f;
-    auto v14 = m_DisplayScoreFadeTimer;
-    auto v16 = m_DisplayScoreTimer;
+    auto MoneyFadeTimer = m_DisplayScoreFadeTimer;
+    auto MoneyTimer = m_DisplayScoreTimer;
     auto displayScoreState = m_DisplayScoreState;
     if (m_LastDisplayScore != playerInfo.m_nDisplayMoney) {
         if (m_DisplayScoreState) {
@@ -1271,42 +1272,42 @@ LABEL_59:
                     goto LABEL_76;
             LABEL_65:
                 if (displayScoreState == 2) {
-                    v14 += CTimer::GetTimeStepInMS();
-                    a1 = v14;
-                    if (v14 <= 1000.0f)
+                    MoneyFadeTimer += CTimer::GetTimeStepInMS();
+                    a1 = MoneyFadeTimer;
+                    if (MoneyFadeTimer <= 1000.0f)
                         goto LABEL_70;
-                    v14 = 1000;
+                    MoneyFadeTimer = 1000;
                     displayScoreState = 1;
                 } else {
                     if (displayScoreState != 3) {
                     LABEL_75:
-                        v16 += CTimer::GetTimeStepInMS();
+                        MoneyTimer += CTimer::GetTimeStepInMS();
                     LABEL_76:
                         m_DisplayScoreState = displayScoreState;
-                        m_DisplayScoreTimer = v16;
-                        m_DisplayScoreFadeTimer = v14;
+                        m_DisplayScoreTimer = MoneyTimer;
+                        m_DisplayScoreFadeTimer = MoneyFadeTimer;
                         alpha = std::clamp(alpha, 0.0f, 255.0f);
                         m_LastDisplayScore = playerInfo.m_nDisplayMoney;
 
                         goto LABEL_99;
                     }
-                    v14 += -CTimer::GetTimeStepInMS();
-                    a1 = v14;
-                    if (v14 >= 0.0f) {
+                    MoneyFadeTimer += -CTimer::GetTimeStepInMS();
+                    a1 = MoneyFadeTimer;
+                    if (MoneyFadeTimer >= 0.0f) {
                     LABEL_70:
                         alpha = a1 * 0.001f * 255.0f;
                         goto LABEL_75;
                     }
-                    v14 = 0;
+                    MoneyFadeTimer = 0;
                     displayScoreState = 0;
                 }
-                a1 = v14;
+                a1 = MoneyFadeTimer;
                 goto LABEL_70;
             }
         } else {
-            v14 = 0;
+            MoneyFadeTimer = 0;
         }
-        v16 = 5;
+        MoneyTimer = 5;
         displayScoreState = 2;
         goto LABEL_65;
     }
@@ -1314,44 +1315,44 @@ LABEL_59:
     if (m_DisplayScoreState && m_DisplayScoreState != 5) {
         switch (m_DisplayScoreState) {
         case 1:
-            v14 = 1000;
+            MoneyFadeTimer = 1000;
             alpha = 255.0f;
             if (m_DisplayScoreTimer > 10000.0f) {
                 displayScoreState = 3;
-                v14 = 3000;
+                MoneyFadeTimer = 3000;
             }
             goto LABEL_94;
         case 2:
-            v14 += CTimer::GetTimeStepInMS();
-            a1a = v14;
-            if (v14 <= 1000.0f)
+            MoneyFadeTimer += CTimer::GetTimeStepInMS();
+            a1a = MoneyFadeTimer;
+            if (MoneyFadeTimer <= 1000.0f)
                 goto LABEL_89;
-            v14 = 1000;
+            MoneyFadeTimer = 1000;
             displayScoreState = 1;
             break;
         case 3:
-            v14 = +-CTimer::GetTimeStepInMS();
-            a1a = v14;
-            if (v14 >= 0.0f) {
+            MoneyFadeTimer = +-CTimer::GetTimeStepInMS();
+            a1a = MoneyFadeTimer;
+            if (MoneyFadeTimer >= 0.0f) {
             LABEL_89:
-                v13 = a1a * 0.001f * 255.0f;
+                alpha = a1a * 0.001f * 255.0f;
                 goto LABEL_94;
             }
-            v14 = 0;
+            MoneyFadeTimer = 0;
             displayScoreState = 0;
             break;
         default:
         LABEL_94:
-            v16 += CTimer::GetTimeStepInMS();
+            MoneyTimer += CTimer::GetTimeStepInMS();
             goto LABEL_95;
         }
-        a1a = v14;
+        a1a = MoneyFadeTimer;
         goto LABEL_89;
     }
 LABEL_95:
     m_DisplayScoreState = displayScoreState;
-    m_DisplayScoreTimer = v16;
-    m_DisplayScoreFadeTimer = v14;
+    m_DisplayScoreTimer = MoneyTimer;
+    m_DisplayScoreFadeTimer = MoneyFadeTimer;
     alpha = std::clamp(alpha, 0.0f, 255.0f);
 
 LABEL_99:
@@ -1359,7 +1360,7 @@ LABEL_99:
         DrawMoney(playerInfo, alpha);
     }
 
-    auto v24 = 255.0f; // alpha
+    auto alpha = 255.0f; // alpha
     if (m_LastWeapon != ped->GetActiveWeapon().m_nType) {
         if (m_WeaponState) {
             if (m_WeaponState != 1 && m_WeaponState != 3) {
@@ -1378,7 +1379,7 @@ LABEL_99:
                     LABEL_124:
                         m_WeaponTimer += CTimer::GetTimeStepInMS();
                     LABEL_125:
-                        v24 = std::clamp(v24, 0.0f, 255.0f);
+                        alpha = std::clamp(alpha, 0.0f, 255.0f);
                         m_LastWeapon = ped->GetActiveWeapon().m_nType;
                         goto LABEL_148;
                     }
@@ -1388,7 +1389,7 @@ LABEL_99:
                         m_WeaponState = 0;
                     }
                 }
-                v24 = m_WeaponFadeTimer * 0.001f * 255.0f;
+                alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
                 goto LABEL_124;
             }
         } else {
@@ -1407,7 +1408,7 @@ LABEL_99:
                 m_WeaponState = 3;
                 m_WeaponFadeTimer = 3000;
             }
-            v24 = 255.0f;
+            alpha = 255.0f;
             m_WeaponTimer += CTimer::GetTimeStepInMS();
             break;
         case 2:
@@ -1416,7 +1417,7 @@ LABEL_99:
                 m_WeaponFadeTimer = 1000;
                 m_WeaponState = 1;
             }
-            v24 = m_WeaponFadeTimer * 0.001f * 255.0f;
+            alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
             m_WeaponTimer += CTimer::GetTimeStepInMS();
             break;
         case 3:
@@ -1425,7 +1426,7 @@ LABEL_99:
                 m_WeaponFadeTimer = 0;
                 m_WeaponState = 0;
             }
-            v24 = m_WeaponFadeTimer * 0.001f * 255.0f;
+            alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
             m_WeaponTimer += CTimer::GetTimeStepInMS();
             break;
         default:
