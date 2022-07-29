@@ -1053,10 +1053,16 @@ void CHud::GetRidOfAllHudMessages(bool arg0) {
     m_VehicleState                = NAME_DONT_SHOW;
 
     for (auto i = 0; i < NUM_BIG_MESSAGES; ++i) {
-        if (BigMessageX[i] == 0.0f) {
-            if (!arg0 || BigMessageX[i] != BigMessageX[1] && BigMessageX[i] != BigMessageX[4]) {
-                memset(m_BigMessage[i], 0, sizeof(m_BigMessage[i]));
-            }
+        if (BigMessageX[i] != 0.0f)
+            continue;
+
+        if (!arg0) {
+            std::ranges::fill(m_BigMessage[i], '\0');
+            continue;
+        }
+
+        if (BigMessageX[i] != BigMessageX[1] && BigMessageX[i] != BigMessageX[4]) {
+            std::ranges::fill(m_BigMessage[i], '\0');
         }
     }
 }
