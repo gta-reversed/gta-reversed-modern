@@ -1847,9 +1847,10 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
     // Make sure model isn't used anywhere by destroying all objects/peds using it.
     if (modelInfo->m_nRefCount > 0) {
         for (auto i = GetPedPool()->GetSize() - 1; i >= 0; i--) {
-            // useless
-            // if (modelInfo->m_nRefCount <= 0)
-            //     break;
+            if (modelInfo->m_nRefCount <= 0) {
+                printf("[NOTSA] useless or not?\n");
+                break;
+            }
 
             CPed* ped = GetPedPool()->GetAt(i);
             if (ped && ped->m_nModelIndex == modelId && !ped->IsPlayer() && ped->CanBeDeletedEvenInVehicle()) {
@@ -1858,9 +1859,10 @@ void CStreaming::RequestSpecialModel(int32 modelId, const char* name, int32 flag
         }
 
         for (auto i = GetObjectPool()->GetSize() - 1; i >= 0; i--) {
-            // useless
-            // if (modelInfo->m_nRefCount <= 0)
-            //     break;
+            if (modelInfo->m_nRefCount <= 0) {
+                printf("[NOTSA] useless or not?\n");
+                break;
+            }
 
             CObject* obj = GetObjectPool()->GetAt(i);
             if (obj && obj->m_nModelIndex == modelId && obj->CanBeDeleted()) {

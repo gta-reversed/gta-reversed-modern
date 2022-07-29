@@ -1916,7 +1916,7 @@ void CWorld::TriggerExplosionSectorList(CPtrList& ptrList, const CVector& point,
                         ped->bIsStanding = false;
                         impactVelocity.z += 4.f;
                     } else {
-                        impactVelocity.z += static_cast<float>(CTimer::GetTimeStepInMS()) * ped->m_fMass / 125.f;
+                        impactVelocity.z += CTimer::GetTimeStepInMS() * ped->m_fMass / 125.f;
                     }
 
                     ped->ApplyMoveForce(impactVelocity);
