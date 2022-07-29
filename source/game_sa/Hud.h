@@ -94,15 +94,15 @@ public:
     static uint16&   m_nHelpMessageStatId;
     static bool&     m_bHelpMessageQuick;
     static int32&    m_nHelpMessageState;
-    static int32&    m_nHelpMessageFadeTimer;
-    static int32&    m_nHelpMessageTimer;
+    static uint32&   m_nHelpMessageFadeTimer;
+    static uint32&   m_nHelpMessageTimer;
     static char      (&m_pHelpMessageToPrint)[400];
     static char      (&m_pLastHelpMessage)[400];
     static char      (&m_pHelpMessage)[400];
 
     static eNameState& m_ZoneState; // see eNameState
     static int32&      m_ZoneFadeTimer;
-    static int32&      m_ZoneNameTimer;
+    static uint32&     m_ZoneNameTimer;
 
     static inline char (&m_Message)[400] = *(char (*)[400])0xBAB040;
     static inline char (&m_BigMessage)[7][128] = *(char (*)[7][128])0xBAACC0;

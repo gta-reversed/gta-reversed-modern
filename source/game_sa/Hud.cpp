@@ -39,14 +39,14 @@ uint16& CHud::m_nHelpMessageMaxStatValue = *(uint16*)0xBAA46C;
 uint16& CHud::m_nHelpMessageStatId = *(uint16*)0xBAA470;
 bool& CHud::m_bHelpMessageQuick = *(bool*)0xBAA472;
 int32& CHud::m_nHelpMessageState = *(int32*)0xBAA474;
-int32& CHud::m_nHelpMessageFadeTimer = *(int32*)0xBAA478;
-int32& CHud::m_nHelpMessageTimer = *(int32*)0xBAA47C;
+uint32& CHud::m_nHelpMessageFadeTimer = *(uint32*)0xBAA478;
+uint32& CHud::m_nHelpMessageTimer = *(uint32*)0xBAA47C;
 char (&CHud::m_pHelpMessageToPrint)[400] = *(char(*)[400])0xBAA480;
 char (&CHud::m_pLastHelpMessage)[400] = *(char(*)[400])0xBAA610;
 char (&CHud::m_pHelpMessage)[400] = *(char(*)[400])0xBAA7A0;
 eNameState& CHud::m_ZoneState = *(eNameState*)0xBAA930;
 int32& CHud::m_ZoneFadeTimer = *(int32*)0xBAA934;
-int32& CHud::m_ZoneNameTimer = *(int32*)0xBAA938;
+uint32& CHud::m_ZoneNameTimer = *(uint32*)0xBAA938;
 char*& CHud::m_ZoneToPrint = *(char**)0xBAB1D0;
 char*& CHud::m_pLastZoneName = *(char**)0xBAB1D4;
 char*& CHud::m_pZoneName = *(char**)0xBAB1D8;
@@ -560,7 +560,7 @@ void CHud::DrawAreaName() {
         case NAME_FADE_OUT:
             if (!TheCamera.GetFading() && TheCamera.GetScreenFadeStatus() != NAME_FADE_IN)
                 m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
-            if (m_ZoneFadeTimer < 0.0) {
+            if (m_ZoneFadeTimer < 0) {
                 m_ZoneFadeTimer = 0;
                 m_ZoneState = NAME_DONT_SHOW;
             }
@@ -619,6 +619,7 @@ void CHud::DrawBustedWastedMessage() {
         BigMessageX[2] = '\0';
         return;
     }
+
     if (BigMessageX[2] == 0.0f) {
         BigMessageX[2] = 1.0f;
         BigMessageAlpha[2] = 0.0f;
@@ -633,14 +634,14 @@ void CHud::DrawBustedWastedMessage() {
     BigMessageAlpha[2] += CTimer::GetTimeStepInMS() * 0.4f;
     BigMessageAlpha[2] = std::min(BigMessageAlpha[2], 255.0f);
 
-    CFont::SetBackground(0, 0);
+    CFont::SetBackground(false, 0);
     CFont::SetScale(SCREEN_SCALE_X(2.0f), SCREEN_SCALE_Y(2.0f));
-    CFont::SetProportional(1);
-    CFont::SetJustify(0);
+    CFont::SetProportional(true);
+    CFont::SetJustify(false);
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetFontStyle(FONT_GOTHIC);
     CFont::SetEdge(3);
-    CFont::SetDropColor(CRGBA(0, 0, 0,BigMessageAlpha[2]));
+    CFont::SetDropColor(CRGBA(0, 0, 0, BigMessageAlpha[2]));
     CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, BigMessageAlpha[2]));
     CFont::PrintStringFromBottom(RsGlobal.maximumWidth * 0.5f, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), m_BigMessage[BIG_MESSAGE_STYLE_2]);
 }
@@ -652,10 +653,7 @@ void CHud::DrawCrossHairs() {
 
 // 0x58D580
 float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
-    float alpha = 255.0f;
-    uint32 operation, timer;
-    int32 fadeTimer;
-
+    uint32 operation, timer, fadeTimer;
     switch (fadingElement) {
     case WANTED_STATE:
         fadeTimer = m_WantedFadeTimer;
@@ -680,6 +678,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
     default:
         break;
     }
+
     if (forceFadingIn) {
         switch (operation) {
         case NAME_DONT_SHOW:
@@ -693,11 +692,12 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
             break;
         }
     }
+
+    float alpha = 255.0f;
     if (operation != NAME_DONT_SHOW) {
         switch (operation) {
         case NAME_SWITCH:
             fadeTimer = 1000;
-            alpha = 255.0f;
             if (timer > 10000) {
                 fadeTimer = 3000;
                 operation = NAME_FADE_OUT;
@@ -705,19 +705,19 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
             break;
         case NAME_FADE_IN:
             fadeTimer += CTimer::GetTimeStepInMS();
-            if (fadeTimer > 1000.0f) {
+            if (fadeTimer > 1000) {
                 operation = NAME_SWITCH;
                 fadeTimer = 1000;
             }
-            alpha = fadeTimer / 1000.0f * 255.0f;
+            alpha = float(fadeTimer) / 1000.0f * 255.0f;
             break;
         case NAME_FADE_OUT:
             fadeTimer -= CTimer::GetTimeStepInMS();
-            if (fadeTimer < 0.0f) {
+            if (fadeTimer < 0) {
                 fadeTimer = 0;
                 operation = NAME_DONT_SHOW;
             }
-            alpha = fadeTimer / 1000.0f * 255.0f;
+            alpha = float(fadeTimer) / 1000.0f * 255.0f;
             break;
         default:
             break;
@@ -767,8 +767,8 @@ void CHud::DrawMissionTimers() {
 void CHud::DrawMissionTitle() {
     if (m_BigMessage[BIG_MESSAGE_STYLE_1][0]) {
         if (BigMessageX[1] != 0.0f) {
-            CFont::SetBackground(0, 0);
-            CFont::SetProportional(1);
+            CFont::SetBackground(false, false);
+            CFont::SetProportional(true);
             CFont::SetRightJustifyWrap(0.0f);
             CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
             CFont::SetFontStyle(FONT_PRICEDOWN);
@@ -799,10 +799,10 @@ void CHud::DrawMissionTitle() {
             BigMessageX[1] = 1.0f;
             m_ZoneState = NAME_DONT_SHOW;
             m_ZoneFadeTimer = 0;
-            SetHelpMessage(0, 1, 0, 0);
+            SetHelpMessage(nullptr, 1, false, false);
         }
     } else {
-        BigMessageX[1] = 0.0;
+        BigMessageX[1] = 0.0f;
     }
 }
 
@@ -969,7 +969,7 @@ void CHud::DrawVehicleName() {
             m_VehicleFadeTimer = 1000;
             m_VehicleState = NAME_SHOW;
         }
-        alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
         break;
     case NAME_FADE_OUT:
         m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
@@ -977,7 +977,7 @@ void CHud::DrawVehicleName() {
             m_VehicleState = NAME_DONT_SHOW;
             m_VehicleFadeTimer = 0;
         }
-        alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
         break;
     case NAME_SWITCH:
         m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
@@ -987,7 +987,7 @@ void CHud::DrawVehicleName() {
             m_VehicleFadeTimer = 0;
             m_pVehicleNameToPrint = m_pLastVehicleName;
         }
-        alpha = m_VehicleFadeTimer * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
         break;
     default:
         break;
@@ -1002,8 +1002,8 @@ void CHud::DrawVehicleName() {
         CFont::SetRightJustifyWrap(0.0f);
         CFont::SetFontStyle(eFontStyle::FONT_MENU);
         CFont::SetEdge(2);
-        CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, alpha));
-        CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
+        CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, (uint8)alpha));
+        CFont::SetDropColor(CRGBA(0, 0, 0, (uint8)alpha));
         if (CTheScripts::bDisplayHud) {
             CFont::PrintString(
                 SCREEN_STRETCH_FROM_RIGHT(32.0f),
@@ -1028,19 +1028,19 @@ void CHud::GetRidOfAllHudMessages(bool arg0) {
     memset(m_pLastHelpMessage, 0, sizeof(m_pLastHelpMessage));
     memset(m_pHelpMessage, 0, sizeof(m_pHelpMessage));
     m_ZoneNameTimer = 0;
-    m_pZoneName = 0;
+    m_pZoneName = nullptr;
     m_ZoneState = NAME_DONT_SHOW;
     m_nHelpMessageTimer = 0;
     m_nHelpMessageFadeTimer = 0;
     m_nHelpMessageState = 0;
-    m_bHelpMessageQuick = 0;
+    m_bHelpMessageQuick = false;
     m_nHelpMessageMaxStatValue = 1000;
     m_nHelpMessageStatId = 0;
     m_fHelpMessageStatUpdateValue = 0.0f;
-    m_bHelpMessagePermanent = 0;
+    m_bHelpMessagePermanent = false;
     m_fHelpMessageTime = 1.0f;
-    m_pVehicleName = 0;
-    m_pVehicleNameToPrint = 0;
+    m_pVehicleName = nullptr;
+    m_pVehicleNameToPrint = nullptr;
     m_VehicleNameTimer = 0;
     m_VehicleFadeTimer = 0;
     m_VehicleState = NAME_DONT_SHOW;
@@ -1159,7 +1159,7 @@ void CHud::DrawPlayerInfo() {
             }
         } else if (m_EnergyLostState == 3) {
             m_EnergyLostFadeTimer += -CTimer::GetTimeStepInMS();
-            if (m_EnergyLostFadeTimer < 0.0) {
+            if (m_EnergyLostFadeTimer < 0.0f) {
                 m_EnergyLostState = 0;
                 m_EnergyLostFadeTimer = 0;
             }
