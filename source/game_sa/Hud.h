@@ -10,6 +10,14 @@
 
 class CSprite2d;
 
+enum eHudItem {
+    ITEM_NONE   = -1,
+    ITEM_ARMOUR =  3,
+    ITEM_HEALTH =  4,
+    ITEM_RADAR  =  8,
+    ITEM_BREATH = 10,
+};
+
 enum DRAW_FADE_STATE {
     WANTED_STATE        = 0,
     ENERGY_LOST_STATE   = 1,
@@ -41,7 +49,9 @@ enum eBigMessageStyle : uint16 {
     BIG_MESSAGE_STYLE_3,
     BIG_MESSAGE_STYLE_4,
     BIG_MESSAGE_STYLE_5,
-    BIG_MESSAGE_STYLE_6
+    BIG_MESSAGE_STYLE_6,
+
+    NUM_BIG_MESSAGES
 };
 
 class CPed;
@@ -133,7 +143,7 @@ public:
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
-    static void SetMessage(char* text);
+    static void SetMessage(const char* message);
     static void SetVehicleName(char* name);
     static void SetZoneName(char* name, uint8 displayState);
 
