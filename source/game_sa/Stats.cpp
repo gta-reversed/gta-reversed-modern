@@ -580,7 +580,7 @@ void CStats::UpdateFatAndMuscleStats(uint32 value) {
 void CStats::UpdateStatsWhenSprinting() {
     UpdateFatAndMuscleStats(static_cast<uint32>(StatReactionValue[STAT_EXERCISE_RATE_SPRINT]));
     if (StatReactionValue[STAT_TIMELIMIT_SPRINT_STAMINA] * 1000.0f >= static_cast<float>(m_SprintStaminaCounter)) {
-        m_SprintStaminaCounter += CTimer::GetTimeStepInMS();
+        m_SprintStaminaCounter += static_cast<uint32>(CTimer::GetTimeStepInMS());
     } else {
         m_SprintStaminaCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
@@ -592,7 +592,7 @@ void CStats::UpdateStatsWhenSprinting() {
 void CStats::UpdateStatsWhenRunning() {
     UpdateFatAndMuscleStats((uint32)StatReactionValue[STAT_EXERCISE_RATE_RUN]);
     if (StatReactionValue[STAT_TIMELIMIT_RUNNING] * 1000.0f >= static_cast<float>(m_RunningCounter)) {
-        m_RunningCounter += CTimer::GetTimeStepInMS();
+        m_RunningCounter += static_cast<uint32>(CTimer::GetTimeStepInMS());
     } else {
         m_RunningCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
@@ -625,7 +625,7 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
     auto bikeCounter = static_cast<float>(m_BikeCounter);
     if (StatReactionValue[STAT_TIMELIMIT_MOTORBIKE_SKILL] * 1000.0f >= bikeCounter) {
         const float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
-        const auto  fTimeStep = static_cast<float>(CTimer::GetTimeStepInMS());
+        const auto  fTimeStep = CTimer::GetTimeStepInMS();
 
         if (bikeMoveSpeed > 0.6f || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 1.5f + bikeCounter);

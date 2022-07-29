@@ -47,14 +47,13 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(/* const */ CVehicle* vehicle) {
 // Process
 // 0x4655E0
 void CUpsideDownCarCheck::UpdateTimers() {
-    const auto delta = CTimer::GetTimeStepInMS();
     for (auto& car : m_aUpsideDownCars) {
         if (!car.m_nHandle)
             continue;
 
         if (const auto vehicle = CPools::GetVehicle(car.m_nHandle)) {
             if (IsCarUpsideDown(vehicle)) {
-                car.m_nTime += delta;
+                car.m_nTime += CTimer::GetTimeStepInMS();
             } else {
                 car.m_nTime = 0;
             }

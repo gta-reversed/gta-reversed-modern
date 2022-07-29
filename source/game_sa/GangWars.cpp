@@ -584,7 +584,7 @@ void CGangWars::StartDefensiveGangWar() {
         Difficulty = TerritoryUnderControlPercentage;
         CHud::SetHelpMessage(TheText.Get("GW_ATK"), true, false, true);
         State2 = WAR_NOTIFIED;
-        FightTimer = static_cast<int32>(DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) * 200.0f + 240'000.0f);
+        FightTimer = static_cast<uint32>(DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) * 200.0f + 240'000.0f);
         RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
 
         switch (Gang1) {
@@ -624,11 +624,11 @@ void CGangWars::StartOffensiveGangWar() {
     }
 
     // NOTSA
-    Gang1 = std::max_element(std::begin(zoneInfo->GangDensity), std::end(zoneInfo->GangDensity)) - zoneInfo->GangDensity;
+    Gang1 = std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity;
     auto gang1Density = zoneInfo->GangDensity[Gang1];
     zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
-    Gang2 = std::max_element(std::begin(zoneInfo->GangDensity), std::end(zoneInfo->GangDensity)) - zoneInfo->GangDensity;
+    Gang2 = std::ranges::max_element(zoneInfo->GangDensity) - zoneInfo->GangDensity;
     auto gang2Density = zoneInfo->GangDensity[Gang2];
     zoneInfo->GangDensity[Gang1] = gang1Density; // to restore
 
@@ -880,7 +880,7 @@ void CGangWars::Update() {
             switch (State2) {
             case WAR_NOTIFIED:
                 if (DistanceBetweenPoints2D(PointOfAttack, playerPos) >= 70.0f) {
-                    FightTimer -= CTimer::GetTimeStepInMS();
+                    FightTimer -= (uint32)CTimer::GetTimeStepInMS();
 
                     if (FightTimer < 0) {
                         auto nosh = TheText.Get("GW_NOSH");
@@ -911,7 +911,7 @@ void CGangWars::Update() {
                     TimeTillNextAttack = CalculateTimeTillNextAttack();
                     ReleasePedsInAttackWave(true, false);
                 } else {
-                    FightTimer -= CTimer::GetTimeStepInMS();
+                    FightTimer -= (uint32)CTimer::GetTimeStepInMS();
 
                     if (FightTimer < 0) {
                         auto slow = TheText.Get("GW_SLOW");
@@ -929,9 +929,9 @@ void CGangWars::Update() {
         } else if (!CTheScripts::IsPlayerOnAMission() && !bTrainingMission && (!veh || !veh->IsSubFlyingVehicle())) {
             if (State == NOT_IN_WAR) {
                 if (CWeather::WeatherRegion == WEATHER_REGION_LA) {
-                    TimeTillNextAttack -= (float)CTimer::GetTimeStepInMS();
+                    TimeTillNextAttack -= CTimer::GetTimeStepInMS();
                 } else {
-                    TimeTillNextAttack -= (float)CTimer::GetTimeStepInMS() * 0.6f;
+                    TimeTillNextAttack -= CTimer::GetTimeStepInMS() * 0.6f;
                 }
             }
 
