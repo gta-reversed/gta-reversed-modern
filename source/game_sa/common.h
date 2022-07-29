@@ -71,6 +71,8 @@ constexpr auto BUILD_NAME_FULL = "TEST";
 
 extern int32 gDefaultTaskTime;
 
+extern RpLight*& pDirect;
+
 static inline char (&gString)[352] = *(char(*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
 

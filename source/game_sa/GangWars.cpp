@@ -624,16 +624,16 @@ void CGangWars::StartOffensiveGangWar() {
     }
 
     // NOTSA
-    Gang1 = std::max_element(zoneInfo->GangDensity, zoneInfo->GangDensity + 10) - zoneInfo->GangDensity;
+    Gang1 = std::max_element(std::begin(zoneInfo->GangDensity), std::end(zoneInfo->GangDensity)) - zoneInfo->GangDensity;
     auto gang1Density = zoneInfo->GangDensity[Gang1];
     zoneInfo->GangDensity[Gang1] = 0; // to find the second biggest
 
-    Gang2 = std::max_element(zoneInfo->GangDensity, zoneInfo->GangDensity + 10) - zoneInfo->GangDensity;
+    Gang2 = std::max_element(std::begin(zoneInfo->GangDensity), std::end(zoneInfo->GangDensity)) - zoneInfo->GangDensity;
     auto gang2Density = zoneInfo->GangDensity[Gang2];
     zoneInfo->GangDensity[Gang1] = gang1Density; // to restore
 
     Provocation = 0.0f;
-    auto densitySum = std::accumulate(zoneInfo->GangDensity, zoneInfo->GangDensity + 10, 0);
+    auto densitySum = std::accumulate(std::begin(zoneInfo->GangDensity), std::end(zoneInfo->GangDensity), 0);
     if (densitySum && (Gang1 == GANG_BALLAS || Gang1 == GANG_VAGOS)) {
         if (State2 != NO_ATTACK)
             return;

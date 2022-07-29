@@ -273,15 +273,9 @@ void CCheat::AllCarsAreShitCheat() {
 void CCheat::BeachPartyCheat() {
     Toggle(CHEAT_BEACH_PARTY);
     if (IsActive(CHEAT_BEACH_PARTY)) {
-        int32 peds[8] = {
-            MODEL_BMYBE,
-            MODEL_HMYBE,
-            MODEL_WFYBE,
-            MODEL_BFYBE,
-            MODEL_HFYBE,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_BMYBE, MODEL_HMYBE, MODEL_WFYBE, MODEL_BFYBE,
+            MODEL_HFYBE, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
@@ -324,19 +318,13 @@ void CCheat::BlowUpCarsCheat() {
 void CCheat::CountrysideInvasionCheat() {
     Toggle(CHEAT_COUNTRY_TRAFFIC);
     if (IsActive(CHEAT_COUNTRY_TRAFFIC)) {
-        int32 peds[8] = {
-            MODEL_CWFOFR,
-            MODEL_CWFOHB,
-            MODEL_CWFYFR1,
-            MODEL_CWFYHB,
-            MODEL_CWMOFR,
-            MODEL_CWMOHB1,
-            MODEL_CWMOHB2,
-            MODEL_CWMYFR,
+        int32 peds[] = {
+            MODEL_CWFOFR, MODEL_CWFOHB, MODEL_CWFYFR1, MODEL_CWFYHB,
+            MODEL_CWMOFR, MODEL_CWMOHB1, MODEL_CWMOHB2, MODEL_CWMYFR,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel("timberfawn", "bask1", CLOTHES_TEXTURE_SHOES);
         player->GetClothesDesc()->SetTextureAndModel("captruck", "captruck", CLOTHES_TEXTURE_HATS);
         player->GetClothesDesc()->SetTextureAndModel("countrytr", "countrytr", CLOTHES_TEXTURE_SPECIAL);
@@ -386,17 +374,10 @@ void CCheat::DuskCheat() {
 void CCheat::ElvisLivesCheat() {
     Toggle(CHEAT_ELVIS_IS_EVERYWHERE);
     if (IsActive(CHEAT_ELVIS_IS_EVERYWHERE)) {
-        int32 peds[8] = {
-            MODEL_VHMYELV,
-            MODEL_VBMYELV,
-            MODEL_VIMYELV,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_VHMYELV, MODEL_VBMYELV, MODEL_VIMYELV, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
-
         CStreaming::StreamPedsIntoRandomSlots(peds);
     }
 }
@@ -450,19 +431,13 @@ void CCheat::FunhouseCheat() {
     if (IsActive(CHEAT_FUNHOUSE_THEME)) {
         CPostEffects::m_bHeatHazeFX = false;
     } else {
-        int32 peds[8] = {
-            MODEL_WMYBELL,
-            MODEL_WFYBURG,
-            MODEL_WMOICE,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_WMYBELL, MODEL_WFYBURG, MODEL_WMOICE, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel(nullptr, nullptr, CLOTHES_TEXTURE_SPECIAL); // FIX_BUGS
         player->GetClothesDesc()->SetTextureAndModel("torso", "torso", CLOTHES_TEXTURE_TORSO);
         player->GetClothesDesc()->SetTextureAndModel("legsheart", "legs", CLOTHES_TEXTURE_LEGS);
@@ -491,15 +466,9 @@ void CCheat::GangLandCheat() {
 void CCheat::GangsCheat() {
     Toggle(CHEAT_GANGMEMBERS_EVERYWHERE);
     if (IsActive(CHEAT_GANGMEMBERS_EVERYWHERE)) {
-        int32 peds[8] = {
-            MODEL_BALLAS1,
-            MODEL_BALLAS2,
-            MODEL_BALLAS3,
-            MODEL_FAM1,
-            MODEL_FAM2,
-            MODEL_LSV1,
-            MODEL_LSV2,
-            MODEL_LSV3,
+        int32 peds[] = {
+            MODEL_BALLAS1, MODEL_BALLAS2, MODEL_BALLAS3, MODEL_FAM1,
+            MODEL_FAM2, MODEL_LSV1, MODEL_LSV2, MODEL_LSV3,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
     }
@@ -560,19 +529,13 @@ void CCheat::JetpackCheat() {
 void CCheat::LoveConquersAllCheat() {
     Toggle(CHEAT_SLUT_MAGNET);
     if (IsActive(CHEAT_SLUT_MAGNET)) {
-        int32 peds[8] = {
-            MODEL_BMYPIMP,
-            MODEL_BFYPRO,
-            MODEL_HFYPRO,
-            MODEL_SWFOPRO,
-            MODEL_SBFYPRO,
-            MODEL_VWFYPRO,
-            MODEL_VHFYPRO,
-            -2,
+        int32 peds[] = {
+            MODEL_BMYPIMP, MODEL_BFYPRO, MODEL_HFYPRO, MODEL_SWFOPRO,
+            MODEL_SBFYPRO, MODEL_VWFYPRO, MODEL_VHFYPRO, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
-        CPlayerPed *player = FindPlayerPed();
+        CPlayerPed* player = FindPlayerPed();
         player->GetClothesDesc()->SetTextureAndModel("gimpleg", "gimpleg", CLOTHES_TEXTURE_SPECIAL);
         if (player->m_nPedState != PEDSTATE_DRIVING) {
             CClothes::RebuildPlayer(player, false);
@@ -659,15 +622,9 @@ void CCheat::NinjaCheat() {
             Disable(CHEAT_BLACK_TRAFFIC);
         }
     } else {
-        int32 peds[8] = {
-            MODEL_TRIADA,
-            MODEL_TRIADB,
-            MODEL_TRIBOSS,
-            -2,
-            -2,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_TRIADA, MODEL_TRIADB, MODEL_TRIBOSS, UNLOAD_MODEL,
+            UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
 
@@ -956,15 +913,9 @@ void CCheat::VillagePeopleCheat() {
         Disable(CHEAT_EVERYONE_ARMED);
         EverybodyAttacksPlayerCheat();
     } else {
-        int32 peds[8] = {
-            MODEL_WMYCON,
-            MODEL_CWMYFR,
-            MODEL_ARMY,
-            MODEL_LAPDM1,
-            MODEL_BIKERB,
-            -2,
-            -2,
-            -2,
+        int32 peds[] = {
+            MODEL_WMYCON, MODEL_CWMYFR, MODEL_ARMY, MODEL_LAPDM1,
+            MODEL_BIKERB, UNLOAD_MODEL, UNLOAD_MODEL, UNLOAD_MODEL,
         };
         CStreaming::StreamPedsIntoRandomSlots(peds);
         EverybodyAttacksPlayerCheat();

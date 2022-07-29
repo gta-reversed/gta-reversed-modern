@@ -83,7 +83,7 @@ void CClothes::ConstructPedModel(uint32 modelId, CPedClothesDesc& newClothes, co
         modelInfo->DeleteRwObject();
         modelInfo->SetClump(skinnedClump);
         modelInfo->RemoveTexDictionaryRef();
-        CStreaming::LoadAllRequestedModels(1);
+        CStreaming::LoadAllRequestedModels(true);
     }
 
     CTimer::Resume();
@@ -111,8 +111,8 @@ void CClothes::RequestMotionGroupAnims() {
 
 // 0x5A8390
 void CClothes::RebuildPlayerIfNeeded(CPlayerPed* player) {
-    const auto fat = player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat;
-    const auto muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
+    const auto& fat = player->m_pPlayerData->m_pPedClothesDesc->m_fFatStat;
+    const auto& muscle = player->m_pPlayerData->m_pPedClothesDesc->m_fMuscleStat;
 
     if (CStats::GetStatValue(STAT_FAT) != fat || CStats::GetStatValue(STAT_MUSCLE) != muscle) {
         RebuildPlayer(player, 0);
@@ -124,7 +124,7 @@ void CClothes::RebuildPlayer(CPlayerPed* player, bool bIgnoreFatAndMuscle) {
     auto assoc = RpAnimBlendClumpExtractAssociations(player->m_pRwClump);
     auto task = player->m_pIntelligence->m_TaskMgr.GetTaskSecondary(TASK_SECONDARY_IK);
     if (task)
-        task->MakeAbortable(player, ABORT_PRIORITY_IMMEDIATE, 0);
+        task->MakeAbortable(player, ABORT_PRIORITY_IMMEDIATE, nullptr);
 
     player->DeleteRwObject();
     CWorld::Remove(player);
@@ -150,70 +150,32 @@ void CClothes::RebuildCutscenePlayer(CPlayerPed* player, int32 modelId) {
 // 0x5A7EA0
 eClothesModelPart CClothes::GetTextureDependency(eClothesTexturePart texturePart) {
     switch (texturePart) {
-    case CLOTHES_TEXTURE_TORSO:
-        return CLOTHES_MODEL_TORSO;
-
-    case CLOTHES_TEXTURE_HEAD:
-        return CLOTHES_MODEL_HEAD;
-
-    case CLOTHES_TEXTURE_LEGS:
-        return CLOTHES_MODEL_LEGS;
-
-    case CLOTHES_TEXTURE_SHOES:
-        return CLOTHES_MODEL_SHOES;
-
-    case CLOTHES_TEXTURE_NECKLACE:
-        return CLOTHES_MODEL_NECKLACE;
-
-    case CLOTHES_TEXTURE_BRACELET:
-        return CLOTHES_MODEL_BRACELET;
-
-    case CLOTHES_TEXTURE_GLASSES:
-        return CLOTHES_MODEL_GLASSES;
-
-    case CLOTHES_TEXTURE_HATS:
-        return CLOTHES_MODEL_HATS;
-
-    case CLOTHES_TEXTURE_SPECIAL:
-        return CLOTHES_MODEL_SPECIAL;
-
-    default:
-        return CLOTHES_MODEL_UNAVAILABLE;
+    case CLOTHES_TEXTURE_TORSO:    return CLOTHES_MODEL_TORSO;
+    case CLOTHES_TEXTURE_HEAD:     return CLOTHES_MODEL_HEAD;
+    case CLOTHES_TEXTURE_LEGS:     return CLOTHES_MODEL_LEGS;
+    case CLOTHES_TEXTURE_SHOES:    return CLOTHES_MODEL_SHOES;
+    case CLOTHES_TEXTURE_NECKLACE: return CLOTHES_MODEL_NECKLACE;
+    case CLOTHES_TEXTURE_BRACELET: return CLOTHES_MODEL_BRACELET;
+    case CLOTHES_TEXTURE_GLASSES:  return CLOTHES_MODEL_GLASSES;
+    case CLOTHES_TEXTURE_HATS:     return CLOTHES_MODEL_HATS;
+    case CLOTHES_TEXTURE_SPECIAL:  return CLOTHES_MODEL_SPECIAL;
+    default:                       return CLOTHES_MODEL_UNAVAILABLE;
     }
 }
 
 // 0x5A7F30
 eClothesTexturePart CClothes::GetDependentTexture(eClothesModelPart modelPart) {
     switch (modelPart) {
-    case CLOTHES_MODEL_TORSO:
-        return CLOTHES_TEXTURE_TORSO;
-
-    case CLOTHES_MODEL_HEAD:
-        return CLOTHES_TEXTURE_HEAD;
-
-    case CLOTHES_MODEL_LEGS:
-        return CLOTHES_TEXTURE_LEGS;
-
-    case CLOTHES_MODEL_SHOES:
-        return CLOTHES_TEXTURE_SHOES;
-
-    case CLOTHES_MODEL_NECKLACE:
-        return CLOTHES_TEXTURE_NECKLACE;
-
-    case CLOTHES_MODEL_BRACELET:
-        return CLOTHES_TEXTURE_BRACELET;
-
-    case CLOTHES_MODEL_GLASSES:
-        return CLOTHES_TEXTURE_GLASSES;
-
-    case CLOTHES_MODEL_HATS:
-        return CLOTHES_TEXTURE_HATS;
-
-    case CLOTHES_MODEL_SPECIAL:
-        return CLOTHES_TEXTURE_SPECIAL;
-
-    default:
-        return CLOTHES_TEXTURE_UNAVAILABLE;
+    case CLOTHES_MODEL_TORSO:    return CLOTHES_TEXTURE_TORSO;
+    case CLOTHES_MODEL_HEAD:     return CLOTHES_TEXTURE_HEAD;
+    case CLOTHES_MODEL_LEGS:     return CLOTHES_TEXTURE_LEGS;
+    case CLOTHES_MODEL_SHOES:    return CLOTHES_TEXTURE_SHOES;
+    case CLOTHES_MODEL_NECKLACE: return CLOTHES_TEXTURE_NECKLACE;
+    case CLOTHES_MODEL_BRACELET: return CLOTHES_TEXTURE_BRACELET;
+    case CLOTHES_MODEL_GLASSES:  return CLOTHES_TEXTURE_GLASSES;
+    case CLOTHES_MODEL_HATS:     return CLOTHES_TEXTURE_HATS;
+    case CLOTHES_MODEL_SPECIAL:  return CLOTHES_TEXTURE_SPECIAL;
+    default:                     return CLOTHES_TEXTURE_UNAVAILABLE;
     }
 }
 

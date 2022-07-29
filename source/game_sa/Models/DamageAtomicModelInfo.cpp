@@ -2,6 +2,7 @@
 
 #include "CustomBuildingRenderer.h"
 #include "DamageAtomicModelInfo.h"
+#include "CustomBuildingRenderer.h"
 
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 

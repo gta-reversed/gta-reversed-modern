@@ -72,7 +72,7 @@ int32 CGangs::ChooseGangPedModel(int16 gangId) {
             break;
 
         if (++v1 >= CPopulation::m_nNumPedsInGroup[CPopulation::m_TranslationArray[gangId + 18].pedGroupIds[0]])
-            return -1;
+            return MODEL_INVALID;
     }
     return CPopulation::m_PedGroups[0][21 * CPopulation::m_TranslationArray[18].pedGroupIds[CPopulation::CurrentWorldZone + v2 * 3] + SequenceElement];
 }

@@ -21,13 +21,15 @@ enum eGangID {
     GANG_TRIAD = 6,
     GANG_AZTECAS = 7,
     GANG_UNUSED1 = 8, // RUSSIAN_MAFIA
-    GANG_UNUSED2 = 9  // BIKERS
+    GANG_UNUSED2 = 9, // BIKERS
+
+    TOTAL_GANGS
 };
 
 class CGangs {
 public:
-    inline static std::array<bool, 10>& GangAttackWithCops = *reinterpret_cast<std::array<bool, 10>*>(0xC091D9);
-    inline static std::array<CGangInfo, 10>& Gang = *reinterpret_cast<std::array<CGangInfo, 10>*>(0xC091F0);
+    inline static std::array<bool, TOTAL_GANGS>& GangAttackWithCops = *reinterpret_cast<std::array<bool, 10>*>(0xC091D9);
+    inline static std::array<CGangInfo, TOTAL_GANGS>& Gang = *reinterpret_cast<std::array<CGangInfo, 10>*>(0xC091F0);
 
 public:
     static void InjectHooks();
