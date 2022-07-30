@@ -685,7 +685,7 @@ void CHud::DrawCrossHairs() {
         }
     }
 
-    auto& activeWeapon = player->GetActiveWeapon();
+    auto& activeWeapon = player->GetActiveWeapon(); // Cppcheck: (warning) nullPointerRedundantCheck: Either the condition 'player' is redundant or there is possible null pointer dereference: player.
     if (camMode != eCamMode::MODE_1STPERSON && player && !activeWeapon.IsTypeMelee() && !bIgnoreCheckMeleeTypeWeapon) {
         bDrawCustomCrossHair = true;
     }
@@ -863,7 +863,7 @@ void CHud::DrawCrossHairs() {
                 1.0f,
                 screenStretchCrossHairX / 2.0f,
                 screenStretchCrossHairY / 2.0f,
-                255, 0, 0, 255, 0.01f, 255, 0, 1
+                255, 255, 255, 255, 0.01f, 255, 0, 1
             );
 
             CSprite::RenderOneXLUSprite(
