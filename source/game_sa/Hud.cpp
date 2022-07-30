@@ -89,7 +89,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
     RH_ScopedInstall(SetZoneName, 0x588BB0);                 // ?
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
-    RH_ScopedInstall(DrawAreaName, 0x58AA50);                // -
+    RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // ?
     // RH_ScopedInstall(DrawCrossHairs, 0x58E020);           //
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTD
@@ -602,17 +602,19 @@ void CHud::DrawAreaName() {
     CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.2f), SCREEN_SCALE_Y(1.9f));
     CFont::SetEdge(2);
     CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
-    CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(180.0f));
-    CFont::SetDropColor(CRGBA(0, 0, 0, (uint8)alpha));
+    CFont::SetRightJustifyWrap(SCREEN_STRETCH_X(180.0f));
+    CFont::SetDropColor({ 0, 0, 0, (uint8)alpha });
     CFont::SetFontStyle(FONT_GOTHIC);
-    CZoneInfo* m_Info = CPopCycle::m_pCurrZoneInfo;
-    if (CGangWars::bGangWarsActive && m_Info && m_Info->ZoneColor.r && m_Info->ZoneColor.g && m_Info->ZoneColor.b) {
-        // Untested
-        CFont::SetColor(CRGBA(m_Info->ZoneColor.r, m_Info->ZoneColor.g, m_Info->ZoneColor.b, (uint8)alpha));
+
+    const CZoneInfo* info = CPopCycle::m_pCurrZoneInfo;
+    const auto& color = info->ZoneColor;
+    if (CGangWars::bGangWarsActive && info && color.r && color.g && color.b) {
+        CFont::SetColor({ color.r, color.g, color.b, (uint8)alpha});
     } else {
         CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_BLUE, (uint8)alpha));
     }
-    CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(28.0f), m_ZoneToPrint);
+
+    CFont::PrintStringFromBottom(SCREEN_STRETCH_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(104.0f) + SCREEN_SCALE_Y(76.0f), m_ZoneToPrint);
     CFont::SetSlant(0.0f);
 }
 
