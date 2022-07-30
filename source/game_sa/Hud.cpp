@@ -73,44 +73,44 @@ void CHud::InjectHooks() {
     RH_ScopedClass(CHud);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Initialise, 0x5BA850);                  // ?
+    RH_ScopedInstall(Initialise, 0x5BA850);                  // +
     RH_ScopedInstall(ReInitialise, 0x588880);                // ?
-    RH_ScopedInstall(Shutdown, 0x588850);                    // ?
-    RH_ScopedInstall(Draw, 0x58FAE0);                        // ?
+    RH_ScopedInstall(Shutdown, 0x588850);                    // +
+    RH_ScopedInstall(Draw, 0x58FAE0);                        // +
     RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);      // ?
-    RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // ?
-    RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // ?
-    RH_ScopedInstall(ResetWastedText, 0x589070);             // ?
+    RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // +
+    RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // +
+    RH_ScopedInstall(ResetWastedText, 0x589070);             // +
     RH_ScopedInstall(SetBigMessage, 0x588FC0);               // ?
     RH_ScopedInstall(SetHelpMessage, 0x588BE0);              // ?
     RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    // ?
     RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    // ?
     // RH_ScopedInstall(SetMessage, 0x588F60);               // ?
-    RH_ScopedInstall(SetVehicleName, 0x588F50);              // ?
+    RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
     RH_ScopedInstall(SetZoneName, 0x588BB0);                 // ?
-    RH_ScopedInstall(DrawAfterFade, 0x58D490);               // ?
-    RH_ScopedInstall(DrawAreaName, 0x58AA50);                // ?
+    RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
+    RH_ScopedInstall(DrawAreaName, 0x58AA50);                // -
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // ?
-    // RH_ScopedInstall(DrawCrossHairs, 0x58E020);           // ?
-    // RH_ScopedInstall(DrawFadeState, 0x58D580);            // ?
-    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             // ?
-    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        // ?
-    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // ?
-    // RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);        // ?
-    RH_ScopedInstall(DrawRadar, 0x58A330);                   // ?
-    // RH_ScopedInstall(DrawScriptText, 0x58C080);           // ?
-    // RH_ScopedInstall(DrawSubtitles, 0x58C250);            // ?
-    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0); // ?
-    RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // ?
-    // RH_ScopedInstall(DrawVitalStats, 0x589650);           // ?
-    RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // ?
+    // RH_ScopedInstall(DrawCrossHairs, 0x58E020);           //
+    RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTD
+    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
+    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // -
+    // RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);        //
+    RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
+    // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
+    // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
+    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0); //
+    RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
+    // RH_ScopedInstall(DrawVitalStats, 0x589650);           //
+    RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // +
     // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // ?
     RH_ScopedInstall(DrawTripSkip, 0x58A160);                // +
-    // RH_ScopedInstall(DrawWanted, 0x58D9A0);               // ?
-    RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // ?
-    RH_ScopedInstall(RenderArmorBar, 0x5890A0);              // ?
-    RH_ScopedInstall(RenderBreathBar, 0x589190);             // ?
-    RH_ScopedInstall(RenderHealthBar, 0x589270);             // ?
+    // RH_ScopedInstall(DrawWanted, 0x58D9A0);               //
+    RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // +
+    RH_ScopedInstall(RenderArmorBar, 0x5890A0);              // +
+    RH_ScopedInstall(RenderBreathBar, 0x589190);             // +
+    RH_ScopedInstall(RenderHealthBar, 0x589270);             // +
 }
 
 bool EachFrames(auto count) {
@@ -242,8 +242,9 @@ void CHud::SetBigMessage(const char* message, eBigMessageStyle style) {
     if (BigMessageX[style] != 0.0f) {
         return;
     }
+
     if (style == BIG_MESSAGE_STYLE_5) {
-        for (int i = 0; i < 128; i++) {
+        for (auto i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;
             if (message[i] != LastBigMessage[BIG_MESSAGE_STYLE_5][i]) {
@@ -254,12 +255,13 @@ void CHud::SetBigMessage(const char* message, eBigMessageStyle style) {
             LastBigMessage[BIG_MESSAGE_STYLE_5][i] = message[i];
         }
     } else {
-        for (int i = 0; i < 128; i++) {
+        for (auto i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;
             m_BigMessage[style][i] = message[i];
         }
     }
+
     LastBigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
     m_BigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
 }
@@ -358,7 +360,7 @@ void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMe
 // TODO Bad Loop
 // 0x588F60
 void CHud::SetMessage(const char* message) {
-    // return plugin::Call<0x588F60, char*>(message);
+    return plugin::Call<0x588F60, const char*>(message);
 
     if (message) {
         uint32 i = 0;
@@ -507,9 +509,9 @@ void CHud::DrawAreaName() {
                 m_ZoneNameTimer = 0;
                 m_ZoneFadeTimer = 0;
                 m_ZoneToPrint = m_pZoneName;
-                if (m_VehicleState == NAME_SHOW ||
-                    m_VehicleState == NAME_FADE_IN)
+                if (m_VehicleState == NAME_SHOW || m_VehicleState == NAME_FADE_IN) {
                     m_VehicleState = NAME_FADE_OUT;
+                }
             }
             break;
         case NAME_SHOW:
@@ -539,9 +541,10 @@ void CHud::DrawAreaName() {
             m_ZoneFadeTimer = 1000;
         }
         break;
+
     case NAME_FADE_IN:
         if (!TheCamera.GetFading() && TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
-            m_ZoneFadeTimer += CTimer::GetTimeStepInMS();
+            m_ZoneFadeTimer += (int32)CTimer::GetTimeStepInMS();
         }
 
         if (m_ZoneFadeTimer > 1000) {
@@ -550,15 +553,16 @@ void CHud::DrawAreaName() {
         }
 
         if (TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
-            alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+            alpha = (float)m_ZoneFadeTimer / 1000.0f * 255.0f;
             break;
         }
         m_ZoneState = NAME_FADE_OUT;
         m_ZoneFadeTimer = 1000;
         break;
+
     case NAME_FADE_OUT:
         if (!TheCamera.GetFading() && TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
-            m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
+            m_ZoneFadeTimer -= (int32)CTimer::GetTimeStepInMS();
         }
 
         if (m_ZoneFadeTimer < 0) {
@@ -567,20 +571,22 @@ void CHud::DrawAreaName() {
         }
 
         if (TheCamera.GetScreenFadeStatus() != NAME_FADE_IN) {
-            alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+            alpha = (float)m_ZoneFadeTimer / 1000.0f * 255.0f;
             break;
         }
         m_ZoneFadeTimer = 1000;
         break;
+
     case NAME_SWITCH:
-        m_ZoneFadeTimer -= CTimer::GetTimeStepInMS();
-        if (m_ZoneFadeTimer < 0.0f) {
+        m_ZoneFadeTimer -= (int32)CTimer::GetTimeStepInMS();
+        if (m_ZoneFadeTimer < 0) {
             m_ZoneFadeTimer = 0;
             m_ZoneState = NAME_FADE_IN;
             m_ZoneToPrint = m_pLastZoneName;
         }
-        alpha = m_ZoneFadeTimer * 0.001f * 255.0f;
+        alpha = (float)m_ZoneFadeTimer / 1000.0f * 255.0f;
         break;
+
     default:
         break;
     }
@@ -590,23 +596,23 @@ void CHud::DrawAreaName() {
         return;
     }
 
-    m_ZoneNameTimer += CTimer::GetTimeStepInMS();
+    m_ZoneNameTimer += (uint32)CTimer::GetTimeStepInMS();
     CFont::SetProportional(true);
     CFont::SetBackground(false, false);
     CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.2f), SCREEN_SCALE_Y(1.9f));
     CFont::SetEdge(2);
     CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
     CFont::SetRightJustifyWrap(SCREEN_SCALE_FROM_RIGHT(180.0f));
-    CFont::SetDropColor(CRGBA(0, 0, 0, alpha));
+    CFont::SetDropColor(CRGBA(0, 0, 0, (uint8)alpha));
     CFont::SetFontStyle(FONT_GOTHIC);
     CZoneInfo* m_Info = CPopCycle::m_pCurrZoneInfo;
     if (CGangWars::bGangWarsActive && m_Info && m_Info->ZoneColor.r && m_Info->ZoneColor.g && m_Info->ZoneColor.b) {
         // Untested
-        CFont::SetColor(CRGBA(m_Info->ZoneColor.r, m_Info->ZoneColor.g, m_Info->ZoneColor.b, alpha));
+        CFont::SetColor(CRGBA(m_Info->ZoneColor.r, m_Info->ZoneColor.g, m_Info->ZoneColor.b, (uint8)alpha));
     } else {
-        CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_BLUE, alpha));
+        CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_BLUE, (uint8)alpha));
     }
-    CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0), SCREEN_SCALE_FROM_BOTTOM(28.0), m_ZoneToPrint);
+    CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(32.0f), SCREEN_SCALE_FROM_BOTTOM(28.0f), m_ZoneToPrint);
     CFont::SetSlant(0.0f);
 }
 
@@ -644,8 +650,8 @@ void CHud::DrawBustedWastedMessage() {
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
     CFont::SetFontStyle(FONT_GOTHIC);
     CFont::SetEdge(3);
-    CFont::SetDropColor(CRGBA(0, 0, 0, messageAlpha));
-    CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, messageAlpha));
+    CFont::SetDropColor(CRGBA(0, 0, 0, (uint8)messageAlpha));
+    CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, (uint8)messageAlpha));
     CFont::PrintStringFromBottom(SCREEN_WIDTH * 0.5f, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), message);
 }
 
@@ -656,40 +662,43 @@ void CHud::DrawCrossHairs() {
 
 // 0x58D580
 float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
-    uint32 operation, timer, fadeTimer;
+    uint32 state, timer, fadeTimer;
     switch (fadingElement) {
     case WANTED_STATE:
         fadeTimer = m_WantedFadeTimer;
-        operation = m_WantedState;
+        state = m_WantedState;
         timer = m_WantedTimer;
         break;
     case ENERGY_LOST_STATE:
         fadeTimer = m_EnergyLostFadeTimer;
-        operation = m_EnergyLostState;
+        state = m_EnergyLostState;
         timer = m_EnergyLostTimer;
         break;
     case DISPLAY_SCORE_STATE:
         fadeTimer = m_DisplayScoreFadeTimer;
-        operation = m_DisplayScoreState;
+        state = m_DisplayScoreState;
         timer = m_DisplayScoreTimer;
         break;
     case WEAPON_STATE:
         fadeTimer = m_WeaponFadeTimer;
-        operation = m_WeaponState;
+        state = m_WeaponState;
         timer = m_WeaponTimer;
         break;
     default:
+        state = fadingElement;
+        timer = fadingElement;
+        fadeTimer = fadingElement;
         break;
     }
 
     if (forceFadingIn) {
-        switch (operation) {
+        switch (state) {
         case NAME_DONT_SHOW:
             fadeTimer = 0;
         case NAME_SWITCH:
         case NAME_FADE_OUT:
             timer = 5;
-            operation = NAME_FADE_IN;
+            state = NAME_FADE_IN;
             break;
         default:
             break;
@@ -697,56 +706,56 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
     }
 
     float alpha = 255.0f;
-    if (operation != NAME_DONT_SHOW) {
-        switch (operation) {
+    if (state != NAME_DONT_SHOW) {
+        switch (state) {
         case NAME_SWITCH:
             fadeTimer = 1000;
             if (timer > 10000) {
                 fadeTimer = 3000;
-                operation = NAME_FADE_OUT;
+                state = NAME_FADE_OUT;
             }
             break;
         case NAME_FADE_IN:
-            fadeTimer += CTimer::GetTimeStepInMS();
+            fadeTimer += (uint32)CTimer::GetTimeStepInMS();
             if (fadeTimer > 1000) {
-                operation = NAME_SWITCH;
+                state = NAME_SWITCH;
                 fadeTimer = 1000;
             }
             alpha = float(fadeTimer) / 1000.0f * 255.0f;
             break;
         case NAME_FADE_OUT:
-            fadeTimer -= CTimer::GetTimeStepInMS();
+            fadeTimer -= (uint32)CTimer::GetTimeStepInMS();
             if (fadeTimer < 0) {
                 fadeTimer = 0;
-                operation = NAME_DONT_SHOW;
+                state = NAME_DONT_SHOW;
             }
             alpha = float(fadeTimer) / 1000.0f * 255.0f;
             break;
         default:
             break;
         }
-        timer += CTimer::GetTimeStepInMS();
+        timer += (uint32)CTimer::GetTimeStepInMS();
     }
 
     switch (fadingElement) {
     case WANTED_STATE:
         m_WantedFadeTimer = fadeTimer;
-        m_WantedState = operation;
+        m_WantedState = state;
         m_WantedTimer = timer;
         break;
     case ENERGY_LOST_STATE:
         m_EnergyLostFadeTimer = fadeTimer;
-        m_EnergyLostState = operation;
+        m_EnergyLostState = state;
         m_EnergyLostTimer = timer;
         break;
     case DISPLAY_SCORE_STATE:
         m_DisplayScoreFadeTimer = fadeTimer;
-        m_DisplayScoreState = operation;
+        m_DisplayScoreState = state;
         m_DisplayScoreTimer = timer;
         break;
     case WEAPON_STATE:
         m_WeaponFadeTimer = fadeTimer;
-        m_WeaponState = operation;
+        m_WeaponState = state;
         m_WeaponTimer = timer;
         break;
     default:
@@ -831,54 +840,61 @@ void CHud::DrawRadar() {
     ) {
         return;
     }
+
     RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwFILTERNEAREST));
 
     CRadar::DrawMap();
 
-    CRect rect;
+    if (FrontEndMenuManager.m_nRadarMode == eRadarMode::BLIPS_ONLY) {
+        CRadar::DrawBlips();
+        return;
+    }
+
     CVehicle* vehicle = FindPlayerVehicle();
     CPlayerPed* player = FindPlayerPed();
 
-    if (FrontEndMenuManager.m_nRadarMode != eRadarMode::BLIPS_ONLY) {
-        if (vehicle && (vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX)) {
-            if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
-                // Non reverse code
-                float angle = FindPlayerHeading(0) - CRadar::m_fRadarOrientation + PI;
-                // printf("angle %f\n",angle);
-                // CMatrixLink m_matrix = playerVehicle->GetMatrix();
-                // vector_constructor_403D60((char*)&rect, 8, 4, (int(__thiscall*)(_DWORD))CVector2D::CVector2D);
+    CRect rect;
+    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
+        float angle = FindPlayerHeading(0) - CRadar::m_fRadarOrientation + PI;
+        // todo: fix radar rotation
+        CRadar::DrawRotatingRadarSprite(
+            &Sprites[SPRITE_RADAR_RING_PLANE],
+            SCREEN_STRETCH_X(86.0f),
+            SCREEN_STRETCH_FROM_BOTTOM(67.0f),
+            angle,
+            (uint32)SCREEN_STRETCH_X(76.0f),
+            (uint32)SCREEN_STRETCH_Y(63.0f),
+            CRGBA(255, 255, 255, 255)
+        );
 
-                // long double v2 = -atan2(-m_matrix.GetRight().z, m_matrix.GetUp().z) - 0.78539819;
-                /* for (int i = 0; i < 4; i++) {
-                     *(&v66 + 2 * i) = sin(i * 1.5707964 + v2) * SCREEN_STRETCH_X(76.0) + SCREEN_STRETCH_X(87.0f);
-                    *(&v67 + 2 * i) = cos(i * 1.5707964 + v2) * SCREEN_SCALE_Y(76.0) + SCREEN_STRETCH_FROM_BOTTOM(84.0f);
-                 }*/
-                CRadar::DrawRotatingRadarSprite(
-                    &Sprites[SPRITE_RADAR_RING_PLANE],
-                    SCREEN_STRETCH_X(86.0f),
-                    SCREEN_STRETCH_FROM_BOTTOM(67.0f),
-                    angle,
-                    SCREEN_STRETCH_X(76.0f),
-                    SCREEN_STRETCH_Y(63.0f),
-                    CRGBA(255, 255, 255, 255)
-                );
-            }
-            /*if (!playerVehicle || playerVehicle->m_nVehicleSubType != VEHICLE_TYPE_PLANE &&
-                playerVehicle->m_nVehicleSubType != VEHICLE_TYPE_HELI ||
-                playerVehicle->m_nModelIndex == MODEL_VORTEX) {
-            }*/
+        // Altitude bar
+        rect.left = SCREEN_STRETCH_X(20.0f);
+        rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
+        rect.right = SCREEN_STRETCH_X(30.0f);
+        rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0f);
+        CSprite2d::DrawRect(rect, { 10, 10, 10, 100 });
 
-            // Padding from my head
-            rect.left = SCREEN_STRETCH_X(20.0f);
-            rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
-            rect.right = SCREEN_STRETCH_X(30.0f);
-            rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0f);
-            CSprite2d::DrawRect(rect, CRGBA(10, 10, 10, 100));
-        }
+        const CVector& pos = vehicle ? vehicle->GetPosition() : player->GetPosition();
+
+        auto lineY = 950.0f;
+        if (pos.z <= 200.0f) {
+            lineY = 200.0f;
+        };
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+
+        auto x1 = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
+        auto y1 = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
+        auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
+        auto y2 = y1 + 2.0f;
+        CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
     }
 
-    // ring orig padding +/- 3.0f
+    if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
+        if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
+            // todo: add missing code
+        }
+    }
 
     const auto black = CRGBA(0, 0, 0, 255);
 
@@ -895,12 +911,12 @@ void CHud::DrawRadar() {
     Sprites[SPRITE_RADAR_DISC].Draw(rect, black); // top right
 
     rect.left = SCREEN_STRETCH_X(36.0f);
-    rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0);
+    rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0f);
     rect.right = SCREEN_STRETCH_X(87.0f);
-    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0);
+    rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0f);
     Sprites[SPRITE_RADAR_DISC].Draw(rect, black); // bottom left
 
-    rect.left = SCREEN_STRETCH_X(138.0);
+    rect.left = SCREEN_STRETCH_X(138.0f);
     rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0f);
     rect.right = SCREEN_STRETCH_X(87.0f);
     rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0f);
@@ -971,37 +987,37 @@ void CHud::DrawVehicleName() {
         alpha = 255.0f;
         break;
     case NAME_FADE_IN:
-        m_VehicleFadeTimer += CTimer::GetTimeStepInMS();
+        m_VehicleFadeTimer += (int32)CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer > 1000) {
             m_VehicleFadeTimer = 1000;
             m_VehicleState = NAME_SHOW;
         }
-        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) / 1000.0f * 255.0f;
         break;
     case NAME_FADE_OUT:
-        m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
+        m_VehicleFadeTimer -= (int32)CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer < 0) {
             m_VehicleState = NAME_DONT_SHOW;
             m_VehicleFadeTimer = 0;
         }
-        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) / 1000.0f * 255.0f;
         break;
     case NAME_SWITCH:
-        m_VehicleFadeTimer -= CTimer::GetTimeStepInMS();
+        m_VehicleFadeTimer -= (int32)CTimer::GetTimeStepInMS();
         if (m_VehicleFadeTimer < 0) {
             m_VehicleNameTimer = 0;
             m_VehicleState = NAME_FADE_IN;
             m_VehicleFadeTimer = 0;
             m_pVehicleNameToPrint = m_pLastVehicleName;
         }
-        alpha = float(m_VehicleFadeTimer) * 0.001f * 255.0f;
+        alpha = float(m_VehicleFadeTimer) / 1000.0f * 255.0f;
         break;
     default:
         break;
     }
 
     if (!m_Message[0]) {
-        m_VehicleNameTimer += CTimer::GetTimeStepInMS();
+        m_VehicleNameTimer += (int32)CTimer::GetTimeStepInMS();
         CFont::SetProportional(true);
         CFont::SetBackground(false, false);
         CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.5f));
@@ -1133,8 +1149,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
 
 // 0x58EAF0
 void CHud::DrawPlayerInfo() {
-    // plugin::Call<0x58EAF0>();
-    // return;
+    return plugin::Call<0x58EAF0>();
 
     if (bDrawClock) {
         DrawClock();
@@ -1161,19 +1176,19 @@ void CHud::DrawPlayerInfo() {
         m_EnergyLostTimer = 5;
     LABEL_9:
         if (m_EnergyLostState == 2) {
-            m_EnergyLostFadeTimer += CTimer::GetTimeStepInMS();
+            m_EnergyLostFadeTimer += (uint32)CTimer::GetTimeStepInMS();
             if (m_EnergyLostFadeTimer > 1000.0) {
                 m_EnergyLostState = 1;
                 m_EnergyLostFadeTimer = 1000;
             }
         } else if (m_EnergyLostState == 3) {
-            m_EnergyLostFadeTimer += -CTimer::GetTimeStepInMS();
+            m_EnergyLostFadeTimer += uint32(-CTimer::GetTimeStepInMS());
             if (m_EnergyLostFadeTimer < 0) {
                 m_EnergyLostState = 0;
                 m_EnergyLostFadeTimer = 0;
             }
         }
-        m_EnergyLostTimer += CTimer::GetTimeStepInMS();
+        m_EnergyLostTimer += (uint32)CTimer::GetTimeStepInMS();
     LABEL_18:
         m_LastTimeEnergyLost = playerInfo.m_nLastTimeEnergyLost;
         goto LABEL_31;
@@ -1186,23 +1201,23 @@ void CHud::DrawPlayerInfo() {
             m_EnergyLostState = 3;
             m_EnergyLostFadeTimer = 3000;
         }
-        m_EnergyLostTimer += CTimer::GetTimeStepInMS();
+        m_EnergyLostTimer += (uint32)CTimer::GetTimeStepInMS();
         break;
     case 2:
-        m_EnergyLostFadeTimer += CTimer::GetTimeStepInMS();
+        m_EnergyLostFadeTimer += (uint32)CTimer::GetTimeStepInMS();
         if (m_EnergyLostFadeTimer > 1000) {
             m_EnergyLostState = 1;
             m_EnergyLostFadeTimer = 1000;
         }
-        m_EnergyLostTimer += CTimer::GetTimeStepInMS();
+        m_EnergyLostTimer += (uint32)CTimer::GetTimeStepInMS();
         break;
     case 3:
-        m_EnergyLostFadeTimer += -CTimer::GetTimeStepInMS();
+        m_EnergyLostFadeTimer += (uint32)(-CTimer::GetTimeStepInMS());
         if (m_EnergyLostFadeTimer < 0) {
             m_EnergyLostState = 0;
             m_EnergyLostFadeTimer = 0;
         }
-        m_EnergyLostTimer += CTimer::GetTimeStepInMS();
+        m_EnergyLostTimer += (uint32)CTimer::GetTimeStepInMS();
         break;
     default:
         break;
@@ -1295,7 +1310,7 @@ LABEL_59:
                     a1 = MoneyFadeTimer;
                     if (MoneyFadeTimer >= 0.0f) {
                     LABEL_70:
-                        alpha = a1 * 0.001f * 255.0f;
+                        alpha = a1 / 1000.0f * 255.0f;
                         goto LABEL_75;
                     }
                     MoneyFadeTimer = 0;
@@ -1335,7 +1350,7 @@ LABEL_59:
             a1a = MoneyFadeTimer;
             if (MoneyFadeTimer >= 0.0f) {
             LABEL_89:
-                alpha = a1a * 0.001f * 255.0f;
+                alpha = a1a / 1000.0f * 255.0f;
                 goto LABEL_94;
             }
             MoneyFadeTimer = 0;
@@ -1389,7 +1404,7 @@ LABEL_99:
                         m_WeaponState = 0;
                     }
                 }
-                alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
+                alpha = m_WeaponFadeTimer / 1000.0f * 255.0f;
                 goto LABEL_124;
             }
         } else {
@@ -1417,7 +1432,7 @@ LABEL_99:
                 m_WeaponFadeTimer = 1000;
                 m_WeaponState = 1;
             }
-            alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
+            alpha = m_WeaponFadeTimer / 1000.0f * 255.0f;
             m_WeaponTimer += CTimer::GetTimeStepInMS();
             break;
         case 3:
@@ -1426,7 +1441,7 @@ LABEL_99:
                 m_WeaponFadeTimer = 0;
                 m_WeaponState = 0;
             }
-            alpha = m_WeaponFadeTimer * 0.001f * 255.0f;
+            alpha = m_WeaponFadeTimer / 1000.0f * 255.0f;
             m_WeaponTimer += CTimer::GetTimeStepInMS();
             break;
         default:
@@ -1472,10 +1487,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
         sprintf(ascii, "-$%07d", m_nDisplayMoney);
     } else {
         CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GREEN, alpha));
-        auto v19 = playerInfo.m_nDisplayMoney;
-        if (v19 < 0)
-            v19 = -v19;
-        sprintf(ascii, "$%08d", v19);
+        sprintf(ascii, "$%08d", std::abs(playerInfo.m_nDisplayMoney));
     }
     AsciiToGxtChar(ascii, text);
     CFont::SetProportional(false);
@@ -1486,7 +1498,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
     CFont::SetFontStyle(FONT_PRICEDOWN);
     CFont::SetDropShadowPosition(0);
     CFont::SetEdge(2);
-    CFont::SetDropColor({0, 0, 0, uint8(alpha)});
+    CFont::SetDropColor({ 0, 0, 0, uint8(alpha) });
     CFont::PrintString(SCREEN_WIDTH - SCREEN_STRETCH_X(32.0f), GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(89.0f), 12), text);
     CFont::SetEdge(0);
 }
@@ -1544,8 +1556,6 @@ void CHud::DrawWanted() {
 
 // 0x58D7D0
 void CHud::DrawWeaponIcon(CPed* ped, int32 x, int32 y, float alpha) {
-    // plugin::Call<0x58D7D0, CPed*, int32, int32, float>(ped, x, y, alpha);
-
     const auto x0 = (float)x;
     const auto y0 = (float)y;
     const float width  = SCREEN_STRETCH_X(47.0f);
@@ -1606,7 +1616,7 @@ void CHud::RenderBreathBar(int32 playerId, int32 x, int32 y) {
     CSprite2d::DrawBarChart(
         (float)x,
         (float)y,
-        (uint16)SCREEN_STRETCH_X(2.0f),
+        (uint16)SCREEN_STRETCH_X(62.0f),
         (uint8)SCREEN_STRETCH_Y(9.0f),
         player->m_pPlayerData->m_fBreath / CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) * 100.0f,
         false,
@@ -1617,7 +1627,6 @@ void CHud::RenderBreathBar(int32 playerId, int32 x, int32 y) {
     );
 }
 
-// little bit different
 // 0x589270
 void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
     if (m_ItemToFlash == ITEM_HEALTH && EachFrames(8))
