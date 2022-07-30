@@ -883,16 +883,18 @@ void CHud::DrawRadar() {
         };
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
-        auto x1 = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
-        auto y1 = SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
+        auto x1 = SCREEN_STRETCH_X(15.0f);
+        auto y1 = SCREEN_STRETCH_FROM_RIGHT(28.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
         auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
         auto y2 = y1 + 2.0f;
         CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
     }
 
     if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
+        // todo fix ZOOM for VORTEX
         if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
             // todo: add missing code
+            // CRadar::DrawBlips();
         }
     }
 
@@ -1182,7 +1184,7 @@ void CHud::DrawPlayerInfo() {
                 m_EnergyLostFadeTimer = 1000;
             }
         } else if (m_EnergyLostState == 3) {
-            m_EnergyLostFadeTimer += uint32(-CTimer::GetTimeStepInMS());
+            m_EnergyLostFadeTimer -= (uint32)CTimer::GetTimeStepInMS();
             if (m_EnergyLostFadeTimer < 0) {
                 m_EnergyLostState = 0;
                 m_EnergyLostFadeTimer = 0;
@@ -1212,7 +1214,7 @@ void CHud::DrawPlayerInfo() {
         m_EnergyLostTimer += (uint32)CTimer::GetTimeStepInMS();
         break;
     case 3:
-        m_EnergyLostFadeTimer += (uint32)(-CTimer::GetTimeStepInMS());
+        m_EnergyLostFadeTimer -= (uint32)CTimer::GetTimeStepInMS();
         if (m_EnergyLostFadeTimer < 0) {
             m_EnergyLostState = 0;
             m_EnergyLostFadeTimer = 0;
@@ -1229,7 +1231,7 @@ LABEL_31:
     /*
      * Health Bar
      * */
-    const auto healthPosX = SCREEN_WIDTH - SCREEN_STRETCH_X(141.0f);
+    const auto healthPosX = SCREEN_STRETCH_FROM_RIGHT(141.0f); 
     RenderHealthBar(CWorld::PlayerInFocus, (int32)healthPosX, (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(77.0f), 10));
     if (ped1) {
         RenderHealthBar(1, (int32)healthPosX, (int32)GetYPosBasedOnHealth(1u, GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(194.0f), 12), 12));
@@ -1238,7 +1240,7 @@ LABEL_31:
     /*
      * Armor Bar
      * */
-    const auto armorPosX = SCREEN_WIDTH - SCREEN_STRETCH_X(94.0f);
+    const auto armorPosX = SCREEN_STRETCH_FROM_RIGHT(94.0f);
     RenderArmorBar(CWorld::PlayerInFocus, (int32)armorPosX, (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(48.0f), 3));
     if (ped1) {
         RenderArmorBar(1, (int32)armorPosX, (int32)GetYPosBasedOnHealth(1u, GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(164.0f), 12), 12));
@@ -1470,7 +1472,7 @@ inline void CHud::DrawClock() {
     sprintf(ascii, "%02d:%02d", CClock::ms_nGameClockHours, CClock::ms_nGameClockMinutes);
     AsciiToGxtChar(ascii, text);
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
-    CFont::PrintString(SCREEN_WIDTH - SCREEN_STRETCH_X(32.0f), SCREEN_STRETCH_Y(22.0f), text);
+    CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(32.0f), SCREEN_STRETCH_Y(22.0f), text);
     CFont::SetEdge(0);
 }
 
@@ -1499,7 +1501,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
     CFont::SetDropShadowPosition(0);
     CFont::SetEdge(2);
     CFont::SetDropColor({ 0, 0, 0, uint8(alpha) });
-    CFont::PrintString(SCREEN_WIDTH - SCREEN_STRETCH_X(32.0f), GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(89.0f), 12), text);
+    CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(32.0f), GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(89.0f), 12), text);
     CFont::SetEdge(0);
 }
 
@@ -1527,9 +1529,9 @@ inline void CHud::DrawWeapon(CPlayerPed* ped0, CPlayerPed* ped1) {
 void CHud::DrawTripSkip() {
     CRect rect{
         SCREEN_STRETCH_X(54.0f),
-        SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f),
-        SCREEN_STRETCH_X(64.0f) + SCREEN_STRETCH_X(54.0f),
-        SCREEN_STRETCH_Y(64.0f) + SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f)
+        SCREEN_STRETCH_FROM_BOTTOM(189.0f),
+        SCREEN_STRETCH_X(118.0f),
+        SCREEN_STRETCH_FROM_BOTTOM(125.0f)
     };
     Sprites[SPRITE_SKIP_ICON].Draw(rect, CRGBA(255, 255, 255, 255));
 
@@ -1544,7 +1546,7 @@ void CHud::DrawTripSkip() {
     CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
     CFont::PrintString(
         SCREEN_STRETCH_X(64.0f) / 2.0f + SCREEN_STRETCH_X(54.0f),
-        SCREEN_HEIGHT - SCREEN_STRETCH_Y(104.0f) - SCREEN_STRETCH_Y(85.0f) + SCREEN_STRETCH_Y(64.0f) - SCREEN_STRETCH_Y(2.0f),
+        SCREEN_STRETCH_FROM_BOTTOM(127.0f),
         TheText.Get("FEC_TSK") // TRIP SKIP
     );
 }
@@ -1638,8 +1640,9 @@ void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
 
     auto* playerInfo = player->GetPlayerInfoForThisPlayerPed();
     auto totalWidth = SCREEN_STRETCH_X((float)playerInfo->m_nMaxHealth * 109.0f) / CStats::GetFatAndMuscleModifier(STAT_MOD_10);
+
     CSprite2d::DrawBarChart(
-        SCREEN_STRETCH_X(109.0f) - totalWidth + (float)x,
+        SCREEN_STRETCH_X(109.0f) - totalWidth + (float)x, // Something wrong with X. Try Toggle Hud via Debug menu
         (float)y,
         (uint16)totalWidth,
         (uint8)SCREEN_STRETCH_Y(9.0f),
