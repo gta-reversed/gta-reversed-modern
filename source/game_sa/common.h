@@ -46,16 +46,10 @@ class CPedGroup;
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
-#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH  / (float) DEFAULT_SCREEN_WIDTH) // RsGlobal.maximumWidth * 0.0015625 * value
-#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / (float) DEFAULT_SCREEN_HEIGHT)
-#define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
-#define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
-
-// This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
-#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
-#define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
-#define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
+constexpr float SCREEN_STRETCH_X(float a)           { return a * SCREEN_WIDTH  / (float)DEFAULT_SCREEN_WIDTH; } // RsGlobal.maximumWidth * 0.0015625 * value
+constexpr float SCREEN_STRETCH_Y(float a)           { return a * SCREEN_HEIGHT / (float)DEFAULT_SCREEN_HEIGHT; }
+constexpr float SCREEN_STRETCH_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_STRETCH_X(a); }
+constexpr float SCREEN_STRETCH_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_STRETCH_Y(a); }
 
 #define ASPECT_RATIO_SCALE
 #ifdef ASPECT_RATIO_SCALE
@@ -63,6 +57,12 @@ class CPedGroup;
 #else
 #define SCREEN_SCALE_AR(a) (a)
 #endif
+
+// This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
+constexpr float SCREEN_SCALE_X(float a)           { return SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)); }
+constexpr float SCREEN_SCALE_Y(float a)           { return SCREEN_STRETCH_Y(a); } // RsGlobal.maximumHeight * 0.  * value
+constexpr float SCREEN_SCALE_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_SCALE_X(a); }
+constexpr float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_SCALE_Y(a); }
 
 #define PUSH_RENDERGROUP(str) 0
 #define POP_RENDERGROUP() 0
