@@ -13,6 +13,7 @@
 #include "GxtChar.h"
 #include "Vehicle.h"
 #include "EntryExitManager.h"
+#include "TaskSimpleUseGun.h"
 
 bool& CHud::bScriptDontDisplayAreaName = *(bool*)0xBAA3F8;
 bool& CHud::bScriptDontDisplayVehicleName = *(bool*)0xBAA3F9;
@@ -91,12 +92,12 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     //
-    // RH_ScopedInstall(DrawCrossHairs, 0x58E020);           //
+    RH_ScopedInstall(DrawCrossHairs, 0x58E020);              //
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTD
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // -
-    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);        //
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTD
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
     // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
@@ -659,7 +660,226 @@ void CHud::DrawBustedWastedMessage() {
 
 // 0x58E020
 void CHud::DrawCrossHairs() {
-    plugin::Call<0x58E020>();
+    CPlayerPed* const player = FindPlayerPed();
+    const CCam& currentCamera = CCamera::GetActiveCamera();
+    const auto& camMode = currentCamera.m_nMode;
+
+    bool bDrawCircleCrossHair = false;
+    bool bDrawCustomCrossHair = false;
+    bool bIgnoreCheckMeleeTypeWeapon = false;
+
+    CRect drawRect;
+
+    if (camMode != eCamMode::MODE_SNIPER) {
+        if (camMode == eCamMode::MODE_1STPERSON) {
+            CVehicle* vehicle = FindPlayerVehicle();
+            if (vehicle && (vehicle->m_nModelIndex == eModelID::MODEL_HYDRA || vehicle->m_nModelIndex == eModelID::MODEL_HUNTER)) {
+                bDrawCustomCrossHair = true;
+            }
+        } else if (
+            camMode != eCamMode::MODE_ROCKETLAUNCHER && camMode != eCamMode::MODE_ROCKETLAUNCHER_HS &&
+            camMode != eCamMode::MODE_M16_1STPERSON && camMode != eCamMode::MODE_HELICANNON_1STPERSON &&
+            camMode != eCamMode::MODE_CAMERA
+        ) {
+            bIgnoreCheckMeleeTypeWeapon = true;
+        }
+    }
+
+    auto& activeWeapon = player->GetActiveWeapon();
+    if (camMode != eCamMode::MODE_1STPERSON && player && !activeWeapon.IsTypeMelee() && !bIgnoreCheckMeleeTypeWeapon) {
+        bDrawCustomCrossHair = true;
+    }
+
+    if (camMode == eCamMode::MODE_M16_1STPERSON_RUNABOUT || camMode == eCamMode::MODE_ROCKETLAUNCHER_RUNABOUT ||
+        camMode == eCamMode::MODE_ROCKETLAUNCHER_RUNABOUT_HS || camMode == eCamMode::MODE_SNIPER_RUNABOUT) {
+        bDrawCircleCrossHair = true;
+    }
+
+    CTaskSimpleUseGun* localTakUseGun = player->GetIntelligence()->GetTaskUseGun();
+    if (!player->m_pTargetedObject && !player->bIsRestoringLook && (!localTakUseGun || !localTakUseGun->m_bSkipAim)) {
+        if (camMode == MODE_AIMWEAPON || camMode == MODE_AIMWEAPON_FROMCAR || camMode == MODE_AIMWEAPON_ATTACHED) {
+            if (player->m_nPedState != ePedState::PEDSTATE_ENTER_CAR && player->m_nPedState != ePedState::PEDSTATE_CARJACK) {
+                if ((activeWeapon.m_nType >= eWeaponType::WEAPON_PISTOL && activeWeapon.m_nType <= eWeaponType::WEAPON_COUNTRYRIFLE) ||
+                    activeWeapon.m_nType == eWeaponType::WEAPON_FLAMETHROWER || activeWeapon.m_nType == eWeaponType::WEAPON_MINIGUN
+                ) {
+                    bDrawCircleCrossHair = camMode != MODE_AIMWEAPON || !TheCamera.m_bTransitionState;
+                }
+            }
+        }
+    }
+
+    const CRGBA black = CRGBA(255, 255, 255, 255);
+    if (bDrawCircleCrossHair || bDrawCustomCrossHair || CTheScripts::bDrawCrossHair) {
+        if (bDrawCircleCrossHair) {
+            RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
+
+            float hairMultXOnScreen = SCREEN_WIDTH * CCamera::m_f3rdPersonCHairMultX;
+            float hairMultYOnScreen = SCREEN_HEIGHT * CCamera::m_f3rdPersonCHairMultY;
+            float gunRadius = player->GetWeaponRadiusOnScreen();
+
+            if (gunRadius == 0.2f) {
+                drawRect.left   = hairMultXOnScreen - 1.0f;
+                drawRect.top    = hairMultYOnScreen - 1.0f;
+                drawRect.right  = hairMultXOnScreen + 1.0f;
+                drawRect.bottom = hairMultYOnScreen + 1.0f;
+                CSprite2d::DrawRect(drawRect, black);
+            }
+
+            drawRect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            drawRect.top    = hairMultYOnScreen - SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+            drawRect.right  = drawRect.left     + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            drawRect.bottom = drawRect.top      + SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // left top
+
+            drawRect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            drawRect.top    = drawRect.top;
+            drawRect.right  = drawRect.right;
+            drawRect.bottom = drawRect.bottom;
+            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // right top
+
+            drawRect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            drawRect.top   += SCREEN_STRETCH_Y(64.0f * gunRadius);
+            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // left bottom
+
+            drawRect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+
+            RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+            return;
+        }
+
+        if (CTheScripts::bDrawCrossHair != 2) { // Is not camera type of CrossHair
+            if (camMode == MODE_M16_1STPERSON || camMode == MODE_M16_1STPERSON_RUNABOUT || camMode == MODE_1STPERSON_RUNABOUT ||
+                camMode == MODE_HELICANNON_1STPERSON) {
+                RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+
+                drawRect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // top left
+                drawRect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+
+                drawRect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // top right
+                drawRect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+
+                drawRect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // bottom left
+                drawRect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+
+                drawRect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // bottom right
+                drawRect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+
+                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
+                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+                return;
+            }
+        }
+
+        RwTexture* drawTexture = nullptr;
+        float screenStretchCrossHairX = 0.0f;
+        float screenStretchCrossHairY = 0.0f;
+        float screenOffsetCenterX = 0.0f;
+        float screenOffsetCenterY = 0.0f;
+        if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA ||
+            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == 2) {
+
+            if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == 2) {
+                screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
+                screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
+            } else {
+                screenStretchCrossHairX = SCREEN_STRETCH_X(210.0f);
+                screenStretchCrossHairY = SCREEN_STRETCH_Y(210.0f);
+            }
+
+            screenOffsetCenterX = 0.0f;
+            screenOffsetCenterY = 0.0f;
+
+            CWeaponInfo& weaponInfoOfActiveWeaponOne = activeWeapon.GetWeaponInfo(eWeaponSkill::STD);
+            if (weaponInfoOfActiveWeaponOne.m_nModelId1 <= 0) {
+                return;
+            }
+
+            CBaseModelInfo* mi = CModelInfo::GetModelInfo(weaponInfoOfActiveWeaponOne.m_nModelId1);
+            TxdDef* txd = CTxdStore::ms_pTxdPool->GetAt(mi->m_nTxdIndex);
+            if (!txd->m_pRwDictionary) {
+                return;
+            }
+            drawTexture = RwTexDictionaryFindHashNamedTexture(txd->m_pRwDictionary, CKeyGen::AppendStringToKey(mi->m_nKey, "CROSSHAIR"));
+        } else {
+            if (camMode != MODE_ROCKETLAUNCHER && camMode != MODE_1STPERSON && camMode != MODE_ROCKETLAUNCHER_RUNABOUT &&
+                camMode != MODE_ROCKETLAUNCHER_HS && camMode != MODE_ROCKETLAUNCHER_RUNABOUT_HS) {
+                return;
+            }
+            drawTexture = Sprites[SPRITE_SITE_ROCKET].m_pTexture;
+            screenStretchCrossHairX = SCREEN_STRETCH_X(24.0f);
+            screenStretchCrossHairY = SCREEN_STRETCH_Y(24.0f);
+            screenOffsetCenterX     = SCREEN_STRETCH_X(20.0f);
+            screenOffsetCenterY     = SCREEN_STRETCH_Y(20.0f);
+        }
+
+        if (drawTexture) {
+            RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+
+            RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+            RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(RwTextureAddressMode::rwTEXTUREADDRESSCLAMP));
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(drawTexture->raster));
+
+
+            CSprite::RenderOneXLUSprite(
+                (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
+                (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
+                1.0f,
+                screenStretchCrossHairX / 2.0f,
+                screenStretchCrossHairY / 2.0f,
+                255, 255, 255, 255, 0.01f, 255, 0, 0
+            );
+
+            CSprite::RenderOneXLUSprite(
+                (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
+                (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
+                1.0f,
+                screenStretchCrossHairX / 2.0f,
+                screenStretchCrossHairY / 2.0f,
+                255, 255, 255, 255, 0.01f, 255, 1, 0
+            );
+
+            CSprite::RenderOneXLUSprite(
+                (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
+                (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
+                1.0f,
+                screenStretchCrossHairX / 2.0f,
+                screenStretchCrossHairY / 2.0f,
+                255, 0, 0, 255, 0.01f, 255, 0, 1
+            );
+
+            CSprite::RenderOneXLUSprite(
+                (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
+                (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
+                1.0f,
+                screenStretchCrossHairX / 2.0f,
+                screenStretchCrossHairY / 2.0f,
+                255, 255, 255, 255, 0.01f, 255, 1, 1
+            );
+
+            RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+        }
+    }
 }
 
 // 0x58D580
