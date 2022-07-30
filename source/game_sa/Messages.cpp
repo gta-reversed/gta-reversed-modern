@@ -27,7 +27,7 @@ void CMessages::InjectHooks() {
     // RH_ScopedInstall(ClearThisBigPrint, 0x69EBE0);
     // RH_ScopedInstall(ClearThisPrintBigNow, 0x69ED80);
     // RH_ScopedInstall(Init, 0x69EE00);
-    // RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
+    RH_ScopedInstall(ClearAllMessagesDisplayedByGame, 0x69EDC0);
     // RH_ScopedInstall(Process, 0x69EE60);
     // RH_ScopedInstall(Display, 0x69EFC0);
     // RH_ScopedInstall(AddMessage, 0x69F0B0);
@@ -155,8 +155,10 @@ void CMessages::ClearThisPrintBigNow(eMessageStyle style) {
 
 // Removes all displayed messages
 // 0x69EDC0
-void CMessages::ClearAllMessagesDisplayedByGame(uint8 unk) {
-    plugin::Call<0x69EDC0, uint8>(unk);
+void CMessages::ClearAllMessagesDisplayedByGame(bool unk) {
+    ClearMessages(unk);
+    ClearPreviousBriefArray();
+    CHud::GetRidOfAllHudMessages(unk);
 }
 
 // Returns length of a string

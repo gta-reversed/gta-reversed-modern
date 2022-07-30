@@ -13,6 +13,7 @@
 #include "eCamMode.h"
 #include "eVehicleType.h"
 #include "ePedType.h"
+#include "Hud.h"
 
 class CEntity;
 class CVector;
@@ -461,7 +462,7 @@ public:
     bool GetLookingLRBFirstPerson();
     float GetPositionAlongSpline() const;
     float GetRoughDistanceToGround();
-    int32 GetScreenFadeStatus() const;
+    eNameState GetScreenFadeStatus() const;
     void GetScreenRect(CRect* rect);
     bool Get_Just_Switched_Status() const;
 

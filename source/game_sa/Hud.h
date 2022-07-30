@@ -7,7 +7,16 @@
 #pragma once
 
 #include "Stats.h"
+
 class CSprite2d;
+
+enum eHudItem {
+    ITEM_NONE   = -1,
+    ITEM_ARMOUR =  3,
+    ITEM_HEALTH =  4,
+    ITEM_RADAR  =  8,
+    ITEM_BREATH = 10,
+};
 
 enum DRAW_FADE_STATE {
     WANTED_STATE        = 0,
@@ -31,6 +40,18 @@ enum eHudSprite {
     SPRITE_RADAR_DISC,
     SPRITE_RADAR_RING_PLANE,
     SPRITE_SKIP_ICON
+};
+
+enum eBigMessageStyle : uint16 {
+    BIG_MESSAGE_STYLE_0,
+    BIG_MESSAGE_STYLE_1,
+    BIG_MESSAGE_STYLE_2,
+    BIG_MESSAGE_STYLE_3,
+    BIG_MESSAGE_STYLE_4,
+    BIG_MESSAGE_STYLE_5,
+    BIG_MESSAGE_STYLE_6,
+
+    NUM_BIG_MESSAGES
 };
 
 class CPed;
@@ -66,9 +87,9 @@ public:
     static inline uint32& m_LastTimeEnergyLost = *(uint32*)0xBAA440;
 
     static char*&    m_pVehicleNameToPrint;
-    static int32&    m_VehicleState;
-    static uint32&   m_VehicleFadeTimer;
-    static uint32&   m_VehicleNameTimer;
+    static eNameState& m_VehicleState;
+    static int32&   m_VehicleFadeTimer;
+    static int32&   m_VehicleNameTimer;
     static char*&    m_pLastVehicleName;
     static char*&    m_pVehicleName;
 
@@ -83,15 +104,15 @@ public:
     static uint16&   m_nHelpMessageStatId;
     static bool&     m_bHelpMessageQuick;
     static int32&    m_nHelpMessageState;
-    static int32&    m_nHelpMessageFadeTimer;
-    static int32&    m_nHelpMessageTimer;
+    static uint32&   m_nHelpMessageFadeTimer;
+    static uint32&   m_nHelpMessageTimer;
     static char      (&m_pHelpMessageToPrint)[400];
     static char      (&m_pLastHelpMessage)[400];
     static char      (&m_pHelpMessage)[400];
 
-    static int32&    m_ZoneState; // see eNameState
-    static int32&    m_ZoneFadeTimer;
-    static int32&    m_ZoneNameTimer;
+    static eNameState& m_ZoneState; // see eNameState
+    static int32&      m_ZoneFadeTimer;
+    static uint32&     m_ZoneNameTimer;
 
     static inline char (&m_Message)[400] = *(char (*)[400])0xBAB040;
     static inline char (&m_BigMessage)[7][128] = *(char (*)[7][128])0xBAACC0;
@@ -112,17 +133,17 @@ public:
     static void ReInitialise();
     static void Shutdown();
 
-    static void  GetRidOfAllHudMessages(uint8 arg0);
+    static void  GetRidOfAllHudMessages(bool arg0);
     static float GetYPosBasedOnHealth(uint8 playerId, float pos, int8 offset);
     static bool HelpMessageDisplayed();
 
     static void ResetWastedText();
 
-    static void SetBigMessage(char* text, uint16 style);
+    static void SetBigMessage(const char* message, eBigMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
-    static void SetMessage(char* text);
+    static void SetMessage(const char* message);
     static void SetVehicleName(char* name);
     static void SetZoneName(char* name, uint8 displayState);
 

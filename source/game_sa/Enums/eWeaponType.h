@@ -6,8 +6,7 @@
 */
 #pragma once
 
-enum eWeaponType : uint32
-{
+enum eWeaponType : uint32 {
     WEAPON_UNARMED = 0,
     WEAPON_BRASSKNUCKLE,
     WEAPON_GOLFCLUB,
@@ -78,4 +77,4 @@ enum eWeaponType : uint32
     WEAPON_ANYWEAPON,
     WEAPON_FLARE,
 };
-constexpr const auto void* NUM_WEAPONS{ (size_t)WEAPON_LAST_WEAPON + 1 };
+constexpr const auto NUM_WEAPONS{ (size_t)WEAPON_LAST_WEAPON + 1 };
