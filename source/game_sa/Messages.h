@@ -67,7 +67,7 @@ public:
     static void ClearThisPrint(const char* text);
     static void ClearThisBigPrint(const char* text);
     static void ClearThisPrintBigNow(eMessageStyle style);
-    static void ClearAllMessagesDisplayedByGame(uint8 unk);
+    static void ClearAllMessagesDisplayedByGame(bool unk);
 
     static uint32 GetStringLength(const char* string);
 
