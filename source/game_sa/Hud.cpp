@@ -747,7 +747,7 @@ void CHud::DrawCrossHairs() {
             return;
         }
 
-        if (CTheScripts::bDrawCrossHair != eCrossHairType::CAMERA) { // Is not camera type of CrossHair
+        if (CTheScripts::bDrawCrossHair != eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
             if (camMode == MODE_M16_1STPERSON || camMode == MODE_M16_1STPERSON_RUNABOUT || camMode == MODE_1STPERSON_RUNABOUT ||
                 camMode == MODE_HELICANNON_1STPERSON) {
                 RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
@@ -790,9 +790,9 @@ void CHud::DrawCrossHairs() {
         float screenOffsetCenterX = 0.0f;
         float screenOffsetCenterY = 0.0f;
         if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA ||
-            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == eCrossHairType::CAMERA) {
+            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
 
-            if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::CAMERA) {
+            if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
                 screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
                 screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
             } else {

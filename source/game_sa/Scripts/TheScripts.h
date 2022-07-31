@@ -24,8 +24,8 @@ enum eScriptParameterType;
 
 enum class eCrossHairType : uint32 {
     NONE,
-    GUN,
-    CAMERA
+    FIXED_DRAW_CIRCLE,
+    FIXED_DRAW_1STPERSON_WEAPON,
 };
 
 enum eScriptThingType : uint8 {
