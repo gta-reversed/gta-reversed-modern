@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Messages.h"
+#include "Hud.h"
 
 void CMessages::InjectHooks() {
     RH_ScopedClass(CMessages);

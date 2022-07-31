@@ -10,7 +10,6 @@
 #include "IdleCam.h"
 #include "MenuSystem.h"
 #include "Radar.h"
-#include "GxtChar.h"
 #include "Vehicle.h"
 #include "EntryExitManager.h"
 #include "TaskSimpleUseGun.h"
@@ -93,11 +92,11 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     //
     RH_ScopedInstall(DrawCrossHairs, 0x58E020);              //
-    RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTD
+    RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // -
-    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTD
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTED
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
     // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
@@ -163,7 +162,7 @@ void CHud::ReInitialise() {
     TimerMainCounterWasDisplayed = false;
     TimerMainCounterHideState = 0;
 
-    CPlayerInfo& playerInfo         = FindPlayerInfo();
+    const CPlayerInfo& playerInfo   = FindPlayerInfo();
     m_LastTimeEnergyLost            = playerInfo.m_nLastTimeEnergyLost;
     m_LastDisplayScore              = playerInfo.m_nDisplayMoney;
     m_fHelpMessageStatUpdateValue   = 0.0f;
@@ -668,8 +667,6 @@ void CHud::DrawCrossHairs() {
     bool bDrawCustomCrossHair = false;
     bool bIgnoreCheckMeleeTypeWeapon = false;
 
-    CRect drawRect;
-
     if (camMode != eCamMode::MODE_SNIPER) {
         if (camMode == eCamMode::MODE_1STPERSON) {
             CVehicle* vehicle = FindPlayerVehicle();
@@ -691,7 +688,8 @@ void CHud::DrawCrossHairs() {
     }
 
     if (camMode == eCamMode::MODE_M16_1STPERSON_RUNABOUT || camMode == eCamMode::MODE_ROCKETLAUNCHER_RUNABOUT ||
-        camMode == eCamMode::MODE_ROCKETLAUNCHER_RUNABOUT_HS || camMode == eCamMode::MODE_SNIPER_RUNABOUT) {
+        camMode == eCamMode::MODE_ROCKETLAUNCHER_RUNABOUT_HS || camMode == eCamMode::MODE_SNIPER_RUNABOUT
+    ) {
         bDrawCircleCrossHair = true;
     }
 
@@ -708,6 +706,7 @@ void CHud::DrawCrossHairs() {
         }
     }
 
+    CRect rect;
     const CRGBA black = CRGBA(255, 255, 255, 255);
     if (bDrawCircleCrossHair || bDrawCustomCrossHair || CTheScripts::bDrawCrossHair != eCrossHairType::NONE) {
         if (bDrawCircleCrossHair) {
@@ -719,31 +718,28 @@ void CHud::DrawCrossHairs() {
             float gunRadius = player->GetWeaponRadiusOnScreen();
 
             if (gunRadius == 0.2f) {
-                drawRect.left   = hairMultXOnScreen - 1.0f;
-                drawRect.top    = hairMultYOnScreen - 1.0f;
-                drawRect.right  = hairMultXOnScreen + 1.0f;
-                drawRect.bottom = hairMultYOnScreen + 1.0f;
-                CSprite2d::DrawRect(drawRect, black);
+                rect.left   = hairMultXOnScreen - 1.0f;
+                rect.top    = hairMultYOnScreen - 1.0f;
+                rect.right  = hairMultXOnScreen + 1.0f;
+                rect.bottom = hairMultYOnScreen + 1.0f;
+                CSprite2d::DrawRect(rect, black);
             }
 
-            drawRect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            drawRect.top    = hairMultYOnScreen - SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
-            drawRect.right  = drawRect.left     + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            drawRect.bottom = drawRect.top      + SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // left top
+            rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            rect.top    = hairMultYOnScreen - SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+            rect.right  = rect.left + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            rect.bottom = rect.top  + SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black); // left top
 
-            drawRect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            drawRect.top    = drawRect.top;
-            drawRect.right  = drawRect.right;
-            drawRect.bottom = drawRect.bottom;
-            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // right top
+            rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black); // right top
 
-            drawRect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            drawRect.top   += SCREEN_STRETCH_Y(64.0f * gunRadius);
-            Sprites[SPRITE_SITE_M16].Draw(drawRect, black); // left bottom
+            rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            rect.top   += SCREEN_STRETCH_Y(64.0f * gunRadius);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black); // left bottom
 
-            drawRect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+            rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
             RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
             RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
@@ -757,29 +753,29 @@ void CHud::DrawCrossHairs() {
                 RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
                 RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
 
-                drawRect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // top left
-                drawRect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
-                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+                rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // top left
+                rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-                drawRect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // top right
-                drawRect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
-                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+                rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // top right
+                rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-                drawRect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // bottom left
-                drawRect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
-                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+                rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // bottom left
+                rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-                drawRect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // bottom right
-                drawRect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
-                drawRect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                drawRect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(drawRect, black);
+                rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // bottom right
+                rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+                Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
                 RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
                 RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
@@ -832,11 +828,11 @@ void CHud::DrawCrossHairs() {
 
         if (drawTexture) {
             RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
-            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
 
-            RwRenderStateSet(rwRENDERSTATEZTESTENABLE, RWRSTATE(FALSE));
+            RwRenderStateSet(rwRENDERSTATEZTESTENABLE,    RWRSTATE(FALSE));
             RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(RwTextureAddressMode::rwTEXTUREADDRESSCLAMP));
-            RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(drawTexture->raster));
+            RwRenderStateSet(rwRENDERSTATETEXTURERASTER,  RWRSTATE(drawTexture->raster));
 
 
             CSprite::RenderOneXLUSprite(
@@ -1824,7 +1820,7 @@ inline void CHud::DrawMoney(const CPlayerInfo& playerInfo, uint8 alpha) {
 inline void CHud::DrawWeapon(CPlayerPed* ped0, CPlayerPed* ped1) {
     const auto magic = SCREEN_WIDTH * 0.17343046f; // todo: magic
     if (m_WeaponState) {
-        DrawWeaponIcon(ped0, SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic), SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
+        DrawWeaponIcon(ped0, SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + magic), (int32)SCREEN_STRETCH_Y(20.0f), (float)m_WeaponFadeTimer);
         if (ped1) {
             const auto posX = (int32)(SCREEN_WIDTH - (SCREEN_STRETCH_X(32.0f) + 111.0f));
             const auto posY = (int32)GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(138.0f), 12);

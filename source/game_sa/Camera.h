@@ -13,7 +13,6 @@
 #include "eCamMode.h"
 #include "eVehicleType.h"
 #include "ePedType.h"
-#include "Hud.h"
 
 class CEntity;
 class CVector;
@@ -454,17 +453,17 @@ public:
 
     void GetArrPosForVehicleType(eVehicleType type, int32& arrPos);
     uint32 GetCutSceneFinishTime();
-    bool GetFading() const;
-    int32 GetFadingDirection() const;
+    [[nodiscard]] bool GetFading() const;
+    [[nodiscard]] int32 GetFadingDirection() const;
     CVector* GetGameCamPosition();
     int32 GetLookDirection();
     bool GetLookingForwardFirstPerson();
     bool GetLookingLRBFirstPerson();
-    float GetPositionAlongSpline() const;
+    [[nodiscard]] float GetPositionAlongSpline() const;
     float GetRoughDistanceToGround();
-    eNameState GetScreenFadeStatus() const;
+    [[nodiscard]] enum eNameState GetScreenFadeStatus() const;
     void GetScreenRect(CRect* rect);
-    bool Get_Just_Switched_Status() const;
+    [[nodiscard]] bool Get_Just_Switched_Status() const;
 
     void HandleCameraMotionForDucking(CPed* ped, CVector* source, CVector* targPosn, bool arg5);
     void HandleCameraMotionForDuckingDuringAim(CPed* ped, CVector* source, CVector* targPosn, bool arg5);

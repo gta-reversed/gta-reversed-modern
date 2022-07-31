@@ -4,6 +4,7 @@
 
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleDuck.h"
+#include "Hud.h"
 
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
