@@ -9,17 +9,6 @@
 #include "platform.h"
 #include "LoadingScreen.h"
 
-// temp
-/*
-void RsCameraShowRaster(RwCamera* camera) {
-    plugin::Call<0x619440, RwCamera*>(camera);
-}
-*/
-
-CSprite2d& CLoadingScreen::GetCurrentDisplayedSplash() {
-    return m_aSplashes[m_currDisplayedSplash];
-}
-
 void CLoadingScreen::InjectHooks() {
     RH_ScopedClass(CLoadingScreen);
     RH_ScopedCategoryGlobal();

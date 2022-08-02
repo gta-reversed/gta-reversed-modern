@@ -63,7 +63,9 @@ public:
     static void NewChunkLoaded();
 
     // NOTSA
-    static CSprite2d& GetCurrentDisplayedSplash();
+    static CSprite2d& GetCurrentDisplayedSplash() {
+        return m_aSplashes[m_currDisplayedSplash];
+    }
 };
 
 void LoadingScreen(const char* msg1, const char* msg2 = nullptr, const char* msg3 = nullptr);
