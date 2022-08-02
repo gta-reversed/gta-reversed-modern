@@ -145,7 +145,7 @@ public:
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
     static void SetMessage(const char* message);
     static void SetVehicleName(char* name);
-    static void SetZoneName(char* name, uint8 displayState);
+    static void SetZoneName(char* name, bool displayImmediately);
 
     static void Draw();
     static void DrawAfterFade();

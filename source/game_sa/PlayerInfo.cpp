@@ -3,6 +3,7 @@
 #include "PlayerInfo.h"
 #include "FireManager.h"
 #include "MenuSystem.h"
+#include "Hud.h"
 
 void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);

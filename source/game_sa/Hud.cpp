@@ -382,10 +382,15 @@ void CHud::SetVehicleName(char* name) {
 }
 
 // 0x588BB0
-void CHud::SetZoneName(char* name, uint8 displayState) {
-    if (displayState || (!CGame::currArea && m_ZoneState == NAME_DONT_SHOW)) { // '&&' within '||'
+void CHud::SetZoneName(char* name, bool displayImmediately) {
+    if (displayImmediately) {
         m_pZoneName = name;
+        return;
     }
+    if (CGame::currArea || m_ZoneState != NAME_DONT_SHOW) {
+        return;
+    }
+    m_pZoneName = name;
 }
 
 // called each frame from Render2dStuff()
