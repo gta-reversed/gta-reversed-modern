@@ -85,7 +85,7 @@ void CLoadingScreen::RenderSplash() {
     CSprite2d::InitPerFrame();
     CRect rect(-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f);
     CRGBA color(255, 255, 255, 255);
-    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(3));
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(rwTEXTUREADDRESSCLAMP));
 
     if (m_bFading) {
         GetCurrentDisplayedSplash().Draw(rect, color);
@@ -130,7 +130,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     char name[20];
     for (auto id = 0; id < 7; id++) {
         if (starting) {
-            sprintf(name, (nvidia) ? "nvidia" : "eax");
+            sprintf(name, nvidia ? "nvidia" : "eax");
         } else if (id) {
             sprintf(name, "loadsc%d", screenIdx[id]);
         } else {
