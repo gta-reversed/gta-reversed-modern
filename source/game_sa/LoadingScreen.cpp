@@ -6,12 +6,18 @@
 */
 
 #include "StdInc.h"
-
+#include "platform.h"
 #include "LoadingScreen.h"
 
 // temp
+/*
 void RsCameraShowRaster(RwCamera* camera) {
     plugin::Call<0x619440, RwCamera*>(camera);
+}
+*/
+
+CSprite2d& CLoadingScreen::GetCurrentDisplayedSplash() {
+    return m_aSplashes[m_currDisplayedSplash];
 }
 
 void CLoadingScreen::InjectHooks() {
@@ -19,15 +25,15 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x5902B0);
-    // RH_ScopedInstall(Shutdown, 0x58FF10);
-    // RH_ScopedInstall(RenderSplash, 0x58FF60);
-    // RH_ScopedInstall(LoadSplashes, 0x5900B0);
+    RH_ScopedInstall(Shutdown, 0x58FF10);
+    RH_ScopedInstall(RenderSplash, 0x58FF60);
+    RH_ScopedInstall(LoadSplashes, 0x5900B0);
     RH_ScopedInstall(DisplayMessage, 0x590220);
     RH_ScopedInstall(SetLoadingBarMsg, 0x590240);
     RH_ScopedInstall(GetClockTime, 0x590280);
     RH_ScopedInstall(Pause, 0x590310);
     RH_ScopedInstall(Continue, 0x590320);
-    // RH_ScopedInstall(RenderLoadingBar, 0x590370);
+    RH_ScopedInstall(RenderLoadingBar, 0x590370);
     RH_ScopedInstall(DisplayNextSplash, 0x5904D0);
     RH_ScopedInstall(StartFading, 0x590530);
     RH_ScopedInstall(DisplayPCScreen, 0x590570);
@@ -35,7 +41,7 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
     // RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
-    // RH_ScopedInstall(NewChunkLoaded, 0x590D00);
+    RH_ScopedInstall(NewChunkLoaded, 0x590D00);
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
@@ -56,17 +62,88 @@ void CLoadingScreen::Init(bool unusedFlag, bool bLoaded) {
 
 // 0x58FF10
 void CLoadingScreen::Shutdown() {
-    plugin::Call<0x58FF10>();
+    //plugin::Call<0x58FF10>();
+
+    m_bActive = false;
+    for (auto splash : m_aSplashes) {
+        if (splash.m_pTexture) {
+            splash.Delete();
+        }
+    }
+
+    auto slot = CTxdStore::FindTxdSlot("loadscs");
+    if (slot != -1) {
+        CTxdStore::RemoveTxd(slot);
+        CTxdStore::RemoveTxdSlot(slot);
+    }
 }
 
 // 0x58FF60
 void CLoadingScreen::RenderSplash() {
-    plugin::Call<0x58FF60>();
+    // plugin::Call<0x58FF60>();
+
+    CSprite2d::InitPerFrame();
+    CRect rect(-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f);
+    CRGBA color(255, 255, 255, 255);
+    RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(3));
+
+    if (m_bFading) {
+        GetCurrentDisplayedSplash().Draw(rect, color);
+
+        if (m_bFadeInNextSplashFromBlack || m_bFadeOutCurrSplashToBlack) {
+            color.Set(0, 0, 0);
+            color.a = (CLoadingScreen::m_bFadeInNextSplashFromBlack) ? 255 - m_FadeAlpha : m_FadeAlpha;
+
+            CSprite2d::DrawRect(rect, color);
+        } else {
+            color.a = 255 - m_FadeAlpha;
+
+            auto next = &GetCurrentDisplayedSplash();
+            next++;
+            next->Draw(rect, color);
+        }
+    } else if (!m_bReadyToDelete) {
+        GetCurrentDisplayedSplash().Draw(rect, color);
+    }
 }
 
 // 0x5900B0
-void CLoadingScreen::LoadSplashes(bool bStarting, bool bNvidia) {
-    plugin::Call<0x5900B0, uint8, uint8>(bStarting, bNvidia);
+void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
+    // plugin::Call<0x5900B0, bool, bool>(starting, nvidia);
+    CFileMgr::SetDir("MODELS\\TXD\\");
+    auto slot = CTxdStore::AddTxdSlot("loadscs");
+    CTxdStore::LoadTxd(slot, "loadscs.txd");
+    CTxdStore::AddRef(slot);
+    CTxdStore::PushCurrentTxd();
+    CTxdStore::SetCurrentTxd(slot);
+
+    // srand affects the global state, can not be omitted.
+    LARGE_INTEGER pc;
+    QueryPerformanceCounter(&pc);
+    srand(pc.u.LowPart);
+
+    uint8 screenIdx[15];
+    std::iota(screenIdx, screenIdx + 15, 1u); // todo: rng::iota
+    rng::shuffle(screenIdx, std::mt19937{std::random_device{}()});
+    screenIdx[0] = 0u; // first index is always 0, "title_pcXX"
+
+    char name[20];
+    for (auto id = 0; id < 7; id++) {
+        if (starting) {
+            sprintf(name, (nvidia) ? "nvidia" : "eax");
+        } else if (id) {
+            sprintf(name, "loadsc%d", screenIdx[id]);
+        } else {
+#ifdef USE_EU_STUFF
+            sprintf(name, "title_pc_EU");
+#else
+            sprintf(name, "title_pc_US");
+#endif
+        }
+        m_aSplashes[id].SetTexture(name);
+    }
+    CTxdStore::PopCurrentTxd();
+    CFileMgr::SetDir("");
 }
 
 // 0x590220
@@ -111,7 +188,26 @@ void CLoadingScreen::Continue() {
 
 // 0x590370
 void CLoadingScreen::RenderLoadingBar() {
-    plugin::Call<0x590370>();
+    //plugin::Call<0x590370>();
+    auto color = HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255);
+
+    if (!m_bLegalScreen && gfLoadingPercentage > 0.0f && gfLoadingPercentage < 100.0f) {
+        CSprite2d::DrawBarChart(
+            SCREEN_STRETCH_X(50.0f),
+            SCREEN_STRETCH_FROM_BOTTOM(40.0f),
+            (uint16)SCREEN_STRETCH_X(180.0f),
+            (uint8)SCREEN_STRETCH_Y(10.0f),
+            gfLoadingPercentage,
+            0,
+            false,
+            true,
+            color,
+            CRGBA{ 0, 0, 0, 0 }
+        );
+        if (m_TimeBarAppeared == 0.0f) {
+            m_TimeBarAppeared = GetClockTime();
+        }
+    }
 }
 
 // 0x5904D0
@@ -197,7 +293,34 @@ void CLoadingScreen::DoPCScreenChange(uint32 bFinish) {
 
 // 0x590D00
 void CLoadingScreen::NewChunkLoaded() {
-    plugin::Call<0x590D00>();
+    //plugin::Call<0x590D00>();
+    if (!m_bActive)
+        return;
+
+    auto loaded = ++m_numChunksLoaded;
+    if (m_chunkBarAppeared != -1) {
+        gfLoadingPercentage = ((float)(loaded - m_chunkBarAppeared) / (140.0f - (float)m_chunkBarAppeared)) * 100.0f;
+    }
+
+    auto now = GetClockTime();
+    auto delta = now - m_timeSinceLastScreen;
+
+    if (m_numChunksLoaded == 140) {
+        return DoPCScreenChange((uint32)true);
+    }
+
+    if (m_currDisplayedSplash && delta < 5.0f) {
+        return DisplayPCScreen();
+    } else if (delta < 5.5f) {
+        return DisplayPCScreen();
+    }
+
+    DoPCScreenChange((uint32)false);
+    m_timeSinceLastScreen = now;
+
+    if (m_chunkBarAppeared == -1) {
+        m_chunkBarAppeared = m_numChunksLoaded;
+    }
 }
 
 // 0x53DED0

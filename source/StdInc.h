@@ -7,6 +7,8 @@
 #include <cmath>
 #include <cinttypes>
 #include <algorithm>
+#include <numeric>
+#include <random>
 #include <list>
 #include <map>
 #include <set>
