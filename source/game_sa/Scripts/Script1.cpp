@@ -422,7 +422,7 @@ OpcodeResult CRunningScript::ProcessCommands100To199(int32 commandId) {
     case COMMAND_SET_CAR_DRIVING_STYLE: // 0x0AE
     {
         CollectParameters(2);
-        auto* vehicle = GetVehiclePool()->GetAt(ScriptParams[0].iParam >> 8);
+        auto* vehicle = GetVehiclePool()->GetAtRef(ScriptParams[0].iParam);
         assert(vehicle);
         vehicle->m_autoPilot.m_nCarDrivingStyle = static_cast<eCarDrivingStyle>(ScriptParams[1].u8Param);
         return OR_CONTINUE;
