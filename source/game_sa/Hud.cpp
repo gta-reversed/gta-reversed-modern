@@ -87,7 +87,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    // ?
     // RH_ScopedInstall(SetMessage, 0x588F60);               // ?
     RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
-    RH_ScopedInstall(SetZoneName, 0x588BB0);                 // ?
+    RH_ScopedInstall(SetZoneName, 0x588BB0);                 // +
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // -
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // ?
@@ -95,7 +95,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTD
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
-    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // -
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // +
     // RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);        //
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
     // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
@@ -104,7 +104,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
     // RH_ScopedInstall(DrawVitalStats, 0x589650);           //
     RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // +
-    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // ?
+    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // ? Only Bars
     RH_ScopedInstall(DrawTripSkip, 0x58A160);                // +
     // RH_ScopedInstall(DrawWanted, 0x58D9A0);               //
     RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // +
@@ -778,18 +778,18 @@ void CHud::DrawMissionTimers() {
 // 0x58D240
 void CHud::DrawMissionTitle() {
     auto& message      = m_BigMessage[BIG_MESSAGE_STYLE_1];
-    auto& messageX     = BigMessageX[BIG_MESSAGE_STYLE_1];
+    auto& messageTimer     = BigMessageX[BIG_MESSAGE_STYLE_1];
     auto& messageAlpha = BigMessageAlpha[BIG_MESSAGE_STYLE_1];
     auto& messageInUse = BigMessageInUse[BIG_MESSAGE_STYLE_1];
 
     if (!message[0]) {
-        messageX = 0.0f;
+        messageTimer = 0.0f;
         return;
     }
 
-    if (messageX == 0.0f) {
+    if (messageInUse == 0.0f) {
         messageInUse = -60.0f;
-        messageX = 1.0f;
+        messageTimer = 1.0f;
         m_ZoneState = NAME_DONT_SHOW;
         m_ZoneFadeTimer = 0;
         SetHelpMessage(nullptr, true, false, false);
@@ -803,25 +803,26 @@ void CHud::DrawMissionTitle() {
     CFont::SetFontStyle(FONT_PRICEDOWN);
     CFont::SetScale(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.3f));
 
-    if (messageX >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
-        messageX += CTimer::GetTimeStep();
-        if (messageX >= 120.0f) {
-            messageX = 120.0f;
+    if (messageTimer >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
+        messageInUse += CTimer::GetTimeStep();
+        if (messageInUse >= 120.0f) {
+            messageInUse = 120.0f;
             messageAlpha -= CTimer::GetTimeStepInMS();
         }
         if (messageAlpha <= 0.0f) {
             messageAlpha = 0.0f;
             message[0] = 0;
-            messageX = 0.0f;
+            messageTimer = 0.0f;
         }
     } else {
-        messageAlpha = 255.0f;
-        messageInUse += CTimer::GetTimeStep() * 1000.0f * 0.006f;
+        messageTimer += SCREEN_SCALE_X((CTimer::GetTimeStepInMS() * 0.3f));
+        messageAlpha += CTimer::GetTimeStepInMS();
+        messageAlpha = std::min(messageAlpha, 255.0f);
     }
 
     CFont::SetEdge(2);
     CFont::SetDropColor(CRGBA(0, 0, 0, uint8(messageAlpha)));
-    CFont::SetColor(CRGBA(144, 98, 16, uint8(messageAlpha))); // Hud Gold Color
+    CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, (uint8)messageAlpha));
     CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0f), message);
     CFont::SetEdge(0);
 }
