@@ -29,7 +29,7 @@ void CLoadingScreen::InjectHooks() {
     // RH_ScopedInstall(Update, 0x5905E0);
     RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
-    // RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
+    RH_ScopedInstall(DoPCScreenChange, 0x590AC0, false);
     RH_ScopedInstall(NewChunkLoaded, 0x590D00);
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
@@ -268,7 +268,7 @@ void CLoadingScreen::DoPCTitleFadeIn() {
     }
 
     for (auto i = 50; i > 0; i--) {
-        m_FadeAlpha = (uint32)((float)i * 5.0f);
+        m_FadeAlpha = 5u * i;
         DisplayPCScreen();
     }
 
@@ -276,8 +276,51 @@ void CLoadingScreen::DoPCTitleFadeIn() {
 }
 
 // 0x590AC0
-void CLoadingScreen::DoPCScreenChange(uint32 bFinish) {
-    plugin::Call<0x590AC0, uint32>(bFinish);
+void CLoadingScreen::DoPCScreenChange(uint32 finish) {
+    //plugin::Call<0x590AC0, uint32>(finish);
+
+    m_bFading = true;
+    if (finish) {
+        m_bFadeOutCurrSplashToBlack = true;
+    } else {
+        m_currDisplayedSplash++;
+    }
+
+    const auto RenderFrame = [&] {
+        if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
+            DefinedState2d();
+            RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
+            RenderSplash();
+            if (m_currDisplayedSplash > 0 && !(m_bFading && m_currDisplayedSplash == 1)) {
+                RenderLoadingBar();
+            }
+            RwCameraEndUpdate(Scene.m_pRwCamera);
+            RsCameraShowRaster(Scene.m_pRwCamera);
+        }
+    };
+
+    for (auto i = 20; i > 0; i--) {
+        m_FadeAlpha = 0;
+        RenderFrame();
+    }
+
+    for (auto i = 0; i < 50; i++) {
+        m_FadeAlpha = 5u * i;
+
+        if (finish || m_bFadeInNextSplashFromBlack) {
+            auto amplitude = (!m_bFadeOutCurrSplashToBlack) ? 1.0f : (255.0f - 5.0f * i) / 255.0f;
+            AudioEngine.ServiceLoadingTune(amplitude);
+        }
+        RenderFrame();
+    }
+    m_FadeAlpha = 255u;
+    RenderFrame();
+    m_bFadeInNextSplashFromBlack = false;
+    m_bFading = false;
+
+    if (finish) {
+        Shutdown();
+    }
 }
 
 // 0x590D00
