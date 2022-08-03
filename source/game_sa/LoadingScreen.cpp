@@ -29,7 +29,7 @@ void CLoadingScreen::InjectHooks() {
     // RH_ScopedInstall(Update, 0x5905E0);
     RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
-    RH_ScopedInstall(DoPCScreenChange, 0x590AC0, false);
+    RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
     RH_ScopedInstall(NewChunkLoaded, 0x590D00);
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
@@ -51,8 +51,6 @@ void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
 
 // 0x58FF10
 void CLoadingScreen::Shutdown() {
-    //plugin::Call<0x58FF10>();
-
     m_bActive = false;
     for (auto splash : m_aSplashes) {
         if (splash.m_pTexture) {
@@ -69,8 +67,6 @@ void CLoadingScreen::Shutdown() {
 
 // 0x58FF60
 void CLoadingScreen::RenderSplash() {
-    // plugin::Call<0x58FF60>();
-
     CSprite2d::InitPerFrame();
     CRect rect(-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f);
     CRGBA color(255, 255, 255, 255);
@@ -98,7 +94,6 @@ void CLoadingScreen::RenderSplash() {
 
 // 0x5900B0
 void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
-    // plugin::Call<0x5900B0, bool, bool>(starting, nvidia);
     CFileMgr::SetDir("MODELS\\TXD\\");
     auto slot = CTxdStore::AddTxdSlot("loadscs");
     CTxdStore::LoadTxd(slot, "loadscs.txd");
@@ -177,7 +172,6 @@ void CLoadingScreen::Continue() {
 
 // 0x590370
 void CLoadingScreen::RenderLoadingBar() {
-    //plugin::Call<0x590370>();
     auto color = HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255);
 
     if (!m_bLegalScreen && gfLoadingPercentage > 0.0f && gfLoadingPercentage < 100.0f) {
@@ -202,7 +196,7 @@ void CLoadingScreen::RenderLoadingBar() {
 // 0x5904D0
 void CLoadingScreen::DisplayNextSplash() {
     if (m_currDisplayedSplash != 6 && !m_bFading) {
-        m_FadeAlpha = -1;
+        m_FadeAlpha = 255;
         if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
             DefinedState2d();
             RenderSplash();
@@ -247,11 +241,11 @@ void CLoadingScreen::DoPCTitleFadeOut() {
     m_bFading = true;
 
     for (auto i = 0; i < 50; i++) {
-        m_FadeAlpha = (uint32)((float)i * 5.0f);
+        m_FadeAlpha = 5u * i;
         DisplayPCScreen();
     }
 
-    m_FadeAlpha = -1;
+    m_FadeAlpha = 255;
     DisplayPCScreen();
     m_bFading = false;
 }
@@ -277,9 +271,8 @@ void CLoadingScreen::DoPCTitleFadeIn() {
 
 // 0x590AC0
 void CLoadingScreen::DoPCScreenChange(uint32 finish) {
-    //plugin::Call<0x590AC0, uint32>(finish);
-
     m_bFading = true;
+
     if (finish) {
         m_bFadeOutCurrSplashToBlack = true;
     } else {
@@ -325,7 +318,6 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
 
 // 0x590D00
 void CLoadingScreen::NewChunkLoaded() {
-    //plugin::Call<0x590D00>();
     if (!m_bActive)
         return;
 
