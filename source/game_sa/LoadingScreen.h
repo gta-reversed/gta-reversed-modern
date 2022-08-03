@@ -42,14 +42,14 @@ public:
 public:
     static void InjectHooks();
 
-    static void Init(bool unusedFlag, bool bLoaded);
+    static void Init(bool unusedFlag, bool loaded);
     static void Shutdown();
 
     static void RenderSplash();
-    static void LoadSplashes(bool bStarting, bool bNvidia);
+    static void LoadSplashes(bool starting, bool nvidia);
     static void DisplayMessage(const char* message);
     static void SetLoadingBarMsg(const char* msg1, const char* msg2);
-    static float GetClockTime(bool bIgnorePauseTime = true);
+    static float GetClockTime(bool ignorePauseTime = true);
     static void Pause();
     static void Continue();
     static void RenderLoadingBar();
@@ -59,7 +59,7 @@ public:
     static void Update();
     static void DoPCTitleFadeOut();
     static void DoPCTitleFadeIn();
-    static void DoPCScreenChange(uint32 bFinish);
+    static void DoPCScreenChange(uint32 finish);
     static void NewChunkLoaded();
 
     // NOTSA

@@ -36,11 +36,11 @@ void CLoadingScreen::InjectHooks() {
 }
 
 // 0x5902B0
-void CLoadingScreen::Init(bool unusedFlag, bool bLoaded) {
+void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
     if (m_bActive)
         return;
 
-    if (!bLoaded) {
+    if (!loaded) {
         LoadSplashes(false, false);
     }
 
@@ -154,9 +154,9 @@ void CLoadingScreen::SetLoadingBarMsg(const char* msg1, const char* msg2) {
 }
 
 // 0x590280
-float CLoadingScreen::GetClockTime(bool bIgnorePauseTime) {
+float CLoadingScreen::GetClockTime(bool ignorePauseTime) {
     float time = (float)GetMillisecondTime() / 1000.0f;
-    return bIgnorePauseTime ? time : time - m_PauseTime;
+    return ignorePauseTime ? time : time - m_PauseTime;
 }
 
 // 0x590310
