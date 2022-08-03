@@ -107,7 +107,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     srand(pc.u.LowPart);
 
     uint8 screenIdx[15];
-    std::iota(screenIdx, screenIdx + 15, 1u); // todo: rng::iota
+    std::iota(std::begin(screenIdx), std::end(screenIdx), 1u); // todo: rng::iota
     rng::shuffle(screenIdx, std::mt19937{std::random_device{}()});
     screenIdx[0] = 0u; // first index is always 0, "title_pcXX"
 
@@ -293,7 +293,7 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
         }
         DisplayPCScreen();
     }
-    m_FadeAlpha = 255u;
+    m_FadeAlpha = 255;
     DisplayPCScreen();
     m_bFadeInNextSplashFromBlack = false;
     m_bFading = false;
@@ -320,9 +320,7 @@ void CLoadingScreen::NewChunkLoaded() {
         return DoPCScreenChange((uint32)true);
     }
 
-    if (m_currDisplayedSplash && delta < 5.0f) {
-        return DisplayPCScreen();
-    } else if (delta < 5.5f) {
+    if ((m_currDisplayedSplash && delta < 5.0f) || delta < 5.5f) {
         return DisplayPCScreen();
     }
 

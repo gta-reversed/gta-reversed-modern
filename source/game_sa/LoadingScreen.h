@@ -16,8 +16,8 @@ public:
     static inline std::array<CSprite2d, 7>& m_aSplashes = *(std::array<CSprite2d, 7>*)0xBAB35C;
 
     static inline int32& m_currDisplayedSplash = *(int32*)0x8D093C;
-    static inline int32& m_numChunksLoaded = *(int32*)0x8D0940; // 0xFFFFFFFF
-    static inline int32& m_chunkBarAppeared = *(int32*)0x8D0944; // 0xFFFFFFFF
+    static inline int32& m_numChunksLoaded = *(int32*)0x8D0940; // -1
+    static inline int32& m_chunkBarAppeared = *(int32*)0x8D0944; // -1
 
     static inline bool& m_bActive = *(bool*)0xBAB318;
     static inline bool& m_bWantToPause = *(bool*)0xBAB319;
