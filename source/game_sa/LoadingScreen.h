@@ -48,7 +48,7 @@ public:
     static void LoadSplashes(bool starting, bool nvidia);
     static void DisplayMessage(const char* message);
     static void SetLoadingBarMsg(const char* msg1, const char* msg2);
-    static float GetClockTime(bool ignorePauseTime = true);
+    [[nodiscard]] static float GetClockTime(bool ignorePauseTime = true);
     static void Pause();
     static void Continue();
     static void RenderLoadingBar();
@@ -61,7 +61,11 @@ public:
     static void NewChunkLoaded();
 
     static void Update();
-    static bool inline IsActive();
+
+    // 0x744DB5
+    [[nodiscard]] static bool IsActive() {
+        return m_bActive;
+    }
 
     // NOTSA
     static CSprite2d& GetCurrentDisplayedSplash() {

@@ -336,11 +336,6 @@ void CLoadingScreen::Update() {
     plugin::Call<0x5905E0>();
 }
 
-// 0x744DB5, inlined
-bool CLoadingScreen::IsActive() {
-    return m_bActive;
-}
-
 // 0x53DED0
 void LoadingScreen(const char* msg1, const char* msg2, const char* msg3) {
     if (msg1) {
