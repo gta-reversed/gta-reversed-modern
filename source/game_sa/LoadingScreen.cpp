@@ -233,11 +233,6 @@ void CLoadingScreen::DisplayPCScreen() {
     }
 }
 
-// 0x5905E0, unused
-void CLoadingScreen::Update() {
-    plugin::Call<0x5905E0>();
-}
-
 // 0x590860
 void CLoadingScreen::DoPCTitleFadeOut() {
     m_bFadeInNextSplashFromBlack = true;
@@ -334,6 +329,11 @@ void CLoadingScreen::NewChunkLoaded() {
     if (m_chunkBarAppeared == -1) {
         m_chunkBarAppeared = m_numChunksLoaded;
     }
+}
+
+// 0x5905E0, unused
+void CLoadingScreen::Update() {
+    plugin::Call<0x5905E0>();
 }
 
 // 0x744DB5, inlined

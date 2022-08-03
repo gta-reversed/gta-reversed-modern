@@ -53,15 +53,16 @@ public:
     static void Pause();
     static void Continue();
     static void RenderLoadingBar();
-    static void DisplayNextSplash();
+    static void inline DisplayNextSplash();
     static void StartFading();
     static void inline DisplayPCScreen();
-    static void Update();
     static void DoPCTitleFadeOut();
     static void DoPCTitleFadeIn();
     static void DoPCScreenChange(uint32 finish);
     static void NewChunkLoaded();
-    static bool IsActive();
+
+    static void Update();
+    static bool inline IsActive();
 
     // NOTSA
     static CSprite2d& GetCurrentDisplayedSplash() {
