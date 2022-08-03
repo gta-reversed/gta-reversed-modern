@@ -61,6 +61,7 @@ public:
     static void DoPCTitleFadeIn();
     static void DoPCScreenChange(uint32 finish);
     static void NewChunkLoaded();
+    static bool IsActive();
 
     // NOTSA
     static CSprite2d& GetCurrentDisplayedSplash() {

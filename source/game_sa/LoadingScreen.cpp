@@ -31,13 +31,14 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
     RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
     RH_ScopedInstall(NewChunkLoaded, 0x590D00);
+    RH_ScopedInstall(IsActive, 0x744DB5);
 
     RH_ScopedGlobalInstall(LoadingScreen, 0x53DED0);
 }
 
 // 0x5902B0
 void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
-    if (m_bActive)
+    if (IsActive())
         return;
 
     if (!loaded) {
@@ -163,12 +164,13 @@ void CLoadingScreen::Pause() {
 
 // 0x590320
 void CLoadingScreen::Continue() {
-    if (m_bActive) {
-        m_bWantToPause = false;
-        if (m_bPaused) {
-            m_bPaused = false;
-            m_PauseTime = GetClockTime() - m_ClockTimeOnPause + m_PauseTime;
-        }
+    if (!IsActive())
+        return;
+
+    m_bWantToPause = false;
+    if (m_bPaused) {
+        m_bPaused = false;
+        m_PauseTime = GetClockTime() - m_ClockTimeOnPause + m_PauseTime;
     }
 }
 
@@ -195,7 +197,7 @@ void CLoadingScreen::RenderLoadingBar() {
     }
 }
 
-// 0x5904D0
+// 0x5904D0, inlined
 void CLoadingScreen::DisplayNextSplash() {
     if (m_currDisplayedSplash != 6 && !m_bFading) {
         m_FadeAlpha = 255;
@@ -231,7 +233,7 @@ void CLoadingScreen::DisplayPCScreen() {
     }
 }
 
-// 0x5905E0
+// 0x5905E0, unused
 void CLoadingScreen::Update() {
     plugin::Call<0x5905E0>();
 }
@@ -307,7 +309,7 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
 
 // 0x590D00
 void CLoadingScreen::NewChunkLoaded() {
-    if (!m_bActive)
+    if (!IsActive())
         return;
 
     auto loaded = ++m_numChunksLoaded;
@@ -332,6 +334,11 @@ void CLoadingScreen::NewChunkLoaded() {
     if (m_chunkBarAppeared == -1) {
         m_chunkBarAppeared = m_numChunksLoaded;
     }
+}
+
+// 0x744DB5, inlined
+bool CLoadingScreen::IsActive() {
+    return m_bActive;
 }
 
 // 0x53DED0
