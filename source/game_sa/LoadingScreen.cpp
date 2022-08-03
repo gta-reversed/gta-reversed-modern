@@ -106,10 +106,12 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     QueryPerformanceCounter(&pc);
     srand(pc.u.LowPart);
 
+    // NOTSA
     uint8 screenIdx[15];
-    std::iota(std::begin(screenIdx), std::end(screenIdx), 1u); // todo: rng::iota
-    rng::shuffle(screenIdx, std::mt19937{std::random_device{}()});
-    screenIdx[0] = 0u; // first index is always 0, "title_pcXX"
+    std::iota(std::begin(screenIdx), std::end(screenIdx), 0u); // todo: rng::iota
+
+    // exclude 0, title_pcXX.
+    std::shuffle(std::begin(screenIdx) + 1, std::end(screenIdx), std::mt19937{std::random_device{}()});
 
     char name[20];
     for (auto id = 0; id < 7; id++) {
