@@ -279,22 +279,9 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
         m_currDisplayedSplash++;
     }
 
-    const auto RenderFrame = [&] {
-        if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
-            DefinedState2d();
-            RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
-            RenderSplash();
-            if (m_currDisplayedSplash > 0 && !(m_bFading && m_currDisplayedSplash == 1)) {
-                RenderLoadingBar();
-            }
-            RwCameraEndUpdate(Scene.m_pRwCamera);
-            RsCameraShowRaster(Scene.m_pRwCamera);
-        }
-    };
-
     for (auto i = 20; i > 0; i--) {
         m_FadeAlpha = 0;
-        RenderFrame();
+        DisplayPCScreen();
     }
 
     for (auto i = 0; i < 50; i++) {
@@ -304,10 +291,10 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
             auto amplitude = (!m_bFadeOutCurrSplashToBlack) ? 1.0f : (255.0f - 5.0f * i) / 255.0f;
             AudioEngine.ServiceLoadingTune(amplitude);
         }
-        RenderFrame();
+        DisplayPCScreen();
     }
     m_FadeAlpha = 255u;
-    RenderFrame();
+    DisplayPCScreen();
     m_bFadeInNextSplashFromBlack = false;
     m_bFading = false;
 
