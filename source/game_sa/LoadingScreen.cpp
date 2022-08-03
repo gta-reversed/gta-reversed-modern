@@ -115,7 +115,7 @@ void CLoadingScreen::LoadSplashes(bool starting, bool nvidia) {
     std::shuffle(std::begin(screenIdx) + 1, std::end(screenIdx), std::mt19937{std::random_device{}()});
 
     char name[20];
-    for (auto id = 0; id < 7; id++) {
+    for (auto id = 0u; id < MAX_SPLAHES; id++) {
         if (starting) {
             sprintf(name, nvidia ? "nvidia" : "eax");
         } else if (id) {

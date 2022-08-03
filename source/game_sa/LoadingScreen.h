@@ -10,10 +10,12 @@ class CSprite2d;
 
 class CLoadingScreen {
 public:
+    static constexpr size_t MAX_SPLAHES = 7u;
+
     static inline char (&m_PopUpMessage)[16] = *(char (*)[16])0xBAB268;
     static inline char (&m_LoadingGxtMsg1)[80] = *(char (*)[80])0xBAB2C8;
     static inline char (&m_LoadingGxtMsg2)[80] = *(char (*)[80])0xBAB278;
-    static inline std::array<CSprite2d, 7>& m_aSplashes = *(std::array<CSprite2d, 7>*)0xBAB35C;
+    static inline std::array<CSprite2d, MAX_SPLAHES>& m_aSplashes = *(std::array<CSprite2d, MAX_SPLAHES>*)0xBAB35C;
 
     static inline int32& m_currDisplayedSplash = *(int32*)0x8D093C;
     static inline int32& m_numChunksLoaded = *(int32*)0x8D0940; // -1
