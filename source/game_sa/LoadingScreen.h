@@ -34,7 +34,6 @@ public:
     static inline float& m_PauseTime = *(float*)0xBAB32C;
 
     static inline float& gfLoadingPercentage = *(float*)0xBAB330;
-    static inline float& flt_BAB334 = *(float*)0xBAB334;
     static inline float& m_TimeBarAppeared = *(float*)0xBAB338;
 
     static inline float& m_timeSinceLastScreen = *(float*)0xBAB340;
