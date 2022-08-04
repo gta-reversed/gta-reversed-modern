@@ -1122,7 +1122,7 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
     float colAngleMult = 0.0f;
     uint16 angleDiff = m_wMiscComponentAngle - m_wMiscComponentAnglePrev;
     if (angleDiff <= 100 && angleDiff >= -100) { // todo: Result of comparison of constant -100 with expression of type 'uint16' (aka 'unsigned short') is always true
-        CVector colPivot;
+        CVector colPivot{};
         RwFrame* carNodeMisc = nullptr;
         if (ModelIndices::IsDumper(m_nModelIndex)) {
             carNodeMisc = m_aCarNodes[CAR_MISC_C];
