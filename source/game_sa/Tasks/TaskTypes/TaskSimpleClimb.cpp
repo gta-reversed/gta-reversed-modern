@@ -167,7 +167,7 @@ bool CTaskSimpleClimb::ProcessPed_Reversed(CPed* ped) {
                 ped->m_vecMoveSpeed += vecClimbEntSpeed;
 
                 if (!(m_pAnim->m_nFlags & ANIMATION_STARTED) || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE) {
-                    m_nGetToPosCounter += CTimer::GetTimeStepInMS();
+                    m_nGetToPosCounter += (uint16)CTimer::GetTimeStepInMS();
                     if (m_nGetToPosCounter > 1000 || m_pAnim->m_nAnimId == ANIM_ID_CLIMB_IDLE && m_nGetToPosCounter > 500) {
                         m_bInvalidClimb = true;
                         MakeAbortable(ped, ABORT_PRIORITY_URGENT, nullptr);

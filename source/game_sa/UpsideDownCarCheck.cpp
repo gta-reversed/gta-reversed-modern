@@ -53,7 +53,7 @@ void CUpsideDownCarCheck::UpdateTimers() {
 
         if (const auto vehicle = CPools::GetVehicle(car.m_nHandle)) {
             if (IsCarUpsideDown(vehicle)) {
-                car.m_nTime += CTimer::GetTimeStepInMS();
+                car.m_nTime += (uint32)CTimer::GetTimeStepInMS();
             } else {
                 car.m_nTime = 0;
             }
