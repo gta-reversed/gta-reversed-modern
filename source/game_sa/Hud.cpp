@@ -857,15 +857,16 @@ void CHud::DrawRadar() {
 
     CRect rect;
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
-        float angle = FindPlayerHeading(0) - CRadar::m_fRadarOrientation + PI;
-        // todo: fix radar rotation
+        // float angle = PI - FindPlayerHeading(0) I Dunno ;
+        float angle = PI - atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
+
         CRadar::DrawRotatingRadarSprite(
             &Sprites[SPRITE_RADAR_RING_PLANE],
-            SCREEN_STRETCH_X(86.0f),
-            SCREEN_STRETCH_FROM_BOTTOM(67.0f),
+            SCREEN_STRETCH_X(87.0f),
+            SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
-            (uint32)SCREEN_STRETCH_X(76.0f),
-            (uint32)SCREEN_STRETCH_Y(63.0f),
+            (uint32)SCREEN_STRETCH_X(78.0f),
+            (uint32)SCREEN_STRETCH_Y(59.0f),
             CRGBA(255, 255, 255, 255)
         );
 
