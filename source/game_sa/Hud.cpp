@@ -856,21 +856,20 @@ void CHud::DrawRadar() {
     CPlayerPed* player = FindPlayerPed();
 
     CRect rect;
-    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
-        // float angle = PI - FindPlayerHeading(0) I Dunno ;
-        float angle = PI - atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
+    if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX || player->GetActiveWeapon().m_nType == WEAPON_PARACHUTE) {
+        if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
+            // float angle = PI - FindPlayerHeading(0) I Dunno ;
+            float angle = PI - atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
 
-        CRadar::DrawRotatingRadarSprite(
-            &Sprites[SPRITE_RADAR_RING_PLANE],
-            SCREEN_STRETCH_X(87.0f),
-            SCREEN_STRETCH_FROM_BOTTOM(66.0f),
-            angle,
-            (uint32)SCREEN_STRETCH_X(78.0f),
-            (uint32)SCREEN_STRETCH_Y(59.0f), // R U Kiddin Me?
-            CRGBA(255, 255, 255, 255)
-        );
-
-        // Altitude bar
+            CRadar::DrawRotatingRadarSprite(
+                &Sprites[SPRITE_RADAR_RING_PLANE],
+                SCREEN_STRETCH_X(87.0f),
+                SCREEN_STRETCH_FROM_BOTTOM(66.0f),
+                angle,
+                (uint32)SCREEN_STRETCH_X(78.0f),
+                (uint32)SCREEN_STRETCH_Y(59.0f),
+                CRGBA(255, 255, 255, 255));
+        }
         rect.left = SCREEN_STRETCH_X(20.0f);
         rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
         rect.right = SCREEN_STRETCH_X(30.0f);
@@ -894,10 +893,6 @@ void CHud::DrawRadar() {
 
     if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
         // todo fix ZOOM for VORTEX
-        if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
-            // todo: add missing code
-            // CRadar::DrawBlips();
-        }
     }
 
     const auto black = CRGBA(0, 0, 0, 255);
