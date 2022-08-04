@@ -891,10 +891,6 @@ void CHud::DrawRadar() {
         CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
     }
 
-    if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
-        // todo fix ZOOM for VORTEX
-    }
-
     const auto black = CRGBA(0, 0, 0, 255);
 
     rect.left = SCREEN_STRETCH_X(36.0f);
