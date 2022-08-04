@@ -866,7 +866,7 @@ void CHud::DrawRadar() {
             SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
             (uint32)SCREEN_STRETCH_X(78.0f),
-            (uint32)SCREEN_STRETCH_Y(59.0f),
+            (uint32)SCREEN_STRETCH_Y(59.0f), // R U Kiddin Me?
             CRGBA(255, 255, 255, 255)
         );
 
@@ -886,7 +886,7 @@ void CHud::DrawRadar() {
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
         auto x1 = SCREEN_STRETCH_X(15.0f);
-        auto y1 = SCREEN_STRETCH_FROM_RIGHT(28.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
+        auto y1 = SCREEN_STRETCH_FROM_BOTTOM(28.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
         auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
         auto y2 = y1 + 2.0f;
         CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
