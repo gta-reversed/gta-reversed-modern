@@ -29,6 +29,8 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
+constexpr float DegreesToRadians(float angleInDegrees); // forward declaration
+
 #define DEFAULT_SCREEN_WIDTH  (640)
 #define DEFAULT_SCREEN_HEIGHT (448)
 #define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
@@ -41,7 +43,7 @@ class CPedGroup;
 #define SCREEN_WIDTH ((float)RsGlobal.maximumWidth)
 #define SCREEN_HEIGHT ((float)RsGlobal.maximumHeight)
 #define SCREEN_ASPECT_RATIO (CDraw::ms_fAspectRatio)
-#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
+float SCREEN_VIEW_WINDOW() { return std::tan(DegreesToRadians(CDraw::GetFOV() / 2.0f)); } // todo: GetScaledFov
 #define SCREEN_WIDTH_UNIT (SCREEN_WIDTH / 640.0f)
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
