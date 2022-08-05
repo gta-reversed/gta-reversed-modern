@@ -47,6 +47,6 @@ public:
     static void ClearRespawnPointForDurationOfMission();
     static void FindClosestHospitalRestartPoint(CVector point, CVector& outPos, float& outAngle);
     static void FindClosestPoliceRestartPoint(CVector point, CVector& storedPoint, float& outAngle);
-    static void Load();
-    static void Save();
+    static bool Load();
+    static bool Save();
 };

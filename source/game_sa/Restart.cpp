@@ -173,7 +173,7 @@ void CRestart::FindClosestPoliceRestartPoint(CVector point, CVector& outPos, flo
 }
 
 // 0x5D3770
-void CRestart::Load() {
+bool  CRestart::Load() {
     Initialise();
 
     CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfHospitalRestarts, 2);
@@ -202,10 +202,11 @@ void CRestart::Load() {
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Pos, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Radius, 4);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Angle, 4);
+    return true;
 }
 
 // 0x5D3620
-void CRestart::Save() {
+bool CRestart::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&NumberOfHospitalRestarts, 2);
     for (auto i = 0; i < NumberOfHospitalRestarts; ++i) {
         CGenericGameStorage::SaveDataToWorkBuffer(&HospitalRestartPoints[i], 12);
@@ -232,4 +233,5 @@ void CRestart::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Pos, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Radius, 4);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraPoliceRestartPoint_Angle, 4);
+    return true;
 }
