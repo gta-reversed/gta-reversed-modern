@@ -136,7 +136,7 @@ void COnscreenTimer::SetCounterFlashWhenFirstDisplayed(uint32 varId, bool bFlash
 
 // 0x44CD30
 void COnscreenTimer::Process() {
-    if (CReplay::Mode == REPLAY_MODE_1 || m_bPaused)
+    if (CReplay::Mode == MODE_PLAYBACK || m_bPaused)
         return;
 
     m_Clock.Process();

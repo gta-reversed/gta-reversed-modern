@@ -26,20 +26,20 @@ public:
     char                   m_nDrivebyStyle;
     int8                   m_nFrequencyPercentage;
     char                   m_nFakeShootDirn;
-    char                   _pad;
     int16                  m_nAttackTimer;
     uint32                 m_nLOSCheckTime;
     bool                   m_nLOSBlocked;
-    char                   _pad2[3];
     float                  m_fAbortRange;
     int32                  m_nRequiredAnimID;
-    int32                  m_nRequiredAnimGroup;
+    AssocGroupId           m_nRequiredAnimGroup;
     CAnimBlendAssociation* m_pAnimAssoc;
     CWeaponInfo*           m_pWeaponInfo;
     CEntity*               m_pTargetEntity;
     CVector                m_vecCoords;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GANG_DRIVEBY;
+
     CTaskSimpleGangDriveBy(CEntity *target, const CVector *targetPos, float abortRange, int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS);
     ~CTaskSimpleGangDriveBy();
 

@@ -3,6 +3,8 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
+#include "reversiblehooks/ReversibleHook/Base.h"
+#include "reversiblehooks/ReversibleHook/Simple.h"
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -10,6 +12,7 @@
 #include <string>
 #include <ranges>
 #include <optional>
+#include <format>
 
 namespace RH = ReversibleHooks;
 namespace rng = std::ranges;
@@ -28,10 +31,10 @@ namespace HookFilter {
     //static inline const std::regex INPUT_VALID_REGEX{
     //    R"r(\/?(?:\w+\/)*\w+(?:\:{2}\w*|\:))r", // We're using in r-string here to avoid the need of escaping all `\`
     //    std::regex::optimize | std::regex::icase
-    //}; 
+    //};
 
     // Used as char buffer for the ImGUI input
-    std::string m_input{};          
+    std::string m_input{};
 
     // Are the string checks case sensitive?
     // It is used, but there's no GUI to change it for now. It is case-insensitive by defult (false).
@@ -48,7 +51,7 @@ namespace HookFilter {
     // Filter of hook name
     // If `nullopt` means there was no `::` (HOOKNAME_SEP) in the user input
     // othewise if there was, it contains whatever was after it (Which might be nothing - So it's empty)
-    std::optional<std::string_view> m_hookFilter{}; 
+    std::optional<std::string_view> m_hookFilter{};
 
     // Clears both filters
     // Making all items visible again is done by `DoFilter`
@@ -140,7 +143,7 @@ namespace HookFilter {
                 } else {
                     cat.m_anyItemsVisible = true;
                     for (auto& i : cat.Items()) {
-                        i->m_isVisible = true; 
+                        i->m_isVisible = true;
                     }
                 }
             }
@@ -155,7 +158,7 @@ namespace HookFilter {
                 const auto ProcessFilter = [&]() -> bool {
                     if (depth == 0) { // Special case - Root namespace depth, no need to check any tokens
                         assert(m_namespaceTokens.front().empty()); // This codepath should be unreachable unless first token is empty
-                        return true; 
+                        return true;
                     } else if (depth < m_namespaceTokens.size()) {
                         if (   hasSubCategories                      // Unless we're last category to match we must have more sub-categories so all tokens can match
                             || depth == m_namespaceTokens.size() - 1 // Last token to match, so there will be no more, thus it's fine if there are no more subcategories.
@@ -239,11 +242,11 @@ namespace HookFilter {
 ;       } else {
             // Filter by hook names
             // Category is visible if it:
-            // - It has visible hooks (After filtering) 
+            // - It has visible hooks (After filtering)
             // - Or it has visible sub-categories
 
             const auto itemsVisible = ProcessItems(true); // Filter items
-            const auto [anySCVisible, anySCOpen] = ProcessSubCategories(); 
+            const auto [anySCVisible, anySCOpen] = ProcessSubCategories();
 
             const auto open = itemsVisible || anySCOpen;
 
@@ -261,7 +264,7 @@ namespace HookFilter {
             DoFilter_Internal(cat);
         } else {
             MakeAllVisibleAndOpen(cat, true, false); // Make all visible, but closed
-        }        
+        }
     }
 
     void OnInputUpdate() {
@@ -273,7 +276,7 @@ namespace HookFilter {
             return; // No filters
         }
 
-        {   
+        {
             const auto sepPos = inputsv.rfind(HOOKNAME_SEP);
 
             // First half contains the namespace filter tokens
@@ -393,6 +396,23 @@ void RenderCategory(RH::HookCategory& cat) {
                             cat.SetItemEnabled(item, hooked);
                         }
                         PopID(); // State checkbox
+                    }
+
+                    if (IsItemHovered()) {
+                        switch (item->Type()) {
+                        case RH::ReversibleHook::Base::HookType::Simple: {
+                            auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
+
+                            SetTooltip("GTA: %#x | Our: %#x", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
+
+                            if (IsItemClicked(ImGuiMouseButton_Middle)) {
+                                SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());
+                            } else if (IsItemClicked(ImGuiMouseButton_Right)) {
+                                SetClipboardText(std::format("{:#x}", s->m_iLibFunctionAddress).c_str());
+                            }
+                            break;
+                        }
+                        }
                     }
 
                     PopID(); // This hook

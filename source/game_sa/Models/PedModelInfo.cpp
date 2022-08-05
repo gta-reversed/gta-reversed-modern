@@ -2,14 +2,13 @@
 
 #include "PedModelInfo.h"
 
-void CPedModelInfo::InjectHooks()
-{
+void CPedModelInfo::InjectHooks() {
     RH_ScopedClass(CPedModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C57C0);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C6C50);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C7340);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C57C0);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C6C50);
+    RH_ScopedVirtualInstall(SetClump, 0x4C7340);
     RH_ScopedInstall(AddXtraAtomics, 0x4C6D40);
     RH_ScopedInstall(SetFaceTexture, 0x4C6D50);
     RH_ScopedInstall(CreateHitColModelSkinned, 0x4C6D90);
@@ -19,34 +18,28 @@ void CPedModelInfo::InjectHooks()
 }
 
 // 0x4C57C0
-ModelInfoType CPedModelInfo::GetModelType()
-{
+ModelInfoType CPedModelInfo::GetModelType() {
     return CPedModelInfo::GetModelType_Reversed();
 }
-ModelInfoType CPedModelInfo::GetModelType_Reversed()
-{
+ModelInfoType CPedModelInfo::GetModelType_Reversed() {
     return ModelInfoType::MODEL_INFO_PED;
 }
 
 // 0x4C6C50
-void CPedModelInfo::DeleteRwObject()
-{
+void CPedModelInfo::DeleteRwObject() {
     CPedModelInfo::DeleteRwObject_Reversed();
 }
-void CPedModelInfo::DeleteRwObject_Reversed()
-{
+void CPedModelInfo::DeleteRwObject_Reversed() {
     CClumpModelInfo::DeleteRwObject();
     delete m_pHitColModel;
     m_pHitColModel = nullptr;
 }
 
 // 0x4C7340
-void CPedModelInfo::SetClump(RpClump* clump)
-{
+void CPedModelInfo::SetClump(RpClump* clump) {
     CPedModelInfo::SetClump_Reversed(clump);
 }
-void CPedModelInfo::SetClump_Reversed(RpClump* clump)
-{
+void CPedModelInfo::SetClump_Reversed(RpClump* clump) {
     CClumpModelInfo::SetClump(clump);
     CClumpModelInfo::SetFrameIds(CPedModelInfo::m_pPedIds);
 
@@ -54,7 +47,7 @@ void CPedModelInfo::SetClump_Reversed(RpClump* clump)
         CPedModelInfo::CreateHitColModelSkinned(clump);
 
     RpClumpForAllAtomics(m_pRwClump, CClumpModelInfo::SetAtomicRendererCB, CVisibilityPlugins::RenderPedCB);
-    GetAnimHierarchyFromClump(m_pRwClump); //Unused? Or indirectly passes through EAX somehow?
+    GetAnimHierarchyFromClump(m_pRwClump); // Unused? Or indirectly passes through EAX somehow?
 }
 
 // 0x4C6D40
@@ -68,14 +61,12 @@ void CPedModelInfo::SetFaceTexture(RwTexture* texture) {
 }
 
 // 0x4C6D90
-void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump)
-{
+void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump) {
     auto hierarchy = GetAnimHierarchyFromSkinClump(clump);
     auto cm = new CColModel();
-
-    cm->AllocateData(12, 0, 0, 0, 0, false);
+    cm->AllocateData(NUM_PED_COL_NODE_INFOS, 0, 0, 0, 0, false);
     RwMatrixInvert(CGame::m_pWorkingMatrix1, RwFrameGetMatrix(RpClumpGetFrame(clump)));
-    for (int32 i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
+    for (auto i = 0; i < NUM_PED_COL_NODE_INFOS; ++i) {
         auto& sphere = cm->m_pColData->m_pSpheres[i];
         auto& nodeInfo = m_pColNodeInfos[i];
         memcpy(CGame::m_pWorkingMatrix2, CGame::m_pWorkingMatrix1, sizeof(RwMatrix));
@@ -88,8 +79,8 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump)
 
         sphere.m_vecCenter = vecCenter;
         sphere.m_fRadius = nodeInfo.m_fRadius;
-        sphere.m_nMaterial = eSurfaceType::SURFACE_PED;
-        sphere.m_nFlags = nodeInfo.m_nFlags;
+        sphere.m_Surface.m_nMaterial = eSurfaceType::SURFACE_PED;
+        sphere.m_Surface.m_nPiece = nodeInfo.m_nFlags;
     }
 
     cm->m_boundSphere.Set(1.5F, CVector(0.0F, 0.0F, 0.0F));
@@ -100,8 +91,7 @@ void CPedModelInfo::CreateHitColModelSkinned(RpClump* clump)
 }
 
 // 0x4C6F70
-CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* clump)
-{
+CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* clump) {
     if (!m_pHitColModel) {
         CreateHitColModelSkinned(clump);
         return m_pHitColModel;
@@ -139,8 +129,7 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinned(RpClump* clump)
 }
 
 // 0x4C7170
-CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* clump)
-{
+CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* clump) {
     if (!m_pHitColModel)
         CreateHitColModelSkinned(clump);
 
@@ -171,14 +160,14 @@ CColModel* CPedModelInfo::AnimatePedColModelSkinnedWorld(RpClump* clump)
 }
 
 // 0x4C7300
-void CPedModelInfo::IncrementVoice()
-{
+void CPedModelInfo::IncrementVoice() {
     if (m_nVoiceMin < 0 || m_nVoiceMax < 0) {
         m_nVoiceId = -1;
         return;
     }
 
     ++m_nVoiceId;
-    if (m_nVoiceId > m_nVoiceMax || m_nVoiceId < m_nVoiceMin)
+    if (m_nVoiceId > m_nVoiceMax || m_nVoiceId < m_nVoiceMin) {
         m_nVoiceId = m_nVoiceMin;
+    }
 }

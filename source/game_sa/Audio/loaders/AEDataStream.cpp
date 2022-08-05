@@ -122,7 +122,7 @@ HRESULT CAEDataStream::Stat(STATSTG* statout, DWORD flags) {
     if (m_bIsOpen == false || statout == nullptr || flags != STATFLAG_NONAME)
         return E_INVALIDARG;
 
-    DWORD fileSize = static_cast<DWORD>(CFileMgr::GetFileLength(m_pFileHandle));
+    auto fileSize = CFileMgr::GetTotalSize(m_pFileHandle);
     memset(statout, 0, sizeof(STATSTG));
     statout->cbSize.LowPart = fileSize;
     statout->type = STGTY_STREAM;
@@ -198,7 +198,7 @@ bool CAEDataStream::Initialise() {
         CFileMgr::Seek(m_pFileHandle, m_nStartPosition, SEEK_SET);
 
         m_nCurrentPosition = static_cast<uint32>(CFileMgr::Tell(m_pFileHandle));
-        m_nLength = m_nLength == 0 ? CFileMgr::GetFileLength(m_pFileHandle) : m_nLength;
+        m_nLength = m_nLength == 0 ? CFileMgr::GetTotalSize(m_pFileHandle) : m_nLength;
         m_bIsOpen = true;
     }
 

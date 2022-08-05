@@ -10,6 +10,7 @@
 
 #include "Occlusion.h"
 #include "PostEffects.h"
+#include "Shadows.h"
 
 #ifdef EXTRA_DEBUG_FEATURES
 #include "toolsmenu\DebugModules\Collision\CollisionDebugModule.h"
@@ -558,7 +559,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
     CBaseModelInfo* baseModelInfo = CModelInfo::GetModelInfo(modelId);
     CBaseModelInfo* baseAtomicModelInfo = baseModelInfo->AsAtomicModelInfoPtr();
     if (entity->IsVehicle() && !entity->m_bTunnelTransition) {
-        if ((!ms_bRenderTunnels && entity->m_bTunnel || !ms_bRenderOutsideTunnels && !entity->m_bTunnel))
+        if (!ms_bRenderTunnels && entity->m_bTunnel || !ms_bRenderOutsideTunnels && !entity->m_bTunnel)
             return RENDERER_INVISIBLE;
     }
 
@@ -567,7 +568,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
     {
         if (baseModelInfo->GetModelType() != MODEL_INFO_CLUMP && baseModelInfo->GetModelType() != MODEL_INFO_WEAPON)
         {
-            if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != REPLAY_MODE_1) {
+            if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != MODE_PLAYBACK) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
                 if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))

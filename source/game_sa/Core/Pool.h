@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <execution>
+
 #define INVALID_POOL_SLOT (-1)
 
 /*
@@ -39,6 +41,10 @@ VALIDATE_SIZE(tPoolObjectFlags, 1);
 
 template <class A, class B = A> class CPool {
 public:
+    // NOTSA typenames
+    using base_type = A;   // Common base of all these objects
+    using widest_type = B; // Type using the most memory (So each object takes this much memory basically)
+
     B*                m_pObjects;
     tPoolObjectFlags* m_byteMap;
     int32             m_nSize;
@@ -172,7 +178,7 @@ public:
 
     // Allocates object at a specific index from a SCM handle (ref) (0x59F610)
     void CreateAtRef(int32 ref) {
-        const auto idx = GetIndexFromRef(ref); // GetIndexFromRef asserts if idx out of range 
+        const auto idx = GetIndexFromRef(ref); // GetIndexFromRef asserts if idx out of range
         m_byteMap[idx].bEmpty = false;
         m_byteMap[idx].nId = ref & 0x7F;
         m_nFirstFree = 0;
@@ -182,7 +188,7 @@ public:
 
     // 0x5A1C00
     A* New(int32 ref) {
-        A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range 
+        A* result = &m_pObjects[GetIndexFromRef(ref)]; // GetIndexFromRef asserts if idx out of range
         CreateAtRef(ref);
         return result;
     }
@@ -203,7 +209,7 @@ public:
 
     // Returns pointer to object by SCM handle (ref)
     A* GetAtRef(int32 ref) {
-        int32 idx = ref >> 8; // It is possible the ref is invalid here, thats why we check for the idx is valid below (And also why GetIndexFromRef isnt used, it would assert)
+        int32 idx = ref >> 8; // It is possible the ref is invalid here, thats why we check for the idx is valid below (And also why GetIndexFromRef isn't used, it would assert)
         return IsIndexInBounds(idx) && m_byteMap[idx].IntValue() == (ref & 0xFF) ?
             reinterpret_cast<A*>(&m_pObjects[idx]) :
             nullptr;
@@ -213,14 +219,12 @@ public:
         return GetAt(GetIndexFromRef(ref));
     }
 
-    // 0x54F6B0
-    auto GetNoOfUsedSpaces() {
-        int32 counter = 0;
-        for (auto i = 0; i < m_nSize; ++i) {
-            if (!IsFreeSlotAtIndex(i))
-                ++counter;
-        }
-        return counter;
+    /*!
+    * @addr 0x54F6B0
+    * @brief Calculate the number of used slots. CAUTION: Slow, especially for large pools.
+    */
+    size_t GetNoOfUsedSpaces() {
+        return (size_t)std::count_if(std::execution::parallel_unsequenced_policy{}, m_byteMap, m_byteMap + m_nSize, [](auto&& v) { return !v.bEmpty; });
     }
 
     auto GetNoOfFreeSpaces() {
@@ -250,12 +254,12 @@ public:
     //
 
     // Check if index is in array bounds
-    bool IsIndexInBounds(int32 idx) {
+    [[nodiscard]] bool IsIndexInBounds(int32 idx) const {
         return idx >= 0 && idx < m_nSize;
     }
 
-    // Check if object pointer is inside object array (eg.: It's index is in the bounds of the array)
-    bool IsFromObjectArray(A* obj) const {
+    // Check if object pointer is inside object array (e.g.: It's index is in the bounds of the array)
+    bool IsFromObjectArray(const A* obj) const {
         return obj >= m_pObjects && obj < m_pObjects + m_nSize;
     }
 
@@ -265,6 +269,21 @@ public:
         assert(IsIndexInBounds(idx));
         return idx;
     }
-};
 
+    // NOTSA - Get all valid objects - Useful for iteration
+    template<typename T = A> // Type the loop iterator should yield. Now that I think about it should always be `A`...
+    auto GetAllValid() {
+        using namespace std;
+        return span{ m_pObjects, (size_t)m_nSize }
+             | views::filter([this](auto&& obj) { return !IsFreeSlotAtIndex(GetIndex(&obj)); }) // Filter only slots in use
+             | views::transform([](auto&& obj) -> T& { return static_cast<T&>(obj); }); // Cast to required type
+    }
+
+    // Similar to above, but gives back a pair [index, object]
+    template<typename T = A>
+    auto GetAllValidWithIndex() {
+        return GetAllValid<T>()
+             | rng::views::transform([this](auto&& obj) { return std::make_pair(GetIndex(&obj), std::ref(obj)); });
+    }
+};
 VALIDATE_SIZE(CPool<int32>, 0x14);

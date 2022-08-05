@@ -37,9 +37,19 @@ public:
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
+    static bool IsTaskPtr(CTask* task);
 
     CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
+
+    // NOTSA
+
+    // I thought this is a good idea, turns out not so much
+    // TODO: Get rid of it :D
+    template<typename T>
+    T* As() {
+        return static_cast<T*>(this);
+    }
 
 private:
     friend void InjectHooksMain();
@@ -48,5 +58,7 @@ private:
     void* New(uint32);
     void  Delete(void* object);
 };
-
 VALIDATE_SIZE(CTask, 0x8);
+
+template<typename T>
+concept Task = std::is_base_of_v<CTask, T>;

@@ -8,13 +8,9 @@ public:
     CVehicle* m_vehicle;
 
 public:
-    static void InjectHooks();
-
     CEventGotKnockedOverByCar(CVehicle* vehicle);
-    ~CEventGotKnockedOverByCar();
-private:
-    CEventGotKnockedOverByCar* Constructor(CVehicle* vehicle);
-public:
+    ~CEventGotKnockedOverByCar() override;
+
     eEventType GetEventType() const override { return EVENT_GOT_KNOCKED_OVER_BY_CAR; }
     int32 GetEventPriority() const override { return 37; }
     int32 GetLifeTime() override { return 0; }
@@ -22,9 +18,6 @@ public:
     CEntity* GetSourceEntity() const override { return m_vehicle ? m_vehicle->m_pDriver : nullptr; }
     float GetLocalSoundLevel() override { return 55.0f; }
     CEventEditableResponse* CloneEditable() override;
-
-    bool AffectsPed_Reversed(CPed* ped);
-    CEventEditableResponse* CloneEditable_Reversed();
 };
 
 VALIDATE_SIZE(CEventGotKnockedOverByCar, 0x18);

@@ -24,10 +24,10 @@ void CPlaneTrail::Render(float intensity) {
 
     uint32 nVertices = 0;
     RxObjSpace3DVertex vertBuff[PLANE_TRAIL_BUFSZ];
-    for (int i = 0; i < PLANE_TRAIL_BUFSZ; i++) {
+    for (auto i = 0; i < PLANE_TRAIL_BUFSZ; i++) {
         const uint32 timeDelta = CTimer::GetTimeInMS() - m_timepoints[i];
         if (m_timepoints[i] && timeDelta <= 30'000) {
-            const CVector pos = m_positions[i];
+            const CVector& pos = m_positions[i];
             RxObjSpace3DVertex& vert = vertBuff[i];
 
             const float fAlphaMult = std::min(1.0f, (30'000.0f - (float)timeDelta) / 10'000.0f); // Clamped to 1.0f
@@ -46,8 +46,8 @@ void CPlaneTrail::Render(float intensity) {
         RwRenderStateSet(rwRENDERSTATEDESTBLEND,         RWRSTATE(rwBLENDINVSRCALPHA));
         RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
         if (RwIm3DTransform(vertBuff, nVertices, nullptr, rwIM3D_VERTEXXYZ | rwIM3D_VERTEXRGBA)) {
-            static RwImVertexIndex indices[] = { // From 0x8D5B98, size 30
-                0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15
+            static RwImVertexIndex indices[] = { // From 0x8D5B98, size 32
+                0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16
             };
             RwIm3DRenderIndexedPrimitive(rwPRIMTYPELINELIST, indices, 2 * nVertices - 2);
             RwIm3DEnd();
@@ -57,11 +57,11 @@ void CPlaneTrail::Render(float intensity) {
 
 // 0x7172D0
 void CPlaneTrail::RegisterPoint(CVector pos) {
-    const uint32 lastUpdate = m_timepoints[0];
+    const auto& lastUpdate = m_timepoints[0];
     const bool bDoShift = lastUpdate && CTimer::GetTimeInMS() - lastUpdate > 2000;
     if (bDoShift) {
         // Shift right
-        for (int i = PLANE_TRAIL_BUFSZ - 1; i; i--) {
+        for (auto i = PLANE_TRAIL_BUFSZ - 1; i; i--) {
             m_timepoints[i] = m_timepoints[i - 1];
             m_positions[i] = m_positions[i - 1];
         }

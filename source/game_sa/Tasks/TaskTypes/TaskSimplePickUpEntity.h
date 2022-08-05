@@ -9,6 +9,8 @@ public:
     CVector m_vecPickuposn;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_PICKUP_ENTITY;
+
     CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, CAnimBlock* animBlock, CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float fMovePedUntilAnimProgress);
     CTaskSimplePickUpEntity(CEntity* entityToHold, CVector* posn, uint8 boneFrameId, uint8 boneFlags, AnimationId animId, AssocGroupId groupId, float fMovePedUntilAnimProgress);
     ~CTaskSimplePickUpEntity() override = default;

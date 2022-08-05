@@ -28,19 +28,19 @@ void CCarEnterExit::InjectHooks() {
     // RH_ScopedInstall(ComputePassengerIndexFromCarDoor, 0x64F1E0);
     // RH_ScopedInstall(ComputeSlowJackedPed, 0x64F070);
     // RH_ScopedInstall(ComputeTargetDoorToEnterAsPassenger, 0x64F190);
-    // RH_ScopedInstall(ComputeTargetDoorToExit, 0x0);
+    // RH_ScopedInstall(ComputeTargetDoorToExit, 0x64F110);
     // RH_ScopedInstall(GetNearestCarDoor, 0x6528F0);
-    // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x0);
+    // RH_ScopedInstall(GetNearestCarPassengerDoor, 0x650BB0);
     // RH_ScopedInstall(GetPositionToOpenCarDoor, 0x64E740);
     // RH_ScopedInstall(IsCarDoorInUse, 0x0);
     // RH_ScopedInstall(IsCarDoorReady, 0x0);
     // RH_ScopedInstall(IsCarQuickJackPossible, 0x0);
     // RH_ScopedInstall(IsCarSlowJackRequired, 0x0);
-    // RH_ScopedInstall(IsClearToDriveAway, 0x0);
+    // RH_ScopedInstall(IsClearToDriveAway, 0x6509B0);
     // RH_ScopedInstall(IsPathToDoorBlockedByVehicleCollisionModel, 0x651210);
     // RH_ScopedInstall(IsPedHealthy, 0x64EEE0);
     // RH_ScopedInstall(IsPlayerToQuitCarEnter, 0x64F240);
-    // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x0);
+    // RH_ScopedInstall(IsRoomForPedToLeaveCar, 0x6504C0);
     // RH_ScopedInstall(IsVehicleHealthy, 0x64EEC0);
     // RH_ScopedInstall(IsVehicleStealable, 0x6510D0);
     // RH_ScopedInstall(MakeUndraggedDriverPedLeaveCar, 0x0);
@@ -102,9 +102,9 @@ int32 CCarEnterExit::ComputeTargetDoorToEnterAsPassenger(const CVehicle* vehicle
     return plugin::CallAndReturn<int32, 0x64F190, const CVehicle*, int32>(vehicle, nPassengerNum);
 }
 
-// 0x
+// 0x64F110
 int32 CCarEnterExit::ComputeTargetDoorToExit(const CVehicle* vehicle, const CPed* ped) {
-    return plugin::CallAndReturn<int32, 0x0, const CVehicle*, const CPed*>(vehicle, ped);
+    return plugin::CallAndReturn<int32, 0x64F110, const CVehicle*, const CPed*>(vehicle, ped);
 }
 
 // 0x6528F0
@@ -112,9 +112,9 @@ bool CCarEnterExit::GetNearestCarDoor(const CPed* ped, const CVehicle* vehicle, 
     return plugin::CallAndReturn<bool, 0x6528F0, const CPed*, const CVehicle*, CVector*, int32>(ped, vehicle, outPos, doorId);
 }
 
-// 0x
-bool CCarEnterExit::GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool flag1, bool flag2, bool flag3) {
-    return plugin::CallAndReturn<bool, 0x0, const CPed*, const CVehicle*, CVector*, int32*, bool, bool, bool>(ped, vehicle, outVec, doorId, flag1, flag2, flag3);
+// 0x650BB0
+bool CCarEnterExit::GetNearestCarPassengerDoor(const CPed* ped, const CVehicle* vehicle, CVector* outVec, int32* doorId, bool CheckIfOccupiedTandemSeat, bool CheckIfDoorIsEnterable, bool CheckIfRoomToGetIn) {
+    return plugin::CallAndReturn<bool, 0x650BB0, const CPed*, const CVehicle*, CVector*, int32*, bool, bool, bool>(ped, vehicle, outVec, doorId, CheckIfOccupiedTandemSeat, CheckIfDoorIsEnterable, CheckIfRoomToGetIn);
 }
 
 // 0x64E740
@@ -142,9 +142,9 @@ bool CCarEnterExit::IsCarSlowJackRequired(const CVehicle* vehicle, int32 doorId)
     return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32>(vehicle, doorId);
 }
 
-// 0x
+// 0x6509B0
 bool CCarEnterExit::IsClearToDriveAway(const CVehicle* outVehicle) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*>(outVehicle);
+    return plugin::CallAndReturn<bool, 0x6509B0, const CVehicle*>(outVehicle);
 }
 
 // 0x651210
@@ -162,9 +162,9 @@ bool CCarEnterExit::IsPlayerToQuitCarEnter(const CPed* ped, const CVehicle* vehi
     return plugin::CallAndReturn<bool, 0x64F240, const CPed*, const CVehicle*, int32, CTask*>(ped, vehicle, startTime, task);
 }
 
-// 0x
+// 0x6504C0
 bool CCarEnterExit::IsRoomForPedToLeaveCar(const CVehicle* vehicle, int32 doorId, CVector* pos) {
-    return plugin::CallAndReturn<bool, 0x0, const CVehicle*, int32, CVector*>(vehicle, doorId, pos);
+    return plugin::CallAndReturn<bool, 0x6504C0, const CVehicle*, int32, CVector*>(vehicle, doorId, pos);
 }
 
 // 0x64EEC0

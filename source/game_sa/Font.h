@@ -15,7 +15,7 @@ class CSprite2d;
 // todo: move
 struct CFontChar {
     uint8     m_cLetter;
-    char      _pad0[3];
+    uint8     m_dLetter;
     CVector2D m_vPosn;
     float     m_fWidth;
     float     m_fHeight;
@@ -26,15 +26,14 @@ struct CFontChar {
     bool      m_bContainImages;
     uint8     m_nFontStyle;
     bool      m_bPropOn;
-    char      _pad1;
     uint16    m_wFontTexture;
     uint8     m_nOutline;
-    char      _pad2;
 
 public:
     // 0x718E50
-    CFontChar* Set(CFontChar& setup) {
+    void Set(const CFontChar& setup) {
         m_cLetter        = setup.m_cLetter;
+        m_dLetter        = setup.m_dLetter;
         m_vPosn          = setup.m_vPosn;
         m_fWidth         = setup.m_fWidth;
         m_fHeight        = setup.m_fHeight;
@@ -75,7 +74,7 @@ enum eExtraFontSymbol : uint8 {
     EXSYMBOL_R3         = 14
 };
 
-enum class eFontStyle : uint8 {
+enum eFontStyle : uint8 {
     FONT_GOTHIC,
     FONT_SUBTITLES,
     FONT_MENU,
@@ -119,60 +118,38 @@ public:
     static uint8& m_nFontOutline;
     static uint8& m_nFontOutlineOrShadow;
 
-    // static functions
+public:
     static void InjectHooks();
 
-    // CFont initialisation
     static void Initialise();
-
     static void LoadFontValues();
-
-    // CFont closing
     static void Shutdown();
-    // this adds a single character into rendering buffer
     static void PrintChar(float x, float y, char character);
-    // get next ' ' character in a string
+    // Get next ' ' character in a string
     static char* GetNextSpace(char* string);
-    // tags processing
     static char* ParseToken(char* text, CRGBA& color, bool isBlip, char* tag);
-    // text scaling
     static void SetScale(float w, float h);
-    // text scaling depends on current language
     static void SetScaleForCurrentLanguage(float w, float h);
-    // set text rotation point
     static void SetSlantRefPoint(float x, float y);
-    // set text rotation angle
     static void SetSlant(float value);
-    // set text color
     static void SetColor(CRGBA color);
-    // set text style
     static void SetFontStyle(eFontStyle style);
-    // set line width at right
     static void SetWrapx(float value);
-    // set line width at center
     static void SetCentreSize(float value);
     static void SetRightJustifyWrap(float value);
-    // like a 'global' font alpha, multiplied with each text alpha (from SetColor)
     static void SetAlphaFade(float alpha);
-    // drop color is used for text shadow and text outline
     static void SetDropColor(CRGBA color);
-    // set shadow size
     static void SetDropShadowPosition(int16 value);
-    // set outline size
     static void SetEdge(int8 value);
-    // toggles character proportions in text
     static void SetProportional(bool on);
-    // setups text background
     static void SetBackground(bool enable, bool includeWrap);
-    // sets background color
     static void SetBackgroundColor(CRGBA color);
     static void SetJustify(bool on);
     static void SetOrientation(eFontAlignment alignment);
-    // need to call this each frame
     static void InitPerFrame();
-    // draw text we have in buffer
     static void RenderFontBuffer();
-    static float GetStringWidth(char* string, bool unk1, bool unk2);
+    static float GetHeight(bool a1 = false);
+    static float GetStringWidth(const char* string, bool full, bool scriptText);
     static void DrawFonts();
     static int16 ProcessCurrentString(bool print, float x, float y, const char* text);
     static int16 GetNumberLines(float x, float y, const char* text);
@@ -181,9 +158,9 @@ public:
     static void PrintString(float x, float y, const char* text);
     static void PrintStringFromBottom(float x, float y, const char* text);
     static float GetCharacterSize(uint8 ch);
+    static uint8 FindSubFontCharacter(uint8 letterId, uint8 fontStyle);
 };
 
 static void ReadFontsDat();
 static float GetScriptLetterSize(uint8 letterId);
-static uint8 GetIDforPropVal(uint8 letterId, uint8 fontStyle);
 static float GetLetterIdPropValue(uint8 letterId);

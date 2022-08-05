@@ -19,7 +19,7 @@ void CPedList::Empty() {
 void CPedList::BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership) {
     m_count = 0;
 
-    for (int i = 0; i < TOTAL_PED_GROUP_MEMBERS - 1; i++) { // last member is the leader, ignore him
+    for (auto i = 0; i < TOTAL_PED_GROUP_MEMBERS - 1; i++) { // last member is the leader, ignore him
         if (CPed* ped = groupMembership.GetMember(i)) {
             AddMember(ped);
         }
@@ -29,7 +29,7 @@ void CPedList::BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership)
 
 // 0x69A4C0
 void CPedList::ExtractPedsWithGuns(CPedList& from) {
-    for (int i = 0; i < from.m_count; i++) {
+    for (auto i = 0u; i < from.m_count; i++) {
         if (!from.Get(i)->GetActiveWeapon().IsTypeMelee()) {
             AddMember(from.Get(i));
             from.RemoveMemberNoFill(i);
@@ -59,11 +59,11 @@ void CPedList::AddMember(CPed* ped) {
 }
 
 // Must call FillUpHoles afterwards!
-void CPedList::RemoveMemberNoFill(int i) {
+void CPedList::RemoveMemberNoFill(int32 i) {
     m_peds[i] = nullptr;
     m_count--;
 }
 
-CPed* CPedList::Get(int i) {
+CPed* CPedList::Get(int32 i) {
     return m_peds[i];
 }

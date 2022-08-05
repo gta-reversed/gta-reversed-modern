@@ -10,7 +10,7 @@ CTaskSimpleDie::CTaskSimpleDie(AssocGroupId animGroupId, AnimationId animId, flo
     m_blendDelta      = blendDelta;
     m_animHierarchy   = nullptr;
     m_animAssociation = nullptr;
-    m_animFlags       = ANIM_FLAG_DEFAULT;
+    m_animFlags       = ANIMATION_DEFAULT;
     m_nFlags          = 0; // here and below should be &= ~3
 }
 
@@ -52,12 +52,12 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANLSATE_X | ANIM_FLAG_TRANLSATE_Y
-                                   | ANIM_FLAG_MOVEMENT
-                                   | ANIM_FLAG_PARTIAL
-                                   | ANIM_FLAG_FREEZE_LAST_FRAME
-                                   | ANIM_FLAG_LOOPED
-                                   | ANIM_FLAG_STARTED;
+    m_animAssociation->m_nFlags &=   ANIMATION_TRANSLATE_X | ANIMATION_TRANSLATE_Y
+                                   | ANIMATION_MOVEMENT
+                                   | ANIMATION_PARTIAL
+                                   | ANIMATION_FREEZE_LAST_FRAME
+                                   | ANIMATION_LOOPED
+                                   | ANIMATION_STARTED;
 
     if (m_animSpeed > 0.0f)
         m_animAssociation->m_fSpeed = m_animSpeed;
@@ -143,10 +143,10 @@ void CTaskSimpleDie::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x62FB40);
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
-    RH_ScopedOverloadedInstall(Clone_Reversed, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
-    RH_ScopedInstall(GetTaskType_Reversed, 0x62FA50);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x62FBA0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x6397E0);
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
+    RH_ScopedVirtualInstall(GetTaskType, 0x62FA50);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
 }
 
 // 0x62FA00

@@ -8,6 +8,7 @@
 
 #include "VehicleModelInfo.h"
 #include "CustomCarPlateMgr.h"
+#include "LoadingScreen.h"
 
 CVehicleModelInfo::CLinkedUpgradeList& CVehicleModelInfo::ms_linkedUpgrades = *(CVehicleModelInfo::CLinkedUpgradeList*)0xB4E6D8;
 RwTexture* &CVehicleModelInfo::ms_pRemapTexture = *(RwTexture**)0xB4E47C;
@@ -15,8 +16,8 @@ RwTexture* &CVehicleModelInfo::ms_pLightsTexture = *(RwTexture**)0xB4E68C;
 RwTexture* &CVehicleModelInfo::ms_pLightsOnTexture = *(RwTexture**)0xB4E690;
 uint8 (&CVehicleModelInfo::ms_currentCol)[NUM_CURRENT_COLORS] = *(uint8(*)[NUM_CURRENT_COLORS])0xB4E3F0;
 CRGBA (&CVehicleModelInfo::ms_vehicleColourTable)[NUM_VEHICLE_COLORS] = *(CRGBA(*)[NUM_VEHICLE_COLORS])0xB4E480;
-char (&CVehicleModelInfo::ms_compsUsed)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0xB4E478;
-char (&CVehicleModelInfo::ms_compsToUse)[NUM_COMPS_USAGE] = *(char(*)[NUM_COMPS_USAGE])0x8A6458;
+uint8 (&CVehicleModelInfo::ms_compsUsed)[NUM_COMPS_USAGE] = *(uint8(*)[NUM_COMPS_USAGE])0xB4E478;
+uint8 (&CVehicleModelInfo::ms_compsToUse)[NUM_COMPS_USAGE] = *(uint8(*)[NUM_COMPS_USAGE])0x8A6458;
 int16(&CVehicleModelInfo::ms_numWheelUpgrades)[NUM_WHEELS] = *(int16(*)[NUM_WHEELS])0xB4E470;
 int32 (&CVehicleModelInfo::ms_wheelFrameIDs)[NUM_WHEELS] = *(int32(*)[NUM_WHEELS])0x8A7770;
 int16(&CVehicleModelInfo::ms_upgradeWheels)[NUM_WHEEL_UPGRADES][NUM_WHEELS] = *(int16(*)[NUM_WHEEL_UPGRADES][NUM_WHEELS])0xB4E3F8;
@@ -44,14 +45,14 @@ void CVehicleModelInfo::InjectHooks()
         RH_ScopedInstall(FindOtherUpgrade, 0x4C74D0);
     }
 
-    RH_ScopedInstall(GetModelType_Reversed, 0x4C7650);
-    RH_ScopedInstall(Init_Reversed, 0x4C7630);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C9890);
-    RH_ScopedInstall(CreateInstance_Reversed, 0x4C9680);
-    RH_ScopedInstall(SetAnimFile_Reversed, 0x4C7670);
-    RH_ScopedInstall(ConvertAnimFileIndex_Reversed, 0x4C76D0);
-    RH_ScopedInstall(GetAnimFileIndex_Reversed, 0x4C7660);
-    RH_ScopedInstall(SetClump_Reversed, 0x4C95C0);
+    RH_ScopedVirtualInstall(GetModelType, 0x4C7650);
+    RH_ScopedVirtualInstall(Init, 0x4C7630);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C9890);
+    RH_ScopedVirtualInstall(CreateInstance, 0x4C9680);
+    RH_ScopedVirtualInstall(SetAnimFile, 0x4C7670);
+    RH_ScopedVirtualInstall(ConvertAnimFileIndex, 0x4C76D0);
+    RH_ScopedVirtualInstall(GetAnimFileIndex, 0x4C7660);
+    RH_ScopedVirtualInstall(SetClump, 0x4C95C0);
     RH_ScopedInstall(SetAtomicRenderCallbacks, 0x4C7B10);
     RH_ScopedInstall(SetVehicleComponentFlags, 0x4C7C10);
     RH_ScopedInstall(GetWheelPosn, 0x4C7D20);
@@ -347,10 +348,10 @@ void CVehicleModelInfo::GetWheelPosn(int32 wheel, CVector& outVec, bool local) c
     else {
         auto matrix = RwMatrixCreate();
         memcpy(matrix, RwFrameGetMatrix(frame), sizeof(CMatrix));
-        auto pParent = RwFrameGetParent(frame);
-        while (pParent) {
-            RwMatrixTransform(matrix, RwFrameGetMatrix(pParent), RwOpCombineType::rwCOMBINEPOSTCONCAT);
-            pParent = RwFrameGetParent(pParent);
+        auto parent = RwFrameGetParent(frame);
+        while (parent) {
+            RwMatrixTransform(matrix, RwFrameGetMatrix(parent), RwOpCombineType::rwCOMBINEPOSTCONCAT);
+            parent = RwFrameGetParent(parent);
         }
 
         outVec = *RwMatrixGetPos(matrix);
@@ -600,20 +601,20 @@ void CVehicleModelInfo::PreprocessHierarchy()
             RwFrameForAllChildren(RpClumpGetFrame(m_pRwClump), CClumpModelInfo::FindFrameFromNameWithoutIdCB, &searchStruct);
             if (searchStruct.m_pFrame) {
                 if (flags.bIsDummy) {
-                    auto& vecDummyPos = m_pVehicleStruct->m_avDummyPos[nameIdAssoc->m_dwHierarchyId];
+                    auto& vecDummyPos = *GetModelDummyPosition(static_cast<eVehicleDummy>(nameIdAssoc->m_dwHierarchyId));
                     vecDummyPos = *RwMatrixGetPos(RwFrameGetMatrix(searchStruct.m_pFrame));
-                    auto pParent = RwFrameGetParent(searchStruct.m_pFrame);
-                    if (pParent) {
-                        while (RwFrameGetParent(pParent)) {
-                            RwV3dTransformPoints(&vecDummyPos, &vecDummyPos, 1, RwFrameGetMatrix(pParent));
-                            pParent = RwFrameGetParent(pParent);
+                    auto parent = RwFrameGetParent(searchStruct.m_pFrame);
+                    if (parent) {
+                        while (RwFrameGetParent(parent)) {
+                            RwV3dTransformPoints(&vecDummyPos, &vecDummyPos, 1, RwFrameGetMatrix(parent));
+                            parent = RwFrameGetParent(parent);
                         }
                     }
                     RwFrameDestroy(searchStruct.m_pFrame);
                 }
                 else if (flags.bIsUpgrade) {
-                    auto pParent = RwFrameGetParent(searchStruct.m_pFrame);
-                    auto parentHierarchyId = CVisibilityPlugins::GetFrameHierarchyId(pParent);
+                    auto parent = RwFrameGetParent(searchStruct.m_pFrame);
+                    auto parentHierarchyId = CVisibilityPlugins::GetFrameHierarchyId(parent);
                     auto& upgrade = m_pVehicleStruct->m_aUpgrades[nameIdAssoc->m_dwHierarchyId];
                     upgrade.m_vPosition = *RwMatrixGetPos(RwFrameGetMatrix(searchStruct.m_pFrame));
                     upgrade.m_qRotation.Set(*RwFrameGetMatrix(searchStruct.m_pFrame));
@@ -767,7 +768,7 @@ int32 CVehicleModelInfo::GetMaximumNumberOfPassengersFromNumberOfDoors(int32 mod
             break;
 
         if (mi->IsBike() || gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId)->m_bTandemSeats) {
-            return mi->m_pVehicleStruct->IsDummyActive(eVehicleDummies::DUMMY_SEAT_REAR) ? 1 : 0;
+            return mi->m_pVehicleStruct->IsDummyActive(eVehicleDummy::DUMMY_SEAT_REAR) ? 1 : 0;
         }
         else {
             if (modelId == MODEL_RCBANDIT || modelId == MODEL_RCTIGER)
@@ -1166,8 +1167,7 @@ RpMaterial* CVehicleModelInfo::GetMatFXEffectMaterialCB(RpMaterial* material, vo
 RpMaterial* CVehicleModelInfo::SetEnvironmentMapCB(RpMaterial* material, void* data)
 {
     if ((uint16)data == 0xFFFF) {
-        RpMatFXMaterialSetEffects(material, RpMatFXMaterialFlags::rpMATFXEFFECTNULL);
-        return material;
+        return DisableMatFx(material, data);
     }
 
     if (RpMatFXMaterialGetEffects(material) != RpMatFXMaterialFlags::rpMATFXEFFECTENVMAP)
@@ -1281,6 +1281,7 @@ void CVehicleModelInfo::SetupCommonData()
     CCarFXRenderer::InitialiseDirtTexture();
 }
 
+// 0x5B6890
 void CVehicleModelInfo::LoadVehicleColours()
 {
     char buffer[1024];
@@ -1331,7 +1332,7 @@ void CVehicleModelInfo::LoadVehicleColours()
 
         if (iLastMode == eCarColLineType::GLOBAL_RGB) {
             uint32 red, green, blue;
-            sscanf(buffer, "%d %d %d", &red, &green, &blue);
+            (void)sscanf(buffer, "%d %d %d", &red, &green, &blue);
             curColor->Set(red, green, blue, 255);
             auto pLineEnd = pLineStart;
             while (*pLineEnd != '#') // Seems redundant(?)
@@ -1436,6 +1437,7 @@ void CVehicleModelInfo::LoadVehicleColours()
     CFileMgr::CloseFile(file);
 }
 
+// 0x5B65A0
 void CVehicleModelInfo::LoadVehicleUpgrades()
 {
     for (auto& wheelUpgrade : ms_numWheelUpgrades)
@@ -1511,8 +1513,8 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
 
         case eCarModsLineType::WHEEL: {
             int32 iModelId = -1, iWheelSet;
-            sscanf(line, "%d", &iWheelSet);
-            strtok(line, " \t,");
+            (void)sscanf(line, "%d", &iWheelSet);
+            (void)strtok(line, " \t,");
             char* token;
             while ((token = strtok(nullptr, " \t,"))) {
                 auto wheelMI = static_cast<CAtomicModelInfo*>(CModelInfo::GetModelInfo(token, &iModelId));
@@ -1527,6 +1529,7 @@ void CVehicleModelInfo::LoadVehicleUpgrades()
     CFileMgr::CloseFile(file);
 }
 
+// 0x4C8780
 void CVehicleModelInfo::LoadEnvironmentMaps()
 {
     CTxdStore::PushCurrentTxd();
@@ -1541,6 +1544,14 @@ void CVehicleModelInfo::LoadEnvironmentMaps()
 
 void CVehicleModelInfo::SetHandlingId(const char* handlingName) {
     m_nHandlingId = gHandlingDataMgr.GetHandlingId(handlingName);
+}
+
+tHandlingData& CVehicleModelInfo::GetHandlingData() const {
+    return gHandlingDataMgr.m_aVehicleHandling[m_nHandlingId];
+}
+
+tFlyingHandlingData& CVehicleModelInfo::GetFlyingHandlingData() const {
+    return *gHandlingDataMgr.GetFlyingPointer(m_nHandlingId);
 }
 
 void CVehicleModelInfo::CLinkedUpgradeList::AddUpgradeLink(int16 upgrade1, int16 upgrade2)
@@ -1690,15 +1701,16 @@ int32 GetListOfComponentsNotUsedByRules(uint32 compRules, int32 numExtras, int32
     return iNumComps;
 }
 
+// 0x4C83B0
 RpMaterial* RemoveWindowAlphaCB(RpMaterial* material, void* data)
 {
-    auto color = RpMaterialGetColor(material);
+    auto* color = RpMaterialGetColor(material);
     if (color->alpha == 255)
         return material;
 
     auto ppEntries = reinterpret_cast<tRestoreEntry**>(data);
-    (*ppEntries)->m_pAddress = RpMaterialGetColor(material);
-    (*ppEntries)->m_pValue = *reinterpret_cast<void**>(RpMaterialGetColor(material));
+    (*ppEntries)->m_pAddress = color;
+    (*ppEntries)->m_pValue = *reinterpret_cast<void**>(color);
     (*ppEntries)++;
 
     color->red = 0;
@@ -1709,6 +1721,7 @@ RpMaterial* RemoveWindowAlphaCB(RpMaterial* material, void* data)
     return material;
 }
 
+// 0x4C7BD0
 RwObject* GetOkAndDamagedAtomicCB(RwObject* object, void* data)
 {
     auto out = reinterpret_cast<RwObject**>(data);
@@ -1722,6 +1735,7 @@ RwObject* GetOkAndDamagedAtomicCB(RwObject* object, void* data)
     return object;
 }
 
+// 0x7323C0
 RpAtomic* atomicDefaultRenderCB(RpAtomic* atomic)
 {
     AtomicDefaultRenderCallBack(atomic);

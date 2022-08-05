@@ -39,7 +39,12 @@ enum eScriptParameterType {
     SCRIPT_PARAM_LOCAL_LONG_STRING_ARRAY,
 };
 
-enum eButtonId {
+enum eScriptVariableType : uint8 {
+    VAR_LOCAL  = 1,
+    VAR_GLOBAL = 2
+};
+
+enum eButtonId : uint16 {
     BUTTON_LEFT_STICK_X,
     BUTTON_LEFT_STICK_Y,
     BUTTON_RIGHT_STICK_X,
@@ -62,57 +67,121 @@ enum eButtonId {
     BUTTON_RIGHTSHOCK,
 };
 
+// *** 🤝 UNION 🤝 ***
 union tScriptParam {
-    uint32 uParam;
-    int32 iParam;
-    float fParam;
-    void* pParam;
-    char* szParam;
-};
+    uint8  u8Param;
+    int8   i8Param;
 
+    uint16 u16Param;
+    int16  i16Param;
+
+    uint32 uParam;
+    int32  iParam;
+
+    float  fParam;
+    void*  pParam;
+    char*  szParam;
+    bool   bParam;
+};
 VALIDATE_SIZE(tScriptParam, 0x4);
 
+static inline std::array<tScriptParam, 32>& ScriptParams = *(std::array<tScriptParam, 32>*)0xA43C78;
+
+enum {
+    MAX_STACK_DEPTH = 8,
+    NUM_LOCAL_VARS  = 32,
+    NUM_TIMERS      = 2
+};
+
+enum OpcodeResult : int8 {
+    OR_CONTINUE        = 0,
+    OR_WAIT            = 1,
+    OR_INTERRUPT       = -1,
+    OR_IMPLEMENTED_YET = -2 // NOTSA
+};
+
 class CRunningScript {
+    /*!
+     * Needed for compound if statements.
+     * Basically, an `if` translates to:
+     * - `COMMAND_ANDOR` followed by a parameter that encodes:
+     *   1. the number of conditions = `n` (max 8)
+     *   2. logical operation between conditions (AND/OR, hence the command name)
+     * - `n` commands that update the conditional flag
+     * 
+     * For instance `if ($A > 0 && $B > 0 && $C > 0)` would generate:
+     * 
+     * ```
+     * COMMAND_ANDOR                          ANDS_2 // (three conditions joined by AND)
+     * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $A 0
+     * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $B 0
+     * COMMAND_IS_INT_VAR_GREATER_THAN_NUMBER $C 0
+     * ```
+     * 
+     * Each time a condition is tested, the result is AND/OR'd with the previous
+     * result and the ANDOR state is decremented until it reaches the lower bound,
+     * meaning that all conditions were tested.
+     */
+    enum {
+        ANDOR_NONE = 0,
+        ANDS_1 = 1,
+        ANDS_2,
+        ANDS_3,
+        ANDS_4,
+        ANDS_5,
+        ANDS_6,
+        ANDS_7,
+        ANDS_8,
+        ORS_1 = 21,
+        ORS_2,
+        ORS_3,
+        ORS_4,
+        ORS_5,
+        ORS_6,
+        ORS_7,
+        ORS_8
+    };
+
 public:
     CRunningScript* m_pNext;
     CRunningScript* m_pPrev;
     char            m_szName[8];
-    uint8*          m_pBaseIP;
-    uint8*          m_pCurrentIP;
-    uint8*          m_apStack[8];
-    uint16          m_nSP;
-    char            _pad3A[2];
-    tScriptParam    m_aLocalVars[32];
-    int32           m_anTimers[2];
+    uint8*          m_pBaseIP;    // base instruction pointer
+    uint8*          m_pCurrentIP; // current instruction pointer
+    uint8*          m_apStack[MAX_STACK_DEPTH];
+    uint16          m_nSP;        // Stack Pointer
+    tScriptParam    m_aLocalVars[NUM_LOCAL_VARS];
+    int32           m_anTimers[NUM_TIMERS];
     bool            m_bIsActive;
     bool            m_bCondResult;
     bool            m_bUseMissionCleanup;
     bool            m_bIsExternal;
     bool            m_bTextBlockOverride;
-    int8            m_externalType;
-    char            field_CA[2];
+    int8            m_nExternalType;
     int32           m_nWakeTime;
     uint16          m_nLogicalOp;
     bool            m_bNotFlag;
-    bool            m_bWastedBustedCheck;
-    bool            m_bWastedOrBusted;
-    char            _padD5[3];
-    uint8*          m_pSceneSkipIP;
+    bool            m_bDeathArrestEnabled;
+    bool            m_bDeathArrestExecuted;
+    uint8*          m_pSceneSkipIP; // scene skip instruction pointer
     bool            m_bIsMission;
-    char            _padDD[3];
+
+    using CommandHandlerFn_t    = OpcodeResult(__thiscall CRunningScript::*)(int32);
+    using CommandHandlerTable_t = std::array<CommandHandlerFn_t, 27>;
+
+    static inline CommandHandlerTable_t& CommandHandlerTable = *(CommandHandlerTable_t*)0x8A6168;
+    static        CommandHandlerTable_t  reSA_CommandHandlerTable;
 
 public:
-    static uint8(__thiscall** CommandHandlerTable)(CRunningScript* _this, uint16 commandId); // static uint8(__thiscall *CommandHandlerTable[27])(CRunningScript *,uint16 )
-
     static void InjectHooks();
 
     void Init();
 
-    void LocateCarCommand(int32 commandId);
-    void LocateObjectCommand(int32 commandId);
     void PlayAnimScriptCommand(int32 commandId);
 
+    void LocateCarCommand(int32 commandId);
     void LocateCharCommand(int32 commandId);
+    void LocateObjectCommand(int32 commandId);
     void LocateCharCarCommand(int32 commandId);
     void LocateCharCharCommand(int32 commandId);
     void LocateCharObjectCommand(int32 commandId);
@@ -125,21 +194,20 @@ public:
     void FlameInAngledAreaCheckCommand(int32 commandId);
     void ObjectInAngledAreaCheckCommand(int32 commandId);
 
-    void CollectParameters(int16 count);
-    tScriptParam CollectNextParameterWithoutIncreasingPC();
+    void  CollectParameters(int16 count);
+    int32 CollectNextParameterWithoutIncreasingPC();
+    void  StoreParameters(int16 count);
 
-    void StoreParameters(int16 count);
-
-    void ReadArrayInformation(int32 move, uint16* pOffset, int32* pIdx);
+    void ReadArrayInformation(int32 updateIp, uint16* outArrVarOffset, int32* outArrElemIdx);
     void ReadParametersForNewlyStartedScript(CRunningScript* newScript);
     void ReadTextLabelFromScript(char* buffer, uint8 nBufferLength);
     void GetCorrectPedModelIndexForEmergencyServiceType(ePedType pedType, int32* outModelId);
-    int16 GetIndexOfGlobalVariable();
     int16 GetPadState(uint16 playerIndex, eButtonId buttonId);
 
-    void* GetPointerToLocalVariable(int32 varId);
-    void* GetPointerToLocalArrayElement(int32 off, uint16 idx, uint8 mul);
-    tScriptParam* GetPointerToScriptVariable(uint8 variableType);
+    tScriptParam* GetPointerToLocalVariable(int32 varId);
+    tScriptParam* GetPointerToLocalArrayElement(int32 arrVarOffset, uint16 arrElemIdx, uint8 arrElemSize);
+    tScriptParam* GetPointerToScriptVariable(eScriptVariableType variableType);
+    uint16        GetIndexOfGlobalVariable();
 
     void DoDeathArrestCheck(); // original name DoDeatharrestCheck
 
@@ -150,42 +218,49 @@ public:
     void RemoveScriptFromList(CRunningScript** queueList);
     void ShutdownThisScript();
 
-    bool IsPedDead(CPed* ped);
+    bool IsPedDead(CPed* ped) const;
     bool ThisIsAValidRandomPed(ePedType pedType, bool civilian, bool gang, bool criminal);
     void ScriptTaskPickUpObject(int32 commandId);
 
     void UpdateCompareFlag(bool state);
     void UpdatePC(int32 newIP);
 
-    void ProcessOneCommand();
-    void Process();
-    void ProcessCommands0To99(int32 commandId);
-    void ProcessCommands100To199(int32 commandId);
-    void ProcessCommands200To299(int32 commandId);
-    void ProcessCommands300To399(int32 commandId);
-    void ProcessCommands400To499(int32 commandId);
-    void ProcessCommands500To599(int32 commandId);
-    void ProcessCommands600To699(int32 commandId);
-    void ProcessCommands700To799(int32 commandId);
-    void ProcessCommands800To899(int32 commandId);
-    void ProcessCommands900To999(int32 commandId);
-    void ProcessCommands1000To1099(int32 commandId);
-    void ProcessCommands1100To1199(int32 commandId);
-    void ProcessCommands1200To1299(int32 commandId);
-    void ProcessCommands1300To1399(int32 commandId);
-    void ProcessCommands1400To1499(int32 commandId);
-    void ProcessCommands1500To1599(int32 commandId);
-    void ProcessCommands1600To1699(int32 commandId);
-    void ProcessCommands1700To1799(int32 commandId);
-    void ProcessCommands1800To1899(int32 commandId);
-    void ProcessCommands1900To1999(int32 commandId);
-    void ProcessCommands2000To2099(int32 commandId);
-    void ProcessCommands2100To2199(int32 commandId);
-    void ProcessCommands2200To2299(int32 commandId);
-    void ProcessCommands2300To2399(int32 commandId);
-    void ProcessCommands2400To2499(int32 commandId);
-    void ProcessCommands2500To2599(int32 commandId);
-    void ProcessCommands2600To2699(int32 commandId);
+    OpcodeResult ProcessOneCommand();
+    OpcodeResult Process();
+    OpcodeResult ProcessCommands0To99(int32 commandId);
+    OpcodeResult ProcessCommands100To199(int32 commandId);
+    OpcodeResult ProcessCommands200To299(int32 commandId);
+    OpcodeResult ProcessCommands300To399(int32 commandId);
+    OpcodeResult ProcessCommands400To499(int32 commandId);
+    OpcodeResult ProcessCommands500To599(int32 commandId);
+    OpcodeResult ProcessCommands600To699(int32 commandId);
+    OpcodeResult ProcessCommands700To799(int32 commandId);
+    OpcodeResult ProcessCommands800To899(int32 commandId);
+    OpcodeResult ProcessCommands900To999(int32 commandId);
+    OpcodeResult ProcessCommands1000To1099(int32 commandId);
+    OpcodeResult ProcessCommands1100To1199(int32 commandId);
+    OpcodeResult ProcessCommands1200To1299(int32 commandId);
+    OpcodeResult ProcessCommands1300To1399(int32 commandId);
+    OpcodeResult ProcessCommands1400To1499(int32 commandId);
+    OpcodeResult ProcessCommands1500To1599(int32 commandId);
+    OpcodeResult ProcessCommands1600To1699(int32 commandId);
+    OpcodeResult ProcessCommands1700To1799(int32 commandId);
+    OpcodeResult ProcessCommands1800To1899(int32 commandId);
+    OpcodeResult ProcessCommands1900To1999(int32 commandId);
+    OpcodeResult ProcessCommands2000To2099(int32 commandId);
+    OpcodeResult ProcessCommands2100To2199(int32 commandId);
+    OpcodeResult ProcessCommands2200To2299(int32 commandId);
+    OpcodeResult ProcessCommands2300To2399(int32 commandId);
+    OpcodeResult ProcessCommands2400To2499(int32 commandId);
+    OpcodeResult ProcessCommands2500To2599(int32 commandId);
+    OpcodeResult ProcessCommands2600To2699(int32 commandId);
+    OpcodeResult ProcessExternalCommands(int32 commandId); // NOTSA
+
+    void SetName(const char* name)  { assert(strlen(name) < sizeof(m_szName)); strcpy(m_szName, name); }
+    void SetBaseIp(uint8* ip)       { m_pBaseIP = ip; }
+    void SetCurrentIp(uint8* ip)    { m_pCurrentIP = ip; }
+    void SetActive(bool active)     { m_bIsActive = active; }
+    void SetExternal(bool external) { m_bIsExternal = external; }
 };
 
 VALIDATE_SIZE(CRunningScript, 0xE0);

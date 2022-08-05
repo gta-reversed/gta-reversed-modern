@@ -12,6 +12,8 @@ public:
     CHandObject* m_pRightHandObject; // always 0
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_HANDSIGNAL_ANIM;
+
     CTaskSimplePlayHandSignalAnim(AnimationId animationId, float fBlendFactor, bool bFatHands, bool bHoldLastFrame);
     ~CTaskSimplePlayHandSignalAnim();
 

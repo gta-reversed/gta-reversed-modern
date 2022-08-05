@@ -19,7 +19,7 @@ void CPedShelterAttractor::ComputeAttractPos(int32 pedId, CVector& outPos) {
 
 // 0x5E9690
 void CPedShelterAttractor::ComputeAttractHeading(int32 bQueue, float& heading) {
-    heading = rand() * RAND_MAX_FLOAT_RECIPROCAL * TWO_PI;
+    heading = CGeneral::GetRandomNumberInRange(0.0f, TWO_PI);
 }
 
 // 0x5EF570
@@ -32,9 +32,9 @@ void CPedShelterAttractor::InjectHooks() {
     RH_ScopedCategory("Attractors");
 
     // RH_ScopedInstall(GetDisplacement, 0x5EF420);
-    RH_ScopedInstall(ComputeAttractPos_Reversed, 0x5EFC40);
-    RH_ScopedInstall(ComputeAttractHeading_Reversed, 0x5E9690);
-    // RH_ScopedInstall(BroadcastDeparture_Reversed, 0x5EF570);
+    RH_ScopedVirtualInstall(ComputeAttractPos, 0x5EFC40);
+    RH_ScopedVirtualInstall(ComputeAttractHeading, 0x5E9690);
+    // RH_ScopedVirtualInstall(BroadcastDeparture, 0x5EF570);
 }
 
 void CPedShelterAttractor::ComputeAttractPos_Reversed(int32 pedId, CVector& posn) {

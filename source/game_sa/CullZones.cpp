@@ -151,23 +151,18 @@ eZoneAttributes CCullZones::FindTunnelAttributesForCoors(CVector point) {
     return static_cast<eZoneAttributes>(out);
 }
 
-// NOTSA
-CCullZoneReflection* CCullZones::FindMirrorAttributesForCoors_(CVector cameraPosition) {
+// 0x72DA70
+CCullZoneReflection* CCullZones::FindMirrorAttributesForCoors(CVector cameraPosition) {
     if (NumMirrorAttributeZones <= 0)
         return nullptr;
 
-    for (auto& pCullZoneReflection: aMirrorAttributeZones) {
-        if (pCullZoneReflection.IsPointWithin(cameraPosition))
-            return &pCullZoneReflection;
+    for (auto& cullZoneReflection : aMirrorAttributeZones) {
+        if (cullZoneReflection.IsPointWithin(cameraPosition)) {
+            return &cullZoneReflection;
+        }
     }
 
     return nullptr;
-}
-
-// 0x72DA70
-CCullZoneReflection* CCullZones::FindMirrorAttributesForCoors(float x, float y, float z) {
-    CVector cameraPosition{x, y, z};
-    return FindMirrorAttributesForCoors_(cameraPosition);
 }
 
 // 0x72DAD0

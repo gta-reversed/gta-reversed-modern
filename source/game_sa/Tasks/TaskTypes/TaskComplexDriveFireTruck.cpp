@@ -13,10 +13,10 @@ void CTaskComplexDriveFireTruck::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x659310);
     RH_ScopedInstall(CreateSubTask, 0x65A240);
-    RH_ScopedInstall(Clone_Reversed, 0x659BC0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65B140);
-    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65B090);
-    RH_ScopedInstall(ControlSubTask_Reversed, 0x65B1E0);
+    RH_ScopedVirtualInstall(Clone, 0x659BC0);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x65B140);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x65B090);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x65B1E0);
 }
 
 CTaskComplexDriveFireTruck* CTaskComplexDriveFireTruck::Constructor(CVehicle* vehicle, CPed* partnerFireman, bool bIsDriver) {
@@ -31,20 +31,14 @@ CTaskComplexDriveFireTruck::CTaskComplexDriveFireTruck(CVehicle* vehicle, CPed* 
     m_bIsDriver       = bIsDriver;
     m_pFire           = nullptr;
 
-    if (m_pVehicle)
-        m_pVehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->RegisterReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeRegisterRef(m_pVehicle);
+    CEntity::SafeRegisterRef(m_pPartnerFireman);
 }
 
 // 0x6593A0
 CTaskComplexDriveFireTruck::~CTaskComplexDriveFireTruck() {
-    if (m_pVehicle)
-        m_pVehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pVehicle));
-
-    if (m_pPartnerFireman)
-        m_pPartnerFireman->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pPartnerFireman));
+    CEntity::SafeCleanUpRef(m_pVehicle);
+    CEntity::SafeCleanUpRef(m_pPartnerFireman);
 }
 
 // 0x659BC0
@@ -132,7 +126,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexDriveFireTruck::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
-        return new CTaskComplexCarDriveWander(m_pVehicle, 0, 10.0F);
+        return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_STOP_FOR_CARS, 10.0F);
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
         return new CTaskComplexDriveToPoint(m_pVehicle, m_pFire->m_vecPosition, 30.0F, 0, -1, 25.0F, 2);
     case TASK_COMPLEX_USE_WATER_CANNON:

@@ -186,6 +186,10 @@ RxPipeline* RxLockedPipeSetEntryPoint(RxLockedPipe* pipeline, RxNodeInput in) {
     return ((RxPipeline*(__cdecl *)(RxLockedPipe*, RxNodeInput))0x807070)(pipeline, in);
 }
 
+RxPipeline* RxLockedPipeAddFragment(RxLockedPipe* pipeline, RwUInt32 firstIndex, RxNodeDefinition* nodeDef0, RwUInt32 nodeUnk) {
+    return plugin::CallAndReturn<RxPipeline*, 0x806BE0, RxLockedPipe*, RwUInt32, RxNodeDefinition*, RwUInt32>(pipeline, firstIndex, nodeDef0, nodeUnk);
+}
+
 RxPipelineNode* RxLockedPipeGetEntryPoint(RxLockedPipe* pipeline) {
     return ((RxPipelineNode*(__cdecl *)(RxLockedPipe*))0x8070D0)(pipeline);
 }
