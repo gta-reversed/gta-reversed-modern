@@ -49,7 +49,7 @@ public:
     CVector            m_vecBoatTurnForce; // m_vecBoatTurnForce = m_vecTurnForce + m_vecFrictionTurnForce
     FxSystem_c*        m_apPropSplashFx[2];
     CVector            m_vecWaterDamping; // { 0.0f, 0.0f, DampingPower }
-    char               field_63C;         // initialised with 0, maybe boat handling type (@CBoat::DebugCode), possibly a leftover
+    char               field_63C;         // initialised with 0, maybe boat handling type (@CBoat::DebugCode)
     uint8              m_nPadNumber;      // 0 - 3
     float              m_fLastWaterImmersionDepth; // initialised with 7.0f, 0.0f - not in water
     int16              m_nNumWaterTrailPoints;
@@ -58,7 +58,7 @@ public:
     uint8              m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
 
     static constexpr int32 NUM_WAKE_GEN_BOATS = 4;
-    static CBoat* (&apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS];
+    static inline std::array<CBoat*, NUM_WAKE_GEN_BOATS>& apFrameWakeGeneratingBoats = *(std::array<CBoat*, NUM_WAKE_GEN_BOATS>*)0xC27994;
     static float& MAX_WAKE_LENGTH;
     static float& MIN_WAKE_INTERVAL;
     static float& WAKE_LIFETIME;

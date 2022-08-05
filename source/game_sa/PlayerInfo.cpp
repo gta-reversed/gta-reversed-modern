@@ -237,12 +237,12 @@ void CPlayerInfo::StreamParachuteWeapon(bool unk) {
 
     if (m_pPed && m_pPed->IsInVehicle()) {
         if (m_pPed->m_pVehicle->IsSubPlane() || m_pPed->m_pVehicle->IsSubHeli()) {
-            if (m_nRequireParachuteTimer <= CTimer::GetTimeStepInMS()) {
+            if (m_nRequireParachuteTimer <= (uint32)CTimer::GetTimeStepInMS()) {
                 const auto groundHeight = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
                 const auto vehToGroundZDist = m_pPed->m_pVehicle->GetPosition().z - groundHeight;
                 m_nRequireParachuteTimer = (vehToGroundZDist <= 50.f) ? 0 : 5000;
             } else {
-                m_nRequireParachuteTimer -= CTimer::GetTimeStepInMS();
+                m_nRequireParachuteTimer -= (uint32)CTimer::GetTimeStepInMS();
             }
         }
     }
@@ -284,7 +284,7 @@ void CPlayerInfo::MakePlayerSafe(bool enable, float radius) {
     flags.bFireProof = enable;
     flags.bExplosionProof = enable;
     flags.bCollisionProof = enable;
-    flags.bMeeleProof = enable;
+    flags.bMeleeProof = enable;
     m_PlayerData.m_bCanBeDamaged = !enable;
     m_PlayerData.m_pWanted->m_bEverybodyBackOff = enable;
     m_pPed->GetPadFromPlayer()->bPlayerSafe = enable;

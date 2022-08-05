@@ -4,7 +4,7 @@
 
 struct tAudioZoneSphere {
     char    m_szName[8];
-    uint16  m_nAudioZone;
+    int16   m_nAudioZone;
     uint16  m_nFlags;
     CVector m_vPosn;
     float   m_fRadius;
@@ -13,7 +13,7 @@ VALIDATE_SIZE(tAudioZoneSphere, 0x1C);
 
 struct tAudioZoneBox {
     char          m_Name[8];
-    uint16        m_nAudioZone;
+    int16         m_nAudioZone;
     uint16        m_Flags;
     CompressedBox m_Box;
 };

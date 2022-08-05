@@ -14,21 +14,21 @@ public:
     int16  y;
     int16  z;
     uint16 m_nDistanceFromStart;
-    bool   m_nSurfaceLighting;
-    bool   m_bSurfLightingFound;
+    tColLighting m_nSurfaceLighting;
+    bool m_bSurfLightingFound;
 
+public:
     CTrainNode();
 
-    void    SetX(float X);
-    void    SetY(float Y);
-    void    SetZ(float Z);
-    float   GetX();
-    float   GetY();
-    float   GetZ();
-    CVector GetPosn();
-    void    SetDistanceFromStart(float dist);
-    float   GetDistanceFromStart();
-    uint8   GetLightingFromCollision();
+    void SetX(float X);
+    void SetY(float Y);
+    void SetZ(float Z);
+    [[nodiscard]] float GetX() const;
+    [[nodiscard]] float GetY() const;
+    [[nodiscard]] float GetZ() const;
+    CVector GetPosn() const;
+    void SetDistanceFromStart(float dist);
+    [[nodiscard]] float GetDistanceFromStart() const;
+    tColLighting GetLightingFromCollision();
 };
-
 VALIDATE_SIZE(CTrainNode, 0xA);

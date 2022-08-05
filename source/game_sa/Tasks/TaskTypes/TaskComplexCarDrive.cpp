@@ -29,7 +29,7 @@ CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle) : CTaskComplex() {
     m_fSpeed                = 0.0f;
     m_carModelIndexToCreate = -1;
     m_nCarDrivingStyle      = DRIVING_STYLE_STOP_FOR_CARS;
-    field_1C                = 1;
+    field_1C                = AS_PASSENGER;
     m_bSavedVehicleBehavior = false;
     CEntity::SafeRegisterRef(m_pVehicle);
 }
@@ -40,7 +40,7 @@ CTaskComplexCarDrive::CTaskComplexCarDrive(CVehicle* vehicle, float speed, int32
     m_carModelIndexToCreate = carModelIndexToCreate;
     m_pVehicle              = vehicle;
     m_nCarDrivingStyle      = carDrivingStyle;
-    field_1C                = 1;
+    field_1C                = AS_PASSENGER;
     m_bSavedVehicleBehavior = false;
     CEntity::SafeRegisterRef(m_pVehicle);
 }

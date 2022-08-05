@@ -214,6 +214,8 @@ public:
     [[nodiscard]] bool IsCtrlPressed() const noexcept                       { return IsLeftCtrlJustDown() || IsRightCtrlJustDown(); }                                        //
     [[nodiscard]] static bool IsUpPressed() noexcept                        { return KEY_IS_PRESSED(up); }                                                                   //
     [[nodiscard]] static bool IsDownPressed() noexcept                      { return KEY_IS_PRESSED(down); }                                                                 //
+    [[nodiscard]] static bool IsLeftPressed() noexcept                      { return KEY_IS_PRESSED(left); }                                                                 //
+    [[nodiscard]] static bool IsRightPressed() noexcept                     { return KEY_IS_PRESSED(right); }                                                                //
     static bool IsPadEnterJustPressed() noexcept                            { return KEY_IS_PRESSED(enter); }                                                                //
     static bool IsReturnJustPressed() noexcept                              { return KEY_IS_PRESSED(extenter); }                                                             //
     static bool IsEnterJustPressed() noexcept                               { return IsPadEnterJustPressed() || IsReturnJustPressed(); }                                     // 0x4D5980
@@ -278,10 +280,6 @@ public:
     [[nodiscard]] int16 GetRightStickY() const noexcept                     { return BUTTON_IS_DOWN(RightStickY); }
 
     bool IsSteeringInAnyDirection() { return GetSteeringLeftRight() || GetSteeringUpDown(); }
-    bool f0x45AF90() {
-        NewState.LeftStickX = NewMouseControllerState.X;
-        NewState.RightStickX = NewMouseControllerState.Y;
-    }
 
     // PAD END
 
@@ -289,7 +287,7 @@ public:
     static bool f0x57C3C0() noexcept               { return !NewMouseControllerState.lmb && OldMouseControllerState.lmb; }          // 0x57C3C0
     static bool IsMouseLButtonPressed() noexcept   { return MOUSE_IS_PRESSED(lmb); }                                                // 0x4D5A00
     static bool IsMouseRButtonPressed() noexcept   { return MOUSE_IS_PRESSED(rmb); }                                                // 0x572E70
-    static bool IsMouseMPressed() noexcept         { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
+    static bool IsMouseMButtonPressed() noexcept   { return MOUSE_IS_PRESSED(mmb); }                                                // 0x57C3E0
     static bool IsMouseWheelUpPressed() noexcept   { return MOUSE_IS_PRESSED(wheelUp); }                                            // 0x57C400
     static bool IsMouseWheelDownPressed() noexcept { return MOUSE_IS_PRESSED(wheelDown); }                                          // 0x57C420
     static bool IsMouseBmx1Pressed() noexcept      { return MOUSE_IS_PRESSED(bmx1); }                                               // 0x57C440
@@ -312,16 +310,22 @@ public:
     bool sub_5404F0() const noexcept { return Mode != 1 ? 0 : IsDPadDownPressed(); } // 0x5404F0
     bool IsPhaseEqual11() const noexcept { return Phase == 11; } // 0x53FB60
 
-    static bool SetCurrentPad(int8 pad) { padNumber = pad; } // 0x53ED70
-    static bool f0x53ED80(int8 a1) { *(char*)0xB73401 = a1; } // see .cpp
-    bool f0x541290() { } // weapon related
+    static void SetCurrentPad(int8 pad) { padNumber = pad; } // 0x53ED70
 
     // 0x541A60
     static bool UpdatePadsTillStable() { return true; }
     bool ArePlayerControlsDisabled() { return DisablePlayerControls != 0; }
+    bool DebugMenuJustPressed();
 };
 
 VALIDATE_SIZE(CPad, 0x134);
+
+// return pressed key, in order of CKeyboardState
+int GetCurrentKeyPressed(RsKeyCodes& keys);
+
+// todo: move these fucks out
+IDirectInputDevice8* DIReleaseMouse();
+void InitialiseMouse(bool exclusive);
 
 /*
 Android has 99 funcs

@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "ClumpModelInfo.h"
+#include "CustomBuildingRenderer.h"
 
 void CClumpModelInfo::InjectHooks()
 {
@@ -19,8 +20,8 @@ void CClumpModelInfo::InjectHooks()
     RH_ScopedVirtualInstall(Shutdown, 0x4C4E60);
     RH_ScopedVirtualInstall(DeleteRwObject, 0x4C4E70);
     RH_ScopedVirtualInstall(GetRwModelType, 0x4C5730);
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
-    RH_ScopedVirtualOverloadedInstall(CreateInstance, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C5140, RwObject * (CClumpModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "mat", 0x4C5110, RwObject * (CClumpModelInfo::*)(RwMatrix*));
     RH_ScopedVirtualInstall(SetAnimFile, 0x4C5200);
     RH_ScopedVirtualInstall(ConvertAnimFileIndex, 0x4C5250);
     RH_ScopedVirtualInstall(GetAnimFileIndex, 0x4C5740);
@@ -126,8 +127,9 @@ RwObject* CClumpModelInfo::CreateInstance_Reversed()
     if (bHasAnimBlend) {
         RpAnimBlendClumpInit(clonedClump);
         auto animBlend = CAnimManager::GetAnimation(m_nKey, &CAnimManager::ms_aAnimBlocks[m_nAnimFileIndex]);
-        if (animBlend)
-            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIM_FLAG_LOOPED, 1.0F);
+        if (animBlend) {
+            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIMATION_LOOPED, 1.0F);
+        }
     }
 
     CBaseModelInfo::RemoveRef();

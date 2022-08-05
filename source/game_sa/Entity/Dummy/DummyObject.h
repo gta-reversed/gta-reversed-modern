@@ -10,7 +10,7 @@
 
 class CDummyObject : public CDummy {
 public:
-    CDummyObject() : CDummy() {}
+    CDummyObject();
     explicit CDummyObject(CObject* obj);
 
 public:

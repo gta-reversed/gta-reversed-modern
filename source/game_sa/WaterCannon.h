@@ -21,15 +21,12 @@ public:
 public:
     static void InjectHooks();
 
-    CWaterCannon();
-    CWaterCannon* Constructor();
-
-    ~CWaterCannon();
-    CWaterCannon* Destructor();
+    CWaterCannon() = default; // 0x728B10
+    ~CWaterCannon() = default; // 0x728B30
 
     void Init();
     void Update_OncePerFrame(int16);
-    void Update_NewInput(CVector* start, CVector* end);
+    void Update_NewInput(const CVector* start, const CVector* end);
     void PushPeds();
     void Render();
 

@@ -27,7 +27,7 @@ void CAEExplosionAudioEntity::AddAudioEvent(eAudioEvents audioEvent, CVector& po
         return;
     }
 
-    float vol0 = static_cast<float>(CAEAudioEntity::m_pAudioEventVolumes[AE_EXPLOSION]) + volume;
+    float vol0 = GetDefaultVolume(AE_EXPLOSION) + volume;
     m_Speed = (m_Speed + 1) % NUM_VARIATIONS;
 
     CAESound sound;

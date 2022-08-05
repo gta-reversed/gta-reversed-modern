@@ -131,7 +131,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 if (moveSpeedForward < maxMoveSpeedForward && m_nProcessCounter < 1000)
                 {
                     ped->ApplyMoveForce(ped->GetForward() * ((maxMoveSpeedForward - moveSpeedForward) * ped->m_fMass));
-                    m_nProcessCounter += CTimer::GetTimeStepInMS();
+                    m_nProcessCounter += (uint32)CTimer::GetTimeStepInMS();
                 }
             }
         }
@@ -182,7 +182,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
             if (m_pAnim && m_bUsingFallGlide)
             {
                 m_pAnim->m_fBlendDelta = -1000.0F;
-                m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim = nullptr;
             }
@@ -227,7 +227,7 @@ bool CTaskSimpleInAir::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
         if (m_pAnim)
         {
             m_pAnim->m_fBlendDelta = -8.0F;
-            m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+            m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
         }

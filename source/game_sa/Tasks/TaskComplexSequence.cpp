@@ -8,13 +8,13 @@ void CTaskComplexSequence::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x632BD0);
     RH_ScopedVirtualInstall(Clone, 0x5F6710);
-    RH_ScopedVirtualInstall(GetId, 0x632C60);
     RH_ScopedVirtualInstall(MakeAbortable, 0x632C00);
     RH_ScopedVirtualInstall(CreateNextSubTask, 0x638A40);
     RH_ScopedOverloadedInstall(CreateNextSubTask, "ped", 0x632C70, CTask*(CTaskComplexSequence::*)(CPed*, int32&, int32&));
     RH_ScopedVirtualInstall(CreateFirstSubTask, 0x638A60);
     RH_ScopedVirtualInstall(ControlSubTask, 0x632D00);
-    RH_ScopedInstall(AddTask, 0x632D10);
+    RH_ScopedOverloadedInstall(AddTask, "0", 0x632D10, void(CTaskComplexSequence::*)(CTask*));
+    RH_ScopedOverloadedInstall(AddTask, "1", 0x632D50, void(CTaskComplexSequence::*)(int32, CTask*));
     RH_ScopedInstall(Flush, 0x632C10);
     RH_ScopedInstall(Contains, 0x41BF10);
     RH_ScopedInstall(f0x463610, 0x463610);
@@ -56,11 +56,6 @@ CTaskComplexSequence* CTaskComplexSequence::Constructor() {
 // 0x5F6710
 CTask* CTaskComplexSequence::Clone() {
     return Clone_Reversed();
-}
-
-// 0x632C60
-eTaskType CTaskComplexSequence::GetTaskType() {
-    return GetId_Reversed();
 }
 
 // 0x632C00
@@ -123,6 +118,16 @@ void CTaskComplexSequence::AddTask(CTask* task) {
     delete task;
 }
 
+// 0x632D50
+void CTaskComplexSequence::AddTask(int32 taskId, CTask* task) {
+    if (taskId >= (int32)std::size(m_aTasks)) {
+        delete task;
+    } else {
+        delete m_aTasks[taskId];
+        m_aTasks[taskId] = task;
+    }
+}
+
 // 0x632C70
 CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int32& repeatCount) {
     UNUSED(ped);
@@ -137,7 +142,7 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int3
             repeatCount = repeatCount + 1;
         }
 
-        if (m_bRepeatSequence || repeatCount != m_bRepeatSequence) {
+        if (m_bRepeatSequence || (bool)repeatCount != m_bRepeatSequence) {
             nextSubTask = m_aTasks[taskIndex]->Clone();
         }
     } else if (incrementedTaskIndex != std::size(m_aTasks)) {

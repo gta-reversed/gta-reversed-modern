@@ -29,6 +29,10 @@ public:
         return std::sqrt(x * x + y * y);
     }
 
+    [[nodiscard]] inline bool IsZero() const {
+        return x == 0.0F && y == 0.0F;
+    }
+
     CVector2D& operator=(const CVector2D& right) {
         x = right.x;
         y = right.y;

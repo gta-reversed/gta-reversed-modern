@@ -11,9 +11,10 @@ public:
     CEvent* m_storedActiveEvent = nullptr;
     CTaskTimer m_storedActiveEventTimer;
 
+public:
     static void InjectHooks();
 
-    CEventHandlerHistory() {}
+    CEventHandlerHistory() = default;
     ~CEventHandlerHistory();
 
     void ClearAllEvents();
@@ -21,13 +22,9 @@ public:
     void ClearTempEvent();
     void ClearStoredActiveEvent();
     void Flush();
-    CEvent* GetCurrentEvent() {
-        return m_tempEvent ? m_tempEvent : m_nonTempEvent;
-    };
+    CEvent* GetCurrentEvent() { return m_tempEvent ? m_tempEvent : m_nonTempEvent; }
     int32 GetCurrentEventPriority();
-    CEvent* GetStoredActiveEvent() {
-        return m_storedActiveEvent;
-    }
+    CEvent* GetStoredActiveEvent() { return m_storedActiveEvent; }
     bool IsRespondingToEvent(eEventType eventType);
     void RecordCurrentEvent(CPed* ped, CEvent& event);
     void StoreActiveEvent();

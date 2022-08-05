@@ -27,7 +27,7 @@ public:
             uint8 m_bBulletProof           : 1;
             uint8 m_bFireProof             : 1;
             uint8 m_bCollisionProof        : 1;
-            uint8 m_bMeeleProof            : 1;
+            uint8 m_bMeleeProof            : 1;
             uint8 m_bExplosionProof        : 1;
             uint8                          : 1;
         };

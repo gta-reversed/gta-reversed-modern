@@ -9,7 +9,7 @@
 #include "Physical.h"
 #include "AEPedAudioEntity.h"
 #include "AEPedSpeechAudioEntity.h"
-#include "AEWeaponAudioEntity.h"
+#include "AEPedWeaponAudioEntity.h"
 #include "PedIntelligence.h"
 #include "PlayerPedData.h"
 #include "AnimBlendFrameData.h"
@@ -126,7 +126,7 @@ public:
 
     CAEPedAudioEntity       m_pedAudio;
     CAEPedSpeechAudioEntity m_pedSpeech;
-    CAEWeaponAudioEntity    m_weaponAudio;
+    CAEPedWeaponAudioEntity m_weaponAudio;
     char                    field_43C[36];
     CPed*                   field_460;
     char                    field_464[4];
@@ -147,14 +147,14 @@ public:
         uint32 bInVehicle : 1 = false;             // is in a vehicle
         uint32 bIsInTheAir : 1 = false;            // is in the air
         uint32 bIsLanding : 1 = false;             // is landing after being in the air
-        uint32 bHitSomethingLastFrame : 1 = false; // has been in a collision last fram
-        uint32 bIsNearCar : 1 = false;             // has been in a collision last fram
-        uint32 bRenderPedInCar : 1 = true;         // has been in a collision last fram
+        uint32 bHitSomethingLastFrame : 1 = false; // has been in a collision last frame
+        uint32 bIsNearCar : 1 = false;             // has been in a collision last frame
+        uint32 bRenderPedInCar : 1 = true;         // has been in a collision last frame
         uint32 bUpdateAnimHeading : 1 = false;     // update ped heading due to heading change during anim sequence
         uint32 bRemoveHead : 1 = false;            // waiting on AntiSpazTimer to remove head - TODO: See `RemoveBodyPart` - The name seems to be incorrect. It should be like `bHasBodyPartToRemove`.
 
         uint32 bFiringWeapon : 1 = false;         // is pulling trigger
-        uint32 bHasACamera : 1 = rand() % 4 != 0; // does ped possess a camera to document accidents
+        uint32 bHasACamera : 1;                   // does ped possess a camera to document accidents
         uint32 bPedIsBleeding : 1 = false;        // Ped loses a lot of blood if true
         uint32 bStopAndShoot : 1 = false;         // Ped cannot reach target to attack with fist, need to use gun
         uint32 bIsPedDieAnimPlaying : 1 = false;  // is ped die animation finished so can dead now
@@ -409,13 +409,13 @@ public:
     void SetLookFlag(CEntity* lookingTo, bool likeUnused, bool arg2);
     void SetAimFlag(CEntity* aimingTo);
     void ClearAimFlag();
-    uint8 GetLocalDirection(const CVector2D& arg0);
-    bool IsPedShootable();
-    bool UseGroundColModel();
-    bool CanPedReturnToState();
-    bool CanSetPedState();
-    bool CanBeArrested();
-    bool CanStrafeOrMouseControl();
+    uint8 GetLocalDirection(const CVector2D& point) const;
+    bool IsPedShootable() const;
+    bool UseGroundColModel() const;
+    bool CanPedReturnToState() const;
+    bool CanSetPedState() const;
+    bool CanBeArrested() const;
+    bool CanStrafeOrMouseControl() const;
     bool CanBeDeleted();
     bool CanBeDeletedEvenInVehicle() const;
     void RemoveGogglesModel();
@@ -485,6 +485,7 @@ public:
     void GiveWeaponSet1();
     void GiveWeaponSet2();
     void GiveWeaponSet3();
+    void GiveWeaponSet4();
     void SetCurrentWeapon(int32 slot);
     void SetCurrentWeapon(eWeaponType weaponType);
     void ClearWeapon(eWeaponType weaponType);
@@ -542,6 +543,7 @@ public:
 
     int32 GetGroupId() { return m_pPlayerData->m_nPlayerGroup; }
     CPedGroup& GetGroup() { return CPedGroups::GetGroup(m_pPlayerData->m_nPlayerGroup); } // TODO: Change this, it's misleading. Should be GetPlayerGroup
+    CPedClothesDesc* GetClothesDesc() { return m_pPlayerData->m_pPedClothesDesc; }
 
     CPedIntelligence* GetIntelligence() { return m_pIntelligence; }
     CPedIntelligence* GetIntelligence() const { return m_pIntelligence; }
@@ -552,21 +554,26 @@ public:
     CEventHandlerHistory& GetEventHandlerHistory() { return m_pIntelligence->m_eventHandler.m_history; }
     CPedStuckChecker& GetStuckChecker() { return m_pIntelligence->m_pedStuckChecker; }
 
-    CWeapon& GetWeaponInSlot(uint32_t slot) noexcept { return m_aWeapons[slot]; }
+    CWeapon& GetWeaponInSlot(size_t slot) noexcept { return m_aWeapons[slot]; }
     CWeapon& GetWeaponInSlot(eWeaponSlot slot) noexcept { return m_aWeapons[(size_t)slot]; }
     CWeapon& GetActiveWeapon() noexcept { return GetWeaponInSlot(m_nActiveWeaponSlot); }
 
     void SetSavedWeapon(eWeaponType weapon) { m_nSavedWeapon = weapon; }
     bool IsStateDriving() const noexcept { return m_nPedState == PEDSTATE_DRIVING; }
     bool IsStateDead() const noexcept { return m_nPedState == PEDSTATE_DEAD; }
+    bool IsStateDying() const noexcept { return m_nPedState == PEDSTATE_DEAD || m_nPedState == PEDSTATE_DIE; }
     bool IsInVehicleAsPassenger() const noexcept;
+
+    bool IsGangster() const noexcept { return m_nPedType >= PED_TYPE_GANG1 && m_nPedType <= PED_TYPE_GANG10; }
+    static bool IsGangster(ePedType pedType) noexcept { return pedType >= PED_TYPE_GANG1 && pedType <= PED_TYPE_GANG10; }
+    bool IsCivilian() const noexcept { return m_nPedType == PED_TYPE_CIVMALE || m_nPedType == PED_TYPE_CIVFEMALE; }
 
     CCopPed*       AsCop()       { return reinterpret_cast<CCopPed*>(this); }
     CCivilianPed*  AsCivilian()  { return reinterpret_cast<CCivilianPed*>(this); }
     CEmergencyPed* AsEmergency() { return reinterpret_cast<CEmergencyPed*>(this); }
     CPlayerPed*    AsPlayer()    { return reinterpret_cast<CPlayerPed*>(this); }
 
-    bool IsFollowerOfGroup(const CPedGroup& group);
+    bool IsFollowerOfGroup(const CPedGroup& group) const;
 
     RwMatrix& GetBoneMatrix(ePedBones bone) const;
 
@@ -577,6 +584,13 @@ public:
     bool IsInVehicle() const { return bInVehicle && m_pVehicle; }
 
     CVector GetBonePosition(ePedBones boneId, bool updateSkinBones = false);
+
+    int32 GetPadNumber() const;
+
+private:
+    void RenderThinBody() const;
+    void RenderBigHead() const;
+
 private:
     // Virtual method wrappers
     auto Constructor(ePedType pt) { this->CPed::CPed(pt); return this; }

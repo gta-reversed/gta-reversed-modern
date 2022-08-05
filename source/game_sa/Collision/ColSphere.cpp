@@ -2,8 +2,7 @@
 
 #include "ColSphere.h"
 
-void CColSphere::InjectHooks()
-{
+void CColSphere::InjectHooks() {
     RH_ScopedClass(CColSphere);
     RH_ScopedCategory("Collision");
 
@@ -15,18 +14,16 @@ void CColSphere::InjectHooks()
 }
 
 // 0x40FD10
-void CColSphere::Set(float radius, const CVector& center, uint8 material, uint8 flags, uint8 lighting)
-{
+void CColSphere::Set(float radius, const CVector& center, eSurfaceType material, uint8 pieceType, tColLighting lighting) {
     m_fRadius = radius;
     m_vecCenter = center;
-    m_nMaterial = material;
-    m_nFlags = flags;
-    m_nLighting = lighting;
+    m_Surface.m_nMaterial = material;
+    m_Surface.m_nPiece = pieceType;
+    m_Surface.m_nLighting = lighting;
 }
 
 // 0x40FF20
-bool CColSphere::IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2)
-{
+bool CColSphere::IntersectRay(const CVector& rayOrigin, const CVector& direction, CVector& intersectPoint1, CVector& intersectPoint2) {
     CVector distance = rayOrigin - m_vecCenter;
     float b = 2.0f * DotProduct(direction, distance);
     float c = DotProduct(distance, distance) - m_fRadius * m_fRadius;
@@ -40,8 +37,7 @@ bool CColSphere::IntersectRay(const CVector& rayOrigin, const CVector& direction
 }
 
 // 0x4100E0
-bool CColSphere::IntersectEdge(const CVector& startPoint, const CVector& endPoint, CVector& intersectPoint1, CVector& intersectPoint2)
-{
+bool CColSphere::IntersectEdge(const CVector& startPoint, const CVector& endPoint, CVector& intersectPoint1, CVector& intersectPoint2) {
     CVector originCenterDistance = startPoint - m_vecCenter;
     CVector rayDirection = endPoint - startPoint;
     float rayLength = rayDirection.Magnitude();
@@ -52,25 +48,31 @@ bool CColSphere::IntersectEdge(const CVector& startPoint, const CVector& endPoin
     float discriminant = b * b - 4.0f * a * c; // discriminant = b^2-4ac
     // discriminant == 0: the ray intersects one point on the sphere
     // discriminant > 0: the ray intersects two points on the sphere
-    if (discriminant < 0.0f)
+    if (discriminant < 0.0f) {
         return false;
+    }
+
     float discriminantSquareRoot = sqrt(discriminant);
     float numerator1 = (-b - discriminantSquareRoot) * 0.5f;
     float numerator2 = (discriminantSquareRoot - b) * 0.5f;
-    if (numerator1 > rayLength || numerator2 < 0.0f)
+    if (numerator1 > rayLength || numerator2 < 0.0f) {
         return false;
+    }
+
     intersectPoint2 = endPoint;
-    if (numerator2 < rayLength)
+    if (numerator2 < rayLength) {
         intersectPoint2 = (rayDirection * numerator2) + startPoint;
+    }
+
     intersectPoint1 = startPoint;
-    if (numerator1 > 0.0f)
+    if (numerator1 > 0.0f) {
         intersectPoint1 = (rayDirection * numerator1) + startPoint;
+    }
     return true;
 }
 
 // 0x410040
-bool CColSphere::IntersectPoint(const CVector& point)
-{
+bool CColSphere::IntersectPoint(const CVector& point) {
     CVector distance = m_vecCenter - point;
     return m_fRadius * m_fRadius > distance.SquaredMagnitude();
 }

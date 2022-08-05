@@ -131,18 +131,9 @@ bool CAudioEngine::Initialise() {
         return false;
     }
 
-    CAEAudioEntity::m_pAudioEventVolumes = new int8[45401];
-    auto file = CFileMgr::OpenFile("AUDIO\\CONFIG\\EVENTVOL.DAT", "r");
-    if (!file) {
-        DEV_LOG("[AudioEngine] Failed to open EVENTVOL.DAT");
+    if (!CAEAudioEntity::StaticInitialise()) {
         return false;
     }
-    if (CFileMgr::Read(file, CAEAudioEntity::m_pAudioEventVolumes, 45401) != 45401) {
-        DEV_LOG("[AudioEngine] Failed to read EVENTVOL.DAT");
-        CFileMgr::CloseFile(file);
-        return false;
-    }
-    CFileMgr::CloseFile(file);
 
     m_FrontendAE.Initialise();
     CAudioEngine::SetEffectsFaderScalingFactor(0.0f);
@@ -216,10 +207,7 @@ void CAudioEngine::Shutdown() {
     AESoundManager.Reset();
     AESoundManager.Terminate();
     AEAudioHardware.Terminate();
-
-    delete[] CAEAudioEntity::m_pAudioEventVolumes;
-    CAEAudioEntity::m_pAudioEventVolumes = nullptr;
-
+    CAEAudioEntity::Shutdown();
     AEUserRadioTrackManager.Shutdown();
 }
 
@@ -530,13 +518,13 @@ bool CAudioEngine::IsAmbienceRadioActive() {
 }
 
 // 0x507290
-void CAudioEngine::PreloadMissionAudio(uint8 sampleId, int32 a3) {
-    m_ScriptAE.PreloadMissionAudio(sampleId, a3);
+void CAudioEngine::PreloadMissionAudio(uint8 slotId, int32 sampleId) {
+    m_ScriptAE.PreloadMissionAudio(slotId, sampleId);
 }
 
 // 0x5072B0
-void CAudioEngine::PlayLoadedMissionAudio(uint8 sampleId) {
-    m_ScriptAE.PlayLoadedMissionAudio(sampleId);
+void CAudioEngine::PlayLoadedMissionAudio(uint8 slotId) {
+    m_ScriptAE.PlayLoadedMissionAudio(slotId);
 }
 
 // 0x5072D0

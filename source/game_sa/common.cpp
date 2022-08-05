@@ -53,8 +53,6 @@ void InjectCommonHooks() {
     RH_ScopedNamespaceName("Common");
     RH_ScopedCategory("Common");
 
-    HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
-
     RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
     RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
     RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
@@ -134,6 +132,18 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
+void MessageLoop() {
+    tagMSG msg;
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+        if (msg.message == WM_QUIT) {
+            RsGlobal.quit = true;
+        } else {
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
+}
+
 // 0x56E010
 CVector FindPlayerCoors(int32 playerId) {
     if (CEntity* e = FindPlayerEntity(playerId))
@@ -149,7 +159,7 @@ CVector& FindPlayerSpeed(int32 playerId) {
 // 0x56E120
 CEntity* FindPlayerEntity(int32 playerId) {
     if (auto player = FindPlayerPed(playerId)) {
-        if (player->bInVehicle && player->m_pVehicle) 
+        if (player->bInVehicle && player->m_pVehicle)
             return player->m_pVehicle;
         return player;
     }
@@ -206,7 +216,7 @@ float FindPlayerHeight() {
 
 // 0x56E210
 CPlayerPed* FindPlayerPed(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
+    return FindPlayerInfo(playerId).m_pPed;
 }
 
 // Returns player vehicle
@@ -227,7 +237,7 @@ CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
 
 // 0x56E230
 CWanted* FindPlayerWanted(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
+    return FindPlayerInfo(playerId).m_PlayerData.m_pWanted;
 }
 
 
@@ -361,6 +371,24 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
+}
+
+// todo: move
+// 0x53D690
+void DoRWStuffStartOfFrame(int16 nR1, int16 nG1, int16 nB1, int16 nR2, int16 nG2, int16 nB2, int16 nA) {
+    plugin::Call<0x53D690, int16, int16, int16, int16, int16, int16, int16>(nR1, nG1, nB1, nR2, nG2, nB2, nA);
+}
+
+// todo: move
+// 0x53D840
+void DoRWStuffEndOfFrame() {
+    plugin::Call<0x53D840>();
+}
+
+// todo: move
+// 0x53EC10
+RsEventStatus AppEventHandler(RsEvent nEvent, void* param) {
+    return plugin::CallAndReturn<RsEventStatus, 0x53EC10, RsEvent, void*>(nEvent, param);
 }
 
 // TODO: Check `outName` size (to avoid buffer overflow)
@@ -826,15 +854,16 @@ void DeActivateDirectional() {
     RpLightSetFlags(pDirect, 0x0);
 }
 
-// unused
-// 0x735C90
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0) {
-    // used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
-    float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
+/*!
+ * @addr 0x735C90
+ * @param idx Color index 0..8
+ */
+void SetAmbientColoursToIndicateRoadGroup(int32 idx) {
+    // used to convert 0-255 to 0.0f-1.0f
 
-    AmbientLightColour.red   = IndicateR[arg0 % 7] * 1.0f / 255.0f;
-    AmbientLightColour.green = IndicateG[arg0 % 7] * 1.0f / 255.0f;
-    AmbientLightColour.blue  = IndicateB[arg0 % 7] * 1.0f / 255.0f;
+    AmbientLightColour.red   = (float)IndicateR[idx % 7] * 255.0f;
+    AmbientLightColour.green = (float)IndicateG[idx % 7] * 255.0f;
+    AmbientLightColour.blue  = (float)IndicateB[idx % 7] * 255.0f;
     RpLightSetColor(pAmbient, &AmbientLightColour);
 }
 
@@ -1272,8 +1301,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::ImguiDrawLoop();
-    CDebugMenu::ImGuiDrawMouse();
+    CDebugMenu::ImGuiDrawLoop();
 }
 
 // NOTSA
