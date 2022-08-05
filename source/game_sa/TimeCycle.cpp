@@ -222,20 +222,16 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
     return plugin::Call<0x5603D0, CVector, CColourSet*>(point, set);
 
     // untested
-    CTimeCycleBox *lodBox, *farBox1, *farBox2, *weatherBox, *tmpBox;
-    float lodBoxInterp, farBox1Interp, farBox2Interp, weatherBoxInterp, tmpInterp;
+    CTimeCycleBox *lodBox, *farBox1, *farBox2, *weatherBox;
+    float lodBoxInterp, farBox1Interp, farBox2Interp, weatherBoxInterp;
     FindTimeCycleBox(point, &lodBox, &lodBoxInterp, true, false, nullptr);
     FindTimeCycleBox(point, &farBox1, &farBox1Interp, false, true, nullptr);
 
     if (farBox1) {
         FindTimeCycleBox(point, &farBox2, &farBox2Interp, false, true, farBox1);
         if (farBox2 && farBox2->m_Box.GetWidth() > farBox1->m_Box.GetWidth()) {
-            tmpBox = farBox1;
-            farBox1 = farBox2;
-            farBox2 = tmpBox;
-            tmpInterp = farBox2Interp;
-            farBox2Interp = farBox1Interp;
-            farBox1Interp = tmpInterp;
+            std::swap(farBox1, farBox2);
+            std::swap(farBox1Interp, farBox2Interp);
         }
     } else {
         farBox2 = nullptr;
@@ -243,8 +239,7 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
     FindTimeCycleBox(point, &weatherBox, &weatherBoxInterp, false, false, nullptr);
 
     float time = (float)CClock::GetGameClockMinutes() / 60.0f + (float)CClock::GetGameClockSeconds() / 3600.0f + (float)CClock::GetGameClockHours();
-    if (time >= 23.999f)
-        time = 23.999f;
+    time = std::min(time, 24.0f); // 23.999f ?
 
     int curHourSel, nextHourSel;
     for (curHourSel = 0; time >= (float)gTimecycleHours[curHourSel + 1]; curHourSel++) {
@@ -296,7 +291,7 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
         nextNew.Interpolate(&nextNew, &set2, 1.0f - f, f, false);
     }
 
-    CColourSet oldInterp, newInterp;
+    CColourSet oldInterp{}, newInterp{};
     oldInterp.Interpolate(&currentOld, &nextOld, invTimeInterp, timeInterp, false);
     newInterp.Interpolate(&currentNew, &nextNew, invTimeInterp, timeInterp, false);
     set->Interpolate(&oldInterp, &newInterp, invWeatherInterp, weatherInterp, false);
@@ -316,9 +311,9 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
     m_CurrentStoredValue = (m_CurrentStoredValue + 1) & 15;
     CVector* vec = &m_VectorToSun[m_CurrentStoredValue];
     float sunAngle = CClock::GetMinutesToday() * PI / 720.0f;
-    vec->x = 0.7f + std::sin(sunAngle);
+    vec->x = +0.7f + std::sin(sunAngle);
     vec->y = -0.7f;
-    vec->z = 0.2f - std::cos(sunAngle);
+    vec->z = +0.2f - std::cos(sunAngle);
     vec->Normalise();
 
     // 0x560AAE
@@ -378,38 +373,29 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
     float inc = CTimer::GetTimeStep() / 120.0f;
     if (m_bExtraColourOn) {
         m_ExtraColourInter += inc;
-        if (m_ExtraColourInter > 1.0f)
-            m_ExtraColourInter = 1.0f;
+        m_ExtraColourInter = std::min(m_ExtraColourInter, 1.0f);
     } else {
         m_ExtraColourInter -= inc;
-        if (m_ExtraColourInter < 0.0f)
-            m_ExtraColourInter = 0.0f;
+        m_ExtraColourInter = std::max(m_ExtraColourInter, 0.0f);
     }
+
     if (m_ExtraColourInter > 0.0f) {
         CColourSet extra(m_ExtraColour, m_ExtraColourWeatherType);
-        bool ignoreSky = (
-            m_nSkyTopRed[m_ExtraColour][m_ExtraColourWeatherType] == 0 &&
-            m_nSkyTopGreen[m_ExtraColour][m_ExtraColourWeatherType] == 0 &&
-            m_nSkyTopBlue[m_ExtraColour][m_ExtraColourWeatherType] == 0
-        );
+        bool ignoreSky = ShouldIgnoreSky();
         set->Interpolate(set, &extra, 1.0f - m_ExtraColourInter, m_ExtraColourInter, ignoreSky);
     }
 
     if (CWeather::UnderWaterness > 0.0f) {
         CColourSet current(curHourSel, 20);
         CColourSet next(nextHourSel, 20);
-        CColourSet tmp;
+        CColourSet tmp{};
         tmp.Interpolate(&current, &next, invTimeInterp, timeInterp, false);
         set->Interpolate(set, &tmp, 1.0f - CWeather::UnderWaterness, CWeather::UnderWaterness, false);
     }
 
     if (CWeather::InTunnelness > 0.0f) {
         CColourSet tunnel(TunnelWeather % NUM_HOURS, TunnelWeather / NUM_HOURS + WEATHER_EXTRA_START);
-        bool ignoreSky = (
-            m_nSkyTopRed[m_ExtraColour][m_ExtraColourWeatherType] == 0 &&
-            m_nSkyTopGreen[m_ExtraColour][m_ExtraColourWeatherType] == 0 &&
-            m_nSkyTopBlue[m_ExtraColour][m_ExtraColourWeatherType] == 0
-        );
+        bool ignoreSky = ShouldIgnoreSky();
         set->Interpolate(set, &tunnel, 1.0f - CWeather::InTunnelness, CWeather::InTunnelness, ignoreSky);
     }
 
@@ -528,7 +514,7 @@ void CTimeCycle::CalcColoursForPoint(CVector point, CColourSet* set) {
 
 // 0x5616E0
 float CTimeCycle::FindFarClipForCoors(CVector cameraPos) {
-    CColourSet set;
+    CColourSet set{};
     bool extraOn = m_bExtraColourOn != 0;
     float extraInter = m_ExtraColourInter;
     m_bExtraColourOn = 0;

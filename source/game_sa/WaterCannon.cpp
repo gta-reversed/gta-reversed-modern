@@ -7,33 +7,11 @@ void CWaterCannon::InjectHooks() {
     RH_ScopedClass(CWaterCannon);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Constructor, 0x728B10);
-    RH_ScopedInstall(Destructor, 0x728B30);
     RH_ScopedInstall(Init, 0x728B40);
     RH_ScopedInstall(Update_OncePerFrame, 0x72A280);
     RH_ScopedInstall(Update_NewInput, 0x728C20);
     RH_ScopedInstall(PushPeds, 0x7295E0);
     RH_ScopedInstall(Render, 0x728DA0);
-}
-
-// 0x728B10
-CWaterCannon::CWaterCannon() {
-    // NOP
-}
-
-CWaterCannon* CWaterCannon::Constructor() {
-    this->CWaterCannon::CWaterCannon();
-    return this;
-}
-
-// 0x728B30
-CWaterCannon::~CWaterCannon() {
-    // NOP
-}
-
-CWaterCannon* CWaterCannon::Destructor() {
-    CWaterCannon::~CWaterCannon();
-    return this;
 }
 
 // 0x728B40
@@ -82,7 +60,7 @@ void CWaterCannon::Update_OncePerFrame(int16 index) {
 }
 
 // 0x728C20
-void CWaterCannon::Update_NewInput(CVector* start, CVector* end) {
+void CWaterCannon::Update_NewInput(const CVector* start, const CVector* end) {
     m_sectionPoint[m_nSectionsCount]     = *start;
     m_sectionMoveSpeed[m_nSectionsCount] = *end;
     m_abUsed[m_nSectionsCount]           = true;
@@ -237,15 +215,15 @@ void CWaterCannon::Render() {
                 CEntity* hitEntity{};
                 const bool hasSectionHit = CWorld::ProcessLineOfSight(prevPosn, currPosn, colPoint, hitEntity, true, true, false, false, false, false, false, false);
                 if (hasSectionHit) {
-                    FxPrtMult_c prtinfo{ 1.0f, 1.0f, 1.0f, 0.15f, 0.75f, 1.0f, 0.2f };
+                    FxPrtMult_c prtInfo{ 1.0f, 1.0f, 1.0f, 0.15f, 0.75f, 1.0f, 0.2f };
                     CVector velocity0 = colPoint.m_vecNormal * 3.0f * CVector::Random(0.2f, 1.8f);
 
                     for (auto n = 0; n < 2; n++) {
-                        const auto unk = (float)(n / CTimer::GetTimeStepInMS());
+                        const auto unk = (float)n / CTimer::GetTimeStepInMS();
 
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity0, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity0, unk, &prtInfo, -1.0f, 1.2f, 0.6f, 0);
                         CVector velocity1 = velocity0 * 0.6f;
-                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity1, unk, &prtinfo, -1.0f, 1.2f, 0.6f, 0);
+                        g_fx.m_pPrtWatersplash->AddParticle(&colPoint.m_vecPoint, &velocity1, unk, &prtInfo, -1.0f, 1.2f, 0.6f, 0);
                     }
 
                     m_Audio.SetSplashInfo(colPoint.m_vecPoint, velocity0.Magnitude());

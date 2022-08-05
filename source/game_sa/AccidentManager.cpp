@@ -75,7 +75,7 @@ CAccident* CAccidentManager::GetNearestFreeAccidentExceptThisOne(CVector& posn, 
             && !(thisOne && thisOne == &acc)
             )
         {
-            float distance = DistanceBetweenPoints(posn, acc.m_pPed->GetPosition());
+            float distance = DistanceBetweenPoints(acc.m_pPed->GetPosition(), posn);
             if (distance < minDistance)
             {
                 minDistance = distance;

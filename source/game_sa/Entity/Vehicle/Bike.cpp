@@ -200,7 +200,7 @@ bool CBike::ProcessAI(uint32& extraHandlingFlags) {
 }
 
 // 0x6BF400
-void CBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
+void CBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (m_bOffscreen && m_nStatus == STATUS_PLAYER)
         return;
 

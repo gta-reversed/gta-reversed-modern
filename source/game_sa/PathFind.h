@@ -197,7 +197,7 @@ public:
     CNodeAddress FindNodeClosestToCoorsFavourDirection(CVector pos, uint8 nodeType, float dirX, float dirY);
     void FindNodePairClosestToCoors(CVector pos, uint8 nodeType, CNodeAddress* outFirst, CNodeAddress* outSecond, float* outDist, float minDist, float maxDist, bool bLowTraffic, bool bUnused, bool bBoats);
     float FindNodeOrientationForCarPlacement(CNodeAddress address);
-    float FindNodeOrientationForCarPlacementFacingDestination(CNodeAddress address, float dirX, float dirY, bool bUnkn) { /*noop, not in PC idb, unused in mobile*/ }
+    float FindNodeOrientationForCarPlacementFacingDestination(CNodeAddress address, float dirX, float dirY, bool bUnkn) { return 0.0f; } /*noop, not in PC idb, unused in mobile*/
     static void AllocatePathFindInfoMem() { /*noop 0x44D2B0*/ }
     void StoreNodeInfoCar(int16, int16, int8, int8, int16, int16, int16, float, int8, int8, bool, bool, uint8, bool, bool, uint8, uint8) { /*noop*/ }
     void StoreNodeInfoPed(int16, int16, int8, int8, int16, int16, int16, float, bool, uint8, bool, uint8) { /*noop*/ }

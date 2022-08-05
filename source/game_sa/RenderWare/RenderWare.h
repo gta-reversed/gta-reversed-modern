@@ -36,3 +36,8 @@ _D3DMATRIX *GetD3DProjTransform();
 
 #define RWRSTATE(a) (reinterpret_cast<void *>(a))
 #define PSGLOBAL(var) (((psGlobalType *)(RsGlobal.ps))->var)
+
+struct RwResEntrySA : RwResEntry {
+    RxD3D9ResEntryHeader header;
+    RxD3D9InstanceData meshData;
+};

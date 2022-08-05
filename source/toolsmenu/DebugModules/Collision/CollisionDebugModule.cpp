@@ -6,6 +6,7 @@
 #include "CollisionDebugModule.h"
 
 #include "Lines.h"
+#include "TaskSimpleClimb.h"
 
 namespace CollisionDebugModule {
 
@@ -145,9 +146,7 @@ void DrawBox(const CMatrix& matrix, const CColBox& box) {
 }
 
 void DrawTriangles(const CMatrix& matrix, const CColTriangle* triangles, const CompressedVector* vertices, const uint32& count, const uint32& startColor, const uint32& endColor) {
-    for (auto i = 0u; i < count; i++) {
-        const auto& triangle = triangles[i];
-
+    for (const auto& triangle : std::span{ triangles, count }) {
         const CVector v14 = matrix * UncompressVector(vertices[triangle.m_nVertA]);
         const CVector v24 = matrix * UncompressVector(vertices[triangle.m_nVertB]);
         const CVector v33 = matrix * UncompressVector(vertices[triangle.m_nVertC]);
@@ -185,20 +184,20 @@ void DrawColModel(const CMatrix& matrix, const CColModel& cm) {
     SetState();
 
     if (gDrawCollisionModule.draw_box) {
-        for (auto i = 0; i < cm.m_pColData->m_nNumBoxes; i++) {
-            DrawBox(matrix, cm.m_pColData->m_pBoxes[i]);
+        for (auto& boxes : cm.m_pColData->GetBoxes()) {
+            DrawBox(matrix, boxes);
         }
     }
 
     if (gDrawCollisionModule.draw_line) {
-        for (auto i = 0; i < cm.m_pColData->m_nNumLines; i++) {
-            DrawLine(matrix, cm.m_pColData->m_pLines[i]);
+        for (auto& lines : cm.m_pColData->GetLines()) {
+            DrawLine(matrix, lines);
         }
     }
 
     if (gDrawCollisionModule.draw_sphere) {
-        for (auto i = 0; i < cm.m_pColData->m_nNumSpheres; i++) {
-            DrawSphere(matrix, cm.m_pColData->m_pSpheres[i]);
+        for (auto& spheres : cm.m_pColData->GetSpheres()) {
+            DrawSphere(matrix, spheres);
         }
     }
 
@@ -215,7 +214,7 @@ void DrawColModel(const CMatrix& matrix, const CColModel& cm) {
             DrawTriangles(matrix, cm.m_pColData->m_pShadowTriangles, cm.m_pColData->m_pShadowVertices, cm.m_pColData->m_nNumShadowTriangles, shadowTriangleColor, shadowTriangleColor);
         }
     }
-    
+
     ResetState();
 }
 
@@ -235,23 +234,19 @@ void ProcessRender() {
     if (!gDrawCollisionModule.enabled)
         return;
 
-    for (int32 i = 0; i < CRenderer::ms_nNoOfVisibleEntities; i++) {
-        const auto& entity = CRenderer::ms_aVisibleEntityPtrs[i];
-        if (!entity)
+    for (auto& entity : std::span{ CRenderer::ms_aVisibleEntityPtrs, (size_t)CRenderer::ms_nNoOfVisibleEntities }) {
+        if (!entity || !entity->m_matrix)
             continue;
 
-        if (!entity->m_matrix)
+        const auto& mi = entity->GetModelInfo();
+        if (!mi)
             continue;
 
-        const auto& modelInfo = CModelInfo::GetModelInfo(entity->m_nModelIndex);
-        if (!modelInfo)
+        const auto& cm = mi->GetColModel();
+        if (!cm)
             continue;
 
-        const auto& colModel = modelInfo->GetColModel();
-        if (!colModel)
-            continue;
-
-        DrawColModel(entity->GetMatrix(), *colModel);
+        DrawColModel(entity->GetMatrix(), *cm);
     }
 }
 

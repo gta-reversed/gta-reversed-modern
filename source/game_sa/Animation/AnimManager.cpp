@@ -776,7 +776,7 @@ inline void CAnimManager::LoadAnimFile_ANP23(RwStream* stream, bool compress, bo
 
     auto animIndex = animBlock->startAnimation;
     for (auto j = 0; j < nAnims; j++) {
-        assert(animIndex < std::size(ms_aAnimations));
+        assert(animIndex < (int32)std::size(ms_aAnimations));
         CAnimBlendHierarchy* hier = &ms_aAnimations[animIndex++];
 
         // Each node has a name and key frames

@@ -87,10 +87,7 @@ void WaterCreature_c::Exit()
     g_waterCreatureMan.m_createdList.RemoveItem(this);
     g_waterCreatureMan.m_freeList.AddItem(this);
     CWorld::Remove(m_pObject);
-
-    if (m_pObject)
-        delete m_pObject;
-
+    delete m_pObject;
     m_pObject = nullptr;
     --CObject::nNoTempObjects;
 }

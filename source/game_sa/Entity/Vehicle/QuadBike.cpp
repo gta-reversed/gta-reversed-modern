@@ -16,7 +16,7 @@ void CQuadBike::InjectHooks() {
     RH_ScopedVirtualInstall(GetRideAnimData, 0x6CDC90);
     RH_ScopedVirtualInstall(PreRender, 0x6CEAD0);
     RH_ScopedVirtualInstall(ProcessAI, 0x6CE460);
-    RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0);
+    // RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0);
     RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CE020);
     RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6CE280);
     RH_ScopedVirtualInstall(ProcessSuspension, 0x6CE270);
@@ -38,7 +38,7 @@ CQuadBike::CQuadBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobil
     field_9A8[3] = 1.0f; // see SetupSuspensionLines
     }
 
-    SetupSuspensionLines();
+    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
 
     m_nQuadFlags &= ~1u; // useless
     m_fSteerAngle = 0.0f;
@@ -70,42 +70,39 @@ CRideAnimData* CQuadBike::GetRideAnimData() {
 void CQuadBike::PreRender() {
     CAutomobile::PreRender();
 
-    auto modelInfo = CModelInfo::GetModelInfo(m_nModelIndex)->AsVehicleModelInfoPtr();
-    {
-        CVector wheelPos;
-        modelInfo->GetWheelPosn(CAR_WHEEL_REAR_LEFT, wheelPos, false);
-        SetTransmissionRotation(
-            m_aCarNodes[QUAD_REAR_AXLE],
-            m_wheelPosition[CAR_WHEEL_REAR_LEFT],
-            m_wheelPosition[CAR_WHEEL_REAR_RIGHT],
-            wheelPos,
-            false
-        );
-    }
+    auto mi = GetVehicleModelInfo();
+    CVector wheelPos{};
+    mi->GetWheelPosn(CAR_WHEEL_REAR_LEFT, wheelPos, false);
+    SetTransmissionRotation(
+        m_aCarNodes[QUAD_REAR_AXLE],
+        m_wheelPosition[CAR_WHEEL_REAR_LEFT],
+        m_wheelPosition[CAR_WHEEL_REAR_RIGHT],
+        wheelPos,
+        false
+    );
 
-    CVector wheelFrontLeftPos;
-    modelInfo->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
+    CVector wheelFrontLeftPos{};
+    mi->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, wheelFrontLeftPos, false);
 
     // Original code saves position of each matrix (because calls to SetRotation set the pos. to 0), then restores it
     // We just use SetRotateYOnly which doesn't modify the position
 
-    if (auto suspensionLF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_LF]) {
-        CMatrix mat;
-        mat.Attach(RwFrameGetMatrix(suspensionLF), false);
+    CMatrix mat;
+
+    if (m_aCarNodes[QUAD_SUSPENSION_LF]) {
+        mat.Attach(RwFrameGetMatrix(m_aCarNodes[QUAD_SUSPENSION_LF]), false);
         mat.SetRotateYOnly(atan2(m_wheelPosition[CAR_WHEEL_FRONT_LEFT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
 
-    if (auto suspensionRF = m_aCarNodes[eQuadBikeNodes::QUAD_SUSPENSION_RF]) {
-        CMatrix mat;
-        mat.Attach(RwFrameGetMatrix(suspensionRF), false);
+    if (m_aCarNodes[QUAD_SUSPENSION_RF]) {
+        mat.Attach(RwFrameGetMatrix(m_aCarNodes[QUAD_SUSPENSION_RF]), false);
         mat.SetRotateYOnly(-atan2(m_wheelPosition[eCarWheel::CAR_WHEEL_FRONT_RIGHT] - wheelFrontLeftPos.z, fabs(wheelFrontLeftPos.x)));
         mat.UpdateRW();
     }
 
-    if (auto handlebars = m_aCarNodes[eQuadBikeNodes::QUAD_HANDLEBARS]) {
-        CMatrix mat;
-        mat.Attach(RwFrameGetMatrix(handlebars), false);
+    if (m_aCarNodes[QUAD_HANDLEBARS]) {
+        mat.Attach(RwFrameGetMatrix(m_aCarNodes[QUAD_HANDLEBARS]), false);
         mat.SetRotateZOnly(QUAD_HBSTEER_ANIM_MULT * m_sRideAnimData.m_fHandlebarsAngle);
         mat.UpdateRW();
     }
@@ -209,6 +206,8 @@ bool CQuadBike::ProcessAI(uint32& extraHandlingFlags) {
 
 // 0x6CDCC0
 void CQuadBike::ProcessControl() {
+    return plugin::CallMethod<0x6CDCC0, CQuadBike*>(this);
+
     if (m_nStatus != STATUS_PLAYER || !bDoQuadDamping) {
         CAutomobile::ProcessControl();
         return;
@@ -253,32 +252,33 @@ void CQuadBike::ProcessControlInputs(uint8 playerNum) {
 
     CPad* pad = CPad::GetPad(playerNum);
     if (!CCamera::m_bUseMouse3rdPerson || !m_bEnableMouseSteering) {
-        m_sRideAnimData.dword10 += (-pad->GetSteeringUpDown() / 128.0f - m_sRideAnimData.dword10) * CTimer::GetTimeStep() * 0.2f;
+        m_sRideAnimData.dword10 += (float(-pad->GetSteeringUpDown()) / 128.0f - m_sRideAnimData.dword10) * CTimer::GetTimeStep() / 5.0f;
     } else {
         if (CPad::NewMouseControllerState.X == 0.0f && CPad::NewMouseControllerState.Y == 0.0f && // todo: Use CPad::? func
-            (fabs(m_fRawSteerAngle) <= 0.0f || m_nLastControlInput != eControllerType::CONTROLLER_MOUSE || pad->IsSteeringInAnyDirection())
+            (std::fabs(m_fRawSteerAngle) <= 0.0f || m_nLastControlInput != eControllerType::CONTROLLER_MOUSE || pad->IsSteeringInAnyDirection())
         ) {
             if (pad->GetSteeringUpDown() || m_nLastControlInput != eControllerType::CONTROLLER_MOUSE) {
                 m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
-                m_sRideAnimData.dword10 += (-pad->GetSteeringUpDown() / 128.0f - m_sRideAnimData.dword10) * CTimer::GetTimeStep() * 0.2f;
+                m_sRideAnimData.dword10 += (float(-pad->GetSteeringUpDown()) / 128.0f - m_sRideAnimData.dword10) * CTimer::GetTimeStep() / 5.0f;
             }
         } else {
             m_nLastControlInput = eControllerType::CONTROLLER_MOUSE;
             if (!pad->NewState.m_bVehicleMouseLook) {
                 m_sRideAnimData.dword10 += CPad::NewMouseControllerState.Y * -0.035f;
             }
-            if (pad->NewState.m_bVehicleMouseLook || fabs(m_sRideAnimData.dword10) < 0.35f) {
-                m_sRideAnimData.dword10 *= pow(0.98f, CTimer::GetTimeStep());
+            if (pad->NewState.m_bVehicleMouseLook || std::fabs(m_sRideAnimData.dword10) < 0.35f) {
+                m_sRideAnimData.dword10 *= std::pow(0.98f, CTimer::GetTimeStep());
             }
         }
     }
-    m_sRideAnimData.dword10 = clamp(m_sRideAnimData.dword10, -1.0f, 1.0f);
-    if (pad->DisablePlayerControls)
+    m_sRideAnimData.dword10 = std::clamp(m_sRideAnimData.dword10, -1.0f, 1.0f);
+    if (pad->DisablePlayerControls) {
         m_sRideAnimData.dword10 = 0.0f;
+    }
 }
 
 // 0x6CE280
-void CQuadBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
+void CQuadBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (!m_bOffscreen) { // see CBike::ProcessDrivingAnims
         CBike::ProcessRiderAnims(driver, this, &m_sRideAnimData, m_pHandling, 0);
     }
@@ -296,11 +296,12 @@ void CQuadBike::ResetSuspension() {
 
 // 0x6CE340
 void CQuadBike::SetupDamageAfterLoad() {
-    if (m_aCarNodes[QUAD_BODY_FRONT])
+    if (m_aCarNodes[QUAD_BODY_FRONT]) {
         CAutomobile::SetBumperDamage(FRONT_BUMPER, false);
-
-    if (m_aCarNodes[QUAD_BODY_REAR])
+    }
+    if (m_aCarNodes[QUAD_BODY_REAR]) {
         CAutomobile::SetDoorDamage(DOOR_BONNET, false);
+    }
 }
 
 // 0x6CDCA0

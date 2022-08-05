@@ -395,13 +395,14 @@ void CAEVehicleAudioEntity::Terminate() {
         TurnOffRadioForVehicle();
     }
 
+    // 0x4FBA43
     if (m_nEngineBankSlotId != -1) {
         const auto usedSlot = m_nEngineBankSlotId - 7;
-        auto&      dummyEng = s_DummyEngineSlots[usedSlot];
-        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS && dummyEng.m_nBankId == m_nEngineDecelerateSoundBankId) {
-            dummyEng.m_nUsageCount = std::max<int16>(0, dummyEng.m_nUsageCount - 1);
+        if (usedSlot >= 0 && usedSlot < NUM_DUMMY_ENGINE_SLOTS &&
+            s_DummyEngineSlots[usedSlot].m_nBankId == m_nEngineDecelerateSoundBankId
+        ) {
+            s_DummyEngineSlots[usedSlot].m_nUsageCount = std::max<int16>(0, s_DummyEngineSlots[usedSlot].m_nUsageCount - 1);
         }
-
         m_nEngineBankSlotId = -1;
     }
 
@@ -1892,7 +1893,7 @@ void CAEVehicleAudioEntity::ProcessReverseGear(cVehicleParams& params) {
 
 // 0x4F8F10
 void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
-    plugin::CallMethod<0x4F8F10, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
+    return plugin::CallMethod<0x4F8F10, CAEVehicleAudioEntity*, cVehicleParams&>(this, params);
 
     tWheelState* wheelStates = nullptr;
     float* aWheelTimers = nullptr;
@@ -1901,7 +1902,6 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     float fUnk = 0.0f;
     auto nWheels = 0;
 
-    /*
     switch (params.m_nVehicleType) {
     case VEHICLE_TYPE_AUTOMOBILE: {
         nWheels = 4;
@@ -1927,7 +1927,6 @@ void CAEVehicleAudioEntity::ProcessVehicleSkidding(cVehicleParams& params) {
     default:
         return;
     }
-    */
 
     // Calculate skid values sum of all wheels
     float fTotalSkidValue = 0.0f;
@@ -2444,11 +2443,10 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
         if (m_bPlayerDriver)
             ProcessReverseGear(params);
 
-        if (bIsNotSimple)
+        if (bIsNotSimple) {
             ProcessVehicleSkidding(params);
-
-        if (bIsNotSimple)
             ProcessVehicleFlatTyre(params);
+        }
 
         ProcessVehicleSirenAlarmHorn(params);
 
@@ -2491,11 +2489,10 @@ void CAEVehicleAudioEntity::ProcessVehicle(CPhysical* physical) {
         else
             ProcessDummyVehicleEngine(params);
 
-        if (bIsNotSimple)
+        if (bIsNotSimple) {
             ProcessEngineDamage(params);
-
-        if (bIsNotSimple)
             ProcessVehicleFlatTyre(params);
+        }
 
         ProcessRainOnVehicle(params);
 
@@ -2579,6 +2576,7 @@ void CAEVehicleAudioEntity::ProcessSpecialVehicle(cVehicleParams& params) {
     case MODEL_RCBANDIT:
     case MODEL_RCTIGER: {
         ProcessDummyRCCar(params);
+        break;
     }
     case MODEL_CADDY: {
         ProcessVehicleRoadNoise(params);
