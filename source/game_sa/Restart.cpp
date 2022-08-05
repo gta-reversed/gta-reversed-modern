@@ -6,14 +6,8 @@
 */
 #include "StdInc.h"
 
-bool& CRestart::bOverrideRespawnBasePointForMission = *(bool*)0xA43248;
-CVector& CRestart::OverrideRespawnBasePointForMission = *(CVector*)0xA4342C;
-float& CRestart::OverrideHeading = *(float*)0xA43260;
-bool& CRestart::bOverrideRestart = *(bool*)0xA43264;
-CVector& CRestart::OverridePosition = *(CVector*)0xA43408;
 
-int16& CRestart::NumberOfPoliceRestarts = *(int16*)0xA43268;
-int16& CRestart::NumberOfHospitalRestarts = *(int16*)0xA4326C;
+
 
 void CRestart::InjectHooks() {
     RH_ScopedClass(CRestart);
