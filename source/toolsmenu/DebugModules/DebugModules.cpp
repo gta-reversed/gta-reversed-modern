@@ -10,6 +10,7 @@
 #include "Script\MissionDebugModule.h"
 #include "Audio\CutsceneTrackManagerDebugModule.h"
 #include "Audio\AmbienceTrackManagerDebugModule.h"
+#include "Audio\PoliceScannerAudioEntityDebugModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
@@ -134,18 +135,29 @@ void DebugModules::ProcessRenderTool() {
 
 void DebugModules::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlusion")) {
-            COcclusionDebugModule::ProcessImGui();
+        if (ImGui::BeginTabItem("OCCL/CULL")) {
+            if (ImGui::CollapsingHeader("Occlusion")) {
+                COcclusionDebugModule::ProcessImGui();
+            }
+            if (ImGui::CollapsingHeader("Cull Zones")) {
+                CullZonesDebugModule::ProcessImGui();
+            }
             ImGui::EndTabItem();
         }
 
         if (ImGui::BeginTabItem("Audio")) {
-            ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Cutscene Track Manager")) {
+                CutsceneTrackManagerDebugModule::ProcessImGui();
+            }
 
-            ImGui::NewLine();
-            ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Ambience Track Manager")) {
+                AmbienceTrackManagerDebugModule::ProcessImGui();
+            }
+
+            if (ImGui::CollapsingHeader("Police Scanner Audio Entity")) {
+                PoliceScannerAudioEntityDebugModule::ProcessImGui();
+            }
+
             ImGui::EndTabItem();
         }
 

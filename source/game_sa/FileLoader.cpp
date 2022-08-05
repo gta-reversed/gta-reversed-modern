@@ -992,24 +992,26 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     {
         newEntity = new CDummyObject();
         newEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
-        if (IsGlassModel(newEntity) && !CModelInfo::GetModelInfo(newEntity->m_nModelIndex)->IsGlassType2())
+        if (IsGlassModel(newEntity) && !CModelInfo::GetModelInfo(newEntity->m_nModelIndex)->IsGlassType2()) {
             newEntity->m_bIsVisible = false;
+        }
     }
 
-    if (fabs(objInstance->m_qRotation.imag.x) > 0.05F
-        || fabs(objInstance->m_qRotation.imag.y) > 0.05F
-        || (objInstance->m_bDontStream && objInstance->m_qRotation.imag.x != 0.0f && objInstance->m_qRotation.imag.y != 0.0f))
-    {
-        objInstance->m_qRotation.imag = -objInstance->m_qRotation.imag;
+    const auto& rot = objInstance->m_qRotation.imag;
+    if (std::fabs(rot.x) > 0.05F || std::fabs(rot.y) > 0.05F ||
+        (
+            objInstance->m_bDontStream &&
+            rot.x != 0.0f && rot.y != 0.0f
+        )
+    ) {
+        objInstance->m_qRotation.imag = -rot;
         newEntity->AllocateStaticMatrix();
-
-        auto tempQuat = objInstance->m_qRotation;
-        newEntity->GetMatrix().SetRotate(tempQuat);
+        newEntity->GetMatrix().SetRotate(objInstance->m_qRotation);
     }
     else
     {
-        const auto fMult = objInstance->m_qRotation.imag.z < 0.0f ? 2.0f : -2.0f;
-        const auto fHeading = acos(objInstance->m_qRotation.real) * fMult;
+        const auto fMult = rot.z < 0.0f ? 2.0f : -2.0f;
+        const auto fHeading = std::acos(objInstance->m_qRotation.real) * fMult;
         newEntity->SetHeading(fHeading);
     }
 

@@ -35,7 +35,6 @@ constexpr float MAP_Z_LOW_LIMIT = -100.0f;
 
 class CWorld {
 public:
-    static int32 TOTAL_PLAYERS;
     static int32& ms_iProcessLineNumCrossings;
     static float& fWeaponSpreadRate;
     // entity to ignore
@@ -150,15 +149,13 @@ public:
     static void IncrementCurrentScanCode();
     static CPtrListSingleLink& GetLodPtrList(int32 x, int32 y);
 
-    static CPlayerInfo& GetFocusedPlayerInfo() { return Players[PlayerInFocus]; }
-
     // Returns sector index in range -60 to 60 (Example: -3000 => -60, 3000 => 60)
-    static float GetHalfMapSectorX(float x) { return x / (MAX_WORLD_UNITS / MAX_SECTORS_X); }
-    static float GetHalfMapSectorY(float y) { return y / (MAX_WORLD_UNITS / MAX_SECTORS_Y); }
+    static float GetHalfMapSectorX(float x) { return x / static_cast<float>(MAX_WORLD_UNITS / MAX_SECTORS_X); }
+    static float GetHalfMapSectorY(float y) { return y / static_cast<float>(MAX_WORLD_UNITS / MAX_SECTORS_Y); }
 
     // Returns sector index in range 0 to 120 (Example: -3000 => 0, 3000 => 120)
-    static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + (MAX_SECTORS_X / 2); }
-    static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + (MAX_SECTORS_Y / 2); }
+    static float GetSectorfX(float x) { return GetHalfMapSectorX(x) + static_cast<float>(MAX_SECTORS_X / 2); }
+    static float GetSectorfY(float y) { return GetHalfMapSectorY(y) + static_cast<float>(MAX_SECTORS_Y / 2); }
 
     // returns sector index in range 0 to 120 (covers full map)
     static int32 GetSectorX(float x) { return static_cast<int32>(std::floor(GetSectorfX(x))); }
@@ -181,23 +178,23 @@ public:
     static CVector2D GetSectorPos(int32 sector) { return { GetSectorPosX(sector), GetSectorPosY(sector) }; }
 
     // returns sector index in range 0 to 15 (covers half of the map)
-    static float GetHalfMapLodSectorX(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
-    static float GetHalfMapLodSectorY(float fSector) { return fSector / (MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
-    static float GetLodSectorfX(float fSector) { return GetHalfMapLodSectorX(fSector) + (MAX_LOD_PTR_LISTS_X / 2); }
-    static float GetLodSectorfY(float fSector) { return GetHalfMapLodSectorY(fSector) + (MAX_LOD_PTR_LISTS_Y / 2); }
+    static float GetHalfMapLodSectorX(float sector) { return sector / static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X); }
+    static float GetHalfMapLodSectorY(float sector) { return sector / static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y); }
+    static float GetLodSectorfX(float sector) { return GetHalfMapLodSectorX(sector) + static_cast<float>(MAX_LOD_PTR_LISTS_X / 2); }
+    static float GetLodSectorfY(float sector) { return GetHalfMapLodSectorY(sector) + static_cast<float>(MAX_LOD_PTR_LISTS_Y / 2); }
     // returns sector index in range 0 to 30 (covers full map)
     static int32 GetLodSectorX(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfX(fSector))); }
-    static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector)));  }
+    static int32 GetLodSectorY(float fSector) { return static_cast<int32>(std::floor(GetLodSectorfY(fSector))); }
     static float GetLodSectorPosX(int32 sector)
     {
         const int32 HalfOfTotalSectorsX = MAX_LOD_PTR_LISTS_X / 2;
-        const float fTotalMapUnitsX = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X;
+        const float fTotalMapUnitsX = static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_X);
         return (sector - HalfOfTotalSectorsX) * fTotalMapUnitsX + (fTotalMapUnitsX / 2);
     }
     static float GetLodSectorPosY(int32 sector)
     {
         const int32 HalfOfTotalSectorsY = MAX_LOD_PTR_LISTS_Y / 2;
-        const float fTotalMapUnitsY = MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y;
+        const float fTotalMapUnitsY = static_cast<float>(MAX_WORLD_UNITS / MAX_LOD_PTR_LISTS_Y);
         return (sector - HalfOfTotalSectorsY) * fTotalMapUnitsY + (fTotalMapUnitsY / 2);
     }
     static bool IsInWorldBounds(CVector2D pos) { // NOTSA

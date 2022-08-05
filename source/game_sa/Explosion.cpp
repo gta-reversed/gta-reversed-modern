@@ -152,7 +152,7 @@ bool DoesNeedToVehProcessBombTimer(eExplosionType type) {
 // 0x736A50
 void CExplosion::AddExplosion(CEntity* victim, CEntity* creator, eExplosionType type, CVector pos, uint32 lifetime, uint8 usesSound, float cameraShake, uint8 bInvisible) {
     if (FindPlayerPed() == creator) {
-        auto& info = CWorld::GetFocusedPlayerInfo();
+        auto& info = FindPlayerInfo();
         info.m_nHavocCaused += 5;
         info.m_fCurrentChaseValue += 7.0f;
     }
