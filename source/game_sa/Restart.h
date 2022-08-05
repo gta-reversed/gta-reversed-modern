@@ -12,7 +12,7 @@ public:
 
     static constexpr uint32 MAX_RESTART_POINTS{ 10u };
 
-    static inline bool& byte_A4325C = *(bool*)0xA4325C;
+    static inline bool& bFadeInAfterNextArrest = *(bool*)0xA4325C;
     static inline bool& bFadeInAfterNextDeath = *(bool*)0xA4325D;
 
     static int16& NumberOfPoliceRestarts;

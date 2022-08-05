@@ -49,7 +49,7 @@ void CRestart::Initialise() {
     OverrideHeading = 0.0f;
     bOverrideRestart = false;
     bFadeInAfterNextDeath = false;
-    byte_A4325C = true;
+    bFadeInAfterNextArrest = true; // todo: always true
     ScriptExtraHospitalRestartPoint_Radius = 0.0f;
     ScriptExtraPoliceRestartPoint_Radius = 0.0f;
     bOverrideRespawnBasePointForMission = false;
@@ -57,16 +57,16 @@ void CRestart::Initialise() {
 
 // 0x460730
 void CRestart::AddHospitalRestartPoint(CVector const& point, float angle, int32 townId) {
-    HospitalRestartPoints[NumberOfHospitalRestarts] = point;
-    HospitalRestartHeadings[NumberOfHospitalRestarts] = angle;
+    HospitalRestartPoints[NumberOfHospitalRestarts]    = point;
+    HospitalRestartHeadings[NumberOfHospitalRestarts]  = angle;
     HospitalRestartWhenToUse[NumberOfHospitalRestarts] = townId;
     NumberOfHospitalRestarts++;
 }
 
 // 0x460780
 void CRestart::AddPoliceRestartPoint(CVector const& point, float angle, int32 townId) {
-    PoliceRestartPoints[NumberOfPoliceRestarts] = point;
-    PoliceRestartHeadings[NumberOfPoliceRestarts] = angle;
+    PoliceRestartPoints[NumberOfPoliceRestarts]    = point;
+    PoliceRestartHeadings[NumberOfPoliceRestarts]  = angle;
     PoliceRestartWhenToUse[NumberOfPoliceRestarts] = townId;
     NumberOfPoliceRestarts++;
 }
@@ -193,7 +193,7 @@ void CRestart::Load() {
     CGenericGameStorage::SaveDataToWorkBuffer(&bOverrideRestart, 1);
     CGenericGameStorage::SaveDataToWorkBuffer(&OverridePosition, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextDeath, 1);
-    CGenericGameStorage::SaveDataToWorkBuffer(&byte_A4325C, 1);
+    CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextArrest, 1);
 
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Pos, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Radius, 4);
@@ -223,7 +223,7 @@ void CRestart::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&bOverrideRestart, 1);
     CGenericGameStorage::SaveDataToWorkBuffer(&OverridePosition, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextDeath, 1);
-    CGenericGameStorage::SaveDataToWorkBuffer(&byte_A4325C, 1);
+    CGenericGameStorage::SaveDataToWorkBuffer(&bFadeInAfterNextArrest, 1);
 
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Pos, 12);
     CGenericGameStorage::SaveDataToWorkBuffer(&ScriptExtraHospitalRestartPoint_Radius, 4);
