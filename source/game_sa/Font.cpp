@@ -269,7 +269,7 @@ void CFont::PrintChar(float x, float y, char character) {
                 float u2 = propval / 16.0f + u1;
                 float v2 = v1;
                 float u3 = u1;
-                float v3 = v1 + 0.0625;
+                float v3 = v1 + 0.0625f;
                 float u4 = u2 - 0.0001f;
                 float v4 = v3 - 0.0001f;
 

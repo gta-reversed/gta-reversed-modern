@@ -513,24 +513,24 @@ void CAutomobile::ProcessControl()
             movingSpeedLimit = 0.015f;
         }
 
-        m_vecForce = (m_vecForce + m_vecMoveSpeed) * 0.5f;
-        m_vecTorque = (m_vecTorque + m_vecTurnSpeed) * 0.5f;
+        m_vecForce  = (m_vecForce + m_vecMoveSpeed)  / 2.0f;
+        m_vecTorque = (m_vecTorque + m_vecTurnSpeed) / 2.0f;
 
         bool resetSpeed = true;
 
         forceLimitRadius *= CTimer::GetTimeStep();
         torqueLimitRadius *= CTimer::GetTimeStep();
         if (forceLimitRadius * forceLimitRadius < m_vecForce.SquaredMagnitude()
-            || torqueLimitRadius * torqueLimitRadius < m_vecTorque.SquaredMagnitude()
+            || sq(torqueLimitRadius) < m_vecTorque.SquaredMagnitude()
             || movingSpeedLimit <= m_fMovingSpeed
             || m_fDamageIntensity > 0.0f && m_pDamageEntity && m_pDamageEntity->IsPed())
         {
             resetSpeed = false;
         }
         else if (physicalFlags.bSubmergedInWater) {
-            CVector distance = GetPosition() - TheCamera.GetPosition();
-            if (distance.SquaredMagnitude() < 2500.0f)
+            if (DistanceBetweenPointsSquared(TheCamera.GetPosition(), GetPosition()) < sq(50.0f)) {
                 resetSpeed = false;
+            }
         }
         if (!resetSpeed && !isVehicleIdle) {
             m_nFakePhysics = 0;
@@ -716,7 +716,7 @@ void CAutomobile::ProcessControl()
             if (m_nStatus == STATUS_PLAYER && !m_pHandlingData->m_bIsBus)
             {
                 if (m_nBusDoorTimerEnd) {
-                    uint32 timeStep = CTimer::GetTimeStepInMS();
+                    uint32 timeStep = (uint32)CTimer::GetTimeStepInMS();
                     if (m_nBusDoorTimerEnd <= timeStep)
                         m_nBusDoorTimerEnd = 0;
                     else
@@ -1122,7 +1122,7 @@ CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
     float colAngleMult = 0.0f;
     uint16 angleDiff = m_wMiscComponentAngle - m_wMiscComponentAnglePrev;
     if (angleDiff <= 100 && angleDiff >= -100) { // todo: Result of comparison of constant -100 with expression of type 'uint16' (aka 'unsigned short') is always true
-        CVector colPivot;
+        CVector colPivot{};
         RwFrame* carNodeMisc = nullptr;
         if (ModelIndices::IsDumper(m_nModelIndex)) {
             carNodeMisc = m_aCarNodes[CAR_MISC_C];
@@ -1185,8 +1185,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             extraHandlingFlags |= EXTRA_HANDLING_NITROS;
         }
         else {
-            CVector distance = GetPosition() - FindPlayerCoors(-1);
-            if (distance.Magnitude() > 50.0f)
+            if (DistanceBetweenPoints(FindPlayerCoors(), GetPosition()) > 50.0f)
                 extraHandlingFlags |= EXTRA_HANDLING_NITROS;
         }
     }
@@ -1344,7 +1343,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
                 BlowUpCar(FindPlayerPed(), false);
             }
         }
-        if (CWorld::GetFocusedPlayerInfo().m_pRemoteVehicle == this)
+        if (FindPlayerInfo().m_pRemoteVehicle == this)
             isRemotelyControlledByPlayer = true;
         break;
     case STATUS_PLANE:
@@ -1416,7 +1415,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         }
     }
 
-    uint32 carLess3WheelCounter = CWorld::GetFocusedPlayerInfo().m_nCarLess3WheelCounter;
+    auto carLess3WheelCounter = FindPlayerInfo().m_nCarLess3WheelCounter;
     m_vecCentreOfMass.z = m_pHandlingData->m_vecCentreOfMass.z;
     if (carLess3WheelCounter > 500 && !IsSubHeli() && !IsSubPlane()) {
         carLess3WheelCounter = std::min(carLess3WheelCounter - 500u, 1000u);
@@ -3890,7 +3889,7 @@ void CAutomobile::TowTruckControl() {
         if (vehicle->vehicleFlags.bIsLocked != 0u)
             continue;
 
-        if (std::fabs(hitchPos.z - towBarPos.z) < 1.0f && (hitchPos - towBarPos).SquaredMagnitude2D() < 0.5f * 0.5f) {
+        if (std::fabs(hitchPos.z - towBarPos.z) < 1.0f && DistanceBetweenPointsSquared2D(towBarPos, hitchPos) < sq(0.5f)) {
             vehicle->SetTowLink(this, false);
             m_wMiscComponentAngle -= 100; // "hide" hoist
             break;
@@ -3951,7 +3950,7 @@ void CAutomobile::DoSoftGroundResistance(uint32& extraHandlingFlags)
     if (IsAnyWheelTouchingSand() && m_nModelIndex != MODEL_RCBANDIT && m_nModelIndex != MODEL_RHINO) {
         CVector speedUp = m_vecMoveSpeed - DotProduct(m_vecMoveSpeed, GetUp()) * GetUp();
         float offroadAbility = 0.005f;
-        if (speedUp.SquaredMagnitude() <= 0.3f * 0.3f) {
+        if (speedUp.SquaredMagnitude() <= sq(0.3f)) {
             npcFlags.bLostTraction = true;
         }
         else {
@@ -4917,7 +4916,7 @@ void CAutomobile::ScanForCrimes()
 
     if (vehicle->m_nAlarmState && vehicle->m_nAlarmState != -1) {
         if (vehicle->m_nStatus != eEntityStatus::STATUS_WRECKED) {
-            if ((vehicle->GetPosition() - GetPosition()).SquaredMagnitude() < 20.f * 20.f) {
+            if (DistanceBetweenPointsSquared(GetPosition(), vehicle->GetPosition()) < sq(20.f)) {
                 FindPlayerPed()->SetWantedLevelNoDrop(1);
             }
         }
@@ -5008,7 +5007,7 @@ void CAutomobile::TankControl()
     }
 
     if (pad->CarGunJustDown()) {
-        CPlayerInfo& playerInfo = CWorld::GetFocusedPlayerInfo();
+        CPlayerInfo& playerInfo = FindPlayerInfo();
         if (CTimer::GetTimeInMS() > playerInfo.m_nLastTimeBigGunFired + 800) {
             playerInfo.m_nLastTimeBigGunFired = CTimer::GetTimeInMS();
             CVector point;
@@ -5082,7 +5081,7 @@ void CAutomobile::TankControl()
 
 // 0x6AF110
 void CAutomobile::BlowUpCarsInPath() {
-    if (m_vecMoveSpeed.SquaredMagnitude() < 0.1f * 0.1f) { // Originally `Magnitude() < 0.1f`
+    if (m_vecMoveSpeed.SquaredMagnitude() < sq(0.1f)) { // Originally `Magnitude() < 0.1f`
         return;
     }
 
@@ -5254,7 +5253,7 @@ void CAutomobile::DoHeliDustEffect(float timeConstMult, float fxMaxZMult) {
 
     // 0x6B07E9
     // Moved early out here instead
-    if ((myPos - TheCamera.GetPosition()).SquaredMagnitude() >= 50.f * 50.f) {
+    if (DistanceBetweenPointsSquared(TheCamera.GetPosition(), myPos) >= sq(50.f)) {
         KillDustFx();
         return;
     }
