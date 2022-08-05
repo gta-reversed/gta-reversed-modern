@@ -13,6 +13,7 @@
 #include "eCamMode.h"
 #include "eVehicleType.h"
 #include "ePedType.h"
+#include "Hud.h"
 
 class CEntity;
 class CVector;

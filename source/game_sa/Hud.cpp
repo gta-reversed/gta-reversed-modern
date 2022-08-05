@@ -95,7 +95,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
-    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // -
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // MrJohnDev: +
     RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTED
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
     // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
@@ -104,9 +104,9 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
     // RH_ScopedInstall(DrawVitalStats, 0x589650);           //
     RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // +
-    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // ?
+    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           //
     RH_ScopedInstall(DrawTripSkip, 0x58A160);                // +
-    // RH_ScopedInstall(DrawWanted, 0x58D9A0);               //
+    RH_ScopedInstall(DrawWanted, 0x58D9A0);                  //
     RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // +
     RH_ScopedInstall(RenderArmorBar, 0x5890A0);              // +
     RH_ScopedInstall(RenderBreathBar, 0x589190);             // +
@@ -1039,12 +1039,12 @@ void CHud::DrawMissionTitle() {
         }
     } else {
         messageAlpha = 255.0f;
-        messageInUse += CTimer::GetTimeStep() * 1000.0f * 0.006f;
+        messageInUse += CTimer::GetTimeStepInMS() * 0.3f;
     }
 
     CFont::SetEdge(2);
     CFont::SetDropColor({ 0, 0, 0, uint8(messageAlpha) });
-    CFont::SetColor({ 144, 98, 16, uint8(messageAlpha) }); // Hud Gold Color
+    CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, (uint8)messageAlpha));
     CFont::PrintStringFromBottom(SCREEN_SCALE_FROM_RIGHT(20.0f), SCREEN_SCALE_FROM_BOTTOM(115.0f), message);
     CFont::SetEdge(0);
 }
@@ -1156,6 +1156,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
     }
 }
 
+// todo: WIP
 // 0x58A330
 void CHud::DrawRadar() {
     if (CEntryExitManager::ms_exitEnterState == EXIT_ENTER_STATE_1 ||
@@ -1181,38 +1182,40 @@ void CHud::DrawRadar() {
 
     CRect rect;
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
-        float angle = FindPlayerHeading(0) - CRadar::m_fRadarOrientation + PI;
-        // todo: fix radar rotation
+        float angle = PI - std::atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
         CRadar::DrawRotatingRadarSprite(
             &Sprites[SPRITE_RADAR_RING_PLANE],
-            SCREEN_STRETCH_X(86.0f),
-            SCREEN_STRETCH_FROM_BOTTOM(67.0f),
+            SCREEN_STRETCH_X(87.0f),
+            SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
             (uint32)SCREEN_STRETCH_X(76.0f),
             (uint32)SCREEN_STRETCH_Y(63.0f),
-            CRGBA(255, 255, 255, 255)
-        );
+            CRGBA(255, 255, 255, 255));
+    }
 
-        // Altitude bar
-        rect.left = SCREEN_STRETCH_X(20.0f);
-        rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
-        rect.right = SCREEN_STRETCH_X(30.0f);
-        rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0f);
-        CSprite2d::DrawRect(rect, { 10, 10, 10, 100 });
+    if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
+        if (player->GetActiveWeapon().m_nType == WEAPON_PARACHUTE) {
+            // Altitude bar
+            rect.left = SCREEN_STRETCH_X(20.0f);
+            rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
+            rect.right = SCREEN_STRETCH_X(30.0f);
+            rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0f);
+            CSprite2d::DrawRect(rect, { 10, 10, 10, 100 });
 
-        const CVector& pos = vehicle ? vehicle->GetPosition() : player->GetPosition();
+            const CVector& pos = vehicle ? vehicle->GetPosition() : player->GetPosition();
 
-        auto lineY = 950.0f;
-        if (pos.z <= 200.0f) {
-            lineY = 200.0f;
-        };
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+            auto lineY = 950.0f;
+            if (pos.z <= 200.0f) {
+                lineY = 200.0f;
+            };
+			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
-        auto x1 = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
-        auto y1 = SCREEN_STRETCH_FROM_BOTTOM(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
-        auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
-        auto y2 = y1 + 2.0f;
-        CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
+	        auto x1 = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
+	        auto y1 = SCREEN_STRETCH_FROM_BOTTOM(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
+	        auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
+	        auto y2 = y1 + 2.0f;
+	        CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
+        }
     }
 
     if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
@@ -1225,6 +1228,7 @@ void CHud::DrawRadar() {
 
     // NOTSA: rects are optimized
     const auto black = CRGBA(0, 0, 0, 255);
+
     rect.left = SCREEN_STRETCH_X(36.0f);
     rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0f);
     rect.right = SCREEN_STRETCH_X(87.0f);
@@ -1870,7 +1874,41 @@ void CHud::DrawTripSkip() {
 
 // 0x58D9A0
 void CHud::DrawWanted() {
-    plugin::Call<0x58D9A0>();
+     //plugin::Call < 0x58D9A0>();
+    
+    if (FindPlayerWanted(-1)->m_nWantedLevel > 0 || FindPlayerWanted(-1)->m_nWantedLevelBeforeParole > 0) {
+         CFont::SetBackground(false, false);
+         CFont::SetScale(SCREEN_STRETCH_X(0.605), SCREEN_STRETCH_Y(1.21));
+         CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+         CFont::SetProportional(true);
+         CFont::SetFontStyle(FONT_GOTHIC);
+         CFont::SetDropColor(CRGBA(0, 0, 0, 255.0f));
+
+         char IconToPrint[16];
+         strcpy(IconToPrint, "]");
+
+         float fOffset = 0.0f;
+         if (static_cast<float>(CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth) > 101.0f)
+             fOffset = 12.0f;
+
+         for (unsigned int i = 0; i < 6; i++) {
+             if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetWanted()->m_nWantedLevel > i &&
+                 (CTimer::m_snTimeInMilliseconds > CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetWanted()->m_nLastTimeWantedLevelChanged + 2000 ||
+                  CTimer::m_FrameCounter & 4)) {
+                 // CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255.0f));
+                 CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255.0f));
+                 CFont::SetEdge(1);
+                 CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * i),
+                                    GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), fOffset), IconToPrint);
+             } else {
+                 CFont::SetEdge(0);
+                 CFont::SetScale(SCREEN_STRETCH_X(0.605) * 1.2, SCREEN_STRETCH_Y(1.21) * 1.2);
+                 CFont::SetColor(CRGBA(0, 0, 0, (255.0f * 0.69999999)));
+                 CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * i),
+                                    GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), fOffset) - SCREEN_STRETCH_Y(2), IconToPrint);
+             }
+         }
+     }
 }
 
 // 0x58D7D0
