@@ -135,8 +135,13 @@ void DebugModules::ProcessRenderTool() {
 
 void DebugModules::ProcessExtraDebugFeatures() {
     if (ImGui::BeginTabBar("Modules")) {
-        if (ImGui::BeginTabItem("Occlusion")) {
-            COcclusionDebugModule::ProcessImGui();
+        if (ImGui::BeginTabItem("OCCL/CULL")) {
+            if (ImGui::CollapsingHeader("Occlusion")) {
+                COcclusionDebugModule::ProcessImGui();
+            }
+            if (ImGui::CollapsingHeader("Cull Zones")) {
+                CullZonesDebugModule::ProcessImGui();
+            }
             ImGui::EndTabItem();
         }
 
