@@ -10,6 +10,7 @@
 #include "Script\MissionDebugModule.h"
 #include "Audio\CutsceneTrackManagerDebugModule.h"
 #include "Audio\AmbienceTrackManagerDebugModule.h"
+#include "Audio\PoliceScannerAudioEntityDebugModule.h"
 #include "CStreamingDebugModule.h"
 #include "CPickupsDebugModule.h"
 #include "HooksDebugModule.h"
@@ -140,12 +141,18 @@ void DebugModules::ProcessExtraDebugFeatures() {
         }
 
         if (ImGui::BeginTabItem("Audio")) {
-            ImGui::Text("Cutscene Track Manager");
-            CutsceneTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Cutscene Track Manager")) {
+                CutsceneTrackManagerDebugModule::ProcessImGui();
+            }
 
-            ImGui::NewLine();
-            ImGui::Text("Ambience Track Manager");
-            AmbienceTrackManagerDebugModule::ProcessImGui();
+            if (ImGui::CollapsingHeader("Ambience Track Manager")) {
+                AmbienceTrackManagerDebugModule::ProcessImGui();
+            }
+
+            if (ImGui::CollapsingHeader("Police Scanner Audio Entity")) {
+                PoliceScannerAudioEntityDebugModule::ProcessImGui();
+            }
+
             ImGui::EndTabItem();
         }
 
