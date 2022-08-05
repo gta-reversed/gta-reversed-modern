@@ -102,12 +102,12 @@ void CRestart::FindClosestHospitalRestartPoint(CVector point, CVector& outPos, f
         bOverrideRespawnBasePointForMission = false;
     }
 
-    if (ScriptExtraHospitalRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(ScriptExtraHospitalRestartPoint_Pos, point) >= ScriptExtraHospitalRestartPoint_Radius) {
+    if (ScriptExtraHospitalRestartPoint_Radius <= 0.0f || DistanceBetweenPoints2D(ScriptExtraHospitalRestartPoint_Pos, point) >= ScriptExtraHospitalRestartPoint_Radius) {
         const auto pointLevel = CTheZones::GetLevelFromPosition(point);
-        float closestDist = FLT_MAX; // OG: 10'000'000.0f
+        float closestDist = 10'000'000.0f; // todo: FLT_MAX
         int32 closestIdx = -1;
         for (auto i = 0u; i < NumberOfHospitalRestarts; i++) {
-            if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= HospitalRestartWhenToUse[i]) {
+            if (CStats::GetStatValue(STAT_CITY_UNLOCKED) >= (float)HospitalRestartWhenToUse[i]) {
                 const auto& restartPos = HospitalRestartPoints[i];
                 auto dist = DistanceBetweenPoints(restartPos, point);
                 if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
@@ -144,12 +144,12 @@ void CRestart::FindClosestPoliceRestartPoint(CVector point, CVector& outPos, flo
         bOverrideRespawnBasePointForMission = false;
     }
 
-    if (ScriptExtraPoliceRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(ScriptExtraPoliceRestartPoint_Pos, point) >= ScriptExtraPoliceRestartPoint_Radius) {
+    if (ScriptExtraPoliceRestartPoint_Radius <= 0.0f || DistanceBetweenPoints2D(ScriptExtraPoliceRestartPoint_Pos, point) >= ScriptExtraPoliceRestartPoint_Radius) {
         const auto pointLevel = CTheZones::GetLevelFromPosition(point);
-        float closestDist = FLT_MAX; // OG: 10'000'000.0f
+        float closestDist = 99'999.898f; // todo: FLT_MAX
         int32 closestIdx = -1;
         for (auto i = 0u; i < NumberOfPoliceRestarts; i++) {
-            if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= PoliceRestartWhenToUse[i]) {
+            if (CStats::GetStatValue(STAT_CITY_UNLOCKED) >= (float)PoliceRestartWhenToUse[i]) {
                 const auto& restartPos = PoliceRestartPoints[i];
                 auto dist = DistanceBetweenPoints(restartPos, point);
                 if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
