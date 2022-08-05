@@ -4,6 +4,7 @@
 
 #include "toolsmenu\DebugModules\CStreamingDebugModule.h"
 #include "TimecycEditor.h"
+#include "toolsmenu\DebugModules\CullZonesDebugModule.h"
 
 
 void CVehicleRecording::InjectHooks() {
@@ -54,6 +55,7 @@ void CVehicleRecording::Render() {
     TimeCycleDebugModule::ProcessRender();
     COcclusionDebugModule::ProcessRender();
     CStreamingDebugModule::ProcessRender();
+    CullZonesDebugModule::ProcessRender();
 #endif
 }
 

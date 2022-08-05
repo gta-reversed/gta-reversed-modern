@@ -103,9 +103,7 @@ void CGame::ShutdownRenderWare() {
     CLoadingScreen::Shutdown();
     CHud::Shutdown();
     CFont::Shutdown();
-    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; i++) {
-        CWorld::Players[i].DeletePlayerSkin();
-    }
+    std::ranges::for_each(CWorld::Players, [](auto& info) { info.DeletePlayerSkin(); });
     CPlayerSkin::Shutdown();
     DestroyDebugFont();
     LightsDestroy(Scene.m_pRpWorld);
@@ -243,11 +241,7 @@ void CGame::ShutDownForRestart() {
     CReplay::FinishPlayback();
     CReplay::EmptyReplayBuffer();
     CMovingThings::Shutdown();
-
-    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
-        CWorld::Players[i].Clear();
-    }
-
+    std::ranges::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
     memset(CTheZones::ZonesVisited, 0, sizeof(CTheZones::ZonesVisited));
     CTheScripts::UndoBuildingSwaps();
     CTheScripts::UndoEntityInvisibilitySettings();
@@ -395,10 +389,10 @@ bool CGame::Init2(const char* datFile) {
     LoadingScreen("Loading the Game", "Setup paths");
     CPathFind::PreparePathData();
 
-    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
-        CWorld::Players[i].Clear();
-        CWorld::Players[i].LoadPlayerSkin();
-    }
+    std::ranges::for_each(CWorld::Players, [](auto& info) {
+        info.Clear();
+        info.LoadPlayerSkin();
+    });
 
     TestModelIndices();
     LoadingScreen("Loading the Game", "Setup water");
@@ -645,11 +639,7 @@ void CGame::ReInitGameObjectVariables() {
     CPed::Initialise();
     CWeapon::InitialiseWeapons();
     CPopulation::Initialise();
-
-    for (int32 i = 0; i < CWorld::TOTAL_PLAYERS; ++i) {
-        CWorld::Players[i].Clear();
-    }
-
+    std::ranges::for_each(CWorld::Players, [](auto& info) { info.Clear(); });
     CWorld::PlayerInFocus = 0;
     CGlass::Init();
     gbLARiots_NoPoliceCars = false;
@@ -679,8 +669,7 @@ void CGame::ReInitGameObjectVariables() {
     g_realTimeShadowMan.Init();
     CStreaming::RemoveInappropriatePedModels();
     AudioEngine.ResetStatistics();
-    if ( !FrontEndMenuManager.m_bLoadingData )
-    {
+    if (!FrontEndMenuManager.m_bLoadingData) {
         CCranes::InitCranes();
         CTheScripts::StartTestScript();
         CTheScripts::Process();

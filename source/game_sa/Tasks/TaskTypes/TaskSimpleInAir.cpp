@@ -131,7 +131,7 @@ bool CTaskSimpleInAir::ProcessPed_Reversed(CPed* ped)
                 if (moveSpeedForward < maxMoveSpeedForward && m_nProcessCounter < 1000)
                 {
                     ped->ApplyMoveForce(ped->GetForward() * ((maxMoveSpeedForward - moveSpeedForward) * ped->m_fMass));
-                    m_nProcessCounter += CTimer::GetTimeStepInMS();
+                    m_nProcessCounter += (uint32)CTimer::GetTimeStepInMS();
                 }
             }
         }

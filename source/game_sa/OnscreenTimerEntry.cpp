@@ -19,7 +19,7 @@ void COnscreenTimerEntry::Process() {
         return;
 
     auto& timerPtr  = *CTheScripts::GetPointerToScriptVariable(m_nVarId);
-    uint32 deltaTime = CTimer::GetTimeStepInMS();
+    auto deltaTime = (uint32)CTimer::GetTimeStepInMS();
 
     switch (m_nTimerDirection) {
     case eTimerDirection::INCREASE:

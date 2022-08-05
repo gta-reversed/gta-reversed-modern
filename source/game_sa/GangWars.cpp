@@ -464,7 +464,7 @@ bool CGangWars::PickZoneToAttack() {
     CCarCtrl::InitSequence(CTheZones::TotalNumberOfNavigationZones);
     CZone* enemyGangZone = nullptr;
 
-    // choose a territory controlled that is by enemy gangs
+    // choose a territory that is controlled by enemy gangs
     for (auto i = 0; i < CTheZones::TotalNumberOfNavigationZones; i++) {
         auto zone = CTheZones::GetNavigationZone(CCarCtrl::FindSequenceElement(i));
         auto zoneInfo = CTheZones::GetZoneInfo(zone);
@@ -521,7 +521,7 @@ void CGangWars::ReleaseCarsInAttackWave() {
         auto vehicle = GetVehiclePool()->GetAt(i);
         if (vehicle && vehicle->vehicleFlags.bPartOfAttackWave) {
             vehicle->vehicleFlags.bPartOfAttackWave = false;
-            vehicle->SetVehicleCreatedBy(1);
+            vehicle->SetVehicleCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE);
         }
     }
 }
@@ -588,21 +588,19 @@ void CGangWars::StartDefensiveGangWar() {
         FightTimer = static_cast<uint32>(DistanceBetweenPoints2D(PointOfAttack, FindPlayerCoors()) * 200.0f + 240'000.0f);
         RadarBlip = CRadar::SetCoordBlip(BLIP_COORD, PointOfAttack, GetGangColor(Gang1), BLIP_DISPLAY_BLIPONLY, nullptr);
 
-        switch (Gang1) {
-        case GANG_BALLAS:
-            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGP);
-            break;
-        case GANG_VAGOS:
-        case GANG_DANANGBOYS:
-            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGY);
-            break;
-        case GANG_RIFA:
-            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_GANGB);
-            break;
-        default:
-            CRadar::SetBlipSprite(RadarBlip, RADAR_SPRITE_ENEMYATTACK);
-            break;
-        }
+        CRadar::SetBlipSprite(RadarBlip, [] {
+            switch (Gang1) {
+            case GANG_BALLAS:
+                return RADAR_SPRITE_GANGP;
+            case GANG_VAGOS:
+            case GANG_DANANGBOYS:
+                return RADAR_SPRITE_GANGY;
+            case GANG_RIFA:
+                return RADAR_SPRITE_GANGB;
+            default:
+                return RADAR_SPRITE_ENEMYATTACK;
+            }
+        }());
 
         bPlayerIsCloseby = false;
         pZoneInfoToFightOver->Flags1 = pZoneInfoToFightOver->Flags1 & 0x9F | 0x40; // todo: flags

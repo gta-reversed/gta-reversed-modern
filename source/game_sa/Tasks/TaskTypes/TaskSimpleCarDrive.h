@@ -10,7 +10,7 @@ public:
     CVehicle*                     m_pVehicle;
     CAnimBlendAssociation*        m_pAnimCloseDoorRolling;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
-    int32                         field_14;
+    CTaskTimer*                   m_TaskTimer;
     int32                         field_18;
     char                          field_1C;
     char                          field_1D;
@@ -31,8 +31,7 @@ public:
     // Inited according to: 0x63C3AE
     uint8 m_b01 : 1;
     uint8 m_b02 : 1;
-    uint8 m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
-    uint8 m_b04 : 1;
+    uint8 m_bUpdateCurrentVehicle : 1; // m_bUpdateCurrentVehicle : 1; // updates m_pVehicle pointer to the current occupied vehicle by ped
     uint8 m_b08 : 1;
     uint8 m_b10 : 1;
     uint8 m_b20 : 1;
@@ -44,7 +43,7 @@ public:
     explicit CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPedWithCar* utilityTask = {}, bool updateCurrentVehicle = {});
     ~CTaskSimpleCarDrive() override;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_DRIVE; }
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
