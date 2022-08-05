@@ -42,7 +42,7 @@ void CRestart::Initialise() {
     OverridePosition = CVector{};
     OverrideHeading = 0.0f;
     bOverrideRestart = false;
-    bFadeInAfterNextDeath = false;
+    bFadeInAfterNextDeath = true;
     bFadeInAfterNextArrest = true; // todo: always true
     ScriptExtraHospitalRestartPoint_Radius = 0.0f;
     ScriptExtraPoliceRestartPoint_Radius = 0.0f;
