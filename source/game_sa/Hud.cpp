@@ -1872,43 +1872,50 @@ void CHud::DrawTripSkip() {
     );
 }
 
+// todo: WIP
 // 0x58D9A0
 void CHud::DrawWanted() {
-     //plugin::Call < 0x58D9A0>();
-    
-    if (FindPlayerWanted(-1)->m_nWantedLevel > 0 || FindPlayerWanted(-1)->m_nWantedLevelBeforeParole > 0) {
-         CFont::SetBackground(false, false);
-         CFont::SetScale(SCREEN_STRETCH_X(0.605), SCREEN_STRETCH_Y(1.21));
-         CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
-         CFont::SetProportional(true);
-         CFont::SetFontStyle(FONT_GOTHIC);
-         CFont::SetDropColor(CRGBA(0, 0, 0, 255.0f));
+    // plugin::Call < 0x58D9A0>();
 
-         char IconToPrint[16];
-         strcpy(IconToPrint, "]");
+    auto wanted = FindPlayerWanted();
+    if (wanted->m_nWantedLevel > 0 || wanted->m_nWantedLevelBeforeParole > 0) {
+        CFont::SetBackground(false, false);
+        CFont::SetScale(SCREEN_STRETCH_X(0.605), SCREEN_STRETCH_Y(1.21f));
+        CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+        CFont::SetProportional(true);
+        CFont::SetFontStyle(FONT_GOTHIC);
+        CFont::SetDropColor({ 0, 0, 0, 255 });
 
-         float fOffset = 0.0f;
-         if (static_cast<float>(CWorld::Players[CWorld::PlayerInFocus].m_nMaxHealth) > 101.0f)
-             fOffset = 12.0f;
+        char IconToPrint[16];
+        strcpy(IconToPrint, "]");
 
-         for (unsigned int i = 0; i < 6; i++) {
-             if (CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetWanted()->m_nWantedLevel > i &&
-                 (CTimer::m_snTimeInMilliseconds > CWorld::Players[CWorld::PlayerInFocus].m_pPed->GetWanted()->m_nLastTimeWantedLevelChanged + 2000 ||
-                  CTimer::m_FrameCounter & 4)) {
-                 // CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255.0f));
-                 CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255.0f));
-                 CFont::SetEdge(1);
-                 CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * i),
-                                    GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), fOffset), IconToPrint);
-             } else {
-                 CFont::SetEdge(0);
-                 CFont::SetScale(SCREEN_STRETCH_X(0.605) * 1.2, SCREEN_STRETCH_Y(1.21) * 1.2);
-                 CFont::SetColor(CRGBA(0, 0, 0, (255.0f * 0.69999999)));
-                 CFont::PrintString(SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * i),
-                                    GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), fOffset) - SCREEN_STRETCH_Y(2), IconToPrint);
-             }
-         }
-     }
+        const auto& info = FindPlayerInfo();
+        int8 offset = 0;
+        if (static_cast<float>(info.m_nMaxHealth) > 101.0f) {
+            offset = 12;
+        }
+
+        for (auto i = 0u; i < 6; i++) { // 6 is MAX WANTED STARS
+            const auto x = SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * (float)i);
+            const auto y = GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), offset);
+
+            if (info.m_pPed->GetWanted()->m_nWantedLevel > i &&
+                (
+                    CTimer::m_snTimeInMilliseconds > info.m_pPed->GetWanted()->m_nLastTimeWantedLevelChanged + 2000 ||
+                    CTimer::m_FrameCounter & 4
+                )
+            ) {
+                CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255) * 0.8f);
+                CFont::SetEdge(1);
+                CFont::PrintString(x, y, IconToPrint);
+            } else {
+                CFont::SetEdge(0);
+                CFont::SetScale(SCREEN_STRETCH_X(0.605f) * 1.2f, SCREEN_STRETCH_Y(1.21f) * 1.2f);
+                CFont::SetColor({ 0, 0, 0, static_cast<uint8>((255.0f * 0.7f)) });
+                CFont::PrintString(x, y - SCREEN_STRETCH_Y(2.0f), IconToPrint);
+            }
+        }
+    }
 }
 
 // 0x58D7D0
