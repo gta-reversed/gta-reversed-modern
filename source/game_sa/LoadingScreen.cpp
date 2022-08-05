@@ -88,7 +88,10 @@ void CLoadingScreen::RenderSplash() {
             next++;
             next->Draw(rect, color);
         }
-    } else if (!m_bReadyToDelete) {
+        return;
+    }
+
+    if (!m_bReadyToDelete) {
         GetCurrentDisplayedSplash().Draw(rect, color);
     }
 }
@@ -143,12 +146,12 @@ void CLoadingScreen::SetLoadingBarMsg(const char* msg1, const char* msg2) {
     if (msg1)
         AsciiToGxtChar(msg1, m_LoadingGxtMsg1);
     else
-        m_LoadingGxtMsg1[0] = 0;
+        m_LoadingGxtMsg1[0] = '\0';
 
     if (msg2)
         AsciiToGxtChar(msg2, m_LoadingGxtMsg2);
     else
-        m_LoadingGxtMsg2[0] = 0;
+        m_LoadingGxtMsg2[0] = '\0';
 }
 
 // 0x590280
@@ -176,40 +179,41 @@ void CLoadingScreen::Continue() {
 
 // 0x590370
 void CLoadingScreen::RenderLoadingBar() {
-    auto color = HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255);
+    if (m_bLegalScreen || gfLoadingPercentage <= 0.0f || gfLoadingPercentage >= 100.0f)
+        return;
 
-    if (!m_bLegalScreen && gfLoadingPercentage > 0.0f && gfLoadingPercentage < 100.0f) {
-        CSprite2d::DrawBarChart(
-            SCREEN_STRETCH_X(50.0f),
-            SCREEN_STRETCH_FROM_BOTTOM(40.0f),
-            (uint16)SCREEN_STRETCH_X(180.0f),
-            (uint8)SCREEN_STRETCH_Y(10.0f),
-            gfLoadingPercentage,
-            0,
-            false,
-            true,
-            color,
-            CRGBA{ 0, 0, 0, 0 }
-        );
-        if (m_TimeBarAppeared == 0.0f) {
-            m_TimeBarAppeared = GetClockTime();
-        }
+    CSprite2d::DrawBarChart(
+        SCREEN_STRETCH_X(50.0f),
+        SCREEN_STRETCH_FROM_BOTTOM(40.0f),
+        (uint16)SCREEN_STRETCH_X(180.0f),
+        (uint8)SCREEN_STRETCH_Y(10.0f),
+        gfLoadingPercentage,
+        0,
+        false,
+        true,
+        HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, 255),
+        CRGBA{ 0, 0, 0, 0 }
+    );
+
+    if (m_TimeBarAppeared == 0.0f) {
+        m_TimeBarAppeared = GetClockTime();
     }
 }
 
 // 0x5904D0, inlined
 void CLoadingScreen::DisplayNextSplash() {
-    if (m_currDisplayedSplash != 6 && !m_bFading) {
-        m_FadeAlpha = 255;
-        if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
-            DefinedState2d();
-            RenderSplash();
-            RenderLoadingBar();
-            RwCameraEndUpdate(Scene.m_pRwCamera);
-            RsCameraShowRaster(Scene.m_pRwCamera);
-        }
-        m_currDisplayedSplash++;
+    if (m_currDisplayedSplash == 6 || m_bFading)
+        return;
+
+    m_FadeAlpha = 255;
+    if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
+        DefinedState2d();
+        RenderSplash();
+        RenderLoadingBar();
+        RwCameraEndUpdate(Scene.m_pRwCamera);
+        RsCameraShowRaster(Scene.m_pRwCamera);
     }
+    m_currDisplayedSplash++;
 }
 
 // 0x590530
@@ -240,7 +244,7 @@ void CLoadingScreen::DoPCTitleFadeOut() {
     m_bFading = true;
 
     for (auto i = 0; i < 50; i++) {
-        m_FadeAlpha = 5u * i;
+        m_FadeAlpha = static_cast<uint8>((float)i * 5.0f);
         DisplayPCScreen();
     }
 
@@ -260,8 +264,8 @@ void CLoadingScreen::DoPCTitleFadeIn() {
         DisplayPCScreen();
     }
 
-    for (auto i = 50; i > 0; i--) {
-        m_FadeAlpha = 5u * i;
+    for (auto i = 50u; i > 0u; i--) {
+        m_FadeAlpha = static_cast<uint8>((float)i * 5.0f);
         DisplayPCScreen();
     }
 
@@ -283,11 +287,12 @@ void CLoadingScreen::DoPCScreenChange(uint32 finish) {
         DisplayPCScreen();
     }
 
-    for (auto i = 0; i < 50; i++) {
-        m_FadeAlpha = 5u * i;
+    for (auto i = 0u; i < 50u; i++) {
+        float alpha = (float)i * 5.0f;
+        m_FadeAlpha = (uint8)alpha;
 
         if (finish || m_bFadeInNextSplashFromBlack) {
-            auto amplitude = (!m_bFadeOutCurrSplashToBlack) ? 1.0f : (255.0f - 5.0f * i) / 255.0f;
+            float amplitude = m_bFadeOutCurrSplashToBlack ? (255.0f - alpha) / 255.0f : 1.0f;
             AudioEngine.ServiceLoadingTune(amplitude);
         }
         DisplayPCScreen();
@@ -307,9 +312,9 @@ void CLoadingScreen::NewChunkLoaded() {
     if (!IsActive())
         return;
 
-    auto loaded = ++m_numChunksLoaded;
+    ++m_numChunksLoaded;
     if (m_chunkBarAppeared != -1) {
-        gfLoadingPercentage = ((float)(loaded - m_chunkBarAppeared) / (140.0f - (float)m_chunkBarAppeared)) * 100.0f;
+        gfLoadingPercentage = (float)(m_numChunksLoaded - m_chunkBarAppeared) / (140.0f - (float)m_chunkBarAppeared) * 100.0f;
     }
 
     auto now = GetClockTime();
