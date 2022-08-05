@@ -679,9 +679,8 @@ public: // NOTSA functions
 
     CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
-    bool HasDriver() const { return !!m_pDriver; }
-    CVehicleAnimGroup& GetAnimGroup() const;
-    AssocGroupId GetAnimGroupId() const;
+    [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
+    [[nodiscard]] AssocGroupId GetAnimGroupId() const;
     auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
