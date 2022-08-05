@@ -6,8 +6,7 @@
 */
 #include "StdInc.h"
 
-
-
+#include "Restart.h"
 
 void CRestart::InjectHooks() {
     RH_ScopedClass(CRestart);
@@ -81,7 +80,7 @@ void CRestart::CancelOverrideRestart() {
 // 0x460810
 void CRestart::SetRespawnPointForDurationOfMission(CVector point) {
     bOverrideRespawnBasePointForMission = true;
-    OverrideRespawnBasePointForMission = point;
+    OverrideRespawnBasePointForMission  = point;
 }
 
 // 0x460840
