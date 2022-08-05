@@ -15,12 +15,12 @@ public:
     static inline bool& bFadeInAfterNextArrest = *(bool*)0xA4325C;
     static inline bool& bFadeInAfterNextDeath = *(bool*)0xA4325D;
 
-    static inline int16& NumberOfPoliceRestarts = *(int16*)0xA43268;
+    static inline uint16& NumberOfPoliceRestarts = *(uint16*)0xA43268;
     static inline int32(&PoliceRestartWhenToUse)[MAX_RESTART_POINTS] = *(int32(*)[MAX_RESTART_POINTS])0xA43270;
     static inline float(&PoliceRestartHeadings)[MAX_RESTART_POINTS] = *(float(*)[MAX_RESTART_POINTS])0xA43298;
     static inline CVector(&PoliceRestartPoints)[MAX_RESTART_POINTS] = *(CVector(*)[MAX_RESTART_POINTS])0xA43390;
 
-    static inline int16& NumberOfHospitalRestarts = *(int16*)0xA4326C;
+    static inline uint16& NumberOfHospitalRestarts = *(uint16*)0xA4326C;
     static inline int32(&HospitalRestartWhenToUse)[MAX_RESTART_POINTS] = *(int32(*)[MAX_RESTART_POINTS])0xA432C0;
     static inline float(&HospitalRestartHeadings)[MAX_RESTART_POINTS] = *(float(*)[MAX_RESTART_POINTS])0xA432E8;
     static inline CVector(&HospitalRestartPoints)[MAX_RESTART_POINTS] = *(CVector(*)[MAX_RESTART_POINTS])0xA43318;
