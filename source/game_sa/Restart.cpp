@@ -94,38 +94,39 @@ void CRestart::FindClosestHospitalRestartPoint(CVector point, CVector& outPos, f
         outPos = OverridePosition;
         outAngle = OverrideHeading;
         bOverrideRestart = false;
-    } else {
-        if (bOverrideRespawnBasePointForMission) {
-            point = OverrideRespawnBasePointForMission;
-            bOverrideRespawnBasePointForMission = false;
-        }
+        return;
+    }
 
-        if (ScriptExtraHospitalRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(point, ScriptExtraHospitalRestartPoint_Pos) >= ScriptExtraHospitalRestartPoint_Radius) {
-            const auto pointLevel = CTheZones::GetLevelFromPosition(point);
-            float closestDist = FLT_MAX;
-            int32 closestIdx = -1;
-            for (auto i = 0u; i < NumberOfHospitalRestarts; i++) {
-                if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= HospitalRestartWhenToUse[i]) {
-                    const auto restartPos = HospitalRestartPoints[i];
-                    auto dist = DistanceBetweenPoints(point, restartPos);
-                    if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
-                        dist *= 6.0f;
-                    }
-                    if (dist < closestDist) {
-                        closestDist = dist;
-                        closestIdx = (int32)i;
-                    }
+    if (bOverrideRespawnBasePointForMission) {
+        point = OverrideRespawnBasePointForMission;
+        bOverrideRespawnBasePointForMission = false;
+    }
+
+    if (ScriptExtraHospitalRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(point, ScriptExtraHospitalRestartPoint_Pos) >= ScriptExtraHospitalRestartPoint_Radius) {
+        const auto pointLevel = CTheZones::GetLevelFromPosition(point);
+        float closestDist = FLT_MAX; // OG: 10'000'000.0f
+        int32 closestIdx = -1;
+        for (auto i = 0u; i < NumberOfHospitalRestarts; i++) {
+            if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= HospitalRestartWhenToUse[i]) {
+                const auto& restartPos = HospitalRestartPoints[i];
+                auto dist = DistanceBetweenPoints(point, restartPos);
+                if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
+                    dist *= 6.0f;
+                }
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = (int32)i;
                 }
             }
-
-            if (closestIdx >= 0u) {
-                outPos = HospitalRestartPoints[closestIdx];
-                outAngle = HospitalRestartHeadings[closestIdx];
-            }
-        } else {
-            outPos = ScriptExtraHospitalRestartPoint_Pos;
-            outAngle = ScriptExtraHospitalRestartPoint_Angle;
         }
+
+        if (closestIdx >= 0u) {
+            outPos = HospitalRestartPoints[closestIdx];
+            outAngle = HospitalRestartHeadings[closestIdx];
+        }
+    } else {
+        outPos = ScriptExtraHospitalRestartPoint_Pos;
+        outAngle = ScriptExtraHospitalRestartPoint_Angle;
     }
 }
 
