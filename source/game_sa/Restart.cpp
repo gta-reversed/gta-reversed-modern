@@ -19,6 +19,7 @@ void CRestart::InjectHooks() {
     RH_ScopedInstall(OverrideNextRestart, 0x4607D0);
     RH_ScopedInstall(CancelOverrideRestart, 0x460800);
     RH_ScopedInstall(ClearRespawnPointForDurationOfMission, 0x460840);
+    RH_ScopedInstall(SetRespawnPointForDurationOfMission, 0x460810);
     RH_ScopedInstall(FindClosestHospitalRestartPoint, 0x460850);
     RH_ScopedInstall(FindClosestPoliceRestartPoint, 0x460A50);
     RH_ScopedInstall(Load, 0x5D3770);
@@ -75,6 +76,12 @@ void CRestart::OverrideNextRestart(CVector const& point, float angle) {
 // 0x460800
 void CRestart::CancelOverrideRestart() {
     bOverrideRestart = false;
+}
+
+// 0x460810
+void CRestart::SetRespawnPointForDurationOfMission(CVector point) {
+    bOverrideRespawnBasePointForMission = true;
+    OverrideRespawnBasePointForMission = point;
 }
 
 // 0x460840
