@@ -41,6 +41,7 @@ public:
     static void Initialise();
     static void AddHospitalRestartPoint(const CVector& point, float angle, int32 townId);
     static void AddPoliceRestartPoint(const CVector& point, float angle, int32 townId);
+    static void OverrideNextRestart(CVector const& point, float angle);
     static void CancelOverrideRestart();
     static void SetRespawnPointForDurationOfMission(CVector point);
     static void ClearRespawnPointForDurationOfMission();
@@ -48,5 +49,4 @@ public:
     static void FindClosestPoliceRestartPoint(CVector point, CVector& storedPoint, float& outAngle);
     static void Load();
     static void Save();
-    static void OverrideNextRestart(CVector const& point, float angle);
 };
