@@ -1,3 +1,5 @@
+#pragma once
+
 #include "TaskSimple.h"
 
 class CAnimBlendHierarchy;
