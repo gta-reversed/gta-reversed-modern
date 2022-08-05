@@ -82,7 +82,7 @@ public:
     CNodeAddress    m_aPathFindNodesInfo[8];
     uint16          m_nPathFindNodesCount;
     char            field_8A[2];
-    CVehicle*       m_pTargetCar;
+    CVehicle*       m_pTargetCar; // More like "target entity", see 0x63C5B9
     CEntity*        m_pCarWeMakingSlowDownFor;
     int8            m_vehicleRecordingId;
     bool            m_bPlaneDogfightSomething;

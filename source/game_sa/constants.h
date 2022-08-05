@@ -1,5 +1,7 @@
 #pragma once
 
+constexpr int32 EXTRA_DIR_SIZE = 550;
+
 // used in CStreaming
 constexpr uint32 TOTAL_DFF_MODEL_IDS = 20000;
 constexpr uint32 TOTAL_TXD_MODEL_IDS = 5000;
@@ -13,12 +15,20 @@ constexpr uint32 TOTAL_INTERNAL_MODEL_IDS = 4; // internal use?
 
 constexpr uint32 TOTAL_IMG_ARCHIVES = 8;
 constexpr uint32 TOTAL_LOADED_PEDS = 8;
-constexpr uint32 TOTAL_GANGS = 10;
 
 constexpr uint32 TOTAL_SCRIPTED_TASKS = 128;
 constexpr uint32 TOTAL_SCRIPTED_BRAIN_TASK_ENTRIES = 48;
 constexpr int32  TOTAL_DECISION_MAKERS = 20;
 constexpr int32  TOTAL_PED_GROUPS = 8;
+constexpr int32  TOTAL_SPECIAL_MODELS = 10;
+constexpr int32  TOTAL_CLOTHES_MODELS = 10;
+constexpr int32  TOTAL_CUTSCENE_MODELS = 20;
+
+constexpr int32  SPECIAL_MODELS_RESOURCE_ID = 290;
+constexpr int32  CLOTHES_MODELS_RESOURCE_ID = 384;
+constexpr int32  CUTSCENE_MODELS_RESOURCE_ID = 300;
+
+constexpr auto MAX_VEHICLES_LOADED = 50;
 
 // used in CRenderer
 constexpr int32 TOTAL_ENTITY_SCAN_LISTS = 5;

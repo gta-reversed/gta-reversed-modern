@@ -2,6 +2,7 @@
 
 #include "TaskSimpleGiveCPR.h"
 #include "InterestingEvents.h"
+#include "EventRevived.h"
 
 void CTaskSimpleGiveCPR::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGiveCPR);

@@ -10,21 +10,28 @@
 
 class IplDef {
 public:
-    CRect m_boundBox;
-    char  m_szName[16];
-    int16 _pad20;
-    int16 m_nMinBuildingId;
-    int16 m_nMaxBuildingId;
-    int16 m_nMinDummyId;
-    int16 m_nMaxDummyId;
-    int16 m_nRelatedIpl; // entity arrays index
-    bool  m_bInterior;
-    char  field_2D;
-    bool  m_bLoadRequest;
-    bool  m_bDisableDynamicStreaming;
-    char  field_30;
-    char  field_31;
-    char  _pad32[2];
+    CRect m_boundBox{};
+    char  m_szName[18]; // Changed to 18 (from 16) (also had to remove padding after it).. Unsure what the actual length was, but `strcpy_s` asserts if it's 16
+
+    int16 m_nMinBuildingId{ SHRT_MAX };
+    int16 m_nMaxBuildingId{ SHRT_MIN };
+
+    int16 m_nMinDummyId{ SHRT_MAX };
+    int16 m_nMaxDummyId{ SHRT_MIN };
+
+    int16 m_nRelatedIpl{ -1 }; // entity arrays index
+    bool  m_bInterior{};
+    char  field_2D{}; // Seemingly something like `m_bIsLoaded`
+    bool  m_bLoadRequest{};
+    bool  m_bDisableDynamicStreaming{ true };
+    char  field_30{};
+    char  field_31{}; // Makes bounding box bigger. (+350 vs +200 units). See `CIplStore::LoadIpl`
+
+    constexpr IplDef() = default;
+
+    IplDef(const char* name) {
+        strcpy_s(m_szName, name); // Using `_s` variant here
+    }
 };
 
 VALIDATE_SIZE(IplDef, 0x34);

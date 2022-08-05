@@ -24,11 +24,6 @@ CLoadMonitor* CLoadMonitor::Constructor() {
     return this;
 }
 
-// 0x856430
-CLoadMonitor::~CLoadMonitor() {
-    // NOP
-}
-
 CLoadMonitor* CLoadMonitor::Destructor() {
     this->CLoadMonitor::~CLoadMonitor();
     return this;

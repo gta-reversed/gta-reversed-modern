@@ -35,7 +35,7 @@ CTaskSimpleDuck::CTaskSimpleDuck(eDuckControlTypes DuckControlType, uint16 nLeng
 CTaskSimpleDuck::~CTaskSimpleDuck() {
     if (m_pDuckAnim) {
         m_pDuckAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
-        if (m_pDuckAnim->m_fBlendAmount > 0.0f && m_pDuckAnim->m_fBlendDelta >= 0.0f && (m_pDuckAnim->m_nFlags & ANIM_FLAG_PARTIAL) != 0)
+        if (m_pDuckAnim->m_fBlendAmount > 0.0f && m_pDuckAnim->m_fBlendDelta >= 0.0f && (m_pDuckAnim->m_nFlags & ANIMATION_PARTIAL) != 0)
             m_pDuckAnim->m_fBlendDelta = -8.0f;
     }
 

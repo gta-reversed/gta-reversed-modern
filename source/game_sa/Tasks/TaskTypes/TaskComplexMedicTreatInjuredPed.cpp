@@ -73,7 +73,7 @@ CTask* CTaskComplexMedicTreatInjuredPed::CreateSubTask(eTaskType taskType) {
     case TASK_COMPLEX_CAR_DRIVE_TO_POINT:
         return new CTaskComplexDriveToPoint(m_pVehicle, m_vecAccidentPosition, 30.0F, 0, -1, -1.0F, 2);
     case TASK_COMPLEX_CAR_DRIVE_WANDER:
-        return new CTaskComplexCarDriveWander(m_pVehicle, 2, 30.0F);
+        return new CTaskComplexCarDriveWander(m_pVehicle, DRIVING_STYLE_AVOID_CARS, 30.0F);
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
         return new CTaskComplexGoToPointAndStandStill(PEDMOVE_RUN, m_vecAccidentPosition, 0.125F, 2.0F, false, false);
     case TASK_COMPLEX_WANDER:
@@ -209,8 +209,8 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped) {
                 auto* taskTreat = reinterpret_cast<CTaskComplexMedicTreatInjuredPed*>(partnerTask);
                 if (taskTreat->m_pAccident && taskTreat->m_pAccident->m_pPed) {
                     m_vecAccidentPosition = taskTreat->m_vecAccidentPosition;
-                    if (DistanceBetweenPoints(m_pVehicle->GetPosition(), m_vecAccidentPosition) < 10.0F) {
-                        ped->Say(231, 0, 1.0F, false, false, false);
+                    if (DistanceBetweenPointsSquared(m_vecAccidentPosition, m_pVehicle->GetPosition()) < 100.0f) {
+                        ped->Say(231, 0, 1.0F);
                         return CreateSubTask(TASK_COMPLEX_LEAVE_CAR);
                     }
                 }
@@ -223,8 +223,8 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped) {
             if (!m_pAccident || !m_pAccident->m_pPed)
                 return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_WANDER);
 
-            if (DistanceBetweenPoints(m_pVehicle->GetPosition(), m_vecAccidentPosition) < 10.0F) {
-                ped->Say(231, 0, 1.0F, false, false, false);
+            if (DistanceBetweenPointsSquared(m_vecAccidentPosition, m_pVehicle->GetPosition()) < 100.0f) {
+                ped->Say(231, 0, 1.0F);
                 return CreateSubTask(TASK_COMPLEX_LEAVE_CAR);
             }
         }
@@ -246,10 +246,12 @@ CTask* CTaskComplexMedicTreatInjuredPed::ControlSubTask_Reversed(CPed* ped) {
             return CreateDealWithNextAccidentTask(ped, nullptr);
 
         auto subTask = reinterpret_cast<CTaskComplexGoToPointAndStandStill*>(m_pSubTask);
-        if (subTask->m_moveState != PEDMOVE_WALK && DistanceBetweenPoints(m_vecAccidentPosition, ped->GetPosition()) < 25.0F) {
-            for (CEntity* entity : ped->GetIntelligence()->m_vehicleScanner.m_apEntities)
-                if (entity && CPedGeometryAnalyser::IsEntityBlockingTarget(entity, m_vecAccidentPosition, 0.125F))
+        if (subTask->m_moveState != PEDMOVE_WALK && DistanceBetweenPointsSquared(ped->GetPosition(), m_vecAccidentPosition) < 25.0F) {
+            for (CEntity* entity : ped->GetIntelligence()->m_vehicleScanner.m_apEntities) {
+                if (entity && CPedGeometryAnalyser::IsEntityBlockingTarget(entity, m_vecAccidentPosition, 0.125F)) {
                     return CreateDealWithNextAccidentTask(ped, nullptr);
+                }
+            }
 
             FindAccidentPosition(ped, m_pAccident->m_pPed);
             subTask->m_moveState = PEDMOVE_WALK;

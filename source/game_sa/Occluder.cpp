@@ -253,9 +253,7 @@ bool COccluder::NearCamera() const
         static_cast<float>(m_wLength) / 4.0F,
         static_cast<float>(m_wWidth) / 4.0F
     );
-    const auto& vecCamPos = TheCamera.GetPosition();
     auto vecPos = CVector(m_wMidX, m_wMidY, m_wMidZ) / 4.0F;
-
-    auto fDist = DistanceBetweenPoints(vecPos, vecCamPos);
+    auto fDist = DistanceBetweenPoints(vecPos, TheCamera.GetPosition());
     return (fDist - fSize / 2.0F) < 250.0F;
 }

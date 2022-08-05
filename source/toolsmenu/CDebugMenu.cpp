@@ -125,7 +125,6 @@ static void DebugCode() {
     if (pad->IsStandardKeyJustPressed('3')) {
         CCheat::VehicleCheat(MODEL_INFERNUS);
     }
-
     if (pad->IsStandardKeyJustPressed('4')) {
         CTimer::Suspend();
     }

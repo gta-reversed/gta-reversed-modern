@@ -15,7 +15,7 @@ class CAnimBlendStaticAssociation {
 public:
     uint16               m_nNumBlendNodes;
     int16                m_nAnimId;
-    uint16               m_nAnimGroup;
+    int16                m_nAnimGroup;
     uint16               m_nFlags;
     CAnimBlendSequence** m_pSequenceArray;
     CAnimBlendHierarchy* m_pHierarchy;

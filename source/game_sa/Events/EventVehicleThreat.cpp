@@ -12,3 +12,8 @@ CEventVehicleThreat::CEventVehicleThreat(CVehicle* vehicle) : CEventEditableResp
 CEventVehicleThreat::~CEventVehicleThreat() {
     CEntity::SafeCleanUpRef(m_Vehicle);
 }
+
+// 0x4AFC50
+bool CEventVehicleThreat::AffectsPed(CPed* ped) {
+    return ped->IsAlive();
+}

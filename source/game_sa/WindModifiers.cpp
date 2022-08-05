@@ -16,7 +16,7 @@ void CWindModifiers::InjectHooks() {
 // 0x72C8B0
 void CWindModifiers::RegisterOne(CVector vecPos, int32 iActive, float fPower) {
     if (Number < MAX_NUM_MODIFIERS) {
-        if (DistanceBetweenPoints(vecPos, TheCamera.GetPosition()) < 200.0f) {
+        if (DistanceBetweenPoints(TheCamera.GetPosition(), vecPos) < 200.0f) {
             Array[Number] = {
                 .m_vecPos = vecPos,
                 .m_iActive = iActive,
@@ -63,7 +63,7 @@ bool CWindModifiers::FindWindModifier(CVector vecPos, float* outX, float* outY) 
     if (!appliedAny)
         return false;
 
-    const float rnd = 1.0f + (float)(rand() % 32 - 16) / 2000.f;
+    const float rnd = 1.0f + (float)(CGeneral::GetRandomNumber() % 32 - 16) / 2000.f;
     *outX += posX * rnd;
     *outY += posY * rnd;
 

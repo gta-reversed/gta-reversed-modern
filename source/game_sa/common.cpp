@@ -374,6 +374,24 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
 }
 
+// todo: move
+// 0x53D690
+void DoRWStuffStartOfFrame(int16 nR1, int16 nG1, int16 nB1, int16 nR2, int16 nG2, int16 nB2, int16 nA) {
+    plugin::Call<0x53D690, int16, int16, int16, int16, int16, int16, int16>(nR1, nG1, nB1, nR2, nG2, nB2, nA);
+}
+
+// todo: move
+// 0x53D840
+void DoRWStuffEndOfFrame() {
+    plugin::Call<0x53D840>();
+}
+
+// todo: move
+// 0x53EC10
+RsEventStatus AppEventHandler(RsEvent nEvent, void* param) {
+    return plugin::CallAndReturn<RsEventStatus, 0x53EC10, RsEvent, void*>(nEvent, param);
+}
+
 // TODO: Check `outName` size (to avoid buffer overflow)
 // 0x5370A0
 void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {

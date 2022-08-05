@@ -120,11 +120,11 @@ public:
     bool Save();
 
     void     ProcessGarageDoorBehaviour();
-    bool     CanBeDeleted();
+    [[nodiscard]] bool CanBeDeleted() const;
     void     SetRelatedDummy(CDummyObject* relatedDummy);
     bool     TryToExplode();
     void     SetObjectTargettable(bool targetable);
-    bool     CanBeTargetted();
+    [[nodiscard]] bool CanBeTargetted() const;
     void     RefModelInfo(int32 modelIndex);
     void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);
     float    GetRopeHeight();

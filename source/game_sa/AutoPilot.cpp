@@ -30,13 +30,13 @@ CAutoPilot::CAutoPilot() : m_aPathFindNodesInfo() {
     m_ucCarMissionModeCounter = 0;
     field_41 = 0;
     field_44 = 1.0f;
-    m_ucHeliSpeedMult = 0;   
+    m_ucHeliSpeedMult = 0;
     movementFlags.bIsStopped = false;
     movementFlags.bIsParked = false;
     field_4A = 0;
     m_ucCarFollowDist = 10;
     m_ucHeliTargetDist2 = 10;
-    field_50 = rand() % 8 + 2;
+    field_50 = CGeneral::GetRandomNumber() % 8 + 2;
     m_vehicleRecordingId = -1;
     m_bPlaneDogfightSomething = false;
     m_pCarWeMakingSlowDownFor = nullptr;

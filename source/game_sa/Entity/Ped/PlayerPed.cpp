@@ -130,7 +130,7 @@ CPlayerPed::CPlayerPed(int32 playerId, bool bGroupCreated) : CPed(PED_TYPE_PLAYE
     m_pPlayerData = &CWorld::Players[playerId].m_PlayerData;
     m_pPlayerData->AllocateData();
 
-    SetModelIndex(MODEL_PLAYER);
+    SetModelIndex(MODEL_PLAYER); // V1053 Calling the 'SetModelIndex' virtual function in the constructor may lead to unexpected result at runtime
 
     CPlayerPed::SetInitialState(bGroupCreated);
 
@@ -261,7 +261,7 @@ void CPlayerPed::ReApplyMoveAnims() {
                 addedAnim->m_fBlendDelta = anim->m_fBlendDelta;
                 addedAnim->m_fBlendAmount = anim->m_fBlendAmount;
 
-                anim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
+                anim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
                 anim->m_fBlendDelta = -1000.0f;
             }
         }
@@ -710,13 +710,15 @@ void CPlayerPed::HandlePlayerBreath(bool bDecreaseAir, float fMultiplier) {
     float& breath = m_pPlayerData->m_fBreath;
     float  decreaseAmount = CTimer::GetTimeStep() * fMultiplier;
     if (!bDecreaseAir || CCheat::IsActive(CHEAT_INFINITE_OXYGEN)) {
-        breath += decreaseAmount * 2.0f;
+        if (CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > breath)
+            breath += decreaseAmount * 2.0f;
     } else {
         if (breath > 0.0f && bDrownsInWater)
             breath = std::max(0.0f, breath - decreaseAmount);
         else
             CWeapon::GenerateDamageEvent(this, this, eWeaponType::WEAPON_DROWNING, (int32)(decreaseAmount * 3.0f), PED_PIECE_TORSO, 0);
     }
+    m_pPlayerData->m_bRequireHandleBreath = false;
 }
 
 // 0x60A9C0
@@ -748,7 +750,7 @@ void CPlayerPed::MakeChangesForNewWeapon(eWeaponType weaponType) {
 
 
     if (auto anim = RpAnimBlendClumpGetAssociation(m_pRwClump, ANIM_ID_FIRE))
-        anim->m_nFlags |= ANIM_FLAG_STARTED & ANIM_FLAG_UNLOCK_LAST_FRAME;
+        anim->m_nFlags |= ANIMATION_STARTED & ANIMATION_UNLOCK_LAST_FRAME;
 
     TheCamera.ClearPlayerWeaponMode();
 }

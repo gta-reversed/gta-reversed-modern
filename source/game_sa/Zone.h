@@ -14,15 +14,6 @@ enum eZoneType : uint8 {
     ZONE_TYPE_MAP = 3
 };
 
-class CZoneExtraInfo {
-public:
-    char   m_nGangDensity[10];
-    char   m_nDealerDensity;
-    RwRGBA ZoneColor;
-    uint8  m_nFlags;
-    char   m_nPopulationRace;
-};
-
 class CZone {
 public:
     uint32     m_nLabel[2];

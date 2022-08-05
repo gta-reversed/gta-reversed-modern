@@ -112,7 +112,7 @@ RwTexDictionary* CFileLoader::LoadTexDictionary(const char* filename) {
 
 // 0x5B40C0
 int32 CFileLoader::LoadAnimatedClumpObject(const char* line) {
-    auto   objID{ MODEL_INVALID };
+    int32  objID{ MODEL_INVALID };
     char   modelName[24]{};
     char   txdName[24]{};
     char   animName[16]{ "null" };
@@ -158,7 +158,7 @@ bool CFileLoader::LoadAtomicFile(RwStream* stream, uint32 modelId) {
         RpClumpDestroy(pReadClump);
     }
 
-    if (!mi->m_pRwObject) // todo: missing guard here by R* (mi && !mi->m_pRwObject)
+    if (mi && !mi->m_pRwObject) // FIX_BUGS: V1004 The 'mi' pointer was used unsafely after it was verified against nullptr.
         return false;
 
     if (bUseCommonVehicleTexDictionary)
@@ -502,7 +502,7 @@ bool CFileLoader::LoadCollisionFile(uint8* buff, uint32 buffSize, uint8 colId) {
         LoadCollisionModelAnyVersion(h, buffIt + sizeof(FileHeader), cm);
 
         cm.m_nColSlot = colId;
-        if (mi->GetModelType() == MODEL_INFO_TYPE_ATOMIC) { // todo: should be MODEL_INFO_ATOMIC
+        if (mi->GetModelType() == MODEL_INFO_ATOMIC) {
             CPlantMgr::SetPlantFriendlyFlagInAtomicMI(static_cast<CAtomicModelInfo*>(mi));
         }
     }
@@ -993,24 +993,26 @@ CEntity* CFileLoader::LoadObjectInstance(CFileObjectInstance* objInstance, const
     {
         newEntity = new CDummyObject();
         newEntity->SetModelIndexNoCreate(objInstance->m_nModelId);
-        if (IsGlassModel(newEntity) && !CModelInfo::GetModelInfo(newEntity->m_nModelIndex)->IsGlassType2())
+        if (IsGlassModel(newEntity) && !CModelInfo::GetModelInfo(newEntity->m_nModelIndex)->IsGlassType2()) {
             newEntity->m_bIsVisible = false;
+        }
     }
 
-    if (fabs(objInstance->m_qRotation.imag.x) > 0.05F
-        || fabs(objInstance->m_qRotation.imag.y) > 0.05F
-        || (objInstance->m_bDontStream && objInstance->m_qRotation.imag.x != 0.0f && objInstance->m_qRotation.imag.y != 0.0f))
-    {
-        objInstance->m_qRotation.imag = -objInstance->m_qRotation.imag;
+    const auto& rot = objInstance->m_qRotation.imag;
+    if (std::fabs(rot.x) > 0.05F || std::fabs(rot.y) > 0.05F ||
+        (
+            objInstance->m_bDontStream &&
+            rot.x != 0.0f && rot.y != 0.0f
+        )
+    ) {
+        objInstance->m_qRotation.imag = -rot;
         newEntity->AllocateStaticMatrix();
-
-        auto tempQuat = objInstance->m_qRotation;
-        newEntity->GetMatrix().SetRotate(tempQuat);
+        newEntity->GetMatrix().SetRotate(objInstance->m_qRotation);
     }
     else
     {
-        const auto fMult = objInstance->m_qRotation.imag.z < 0.0f ? 2.0f : -2.0f;
-        const auto fHeading = acos(objInstance->m_qRotation.real) * fMult;
+        const auto fMult = rot.z < 0.0f ? 2.0f : -2.0f;
+        const auto fHeading = std::acos(objInstance->m_qRotation.real) * fMult;
         newEntity->SetHeading(fHeading);
     }
 
@@ -1193,14 +1195,14 @@ void CFileLoader::LoadEntryExit(const char* line) {
     assert(enex);
 
     enum Flags {
-        UNKNOWN_INTERIOR,
-        UNKNOWN_PAIRING,
-        CREATE_LINKED_PAIR,
-        REWARD_INTERIOR,
-        USED_REWARD_ENTRANCE,
-        CARS_AND_AIRCRAFT,
-        BIKES_AND_MOTORCYCLES,
-        DISABLE_ONFOOT
+        UNKNOWN_INTERIOR      = 1 << 0,
+        UNKNOWN_PAIRING       = 1 << 1,
+        CREATE_LINKED_PAIR    = 1 << 2,
+        REWARD_INTERIOR       = 1 << 3,
+        USED_REWARD_ENTRANCE  = 1 << 4,
+        CARS_AND_AIRCRAFT     = 1 << 5,
+        BIKES_AND_MOTORCYCLES = 1 << 6,
+        DISABLE_ONFOOT        = 1 << 7,
     };
 
     if (flags & UNKNOWN_INTERIOR)
@@ -1754,7 +1756,7 @@ int32 CFileLoader::LoadTimeObject(const char* line) {
             (void)sscanf(line, "%d %s %s %d %f %f %f %d %d %d", &modelId, modelName, texName, &numObjs, &drawDistance[0], &drawDistance[1], &drawDistance[2], &flags, &timeOn, &timeOff);
             break;
         default:
-            NOTSA_UNREACHABLE;
+            NOTSA_UNREACHABLE();
         }
     }
 
@@ -2101,7 +2103,7 @@ void CFileLoader::LoadScene(const char* filename) {
     auto newIPLIndex{ -1 };
     if (gCurrIplInstancesCount > 0) {
         newIPLIndex = CIplStore::GetNewIplEntityIndexArray(gCurrIplInstancesCount);
-        std::ranges::copy(gCurrIplInstances, gCurrIplInstances + gCurrIplInstancesCount, CIplStore::GetIplEntityIndexArray(newIPLIndex));
+        rng::copy(gCurrIplInstances | std::views::take(gCurrIplInstancesCount), CIplStore::GetIplEntityIndexArray(newIPLIndex));
     }
     LinkLods(CIplStore::SetupRelatedIpls(filename, newIPLIndex, &gCurrIplInstances[gCurrIplInstancesCount]));
     CIplStore::RemoveRelatedIpls(newIPLIndex); // I mean this totally makes sense, doesn't it?
