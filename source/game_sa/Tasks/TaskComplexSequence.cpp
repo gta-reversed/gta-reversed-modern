@@ -120,7 +120,7 @@ void CTaskComplexSequence::AddTask(CTask* task) {
 
 // 0x632D50
 void CTaskComplexSequence::AddTask(int32 taskId, CTask* task) {
-    if (taskId >= std::size(m_aTasks)) {
+    if (taskId >= (int32)std::size(m_aTasks)) {
         delete task;
     } else {
         delete m_aTasks[taskId];
@@ -142,7 +142,7 @@ CTask* CTaskComplexSequence::CreateNextSubTask(CPed* ped, int32& taskIndex, int3
             repeatCount = repeatCount + 1;
         }
 
-        if (m_bRepeatSequence || repeatCount != m_bRepeatSequence) {
+        if (m_bRepeatSequence || (bool)repeatCount != m_bRepeatSequence) {
             nextSubTask = m_aTasks[taskIndex]->Clone();
         }
     } else if (incrementedTaskIndex != std::size(m_aTasks)) {

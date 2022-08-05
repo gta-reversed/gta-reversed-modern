@@ -128,7 +128,7 @@ bool CTaskSimpleIKChain::ProcessPed(CPed* ped) {
 
     // 0x633D98
     if ((int32)CTimer::GetTimeInMS() <= m_nTargetTime) {
-        m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.f, (float)CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
+        m_fBlend += (m_fTargetBlend - m_fBlend) * std::min(1.0f, CTimer::GetTimeStepInMS() / (float)(m_nTargetTime - CTimer::GetTimeStepInMS() - CTimer::GetTimeInMS()));
     } else {
         m_fBlend = m_fTargetBlend;
     }

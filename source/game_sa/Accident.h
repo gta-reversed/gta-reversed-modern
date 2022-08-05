@@ -7,8 +7,8 @@ class CPed;
 class CAccident {
 public:
     CPed* m_pPed;
-    uint8 m_bIsTreated;
-    uint8 m_bIsRevived;
+    bool  m_bIsTreated;
+    bool  m_bIsRevived;
 
 public:
     // 0x56CDE0

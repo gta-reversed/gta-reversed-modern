@@ -71,7 +71,7 @@ public:
     uint8         m_nColDamageEffect;        // see eObjectColDamageEffect
     uint8         m_nSpecialColResponseCase; // see eObjectSpecialColResponseCases
     char          field_146;
-    char          m_nGarageDoorGarageIndex;
+    int8          m_nGarageDoorGarageIndex;
     uint8         m_nLastWeaponDamage;
     tColLighting  m_nColLighting;
     int16         m_nRefModelIndex;
@@ -120,11 +120,11 @@ public:
     bool Save();
 
     void     ProcessGarageDoorBehaviour();
-    bool     CanBeDeleted();
+    [[nodiscard]] bool CanBeDeleted() const;
     void     SetRelatedDummy(CDummyObject* relatedDummy);
     bool     TryToExplode();
     void     SetObjectTargettable(bool targetable);
-    bool     CanBeTargetted();
+    [[nodiscard]] bool CanBeTargetted() const;
     void     RefModelInfo(int32 modelIndex);
     void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);
     float    GetRopeHeight();

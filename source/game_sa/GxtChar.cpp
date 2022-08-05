@@ -100,3 +100,9 @@ void TextCopy(GxtChar* dst, const GxtChar* src) {
     }
     *dst = '\0';
 }
+
+// 0x718660
+GxtChar* GxtCharStrcpy(GxtChar* dst, const GxtChar* src) {
+    TextCopy(dst, src);
+    return dst;
+}

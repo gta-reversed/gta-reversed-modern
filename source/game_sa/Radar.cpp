@@ -116,7 +116,7 @@ void CRadar::InjectHooks()
     RH_ScopedInstall(SetMapCentreToPlayerCoords, 0x585B20);
     RH_ScopedInstall(InitFrontEndMap, 0x585960);
     RH_ScopedInstall(CalculateBlipAlpha, 0x583420);
-    RH_ScopedInstall(TransformRadarPointToScreenSpace, 0x583480, true); // register problem?
+    // RH_ScopedInstall(TransformRadarPointToScreenSpace, 0x583480, true); // register problem?
     RH_ScopedInstall(TransformRealWorldPointToRadarSpace, 0x583530);
     RH_ScopedInstall(CalculateCachedSinCos, 0x583670);
     RH_ScopedInstall(SetBlipSprite, 0x583D70);

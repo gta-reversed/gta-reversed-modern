@@ -71,7 +71,7 @@ public:
     static void   SetTimeStep(float ts) { ms_fTimeStep = ts; }
     static void   UpdateTimeStep(float ts) { ms_fTimeStep = std::max(ts, 0.00001f); }
     static float  GetTimeStepInSeconds() { return ms_fTimeStep / 50.0f; }
-    static uint32 GetTimeStepInMS() { return static_cast<uint32>(GetTimeStepInSeconds() * 1000.0f); } // pattern: CTimer::ms_fTimeStep * 0.02f * 1000.0f
+    static float  GetTimeStepInMS() { return GetTimeStepInSeconds() * 1000.0f; } // pattern: CTimer::ms_fTimeStep * 0.02f * 1000.0f
 
     static float  GetTimeStepNonClipped() { return ms_fTimeStepNonClipped; }
     static float  GetTimeStepNonClippedInSeconds() { return ms_fTimeStepNonClipped / 50.0f; }

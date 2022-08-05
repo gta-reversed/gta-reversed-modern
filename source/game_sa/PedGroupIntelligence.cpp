@@ -109,3 +109,8 @@ void CPedGroupIntelligence::SetDefaultTaskAllocatorType(int32 nPedGroupTaskAlloc
 bool CPedGroupIntelligence::ReportFinishedTask(const CPed* ped, const CTask* task) {
     return plugin::CallMethodAndReturn<bool, 0x5F86F0>(this, ped, task);
 }
+
+// 0x5F7540
+void CPedGroupIntelligence::SetTask(CPed* ped, const CTask* task, CPedTaskPair* pair, int32 arg5, bool arg6) {
+    plugin::Call<0x5F7540, CPed*, const CTask*, CPedTaskPair*, int32, bool>(ped, task, pair, arg5, arg6);
+}
