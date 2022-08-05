@@ -136,38 +136,39 @@ void CRestart::FindClosestPoliceRestartPoint(CVector point, CVector& outPos, flo
         outPos = OverridePosition;
         outAngle = OverrideHeading;
         bOverrideRestart = false;
-    } else {
-        if (bOverrideRespawnBasePointForMission) {
-            point = OverrideRespawnBasePointForMission;
-            bOverrideRespawnBasePointForMission = false;
-        }
+        return;
+    }
 
-        if (ScriptExtraPoliceRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(point, ScriptExtraPoliceRestartPoint_Pos) >= ScriptExtraPoliceRestartPoint_Radius) {
-            const auto pointLevel = CTheZones::GetLevelFromPosition(point);
-            float closestDist = FLT_MAX;
-            int32 closestIdx = -1;
-            for (auto i = 0u; i < NumberOfPoliceRestarts; i++) {
-                if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= PoliceRestartWhenToUse[i]) {
-                    const auto restartPos = PoliceRestartPoints[i];
-                    auto dist = DistanceBetweenPoints(point, restartPos);
-                    if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
-                        dist *= 6.0f;
-                    }
-                    if (dist < closestDist) {
-                        closestDist = dist;
-                        closestIdx = (int32)i;
-                    }
+    if (bOverrideRespawnBasePointForMission) {
+        point = OverrideRespawnBasePointForMission;
+        bOverrideRespawnBasePointForMission = false;
+    }
+
+    if (ScriptExtraPoliceRestartPoint_Radius <= 0.0f || DistanceBetweenPoints(point, ScriptExtraPoliceRestartPoint_Pos) >= ScriptExtraPoliceRestartPoint_Radius) {
+        const auto pointLevel = CTheZones::GetLevelFromPosition(point);
+        float closestDist = FLT_MAX; // OG: 10'000'000.0f
+        int32 closestIdx = -1;
+        for (auto i = 0u; i < NumberOfPoliceRestarts; i++) {
+            if ((int32)CStats::GetStatValue(STAT_CITY_UNLOCKED) >= PoliceRestartWhenToUse[i]) {
+                const auto& restartPos = PoliceRestartPoints[i];
+                auto dist = DistanceBetweenPoints(point, restartPos);
+                if (pointLevel != eLevelName::LEVEL_NAME_COUNTRY_SIDE && pointLevel != CTheZones::GetLevelFromPosition(restartPos)) {
+                    dist *= 6.0f;
+                }
+                if (dist < closestDist) {
+                    closestDist = dist;
+                    closestIdx = (int32)i;
                 }
             }
-
-            if (closestIdx >= 0u) {
-                outPos = PoliceRestartPoints[closestIdx];
-                outAngle = PoliceRestartHeadings[closestIdx];
-            }
-        } else {
-            outPos = ScriptExtraPoliceRestartPoint_Pos;
-            outAngle = ScriptExtraPoliceRestartPoint_Angle;
         }
+
+        if (closestIdx >= 0u) {
+            outPos = PoliceRestartPoints[closestIdx];
+            outAngle = PoliceRestartHeadings[closestIdx];
+        }
+    } else {
+        outPos = ScriptExtraPoliceRestartPoint_Pos;
+        outAngle = ScriptExtraPoliceRestartPoint_Angle;
     }
 }
 
