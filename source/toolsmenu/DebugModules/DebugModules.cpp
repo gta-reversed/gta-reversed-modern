@@ -18,6 +18,7 @@
 #include "FXDebugModule.h"
 #include "Pools\PoolsDebugModule.h"
 #include "TimecycEditor.h"
+#include "CullZonesDebugModule.h"
 
 bool DebugModules::m_ShowFPS = false;
 bool DebugModules::m_ShowExtraDebugFeatures = false;
