@@ -6,8 +6,9 @@
 */
 #include "StdInc.h"
 
-#include "Vehicle.h"
+#include <functional>
 
+#include "Vehicle.h"
 #include "CustomCarPlateMgr.h"
 #include "Buoyancy.h"
 #include "CarCtrl.h"
@@ -108,9 +109,9 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
     RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
     RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
-    // RH_ScopedInstall(AddPassenger, 0x6D13A0);
-    // RH_ScopedInstall(AddPassenger, 0x6D14D0);
-    // RH_ScopedInstall(RemovePassenger, 0x6D1610);
+    RH_ScopedOverloadedInstall(AddPassenger, "Auto-Seat", 0x6D13A0, bool(CVehicle::*)(CPed*));
+    RH_ScopedOverloadedInstall(AddPassenger, "Fixed-Seat", 0x6D14D0, bool(CVehicle::*)(CPed*, uint8));
+    RH_ScopedInstall(RemovePassenger, 0x6D1610);
     // RH_ScopedInstall(SetDriver, 0x6D16A0);
     // RH_ScopedInstall(RemoveDriver, 0x6D1950);
     // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
@@ -1404,19 +1405,81 @@ void CVehicle::ProcessDelayedExplosion() {
     }
 }
 
+void CVehicle::ApplyTurnForceToPassengerOnEntry(CPed* passenger) {
+    // Apply some turn force
+    switch (m_nVehicleType) {
+    case VEHICLE_TYPE_BIKE: {
+        ApplyTurnForce(
+            GetUp() * passenger->m_fMass / -50.f,
+            GetForward() / -10.f // Behind the bike
+        );
+        break;
+    }
+    default: {
+        ApplyTurnForce(
+            { .0f, .0f, passenger->m_fMass / -5.f },
+            { CVector2D{passenger->GetPosition() - GetPosition()}, 0.f }
+        );
+        break;
+    }
+    }
+}
+
 // 0x6D13A0
 bool CVehicle::AddPassenger(CPed* passenger) {
-    return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D13A0)(this, passenger);
+    ApplyTurnForceToPassengerOnEntry(passenger);
+    
+    // Now, find a seat and place them into it
+    const auto seats = GetMaxPassengerSeats();
+    if (const auto emptySeat = rng::find(seats, nullptr); emptySeat != seats.end()) {
+        *emptySeat = passenger;
+        CEntity::RegisterReference(*emptySeat);
+        m_nNumPassengers++;
+        return true;
+    }
+
+    // No empty seats
+    return false;
 }
 
 // 0x6D14D0
-bool CVehicle::AddPassenger(CPed* passenger, uint8 seatNumber) {
-    return ((bool(__thiscall*)(CVehicle*, CPed*, uint8))0x6D14D0)(this, passenger, seatNumber);
+bool CVehicle::AddPassenger(CPed* passenger, uint8 seatIdx) {
+    if (vehicleFlags.bIsBus) {
+        return AddPassenger(passenger);
+    }
+
+    // Check if seat is valid
+    if (seatIdx >= m_nMaxPassengers) {
+        return false;
+    }
+
+    // Check if anyone is already in that seat
+    if (m_apPassengers[seatIdx]) {
+        return false;
+    }
+
+    // Place passenger into seat, and add ref
+    m_apPassengers[seatIdx] = passenger;
+    CEntity::RegisterReference(m_apPassengers[seatIdx]);
+    m_nNumPassengers++;
+
+    return true;
 }
 
 // 0x6D1610
 void CVehicle::RemovePassenger(CPed* passenger) {
-    ((void(__thiscall*)(CVehicle*, CPed*))0x6D1610)(this, passenger);
+    if (!passenger) {
+        return;
+    }
+
+    const auto seats = IsTrain() ? std::span{ m_apPassengers, 8 } : GetMaxPassengerSeats(); // TODO: Magic number `8`
+    if (const auto seatOfPsgr = rng::find(seats, passenger); seatOfPsgr != seats.end()) {
+        CEntity::SafeCleanUpRef(*seatOfPsgr);
+        *seatOfPsgr = nullptr;
+
+        assert(m_nNumPassengers > 0); // NOTSA: Sanity check
+        m_nNumPassengers--;
+    }
 }
 
 // 0x6D16A0

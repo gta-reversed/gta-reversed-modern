@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "Vector.h"
+#include "Vector2D.h"
 
 void CVector::InjectHooks()
 {
@@ -27,6 +28,17 @@ void CVector::InjectHooks()
     RH_ScopedGlobalOverloadedInstall(DotProduct, "vec*vec*", 0x59C6D0, float(*)(CVector*, CVector*));
 }
 
+/*!
+* @brief From a 2D vector and Z position
+*/
+CVector::CVector(const CVector2D& v2d, float Z) :
+    RwV3d{ v2d.x, v2d.y, Z }
+{
+}
+
+/*!
+* @returns A vector with each of its components set to a number in the given range [min, max)
+*/
 CVector CVector::Random(float min, float max) {
     const auto Get = [=] { return CGeneral::GetRandomNumberInRange(min, max); };
     return { Get(), Get(), Get() };
