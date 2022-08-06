@@ -1744,7 +1744,15 @@ bool CVehicle::CanPedOpenLocks(CPed* ped) {
 
 // 0x6D1E60
 bool CVehicle::CanDoorsBeDamaged() {
-    return ((bool(__thiscall*)(CVehicle*))0x6D1E60)(this);
+    // TODO: ranges::contains({...}, m_nDoorLock)
+    switch (m_nDoorLock) {
+    case CARLOCK_NOT_USED:
+    case CARLOCK_UNLOCKED:
+    case CARLOCK_SKIP_SHUT_DOORS:
+        return true;
+    default:
+        return false;
+    }
 }
 
 // 0x6D1E80
