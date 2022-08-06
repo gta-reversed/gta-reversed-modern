@@ -34,6 +34,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(GetPathNode, 0x420AC0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
     RH_ScopedInstall(TestCrossesRoad, 0x44D790);
+    RH_ScopedInstall(TestForPedTrafficLight, 0x44D480);
 }
 
 void CPathNode::InjectHooks() {
@@ -105,10 +106,11 @@ void CPathFind::ReleaseRequestedNodes() {
     m_bNodesLoadingRequested = false;
 }
 
-// 0x44D790
-bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
-    // Check if path nodes are loaded for both addresses areas
-
+/*!
+* @addr notsa
+* @brief Find intersectioninfo between 2 nodes
+*/
+auto CPathFind::FindIntersection(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) -> CPathIntersectionInfo* {
     const auto nodesInStartArea = m_pPathNodes[startNodeAddress.m_wAreaId];
     if (!nodesInStartArea) {
         return false;
@@ -121,23 +123,34 @@ bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targ
     // Check if the start node has any links (TODO: could be omitted I think, as the loop condition checks for this as well)
     const auto startNode = nodesInStartArea[startNodeAddress.m_wNodeId];
     if (!startNode.m_nNumLinks) {
-        return false;
+        return nullptr;
     }
 
     const auto nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
     for (auto i = 0; i < startNode.m_nNumLinks; i++) {
         const auto linkedNodeIdx = startNode.m_wBaseLinkId + i;
         if (nodeLinks[linkedNodeIdx] == targetNodeAddress) {
-            return m_pPathIntersections[linkedNodeIdx]->m_bRoadCross;
+            return &m_pPathIntersections[startNodeAddress.m_wAreaId][linkedNodeIdx];
         }
     }
 
+    return nullptr;
+}
+
+// 0x44D790
+bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
+    if (const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress)) {
+        return intersect->m_bRoadCross;
+    }
     return false;
 }
 
 // 0x44D480
 bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
-    return plugin::CallMethodAndReturn<bool, 0x44D480, CPathFind*, CNodeAddress, CNodeAddress>(this, startNodeAddress, targetNodeAddress);
+    if (const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress)) {
+        return intersect->m_bPedTrafficLight;
+    }
+    return false;
 }
 
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {

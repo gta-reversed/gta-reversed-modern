@@ -287,6 +287,7 @@ public:
 
     // Helpers - NOTSA
     bool FindNodeCoorsForScript(CVector& outPos, CNodeAddress addr);
+    auto FindIntersection(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) -> CPathIntersectionInfo*;
 
 };
 
