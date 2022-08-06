@@ -11,10 +11,12 @@ public:
     bool        m_bUpdateTime;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_DIE_IN_CAR;
+
     explicit CTaskComplexDieInCar(eWeaponType weaponType);
     ~CTaskComplexDieInCar() override = default; // 0x62FCF0, 0x6375D0
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_DIE_IN_CAR; };       // 0x62FCB0
+    eTaskType GetTaskType() override { return Type; }; // 0x62FCB0
     CTask* Clone() override { return new CTaskComplexDieInCar(m_nWeaponType); } // 0x635F90
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
@@ -26,7 +28,7 @@ public:
 
 private:
     friend void InjectHooksMain();
-    static void InjectHooks();;
+    static void InjectHooks();
 
     CTask* ControlSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);

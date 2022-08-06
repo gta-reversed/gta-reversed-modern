@@ -26,10 +26,12 @@ public:
     static inline float ms_LateralForceMagnitude    = 6.0f; // 0x8D2F18
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_FALL_TO_DEATH;
+
     CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool a4, bool a5);
     ~CTaskComplexFallToDeath() override = default; // 0x6790B0, 0x67D550
 
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FALL_TO_DEATH; }; // 0x6790A0
+    eTaskType GetTaskType() override { return Type; }; // 0x6790A0
     CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* ControlSubTask(CPed* ped) override;
@@ -45,6 +47,5 @@ private:
     CTask* ControlSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
-
 };
 VALIDATE_SIZE(CTaskComplexFallToDeath, 0x24);
