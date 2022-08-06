@@ -7,7 +7,7 @@
 #include "StdInc.h"
 
 #include <functional>
-
+#include "extensions/utility.hpp"
 #include "Vehicle.h"
 #include "CustomCarPlateMgr.h"
 #include "Buoyancy.h"
@@ -135,7 +135,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
-    // RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
+    RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
     // RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
     RH_ScopedInstall(AddDamagedVehicleParticles, 0x6D2A80);
     RH_ScopedInstall(MakeDirty, 0x6D2BF0);
@@ -2030,7 +2030,14 @@ void CVehicle::UpdateClumpAlpha() {
 
 // 0x6D29E0
 void CVehicle::UpdatePassengerList() {
-    ((void(__thiscall*)(CVehicle*))0x6D29E0)(this);
+    // No sure what's the point of this
+    // It checks if there should be any passengers
+    // If there's none only then it sets the number of them to 0.. weird.
+    if (m_nNumPassengers) {
+        if (rng::all_of(std::span{ m_apPassengers, 8 }, [](auto&& p) { return p == nullptr; })) { // TODO: Again, magic number `8`
+            m_nNumPassengers = 0;
+        }
+    }
 }
 
 // 0x6D2A10
