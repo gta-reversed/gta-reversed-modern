@@ -13,14 +13,13 @@ public:
     CVector m_vecCenter;
     float   m_fRadius;
 
-    CSphere() {};
-    CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius) {};
-    CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius) {};
+    constexpr CSphere() = default;
+    constexpr CSphere(CVector center, float radius) : m_vecCenter(center), m_fRadius(radius){};
+    constexpr CSphere(float radius, CVector center) : m_vecCenter(center), m_fRadius(radius){};
 
     void Set(float radius, const CVector& center);
 
     // NOTSA
-    bool IsPointWithin(const CVector& p) const;
+    [[nodiscard]] bool IsPointWithin(const CVector& p) const;
 };
-
 VALIDATE_SIZE(CSphere, 0x10);

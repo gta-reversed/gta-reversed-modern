@@ -694,7 +694,7 @@ void CPed::SetMoveAnimSpeed(CAnimBlendAssociation* association) {
     if (IsCreatedByMission()) {
         association->m_fSpeed = pitchFactor + 1.f;
     } else {
-        association->m_fSpeed = pitchFactor + 1.2f - m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f; // todo: use GetRandom from CGeneral::
+        association->m_fSpeed = pitchFactor + 1.2f - (float)m_nRandomSeed * RAND_MAX_FLOAT_RECIPROCAL * 0.4f; // todo: use GetRandom from CGeneral::
     }
 }
 
@@ -814,7 +814,7 @@ void CPed::ClearAimFlag() {
 * @returns Which quadrant a given point is in relative to the ped's rotation. (Google: "Angle quadrants" - https://www.mathstips.com/wp-content/uploads/2014/03/unit-circle.png)
 * @param point Point should be relative to the ped's position. Eg.: point = actualPoint - ped.GetPostion2D()
 */
-uint8 CPed::GetLocalDirection(const CVector2D& point) {
+uint8 CPed::GetLocalDirection(const CVector2D& point) const {
     float angle;
     for (angle = point.Heading() - m_fCurrentRotation + RadiansToDegrees(45.0f); angle < 0.0f; angle += TWO_PI); // TODO: This is quite stupid as well..
     return ((uint8)RadiansToDegrees(angle) / 90) % 4; // See original code below:
@@ -829,7 +829,7 @@ uint8 CPed::GetLocalDirection(const CVector2D& point) {
 /*!
 * @addr 0x5DEFD0
 */
-bool CPed::IsPedShootable() {
+bool CPed::IsPedShootable() const {
     // Not sure if they used a switch case or `<= PEDSTATE_STATES_CAN_SHOOT` originally, but I'll use a switch case.
     switch (m_nPedState) {
     case PEDSTATE_NONE:
@@ -879,7 +879,7 @@ bool CPed::IsPedShootable() {
     case PEDSTATE_STAGGER:
     case PEDSTATE_EVADE_DIVE:
     case PEDSTATE_STATES_CAN_SHOOT:
-    return true;
+        return true;
     }
     return false;
 }
@@ -887,7 +887,7 @@ bool CPed::IsPedShootable() {
 /*!
 * @addr 0x5DEFE0
 */
-bool CPed::UseGroundColModel() {
+bool CPed::UseGroundColModel() const {
     switch (m_nPedState) {
     case PEDSTATE_FALL:
     case PEDSTATE_EVADE_DIVE:
@@ -901,8 +901,7 @@ bool CPed::UseGroundColModel() {
 /*!
 * @addr 0x5DF000
 */
-bool CPed::CanPedReturnToState()
-{
+bool CPed::CanPedReturnToState() const {
     switch (m_nPedState) {
     case PEDSTATE_NONE:
     case PEDSTATE_IDLE:
@@ -945,7 +944,7 @@ bool CPed::CanPedReturnToState()
 /*!
 * @addr 0x5DF030
 */
-bool CPed::CanSetPedState() {
+bool CPed::CanSetPedState() const {
     switch (m_nPedState) {
     case PEDSTATE_DIE:
     case PEDSTATE_DEAD:
@@ -961,8 +960,7 @@ bool CPed::CanSetPedState() {
 /*!
 * @addr 0x5DF060
 */
-bool CPed::CanBeArrested()
-{
+bool CPed::CanBeArrested() const {
     switch (m_nPedState) {
     case PEDSTATE_DIE:
     case PEDSTATE_DEAD:
@@ -977,8 +975,7 @@ bool CPed::CanBeArrested()
 /*!
 * @addr 5DF090
 */
-bool CPed::CanStrafeOrMouseControl()
-{
+bool CPed::CanStrafeOrMouseControl() const {
     switch (m_nPedState) {
     case PEDSTATE_IDLE:
     case PEDSTATE_FLEE_ENTITY:
@@ -1008,8 +1005,7 @@ bool CPed::CanBeDeleted() {
 * @brief Check if ped can be deleted even if it's in a vehicle.
 * @returns False only if created by PED_UNKNOWN or PED_MISSION, true otherwise.
 */
-bool CPed::CanBeDeletedEvenInVehicle() const
-{
+bool CPed::CanBeDeletedEvenInVehicle() const {
     switch (m_nCreatedBy) {
     case ePedCreatedBy::PED_MISSION:
     case ePedCreatedBy::PED_UNKNOWN:
@@ -1040,7 +1036,7 @@ void CPed::RemoveGogglesModel() {
     RpClumpGetFrame(m_pGogglesObject);
 
     // Destroy clump
-    RpClumpDestroy((RpClump*)m_pGogglesObject);
+    RpClumpDestroy(m_pGogglesObject);
     m_pGogglesObject = nullptr;
 
     // Disable FX's of the goggles. (See mem. var. `m_pGogglesState` in the header)
@@ -1191,7 +1187,7 @@ float CPed::GetBikeRidingSkill() const {
 */
 void CPed::ShoulderBoneRotation(RpClump* clump) {
     // Note: Didn't use `GetBoneMatrix` here, because it would be slower
-    // (Because it would call `GetAnimHierarchyFromClump` multiple tiems)
+    // (Because it would call `GetAnimHierarchyFromClump` multiple times)
     auto GetMatrixOf = [hier = GetAnimHierarchyFromClump(clump)](ePedBones bone) mutable -> RwMatrix& {
         return (RpHAnimHierarchyGetMatrixArray(hier))[RpHAnimIDGetIndex(hier, (size_t)bone)];
     };
@@ -1475,7 +1471,7 @@ float CPed::GetWalkAnimSpeed() {
     auto hier = CAnimManager::GetAnimAssociation(m_nAnimGroup, ANIM_ID_WALK)->m_pHierarchy;
 
     CAnimManager::UncompressAnimation(hier);
-    auto& firstSequence = hier->GetSequences()[ANIM_ID_WALK];
+    auto& firstSequence = hier->m_pSequences[ANIM_ID_WALK];
 
     if (!firstSequence.m_nFrameCount) {
         return 0.f; // No frames
@@ -1854,7 +1850,7 @@ void CPed::AddGogglesModel(int32 modelIndex, bool& inOutGogglesState) {
     assert(!m_pGogglesObject); // Make sure it's not created already
 
     if (modelIndex != MODEL_INVALID) {
-        m_pGogglesObject = (RpClump*)CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef();
+        m_pGogglesObject = reinterpret_cast<RpClump*>(CModelInfo::GetModelInfo(modelIndex)->CreateInstanceAddRef());
 
         m_pGogglesState = &inOutGogglesState;
         inOutGogglesState = true;
@@ -2112,11 +2108,10 @@ void CPed::SetCharCreatedBy(ePedCreatedBy createdBy) {
 }
 
 /*!
-* @addr 0x5E4C50
-*/
-void CPed::CalculateNewVelocity()
-{
-    ((void(__thiscall *)(CPed*))0x5E4C50)(this);
+ * @addr 0x5E4C50
+ */
+void CPed::CalculateNewVelocity() {
+    ((void(__thiscall*)(CPed*))0x5E4C50)(this);
 }
 
 /*!
@@ -2143,11 +2138,10 @@ void CPed::ClearAll() {
 }
 
 /*!
-* @addr 0x5E5380
-*/
-void CPed::DoFootLanded(bool leftFoot, uint8 arg1)
-{
-    ((void(__thiscall *)(CPed*, bool, uint8))0x5E5380)(this, leftFoot, arg1);
+ * @addr 0x5E5380
+ */
+void CPed::DoFootLanded(bool leftFoot, uint8 arg1) {
+    ((void(__thiscall*)(CPed*, bool, uint8))0x5E5380)(this, leftFoot, arg1);
 }
 
 /*!
@@ -3268,19 +3262,13 @@ void CPed::MakeTyresMuddySectorList(CPtrList& ptrList)
 * @brief Do sector list processing in a range of -/+2 (Calls \r MakeTyresMuddySectorList)
 */
 void CPed::DeadPedMakesTyresBloody() {
-    CWorld::IncrementCurrentScanCode();
-
     const auto& pos = GetPosition();
+    const auto startSectorX = std::max(CWorld::GetLodSectorX(pos.x - 2.0f), 0);
+    const auto startSectorY = std::max(CWorld::GetLodSectorY(pos.y - 2.0f), 0);
+    const auto endSectorX   = std::min(CWorld::GetLodSectorX(pos.x + 2.0f), MAX_LOD_PTR_LISTS_X - 1);
+    const auto endSectorY   = std::min(CWorld::GetLodSectorY(pos.y + 2.0f), MAX_LOD_PTR_LISTS_Y - 1);
 
-    const float minX = pos.x - 2.f;
-    const float maxX = pos.x + 2.f;
-    const float minY = pos.y - 2.f;
-    const float maxY = pos.y + 2.f;
-
-    const int32 startSectorX = std::max(CWorld::GetLodSectorX(minX), 0);
-    const int32 startSectorY = std::max(CWorld::GetLodSectorY(minY), 0);
-    const int32 endSectorX = std::min(CWorld::GetLodSectorX(maxX), MAX_LOD_PTR_LISTS_X - 1);
-    const int32 endSectorY = std::min(CWorld::GetLodSectorY(maxY), MAX_LOD_PTR_LISTS_Y - 1);
+    CWorld::IncrementCurrentScanCode();
 
     for (int32 sy = startSectorY; sy <= endSectorY; ++sy) {
         for (int32 sx = startSectorX; sx <= endSectorX; ++sx) {
@@ -3305,7 +3293,7 @@ bool CPed::IsInVehicleThatHasADriver() {
 * @notsa
 * @returns If ped is follower of \a group
 */
-bool CPed::IsFollowerOfGroup(const CPedGroup& group) {
+bool CPed::IsFollowerOfGroup(const CPedGroup& group) const {
     return group.GetMembership().IsFollower(this);
 }
 

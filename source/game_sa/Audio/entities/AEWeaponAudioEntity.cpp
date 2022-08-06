@@ -238,7 +238,7 @@ void CAEWeaponAudioEntity::PlayMiniGunStopSound(CPhysical* entity) {
         return;
     }
 
-    if (m_nState == 2) { // ?
+    if (m_nState == 2) { // todo: figure out what is that
         m_nState = 2;
         return;
     }

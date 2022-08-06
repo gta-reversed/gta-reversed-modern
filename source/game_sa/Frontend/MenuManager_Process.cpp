@@ -74,13 +74,99 @@ void CMenuManager::ProcessStreaming(bool streamAll) {
 
 // 0x578D60
 void CMenuManager::ProcessFileActions() {
-    plugin::CallMethod<0x578D60, CMenuManager*>(this);
+    switch (m_nCurrentScreen) {
+    case SCREEN_LOAD_FIRST_SAVE:
+        if (field_1B3C) {
+            if (CGenericGameStorage::CheckSlotDataValid(m_bSelectedSaveGame)) {
+                if (!m_bMainMenuSwitch) {
+                    DoSettingsBeforeStartingAGame();
+                }
+
+                m_bDontDrawFrontEnd = true;
+                CGame::bMissionPackGame = false;
+                m_bLoadingData = true;
+            } else {
+                // Load Game
+                //
+                // Load Failed! There was an error while loading the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_SAVED, "FET_LG", "FES_LCE");
+            }
+            field_1B3C = false;
+        } else {
+            field_1B3C = true;
+        }
+        break;
+
+    case SCREEN_DELETE_FINISHED:
+        if (field_1B3D) {
+            if (s_PcSaveHelper.DeleteSlot(m_bSelectedSaveGame)) {
+                s_PcSaveHelper.PopulateSlotInfo();
+                SwitchToNewScreen(SCREEN_DELETE_SUCCESSFUL);
+                m_nCurrentScreenItem = true;
+            } else {
+                // Delete Game
+                //
+                // Deleting Failed! There was an error while deleting the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_SAVED, "FES_DEL", "FES_DEE");
+            }
+            field_1B3D = false;
+        } else {
+            field_1B3D = true;
+        }
+        break;
+
+    case SCREEN_SAVE_DONE_1:
+        if (field_1B3E) {
+            if (CGame::bMissionPackGame) {
+                CFileMgr::SetDirMyDocuments();
+                sprintf(gString, "MPACK//MPACK%d//SCR.SCM", CGame::bMissionPackGame);
+                auto file = CFileMgr::OpenFile(gString, "rb");
+                CFileMgr::SetDir(""); // FIX_BUGS
+
+                if (!file) {
+                    // Save Game
+                    //
+                    // Save failed! The current Mission Pack is not available.
+                    // Please recheck that the current Mission Pack is installed correctly.
+                    return JumpToGenericMessageScreen(SCREEN_GAME_LOADED, "FET_SG", "FES_NIM");
+                } else {
+                    CFileMgr::CloseFile(file);
+                }
+            }
+
+            if (s_PcSaveHelper.SaveSlot(m_bSelectedSaveGame)) {
+                // Save Game
+                //
+                // Save failed! There was an error while saving the current game.
+                // Please check your savegame directory and try again.
+                JumpToGenericMessageScreen(SCREEN_GAME_LOADED, "FET_SG", "FES_CMP");
+            } else {
+                // Save Game
+                //
+                // Save Successful. Select OK to continue.
+                SwitchToNewScreen(SCREEN_SAVE_DONE_2);
+            }
+            s_PcSaveHelper.PopulateSlotInfo();
+
+            field_1B3E = false;
+        } else {
+            field_1B3E = true;
+        }
+        break;
+
+    default:
+        return;
+    }
 }
 
 // 0x576FE0
-void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed) {
-    return plugin::CallMethod<0x576FE0, CMenuManager*, int8, bool*, bool>(this, pressedLR, cancelPressed, acceptPressed);
-
+// @param pressedLR Arrow button pressed. <0 for left, >0 for right
+// @param cancelPressed Returns true to go back.
+// @param acceptPressed Is enter pressed. Used for AA mode and resolution
+// @addr 0x57CD50
+void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed) {
     if (ProcessPCMenuOptions(pressedLR, acceptPressed))
         return;
 
@@ -89,7 +175,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
 
     switch (item->m_nActionType) {
     case MENU_ACTION_BACK:
-        *cancelPressed = true;
+        cancelPressed = true;
         return;
     case MENU_ACTION_YES:
     case MENU_ACTION_NO:
@@ -100,6 +186,7 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         ProcessMissionPackNewGame();
         return;
     case MENU_ACTION_MPACK:
+        // -1 for 0-based index, additional -1 for skipping the standard game opt?
         m_nMissionPackGameId = m_MissionPacks[m_nCurrentScreenItem - 2].m_Id; // todo: maybe wrong
         SwitchToNewScreen(SCREEN_MISSION_PACK_LOADING_ASK);
         return;
@@ -108,7 +195,16 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         DoSettingsBeforeStartingAGame();
         return;
     case MENU_ACTION_SAVE_SLOT:
-        // todo:
+        if (item->m_nType >= MENU_ENTRY_SAVE_1 && item->m_nType <= MENU_ENTRY_SAVE_8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem - 1];
+            m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
+
+            if (m_nCurrentScreen == SCREEN_DELETE_GAME && slot != eSlotState::EMPTY) {
+                SwitchToNewScreen(SCREEN_DELETE_GAME_ASK);
+            } else if (slot == eSlotState::IN_USE) {
+                SwitchToNewScreen(SCREEN_LOAD_GAME_ASK);
+            }
+        }
         return;
     case MENU_ACTION_STANDARD_GAME:
         CGame::bMissionPackGame = 0;
@@ -119,10 +215,49 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         m_bDontDrawFrontEnd = true;
         return;
     case MENU_ACTION_SAVE_GAME:
-        // todo:
+        if (item->m_nType >= MENU_ENTRY_SAVE_1 && item->m_nType <= MENU_ENTRY_SAVE_8) {
+            auto slot = CGenericGameStorage::ms_Slots[m_nCurrentScreenItem - 1];
+            m_bSelectedSaveGame = m_nCurrentScreenItem - 1;
+
+            SwitchToNewScreen(SCREEN_SAVE_WRITE_ASK);
+        }
         return;
     case MENU_ACTION_STAT:
-        // todo:
+        // todo: refactor
+        if (pressedLR != 1) {
+            if (m_nStatsScrollDirection) {
+                if (m_fStatsScrollSpeed != 0.0f) {
+                    m_fStatsScrollSpeed = 0.0f;
+                    m_nStatsScrollDirection = 0;
+                }
+            } else if (m_fStatsScrollSpeed != 0.0f) {
+                if (m_fStatsScrollSpeed == 150.0f) {
+                    m_fStatsScrollSpeed = 20.0f;
+                }
+                m_nStatsScrollDirection = 0;
+            } else {
+                m_fStatsScrollSpeed = 150.0f;
+                m_nStatsScrollDirection = 0;
+            }
+        } else if (m_nStatsScrollDirection) {
+            if (m_fStatsScrollSpeed == 0.0f) {
+                m_fStatsScrollSpeed = 150.0f;
+                m_nStatsScrollDirection = 1;
+            } else {
+                if (m_fStatsScrollSpeed == 150.0f) {
+                    m_fStatsScrollSpeed = 20.0f;
+                }
+                m_nStatsScrollDirection = 1;
+            }
+        } else {
+            if (m_fStatsScrollSpeed == 0.0f) {
+                m_fStatsScrollSpeed = 150.0f;
+                m_nStatsScrollDirection = 1;
+            } else {
+                m_fStatsScrollSpeed = 0.0f;
+                m_nStatsScrollDirection = 1;
+            }
+        }
         break;
     case MENU_ACTION_INVERT_PAD:
         CPad::bInvertLook4Pad ^= true;
@@ -155,34 +290,37 @@ void CMenuManager::ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool 
         m_bMapLegend ^= true;
         return;
     case MENU_ACTION_RADAR_MODE:
-        m_nRadarMode += pressedLR; // todo: refactor
-
-        if (m_nRadarMode < 0) {
-            m_nRadarMode = 2;
-        }
-
-        if (m_nRadarMode > 2) {
-            m_nRadarMode = 0;
-        }
-
+        m_nRadarMode = (eRadarMode)((m_nRadarMode + pressedLR) % 3);
         SaveSettings();
         return;
     case MENU_ACTION_HUD_MODE:
-        m_bHudOn ^= true;
+        m_bHudOn = !m_bHudOn;
         SaveSettings();
         return;
-    case MENU_ACTION_LANGUAGE:
-        // todo:
+    case MENU_ACTION_LANGUAGE: {
+        // todo: MORE_LANGUAGES; does this ever execute?
+        auto prevLanguage = m_nPrefsLanguage;
+        if (pressedLR <= 0 && prevLanguage == eLanguage::AMERICAN) {
+            m_nPrefsLanguage = eLanguage::SPANISH;
+        } else if (prevLanguage == eLanguage::SPANISH) {
+            m_nPrefsLanguage = eLanguage::AMERICAN;
+        }
+
+        m_nPreviousLanguage = (eLanguage)-99; // what the fuck
+        m_bLanguageChanged = true;
+        InitialiseChangedLanguageSettings(0);
+        SaveSettings();
         return;
+    }
     default:
         return;
     }
 }
 
-// 0x57CD50
+// @param pressedLR Arrow button pressed. <0 for left, >0 for right
+// @param acceptPressed Is enter pressed. Used for AA mode and resolution
+// @addr 0x57CD50
 bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
-    return plugin::CallMethodAndReturn<bool, 0x57CD50, CMenuManager*, int8, uint8>(this, pressedLR, acceptPressed);
-
     tMenuScreen* screen   = &aScreens[m_nCurrentScreen];
     tMenuScreenItem* item = &screen->m_aItems[m_nCurrentScreenItem];
 
@@ -208,9 +346,16 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         SaveSettings();
         return true;
     case MENU_ACTION_RADAR_MODE:
-        // todo: ?
-        if (++m_nRadarMode > 2) {
-            m_nRadarMode = 0;
+        switch (m_nRadarMode) {
+        case eRadarMode::MAPS_AND_BLIPS:
+            m_nRadarMode = eRadarMode::BLIPS_ONLY;
+            break;
+        case eRadarMode::BLIPS_ONLY:
+            m_nRadarMode = eRadarMode::OFF;
+            break;
+        case eRadarMode::OFF:
+            m_nRadarMode = eRadarMode::MAPS_AND_BLIPS;
+            break;
         }
         SaveSettings();
         return true;
@@ -286,9 +431,9 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     case MENU_ACTION_45:
         field_1B14 = 1;
         field_1B09 = 1;
-        field_1B08 = 1;
+        m_bJustOpenedControlRedefWindow = true;
         field_1B0C = m_nCurrentScreenItem;
-        field_F0 = (int32)&field_38;
+        m_pPressedKey = &field_38;
         return true;
     case MENU_ACTION_CONTROLS_MOUSE_INVERT_Y:
         bInvertMouseY = bInvertMouseY == 0;
@@ -423,5 +568,44 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
 
 // 0x57D520
 void CMenuManager::ProcessMissionPackNewGame() {
-    plugin::CallMethod<0x57D520, CMenuManager*>(this);
+    for (auto mpack : m_MissionPacks) {
+        mpack.m_Id = 0u;
+    }
+
+    auto isAnyAvailable = false;
+    CFileMgr::SetDirMyDocuments();
+    for (auto i = 0u; i < 25u; i++) {
+        sprintf(gString, "MPACK//MPACK%d//MPACK.DAT", i);
+        if (auto file = CFileMgr::OpenFile(gString, "rb")) {
+            // MPACK.DAT file format:
+            //
+            // <ID>#<NAME OF THE MPACK>#
+            // Ex.: '5#Design Your Own Mission#'
+
+            if (!isAnyAvailable) {
+                isAnyAvailable = true;
+            }
+
+            // NOTSA
+            RET_IGNORED(fscanf(file, "%" PRIu8 "#%[^\n\r#]#", &m_MissionPacks[i].m_Id, m_MissionPacks[i].m_Name));
+            CFileMgr::CloseFile(file);
+        }
+    }
+
+    if (isAnyAvailable) {
+        SwitchToNewScreen(SCREEN_SELECT_GAME);
+    } else {
+        SwitchToNewScreen(SCREEN_NEW_GAME_ASK);
+
+        auto screen = &aScreens[m_nCurrentScreen];
+        if (CGame::bMissionPackGame) {
+            // Are you sure you want to start a new standard game?
+            // All current game progress in this Mission Pack will be lost. Proceed?
+            strncpy(screen->m_aItems[0].m_szName, "FESZ_MR", 8u);
+        } else {
+            // Are you sure you want to start a new game?
+            // All current game progress will be lost. Proceed?
+            strncpy(screen->m_aItems[0].m_szName, "FESZ_QR", 8u);
+        }
+    }
 }

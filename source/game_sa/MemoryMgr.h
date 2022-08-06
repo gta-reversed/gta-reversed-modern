@@ -41,7 +41,7 @@ enum eMemoryId {
     MEM_STREAMED_TEXTURES    = 11,
     MEM_STREAMED_COLLISION   = 12,
     MEM_STREAMED_ANIMATION   = 13,
-    MEM_MAYBE_STREAMABLE_SCM = 14,
+    MEM_STREAMABLE_SCM       = 14,
     MEM_TEXTURES             = 15,
     MEM_COLLISION            = 16,
     MEM_PRE_ALLOC            = 17,
