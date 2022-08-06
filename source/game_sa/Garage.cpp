@@ -81,6 +81,15 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
 // 0x449050
 bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
     return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
+
+    for (auto& sphere : entity->GetColModel()->m_pColData->GetSpheres()) {
+        auto mat = entity->GetMatrix(); // creates a matrix if it is missing
+        auto point = MultiplyMatrixWithVector(mat, sphere.m_vecCenter);
+        if (!IsPointInsideGarage(point, fRadius + sphere.m_fRadius)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x449690
@@ -93,7 +102,7 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
             continue;
 
         if (IsEntityTouching3D(vehicle) &&
-            IsPointInsideGarage(vehicle->GetPosition()) &&
+            !IsPointInsideGarage(vehicle->GetPosition()) &&
             !vehicle->vehicleFlags.bIsLocked &&
             vehicle->CanBeDeleted()
         ) {
