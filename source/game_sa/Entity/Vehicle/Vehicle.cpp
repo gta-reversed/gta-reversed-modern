@@ -119,7 +119,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
     RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
-    // RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
+    RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
     // RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
     // RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
     // RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
@@ -1729,7 +1729,17 @@ bool CVehicle::IsOnItsSide() {
 
 // 0x6D1E20
 bool CVehicle::CanPedOpenLocks(CPed* ped) {
-    return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D1E20)(this, ped);
+    switch (m_nDoorLock) {
+    case CARLOCK_LOCKED:
+    case CARLOCK_COP_CAR:
+    case CARLOCK_LOCKED_PLAYER_INSIDE:
+    case CARLOCK_SKIP_SHUT_DOORS:
+        return false;
+    case CARLOCK_LOCKOUT_PLAYER_ONLY:
+        return !ped->IsPlayer();
+    default:
+        return true;
+    }
 }
 
 // 0x6D1E60
