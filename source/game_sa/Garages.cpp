@@ -72,7 +72,7 @@ void CGarages::Init_AfterRestart() {
 
     NoResprays = false;
 
-    for (auto& safeHouseCars : aCarsInSafeHouse) { // TODO: Seems like inlined?
+    for (auto& safeHouseCars : aCarsInSafeHouse) {
         for (auto& car : safeHouseCars) {
             car.Init();
         }
@@ -138,8 +138,8 @@ void CGarages::GivePlayerDetonator() {
 // 0x2	door goes in
 // 0x4	camera follow players
 // TODO...
-void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, uint8 type, uint32 a10, char* name, uint32 argFlags) {
-    return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, uint8, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, argFlags);
+void CGarages::AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32 a10, char* name, uint32 door) {
+    return plugin::Call<0x4471E0, float, float, float, float, float, float, float, float, eGarageType, uint32, char*, uint32>(x1, y1, z1, frontX, frontY, x2, y2, z2, type, a10, name, door);
 }
 
 // 0x44A170
@@ -397,7 +397,7 @@ void CGarages::PrintMessages() {
 
 // 0x4476D0
 void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused) {
-    auto garage = GetGarage(garageId);
+    auto& garage = GetGarage(garageId);
     garage.m_nType = type;
 
     if (type < BOMBSHOP_TIMED) {
@@ -435,6 +435,7 @@ int16 CGarages::GetGarageNumberByName(const char* name) {
 bool CGarages::Load() {
     return plugin::CallAndReturn<bool, 0x5D3270>();
 
+    /*
     CloseHideOutGaragesBeforeSave();
 
     LoadDataFromWorkBuffer(NumGarages);
@@ -474,6 +475,7 @@ bool CGarages::Load() {
     bCamShouldBeOutside = false;
 
     return true;
+    */
 }
 
 // todo: fix Update()
@@ -481,6 +483,7 @@ bool CGarages::Load() {
 bool CGarages::Save() {
     return plugin::CallAndReturn<bool, 0x5D3160>();
 
+    /*
     SaveDataToWorkBuffer(NumGarages);
     SaveDataToWorkBuffer(BombsAreFree);
     SaveDataToWorkBuffer(RespraysAreFree);
@@ -512,6 +515,7 @@ bool CGarages::Save() {
     }
 
     return true;
+    */
 }
 
 // 0x44A3C0

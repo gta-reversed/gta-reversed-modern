@@ -1,7 +1,9 @@
 #pragma once
 
 #include "AEDoorAudioEntity.h"
+class CStoredCar;
 
+// Based on https://gtamods.com/wiki/Garage
 enum eGarageType : uint8 {
     INVALID = 0,
     ONLY_TARGET_VEH = 1,
@@ -60,38 +62,6 @@ enum eGarageDoorState : uint8 {
     GARAGE_DOOR_WAITING_PLAYER_TO_EXIT = 4,
     GARAGE_DOOR_CLOSED_DROPPED_CAR = 5,
 };
-
-struct CStoredCar {
-    CVector m_vPosn;
-    uint32  m_nHandlingFlags;
-    uint8   m_nStoredCarFlags;
-    uint8   _pad0;
-    uint16  m_wModelIndex;
-    int16   m_awCarMods[15];
-    uint8   m_nPrimaryColor;
-    uint8   m_nSecondaryColor;
-    uint8   m_nTertiaryColor;
-    uint8   m_nQuaternaryColor;
-    uint8   m_nRadioStation;
-    uint8   m_anCompsToUse[2];
-    uint8   m_nBombType;
-    uint8   m_nPaintJob;
-    uint8   m_nNitroBoosts;
-    uint8   m_nPackedForwardX;
-    uint8   m_nPackedForwardY;
-    uint8   m_nPackedForwardZ;
-    uint8   _pad1;
-
-public:
-    void      StoreCar(CVehicle* vehicle); // 0x449760
-    CVehicle* RestoreCar();                // 0x447E40
-
-    // NOTSA/Inlined
-    void Init() { m_wModelIndex = 0; }
-    void Clear() { m_wModelIndex = 0; }
-    bool HasCar() const { return m_wModelIndex != 0; }
-};
-VALIDATE_SIZE(CStoredCar, 0x40);
 
 class CGarage {
 public:

@@ -12,6 +12,7 @@
 #include "tPickupMessage.h"
 #include "Radar.h"
 #include "TaskSimpleJetPack.h"
+#include "Garages.h"
 
 int32& CollectPickupBuffer = *(int32*)0x97D644;
 
