@@ -488,7 +488,7 @@ public:
     float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
     bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, bool& bDamagedDueToFireOrExplosionOrBullet);
     void ProcessDelayedExplosion();
-    void ApplyTurnForceToPassengerOnEntry(CPed* passenger); // NOTSA
+    void ApplyTurnForceToOccupantOnEntry(CPed* passenger); // NOTSA
     bool AddPassenger(CPed* passenger);
     bool AddPassenger(CPed* passenger, uint8 seatNumber);
     void RemovePassenger(CPed* passenger);

@@ -113,7 +113,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedOverloadedInstall(AddPassenger, "Fixed-Seat", 0x6D14D0, bool(CVehicle::*)(CPed*, uint8));
     RH_ScopedInstall(RemovePassenger, 0x6D1610);
     RH_ScopedInstall(SetDriver, 0x6D16A0);
-    // RH_ScopedInstall(RemoveDriver, 0x6D1950);
+    RH_ScopedInstall(RemoveDriver, 0x6D1950);
     // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
     // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
     // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
@@ -1534,8 +1534,45 @@ void CVehicle::SetDriver(CPed* driver) {
 }
 
 // 0x6D1950
-void CVehicle::RemoveDriver(bool arg0) {
-    ((void(__thiscall*)(CVehicle*, bool))0x6D1950)(this, arg0);
+void CVehicle::RemoveDriver(bool dontTurnEngineOff) {
+    m_nStatus = STATUS_ABANDONED;
+
+    if (!dontTurnEngineOff) {
+        if (!m_pDriver || !m_pDriver->IsPlayer()) {
+            vehicleFlags.bEngineOn = false;
+        }
+    }
+
+    if (const auto playerPed = FindPlayerPed();  m_pDriver == playerPed) {
+        switch (m_nModelIndex) {
+        case MODEL_CADDY: {
+            if (CStreaming::IsModelLoaded(MODEL_GOLFCLUB)) {
+                if (playerPed->DoesPlayerWantNewWeapon(eWeaponType::WEAPON_GOLFCLUB, true)) {
+                    playerPed->GiveWeapon(WEAPON_GOLFCLUB, 1, true);
+                }
+                CStreaming::SetModelIsDeletable(MODEL_GOLFCLUB);
+            }
+            break;
+        }
+        case MODEL_COPCARLA:
+        case MODEL_COPCARSF:
+        case MODEL_COPCARVG:
+        case MODEL_COPCARRU: {
+            if (CStreaming::IsModelLoaded(MODEL_CHROMEGUN) && vehicleFlags.bFreebies) {
+                if (playerPed->DoesPlayerWantNewWeapon(eWeaponType::WEAPON_SHOTGUN, true)) {
+                    playerPed->GiveWeapon(eWeaponType::WEAPON_SHOTGUN, 5, true);
+                } else {
+                    playerPed->GrantAmmo(eWeaponType::WEAPON_SHOTGUN, 5);
+                }
+                vehicleFlags.bFreebies = false;
+                CStreaming::SetModelIsDeletable(MODEL_CHROMEGUN);
+            }
+            break;
+        }
+        }
+    }
+
+    CEntity::ClearReference(m_pDriver);
 }
 
 // 0x6D1A50
