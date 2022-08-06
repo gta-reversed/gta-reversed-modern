@@ -2024,6 +2024,7 @@ void CVehicle::UpdateClumpAlpha() {
         } else if (curr < 255) {
             return std::min(255, curr + 16);
         }
+        return 255;
     };
     CVisibilityPlugins::SetClumpAlpha(m_pRwClump, GetAlphaToSet());
 }
