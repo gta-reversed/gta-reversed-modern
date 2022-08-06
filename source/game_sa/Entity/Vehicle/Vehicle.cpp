@@ -123,7 +123,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
     RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
     RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
-    // RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
+    RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
     RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
     RH_ScopedInstall(IsLawEnforcementVehicle, 0x6D2370);
     RH_ScopedInstall(ExtinguishCarFire, 0x6D2460);
@@ -1784,8 +1784,18 @@ void CVehicle::ProcessCarAlarm() {
 }
 
 // 0x6D2250
-void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle) {
-    ((void(__cdecl*)(CVehicle*))0x6D2250)(vehicle);
+void CVehicle::DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle) {
+    const auto ProcessOccupant = [](CPed* occupant) {
+        if (occupant) {
+            if (!CGameLogic::IsCoopGameGoingOn()) {
+                CDarkel::RegisterKillByPlayer(occupant, WEAPON_UNIDENTIFIED, false, 0);
+            }
+            occupant->FlagToDestroyWhenNextProcessed();
+        }
+    };
+
+    ProcessOccupant(m_pDriver);
+    rng::for_each(GetMaxPassengerSeats(), ProcessOccupant);
 }
 
 // 0x6D22F0

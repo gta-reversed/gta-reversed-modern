@@ -507,6 +507,7 @@ public:
     bool CanDoorsBeDamaged();
     bool CanPedEnterCar();
     void ProcessCarAlarm();
+    void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
     bool IsVehicleNormal();
     void ChangeLawEnforcerState(bool bIsEnforcer);
     bool IsLawEnforcementVehicle();
