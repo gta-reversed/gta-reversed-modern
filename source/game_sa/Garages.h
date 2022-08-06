@@ -73,7 +73,6 @@ public:
     static void DeActivateGarage(int16 garageId);
     static void SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle);
 
-    static int16 GetGarageNumberByName(const char* name);
     static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
 
     static void ChangeGarageType(int16 garageId, eGarageType type, uint32 unused);

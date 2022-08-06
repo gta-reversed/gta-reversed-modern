@@ -49,30 +49,33 @@ void CGarage::TidyUpGarage() {
 
 // 0x449900
 void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 maxSlot) {
-    maxSlot = std::min<int32>(maxSlot, NUM_GARAGE_STORED_CARS);
+    maxSlot = std::min(maxSlot, NUM_GARAGE_STORED_CARS);
 
-    for (auto i = 0; i < NUM_GARAGE_STORED_CARS; i++)
+    for (auto i = 0; i < NUM_GARAGE_STORED_CARS; i++) {
         storedCars[i].Clear();
+    }
 
-    auto pool = GetVehiclePool();
     auto storedCarIdx{0u};
-    for (auto i = pool->GetSize(); i; i--) {
-        if (auto vehicle = pool->GetAt(i - 1)) {
-            if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
-                if (storedCarIdx < maxSlot && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
-                    storedCars[storedCarIdx++].StoreCar(vehicle);
-                }
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (!vehicle)
+            continue;
 
-                FindPlayerInfo().CancelPlayerEnteringCars(vehicle);
-                CWorld::Remove(vehicle);
-                delete vehicle;
+        if (IsPointInsideGarage(vehicle->GetPosition()) && vehicle->m_nCreatedBy != MISSION_VEHICLE) {
+            if (storedCarIdx < maxSlot && !EntityHasASphereWayOutsideGarage(vehicle, 1.0f)) {
+                storedCars[storedCarIdx++].StoreCar(vehicle);
             }
+
+            FindPlayerInfo().CancelPlayerEnteringCars(vehicle);
+            CWorld::Remove(vehicle);
+            delete vehicle;
         }
     }
 
     // Clear slots with no vehicles in it
-    for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++)
+    for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++) {
         storedCars[i].Clear();
+    }
 }
 
 // 0x449050
@@ -117,18 +120,19 @@ eGarageDoorState CGarage::PlayerArrestedOrDied() {
 
 // 0x447D50
 void CGarage::OpenThisGarage() {
-  if ( m_nDoorState == GARAGE_DOOR_CLOSED
-    || m_nDoorState == GARAGE_DOOR_CLOSING
-    || m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR)
-  {
-    m_nDoorState = GARAGE_DOOR_OPENING;
-  }
+    if (m_nDoorState == GARAGE_DOOR_CLOSED ||
+        m_nDoorState == GARAGE_DOOR_CLOSING ||
+        m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR
+    ) {
+        m_nDoorState = GARAGE_DOOR_OPENING;
+    }
 }
 
 // 0x447D70
 void CGarage::CloseThisGarage() {
-    if (m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_OPENING)
+    if (m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_OPENING) {
         m_nDoorState = GARAGE_DOOR_CLOSING;
+    }
 }
 
 // 0x447600
@@ -193,20 +197,25 @@ bool CGarage::IsGarageEmpty() {
     return false;
 }
 
-/*
-void CGarage::CenterCarInGarage(CEntity* entity) {
-    auto vehicle = FindPlayerVehicle();
-    if (IsAnyOtherCarTouchingGarage(vehicle))
+// 0x449100
+bool CGarage::IsAnyOtherCarTouchingGarage(CVehicle* vehicle) {
+    return plugin::CallMethodAndReturn<bool, 0x449100, CGarage*, CVehicle*>(this, vehicle);
+}
+
+// 0x4493E0
+bool CGarage::IsAnyOtherPedTouchingGarage(CPed* ped) {
+    return plugin::CallMethodAndReturn<bool, 0x4493E0, CGarage*, CPed*>(this, ped);
+}
+
+// WIP?
+// 0x449E90
+void CGarage::CenterCarInGarage(CVehicle* vehicle) {
+    if (IsAnyOtherCarTouchingGarage(FindPlayerVehicle()) || IsAnyOtherPedTouchingGarage(FindPlayerPed()))
         return;
 
-    auto player = FindPlayerPed();
-    if (IsAnyOtherPedTouchingGarage(player))
-        return;
-
-    auto pos = entity->GetPosition();
-
-    const auto halfX = (m_fRightCoord + m_fLeftCoord) * 0.5f;
-    const auto halfY = (m_fBackCoord + m_fFrontCoord) * 0.5f;
+    const auto& pos = vehicle->GetPosition();
+    const auto halfX = (m_fRightCoord + m_fLeftCoord) / 2.0f;
+    const auto halfY = (m_fBackCoord + m_fFrontCoord) / 2.0f;
     CVector p1{
         halfX - pos.x,
         halfY - pos.y,
@@ -222,10 +231,10 @@ void CGarage::CenterCarInGarage(CEntity* entity) {
         auto y = halfY;
     }
 
-    if (!IsEntityEntirelyInside3D(entity, 0.3f))
-        entity->SetPosn(entity->GetPosition());
+    if (!IsEntityEntirelyInside3D(vehicle, 0.3f)) {
+        vehicle->SetPosn(pos);
+    }
 }
-*/
 
 // 0x5D3020
 void CSaveGarage::CopyGarageIntoSaveGarage(Const CGarage& g) {
@@ -268,15 +277,4 @@ void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
     g.m_nOriginalType = m_nOriginalType;
     g.m_pTargetCar    = nullptr;
     strcpy_s(g.m_anName, m_anName);
-}
-
-// todo move
-// 0x449760
-void CStoredCar::StoreCar(CVehicle* vehicle) {
-    plugin::CallMethod<0x449760, CStoredCar*, CVehicle*>(this, vehicle);
-}
-
-// 0x447E40
-CVehicle* CStoredCar::RestoreCar() {
-    return plugin::CallMethodAndReturn<CVehicle*, 0x447E40, CStoredCar*>(this);
 }

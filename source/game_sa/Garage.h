@@ -98,7 +98,7 @@ public:
     CAEDoorAudioEntity m_GarageAudio;
 
 public:
-    static constexpr auto NUM_GARAGE_STORED_CARS{ 4u };
+    static constexpr auto NUM_GARAGE_STORED_CARS{ 4 };
 
     static void InjectHooks();
 
@@ -130,9 +130,11 @@ public:
     bool IsPlayerOutsideGarage(float fRadius);
     bool IsPlayerEntirelyInsideGarage();
     bool EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius);
-    bool IsAnyOtherCarTouchingGarage(CVehicle* ignoredVehicle);
+
+    bool IsAnyOtherCarTouchingGarage(CVehicle* vehicle);
+    bool IsAnyOtherPedTouchingGarage(CPed* ped);
+
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
-    bool IsAnyOtherPedTouchingGarage(CPed* ignoredVehicle);
     bool IsAnyCarBlockingDoor();
     int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
     void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, int32 iMaxSlot);
@@ -174,5 +176,4 @@ struct CSaveGarage {
     void CopyGarageIntoSaveGarage(Const CGarage& garage);
     void CopyGarageOutOfSaveGarage(CGarage& garage) const;
 };
-
 VALIDATE_SIZE(CSaveGarage, 0x50);
