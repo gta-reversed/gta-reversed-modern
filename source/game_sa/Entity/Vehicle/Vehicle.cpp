@@ -107,7 +107,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CanBeDeleted, 0x6D1180);
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
     RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
-    // RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
+    RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
     // RH_ScopedInstall(AddPassenger, 0x6D13A0);
     // RH_ScopedInstall(AddPassenger, 0x6D14D0);
     // RH_ScopedInstall(RemovePassenger, 0x6D1610);
@@ -1389,7 +1389,19 @@ bool CVehicle::CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, bool& b
 
 // 0x6D1340
 void CVehicle::ProcessDelayedExplosion() {
-    ((void(__thiscall*)(CVehicle*))0x6D1340)(this);
+    if (!m_wBombTimer) {
+        return;
+    }
+
+    if (const auto period = (size_t)(CTimer::GetTimeStep() * 16.666666f); m_wBombTimer > period) {
+        m_wBombTimer -= period;
+    } else {
+        m_wBombTimer = 0;
+    }
+
+    if (!m_wBombTimer) {
+        BlowUpCar(m_pWhoDetonatedMe, false);
+    }
 }
 
 // 0x6D13A0
