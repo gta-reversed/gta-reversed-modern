@@ -31,12 +31,12 @@ class CPedGroup;
 
 constexpr float DegreesToRadians(float angleInDegrees); // forward declaration
 
-#define DEFAULT_SCREEN_WIDTH  (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
-#define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
-#define DEFAULT_VIEWWINDOW (0.7f)
+constexpr auto DEFAULT_SCREEN_WIDTH       = 640;
+constexpr auto DEFAULT_SCREEN_HEIGHT      = 448;
+constexpr auto DEFAULT_SCREEN_HEIGHT_PAL  = 512.0f;
+constexpr auto DEFAULT_SCREEN_HEIGHT_NTSC = 448.0f;
+constexpr auto DEFAULT_ASPECT_RATIO       = 4.0f / 3.0f;
+constexpr auto DEFAULT_VIEW_WINDOW        = 0.7f;
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode

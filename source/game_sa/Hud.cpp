@@ -97,8 +97,8 @@ void CHud::InjectHooks() {
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // MrJohnDev: +
     RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTED
-    RH_ScopedInstall(DrawRadar, 0x58A330);                   // WIP
-    // RH_ScopedInstall(DrawScriptText, 0x58C080);           //
+    RH_ScopedInstall(DrawRadar, 0x58A330);                   // test angle
+    RH_ScopedInstall(DrawScriptText, 0x58C080);              // +
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
     // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0); //
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
@@ -439,8 +439,7 @@ void CHud::Draw() {
         } else {
             DrawTripSkip();
             if (!HelpTripSkipShown) {
-                const char* text = TheText.Get("SKIP_1");
-                SetHelpMessage(text, true, false, false);
+                SetHelpMessage(TheText.Get("SKIP_1"), true, false, false);
                 HelpTripSkipShown = true;
             }
         }
@@ -455,13 +454,13 @@ void CHud::Draw() {
             if (CMenuSystem::GetNumMenusInUse()) {
                 CMenuSystem::Process(CMenuSystem::MENU_UNDEFINED);
             }
-            DrawScriptText(1);
+            DrawScriptText(true);
         }
         if (CTheScripts::bDrawSubtitlesBeforeFade) {
             DrawSubtitles();
         }
         DrawHelpText();
-        DrawOddJobMessage(1);
+        DrawOddJobMessage(true);
         DrawSuccessFailedMessage();
         DrawBustedWastedMessage();
     }
@@ -486,7 +485,7 @@ void CHud::DrawAfterFade() {
     }
 
     if (!m_BigMessage[BIG_MESSAGE_STYLE_0][0]) {
-        DrawScriptText(0);
+        DrawScriptText(false);
     }
 
     if (!CTheScripts::bDrawSubtitlesBeforeFade) {
@@ -494,7 +493,7 @@ void CHud::DrawAfterFade() {
     }
 
     DrawMissionTitle();
-    DrawOddJobMessage(0);
+    DrawOddJobMessage(false);
 }
 
 // 0x58AA50
@@ -659,7 +658,7 @@ void CHud::DrawBustedWastedMessage() {
     CFont::SetEdge(3);
     CFont::SetDropColor({ 0, 0, 0, (uint8)messageAlpha });
     CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, (uint8)messageAlpha));
-    CFont::PrintStringFromBottom(SCREEN_WIDTH * 0.5f, RsGlobal.maximumHeight / 2 - SCREEN_SCALE_Y(30.0f), message);
+    CFont::PrintStringFromBottom(SCREEN_WIDTH / 2.0f, static_cast<float>(RsGlobal.maximumHeight / 2) - SCREEN_SCALE_Y(30.0f), message);
 }
 
 // 0x58E020
@@ -744,7 +743,7 @@ void CHud::DrawCrossHairs() {
             Sprites[SPRITE_SITE_M16].Draw(rect, black); // left bottom
 
             rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(rect, black);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black); // right bottom
 
             RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
             RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
@@ -839,41 +838,37 @@ void CHud::DrawCrossHairs() {
             RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(RwTextureAddressMode::rwTEXTUREADDRESSCLAMP));
             RwRenderStateSet(rwRENDERSTATETEXTURERASTER,  RWRSTATE(drawTexture->raster));
 
+            const auto RenderOneXLUSprite = [=](float x, float y, auto u, auto v) {
+                CSprite::RenderOneXLUSprite(
+                    x, y,
+                    1.0f,
+                    screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f,
+                    255, 255, 255, 255, 0.01f, 255, u, v
+                );
+            };
 
-            CSprite::RenderOneXLUSprite(
+            RenderOneXLUSprite(
                 (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
                 (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
-                1.0f,
-                screenStretchCrossHairX / 2.0f,
-                screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, 0, 0
+                0, 0
             );
 
-            CSprite::RenderOneXLUSprite(
+            RenderOneXLUSprite(
                 (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
                 (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
-                1.0f,
-                screenStretchCrossHairX / 2.0f,
-                screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, 1, 0
+                1, 0
             );
 
-            CSprite::RenderOneXLUSprite(
+            RenderOneXLUSprite(
                 (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
                 (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
-                1.0f,
-                screenStretchCrossHairX / 2.0f,
-                screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, 0, 1
+                0, 1
             );
 
-            CSprite::RenderOneXLUSprite(
+            RenderOneXLUSprite(
                 (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
                 (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
-                1.0f,
-                screenStretchCrossHairX / 2.0f,
-                screenStretchCrossHairY / 2.0f,
-                255, 255, 255, 255, 0.01f, 255, 1, 1
+                1, 1
             );
 
             RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
@@ -1050,12 +1045,12 @@ void CHud::DrawMissionTitle() {
 }
 
 // 0x58CC80
-void CHud::DrawOddJobMessage(uint8 priority) {
+void CHud::DrawOddJobMessage(bool displayImmediately) {
     const auto& message1 = m_BigMessage[BIG_MESSAGE_STYLE_1]; const auto& message3 = m_BigMessage[BIG_MESSAGE_STYLE_3];
     const auto& message4 = m_BigMessage[BIG_MESSAGE_STYLE_4]; const auto& message5 = m_BigMessage[BIG_MESSAGE_STYLE_5];
     const auto& message6 = m_BigMessage[BIG_MESSAGE_STYLE_6];
 
-    if (priority == CTheScripts::bDrawOddJobTitleBeforeFade && !message1[0]) {
+    if (displayImmediately == CTheScripts::bDrawOddJobTitleBeforeFade && !message1[0]) {
         if (message4[0]) {
             CFont::SetBackground(false, false);
             CFont::SetJustify(false);
@@ -1067,11 +1062,11 @@ void CHud::DrawOddJobMessage(uint8 priority) {
             CFont::SetEdge(2);
             CFont::SetDropColor({ 0, 0, 0, 255 });
             CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_GOLD));
-            CFont::PrintStringFromBottom(float(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(140.0f), message4);
+            CFont::PrintStringFromBottom(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(140.0f), message4);
         }
     }
 
-    if (!priority)
+    if (!displayImmediately)
         return;
 
     if (message6[0]) {
@@ -1085,7 +1080,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE));
-        CFont::PrintString(float(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(60.0f), message6);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(60.0f), message6);
     }
 
     if (message3[0]) {
@@ -1099,7 +1094,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_GOLD));
-        CFont::PrintString(float(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(155.0f), message3);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(155.0f), message3);
     }
 
     if (OddJob2OffTimer > 0.0f) {
@@ -1122,7 +1117,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
             OddJob2On = 2;
             OddJob2Timer = 0;
         } else {
-            OddJob2XOffset -= std::min(OddJob2XOffset * 0.16666667f, 40.0f);
+            OddJob2XOffset -= std::min(OddJob2XOffset / 6.0f, 40.0f);
         }
         break;
     case 2:
@@ -1132,7 +1127,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
         }
         break;
     case 3:
-        OddJob2XOffset -= std::min(OddJob2XOffset * 0.2f, 30.0f);
+        OddJob2XOffset -= std::min(OddJob2XOffset / 5.0f, 30.0f);
         if (OddJob2XOffset < -380.0f) {
             OddJob2On = 0;
             OddJob2OffTimer = 5000.0f;
@@ -1152,7 +1147,7 @@ void CHud::DrawOddJobMessage(uint8 priority) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
-        CFont::PrintString(float(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(217.0f), message5);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(217.0f), message5);
     }
 }
 
@@ -1178,8 +1173,6 @@ void CHud::DrawRadar() {
     }
 
     CVehicle* vehicle = FindPlayerVehicle();
-    CPlayerPed* player = FindPlayerPed();
-
     CRect rect;
     if (vehicle && vehicle->IsSubPlane() && vehicle->m_nModelIndex != MODEL_VORTEX) {
         float angle = PI - std::atan2(-vehicle->m_matrix->GetRight().z, vehicle->m_matrix->GetUp().z);
@@ -1188,50 +1181,43 @@ void CHud::DrawRadar() {
             SCREEN_STRETCH_X(87.0f),
             SCREEN_STRETCH_FROM_BOTTOM(66.0f),
             angle,
-            (uint32)SCREEN_STRETCH_X(76.0f),
-            (uint32)SCREEN_STRETCH_Y(63.0f),
-            CRGBA(255, 255, 255, 255));
+            (uint32)SCREEN_STRETCH_X(78.0f),
+            (uint32)SCREEN_STRETCH_Y(59.0f),
+            CRGBA(255, 255, 255, 255)
+        );
     }
 
-    if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
-        if (player->GetActiveWeapon().m_nType == WEAPON_PARACHUTE) {
-            // Altitude bar
-            rect.left = SCREEN_STRETCH_X(20.0f);
-            rect.top = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
-            rect.right = SCREEN_STRETCH_X(30.0f);
-            rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(28.0f);
-            CSprite2d::DrawRect(rect, { 10, 10, 10, 100 });
+    CPlayerPed* player = FindPlayerPed();
+    // Draws Altimeter on Planes And Helis or when parachuting down
+    if (vehicle && (vehicle->IsSubPlane() || vehicle->IsSubHeli() && vehicle->m_nModelIndex != MODEL_VORTEX)
+        || player->GetActiveWeapon().m_nType == WEAPON_PARACHUTE
+    ) {
+        rect.left   = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(20.0f);
+        rect.top    = SCREEN_STRETCH_FROM_BOTTOM(104.0f);
+        rect.right  = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(10.0f);
+        rect.bottom = SCREEN_STRETCH_Y(76.0f) + SCREEN_STRETCH_FROM_BOTTOM(104.0f);
+        CSprite2d::DrawRect(rect, { 10, 10, 10, 100 }); // rectangle
 
-            const CVector& pos = vehicle ? vehicle->GetPosition() : player->GetPosition();
+        const CVector& pos = vehicle ? vehicle->GetPosition() : player->GetPosition();
+        auto lineY = 950.0f;
+        if (pos.z <= 200.0f) {
+            lineY = 200.0f;
+        };
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
 
-            auto lineY = 950.0f;
-            if (pos.z <= 200.0f) {
-                lineY = 200.0f;
-            };
-			RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
-
-	        auto x1 = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
-	        auto y1 = SCREEN_STRETCH_FROM_BOTTOM(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
-	        auto x2 = SCREEN_STRETCH_X(40.0f) - 5.0f;
-	        auto y2 = y1 + 2.0f;
-	        CSprite2d::DrawRect(CRect(x1, y1, x2, y2), { 200u, 200u, 200u, 200u });
-        }
-    }
-
-    if (!vehicle || !vehicle->IsSubPlane() && !vehicle->IsSubHeli() || vehicle->m_nModelIndex == MODEL_VORTEX) {
-        // todo fix ZOOM for VORTEX
-        if (player->GetActiveWeapon().m_nType != WEAPON_PARACHUTE) {
-            // todo: add missing code
-            // CRadar::DrawBlips();
-        }
+        rect.left   = SCREEN_STRETCH_X(40.0f) - SCREEN_STRETCH_X(25.0f);
+        rect.top    = SCREEN_STRETCH_FROM_BOTTOM(104.0f) + SCREEN_STRETCH_Y(76.0f) - std::min(SCREEN_STRETCH_Y(76.0f), SCREEN_STRETCH_Y(76.0f) * pos.z / lineY);
+        rect.right  = SCREEN_STRETCH_X(40.0f) - 5.0f;
+        rect.bottom = rect.top + 2.0f;
+        CSprite2d::DrawRect(rect, { 200, 200, 200, 200 }); // horizontal line (current height)
     }
 
     // NOTSA: rects are optimized
     const auto black = CRGBA(0, 0, 0, 255);
 
-    rect.left = SCREEN_STRETCH_X(36.0f);
-    rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0f);
-    rect.right = SCREEN_STRETCH_X(87.0f);
+    rect.left   = SCREEN_STRETCH_X(36.0f);
+    rect.top    = SCREEN_STRETCH_FROM_BOTTOM(108.0f);
+    rect.right  = SCREEN_STRETCH_X(87.0f);
     rect.bottom = SCREEN_STRETCH_FROM_BOTTOM(66.0f);
     Sprites[SPRITE_RADAR_DISC].Draw(rect, black); // top left
 
@@ -1239,7 +1225,7 @@ void CHud::DrawRadar() {
     Sprites[SPRITE_RADAR_DISC].Draw(rect, black); // bottom left
 
     rect.left = SCREEN_STRETCH_X(138.0f);
-    rect.top = SCREEN_STRETCH_FROM_BOTTOM(108.0f);
+    rect.top  = SCREEN_STRETCH_FROM_BOTTOM(108.0f);
     Sprites[SPRITE_RADAR_DISC].Draw(rect, black); // top right
 
     rect.top = SCREEN_STRETCH_FROM_BOTTOM(24.0f);
@@ -1249,8 +1235,46 @@ void CHud::DrawRadar() {
 }
 
 // 0x58C080
-void CHud::DrawScriptText(uint8 priority) {
-    plugin::Call<0x58C080, uint8>(priority);
+void CHud::DrawScriptText(bool displayImmediately) {
+    CTheScripts::DrawScriptSpritesAndRectangles(displayImmediately);
+
+    char textFormatted[400];
+    for (auto& scriptText : CTheScripts::IntroTextLines) { // todo: NOTSA optimization std::span{ CTheScripts::IntroTextLines, CTheScripts::NumberOfIntroTextLinesThisFrame }
+        if (!scriptText.m_szGxtEntry[0])
+            continue;
+        if (scriptText.m_bDrawBeforeFade != displayImmediately)
+            continue;
+
+        CFont::SetScale(SCREEN_SCALE_X(scriptText.m_fLetterWidth), SCREEN_SCALE_Y(scriptText.m_fLetterHeight / 2.0f));
+        CFont::SetColor(scriptText.m_Color);
+        CFont::SetJustify(scriptText.m_bJustify);
+
+        if (scriptText.m_bRightJustify)
+            CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+        else
+            CFont::SetOrientation((eFontAlignment)!scriptText.m_bCentered);
+
+        CFont::SetWrapx(SCREEN_SCALE_X(scriptText.m_fLineHeight)); // todo: SCREEN_SCALE_X used while height passed - it's ok?
+        CFont::SetCentreSize(SCREEN_SCALE_X(scriptText.m_fLineWidth));
+        CFont::SetBackground(scriptText.m_bWithBackground, false);
+        CFont::SetBackgroundColor(scriptText.m_BackgroundBoxColor);
+        CFont::SetProportional(scriptText.m_bProportional);
+        CFont::SetDropColor(scriptText.m_BackgroundColor);
+
+        if (scriptText.m_nOutlineType)
+            CFont::SetEdge(scriptText.m_nOutlineType);
+        else
+            CFont::SetDropShadowPosition(scriptText.m_nShadowType);
+
+        CFont::SetFontStyle((eFontStyle)scriptText.m_nFont);
+        CMessages::InsertNumberInString(TheText.Get(scriptText.m_szGxtEntry), scriptText.param1, scriptText.param2, -1, -1, -1, -1, textFormatted);
+        CMessages::InsertPlayerControlKeysInString(textFormatted);
+
+        // todo: Replace DEFAULT_SCREEN_WIDTH, DEFAULT_SCREEN_HEIGHT
+        // The first letter doesn't look good in window mode, but it looks fine in full-screen mode
+        CFont::PrintString(SCREEN_SCALE_FROM_RIGHT(DEFAULT_SCREEN_WIDTH - scriptText.m_Pos.x), SCREEN_SCALE_FROM_BOTTOM(DEFAULT_SCREEN_HEIGHT - scriptText.m_Pos.y), textFormatted);
+        CFont::SetEdge(0);
+    }
 }
 
 // 0x58C250
@@ -1581,7 +1605,7 @@ LABEL_31:
             ||
             (
                 CStats::GetFatAndMuscleModifier(STAT_MOD_AIR_IN_LUNG) > ped->m_pPlayerData->m_fBreath &&
-                m_LastBreathTime + 500 > CTimer::GetTimeInMS() // todo: this line should be applied only for ped0
+                m_LastBreathTime + 500 > (int32)CTimer::GetTimeInMS() // todo: this line should be applied only for ped0
             )
         ) {
             m_LastBreathTime = (int32)CTimer::GetTimeInMS();
@@ -1880,7 +1904,7 @@ void CHud::DrawWanted() {
     auto wanted = FindPlayerWanted();
     if (wanted->m_nWantedLevel > 0 || wanted->m_nWantedLevelBeforeParole > 0) {
         CFont::SetBackground(false, false);
-        CFont::SetScale(SCREEN_STRETCH_X(0.605), SCREEN_STRETCH_Y(1.21f));
+        CFont::SetScale(SCREEN_STRETCH_X(0.605f), SCREEN_STRETCH_Y(1.21f));
         CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
         CFont::SetProportional(true);
         CFont::SetFontStyle(FONT_GOTHIC);
@@ -1956,13 +1980,13 @@ void CHud::RenderArmorBar(int32 playerId, int32 x, int32 y) {
     if ((m_ItemToFlash == ITEM_ARMOUR && EachFrames(8)) || player->m_fArmour <= 1.0f)
         return;
 
-    auto playerInfo = player->GetPlayerInfoForThisPlayerPed();
+    const auto info = player->GetPlayerInfoForThisPlayerPed();
     CSprite2d::DrawBarChart(
         (float)x,
         (float)y,
         (uint16)SCREEN_STRETCH_X(62.0f),
         (uint8)SCREEN_STRETCH_Y(9.0f),
-        player->m_fArmour / (float)playerInfo->m_nMaxArmour * 100.0f,
+        player->m_fArmour / (float)info->m_nMaxArmour * 100.0f,
         false,
         false,
         true,
@@ -2001,15 +2025,15 @@ void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
         return;
 
     const float x109 = SCREEN_STRETCH_X(109.0f);
-    auto* playerInfo = player->GetPlayerInfoForThisPlayerPed();
-    uint16 totalWidth = uint16(x109 * (float)playerInfo->m_nMaxHealth / CStats::GetFatAndMuscleModifier(STAT_MOD_10));
+    const auto info = player->GetPlayerInfoForThisPlayerPed();
+    const auto totalWidth = uint16(x109 * (float)info->m_nMaxHealth / CStats::GetFatAndMuscleModifier(STAT_MOD_10));
 
     CSprite2d::DrawBarChart(
         x109 - (float)totalWidth + (float)x,
         (float)y,
         totalWidth,
         (uint8)SCREEN_STRETCH_Y(9.0f),
-        player->m_fHealth * 100.0f / (float)playerInfo->m_nMaxHealth,
+        player->m_fHealth * 100.0f / (float)info->m_nMaxHealth,
         false,
         false,
         true,

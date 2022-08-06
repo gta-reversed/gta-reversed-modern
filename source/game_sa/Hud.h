@@ -156,9 +156,9 @@ public:
     static void DrawHelpText();
     static void DrawMissionTimers();
     static void DrawMissionTitle();
-    static void DrawOddJobMessage(uint8 priority);
+    static void DrawOddJobMessage(bool displayImmediately);
     static void DrawRadar();
-    static void DrawScriptText(uint8 priority);
+    static void DrawScriptText(bool displayImmediately);
     static void DrawSubtitles();
     static void DrawSuccessFailedMessage();
     static void DrawVehicleName();
