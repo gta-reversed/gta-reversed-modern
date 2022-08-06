@@ -85,7 +85,23 @@ bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
 
 // 0x449690
 void CGarage::RemoveCarsBlockingDoorNotInside() {
-    plugin::CallMethod<0x449690, CGarage*>(this);
+    return plugin::CallMethod<0x449690, CGarage*>(this);
+
+    for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
+        auto vehicle = GetVehiclePool()->GetAt(i);
+        if (!vehicle)
+            continue;
+
+        if (IsEntityTouching3D(vehicle) &&
+            IsPointInsideGarage(vehicle->GetPosition()) &&
+            !vehicle->vehicleFlags.bIsLocked &&
+            vehicle->CanBeDeleted()
+        ) {
+            CWorld::Remove(vehicle);
+            delete vehicle;
+            return;
+        }
+    }
 }
 
 // 0x448EE0
