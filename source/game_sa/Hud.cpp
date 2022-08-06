@@ -1905,7 +1905,7 @@ void CHud::DrawWanted() {
                     CTimer::m_FrameCounter & 4
                 )
             ) {
-                CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255) * 0.8f);
+                CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_GOLD, 255));
                 CFont::SetEdge(1);
                 CFont::PrintString(x, y, IconToPrint);
             } else {
@@ -1997,16 +1997,17 @@ void CHud::RenderHealthBar(int32 playerId, int32 x, int32 y) {
         return;
 
     auto* player = FindPlayerPed(playerId);
-    if ((int16)player->m_fHealth < 10 && EachFrames(8))
+    if ((int)player->m_fHealth < 10 && EachFrames(8))
         return;
 
+    const float x109 = SCREEN_STRETCH_X(109.0f);
     auto* playerInfo = player->GetPlayerInfoForThisPlayerPed();
-    auto totalWidth = SCREEN_STRETCH_X((float)playerInfo->m_nMaxHealth * 109.0f) / CStats::GetFatAndMuscleModifier(STAT_MOD_10);
+    uint16 totalWidth = uint16(x109 * (float)playerInfo->m_nMaxHealth / CStats::GetFatAndMuscleModifier(STAT_MOD_10));
 
     CSprite2d::DrawBarChart(
-        SCREEN_STRETCH_X(109.0f) - totalWidth + (float)x, // Something wrong with X. Try Toggle Hud via Debug menu
+        x109 - (float)totalWidth + (float)x,
         (float)y,
-        (uint16)totalWidth,
+        totalWidth,
         (uint8)SCREEN_STRETCH_Y(9.0f),
         player->m_fHealth * 100.0f / (float)playerInfo->m_nMaxHealth,
         false,
