@@ -112,7 +112,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedOverloadedInstall(AddPassenger, "Auto-Seat", 0x6D13A0, bool(CVehicle::*)(CPed*));
     RH_ScopedOverloadedInstall(AddPassenger, "Fixed-Seat", 0x6D14D0, bool(CVehicle::*)(CPed*, uint8));
     RH_ScopedInstall(RemovePassenger, 0x6D1610);
-    // RH_ScopedInstall(SetDriver, 0x6D16A0);
+    RH_ScopedInstall(SetDriver, 0x6D16A0);
     // RH_ScopedInstall(RemoveDriver, 0x6D1950);
     // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
     // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
@@ -1405,7 +1405,7 @@ void CVehicle::ProcessDelayedExplosion() {
     }
 }
 
-void CVehicle::ApplyTurnForceToPassengerOnEntry(CPed* passenger) {
+void CVehicle::ApplyTurnForceToOccupantOnEntry(CPed* passenger) {
     // Apply some turn force
     switch (m_nVehicleType) {
     case VEHICLE_TYPE_BIKE: {
@@ -1427,7 +1427,7 @@ void CVehicle::ApplyTurnForceToPassengerOnEntry(CPed* passenger) {
 
 // 0x6D13A0
 bool CVehicle::AddPassenger(CPed* passenger) {
-    ApplyTurnForceToPassengerOnEntry(passenger);
+    ApplyTurnForceToOccupantOnEntry(passenger);
     
     // Now, find a seat and place them into it
     const auto seats = GetMaxPassengerSeats();
@@ -1484,7 +1484,53 @@ void CVehicle::RemovePassenger(CPed* passenger) {
 
 // 0x6D16A0
 void CVehicle::SetDriver(CPed* driver) {
-    ((void(__thiscall*)(CVehicle*, CPed*))0x6D16A0)(this, driver);
+    CEntity::ChangeEntityReference(m_pDriver, driver);
+
+    if (vehicleFlags.bFreebies && driver == FindPlayerPed()) {
+        vehicleFlags.bFreebies = false;
+
+        switch (m_nModelIndex)
+        {
+        case MODEL_AMBULAN: {
+            FindPlayerInfo(0).AddHealth(20);
+            break;
+        }
+        case MODEL_TAXI:
+        case MODEL_CABBIE: {
+            FindPlayerInfo().m_nMoney += 12;
+            break;
+        }
+        case MODEL_ENFORCER: {
+            driver->m_fArmour = std::max((float)FindPlayerInfo(0).m_nMaxArmour, driver->m_fArmour);
+            break;
+        }
+        case MODEL_CADDY: {
+            // Pirulax:
+            // `driver->IsPlayer()` check is useless here, because the precondition
+            // to ever reach this code is `driver == FindPlayerPed()`
+            if (!driver->IsPlayer() || driver->AsPlayer()->DoesPlayerWantNewWeapon(eWeaponType::WEAPON_GOLFCLUB, true)) {
+                CStreaming::RequestModel(MODEL_GOLFCLUB, STREAMING_GAME_REQUIRED);
+            }
+            break;
+        }
+        case MODEL_HOTDOG: {
+            CStats::IncrementStat(STAT_CALORIES, 40.0);
+            break;
+        }
+        case MODEL_COPCARLA:
+        case MODEL_COPCARSF:
+        case MODEL_COPCARVG:
+        case MODEL_COPCARRU: {
+            CStreaming::RequestModel(MODEL_CHROMEGUN, STREAMING_GAME_REQUIRED);
+            vehicleFlags.bFreebies = true;
+            break;
+        }
+        default:
+            break;
+        }
+    }
+
+    ApplyTurnForceToOccupantOnEntry(driver);
 }
 
 // 0x6D1950
