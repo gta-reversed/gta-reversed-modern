@@ -970,8 +970,10 @@ void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
     switch (zoomMode) {
     case 1:
         m_fPedZoomValueScript = 1.50f;
+        break;
     case 2:
         m_fPedZoomValueScript = 2.90f;
+        break;
     default:
         m_fPedZoomValueScript = 0.25f;
     }
