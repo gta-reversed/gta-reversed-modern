@@ -42,19 +42,8 @@ enum eHudSprite {
     SPRITE_SKIP_ICON
 };
 
-enum eBigMessageStyle : uint16 {
-    BIG_MESSAGE_STYLE_0,
-    BIG_MESSAGE_STYLE_1,
-    BIG_MESSAGE_STYLE_2,
-    BIG_MESSAGE_STYLE_3,
-    BIG_MESSAGE_STYLE_4,
-    BIG_MESSAGE_STYLE_5,
-    BIG_MESSAGE_STYLE_6,
-
-    NUM_BIG_MESSAGES
-};
-
 class CPed;
+enum eMessageStyle : uint16;
 
 class CHud {
 public:
@@ -115,7 +104,7 @@ public:
     static uint32&     m_ZoneNameTimer;
 
     static inline char (&m_Message)[400] = *(char (*)[400])0xBAB040;
-    static inline char (&m_BigMessage)[7][128] = *(char (*)[7][128])0xBAACC0;
+    static inline char (&m_BigMessage)[NUM_MESSAGE_STYLES][128] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
 
     static char*&    m_ZoneToPrint;
     static char*&    m_pLastZoneName;
@@ -139,7 +128,7 @@ public:
 
     static void ResetWastedText();
 
-    static void SetBigMessage(const char* message, eBigMessageStyle style);
+    static void SetBigMessage(const char* message, eMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);

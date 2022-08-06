@@ -90,7 +90,7 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(SetZoneName, 0x588BB0);                 //
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
-    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     //
+    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // +
     RH_ScopedInstall(DrawCrossHairs, 0x58E020);              //
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
@@ -230,29 +230,29 @@ bool CHud::HelpMessageDisplayed() {
 
 // 0x589070
 void CHud::ResetWastedText() {
-    BigMessageX[BIG_MESSAGE_STYLE_2] = 0.0f;
-    m_BigMessage[BIG_MESSAGE_STYLE_2][0] = '\0';
+    BigMessageX[STYLE_WHITE_MIDDLE] = 0.0f;
+    m_BigMessage[STYLE_WHITE_MIDDLE][0] = '\0';
 
-    BigMessageX[BIG_MESSAGE_STYLE_0] = 0.0f;
-    m_BigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
+    BigMessageX[STYLE_MIDDLE] = 0.0f;
+    m_BigMessage[STYLE_MIDDLE][0] = '\0';
 }
 
 // 0x588FC0
-void CHud::SetBigMessage(const char* message, eBigMessageStyle style) {
+void CHud::SetBigMessage(const char* message, eMessageStyle style) {
     if (BigMessageX[style] != 0.0f) {
         return;
     }
 
-    if (style == BIG_MESSAGE_STYLE_5) {
+    if (style == STYLE_WHITE_MIDDLE_SMALLER) {
         for (auto i = 0; i < 128; i++) {
             if (message[i] == 0)
                 break;
-            if (message[i] != LastBigMessage[BIG_MESSAGE_STYLE_5][i]) {
+            if (message[i] != LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]) {
                 OddJob2On = 0;
                 OddJob2OffTimer = 0.0f;
             }
-            m_BigMessage[BIG_MESSAGE_STYLE_5][i] = message[i];
-            LastBigMessage[BIG_MESSAGE_STYLE_5][i] = message[i];
+            m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
+            LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
         }
     } else {
         for (auto i = 0; i < 128; i++) {
@@ -262,13 +262,17 @@ void CHud::SetBigMessage(const char* message, eBigMessageStyle style) {
         }
     }
 
-    LastBigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
-    m_BigMessage[BIG_MESSAGE_STYLE_0][0] = '\0';
+    LastBigMessage[STYLE_MIDDLE][0] = '\0';
+    m_BigMessage[STYLE_MIDDLE][0] = '\0';
 }
 
 // 0x588BE0
 void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, bool addToBrief) {
-    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsRunning()) {
+    if (m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER][0]
+        || CGarages::MessageIDString[0]
+        || CReplay::Mode == MODE_PLAYBACK
+        || CCutsceneMgr::IsRunning()
+    ) {
         return;
     }
 
@@ -307,7 +311,7 @@ void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, b
 
 // 0x588D40
 void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max) {
-    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
+    if (m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
         return;
     }
 
@@ -331,7 +335,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
 
 // 0x588E30
 void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMessage, bool permanent) {
-    if (m_BigMessage[BIG_MESSAGE_STYLE_4][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
+    if (m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsCutsceneProcessing()) {
         return;
     }
 
@@ -450,7 +454,7 @@ void CHud::Draw() {
     }
 
     if (!CTimer::GetIsUserPaused()) {
-        if (!m_BigMessage[BIG_MESSAGE_STYLE_0][0]) {
+        if (!m_BigMessage[STYLE_MIDDLE][0]) {
             if (CMenuSystem::GetNumMenusInUse()) {
                 CMenuSystem::Process(CMenuSystem::MENU_UNDEFINED);
             }
@@ -484,7 +488,7 @@ void CHud::DrawAfterFade() {
         }
     }
 
-    if (!m_BigMessage[BIG_MESSAGE_STYLE_0][0]) {
+    if (!m_BigMessage[STYLE_MIDDLE][0]) {
         DrawScriptText(false);
     }
 
@@ -595,7 +599,7 @@ void CHud::DrawAreaName() {
         break;
     }
 
-    if (m_Message[0] || BigMessageX[BIG_MESSAGE_STYLE_1] != 0.0f || BigMessageX[BIG_MESSAGE_STYLE_2] != 0.0f) {
+    if (m_Message[0] || BigMessageX[STYLE_BOTTOM_RIGHT] != 0.0f || BigMessageX[STYLE_WHITE_MIDDLE] != 0.0f) {
         m_ZoneState = NAME_FADE_OUT;
         return;
     }
@@ -624,9 +628,9 @@ void CHud::DrawAreaName() {
 
 // 0x58CA50
 void CHud::DrawBustedWastedMessage() {
-    auto& message      = m_BigMessage[BIG_MESSAGE_STYLE_2];
-    auto& messageX     = BigMessageX[BIG_MESSAGE_STYLE_2];
-    auto& messageAlpha = BigMessageAlpha[BIG_MESSAGE_STYLE_2];
+    auto& message      = m_BigMessage[STYLE_WHITE_MIDDLE];
+    auto& messageX     = BigMessageX[STYLE_WHITE_MIDDLE];
+    auto& messageAlpha = BigMessageAlpha[STYLE_WHITE_MIDDLE];
 
     if (!message[0]) {
         messageX = '\0';
@@ -650,7 +654,7 @@ void CHud::DrawBustedWastedMessage() {
     messageAlpha = std::min(messageAlpha, 255.0f);
 
     CFont::SetBackground(false, false);
-    CFont::SetScale(SCREEN_STRETCH_X(2.0f), SCREEN_SCALE_Y(2.0f));
+    CFont::SetScale(SCREEN_STRETCH_X(2.1f), SCREEN_SCALE_Y(2.1f));
     CFont::SetProportional(true);
     CFont::SetJustify(false);
     CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
@@ -658,7 +662,7 @@ void CHud::DrawBustedWastedMessage() {
     CFont::SetEdge(3);
     CFont::SetDropColor({ 0, 0, 0, (uint8)messageAlpha });
     CFont::SetColor(HudColour.GetRGBA(HUD_COLOUR_LIGHT_GRAY, (uint8)messageAlpha));
-    CFont::PrintStringFromBottom(SCREEN_WIDTH / 2.0f, static_cast<float>(RsGlobal.maximumHeight / 2) - SCREEN_SCALE_Y(30.0f), message);
+    CFont::PrintStringFromBottom(SCREEN_WIDTH / 2.0f, static_cast<float>(RsGlobal.maximumHeight / 2) - SCREEN_SCALE_Y(30.0f), message); // OG: posY static allocated var
 }
 
 // 0x58E020
@@ -995,10 +999,10 @@ void CHud::DrawMissionTimers() {
 
 // 0x58D240
 void CHud::DrawMissionTitle() {
-    auto& message      = m_BigMessage[BIG_MESSAGE_STYLE_1];
-    auto& messageX     = BigMessageX[BIG_MESSAGE_STYLE_1];
-    auto& messageAlpha = BigMessageAlpha[BIG_MESSAGE_STYLE_1];
-    auto& messageInUse = BigMessageInUse[BIG_MESSAGE_STYLE_1];
+    auto& message      = m_BigMessage[STYLE_BOTTOM_RIGHT];
+    auto& messageX     = BigMessageX[STYLE_BOTTOM_RIGHT];
+    auto& messageAlpha = BigMessageAlpha[STYLE_BOTTOM_RIGHT];
+    auto& messageInUse = BigMessageInUse[STYLE_BOTTOM_RIGHT];
 
     if (!message[0]) {
         messageX = 0.0f;
@@ -1046,30 +1050,27 @@ void CHud::DrawMissionTitle() {
 
 // 0x58CC80
 void CHud::DrawOddJobMessage(bool displayImmediately) {
-    const auto& message1 = m_BigMessage[BIG_MESSAGE_STYLE_1]; const auto& message3 = m_BigMessage[BIG_MESSAGE_STYLE_3];
-    const auto& message4 = m_BigMessage[BIG_MESSAGE_STYLE_4]; const auto& message5 = m_BigMessage[BIG_MESSAGE_STYLE_5];
-    const auto& message6 = m_BigMessage[BIG_MESSAGE_STYLE_6];
-
-    if (displayImmediately == CTheScripts::bDrawOddJobTitleBeforeFade && !message1[0]) {
-        if (message4[0]) {
-            CFont::SetBackground(false, false);
-            CFont::SetJustify(false);
-            CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(0.6f), SCREEN_SCALE_Y(1.35f));
-            CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
-            CFont::SetProportional(true);
-            CFont::SetCentreSize(SCREEN_STRETCH_X(350.0f));
-            CFont::SetFontStyle(FONT_MENU);
-            CFont::SetEdge(2);
-            CFont::SetDropColor({ 0, 0, 0, 255 });
-            CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_GOLD));
-            CFont::PrintStringFromBottom(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(140.0f), message4);
-        }
+    const auto& m1 = m_BigMessage[STYLE_BOTTOM_RIGHT];
+    const auto& m4 = m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER];
+    if (displayImmediately == CTheScripts::bDrawOddJobTitleBeforeFade && !m1[0] && m4[0]) {
+        CFont::SetBackground(false, false);
+        CFont::SetJustify(false);
+        CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(0.6f), SCREEN_SCALE_Y(1.35f));
+        CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
+        CFont::SetProportional(true);
+        CFont::SetCentreSize(SCREEN_STRETCH_X(350.0f));
+        CFont::SetFontStyle(FONT_MENU);
+        CFont::SetEdge(2);
+        CFont::SetDropColor({ 0, 0, 0, 255 });
+        CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_GOLD));
+        CFont::PrintStringFromBottom(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(140.0f), m4);
     }
 
     if (!displayImmediately)
         return;
 
-    if (message6[0]) {
+    const auto& m6 = m_BigMessage[STYLE_LIGHT_BLUE_TOP];
+    if (m6[0]) {
         CFont::SetBackground(false, false);
         CFont::SetJustify(false);
         CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.8f));
@@ -1080,10 +1081,11 @@ void CHud::DrawOddJobMessage(bool displayImmediately) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_BLUE));
-        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(60.0f), message6);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(60.0f), m6);
     }
 
-    if (message3[0]) {
+    const auto& m3 = m_BigMessage[STYLE_MIDDLE_SMALLER];
+    if (m3[0]) {
         CFont::SetBackground(false, false);
         CFont::SetJustify(false);
         CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(0.6f), SCREEN_SCALE_Y(1.35f));
@@ -1094,14 +1096,15 @@ void CHud::DrawOddJobMessage(bool displayImmediately) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_GOLD));
-        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(155.0f), message3);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(155.0f), m3);
     }
 
     if (OddJob2OffTimer > 0.0f) {
         OddJob2OffTimer -= CTimer::GetTimeStepInMS();
     }
 
-    if (!message5[0])
+    const auto& m5 = m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER];
+    if (!m5[0])
         return;
 
     if (OddJob2OffTimer > 0.0f)
@@ -1137,7 +1140,7 @@ void CHud::DrawOddJobMessage(bool displayImmediately) {
         break;
     }
 
-    if (!message1[0]) {
+    if (!m1[0]) {
         CFont::SetBackground(false, false);
         CFont::SetScaleForCurrentLanguage(SCREEN_STRETCH_X(0.6f), SCREEN_SCALE_Y(1.35f));
         CFont::SetOrientation(eFontAlignment::ALIGN_CENTER);
@@ -1147,11 +1150,10 @@ void CHud::DrawOddJobMessage(bool displayImmediately) {
         CFont::SetEdge(2);
         CFont::SetDropColor({ 0, 0, 0, 255 });
         CFont::SetColor(HudColour.GetRGB(HUD_COLOUR_LIGHT_GRAY));
-        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(217.0f), message5);
+        CFont::PrintString(static_cast<float>(RsGlobal.maximumWidth / 2), SCREEN_STRETCH_Y(217.0f), m5);
     }
 }
 
-// todo: WIP
 // 0x58A330
 void CHud::DrawRadar() {
     if (CEntryExitManager::ms_exitEnterState == EXIT_ENTER_STATE_1 ||
@@ -1415,13 +1417,13 @@ void CHud::GetRidOfAllHudMessages(bool arg0) {
     m_VehicleFadeTimer            = 0;
     m_VehicleState                = NAME_DONT_SHOW;
 
-    for (auto i = 0; i < NUM_BIG_MESSAGES; ++i) {
+    for (auto i = 0; i < NUM_MESSAGE_STYLES; ++i) {
         if (BigMessageX[i] != 0.0f)
             continue;
 
         if (arg0) {
-            if (BigMessageX[i] == BigMessageX[1] ||
-                BigMessageX[i] == BigMessageX[4]
+            if (BigMessageX[i] == BigMessageX[STYLE_BOTTOM_RIGHT] ||
+                BigMessageX[i] == BigMessageX[STYLE_MIDDLE_SMALLER_HIGHER]
             ) {
                 continue;
             }

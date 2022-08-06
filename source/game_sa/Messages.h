@@ -13,7 +13,9 @@ enum eMessageStyle : uint16 {
     STYLE_MIDDLE_SMALLER,        // In The Middle Smaller
     STYLE_MIDDLE_SMALLER_HIGHER, // In The Middle Smaller A Bit Higher On The Screen
     STYLE_WHITE_MIDDLE_SMALLER,  // Small White Text In The Middle Of The Screen
-    STYLE_LIGHT_BLUE_TOP         // Light Blue Text On Top Of The Screen
+    STYLE_LIGHT_BLUE_TOP,        // Light Blue Text On Top Of The Screen
+
+    NUM_MESSAGE_STYLES
 };
 
 struct tMessage {
