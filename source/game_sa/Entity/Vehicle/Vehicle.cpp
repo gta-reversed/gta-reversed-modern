@@ -103,7 +103,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30); // ??: register problem?
 
     RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
-    // RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
+    RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
     RH_ScopedInstall(CanBeDeleted, 0x6D1180);
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
     // RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
@@ -1311,7 +1311,10 @@ bool CVehicle::CustomCarPlate_TextureCreate(CVehicleModelInfo* model) {
 
 // 0x6D1150
 void CVehicle::CustomCarPlate_TextureDestroy() {
-    ((void(__thiscall*)(CVehicle*))0x6D1150)(this);
+    if (m_pCustomCarPlate) {
+        RwTextureDestroy(m_pCustomCarPlate);
+        m_pCustomCarPlate = nullptr;
+    }
 }
 
 // 0x6D1180
