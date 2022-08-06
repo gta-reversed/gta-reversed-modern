@@ -1659,14 +1659,9 @@ CPed* CVehicle::SetupPassenger(int32 seatIdx, int32 gangPedType, bool createAsMa
         return true;
     };
 
-    if (!ProcessOccupant(m_pDriver)) {
+    // Not sure why this checks only up to the seat the passenger was added to, but okay.
+    if (!ProcessOccupant(m_pDriver) || !rng::all_of(std::span{ m_apPassengers, (size_t)seatIdx }, ProcessOccupant)) {
         return nullptr;
-    }
-
-    for (const auto psgr : std::span{m_apPassengers, seatIdx}) { // Not sure why this checks only up to the seat the passenger was added to, but okay.
-        if (!ProcessOccupant(psgr)) {
-            return nullptr;
-        }
     }
 
     return psgrAdded;

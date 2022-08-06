@@ -1,5 +1,8 @@
 #pragma once
 
+#include <ranges>
+#include <algorithm>
+
 enum ePedType : uint32 {
     PED_TYPE_PLAYER1 = 0,
     PED_TYPE_PLAYER2,
@@ -51,7 +54,7 @@ static constexpr auto s_GangPedTypes = std::to_array({
 });
 
 static constexpr bool IsPedTypeGang(ePedType ptype) {
-    return rng::find(s_GangPedTypes, ptype) != s_GangPedTypes.end();
+    return std::ranges::find(s_GangPedTypes, ptype) != s_GangPedTypes.end();
 }
 
 // 0x8D23B8
