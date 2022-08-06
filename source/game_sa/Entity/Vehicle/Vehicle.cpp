@@ -134,7 +134,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
-    // RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
+    RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
     // RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
     // RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
     RH_ScopedInstall(AddDamagedVehicleParticles, 0x6D2A80);
@@ -2017,7 +2017,15 @@ CVector CVehicle::GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace) {
 
 // 0x6D2980
 void CVehicle::UpdateClumpAlpha() {
-    ((void(__thiscall*)(CVehicle*))0x6D2980)(this);
+    const auto GetAlphaToSet = [this] {
+        const auto curr = CVisibilityPlugins::GetClumpAlpha(m_pRwClump);
+        if (vehicleFlags.bFadeOut) {
+            return std::max(0, curr - 8);
+        } else if (curr < 255) {
+            return std::min(255, curr + 16);
+        }
+    };
+    CVisibilityPlugins::SetClumpAlpha(m_pRwClump, GetAlphaToSet());
 }
 
 // 0x6D29E0
