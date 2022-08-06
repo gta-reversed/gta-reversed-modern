@@ -130,7 +130,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ActivateBomb, 0x6D24F0);
     RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
     RH_ScopedInstall(CarHasRoof, 0x6D25D0);
-    // RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
+    RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
     // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
     // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
@@ -1910,8 +1910,30 @@ bool CVehicle::CarHasRoof() {
 }
 
 // 0x6D2600
-float CVehicle::HeightAboveCeiling(float arg0, eFlightModel arg1) {
-    return ((float(__thiscall*)(CVehicle*, float, eFlightModel))0x6D2600)(this, arg0, arg1);
+float CVehicle::HeightAboveCeiling(float height, eFlightModel flightModel) {
+    switch (flightModel) {
+    case eFlightModel::FLIGHT_MODEL_BARON: {
+        if (height >= 500.0) {
+            if (height < 950.0) {
+                return height - 500.0;
+            }
+
+            if (height >= 1500.0) {
+                return (height - 1000.0) + 500.0;
+            }
+        }
+        return -1.0;
+    }
+    default: {
+        // Originally this was the condition used, but it's ugly
+        // Leaving here to make sure it all works as expectd
+        assert(!(((int)flightModel - 1) <= 1));
+
+        if (height < 800.0)
+            return -1.0;
+        return height - 800.0;
+    }
+    }
 }
 
 // 0x6D2690
