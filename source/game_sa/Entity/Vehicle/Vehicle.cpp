@@ -106,7 +106,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
     RH_ScopedInstall(CanBeDeleted, 0x6D1180);
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
-    // RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
+    RH_ScopedInstall(CanVehicleBeDamaged, 0x6D1280);
     // RH_ScopedInstall(ProcessDelayedExplosion, 0x6D1340);
     // RH_ScopedInstall(AddPassenger, 0x6D13A0);
     // RH_ScopedInstall(AddPassenger, 0x6D14D0);
