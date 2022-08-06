@@ -1874,7 +1874,22 @@ void CVehicle::ExtinguishCarFire() {
 
 // 0x6D24F0
 void CVehicle::ActivateBomb() {
-    ((void(__thiscall*)(CVehicle*))0x6D24F0)(this);
+    switch (m_nBombOnBoard) {
+    case BOMB_TIMED_NOT_ACTIVATED: {
+        m_nBombOnBoard = BOMB_TIMED_ACTIVATED;
+        m_wBombTimer = 7000;
+        m_pWhoDetonatedMe = FindPlayerPed();
+        break;
+    }
+    case BOMB_IGNITION: {
+        m_nBombOnBoard = BOMB_IGNITION_ACTIVATED;
+        break;
+    }
+    default: {
+        return;
+    }
+    }
+    CGarages::TriggerMessage("GA_12", -1, 3000u); // "Bomb armed"
 }
 
 // 0x6D2570
