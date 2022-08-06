@@ -19,8 +19,10 @@ public:
     static constexpr auto MAX_CARS_IN_SAFEHOUSE{ 4 };
     static constexpr auto MAX_NUM_GARAGES{ 50 };
 
-    static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD4;
+    static inline int32& NumGarages = *(int32*)0x96C024;
     static inline CGarage (&aGarages)[MAX_NUM_GARAGES] = *(CGarage(*)[50])0x96C048;
+
+    static inline CStoredCar (&aCarsInSafeHouse)[MAX_NUM_SAFEHOUSES][MAX_CARS_IN_SAFEHOUSE] = *(CStoredCar(*)[20][4])0x96ABD4;
     static inline char (&MessageIDString)[8] = *(char (*)[8])0x96C014;
     static inline int32& LastGaragePlayerWasIn = *(int32*)0x96BFDC;
     static inline int32& LastTimeHelpMessage = *(int32*)0x96BFE0;
@@ -38,7 +40,6 @@ public:
     static inline int32& MessageNumberInString2 = *(int32*)0x96C010;
     static inline uint32& MessageEndTime = *(uint32*)0x96C01C;
     static inline uint32& MessageStartTime = *(uint32*)0x96C020;
-    static inline int32& NumGarages = *(int32*)0x96C024;
     static inline CGarage*& pOldToGarageWeAreIn = *(CGarage**)0x96BFD8;
 
 public:
@@ -90,6 +91,7 @@ public:
     static bool Save();
 
     static CGarage& GetGarage(int32 iGarageInd) { return aGarages[iGarageInd]; }
+    static auto GetGarages() { return std::span{ aGarages, (size_t)NumGarages }; }
     static CStoredCar* GetStoredCarsInSafehouse(int32 iSafehouseInd) { return aCarsInSafeHouse[iSafehouseInd]; }
     static CStoredCar& GetStoredCar(int32 iSafehouseInd, int32 iCarInd) { return aCarsInSafeHouse[iSafehouseInd][iCarInd]; }
 };

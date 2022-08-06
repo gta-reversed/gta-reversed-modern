@@ -62,8 +62,7 @@ void CGarages::Init() {
 // 0x448B60
 void CGarages::Init_AfterRestart() {
     if (NumGarages) {
-        for (auto i = 0; i < NumGarages; i++) {
-            auto& garage = GetGarage(i);
+        for (auto& garage : GetGarages()) {
             garage.m_nType = garage.m_nOriginalType;
             garage.InitDoorsAtStart();
             garage.m_GarageAudio.Reset();
@@ -81,7 +80,8 @@ void CGarages::Init_AfterRestart() {
 
 // 0x4471B0
 void CGarages::Shutdown() {
-    for (auto& garage : aGarages) {
+    NumGarages = 0;
+    for (auto& garage : aGarages) { // BUG(prone): Should be used GetGarages() and then reset NumGarages
         garage.m_GarageAudio.Reset();
     }
 }
