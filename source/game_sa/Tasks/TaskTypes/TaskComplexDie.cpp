@@ -118,44 +118,45 @@ CTask* CTaskComplexDie::CreateNextSubTask_Reversed(CPed* ped) {
 // 0x6302D0
 CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     SayDeathSample(ped);
-    if (m_nWeaponType != WEAPON_DROWNING
-        || !ped->bInVehicle
-        || ped->bForceDieInCar
-        || (ped->m_pVehicle && (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli()))
-    ) {
-        ped->SetPedState(PEDSTATE_DIE);
-        ped->GetIntelligence()->ClearTasks(false, true);
-        if (ped->bInVehicle) // repeated branch
-        {
-            return new CTaskComplexDieInCar(WEAPON_UNARMED);
+    if (m_nWeaponType == WEAPON_DROWNING && ped->bInVehicle && !ped->bForceDieInCar) {
+        if (ped->m_pVehicle) {
+            if (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli()) {
+                return nullptr;
+            }
         }
-        else if (m_nWeaponType == WEAPON_DROWNING)
-        {
-            return new CTaskSimpleDrown();
-        }
-        else if (m_bFallingToDeath)
-        {
-            const auto GetFallDirection = [=]() -> CVector {
-                switch (m_nFallToDeathDir) {
-                case eFallDir::FORWARD:
-                    return ped->m_matrix->GetForward();
-                case eFallDir::LEFT:
-                    return ped->m_matrix->GetRight() * -1.0f;
-                case eFallDir::BACKWARD:
-                    return ped->m_matrix->GetForward() * -1.0f;
-                case eFallDir::RIGHT:
-                    return ped->m_matrix->GetRight();
-                default:
-                    // Originally not initialized
-                    // Just to return something so compiler doesn't cry
-                    return {};
-                }
-            };
-            return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), m_bFallToDeathOverRailing, false);
-        } else {
-            return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);
-        }
+        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
     }
 
-    return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
+    ped->SetPedState(PEDSTATE_DIE);
+    ped->GetIntelligence()->ClearTasks(false, true);
+    if (ped->bInVehicle) // repeated branch
+    {
+        return new CTaskComplexDieInCar(WEAPON_UNARMED);
+    }
+    else if (m_nWeaponType == WEAPON_DROWNING)
+    {
+        return new CTaskSimpleDrown();
+    }
+    else if (m_bFallingToDeath)
+    {
+        const auto GetFallDirection = [=]() -> CVector {
+            switch (m_nFallToDeathDir) {
+            case eFallDir::FORWARD:
+                return ped->m_matrix->GetForward();
+            case eFallDir::LEFT:
+                return ped->m_matrix->GetRight() * -1.0f;
+            case eFallDir::BACKWARD:
+                return ped->m_matrix->GetForward() * -1.0f;
+            case eFallDir::RIGHT:
+                return ped->m_matrix->GetRight();
+            default:
+                // Originally not initialized
+                // Just to return something so compiler doesn't cry
+                return {};
+            }
+        };
+        return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), m_bFallToDeathOverRailing, false);
+    }
+
+    return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);
 }
