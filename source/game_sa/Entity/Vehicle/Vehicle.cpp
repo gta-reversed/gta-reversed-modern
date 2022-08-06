@@ -116,7 +116,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(RemoveDriver, 0x6D1950);
     RH_ScopedInstall(SetUpDriver, 0x6D1A50);
     RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
-    // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
+    RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
     RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
     // RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
@@ -1703,9 +1703,25 @@ bool CVehicle::IsDriver(int32 modelIndex) const {
     return m_pDriver && m_pDriver->m_nModelIndex == modelIndex;
 }
 
-// 0x6D1C80
+/*!
+* @addr 0x6D1C80
+* @brief Kill all peds in the vehicle, and dispatch an event as if they were killed by an explosion
+*/
 void CVehicle::KillPedsInVehicle() {
-    ((void(__thiscall*)(CVehicle*))0x6D1C80)(this);
+    const auto ProcessOccupant = [this](CPed* occupant) {
+        if (!occupant) {
+            return;
+        }
+
+        if (!CGameLogic::IsCoopGameGoingOn()) {
+            CDarkel::RegisterKillByPlayer(occupant, WEAPON_EXPLOSION, false, 0);
+        }
+        CEventVehicleDied event{ this };
+        occupant->GetIntelligence()->m_eventGroup.Add(&event);
+    };
+
+    ProcessOccupant(m_pDriver);
+    rng::for_each(GetMaxPassengerSeats(), ProcessOccupant);
 }
 
 // 0x6D1D90
