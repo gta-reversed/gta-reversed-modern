@@ -114,7 +114,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(RemovePassenger, 0x6D1610);
     RH_ScopedInstall(SetDriver, 0x6D16A0);
     RH_ScopedInstall(RemoveDriver, 0x6D1950);
-    // RH_ScopedInstall(SetUpDriver, 0x6D1A50);
+    RH_ScopedInstall(SetUpDriver, 0x6D1A50);
     // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
     // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
@@ -1576,8 +1576,17 @@ void CVehicle::RemoveDriver(bool dontTurnEngineOff) {
 }
 
 // 0x6D1A50
-CPed* CVehicle::SetUpDriver(int32 pedType, bool arg1, bool arg2) {
-    return ((CPed * (__thiscall*)(CVehicle*, int32, bool, bool))0x6D1A50)(this, pedType, arg1, arg2);
+CPed* CVehicle::SetUpDriver(int32 gangPedType, bool createAsMale, bool createAsCriminal) {
+    if (m_pDriver) {
+        return m_pDriver;
+    }
+
+    if (IsCreatedBy(eVehicleCreatedBy::RANDOM_VEHICLE)) {
+        CPopulation::AddPedInCar(this, true, gangPedType, 0, createAsMale, createAsCriminal);
+        return m_pDriver;
+    }
+
+    return nullptr;
 }
 
 // 0x6D1AA0
