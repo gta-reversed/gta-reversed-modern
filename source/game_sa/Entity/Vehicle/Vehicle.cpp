@@ -127,8 +127,8 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
     RH_ScopedInstall(IsLawEnforcementVehicle, 0x6D2370);
     RH_ScopedInstall(ExtinguishCarFire, 0x6D2460);
-    // RH_ScopedInstall(ActivateBomb, 0x6D24F0);
-    // RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
+    RH_ScopedInstall(ActivateBomb, 0x6D24F0);
+    RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
     // RH_ScopedInstall(CarHasRoof, 0x6D25D0);
     // RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
     // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
@@ -1894,7 +1894,14 @@ void CVehicle::ActivateBomb() {
 
 // 0x6D2570
 void CVehicle::ActivateBombWhenEntered() {
-    ((void(__thiscall*)(CVehicle*))0x6D2570)(this);
+    if (m_pDriver) {
+        if (!vehicleFlags.bDriverLastFrame && m_nBombOnBoard == BOMB_IGNITION_ACTIVATED) { // If the driver just entered and there's an ignition bomb...
+            m_wBombTimer = 1000;
+            m_pWhoDetonatedMe = m_pWhoInstalledBombOnMe; // NOTE: `m_pWhoInstalledBombOnMe` isn't set in `ActivateBomb` weird...
+            CEntity::RegisterReference(m_pWhoDetonatedMe);
+        }
+    }
+    vehicleFlags.bDriverLastFrame = m_pDriver != nullptr;
 }
 
 // 0x6D25D0
