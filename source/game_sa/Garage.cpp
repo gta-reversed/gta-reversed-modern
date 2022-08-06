@@ -6,23 +6,25 @@ void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(BuildRotatedDoorMatrix, 0x4479F0);
-    // RH_ScopedInstall(TidyUpGarageClose, 0x449D10);
-    // RH_ScopedInstall(TidyUpGarage, 0x449C50);
-    RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);
-    // RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
-    // RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
-    // RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
-    // RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
-    // RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
-    // RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
-    // RH_ScopedInstall(IsPointInsideGarage, 0x448740);
-    // RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);
-    RH_ScopedInstall(OpenThisGarage, 0x447D50);
-    RH_ScopedInstall(CloseThisGarage, 0x447D70);
-    // RH_ScopedInstall(InitDoorsAtStart, 0x447600);
-    // RH_ScopedInstall(IsPointInsideGarage, 0x4487D0);
-    // RH_ScopedInstall(Update, 0x44AA50);
+    RH_ScopedInstall(BuildRotatedDoorMatrix, 0x4479F0);                                                //
+    // RH_ScopedInstall(TidyUpGarageClose, 0x449D10);                                                     //
+    // RH_ScopedInstall(TidyUpGarage, 0x449C50);                                                          //
+    RH_ScopedInstall(StoreAndRemoveCarsForThisHideOut, 0x449900);                                      //
+    RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);                                      //
+    RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);                                       //
+    RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);                                                    //
+    RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);                                               //
+    RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);                                              //
+    RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);                                       //
+    RH_ScopedOverloadedInstall(IsPointInsideGarage, "p",  0x448740, bool(CGarage::*)(CVector));        //
+    RH_ScopedOverloadedInstall(IsPointInsideGarage, "pr", 0x4487D0, bool(CGarage::*)(CVector, float)); //
+    // RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);                                                  //
+    RH_ScopedInstall(OpenThisGarage, 0x447D50);                                                        //
+    RH_ScopedInstall(CloseThisGarage, 0x447D70);                                                       //
+    // RH_ScopedInstall(InitDoorsAtStart, 0x447600);                                                      //
+    // RH_ScopedInstall(Update, 0x44AA50);                                                                //
+    // RH_ScopedInstall(IsAnyOtherCarTouchingGarage, 0x449100);                                           //
+    // RH_ScopedInstall(IsAnyOtherPedTouchingGarage, 0x4493E0);                                           //
 }
 
 // 0x4479F0
@@ -80,7 +82,7 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
 
 // 0x449050
 bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
-    return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
+    // return plugin::CallMethodAndReturn<bool, 0x449050, CGarage*, CEntity*, float>(this, entity, fRadius);
 
     for (auto& sphere : entity->GetColModel()->m_pColData->GetSpheres()) {
         auto mat = entity->GetMatrix(); // creates a matrix if it is missing
@@ -94,7 +96,7 @@ bool CGarage::EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius) {
 
 // 0x449690
 void CGarage::RemoveCarsBlockingDoorNotInside() {
-    return plugin::CallMethod<0x449690, CGarage*>(this);
+    // return plugin::CallMethod<0x449690, CGarage*>(this);
 
     for (auto i = 0; i < GetVehiclePool()->GetSize(); i++) {
         auto vehicle = GetVehiclePool()->GetAt(i);
@@ -115,7 +117,7 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
 
 // 0x448EE0
 bool CGarage::IsEntityTouching3D(CEntity* entity) {
-    return plugin::CallMethodAndReturn<bool, 0x448EE0, CGarage*, CEntity*>(this, entity);
+    // return plugin::CallMethodAndReturn<bool, 0x448EE0, CGarage*, CEntity*>(this, entity);
 
     const auto cm = entity->GetModelInfo()->GetColModel();
     const auto& radius = cm->GetBoundRadius();
@@ -139,7 +141,7 @@ bool CGarage::IsEntityTouching3D(CEntity* entity) {
 
 // 0x44A830
 bool CGarage::IsStaticPlayerCarEntirelyInside() {
-    return plugin::CallMethodAndReturn<bool, 0x44A830, CGarage*>(this);
+    // return plugin::CallMethodAndReturn<bool, 0x44A830, CGarage*>(this);
 
     auto vehicle = FindPlayerVehicle();
     if (!vehicle)
@@ -185,7 +187,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
 // Also, can't use inverted IsEntityEntirelyInside3D due m_pColData check.
 // 0x448D30
 bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x448D30, CGarage*, CEntity*, float>(this, entity, radius);
+    // return plugin::CallMethodAndReturn<bool, 0x448D30, CGarage*, CEntity*, float>(this, entity, radius);
 
     const auto& pos = entity->GetPosition();
     if (m_fLeftCoord - radius < pos.x || radius + m_fRightCoord > pos.x)
@@ -207,7 +209,7 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
 
 // 0x448BE0
 bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
+    // return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
 
     const auto& pos = entity->GetPosition();
     if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
@@ -258,7 +260,7 @@ void CGarage::InitDoorsAtStart() {
 
 // 0x448740
 bool CGarage::IsPointInsideGarage(CVector point) {
-    return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
+    // return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
 
     if (point.z < m_vPosn.z || point.z > m_fTopZ)
         return false;
@@ -274,13 +276,13 @@ bool CGarage::IsPointInsideGarage(CVector point) {
     if (sqMagB < 0.0f || sqMagB > m_fHeight)
         return false;
 
-    return 1;
+    return true;
 }
 
 // See CZoneDef::IsPointWithin
 // 0x4487D0
 bool CGarage::IsPointInsideGarage(CVector point, float radius) {
-    return plugin::CallMethodAndReturn<bool, 0x4487D0, CGarage*, CVector, float>(this, point, radius);
+    // return plugin::CallMethodAndReturn<bool, 0x4487D0, CGarage*, CVector, float>(this, point, radius);
 
     if (m_vPosn.z - radius > point.z || radius + m_fTopZ < point.z)
         return false;
@@ -331,7 +333,7 @@ bool CGarage::IsHideOut() const {
 
 // 0x44A9C0
 bool CGarage::IsGarageEmpty() {
-    return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
+    // return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
 
     CVector cornerA = { m_fLeftCoord, m_fFrontCoord, m_vPosn.z };
     CVector cornerB = { m_fRightCoord, m_fBackCoord, m_fTopZ   };
