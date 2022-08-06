@@ -132,7 +132,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CarHasRoof, 0x6D25D0);
     RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
     RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
-    // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
+    RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     // RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
     // RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
