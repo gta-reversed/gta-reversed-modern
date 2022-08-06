@@ -101,6 +101,45 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
 // 0x44A830
 bool CGarage::IsStaticPlayerCarEntirelyInside() {
     return plugin::CallMethodAndReturn<bool, 0x44A830, CGarage*>(this);
+
+    auto vehicle = FindPlayerVehicle();
+    if (!vehicle)
+        return false;
+    if (vehicle->m_nVehicleType && vehicle->m_nVehicleType != VEHICLE_TYPE_BIKE)
+        return false;
+
+    auto player = FindPlayerPed();
+    if (player->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
+        return false;
+
+    const auto& pos = vehicle->GetPosition();
+    if (pos.x < m_fLeftCoord || pos.x > m_fRightCoord)
+        return false;
+    if (pos.y < m_fFrontCoord || pos.y > m_fBackCoord)
+        return false;
+
+    auto x = vehicle->m_vecMoveSpeed.x;
+    if (x < 0.0f)
+        x = -x;
+    if (x > 0.01f)
+        return false;
+
+    auto y = vehicle->m_vecMoveSpeed.y;
+    if (y < 0.0f)
+        y = -y;
+    if (y > 0.01f)
+        return false;
+
+    auto z = vehicle->m_vecMoveSpeed.z;
+    if (z < 0.0f)
+        z = -z;
+    if (z > 0.01f)
+        return false;
+
+    if (CVector{ x, y, z }.SquaredMagnitude() > sq(0.01f))
+        return false;
+
+    return IsEntityEntirelyInside3D(vehicle, 0.0f);
 }
 
 // 0x448BE0
