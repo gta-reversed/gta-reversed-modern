@@ -395,7 +395,7 @@ void CPickups::RemoveUnnecessaryPickups(const CVector& posn, float radius) {
 
 // 0x455000
 void CPickups::RenderPickUpText() {
-    plugin::Call<0x455000>();
+    return plugin::Call<0x455000>();
 
     for (auto& message : std::span{ aMessages.data(), NumMessages }) {
         if (!message.price) {

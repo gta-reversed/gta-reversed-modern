@@ -227,7 +227,7 @@ void CBirds::Update() {
 
     auto iBirdIndex = CTimer::GetFrameCounter() % std::size(aBirds);
     auto& checkedBird = aBirds[iBirdIndex];
-    if (checkedBird.m_bCreated && DistanceBetweenPoints2D(CVector2D(checkedBird.m_vecPosn), CVector2D(vecCamPos)) > checkedBird.m_fMaxBirdDistance)
+    if (checkedBird.m_bCreated && DistanceBetweenPoints2D(vecCamPos, checkedBird.m_vecPosn) > checkedBird.m_fMaxBirdDistance)
     {
         checkedBird.m_bCreated = false;
         uiNumberOfBirds--;

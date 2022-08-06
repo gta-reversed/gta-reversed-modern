@@ -79,18 +79,19 @@ void CAEAudioChannel::SetFrequencyScalingFactor(float factor) {
     SetFrequency(newFreq);
 
     if (m_bNoScalingFactor) {
-        const auto curPos = GetCurrentPlaybackPosition();
-        if (curPos != 0)
-            m_pDirectSoundBuffer->SetVolume(-10000);
+        if (m_pDirectSoundBuffer) {
+            const auto curPos = GetCurrentPlaybackPosition();
+            if (curPos != 0) {
+                m_pDirectSoundBuffer->SetVolume(-10000);
+            }
 
-        if (m_pDirectSoundBuffer)
             m_pDirectSoundBuffer->Play(0, 0, m_bLooped);
 
-        if (curPos != 0 && !AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, -2, false)) {
-            const auto volume = static_cast<LONG>(m_fVolume * 100.0F);
-            m_pDirectSoundBuffer->SetVolume(volume);
+            if (curPos != 0 && !AESmoothFadeThread.RequestFade(m_pDirectSoundBuffer, m_fVolume, -2, false)) {
+                const auto volume = static_cast<LONG>(m_fVolume * 100.0F);
+                m_pDirectSoundBuffer->SetVolume(volume);
+            }
         }
-
         m_bNoScalingFactor = false;
     }
 }

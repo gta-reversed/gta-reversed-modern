@@ -10,32 +10,27 @@ class CBaseModelInfo;
 
 class CModelInfoAccelerator {
 public:
-    CModelInfoAccelerator() { CModelInfoAccelerator::Init(); }
-    ~CModelInfoAccelerator() {}
-
-public:
     uint16* m_pIDs;
     uint16  m_nNumIDs;
     char    m_szFilePath[20];
-    char    field_1A;
+    bool    field_1A; // always false
     bool    m_bFileRead;
 
-public:
     static constexpr int32 BUFFER_SIZE = 41100;
 
 public:
-    static void InjectHooks();
+    CModelInfoAccelerator();
+    ~CModelInfoAccelerator() = default;
 
     void Init();
     void AddModelInfoId(uint16 modelId);
     uint16 GetNextModelInfoId();
     void AllocModelInfoIds();
     void FreeModelInfoIds();
-    void GetEntry(CBaseModelInfo** arg0, int32* arg1, char* arg2);
-    void End(char* arg0);
+    void GetEntry(CBaseModelInfo** mi, int32* arg1, char* arg2);
+    bool Begin(const char* filePath);
+    void End(const char* filePath);
     bool GetModelInfoIdFile();
     void EndOfLoadPhase();
-    bool Begin(char* filePath);
 };
-
 VALIDATE_SIZE(CModelInfoAccelerator, 0x1C);

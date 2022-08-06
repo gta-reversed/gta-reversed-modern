@@ -26,7 +26,6 @@ CZoneInfo*& CPopCycle::m_pCurrZoneInfo = *(CZoneInfo**)0xC0BC68;
 int32& CPopCycle::m_nCurrentZoneType = *(int32*)0xC0BC6C;
 int32& CPopCycle::m_nCurrentTimeOfWeek = *(int32*)0xC0BC70;
 int32& CPopCycle::m_nCurrentTimeIndex = *(int32*)0xC0BC74;
-char* CPopCycle::m_nPercTypeGroup = (char*)0xC0BC78;
 uint8* CPopCycle::m_nPercOther = (uint8*)0xC0DE38;
 uint8* CPopCycle::m_nPercCops = (uint8*)0xC0E018;
 uint8* CPopCycle::m_nPercGang = (uint8*)0xC0E1F8;
@@ -34,6 +33,11 @@ uint8* CPopCycle::m_nPercDealers = (uint8*)0xC0E3D8;
 uint8* CPopCycle::m_nMaxNumCars = (uint8*)0xC0E5B8;
 uint8* CPopCycle::m_nMaxNumPeds = (uint8*)0xC0E798;
 float& CPopCycle::m_NumDealers_Peds = *(float*)0xC0E978;
+
+// 0x5BC090
+void CPopCycle::Initialise() {
+    plugin::Call<0x5BC090>();
+}
 
 // 0x60FBD0
 bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, bool arg4) {
@@ -43,11 +47,6 @@ bool CPopCycle::FindNewPedType(ePedType* arg1, int32* modelIndex, bool arg3, boo
 // 0x610310
 float CPopCycle::GetCurrentPercOther_Peds() {
     return plugin::CallAndReturn<float, 0x610310>();
-}
-
-// 0x5BC090
-void CPopCycle::Initialise() {
-    plugin::Call<0x5BC090>();
 }
 
 // 0x610150
@@ -77,7 +76,9 @@ int32 CPopCycle::PickPedMIToStreamInForCurrentZone() {
 
 // 0x610490
 void CPopCycle::PlayerKilledADealer() {
-    plugin::Call<0x610490>();
+    if (m_pCurrZoneInfo && m_pCurrZoneInfo->DrugDealerCounter) {
+        m_pCurrZoneInfo->DrugDealerCounter--;
+    }
 }
 
 // 0x610BF0
@@ -87,7 +88,17 @@ void CPopCycle::Update() {
 
 // 0x610560
 void CPopCycle::UpdateAreaDodgyness() {
-    plugin::Call<0x610560>();
+    return plugin::Call<0x610560>();
+
+    m_fCurrentZoneDodgyness = 0.0f;
+    m_fCurrentZoneDodgyness = (float)m_pCurrZoneInfo->DrugDealerCounter * 0.07f;
+    m_fCurrentZoneDodgyness = std::accumulate(
+        std::begin(m_pCurrZoneInfo->GangDensity),
+        std::end(m_pCurrZoneInfo->GangDensity),
+        m_fCurrentZoneDodgyness,
+        [](const auto& a, const auto& b) { return a + float(b) / 100.0f; }
+    );
+    m_fCurrentZoneDodgyness = std::min(m_fCurrentZoneDodgyness, 1.0f);
 }
 
 // 0x6104B0

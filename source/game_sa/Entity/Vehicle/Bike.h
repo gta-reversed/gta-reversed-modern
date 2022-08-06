@@ -101,7 +101,7 @@ public:
 
     void Fix() override;
     void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
-    void ProcessDrivingAnims(CPed* driver, uint8 bBlend) override;
+    void ProcessDrivingAnims(CPed* driver, bool blend) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     void ProcessControlInputs(uint8 playerNum) override;
     int32 ProcessEntityCollision(CEntity* entity, CColPoint* colPoint) override;
@@ -182,7 +182,7 @@ private:
 
     void Fix_Reversed() { CBike::Fix(); }
     void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CBike::BlowUpCar(damager, bHideExplosion); }
-    void ProcessDrivingAnims_Reversed(CPed* driver, uint8 bBlend) { CBike::ProcessDrivingAnims(driver, bBlend); }
+    void ProcessDrivingAnims_Reversed(CPed* driver, bool blend) { CBike::ProcessDrivingAnims(driver, blend); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CBike::BurstTyre(tyreComponentId, bPhysicalEffect); }
     void ProcessControlInputs_Reversed(uint8 playerNum) { CBike::ProcessControlInputs(playerNum); }
     int32 ProcessEntityCollision_Reversed(CEntity* entity, CColPoint* colPoint) { return CBike::ProcessEntityCollision(entity, colPoint); }

@@ -184,7 +184,7 @@ public:
         info->m_nMoney =                    m_nMoney;
         info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
         info->m_nPlayerState =              m_nPlayerState;
-        info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone;
+        // info->m_nCarDensityForCurrentZone = m_nCarDensityForCurrentZone; redundant
         info->m_fRoadDensityAroundPlayer =  m_fRoadDensityAroundPlayer;
         info->m_nDisplayMoney =             m_nDisplayMoney;
         info->m_nNumHoursDidntEat =         m_nNumHoursDidntEat;

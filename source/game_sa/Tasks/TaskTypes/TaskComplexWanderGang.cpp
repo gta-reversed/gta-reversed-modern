@@ -7,7 +7,7 @@ CTaskComplexWanderGang::CTaskComplexWanderGang(eMoveState moveState, uint8 dir, 
     : CTaskComplexWander(moveState, dir, bWanderSensibly, fTargetRadius)
 {
     m_nTime = 0;
-    dword2C = 0;
+    // dword2C = 0; V519 The 'dword2C' variable is assigned values twice successively. Perhaps this is a mistake.
     byte30 = 0;
     byte31 = 0;
     dword34 = a4;

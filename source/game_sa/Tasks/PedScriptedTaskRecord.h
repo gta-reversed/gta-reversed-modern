@@ -25,13 +25,13 @@ public:
     CPed*                m_ped;
     eScriptedTaskStatus  m_status;
 
+public:
     static void InjectHooks();
+    CPedScriptedTaskRecordData* Constructor();
 
     CPedScriptedTaskRecordData();
-    ~CPedScriptedTaskRecordData() {}
-private:
-    CPedScriptedTaskRecordData* Constructor();
-public:
+    ~CPedScriptedTaskRecordData() = default;
+
     void AssociateWithTask(CTask* task);
     void AssociateWithEvent(CEventScriptCommand* event);
     void Set(CPed* ped, int32 opcode, CEventScriptCommand* event);
@@ -40,7 +40,6 @@ public:
     void SetAsAttractorScriptTask(CPed* ped, int32 opcode, CTask* task);
     void Flush();
 };
-
 VALIDATE_SIZE(CPedScriptedTaskRecordData, 0x14);
 
 class CPedScriptedTaskRecord {

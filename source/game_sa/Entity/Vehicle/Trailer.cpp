@@ -40,7 +40,7 @@ CTrailer::CTrailer(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(
     if (m_nModelIndex == MODEL_BAGBOXA || m_nModelIndex == MODEL_BAGBOXB)
         m_fTrailerTowedRatio = -1000.0f;
 
-    SetupSuspensionLines();
+    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
 
     m_nStatus = eEntityStatus::STATUS_ABANDONED;
 }
@@ -128,7 +128,7 @@ void CTrailer::ScanForTowLink() {
             continue;
         }
 
-        const auto dist = DistanceBetweenPoints2D(towHitchPos, towBarPos);
+        const auto dist = DistanceBetweenPoints2D(towBarPos, towHitchPos);
         if (dist < RELINK_TRAILER_DIFF_LIMIT_XY && std::fabs(towHitchPos.z - towBarPos.z) < RELINK_TRAILER_DIFF_LIMIT_Z) {
             SetTowLink(vehicle, false);
             return;

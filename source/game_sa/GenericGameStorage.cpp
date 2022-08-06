@@ -463,7 +463,7 @@ bool CGenericGameStorage::CheckSlotDataValid(int32 slot) {
     assert(slot < MAX_SAVEGAME_SLOTS);
 
     char fileName[MAX_PATH]{};
-    C_PcSave::GenerateGameFilename(slot, fileName);
+    s_PcSaveHelper.GenerateGameFilename(slot, fileName);
 
     if (CheckDataNotCorrupt(slot, fileName)) {
         CStreaming::DeleteAllRwObjects();
@@ -491,7 +491,7 @@ bool CGenericGameStorage::LoadDataFromWorkBuffer(void* data, int32 size) {
         if (LoadDataFromWorkBuffer(data, maxSize)) {
             if (LoadWorkBuffer()) {
                 pos = ms_WorkBufferPos;
-                data = (byte*)data + maxSize;
+                data = (uint8*)data + maxSize;
                 size -= maxSize;
             }
         }
@@ -670,7 +670,7 @@ bool CGenericGameStorage::OpenFileForReading(const char* fileName, int32 slot) {
 
     if (fileName) {
         strcpy_s(ms_LoadFileName, fileName);
-        C_PcSave::GenerateGameFilename(slot, ms_LoadFileNameWithPath);
+        s_PcSaveHelper.GenerateGameFilename(slot, ms_LoadFileNameWithPath);
     }
 
     ms_FileHandle = CFileMgr::OpenFile(ms_LoadFileName, "rb");

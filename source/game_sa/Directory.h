@@ -15,7 +15,7 @@ public:
     struct DirectoryInfo {
         uint32 m_nOffset;           // Offset (in sectors)
         uint16 m_nStreamingSize;    // Size (in sectors)
-        uint16 m_nSizeInArchive;    // Size in archive (in sectors) (always 0 when read)       
+        uint16 m_nSizeInArchive;    // Size in archive (in sectors) (always 0 when read)
         char   m_szName[24];        // Name of the file with extension (null terminated).
     };
 
@@ -25,17 +25,18 @@ public:
     bool           m_bOwnsEntries{};
 
 public:
-    CDirectory();
-    CDirectory(size_t capacity);
+    CDirectory() = default; // 0x532290
+    explicit CDirectory(size_t capacity);
     ~CDirectory();
 
     void Init(int32 capacity, DirectoryInfo* entries);
     void AddItem(const DirectoryInfo& dirInfo);
+    void AddItem(const DirectoryInfo &dirInfo, int32 imgId);
     void ReadDirFile(const char* filename);
     bool WriteDirFile(const char* fileName);
-    DirectoryInfo* FindItem(const char* itemName);
-    bool FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize);
-    bool FindItem(uint32 hashKey, uint32& outOffset, uint32& outStreamingSize);
+    DirectoryInfo* FindItem(const char* itemName) const;
+    bool FindItem(const char* name, uint32& outOffset, uint32& outStreamingSize) const;
+    bool FindItem(uint32 hashKey, uint32& outOffset, uint32& outStreamingSize) const;
 
 private:
     friend void InjectHooksMain();
