@@ -131,7 +131,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
     RH_ScopedInstall(CarHasRoof, 0x6D25D0);
     RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
-    // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
+    RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
     // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     // RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
@@ -1948,7 +1948,13 @@ RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data) {
 
 // 0x6D2700
 void CVehicle::SetComponentVisibility(RwFrame* component, uint32 visibilityState) { // see eAtomicComponentFlag
-    ((void(__thiscall*)(CVehicle*, RwFrame*, uint32))0x6D2700)(this, component, visibilityState);
+    if (component) {
+        if (visibilityState == eAtomicComponentFlag::ATOMIC_IS_DAM_STATE) {
+            vehicleFlags.bIsDamaged = true;
+        }
+        RwFrameForAllObjects(component, SetVehicleAtomicVisibilityCB, (void*)visibilityState);
+        RwFrameForAllChildren(component, SetVehicleAtomicVisibilityCB, (void*)visibilityState);
+    }
 }
 
 // 0x6D2740
