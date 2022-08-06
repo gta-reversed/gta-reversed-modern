@@ -1757,7 +1757,13 @@ bool CVehicle::CanDoorsBeDamaged() {
 
 // 0x6D1E80
 bool CVehicle::CanPedEnterCar() {
-    return ((bool(__thiscall*)(CVehicle*))0x6D1E80)(this);
+    if (const auto upZ = GetUp().z; IsBike() || upZ > .1f || upZ < -.1f) {
+        return true;
+    }
+
+    return rng::all_of(std::array{ m_vecTurnSpeed, m_vecMoveSpeed }, [](const CVector& velocity) {
+        return velocity.SquaredMagnitude() <= .04f;
+    });
 }
 
 // 0x6D21F0
