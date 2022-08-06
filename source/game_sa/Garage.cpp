@@ -28,8 +28,8 @@ void CGarage::InjectHooks() {
 // 0x4479F0
 void CGarage::BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition) {
     const auto fAngle = fDoorPosition * -HALF_PI;
-    const auto fSin = sin(fAngle);
-    const auto fCos = cos(fAngle);
+    const auto fSin = std::sin(fAngle);
+    const auto fCos = std::cos(fAngle);
     CMatrix& matrix = entity->GetMatrix();
 
     const auto& vecForward = matrix.GetForward();
@@ -108,11 +108,6 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
     return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
 }
 
-// 0x448740
-bool CGarage::IsPointInsideGarage(CVector point) {
-    return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
-}
-
 // 0x4486C0
 eGarageDoorState CGarage::PlayerArrestedOrDied() {
     return plugin::CallMethodAndReturn<eGarageDoorState, 0x4486C0, CGarage*>(this);
@@ -140,9 +135,47 @@ void CGarage::InitDoorsAtStart() {
     plugin::CallMethod<0x447600, CGarage*>(this);
 }
 
+// 0x448740
+bool CGarage::IsPointInsideGarage(CVector point) {
+    return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
+
+    if (point.z < m_vPosn.z || point.z > m_fTopZ)
+        return false;
+
+    const auto x0 = point.x - m_vPosn.x;
+    const auto y0 = point.y - m_vPosn.y;
+
+    auto sqMagA = x0 * m_vDirectionA.x + y0 * m_vDirectionA.y;
+    if (sqMagA < 0.0f || sqMagA > m_fWidth)
+        return false;
+
+    auto sqMagB = x0 * m_vDirectionB.x + y0 * m_vDirectionB.y;
+    if (sqMagB < 0.0f || sqMagB > m_fHeight)
+        return false;
+
+    return 1;
+}
+
+// See CZoneDef::IsPointWithin
 // 0x4487D0
 bool CGarage::IsPointInsideGarage(CVector point, float radius) {
     return plugin::CallMethodAndReturn<bool, 0x4487D0, CGarage*, CVector, float>(this, point, radius);
+
+    if (m_vPosn.z - radius > point.z || radius + m_fTopZ < point.z)
+        return false;
+
+    const auto x0 = point.x - m_vPosn.x;
+    const auto y0 = point.y - m_vPosn.y;
+
+    auto sqMagA = x0 * m_vDirectionA.x + y0 * m_vDirectionA.y;
+    if (sqMagA < -radius || sqMagA > radius + m_fWidth)
+        return false;
+
+    auto sqMagB = x0 * m_vDirectionB.x + y0 * m_vDirectionB.y;
+    if (sqMagB < -radius || sqMagB > radius + m_fHeight)
+        return false;
+
+    return true;
 }
 
 // 0x44AA50
