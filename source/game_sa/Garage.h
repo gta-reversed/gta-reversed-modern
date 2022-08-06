@@ -1,67 +1,9 @@
 #pragma once
 
 #include "AEDoorAudioEntity.h"
+#include "eGarage.h"
+
 class CStoredCar;
-
-// Based on https://gtamods.com/wiki/Garage
-enum eGarageType : uint8 {
-    INVALID = 0,
-    ONLY_TARGET_VEH = 1,
-    BOMBSHOP_TIMED = 2,
-    BOMBSHOP_ENGINE = 3,
-    BOMBSHOP_REMOTE = 4,
-    PAYNSPRAY = 5,
-
-    UNKN_CLOSESONTOUCH = 11,
-    OPEN_FOR_TARGET_FREEZE_PLAYER = 14,
-    SCRIPT_ONLY_OPEN = 15,
-
-    SAFEHOUSE_GANTON = 16,
-    SAFEHOUSE_SANTAMARIA = 17,
-    SAGEHOUSE_ROCKSHORE = 18,
-
-    SCRIPT_CONTROLLED = 19,
-    STAY_OPEN_WITH_CAR_INSIDE = 20,
-    CLOSE_WITH_CAR_DONT_OPEN_AGAIN = 21,
-    SCRIPT_OPEN_FREEZE_WHEN_CLOSING = 23,
-
-    SAFEHOUSE_FORTCARSON = 24,
-    SAFEHOUSE_VERDANTMEADOWS = 25,
-    SAFEHOUSE_DILLIMORE = 26,
-    SAFEHOUSE_PRICKLEPINE = 27,
-    SAFEHOUSE_WHITEWOOD = 28,
-    SAFEHOUSE_PALOMINOCREEK = 29,
-    SAFEHOUSE_REDSANDSWEST = 30,
-    SAFEHOUSE_ELCORONA = 31,
-    SAFEHOUSE_MULHOLLAND = 32,
-
-    IMPOUND_LS = 33,
-    IMPOUND_SF = 34,
-    IMPOUND_LV = 35,
-
-    TUNING_LOCO_LOW_CO = 36,
-    TUNING_WHEEL_ARCH_ANGELS = 37,
-    TUNING_TRANSFENDER = 38,
-
-    SAFEHOUSE_CALTONHEIGHTS = 39,
-    SAFEHOUSE_PARADISO = 40,
-    SAFEHOUSE_DOHERTY = 41,
-    SAFEHOUSE_HASHBURY = 42,
-
-    BURGLARY = 43,
-
-    HANGAR_AT400 = 44,
-    HANGAR_ABANDONED_AIRPORT = 45
-};
-
-enum eGarageDoorState : uint8 {
-    GARAGE_DOOR_CLOSED = 0,
-    GARAGE_DOOR_OPEN = 1,
-    GARAGE_DOOR_CLOSING = 2,
-    GARAGE_DOOR_OPENING = 3,
-    GARAGE_DOOR_WAITING_PLAYER_TO_EXIT = 4,
-    GARAGE_DOOR_CLOSED_DROPPED_CAR = 5,
-};
 
 class CGarage {
 public:
@@ -105,44 +47,52 @@ public:
     CGarage() = default;  // 0x4470E0
     ~CGarage() = default; // 0x447110
 
+    void InitDoorsAtStart();
+    void Update(int32 garageId);
+
     void TidyUpGarageClose();
     void TidyUpGarage();
+
     void StoreAndRemoveCarsForThisHideOut(CStoredCar* car, int32 maxSlot);
+    bool RestoreCarsForThisHideOut(CStoredCar* car);
+    bool RestoreCarsForThisImpoundingGarage(CStoredCar* car);
+
     void RemoveCarsBlockingDoorNotInside();
+
     bool IsEntityTouching3D(CEntity* entity);
     bool IsEntityEntirelyOutside(CEntity* entity, float radius);
     bool IsStaticPlayerCarEntirelyInside();
     bool IsEntityEntirelyInside3D(CEntity* entity, float radius);
     bool IsPointInsideGarage(CVector point);
+    bool IsPointInsideGarage(CVector point, float radius);
+    bool IsPlayerOutsideGarage(float fRadius);
+    bool IsPlayerEntirelyInsideGarage();
+    bool IsAnyOtherCarTouchingGarage(CVehicle* vehicle);
+    bool IsAnyOtherPedTouchingGarage(CPed* ped);
+    bool IsAnyCarBlockingDoor();
+    bool IsGarageEmpty();
+
     eGarageDoorState PlayerArrestedOrDied();
+
     void OpenThisGarage();
     void CloseThisGarage();
-    void InitDoorsAtStart();
-    bool IsPointInsideGarage(CVector point, float radius);
-    void Update(int32 garageId);
+
+    bool SlideDoorOpen();
+    bool SlideDoorClosed();
 
     bool RightModTypeForThisGarage(CVehicle* vehicle);
     float CalcDistToGarageRectangleSquared(float, float);
     void NeatlyLineUpStoredCars(CStoredCar* car);
-    bool RestoreCarsForThisHideOut(CStoredCar* car);
-    bool RestoreCarsForThisImpoundingGarage(CStoredCar* car);
+
     int32 FindMaxNumStoredCarsForGarage();
-    bool IsPlayerOutsideGarage(float fRadius);
-    bool IsPlayerEntirelyInsideGarage();
     bool EntityHasASphereWayOutsideGarage(CEntity* entity, float fRadius);
 
-    bool IsAnyOtherCarTouchingGarage(CVehicle* vehicle);
-    bool IsAnyOtherPedTouchingGarage(CPed* ped);
-
     void ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle);
-    bool IsAnyCarBlockingDoor();
     int32 CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle);
     void StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, int32 iMaxSlot);
     void CenterCarInGarage(CVehicle* vehicle);
     void FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor);
-    bool SlideDoorOpen();
-    bool SlideDoorClosed();
-    bool IsGarageEmpty();
+
     static void BuildRotatedDoorMatrix(CEntity* entity, float fDoorPosition);
 
     // NOTSA section
@@ -153,27 +103,4 @@ public:
     void SetClosed() { m_nDoorState = GARAGE_DOOR_CLOSED; }
     void ResetDoorPosition() { m_fDoorPosition = 0.0f; } // todo: not good name
 };
-
 VALIDATE_SIZE(CGarage, 0xD8);
-
-struct CSaveGarage {
-    eGarageType      m_nType;
-    eGarageDoorState m_nDoorState;
-    uint8            m_nFlags;
-    CVector          m_vPosn;
-    CVector2D        m_vDirectionA, m_vDirectionB;
-    float            m_fTopZ;
-    float            m_fWidth, m_fHeight;
-    float            m_fLeftCoord;
-    float            m_fRightCoord;
-    float            m_fFrontCoord;
-    float            m_fBackCoord;
-    float            m_fDoorPosition;
-    uint32           m_nTimeToOpen;
-    char             m_anName[8];
-    eGarageType      m_nOriginalType;
-
-    void CopyGarageIntoSaveGarage(Const CGarage& garage);
-    void CopyGarageOutOfSaveGarage(CGarage& garage) const;
-};
-VALIDATE_SIZE(CSaveGarage, 0x50);

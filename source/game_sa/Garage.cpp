@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Garage.h"
+#include "StoredCar.h"
 
 void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
@@ -25,6 +26,20 @@ void CGarage::InjectHooks() {
     // RH_ScopedInstall(Update, 0x44AA50);                                                                //
     // RH_ScopedInstall(IsAnyOtherCarTouchingGarage, 0x449100);                                           //
     // RH_ScopedInstall(IsAnyOtherPedTouchingGarage, 0x4493E0);                                           //
+
+    // RH_ScopedInstall(RightModTypeForThisGarage, 0x0);                                                  //
+    // RH_ScopedInstall(CalcDistToGarageRectangleSquared, 0x0);                                           //
+    // RH_ScopedInstall(NeatlyLineUpStoredCars, 0x0);                                                     //
+    // RH_ScopedInstall(FindMaxNumStoredCarsForGarage, 0x0);                                              //
+    // RH_ScopedInstall(IsPlayerOutsideGarage, 0x448E50);                                                 //
+    // RH_ScopedInstall(IsPlayerEntirelyInsideGarage, 0x448EA0);                                          //
+    // RH_ScopedInstall(ThrowCarsNearDoorOutOfGarage, 0x0);                                               //
+    // RH_ScopedInstall(IsAnyCarBlockingDoor, 0x0);                                                       //
+    // RH_ScopedInstall(CountCarsWithCenterPointWithinGarage, 0x0);                                       //
+    // RH_ScopedInstall(StoreAndRemoveCarsForThisImpoundingGarage, 0x449A50);                             //
+    // RH_ScopedInstall(FindDoorsWithGarage, 0x449FF0);                                                   //
+    // RH_ScopedInstall(SlideDoorOpen, 0x44A660);                                                         //
+    // RH_ScopedInstall(SlideDoorClosed, 0x44A750);                                                       //
 }
 
 // 0x4479F0
@@ -78,6 +93,16 @@ void CGarage::StoreAndRemoveCarsForThisHideOut(CStoredCar* storedCars, int32 max
     for (auto i = storedCarIdx; i < NUM_GARAGE_STORED_CARS; i++) {
         storedCars[i].Clear();
     }
+}
+
+// 0x448550
+bool CGarage::RestoreCarsForThisHideOut(CStoredCar* car) {
+    return 0;
+}
+
+// 0x4485C0
+bool CGarage::RestoreCarsForThisImpoundingGarage(CStoredCar* car) {
+    return 0;
 }
 
 // 0x449050
@@ -392,45 +417,83 @@ void CGarage::CenterCarInGarage(CVehicle* vehicle) {
     }
 }
 
-// 0x5D3020
-void CSaveGarage::CopyGarageIntoSaveGarage(Const CGarage& g) {
-    m_nType         = g.m_nType;
-    m_nDoorState    = g.m_nDoorState;
-    m_nFlags        = g.m_nFlags;
-    m_vPosn         = g.m_vPosn;
-    m_vDirectionA   = g.m_vDirectionA;
-    m_vDirectionB   = g.m_vDirectionB;
-    m_fTopZ         = g.m_fTopZ;
-    m_fWidth        = g.m_fWidth;
-    m_fHeight       = g.m_fHeight;
-    m_fLeftCoord    = g.m_fLeftCoord;
-    m_fRightCoord   = g.m_fRightCoord;
-    m_fFrontCoord   = g.m_fFrontCoord;
-    m_fBackCoord    = g.m_fBackCoord;
-    m_fDoorPosition = g.m_fDoorPosition;
-    m_nTimeToOpen   = g.m_nTimeToOpen;
-    m_nOriginalType = g.m_nOriginalType;
-    strcpy_s(m_anName, g.m_anName);
+bool CGarage::RightModTypeForThisGarage(CVehicle* vehicle) {
+    return 0;
 }
 
-// 0x5D30C0
-void CSaveGarage::CopyGarageOutOfSaveGarage(CGarage& g) const {
-    g.m_nType         = m_nType;
-    g.m_nDoorState    = m_nDoorState;
-    g.m_nFlags        = m_nFlags;
-    g.m_vPosn         = m_vPosn;
-    g.m_vDirectionA   = m_vDirectionA;
-    g.m_vDirectionB   = m_vDirectionB;
-    g.m_fTopZ         = m_fTopZ;
-    g.m_fWidth        = m_fWidth;
-    g.m_fHeight       = m_fHeight;
-    g.m_fLeftCoord    = m_fLeftCoord;
-    g.m_fRightCoord   = m_fRightCoord;
-    g.m_fFrontCoord   = m_fFrontCoord;
-    g.m_fBackCoord    = m_fBackCoord;
-    g.m_fDoorPosition = m_fDoorPosition;
-    g.m_nTimeToOpen   = m_nTimeToOpen;
-    g.m_nOriginalType = m_nOriginalType;
-    g.m_pTargetCar    = nullptr;
-    strcpy_s(g.m_anName, m_anName);
+// untested
+float CGarage::CalcDistToGarageRectangleSquared(float x, float y) {
+    float dx{}, dy{};
+
+    if (m_fLeftCoord > x || x > m_fRightCoord) {
+        dx = x - m_fLeftCoord * x - m_fLeftCoord;
+    }
+
+    if (m_fFrontCoord > y || y > m_fBackCoord) {
+        dy = y - m_fFrontCoord * y - m_fFrontCoord;
+    }
+
+    return dx + dy;
+}
+
+void CGarage::NeatlyLineUpStoredCars(CStoredCar* car) {
+
+}
+
+int32 CGarage::FindMaxNumStoredCarsForGarage() {
+    return 0;
+}
+
+// 0x448E50
+bool CGarage::IsPlayerOutsideGarage(float fRadius) {
+    CEntity* entity;
+    auto vehicle = FindPlayerVehicle();
+    if (vehicle)
+        entity = vehicle;
+    else
+        entity = FindPlayerPed();
+    return IsEntityEntirelyOutside(entity, fRadius);
+}
+
+// 0x448EA0
+bool CGarage::IsPlayerEntirelyInsideGarage() {
+    CEntity* entity;
+    auto vehicle = FindPlayerVehicle();
+    if (vehicle)
+        entity = vehicle;
+    else
+        entity = FindPlayerPed();
+    return IsEntityEntirelyInside3D(entity, 0.0f);
+}
+
+void CGarage::ThrowCarsNearDoorOutOfGarage(CVehicle* ignoredVehicle) {
+
+}
+
+bool CGarage::IsAnyCarBlockingDoor() {
+    return 0;
+}
+
+int32 CGarage::CountCarsWithCenterPointWithinGarage(CVehicle* ignoredVehicle) {
+    return 0;
+}
+
+// 0x449A50
+void CGarage::StoreAndRemoveCarsForThisImpoundingGarage(CStoredCar* storedCars, int32 iMaxSlot) {
+
+}
+
+// 0x449FF0
+void CGarage::FindDoorsWithGarage(CObject** ppFirstDoor, CObject** ppSecondDoor) {
+
+}
+
+// 0x44A660
+bool CGarage::SlideDoorOpen() {
+    return 0;
+}
+
+// 0x44A750
+bool CGarage::SlideDoorClosed() {
+    return 0;
 }
