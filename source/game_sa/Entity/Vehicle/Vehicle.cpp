@@ -1646,22 +1646,20 @@ CPed* CVehicle::SetupPassenger(int32 seatIdx, int32 gangPedType, bool createAsMa
     // has the same model id.
     // In case they do, the passenger that we've just added will be removed
     // and nullptr will be returned.
-    if (!ShouldCheckModels()) {
-        return psgrAdded;
-    }
+    if (ShouldCheckModels()) {
+        const auto ProcessOccupant = [&](CPed* occupant) {
+            if (occupant && occupant->m_nModelIndex == psgrAdded->m_nModelIndex) {
+                RemovePassenger(psgrAdded);
+                CPopulation::RemovePed(psgrAdded);
+                return false;
+            }
+            return true;
+        };
 
-    const auto ProcessOccupant = [&](CPed* occupant) {
-        if (occupant && occupant->m_nModelIndex == psgrAdded->m_nModelIndex) {
-            RemovePassenger(psgrAdded);
-            CPopulation::RemovePed(psgrAdded);
-            return false;
+        // Not sure why this checks only up to the seat the passenger was added to, but okay.
+        if (!ProcessOccupant(m_pDriver) || !rng::all_of(std::span{ m_apPassengers, (size_t)seatIdx }, ProcessOccupant)) {
+            return nullptr;
         }
-        return true;
-    };
-
-    // Not sure why this checks only up to the seat the passenger was added to, but okay.
-    if (!ProcessOccupant(m_pDriver) || !rng::all_of(std::span{ m_apPassengers, (size_t)seatIdx }, ProcessOccupant)) {
-        return nullptr;
     }
 
     return psgrAdded;
