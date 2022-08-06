@@ -106,6 +106,26 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
 // 0x448BE0
 bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
     return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
+
+    const auto& pos = entity->GetPosition();
+    if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
+        return false;
+    if (m_fFrontCoord - radius > pos.y || radius + m_fBackCoord < pos.y)
+        return false;
+    if (m_vPosn.z - radius > pos.z || radius + m_fTopZ < pos.z)
+        return false;
+
+    auto cd = entity->GetColModel()->m_pColData;
+    if (!cd)
+        return true;
+
+    for (auto& sphere : cd->GetSpheres()) {
+        CVector out = MultiplyMatrixWithVector(entity->GetMatrix(), sphere.GetCenter());
+        if (IsPointInsideGarage(out, radius - sphere.m_fRadius)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x4486C0
