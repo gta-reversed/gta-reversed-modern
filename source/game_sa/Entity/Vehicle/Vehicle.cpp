@@ -8,6 +8,7 @@
 
 #include "Vehicle.h"
 
+#include "CustomCarPlateMgr.h"
 #include "Buoyancy.h"
 #include "CarCtrl.h"
 #include "VehicleSaveStructure.h"
@@ -90,18 +91,18 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CalculateLightingFromCollision, 0x6D0CF0);
     RH_ScopedInstall(ProcessWheel, 0x6D6C00);
     RH_ScopedOverloadedInstall(IsPassenger, "Ped", 0x6D1BD0, bool(CVehicle::*)(CPed*) const);
-    RH_ScopedOverloadedInstall(IsPassenger, "Int", 0x6D1C00, bool(CVehicle::*)(int32) const);
+    RH_ScopedOverloadedInstall(IsPassenger, "ModelID", 0x6D1C00, bool(CVehicle::*)(int32) const);
     RH_ScopedOverloadedInstall(IsDriver, "Ped", 0x6D1C40, bool(CVehicle::*)(CPed*) const);
-    RH_ScopedOverloadedInstall(IsDriver, "Int", 0x6D1C60, bool(CVehicle::*)(int32) const);
+    RH_ScopedOverloadedInstall(IsDriver, "ModelID", 0x6D1C60, bool(CVehicle::*)(int32) const);
     RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
     RH_ScopedInstall(ProcessBoatControl, 0x6DBCE0);
     RH_ScopedInstall(ChangeLawEnforcerState, 0x6D2330);
     RH_ScopedInstall(GetVehicleAppearance, 0x6D1080);
     RH_ScopedInstall(DoHeadLightBeam, 0x6E0E20);
-    // RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30); register problem?
+    // RH_ScopedInstall(GetPlaneNumGuns, 0x6D3F30); // ??: register problem?
 
-    // RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
+    RH_ScopedInstall(CustomCarPlate_TextureCreate, 0x6D10E0);
     // RH_ScopedInstall(CustomCarPlate_TextureDestroy, 0x6D1150);
     RH_ScopedInstall(CanBeDeleted, 0x6D1180);
     RH_ScopedInstall(ProcessWheelRotation, 0x6D1230);
@@ -1290,7 +1291,22 @@ eVehicleAppearance CVehicle::GetVehicleAppearance() const {
 // returns false if vehicle model has no car plate material
 // 0x6D10E0
 bool CVehicle::CustomCarPlate_TextureCreate(CVehicleModelInfo* model) {
-    return plugin::CallMethodAndReturn<bool, 0x6D10E0, CVehicle*, CVehicleModelInfo*>(this, model);
+    m_pCustomCarPlate = nullptr;
+
+    if (!model->m_pPlateMaterial) {
+        return false;
+    }
+
+    if (const auto text = model->GetCustomCarPlateText()) {
+        m_pCustomCarPlate = CCustomCarPlateMgr::CreatePlateTexture(text, model->m_nPlateType);
+        model->SetCustomCarPlateText(text);
+        model->m_nPlateType = -1;
+    } else {
+        m_pCustomCarPlate = RpMaterialGetTexture(model->m_pPlateMaterial);
+        RwTextureAddRef(m_pCustomCarPlate);
+    }
+
+    return true;
 }
 
 // 0x6D1150
