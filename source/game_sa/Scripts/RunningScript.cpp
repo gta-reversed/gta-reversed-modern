@@ -3,6 +3,7 @@
 #include "RunningScript.h"
 #include "TheScripts.h"
 #include "CarGenerator.h"
+#include "Hud.h"
 
 // https://library.sannybuilder.com/#/sa
 

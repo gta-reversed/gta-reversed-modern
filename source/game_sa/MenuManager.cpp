@@ -17,6 +17,7 @@
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "platform.h"
+#include "Hud.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 

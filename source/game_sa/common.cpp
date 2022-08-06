@@ -11,11 +11,10 @@
 #include "GxtChar.h"
 #include "CDebugMenu.h"
 #include "CarCtrl.h"
-#include "ColourSet.h"
-#include "GxtChar.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"
 #include "SpecialFX.h"
+#include "Hud.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
