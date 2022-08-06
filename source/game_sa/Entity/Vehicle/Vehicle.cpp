@@ -115,7 +115,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetDriver, 0x6D16A0);
     RH_ScopedInstall(RemoveDriver, 0x6D1950);
     RH_ScopedInstall(SetUpDriver, 0x6D1A50);
-    // RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
+    RH_ScopedInstall(SetupPassenger, 0x6D1AA0);
     // RH_ScopedInstall(KillPedsInVehicle, 0x6D1C80);
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
     RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
@@ -1590,8 +1590,86 @@ CPed* CVehicle::SetUpDriver(int32 gangPedType, bool createAsMale, bool createAsC
 }
 
 // 0x6D1AA0
-CPed* CVehicle::SetupPassenger(int32 seatNumber, int32 pedType, bool arg2, bool arg3) {
-    return ((CPed * (__thiscall*)(CVehicle*, int32, int32, bool, bool))0x6D1AA0)(this, seatNumber, pedType, arg2, arg3);
+CPed* CVehicle::SetupPassenger(int32 seatIdx, int32 gangPedType, bool createAsMale, bool createAsCriminal) {
+    if (const auto psgr = m_apPassengers[seatIdx]) {
+        return psgr;
+    }
+
+    switch (m_nModelIndex) {
+    case MODEL_TAXI:
+    case MODEL_CABBIE:
+    case MODEL_STRETCH: {
+        if (!seatIdx) {
+            // RemovePassenger(m_apPassengers[0]); // Nice C*! => This does nothing, because above we've already ensured that nobody sits here!
+            return nullptr;
+        }
+    }
+    }
+
+    const auto psgrAdded = CPopulation::AddPedInCar(this, false, gangPedType, seatIdx, createAsMale, createAsCriminal);
+
+    const auto ShouldCheckModels = [&] {
+        // unit test: https://godbolt.org/z/deqcso6WT
+        switch (psgrAdded->m_nPedType) {
+        case PED_TYPE_MEDIC:
+        case PED_TYPE_FIREMAN:
+        case PED_TYPE_COP: {
+            return false;
+        }
+        case PED_TYPE_CRIMINAL: { // (ped_added_to_car_type != PED_TYPE_CRIMINAL || pedType < PED_TYPE_GANG8 || pedType > PED_TYPE_SPECIAL) )
+            switch (gangPedType) { // pedType < PED_TYPE_GANG8 || pedType > PED_TYPE_SPECIAL)
+            case PED_TYPE_GANG8:
+            case PED_TYPE_GANG9:
+            case PED_TYPE_GANG10:
+            case PED_TYPE_DEALER:
+            case PED_TYPE_MEDIC:
+            case PED_TYPE_FIREMAN:
+            case PED_TYPE_CRIMINAL:
+            case PED_TYPE_BUM:
+            case PED_TYPE_PROSTITUTE:
+            case PED_TYPE_SPECIAL:
+                return false;
+            }
+            break;
+        }
+        default: {
+            if (IsPedTypeGang(psgrAdded->m_nPedType)) {
+                return false;
+            }
+        }
+        }
+        return true;
+    };
+
+    // In case of some specific ped types we make sure
+    // that no occupant in the seats before the current (eg.: `seatIdx`)
+    // has the same model id.
+    // In case they do, the passenger that we've just added will be removed
+    // and nullptr will be returned.
+    if (!ShouldCheckModels()) {
+        return psgrAdded;
+    }
+
+    const auto ProcessOccupant = [&](CPed* occupant) {
+        if (occupant && occupant->m_nModelIndex == psgrAdded->m_nModelIndex) {
+            RemovePassenger(psgrAdded);
+            CPopulation::RemovePed(psgrAdded);
+            return false;
+        }
+        return true;
+    };
+
+    if (!ProcessOccupant(m_pDriver)) {
+        return nullptr;
+    }
+
+    for (const auto psgr : std::span{m_apPassengers, seatIdx}) { // Not sure why this checks only up to the seat the passenger was added to, but okay.
+        if (!ProcessOccupant(psgr)) {
+            return nullptr;
+        }
+    }
+
+    return psgrAdded;
 }
 
 // 0x6D1BD0

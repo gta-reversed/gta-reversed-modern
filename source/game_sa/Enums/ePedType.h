@@ -37,6 +37,23 @@ enum ePedType : uint32 {
     PED_TYPE_COUNT // 32
 };
 
+static constexpr auto s_GangPedTypes = std::to_array({
+    PED_TYPE_GANG1,
+    PED_TYPE_GANG2,
+    PED_TYPE_GANG3,
+    PED_TYPE_GANG4,
+    PED_TYPE_GANG5,
+    PED_TYPE_GANG6,
+    PED_TYPE_GANG7,
+    PED_TYPE_GANG8,
+    PED_TYPE_GANG9,
+    PED_TYPE_GANG10,
+});
+
+static constexpr bool IsPedTypeGang(ePedType ptype) {
+    return rng::find(s_GangPedTypes, ptype) != s_GangPedTypes.end();
+}
+
 // 0x8D23B8
 constexpr const char* aPedTypeNames[PED_TYPE_COUNT] = {
     "PLAYER1",
