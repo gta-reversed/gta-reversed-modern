@@ -129,7 +129,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ExtinguishCarFire, 0x6D2460);
     RH_ScopedInstall(ActivateBomb, 0x6D24F0);
     RH_ScopedInstall(ActivateBombWhenEntered, 0x6D2570);
-    // RH_ScopedInstall(CarHasRoof, 0x6D25D0);
+    RH_ScopedInstall(CarHasRoof, 0x6D25D0);
     // RH_ScopedInstall(HeightAboveCeiling, 0x6D2600);
     // RH_ScopedInstall(SetComponentVisibility, 0x6D2700);
     // RH_ScopedInstall(ApplyBoatWaterResistance, 0x6D2740);
@@ -1906,7 +1906,7 @@ void CVehicle::ActivateBombWhenEntered() {
 
 // 0x6D25D0
 bool CVehicle::CarHasRoof() {
-    return ((bool(__thiscall*)(CVehicle*))0x6D25D0)(this);
+    return !m_pHandlingData->m_bConvertible || !m_anExtras[0] || !m_anExtras[1];
 }
 
 // 0x6D2600
