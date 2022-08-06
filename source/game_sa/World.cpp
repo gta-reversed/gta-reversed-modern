@@ -1387,8 +1387,8 @@ void CWorld::ClearCarsFromArea(float minX, float minY, float minZ, float maxX, f
             CEntity::ClearReference(driver); // Not even sure why this is done - Ped::Remove already unlinks it from the vehicle it's in
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (const auto passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
@@ -2578,8 +2578,8 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             CEntity::ClearReference(driver);
         }
 
-        for (auto j = 0; j < veh->m_nMaxPassengers; j++) {
-            if (auto passenger = veh->m_apPassengers[j]) {
+        for (auto& passenger : veh->GetPassengers()) {
+            if (passenger) {
                 veh->RemovePassenger(passenger);
                 CPopulation::RemovePed(passenger);
             }
