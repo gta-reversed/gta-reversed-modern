@@ -27,8 +27,8 @@ public:
 public:
     static void InjectHooks();
 
-    CVehicle* RestoreCar();
     void      StoreCar(CVehicle* vehicle);
+    CVehicle* RestoreCar();
 
     // NOTSA
     void Init() { m_wModelIndex = 0; }
