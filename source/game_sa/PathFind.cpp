@@ -33,6 +33,7 @@ void CPathFind::InjectHooks() {
     RH_ScopedInstall(UnLoadPathFindData, 0x44D0F0);
     RH_ScopedInstall(GetPathNode, 0x420AC0);
     RH_ScopedInstall(AddDynamicLinkBetween2Nodes_For1Node, 0x44E000);
+    RH_ScopedInstall(TestCrossesRoad, 0x44D790);
 }
 
 void CPathNode::InjectHooks() {
@@ -106,7 +107,32 @@ void CPathFind::ReleaseRequestedNodes() {
 
 // 0x44D790
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
-    return plugin::CallMethodAndReturn<bool, 0x44D790, CPathFind*, CNodeAddress, CNodeAddress>(this, startNodeAddress, targetNodeAddress);
+    // Check if path nodes are loaded for both addresses areas
+
+    const auto nodesInStartArea = m_pPathNodes[startNodeAddress.m_wAreaId];
+    if (!nodesInStartArea) {
+        return false;
+    }
+
+    if (!m_pPathNodes[targetNodeAddress.m_wAreaId]) {
+        return false;
+    }
+
+    // Check if the start node has any links (TODO: could be omitted I think, as the loop condition checks for this as well)
+    const auto startNode = nodesInStartArea[startNodeAddress.m_wNodeId];
+    if (!startNode.m_nNumLinks) {
+        return false;
+    }
+
+    const auto nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
+    for (auto i = 0; i < startNode.m_nNumLinks; i++) {
+        const auto linkedNodeIdx = startNode.m_wBaseLinkId + i;
+        if (nodeLinks[linkedNodeIdx] == targetNodeAddress) {
+            return m_pPathIntersections[linkedNodeIdx]->m_bRoadCross;
+        }
+    }
+
+    return false;
 }
 
 // 0x44D480

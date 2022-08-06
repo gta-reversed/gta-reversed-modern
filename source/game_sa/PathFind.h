@@ -114,11 +114,13 @@ public:
     uint8            m_nPathWidth;
     uint8            m_nFloodFill;
 
+    // byte 0
     uint32 m_nNumLinks : 4;
     uint32 m_nTrafficLevel : 2; // TrafficLevel uses 4 steps: 0 = full 1 = high 2 = medium 3 = low
     uint32 m_bRoadBlocks : 1;
     uint32 m_bWaterNode : 1;
 
+    // byte 1
     uint32 m_bEmergencyVehiclesOnly : 1;
     uint32 unk1 : 1; // not used in paths data files
     uint32 m_bDontWander : 1;
@@ -128,10 +130,11 @@ public:
     uint32 unk3 : 1; // not used in paths data files
     uint32 unk4 : 1; // not used in paths data files
 
+    // byte 2
     uint32 m_nSpawnProbability : 4;
     uint32 m_nBehaviourType : 4; // 1 - roadblock
                                  // 2 - parking node
-
+    // byte 3
 public:
     static void InjectHooks();
     CVector GetNodeCoors();
