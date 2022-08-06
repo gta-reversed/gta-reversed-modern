@@ -120,8 +120,8 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(IsUpsideDown, 0x6D1D90);
     RH_ScopedInstall(IsOnItsSide, 0x6D1DD0);
     RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
-    // RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
-    // RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
+    RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
+    RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
     // RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
     // RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
     RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
