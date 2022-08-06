@@ -169,8 +169,7 @@ void CGarages::PlayerArrestedOrDied() {
 // 0x448B30
 void CGarages::AllRespraysCloseOrOpen(bool bOpen) {
     if (NumGarages) {
-        for (auto i = 0; i < NumGarages; i++) {
-            auto& garage = GetGarage(i);
+        for (auto& garage : GetGarages()) {
             if (garage.m_nType == eGarageType::PAYNSPRAY) {
                 garage.m_nDoorState = bOpen ? GARAGE_DOOR_OPEN : GARAGE_DOOR_CLOSED;
             }
@@ -419,16 +418,6 @@ void CGarages::ChangeGarageType(int16 garageId, eGarageType type, uint32 unused)
         garage.SetOpened();
         garage.m_fDoorPosition = 1.0f;
     }
-}
-
-// 0x447680
-int16 CGarages::GetGarageNumberByName(const char* name) {
-    for (auto i = 0; i < NumGarages; i++) {
-        const auto& garage = aGarages[i];
-        if (_stricmp(garage.m_anName, name) == 0)
-            return i;
-    }
-    return -1;
 }
 
 // 0x5D3270
