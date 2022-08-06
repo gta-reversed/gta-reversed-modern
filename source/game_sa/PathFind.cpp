@@ -443,10 +443,18 @@ CNodeAddress CPathFind::FindNodeClosestToCoorsFavourDirection(CVector pos, uint8
 
 // 0x5D3500
 bool CPathFind::Load() {
-    return plugin::CallMethodAndReturn<bool, 0x5D3500>(this);
+    CGenericGameStorage::SaveDataToWorkBuffer(&m_nNumForbiddenAreas, sizeof(m_nNumForbiddenAreas));
+    for (auto& area : std::span{ m_aForbiddenAreas, (size_t)m_nNumForbiddenAreas }) {
+        CGenericGameStorage::SaveDataToWorkBuffer(&area, sizeof(area));
+    }
+    return true;
 }
 
-// 0x5D1502
+// 0x5D34C0
 bool CPathFind::Save() {
-    return plugin::CallMethodAndReturn<bool, 0x5D1502>(this);
+    CGenericGameStorage::LoadDataFromWorkBuffer(&m_nNumForbiddenAreas, sizeof(m_nNumForbiddenAreas));
+    for (auto& area : std::span{ m_aForbiddenAreas, (size_t)m_nNumForbiddenAreas }) {
+        CGenericGameStorage::LoadDataFromWorkBuffer(&area, sizeof(area));
+    }
+    return true;
 }
