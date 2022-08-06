@@ -294,7 +294,7 @@ public:
     uint8             m_anExtras[2];
     std::array<int16, 15> m_anUpgrades;
     float             m_fWheelScale;
-    int16             m_nAlarmState;
+    uint16            m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic
     CPed*             m_pDriver;
     CPed*             m_apPassengers[8];

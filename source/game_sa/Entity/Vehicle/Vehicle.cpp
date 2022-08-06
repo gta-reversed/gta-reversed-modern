@@ -122,7 +122,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CanPedOpenLocks, 0x6D1E20);
     RH_ScopedInstall(CanDoorsBeDamaged, 0x6D1E60);
     RH_ScopedInstall(CanPedEnterCar, 0x6D1E80);
-    // RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
+    RH_ScopedInstall(ProcessCarAlarm, 0x6D21F0);
     // RH_ScopedInstall(DestroyVehicleAndDriverAndPassengers, 0x6D2250);
     RH_ScopedInstall(IsVehicleNormal, 0x6D22F0);
     RH_ScopedInstall(IsLawEnforcementVehicle, 0x6D2370);
@@ -1768,7 +1768,19 @@ bool CVehicle::CanPedEnterCar() {
 
 // 0x6D21F0
 void CVehicle::ProcessCarAlarm() {
-    ((void(__thiscall*)(CVehicle*))0x6D21F0)(this);
+    switch (m_nAlarmState) {
+    case 0:
+    case std::numeric_limits<decltype(m_nAlarmState)>::max(): { // Doing this in case we ever the underlaying type.
+        return;
+    }
+    }
+
+    if (const auto ts = CTimer::GetTimeStepInMS(); m_nAlarmState >= ts) {
+        m_nAlarmState = ts;
+    } else {
+        m_nAlarmState = 0;
+        m_nHornCounter = 0;
+    }
 }
 
 // 0x6D2250
