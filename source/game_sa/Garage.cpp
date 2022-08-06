@@ -1,7 +1,6 @@
 #include "StdInc.h"
 
 #include "Garage.h"
-#include "StoredCar.h"
 
 void CGarage::InjectHooks() {
     RH_ScopedClass(CGarage);
@@ -14,8 +13,8 @@ void CGarage::InjectHooks() {
     // RH_ScopedInstall(EntityHasASphereWayOutsideGarage, 0x449050);
     // RH_ScopedInstall(RemoveCarsBlockingDoorNotInside, 0x449690);
     // RH_ScopedInstall(IsEntityTouching3D, 0x448EE0);
-    RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
-    RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
+    // RH_ScopedInstall(IsEntityEntirelyOutside, 0x448D30);
+    // RH_ScopedInstall(IsEntityEntirelyInside3D, 0x448BE0);
     // RH_ScopedInstall(IsStaticPlayerCarEntirelyInside, 0x44A830);
     // RH_ScopedInstall(IsPointInsideGarage, 0x448740);
     // RH_ScopedInstall(PlayerArrestedOrDied, 0x4486C0);
@@ -92,6 +91,25 @@ void CGarage::RemoveCarsBlockingDoorNotInside() {
 // 0x448EE0
 bool CGarage::IsEntityTouching3D(CEntity* entity) {
     return plugin::CallMethodAndReturn<bool, 0x448EE0, CGarage*, CEntity*>(this, entity);
+
+    const auto cm = entity->GetModelInfo()->GetColModel();
+    const auto& radius = cm->GetBoundRadius();
+    const auto& pos = entity->GetPosition();
+
+    if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
+        return false;
+    if (m_fFrontCoord - radius > pos.y || radius + m_fBackCoord < pos.y)
+        return false;
+    if (m_vPosn.z - radius > pos.z || radius + m_fTopZ < pos.z)
+        return false;
+
+    for (auto& sphere : cm->m_pColData->GetSpheres()) {
+        CVector point = MultiplyMatrixWithVector(entity->GetMatrix(), sphere.m_vecCenter);
+        if (IsPointInsideGarage(point, sphere.m_fRadius)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // 0x44A830
@@ -101,7 +119,7 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
     auto vehicle = FindPlayerVehicle();
     if (!vehicle)
         return false;
-    if (vehicle->m_nVehicleType && vehicle->m_nVehicleType != VEHICLE_TYPE_BIKE)
+    if (!vehicle->IsAutomobile() && !vehicle->IsBike())
         return false;
 
     auto player = FindPlayerPed();
@@ -138,14 +156,12 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
     return IsEntityEntirelyInside3D(vehicle, 0.0f);
 }
 
+// Doesn't check the height against the IsEntityEntirelyInside3D.
+// Also, can't use inverted IsEntityEntirelyInside3D due m_pColData check.
 // 0x448D30
 bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
-    const auto& pos = entity->GetPosition();
-    if (m_vPosn.z - radius > pos.z || radius + m_fTopZ < pos.z)
-        return false;
-    return IsEntityEntirelyInside3D(entity, radius);
+    return plugin::CallMethodAndReturn<bool, 0x448D30, CGarage*, CEntity*, float>(this, entity, radius);
 
-    /*
     const auto& pos = entity->GetPosition();
     if (m_fLeftCoord - radius < pos.x || radius + m_fRightCoord > pos.x)
         return false;
@@ -155,18 +171,19 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
     auto cd = entity->GetColModel()->m_pColData;
     if (!cd) return true;
 
-    for (auto& sphere : cd->GetSpheres()) {
+    for (const auto& sphere : cd->GetSpheres()) {
         CVector out = MultiplyMatrixWithVector(entity->GetMatrix(), sphere.m_vecCenter);
         if (!IsPointInsideGarage(out, radius + sphere.m_fRadius)) {
             return true;
         }
     }
     return false;
-     */
 }
 
 // 0x448BE0
 bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
+    return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
+
     const auto& pos = entity->GetPosition();
     if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
         return false;
@@ -178,7 +195,7 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
     auto cd = entity->GetColModel()->m_pColData;
     if (!cd) return true;
 
-    for (auto& sphere : cd->GetSpheres()) {
+    for (const auto& sphere : cd->GetSpheres()) {
         CVector out = MultiplyMatrixWithVector(entity->GetMatrix(), sphere.m_vecCenter);
         if (IsPointInsideGarage(out, radius - sphere.m_fRadius)) {
             return true;
