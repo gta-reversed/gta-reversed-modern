@@ -24,7 +24,7 @@ public:
     static void Update();
     static void Render();
 
-    static bool RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CPhysical* holder, uint32 timeExpire);
+    static bool RegisterRope(uint32 ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8, CPhysical* holder, uint32 timeExpire);
 
     static float FindPickupHeight(CEntity* entity);
     static int32 FindRope(uint32 id);

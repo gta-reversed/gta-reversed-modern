@@ -70,8 +70,8 @@ void CRopes::Render() {
 
 // Must be used in loop to make attached to holder
 // 0x556B40
-bool CRopes::RegisterRope(CEntity* ropeObj, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CPhysical* holder, uint32 timeExpire) {
-    return plugin::CallAndReturn<bool, 0x556B40, CEntity*, uint32, CVector, bool, uint8, uint8, CPhysical*, uint32>(ropeObj, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
+bool CRopes::RegisterRope(uint32 ropeID, uint32 ropeType, CVector startPos, bool bExpires, uint8 segmentCount, uint8 flags, CPhysical* holder, uint32 timeExpire) {
+    return plugin::CallAndReturn<bool, 0x556B40, uint32, uint32, CVector, bool, uint8, uint8, CPhysical*, uint32>(ropeID, ropeType, startPos, bExpires, segmentCount, flags, holder, timeExpire);
 }
 
 // 0x556760

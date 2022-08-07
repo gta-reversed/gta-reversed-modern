@@ -160,7 +160,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
     RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
     RH_ScopedInstall(InitWinch, 0x6D3B60);
-    // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
+    RH_ScopedInstall(UpdateWinch, 0x6D3B80);
     // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
     RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
     RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
@@ -2530,7 +2530,33 @@ void CVehicle::InitWinch(int32 winchType) {
 
 // 0x6D3B80
 void CVehicle::UpdateWinch() {
-    ((void(__thiscall*)(CVehicle*))0x6D3B80)(this);
+    if (!m_nWinchType) {
+        return;
+    }
+
+    const auto ropeID = (uint32)&m_nFlags + 1;
+
+    const auto GetZAndSegmentCount = [&, this]() -> std::pair<float, uint32> { 
+        const auto baseLen = m_nWinchType == 3 ? -0.2f : -0.6f;
+        if (const auto ropeIdx = CRopes::FindRope(ropeID); ropeIdx >= 0) { // Inverted condition
+            const auto& rope = CRopes::GetRope(ropeIdx);
+            const auto segCount = std::floor(rope.m_fSegmentLength * 32.f);
+            return { (rope.m_fMass * rope.m_fSegmentLength) - (segCount * rope.m_fTotalLength) + baseLen, segCount };
+        }
+        return { baseLen, 0 };
+    };
+
+    const auto [pointZ, segCount] = GetZAndSegmentCount();
+    CRopes::RegisterRope(
+        ropeID,
+        m_nWinchType,
+        MultiplyMatrixWithVector(*m_matrix, CVector{ 0.f, 0.f, pointZ }),
+        false,
+        segCount,
+        1u,
+        this,
+        20'000u
+    );
 }
 
 // 0x6D3C70
