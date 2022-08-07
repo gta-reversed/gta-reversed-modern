@@ -488,7 +488,7 @@ public:
     float ProcessWheelRotation(tWheelState wheelState, const CVector& arg1, const CVector& arg2, float arg3);
     bool CanVehicleBeDamaged(CEntity* damager, eWeaponType weapon, bool& bDamagedDueToFireOrExplosionOrBullet);
     void ProcessDelayedExplosion();
-    void ApplyTurnForceToOccupantOnEntry(CPed* passenger); // NOTSA
+    void ApplyTurnForceToOccupantOnEntry(CPed* passenger);
     bool AddPassenger(CPed* passenger);
     bool AddPassenger(CPed* passenger, uint8 seatNumber);
     void RemovePassenger(CPed* passenger);
@@ -504,7 +504,7 @@ public:
     bool IsUpsideDown();
     bool IsOnItsSide();
     bool CanPedOpenLocks(CPed* ped);
-    bool CanDoorsBeDamaged();
+    bool CanDoorsBeDamaged() const;
     bool CanPedEnterCar();
     void ProcessCarAlarm();
     void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
@@ -543,7 +543,7 @@ public:
     // return upgrade model id or -1 if not present
     int32 GetReplacementUpgrade(int32 nodeId);
     void RemoveAllUpgrades();
-    int32 GetSpareHasslePosId();
+    int32 GetSpareHasslePosId() const;
     void SetHasslePosId(int32 hasslePos, bool enable);
     void InitWinch(int32 arg0);
     void UpdateWinch();
