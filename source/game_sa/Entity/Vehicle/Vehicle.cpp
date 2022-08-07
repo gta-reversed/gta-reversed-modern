@@ -172,7 +172,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
     RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
-    // RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
+    RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
     // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
     // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
@@ -2855,8 +2855,53 @@ void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type) {
 }
 
 // 0x6D4AD0
-void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 particleIndex) {
-    ((void(__thiscall*)(CVehicle*, CWeapon*, CVector&, CVector&, int32))0x6D4AD0)(this, weapon, particlePos, gunshellPos, particleIndex);
+void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 fxIdx) {
+    const auto DoFx = [&](auto entity) {
+        const auto self = AsPlane();
+
+        auto& parts = self->m_pGunParticles;
+
+        if (!parts) {
+            const auto nguns = GetPlaneNumGuns();
+            parts = new FxSystem_c * [nguns];
+            rng::fill(std::span{ parts, (size_t)nguns }, nullptr);
+        }
+
+        if (parts) {
+            auto& part = parts[fxIdx];
+            if (!part) {
+                CVector point{ 0.f, 0.f, 0.f };
+                part = g_fxMan.CreateFxSystem("gunflash", &point, RwFrameGetMatrix(RpClumpGetFrame(m_pRwClump)), false);
+            }
+
+            if (part) {
+                part->SetOffsetPos(particlePos);
+                part->Play();
+            }
+        }
+
+        if (s_bPlaneGunsEjectShellCasings) {
+            weapon->AddGunshell(this, gunshellPos, { 0.f, 0.1f }, 0.5f);
+        }
+
+        CPointLights::AddLight(0, gunshellPos, { 0.f, 0.f, 0.f }, 3.f, 0.5f, 0.4f, 0.f);
+    };
+
+
+    switch (m_nVehicleSubType) {
+    case VEHICLE_TYPE_PLANE: {
+        DoFx(AsPlane());
+        break;
+    }
+    case VEHICLE_TYPE_HELI: {
+        DoFx(AsHeli());
+        break;
+    }
+    default: {
+        return;
+    }
+    }
+    
 }
 
 // 0x6D4D30
