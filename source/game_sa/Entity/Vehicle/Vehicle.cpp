@@ -1408,6 +1408,7 @@ void CVehicle::ProcessDelayedExplosion() {
     }
 }
 
+// NOTSA
 void CVehicle::ApplyTurnForceToOccupantOnEntry(CPed* passenger) {
     // Apply some turn force
     switch (m_nVehicleType) {
@@ -1431,7 +1432,7 @@ void CVehicle::ApplyTurnForceToOccupantOnEntry(CPed* passenger) {
 // 0x6D13A0
 bool CVehicle::AddPassenger(CPed* passenger) {
     ApplyTurnForceToOccupantOnEntry(passenger);
-    
+
     // Now, find a seat and place them into it
     const auto seats = GetMaxPassengerSeats();
     if (const auto emptySeat = rng::find(seats, nullptr); emptySeat != seats.end()) {
@@ -1475,7 +1476,7 @@ void CVehicle::RemovePassenger(CPed* passenger) {
         return;
     }
 
-    const auto seats = IsTrain() ? std::span{ m_apPassengers, 8 } : GetMaxPassengerSeats(); // TODO: Magic number `8`
+    const auto seats = IsTrain() ? m_apPassengers : GetMaxPassengerSeats();
     if (const auto seatOfPsgr = rng::find(seats, passenger); seatOfPsgr != seats.end()) {
         CEntity::SafeCleanUpRef(*seatOfPsgr);
         *seatOfPsgr = nullptr;
@@ -1517,7 +1518,7 @@ void CVehicle::SetDriver(CPed* driver) {
             break;
         }
         case MODEL_HOTDOG: {
-            CStats::IncrementStat(STAT_CALORIES, 40.0);
+            CStats::IncrementStat(STAT_CALORIES, 40.0f);
             break;
         }
         case MODEL_COPCARLA:
@@ -1594,8 +1595,8 @@ CPed* CVehicle::SetUpDriver(int32 gangPedType, bool createAsMale, bool createAsC
 
 // 0x6D1AA0
 CPed* CVehicle::SetupPassenger(int32 seatIdx, int32 gangPedType, bool createAsMale, bool createAsCriminal) {
-    if (const auto psgr = m_apPassengers[seatIdx]) {
-        return psgr;
+    if (const auto passenger = m_apPassengers[seatIdx]) {
+        return passenger;
     }
 
     switch (m_nModelIndex) {
@@ -1705,15 +1706,13 @@ bool CVehicle::IsDriver(int32 modelIndex) const {
 */
 void CVehicle::KillPedsInVehicle() {
     const auto ProcessOccupant = [this](CPed* occupant) {
-        if (!occupant) {
-            return;
+        if (occupant) {
+            if (!CGameLogic::IsCoopGameGoingOn()) {
+                CDarkel::RegisterKillByPlayer(occupant, WEAPON_EXPLOSION, false, 0);
+            }
+            CEventVehicleDied event{ this };
+            occupant->GetIntelligence()->m_eventGroup.Add(&event);
         }
-
-        if (!CGameLogic::IsCoopGameGoingOn()) {
-            CDarkel::RegisterKillByPlayer(occupant, WEAPON_EXPLOSION, false, 0);
-        }
-        CEventVehicleDied event{ this };
-        occupant->GetIntelligence()->m_eventGroup.Add(&event);
     };
 
     ProcessOccupant(m_pDriver);
@@ -1746,7 +1745,7 @@ bool CVehicle::CanPedOpenLocks(CPed* ped) {
 }
 
 // 0x6D1E60
-bool CVehicle::CanDoorsBeDamaged() {
+bool CVehicle::CanDoorsBeDamaged() const {
     // TODO: ranges::contains({...}, m_nDoorLock)
     switch (m_nDoorLock) {
     case CARLOCK_NOT_USED:
@@ -1760,25 +1759,26 @@ bool CVehicle::CanDoorsBeDamaged() {
 
 // 0x6D1E80
 bool CVehicle::CanPedEnterCar() {
-    if (const auto upZ = GetUp().z; IsBike() || upZ > .1f || upZ < -.1f) {
+    const auto upZ = GetUp().z;
+    if (IsBike() || upZ > 0.1f || upZ < -0.1f) {
         return true;
     }
 
-    return rng::all_of(std::array{ m_vecTurnSpeed, m_vecMoveSpeed }, [](const CVector& velocity) {
-        return velocity.SquaredMagnitude() <= .04f;
-    });
+    return m_vecTurnSpeed.SquaredMagnitude() <= sq(0.2f) &&
+           m_vecMoveSpeed.SquaredMagnitude() <= sq(0.2f);
 }
 
 // 0x6D21F0
 void CVehicle::ProcessCarAlarm() {
     switch (m_nAlarmState) {
     case 0:
-    case std::numeric_limits<decltype(m_nAlarmState)>::max(): { // Doing this in case we ever the underlaying type.
+    case std::numeric_limits<decltype(m_nAlarmState)>::max(): { // Doing this in case we ever the underlying type.
         return;
     }
     }
 
-    if (const auto ts = (uint16)CTimer::GetTimeStepInMS(); m_nAlarmState >= ts) {
+    const auto ts = (uint16)CTimer::GetTimeStepInMS();
+    if (m_nAlarmState >= ts) {
         m_nAlarmState = ts;
     } else {
         m_nAlarmState = 0;
@@ -1799,6 +1799,9 @@ void CVehicle::DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle) {
 
     ProcessOccupant(m_pDriver);
     rng::for_each(GetMaxPassengerSeats(), ProcessOccupant);
+
+    CWorld::Remove(vehicle);
+    delete vehicle;
 }
 
 // 0x6D22F0
@@ -2038,7 +2041,7 @@ void CVehicle::UpdatePassengerList() {
     // It checks if there should be any passengers
     // If there's none only then it sets the number of them to 0.. weird.
     if (m_nNumPassengers) {
-        if (rng::all_of(std::span{ m_apPassengers, 8 }, [](auto&& p) { return p == nullptr; })) { // TODO: Again, magic number `8`
+        if (rng::all_of(m_apPassengers, [](auto&& p) { return p == nullptr; })) {
             m_nNumPassengers = 0;
         }
     }
@@ -2046,8 +2049,6 @@ void CVehicle::UpdatePassengerList() {
 
 // 0x6D2A10
 CPed* CVehicle::PickRandomPassenger() {
-    const auto numPsgrs = std::size(m_apPassengers);
-
     // TODO: Add a function for this to random.hpp
 
     const auto rnd = CGeneral::GetRandomNumberInRange(0, std::size(m_apPassengers));
@@ -2172,7 +2173,7 @@ bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int3
 
         handlingFlags.bHydraulicInst = true;
         m_nFakePhysics = false;
-        m_vecMoveSpeed.z = .0f;
+        m_vecMoveSpeed.z = 0.0f;
 
         return true;
     }
@@ -2181,7 +2182,7 @@ bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int3
             return false;
         }
 
-        const auto GetNitroValue = [&] {
+        const auto GetNitroValue = [&]() -> int8 {
             if (upgradeModelIndex == ModelIndices::MI_NITRO_BOTTLE_LARGE) {
                 return 5;
             } else if (upgradeModelIndex == ModelIndices::MI_NITRO_BOTTLE_DOUBLE) {
@@ -2227,7 +2228,7 @@ bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int3
     default: {
         return false;
     }
-    }    
+    }
 }
 
 // 0x6D3210
@@ -2264,8 +2265,9 @@ bool CVehicle::ClearVehicleUpgradeFlags(int32 arg0, int32 modId) {
     }
     case 16: { // 0x6D321C
         if (handlingFlags.bHydraulicInst) {
-            if (auto& specColIdx = m_vehicleSpecialColIndex; specColIdx > -1) {
-                CVehicle::m_aSpecialColVehicle[specColIdx] = nullptr;
+            auto& specColIdx = m_vehicleSpecialColIndex;
+            if (specColIdx > -1) {
+                m_aSpecialColVehicle[specColIdx] = nullptr;
                 specColIdx = -1;
 
                 SetupSuspensionLines();
@@ -2306,7 +2308,7 @@ RwFrame* RemoveObjectsCB(RwFrame* component, void* data) {
 static auto& CopyObjectsCB_TargetClump = *(RpClump**)0xC1CB58;
 RwObject* CopyObjectsCB(RwObject* object, void* data) {
     const auto frame = (RwFrame*)data;
-    
+
     if (RwObjectGetType(object) == rpATOMIC) {
         const auto atomic = (RpAtomic*)object;
         const auto clone = RpAtomicClone(atomic);
@@ -2378,7 +2380,7 @@ RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* mi, const UpgradePosnDes
     CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_IS_REPLACEMENT_UPGRADE | ATOMIC_RENDER_ALWAYS); // NOTE: Combined 2 flags together here
 
     SetupUpgradeAtomicRendering(atomic, isDamaged);
-    
+
     CDamageAtomicModelInfo::ms_bCreateDamagedVersion = false;
     return atomic;
 }
@@ -2436,7 +2438,7 @@ RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* mi, RwFrame* parentF
     if (bIsWheel) {
         const auto mat = RwFrameGetMatrix(frame);
         CMatrix::GetIdentity().UpdateRwMatrix(mat);
-        mat->flags |= 0x20'003; // TODO: What flags are this?
+        mat->flags |= rwMATRIXINTERNALIDENTITY | rwMATRIXTYPEMASK;
         CVisibilityPlugins::SetFrameHierarchyId(frame, 0);
         RwFrameAddChild(parentFrame, frame);
     } else {
@@ -2492,21 +2494,21 @@ void CVehicle::RemoveAllUpgrades() {
 }
 
 // 0x6D3AE0
-int32 CVehicle::GetSpareHasslePosId() {
-    const auto GetNumberOfPositions = [type = m_nVehicleSubType] { // Must save into variable `type`, so compiler can optimize
-        switch (type) {
+int32 CVehicle::GetSpareHasslePosId() const {
+    const auto numberOfPositions = [&] {
+        switch (m_nVehicleSubType) {
         case eVehicleType::VEHICLE_TYPE_BIKE:
         case eVehicleType::VEHICLE_TYPE_BMX:
         case eVehicleType::VEHICLE_TYPE_QUAD:
-            return 2u;
+            return 2;
         case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
-            return 6u;
+            return 6;
         default:
-            return 0u;
+            return 0;
         }
-    };
+    }();
 
-    for (size_t i = 0; i < GetNumberOfPositions(); i++) {
+    for (auto i = 0; i < numberOfPositions; i++) {
         if ((m_nHasslePosId  & (1 << i)) == 0) {
             return i;
         }
@@ -2537,7 +2539,7 @@ void CVehicle::UpdateWinch() {
 
     const auto ropeID = GetRopeID();
 
-    const auto GetZAndSegmentCount = [&, this]() -> std::pair<float, uint32> { 
+    const auto GetZAndSegmentCount = [&, this]() -> std::pair<float, uint32> {
         const auto baseLen = (eRopeType)m_ropeType == eRopeType::MAGNET ? -0.2f : -0.6f;
         if (const auto ropeIdx = CRopes::FindRope(ropeID); ropeIdx >= 0) { // Inverted condition
             const auto& rope = CRopes::GetRope(ropeIdx);
@@ -2733,7 +2735,8 @@ uint32 CVehicle::GetPlaneGunsRateOfFire() {
 
 // 0x6D4290
 CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
-    if (const auto pos = GetModelInfo()->AsVehicleModelInfoPtr()->GetModelDummyPosition(DUMMY_VEHICLE_GUN); !pos->IsZero()) {
+    const auto& pos = GetModelInfo()->AsVehicleModelInfoPtr()->GetModelDummyPosition(DUMMY_VEHICLE_GUN);
+    if (!pos->IsZero()) {
         return pos;
     }
 
@@ -2741,23 +2744,23 @@ CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
     case MODEL_HUNTER:
         return VehicleGunOffset[0];
     case MODEL_SEASPAR:
-        return { -.5f, 2.4f, -.785f }; // 0x8D35F8
+        return { -0.5f, 2.4f, -0.785f }; // 0x8D35F8
     case MODEL_RCBARON:
-        return { .0f, .45f, .0f }; // 0x8D3634
+        return { 0.0f, 0.45f, 0.0f };    // 0x8D3634
     case MODEL_RUSTLER:
-        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.f, 0.f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
+        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.0f, 0.0f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
     case MODEL_MAVERICK:
-        return { 0.f, 2.85f, -0.5f }; // 0x8D35E0
+        return { 0.0f, 2.85f, -0.5f };   // 0x8D35E0
     case MODEL_POLMAV:
-        return { 0.f, 2.85f, -0.5f }; // 0x8D35EC [Values same as the maverick's]
+        return { 0.0f, 2.85f, -0.5f };   // 0x8D35EC [Values same as the maverick's]
     case MODEL_HYDRA:
         return { 1.48f, 0.44f, -0.52f }; // 0x8D3628
     case MODEL_CARGOBOB:
-        return { 0.f, 6.87f, -1.65f }; // 0x8D3604
+        return { 0.0f, 6.87f, -1.65f };  // 0x8D3604
     case MODEL_TORNADO:
-        return *(CVector*)0xC1CC2C; // TODO
+        return *(CVector*)0xC1CC2C; // TODO Izzotop: just CVector{}
     default:
-        return { 0.f, 0.f, 0.f }; // 
+        return { 0.f, 0.f, 0.f }; //
     }
 }
 
@@ -2827,17 +2830,21 @@ void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type) {
         switch (m_nModelIndex) {
         case MODEL_TORNADO: // Originally a separate case at the bottom, but since they both do the same, I moved it here.
         case MODEL_HUNTER:
-            return type == 1 ? CAR_WEAPON_DOUBLE_ROCKET
-                             : bChange ? CAR_WEAPON_HEAVY_GUN
-                                       : m_nVehicleWeaponInUse;
+            if (type == 1) {
+                return CAR_WEAPON_DOUBLE_ROCKET;
+            } else {
+                return bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
+            }
         case MODEL_SEASPAR:
         case MODEL_RCBARON:
             return bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
 
         case MODEL_RUSTLER:
-            return type == 1 ? CAR_WEAPON_FREEFALL_BOMB
-                             : bChange ? CAR_WEAPON_HEAVY_GUN
-                                       : m_nVehicleWeaponInUse;
+            if (type == 1) {
+                return CAR_WEAPON_FREEFALL_BOMB;
+            } else {
+                return bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
+            }
         case MODEL_HYDRA: {
             switch (type) {
             case 1:
@@ -2858,10 +2865,7 @@ void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type) {
 // 0x6D4AD0
 void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 fxIdx) {
     const auto DoFx = [&](auto entity) {
-        const auto self = AsPlane();
-
-        auto& parts = self->m_pGunParticles;
-
+        auto& parts = AsPlane()->m_pGunParticles;
         if (!parts) {
             const auto nguns = GetPlaneNumGuns();
             parts = new FxSystem_c * [nguns];
@@ -2902,7 +2906,6 @@ void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& 
         return;
     }
     }
-    
 }
 
 // 0x6D4D30
