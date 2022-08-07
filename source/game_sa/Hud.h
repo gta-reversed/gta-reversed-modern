@@ -7,53 +7,22 @@
 #pragma once
 
 #include "Stats.h"
+#include "eHud.h"
 
 class CSprite2d;
-
-enum eHudItem {
-    ITEM_NONE   = -1,
-    ITEM_ARMOUR =  3,
-    ITEM_HEALTH =  4,
-    ITEM_RADAR  =  8,
-    ITEM_BREATH = 10,
-};
-
-enum DRAW_FADE_STATE {
-    WANTED_STATE        = 0,
-    ENERGY_LOST_STATE   = 1,
-    DISPLAY_SCORE_STATE = 2,
-    WEAPON_STATE        = 3,
-};
-
-enum eNameState {
-    NAME_DONT_SHOW = 0,
-    NAME_SHOW      = 1,
-    NAME_FADE_IN   = 2,
-    NAME_FADE_OUT  = 3,
-    NAME_SWITCH    = 4,
-};
-
-enum eHudSprite {
-    SPRITE_FIST,
-    SPRITE_SITE_M16,
-    SPRITE_SITE_ROCKET,
-    SPRITE_RADAR_DISC,
-    SPRITE_RADAR_RING_PLANE,
-    SPRITE_SKIP_ICON
-};
-
 class CPed;
-enum eMessageStyle : uint16;
 
 class CHud {
 public:
-    static bool&     bScriptDontDisplayAreaName;
-    static bool&     bScriptDontDisplayVehicleName;
-    static bool&     bScriptForceDisplayWithCounters;
-    static bool&     bScriptDontDisplayRadar;
+    static constexpr auto BIG_MESSAGE_SIZE = 128;
+
+    static bool& bScriptDontDisplayAreaName;
+    static bool& bScriptDontDisplayVehicleName;
+    static bool& bScriptForceDisplayWithCounters;
+    static bool& bScriptDontDisplayRadar;
 
     static inline int32& m_LastBreathTime = *(int32*)0xBAA3FC;
-    static bool&     bDrawClock;
+    static bool& bDrawClock;
 
     static inline uint32& m_WeaponState = *(uint32*)0xBAA404;
     static inline uint32& m_WeaponFadeTimer = *(uint32*)0xBAA408;
@@ -75,45 +44,45 @@ public:
     static inline uint32& m_EnergyLostTimer = *(uint32*)0xBAA43C;
     static inline uint32& m_LastTimeEnergyLost = *(uint32*)0xBAA440;
 
-    static char*&    m_pVehicleNameToPrint;
+    static char*& m_pVehicleNameToPrint;
     static eNameState& m_VehicleState;
-    static int32&   m_VehicleFadeTimer;
-    static int32&   m_VehicleNameTimer;
-    static char*&    m_pLastVehicleName;
-    static char*&    m_pVehicleName;
+    static int32& m_VehicleFadeTimer;
+    static int32& m_VehicleNameTimer;
+    static char*& m_pLastVehicleName;
+    static char*& m_pVehicleName;
 
-    static bool&     m_bDraw3dMarkers;
-    static bool&     m_Wants_To_Draw_Hud;
+    static bool& m_bDraw3dMarkers;
+    static bool& m_Wants_To_Draw_Hud;
 
-    static float&    m_fHelpMessageTime;     // in seconds
-    static float&    m_fHelpMessageBoxWidth; // default 200.0
-    static bool&     m_bHelpMessagePermanent;
-    static float&    m_fHelpMessageStatUpdateValue;
-    static uint16&   m_nHelpMessageMaxStatValue;
-    static uint16&   m_nHelpMessageStatId;
-    static bool&     m_bHelpMessageQuick;
-    static int32&    m_nHelpMessageState;
-    static uint32&   m_nHelpMessageFadeTimer;
-    static uint32&   m_nHelpMessageTimer;
-    static char      (&m_pHelpMessageToPrint)[400];
-    static char      (&m_pLastHelpMessage)[400];
-    static char      (&m_pHelpMessage)[400];
+    static float&  m_fHelpMessageTime;     // in seconds
+    static float&  m_fHelpMessageBoxWidth; // default 200.0
+    static bool&   m_bHelpMessagePermanent;
+    static float&  m_fHelpMessageStatUpdateValue;
+    static uint16& m_nHelpMessageMaxStatValue;
+    static uint16& m_nHelpMessageStatId;
+    static bool&   m_bHelpMessageQuick;
+    static int32&  m_nHelpMessageState;
+    static uint32& m_nHelpMessageFadeTimer;
+    static uint32& m_nHelpMessageTimer;
+    static char    (&m_pHelpMessageToPrint)[400];
+    static char    (&m_pLastHelpMessage)[400];
+    static char    (&m_pHelpMessage)[400];
 
     static eNameState& m_ZoneState; // see eNameState
     static int32&      m_ZoneFadeTimer;
     static uint32&     m_ZoneNameTimer;
 
     static inline char (&m_Message)[400] = *(char (*)[400])0xBAB040;
-    static inline char (&m_BigMessage)[NUM_MESSAGE_STYLES][128] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
+    static inline char (&m_BigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
 
-    static char*&    m_ZoneToPrint;
-    static char*&    m_pLastZoneName;
-    static char*&    m_pZoneName;
+    static char*& m_ZoneToPrint;
+    static char*& m_pLastZoneName;
+    static char*& m_pZoneName;
 
-    static int16&    m_ItemToFlash; // -1 - no item
-    static bool&     bDrawingVitalStats;
+    static int16& m_ItemToFlash; // -1 - no item
+    static bool&  bDrawingVitalStats;
 
-    static CSprite2d (&Sprites)[6];
+    static CSprite2d (&Sprites)[NUM_HUD_SPRITES];
 
 public:
     static void InjectHooks();

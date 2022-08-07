@@ -13,6 +13,7 @@
 #include "Vehicle.h"
 #include "EntryExitManager.h"
 #include "TaskSimpleUseGun.h"
+#include "eHud.h"
 
 bool& CHud::bScriptDontDisplayAreaName = *(bool*)0xBAA3F8;
 bool& CHud::bScriptDontDisplayVehicleName = *(bool*)0xBAA3F9;
@@ -60,7 +61,7 @@ int16 (&TimerCounterHideState)[4] = *(int16(*)[4])0xBAA38C;
 int16 (&TimerCounterWasDisplayed)[4] = *(int16(*)[4])0xBAA394;
 float& OddJob2OffTimer = *(float*)0xBAA398;
 float& OddJob2XOffset = *(float*)0xBAA39C;
-int32& OddJob2Timer = *(int32*)0xBAA3A0;
+uint16& OddJob2Timer = *(uint16*)0xBAA3A0;
 float (&BigMessageAlpha)[7] = *(float(*)[7])0xBAA3A4;
 float (&BigMessageInUse)[7] = *(float(*)[7])0xBAA3C0;
 float (&BigMessageX)[7] = *(float(*)[7])0xBAA3DC;
@@ -81,13 +82,13 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // +
     RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // +
     RH_ScopedInstall(ResetWastedText, 0x589070);             // +
-    RH_ScopedInstall(SetBigMessage, 0x588FC0);               //
-    RH_ScopedInstall(SetHelpMessage, 0x588BE0);              //
-    RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    //
-    RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    //
+    RH_ScopedInstall(SetBigMessage, 0x588FC0);               // -
+    RH_ScopedInstall(SetHelpMessage, 0x588BE0);              // +
+    RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    // +
+    RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    // +
     // RH_ScopedInstall(SetMessage, 0x588F60);               //
     RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
-    RH_ScopedInstall(SetZoneName, 0x588BB0);                 //
+    RH_ScopedInstall(SetZoneName, 0x588BB0);                 // +
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // +
@@ -95,8 +96,8 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
-    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // MrJohnDev: +
-    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // UNTESTED
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // +-
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // looks like OG
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // test angle
     RH_ScopedInstall(DrawScriptText, 0x58C080);              // +
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
@@ -244,7 +245,7 @@ void CHud::SetBigMessage(const char* message, eMessageStyle style) {
     }
 
     if (style == STYLE_WHITE_MIDDLE_SMALLER) {
-        for (auto i = 0; i < 128; i++) {
+        for (auto i = 0; i < BIG_MESSAGE_SIZE; i++) {
             if (message[i] == 0)
                 break;
             if (message[i] != LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]) {
@@ -255,7 +256,7 @@ void CHud::SetBigMessage(const char* message, eMessageStyle style) {
             LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
         }
     } else {
-        for (auto i = 0; i < 128; i++) {
+        for (auto i = 0; i < BIG_MESSAGE_SIZE; i++) {
             if (message[i] == 0)
                 break;
             m_BigMessage[style][i] = message[i];
@@ -268,11 +269,7 @@ void CHud::SetBigMessage(const char* message, eMessageStyle style) {
 
 // 0x588BE0
 void CHud::SetHelpMessage(const char* text, bool quickMessage, bool permanent, bool addToBrief) {
-    if (m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER][0]
-        || CGarages::MessageIDString[0]
-        || CReplay::Mode == MODE_PLAYBACK
-        || CCutsceneMgr::IsRunning()
-    ) {
+    if (m_BigMessage[STYLE_MIDDLE_SMALLER_HIGHER][0] || CGarages::MessageIDString[0] || CReplay::Mode == MODE_PLAYBACK || CCutsceneMgr::IsRunning()) {
         return;
     }
 
@@ -329,7 +326,7 @@ void CHud::SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float
     m_nHelpMessageStatId = statId;
     m_fHelpMessageStatUpdateValue = diff;
     m_nHelpMessageMaxStatValue = (uint32)max;
-    strcpy(gString, (state == STAT_UPDATE_INCREASE) ? "+" : "-");
+    sprintf(gString, state == STAT_UPDATE_INCREASE ? "+" : "-");
     AsciiToGxtChar(gString, m_pHelpMessage);
 }
 
@@ -339,7 +336,7 @@ void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMe
         return;
     }
 
-    char str[800];
+    char str[400];
     CMessages::InsertNumberInString(const_cast<char*>(text), number, -1, -1, -1, -1, -1, str);
     CMessages::GetStringLength(str);
     CMessages::StringCopy(m_pHelpMessage, str, sizeof(m_pHelpMessage));
@@ -1025,7 +1022,7 @@ void CHud::DrawMissionTitle() {
     CFont::SetFontStyle(FONT_PRICEDOWN);
     CFont::SetScale(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.3f));
 
-    if (messageX >= SCREEN_SCALE_FROM_RIGHT(20.0f)) {
+    if (messageInUse > SCREEN_WIDTH - 20.0f) { // not 100% OG
         messageX += CTimer::GetTimeStep();
         if (messageX >= 120.0f) {
             messageX = 120.0f;
@@ -1033,7 +1030,7 @@ void CHud::DrawMissionTitle() {
         }
         if (messageAlpha <= 0.0f) {
             messageAlpha = 0.0f;
-            message[0] = 0;
+            message[0] = '\0';
             messageX = 0.0f;
         }
     } else {
@@ -1124,13 +1121,13 @@ void CHud::DrawOddJobMessage(bool displayImmediately) {
         }
         break;
     case 2:
-        OddJob2Timer += (int32)CTimer::GetTimeStepInMS();
+        OddJob2Timer += (uint16)CTimer::GetTimeStepInMS();
         if (OddJob2Timer > 1500) {
             OddJob2On = 3;
         }
         break;
     case 3:
-        OddJob2XOffset -= std::min(OddJob2XOffset / 5.0f, 30.0f);
+        OddJob2XOffset -= std::max(OddJob2XOffset / 5.0f, 30.0f);
         if (OddJob2XOffset < -380.0f) {
             OddJob2On = 0;
             OddJob2OffTimer = 5000.0f;
