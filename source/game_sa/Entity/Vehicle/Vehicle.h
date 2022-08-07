@@ -322,7 +322,7 @@ public:
                                                       // 4 = Timed Bomb has been activated
                                                       // 5 = On ignition has been activated
     uint8            m_nOverrideLights : 2;           // uses enum NO_CAR_LIGHT_OVERRIDE, FORCE_CAR_LIGHTS_OFF, FORCE_CAR_LIGHTS_ON
-    uint8            m_nWinchType : 2;                // Does this vehicle use a winch?
+    uint8            m_ropeType : 2;                  // See `eRopeType` (also called `m_nWinchType`)
     uint8            m_nGunsCycleIndex : 2;           // Cycle through alternate gun hard-points on planes/helis
     uint8            m_nOrdnanceCycleIndex : 2;       // Cycle through alternate ordnance hard-points on planes/helis
     uint8            m_nUsedForCover;                 // Has n number of cops hiding/attempting to hid behind it
@@ -681,6 +681,7 @@ public: // NOTSA functions
 
     CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
+    [[nodiscard]] constexpr int32 GetRopeID() const { return (uint32)&m_nFlags + 1; }
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
     auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }

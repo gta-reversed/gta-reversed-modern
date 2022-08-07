@@ -161,7 +161,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
     RH_ScopedInstall(InitWinch, 0x6D3B60);
     RH_ScopedInstall(UpdateWinch, 0x6D3B80);
-    // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
+    RH_ScopedInstall(RemoveWinch, 0x6D3C70);
     RH_ScopedInstall(RenderDriverAndPassengers, 0x6D3D60);
     RH_ScopedInstall(PreRenderDriverAndPassengers, 0x6D3DB0);
     RH_ScopedInstall(GetPlaneGunsAutoAimAngle, 0x6D3E00);
@@ -295,7 +295,7 @@ CVehicle::CVehicle(eVehicleCreatedBy createdBy) : CPhysical(), m_vehicleAudio(),
 
     m_nBombOnBoard = 0;
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
-    m_nWinchType = 0;
+    m_ropeType = 0;
     m_nGunsCycleIndex = 0;
     physicalFlags.bCanBeCollidedWith = true;
 
@@ -2525,19 +2525,19 @@ void CVehicle::SetHasslePosId(int32 hasslePos, bool enable) {
 
 // 0x6D3B60
 void CVehicle::InitWinch(int32 winchType) {
-    m_nWinchType = winchType;
+    m_ropeType = winchType;
 }
 
 // 0x6D3B80
 void CVehicle::UpdateWinch() {
-    if (!m_nWinchType) {
+    if (!m_ropeType) {
         return;
     }
 
-    const auto ropeID = (uint32)&m_nFlags + 1;
+    const auto ropeID = GetRopeID();
 
     const auto GetZAndSegmentCount = [&, this]() -> std::pair<float, uint32> { 
-        const auto baseLen = m_nWinchType == 3 ? -0.2f : -0.6f;
+        const auto baseLen = (eRopeType)m_ropeType == eRopeType::MAGNET ? -0.2f : -0.6f;
         if (const auto ropeIdx = CRopes::FindRope(ropeID); ropeIdx >= 0) { // Inverted condition
             const auto& rope = CRopes::GetRope(ropeIdx);
             const auto segCount = std::floor(rope.m_fSegmentLength * 32.f);
@@ -2549,7 +2549,7 @@ void CVehicle::UpdateWinch() {
     const auto [pointZ, segCount] = GetZAndSegmentCount();
     CRopes::RegisterRope(
         ropeID,
-        m_nWinchType,
+        m_ropeType,
         MultiplyMatrixWithVector(*m_matrix, CVector{ 0.f, 0.f, pointZ }),
         false,
         segCount,
@@ -2561,18 +2561,21 @@ void CVehicle::UpdateWinch() {
 
 // 0x6D3C70
 void CVehicle::RemoveWinch() {
-    return plugin::CallMethod<0x6D3C70, CVehicle*>(this);
+    // NOTE: This function is not correct, as in
+    //       the original code uses `&this[29]` as the rope index (and not `GetRopeIndex()`).
+    //       BUT it's not used anywhere, so..
 
-    const auto ropeIndex = GetRopeIndex();
-    if (ropeIndex >= 0)
-        CRopes::GetRope(ropeIndex).Remove();
+    NOTSA_UNREACHABLE("Unused function");
 
-    // todo: m_nBombLightsWinchFlags &= 0x9Fu;
+    if (const auto ropeIdx = GetRopeIndex(); ropeIdx >= 0)
+        CRopes::GetRope(ropeIdx).Remove();
+
+    m_ropeType = 0;
 }
 
 // NOTSA
 int32 CVehicle::GetRopeIndex() {
-    return CRopes::FindRope(m_nFlags + 1); // yep, flags + 1
+    return CRopes::FindRope((uint32)&m_nFlags + 1);
 }
 
 CVehicleAnimGroup& CVehicle::GetAnimGroup() const {
