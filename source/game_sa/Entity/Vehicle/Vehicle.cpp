@@ -1396,7 +1396,7 @@ void CVehicle::ProcessDelayedExplosion() {
         return;
     }
 
-    if (const auto period = (size_t)(CTimer::GetTimeStep() * 16.666666f); m_wBombTimer > period) {
+    if (const auto period = (int16)(CTimer::GetTimeStep() * 16.666666f); m_wBombTimer > period) {
         m_wBombTimer -= period;
     } else {
         m_wBombTimer = 0;
@@ -1777,7 +1777,7 @@ void CVehicle::ProcessCarAlarm() {
     }
     }
 
-    if (const auto ts = CTimer::GetTimeStepInMS(); m_nAlarmState >= ts) {
+    if (const auto ts = (uint16)CTimer::GetTimeStepInMS(); m_nAlarmState >= ts) {
         m_nAlarmState = ts;
     } else {
         m_nAlarmState = 0;
@@ -1915,25 +1915,25 @@ bool CVehicle::CarHasRoof() {
 float CVehicle::HeightAboveCeiling(float height, eFlightModel flightModel) {
     switch (flightModel) {
     case eFlightModel::FLIGHT_MODEL_BARON: {
-        if (height >= 500.0) {
-            if (height < 950.0) {
-                return height - 500.0;
+        if (height >= 500.f) {
+            if (height < 950.f) {
+                return height - 500.f;
             }
 
-            if (height >= 1500.0) {
-                return (height - 1000.0) + 500.0;
+            if (height >= 1500.f) {
+                return (height - 1000.f) + 500.f;
             }
         }
-        return -1.0;
+        return -1.f;
     }
     default: {
         // Originally this was the condition used, but it's ugly
         // Leaving here to make sure it all works as expectd
         assert(!(((int)flightModel - 1) <= 1));
 
-        if (height < 800.0)
-            return -1.0;
-        return height - 800.0;
+        if (height < 800.f)
+            return -1.f;
+        return height - 800.f;
     }
     }
 }
@@ -2050,7 +2050,7 @@ CPed* CVehicle::PickRandomPassenger() {
     // TODO: Add a function for this to random.hpp
 
     const auto rnd = CGeneral::GetRandomNumberInRange(0, std::size(m_apPassengers));
-    for (auto i = 0; i < std::size(m_apPassengers); i++) {
+    for (auto i = 0u; i < std::size(m_apPassengers); i++) {
         if (const auto psgr = m_apPassengers[(rnd + i) % std::size(m_apPassengers)]) {
             return psgr;
         }
@@ -2497,11 +2497,11 @@ int32 CVehicle::GetSpareHasslePosId() {
         case eVehicleType::VEHICLE_TYPE_BIKE:
         case eVehicleType::VEHICLE_TYPE_BMX:
         case eVehicleType::VEHICLE_TYPE_QUAD:
-            return 2;
+            return 2u;
         case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
-            return 6;
+            return 6u;
         default:
-            return 0;
+            return 0u;
         }
     };
 
@@ -2540,8 +2540,8 @@ void CVehicle::UpdateWinch() {
         const auto baseLen = (eRopeType)m_ropeType == eRopeType::MAGNET ? -0.2f : -0.6f;
         if (const auto ropeIdx = CRopes::FindRope(ropeID); ropeIdx >= 0) { // Inverted condition
             const auto& rope = CRopes::GetRope(ropeIdx);
-            const auto segCount = std::floor(rope.m_fSegmentLength * 32.f);
-            return { (rope.m_fMass * rope.m_fSegmentLength) - (segCount * rope.m_fTotalLength) + baseLen, segCount };
+            const auto segCount = (uint32)(rope.m_fSegmentLength * 32.f);
+            return { (rope.m_fMass * rope.m_fSegmentLength) - ((float)segCount * rope.m_fTotalLength) + baseLen, segCount };
         }
         return { baseLen, 0 };
     };
@@ -2744,7 +2744,7 @@ CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
     case MODEL_RCBARON:
         return { .0f, .45f, .0f }; // 0x8D3634
     case MODEL_RUSTLER:
-        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.f, 0.f } * (gunId - 1);  // 0x8D3610, 0x8D361C
+        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.f, 0.f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
     case MODEL_MAVERICK:
         return { 0.f, 2.85f, -0.5f }; // 0x8D35E0
     case MODEL_POLMAV:
