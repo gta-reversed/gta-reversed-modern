@@ -2864,11 +2864,10 @@ void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type) {
 
 // 0x6D4AD0
 void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& gunshellPos, int32 fxIdx) {
-    const auto DoFx = [&](auto entity) {
-        auto& parts = AsPlane()->m_pGunParticles;
+    const auto DoFx = [&](auto& parts) {
         if (!parts) {
             const auto nguns = GetPlaneNumGuns();
-            parts = new FxSystem_c * [nguns];
+            parts = new FxSystem_c*[nguns];
             rng::fill(std::span{ parts, (size_t)nguns }, nullptr);
         }
 
@@ -2895,11 +2894,11 @@ void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& 
 
     switch (m_nVehicleSubType) {
     case VEHICLE_TYPE_PLANE: {
-        DoFx(AsPlane());
+        DoFx(AsPlane()->m_pGunParticles);
         break;
     }
     case VEHICLE_TYPE_HELI: {
-        DoFx(AsHeli());
+        DoFx(AsHeli()->m_pParticlesList);
         break;
     }
     default: {
