@@ -158,7 +158,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
     RH_ScopedInstall(RemoveAllUpgrades, 0x6D3AB0);
     RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
-    // RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
+    RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
     // RH_ScopedInstall(InitWinch, 0x6D3B60);
     // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
     // RH_ScopedInstall(RemoveWinch, 0x6D3C70);
@@ -2516,7 +2516,11 @@ int32 CVehicle::GetSpareHasslePosId() {
 
 // 0x6D3B30
 void CVehicle::SetHasslePosId(int32 hasslePos, bool enable) {
-    ((void(__thiscall*)(CVehicle*, int32, bool))0x6D3B30)(this, hasslePos, enable);
+    if (enable) {
+        m_nHasslePosId |= 1 << hasslePos;
+    } else {
+        m_nHasslePosId ^= 1 << hasslePos;
+    }
 }
 
 // 0x6D3B60
