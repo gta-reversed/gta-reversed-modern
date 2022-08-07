@@ -1798,6 +1798,9 @@ void CVehicle::DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle) {
 
     ProcessOccupant(m_pDriver);
     rng::for_each(GetMaxPassengerSeats(), ProcessOccupant);
+
+    CWorld::Remove(vehicle);
+    delete vehicle;
 }
 
 // 0x6D22F0
