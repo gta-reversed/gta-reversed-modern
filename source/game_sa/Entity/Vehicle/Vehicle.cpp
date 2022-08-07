@@ -7,6 +7,7 @@
 #include "StdInc.h"
 
 #include <functional>
+#include "ModelIndices.h"
 #include "extensions/utility.hpp"
 #include "Vehicle.h"
 #include "CustomCarPlateMgr.h"
@@ -146,7 +147,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ClearGettingOutFlags, 0x6D3060);
     RH_ScopedInstall(SetWindowOpenFlag, 0x6D3080);
     RH_ScopedInstall(ClearWindowOpenFlag, 0x6D30B0);
-    // RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
+    RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
     // RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
     // RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
     RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
@@ -2156,8 +2157,75 @@ void CVehicle::ClearWindowOpenFlag(uint8 doorId) {
 }
 
 // 0x6D30E0
-bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 componentIndex, int32& resultModelIndex) {
-    return ((bool(__thiscall*)(CVehicle*, int32, int32, int32&))0x6D30E0)(this, upgradeModelIndex, componentIndex, resultModelIndex);
+bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int32& resultModelIndex) {
+    // At the one and only place this function is called from
+    // componentIndex == CModelInfo::GetModelInfo(upgradeModelIndex)->AsVehicleModelInfo().nCarmodId
+    // Now, I'm not sure what value it has, so..
+
+    switch (modId) {
+    case 16: {
+        if (handlingFlags.bHydraulicInst) {
+            resultModelIndex = upgradeModelIndex;
+        }
+
+        handlingFlags.bHydraulicInst = true;
+        m_nFakePhysics = false;
+        m_vecMoveSpeed.z = .0f;
+
+        return true;
+    }
+    case 15: {
+        if (!IsAutomobile()) {
+            return;
+        }
+
+        const auto GetNitroValue = [&] {
+            if (upgradeModelIndex == ModelIndices::MI_NITRO_BOTTLE_LARGE) {
+                return 5;
+            } else if (upgradeModelIndex == ModelIndices::MI_NITRO_BOTTLE_DOUBLE) {
+                return 10;
+            }
+            return 2;
+        };
+
+        if (handlingFlags.bNosInst) {
+            resultModelIndex = ModelIndices::MI_NITRO_BOTTLE_SMALL;
+        }
+
+        AsAutomobile()->NitrousControl(GetNitroValue());
+
+        return GetModelInfo()->AsVehicleModelInfoPtr()->m_pVehicleStruct->m_aUpgrades[15].m_nParentComponentId < 0;
+    }
+    case 17: {
+        if (m_vehicleAudio.m_Settings.m_nRadioType != RADIO_CIVILIAN || vehicleFlags.bUpgradedStereo) {
+            resultModelIndex = upgradeModelIndex;
+            return true;
+        }
+
+        auto& bassSetting = m_vehicleAudio.m_Settings.m_nBassSetting;
+        switch (bassSetting) {
+        case 1:
+            return true;
+        case 2: {
+            bassSetting = 0;
+            break;
+        }
+        case 0: {
+            bassSetting = 1;
+            break;
+        }
+        }
+
+        AudioEngine.SetRadioBassSetting(bassSetting);
+
+        vehicleFlags.bUpgradedStereo = true;
+
+        return true;
+    }
+    default: {
+        NOTSA_UNREACHABLE();
+    }
+    }    
 }
 
 // 0x6D3210

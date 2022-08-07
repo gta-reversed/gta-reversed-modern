@@ -196,9 +196,9 @@ public:
             uint32 bWheelRWide2 : 1;
 
             uint32 bHydraulicGeom : 1;
-            uint32 bHydraulicInst : 1;
+            uint32 bHydraulicInst : 1; // ..alled (bHydraulicInstalled)
             uint32 bHydraulicNone : 1;
-            uint32 bNosInst : 1;
+            uint32 bNosInst : 1; // ...alled (bNosInstalled)
             uint32 bOffroadAbility : 1;
             uint32 bOffroadAbility2 : 1;
             uint32 bHalogenLights : 1;

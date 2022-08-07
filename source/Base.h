@@ -39,10 +39,18 @@ typedef uint16    bool16;
 typedef uint32    bool32;
 
 // Use this macro for unreachable code paths.. Will be eventually replaced by something like llvm::unreachable
+#if _DEBUG
+#if __has_builtin(__builtin_unreachable)
+#define NOTSA_UNREACHABLE(...) assert(false && "UNREACHABLE CODE REACHED!"); __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define NOTSA_UNREACHABLE(...) assert(false && "UNREACHABLE CODE REACHED!"); __assume(false)
+#endif
+#else
 #if __has_builtin(__builtin_unreachable)
 #define NOTSA_UNREACHABLE(...) __builtin_unreachable()
 #elif defined(_MSC_VER)
 #define NOTSA_UNREACHABLE(...) __assume(false)
+#endif
 #endif
 
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
