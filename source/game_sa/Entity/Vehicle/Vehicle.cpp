@@ -19,6 +19,7 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "IKChainManager_c.h"
+#include <optional>
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
@@ -173,7 +174,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
     RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
     RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
-    // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
+    RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
     // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
     // + RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
@@ -2906,90 +2907,101 @@ void CVehicle::DoPlaneGunFireFX(CWeapon* weapon, CVector& particlePos, CVector& 
 
 // 0x6D4D30
 void CVehicle::FirePlaneGuns() {
-    return plugin::CallMethod<0x6D4D30, CVehicle*>(this);
-
-    if (!GetPlaneNumGuns())
+    if (!GetPlaneNumGuns()) {
         return;
+    }
 
-    if (CTimer::GetTimeInMS() <= m_nGunFiringTime + GetPlaneGunsRateOfFire())
+    if (CTimer::GetTimeInMS() <= m_nGunFiringTime + GetPlaneGunsRateOfFire()) {
         return;
+    }
 
-    uint8 frequency;
-    bool bFire;
-    eWeaponType weaponType;
-    switch (m_nModelIndex) {
-    case MODEL_HUNTER:
-    case MODEL_CARGOBOB:
-        bFire = false;
-        frequency = 160;
-        weaponType = WEAPON_MINIGUN;
-        break;
-    case MODEL_SEASPAR:
-    case MODEL_RCBARON:
-    case MODEL_MAVERICK:
-    case MODEL_POLMAV:
-        weaponType = WEAPON_M4;
-        bFire = false;
-        frequency = 92;
-        break;
-    case MODEL_RUSTLER:
-        weaponType = WEAPON_M4;
-        bFire = true;
-        frequency = 224;
-        /*
-        m_nGunsFlags = m_nGunsFlags ^ (m_nGunsFlags ^ (m_nGunsFlags + 1)) & 3;
-        if ((m_nGunsFlags & 3) == 3) {
-            m_nGunsFlags = m_nGunsFlags & 0xFC;
+    struct ModelGunInfo {
+        bool        isDoubleGun{};
+        uint8       freq{};
+        eWeaponType weap{};
+    };
+    const auto GetModelGunInfo = [this]() -> std::optional<ModelGunInfo> {
+        switch (m_nModelIndex) {
+        case MODEL_HUNTER:
+        case MODEL_CARGOBOB:
+            return ModelGunInfo{ false, 160u, WEAPON_MINIGUN };
+        case MODEL_SEASPAR:
+        case MODEL_RCBARON:
+        case MODEL_MAVERICK:
+        case MODEL_POLMAV:
+            return ModelGunInfo{ false, 92u, WEAPON_M4 };
+        case MODEL_RUSTLER: {
+            if (m_nGunsCycleIndex + 1 == 3) {
+                m_nGunsCycleIndex = 0;
+            } else {
+                m_nGunsCycleIndex++;
+            }
+            return ModelGunInfo{ true, 225u, WEAPON_M4 };
         }
-        */
-        break;
-    case MODEL_HYDRA:
-    case MODEL_TORNADO:
-        bFire = true;
-        frequency = 128;
-        weaponType = WEAPON_MINIGUN;
-        break;
-    default:
-        return;
-    }
-
-    CVector planeGunsPos;
-    auto weapon = CWeapon(weaponType, 5000);
-    // GetPlaneGunsPosition(this, &planeGunsPos, m_nGunsFlags & 3);
-    CVector posn = CTimer::GetTimeStep() * m_vecMoveSpeed + MultiplyMatrixWithVector(*m_matrix, &planeGunsPos);
-    weapon.FireInstantHit(this, &posn, &posn, nullptr, nullptr, nullptr, false, false);
-
-    if (bFire) {
-        // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, 2 * (m_nGunsFlags & 3));
-        CVector PlaneGunsPosition;
-        // GetPlaneGunsPosition(this, &PlaneGunsPosition, m_nGunsFlags & 3);
-        PlaneGunsPosition.x = -PlaneGunsPosition.x;
-        posn = CTimer::GetTimeStep() * m_vecMoveSpeed + MultiplyMatrixWithVector(*m_matrix, &PlaneGunsPosition);
-        weapon.FireInstantHit(this, &posn, &posn, nullptr, nullptr, nullptr, false, false);
-        // DoPlaneGunFireFX(this, &weapon, &PlaneGunsPosition, &posn, 2 * (m_nGunsFlags & 3) + 1);
-    } else {
-        // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, m_nGunsFlags & 3);
-    }
-
-    if (m_nStatus == STATUS_PLANE) {
-        CPad::GetPad(0)->StartShake(240, frequency, 0);
-    } else if (m_pDriver && m_pDriver->IsPlayer()) {
-        switch (m_pDriver->m_nPedType) {
-        case PED_TYPE_PLAYER1:
-            CPad::GetPad(0)->StartShake(240, frequency, 0);
-            break;
-        case PED_TYPE_PLAYER2:
-            CPad::GetPad(1)->StartShake(240, frequency, 0);
-            break;
+        case MODEL_HYDRA:
+        case MODEL_TORNADO:
+            return ModelGunInfo{ true, 123u, WEAPON_MINIGUN };
         default:
-            break;
+            return std::nullopt;
         }
+    };
+
+    const auto ginfo = GetModelGunInfo();
+    if (!ginfo.has_value()) {
+        return;
     }
 
-    if (weaponType == WEAPON_MINIGUN) {
-        weaponType = WEAPON_M4;
+    const auto [giIsDoubleGun, giFreq, giWeaponType] = *ginfo;
+
+    CWeapon weapon{ giWeaponType, 5000 };
+
+          auto planeGunPosMS  = GetPlaneGunsPosition(m_nGunsCycleIndex); // MS = Model Space
+    const auto velocityOffset = m_vecMoveSpeed * CTimer::GetTimeStep();
+          auto gunShellPos    = velocityOffset +  MultiplyMatrixWithVector(*m_matrix, planeGunPosMS);
+
+    const auto FireGun = [&](const auto gunId) {
+        DoPlaneGunFireFX(
+            &weapon,
+            planeGunPosMS,
+            gunShellPos,
+            gunId
+        );
+        weapon.FireInstantHit(this, &gunShellPos, &gunShellPos);
+    };
+
+    if (giIsDoubleGun) {
+        // NOTE: There might be a bug in the original code, being that
+        //       the gun position (`planeGunPosMS`) is not recalculated for the second gun
+        //       although, the gunId in `GetPlaneGunsPosition` is only used for the "rustler"
+        for (auto i = 0u; i < 2; i++) {
+            FireGun(m_nGunsCycleIndex * 2 + i);
+        }
+    } else {
+        FireGun(m_nGunsCycleIndex);
     }
-    AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE_PLANE, weaponType, this);
+
+    // Shake pad (if necessary)
+    const auto GetPadIdToShake = [this]() -> std::optional<int32> {
+        if (m_nStatus == STATUS_HELI) {
+            return 0;
+        } else {
+            if (m_pDriver) {
+                switch (m_pDriver->m_nPedType) {
+                case PED_TYPE_PLAYER1:
+                    return 0;
+                case PED_TYPE_PLAYER2:
+                    return 1;
+                }
+            }
+        }
+        return std::nullopt;
+    };
+    if (const auto padId = GetPadIdToShake()) {
+        CPad::GetPad(*padId)->StartShake(240, giFreq, 0);
+    }
+
+    AudioEngine.ReportWeaponEvent(AE_WEAPON_FIRE_PLANE, giWeaponType == WEAPON_MINIGUN ? WEAPON_M4 : giWeaponType, this); // Unsure about why the change the M4 => minigun but okay
+
     m_nGunFiringTime = CTimer::GetTimeInMS();
 }
 
