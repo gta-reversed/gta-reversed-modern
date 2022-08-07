@@ -1906,31 +1906,79 @@ void CHud::DrawTripSkip() {
 void CHud::DrawWanted() {
     // plugin::Call < 0x58D9A0>();
 
+    static bool& byte_BAB228 = *(bool*)(0xBAB228);
     auto wanted = FindPlayerWanted();
-    if (wanted->m_nWantedLevel > 0 || wanted->m_nWantedLevelBeforeParole > 0) {
-        CFont::SetBackground(false, false);
-        CFont::SetScale(SCREEN_STRETCH_X(0.605f), SCREEN_STRETCH_Y(1.21f));
-        CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
-        CFont::SetProportional(true);
-        CFont::SetFontStyle(FONT_GOTHIC);
-        CFont::SetDropColor({ 0, 0, 0, 255 });
 
-        char IconToPrint[16];
-        strcpy(IconToPrint, "]");
+    // WIP
+    auto alpha = 255.0f;
+    switch (m_WantedState) {
+    case FADED_OUT:
+        break;
 
-        const auto& info = FindPlayerInfo();
-        int8 offset = 0;
-        if (static_cast<float>(info.m_nMaxHealth) > 101.0f) {
-            offset = 12;
+    case START_FADE_OUT:
+        m_WantedFadeTimer = 1000;
+        if (m_WantedTimer > 10'000.0f) {
+            m_WantedState = 3;
+            m_WantedFadeTimer = 3000;
         }
+        break;
 
+    case FADING_IN:
+        m_WantedFadeTimer += (uint32)CTimer::GetTimeStepInMS();
+        if (m_WantedFadeTimer > 1000.0f) {
+            m_WantedFadeTimer = 1000;
+            m_WantedState = 1;
+        }
+        break;
+
+    case FADING_OUT:
+        m_WantedFadeTimer -= (uint32)CTimer::GetTimeStepInMS();
+        if (m_WantedFadeTimer < 0.0f) {
+            m_WantedFadeTimer = 0;
+            m_WantedState = 0;
+        }
+        break;
+
+    case FADE_DISABLED:
+        break;
+
+    default:
+        m_WantedTimer += (uint32)CTimer::GetTimeStepInMS();
+    }
+    alpha = std::clamp(alpha, 0.0f, 255.0f);
+    // WIP
+
+
+    // Almost done
+    // V
+    if (!m_WantedState) {
+        return;
+    }
+
+    CFont::SetBackground(false, false);
+    CFont::SetScale(SCREEN_STRETCH_X(0.605f), SCREEN_STRETCH_Y(1.21f));
+    CFont::SetOrientation(eFontAlignment::ALIGN_RIGHT);
+    CFont::SetProportional(true);
+    CFont::SetFontStyle(FONT_GOTHIC);
+    CFont::SetDropColor({ 0, 0, 0, 255 });
+
+    char IconToPrint[16];
+    strcpy(IconToPrint, "]");
+
+    const auto& info = FindPlayerInfo();
+    int8 offset = 0;
+    if (static_cast<float>(info.m_nMaxHealth) > 101.0f) {
+        offset = 12;
+    }
+
+    if (wanted->m_nWantedLevel > 0 && byte_BAB228 || wanted->m_nWantedLevelBeforeParole > 0) {
         for (auto i = 0u; i < 6; i++) { // 6 is MAX WANTED STARS
             const auto x = SCREEN_STRETCH_FROM_RIGHT(29.0f + 18.0f * (float)i);
             const auto y = GetYPosBasedOnHealth(CWorld::PlayerInFocus, SCREEN_STRETCH_Y(114.0f), offset);
 
-            if (info.m_pPed->GetWanted()->m_nWantedLevel > i &&
+            if (wanted->m_nWantedLevel > i &&
                 (
-                    CTimer::m_snTimeInMilliseconds > info.m_pPed->GetWanted()->m_nLastTimeWantedLevelChanged + 2000 ||
+                    CTimer::m_snTimeInMilliseconds > wanted->m_nLastTimeWantedLevelChanged + 2000 ||
                     CTimer::m_FrameCounter & 4
                 )
             ) {

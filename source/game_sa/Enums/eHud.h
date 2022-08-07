@@ -27,6 +27,14 @@ enum DRAW_FADE_STATE {
     WEAPON_STATE        = 3,
 };
 
+enum eFadeOperation {
+    FADED_OUT = 0,
+    START_FADE_OUT,
+    FADING_IN,
+    FADING_OUT,
+    FADE_DISABLED = 5,
+};
+
 enum eNameState {
     NAME_DONT_SHOW = 0,
     NAME_SHOW      = 1,
