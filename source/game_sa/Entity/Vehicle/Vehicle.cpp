@@ -2302,7 +2302,7 @@ RwFrame* RemoveObjectsCB(RwFrame* component, void* data) {
 }
 
 // 0x6D3450
-static constexpr auto& CopyObjectsCB_TargetClump = *(RpClump**)0xC1CB58;
+static auto& CopyObjectsCB_TargetClump = *(RpClump**)0xC1CB58;
 RwObject* CopyObjectsCB(RwObject* object, void* data) {
     const auto frame = (RwFrame*)data;
     
