@@ -98,7 +98,7 @@ bool CRopes::FindCoorsAlongRope(uint32 ropeId, float fCoorAlongRope, CVector* ou
 // 0x558D10
 int32 CRopes::CreateRopeForSwatPed(const CVector& startPos) {
     int32 newRopeId = m_nRopeIdCreationCounter + 100;
-    if (RegisterRope(reinterpret_cast<CEntity*>(newRopeId), static_cast<uint32>(eRopeType::SWAT), startPos, true, 0, 0, nullptr, 4000)) {
+    if (RegisterRope(newRopeId, static_cast<uint32>(eRopeType::SWAT), startPos, true, 0, 0, nullptr, 4000)) {
         return -1;
     }
 

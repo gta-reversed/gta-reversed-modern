@@ -681,7 +681,7 @@ public: // NOTSA functions
 
     CVector GetDummyPosition(eVehicleDummy dummy, bool bWorldSpace = true);
     int32 GetRopeIndex();
-    [[nodiscard]] constexpr int32 GetRopeID() const { return (uint32)&m_nFlags + 1; }
+    [[nodiscard]] constexpr auto GetRopeID() const { return (uint32)&m_nFlags + 1; }
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
     auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
