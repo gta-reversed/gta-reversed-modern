@@ -168,7 +168,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetFiringRateMultiplier, 0x6D4010);
     RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
     RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
-    // RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
+    RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
     // RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
     // RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
@@ -2732,9 +2732,32 @@ uint32 CVehicle::GetPlaneGunsRateOfFire() {
 
 // 0x6D4290
 CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
-    CVector result;
-    ((void(__thiscall*)(CVehicle*, CVector*, int32))0x6D4290)(this, &result, gunId);
-    return result;
+    if (const auto pos = GetModelInfo()->AsVehicleModelInfoPtr()->GetModelDummyPosition(DUMMY_VEHICLE_GUN); !pos->IsZero()) {
+        return pos;
+    }
+
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+        return VehicleGunOffset[0];
+    case MODEL_SEASPAR:
+        return { -.5f, 2.4f, -.785f }; // 0x8D35F8
+    case MODEL_RCBARON:
+        return { .0f, .45f, .0f }; // 0x8D3634
+    case MODEL_RUSTLER:
+        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.f, 0.f } * (gunId - 1);  // 0x8D3610, 0x8D361C
+    case MODEL_MAVERICK:
+        return { 0.f, 2.85f, -0.5f }; // 0x8D35E0
+    case MODEL_POLMAV:
+        return { 0.f, 2.85f, -0.5f }; // 0x8D35EC [Values same as the maverick's]
+    case MODEL_HYDRA:
+        return { 1.48f, 0.44f, -0.52f }; // 0x8D3628
+    case MODEL_CARGOBOB:
+        return { 0.f, 6.87f, -1.65f }; // 0x8D3604
+    case MODEL_TORNADO:
+        return *(CVector*)0xC1CC2C; // TODO
+    default:
+        return { 0.f, 0.f, 0.f }; // 
+    }
 }
 
 // 0x6D4590
