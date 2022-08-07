@@ -136,7 +136,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetComponentAtomicAlpha, 0x6D2960);
     RH_ScopedInstall(UpdateClumpAlpha, 0x6D2980);
     RH_ScopedInstall(UpdatePassengerList, 0x6D29E0);
-    // RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
+    RH_ScopedInstall(PickRandomPassenger, 0x6D2A10);
     RH_ScopedInstall(AddDamagedVehicleParticles, 0x6D2A80);
     RH_ScopedInstall(MakeDirty, 0x6D2BF0);
     // RH_ScopedInstall(AddWheelDirtAndWater, 0x6D2D50);
@@ -2043,7 +2043,18 @@ void CVehicle::UpdatePassengerList() {
 
 // 0x6D2A10
 CPed* CVehicle::PickRandomPassenger() {
-    return ((CPed * (__thiscall*)(CVehicle*))0x6D2A10)(this);
+    const auto numPsgrs = std::size(m_apPassengers);
+
+    // TODO: Add a function for this to random.hpp
+
+    const auto rnd = CGeneral::GetRandomNumberInRange(0, std::size(m_apPassengers));
+    for (auto i = 0; i < std::size(m_apPassengers); i++) {
+        if (const auto psgr = m_apPassengers[(rnd + i) % std::size(m_apPassengers)]) {
+            return psgr;
+        }
+    }
+
+    return nullptr;
 }
 
 // 0x6D2A80
