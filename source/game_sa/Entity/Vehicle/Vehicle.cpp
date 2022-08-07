@@ -169,7 +169,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetFiringRateMultiplier, 0x6D4090);
     RH_ScopedInstall(GetPlaneGunsRateOfFire, 0x6D40E0);
     RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
-    // RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
+    RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
     // RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
     // RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
