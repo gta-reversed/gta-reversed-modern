@@ -154,7 +154,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetUpgrade, 0x6D3650);
     RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
     // RH_ScopedInstall(AddReplacementUpgrade, 0x6D3830);
-    // RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
+    RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
     RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
     RH_ScopedInstall(RemoveAllUpgrades, 0x6D3AB0);
     // RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
@@ -234,7 +234,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedGlobalInstall(FindUpgradeCB, 0x6D3370);
     // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D33B0);
     // RH_ScopedGlobalInstall(RemoveObjectsCB, 0x6D3420);
-    // RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
+    RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
     // RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490);
     RH_ScopedGlobalInstall(RemoveAllUpgradesCB, 0x6D34D0);
     RH_ScopedGlobalInstall(SetVehicleAtomicVisibility, 0x732290);
@@ -2302,8 +2302,18 @@ RwFrame* RemoveObjectsCB(RwFrame* component, void* data) {
 }
 
 // 0x6D3450
+static constexpr auto& CopyObjectsCB_TargetClump = *(RpClump**)0xC1CB58;
 RwObject* CopyObjectsCB(RwObject* object, void* data) {
-    return ((RwObject * (__cdecl*)(RwObject*, void*))0x6D3450)(object, data);
+    const auto frame = (RwFrame*)data;
+    
+    if (RwObjectGetType(object) == rpATOMIC) {
+        const auto atomic = (RpAtomic*)object;
+        const auto clone = RpAtomicClone(atomic);
+        RpClumpAddAtomic(CopyObjectsCB_TargetClump, clone);
+        RpAtomicSetFrame(clone, frame);
+    }
+
+    return object;
 }
 
 // 0x6D3490
@@ -2444,12 +2454,23 @@ RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* mi, RwFrame* parentF
 
 // 0x6D3830
 void CVehicle::AddReplacementUpgrade(int32 modelIndex, int32 nodeId) {
+    // NOTE: 0x6D38D5 - 0x6D390B => `SetupUpgradeAtomicRendering`
+
     ((void(__thiscall*)(CVehicle*, int32, int32))0x6D3830)(this, modelIndex, nodeId);
 }
 
 // 0x6D39E0
-void CVehicle::RemoveReplacementUpgrade(int32 nodeId) {
-    ((void(__thiscall*)(CVehicle*, int32))0x6D39E0)(this, nodeId);
+void CVehicle::RemoveReplacementUpgrade(int32 frameId) {
+    auto frameOfUpgrade = CClumpModelInfo::GetFrameFromId(m_pRwClump, frameId);
+    RwFrameForAllObjects(frameOfUpgrade, RemoveObjectsCB, &frameOfUpgrade);
+    RwFrameForAllChildren(frameOfUpgrade, RemoveObjectsCB, &frameOfUpgrade);
+
+    CopyObjectsCB_TargetClump = m_pRwClump;
+    RwFrameForAllObjects(
+        CClumpModelInfo::GetFrameFromId(GetModelInfo()->m_pRwClump, frameId),
+        CopyObjectsCB,
+        frameOfUpgrade
+    );
 }
 
 // 0x6D3A50
