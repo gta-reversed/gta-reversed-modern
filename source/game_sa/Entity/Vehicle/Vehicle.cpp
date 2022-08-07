@@ -171,7 +171,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetPlaneGunsPosition, 0x6D4290);
     RH_ScopedInstall(GetPlaneOrdnanceRateOfFire, 0x6D4590);
     RH_ScopedInstall(GetPlaneOrdnancePosition, 0x6D46E0);
-    // RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
+    RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
     // RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
     // RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
     // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
@@ -2822,47 +2822,36 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type) {
 
 // 0x6D4900
 void CVehicle::SelectPlaneWeapon(bool bChange, eOrdnanceType type) {
-    return plugin::CallMethod<0x6D4900, CVehicle*, bool, eOrdnanceType>(this, bChange, type);
+    const auto GetWeaponToUse = [&, this] {
+        switch (m_nModelIndex) {
+        case MODEL_TORNADO: // Originally a separate case at the bottom, but since they both do the same, I moved it here.
+        case MODEL_HUNTER:
+            return type == 1 ? CAR_WEAPON_DOUBLE_ROCKET
+                             : bChange ? CAR_WEAPON_HEAVY_GUN
+                                       : m_nVehicleWeaponInUse;
+        case MODEL_SEASPAR:
+        case MODEL_RCBARON:
+            return bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
 
-    switch (m_nModelIndex) {
-    case MODEL_HUNTER: {
-        m_nVehicleWeaponInUse = bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
-        if (type != 1) {
-            break;
+        case MODEL_RUSTLER:
+            return type == 1 ? CAR_WEAPON_FREEFALL_BOMB
+                             : bChange ? CAR_WEAPON_HEAVY_GUN
+                                       : m_nVehicleWeaponInUse;
+        case MODEL_HYDRA: {
+            switch (type) {
+            case 1:
+                return CAR_WEAPON_DOUBLE_ROCKET;
+            case 2:
+                return CAR_WEAPON_LOCK_ON_ROCKET;
+            default:
+                return bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
+            }
         }
-        m_nVehicleWeaponInUse = CAR_WEAPON_DOUBLE_ROCKET;
-        break;
-    }
-    case MODEL_SEASPAR:
-    case MODEL_RCBARON: {
-        m_nVehicleWeaponInUse = bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
-        break;
-    }
-    case MODEL_RUSTLER: {
-        m_nVehicleWeaponInUse = bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
-        if (type != 1) {
-            break;
+        default:
+            return m_nVehicleWeaponInUse;
         }
-        m_nVehicleWeaponInUse = CAR_WEAPON_FREEFALL_BOMB;
-        break;
-    }
-    case MODEL_HYDRA: {
-        m_nVehicleWeaponInUse = bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
-        if (type == 1) {
-            m_nVehicleWeaponInUse = CAR_WEAPON_DOUBLE_ROCKET;
-        } else if (type == 2) {
-            m_nVehicleWeaponInUse = CAR_WEAPON_LOCK_ON_ROCKET;
-        }
-        break;
-    }
-    case MODEL_TORNADO:
-        m_nVehicleWeaponInUse = bChange ? CAR_WEAPON_HEAVY_GUN : m_nVehicleWeaponInUse;
-        if (type == 1)
-            m_nVehicleWeaponInUse = CAR_WEAPON_DOUBLE_ROCKET;
-        break;
-    default:
-        return;
-    }
+    };
+    m_nVehicleWeaponInUse = GetWeaponToUse();
 }
 
 // 0x6D4AD0
