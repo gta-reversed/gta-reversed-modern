@@ -175,7 +175,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SelectPlaneWeapon, 0x6D4900);
     RH_ScopedInstall(DoPlaneGunFireFX, 0x6D4AD0);
     RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
-    // RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
+    RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
     // + RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
     // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
@@ -2985,13 +2985,8 @@ void CVehicle::FirePlaneGuns() {
         if (m_nStatus == STATUS_HELI) {
             return 0;
         } else {
-            if (m_pDriver) {
-                switch (m_pDriver->m_nPedType) {
-                case PED_TYPE_PLAYER1:
-                    return 0;
-                case PED_TYPE_PLAYER2:
-                    return 1;
-                }
+            if (m_pDriver && m_pDriver->IsPlayer()) {
+                return m_pDriver->GetPadNumber();
             }
         }
         return std::nullopt;
@@ -3007,7 +3002,37 @@ void CVehicle::FirePlaneGuns() {
 
 // 0x6D5110
 void CVehicle::FireUnguidedMissile(eOrdnanceType type, bool bCheckTime) {
-    ((void(__thiscall*)(CVehicle*, eOrdnanceType, bool))0x6D5110)(this, type, bCheckTime);
+    auto& firingTimeForOrdnanceType = type == 1 ? m_nProjectileWeaponFiringTime : m_nAdditionalProjectileWeaponFiringTime;
+
+    if (bCheckTime) {
+        if (CTimer::GetTimeInMS() <= firingTimeForOrdnanceType + GetPlaneOrdnanceRateOfFire(type)) {
+            return;
+        }
+    }
+
+    switch (m_nModelIndex) {
+    case MODEL_HUNTER:
+    case MODEL_HYDRA:
+    case MODEL_TORNADO:
+        break;
+    default:
+        return;
+    }
+
+    CWeapon weapon{ WEAPON_RLAUNCHER, 5000 };
+
+    for (auto i = 0; i < 2; i++) {
+        const auto ordnancePos = MultiplyMatrixWithVector(*m_matrix, GetPlaneOrdnancePosition(type));
+        // This places a point somewhere in front of us, depending on our velocity's direction
+        auto origin = ordnancePos + m_matrix->GetForward() * (std::max(0.f, DotProduct(m_matrix->GetForward(), m_vecMoveSpeed)) * CTimer::GetTimeStep());
+        weapon.FireProjectile(this, &origin);
+    }
+
+    if (m_pDriver && m_pDriver->IsPlayer()) {
+        CPad::GetPad(m_pDriver->GetPadNumber())->StartShake(240, 160u, 0);
+    }
+
+    firingTimeForOrdnanceType = CTimer::GetTimeInMS();
 }
 
 // 0x6D5400
