@@ -239,32 +239,35 @@ void CHud::ResetWastedText() {
 }
 
 // 0x588FC0
-void CHud::SetBigMessage(const char* message, eMessageStyle style) {
+void CHud::SetBigMessage(char* message, eMessageStyle style) {
     if (BigMessageX[style] != 0.0f) {
         return;
     }
 
+    uint16 i = 0;
     if (style == STYLE_WHITE_MIDDLE_SMALLER) {
-        for (auto i = 0; i < BIG_MESSAGE_SIZE; i++) {
-            if (message[i] == 0)
+        for (; i < BIG_MESSAGE_SIZE; i++) {
+            if (message[i] == '\0')
                 break;
             if (message[i] != LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]) {
-                OddJob2On = 0;
                 OddJob2OffTimer = 0.0f;
+                OddJob2On = 0;
             }
-            m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
+            m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]   = message[i];
             LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
+
         }
     } else {
-        for (auto i = 0; i < BIG_MESSAGE_SIZE; i++) {
-            if (message[i] == 0)
+        for (; i < BIG_MESSAGE_SIZE; i++) { // strcpy_s(m_BigMessage[style], BIG_MESSAGE_SIZE, message[]);
+            if (message[i] == '\0')
                 break;
             m_BigMessage[style][i] = message[i];
         }
+        *message = '\0';
     }
 
-    LastBigMessage[STYLE_MIDDLE][0] = '\0';
-    m_BigMessage[STYLE_MIDDLE][0] = '\0';
+    m_BigMessage[style][i]   = '\0';
+    LastBigMessage[style][i] = '\0';
 }
 
 // 0x588BE0

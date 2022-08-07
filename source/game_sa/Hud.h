@@ -97,7 +97,7 @@ public:
 
     static void ResetWastedText();
 
-    static void SetBigMessage(const char* message, eMessageStyle style);
+    static void SetBigMessage(char* message, eMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
