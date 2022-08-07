@@ -148,7 +148,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetWindowOpenFlag, 0x6D3080);
     RH_ScopedInstall(ClearWindowOpenFlag, 0x6D30B0);
     RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
-    // RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
+    RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
     // RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
     RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
     RH_ScopedInstall(GetUpgrade, 0x6D3650);
@@ -2176,7 +2176,7 @@ bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int3
     }
     case 15: {
         if (!IsAutomobile()) {
-            return;
+            return false;
         }
 
         const auto GetNitroValue = [&] {
@@ -2223,14 +2223,61 @@ bool CVehicle::SetVehicleUpgradeFlags(int32 upgradeModelIndex, int32 modId, int3
         return true;
     }
     default: {
-        NOTSA_UNREACHABLE();
+        return false;
     }
     }    
 }
 
 // 0x6D3210
-bool CVehicle::ClearVehicleUpgradeFlags(int32 arg0, int32 componentIndex) {
-    return ((bool(__thiscall*)(CVehicle*, int32, int32))0x6D3210)(this, arg0, componentIndex);
+bool CVehicle::ClearVehicleUpgradeFlags(int32 arg0, int32 modId) {
+    // See `SetVehicleUpgradeFlags` for a comment on what `componentIndex` is
+
+    switch (modId) {
+    case 17: { // 0x6D3270
+        if (m_vehicleAudio.m_Settings.m_nRadioType != RADIO_CIVILIAN && vehicleFlags.bUpgradedStereo) {
+            auto& bassSetting = m_vehicleAudio.m_Settings.m_nBassSetting;
+            switch (bassSetting) {
+            case 1: {
+                bassSetting = 0;
+                break;
+            }
+            case 0: {
+                bassSetting = 2;
+                break;
+            }
+            }
+            AudioEngine.SetRadioBassSetting(bassSetting);
+            vehicleFlags.bUpgradedStereo = false;
+        }
+        return true;
+    }
+    case 15: { // 0x6D32C6
+        if (!IsAutomobile()) {
+            return false;
+        }
+
+        AsAutomobile()->NitrousControl(-1);
+
+        return GetModelInfo()->AsVehicleModelInfoPtr()->m_pVehicleStruct->m_aUpgrades[15].m_nParentComponentId < 0;
+    }
+    case 16: { // 0x6D321C
+        if (handlingFlags.bHydraulicInst) {
+            if (auto& specColIdx = m_vehicleSpecialColIndex; specColIdx > -1) {
+                CVehicle::m_aSpecialColVehicle[specColIdx] = nullptr;
+                specColIdx = -1;
+
+                SetupSuspensionLines();
+                m_nFakePhysics = false;
+                m_vecMoveSpeed.z = .02f;
+            }
+        }
+        handlingFlags.bHydraulicInst = false;
+        return true;
+    }
+    default: {
+        return false;
+    }
+    }
 }
 
 // 0x6D3300
