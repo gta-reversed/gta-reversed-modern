@@ -112,27 +112,27 @@ void CPathFind::ReleaseRequestedNodes() {
 }
 
 /*!
-* @addr notsa
-* @brief Find intersectioninfo between 2 nodes
+* @brief Find intersection info between 2 nodes
+* @addr notsa 100% inlined
 */
-auto CPathFind::FindIntersection(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) -> CPathIntersectionInfo* {
-    const auto nodesInStartArea = m_pPathNodes[startNodeAddress.m_wAreaId];
+auto CPathFind::FindIntersection(const CNodeAddress& startNodeAddress, const CNodeAddress& targetNodeAddress) -> CPathIntersectionInfo* {
+    const auto& nodesInStartArea = m_pPathNodes[startNodeAddress.m_wAreaId];
     if (!nodesInStartArea) {
-        return false;
+        return nullptr;
     }
 
     if (!m_pPathNodes[targetNodeAddress.m_wAreaId]) {
-        return false;
+        return nullptr;
     }
 
     // Check if the start node has any links (TODO: could be omitted I think, as the loop condition checks for this as well)
-    const auto startNode = nodesInStartArea[startNodeAddress.m_wNodeId];
+    const auto& startNode = nodesInStartArea[startNodeAddress.m_wNodeId];
     if (!startNode.m_nNumLinks) {
         return nullptr;
     }
 
-    const auto nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
-    for (auto i = 0; i < startNode.m_nNumLinks; i++) {
+    const auto& nodeLinks = m_pNodeLinks[startNodeAddress.m_wAreaId];
+    for (auto i = 0u; i < startNode.m_nNumLinks; i++) {
         const auto linkedNodeIdx = startNode.m_wBaseLinkId + i;
         if (nodeLinks[linkedNodeIdx] == targetNodeAddress) {
             return &m_pPathIntersections[startNodeAddress.m_wAreaId][linkedNodeIdx];
@@ -144,18 +144,14 @@ auto CPathFind::FindIntersection(CNodeAddress startNodeAddress, CNodeAddress tar
 
 // 0x44D790
 bool CPathFind::TestCrossesRoad(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
-    if (const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress)) {
-        return intersect->m_bRoadCross;
-    }
-    return false;
+    const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress);
+    return intersect ? intersect->m_bRoadCross : false;
 }
 
 // 0x44D480
 bool CPathFind::TestForPedTrafficLight(CNodeAddress startNodeAddress, CNodeAddress targetNodeAddress) {
-    if (const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress)) {
-        return intersect->m_bPedTrafficLight;
-    }
-    return false;
+    const auto intersect = FindIntersection(startNodeAddress, targetNodeAddress);
+    return intersect ? intersect->m_bPedTrafficLight : false;
 }
 
 CVector CPathFind::TakeWidthIntoAccountForWandering(CNodeAddress nodeAddress, uint16 randomSeed) {
