@@ -734,6 +734,7 @@ RpMaterial* SetCompAlphaCB(RpMaterial* material, void* data);
 RwObject* SetVehicleAtomicVisibilityCB(RwObject* object, void* data);
 RwFrame* SetVehicleAtomicVisibilityCB(RwFrame* component, void* data);
 void DestroyVehicleAndDriverAndPassengers(CVehicle* vehicle);
+void SetVehicleAtomicVisibility(RpAtomic* atomic, int16 state);
 
 extern char *&HandlingFilename;
 extern char (&VehicleNames)[100][14]; // sorting is based on handling id

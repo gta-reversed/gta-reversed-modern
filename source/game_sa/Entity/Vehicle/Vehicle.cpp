@@ -149,7 +149,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ClearWindowOpenFlag, 0x6D30B0);
     RH_ScopedInstall(SetVehicleUpgradeFlags, 0x6D30E0);
     RH_ScopedInstall(ClearVehicleUpgradeFlags, 0x6D3210);
-    // RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
+    RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
     RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
     RH_ScopedInstall(GetUpgrade, 0x6D3650);
     // RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
@@ -237,6 +237,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedGlobalInstall(CopyObjectsCB, 0x6D3450);
     // RH_ScopedGlobalInstall(FindReplacementUpgradeCB, 0x6D3490);
     RH_ScopedGlobalInstall(RemoveAllUpgradesCB, 0x6D34D0);
+    RH_ScopedGlobalInstall(SetVehicleAtomicVisibility, 0x732290);
 }
 
 // 0x6D5F10
@@ -2321,9 +2322,51 @@ RpAtomic* RemoveAllUpgradesCB(RpAtomic* atomic, void* data) {
     return atomic;
 }
 
+// 0x732290
+static void SetVehicleAtomicVisibility(RpAtomic* atomic, int16 state) {
+    RpAtomicGetVisibilityPlugin(atomic)->m_modelId = state;
+}
+
 // 0x6D3510
-RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* model, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged) {
-    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, const UpgradePosnDesc*, RwFrame*, bool))0x6D3510)(this, model, upgradePosn, parentComponent, isDamaged);
+RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* mi, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged) {
+    if (isDamaged) {
+        CDamageAtomicModelInfo::ms_bCreateDamagedVersion = true;
+    }
+
+    const auto atomic = reinterpret_cast<RpAtomic*>(mi->CreateInstance()); // Trust me, CreateInstace returns an atomic in this case
+    const auto frame = RpAtomicGetFrame(atomic);
+    const auto mat   = RwFrameGetMatrix(frame);
+
+    // Update it's position
+    upgradePosn->m_qRotation.Get(mat);
+    RwV3dAssign(RwMatrixGetPos(mat), &upgradePosn->m_vPosition);
+    RwMatrixUpdate(mat);
+
+    // Update us and parent frame
+    RpClumpAddAtomic(m_pRwClump, atomic);
+    RwFrameAddChild(parentComponent, frame);
+
+    mi->AddRef();
+
+    SetVehicleAtomicVisibility(atomic, isDamaged ? 2 : 1); //  TODO: Use RpAtomicVisibility: isDamaged ? VISIBILITY_DAM : VISIBILITY_OK
+
+    CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_IS_REPLACEMENT_UPGRADE | ATOMIC_RENDER_ALWAYS); // NOTE: Combined 2 flags together here
+
+    // Setup stuff for alpha
+    bool hasAlphaMaterial{};
+    RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CVehicleModelInfo::HasAlphaMaterialCB, &hasAlphaMaterial);
+    if (hasAlphaMaterial) {
+        CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_HAS_ALPHA);
+    }
+    CVisibilityPlugins::SetAtomicRenderCallback(
+        atomic,
+        hasAlphaMaterial ? CVisibilityPlugins::RenderVehicleHiDetailAlphaCB : CVisibilityPlugins::RenderVehicleHiDetailCB // Moved this out to here from the above `if`
+    );
+
+    CVehicleModelInfo::SetRenderPipelinesCB(atomic, nullptr);
+    CDamageAtomicModelInfo::ms_bCreateDamagedVersion = false;
+
+    return atomic;
 }
 
 // 0x6D3630
