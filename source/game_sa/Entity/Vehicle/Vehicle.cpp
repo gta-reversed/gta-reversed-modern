@@ -152,7 +152,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CreateUpgradeAtomic, 0x6D3510);
     RH_ScopedInstall(RemoveUpgrade, 0x6D3630);
     RH_ScopedInstall(GetUpgrade, 0x6D3650);
-    // RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
+    RH_ScopedInstall(CreateReplacementAtomic, 0x6D3700);
     // RH_ScopedInstall(AddReplacementUpgrade, 0x6D3830);
     // RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
     RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
@@ -2327,6 +2327,20 @@ static void SetVehicleAtomicVisibility(RpAtomic* atomic, int16 state) {
     RpAtomicGetVisibilityPlugin(atomic)->m_modelId = state;
 }
 
+static void SetupUpgradeAtomicRendering(RpAtomic* atomic, bool isDamaged) {
+    bool hasAlphaMaterial{};
+    RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CVehicleModelInfo::HasAlphaMaterialCB, &hasAlphaMaterial);
+    if (hasAlphaMaterial) {
+        CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_HAS_ALPHA);
+    }
+    CVisibilityPlugins::SetAtomicRenderCallback(
+        atomic,
+        hasAlphaMaterial ? CVisibilityPlugins::RenderVehicleHiDetailAlphaCB : CVisibilityPlugins::RenderVehicleHiDetailCB // Moved this out to here from the above `if`
+    );
+
+    CVehicleModelInfo::SetRenderPipelinesCB(atomic, nullptr);
+}
+
 // 0x6D3510
 RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* mi, const UpgradePosnDesc* upgradePosn, RwFrame* parentComponent, bool isDamaged) {
     if (isDamaged) {
@@ -2348,24 +2362,13 @@ RpAtomic* CVehicle::CreateUpgradeAtomic(CBaseModelInfo* mi, const UpgradePosnDes
 
     mi->AddRef();
 
-    SetVehicleAtomicVisibility(atomic, isDamaged ? 2 : 1); //  TODO: Use RpAtomicVisibility: isDamaged ? VISIBILITY_DAM : VISIBILITY_OK
+    SetVehicleAtomicVisibility(atomic, isDamaged ? ATOMIC_IS_DAM_STATE : ATOMIC_IS_OK_STATE); //  TODO: Use RpAtomicVisibility: isDamaged ? VISIBILITY_DAM : VISIBILITY_OK
 
     CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_IS_REPLACEMENT_UPGRADE | ATOMIC_RENDER_ALWAYS); // NOTE: Combined 2 flags together here
 
-    // Setup stuff for alpha
-    bool hasAlphaMaterial{};
-    RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CVehicleModelInfo::HasAlphaMaterialCB, &hasAlphaMaterial);
-    if (hasAlphaMaterial) {
-        CVisibilityPlugins::SetAtomicFlag(atomic, ATOMIC_HAS_ALPHA);
-    }
-    CVisibilityPlugins::SetAtomicRenderCallback(
-        atomic,
-        hasAlphaMaterial ? CVisibilityPlugins::RenderVehicleHiDetailAlphaCB : CVisibilityPlugins::RenderVehicleHiDetailCB // Moved this out to here from the above `if`
-    );
-
-    CVehicleModelInfo::SetRenderPipelinesCB(atomic, nullptr);
+    SetupUpgradeAtomicRendering(atomic, isDamaged);
+    
     CDamageAtomicModelInfo::ms_bCreateDamagedVersion = false;
-
     return atomic;
 }
 
@@ -2404,8 +2407,39 @@ int32 CVehicle::GetUpgrade(int32 upgradeId) {
 }
 
 // 0x6D3700
-RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* model, RwFrame* component, int32 arg2, bool bDamaged, bool bIsWheel) {
-    return ((RpAtomic * (__thiscall*)(CVehicle*, CBaseModelInfo*, RwFrame*, int32, bool, bool))0x6D3700)(this, model, component, arg2, bDamaged, bIsWheel);
+RpAtomic* CVehicle::CreateReplacementAtomic(CBaseModelInfo* mi, RwFrame* parentFrame, int16 atomicVisibilityFlags, bool isDamaged, bool bIsWheel) {
+    // atomicVisibilityFlags flags combined from `eAtomicComponentFlag`
+
+    if (isDamaged) {
+        CDamageAtomicModelInfo::ms_bCreateDamagedVersion = true;
+    }
+
+    const auto atomic = reinterpret_cast<RpAtomic*>(mi->CreateInstance());
+    const auto frame = RpAtomicGetFrame(atomic);
+
+    mi->AddRef();
+
+    // Update us and parent frame
+    RpClumpAddAtomic(m_pRwClump, atomic);
+
+    if (bIsWheel) {
+        const auto mat = RwFrameGetMatrix(frame);
+        CMatrix::GetIdentity().UpdateRwMatrix(mat);
+        mat->flags |= 0x20'003; // TODO: What flags are this?
+        CVisibilityPlugins::SetFrameHierarchyId(frame, 0);
+        RwFrameAddChild(parentFrame, frame);
+    } else {
+        RpAtomicSetFrame(atomic, parentFrame);
+        RwFrameDestroy(frame);
+    }
+
+    SetVehicleAtomicVisibility(atomic, atomicVisibilityFlags & ~(ATOMIC_IS_DAM_STATE | ATOMIC_IS_OK_STATE));
+
+    SetupUpgradeAtomicRendering(atomic, isDamaged);
+
+    CDamageAtomicModelInfo::ms_bCreateDamagedVersion = false;
+
+    return atomic;
 }
 
 // 0x6D3830
