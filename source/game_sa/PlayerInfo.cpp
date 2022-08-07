@@ -3,6 +3,7 @@
 #include "PlayerInfo.h"
 #include "FireManager.h"
 #include "MenuSystem.h"
+#include "Hud.h"
 
 void CPlayerInfo::InjectHooks() {
     RH_ScopedClass(CPlayerInfo);
@@ -237,12 +238,12 @@ void CPlayerInfo::StreamParachuteWeapon(bool unk) {
 
     if (m_pPed && m_pPed->IsInVehicle()) {
         if (m_pPed->m_pVehicle->IsSubPlane() || m_pPed->m_pVehicle->IsSubHeli()) {
-            if (m_nRequireParachuteTimer <= CTimer::GetTimeStepInMS()) {
+            if (m_nRequireParachuteTimer <= (uint32)CTimer::GetTimeStepInMS()) {
                 const auto groundHeight = TheCamera.CalculateGroundHeight(eGroundHeightType::ENTITY_BOUNDINGBOX_BOTTOM);
                 const auto vehToGroundZDist = m_pPed->m_pVehicle->GetPosition().z - groundHeight;
                 m_nRequireParachuteTimer = (vehToGroundZDist <= 50.f) ? 0 : 5000;
             } else {
-                m_nRequireParachuteTimer -= CTimer::GetTimeStepInMS();
+                m_nRequireParachuteTimer -= (uint32)CTimer::GetTimeStepInMS();
             }
         }
     }
@@ -372,7 +373,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
             bool bDecreaseHealth{};
             if (CStats::GetStatValue(STAT_FAT) > 0.0f) {
                 CStats::DecrementStat(STAT_FAT, 25.0f);
-                CStats::DisplayScriptStatUpdateMessage(0, STAT_FAT, 25.0f);
+                CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_FAT, 25.0f);
                 bDecreaseHealth = true;
                 if (!s_LastHungryState) {
                     s_LastHungryState = m_nNumHoursDidntEat + 24;
@@ -385,7 +386,7 @@ void CPlayerInfo::WorkOutEnergyFromHunger() {
                 }
             } else {
                 CStats::DecrementStat(STAT_MUSCLE, 25.0);
-                CStats::DisplayScriptStatUpdateMessage(0, STAT_MUSCLE, 25.0f);
+                CStats::DisplayScriptStatUpdateMessage(STAT_UPDATE_DECREASE, STAT_MUSCLE, 25.0f);
             }
         } else {
             CHud::SetHelpMessage(TheText.Get("NOTEAT"), true, false, true);

@@ -45,7 +45,11 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         break;
     case COMMAND_SET_PHOTO_CAMERA_EFFECT: // 0xA2F
         CollectParameters(1);
-        CTheScripts::bDrawCrossHair = ScriptParams[0].uParam != 0 ? 2 : 0;
+        if (ScriptParams[0].uParam != 0) {
+            CTheScripts::bDrawCrossHair = eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON;
+        } else {
+            CTheScripts::bDrawCrossHair = eCrossHairType::NONE;
+        }
         return OR_CONTINUE;
     case COMMAND_FIX_CAR: // 0xA30
     {
@@ -93,12 +97,13 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         break;
     case COMMAND_CREATE_USER_3D_MARKER: // 0xA40
         CollectParameters(4);
-        ScriptParams[0].uParam = C3dMarkers::User3dMarkerSet(ScriptParams[0].fParam, ScriptParams[1].fParam, ScriptParams[2].fParam, ScriptParams[3].iParam);
+        // ScriptParams[0].uParam = C3dMarkers::User3dMarkerSet(ScriptParams[0].fParam, ScriptParams[1].fParam, ScriptParams[2].fParam, ScriptParams[3].iParam);
         StoreParameters(1);
         return OR_CONTINUE;
     case COMMAND_REMOVE_USER_3D_MARKER: // 0xA41
+        break;
         CollectParameters(1);
-        C3dMarkers::User3dMarkerDelete(ScriptParams[0].iParam);
+        // C3dMarkers::User3dMarkerDelete(ScriptParams[0].iParam);
         return OR_CONTINUE;
     case COMMAND_REMOVE_ALLUSER_3D_MARKERS: // 0xA42 NOTSA
         break;
@@ -118,12 +123,9 @@ OpcodeResult CRunningScript::ProcessCommands2600To2699(int32 commandId) {
         }
         return OR_CONTINUE;
     case COMMAND_SWITCH_OBJECT_BRAINS: // 0xA46
+        break;
         CollectParameters(2);
-        if (ScriptParams[1].uParam) {
-            CTheScripts::ScriptsForBrains.SwitchAllObjectBrainsWithThisID(ScriptParams[0].i8Param, true);
-        } else {
-            CTheScripts::ScriptsForBrains.SwitchAllObjectBrainsWithThisID(ScriptParams[0].i8Param, false);
-        }
+        // CTheScripts::ScriptsForBrains.SwitchAllObjectBrainsWithThisID(ScriptParams[0].i8Param, ScriptParams[1].uParam ? true : false);
         return OR_CONTINUE;
     case COMMAND_FINISH_SETTING_UP_CONVERSATION_NO_SUBTITLES: // 0xA47
         break;

@@ -53,7 +53,7 @@ public:
     uint32       m_nTotalAmmo;
     uint32       m_nTimeForNextShot;
     uint8        field_14;
-    uint8        m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
+    bool         m_bNoModel; // Used in case of goggles (infrared/nightvision) : When they're put on the weapon model isn't and shouldn't be loaded.
     uint8        field_16;
     uint8        field_17;
     FxSystem_c*  m_pFxSystem; // flamethrower, spraycan, extinguisher particle
@@ -70,6 +70,7 @@ public:
         m_pFxSystem = nullptr;
     };
     CWeapon(eWeaponType weaponType, int32 ammo);
+    CWeapon(const CWeapon&) = delete;
 
     void Initialise(eWeaponType weaponType, int32 ammo, CPed* owner);
     static void InitialiseWeapons();

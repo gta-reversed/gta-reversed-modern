@@ -48,6 +48,8 @@ typedef uint32    bool32;
 // Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
 #define UNUSED(x) (void)(x);
 
+// Macro for unused function return values.
+#define RET_IGNORED(x) (void)(x);
 
 #define _IGNORED_
 #define _CAN_BE_NULL_

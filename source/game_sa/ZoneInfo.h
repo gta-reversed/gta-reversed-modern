@@ -12,7 +12,7 @@ class CZoneInfo {
 public:
     uint8  GangDensity[10];
     uint8  DrugDealerCounter;
-    RwRGBA ZoneColor;
+    CRGBA  ZoneColor;
     union {
         struct {
             uint8 zonePopulationType : 5;

@@ -28,12 +28,14 @@ CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPe
     m_pVehicle = vehicle;
     m_pAnimCloseDoorRolling = nullptr;
     m_pTaskUtilityLineUpPedWithCar = nullptr;
-    field_14 = 0;
+    m_TaskTimer = nullptr;
     field_18 = 0;
     field_1C = 0;
     field_1D = 0;
     m_nTimePassedSinceCarUpSideDown = 0;
+
     m_bUpdateCurrentVehicle = updateCurrentVehicle;
+    m_b08 = true;
 
     CEntity::SafeRegisterRef(m_pVehicle);
 
@@ -41,13 +43,13 @@ CTaskSimpleCarDrive::CTaskSimpleCarDrive(CVehicle* vehicle, CTaskUtilityLineUpPe
         m_pTaskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar(CVector{}, 0, utilityTask->m_nDoorOpenPosType, utilityTask->m_nDoorIdx);
     }
 
-    m_b08 = true;
     m_fHeadBoppingFactor = 0.0f;
     m_fHeadBoppingOrientation = 0.0f;
     m_fRandomHeadBoppingMultiplier = 0.0f;
     m_nBoppingStartTime = -1;
 }
 
+// 0x63C460
 CTaskSimpleCarDrive::~CTaskSimpleCarDrive() {
     CEntity::SafeCleanUpRef(m_pVehicle);
 
@@ -57,6 +59,7 @@ CTaskSimpleCarDrive::~CTaskSimpleCarDrive() {
     }
 
     if (m_b20) {
+        assert(m_pAnimCloseDoorRolling);
         m_pAnimCloseDoorRolling->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         if (m_pVehicle) {
             m_pVehicle->ClearGettingOutFlags(1);
@@ -102,7 +105,7 @@ void CTaskSimpleCarDrive::TriggerIK(CPed* ped) const {
 
 // 0x63C900
 void CTaskSimpleCarDrive::UpdateBopping() {
-    const auto timeDelta = CTimer::GetTimeInMS() - m_nBoppingStartTime;
+    const auto timeDelta = (int32)CTimer::GetTimeInMS() - m_nBoppingStartTime;
     m_fBoppingProgress = (float)(timeDelta % m_nBoppingEndTime) / (float)m_nBoppingEndTime;
     m_nBoppingCompletedTimes = timeDelta / m_nBoppingEndTime % 2;
 }
@@ -137,7 +140,7 @@ void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, bool a3) {
             UpdateBopping();
         }
 
-        auto dist = (ped->GetPosition() - TheCamera.GetPosition()).SquaredMagnitude();
+        const auto dist = DistanceBetweenPointsSquared(TheCamera.GetPosition(), ped->GetPosition());
         ProcessHeadBopping(ped, a3, dist);
         ProcessArmBopping(ped, a3, dist);
         if (m_nBoppingStartTime != -1 && !m_b01 && !m_b02) {
@@ -149,7 +152,7 @@ void CTaskSimpleCarDrive::ProcessBopping(CPed* ped, bool a3) {
 // 0x63DC20
 CTask* CTaskSimpleCarDrive::Clone() {
     auto task = new CTaskSimpleCarDrive(m_pVehicle);
-    task->m_bUpdateCurrentVehicle ^= true;
+    task->m_bUpdateCurrentVehicle = m_bUpdateCurrentVehicle;
     return task;
 }
 

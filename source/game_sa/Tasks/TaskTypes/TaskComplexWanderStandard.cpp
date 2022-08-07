@@ -15,18 +15,16 @@ void CTaskComplexWanderStandard::ScanForStuff(CPed* ped) {
         m_TaskTimer.m_bStarted = true;
     }
 
-    auto startTime = CTimer::GetTimeInMS();
     if (CTimer::GetTimeInMS() >= m_nMinNextScanTime) {
-        if (m_TaskTimer.m_bStarted) {
+        if (m_TaskTimer.m_bStarted) { // V547 Expression 'm_TaskTimer.m_bStarted' is always true.
             if (m_TaskTimer.m_bStopped) {
                 m_TaskTimer.m_nStartTime = CTimer::GetTimeInMS();
                 m_TaskTimer.m_bStopped = false;
-                startTime = CTimer::GetTimeInMS();
             }
 
-            if (startTime >= m_TaskTimer.m_nStartTime + m_TaskTimer.m_nInterval) {
+            if (CTimer::GetTimeInMS() >= m_TaskTimer.m_nStartTime + m_TaskTimer.m_nInterval) {
                 m_TaskTimer.m_nInterval = 50;
-                m_TaskTimer.m_nStartTime = startTime;
+                m_TaskTimer.m_nStartTime = CTimer::GetTimeInMS();
                 m_TaskTimer.m_bStarted = true;
                 if (!LookForGangMembers(ped) && !LookForChatPartners(ped)) {
                     CTaskComplexWanderStandard::LookForSexyCars(ped);

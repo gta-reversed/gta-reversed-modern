@@ -47,7 +47,7 @@ OpcodeResult CRunningScript::ProcessCommands700To799(int32 commandId) {
         CollectParameters(3);
         const CVector pos = CTheScripts::ReadCVectorFromScript(0);
         bool success = false;
-        *(float*)&ScriptParams[0] = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z, &success, nullptr);
+        *(float*)&ScriptParams[0] = CWorld::FindGroundZFor3DCoord(pos, &success, nullptr);
         StoreParameters(1);
         return OR_CONTINUE;
     }
@@ -58,7 +58,7 @@ OpcodeResult CRunningScript::ProcessCommands700To799(int32 commandId) {
         if (pos.z <= MAP_Z_LOW_LIMIT)
             pos.z = CWorld::FindGroundZForCoord(pos.x, pos.y);
 
-        ScriptParams[0].iParam = gFireManager.StartScriptFire(pos, nullptr, 0.8f, 1, ScriptParams[3].iParam, ScriptParams[4].iParam);
+        ScriptParams[0].iParam = gFireManager.StartScriptFire(pos, nullptr, 0.8f, 1, ScriptParams[3].i8Param, ScriptParams[4].iParam);
         StoreParameters(1);
         return OR_CONTINUE;
     }

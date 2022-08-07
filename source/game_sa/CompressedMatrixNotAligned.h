@@ -7,7 +7,7 @@ struct CByteCompressedVector {
     int8 y;
     int8 z;
 
-    CByteCompressedVector() {}
+    CByteCompressedVector() = default;
     CByteCompressedVector(const CVector& vec) {
         x = static_cast<int8>(vec.x * 127.0F);
         y = static_cast<int8>(vec.y * 127.0F);

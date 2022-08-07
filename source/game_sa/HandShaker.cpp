@@ -31,9 +31,9 @@ void CHandShaker::SetDefaults() {
 void CHandShaker::Reset() {
     vec = CVector();
     vec3 = CVector{
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.x,
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.y,
-        (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * vec2.z,
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.x),
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.y),
+        CGeneral::GetRandomNumberInRange(0.0f, vec2.z),
     };
 }
 

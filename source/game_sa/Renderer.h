@@ -24,32 +24,25 @@ struct tScanLists {
     CPtrListDoubleLink* pedsList;
     CPtrListDoubleLink* dummiesList;
 
-    inline CPtrListDoubleLink* GetList(uint32 index) const {
+    [[nodiscard]] inline CPtrListDoubleLink* GetList(uint32 index) const {
         switch (index) {
-            case 0:
-                return buildingsList;
-            case 1:
-                return objectsList;
-            case 2:
-                return vehiclesList;
-            case 3:
-                return pedsList;
-            case 4:
-                return dummiesList;
+            case 0: return buildingsList;
+            case 1: return objectsList;
+            case 2: return vehiclesList;
+            case 3: return pedsList;
+            case 4: return dummiesList;
             default:
                 assert(false); // Shouldn't ever happen
                 return nullptr;
         }
     }
 };
-
 VALIDATE_SIZE(tScanLists, 0x14);
 
 struct tRenderListEntry {
     CEntity* entity;
     float distance;
 };
-
 VALIDATE_SIZE(tRenderListEntry, 8);
 
 constexpr auto MAX_INVISIBLE_ENTITY_PTRS = 150u;
@@ -90,9 +83,7 @@ public:
 public:
     static void InjectHooks();
 
-    // dummy function
     static void Init();
-    // dummy function
     static void Shutdown();
     static void RenderFadingInEntities();
     static void RenderFadingInUnderwaterEntities();
@@ -104,7 +95,6 @@ public:
     static tRenderListEntry* GetLodDontRenderListBase();
     static void ResetLodRenderLists();
     static void AddToLodRenderList(CEntity* entity, float distance);
-    // unused
     static void AddToLodDontRenderList(CEntity* entity, float distance);
     static void ProcessLodRenderLists();
     static void PreRender();
@@ -124,13 +114,17 @@ public:
     static void ConstructRenderList();
     static void ScanSectorList_RequestModels(int32 sectorX, int32 sectorY);
     static void ScanWorld();
-    // returns objects count
     static int32 GetObjectsInFrustum(CEntity** outEntities, float farPlane, RwMatrix* transformMatrix);
     static void RequestObjectsInFrustum(RwMatrix* transformMatrix, int32 modelRequestFlags);
     static void RequestObjectsInDirection(const CVector& posn, float angle, int32 modelRequestFlags);
     static void SetupScanLists(int32 sectorX, int32 sectorY);
 
     static void SetLoadingPriority(int8 priority) noexcept { m_loadingPriority = priority; } // 0x407370
+
+    static auto GetVisibleLodPtrs()      { return std::span{ ms_aVisibleLodPtrs,      (size_t)ms_nNoOfVisibleLods }; }
+    static auto GetVisibleEntityPtrs()   { return std::span{ ms_aVisibleEntityPtrs,   (size_t)ms_nNoOfVisibleEntities }; }
+    static auto GetVisibleSuperLodPtrs() { return std::span{ ms_aVisibleSuperLodPtrs, (size_t)ms_nNoOfVisibleSuperLods }; }
+    static auto GetInVisibleEntityPtrs() { return std::span{ ms_aInVisibleEntityPtrs, (size_t)ms_nNoOfInVisibleEntities }; }
 };
 
 extern uint32& gnRendererModelRequestFlags;

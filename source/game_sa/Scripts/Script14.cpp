@@ -53,7 +53,7 @@ OpcodeResult CRunningScript::ProcessCommands1400To1499(int32 commandId) {
         auto target = CTheScripts::ReadCVectorFromScript(3) - origin;
         target.Normalise();
         CPointLights::AddLight(ePointLightType::PLTYPE_POINTLIGHT, origin, {}, 5.0f, 1.0f, 0.8f, 0.0f, 0, false, nullptr);
-        g_fx.TriggerGunshot(0, origin, target, true);
+        g_fx.TriggerGunshot(nullptr, origin, target, true);
         return OR_CONTINUE;
     }
     case COMMAND_HAS_CHAR_BOUGHT_ICE_CREAM: // 0x58B
