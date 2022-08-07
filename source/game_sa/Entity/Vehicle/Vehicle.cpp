@@ -157,7 +157,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(RemoveReplacementUpgrade, 0x6D39E0);
     RH_ScopedInstall(GetReplacementUpgrade, 0x6D3A50);
     RH_ScopedInstall(RemoveAllUpgrades, 0x6D3AB0);
-    // RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
+    RH_ScopedInstall(GetSpareHasslePosId, 0x6D3AE0);
     // RH_ScopedInstall(SetHasslePosId, 0x6D3B30);
     // RH_ScopedInstall(InitWinch, 0x6D3B60);
     // RH_ScopedInstall(UpdateWinch, 0x6D3B80);
@@ -2492,7 +2492,26 @@ void CVehicle::RemoveAllUpgrades() {
 
 // 0x6D3AE0
 int32 CVehicle::GetSpareHasslePosId() {
-    return ((int32(__thiscall*)(CVehicle*))0x6D3AE0)(this);
+    const auto GetNumberOfPositions = [type = m_nVehicleSubType] { // Must save into variable `type`, so compiler can optimize
+        switch (type) {
+        case eVehicleType::VEHICLE_TYPE_BIKE:
+        case eVehicleType::VEHICLE_TYPE_BMX:
+        case eVehicleType::VEHICLE_TYPE_QUAD:
+            return 2;
+        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
+            return 6;
+        default:
+            return 0;
+        }
+    };
+
+    for (size_t i = 0; i < GetNumberOfPositions(); i++) {
+        if ((m_nHasslePosId  & (1 << i)) == 0) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 // 0x6D3B30

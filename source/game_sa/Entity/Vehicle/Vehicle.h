@@ -364,7 +364,7 @@ public:
     int8            m_nRandomIdRelatedToSiren;
     char            m_nCarHornTimer; // car horn related
     char            m_comedyControlState;
-    char            m_nHasslePosId;
+    uint8           m_nHasslePosId;           // Bitfield
     CStoredCollPoly m_FrontCollPoly;          // poly which is under front part of car
     CStoredCollPoly m_RearCollPoly;           // poly which is under rear part of car
     tColLighting    m_anCollisionLighting[4]; // left front, left rear, right front, right rear
