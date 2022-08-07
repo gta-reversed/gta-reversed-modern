@@ -82,11 +82,11 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // +
     RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // +
     RH_ScopedInstall(ResetWastedText, 0x589070);             // +
-    RH_ScopedInstall(SetBigMessage, 0x588FC0);               // -
+    RH_ScopedInstall(SetMessage, 0x588F60);                  //
+    // RH_ScopedInstall(SetBigMessage, 0x588FC0);               // -
     RH_ScopedInstall(SetHelpMessage, 0x588BE0);              // +
     RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    // +
     RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    // +
-    // RH_ScopedInstall(SetMessage, 0x588F60);               //
     RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
     RH_ScopedInstall(SetZoneName, 0x588BB0);                 // +
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
@@ -229,13 +229,20 @@ bool CHud::HelpMessageDisplayed() {
     return m_nHelpMessageState != 0;
 }
 
-// 0x589070
-void CHud::ResetWastedText() {
-    BigMessageX[STYLE_WHITE_MIDDLE] = 0.0f;
-    m_BigMessage[STYLE_WHITE_MIDDLE][0] = '\0';
-
-    BigMessageX[STYLE_MIDDLE] = 0.0f;
-    m_BigMessage[STYLE_MIDDLE][0] = '\0';
+// 0x588F60
+void CHud::SetMessage(const char* message) {
+    if (message) {
+        uint32 i = 0;
+        for (i = 0u; i < std::size(m_Message); i++) {
+            if (message[i] == '\0') {
+                break;
+            }
+            m_Message[i] = message[i];
+        }
+        m_Message[i] = '\0';
+    } else {
+        m_Message[0] = '\0';
+    }
 }
 
 // 0x588FC0
@@ -255,7 +262,6 @@ void CHud::SetBigMessage(char* message, eMessageStyle style) {
             }
             m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]   = message[i];
             LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
-
         }
     } else {
         for (; i < BIG_MESSAGE_SIZE; i++) { // strcpy_s(m_BigMessage[style], BIG_MESSAGE_SIZE, message[]);
@@ -359,25 +365,6 @@ void CHud::SetHelpMessageWithNumber(const char* text, int32 number, bool quickMe
     m_nHelpMessageStatId = 0;
     m_nHelpMessageMaxStatValue = 1000;
     m_fHelpMessageStatUpdateValue = 0.0f;
-}
-
-// TODO Bad Loop
-// 0x588F60
-void CHud::SetMessage(const char* message) {
-    return plugin::Call<0x588F60, const char*>(message);
-
-    if (message) {
-        uint32 i = 0;
-        for (i = 0u; i < std::size(m_Message); i++) {
-            if (message[i] == 0) {
-                break;
-            }
-            m_Message[i] = message[i];
-        }
-        m_Message[i] = '\0';
-    } else {
-        m_Message[0] = '\0';
-    }
 }
 
 // 0x588F50
@@ -665,6 +652,15 @@ void CHud::DrawBustedWastedMessage() {
     CFont::PrintStringFromBottom(SCREEN_WIDTH / 2.0f, static_cast<float>(RsGlobal.maximumHeight / 2) - SCREEN_SCALE_Y(30.0f), message); // OG: posY static allocated var
 }
 
+// 0x589070
+void CHud::ResetWastedText() {
+    BigMessageX[STYLE_WHITE_MIDDLE] = 0.0f;
+    m_BigMessage[STYLE_WHITE_MIDDLE][0] = '\0';
+
+    BigMessageX[STYLE_MIDDLE] = 0.0f;
+    m_BigMessage[STYLE_MIDDLE][0] = '\0';
+}
+
 // 0x58E020
 void CHud::DrawCrossHairs() {
     CPlayerPed* const player = FindPlayerPed();
@@ -691,7 +687,11 @@ void CHud::DrawCrossHairs() {
     }
 
     auto& activeWeapon = player->GetActiveWeapon(); // Cppcheck: (warning) nullPointerRedundantCheck: Either the condition 'player' is redundant or there is possible null pointer dereference: player.
-    if (camMode != eCamMode::MODE_1STPERSON && player && !activeWeapon.IsTypeMelee() && !bIgnoreCheckMeleeTypeWeapon) {
+    if (camMode != eCamMode::MODE_1STPERSON &&
+        player &&
+        !activeWeapon.IsTypeMelee() &&
+        !bIgnoreCheckMeleeTypeWeapon
+    ) {
         bDrawCustomCrossHair = true;
     }
 
@@ -705,10 +705,12 @@ void CHud::DrawCrossHairs() {
     if (!player->m_pTargetedObject && !player->bIsRestoringLook && (!localTakUseGun || !localTakUseGun->m_bSkipAim)) {
         if (camMode == MODE_AIMWEAPON || camMode == MODE_AIMWEAPON_FROMCAR || camMode == MODE_AIMWEAPON_ATTACHED) {
             if (player->m_nPedState != ePedState::PEDSTATE_ENTER_CAR && player->m_nPedState != ePedState::PEDSTATE_CARJACK) {
-                if ((activeWeapon.m_nType >= eWeaponType::WEAPON_PISTOL && activeWeapon.m_nType <= eWeaponType::WEAPON_COUNTRYRIFLE) ||
-                    activeWeapon.m_nType == eWeaponType::WEAPON_FLAMETHROWER || activeWeapon.m_nType == eWeaponType::WEAPON_MINIGUN
+                if ((activeWeapon.m_nType >= eWeaponType::WEAPON_PISTOL &&
+                     activeWeapon.m_nType <= eWeaponType::WEAPON_COUNTRYRIFLE
+                    ) ||
+                     activeWeapon.m_nType == eWeaponType::WEAPON_FLAMETHROWER || activeWeapon.m_nType == eWeaponType::WEAPON_MINIGUN
                 ) {
-                    bDrawCircleCrossHair = camMode != MODE_AIMWEAPON || !TheCamera.m_bTransitionState;
+                    bDrawCircleCrossHair = camMode == MODE_AIMWEAPON || TheCamera.m_bTransitionState;
                 }
             }
         }
@@ -798,8 +800,8 @@ void CHud::DrawCrossHairs() {
         float screenOffsetCenterX = 0.0f;
         float screenOffsetCenterY = 0.0f;
         if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA ||
-            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
-
+            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON
+        ) {
             if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
                 screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
                 screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
@@ -824,7 +826,8 @@ void CHud::DrawCrossHairs() {
             drawTexture = RwTexDictionaryFindHashNamedTexture(txd->m_pRwDictionary, CKeyGen::AppendStringToKey(mi->m_nKey, "CROSSHAIR"));
         } else {
             if (camMode != MODE_ROCKETLAUNCHER && camMode != MODE_1STPERSON && camMode != MODE_ROCKETLAUNCHER_RUNABOUT &&
-                camMode != MODE_ROCKETLAUNCHER_HS && camMode != MODE_ROCKETLAUNCHER_RUNABOUT_HS) {
+                camMode != MODE_ROCKETLAUNCHER_HS && camMode != MODE_ROCKETLAUNCHER_RUNABOUT_HS
+            ) {
                 return;
             }
             drawTexture = Sprites[SPRITE_SITE_ROCKET].m_pTexture;

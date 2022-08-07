@@ -91,17 +91,15 @@ public:
     static void ReInitialise();
     static void Shutdown();
 
-    static void  GetRidOfAllHudMessages(bool arg0);
+    static void GetRidOfAllHudMessages(bool arg0);
     static float GetYPosBasedOnHealth(uint8 playerId, float pos, int8 offset);
     static bool HelpMessageDisplayed();
 
-    static void ResetWastedText();
-
+    static void SetMessage(const char* message);
     static void SetBigMessage(char* message, eMessageStyle style);
     static void SetHelpMessage(char const* text, bool quickMessage, bool permanent, bool addToBrief);
     static void SetHelpMessageStatUpdate(eStatUpdateState state, uint16 statId, float diff, float max);
     static void SetHelpMessageWithNumber(char const* text, int32 number, bool quickMessage, bool permanent);
-    static void SetMessage(const char* message);
     static void SetVehicleName(char* name);
     static void SetZoneName(char* name, bool displayImmediately);
 
@@ -109,6 +107,7 @@ public:
     static void DrawAfterFade();
     static void DrawAreaName();
     static void DrawBustedWastedMessage();
+    static void ResetWastedText();
     static void DrawCrossHairs();
     static float DrawFadeState(DRAW_FADE_STATE fadeState, int32 arg1);
     static void DrawHelpText();
