@@ -6,9 +6,9 @@
 */
 #pragma once
 
-template <typename ObjectType, uint32 Capacity> class CStore {
+template <typename ObjectType, size_t Capacity> class CStore {
 public:
-    uint32     m_nCount;
+    size_t     m_nCount;
     ObjectType m_aObjects[Capacity];
 
 public:
@@ -16,7 +16,7 @@ public:
         m_nCount = 0;
     }
 
-    ObjectType& GetItemAtIndex(uint32 index) {
+    ObjectType& GetItemAtIndex(size_t index) {
         return m_aObjects[index];
     }
 

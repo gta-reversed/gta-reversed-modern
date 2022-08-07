@@ -96,6 +96,9 @@ target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     game_sa/Memory/
     game_sa/Models/
     game_sa/Plugins/
+    game_sa/Pipelines/
+    game_sa/Pipelines/CustomBuilding
+    game_sa/Pipelines/CustomCarEnvMap
     game_sa/RenderWare/
     game_sa/RenderWare/rw/
     game_sa/Scripts/

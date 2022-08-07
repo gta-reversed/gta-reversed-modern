@@ -11,11 +11,10 @@
 #include "GxtChar.h"
 #include "CDebugMenu.h"
 #include "CarCtrl.h"
-#include "ColourSet.h"
-#include "GxtChar.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"
 #include "SpecialFX.h"
+#include "Hud.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
@@ -366,6 +365,24 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
+}
+
+// todo: move
+// 0x53D690
+void DoRWStuffStartOfFrame(int16 nR1, int16 nG1, int16 nB1, int16 nR2, int16 nG2, int16 nB2, int16 nA) {
+    plugin::Call<0x53D690, int16, int16, int16, int16, int16, int16, int16>(nR1, nG1, nB1, nR2, nG2, nB2, nA);
+}
+
+// todo: move
+// 0x53D840
+void DoRWStuffEndOfFrame() {
+    plugin::Call<0x53D840>();
+}
+
+// todo: move
+// 0x53EC10
+RsEventStatus AppEventHandler(RsEvent nEvent, void* param) {
+    return plugin::CallAndReturn<RsEventStatus, 0x53EC10, RsEvent, void*>(nEvent, param);
 }
 
 // TODO: Check `outName` size (to avoid buffer overflow)

@@ -462,7 +462,7 @@ int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
             if (ped->m_nPedType != PED_TYPE_COP || !ped->IsAlive())
                 continue;
 
-            if (DistanceBetweenPoints(posn, ped->GetPosition()) < radius)
+            if (DistanceBetweenPoints(ped->GetPosition(), posn) < radius)
                 numCops++;
         }
     }
@@ -478,7 +478,7 @@ int32 CWanted::WorkOutPolicePresence(CVector posn, float radius) {
             if (veh->m_nStatus == STATUS_ABANDONED || veh->m_nStatus == STATUS_WRECKED)
                 continue;
 
-            if (DistanceBetweenPoints(posn, veh->GetPosition()) < radius)
+            if (DistanceBetweenPoints(veh->GetPosition(), posn) < radius)
                 numCops++;
         }
     }

@@ -192,7 +192,20 @@ void CGameLogic::ResetStuffUponResurrection() {
 
 // 0x441D30
 void CGameLogic::RestorePedsWeapons(CPed* ped) {
-    plugin::Call<0x441D30, CPed*>(ped);
+    return plugin::Call<0x441D30, CPed*>(ped);
+
+    static CWeapon (&s_SavedWeapons)[13] = *(CWeapon(*)[13])0x96A9B8;
+
+    ped->ClearWeapons();
+    for (auto& weapon : s_SavedWeapons) {
+        auto modelId1 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId1;
+        auto modelId2 = CWeaponInfo::GetWeaponInfo(weapon.m_nType, eWeaponSkill::STD)->m_nModelId2;
+        if (   (modelId1 == MODEL_INVALID || CStreaming::GetInfo(modelId1).IsLoaded())
+            && (modelId2 == MODEL_INVALID || CStreaming::GetInfo(modelId2).IsLoaded()) // FIX_BUGS: They checked modelId1 twice
+        ) {
+            ped->GiveWeapon(weapon.m_nType, weapon.m_nTotalAmmo, true);
+        }
+    }
 }
 
 // 0x442060
@@ -212,8 +225,8 @@ void CGameLogic::SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAft
 }
 
 // 0x4415C0
-void CGameLogic::SkipCanBeActivated() {
-    plugin::Call<0x4415C0>();
+bool CGameLogic::SkipCanBeActivated() {
+    return plugin::CallAndReturn<bool, 0x4415C0>();
 }
 
 // 0x441440

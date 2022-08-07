@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "DamageAtomicModelInfo.h"
+#include "CustomBuildingRenderer.h"
 #include "CarFXRenderer.h"
 
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;

@@ -16,7 +16,7 @@
 class List_c {
 public:
     List_c() : m_pHead(nullptr), m_pTail(nullptr), m_nCount(0) {}
-    ~List_c() {}
+    ~List_c() = default;
 
 public:
     ListItem_c* m_pHead;

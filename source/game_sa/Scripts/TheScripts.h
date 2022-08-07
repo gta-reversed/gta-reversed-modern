@@ -22,6 +22,12 @@ class CCheckpoint;
 
 enum eScriptParameterType;
 
+enum class eCrossHairType : uint32 {
+    NONE,
+    FIXED_DRAW_CIRCLE,
+    FIXED_DRAW_1STPERSON_WEAPON,
+};
+
 enum eScriptThingType : uint8 {
     SCRIPT_THING_SPHERE         = 0,
     SCRIPT_THING_EFFECT_SYSTEM  = 1,
@@ -363,7 +369,7 @@ public:
     static inline bool& bScriptHasFadedOut = *reinterpret_cast<bool*>(0xA4448A);
     static inline bool& bAddNextMessageToPreviousBriefs = *reinterpret_cast<bool*>(0xA4448B);
     static inline int32& ForceRandomCarModel = *reinterpret_cast<int32*>(0xA4448C);
-    static inline bool& bDrawCrossHair = *reinterpret_cast<bool*>(0xA44490);
+    static inline eCrossHairType& bDrawCrossHair = *reinterpret_cast<eCrossHairType*>(0xA44490);
     static inline bool& bEnableCraneRelease = *reinterpret_cast<bool*>(0xA44494);
     static inline bool& bEnableCraneLower = *reinterpret_cast<bool*>(0xA44495);
     static inline bool& bEnableCraneRaise = *reinterpret_cast<bool*>(0xA44496);

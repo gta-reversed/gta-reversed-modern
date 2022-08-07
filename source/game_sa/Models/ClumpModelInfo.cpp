@@ -8,6 +8,7 @@
 #include "StdInc.h"
 
 #include "ClumpModelInfo.h"
+#include "CustomBuildingRenderer.h"
 #include "CarFXRenderer.h"
 
 void CClumpModelInfo::InjectHooks()
@@ -127,8 +128,9 @@ RwObject* CClumpModelInfo::CreateInstance_Reversed()
     if (bHasAnimBlend) {
         RpAnimBlendClumpInit(clonedClump);
         auto animBlend = CAnimManager::GetAnimation(m_nKey, &CAnimManager::ms_aAnimBlocks[m_nAnimFileIndex]);
-        if (animBlend)
-            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIM_FLAG_LOOPED, 1.0F);
+        if (animBlend) {
+            CAnimManager::BlendAnimation(clonedClump, animBlend, ANIMATION_LOOPED, 1.0F);
+        }
     }
 
     CBaseModelInfo::RemoveRef();

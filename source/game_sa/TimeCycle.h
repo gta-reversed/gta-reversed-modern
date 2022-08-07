@@ -161,4 +161,11 @@ public: // NOTSA
     static float SumOfCurrentRGB2() { return m_fCurrentRGB2Blue + m_fCurrentRGB2Green + m_fCurrentRGB2Red; }
 
     static auto GetBoxes() { return std::span{ m_aBoxes, m_NumBoxes}; }
+    static bool ShouldIgnoreSky() {
+        return (
+            m_nSkyTopRed[m_ExtraColour][m_ExtraColourWeatherType]   == 0 &&
+            m_nSkyTopGreen[m_ExtraColour][m_ExtraColourWeatherType] == 0 &&
+            m_nSkyTopBlue[m_ExtraColour][m_ExtraColourWeatherType]  == 0
+        );
+    }
 };

@@ -18,16 +18,13 @@ public:
     bool                          m_bSensibleLeaveCar;
     bool                          m_bForceGetOut;
     bool                          m_bDie;
-    char                          _pad1;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     uint8                         m_nDoorFlagsSet;
     uint8                         m_nNumGettingInSet;
-    char                          _pad2[2];
     int32                         m_nDieAnimID;
     float                         m_fDieAnimBlendDelta;
     float                         m_fDieAnimSpeed;
     bool                          m_bIsInAir;
-    char                          _pad3[3];
 
 public:
     static constexpr auto Type = TASK_COMPLEX_LEAVE_CAR;

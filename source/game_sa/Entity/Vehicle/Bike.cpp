@@ -139,9 +139,8 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
-            auto pCurPassenger = m_apPassengers[iPassengerInd];
-            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        for (const auto passenger : GetPassengers()) {
+            ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }
     else {
@@ -201,7 +200,7 @@ bool CBike::ProcessAI(uint32& extraHandlingFlags) {
 }
 
 // 0x6BF400
-void CBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
+void CBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (m_bOffscreen && m_nStatus == STATUS_PLAYER)
         return;
 
@@ -318,7 +317,7 @@ void CBike::Render() {
 
     if (m_renderLights.m_bRightFront) {
         CalculateLeanMatrix();
-        CVehicle::DoHeadLightBeam(0, m_mLeanMatrix, true);
+        CVehicle::DoHeadLightBeam(DUMMY_LIGHT_FRONT_MAIN, m_mLeanMatrix, true);
     }
 
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(savedRef));

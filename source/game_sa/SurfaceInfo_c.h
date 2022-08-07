@@ -62,8 +62,9 @@ struct SurfaceInfo {
     char     BulletFx[32];
 
     void Read(const char* line) {
+        // FIX_BUGS: Possible buffer overflow
         (void)sscanf(
-            line, "%s %s %f %f %s %s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %s",
+            line, "%63s %31s %f %f %31s %31s %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %31s",
             SurfaceName, AdhesionGroup,
             &TyreGrip, &WetGrip, SkidMark, FrictionEffect,
             &SoftLand, &SeeThrough, &ShootThrough, &Sand, &Water, &ShallowWater, &Beach, &SteepSlope, &Glass, &Stairs, &Skateable, &Pavement,

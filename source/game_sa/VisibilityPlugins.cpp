@@ -1000,8 +1000,10 @@ void CVisibilityPlugins::RenderWeaponPedsForPC() {
             const int32 boneID = activeWeapon.m_nType != WEAPON_PARACHUTE ? BONE_R_HAND : BONE_SPINE1;
             int32 animIDIndex = RpHAnimIDGetIndex(pRpAnimHierarchy, boneID);
             RwMatrix* pRightHandMatrix = &RpHAnimHierarchyGetMatrixArray(pRpAnimHierarchy)[animIDIndex];
+            { // todo: NOTSA
             if (boneID == BONE_NORMAL) {
                 pRightHandMatrix = ped->GetModellingMatrix();
+            }
             }
             RwFrame* weaponFrame = RpClumpGetFrame(ped->m_pWeaponObject);
             RwMatrix* weaponRwMatrix = RwFrameGetMatrix(weaponFrame);

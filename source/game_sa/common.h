@@ -71,6 +71,8 @@ constexpr auto BUILD_NAME_FULL = "TEST";
 
 extern int32 gDefaultTaskTime;
 
+extern RpLight*& pDirect;
+
 static inline char (&gString)[352] = *(char(*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
 
@@ -178,7 +180,11 @@ static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
 }
 
 static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
-    return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+    return DistanceBetweenPointsSquared2D(point, center) <= sq(r);
+}
+
+static bool IsPointInSphere(const CVector& point, const CVector& center, float r) {
+    return DistanceBetweenPointsSquared(point, center) <= sq(r);
 }
 
 // Converts degrees to radians

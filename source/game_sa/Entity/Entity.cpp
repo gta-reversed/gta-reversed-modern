@@ -21,6 +21,7 @@
 #include "Glass.h"
 #include "TheScripts.h"
 #include "Shadows.h"
+#include "CustomBuildingRenderer.h"
 
 void CEntity::InjectHooks()
 {
@@ -94,10 +95,9 @@ void CEntity::InjectHooks()
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
 }
 
-CEntity::CEntity() : CPlaceable()
-{
-    m_nStatus = eEntityStatus::STATUS_PLAYER;
-    m_nType = ENTITY_TYPE_BUILDING;
+CEntity::CEntity() : CPlaceable() {
+    m_nStatus = STATUS_ABANDONED;
+    m_nType = ENTITY_TYPE_NOTHING;
 
     m_nFlags = 0;
     m_bIsVisible = true;
@@ -108,7 +108,7 @@ CEntity::CEntity() : CPlaceable()
     m_nModelIndex = 0xFFFF;
     m_pRwObject = nullptr;
     m_nIplIndex = 0;
-    m_nRandomSeed = rand();
+    m_nRandomSeed = CGeneral::GetRandomNumber();
     m_pReferences = nullptr;
     m_pStreamingLink = nullptr;
     m_nNumLodChildren = 0;
@@ -547,12 +547,14 @@ void CEntity::PreRender_Reversed()
 
         mi->IncreaseAlpha();
 
+        // PC Only
         if (ami) {
             CCustomBuildingDNPipeline::PreRenderUpdate(ami->m_pRwAtomic, false);
         }
         else if (mi->GetModelType() == MODEL_INFO_CLUMP) {
             RpClumpForAllAtomics(mi->m_pRwClump, CCustomBuildingDNPipeline::PreRenderUpdateRpAtomicCB, reinterpret_cast<void*>(false));
         }
+        // PC Only
     }
 
     if (!m_bHasPreRenderEffects)
@@ -562,9 +564,7 @@ void CEntity::PreRender_Reversed()
         && ami->SwaysInWind()
         && (!IsObject() || !AsObject()->objectFlags.bIsExploded)
     ) {
-        auto vecCamPos = CVector2D(TheCamera.GetPosition());
-        auto vecEntPos = CVector2D(GetPosition());
-        auto fDist = DistanceBetweenPoints2D(vecCamPos, vecEntPos);
+        auto fDist = DistanceBetweenPoints2D(GetPosition(), TheCamera.GetPosition());
         CObject::fDistToNearestTree = std::min(CObject::fDistToNearestTree, fDist);
         ModifyMatrixForTreeInWind();
     }
@@ -604,7 +604,7 @@ void CEntity::PreRender_Reversed()
         else if (m_nModelIndex == MODEL_MISSILE) {
             if (CReplay::Mode != MODE_PLAYBACK) {
                 CVector vecPos = GetPosition();
-                auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+                auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
                 CShadows::StoreShadowToBeRendered(
                     eShadowTextureType::SHADOW_TEX_PED,
                     gpShadowExplosionTex,
@@ -664,7 +664,7 @@ void CEntity::PreRender_Reversed()
         }
         else if (m_nModelIndex == ModelIndices::MI_FLARE) {
             CVector vecPos = GetPosition();
-            auto fRand = static_cast<float>(rand() % 16) / 16.0F;
+            auto fRand = static_cast<float>(CGeneral::GetRandomNumber() % 16) / 16.0F;
             fRand = std::max(fRand, 0.5F);
             CShadows::StoreShadowToBeRendered(
                 eShadowTextureType::SHADOW_TEX_PED,
@@ -1099,15 +1099,15 @@ bool IsEntityPointerValid(CEntity* entity)
 
     switch (entity->m_nType) {
     case ENTITY_TYPE_BUILDING:
-        return IsBuildingPointerValid(reinterpret_cast<CBuilding*>(entity));
+        return IsBuildingPointerValid(entity->AsBuilding());
     case ENTITY_TYPE_VEHICLE:
-        return IsVehiclePointerValid(reinterpret_cast<CVehicle*>(entity));
+        return IsVehiclePointerValid(entity->AsVehicle());
     case ENTITY_TYPE_PED:
         return IsPedPointerValid(entity->AsPed());
     case ENTITY_TYPE_OBJECT:
-        return IsObjectPointerValid(reinterpret_cast<CObject*>(entity));
+        return IsObjectPointerValid(entity->AsObject());
     case ENTITY_TYPE_DUMMY:
-        return IsDummyPointerValid(reinterpret_cast<CDummy*>(entity));
+        return IsDummyPointerValid(entity->AsDummy());
     case ENTITY_TYPE_NOTINPOOLS:
         return true;
     }
@@ -2178,7 +2178,7 @@ void CEntity::ProcessLightsForEntity()
                 bSkipCoronaChecks = true;
                 auto fBrightness = fIntensity;
                 if (effect->light.m_bBlinking1)
-                    fBrightness = (1.0F - (rand() % 32) * 0.012F) * fIntensity;
+                    fBrightness = (1.0F - (CGeneral::GetRandomNumber() % 32) * 0.012F) * fIntensity;
 
                 if (effect->light.m_bBlinking2 && (CTimer::GetFrameCounter() + uiRand) & 3)
                     fBrightness = 0.0F;
@@ -2447,8 +2447,8 @@ bool CEntity::IsEntityOccluded()
             auto vecMin = GetMatrix() * bounding.m_vecMin;
             if (!CalcScreenCoors(vecMin, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMin, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2456,8 +2456,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecMax, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecMax, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2465,8 +2465,8 @@ bool CEntity::IsEntityOccluded()
             if (bInView
                 || !CalcScreenCoors(vecDiag1, &vecScreen)
                 || !activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)) {
-
+                || !activeOccluder.IsPointBehindOccluder(vecDiag1, 0.0F)
+            ) {
                 bInView = true;
             }
 
@@ -2474,15 +2474,15 @@ bool CEntity::IsEntityOccluded()
             if (!bInView
                 && CalcScreenCoors(vecDiag2, &vecScreen)
                 && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)) {
-
-                if (bounding.m_vecMax.x - bounding.m_vecMin.x <= 60.0F)
+                && activeOccluder.IsPointBehindOccluder(vecDiag2, 0.0F)
+            ) {
+                if (bounding.GetWidth() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.y - bounding.m_vecMin.y <= 60.0F)
+                if (bounding.GetLength() <= 60.0F)
                     return true;
 
-                if (bounding.m_vecMax.z - bounding.m_vecMin.z <= 30.0F)
+                if (bounding.GetHeight() <= 30.0F)
                     return true;
 
                 auto vecDiag3 = GetMatrix() * CVector(bounding.m_vecMin.x, bounding.m_vecMin.y, bounding.m_vecMax.z);
@@ -2497,8 +2497,8 @@ bool CEntity::IsEntityOccluded()
                 if (!bInView
                     && CalcScreenCoors(vecDiag4, &vecScreen)
                     && activeOccluder.IsPointWithinOcclusionArea(vecScreen.x, vecScreen.y, 0.0F)
-                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)) {
-
+                    && activeOccluder.IsPointBehindOccluder(vecDiag4, 0.0F)
+                ) {
                     return true;
                 }
             }

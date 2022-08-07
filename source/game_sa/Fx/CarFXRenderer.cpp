@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CarFXRenderer.h"
+#include "CustomCarEnvMapPipeline.h"
 
 RwTexture* (&CCarFXRenderer::ms_aDirtTextures)[NUM_DIRT_TEXTURES] = *(RwTexture * (*)[NUM_DIRT_TEXTURES])0xC02BD0;
 float& gSpecIntensity = *(float*)0x8D12D0; // 1.0f
