@@ -725,14 +725,10 @@ void CVehicle::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId_, uint
     auto doorComponentId = (int32)doorComponentId_; // silence warns, todo: OpenDoor receives int32, why?
     eDoors iCheckedDoor = [&] {
         switch (doorComponentId) {
-        case COMPONENT_DOOR_RF:
-            return DOOR_RIGHT_FRONT;
-        case COMPONENT_DOOR_LR:
-            return DOOR_RIGHT_REAR;
-        case COMPONENT_DOOR_RR:
-            return DOOR_LEFT_FRONT;
-        case COMPONENT_WING_LF:
-            return DOOR_LEFT_REAR;
+        case COMPONENT_DOOR_RF: return DOOR_RIGHT_FRONT;
+        case COMPONENT_DOOR_LR: return DOOR_RIGHT_REAR;
+        case COMPONENT_DOOR_RR: return DOOR_LEFT_FRONT;
+        case COMPONENT_WING_LF: return DOOR_LEFT_REAR;
         default:
             assert(false); // Shouldn't get here
             return static_cast<eDoors>(fTime);
@@ -1275,14 +1271,11 @@ eVehicleAppearance CVehicle::GetVehicleAppearance() const {
 
     if (flags <= VEHICLE_HANDLING_MODEL_IS_HELI) {
         switch (flags) {
-        case VEHICLE_HANDLING_MODEL_IS_HELI:
-            return VEHICLE_APPEARANCE_HELI;
-        case VEHICLE_HANDLING_MODEL_NONE:
-            return VEHICLE_APPEARANCE_AUTOMOBILE;
-        case VEHICLE_HANDLING_MODEL_IS_BIKE:
-            return VEHICLE_APPEARANCE_BIKE;
+        case VEHICLE_HANDLING_MODEL_IS_HELI: return VEHICLE_APPEARANCE_HELI;
+        case VEHICLE_HANDLING_MODEL_NONE:    return VEHICLE_APPEARANCE_AUTOMOBILE;
+        case VEHICLE_HANDLING_MODEL_IS_BIKE: return VEHICLE_APPEARANCE_BIKE;
+        default:                             return VEHICLE_APPEARANCE_NONE;
         }
-        return VEHICLE_APPEARANCE_NONE;
     }
 
     if (flags == VEHICLE_HANDLING_MODEL_IS_PLANE)
@@ -2645,26 +2638,16 @@ void CVehicle::PreRenderDriverAndPassengers() {
 // 0x6D3E00
 float CVehicle::GetPlaneGunsAutoAimAngle() {
     switch (m_nModelIndex) {
-    case MODEL_HUNTER:
-        return 25.0f;
-    case MODEL_SEASPAR:
-        return 10.0f;
-    case MODEL_RCBARON:
-        return 30.0f;
+    case MODEL_SEASPAR:  return 10.0f;
     case MODEL_RUSTLER:
-        return 15.0f;
     case MODEL_MAVERICK:
-        return 15.0f;
     case MODEL_POLMAV:
-        return 15.0f;
     case MODEL_HYDRA:
-        return 15.0f;
     case MODEL_CARGOBOB:
-        return 15.0f;
-    case MODEL_RCTIGER:
-        return 20.0f;
-    case MODEL_TORNADO:
-        return 15.0f;
+    case MODEL_TORNADO:  return 15.0f;
+    case MODEL_RCTIGER:  return 20.0f;
+    case MODEL_HUNTER:   return 25.0f;
+    case MODEL_RCBARON:  return 30.0f;
     default:
         return 0.0f;
     }
@@ -2743,26 +2726,17 @@ CVector CVehicle::GetPlaneGunsPosition(int32 gunId) {
     }
 
     switch (m_nModelIndex) {
-    case MODEL_HUNTER:
-        return VehicleGunOffset[0];
-    case MODEL_SEASPAR:
-        return { -0.5f, 2.4f, -0.785f }; // 0x8D35F8
-    case MODEL_RCBARON:
-        return { 0.0f, 0.45f, 0.0f };    // 0x8D3634
-    case MODEL_RUSTLER:
-        return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.0f, 0.0f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
-    case MODEL_MAVERICK:
-        return { 0.0f, 2.85f, -0.5f };   // 0x8D35E0
-    case MODEL_POLMAV:
-        return { 0.0f, 2.85f, -0.5f };   // 0x8D35EC [Values same as the maverick's]
-    case MODEL_HYDRA:
-        return { 1.48f, 0.44f, -0.52f }; // 0x8D3628
-    case MODEL_CARGOBOB:
-        return { 0.0f, 6.87f, -1.65f };  // 0x8D3604
-    case MODEL_TORNADO:
-        return *(CVector*)0xC1CC2C; // TODO Izzotop: just CVector{}
+    case MODEL_HUNTER:   return VehicleGunOffset[0];
+    case MODEL_SEASPAR:  return { -0.5f, 2.4f, -0.785f }; // 0x8D35F8
+    case MODEL_RCBARON:  return { 0.0f, 0.45f, 0.0f };    // 0x8D3634
+    case MODEL_RUSTLER:  return CVector{ 2.19f, 1.5f, -0.58f } + CVector{ 0.2f, 0.0f, 0.0f } * (float)(gunId - 1);  // 0x8D3610, 0x8D361C
+    case MODEL_MAVERICK: return { 0.0f, 2.85f, -0.5f };   // 0x8D35E0
+    case MODEL_POLMAV:   return { 0.0f, 2.85f, -0.5f };   // 0x8D35EC [Values same as the maverick's]
+    case MODEL_HYDRA:    return { 1.48f, 0.44f, -0.52f }; // 0x8D3628
+    case MODEL_CARGOBOB: return { 0.0f, 6.87f, -1.65f };  // 0x8D3604
+    case MODEL_TORNADO:  return {};                       // 0xC1CC2C
     default:
-        return { 0.f, 0.f, 0.f }; //
+        return { 0.f, 0.f, 0.f };
     }
 }
 
@@ -2803,15 +2777,10 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type) {
     constexpr CVector TORNADO_ORDNANCE_POS = { }; // 0xC1CC44;
 
     switch (m_nModelIndex) {
-    case MODEL_HUNTER:
-        return HUNTER_ORDNANCE_POS;
-    case MODEL_SEASPAR:
-        return SEASPAR_ORDNANCE_POS;
-    case MODEL_RCBARON:
-        return RCBARON_ORDNANCE_POS;
-        break;
-    case MODEL_RUSTLER:
-        return RUSTLER_ORDNANCE_POS;
+    case MODEL_HUNTER:  return HUNTER_ORDNANCE_POS;
+    case MODEL_SEASPAR: return SEASPAR_ORDNANCE_POS;
+    case MODEL_RCBARON: return RCBARON_ORDNANCE_POS;
+    case MODEL_RUSTLER: return RUSTLER_ORDNANCE_POS;
     case MODEL_HYDRA:
         if (type == 1) {
             return HYDRA_1_ORDNANCE_POS;
@@ -2819,8 +2788,7 @@ CVector CVehicle::GetPlaneOrdnancePosition(eOrdnanceType type) {
             return HYDRA_2_ORDNANCE_POS;
         }
         return pos;
-    case MODEL_TORNADO:
-        return TORNADO_ORDNANCE_POS;
+    case MODEL_TORNADO: return TORNADO_ORDNANCE_POS;
     default:
         return {};
     }
@@ -2988,11 +2956,12 @@ void CVehicle::FirePlaneGuns() {
     const auto GetPadIdToShake = [this]() -> std::optional<int32> {
         if (m_nStatus == STATUS_HELI) {
             return 0;
-        } else {
-            if (m_pDriver && m_pDriver->IsPlayer()) {
-                return m_pDriver->GetPadNumber();
-            }
         }
+
+        if (m_pDriver && m_pDriver->IsPlayer()) {
+            return m_pDriver->GetPadNumber();
+        }
+
         return std::nullopt;
     };
     if (const auto padId = GetPadIdToShake()) {
@@ -3082,7 +3051,7 @@ bool CVehicle::GetVehicleLightsStatus() {
     ) {
         return false; // Real OG' don't use lights! Vo�l�!
     }
-    
+
     // The rest pretty much follows the original code
 
     if (CClock::GetIsTimeInRange(20, 6)) {
@@ -3191,8 +3160,13 @@ void CVehicle::SetupRender() {
 }
 
 // 0x6D6C00
-void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint,
-    int32 wheelsOnGround, float thrust, float brake, float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus) {
+void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight,
+                            CVector& wheelContactSpeed, CVector& wheelContactPoint,
+                            int32 wheelsOnGround,
+                            float thrust, float brake, float adhesion,
+                            int8 wheelId, float* wheelSpeed,
+                            tWheelState* wheelState, uint16 wheelStatus
+) {
     static bool& bBraking = *(bool*)0xC1CDAE; // false
     static bool& bDriving = *(bool*)0xC1CDAD; // false
     static bool& bAlreadySkidding = *(bool*)0xC1CDAC; // false
@@ -3403,12 +3377,12 @@ bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius) 
 
 // 0x6D85F0
 void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus) {
-    ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, leftRightSkid, steeringUpDown, steeringLeftRight, accelerationBreakStatus);
+    return ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, leftRightSkid, steeringUpDown, steeringLeftRight, accelerationBreakStatus);
 
     /*
     * Code below should be correct. I just didn't finish it, because I can't be bothered to figure out what
     * 0x6D8BFD is.. maybe later.
-    * 
+    */
     if (!m_pFlyingHandlingData || CTimer::GetTimeStep() <= 0.f) {
         return;
     }
@@ -3436,18 +3410,15 @@ void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, floa
             steeringUpDown = 0.f;
             if (padOfPlayerDriver) {
                 steeringUpDown = (float)padOfPlayerDriver->GetSteeringUpDown() / 128.f;
-                if (const auto gunUpDown = padOfPlayerDriver->GetCarGunUpDown(); std::abs((float)gunUpDown) > 1.f) {
+                const auto gunUpDown = padOfPlayerDriver->GetCarGunUpDown();
+                if (std::abs((float)gunUpDown) > 1.f) {
                     steeringUpDown = -gunUpDown / 128.f;
                 }
             }
         }
-
-
-
         break;
     }
     }
-    */
 }
 
 // always return false?
