@@ -78,11 +78,11 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(ReInitialise, 0x588880);                // +
     RH_ScopedInstall(Shutdown, 0x588850);                    // +
     RH_ScopedInstall(Draw, 0x58FAE0);                        // +
-    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);      //
+    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);      // ?
     RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // +
     RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // +
     RH_ScopedInstall(ResetWastedText, 0x589070);             // +
-    RH_ScopedInstall(SetMessage, 0x588F60);                  //
+    RH_ScopedInstall(SetMessage, 0x588F60);                  // ?
     // RH_ScopedInstall(SetBigMessage, 0x588FC0);               // -
     RH_ScopedInstall(SetHelpMessage, 0x588BE0);              // +
     RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    // +
@@ -92,22 +92,22 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
     RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // +
-    RH_ScopedInstall(DrawCrossHairs, 0x58E020);              //
-    RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
-    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);             //
-    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);        //
+    RH_ScopedInstall(DrawCrossHairs, 0x58E020);              // UNTESTED
+    // RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
+    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);                // UNTOUCHED
+    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);           // UNTOUCHED
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // +-
     RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // looks like OG
     RH_ScopedInstall(DrawRadar, 0x58A330);                   // test angle
     RH_ScopedInstall(DrawScriptText, 0x58C080);              // +
-    // RH_ScopedInstall(DrawSubtitles, 0x58C250);            //
-    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0); //
+    // RH_ScopedInstall(DrawSubtitles, 0x58C250);               // UNTOUCHED
+    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);    // UNTOUCHED
     RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
-    // RH_ScopedInstall(DrawVitalStats, 0x589650);           //
+    // RH_ScopedInstall(DrawVitalStats, 0x589650);              // UNTOUCHED
     RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // +
-    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           //
+    // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // WIP
     RH_ScopedInstall(DrawTripSkip, 0x58A160);                // +
-    RH_ScopedInstall(DrawWanted, 0x58D9A0);                  //
+    RH_ScopedInstall(DrawWanted, 0x58D9A0);                  // WIP
     RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // +
     RH_ScopedInstall(RenderArmorBar, 0x5890A0);              // +
     RH_ScopedInstall(RenderBreathBar, 0x589190);             // +
@@ -247,6 +247,8 @@ void CHud::SetMessage(const char* message) {
 
 // 0x588FC0
 void CHud::SetBigMessage(char* message, eMessageStyle style) {
+    return plugin::Call<0x588FC0, char*, eMessageStyle>(message, style); // todo: Fix STYLE_BOTTOM_RIGHT (test - strcpy(CHud::m_BigMessage[STYLE_BOTTOM_RIGHT], "STYLE_BOTTOM_RIGHT");)
+
     if (BigMessageX[style] != 0.0f) {
         return;
     }
@@ -663,7 +665,6 @@ void CHud::ResetWastedText() {
 
 // 0x58E020
 void CHud::DrawCrossHairs() {
-    CPlayerPed* const player = FindPlayerPed();
     const CCam& currentCamera = CCamera::GetActiveCamera();
     const auto& camMode = currentCamera.m_nMode;
 
@@ -686,6 +687,7 @@ void CHud::DrawCrossHairs() {
         }
     }
 
+    auto* const player = FindPlayerPed();
     auto& activeWeapon = player->GetActiveWeapon(); // Cppcheck: (warning) nullPointerRedundantCheck: Either the condition 'player' is redundant or there is possible null pointer dereference: player.
     if (camMode != eCamMode::MODE_1STPERSON &&
         player &&
@@ -887,6 +889,8 @@ void CHud::DrawCrossHairs() {
 
 // 0x58D580
 float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
+    return plugin::CallAndReturn<float, 0x58D580, DRAW_FADE_STATE, int32>(fadingElement, forceFadingIn);
+
     uint32 state, timer, fadeTimer;
     switch (fadingElement) {
     case WANTED_STATE:
@@ -935,7 +939,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
         switch (state) {
         case NAME_SWITCH:
             fadeTimer = 1000;
-            if (timer > 10000) {
+            if (timer > 10'000) {
                 fadeTimer = 3000;
                 state = NAME_FADE_OUT;
             }
@@ -1437,10 +1441,12 @@ void CHud::GetRidOfAllHudMessages(bool arg0) {
 
 // 0x5893B0
 void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
+    const auto MAX_CLIP = 9999;
+
     const auto& weapon = ped->GetActiveWeapon();
     const auto& totalAmmo = weapon.m_nTotalAmmo;
-    const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
     const auto& ammoInClip = weapon.m_nAmmoInClip;
+    const auto& ammoClip = CWeaponInfo::GetWeaponInfo(weapon.m_nType, ped->GetWeaponSkill())->m_nAmmoClip;
 
     if (ammoClip <= 1 || ammoClip >= 1000) {
         sprintf(gString, "%d", totalAmmo);
@@ -1448,17 +1454,18 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
         uint32 total, current;
 
         if (weapon.m_nType == WEAPON_FLAMETHROWER ) {
-            auto out = 9999;
-            if ((totalAmmo - ammoInClip) / 10 <= 9999) {
-                out = (totalAmmo - ammoInClip) / 10;
+            uint32 out = MAX_CLIP;
+            if ((totalAmmo - ammoInClip) / 10 <= MAX_CLIP) {
+                out = (totalAmmo - ammoInClip) / 10u;
             }
             total = out;
 
             current = ammoInClip / 10;
         } else {
             auto out = totalAmmo - ammoInClip;
-            if (totalAmmo - ammoInClip > 9999)
-                out = 9999;
+            if (totalAmmo - ammoInClip > MAX_CLIP) {
+                out = MAX_CLIP;
+            }
             total = out;
 
             current = ammoInClip;
@@ -1476,7 +1483,7 @@ void CHud::DrawAmmo(CPed* ped, int32 x, int32 y, float alpha) {
     CFont::SetDropColor({ 0, 0, 0, 255 });
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
 
-    if (   totalAmmo - weapon.m_nAmmoInClip >= 9999
+    if (   totalAmmo - weapon.m_nAmmoInClip >= MAX_CLIP
         || CDarkel::FrenzyOnGoing()
         || weapon.m_nType == WEAPON_UNARMED
         || weapon.m_nType == WEAPON_DETONATOR
@@ -1901,10 +1908,9 @@ void CHud::DrawTripSkip() {
     );
 }
 
-// todo: WIP
 // 0x58D9A0
 void CHud::DrawWanted() {
-    // plugin::Call < 0x58D9A0>();
+    return plugin::Call<0x58D9A0>(); // todo: WIP
 
     static bool& byte_BAB228 = *(bool*)(0xBAB228);
     auto wanted = FindPlayerWanted();
@@ -1917,7 +1923,7 @@ void CHud::DrawWanted() {
 
     case START_FADE_OUT:
         m_WantedFadeTimer = 1000;
-        if (m_WantedTimer > 10'000.0f) {
+        if (m_WantedTimer > 10'000) {
             m_WantedState = 3;
             m_WantedFadeTimer = 3000;
         }
@@ -1925,7 +1931,7 @@ void CHud::DrawWanted() {
 
     case FADING_IN:
         m_WantedFadeTimer += (uint32)CTimer::GetTimeStepInMS();
-        if (m_WantedFadeTimer > 1000.0f) {
+        if (m_WantedFadeTimer > 1000) {
             m_WantedFadeTimer = 1000;
             m_WantedState = 1;
         }
@@ -1933,7 +1939,7 @@ void CHud::DrawWanted() {
 
     case FADING_OUT:
         m_WantedFadeTimer -= (uint32)CTimer::GetTimeStepInMS();
-        if (m_WantedFadeTimer < 0.0f) {
+        if (m_WantedFadeTimer < 0) {
             m_WantedFadeTimer = 0;
             m_WantedState = 0;
         }
