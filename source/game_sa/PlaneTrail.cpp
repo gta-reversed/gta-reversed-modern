@@ -71,3 +71,39 @@ void CPlaneTrail::RegisterPoint(CVector pos) {
     if (bDoShift || !m_timepoints[0])
         m_timepoints[0] = CTimer::GetTimeInMS();
 }
+
+void CPlaneTrail::Update(CVector pos, CRGBA color, uint32_t coronaIdx, uint32_t timeModifierMs, uint8_t afterHour, uint8_t beforeHour) {
+    const float fTimeProg = (float)(CTimer::m_snTimeInMilliseconds % 131072) / 20860.0f; // or * 0.000047936901.. Not sure where this comes from..
+    const CVector currPos = pos * CVector(std::sin(fTimeProg), std::cos(fTimeProg), 1.0f);
+
+    RegisterPoint(currPos);
+
+    if (!CClock::ClockHoursInRange(afterHour, beforeHour)) {
+        return;
+    }
+
+    if ((CTimer::m_snTimeInMilliseconds + timeModifierMs) & 512) {
+        CCoronas::RegisterCorona(
+            coronaIdx,
+            nullptr,
+            color.r, color.g, color.b, color.a,
+            currPos,
+            5.0f,
+            2000.0f,
+            eCoronaType::CORONATYPE_HEADLIGHT,
+            eCoronaFlareType::FLARETYPE_NONE,
+            false,
+            false,
+            false,
+            0.0f,
+            false,
+            1.5f,
+            0,
+            15.0f,
+            false,
+            false
+        );
+    } else {
+        CCoronas::UpdateCoronaCoors(coronaIdx, currPos, 2000.0f, 0.0f);
+    }
+}

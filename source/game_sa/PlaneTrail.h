@@ -23,6 +23,7 @@ public:
     void Init();
     void Render(float intensity);
     void RegisterPoint(CVector point);
+    void Update(CVector pos, CRGBA color, uint32_t coronaIdx, uint32_t timeModifierMs, uint8_t afterHour, uint8_t beforeHour);
 };
 
 VALIDATE_SIZE(CPlaneTrail, 0x100);
