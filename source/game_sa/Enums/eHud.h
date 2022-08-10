@@ -12,7 +12,7 @@ enum eMessageStyle : uint16 {
     NUM_MESSAGE_STYLES
 };
 
-enum eHudItem {
+enum eHudItem : int16 {
     ITEM_NONE   = -1,
     ITEM_ARMOUR =  3,
     ITEM_HEALTH =  4,

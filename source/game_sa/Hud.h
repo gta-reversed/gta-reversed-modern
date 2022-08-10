@@ -16,13 +16,48 @@ class CHud {
 public:
     static constexpr auto BIG_MESSAGE_SIZE = 128;
 
-    static bool& bScriptDontDisplayAreaName;
-    static bool& bScriptDontDisplayVehicleName;
-    static bool& bScriptForceDisplayWithCounters;
-    static bool& bScriptDontDisplayRadar;
+    static inline bool& bScriptDontDisplayAreaName = *(bool*)0xBAA3F8;
+    static inline bool& bScriptDontDisplayVehicleName = *(bool*)0xBAA3F9;
+    static inline bool& bScriptForceDisplayWithCounters = *(bool*)0xBAA3FA;
+    static inline bool& bScriptDontDisplayRadar = *(bool*)0xBAA3FB;
+
+    static inline bool& bDrawClock = *(bool*)0xBAA400;
+
+    static inline char*& m_pVehicleNameToPrint = *(char**)0xBAA444;
+    static inline eNameState& m_VehicleState = *(eNameState*)0xBAA448;
+    static inline int32& m_VehicleFadeTimer = *(int32*)0xBAA44C;
+    static inline int32& m_VehicleNameTimer = *(int32*)0xBAA450;
+    static inline char*& m_pLastVehicleName = *(char**)0xBAA454;
+    static inline char*& m_pVehicleName = *(char**)0xBAA458;
+
+    static inline bool& m_bDraw3dMarkers = *(bool*)0xBAA45C;
+    static inline bool& m_Wants_To_Draw_Hud = *(bool*)0xBAA45D;
+
+    static inline float& m_fHelpMessageTime = *(float*)0xBAA460; // in seconds
+    static inline float& m_fHelpMessageBoxWidth = *(float*)0x8D0934; // default 200.0
+    static inline bool& m_bHelpMessagePermanent = *(bool*)0xBAA464;
+    static inline float& m_fHelpMessageStatUpdateValue = *(float*)0xBAA468;
+    static inline uint16& m_nHelpMessageMaxStatValue = *(uint16*)0xBAA46C;
+    static inline uint16& m_nHelpMessageStatId = *(uint16*)0xBAA470;
+    static inline bool& m_bHelpMessageQuick = *(bool*)0xBAA472;
+    static inline int32& m_nHelpMessageState = *(int32*)0xBAA474;
+    static inline uint32& m_nHelpMessageFadeTimer = *(uint32*)0xBAA478;
+    static inline uint32& m_nHelpMessageTimer = *(uint32*)0xBAA47C;
+    static inline char (&m_pHelpMessageToPrint)[400] = *(char(*)[400])0xBAA480;
+    static inline char (&m_pLastHelpMessage)[400] = *(char(*)[400])0xBAA610;
+    static inline char (&m_pHelpMessage)[400] = *(char(*)[400])0xBAA7A0;
+
+    static inline eNameState& m_ZoneState = *(eNameState*)0xBAA930;
+    static inline int32& m_ZoneFadeTimer = *(int32*)0xBAA934;
+    static inline uint32& m_ZoneNameTimer = *(uint32*)0xBAA938;
+    static inline char*& m_ZoneToPrint = *(char**)0xBAB1D0;
+    static inline char*& m_pLastZoneName = *(char**)0xBAB1D4;
+    static inline char*& m_pZoneName = *(char**)0xBAB1D8;
+
+    static inline eHudItem& m_ItemToFlash = *(eHudItem*)0xBAB1DC;
+    static inline bool& bDrawingVitalStats = *(bool*)0xBAB1DE;
 
     static inline int32& m_LastBreathTime = *(int32*)0xBAA3FC;
-    static bool& bDrawClock;
 
     static inline uint32& m_WeaponState = *(uint32*)0xBAA404;
     static inline uint32& m_WeaponFadeTimer = *(uint32*)0xBAA408;
@@ -44,49 +79,27 @@ public:
     static inline uint32& m_EnergyLostTimer = *(uint32*)0xBAA43C;
     static inline uint32& m_LastTimeEnergyLost = *(uint32*)0xBAA440;
 
-    static char*& m_pVehicleNameToPrint;
-    static eNameState& m_VehicleState;
-    static int32& m_VehicleFadeTimer;
-    static int32& m_VehicleNameTimer;
-    static char*& m_pLastVehicleName;
-    static char*& m_pVehicleName;
-
-    static bool& m_bDraw3dMarkers;
-    static bool& m_Wants_To_Draw_Hud;
-
-    static float&  m_fHelpMessageTime;     // in seconds
-    static float&  m_fHelpMessageBoxWidth; // default 200.0
-    static bool&   m_bHelpMessagePermanent;
-    static float&  m_fHelpMessageStatUpdateValue;
-    static uint16& m_nHelpMessageMaxStatValue;
-    static uint16& m_nHelpMessageStatId;
-    static bool&   m_bHelpMessageQuick;
-    static int32&  m_nHelpMessageState;
-    static uint32& m_nHelpMessageFadeTimer;
-    static uint32& m_nHelpMessageTimer;
-    static char    (&m_pHelpMessageToPrint)[400];
-    static char    (&m_pLastHelpMessage)[400];
-    static char    (&m_pHelpMessage)[400];
-
-    static eNameState& m_ZoneState; // see eNameState
-    static int32&      m_ZoneFadeTimer;
-    static uint32&     m_ZoneNameTimer;
-
     static inline char  (&m_Message)[400] = *(char (*)[400])0xBAB040;
     static inline char  (&m_BigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
     static inline char  (&LastBigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char(*)[NUM_MESSAGE_STYLES][128])0xBAA940;
-    static inline float (&BigMessageAlpha)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3A4;
-    static inline float (&BigMessageInUse)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3C0;
-    static inline float (&BigMessageX)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3DC;
+    static inline float (&BigMessageAlpha)[NUM_MESSAGE_STYLES] = *(float(*)[NUM_MESSAGE_STYLES])0xBAA3A4;
+    static inline float (&BigMessageInUse)[NUM_MESSAGE_STYLES] = *(float(*)[NUM_MESSAGE_STYLES])0xBAA3C0;
+    static inline float (&BigMessageX)[NUM_MESSAGE_STYLES] = *(float(*)[NUM_MESSAGE_STYLES])0xBAA3DC;
 
-    static char*& m_ZoneToPrint;
-    static char*& m_pLastZoneName;
-    static char*& m_pZoneName;
+    static inline CSprite2d (&Sprites)[6] = *(CSprite2d(*)[6])0xBAB1FC;
 
-    static int16& m_ItemToFlash; // -1 - no item
-    static bool&  bDrawingVitalStats;
+    static inline int16& TimerMainCounterHideState = *(int16*)0xBAA388;
+    static inline bool& TimerMainCounterWasDisplayed = *(bool*)0xBAA38A;
+    static inline int16 (&TimerCounterHideState)[4] = *(int16(*)[4])0xBAA38C;
+    static inline int16 (&TimerCounterWasDisplayed)[4] = *(int16(*)[4])0xBAA394;
 
-    static CSprite2d (&Sprites)[NUM_HUD_SPRITES];
+    static inline float& OddJob2OffTimer = *(float*)0xBAA398;
+    static inline float& OddJob2XOffset = *(float*)0xBAA39C;
+    static inline uint16& OddJob2Timer = *(uint16*)0xBAA3A0;
+    static inline uint16& OddJob2On = *(uint16*)0xBAB1E0;
+
+    static inline float& PagerXOffset = *(float*)0x8D0938; // 150.0f
+    static inline bool& HelpTripSkipShown = *(bool*)0xBAB229;
 
 public:
     static void InjectHooks();
