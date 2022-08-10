@@ -179,7 +179,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
     RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
     RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
-    // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
+    RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
     // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
     // RH_ScopedInstall(SetupRender, 0x6D64F0);
     // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
@@ -3100,7 +3100,27 @@ bool CVehicle::GetVehicleLightsStatus() {
 
 // 0x6D5CF0
 bool CVehicle::CanPedLeanOut(CPed* ped) {
-    return ((bool(__thiscall*)(CVehicle*, CPed*))0x6D5CF0)(this, ped);
+    switch (m_pHandlingData->m_nAnimGroup) {
+    case ANIM_GROUP_COLT45:
+        return notsa::contains(std::array{ m_pDriver, m_apPassengers[0] }, ped);
+    case ANIM_GROUP_COLT_COP:
+    case ANIM_GROUP_COLT45PRO:
+    case ANIM_GROUP_SAWNOFF:
+    case ANIM_GROUP_SAWNOFFPRO:
+    case ANIM_GROUP_SILENCED:
+        return false;
+    default: {
+        switch (m_nVehicleSubType) {
+        case VEHICLE_TYPE_HELI:
+        case VEHICLE_TYPE_PLANE:
+        case VEHICLE_TYPE_TRAIN:
+        case VEHICLE_TYPE_BOAT:
+            return false;
+        default:
+            return true;
+        }
+    }
+    }
 }
 
 // 0x6D5D70
