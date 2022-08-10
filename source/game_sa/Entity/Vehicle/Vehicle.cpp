@@ -181,7 +181,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
     RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
     RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
-    // RH_ScopedInstall(SetupRender, 0x6D64F0);
+    RH_ScopedInstall(SetupRender, 0x6D64F0);
     // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
     // RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0);
     // RH_ScopedInstall(InflictDamage, 0x6D7C90);
@@ -3134,7 +3134,58 @@ void CVehicle::SetVehicleCreatedBy(eVehicleCreatedBy createdBy) {
 
 // 0x6D64F0
 void CVehicle::SetupRender() {
-    ((void(__thiscall*)(CVehicle*))0x6D64F0)(this);
+    const auto mi = GetModelInfo()->AsVehicleModelInfoPtr();
+
+    RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(TRUE));
+
+    if (IsSubAutomobile()) {
+        AsAutomobile()->CustomCarPlate_BeforeRenderingStart(*mi);
+    }
+
+    // Handle remap TXD
+    if (m_nRemapTxd < 0) {
+        vehicleFlags.bDontSetColourWhenRemapping = false;
+    } else {
+        // Make sure it's loaded, if not, request it to be loaded
+        if (CStreaming::IsModelLoaded(ModelIdToTXD(m_nRemapTxd))) {
+            // If there was a remap texture set, remove it
+            if (m_pRemapTexture) {
+                m_pRemapTexture = nullptr;
+                CTxdStore::RemoveRef(m_nPreviousRemapTxd);
+            }
+
+            // Add ref to current txd
+            CTxdStore::AddRef(m_nRemapTxd);
+
+            m_nPreviousRemapTxd = m_nRemapTxd;
+
+            // Set this to -1. From the looks of it, this
+            // should be set during the frame or something
+            // and then it's loaded here
+            // instead of having to load the txd and all that mid-frame
+            m_nRemapTxd = -1;
+
+            // Store texture of current txd
+            m_pRemapTexture = GetFirstTexture(CTxdStore::GetTxd(m_nPreviousRemapTxd));
+
+            if (!vehicleFlags.bDontSetColourWhenRemapping) {
+                m_nPrimaryColor = 1;
+            }
+        } else {
+            CStreaming::RequestModel(ModelIdToTXD(m_nRemapTxd), STREAMING_KEEP_IN_MEMORY);
+        }
+    }
+
+    mi->SetVehicleColour(
+        m_nPrimaryColor,
+        m_nSecondaryColor,
+        m_nTertiaryColor,
+        m_nQuaternaryColor
+    );
+
+    CVehicleModelInfo::SetupLightFlags(this);
+    CVehicleModelInfo::ms_pRemapTexture = m_pRemapTexture;
+    CVehicleModelInfo::SetEditableMaterials(m_pRwClump);
 }
 
 // 0x6D6C00

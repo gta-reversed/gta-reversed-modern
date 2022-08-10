@@ -3493,12 +3493,12 @@ void CAutomobile::ReduceHornCounter()
 static RwTexture*& renderLicensePlateTexture{ *(RwTexture**)0xC1BFD8 };
 
 // 0x6A2F00
-void CAutomobile::CustomCarPlate_BeforeRenderingStart(CVehicleModelInfo* model)
+void CAutomobile::CustomCarPlate_BeforeRenderingStart(const CVehicleModelInfo& mi)
 {
-    if (model->m_pPlateMaterial) {
-        renderLicensePlateTexture = RpMaterialGetTexture(model->m_pPlateMaterial);
+    if (mi.m_pPlateMaterial) {
+        renderLicensePlateTexture = RpMaterialGetTexture(mi.m_pPlateMaterial);
         RwTextureAddRef(renderLicensePlateTexture);
-        RpMaterialSetTexture(model->m_pPlateMaterial, m_pCustomCarPlate);
+        RpMaterialSetTexture(mi.m_pPlateMaterial, m_pCustomCarPlate);
     }
 }
 
