@@ -177,7 +177,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(FirePlaneGuns, 0x6D4D30);
     RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
-    // + RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
+    RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
     // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
     // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
     // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
@@ -3049,32 +3049,23 @@ bool CVehicle::CanBeDriven() {
 }
 
 // 0x6D5490
-void CVehicle::ReactToVehicleDamage(CPed* ped) {
-    return ((void(__thiscall*)(CVehicle*, CPed*))0x6D5490)(this, ped);
-
-    const auto React = [=](CPed* ped, CEntity* target, int32 time) {
-        g_ikChainMan.LookAt("ReactToVhclDam", ped, target, time, BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
+void CVehicle::ReactToVehicleDamage(CPed* dmgCauser) {
+    const auto DoReact = [=](CPed* pedThatLooks, CEntity* pedToLookAt) {
+        g_ikChainMan.LookAt("ReactToVhclDam", pedThatLooks, pedToLookAt, CGeneral::GetRandomNumberInRange(2000, 5000), BONE_HEAD, nullptr, false, 0.25f, 500, 3, false);
     };
 
-    // FIX_BUGS ?
-    int32 t1 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
+    const auto& passenger = m_apPassengers[0];
+
     if (m_pDriver) {
-        if (m_apPassengers[0]) {
-            if (CGeneral::GetRandomNumber() >= 0x3FFF)
-                React(m_pDriver, ped, t1);
-            else
-                React(m_pDriver, m_apPassengers[0], t1);
+        if (passenger) {
+            DoReact(m_pDriver, CGeneral::DoCoinFlip() ? dmgCauser : passenger);
         } else {
-            React(m_pDriver, ped, t1);
+            DoReact(m_pDriver, dmgCauser);
         }
     }
 
-    int32 t2 = 2000 - CGeneral::GetRandomNumberInRange(-3000.0f, 0.0f);
-    if (m_apPassengers[0]) {
-        if (CGeneral::GetRandomNumber() >= 0x3FFF)
-            React(m_apPassengers[0], ped, t2);
-        else
-            React(m_apPassengers[0], m_pDriver, t2);
+    if (passenger) {
+        DoReact(passenger, CGeneral::DoCoinFlip() ? dmgCauser : m_pDriver);
     }
 }
 

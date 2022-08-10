@@ -187,3 +187,11 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
 float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
     return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }
+
+/*!
+* @brief Do a "coin-flip" with 50/50 chance
+* @addr notsa
+*/
+bool CGeneral::DoCoinFlip() {
+    return CGeneral::GetRandomNumber() >= RAND_MAX / 2;
+}
