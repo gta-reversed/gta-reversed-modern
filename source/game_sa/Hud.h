@@ -72,8 +72,12 @@ public:
     static int32&      m_ZoneFadeTimer;
     static uint32&     m_ZoneNameTimer;
 
-    static inline char (&m_Message)[400] = *(char (*)[400])0xBAB040;
-    static inline char (&m_BigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
+    static inline char  (&m_Message)[400] = *(char (*)[400])0xBAB040;
+    static inline char  (&m_BigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char (*)[NUM_MESSAGE_STYLES][128])0xBAACC0;
+    static inline char  (&LastBigMessage)[NUM_MESSAGE_STYLES][BIG_MESSAGE_SIZE] = *(char(*)[NUM_MESSAGE_STYLES][128])0xBAA940;
+    static inline float (&BigMessageAlpha)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3A4;
+    static inline float (&BigMessageInUse)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3C0;
+    static inline float (&BigMessageX)[NUM_MESSAGE_STYLES] = *(float(*)[7])0xBAA3DC;
 
     static char*& m_ZoneToPrint;
     static char*& m_pLastZoneName;

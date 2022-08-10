@@ -62,10 +62,6 @@ int16 (&TimerCounterWasDisplayed)[4] = *(int16(*)[4])0xBAA394;
 float& OddJob2OffTimer = *(float*)0xBAA398;
 float& OddJob2XOffset = *(float*)0xBAA39C;
 uint16& OddJob2Timer = *(uint16*)0xBAA3A0;
-float (&BigMessageAlpha)[7] = *(float(*)[7])0xBAA3A4;
-float (&BigMessageInUse)[7] = *(float(*)[7])0xBAA3C0;
-float (&BigMessageX)[7] = *(float(*)[7])0xBAA3DC;
-char (&LastBigMessage)[7][128] = *(char(*)[7][128])0xBAABC0;
 uint16& OddJob2On = *(uint16*)0xBAB1E0;
 float& PagerXOffset = *(float*)0x8D0938; // 150.0
 bool& HelpTripSkipShown = *(bool*)0xBAB229;
@@ -74,44 +70,44 @@ void CHud::InjectHooks() {
     RH_ScopedClass(CHud);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Initialise, 0x5BA850);                  // +
-    RH_ScopedInstall(ReInitialise, 0x588880);                // +
-    RH_ScopedInstall(Shutdown, 0x588850);                    // +
-    RH_ScopedInstall(Draw, 0x58FAE0);                        // +
-    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50);      // ?
-    RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);        // +
-    RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);        // +
-    RH_ScopedInstall(ResetWastedText, 0x589070);             // +
-    RH_ScopedInstall(SetMessage, 0x588F60);                  // ?
-    // RH_ScopedInstall(SetBigMessage, 0x588FC0);               // -
-    RH_ScopedInstall(SetHelpMessage, 0x588BE0);              // +
-    RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);    // +
-    RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);    // +
-    RH_ScopedInstall(SetVehicleName, 0x588F50);              // +
-    RH_ScopedInstall(SetZoneName, 0x588BB0);                 // +
-    RH_ScopedInstall(DrawAfterFade, 0x58D490);               // +
-    RH_ScopedInstall(DrawAreaName, 0x58AA50);                // +
-    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);     // +
-    RH_ScopedInstall(DrawCrossHairs, 0x58E020);              // UNTESTED
-    // RH_ScopedInstall(DrawFadeState, 0x58D580);               // UNTESTED
-    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);                // UNTOUCHED
-    // RH_ScopedInstall(DrawMissionTimers, 0x58B180);           // UNTOUCHED
-    RH_ScopedInstall(DrawMissionTitle, 0x58D240);            // +-
-    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);           // looks like OG
-    RH_ScopedInstall(DrawRadar, 0x58A330);                   // test angle
-    RH_ScopedInstall(DrawScriptText, 0x58C080);              // +
-    // RH_ScopedInstall(DrawSubtitles, 0x58C250);               // UNTOUCHED
-    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);    // UNTOUCHED
-    RH_ScopedInstall(DrawVehicleName, 0x58AEA0);             // +
-    // RH_ScopedInstall(DrawVitalStats, 0x589650);              // UNTOUCHED
-    RH_ScopedInstall(DrawAmmo, 0x5893B0);                    // +
+    RH_ScopedInstall(Initialise, 0x5BA850);
+    RH_ScopedInstall(ReInitialise, 0x588880);
+    RH_ScopedInstall(Shutdown, 0x588850);
+    RH_ScopedInstall(Draw, 0x58FAE0);
+    RH_ScopedInstall(GetRidOfAllHudMessages, 0x588A50); // ?
+    RH_ScopedInstall(GetYPosBasedOnHealth, 0x588B60);
+    RH_ScopedInstall(HelpMessageDisplayed, 0x588B50);
+    RH_ScopedInstall(ResetWastedText, 0x589070);
+    RH_ScopedInstall(SetMessage, 0x588F60);
+    RH_ScopedInstall(SetBigMessage, 0x588FC0);
+    RH_ScopedInstall(SetHelpMessage, 0x588BE0);
+    RH_ScopedInstall(SetHelpMessageStatUpdate, 0x588D40);
+    RH_ScopedInstall(SetHelpMessageWithNumber, 0x588E30);
+    RH_ScopedInstall(SetVehicleName, 0x588F50);
+    RH_ScopedInstall(SetZoneName, 0x588BB0);
+    RH_ScopedInstall(DrawAfterFade, 0x58D490);
+    RH_ScopedInstall(DrawAreaName, 0x58AA50);
+    RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
+    // RH_ScopedInstall(DrawCrossHairs, 0x58E020); // -
+    // RH_ScopedInstall(DrawFadeState, 0x58D580);     // UNTESTED
+    // RH_ScopedInstall(DrawHelpText, 0x58B6E0);      // untouched
+    // RH_ScopedInstall(DrawMissionTimers, 0x58B180); // untouched
+    RH_ScopedInstall(DrawMissionTitle, 0x58D240);
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);    // looks like OG
+    RH_ScopedInstall(DrawRadar, 0x58A330);            // test angle
+    RH_ScopedInstall(DrawScriptText, 0x58C080);
+    // RH_ScopedInstall(DrawSubtitles, 0x58C250);               // untouched
+    // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);    // untouched
+    RH_ScopedInstall(DrawVehicleName, 0x58AEA0);
+    // RH_ScopedInstall(DrawVitalStats, 0x589650);              // untouched
+    RH_ScopedInstall(DrawAmmo, 0x5893B0);
     // RH_ScopedInstall(DrawPlayerInfo, 0x58EAF0);           // WIP
-    RH_ScopedInstall(DrawTripSkip, 0x58A160);                // +
-    RH_ScopedInstall(DrawWanted, 0x58D9A0);                  // WIP
-    RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);              // +
-    RH_ScopedInstall(RenderArmorBar, 0x5890A0);              // +
-    RH_ScopedInstall(RenderBreathBar, 0x589190);             // +
-    RH_ScopedInstall(RenderHealthBar, 0x589270);             // +
+    RH_ScopedInstall(DrawTripSkip, 0x58A160);
+    // RH_ScopedInstall(DrawWanted, 0x58D9A0);               // WIP
+    RH_ScopedInstall(DrawWeaponIcon, 0x58D7D0);
+    RH_ScopedInstall(RenderArmorBar, 0x5890A0);
+    RH_ScopedInstall(RenderBreathBar, 0x589190);
+    RH_ScopedInstall(RenderHealthBar, 0x589270);
 }
 
 bool EachFrames(auto count) {
@@ -232,50 +228,34 @@ bool CHud::HelpMessageDisplayed() {
 // 0x588F60
 void CHud::SetMessage(const char* message) {
     if (message) {
-        uint32 i = 0;
-        for (i = 0u; i < std::size(m_Message); i++) {
-            if (message[i] == '\0') {
-                break;
-            }
-            m_Message[i] = message[i];
-        }
-        m_Message[i] = '\0';
+        strncpy(m_Message, message, sizeof(m_Message));
     } else {
         m_Message[0] = '\0';
     }
 }
 
+// little bit different from OG
 // 0x588FC0
 void CHud::SetBigMessage(char* message, eMessageStyle style) {
-    return plugin::Call<0x588FC0, char*, eMessageStyle>(message, style); // todo: Fix STYLE_BOTTOM_RIGHT (test - strcpy(CHud::m_BigMessage[STYLE_BOTTOM_RIGHT], "STYLE_BOTTOM_RIGHT");)
-
     if (BigMessageX[style] != 0.0f) {
         return;
     }
 
-    uint16 i = 0;
-    if (style == STYLE_WHITE_MIDDLE_SMALLER) {
-        for (; i < BIG_MESSAGE_SIZE; i++) {
-            if (message[i] == '\0')
-                break;
-            if (message[i] != LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]) {
-                OddJob2OffTimer = 0.0f;
-                OddJob2On = 0;
-            }
-            m_BigMessage[STYLE_WHITE_MIDDLE_SMALLER][i]   = message[i];
-            LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER][i] = message[i];
-        }
-    } else {
-        for (; i < BIG_MESSAGE_SIZE; i++) { // strcpy_s(m_BigMessage[style], BIG_MESSAGE_SIZE, message[]);
-            if (message[i] == '\0')
-                break;
-            m_BigMessage[style][i] = message[i];
-        }
-        *message = '\0';
-    }
+    strncpy(m_BigMessage[style], message, sizeof(m_BigMessage[style]));
 
-    m_BigMessage[style][i]   = '\0';
-    LastBigMessage[style][i] = '\0';
+    switch (style) {
+    case STYLE_WHITE_MIDDLE_SMALLER: {
+        if (strcmp(message, LastBigMessage[STYLE_WHITE_MIDDLE_SMALLER]) != 0) {
+            OddJob2OffTimer = 0.0f;
+            OddJob2On = 0;
+        }
+        strncpy(LastBigMessage[style], message, sizeof(LastBigMessage[style]));
+        break;
+    }
+    default: {
+        message[0] = '\0';
+    }
+    }
 }
 
 // 0x588BE0
@@ -665,6 +645,17 @@ void CHud::ResetWastedText() {
 
 // 0x58E020
 void CHud::DrawCrossHairs() {
+    plugin::Call<0x58E020>();
+
+    struct RestoreRenderState {
+        ~RestoreRenderState() {
+            RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+        }
+    };
+    RestoreRenderState state;
+
     const CCam& currentCamera = CCamera::GetActiveCamera();
     const auto& camMode = currentCamera.m_nMode;
 
@@ -718,172 +709,166 @@ void CHud::DrawCrossHairs() {
         }
     }
 
+    if (!bDrawCircleCrossHair && !bDrawCustomCrossHair && CTheScripts::bDrawCrossHair == eCrossHairType::NONE)
+        return;
+
     CRect rect;
-    const CRGBA black = CRGBA(255, 255, 255, 255);
-    if (bDrawCircleCrossHair || bDrawCustomCrossHair || CTheScripts::bDrawCrossHair != eCrossHairType::NONE) {
-        if (bDrawCircleCrossHair) {
+    const CRGBA black = CRGBA(255, 0, 0, 255); // TODO: RED FOR TES PURPOSES. OG : CRGBA(255, 255, 255, 255);
+    if (bDrawCircleCrossHair) { // 0x58E1E1
+        RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
+
+        float hairMultXOnScreen = SCREEN_WIDTH * CCamera::m_f3rdPersonCHairMultX;
+        float hairMultYOnScreen = SCREEN_HEIGHT * CCamera::m_f3rdPersonCHairMultY;
+        float gunRadius = player->GetWeaponRadiusOnScreen();
+
+        if (gunRadius == 0.2f) {
+            rect.left   = hairMultXOnScreen - 1.0f;
+            rect.top    = hairMultYOnScreen - 1.0f;
+            rect.right  = hairMultXOnScreen + 1.0f;
+            rect.bottom = hairMultYOnScreen + 1.0f;
+            CSprite2d::DrawRect(rect, black);
+        }
+
+        rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+        rect.top    = hairMultYOnScreen - SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+        rect.right  = rect.left + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+        rect.bottom = rect.top  + SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
+        Sprites[SPRITE_SITE_M16].Draw(rect, black); // left top
+
+        rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+        Sprites[SPRITE_SITE_M16].Draw(rect, black); // right top
+
+        rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+        rect.top   += SCREEN_STRETCH_Y(64.0f * gunRadius);
+        Sprites[SPRITE_SITE_M16].Draw(rect, black); // left bottom
+
+        rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
+        Sprites[SPRITE_SITE_M16].Draw(rect, black); // right bottom
+        return;
+    }
+
+    if (CTheScripts::bDrawCrossHair != eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
+        if (camMode == MODE_M16_1STPERSON ||
+            camMode == MODE_M16_1STPERSON_RUNABOUT ||
+            camMode == MODE_1STPERSON_RUNABOUT ||
+            camMode == MODE_HELICANNON_1STPERSON
+        ) {
             RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
-            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
+            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
 
-            float hairMultXOnScreen = SCREEN_WIDTH * CCamera::m_f3rdPersonCHairMultX;
-            float hairMultYOnScreen = SCREEN_HEIGHT * CCamera::m_f3rdPersonCHairMultY;
-            float gunRadius = player->GetWeaponRadiusOnScreen();
+            rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // top left
+            rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+            rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+            rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-            if (gunRadius == 0.2f) {
-                rect.left   = hairMultXOnScreen - 1.0f;
-                rect.top    = hairMultYOnScreen - 1.0f;
-                rect.right  = hairMultXOnScreen + 1.0f;
-                rect.bottom = hairMultYOnScreen + 1.0f;
-                CSprite2d::DrawRect(rect, black);
-            }
+            rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // top right
+            rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
+            rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+            rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-            rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            rect.top    = hairMultYOnScreen - SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
-            rect.right  = rect.left + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            rect.bottom = rect.top  + SCREEN_STRETCH_Y(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(rect, black); // left top
+            rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // bottom left
+            rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+            rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+            rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black);
 
-            rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(rect, black); // right top
+            rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // bottom right
+            rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
+            rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
+            rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
+            Sprites[SPRITE_SITE_M16].Draw(rect, black);
+            return;
+        }
+    }
 
-            rect.left   = hairMultXOnScreen - SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            rect.top   += SCREEN_STRETCH_Y(64.0f * gunRadius);
-            Sprites[SPRITE_SITE_M16].Draw(rect, black); // left bottom
+    RwTexture* drawTexture = nullptr;
+    float screenStretchCrossHairX = 0.0f;
+    float screenStretchCrossHairY = 0.0f;
+    float screenOffsetCenterX = 0.0f;
+    float screenOffsetCenterY = 0.0f;
 
-            rect.left   = hairMultXOnScreen + SCREEN_STRETCH_X(64.0f * gunRadius / 2.0f);
-            Sprites[SPRITE_SITE_M16].Draw(rect, black); // right bottom
+    if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE ||
+        CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON
+    ) {
+        if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
+            screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
+            screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
+        } else {
+            screenStretchCrossHairX = SCREEN_STRETCH_X(210.0f);
+            screenStretchCrossHairY = SCREEN_STRETCH_Y(210.0f);
+        }
 
-            RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
-            RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
-            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
+        screenOffsetCenterX = 0.0f;
+        screenOffsetCenterY = 0.0f;
+
+        CWeaponInfo& info = activeWeapon.GetWeaponInfo(eWeaponSkill::STD);
+        if (info.m_nModelId1 <= 0) {
             return;
         }
 
-        if (CTheScripts::bDrawCrossHair != eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
-            if (camMode == MODE_M16_1STPERSON || camMode == MODE_M16_1STPERSON_RUNABOUT || camMode == MODE_1STPERSON_RUNABOUT ||
-                camMode == MODE_HELICANNON_1STPERSON) {
-                RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
-                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(FALSE));
-
-                rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // top left
-                rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
-                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(rect, black);
-
-                rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // top right
-                rect.top    = (SCREEN_HEIGHT / 2.0f)  - SCREEN_STRETCH_Y(64.0f / 2.0f);
-                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(rect, black);
-
-                rect.left   = (SCREEN_WIDTH / 2.0f)   - SCREEN_STRETCH_X(64.0f / 2.0f); // bottom left
-                rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
-                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(rect, black);
-
-                rect.left   = (SCREEN_WIDTH / 2.0f)   + SCREEN_STRETCH_X(64.0f / 2.0f); // bottom right
-                rect.top    = SCREEN_STRETCH_Y(64.0f) + ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f));
-                rect.right  = ((SCREEN_WIDTH / 2.0f)  - SCREEN_STRETCH_X(64.0f / 2.0f)) + SCREEN_STRETCH_X(64.0f / 2.0f);
-                rect.bottom = ((SCREEN_HEIGHT / 2.0f) - SCREEN_STRETCH_Y(64.0f / 2.0f)) + SCREEN_STRETCH_Y(64.0f / 2.0f);
-                Sprites[SPRITE_SITE_M16].Draw(rect, black);
-
-                RwRenderStateSet(rwRENDERSTATESRCBLEND, RWRSTATE(RwBlendFunction::rwBLENDSRCALPHA));
-                RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(RwBlendFunction::rwBLENDINVSRCALPHA));
-                RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
-                return;
-            }
+        CBaseModelInfo* mi = CModelInfo::GetModelInfo(info.m_nModelId1);
+        TxdDef* txd = CTxdStore::ms_pTxdPool->GetAt(mi->m_nTxdIndex);
+        if (!txd->m_pRwDictionary) {
+            return;
         }
-
-        RwTexture* drawTexture = nullptr;
-        float screenStretchCrossHairX = 0.0f;
-        float screenStretchCrossHairY = 0.0f;
-        float screenOffsetCenterX = 0.0f;
-        float screenOffsetCenterY = 0.0f;
-        if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA ||
-            activeWeapon.m_nType == eWeaponType::WEAPON_SNIPERRIFLE || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON
+        drawTexture = RwTexDictionaryFindHashNamedTexture(txd->m_pRwDictionary, CKeyGen::AppendStringToKey(mi->m_nKey, "CROSSHAIR"));
+    } else {
+        if (camMode != MODE_ROCKETLAUNCHER && camMode != MODE_1STPERSON && camMode != MODE_ROCKETLAUNCHER_RUNABOUT &&
+            camMode != MODE_ROCKETLAUNCHER_HS && camMode != MODE_ROCKETLAUNCHER_RUNABOUT_HS
         ) {
-            if (activeWeapon.m_nType == eWeaponType::WEAPON_CAMERA || CTheScripts::bDrawCrossHair == eCrossHairType::FIXED_DRAW_1STPERSON_WEAPON) {
-                screenStretchCrossHairX = SCREEN_STRETCH_X(256.0f);
-                screenStretchCrossHairY = SCREEN_STRETCH_Y(192.0f);
-            } else {
-                screenStretchCrossHairX = SCREEN_STRETCH_X(210.0f);
-                screenStretchCrossHairY = SCREEN_STRETCH_Y(210.0f);
-            }
-
-            screenOffsetCenterX = 0.0f;
-            screenOffsetCenterY = 0.0f;
-
-            CWeaponInfo& weaponInfoOfActiveWeaponOne = activeWeapon.GetWeaponInfo(eWeaponSkill::STD);
-            if (weaponInfoOfActiveWeaponOne.m_nModelId1 <= 0) {
-                return;
-            }
-
-            CBaseModelInfo* mi = CModelInfo::GetModelInfo(weaponInfoOfActiveWeaponOne.m_nModelId1);
-            TxdDef* txd = CTxdStore::ms_pTxdPool->GetAt(mi->m_nTxdIndex);
-            if (!txd->m_pRwDictionary) {
-                return;
-            }
-            drawTexture = RwTexDictionaryFindHashNamedTexture(txd->m_pRwDictionary, CKeyGen::AppendStringToKey(mi->m_nKey, "CROSSHAIR"));
-        } else {
-            if (camMode != MODE_ROCKETLAUNCHER && camMode != MODE_1STPERSON && camMode != MODE_ROCKETLAUNCHER_RUNABOUT &&
-                camMode != MODE_ROCKETLAUNCHER_HS && camMode != MODE_ROCKETLAUNCHER_RUNABOUT_HS
-            ) {
-                return;
-            }
-            drawTexture = Sprites[SPRITE_SITE_ROCKET].m_pTexture;
-            screenStretchCrossHairX = SCREEN_STRETCH_X(24.0f);
-            screenStretchCrossHairY = SCREEN_STRETCH_Y(24.0f);
-            screenOffsetCenterX     = SCREEN_STRETCH_X(20.0f);
-            screenOffsetCenterY     = SCREEN_STRETCH_Y(20.0f);
+            return;
         }
+        drawTexture = Sprites[SPRITE_SITE_ROCKET].m_pTexture;
+        screenStretchCrossHairX = SCREEN_STRETCH_X(24.0f);
+        screenStretchCrossHairY = SCREEN_STRETCH_Y(24.0f);
+        screenOffsetCenterX     = SCREEN_STRETCH_X(20.0f);
+        screenOffsetCenterY     = SCREEN_STRETCH_Y(20.0f);
+    }
 
-        if (drawTexture) {
-            RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
-            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
+    if (drawTexture) {
+        RwRenderStateSet(rwRENDERSTATETEXTUREFILTER, RWRSTATE(rwFILTERLINEAR));
+        RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,  RWRSTATE(FALSE));
 
-            RwRenderStateSet(rwRENDERSTATEZTESTENABLE,    RWRSTATE(FALSE));
-            RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(RwTextureAddressMode::rwTEXTUREADDRESSCLAMP));
-            RwRenderStateSet(rwRENDERSTATETEXTURERASTER,  RWRSTATE(drawTexture->raster));
+        RwRenderStateSet(rwRENDERSTATEZTESTENABLE,    RWRSTATE(FALSE));
+        RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(RwTextureAddressMode::rwTEXTUREADDRESSCLAMP));
+        RwRenderStateSet(rwRENDERSTATETEXTURERASTER,  RWRSTATE(drawTexture->raster));
 
-            const auto RenderOneXLUSprite = [=](float x, float y, auto u, auto v) {
-                CSprite::RenderOneXLUSprite(
-                    x, y,
-                    1.0f,
-                    screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f,
-                    255, 255, 255, 255, 0.01f, 255, u, v
-                );
-            };
-
-            RenderOneXLUSprite(
-                (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
-                (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
-                0, 0
+        const auto RenderOneXLUSprite = [=](float x, float y, auto u, auto v) {
+            CSprite::RenderOneXLUSprite(
+                x, y,
+                1.0f,
+                screenStretchCrossHairX / 2.0f, screenStretchCrossHairY / 2.0f,
+                255, 255, 255, 255, 0.01f, 255, u, v
             );
+        };
 
-            RenderOneXLUSprite(
-                (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
-                (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
-                1, 0
-            );
+        RenderOneXLUSprite(
+            (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
+            (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
+            0, 0
+        );
 
-            RenderOneXLUSprite(
-                (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
-                (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
-                0, 1
-            );
+        RenderOneXLUSprite(
+            (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
+            (SCREEN_HEIGHT / 2.0f) - (screenStretchCrossHairY / 2.0f) - screenOffsetCenterY,
+            1, 0
+        );
 
-            RenderOneXLUSprite(
-                (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
-                (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
-                1, 1
-            );
+        RenderOneXLUSprite(
+            (SCREEN_WIDTH  / 2.0f) - (screenStretchCrossHairX / 2.0f) - screenOffsetCenterX,
+            (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
+            0, 1
+        );
 
-            RwRenderStateSet(rwRENDERSTATESRCBLEND,     RWRSTATE(rwBLENDSRCALPHA));
-            RwRenderStateSet(rwRENDERSTATEDESTBLEND,    RWRSTATE(rwBLENDINVSRCALPHA));
-            RwRenderStateSet(rwRENDERSTATEZWRITEENABLE, RWRSTATE(TRUE));
-        }
+        RenderOneXLUSprite(
+            (SCREEN_WIDTH  / 2.0f) + (screenStretchCrossHairX / 2.0f) + screenOffsetCenterX,
+            (SCREEN_HEIGHT / 2.0f) + (screenStretchCrossHairY / 2.0f) + screenOffsetCenterY,
+            1, 1
+        );
+        return;
     }
 }
 
@@ -1032,7 +1017,7 @@ void CHud::DrawMissionTitle() {
     CFont::SetFontStyle(FONT_PRICEDOWN);
     CFont::SetScale(SCREEN_STRETCH_X(1.0f), SCREEN_SCALE_Y(1.3f));
 
-    if (messageInUse > SCREEN_WIDTH - 20.0f) { // not 100% OG
+    if (messageInUse >= SCREEN_WIDTH - 20.0f) { // magic shit
         messageX += CTimer::GetTimeStep();
         if (messageX >= 120.0f) {
             messageX = 120.0f;
