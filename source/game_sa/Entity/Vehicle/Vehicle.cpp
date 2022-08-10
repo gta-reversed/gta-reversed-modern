@@ -180,7 +180,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
     RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
     RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
-    // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
+    RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
     // RH_ScopedInstall(SetupRender, 0x6D64F0);
     // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
     // RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0);
@@ -3124,8 +3124,12 @@ bool CVehicle::CanPedLeanOut(CPed* ped) {
 }
 
 // 0x6D5D70
-void CVehicle::SetVehicleCreatedBy(int32 createdBy) {
-    ((void(__thiscall*)(CVehicle*, int32))0x6D5D70)(this, createdBy);
+void CVehicle::SetVehicleCreatedBy(eVehicleCreatedBy createdBy) {
+    if (m_nCreatedBy != createdBy) {
+        CCarCtrl::UpdateCarCount(this, true);
+        m_nCreatedBy = createdBy;
+        CCarCtrl::UpdateCarCount(this, false);
+    }
 }
 
 // 0x6D64F0
