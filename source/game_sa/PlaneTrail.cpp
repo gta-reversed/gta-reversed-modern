@@ -13,30 +13,30 @@ void CPlaneTrail::InjectHooks() {
 
 // 0x717160
 void CPlaneTrail::Init() {
-    std::ranges::fill(m_timepoints, 0);
+    std::ranges::fill(m_Timepoints, 0);
 }
 
 // 0x717180
 void CPlaneTrail::Render(float intensity) {
-    const int32 maxAlpha = (int32)(intensity * 110.0f);
+    const auto maxAlpha = (int32)(intensity * 110.0f);
     if (!maxAlpha)
         return;
 
     uint32 nVertices = 0;
-    RxObjSpace3DVertex vertBuff[PLANE_TRAIL_BUFSZ];
-    for (auto i = 0; i < PLANE_TRAIL_BUFSZ; i++) {
-        const uint32 timeDelta = CTimer::GetTimeInMS() - m_timepoints[i];
-        if (m_timepoints[i] && timeDelta <= 30'000) {
-            const CVector& pos = m_positions[i];
+    RxObjSpace3DVertex vertBuff[PLANE_TRAIL_BUF_SIZE];
+    for (auto i = 0; i < PLANE_TRAIL_BUF_SIZE; i++) {
+        const uint32 timeDelta = CTimer::GetTimeInMS() - m_Timepoints[i];
+        if (m_Timepoints[i] && timeDelta <= 30'000) {
+            const CVector& pos = m_Positions[i];
             RxObjSpace3DVertex& vert = vertBuff[i];
 
             const float fAlphaMult = std::min(1.0f, (30'000.0f - (float)timeDelta) / 10'000.0f); // Clamped to 1.0f
-            RwIm3DVertexSetRGBA(&vert, 0xFF, 0xFF, 0xFF, (RwUInt8)(maxAlpha * fAlphaMult));
+            RwIm3DVertexSetRGBA(&vert, 255, 255, 255, (uint8)((float)maxAlpha * fAlphaMult));
             RwIm3DVertexSetPos(&vert, pos.x, pos.y, pos.z);
 
             nVertices++;
         } else {
-            m_timepoints[i] = 0;
+            m_Timepoints[i] = 0;
         }
     }
 
@@ -57,23 +57,24 @@ void CPlaneTrail::Render(float intensity) {
 
 // 0x7172D0
 void CPlaneTrail::RegisterPoint(CVector pos) {
-    const auto& lastUpdate = m_timepoints[0];
+    const auto& lastUpdate = m_Timepoints[0];
     const bool bDoShift = lastUpdate && CTimer::GetTimeInMS() - lastUpdate > 2000;
     if (bDoShift) {
         // Shift right
-        for (auto i = PLANE_TRAIL_BUFSZ - 1; i; i--) {
-            m_timepoints[i] = m_timepoints[i - 1];
-            m_positions[i] = m_positions[i - 1];
+        for (auto i = PLANE_TRAIL_BUF_SIZE - 1; i; i--) {
+            m_Timepoints[i] = m_Timepoints[i - 1];
+            m_Positions[i]  = m_Positions[i - 1];
         }
     }
 
-    m_positions[0] = pos;
-    if (bDoShift || !m_timepoints[0])
-        m_timepoints[0] = CTimer::GetTimeInMS();
+    m_Positions[0] = pos;
+    if (bDoShift || !m_Timepoints[0]) {
+        m_Timepoints[0] = CTimer::GetTimeInMS();
+    }
 }
 
-void CPlaneTrail::Update(CVector pos, CRGBA color, uint32_t coronaIdx, uint32_t timeModifierMs, uint8_t afterHour, uint8_t beforeHour) {
-    const float fTimeProg = (float)(CTimer::m_snTimeInMilliseconds % 131072) / 20860.0f; // or * 0.000047936901.. Not sure where this comes from..
+void CPlaneTrail::Update(CVector pos, const CRGBA& color, uint32 coronaIdx, uint32 timeModifierMs, uint8 afterHour, uint8 beforeHour) {
+    const float fTimeProg = (float)(CTimer::GetTimeInMS() % 131072) / 20860.0f; // or * 0.000047936901.. Not sure where this comes from..
     const CVector currPos = pos * CVector(std::sin(fTimeProg), std::cos(fTimeProg), 1.0f);
 
     RegisterPoint(currPos);
@@ -82,7 +83,7 @@ void CPlaneTrail::Update(CVector pos, CRGBA color, uint32_t coronaIdx, uint32_t 
         return;
     }
 
-    if ((CTimer::m_snTimeInMilliseconds + timeModifierMs) & 512) {
+    if ((CTimer::GetTimeInMS() + timeModifierMs) & 512) {
         CCoronas::RegisterCorona(
             coronaIdx,
             nullptr,

@@ -8,14 +8,14 @@
 
 #include "Vector.h"
 
-#define PLANE_TRAIL_BUFSZ 16
+constexpr auto PLANE_TRAIL_BUF_SIZE = 16;
 
 class CPlaneTrail {
 public:
     // Shifting buffers, with 2000ms intervals
     // first element being the most recent
-    CVector m_positions[PLANE_TRAIL_BUFSZ];
-    uint32  m_timepoints[PLANE_TRAIL_BUFSZ];
+    CVector m_Positions[PLANE_TRAIL_BUF_SIZE];
+    uint32  m_Timepoints[PLANE_TRAIL_BUF_SIZE];
 
 public:
     static void InjectHooks();
@@ -23,7 +23,6 @@ public:
     void Init();
     void Render(float intensity);
     void RegisterPoint(CVector point);
-    void Update(CVector pos, CRGBA color, uint32_t coronaIdx, uint32_t timeModifierMs, uint8_t afterHour, uint8_t beforeHour);
+    void Update(CVector pos, const CRGBA& color, uint32 coronaIdx, uint32 timeModifierMs, uint8 afterHour, uint8 beforeHour);
 };
-
 VALIDATE_SIZE(CPlaneTrail, 0x100);
