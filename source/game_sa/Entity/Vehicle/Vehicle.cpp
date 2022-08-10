@@ -178,7 +178,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(FireUnguidedMissile, 0x6D5110);
     RH_ScopedInstall(CanBeDriven, 0x6D5400);
     RH_ScopedInstall(ReactToVehicleDamage, 0x6D5490);
-    // RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
+    RH_ScopedInstall(GetVehicleLightsStatus, 0x6D55C0);
     // RH_ScopedInstall(CanPedLeanOut, 0x6D5CF0);
     // RH_ScopedInstall(SetVehicleCreatedBy, 0x6D5D70);
     // RH_ScopedInstall(SetupRender, 0x6D64F0);
@@ -3071,7 +3071,31 @@ void CVehicle::ReactToVehicleDamage(CPed* dmgCauser) {
 
 // 0x6D55C0
 bool CVehicle::GetVehicleLightsStatus() {
-    return ((bool(__thiscall*)(CVehicle*))0x6D55C0)(this);
+    // I've changed the logic flow a little bit so avoid the usage of variables
+    // 0x6D566A - This branch overwrites everything, so test it first
+    if (   m_pDriver
+        && IsPedTypeGang(m_pDriver->m_nPedType)
+        && m_pDriver->m_nRandomSeed % 2
+        && CPopCycle::m_bCurrentZoneIsGangArea
+    ) {
+        return false; // Real OG' don't use lights! Vo�l�!
+    }
+    
+    // The rest pretty much follows the original code
+
+    if (CClock::GetIsTimeInRange(20, 6)) {
+        return true;
+    }
+
+    if (CClock::GetIsTimeInRange(19u, 7u) && CClock::GetGameClockMinutes() > (m_nRandomSeed % 64)) {
+        return true;
+    }
+
+    if (const auto treshold = (float)m_nRandomSeed / 50'000.f; CWeather::Foggyness > treshold || CWeather::WetRoads > treshold) {
+        return true;
+    }
+
+    return m_fContactSurfaceBrightness > 0.05f && CCullZones::CamNoRain();
 }
 
 // 0x6D5CF0
