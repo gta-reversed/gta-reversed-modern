@@ -7,6 +7,8 @@
 #include "StdInc.h"
 
 #include <functional>
+#include <TaskComplexEnterCarAsDriver.h>
+#include <TaskComplexEnterCarAsPassenger.h>
 #include "ModelIndices.h"
 #include "extensions/utility.hpp"
 #include "Vehicle.h"
@@ -185,7 +187,7 @@ void CVehicle::InjectHooks() {
     // RH_ScopedInstall(ProcessBikeWheel, 0x6D73B0);
     // RH_ScopedInstall(FindTyreNearestPoint, 0x6D7BC0);
     // RH_ScopedInstall(InflictDamage, 0x6D7C90);
-    // RH_ScopedInstall(KillPedsGettingInVehicle, 0x6D82F0);
+    RH_ScopedInstall(KillPedsGettingInVehicle, 0x6D82F0);
     RH_ScopedInstall(UsesSiren, 0x6D8470);
     RH_ScopedInstall(IsSphereTouchingVehicle, 0x6D84D0);
     // RH_ScopedInstall(FlyingControl, 0x6D85F0);
@@ -3334,7 +3336,26 @@ void CVehicle::InflictDamage(CEntity* damager, eWeaponType weapon, float intensi
 
 // 0x6D82F0
 void CVehicle::KillPedsGettingInVehicle() {
-    ((void(__thiscall*)(CVehicle*))0x6D82F0)(this);
+    for (auto& ped : GetPedPool()->GetAllValid()) {
+        if (ped.bInVehicle || ped.bIsStanding) {
+            continue;
+        }
+
+        if (const auto task = static_cast<CTaskComplexEnterCar*>(ped.GetTaskManager().Find<CTaskComplexEnterCarAsPassenger, CTaskComplexEnterCarAsDriver>());
+            !task || task->m_pTargetVehicle != this
+        ) {
+            continue;
+        }
+
+        CPedDamageResponseCalculator dmgRespCalc{ &ped, 1000.f, WEAPON_EXPLOSION, PED_PIECE_TORSO, false };
+        CEventDamage dmgEvent{ &ped, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, 0, false, ped.bInVehicle };
+        if (dmgEvent.AffectsPed(&ped)) {
+            dmgRespCalc.ComputeDamageResponse(&ped, dmgEvent.m_damageResponse, true);
+        } else {
+            dmgEvent.m_damageResponse.m_bDamageCalculated = true;
+        }
+        ped.GetEventGroup().Add(&dmgEvent);
+    }
 }
 
 // 0x6D8470
