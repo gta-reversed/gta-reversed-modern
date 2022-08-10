@@ -38,12 +38,12 @@ void CHud::InjectHooks() {
     RH_ScopedInstall(DrawAreaName, 0x58AA50);
     RH_ScopedInstall(DrawBustedWastedMessage, 0x58CA50);
     // RH_ScopedInstall(DrawCrossHairs, 0x58E020); // -
-    // RH_ScopedInstall(DrawFadeState, 0x58D580);  // UNTESTED
+    // RH_ScopedInstall(DrawFadeState, 0x58D580);  // untested
     // RH_ScopedInstall(DrawHelpText, 0x58B6E0);
     // RH_ScopedInstall(DrawMissionTimers, 0x58B180);
     RH_ScopedInstall(DrawMissionTitle, 0x58D240);
-    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);    // looks like OG
-    RH_ScopedInstall(DrawRadar, 0x58A330);            // test angle
+    RH_ScopedInstall(DrawOddJobMessage, 0x58CC80);
+    RH_ScopedInstall(DrawRadar, 0x58A330);
     RH_ScopedInstall(DrawScriptText, 0x58C080);
     // RH_ScopedInstall(DrawSubtitles, 0x58C250);
     // RH_ScopedInstall(DrawSuccessFailedMessage, 0x58C6A0);
@@ -856,6 +856,7 @@ float CHud::DrawFadeState(DRAW_FADE_STATE fadingElement, int32 forceFadingIn) {
         switch (state) {
         case NAME_DONT_SHOW:
             fadeTimer = 0;
+            break;
         case NAME_SWITCH:
         case NAME_FADE_OUT:
             timer = 5;
@@ -987,6 +988,7 @@ void CHud::DrawMissionTitle() {
     CFont::SetEdge(0);
 }
 
+// It looks like the original, but needs to be recheck
 // 0x58CC80
 void CHud::DrawOddJobMessage(bool displayImmediately) {
     const auto& m1 = m_BigMessage[STYLE_BOTTOM_RIGHT];
