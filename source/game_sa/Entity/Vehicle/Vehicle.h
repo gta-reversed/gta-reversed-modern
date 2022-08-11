@@ -579,7 +579,7 @@ public:
                       float adhesion, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, uint16 wheelStatus);
     void ProcessBikeWheel(CVector& wheelFwd, CVector& wheelRight, CVector& wheelContactSpeed, CVector& wheelContactPoint, int32 wheelsOnGround, float thrust, float brake,
                           float adhesion, float destabTraction, int8 wheelId, float* wheelSpeed, tWheelState* wheelState, eBikeWheelSpecial special, uint16 wheelStatus);
-    int32 FindTyreNearestPoint(float x, float y);
+    int32 FindTyreNearestPoint(CVector2D point);
     void InflictDamage(CEntity* damager, eWeaponType weapon, float intensity, CVector coords);
     void KillPedsGettingInVehicle();
     bool UsesSiren();

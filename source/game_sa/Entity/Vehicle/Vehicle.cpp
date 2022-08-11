@@ -3326,7 +3326,7 @@ void CVehicle::ProcessBikeWheel(CVector& wheelFwd, CVector& wheelRight, CVector&
 
 // return nearest wheel?
 // 0x6D7BC0
-int32 CVehicle::FindTyreNearestPoint(float x, float y) {
+int32 CVehicle::FindTyreNearestPoint(CVector2D point) {
     return ((int32(__thiscall*)(CVehicle*, float, float))0x6D7BC0)(this, x, y);
 }
 
