@@ -6,6 +6,8 @@
 */
 #pragma once
 
+#include <extensions/enumerate.hpp>
+
 #include "ColSphere.h"
 #include "ColBox.h"
 #include "ColLine.h"
@@ -98,6 +100,8 @@ public:
     [[nodiscard]] auto GetLines()   const { return std::span{ m_pLines, m_nNumLines }; }
 
     [[nodiscard]] auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
+
+    [[nodiscard]] auto GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3>;
 
     void AllocateLines(uint32 num);
 

@@ -4124,7 +4124,30 @@ void CVehicle::DoSunGlare() {
 
 // 0x6DDF60
 void CVehicle::AddWaterSplashParticles() {
-    ((void(__thiscall*)(CVehicle*))0x6DDF60)(this);
+    if (!IsPointInSphere(GetPosition(), TheCamera.GetPosition(), 10.f)) {
+        return;
+    }
+
+    auto fxPrtMult = FxPrtMult_c{ 1.0f, 1.0f, 1.0f, 0.35f, 0.02f, 0.0f, 0.03f };
+    const auto& cd = *GetColModel()->m_pColData;
+    for (const auto& tri : cd.GetTris()) {
+        // Get and transform triangle vertices to world space
+        auto vertices = cd.GetTriVertices(tri);
+        for (auto& v : vertices) {
+            v = MultiplyMatrixWithVector(*m_matrix, v);
+        }
+
+        const auto v0v1 = vertices[1] - vertices[0];
+        const auto v1v2 = vertices[2] - vertices[1];
+
+        for (auto i = 1 - (size_t)(CWeather::Rain * -2.f); i > 0; i--) {
+            CVector velocity{0.f, 0.f, 0.f};
+            auto pieceOfShit = vertices[0]
+                + v0v1 * CGeneral::GetRandomNumberInRange(0.f, 1.f)
+                + v1v2 * CGeneral::GetRandomNumberInRange(0.f, 1.f);
+            g_fx.m_pPrtSplash->AddParticle(&pieceOfShit, &velocity, 0.f, &fxPrtMult, -1.f, 1.2f, 0.6f, 0u);
+        }
+    }
 }
 
 // 0x6DE240
