@@ -41,15 +41,15 @@ typedef uint32    bool32;
 // Use this macro for unreachable code paths.. Will be eventually replaced by something like llvm::unreachable
 #if _DEBUG
 #if __has_builtin(__builtin_unreachable)
-#define NOTSA_UNREACHABLE(...) assert(false && "UNREACHABLE CODE REACHED!"); __builtin_unreachable()
+#define NOTSA_UNREACHABLE(...) do { assert(false && "UNREACHABLE CODE REACHED!"); __builtin_unreachable(); } while (false)
 #elif defined(_MSC_VER)
-#define NOTSA_UNREACHABLE(...) assert(false && "UNREACHABLE CODE REACHED!"); __assume(false)
+#define NOTSA_UNREACHABLE(...) do { assert(false && "UNREACHABLE CODE REACHED!"); __assume(false); } while(false)
 #endif
 #else
 #if __has_builtin(__builtin_unreachable)
-#define NOTSA_UNREACHABLE(...) __builtin_unreachable()
+#define NOTSA_UNREACHABLE(...) do { __builtin_unreachable(); } while(false)
 #elif defined(_MSC_VER)
-#define NOTSA_UNREACHABLE(...) __assume(false)
+#define NOTSA_UNREACHABLE(...) do { __assume(false); } while (false)
 #endif
 #endif
 
