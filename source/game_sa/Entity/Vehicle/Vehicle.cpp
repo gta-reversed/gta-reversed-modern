@@ -3348,7 +3348,7 @@ void CVehicle::KillPedsGettingInVehicle() {
         }
 
         CPedDamageResponseCalculator dmgRespCalc{ &ped, 1000.f, WEAPON_EXPLOSION, PED_PIECE_TORSO, false };
-        CEventDamage dmgEvent{ &ped, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, 0, false, ped.bInVehicle };
+        CEventDamage dmgEvent{ &ped, CTimer::GetTimeInMS(), WEAPON_EXPLOSION, PED_PIECE_TORSO, 0, false, (bool)ped.bInVehicle };
         if (dmgEvent.AffectsPed(&ped)) {
             dmgRespCalc.ComputeDamageResponse(&ped, dmgEvent.m_damageResponse, true);
         } else {
@@ -3404,6 +3404,50 @@ bool CVehicle::IsSphereTouchingVehicle(float x, float y, float z, float radius) 
 // 0x6D85F0
 void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, float steeringUpDown, float steeringLeftRight, float accelerationBreakStatus) {
     ((void(__thiscall*)(CVehicle*, eFlightModel, float, float, float, float))0x6D85F0)(this, flightModel, leftRightSkid, steeringUpDown, steeringLeftRight, accelerationBreakStatus);
+
+    /*
+    * Code below should be correct. I just didn't finish it, because I can't be bothered to figure out what
+    * 0x6D8BFD is.. maybe later.
+    * 
+    if (!m_pFlyingHandlingData || CTimer::GetTimeStep() <= 0.f) {
+        return;
+    }
+
+    const auto padOfPlayerDriver = (m_nStatus == STATUS_PLAYER && m_pDriver && m_pDriver->IsPlayer()) ? m_pDriver->AsPlayer()->GetPadFromPlayer() : nullptr;
+    const auto windDragForce     = IsMissionVehicle() ? CVector{} : -CWeather::WindDir * m_pFlyingHandlingData->m_fWindMult;
+    const auto velocityWithDrag = m_vecMoveSpeed + windDragForce; // Plus because `windDragForce` is opposing to our velocity already
+
+    switch (flightModel) {
+    case FLIGHT_MODEL_UNK:
+    case FLIGHT_MODEL_UNK2: {
+        NOTSA_UNREACHABLE("The function doesn't seem to be called with this model from anywhere, but it is present in the code.. So I wont bother");
+        return;
+    }
+    case FLIGHT_MODEL_BARON:
+    case FLIGHT_MODEL_PLANE:
+    case FLIGHT_MODEL_BOAT: {
+        if (leftRightSkid == -9999.9902f) { // What a weird fucking value lol
+            leftRightSkid = 0.f;
+            if (padOfPlayerDriver) {
+                leftRightSkid = (float)padOfPlayerDriver->GetSteeringLeftRight() / 128.f;
+            }
+        }
+        if (steeringUpDown == -9999.9902f) {
+            steeringUpDown = 0.f;
+            if (padOfPlayerDriver) {
+                steeringUpDown = (float)padOfPlayerDriver->GetSteeringUpDown() / 128.f;
+                if (const auto gunUpDown = padOfPlayerDriver->GetCarGunUpDown(); std::abs((float)gunUpDown) > 1.f) {
+                    steeringUpDown = -gunUpDown / 128.f;
+                }
+            }
+        }
+
+
+
+        break;
+    }
+    }
+    */
 }
 
 // always return false?
