@@ -1,6 +1,9 @@
 #include "StdInc.h"
 
 #include "SpecialFX.h"
+#include "3dMarkers.h"
+#include "Checkpoints.h"
+#include "MotionBlurStreaks.h"
 
 extern RwTexture*& gpFinishFlagTex;
 
@@ -52,13 +55,13 @@ void CSpecialFX::AddWeaponStreak(eWeaponType weaponType) {
 
 // 0x726AD0
 void CSpecialFX::Render() {
-    plugin::Call<0x726AD0>();
-//    CMotionBlurStreaks::Render();
-//    CBulletTraces::Render();
-//    CBrightLights::Render();
-//    CShinyTexts::Render();
-//    C3dMarkers::Render();
-//    CCheckpoints::Render();
+    return plugin::Call<0x726AD0>();
+    CMotionBlurStreaks::Render();
+    CBulletTraces::Render();
+    CBrightLights::Render();
+    CShinyTexts::Render();
+    C3dMarkers::Render();
+    CCheckpoints::Render();
 }
 
 // 0x721660

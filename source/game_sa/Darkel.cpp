@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "Darkel.h"
+#include "Hud.h"
 
 char*& CDarkel::pStartMessage = *reinterpret_cast<char**>(0x96A6D0);
 uint32& CDarkel::AmmoInterruptedWeapon = *reinterpret_cast<uint32*>(0x96A6D4);

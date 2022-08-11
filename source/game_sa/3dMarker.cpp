@@ -155,23 +155,23 @@ void C3dMarker::SetZCoordinateIfNotUpToDate(float coordinate) {
 
 // 0x724D40
 void C3dMarker::UpdateZCoordinate(CVector point, float zDistance) {
-    plugin::CallMethod<0x724D40, C3dMarker*, CVector, float>(this, point, zDistance);
-    return;
+    return plugin::CallMethod<0x724D40, C3dMarker*, CVector, float>(this, point, zDistance);
 
     if (IsZCoordinateUpToDate())
         return;
 
     auto& pos = m_mat.GetPosition();
-    // auto dist = ( CVector2D(point) - CVector2D(pos)).SquaredMagnitude();
-    if ((point.x - pos.x) * (point.x - pos.x) + (point.y - pos.y) * (point.y - pos.y) < 10000.0f) {
-        if (CColStore::HasCollisionLoaded(pos, AREA_CODE_NORMAL_WORLD)) {
-            bool found;
-            auto GroundZFor3DCoord = CWorld::FindGroundZFor3DCoord(pos.x, pos.y, pos.z + 1.0f, &found, nullptr);
-            if (found)
-                pos.z = GroundZFor3DCoord - zDistance * 0.05f;
+    if (DistanceBetweenPointsSquared2D(pos, point) >= sq(100.0f))
+        return;
 
-            m_nLastMapReadX = static_cast<uint16>(pos.x);
-            m_nLastMapReadY = static_cast<uint16>(pos.y);
+    if (CColStore::HasCollisionLoaded(pos, AREA_CODE_NORMAL_WORLD)) {
+        bool found{};
+        auto height = CWorld::FindGroundZFor3DCoord({ pos.x, pos.y, pos.z + 1.0f }, &found, nullptr); // todo: Add OG version FindGroundZFor3DCoord(float x, float y, float z)?
+        if (found) {
+            pos.z = height - zDistance / 20.0f;
         }
+
+        m_nLastMapReadX = static_cast<uint16>(pos.x);
+        m_nLastMapReadY = static_cast<uint16>(pos.y);
     }
 }
