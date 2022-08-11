@@ -195,7 +195,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
     RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
     RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
-    // RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
+    RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
     // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
     // RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
     // RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
