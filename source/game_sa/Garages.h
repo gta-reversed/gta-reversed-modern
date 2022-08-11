@@ -109,7 +109,7 @@ public:
 
     static bool Load();
     static bool Save();
-    static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin, uint16 ucTime, int16 wMsgMax);
+    static void TriggerMessage(Const char* cTagMsg, int16 wMsgMin = -1, uint16 ucTime = 5000, int16 wMsgMax = -1);
     static void PrintMessages();
     static int32 FindGarageIndex(char*);
     static int32 FindGarageForObject(CObject* obj);

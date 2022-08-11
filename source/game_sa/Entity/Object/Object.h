@@ -40,7 +40,7 @@ public:
             uint32 bChangesVehColor : 1;        // 0x80
 
             uint32 bIsLampPost : 1;
-            uint32 bIsTargatable : 1;
+            uint32 bIsTargetable : 1;
             uint32 bIsBroken : 1;
             uint32 bTrainCrossEnabled : 1;
             uint32 bIsPhotographed : 1;
@@ -57,7 +57,7 @@ public:
             uint32 bFadingIn : 1; // works only for objects with type 2 (OBJECT_MISSION)
             uint32 bAffectedByColBrightness : 1;
 
-            uint32 b0x01000000 : 1;
+            uint32 b0x1000000 : 1;
             uint32 bDoNotRender : 1;
             uint32 bFadingIn2 : 1;
             uint32 b0x08000000 : 1;
@@ -71,12 +71,12 @@ public:
     uint8         m_nColDamageEffect;        // see eObjectColDamageEffect
     uint8         m_nSpecialColResponseCase; // see eObjectSpecialColResponseCases
     char          field_146;
-    char          m_nGarageDoorGarageIndex;
+    int8          m_nGarageDoorGarageIndex;
     uint8         m_nLastWeaponDamage;
     tColLighting  m_nColLighting;
     int16         m_nRefModelIndex;
     uint8         m_nCarColor[4];  // this is used for detached car parts
-    int32         m_dwRemovalTime; // time when this object must be deleted
+    uint32        m_nRemovalTime;  // time when this object must be deleted
     float         m_fHealth;
     float         m_fDoorStartAngle; // this is used for door objects
     float         m_fScale;
@@ -120,11 +120,11 @@ public:
     bool Save();
 
     void     ProcessGarageDoorBehaviour();
-    bool     CanBeDeleted();
+    [[nodiscard]] bool CanBeDeleted() const;
     void     SetRelatedDummy(CDummyObject* relatedDummy);
     bool     TryToExplode();
     void     SetObjectTargettable(bool targetable);
-    bool     CanBeTargetted();
+    [[nodiscard]] bool CanBeTargetted() const;
     void     RefModelInfo(int32 modelIndex);
     void     SetRemapTexture(RwTexture* remapTexture, int16 txdIndex);
     float    GetRopeHeight();

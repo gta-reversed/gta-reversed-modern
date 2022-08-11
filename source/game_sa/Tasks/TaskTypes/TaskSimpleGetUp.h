@@ -9,6 +9,8 @@ public:
     CAnimBlendAssociation* m_pAnim;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GET_UP;
+
     CTaskSimpleGetUp();
     ~CTaskSimpleGetUp() override;
 

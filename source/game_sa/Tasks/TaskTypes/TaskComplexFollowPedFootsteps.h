@@ -14,6 +14,8 @@ public:
     uint8        m_updateGoToPoint : 1;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_FOLLOW_PED_FOOTSTEPS;
+
     CTaskComplexFollowPedFootsteps(CPed* ped);
     ~CTaskComplexFollowPedFootsteps();
 

@@ -12,5 +12,5 @@ void CConversations::Clear() {
 
 // 0x43A960
 void CConversations::RemoveConversationForPed(CPed* ped) {
-    plugin::Call<0x43A960>(ped);
+    plugin::Call<0x43A960, CPed*>(ped);
 }

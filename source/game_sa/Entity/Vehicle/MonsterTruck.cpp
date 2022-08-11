@@ -18,14 +18,14 @@ void CMonsterTruck::InjectHooks() {
     RH_ScopedInstall(PreRender, 0x6C7DE0);
     // RH_ScopedInstall(ExtendSuspension, 0x6C7D80);
     // RH_ScopedInstall(ResetSuspension, 0x6C7D40);
-    RH_ScopedInstall(BurstTyre_Reversed, 0x6C7D30);
-    RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6C7D20);
+    RH_ScopedVirtualInstall(BurstTyre, 0x6C7D30);
+    RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C7D20);
 }
 
 // 0x6C8D60
 CMonsterTruck::CMonsterTruck(int32 modelIndex, eVehicleCreatedBy createdBy) : CAutomobile(modelIndex, createdBy, false) {
     std::ranges::fill(field_988, 1.0f);
-    SetupSuspensionLines();
+    SetupSuspensionLines(); // V1053 Calling the 'SetupSuspensionLines' virtual function in the constructor may lead to unexpected result at runtime.
     npcFlags.bSoftSuspension = true;
     m_nVehicleSubType = VEHICLE_TYPE_MTRUCK;
 }
@@ -67,16 +67,14 @@ void CMonsterTruck::PreRender() {
     CMatrix mat;
     CVector pos;
 
-    mi->GetWheelPosn(CARWHEEL_FRONT_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CARWHEEL_FRONT_LEFT], m_wheelPosition[CARWHEEL_FRONT_RIGHT], pos, true);
+    mi->GetWheelPosn(CAR_WHEEL_FRONT_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_F], m_wheelPosition[CAR_WHEEL_FRONT_LEFT], m_wheelPosition[CAR_WHEEL_FRONT_RIGHT], pos, true);
 
-    mi->GetWheelPosn(CARWHEEL_REAR_LEFT, pos, false);
-    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CARWHEEL_REAR_LEFT], m_wheelPosition[CARWHEEL_REAR_RIGHT], pos, false);
+    mi->GetWheelPosn(CAR_WHEEL_REAR_LEFT, pos, false);
+    SetTransmissionRotation(m_aCarNodes[MONSTER_TRANSMISSION_R], m_wheelPosition[CAR_WHEEL_REAR_LEFT], m_wheelPosition[CAR_WHEEL_REAR_RIGHT], pos, false);
 
-    if (m_nModelIndex == MODEL_DUMPER) {
-        if (auto node = m_aCarNodes[MONSTER_MISC_A]) {
-            SetComponentRotation(node, AXIS_X, (float)m_wMiscComponentAngle * DUMPER_COL_ANGLEMULT, true);
-        }
+    if (m_nModelIndex == MODEL_DUMPER && m_aCarNodes[MONSTER_MISC_A]) {
+        SetComponentRotation(m_aCarNodes[MONSTER_MISC_A], AXIS_X, (float)m_wMiscComponentAngle * DUMPER_COL_ANGLEMULT, true);
     }
 }
 
@@ -87,13 +85,9 @@ void CMonsterTruck::ExtendSuspension() {
 
 // 0x6C7D40
 void CMonsterTruck::ResetSuspension() {
-    plugin::CallMethod<0x6C7D40, CMonsterTruck*>(this);
-    return;
-
+    return plugin::CallMethod<0x6C7D40, CMonsterTruck*>(this);
     CAutomobile::ResetSuspension();
-    for (auto& suspension : m_wheelPosition) {
-        suspension = 1.0f;
-    }
+    std::ranges::fill(m_wheelPosition, 1.0f);
 }
 
 // 0x6C7D30

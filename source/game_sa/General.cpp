@@ -140,7 +140,17 @@ bool CGeneral::SolveQuadratic(float a, float b, float c, float& x1, float& x2) {
 
 // 0x53CEA0
 float CGeneral::GetAngleBetweenPoints(float x1, float y1, float x2, float y2) {
-    return RWRAD2DEG(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+    return RadiansToDegrees(GetRadianAngleBetweenPoints(x1, y1, x2, y2));
+}
+
+uint16 CGeneral::GetRandomNumber()
+{
+    static_assert(RAND_MAX == 0x7FFF, "PC-generated random numbers should not exceed 32767");
+#ifdef BETTER_RNG
+    static_assert(false, "PC-generated random numbers should not exceed 32767");
+#else
+    return rand();
+#endif
 }
 
 /**
@@ -154,7 +164,7 @@ int32 CGeneral::GetRandomNumberInRange(const int32 min, const int32 max) {
 #ifdef BETTER_RNG
     // TODO: Use better RNG
 #else
-    return min + static_cast<int32>(rand() * RAND_MAX_INT_RECIPROCAL * (max - min));
+    return min + static_cast<int32>((float)GetRandomNumber() * RAND_MAX_INT_RECIPROCAL * (float)(max - min));
 #endif
 }
 
@@ -170,7 +180,7 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
     std::uniform_real_distribution<float> uniform_dist(min, max);
     return uniform_dist(randomEngine);
 #else
-    return min + (max - min) * rand() * RAND_MAX_FLOAT_RECIPROCAL;
+    return min + (max - min) * (float)GetRandomNumber() * RAND_MAX_FLOAT_RECIPROCAL;
 #endif
 }
 

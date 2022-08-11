@@ -8,6 +8,8 @@ public:
     CAccident* m_pAccident;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_TREAT_ACCIDENT;
+
     CTaskComplexTreatAccident(CAccident* accident);
     ~CTaskComplexTreatAccident() override = default; // 0x658AE0
 

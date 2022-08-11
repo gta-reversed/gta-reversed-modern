@@ -16,7 +16,7 @@ void CObjectSaveStructure::Construct(CObject* obj)
     m_matrix.CompressFromFullMatrix(*obj->m_matrix);
     m_nBonusValue  = obj->m_nBonusValue;
     m_nCostValue   = obj->m_wCostValue;
-    m_nRemovalTime = obj->m_dwRemovalTime;
+    m_nRemovalTime = obj->m_nRemovalTime;
     m_nEntityFlags = obj->m_nFlags;
     m_nObjectFlags = obj->m_nObjectFlags;
     m_nObjectType  = obj->m_nObjectType;
@@ -41,8 +41,8 @@ void CObjectSaveStructure::Construct(CObject* obj)
     if (obj->physicalFlags.bCollisionProof)
         m_bCollisionProof = true;
 
-    if (obj->physicalFlags.bMeeleProof)
-        m_bMeeleProof = true;
+    if (obj->physicalFlags.bMeleeProof)
+        m_bMeleeProof = true;
 
     if (obj->physicalFlags.bExplosionProof)
         m_bExplosionProof = true;
@@ -53,7 +53,7 @@ void CObjectSaveStructure::Extract(CObject* obj)
     m_matrix.DecompressIntoFullMatrix(*obj->m_matrix);
     obj->m_nBonusValue = m_nBonusValue;
     obj->m_wCostValue = m_nCostValue;
-    obj->m_dwRemovalTime = m_nRemovalTime;
+    obj->m_nRemovalTime = m_nRemovalTime;
     obj->m_nFlags = m_nEntityFlags;
     obj->m_nObjectFlags = m_nObjectFlags;
     obj->m_nObjectType = m_nObjectType;
@@ -65,6 +65,6 @@ void CObjectSaveStructure::Extract(CObject* obj)
     obj->physicalFlags.bBulletProof = m_bBulletProof;
     obj->physicalFlags.bFireProof = m_bFireProof;
     obj->physicalFlags.bCollisionProof = m_bCollisionProof;
-    obj->physicalFlags.bMeeleProof = m_bMeeleProof;
+    obj->physicalFlags.bMeleeProof = m_bMeleeProof;
     obj->physicalFlags.bExplosionProof = m_bExplosionProof;
 }

@@ -2,6 +2,8 @@
 
 class CTaskComplexStuckInAir : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_COMPLEX_STUCK_IN_AIR;
+
     CTaskComplexStuckInAir() = default;           // 0x67BA40
     ~CTaskComplexStuckInAir() override = default; // 0x67BA70
 

@@ -7,6 +7,8 @@ public:
     bool m_bScanAllowedScriptedTask;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_TOGGLE_PED_THREAT_SCANNER;
+
     CTaskSimpleTogglePedThreatScanner(bool bScanAllowedScriptPed, bool bScanAllowedInVehicle, bool bScanAllowedScriptedTask);
     ~CTaskSimpleTogglePedThreatScanner() {}
 

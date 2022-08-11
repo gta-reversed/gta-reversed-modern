@@ -13,13 +13,11 @@ public:
     ePlayerGroupCommand m_command;
     CPed*               m_target;
 
+public:
     static void InjectHooks();
 
     explicit CEventPlayerCommandToGroup(ePlayerGroupCommand command = ePlayerGroupCommand::PLAYER_GROUP_COMMAND_ATTACK, CPed* target = nullptr);
-    ~CEventPlayerCommandToGroup();
-private:
-    CEventPlayerCommandToGroup* Constructor(ePlayerGroupCommand command, CPed* target);
-public:
+    ~CEventPlayerCommandToGroup() override;
 
     eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP; }
     int32_t GetEventPriority() const override { return 44; }
@@ -29,7 +27,9 @@ public:
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEntity* GetSourceEntity() const override { return reinterpret_cast<CEntity*>(m_target); }
     bool TakesPriorityOver(const CEvent& refEvent) override { return true; }
+
 private:
+    CEventPlayerCommandToGroup* Constructor(ePlayerGroupCommand command, CPed* target);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 
@@ -40,15 +40,15 @@ public:
     static void InjectHooks();
 
     CEventPlayerCommandToGroupAttack(CPed* target) : CEventPlayerCommandToGroup(PLAYER_GROUP_COMMAND_ATTACK, target) {}
-    ~CEventPlayerCommandToGroupAttack() {}
-private:
-    CEventPlayerCommandToGroupAttack* Constructor(CPed* target);
-public:
+    ~CEventPlayerCommandToGroupAttack() override = default;
+
     eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP; }
     int32 GetEventPriority() const override { return 44; }
     bool AffectsPedGroup(CPedGroup* pedGroup) override;
     CEventPlayerCommandToGroupAttack* CloneEditable() override { return new CEventPlayerCommandToGroupAttack(m_target); }
+
 private:
+    CEventPlayerCommandToGroupAttack* Constructor(CPed* target);
     bool AffectsPedGroup_Reversed(CPedGroup* pedGroup);
 };
 
@@ -59,13 +59,13 @@ public:
     static void InjectHooks();
 
     CEventPlayerCommandToGroupGather(CPed* target) : CEventPlayerCommandToGroup(PLAYER_GROUP_COMMAND_GATHER, target) {}
-    ~CEventPlayerCommandToGroupGather() {}
-private:
-    CEventPlayerCommandToGroupGather* Constructor(CPed* target);
-public:
+    ~CEventPlayerCommandToGroupGather() override = default;
+
     eEventType GetEventType() const override { return EVENT_PLAYER_COMMAND_TO_GROUP_GATHER; }
     int32 GetEventPriority() const override { return 45; }
     CEventPlayerCommandToGroupGather* CloneEditable() override { return new CEventPlayerCommandToGroupGather(m_target); }
+
+    CEventPlayerCommandToGroupGather* Constructor(CPed* target);
 };
 
 VALIDATE_SIZE(CEventPlayerCommandToGroupGather, 0x1C);
@@ -74,18 +74,19 @@ class CEventDontJoinPlayerGroup : public CEvent {
 public:
     CPed* m_player;
 
+public:
     static void InjectHooks();
 
     CEventDontJoinPlayerGroup(CPed* player);
-    ~CEventDontJoinPlayerGroup();
-private:
-    CEventDontJoinPlayerGroup* Constructor(CPed* player);
-public:
+    ~CEventDontJoinPlayerGroup() override;
+
     eEventType GetEventType() const override { return EVENT_DONT_JOIN_GROUP; }
     int32 GetEventPriority() const override { return 43; }
     int32 GetLifeTime() override { return 0; }
     CEventDontJoinPlayerGroup* Clone() override { return new CEventDontJoinPlayerGroup(m_player); }
     bool AffectsPed(CPed* ped) override { return true; }
+
+    CEventDontJoinPlayerGroup* Constructor(CPed* player);
 };
 
 VALIDATE_SIZE(CEventDontJoinPlayerGroup, 0x10);
@@ -94,18 +95,19 @@ class CEventNewGangMember : public CEvent {
 public:
     CPed* m_member;
 
+public:
     static void InjectHooks();
 
     CEventNewGangMember(CPed* member);
-    ~CEventNewGangMember();
-private:
-    CEventNewGangMember* Constructor(CPed* member);
-public:
+    ~CEventNewGangMember() override;
+
     eEventType GetEventType() const override { return EVENT_NEW_GANG_MEMBER; }
     int32 GetEventPriority() const override { return 42; }
     int32 GetLifeTime() override { return 0; }
     CEventNewGangMember* Clone() override { return new CEventNewGangMember(m_member); }
     bool AffectsPed(CPed* ped) override { return true; }
+
+    CEventNewGangMember* Constructor(CPed* member);
 };
 
 VALIDATE_SIZE(CEventNewGangMember, 0x10);

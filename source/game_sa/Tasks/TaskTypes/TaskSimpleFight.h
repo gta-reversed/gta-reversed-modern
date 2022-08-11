@@ -20,7 +20,7 @@ enum eFightAttackType : int8 {
 
 class CMeleeInfo {
 public:
-    int32  m_dwAnimGroup;
+    AssocGroupId m_nAnimGroup;
     float  m_fRanges;
     float  m_fHit[5];
     float  m_fChain[5];
@@ -29,15 +29,12 @@ public:
     int32  ABlockHit;
     int32  ABlockChain;
     uint8  m_nHitLevel;
-    char   _pad0[3];
-    int32  damage;
+    int32  m_nDamage;
     int32  field_58;
-    int32  hit[5];
-    int32  altHit[5];
+    int32  m_Hit[5];
+    int32  m_AltHit[5];
     uint16 m_wFlags;
-    char   _pad1[2];
 };
-
 VALIDATE_SIZE(CMeleeInfo, 0x88);
 
 class CPed;
@@ -48,13 +45,11 @@ public:
     bool                   m_bIsFinished;
     bool                   m_bIsInControl;
     bool                   m_bAnimsReferenced;
-    char                   _pad;
-    uint32                 m_nRequiredAnimGroup;
+    AssocGroupId           m_nRequiredAnimGroup;
     uint16                 m_nIdlePeriod;
     uint16                 m_nIdleCounter;
-    char                   m_nContinueStrike;
-    char                   m_nChainCounter;
-    char                   _pad2[2];
+    int8                   m_nContinueStrike;
+    int8                   m_nChainCounter;
     CEntity*               m_pTargetEntity;
     CAnimBlendAssociation* m_pAnim;
     CAnimBlendAssociation* m_pIdleAnim;
@@ -63,9 +58,11 @@ public:
     uint8                  m_nNextCommand;
     uint8                  m_nLastCommand;
 
-    static CMeleeInfo* m_aComboData; // m_aComboData[12];
+    static inline CMeleeInfo (&m_aComboData)[12] = *(CMeleeInfo(*)[12])0xC170D0;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_FIGHT_CTRL;
+
     CTaskSimpleFight(CEntity* entity, int32 nCommand, uint32 nIdlePeriod = 10000);
     ~CTaskSimpleFight() override;
 

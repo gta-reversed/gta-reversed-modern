@@ -111,8 +111,7 @@ void CPedScriptedTaskRecordData::SetAsAttractorScriptTask(CPed* ped, int32 opcod
 // 0x608350
 void CPedScriptedTaskRecordData::Flush()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
     m_ped = nullptr;
     m_event = nullptr;
     m_task = nullptr;

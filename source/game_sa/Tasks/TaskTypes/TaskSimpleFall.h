@@ -15,6 +15,8 @@ public:
     static uint32& m_nMaxPlayerDownTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_FALL;
+
     CTaskSimpleFall(AnimationId nAnimId, AssocGroupId nAnimGroup, int32 nDownTime);
     ~CTaskSimpleFall() override;
 

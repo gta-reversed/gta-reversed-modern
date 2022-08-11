@@ -1,3 +1,5 @@
+#pragma once
+
 #include "TaskSimple.h"
 
 class CAnimBlendHierarchy;
@@ -27,6 +29,8 @@ public:
     CAnimBlendAssociation* m_animAssociation;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_DIE;
+
     CTaskSimpleDie(AssocGroupId animGroupId, AnimationId animId, float blendDelta, float animSpeed);
     CTaskSimpleDie(const char* animName, const char* animBlock, eAnimationFlags animFlags, float blendDelta, float animSpeed);
     CTaskSimpleDie(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed);

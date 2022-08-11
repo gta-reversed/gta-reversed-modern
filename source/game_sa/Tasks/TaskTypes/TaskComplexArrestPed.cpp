@@ -20,17 +20,14 @@ void CTaskComplexArrestPed::InjectHooks() {
 }
 
 // 0x68B990
-CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) :
-    m_pedToArrest{ped}
-{
-    if (ped) {
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_pedToArrest));
-    }
+CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) : CTaskComplex() {
+    m_pedToArrest = ped;
+    m_vehicle = nullptr;
+    CEntity::SafeRegisterRef(m_pedToArrest);
 }
 
 CTaskComplexArrestPed::~CTaskComplexArrestPed() {
-    if (m_pedToArrest)
-        m_pedToArrest->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_pedToArrest));
+    CEntity::SafeCleanUpRef(m_pedToArrest);
 }
 
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {

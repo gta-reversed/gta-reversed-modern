@@ -10,6 +10,8 @@
 
 class CTaskComplexUseGoggles : public CTaskComplex {
 public:
+    static constexpr auto Type = TASK_COMPLEX_USE_GOGGLES;
+
     CTaskComplexUseGoggles() = default; // 0x634EF0
     ~CTaskComplexUseGoggles() override = default; // 0x634F20
 

@@ -6,11 +6,11 @@ void CTaskSimpleStealthKill::InjectHooks()
 {
     RH_ScopedClass(CTaskSimpleStealthKill);
     RH_ScopedCategory("Tasks/TaskTypes");
-    RH_ScopedInstall(ProcessPed_Reversed, 0x62E540);
+    RH_ScopedVirtualInstall(ProcessPed, 0x62E540);
     RH_ScopedInstall(Constructor, 0x6225F0);
-    RH_ScopedInstall(Clone_Reversed, 0x623830);
-    RH_ScopedInstall(GetId_Reversed, 0x622670);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x6226F0);
+    RH_ScopedVirtualInstall(Clone, 0x623830);
+    RH_ScopedVirtualInstall(GetId, 0x622670);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x6226F0);
     RH_ScopedInstall(ManageAnim, 0x6296D0);
     RH_ScopedInstall(FinishAnimStealthKillCB, 0x622790);
 }
@@ -18,14 +18,13 @@ void CTaskSimpleStealthKill::InjectHooks()
 CTaskSimpleStealthKill::CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId)
 {
     m_bKeepTargetAlive = keepTargetAlive;
-    m_pTarget = target;
-    m_nAssocGroupId = groupId;
-    m_bIsAborting = false;
-    m_bIsFinished = false;
-    m_pAnim = nullptr;
-    m_nTime = 0;
-    if (target)
-        target->RegisterReference(reinterpret_cast<CEntity**>(&m_pTarget));
+    m_pTarget          = target;
+    m_nAssocGroupId    = groupId;
+    m_bIsAborting      = false;
+    m_bIsFinished      = false;
+    m_pAnim            = nullptr;
+    m_nTime            = 0;
+    CEntity::SafeRegisterRef(m_pTarget);
 }
 
 // 0x6225F0
@@ -152,7 +151,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
             CEventDamage eventDamage(m_pTarget, CTimer::GetTimeInMS(), m_pTarget->GetActiveWeapon().m_nType, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
             if (eventDamage.AffectsPed(ped))
             {
-                damageCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+                damageCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
 
                 eventDamage.m_nAnimGroup = m_nAssocGroupId;
                 eventDamage.m_nAnimID = ANIM_ID_KILL_KNIFE_PED_DIE;
@@ -172,7 +171,7 @@ void CTaskSimpleStealthKill::ManageAnim(CPed* ped)
     }
     else
     {
-        m_nTime += CTimer::GetTimeStepInMS();
+        m_nTime += (uint32)CTimer::GetTimeStepInMS();
         if (m_nTime > 10000)
             m_bIsAborting = true;
     }

@@ -19,6 +19,8 @@ public:
     int32             m_nDuration2;
     
 public:
+    static constexpr auto Type = TASK_COMPLEX_FACIAL;
+
     CTaskComplexFacial();
     ~CTaskComplexFacial() override = default; // 0x690D90
 

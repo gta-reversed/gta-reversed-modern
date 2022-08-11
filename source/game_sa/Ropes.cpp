@@ -51,7 +51,7 @@ void CRopes::Shutdown() {
 
 // 0x558D70
 void CRopes::Update() {
-    if (CReplay::Mode == REPLAY_MODE_1)
+    if (CReplay::Mode == MODE_PLAYBACK)
         return;
 
     for (auto& rope : aRopes) {

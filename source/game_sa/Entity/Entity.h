@@ -120,7 +120,7 @@ public:
     virtual void SetModelIndexNoCreate(uint32 index);               // VTab: 6
     virtual void CreateRwObject();                                  // VTab: 7
     virtual void DeleteRwObject();                                  // VTab: 8
-    virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9
+    virtual CRect* GetBoundRect(CRect* pRect);                      // VTab: 9 - TODO: Most likely RVO'd. Should probably return a `CRect`, and take no args.
     virtual void ProcessControl();                                  // VTab: 10
     virtual void ProcessCollision();                                // VTab: 11
     virtual void ProcessShift();                                    // VTab: 12
@@ -191,7 +191,7 @@ public:
     CBaseModelInfo* GetModelInfo() const;
 
     // Wrapper around the mess called `CleanUpOldReference`
-    // Takes in `ref` (which is usally a member variable),
+    // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`
     // Used often in the code. 
     template<typename T>
@@ -212,6 +212,25 @@ public:
         if (entity) { // Set new (if any)
             inOutRef = entity;
             inOutRef->RegisterReference(reinterpret_cast<CEntity**>(&inOutRef));
+        }
+    }
+
+    template<typename T>
+    void RegisterReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
+        RegisterReference(reinterpret_cast<CEntity**>(&ref));
+    }
+
+    template<typename T>
+    static void SafeRegisterRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->RegisterReference(reinterpret_cast<CEntity**>(&e));
+        }
+    }
+
+    template<typename T>
+    static void SafeCleanUpRef(T*& e) requires std::is_base_of_v<CEntity, T> {
+        if (e) {
+            e->CleanUpOldReference(reinterpret_cast<CEntity**>(&e));
         }
     }
 

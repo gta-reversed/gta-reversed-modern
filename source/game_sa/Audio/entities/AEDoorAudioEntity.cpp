@@ -28,7 +28,7 @@ void CAEDoorAudioEntity::Reset() {
 void CAEDoorAudioEntity::AddAudioEvent(eAudioEvents event, CPhysical* physical) {
     if (event == AE_ENTRY_EXIT_DOOR_MOVING && !AESoundManager.AreSoundsOfThisEventPlayingForThisEntity(AE_ENTRY_EXIT_DOOR_MOVING, this) &&
         CTimer::GetTimeInMS() > m_nMovingDoorTime + 4000) {
-        PlayDoorSound(1, AE_ENTRY_EXIT_DOOR_MOVING, physical->GetPosition(), 0.0f, 1.0f);
+        PlayDoorSound(1, AE_ENTRY_EXIT_DOOR_MOVING, physical->GetPosition());
         m_nMovingDoorTime = CTimer::GetTimeInMS();
     }
 }
@@ -93,7 +93,7 @@ void CAEDoorAudioEntity::PlayDoorSound(int16 sfxId, eAudioEvents event, CVector&
             position = posn;
         }
 
-        const float eventVolume = CAEAudioEntity::m_pAudioEventVolumes[event];
+        const float eventVolume = GetDefaultVolume(event);
         const float volume = eventVolume + volumeDelta;
         CAESound    sound;
         sound.Initialise(31, sfxId, this, position, volume, 2.0f, speed, 1.0f, 0, SOUND_REQUEST_UPDATES, 0.0f, 0);
@@ -119,7 +119,7 @@ void CAEDoorAudioEntity::UpdateParameters(CAESound* sound, int16 curPlayPos) {
 
             return;
         }
-        AddAudioEvent(AE_GARAGE_DOOR_OPENED, sound->m_vecCurrPosn, 0.0f, 1.0f);
+        AddAudioEvent(AE_GARAGE_DOOR_OPENED, sound->m_vecCurrPosn);
         return sound->StopSoundAndForget();
     }
 
@@ -181,7 +181,7 @@ void CAEDoorAudioEntity::InjectHooks() {
     RH_ScopedOverloadedInstall(AddAudioEvent, "1", 0x4DC9F0, void (CAEDoorAudioEntity::*)(eAudioEvents, CPhysical*));
     RH_ScopedOverloadedInstall(AddAudioEvent, "2", 0x4DC860, void (CAEDoorAudioEntity::*)(eAudioEvents, CVector&, float, float));
     RH_ScopedInstall(PlayDoorSound, 0x4DC6D0);
-    RH_ScopedInstall(UpdateParameters_Reversed, 0x4DCA60);
+    RH_ScopedVirtualInstall(UpdateParameters, 0x4DCA60);
 }
 
 void CAEDoorAudioEntity::UpdateParameters_Reversed(CAESound* sound, int16 curPlayPos) {
