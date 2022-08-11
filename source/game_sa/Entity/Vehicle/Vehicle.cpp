@@ -23,6 +23,7 @@
 #include "IKChainManager_c.h"
 #include <optional>
 
+uint32& planeRotorDmgTimeMS = *(uint32*)0xC1CC1C;
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
 float& CVehicle::WHEELSPIN_RISE_RATE = *(float*)0x8D34A0;            // 0.95f
@@ -191,7 +192,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(UsesSiren, 0x6D8470);
     RH_ScopedInstall(IsSphereTouchingVehicle, 0x6D84D0);
     // RH_ScopedInstall(FlyingControl, 0x6D85F0);
-    // RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
+    RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
     // RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
     RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
     // RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
@@ -3450,10 +3451,218 @@ void CVehicle::FlyingControl(eFlightModel flightModel, float leftRightSkid, floa
     */
 }
 
-// always return false?
 // 0x6DAF00
-void CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 rotorType, float damageMult) {
-    plugin::CallMethod<0x6DAF00, CVehicle*, CPtrList&, CColModel&, CMatrix&, int16, float>(this, ptrList, colModel, matrix, rotorType, damageMult);
+// always returns `false`, and `rotorType` is always `-3`
+bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatrix& matrix, int16 rotorType, float damageMult) {
+    if (ptrList.IsEmpty()) {
+        return false;
+    }
+
+    // Returns UP vector and thickness vector (in which only 1 component is set and that is the thickness)
+    const auto GetRotorDirUpAndThickness = [this, rotorType, &matrix]() -> std::pair<CVector, CVector> {
+        // Seems like `rotorType` is just one of the 6 possible directions:
+        // down, backwards, left, up, foward, right => -3, -2, -1, 1, 2, 3
+        // Not sure how this works in the real world, as the code only uses -3
+        assert(rotorType == -3); // NOTSA: Testing my theory (Pirulax)
+        switch (rotorType) {
+        case -3:
+            return {
+                -matrix.GetUp(),
+                {0.f, 0.f, -0.2f},
+            };
+        case -2:
+            return {
+                -matrix.GetForward(),
+                {0.f, -0.2f, 0.f},
+            };
+        case -1:
+            return {
+                -matrix.GetRight(),
+                {-0.2f, 0.f, 0.f},
+            };
+        case 1:
+            return {
+                matrix.GetRight(),
+                {0.2f, 0.f, 0.f},
+            };
+        case 2:
+            return {
+                matrix.GetForward(),
+                {0.f, 0.2f, 0.f},
+            };
+        case 3:
+            return {
+                matrix.GetUp(),
+                {0.f, 0.f, 0.2f},
+            };
+        default:
+            NOTSA_UNREACHABLE("Unknown rotorType");
+        }
+    };
+
+    const auto [rotorUp, rotorSizeMS] = GetRotorDirUpAndThickness();
+    const auto rotorSize              = Multiply3x3(matrix, rotorSizeMS);
+    const auto colModelCenter         = MultiplyMatrixWithVector(matrix, colModel.GetBoundCenter());
+    const auto thisPosn               = GetPosition();
+
+    for (CPtrNode* it = ptrList.GetNode(), *next{}; it; it = next) {
+        next = it->GetNext();
+        auto& entity = *reinterpret_cast<CEntity*>(it->m_item);
+
+        if (&entity == this || !entity.m_bUsesCollision || entity.IsScanCodeCurrent()) {
+            continue;
+        }
+
+        entity.SetCurrentScanCode();
+
+        auto entityCM = entity.IsPed()
+            ? entity.GetModelInfo()->AsPedModelInfoPtr()->AnimatePedColModelSkinned(entity.m_pRwClump)
+            : entity.GetColModel();
+
+        if (!entityCM) {
+            continue;
+        }
+
+        if (entity.IsObject() && entity.AsObject()->m_nObjectType == eObjectType::OBJECT_TEMPORARY) {
+            continue;
+        }
+
+        const auto numColls = CCollision::ProcessColModels(
+            matrix,
+            colModel,
+            *entity.m_matrix,
+            *entityCM,
+            CWorld::m_aTempColPts,
+            nullptr,
+            nullptr,
+            false
+        );
+        if (numColls <= 0) {
+            continue;
+        }
+
+        if (entity.IsPed()) {
+            auto& ped = *entity.AsPed();
+
+            const auto dirThisToPed = Normalized(thisPosn - ped.GetPosition());
+
+            if (!ped.m_pAttachedTo) {
+                ped.ApplyMoveForce({ CVector2D{dirThisToPed} * -5.f, 5.f });
+            }
+
+            // TODO: This is such a common pattern, it must be inlined from somewhere...
+            CPedDamageResponseCalculator dmgRespCalc{ this, 1000.f, WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, false };
+            CEventDamage dmgEvent{ this, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, ped.GetLocalDirection(dirThisToPed), false, false };
+            if (dmgEvent.AffectsPed(&ped)) {
+                dmgRespCalc.ComputeDamageResponse(&ped, dmgEvent.m_damageResponse, true);
+            } else {
+                dmgEvent.m_damageResponse.m_bDamageCalculated = true;
+            }
+
+            if (CLocalisation::Blood()) {
+                if (ped.GetIsOnScreen()) {
+                    g_fx.AddBlood(
+                        thisPosn + CVector{ CVector2D{dirThisToPed} *0.35f, 0.6f }, // TODO: Magic 0.6f
+                        dirThisToPed / 100.f,
+                        16,
+                        ped.m_fContactSurfaceBrightness
+                    );
+                }
+            }
+        } else if (entity.m_nModelIndex != eModelID::MODEL_MISSILE) {
+            bool  wasAnyCPValid{};
+            float automobileCollisionDmgIntensity{};
+            CVector cpOnRotor{};
+            const auto originalElasticity = m_fElasticity;
+            m_fElasticity = 1.f;
+            for (const auto& cp : std::span{ CWorld::m_aTempColPts, (size_t)numColls }) {
+                const auto cpToCMCenter = cp.m_vecPoint - colModelCenter;
+                const auto rotorUpDotCpToCenter = DotProduct(cpToCMCenter, rotorUp);
+
+                if (const auto absRotorUpDotCpToCenter = std::abs(rotorUpDotCpToCenter);
+                    absRotorUpDotCpToCenter > ROTOR_SEMI_THICKNESS * 2.f
+                 && absRotorUpDotCpToCenter > std::abs(DotProduct(cpToCMCenter, cp.m_vecNormal))
+                ) {
+                    continue;
+                }
+
+                wasAnyCPValid = true;
+
+                           cpOnRotor    = cp.m_vecPoint - rotorUp * rotorUpDotCpToCenter;
+                      auto collForceDir = CrossProduct(rotorSize, cpOnRotor - colModelCenter);
+                const auto fxForce      = collForceDir.NormaliseAndMag();
+                g_fx.AddSparks(
+                    cpOnRotor,
+                    collForceDir,
+                    fxForce,
+                    16,
+                    CVector{},
+                    eSparkType::SPARK_PARTICLE_SPARK,
+                    .2f,
+                    1.f
+                );
+
+                if (IsAutomobile()) {
+                    const auto au = AsAutomobile();
+                    if (au->m_fHeliRotorSpeed <= .15f) {
+                        if (au->m_fHeliRotorSpeed < .15f / 2.f && au->m_fHeliRotorSpeed > 0.f) {
+                            au->m_fHeliRotorSpeed *= -1.f;
+                        }
+                    } else {
+                        // Cast away constness, as the function doesn't violate it
+                        ApplySoftCollision(&entity, const_cast<CColPoint&>(cp), automobileCollisionDmgIntensity);
+                        ApplyTurnForce(collForceDir, cpOnRotor - colModelCenter);
+                        au->m_fHeliRotorSpeed = 0.15f;
+                    }
+                }
+                SetDamagedPieceRecord(
+                    std::max(automobileCollisionDmgIntensity, 100.f * m_fMass / 3000.f),
+                    &entity,
+                    const_cast<CColPoint&>(cp),
+                    1.f
+                );
+            }
+
+            if (wasAnyCPValid) {
+                if (entity.IsPed() && !CTimer::IsTimeInRange(planeRotorDmgTimeMS - 2000, planeRotorDmgTimeMS)) {
+                    if (m_nStatus == STATUS_HELI) {
+                        AudioEngine.ReportCollision(
+                            this,
+                            &entity,
+                            SURFACE_CAR_PANEL,
+                            SURFACE_CAR,
+                            cpOnRotor,
+                            nullptr,
+                            0.15f,
+                            1.f,
+                            false,
+                            false
+                        );
+                    } else {
+                        const auto& gc = *TheCamera.GetGameCamPosition();
+                         auto fuckingBullshit = gc + Normalized(cpOnRotor - gc) * 4.f;
+                        AudioEngine.ReportCollision(
+                            this,
+                            &entity,
+                            SURFACE_CAR_PANEL,
+                            SURFACE_CAR,
+                            fuckingBullshit,
+                            nullptr,
+                            0.15f,
+                            1.f,
+                            false,
+                            false
+                        );
+                    }
+                    planeRotorDmgTimeMS = CTimer::GetTimeInMS() + CGeneral::GetRandomNumberInRange(150, 250);
+                }
+            }
+
+            m_fElasticity = originalElasticity;
+        }
+    }
+
+    return false;
 }
 
 // 0x6DBA30
