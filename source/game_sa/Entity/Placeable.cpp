@@ -196,8 +196,9 @@ void CPlaceable::SetMatrix(CMatrix& matrix)
     *static_cast<CMatrix*>(m_matrix) = matrix;
 }
 
+// NOTSA
 bool CPlaceable::IsPointInRange(const CVector& point, float range) {
-    return (GetPosition() - point).SquaredMagnitude() <= range * range;
+    return DistanceBetweenPointsSquared(point, GetPosition()) <= sq(range);
 }
 
 CMatrixLink& CPlaceable::GetMatrix() {
