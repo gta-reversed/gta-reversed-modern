@@ -402,7 +402,7 @@ public:
     static bool &m_bEnableMouseSteering;
     static bool &m_bEnableMouseFlying;
     static int32 &m_nLastControlInput;
-    static CColModel* (&m_aSpecialColVehicle)[4];
+    static inline std::array<CVehicle*, 4>& m_aSpecialColVehicle = *(std::array<CVehicle*, 4>*)0xC1CC08;
     static bool &ms_forceVehicleLightsOff;
     static bool &s_bPlaneGunsEjectShellCasings;
     static CColModel (&m_aSpecialColModel)[4];

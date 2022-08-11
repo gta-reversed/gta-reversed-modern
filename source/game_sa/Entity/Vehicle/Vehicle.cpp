@@ -36,7 +36,6 @@ bool& CVehicle::bDisableRemoteDetonationOnContact = *(bool*)0xC1CC01;
 bool& CVehicle::m_bEnableMouseSteering = *(bool*)0xC1CC02;
 bool& CVehicle::m_bEnableMouseFlying = *(bool*)0xC1CC03;
 int32& CVehicle::m_nLastControlInput = *(int32*)0xC1CC04;
-CColModel* (&CVehicle::m_aSpecialColVehicle)[4] = *(CColModel*(*)[4])0xC1CC08;
 bool& CVehicle::ms_forceVehicleLightsOff = *(bool*)0xC1CC18;
 bool& CVehicle::s_bPlaneGunsEjectShellCasings = *(bool*)0xC1CC19;
 CColModel (&CVehicle::m_aSpecialColModel)[4] = *(CColModel(*)[4])0xC1CC78;
@@ -198,9 +197,9 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
     // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
     RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
-    // RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
+    RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     // RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880);
-    // RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0);
+    RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0);
     // RH_ScopedInstall(RemoveVehicleUpgrade, 0x6DF930);
     // RH_ScopedInstall(AddUpgrade, 0x6DFA20);
     // RH_ScopedInstall(UpdateTrailerLink, 0x6DFC50);
@@ -4276,7 +4275,29 @@ bool CVehicle::AddSingleWheelParticles(tWheelState wheelState, uint32 arg1, floa
 
 // 0x6DF3D0
 bool CVehicle::GetSpecialColModel() {
-    return ((bool(__thiscall*)(CVehicle*))0x6DF3D0)(this);
+    if (m_vehicleSpecialColIndex > -1 && m_aSpecialColVehicle[m_vehicleSpecialColIndex] == this) {
+        return true;
+    }
+
+    const auto specialCMSlot = rng::find(m_aSpecialColVehicle, nullptr);
+    if (specialCMSlot == m_aSpecialColVehicle.end()) {
+        return false;
+    }
+    const auto specialCMIdx = rng::distance(m_aSpecialColVehicle.begin(), specialCMSlot);
+    m_vehicleSpecialColIndex = specialCMIdx;
+    physicalFlags.bAddMovingCollisionSpeed = true;
+    *specialCMSlot = this;
+    CEntity::RegisterReference(*specialCMSlot);
+    auto& cm = m_aSpecialColModel[m_vehicleSpecialColIndex];
+    cm.RemoveTrianglePlanes();
+    if (!cm.m_pColData) {
+        cm.AllocateData();
+    }
+    cm = *GetModelInfo()->m_pColModel;
+    auto& specialHydrDat = m_aSpecialHydraulicData[specialCMIdx];
+    specialHydrDat.m_fSuspensionExtendedUpperLimit = 100.f;
+    rng::fill(specialHydrDat.m_aWheelSuspension, 0);
+    return true;
 }
 
 // 0x6DF930
