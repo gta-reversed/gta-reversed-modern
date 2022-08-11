@@ -193,7 +193,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(IsSphereTouchingVehicle, 0x6D84D0);
     // RH_ScopedInstall(FlyingControl, 0x6D85F0);
     RH_ScopedInstall(BladeColSectorList, 0x6DAF00);
-    // RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
+    RH_ScopedInstall(SetComponentRotation, 0x6DBA30);
     RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
     // RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
     // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
@@ -3667,7 +3667,27 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
 
 // 0x6DBA30
 void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, float angle, bool bResetPosition) {
-    plugin::CallMethod<0x6DBA30, CVehicle*, RwFrame*, eRotationAxis, float, bool>(this, component, axis, angle, bResetPosition);
+    if (!component) {
+        return;
+    }
+
+    CMatrix mat{ RwFrameGetMatrix(component) };
+    std::invoke(
+        [bResetPosition, axis]() {
+            // We're using the `Only` version of `SetRotate`, that way the position
+            // That way 0x6DBB69 can be omitted (and 0x6DBB02 because it's just there to cancel out the former)
+            switch (axis) {
+            case AXIS_Z:
+                return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
+            case AXIS_Y:
+                return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
+            case AXIS_X:
+                return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
+            }
+        }(),
+        &mat, angle
+    );
+    mat.UpdateRW();
 }
 
 // 0x6DBBB0
