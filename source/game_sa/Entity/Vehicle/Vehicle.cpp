@@ -197,7 +197,7 @@ void CVehicle::InjectHooks() {
     RH_ScopedInstall(SetTransmissionRotation, 0x6DBBB0);
     RH_ScopedInstall(DoBoatSplashes, 0x6DD130);
     // RH_ScopedInstall(DoSunGlare, 0x6DD6F0);
-    // RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
+    RH_ScopedInstall(AddWaterSplashParticles, 0x6DDF60);
     // RH_ScopedInstall(AddExhaustParticles, 0x6DE240);
     // RH_ScopedInstall(AddSingleWheelParticles, 0x6DE880);
     // RH_ScopedInstall(GetSpecialColModel, 0x6DF3D0);
@@ -3327,7 +3327,7 @@ void CVehicle::ProcessBikeWheel(CVector& wheelFwd, CVector& wheelRight, CVector&
 // return nearest wheel?
 // 0x6D7BC0
 int32 CVehicle::FindTyreNearestPoint(CVector2D point) {
-    return ((int32(__thiscall*)(CVehicle*, float, float))0x6D7BC0)(this, x, y);
+    return ((int32(__thiscall*)(CVehicle*, float, float))0x6D7BC0)(this, point.x, point.y);
 }
 
 // 0x6D7C90
@@ -3683,6 +3683,8 @@ void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, floa
                 return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
             case AXIS_X:
                 return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
+            default:
+                NOTSA_UNREACHABLE();
             }
         }(),
         &mat, angle

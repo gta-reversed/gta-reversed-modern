@@ -245,7 +245,7 @@ auto CCollisionData::GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup> 
 auto CCollisionData::GetTriVertices(const CColTriangle& tri) const->std::array<CVector, 3> {
     std::array<CVector, 3> verts;
     for (const auto [i, j] : notsa::enumerate(tri.m_vertIndices)) {
-        verts[i] = UncompressVector(m_pVertices[i]);
+        verts[i] = UncompressVector(m_pVertices[j]);
     }
     return verts;
 }
