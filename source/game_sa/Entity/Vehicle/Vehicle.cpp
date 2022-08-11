@@ -4112,7 +4112,14 @@ void CVehicle::DoBoatSplashes(float fWaterDamping) {
 
 // 0x6DD6F0
 void CVehicle::DoSunGlare() {
-    ((void(__thiscall*)(CVehicle*))0x6DD6F0)(this);
+    return ((void(__thiscall*)(CVehicle*))0x6DD6F0)(this);
+
+    /*
+    * Below code should be good so far, I'm lazy to finish it, srry.
+    if (physicalFlags.bDestroyed || GetUp().z < 0.f || GetVehicleAppearance() != eVehicleAppearance::VEHICLE_APPEARANCE_AUTOMOBILE || CWeather::SunGlare <= 0.f) {
+        return;
+    }
+    */
 }
 
 // 0x6DDF60
