@@ -109,8 +109,9 @@ void DebugModules::DisplayFramePerSecond() {
 
     // Top-left framerate display overlay window.
     ImGui::SetNextWindowPos(ImVec2(10, 10));
+    ImGui::SetNextWindowSize({ 265, 20 });
     ImGui::Begin("FPS", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-    ImGui::Text("FPS: %.2f", ImGui::GetIO().Framerate);
+    ImGui::Text("FPS: %.2f [RsGlobal.frameLimit=%i]", ImGui::GetIO().Framerate, RsGlobal.frameLimit);
     ImGui::End();
 }
 
