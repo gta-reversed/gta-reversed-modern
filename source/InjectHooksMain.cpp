@@ -114,6 +114,7 @@
 #include "ShadowCamera.h"
 #include "VehicleRecording.h"
 #include "Birds.h"
+#include "Hud.h"
 
 // Tasks
 #include "TaskSimpleAbseil.h"

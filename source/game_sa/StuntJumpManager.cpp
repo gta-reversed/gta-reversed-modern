@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "StuntJumpManager.h"
+#include "Hud.h"
 
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
 

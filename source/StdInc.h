@@ -255,7 +255,6 @@ namespace rng = std::ranges;
 #include "game_sa\General.h"
 #include "game_sa\GenericGameStorage.h"
 #include "game_sa\cHandlingDataMgr.h"
-#include "game_sa\Hud.h"
 #include "game_sa\HudColours.h"
 #include "game_sa\IniFile.h"
 #include "game_sa\IplStore.h"
