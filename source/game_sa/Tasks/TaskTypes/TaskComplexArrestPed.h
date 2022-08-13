@@ -17,7 +17,7 @@ public:
     static constexpr auto Type = TASK_COMPLEX_ARREST_PED;
 
     explicit CTaskComplexArrestPed(CPed* ped);
-    ~CTaskComplexArrestPed();
+    ~CTaskComplexArrestPed() override;
 
     CTask* Clone() override { return new CTaskComplexArrestPed(m_PedToArrest); }
     eTaskType GetTaskType() override { return Type; }
@@ -33,9 +33,9 @@ private:
 
     CTaskComplexArrestPed* Constructor(CPed* ped) { this->CTaskComplexArrestPed::CTaskComplexArrestPed(ped); return this; }
     CTaskComplexArrestPed* Destructor() { this->CTaskComplexArrestPed::~CTaskComplexArrestPed(); return this; }
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable(ped, priority, event); };
-    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CreateNextSubTask(ped); };
-    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CreateFirstSubTask(ped); };
-    CTask* ControlSubTask_Reversed(CPed* ped) { return ControlSubTask(ped); };
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* ControlSubTask_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CTaskComplexArrestPed, 0x24);

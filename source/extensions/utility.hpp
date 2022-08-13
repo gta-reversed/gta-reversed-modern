@@ -8,7 +8,7 @@ namespace notsa {
 template<typename Fn>
 struct AutoCallOnDestruct {
     AutoCallOnDestruct(Fn&& fn) :
-        m_fn{std::move(fn)}
+        m_fn{ std::move(fn) }
     {
     }
 

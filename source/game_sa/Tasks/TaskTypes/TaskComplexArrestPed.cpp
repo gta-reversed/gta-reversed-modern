@@ -27,6 +27,10 @@ void CTaskComplexArrestPed::InjectHooks() {
     // untested RH_ScopedInstall(ControlSubTask_Reversed, 0x68D350);
     // + RH_ScopedInstall(CreateSubTask, 0x68CF80);
 }
+bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
+CTask* CTaskComplexArrestPed::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
+CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
 
 // 0x68B990
 CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) : CTaskComplex() {
@@ -41,12 +45,12 @@ CTaskComplexArrestPed::~CTaskComplexArrestPed() {
 }
 
 // 0x68BA60
-bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexArrestPed::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
 // 0x690220 See #gists in discord
-CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) {
+CTask* CTaskComplexArrestPed::CreateNextSubTask_Reversed(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x690220, CTaskComplexArrestPed*, CPed*>(this, ped);
 }
 
@@ -69,7 +73,7 @@ void MakeSurePedHasWeaponInHand(CPed* ped) {
 }
 
 // 0x6907A0
-CTask* CTaskComplexArrestPed::CreateFirstSubTask(CPed* ped) {
+CTask* CTaskComplexArrestPed::CreateFirstSubTask_Reversed(CPed* ped) {
     if (!m_PedToArrest) {
         return nullptr;
     }
@@ -96,7 +100,7 @@ CTask* CTaskComplexArrestPed::CreateFirstSubTask(CPed* ped) {
 }
 
 // 0x68D350
-CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped) {
+CTask* CTaskComplexArrestPed::ControlSubTask_Reversed(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x68D350, CTaskComplexArrestPed*, CPed*>(this, ped);
 
     // Automatically make ped say something on function return
