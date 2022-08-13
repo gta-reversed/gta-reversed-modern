@@ -4,7 +4,7 @@
 #include "eWeaponType.h"
 #include "Vehicle.h"
 
-enum class eFallDir : int32 { FORWARD, LEFT, BACKWARD, RIGHT };
+enum class eFallDir : uint8 { FORWARD, LEFT, BACKWARD, RIGHT };
 
 class CTaskComplexDie : public CTaskComplex {
 public:

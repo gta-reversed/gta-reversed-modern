@@ -266,6 +266,7 @@ void InjectHooksMain() {
     CTaskComplexDieInCar::InjectHooks();
     CTaskComplexFallToDeath::InjectHooks();
     CTaskComplexLeaveCar::InjectHooks();
+    CTaskSimpleDead::InjectHooks();
     CTaskSimpleDieInCar::InjectHooks();
     CTaskSimpleDrown::InjectHooks();
     CTaskSimpleDrownInCar::InjectHooks();

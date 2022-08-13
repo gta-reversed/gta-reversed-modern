@@ -2,10 +2,10 @@
 
 #include "TaskComplex.h"
 
+enum class eFallDir : uint8;
+
 class CTaskComplexFallToDeath : public CTaskComplex {
 public:
-    enum class eFallDir : int8 { FORWARD, LEFT, BACKWARD, RIGHT };
-
     CVector     m_Posn;
     AnimationId m_nAnimId;
     AnimationId m_nAnimId1;
@@ -14,7 +14,7 @@ public:
         struct {
             uint8 b0x1  : 1;
             uint8 b0x2  : 1;
-            uint8 bFallToDeathOverRailing : 1;
+            uint8 b0x4 : 1; // bFallToDeathOverRailing
             uint8 b0x8  : 1;
             uint8 b0x10 : 1;
         };
@@ -28,8 +28,8 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_FALL_TO_DEATH;
 
-    CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool a4, bool a5);
-    ~CTaskComplexFallToDeath() override = default; // 0x6790B0, 0x67D550
+    CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bFallToDeathOverRailing, bool a5);
+    ~CTaskComplexFallToDeath() override = default; // 0x6790B0
 
     eTaskType GetTaskType() override { return Type; }; // 0x6790A0
     CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
@@ -39,6 +39,8 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
 
 private:
+    void UpdateAnims(CPed* ped);
+
     friend void InjectHooksMain();
     static void InjectHooks();
 

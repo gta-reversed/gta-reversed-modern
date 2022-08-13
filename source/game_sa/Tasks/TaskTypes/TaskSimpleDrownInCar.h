@@ -7,7 +7,7 @@ public:
     static constexpr auto Type = TASK_SIMPLE_DROWN_IN_CAR;
 
     CTaskSimpleDrownInCar() = default;  // 0x62FF20
-    ~CTaskSimpleDrownInCar() override = default; // 0x62FF60, 0x6378F0
+    ~CTaskSimpleDrownInCar() override = default; // 0x62FF60
 
     eTaskType GetTaskType() override { return Type; }; // 0x62FF40
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; } // 0x62FF50

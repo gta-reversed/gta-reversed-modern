@@ -58,9 +58,9 @@ bool CTaskSimpleFacial::ProcessPed(CPed* ped) {
     if (!m_Timer.m_bStarted) {
         if (!assoc) {
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, animId, 4.0f);
-            m_Timer.m_nInterval  = m_nDuration;
+            m_Timer.m_nInterval = m_nDuration;
             m_Timer.m_nStartTime = CTimer::GetTimeInMS();
-            m_Timer.m_bStarted   = true;
+            m_Timer.m_bStarted = true;
             return false;
         }
         return true;
