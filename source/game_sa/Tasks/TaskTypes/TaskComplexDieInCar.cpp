@@ -55,7 +55,7 @@ CTask* CTaskComplexDieInCar::ControlSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexDieInCar::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_LEAVE_CAR_AND_DIE:
-        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
+        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0);
     case TASK_SIMPLE_CAR_DRIVE:
         return new CTaskSimpleCarDrive(ped->m_pVehicle, nullptr, false);
     case TASK_SIMPLE_DIE_IN_CAR:
@@ -119,8 +119,7 @@ CTask* CTaskComplexDieInCar::CreateFirstSubTask_Reversed(CPed* ped) {
 }
 
 // 0x62FD00
-void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle)
-{
+void CTaskComplexDieInCar::PreparePedVehicleForPedDeath(CVehicle *vehicle) {
     if (vehicle->m_nStatus == STATUS_SIMPLE) {
         CCarCtrl::SwitchVehicleToRealPhysics(vehicle);
     }

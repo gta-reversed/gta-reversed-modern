@@ -14,7 +14,6 @@ void CTaskComplexDie::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x630040);
-    RH_ScopedInstall(Clone_Reversed, 0x636060);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x6300D0);
     RH_ScopedInstall(SayDeathSample, 0x630100);
     RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6301E0);
@@ -25,7 +24,6 @@ CTaskComplexDie* CTaskComplexDie::Constructor(eWeaponType nWeaponType, AssocGrou
 bool CTaskComplexDie::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 CTask* CTaskComplexDie::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 CTask* CTaskComplexDie::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
-CTask* CTaskComplexDie::Clone() { return Clone_Reversed(); }
 
 // 0x630040
 CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
@@ -34,7 +32,8 @@ CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
                                  float fBlendDelta,
                                  float fAnimSpeed,
                                  bool bBeingKilledByStealth,
-                                 bool bFallingToDeath, eFallDir nFallToDeathDir,
+                                 bool bFallingToDeath,
+                                 eFallDir nFallToDeathDir,
                                  bool bFallToDeathOverRailing) : CTaskComplex()
 {
     m_nWeaponType             = nWeaponType;
@@ -47,21 +46,6 @@ CTaskComplexDie::CTaskComplexDie(eWeaponType nWeaponType,
     m_bFallToDeathOverRailing = bFallToDeathOverRailing;
     m_nFallToDeathDir         = nFallToDeathDir;
 };
-
-// 0x636060
-CTask* CTaskComplexDie::Clone_Reversed() {
-    return new CTaskComplexDie(
-        m_nWeaponType,
-        m_nAnimGroup,
-        m_nAnimID,
-        m_fBlendDelta,
-        m_fAnimSpeed,
-        !m_bBeingKilledByStealth,
-        m_bFallingToDeath,
-        m_nFallToDeathDir,
-        m_bFallToDeathOverRailing
-    );
-}
 
 // 0x6300D0
 bool CTaskComplexDie::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
@@ -118,17 +102,17 @@ CTask* CTaskComplexDie::CreateNextSubTask_Reversed(CPed* ped) {
 // 0x6302D0
 CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     SayDeathSample(ped);
+
     if (m_nWeaponType == WEAPON_DROWNING && ped->bInVehicle && !ped->bForceDieInCar) {
-        if (ped->m_pVehicle) {
-            if (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli()) {
-                return nullptr;
-            }
+        if (ped->m_pVehicle && (ped->m_pVehicle->IsSubPlane() || ped->m_pVehicle->IsSubHeli())) {
+            return nullptr;
         }
         return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, false, true);
     }
 
     ped->SetPedState(PEDSTATE_DIE);
     ped->GetIntelligence()->ClearTasks(false, true);
+
     if (ped->bInVehicle) // repeated branch
     {
         return new CTaskComplexDieInCar(WEAPON_UNARMED);
@@ -139,23 +123,18 @@ CTask* CTaskComplexDie::CreateFirstSubTask_Reversed(CPed* ped) {
     }
     else if (m_bFallingToDeath)
     {
-        const auto GetFallDirection = [=]() -> CVector {
+        const auto fallDirection = [&]() -> CVector {
             switch (m_nFallToDeathDir) {
-            case eFallDir::FORWARD:
-                return ped->m_matrix->GetForward();
-            case eFallDir::LEFT:
-                return ped->m_matrix->GetRight() * -1.0f;
-            case eFallDir::BACKWARD:
-                return ped->m_matrix->GetForward() * -1.0f;
-            case eFallDir::RIGHT:
-                return ped->m_matrix->GetRight();
+            case eFallDir::FORWARD:  return ped->m_matrix->GetForward();
+            case eFallDir::LEFT:     return ped->m_matrix->GetRight()   * -1.0f;
+            case eFallDir::BACKWARD: return ped->m_matrix->GetForward() * -1.0f;
+            case eFallDir::RIGHT:    return ped->m_matrix->GetRight();
             default:
-                // Originally not initialized
-                // Just to return something so compiler doesn't cry
+                NOTSA_UNREACHABLE("Originally not initialized");
                 return {};
             }
-        };
-        return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), GetFallDirection(), m_bFallToDeathOverRailing, false);
+        }();
+        return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), fallDirection, m_bFallToDeathOverRailing, false);
     }
 
     return new CTaskSimpleDie(m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed);

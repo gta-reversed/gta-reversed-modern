@@ -4,10 +4,10 @@
 #include "eWeaponType.h"
 #include "Vehicle.h"
 
+enum class eFallDir : int32 { FORWARD, LEFT, BACKWARD, RIGHT };
+
 class CTaskComplexDie : public CTaskComplex {
 public:
-    enum class eFallDir : int32 { FORWARD, LEFT, BACKWARD, RIGHT };
-
     eWeaponType  m_nWeaponType;
     AssocGroupId m_nAnimGroup;
     AnimationId  m_nAnimID;
@@ -45,7 +45,10 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed*) override { return m_pSubTask; } // 0x630580
-    CTask* Clone() override;
+    CTask* Clone() override {
+        return new CTaskComplexDie(m_nWeaponType, m_nAnimGroup, m_nAnimID, m_fBlendDelta, m_fAnimSpeed, m_bBeingKilledByStealth,
+                                   m_bFallingToDeath, m_nFallToDeathDir, m_bFallToDeathOverRailing);
+    } // 0x636060
 
     void SayDeathSample(CPed* ped) const;
 
@@ -57,7 +60,6 @@ private:
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* CreateNextSubTask_Reversed(CPed* ped);
     CTask* CreateFirstSubTask_Reversed(CPed* ped);
-    CTask* Clone_Reversed();
 };
 
 VALIDATE_SIZE(CTaskComplexDie, 0x28);

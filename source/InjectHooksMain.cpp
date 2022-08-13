@@ -259,10 +259,19 @@ void InjectHooksMain() {
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
 
-    InjectCommonHooks();
     CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
+    CTaskComplexDie::InjectHooks();
+    CTaskComplexDieInCar::InjectHooks();
+    CTaskComplexFallToDeath::InjectHooks();
+    CTaskComplexLeaveCar::InjectHooks();
+    CTaskSimpleDieInCar::InjectHooks();
+    CTaskSimpleDrown::InjectHooks();
+    CTaskSimpleDrownInCar::InjectHooks();
+    return;
+
+    InjectCommonHooks();
     CEscalator::InjectHooks();
     CShadowCamera::InjectHooks();
     CInterestingEvents::InjectHooks();
@@ -560,7 +569,7 @@ void InjectHooksMain() {
         // CTaskComplexDestroyCar::InjectHooks();
         // CTaskComplexDestroyCarArmed::InjectHooks();
         // CTaskComplexDestroyCarMelee::InjectHooks();
-        // CTaskComplexDieInCar::InjectHooks();
+        CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
         // CTaskComplexDragPedFromCar::InjectHooks();
         // CTaskComplexDrivePointRoute::InjectHooks();
@@ -573,7 +582,7 @@ void InjectHooksMain() {
         // CTaskComplexExtinguishFireOnFoot::InjectHooks();
         // CTaskComplexExtinguishFires::InjectHooks();
         // CTaskComplexFallAndStayDown::InjectHooks();
-        // CTaskComplexFallToDeath::InjectHooks();
+        CTaskComplexFallToDeath::InjectHooks();
         // CTaskComplexFleeAnyMeans::InjectHooks();
         // CTaskComplexFleeEntity::InjectHooks();
         // CTaskComplexFleePoint::InjectHooks();
@@ -689,10 +698,10 @@ void InjectHooksMain() {
         // CTaskSimpleCower::InjectHooks();
         // CTaskSimpleDead::InjectHooks();
         // CTaskSimpleDetonate::InjectHooks();
-        // CTaskSimpleDieInCar::InjectHooks();
+        CTaskSimpleDieInCar::InjectHooks();
         // CTaskSimpleDoHandSignal::InjectHooks();
-        // CTaskSimpleDrown::InjectHooks();
-        // CTaskSimpleDrownInCar::InjectHooks();
+        CTaskSimpleDrown::InjectHooks();
+        CTaskSimpleDrownInCar::InjectHooks();
         // CTaskSimpleDuckToggle::InjectHooks();
         // CTaskSimpleDuckWhileShotsWhizzing::InjectHooks();
         // CTaskSimpleEvasiveDive::InjectHooks();
@@ -852,7 +861,6 @@ void InjectHooksMain() {
         CTaskComplexFallToDeath::InjectHooks();
         CTaskSimpleDieInCar::InjectHooks();
         CTaskSimpleDrown::InjectHooks();
-        CTaskSimpleDrownInCar::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
