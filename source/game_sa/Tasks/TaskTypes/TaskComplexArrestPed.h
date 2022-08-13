@@ -25,7 +25,7 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateSubTask(int32 taskId, CPed* ped);
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();
@@ -33,5 +33,9 @@ private:
 
     CTaskComplexArrestPed* Constructor(CPed* ped) { this->CTaskComplexArrestPed::CTaskComplexArrestPed(ped); return this; }
     CTaskComplexArrestPed* Destructor() { this->CTaskComplexArrestPed::~CTaskComplexArrestPed(); return this; }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable(ped, priority, event); };
+    CTask* CreateNextSubTask_Reversed(CPed* ped) { return CreateNextSubTask(ped); };
+    CTask* CreateFirstSubTask_Reversed(CPed* ped) { return CreateFirstSubTask(ped); };
+    CTask* ControlSubTask_Reversed(CPed* ped) { return ControlSubTask(ped); };
 };
 VALIDATE_SIZE(CTaskComplexArrestPed, 0x24);
