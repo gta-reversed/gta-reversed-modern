@@ -173,7 +173,7 @@ void* CObject::operator new(unsigned size) {
 
 // 0x5A1EF0
 void* CObject::operator new(unsigned size, int32 poolRef) {
-    return GetObjectPool()->New(poolRef);
+    return GetObjectPool()->NewAt(poolRef);
 }
 
 // 0x5A1F20
