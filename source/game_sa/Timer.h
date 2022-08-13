@@ -105,3 +105,4 @@ public:
 };
 
 uint64 GetMillisecondTime();
+bool EachFrames(auto count) { return (CTimer::GetFrameCounter() & count) == 0; }

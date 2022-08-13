@@ -1287,13 +1287,13 @@ void CRadar::DrawMap()
         goto DRAW_RADAR;
     }
 
-    if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
-        float speedZ = vehicle->GetPosition().z * 1.0f / 200.0f;
+    if (vehicle && vehicle->IsSubPlane() && !ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+        float speedZ = vehicle->GetPosition().z / 200.0f;
 
         if (speedZ < RADAR_MIN_SPEED)
             m_radarRange = RADAR_MAX_RANGE - 10.0f;
         else if (speedZ < RADAR_MAX_SPEED)
-            m_radarRange = (speedZ - RADAR_MIN_SPEED) * (1.0f / 60.0f) + (RADAR_MAX_RANGE - 10.0f);
+            m_radarRange = (speedZ - RADAR_MIN_SPEED) / 60.0f + (RADAR_MAX_RANGE - 10.0f);
         else
             m_radarRange = RADAR_MAX_RANGE;
     }
