@@ -4,11 +4,14 @@
 
 #include "TaskComplexArrestPed.h"
 #include "TaskComplexFallAndGetUp.h"
+#include "TaskSimpleWaitUntilPedIsOutCar.h"
+// #include "TaskSimpleArrestPed.h"
+#include "TaskComplexKillPedOnFoot.h"
+// #include "TaskComplexDestroyCar.h"
+// #include "TaskComplexSeekEntity.h"
 // #include "TaskComplexDragPedFromCar.h"
 // #include "TaskComplexOpenDriverDoor.h"
 // #include "TaskComplexOpenPassengerDoor.h"
-#include "TaskSimpleWaitUntilPedIsOutCar.h"
-#include "TaskComplexKillPedOnFoot.h"
 
 #include "eTargetDoor.h"
 
@@ -19,10 +22,10 @@ void CTaskComplexArrestPed::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x68B990);
     RH_ScopedInstall(Destructor, 0x68BA00);
     RH_ScopedInstall(MakeAbortable, 0x68BA60);
-    //RH_ScopedInstall(CreateNextSubTask, 0x690220);
+    // ~+ RH_ScopedInstall(CreateNextSubTask, 0x690220);
     RH_ScopedInstall(CreateFirstSubTask, 0x6907A0);
     RH_ScopedInstall(ControlSubTask, 0x68D350);
-    //RH_ScopedInstall(CreateSubTask, 0x68CF80);
+    // + RH_ScopedInstall(CreateSubTask, 0x68CF80);
 }
 
 // 0x68B990
@@ -32,34 +35,161 @@ CTaskComplexArrestPed::CTaskComplexArrestPed(CPed* ped) : CTaskComplex() {
     CEntity::SafeRegisterRef(m_PedToArrest);
 }
 
+// 0x68BA00
 CTaskComplexArrestPed::~CTaskComplexArrestPed() {
     CEntity::SafeCleanUpRef(m_PedToArrest);
 }
 
+// 0x68BA60
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return m_pSubTask->MakeAbortable(ped, priority, event);
 }
 
+// 0x690220
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x690220, CTaskComplexArrestPed*, CPed*>(this, ped);
 
-    if (!m_PedToArrest) {
+    if (!m_PedToArrest)
+        return CreateSubTask(TASK_FINISHED, ped);
+
+    auto taskType = m_pSubTask->GetTaskType();
+    if (m_PedToArrest->bIsBeingArrested && taskType != TASK_SIMPLE_ARREST_PED) {
+        /*
+        if (taskType == TASK_COMPLEX_SEEK_ENTITY && ((int)this->m_pSubTask[9].__vftable & 4) != 0) {
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+        } else {
+            return CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
+        }
+        */
+    }
+
+    if (taskType > TASK_COMPLEX_SEEK_ENTITY) {
+        auto v27 = taskType - 1000;
+        if (v27) {
+            auto v28 = v27 - 3;
+            if (v28 && v28 != 97)
+                return nullptr;
+        } else {
+            if (m_PedToArrest->m_fHealth <= 0.0f)
+                return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+
+            auto v15 = m_PedToArrest->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FALL_AND_GET_UP);
+            if (v15 && static_cast<CTaskComplexFallAndGetUp*>(v15)->IsFalling()) {
+                auto a1 = m_PedToArrest->GetPosition() - ped->GetPosition();
+                auto v36 = std::fabs(a1.z);
+                a1.z = 0.0f;
+                if (v36 > 2.0f || sq(3.0f) < a1.SquaredMagnitude()) {
+                    return CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
+                }
+                static_cast<CTaskComplexFallAndGetUp*>(v15)->SetDownTime(100'000);
+                return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+            }
+
+            if (ped->m_nPedType == PED_TYPE_COP)
+                return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+
+            if (!m_PedToArrest->IsPlayer())
+                return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+
+            auto wanted = m_PedToArrest->m_pPlayerData ? m_PedToArrest->m_pPlayerData->m_pWanted : nullptr;
+            if (!wanted->m_nCopsInPursuit) // C* missing check for nullptr
+                return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        }
         return CreateSubTask(TASK_FINISHED, ped);
     }
 
-    if (m_PedToArrest->bIsBeingArrested) {
-        switch (m_pSubTask->GetTaskType()) {
-        case TASK_SIMPLE_ARREST_PED:
-            break;
-        case TASK_COMPLEX_SEEK_ENTITY: { // TODO: Missing
+    switch (taskType) {
+    case TASK_COMPLEX_SEEK_ENTITY: { // TASK_COMPLEX_SEEK_ENTITY ~ == TASK_COMPLEX_DRAG_PED_FROM_CAR almost copypasta
+        auto v15 = m_PedToArrest->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FALL_AND_GET_UP);
+        /*
+        if (!v15 || !static_cast<CTaskComplexFallAndGetUp*>(v15)->IsFalling() || ((int)this->m_pSubTask[9].__vftable & 4) == 0) {
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
         }
+        */
+        auto a1 = m_PedToArrest->GetPosition() - ped->GetPosition();
+        auto v26 = std::fabs(a1.z);
+        a1.z = 0.0f;
+        if (v26 <= 2.0f && sq(3.0f) >= a1.SquaredMagnitude()) {
+            static_cast<CTaskComplexFallAndGetUp*>(v15)->SetDownTime(100'000);
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
         }
-        if (m_pSubTask->GetTaskType() != TASK_SIMPLE_ARREST_PED) {
+        return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+    }
+    case TASK_COMPLEX_DRAG_PED_FROM_CAR: {
+        auto v15 = m_PedToArrest->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_FALL_AND_GET_UP);
+        /*
+        if (!v15 || !static_cast<CTaskComplexFallAndGetUp*>(v15)->IsFalling() || ((int)this->m_pSubTask[2].__vftable & 4) != 0) {
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
         }
+        */
+        auto a1 = m_PedToArrest->GetPosition() - ped->GetPosition();
+        auto v26 = std::fabs(a1.z);
+        a1.z = 0.0f;
+        if (v26 <= 2.0f && sq(3.0f) >= a1.SquaredMagnitude()) {
+            static_cast<CTaskComplexFallAndGetUp*>(v15)->SetDownTime(100'000);
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+        }
+        return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+    }
+    case TASK_COMPLEX_CAR_OPEN_DRIVER_DOOR: { // TASK_COMPLEX_CAR_OPEN_DRIVER_DOOR == TASK_COMPLEX_CAR_OPEN_PASSENGER_DOOR copypasta
+        /*
+        if (((int)this->m_pSubTask[2].__vftable & 2) != 0) {
+            if (m_PedToArrest->m_pVehicle) {
+                if (!m_PedToArrest->m_pVehicle->CanPedOpenLocks(ped)) {
+                    m_Vehicle = m_PedToArrest->m_pVehicle;
+                }
+            }
+        }
+        */
+
+        if (!m_PedToArrest->IsAlive())
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+
+        /*
+        if (!m_PedToArrest->bInVehicle || ((int)this->m_pSubTask[2].__vftable & 2) != 0)
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        */
+
+        auto task = m_PedToArrest->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR);
+        if (task) {
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        } else {
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+        }
+    }
+    case TASK_COMPLEX_CAR_OPEN_PASSENGER_DOOR: {
+        /*
+        if (((int)this->m_pSubTask[2].__vftable & 2) != 0) {
+            if (m_PedToArrest->m_pVehicle) {
+                if (!m_PedToArrest->m_pVehicle->CanPedOpenLocks(ped)) {
+                    m_Vehicle = m_PedToArrest->m_pVehicle;
+                }
+            }
+        }
+        */
+
+        if (!m_PedToArrest->IsAlive())
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+
+        /*
+        if (!m_PedToArrest->bInVehicle || ((int)this->m_pSubTask[2].__vftable & 2) != 0)
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        */
+
+        auto task = m_PedToArrest->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR);
+        if (task) {
+            return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+        } else {
+            return CreateSubTask(TASK_SIMPLE_ARREST_PED, ped);
+        }
+    }
+    case TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR:
+        return CreateSubTask(TASK_COMPLEX_KILL_PED_ON_FOOT, ped);
+    default:
+        return nullptr;
     }
 }
 
-// TODO: Maybe move this to CPed
 void MakeSurePedHasWeaponInHand(CPed* ped) {
     // Make sure ped has an actual weapon in their hand
     if (!ped->GetActiveWeapon().IsTypeMelee())
