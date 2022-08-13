@@ -258,20 +258,9 @@ void InjectHooksMain() {
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
-
-    CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
-    CTaskComplexDie::InjectHooks();
-    CTaskComplexDieInCar::InjectHooks();
-    CTaskComplexFallToDeath::InjectHooks();
-    CTaskComplexLeaveCar::InjectHooks();
-    CTaskSimpleDead::InjectHooks();
-    CTaskSimpleDieInCar::InjectHooks();
-    CTaskSimpleDrown::InjectHooks();
-    CTaskSimpleDrownInCar::InjectHooks();
-    return;
-
+    CPad::InjectHooks();
     InjectCommonHooks();
     CEscalator::InjectHooks();
     CShadowCamera::InjectHooks();
@@ -699,7 +688,7 @@ void InjectHooksMain() {
         // CTaskSimpleCower::InjectHooks();
         // CTaskSimpleDead::InjectHooks();
         // CTaskSimpleDetonate::InjectHooks();
-        CTaskSimpleDieInCar::InjectHooks();
+        // + CTaskSimpleDieInCar
         // CTaskSimpleDoHandSignal::InjectHooks();
         CTaskSimpleDrown::InjectHooks();
         CTaskSimpleDrownInCar::InjectHooks();
@@ -760,7 +749,7 @@ void InjectHooksMain() {
         CTaskComplexLeaveAnyCar::InjectHooks();
         // CTaskSimpleAbseil::InjectHooks();
         CTaskComplexWanderCop::InjectHooks();
-        CTaskComplexUseMobilePhone::InjectHooks();
+        // CTaskComplexUseMobilePhone::InjectHooks();
         CTaskSimpleStandStill::InjectHooks();
         CTaskSimpleCarDrive::InjectHooks();
         // CTaskSimpleScratchHead::InjectHooks();
@@ -775,7 +764,7 @@ void InjectHooksMain() {
         CTaskComplexFollowPedFootsteps::InjectHooks();
         CTaskComplexGetUpAndStandStill::InjectHooks();
         // CTaskComplexGoPickUpEntity::InjectHooks();
-        CTaskSimpleDie::InjectHooks();
+        CTaskSimpleDie__InjectHooks();
         CTaskSimpleDuck::InjectHooks();
         CTaskComplexPolicePursuit::InjectHooks();
         // CTaskSimpleFacial::InjectHooks();
@@ -800,7 +789,6 @@ void InjectHooksMain() {
         // CTaskComplexWaitForPed::InjectHooks();
         CTaskComplexJump::InjectHooks();
         // CTaskComplexWanderStandard::InjectHooks();
-        // CTaskSimpleIKLookAt::InjectHooks();
         // CTaskComplexSunbathe::InjectHooks();
         // CTaskComplexEnterCar::InjectHooks();
         // CTaskSimpleTogglePedThreatScanner::InjectHooks();
@@ -808,7 +796,6 @@ void InjectHooksMain() {
         // CTaskComplexCrossRoadLookAndAchieveHeading::InjectHooks();
         CTaskComplexGoToPointAndStandStill::InjectHooks();
         // CTaskSimpleAchieveHeading::InjectHooks();
-        // CTaskSimpleIKChain::InjectHooks();
         CTaskSimpleGiveCPR::InjectHooks();
         // CTaskSimpleCarSetPedInAsPassenger::InjectHooks();
         CTaskComplexDriveFireTruck::InjectHooks();
@@ -858,10 +845,6 @@ void InjectHooksMain() {
         CTaskSimpleIKPointArm::InjectHooks();
         CTaskSimpleIKLookAt::InjectHooks();
         CTaskComplexDie::InjectHooks();
-        CTaskComplexDieInCar::InjectHooks();
-        CTaskComplexFallToDeath::InjectHooks();
-        CTaskSimpleDieInCar::InjectHooks();
-        CTaskSimpleDrown::InjectHooks();
         // CTaskComplexEnterBoatAsDriver::InjectHooks();
         CTaskSimpleFight::InjectHooks();
         CTaskComplexUseWaterCannon::InjectHooks();
