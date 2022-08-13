@@ -117,6 +117,7 @@
 #include "Hud.h"
 
 // Tasks
+#include "TaskComplexDragPedFromCar.h"
 #include "TaskComplexDestroyCar.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
@@ -557,7 +558,7 @@ void InjectHooksMain() {
         // CTaskComplexDestroyCarMelee::InjectHooks();
         // CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
-        // CTaskComplexDragPedFromCar::InjectHooks();
+        CTaskComplexDragPedFromCar__InjectHooks();
         // CTaskComplexDrivePointRoute::InjectHooks();
         // CTaskComplexEnterCarAsDriverTimed::InjectHooks();
         // CTaskComplexEnterCarAsPassengerTimed::InjectHooks();
