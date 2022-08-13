@@ -4,6 +4,12 @@
 
 #include "TaskComplexArrestPed.h"
 #include "TaskComplexFallAndGetUp.h"
+// #include "TaskComplexDragPedFromCar.h"
+// #include "TaskComplexOpenDriverDoor.h"
+// #include "TaskComplexOpenPassengerDoor.h"
+#include "TaskSimpleWaitUntilPedIsOutCar.h"
+#include "TaskComplexKillPedOnFoot.h"
+
 #include "eTargetDoor.h"
 
 void CTaskComplexArrestPed::InjectHooks() {
@@ -254,6 +260,45 @@ CTask* CTaskComplexArrestPed::ControlSubTask(CPed* ped) {
     return m_pSubTask;
 }
 
+// 0x68CF80
 CTask* CTaskComplexArrestPed::CreateSubTask(int32 taskId, CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x68CF80, CTaskComplexArrestPed*, int32, CPed*>(this, taskId, ped);
+    /*
+    switch (taskId) {
+    case TASK_SIMPLE_ARREST_PED:
+        if (m_PedToArrest->m_pVehicle) {
+            if (m_PedToArrest->m_pVehicle->IsDriver(m_PedToArrest)) {
+                m_PedToArrest->m_pVehicle->vehicleFlags.bIsHandbrakeOn = true;
+                m_PedToArrest->m_pVehicle->m_nStatus = STATUS_PLANE; // todo: What does that mean??
+            }
+        }
+        return new CTaskSimpleArrestPed(m_PedToArrest);
+
+    case TASK_COMPLEX_KILL_PED_ON_FOOT:
+        return new CTaskComplexKillPedOnFoot(m_PedToArrest, -1, 0, 0, 0, 1);
+
+    case TASK_COMPLEX_DESTROY_CAR:
+        return new CTaskComplexDestroyCar(m_PedToArrest->m_pVehicle, 0, 0, 0);
+
+    case TASK_COMPLEX_SEEK_ENTITY: {
+        float radius = m_PedToArrest->bIsBeingArrested ? 4.0f : 3.0f;
+        return new CTaskComplexSeekEntity<CEntitySeekPosCalculatorStandard>(m_PedToArrest, 50'000, 1000, radius, 2.0f, 2.0f, 1, 1);
+    }
+    case TASK_COMPLEX_DRAG_PED_FROM_CAR:
+        return new CTaskComplexDragPedFromCar(m_PedToArrest, 100'000);
+
+    case TASK_COMPLEX_CAR_OPEN_DRIVER_DOOR:
+        return new CTaskComplexOpenDriverDoor(m_PedToArrest->m_pVehicle);
+
+    case TASK_COMPLEX_CAR_OPEN_PASSENGER_DOOR:
+        return new CTaskComplexOpenPassengerDoor(m_PedToArrest->m_pVehicle, 8);
+
+    case TASK_SIMPLE_WAIT_UNTIL_PED_OUT_CAR:
+        auto out = m_PedToArrest->GetPosition() - ped->GetPosition();
+        return new CTaskSimpleWaitUntilPedIsOutCar(m_PedToArrest, &out);
+
+    default:
+        return nullptr;
+    }
+    */
 }
