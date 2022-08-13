@@ -117,6 +117,7 @@
 #include "Hud.h"
 
 // Tasks
+#include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
 #include "TaskComplexDestroyCar.h"
 #include "TaskSimpleAbseil.h"
@@ -658,7 +659,7 @@ void InjectHooksMain() {
         // CTaskComplexWalkRoundFire::InjectHooks();
         // CTaskComplexWanderFlee::InjectHooks();
         // CTaskSimpleAffectSecondaryBehaviour::InjectHooks();
-        // CTaskSimpleArrestPed::InjectHooks();
+        CTaskSimpleArrestPed__InjectHooks();
         // CTaskSimpleBeHit::InjectHooks();
         // CTaskSimpleBeHitWhileMoving::InjectHooks();
         // CTaskSimpleBeKickedOnGround::InjectHooks();
