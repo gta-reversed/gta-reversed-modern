@@ -2573,24 +2573,24 @@ void CWorld::ClearExcitingStuffFromArea(const CVector& point, float radius, uint
             continue;
 
         { // todo: see ClearCarsFromArea | inlined
-        if (auto& driver = veh->m_pDriver) {
-            CPopulation::RemovePed(driver);
-            CEntity::ClearReference(driver);
-        }
-
-        for (auto& passenger : veh->GetPassengers()) {
-            if (passenger) {
-                veh->RemovePassenger(passenger);
-                CPopulation::RemovePed(passenger);
+            if (auto& driver = veh->m_pDriver) {
+                CPopulation::RemovePed(driver);
+                CEntity::ClearReference(driver);
             }
-        }
 
-        if (CCarCtrl::IsThisVehicleInteresting(veh))
-            CGarages::StoreCarInNearestImpoundingGarage(veh);
+            for (const auto passenger : veh->GetPassengers()) {
+                if (passenger) {
+                    veh->RemovePassenger(passenger);
+                    CPopulation::RemovePed(passenger);
+                }
+            }
 
-        CCarCtrl::RemoveFromInterestingVehicleList(veh);
-        Remove(veh);
-        delete veh;
+            if (CCarCtrl::IsThisVehicleInteresting(veh))
+                CGarages::StoreCarInNearestImpoundingGarage(veh);
+
+            CCarCtrl::RemoveFromInterestingVehicleList(veh);
+            Remove(veh);
+            delete veh;
         }
     }
 
