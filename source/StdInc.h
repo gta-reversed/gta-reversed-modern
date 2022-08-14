@@ -405,6 +405,7 @@ namespace rng = std::ranges;
 
 #include "game_sa\Fx\eFxInfoType.h"
 #include "game_sa\Fx\FxManager.h"
+#include "game_sa\Fx\FxPrtMult.h"
 #include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"

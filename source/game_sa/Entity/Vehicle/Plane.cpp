@@ -3,7 +3,6 @@
 #include "Plane.h"
 #include "CarCtrl.h"
 #include "FireManager.h"
-#include "FxPrtMult.h"
 
 int32& CPlane::GenPlane_ModelIndex = *(int32*)0xC1CAD8;
 uint32& CPlane::GenPlane_Status = *(uint32*)0xC1CADC;

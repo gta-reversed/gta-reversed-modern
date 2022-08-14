@@ -2,7 +2,6 @@
 
 #include "TaskSimpleSwim.h"
 #include "TaskSimpleClimb.h"
-#include "FxPrtMult.h"
 
 float& CTaskSimpleSwim::SWIM_DIVE_UNDER_ANGLE = *reinterpret_cast<float*>(0x8D2FC4);
 float& CTaskSimpleSwim::SWIM_STOP_TIME = *reinterpret_cast<float*>(0x8D2FC0);

@@ -8,7 +8,6 @@
 
 #include "eWeatherType.h"
 #include "game_sa/Data/Weather.def"
-#include "FxPrtMult.h"
 
 float& CWeather::TrafficLightsBrightness = *(float*)0xC812A8;
 bool& CWeather::bScriptsForceRain = *(bool*)0xC812AC;

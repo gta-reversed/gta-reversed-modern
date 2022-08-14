@@ -5,7 +5,6 @@
 #include "FxEmitterPrt.h"
 #include "FxPrimBP.h"
 #include "FxEmitterBP.h"
-#include "FxPrtMult.h"
 
 void FxEmitter_c::InjectHooks() {
     RH_ScopedClass(FxEmitter_c);

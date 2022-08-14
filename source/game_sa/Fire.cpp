@@ -3,7 +3,6 @@
 #include "Fire.h"
 #include "FireManager.h"
 #include "CreepingFire.h"
-#include "FxPrtMult.h"
 
 void CFire::InjectHooks() {
     RH_ScopedClass(CFire);

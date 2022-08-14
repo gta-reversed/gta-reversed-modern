@@ -16,7 +16,6 @@
 #include "Rope.h"
 #include "Ropes.h"
 #include "IKChainManager_c.h"
-#include "FxPrtMult.h"
 
 float& CVehicle::WHEELSPIN_TARGET_RATE = *(float*)0x8D3498;          // 1.0f
 float& CVehicle::WHEELSPIN_INAIR_TARGET_RATE = *(float*)0x8D349C;    // 10.0f
