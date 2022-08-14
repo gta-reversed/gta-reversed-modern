@@ -33,30 +33,27 @@ public:
 
     uint8                         m_nNumGettingInSet;
     uint8                         m_nCamMovementChoice;
-    char                          _pad2[2];
     CVector                       m_vTargetDoorPos;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     bool                          m_bIsAborting;
-    char                          _pad3[3];
     CPed*                         m_pDraggedPed;
     uint8                         m_nDoorFlagsSet; // used for CVehicle::SetGettingInFlags
-    char                          _pad4[3];
     float                         m_fCruiseSpeed;
     int32                         m_nEnterCarStartTime;
 
 public:
     // Shouldn't be used directly, use CTaskComplexEnterCarAsDriver or CTaskComplexEnterCarAsPassenger instead
     CTaskComplexEnterCar(CVehicle* targetVehicle, bool bAsDriver, bool bQuitAfterOpeningDoor, bool bQuitAfterDraggingPedOut, bool bCarryOnAfterFallingOff = false);
-    ~CTaskComplexEnterCar();
+    ~CTaskComplexEnterCar() override;
 
     bool           MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask*         CreateNextSubTask(CPed* ped) override;
     CTask*         CreateFirstSubTask(CPed* ped) override;
     CTask*         ControlSubTask(CPed* ped) override;
+    CTask*         CreateSubTask(eTaskType type, CPed* ped);
     virtual CTask* CreateNextSubTask_AfterSimpleCarAlign(CPed* ped);
     CVector        GetTargetPos();
 
     auto GetVehicle() const { return m_pTargetVehicle; }
 };
-
 VALIDATE_SIZE(CTaskComplexEnterCar, 0x50);
