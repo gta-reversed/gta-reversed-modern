@@ -6,57 +6,48 @@ class CEntity;
 
 class CTaskComplexGangLeader : public CTaskComplex {
 public:
-    CPedGroup* m_PedGroup = {};    // 0xC
-    uint32 m_Time = {};            // 0x10
-    int32 m_Time1 = {};            // 0x14
-    bool byte18 = {};              // 0x18
-    uint8 byte19 = {};             // 0x19
-    uint8 gap1A[2] = {};           // 0x1A
-    int32 m_Time2 = {};            // 0x1C
-    int32 m_Time3 = {};            // 0x20
-    uint8 byte24 = {};             // 0x24
-    bool m_bTime = {};             // 0x25
-    uint8 gap26[2] = {};           // 0x26
-    int32 dword28 = {};            // 0x28
-    int32 dword2C = {};            // 0x2C
-    uint8 byte30 = {};             // 0x30
-    uint8 byte31 = {};             // 0x31
-    uint8 gap32[2] = {};           // 0x32
-    bool byte34 = {};              // 0x34
+    CPedGroup* m_PedGroup;
+    uint32     m_Time;
+    int32      m_Time1;
+    bool       byte18;
+    uint8      byte19;
+    uint8      gap1A[2];
+    int32      m_Time2;
+    int32      m_Time3;
+    uint8      byte24;
+    bool       m_bTime;
+    uint8      gap26[2];
+    int32      dword28;
+    int32      dword2C;
+    uint8      byte30;
+    uint8      byte31;
+    uint8      gap32[2];
+    bool       byte34;
 
 public:
-    static void InjectHooks();
-
-    ~CTaskComplexGangLeader();
-    CTaskComplexGangLeader(CPedGroup* pedGroup);
-
-    static int32 GetRandomGangAmbientAnim(CPed* ped, CEntity* entity);
-    static bool ShouldLoadGangAnims();
-    static void DoGangAbuseSpeech(CPed* ped, CPed* a2);
-
-    CPed* TryToPassObject(CPed* ped, CPedGroup* pedGroup);
-
     static constexpr auto Type = eTaskType::TASK_COMPLEX_GANG_LEADER;
 
-    virtual CTask* Clone();
-    virtual eTaskType GetTaskType() { return Type; }
-    virtual bool MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
-    virtual void ScanForStuff(CPed* ped);
+    explicit CTaskComplexGangLeader(CPedGroup* pedGroup);
+    ~CTaskComplexGangLeader() override;
 
-private: // Wrappers for hooks
-    // 0x65DED0
-    CTaskComplexGangLeader* Constructor(CPedGroup* pedGroup) {
-        this->CTaskComplexGangLeader::CTaskComplexGangLeader(pedGroup);
-        return this;
-    }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskComplexGangLeader(m_PedGroup); } // 0x661FA0;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
 
-    // 0x65DF30
-    CTaskComplexGangLeader* Destructor() {
-        this->CTaskComplexGangLeader::~CTaskComplexGangLeader();
-        return this;
-    }
+    void ScanForStuff(CPed* ped);
+    CPed* TryToPassObject(CPed* ped, CPedGroup* pedGroup);
+    static int32 GetRandomGangAmbientAnim(CPed* ped, CEntity* entity);
+    static bool ShouldLoadGangAnims();
+    static void DoGangAbuseSpeech(CPed* ped1, CPed* ped2);
+
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+
+    CTaskComplexGangLeader* Constructor(CPedGroup* pedGroup) { this->CTaskComplexGangLeader::CTaskComplexGangLeader(pedGroup); return this; }
+    CTaskComplexGangLeader* Destructor() { this->CTaskComplexGangLeader::~CTaskComplexGangLeader(); return this; }
 };
 VALIDATE_SIZE(CTaskComplexGangLeader, 0x38);
