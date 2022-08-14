@@ -1,7 +1,7 @@
 #pragma once
 #include "TaskComplex.h"
 
-class CTaskComplex;
+class CEntity;
 
 class CTaskGangHasslePed : public CTaskComplex {
 public:
