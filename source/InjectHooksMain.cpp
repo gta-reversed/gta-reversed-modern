@@ -580,7 +580,7 @@ void InjectHooksMain() {
         CTaskLeanOnVehicle::InjectHooks();
         CTaskComplexCarSlowBeDraggedOut::InjectHooks();
         CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
-        CTaskComplexDestroyCar::InjectHooks();
+        CTaskComplexDestroyCar__InjectHooks();
         // CTaskComplexDestroyCarArmed::InjectHooks();
         // CTaskComplexDestroyCarMelee::InjectHooks();
         CTaskComplexDieInCar::InjectHooks();
