@@ -182,11 +182,11 @@ static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
 }
 
 static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
-    return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+    return DistanceBetweenPointsSquared2D(point, center) <= sq(r);
 }
 
 static bool IsPointInSphere(const CVector& point, const CVector& center, float r) {
-    return DistanceBetweenPointsSquared(point, center) <= r * r;
+    return DistanceBetweenPointsSquared(point, center) <= sq(r);
 }
 
 // Converts degrees to radians
@@ -195,6 +195,8 @@ constexpr float DegreesToRadians(float angleInDegrees) {
     return angleInDegrees * PI / 180.0F;
 }
 
+// Converts radians to degrees
+// 57.295826
 constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }

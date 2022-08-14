@@ -4,6 +4,7 @@
 
 #include "RealTimeShadowManager.h"
 #include "Shadows.h"
+#include "CarFXRenderer.h"
 
 char* (&CCutsceneObject::ms_sCutsceneVehNames)[NUM_CUTSCENE_VEHS] = *(char* (*)[NUM_CUTSCENE_VEHS])0x8D0F68;
 

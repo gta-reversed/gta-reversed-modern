@@ -115,6 +115,7 @@
 #include "VehicleRecording.h"
 #include "Birds.h"
 #include "Hud.h"
+#include "CarFXRenderer.h"
 
 // Tasks
 #include "EntitySeekPosCalculator.h"

@@ -90,6 +90,8 @@ target_include_directories(${RE_PROJECT_LIB_NAME} PRIVATE
     game_sa/Events/
     game_sa/Frontend/
     game_sa/Fx/
+    game_sa/Fx/Blueprints/
+    game_sa/Fx/Blueprints/Interp
     game_sa/Interior/
     game_sa/Memory/
     game_sa/Models/
