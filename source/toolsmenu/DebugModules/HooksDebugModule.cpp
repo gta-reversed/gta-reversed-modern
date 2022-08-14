@@ -336,6 +336,10 @@ void RenderCategory(RH::HookCategory& cat) {
         return;
     }
 
+    // We copy ImGui style here to alter it for indication.
+    const auto styleRestore = ImGui::GetStyle();
+    auto& style = ImGui::GetStyle();
+
     // NOTE: Won't work properly if `cat::m_items`s type is changed from `std::list`
     // Using this instead of the name as it's faster than encoding a string (And we care about performance, since this is mostly run in debug mode)
     PushID(&cat);
@@ -392,8 +396,24 @@ void RenderCategory(RH::HookCategory& cat) {
                     {
                         PushID("state");
                         bool hooked{ item->Hooked() };
-                        if (SameLine(); Checkbox(item->Name().c_str(), &hooked)) {
+
+                        // it's locked, indicate it.
+                        if (item->Locked()) {
+                            // w is the alpha component
+                            style.Colors[ImGuiCol_Text].w = 0.33f;
+                            style.Colors[ImGuiCol_FrameBg].w = 0.33f;
+                            style.Colors[ImGuiCol_FrameBgActive].w = 0.33f;
+                        }
+                        if (SameLine(); Checkbox(item->Name().c_str(), &hooked) && !item->Locked()) {
                             cat.SetItemEnabled(item, hooked);
+                        }
+
+                        // now restore it
+                        if (item->Locked()) {
+                            // w is the alpha component
+                            style.Colors[ImGuiCol_Text].w = styleRestore.Colors[ImGuiCol_Text].w;
+                            style.Colors[ImGuiCol_FrameBg].w = styleRestore.Colors[ImGuiCol_FrameBg].w;
+                            style.Colors[ImGuiCol_FrameBgActive].w = styleRestore.Colors[ImGuiCol_FrameBgActive].w;
                         }
                         PopID(); // State checkbox
                     }
@@ -403,7 +423,11 @@ void RenderCategory(RH::HookCategory& cat) {
                         case RH::ReversibleHook::Base::HookType::Simple: {
                             auto s = static_cast<RH::ReversibleHook::Simple*>(item.get());
 
-                            SetTooltip("GTA: %#x | Our: %#x", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
+                            std::string tooltipText = std::format("SA: {:#x} - Our: {:#x}", s->m_iRealHookedAddress, s->m_iLibFunctionAddress);
+                            if (item->Locked()) {
+                                tooltipText += "\n(locked)";
+                            }
+                            SetTooltip(tooltipText.c_str());
 
                             if (IsItemClicked(ImGuiMouseButton_Middle)) {
                                 SetClipboardText(std::format("{:#x}", s->m_iRealHookedAddress).c_str());

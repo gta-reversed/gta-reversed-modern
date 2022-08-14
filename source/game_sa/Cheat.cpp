@@ -138,7 +138,7 @@ void CCheat::InjectHooks() {
     RH_ScopedClass(CCheat);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(AddToCheatString, 0x438480);
+    RH_ScopedInstall(AddToCheatString, 0x438480, {.locked = true});
     RH_ScopedInstall(HandleSpecialCheats, 0x439A10);
     RH_ScopedInstall(DoCheats, 0x439AF0);
     RH_ScopedInstall(ResetCheats, 0x438450);

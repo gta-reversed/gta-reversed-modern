@@ -95,9 +95,9 @@ namespace ReversibleHooks {
     };
 
     template <typename T>
-    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, HookInstallOptions&& opt) {
+    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, HookInstallOptions&& opt = {}) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        detail::HookInstall(category, std::move(fnName), installAddress, ptr, opt);
+        detail::HookInstall(category, std::move(fnName), installAddress, ptr, std::move(opt));
     }
 
     template <typename T>

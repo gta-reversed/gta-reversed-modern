@@ -138,15 +138,14 @@ private:
     // Set all our and subcategories' items to the specified state.
     // `dontNotify` - Useful to avoid unnecessary parent notifications (Only the level 1 caller should notify it's parents)
     void SetAllItemsEnabled_Internal(bool enabled, bool notifyParent = true) {
-        bool someFailed = false; // some items state couldn't be changed, they're locked.
+        auto failedItems = 0u;
 
         for (auto& item : m_items) {
-            if (item->Locked() && !someFailed) {
+            if (item->Locked()) {
                 // the hook is locked thus we can't change it's state.
-                // now we check if it's state is same with `enabled`.
-                // if it's not, then we can't show the `state` as all OR none
-                // are hooked.
-                someFailed = item->Hooked() != enabled;
+                if (item->Hooked() != enabled) {
+                    failedItems++;
+                }
             } else {
                 item->State(enabled);
             }
@@ -156,7 +155,17 @@ private:
             cat.SetAllItemsEnabled_Internal(enabled, false); // No need to notify parents as we'll do that ourselves
         }
 
-        const auto state = someFailed ? HooksState::SOME : (enabled ? HooksState::ALL : HooksState::NONE);
+        const auto GetHookState = [](bool state) { return state ? HooksState::ALL : HooksState::NONE; };
+
+        auto state = GetHookState(enabled);
+        if (failedItems) {
+            if (failedItems == m_items.size()) {
+                // all of them are failed.
+                state = GetHookState(!enabled);
+            } else {
+                state = HooksState::SOME;
+            }
+        }
         m_itemsState = state;
         m_subcatsState = state;
         ReCalculateOverallStateAndMaybeNotify(notifyParent); // It's enough if only we notify our parent
