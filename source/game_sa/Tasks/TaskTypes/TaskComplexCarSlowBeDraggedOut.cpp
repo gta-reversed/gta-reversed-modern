@@ -3,7 +3,7 @@
 
 void CTaskComplexCarSlowBeDraggedOut::InjectHooks() {
     RH_ScopedClass(CTaskComplexCarSlowBeDraggedOut);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes"); // TODO: Change this to the appropriate category!
 
     RH_ScopedInstall(Constructor, 0x648490);
     RH_ScopedInstall(Destructor, 0x64C580);
