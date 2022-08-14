@@ -3,7 +3,7 @@
 
 void CTaskComplexSmartFleeEntity::InjectHooks() {
     RH_ScopedClass(CTaskComplexSmartFleeEntity);
-    RH_ScopedCategory(); // TODO: Change this to the appropriate category!
+    RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x65C430);
     RH_ScopedInstall(Destructor, 0x65C4D0);
