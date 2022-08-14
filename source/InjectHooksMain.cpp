@@ -234,6 +234,7 @@
 #include "TaskComplexAvoidEntity.h"
 #include "TaskGangHasslePed.h"
 #include "TaskGangHassleVehicle.h"
+#include "TaskGoToVehicleAndLean.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -540,7 +541,7 @@ void InjectHooksMain() {
     const auto Tasks = []() {
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();
-        // CTaskGoToVehicleAndLean::InjectHooks();
+        CTaskGoToVehicleAndLean::InjectHooks();
         // CTaskInteriorBeInHouse::InjectHooks();
         // CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
