@@ -242,6 +242,8 @@
 #include "TaskComplexGangJoinRespond.h"
 #include "TaskComplexGangLeader.h"
 #include "TaskComplexGetOnBoatSeat.h"
+#include "TaskComplexGoToAttractor.h"
+#include "TaskComplexGoToBoatSteeringWheel.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -590,8 +592,8 @@ void InjectHooksMain() {
         CTaskComplexGangJoinRespond::InjectHooks();
         CTaskComplexGangLeader::InjectHooks();
         CTaskComplexGetOnBoatSeat::InjectHooks();
-        // CTaskComplexGoToAttractor::InjectHooks();
-        // CTaskComplexGoToBoatSteeringWheel::InjectHooks();
+        CTaskComplexGoToAttractor::InjectHooks();
+        CTaskComplexGoToBoatSteeringWheel::InjectHooks();
         // CTaskComplexGoToCarDoorAndStandStill::InjectHooks();
         // CTaskComplexGoToPointAiming::InjectHooks();
         // CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks();
