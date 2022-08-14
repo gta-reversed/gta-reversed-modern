@@ -45,6 +45,9 @@ public:
     void AllocateMatrix();
     void SetMatrix(CMatrix& matrix);
 
+    // NOTSA
+    bool IsPointInRange(const CVector& point, float range);
+    bool IsEntityInRange(const CPlaceable* entity, float range) { return IsPointInRange(entity->GetPosition(), range); }
 public:
     static constexpr uint32 NUM_MATRICES_TO_CREATE = 900;
     

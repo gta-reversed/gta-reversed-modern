@@ -2,7 +2,7 @@
 
 #include "TaskComplex.h"
 #include "eWeaponType.h"
-#include "Vehicle.h"
+class CVehicle;
 
 enum class eFallDir : uint8 { FORWARD, LEFT, BACKWARD, RIGHT };
 
