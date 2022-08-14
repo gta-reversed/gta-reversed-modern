@@ -244,6 +244,7 @@
 #include "TaskComplexGetOnBoatSeat.h"
 #include "TaskComplexGoToAttractor.h"
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskComplexGoToCarDoorAndStandStill.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -594,7 +595,7 @@ void InjectHooksMain() {
         CTaskComplexGetOnBoatSeat::InjectHooks();
         CTaskComplexGoToAttractor::InjectHooks();
         CTaskComplexGoToBoatSteeringWheel::InjectHooks();
-        // CTaskComplexGoToCarDoorAndStandStill::InjectHooks();
+        CTaskComplexGoToCarDoorAndStandStill::InjectHooks();
         // CTaskComplexGoToPointAiming::InjectHooks();
         // CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks();
         // CTaskComplexGoToPointAnyMeans::InjectHooks();
