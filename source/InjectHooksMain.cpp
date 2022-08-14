@@ -313,6 +313,7 @@ void InjectHooksMain() {
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
+    BreakObject_c::InjectHooks();
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();

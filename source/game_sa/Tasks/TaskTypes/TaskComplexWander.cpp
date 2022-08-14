@@ -22,7 +22,7 @@ void CTaskComplexWander::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x66F450);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674140);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674140, true); //TODO: Bugged function, needs fix
     RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6740E0);
     RH_ScopedVirtualInstall(ControlSubTask, 0x674C30);
     RH_ScopedVirtualInstall(UpdateDir, 0x669DA0);
