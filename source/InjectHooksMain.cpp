@@ -232,6 +232,7 @@
 #include "TaskSimpleCarSlowDragPedOut.h"
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
 #include "TaskComplexAvoidEntity.h"
+#include "TaskGangHasslePed.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -536,7 +537,7 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
-        // CTaskGangHasslePed::InjectHooks();
+        CTaskGangHasslePed::InjectHooks();
         // CTaskGangHassleVehicle::InjectHooks();
         // CTaskGoToVehicleAndLean::InjectHooks();
         // CTaskInteriorBeInHouse::InjectHooks();
