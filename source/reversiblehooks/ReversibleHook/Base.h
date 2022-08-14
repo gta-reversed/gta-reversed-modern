@@ -19,9 +19,10 @@ struct Base {
         Virtual
     };
 
-    Base(std::string fnName, HookType type) :
+    Base(std::string fnName, HookType type, bool locked = false) :
         m_fnName{std::move(fnName)},
-        m_type{type}
+        m_type{type},
+        m_bIsLocked{locked}
     {
     }
 
@@ -31,24 +32,33 @@ struct Base {
     virtual void Check() = 0;
 
     void State(bool hooked) {
+        if (m_bIsLocked)
+            return;
+
         if (m_bIsHooked != hooked) {
             Switch();
         }
+    }
+
+    void LockState(bool locked) {
+        m_bIsLocked = locked;
     }
 
     const auto& Name()   const { return m_fnName; }
     const auto  Type()   const { return m_type; }
     const auto  Hooked() const { return m_bIsHooked; }
     const char* Symbol() const { return Type() == HookType::Simple ? "S" : "V"; } // Symbol in ImGui
+    const auto  Locked() const { return m_bIsLocked; }
 
 public:
     // ImGui stuff
     bool m_isVisible{};
 
 protected:
-    bool        m_bIsHooked{};     // Is hook installed
-    std::string m_fnName{}; // Name of function, eg.: `Add` (Referring to CEntity::Add)
+    bool        m_bIsHooked{};  // Is hook installed
+    std::string m_fnName{};     // Name of function, eg.: `Add` (Referring to CEntity::Add)
     HookType    m_type{};
+    bool        m_bIsLocked{};  // Is hook locked, i.e.: the hooked state can't be changed.
 };
 };
 };
