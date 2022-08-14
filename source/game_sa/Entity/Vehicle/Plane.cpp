@@ -401,7 +401,7 @@ void CPlane::Render() {
 
 // 0x6C9260
 void CPlane::ProcessControl() {
-    // return plugin::CallMethod<0x6C9260, CPlane*>(this);
+    return plugin::CallMethod<0x6C9260, CPlane*>(this);
 
     // untested
     if (m_nStatus == STATUS_PLAYER) {

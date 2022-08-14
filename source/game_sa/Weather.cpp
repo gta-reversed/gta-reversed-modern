@@ -118,20 +118,11 @@ void CWeather::AddSandStormParticles() {
 // 0x72A520
 const eWeatherType* CWeather::FindWeatherTypesList() {
     switch (WeatherRegion) {
-    case WEATHER_REGION_LA:
-        return WeatherTypesListLA;
-
-    case WEATHER_REGION_SF:
-        return WeatherTypesListSF;
-
-    case WEATHER_REGION_LV:
-        return WeatherTypesListVegas;
-
-    case WEATHER_REGION_DESERT:
-        return WeatherTypesListDesert;
-
-    default:
-        return WeatherTypesListDefault;
+    case WEATHER_REGION_LA:     return WeatherTypesListLA;
+    case WEATHER_REGION_SF:     return WeatherTypesListSF;
+    case WEATHER_REGION_LV:     return WeatherTypesListVegas;
+    case WEATHER_REGION_DESERT: return WeatherTypesListDesert;
+    default:                    return WeatherTypesListDefault;
     }
 }
 

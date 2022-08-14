@@ -323,7 +323,7 @@ void CObject::ProcessControl_Reversed() {
         static float fMaxDoorDiff = 0.3F;
         static float fDoorCutoffSpeed = 0.02F;
         static float fDoorSpeedMult = 0.002F;
-        fDiff = clamp(fDiff, -fMaxDoorDiff, fMaxDoorDiff);
+        fDiff = std::clamp(fDiff, -fMaxDoorDiff, fMaxDoorDiff);
         if (fDiff > 0.0F && m_vecTurnSpeed.z < +fDoorCutoffSpeed ||
             fDiff < 0.0F && m_vecTurnSpeed.z > -fDoorCutoffSpeed
         ) {

@@ -60,11 +60,11 @@ public:
 
 public:
     static void InjectHooks();
+    Fx_c* Constructor();
+    Fx_c* Destructor();
 
     Fx_c() = default; // 0x49E620
     ~Fx_c() = default; // 0x49E630
-    Fx_c* Constructor();
-    Fx_c* Destructor();
 
     void InitStaticSystems();
     void ExitStaticSystems();

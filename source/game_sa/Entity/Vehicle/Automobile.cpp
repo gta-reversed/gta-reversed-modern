@@ -4261,16 +4261,7 @@ void CAutomobile::dmgDrawCarCollidingParticles(const CVector& position, float fo
         // The higher our speed the more particles we create
         const auto numSmokes = std::max(1u, (uint32)((m_vecMoveSpeed * CTimer::GetTimeStep()).Magnitude() * 4.f));
         for (auto i = 0u; i < numSmokes; i++) {
-            g_fx.m_SmokeHuge->AddParticle(
-                &fxPos,
-                &velocity,
-                0.f,
-                &prtMult,
-                -1.f,
-                1.2f,
-                0.6f,
-                0
-            );
+            g_fx.m_SmokeHuge->AddParticle(&fxPos, &velocity, 0.f, &prtMult, -1.f, 1.2f, 0.6f, 0);
         }
     }
 
