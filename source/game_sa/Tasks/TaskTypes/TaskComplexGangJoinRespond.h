@@ -1,34 +1,32 @@
 #pragma once
+
 #include "TaskComplex.h"
 
 class CPed;
 
 class CTaskComplexGangJoinRespond : public CTaskComplex {
 public:
+    bool  byteC;
+    bool  byteD;
+    int32 b10;
+
+public:
+    static constexpr auto Type = TASK_COMPLEX_GANG_JOIN_RESPOND;
+
+    explicit CTaskComplexGangJoinRespond(uint8 a2);
+    ~CTaskComplexGangJoinRespond() override;
+
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskComplexGangJoinRespond(byteC); } // 0x662290;
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; } // 0x661790;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
+
+private:
+    friend void InjectHooksMain();
     static void InjectHooks();
-
-    CTaskComplexGangJoinRespond(uint8 a2);
-    ~CTaskComplexGangJoinRespond();
-
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_GANG_JOIN_RESPOND;
-
-    virtual CTask* Clone();
-    virtual eTaskType GetTaskType() { return Type; }
-    virtual bool MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
-
-private: // Wrappers for hooks
-    // 0x6616F0
-    CTaskComplexGangJoinRespond* Constructor(uint8 a2) {
-        this->CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(a2);
-        return this;
-    }
-
-    // 0x661720
-    CTaskComplexGangJoinRespond* Destructor() {
-        this->CTaskComplexGangJoinRespond::~CTaskComplexGangJoinRespond();
-        return this;
-    }
+    CTaskComplexGangJoinRespond* Constructor(uint8 a2) { this->CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(a2); return this; }
+    CTaskComplexGangJoinRespond* Destructor() { this->CTaskComplexGangJoinRespond::~CTaskComplexGangJoinRespond(); return this; }
 };
+VALIDATE_SIZE(CTaskComplexGangJoinRespond, 0x14);

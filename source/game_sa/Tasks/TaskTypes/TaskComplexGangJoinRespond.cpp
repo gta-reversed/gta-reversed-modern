@@ -1,5 +1,7 @@
 #include "StdInc.h"
+
 #include "TaskComplexGangJoinRespond.h"
+// #include "TaskComplexTurnToFaceEntityOrCoord.h"
 
 void CTaskComplexGangJoinRespond::InjectHooks() {
     RH_ScopedClass(CTaskComplexGangJoinRespond);
@@ -7,29 +9,25 @@ void CTaskComplexGangJoinRespond::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x6616F0);
     RH_ScopedInstall(Destructor, 0x661720);
-
-    // RH_ScopedInstall(Clone, 0x662290);
-    RH_ScopedInstall(GetTaskType, 0x661710);
-    // RH_ScopedInstall(MakeAbortable, 0x661790);
-    // RH_ScopedInstall(CreateNextSubTask, 0x6617A0);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x6618D0);
-    // RH_ScopedInstall(ControlSubTask, 0x661950);
+    // RH_ScopedInstall(Clone_Reversed, 0x662290);
+    // RH_ScopedInstall(MakeAbortable_Reversed, 0x661790);
+    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6617A0);
+    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6618D0);
+    // RH_ScopedInstall(ControlSubTask_Reversed, 0x661950);
 }
 
 // 0x6616F0
-CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(uint8) {}
-
-// 0x661720
-CTaskComplexGangJoinRespond::~CTaskComplexGangJoinRespond() {}
-
-// 0x662290
-CTask* CTaskComplexGangJoinRespond::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x662290, CTaskComplexGangJoinRespond*>(this);
+CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(uint8 a2) : CTaskComplex() {
+    byteC = a2;
+    byteD = false;
 }
 
-// 0x661790
-bool CTaskComplexGangJoinRespond::MakeAbortable(CPed* ped, int32 priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x661790, CTaskComplexGangJoinRespond*, CPed*, int32, CEvent const*>(this, ped, priority, event);
+// 0x661720
+CTaskComplexGangJoinRespond::~CTaskComplexGangJoinRespond() {
+    if (byteD) {
+        CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex("gangs"));
+        byteD = false;
+    }
 }
 
 // 0x6617A0
@@ -40,6 +38,8 @@ CTask* CTaskComplexGangJoinRespond::CreateNextSubTask(CPed* ped) {
 // 0x6618D0
 CTask* CTaskComplexGangJoinRespond::CreateFirstSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x6618D0, CTaskComplexGangJoinRespond*, CPed*>(this, ped);
+    // b10 = 0;
+    // return new CTaskComplexTurnToFaceEntityOrCoord(FindPlayerPed(0), 0.5f, 0.2f);
 }
 
 // 0x661950
