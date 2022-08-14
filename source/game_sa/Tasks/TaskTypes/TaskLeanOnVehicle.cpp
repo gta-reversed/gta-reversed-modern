@@ -18,7 +18,7 @@ CTaskLeanOnVehicle::CTaskLeanOnVehicle(CEntity* vehicle, int32 leanAnimDurationI
     m_LeanAnimDurationInMs = leanAnimDurationInMs;
     m_Vehicle = vehicle->AsVehicle(); // todo: strange
     field_10 = a4;
-    m_LeanAnimAssoc = 0;
+    m_LeanAnimAssoc = nullptr;
     m_nAnimId = ANIM_ID_UNDEFINED;
     m_bFinished = 0;
     m_LeanAnimId = 0;

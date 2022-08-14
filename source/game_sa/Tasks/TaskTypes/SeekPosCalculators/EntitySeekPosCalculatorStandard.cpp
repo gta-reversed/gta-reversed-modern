@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "EntitySeekPosCalculatorStandard.h"
 
 void CEntitySeekPosCalculatorStandard::InjectHooks() {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TaskComplex.h"
+#include "TaskComplexGoToPointAiming.h"
 
 class CTaskComplexGoToPointShooting : public CTaskComplexGoToPointAiming {
 public:

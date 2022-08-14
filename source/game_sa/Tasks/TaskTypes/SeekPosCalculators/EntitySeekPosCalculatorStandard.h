@@ -6,5 +6,5 @@ class CEntitySeekPosCalculatorStandard : public CEntitySeekPosCalculator {
 public:
     static void InjectHooks();
 
-    virtual void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos);
+    void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) override;
 };

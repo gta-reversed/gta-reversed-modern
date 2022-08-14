@@ -8,10 +8,9 @@ void CTaskGangHasslePed::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x65FED0);
     RH_ScopedInstall(Destructor, 0x65FF60);
-    // RH_ScopedInstall(Clone, 0x6620D0);
-    // RH_ScopedInstall(CreateNextSubTask, 0x6642C0);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x664380);
-    // RH_ScopedInstall(ControlSubTask, 0x65FFE0);
+    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6642C0);
+    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x664380);
+    // RH_ScopedInstall(ControlSubTask_Reversed, 0x65FFE0);
 }
 
 // 0x65FED0
@@ -24,7 +23,7 @@ CTaskGangHasslePed::CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5) 
     dword14 = a4;
     m_Ped = ped;
     dword18 = a5;
-    m_bAnimationNotDeleted = 0;
+    m_bAnimationNotDeleted = false;
     CEntity::SafeRegisterRef(m_Ped);
 }
 

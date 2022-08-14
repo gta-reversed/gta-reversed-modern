@@ -10,13 +10,13 @@ public:
     CAnimBlendAssociation* m_LeanAnimAssoc;
     int32      m_nAnimId;
     CTaskTimer m_LeanTimer;
-    int8 m_bFinished;
+    bool       m_bFinished;
     int8       m_LeanAnimId;
-    int8       m_StopLeaning;
+    bool       m_StopLeaning;
     int8       field_2B;
 
 public:
-    static constexpr auto Type = TASK_COMPLEX_LEAN_ON_VEHICLE; // ?
+    static constexpr auto Type = TASK_COMPLEX_LEAN_ON_VEHICLE;
 
     CTaskLeanOnVehicle(CEntity* vehicle, int32 leanAnimDurationInMs, uint8 a4);
     ~CTaskLeanOnVehicle() override;

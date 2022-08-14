@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "EntitySeekPosCalculatorXYOffset.h"
 
 void CEntitySeekPosCalculatorXYOffset::InjectHooks() {

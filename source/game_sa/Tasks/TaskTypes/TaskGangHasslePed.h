@@ -10,19 +10,17 @@ public:
     int32 dword10;
     int32 dword14;
     int32 dword18;
-    uint8 m_bAnimationNotDeleted;
+    bool m_bAnimationNotDeleted;
     int32 m_nTime;
     int32 m_nSomeRandomShit;
     uint8 m_bFirstSubTaskInitialised;
     uint8 byte29;
 
 public:
-    static void InjectHooks();
+    static constexpr auto Type = TASK_COMPLEX_GANG_HASSLE_PED;
 
     CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5);
     ~CTaskGangHasslePed() override;
-
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_GANG_HASSLE_PED;
 
     CTask* Clone() override { return new CTaskGangHasslePed(m_Ped, dword10, dword14, dword18); } // 0x6620D0
     eTaskType GetTaskType() override { return Type; }
@@ -31,6 +29,8 @@ public:
     CTask* ControlSubTask(CPed* ped) override;
 
 private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
     CTaskGangHasslePed* Constructor(CPed* ped, int32 a3, int32 a4, int32 a5) { this->CTaskGangHasslePed::CTaskGangHasslePed(ped, a3, a4, a5); return this; }
     CTaskGangHasslePed* Destructor() { this->CTaskGangHasslePed::~CTaskGangHasslePed(); return this; }
 };
