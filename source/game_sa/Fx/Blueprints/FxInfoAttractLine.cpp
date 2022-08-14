@@ -15,20 +15,14 @@ void FxInfoAttractLine_c::Load(FILESTREAM file, int32 version) {
 
 // 0x4A4880
 void FindClosestPtOnLine(CVector& out, CVector& a2, CVector& a3, CVector& a4) {
-    auto a = DistanceBetweenPoints(a4, a2);
-    auto b = DistanceBetweenPoints(a3, a2);
-    auto c = a / b; // todo:
+    return plugin::Call<0x4A4880, CVector&, CVector&, CVector&, CVector&>(out, a2, a3, a4);
 
-    float v9 = (
-        (
-            (a4.z - a2.z) * (a3.z - a2.z) +
-            (a4.y - a2.y) * (a3.y - a2.y) +
-            (a4.x - a2.x) * (a3.x - a2.x))
-        /
-        ((a3.z - a2.z) * (a3.z - a2.z) + (a3.y - a2.y) * (a3.y - a2.y) + (a3.x - a2.x) * (a3.x - a2.x))
-    );
-    v9 = std::clamp(v9, 0.0f, 1.0f);
-    out = (a3 - a2) * v9 + a2;
+    const auto a = DistanceBetweenPoints(a4, a2);
+    const auto b = DistanceBetweenPoints(a3, a2);
+    const auto a3m2 = a3 - a2;
+    const auto a4m2 = a4 - a2;
+    float v9 = DotProduct(a4m2, a3m2) / a3m2.SquaredMagnitude();
+    out = a3m2 * std::clamp(v9, 0.0f, 1.0f) + a2;
 }
 
 // 0x4A5850
