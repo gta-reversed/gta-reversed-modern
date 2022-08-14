@@ -16,7 +16,8 @@ void CTaskSimpleSlideToCoord::InjectHooks() {
 }
 
 // 0x66C3E0
-CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(CVector const& pos, float aimingRotation, float radius) :
+CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(const CVector& pos, float aimingRotation, float radius) :
+    CTaskSimpleRunNamedAnim(),
     m_SlideToPos{ pos },
     m_fAimingRotation{ aimingRotation },
     m_fRadius{ radius },
@@ -26,7 +27,7 @@ CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(CVector const& pos, float aimin
 }
 
 // 0x66C450
-CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(CVector const& slideToPos, float aimingRotation, float radius, char const* animBlockName, char const* animGroupName, uint32 animFlags, float animBlendDelta, bool isActiveSequence, uint32 endTime) :
+CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(const CVector& slideToPos, float aimingRotation, float radius, const char* animBlockName, const char* animGroupName, uint32 animFlags, float animBlendDelta, bool isActiveSequence, uint32 endTime) :
     CTaskSimpleRunNamedAnim{ animBlockName, animGroupName, animFlags, animBlendDelta, endTime, false, isActiveSequence, false, false },
     m_SlideToPos{ slideToPos },
     m_fAimingRotation{ aimingRotation },
@@ -38,13 +39,13 @@ CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(CVector const& slideToPos, floa
 // 0x66D300
 CTask* CTaskSimpleSlideToCoord::Clone() {
     return m_bHasAnim ?
-        new CTaskSimpleSlideToCoord{m_SlideToPos, m_fAimingRotation, m_fRadius, m_animName, m_animGroupName, m_animFlags, m_blendDelta, !!m_bRunInSequence, m_endTime } :
-        new CTaskSimpleSlideToCoord{m_SlideToPos, m_fAimingRotation, m_fRadius};
+        new CTaskSimpleSlideToCoord(m_SlideToPos, m_fAimingRotation, m_fRadius, m_animName, m_animGroupName, m_animFlags, m_blendDelta, !!m_bRunInSequence, m_endTime) :
+        new CTaskSimpleSlideToCoord(m_SlideToPos, m_fAimingRotation, m_fRadius);
 }
 
 // 0x66C4D0
 bool CTaskSimpleSlideToCoord::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
-    return !m_bHasAnim || CTaskSimpleAnim::MakeAbortable(ped, priority, event);
+    return m_bHasAnim ? CTaskSimpleAnim::MakeAbortable(ped, priority, event) : true;
 }
 
 // 0x66C4E0
