@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexCarSlowBeDraggedOut.h"
 
 void CTaskComplexCarSlowBeDraggedOut::InjectHooks() {
@@ -7,23 +8,30 @@ void CTaskComplexCarSlowBeDraggedOut::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x648490);
     RH_ScopedInstall(Destructor, 0x64C580);
-
-    //RH_ScopedInstall(CreateTaskUtilityLineUpPedWithCar, 0x648520);
-    //RH_ScopedInstall(CreateSubTask, 0x64C6A0);
-
-    //RH_ScopedInstall(Clone, 0x64A120);
+    // RH_ScopedInstall(CreateTaskUtilityLineUpPedWithCar, 0x648520);
+    // RH_ScopedInstall(CreateSubTask, 0x64C6A0);
+    // RH_ScopedInstall(Clone, 0x64A120);
     RH_ScopedInstall(GetTaskType, 0x648500);
-    //RH_ScopedInstall(MakeAbortable, 0x64C600);
-    //RH_ScopedInstall(CreateNextSubTask, 0x64C810);
-    //RH_ScopedInstall(CreateFirstSubTask, 0x64C8B0);
-    //RH_ScopedInstall(ControlSubTask, 0x648510);
+    // RH_ScopedInstall(MakeAbortable, 0x64C600);
+    // RH_ScopedInstall(CreateNextSubTask, 0x64C810);
+    // RH_ScopedInstall(CreateFirstSubTask, 0x64C8B0);
+    // RH_ScopedInstall(ControlSubTask, 0x648510);
 }
 
 // 0x648490
-CTaskComplexCarSlowBeDraggedOut::CTaskComplexCarSlowBeDraggedOut(CVehicle* car, int32 a3, bool a4) {}
+CTaskComplexCarSlowBeDraggedOut::CTaskComplexCarSlowBeDraggedOut(CVehicle* vehicle, int32 door, bool a4) : CTaskComplex() {
+    m_Door = door;
+    m_Vehicle = vehicle;
+    field_14 = a4;
+    m_TaskUtilityLineUpPedWithCar = nullptr;
+    CEntity::SafeRegisterRef(m_Vehicle);
+}
 
 // 0x64C580
-CTaskComplexCarSlowBeDraggedOut::~CTaskComplexCarSlowBeDraggedOut() {}
+CTaskComplexCarSlowBeDraggedOut::~CTaskComplexCarSlowBeDraggedOut() {
+    CEntity::SafeCleanUpRef(m_Vehicle);
+    delete m_TaskUtilityLineUpPedWithCar;
+}
 
 // 0x648520
 CTaskUtilityLineUpPedWithCar* CTaskComplexCarSlowBeDraggedOut::CreateTaskUtilityLineUpPedWithCar(int32 a2) {
@@ -31,18 +39,13 @@ CTaskUtilityLineUpPedWithCar* CTaskComplexCarSlowBeDraggedOut::CreateTaskUtility
 }
 
 // 0x64C6A0
-CTaskSimpleCarFallOut* CTaskComplexCarSlowBeDraggedOut::CreateSubTask(int32 a2) {
-    return plugin::CallMethodAndReturn<CTaskSimpleCarFallOut*, 0x64C6A0, CTaskComplexCarSlowBeDraggedOut*, int32>(this, a2);
-}
-
-// 0x64A120
-CTask* CTaskComplexCarSlowBeDraggedOut::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A120, CTaskComplexCarSlowBeDraggedOut*>(this);
+CTask* CTaskComplexCarSlowBeDraggedOut::CreateSubTask(eTaskType taskType) {
+    return plugin::CallMethodAndReturn<CTask*, 0x64C6A0, CTaskComplexCarSlowBeDraggedOut*, eTaskType>(this, taskType);
 }
 
 // 0x64C600
-bool CTaskComplexCarSlowBeDraggedOut::MakeAbortable(CPed* ped, int32 priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x64C600, CTaskComplexCarSlowBeDraggedOut*, CPed*, int32, CEvent const*>(this, ped, priority, event);
+bool CTaskComplexCarSlowBeDraggedOut::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    return plugin::CallMethodAndReturn<bool, 0x64C600, CTaskComplexCarSlowBeDraggedOut*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
 }
 
 // 0x64C810
