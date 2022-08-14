@@ -249,6 +249,7 @@
 #include "TaskComplexGoToPointAndStandStillAndAchieveHeading.h"
 #include "TaskComplexGoToPointAnyMeans.h"
 #include "TaskComplexGoToPointShooting.h"
+#include "TaskComplexGotoDoorAndOpen.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -605,7 +606,7 @@ void InjectHooksMain() {
         CTaskComplexGoToPointAnyMeans::InjectHooks();
         CTaskComplexGoToPointShooting::InjectHooks();
         // CTaskComplexGoToPointUntilCollisionAndStandStill::InjectHooks();
-        // CTaskComplexGotoDoorAndOpen::InjectHooks();
+        CTaskComplexGotoDoorAndOpen::InjectHooks();
         // CTaskComplexHitByGunResponse::InjectHooks();
         // CTaskComplexHitResponse::InjectHooks();
         // CTaskComplexInWater::InjectHooks();
