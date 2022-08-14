@@ -5,10 +5,10 @@
 class CTaskGoToVehicleAndLean : public CTaskComplex {
 public:
     CVehicle* m_vehicle = {}; // 0xC
-    int32 m_leanAnimDurationInMs = {}; // 0x10
-    int8_t m_leanOnVehicle = {}; // 0x14
-    int8_t field_15 = {}; // 0x15
-    char field_16[2] = {}; // 0x16
+    int32     m_leanAnimDurationInMs = {}; // 0x10
+    int8      m_leanOnVehicle = {}; // 0x14
+    int8      field_15 = {}; // 0x15
+    uint8     field_16[2] = {}; // 0x16
 
 public:
     static void InjectHooks();
@@ -18,12 +18,12 @@ public:
 
     static constexpr auto Type = eTaskType::TASK_COMPLEX_GOTO_VEHICLE_AND_LEAN;
 
-    virtual CTask* Clone();
+    virtual CTask*    Clone();
     virtual eTaskType GetTaskType() { return Type; }
-    virtual bool MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
+    virtual bool      MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
+    virtual CTask*    CreateNextSubTask(CPed* ped);
+    virtual CTask*    CreateFirstSubTask(CPed* ped);
+    virtual CTask*    ControlSubTask(CPed* ped);
 
 private: // Wrappers for hooks
     // 0x660E60
