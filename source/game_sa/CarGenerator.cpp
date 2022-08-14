@@ -26,8 +26,7 @@ void CCarGenerator::InjectHooks()
 }
 
 // 0x6F32E0
-bool CCarGenerator::CheckForBlockage(int32 modelId)
-{
+bool CCarGenerator::CheckForBlockage(int32 modelId) {
     auto colModel = CModelInfo::GetModelInfo(modelId)->GetColModel();
     float radius = colModel ? colModel->GetBoundRadius() : 2.0f;
 
@@ -37,24 +36,22 @@ bool CCarGenerator::CheckForBlockage(int32 modelId)
     CVector posn = UncompressLargeVector(m_vecPosn);
     CWorld::FindObjectsKindaColliding(posn, radius, true, &entityCount, 8, objects, false, true, true, false, false);
 
-    for (int32 i = 0; i < entityCount; i++)
-    {
-        auto pEntityColModel = CModelInfo::GetModelInfo(objects[i]->m_nModelIndex)->GetColModel();
-
+    for (auto& obj : std::span{ objects, (size_t)entityCount }) {
+        auto entityColModel = obj->GetModelInfo()->GetColModel();
         if (colModel)
         {
-            if (objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z + colModel->GetBoundingBox().m_vecMin.z &&
-                objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + colModel->GetBoundingBox().m_vecMax.z)
-            {
+            if (obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z + colModel->GetBoundingBox().m_vecMin.z &&
+                obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + colModel->GetBoundingBox().m_vecMax.z
+            ) {
                 bWaitUntilFarFromPlayer = true;
                 return true;
             }
         }
         else
         {
-            if (objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z - 1.0f &&
-                objects[i]->GetPosition().z + pEntityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + 1.0f)
-            {
+            if (obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMax.z + 1.0f > posn.z - 1.0f &&
+                obj->GetPosition().z + entityColModel->GetBoundingBox().m_vecMin.z - 1.0f < posn.z + 1.0f
+            ) {
                 bWaitUntilFarFromPlayer = true;
                 return true;
             }
@@ -117,7 +114,7 @@ void CCarGenerator::DoInternalProcessing()
     tCarGenPlateText plate{};
     int32 tractorDriverPedType;
 
-    bool nightTime = CClock::ms_nGameClockHours > 21 || CClock::ms_nGameClockHours < 7;
+    bool nightTime = CClock::ClockHoursInRange(21, 7);
     if (!bIgnorePopulationLimit
         && (nightTime && CCarCtrl::NumParkedCars >= 10 || !nightTime && CCarCtrl::NumParkedCars >= 5)
     )
@@ -277,7 +274,7 @@ void CCarGenerator::DoInternalProcessing()
         // 0x6F3BF4
 
         CVector vehPosn = vehicle->GetPosition();
-        CNodeAddress pathLink = ThePaths.FindNodeClosestToCoors(vehPosn, 0, 20.0F, 0, 0, 0, 0, 1);        
+        CNodeAddress pathLink = ThePaths.FindNodeClosestToCoors(vehPosn, 0, 20.0F, 0, 0, 0, 0, 1);
         if (pathLink.IsAreaValid())
         {
             assert(pathLink.IsValid());

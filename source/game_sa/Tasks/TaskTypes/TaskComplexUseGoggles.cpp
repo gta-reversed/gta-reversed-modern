@@ -32,9 +32,8 @@ CTask* CTaskComplexUseGoggles::CreateFirstSubTask(CPed* ped) {
 
 // 0x635050
 CTask* CTaskComplexUseGoggles::ControlSubTask(CPed* ped) {
-    ped->m_pPlayerData->m_bDontAllowWeaponChange = true;
-
     if (ped->m_pPlayerData) {
+        ped->m_pPlayerData->m_bDontAllowWeaponChange = true; // FIX_BUGS: V595 The 'ped->m_pPlayerData' pointer was utilized before it was verified against nullptr.
         ped->m_pPlayerData->m_bPlayerSprintDisabled = true;
         ped->m_pPlayerData->m_fTimeCanRun = std::max(ped->m_pPlayerData->m_fTimeCanRun, 0.0f);
 

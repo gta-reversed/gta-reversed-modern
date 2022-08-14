@@ -154,7 +154,7 @@ bool CAEUserRadioTrackManager::ReadUserTracks() {
     if (file == nullptr)
         return false;
 
-    size_t size = static_cast<size_t>(CFileMgr::GetFileLength(file));
+    auto size = CFileMgr::GetTotalSize(file);
     if (size == 0) {
         CFileMgr::CloseFile(file);
         return false;
@@ -162,8 +162,9 @@ bool CAEUserRadioTrackManager::ReadUserTracks() {
 
     m_nUserTracksCount = size / sizeof(tUserTracksInfo);
 
-    if (m_pUserTracksInfo)
+    if (m_pUserTracksInfo) {
         CMemoryMgr::Free(m_pUserTracksInfo);
+    }
     m_pUserTracksInfo = (tUserTracksInfo*)CMemoryMgr::Malloc(size);
 
     CFileMgr::Read(file, m_pUserTracksInfo, size);

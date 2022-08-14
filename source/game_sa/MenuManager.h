@@ -25,6 +25,12 @@ enum eHelperText : int32 {
     FEA_STS = 6, // STATS SAVED TO 'STATS.HTML'
 };
 
+enum eRadarMode : int32 {
+    MAPS_AND_BLIPS,
+    BLIPS_ONLY,
+    OFF
+};
+
 struct MPack {
     uint8 m_Id;
     char  m_Name[260];
@@ -40,6 +46,8 @@ class CMenuManager {
     };
 
 public:
+    static constexpr uint32 SETTINGS_FILE_VERSION = 6u;
+
     int8      m_nStatsScrollDirection;
     float     m_fStatsScrollSpeed;
     uint8     m_nSelectedRow; // CMenuSystem
@@ -47,7 +55,7 @@ public:
     bool      m_PrefsUseVibration;
     bool      m_bHudOn;
     char      field_22[2]; // pad
-    int32     m_nRadarMode;
+    eRadarMode m_nRadarMode;
     char      field_28[4];
     int32     m_nTargetBlipIndex; // blip script handle
     uint8     m_nSysMenu; // CMenuSystem
@@ -57,7 +65,7 @@ public:
     bool      m_bMenuAccessWidescreen;
     char      field_35;
     char      field_36[2];
-    int32     field_38;
+    RsKeyCodes field_38;
     int32     m_PrefsBrightness;
     float     m_fDrawDistance;
 
@@ -132,7 +140,7 @@ public:
     int8      m_nController;
     int32     m_nPrefsVideoMode;
     int32     m_nDisplayVideoMode;
-    int32     field_DC; // initialized | not used
+    int32     m_nCurrentRwSubsystem; // initialized | not used
 
     int32     m_nMousePosWinX; // xPos = GET_X_LPARAM(lParam); 0x748323
     int32     m_nMousePosWinY; // yPos = GET_Y_LPARAM(lParam);
@@ -142,7 +150,7 @@ public:
     int8      m_nPlayerNumber;
     bool      m_bLanguageChanged; // useless?
     int32     field_EC;
-    int32     field_F0;
+    RsKeyCodes* m_pPressedKey; // any pressed key, in order of CKeyboardState; rsNULL means no key pressed
     bool      field_F4; // m_bPreInitialised
 
     union {
@@ -162,10 +170,10 @@ public:
     uint8 m_nMissionPackGameId;
     MPack m_MissionPacks[25];
     bool  m_bDoVideoModeUpdate;
-    int32 field_1AE0;
-    int32 field_1AE4;
+    RsKeyCodes m_nPressedMouseButton; // used in redefine controls
+    int32 m_nJustDownJoyButton; // used in redefine controls; set via CControllerConfigManager::GetJoyButtonJustDown
     char  field_1AE8;
-    char  field_1AE9;
+    bool  m_bRadioAvailable;
     uint8 m_nControllerError;
     bool  m_bScanningUserTracks;
     int32 m_nHelperTextFadingAlpha;
@@ -178,8 +186,8 @@ public:
     int32 field_1AFC; // m_nOldMousePosY ?
     int32 field_1B00;
     int32 field_1B04;
-    char  field_1B08;
-    char  field_1B09;
+    char  m_bJustOpenedControlRedefWindow;
+    char  field_1B09; // controller
     char  field_1B0A;
     char  field_1B0B;
     int32 field_1B0C;
@@ -201,13 +209,13 @@ public:
     char   field_1B29;
     int16  field_1B2A;
     int32  field_1B2C;
-    int32  field_1B30;
-    int16  field_1B34;
+    uint32 m_nBriefsArrowBlinkTimeMs;
+    int16  field_1B34; // CPad::DisablePlayerControls
     int16  field_1B36;
     int32  field_1B38;
     char   field_1B3C;
     char   field_1B3D;
-    char   field_1B3E;
+    char   field_1B3E; // mpack related
     char   field_1B3F;
     uint32 m_nUserTrackScanningTimeMs;
     char   field_1B44;
@@ -227,7 +235,7 @@ public:
     char  field_1B51;
     int16 field_1B52;
     int32 field_1B54;
-    int32 m_nTimeHelperTextUpdated;
+    uint32 m_nTimeHelperTextUpdated;
     char  field_1B5C;
     char  field_1B5D;
     int16 field_1B5E;
@@ -240,8 +248,8 @@ public:
 
     static int32& nLastMenuPage;
 
-    static bool& bInvertMouseX;
-    static bool& bInvertMouseY;
+    static inline bool& bInvertMouseX = *(bool*)0xBA6744;
+    static inline bool& bInvertMouseY = *(bool*)0xBA6745;
 
 public:
     static void InjectHooks();
@@ -255,7 +263,7 @@ public:
     void SwapTexturesRound(bool slot);
     void UnloadTextures();
 
-    void InitialiseChangedLanguageSettings(bool bReinitControls);
+    void InitialiseChangedLanguageSettings(bool reinitControls);
     bool HasLanguageChanged();
 
     void DoSettingsBeforeStartingAGame();
@@ -274,7 +282,7 @@ public:
     void DrawBackground();
     void DrawStandardMenus(uint8);
     void DrawWindow(const CRect& coords, const char* key, uint8 color, CRGBA backColor, bool unused, bool background);
-    void DrawWindowedText(float a2, float a3, float a4, Const char* str, Const char* str1, eFontAlignment alignment);
+    void DrawWindowedText(float x, float y, float wrap, const char* str1, const char* str2, eFontAlignment alignment);
     void DrawQuitGameScreen();
     void DrawControllerScreenExtraText(int32);
     void DrawControllerBound(uint16, bool);
@@ -292,14 +300,14 @@ public:
     void SaveLoadFileError_SetUpErrorScreen();
 
     void CheckSliderMovement(int8 value);
-    bool CheckFrontEndUpInput();
-    bool CheckFrontEndDownInput();
-    bool CheckFrontEndLeftInput();
-    bool CheckFrontEndRightInput();
-    bool CheckForMenuClosing();
-    bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
+    [[nodiscard]] bool CheckFrontEndUpInput() const;
+    [[nodiscard]] bool CheckFrontEndDownInput() const;
+    [[nodiscard]] bool CheckFrontEndLeftInput() const;
+    [[nodiscard]] bool CheckFrontEndRightInput() const;
+    void CheckForMenuClosing();
+    [[nodiscard]] bool CheckHover(int32 left, int32 right, int32 top, int32 bottom) const;
     bool CheckMissionPackValidMenu();
-    bool CheckCodesForControls(int32);
+    bool CheckCodesForControls(RsInputDeviceType type);
 
     int32 DisplaySlider(float x, float y, float h1, float h2, float length, float value, int32 spacing);
 
@@ -329,9 +337,12 @@ public:
     void ProcessStreaming(bool streamAll);
     void ProcessFileActions();
     void ProcessUserInput(bool downPressed, bool upPressed, bool acceptPressed, bool cancelPressed, int8 pressedLR);
-    void ProcessMenuOptions(int8 pressedLR, bool* cancelPressed, bool acceptPressed);
+    void ProcessMenuOptions(int8 pressedLR, bool& cancelPressed, bool acceptPressed);
     bool ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed);
     void ProcessMissionPackNewGame();
+
+private:
+    static void SetBrightness(float brightness, bool arg2);
 };
 
 VALIDATE_SIZE(CMenuManager, 0x1B78);

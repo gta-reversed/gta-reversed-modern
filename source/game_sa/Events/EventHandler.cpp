@@ -9,6 +9,7 @@
 
 #include "InterestingEvents.h"
 #include "IKChainManager_c.h"
+#include "EventSexyVehicle.h"
 
 void CEventHandler::InjectHooks() {
     RH_ScopedClass(CEventHandler);

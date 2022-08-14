@@ -17,7 +17,8 @@ Virtual::Virtual(std::string fnName, void* libFuncAddress, std::vector<uint32> v
     VirtualProtect((void*)vecAddressesToHook[0], 4, dwProtectInitial[0], &dwProtectInitial[1]);
 
     m_bIsHooked = false;
-    Switch(); // Installs hooks (also sets `m_bIsHooked` to `true`)
+    // V1053 Calling the 'Switch' virtual function in the constructor may lead to unexpected result at runtime.
+    Switch(); // Installs hooks (also sets `m_bIsHooked` to `true`) 
 };
 
 void Virtual::Switch()

@@ -16,7 +16,7 @@
 #include "Link.h"
 
 namespace ColHelpers {
-    struct TFaceGroup;
+struct TFaceGroup;
 };
 
 //
@@ -28,30 +28,29 @@ public:
     CCollisionData();
 
 public:
-    uint16 m_nNumSpheres;       // 0x00
-    uint16 m_nNumBoxes;         // 0x02
-    uint16 m_nNumTriangles;     // 0x04
-    uint8  m_nNumLines;         // 0x06
+    uint16 m_nNumSpheres;
+    uint16 m_nNumBoxes;
+    uint16 m_nNumTriangles;
+    uint8  m_nNumLines;
 
-
-    struct { // 0x07
-        uint8 bUsesDisks : 1;       // 0x1 - Always set to false
-        uint8 bHasFaceGroups : 1;   // 0x2 - See the huge comment below
-        uint8 bHasShadowInfo : 1;   // 0x4 - See wiki.
+    struct {
+        uint8 bUsesDisks : 1;     // 0x1 - Always set to false
+        uint8 bHasFaceGroups : 1; // 0x2 - See the huge comment below
+        uint8 bHasShadowInfo : 1; // 0x4 - See wiki.
     };
 
-    CColSphere* m_pSpheres;    // 0x08
-    CColBox*    m_pBoxes;      // 0x0C
+    CColSphere* m_pSpheres;
+    CColBox* m_pBoxes;
 
-    union { // 0x10
+    union {
         CColLine* m_pLines;
         CColDisk* m_pDisks;
     };
-        
-    CompressedVector*  m_pVertices;             // 0x14
+
+    CompressedVector* m_pVertices;
 
     // If you take a look here: https://gtamods.com/wiki/Collision_File#Body
-    // You may notiuce there's an extra section called `TFaceGroups` before `TFace` (triangles)
+    // You may notice there's an extra section called `TFaceGroups` before `TFace` (triangles)
     // And it is used in `CCollision::ProcessColModels`.
     //
     // The following is only true if `bHasFaceGroups` flag is set (Which is the case only when loaded by `CFileLoader::LoadCollisionModelVer2/3/4`). **
@@ -81,7 +80,6 @@ public:
 public:
     static void InjectHooks();
 
-
     void RemoveCollisionVolumes();
     void Copy(const CCollisionData& src);
     void CalculateTrianglePlanes();
@@ -92,23 +90,25 @@ public:
     CLink<CCollisionData*>* GetLinkPtr();
 
     // NOTSA section
-    auto GetNumFaceGroups() const -> uint32;
+    [[nodiscard]] auto GetNumFaceGroups() const -> uint32;
 
-    auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
-    auto GetBoxes() const { return std::span{ m_pBoxes, m_nNumBoxes }; }
-    auto GetTris() const { return std::span{ m_pTriangles, m_nNumTriangles }; }
-    auto GetLines() const { return std::span{ m_pLines, m_nNumLines }; }
+    [[nodiscard]] auto GetSpheres() const { return std::span{ m_pSpheres, m_nNumSpheres }; }
+    [[nodiscard]] auto GetBoxes()   const { return std::span{ m_pBoxes, m_nNumBoxes }; }
+    [[nodiscard]] auto GetTris()    const { return std::span{ m_pTriangles, m_nNumTriangles }; }
+    [[nodiscard]] auto GetLines()   const { return std::span{ m_pLines, m_nNumLines }; }
 
-    auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
+    [[nodiscard]] auto GetFaceGroups() const -> std::span<ColHelpers::TFaceGroup>;
 
     void AllocateLines(uint32 num);
+
+    void SetSpheres(const CColSphere* spheres);
+
 private:
     // HELPERS
-    template <typename T> T* GetPointerToColArray(uint32 byteOffset) {
+    template <typename T> T* GetPointerToColArray(size_t byteOffset) {
         return reinterpret_cast<T*>(&reinterpret_cast<uint8*>(this)[byteOffset]);
     }
 
     friend class CColModel;
 };
-
 VALIDATE_SIZE(CCollisionData, 0x30);

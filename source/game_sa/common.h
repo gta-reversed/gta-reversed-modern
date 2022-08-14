@@ -29,33 +29,29 @@ class CEventGlobalGroup;
 struct RtAnimAnimation;
 class CPedGroup;
 
-#define DEFAULT_SCREEN_WIDTH  (640)
-#define DEFAULT_SCREEN_HEIGHT (448)
-#define DEFAULT_SCREEN_HEIGHT_PAL (512.0f)
-#define DEFAULT_SCREEN_HEIGHT_NTSC (448.0f)
-#define DEFAULT_ASPECT_RATIO (4.0f/3.0f)
-#define DEFAULT_VIEWWINDOW (0.7f)
+constexpr float DegreesToRadians(float angleInDegrees); // forward declaration
+
+constexpr auto DEFAULT_SCREEN_WIDTH       = 640;
+constexpr auto DEFAULT_SCREEN_HEIGHT      = 448;
+constexpr auto DEFAULT_SCREEN_HEIGHT_PAL  = 512.0f;
+constexpr auto DEFAULT_SCREEN_HEIGHT_NTSC = 448.0f;
+constexpr auto DEFAULT_ASPECT_RATIO       = 4.0f / 3.0f;
+constexpr auto DEFAULT_VIEW_WINDOW        = 0.7f;
 
 // game uses maximumWidth/Height, but this probably won't work
 // with RW windowed mode
 #define SCREEN_WIDTH ((float)RsGlobal.maximumWidth)
 #define SCREEN_HEIGHT ((float)RsGlobal.maximumHeight)
 #define SCREEN_ASPECT_RATIO (CDraw::ms_fAspectRatio)
-#define SCREEN_VIEWWINDOW (Tan(DEGTORAD(CDraw::GetScaledFOV() * 0.5f)))
+float SCREEN_VIEW_WINDOW() { return std::tan(DegreesToRadians(CDraw::GetFOV() / 2.0f)); } // todo: GetScaledFov
 #define SCREEN_WIDTH_UNIT (SCREEN_WIDTH / 640.0f)
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
 // This scales from PS2 pixel coordinates to the real resolution
-#define SCREEN_STRETCH_X(a)   ((a) * (float) SCREEN_WIDTH  / (float) DEFAULT_SCREEN_WIDTH) // RsGlobal.maximumWidth * 0.0015625 * value
-#define SCREEN_STRETCH_Y(a)   ((a) * (float) SCREEN_HEIGHT / (float) DEFAULT_SCREEN_HEIGHT)
-#define SCREEN_STRETCH_FROM_RIGHT(a)  (SCREEN_WIDTH - SCREEN_STRETCH_X(a))
-#define SCREEN_STRETCH_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_STRETCH_Y(a))
-
-// This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
-#define SCREEN_SCALE_X(a) SCREEN_SCALE_AR(SCREEN_STRETCH_X(a))
-#define SCREEN_SCALE_Y(a) SCREEN_STRETCH_Y(a)                  // RsGlobal.maximumHeight * 0.002232143 * value
-#define SCREEN_SCALE_FROM_RIGHT(a) (SCREEN_WIDTH - SCREEN_SCALE_X(a))
-#define SCREEN_SCALE_FROM_BOTTOM(a) (SCREEN_HEIGHT - SCREEN_SCALE_Y(a))
+constexpr float SCREEN_STRETCH_X(float a)           { return a * SCREEN_WIDTH  / (float)DEFAULT_SCREEN_WIDTH; } // RsGlobal.maximumWidth * 0.0015625 * value
+constexpr float SCREEN_STRETCH_Y(float a)           { return a * SCREEN_HEIGHT / (float)DEFAULT_SCREEN_HEIGHT; }
+constexpr float SCREEN_STRETCH_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_STRETCH_X(a); }
+constexpr float SCREEN_STRETCH_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_STRETCH_Y(a); }
 
 #define ASPECT_RATIO_SCALE
 #ifdef ASPECT_RATIO_SCALE
@@ -64,12 +60,20 @@ class CPedGroup;
 #define SCREEN_SCALE_AR(a) (a)
 #endif
 
+// This scales from PS2 pixel coordinates while optionally maintaining the aspect ratio
+constexpr float SCREEN_SCALE_X(float a)           { return SCREEN_SCALE_AR(SCREEN_STRETCH_X(a)); }
+constexpr float SCREEN_SCALE_Y(float a)           { return SCREEN_STRETCH_Y(a); } // RsGlobal.maximumHeight * 0.  * value
+constexpr float SCREEN_SCALE_FROM_RIGHT(float a)  { return SCREEN_WIDTH  - SCREEN_SCALE_X(a); }
+constexpr float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREEN_SCALE_Y(a); }
+
 #define PUSH_RENDERGROUP(str) 0
 #define POP_RENDERGROUP() 0
 
 constexpr auto BUILD_NAME_FULL = "TEST";
 
 extern int32 gDefaultTaskTime;
+
+extern RpLight*& pDirect;
 
 static inline char (&gString)[352] = *(char(*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char(*)[352])0xB71510;
@@ -179,6 +183,10 @@ static bool IsPointInRect2D(CVector2D point, CVector2D min, CVector2D max) {
 
 static bool IsPointInCircle2D(CVector2D point, CVector2D center, float r) {
     return DistanceBetweenPointsSquared2D(point, center) <= r * r;
+}
+
+static bool IsPointInSphere(const CVector& point, const CVector& center, float r) {
+    return DistanceBetweenPointsSquared(point, center) <= r * r;
 }
 
 // Converts degrees to radians

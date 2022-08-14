@@ -18,29 +18,28 @@ public:
     bool                          m_bSensibleLeaveCar;
     bool                          m_bForceGetOut;
     bool                          m_bDie;
-    char                          _pad1;
     CTaskUtilityLineUpPedWithCar* m_pTaskUtilityLineUpPedWithCar;
     uint8                         m_nDoorFlagsSet;
     uint8                         m_nNumGettingInSet;
-    char                          _pad2[2];
     int32                         m_nDieAnimID;
     float                         m_fDieAnimBlendDelta;
     float                         m_fDieAnimSpeed;
     bool                          m_bIsInAir;
-    char                          _pad3[3];
 
 public:
     static constexpr auto Type = TASK_COMPLEX_LEAVE_CAR;
 
-    CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
-    ~CTaskComplexLeaveCar();
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime);
+    explicit CTaskComplexLeaveCar(CVehicle* targetVehicle, int32 nTargetDoor, int32 nDelayTime, bool bSensibleLeaveCar, bool bForceGetOut);
+    ~CTaskComplexLeaveCar() override;
 
-    CTask*    Clone() override;
+    CTask* Clone() override { return new CTaskComplexLeaveCar(m_pTargetVehicle, m_nTargetDoor, m_nDelayTime, m_bSensibleLeaveCar, m_bForceGetOut); } // 0x63D9E0
     eTaskType GetTaskType() override { return TASK_COMPLEX_LEAVE_CAR; }
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
 private:
     friend void InjectHooksMain();

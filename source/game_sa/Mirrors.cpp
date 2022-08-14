@@ -189,7 +189,7 @@ void CMirrors::RenderMirrorBuffer() {
         RwIm2DRenderIndexedPrimitive(rwPRIMTYPETRILIST, vertices, std::size(vertices), indices, std::size(indices));
     }
 
-    if (DistanceBetweenPoints(TheCamera.GetPosition(), { 1003.0f, -42.0f, 216.0f }) < 50.0f) {
+    if (DistanceBetweenPoints({ 1003.0f, -42.0f, 216.0f }, TheCamera.GetPosition()) < 50.0f) {
         const CVector pos[]{
             { 216.0f, -45.0f, 1000.0f },
             { 216.0f, -45.0f, 1006.0f },

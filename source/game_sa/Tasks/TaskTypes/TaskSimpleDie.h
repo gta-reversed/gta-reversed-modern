@@ -1,3 +1,5 @@
+#pragma once
+
 #include "TaskSimple.h"
 
 class CAnimBlendHierarchy;
@@ -42,19 +44,14 @@ public:
     void        StartAnim(CPed* ped);
     static void FinishAnimDieCB(CAnimBlendAssociation* association, void* data);
 
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
     CTaskSimpleDie* Constructor(AssocGroupId animGroupId, AnimationId animId, float blendDelta, float animSpeed);
     CTaskSimpleDie* Constructor(const char* animName, const char* animBlock, eAnimationFlags animFlags, float blendDelta, float animSpeed);
     CTaskSimpleDie* Constructor(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed);
     CTaskSimpleDie* Destructor();
 
     CTask*    Clone_Reversed();
-    eTaskType GetTaskType_Reversed();
     bool      MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     bool      ProcessPed_Reversed(CPed* ped);
 };
-
 VALIDATE_SIZE(CTaskSimpleDie, 0x28);
+extern void CTaskSimpleDie__InjectHooks();

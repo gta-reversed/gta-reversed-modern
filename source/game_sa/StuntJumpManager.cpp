@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "StuntJumpManager.h"
+#include "Hud.h"
 
 static constexpr uint16 STUNT_JUMP_COUNT = 256;
 
@@ -167,7 +168,7 @@ void CStuntJumpManager::Update() {
             time = m_iTimer;
         }
 
-        m_iTimer = CTimer::GetTimeStepInMS() + time;
+        m_iTimer = (uint32)CTimer::GetTimeStepInMS() + time;
         if (m_iTimer > 1000 && time <= 1000) {
             auto vehicle = FindPlayerVehicle();
             if (vehicle) {
@@ -180,7 +181,7 @@ void CStuntJumpManager::Update() {
         break;
     }
     case eJumpState::END_POINT_INTERSECTED: {
-        m_iTimer += CTimer::GetTimeStepInMS();
+        m_iTimer += (uint32)CTimer::GetTimeStepInMS();
         if (m_iTimer < 300)
             return;
 
