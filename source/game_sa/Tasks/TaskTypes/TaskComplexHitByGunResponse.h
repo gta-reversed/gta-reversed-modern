@@ -1,32 +1,27 @@
 #pragma once
+
 #include "TaskComplex.h"
 
 class CTaskComplexHitByGunResponse : public CTaskComplex {
 public:
+    int32 m_Direction;
+
+public:
+    static constexpr auto Type = TASK_COMPLEX_HIT_BY_GUN_RESPONSE;
+
+    explicit CTaskComplexHitByGunResponse(int32 direction);
+    ~CTaskComplexHitByGunResponse() override = default; // 0x631E30
+
+    eTaskType GetTaskType() override { return Type; } // 0x631DF0
+    CTask* Clone() override { return new CTaskComplexHitByGunResponse(m_Direction); } // 0x636640
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x631E40
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override { return m_pSubTask; } // 0x631F70
+
+private:
+    friend void InjectHooksMain();
     static void InjectHooks();
-
-    ~CTaskComplexHitByGunResponse();
-    CTaskComplexHitByGunResponse(int32 a1);
-
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_HIT_BY_GUN_RESPONSE;
-
-    virtual CTask* Clone();
-    virtual eTaskType GetTaskType() { return Type; }
-    virtual bool MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
-
-private: // Wrappers for hooks
-    // 0x631DD0
-    CTaskComplexHitByGunResponse* Constructor(int32 a1) {
-        this->CTaskComplexHitByGunResponse::CTaskComplexHitByGunResponse(a1);
-        return this;
-    }
-
-    // 0x631E30
-    CTaskComplexHitByGunResponse* Destructor() {
-        this->CTaskComplexHitByGunResponse::~CTaskComplexHitByGunResponse();
-        return this;
-    }
+    CTaskComplexHitByGunResponse* Constructor(int32 a1) { this->CTaskComplexHitByGunResponse::CTaskComplexHitByGunResponse(a1); return this; }
+    CTaskComplexHitByGunResponse* Destructor() { this->CTaskComplexHitByGunResponse::~CTaskComplexHitByGunResponse(); return this; }
 };
