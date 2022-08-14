@@ -19,7 +19,7 @@ struct BreakGroup_t {
     BreakGroupRenderInfo_t* m_RenderInfo;
     RwTexture*              m_Texture;
     int8                    m_Type;
-    float                   m_LongestSide;
+    float                   m_BoundingSize;
     float                   m_RotationSpeed;
     CVector                 m_RotationAxis;
     int32                   m_Random;

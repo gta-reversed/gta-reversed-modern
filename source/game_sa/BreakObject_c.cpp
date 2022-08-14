@@ -11,7 +11,7 @@ void BreakObject_c::InjectHooks() {
     //RH_ScopedInstall(SetBreakInfo, 0x59D7F0);
     RH_ScopedInstall(Exit, 0x59DDD0);
     //RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
-    //RH_ScopedInstall(DoCollision, 0x59E1F0);
+    RH_ScopedInstall(DoCollision, 0x59E1F0);
     //RH_ScopedInstall(Update, 0x59E220);
     //RH_ScopedInstall(Render, 0x59E480);
     RH_ScopedInstall(Init, 0x59E750);
@@ -140,15 +140,15 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
         if (width > length || width > height) {
             if (height <= width && height <= (double)length) {
                 group->m_Type = 2;
-                group->m_LongestSide = height * 0.5;
+                group->m_BoundingSize = height * 0.5;
             }
         } else {
             group->m_Type = 1;
-            group->m_LongestSide = width * 0.5;
+            group->m_BoundingSize = width * 0.5;
         }
     } else {
         group->m_Type = 0;
-        group->m_LongestSide = length * 0.5;
+        group->m_BoundingSize = length * 0.5;
     }
 }
 
@@ -191,12 +191,16 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
 
 // 0x59DE40
 void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) {
-    plugin::CallMethod<0x59DE40, BreakObject_c*, BreakGroup_t*, float, RwV3d*, float>(this, group, timeStep, vecNormal, groundZ);
+    //plugin::CallMethod<0x59DE40, BreakObject_c*, BreakGroup_t*, float, RwV3d*, float>(this, group, timeStep, vecNormal, groundZ);
+    static float& velocityMultiplier = *(float*)0x8D0A18; // TODO | STATICREF // = 0.85f;
+
+    auto dotProd = RwV3dDotProduct(&group->m_Velocity, vecNormal);
 }
 
 // 0x59E1F0
 void BreakObject_c::DoCollision(BreakGroup_t* group, float timeStep) {
-    plugin::CallMethod<0x59E1F0, BreakObject_c*, BreakGroup_t*, float>(this, group, timeStep);
+    if (RwMatrixGetPos(&group->m_Matrix)->z - group->m_BoundingSize < m_GroundZ)
+        DoCollisionResponse(group, timeStep, &m_VecNormal, m_GroundZ);
 }
 
 // 0x59E220
