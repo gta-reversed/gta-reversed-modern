@@ -455,7 +455,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATESHADEMODE,     RWRSTATE(rwSHADEMODEFLAT));
 
-    progress = std::max(0.0f, progress);
+    progress = std::clamp(progress, 0.0f, 100.0f);
 
     const float endX = x + (float)width;
     const float unclampedCurrX = x + (float)width * progress / 100.0f;
@@ -463,22 +463,9 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     const auto fheight = (float)height;
 
     // Progress rect
-    DrawRect({
-        x,
-        y,
-        currX,
-        y + fheight
-    }, color);
-
+    DrawRect({ x, y, currX, y + fheight }, color);
     // Background (from currX to endX)
-    CRGBA loadingBarBgColor = color / 2.0f;
-    loadingBarBgColor.a = color.a;
-    DrawRect({
-        currX,
-        y,
-        endX,
-        y + fheight
-    }, loadingBarBgColor);
+    DrawRect({ currX, y, endX, y + fheight }, { uint8(color.r / 2.0f), uint8(color.g / 2.0f), uint8(color.b / 2.0f), color.a });
 
     if (progressAdd) {
         addColor.a = color.a;
@@ -491,7 +478,7 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     }
 
     if (drawBlackBorder) {
-        const float w = SCREEN_SCALE_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
+        const float w = SCREEN_STRETCH_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
         const CRect rects[] = {
             //left,     top,              right,    bottom
             { x,        y,                endX,     y + h       },       // Top
@@ -500,15 +487,16 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
             { endX - w, y,                endX,     y + fheight }        // Right
         };
 
+        const auto black = CRGBA{ 0, 0, 0, color.a };
         for (const CRect& rect : rects) {
-            DrawRect(rect, { 0, 0, 0, color.a });
+            DrawRect(rect, black);
         }
     }
 
     // unused
     if (drawPercentage) {
         char text[12];
-        sprintf(text, "%d%%", (unsigned)progress);
+        sprintf(text, "%d%%", (int)progress);
 
         GxtChar gxtText[12];
         AsciiToGxtChar(text, gxtText);
