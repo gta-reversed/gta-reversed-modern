@@ -6,8 +6,8 @@ void CTaskComplexGotoDoorAndOpen::InjectHooks() {
     RH_ScopedClass(CTaskComplexGotoDoorAndOpen);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedOverloadedInstall(Constructor, "", 0x66BB20, CTaskComplexGotoDoorAndOpen*(CTaskComplexGotoDoorAndOpen::*)(CObject *));
-    RH_ScopedOverloadedInstall(Constructor, "", 0x66BBA0, CTaskComplexGotoDoorAndOpen*(CTaskComplexGotoDoorAndOpen::*)(CVector const&, CVector const&));
+    RH_ScopedOverloadedInstall(Constructor, "0", 0x66BB20, CTaskComplexGotoDoorAndOpen*(CTaskComplexGotoDoorAndOpen::*)(CObject *));
+    RH_ScopedOverloadedInstall(Constructor, "1", 0x66BBA0, CTaskComplexGotoDoorAndOpen*(CTaskComplexGotoDoorAndOpen::*)(CVector const&, CVector const&));
     RH_ScopedInstall(Destructor, 0x66BC00);
     // RH_ScopedInstall(Clone, 0x66BCA0);
     // RH_ScopedInstall(CreateNextSubTask, 0x66C0D0);
