@@ -117,6 +117,7 @@
 #include "Hud.h"
 
 // Tasks
+#include "TaskComplexSmartFleeEntity.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -629,7 +630,7 @@ void InjectHooksMain() {
         // CTaskComplexShuffleSeats::InjectHooks();
         // CTaskComplexSignalAtPed::InjectHooks();
         // CTaskComplexSitDownThenIdleThenStandUp::InjectHooks();
-        // CTaskComplexSmartFleeEntity::InjectHooks();
+        CTaskComplexSmartFleeEntity::InjectHooks();
         // CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
