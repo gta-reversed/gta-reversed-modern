@@ -1,5 +1,8 @@
 #include "StdInc.h"
+
 #include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskSimpleStandStill.h"
+#include "TaskComplexGoToPointAndStandStill.h"
 
 void CTaskComplexGoToBoatSteeringWheel::InjectHooks() {
     RH_ScopedClass(CTaskComplexGoToBoatSteeringWheel);
@@ -7,33 +10,62 @@ void CTaskComplexGoToBoatSteeringWheel::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x649090);
     RH_ScopedInstall(Destructor, 0x649100);
-
     // RH_ScopedInstall(Clone, 0x64A350);
-    RH_ScopedInstall(GetTaskType, 0x6490F0);
     // RH_ScopedInstall(CreateNextSubTask, 0x64E350);
     // RH_ScopedInstall(CreateFirstSubTask, 0x64E390);
     // RH_ScopedInstall(ControlSubTask, 0x64E3B0);
 }
 
 // 0x649090
-CTaskComplexGoToBoatSteeringWheel::CTaskComplexGoToBoatSteeringWheel(CVehicle*) {}
+CTaskComplexGoToBoatSteeringWheel::CTaskComplexGoToBoatSteeringWheel(CVehicle* vehicle) : CTaskComplex() {
+    m_Vehicle = vehicle;
+    byte1C = false;
+    m_FirstSubTaskStartTime = 0;
+    CEntity::SafeRegisterRef(m_Vehicle);
+}
 
 // 0x649100
-CTaskComplexGoToBoatSteeringWheel::~CTaskComplexGoToBoatSteeringWheel() {}
-
-// 0x64A350
-CTask* CTaskComplexGoToBoatSteeringWheel::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x64A350, CTaskComplexGoToBoatSteeringWheel*>(this);
+CTaskComplexGoToBoatSteeringWheel::~CTaskComplexGoToBoatSteeringWheel() {
+    CEntity::SafeCleanUpRef(m_Vehicle);
 }
 
 // 0x64E350
 CTask* CTaskComplexGoToBoatSteeringWheel::CreateNextSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x64E350, CTaskComplexGoToBoatSteeringWheel*, CPed*>(this, ped);
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_STAND_STILL:
+        return CreateSubTask(TASK_FINISHED);
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
+        byte1C = true;
+        return CreateSubTask(TASK_FINISHED);
+    default:
+        return nullptr;
+    }
+}
+
+// 0x649160
+void CTaskComplexGoToBoatSteeringWheel::ComputeTargetPos() {
+    assert(false);
+}
+
+// 0x64CDA0
+CTask* CTaskComplexGoToBoatSteeringWheel::CreateSubTask(eTaskType taskType) {
+    switch (taskType) {
+    case TASK_SIMPLE_STAND_STILL:
+        return new CTaskSimpleStandStill(-1, 0, 0, 8.0f);
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
+        ComputeTargetPos();
+        return new CTaskComplexGoToPointAndStandStill(PEDMOVE_WALK, m_TargetPos, 0.5f, 2.0f, 0, 0);
+    case TASK_FINISHED:
+        return nullptr;
+    default:
+        return nullptr;
+    }
 }
 
 // 0x64E390
 CTask* CTaskComplexGoToBoatSteeringWheel::CreateFirstSubTask(CPed* ped) {
-    return plugin::CallMethodAndReturn<CTask*, 0x64E390, CTaskComplexGoToBoatSteeringWheel*, CPed*>(this, ped);
+    m_FirstSubTaskStartTime = CTimer::GetTimeInMS();
+    return CreateSubTask(TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL);
 }
 
 // 0x64E3B0
