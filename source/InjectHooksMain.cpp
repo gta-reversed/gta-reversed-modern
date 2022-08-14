@@ -117,6 +117,10 @@
 #include "Hud.h"
 
 // Tasks
+#include "EntitySeekPosCalculator.h"
+#include "EntitySeekPosCalculatorStandard.h"
+#include "EntitySeekPosCalculatorRadiusAngleOffset.h"
+#include "EntitySeekPosCalculatorXYOffset.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -853,6 +857,14 @@ void InjectHooksMain() {
         // CTaskComplexBeCop::InjectHooks();
         CTaskComplexAvoidOtherPedWhileWandering::InjectHooks();
         CTaskComplexArrestPed::InjectHooks();
+
+        const auto EntitySeekPosCalculators = [] {
+            CEntitySeekPosCalculator::InjectHooks();
+            CEntitySeekPosCalculatorStandard::InjectHooks();
+            CEntitySeekPosCalculatorRadiusAngleOffset::InjectHooks();
+            CEntitySeekPosCalculatorXYOffset::InjectHooks();
+        };
+        EntitySeekPosCalculators();
     };
 
     const auto Events = []() {
