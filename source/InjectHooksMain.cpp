@@ -236,6 +236,7 @@
 #include "TaskGangHassleVehicle.h"
 #include "TaskGoToVehicleAndLean.h"
 #include "TaskLeanOnVehicle.h"
+#include "TaskComplexCarSlowBeDraggedOut.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -553,7 +554,7 @@ void InjectHooksMain() {
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
         CTaskLeanOnVehicle::InjectHooks();
-        // CTaskComplexCarSlowBeDraggedOut::InjectHooks();
+        CTaskComplexCarSlowBeDraggedOut::InjectHooks();
         // CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
         // CTaskComplexDestroyCar::InjectHooks();
         // CTaskComplexDestroyCarArmed::InjectHooks();
