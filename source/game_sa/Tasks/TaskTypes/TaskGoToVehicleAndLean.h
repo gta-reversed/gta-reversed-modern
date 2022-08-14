@@ -1,41 +1,33 @@
 #pragma once
+
 #include "TaskComplex.h"
-#include "Vehicle.h"
+class CVehicle;
 
 class CTaskGoToVehicleAndLean : public CTaskComplex {
 public:
-    CVehicle* m_vehicle = {}; // 0xC
-    int32     m_leanAnimDurationInMs = {}; // 0x10
-    int8      m_leanOnVehicle = {}; // 0x14
-    int8      field_15 = {}; // 0x15
-    uint8     field_16[2] = {}; // 0x16
+    CVehicle* m_Vehicle;
+    int32     m_LeanAnimDurationInMs;
+    int8      m_LeanOnVehicle;
+    int8      field_15;
+    uint8     field_16[2];
 
 public:
-    static void InjectHooks();
+    static constexpr auto Type = TASK_COMPLEX_GOTO_VEHICLE_AND_LEAN;
 
     CTaskGoToVehicleAndLean(CVehicle* vehicle, int32 leanAnimDurationInMs);
-    ~CTaskGoToVehicleAndLean();
+    ~CTaskGoToVehicleAndLean() override;
 
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_GOTO_VEHICLE_AND_LEAN;
+    eTaskType GetTaskType() override { return Type; } // 0x660ED0
+    CTask* Clone() override { return new CTaskGoToVehicleAndLean(m_Vehicle, m_LeanAnimDurationInMs); } // 0x6621B0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
 
-    virtual CTask*    Clone();
-    virtual eTaskType GetTaskType() { return Type; }
-    virtual bool      MakeAbortable(CPed* ped, int32 priority, CEvent const* event);
-    virtual CTask*    CreateNextSubTask(CPed* ped);
-    virtual CTask*    CreateFirstSubTask(CPed* ped);
-    virtual CTask*    ControlSubTask(CPed* ped);
-
-private: // Wrappers for hooks
-    // 0x660E60
-    CTaskGoToVehicleAndLean* Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs) {
-        this->CTaskGoToVehicleAndLean::CTaskGoToVehicleAndLean(vehicle, leanAnimDurationInMs);
-        return this;
-    }
-
-    // 0x660EE0
-    CTaskGoToVehicleAndLean* Destructor() {
-        this->CTaskGoToVehicleAndLean::~CTaskGoToVehicleAndLean();
-        return this;
-    }
+private:
+    friend void InjectHooksMain();
+    static void InjectHooks();
+    CTaskGoToVehicleAndLean* Constructor(CVehicle* vehicle, int32 leanAnimDurationInMs) { this->CTaskGoToVehicleAndLean::CTaskGoToVehicleAndLean(vehicle, leanAnimDurationInMs); return this; }
+    CTaskGoToVehicleAndLean* Destructor() { this->CTaskGoToVehicleAndLean::~CTaskGoToVehicleAndLean(); return this; }
 };
 VALIDATE_SIZE(CTaskGoToVehicleAndLean, 0x18);
