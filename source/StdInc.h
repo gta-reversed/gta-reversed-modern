@@ -433,6 +433,7 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
+#include "game_sa\Plugins\BreakablePlugin\BreakablePlugin.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"

@@ -480,6 +480,7 @@ void InjectHooksMain() {
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
+    BreakablePlugin::InjectHooks();
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();

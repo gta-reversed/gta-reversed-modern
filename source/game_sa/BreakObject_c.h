@@ -5,31 +5,6 @@
 #include "Vector.h"
 #include <rwplcore.h>
 
-struct BreakInfo_t {
-    uint32               m_nPosRule;
-    uint16               m_nNumVertices;
-    char                 _pad06[2];
-    CVector*             m_pVertexPos;
-    RwTexCoords*         m_pTexCoors;
-    RwRGBA*              m_pVertexColors;
-    int16                m_usNumTriangles;
-    char                 _pad16[2];
-    RpTriangle*          m_pTriangles;
-    uint16*              m_pMaterialAssignments;
-    uint16               m_usNumMaterials;
-    char                 _pad22[2];
-    RwTexture**          m_pTextures;
-    char*                m_pTextureNames;
-    char*                m_pMaskNames;
-    RwSurfaceProperties* m_pMaterialProperties;
-};
-
-struct BreakGroup_test {
-    CVector a;
-    CVector b;
-    CVector c;
-};
-
 struct BreakGroup_t_f50 {
     CVector     positions[3];
     RwTexCoords texCoords[3];
@@ -37,14 +12,9 @@ struct BreakGroup_t_f50 {
 };
 
 struct BreakGroup_t {
-    char              pad00[12];
-    int32             unk;
-    int16             f10;
-    char              pad12[14];
-    int16             f20;
-    char              pad22[14];
-    CVector           fxPosn;
-    CVector           vec3C;
+    RwMatrixTag       m_Matrix;
+    float             m_LengthMaybe;
+    float             m_WidthMaybe;
     float             m_Height;
     int8              f4C;
     char              pad4c;
