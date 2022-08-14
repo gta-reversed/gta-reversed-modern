@@ -1,21 +1,31 @@
 #pragma once
+
 #include "TaskSimple.h"
 
-class CTaskSimpleAchieveHeading : public CTaskSimple
-{
+class CTaskSimpleAchieveHeading : public CTaskSimple {
 public:
-    int32 field_8;
-    int32 field_C;
-    int32 field_10;
-    int32 field_14;
+    float m_fAngle;
+    float m_fChangeRateMult;
+    float m_fMaxHeading;
+    union {
+        struct {
+            bool m_b1 : 1;
+        };
+        uint8 m_Flags;
+    };
 
-    CTaskSimpleAchieveHeading(float fAngle, float arg2, float arg3);
-    ~CTaskSimpleAchieveHeading() override;
+public:
+    CTaskSimpleAchieveHeading(float fAngle, float changeRateMult, float maxHeading);
+    ~CTaskSimpleAchieveHeading() override = default; // 0x667E70
 
-    bool ProcessPed(class CPed* ped) override;
-    CTask* Clone() override;
+    CTask* Clone() override { return new CTaskSimpleAchieveHeading(m_fAngle, m_fChangeRateMult, m_fMaxHeading); } // 0x66CCF0
     eTaskType GetTaskType() override { return TASK_SIMPLE_ACHIEVE_HEADING; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-};
+    bool ProcessPed(class CPed* ped) override;
 
+    void QuitIK(CPed* ped) const;
+    void SetUpIK(CPed* ped);
+
+    static void InjectHooks();
+};
 VALIDATE_SIZE(CTaskSimpleAchieveHeading, 0x18);

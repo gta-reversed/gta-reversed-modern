@@ -1391,7 +1391,7 @@ void CPed::ReleaseCoverPoint() {
 CTaskSimpleHoldEntity* CPed::GetHoldingTask() {
     // Man programming in C++03 must've been a pain.. if, if, if, if, if, if... IF.
     if (const auto task = GetTaskManager().FindActiveTaskFromList({ TASK_SIMPLE_HOLD_ENTITY, TASK_SIMPLE_PICKUP_ENTITY, TASK_SIMPLE_PUTDOWN_ENTITY })) {
-        return task->As<CTaskSimpleHoldEntity>();
+        return static_cast<CTaskSimpleHoldEntity*>(task);
     }
     return nullptr;
 }

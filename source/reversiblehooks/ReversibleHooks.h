@@ -42,6 +42,9 @@
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
+// Eventually we'll drop _Reversed wrappers for virtual functions, until then, use this for them
+#define RH_ScopedVirtualInstall2 RH_ScopedInstall
+
 // Install a hook on a virtual function
 #define RH_ScopedVirtualInstall(fn, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn ## _Reversed __VA_OPT__(,) __VA_ARGS__)
