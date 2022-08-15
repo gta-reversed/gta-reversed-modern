@@ -16,7 +16,7 @@ public:
 
 public:
     CTaskComplex();
-    ~CTaskComplex();
+    ~CTaskComplex() override;
 
     CTask* GetSubTask() override;
     bool IsSimple() override;

@@ -23,8 +23,8 @@ public:
     CTaskComplexWalkRoundObject(int32 moveState, const CVector& targetPoint, CEntity* object);
     ~CTaskComplexWalkRoundObject() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexWalkRoundObject(m_moveState, m_targetPoint, m_object); }
-    eTaskType GetTaskType() override { return TASK_COMPLEX_WALK_ROUND_OBJECT; }
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

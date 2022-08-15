@@ -11,27 +11,26 @@ public:
     bool              m_bStarted;
     bool              m_bIsAborting;
 
-    // TODO: Should probably make a struct of this then an array of it.
     eFacialExpression m_nFacialExpression1;
     int32             m_nDuration1;
 
     eFacialExpression m_nFacialExpression2;
     int32             m_nDuration2;
-    
+
 public:
     static constexpr auto Type = TASK_COMPLEX_FACIAL;
 
     CTaskComplexFacial();
     ~CTaskComplexFacial() override = default; // 0x690D90
 
-    void StopAll();
-
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FACIAL; }
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexFacial(); }; // 0x6928B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+
+    void StopAll();
 
 private:
     friend void InjectHooksMain();

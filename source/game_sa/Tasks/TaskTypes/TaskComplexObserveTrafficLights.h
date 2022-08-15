@@ -15,10 +15,11 @@ public:
     CTaskComplexObserveTrafficLights();
     ~CTaskComplexObserveTrafficLights() override = default; // 0x6317C0
 
+    eTaskType GetTaskType() override { return Type; }    // 0x6317B0
     CTask* Clone() override { return new CTaskComplexObserveTrafficLights(); }          // 0x636410
-    eTaskType GetTaskType() override { return TASK_COMPLEX_OBSERVE_TRAFFIC_LIGHTS; }    // 0x6317B0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return true; }  // 0x6317D0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override { return CreateNextSubTask(ped); }    // 0x6318D0
     CTask* ControlSubTask(CPed* ped) override;
 };
+VALIDATE_SIZE(CTaskComplexObserveTrafficLights, 0x18);
