@@ -241,6 +241,26 @@
 #include "TaskSimpleCarSlowDragPedOut.h"
 #include "TaskSimpleWaitUntilPedIsOutCar.h"
 #include "TaskComplexAvoidEntity.h"
+#include "TaskGangHasslePed.h"
+#include "TaskGangHassleVehicle.h"
+#include "TaskGoToVehicleAndLean.h"
+#include "TaskLeanOnVehicle.h"
+#include "TaskComplexCarSlowBeDraggedOut.h"
+#include "TaskComplexCarSlowBeDraggedOutAndStandUp.h"
+#include "TaskComplexGangFollower.h"
+#include "TaskComplexGangJoinRespond.h"
+#include "TaskComplexGangLeader.h"
+#include "TaskComplexGetOnBoatSeat.h"
+#include "TaskComplexGoToAttractor.h"
+#include "TaskComplexGoToBoatSteeringWheel.h"
+#include "TaskComplexGoToCarDoorAndStandStill.h"
+#include "TaskComplexGoToPointAiming.h"
+#include "TaskComplexGoToPointAndStandStillAndAchieveHeading.h"
+#include "TaskComplexGoToPointAnyMeans.h"
+#include "TaskComplexGoToPointShooting.h"
+#include "TaskComplexGotoDoorAndOpen.h"
+#include "TaskComplexHitByGunResponse.h"
+#include "TaskComplexHitResponse.h"
 #include "TaskSimpleDrown.h"
 #include "TaskComplexDieInCar.h"
 #include "TaskComplexFallToDeath.h"
@@ -550,9 +570,9 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
-        // CTaskGangHasslePed::InjectHooks();
-        // CTaskGangHassleVehicle::InjectHooks();
-        // CTaskGoToVehicleAndLean::InjectHooks();
+        CTaskGangHasslePed::InjectHooks();
+        CTaskGangHassleVehicle::InjectHooks();
+        CTaskGoToVehicleAndLean::InjectHooks();
         // CTaskInteriorBeInHouse::InjectHooks();
         // CTaskInteriorBeInOffice::InjectHooks();
         // CTaskInteriorBeInShop::InjectHooks();
@@ -562,9 +582,9 @@ void InjectHooksMain() {
         // CTaskInteriorSitAtDesk::InjectHooks();
         // CTaskInteriorSitInChair::InjectHooks();
         // CTaskInteriorUseInfo::InjectHooks();
-        // CTaskLeanOnVehicle::InjectHooks();
-        // CTaskComplexCarSlowBeDraggedOut::InjectHooks();
-        // CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
+        CTaskLeanOnVehicle::InjectHooks();
+        CTaskComplexCarSlowBeDraggedOut::InjectHooks();
+        CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
         CTaskComplexDestroyCar__InjectHooks();
         // CTaskComplexDestroyCarArmed::InjectHooks();
         // CTaskComplexDestroyCarMelee::InjectHooks();
@@ -590,21 +610,21 @@ void InjectHooksMain() {
         // CTaskComplexFollowNodeRouteShooting::InjectHooks();
         // CTaskComplexFollowPatrolRoute::InjectHooks();
         // CTaskComplexFollowPointRoute::InjectHooks();
-        // CTaskComplexGangFollower::InjectHooks();
-        // CTaskComplexGangJoinRespond::InjectHooks();
-        // CTaskComplexGangLeader::InjectHooks();
-        // CTaskComplexGetOnBoatSeat::InjectHooks();
-        // CTaskComplexGoToAttractor::InjectHooks();
-        // CTaskComplexGoToBoatSteeringWheel::InjectHooks();
-        // CTaskComplexGoToCarDoorAndStandStill::InjectHooks();
-        // CTaskComplexGoToPointAiming::InjectHooks();
-        // CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks();
-        // CTaskComplexGoToPointAnyMeans::InjectHooks();
-        // CTaskComplexGoToPointShooting::InjectHooks();
+        CTaskComplexGangFollower::InjectHooks();
+        CTaskComplexGangJoinRespond::InjectHooks();
+        CTaskComplexGangLeader::InjectHooks();
+        CTaskComplexGetOnBoatSeat::InjectHooks();
+        CTaskComplexGoToAttractor::InjectHooks();
+        CTaskComplexGoToBoatSteeringWheel::InjectHooks();
+        CTaskComplexGoToCarDoorAndStandStill::InjectHooks();
+        CTaskComplexGoToPointAiming::InjectHooks();
+        CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks();
+        CTaskComplexGoToPointAnyMeans::InjectHooks();
+        CTaskComplexGoToPointShooting::InjectHooks();
         // CTaskComplexGoToPointUntilCollisionAndStandStill::InjectHooks();
-        // CTaskComplexGotoDoorAndOpen::InjectHooks();
-        // CTaskComplexHitByGunResponse::InjectHooks();
-        // CTaskComplexHitResponse::InjectHooks();
+        CTaskComplexGotoDoorAndOpen::InjectHooks();
+        CTaskComplexHitByGunResponse::InjectHooks();
+        CTaskComplexHitResponse::InjectHooks();
         // CTaskComplexInWater::InjectHooks();
         // CTaskComplexInvestigateDeadPed::InjectHooks();
         // CTaskComplexInvestigateDisturbance::InjectHooks();

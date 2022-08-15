@@ -1,6 +1,6 @@
 #include "StdInc.h"
-#include "EntitySeekPosCalculatorRadiusAngleOffset.h"
 
+#include "EntitySeekPosCalculatorRadiusAngleOffset.h"
 
 void CEntitySeekPosCalculatorRadiusAngleOffset::InjectHooks() {
     RH_ScopedClass(CEntitySeekPosCalculatorRadiusAngleOffset);
