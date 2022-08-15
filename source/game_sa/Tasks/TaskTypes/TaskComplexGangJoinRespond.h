@@ -7,7 +7,7 @@ class CPed;
 class CTaskComplexGangJoinRespond : public CTaskComplex {
 public:
     bool  byteC;
-    bool  byteD;
+    bool  m_bAnimBlockRefAdded;
     int32 b10;
 
 public:

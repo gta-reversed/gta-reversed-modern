@@ -12,7 +12,7 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     // RH_ScopedInstall(ComputeRouteToDoor, 0x645910);
     // RH_ScopedInstall(CreateSubTask_Reversed, 0x64A5F0);
     // RH_ScopedInstall(Clone_Reversed, 0x6498B0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x645840);
+    // RH_ScopedInstall(MakeAbortable_Reversed, 0x645840);
     // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x64D2B0);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x64D440);
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x64A820);
@@ -43,7 +43,7 @@ CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(CVehi
 // 0x64A580
 CTaskComplexGoToCarDoorAndStandStill::~CTaskComplexGoToCarDoorAndStandStill() {
     CEntity::SafeCleanUpRef(m_Vehicle);
-    delete m_PointRoute;
+    if (m_PointRoute) delete m_PointRoute; // allocated on the pool, a check is required
 }
 
 // 0x645840

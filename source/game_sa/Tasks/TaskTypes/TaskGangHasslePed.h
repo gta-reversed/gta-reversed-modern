@@ -10,7 +10,7 @@ public:
     int32 dword10; // values are 0, 1, 2
     int32 m_RndMin;
     int32 m_RndMax;
-    bool  m_bAnimationNotDeleted;
+    bool  m_bAnimBlockRefAdded;
     int32 m_nTime;
     int32 m_nSomeRandomShit;
     uint8 m_bFirstSubTaskInitialised;

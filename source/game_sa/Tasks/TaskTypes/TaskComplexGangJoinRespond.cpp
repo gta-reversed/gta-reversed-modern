@@ -19,14 +19,14 @@ void CTaskComplexGangJoinRespond::InjectHooks() {
 // 0x6616F0
 CTaskComplexGangJoinRespond::CTaskComplexGangJoinRespond(uint8 a2) : CTaskComplex() {
     byteC = a2;
-    byteD = false;
+    m_bAnimBlockRefAdded = false;
 }
 
 // 0x661720
 CTaskComplexGangJoinRespond::~CTaskComplexGangJoinRespond() {
-    if (byteD) {
+    if (m_bAnimBlockRefAdded) {
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex("gangs"));
-        byteD = false;
+        m_bAnimBlockRefAdded = false;
     }
 }
 
