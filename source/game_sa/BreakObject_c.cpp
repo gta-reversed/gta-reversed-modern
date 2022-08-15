@@ -92,7 +92,6 @@ void BreakObject_c::Exit() {
     m_bActive = false;
 }
 
-// Methods
 // 0x59D190
 void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     CBoundingBox bbox(
@@ -177,9 +176,9 @@ void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVe
 
 // 0x59D7F0
 void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
-    static float& ambientRed = *(float*)0x8D0A0C;    // TODO | STATICREF // = 32.0f;
+    static float& ambientRed   = *(float*)0x8D0A0C;  // TODO | STATICREF // = 32.0f;
     static float& ambientGreen = *(float*)0x8D0A08;  // TODO | STATICREF // = 32.0f;
-    static float& ambientBlue = *(float*)0x8D0A04;   // TODO | STATICREF // = 32.0f;
+    static float& ambientBlue  = *(float*)0x8D0A04;  // TODO | STATICREF // = 32.0f;
 
     m_NumBreakGroups = bJustFaces ? info->m_usNumTriangles : info->m_usNumMaterials;
     m_BreakGroups = new BreakGroup_t[m_NumBreakGroups];
@@ -231,9 +230,9 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
 
         for (auto ind = 0; ind < 3; ++ind) {
             auto& vertColor = info->m_pVertexColors[triangle.vertIndex[ind]];
-            auto red   = (uint8)std::min(255.0f, vertColor.red   * matColor.red   + ambientRed);
-            auto green = (uint8)std::min(255.0f, vertColor.green * matColor.green + ambientGreen);
-            auto blue  = (uint8)std::min(255.0f, vertColor.blue  * matColor.blue  + ambientBlue);
+            auto red   = (uint8)std::min(255.0f, (float)vertColor.red   * matColor.red   + ambientRed);
+            auto green = (uint8)std::min(255.0f, (float)vertColor.green * matColor.green + ambientGreen);
+            auto blue  = (uint8)std::min(255.0f, (float)vertColor.blue  * matColor.blue  + ambientBlue);
 
             curRenderInfo.colors[ind].Set(red, green, blue);
             curRenderInfo.texCoords[ind] = info->m_pTexCoors[triangle.vertIndex[ind]];
@@ -250,35 +249,36 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
 }
 
 // 0x59DE40
-void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) {
-    static float& dotMultiplier = *(float*)0x8D0A18; // TODO | STATICREF // = 0.85f;
+void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) const {
+    static float& dotMultiplier = *(float*)0x8D0A18;   // TODO | STATICREF // = 0.85f;
     static float& timestepScaling = *(float*)0x8D0A14; // TODO | STATICREF // = 0.05f;
     static float& velocityScaling = *(float*)0x8D0A10; // TODO | STATICREF // = 0.8f;
 
-    auto dotProd = RwV3dDotProduct(&group->m_Velocity, vecNormal) * dotMultiplier;
-    RwV3d newVelocity, velocityChange;
-    RwV3dAssign(&velocityChange, vecNormal);
-    RwV3dScale(&velocityChange, &velocityChange, dotProd * 2);
+    auto dotProd = DotProduct(group->m_Velocity, *vecNormal) * dotMultiplier;
+    CVector newVelocity, velocityChange;
+    velocityChange = *vecNormal;
+    velocityChange *= dotProd * 2;
 
-    RwV3dAssign(&newVelocity, &group->m_Velocity);
-    RwV3dSub(&newVelocity, &newVelocity, &velocityChange);
+    newVelocity = group->m_Velocity;
+    newVelocity -= velocityChange;
 
     auto fTimeScale = timeStep * timestepScaling;
-    RwV3d vecRand;
-    vecRand.x = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-    vecRand.y = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-    vecRand.z = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-    RwV3dNormalize(&vecRand, &vecRand);
-    RwV3dScale(&vecRand, &vecRand, fTimeScale);
+    CVector vecRand{
+        CGeneral::GetRandomNumberInRange(-1.0f, 1.0f),
+        CGeneral::GetRandomNumberInRange(-1.0f, 1.0f),
+        CGeneral::GetRandomNumberInRange(-1.0f, 1.0f),
+    };
+    vecRand.Normalise();
+    vecRand *= fTimeScale;
 
-    auto fOriginalVelocityScale = RwV3dLength(&newVelocity);
-    RwV3dAdd(&newVelocity, &newVelocity, &vecRand);
-    RwV3dNormalize(&newVelocity, &newVelocity);
-    RwV3dScale(&newVelocity, &newVelocity, fOriginalVelocityScale);
-    RwV3dScale(&newVelocity, &newVelocity, velocityScaling);
+    auto fOriginalVelocityScale = newVelocity.Magnitude();
+    newVelocity += vecRand;
+    newVelocity.Normalise();
+    newVelocity *= fOriginalVelocityScale;
+    newVelocity *= velocityScaling;
 
     group->m_RotationSpeed = 0.0f;
-    RwV3dAssign(&group->m_Velocity, &newVelocity);
+    group->m_Velocity = newVelocity;
     RwMatrixGetPos(&group->m_Matrix)->z = groundZ + group->m_BoundingSize;
 
     if (fOriginalVelocityScale >= 0.05f) {
@@ -292,38 +292,26 @@ void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV
         }
     }
 
-    auto particle = FxPrtMult_c(1.0f, 1.0f, 1.0f, 0.1f, 0.3f, 0.0f, 0.15f);
-    auto* groupPos = RwMatrixGetPos(&group->m_Matrix);
+    CVector groupPos = *RwMatrixGetPos(&group->m_Matrix);
     for (auto i = 0; i < 4; ++i) {
-        RwV3d particlePos, particleVelocity;
-        RwV3dAssign(&particlePos, groupPos);
+        CVector particlePos = groupPos;
         particlePos.x += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
         particlePos.y += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
 
-        particleVelocity.x = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
-        particleVelocity.y = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
-        particleVelocity.z = 0.0f;
+        CVector particleVelocity = {
+            CGeneral::GetRandomNumberInRange(-0.15f, 0.15f),
+            CGeneral::GetRandomNumberInRange(-0.15f, 0.15f),
+            0.0f,
+        };
 
+        auto particle = FxPrtMult_c(1.0f, 1.0f, 1.0f, 0.1f, 0.3f, 0.0f, 0.15f);
         g_fx.m_SmokeII3expand->AddParticle(&particlePos, &particleVelocity, 0.0f, &particle, -1.0f, 1.2f, 0.6f, 0);
     }
 
     if (m_AddSparks) {
-        auto fSpeed = RwV3dLength(&group->m_Velocity);
-        RwV3d particlePos, particleVelocity;
-        RwV3dAssign(&particlePos, groupPos);
-        particleVelocity.x = 0.0f;
-        particleVelocity.y = 0.0f;
-        particleVelocity.z = 1.0f;
-
-        //TODO: (?) Fx_c methods originally take in RwV3d instead of CVectors, as the debug symbols show
-        g_fx.AddSparks(*reinterpret_cast<CVector*>(&particlePos),
-            *reinterpret_cast<CVector*>(&particleVelocity),
-            2.0f,
-            static_cast<int32>(fSpeed * 100.0f),
-            CVector(0.0f, 0.0f, 0.0f),
-            eSparkType::SPARK_PARTICLE_SPARK,
-            0.4f,
-            1.0f);
+        CVector particleVelocity = { 0.0f, 0.0f, 1.0f };
+        auto amount = static_cast<int32>(group->m_Velocity.Magnitude() * 100.0f);
+        g_fx.AddSparks(groupPos, particleVelocity, 2.0f, amount, CVector(0.0f, 0.0f, 0.0f), SPARK_PARTICLE_SPARK, 0.4f, 1.0f);
     }
 }
 
@@ -346,9 +334,8 @@ void BreakObject_c::Update(float timeStep) {
     for (auto& group : GetBreakGroups()) {
         if (!group.m_bStoppedMoving) {
             group.m_Velocity.z -= timeStep / 125.0f;
-            RwV3d vecVelocity;
-            RwV3dAssign(&vecVelocity, &group.m_Velocity);
-            RwV3dScale(&vecVelocity, &vecVelocity, timeStep);
+            CVector vecVelocity = group.m_Velocity;
+            vecVelocity *= timeStep;
 
             auto* pos = RwMatrixGetPos(&group.m_Matrix);
             RwV3dAdd(pos, pos, &vecVelocity);
@@ -356,8 +343,8 @@ void BreakObject_c::Update(float timeStep) {
             if (m_FramesActive >= 5) {
                 RwV3d* vecFacing = [&]{
                     switch (group.m_Type) {
-                    case 1: return RwMatrixGetUp(&group.m_Matrix);
-                    case 2: return RwMatrixGetAt(&group.m_Matrix);
+                    case 1:  return RwMatrixGetUp(&group.m_Matrix);
+                    case 2:  return RwMatrixGetAt(&group.m_Matrix);
                     default: return RwMatrixGetRight(&group.m_Matrix); // type 0
                     }
                 }();
@@ -369,10 +356,9 @@ void BreakObject_c::Update(float timeStep) {
                     RwV3dNormalize(&axis, &axis);
 
                     auto fAngleDeg = RadiansToDegrees(fAngleRad) * timeStep / 20.0f;
-                    RwV3d savedPos;
-                    RwV3dAssign(&savedPos, pos);
+                    CVector savedPos = *pos;
                     RwMatrixRotate(&group.m_Matrix, &axis, fAngleDeg, RwOpCombineType::rwCOMBINEPOSTCONCAT);
-                    RwV3dAssign(pos, &savedPos);
+                    *pos = savedPos;
                 }
             } else {
                 float fAngle = timeStep * group.m_RotationSpeed;

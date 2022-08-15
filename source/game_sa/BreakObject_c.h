@@ -13,7 +13,7 @@ struct BreakGroupRenderInfo_t {
 
 struct BreakGroup_t {
     RwMatrix                m_Matrix;
-    RwV3d                   m_Velocity;
+    CVector                 m_Velocity;
     bool                    m_bStoppedMoving;
     int16                   m_NumTriangles;
     BreakGroupRenderInfo_t* m_RenderInfo;
@@ -53,7 +53,7 @@ public:
     void SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand);
     void SetBreakInfo(BreakInfo_t* info, int32 bJustFaces);
 
-    void DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ);
+    void DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) const;
     void DoCollision(BreakGroup_t* group, float timeStep);
     void Update(float timeStep);
     void Render(bool isDrawLast) const;
