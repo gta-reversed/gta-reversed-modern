@@ -6,13 +6,12 @@ void CTaskComplexGangLeader::InjectHooks() {
     RH_ScopedClass(CTaskComplexGangLeader);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x65DED0); // todo: doesn't work?
-    // RH_ScopedInstall(Destructor, 0x65DF30); // todo: doesn't work?
+    RH_ScopedInstall(Constructor, 0x65DED0);
+    RH_ScopedInstall(Destructor, 0x65DF30);
     // RH_ScopedGlobalInstall(GetRandomGangAmbientAnim, 0x65E730);
     // RH_ScopedGlobalInstall(ShouldLoadGangAnims, 0x65E7F0);
     // RH_ScopedGlobalInstall(DoGangAbuseSpeech, 0x65E860);
     // RH_ScopedInstall(TryToPassObject, 0x65EA50);
-    // RH_ScopedInstall(Clone, 0x661FA0);
     // RH_ScopedInstall(MakeAbortable, 0x65DFA0);
     // RH_ScopedInstall(CreateNextSubTask, 0x65DFF0);
     // RH_ScopedInstall(CreateFirstSubTask, 0x65E1F0);
@@ -22,27 +21,15 @@ void CTaskComplexGangLeader::InjectHooks() {
 
 // 0x65DED0
 CTaskComplexGangLeader::CTaskComplexGangLeader(CPedGroup* pedGroup) : CTaskComplex() {
-    m_Time = 0;
-    m_Time1 = 0;
-    byte18 = 0;
-    byte19 = 0;
-    m_Time2 = 0;
-    m_Time3 = 0;
-    byte24 = 0;
-    m_bTime = 0;
-    dword28 = 0;
-    dword2C = 0;
-    byte30 = 0;
-    byte31 = 0;
-    byte34 = 0;
+    m_bAnimBlockRefAdded = false;
     m_PedGroup = pedGroup;
 }
 
 // 0x65DF30
 CTaskComplexGangLeader::~CTaskComplexGangLeader() {
-    if (byte34) {
+    if (m_bAnimBlockRefAdded) {
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex("gangs"));
-        byte34 = 0;
+        m_bAnimBlockRefAdded = false;
     }
 }
 

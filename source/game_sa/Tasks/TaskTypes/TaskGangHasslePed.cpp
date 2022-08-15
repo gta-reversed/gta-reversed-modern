@@ -24,7 +24,7 @@ CTaskGangHasslePed::CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5) 
     m_RndMin = a4;
     m_Ped = ped;
     m_RndMax = a5;
-    m_bAnimationNotDeleted = false;
+    m_bAnimBlockRefAdded = false;
     CEntity::SafeRegisterRef(m_Ped);
 }
 
@@ -32,9 +32,9 @@ CTaskGangHasslePed::CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5) 
 CTaskGangHasslePed::~CTaskGangHasslePed() {
     CEntity::SafeCleanUpRef(m_Ped);
 
-    if (m_bAnimationNotDeleted) {
+    if (m_bAnimBlockRefAdded) {
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex("gangs"));
-        m_bAnimationNotDeleted = false;
+        m_bAnimBlockRefAdded = false;
     }
 }
 

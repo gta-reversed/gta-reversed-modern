@@ -7,25 +7,13 @@ class CEntity;
 class CTaskComplexGangLeader : public CTaskComplex {
 public:
     CPedGroup* m_PedGroup;
-    uint32     m_Time;
-    int32      m_Time1;
-    bool       byte18;
-    uint8      byte19;
-    uint8      gap1A[2];
-    int32      m_Time2;
-    int32      m_Time3;
-    uint8      byte24;
-    bool       m_bTime;
-    uint8      gap26[2];
-    int32      dword28;
-    int32      dword2C;
-    uint8      byte30;
-    uint8      byte31;
-    uint8      gap32[2];
-    bool       byte34;
+    CTaskTimer m_Timer1;
+    CTaskTimer m_Timer2;
+    CTaskTimer m_Timer3;
+    bool       m_bAnimBlockRefAdded;
 
 public:
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_GANG_LEADER;
+    static constexpr auto Type = TASK_COMPLEX_GANG_LEADER;
 
     explicit CTaskComplexGangLeader(CPedGroup* pedGroup);
     ~CTaskComplexGangLeader() override;
@@ -37,7 +25,7 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
-    void ScanForStuff(CPed* ped);
+    virtual void ScanForStuff(CPed* ped);
     CPed* TryToPassObject(CPed* ped, CPedGroup* pedGroup);
     static int32 GetRandomGangAmbientAnim(CPed* ped, CEntity* entity);
     static bool ShouldLoadGangAnims();
