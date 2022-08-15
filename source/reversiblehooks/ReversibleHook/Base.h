@@ -31,13 +31,22 @@ struct Base {
     virtual void Switch() = 0;
     virtual void Check() = 0;
 
-    void State(bool hooked) {
-        if (m_bIsLocked)
-            return;
-
-        if (m_bIsHooked != hooked) {
-            Switch();
+    /*!
+    * @brief Hook/unhook
+    * 
+    * @param hooked If this hook should be installed/uninstalled (true/false)
+    *
+    * @returns If state is already the same as `hooked`
+    */
+    bool State(bool hooked) {
+        if (hooked == m_bIsHooked) {
+            return true;
         }
+        if (m_bIsLocked) {
+            return false;
+        }
+        Switch();
+        return true;
     }
 
     void LockState(bool locked) {
@@ -52,7 +61,7 @@ struct Base {
 
 public:
     // ImGui stuff
-    bool m_isVisible{};
+    bool m_isVisible{true};
 
 protected:
     bool        m_bIsHooked{};  // Is hook installed
