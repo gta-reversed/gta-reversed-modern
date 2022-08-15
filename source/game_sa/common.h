@@ -43,7 +43,7 @@ constexpr auto DEFAULT_VIEW_WINDOW        = 0.7f;
 #define SCREEN_WIDTH ((float)RsGlobal.maximumWidth)
 #define SCREEN_HEIGHT ((float)RsGlobal.maximumHeight)
 #define SCREEN_ASPECT_RATIO (CDraw::ms_fAspectRatio)
-float SCREEN_VIEW_WINDOW() { return std::tan(DegreesToRadians(CDraw::GetFOV() / 2.0f)); } // todo: GetScaledFov
+#define SCREEN_VIEW_WINDOW (std::tan(DegreesToRadians(CDraw::GetFOV() / (2.0f)))) // todo: GetScaledFov
 #define SCREEN_WIDTH_UNIT (SCREEN_WIDTH / 640.0f)
 #define SCREEN_HEIGHT_UNIT (SCREEN_HEIGHT / 448.0f)
 
