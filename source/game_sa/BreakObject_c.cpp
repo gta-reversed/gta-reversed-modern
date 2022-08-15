@@ -47,7 +47,7 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
     m_AddSparks = object->m_pObjectInfo->m_nSparksOnImpact;
     m_bDrawLast = object->m_bDrawLast;
 
-    CVector vecOrigin; 
+    CVector vecOrigin;
     if (info->m_uiPosRule != eBreakablePluginPositionRule::OBJECT_ORIGIN) {
         auto* colModel = object->GetModelInfo()->GetColModel();
         auto usedPoint = colModel->GetBoundingBox().GetCenter();
@@ -65,10 +65,10 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
     if (CWorld::ProcessVerticalLine(vecOrigin, -1000.0f, colPoint, colEntity, true)) {
         m_GroundZ = colPoint.m_vecPoint.z;
         m_VecNormal = colPoint.m_vecNormal;
-        if (fabs(m_VecNormal.x) < 0.01f
-            && fabs(m_VecNormal.y) < 0.01f
-            && fabs(m_VecNormal.z) < 0.01f) {
-
+        if (std::fabs(m_VecNormal.x) < 0.01f &&
+            std::fabs(m_VecNormal.y) < 0.01f &&
+            std::fabs(m_VecNormal.z) < 0.01f
+        ) {
             m_VecNormal.Set(0.0f, 0.0f, 1.0f);
         }
     } else {
@@ -81,20 +81,14 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
 
 // 0x59DDD0
 void BreakObject_c::Exit() {
-    if (m_BreakGroups) {
-        for (auto i = 0; i < m_NumBreakGroups; ++i) {
-            if (m_BreakGroups[i].m_Texture) {
-                RwTextureDestroy(m_BreakGroups[i].m_Texture);
-                m_BreakGroups[i].m_Texture = 0;
-            }
-
-            if (m_BreakGroups[i].m_RenderInfo)
-                delete m_BreakGroups[i].m_RenderInfo;
+    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+        if (group.m_Texture) {
+            RwTextureDestroy(group.m_Texture);
+            group.m_Texture = nullptr;
         }
-
-        delete[] m_BreakGroups;
+        delete group.m_RenderInfo;
     }
-
+    delete[] m_BreakGroups;
     m_bActive = false;
 }
 
@@ -104,23 +98,22 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     CVector vecMin(9999999.0f, 9999999.0f, 9999999.0f);
     CVector vecMax(-9999999.0f, -9999999.0f, -9999999.0f);
 
-    for (auto i = 0; i < group->m_NumTriangles; ++i) {
-        auto& info = group->m_RenderInfo[i];
-        for (auto posInd = 0; posInd < 3; ++posInd) {
-            vecMin.x = std::min(vecMin.x, info.positions[posInd].x);
-            vecMax.x = std::max(vecMax.x, info.positions[posInd].x);
-            vecMin.y = std::min(vecMin.y, info.positions[posInd].y);
-            vecMax.y = std::max(vecMax.y, info.positions[posInd].y);
-            vecMin.z = std::min(vecMin.z, info.positions[posInd].z);
-            vecMax.z = std::max(vecMax.z, info.positions[posInd].z);
+    for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles }) {
+        for (auto& position : info.positions) {
+            vecMin.x = std::min(vecMin.x, position.x);
+            vecMax.x = std::max(vecMax.x, position.x);
+            vecMin.y = std::min(vecMin.y, position.y);
+            vecMax.y = std::max(vecMax.y, position.y);
+            vecMin.z = std::min(vecMin.z, position.z);
+            vecMax.z = std::max(vecMax.z, position.z);
         }
     }
 
     auto vecCenter = (vecMax + vecMin) / 2.0f;
-    for (auto i = 0; i < group->m_NumTriangles; ++i) {
-        auto& info = group->m_RenderInfo[i];
-        for (auto posInd = 0; posInd < 3; ++posInd)
-            RwV3dSub(&info.positions[posInd], &info.positions[posInd], &vecCenter);
+    for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles}) {
+        for (auto& position : info.positions) {
+            RwV3dSub(&position, &position, &vecCenter); // position -= center
+        }
     }
 
     vecMin -= vecCenter;
@@ -141,22 +134,21 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
         if (width > length || width > height) {
             if (height <= width && height <= (double)length) {
                 group->m_Type = 2;
-                group->m_BoundingSize = height * 0.5f;
+                group->m_BoundingSize = height / 2.0f;
             }
         } else {
             group->m_Type = 1;
-            group->m_BoundingSize = width * 0.5f;
+            group->m_BoundingSize = width / 2.0f;
         }
     } else {
         group->m_Type = 0;
-        group->m_BoundingSize = length * 0.5f;
+        group->m_BoundingSize = length / 2.0f;
     }
 }
 
 // 0x59D570
 void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand) {
-    for (int i = 0; i < m_NumBreakGroups; ++i) {
-        auto& group = m_BreakGroups[i];
+    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
         group.m_Matrix = *matrix;
 
         CalcGroupCenter(&group);
@@ -181,7 +173,7 @@ void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVe
         group.m_RotationAxis.z = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
         RwV3dNormalize(&group.m_RotationAxis, &group.m_RotationAxis);
 
-        group.m_bStoppedMoving = 0;
+        group.m_bStoppedMoving = false;
     }
 }
 
@@ -191,11 +183,7 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
     static float& ambientGreen = *(float*)0x8D0A08;  // TODO | STATICREF // = 32.0f;
     static float& ambientBlue = *(float*)0x8D0A04;   // TODO | STATICREF // = 32.0f;
 
-    if (bJustFaces)
-        m_NumBreakGroups = info->m_usNumTriangles;
-    else
-        m_NumBreakGroups = info->m_usNumMaterials;
-
+    m_NumBreakGroups = bJustFaces ? info->m_usNumTriangles : info->m_usNumMaterials;
     m_BreakGroups = new BreakGroup_t[m_NumBreakGroups];
 
     for (auto i = 0; i < m_NumBreakGroups; ++i) {
@@ -229,36 +217,37 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         auto& group = m_BreakGroups[curIndice];
         // BUG: (?) Compiler shows that invalid access can happen in next line, possibly something wrong with reversed code
         auto& curRenderInfo = group.m_RenderInfo[group.m_NumTriangles];
-        for (auto ind = 0; ind < 3; ++ind)
+        for (auto ind = 0; ind < 3; ++ind) {
             curRenderInfo.positions[ind] = info->m_pVertexPos[triangle.vertIndex[ind]];
+        }
 
         auto textureInd = bJustFaces ? info->m_pTrianglesMaterialIndices[i] : curIndice;
         group.m_Texture = info->m_pTextures[textureInd];
 
         auto& matColor = info->m_pMaterialProperties[textureInd];
         if (!CPostEffects::IsVisionFXActive()) {
-            ambientRed = AmbientLightColourForFrame.red * 255.0f;
+            ambientRed   = AmbientLightColourForFrame.red   * 255.0f;
             ambientGreen = AmbientLightColourForFrame.green * 255.0f;
-            ambientBlue = AmbientLightColourForFrame.blue * 255.0f;
+            ambientBlue  = AmbientLightColourForFrame.blue  * 255.0f;
         }
 
         for (auto ind = 0; ind < 3; ++ind) {
             auto& vertColor = info->m_pVertexColors[triangle.vertIndex[ind]];
-            auto fRed = std::min(255.0f, vertColor.red * matColor.red + ambientRed);
-            auto fGreen = std::min(255.0f, vertColor.green * matColor.green + ambientGreen);
-            auto fBlue = std::min(255.0f, vertColor.blue * matColor.blue + ambientBlue);
+            auto red   = (uint8)std::min(255.0f, vertColor.red   * matColor.red   + ambientRed);
+            auto green = (uint8)std::min(255.0f, vertColor.green * matColor.green + ambientGreen);
+            auto blue  = (uint8)std::min(255.0f, vertColor.blue  * matColor.blue  + ambientBlue);
 
-            curRenderInfo.colors[ind].Set(fRed, fGreen, fBlue);
+            curRenderInfo.colors[ind].Set(red, green, blue);
             curRenderInfo.texCoords[ind] = info->m_pTexCoors[triangle.vertIndex[ind]];
         }
 
         ++group.m_NumTriangles;
     }
 
-    for (auto i = 0; i < m_NumBreakGroups; ++i) {
-        auto& group = m_BreakGroups[i];
-        if (group.m_Texture)
-            ++group.m_Texture->refCount;
+    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+        if (group.m_Texture) {
+            RwTextureAddRef(group.m_Texture);
+        }
     }
 }
 
@@ -342,8 +331,9 @@ void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV
 
 // 0x59E1F0
 void BreakObject_c::DoCollision(BreakGroup_t* group, float timeStep) {
-    if (RwMatrixGetPos(&group->m_Matrix)->z - group->m_BoundingSize < m_GroundZ)
+    if (RwMatrixGetPos(&group->m_Matrix)->z - group->m_BoundingSize < m_GroundZ) {
         DoCollisionResponse(group, timeStep, &m_VecNormal, m_GroundZ);
+    }
 }
 
 // 0x59E220
@@ -355,9 +345,7 @@ void BreakObject_c::Update(float timeStep) {
     }
 
     auto bToBeRemoved = true;
-    for (auto i = 0; i < m_NumBreakGroups; ++i) {
-        auto& group = m_BreakGroups[i];
-
+    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
         if (!group.m_bStoppedMoving) {
             group.m_Velocity.z -= timeStep / 125.0f;
             RwV3d vecVelocity;
@@ -375,14 +363,16 @@ void BreakObject_c::Update(float timeStep) {
                     vecFacing = RwMatrixGetUp(&group.m_Matrix);
                 else if (group.m_Type == 2)
                     vecFacing = RwMatrixGetAt(&group.m_Matrix);
+                else
+                    assert("Vec Facing is nullptr");
 
                 auto fAngleRad = RwACos(RwV3dDotProduct(&m_VecNormal, vecFacing));
-                if (fabs(fAngleRad > 0.01f)) {
+                if (std::fabs(fAngleRad > 0.01f)) {
                     RwV3d axis;
                     RwV3dCrossProduct(&axis, vecFacing, &m_VecNormal);
                     RwV3dNormalize(&axis, &axis);
 
-                    auto fAngleDeg = RWRAD2DEG(fAngleRad) * timeStep / 20.0f;
+                    auto fAngleDeg = RadiansToDegrees(fAngleRad) * timeStep / 20.0f;
                     RwV3d savedPos;
                     RwV3dAssign(&savedPos, pos);
                     RwMatrixRotate(&group.m_Matrix, &axis, fAngleDeg, RwOpCombineType::rwCOMBINEPOSTCONCAT);
@@ -410,13 +400,12 @@ void BreakObject_c::Update(float timeStep) {
 }
 
 // 0x59E480
-void BreakObject_c::Render(bool isDrawLast) {
-    if (isDrawLast != m_bDrawLast || m_NumBreakGroups <= 0)
+void BreakObject_c::Render(bool isDrawLast) const {
+    if (isDrawLast != m_bDrawLast)
         return;
 
     RwRaster* lastRaster = nullptr;
-    for (auto i = 0; i < m_NumBreakGroups; ++i) {
-        auto& group = m_BreakGroups[i];
+    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
         RwRaster* curRaster = nullptr;
         if (group.m_Texture)
             curRaster = RwTextureGetRaster(group.m_Texture);
@@ -424,38 +413,30 @@ void BreakObject_c::Render(bool isDrawLast) {
         if (lastRaster != curRaster) {
             RenderEnd();
             lastRaster = curRaster;
-            RenderBegin(curRaster, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV); //TODO: Verify if that's the right enum
+            RenderBegin(curRaster, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV);
         }
 
         if (!curRaster && !lastRaster) {
             RenderEnd();
             lastRaster = nullptr;
-            RenderBegin(nullptr, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV); // TODO: Verify if that's the right enum
+            RenderBegin(nullptr, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV);
         }
 
-        for (auto iTri = 0; iTri < group.m_NumTriangles; ++iTri) {
-            auto& renderInfo = group.m_RenderInfo[iTri];
+        for (auto& renderInfo : std::span{ group.m_RenderInfo, (size_t)group.m_NumTriangles }) {
             RwV3d aVecPos[3];
             RwV3dTransformPoints(aVecPos, renderInfo.positions, 3, &group.m_Matrix);
 
-            int32 alpha;
-            if (m_JustFaces) {
-                alpha = group.m_FramesToLive * 8;
-            } else {
-                alpha = group.m_FramesToLive * 2;
-            }
+            int32 alpha = group.m_FramesToLive * (m_JustFaces ? 8 : 2);
+            alpha = std::min(alpha, 255);
 
-            if (alpha > 255)
-                alpha = 255;
+            auto colors = std::to_array(renderInfo.colors);
+            std::ranges::for_each(colors, [&](auto& color) { color.a = alpha; });
 
-            CRGBA colors[3]{};
-            for (auto k = 0; k < 3; ++k) {
-                colors[k] = renderInfo.colors[k];
-                colors[k].a = alpha;
-            }
-            RenderAddTri(aVecPos[0], aVecPos[1], aVecPos[2],
+            RenderAddTri(
+                aVecPos[0], aVecPos[1], aVecPos[2],
                 renderInfo.texCoords[0], renderInfo.texCoords[1], renderInfo.texCoords[2],
-                colors[0], colors[1], colors[2]);
+                colors[0], colors[1], colors[2]
+            );
         }
     }
 

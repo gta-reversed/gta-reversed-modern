@@ -139,4 +139,3 @@ void* BreakableDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInOb
 
     return object;
 }
-
