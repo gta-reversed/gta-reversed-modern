@@ -14,7 +14,7 @@ void BreakObject_c::InjectHooks() {
     RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
     RH_ScopedInstall(DoCollision, 0x59E1F0);
     RH_ScopedInstall(Update, 0x59E220);
-    //RH_ScopedInstall(Render, 0x59E480);
+    RH_ScopedInstall(Render, 0x59E480);
     RH_ScopedInstall(Init, 0x59E750);
 }
 
@@ -120,7 +120,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     for (auto i = 0; i < group->m_NumTriangles; ++i) {
         auto& info = group->m_RenderInfo[i];
         for (auto posInd = 0; posInd < 3; ++posInd)
-            info.positions[posInd] -= vecCenter;
+            RwV3dSub(&info.positions[posInd], &info.positions[posInd], &vecCenter);
     }
 
     vecMin -= vecCenter;
@@ -411,5 +411,53 @@ void BreakObject_c::Update(float timeStep) {
 
 // 0x59E480
 void BreakObject_c::Render(bool isDrawLast) {
-    plugin::CallMethod<0x59E480, BreakObject_c*>(this, isDrawLast);
+    if (isDrawLast != m_bDrawLast || m_NumBreakGroups <= 0)
+        return;
+
+    RwRaster* lastRaster = nullptr;
+    for (auto i = 0; i < m_NumBreakGroups; ++i) {
+        auto& group = m_BreakGroups[i];
+        RwRaster* curRaster = nullptr;
+        if (group.m_Texture)
+            curRaster = RwTextureGetRaster(group.m_Texture);
+
+        if (lastRaster != curRaster) {
+            RenderEnd();
+            lastRaster = curRaster;
+            RenderBegin(curRaster, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV); //TODO: Verify if that's the right enum
+        }
+
+        if (!curRaster && !lastRaster) {
+            RenderEnd();
+            lastRaster = nullptr;
+            RenderBegin(nullptr, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV); // TODO: Verify if that's the right enum
+        }
+
+        for (auto iTri = 0; iTri < group.m_NumTriangles; ++iTri) {
+            auto& renderInfo = group.m_RenderInfo[iTri];
+            RwV3d aVecPos[3];
+            RwV3dTransformPoints(aVecPos, renderInfo.positions, 3, &group.m_Matrix);
+
+            int32 alpha;
+            if (m_JustFaces) {
+                alpha = group.m_FramesToLive * 8;
+            } else {
+                alpha = group.m_FramesToLive * 2;
+            }
+
+            if (alpha > 255)
+                alpha = 255;
+
+            CRGBA colors[3]{};
+            for (auto k = 0; k < 3; ++k) {
+                colors[k] = renderInfo.colors[k];
+                colors[k].a = alpha;
+            }
+            RenderAddTri(aVecPos[0], aVecPos[1], aVecPos[2],
+                renderInfo.texCoords[0], renderInfo.texCoords[1], renderInfo.texCoords[2],
+                colors[0], colors[1], colors[2]);
+        }
+    }
+
+    RenderEnd();
 }

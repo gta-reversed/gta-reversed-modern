@@ -6,7 +6,7 @@
 #include <rwplcore.h>
 
 struct BreakGroupRenderInfo_t {
-    CVector     positions[3];
+    RwV3d       positions[3];
     RwTexCoords texCoords[3];
     CRGBA       colors[3];
 };
