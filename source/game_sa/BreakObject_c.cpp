@@ -217,7 +217,7 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         }
 
         group.m_RenderInfo = new BreakGroupRenderInfo_t[numMaterials];
-        group.m_Random = 256 + CGeneral::GetRandomNumberInRange(0, 32);
+        group.m_FramesToLive = 256 + CGeneral::GetRandomNumberInRange(0, 32);
     }
 
     for (auto i = 0; i < info->m_usNumTriangles; ++i) {
@@ -300,7 +300,7 @@ void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV
     } else {
         group->m_bStoppedMoving = true;
         if (m_JustFaces) {
-            group->m_Random = 32 + CGeneral::GetRandomNumberInRange(0, 32);
+            group->m_FramesToLive = 32 + CGeneral::GetRandomNumberInRange(0, 32);
             return;
         }
     }

@@ -22,7 +22,7 @@ struct BreakGroup_t {
     float                   m_BoundingSize;
     float                   m_RotationSpeed;
     CVector                 m_RotationAxis;
-    int32                   m_Random;
+    int32                   m_FramesToLive;
 };
 VALIDATE_SIZE(BreakGroup_t, 0x74);
 
