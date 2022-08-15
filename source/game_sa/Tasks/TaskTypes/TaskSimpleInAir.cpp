@@ -28,9 +28,9 @@ CTaskSimpleInAir* CTaskSimpleInAir::Constructor(bool bUsingJumpGlide, bool bUsin
 // 0x678CD0
 CTaskSimpleInAir::CTaskSimpleInAir(bool bUsingJumpGlide, bool bUsingFallGlide, bool bUsingClimbJump) : m_timer()
 {
-    this->m_bUsingJumpGlide = bUsingJumpGlide;
-    this->m_bUsingFallGlide = bUsingFallGlide;
-    this->m_bUsingClimbJump = bUsingClimbJump;
+    m_bUsingJumpGlide = bUsingJumpGlide;
+    m_bUsingFallGlide = bUsingFallGlide;
+    m_bUsingClimbJump = bUsingClimbJump;
 
     m_pAnim = nullptr;
     m_fMinZSpeed = 0.0F;

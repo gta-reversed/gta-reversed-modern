@@ -7,13 +7,12 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
+class CAnimBlendAssociation;
 
 class CTaskSimpleAnim : public CTaskSimple {
 public:
-    CAnimBlendAssociation* m_pAnim;
+    CAnimBlendAssociation *m_pAnim;
     union {
-        uint8 m_nFlags;
         struct {
             uint8 m_bIsFinished : 1;
             uint8 m_bDontInterrupt : 1;
@@ -27,17 +26,17 @@ public:
             uint8 m_bOffsetAtEnd : 1;
             uint8 m_bOffsetAvailable : 1;
         };
+        uint8 m_nFlags;
     };
 
 public:
-    static void InjectHooks();
-
     explicit CTaskSimpleAnim(bool bHoldLastFrame);
-    CTaskSimpleAnim(bool bHoldLastFrame, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed);
     ~CTaskSimpleAnim() override;
 
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    static void FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data);
+    static void FinishRunAnimCB(CAnimBlendAssociation* blendAssoc, void* data); //data is CTaskSimpleAnim
+
+    static void InjectHooks();
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
 VALIDATE_SIZE(CTaskSimpleAnim, 0x10);

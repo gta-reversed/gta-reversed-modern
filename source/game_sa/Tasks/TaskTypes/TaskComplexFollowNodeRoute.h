@@ -38,11 +38,13 @@ public:
     float m_afUnkn[4];
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_FOLLOW_NODE_ROUTE;
+
     CTaskComplexFollowNodeRoute(int32 mode, const CVector& targetPos, float radius, float fUnkn1, float fUnkn2, bool bUnknFlag, int32 time, bool bUnknFlag2);
     ~CTaskComplexFollowNodeRoute() override;
 
+    eTaskType GetTaskType() override { return Type; } // 0x66EB60
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_FOLLOW_NODE_ROUTE; } // 0x66EB60
     void StopTimer(const CEvent* event) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;

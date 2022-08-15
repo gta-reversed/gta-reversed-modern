@@ -8,8 +8,8 @@
 
 #include "TaskSimple.h"
 #include "Vector.h"
-#include "AnimBlendAssociation.h"
-#include "FxSystem.h"
+class CAnimBlendAssociation;
+class CFxSystem;
 
 class CPed;
 class CPlayerPed;
@@ -64,19 +64,17 @@ public:
     static float& LEG_SWING_GRAVITY_MULT; // 0.01f
     static float& LEG_SWING_DAMP_FRAC;    // 0.98f
 
-  public:
+public:
     static constexpr auto Type = TASK_SIMPLE_JETPACK;
 
-    static void InjectHooks();
 
     CTaskSimpleJetPack(const CVector* pVecTargetPos = nullptr, float fCruiseHeight = 10.0f, int32 nHoverTime = 0, CEntity* entity = nullptr);
     CTaskSimpleJetPack* Constructor(const CVector* pVecTargetPos, float fCruiseHeight, int32 nHoverTime, CEntity* entity);
-
     ~CTaskSimpleJetPack() override;
 
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_JETPACK; }
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
+    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     void RenderJetPack(CPed* ped);
@@ -87,12 +85,11 @@ public:
     void DropJetPack(CPed* ped);
     void DoJetPackEffect(CPed* ped);
 
-  private:
+    static void InjectHooks();
     bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
     CTask* Clone_Reversed();
 };
-
-extern CVector& JETPACK_POS_OFFSET; // { 0.1f, 0.08f, 0.0f }
-extern CVector& JETPACK_ROT_AXIS;   // { 0.0f, 1.0f, 0.0f }
-
 VALIDATE_SIZE(CTaskSimpleJetPack, 0x70);
+
+static constexpr CVector JETPACK_POS_OFFSET = { 0.1f, 0.08f, 0.0f };
+static constexpr CVector JETPACK_ROT_AXIS   = { 0.0f, 1.0f, 0.0f };

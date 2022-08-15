@@ -109,7 +109,7 @@ CTask* CTaskComplexDriveFireTruck::ControlSubTask_Reversed(CPed* ped) {
 
             if (newFire != m_pFire) {
                 m_pFire = newFire;
-                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->point = m_pFire->m_vecPosition;
+                reinterpret_cast<CTaskComplexDriveToPoint*>(m_pSubTask)->m_Point = m_pFire->m_vecPosition;
             }
         }
     }

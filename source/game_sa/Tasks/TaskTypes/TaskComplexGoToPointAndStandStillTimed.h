@@ -10,7 +10,7 @@ public:
 
 public:
     CTaskComplexGoToPointAndStandStillTimed(int32 moveState, const CVector& targetPoint, float fRadius, float fMoveStateRadius, int32 time);
-    ~CTaskComplexGoToPointAndStandStillTimed();
+    ~CTaskComplexGoToPointAndStandStillTimed() override;
 
     CTask* Clone() override;
     void StopTimer(const CEvent* event) override;
