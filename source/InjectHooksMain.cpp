@@ -810,7 +810,7 @@ void InjectHooksMain() {
         CTaskUtilityLineUpPedWithCar::InjectHooks();
         CTaskSimpleLand::InjectHooks();
         CTaskSimpleJetPack::InjectHooks();
-        CTaskSimpleSetStayInSamePlace::InjectHooks();
+        // + CTaskSimpleSetStayInSamePlace::InjectHooks();
         CTaskSimpleJump::InjectHooks();
         CTaskSimpleFall::InjectHooks();
         CTaskSimpleClimb::InjectHooks();
@@ -832,7 +832,7 @@ void InjectHooksMain() {
         CTaskComplexWalkRoundObject::InjectHooks();
         CTaskSimplePause::InjectHooks();
         // CTaskComplexEnterCarAsPassenger::InjectHooks();
-        // CTaskComplexEnterCarAsDriver::InjectHooks();
+        // + CTaskComplexEnterCarAsDriver::InjectHooks();
         // CTaskSimpleNone::InjectHooks();
         CTaskComplexKillPedOnFoot::InjectHooks();
         CTaskSimpleThrowProjectile::InjectHooks();
