@@ -25,24 +25,24 @@ void CGenericGameStorage::InjectHooks() {
     // until we reverse everything.
 
     RH_ScopedInstall(ReportError, 0x5D08C0);
-    RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, true);
-    RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, true);
-    RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, true);
-    RH_ScopedGlobalInstall(GetSavedGameDateAndTime, 0x618D00, true);
-    RH_ScopedInstall(GenericLoad, 0x5D17B0, true);
-    RH_ScopedInstall(GenericSave, 0x5D13E0, true);
-    RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, true);
-    RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, true);
-    RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, true);
-    RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, true);
-    RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, true);
-    RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, true);
-    RH_ScopedInstall(MakeValidSaveName, 0x5D0E90, true);
-    RH_ScopedInstall(CloseFile, 0x5D0E30, true);
-    RH_ScopedInstall(OpenFileForWriting, 0x5D0DD0, true);
-    RH_ScopedInstall(OpenFileForReading, 0x5D0D20, true);
-    RH_ScopedInstall(CheckDataNotCorrupt, 0x5D1170, true);
-    RH_ScopedInstall(RestoreForStartLoad, 0x619000, true);
+    RH_ScopedInstall(DoGameSpecificStuffBeforeSave, 0x618F50, { .enabled = false, .locked = true });
+    RH_ScopedInstall(DoGameSpecificStuffAfterSucessLoad, 0x618E90, { .enabled = false, .locked = true });
+    RH_ScopedInstall(InitRadioStationPositionList, 0x618E70, { .enabled = false, .locked = true });
+    RH_ScopedGlobalInstall(GetSavedGameDateAndTime, 0x618D00, { .enabled = false, .locked = true });
+    RH_ScopedInstall(GenericLoad, 0x5D17B0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(GenericSave, 0x5D13E0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(CheckSlotDataValid, 0x5D1380, { .enabled = false, .locked = true });
+    RH_ScopedInstall(LoadDataFromWorkBuffer, 0x5D1300, { .enabled = false, .locked = true });
+    RH_ScopedInstall(SaveDataToWorkBuffer, 0x5D1270, { .enabled = false, .locked = true });
+    RH_ScopedInstall(LoadWorkBuffer, 0x5D10B0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(SaveWorkBuffer, 0x5D0F80, { .enabled = false, .locked = true });
+    RH_ScopedInstall(GetCurrentVersionNumber, 0x5D0F50, { .enabled = false, .locked = true });
+    RH_ScopedInstall(MakeValidSaveName, 0x5D0E90, { .enabled = false, .locked = true });
+    RH_ScopedInstall(CloseFile, 0x5D0E30, { .enabled = false, .locked = true });
+    RH_ScopedInstall(OpenFileForWriting, 0x5D0DD0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(OpenFileForReading, 0x5D0D20, { .enabled = false, .locked = true });
+    RH_ScopedInstall(CheckDataNotCorrupt, 0x5D1170, { .enabled = false, .locked = true });
+    RH_ScopedInstall(RestoreForStartLoad, 0x619000, { .enabled = false, .locked = true });
 }
 
 // 0x5D08C0

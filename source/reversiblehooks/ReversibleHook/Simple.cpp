@@ -145,6 +145,9 @@ void Simple::GenerateECXPreservationThunk(int stackArguments)
 void Simple::Switch()
 {
     using namespace ReversibleHooks::detail;
+    if (m_bIsLocked)
+        return;
+
     if (m_bIsHooked) {
         // Unhook (make our code jump to the GTA function)
 
