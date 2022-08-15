@@ -95,8 +95,12 @@ void BreakObject_c::Exit() {
 // Methods
 // 0x59D190
 void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
-    CVector vecMin(9999999.0f, 9999999.0f, 9999999.0f);
-    CVector vecMax(-9999999.0f, -9999999.0f, -9999999.0f);
+    CBoundingBox bbox(
+        { +9999999.0f, +9999999.0f, +9999999.0f },
+        { -9999999.0f, -9999999.0f, -9999999.0f }
+    );
+    auto& vecMin = bbox.m_vecMin;
+    auto& vecMax = bbox.m_vecMax;
 
     for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles }) {
         for (auto& position : info.positions) {
@@ -109,10 +113,10 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
         }
     }
 
-    auto vecCenter = (vecMax + vecMin) / 2.0f;
+    auto vecCenter = bbox.GetCenter();
     for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles}) {
         for (auto& position : info.positions) {
-            RwV3dSub(&position, &position, &vecCenter); // position -= center
+            position -= vecCenter;
         }
     }
 
@@ -126,23 +130,19 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     pos->y += vecTransformedCenter.y;
     pos->z += vecTransformedCenter.z;
 
-    auto length = vecMax.x - vecMin.x;
-    auto width = vecMax.y - vecMin.y;
+    auto length = vecMax.x - vecMin.x; // ? width See CBoundingBox
+    auto width  = vecMax.y - vecMin.y; // ? length
     auto height = vecMax.z - vecMin.z;
 
-    if (length > width || length > height) {
-        if (width > length || width > height) {
-            if (height <= width && height <= (double)length) {
-                group->m_Type = 2;
-                group->m_BoundingSize = height / 2.0f;
-            }
-        } else {
-            group->m_Type = 1;
-            group->m_BoundingSize = width / 2.0f;
-        }
-    } else {
+    if (length <= width && length <= height) {
         group->m_Type = 0;
         group->m_BoundingSize = length / 2.0f;
+    } else if (width <= length && width <= height) {
+        group->m_Type = 1;
+        group->m_BoundingSize = width / 2.0f;
+    } else if (height <= width && height <= length) {
+        group->m_Type = 2;
+        group->m_BoundingSize = height / 2.0f;
     }
 }
 
