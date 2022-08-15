@@ -1,35 +1,45 @@
 #pragma once
 
 #include "TaskComplex.h"
+#include "Vector.h"
+
 class CVehicle;
 
 class CTaskComplexDestroyCar : public CTaskComplex {
 public:
-    bool      dword0C;
-    CVehicle* m_Vehicle;
-    uint32    dword14;
-    uint32    dword18;
-    uint32    dword1C;
+    bool m_arg0 = {};                  // 0xC
+    bool m_arg1 = {};                  // 0xD
+    CVehicle* m_vehicleToDestroy = {}; // 0x10
+    CVector m_vehPosn = {};             // 0x14
 
 public:
-    static constexpr auto Type = TASK_COMPLEX_DESTROY_CAR;
+    static void InjectHooks();
 
-    CTaskComplexDestroyCar(CVehicle* vehicle, uint32 a3, uint32 a4, uint32 a5);
-    ~CTaskComplexDestroyCar() override;
+    ~CTaskComplexDestroyCar();
+    CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, CVector vehPosn);
 
-    eTaskType GetTaskType() override { return Type; } // 0x621C70
-    CTask* Clone() override { return new CTaskComplexDestroyCar(m_Vehicle, dword14, dword18, dword1C); } // 0x623530
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    static constexpr auto Type = eTaskType::TASK_COMPLEX_DESTROY_CAR;
 
-    CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
+
+    CTask* Clone() override;
+    eTaskType GetTaskType() override { return Type; }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
-    CTask* CreateSubTask(eTaskType taskType, CPed* ped = nullptr);
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
 
-    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
-    CTask* ControlSubTask_Reversed(CPed* ped);
-    CTask* CreateFirstSubTask_Reversed(CPed* ped);
-    CTask* CreateNextSubTask_Reversed(CPed* ped);
+private: // Wrappers for hooks
+    // 0x621C00
+    CTaskComplexDestroyCar* Constructor(CVehicle* vehicleToDestroy, CVector vehPosn) {
+        this->CTaskComplexDestroyCar::CTaskComplexDestroyCar(vehicleToDestroy, vehPosn);
+        return this;
+    }
+
+    // 0x621CB0
+    CTaskComplexDestroyCar* Destructor() {
+        this->CTaskComplexDestroyCar::~CTaskComplexDestroyCar();
+        return this;
+    }
 };
 VALIDATE_SIZE(CTaskComplexDestroyCar, 0x20);
-extern void CTaskComplexDestroyCar__InjectHooks();
