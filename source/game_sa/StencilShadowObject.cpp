@@ -48,7 +48,7 @@ bool gRenderStencil() {
 
     // todo:
     const auto depth = RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera));
-    if ( g_fx.GetFxQuality() < FXQUALITY_MEDIUM || depth < 32 )
+    if ( g_fx.GetFxQuality() < FX_QUALITY_MEDIUM || depth < 32 )
         return false;
 
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,             RWRSTATE(FALSE));

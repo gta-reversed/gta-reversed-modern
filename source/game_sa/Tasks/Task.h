@@ -23,7 +23,7 @@ class CTask {
 public:
     CTask* m_pParentTask;
 
-    void* operator new(unsigned size);
+    void* operator new(size_t size);
     void operator delete(void* object);
 
     CTask() { m_pParentTask = nullptr; } // 0x61A340
@@ -41,22 +41,6 @@ public:
 
     CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
-
-    // NOTSA
-
-    // I thought this is a good idea, turns out not so much
-    // TODO: Get rid of it :D
-    template<typename T>
-    T* As() {
-        return static_cast<T*>(this);
-    }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    void* New(uint32);
-    void  Delete(void* object);
 };
 VALIDATE_SIZE(CTask, 0x8);
 

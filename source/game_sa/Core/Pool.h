@@ -39,7 +39,8 @@ public:
 
 VALIDATE_SIZE(tPoolObjectFlags, 1);
 
-template <class A, class B = A> class CPool {
+// `DontDebugCheckAlloc` is NOTSA, used to skip allocation fail checking, as some places actually handle it correctly.
+template <class A, class B = A, bool DontDebugCheckAlloc = false> class CPool {
 public:
     // NOTSA typenames
     using base_type = A;   // Common base of all these objects
@@ -162,7 +163,9 @@ public:
             if (++m_nFirstFree >= m_nSize) {
                 if (bReachedTop) {
                     m_nFirstFree = -1;
-                    assert(0);          // Shouldn't happen
+                    if constexpr (!DontDebugCheckAlloc) {
+                        NOTSA_UNREACHABLE("Allocation failed");
+                    }
                     return nullptr;
                 }
                 bReachedTop = true;

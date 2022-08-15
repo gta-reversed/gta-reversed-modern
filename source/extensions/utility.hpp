@@ -8,6 +8,24 @@ namespace notsa {
 namespace rng = std::ranges;
 
 /*!
+* @brief Call the given function on object destruction.
+*/
+template<typename Fn>
+struct AutoCallOnDestruct {
+    AutoCallOnDestruct(Fn&& fn) :
+        m_fn{ std::move(fn) }
+    {
+    }
+
+    ~AutoCallOnDestruct() {
+        m_fn();
+    }
+
+private:
+    Fn m_fn;
+};
+
+/*!
 * @arg value The value to search for in the range
 * 
 * @brief Check if a range contains a value, uses `rng::find`. NOTE: If you plan on using the iterator, just use `rng::find` instead..
@@ -18,4 +36,4 @@ bool contains(R&& r, const T& value, Proj proj = {}) {
     return rng::find(r, value, proj) != r.end();
 }
 
-}; // namespace notsa
+};

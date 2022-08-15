@@ -9,11 +9,7 @@ CTaskComplexEnterCarAsDriver::CTaskComplexEnterCarAsDriver(CVehicle* targetVehic
 
 // 0x643780
 CTask* CTaskComplexEnterCarAsDriver::Clone() {
-    return CTaskComplexEnterCarAsDriver::Clone_Reversed();
-}
-
-CTask* CTaskComplexEnterCarAsDriver::Clone_Reversed() {
-    auto clonedTask = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
-    clonedTask->m_nMoveState = m_nMoveState;
-    return clonedTask;
+    auto task = new CTaskComplexEnterCarAsDriver(m_pTargetVehicle);
+    task->m_nMoveState = m_nMoveState;
+    return task;
 }

@@ -323,7 +323,7 @@ void CObject::ProcessControl_Reversed() {
         static float fMaxDoorDiff = 0.3F;
         static float fDoorCutoffSpeed = 0.02F;
         static float fDoorSpeedMult = 0.002F;
-        fDiff = clamp(fDiff, -fMaxDoorDiff, fMaxDoorDiff);
+        fDiff = std::clamp(fDiff, -fMaxDoorDiff, fMaxDoorDiff);
         if (fDiff > 0.0F && m_vecTurnSpeed.z < +fDoorCutoffSpeed ||
             fDiff < 0.0F && m_vecTurnSpeed.z > -fDoorCutoffSpeed
         ) {
@@ -892,10 +892,10 @@ void CObject::DoBurnEffect() {
         const auto fRandZ = CGeneral::GetRandomNumberInRange(box.m_vecMin.z, box.m_vecMax.z);
         auto vecParticlePos = *m_matrix * CVector(fRandX, fRandY, fRandZ);
 
-        //auto smokePart = FxPrtMult_c() Originally overwritten right after
+        // auto smokePart = FxPrtMult_c() Originally overwritten right after
         auto smokePart = FxPrtMult_c(0.0F, 0.0F, 0.0F, 1.0F, 1.0F, 1.0F, 0.4F);
         auto vecVelocity = CVector(0.0F, 0.0F, 0.02F);
-        g_fx.m_pPrtSmokeII3expand->AddParticle(&vecParticlePos, &vecVelocity, 0.0F, &smokePart, -1.0F, 1.2F, 0.6F, false);
+        g_fx.m_SmokeII3expand->AddParticle(&vecParticlePos, &vecVelocity, 0.0F, &smokePart, -1.0F, 1.2F, 0.6F, false);
     }
 }
 

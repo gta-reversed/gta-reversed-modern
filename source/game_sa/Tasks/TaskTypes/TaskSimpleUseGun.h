@@ -9,9 +9,9 @@
 #include "TaskSimple.h"
 #include "Vector.h"
 #include "Vector2D.h"
-#include "WeaponInfo.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
+class CWeaponInfo;
+class CAnimBlendAssociation;
+class CEntity;
 
 class CTaskSimpleUseGun : public CTaskSimple {
 public:
@@ -53,7 +53,7 @@ public:
     ~CTaskSimpleUseGun() override;
 
     CTask* Clone() override { return new CTaskSimpleUseGun(m_pTarget, m_vecTarget, m_nLastCommand, m_nBurstLength, m_bAimImmediate); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_USE_GUN; };
+    eTaskType GetTaskType() override { return Type; };
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;

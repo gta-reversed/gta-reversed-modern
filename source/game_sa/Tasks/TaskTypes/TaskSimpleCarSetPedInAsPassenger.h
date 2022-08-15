@@ -7,8 +7,8 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "Vehicle.h"
 #include "TaskUtilityLineUpPedWithCar.h"
+class Vehicle;
 
 class CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
 public:
@@ -25,13 +25,11 @@ public:
     static constexpr auto Type = TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER;
 
     CTaskSimpleCarSetPedInAsPassenger(CVehicle* targetVehicle, int32 nTargetDoor, CTaskUtilityLineUpPedWithCar* utility);
-    ~CTaskSimpleCarSetPedInAsPassenger();
+    ~CTaskSimpleCarSetPedInAsPassenger() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_CAR_SET_PED_IN_AS_PASSENGER; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return false; }
     bool ProcessPed(CPed* ped) override;
 };
-
 VALIDATE_SIZE(CTaskSimpleCarSetPedInAsPassenger, 0x20);
-

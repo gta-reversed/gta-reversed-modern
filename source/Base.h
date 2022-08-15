@@ -38,25 +38,37 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
-// Use this macro for unreachable code paths.. Will be eventually replaced by something like llvm::unreachable
+// Use the `NOTSA_UNREACHABLE` macro for unreachable code paths.
+// In debug mode it will do a DebugBreak() and print a message to the console,
+// while in release code it'll be optimized away (by using special compiler directives)
+// Also serves as a way to supress compiler warnings (for example, when you don't have need a `default` case in a `switch`)
 #if _DEBUG
-#if __has_builtin(__builtin_unreachable)
-#define NOTSA_UNREACHABLE(...) do { assert(false && "UNREACHABLE CODE REACHED!"); __builtin_unreachable(); } while (false)
-#elif defined(_MSC_VER)
-#define NOTSA_UNREACHABLE(...) do { assert(false && "UNREACHABLE CODE REACHED!"); __assume(false); } while(false)
-#endif
+#include <format>
+
+namespace notsa {
+template<typename... Ts>
+static void unreachable(const char* method, const char* file, int line, std::string_view fmt = "", Ts&&... fmtArgs) {
+    const auto usrMsg = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
+    std::cout << std::format("[{}:{}:{}]: Unreachable code reached! Details: {}\n", file, method, line, usrMsg.empty() ? "None" : usrMsg);
+    DebugBreak();
+}
+};
+// TODO/NOTE: We might need to manually suppress warnings here?
+// Since all the code here is perfectly valid, so the compiler might
+// still complain that, for example, the function doesn't return on all code paths, etc
+#define NOTSA_UNREACHABLE(...) do { notsa::unreachable(__FUNCTION__, __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
 #else
 #if __has_builtin(__builtin_unreachable)
-#define NOTSA_UNREACHABLE(...) do { __builtin_unreachable(); } while(false)
+#define NOTSA_UNREACHABLE(...) __builtin_unreachable()
 #elif defined(_MSC_VER)
-#define NOTSA_UNREACHABLE(...) do { __assume(false); } while (false)
+#define NOTSA_UNREACHABLE(...) __assume(false)
 #endif
 #endif
-
-// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
+// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments
 #define UNUSED(x) (void)(x);
 
 // Macro for unused function return values.
+// Eventually could instead verify the returned value? In case of `sscanf` etc...
 #define RET_IGNORED(x) (void)(x);
 
 #define _IGNORED_
