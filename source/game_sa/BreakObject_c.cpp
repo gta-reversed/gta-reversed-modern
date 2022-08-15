@@ -126,21 +126,19 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     RwV3d vecTransformedCenter;
     RwV3dTransformVector(&vecTransformedCenter, &vecCenter, &group->m_Matrix);
     auto* pos = RwMatrixGetPos(&group->m_Matrix);
-    pos->x += vecTransformedCenter.x;
-    pos->y += vecTransformedCenter.y;
-    pos->z += vecTransformedCenter.z;
+    RwV3dAdd(pos, pos, &vecTransformedCenter);
 
-    auto length = vecMax.x - vecMin.x; // ? width See CBoundingBox
-    auto width  = vecMax.y - vecMin.y; // ? length
-    auto height = vecMax.z - vecMin.z;
+    auto width  = bbox.GetWidth();
+    auto length = bbox.GetLength();
+    auto height = bbox.GetHeight();
 
-    if (length <= width && length <= height) {
+    if (width <= length && width <= height) {
         group->m_Type = 0;
-        group->m_BoundingSize = length / 2.0f;
-    } else if (width <= length && width <= height) {
-        group->m_Type = 1;
         group->m_BoundingSize = width / 2.0f;
-    } else if (height <= width && height <= length) {
+    } else if (length <= width && length <= height) {
+        group->m_Type = 1;
+        group->m_BoundingSize = length / 2.0f;
+    } else if (height <= length && height <= width) {
         group->m_Type = 2;
         group->m_BoundingSize = height / 2.0f;
     }
@@ -355,19 +353,17 @@ void BreakObject_c::Update(float timeStep) {
             auto* pos = RwMatrixGetPos(&group.m_Matrix);
             RwV3dAdd(pos, pos, &vecVelocity);
 
-            RwV3d* vecFacing = nullptr;
             if (m_FramesActive >= 5) {
-                if (group.m_Type == 0)
-                    vecFacing = RwMatrixGetRight(&group.m_Matrix);
-                else if (group.m_Type == 1)
-                    vecFacing = RwMatrixGetUp(&group.m_Matrix);
-                else if (group.m_Type == 2)
-                    vecFacing = RwMatrixGetAt(&group.m_Matrix);
-                else
-                    assert("Vec Facing is nullptr");
+                RwV3d* vecFacing = [&]{
+                    switch (group.m_Type) {
+                    case 1: return RwMatrixGetUp(&group.m_Matrix);
+                    case 2: return RwMatrixGetAt(&group.m_Matrix);
+                    default: return RwMatrixGetRight(&group.m_Matrix); // type 0
+                    }
+                }();
 
                 auto fAngleRad = RwACos(RwV3dDotProduct(&m_VecNormal, vecFacing));
-                if (std::fabs(fAngleRad > 0.01f)) {
+                if (std::fabs(fAngleRad) > 0.01f) {
                     RwV3d axis;
                     RwV3dCrossProduct(&axis, vecFacing, &m_VecNormal);
                     RwV3dNormalize(&axis, &axis);
