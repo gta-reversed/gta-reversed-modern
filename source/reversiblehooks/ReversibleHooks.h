@@ -79,10 +79,17 @@ namespace ReversibleHooks {
         std::string name{};
     };
 
+    struct HookInstallOptions {
+        bool enabled{true};
+        bool locked{false};
+        int jmpCodeSize{5};
+        int stackArguments{-1};
+    };
+
     RootHookCategory& GetRootCategory();
 
     namespace detail {
-        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false, int stackArguments = -1);
+        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
         void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
         /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
         bool IsFunctionHooked(const std::string& category, const std::string& fnName);
@@ -91,9 +98,9 @@ namespace ReversibleHooks {
     };
 
     template <typename T>
-    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5, int stackArguments = -1) {
+    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, HookInstallOptions&& opt = {}) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        detail::HookInstall(category, std::move(fnName), installAddress, ptr, iJmpCodeSize, bDisableByDefault, stackArguments);
+        detail::HookInstall(category, std::move(fnName), installAddress, ptr, std::move(opt));
     }
 
     template <typename T>
