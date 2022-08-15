@@ -7,8 +7,8 @@
 #pragma once
 
 #include "TaskSimple.h"
+#include "TaskUtilityLineUpPedWithCar.h"
 class Vehicle;
-class TaskUtilityLineUpPedWithCar;
 
 class CTaskSimpleCarSetPedInAsPassenger : public CTaskSimple {
 public:
@@ -33,4 +33,3 @@ public:
     bool ProcessPed(CPed* ped) override;
 };
 VALIDATE_SIZE(CTaskSimpleCarSetPedInAsPassenger, 0x20);
-

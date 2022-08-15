@@ -6,8 +6,8 @@ void CTaskComplexGangLeader::InjectHooks() {
     RH_ScopedClass(CTaskComplexGangLeader);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Constructor, 0x65DED0);
-    RH_ScopedInstall(Destructor, 0x65DF30);
+    // RH_ScopedInstall(Constructor, 0x65DED0); // todo: doesn't work?
+    // RH_ScopedInstall(Destructor, 0x65DF30); // todo: doesn't work?
     // RH_ScopedGlobalInstall(GetRandomGangAmbientAnim, 0x65E730);
     // RH_ScopedGlobalInstall(ShouldLoadGangAnims, 0x65E7F0);
     // RH_ScopedGlobalInstall(DoGangAbuseSpeech, 0x65E860);
