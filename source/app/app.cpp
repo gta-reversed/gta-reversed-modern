@@ -47,6 +47,7 @@ void RenderEffects() {
     plugin::Call<0x53E170>();
 }
 
+// 0x53E920
 void Idle(void* param) {
     /* FPS lock. Limits to 26 frames per second.
     CTimer::GetCurrentTimeInCycles();
@@ -72,34 +73,35 @@ void Idle(void* param) {
     auto& cc = CTimeCycle::m_CurrentColours;
     if (FrontEndMenuManager.m_bMenuActive || TheCamera.GetScreenFadeStatus() == eNameState::NAME_FADE_IN) {
         CDraw::CalculateAspectRatio();
-        CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, CDraw::GetAspectRatio());
+        CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, SCREEN_ASPECT_RATIO);
         CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
         RwCameraClear(Scene.m_pRwCamera, &gColourTop, rwCAMERACLEARZ);
         if (!RsCameraBeginUpdate(Scene.m_pRwCamera)) {
             return;
         }
-        goto LABEL_16;
     }
 
-    CVector2D mousePos{ SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f };
-    RsMouseSetPos(&mousePos);
-    CRenderer::ConstructRenderList();
-    CRenderer::PreRender();
-    CWorld::ProcessPedsAfterPreRender();
-    g_realTimeShadowMan.Update();
-    CMirrors::BeforeMainRender();
+    if (!FrontEndMenuManager.m_bMenuActive && TheCamera.GetScreenFadeStatus() != eNameState::NAME_FADE_IN) {
+        CVector2D mousePos{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f};
+        RsMouseSetPos(&mousePos);
+        CRenderer::ConstructRenderList();
+        CRenderer::PreRender();
+        CWorld::ProcessPedsAfterPreRender();
+        g_realTimeShadowMan.Update();
+        CMirrors::BeforeMainRender();
 
-    bool v3;
-    if (CWeather::LightningFlash) {
-        cc.m_nSkyBottomRed   = 255;
-        cc.m_nSkyBottomGreen = 255;
-        cc.m_nSkyBottomBlue  = 255;
-        v3 = DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
-    } else {
-        v3 = DoRWStuffStartOfFrame_Horizon(cc.m_nSkyTopRed, cc.m_nSkyTopGreen, cc.m_nSkyTopBlue, cc.m_nSkyBottomRed, cc.m_nSkyBottomGreen, cc.m_nSkyBottomBlue, 255);
-    }
+        bool started;
+        if (CWeather::LightningFlash) {
+            cc.m_nSkyBottomRed = 255;
+            cc.m_nSkyBottomGreen = 255;
+            cc.m_nSkyBottomBlue = 255;
+            started = DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
+        } else {
+            started = DoRWStuffStartOfFrame_Horizon(cc.m_nSkyTopRed, cc.m_nSkyTopGreen, cc.m_nSkyTopBlue, cc.m_nSkyBottomRed, cc.m_nSkyBottomGreen, cc.m_nSkyBottomBlue, 255);
+        }
+        if (!started)
+            return;
 
-    if (v3) {
         DefinedState();
         RwCameraSetFarClipPlane(Scene.m_pRwCamera, cc.m_fFarClip);
         Scene.m_pRwCamera->fogPlane = cc.m_fFogStart;
@@ -108,28 +110,27 @@ void Idle(void* param) {
         CVisibilityPlugins::RenderWeaponPedsForPC();
         CVisibilityPlugins::ms_weaponPedsForPC.Clear();
         RenderEffects();
-        if (!TheCamera.m_nBlurType || TheCamera.m_nBlurType == 2) {
+        if (TheCamera.m_nBlurType != 0 || TheCamera.m_nBlurType == 2) {
             if (TheCamera.m_fScreenReductionPercentage > 0.0f) {
                 TheCamera.SetMotionBlurAlpha(150);
             }
         }
         TheCamera.RenderMotionBlur();
         Render2dStuff();
-
-    LABEL_16:
-        if (FrontEndMenuManager.m_bMenuActive) {
-            FrontEndMenuManager.DrawFrontEnd();
-        }
-
-        RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
-        DoFade();
-        CHud::DrawAfterFade();
-        CMessages::Display(false);
-        CFont::DrawFonts();
-        CCredits::Render();
-        CDebug::DebugDisplayTextBuffer();
-        FlushObrsPrintfs();
-        RwCameraEndUpdate(Scene.m_pRwCamera);
-        RsCameraShowRaster(Scene.m_pRwCamera);
     }
+
+    if (FrontEndMenuManager.m_bMenuActive) {
+        FrontEndMenuManager.DrawFrontEnd();
+    }
+
+    RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
+    DoFade();
+    CHud::DrawAfterFade();
+    CMessages::Display(false);
+    CFont::DrawFonts();
+    CCredits::Render();
+    CDebug::DebugDisplayTextBuffer();
+    FlushObrsPrintfs();
+    RwCameraEndUpdate(Scene.m_pRwCamera);
+    RsCameraShowRaster(Scene.m_pRwCamera);
 }
