@@ -1,12 +1,12 @@
 #pragma once
 
 /**
- * collision plugin unique rwID
+ * Breakable plugin unique rwID
  */
 #define rwID_BREAKABLEPLUGIN MAKECHUNKID(rwVENDORID_DEVELOPER, 0xFD)
 
 /*
- * Collision plugin static offset
+ * Breakable plugin static offset
  */
 extern RwInt32& g_BreakablePlugin;
 
