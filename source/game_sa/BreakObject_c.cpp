@@ -10,7 +10,7 @@ void BreakObject_c::InjectHooks() {
     RH_ScopedInstall(SetGroupData, 0x59D570);
     //RH_ScopedInstall(SetBreakInfo, 0x59D7F0);
     RH_ScopedInstall(Exit, 0x59DDD0);
-    //RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
+    RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
     RH_ScopedInstall(DoCollision, 0x59E1F0);
     //RH_ScopedInstall(Update, 0x59E220);
     //RH_ScopedInstall(Render, 0x59E480);
@@ -191,10 +191,80 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
 
 // 0x59DE40
 void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) {
-    //plugin::CallMethod<0x59DE40, BreakObject_c*, BreakGroup_t*, float, RwV3d*, float>(this, group, timeStep, vecNormal, groundZ);
-    static float& velocityMultiplier = *(float*)0x8D0A18; // TODO | STATICREF // = 0.85f;
+    static float& dotMultiplier = *(float*)0x8D0A18; // TODO | STATICREF // = 0.85f;
+    static float& timestepScaling = *(float*)0x8D0A14; // TODO | STATICREF // = 0.05f;
+    static float& velocityScaling = *(float*)0x8D0A10; // TODO | STATICREF // = 0.8f;
 
-    auto dotProd = RwV3dDotProduct(&group->m_Velocity, vecNormal);
+    auto dotProd = RwV3dDotProduct(&group->m_Velocity, vecNormal) * dotMultiplier;
+    RwV3d newVelocity, velocityChange;
+    RwV3dAssign(&velocityChange, vecNormal);
+    RwV3dScale(&velocityChange, &velocityChange, dotProd * 2);
+
+    RwV3dAssign(&newVelocity, &group->m_Velocity);
+    RwV3dSub(&newVelocity, &newVelocity, &velocityChange);
+
+    auto fTimeScale = timeStep * timestepScaling;
+    RwV3d vecRand;
+    vecRand.x = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
+    vecRand.y = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
+    vecRand.z = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
+    RwV3dNormalize(&vecRand, &vecRand);
+    RwV3dScale(&vecRand, &vecRand, fTimeScale);
+
+    auto fOriginalVelocityScale = RwV3dLength(&newVelocity);
+    RwV3dAdd(&newVelocity, &newVelocity, &vecRand);
+    RwV3dNormalize(&newVelocity, &newVelocity);
+    RwV3dScale(&newVelocity, &newVelocity, fOriginalVelocityScale);
+    RwV3dScale(&newVelocity, &newVelocity, velocityScaling);
+
+    group->m_RotationSpeed = 0.0f;
+    RwV3dAssign(&group->m_Velocity, &newVelocity);
+    RwMatrixGetPos(&group->m_Matrix)->z = groundZ + group->m_BoundingSize;
+
+    if (fOriginalVelocityScale >= 0.05f) {
+        if (m_JustFaces)
+            return;
+    } else {
+        group->m_bStoppedMoving = true;
+        if (m_JustFaces) {
+            group->m_Random = CGeneral::GetRandomNumberInRange(0, 32);
+            return;
+        }
+    }
+
+    auto particle = FxPrtMult_c(1.0f, 1.0f, 1.0f, 0.1f, 0.3f, 0.0f, 0.15f);
+    auto* groupPos = RwMatrixGetPos(&group->m_Matrix);
+    for (auto i = 0; i < 4; ++i) {
+        RwV3d particlePos, particleVelocity;
+        RwV3dAssign(&particlePos, groupPos);
+        particlePos.x += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
+        particlePos.y += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
+
+        particleVelocity.x = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
+        particleVelocity.y = CGeneral::GetRandomNumberInRange(-0.15f, 0.15f);
+        particleVelocity.z = 0.0f;
+
+        g_fx.m_SmokeII3expand->AddParticle(&particlePos, &particleVelocity, 0.0f, &particle, -1.0f, 1.2f, 0.6f, 0);
+    }
+
+    if (m_AddSparks) {
+        auto fSpeed = RwV3dLength(&group->m_Velocity);
+        RwV3d particlePos, particleVelocity;
+        RwV3dAssign(&particlePos, groupPos);
+        particleVelocity.x = 0.0f;
+        particleVelocity.y = 0.0f;
+        particleVelocity.z = 1.0f;
+
+        //TODO: (?) Fx_c methods originally take in RwV3d instead of CVectors, as the debug symbols show
+        g_fx.AddSparks(*reinterpret_cast<CVector*>(&particlePos),
+            *reinterpret_cast<CVector*>(&particleVelocity),
+            2.0f,
+            static_cast<int32>(fSpeed * 100.0f),
+            CVector(0.0f, 0.0f, 0.0f),
+            eSparkType::SPARK_PARTICLE_SPARK,
+            0.4f,
+            1.0f);
+    }
 }
 
 // 0x59E1F0
