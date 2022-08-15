@@ -7,8 +7,8 @@ class CTaskGoToVehicleAndLean : public CTaskComplex {
 public:
     CVehicle* m_Vehicle;
     int32     m_LeanAnimDurationInMs;
-    int8      m_LeanOnVehicle;
-    int8      field_15;
+    bool      m_LeanOnVehicle;
+    bool      field_15; // CalcTargetPos
     uint8     field_16[2];
 
 public:
@@ -23,6 +23,9 @@ public:
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+
+    void DoTidyUp(CPed* ped);
+    // CalcTargetPos(CPed* ped) 0x664770
 
 private:
     friend void InjectHooksMain();

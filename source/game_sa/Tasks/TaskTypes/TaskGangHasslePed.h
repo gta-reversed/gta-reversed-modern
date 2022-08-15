@@ -7,14 +7,14 @@ class CEntity;
 class CTaskGangHasslePed : public CTaskComplex {
 public:
     CPed* m_Ped;
-    int32 dword10;
-    int32 dword14;
-    int32 dword18;
-    bool m_bAnimationNotDeleted;
+    int32 dword10; // values are 0, 1, 2
+    int32 m_RndMin;
+    int32 m_RndMax;
+    bool  m_bAnimationNotDeleted;
     int32 m_nTime;
     int32 m_nSomeRandomShit;
     uint8 m_bFirstSubTaskInitialised;
-    uint8 byte29;
+    bool  m_bRefreshTime;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_GANG_HASSLE_PED;
@@ -22,8 +22,8 @@ public:
     CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5);
     ~CTaskGangHasslePed() override;
 
-    CTask* Clone() override { return new CTaskGangHasslePed(m_Ped, dword10, dword14, dword18); } // 0x6620D0
     eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskGangHasslePed(m_Ped, dword10, m_RndMin, m_RndMax); } // 0x6620D0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

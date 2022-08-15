@@ -51,10 +51,10 @@ void CTaskComplexGoToBoatSteeringWheel::ComputeTargetPos() {
 CTask* CTaskComplexGoToBoatSteeringWheel::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_SIMPLE_STAND_STILL:
-        return new CTaskSimpleStandStill(-1, 0, 0, 8.0f);
+        return new CTaskSimpleStandStill(-1, false, false, 8.0f);
     case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
         ComputeTargetPos();
-        return new CTaskComplexGoToPointAndStandStill(PEDMOVE_WALK, m_TargetPos, 0.5f, 2.0f, 0, 0);
+        return new CTaskComplexGoToPointAndStandStill(PEDMOVE_WALK, m_TargetPos, 0.5f, 2.0f, false, false);
     case TASK_FINISHED:
         return nullptr;
     default:

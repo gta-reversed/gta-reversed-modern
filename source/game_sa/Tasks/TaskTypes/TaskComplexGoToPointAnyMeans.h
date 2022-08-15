@@ -12,21 +12,21 @@ public:
     eMoveState m_MoveState;
     float      m_fRadius;
     CVehicle*  m_Vehicle;
-    int32      dword2C;
+    int32      m_nModelId;
     uint32     m_nStartTimeInMs;
     uint32     m_nTimeOffsetInMs;
-    bool       byte32;
+    bool       m_bRefreshTime;
     bool       m_bResetStartTime;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_ANY_MEANS;
 
-    CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, float a4, int32 a5);
-    CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, CVehicle* vehicle, float radius, int32 a6);
+    CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, float radius, int32 modelId);
+    CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, CVehicle* vehicle, float radius, int32 modelId);
     ~CTaskComplexGoToPointAnyMeans() override;
 
     eTaskType GetTaskType() override { return Type; } // 0x66B780
-    CTask* Clone() override { return new CTaskComplexGoToPointAnyMeans(m_MoveState, m_Pos, m_Vehicle, m_fRadius, dword2C); } // 0x66D1E0
+    CTask* Clone() override { return new CTaskComplexGoToPointAnyMeans(m_MoveState, m_Pos, m_Vehicle, m_fRadius, m_nModelId); } // 0x66D1E0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

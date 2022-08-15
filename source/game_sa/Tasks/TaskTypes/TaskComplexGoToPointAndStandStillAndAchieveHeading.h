@@ -6,22 +6,22 @@ class CVector;
 
 class CTaskComplexGoToPointAndStandStillAndAchieveHeading : public CTaskComplex {
 private:
-    int32   dwordC;
-    CVector dword10;
-    float   float1C;
-    float   float20;
-    float   float24;
-    float   float28;
+    int32   m_MoveState;
+    CVector m_TargetPos;
+    float   m_Radius;
+    float   m_Angle;
+    float   m_ChangeRateMult; // var naming?
+    float   m_MaxHeading; // var naming?
     uint8   m_nFlags;
 
 public:
     static constexpr auto Type = TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL_AND_ACHIEVE_HEADING;
 
-    CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 a2, const CVector& a3, float a4, float a5, float a6, float a7);
+    CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading);
     ~CTaskComplexGoToPointAndStandStillAndAchieveHeading() override = default; // 0x668D40
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexGoToPointAndStandStillAndAchieveHeading(dwordC, dword10, float20, float1C, float24, float28); } // 0x66CFD0
+    CTask* Clone() override { return new CTaskComplexGoToPointAndStandStillAndAchieveHeading(m_MoveState, m_TargetPos, m_Angle, m_Radius, m_ChangeRateMult, m_MaxHeading); } // 0x66CFD0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;

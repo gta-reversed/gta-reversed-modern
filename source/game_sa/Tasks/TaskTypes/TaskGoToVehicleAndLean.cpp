@@ -19,7 +19,7 @@ void CTaskGoToVehicleAndLean::InjectHooks() {
 CTaskGoToVehicleAndLean::CTaskGoToVehicleAndLean(CVehicle* vehicle, int32 leanAnimDurationInMs) : CTaskComplex() {
     m_Vehicle = vehicle;
     m_LeanAnimDurationInMs = leanAnimDurationInMs;
-    m_LeanOnVehicle = 0;
+    m_LeanOnVehicle = false;
     CEntity::SafeRegisterRef(m_Vehicle);
 }
 
@@ -27,7 +27,7 @@ CTaskGoToVehicleAndLean::CTaskGoToVehicleAndLean(CVehicle* vehicle, int32 leanAn
 CTaskGoToVehicleAndLean::~CTaskGoToVehicleAndLean() {
     if (m_LeanOnVehicle) {
         CAnimManager::RemoveAnimBlockRef(CAnimManager::GetAnimationBlockIndex("gangs"));
-        m_LeanOnVehicle = 0;
+        m_LeanOnVehicle = false;
     }
     CEntity::SafeCleanUpRef(m_Vehicle);
 }
@@ -50,4 +50,13 @@ CTask* CTaskGoToVehicleAndLean::CreateFirstSubTask(CPed* ped) {
 // 0x664E60
 CTask* CTaskGoToVehicleAndLean::ControlSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x664E60, CTaskGoToVehicleAndLean*, CPed*>(this, ped);
+}
+
+// 0x660F60
+void CTaskGoToVehicleAndLean::DoTidyUp(CPed* ped) {
+    if (m_Vehicle)
+        m_Vehicle->vehicleFlags.bHasGangLeaningOn = false;
+
+    if (m_pSubTask)
+        m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_IMMEDIATE, nullptr);
 }

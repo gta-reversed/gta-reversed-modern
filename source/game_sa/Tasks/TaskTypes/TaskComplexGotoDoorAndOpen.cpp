@@ -21,7 +21,7 @@ CTaskComplexGotoDoorAndOpen::CTaskComplexGotoDoorAndOpen(CObject* door) : CTaskC
     m_nStartTime = 0;
     m_nOffsetTime = 0;
     byte30 = 0;
-    byte31 = 0;
+    m_bRefreshTime = false;
     m_nFlags = m_nFlags & 0xF0 | 1; // todo: flags
     CEntity::SafeRegisterRef(m_Object);
 }
@@ -34,7 +34,7 @@ CTaskComplexGotoDoorAndOpen::CTaskComplexGotoDoorAndOpen(const CVector& start, c
     m_nStartTime = 0;
     m_nOffsetTime = 0;
     byte30 = 0;
-    byte31 = 0;
+    m_bRefreshTime = false;
     m_nFlags &= 244u; // todo: flags
 }
 
@@ -48,7 +48,7 @@ CTaskComplexGotoDoorAndOpen::~CTaskComplexGotoDoorAndOpen() {
 
 // 0x66BCA0
 CTask* CTaskComplexGotoDoorAndOpen::Clone() {
-    if ((this->m_nFlags & 1) != 0) { // todo: flags
+    if ((m_nFlags & 1) != 0) { // todo: flags
         return new CTaskComplexGotoDoorAndOpen(m_Object);
     } else {
         return new CTaskComplexGotoDoorAndOpen(m_Start, m_End);

@@ -12,41 +12,42 @@ void CTaskComplexGoToCarDoorAndStandStill::InjectHooks() {
     // RH_ScopedInstall(ComputeRouteToDoor, 0x645910);
     // RH_ScopedInstall(CreateSubTask_Reversed, 0x64A5F0);
     // RH_ScopedInstall(Clone_Reversed, 0x6498B0);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x645840);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x645840);
     // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x64D2B0);
     // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x64D440);
     // RH_ScopedInstall(ControlSubTask_Reversed, 0x64A820);
 }
+bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 
 // 0x645780
-CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(CVehicle* vehicle, int32 a3, bool a4, int32 a5, float a6, float a7, float a8, int32 a9) {
-    m_pVehicle = vehicle;
-    f4 = a3;
+CTaskComplexGoToCarDoorAndStandStill::CTaskComplexGoToCarDoorAndStandStill(CVehicle* vehicle, int32 moveState, bool a4, int32 a5, float radius, float a7, float a8, int32 a9) {
+    m_Vehicle = vehicle;
+    m_nMoveState = moveState;
     f14 = a4;
-    f18 = a6;
+    m_fRadius = radius;
     f1C = a7;
     f20 = a8;
     f24 = a9;
-    f28 = 0.0f;
+    f28 = 0;
     f2C = 0.0f;
-    f30 = 0;
+    f30 = false;
     m_nDoorId = 0;
     m_vecPositionToOpenCarDoor = CVector{};
     f44 = a5;
-    f48 = 0;
-    f49 = 0;
-    f4C = nullptr;
-    CEntity::SafeRegisterRef(m_pVehicle);
+    f48 = false;
+    f49 = false;
+    m_PointRoute = nullptr;
+    CEntity::SafeRegisterRef(m_Vehicle);
 }
 
 // 0x64A580
 CTaskComplexGoToCarDoorAndStandStill::~CTaskComplexGoToCarDoorAndStandStill() {
-    CEntity::SafeCleanUpRef(m_pVehicle);
-    delete f4C;
+    CEntity::SafeCleanUpRef(m_Vehicle);
+    delete m_PointRoute;
 }
 
 // 0x645840
-bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexGoToCarDoorAndStandStill::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return plugin::CallMethodAndReturn<bool, 0x645840, CTaskComplexGoToCarDoorAndStandStill*, CPed*, int32, CEvent const*>(this, ped, priority, event);
 }
 

@@ -20,16 +20,16 @@ void CTaskComplexGoToPointAndStandStillAndAchieveHeading::InjectHooks() {
 }
 
 // 0x668CD0
-CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 a2, CVector const& a3, float a4, float a5, float a6, float a7)
+CTaskComplexGoToPointAndStandStillAndAchieveHeading::CTaskComplexGoToPointAndStandStillAndAchieveHeading(int32 moveState, const CVector& targetPos, float angle, float radius, float changeRateMult, float maxHeading)
     : CTaskComplex()
 {
-    dwordC = a2;
-    dword10 = a3;
-    float1C = a5;
-    float28 = a7;
+    m_MoveState = moveState;
+    m_TargetPos = targetPos;
+    m_Radius = radius;
+    m_MaxHeading = maxHeading;
     m_nFlags = m_nFlags | 1; // todo: flags
-    float20 = a4;
-    float24 = a6;
+    m_Angle = angle;
+    m_ChangeRateMult = changeRateMult;
 }
 
 // 0x66DFD0
@@ -50,11 +50,11 @@ CTask* CTaskComplexGoToPointAndStandStillAndAchieveHeading::CreateNextSubTask(CP
 CTask* CTaskComplexGoToPointAndStandStillAndAchieveHeading::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_SIMPLE_ACHIEVE_HEADING:
-        return new CTaskSimpleAchieveHeading(float20, float24, float28);
+        return new CTaskSimpleAchieveHeading(m_Angle, m_ChangeRateMult, m_MaxHeading);
     case TASK_SIMPLE_STAND_STILL:
         return new CTaskSimpleStandStill();
     case TASK_SIMPLE_GO_TO_POINT:
-        return new CTaskSimpleGoToPoint(dwordC, dword10, float1C, false, false);
+        return new CTaskSimpleGoToPoint(m_MoveState, m_TargetPos, m_Radius, false, false);
     default:
         return nullptr;
     }

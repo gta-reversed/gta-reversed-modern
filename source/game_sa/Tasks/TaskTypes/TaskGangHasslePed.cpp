@@ -1,3 +1,4 @@
+#include <EntitySeekPosCalculatorStandard.h>
 #include "StdInc.h"
 
 #include "TaskGangHasslePed.h"
@@ -18,11 +19,11 @@ CTaskGangHasslePed::CTaskGangHasslePed(CPed* ped, int32 a3, int32 a4, int32 a5) 
     m_nTime = 0;
     m_nSomeRandomShit = 0;
     m_bFirstSubTaskInitialised = 0;
-    byte29 = 0;
+    m_bRefreshTime = 0;
     dword10 = a3;
-    dword14 = a4;
+    m_RndMin = a4;
     m_Ped = ped;
-    dword18 = a5;
+    m_RndMax = a5;
     m_bAnimationNotDeleted = false;
     CEntity::SafeRegisterRef(m_Ped);
 }
@@ -40,11 +41,30 @@ CTaskGangHasslePed::~CTaskGangHasslePed() {
 // 0x6642C0
 CTask* CTaskGangHasslePed::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x6642C0, CTaskGangHasslePed*, CPed*>(this, ped);
+    /*
+    if (m_pSubTask->GetTaskType() == TASK_COMPLEX_KILL_PED_ON_FOOT)
+        return nullptr;
+
+    auto radius = CGeneral::GetRandomNumberInRange(3.0f, 5.0f); // strange math here
+    return new CEntitySeekPosCalculatorStandard(m_Ped, 999'999, 1000, radius, 2.0f, 2.0f, false, true);
+    */
 }
 
 // 0x664380
 CTask* CTaskGangHasslePed::CreateFirstSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x664380, CTaskGangHasslePed*, CPed*>(this, ped);
+
+    /*
+    if (!m_Ped)
+        return nullptr;
+
+    m_nTime = CTimer::GetTimeInMS();
+    m_nSomeRandomShit = CGeneral::GetRandomNumberInRange(m_RndMin, m_RndMax);
+    m_bFirstSubTaskInitialised = true;
+
+    auto radius = CGeneral::GetRandomNumberInRange(3.0f, 5.0f); // strange math here
+    return new CEntitySeekPosCalculatorStandard(m_Ped, 999'999, 1000, radius, 2.0f, 2.0f, false, true);
+    */
 }
 
 // 0x65FFE0

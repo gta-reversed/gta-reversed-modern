@@ -6,7 +6,7 @@ class CTaskComplexGoToBoatSteeringWheel : public CTaskComplex {
 public:
     CVector   m_TargetPos;
     CVehicle* m_Vehicle;
-    bool      byte1C;
+    bool      byte1C; // useless
     uint32    m_FirstSubTaskStartTime;
 
 public:

@@ -14,8 +14,8 @@ public:
     uint32   m_nStartTime;
     uint32   m_nOffsetTime;
     uint8    byte30;
-    uint8    byte31;
-    uint8    gap32[2];
+    bool     m_bRefreshTime;
+    uint8    _align[2];
     uint8    m_nFlags;
 
 public:

@@ -16,29 +16,24 @@ void CTaskComplexGoToPointAnyMeans::InjectHooks() {
 }
 
 // 0x66B720
-CTaskComplexGoToPointAnyMeans::CTaskComplexGoToPointAnyMeans(int32 a2, const CVector& posn, float a4, int32 a5) : CTaskComplex() {
-    m_Pos = posn;
-    m_fRadius = a4;
-    m_Vehicle = 0;
-    m_MoveState = static_cast<eMoveState>(a2);
-    dword2C = a5;
-    m_nStartTimeInMs = 0;
-    m_nTimeOffsetInMs = 0;
-    byte32 = 0;
-    m_bResetStartTime = 0;
-}
-
-// 0x66B790
-CTaskComplexGoToPointAnyMeans::CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, CVehicle* vehicle, float radius, int32 a6) : CTaskComplex() {
+CTaskComplexGoToPointAnyMeans::CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, float radius, int32 modelId) : CTaskComplex() {
     m_Pos = posn;
     m_fRadius = radius;
     m_MoveState = static_cast<eMoveState>(moveState);
-    m_Vehicle = vehicle;
-    dword2C = a6;
+    m_nModelId = modelId;
     m_nStartTimeInMs = 0;
     m_nTimeOffsetInMs = 0;
-    byte32 = 0;
-    m_bResetStartTime = 0;
+    m_bRefreshTime = false;
+    m_bResetStartTime = false;
+    m_Vehicle = nullptr;
+}
+
+// optimized (DRY)
+// 0x66B790
+CTaskComplexGoToPointAnyMeans::CTaskComplexGoToPointAnyMeans(int32 moveState, const CVector& posn, CVehicle* vehicle, float radius, int32 modelId)
+    : CTaskComplexGoToPointAnyMeans(moveState, posn, radius, modelId)
+{
+    m_Vehicle = vehicle;
     CEntity::SafeRegisterRef(m_Vehicle);
 }
 
@@ -60,16 +55,13 @@ CTask* CTaskComplexGoToPointAnyMeans::CreateNextSubTask(CPed* ped) {
 // 0x6729C0
 CTask* CTaskComplexGoToPointAnyMeans::CreateFirstSubTask(CPed* ped) {
     if (m_Vehicle) {
-        if (ped->m_pVehicle && ped->bInVehicle)
-            return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_TO_POINT, ped);
-        else
-            return CreateSubTask(TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped);
-    } else {
-        if (ped->m_pVehicle && ped->bInVehicle && ped->m_pVehicle->IsDriver(ped))
-            return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_TO_POINT, ped);
-        else
-            return CreateSubTask(TASK_COMPLEX_FOLLOW_NODE_ROUTE, ped);
+        return CreateSubTask(ped->IsInVehicle() ? TASK_COMPLEX_CAR_DRIVE_TO_POINT : TASK_COMPLEX_ENTER_CAR_AS_DRIVER, ped);
     }
+
+    if (ped->IsInVehicle() && ped->m_pVehicle->IsDriver(ped))
+        return CreateSubTask(TASK_COMPLEX_CAR_DRIVE_TO_POINT, ped);
+    else
+        return CreateSubTask(TASK_COMPLEX_FOLLOW_NODE_ROUTE, ped);
 }
 
 // 0x672A50
