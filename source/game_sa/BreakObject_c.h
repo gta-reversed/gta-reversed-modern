@@ -23,6 +23,8 @@ struct BreakGroup_t {
     float                   m_RotationSpeed;
     CVector                 m_RotationAxis;
     int32                   m_FramesToLive;
+
+    auto GetRenderInfos() { return std::span{ m_RenderInfo, (size_t)m_NumTriangles }; }
 };
 VALIDATE_SIZE(BreakGroup_t, 0x74);
 
@@ -55,6 +57,8 @@ public:
     void DoCollision(BreakGroup_t* group, float timeStep);
     void Update(float timeStep);
     void Render(bool isDrawLast) const;
-};
 
+    auto GetBreakGroups()       { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
+    auto GetBreakGroups() const { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
+};
 VALIDATE_SIZE(BreakObject_c, 0x20);

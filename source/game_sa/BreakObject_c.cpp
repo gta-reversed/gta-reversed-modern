@@ -81,7 +81,7 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
 
 // 0x59DDD0
 void BreakObject_c::Exit() {
-    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+    for (auto& group : GetBreakGroups()) {
         if (group.m_Texture) {
             RwTextureDestroy(group.m_Texture);
             group.m_Texture = nullptr;
@@ -102,7 +102,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     auto& vecMin = bbox.m_vecMin;
     auto& vecMax = bbox.m_vecMax;
 
-    for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles }) {
+    for (auto& info : group->GetRenderInfos()) {
         for (auto& position : info.positions) {
             vecMin.x = std::min(vecMin.x, position.x);
             vecMax.x = std::max(vecMax.x, position.x);
@@ -114,7 +114,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     }
 
     auto vecCenter = bbox.GetCenter();
-    for (auto& info : std::span{ group->m_RenderInfo, (size_t)group->m_NumTriangles}) {
+    for (auto& info : group->GetRenderInfos()) {
         for (auto& position : info.positions) {
             position -= vecCenter;
         }
@@ -148,7 +148,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
 
 // 0x59D570
 void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand) {
-    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+    for (auto& group : GetBreakGroups()) {
         group.m_Matrix = *matrix;
 
         CalcGroupCenter(&group);
@@ -244,7 +244,7 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         ++group.m_NumTriangles;
     }
 
-    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+    for (auto& group : GetBreakGroups()) {
         if (group.m_Texture) {
             RwTextureAddRef(group.m_Texture);
         }
@@ -345,7 +345,7 @@ void BreakObject_c::Update(float timeStep) {
     }
 
     auto bToBeRemoved = true;
-    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+    for (auto& group : GetBreakGroups()) {
         if (!group.m_bStoppedMoving) {
             group.m_Velocity.z -= timeStep / 125.0f;
             RwV3d vecVelocity;
@@ -405,7 +405,7 @@ void BreakObject_c::Render(bool isDrawLast) const {
         return;
 
     RwRaster* lastRaster = nullptr;
-    for (auto& group : std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }) {
+    for (auto& group : GetBreakGroups()) {
         RwRaster* curRaster = nullptr;
         if (group.m_Texture)
             curRaster = RwTextureGetRaster(group.m_Texture);
@@ -422,7 +422,7 @@ void BreakObject_c::Render(bool isDrawLast) const {
             RenderBegin(nullptr, nullptr, RwIm3DTransformFlags::rwIM3D_VERTEXUV);
         }
 
-        for (auto& renderInfo : std::span{ group.m_RenderInfo, (size_t)group.m_NumTriangles }) {
+        for (auto& renderInfo : group.GetRenderInfos()) {
             RwV3d aVecPos[3];
             RwV3dTransformPoints(aVecPos, renderInfo.positions, 3, &group.m_Matrix);
 
