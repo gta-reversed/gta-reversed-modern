@@ -9,3 +9,4 @@ public:
 
     void ComputeEntitySeekPos(const CPed& seeker, const CEntity& target, CVector& outPos) override;
 };
+VALIDATE_SIZE(CEntitySeekPosCalculatorStandard, 0x4);
