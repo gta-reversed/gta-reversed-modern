@@ -132,13 +132,13 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     auto height = bbox.GetHeight();
 
     if (width <= length && width <= height) {
-        group->m_Type = 0;
+        group->m_Type = BreakGroupType::RIGHT;
         group->m_BoundingSize = width / 2.0f;
     } else if (length <= width && length <= height) {
-        group->m_Type = 1;
+        group->m_Type = BreakGroupType::UP;
         group->m_BoundingSize = length / 2.0f;
     } else if (height <= length && height <= width) {
-        group->m_Type = 2;
+        group->m_Type = BreakGroupType::AT;
         group->m_BoundingSize = height / 2.0f;
     }
 }
@@ -202,7 +202,7 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         }
 
         group.m_RenderInfo = new BreakGroupRenderInfo_t[numMaterials];
-        group.m_FramesToLive = 256 + CGeneral::GetRandomNumberInRange(0, 32);
+        group.m_FramesToLive = 256 + CGeneral::GetRandomNumberInRange(0, 32); // todo: magic numbers
     }
 
     for (auto i = 0; i < info->m_usNumTriangles; ++i) {
@@ -343,8 +343,8 @@ void BreakObject_c::Update(float timeStep) {
             if (m_FramesActive >= 5) {
                 RwV3d* vecFacing = [&]{
                     switch (group.m_Type) {
-                    case 1:  return RwMatrixGetUp(&group.m_Matrix);
-                    case 2:  return RwMatrixGetAt(&group.m_Matrix);
+                    case BreakGroupType::UP: return RwMatrixGetUp(&group.m_Matrix);
+                    case BreakGroupType::AT: return RwMatrixGetAt(&group.m_Matrix);
                     default: return RwMatrixGetRight(&group.m_Matrix); // type 0
                     }
                 }();

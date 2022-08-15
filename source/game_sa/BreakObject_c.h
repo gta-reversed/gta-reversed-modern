@@ -11,6 +11,12 @@ struct BreakGroupRenderInfo_t {
     CRGBA       colors[3];
 };
 
+enum class BreakGroupType : uint8 {
+    RIGHT = 0,
+    UP    = 1,
+    AT    = 2,
+};
+
 struct BreakGroup_t {
     RwMatrix                m_Matrix;
     CVector                 m_Velocity;
@@ -18,7 +24,7 @@ struct BreakGroup_t {
     int16                   m_NumTriangles;
     BreakGroupRenderInfo_t* m_RenderInfo;
     RwTexture*              m_Texture;
-    int8                    m_Type;
+    BreakGroupType          m_Type;
     float                   m_BoundingSize;
     float                   m_RotationSpeed;
     CVector                 m_RotationAxis;
@@ -49,7 +55,7 @@ public:
     bool Init(CObject* object, RwV3d* vecVelocity, float fVelocityRand, int32 bJustFaces);
     void Exit();
 
-    void CalcGroupCenter(BreakGroup_t* group);
+    static void CalcGroupCenter(BreakGroup_t* group);
     void SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand);
     void SetBreakInfo(BreakInfo_t* info, int32 bJustFaces);
 
@@ -58,7 +64,7 @@ public:
     void Update(float timeStep);
     void Render(bool isDrawLast) const;
 
-    auto GetBreakGroups()       { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
-    auto GetBreakGroups() const { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
+    auto GetBreakGroups() { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
+    [[nodiscard]] auto GetBreakGroups() const { return std::span{ m_BreakGroups, (size_t)m_NumBreakGroups }; }
 };
 VALIDATE_SIZE(BreakObject_c, 0x20);
