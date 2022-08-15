@@ -13,7 +13,7 @@ void BreakObject_c::InjectHooks() {
     RH_ScopedInstall(Exit, 0x59DDD0);
     RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
     RH_ScopedInstall(DoCollision, 0x59E1F0);
-    //RH_ScopedInstall(Update, 0x59E220);
+    RH_ScopedInstall(Update, 0x59E220);
     //RH_ScopedInstall(Render, 0x59E480);
     RH_ScopedInstall(Init, 0x59E750);
 }
@@ -348,7 +348,65 @@ void BreakObject_c::DoCollision(BreakGroup_t* group, float timeStep) {
 
 // 0x59E220
 void BreakObject_c::Update(float timeStep) {
-    plugin::CallMethod<0x59E220, BreakObject_c*, float>(this, timeStep);
+    if (m_NumBreakGroups <= 0) {
+        Exit();
+        ++m_FramesActive;
+        return;
+    }
+
+    auto bToBeRemoved = true;
+    for (auto i = 0; i < m_NumBreakGroups; ++i) {
+        auto& group = m_BreakGroups[i];
+
+        if (!group.m_bStoppedMoving) {
+            group.m_Velocity.z -= timeStep / 125.0f;
+            RwV3d vecVelocity;
+            RwV3dAssign(&vecVelocity, &group.m_Velocity);
+            RwV3dScale(&vecVelocity, &vecVelocity, timeStep);
+
+            auto* pos = RwMatrixGetPos(&group.m_Matrix);
+            RwV3dAdd(pos, pos, &vecVelocity);
+
+            RwV3d* vecFacing = nullptr;
+            if (m_FramesActive >= 5) {
+                if (group.m_Type == 0)
+                    vecFacing = RwMatrixGetRight(&group.m_Matrix);
+                else if (group.m_Type == 1)
+                    vecFacing = RwMatrixGetUp(&group.m_Matrix);
+                else if (group.m_Type == 2)
+                    vecFacing = RwMatrixGetAt(&group.m_Matrix);
+
+                auto fAngleRad = RwACos(RwV3dDotProduct(&m_VecNormal, vecFacing));
+                if (fabs(fAngleRad > 0.01f)) {
+                    RwV3d axis;
+                    RwV3dCrossProduct(&axis, vecFacing, &m_VecNormal);
+                    RwV3dNormalize(&axis, &axis);
+
+                    auto fAngleDeg = RWRAD2DEG(fAngleRad) * timeStep / 20.0f;
+                    RwV3d savedPos;
+                    RwV3dAssign(&savedPos, pos);
+                    RwMatrixRotate(&group.m_Matrix, &axis, fAngleDeg, RwOpCombineType::rwCOMBINEPOSTCONCAT);
+                    RwV3dAssign(pos, &savedPos);
+                }
+            } else {
+                float fAngle = timeStep * group.m_RotationSpeed;
+                RwMatrixRotate(&group.m_Matrix, &group.m_RotationAxis, fAngle, RwOpCombineType::rwCOMBINEPRECONCAT);
+            }
+
+            DoCollision(&group, timeStep);
+        }
+
+        --group.m_FramesToLive;
+        if (group.m_FramesToLive <= 0)
+            group.m_FramesToLive = 0;
+        else
+            bToBeRemoved = false;
+    }
+
+    if (bToBeRemoved)
+        Exit();
+
+    ++m_FramesActive;
 }
 
 // 0x59E480
