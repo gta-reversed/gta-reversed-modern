@@ -22,7 +22,7 @@ void CTaskComplexWander::InjectHooks() {
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x66F450);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674140, true); //TODO: Bugged function, needs fix
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x674140, { .enabled=false }); // TODO: Bugged function, needs fix
     RH_ScopedVirtualInstall(CreateFirstSubTask, 0x6740E0);
     RH_ScopedVirtualInstall(ControlSubTask, 0x674C30);
     RH_ScopedVirtualInstall(UpdateDir, 0x669DA0);
@@ -41,8 +41,6 @@ CTaskComplexWander::CTaskComplexWander(int32 moveState, uint8 dir, bool bWanderS
     m_nMoveState = static_cast<eMoveState>(moveState); // todo: change signature
     m_nDir = dir;
     m_fTargetRadius = fTargetRadius;
-    m_LastNode.m_wAreaId = (uint16)-1;
-    m_NextNode.m_wAreaId = (uint16)-1;
     m_bWanderSensibly = bWanderSensibly;
     m_nLastUpdateDirFrameCount = 0;
 }
