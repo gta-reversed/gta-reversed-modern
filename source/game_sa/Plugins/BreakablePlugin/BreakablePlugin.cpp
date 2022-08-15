@@ -68,7 +68,7 @@ RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, 
     RwStreamRead(stream, pluginStruct->GetMaskNamesPtr(), sizeof(char[32]) * pluginStruct->m_Info.m_usNumMaterials);
 
     pluginStruct->m_Info.m_pMaterialProperties = pluginStruct->GetSurfacePropsPtr();
-    RwStreamRead(stream, pluginStruct->GetSurfacePropsPtr(), sizeof(RwSurfaceProperties) * pluginStruct->m_Info.m_usNumMaterials);
+    RwStreamRead(stream, pluginStruct->GetSurfacePropsPtr(), sizeof(BreakInfoColor) * pluginStruct->m_Info.m_usNumMaterials);
 
     pluginStruct->m_Info.m_pTextures = pluginStruct->GetTexturesPtr();
     for (auto i = 0; i < pluginStruct->m_Info.m_usNumMaterials; ++i) {
@@ -101,7 +101,7 @@ RwStream* BreakableStreamWrite(RwStream* stream, RwInt32 binaryLength, const voi
         RwStreamWrite(stream, info->m_pTrianglesMaterialIndices, sizeof(uint16) * info->m_usNumTriangles);
         RwStreamWrite(stream, info->m_pTextureNames, sizeof(char[32]) * info->m_usNumMaterials);
         RwStreamWrite(stream, info->m_pMaskNames, sizeof(char[32]) * info->m_usNumMaterials);
-        RwStreamWrite(stream, info->m_pMaterialProperties, sizeof(RwSurfaceProperties) * info->m_usNumMaterials);
+        RwStreamWrite(stream, info->m_pMaterialProperties, sizeof(BreakInfoColor) * info->m_usNumMaterials);
     }
 
     return stream;

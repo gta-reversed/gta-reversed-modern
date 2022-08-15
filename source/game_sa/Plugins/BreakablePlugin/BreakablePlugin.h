@@ -19,6 +19,13 @@ struct BreakInfoTriangle {
     RwUInt16 vertIndex[3];
 };
 
+struct BreakInfoColor {
+    RwReal red;
+    RwReal green;
+    RwReal blue;
+};
+VALIDATE_SIZE(BreakInfoColor, 0xC);
+
 // RW PLUGIN
 struct BreakInfo_t {
     eBreakablePluginPositionRule m_uiPosRule;
@@ -33,7 +40,7 @@ struct BreakInfo_t {
     struct RwTexture**           m_pTextures;
     char*                        m_pTextureNames;
     char*                        m_pMaskNames;
-    struct RwSurfaceProperties*  m_pMaterialProperties;
+    struct BreakInfoColor*       m_pMaterialProperties;
 };
 VALIDATE_SIZE(BreakInfo_t, 0x34);
 
@@ -57,7 +64,7 @@ struct BreakablePluginData {
     // uint16              m_aTriangleMaterialIndices[m_usNumTriangles];
     // char                m_aTextureNames[m_usNumMaterials][32];
     // char                m_aMaskNames[m_usNumMaterials][32];
-    // RwSurfaceProperties m_aMaterialProperties[m_usNumMaterial];
+    // BreakInfoColor      m_aMaterialProperties[m_usNumMaterial];
     // RwTexture*          m_aTexturePointers[m_usNumMaterial];
 
 // NOTSA: Helper functions
@@ -70,7 +77,7 @@ struct BreakablePluginData {
         size += sizeof(uint16) * baseInfo.m_usNumTriangles;
         size += sizeof(char[32]) * baseInfo.m_usNumMaterials;
         size += sizeof(char[32]) * baseInfo.m_usNumMaterials;
-        size += sizeof(RwSurfaceProperties) * baseInfo.m_usNumMaterials;
+        size += sizeof(BreakInfoColor) * baseInfo.m_usNumMaterials;
         size += sizeof(RwTexture*) * baseInfo.m_usNumMaterials;
 
         return size;
@@ -133,7 +140,7 @@ struct BreakablePluginData {
         return reinterpret_cast<char*>(&reinterpret_cast<uint8*>(this)[byteOffset]);
     };
 
-    inline RwSurfaceProperties* GetSurfacePropsPtr() {
+    inline BreakInfoColor* GetSurfacePropsPtr() {
         auto byteOffset = sizeof(BreakInfo_t);
         byteOffset += sizeof(RwV3d) * m_Info.m_usNumVertices;
         byteOffset += sizeof(RwTexCoords) * m_Info.m_usNumVertices;
@@ -142,7 +149,7 @@ struct BreakablePluginData {
         byteOffset += sizeof(uint16) * m_Info.m_usNumTriangles;
         byteOffset += sizeof(char[32]) * m_Info.m_usNumMaterials;
         byteOffset += sizeof(char[32]) * m_Info.m_usNumMaterials;
-        return reinterpret_cast<RwSurfaceProperties*>(&reinterpret_cast<uint8*>(this)[byteOffset]);
+        return reinterpret_cast<BreakInfoColor*>(&reinterpret_cast<uint8*>(this)[byteOffset]);
     };
 
     inline RwTexture** GetTexturesPtr() {
@@ -154,7 +161,7 @@ struct BreakablePluginData {
         byteOffset += sizeof(uint16) * m_Info.m_usNumTriangles;
         byteOffset += sizeof(char[32]) * m_Info.m_usNumMaterials;
         byteOffset += sizeof(char[32]) * m_Info.m_usNumMaterials;
-        byteOffset += sizeof(RwSurfaceProperties) * m_Info.m_usNumMaterials;
+        byteOffset += sizeof(BreakInfoColor) * m_Info.m_usNumMaterials;
         return reinterpret_cast<RwTexture**>(&reinterpret_cast<uint8*>(this)[byteOffset]);
     };
 };

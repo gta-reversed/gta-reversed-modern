@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "BreakObject_c.h"
+#include "PostEffects.h"
 
 void BreakObject_c::InjectHooks() {
     RH_ScopedClass(BreakObject_c);
@@ -8,7 +9,7 @@ void BreakObject_c::InjectHooks() {
 
     RH_ScopedInstall(CalcGroupCenter, 0x59D190);
     RH_ScopedInstall(SetGroupData, 0x59D570);
-    //RH_ScopedInstall(SetBreakInfo, 0x59D7F0);
+    RH_ScopedInstall(SetBreakInfo, 0x59D7F0);
     RH_ScopedInstall(Exit, 0x59DDD0);
     RH_ScopedInstall(DoCollisionResponse, 0x59DE40);
     RH_ScopedInstall(DoCollision, 0x59E1F0);
@@ -21,7 +22,7 @@ void BreakObject_c::InjectHooks() {
 BreakObject_c::BreakObject_c() {
     m_JustFaces = false;
     m_bActive = false;
-    m_BreakGroup = nullptr;
+    m_BreakGroups = nullptr;
 }
 
 // 0x59E750
@@ -80,18 +81,18 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
 
 // 0x59DDD0
 void BreakObject_c::Exit() {
-    if (m_BreakGroup) {
+    if (m_BreakGroups) {
         for (auto i = 0; i < m_NumBreakGroups; ++i) {
-            if (m_BreakGroup[i].m_Texture) {
-                RwTextureDestroy(m_BreakGroup[i].m_Texture);
-                m_BreakGroup[i].m_Texture = 0;
+            if (m_BreakGroups[i].m_Texture) {
+                RwTextureDestroy(m_BreakGroups[i].m_Texture);
+                m_BreakGroups[i].m_Texture = 0;
             }
 
-            if (m_BreakGroup[i].m_RenderInfo)
-                delete m_BreakGroup[i].m_RenderInfo;
+            if (m_BreakGroups[i].m_RenderInfo)
+                delete m_BreakGroups[i].m_RenderInfo;
         }
 
-        delete[] m_BreakGroup;
+        delete[] m_BreakGroups;
     }
 
     m_bActive = false;
@@ -140,22 +141,22 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
         if (width > length || width > height) {
             if (height <= width && height <= (double)length) {
                 group->m_Type = 2;
-                group->m_BoundingSize = height * 0.5;
+                group->m_BoundingSize = height * 0.5f;
             }
         } else {
             group->m_Type = 1;
-            group->m_BoundingSize = width * 0.5;
+            group->m_BoundingSize = width * 0.5f;
         }
     } else {
         group->m_Type = 0;
-        group->m_BoundingSize = length * 0.5;
+        group->m_BoundingSize = length * 0.5f;
     }
 }
 
 // 0x59D570
 void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand) {
     for (int i = 0; i < m_NumBreakGroups; ++i) {
-        auto& group = m_BreakGroup[i];
+        auto& group = m_BreakGroups[i];
         group.m_Matrix = *matrix;
 
         CalcGroupCenter(&group);
@@ -186,7 +187,79 @@ void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVe
 
 // 0x59D7F0
 void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
-    plugin::CallMethod<0x59D7F0, BreakObject_c*, BreakInfo_t*, int32>(this, info, bJustFaces);
+    static float& ambientRed = *(float*)0x8D0A0C;    // TODO | STATICREF // = 32.0f;
+    static float& ambientGreen = *(float*)0x8D0A08;  // TODO | STATICREF // = 32.0f;
+    static float& ambientBlue = *(float*)0x8D0A04;   // TODO | STATICREF // = 32.0f;
+
+    if (bJustFaces)
+        m_NumBreakGroups = info->m_usNumTriangles;
+    else
+        m_NumBreakGroups = info->m_usNumMaterials;
+
+    m_BreakGroups = new BreakGroup_t[m_NumBreakGroups];
+
+    for (auto i = 0; i < m_NumBreakGroups; ++i) {
+        auto& group = m_BreakGroups[i];
+        group.m_NumTriangles = 0;
+        group.m_Texture = nullptr;
+
+        auto numMaterials = 0u;
+        if (bJustFaces)
+            numMaterials = 1u;
+        else {
+            auto* pIndice = info->m_pTrianglesMaterialIndices;
+            for (auto triInd = 0; triInd < info->m_usNumTriangles; ++triInd) {
+                if (*pIndice == i)
+                    ++numMaterials;
+
+                ++pIndice;
+            }
+        }
+
+        group.m_RenderInfo = new BreakGroupRenderInfo_t[numMaterials];
+        group.m_Random = 256 + CGeneral::GetRandomNumberInRange(0, 32);
+    }
+
+    for (auto i = 0; i < info->m_usNumTriangles; ++i) {
+        auto curIndice = i;
+        if (!bJustFaces)
+            curIndice = info->m_pTrianglesMaterialIndices[curIndice];
+
+        auto& triangle = info->m_pTriangles[i];
+        auto& group = m_BreakGroups[curIndice];
+        // BUG: (?) Compiler shows that invalid access can happen in next line, possibly something wrong with reversed code
+        auto& curRenderInfo = group.m_RenderInfo[group.m_NumTriangles];
+        for (auto ind = 0; ind < 3; ++ind)
+            curRenderInfo.positions[ind] = info->m_pVertexPos[triangle.vertIndex[ind]];
+
+        auto textureInd = bJustFaces ? info->m_pTrianglesMaterialIndices[i] : curIndice;
+        group.m_Texture = info->m_pTextures[textureInd];
+
+        auto& matColor = info->m_pMaterialProperties[textureInd];
+        if (!CPostEffects::IsVisionFXActive()) {
+            ambientRed = AmbientLightColourForFrame.red * 255.0f;
+            ambientGreen = AmbientLightColourForFrame.green * 255.0f;
+            ambientBlue = AmbientLightColourForFrame.blue * 255.0f;
+        }
+
+        for (auto ind = 0; ind < 3; ++ind) {
+            auto& vertColor = info->m_pVertexColors[triangle.vertIndex[ind]];
+            auto fRed = std::min(255.0f, vertColor.red * matColor.red + ambientRed);
+            auto fGreen = std::min(255.0f, vertColor.green * matColor.green + ambientGreen);
+            auto fBlue = std::min(255.0f, vertColor.blue * matColor.blue + ambientBlue);
+
+            curRenderInfo.colors[ind].Set(fRed, fGreen, fBlue);
+            curRenderInfo.texCoords[ind] = info->m_pTexCoors[triangle.vertIndex[ind]];
+        }
+
+        ++group.m_NumTriangles;
+    }
+
+    for (auto i = 0; i < m_NumBreakGroups; ++i) {
+        auto& group = m_BreakGroups[i];
+        if (group.m_Texture)
+            ++group.m_Texture->refCount;
+    }
 }
 
 // 0x59DE40
@@ -227,7 +300,7 @@ void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV
     } else {
         group->m_bStoppedMoving = true;
         if (m_JustFaces) {
-            group->m_Random = CGeneral::GetRandomNumberInRange(0, 32);
+            group->m_Random = 32 + CGeneral::GetRandomNumberInRange(0, 32);
             return;
         }
     }

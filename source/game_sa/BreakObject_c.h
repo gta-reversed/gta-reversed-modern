@@ -33,7 +33,7 @@ public:
     bool          m_AddSparks;
     bool          m_bDrawLast;
     int32         m_NumBreakGroups;
-    BreakGroup_t* m_BreakGroup;
+    BreakGroup_t* m_BreakGroups;
     int32         m_FramesActive;
     float         m_GroundZ;
     CVector       m_VecNormal;

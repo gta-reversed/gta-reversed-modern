@@ -84,6 +84,9 @@ static inline char (&GxtErrorString)[32] = *(char(*)[32])0xC1AEB8;
 
 extern float &GAME_GRAVITY; // default 0.008f
 
+extern RwRGBAReal& AmbientLightColour;
+extern RwRGBAReal& AmbientLightColourForFrame;
+
 extern char(&PC_Scratch)[16384];
 
 extern float& gfLaRiotsLightMult;
