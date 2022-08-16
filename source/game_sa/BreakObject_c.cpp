@@ -26,7 +26,7 @@ BreakObject_c::BreakObject_c() {
 }
 
 // 0x59E750
-bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRand, int32 bJustFaces) {
+bool BreakObject_c::Init(CObject* object, const CVector* velocity, float fVelocityRand, int32 bJustFaces) {
     if (!object->m_pRwObject)
         return false;
 
@@ -39,7 +39,7 @@ bool BreakObject_c::Init(CObject* object, RwV3d* vecVelocity, float fVelocityRan
 
     SetBreakInfo(info, bJustFaces);
     auto ltm = RwFrameGetLTM(RpAtomicGetFrame(object->m_pRwAtomic));
-    SetGroupData(ltm, vecVelocity, fVelocityRand);
+    SetGroupData(ltm, velocity, fVelocityRand);
 
     m_JustFaces = bJustFaces;
     m_bActive = true;
@@ -144,7 +144,7 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
 }
 
 // 0x59D570
-void BreakObject_c::SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand) {
+void BreakObject_c::SetGroupData(const RwMatrix* matrix, const CVector* vecVelocity, float fVelocityRand) {
     for (auto& group : GetBreakGroups()) {
         group.m_Matrix = *matrix;
 
@@ -192,12 +192,12 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         if (bJustFaces)
             numMaterials = 1u;
         else {
-            auto* pIndice = info->m_pTrianglesMaterialIndices;
+            auto* pIndex = info->m_pTrianglesMaterialIndices;
             for (auto triInd = 0; triInd < info->m_usNumTriangles; ++triInd) {
-                if (*pIndice == i)
+                if (*pIndex == i)
                     ++numMaterials;
 
-                ++pIndice;
+                ++pIndex;
             }
         }
 
@@ -206,22 +206,22 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
     }
 
     for (auto i = 0; i < info->m_usNumTriangles; ++i) {
-        auto curIndice = i;
+        auto curIndex = i;
         if (!bJustFaces)
-            curIndice = info->m_pTrianglesMaterialIndices[curIndice];
+            curIndex = info->m_pTrianglesMaterialIndices[curIndex];
 
         auto& triangle = info->m_pTriangles[i];
-        auto& group = m_BreakGroups[curIndice];
+        auto& group = m_BreakGroups[curIndex];
         // BUG: (?) Compiler shows that invalid access can happen in next line, possibly something wrong with reversed code
         auto& curRenderInfo = group.m_RenderInfo[group.m_NumTriangles];
         for (auto ind = 0; ind < 3; ++ind) {
             curRenderInfo.positions[ind] = info->m_pVertexPos[triangle.vertIndex[ind]];
         }
 
-        auto textureInd = bJustFaces ? info->m_pTrianglesMaterialIndices[i] : curIndice;
+        auto textureInd = bJustFaces ? info->m_pTrianglesMaterialIndices[i] : curIndex;
         group.m_Texture = info->m_pTextures[textureInd];
 
-        auto& matColor = info->m_pMaterialProperties[textureInd];
+        const auto& matColor = info->m_pMaterialProperties[textureInd];
         if (!CPostEffects::IsVisionFXActive()) {
             ambientRed   = AmbientLightColourForFrame.red   * 255.0f;
             ambientGreen = AmbientLightColourForFrame.green * 255.0f;

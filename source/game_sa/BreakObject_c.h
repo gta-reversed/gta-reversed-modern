@@ -52,11 +52,11 @@ public:
     BreakObject_c();
     ~BreakObject_c() = default;
 
-    bool Init(CObject* object, RwV3d* vecVelocity, float fVelocityRand, int32 bJustFaces);
+    bool Init(CObject* object, const CVector* velocity, float fVelocityRand, int32 bJustFaces);
     void Exit();
 
     static void CalcGroupCenter(BreakGroup_t* group);
-    void SetGroupData(RwMatrix* matrix, RwV3d* vecVelocity, float fVelocityRand);
+    void SetGroupData(const RwMatrix* matrix, const CVector* vecVelocity, float fVelocityRand);
     void SetBreakInfo(BreakInfo_t* info, int32 bJustFaces);
 
     void DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) const;
