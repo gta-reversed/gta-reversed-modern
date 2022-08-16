@@ -3435,38 +3435,15 @@ bool CVehicle::BladeColSectorList(CPtrList& ptrList, CColModel& colModel, CMatri
         // Not sure how this works in the real world, as the code only uses -3
         assert(rotorType == -3); // NOTSA: Testing my theory (Pirulax)
         switch (rotorType) {
-        case -3:
-            return {
-                -matrix.GetUp(),
-                {0.f, 0.f, -0.2f},
-            };
-        case -2:
-            return {
-                -matrix.GetForward(),
-                {0.f, -0.2f, 0.f},
-            };
-        case -1:
-            return {
-                -matrix.GetRight(),
-                {-0.2f, 0.f, 0.f},
-            };
-        case 1:
-            return {
-                matrix.GetRight(),
-                {0.2f, 0.f, 0.f},
-            };
-        case 2:
-            return {
-                matrix.GetForward(),
-                {0.f, 0.2f, 0.f},
-            };
-        case 3:
-            return {
-                matrix.GetUp(),
-                {0.f, 0.f, 0.2f},
-            };
+        case -3: return { -matrix.GetUp(),      {  0.0f,  0.0f, -0.2f }, };
+        case -2: return { -matrix.GetForward(), {  0.0f, -0.2f,  0.0f }, };
+        case -1: return { -matrix.GetRight(),   { -0.2f,  0.0f,  0.0f }, };
+        case  1: return {  matrix.GetRight(),   {  0.2f,  0.0f,  0.0f }, };
+        case  2: return {  matrix.GetForward(), {  0.0f,  0.2f,  0.0f }, };
+        case  3: return {  matrix.GetUp(),      {  0.0f,  0.0f,  0.2f }, };
         default:
             NOTSA_UNREACHABLE("Unknown rotorType");
+            return { {}, {} };
         }
     };
 
@@ -3647,14 +3624,12 @@ void CVehicle::SetComponentRotation(RwFrame* component, eRotationAxis axis, floa
             // We're using the `Only` version of `SetRotate`, that way the position
             // That way 0x6DBB69 can be omitted (and 0x6DBB02 because it's just there to cancel out the former)
             switch (axis) {
-            case AXIS_Z:
-                return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
-            case AXIS_Y:
-                return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
-            case AXIS_X:
-                return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
+            case AXIS_Z: return bResetPosition ? &CMatrix::SetRotateZOnly : &CMatrix::RotateZ;
+            case AXIS_Y: return bResetPosition ? &CMatrix::SetRotateYOnly : &CMatrix::RotateY;
+            case AXIS_X: return bResetPosition ? &CMatrix::SetRotateXOnly : &CMatrix::RotateX;
             default:
-                NOTSA_UNREACHABLE();
+                NOTSA_UNREACHABLE("Supress warn");
+                return &CMatrix::RotateX;
             }
         }(),
         &mat, angle
@@ -4117,7 +4092,7 @@ void CVehicle::AddWaterSplashParticles() {
             auto pieceOfShit = vertices[0]
                 + v0v1 * CGeneral::GetRandomNumberInRange(0.f, 1.f)
                 + v1v2 * CGeneral::GetRandomNumberInRange(0.f, 1.f);
-            g_fx.m_pPrtSplash->AddParticle(&pieceOfShit, &velocity, 0.f, &fxPrtMult, -1.f, 1.2f, 0.6f, 0u);
+            g_fx.m_Splash->AddParticle(&pieceOfShit, &velocity, 0.f, &fxPrtMult, -1.f, 1.2f, 0.6f, 0u);
         }
     }
 }
@@ -4254,20 +4229,22 @@ bool CVehicle::GetSpecialColModel() {
     if (specialCMSlot == m_aSpecialColVehicle.end()) {
         return false;
     }
+
     const auto specialCMIdx = rng::distance(m_aSpecialColVehicle.begin(), specialCMSlot);
     m_vehicleSpecialColIndex = specialCMIdx;
     physicalFlags.bAddMovingCollisionSpeed = true;
     *specialCMSlot = this;
     CEntity::RegisterReference(*specialCMSlot);
+
     auto& cm = m_aSpecialColModel[m_vehicleSpecialColIndex];
     cm.RemoveTrianglePlanes();
     if (!cm.m_pColData) {
         cm.AllocateData();
     }
     cm = *GetModelInfo()->m_pColModel;
-    auto& specialHydrDat = m_aSpecialHydraulicData[specialCMIdx];
-    specialHydrDat.m_fSuspensionExtendedUpperLimit = 100.f;
-    rng::fill(specialHydrDat.m_aWheelSuspension, 0);
+
+    m_aSpecialHydraulicData[specialCMIdx].m_fSuspensionExtendedUpperLimit = 100.f;
+    rng::fill(m_aSpecialHydraulicData[specialCMIdx].m_aWheelSuspension, 0.0f);
     return true;
 }
 
