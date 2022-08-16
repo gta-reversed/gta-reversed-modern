@@ -25,16 +25,16 @@ public:
 public:
     static void InjectHooks();
 
+    static constexpr eTaskType Type = eTaskType::TASK_COMPLEX_DESTROY_CAR_ARMED;
+
     ~CTaskComplexDestroyCarArmed();
     CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, CVector posn);
 
     void CalculateSearchPositionAndRanges(CPed* ped);
-    void CreateSubTask(int32 a2, CPed* ped);
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-    static constexpr eTaskType Type = eTaskType::TASK_COMPLEX_DESTROY_CAR_ARMED;
-
-    CTask* Clone() override;
     eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
@@ -42,15 +42,9 @@ public:
 
 private: // Wrappers for hooks
     // 0x621F50
-    CTaskComplexDestroyCarArmed* Constructor(CVehicle* vehicleToDestroy, CVector posn) {
-        this->CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(vehicleToDestroy, posn);
-        return this;
-    }
+    CTaskComplexDestroyCarArmed* Constructor(CVehicle* vehicleToDestroy, CVector posn) { this->CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(vehicleToDestroy, posn); return this; }
 
     // 0x622010
-    CTaskComplexDestroyCarArmed* Destructor() {
-        this->CTaskComplexDestroyCarArmed::~CTaskComplexDestroyCarArmed();
-        return this;
-    }
+    CTaskComplexDestroyCarArmed* Destructor() { this->CTaskComplexDestroyCarArmed::~CTaskComplexDestroyCarArmed(); return this; }
 };
 VALIDATE_SIZE(CTaskComplexDestroyCarArmed, 0x64);

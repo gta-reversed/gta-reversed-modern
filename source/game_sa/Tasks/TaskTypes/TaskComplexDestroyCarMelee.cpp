@@ -5,30 +5,31 @@ void CTaskComplexDestroyCarMelee::InjectHooks() {
     RH_ScopedClass(CTaskComplexDestroyCarMelee);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x621D10);
+    RH_ScopedInstall(Constructor, 0x621D10);
+    RH_ScopedInstall(Destructor, 0x621DA0);
 
-    // RH_ScopedInstall(Destructor, 0x621DA0);
+    RH_ScopedInstall(CalculateSearchPositionAndRanges, 0x6289F0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(CreateSubTask, 0x628A70, { .enabled = false, .locked = true });
 
-    // RH_ScopedInstall(CalculateSearchPositionAndRanges, 0x6289F0);
-    // RH_ScopedInstall(CreateSubTask, 0x628A70);
-
-    // RH_ScopedVirtualInstall(Clone, 0x6235A0);
-    // RH_ScopedVirtualInstall(GetTaskType, 0x621D90);
-    // RH_ScopedVirtualInstall(MakeAbortable, 0x621E00);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x62DC20);
-    // RH_ScopedVirtualInstall(CreateFirstSubTask, 0x62DB20);
-    // RH_ScopedVirtualInstall(ControlSubTask, 0x62DDB0);
+    RH_ScopedVirtualInstall2(Clone, 0x6235A0, { .enabled = false, .locked = true });
+    RH_ScopedVirtualInstall2(GetTaskType, 0x621D90);
+    RH_ScopedVirtualInstall2(MakeAbortable, 0x621E00, { .enabled = false, .locked = true });
+    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x62DC20, { .enabled = false, .locked = true });
+    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x62DB20, { .enabled = false, .locked = true });
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x62DDB0, { .enabled = false, .locked = true });
 }
 
 // 0x621D10
 CTaskComplexDestroyCarMelee::CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy) :
     CTaskComplexDestroyCar{vehToDestroy, {}}
 {
-    /* NOP */
+    /* Done in header */
 }
 
 // 0x621DA0
-CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee() {}
+CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee() {
+    /* Done by base class */
+}
 
 // 0x6289F0
 void CTaskComplexDestroyCarMelee::CalculateSearchPositionAndRanges(CPed* ped) {
