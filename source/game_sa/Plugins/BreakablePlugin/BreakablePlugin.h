@@ -8,21 +8,21 @@
 /*
  * Breakable plugin static offset
  */
-extern RwInt32& g_BreakablePlugin;
+static inline int32& g_BreakablePlugin = *(int32*)0xBB4238;
 
 enum eBreakablePluginPositionRule : uint32 {
-    OBJECT_ORIGIN = 0,
+    OBJECT_ORIGIN    = 0,
     COLLISION_ORIGIN = 1,
 };
 
 struct BreakInfoTriangle {
-    RwUInt16 vertIndex[3];
+    uint16 vertIndex[3];
 };
 
 struct BreakInfoColor {
-    RwReal red;
-    RwReal green;
-    RwReal blue;
+    float red;
+    float green;
+    float blue;
 };
 VALIDATE_SIZE(BreakInfoColor, 0xC);
 
@@ -33,9 +33,11 @@ struct BreakInfo_t {
     struct RwV3d*                m_pVertexPos;
     struct RwTexCoords*          m_pTexCoors;
     struct RwRGBA*               m_pVertexColors;
+
     uint16                       m_usNumTriangles;
     struct BreakInfoTriangle*    m_pTriangles;
     uint16*                      m_pTrianglesMaterialIndices;
+
     uint16                       m_usNumMaterials;
     struct RwTexture**           m_pTextures;
     char*                        m_pTextureNames;
@@ -46,7 +48,7 @@ VALIDATE_SIZE(BreakInfo_t, 0x34);
 
 struct BreakablePlugin {
     union {
-        uint32 m_SectionHeader;
+        uint32       m_SectionHeader;
         BreakInfo_t* m_pBreakableInfo;
     };
 
@@ -56,6 +58,7 @@ VALIDATE_SIZE(BreakablePlugin, 0x4);
 
 struct BreakablePluginData {
     BreakInfo_t m_Info;
+
     // Dynamically allocated size, depending on loaded model sizes]
     // RwV3d               m_aVertexPos[m_usNumVertices];
     // RwTexCoords         m_aTexCoors[m_usNumVertices];
@@ -68,7 +71,7 @@ struct BreakablePluginData {
     // RwTexture*          m_aTexturePointers[m_usNumMaterial];
 
 // NOTSA: Helper functions
-    static uint32 GetRequiredAllocationSize(BreakInfo_t const& baseInfo) {
+    static uint32 GetRequiredAllocationSize(const BreakInfo_t& baseInfo) {
         auto size = sizeof(BreakInfo_t);
         size += sizeof(RwV3d) * baseInfo.m_usNumVertices;
         size += sizeof(RwTexCoords) * baseInfo.m_usNumVertices;

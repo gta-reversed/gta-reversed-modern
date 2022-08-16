@@ -1,7 +1,5 @@
 #include "StdInc.h"
 
-RwInt32& g_BreakablePlugin = *(RwInt32*)0xBB4238;
-
 void BreakablePlugin::InjectHooks() {
     RH_ScopedClass(BreakablePlugin);
     RH_ScopedCategory("Plugins");
