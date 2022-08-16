@@ -13,13 +13,14 @@ void CTaskComplexDestroyCar::InjectHooks() {
     RH_ScopedInstall(Destructor, 0x621CB0);
 
     RH_ScopedInstall(CreateSubTask, 0x6287A0);
-
-    RH_ScopedVirtualInstall2(Clone, 0x623530);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x621C70);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x621C80);
-    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x62D9E0);
-    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x62DA90);
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0, { .enabled = false, .locked = true });
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x621C80);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x62D9E0);
+    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x62DA90);
+    // RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0);
+}
+bool CTaskComplexDestroyCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
+CTask* CTaskComplexDestroyCar::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
+CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
 }
 
 // 0x621C00
