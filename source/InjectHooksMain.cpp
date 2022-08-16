@@ -266,6 +266,7 @@
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
+#include <TaskSimpleTired.h>
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -279,7 +280,6 @@
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
-
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
@@ -759,7 +759,7 @@ void InjectHooksMain() {
         // CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
-        // CTaskSimpleTired::InjectHooks();
+        CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
         // CTaskSimpleTurn180::InjectHooks();
         // CTaskSimpleUseAtm::InjectHooks();
