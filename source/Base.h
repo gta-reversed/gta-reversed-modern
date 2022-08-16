@@ -22,8 +22,6 @@ VALIDATE_SIZE(long long, 8);
 // Use this to add const that wasn't there in the original code
 #define Const const
 
-#define NOTASA_ASSERT assert
-
 // Basic types for structures describing
 typedef int8_t    int8;
 typedef int16_t   int16;
