@@ -23,6 +23,9 @@ Virtual::Virtual(std::string fnName, void* libFuncAddress, std::vector<uint32> v
 
 void Virtual::Switch()
 {
+    if (m_bIsLocked)
+        return;
+
     for (auto uiAddress : m_vecHookedAddresses) {
         using namespace ReversibleHooks::detail;
         VirtualCopy((void*)uiAddress, (void*)(m_bIsHooked ? m_OriginalFunctionAddress : m_LibFunctionAddress), 5);

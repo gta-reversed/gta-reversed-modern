@@ -298,61 +298,54 @@ void CMirrors::BeforeConstructRenderList() {
         Init();
     }
 
-    bool bActiveMirror = false;
     CCullZoneReflection* mirrorAttrs = nullptr;
 
-    while (true) {
+    const auto mirrorActive = [&](){
         // Check player is in heli/plane
         if (auto* vehicle = FindPlayerVehicle()) {
             if (vehicle->IsSubHeli() || vehicle->IsSubPlane()) {
                 ShutDown();
-                break;
+                return false;
             }
         }
 
         mirrorAttrs = CCullZones::FindMirrorAttributesForCoors(TheCamera.GetPosition());
         if (!mirrorAttrs) {
-            ShutDown();
-            break;
+            return false;
         }
 
-        bActiveMirror = true;
         if ((mirrorAttrs->flags & CAM_STAIRS_FOR_PLAYER) == 0) {
-            ShutDown();
-            break;
+            return true;
         }
 
-        bActiveMirror = false;
-        for (auto & track : Screens8Track) {
+        return rng::any_of(Screens8Track, [](const auto& track) {
             TheCamera.m_bMirrorActive = false;
             const auto origin = CVector::AverageN(std::begin(track), 4);
-            if (TheCamera.IsSphereVisible(origin, 8.0f)) {
-                bActiveMirror = true;
-            }
-        }
-        break;
-    };
+            return TheCamera.IsSphereVisible(origin, 8.0f);
+        });
+    }();
 
-    if (!bActiveMirror) {
-        ShutDown();
-    } else {
+    if (mirrorActive) {
         // Actually update cam
         assert(mirrorAttrs);
+
         MirrorV = mirrorAttrs->cm;
         MirrorNormal = CVector{ (float)mirrorAttrs->vx, (float)mirrorAttrs->vy, (float)mirrorAttrs->vz } / 100.0f;
         MirrorFlags = mirrorAttrs->flags;
 
         TypeOfMirror = std::fabs(MirrorNormal.z) <= 0.7f ? MIRROR_TYPE_1 : MIRROR_TYPE_2;
         CreateBuffer();
+    } else {
+        ShutDown();
     }
 
     if ((MirrorFlags & CAM_STAIRS_FOR_PLAYER) != 0 || bFudgeNow) {
         CMatrix mat{};
         BuildCameraMatrixForScreens(mat);
-        TheCamera.DealWithMirrorBeforeConstructRenderList(bActiveMirror, MirrorNormal, MirrorV, &mat);
+        TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, &mat);
     } else {
-        TheCamera.DealWithMirrorBeforeConstructRenderList(bActiveMirror, MirrorNormal, MirrorV, nullptr);
-    }
+        TheCamera.DealWithMirrorBeforeConstructRenderList(mirrorActive, MirrorNormal, MirrorV, nullptr);
+    }    
 }
 
 void RenderScene();
