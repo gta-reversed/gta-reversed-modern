@@ -24,7 +24,6 @@ public:
     static int32 GetRandomNumberInRange(const int32 min, const int32 max);
     static float GetRandomNumberInRange(const float min, const float max);
 
-
     // NOTSA - Helpers
     static float GetRadianAngleBetweenPoints(CVector2D a, CVector2D b);
     static bool  DoCoinFlip();
