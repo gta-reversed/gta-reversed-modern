@@ -266,6 +266,7 @@
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
+#include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include <TaskSimpleTired.h>
 
 #include "EventSeenPanickedPed.h"
@@ -668,7 +669,7 @@ void InjectHooksMain() {
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
         // CTaskComplexTrackEntity::InjectHooks();
-        // CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
+        CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
         // CTaskComplexUseAttractor::InjectHooks();
         // CTaskComplexUseAttractorPartner::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
