@@ -1,42 +1,40 @@
 #pragma once
 
-#include "TaskComplexDestroyCar.h"
+#include "TaskComplex.h"
 #include "Vector.h"
 
 class CVehicle;
 
-class CTaskComplexDestroyCarMelee : public CTaskComplexDestroyCar {
+class CTaskComplexDestroyCarMelee : public CTaskComplex {
 public:
-    int32 m_field20 = {};  
-    int32 m_field24 = {};  
-    int32 m_field28 = {};  
-    int32 m_field2C = {};  
-    int32 m_field30 = {-1};
-    int32 m_field34 = {};  
+    bool      byteC;
+    bool      byteD;
+    CVehicle* m_Vehicle;
+    CVector   m_VehiclePos;
+    float     m_DistSq0;
+    float     m_fY;
+    float     m_DistSq1;
+    int32     dword2C;
+    int32     m_nTime;
 
 public:
-    static void InjectHooks();
+    static constexpr eTaskType Type = TASK_COMPLEX_DESTROY_CAR_MELEE;
 
-    static constexpr eTaskType Type = eTaskType::TASK_COMPLEX_DESTROY_CAR_MELEE;
-
-    CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy);
-    ~CTaskComplexDestroyCarMelee();
+    explicit CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy);
+    ~CTaskComplexDestroyCarMelee() override;
 
     void CalculateSearchPositionAndRanges(CPed* ped);
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-    virtual eTaskType GetTaskType() { return Type; }
-    virtual CTask* Clone();
-    virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event);
-    virtual CTask* CreateNextSubTask(CPed* ped);
-    virtual CTask* CreateFirstSubTask(CPed* ped);
-    virtual CTask* ControlSubTask(CPed* ped);
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskComplexDestroyCarMelee(m_Vehicle); } // 0x6235A0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    CTask* CreateNextSubTask(CPed* ped) override;
+    CTask* CreateFirstSubTask(CPed* ped) override;
+    CTask* ControlSubTask(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x621D10
+    static void InjectHooks();
     CTaskComplexDestroyCarMelee* Constructor(CVehicle* vehToDestroy) { this->CTaskComplexDestroyCarMelee::CTaskComplexDestroyCarMelee(vehToDestroy); return this; }
-
-    // 0x621DA0
     CTaskComplexDestroyCarMelee* Destructor() { this->CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee(); return this; }
 };
-VALIDATE_SIZE(CTaskComplexDestroyCarMelee, 0x38);
+VALIDATE_SIZE(CTaskComplexDestroyCarMelee, 0x34);

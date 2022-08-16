@@ -7,34 +7,29 @@ class CVehicle;
 
 class CTaskComplexDestroyCar : public CTaskComplex {
 public:
-    bool m_arg0 = {};
-    bool m_arg1 = {};
-    CVehicle* m_vehicleToDestroy = {};
-    CVector m_vehPosn = {};
+    bool      m_arg0;
+    bool      m_arg1;
+    CVehicle* m_VehicleToDestroy;
+    uint32    dword14;
+    uint32    dword18;
+    uint32    dword1C;
 
 public:
-    static void InjectHooks();
+    static constexpr auto Type = TASK_COMPLEX_DESTROY_CAR;
 
-    static constexpr auto Type = eTaskType::TASK_COMPLEX_DESTROY_CAR;
-
-    CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, CVector vehPosn);
-    CTaskComplexDestroyCar(const CTaskComplexDestroyCar&);
+    CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5);
     ~CTaskComplexDestroyCar() override;
 
-    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
-
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexDestroyCar{ *this }; }
+    CTask* Clone() override { return new CTaskComplexDestroyCar(m_VehicleToDestroy, dword14, dword18, dword1C); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
-private: // Wrappers for hooks
-    // 0x621C00
-    CTaskComplexDestroyCar* Constructor(CVehicle* vehicleToDestroy, CVector vehPosn) { this->CTaskComplexDestroyCar::CTaskComplexDestroyCar(vehicleToDestroy, vehPosn); return this; }
-
-    // 0x621CB0
+    static void InjectHooks();
+    CTaskComplexDestroyCar* Constructor(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) { this->CTaskComplexDestroyCar::CTaskComplexDestroyCar(vehicleToDestroy, a3, a4, a5); return this; }
     CTaskComplexDestroyCar* Destructor() { this->CTaskComplexDestroyCar::~CTaskComplexDestroyCar(); return this; }
 };
 VALIDATE_SIZE(CTaskComplexDestroyCar, 0x20);

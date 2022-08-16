@@ -277,7 +277,7 @@ CTask* CTaskComplexArrestPed::CreateSubTask(eTaskType taskType, CPed* ped) {
         return new CTaskComplexKillPedOnFoot(m_PedToArrest, -1, 0, 0, 0, 1);
 
     case TASK_COMPLEX_DESTROY_CAR:
-        return new CTaskComplexDestroyCar(m_PedToArrest->m_pVehicle, {});
+        return new CTaskComplexDestroyCar(m_PedToArrest->m_pVehicle, 0, 0, 0);
 
     case TASK_COMPLEX_SEEK_ENTITY: {
         float radius = m_PedToArrest->bIsBeingArrested ? 4.0f : 3.0f;

@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexDestroyCar.h"
 #include "TaskComplexDestroyCarArmed.h"
 #include "TaskComplexDestroyCarMelee.h"
@@ -10,9 +11,7 @@ void CTaskComplexDestroyCar::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x621C00);
     RH_ScopedInstall(Destructor, 0x621CB0);
-
     RH_ScopedInstall(CreateSubTask, 0x6287A0);
-
     RH_ScopedVirtualInstall2(Clone, 0x623530);
     RH_ScopedVirtualInstall2(GetTaskType, 0x621C70);
     RH_ScopedVirtualInstall2(MakeAbortable, 0x621C80);
@@ -22,34 +21,30 @@ void CTaskComplexDestroyCar::InjectHooks() {
 }
 
 // 0x621C00
-CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, CVector vehPosn) :
-    m_vehicleToDestroy{vehicleToDestroy},
-    m_vehPosn{vehPosn}
+CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) :
+      m_VehicleToDestroy{ vehicleToDestroy }
 {
-    NOTASA_ASSERT(m_vehicleToDestroy);
-
-    CEntity::SafeRegisterRef(m_vehicleToDestroy);
-}
-
-CTaskComplexDestroyCar::CTaskComplexDestroyCar(const CTaskComplexDestroyCar& o) :
-    CTaskComplexDestroyCar{o.m_vehicleToDestroy, o.m_vehPosn}
-{
+    dword14 = a3;
+    dword18 = a4;
+    dword1C = a5;
+    assert(m_VehicleToDestroy);
+    CEntity::SafeRegisterRef(m_VehicleToDestroy);
 }
 
 // 0x621CB0
 CTaskComplexDestroyCar::~CTaskComplexDestroyCar() {
-    CEntity::SafeCleanUpRef(m_vehicleToDestroy);
+    CEntity::SafeCleanUpRef(m_VehicleToDestroy);
 }
 
 // 0x6287A0
 CTask* CTaskComplexDestroyCar::CreateSubTask(eTaskType taskType, CPed* ped) {
     switch (taskType) {
     case TASK_COMPLEX_DESTROY_CAR_ARMED:
-        return new CTaskComplexDestroyCarArmed{ m_vehicleToDestroy, m_vehPosn };
+        return new CTaskComplexDestroyCarArmed(m_VehicleToDestroy, dword14, dword18, dword1C);
     case TASK_COMPLEX_LEAVE_CAR:
-        return new CTaskComplexLeaveCar{ ped->m_pVehicle, 0, 0, true, false };
+        return new CTaskComplexLeaveCar(ped->m_pVehicle, 0, 0, true, false);
     case TASK_COMPLEX_DESTROY_CAR_MELEE:
-        return new CTaskComplexDestroyCarMelee{ m_vehicleToDestroy };
+        return new CTaskComplexDestroyCarMelee(m_VehicleToDestroy);
     default:
         return nullptr;
     }
@@ -86,7 +81,7 @@ CTask* CTaskComplexDestroyCar::CreateNextSubTask(CPed* ped) {
 CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) {
     m_arg0 = false;
 
-    if (!m_vehicleToDestroy) {
+    if (!m_VehicleToDestroy) {
         return CreateSubTask(TASK_FINISHED, nullptr);
     }
     if (ped->m_pVehicle && ped->bInVehicle) {

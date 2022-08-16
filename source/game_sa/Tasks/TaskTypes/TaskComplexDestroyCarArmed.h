@@ -1,37 +1,37 @@
 #pragma once
 
-#include "TaskComplexDestroyCar.h"
+#include "TaskComplex.h"
 #include "Vector.h"
-#include <Base.h>
+#include "Base.h"
 
 class CVehicle;
 class CPed;
 class CEvent;
 
-class CTaskComplexDestroyCarArmed : public CTaskComplexDestroyCar {
+class CTaskComplexDestroyCarArmed : public CTaskComplex {
 public:
-    CVector m_vehPos = {};         // 0x20
-    CVector m_vehToPedVector = {}; // 0x2C
-    float m_rangeMax = {};         // 0x38
-    int32 dword28 = {};            // 0x3C
-    float m_rangeMin = {};         // 0x40
-    int32 dword30 = {};            // 0x44
-    float m_pedToVehDist = {};     // 0x48
-    float dword38 = {};            // 0x4C
-    bool dword3C = {};             // 0x50
-    int32 dword40 = {-1};          // 0x54
-    CVector m_posn = {};           // 0x58
+    bool      m_b0;
+    CVehicle* m_Vehicle;
+    CVector   m_PedPos;
+    CVector   m_VehiclePos;
+    CVector   m_DiffBetweenPedAndVehicle;
+    float     m_fWeaponRange;
+    int32     dword3C;
+    float     m_fWeaponRangeClamped;
+    int32     dword44;
+    float     m_DistanceBetweenPedAndVehicle;
+    float     dword4C;
+    bool      m_bGotoPointAndStandStill;
+    int32     dword54;
+    uint32    ctor58;
+    uint32    ctor5C;
+    uint32    ctor60;
 
 public:
-    static void InjectHooks();
+    static constexpr eTaskType Type = TASK_COMPLEX_DESTROY_CAR_ARMED;
 
-    static constexpr eTaskType Type = eTaskType::TASK_COMPLEX_DESTROY_CAR_ARMED;
-
-    ~CTaskComplexDestroyCarArmed();
-    CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, CVector posn);
-
-    void CalculateSearchPositionAndRanges(CPed* ped);
-    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
+    CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, uint32 a3 = 0, uint32 a4 = 0, uint32 a5 = 0);
+    ~CTaskComplexDestroyCarArmed() override;
 
     eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
@@ -40,11 +40,11 @@ public:
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x621F50
-    CTaskComplexDestroyCarArmed* Constructor(CVehicle* vehicleToDestroy, CVector posn) { this->CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(vehicleToDestroy, posn); return this; }
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
+    void CalculateSearchPositionAndRanges(CPed* ped);
 
-    // 0x622010
+    static void InjectHooks();
+    CTaskComplexDestroyCarArmed* Constructor(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) { this->CTaskComplexDestroyCarArmed::CTaskComplexDestroyCarArmed(vehicleToDestroy, a3, a4, a5); return this; }
     CTaskComplexDestroyCarArmed* Destructor() { this->CTaskComplexDestroyCarArmed::~CTaskComplexDestroyCarArmed(); return this; }
 };
 VALIDATE_SIZE(CTaskComplexDestroyCarArmed, 0x64);
