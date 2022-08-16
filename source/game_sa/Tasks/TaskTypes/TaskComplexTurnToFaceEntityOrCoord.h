@@ -8,44 +8,30 @@ class CEntity;
 
 class CTaskComplexTurnToFaceEntityOrCoord : public CTaskComplex {
 public:
-    CEntity* m_entityToFace = {};
-    bool m_bFaceEntity = {};
-    CVector m_coordsToFace = {};
-    float m_fChangeRateMult = {};
-    float m_fMaxHeading = {};
+    CEntity* m_EntityToFace;
+    bool     m_bFaceEntity;
+    CVector  m_CoordsToFace;
+    float    m_fChangeRateMult;
+    float    m_fMaxHeading;
 
 public:
-    static void InjectHooks();
-
-    constexpr static auto Type = eTaskType::TASK_COMPLEX_TURN_TO_FACE_ENTITY;
+    constexpr static auto Type = TASK_COMPLEX_TURN_TO_FACE_ENTITY;
 
     CTaskComplexTurnToFaceEntityOrCoord(CEntity* entity, float changeRateMult, float maxHeading);
-    CTaskComplexTurnToFaceEntityOrCoord(CVector const& coords, float changeRateMult, float maxHeading);
+    CTaskComplexTurnToFaceEntityOrCoord(const CVector& coords, float changeRateMult, float maxHeading);
     ~CTaskComplexTurnToFaceEntityOrCoord() override;
 
-    CTask* Clone() override;
-    eTaskType GetTaskType() override { return Type; }
-    CTask* CreateNextSubTask(CPed* ped) override;
+    eTaskType GetTaskType() override { return Type; } // 0x66B900
+    CTask* Clone() override; // 0x66D250
+    CTask* CreateNextSubTask(CPed* ped) override { return nullptr; } // 0x66B9C0
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
 
     float ComputeTargetHeading(CPed* ped) const;
-private: // Wrappers for hooks
-    // 0x66B890
-    CTaskComplexTurnToFaceEntityOrCoord* Constructor(CEntity* entity, float changeRateMult, float maxHeading) {
-        this->CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(entity, changeRateMult, maxHeading);
-        return this;
-    }
-    // 0x66B910
-    CTaskComplexTurnToFaceEntityOrCoord* Constructor(CVector const& coords, float changeRateMult, float maxHeading) {
-        this->CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(coords, changeRateMult, maxHeading);
-        return this;
-    }
+    static void InjectHooks();
 
-    // 0x66B960
-    CTaskComplexTurnToFaceEntityOrCoord* Destructor() {
-        this->CTaskComplexTurnToFaceEntityOrCoord::~CTaskComplexTurnToFaceEntityOrCoord();
-        return this;
-    }
+    CTaskComplexTurnToFaceEntityOrCoord* Constructor(CEntity* entity, float changeRateMult, float maxHeading) { this->CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(entity, changeRateMult, maxHeading); return this; }
+    CTaskComplexTurnToFaceEntityOrCoord* Constructor(CVector const& coords, float changeRateMult, float maxHeading) { this->CTaskComplexTurnToFaceEntityOrCoord::CTaskComplexTurnToFaceEntityOrCoord(coords, changeRateMult, maxHeading); return this; }
+    CTaskComplexTurnToFaceEntityOrCoord* Destructor() { this->CTaskComplexTurnToFaceEntityOrCoord::~CTaskComplexTurnToFaceEntityOrCoord(); return this; }
 };
 VALIDATE_SIZE(CTaskComplexTurnToFaceEntityOrCoord, 0x28);
