@@ -30,7 +30,7 @@ struct BreakGroup_t {
     CVector                 m_RotationAxis;
     int32                   m_FramesToLive;
 
-    auto GetRenderInfos() { return std::span{ m_RenderInfo, (size_t)m_NumTriangles }; }
+    auto GetRenderInfos() const { return std::span{ m_RenderInfo, (size_t)m_NumTriangles }; }
 };
 VALIDATE_SIZE(BreakGroup_t, 0x74);
 
@@ -55,7 +55,7 @@ public:
     bool Init(CObject* object, const CVector* velocity, float fVelocityRand, int32 bJustFaces);
     void Exit();
 
-    static void CalcGroupCenter(BreakGroup_t* group);
+    void CalcGroupCenter(BreakGroup_t* group);
     void SetGroupData(const RwMatrix* matrix, const CVector* vecVelocity, float fVelocityRand);
     void SetBreakInfo(BreakInfo_t* info, int32 bJustFaces);
 
