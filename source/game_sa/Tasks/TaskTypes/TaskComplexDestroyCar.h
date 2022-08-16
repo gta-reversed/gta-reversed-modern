@@ -20,16 +20,20 @@ public:
     CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5);
     ~CTaskComplexDestroyCar() override;
 
-    eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexDestroyCar(m_VehicleToDestroy, dword14, dword18, dword1C); }
+    eTaskType GetTaskType() override { return Type; } // 0x621C70
+    CTask* Clone() override { return new CTaskComplexDestroyCar(m_VehicleToDestroy, dword14, dword18, dword1C); } // 0x623530
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    CTask* CreateSubTask(eTaskType taskType, CPed* ped);
+    CTask* CreateSubTask(eTaskType taskType, CPed* ped = nullptr);
 
     static void InjectHooks();
     CTaskComplexDestroyCar* Constructor(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) { this->CTaskComplexDestroyCar::CTaskComplexDestroyCar(vehicleToDestroy, a3, a4, a5); return this; }
     CTaskComplexDestroyCar* Destructor() { this->CTaskComplexDestroyCar::~CTaskComplexDestroyCar(); return this; }
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
+    CTask* ControlSubTask_Reversed(CPed* ped);
+    CTask* CreateFirstSubTask_Reversed(CPed* ped);
+    CTask* CreateNextSubTask_Reversed(CPed* ped);
 };
 VALIDATE_SIZE(CTaskComplexDestroyCar, 0x20);
