@@ -5,6 +5,8 @@
 #include "Vector.h"
 #include <rwplcore.h>
 
+struct BreakInfo_t;
+
 constexpr auto NUM_BREAK_GROUP_RENDER_INFO = 3;
 
 struct BreakGroupRenderInfo_t {

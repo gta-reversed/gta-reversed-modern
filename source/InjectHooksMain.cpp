@@ -278,6 +278,8 @@
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
 
+#include "Plugins\BreakablePlugin\BreakablePlugin.h"
+
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
