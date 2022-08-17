@@ -118,6 +118,7 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskSimpleFightingControl.h"
 #include "EntitySeekPosCalculator.h"
 #include "EntitySeekPosCalculatorStandard.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -725,7 +726,7 @@ void InjectHooksMain() {
         // CTaskSimpleDuckWhileShotsWhizzing::InjectHooks();
         // CTaskSimpleEvasiveDive::InjectHooks();
         // CTaskSimpleEvasiveStep::InjectHooks();
-        // CTaskSimpleFightingControl::InjectHooks();
+        CTaskSimpleFightingControl::InjectHooks();
         // CTaskSimpleFinishBrain::InjectHooks();
         // CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
