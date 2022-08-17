@@ -53,6 +53,8 @@ struct BreakablePlugin {
     };
 
     static void InjectHooks();
+
+    auto GetTextures() { return std::span { m_pBreakableInfo->m_pTextures, m_pBreakableInfo->m_usNumMaterials }; }
 };
 VALIDATE_SIZE(BreakablePlugin, 0x4);
 

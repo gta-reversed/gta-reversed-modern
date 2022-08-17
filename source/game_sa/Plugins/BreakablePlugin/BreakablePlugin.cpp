@@ -14,22 +14,25 @@ void BreakablePlugin::InjectHooks() {
     RH_ScopedGlobalInstall(BreakableStreamGetSize, 0x59D0F0);
 }
 
-//0x59D100
+// 0x59D100
 bool BreakablePluginAttach() {
     g_BreakablePlugin = RpGeometryRegisterPlugin(sizeof(BreakablePlugin), rwID_BREAKABLEPLUGIN, BreakableConstructor, BreakableDestructor, nullptr);
-    if (g_BreakablePlugin == -1)
+    if (g_BreakablePlugin == -1) {
+        DEV_LOG("Failed to register Breakable Plugin");
         return false;
+    }
 
     auto registerResult = RpGeometryRegisterPluginStream(rwID_BREAKABLEPLUGIN, BreakableStreamRead, BreakableStreamWrite, BreakableStreamGetSize);
     if (registerResult < 0) {
         g_BreakablePlugin = -1;
+        DEV_LOG("Failed to register Breakable Plugin Stream");
         return false;
     }
 
     return true;
 }
 
-//0x59CD70
+// 0x59CD70
 void* BreakableConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     if (g_BreakablePlugin <= 0)
         return object;
@@ -39,26 +42,25 @@ void* BreakableConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInO
     return object;
 }
 
-//0x59CD90
+// 0x59CD90
 void* BreakableDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     if (g_BreakablePlugin <= 0)
         return object;
 
     auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
-    if (plugin->m_pBreakableInfo) {
-        for (auto i = 0; i < plugin->m_pBreakableInfo->m_usNumMaterials; ++i) {
-            if (plugin->m_pBreakableInfo->m_pTextures[i]) {
-                RwTextureDestroy(plugin->m_pBreakableInfo->m_pTextures[i]);
-            }
+    if (!plugin->m_pBreakableInfo)
+        return object;
+
+    for (auto& texture : plugin->GetTextures()) {
+        if (texture) {
+            RwTextureDestroy(texture);
         }
-
-        operator delete(plugin->m_pBreakableInfo);
     }
-
+    delete plugin->m_pBreakableInfo;
     return object;
 }
 
-//0x59CEC0
+// 0x59CEC0
 RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
     RwStreamRead(stream, &plugin->m_SectionHeader, 4u);
@@ -73,48 +75,34 @@ RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, 
 
     plugin->m_pBreakableInfo = &pluginStruct->m_Info;
     pluginStruct->m_Info = infoBuffer;
+    auto& info = pluginStruct->m_Info;
 
-    pluginStruct->m_Info.m_pVertexPos = pluginStruct->GetVertexPosPtr();
-    RwStreamRead(stream, pluginStruct->GetVertexPosPtr(), sizeof(RwV3d) * pluginStruct->m_Info.m_usNumVertices);
+    const auto Read = [&](void* to, void* what, size_t size) {
+        to = what;
+        RwStreamRead(stream, to, size);
+    };
+    Read(info.m_pVertexPos,                pluginStruct->GetVertexPosPtr(),       sizeof(RwV3d) * info.m_usNumVertices);
+    Read(info.m_pTexCoors,                 pluginStruct->GetTexCoordsPtr(),       sizeof(RwTexCoords) * info.m_usNumVertices);
+    Read(info.m_pVertexColors,             pluginStruct->GetVertColorsPtr(),      sizeof(RwRGBA) * info.m_usNumVertices);
+    Read(info.m_pTriangles,                pluginStruct->GetTrianglesPtr(),       sizeof(BreakInfoTriangle) * info.m_usNumTriangles);
+    Read(info.m_pTrianglesMaterialIndices, pluginStruct->GetMaterialIndicesPtr(), sizeof(uint16) * info.m_usNumTriangles);
+    Read(info.m_pTextureNames,             pluginStruct->GetTextureNamesPtr(),    sizeof(char[32]) * info.m_usNumMaterials);
+    Read(info.m_pMaskNames,                pluginStruct->GetMaskNamesPtr(),       sizeof(char[32]) * info.m_usNumMaterials);
+    Read(info.m_pMaterialProperties,       pluginStruct->GetSurfacePropsPtr(),    sizeof(BreakInfoColor) * info.m_usNumMaterials);
 
-    pluginStruct->m_Info.m_pTexCoors = pluginStruct->GetTexCoordsPtr();
-    RwStreamRead(stream, pluginStruct->GetTexCoordsPtr(), sizeof(RwTexCoords) * pluginStruct->m_Info.m_usNumVertices);
-
-    pluginStruct->m_Info.m_pVertexColors = pluginStruct->GetVertColorsPtr();
-    RwStreamRead(stream, pluginStruct->GetVertColorsPtr(), sizeof(RwRGBA) * pluginStruct->m_Info.m_usNumVertices);
-
-    pluginStruct->m_Info.m_pTriangles = pluginStruct->GetTrianglesPtr();
-    RwStreamRead(stream, pluginStruct->GetTrianglesPtr(), sizeof(BreakInfoTriangle) * pluginStruct->m_Info.m_usNumTriangles);
-
-    pluginStruct->m_Info.m_pTrianglesMaterialIndices = pluginStruct->GetMaterialIndicesPtr();
-    RwStreamRead(stream, pluginStruct->GetMaterialIndicesPtr(), sizeof(uint16) * pluginStruct->m_Info.m_usNumTriangles);
-
-    pluginStruct->m_Info.m_pTextureNames = pluginStruct->GetTextureNamesPtr();
-    RwStreamRead(stream, pluginStruct->GetTextureNamesPtr(), sizeof(char[32]) * pluginStruct->m_Info.m_usNumMaterials);
-
-    pluginStruct->m_Info.m_pMaskNames = pluginStruct->GetMaskNamesPtr();
-    RwStreamRead(stream, pluginStruct->GetMaskNamesPtr(), sizeof(char[32]) * pluginStruct->m_Info.m_usNumMaterials);
-
-    pluginStruct->m_Info.m_pMaterialProperties = pluginStruct->GetSurfacePropsPtr();
-    RwStreamRead(stream, pluginStruct->GetSurfacePropsPtr(), sizeof(BreakInfoColor) * pluginStruct->m_Info.m_usNumMaterials);
-
-    pluginStruct->m_Info.m_pTextures = pluginStruct->GetTexturesPtr();
-    for (auto i = 0; i < pluginStruct->m_Info.m_usNumMaterials; ++i) {
-        auto charOffset = i * 32;
-        RwTexture* texture = nullptr;
-
-        if (pluginStruct->m_Info.m_pMaskNames[charOffset])
-            texture = RwTextureRead(&pluginStruct->m_Info.m_pTextureNames[charOffset], &pluginStruct->m_Info.m_pMaskNames[charOffset]);
-        else
-            texture = RwTextureRead(&pluginStruct->m_Info.m_pTextureNames[charOffset], nullptr);
-
-        pluginStruct->m_Info.m_pTextures[i] = texture;
+    info.m_pTextures = pluginStruct->GetTexturesPtr();
+    for (auto i = 0; i < info.m_usNumMaterials; ++i) {
+        auto charOffset = i * 32; // todo: sizeof m_pTextureNames[0]?
+        info.m_pTextures[i] = RwTextureRead(
+            &info.m_pTextureNames[charOffset],
+            info.m_pMaskNames[charOffset] ? &info.m_pMaskNames[charOffset] : nullptr
+        );
     }
 
     return stream;
 }
 
-//0x59CDE0
+// 0x59CDE0
 RwStream* BreakableStreamWrite(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
     RwStreamWrite(stream, plugin, 4u);
