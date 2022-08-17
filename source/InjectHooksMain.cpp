@@ -265,6 +265,7 @@
 #include "TaskComplexDieInCar.h"
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
+#include "TaskSimpleThrowControl.h"
 #include "TaskSimpleDieInCar.h"
 
 #include "EventSeenPanickedPed.h"
@@ -758,7 +759,7 @@ void InjectHooksMain() {
         // CTaskSimpleSitDown::InjectHooks();
         // CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
-        // CTaskSimpleThrowControl::InjectHooks();
+        CTaskSimpleThrowControl::InjectHooks();
         // CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
         // CTaskSimpleTurn180::InjectHooks();
