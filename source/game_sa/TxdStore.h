@@ -60,6 +60,16 @@ public:
 
     static RwTexture* TxdStoreFindCB(const char* name);
     static RwTexture* TxdStoreLoadCB(const char* name, const char* mask);
+
+    static auto FindOrAddTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot == -1) slot = CTxdStore::AddTxdSlot(name);
+        return slot;
+    }
+    static void SafeRemoveTxdSlot(const char* name) {
+        auto slot = CTxdStore::FindTxdSlot(name);
+        if (slot != -1) CTxdStore::RemoveTxdSlot(slot);
+    }
 };
 
 RwTexture* RemoveIfRefCountIsGreaterThanOne(RwTexture* texture, void* data);
