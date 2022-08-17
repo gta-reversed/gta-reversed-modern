@@ -27,10 +27,7 @@ BreakObject_c::BreakObject_c() {
 
 // 0x59E750
 bool BreakObject_c::Init(CObject* object, const CVector* velocity, float fVelocityRand, int32 bJustFaces) {
-    if (!object->m_pRwObject)
-        return false;
-
-    if (RwObjectGetType(object->m_pRwObject) != rpATOMIC)
+    if (!object->m_pRwObject || RwObjectGetType(object->m_pRwObject) != rpATOMIC)
         return false;
 
     auto* info = BREAKABLEPLG(RpAtomicGetGeometry(object->m_pRwAtomic), m_pBreakableInfo);
@@ -48,14 +45,12 @@ bool BreakObject_c::Init(CObject* object, const CVector* velocity, float fVeloci
     m_bDrawLast = object->m_bDrawLast;
 
     CVector vecOrigin;
+    auto* colModel = object->GetModelInfo()->GetColModel();
     if (info->m_uiPosRule != eBreakablePluginPositionRule::OBJECT_ORIGIN) {
-        auto* colModel = object->GetModelInfo()->GetColModel();
         auto usedPoint = colModel->GetBoundingBox().GetCenter();
         usedPoint.z += 0.25f;
-
         vecOrigin = *object->m_matrix * usedPoint;
     } else {
-        auto* colModel = object->GetModelInfo()->GetColModel();
         vecOrigin = *RwMatrixGetPos(ltm);
         vecOrigin.z += colModel->GetBoundingBox().m_vecMin.z + 0.25f;
     }
@@ -86,7 +81,7 @@ void BreakObject_c::Exit() {
             RwTextureDestroy(group.m_Texture);
             group.m_Texture = nullptr;
         }
-        delete group.m_RenderInfo;
+        delete[] group.m_RenderInfo;
     }
     delete[] m_BreakGroups;
     m_bActive = false;
@@ -95,20 +90,20 @@ void BreakObject_c::Exit() {
 // 0x59D190
 void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
     CBoundingBox bbox(
-        { +9999999.0f, +9999999.0f, +9999999.0f },
+        { +9999999.0f, +9999999.0f, +9999999.0f }, // todo: replace one million - 1 with a more comprehensible
         { -9999999.0f, -9999999.0f, -9999999.0f }
     );
-    auto& vecMin = bbox.m_vecMin;
-    auto& vecMax = bbox.m_vecMax;
+    auto& vMin = bbox.m_vecMin;
+    auto& vMax = bbox.m_vecMax;
 
     for (auto& info : group->GetRenderInfos()) {
         for (auto& position : info.positions) {
-            vecMin.x = std::min(vecMin.x, position.x);
-            vecMax.x = std::max(vecMax.x, position.x);
-            vecMin.y = std::min(vecMin.y, position.y);
-            vecMax.y = std::max(vecMax.y, position.y);
-            vecMin.z = std::min(vecMin.z, position.z);
-            vecMax.z = std::max(vecMax.z, position.z);
+            vMin.x = std::min(vMin.x, position.x);
+            vMax.x = std::max(vMax.x, position.x);
+            vMin.y = std::min(vMin.y, position.y);
+            vMax.y = std::max(vMax.y, position.y);
+            vMin.z = std::min(vMin.z, position.z);
+            vMax.z = std::max(vMax.z, position.z);
         }
     }
 
@@ -119,8 +114,8 @@ void BreakObject_c::CalcGroupCenter(BreakGroup_t* group) {
         }
     }
 
-    vecMin -= vecCenter;
-    vecMax -= vecCenter;
+    vMin -= vecCenter;
+    vMax -= vecCenter;
 
     RwV3d vecTransformedCenter;
     RwV3dTransformVector(&vecTransformedCenter, &vecCenter, &group->m_Matrix);
@@ -168,7 +163,7 @@ void BreakObject_c::SetGroupData(const RwMatrix* matrix, const CVector* vecVeloc
         group.m_RotationAxis.x = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
         group.m_RotationAxis.y = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
         group.m_RotationAxis.z = CGeneral::GetRandomNumberInRange(-1.0f, 1.0f);
-        RwV3dNormalize(&group.m_RotationAxis, &group.m_RotationAxis);
+        group.m_RotationAxis.Normalise();
 
         group.m_bStoppedMoving = false;
     }
@@ -214,21 +209,21 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
         auto& group = m_BreakGroups[curIndex];
         // BUG: (?) Compiler shows that invalid access can happen in next line, possibly something wrong with reversed code
         auto& curRenderInfo = group.m_RenderInfo[group.m_NumTriangles];
-        for (auto ind = 0; ind < 3; ++ind) {
+        for (auto ind = 0; ind < NUM_BREAK_GROUP_RENDER_INFO; ++ind) {
             curRenderInfo.positions[ind] = info->m_pVertexPos[triangle.vertIndex[ind]];
         }
 
         auto textureInd = bJustFaces ? info->m_pTrianglesMaterialIndices[i] : curIndex;
         group.m_Texture = info->m_pTextures[textureInd];
 
-        const auto& matColor = info->m_pMaterialProperties[textureInd];
         if (!CPostEffects::IsVisionFXActive()) {
             ambientRed   = AmbientLightColourForFrame.red   * 255.0f;
             ambientGreen = AmbientLightColourForFrame.green * 255.0f;
             ambientBlue  = AmbientLightColourForFrame.blue  * 255.0f;
         }
 
-        for (auto ind = 0; ind < 3; ++ind) {
+        const auto& matColor = info->m_pMaterialProperties[textureInd];
+        for (auto ind = 0; ind < NUM_BREAK_GROUP_RENDER_INFO; ++ind) {
             auto& vertColor = info->m_pVertexColors[triangle.vertIndex[ind]];
             auto red   = (uint8)std::min(255.0f, (float)vertColor.red   * matColor.red   + ambientRed);
             auto green = (uint8)std::min(255.0f, (float)vertColor.green * matColor.green + ambientGreen);
@@ -249,17 +244,16 @@ void BreakObject_c::SetBreakInfo(BreakInfo_t* info, int32 bJustFaces) {
 }
 
 // 0x59DE40
-void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) const {
+void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, const CVector* vecNormal, float groundZ) const {
     static float& dotMultiplier = *(float*)0x8D0A18;   // TODO | STATICREF // = 0.85f;
     static float& timestepScaling = *(float*)0x8D0A14; // TODO | STATICREF // = 0.05f;
     static float& velocityScaling = *(float*)0x8D0A10; // TODO | STATICREF // = 0.8f;
 
     auto dotProd = DotProduct(group->m_Velocity, *vecNormal) * dotMultiplier;
-    CVector newVelocity, velocityChange;
-    velocityChange = *vecNormal;
+    CVector velocityChange = *vecNormal;
     velocityChange *= dotProd * 2;
 
-    newVelocity = group->m_Velocity;
+    CVector newVelocity = group->m_Velocity;
     newVelocity -= velocityChange;
 
     auto fTimeScale = timeStep * timestepScaling;
@@ -287,13 +281,14 @@ void BreakObject_c::DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV
     } else {
         group->m_bStoppedMoving = true;
         if (m_JustFaces) {
-            group->m_FramesToLive = 32 + CGeneral::GetRandomNumberInRange(0, 32);
+            group->m_FramesToLive = 32 + CGeneral::GetRandomNumberInRange(0, 32); // todo: magic numbers
             return;
         }
     }
 
+    const auto NUM_PARTICLES = 4;
     CVector groupPos = *RwMatrixGetPos(&group->m_Matrix);
-    for (auto i = 0; i < 4; ++i) {
+    for (auto i = 0; i < NUM_PARTICLES; ++i) {
         CVector particlePos = groupPos;
         particlePos.x += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
         particlePos.y += CGeneral::GetRandomNumberInRange(-0.5f, 0.5f);
@@ -345,15 +340,15 @@ void BreakObject_c::Update(float timeStep) {
                     switch (group.m_Type) {
                     case BreakGroupType::UP: return RwMatrixGetUp(&group.m_Matrix);
                     case BreakGroupType::AT: return RwMatrixGetAt(&group.m_Matrix);
-                    default: return RwMatrixGetRight(&group.m_Matrix); // type 0
+                    case BreakGroupType::RIGHT:
+                    default:                 return RwMatrixGetRight(&group.m_Matrix);
                     }
                 }();
 
-                auto fAngleRad = RwACos(RwV3dDotProduct(&m_VecNormal, vecFacing));
+                auto fAngleRad = std::acos(DotProduct(m_VecNormal, *vecFacing));
                 if (std::fabs(fAngleRad) > 0.01f) {
-                    RwV3d axis;
-                    RwV3dCrossProduct(&axis, vecFacing, &m_VecNormal);
-                    RwV3dNormalize(&axis, &axis);
+                    CVector axis = CrossProduct(*vecFacing, m_VecNormal);
+                    axis.Normalise();
 
                     auto fAngleDeg = RadiansToDegrees(fAngleRad) * timeStep / 20.0f;
                     CVector savedPos = *pos;
@@ -361,8 +356,8 @@ void BreakObject_c::Update(float timeStep) {
                     *pos = savedPos;
                 }
             } else {
-                float fAngle = timeStep * group.m_RotationSpeed;
-                RwMatrixRotate(&group.m_Matrix, &group.m_RotationAxis, fAngle, RwOpCombineType::rwCOMBINEPRECONCAT);
+                float angle = timeStep * group.m_RotationSpeed;
+                RwMatrixRotate(&group.m_Matrix, &group.m_RotationAxis, angle, RwOpCombineType::rwCOMBINEPRECONCAT);
             }
 
             DoCollision(&group, timeStep);
@@ -405,8 +400,8 @@ void BreakObject_c::Render(bool isDrawLast) const {
         }
 
         for (auto& renderInfo : group.GetRenderInfos()) {
-            RwV3d aVecPos[3];
-            RwV3dTransformPoints(aVecPos, renderInfo.positions, 3, &group.m_Matrix);
+            RwV3d aVecPos[NUM_BREAK_GROUP_RENDER_INFO];
+            RwV3dTransformPoints(aVecPos, renderInfo.positions, NUM_BREAK_GROUP_RENDER_INFO, &group.m_Matrix);
 
             int32 alpha = group.m_FramesToLive * (m_JustFaces ? 8 : 2);
             alpha = std::min(alpha, 255);

@@ -5,10 +5,12 @@
 #include "Vector.h"
 #include <rwplcore.h>
 
+constexpr auto NUM_BREAK_GROUP_RENDER_INFO = 3;
+
 struct BreakGroupRenderInfo_t {
-    CVector     positions[3];
-    RwTexCoords texCoords[3];
-    CRGBA       colors[3];
+    CVector     positions[NUM_BREAK_GROUP_RENDER_INFO];
+    RwTexCoords texCoords[NUM_BREAK_GROUP_RENDER_INFO];
+    CRGBA       colors[NUM_BREAK_GROUP_RENDER_INFO];
 };
 
 enum class BreakGroupType : uint8 {
@@ -59,7 +61,7 @@ public:
     void SetGroupData(const RwMatrix* matrix, const CVector* vecVelocity, float fVelocityRand);
     void SetBreakInfo(BreakInfo_t* info, int32 bJustFaces);
 
-    void DoCollisionResponse(BreakGroup_t* group, float timeStep, RwV3d* vecNormal, float groundZ) const;
+    void DoCollisionResponse(BreakGroup_t* group, float timeStep, const CVector* vecNormal, float groundZ) const;
     void DoCollision(BreakGroup_t* group, float timeStep);
     void Update(float timeStep);
     void Render(bool isDrawLast) const;
