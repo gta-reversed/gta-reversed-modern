@@ -383,17 +383,17 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     }
     case MENU_ACTION_FX_QUALITY:
         switch (g_fx.GetFxQuality()) {
-        case FXQUALITY_LOW:
-            g_fx.SetFxQuality(FXQUALITY_MEDIUM);
+        case FX_QUALITY_LOW:
+            g_fx.SetFxQuality(FX_QUALITY_MEDIUM);
             break;
-        case FXQUALITY_MEDIUM:
-            g_fx.SetFxQuality(FXQUALITY_HIGH);
+        case FX_QUALITY_MEDIUM:
+            g_fx.SetFxQuality(FX_QUALITY_HIGH);
             break;
-        case FXQUALITY_HIGH:
-            g_fx.SetFxQuality(FXQUALITY_VERY_HIGH);
+        case FX_QUALITY_HIGH:
+            g_fx.SetFxQuality(FX_QUALITY_VERY_HIGH);
             break;
-        case FXQUALITY_VERY_HIGH:
-            g_fx.SetFxQuality(FXQUALITY_LOW);
+        case FX_QUALITY_VERY_HIGH:
+            g_fx.SetFxQuality(FX_QUALITY_LOW);
             break;
         }
         SaveSettings();

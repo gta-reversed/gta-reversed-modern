@@ -446,13 +446,13 @@ public:
     virtual bool IsOpenTopCar(){ return false; }
     // remove ref to this entity
     virtual void RemoveRefsToVehicle(CEntity* entity) { /* Do nothing */ }
-    virtual void BlowUpCar(CEntity* damager, uint8 bHideExplosion) { /* Do nothing */ }
+    virtual void BlowUpCar(CEntity* damager, bool bHideExplosion) { /* Do nothing */ }
     virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { /* Do nothing */ }
     virtual bool SetUpWheelColModel(CColModel* wheelCol) { return false; }
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle
     virtual bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) { return false; }
-    virtual bool IsRoomForPedToLeaveCar(uint32 arg0, CVector* arg1) { return false; }
-    virtual void ProcessDrivingAnims(CPed* driver, bool blend);
+    virtual bool IsRoomForPedToLeaveCar(uint32 doorId, CVector* arg1) { return false; }
+    virtual void ProcessDrivingAnims(CPed* driver, bool bBlend);
     // get special ride anim data for bile or quad
     virtual CRideAnimData* GetRideAnimData() { return nullptr; }
     virtual void SetupSuspensionLines() { /* Do nothing */ }
@@ -681,6 +681,7 @@ public: // NOTSA functions
     int32 GetRopeIndex();
     [[nodiscard]] CVehicleAnimGroup& GetAnimGroup() const;
     [[nodiscard]] AssocGroupId GetAnimGroupId() const;
+    auto GetPassengers() { return std::span{ m_apPassengers, m_nMaxPassengers }; }
     [[nodiscard]] float GetDefaultAirResistance() const {
         if (m_pHandlingData->m_fDragMult <= 0.01f) {
             return m_pHandlingData->m_fDragMult;

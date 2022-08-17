@@ -17,6 +17,7 @@
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "platform.h"
+#include "Hud.h"
 
 CMenuManager& FrontEndMenuManager = *(CMenuManager*)0xBA6748;
 
@@ -168,9 +169,7 @@ void CMenuManager::LoadAllTextures() {
         CStreaming::ImGonnaUseStreamingMemory();
         CGame::TidyUpMemory(false, true);
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -204,9 +203,7 @@ void CMenuManager::SwapTexturesRound(bool round) {
         CStreaming::MakeSpaceFor(size);
         CStreaming::ImGonnaUseStreamingMemory();
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -479,7 +476,7 @@ void CMenuManager::SetDefaultPreferences(eMenuScreen screen) {
         break;
     case SCREEN_DISPLAY_SETTINGS:
     case SCREEN_DISPLAY_ADVANCED:
-        g_fx.SetFxQuality(FXQUALITY_HIGH);
+        g_fx.SetFxQuality(FX_QUALITY_HIGH);
         SetBrightness(256.0f, true);
         m_PrefsBrightness                = 256;
         m_fDrawDistance                  = 1.2f;
@@ -619,7 +616,7 @@ void CMenuManager::LoadSettings() {
 
     uint32 version = 0u;
     struct { uint8 m_unk; uint8 m_separator; uint8 m_underscore; uint8 _align; } constants;
-    FxQuality_e fxQuality = FXQUALITY_HIGH;
+    FxQuality_e fxQuality = FX_QUALITY_HIGH;
     auto previousLang = m_nPrefsLanguage;
 
     ReadFromFile(version);

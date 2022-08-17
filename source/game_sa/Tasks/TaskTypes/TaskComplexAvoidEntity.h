@@ -28,11 +28,13 @@ public:
     };
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_AVOID_ENTITY;
+
     CTaskComplexAvoidEntity(int32, CEntity* entity, const CVector& pos);
     ~CTaskComplexAvoidEntity() override;
 
+    eTaskType GetTaskType() override { return Type; } // 0x66AAD0
     CTask* Clone() override { return new CTaskComplexAvoidEntity(field_10, m_Entity, f20); } // 0x66D0C0
-    eTaskType GetTaskType() override { return TASK_COMPLEX_AVOID_ENTITY; } // 0x66AAD0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

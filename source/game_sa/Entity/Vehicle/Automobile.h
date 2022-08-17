@@ -157,7 +157,7 @@ public:
     bool IsDoorMissing(uint32 door) override;
     bool IsOpenTopCar() override;
     void RemoveRefsToVehicle(CEntity* entity) override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
@@ -412,7 +412,7 @@ private:
     bool IsDoorMissing_Reversed(uint32 door) { return CAutomobile::IsDoorMissing(door); }
     bool IsOpenTopCar_Reversed() { return CAutomobile::IsOpenTopCar(); }
     void RemoveRefsToVehicle_Reversed(CEntity* entity) { CAutomobile::RemoveRefsToVehicle(entity); }
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CAutomobile::BlowUpCar(damager, bHideExplosion); }
     void BlowUpCarCutSceneNoExtras_Reversed(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { CAutomobile::BlowUpCarCutSceneNoExtras(bNoCamShake, bNoSpawnFlyingComps, bDetachWheels, bExplosionSound); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CAutomobile::SetUpWheelColModel(wheelCol); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CAutomobile::BurstTyre(tyreComponentId, bPhysicalEffect); }

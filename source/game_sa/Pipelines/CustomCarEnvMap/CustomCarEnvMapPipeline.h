@@ -64,9 +64,9 @@ struct CustomSpecMapPipeMaterialData {
 };
 VALIDATE_SIZE(CustomSpecMapPipeMaterialData, 0x8);
 
-typedef CPool<CustomEnvMapPipeMaterialData>  CustomEnvMapPipeMaterialDataPool;
-typedef CPool<CustomEnvMapPipeAtomicData>    CustomEnvMapPipeAtomicDataPool;
-typedef CPool<CustomSpecMapPipeMaterialData> CustomSpecMapPipeMaterialDataPool;
+typedef CPool<CustomEnvMapPipeMaterialData, CustomEnvMapPipeMaterialData, true>  CustomEnvMapPipeMaterialDataPool;
+typedef CPool<CustomEnvMapPipeAtomicData, CustomEnvMapPipeAtomicData, true>    CustomEnvMapPipeAtomicDataPool;
+typedef CPool<CustomSpecMapPipeMaterialData, CustomSpecMapPipeMaterialData, true> CustomSpecMapPipeMaterialDataPool;
 
 class CCustomCarEnvMapPipeline {
 public:

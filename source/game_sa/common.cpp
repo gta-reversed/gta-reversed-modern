@@ -11,11 +11,10 @@
 #include "GxtChar.h"
 #include "CDebugMenu.h"
 #include "CarCtrl.h"
-#include "ColourSet.h"
-#include "GxtChar.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"
 #include "SpecialFX.h"
+#include "Hud.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
@@ -203,15 +202,10 @@ float FindPlayerHeading(int32 playerId) {
     return FindPlayerPed(playerId)->GetHeading();
 }
 
-// unused
 // 0x56E520
 float FindPlayerHeight() {
-    CPlayerPed* ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-    CMatrixLink* matrix = ped->m_matrix;
-    if (matrix)
-        return matrix->GetPosition().z;
-    else
-        return ped->m_placement.m_vPosn.z;
+    CPlayerPed* ped = FindPlayerPed();
+    return ped->GetPosition().z;
 }
 
 // 0x56E210
@@ -1164,7 +1158,7 @@ bool RpAnimBlendPluginAttach() {
 
 // 0x70F9B0
 bool GraphicsLowQuality() {
-    if (g_fx.GetFxQuality() < FxQuality_e::FXQUALITY_MEDIUM)
+    if (g_fx.GetFxQuality() < FX_QUALITY_MEDIUM)
         return false;
     if (RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) < 32)
         return false;

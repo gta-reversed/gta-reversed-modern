@@ -9,6 +9,7 @@
 
 #include "Stats.h"
 #include "MenuSystem.h"
+#include "Hud.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;
@@ -412,7 +413,7 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 }
 
 // 0x55B980
-void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value) {
+void CStats::DisplayScriptStatUpdateMessage(eStatUpdateState state, eStats stat, float value) {
     if (CPad::GetPad(0)->JustOutOfFrontEnd
         || !bShowUpdateStats
         || TheCamera.m_bWideScreenOn
@@ -584,7 +585,7 @@ void CStats::UpdateStatsWhenSprinting() {
     } else {
         m_SprintStaminaCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
     }
 }
 
@@ -596,7 +597,7 @@ void CStats::UpdateStatsWhenRunning() {
     } else {
         m_RunningCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
     }
 }
 
@@ -634,7 +635,7 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
     } else {
         m_BikeCounter = 0;
         IncrementStat(STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
-        DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
     }
 }
 

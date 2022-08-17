@@ -288,10 +288,12 @@ bool CPedGeometryAnalyser::LiesInsideBoundingBox(const CPed& ped, const CVector&
     return plugin::CallAndReturn<bool, 0x5F3880, const CPed&, const CVector&, CEntity&>(ped, posn, entity);
 }
 
+// 0x41B7C0
 void* CPointRoute::operator new(uint32 size) {
     return CPools::ms_pPointRoutePool->New();
 }
 
+// 0x41B7D0
 void CPointRoute::operator delete(void* ptr, size_t sz) {
     CPools::ms_pPointRoutePool->Delete(reinterpret_cast<CPointRoute*>(ptr));
 }

@@ -52,7 +52,7 @@ void OnInjectionEnd() {
 }
 
 namespace detail {
-void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault, int stackArguments) {
+void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt) {
 #ifndef NDEBUG // Functions with the same name are asserted in `HookCategory::AddItem()`
     auto [iter, inserted] = s_HookedAddresses.insert(installAddress);
     if (!inserted) {
@@ -62,8 +62,9 @@ void HookInstall(std::string_view category, std::string fnName, uint32 installAd
     }
 #endif
 
-    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize, stackArguments);
-    item->State(!bDisableByDefault);
+    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, opt.jmpCodeSize, opt.stackArguments);
+    item->State(opt.enabled);
+    item->LockState(opt.locked);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 

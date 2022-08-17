@@ -6,6 +6,7 @@
 
 #include "TaskSimpleJetPack.h"
 #include "PostEffects.h"
+#include "Hud.h"
 
 /*
  * Interesting links:
