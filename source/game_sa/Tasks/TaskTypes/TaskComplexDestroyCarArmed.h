@@ -10,31 +10,32 @@ class CEvent;
 
 class CTaskComplexDestroyCarArmed : public CTaskComplex {
 public:
-    bool      m_b0;
-    CVehicle* m_Vehicle;
-    CVector   m_PedPos;
-    CVector   m_VehiclePos;
-    CVector   m_DiffBetweenPedAndVehicle;
-    float     m_fWeaponRange;
-    int32     dword3C;
-    float     m_fWeaponRangeClamped;
-    int32     dword44;
-    float     m_DistanceBetweenPedAndVehicle;
-    float     dword4C;
-    bool      m_bGotoPointAndStandStill;
-    int32     dword54;
-    uint32    ctor58;
-    uint32    ctor5C;
-    uint32    ctor60;
+    bool m_bNeedsToCreatefirstSubTask;
+    CVehicle* m_VehToDestroy;
+    CVector m_PedPos;
+    CVector m_VehiclePos;
+    CVector m_PedToVehDirUnnorm;
+    float m_fWeaponRange;
+    int32 dword3C;
+    float m_fWeaponRangeClamped;
+    int32 dword44;
+    float m_PedVehDist;
+    float dword4C;
+    bool m_bGotoPointAndStandStill;
+    int32     dword54{-1};
+    uint32    ctor58{};
+    uint32    ctor5C{};
+    uint32    ctor60{};
 
 public:
     static constexpr eTaskType Type = TASK_COMPLEX_DESTROY_CAR_ARMED;
 
     CTaskComplexDestroyCarArmed(CVehicle* vehicleToDestroy, uint32 a3 = 0, uint32 a4 = 0, uint32 a5 = 0);
+    CTaskComplexDestroyCarArmed(const CTaskComplexDestroyCarArmed&); // NOTSA
     ~CTaskComplexDestroyCarArmed() override;
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override;
+    CTask* Clone() override { return new CTaskComplexDestroyCarArmed{ *this }; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

@@ -11,20 +11,19 @@ void CTaskComplexDestroyCar::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x621C00);
     RH_ScopedInstall(Destructor, 0x621CB0);
+
     RH_ScopedInstall(CreateSubTask, 0x6287A0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x621C80);
-    RH_ScopedVirtualInstall2(CreateNextSubTask_Reversed, 0x62D9E0);
-    RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x62DA90);
-    // RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0);
+
+    RH_ScopedVirtualInstall2(Clone, 0x623530);
+    RH_ScopedVirtualInstall2(GetTaskType, 0x621C70);
+    RH_ScopedVirtualInstall2(MakeAbortable, 0x621C80);
+    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x62D9E0);
+    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x62DA90);
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x6288C0, { .enabled = false, .locked = true });
 }
-bool CTaskComplexDestroyCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
-CTask* CTaskComplexDestroyCar::ControlSubTask(CPed* ped) { return ControlSubTask_Reversed(ped); }
-CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) { return CreateFirstSubTask_Reversed(ped); }
-CTask* CTaskComplexDestroyCar::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 
 // 0x621C00
 CTaskComplexDestroyCar::CTaskComplexDestroyCar(CVehicle* vehicleToDestroy, uint32 a3, uint32 a4, uint32 a5) :
-      CTaskComplex(),
       m_VehicleToDestroy{ vehicleToDestroy },
       dword14{ a3 },
       dword18{ a4 },
@@ -40,7 +39,7 @@ CTaskComplexDestroyCar::~CTaskComplexDestroyCar() {
 }
 
 // 0x621C80
-bool CTaskComplexDestroyCar::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
+bool CTaskComplexDestroyCar::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_URGENT:
     case ABORT_PRIORITY_IMMEDIATE:
@@ -51,7 +50,7 @@ bool CTaskComplexDestroyCar::MakeAbortable_Reversed(CPed* ped, eAbortPriority pr
 }
 
 // 0x62DA90
-CTask* CTaskComplexDestroyCar::CreateFirstSubTask_Reversed(CPed* ped) {
+CTask* CTaskComplexDestroyCar::CreateFirstSubTask(CPed* ped) {
     m_arg0 = false;
 
     if (!m_VehicleToDestroy)
@@ -67,7 +66,7 @@ CTask* CTaskComplexDestroyCar::CreateFirstSubTask_Reversed(CPed* ped) {
 }
 
 // 0x62D9E0
-CTask* CTaskComplexDestroyCar::CreateNextSubTask_Reversed(CPed* ped) {
+CTask* CTaskComplexDestroyCar::CreateNextSubTask(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_BE_HIT:
     case TASK_COMPLEX_FALL_AND_GET_UP:
@@ -95,6 +94,6 @@ CTask* CTaskComplexDestroyCar::CreateSubTask(eTaskType taskType, CPed* ped) {
 }
 
 // 0x6288C0
-CTask* CTaskComplexDestroyCar::ControlSubTask_Reversed(CPed* ped) {
+CTask* CTaskComplexDestroyCar::ControlSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x6288C0, CTaskComplexDestroyCar*, CPed*>(this, ped);
 }

@@ -23,59 +23,87 @@ CTaskComplexDestroyCarMelee::CTaskComplexDestroyCarMelee(CVehicle* vehToDestroy)
     CTaskComplex(),
     m_VehiclePos{},
     dword2C{ 0 },
-    m_nTime{ -1 }
+    m_nTimeMs{ -1 }
 {
-    m_Vehicle = vehToDestroy;
-    byteC = false;
+    m_VehToDestroy = vehToDestroy;
+    m_bNeedsToCreatefirstSubTask = false;
     byteD = false;
-    m_DistSq0 = 0.0f;
-    m_DistSq1 = 0.0f;
-    CEntity::SafeRegisterRef(m_Vehicle);
+    m_MaxTargetFightDist = 0.0f;
+    m_MaxFightCtrlRadius = 0.0f;
+    CEntity::SafeRegisterRef(m_VehToDestroy);
 }
 
 // 0x621DA0
 CTaskComplexDestroyCarMelee::~CTaskComplexDestroyCarMelee() {
-    CEntity::SafeCleanUpRef(m_Vehicle);
+    CEntity::SafeCleanUpRef(m_VehToDestroy);
 }
 
 // 0x621E00
 bool CTaskComplexDestroyCarMelee::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
-    return plugin::CallMethodAndReturn<bool, 0x621E00, CTaskComplexDestroyCarMelee*, CPed*, eAbortPriority, CEvent const*>(this, ped, priority, event);
+    switch (priority) {
+    case ABORT_PRIORITY_IMMEDIATE:
+        return m_pSubTask->MakeAbortable(ped, priority, event);
+    case ABORT_PRIORITY_URGENT: {
+
+        break;
+    }
+    case ABORT_PRIORITY_LEISURE: {
+        m_bNeedsToCreatefirstSubTask = true;
+        return false;
+    }
+    default:
+        NOTSA_UNREACHABLE("Invalid priority");
+    }
 }
 
 // 0x62DC20
 CTask* CTaskComplexDestroyCarMelee::CreateNextSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x62DC20, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
 
-    if (byteC)
+    if (m_bNeedsToCreatefirstSubTask) {
         return nullptr;
+    }
 
-    auto taskType = m_pSubTask->GetTaskType();
-
-    // add missing code from 0x62DC3A to 0x62DC53
-
-    if (taskType != TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL)
-        return nullptr;
-
-    CalculateSearchPositionAndRanges(ped);
-    if (DistanceBetweenPointsSquared(ped->GetPosition(), m_Vehicle->GetPosition()) < sq(m_DistSq0)) {
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_PAUSE:
+    case TASK_SIMPLE_FIGHT_CTRL: {
+        if (ped->bStayInSamePlace) { // Inverted
+            const auto finished = m_nTimeMs != -1 && CTimer::GetTimeInMS() - m_nTimeMs > 3000;
+            return CreateSubTask(finished ? TASK_FINISHED : TASK_SIMPLE_PAUSE, ped);
+        }
+        CalculateSearchPositionAndRanges(ped);
+        return CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
+    }
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL: {
+        CalculateSearchPositionAndRanges(ped);
+        if (IsPointInSphere(ped->GetPosition(), m_VehToDestroy->GetPosition(), m_MaxTargetFightDist)) {
+            return CreateSubTask(TASK_SIMPLE_FIGHT_CTRL, ped);
+        }
+        return CreateSubTask(ped->bStayInSamePlace ? TASK_SIMPLE_PAUSE : TASK_COMPLEX_SEEK_ENTITY, ped);
+    }
+    case TASK_COMPLEX_SEEK_ENTITY: {
         return CreateSubTask(TASK_SIMPLE_FIGHT_CTRL, ped);
     }
-    return CreateSubTask(ped->bStayInSamePlace ? TASK_SIMPLE_PAUSE : TASK_COMPLEX_SEEK_ENTITY, ped);
+    default:
+        return nullptr;
+    }
 }
 
 // 0x62DB20
 CTask* CTaskComplexDestroyCarMelee::CreateFirstSubTask(CPed* ped) {
     byteD = false;
-    CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_nType); // unused
+
+    // CWeaponInfo::GetWeaponInfo(ped->GetActiveWeapon().m_nType); // unused
+
+    CalculateSearchPositionAndRanges(ped);
 
     const auto& pedPos = ped->GetPosition();
-    CalculateSearchPositionAndRanges(ped);
-    if (DistanceBetweenPointsSquared(pedPos, m_Vehicle->GetPosition()) <= sq(m_DistSq1)) {
+
+    if (IsPointInSphere(pedPos, m_VehToDestroy->GetPosition(), m_MaxFightCtrlRadius)) {
         return CreateSubTask(ped->bStayInSamePlace ? TASK_SIMPLE_PAUSE : TASK_COMPLEX_SEEK_ENTITY, ped);
     }
 
-    ped->m_fAimingRotation = CGeneral::GetRadianAngleBetweenPoints(m_VehiclePos.x, m_VehiclePos.y, pedPos.x, pedPos.y);
+    ped->m_fAimingRotation = CGeneral::GetRadianAngleBetweenPoints(m_VehiclePos, pedPos);
     return CreateSubTask(TASK_SIMPLE_FIGHT_CTRL, ped);
 }
 
@@ -83,24 +111,26 @@ CTask* CTaskComplexDestroyCarMelee::CreateFirstSubTask(CPed* ped) {
 CTask* CTaskComplexDestroyCarMelee::ControlSubTask(CPed* ped) {
     return plugin::CallMethodAndReturn<CTask*, 0x62DDB0, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
 
-    if (byteD)
+    if (byteD) {
         return CreateFirstSubTask(ped);
+    }
 
-    if (m_Vehicle->m_fHealth <= 0.0f)
+    if (m_VehToDestroy->m_fHealth <= 0.0f)
         return nullptr;
 
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_SEEK_ENTITY:
-    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL:
+    case TASK_COMPLEX_GO_TO_POINT_AND_STAND_STILL: {
         CalculateSearchPositionAndRanges(ped);
-        if (DistanceBetweenPoints(ped->GetPosition(), m_Vehicle->GetPosition()) > sq(m_DistSq0)) {
+        if (DistanceBetweenPoints(ped->GetPosition(), m_VehToDestroy->GetPosition()) > sq(m_MaxTargetFightDist)) {
             return CreateSubTask(TASK_SIMPLE_FIGHT_CTRL, ped);
         }
         return m_pSubTask;
+    }
     case TASK_SIMPLE_FIGHT_CTRL:
         CalculateSearchPositionAndRanges(ped);
-        if (DistanceBetweenPoints(ped->GetPosition(), m_Vehicle->GetPosition()) > m_DistSq0 + 0.6f) {
-            CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
+        if (DistanceBetweenPoints(ped->GetPosition(), m_VehToDestroy->GetPosition()) > m_MaxTargetFightDist + 0.6f) {
+            return CreateSubTask(TASK_COMPLEX_SEEK_ENTITY, ped);
         }
         // todo:
         return m_pSubTask;
@@ -111,7 +141,7 @@ CTask* CTaskComplexDestroyCarMelee::ControlSubTask(CPed* ped) {
 
 // 0x6289F0
 void CTaskComplexDestroyCarMelee::CalculateSearchPositionAndRanges(CPed* ped) {
-    DistanceBetweenPointsSquared(ped->GetPosition(), m_Vehicle->GetPosition());
+    DistanceBetweenPointsSquared(ped->GetPosition(), m_VehToDestroy->GetPosition());
     return plugin::CallMethodAndReturn<void, 0x6289F0, CTaskComplexDestroyCarMelee*, CPed*>(this, ped);
 }
 

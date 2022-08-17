@@ -12,6 +12,7 @@ enum {
     ANY_CAR_AS_DRIVER = 2
 };
 
+
 class CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;

@@ -7,15 +7,15 @@ class CVehicle;
 
 class CTaskComplexDestroyCarMelee : public CTaskComplex {
 public:
-    bool      byteC;
+    bool      m_bNeedsToCreatefirstSubTask;
     bool      byteD;
-    CVehicle* m_Vehicle;
+    CVehicle* m_VehToDestroy;
     CVector   m_VehiclePos;
-    float     m_DistSq0;
-    float     m_fY;
-    float     m_DistSq1;
+    float     m_MaxTargetFightDist;
+    float     m_PedVehicleAngleRad;
+    float     m_MaxFightCtrlRadius;
     int32     dword2C;
-    int32     m_nTime;
+    int32     m_nTimeMs;
 
 public:
     static constexpr eTaskType Type = TASK_COMPLEX_DESTROY_CAR_MELEE;
@@ -27,7 +27,7 @@ public:
     CTask* CreateSubTask(eTaskType taskType, CPed* ped);
 
     eTaskType GetTaskType() override { return Type; }
-    CTask* Clone() override { return new CTaskComplexDestroyCarMelee(m_Vehicle); } // 0x6235A0
+    CTask* Clone() override { return new CTaskComplexDestroyCarMelee(m_VehToDestroy); } // 0x6235A0
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
