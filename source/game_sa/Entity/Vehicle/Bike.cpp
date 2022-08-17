@@ -59,6 +59,96 @@ void CBike::InjectHooks() {
 // 0x6BF430
 CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
     plugin::CallMethod<0x6BF430, CBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+    return;
+
+    auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
+    if (mi->m_nVehicleType == VEHICLE_TYPE_BIKE) {
+        auto animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].animationStyle;
+        m_rideAnimData.m_nAnimGroup = animationStyle;
+        if (animationStyle < ANIM_GROUP_BIKES || animationStyle > ANIM_GROUP_WAYFARER) {
+            m_rideAnimData.m_nAnimGroup = ANIM_GROUP_BIKES;
+        }
+    }
+
+    m_nVehicleSubType = VEHICLE_TYPE_BIKE;
+    m_nVehicleType = VEHICLE_TYPE_BIKE;
+
+    m_fFireBlowUpTimer = 0.0f;
+    m_bDoingBurnout = false;
+    nBikeFlags = 0;
+    SetModelIndex(modelIndex);
+
+    m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
+    m_pBikeHandlingData = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId - MODEL_CWMYHB1); // hardcode
+    m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
+    field_740 = 20.0f;
+    mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
+    m_fRearForkLength = 0.0f;
+    m_fFrontForkY = 0.0f;
+    m_fFrontForkZ = 0.0f;
+    m_bPedLeftHandFixed = false;
+    m_bPedRightHandFixed = false;
+    m_fFrontForkSlope = std::tan(DegreesToRadians(mi->m_fBikeSteerAngle));
+    m_fMass = m_pHandlingData->m_fMass;
+    m_fTurnMass = m_pHandlingData->m_fTurnMass;
+    m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
+    m_vecCentreOfMass.z = 0.1f;
+    m_fAirResistance = GetDefaultAirResistance();
+    m_fElasticity = 0.05f;
+    m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
+    m_fSteerAngle = 0.0f;
+    m_fGasPedal = 0.0f;
+    m_fBreakPedal = 0.0f;
+    m_pDamager = nullptr;
+    m_pWhoInstalledBombOnMe = nullptr;
+    m_fGasPedalAudio = 0.0f;
+    m_fTireTemperature = 1.0f;
+    m_fBrakeDestabilization = 0.0f;
+    field_7B8 = nullptr;
+
+    for (auto i = 0; i < 2; ++i) {
+        m_afWheelRotationX[i] = 0;
+        m_fWheelSpeed[i] = 0;
+        m_anWheelState[i] = WHEEL_STATE_NORMAL;
+        m_anWheelSurfaceType[i] = 0;
+        m_abBloodState[i] = false;
+        m_aWheelSkidmarkUnk[i] = false;
+        m_anWheelDamageState[i] = 0;
+    }
+
+    for (auto i = 0; i < 4; ++i) {
+        m_avTouchPointsLocalSpace[i] = CVector{};
+        m_fWheelsSuspensionCompression[i] = 1.0f;
+        m_fWheelsSuspensionCompressionPrev[i] = 1.0f;
+        m_aWheelTimer[i] = 0.0f;
+    }
+
+    m_nNumContactWheels = 0;
+    m_nNumWheelsOnGround = 0;
+    m_nDriveWheelsOnGround = 0;
+    m_fHeightAboveRoad = 0.0f;
+    m_fTraction = 1.0f;
+
+    if (!mi->m_pColModel->m_pColData->m_pLines) {
+        mi->m_pColModel->m_pColData->m_nNumLines = 4;
+        mi->m_pColModel->m_pColData->m_pLines = static_cast<CColLine*>(CMemoryMgr::Malloc(128));
+        mi->m_pColModel->m_pColData->m_pLines[1].m_vecStart.x = 10'0000.0f;
+    }
+    mi->m_pColModel->m_pColData->m_pLines[0].m_vecStart.z = 10'0000.0f;
+    CBike::SetupSuspensionLines();
+
+    m_autoPilot.m_nCarMission = MISSION_NONE;
+    m_autoPilot.m_nTempAction = 0;
+    m_autoPilot.m_nCarCtrlFlags = m_autoPilot.m_nCarCtrlFlags & 0xFB;
+
+    m_nStatus = STATUS_SIMPLE;
+    m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
+    m_nNumPassengers = 0;
+    m_bLeanMatrixCalculated = false;
+    m_mLeanMatrix = *m_matrix;
+    m_vecAvgSurfaceRight = CVector{};
+    m_vehicleAudio.Initialise(this);
 }
 
 // 0x6B57A0
@@ -289,7 +379,7 @@ void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector ar
 }
 
 // 0x6BEA10
-void CBike::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CBike::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     plugin::CallMethod<0x6BEA10, CBike*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 

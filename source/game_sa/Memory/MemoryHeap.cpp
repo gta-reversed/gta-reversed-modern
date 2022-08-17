@@ -215,7 +215,7 @@ void* CMemoryHeap::Malloc(uint32 size) {
     while (blockSize > uint32(block->m_nSize)) {
         block = block->m_Next;
         if (block == &m_FreeListEnd) {
-            DEV_LOG("CMemoryHeap[%02d]: !!! failed to allocate %d bytes !!!", m_nMemId, _nSize);
+            DEV_LOG("CMemoryHeap[%02d]: !!! failed to allocate %d bytes !!!", m_nMemId, block->m_nSize);
             return nullptr;
         }
     }
