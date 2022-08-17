@@ -175,10 +175,11 @@ struct BreakablePluginData {
 #define BREAKABLECONSTPLG(geometry, var) \
     (RWPLUGINOFFSETCONST(BreakablePlugin, geometry, g_BreakablePlugin)->var)
 
+bool BreakablePluginAttach();
+
 void* BreakableConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 void* BreakableDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 
-bool BreakablePluginAttach();
 RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 RwStream* BreakableStreamWrite(RwStream* stream, RwInt32 binaryLength, const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);
 RwInt32 BreakableStreamGetSize(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject);

@@ -1,16 +1,17 @@
 #include "StdInc.h"
 
+#include "BreakablePlugin.h"
+
 void BreakablePlugin::InjectHooks() {
     RH_ScopedClass(BreakablePlugin);
     RH_ScopedCategory("Plugins");
 
+    RH_ScopedGlobalInstall(BreakableConstructor, 0x59CD70);
+    RH_ScopedGlobalInstall(BreakableDestructor, 0x59CD90);
     RH_ScopedGlobalInstall(BreakablePluginAttach, 0x59D100);
     RH_ScopedGlobalInstall(BreakableStreamRead, 0x59CEC0);
     RH_ScopedGlobalInstall(BreakableStreamWrite, 0x59CDE0);
     RH_ScopedGlobalInstall(BreakableStreamGetSize, 0x59D0F0);
-
-    RH_ScopedGlobalInstall(BreakableConstructor, 0x59CD70);
-    RH_ScopedGlobalInstall(BreakableDestructor, 0x59CD90);
 }
 
 //0x59D100
@@ -26,6 +27,35 @@ bool BreakablePluginAttach() {
     }
 
     return true;
+}
+
+//0x59CD70
+void* BreakableConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+    if (g_BreakablePlugin <= 0)
+        return object;
+
+    auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
+    plugin->m_pBreakableInfo = nullptr;
+    return object;
+}
+
+//0x59CD90
+void* BreakableDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
+    if (g_BreakablePlugin <= 0)
+        return object;
+
+    auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
+    if (plugin->m_pBreakableInfo) {
+        for (auto i = 0; i < plugin->m_pBreakableInfo->m_usNumMaterials; ++i) {
+            if (plugin->m_pBreakableInfo->m_pTextures[i]) {
+                RwTextureDestroy(plugin->m_pBreakableInfo->m_pTextures[i]);
+            }
+        }
+
+        operator delete(plugin->m_pBreakableInfo);
+    }
+
+    return object;
 }
 
 //0x59CEC0
@@ -108,32 +138,4 @@ RwStream* BreakableStreamWrite(RwStream* stream, RwInt32 binaryLength, const voi
 // 0x59D0F0
 RwInt32 BreakableStreamGetSize(const void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
     return sizeof(BreakInfo_t);
-}
-
-//0x59CD70
-void* BreakableConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    if (g_BreakablePlugin <= 0)
-        return object;
-
-    auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
-    plugin->m_pBreakableInfo = nullptr;
-    return object;
-}
-
-//0x59CD90
-void* BreakableDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    if (g_BreakablePlugin <= 0)
-        return object;
-
-    auto* plugin = RWPLUGINOFFSET(BreakablePlugin, object, g_BreakablePlugin);
-    if (plugin->m_pBreakableInfo) {
-        for (auto i = 0; i < plugin->m_pBreakableInfo->m_usNumMaterials; ++i) {
-            if (plugin->m_pBreakableInfo->m_pTextures[i])
-                RwTextureDestroy(plugin->m_pBreakableInfo->m_pTextures[i]);
-        }
-
-        operator delete(plugin->m_pBreakableInfo);
-    }
-
-    return object;
 }
