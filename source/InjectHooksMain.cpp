@@ -282,8 +282,11 @@
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
+#include "extensions/utility.hpp"
+
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
+    notsa::AutoCallOnDestruct autoInjectionEnd{ ReversibleHooks::OnInjectionEnd };
 
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
@@ -1043,6 +1046,4 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
-
-    ReversibleHooks::OnInjectionEnd();
 }
