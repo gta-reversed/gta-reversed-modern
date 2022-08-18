@@ -57,6 +57,8 @@ public:
     static bool  ProcessVerticalLineUsingCache(CVector point, float* outZ);
     static void  AddLight(uint8 lightType, CVector point, CVector direction, float radius, float red, float green, float blue, uint8 fogType, bool generateExtraShadows, CEntity* entityAffected);
     static void  RenderFogEffect();
+
+    static void ResetNumLights() { NumLights = 0; }
 };
 
 extern uint32 MAX_POINTLIGHTS; // default: 32

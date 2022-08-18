@@ -99,15 +99,13 @@ enum eControllerType {
     CONTROLLER_PAD = 3,
 };
 
-class CControllerKey {
-public:
-    uint32 keyCode;
-    uint32 priority;
+struct CControllerKey {
+    uint32 KeyCode;
+    uint32 Priority;
 };
 
-class CControllerAction {
-public:
-    CControllerKey keys[4];
+struct CControllerAction {
+    CControllerKey Keys[4];
 };
 
 class CControllerConfigManager {
@@ -116,15 +114,13 @@ public:
     char              field_1;
     char              m_prev;
     char              field_3;
-    DIJOYSTATE2       m_prevPadState;
-    DIJOYSTATE2       m_currPadState;
+    DIJOYSTATE2       m_PrevPadState;
+    DIJOYSTATE2       m_CurrPadState;
     char              m_aszEventNames[59][40];
-    char              field_B5C[17]; // pad button states
-    char              _pad1[3];
-    CControllerAction m_actions[59];
+    bool              m_ButtonStates[17];
+    CControllerAction m_Actions[59];
     char              field_12D0[16];
     char              field_12E0;
-    char              _pad2[3];
 
 public:
     static void InjectHooks();
@@ -132,8 +128,8 @@ public:
     CControllerConfigManager();
     CControllerConfigManager* Constructor();
 
-    bool LoadSettings(FILE* file);
-    void SaveSettings(FILE* file);
+    bool LoadSettings(FILESTREAM file);
+    void SaveSettings(FILESTREAM file);
 
     void InitDefaultControlConfiguration();
     void InitialiseControllerActionNameArray();

@@ -228,7 +228,7 @@ void CTimer::UpdateVariables(float timeStep)
     }
 
     ms_fOldTimeStep = ms_fTimeStep;
-    ms_fTimeStep = clamp<float>(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
+    ms_fTimeStep = std::clamp(ms_fTimeStepNonClipped, 0.00001f, 3.0f);
 }
 
 // 0x561B10

@@ -5,8 +5,6 @@
 #include "dshow.h"
 #pragma comment(lib, "strmiids.lib") // Class identifiers (CLSIDs) and interface identifiers (IIDs).
 
-int32& gGameState = *(int32*)0xC8D4C0;
-
 namespace VideoPlayer {
 
 IGraphBuilder*& pvGraphBuilder = *(IGraphBuilder**)0xC920D4;

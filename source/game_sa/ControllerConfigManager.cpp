@@ -49,12 +49,12 @@ CControllerConfigManager* CControllerConfigManager::Constructor() {
 }
 
 // 0x530530
-bool CControllerConfigManager::LoadSettings(FILE* file) {
-    return plugin::CallMethodAndReturn<bool, 0x530530, CControllerConfigManager*, FILE*>(this, file);
+bool CControllerConfigManager::LoadSettings(FILESTREAM file) {
+    return plugin::CallMethodAndReturn<bool, 0x530530, CControllerConfigManager*, FILESTREAM>(this, file);
 }
 
 // 0x52D200
-void CControllerConfigManager::SaveSettings(FILE* file) {
+void CControllerConfigManager::SaveSettings(FILESTREAM file) {
     plugin::CallMethod<0x52D200, CControllerConfigManager*, FILE*>(this, file);
 }
 

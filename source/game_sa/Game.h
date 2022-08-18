@@ -7,9 +7,12 @@
 #pragma once
 
 #include "RenderWare.h"
+#include "eGameState.h"
 
 class CColModel;
 class CEntity;
+
+static inline eGameState gGameState = *(eGameState*)0xC8D4C0;
 
 class CGame {
 public:

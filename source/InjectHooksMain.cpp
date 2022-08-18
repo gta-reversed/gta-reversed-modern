@@ -278,7 +278,7 @@
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
 
-#include "Plugins\BreakablePlugin\BreakablePlugin.h"
+#include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
@@ -1030,6 +1030,9 @@ void InjectHooksMain() {
         Securom::InjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
+        PsInjectHooks();
+        RwInjectHooks();
+        AppInjectHooks();
     };
 
     const auto Animation = []() {

@@ -13,6 +13,7 @@
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "Radar.h"
+#include "ControllerConfigManager.h"
 
 // 0x57B440
 void CMenuManager::Process() {
@@ -501,7 +502,7 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         return true;
     }
     case MENU_ACTION_RESET_CFG: {
-        auto targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
+        const auto& targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
         SetDefaultPreferences(targetMenu);
         if (targetMenu == SCREEN_DISPLAY_ADVANCED) {
             RwD3D9ChangeMultiSamplingLevels(m_nPrefsAntialiasing);

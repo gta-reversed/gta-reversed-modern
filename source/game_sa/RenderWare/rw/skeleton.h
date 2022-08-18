@@ -64,44 +64,39 @@ enum RsEventStatus
 };
 typedef enum RsEventStatus RsEventStatus;
 
-enum RsEvent
-{
-#ifdef RWSPLASH
-    rsDISPLAYSPLASH,
-#endif
-    rsCAMERASIZE,
-    rsCOMMANDLINE,
-    rsFILELOAD,
-    rsINITDEBUG,
-    rsINPUTDEVICEATTACH,
-    rsLEFTBUTTONDOWN,
-    rsLEFTBUTTONUP,
-    rsMOUSEMOVE,
-    rsMOUSEWHEELMOVE,
-    rsPLUGINATTACH,
-    rsREGISTERIMAGELOADER,
-    rsRIGHTBUTTONDOWN,
-    rsRIGHTBUTTONUP,
-    // ...
-    rsRWINITIALIZE = 0x15,
-    rsRWTERMINATE,
-    rsSELECTDEVICE,
-    rsINITIALIZE,
-    rsTERMINATE,
-    rsIDLE,
-    rsRENDER,
-    rsKEYDOWN,
-    rsKEYUP,
-    rsQUITAPP,
-    rsPADBUTTONDOWN,
-    rsPADBUTTONUP,
-    rsPADANALOGUELEFT,
-    rsPADANALOGUELEFTRESET,
-    rsPADANALOGUERIGHT,
-    rsPADANALOGUERIGHTRESET,
-    rsPREINITCOMMANDLINE,
-    rsACTIVATE,
-    rsSETMEMORYFUNCS
+enum RsEvent {
+    rsCAMERASIZE            =  0,
+    rsCOMMANDLINE           =  1,
+    rsFILELOAD              =  2,
+    rsINITDEBUG             =  3,
+    rsINPUTDEVICEATTACH     =  4,
+    rsLEFTBUTTONDOWN        =  5,
+    rsLEFTBUTTONUP          =  6,
+    rsMOUSEMOVE             =  7,
+    rsMOUSEWHEELMOVE        =  8,
+    rsPLUGINATTACH          =  9,
+    rsREGISTERIMAGELOADER   = 10,
+
+    rsRWINITIALIZE          = 21,
+    rsRWTERMINATE           = 22,
+    rsSELECTDEVICE          = 23,
+    rsINITIALIZE            = 24,
+    rsTERMINATE             = 25,
+    rsIDLE                  = 26,
+    rsRENDER                = 27,
+    rsKEYDOWN               = 28,
+    rsKEYUP                 = 29,
+    rsQUITAPP               = 30,
+    rsPADBUTTONDOWN         = 31,
+    rsPADBUTTONUP           = 32,
+    rsPADANALOGUELEFT       = 33, // need to check
+    rsPADANALOGUELEFTRESET  = 34, // need to check
+    rsPADANALOGUERIGHT      = 35, // need to check
+    rsPADANALOGUERIGHTRESET = 36, // need to check
+    rsPREINITCOMMANDLINE    = 37,
+    rsACTIVATE              = 38,
+
+    rsSETMEMORYFUNCS,
 };
 typedef enum RsEvent RsEvent;
 
@@ -115,17 +110,22 @@ struct RsInputDevice
     RsInputEventHandler inputEventHandler;
 };
 
+/**
+ * platform-specific global data
+ */
 struct psGlobalType
 {
     HWND      window;
     HINSTANCE instance;
     RwBool    fullScreen;
     RwV2d     lastMousePos;
+
     int       field_14;
-    void*     diInterface;
-    void*     diMouse;
-    void*     diDevice1;
-    void*     diDevice2;
+
+    LPDIRECTINPUT8       diInterface;
+    LPDIRECTINPUTDEVICE8 diMouse;
+    LPDIRECTINPUTDEVICE8 diDevice1;
+    LPDIRECTINPUTDEVICE8 diDevice2;
 };
 
 typedef struct RsGlobalType RsGlobalType;

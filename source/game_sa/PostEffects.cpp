@@ -206,7 +206,7 @@ void CPostEffects::SetupBackBufferVertex() {
     const auto width  = (int32)std::pow(2.0f, (int32)log2((float)RwRasterGetWidth(raster)));
     const auto height = (int32)std::pow(2.0f, (int32)log2((float)RwRasterGetHeight(raster)));
     const auto fwidth = float(width);
-    const auto fheight = float(height); 
+    const auto fheight = float(height);
 
     const auto InitVertices = [=]() {
         cc_vertices[0].x = 0.0f;
@@ -407,7 +407,7 @@ void CPostEffects::ScriptDarknessFilterSwitch(bool enable, int32 alpha) {
     if (alpha == 255) {
         m_DarknessFilterAlpha = m_DarknessFilterAlphaDefault;
     } else {
-        m_DarknessFilterAlpha = clamp(0, alpha, 255);
+        m_DarknessFilterAlpha = std::clamp(0, alpha, 255);
     }
 }
 

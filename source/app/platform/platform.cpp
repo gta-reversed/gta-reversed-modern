@@ -1,5 +1,6 @@
 #include "StdInc.h"
 
+#include "win.h"
 #include "platform.h"
 #include "VideoMode.h"
 #include "app/app.h"

@@ -558,7 +558,7 @@ void CStats::IncrementStat(eStats stat, float value)
     // STAT_RIOT_MISSION_ACCOMPLISHED increment, enum name incorrect?
 
     float kcals = playerInfo->m_nNumHoursDidntEat - value / 2.0f;
-    kcals = clamp(kcals, 0.0f, 36.0f);
+    kcals = std::clamp(kcals, 0.0f, 36.0f);
 
     float healthDiff = playerInfo->m_nMaxHealth - player->m_fHealth;
 

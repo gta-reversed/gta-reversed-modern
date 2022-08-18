@@ -5,6 +5,31 @@
 #include "platform.h"
 #include "LoadingScreen.h"
 
+void PsInjectHooks() {
+    RH_ScopedNamespaceName("Ps");
+    RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
+    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
+    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
+    RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
+    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
+    RH_ScopedGlobalInstall(psTimer, 0x745270);
+    // RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
+    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
+    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
+    // RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
+    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
+    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
+    // RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
+    // RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
+    // RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
+    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
+    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
+    // RH_ScopedGlobalInstall(psSelectDevice, 0x746190);
+    // RH_ScopedGlobalInstall(psInitialize, 0x747420);
+}
+
 // 0x747420
 bool psInitialize() {
     return plugin::CallAndReturn<bool, 0x747420>();
@@ -34,13 +59,11 @@ void psWarningMessage(const char* str) {
 bool psCameraBeginUpdate(RwCamera* camera) {
     return plugin::CallAndReturn<bool, 0x745210, RwCamera*>(camera);
 
-    /*
     if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
         return true;
     }
     RsEventHandler(rsACTIVATE, nullptr);
     return false;
-    */
 }
 
 // 0x745240
@@ -146,6 +169,19 @@ void psMouseSetPos(RwV2d* pos) {
 // 0x745470
 char* psPathnameCreate(const char* buffer) {
     return plugin::CallAndReturn<char*, 0x745470, const char*>(buffer);
+
+    /*
+    char* charToConvert = nullptr;
+    char* dstBuffer = (char*)RwMalloc(sizeof(char) * (rwstrlen(buffer) + 1), rwID_NAOBJECT);
+    if (dstBuffer) {
+        strcpy(dstBuffer, buffer);
+
+        while ((charToConvert = rwstrchr(dstBuffer, '/'))) {
+            *charToConvert = '\\';
+        }
+    }
+    return dstBuffer;
+    */
 }
 
 // 0x7454E0

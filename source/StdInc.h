@@ -66,6 +66,10 @@ namespace rng = std::ranges;
 
 #include "debug.h"
 
+#include "app/app.h"
+#include "app/app_light.h"
+#include "platform.h"
+
 #include "EntryInfoNode.h"
 #include "EntryInfoList.h"
 #include "KeyGen.h"
@@ -92,6 +96,7 @@ namespace rng = std::ranges;
 #include "SArray.h"
 
 #include "GxtChar.h"
+#include "RwHelper.h"
 
 #include "game_sa\common.h"
 
@@ -109,6 +114,8 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eEntityStatus.h"
 #include "game_sa\Enums\eEntityType.h"
 #include "game_sa\Enums\eEventType.h"
+#include "game_sa\Enums\eFontAlignment.h"
+#include "game_sa\Enums\eGameState.h"
 #include "game_sa\Enums\eModelID.h"
 #include "game_sa\Enums\ePedBones.h"
 #include "game_sa\Enums\ePedModel.h"
@@ -140,7 +147,6 @@ namespace rng = std::ranges;
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
@@ -224,7 +230,6 @@ namespace rng = std::ranges;
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
 #include "game_sa\CoverPoint.h"
@@ -433,6 +438,7 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
+#include "game_sa\Plugins\RpAnimBlendPlugin\RpAnimBlend.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"
