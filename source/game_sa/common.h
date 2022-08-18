@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <initializer_list>
 #include <RenderWare.h>
 
 #include "Vector.h"
@@ -373,10 +374,14 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
 
 void LittleTest();
 
+// NOTSA
+
 /* Convert UTF-8 string to Windows Unicode. Free pointer using delete[] */
 std::wstring UTF8ToUnicode(const std::string& str);
 /* Convert Windows Unicode to UTF-8. Free pointer using delete[] */
 std::string UnicodeToUTF8(const std::wstring& str);
+
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<enum AnimationId> ids);
 
 extern int32 WindowsCharset;
 

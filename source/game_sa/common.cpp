@@ -15,6 +15,7 @@
 #include "PostEffects.h"
 #include "SpecialFX.h"
 #include "Hud.h"
+#include "AnimationEnums.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
@@ -1338,6 +1339,19 @@ std::string UnicodeToUTF8(const std::wstring &str)
     }
 
     return out;
+}
+
+/*!
+* @notsa
+* @return The anim first found from `ids`
+*/
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, std::initializer_list<AnimationId> ids) {
+    for (const auto id : ids) {
+        if (const auto anim = RpAnimBlendClumpGetAssociation(clump, (int32)id)) {
+            return anim;
+        }
+    }
+    return nullptr;
 }
 
 int32 WindowsCharset = static_cast<int32>(GetACP());
