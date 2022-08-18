@@ -36,25 +36,21 @@ static bool LoadModels(std::initializer_list<const char*> models, RpAtomic* (&at
 bool CPlantMgr::Initialise() {
     return plugin::CallAndReturn<bool, 0x5DD910>();
 
-    if (!CPlantMgr::ReloadConfig())
+    if (!ReloadConfig())
         return false;
 
     CStreaming::MakeSpaceFor(0x8800);
     CStreaming::ImGonnaUseStreamingMemory();
     CTxdStore::PushCurrentTxd();
-    auto slot = CTxdStore::FindTxdSlot("grass_pc");
-    if (slot == -1)
-        slot = CTxdStore::AddTxdSlot("grass_pc");
+    auto slot = CTxdStore::FindOrAddTxdSlot("grass_pc");
     CTxdStore::LoadTxd(slot, "models\\grass\\plant1.txd");
     CTxdStore::AddRef(slot);
     CTxdStore::SetCurrentTxd(slot);
 
     const auto ReadTexture = [](const char* name) {
         auto texture = RwTextureRead(name, nullptr);
-        /* 31 [xxxxxxxx xxxxxxxx vvvvuuuu ffffffff] 0 */
-        // todo: filtering
-        // LOBYTE(texture->filterAddressing) = 2;
-        // BYTE1(texture->filterAddressing) = 17;
+        RwTextureSetAddressing(texture, rwTEXTUREADDRESSWRAP);
+        RwTextureSetFilterMode(texture, rwFILTERLINEAR);
         return  texture;
     };
 
@@ -135,9 +131,7 @@ void CPlantMgr::Shutdown() {
     DestroyTextures(PC_PlantTextureTab2);
     DestroyTextures(PC_PlantTextureTab3);
 
-    auto slot = CTxdStore::FindTxdSlot("grass_pc");
-    if (slot != -1 )
-        CTxdStore::RemoveTxdSlot(slot);
+    CTxdStore::SafeRemoveTxdSlot("grass_pc");
 }
 
 // 0x5DD780
@@ -172,17 +166,14 @@ void CPlantMgr::Update(const CVector& cameraPosition) {
     static int8& cache = *(int8*)0xC09171;
     static int8& section = *(int8*)0xC09170;
 
-    ++CPlantMgr::m_scanCode;
-    CGrassRenderer::SetCurrentScanCode(CPlantMgr::m_scanCode);
+    IncrementScanCode();
+    CGrassRenderer::SetCurrentScanCode(m_scanCode);
     CGrassRenderer::SetGlobalCameraPos(cameraPosition);
 
     UpdateAmbientColor();
     CGrassRenderer::SetGlobalWindBending(CalculateWindBending());
 
-    if ( (++cache % MAX_PLANTS) != 0 )
-        _ColEntityCache_Update(cameraPosition, true);
-    else
-        _ColEntityCache_Update(cameraPosition, false);
+    _ColEntityCache_Update(cameraPosition, (++cache % MAX_PLANTS) != 0 ? true : false);
 
     auto prev = m_CloseColEntListHead;
     for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_Prev )

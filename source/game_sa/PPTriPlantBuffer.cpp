@@ -31,22 +31,17 @@ void CPPTriPlantBuffer::Flush() {
     if (m_nNumActive <= 0)
         return;
 
-    auto atomics = [this] {
+    auto atomics = [&] {
         switch (m_nType) {
-        case 0:
-            return m_aAtomics[0];
-        case 1:
-            return m_aAtomics[1];
-        case 2:
-            return m_aAtomics[2];
-        case 3:
-            return m_aAtomics[3];
-        default:
-            return (RpAtomic**)nullptr; // todo: ?
+        case 0:  return m_aAtomics[0];
+        case 1:  return m_aAtomics[1];
+        case 2:  return m_aAtomics[2];
+        case 3:  return m_aAtomics[3];
+        default: return (RpAtomic**)nullptr;
         }
     }();
 
-    int32 random = CGeneral::GetRandomNumber();
+    auto random = CGeneral::GetRandomNumber();
     CGrassRenderer::DrawTriPlants(m_aPlants, m_nNumActive, atomics);
     m_nNumActive = 0;
     srand(random);
@@ -80,16 +75,14 @@ void CPPTriPlantBuffer::IncreaseBufferIndex(int32 type, int32 nIncrease) {
 
 // 0x5DACA0
 void* CPPTriPlantBuffer::GetPlantModelsTab(uint32 type) {
-    if (type < std::size(m_aAtomics))
-        return m_aAtomics[type];
-    else
-        return nullptr;
+    return type < std::size(m_aAtomics) ? m_aAtomics[type] : nullptr;
 }
 
 // 0x5DAC80
 void CPPTriPlantBuffer::SetPlantModelsTab(uint32 type, RpAtomic** atomics) {
-    if (type < std::size(m_aAtomics))
+    if (type < std::size(m_aAtomics)) {
         m_aAtomics[type] = atomics;
+    }
 }
 
 // 'data' is a pointer to RwRGBA

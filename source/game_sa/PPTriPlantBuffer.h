@@ -13,11 +13,11 @@ public:
     float        field_34;
     float        field_38;
     RwTexture*   m_Texture;
-    CRGBA        color;
+    CRGBA        m_Color;
     uint8        m_nColorIntensity;
     uint8        m_Surface; // eSurfaceType?
     int8         field_47;
-    uint32       randomSeed;
+    uint32       m_RandomSeed;
     float        field_4C;
     float        field_50;
     float        m_fWindBendingModifier;

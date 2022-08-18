@@ -46,10 +46,7 @@ tSurfPropTab* CPlantSurfPropMgr::AllocSurfProperties(uint16 surfaceId, bool clea
 
 // 0x6F9DE0
 tSurfPropTab* CPlantSurfPropMgr::GetSurfProperties(uint16 index) {
-    if (index >= MAX_SURFACE_PTR_PROPERTIES)
-        return nullptr;
-    else
-        return m_SurfPropPtrTab[index];
+    return index < MAX_SURFACE_PTR_PROPERTIES ? m_SurfPropPtrTab[index] : nullptr;
 }
 
 // 0x5DD3B0

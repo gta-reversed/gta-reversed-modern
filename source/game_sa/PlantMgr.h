@@ -62,5 +62,5 @@ private:
     static void DbgRenderCachedEntities(uint32*);
     static void DbgRenderLocTris();
 
-    static void IncrementScanCode() { ++CPlantMgr::m_scanCode; } // 0x5DB2D0
+    static void IncrementScanCode() { ++m_scanCode; } // 0x5DB2D0
 };
