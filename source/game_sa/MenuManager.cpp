@@ -169,9 +169,7 @@ void CMenuManager::LoadAllTextures() {
         CStreaming::ImGonnaUseStreamingMemory();
         CGame::TidyUpMemory(false, true);
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);
@@ -205,9 +203,7 @@ void CMenuManager::SwapTexturesRound(bool round) {
         CStreaming::MakeSpaceFor(size);
         CStreaming::ImGonnaUseStreamingMemory();
         CTxdStore::PushCurrentTxd();
-        auto slot = CTxdStore::FindTxdSlot(slotName);
-        if (slot == -1)
-            slot = CTxdStore::AddTxdSlot(slotName);
+        auto slot = CTxdStore::FindOrAddTxdSlot(slotName);
         CTxdStore::LoadTxd(slot, txdName);
         CTxdStore::AddRef(slot);
         CTxdStore::SetCurrentTxd(slot);

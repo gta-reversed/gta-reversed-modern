@@ -268,6 +268,8 @@
 #include "TaskComplexFallToDeath.h"
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
+#include "TaskComplexTurnToFaceEntityOrCoord.h"
+#include <TaskSimpleTired.h>
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -282,9 +284,11 @@
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
+#include "extensions/utility.hpp"
 
 void InjectHooksMain() {
     ReversibleHooks::OnInjectionBegin();
+    notsa::AutoCallOnDestruct autoInjectionEnd{ ReversibleHooks::OnInjectionEnd };
 
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
@@ -670,7 +674,7 @@ void InjectHooksMain() {
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
         // CTaskComplexTrackEntity::InjectHooks();
-        // CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
+        CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
         // CTaskComplexUseAttractor::InjectHooks();
         // CTaskComplexUseAttractorPartner::InjectHooks();
         // CTaskComplexUseClosestFreeScriptedAttractor::InjectHooks();
@@ -761,7 +765,7 @@ void InjectHooksMain() {
         // CTaskSimpleSitIdle::InjectHooks();
         // CTaskSimpleStandUp::InjectHooks();
         // CTaskSimpleThrowControl::InjectHooks();
-        // CTaskSimpleTired::InjectHooks();
+        CTaskSimpleTired::InjectHooks();
         // CTaskSimpleTriggerEvent::InjectHooks();
         // CTaskSimpleTurn180::InjectHooks();
         // CTaskSimpleUseAtm::InjectHooks();
@@ -1044,6 +1048,4 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
-
-    ReversibleHooks::OnInjectionEnd();
 }
