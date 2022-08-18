@@ -278,6 +278,8 @@
 #include "EventCopCarBeingStolen.h"
 #include "EventDanger.h"
 
+#include "Plugins\BreakablePlugin\BreakablePlugin.h"
+
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
@@ -343,6 +345,7 @@ void InjectHooksMain() {
     CCreepingFire::InjectHooks();
     CPtrList::InjectHooks();
     BreakManager_c::InjectHooks();
+    BreakObject_c::InjectHooks();
     CFireManager::InjectHooks();
     CGroupEventHandler::InjectHooks();
     CVehicleRecording::InjectHooks();
@@ -518,6 +521,7 @@ void InjectHooksMain() {
     JPegPlugin::InjectHooks();
     PipelinePlugin::InjectHooks();
     CCollisionPlugin::InjectHooks();
+    BreakablePlugin::InjectHooks();
     CIplStore::InjectHooks();
     cHandlingDataMgr::InjectHooks();
     CLoadingScreen::InjectHooks();
