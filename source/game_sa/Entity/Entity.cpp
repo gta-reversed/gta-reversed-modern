@@ -80,7 +80,7 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(UpdateAnim, 0x535F00);
     RH_ScopedInstall(IsVisible, 0x536BC0);
     RH_ScopedInstall(GetDistanceFromCentreOfMassToBaseOfModel, 0x536BE0);
-    RH_ScopedInstall(CleanUpOldReference, 0x571A00);
+    RH_ScopedOverloadedInstall(CleanUpOldReference, "", 0x571A00, void(CEntity::*)(CEntity**));
     RH_ScopedInstall(ResolveReferences, 0x571A40);
     RH_ScopedInstall(PruneReferences, 0x571A90);
     RH_ScopedOverloadedInstall(RegisterReference, "", 0x571B70, void(CEntity::*)(CEntity**));
