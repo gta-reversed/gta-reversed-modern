@@ -71,31 +71,41 @@ RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, 
     RwStreamRead(stream, &infoBuffer, sizeof(BreakInfo_t));
 
     auto allocSize = BreakablePluginData::GetRequiredAllocationSize(infoBuffer);
-    auto* pluginStruct = reinterpret_cast<BreakablePluginData*>(operator new(allocSize));
+    auto* data = new BreakablePluginData[allocSize];
 
-    plugin->m_pBreakableInfo = &pluginStruct->m_Info;
-    pluginStruct->m_Info = infoBuffer;
-    auto& info = pluginStruct->m_Info;
+    plugin->m_pBreakableInfo = &data->m_Info;
+    data->m_Info = infoBuffer;
 
-    const auto Read = [&](void* to, void* what, size_t size) {
-        to = what;
-        RwStreamRead(stream, to, size);
-    };
-    Read(info.m_pVertexPos,                pluginStruct->GetVertexPosPtr(),       sizeof(RwV3d) * info.m_usNumVertices);
-    Read(info.m_pTexCoors,                 pluginStruct->GetTexCoordsPtr(),       sizeof(RwTexCoords) * info.m_usNumVertices);
-    Read(info.m_pVertexColors,             pluginStruct->GetVertColorsPtr(),      sizeof(RwRGBA) * info.m_usNumVertices);
-    Read(info.m_pTriangles,                pluginStruct->GetTrianglesPtr(),       sizeof(BreakInfoTriangle) * info.m_usNumTriangles);
-    Read(info.m_pTrianglesMaterialIndices, pluginStruct->GetMaterialIndicesPtr(), sizeof(uint16) * info.m_usNumTriangles);
-    Read(info.m_pTextureNames,             pluginStruct->GetTextureNamesPtr(),    sizeof(char[32]) * info.m_usNumMaterials);
-    Read(info.m_pMaskNames,                pluginStruct->GetMaskNamesPtr(),       sizeof(char[32]) * info.m_usNumMaterials);
-    Read(info.m_pMaterialProperties,       pluginStruct->GetSurfacePropsPtr(),    sizeof(BreakInfoColor) * info.m_usNumMaterials);
+    data->m_Info.m_pVertexPos = data->GetVertexPosPtr();
+    RwStreamRead(stream, data->GetVertexPosPtr(), sizeof(RwV3d) * data->m_Info.m_usNumVertices);
 
-    info.m_pTextures = pluginStruct->GetTexturesPtr();
-    for (auto i = 0; i < info.m_usNumMaterials; ++i) {
-        auto charOffset = i * 32; // todo: sizeof m_pTextureNames[0]?
-        info.m_pTextures[i] = RwTextureRead(
-            &info.m_pTextureNames[charOffset],
-            info.m_pMaskNames[charOffset] ? &info.m_pMaskNames[charOffset] : nullptr
+    data->m_Info.m_pTexCoors = data->GetTexCoordsPtr();
+    RwStreamRead(stream, data->GetTexCoordsPtr(), sizeof(RwTexCoords) * data->m_Info.m_usNumVertices);
+
+    data->m_Info.m_pVertexColors = data->GetVertColorsPtr();
+    RwStreamRead(stream, data->GetVertColorsPtr(), sizeof(RwRGBA) * data->m_Info.m_usNumVertices);
+
+    data->m_Info.m_pTriangles = data->GetTrianglesPtr();
+    RwStreamRead(stream, data->GetTrianglesPtr(), sizeof(BreakInfoTriangle) * data->m_Info.m_usNumTriangles);
+
+    data->m_Info.m_pTrianglesMaterialIndices = data->GetMaterialIndicesPtr();
+    RwStreamRead(stream, data->GetMaterialIndicesPtr(), sizeof(uint16) * data->m_Info.m_usNumTriangles);
+
+    data->m_Info.m_pTextureNames = data->GetTextureNamesPtr();
+    RwStreamRead(stream, data->GetTextureNamesPtr(), sizeof(char[32]) * data->m_Info.m_usNumMaterials);
+
+    data->m_Info.m_pMaskNames = data->GetMaskNamesPtr();
+    RwStreamRead(stream, data->GetMaskNamesPtr(), sizeof(char[32]) * data->m_Info.m_usNumMaterials);
+
+    data->m_Info.m_pMaterialProperties = data->GetSurfacePropsPtr();
+    RwStreamRead(stream, data->GetSurfacePropsPtr(), sizeof(BreakInfoColor) * data->m_Info.m_usNumMaterials);
+
+    data->m_Info.m_pTextures = data->GetTexturesPtr();
+    for (auto i = 0; i < data->m_Info.m_usNumMaterials; ++i) {
+        auto charOffset = i * 32;
+        data->m_Info.m_pTextures[i] = RwTextureRead(
+            &data->m_Info.m_pTextureNames[charOffset],
+            data->m_Info.m_pMaskNames[charOffset] ? &data->m_Info.m_pMaskNames[charOffset] : nullptr
         );
     }
 
