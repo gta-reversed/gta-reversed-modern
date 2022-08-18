@@ -118,6 +118,7 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "EntitySeekPosCalculator.h"
 #include "EntitySeekPosCalculatorStandard.h"
 #include "EntitySeekPosCalculatorRadiusAngleOffset.h"
@@ -702,7 +703,7 @@ void InjectHooksMain() {
         // CTaskSimpleBikeJacked::InjectHooks();
         // CTaskSimpleCarAlign::InjectHooks();
         CTaskSimpleCarCloseDoorFromInside::InjectHooks();
-        // CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
+        CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
         // CTaskSimpleCarFallOut::InjectHooks();
         // CTaskSimpleCarForcePedOut::InjectHooks();
         // CTaskSimpleCarGetIn::InjectHooks();
