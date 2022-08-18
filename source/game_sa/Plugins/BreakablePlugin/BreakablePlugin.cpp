@@ -71,7 +71,7 @@ RwStream* BreakableStreamRead(RwStream* stream, int binaryLength, void* object, 
     RwStreamRead(stream, &infoBuffer, sizeof(BreakInfo_t));
 
     auto allocSize = BreakablePluginData::GetRequiredAllocationSize(infoBuffer);
-    auto* data = new BreakablePluginData[allocSize];
+    auto* data = reinterpret_cast<BreakablePluginData*>(operator new(allocSize)); // Allocated on heap dynamically sized BreakablePluginData
 
     plugin->m_pBreakableInfo = &data->m_Info;
     data->m_Info = infoBuffer;
