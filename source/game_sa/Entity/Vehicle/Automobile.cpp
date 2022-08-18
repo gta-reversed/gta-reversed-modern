@@ -1026,14 +1026,14 @@ void CAutomobile::ProcessControl()
     }
 
     if (m_pTractor) {
-        if (m_nStatus == STATUS_REMOTE_CONTROLLED) {
+        if (m_nStatus == STATUS_IS_TOWED) {
             bool updateTractorLink = false; // TODO: rename this variable later
             if (m_pTractor->m_vecMoveSpeed != 0.0f || m_vecMoveSpeed.SquaredMagnitude() > 0.01f) {
                 updateTractorLink = true;
                 m_pTractor->UpdateTractorLink(false, false);
             }
             CVehicle::UpdateTrailerLink(false, false);
-            if (m_pTractor && m_nStatus == STATUS_REMOTE_CONTROLLED) {
+            if (m_pTractor && m_nStatus == STATUS_IS_TOWED) {
                 if (updateTractorLink)
                     m_pTractor->UpdateTractorLink(false, true);
                 UpdateTrailerLink(false, true);
@@ -1044,7 +1044,7 @@ void CAutomobile::ProcessControl()
         }
     }
     else if (m_pTrailer) {
-        if (m_pTrailer->m_nStatus == STATUS_REMOTE_CONTROLLED) {
+        if (m_pTrailer->m_nStatus == STATUS_IS_TOWED) {
             if (m_pTrailer->m_pTractor == this) {
                 RemoveFromMovingList();
                 AddToMovingList();
@@ -1112,56 +1112,60 @@ void CAutomobile::ProcessControl()
 }
 
 // 0x6A1ED0
-CVector CAutomobile::AddMovingCollisionSpeed(CVector& point)
-{
-    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_PLANE) {
+CVector CAutomobile::AddMovingCollisionSpeed(CVector& point) {
+    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_FORCED_STOP) {
         if (m_nCreatedBy != MISSION_VEHICLE || !m_wMiscComponentAngle && !m_wMiscComponentAnglePrev)
             return {};
     }
-    float colAngleMult = 0.0f;
-    uint16 angleDiff = m_wMiscComponentAngle - m_wMiscComponentAnglePrev;
-    if (angleDiff <= 100 && angleDiff >= -100) { // todo: Result of comparison of constant -100 with expression of type 'uint16' (aka 'unsigned short') is always true
-        CVector colPivot{};
-        RwFrame* carNodeMisc = nullptr;
-        if (ModelIndices::IsDumper(m_nModelIndex)) {
-            carNodeMisc = m_aCarNodes[CAR_MISC_C];
-            colAngleMult = CMonsterTruck::DUMPER_COL_ANGLEMULT;
-        }
-        else if (ModelIndices::IsPacker(m_nModelIndex)) {
-            colAngleMult = PACKER_COL_ANGLE_MULT;
-            colPivot = PACKER_COL_PIVOT;
-        }
-        else if (ModelIndices::IsDozer(m_nModelIndex)) {
-            carNodeMisc = m_aCarNodes[CAR_MISC_A];
-            if (carNodeMisc)
-                colAngleMult = DOZER_COL_ANGLE_MULT;
-        }
-        else if (ModelIndices::IsAndromada(m_nModelIndex)) {
-            carNodeMisc = m_aCarNodes[CAR_MISC_E];
-            if (carNodeMisc)
-                colAngleMult = CPlane::ANDROM_COL_ANGLE_MULT;
-        }
-        else if (ModelIndices::IsForklift(m_nModelIndex)) {
-            float rot = float(angleDiff) / CTimer::GetTimeStep() * FORKLIFT_COL_ANGLE_MULT * 2.0f;
-            return rot * GetUp();
-        }
 
-        if (colAngleMult != 0.0f) {
-            if (carNodeMisc)
-                colPivot = RwFrameGetMatrix(carNodeMisc)->pos;
-            CVector rotation(float(angleDiff) / CTimer::GetTimeStep() * colAngleMult, 0.0f, 0.0f);
-            CVector pos = Multiply3x3(GetMatrix(), rotation);
-            CVector pivotPos = Multiply3x3(GetMatrix(), colPivot);
-            CVector distance = point - pivotPos;
-            return CrossProduct(pos, distance);
+    uint16 angleDiff = m_wMiscComponentAngle - m_wMiscComponentAnglePrev;
+    if (angleDiff > 100 || angleDiff < -100)
+        return {};
+
+    float colAngleMult = 0.0f;
+    CVector colPivot{};
+    RwFrame* carNodeMisc = nullptr;
+    if (ModelIndices::IsDumper(m_nModelIndex))
+    {
+        carNodeMisc = m_aCarNodes[CAR_MISC_C];
+        colAngleMult = CMonsterTruck::DUMPER_COL_ANGLEMULT;
+    }
+    else if (ModelIndices::IsPacker(m_nModelIndex)) {
+        colAngleMult = PACKER_COL_ANGLE_MULT;
+        colPivot = PACKER_COL_PIVOT;
+    }
+    else if (ModelIndices::IsDozer(m_nModelIndex)) {
+        carNodeMisc = m_aCarNodes[CAR_MISC_A];
+        if (carNodeMisc) {
+            colAngleMult = DOZER_COL_ANGLE_MULT;
         }
     }
-    return {};
+    else if (ModelIndices::IsAndromada(m_nModelIndex)) {
+        carNodeMisc = m_aCarNodes[CAR_MISC_E];
+        if (carNodeMisc) {
+            colAngleMult = CPlane::ANDROM_COL_ANGLE_MULT;
+        }
+    }
+    else if (ModelIndices::IsForklift(m_nModelIndex)) {
+        float rot = float(angleDiff) / CTimer::GetTimeStep() * FORKLIFT_COL_ANGLE_MULT * 2.0f;
+        return rot * GetUp();
+    }
+
+    if (colAngleMult == 0.0f)
+        return {};
+
+    if (carNodeMisc) {
+        colPivot = RwFrameGetMatrix(carNodeMisc)->pos;
+    }
+    CVector rotation(float(angleDiff) / CTimer::GetTimeStep() * colAngleMult, 0.0f, 0.0f);
+    CVector pos = Multiply3x3(GetMatrix(), rotation);
+    CVector pivotPos = Multiply3x3(GetMatrix(), colPivot);
+    CVector distance = point - pivotPos;
+    return CrossProduct(pos, distance);
 }
 
 // 0x6B4800
-bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
-{
+bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
     CColModel* colModel = GetColModel();
     CCollisionData* colData = colModel->m_pColData;
     int8 recordingId = this->m_autoPilot.m_vehicleRecordingId;
@@ -1177,19 +1181,17 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             || carMission == MISSION_BLOCKPLAYER_FARAWAY
             || carMission == MISSION_RAMPLAYER_CLOSE
             || carMission == MISSION_BLOCKPLAYER_CLOSE)
-        && FindPlayerSpeed().Magnitude() > 0.3f)
-    {
+        && FindPlayerSpeed().Magnitude() > 0.3f
+    ) {
         extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
         if (FindPlayerSpeed().Magnitude() > 0.4f && m_vecMoveSpeed.Magnitude() < 0.3f) {
             extraHandlingFlags |= EXTRA_HANDLING_NITROS;
-        }
-        else {
+        } else {
             if (DistanceBetweenPoints(FindPlayerCoors(), GetPosition()) > 50.0f)
                 extraHandlingFlags |= EXTRA_HANDLING_NITROS;
         }
-    }
-    else if (m_nModelIndex == MODEL_RCBANDIT && m_nStatus != STATUS_HELI) {
-            extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
+    } else if (m_nModelIndex == MODEL_RCBANDIT && m_nStatus != STATUS_REMOTE_CONTROLLED) {
+        extraHandlingFlags |= EXTRA_HANDLING_PERFECT;
     }
 
     bool extraPerfectHandling = !!(extraHandlingFlags & EXTRA_HANDLING_PERFECT);
@@ -1217,8 +1219,8 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
     }
 
     if (m_nStatus != STATUS_ABANDONED && m_nStatus != STATUS_WRECKED
-        && m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI
-        && m_nStatus != STATUS_PLANE && vehicleFlags.bIsLawEnforcer)
+        && m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED
+        && m_nStatus != STATUS_FORCED_STOP && vehicleFlags.bIsLawEnforcer)
     {
         ScanForCrimes();
     }
@@ -1329,7 +1331,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             return false;
         m_nHornCounter = 0;
         return false;
-    case STATUS_HELI:
+    case STATUS_REMOTE_CONTROLLED:
         if (CPad::GetPad()->CarGunJustDown() && !CVehicle::bDisableRemoteDetonation) {
             BlowUpCar(FindPlayerPed(), false);
             CRemote::TakeRemoteControlledCarFromPlayer(true);
@@ -1345,7 +1347,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         if (FindPlayerInfo().m_pRemoteVehicle == this)
             isRemotelyControlledByPlayer = true;
         break;
-    case STATUS_PLANE:
+    case STATUS_FORCED_STOP:
         if (m_vecMoveSpeed.SquaredMagnitude() < 0.01f
             || m_pDriver
             && m_pDriver->IsPlayer()
@@ -1367,7 +1369,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
             return false;
         m_nHornCounter = 0;
         return false;
-    case STATUS_REMOTE_CONTROLLED:
+    case STATUS_IS_TOWED:
         vehicleFlags.bIsHandbrakeOn = false;
         m_fBreakPedal = 0.0f;
         m_fSteerAngle = 0.0f;
@@ -1377,7 +1379,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         return false;
     }
 
-    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI)
+    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED)
         return false;
 
     bool processControlInput = isRemotelyControlledByPlayer;
@@ -1405,12 +1407,11 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags)
         ProcessControlInputs(static_cast<uint8>(m_pDriver->m_nPedType));
     }
 
-    if (m_nStatus == STATUS_PLAYER) {
-        if (!IsSubHeli()) {
-            if ((m_nModelIndex == MODEL_VORTEX || !IsSubPlane())
-                && m_nModelIndex != MODEL_SWATVAN
-                && m_nModelIndex != MODEL_RHINO)
+    if (m_nStatus == STATUS_PLAYER && !IsSubHeli()) {
+        if (m_nModelIndex == MODEL_VORTEX || !IsSubPlane()) {
+            if (m_nModelIndex != MODEL_SWATVAN && m_nModelIndex != MODEL_RHINO) {
                 DoDriveByShootings();
+            }
         }
     }
 
@@ -1498,7 +1499,7 @@ void CAutomobile::ResetSuspension()
 // 0x6A8500
 void CAutomobile::ProcessFlyingCarStuff()
 {
-    if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI || m_nStatus == STATUS_PHYSICS) {
+    if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED || m_nStatus == STATUS_PHYSICS) {
         if (CCheat::IsActive(CHEAT_CARS_FLY)
             && m_vecMoveSpeed.Magnitude() > 0.0f
             && CTimer::GetTimeStep() > 0.0f
@@ -1679,7 +1680,7 @@ void CAutomobile::ProcessSuspension() {
 
     float speedThreshold = 0.02f;
     float rollOnToWheelsForce = ROLL_ONTO_WHEELS_FORCE;
-    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI) {
+    if (m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED) {
         speedThreshold *= 2.0f;
         rollOnToWheelsForce *= 2.0f;
     }
@@ -2292,7 +2293,7 @@ void CAutomobile::VehicleDamage(float damageIntensity, eVehicleCollisionComponen
                 return;
             }
             switch (m_nStatus) {
-            case eEntityStatus::STATUS_HELI: {
+            case eEntityStatus::STATUS_REMOTE_CONTROLLED: {
                 if (physicalFlags.bSubmergedInWater)
                     return;
                 break;
@@ -2772,7 +2773,7 @@ bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
 
     switch (m_nStatus) {
     case eEntityStatus::STATUS_PHYSICS:
-    case eEntityStatus::STATUS_REMOTE_CONTROLLED:
+    case eEntityStatus::STATUS_IS_TOWED:
     case eEntityStatus::STATUS_ABANDONED:
         break;
     case eEntityStatus::STATUS_SIMPLE:
@@ -2783,7 +2784,7 @@ bool CAutomobile::SetTowLink(CVehicle* tractor, bool placeMeOnRoadProperly) {
     }
     }
 
-    m_nStatus = STATUS_REMOTE_CONTROLLED;
+    m_nStatus = STATUS_IS_TOWED;
 
     m_pTractor = tractor;
     tractor->RegisterReference(m_pTractor);
@@ -2828,7 +2829,7 @@ bool CAutomobile::BreakTowLink() {
     }
 
     switch (m_nStatus) {
-    case eEntityStatus::STATUS_REMOTE_CONTROLLED:
+    case eEntityStatus::STATUS_IS_TOWED:
     case eEntityStatus::STATUS_PLAYER_DISABLED: {
         if (m_pDriver) {
             m_nStatus = m_pDriver->IsPlayer() ? eEntityStatus::STATUS_PLAYER : eEntityStatus::STATUS_PHYSICS;
@@ -3970,7 +3971,7 @@ void CAutomobile::ProcessCarWheelPair(eCarWheel leftWheel, eCarWheel rightWheel,
             cosSteerAngle = std::cos(steerAngle);
         }
 
-        bool neutralHandling = m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_HELI && handlingFlags.bNpcNeutralHandl;
+        bool neutralHandling = m_nStatus != STATUS_PLAYER && m_nStatus != STATUS_REMOTE_CONTROLLED && handlingFlags.bNpcNeutralHandl;
         float brakeBias = 0.0f;
         float tractionBias = 0.0f;
 
@@ -4872,7 +4873,7 @@ void CAutomobile::ScanForCrimes()
 // 0x6AE850
 void CAutomobile::TankControl()
 {
-    if (m_nModelIndex == MODEL_RCTIGER && m_nStatus  == STATUS_HELI) {
+    if (m_nModelIndex == MODEL_RCTIGER && m_nStatus  == STATUS_REMOTE_CONTROLLED) {
         if (CPad::GetPad()->CarGunJustDown()) {
             if (CTimer::GetTimeInMS() > m_nGunFiringTime + TIGER_GUNFIRE_RATE) {
                 CWeapon minigun(WEAPON_MINIGUN, 5000);

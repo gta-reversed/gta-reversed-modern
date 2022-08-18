@@ -2076,7 +2076,7 @@ bool CPhysical::ProcessShiftSectorList(int32 sectorX, int32 sectorY)
                                 {
                                     if (   physicalFlags.bDontCollideWithFlyers
                                         && m_nStatus // todo:  == STATUS_PLAYER_PLAYBACK_FROM_BUFFER
-                                        && m_nStatus != STATUS_HELI
+                                        && m_nStatus != STATUS_REMOTE_CONTROLLED
                                         && entity->DoesNotCollideWithFlyers()
                                     ) {
                                         bCollisionDisabled = true;
@@ -4084,7 +4084,7 @@ bool CPhysical::ProcessCollisionSectorList(int32 sectorX, int32 sectorY)
                         } else if (!physicalFlags.bDisableZ || physicalFlags.bApplyGravity) {
                             if (physicalFlags.bDontCollideWithFlyers) {
                                 if (m_nStatus) {
-                                    if (m_nStatus != STATUS_HELI && entity->DoesNotCollideWithFlyers()) {
+                                    if (m_nStatus != STATUS_REMOTE_CONTROLLED && entity->DoesNotCollideWithFlyers()) {
                                         bCollisionDisabled = true;
                                     }
                                 }
