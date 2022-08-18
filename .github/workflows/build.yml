@@ -3,10 +3,10 @@ on: [ push, pull_request ]
 
 jobs:
   build:
-    runs-on: windows-2022
+    runs-on: windows-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
         with:
           fetch-depth: 1
           submodules: recursive
@@ -20,7 +20,7 @@ jobs:
         run: cmake --build build --config Debug
 
       - name: Artifact Debug
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gta_reversed-debug
           path: bin/Debug
@@ -29,7 +29,7 @@ jobs:
         run: cmake --build build --config Release
 
       - name: Artifact Release
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: gta_reversed-release
           path: bin/Release
