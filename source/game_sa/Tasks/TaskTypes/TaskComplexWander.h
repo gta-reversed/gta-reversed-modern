@@ -58,13 +58,13 @@ public:
     virtual void UpdateDir(CPed* ped);
     virtual void UpdatePathNodes(const CPed* ped, uint8 dir, CNodeAddress& originNode, CNodeAddress& targetNode, uint8& outDir);
 
-    CTask* CreateSubTask(CPed* ped, int32 taskId);
-    void ComputeTargetPos(const CPed* ped, CVector& foutTargetPos, const CNodeAddress& targetNodeAddress);
+    CTask* CreateSubTask(CPed* ped, eTaskType taskType);
+    void ComputeTargetPos(const CPed* ped, CVector& outTargetPos, const CNodeAddress& targetNodeAddress);
     float ComputeTargetHeading(CPed* ped);
-    bool ValidNodes() const;
+    [[nodiscard]] bool ValidNodes() const;
     void ScanForBlockedNodes(CPed* ped);
     bool ScanForBlockedNode(CPed* ped, const CNodeAddress& targetNodeAddress);
-    bool ScanForBlockedNode(CVector* position, class CEntity* entity);
+    bool ScanForBlockedNode(const CVector& position, class CEntity* entity);
 
     static CTaskComplexWander* GetWanderTaskByPedType(CPed* ped);
 
