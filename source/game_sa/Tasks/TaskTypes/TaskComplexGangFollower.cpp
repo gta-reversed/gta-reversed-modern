@@ -6,14 +6,14 @@ void CTaskComplexGangFollower::InjectHooks() {
     RH_ScopedClass(CTaskComplexGangFollower);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    // RH_ScopedInstall(Constructor, 0x65EAA0);
-    // RH_ScopedInstall(Destructor, 0x65EBB0);
-    // RH_ScopedInstall(CalculateOffsetPosition, 0x65ED40);
-    // RH_ScopedInstall(Clone, 0x65ECB0);
-    // RH_ScopedInstall(MakeAbortable, 0x65EC30);
-    // RH_ScopedInstall(CreateNextSubTask, 0x665E00);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x666160);
-    // RH_ScopedInstall(ControlSubTask, 0x662A10);
+    RH_ScopedInstall(Constructor, 0x65EAA0, { .reversed = false });
+    RH_ScopedInstall(Destructor, 0x65EBB0, { .reversed = false });
+    RH_ScopedInstall(CalculateOffsetPosition, 0x65ED40, { .reversed = false });
+    RH_ScopedInstall(Clone, 0x65ECB0, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x65EC30, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask, 0x665E00, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x666160, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x662A10, { .reversed = false });
 }
 
 // 0x65EAA0
