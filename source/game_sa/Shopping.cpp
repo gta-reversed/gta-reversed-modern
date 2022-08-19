@@ -1,5 +1,5 @@
 #include "StdInc.h"
-
+#include <extensions/enumerate.hpp>
 #include "Shopping.h"
 
 void CShopping::InjectHooks() {
@@ -44,22 +44,17 @@ void CShopping::InjectHooks() {
 // Used only in CShopping::LoadStats()
 // 0x49ABD0
 int32 GetChangingStatIndex(const char* stat) {
-    if (!strcmp("-", stat))
-        return -1;
-    if (!strcmp("fat", stat))
-        return 0;
-    if (!strcmp("respect", stat))
-        return 1;
-    if (!strcmp("sexy", stat))
-        return 2;
-    if (!strcmp("health", stat))
-        return 3;
-    if (!strcmp("stamina", stat))
-        return 4;
-    if (strcmp("calories", stat) != 0)
-        return -1;
+    static constexpr const char* statNames[] = {
+        "fat", "respect", "sexy", "health", "calories"
+    };
 
-    return 5;
+    for (auto&& [i, name] : notsa::enumerate(statNames)) {
+        if (!strcmp(name, stat)) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 // 0x
