@@ -7,9 +7,9 @@ void CInformGroupEventQueue::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x4B2AD0);
-//    RH_ScopedInstall(Add, 0x4B7CD0);
-//    RH_ScopedInstall(Flush, 0x4AC410);
-//    RH_ScopedInstall(Process, 0x4B2AE0);
+RH_ScopedInstall(Add, 0x4B7CD0, { .reversed = false });
+RH_ScopedInstall(Flush, 0x4AC410, { .reversed = false });
+RH_ScopedInstall(Process, 0x4B2AE0, { .reversed = false });
 }
 
 // 0x4B2AD0
