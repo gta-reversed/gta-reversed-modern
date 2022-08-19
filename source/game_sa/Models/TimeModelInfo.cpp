@@ -8,7 +8,6 @@ void CTimeModelInfo::InjectHooks() {
 
     RH_ScopedVirtualInstall(GetModelType, 0x4C5660);
     RH_ScopedVirtualInstall(GetTimeInfo, 0x4C5670);
-    // RH_ScopedInstall(FindOtherTimeModel, 0x4C47E0);
 }
 
 // 0x4C5660
