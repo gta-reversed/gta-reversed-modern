@@ -11,19 +11,19 @@ void BoneNode_c::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x6177B0);
     RH_ScopedInstall(InitLimits, 0x617490);
-    //RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0);
-    //RH_ScopedGlobalInstall(QuatToEuler, 0x617080);
+    RH_ScopedGlobalInstall(EulerToQuat, 0x6171F0, { .reversed = false });
+    RH_ScopedGlobalInstall(QuatToEuler, 0x617080, { .reversed = false });
     RH_ScopedGlobalInstall(GetIdFromBoneTag, 0x617050);
     RH_ScopedInstall(ClampLimitsCurrent, 0x6175D0);
     RH_ScopedInstall(ClampLimitsDefault, 0x617530);
-    //RH_ScopedInstall(Limit, 0x617650);
-    //RH_ScopedInstall(BlendKeyframe, 0x616E30);
+    RH_ScopedInstall(Limit, 0x617650, { .reversed = false });
+    RH_ScopedInstall(BlendKeyframe, 0x616E30, { .reversed = false });
     RH_ScopedInstall(GetSpeed, 0x616CB0);
     RH_ScopedInstall(SetSpeed, 0x616CC0);
     RH_ScopedInstall(SetLimits, 0x616C50);
     RH_ScopedInstall(GetLimits, 0x616BF0);
     RH_ScopedInstall(AddChild, 0x616BD0);
-    //RH_ScopedInstall(CalcWldMat, 0x616CD0);
+    RH_ScopedInstall(CalcWldMat, 0x616CD0, { .reversed = false });
 }
 
 // 0x6177B0
