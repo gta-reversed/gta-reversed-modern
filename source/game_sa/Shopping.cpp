@@ -34,6 +34,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetNextSection, 0x49AF10, { .reversed = false });
     RH_ScopedInstall(GetPrice, 0x49AD50, { .reversed = false });
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0, { .reversed = false });
+    RH_ScopedInstall(SetPlayerHasBought, 0x49B610, {.reversed = false});
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0, { .reversed = false });
     RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
     RH_ScopedInstall(IncrementStat2, 0x0, { .reversed = false });
@@ -46,7 +47,6 @@ void CShopping::InjectHooks() {
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
     RH_ScopedInstall(RestoreClothesState, 0x49B240, { .reversed = false });
     RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0, { .reversed = false });
-    RH_ScopedInstall(SetPlayerHasBought, 0x49B610, { .reversed = false });
     RH_ScopedInstall(ShutdownForRestart, 0x49B640, { .reversed = false });
     RH_ScopedInstall(StoreClothesState, 0x49B200, { .reversed = false });
     RH_ScopedInstall(StoreVehicleMods, 0x0, { .reversed = false });
@@ -148,9 +148,25 @@ void CShopping::GetPriceSectionFromName(const char* name) {
     plugin::Call<0x49AAD0, const char*>(name);
 }
 
+// 0x49B610
+void CShopping::SetPlayerHasBought(uint32 itemKey) {
+    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+        if (key == itemKey) {
+            ms_bHasBought[i] = true;
+        }
+    }
+}
+
 // 0x49B5E0
-void CShopping::HasPlayerBought(uint32 a1) {
-    plugin::Call<0x49B5E0, uint32>(a1);
+bool CShopping::HasPlayerBought(uint32 itemKey) {
+    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+        if (key == itemKey) {
+            return ms_bHasBought[i];
+        }
+    }
+
+    // NOTSA. SA does `return ms_bHasBought[-1];`.
+    return false;
 }
 
 // 0x
@@ -218,15 +234,6 @@ void CShopping::RestoreVehicleMods() {
 // 0x
 void CShopping::SetCurrentProperty(CMultiBuilding* property) {
     //gpCurrentProperty = property;
-}
-
-// 0x49B610
-void CShopping::SetPlayerHasBought(uint32 itemKey) {
-    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
-        if (key == itemKey) {
-            ms_bHasBought[i] = true;
-        }
-    }
 }
 
 // 0x49B640

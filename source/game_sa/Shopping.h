@@ -45,10 +45,10 @@ public:
     static void GetNextSection(FILE* file);
     static void GetPrice(uint32 itemId);
     static void GetPriceSectionFromName(const char* name);
-    static void HasPlayerBought(uint32 a1);
+    static void SetPlayerHasBought(uint32 itemKey);
+    static bool HasPlayerBought(uint32 itemKey);
     static void IncrementStat(int32 a1, int32 a2);
     static void IncrementStat2(int32 a1, int32 a2);
-    static void Load();
     static void LoadPrices(const char* sectionName);
     static void LoadShop(const char* sectionName);
     static void LoadStats();
@@ -58,13 +58,13 @@ public:
     static void RemovePriceModifier(uint32 a1);
     static void RestoreClothesState();
     static void RestoreVehicleMods();
-    static void Save();
     static void SetCurrentProperty(CMultiBuilding* property);
-    static void SetPlayerHasBought(uint32 itemKey);
     static void ShutdownForRestart();
     static void StoreClothesState();
     static void StoreVehicleMods();
     static void UpdateStats(int32 a1, bool a2);
+    static void Load();
+    static void Save();
 };
 
 static constexpr auto NUM_COMPONENTS = 20u; // ?
