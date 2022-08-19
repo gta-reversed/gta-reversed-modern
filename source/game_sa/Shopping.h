@@ -57,4 +57,6 @@ public:
     static void UpdateStats(int32 a1, bool a2);
 };
 
-char& gClothesHaveBeenStored = *(char*)0xA97298;
+extern char& gClothesHaveBeenStored;
+extern std::array<eDamageState, 20u>& gComponentDamageState;
+extern std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods;

@@ -169,6 +169,8 @@ struct tHydraulicData {
 
 VALIDATE_SIZE(tHydraulicData, 0x28);
 
+static constexpr auto NUM_VEHICLE_UPGRADES = 15u;
+
 class CVehicle : public CPhysical {
 public:
     CAEVehicleAudioEntity m_vehicleAudio;
@@ -292,7 +294,7 @@ public:
     uint8             m_nTertiaryColor;
     uint8             m_nQuaternaryColor;
     uint8             m_anExtras[2];
-    std::array<int16, 15> m_anUpgrades;
+    std::array<int16, NUM_VEHICLE_UPGRADES> m_anUpgrades;
     float             m_fWheelScale;
     int16             m_nAlarmState;
     int16             m_nForcedRandomRouteSeed; // if this is non-zero the random wander gets deterministic

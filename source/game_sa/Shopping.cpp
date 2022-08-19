@@ -2,6 +2,10 @@
 #include <extensions/enumerate.hpp>
 #include "Shopping.h"
 
+char& gClothesHaveBeenStored = *(char*)0xA97298;
+std::array<eDamageState, 20u>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
+std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
+
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
@@ -54,12 +58,13 @@ void CShopping::Init() {
 // Used only in CShopping::LoadStats()
 // 0x49ABD0
 int32 GetChangingStatIndex(const char* stat) {
-    constexpr const char* statNames[] = {
+    static constexpr const char* statNames[] = {
         "fat", "respect", "sexy", "health", "calories"
     };
 
-    for (auto&& [i, name] : notsa::enumerate(statNames)) {
-        if (!strcmp(name, stat)) {
+    // todo: use notsa::enumerate
+    for (auto i = 0u; i < std::size(statNames); i++) {
+        if (!strcmp(statNames[i], stat)) {
             return i;
         }
     }
@@ -214,9 +219,51 @@ void CShopping::StoreClothesState() {
     plugin::Call<0x49B200>();
 }
 
-// 0x
+// 0x49B280
 void CShopping::StoreVehicleMods() {
-    plugin::Call<0x0>();
+    plugin::Call<0x49B280>();
+
+    auto veh = FindPlayerVehicle()->AsAutomobile();
+    if (!veh) // NOTSA
+        return;
+
+    memcpy(&gStoredVehicleMods, &veh->m_anUpgrades, NUM_VEHICLE_UPGRADES);
+
+    if (!veh->IsAutomobile())
+        return;
+
+    const auto& damage = veh->m_damageManager;
+    for (auto&& [i, state] : notsa::enumerate(gComponentDamageState)) {
+        switch (i) {
+        case 2:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_RIGHT);
+            break;
+        case 4:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_RIGHT);
+            break;
+        case 5:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_LEFT);
+            break;
+        case 7:
+            state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_REAR_LEFT);
+            break;
+        case 12:
+            state = (eDamageState)damage.GetPanelStatus(FRONT_BUMPER);
+            break;
+        case 13:
+            state = (eDamageState)damage.GetPanelStatus(REAR_BUMPER);
+            break;
+        case 16:
+            state = (eDamageState)damage.GetDoorStatus(DOOR_BONNET);
+            break;
+        case 17:
+            state = (eDamageState)damage.GetDoorStatus(DOOR_BOOT);
+            break;
+        default:
+            state = DAMAGE_STATE_OK;
+            break;
+        }
+    }
 }
 
 // 0x
@@ -234,7 +281,7 @@ void CShopping::Load() {
     }
 
     CGenericGameStorage::LoadDataFromWorkBuffer(&ms_numBuyableItems, sizeof(uint32));
-    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_bHasBought, sizeof(ms_numBuyableItems) * sizeof(bool));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_bHasBought, ms_numBuyableItems);
 }
 
 // 0x5D3DE0
@@ -247,5 +294,5 @@ void CShopping::Save() {
     }
 
     CGenericGameStorage::SaveDataToWorkBuffer(&ms_numBuyableItems, sizeof(uint32));
-    CGenericGameStorage::SaveDataToWorkBuffer(&ms_bHasBought, sizeof(ms_numBuyableItems) * sizeof(bool));
+    CGenericGameStorage::SaveDataToWorkBuffer(&ms_bHasBought, ms_numBuyableItems);
 }
