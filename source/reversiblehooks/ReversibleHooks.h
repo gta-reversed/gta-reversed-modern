@@ -92,10 +92,11 @@ namespace ReversibleHooks {
     };
 
     struct HookInstallOptions {
-        bool enabled{true};
-        bool locked{false};
-        int jmpCodeSize{5};
-        int stackArguments{-1};
+        bool reversed{ true };          // Has this function been reversed?
+        bool enabled{ reversed };       // Is this hook enabled (eg.: redirects GTA calls to ours or vice versa if disabled) by default?
+        bool locked{ !reversed };       // If this hook shouldn't be switchable from the GUI
+        int jmpCodeSize{ 5 };
+        int stackArguments{ -1 };
     };
 
     RootHookCategory& GetRootCategory();
