@@ -36,7 +36,7 @@ void RsInjectHooks() {
     RH_ScopedGlobalInstall(RsErrorMessage, 0x619B00);
     RH_ScopedGlobalInstall(RsWarningMessage, 0x619B30);
     RH_ScopedGlobalInstall(RsEventHandler, 0x619B60);
-    // RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90);
+    RH_ScopedGlobalInstall(RsRwInitialize, 0x619C90, { .reversed = false });
 }
 
 static std::array<uint8, 256>& KeysShifted = *(std::array<uint8, 256>*)0x8D2D00;
