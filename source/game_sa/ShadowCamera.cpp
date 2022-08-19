@@ -6,22 +6,22 @@ void CShadowCamera::InjectHooks() {
     RH_ScopedClass(CShadowCamera);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(CShadowCamera, 0x7053F0);
+    // RH_ScopedInstall(CShadowCamera, 0x7053F0, { .reversed = false }); // TODO: Constructor
     // RH_ScopedInstall(~CShadowCamera, 0x705B50);
-    // - RH_ScopedInstall(Destroy, 0x705400);
+    RH_ScopedInstall(Destroy, 0x705400, { .reversed = false });
     RH_ScopedInstall(SetFrustum, 0x7054C0);
     RH_ScopedInstall(SetLight, 0x705520);
     RH_ScopedInstall(SetCenter, 0x705590);
-    // RH_ScopedInstall(InvertRaster, 0x705660);
+    RH_ScopedInstall(InvertRaster, 0x705660, { .reversed = false });
     RH_ScopedInstall(GetRwRenderRaster, 0x705770);
     RH_ScopedInstall(GetRwRenderTexture, 0x705780);
-    // RH_ScopedInstall(DrawOutlineBorder, 0x705790);
-    // RH_ScopedInstall(Create, 0x705B60);
-    // RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*));
-    // RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera*(CShadowCamera::*)(RpAtomic*));
-    // RH_ScopedInstall(MakeGradientRaster, 0x705D20);
-    // RH_ScopedInstall(RasterResample, 0x706070);
-    // RH_ScopedInstall(RasterBlur, 0x706170);
+    RH_ScopedInstall(DrawOutlineBorder, 0x705790, { .reversed = false });
+    RH_ScopedInstall(Create, 0x705B60, { .reversed = false });
+    RH_ScopedOverloadedInstall(Update, "Clump", 0x705BF0, RwCamera*(CShadowCamera::*)(RpClump*), { .reversed = false });
+    RH_ScopedOverloadedInstall(Update, "Atomic", 0x705C80, RwCamera * (CShadowCamera::*)(RpAtomic*), { .reversed = false });
+    RH_ScopedInstall(MakeGradientRaster, 0x705D20, { .reversed = false });
+    RH_ScopedInstall(RasterResample, 0x706070, { .reversed = false });
+    RH_ScopedInstall(RasterBlur, 0x706170, { .reversed = false });
 }
 
 // 0x7053F0
