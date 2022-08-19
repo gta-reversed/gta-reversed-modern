@@ -6,9 +6,9 @@ void CEscalator::InjectHooks() {
     RH_ScopedClass(CEscalator);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(SwitchOff, 0x717860);
-    // RH_ScopedInstall(AddThisOne, 0x717970);
-    // RH_ScopedInstall(Update, 0x717D30);
+    RH_ScopedInstall(SwitchOff, 0x717860, { .reversed = false });
+    RH_ScopedInstall(AddThisOne, 0x717970, { .reversed = false });
+    RH_ScopedInstall(Update, 0x717D30, { .reversed = false });
 }
 
 // 0x717110
