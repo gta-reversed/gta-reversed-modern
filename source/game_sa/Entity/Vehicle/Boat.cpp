@@ -433,7 +433,7 @@ void CBoat::ProcessControl_Reversed() {
         break;
     }
 
-    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_HELI || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
+    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_REMOTE_CONTROLLED || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
         auto fSTDPropSpeed = 0.0F;
         auto fROCPropSpeed = CPlane::PLANE_ROC_PROP_SPEED;
         if (m_nModelIndex == MODEL_SKIMMER)

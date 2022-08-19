@@ -53,7 +53,7 @@ void CLoadingScreen::Init(bool unusedFlag, bool loaded) {
 // 0x58FF10
 void CLoadingScreen::Shutdown() {
     m_bActive = false;
-    for (auto splash : m_aSplashes) {
+    for (auto& splash : m_aSplashes) {
         if (splash.m_pTexture) {
             splash.Delete();
         }
