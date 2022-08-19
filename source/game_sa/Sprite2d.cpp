@@ -47,7 +47,7 @@ void CSprite2d::InjectHooks() {
     RH_ScopedInstall(DrawAnyRect, 0x727CC0);
     RH_ScopedInstall(Draw2DPolygon, 0x7285B0);
     RH_ScopedInstall(DrawBarChart, 0x728640);
-    // RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60);
+    RH_ScopedInstall(DrawCircleAtNearClip, 0x727D60, { .reversed = false });
 }
 
 CSprite2d::CSprite2d()
