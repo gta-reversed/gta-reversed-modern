@@ -382,17 +382,17 @@ void CAEWeaponAudioEntity::InjectHooks() {
     RH_ScopedInstall(WeaponReload, 0x503690);
     RH_ScopedInstall(PlayChainsawStopSound, 0x504AA0);
     RH_ScopedInstall(PlayMiniGunStopSound, 0x504960);
-    // RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0);
+    RH_ScopedInstall(PlayMiniGunFireSounds, 0x5047C0, { .reversed = false });
     RH_ScopedInstall(PlayCameraSound, 0x5046F0);
     RH_ScopedInstall(PlayWeaponLoopSound, 0x504610);
-    // RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470);
-    // RH_ScopedInstall(PlayGunSounds, 0x503CE0);
+    RH_ScopedInstall(PlayFlameThrowerSounds, 0x504470, { .reversed = false });
+    RH_ScopedInstall(PlayGunSounds, 0x503CE0, { .reversed = false });
     RH_ScopedInstall(ReportStealthKill, 0x503B20);
-    // RH_ScopedInstall(ReportChainsawEvent, 0x503910);
+    RH_ScopedInstall(ReportChainsawEvent, 0x503910, { .reversed = false });
     RH_ScopedInstall(PlayFlameThrowerIdleGasLoop, 0x503870);
     RH_ScopedInstall(PlayGoggleSound, 0x503500);
     RH_ScopedInstall(StopFlameThrowerIdleGasLoop, 0x5034E0);
-    // RH_ScopedInstall(UpdateParameters, 0x504B70);
+    RH_ScopedInstall(UpdateParameters, 0x504B70, { .reversed = false });
 
 }
 
