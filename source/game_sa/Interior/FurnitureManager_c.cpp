@@ -5,15 +5,15 @@ void FurnitureManager_c::InjectHooks() {
     RH_ScopedClass(FurnitureManager_c);
     RH_ScopedCategory("Interior");
 
-    // RH_ScopedInstall(Constructor, 0x591260);
-    // RH_ScopedInstall(Destructor, 0x5912E0);
-    // RH_ScopedGlobalInstall(GetGroupId, 0x5BFB40);
-    // RH_ScopedGlobalInstall(GetSubGroupId, 0x5BFBF0);
-    // RH_ScopedInstall(Exit, 0x5911A0);
-    // RH_ScopedInstall(GetFurniture, 0x5911E0);
-    // RH_ScopedInstall(GetRandomId, 0x591220);
-    // RH_ScopedInstall(LoadFurniture, 0x5C0280);
-    // RH_ScopedInstall(Init, 0x5C04A0);
+    //RH_ScopedInstall(Constructor, 0x591260, { .reversed = false });
+    //RH_ScopedInstall(Destructor, 0x5912E0, { .reversed = false });
+    RH_ScopedGlobalInstall(GetGroupId, 0x5BFB40, { .reversed = false });
+    RH_ScopedGlobalInstall(GetSubGroupId, 0x5BFBF0, { .reversed = false });
+    RH_ScopedInstall(Exit, 0x5911A0, { .reversed = false });
+    RH_ScopedInstall(GetFurniture, 0x5911E0, { .reversed = false });
+    RH_ScopedInstall(GetRandomId, 0x591220, { .reversed = false });
+    RH_ScopedInstall(LoadFurniture, 0x5C0280, { .reversed = false });
+    RH_ScopedInstall(Init, 0x5C04A0, { .reversed = false });
 }
 
 // 0x5C04A0
