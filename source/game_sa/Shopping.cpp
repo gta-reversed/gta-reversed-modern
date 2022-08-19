@@ -8,6 +8,8 @@ char& gClothesHaveBeenStored = *(char*)0xA97298;
 std::array<eDamageState, 20u>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
 std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
 
+CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0x0;
+
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
@@ -205,8 +207,8 @@ void CShopping::RestoreVehicleMods() {
 
 // unused
 // 0x
-void CShopping::SetCurrentProperty() {
-
+void CShopping::SetCurrentProperty(CMultiBuilding* property) {
+    //gpCurrentProperty = property;
 }
 
 // 0x49B610

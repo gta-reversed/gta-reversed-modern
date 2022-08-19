@@ -2,6 +2,9 @@
 
 #include <cstdio> // FILE*
 
+// incomplete, todo: move
+class CMultiBuilding {};
+
 class CShopping {
     struct tPriceModifier {
         const char* key;
@@ -49,7 +52,7 @@ public:
     static void RestoreClothesState();
     static void RestoreVehicleMods();
     static void Save();
-    static void SetCurrentProperty();
+    static void SetCurrentProperty(CMultiBuilding* property);
     static void SetPlayerHasBought(uint32 a1);
     static void ShutdownForRestart();
     static void StoreClothesState();
@@ -61,3 +64,4 @@ extern char& gClothesHaveBeenStored;
 extern std::array<eDamageState, 20u>& gComponentDamageState;
 extern std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods;
 extern CPedClothesDesc& gStoredClothesState;
+extern CMultiBuilding* gpCurrentProperty;
