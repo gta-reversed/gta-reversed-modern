@@ -32,7 +32,7 @@ void CPlane::InjectHooks() {
     RH_ScopedInstall(InitPlaneGenerationAndRemoval, 0x6CAD90);
     RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C9140);
     RH_ScopedVirtualInstall(BurstTyre, 0x6C9150);
-    // RH_ScopedVirtualInstall(PreRender, 0x6C94A0);
+    RH_ScopedVirtualInstall(PreRender, 0x6C94A0, { .reversed = false });
     RH_ScopedVirtualInstall(Render, 0x6CAB70);
     RH_ScopedInstall(IsAlreadyFlying, 0x6CAB90);
     RH_ScopedVirtualInstall(Fix, 0x6CABB0);
@@ -40,17 +40,17 @@ void CPlane::InjectHooks() {
     RH_ScopedInstall(SetGearUp, 0x6CAC20);
     RH_ScopedInstall(SetGearDown, 0x6CAC70);
     RH_ScopedVirtualInstall(OpenDoor, 0x6CACB0);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x6C9260);
-    // RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CADD0);
-    // RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6CB7C0);
-    // RH_ScopedVirtualInstall(VehicleDamage, 0x6CC4B0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6C9260, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CADD0, { .reversed = false });
+    RH_ScopedVirtualInstall(ProcessFlyingCarStuff, 0x6CB7C0, { .reversed = false });
+    RH_ScopedVirtualInstall(VehicleDamage, 0x6CC4B0, { .reversed = false });
     RH_ScopedInstall(CountPlanesAndHelis, 0x6CCA50);
     RH_ScopedInstall(AreWeInNoPlaneZone, 0x6CCAA0);
     RH_ScopedInstall(AreWeInNoBigPlaneZone, 0x6CCBB0);
-    // RH_ScopedInstall(SwitchAmbientPlanes, 0x6CCC50);
-    // RH_ScopedVirtualInstall(BlowUpCar, 0x6CCCF0);
-    // RH_ScopedInstall(FindPlaneCreationCoors, 0x6CD090);
-    // RH_ScopedInstall(DoPlaneGenerationAndRemoval, 0x6CD2F0);
+    RH_ScopedInstall(SwitchAmbientPlanes, 0x6CCC50, { .reversed = false });
+    RH_ScopedVirtualInstall(BlowUpCar, 0x6CCCF0, { .reversed = false });
+    RH_ScopedInstall(FindPlaneCreationCoors, 0x6CD090, { .reversed = false });
+    RH_ScopedInstall(DoPlaneGenerationAndRemoval, 0x6CD2F0, { .reversed = false });
 }
 
 // 0x6C8E20
