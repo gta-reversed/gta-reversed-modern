@@ -3,9 +3,9 @@
 #include <reversiblehooks/RootHookCategory.h>
 #include "HooksDebugModule.h"
 #include "Utility.h"
-#include <ReversibleHook/Base.h>
-#include <ReversibleHook/Simple.h>
-#include <ReversibleHook/Virtual.h>
+#include <reversiblehooks/ReversibleHook/Base.h>
+#include <reversiblehooks/ReversibleHook/Simple.h>
+#include <reversiblehooks/ReversibleHook/Virtual.h>
 
 #include <imgui.h>
 #include <imgui_stdlib.h>
