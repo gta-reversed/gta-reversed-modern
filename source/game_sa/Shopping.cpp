@@ -14,6 +14,8 @@ std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16
 
 CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0x0;
 
+
+
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
@@ -178,17 +180,17 @@ void CShopping::LoadStats() {
 
 // 0x
 void CShopping::RemoveLoadedPrices() {
-    plugin::Call<0x0>();
-}
-
-// 0x49AE30
-void CShopping::RemoveLoadedShop() {
-    ms_shopLoaded[0] = false;
     auto animBlockIndex = CAnimManager::GetAnimationBlockIndex(ms_sectionNames[ms_priceSectionLoaded]);
     if (animBlockIndex != -1) {
         CStreaming::SetModelIsDeletable(IFPToModelId(animBlockIndex));
     }
     ms_priceSectionLoaded = 0;
+}
+
+// 0x49AE30
+void CShopping::RemoveLoadedShop() {
+    ms_shopLoaded[0] = false;
+    RemoveLoadedPrices();
 }
 
 // 0x
