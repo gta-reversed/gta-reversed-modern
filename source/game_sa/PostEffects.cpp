@@ -134,15 +134,15 @@ void CPostEffects::InjectHooks() {
     RH_ScopedClass(CPostEffects);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Initialise, 0x704630);
+    RH_ScopedInstall(Initialise, 0x704630, { .reversed = false });
     RH_ScopedInstall(Close, 0x7010C0);
     RH_ScopedInstall(DoScreenModeDependentInitializations, 0x7046D0);
-    // RH_ScopedInstall(SetupBackBufferVertex, 0x7043D0);
+    RH_ScopedInstall(SetupBackBufferVertex, 0x7043D0, { .reversed = false });
     RH_ScopedInstall(Update, 0x7046A0);
     RH_ScopedInstall(DrawQuad, 0x700EC0);
-    // RH_ScopedInstall(FilterFX_StoreAndSetDayNightBalance, 0x7034B0);
-    // RH_ScopedInstall(FilterFX_RestoreDayNightBalance, 0x7034D0);
-    // RH_ScopedInstall(ImmediateModeFilterStuffInitialize, 0x703CC0);
+    RH_ScopedInstall(FilterFX_StoreAndSetDayNightBalance, 0x7034B0, { .reversed = false });
+    RH_ScopedInstall(FilterFX_RestoreDayNightBalance, 0x7034D0, { .reversed = false });
+    RH_ScopedInstall(ImmediateModeFilterStuffInitialize, 0x703CC0, { .reversed = false });
     RH_ScopedInstall(ImmediateModeRenderStatesSet, 0x700D70);
     RH_ScopedInstall(ImmediateModeRenderStatesStore, 0x700CC0);
     RH_ScopedInstall(ImmediateModeRenderStatesReStore, 0x700E00);
@@ -152,25 +152,25 @@ void CPostEffects::InjectHooks() {
     RH_ScopedInstall(ScriptInfraredVisionSwitch, 0x701140);
     RH_ScopedInstall(ScriptNightVisionSwitch, 0x701120);
     RH_ScopedInstall(ScriptResetForEffects, 0x7010F0);
-    // RH_ScopedInstall(UnderWaterRipple, 0x7039C0);
+    RH_ScopedInstall(UnderWaterRipple, 0x7039C0, { .reversed = false });
     RH_ScopedInstall(HeatHazeFXInit, 0x701450);
-    // RH_ScopedInstall(HeatHazeFX, 0x701780);
+    RH_ScopedInstall(HeatHazeFX, 0x701780, { .reversed = false });
     RH_ScopedInstall(IsVisionFXActive, 0x7034F0);
-    // RH_ScopedInstall(NightVision, 0x7011C0);
+    RH_ScopedInstall(NightVision, 0x7011C0, { .reversed = false });
     RH_ScopedInstall(NightVisionSetLights, 0x7012E0);
     RH_ScopedInstall(SetFilterMainColour, 0x703520);
     RH_ScopedInstall(InfraredVision, 0x703F80);
     RH_ScopedInstall(InfraredVisionSetLightsForDefaultObjects, 0x701430);
     RH_ScopedInstall(InfraredVisionStoreAndSetLightsForHeatObjects, 0x701320);
     RH_ScopedInstall(InfraredVisionRestoreLightsForHeatObjects, 0x701410);
-    // RH_ScopedInstall(Fog, 0x704150);
-    // RH_ScopedInstall(CCTV, 0x702F40);
-    // RH_ScopedInstall(Grain, 0x7037C0);
-    // RH_ScopedInstall(SpeedFX, 0x7030A0);
-    // RH_ScopedInstall(DarknessFilter, 0x702F00);
+    RH_ScopedInstall(Fog, 0x704150, { .reversed = false });
+    RH_ScopedInstall(CCTV, 0x702F40, { .reversed = false });
+    RH_ScopedInstall(Grain, 0x7037C0, { .reversed = false });
+    RH_ScopedInstall(SpeedFX, 0x7030A0, { .reversed = false });
+    RH_ScopedInstall(DarknessFilter, 0x702F00, { .reversed = false });
     RH_ScopedInstall(ColourFilter, 0x703650);
-    // RH_ScopedInstall(Radiosity, 0x702080);
-    // RH_ScopedInstall(Render, 0x7046E0);
+    RH_ScopedInstall(Radiosity, 0x702080, { .reversed = false });
+    RH_ScopedInstall(Render, 0x7046E0, { .reversed = false });
 }
 
 // 0x704630
