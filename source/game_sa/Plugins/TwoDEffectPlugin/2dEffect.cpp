@@ -26,7 +26,7 @@ void C2dEffect::InjectHooks()
     RH_ScopedGlobalInstall(t2dEffectPluginDestructor, 0x6FA880);
     RH_ScopedGlobalInstall(t2dEffectPluginCopyConstructor, 0x6F9FB0);
 
-    //RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0);
+    RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkReadCallBack, 0x6F9FD0, { .reversed = false });
     RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkWriteCallBack, 0x6FA620);
     RH_ScopedGlobalInstall(Rwt2dEffectPluginDataChunkGetSizeCallBack, 0x6FA630);
 }
