@@ -193,6 +193,9 @@ void CShopping::RemovePriceModifier(uint32 a1) {
 // 0x49B240
 void CShopping::RestoreClothesState() {
     plugin::Call<0x49B240>();
+
+    memcpy(FindPlayerPed()->m_pPlayerData->m_pPedClothesDesc, &gStoredClothesState, sizeof(CPedClothesDesc));
+    gClothesHaveBeenStored = 0u;
 }
 
 // 0x49B3C0
