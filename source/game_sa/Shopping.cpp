@@ -212,8 +212,14 @@ void CShopping::SetCurrentProperty(CMultiBuilding* property) {
 }
 
 // 0x49B610
-void CShopping::SetPlayerHasBought(uint32 a1) {
-    plugin::Call<0x49B610, uint32>(a1);
+void CShopping::SetPlayerHasBought(uint32 itemKey) {
+    plugin::Call<0x49B610, uint32>(itemKey);
+
+    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+        if (key == itemKey) {
+            ms_bHasBought[i] = true;
+        }
+    }
 }
 
 // 0x49B640

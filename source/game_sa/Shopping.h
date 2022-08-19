@@ -18,8 +18,9 @@ class CShopping {
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
-    inline static std::array<tPriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<tPriceModifier, 20>*)0xA98650;
-    inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, 560>*)0xA972A0;
+    inline static std::array<tPriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<tPriceModifier, NUM_PRICE_MODIFIERS>*)0xA98650;
+    inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
+    inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
 
 public:
     static void InjectHooks();
@@ -53,7 +54,7 @@ public:
     static void RestoreVehicleMods();
     static void Save();
     static void SetCurrentProperty(CMultiBuilding* property);
-    static void SetPlayerHasBought(uint32 a1);
+    static void SetPlayerHasBought(uint32 itemKey);
     static void ShutdownForRestart();
     static void StoreClothesState();
     static void StoreVehicleMods();
