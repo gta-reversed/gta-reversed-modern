@@ -67,8 +67,10 @@ public:
     static void UpdateStats(int32 a1, bool a2);
 };
 
+static constexpr auto NUM_COMPONENTS = 20u; // ?
+
 extern char& gClothesHaveBeenStored;
-extern std::array<eDamageState, 20u>& gComponentDamageState;
+extern std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState;
 extern std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods;
 extern CPedClothesDesc& gStoredClothesState;
 extern CMultiBuilding* gpCurrentProperty;

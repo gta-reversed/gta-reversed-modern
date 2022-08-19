@@ -9,7 +9,7 @@
 
 CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
 char& gClothesHaveBeenStored = *(char*)0xA97298;
-std::array<eDamageState, 20u>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
+std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
 std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
 
 CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0x0;
