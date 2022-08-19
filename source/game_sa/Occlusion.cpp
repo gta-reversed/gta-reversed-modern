@@ -35,7 +35,7 @@ void COcclusion::InjectHooks()
     RH_ScopedInstall(AddOne, 0x71DCD0);
     RH_ScopedInstall(IsPositionOccluded, 0x7200B0);
     RH_ScopedInstall(OccluderHidesBehind, 0x71E080);
-    // RH_ScopedInstall(ProcessBeforeRendering, 0x7201C0);
+    RH_ScopedInstall(ProcessBeforeRendering, 0x7201C0, { .reversed = false });
 }
 
 // 0x71DCA0
