@@ -6,6 +6,7 @@ void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
 
+//    RH_ScopedInstall(Init, 0x49C290);
 //    RH_ScopedInstall(AddPriceModifier, 0x0);
 //    RH_ScopedInstall(AddPriceModifier, 0x0);
 //    RH_ScopedInstall(Buy, 0x49BF70);
@@ -22,7 +23,6 @@ void CShopping::InjectHooks() {
 //    RH_ScopedInstall(HasPlayerBought, 0x49B5E0);
 //    RH_ScopedInstall(IncrementStat, 0x0);
 //    RH_ScopedInstall(IncrementStat2, 0x0);
-//    RH_ScopedInstall(Init, 0x49C290);
 //    RH_ScopedInstall(Load, 0x5D3E40);
 //    RH_ScopedInstall(LoadPrices, 0x49B8D0);
 //    RH_ScopedInstall(LoadShop, 0x49BBE0);
@@ -41,10 +41,20 @@ void CShopping::InjectHooks() {
 //    RH_ScopedInstall(UpdateStats, 0x0);
 }
 
+// 0x49C290
+void CShopping::Init() {
+    ms_numPrices = 0;
+    ms_numPriceModifiers = 0;
+    ms_numBuyableItems = 0u;
+    gClothesHaveBeenStored = 0;
+
+    LoadStats();
+}
+
 // Used only in CShopping::LoadStats()
 // 0x49ABD0
 int32 GetChangingStatIndex(const char* stat) {
-    static constexpr const char* statNames[] = {
+    constexpr const char* statNames[] = {
         "fat", "respect", "sexy", "health", "calories"
     };
 
@@ -136,11 +146,6 @@ void CShopping::IncrementStat(int32 a1, int32 a2) {
 // 0x
 void CShopping::IncrementStat2(int32 a1, int32 a2) {
     plugin::Call<0x0, int32, int32>(a1, a2);
-}
-
-// 0x49C290
-void CShopping::Init() {
-    plugin::Call<0x49C290>();
 }
 
 // 0x5D3E40

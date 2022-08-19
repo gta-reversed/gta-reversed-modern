@@ -3,9 +3,14 @@
 #include <cstdio> // FILE*
 
 class CShopping {
+    inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
+    inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
+    inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
+
 public:
     static void InjectHooks();
 
+    static void Init();
     static void AddPriceModifier(const char* a1, const char* a2, int32 a3);
     static void AddPriceModifier(uint32 a1, int32 a2);
     static void Buy(uint32 a1, int32 a2);
@@ -22,7 +27,6 @@ public:
     static void HasPlayerBought(uint32 a1);
     static void IncrementStat(int32 a1, int32 a2);
     static void IncrementStat2(int32 a1, int32 a2);
-    static void Init();
     static void Load();
     static void LoadPrices(const char* sectionName);
     static void LoadShop(const char* sectionName);
@@ -41,3 +45,5 @@ public:
     static void StoreVehicleMods();
     static void UpdateStats(int32 a1, bool a2);
 };
+
+char& gClothesHaveBeenStored = *(char*)0xA97298;
