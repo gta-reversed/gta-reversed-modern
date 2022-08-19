@@ -9,11 +9,12 @@ void CTaskComplexGangJoinRespond::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x6616F0);
     RH_ScopedInstall(Destructor, 0x661720);
-    // RH_ScopedInstall(Clone_Reversed, 0x662290);
-    // RH_ScopedInstall(MakeAbortable_Reversed, 0x661790);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x6617A0);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6618D0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x661950);
+
+    RH_ScopedVirtualInstall2(Clone, 0x662290, { .reversed = false });
+    RH_ScopedVirtualInstall2(MakeAbortable, 0x661790, { .reversed = false });
+    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x6617A0, { .reversed = false });
+    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x6618D0, { .reversed = false });
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x661950, { .reversed = false });
 }
 
 // 0x6616F0
