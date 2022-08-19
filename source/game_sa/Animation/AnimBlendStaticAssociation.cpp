@@ -6,10 +6,10 @@ void CAnimBlendStaticAssociation::InjectHooks() {
     RH_ScopedClass(CAnimBlendStaticAssociation);
     RH_ScopedCategory("Animation");
 
-    // RH_ScopedInstall(Constructor0, 0x4CE940);
-    // RH_ScopedInstall(Constructor1, 0x4CEF60);
-    // RH_ScopedInstall(Destructor, 0x4CDF50);
-    // RH_ScopedInstall(Init, 0x4CEC20);
+    //RH_ScopedInstall(Constructor0, 0x4CE940, { .reversed = false });
+    //RH_ScopedInstall(Constructor1, 0x4CEF60, { .reversed = false });
+    //RH_ScopedInstall(Destructor, 0x4CDF50, { .reversed = false });
+    RH_ScopedInstall(Init, 0x4CEC20, { .reversed = false });
     RH_ScopedInstall(AllocateSequenceArray, 0x4CE960);
     RH_ScopedInstall(FreeSequenceArray, 0x4CE9A0);
 }
