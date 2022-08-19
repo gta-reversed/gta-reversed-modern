@@ -35,7 +35,7 @@ void CPhysical::InjectHooks()
     RH_ScopedInstall(ApplyTurnForce, 0x542A50);
     RH_ScopedInstall(ApplyForce, 0x542B50);
     RH_ScopedInstall(GetSpeed, 0x542CE0);
-    // RH_ScopedInstall(ApplyMoveSpeed, 0x542DD0); // Go to the function definition and see why this is commented
+    RH_ScopedInstall(ApplyMoveSpeed, 0x542DD0, { .reversed = false }); // Go to the function definition and see why this is commented
     RH_ScopedInstall(ApplyTurnSpeed, 0x542E20);
     RH_ScopedOverloadedInstall(ApplyMoveForce, "vec", 0x5429F0, void(CPhysical::*)(CVector force));
     RH_ScopedInstall(SetDamagedPieceRecord, 0x5428C0);
