@@ -12,7 +12,7 @@ void CTaskComplexHitByGunResponse::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x631DD0);
     RH_ScopedInstall(Destructor, 0x631E30);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x631E50);
+    RH_ScopedInstall(CreateFirstSubTask, 0x631E50, { .reversed = false });
 }
 
 // 0x631DD0
