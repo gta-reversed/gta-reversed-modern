@@ -8,10 +8,10 @@ void CTaskComplexGoToPointAiming::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x668790);
     RH_ScopedInstall(Destructor, 0x668870);
-    // RH_ScopedInstall(CreateSubTask, 0x6688D0);
-    // RH_ScopedInstall(Clone, 0x66CD80);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x66DDB0);
-    // RH_ScopedInstall(ControlSubTask, 0x6689E0);
+    RH_ScopedInstall(CreateSubTask, 0x6688D0, { .reversed = false });
+    RH_ScopedInstall(Clone, 0x66CD80, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x66DDB0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x6689E0, { .reversed = false });
 }
 
 // 0x668790
