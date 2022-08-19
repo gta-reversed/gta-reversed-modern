@@ -22,10 +22,10 @@ void CTaskComplexArrestPed::InjectHooks() {
     RH_ScopedInstall(Constructor, 0x68B990);
     RH_ScopedInstall(Destructor, 0x68BA00);
     RH_ScopedInstall(MakeAbortable_Reversed, 0x68BA60);
-    // ~+ RH_ScopedInstall(CreateNextSubTask_Reversed, 0x690220);
+    RH_ScopedInstall(CreateNextSubTask_Reversed, 0x690220, { .reversed = false });
     RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x6907A0);
-    // untested RH_ScopedInstall(ControlSubTask_Reversed, 0x68D350);
-    // + RH_ScopedInstall(CreateSubTask, 0x68CF80);
+    RH_ScopedInstall(ControlSubTask_Reversed, 0x68D350, { .reversed = false });
+    RH_ScopedInstall(CreateSubTask, 0x68CF80, { .reversed = false });
 }
 bool CTaskComplexArrestPed::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return MakeAbortable_Reversed(ped, priority, event); }
 CTask* CTaskComplexArrestPed::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
