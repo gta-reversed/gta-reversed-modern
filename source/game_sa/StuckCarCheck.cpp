@@ -7,13 +7,13 @@ void CStuckCarCheck::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x4639E0);
-    // RH_ScopedInstall(AddCarToCheck, 0x465970);
-    // RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60);
+    RH_ScopedInstall(AddCarToCheck, 0x465970, { .reversed = false });
+    RH_ScopedInstall(AttemptToWarpVehicle, 0x463A60, { .reversed = false });
     RH_ScopedInstall(ClearStuckFlagForCar, 0x463C40);
-    // RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00);
-    // RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70);
-    // RH_ScopedInstall(Process, 0x465680);
-    // RH_ScopedInstall(RemoveCarFromCheck, 0x463B80);
+    RH_ScopedInstall(HasCarBeenStuckForAWhile, 0x463C00, { .reversed = false });
+    RH_ScopedInstall(IsCarInStuckCarArray, 0x463C70, { .reversed = false });
+    RH_ScopedInstall(Process, 0x465680, { .reversed = false });
+    RH_ScopedInstall(RemoveCarFromCheck, 0x463B80, { .reversed = false });
 }
 
 // 0x4639E0
