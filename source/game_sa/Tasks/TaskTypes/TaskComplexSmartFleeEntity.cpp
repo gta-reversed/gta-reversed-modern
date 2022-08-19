@@ -12,9 +12,10 @@ void CTaskComplexSmartFleeEntity::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x65C430);
     RH_ScopedInstall(Destructor, 0x65C4D0);
-    // RH_ScopedInstall(CreateNextSubTask_Reversed, 0x65C680);
-    // RH_ScopedInstall(CreateFirstSubTask_Reversed, 0x65C6F0);
-    // RH_ScopedInstall(ControlSubTask_Reversed, 0x65C780);
+
+    RH_ScopedVirtualInstall2(CreateNextSubTask, 0x65C680, { .reversed = false });
+    RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x65C6F0, { .reversed = false });
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x65C780, { .reversed = false });
 }
 
 // 0x65C430
