@@ -9,10 +9,10 @@ void CPlaneTrails::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     // using namespace ReversibleHooks;
-    // RH_ScopedInstall(Init, 0x717370);
-    // RH_ScopedInstall(Render, 0x7173A0);
-    // RH_ScopedInstall(RegisterPoint, 0x7174C0);
-    // RH_ScopedInstall(Update, 0x7174F0);
+    RH_ScopedInstall(Init, 0x717370, { .reversed = false });
+    RH_ScopedInstall(Render, 0x7173A0, { .reversed = false });
+    RH_ScopedInstall(RegisterPoint, 0x7174C0, { .reversed = false });
+    RH_ScopedInstall(Update, 0x7174F0, { .reversed = false });
 }
 
 void CPlaneTrails::Init() {
