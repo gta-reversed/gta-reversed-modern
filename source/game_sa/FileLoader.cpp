@@ -1143,7 +1143,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
     uint32 timeOn = 0, timeOff = 24;
     CVector enter{}, exit{};
     CVector2D range;
-    float enteranceAngle;
+    float entranceAngle;
     float unused;
     float exitAngle;
     int32 area;
@@ -1155,7 +1155,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
         line,
         "%f %f %f %f %f %f %f %f %f %f %f %d %d %s %d %d %d %d",
         &enter.x, &enter.y, &enter.z,
-        &enteranceAngle,
+        &entranceAngle,
         &range.x, &range.y,
         &unused,
         &exit.x, &exit.y, &exit.z,
@@ -1177,7 +1177,7 @@ void CFileLoader::LoadEntryExit(const char* line) {
 
     const auto enexPoolIdx = CEntryExitManager::AddOne(
         enter.x, enter.y, enter.z,
-        enteranceAngle,
+        entranceAngle,
         range.x, range.y,
         unused,
         exit.x, exit.y, exit.z,

@@ -45,7 +45,6 @@ public:
     uint8       m_nTimeOn;
     uint8       m_nTimeOff;
     uint8       m_nNumberOfPeds;
-    // char        _pad37;
     CEntryExit* m_pLink;
 
     static bool& ms_bWarping;
@@ -77,12 +76,12 @@ public:
     auto GetLinkedOrThis() const { return m_pLink ? m_pLink : this; }
     bool IsVisibleByTime() const;
 
-    // Most likely didnt exist in this form.
-    CMatrix GetRectEnteranceMatrix() const;
+    // Most likely didn't exist in this form.
+    CMatrix GetRectEntranceMatrix() const;
 
     // This possibly existed in some form.
     // `IsInArea` has some transformation code Which is very similar to the one in `CEnExManager::AddOne`
-    CVector TransformEnterancePoint(const CVector& point) const;
+    CVector TransformEntrancePoint(const CVector& point) const;
 };
 
 VALIDATE_SIZE(CEntryExit, 0x3C);
