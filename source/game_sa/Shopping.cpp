@@ -229,7 +229,10 @@ void CShopping::SetPlayerHasBought(uint32 itemKey) {
 
 // 0x49B640
 void CShopping::ShutdownForRestart() {
-    plugin::Call<0x49B640>();
+    RemoveLoadedShop();
+
+    ms_numPriceModifiers = 0;
+    rng::fill(ms_bHasBought, false);
 }
 
 // 0x49B200
