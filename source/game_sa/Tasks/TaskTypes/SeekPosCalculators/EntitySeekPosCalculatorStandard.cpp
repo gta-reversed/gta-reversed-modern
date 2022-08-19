@@ -6,7 +6,7 @@ void CEntitySeekPosCalculatorStandard::InjectHooks() {
     RH_ScopedClass(CEntitySeekPosCalculatorStandard);
     RH_ScopedCategory("Tasks/TaskTypes/SeekPosCalculators");
 
-    // RH_ScopedVirtualInstall2(ComputeEntitySeekPos, 0x46af20);
+    RH_ScopedVirtualInstall2(ComputeEntitySeekPos, 0x46af20, { .reversed = false });
 }
 
 /*
