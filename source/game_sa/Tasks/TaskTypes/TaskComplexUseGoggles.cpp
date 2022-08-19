@@ -5,29 +5,19 @@
 #include "TaskSimpleRunAnim.h"
 #include "TaskSimplePlayerOnFoot.h"
 
-// 0x634EF0
-CTaskComplexUseGoggles::CTaskComplexUseGoggles() : CTaskComplex() {
-    // NOP
-}
-
-// 0x634F20
-CTaskComplexUseGoggles::~CTaskComplexUseGoggles() {
-    // NOP
-}
-
 // 0x634F40
 CTask* CTaskComplexUseGoggles::CreateNextSubTask(CPed* ped) {
-    int enabled = m_pSubTask->GetTaskType() - TASK_SIMPLE_GOGGLES_ON;
-    if (enabled) {
-        if (enabled == 1) {
-            ped->TakeOffGoggles();
-            return nullptr;
-        }
-    } else {
+    switch (m_pSubTask->GetTaskType()) {
+    case TASK_SIMPLE_GOGGLES_OFF:
+        ped->TakeOffGoggles();
+        return nullptr;
+    case TASK_SIMPLE_GOGGLES_ON:
         ped->PutOnGoggles();
         ped->m_weaponAudio.AddAudioEvent(AE_WEAPON_FIRE);
+        return nullptr;
+    default:
+        return nullptr;
     }
-    return nullptr;
 }
 
 // 0x634F90
@@ -42,21 +32,31 @@ CTask* CTaskComplexUseGoggles::CreateFirstSubTask(CPed* ped) {
 
 // 0x635050
 CTask* CTaskComplexUseGoggles::ControlSubTask(CPed* ped) {
-    ped->m_pPlayerData->m_bDontAllowWeaponChange = true;
+    if (ped->m_pPlayerData) {
+        ped->m_pPlayerData->m_bDontAllowWeaponChange = true; // FIX_BUGS: V595 The 'ped->m_pPlayerData' pointer was utilized before it was verified against nullptr.
+        ped->m_pPlayerData->m_bPlayerSprintDisabled = true;
+        ped->m_pPlayerData->m_fTimeCanRun = std::max(ped->m_pPlayerData->m_fTimeCanRun, 0.0f);
 
-    auto* m_pPlayerData = ped->m_pPlayerData;
-    if (m_pPlayerData) {
-        m_pPlayerData->m_bPlayerSprintDisabled = true;
-        m_pPlayerData->m_fTimeCanRun = std::max(m_pPlayerData->m_fTimeCanRun, 0.0f);
-
-        auto* task = ped->m_pIntelligence->FindTaskByType(TASK_SIMPLE_PLAYER_ON_FOOT);
+        auto* task = ped->GetIntelligence()->FindTaskByType(TASK_SIMPLE_PLAYER_ON_FOOT);
         if (task)
-            static_cast<CTaskSimplePlayerOnFoot*>(task)->PlayerControlZelda(static_cast<CPlayerPed*>(ped), true);
+            static_cast<CTaskSimplePlayerOnFoot*>(task)->PlayerControlZelda(ped->AsPlayer(), true);
 
         ped->m_pPlayerData->m_bPlayerSprintDisabled = false;
     }
+
     return m_pSubTask;
 }
+
+void CTaskComplexUseGoggles::InjectHooks() {
+    RH_ScopedClass(CTaskComplexUseGoggles);
+    RH_ScopedCategory("Tasks/TaskTypes");
+
+    RH_ScopedVirtualInstall(Clone, 0x637060);
+    RH_ScopedVirtualInstall(GetTaskType, 0x634F10);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x634F40);
+    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x634F90);
+    RH_ScopedVirtualInstall(ControlSubTask, 0x635050);
+};
 
 void TaskComplexUseGogglesTestCode() {
     CStreaming::RequestModel(MODEL_NVGOGGLES, STREAMING_GAME_REQUIRED);

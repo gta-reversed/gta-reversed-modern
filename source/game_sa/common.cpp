@@ -11,20 +11,19 @@
 #include "GxtChar.h"
 #include "CDebugMenu.h"
 #include "CarCtrl.h"
-#include "ColourSet.h"
-#include "GxtChar.h"
 #include "UserDisplay.h"
 #include "PostEffects.h"
+#include "SpecialFX.h"
+#include "Hud.h"
 
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
-char *gString = (char *)0xB71670;
 
 float &GAME_GRAVITY = *(float *)0x863984;
 
 char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
 
-RpLight* (&ObjectAffectingLights)[6] = *reinterpret_cast<RpLight* (*)[6]>(0xC886F0);
+RpLight* (&pExtraDirectionals)[6] = *reinterpret_cast<RpLight* (*)[6]>(0xC886F0);
 int32& numExtraDirectionalLights = *reinterpret_cast<int32*>(0xC88708);
 
 RwV3d& sun2Dir = *reinterpret_cast<RwV3d*>(0xB7CB14);
@@ -49,17 +48,9 @@ float& gfLaRiotsLightMult = *(float*)0x8CD060; // 1.0f
 
 uint32 &ClumpOffset = *(uint32 *)0xB5F878;
 
-// used to convert 0-255 to 0.0f-1.0f, also see RwRGBARealFromRwRGBAMacro
-float& flt_859A3C = *(float*)0x859A3C; // 1.0f / 255.0f = 0.0039215689f
-
-
-
-void InjectCommonHooks()
-{
+void InjectCommonHooks() {
     RH_ScopedNamespaceName("Common");
     RH_ScopedCategory("Common");
-
-    HookInstall(0x53E230, &Render2dStuff); // This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without :D
 
     RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
     RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
@@ -111,6 +102,7 @@ void InjectCommonHooks()
     RH_ScopedGlobalInstall(SetFilterModeOnAtomicsTextures, 0x734D80);
 
     RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
+    RH_ScopedGlobalInstall(LightsCreate, 0x5BA520);
     RH_ScopedGlobalInstall(LightsDestroy, 0x735730);
     RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
 //    RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
@@ -139,6 +131,18 @@ void InjectCommonHooks()
     RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
+void MessageLoop() {
+    tagMSG msg;
+    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+        if (msg.message == WM_QUIT) {
+            RsGlobal.quit = true;
+        } else {
+            TranslateMessage(&msg);
+            DispatchMessageA(&msg);
+        }
+    }
+}
+
 // 0x56E010
 CVector FindPlayerCoors(int32 playerId) {
     if (CEntity* e = FindPlayerEntity(playerId))
@@ -154,7 +158,7 @@ CVector& FindPlayerSpeed(int32 playerId) {
 // 0x56E120
 CEntity* FindPlayerEntity(int32 playerId) {
     if (auto player = FindPlayerPed(playerId)) {
-        if (player->bInVehicle && player->m_pVehicle) 
+        if (player->bInVehicle && player->m_pVehicle)
             return player->m_pVehicle;
         return player;
     }
@@ -198,20 +202,15 @@ float FindPlayerHeading(int32 playerId) {
     return FindPlayerPed(playerId)->GetHeading();
 }
 
-// unused
 // 0x56E520
 float FindPlayerHeight() {
-    CPlayerPed* ped = CWorld::Players[CWorld::PlayerInFocus].m_pPed;
-    CMatrixLink* matrix = ped->m_matrix;
-    if (matrix)
-        return matrix->GetPosition().z;
-    else
-        return ped->m_placement.m_vPosn.z;
+    CPlayerPed* ped = FindPlayerPed();
+    return ped->GetPosition().z;
 }
 
 // 0x56E210
 CPlayerPed* FindPlayerPed(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_pPed;
+    return FindPlayerInfo(playerId).m_pPed;
 }
 
 // Returns player vehicle
@@ -232,9 +231,13 @@ CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
 
 // 0x56E230
 CWanted* FindPlayerWanted(int32 playerId) {
-    return CWorld::Players[(playerId < 0 ? CWorld::PlayerInFocus : playerId)].m_PlayerData.m_pWanted;
+    return FindPlayerInfo(playerId).m_PlayerData.m_pWanted;
 }
 
+
+CPedGroup& FindPlayerGroup(int32 playerId) {
+    return FindPlayerPed()->GetGroup();
+}
 
 // NOTSA, inlined
 CPlayerInfo& FindPlayerInfo(int playerId) {
@@ -309,11 +312,6 @@ bool EndsWith(const char* str, const char* with, bool caseSensitive) {
     return (caseSensitive ? strncmp : _strnicmp)(str + strsz - withsz, with, withsz) == 0;
 }
 
-// 0x734610
-void CreateDebugFont() {
-    // NOP
-}
-
 // 0x4ABA50
 CEventGlobalGroup* GetEventGlobalGroup() {
     static CEventGlobalGroup*& globalEvents = *(CEventGlobalGroup**)0xA9AF6C;
@@ -323,22 +321,6 @@ CEventGlobalGroup* GetEventGlobalGroup() {
 
     globalEvents = new CEventGlobalGroup(nullptr);
     return globalEvents;
-}
-
-// 0x734620
-void DestroyDebugFont() {
-    // NOP
-}
-
-// unused
-// 0x734630
-void ObrsPrintfString(const char* arg0, int16 arg1, int16 arg2) {
-    // NOP
-}
-
-// 0x734640
-void FlushObrsPrintfs() {
-    // NOP
 }
 
 // 0x734650
@@ -383,6 +365,24 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATECULLMODE,             RWRSTATE(rwCULLMODECULLNONE));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTION,    RWRSTATE(rwALPHATESTFUNCTIONGREATER));
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
+}
+
+// todo: move
+// 0x53D690
+void DoRWStuffStartOfFrame(int16 nR1, int16 nG1, int16 nB1, int16 nR2, int16 nG2, int16 nB2, int16 nA) {
+    plugin::Call<0x53D690, int16, int16, int16, int16, int16, int16, int16>(nR1, nG1, nB1, nR2, nG2, nB2, nA);
+}
+
+// todo: move
+// 0x53D840
+void DoRWStuffEndOfFrame() {
+    plugin::Call<0x53D840>();
+}
+
+// todo: move
+// 0x53EC10
+RsEventStatus AppEventHandler(RsEvent nEvent, void* param) {
+    return plugin::CallAndReturn<RsEventStatus, 0x53EC10, RsEvent, void*>(nEvent, param);
 }
 
 // TODO: Check `outName` size (to avoid buffer overflow)
@@ -508,30 +508,30 @@ RpAtomic* AtomicRemoveAnimFromSkinCB(RpAtomic* atomic, void* data) {
 
 // 0x734BE0
 bool RpAtomicConvertGeometryToTL(RpAtomic* atomic) {
-    RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
+    RpGeometry* geometry = RpAtomicGetGeometry(atomic);
 
-    auto flags = RpGeometryGetFlags(pGeom);
+    auto flags = RpGeometryGetFlags(geometry);
     if (flags & rpGEOMETRYNATIVE || !(flags & rpGEOMETRYTRISTRIP))
         return false;
 
-    RpGeometryLock(pGeom, rpGEOMETRYLOCKALL);
-    RpGeometrySetFlags(pGeom, flags & ~rpGEOMETRYTRISTRIP);
-    RpGeometryUnlock(pGeom);
+    RpGeometryLock(geometry, rpGEOMETRYLOCKALL);
+    RpGeometrySetFlags(geometry, flags & ~rpGEOMETRYTRISTRIP);
+    RpGeometryUnlock(geometry);
 
     return true;
 }
 
 // 0x734C20
 bool RpAtomicConvertGeometryToTS(RpAtomic* atomic) {
-    RpGeometry* pGeom = RpAtomicGetGeometry(atomic);
+    RpGeometry* geometry = RpAtomicGetGeometry(atomic);
 
-    auto flags = RpGeometryGetFlags(pGeom);
+    auto flags = RpGeometryGetFlags(geometry);
     if (flags & rpGEOMETRYNATIVE || flags & rpGEOMETRYTRISTRIP)
         return false;
 
-    RpGeometryLock(pGeom, rpGEOMETRYLOCKALL);
-    RpGeometrySetFlags(pGeom, flags | rpGEOMETRYTRISTRIP);
-    RpGeometryUnlock(pGeom);
+    RpGeometryLock(geometry, rpGEOMETRYLOCKALL);
+    RpGeometrySetFlags(geometry, flags | rpGEOMETRYTRISTRIP);
+    RpGeometryUnlock(geometry);
 
     return true;
 }
@@ -623,50 +623,96 @@ void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table) {
 
 // 0x7354E0
 void SetLightsWithTimeOfDayColour(RpWorld* world) {
+    assert(world);
     if (pAmbient) {
-        AmbientLightColourForFrame.red = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
+        AmbientLightColourForFrame.red   = CTimeCycle::GetAmbientRed() * CCoronas::LightsMult;
         AmbientLightColourForFrame.green = CTimeCycle::GetAmbientGreen() * CCoronas::LightsMult;
-        AmbientLightColourForFrame.blue = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
-        AmbientLightColourForFrame_PedsCarsAndObjects.red = CTimeCycle::GetAmbientRed_Obj() * CCoronas::LightsMult;
+        AmbientLightColourForFrame.blue  = CTimeCycle::GetAmbientBlue() * CCoronas::LightsMult;
+
+        AmbientLightColourForFrame_PedsCarsAndObjects.red   = CTimeCycle::GetAmbientRed_Obj()   * CCoronas::LightsMult;
         AmbientLightColourForFrame_PedsCarsAndObjects.green = CTimeCycle::GetAmbientGreen_Obj() * CCoronas::LightsMult;
-        AmbientLightColourForFrame_PedsCarsAndObjects.blue = CTimeCycle::GetAmbientBlue_Obj() * CCoronas::LightsMult;
+        AmbientLightColourForFrame_PedsCarsAndObjects.blue  = CTimeCycle::GetAmbientBlue_Obj()  * CCoronas::LightsMult;
+
         if (CWeather::LightningFlash) {
-            AmbientLightColourForFrame.blue = 1.0f;
+            AmbientLightColourForFrame.blue  = 1.0f;
             AmbientLightColourForFrame.green = 1.0f;
-            AmbientLightColourForFrame.red = 1.0f;
-            AmbientLightColourForFrame_PedsCarsAndObjects.blue = 1.0f;
+            AmbientLightColourForFrame.red   = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects.blue  = 1.0f;
             AmbientLightColourForFrame_PedsCarsAndObjects.green = 1.0f;
-            AmbientLightColourForFrame_PedsCarsAndObjects.red = 1.0f;
+            AmbientLightColourForFrame_PedsCarsAndObjects.red   = 1.0f;
         }
         RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
     }
 
     if (pDirect) {
-        DirectionalLightColourForFrame.red = CTimeCycle::m_CurrentColours.m_fIllumination * 0.99609375f * CCoronas::LightsMult;
-        DirectionalLightColourForFrame.green = DirectionalLightColourForFrame.red;
-        DirectionalLightColourForFrame.blue = DirectionalLightColourForFrame.red;
+        const float color = CTimeCycle::m_CurrentColours.m_fIllumination * 0.99609375f * CCoronas::LightsMult;
+        DirectionalLightColourForFrame.red   = color;
+        DirectionalLightColourForFrame.green = color;
+        DirectionalLightColourForFrame.blue  = color;
         RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 
-        const CVector vertical{ 0.0f, 0.0f, 1.0f };
+        CVector vecDir   = CTimeCycle::m_vecDirnLightToSun;
+        CVector vecUp    = CrossProduct(CVector(0, 0, 1), vecDir);
+        vecUp.Normalise();
+        CVector vecRight = CrossProduct(vecUp, vecDir);
 
-        // TODO: This is a fairly commonly used thing,
-        // would be nice to make a function out of it..
-        // Is basically calculates a matrix out of a normal.
-       
-        RwMatrix mat;
-
-        mat.at = -CTimeCycle::m_vecDirnLightToSun;
-        mat.up = Normalized(CrossProduct(vertical, CTimeCycle::m_vecDirnLightToSun));
-        mat.right = CrossProduct(mat.up, CTimeCycle::m_vecDirnLightToSun);
-
-        RwFrameTransform(RpClumpGetFrame(pDirect), &mat, RwOpCombineType::rwCOMBINEREPLACE);
+        RwMatrix mxTransform;
+        mxTransform.right = vecRight;
+        mxTransform.up    = vecUp;
+        mxTransform.at    = -vecDir;
+        RwFrameTransform(RpLightGetFrame(pDirect), &mxTransform, rwCOMBINEREPLACE);
     }
 }
 
-// unused
-// 0x735720
+// 0x735720 unused
 void LightsEnable(int32 arg0) {
     // NOP
+}
+
+// 0x5BA520
+void LightsCreate(RpWorld* world) {
+    if (!world) {
+        return;
+    }
+
+    RwRGBAReal color;
+
+    pAmbient = RpLightCreate(rpLIGHTAMBIENT);
+    RpLightSetFlags(pAmbient, rpLIGHTLIGHTATOMICS);
+    color.red   = 0.25f;
+    color.green = 0.25f;
+    color.blue  = 0.20f;
+    RpLightSetColor(pAmbient, &color);
+
+    pDirect = RpLightCreate(rpLIGHTDIRECTIONAL);
+    RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
+    color.red   = 1.00f;
+    color.green = 0.85f;
+    color.blue  = 0.45f;
+    RpLightSetColor(pDirect, &color);
+    RpLightSetRadius(pDirect, 2.0f);
+
+    RwFrame* frame = RwFrameCreate();
+    rwObjectHasFrameSetFrame(pDirect, frame);
+    RwV3d _vecLight = { 1.0f, 1.0f, 0.0f };
+    RwFrameRotate(frame, &_vecLight, 160.0f, rwCOMBINEPRECONCAT);
+
+    RpWorldAddLight(world, pAmbient);
+    RpWorldAddLight(world, pDirect);
+
+    for (auto& light : pExtraDirectionals) {
+        light = RpLightCreate(rpLIGHTDIRECTIONAL);
+        RpLightSetFlags(light, NULL);
+
+        color.red   = 1.0f;
+        color.green = 0.5f;
+        color.blue  = 0.0f;
+        RpLightSetColor(light, &color);
+        RpLightSetRadius(light, 2.0f);
+        rwObjectHasFrameSetFrame(light, RwFrameCreate());
+
+        RpWorldAddLight(world, light);
+    }
 }
 
 // 0x735730
@@ -680,37 +726,35 @@ void LightsDestroy(RpWorld* world) {
         RpLightDestroy(pAmbient);
         pAmbient = nullptr;
     }
+
     if (pDirect) {
         RpWorldRemoveLight(world, pDirect);
-        auto* parentFrame = static_cast<RwFrame*>(pDirect->object.object.parent);
-        RwFrameDestroy(parentFrame);
+        RwFrameDestroy(RpLightGetFrame(pDirect));
         RpLightDestroy(pDirect);
         pDirect = nullptr;
     }
 
-    for (auto& light : ObjectAffectingLights) {
-        if (light) {
-            RpWorldRemoveLight(world, light);
-            auto* parentFrame = static_cast<RwFrame*>(light->object.object.parent);
-            RwFrameDestroy(parentFrame);
-            RpLightDestroy(light);
-            light = nullptr;
-        }
+    for (auto& light : pExtraDirectionals) {
+        RpWorldRemoveLight(world, light);
+        RwFrameDestroy(RpLightGetFrame(light));
+        RpLightDestroy(light);
+        light = nullptr;
     }
 }
 
+// lighting = [ 0.0f; 1.0f ]
 // 0x7357E0
 void WorldReplaceNormalLightsWithScorched(RpWorld* world, float lighting) {
     RwRGBAReal color{lighting, lighting, lighting};
     RpLightSetColor(pAmbient, &color);
-    pDirect->object.object.flags = 0;
+    DeActivateDirectional();
 }
 
 // unused
 // 0x735820
 void WorldReplaceScorchedLightsWithNormal(RpWorld* world) {
     RpLightSetColor(pAmbient, &AmbientLightColourForFrame);
-    pDirect->object.object.flags = 1;
+    ActivateDirectional();
 }
 
 // 0x735840
@@ -720,69 +764,70 @@ void AddAnExtraDirectionalLight(RpWorld* world, float x, float y, float z, float
 
 // 0x7359E0
 void RemoveExtraDirectionalLights(RpWorld* world) {
-    for (auto& light : ObjectAffectingLights) {
-        light->object.object.flags = 0;
+    for (auto& light : pExtraDirectionals) {
+        RpLightSetFlags(light, 0x0);
     }
     numExtraDirectionalLights = 0;
 }
 
+// fMult = [ 0.0f; 1.0f ]
 // used in SetFlashyColours and SetFlashyColours_Mild which unused
 // 0x735A20
-void SetAmbientAndDirectionalColours(float lighting) {
-    AmbientLightColour.red = AmbientLightColourForFrame.red * lighting;
-    AmbientLightColour.green = AmbientLightColourForFrame.green * lighting;
-    AmbientLightColour.blue = AmbientLightColourForFrame.blue * lighting;
+void SetAmbientAndDirectionalColours(float fMult) {
+    AmbientLightColour.red       = fMult * AmbientLightColourForFrame.red;
+    AmbientLightColour.green     = fMult * AmbientLightColourForFrame.green;
+    AmbientLightColour.blue      = fMult * AmbientLightColourForFrame.blue;
 
-    DirectionalLightColour.red = DirectionalLightColourForFrame.red * lighting;
-    DirectionalLightColour.green = DirectionalLightColourForFrame.green * lighting;
-    DirectionalLightColour.blue = DirectionalLightColourForFrame.blue * lighting;
+    DirectionalLightColour.red   = fMult * DirectionalLightColourForFrame.red;
+    DirectionalLightColour.green = fMult * DirectionalLightColourForFrame.green;
+    DirectionalLightColour.blue  = fMult * DirectionalLightColourForFrame.blue;
 
     RpLightSetColor(pAmbient, &AmbientLightColour);
     RpLightSetColor(pDirect, &DirectionalLightColour);
 }
 
-// unused
-// 0x735AB0
-void SetFlashyColours(float lighting) {
-    if ((CTimer::GetTimeInMS() & 0x100) != 0) {
-        AmbientLightColour.red = 1.0f;
+// fMult = [ 0.0f; 1.0f ]
+// 0x735AB0 unused
+void SetFlashyColours(float fMult) {
+    if (CTimer::GetTimeInMS() & 0x100) {
+        AmbientLightColour.red   = 1.0f;
         AmbientLightColour.green = 1.0f;
-        AmbientLightColour.blue = 1.0f;
-        DirectionalLightColour.red = DirectionalLightColourForFrame.red;
-        DirectionalLightColour.green = DirectionalLightColourForFrame.green;
-        DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+        AmbientLightColour.blue  = 1.0f;
+        DirectionalLightColour = DirectionalLightColourForFrame;
+
         RpLightSetColor(pAmbient, &AmbientLightColour);
         RpLightSetColor(pDirect, &DirectionalLightColour);
-    } else {
-        SetAmbientAndDirectionalColours(lighting * 0.75f);
+        return;
     }
+    SetAmbientAndDirectionalColours(fMult * 0.75f);
 }
 
-// unused
-// 0x735B40
-void SetFlashyColours_Mild(float lighting) {
+// fMult = [ 0.0f; 1.0f ]
+// 0x735B40 unused
+void SetFlashyColours_Mild(float fMult) {
     if ((CTimer::GetTimeInMS() & 0x100) != 0) {
-        AmbientLightColour.red = 1.0f;
-        AmbientLightColour.green = 1.0f;
-        AmbientLightColour.blue = 1.0f;
-        DirectionalLightColour.red = DirectionalLightColourForFrame.red;
-        DirectionalLightColour.green = DirectionalLightColourForFrame.green;
-        DirectionalLightColour.blue = DirectionalLightColourForFrame.blue;
+        AmbientLightColour.red   = 0.65f;
+        AmbientLightColour.green = 0.65f;
+        AmbientLightColour.blue  = 0.65f;
+        DirectionalLightColour = DirectionalLightColourForFrame;
+
         RpLightSetColor(pAmbient, &AmbientLightColour);
         RpLightSetColor(pDirect, &DirectionalLightColour);
-    } else {
-        SetAmbientAndDirectionalColours(lighting * 0.9f);
+        return;
     }
+    SetAmbientAndDirectionalColours(fMult * 0.9f);
 }
 
 // 0x735BD0
 void SetBrightMarkerColours(float lighting) {
-    AmbientLightColour.red = 0.6f;
+    AmbientLightColour.red   = 0.6f;
     AmbientLightColour.green = 0.6f;
-    AmbientLightColour.blue = 0.6f;
-    DirectionalLightColour.red = 1.0f;
+    AmbientLightColour.blue  = 0.6f;
+
+    DirectionalLightColour.red   = 1.0f;
     DirectionalLightColour.green = 1.0f;
-    DirectionalLightColour.blue = 1.0f;
+    DirectionalLightColour.blue  = 1.0f;
+
     RpLightSetColor(pAmbient, &AmbientLightColour);
     RpLightSetColor(pDirect, &DirectionalLightColour);
 }
@@ -793,22 +838,26 @@ void ReSetAmbientAndDirectionalColours() {
     RpLightSetColor(pDirect, &DirectionalLightColourForFrame);
 }
 
-// 0x735C70
-void DeActivateDirectional() {
-    pDirect->object.object.flags = 0;
-}
-
 // 0x735C80
 void ActivateDirectional() {
-    pDirect->object.object.flags = 1;
+    RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);
 }
 
-// unused
-// 0x735C90
-void SetAmbientColoursToIndicateRoadGroup(int32 arg0) {
-    AmbientLightColour.red = IndicateR[arg0 % 7] * flt_859A3C;
-    AmbientLightColour.green = IndicateG[arg0 % 7] * flt_859A3C;
-    AmbientLightColour.blue = IndicateB[arg0 % 7] * flt_859A3C;
+// 0x735C70
+void DeActivateDirectional() {
+    RpLightSetFlags(pDirect, 0x0);
+}
+
+/*!
+ * @addr 0x735C90
+ * @param idx Color index 0..8
+ */
+void SetAmbientColoursToIndicateRoadGroup(int32 idx) {
+    // used to convert 0-255 to 0.0f-1.0f
+
+    AmbientLightColour.red   = (float)IndicateR[idx % 7] * 255.0f;
+    AmbientLightColour.green = (float)IndicateG[idx % 7] * 255.0f;
+    AmbientLightColour.blue  = (float)IndicateB[idx % 7] * 255.0f;
     RpLightSetColor(pAmbient, &AmbientLightColour);
 }
 
@@ -825,23 +874,30 @@ void SetAmbientColours() {
 
 // 0x735D50
 void SetAmbientColours(RwRGBAReal* color) {
+    assert(color);
     RpLightSetColor(pAmbient, color);
 }
 
 // 0x735D70
 void SetDirectionalColours(RwRGBAReal* color) {
+    assert(color);
     RpLightSetColor(pDirect, color);
 }
 
+// fMult = [ 0.0f; 1.0f ]
 // 0x735D90
-void SetLightColoursForPedsCarsAndObjects(float lighting) {
-    DirectionalLightColour.red = DirectionalLightColourForFrame.red * lighting;
-    DirectionalLightColour.green = DirectionalLightColourForFrame.green * lighting;
-    DirectionalLightColour.blue = DirectionalLightColourForFrame.blue * lighting;
+void SetLightColoursForPedsCarsAndObjects(float fMult) {
+    DirectionalLightColour.red   = fMult * DirectionalLightColourForFrame.red;
+    DirectionalLightColour.green = fMult * DirectionalLightColourForFrame.green;
+    DirectionalLightColour.blue  = fMult * DirectionalLightColourForFrame.blue;
 
-    AmbientLightColour.red = CTimeCycle::m_BrightnessAddedToAmbientRed + AmbientLightColourForFrame_PedsCarsAndObjects.red * lighting;
-    AmbientLightColour.green = CTimeCycle::m_BrightnessAddedToAmbientGreen + AmbientLightColourForFrame_PedsCarsAndObjects.green * lighting;
-    AmbientLightColour.blue = CTimeCycle::m_BrightnessAddedToAmbientBlue + AmbientLightColourForFrame_PedsCarsAndObjects.blue * lighting;
+    AmbientLightColour.red       = fMult * AmbientLightColourForFrame_PedsCarsAndObjects.red;
+    AmbientLightColour.green     = fMult * AmbientLightColourForFrame_PedsCarsAndObjects.green;
+    AmbientLightColour.blue      = fMult * AmbientLightColourForFrame_PedsCarsAndObjects.blue;
+
+    AmbientLightColour.red      += CTimeCycle::m_BrightnessAddedToAmbientRed;
+    AmbientLightColour.green    += CTimeCycle::m_BrightnessAddedToAmbientRed;
+    AmbientLightColour.blue     += CTimeCycle::m_BrightnessAddedToAmbientRed;
 
     RpLightSetColor(pAmbient, &AmbientLightColour);
     RpLightSetColor(pDirect, &DirectionalLightColour);
@@ -1102,7 +1158,7 @@ bool RpAnimBlendPluginAttach() {
 
 // 0x70F9B0
 bool GraphicsLowQuality() {
-    if (g_fx.GetFxQuality() < FxQuality_e::FXQUALITY_MEDIUM)
+    if (g_fx.GetFxQuality() < FX_QUALITY_MEDIUM)
         return false;
     if (RwRasterGetDepth(RwCameraGetRaster(Scene.m_pRwCamera)) < 32)
         return false;
@@ -1166,8 +1222,57 @@ bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, flo
     return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
 }
 
+// 0x53E160
+void RenderDebugShit() {
+    PUSH_RENDERGROUP("RenderDebugShit");
+    CTheScripts::RenderTheScriptDebugLines();
+#ifndef FINAL
+    // if(gbShowCollisionLines) CRenderer::RenderCollisionLines();
+    // ThePaths.DisplayPathData();
+    // CDebug::DrawLines();
+    DefinedState();
+#endif
+    POP_RENDERGROUP();
+}
+
 // 0x53E230
 void Render2dStuff() {
+    RenderDebugShit(); // NOTSA, temp
+
+    const auto DrawOuterZoomBox = []() {
+        CPed* player = FindPlayerPed();
+        eWeaponType weaponType = WEAPON_UNARMED;
+        if (player)
+            weaponType = player->GetActiveWeapon().m_nType;
+        eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
+        bool firstPersonWeapon = false;
+        if (camMode == MODE_SNIPER
+            || camMode == MODE_SNIPER_RUNABOUT
+            || camMode == MODE_ROCKETLAUNCHER
+            || camMode == MODE_ROCKETLAUNCHER_RUNABOUT
+            || camMode == MODE_CAMERA
+            || camMode == MODE_HELICANNON_1STPERSON)
+        {
+            firstPersonWeapon = true;
+        }
+
+        if ((weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_ROCKET) && firstPersonWeapon) {
+            CRGBA black(0, 0, 0, 255);
+            if (weaponType == WEAPON_ROCKET)
+            {
+                CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180.0f)), black);
+                CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170.0f), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+            }
+            else
+            {
+                CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210.0f)), black);
+                CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210.0f), SCREEN_WIDTH, SCREEN_HEIGHT), black);
+            }
+            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210.0f), SCREEN_HEIGHT), black);
+            CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210.0f), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
+        }
+    };
+
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(TRUE));
@@ -1178,39 +1283,8 @@ void Render2dStuff() {
 
     CReplay::Display();
     CPickups::RenderPickUpText();
-    if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn)
-        TheCamera.DrawBordersForWideScreen();
-    CPed* player = FindPlayerPed();
-    eWeaponType weaponType = WEAPON_UNARMED;
-    if (player)
-        weaponType = player->GetActiveWeapon().m_nType;
-    eCamMode camMode = CCamera::GetActiveCamera().m_nMode;
-    bool firstPersonWeapon = false;
-    if (camMode == MODE_SNIPER
-        || camMode == MODE_SNIPER_RUNABOUT
-        || camMode == MODE_ROCKETLAUNCHER
-        || camMode == MODE_ROCKETLAUNCHER_RUNABOUT
-        || camMode == MODE_CAMERA
-        || camMode == MODE_HELICANNON_1STPERSON)
-    {
-        firstPersonWeapon = true;
-    }
-    if ((weaponType == WEAPON_SNIPERRIFLE || weaponType == WEAPON_ROCKET) && firstPersonWeapon)
-    {
-        CRGBA black(0, 0, 0, 255);
-        if (weaponType == WEAPON_ROCKET)
-        {
-            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(180)), black);
-            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(170), SCREEN_WIDTH, SCREEN_HEIGHT), black);
-        }
-        else
-        {
-            CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT / 2 - SCREEN_SCALE_Y(210)), black);
-            CSprite2d::DrawRect(CRect(0.0f, SCREEN_HEIGHT / 2 + SCREEN_SCALE_Y(210), SCREEN_WIDTH, SCREEN_HEIGHT), black);
-        }
-        CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH / 2 - SCREEN_SCALE_X(210), SCREEN_HEIGHT), black);
-        CSprite2d::DrawRect(CRect(SCREEN_WIDTH / 2 + SCREEN_SCALE_X(210), 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), black);
-    }
+    if (TheCamera.m_bWideScreenOn && !FrontEndMenuManager.m_bWidescreenOn) TheCamera.DrawBordersForWideScreen();
+    DrawOuterZoomBox();
     AudioEngine.DisplayRadioStationName();
     CHud::Draw();
     CSpecialFX::Render2DFXs();
@@ -1221,8 +1295,7 @@ void Render2dStuff() {
     CFont::DrawFonts();
 
     // NOTSA: ImGui menu draw loop
-    CDebugMenu::ImguiDrawLoop();
-    CDebugMenu::ImGuiDrawMouse();
+    CDebugMenu::ImGuiDrawLoop();
 }
 
 // NOTSA

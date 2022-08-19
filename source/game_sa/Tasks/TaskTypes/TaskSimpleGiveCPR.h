@@ -1,7 +1,7 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "Accident.h"
+class CAccident;
 
 class CTaskSimpleGiveCPR : public CTaskSimple {
 public:
@@ -17,17 +17,18 @@ public:
     float m_fInitialHealth;
 
 public:
-    CTaskSimpleGiveCPR(CAccident* pAccident);
+    static constexpr auto Type = TASK_SIMPLE_GIVE_CPR;
+
+    explicit CTaskSimpleGiveCPR(CAccident* accident);
     ~CTaskSimpleGiveCPR() override;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GIVE_CPR; }
-
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
     bool ProcessPed(CPed* ped) override;
     bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
 
     void ReviveDeadPed(CPed* ped);
-    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* priv);
+    static void FinishGiveCPRAnimCB(CAnimBlendAssociation* anim, void* ptask);
 
 private:
     friend void InjectHooksMain();
@@ -39,5 +40,4 @@ private:
     bool ProcessPed_Reversed(CPed* ped);
     bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
 };
-
 VALIDATE_SIZE(CTaskSimpleGiveCPR, 0x18);

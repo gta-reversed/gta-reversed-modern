@@ -10,17 +10,12 @@
 
 class CTaskComplexEnterCarAsDriver : public CTaskComplexEnterCar {
 public:
-    CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
-    ~CTaskComplexEnterCarAsDriver() {}
+    static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_DRIVER;
 
+    explicit CTaskComplexEnterCarAsDriver(CVehicle* targetVehicle);
+    ~CTaskComplexEnterCarAsDriver() override = default;
+
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_DRIVER; }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    CTask* Clone_Reversed();
 };
-
 VALIDATE_SIZE(CTaskComplexEnterCarAsDriver, 0x50);

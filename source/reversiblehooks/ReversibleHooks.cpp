@@ -11,7 +11,7 @@ namespace ReversibleHooks {
 RootHookCategory           s_RootCategory{};
 
 #ifndef NDEBUG
-// Not particularly memmory efficient, but it should be fine
+// Not particularly memory efficient, but it should be fine
 std::unordered_set<uint32> s_HookedAddresses{};  // Original GTA addresses to which we've installed hooks
 #endif
 
@@ -25,8 +25,18 @@ void CheckAll() {
     });
 }
 
+void SwitchHook(std::string_view funcName) {
+    s_RootCategory.ForEachItem([=](auto& item) {
+        const auto name = item->Name();
+        if (name == funcName) {
+            item->Switch();
+            return;
+        }
+    });
+}
+
 void OnInjectionBegin() {
-#ifndef NDEBUG 
+#ifndef NDEBUG
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
 #endif
 }
@@ -42,12 +52,19 @@ void OnInjectionEnd() {
 }
 
 namespace detail {
-void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize, bool bDisableByDefault) {
-    // Functions with the same name are asserted in `HookCategory::AddItem()`
-    assert(s_HookedAddresses.insert(installAddress).second); // If this asserts that means the address was hooked once already - Thats bad!
+void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt) {
+#ifndef NDEBUG // Functions with the same name are asserted in `HookCategory::AddItem()`
+    auto [iter, inserted] = s_HookedAddresses.insert(installAddress);
+    if (!inserted) {
+        // If this asserts that means the address was hooked once already - Thats bad!
+        printf("Warn %s %s\n", category.data(), fnName.c_str());
+        return;
+    }
+#endif
 
-    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, iJmpCodeSize);
-    item->State(!bDisableByDefault);
+    auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, opt.jmpCodeSize, opt.stackArguments);
+    item->State(opt.enabled);
+    item->LockState(opt.locked);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 

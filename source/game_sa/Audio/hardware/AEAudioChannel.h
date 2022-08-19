@@ -4,25 +4,30 @@
 
 #include "Vector.h"
 
+#define USE_DSOUND
+
 #pragma pack(push, 1)
 class CAEAudioChannel {
 public:
+#ifdef USE_DSOUND
     IDirectSound*         m_pDirectSound;
     IDirectSoundBuffer*   m_pDirectSoundBuffer;
     IDirectSound3DBuffer* m_pDirectSound3DBuffer;
+#endif
+
     char                  _pad10[24];
     uint32                m_nFlags;
     uint32                m_nLengthInBytes;
-    uint32                field_30;
+    uint32                field_30; // unused
     float                 m_fVolume;
     bool                  m_bNoScalingFactor;
-    uint8                 field_39;
+    uint8                 field_39; // unused
     uint16                m_nChannelId;
     uint32                m_nFrequency;
     uint32                m_nOriginalFrequency;
     bool                  m_bLooped;
     uint8                 field_45;
-    uint8                 field_46[1];
+    uint8                 field_46; // unused
     uint16                field_47;
     uint16                m_wFrequencyMult;
     uint32                m_nBufferFrequency;
@@ -31,8 +36,10 @@ public:
     uint16                m_wBitsPerSample;
     uint16                field_57;
     uint16                field_59;
+#ifdef USE_DSOUND
     char                  _pad;
     uint32                m_nBufferStatus;
+#endif
 
 public:
     CAEAudioChannel(IDirectSound* directSound, uint16 channelId, uint32 samplesPerSec, uint16 bitsPerSample);
@@ -52,7 +59,7 @@ public:
     float  GetVolume() const { return m_fVolume; };
     void   SetVolume(float volume);
     bool   IsBufferPlaying() const { return m_nBufferStatus & DSBSTATUS_PLAYING; };
-    int32  GetCurrentPlaybackPosition() const;
+    uint32 GetCurrentPlaybackPosition() const;
     uint32 ConvertFromBytesToMS(uint32 bytes) const;
     uint32 ConvertFromMsToBytes(uint32 ms) const;
     void   SetFrequency(uint32 freq);
@@ -74,5 +81,9 @@ private:
 };
 #pragma pack(pop)
 VALIDATE_SIZE(CAEAudioChannel, 0x60);
+VALIDATE_OFFSET(CAEAudioChannel, m_pDirectSound, 0x4);
+VALIDATE_OFFSET(CAEAudioChannel, m_nChannelId, 0x3A);
+VALIDATE_OFFSET(CAEAudioChannel, m_nBufferFrequency, 0x4B);
+VALIDATE_OFFSET(CAEAudioChannel, m_wFrequencyMult, 0x49);
 
 extern uint32& g_numSoundChannelsUsed;

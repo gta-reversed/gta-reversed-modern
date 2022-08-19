@@ -9,11 +9,13 @@ public:
     CAnimBlendAssociation* m_pAnim;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_GET_UP;
+
     CTaskSimpleGetUp();
     ~CTaskSimpleGetUp() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleGetUp(); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GET_UP; }
     bool ProcessPed(class CPed* ped) override;
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
 

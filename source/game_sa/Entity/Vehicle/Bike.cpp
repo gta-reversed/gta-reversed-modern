@@ -33,32 +33,122 @@ void CBike::InjectHooks() {
     // RH_ScopedInstall(FixHandsToBars, 0x6B7F90);
     // RH_ScopedInstall(PlaceOnRoadProperly, 0x6BEEB0);
     // RH_ScopedInstall(GetCorrectedWorldDoorPosition, 0x6BF230);
-    RH_ScopedInstall(Fix_Reversed, 0x6B7050);
-    // RH_ScopedInstall(BlowUpCar_Reversed, 0x6BEA10);
-    RH_ScopedInstall(ProcessDrivingAnims_Reversed, 0x6BF400);
-    // RH_ScopedInstall(BurstTyre_Reversed, 0x6BEB20);
-    // RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6BE310);
-    // RH_ScopedInstall(ProcessEntityCollision_Reversed, 0x6BDEA0);
-    RH_ScopedInstall(Render_Reversed, 0x6BDE20);
-    // RH_ScopedInstall(PreRender_Reversed, 0x6BD090);
-    RH_ScopedInstall(Teleport_Reversed, 0x6BCFC0);
-    // RH_ScopedInstall(ProcessControl_Reversed, 0x6B9250);
-    // RH_ScopedInstall(VehicleDamage_Reversed, 0x6B8EC0);
-    // RH_ScopedInstall(SetupSuspensionLines_Reversed, 0x6B89B0);
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x6B8970);
-    // RH_ScopedInstall(PlayCarHorn_Reversed, 0x6B7080);
-    RH_ScopedInstall(SetupDamageAfterLoad_Reversed, 0x6B7070);
-    // RH_ScopedInstall(DoBurstAndSoftGroundRatios_Reversed, 0x6B6950);
-    // RH_ScopedInstall(SetUpWheelColModel_Reversed, 0x6B67E0);
-    RH_ScopedInstall(RemoveRefsToVehicle_Reversed, 0x6B67B0);
-    // RH_ScopedInstall(ProcessControlCollisionCheck_Reversed, 0x6B6620);
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6B5990);
-    RH_ScopedInstall(ProcessOpenDoor_Reversed, 0x6B58D0);
+    RH_ScopedVirtualInstall(Fix, 0x6B7050);
+    // RH_ScopedVirtualInstall(BlowUpCar, 0x6BEA10);
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6BF400);
+    // RH_ScopedVirtualInstall(BurstTyre, 0x6BEB20);
+    // RH_ScopedVirtualInstall(ProcessControlInputs, 0x6BE310);
+    // RH_ScopedVirtualInstall(ProcessEntityCollision, 0x6BDEA0);
+    RH_ScopedVirtualInstall(Render, 0x6BDE20);
+    // RH_ScopedVirtualInstall(PreRender, 0x6BD090);
+    RH_ScopedVirtualInstall(Teleport, 0x6BCFC0);
+    // RH_ScopedVirtualInstall(ProcessControl, 0x6B9250);
+    // RH_ScopedVirtualInstall(VehicleDamage, 0x6B8EC0);
+    // RH_ScopedVirtualInstall(SetupSuspensionLines, 0x6B89B0);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x6B8970);
+    // RH_ScopedVirtualInstall(PlayCarHorn, 0x6B7080);
+    RH_ScopedVirtualInstall(SetupDamageAfterLoad, 0x6B7070);
+    // RH_ScopedVirtualInstall(DoBurstAndSoftGroundRatios, 0x6B6950);
+    // RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6B67E0);
+    RH_ScopedVirtualInstall(RemoveRefsToVehicle, 0x6B67B0);
+    // RH_ScopedVirtualInstall(ProcessControlCollisionCheck, 0x6B6620);
+    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6B5990);
+    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6B58D0);
 }
 
 // 0x6BF430
 CBike::CBike(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(plugin::dummy) {
     plugin::CallMethod<0x6BF430, CBike*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
+    return;
+
+    auto mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
+    if (mi->m_nVehicleType == VEHICLE_TYPE_BIKE) {
+        auto animationStyle = CAnimManager::ms_aAnimBlocks[mi->GetAnimFileIndex()].animationStyle;
+        m_rideAnimData.m_nAnimGroup = animationStyle;
+        if (animationStyle < ANIM_GROUP_BIKES || animationStyle > ANIM_GROUP_WAYFARER) {
+            m_rideAnimData.m_nAnimGroup = ANIM_GROUP_BIKES;
+        }
+    }
+
+    m_nVehicleSubType = VEHICLE_TYPE_BIKE;
+    m_nVehicleType = VEHICLE_TYPE_BIKE;
+
+    m_fFireBlowUpTimer = 0.0f;
+    m_bDoingBurnout = false;
+    nBikeFlags = 0;
+    SetModelIndex(modelIndex);
+
+    m_pHandlingData = gHandlingDataMgr.GetVehiclePointer(mi->m_nHandlingId);
+    m_pBikeHandlingData = gHandlingDataMgr.GetBikeHandlingPointer(mi->m_nHandlingId - MODEL_CWMYHB1); // hardcode
+    m_nHandlingFlagsIntValue = m_pHandlingData->m_nHandlingFlags;
+    m_pFlyingHandlingData = gHandlingDataMgr.GetFlyingPointer(mi->m_nHandlingId);
+    field_740 = 20.0f;
+    mi->ChooseVehicleColour(m_nPrimaryColor, m_nSecondaryColor, m_nTertiaryColor, m_nQuaternaryColor, 1);
+    m_fRearForkLength = 0.0f;
+    m_fFrontForkY = 0.0f;
+    m_fFrontForkZ = 0.0f;
+    m_bPedLeftHandFixed = false;
+    m_bPedRightHandFixed = false;
+    m_fFrontForkSlope = std::tan(DegreesToRadians(mi->m_fBikeSteerAngle));
+    m_fMass = m_pHandlingData->m_fMass;
+    m_fTurnMass = m_pHandlingData->m_fTurnMass;
+    m_vecCentreOfMass = m_pHandlingData->m_vecCentreOfMass;
+    m_vecCentreOfMass.z = 0.1f;
+    m_fAirResistance = GetDefaultAirResistance();
+    m_fElasticity = 0.05f;
+    m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
+    m_fSteerAngle = 0.0f;
+    m_fGasPedal = 0.0f;
+    m_fBreakPedal = 0.0f;
+    m_pDamager = nullptr;
+    m_pWhoInstalledBombOnMe = nullptr;
+    m_fGasPedalAudio = 0.0f;
+    m_fTireTemperature = 1.0f;
+    m_fBrakeDestabilization = 0.0f;
+    field_7B8 = nullptr;
+
+    for (auto i = 0; i < 2; ++i) {
+        m_afWheelRotationX[i] = 0;
+        m_fWheelSpeed[i] = 0;
+        m_anWheelState[i] = WHEEL_STATE_NORMAL;
+        m_anWheelSurfaceType[i] = 0;
+        m_abBloodState[i] = false;
+        m_aWheelSkidmarkUnk[i] = false;
+        m_anWheelDamageState[i] = 0;
+    }
+
+    for (auto i = 0; i < 4; ++i) {
+        m_avTouchPointsLocalSpace[i] = CVector{};
+        m_fWheelsSuspensionCompression[i] = 1.0f;
+        m_fWheelsSuspensionCompressionPrev[i] = 1.0f;
+        m_aWheelTimer[i] = 0.0f;
+    }
+
+    m_nNumContactWheels = 0;
+    m_nNumWheelsOnGround = 0;
+    m_nDriveWheelsOnGround = 0;
+    m_fHeightAboveRoad = 0.0f;
+    m_fTraction = 1.0f;
+
+    if (!mi->m_pColModel->m_pColData->m_pLines) {
+        mi->m_pColModel->m_pColData->m_nNumLines = 4;
+        mi->m_pColModel->m_pColData->m_pLines = static_cast<CColLine*>(CMemoryMgr::Malloc(128));
+        mi->m_pColModel->m_pColData->m_pLines[1].m_vecStart.x = 10'0000.0f;
+    }
+    mi->m_pColModel->m_pColData->m_pLines[0].m_vecStart.z = 10'0000.0f;
+    CBike::SetupSuspensionLines();
+
+    m_autoPilot.m_nCarMission = MISSION_NONE;
+    m_autoPilot.m_nTempAction = 0;
+    m_autoPilot.m_nCarCtrlFlags = m_autoPilot.m_nCarCtrlFlags & 0xFB;
+
+    m_nStatus = STATUS_SIMPLE;
+    m_autoPilot.m_nTimeToStartMission = CTimer::GetTimeInMS();
+    m_nNumPassengers = 0;
+    m_bLeanMatrixCalculated = false;
+    m_mLeanMatrix = *m_matrix;
+    m_vecAvgSurfaceRight = CVector{};
+    m_vehicleAudio.Initialise(this);
 }
 
 // 0x6B57A0
@@ -139,9 +229,8 @@ void CBike::ProcessBuoyancy() {
             vehicleFlags.bEngineOn = false;
         }
 
-        for (int32 iPassengerInd = 0; iPassengerInd < m_nMaxPassengers; ++iPassengerInd) {
-            auto pCurPassenger = m_apPassengers[iPassengerInd];
-            ProcessPedInVehicleBuoyancy(pCurPassenger, false);
+        for (const auto passenger : GetPassengers()) {
+            ProcessPedInVehicleBuoyancy(passenger, false);
         }
     }
     else {
@@ -167,7 +256,7 @@ inline void CBike::ProcessPedInVehicleBuoyancy(CPed* ped, bool bIsDriver)
             auto pedDamageResponseCalc = CPedDamageResponseCalculator(this, CTimer::GetTimeStep(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, false);
             auto damageEvent = CEventDamage(this, CTimer::GetTimeInMS(), eWeaponType::WEAPON_DROWNING, PED_PIECE_TORSO, 0, false, true);
             if (damageEvent.AffectsPed(ped))
-                pedDamageResponseCalc.ComputeDamageResponse(ped, &damageEvent.m_damageResponse, true);
+                pedDamageResponseCalc.ComputeDamageResponse(ped, damageEvent.m_damageResponse, true);
             else
                 damageEvent.m_damageResponse.m_bDamageCalculated = true;
 
@@ -201,7 +290,7 @@ bool CBike::ProcessAI(uint32& extraHandlingFlags) {
 }
 
 // 0x6BF400
-void CBike::ProcessDrivingAnims(CPed* driver, uint8 bBlend) {
+void CBike::ProcessDrivingAnims(CPed* driver, bool blend) {
     if (m_bOffscreen && m_nStatus == STATUS_PLAYER)
         return;
 
@@ -290,7 +379,7 @@ void CBike::GetCorrectedWorldDoorPosition(CVector& out, CVector arg1, CVector ar
 }
 
 // 0x6BEA10
-void CBike::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CBike::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     plugin::CallMethod<0x6BEA10, CBike*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 
@@ -318,7 +407,7 @@ void CBike::Render() {
 
     if (m_renderLights.m_bRightFront) {
         CalculateLeanMatrix();
-        CVehicle::DoHeadLightBeam(0, m_mLeanMatrix, true);
+        CVehicle::DoHeadLightBeam(DUMMY_LIGHT_FRONT_MAIN, m_mLeanMatrix, true);
     }
 
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(savedRef));

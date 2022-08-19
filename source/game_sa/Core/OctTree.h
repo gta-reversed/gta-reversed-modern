@@ -8,11 +8,13 @@
 
 #include "Pool.h"
 
+typedef CPool<class COctTree> COctTreePool;
+
 class COctTree {
 public:
     uint32 m_nLevel;
     bool   m_bLastStep;       // no children
-    int32  m_aChildrens[4];   // pool slot IDs,  -1 - empty
+    int16  m_aChildrens[8];   // pool slot IDs,  -1 - empty
     uint32 m_nRedComponent;
     uint32 m_nGreenComponent;
     uint32 m_nBlueComponent;
@@ -20,28 +22,26 @@ public:
 public:
     static bool&            ms_bFailed;
     static uint32&          ms_level;
-    static CPool<COctTree>& ms_octTreePool;
+    static COctTreePool&    ms_octTreePool;
 
 public:
     COctTree();
     ~COctTree();
 
-    static void* operator new(uint32 size);
+    static void* operator new(size_t size);
     static void  operator delete(void* data);
 
-    //vtable
-    virtual bool InsertTree(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    virtual bool InsertTree(uint8 red, uint8 green, uint8 blue);
     virtual void FillPalette(uint8* colors);
 
     static void InitPool(void* data, int32 dataSize);
     static void ShutdownPool();
-    uint32      FindNearestColour(uint8 colorRed, uint8 colorGreen, uint8 colorBlue);
+    uint32      FindNearestColour(uint8 red, uint8 green, uint8 blue);
     uint32      NoOfChildren();
     void        ReduceTree();
     void        RemoveChildren();
     void        empty();
 };
-
 VALIDATE_SIZE(COctTree, 0x28);
 
 extern COctTree*& gpTmpOctTree;

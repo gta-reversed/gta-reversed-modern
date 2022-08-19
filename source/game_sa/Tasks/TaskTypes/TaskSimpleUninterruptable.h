@@ -3,18 +3,18 @@
 #include "TaskSimple.h"
 
 class CTaskSimpleUninterruptable : public CTaskSimple {
-private:
-    CTaskSimpleUninterruptable* Constructor();
 public:
-    CTaskSimpleUninterruptable() {}
-    ~CTaskSimpleUninterruptable() override {}
+    static constexpr auto Type = TASK_SIMPLE_UNINTERRUPTABLE;
 
-    static void InjectHooks();
+    CTaskSimpleUninterruptable() = default;
+    ~CTaskSimpleUninterruptable() override = default;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskSimpleUninterruptable(); }
-    eTaskType GetTaskType() override { return TASK_SIMPLE_UNINTERRUPTABLE; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override { return priority == ABORT_PRIORITY_IMMEDIATE; }
     bool ProcessPed(CPed* ped) override { return false; }
-};
 
+    static void InjectHooks();
+    CTaskSimpleUninterruptable* Constructor();
+};
 VALIDATE_SIZE(CTaskSimpleUninterruptable, 0x8);

@@ -8,33 +8,24 @@
 
 #include "Box.h"
 #include "ColPoint.h"
+#include "ColSurface.h"
 
 class CColBox : public CBox {
 public:
-    uint8        m_nMaterial;
-    uint8        m_nFlags; // TODO: This aren't actually `flags`, it's `piece` (as in CColPoint::piceType)
-    tColLighting m_nLighting;
-    uint8        m_nBrightness;
+    CColSurface m_Surface;
 
 public:
     CColBox() = default;
-    
-    CColBox(const CBox& box) :
-        CBox(box)
-    {
+
+    constexpr CColBox(const CBox& box) : CBox(box) {}
+
+    constexpr CColBox(const CBox& box, eSurfaceType material, uint8 pieceType, tColLighting lightning) : CBox(box) {
+        m_Surface.m_nMaterial = material;
+        m_Surface.m_nPiece = pieceType;
+        m_Surface.m_nLighting = lightning;
     }
 
-    CColBox(const CBox& box, uint8 material, uint8 flags, uint8 lightning) :
-        CBox(box),
-        m_nMaterial(material),
-        m_nFlags(flags),
-        m_nLighting(lightning)
-    {
-
-    }
-
-    void     Set(const CVector& sup, const CVector& inf, uint8 material, uint8 flags, uint8 lighting);
+    void Set(const CVector& sup, const CVector& inf, eSurfaceType material, uint8 pieceType, tColLighting lighting);
     CColBox& operator=(const CColBox& right);
 };
-
 VALIDATE_SIZE(CColBox, 0x1C);

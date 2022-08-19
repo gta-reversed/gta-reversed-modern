@@ -186,6 +186,10 @@ RxPipeline* RxLockedPipeSetEntryPoint(RxLockedPipe* pipeline, RxNodeInput in) {
     return ((RxPipeline*(__cdecl *)(RxLockedPipe*, RxNodeInput))0x807070)(pipeline, in);
 }
 
+RxPipeline* RxLockedPipeAddFragment(RxLockedPipe* pipeline, RwUInt32 firstIndex, RxNodeDefinition* nodeDef0, RwUInt32 nodeUnk) {
+    return plugin::CallAndReturn<RxPipeline*, 0x806BE0, RxLockedPipe*, RwUInt32, RxNodeDefinition*, RwUInt32>(pipeline, firstIndex, nodeDef0, nodeUnk);
+}
+
 RxPipelineNode* RxLockedPipeGetEntryPoint(RxLockedPipe* pipeline) {
     return ((RxPipelineNode*(__cdecl *)(RxLockedPipe*))0x8070D0)(pipeline);
 }
@@ -1140,4 +1144,12 @@ const RwCamera* RwCameraStreamWrite(const RwCamera* camera, RwStream* stream) {
 
 RwCameraChunkInfo* RwCameraChunkInfoRead(RwStream* stream, RwCameraChunkInfo* cameraChunkInfo, RwInt32* bytesRead) {
     return ((RwCameraChunkInfo*(__cdecl *)(RwStream*, RwCameraChunkInfo*, RwInt32*))0x808EF0)(stream, cameraChunkInfo, bytesRead);
+}
+
+void _rwObjectHasFrameSetFrame(void *object, RwFrame *frame) {
+    plugin::Call<0x804EF0, void*, RwFrame*>(object, frame);
+}
+
+void _rwObjectHasFrameReleaseFrame(void *object) {
+    plugin::Call<0x804F40, void*>(object);
 }

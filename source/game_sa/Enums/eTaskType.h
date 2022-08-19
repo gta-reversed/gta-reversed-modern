@@ -7,6 +7,7 @@
 #pragma once
 
 /* https://github.com/multitheftauto/mtasa-blue/blob/master/Client/sdk/game/TaskTypes.h */
+#include "Base.h"
 
 enum eTaskType : int32 {
     // player tasks
@@ -402,7 +403,7 @@ enum eTaskType : int32 {
     // new weapon/fight tasks
     TASK_SIMPLE_FIGHT,
     TASK_SIMPLE_USE_GUN,
-    TASK_SIMPLE_THROW,
+    TASK_SIMPLE_THROW_PROJECTILE,
     TASK_SIMPLE_FIGHT_CTRL,
     TASK_SIMPLE_GUN_CTRL,
     // SCRIPT_DECISION

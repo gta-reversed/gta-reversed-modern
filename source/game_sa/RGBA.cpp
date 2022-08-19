@@ -28,8 +28,6 @@ CRGBA::CRGBA(const RwRGBA& rhs) {
     Set(rhs);
 }
 
-CRGBA::CRGBA() {}
-
 void CRGBA::Set(uint8 red, uint8 green, uint8 blue) {
     r = red;
     g = green;

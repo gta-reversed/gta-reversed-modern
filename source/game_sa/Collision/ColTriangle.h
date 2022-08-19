@@ -16,18 +16,18 @@ public:
         };
         uint16 m_vertIndices[3];
     };
-    uint8 m_nMaterial;
+    eSurfaceType m_nMaterial;
     uint8 m_nLight;
 
     CColTriangle() = default;
-    CColTriangle(uint16 a, uint16 b, uint16 c, uint8 material, uint8 light) :
-        m_nVertA(a),
-        m_nVertB(b),
-        m_nVertC(c),
-        m_nMaterial(material),
-        m_nLight(light)
+    CColTriangle(uint16 a, uint16 b, uint16 c, eSurfaceType material, uint8 light) :
+          m_nVertA(a),
+          m_nVertB(b),
+          m_nVertC(c),
+          m_nMaterial(material),
+          m_nLight(light)
     {
+
     }
 };
-
-VALIDATE_SIZE(CColTriangle, 8);
+VALIDATE_SIZE(CColTriangle, 0x8);

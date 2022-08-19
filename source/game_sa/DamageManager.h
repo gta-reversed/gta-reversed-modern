@@ -140,6 +140,8 @@ public:
 public:
     static void InjectHooks();
 
+    CDamageManager(float wheelDamageEffect);
+
     void Init();
     void ResetDamageStatus();
     void ResetDamageStatusAndWheelDamage();
@@ -156,7 +158,7 @@ public:
     uint8 GetAeroplaneCompStatus(uint8 frame);
     void SetAeroplaneCompStatus(uint8 frame, ePanelDamageState status);
 
-    uint8 GetEngineStatus();
+    uint32 GetEngineStatus();
     void SetEngineStatus(uint8 status);
 
     // There are 2 door functions, one takes `tComponent` the other `eDoors`.
@@ -185,13 +187,13 @@ public:
     // NOTSA
     void SetAllWheelsState(eCarWheelStatus state);
     void SetDoorStatus(std::initializer_list<eDoors> doors, eDoorStatus status); 
+    void SetDoorOpen(eDoors door);
+    void SetDoorClosed(eDoors door);
     [[nodiscard]] auto GetAllLightsState() const -> std::array<eLightsState, 4>;
     [[nodiscard]] bool IsDoorOpen(eDoors door) const;
     [[nodiscard]] bool IsDoorClosed(eDoors door) const;
     [[nodiscard]] bool IsDoorPresent(eDoors door) const;
     [[nodiscard]] bool IsDoorDamaged(eDoors door) const;
-    void SetDoorOpen(eDoors door);
-    void SetDoorClosed(eDoors door);
 
 private: 
     // Wrapper functions

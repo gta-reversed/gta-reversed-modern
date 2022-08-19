@@ -3,7 +3,6 @@
 #include "Boat.h"
 #include "CarCtrl.h"
 
-CBoat* (&CBoat::apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS] = *(CBoat*(*)[NUM_WAKE_GEN_BOATS])0xC27994;
 float& CBoat::MAX_WAKE_LENGTH = *(float*)0x8D3938;   // 50.0f
 float& CBoat::MIN_WAKE_INTERVAL = *(float*)0x8D393C; // 2.0f
 float& CBoat::WAKE_LIFETIME = *(float*)0x8D3940;     // 150.0f
@@ -21,15 +20,15 @@ void CBoat::InjectHooks() {
     RH_ScopedClass(CBoat);
     RH_ScopedCategory("Vehicle");
 
-    RH_ScopedInstall(SetModelIndex_Reversed, 0x6F1140);
-    RH_ScopedInstall(ProcessControl_Reversed, 0x6F1770);
-    RH_ScopedInstall(Teleport_Reversed, 0x6F20E0);
-    RH_ScopedInstall(PreRender_Reversed, 0x6F1180);
-    RH_ScopedInstall(Render_Reversed, 0x6F0210);
-    RH_ScopedInstall(ProcessControlInputs_Reversed, 0x6F0A10);
-    RH_ScopedInstall(GetComponentWorldPosition_Reversed, 0x6F01D0);
-    RH_ScopedInstall(ProcessOpenDoor_Reversed, 0x6F0190);
-    RH_ScopedInstall(BlowUpCar_Reversed, 0x6F21B0);
+    RH_ScopedVirtualInstall(SetModelIndex, 0x6F1140);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6F1770);
+    RH_ScopedVirtualInstall(Teleport, 0x6F20E0);
+    RH_ScopedVirtualInstall(PreRender, 0x6F1180);
+    RH_ScopedVirtualInstall(Render, 0x6F0210);
+    RH_ScopedVirtualInstall(ProcessControlInputs, 0x6F0A10);
+    RH_ScopedVirtualInstall(GetComponentWorldPosition, 0x6F01D0);
+    RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6F0190);
+    RH_ScopedVirtualInstall(BlowUpCar, 0x6F21B0);
     RH_ScopedInstall(PruneWakeTrail, 0x6F0E20);
     RH_ScopedInstall(AddWakePoint, 0x6F2550);
     RH_ScopedInstall(SetupModelNodes, 0x6F01A0);
@@ -45,9 +44,6 @@ void CBoat::InjectHooks() {
 
 // 0x6F2940
 CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy) {
-    // plugin::CallMethod<0x6F2940, CBoat*, int32, eVehicleCreatedBy>(this, modelIndex, createdBy);
-    // return;
-
     memset(&m_boatFlap, 0, sizeof(m_boatFlap));
     CVehicleModelInfo* mi = CModelInfo::GetModelInfo(modelIndex)->AsVehicleModelInfoPtr();
     m_nVehicleType = VEHICLE_TYPE_BOAT;
@@ -75,10 +71,7 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     m_fElasticity = 0.1F;
     m_fBuoyancyConstant = m_pHandlingData->m_fBuoyancyConstant;
 
-    if (m_pHandlingData->m_fDragMult <= 0.01F)
-        m_fAirResistance = m_pHandlingData->m_fDragMult;
-    else
-        m_fAirResistance = m_pHandlingData->m_fDragMult / 1000.0F * 0.5F;
+    m_fAirResistance = GetDefaultAirResistance();
 
     physicalFlags.bTouchingWater = true;
     physicalFlags.bSubmergedInWater = true;
@@ -113,24 +106,15 @@ CBoat::CBoat(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(createdBy
     }
 
     m_vehicleAudio.Initialise(this);
-    for (auto& fx : m_apPropSplashFx)
-        fx = nullptr;
+    std::ranges::fill(m_apPropSplashFx, nullptr);
 }
 
 // 0x6F00F0
 CBoat::~CBoat() {
-    if (m_pFireParticle) {
-        m_pFireParticle->Kill();
-        m_pFireParticle = nullptr;
-    }
-
+    FxSystem_c::SafeKillAndClear(m_pFireParticle);
     for (auto& fx : m_apPropSplashFx) {
-        if (fx) {
-            fx->Kill();
-            fx = nullptr;
-        }
+        FxSystem_c::SafeKillAndClear(fx);
     }
-
     m_vehicleAudio.Terminate();
 }
 
@@ -139,14 +123,15 @@ inline void CBoat::SetupModelNodes() {
     CClumpModelInfo::FillFrameArray(m_pRwClump, m_aBoatNodes);
 }
 
+// 0x6F0D00
 void CBoat::DebugCode() {
-    if (FindPlayerVehicle() != AsVehicle())
+    if (FindPlayerVehicle() != this)
         return;
 
     if (CPad::GetPad(m_nPadNumber)->NewState.Start)
         return;
 
-    auto pad = CPad::GetPad(0);
+    auto pad = CPad::GetPad();
     if (!pad->NewState.DPadLeft || pad->OldState.DPadLeft)
         return;
 
@@ -158,7 +143,7 @@ void CBoat::DebugCode() {
 // uses debug printing
 // 0x6F0D90
 void CBoat::PrintThrustAndRudderInfo() {
-    char cBuffer[64];
+    char cBuffer[64]{};
     sprintf(cBuffer, "Thrust %3.2f", m_pHandlingData->m_transmissionData.m_fEngineAcceleration * m_pHandlingData->m_fMass);
     sprintf(cBuffer, "Rudder Angle  %3.2f", m_pHandlingData->m_fSteeringLock);
 }
@@ -168,29 +153,27 @@ void CBoat::ModifyHandlingValue(const bool& bIncrement) {
     if (bIncrement)
         fChange = 1.0F;
 
-    if (field_63C == 4)
+    if (field_63C == 4) {
         m_pHandlingData->m_fSteeringLock += fChange;
+    }
 }
 
+// 0x6F0E20
 void CBoat::PruneWakeTrail() {
-    int16 iInd;
-    for (iInd = 0; iInd < 32; ++iInd) {
-        auto fPointLifeTime = m_afWakePointLifeTime[iInd];
-        if (fPointLifeTime <= 0.0F)
+    int16 count;
+    for (count = 0; count < (int16)std::size(m_afWakePointLifeTime); count++) {
+        float& lifetime = m_afWakePointLifeTime[count];
+        if (lifetime <= 0.0F)
             break;
 
-        if (fPointLifeTime <= CTimer::GetTimeStep()) {
-            m_afWakePointLifeTime[iInd] = 0.0F;
+        if (lifetime <= CTimer::GetTimeStep()) {
+            lifetime = 0.0F;
             break;
         }
 
-        m_afWakePointLifeTime[iInd] -= CTimer::GetTimeStep();
+        lifetime -= CTimer::GetTimeStep();
     }
-
-    if (iInd >= 32)
-        return;
-
-    m_nNumWaterTrailPoints = iInd;
+    m_nNumWaterTrailPoints = count;
 }
 
 void CBoat::AddWakePoint(CVector posn) {
@@ -206,7 +189,7 @@ void CBoat::AddWakePoint(CVector posn) {
         return;
     }
 
-    if (DistanceBetweenPoints2D(posn, m_avecWakePoints[0]) <= MIN_WAKE_INTERVAL)
+    if (DistanceBetweenPointsSquared2D(m_avecWakePoints[0], GetPosition()) <= sq(MIN_WAKE_INTERVAL))
         return;
 
     int16 uiMaxWakePoints = 31;
@@ -220,18 +203,19 @@ void CBoat::AddWakePoint(CVector posn) {
 
     // Shift wake points
     if (m_nNumWaterTrailPoints >= uiMaxWakePoints || uiCurWaterPoints > 0) {
-        for (uint32 iInd = uiCurWaterPoints; iInd > 0; --iInd) {
-            m_avecWakePoints[iInd] = m_avecWakePoints[iInd - 1];
-            m_anWakePointIntensity[iInd] = m_anWakePointIntensity[iInd - 1];
-            m_afWakePointLifeTime[iInd] = m_afWakePointLifeTime[iInd - 1];
+        for (auto i = uiCurWaterPoints; i > 0; --i) {
+            m_avecWakePoints[i] = m_avecWakePoints[i - 1];
+            m_anWakePointIntensity[i] = m_anWakePointIntensity[i - 1];
+            m_afWakePointLifeTime[i] = m_afWakePointLifeTime[i - 1];
         }
     }
 
     m_anWakePointIntensity[0] = ucIntensity;
     m_avecWakePoints[0].Set(posn.x, posn.y);
     m_afWakePointLifeTime[0] = WAKE_LIFETIME;
-    if (m_nNumWaterTrailPoints < 32)
+    if (m_nNumWaterTrailPoints < 32) { // todo: magic number
         ++m_nNumWaterTrailPoints;
+    }
 }
 
 bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBoats) {
@@ -248,8 +232,11 @@ bool CBoat::IsSectorAffectedByWake(CVector2D vecPos, float fOffset, CBoat** ppBo
 
         for (int32 iTrail = 0; iTrail < boat->m_nNumWaterTrailPoints; ++iTrail) {
             auto fDist = (WAKE_LIFETIME - boat->m_afWakePointLifeTime[iTrail]) * fShapeTime + static_cast<float>(iTrail) * fShapeLength + fOffset;
-            if (fabs(boat->m_avecWakePoints[iTrail].x - vecPos.x) >= fDist || fabs(boat->m_avecWakePoints[iTrail].y - vecPos.y) >= fDist)
+            if (std::fabs(boat->m_avecWakePoints[iTrail].x - vecPos.x) >= fDist ||
+                std::fabs(boat->m_avecWakePoints[iTrail].y - vecPos.y) >= fDist
+            ) {
                 continue;
+            }
 
             ppBoats[bWakeFound] = boat;
             bWakeFound = true;
@@ -264,8 +251,9 @@ float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* boat, int16 wIndex, b
     if (bUnkn) {
         waUnknArr[wIndex] = 0;
         waUnknArr2[wIndex] = 8;
-    } else if (waUnknArr[wIndex] > 0)
+    } else if (waUnknArr[wIndex] > 0) {
         return 0.0F;
+    }
 
     if (!boat->m_nNumWaterTrailPoints)
         return 0.0F;
@@ -282,11 +270,13 @@ float CBoat::IsVertexAffectedByWake(CVector vecPos, CBoat* boat, int16 wIndex, b
 
         auto fDistDiff = fTrailDistSquared - fWakeDistSquared;
         if (fDistDiff > 20.0F) {
-            if (waUnknArr2[wIndex] > 3)
+            if (waUnknArr2[wIndex] > 3) {
                 waUnknArr2[wIndex] = 3;
+            }
         } else if (fDistDiff > 10.0F) {
-            if (waUnknArr2[wIndex] > 2)
+            if (waUnknArr2[wIndex] > 2) {
                 waUnknArr2[wIndex] = 2;
+            }
         }
     }
 
@@ -302,8 +292,9 @@ void CBoat::CheckForSkippingCalculations() {
                 continue;
             }
             waUnknArr[ind] = iVal - 1;
-        } else if (iVal <= waUnknArr[ind] - 1)
+        } else if (iVal <= waUnknArr[ind] - 1) {
             --waUnknArr[ind];
+        }
 
         waUnknArr2[ind] = 8;
     }
@@ -311,21 +302,15 @@ void CBoat::CheckForSkippingCalculations() {
 
 // 0x6F2710
 void CBoat::FillBoatList() {
-    for (auto& boat : apFrameWakeGeneratingBoats)
-        boat = nullptr;
+    apFrameWakeGeneratingBoats.fill(nullptr);
 
-    auto vecCamPos = CVector2D(TheCamera.GetPosition());
-    auto vecCamDir = CVector2D(TheCamera.m_mCameraMatrix.GetForward());
+    const auto& vecCamPos = TheCamera.GetPosition();
+    auto vecCamDir = TheCamera.m_mCameraMatrix.GetForward();
     vecCamDir.Normalise();
 
-    auto iVehNum = CPools::ms_pVehiclePool->GetSize();
-    if (!iVehNum)
-        return;
-
-    int32 iCurBoat = 0;
-
-    for (int32 iInd = 0; iInd < iVehNum; ++iInd) {
-        auto vehicle = CPools::ms_pVehiclePool->GetAt(iInd);
+    auto iCurBoat = 0u;
+    for (int32 iInd = 0; iInd < GetVehiclePool()->GetSize(); ++iInd) {
+        auto vehicle = GetVehiclePool()->GetAt(iInd);
         if (!vehicle || !vehicle->IsBoat())
             continue;
 
@@ -333,18 +318,18 @@ void CBoat::FillBoatList() {
         if (!boat->m_nNumWaterTrailPoints)
             continue;
 
-        auto vecBoatPos = CVector2D(boat->GetPosition());
-        auto vecBoatCamOffset = vecBoatPos - vecCamPos;
-        auto fCamDot = DotProduct2D(vecBoatCamOffset, vecCamDir);
+        const auto& vecBoatPos = boat->GetPosition();
+        CVector2D vecBoatCamOffset = vecBoatPos - vecCamPos;
+        const auto fCamDot = DotProduct2D(vecBoatCamOffset, vecCamDir);
         if (fCamDot > 100.0F || fCamDot < -15.0F)
             continue;
 
-        auto fDistFromCam = DistanceBetweenPoints2D(vecBoatPos, vecCamPos);
+        const auto fDistFromCam = DistanceBetweenPoints2D(vecCamPos, vecBoatPos);
         if (fDistFromCam > 80.0F) // Originally squared dist, compared to 6400.0F
             continue;
 
         // Early out, the list isn't full yet
-        if (iCurBoat < 4) {
+        if (iCurBoat < std::size(apFrameWakeGeneratingBoats)) {
             apFrameWakeGeneratingBoats[iCurBoat] = boat;
             ++iCurBoat;
             continue;
@@ -354,17 +339,18 @@ void CBoat::FillBoatList() {
         auto iNewInd = -1;
         auto fMinDist = 999999.99F;
         for (int32 iCheckedInd = 0; iCheckedInd < NUM_WAKE_GEN_BOATS; ++iCheckedInd) {
-            auto pCheckedBoat = apFrameWakeGeneratingBoats[iCheckedInd];
-            auto vecCheckedPos = CVector2D(pCheckedBoat->GetPosition());
-            auto fCheckedDistFromCam = DistanceBetweenPoints2D(vecCheckedPos, vecCamPos); // Originally squared dist
+            auto checkedBoat = apFrameWakeGeneratingBoats[iCheckedInd];
+            const auto& vecCheckedPos = checkedBoat->GetPosition();
+            auto fCheckedDistFromCam = DistanceBetweenPoints2D(vecCamPos, vecCheckedPos); // Originally squared dist
             if (fCheckedDistFromCam < fMinDist) {
                 fMinDist = fCheckedDistFromCam;
                 iNewInd = iCheckedInd;
             }
         }
 
-        if (iNewInd != -1 && (fDistFromCam < fMinDist || boat->m_nStatus == eEntityStatus::STATUS_PLAYER))
+        if (iNewInd != -1 && (fDistFromCam < fMinDist || boat->m_nStatus == eEntityStatus::STATUS_PLAYER)) {
             apFrameWakeGeneratingBoats[iNewInd] = boat;
+        }
     }
 }
 
@@ -382,16 +368,17 @@ void CBoat::ProcessControl_Reversed() {
     if (physicalFlags.bDestroyed && fMassCheck < m_fBuoyancyConstant)
         m_fBuoyancyConstant -= ((m_fMass * 0.001F) * 0.008F);
 
-    auto wanted = FindPlayerPed()->m_pPlayerData->m_pWanted;
+    auto wanted = FindPlayerWanted();
     if (wanted->m_nWantedLevel > 0 && m_nModelIndex == MODEL_PREDATOR) {
-        auto pPlayerVeh = FindPlayerVehicle();
-        if (pPlayerVeh && pPlayerVeh->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BOAT) {
+        auto vehicle = FindPlayerVehicle();
+        if (vehicle && vehicle->GetVehicleAppearance() == eVehicleAppearance::VEHICLE_APPEARANCE_BOAT) {
             auto iCarMission = m_autoPilot.m_nCarMission;
             if (iCarMission == eCarMission::MISSION_ATTACKPLAYER ||
-                (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)) {
-
-                if (static_cast<uint32>(CTimer::GetTimeInMS()) > m_nAttackPlayerTime)
-                    m_nAttackPlayerTime = rand() % 4096 + CTimer::GetTimeInMS() + 4500;
+                (iCarMission >= eCarMission::MISSION_RAMPLAYER_FARAWAY && iCarMission <= eCarMission::MISSION_BLOCKPLAYER_CLOSE)
+            ) {
+                if (CTimer::GetTimeInMS() > m_nAttackPlayerTime) {
+                    m_nAttackPlayerTime = CGeneral::GetRandomNumber() % 4096 + CTimer::GetTimeInMS() + 4500;
+                }
             }
         }
     }
@@ -439,14 +426,14 @@ void CBoat::ProcessControl_Reversed() {
 
         auto fDist = (GetPosition() - FindPlayerCentreOfWorld_NoSniperShift(0)).Magnitude();
         if (fDist > 150.0F) {
-            m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
-            m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+            ResetMoveSpeed();
+            ResetTurnSpeed();
             return;
         }
         break;
     }
 
-    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_HELI || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
+    if (m_nStatus == eEntityStatus::STATUS_PLAYER || m_nStatus == eEntityStatus::STATUS_REMOTE_CONTROLLED || m_nStatus == eEntityStatus::STATUS_PHYSICS) {
         auto fSTDPropSpeed = 0.0F;
         auto fROCPropSpeed = CPlane::PLANE_ROC_PROP_SPEED;
         if (m_nModelIndex == MODEL_SKIMMER)
@@ -463,8 +450,9 @@ void CBoat::ProcessControl_Reversed() {
             fSTDPropSpeed = (CPlane::PLANE_MAX_PROP_SPEED - CPlane::PLANE_STD_PROP_SPEED) * m_fGasPedal + CPlane::PLANE_STD_PROP_SPEED;
             m_fPropSpeed += (fSTDPropSpeed - m_fPropSpeed) * CTimer::GetTimeStep() * fROCPropSpeed;
         }
-    } else if (m_fPropSpeed > 0.0F)
+    } else if (m_fPropSpeed > 0.0F) {
         m_fPropSpeed *= 0.95F;
+    }
 
     auto fDamagePower = m_fDamageIntensity * m_pHandlingData->m_fCollisionDamageMultiplier;
     if (fDamagePower > 25.0F && m_nStatus != eEntityStatus::STATUS_WRECKED && m_fHealth >= 250.0F) {
@@ -478,10 +466,11 @@ void CBoat::ProcessControl_Reversed() {
             if (vehicleFlags.bTakeLessDamage)
                 fGivenDamage /= 6.0F;
             else
-                fGivenDamage *= 0.5F;
+                fGivenDamage /= 2.0F;
         } else {
-            if (fGivenDamage > 60.0F && m_pDriver)
-                m_pDriver->Say(0x44U, 0, 1.0F, 0, 0, 0);
+            if (fGivenDamage > 60.0F && m_pDriver) {
+                m_pDriver->Say(68);
+            }
 
             fGivenDamage -= 25.0F;
             if (vehicleFlags.bTakeLessDamage)
@@ -499,35 +488,32 @@ void CBoat::ProcessControl_Reversed() {
 
     if (m_fHealth > 460.0F || m_nStatus == eEntityStatus::STATUS_WRECKED) {
         m_fBurningTimer = 0.0F;
-        if (m_pFireParticle) {
-            m_pFireParticle->Kill();
-            m_pFireParticle = nullptr;
-        }
+        FxSystem_c::SafeKillAndClear(m_pFireParticle);
     } else {
         auto vecDist = GetPosition() - TheCamera.GetPosition();
-        if (fabs(vecDist.x) < 200.0F && fabs(vecDist.y) < 200.0F) {
-
+        if (std::fabs(vecDist.x) < 200.0F && fabs(vecDist.y) < 200.0F) {
             CVector vecFirePos(-1.5F, -0.5F, 1.2F);
-            if (m_nModelIndex == MODEL_SPEEDER)
+            if (m_nModelIndex == MODEL_SPEEDER) {
                 vecFirePos.Set(0.4F, -2.4F, 0.8F);
-            else if (m_nModelIndex == MODEL_REEFER)
+            } else if (m_nModelIndex == MODEL_REEFER) {
                 vecFirePos.Set(2.0F, -1.0F, 0.5F);
+            }
 
             if (m_fHealth < 250.0F) {
-                if (!m_pFireParticle) {
-                    if (auto modellingMat = GetModellingMatrix()) {
-                        m_pFireParticle = g_fxMan.CreateFxSystem("fire_car", &vecFirePos, modellingMat, false);
-                        if (m_pFireParticle) {
-                            m_pFireParticle->Play();
-                            CEventVehicleOnFire vehOnFireEvent(this);
-                            GetEventGlobalGroup()->Add(&vehOnFireEvent, false);
-                        }
+                auto modellingMat = GetModellingMatrix();
+                if (!m_pFireParticle && modellingMat) {
+                    m_pFireParticle = g_fxMan.CreateFxSystem("fire_car", &vecFirePos, modellingMat, false);
+                    if (m_pFireParticle) {
+                        m_pFireParticle->Play();
+                        CEventVehicleOnFire vehOnFireEvent(this);
+                        GetEventGlobalGroup()->Add(&vehOnFireEvent, false);
                     }
                 }
 
                 m_fBurningTimer += (CTimer::GetTimeStep() * 20.0F);
-                if (m_fBurningTimer > 5000.0F)
+                if (m_fBurningTimer > 5000.0F) {
                     BlowUpCar(m_pWhoDestroyedMe, false);
+                }
             }
         }
     }
@@ -565,8 +551,8 @@ void CBoat::Teleport_Reversed(CVector destination, bool resetRotation) {
     if (resetRotation)
         SetOrientation(0.0F, 0.0F, 0.0F);
 
-    m_vecMoveSpeed.Set(0.0F, 0.0F, 0.0F);
-    m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+    ResetMoveSpeed();
+    ResetTurnSpeed();
     CWorld::Add(this);
 }
 
@@ -598,7 +584,7 @@ void CBoat::PreRender_Reversed() {
         if (pFlap) {
             auto tempMat = CMatrix();
             tempMat.Attach(RwFrameGetMatrix(pFlap), false);
-            CVector posCopy = tempMat.GetPosition();
+            CVector& posCopy = tempMat.GetPosition();
             auto vecTransformed = Multiply3x3(GetMatrix(), posCopy);
 
             m_boatFlap.Process(this, m_vecBoatMoveForce, m_vecBoatTurnForce, vecTransformed);
@@ -637,9 +623,8 @@ void CBoat::PreRender_Reversed() {
     auto fSpeed = m_vecMoveSpeed.Magnitude();
 
     int32 iCounter = 0;
-    constexpr eBoatNodes aCheckedNodes[2] = { BOAT_STATIC_PROP, BOAT_STATIC_PROP_2 };
-    for (const auto eNode : aCheckedNodes) {
-        auto prop = m_aBoatNodes[eNode];
+    for (const auto node : { BOAT_STATIC_PROP, BOAT_STATIC_PROP_2 }) {
+        auto prop = m_aBoatNodes[node];
         RwMatrix* splashMat = CEntity::GetModellingMatrix();
 
         auto splashFx = m_apPropSplashFx[iCounter];
@@ -690,6 +675,7 @@ inline void CBoat::ProcessBoatNodeRendering(eBoatNodes eNode, float fRotation, R
         CVehicle::SetComponentAtomicAlpha(atomic, ucAlpha);
 }
 
+// 0x6F0210
 void CBoat::Render_Reversed() {
     m_nTimeTillWeNeedThisCar = CTimer::GetTimeInMS() + 3000;
     if (CCheat::IsActive(CHEAT_INVISIBLE_CAR))
@@ -700,7 +686,7 @@ void CBoat::Render_Reversed() {
     if (m_nModelIndex == MODEL_SKIMMER)
         return;
 
-    // Code below is used to draw the "no water" zones, so the inside of the boat that is under water surface, doesn't have water visible in it
+    // Code below is used to draw the "no water" zones, so the inside of the boat that is underwater surface, doesn't have water visible in it
 
     RwRGBA rwColor = CRGBA(255, 255, 255, 255).ToRwRGBA();
     RxObjSpace3DVertexSetPreLitColor(&aRenderVertices[0], &rwColor);
@@ -815,6 +801,7 @@ void CBoat::Render_Reversed() {
     RwRenderStateSet(rwRENDERSTATEDESTBLEND, RWRSTATE(rwBLENDINVSRCALPHA));
 }
 
+// 0x6F0A10
 void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
     m_nPadNumber = ucPadNum;
     if (ucPadNum > 3)
@@ -838,33 +825,38 @@ void CBoat::ProcessControlInputs_Reversed(uint8 ucPadNum) {
         if (CPad::NewMouseControllerState.X == 0.0F && bChangedInput) { // No longer using mouse controls
             m_fRawSteerAngle += (static_cast<float>(-pad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
             CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
-        } else if (m_fRawSteerAngle != 0.0F || m_fRawSteerAngle != 0.0F) {
+        } else if (m_fRawSteerAngle != 0.0F || m_fRawSteerAngle != 0.0F) { // todo: doesn't match OG and duplicateExpression: Same expression on both sides of '||'.
             CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_MOUSE;
-            if (!pad->NewState.m_bVehicleMouseLook)
+            if (!pad->NewState.m_bVehicleMouseLook) {
                 m_fRawSteerAngle += CPad::NewMouseControllerState.X * -0.0035F;
+            }
 
-            if (fabs(m_fRawSteerAngle) < 0.5 || pad->NewState.m_bVehicleMouseLook)
-                m_fRawSteerAngle *= pow(0.985F, CTimer::GetTimeStep());
+            if (std::fabs(m_fRawSteerAngle) < 0.5f || pad->NewState.m_bVehicleMouseLook) {
+                m_fRawSteerAngle *= std::pow(0.985F, CTimer::GetTimeStep());
+            }
         }
     } else {
         m_fRawSteerAngle += (static_cast<float>(-pad->GetSteeringLeftRight()) * (1.0F / 128.0F) - m_fRawSteerAngle) * 0.2F * CTimer::GetTimeStep();
         CVehicle::m_nLastControlInput = eControllerType::CONTROLLER_KEYBOARD1;
     }
 
-    m_fRawSteerAngle = clamp(m_fRawSteerAngle, -1.0F, 1.0F);
+    m_fRawSteerAngle = std::clamp(m_fRawSteerAngle, -1.0F, 1.0F);
     auto fSignedPow = m_fRawSteerAngle * fabs(m_fRawSteerAngle);
     m_fSteerAngle = DegreesToRadians(m_pHandlingData->m_fSteeringLock * fSignedPow);
 }
 
+// 0x6F01D0
 void CBoat::GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos) {
     outPos = RwFrameGetLTM(m_aBoatNodes[componentId])->pos;
 }
 
+// 0x6F0190
 void CBoat::ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) {
     // NOP
 }
 
-void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
+// 0x6F21B0
+void CBoat::BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) {
     if (!vehicleFlags.bCanBeDamaged)
         return;
 
@@ -876,7 +868,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
     m_wBombTimer = 0;
 
     const auto& vecPos = GetPosition();
-    TheCamera.CamShake(0.4F, vecPos.x, vecPos.y, vecPos.z);
+    TheCamera.CamShake(0.4F, vecPos);
     CVehicle::KillPedsInVehicle();
     m_nOverrideLights = eVehicleOverrideLightsState::NO_CAR_LIGHT_OVERRIDE;
     vehicleFlags.bEngineOn = false;
@@ -895,7 +887,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
         return;
 
     auto obj = new CObject();
-    obj->SetModelIndexNoCreate(379); // todo: MODEL_TEMPCOL_WHEEL1 ?
+    obj->SetModelIndexNoCreate(MODEL_TEMPCOL_WHEEL1);
     obj->RefModelInfo(m_nModelIndex);
 
     auto movingCompMatrix = RwFrameGetLTM(movingComponent);
@@ -916,7 +908,7 @@ void CBoat::BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) {
     obj->m_nObjectType = eObjectType::OBJECT_TEMPORARY;
     obj->SetIsStatic(false);
     obj->objectFlags.bIsPickup = false;
-    obj->m_dwRemovalTime = CTimer::GetTimeInMS() + 20000;
+    obj->m_nRemovalTime = CTimer::GetTimeInMS() + 20000;
 
     obj->m_vecMoveSpeed = m_vecMoveSpeed;
     if (GetUp().z <= 0.0F)
@@ -955,4 +947,4 @@ void CBoat::Render() { return CBoat::Render_Reversed(); }
 void CBoat::ProcessControlInputs(uint8 playerNum) { return CBoat::ProcessControlInputs_Reversed(playerNum); }
 void CBoat::GetComponentWorldPosition(int32 componentId, CVector& outPos) { return CBoat::GetComponentWorldPosition_Reversed(componentId, outPos); }
 void CBoat::ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) { return CBoat::ProcessOpenDoor_Reversed(ped, doorComponentId, animGroup, animId, fTime); }
-void CBoat::BlowUpCar(CEntity* damager, uint8 bHideExplosion) { return CBoat::BlowUpCar_Reversed(damager, bHideExplosion); }
+void CBoat::BlowUpCar(CEntity* damager, bool bHideExplosion) { return CBoat::BlowUpCar_Reversed(damager, bHideExplosion); }

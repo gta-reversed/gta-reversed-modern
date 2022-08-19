@@ -3213,6 +3213,34 @@ typedef RwMatrixTag RwMatrix;
  */
 #endif /* (!defined(DOXYGEN)) */
 
+#define rwMatrixSetFlags(m, flagsbit)     ((m)->flags = (flagsbit))
+#define rwMatrixGetFlags(m)               ((m)->flags)
+#define rwMatrixTestFlags(m, flagsbit)    ((m)->flags & (RwInt32)(flagsbit))
+
+#if (!defined(RwMatrixCopyMacro))
+#define RwMatrixCopyMacro(_target, _source)             \
+    ( *(_target) = *(_source) )
+#endif /* (!defined(RwMatrixCopyMacro)) */
+
+#if (!defined(RwMatrixSetIdentityMacro))
+#define RwMatrixSetIdentityMacro(m)                                     \
+MACRO_START                                                             \
+{                                                                       \
+    (m)->right.x = (m)->up.y    = (m)->at.z    = (RwReal)((1.0));       \
+    (m)->right.y = (m)->right.z = (m)->up.x    = (RwReal)((0.0));       \
+    (m)->up.z    = (m)->at.x    = (m)->at.y    = (RwReal)((0.0));       \
+    (m)->pos.x   = (m)->pos.y   = (m)->pos.z   = (RwReal)((0.0));       \
+    rwMatrixSetFlags((m),                                               \
+                     rwMatrixGetFlags(m) |                              \
+                     (rwMATRIXINTERNALIDENTITY |                        \
+                      rwMATRIXTYPEORTHONORMAL));                        \
+}                                                                       \
+MACRO_STOP
+#endif /* (!defined(RwMatrixSetIdentityMacro)) */
+
+#define RwMatrixCopy(dst, src)   RwMatrixCopyMacro(dst, src)
+#define RwMatrixSetIdentity(m)   RwMatrixSetIdentityMacro(m)
+
 typedef void (RWASMCALL * rwMatrixMultFn) (RwMatrix * dstMat,
                                            const RwMatrix * matA,
                                            const RwMatrix * matB);
@@ -4862,6 +4890,13 @@ typedef void        (*RwDebugHandler) (RwDebugType type,
 
 #define RWPLUGINOFFSETCONST(_type, _base, _offset)              \
    ((const _type *)((const RwUInt8 *)(_base) + (_offset)))
+
+/* macro used to access global data structure (the root type is RwGlobals) */
+#define RWSRCGLOBAL(variable) \
+   (((RwGlobals *)RwEngineInstance)->variable)
+
+#define RWASSERTISTYPE(_f, _t) \
+   RWASSERT((((const RwObject *)(_f))->type)==(_t))
 
 /****************************************************************************
  Global Types

@@ -30,9 +30,9 @@ bool WaterCreature_c::Init(int32 nType, CVector* vecPos, WaterCreature_c* parent
         vecPos->z = CGeneral::GetRandomNumberInRange(fMinZ, fMaxZ);
     }
 
-    CPools::ms_pObjectPool->m_bIsLocked = true;
+    GetObjectPool()->m_bIsLocked = true;
     m_pObject = new CObject(*info.m_pModelId, false);
-    CPools::ms_pObjectPool->m_bIsLocked = false;
+    GetObjectPool()->m_bIsLocked = false;
 
     if (!m_pObject)
         return false;
@@ -87,10 +87,7 @@ void WaterCreature_c::Exit()
     g_waterCreatureMan.m_createdList.RemoveItem(this);
     g_waterCreatureMan.m_freeList.AddItem(this);
     CWorld::Remove(m_pObject);
-
-    if (m_pObject)
-        delete m_pObject;
-
+    delete m_pObject;
     m_pObject = nullptr;
     --CObject::nNoTempObjects;
 }

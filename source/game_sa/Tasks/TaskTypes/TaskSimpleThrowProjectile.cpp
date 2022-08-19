@@ -12,8 +12,7 @@ CTaskSimpleThrowProjectile::~CTaskSimpleThrowProjectile() {
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;
     }
-    if (m_pTarget)
-        m_pTarget->CleanUpOldReference(&m_pTarget);
+    CEntity::SafeCleanUpRef(m_pTarget);
 }
 
 
@@ -27,7 +26,7 @@ bool CTaskSimpleThrowProjectile::MakeAbortable(CPed* ped, eAbortPriority priorit
     return plugin::CallMethodAndReturn<bool, 0x61F780, CTaskSimpleThrowProjectile*, CPed*, eAbortPriority, const CEvent*>(this, ped, priority, event);
 
     // untested
-    if (priority == 2) {
+    if (priority == ABORT_PRIORITY_URGENT) {
         if (m_pAnim) {
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim->m_fBlendDelta = -1000.0f;
@@ -36,7 +35,7 @@ bool CTaskSimpleThrowProjectile::MakeAbortable(CPed* ped, eAbortPriority priorit
         }
     } else if (event && event->GetEventType() == EVENT_DAMAGE) {
         const auto* eventDamage = static_cast<const CEventDamage*>(event);
-        if ((eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup || (eventDamage->m_ucFlags & 2) != 0)) { // todo: m_bKnockOffPed
+        if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup || eventDamage->m_bKnockOffPed) {
             if (m_pAnim) {
                 m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
                 m_pAnim->m_fBlendDelta = -4.0f;

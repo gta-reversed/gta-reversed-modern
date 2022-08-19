@@ -5,51 +5,44 @@
 
 CColPoint(&CTaskSimpleGetUp::m_aColPoints)[32] = *reinterpret_cast<CColPoint(*)[32]>(0xC18F98);
 
-void CTaskSimpleGetUp::InjectHooks()
-{
+void CTaskSimpleGetUp::InjectHooks() {
     RH_ScopedClass(CTaskSimpleGetUp);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x677F50);
     RH_ScopedInstall(StartAnim, 0x67C770);
     RH_ScopedInstall(FinishGetUpAnimCB, 0x678110);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67FA80);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x677FE0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67FA80);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x677FE0);
 }
 
-CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor()
-{
+CTaskSimpleGetUp* CTaskSimpleGetUp::Constructor() {
     this->CTaskSimpleGetUp::CTaskSimpleGetUp();
     return this;
 }
 
 // 0x677F50
-CTaskSimpleGetUp::CTaskSimpleGetUp()
-{
+CTaskSimpleGetUp::CTaskSimpleGetUp() {
     m_bIsFinished = false;
     m_bAnimFinished = false;
     m_pAnim = nullptr;
 }
 
-CTaskSimpleGetUp::~CTaskSimpleGetUp()
-{
+CTaskSimpleGetUp::~CTaskSimpleGetUp() {
     if (m_pAnim)
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
 }
 
 // 0x67FA80
-bool CTaskSimpleGetUp::ProcessPed(CPed* ped)
-{
+bool CTaskSimpleGetUp::ProcessPed(CPed* ped) {
     return ProcessPed_Reversed(ped);
 }
 
 // 0x677FE0
-bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleGetUp::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
-bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
-{
+bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped) {
     ped->m_pedIK.bSlopePitch = true;
 
     if (m_bAnimFinished)
@@ -67,44 +60,36 @@ bool CTaskSimpleGetUp::ProcessPed_Reversed(CPed* ped)
     return false;
 }
 
-bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
 
-    if (priority == ABORT_PRIORITY_URGENT)
-    {
+    if (priority == ABORT_PRIORITY_URGENT) {
         bool bTooMuchTimePassed = false;
         bool bFatalDamage = false;
 
-        if (event)
-        {
-            if (event->GetEventType() == EVENT_DAMAGE)
-            {
+        if (event) {
+            if (event->GetEventType() == EVENT_DAMAGE) {
                 const auto eventDamage = static_cast<const CEventDamage*>(event);
                 if (eventDamage->m_damageResponse.m_bHealthZero && eventDamage->m_bAddToEventGroup)
                     bFatalDamage = true;
-                else if (CTimer::GetTimeInMS() - eventDamage->m_nStartTime > CTimer::GetTimeStepInMS() * 3.0F)
+                else if (CTimer::GetTimeInMS() - eventDamage->m_nStartTime > uint32(CTimer::GetTimeStepInMS() * 3.0F))
                     bTooMuchTimePassed = true;
-            }
-            else if (event->GetEventPriority() < 61)
+            } else if (event->GetEventPriority() < 61)
                 return false;
         }
 
-        if (m_pAnim && !bTooMuchTimePassed)
-        {
+        if (m_pAnim && !bTooMuchTimePassed) {
             m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
             m_pAnim = nullptr;
             m_bIsFinished = true;
             m_bAnimFinished = true;
-        }
-        else if (!m_bIsFinished && !bFatalDamage)
+        } else if (!m_bIsFinished && !bFatalDamage)
             return false;
 
         ped->bStuckUnderCar = false;
         return true;
     }
 
-    if (priority == ABORT_PRIORITY_IMMEDIATE)
-    {
+    if (priority == ABORT_PRIORITY_IMMEDIATE) {
         if (m_pAnim)
             m_pAnim->m_fBlendDelta = -1000.0F;
         ped->bStuckUnderCar = false;
@@ -115,8 +100,7 @@ bool CTaskSimpleGetUp::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority
 }
 
 // 0x67C770
-bool CTaskSimpleGetUp::StartAnim(CPed* ped)
-{
+bool CTaskSimpleGetUp::StartAnim(CPed* ped) {
     auto vehicle = CPedPlacement::IsPositionClearOfCars(ped);
 
     if (!vehicle
@@ -124,9 +108,8 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
         || vehicle->IsSubQuad()
         || vehicle == ped->m_pAttachedTo
         || vehicle == ped->m_standingOnEntity
-        )
-    {
-        auto entity = ped->m_pEntityIgnoredCollision;
+    ) {
+        auto& entity = ped->m_pEntityIgnoredCollision;
 
         if (!entity
             || !entity->IsVehicle()
@@ -144,15 +127,15 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
                 nullptr,
                 false
             ) <= 0
-            )
-        {
+        ) {
             ped->m_pEntityIgnoredCollision = nullptr;
 
             m_pAnim = CAnimManager::BlendAnimation(
                 ped->m_pRwClump,
                 ANIM_GROUP_DEFAULT,
-                RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIM_FLAG_800) ? ANIM_ID_GETUP_FRONT : ANIM_ID_GETUP_0,
-                1000.0F);
+                RpAnimBlendClumpGetFirstAssociation(ped->m_pRwClump, ANIMATION_800) ? ANIM_ID_GETUP_FRONT : ANIM_ID_GETUP_0,
+                1000.0F
+            );
 
             m_pAnim->SetFinishCallback(FinishGetUpAnimCB, this);
             ped->SetPedState(PEDSTATE_IDLE);
@@ -164,15 +147,12 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 
     float fDamage;
 
-    if (ped->IsPlayer())
-    {
+    if (ped->IsPlayer()) {
         if (CTimer::GetTimeStep() > 0.0F)
             fDamage = CTimer::GetTimeStep();
         else
             return false;
-    }
-    else
-    {
+    } else {
         if (CPad::GetPad(0)->DisablePlayerControls)
             fDamage = 1000.0F;
         else
@@ -183,7 +163,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
     CEventDamage eventDamage(vehicle, CTimer::GetTimeInMS(), WEAPON_RUNOVERBYCAR, PED_PIECE_TORSO, 0, false, ped->bInVehicle);
 
     if (eventDamage.AffectsPed(ped))
-        damageResponseCalculator.ComputeDamageResponse(ped, &eventDamage.m_damageResponse, true);
+        damageResponseCalculator.ComputeDamageResponse(ped, eventDamage.m_damageResponse, true);
     else
         eventDamage.m_damageResponse.m_bDamageCalculated = true;
 
@@ -193,8 +173,7 @@ bool CTaskSimpleGetUp::StartAnim(CPed* ped)
 }
 
 // 0x678110
-void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data)
-{
+void CTaskSimpleGetUp::FinishGetUpAnimCB(CAnimBlendAssociation* blendAssoc, void* data) {
     auto task = reinterpret_cast<CTaskSimpleGetUp*>(data);
     task->m_bIsFinished = true;
     task->m_bAnimFinished = true;

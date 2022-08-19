@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderware.h"
+#include "RenderWare.h"
 
 #include "Vector.h"
 #include "Matrix.h"
@@ -13,24 +13,25 @@ public:
     CVector  m_vEnd;
     CMatrix  m_mRotation;
     bool     m_bExist;
-    char     m_bObjectsCreated;
-    char     m_bMoveDown;
-    char     __pad;
-    int32    m_dwNumIntermediatePlanes;
-    uint32   m_dwNumBottomPlanes;
-    uint32   m_dwNumTopPlanes;
-    char     __unused[8];
+    uint8    m_nObjectsCreated; // todo: check offset and size
+    bool     m_bMoveDown;
+    int32    m_nNumIntermediatePlanes;
+    uint32   m_nNumBottomPlanes;
+    uint32   m_nNumTopPlanes;
+    char     _unused[8];
     RwSphere m_Bounding;
-    float    m_dwCurrentPosition;
+    float    m_nCurrentPosition;
     void*    m_pEntity;
-    void*    m_pObjects[42];
+    CObject* m_pObjects[42];
 
 public:
     static void InjectHooks();
 
-public:
+    CEscalator();
+    ~CEscalator() = default; // 0x717130
+
     void SwitchOff();
-    void AddThisOne(const CVector& vecStart, const CVector& vecBottom,const  CVector& vecEnd,const  CVector& vecTop, bool bMoveDown, CEntity* entity);
+    void AddThisOne(const CVector& vecStart, const CVector& vecBottom, const CVector& vecEnd, const CVector& vecTop, bool bMoveDown, CEntity* entity);
     void Update();
 };
 

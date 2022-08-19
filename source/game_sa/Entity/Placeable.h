@@ -45,6 +45,9 @@ public:
     void AllocateMatrix();
     void SetMatrix(CMatrix& matrix);
 
+    // NOTSA
+    bool IsPointInRange(const CVector& point, float range);
+    bool IsEntityInRange(const CPlaceable* entity, float range) { return IsPointInRange(entity->GetPosition(), range); }
 public:
     static constexpr uint32 NUM_MATRICES_TO_CREATE = 900;
     
@@ -53,6 +56,7 @@ public:
     inline CVector& GetUp() const { return m_matrix->GetUp(); }
     inline const CVector& GetPosition() const { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
     inline CVector& GetPosition() { return m_matrix ? m_matrix->GetPosition() : m_placement.m_vPosn; }
+    inline CVector2D GetPosition2D() { return { GetPosition() }; }
 };
 
 VALIDATE_SIZE(CPlaceable, 0x18);

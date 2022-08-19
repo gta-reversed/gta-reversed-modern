@@ -1,10 +1,14 @@
 #pragma once
 #pragma message("Compiling precompiled header.\n")
 
+#include <WinSock2.h>
 #include <Windows.h>
 #include <cstdio>
 #include <cmath>
+#include <cinttypes>
 #include <algorithm>
+#include <numeric>
+#include <random>
 #include <list>
 #include <map>
 #include <set>
@@ -24,6 +28,7 @@
 namespace rng = std::ranges;
 
 #include "Base.h"
+#include "config.h"
 
 #include "HookSystem.h"
 #include "reversiblehooks\ReversibleHooks.h"
@@ -32,6 +37,34 @@ namespace rng = std::ranges;
 #include <d3d9.h>
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+
+// RenderWare
+#include "game_sa\RenderWare\D3DIndexDataBuffer.h"
+#include "game_sa\RenderWare\D3DResourceSystem.h"
+#include "game_sa\RenderWare\D3DTextureBuffer.h"
+#include "game_sa\RenderWare\rw\rpanisot.h"
+#include "game_sa\RenderWare\rw\rpcriter.h"
+#include "game_sa\RenderWare\rw\rperror.h"
+#include "game_sa\RenderWare\rw\rphanim.h"
+#include "game_sa\RenderWare\rw\rpmatfx.h"
+#include "game_sa\RenderWare\rw\rpskin.h"
+#include "game_sa\RenderWare\rw\rpuvanim.h"
+#include "game_sa\RenderWare\rw\rpworld.h"
+#include "game_sa\RenderWare\rw\rtanim.h"
+#include "game_sa\RenderWare\rw\rtbmp.h"
+#include "game_sa\RenderWare\rw\rtdict.h"
+#include "game_sa\RenderWare\rw\rtpng.h"
+#include "game_sa\RenderWare\rw\rtquat.h"
+#include "game_sa\RenderWare\rw\rwcore.h"
+#include "game_sa\RenderWare\rw\rwplcore.h"
+#include "game_sa\RenderWare\rw\rwtexdict.h"
+#include "game_sa\RenderWare\rw\skeleton.h"
+#include "game_sa\RenderWare\RenderWare.h"
+
+// oswrapper
+#include "oswrapper/oswrapper.h"
+
+#include "debug.h"
 
 #include "EntryInfoNode.h"
 #include "EntryInfoList.h"
@@ -58,6 +91,10 @@ namespace rng = std::ranges;
 #include "List_c.h"
 #include "SArray.h"
 
+#include "GxtChar.h"
+
+#include "game_sa\common.h"
+
 #include "game_sa\Enums\eCheats.h"
 #include "game_sa\Enums\AnimationEnums.h"
 #include "game_sa\Enums\eAnimBlendCallbackType.h"
@@ -77,6 +114,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\ePedModel.h"
 #include "game_sa\Enums\ePedState.h"
 #include "game_sa\Enums\eRadioID.h"
+#include "game_sa\Enums\eReplay.h"
 #include "game_sa\Enums\eScriptCommands.h"
 #include "game_sa\Enums\eSoundID.h"
 #include "game_sa\Enums\eSprintType.h"
@@ -84,6 +122,7 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eStats.h"
 #include "game_sa\Enums\eStatsReactions.h"
 #include "game_sa\Enums\eSurfaceType.h"
+#include "game_sa\Enums\eTargetDoor.h"
 #include "game_sa\Enums\eTaskType.h"
 #include "game_sa\Enums\eVehicleClass.h"
 #include "game_sa\Enums\eVehicleHandlingFlags.h"
@@ -103,13 +142,11 @@ namespace rng = std::ranges;
 #include "game_sa\CullZones.h"
 #include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
-#include "game_sa\PlayerRelationshipRecorder.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
 #include "game_sa\DecisionMakerTypes.h"
 #include "game_sa\InformGroupEventQueue.h"
 #include "game_sa\InformFriendsEventQueue.h"
-#include "game_sa\InterestingEvents.h"
 #include "game_sa\Events\GroupEventHandler.h"
 #include "game_sa\Events\EventInAir.h"
 #include "game_sa\Events\EventAcquaintancePed.h"
@@ -157,7 +194,6 @@ namespace rng = std::ranges;
 #include "game_sa\SurfaceInfo_c.h"
 #include "game_sa\SurfaceInfos_c.h"
 #include "game_sa\Replay.h"
-#include "game_sa\VehicleRecording.h"
 #include "game_sa\VehicleAnimGroupData.h"
 #include "game_sa\Collision\ColStore.h"
 #include "game_sa\Collision\ColAccel.h"
@@ -174,7 +210,6 @@ namespace rng = std::ranges;
 #include "game_sa\AccidentManager.h"
 #include "game_sa\AttractorScanner.h"
 #include "game_sa\AutoPilot.h"
-#include "game_sa\Birds.h"
 #include "game_sa\BouncingPanel.h"
 #include "game_sa\Bridge.h"
 #include "game_sa\BrightLights.h"
@@ -186,8 +221,6 @@ namespace rng = std::ranges;
 #include "game_sa\CarAI.h"
 #include "game_sa\CarEnterExit.h"
 #include "game_sa\Cheat.h"
-#include "game_sa\Checkpoint.h"
-#include "game_sa\Checkpoints.h"
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
@@ -197,7 +230,6 @@ namespace rng = std::ranges;
 #include "game_sa\CoverPoint.h"
 #include "game_sa\Cranes.h"
 #include "game_sa\CrimeBeingQd.h"
-#include "game_sa\CustomCarEnvMapPipeline.h"
 #include "game_sa\CutsceneMgr.h"
 #include "game_sa\Darkel.h"
 #include "game_sa\Date.h"
@@ -223,22 +255,18 @@ namespace rng = std::ranges;
 #include "game_sa\General.h"
 #include "game_sa\GenericGameStorage.h"
 #include "game_sa\cHandlingDataMgr.h"
-#include "game_sa\Hud.h"
 #include "game_sa\HudColours.h"
 #include "game_sa\IniFile.h"
 #include "game_sa\IplStore.h"
 #include "game_sa\LoadedCarGroup.h"
-#include "game_sa\LoadingScreen.h"
 #include "game_sa\Localisation.h"
 #include "game_sa\MenuManager.h"
-#include "game_sa\MenuSystem.h"
 #include "game_sa\Messages.h"
 #include "game_sa\Mirrors.h"
 #include "game_sa\MissionCleanup.h"
-#include "game_sa\ModelInfoAccelerator.h"
 #include "game_sa\NodeAddress.h"
+#include "game_sa\NodeRoute.h"
 #include "game_sa\ObjectData.h"
-#include "game_sa\common.h"
 #include "game_sa\CustomRoadsignMgr.h"
 #include "game_sa\CompressedVector.h"
 #include "game_sa\CompressedMatrixNotAligned.h"
@@ -269,18 +297,14 @@ namespace rng = std::ranges;
 #include "game_sa\Population.h"
 #include "game_sa\ProjectileInfo.h"
 #include "game_sa\QueuedMode.h"
-#include "game_sa\RealTimeShadow.h"
-#include "game_sa\RealTimeShadowManager.h"
 #include "game_sa\Reference.h"
 #include "game_sa\References.h"
 #include "game_sa\RegisteredCorona.h"
 #include "game_sa\RegisteredMotionBlurStreak.h"
 #include "game_sa\Renderer.h"
-#include "game_sa\CustomBuildingRenderer.h"
 #include "game_sa\RepeatSector.h"
 #include "game_sa\Restart.h"
 #include "game_sa\RGBA.h"
-#include "game_sa\RideAnims.h"
 #include "game_sa\RideAnimData.h"
 #include "game_sa\RoadBlocks.h"
 #include "game_sa\Scene.h"
@@ -289,8 +313,6 @@ namespace rng = std::ranges;
 #include "game_sa\Sector.h"
 #include "game_sa\SetPiece.h"
 #include "game_sa\SetPieces.h"
-#include "game_sa\ShadowCamera.h"
-#include "game_sa\Shadows.h"
 #include "game_sa\ShinyTexts.h"
 #include "game_sa\Shopping.h"
 #include "game_sa\ShotInfo.h"
@@ -382,19 +404,19 @@ namespace rng = std::ranges;
 #include "game_sa\Audio\config\eSFX.h"
 
 #include "game_sa\Fx\CarFXRenderer.h"
-#include "game_sa\Fx\FxBox_c.h"
-#include "game_sa\Fx\FxEmitterBP_c.h"
-#include "game_sa\Fx\FxFrustumInfo_c.h"
-#include "game_sa\Fx\FxInfoManager_c.h"
-#include "game_sa\Fx\FxManager_c.h"
-#include "game_sa\Fx\FxMemoryPool_c.h"
-#include "game_sa\Fx\FxPlane_c.h"
-#include "game_sa\Fx\FxPrimBP_c.h"
-#include "game_sa\Fx\FxPrtMult_c.h"
-#include "game_sa\Fx\FxSphere_c.h"
-#include "game_sa\Fx\FxSystemBP_c.h"
-#include "game_sa\Fx\FxSystem_c.h"
-#include "game_sa\Fx\Fx_c.h"
+#include "game_sa\Fx\FxBox.h"
+#include "game_sa\Fx\FxEmitterBP.h"
+#include "game_sa\Fx\FxFrustumInfo.h"
+#include "game_sa\Fx\FxInfoManager.h"
+#include "game_sa\Fx\FxManager.h"
+#include "game_sa\Fx\FxMemoryPool.h"
+#include "game_sa\Fx\FxPlane.h"
+#include "game_sa\Fx\FxPrimBP.h"
+#include "game_sa\Fx\FxPrtMult.h"
+#include "game_sa\Fx\FxSphere.h"
+#include "game_sa\Fx\FxSystemBP.h"
+#include "game_sa\Fx\FxSystem.h"
+#include "game_sa\Fx\Fx.h"
 
 #include "game_sa\Models\AtomicModelInfo.h"
 #include "game_sa\Models\LodAtomicModelInfo.h"
@@ -411,28 +433,6 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
-
-#include "game_sa\RenderWare\D3DIndexDataBuffer.h"
-#include "game_sa\RenderWare\D3DResourceSystem.h"
-#include "game_sa\RenderWare\D3DTextureBuffer.h"
-#include "game_sa\RenderWare\RenderWare.h"
-#include "game_sa\RenderWare\rw\rpanisot.h"
-#include "game_sa\RenderWare\rw\rpcriter.h"
-#include "game_sa\RenderWare\rw\rperror.h"
-#include "game_sa\RenderWare\rw\rphanim.h"
-#include "game_sa\RenderWare\rw\rpmatfx.h"
-#include "game_sa\RenderWare\rw\rpskin.h"
-#include "game_sa\RenderWare\rw\rpuvanim.h"
-#include "game_sa\RenderWare\rw\rpworld.h"
-#include "game_sa\RenderWare\rw\rtanim.h"
-#include "game_sa\RenderWare\rw\rtbmp.h"
-#include "game_sa\RenderWare\rw\rtdict.h"
-#include "game_sa\RenderWare\rw\rtpng.h"
-#include "game_sa\RenderWare\rw\rtquat.h"
-#include "game_sa\RenderWare\rw\rwcore.h"
-#include "game_sa\RenderWare\rw\rwplcore.h"
-#include "game_sa\RenderWare\rw\rwtexdict.h"
-#include "game_sa\RenderWare\rw\skeleton.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"

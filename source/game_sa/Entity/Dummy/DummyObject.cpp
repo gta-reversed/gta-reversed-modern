@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "DummyObject.h"
+#include "TheScripts.h"
 
 void CDummyObject::InjectHooks() {
     RH_ScopedClass(CDummyObject);
@@ -10,6 +11,12 @@ void CDummyObject::InjectHooks() {
     RH_ScopedInstall(UpdateFromObject, 0x59EB70);
 }
 
+// 0x59EA00
+CDummyObject::CDummyObject() : CDummy() {
+    // NOP
+}
+
+// 0x59EA20
 CDummyObject::CDummyObject(CObject* obj) : CDummy() {
     CEntity::SetModelIndexNoCreate(m_nModelIndex);
     if (obj->m_pRwObject)
@@ -21,6 +28,7 @@ CDummyObject::CDummyObject(CObject* obj) : CDummy() {
     CIplStore::IncludeEntity(m_nIplIndex, this);
 }
 
+// 0x59EAC0
 CObject* CDummyObject::CreateObject() {
     m_bImBeingRendered = true; // BUG? Seems like that flag doesn't fit here
     auto* obj = CObject::Create(this);
@@ -38,6 +46,7 @@ CObject* CDummyObject::CreateObject() {
     return obj;
 }
 
+// 0x59EB70
 void CDummyObject::UpdateFromObject(CObject* obj) {
     m_bIsVisible = true;
     m_bUsesCollision = true;

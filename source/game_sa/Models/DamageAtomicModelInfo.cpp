@@ -1,6 +1,8 @@
 #include "StdInc.h"
 
 #include "DamageAtomicModelInfo.h"
+#include "CustomBuildingRenderer.h"
+#include "CarFXRenderer.h"
 
 bool& CDamageAtomicModelInfo::ms_bCreateDamagedVersion = *(bool*)0xA9B0B0;
 
@@ -9,11 +11,11 @@ void CDamageAtomicModelInfo::InjectHooks()
     RH_ScopedClass(CDamageAtomicModelInfo);
     RH_ScopedCategory("Models");
 
-    RH_ScopedInstall(Init_Reversed, 0x4C48B0);
-    RH_ScopedInstall(AsDamageAtomicModelInfoPtr_Reversed, 0x4C55C0);
-    RH_ScopedInstall(DeleteRwObject_Reversed, 0x4C49D0);
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "void", 0x4C4960, RwObject * (CDamageAtomicModelInfo::*)());
-    RH_ScopedOverloadedInstall(CreateInstance_Reversed, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
+    RH_ScopedVirtualInstall(Init, 0x4C48B0);
+    RH_ScopedVirtualInstall(AsDamageAtomicModelInfoPtr, 0x4C55C0);
+    RH_ScopedVirtualInstall(DeleteRwObject, 0x4C49D0);
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "void", 0x4C4960, RwObject * (CDamageAtomicModelInfo::*)());
+    // clang moment: RH_ScopedVirtualOverloadedInstall(CreateInstance, "rwmat", 0x4C4910, RwObject * (CDamageAtomicModelInfo::*)(RwMatrix*));
 
     RH_ScopedInstall(SetDamagedAtomic, 0x4C48D0);
 }
@@ -94,7 +96,11 @@ void CDamageAtomicModelInfo::SetDamagedAtomic(RpAtomic* atomic)
 {
     m_pDamagedAtomic = atomic;
     if (CCustomBuildingRenderer::IsCBPCPipelineAttached(atomic))
+    {
         CCustomBuildingRenderer::AtomicSetup(atomic);
+    }
     else if (CCarFXRenderer::IsCCPCPipelineAttached(atomic))
+    {
         CCarFXRenderer::SetCustomFXAtomicRenderPipelinesVMICB(atomic, nullptr);
+    }
 }

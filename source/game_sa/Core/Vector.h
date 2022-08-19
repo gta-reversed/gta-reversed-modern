@@ -21,7 +21,8 @@ public:
     explicit constexpr CVector(const CVector2D& v2d, float Z = 0.f) : RwV3d{ v2d.x, v2d.y, Z} {}
     constexpr CVector(RwV3d rwVec) { x = rwVec.x; y = rwVec.y; z = rwVec.z; }
     constexpr CVector(const CVector* rhs) { x = rhs->x; y = rhs->y; z = rhs->z; }
-    
+    constexpr explicit CVector(float value) { x = y = z = value; }
+
 public:
     static void InjectHooks();
 
@@ -48,13 +49,18 @@ public:
     // Subtracts left - right and stores result
     void Difference(const CVector& left, const CVector& right);
 
-    void operator=(const RwV3d& right) {
+    CVector& operator=(const RwV3d& right) {
         x = right.x;
         y = right.y;
         z = right.z;
+        return *this;
     }
-
-    void operator=(const CVector& right);
+    CVector& operator=(const CVector& right) {
+        x = right.x;
+        y = right.y;
+        z = right.z;
+        return *this;
+    }
     void operator+=(const CVector& right);
     void operator-=(const CVector& right);
     void operator*=(const CVector& right);
@@ -71,6 +77,10 @@ public:
         z = Z;
     }
 
+    void Reset() {
+        Set(0.f, 0.f, 0.f);
+    }
+
     inline RwV3d ToRwV3d() {
         return { x, y, z };
     }
@@ -81,11 +91,11 @@ public:
         z = vec.z;
     }
 
-    inline float ComponentwiseSum() const {
+    [[nodiscard]] inline float ComponentwiseSum() const {
         return x + y + z;
     }
 
-    inline float SquaredMagnitude() const {
+    [[nodiscard]] inline float SquaredMagnitude() const {
         return x * x + y * y + z * z;
     }
 
@@ -93,7 +103,7 @@ public:
         return x * x + y * y;
     }
 
-    inline bool IsZero() const {
+    [[nodiscard]] inline bool IsZero() const {
         return x == 0.0F && y == 0.0F && z == 0.0F;
     }
 
@@ -113,47 +123,48 @@ public:
     }
 };
 
-inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z);
+constexpr inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z };
 }
 
-inline CVector operator+(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x + vecTwo.x, vecOne.y + vecTwo.y, vecOne.z + vecTwo.z);
+constexpr inline CVector operator+(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x + vecTwo.x, vecOne.y + vecTwo.y, vecOne.z + vecTwo.z };
 }
 
-inline CVector operator*(const CVector& vecOne, const CVector& vecTwo) {
-    return CVector(vecOne.x * vecTwo.x, vecOne.y * vecTwo.y, vecOne.z * vecTwo.z);
+constexpr inline CVector operator*(const CVector& vecOne, const CVector& vecTwo) {
+    return { vecOne.x * vecTwo.x, vecOne.y * vecTwo.y, vecOne.z * vecTwo.z };
 }
-inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
+
+constexpr inline bool operator!=(const CVector& vecOne, const CVector& vecTwo) {
     return vecOne.x != vecTwo.x || vecOne.y != vecTwo.y || vecOne.z != vecTwo.z;
 }
 
-inline bool operator!=(const CVector& vec, float notEqualTo) {
+constexpr inline bool operator!=(const CVector& vec, float notEqualTo) {
     return vec.x != notEqualTo || vec.y != notEqualTo || vec.z != notEqualTo;
 }
 
-inline bool operator==(const CVector& vec, float equalTo) {
+constexpr inline bool operator==(const CVector& vec, float equalTo) {
     return vec.x == equalTo && vec.y == equalTo && vec.z == equalTo;
 }
 
-inline bool operator==(const CVector& vecLeft, const CVector& vecRight) {
+constexpr inline bool operator==(const CVector& vecLeft, const CVector& vecRight) {
     return vecLeft.x == vecRight.x && vecLeft.y == vecRight.y && vecLeft.z == vecRight.z;
 }
 
-inline CVector operator*(const CVector& vec, float multiplier) {
-    return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
+constexpr inline CVector operator*(const CVector& vec, float multiplier) {
+    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
 }
 
-inline CVector operator/(const CVector& vec, float dividend) {
-    return CVector(vec.x / dividend, vec.y / dividend, vec.z / dividend);
+constexpr inline CVector operator/(const CVector& vec, float dividend) {
+    return { vec.x / dividend, vec.y / dividend, vec.z / dividend };
 }
 
-inline CVector operator*(float multiplier, const CVector& vec) {
-    return CVector(vec.x * multiplier, vec.y * multiplier, vec.z * multiplier);
+constexpr inline CVector operator*(float multiplier, const CVector& vec) {
+    return { vec.x * multiplier, vec.y * multiplier, vec.z * multiplier };
 }
 
-inline CVector operator-(const CVector& vec) {
-    return CVector(-vec.x, -vec.y, -vec.z);
+constexpr inline CVector operator-(const CVector& vec) {
+    return { -vec.x, -vec.y, -vec.z };
 }
 
 inline float DistanceBetweenPoints(const CVector& pointOne, const CVector& pointTwo) {
@@ -169,7 +180,7 @@ inline CVector Lerp(const CVector& vecOne, const CVector& vecTwo, float fProgres
 }
 
 inline CVector Pow(const CVector& vec, float fPow) {
-    return CVector(pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow));
+    return { pow(vec.x, fPow), pow(vec.y, fPow), pow(vec.z, fPow) };
 }
 
 CVector* CrossProduct(CVector* out, CVector* a, CVector* b);
