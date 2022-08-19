@@ -14,13 +14,13 @@ void CTaskComplexCarDrive::InjectHooks() {
     RH_ScopedInstall(Constructor_1, 0x63C940);
     RH_ScopedInstall(Destructor, 0x63CA40);
     RH_ScopedVirtualInstall(Clone, 0x63DC90);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x644E20);
+    RH_ScopedVirtualInstall(CreateNextSubTask, 0x644E20, { .reversed = false });
     RH_ScopedVirtualInstall(CreateFirstSubTask, 0x645100);
     RH_ScopedVirtualInstall(ControlSubTask, 0x645240);
     RH_ScopedVirtualInstall(SetUpCar, 0x63CAE0);
     RH_ScopedVirtualInstall(CreateSubTaskCannotGetInCar, 0x643200);
     RH_ScopedVirtualInstall(Drive, 0x63CAD0);
-    // RH_ScopedVirtualInstall(CreateSubTask, 0x642FA0);
+    RH_ScopedVirtualInstall(CreateSubTask, 0x642FA0, { .reversed = false });
 }
 
 // 0x63C9D0
