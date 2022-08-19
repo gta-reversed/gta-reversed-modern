@@ -12,15 +12,15 @@ void CTaskSimpleCarDrive::InjectHooks() {
 
     RH_ScopedInstall(TriggerIK, 0x63C500);
     RH_ScopedInstall(UpdateBopping, 0x63C900);
-    //RH_ScopedInstall(StartBopping, 0x642760);
-    //RH_ScopedInstall(ProcessHeadBopping, 0x6428C0);
-    //RH_ScopedInstall(ProcessArmBopping, 0x642AE0);
+    RH_ScopedInstall(StartBopping, 0x642760, { .reversed = false });
+    RH_ScopedInstall(ProcessHeadBopping, 0x6428C0, { .reversed = false });
+    RH_ScopedInstall(ProcessArmBopping, 0x642AE0, { .reversed = false });
     RH_ScopedInstall(ProcessBopping, 0x642E70);
     RH_ScopedInstall(Clone_Reversed, 0x63DC20);
     RH_ScopedInstall(GetTaskType_Reversed, 0x63C450);
-    //RH_ScopedInstall(MakeAbortable_Reversed, 0x63C670);
-    //RH_ScopedInstall(ProcessPed_Reversed, 0x644470);
-    //RH_ScopedInstall(SetPedPosition_Reversed, 0x63C770);
+    RH_ScopedInstall(MakeAbortable_Reversed, 0x63C670, { .reversed = false });
+    RH_ScopedInstall(ProcessPed_Reversed, 0x644470, { .reversed = false });
+    RH_ScopedInstall(SetPedPosition_Reversed, 0x63C770, { .reversed = false });
 }
 
 // 0x63C340
