@@ -8,10 +8,10 @@ void CCustomBuildingPipeline::InjectHooks() {
     RH_ScopedClass(CCustomBuildingPipeline);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(CreatePipe, 0x5D7D90);
-    // RH_ScopedInstall(DestroyPipe, 0x5D7380);
-    // RH_ScopedInstall(CustomPipeAtomicSetup, 0x5D7E50);
-    // RH_ScopedInstall(CreateCustomObjPipe, 0x5D7AA0);
+    RH_ScopedInstall(CreatePipe, 0x5D7D90, { .reversed = false });
+    RH_ScopedInstall(DestroyPipe, 0x5D7380, { .reversed = false });
+    RH_ScopedInstall(CustomPipeAtomicSetup, 0x5D7E50, { .reversed = false });
+    RH_ScopedInstall(CreateCustomObjPipe, 0x5D7AA0, { .reversed = false });
 }
 
 // 0x5D7D90
