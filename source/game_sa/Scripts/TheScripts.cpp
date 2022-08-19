@@ -19,7 +19,7 @@ void CTheScripts::InjectHooks() {
     RH_ScopedClass(CTheScripts);
     RH_ScopedCategory("Scripts");
 
-    // RH_ScopedInstall(Init, 0x468D50);
+    RH_ScopedInstall(Init, 0x468D50, { .reversed = false });
     RH_ScopedOverloadedInstall(StartNewScript, "", 0x464C20, CRunningScript* (*)(uint8*));
     // RH_ScopedOverloadedInstall(StartNewScript, "index", 0x464C90, CRunningScript* (*)(uint8*, uint16));
     RH_ScopedInstall(StartTestScript, 0x464D40);
