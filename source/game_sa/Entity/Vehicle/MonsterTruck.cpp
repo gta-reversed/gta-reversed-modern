@@ -10,14 +10,14 @@ void CMonsterTruck::InjectHooks() {
     RH_ScopedCategory("Vehicle");
 
     RH_ScopedInstall(Constructor, 0x6C8D60);
-    // RH_ScopedInstall(ProcessEntityCollision, 0x6C8AE0);
-    // RH_ScopedInstall(ProcessSuspension, 0x6C83A0);
-    // RH_ScopedInstall(ProcessControlCollisionCheck, 0x6C8330);
-    // RH_ScopedInstall(ProcessControl, 0x6C8250);
-    // RH_ScopedInstall(SetupSuspensionLines, 0x6C7FB0);
+    RH_ScopedInstall(ProcessEntityCollision, 0x6C8AE0, { .reversed = false });
+    RH_ScopedInstall(ProcessSuspension, 0x6C83A0, { .reversed = false });
+    RH_ScopedInstall(ProcessControlCollisionCheck, 0x6C8330, { .reversed = false });
+    RH_ScopedInstall(ProcessControl, 0x6C8250, { .reversed = false });
+    RH_ScopedInstall(SetupSuspensionLines, 0x6C7FB0, { .reversed = false });
     RH_ScopedInstall(PreRender, 0x6C7DE0);
-    // RH_ScopedInstall(ExtendSuspension, 0x6C7D80);
-    // RH_ScopedInstall(ResetSuspension, 0x6C7D40);
+    RH_ScopedInstall(ExtendSuspension, 0x6C7D80, { .reversed = false });
+    RH_ScopedInstall(ResetSuspension, 0x6C7D40, { .reversed = false });
     RH_ScopedVirtualInstall(BurstTyre, 0x6C7D30);
     RH_ScopedVirtualInstall(SetUpWheelColModel, 0x6C7D20);
 }
