@@ -8,7 +8,8 @@
 
 namespace ReversibleHooks {
 
-RootHookCategory           s_RootCategory{};
+RootHookCategory s_RootCategory{};
+HMODULE          s_hThisDLL{}; // Handle to this DLL, only valid after `OnInjectionBegin` is called.
 
 #ifndef NDEBUG
 // Not particularly memory efficient, but it should be fine
@@ -35,8 +36,10 @@ void SwitchHook(std::string_view funcName) {
     });
 }
 
-void OnInjectionBegin() {
-#ifndef NDEBUG
+void OnInjectionBegin(HMODULE hThisDLL) {
+    s_hThisDLL = hThisDLL;
+
+#ifndef NDEBUG 
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
 #endif
 }
@@ -47,8 +50,25 @@ void OnInjectionEnd() {
     s_HookedAddresses.clear();
     s_HookedAddresses = {};
 #endif
-    s_RootCategory.OnInjectionEnd();
 
+    s_RootCategory.OnInjectionEnd();
+}
+
+void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt) {
+    // Find
+    const auto spanGTAVTbl = std::span{ vtblGTA, nVirtFns };
+    const auto iter = rng::find(spanGTAVTbl, fnGTAAddr);
+    if (iter == spanGTAVTbl.end()) {
+        NOTSA_UNREACHABLE("{}: Couldn't find function [{} @ {}] in vtable\n", category, fnName, fnGTAAddr);
+    }
+    const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);
+
+    std::cout << std::format("{}::{} => {}\n", category, fnName, fnVTblIdx);
+
+    auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), vtblGTA, vtblOur, fnVTblIdx);
+    item->State(opt.enabled);
+    item->LockState(opt.locked);
+    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
 namespace detail {
@@ -68,19 +88,23 @@ void HookInstall(std::string_view category, std::string fnName, uint32 installAd
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
-void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook) {
-    // TODO: Duplicate hooked function detection - Currently VHooks aren't used AFAIK, so it's fine not to add them.
-
-    auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), libVTableAddress, std::move(vecAddressesToHook));
-    //item->SetState(!bDisableByDefault);
-    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
-}
-
 void VirtualCopy(void* dst, void* src, size_t nbytes) {
     DWORD dwProtect[2] = { 0 };
     VirtualProtect(dst, nbytes, PAGE_EXECUTE_READWRITE, &dwProtect[0]);
     memcpy(dst, src, nbytes);
     VirtualProtect(dst, nbytes, dwProtect[0], &dwProtect[1]);
+}
+
+// The VTable is exported as a symbol, in the format `??_7<class name>@@6B@` where `<class name>` is the name of the class.
+// In order for this to work the class has to be exported (So the `NOTSA_EXPORT_VTABLE` macro has to be used)
+void** GetVTableAddress(std::string_view className) {
+    CHAR buffer[1024];
+    sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data()); 
+    if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
+        return vtbl;
+    } else {
+        NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
+    }
 }
 
 }; // namespace detail

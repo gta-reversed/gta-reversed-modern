@@ -11,7 +11,7 @@ void CTaskComplexTurnToFaceEntityOrCoord::InjectHooks() {
     RH_ScopedOverloadedInstall(Constructor, "Entity", 0x66B910, CTaskComplexTurnToFaceEntityOrCoord*(CTaskComplexTurnToFaceEntityOrCoord::*)(CVector const&, float, float));
     RH_ScopedInstall(Destructor, 0x66B960);
     RH_ScopedInstall(ComputeTargetHeading, 0x66B9D0);
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x670920, {.enabled = false, .locked = true});
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x670920, { .reversed = false });
 }
 
 // 0x66B890

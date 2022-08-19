@@ -4,7 +4,7 @@
 
 class CVehicle;
 
-class CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive {
+class NOTSA_EXPORT_VTABLE CTaskSimpleCarDriveTimed : public CTaskSimpleCarDrive {
 public:
     int32      m_nTime;
     CTaskTimer m_nTimer;

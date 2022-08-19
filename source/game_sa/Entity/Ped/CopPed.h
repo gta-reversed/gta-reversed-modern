@@ -19,7 +19,7 @@ enum eCopType : uint32 {
     COP_TYPE_CSHER = 7
 };
 
-class CCopPed : public CPed {
+class NOTSA_EXPORT_VTABLE CCopPed : public CPed {
 public:
     bool     m_bDontPursuit;
     bool     field_79D;

@@ -3,7 +3,7 @@
 #include "TaskSimple.h"
 #include "TaskTimer.h"
 
-class CTaskSimplePause : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimplePause : public CTaskSimple {
 public:
     CTaskTimer m_timer;
     int32      m_nTime;

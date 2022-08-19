@@ -491,7 +491,7 @@ void CVehicle::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, b
 
     if (physicalFlags.bSubmergedInWater
         && m_nStatus != eEntityStatus::STATUS_PLAYER
-        && (m_nStatus != eEntityStatus::STATUS_HELI && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
+        && (m_nStatus != eEntityStatus::STATUS_REMOTE_CONTROLLED && colPhysical->DoesNotCollideWithFlyers())) //Bug? Seems like it should check for it being heli
     {
         bCollisionDisabled = true;
         return;
@@ -2253,7 +2253,7 @@ void CVehicle::FirePlaneGuns() {
         // DoPlaneGunFireFX(this, &weapon, &planeGunsPos, &posn, m_nGunsFlags & 3);
     }
 
-    if (m_nStatus == STATUS_PLANE) {
+    if (m_nStatus == STATUS_FORCED_STOP) {
         CPad::GetPad(0)->StartShake(240, frequency, 0);
     } else if (m_pDriver && m_pDriver->IsPlayer()) {
         switch (m_pDriver->m_nPedType) {
@@ -2363,7 +2363,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         bAlreadySkidding = true;
         adhesion *= m_pHandlingData->m_fTractionLoss;
         if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI)
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED)
                 adhesion *= (1.0f - fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
         }
     }
@@ -2423,7 +2423,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
         if (bAlreadySkidding) {
             tractionLoss = 1.0f;
         } else if (*wheelState == WHEEL_STATE_SPINNING) {
-            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_HELI) {
+            if (m_nStatus == STATUS_PLAYER || m_nStatus == STATUS_REMOTE_CONTROLLED) {
                 tractionLoss = tractionLoss * (1.0f - std::fabs(m_fGasPedal) * WS_ALREADY_SPINNING_LOSS);
             }
         }
