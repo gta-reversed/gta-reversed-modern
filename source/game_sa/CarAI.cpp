@@ -13,31 +13,31 @@ void CCarAI::InjectHooks() {
     RH_ScopedClass(CCarAI);
     RH_ScopedCategory("AI");
 
-    // RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0);
-    // RH_ScopedInstall(AddFiretruckOccupants, 0x41C600);
-    // RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070);
-    // RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0);
-    // RH_ScopedInstall(CarHasReasonToStop, 0x41C050);
-    // RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00);
+    RH_ScopedInstall(AddAmbulanceOccupants, 0x41C4A0, { .reversed = false });
+    RH_ScopedInstall(AddFiretruckOccupants, 0x41C600, { .reversed = false });
+    RH_ScopedInstall(AddPoliceCarOccupants, 0x41C070, { .reversed = false });
+    RH_ScopedInstall(BackToCruisingIfNoWantedLevel, 0x41BFA0, { .reversed = false });
+    RH_ScopedInstall(CarHasReasonToStop, 0x41C050, { .reversed = false });
+    RH_ScopedInstall(EntitiesGoHeadOn, 0x41CD00, { .reversed = false });
     RH_ScopedInstall(FindPoliceBikeMissionForWantedLevel, 0x41CA40);
     RH_ScopedInstall(FindPoliceBoatMissionForWantedLevel, 0x41CA50);
-    // RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0);
+    RH_ScopedInstall(FindPoliceCarMissionForWantedLevel, 0x41C9D0, { .reversed = false });
     RH_ScopedInstall(FindPoliceCarSpeedForWantedLevel, 0x41CAA0);
-    // RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50);
-    // RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70);
-    // RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30);
-    // RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0);
-    // RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210);
-    // RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0);
-    // RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350);
-    // RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660);
-    // RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0);
+    RH_ScopedInstall(FindSwitchDistanceClose, 0x41BF50, { .reversed = false });
+    RH_ScopedInstall(FindSwitchDistanceFar, 0x41BF70, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoors, 0x41CE30, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoorsAccurate, 0x41D0E0, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoorsRacing, 0x41D210, { .reversed = false });
+    RH_ScopedInstall(GetCarToGoToCoorsStraightLine, 0x41CFB0, { .reversed = false });
+    RH_ScopedInstall(GetCarToParkAtCoors, 0x41D350, { .reversed = false });
+    RH_ScopedInstall(MakeWayForCarWithSiren, 0x41D660, { .reversed = false });
+    RH_ScopedInstall(MellowOutChaseSpeed, 0x41D3D0, { .reversed = false });
     RH_ScopedInstall(MellowOutChaseSpeedBoat, 0x41CB70);
-    // RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900);
-    // RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960);
-    // RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0);
-    // RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760);
-    // RH_ScopedInstall(UpdateCarAI, 0x41DA30);
+    RH_ScopedInstall(TellCarToBlockOtherCar, 0x41C900, { .reversed = false });
+    RH_ScopedInstall(TellCarToFollowOtherCar, 0x41C960, { .reversed = false });
+    RH_ScopedInstall(TellCarToRamOtherCar, 0x41C8A0, { .reversed = false });
+    RH_ScopedInstall(TellOccupantsToLeaveCar, 0x41C760, { .reversed = false });
+    RH_ScopedInstall(UpdateCarAI, 0x41DA30, { .reversed = false });
 }
 
 // 0x41C4A0
