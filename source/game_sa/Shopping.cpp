@@ -186,7 +186,7 @@ void CShopping::RemoveLoadedShop() {
     ms_shopLoaded[0] = false;
     auto animBlockIndex = CAnimManager::GetAnimationBlockIndex(ms_sectionNames[ms_priceSectionLoaded]);
     if (animBlockIndex != -1) {
-        CStreaming::SetModelIsDeletable(animBlockIndex + 25575); // todo const
+        CStreaming::SetModelIsDeletable(IFPToModelId(animBlockIndex));
     }
     ms_priceSectionLoaded = 0;
 }
