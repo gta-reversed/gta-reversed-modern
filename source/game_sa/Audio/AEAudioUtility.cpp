@@ -18,7 +18,7 @@ void CAEAudioUtility::InjectHooks() {
     RH_ScopedInstall(AudioLog10, 0x4d9e50);
     RH_ScopedInstall(ConvertFromBytesToMS, 0x4d9ef0);
     RH_ScopedInstall(ConvertFromMSToBytes, 0x4d9f40);
-    // RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0);
+    RH_ScopedInstall(GetBankAndSoundFromScriptSlotAudioEvent, 0x4D9CC0, { .reversed = false });
     RH_ScopedInstall(FindVehicleOfPlayer, 0x4D9E10);
 
     RH_ScopedInstall(GetCurrentTimeInMilliseconds, 0x4d9e80);
