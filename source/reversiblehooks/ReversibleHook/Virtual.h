@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "Base.h"
+#include <ReversibleHook/Simple.h>
 
 namespace ReversibleHooks{
 namespace ReversibleHook{
@@ -13,11 +14,15 @@ struct Virtual : public Base {
     ~Virtual() override = default;
 
     void Switch() override;
-    void Check() override {} // Nothing to do 
+    void Check() override { m_simpleHook.Check(); }
+
+    auto GetHookGTAAddress() const { return m_pfns[GTA]; }
+    auto GetHookOurAddress() const { return m_pfns[OUR]; }
+
 private:
     // Use these values for indexing below arrays
     constexpr static auto GTA = 0u;
-    constexpr static auto OUR = 0u;
+    constexpr static auto OUR = 1u;
 
     // Original function pointers
     void* m_pfns[2]{};
@@ -27,6 +32,8 @@ private:
 
     // Function index in vtable
     size_t m_fnIdx{};
+
+    Simple m_simpleHook;
 };
 
 };

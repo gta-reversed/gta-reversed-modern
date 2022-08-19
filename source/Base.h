@@ -51,7 +51,7 @@ namespace notsa {
 template<typename... Ts>
 static void unreachable(const char* method, const char* file, int line, std::string_view fmt = "", Ts&&... fmtArgs) {
     const auto usrMsg = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
-    std::cout << std::format("[{}:{}:{}]: Unreachable code reached! Details: {}\n", file, method, line, usrMsg.empty() ? "None" : usrMsg);
+    std::cout << std::format("[{}:{}]: Unreachable code reached! Details: {}\n", method, line, usrMsg.empty() ? "None" : usrMsg);
     DebugBreak();
 }
 };

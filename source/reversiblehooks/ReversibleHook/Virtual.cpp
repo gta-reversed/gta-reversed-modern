@@ -6,8 +6,10 @@
 namespace ReversibleHooks{
 namespace ReversibleHook{
 Virtual::Virtual(std::string fnName, void** vtblGTA, void** vtblOur, size_t fnIdx) :
-    Base{ std::move(fnName), HookType::Virtual },
-    m_vtbls{vtblGTA, vtblOur} // Should be in the same order as the indexers: GTA, OUR
+    Base{ fnName, HookType::Virtual },
+    m_vtbls{vtblGTA, vtblOur}, // Should be in the same order as the indexers: GTA, OUR
+    m_fnIdx{ fnIdx },
+    m_simpleHook{ std::move(fnName), (uint32)vtblGTA[fnIdx], vtblOur[fnIdx]} // Making sure this has a name too, for debugging purposes..
 {
     for (const auto [i, vtbl] : notsa::enumerate(m_vtbls)) {
         m_pfns[i] = vtbl[fnIdx];
@@ -27,8 +29,7 @@ void Virtual::Switch()
         vtbl[m_fnIdx] = pfn;
     }
 
-    // TODO: Also install trampoline to redirect direct virtual calls (Eg.: `CVehicle::Render` calls `CEntity::Render` directly)
-    //       With little modification we could use a Simple hook, but tbh I'd recommend using the Detours lib.
+    m_simpleHook.State(m_bIsHooked);
 }
 };
 };

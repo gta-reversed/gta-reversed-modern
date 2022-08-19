@@ -20,12 +20,13 @@
     using RHCurrentNS = name; \
     ReversibleHooks::ScopeName RHCurrentScopeName {#name};
 
-#define RH_ScopedVirtualClass(name, addrGTAVtbl, nVirtFns_) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name}; \
+#define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls}; \
     const auto pGTAVTbl = (void**)addrGTAVtbl; \
-    const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#name); \
-    const auto nVirtFns = nVirtFns_;
+    const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
+    const auto nVirtFns = nVirtFns_; \
+    std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
 
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \

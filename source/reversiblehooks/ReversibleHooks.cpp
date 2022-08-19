@@ -58,7 +58,9 @@ void InstallVirtual(std::string_view category, std::string fnName, void** vtblGT
     // Find
     const auto spanGTAVTbl = std::span{ vtblGTA, nVirtFns };
     const auto iter = rng::find(spanGTAVTbl, fnGTAAddr);
-    assert(iter != spanGTAVTbl.end()); // Function ptr not found in GTA VMT => Make sure address is correct.
+    if (iter == spanGTAVTbl.end()) {
+        NOTSA_UNREACHABLE("{}: Couldn't find function [{} @ {}] in vtable\n", category, fnName, fnGTAAddr);
+    }
     const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);
 
     std::cout << std::format("{}::{} => {}\n", category, fnName, fnVTblIdx);
@@ -101,7 +103,7 @@ void** GetVTableAddress(std::string_view className) {
     if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
         return vtbl;
     } else {
-        NOTSA_UNREACHABLE();
+        NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
     }
 }
 
