@@ -8,15 +8,15 @@ void CTaskComplexGangLeader::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x65DED0);
     RH_ScopedInstall(Destructor, 0x65DF30);
-    // RH_ScopedGlobalInstall(GetRandomGangAmbientAnim, 0x65E730);
-    // RH_ScopedGlobalInstall(ShouldLoadGangAnims, 0x65E7F0);
-    // RH_ScopedGlobalInstall(DoGangAbuseSpeech, 0x65E860);
-    // RH_ScopedInstall(TryToPassObject, 0x65EA50);
-    // RH_ScopedInstall(MakeAbortable, 0x65DFA0);
-    // RH_ScopedInstall(CreateNextSubTask, 0x65DFF0);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x65E1F0);
-    // RH_ScopedInstall(ControlSubTask, 0x662370);
-    // RH_ScopedInstall(ScanForStuff, 0x65E200);
+    RH_ScopedGlobalInstall(GetRandomGangAmbientAnim, 0x65E730, { .reversed = false });
+    RH_ScopedGlobalInstall(ShouldLoadGangAnims, 0x65E7F0, { .reversed = false });
+    RH_ScopedGlobalInstall(DoGangAbuseSpeech, 0x65E860, { .reversed = false });
+    RH_ScopedInstall(TryToPassObject, 0x65EA50, { .reversed = false });
+    RH_ScopedInstall(MakeAbortable, 0x65DFA0, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask, 0x65DFF0, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x65E1F0, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x662370, { .reversed = false });
+    RH_ScopedInstall(ScanForStuff, 0x65E200, { .reversed = false });
 }
 
 // 0x65DED0
