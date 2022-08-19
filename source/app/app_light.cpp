@@ -3,8 +3,6 @@
 #include "app.h"
 #include "PostEffects.h"
 
-
-
 // 0x735C80
 void ActivateDirectional() {
     RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);

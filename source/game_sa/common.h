@@ -56,7 +56,7 @@ constexpr float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREE
 
 constexpr auto BUILD_NAME_FULL = "TEST"; // NOTSA
 
-extern int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
+extern int32 gDefaultTaskTime = 9'999'999; // or 0x98967F a.k.a (ten million - 1)
 
 static inline char (&gString)[352] = *(char (*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char (*)[352])0xB71510;
