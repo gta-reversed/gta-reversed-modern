@@ -60,3 +60,4 @@ public:
 extern char& gClothesHaveBeenStored;
 extern std::array<eDamageState, 20u>& gComponentDamageState;
 extern std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods;
+extern CPedClothesDesc& gStoredClothesState;

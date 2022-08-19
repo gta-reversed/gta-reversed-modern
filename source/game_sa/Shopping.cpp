@@ -1,7 +1,9 @@
 #include "StdInc.h"
 #include <extensions/enumerate.hpp>
 #include "Shopping.h"
+#include "PedClothesDesc.h"
 
+CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
 char& gClothesHaveBeenStored = *(char*)0xA97298;
 std::array<eDamageState, 20u>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
 std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
@@ -217,6 +219,10 @@ void CShopping::ShutdownForRestart() {
 // 0x49B200
 void CShopping::StoreClothesState() {
     plugin::Call<0x49B200>();
+
+    // todo: operator=
+    memcpy(&gStoredClothesState, FindPlayerPed()->m_pPlayerData->m_pPedClothesDesc, sizeof(CPedClothesDesc));
+    gClothesHaveBeenStored = 1u;
 }
 
 // 0x49B280
