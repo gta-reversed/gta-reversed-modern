@@ -2,6 +2,10 @@
 #include <extensions/enumerate.hpp>
 #include "Shopping.h"
 #include "PedClothesDesc.h"
+#include <AECutsceneTrackManager.h>
+#include <AEAmbienceTrackManager.h>
+#include <AEAudioHardware.h>
+#include <AESoundManager.h>
 
 CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
 char& gClothesHaveBeenStored = *(char*)0xA97298;
@@ -180,6 +184,13 @@ void CShopping::RemoveLoadedPrices() {
 // 0x49AE30
 void CShopping::RemoveLoadedShop() {
     plugin::Call<0x49AE30>();
+
+    ms_shopLoaded[0] = false;
+    auto animBlockIndex = CAnimManager::GetAnimationBlockIndex(ms_sectionNames[ms_priceSectionLoaded]);
+    if (animBlockIndex != -1) {
+        CStreaming::SetModelIsDeletable(animBlockIndex + 25575); // todo const
+    }
+    ms_priceSectionLoaded = 0;
 }
 
 // 0x

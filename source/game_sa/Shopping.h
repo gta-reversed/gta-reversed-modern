@@ -14,13 +14,19 @@ class CShopping {
 
     static constexpr auto NUM_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
+    static constexpr auto NUM_SHOPS = 24u;
+    static constexpr auto NUM_SECTION_NAMES = 11u;
 
+    inline static int32& ms_priceSectionLoaded = *(int32*)0xA9A7C8;
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
+    inline static std::array<int8, NUM_SHOPS>& ms_shopLoaded = *(std::array<int8, NUM_SHOPS>*)0xA9A7D8;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
     inline static std::array<tPriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<tPriceModifier, NUM_PRICE_MODIFIERS>*)0xA98650;
     inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
     inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
+
+    inline static std::array<const char*, NUM_SECTION_NAMES>& ms_sectionNames = *(std::array<const char*, NUM_SECTION_NAMES>*)0x8A61D8;
 
 public:
     static void InjectHooks();
