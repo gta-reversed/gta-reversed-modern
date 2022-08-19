@@ -16,7 +16,7 @@ void CQuadBike::InjectHooks() {
     RH_ScopedVirtualInstall(GetRideAnimData, 0x6CDC90);
     RH_ScopedVirtualInstall(PreRender, 0x6CEAD0);
     RH_ScopedVirtualInstall(ProcessAI, 0x6CE460);
-    // RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0);
+    RH_ScopedVirtualInstall(ProcessControl, 0x6CDCC0, { .reversed = false });
     RH_ScopedVirtualInstall(ProcessControlInputs, 0x6CE020);
     RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6CE280);
     RH_ScopedVirtualInstall(ProcessSuspension, 0x6CE270);
