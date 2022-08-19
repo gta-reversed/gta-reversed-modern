@@ -54,6 +54,21 @@ void OnInjectionEnd() {
     s_RootCategory.OnInjectionEnd();
 }
 
+void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt) {
+    // Find
+    const auto spanGTAVTbl = std::span{ vtblGTA, nVirtFns };
+    const auto iter = rng::find(spanGTAVTbl, fnGTAAddr);
+    assert(iter != spanGTAVTbl.end()); // Function ptr not found in GTA VMT => Make sure address is correct.
+    const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);
+
+    std::cout << std::format("{}::{} => {}\n", category, fnName, fnVTblIdx);
+
+    auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), vtblGTA, vtblOur, fnVTblIdx);
+    item->State(opt.enabled);
+    item->LockState(opt.locked);
+    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
+}
+
 namespace detail {
 void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt) {
 #ifndef NDEBUG // Functions with the same name are asserted in `HookCategory::AddItem()`
@@ -68,14 +83,6 @@ void HookInstall(std::string_view category, std::string fnName, uint32 installAd
     auto item = std::make_shared<ReversibleHook::Simple>(std::move(fnName), installAddress, addressToJumpTo, opt.jmpCodeSize, opt.stackArguments);
     item->State(opt.enabled);
     item->LockState(opt.locked);
-    s_RootCategory.AddItemToNamedCategory(category, std::move(item));
-}
-
-void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook) {
-    // TODO: Duplicate hooked function detection - Currently VHooks aren't used AFAIK, so it's fine not to add them.
-
-    auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), libVTableAddress, std::move(vecAddressesToHook));
-    //item->SetState(!bDisableByDefault);
     s_RootCategory.AddItemToNamedCategory(category, std::move(item));
 }
 
