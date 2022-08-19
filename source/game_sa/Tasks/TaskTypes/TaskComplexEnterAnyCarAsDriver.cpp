@@ -7,11 +7,11 @@ void CTaskComplexEnterAnyCarAsDriver::InjectHooks() {
     RH_ScopedVirtualClass(CTaskComplexEnterAnyCarAsDriver, 0x86EA14, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedVirtualInstallIdx(Clone, 0x63DE60);
-    RH_ScopedVirtualInstallIdx(GetTaskType, 0x63D0F0);
-    RH_ScopedVirtualInstallIdx(CreateNextSubTask, 0x63D110);
-    RH_ScopedVirtualInstallIdx(CreateFirstSubTask, 0x643510);
-    RH_ScopedVirtualInstallIdx(ControlSubTask, 0x63D120);
+    RH_ScopedVMTlInstall(Clone, 0x63DE60);
+    RH_ScopedVMTlInstall(GetTaskType, 0x63D0F0);
+    RH_ScopedVMTlInstall(CreateNextSubTask, 0x63D110);
+    RH_ScopedVMTlInstall(CreateFirstSubTask, 0x643510);
+    RH_ScopedVMTlInstall(ControlSubTask, 0x63D120);
 }
 
 // 0x643510

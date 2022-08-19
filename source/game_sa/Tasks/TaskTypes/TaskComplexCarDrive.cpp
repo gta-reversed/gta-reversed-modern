@@ -16,13 +16,13 @@ void CTaskComplexCarDrive::InjectHooks() {
 
     RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
 
-    RH_ScopedVirtualInstallIdx(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false});
-    RH_ScopedVirtualInstallIdx(SetUpCar, 0x63CAE0, { .enabled = false});
-    RH_ScopedVirtualInstallIdx(Drive, 0x63CAD0, { .enabled = false});
-    RH_ScopedVirtualInstallIdx(Clone, 0x63DC90, { .enabled = false});
-    RH_ScopedVirtualInstallIdx(CreateNextSubTask, 0x644E20, { .enabled = false, .locked = true });
-    RH_ScopedVirtualInstallIdx(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
-    RH_ScopedVirtualInstallIdx(ControlSubTask, 0x645240, { .enabled = false});
+    RH_ScopedVMTlInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false});
+    RH_ScopedVMTlInstall(SetUpCar, 0x63CAE0, { .enabled = false});
+    RH_ScopedVMTlInstall(Drive, 0x63CAD0, { .enabled = false});
+    RH_ScopedVMTlInstall(Clone, 0x63DC90, { .enabled = false});
+    RH_ScopedVMTlInstall(CreateNextSubTask, 0x644E20, { .enabled = false, .locked = true });
+    RH_ScopedVMTlInstall(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
+    RH_ScopedVMTlInstall(ControlSubTask, 0x645240, { .enabled = false});
 }
 
 // 0x63C9D0
