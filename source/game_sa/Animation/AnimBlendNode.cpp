@@ -8,20 +8,20 @@ void CAnimBlendNode::InjectHooks() {
 
     RH_ScopedInstall(Init, 0x4CFB70);
     RH_ScopedInstall(NextKeyFrameNoCalc, 0x4CFB90);
-    // RH_ScopedInstall(GetCurrentTranslation, 0x4CFC50);
-    // RH_ScopedInstall(GetCurrentTranslationCompressed, 0x4CFE60);
-    // RH_ScopedInstall(GetEndTranslation, 0x4CFD90);
-    // RH_ScopedInstall(GetEndTranslationCompressed, 0x4D0000);
+    RH_ScopedInstall(GetCurrentTranslation, 0x4CFC50, { .reversed = false });
+    RH_ScopedInstall(GetCurrentTranslationCompressed, 0x4CFE60, { .reversed = false });
+    RH_ScopedInstall(GetEndTranslation, 0x4CFD90, { .reversed = false });
+    RH_ScopedInstall(GetEndTranslationCompressed, 0x4D0000, { .reversed = false });
     RH_ScopedInstall(CalcTheta, 0x4D00E0);
     RH_ScopedInstall(UpdateTime, 0x4D0160);
     RH_ScopedInstall(CalcDeltas, 0x4D0190);
     RH_ScopedInstall(FindKeyFrame, 0x4D0240);
     RH_ScopedInstall(CalcDeltasCompressed, 0x4D0350);
-    // RH_ScopedInstall(NextKeyFrame, 0x4D04A0);
-    // RH_ScopedInstall(NextKeyFrameCompressed, 0x4D0570);
+    RH_ScopedInstall(NextKeyFrame, 0x4D04A0, { .reversed = false });
+    RH_ScopedInstall(NextKeyFrameCompressed, 0x4D0570, { .reversed = false });
     RH_ScopedInstall(SetupKeyFrameCompressed, 0x4D0650);
-    // RH_ScopedInstall(Update, 0x4D06C0);
-    // RH_ScopedInstall(UpdateCompressed, 0x4D08D0);
+    RH_ScopedInstall(Update, 0x4D06C0, { .reversed = false });
+    RH_ScopedInstall(UpdateCompressed, 0x4D08D0, { .reversed = false });
 }
 
 // 0x4CFB70
