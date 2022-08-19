@@ -10,10 +10,10 @@ void CTaskComplexGoToBoatSteeringWheel::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x649090);
     RH_ScopedInstall(Destructor, 0x649100);
-    // RH_ScopedInstall(Clone, 0x64A350);
-    // RH_ScopedInstall(CreateNextSubTask, 0x64E350);
-    // RH_ScopedInstall(CreateFirstSubTask, 0x64E390);
-    // RH_ScopedInstall(ControlSubTask, 0x64E3B0);
+    RH_ScopedInstall(Clone, 0x64A350, { .reversed = false });
+    RH_ScopedInstall(CreateNextSubTask, 0x64E350, { .reversed = false });
+    RH_ScopedInstall(CreateFirstSubTask, 0x64E390, { .reversed = false });
+    RH_ScopedInstall(ControlSubTask, 0x64E3B0, { .reversed = false });
 }
 
 // 0x649090
