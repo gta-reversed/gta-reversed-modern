@@ -44,7 +44,7 @@ public:
     static void GetNameTag(uint32 a1);
     static void GetNextSection(FILE* file);
     static void GetPrice(uint32 itemId);
-    static void GetPriceSectionFromName(const char* name);
+    static int32 GetPriceSectionFromName(const char* name);
     static void SetPlayerHasBought(uint32 itemKey);
     static bool HasPlayerBought(uint32 itemKey);
     static void IncrementStat(int32 a1, int32 a2);

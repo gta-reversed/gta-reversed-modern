@@ -144,8 +144,14 @@ void CShopping::GetPrice(uint32 itemId) {
 }
 
 // 0x49AAD0
-void CShopping::GetPriceSectionFromName(const char* name) {
-    plugin::Call<0x49AAD0, const char*>(name);
+int32 CShopping::GetPriceSectionFromName(const char* name) {
+    for (auto&& [i, sectionName] : notsa::enumerate(ms_sectionNames)) {
+        if (_stricmp(name, sectionName)) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 // 0x49B610
