@@ -151,6 +151,14 @@ void CShopping::IncrementStat2(int32 a1, int32 a2) {
 // 0x5D3E40
 void CShopping::Load() {
     plugin::Call<0x5D3E40>();
+
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_numPriceModifiers, sizeof(int32));
+    for (auto i = 0; i < ms_numPriceModifiers; i++) {
+        CGenericGameStorage::LoadDataFromWorkBuffer(&ms_priceModifiers[i], sizeof(tPriceModifier));
+    }
+
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_numBuyableItems, sizeof(uint32));
+    CGenericGameStorage::LoadDataFromWorkBuffer(&ms_bHasBought, sizeof(ms_numBuyableItems) * sizeof(bool));
 }
 
 // 0x49B8D0

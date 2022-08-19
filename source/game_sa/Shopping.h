@@ -3,9 +3,20 @@
 #include <cstdio> // FILE*
 
 class CShopping {
+    struct tPriceModifier {
+        const char* key;
+        uint32 price;
+    };
+    VALIDATE_SIZE(tPriceModifier, 8u);
+
+    static constexpr auto NUM_PRICE_MODIFIERS = 20u;
+    static constexpr auto NUM_ITEMS = 560u; // ?
+
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
+    inline static std::array<tPriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<tPriceModifier, 20>*)0xA98650;
+    inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, 560>*)0xA972A0;
 
 public:
     static void InjectHooks();
