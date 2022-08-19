@@ -16,7 +16,7 @@ bool CTaskSimpleDrownInCar::ProcessPed_Reversed(CPed* ped) {
 
     if (ped == FindPlayerPed()) {
         CStats::IncrementStat(STAT_TIMES_DROWNED, 1.0f);
-        ped->m_pVehicle->m_nStatus = STATUS_PLANE; // todo: What does that mean??
+        ped->m_pVehicle->m_nStatus = STATUS_FORCED_STOP;
     }
 
     CEventDeath event(true);

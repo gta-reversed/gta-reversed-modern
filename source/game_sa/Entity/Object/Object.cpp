@@ -1160,8 +1160,7 @@ void CObject::ObjectDamage(float damage, CVector* fxOrigin, CVector* fxDirection
             return;
         }
 
-        auto particleMat = CMatrix(*m_matrix);
-        auto vecPoint = Multiply3x3(particleMat, m_pObjectInfo->m_vFxOffset);
+        auto vecPoint = Multiply3x3(*m_matrix, m_pObjectInfo->m_vFxOffset);
         vecPoint += GetPosition();
         auto* fxSystem = g_fxMan.CreateFxSystem(m_pObjectInfo->m_pFxSystemBP, &vecPoint, nullptr, false);
         if (fxSystem)
