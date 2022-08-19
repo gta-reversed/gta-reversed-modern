@@ -9,19 +9,19 @@ void CIdleCam::InjectHooks() {
     RH_ScopedClass(CIdleCam);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0);
-    // RH_ScopedInstall(Init, 0x50E6D0);
-    // RH_ScopedInstall(Reset, 0x50A160);
-    // RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200);
-    // RH_ScopedInstall(SetTarget, 0x50A280);
-    // RH_ScopedInstall(FinaliseIdleCamera, 0x50E760);
-    // RH_ScopedInstall(SetTargetPlayer, 0x50EB50);
-    // RH_ScopedInstall(IsTargetValid, 0x517770);
-    // RH_ScopedInstall(ProcessTargetSelection, 0x517870);
-    // RH_ScopedInstall(ProcessSlerp, 0x5179E0);
-    // RH_ScopedInstall(ProcessFOVZoom, 0x517BF0);
-    // RH_ScopedInstall(Run, 0x51D3E0);
-    // RH_ScopedInstall(Process, 0x522C80);
+    RH_ScopedInstall(GetLookAtPositionOnTarget, 0x50EAE0, { .reversed = false });
+    RH_ScopedInstall(Init, 0x50E6D0, { .reversed = false });
+    RH_ScopedInstall(Reset, 0x50A160, { .reversed = false });
+    RH_ScopedInstall(ProcessIdleCamTicker, 0x50A200, { .reversed = false });
+    RH_ScopedInstall(SetTarget, 0x50A280, { .reversed = false });
+    RH_ScopedInstall(FinaliseIdleCamera, 0x50E760, { .reversed = false });
+    RH_ScopedInstall(SetTargetPlayer, 0x50EB50, { .reversed = false });
+    RH_ScopedInstall(IsTargetValid, 0x517770, { .reversed = false });
+    RH_ScopedInstall(ProcessTargetSelection, 0x517870, { .reversed = false });
+    RH_ScopedInstall(ProcessSlerp, 0x5179E0, { .reversed = false });
+    RH_ScopedInstall(ProcessFOVZoom, 0x517BF0, { .reversed = false });
+    RH_ScopedInstall(Run, 0x51D3E0, { .reversed = false });
+    RH_ScopedInstall(Process, 0x522C80, { .reversed = false });
 }
 
 // 0x517760
