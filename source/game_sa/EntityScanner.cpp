@@ -6,8 +6,8 @@ void CEntityScanner::InjectHooks() {
     RH_ScopedClass(CEntityScanner);
     RH_ScopedCategoryGlobal();
 
-    // RH_ScopedInstall(Clear, 0x5FF9D0);
-    // RH_ScopedInstall(ScanForEntitiesInRange, 0x5FFA20);
+    RH_ScopedInstall(Clear, 0x5FF9D0, { .reversed = false });
+    RH_ScopedInstall(ScanForEntitiesInRange, 0x5FFA20, { .reversed = false });
 }
 
 // 0x5FF990
