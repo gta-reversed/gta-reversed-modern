@@ -5,28 +5,28 @@ void InteriorManager_c::InjectHooks() {
     RH_ScopedClass(InteriorManager_c);
     RH_ScopedCategory("Interior");
 
-    // RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430);
-    // RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0);
-    // RH_ScopedInstall(PruneVisibleEffects, 0x598A60);
-    // RH_ScopedInstall(Exit, 0x598010);
-    // RH_ScopedInstall(GetVisibleEffects, 0x598D80);
-    // RH_ScopedInstall(IsInteriorEffectVisible, 0x598690);
-    // RH_ScopedInstall(GetPedsInterior, 0x598620);
-    // RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0);
-    // RH_ScopedInstall(GetInteriorFromPool, 0x5984A0);
-    // RH_ScopedInstall(GetVectorsInterior, 0x5983D0);
-    // RH_ScopedInstall(SetStealableObjectStolen, 0x598390);
+    RH_ScopedGlobalInstall(AddSameGroupEffectInfos, 0x598430, { .reversed = false });
+    RH_ScopedGlobalInstall(AreAnimsLoaded, 0x5980F0, { .reversed = false });
+    RH_ScopedInstall(PruneVisibleEffects, 0x598A60, { .reversed = false });
+    RH_ScopedInstall(Exit, 0x598010, { .reversed = false });
+    RH_ScopedInstall(GetVisibleEffects, 0x598D80, { .reversed = false });
+    RH_ScopedInstall(IsInteriorEffectVisible, 0x598690, { .reversed = false });
+    RH_ScopedInstall(GetPedsInterior, 0x598620, { .reversed = false });
+    RH_ScopedInstall(ReturnInteriorToPool, 0x5984B0, { .reversed = false });
+    RH_ScopedInstall(GetInteriorFromPool, 0x5984A0, { .reversed = false });
+    RH_ScopedInstall(GetVectorsInterior, 0x5983D0, { .reversed = false });
+    RH_ScopedInstall(SetStealableObjectStolen, 0x598390, { .reversed = false });
     // RH_ScopedOverloadedInstall(FindStealableObjectId, "", 0x598360,  int32(InteriorManager_c::*)(CEntity *));
     // RH_ScopedOverloadedInstall(FindStealableObjectId, "", 0x5982F0,  int32(InteriorManager_c::*)(int32, int32, CVector));
-    // RH_ScopedInstall(HasInteriorHadStealDataSetup, 0x5982B0);
-    // RH_ScopedInstall(IsGroupActive, 0x598280);
-    // RH_ScopedInstall(GetPedsInteriorGroup, 0x598240);
-    // RH_ScopedInstall(SetEntryExitPtr, 0x598180);
-    // RH_ScopedInstall(GetBoundingBox, 0x598090);
-    // RH_ScopedInstall(ActivatePeds, 0x598080);
-    // RH_ScopedInstall(inlined_prune_visible_effects, 0x598070);
-    // RH_ScopedInstall(Update, 0x598F50);
-    // RH_ScopedInstall(Init, 0x5C0500);
+    RH_ScopedInstall(HasInteriorHadStealDataSetup, 0x5982B0, { .reversed = false });
+    RH_ScopedInstall(IsGroupActive, 0x598280, { .reversed = false });
+    RH_ScopedInstall(GetPedsInteriorGroup, 0x598240, { .reversed = false });
+    RH_ScopedInstall(SetEntryExitPtr, 0x598180, { .reversed = false });
+    RH_ScopedInstall(GetBoundingBox, 0x598090, { .reversed = false });
+    RH_ScopedInstall(ActivatePeds, 0x598080, { .reversed = false });
+    RH_ScopedInstall(inlined_prune_visible_effects, 0x598070, { .reversed = false });
+    RH_ScopedInstall(Update, 0x598F50, { .reversed = false });
+    RH_ScopedInstall(Init, 0x5C0500, { .reversed = false });
 }
 
 // 0x5C0500
