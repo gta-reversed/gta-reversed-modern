@@ -29,6 +29,12 @@ void C3dMarkers::Shutdown() {
     plugin::Call<0x722710>();
 }
 
+// Modifies `posn`!!
+void C3dMarkers::PlaceMarkerCone(uint32 id, CVector& posn, float size, uint8 red, uint8 green, uint8 blue, uint8 alpha, uint16 pulsePeriod, float pulseFraction, int16 rotateRate, uint8 bEnableCollision)
+{
+    plugin::Call<0x726D40, uint32, CVector&, float, uint8, uint8, uint8, uint8, uint16, float, int16, uint8>(id, posn, size, red, green, blue, alpha, pulsePeriod, pulseFraction, rotateRate, bEnableCollision);
+}
+
 // 0x725040
 void C3dMarkers::Render() {
     plugin::Call<0x725040>();

@@ -51,6 +51,7 @@ void ColDef::operator delete(void* data)
     CColStore::ms_pColPool->Delete(static_cast<ColDef*>(data));
 }
 
+// 0x4113F0
 // Initialise
 void CColStore::Initialise()
 {

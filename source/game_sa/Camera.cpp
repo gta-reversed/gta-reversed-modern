@@ -862,9 +862,9 @@ void CCamera::SetCameraDirectlyInFrontForFollowPed_ForAPed_CamOnAString(CPed* ta
 }
 
 // 0x50BEC0
-void CCamera::SetCamPositionForFixedMode(const CVector* fixedModeSource, const CVector* fixedModeUpOffset) {
-    m_vecFixedModeSource = *fixedModeSource;
-    m_vecFixedModeUpOffSet = *fixedModeUpOffset;
+void CCamera::SetCamPositionForFixedMode(const CVector& fixedModeSource, const CVector& fixedModeUpOffset) {
+    m_vecFixedModeSource = fixedModeSource;
+    m_vecFixedModeUpOffSet = fixedModeUpOffset;
     m_bGarageFixedCamPositionSet = false;
 }
 
