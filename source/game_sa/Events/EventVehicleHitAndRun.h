@@ -6,7 +6,7 @@
 
 class CVehicle;
 
-class CEventVehicleHitAndRun : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventVehicleHitAndRun : public CEvent {
 public:
     CPed*     m_victim;
     CVehicle* m_vehicle;

@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleSetStayInSamePlace : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleSetStayInSamePlace : public CTaskSimple {
 public:
     bool m_bStayInSamePlace;
 

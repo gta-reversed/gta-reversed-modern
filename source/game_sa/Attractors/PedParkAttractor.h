@@ -2,7 +2,7 @@
 
 #include "PedAttractor.h"
 
-class CPedParkAttractor : public CPedAttractor {
+class NOTSA_EXPORT_VTABLE CPedParkAttractor : public CPedAttractor {
 public:
     // 0x5EEB00
     CPedParkAttractor(C2dEffect* effect, CEntity* entity, int a4)

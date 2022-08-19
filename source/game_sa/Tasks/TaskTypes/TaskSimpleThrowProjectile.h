@@ -10,7 +10,7 @@
 class CAnimBlendAssociation;
 class CEntity;
 
-class CTaskSimpleThrowProjectile : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleThrowProjectile : public CTaskSimple {
 public:
     bool                   m_bIsAborting;
     bool                   m_bFinished;

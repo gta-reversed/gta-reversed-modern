@@ -287,12 +287,11 @@
 #include "extensions/utility.hpp"
 
 void InjectHooksMain() {
-    ReversibleHooks::OnInjectionBegin();
-    notsa::AutoCallOnDestruct autoInjectionEnd{ ReversibleHooks::OnInjectionEnd };
-
     HookInstall(0x53E230, &Render2dStuff);   // [ImGui] This one shouldn't be reversible, it contains imgui debug menu logic, and makes game unplayable without
     HookInstall(0x541DD0, CPad::UpdatePads); // [ImGui] Changes logic of the function and shouldn't be toggled on/off
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
+    
+    CPad::InjectHooks();
     CFileMgr::InjectHooks();
 
     CPad::InjectHooks();
@@ -1050,4 +1049,10 @@ void InjectHooksMain() {
     Fx();
     Vehicle();
     Scripts();
+}
+
+void InjectHooksMain(HMODULE hThisDLL) {
+    ReversibleHooks::OnInjectionBegin(hThisDLL);
+    InjectHooksMain();
+    ReversibleHooks::OnInjectionEnd();
 }
