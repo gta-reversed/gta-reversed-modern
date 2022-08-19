@@ -420,4 +420,3 @@ bool CPathFind::Save() {
 void CPathFind::SetPathsNeededAtPosition(const CVector& posn) {
     return plugin::CallAndReturn<void, 0x44DCD0, CPathFind*, const CVector&>(this,posn);
 }
-
