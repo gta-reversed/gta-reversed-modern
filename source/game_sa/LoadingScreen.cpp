@@ -26,7 +26,7 @@ void CLoadingScreen::InjectHooks() {
     RH_ScopedInstall(DisplayNextSplash, 0x5904D0);
     RH_ScopedInstall(StartFading, 0x590530);
     RH_ScopedInstall(DisplayPCScreen, 0x590570);
-    // RH_ScopedInstall(Update, 0x5905E0);
+    RH_ScopedInstall(Update, 0x5905E0, { .reversed = false });
     RH_ScopedInstall(DoPCTitleFadeOut, 0x590860);
     RH_ScopedInstall(DoPCTitleFadeIn, 0x590990);
     RH_ScopedInstall(DoPCScreenChange, 0x590AC0);
