@@ -267,7 +267,7 @@ void CShopping::RestoreVehicleMods() {
         return;
 
     auto& damage = veh->m_damageManager;
-    for (auto&& [i, state] : notsa::enumerate(gComponentDamageState)) {
+    for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
         if (state == DAMAGE_STATE_OK)
             continue;
 
@@ -333,7 +333,7 @@ void CShopping::StoreVehicleMods() {
         return;
 
     const auto& damage = veh->m_damageManager;
-    for (auto&& [i, state] : notsa::enumerate(gComponentDamageState)) {
+    for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
         switch (i) {
         case 2:
             state = (eDamageState)damage.GetWheelStatus(CAR_WHEEL_FRONT_RIGHT);
