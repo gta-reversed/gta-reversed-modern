@@ -21,67 +21,60 @@ void CPPTriPlantBuffer::InjectHooks() {
 
 // 0x5DB090
 CPPTriPlantBuffer::CPPTriPlantBuffer() {
-    m_nNumActive = 0;
-    m_nType = 0;
-    std::ranges::fill(m_aAtomics, nullptr);
+    m_CurrentIndex = 0;
+    m_PlantModelsSet = 0;
+    std::ranges::fill(m_pPlantModelsTab, nullptr);
 }
 
 // 0x5DB0C0
 void CPPTriPlantBuffer::Flush() {
-    if (m_nNumActive <= 0)
+    if (m_CurrentIndex <= 0)
         return;
 
-    auto atomics = [&] {
-        switch (m_nType) {
-        case 0:  return m_aAtomics[0];
-        case 1:  return m_aAtomics[1];
-        case 2:  return m_aAtomics[2];
-        case 3:  return m_aAtomics[3];
-        default: return (RpAtomic**)nullptr;
-        }
-    }();
-
+    // FIX_BUGS: m_pPlantModelsTab[m_PlantModelsSet] can be null. With std::array we check it.
+    // While DrawTriPlants does not check for null.
     auto random = CGeneral::GetRandomNumber();
-    CGrassRenderer::DrawTriPlants(m_aPlants, m_nNumActive, atomics);
-    m_nNumActive = 0;
+    CGrassRenderer::DrawTriPlants(m_Buffer, m_CurrentIndex, GetPlantModelsTab(m_PlantModelsSet));
+    m_CurrentIndex = 0;
     srand(random);
 }
 
 // 0x5DB140
-PPTriPlant* CPPTriPlantBuffer::GetPPTriPlantPtr(int32 nIncrease) {
-    if (m_nNumActive + nIncrease > MAX_PLANTS)
+PPTriPlant* CPPTriPlantBuffer::GetPPTriPlantPtr(int32 amountToAdd) {
+    if (m_CurrentIndex + amountToAdd > MAX_PLANTS)
         Flush();
 
-    return &m_aPlants[m_nNumActive];
+    return &m_Buffer[m_CurrentIndex];
 }
 
 // 0x5DB170
-void CPPTriPlantBuffer::ChangeCurrentPlantModelsSet(int32 type) {
-    if (m_nType == type)
+void CPPTriPlantBuffer::ChangeCurrentPlantModelsSet(int32 newSet) {
+    if (m_PlantModelsSet == newSet)
         return;
 
     Flush();
-    m_nType = type;
+    m_PlantModelsSet = newSet;
 }
 
 // 0x5DB1A0
-void CPPTriPlantBuffer::IncreaseBufferIndex(int32 type, int32 nIncrease) {
-    if (m_nType == type) {
-        m_nNumActive += nIncrease;
-        if (m_nNumActive >= MAX_PLANTS)
+void CPPTriPlantBuffer::IncreaseBufferIndex(int32 pipeMode, int32 amount) {
+    if (m_PlantModelsSet == pipeMode) {
+        m_CurrentIndex += amount;
+        if (m_CurrentIndex >= MAX_PLANTS) {
             Flush();
+        }
     }
 }
 
 // 0x5DACA0
-void* CPPTriPlantBuffer::GetPlantModelsTab(uint32 type) {
-    return type < std::size(m_aAtomics) ? m_aAtomics[type] : nullptr;
+RpAtomic** CPPTriPlantBuffer::GetPlantModelsTab(uint32 index) {
+    return index < std::size(m_pPlantModelsTab) ? m_pPlantModelsTab[index] : nullptr;
 }
 
 // 0x5DAC80
-void CPPTriPlantBuffer::SetPlantModelsTab(uint32 type, RpAtomic** atomics) {
-    if (type < std::size(m_aAtomics)) {
-        m_aAtomics[type] = atomics;
+void CPPTriPlantBuffer::SetPlantModelsTab(uint32 index, RpAtomic** pPlantModels) {
+    if (index < std::size(m_pPlantModelsTab)) {
+        m_pPlantModelsTab[index] = pPlantModels;
     }
 }
 

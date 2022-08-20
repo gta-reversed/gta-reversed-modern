@@ -6,22 +6,26 @@ struct RwTexture;
 
 class PPTriPlant {
 public:
-    CBoundingBox start;
-    CBoundingBox end;
-    uint16       type;
-    int16        field_32;
-    float        field_34;
-    float        field_38;
-    RwTexture*   m_Texture;
-    CRGBA        m_Color;
-    uint8        m_nColorIntensity;
-    uint8        m_Surface; // eSurfaceType?
-    int8         field_47;
-    uint32       m_RandomSeed;
-    float        field_4C;
-    float        field_50;
-    float        m_fWindBendingModifier;
-    float        field_58;
+    CVector V1;
+    CVector V2;
+    CVector V3;
+    CVector Center;
+
+    uint16 model_id;
+    uint16 num_plants;
+
+    CVector2D scale;
+    RwTexture* texture;
+
+    CRGBA color;
+    uint8 intensity;
+    uint8 intensity_var;
+
+    float seed;
+    float scale_var_xy;
+    float scale_var_z;
+    float wind_bend_scale;
+    float wind_bend_var;
 };
 VALIDATE_SIZE(PPTriPlant, 0x5C);
 
@@ -29,10 +33,10 @@ constexpr auto MAX_PLANTS = 32u;
 
 class CPPTriPlantBuffer {
 public:
-    int32      m_nNumActive;
-    PPTriPlant m_aPlants[MAX_PLANTS];
-    int32      m_nType;
-    RpAtomic** m_aAtomics[4];
+    int32      m_CurrentIndex;
+    PPTriPlant m_Buffer[MAX_PLANTS];
+    int32      m_PlantModelsSet;
+    std::array<RpAtomic**, 4> m_pPlantModelsTab;
 
 public:
     static void InjectHooks();
@@ -41,21 +45,21 @@ public:
     ~CPPTriPlantBuffer() = default;
 
     void Flush();
-    PPTriPlant* GetPPTriPlantPtr(int32 nIncrease);
-    void ChangeCurrentPlantModelsSet(int32 type);
-    void IncreaseBufferIndex(int32 type, int32 nIncrease);
+    PPTriPlant* GetPPTriPlantPtr(int32 amountToAdd);
+    void ChangeCurrentPlantModelsSet(int32 newSet);
+    void IncreaseBufferIndex(int32 pipeMode, int32 amount);
 
-    void* GetPlantModelsTab(uint32 type);
-    void SetPlantModelsTab(uint32 type, RpAtomic** atomics);
+    RpAtomic** GetPlantModelsTab(uint32 index);
+    void SetPlantModelsTab(uint32 index, RpAtomic** pPlantModels);
 
     static RpMaterial* SetGrassMaterialCB(RpMaterial* material, void* data);
 
-    int32 GetType() const    { return m_nType; }; // 0x5DAAF0
-    void SetType(int32 type) { m_nType = type; }; // 0x5DAAE0
+    int32 GetType() const    { return m_PlantModelsSet; }; // 0x5DAAF0
+    void SetType(int32 type) { m_PlantModelsSet = type; }; // 0x5DAAE0
 
     // NOTSA
     void CopyToActive(PPTriPlant* plant) {
-        memcpy(&m_aPlants[m_nNumActive], plant, sizeof(PPTriPlant));
+        memcpy(&m_Buffer[m_CurrentIndex], plant, sizeof(PPTriPlant));
     }
 };
 

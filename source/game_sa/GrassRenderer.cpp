@@ -41,73 +41,72 @@ void CGrassRenderer::Shutdown() {
 }
 
 // 0x5DB1D0
-void CGrassRenderer::AddTriPlant(PPTriPlant* plant, uint32 type) {
-    gTriPlantBuf.ChangeCurrentPlantModelsSet(type);
+void CGrassRenderer::AddTriPlant(PPTriPlant* srcPlant, uint32 plantModelSet) {
+    gTriPlantBuf.ChangeCurrentPlantModelsSet(plantModelSet);
 
-    if (gTriPlantBuf.m_nNumActive + 1 > MAX_PLANTS)
+    if (gTriPlantBuf.m_CurrentIndex + 1 > MAX_PLANTS)
         gTriPlantBuf.Flush();
 
-    gTriPlantBuf.CopyToActive(plant);
-    gTriPlantBuf.IncreaseBufferIndex(type, 1);
+    gTriPlantBuf.CopyToActive(srcPlant);
+    gTriPlantBuf.IncreaseBufferIndex(plantModelSet, 1);
 }
 
 // 0x5DAD00
-void CGrassRenderer::DrawTriPlants(PPTriPlant* plants, int32 count, RpAtomic** atomics) {
+void CGrassRenderer::DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, RpAtomic** plantModelsTab, RwMatrix* ltm) {
     // return plugin::Call<0x5DAD00, PPTriPlant*, int32, RpAtomic**>(plant, count, atomics);
     { // debug
         CFont::InitPerFrame();
         char buf[32]{};
-        sprintf(buf, "hook %d", count);
+        sprintf(buf, "hook %d", numTriPlants);
         CFont::PrintString(100, 200, buf);
     }
 
-    const auto GetFarDist = []() -> float {
+    const auto farDist = [] { // OG: located in loop
         switch (g_fx.GetFxQuality()) {
         case FX_QUALITY_LOW:
         case FX_QUALITY_MEDIUM:
+        default:
             return m_farDist / 2.0f;
         case FX_QUALITY_HIGH:
         case FX_QUALITY_VERY_HIGH:
             return m_farDist;
         }
-    };
-
-    for (const auto& plant : std::span{ plants, (size_t)count }) {
-        const auto farDist = GetFarDist();
-        const auto nearDist = DistanceBetweenPoints(m_vecCameraPos, plant.end.m_vecMax);
+    }();
+    for (const auto& plant : std::span{triPlants, (size_t)numTriPlants}) {
+        const auto nearDist = DistanceBetweenPoints(m_vecCameraPos, plant.Center);
         if (nearDist > farDist + 20.0f) {
             continue;
         }
 
-        const auto atomic = atomics[plant.type];
+        const auto atomic = plantModelsTab[plant.model_id];
         auto frame = RpAtomicGetFrame(atomic);
-        srand(plant.m_RandomSeed);
+        srand(plant.seed);
 
         RwRGBA newColorIntensity{};
         if (nearDist >= farDist) {
-            const auto alpha = std::floor((farDist + 20.0f - nearDist) * (float)plant.m_Color.a / 20.0f);
+            const auto alpha = std::floor((farDist + 20.0f - nearDist) * (float)plant.color.a / 20.0f);
             newColorIntensity.alpha = (uint8)std::clamp(alpha, 0.0f, 255.0f);
         } else {
-            newColorIntensity.alpha = plant.m_Color.a;
+            newColorIntensity.alpha = plant.color.a;
         }
 
         // 0x5DAE61
-        auto mult = std::min(float(plant.m_nColorIntensity), 255.0f);
-        newColorIntensity.red   = uint16(mult * (float)plant.m_Color.r) / 256;
-        newColorIntensity.green = uint16(mult * (float)plant.m_Color.g) / 256;
-        newColorIntensity.blue  = uint16(mult * (float)plant.m_Color.b) / 256;
+        auto mult = std::min(float(plant.intensity), 255.0f);
+        newColorIntensity.red   = uint16(mult * (float)plant.color.r) / 256;
+        newColorIntensity.green = uint16(mult * (float)plant.color.g) / 256;
+        newColorIntensity.blue  = uint16(mult * (float)plant.color.b) / 256;
 
         // 0x5DAC40
-        RenderGrassTexture = plant.m_Texture;
+        RenderGrassTexture = plant.texture;
         RpGeometryForAllMaterials(RpAtomicGetGeometry(atomic), CPPTriPlantBuffer::SetGrassMaterialCB, &newColorIntensity);
 
-        for (auto j = 0; j < plant.field_32; j++) {
+        for (auto j = 0; j < plant.num_plants; j++) {
             CVector posn;
             sub_5DAB00(
                 posn,
-                &plant.start.m_vecMin,
-                &plant.start.m_vecMax,
-                &plant.end.m_vecMin,
+                &plant.V1,
+                &plant.V2,
+                &plant.V3,
                 CGeneral::GetRandomNumberInRange(0.0f, 1.0f),
                 CGeneral::GetRandomNumberInRange(0.0f, 1.0f)
             );
@@ -121,14 +120,14 @@ void CGrassRenderer::DrawTriPlants(PPTriPlant* plants, int32 count, RpAtomic** a
 
             RwFrameTranslate(frame, &posn, rwCOMBINEREPLACE);
 
-            const auto xy = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_4C + plant.field_34;
+            const auto xy = (float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.scale_var_xy + plant.scale.x;
             frame->modelling.right.x *= xy;
             frame->modelling.up.y *= xy;
 
-            const auto xy1 = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_58 + 1.0f) * (m_windBending * plant.m_fWindBendingModifier);
+            const auto xy1 = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.wind_bend_var + 1.0f) * (m_windBending * plant.wind_bend_scale);
             frame->modelling.at.x = xy1;
             frame->modelling.at.y = xy1;
-            frame->modelling.at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.field_50 + plant.field_38) * frame->modelling.at.z;
+            frame->modelling.at.z = ((float)rand() * RAND_MAX_FLOAT_RECIPROCAL * plant.scale_var_z + plant.scale.y) * frame->modelling.at.z;
 
             RwMatrixUpdate(&frame->modelling);
             atomic->renderCallBack(atomic);
@@ -172,7 +171,7 @@ void CGrassRenderer::SetGlobalWindBending(float bending) {
     m_windBending = bending;
 }
 
-void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& startMin, const CVector& startMax, const CVector& endMin, float randA, float randB) {
+void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float randA, float randB) {
     float f1 = randA;
     float f2 = randB;
     if (randA + randB > 1.0f) {
@@ -181,5 +180,7 @@ void CGrassRenderer::sub_5DAB00(CVector& outPosn, const CVector& startMin, const
     }
     float inv = 1.0f - f1 - f2;
 
-    outPosn = inv * startMin + f1 * startMax + f2 * endMin;
+    outPosn = inv *
+                  v1 + f1 *
+                  v2 + f2 * v3;
 }

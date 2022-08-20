@@ -97,7 +97,7 @@ bool CPlantMgr::Initialise() {
 void CPlantMgr::Shutdown() {
     // return plugin::Call<0x5DB940>();
 
-    for (auto it = m_CloseColEntListHead; it; it = it->m_Prev) {
+    for (auto it = m_CloseColEntListHead; it; it = it->m_NextEntry) {
         it->ReleaseEntry();
     }
 
@@ -176,7 +176,7 @@ void CPlantMgr::Update(const CVector& cameraPosition) {
     _ColEntityCache_Update(cameraPosition, (++cache % MAX_PLANTS) != 0 ? true : false);
 
     auto prev = m_CloseColEntListHead;
-    for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_Prev )
+    for (auto i = section++ % 8; m_CloseColEntListHead; prev = m_CloseColEntListHead->m_NextEntry)
         _ProcessEntryCollisionDataSections(prev, cameraPosition, i);
 }
 
@@ -237,7 +237,7 @@ void CPlantMgr::_ProcessEntryCollisionDataSections_RemoveLocTris(CPlantColEntEnt
 
 // 0x5DCF00
 void CPlantMgr::_UpdateLocTris(const CVector& center, int32 a2) {
-    for (auto i = m_CloseColEntListHead; i; i = i->m_Prev) {
+    for (auto i = m_CloseColEntListHead; i; i = i->m_NextEntry) {
         _ProcessEntryCollisionDataSections(i, center, a2);
     }
 }

@@ -8,8 +8,8 @@ public:
     CEntity*           m_Entity;
     CPlantLocTri**     m_Objects;
     uint16             m_numTriangles;
-    CPlantColEntEntry* m_Prev;
-    CPlantColEntEntry* m_Next;
+    CPlantColEntEntry* m_NextEntry;
+    CPlantColEntEntry* m_PrevEntry;
 
 public:
     CPlantColEntEntry* AddEntry(CEntity* entity);

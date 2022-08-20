@@ -20,8 +20,8 @@ public:
     static bool Initialise();
     static void Shutdown();
 
-    static void AddTriPlant(PPTriPlant* plant, uint32 type);
-    static void DrawTriPlants(PPTriPlant* plant, int32 count, RpAtomic** atomics);
+    static void AddTriPlant(PPTriPlant* srcPlant, uint32 plantModelSet);
+    static void DrawTriPlants(PPTriPlant* triPlants, int32 numTriPlants, RpAtomic** plantModelsTab, RwMatrix* ltm = nullptr);
     static void FlushTriPlantBuffer();
 
     static void* GetPlantModelsTab(uint32 type);
@@ -32,5 +32,5 @@ public:
     static void SetGlobalCameraPos(const CVector& cameraPosn);
     static void SetGlobalWindBending(float bending);
 
-    static void sub_5DAB00(CVector& outPosn, const CVector& startMin, const CVector& startMax, const CVector& endMin, float randA, float randB);
+    static void sub_5DAB00(CVector& outPosn, const CVector& v1, const CVector& v2, const CVector& v3, float randA, float randB);
 };

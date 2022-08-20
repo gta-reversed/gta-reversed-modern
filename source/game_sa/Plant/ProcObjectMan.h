@@ -11,16 +11,16 @@ class CPlantLocTri;
 
 class ProcObjectListItem : public ListItem_c {
 public:
-    CObject*      m_Obj;
-    CPlantLocTri* m_Plant;
-    bool          m_bDecrease;
+    CEntity*      m_Obj;
+    CPlantLocTri* m_LocTri;
+    bool          m_bAllocatedMatrix;
 };
 VALIDATE_SIZE(ProcObjectListItem, 0x14);
 
 class ProcObjectMan_c {
 public:
-    uint32                      m_nNumAligned; // todo: rename to more meaningful name
-    uint32                      m_ProcObjInfoCount;
+    int32 m_numAllocatedMatrices;
+    int32 m_numProcSurfaceInfos;
     ProcSurfaceInfo_c           m_ProcObjSurfaceInfos[128];
     ProcObjectListItem          m_Objects[512];
     TList_c<ProcObjectListItem> m_ObjectsList;

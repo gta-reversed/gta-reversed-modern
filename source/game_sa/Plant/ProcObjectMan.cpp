@@ -24,9 +24,9 @@ void ProcObjectMan_c::Init() {
     for (auto& obj : m_Objects) {
         m_ObjectsList.AddItem(&obj);
     }
-    m_ProcObjInfoCount = 0;
+    m_numProcSurfaceInfos = 0;
     LoadDataFile();
-    m_nNumAligned = 0;
+    m_numAllocatedMatrices = 0;
 }
 
 // 0x5A3110
@@ -36,7 +36,7 @@ void ProcObjectMan_c::Update() {
 
 // 0x5A3EE0
 void ProcObjectMan_c::Exit() {
-    for (auto& info : std::span{ m_ProcObjSurfaceInfos, m_ProcObjInfoCount }) {
+    for (auto& info : std::span{ m_ProcObjSurfaceInfos, (size_t)m_numProcSurfaceInfos}) {
         info.Exit();
     }
     m_ObjectsList.RemoveAll();
@@ -75,7 +75,7 @@ void ProcObjectMan_c::LoadDataFile() {
             &zOffsetMin, &zOffsetMax,
             &align, &useGrid
         );
-        m_ProcObjSurfaceInfos[m_ProcObjInfoCount].Init(
+        m_ProcObjSurfaceInfos[m_numProcSurfaceInfos].Init(
             surfaceType,
             objectName,
             spacing,
@@ -86,7 +86,7 @@ void ProcObjectMan_c::LoadDataFile() {
             zOffsetMin, zOffsetMax,
             align, useGrid
         );
-        m_ProcObjInfoCount++;
+        m_numProcSurfaceInfos++;
     }
     CFileMgr::CloseFile(file);
 }
@@ -106,7 +106,7 @@ int32 ProcObjectMan_c::ProcessTriangleAdded(CPlantLocTri* plant) {
     // return plugin::CallMethodAndReturn<int32, 0x5A3F20, ProcObjectMan_c*, CPlantLocTri*>(this, plant);
 
     uint8 count = 0;
-    for (auto& info : std::span{ m_ProcObjSurfaceInfos, m_ProcObjInfoCount }) {
+    for (auto& info : std::span{ m_ProcObjSurfaceInfos, (size_t)m_numProcSurfaceInfos}) {
         if (m_ProcObjSurfaceInfos->m_SurfaceId == plant->m_SurfaceId) {
             count += info.AddObjects(plant);
         }
