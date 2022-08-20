@@ -226,7 +226,6 @@ namespace rng = std::ranges;
 #include "game_sa\Clock.h"
 #include "game_sa\Clothes.h"
 #include "game_sa\ClothesBuilder.h"
-#include "game_sa\ControllerConfigManager.h"
 #include "game_sa\Coronas.h"
 #include "game_sa\Cover.h"
 #include "game_sa\CoverPoint.h"
