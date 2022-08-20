@@ -66,13 +66,13 @@ public:
     static void AddPriceModifier(uint32 a1, int32 a2);
     static void Buy(uint32 a1, int32 a2);
     static int32 FindItem(uint32 itemKey);
-    static void FindSection(FILE* file, const char* sectionName);
-    static void FindSectionInSection(FILE* file, const char* sectionName, const char* a3);
+    static bool FindSection(FILESTREAM file, const char* sectionName);
+    static bool FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection);
     static void GetExtraInfo(uint32 a1, int32 a2);
     static int32 GetItemIndex(uint32 itemKey);
     static void GetKey(const char* modelName, int32 index);
     static void GetNameTag(uint32 a1);
-    static void GetNextSection(FILE* file);
+    static void GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);
     static int32 GetPriceSectionFromName(const char* name);
     static void SetPlayerHasBought(uint32 itemKey);

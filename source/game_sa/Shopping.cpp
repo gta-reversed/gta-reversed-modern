@@ -110,14 +110,14 @@ int32 CShopping::FindItem(uint32 itemKey) {
 }
 
 // 0x49AE70
-void CShopping::FindSection(FILE* file, const char* sectionName) {
-    plugin::Call<0x49AE70, FILE*, const char*>(file, sectionName);
+bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
+    plugin::Call<0x49AE70, FILESTREAM, const char*>(file, sectionName);
 }
 
 // unused
 // 0x49AF90
-void CShopping::FindSectionInSection(FILE* file, const char* sectionName, const char* a3) {
-
+bool CShopping::FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection) {
+    return FindSection(file, parentSection) && FindSection(file, childSection);
 }
 
 // 0x49ADE0
