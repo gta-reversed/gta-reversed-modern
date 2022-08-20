@@ -95,7 +95,7 @@ void CShopping::Buy(uint32 a1, int32 a2) {
     plugin::Call<0x49BF70, uint32, int32>(a1, a2);
 }
 
-// inlined (0x)
+// inlined
 int32 CShopping::FindItem(uint32 itemKey) {
     auto itemId = -1; // ms_numPrices <= -1 OR key not found. will this case ever happen?
     if (ms_numPrices > 0) {
@@ -106,6 +106,7 @@ int32 CShopping::FindItem(uint32 itemKey) {
         }
     }
 
+    assert(itemId != -1);
     return itemId;
 }
 
@@ -135,8 +136,15 @@ int32 CShopping::GetExtraInfo(uint32 itemKey, int32 index) {
 }
 
 // 0x49AB10
-int32 CShopping::GetItemIndex(uint32 a1) {
-    return plugin::CallAndReturn<int32, 0x49AB10, uint32>(a1);
+int32 CShopping::GetItemIndex(uint32 itemKey) {
+    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+        if (key == itemKey) {
+            return i;
+        }
+    }
+
+    assert(false);
+    return -1;
 }
 
 // 0x49AB30
@@ -144,9 +152,9 @@ void CShopping::GetKey(const char* modelName, int32 index) {
     plugin::Call<0x49AB30, const char*, int32>(modelName, index);
 }
 
-// 0x
-void CShopping::GetNameTag(uint32 a1) {
-    plugin::Call<0x0, uint32>(a1);
+// inlined
+const char* CShopping::GetNameTag(uint32 itemKey) {
+    return ms_prices[FindItem(itemKey)].nameTag;
 }
 
 // 0x49AF10
@@ -172,23 +180,12 @@ int32 CShopping::GetPriceSectionFromName(const char* name) {
 
 // 0x49B610
 void CShopping::SetPlayerHasBought(uint32 itemKey) {
-    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
-        if (key == itemKey) {
-            ms_bHasBought[i] = true;
-        }
-    }
+    ms_bHasBought[GetItemIndex(itemKey)] = true;
 }
 
 // 0x49B5E0
 bool CShopping::HasPlayerBought(uint32 itemKey) {
-    for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
-        if (key == itemKey) {
-            return ms_bHasBought[i];
-        }
-    }
-
-    // NOTSA. SA does `return ms_bHasBought[-1];`.
-    return false;
+    return ms_bHasBought[GetItemIndex(itemKey)];
 }
 
 // 0x

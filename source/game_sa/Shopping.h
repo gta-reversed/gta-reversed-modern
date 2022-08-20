@@ -71,7 +71,7 @@ public:
     static int32 GetExtraInfo(uint32 itemKey, int32 index);
     static int32 GetItemIndex(uint32 itemKey);
     static void GetKey(const char* modelName, int32 index);
-    static void GetNameTag(uint32 a1);
+    static const char* GetNameTag(uint32 itemKey);
     static void GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);
     static int32 GetPriceSectionFromName(const char* name);
