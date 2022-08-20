@@ -39,7 +39,7 @@ void SwitchHook(std::string_view funcName) {
 void OnInjectionBegin(HMODULE hThisDLL) {
     s_hThisDLL = hThisDLL;
 
-#ifndef NDEBUG 
+#ifndef NDEBUG
     s_HookedAddresses.reserve(20000); // Should be enough - We free it after the injection has finished, so it should be fine
 #endif
 }
@@ -63,7 +63,9 @@ void InstallVirtual(std::string_view category, std::string fnName, void** vtblGT
     }
     const auto fnVTblIdx = (size_t)rng::distance(spanGTAVTbl.begin(), iter);
 
+#ifdef HOOKS_DEBUG
     std::cout << std::format("{}::{} => {}\n", category, fnName, fnVTblIdx);
+#endif
 
     auto item = std::make_shared<ReversibleHook::Virtual>(std::move(fnName), vtblGTA, vtblOur, fnVTblIdx);
     item->State(opt.enabled);
@@ -99,12 +101,13 @@ void VirtualCopy(void* dst, void* src, size_t nbytes) {
 // In order for this to work the class has to be exported (So the `NOTSA_EXPORT_VTABLE` macro has to be used)
 void** GetVTableAddress(std::string_view className) {
     CHAR buffer[1024];
-    sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data()); 
+    sprintf_s(buffer, "??_7%.*s@@6B@", (int)className.length(), className.data());
     if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
         return vtbl;
-    } else {
-        NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
     }
+
+    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
+    return nullptr;
 }
 
 }; // namespace detail
