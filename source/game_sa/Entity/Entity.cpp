@@ -96,6 +96,28 @@ void CEntity::InjectHooks()
 
     RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
+void CEntity::Add() { CEntity::Add_Reversed(); }
+void CEntity::Add(const CRect& rect) { CEntity::Add_Reversed(rect); }
+void CEntity::Remove() { CEntity::Remove_Reversed(); }
+void CEntity::SetIsStatic(bool isStatic) { return CEntity::SetIsStatic_Reversed(isStatic); }
+void CEntity::SetModelIndex(uint32 index) { return CEntity::SetModelIndex_Reversed(index); }
+void CEntity::SetModelIndexNoCreate(uint32 index) { return CEntity::SetModelIndexNoCreate_Reversed(index); }
+void CEntity::CreateRwObject() { return CEntity::CreateRwObject_Reversed(); }
+void CEntity::DeleteRwObject() { CEntity::DeleteRwObject_Reversed(); }
+CRect* CEntity::GetBoundRect(CRect* pRect) { return CEntity::GetBoundRect_Reversed(pRect); }
+void CEntity::ProcessControl() { CEntity::ProcessControl_Reversed(); }
+void CEntity::ProcessCollision() { CEntity::ProcessCollision_Reversed(); }
+void CEntity::ProcessShift() { CEntity::ProcessShift_Reversed(); }
+bool CEntity::TestCollision(bool bApplySpeed) { return CEntity::TestCollision_Reversed(bApplySpeed); }
+void CEntity::Teleport(CVector destination, bool resetRotation) { CEntity::Teleport_Reversed(destination, resetRotation); }
+void CEntity::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck) { CEntity::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck); }
+uint8 CEntity::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2) { return CEntity::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2); }
+void CEntity::PreRender() { CEntity::PreRender_Reversed(); }
+void CEntity::Render() { CEntity::Render_Reversed(); }
+bool CEntity::SetupLighting() { return CEntity::SetupLighting_Reversed(); }
+
+void CEntity::RemoveLighting(bool bRemove) { CEntity::RemoveLighting_Reversed(bRemove); }
+void CEntity::FlagToDestroyWhenNextProcessed() { CEntity::FlagToDestroyWhenNextProcessed_Reversed(); }
 
 CEntity::CEntity() : CPlaceable() {
     m_nStatus = STATUS_ABANDONED;
@@ -118,8 +140,7 @@ CEntity::CEntity() : CPlaceable() {
     m_pLod = nullptr;
 }
 
-CEntity::~CEntity()
-{
+CEntity::~CEntity() {
     if (m_pLod)
         m_pLod->m_nNumLodChildren--;
 
@@ -127,35 +148,17 @@ CEntity::~CEntity()
     CEntity::ResolveReferences();
 }
 
-void CEntity::Add()
-{
-    CEntity::Add_Reversed();
-}
-void CEntity::Add_Reversed()
-{
+// 0x533020
+void CEntity::Add_Reversed() {
     auto rect = CRect();
     GetBoundRect(&rect);
     Add(rect);
 }
 
-void CEntity::Add(const CRect& rect)
-{
-    CEntity::Add_Reversed(rect);
-}
-void CEntity::Add_Reversed(const CRect& rect)
-{
+// 0x5347D0
+void CEntity::Add_Reversed(const CRect& rect) {
     CRect usedRect = rect;
-    if (usedRect.left < -3000.0F)
-        usedRect.left = -3000.0F;
-
-    if (usedRect.right >= 3000.0F)
-        usedRect.right = 2999.0F;
-
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
-
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    usedRect.Restrict(WORLD_BOUNDS);
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
@@ -168,65 +171,48 @@ void CEntity::Add_Reversed(const CRect& rect)
                 pLodListEntry.AddItem(this);
             }
         }
+        return;
     }
-    else {
-        int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
-        int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
-        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-                CPtrListDoubleLink* list = nullptr;
-                auto repeatSector = GetRepeatSector(sectorX, sectorY);
-                auto sector = GetSector(sectorX, sectorY);
 
-                if (IsBuilding()) { //Buildings are treated as single link here, needs checking if the list is actually single or double
-                    reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->AddItem(this);
-                    continue;
-                }
+    int32 startSectorX = CWorld::GetSectorX(usedRect.left);
+    int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+    int32 endSectorX = CWorld::GetSectorX(usedRect.right);
+    int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            CPtrListDoubleLink* list = nullptr;
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
+            auto sector = GetSector(sectorX, sectorY);
 
-                switch (m_nType)
-                {
-                case ENTITY_TYPE_DUMMY:
-                    list = &sector->m_dummies;
-                    break;
-                case ENTITY_TYPE_VEHICLE:
-                    list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
-                    break;
-                case ENTITY_TYPE_PED:
-                    list = &repeatSector->GetList(REPEATSECTOR_PEDS);
-                    break;
-                case ENTITY_TYPE_OBJECT:
-                    list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
-                    break;
-                }
-
-                list->AddItem(this);
+            if (IsBuilding()) { // Buildings are treated as single link here, needs checking if the list is actually single or double
+                reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->AddItem(this);
+                continue;
             }
+
+            switch (m_nType) {
+            case ENTITY_TYPE_DUMMY:
+                list = &sector->m_dummies;
+                break;
+            case ENTITY_TYPE_VEHICLE:
+                list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+                break;
+            case ENTITY_TYPE_PED:
+                list = &repeatSector->GetList(REPEATSECTOR_PEDS);
+                break;
+            case ENTITY_TYPE_OBJECT:
+                list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+                break;
+            }
+
+            list->AddItem(this);
         }
     }
 }
 
-void CEntity::Remove()
-{
-    CEntity::Remove_Reversed();
-}
-void CEntity::Remove_Reversed()
-{
+void CEntity::Remove_Reversed() {
     auto usedRect = CRect();
     GetBoundRect(&usedRect);
-
-    if (usedRect.left < -3000.0F)
-        usedRect.left = -3000.0F;
-
-    if (usedRect.right >= 3000.0F)
-        usedRect.right = 2999.0F;
-
-    if (usedRect.top < -3000.0F)
-        usedRect.top = -3000.0F;
-
-    if (usedRect.bottom >= 3000.0F)
-        usedRect.bottom = 2999.0F;
+    usedRect.Restrict(WORLD_BOUNDS);
 
     if (m_bIsBIGBuilding) {
         int32 startSectorX = CWorld::GetLodSectorX(usedRect.left);
@@ -239,68 +225,55 @@ void CEntity::Remove_Reversed()
                 list.DeleteItem(this);
             }
         }
+        return;
     }
-    else {
-        int32 startSectorX = CWorld::GetSectorX(usedRect.left);
-        int32 startSectorY = CWorld::GetSectorY(usedRect.top);
-        int32 endSectorX = CWorld::GetSectorX(usedRect.right);
-        int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
-        for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
-            for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
-                CPtrListDoubleLink* list = nullptr;
-                auto sector = GetSector(sectorX, sectorY);
-                auto repeatSector = GetRepeatSector(sectorX, sectorY);
 
-                if (IsBuilding()) { //Buildings are treated as single link here
-                    reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->DeleteItem(this);
-                    continue;
-                }
+    int32 startSectorX = CWorld::GetSectorX(usedRect.left);
+    int32 startSectorY = CWorld::GetSectorY(usedRect.top);
+    int32 endSectorX = CWorld::GetSectorX(usedRect.right);
+    int32 endSectorY = CWorld::GetSectorY(usedRect.bottom);
+    for (int32 sectorY = startSectorY; sectorY <= endSectorY; ++sectorY) {
+        for (int32 sectorX = startSectorX; sectorX <= endSectorX; ++sectorX) {
+            CPtrListDoubleLink* list = nullptr;
+            auto sector = GetSector(sectorX, sectorY);
+            auto repeatSector = GetRepeatSector(sectorX, sectorY);
 
-                switch (m_nType)
-                {
-                case ENTITY_TYPE_DUMMY:
-                    list = &sector->m_dummies;
-                    break;
-                case ENTITY_TYPE_VEHICLE:
-                    list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
-                    break;
-                case ENTITY_TYPE_PED:
-                    list = &repeatSector->GetList(REPEATSECTOR_PEDS);
-                    break;
-                case ENTITY_TYPE_OBJECT:
-                    list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
-                    break;
-                }
-
-                list->DeleteItem(this);
+            if (IsBuilding()) { // Buildings are treated as single link here
+                reinterpret_cast<CPtrListSingleLink*>(&sector->m_buildings)->DeleteItem(this);
+                continue;
             }
+
+            switch (m_nType) {
+            case ENTITY_TYPE_DUMMY:
+                list = &sector->m_dummies;
+                break;
+            case ENTITY_TYPE_VEHICLE:
+                list = &repeatSector->GetList(REPEATSECTOR_VEHICLES);
+                break;
+            case ENTITY_TYPE_PED:
+                list = &repeatSector->GetList(REPEATSECTOR_PEDS);
+                break;
+            case ENTITY_TYPE_OBJECT:
+                list = &repeatSector->GetList(REPEATSECTOR_OBJECTS);
+                break;
+            }
+
+            list->DeleteItem(this);
         }
     }
 }
 
-void CEntity::SetIsStatic(bool isStatic)
-{
-    return CEntity::SetIsStatic_Reversed(isStatic);
-}
 void CEntity::SetIsStatic_Reversed(bool isStatic)
 {
     m_bIsStatic = isStatic;
 }
 
-void CEntity::SetModelIndex(uint32 index)
-{
-    return CEntity::SetModelIndex_Reversed(index);
-}
 void CEntity::SetModelIndex_Reversed(uint32 index)
 {
     CEntity::SetModelIndexNoCreate(index);
     CEntity::CreateRwObject();
 }
 
-void CEntity::SetModelIndexNoCreate(uint32 index)
-{
-    return CEntity::SetModelIndexNoCreate_Reversed(index);
-}
 void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
 {
     auto mi = CModelInfo::GetModelInfo(index);
@@ -318,10 +291,6 @@ void CEntity::SetModelIndexNoCreate_Reversed(uint32 index)
         CTagManager::AddTag(this);
 }
 
-void CEntity::CreateRwObject()
-{
-    return CEntity::CreateRwObject_Reversed();
-}
 void CEntity::CreateRwObject_Reversed()
 {
     if (!m_bIsVisible)
@@ -390,12 +359,7 @@ void CEntity::CreateRwObject_Reversed()
         m_bLightObject = true;
 }
 
-void CEntity::DeleteRwObject()
-{
-    CEntity::DeleteRwObject_Reversed();
-}
-void CEntity::DeleteRwObject_Reversed()
-{
+void CEntity::DeleteRwObject_Reversed() {
     if (!m_pRwObject)
         return;
 
@@ -426,8 +390,8 @@ void CEntity::DeleteRwObject_Reversed()
 
     if (mi->GetModelType() == MODEL_INFO_CLUMP
         && mi->IsRoad()
-        && !IsObject()) {
-
+        && !IsObject()
+    ) {
         CWorld::ms_listMovingEntityPtrs.DeleteItem(this);
     }
 
@@ -435,101 +399,67 @@ void CEntity::DeleteRwObject_Reversed()
     CEntity::RemoveEscalatorsForEntity();
 }
 
-CRect* CEntity::GetBoundRect(CRect* pRect)
-{
-    return CEntity::GetBoundRect_Reversed(pRect);
-}
-CRect* CEntity::GetBoundRect_Reversed(CRect* outRect)
-{
-    CColModel* colModel = CModelInfo::GetModelInfo(m_nModelIndex)->GetColModel();
+CRect* CEntity::GetBoundRect_Reversed(CRect* outRect) {
+    CColModel* colModel = GetModelInfo()->GetColModel();
     CVector vecMin = colModel->m_boundBox.m_vecMin;
     CVector vecMax = colModel->m_boundBox.m_vecMax;
     CRect rect;
     CVector point;
+
     TransformFromObjectSpace(point, vecMin);
+
+    rect.StretchToPoint(point.x, point.y);
+    TransformFromObjectSpace(point, vecMax);
+
+    rect.StretchToPoint(point.x, point.y);
+    std::swap(vecMin.x, vecMax.x);
+    TransformFromObjectSpace(point, vecMin);
+
     rect.StretchToPoint(point.x, point.y);
     TransformFromObjectSpace(point, vecMax);
     rect.StretchToPoint(point.x, point.y);
-    float maxX = vecMax.x;
-    vecMax.x = vecMin.x;
-    vecMin.x = maxX;
-    TransformFromObjectSpace(point, vecMin);
-    rect.StretchToPoint(point.x, point.y);
-    TransformFromObjectSpace(point, vecMax);
-    rect.StretchToPoint(point.x, point.y);
+
     *outRect = rect;
     return outRect;
 }
 
-void CEntity::ProcessControl()
-{
-    CEntity::ProcessControl_Reversed();
-}
 void CEntity::ProcessControl_Reversed()
 {
     // NOP
 }
 
-void CEntity::ProcessCollision()
-{
-    CEntity::ProcessCollision_Reversed();
-}
 void CEntity::ProcessCollision_Reversed()
 {
     // NOP
 }
 
-void CEntity::ProcessShift()
-{
-    CEntity::ProcessShift_Reversed();
-}
 void CEntity::ProcessShift_Reversed()
 {
     // NOP
 }
 
-bool CEntity::TestCollision(bool bApplySpeed)
-{
-    return CEntity::TestCollision_Reversed(bApplySpeed);
-}
 bool CEntity::TestCollision_Reversed(bool bApplySpeed)
 {
     return false;
 }
 
-void CEntity::Teleport(CVector destination, bool resetRotation)
-{
-    CEntity::Teleport_Reversed(destination, resetRotation);
-}
 void CEntity::Teleport_Reversed(CVector destination, bool resetRotation)
 {
     // NOP
 }
 
 // 0x403E90
-void CEntity::SpecialEntityPreCollisionStuff(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
-{
-    CEntity::SpecialEntityPreCollisionStuff_Reversed(colPhysical, bIgnoreStuckCheck, bCollisionDisabled, bCollidedEntityCollisionIgnored, bCollidedEntityUnableToMove, bThisOrCollidedEntityStuck);
-}
 void CEntity::SpecialEntityPreCollisionStuff_Reversed(CPhysical* colPhysical, bool bIgnoreStuckCheck, bool& bCollisionDisabled, bool& bCollidedEntityCollisionIgnored, bool& bCollidedEntityUnableToMove, bool& bThisOrCollidedEntityStuck)
 {
     // NOP
 }
 
-uint8 CEntity::SpecialEntityCalcCollisionSteps(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
-{
-    return CEntity::SpecialEntityCalcCollisionSteps_Reversed(bProcessCollisionBeforeSettingTimeStep, unk2);
-}
 uint8 CEntity::SpecialEntityCalcCollisionSteps_Reversed(bool& bProcessCollisionBeforeSettingTimeStep, bool& unk2)
 {
     return 1;
 }
 
 // 0x535FA0
-void CEntity::PreRender()
-{
-    CEntity::PreRender_Reversed();
-}
 void CEntity::PreRender_Reversed()
 {
     auto mi = CModelInfo::GetModelInfo(m_nModelIndex);
@@ -842,10 +772,6 @@ void CEntity::PreRender_Reversed()
     }
 }
 
-void CEntity::Render()
-{
-    CEntity::Render_Reversed();
-}
 void CEntity::Render_Reversed()
 {
     if (!m_pRwObject)
@@ -879,10 +805,6 @@ void CEntity::Render_Reversed()
     }
 }
 
-bool CEntity::SetupLighting()
-{
-    return CEntity::SetupLighting_Reversed();
-}
 bool CEntity::SetupLighting_Reversed()
 {
     if (!m_bLightObject)
@@ -896,10 +818,6 @@ bool CEntity::SetupLighting_Reversed()
     return true;
 }
 
-void CEntity::RemoveLighting(bool bRemove)
-{
-    CEntity::RemoveLighting_Reversed(bRemove);
-}
 void CEntity::RemoveLighting_Reversed(bool bRemove)
 {
     if (!bRemove)
@@ -908,11 +826,6 @@ void CEntity::RemoveLighting_Reversed(bool bRemove)
     SetAmbientColours();
     DeActivateDirectional();
     CPointLights::RemoveLightsAffectingObject();
-}
-
-void CEntity::FlagToDestroyWhenNextProcessed()
-{
-    CEntity::FlagToDestroyWhenNextProcessed_Reversed();
 }
 
 void CEntity::FlagToDestroyWhenNextProcessed_Reversed()

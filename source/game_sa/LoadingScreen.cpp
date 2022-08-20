@@ -69,7 +69,7 @@ void CLoadingScreen::Shutdown() {
 // 0x58FF60
 void CLoadingScreen::RenderSplash() {
     CSprite2d::InitPerFrame();
-    CRect rect(-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f);
+    CRect rect(-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f);
     CRGBA color(255, 255, 255, 255);
     RwRenderStateSet(rwRENDERSTATETEXTUREADDRESS, RWRSTATE(rwTEXTUREADDRESSCLAMP));
 

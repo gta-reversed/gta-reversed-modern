@@ -8,8 +8,7 @@
 
 #include "Rect.h"
 
-void CRect::InjectHooks()
-{
+void CRect::InjectHooks() {
     RH_ScopedClass(CRect);
     RH_ScopedCategory("Core");
 
@@ -24,27 +23,26 @@ void CRect::InjectHooks()
 }
 
 // 0x404200
-inline void CRect::Restrict(const CRect& restriction)
-{
+inline void CRect::Restrict(const CRect& restriction) {
     if (restriction.left < left)
         left = restriction.left;
 
     if (restriction.right > right)
         right = restriction.right;
 
-    if (restriction.top < top)
-        top = restriction.top;
-
-    if (restriction.bottom > bottom)
+    if (restriction.bottom < bottom)
         bottom = restriction.bottom;
+
+    if (restriction.top > top)
+        top = restriction.top;
 }
 
 // 0x404260
 inline void CRect::Resize(float resizeX, float resizeY)
 {
     left   -= resizeX;
-    right  += resizeX;
     top    -= resizeY;
+    right  += resizeX;
     bottom += resizeY;
 }
 
@@ -61,8 +59,8 @@ inline bool CRect::IsPointInside(const CVector2D& point) const
 inline bool CRect::IsPointInside(const CVector2D& point, float tolerance) const
 {
     return left   - tolerance <= point.x
-        && right  + tolerance >= point.x
         && top    - tolerance <= point.y
+        && right  + tolerance >= point.x
         && bottom + tolerance >= point.y;
 }
 
@@ -76,23 +74,21 @@ inline void CRect::SetFromCenter(float x, float y, float size)
 }
 
 // 0x43E050
-inline void CRect::GetCenter(float* x, float* y) const
-{
+inline void CRect::GetCenter(float* x, float* y) const {
     *x = (right + left) / 2.0f;
     *y = (top + bottom) / 2.0f;
 }
 
 // 0x5327F0
-inline void CRect::StretchToPoint(float x, float y)
-{
+inline void CRect::StretchToPoint(float x, float y) {
     if (x < left)
         left = x;
 
-    if (x > right)
-        right = x;
-
     if (y < top)
         top = y;
+
+    if (x > right)
+        right = x;
 
     if (y > bottom)
         bottom = y;

@@ -463,9 +463,9 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     const auto fheight = (float)height;
 
     // Progress rect
-    DrawRect({ x, y, currX, y + fheight }, color);
+    DrawRect({ x, y + fheight, currX, y }, color);
     // Background (from currX to endX)
-    DrawRect({ currX, y, endX, y + fheight }, { uint8(color.r / 2.0f), uint8(color.g / 2.0f), uint8(color.b / 2.0f), color.a });
+    DrawRect({ currX, y + fheight , endX, y }, { uint8(color.r / 2.0f), uint8(color.g / 2.0f), uint8(color.b / 2.0f), color.a });
 
     if (progressAdd) {
         addColor.a = color.a;
@@ -480,11 +480,11 @@ void CSprite2d::DrawBarChart(float x, float y, uint16 width, uint8 height, float
     if (drawBlackBorder) {
         const float w = SCREEN_STRETCH_X(2.0f), h = SCREEN_SCALE_Y(2.0f);
         const CRect rects[] = {
-            //left,     top,              right,    bottom
-            { x,        y,                endX,     y + h       },       // Top
-            { x,        y + fheight - h,  endX,     y + fheight },       // Bottom
-            { x,        y,                x + w,    y + fheight },       // Left
-            { endX - w, y,                endX,     y + fheight }        // Right
+            //left,     top,         right, bottom
+            { x,        y + h,       endX,  y               }, // Top
+            { x,        y + fheight, endX,  y + fheight - h }, // Bottom
+            { x,        y + fheight, x + w, y               }, // Left
+            { endX - w, y + fheight, endX,  y               }  // Right
         };
 
         const auto black = CRGBA{ 0, 0, 0, color.a };

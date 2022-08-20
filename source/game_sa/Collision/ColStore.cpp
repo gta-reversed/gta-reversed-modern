@@ -54,13 +54,12 @@ void ColDef::operator delete(void* data)
 // Initialise
 void CColStore::Initialise()
 {
-    const auto rect = CRect(-3000.0F, -3000.0F, 3000.0F, 3000.0F);
     ms_bCollisionNeeded = false;
     if (!ms_pColPool)
         ms_pColPool = new CColPool(TOTAL_COL_MODEL_IDS, "CollisionFiles");
 
     AddColSlot("generic");
-    ms_pQuadTree = new CQuadTreeNode(rect, 3);
+    ms_pQuadTree = new CQuadTreeNode(WORLD_BOUNDS, 3);
 }
 
 // 0x4114D0

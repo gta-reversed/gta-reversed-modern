@@ -21,15 +21,15 @@
 
 class CRect {
 public:
-    float left   =  1000000.0F; // x1
-    float bottom = -1000000.0F; // y2
-    float right  = -1000000.0F; // x2
+    float left   = -1000000.0F; // x1
     float top    =  1000000.0F; // y1
+    float right  =  1000000.0F; // x2
+    float bottom = -1000000.0F; // y2
 
 public:
     static void InjectHooks();
 
-    CRect() = default; // 0x4041C0
+    CRect() = default;
     constexpr CRect(float fLeft, float fTop, float fRight, float fBottom) { // 0x4041C0
        left   = fLeft;
        top    = fTop;
@@ -39,7 +39,7 @@ public:
     }
 
     [[nodiscard]] constexpr inline bool IsFlipped() const { // 0x404190
-        return left > right || top > bottom;
+        return left > right || top < bottom;
     }
 
     void Restrict(const CRect& restriction);
@@ -50,7 +50,6 @@ public:
     void GetCenter(float* x, float* y) const;
     [[nodiscard]] inline CVector2D GetCenter() const { return { (right + left) * 0.5F, (top + bottom) * 0.5F }; }
     void StretchToPoint(float x, float y);
-
 };
 
 VALIDATE_SIZE(CRect, 0x10);

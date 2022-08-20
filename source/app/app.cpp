@@ -21,7 +21,7 @@ bool DoRWStuffStartOfFrame(int16 TopRed, int16 TopGreen, int16 TopBlue, int16 Bo
     CSprite2d::InitPerFrame();
 
     if (Alpha != 0)
-        CSprite2d::DrawRect(CRect(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT), BottomColor, BottomColor, TopColor, TopColor);
+        CSprite2d::DrawRect(CRect(SCREEN_HEIGHT, 0.0f, SCREEN_WIDTH, 0.0f), BottomColor, BottomColor, TopColor, TopColor);
 
     return true;
 }
