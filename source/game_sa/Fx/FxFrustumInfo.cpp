@@ -10,7 +10,7 @@ bool FxFrustumInfo_c::IsCollision(FxSphere_c* sphere) {
     if (!m_Sphere.IsCollision(sphere))
         return false;
 
-    for (auto i = 0; i < std::size(m_Planes); i++) {
+    for (auto i = 0u; i < std::size(m_Planes); i++) {
         if (sphere->GetDistToPlane(&m_Planes[i]) > sphere->m_fRadius) {
             sphere->m_nNumPlanesPassed = i;
             return false;

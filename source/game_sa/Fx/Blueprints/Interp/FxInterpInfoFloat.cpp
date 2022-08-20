@@ -5,12 +5,12 @@
 
 // 0x4A8440
 FxInterpInfoFloat_c::FxInterpInfoFloat_c() : FxInterpInfo_c() {
-    m_pValues = nullptr;
+    m_Keys = nullptr;
 }
 
 // 0x5C16F0
 void FxInterpInfoFloat_c::Load(FILESTREAM file) {
-    for (int32 i = 0; i < m_nCount; i++) {
+    for (auto i = 0; i < m_nCount; i++) {
         ReadField<void>(file);
         ReadField<void>(file, "FX_INTERP_DATA:");
 
@@ -21,11 +21,11 @@ void FxInterpInfoFloat_c::Load(FILESTREAM file) {
             m_pTimes = g_fxMan.Allocate<uint16>(m_nNumKeys);
         }
 
-        m_pValues[i] = g_fxMan.Allocate<float>(m_nNumKeys);
-        for (int32 j = 0; j < m_nNumKeys; j++) {
+        m_Keys[i] = g_fxMan.Allocate<float>(m_nNumKeys);
+        for (auto j = 0; j < m_nNumKeys; j++) {
             ReadField<void>(file, "FX_KEYFLOAT_DATA:");
             m_pTimes[j] = uint16(ReadField<float>(file) * 256.f);
-            m_pValues[i][j] = ReadField<float>(file);
+            m_Keys[i][j] = ReadField<float>(file);
         }
     }
 }
@@ -33,12 +33,12 @@ void FxInterpInfoFloat_c::Load(FILESTREAM file) {
 // NOTSA
 void FxInterpInfoFloat_c::Allocate(int32 count) {
     m_nCount = count;
-    m_pValues = g_fxMan.Allocate<float*>(count);
+    m_Keys = g_fxMan.Allocate<float*>(count);
 }
 
 // 0x4A85C0
-float FxInterpInfoFloat_c::GetVal(int32 a1, float time, float a3) {
-    return plugin::CallMethodAndReturn<float, 0x4A85C0, FxInterpInfoFloat_c*, int32, float, float>(this, a1, time, a3);
+float FxInterpInfoFloat_c::GetVal(int32 attrib, float time, float deltaTime) {
+    return plugin::CallMethodAndReturn<float, 0x4A85C0, FxInterpInfoFloat_c*, int32, float, float>(this, attrib, time, deltaTime);
 }
 
 // 0x4A8470
@@ -47,7 +47,7 @@ void FxInterpInfoFloat_c::GetVal(float* outValues, float delta) {
 
     if (m_nNumKeys == 1) {
         for (auto i = 0; i < m_nCount; i++) {
-            outValues[i] = *m_pValues[i];
+            outValues[i] = *m_Keys[i];
         }
         return;
     }
@@ -59,7 +59,7 @@ void FxInterpInfoFloat_c::GetVal(float* outValues, float delta) {
 
     if (m_nNumKeys <= 1) {
         for (auto j = 0; j < m_nCount; j++) {
-            outValues[j] = m_pValues[j][m_nNumKeys - 1];
+            outValues[j] = m_Keys[j][m_nNumKeys - 1];
         }
         return;
     }
@@ -75,7 +75,7 @@ void FxInterpInfoFloat_c::GetVal(float* outValues, float delta) {
         ++v10;
         if (v8 >= m_nNumKeys) {
             for (auto j = 0; j < m_nCount; j++) {
-                outValues[j] = m_pValues[j][m_nNumKeys - 1];
+                outValues[j] = m_Keys[j][m_nNumKeys - 1];
             }
             return;
         }
@@ -86,6 +86,6 @@ void FxInterpInfoFloat_c::GetVal(float* outValues, float delta) {
     float a3a;
     float* v15;
     for (a3a = (delta - v14) / (v11 - v14); v13 < m_nCount; outValues[v13 - 1] = (v15[v8] - v15[v8 - 1]) * a3a + v15[v8 - 1]) {
-        v15 = m_pValues[v13++];
+        v15 = m_Keys[v13++];
     }
 }

@@ -15,9 +15,9 @@ void FxInfoFlat_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 004A63B0
-void FxInfoFlat_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoFlat_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if ( !m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[9];
@@ -27,6 +27,6 @@ void FxInfoFlat_c::GetValue(float currentTime, float mult, float totalTime, floa
     render.m_FlatMatrix.right = *(RwV3d *)&values[0];
     render.m_FlatMatrix.up    = *(RwV3d *)&values[3];
     render.m_FlatMatrix.at    = *(RwV3d *)&values[6];
-    render.m_bFlatUsed = true;
+    render.m_bIsFlat = true;
     RwMatrixUpdate(&render.m_FlatMatrix);
 }

@@ -4,7 +4,7 @@
 
 class FxInterpInfo255_c : public FxInterpInfo_c {
 protected:
-    int16** m_pValues;
+    int16** m_Keys;
 
 public:
     FxInterpInfo255_c();

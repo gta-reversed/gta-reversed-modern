@@ -89,7 +89,7 @@ void FxManager_c::Exit() {
     m_FxEmitters = nullptr;
     m_FxEmitterParticles.RemoveAll();
     CTxdStore::RemoveTxdSlot(m_nFxTxdIndex);
-    std::for_each(m_apMatrices.begin(), m_apMatrices.end(), RwMatrixDestroy);
+    std::ranges::for_each(m_apMatrices, RwMatrixDestroy);
     m_Pool.Exit();
 }
 
@@ -288,7 +288,7 @@ void FxManager_c::FreeUpParticle() {
         do {
             auto numItems = m_FxSystems.GetNumItems();
             system = m_FxSystems.GetItemOffset(true, CGeneral::GetRandomNumber() % numItems);
-        } while (system->m_bMustCreateParticles);
+        } while (system->m_MustCreateParticles);
     } while (!system->m_SystemBP->FreePrtFromSystem(system));
 }
 

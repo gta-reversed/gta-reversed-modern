@@ -10,66 +10,59 @@ enum class ERenderColorType : int32 {
 };
 
 struct RenderInfo_t {
-    RwRGBA           m_Color;
-    uint8            m_nColorRangeRed;
-    uint8            m_nColorRangeGreen;
-    uint8            m_nColorRangeBlue;
-    uint8            m_nColorBrightBias;
+    RwRGBA m_Color1;
+    RwRGBA m_Color2;
     ERenderColorType m_nColorType;
 
-    float    m_fSizeX;
-    float    m_fSizeY;
-    float    m_fSizeXBias;
-    float    m_fSizeYBias;
+    float m_fSizeX; // todo: CVector2D m_Size, m_SizeBias
+    float m_fSizeY;
+    float m_fSizeXBias;
+    float m_fSizeYBias;
 
-    float    m_fSpriteTop;
-    float    m_fSpriteBottom;
-    float    m_fSpriteLeft;
-    float    m_fSpriteRight;
+    float m_fSpriteTop; // todo: RwV4d m_SpriteRect
+    float m_fSpriteBottom;
+    float m_fSpriteLeft;
+    float m_fSpriteRight;
 
-    int32    m_nTrailScreenMode;
-    float    m_fTrailTime;
+    int32 m_nTrailScreenMode; // trail id
+    float m_fTrailTime;
 
-    bool     m_bAnimTextureUsed;
-    int8     m_nAnimTexId;
+    bool m_bHasAnimTextures;
+    int8 m_nCurrentTexId;
 
-    bool     m_bHeatHaze;
-    bool     m_bSelfLit;
+    bool m_bHeatHaze;
+    bool m_bSelfLit;
 
     RwMatrix m_FlatMatrix;
-    bool     m_bFlatUsed;
+    bool m_bIsFlat;
+    bool m_bHasDir;
+    bool m_bUseVel;
 
-    bool     m_bDirUsed;
-    bool     m_bIgnoreDirThisFrame;
-
-    int8     m_nSmokeCount; // ?
+    int8 m_SmokeType;
     CVector  m_Direction;
-    float    m_ColR;
-    float    m_ColG;
-    float    m_ColB;
-    float    m_ColA;
-    float    field_98;
-    float    m_PrtSize;  // ?
-    float    m_Lifetime; // ?
+    RwRGBAReal m_SmokeColor;
+    float m_SmokeBrightness;
+    float m_SmokeSize;
+    float m_SmokeLife;
 
     void SetColor(float red, float green, float blue, float alpha) {
-        m_Color.red   = (uint8)red;
-        m_Color.green = (uint8)green;
-        m_Color.blue  = (uint8)blue;
-        m_Color.alpha = (uint8)alpha;
+        m_Color1.red   = (uint8)red;
+        m_Color1.green = (uint8)green;
+        m_Color1.blue  = (uint8)blue;
+        m_Color1.alpha = (uint8)alpha;
     }
 
     void SetRangeColor(float red, float green, float blue) {
-        m_nColorRangeRed   = (uint8)red;
-        m_nColorRangeGreen = (uint8)green;
-        m_nColorRangeBlue  = (uint8)blue;
+        m_Color2.red   = (uint8)red;
+        m_Color2.green = (uint8)green;
+        m_Color2.blue  = (uint8)blue;
     }
 
     void Process() {
-        m_Color.red           = 255;
-        m_Color.green         = 255;
-        m_Color.blue          = 255;
-        m_Color.alpha         = 255;
+        m_Color1.red          = 255;
+        m_Color1.green        = 255;
+        m_Color1.blue         = 255;
+        m_Color1.alpha        = 255;
         m_fSizeX              = 0.1f;
         m_fSizeY              = 0.1f;
         m_nColorType          = ERenderColorType::DEFAULT;
@@ -81,12 +74,12 @@ struct RenderInfo_t {
         m_fSpriteRight        = -0.5f;
         m_bHeatHaze           = false;
         m_bSelfLit            = false;
-        m_bFlatUsed           = false;
-        m_bAnimTextureUsed    = false;
+        m_bIsFlat             = false;
+        m_bHasAnimTextures    = false;
         m_nTrailScreenMode    = 0;
-        m_bDirUsed            = false;
-        m_bIgnoreDirThisFrame = false;
-        m_nSmokeCount         = -1;
+        m_bHasDir             = false;
+        m_bUseVel             = false;
+        m_SmokeType           = -1;
     }
 };
 VALIDATE_SIZE(RenderInfo_t, 0xA4);

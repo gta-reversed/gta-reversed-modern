@@ -14,14 +14,14 @@ void FxInfoForce_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A54E0
-void FxInfoForce_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoForce_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[3];
     m_InterpInfo.GetVal(values, mult);
 
     auto& movement = *static_cast<MovementInfo_t*>(info);
-    movement.m_v1 += CVector(values[0], values[1], values[2]) * totalTime;
+    movement.m_Vel += CVector(values[0], values[1], values[2]) * totalTime;
 }

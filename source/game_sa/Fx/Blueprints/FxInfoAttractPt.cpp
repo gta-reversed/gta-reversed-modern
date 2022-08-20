@@ -14,22 +14,22 @@ void FxInfoAttractPt_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A56E0
-void FxInfoAttractPt_c::GetValue(float currentTime, float mult, float totalTime, float a5, bool bConstTimeSet, void* info) {
+void FxInfoAttractPt_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / a5;
+        mult = currentTime / len;
     }
 
     float values[4];
     m_InterpInfo.GetVal(values, mult);
 
     auto& movement = *static_cast<MovementInfo_t*>(info);
-    CVector in = *(CVector*)&values[0] - movement.m_v0;
+    CVector in = *(CVector*)&values[0] - movement.m_Pos;
 
     auto length = in.Magnitude();
     if (length > 0.0f)
         in.Normalise();
 
     if (length > 0.1f) {
-        movement.m_v1 += in * values[0] * totalTime;
+        movement.m_Vel += in * values[0] * totalTime;
     }
 }

@@ -8,7 +8,7 @@ class FxSphere_c /*: public RwSphere*/ {
 public:
     CVector m_vecCenter;
     float   m_fRadius;
-    uint32  m_nNumPlanesPassed;
+    uint32  m_nNumPlanesPassed; // m_LastPlaneRejected
 
 public:
     static void InjectHooks();

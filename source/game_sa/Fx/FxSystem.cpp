@@ -48,12 +48,14 @@ void FxSystem_c::InjectHooks() {
     RH_ScopedInstall(IsVisible, 0x4AAF30);
     // RH_ScopedInstall(Update, 0x4AAF70);
 }
+FxSystem_c* FxSystem_c::Constructor() { this->FxSystem_c::FxSystem_c(); return this; }
+FxSystem_c* FxSystem_c::Destructor() { this->FxSystem_c::~FxSystem_c(); return this; }
 
 // 0x4AAF00
 FxSystem_c::FxSystem_c() : ListItem_c() {
     m_SystemBP        = nullptr;
     m_BoundingSphere  = nullptr;
-    m_bMustCreateParticles = false;
+    m_MustCreateParticles = false;
 }
 
 // 0x4AA260
@@ -63,34 +65,24 @@ FxSystem_c::~FxSystem_c() {
     if (m_BoundingSphere) // looks pointless
         CMemoryMgr::Free(m_BoundingSphere);
 
-    if (m_bOwnedParentMatrix)
-        RwMatrixDestroy(m_pParentMatrix);
-}
-
-FxSystem_c* FxSystem_c::Constructor() {
-    this->FxSystem_c::FxSystem_c();
-    return this;
-}
-
-FxSystem_c* FxSystem_c::Destructor() {
-    this->FxSystem_c::~FxSystem_c();
-    return this;
+    if (m_allocatedParentMat)
+        RwMatrixDestroy(m_ParentMatrix);
 }
 
 // 0x4AA750
 bool FxSystem_c::Init(FxSystemBP_c* systemBP, RwMatrix* local, RwMatrix* parent) {
     m_SystemBP      = systemBP;
     m_LocalMatrix   = *local;
-    m_pParentMatrix = parent;
+    m_ParentMatrix  = parent;
     m_fCurrentTime  = 0;
     m_nPlayStatus   = eFxSystemPlayStatus::FX_STOPPED;
     m_nKillStatus   = eFxSystemKillStatus::FX_NOT_KILLED;
-    m_bConstTimeSet = 0;
+    m_UseConstTime  = false;
     m_nConstTime    = 0;
     m_nRateMult     = 1000;
     m_nTimeMult     = 1000;
-    m_vecVelAdd     = CVector();
-    m_bZTestEnabled = true;
+    m_VelAdd = CVector();
+    m_useZTest = true;
 
     m_BoundingSphere = nullptr;
     if (m_SystemBP->m_BoundingSphere) {
@@ -103,7 +95,7 @@ bool FxSystem_c::Init(FxSystemBP_c* systemBP, RwMatrix* local, RwMatrix* parent)
         m_Prims[i]->Init(m_SystemBP->m_Prims[i], this);
     }
 
-    m_FireAudio.Initialise(this);
+    m_FireAE.Initialise(this);
     return true;
 }
 
@@ -113,7 +105,7 @@ void FxSystem_c::Exit() {
         delete prim;
     }
     delete[] m_Prims;
-    m_FireAudio.Terminate();
+    m_FireAE.Terminate();
 }
 
 // 0x4AA2F0
@@ -128,10 +120,10 @@ void FxSystem_c::Play() {
     m_nKillStatus = eFxSystemKillStatus::FX_NOT_KILLED;
     m_nPlayStatus = eFxSystemPlayStatus::FX_PLAYING;
 
-    m_bUnknown4 = false;
-    m_bUnknown5 = false;
+    m_stopParticleCreation = false;
+    m_prevCulled = false;
 
-    m_fUnkRandom = (float)(rand() % 10000) / 10000.0f * (m_SystemBP->m_fLoopLength - m_SystemBP->m_fLoopIntervalMin) + m_SystemBP->m_fLoopIntervalMin;
+    m_LoopInterval = (float)(CGeneral::GetRandomNumber() % 10'000) / 10'000.0f * (m_SystemBP->m_fLoopLength - m_SystemBP->m_fLoopIntervalMin) + m_SystemBP->m_fLoopIntervalMin;
 }
 
 // 0x4AA370
@@ -176,21 +168,21 @@ void FxSystem_c::Kill() {
 void FxSystem_c::AttachToBone(CEntity* entity, ePedBones boneId) {
     auto animHier = GetAnimHierarchyFromSkinClump(entity->m_pRwClump);
     auto index = RpHAnimIDGetIndex(animHier, boneId);
-    m_pParentMatrix = &RpHAnimHierarchyGetMatrixArray(animHier)[index];
+    m_ParentMatrix = &RpHAnimHierarchyGetMatrixArray(animHier)[index];
 }
 
 auto CanAddParticle() {
     auto v10 = (uint32)((float)(uint32)rand() * RAND_MAX_INT_RECIPROCAL * 100.0f); // [0, 199]
-    return (g_fx.GetFxQuality() || v10 >= 50) && (g_fx.GetFxQuality() != 1 || v10 >= 25);
+    return (g_fx.GetFxQuality() || v10 >= 50) && (g_fx.GetFxQuality() != FX_QUALITY_MEDIUM || v10 >= 25);
 }
 
 //  0x4AA440
-void FxSystem_c::AddParticle(CVector* position, CVector* velocity, float a4, FxPrtMult_c* prtMult, float a6, float brightness, float a8, bool a9) {
+void FxSystem_c::AddParticle(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float lightMult, float lightMultLimit, bool createLocal) {
     if (CanAddParticle()) {
-        auto v13 = brightness < a8 ? 1.0f - a8 + brightness : 1.0f;
+        auto brightness = lightMult < lightMultLimit ? 1.0f - lightMultLimit + lightMult : 1.0f;
         for (auto& prim : GetPrims()) {
             if (prim->m_bEnabled) {
-                prim->AddParticle(position, velocity, a4, prtMult, a6, v13, a9);
+                prim->AddParticle(pos, vel, timeSince, fxMults, rotZ, brightness, createLocal);
             }
         }
     }
@@ -198,11 +190,11 @@ void FxSystem_c::AddParticle(CVector* position, CVector* velocity, float a4, FxP
 
 // unused
 // 0x4AA540
-void FxSystem_c::AddParticle(RwMatrix* transform, CVector* velocity, float a4, FxPrtMult_c* prtMult, float a6, float brightness, float a8, bool a9) {
+void FxSystem_c::AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float lightMult, float lightMultLimit, bool createLocal) {
     if (CanAddParticle()) {
-        auto v13 = brightness < a8 ? 1.0f - a8 + brightness : 1.0f;
+        auto brightness = lightMult < lightMultLimit ? 1.0f - lightMultLimit + lightMult : 1.0f;
         for (auto& prim : GetPrims()) {
-            prim->AddParticle(transform, velocity, a4, prtMult, a6, v13, a9);
+            prim->AddParticle(mat, vel, timeSince, fxMults, rotZ, brightness, createLocal);
         }
     }
 }
@@ -214,10 +206,10 @@ void FxSystem_c::EnablePrim(int32 primIndex, bool enable) {
 
 // 0x4AA630
 void FxSystem_c::SetMatrix(RwMatrix* matrix) {
-    if (m_bOwnedParentMatrix)
-        *m_pParentMatrix = *matrix;
+    if (m_allocatedParentMat)
+        *m_ParentMatrix = *matrix;
     else
-        m_pParentMatrix = matrix;
+        m_ParentMatrix = matrix;
 }
 
 // 0x4AA660
@@ -233,9 +225,9 @@ void FxSystem_c::AddOffsetPos(CVector* pos) {
 }
 
 // 0x4AA6C0
-void FxSystem_c::SetConstTime(uint8 time, float amount) {
-    m_bConstTimeSet = time;
-    m_nConstTime    = (uint16)(amount * 256.0f);
+void FxSystem_c::SetConstTime(bool on, float time) {
+    m_UseConstTime = on;
+    m_nConstTime   = (uint16)(time * 256.0f);
 }
 
 // 0x4AA6F0
@@ -250,37 +242,37 @@ void FxSystem_c::SetTimeMult(float mult) {
 
 // 0x4AA730
 void FxSystem_c::SetVelAdd(CVector* velocity) {
-    m_vecVelAdd = *velocity;
+    m_VelAdd = *velocity;
 }
 
 // 0x4AA910
 void FxSystem_c::SetLocalParticles(bool enable) {
-    m_bLocalParticles = enable;
+    m_createLocal = enable;
 }
 
 // 0x4AAC50
 void FxSystem_c::SetZTestEnable(bool enable) {
-    m_bZTestEnabled = enable;
+    m_useZTest = enable;
 }
 
 // 0x4AAC70
 void FxSystem_c::SetMustCreatePrts(bool enable) {
-    m_bMustCreateParticles = enable;
+    m_MustCreateParticles = enable;
 }
 
 // 0x4AA890
 void FxSystem_c::CopyParentMatrix() {
-    RwMatrix* old = m_pParentMatrix;
+    RwMatrix* old = m_ParentMatrix;
     RwMatrix* allocated = RwMatrixCreate();
-    m_pParentMatrix = allocated;
+    m_ParentMatrix = allocated;
     *allocated = *old;
-    m_bOwnedParentMatrix = true;
+    m_allocatedParentMat = true;
 }
 
 // 0x4AA8C0
 void FxSystem_c::GetCompositeMatrix(RwMatrix* out) {
-    if (m_pParentMatrix)
-        RwMatrixMultiply(out, &m_LocalMatrix, m_pParentMatrix);
+    if (m_ParentMatrix)
+        RwMatrixMultiply(out, &m_LocalMatrix, m_ParentMatrix);
     else
         *out = m_LocalMatrix;
 }
@@ -296,7 +288,7 @@ uint32 FxSystem_c::ForAllParticles(void(*callback)(Particle_c*, int32, FxBox_c**
 
     for (auto& prim : m_SystemBP->GetPrims()) {
         for (auto* particle = prim->m_Particles.GetHead(); particle; particle = prim->m_Particles.GetNext(particle)) {
-            if (prim->field_4 && this == particle->m_System) {
+            if (prim->m_Type && this == particle->m_System) {
                 callback(particle, 0, &data);
                 count++;
             }
@@ -320,15 +312,15 @@ void FxSystem_c::GetBoundingBox(FxBox_c* out) {
     }
 
     auto mat = g_fxMan.FxRwMatrixCreate();
-    if (m_pParentMatrix) {
-        RwMatrixMultiply(mat, &m_LocalMatrix, m_pParentMatrix);
+    if (m_ParentMatrix) {
+        RwMatrixMultiply(mat, &m_LocalMatrix, m_ParentMatrix);
     } else {
         *mat = m_LocalMatrix;
     }
 
-    out->m_fCornerA_x = out->m_fCornerB_x = mat->pos.x;
-    out->m_fCornerA_y = out->m_fCornerB_y = mat->pos.y;
-    out->m_fCornerA_z = out->m_fCornerB_z = mat->pos.z;
+    out->minX = out->maxX = mat->pos.x;
+    out->minY = out->maxY = mat->pos.y;
+    out->minZ = out->maxZ = mat->pos.z;
     g_fxMan.FxRwMatrixDestroy(mat);
 }
 
@@ -383,7 +375,7 @@ void FxSystem_c::ResetBoundingSphere() {
 }
 
 // 0x4AAC90
-void FxSystem_c::DoFxAudio(CVector posn) {
+void FxSystem_c::DoFxAudio(CVector pos) {
     constexpr struct { const char* hash; eAudioEvents event; } mapping[] = {
         { "fire",           AE_FIRE               },
         { "fire_med",       AE_FIRE_MEDIUM        },
@@ -401,7 +393,7 @@ void FxSystem_c::DoFxAudio(CVector posn) {
     };
     for (auto& [hash, event] : mapping) {
         if (m_SystemBP->GetNameKey() == CKeyGen::GetUppercaseKey(hash)) {
-            m_FireAudio.AddAudioEvent(event, posn);
+            m_FireAE.AddAudioEvent(event, pos);
         }
     }
 }

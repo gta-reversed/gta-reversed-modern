@@ -3,22 +3,16 @@
 #include "Vector.h"
 
 struct MovementInfo_t {
-    CVector m_v0;
-    CVector m_v1;
-    float   m_fMinCW;
-    float   m_fMaxCW;
-    float   m_fMinCCW;
-    float   m_fMaxCCW;
-    bool    m_bFloat;
-    bool    m_bUnderwater;
+    CVector m_Pos;
+    CVector m_Vel;
+    float   m_Rot[4];
+    bool    m_bHasFloatInfo;
+    bool    m_bHasUnderwaterInfo;
 
     void Process() {
-        m_fMinCW      = 0.0f;
-        m_fMaxCW      = 0.0f;
-        m_fMinCCW     = 0.0f;
-        m_fMaxCCW     = 0.0f;
-        m_bFloat      = false;
-        m_bUnderwater = false;
+        for (auto& r : m_Rot) { r = 0.0f; }
+        m_bHasFloatInfo = false;
+        m_bHasUnderwaterInfo = false;
     }
 };
 VALIDATE_SIZE(MovementInfo_t, 0x2C);

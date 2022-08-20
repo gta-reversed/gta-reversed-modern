@@ -58,16 +58,8 @@ void Fx_c::InjectHooks() {
     RH_ScopedGlobalInstall(RenderEnd, 0x4A1600);
     RH_ScopedGlobalInstall(RenderBegin, 0x4A13B0);
 }
-
-Fx_c* Fx_c::Constructor() {
-    this->Fx_c::Fx_c();
-    return this;
-}
-
-Fx_c* Fx_c::Destructor() {
-    this->Fx_c::~Fx_c();
-    return this;
-}
+Fx_c* Fx_c::Constructor() { this->Fx_c::Fx_c(); return this; }
+Fx_c* Fx_c::Destructor() { this->Fx_c::~Fx_c(); return this; }
 
 // 0x49E660
 void Fx_c::InitStaticSystems() {
@@ -133,7 +125,7 @@ void Fx_c::Init() {
     g_fxMan.SetWindData(&CWeather::WindDir, &CWeather::Wind);
     InitStaticSystems();
     InitEntitySystems();
-    m_nBloodPoolsCount = 0;
+    m_Randomizer = 0;
 }
 
 // 0x4A1320
@@ -151,10 +143,10 @@ void Fx_c::Reset() {
 }
 
 // 0x4A11E0
-void Fx_c::CreateEntityFx(CEntity* entity, char* fxName, CVector* posn, RwMatrix* transform) {
-    // ((void(__thiscall*)(Fx_c*, CEntity*, char*, RwV3d*, RwMatrix*))0x4A11E0)(this, entity, fxName, posn, transform);
+void Fx_c::CreateEntityFx(CEntity* entity, const char* fxName, CVector* pos, RwMatrix* transform) {
+    // ((void(__thiscall*)(Fx_c*, CEntity*, char*, RwV3d*, RwMatrix*))0x4A11E0)(this, entity, fxName, pos transform);
 
-    auto* particle = g_fxMan.CreateFxSystem(fxName, posn, transform, true);
+    auto* particle = g_fxMan.CreateFxSystem(fxName, pos, transform, true);
     if (particle) {
         auto it = new FxEntitySystem();
         it->m_System = particle;
@@ -220,103 +212,103 @@ FxQuality_e Fx_c::GetFxQuality() const {
 }
 
 // 0x49EB00
-void Fx_c::AddBlood(CVector& origin, CVector& direction, int32 amount, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EB00)(this, origin, direction, amount, arg3);
+void Fx_c::AddBlood(CVector& pos, CVector& direction, int32 amount, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EB00)(this, pos, direction, amount, lightMult);
 }
 
 // 0x49EE10
-void Fx_c::AddWood(CVector& origin, CVector& direction, int32 amount, float arg3) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EE10)(this, origin, direction, amount, arg3);
+void Fx_c::AddWood(CVector& pos, CVector& direction, int32 amount, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, float))0x49EE10)(this, pos, direction, amount, lightMult);
 }
 
 // 0x49F040
-void Fx_c::AddSparks(CVector& origin, CVector& direction, float force, int32 amount, CVector across, eSparkType sparksType, float spread, float life) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, float, int32, CVector, uint8, float, float))0x49F040)(this, origin, direction, force, amount, across, sparksType, spread, life);
+void Fx_c::AddSparks(CVector& pos, CVector& direction, float speed, int32 amount, CVector vMoveSpeed, bool useGravity, float spread, float lifeMult) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, float, int32, CVector, bool, float, float))0x49F040)(this, pos, direction, speed, amount, vMoveSpeed, useGravity, spread, lifeMult);
 }
 
 // 0x49F300
-void Fx_c::AddTyreBurst(CVector& posn, CVector& velocity) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&))0x49F300)(this, posn, velocity);
+void Fx_c::AddTyreBurst(CVector& pos, CVector& velocity) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&))0x49F300)(this, pos, velocity);
 }
 
 // 0x49F3D0
-void Fx_c::AddBulletImpact(CVector& posn, CVector& direction, int32 bulletFxType, int32 amount, float arg4) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, int32, float))0x49F3D0)(this, posn, direction, bulletFxType, amount, arg4);
+void Fx_c::AddBulletImpact(CVector& pos, CVector& direction, int32 surfaceId, int32 amount, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32, int32, float))0x49F3D0)(this, pos, direction, surfaceId, amount, lightMult);
 }
 
 // 0x49F670
-void Fx_c::AddPunchImpact(CVector& posn, CVector& velocity, int32 arg2) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32))0x49F670)(this, posn, velocity, arg2);
+void Fx_c::AddPunchImpact(CVector& pos, CVector& velocity, int32 num) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&, int32))0x49F670)(this, pos, velocity, num);
 }
 
 // 0x49F750
-void Fx_c::AddDebris(CVector& posn, RwRGBA& color, float scale, int32 amount) {
-    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F750)(this, posn, color, scale, amount);
+void Fx_c::AddDebris(CVector& pos, RwRGBA& color, float scale, int32 amount) {
+    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F750)(this, pos, color, scale, amount);
 }
 
 // 0x49F970
-void Fx_c::AddGlass(CVector& posn, RwRGBA& color, float scale, int32 amount) {
-    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F970)(this, posn, color, scale, amount);
+void Fx_c::AddGlass(CVector& pos, RwRGBA& color, float scale, int32 amount) {
+    ((void(__thiscall*)(Fx_c*, CVector&, RwRGBA&, float, int32))0x49F970)(this, pos, color, scale, amount);
 }
 
 // 0x49FB30
-void Fx_c::AddWheelSpray(CVehicle* vehicle, CVector posn, uint8 arg2, uint8 arg3, float arg4) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, uint8, float))0x49FB30)(this, vehicle, posn, arg2, arg3, arg4);
+void Fx_c::AddWheelSpray(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, bool bInWater, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, uint8, float))0x49FB30)(this, vehicle, pos, bWheelsSpinning, bInWater, lightMult);
 }
 
 // 0x49FF20
-void Fx_c::AddWheelGrass(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x49FF20)(this, vehicle, posn, arg2, brightness);
+void Fx_c::AddWheelGrass(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x49FF20)(this, vehicle, pos, bWheelsSpinning, lightMult);
 }
 
 // 0x4A0170
-void Fx_c::AddWheelGravel(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0170)(this, vehicle, posn, arg2, brightness);
+void Fx_c::AddWheelGravel(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0170)(this, vehicle, pos, bWheelsSpinning, lightMult);
 }
 
 // 0x4A03C0
-void Fx_c::AddWheelMud(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A03C0)(this, vehicle, posn, arg2, brightness);
+void Fx_c::AddWheelMud(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A03C0)(this, vehicle, pos, bWheelsSpinning, lightMult);
 }
 
 // 0x4A0610
-void Fx_c::AddWheelSand(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0610)(this, vehicle, posn, arg2, brightness);
+void Fx_c::AddWheelSand(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A0610)(this, vehicle, pos, bWheelsSpinning, lightMult);
 }
 
 // 0x4A09C0
-void Fx_c::AddWheelDust(CVehicle* vehicle, CVector posn, uint8 arg2, float brightness) {
-    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A09C0)(this, vehicle, posn, arg2, brightness);
+void Fx_c::AddWheelDust(CVehicle* vehicle, CVector pos, bool bWheelsSpinning, float lightMult) {
+    ((void(__thiscall*)(Fx_c*, CVehicle*, CVector, uint8, float))0x4A09C0)(this, vehicle, pos, bWheelsSpinning, lightMult);
 }
 
 // 0x4A0D70
-void Fx_c::TriggerWaterHydrant(CVector& posn) {
-    ((void(__thiscall*)(Fx_c*, CVector&))0x4A0D70)(this, posn);
+void Fx_c::TriggerWaterHydrant(CVector& pos) {
+    ((void(__thiscall*)(Fx_c*, CVector&))0x4A0D70)(this, pos);
 }
 
 // 0x4A0DE0
-void Fx_c::TriggerGunshot(CEntity* entity, CVector& origin, CVector& target, bool doGunflash) {
-    ((void(__thiscall*)(Fx_c*, CEntity*, CVector&, CVector&, bool))0x4A0DE0)(this, entity, origin, target, doGunflash);
+void Fx_c::TriggerGunshot(CEntity* entity, CVector& pos, CVector& dir, bool bDoFlash) {
+    ((void(__thiscall*)(Fx_c*, CEntity*, CVector&, CVector&, bool))0x4A0DE0)(this, entity, pos, dir, bDoFlash);
 }
 
 // 0x4A0FA0
-void Fx_c::TriggerTankFire(CVector& origin, CVector& target) {
-    ((void(__thiscall*)(Fx_c*, CVector&, CVector&))0x4A0FA0)(this, origin, target);
+void Fx_c::TriggerTankFire(CVector& pos, CVector& dir) {
+    ((void(__thiscall*)(Fx_c*, CVector&, CVector&))0x4A0FA0)(this, pos, dir);
 }
 
 // 0x4A1070
-void Fx_c::TriggerWaterSplash(CVector& posn) {
-    ((void(__thiscall*)(Fx_c*, CVector&))0x4A1070)(this, posn);
+void Fx_c::TriggerWaterSplash(CVector& pos) {
+    ((void(__thiscall*)(Fx_c*, CVector&))0x4A1070)(this, pos);
 }
 
 // 0x4A10E0
-void Fx_c::TriggerBulletSplash(CVector& posn) {
-    ((void(__thiscall*)(Fx_c*, CVector&))0x4A10E0)(this, posn);
+void Fx_c::TriggerBulletSplash(CVector& pos) {
+    ((void(__thiscall*)(Fx_c*, CVector&))0x4A10E0)(this, pos);
 }
 
 // 0x4A1150
-void Fx_c::TriggerFootSplash(CVector& posn) {
-    ((void(__thiscall*)(Fx_c*, CVector&))0x4A1150)(this, posn);
+void Fx_c::TriggerFootSplash(CVector& pos) {
+    ((void(__thiscall*)(Fx_c*, CVector&))0x4A1150)(this, pos);
 }
 
 // see RwIm3DTransformFlags
@@ -414,11 +406,11 @@ void RenderEnd() {
 }
 
 // 0x4A1660
-void RotateVecIntoVec(RwV3d* vectorsOut, RwV3d* vectorsIn, RwV3d* dir) {
-    ((void(__cdecl*)(RwV3d*, RwV3d*, RwV3d*))0x4A1660)(vectorsOut, vectorsIn, dir);
+void RotateVecIntoVec(RwV3d* vecRes, RwV3d* vec, RwV3d* vecAlign) {
+    ((void(__cdecl*)(RwV3d*, RwV3d*, RwV3d*))0x4A1660)(vecRes, vec, vecAlign);
 }
 
 // 0x4A1780
-void RotateVecAboutVec(RwV3d* out, RwV3d* arg1, RwV3d* arg2, float angle) {
-    ((void(__cdecl*)(RwV3d*, RwV3d*, RwV3d*, float))0x4A1780)(out, arg1, arg2, angle);
+void RotateVecAboutVec(RwV3d* vecRes, RwV3d* vec, RwV3d* axis, float angle) {
+    ((void(__cdecl*)(RwV3d*, RwV3d*, RwV3d*, float))0x4A1780)(vecRes, vec, axis, angle);
 }

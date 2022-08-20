@@ -35,13 +35,13 @@ struct Particle_c;
 class FxSystem_c : public ListItem_c {
 public:
     FxSystemBP_c* m_SystemBP;
-    RwMatrix*     m_pParentMatrix;
-    RwMatrix      m_LocalMatrix;
+    RwMatrix*     m_ParentMatrix;
+    RwMatrix      m_LocalMatrix; // aka Offset Mat
 
     eFxSystemPlayStatus m_nPlayStatus;
     eFxSystemKillStatus m_nKillStatus;
 
-    uint8  m_bConstTimeSet;
+    bool   m_UseConstTime;
     float  m_fCurrentTime;
     float  m_fCameraDistance;
     uint16 m_nConstTime;
@@ -49,18 +49,18 @@ public:
     uint16 m_nRateMult;
     uint16 m_nTimeMult;
 
-    uint8 m_bOwnedParentMatrix : 1;
-    uint8 m_bLocalParticles : 1;
-    uint8 m_bZTestEnabled : 1;
-    uint8 m_bUnknown4 : 1;
-    uint8 m_bUnknown5 : 1;
-    uint8 m_bMustCreateParticles : 1;
+    uint8 m_allocatedParentMat : 1; //  m_bOwnedParentMatrix
+    uint8 m_createLocal : 1;
+    uint8 m_useZTest : 1;
+    uint8 m_stopParticleCreation : 1;
+    uint8 m_prevCulled : 1;
+    uint8 m_MustCreateParticles : 1;
 
-    float              m_fUnkRandom;
-    CVector            m_vecVelAdd;
+    float              m_LoopInterval;
+    CVector            m_VelAdd;
     FxSphere_c*        m_BoundingSphere;
     FxPrim_c**         m_Prims;
-    CAEFireAudioEntity m_FireAudio;
+    CAEFireAudioEntity m_FireAE;
 
 public:
     static void InjectHooks();
@@ -81,14 +81,14 @@ public:
 
     void AttachToBone(CEntity* entity, ePedBones boneId);
 
-    void AddParticle(CVector* position, CVector* velocity, float arg2, FxPrtMult_c* prtMult, float arg4, float brightness, float arg6, bool bLocalParticles);
-    void AddParticle(RwMatrix* transform, CVector* velocity, float a4, FxPrtMult_c* prtMult, float a6, float brightness, float a8, bool a9);
+    void AddParticle(CVector* pos, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float lightMult, float lightMultLimit, bool createLocal);
+    void AddParticle(RwMatrix* mat, CVector* vel, float timeSince, FxPrtMult_c* fxMults, float rotZ, float lightMult, float lightMultLimit, bool createLocal);
 
     void EnablePrim(int32 primIndex, bool enable);
     void SetMatrix(RwMatrix* matrix);
     void SetOffsetPos(const CVector& pos);
     void AddOffsetPos(CVector* pos);
-    void SetConstTime(uint8 time, float amount);
+    void SetConstTime(bool on, float time);
     void SetRateMult(float mult);
     void SetTimeMult(float mult);
     void SetVelAdd(CVector* velocity);
@@ -111,7 +111,7 @@ public:
 
     bool IsVisible();
 
-    void DoFxAudio(CVector posn);
+    void DoFxAudio(CVector pos);
     bool Update(RwCamera* camera, float timeDelta);
 
 public:

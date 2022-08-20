@@ -15,7 +15,7 @@ public:
     FxInfo_c() = default;    // 0x4A4B30
     virtual ~FxInfo_c() = 0; // 0x4A4940
     virtual void Load(FILESTREAM file, int32 version) = 0;
-    virtual void GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) = 0;
+    virtual void GetValue(float currentTime, float mult, float totalTime, float length, bool useConst, void* info) = 0;
 
     friend class FxInfoManager_c;
     friend class FxEmitterBP_c;

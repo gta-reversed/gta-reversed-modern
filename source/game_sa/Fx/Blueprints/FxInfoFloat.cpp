@@ -15,6 +15,6 @@ void FxInfoFloat_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A5E10
-void FxInfoFloat_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
-    static_cast<MovementInfo_t*>(info)->m_bFloat = true;
+void FxInfoFloat_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
+    static_cast<MovementInfo_t*>(info)->m_bHasFloatInfo = true;
 }

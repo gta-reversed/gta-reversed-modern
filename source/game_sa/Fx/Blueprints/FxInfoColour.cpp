@@ -13,9 +13,9 @@ void FxInfoColour_c::Load(FILESTREAM file, int32 version) {
     m_InterpInfo.Load(file);
 }
 
-void FxInfoColour_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoColour_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[4];

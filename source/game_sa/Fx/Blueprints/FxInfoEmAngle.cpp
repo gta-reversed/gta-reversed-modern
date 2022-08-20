@@ -14,7 +14,7 @@ void FxInfoEmAngle_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A4F20
-void FxInfoEmAngle_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoEmAngle_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     float values[2];
     m_InterpInfo.GetVal(values, currentTime);
 

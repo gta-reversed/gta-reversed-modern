@@ -14,9 +14,9 @@ void FxInfoColourBright_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A6860
-void FxInfoColourBright_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoColourBright_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[5];
@@ -24,6 +24,6 @@ void FxInfoColourBright_c::GetValue(float currentTime, float mult, float totalTi
 
     auto& render = *static_cast<RenderInfo_t*>(info);
     render.SetColor(values[0], values[1], values[2], values[3]);
-    render.m_nColorBrightBias = (uint8)values[4];
+    render.m_Color2.alpha = (uint8)values[4];
     render.m_nColorType = ERenderColorType::BRIGHT;
 }

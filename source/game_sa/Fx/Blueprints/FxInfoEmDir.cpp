@@ -14,9 +14,9 @@ void FxInfoEmDir_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A4E50
-void FxInfoEmDir_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoEmDir_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     float values[3];
     m_InterpInfo.GetVal(values, currentTime);
 
-    static_cast<EmissionInfo_t*>(info)->m_0x28 = *(CVector*)&values[0];
+    static_cast<EmissionInfo_t*>(info)->m_Direction = *(CVector*)&values[0];
 }

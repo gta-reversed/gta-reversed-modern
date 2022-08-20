@@ -15,15 +15,15 @@ void FxInfoAnimTexture_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A65E0
-void FxInfoAnimTexture_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoAnimTexture_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[16];
     m_InterpInfo.GetVal(values, mult);
 
     auto& render = *static_cast<RenderInfo_t*>(info);
-    render.m_bAnimTextureUsed = true;
-    render.m_nAnimTexId = static_cast<int8>(values[0]);
+    render.m_bHasAnimTextures = true;
+    render.m_nCurrentTexId = static_cast<int8>(values[0]);
 }

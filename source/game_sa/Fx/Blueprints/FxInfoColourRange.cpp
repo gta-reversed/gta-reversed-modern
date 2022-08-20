@@ -14,9 +14,9 @@ void FxInfoColourRange_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A66C0
-void FxInfoColourRange_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoColourRange_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[7];

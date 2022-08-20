@@ -4,34 +4,32 @@
 
 class FxBox_c {
 public:
-    float m_fCornerA_x;
-    float m_fCornerB_x;
+    float minX;
+    float maxX;
+    float minY;
+    float maxY;
+    float minZ;
+    float maxZ;
 
-    float m_fCornerA_y;
-    float m_fCornerB_y;
-
-    float m_fCornerA_z;
-    float m_fCornerB_z;
-
-    inline FxBox_c() {
+    FxBox_c() {
         Reset();
     }
 
-    inline void Reset() {
-        m_fCornerA_x = m_fCornerA_y = m_fCornerA_z = 999999.0f;
-        m_fCornerB_x = m_fCornerB_y = m_fCornerB_z = -999999.0f;
+    void Reset() {
+        minX = minY = minZ = 999999.0f;
+        maxX = maxY = maxZ = -999999.0f;
     }
 
     FxBox_c& operator=(const FxBox_c& right) = default;
 
     FxBox_c& operator=(const RwMatrix& right) {
-        m_fCornerA_x = right.pos.x;
-        m_fCornerA_y = right.pos.y;
-        m_fCornerA_z = right.pos.z;
+        minX = right.pos.x;
+        minY = right.pos.y;
+        minZ = right.pos.z;
 
-        m_fCornerB_x = right.pos.x;
-        m_fCornerB_y = right.pos.y;
-        m_fCornerB_z = right.pos.z;
+        maxX = right.pos.x;
+        maxY = right.pos.y;
+        maxZ = right.pos.z;
         return *this;
     }
 };

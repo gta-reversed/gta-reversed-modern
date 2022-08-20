@@ -14,19 +14,19 @@ void FxInfoEmRate_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A4B60
-void FxInfoEmRate_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoEmRate_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     float values[16];
     m_InterpInfo.GetVal(values, currentTime);
 
     auto& emission = *static_cast<EmissionInfo_t*>(info);
 
     auto v10 = currentTime - totalTime;
-    if (bConstTimeSet) {
-        emission.m_fRate = values[0] * totalTime;
+    if (useConst) {
+        emission.m_fCount = values[0] * totalTime;
     } else if (v10 >= 0.0f) {
-        emission.m_fRate = m_InterpInfo.GetVal(0, currentTime, totalTime);
+        emission.m_fCount = m_InterpInfo.GetVal(0, currentTime, totalTime);
     } else {
-        emission.m_fRate = m_InterpInfo.GetVal(0, length, -v10);
-        emission.m_fRate = m_InterpInfo.GetVal(0, currentTime, v10 + totalTime) + emission.m_fRate;
+        emission.m_fCount = m_InterpInfo.GetVal(0, len, -v10);
+        emission.m_fCount = m_InterpInfo.GetVal(0, currentTime, v10 + totalTime) + emission.m_fCount;
     }
 }

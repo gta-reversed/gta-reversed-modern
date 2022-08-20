@@ -20,7 +20,7 @@ void FxInfoEmSpeed_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A4D90
-void FxInfoEmSpeed_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoEmSpeed_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     float values[2];
     m_InterpInfo.GetVal(values, currentTime);
 

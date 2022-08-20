@@ -14,6 +14,6 @@ void FxInfoUnderwater_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A5E90
-void FxInfoUnderwater_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
-    static_cast<MovementInfo_t*>(info)->m_bUnderwater = true;
+void FxInfoUnderwater_c::GetValue(float currentTime, float mult, float totalTime, float length, bool useConst, void* info) {
+    static_cast<MovementInfo_t*>(info)->m_bHasUnderwaterInfo = true;
 }

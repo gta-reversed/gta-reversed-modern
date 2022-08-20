@@ -15,6 +15,6 @@ void FxInfoSelfLit_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A67C0
-void FxInfoSelfLit_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoSelfLit_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     static_cast<RenderInfo_t*>(info)->m_bSelfLit = true;
 }

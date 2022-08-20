@@ -26,7 +26,7 @@ void FxEmitterBP_c::InjectHooks() {
 }
 
 FxPrim_c* FxEmitterBP_c::CreateInstance() { return CreateInstance_Reversed(); }
-void FxEmitterBP_c::Update(float time) { Update_Reversed(time); }
+void FxEmitterBP_c::Update(float deltaTime) { Update_Reversed(deltaTime); }
 bool FxEmitterBP_c::LoadTextures(FxName32_t* textureNames, int32 version) { return LoadTextures_Reversed(textureNames, version); }
 bool FxEmitterBP_c::Load(FILESTREAM file, int32 version, FxName32_t* textureNames) { return Load_Reversed(file, version, textureNames); }
 void FxEmitterBP_c::Render(RwCamera* camera, uint32 a2, float dayNightBalance, bool bCanRenderHeatHaze) { Render_Reversed(camera, a2, dayNightBalance, bCanRenderHeatHaze); }
@@ -34,17 +34,17 @@ bool FxEmitterBP_c::FreePrtFromPrim(FxSystem_c* system) { return FreePrtFromPrim
 
 // 0x4A18D0
 FxEmitterBP_c::FxEmitterBP_c() : FxPrimBP_c() {
-    field_4 = 0; // see ForAllParticles
+    m_Type = 0;
 }
 
 // 0x4A1940
-void FxEmitterBP_c::RenderHeatHaze(RwCamera* camera, uint32 a3, float a4) {
-    return plugin::CallMethod<0x4A1940, FxEmitterBP_c*, RwCamera*, uint32, float>(this, camera, a3, a4);
+void FxEmitterBP_c::RenderHeatHaze(RwCamera* camera, uint32 txdHashKey, float brightness) {
+    return plugin::CallMethod<0x4A1940, FxEmitterBP_c*, RwCamera*, uint32, float>(this, camera, txdHashKey, brightness);
 }
 
 // 0x4A21D0
-bool FxEmitterBP_c::UpdateParticle(float time, FxEmitterPrt_c* emitter) {
-    return plugin::CallMethodAndReturn<bool, 0x4A21D0, FxEmitterBP_c*, float, FxEmitterPrt_c*>(this, time, emitter);
+bool FxEmitterBP_c::UpdateParticle(float deltaTime, FxEmitterPrt_c* emitter) {
+    return plugin::CallMethodAndReturn<bool, 0x4A21D0, FxEmitterBP_c*, float, FxEmitterPrt_c*>(this, deltaTime, emitter);
 }
 
 // 0x4A2B40
@@ -53,20 +53,20 @@ FxPrim_c* FxEmitterBP_c::CreateInstance_Reversed() {
 }
 
 // 0x4A2BC0
-void FxEmitterBP_c::Update_Reversed(float time) {
-    plugin::CallMethod<0x4A2BC0, FxEmitterBP_c*, float>(this, time);
-    return;
+void FxEmitterBP_c::Update_Reversed(float deltaTime) {
+    return plugin::CallMethod<0x4A2BC0, FxEmitterBP_c*, float>(this, deltaTime);
 
-    /*for (auto it = m_Particles.GetHead(); it; it = m_Particles.GetNext(it)) {
+    for (auto it = m_Particles.GetHead(); it; it = m_Particles.GetNext(it)) {
         if (it->m_System->m_nKillStatus == eFxSystemKillStatus::FX_3) {
             it->m_System->m_nKillStatus = eFxSystemKillStatus::FX_KILLED;
         }
 
-        if (it->m_System->m_nPlayStatus != eFxSystemPlayStatus::T2 && UpdateParticle(time, it)) {
+        // wrong casts or smth
+        if (it->m_System->m_nPlayStatus != eFxSystemPlayStatus::T2 && UpdateParticle(deltaTime, reinterpret_cast<FxEmitterPrt_c*>(it))) {
             m_Particles.RemoveItem(it);
-            g_fxMan.ReturnParticle(it);
+            g_fxMan.ReturnParticle(reinterpret_cast<FxEmitterPrt_c*>(it));
         }
-    }*/
+    }
 }
 
 // 0x5C25F0
@@ -114,8 +114,8 @@ bool FxEmitterBP_c::LoadTextures_Reversed(FxName32_t* textureNames, int32 versio
 }
 
 // 0x4A2C40
-void FxEmitterBP_c::Render_Reversed(RwCamera* camera, uint32 a2, float dayNightBalance, bool bCanRenderHeatHaze) {
-    plugin::CallMethod<0x4A2C40, FxEmitterBP_c*, RwCamera*, uint32, float, bool>(this, camera, a2, dayNightBalance, bCanRenderHeatHaze);
+void FxEmitterBP_c::Render_Reversed(RwCamera* camera, uint32 txdHashKey, float brightness, bool doHeatHaze) {
+    plugin::CallMethod<0x4A2C40, FxEmitterBP_c*, RwCamera*, uint32, float, bool>(this, camera, txdHashKey, brightness, doHeatHaze);
 }
 
 // 0x4A2510

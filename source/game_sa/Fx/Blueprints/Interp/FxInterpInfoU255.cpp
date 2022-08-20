@@ -5,7 +5,7 @@
 
 // 0x4A87D0
 FxInterpInfoU255_c::FxInterpInfoU255_c() : FxInterpInfo_c() {
-    m_pValues = nullptr;
+    m_Keys = nullptr;
 }
 
 // 0x5C18F0
@@ -21,11 +21,11 @@ void FxInterpInfoU255_c::Load(FILESTREAM file) {
             m_pTimes = g_fxMan.Allocate<uint16>(m_nNumKeys);
         }
 
-        m_pValues[i] = g_fxMan.Allocate<uint16>(m_nNumKeys);
+        m_Keys[i] = g_fxMan.Allocate<uint16>(m_nNumKeys);
         for (auto j = 0; j < m_nNumKeys; j++) {
             ReadField<void>(file, "FX_KEYFLOAT_DATA:");
             m_pTimes[j] = uint16(ReadField<float>(file) * 256.f);
-            m_pValues[i][j] = uint16(ReadField<float>(file) * 256.f);
+            m_Keys[i][j] = uint16(ReadField<float>(file) * 256.f);
         }
     }
 }
@@ -33,7 +33,7 @@ void FxInterpInfoU255_c::Load(FILESTREAM file) {
 // NOTSA
 void FxInterpInfoU255_c::Allocate(int32 count) {
     m_nCount = count;
-    m_pValues = g_fxMan.Allocate<uint16*>(count);
+    m_Keys = g_fxMan.Allocate<uint16*>(count);
 }
 
 // 0x4A8800

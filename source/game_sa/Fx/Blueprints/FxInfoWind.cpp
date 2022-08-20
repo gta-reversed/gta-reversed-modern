@@ -15,7 +15,7 @@ void FxInfoWind_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A5AA0
-void FxInfoWind_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoWind_c::GetValue(float currentTime, float mult, float totalTime, float length, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
         mult = currentTime / length;
     }
@@ -25,5 +25,5 @@ void FxInfoWind_c::GetValue(float currentTime, float mult, float totalTime, floa
 
     auto& movement = *static_cast<MovementInfo_t*>(info);
     auto wind = value * *g_fxMan.m_pfWindSpeed * totalTime;
-    movement.m_v1 += wind * *g_fxMan.m_pWindDir;
+    movement.m_Vel += wind * *g_fxMan.m_pWindDir;
 }

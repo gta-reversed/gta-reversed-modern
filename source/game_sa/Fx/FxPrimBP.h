@@ -53,13 +53,13 @@ struct FxBufferedMatrix {
 
 class FxPrimBP_c {
 public:
-    char                      field_4;
+    int8                      m_Type;
     uint8                     m_nSrcBlendId;
     uint8                     m_nDstBlendId;
     bool                      m_bAlphaOn;
-    FxBufferedMatrix*         m_pMatrixBuffered;
+    FxBufferedMatrix*         m_pMatrixBuffered; // int16* m_matVals;
     std::array<RwTexture*, 4> m_apTextures;
-    int32                     field_1C;
+    int32 m_TxdIndex;
     TList_c<Particle_c>       m_Particles;
     FxInfoManager_c           m_FxInfoManager;
 

@@ -15,7 +15,7 @@ void FxInfoEmWeather_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A5170
-void FxInfoEmWeather_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoEmWeather_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     float values[4];
     m_InterpInfo.GetVal(values, currentTime);
 

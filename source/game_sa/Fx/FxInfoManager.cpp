@@ -97,7 +97,7 @@ FxInfo_c* FxInfoManager_c::AddFxInfo(int32 info) {
     };
 }
 
-constexpr struct { int32 type; const char* name; } mapping[] = {
+constexpr struct { int32 type; const char* name; } FXINFOMANAGER_C_LOAD_MAPPING[] = {
     { FX_INFO_EMRATE_DATA,           "FX_INFO_EMRATE_DATA:"        },
     { FX_INFO_EMSIZE_DATA,           "FX_INFO_EMSIZE_DATA:"        },
     { FX_INFO_EMSPEED_DATA,          "FX_INFO_EMSPEED_DATA:"       },
@@ -142,8 +142,8 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
 
     ReadField<void>(file);
     m_nNumInfos = ReadField<int32>(file, "NUM_INFOS:");
-    m_nFirstMovementInfo = -1;
-    m_nFirstRenderInfo   = -1;
+    m_MovementOffset = -1;
+    m_RenderOffset = -1;
 
     m_pInfos = g_fxMan.Allocate<FxInfo_c*>(m_nNumInfos);
     assert(m_pInfos);
@@ -154,7 +154,7 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
         sscanf(line, "%s", field);
 
         const auto GetType = [=]() -> int32 {
-            for (auto& [type, name] : mapping) {
+            for (auto& [type, name] : FXINFOMANAGER_C_LOAD_MAPPING) {
                 if (strcmp(field, name) == 0) {
                     return type;
                 }
@@ -178,11 +178,11 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
         info->m_bTimeModeParticle = bTimeModePrt;
     }
 
-    if (m_nFirstRenderInfo == -1)
-        m_nFirstRenderInfo = m_nNumInfos;
+    if (m_RenderOffset == -1)
+        m_RenderOffset = m_nNumInfos;
 
-    if (m_nFirstMovementInfo == -1)
-        m_nFirstMovementInfo = m_nFirstRenderInfo;
+    if (m_MovementOffset == -1)
+        m_MovementOffset = m_RenderOffset;
 }
 
 /* todo:
@@ -192,39 +192,39 @@ void FxInfoManager_c::Load(FILESTREAM file, int32 version) {
  */
 
 // 0x4A4960
-void FxInfoManager_c::ProcessEmissionInfo(float currentTime, float mult, float totalTime, bool bConstTimeSet, EmissionInfo_t* emission) {
+void FxInfoManager_c::ProcessEmissionInfo(float currentTime, float mult, float totalTime, bool useConst, EmissionInfo_t* emission) {
     emission->Process(mult);
 
-    for (auto i = 0; i < m_nFirstMovementInfo; i++) {
+    for (auto i = 0; i < m_MovementOffset; i++) {
         auto& info = m_pInfos[i];
         if ((info->m_nType & 0x1000) != 0) {
-            info->GetValue(currentTime, 0.0f, mult, totalTime, bConstTimeSet, emission);
+            info->GetValue(currentTime, 0.0f, mult, totalTime, useConst, emission);
         }
     }
 }
 
 // a6 - always false
 // 0x4A4A10
-void FxInfoManager_c::ProcessMovementInfo(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, MovementInfo_t* movementInfo) {
+void FxInfoManager_c::ProcessMovementInfo(float currentTime, float mult, float totalTime, float length, bool useConst, MovementInfo_t* movementInfo) {
     movementInfo->Process();
 
-    for (auto i = m_nFirstMovementInfo; i < m_nFirstRenderInfo; i++) {
+    for (int i = m_MovementOffset; i < m_RenderOffset; i++) {
         auto& info = m_pInfos[i];
         if ((info->m_nType & 0x2000) != 0) {
-            info->GetValue(currentTime, mult, totalTime, length, bConstTimeSet, movementInfo);
+            info->GetValue(currentTime, mult, totalTime, length, useConst, movementInfo);
         }
     }
 }
 
 // a6 - always false
 // 0x4A4A80
-void FxInfoManager_c::ProcessRenderInfo(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, RenderInfo_t* renderInfo) {
+void FxInfoManager_c::ProcessRenderInfo(float currentTime, float mult, float totalTime, float length, bool useConst, RenderInfo_t* renderInfo) {
     renderInfo->Process();
 
-    for (auto i = m_nFirstRenderInfo; i < m_nNumInfos; i++) {
+    for (int i = m_RenderOffset; i < m_nNumInfos; i++) {
         auto& info = m_pInfos[i];
-        if ((info->m_nType & 0xC000) != 0) {
-            info->GetValue(currentTime, mult, totalTime, length, bConstTimeSet, renderInfo);
+        if ((info->m_nType & 0xC000) != 0) { // 0xC000 == -0x4000u | m_nType >= 0x4000u
+            info->GetValue(currentTime, mult, totalTime, length, useConst, renderInfo);
         }
     }
 }

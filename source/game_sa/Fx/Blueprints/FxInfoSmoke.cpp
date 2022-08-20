@@ -14,9 +14,9 @@ void FxInfoSmoke_c::Load(FILESTREAM file, int32 version) {
 }
 
 // 0x4A6970
-void FxInfoSmoke_c::GetValue(float currentTime, float mult, float totalTime, float length, bool bConstTimeSet, void* info) {
+void FxInfoSmoke_c::GetValue(float currentTime, float mult, float totalTime, float len, bool useConst, void* info) {
     if (!m_bTimeModeParticle) {
-        mult = currentTime / length;
+        mult = currentTime / len;
     }
 
     float values[8];
@@ -24,12 +24,12 @@ void FxInfoSmoke_c::GetValue(float currentTime, float mult, float totalTime, flo
 
     auto& render = *static_cast<RenderInfo_t*>(info);
 
-    render.m_nSmokeCount = static_cast<int8>(values[0]);
-    render.m_ColR = values[1];
-    render.m_ColG = values[2];
-    render.m_ColB = values[3];
-    render.m_ColA = values[4];
-    render.field_98 = values[5];
-    render.m_PrtSize = values[6];
-    render.m_Lifetime = values[7];
+    render.m_SmokeType = static_cast<int8>(values[0]);
+    render.m_SmokeColor.red = values[1];
+    render.m_SmokeColor.green = values[2];
+    render.m_SmokeColor.blue = values[3];
+    render.m_SmokeColor.alpha = values[4];
+    render.m_SmokeBrightness = values[5];
+    render.m_SmokeSize = values[6];
+    render.m_SmokeLife = values[7];
 }

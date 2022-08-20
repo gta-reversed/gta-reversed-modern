@@ -12,8 +12,8 @@
 class FxMemoryPool_c {
 public:
     uint8* m_pData;
-    uint32 m_nSize;
-    uint32 m_nPosition;
+    size_t m_nSize;
+    size_t m_nPosition; // offset, current byte
 
 public:
     static void InjectHooks();
