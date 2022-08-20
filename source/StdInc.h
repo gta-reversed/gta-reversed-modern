@@ -64,7 +64,11 @@ namespace rng = std::ranges;
 // oswrapper
 #include "oswrapper/oswrapper.h"
 
-#include "debug.h"
+#include "app_debug.h"
+
+#include "app/app.h"
+#include "app/app_light.h"
+#include "platform.h"
 
 #include "app/app.h"
 #include "app/app_light.h"

@@ -8,14 +8,6 @@
 
 #include "PointLights.h"
 
-uint32 MAX_POINTLIGHTS = 32;
-
-uint32& CPointLights::NumLights = *(uint32*)0xC3F0D0;
-CPointLight* CPointLights::aLights = (CPointLight*)0xC3F0E0;
-float* CPointLights::aCachedMapReadResults = (float*)0xC3F050;
-uint32& CPointLights::NextCachedValue = *(uint32*)0xC3F0D4;
-CVector* CPointLights::aCachedMapReads = (CVector*)0xC3F6E0;
-
 // 0x6FFB40
 void CPointLights::Init() {
     plugin::Call<0x6FFB40>();

@@ -122,7 +122,6 @@ void InjectCommonHooks();
 
 void MessageLoop();
 
-
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin);

@@ -4,7 +4,7 @@
 
 class CEventGlobalGroup;
 
-void RwInjectHooks();
+void RwHelperInjectHooks();
 
 CEventGlobalGroup* GetEventGlobalGroup();
 

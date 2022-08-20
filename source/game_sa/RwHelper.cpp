@@ -2,7 +2,7 @@
 
 #include "RwHelper.h"
 
-void RwInjectHooks() {
+void RwHelperInjectHooks() {
     RH_ScopedNamespaceName("RwHelper");
     RH_ScopedCategoryGlobal();
 
