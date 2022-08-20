@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimpleCarWaitToSlowDown.h"
 
 void CTaskSimpleCarWaitToSlowDown::InjectHooks() {
@@ -7,7 +8,6 @@ void CTaskSimpleCarWaitToSlowDown::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x646990);
     RH_ScopedInstall(Destructor, 0x646A00);
-
     RH_ScopedVMTInstall(Clone, 0x649CB0);
     RH_ScopedVMTInstall(GetTaskType, 0x6469F0);
     RH_ScopedVMTInstall(MakeAbortable, 0x646A60);
@@ -16,20 +16,21 @@ void CTaskSimpleCarWaitToSlowDown::InjectHooks() {
 }
 
 // 0x646990
-CTaskSimpleCarWaitToSlowDown::CTaskSimpleCarWaitToSlowDown(CVehicle* veh, SlowDownType type) :
-    m_veh{veh},
-    m_type{type}
+CTaskSimpleCarWaitToSlowDown::CTaskSimpleCarWaitToSlowDown(CVehicle* vehicle, SlowDownType type) :
+    CTaskSimple(),
+    m_TargetVehicle{ vehicle },
+    m_SlowType{ type }
 {
-    CEntity::SafeRegisterRef(m_veh);
+    CEntity::SafeRegisterRef(m_TargetVehicle);
 }
 
 // 0x646A00
 CTaskSimpleCarWaitToSlowDown::~CTaskSimpleCarWaitToSlowDown() {
-    CEntity::SafeCleanUpRef(m_veh);
+    CEntity::SafeCleanUpRef(m_TargetVehicle);
 }
 
 // 0x646A60
-bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE:
         return true;
@@ -43,40 +44,39 @@ bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, eAbortPriority prior
         break;
     }
     }
-    m_type = SlowDownType::DONE;
+    m_SlowType = SlowDownType::DONE;
     return false;
 }
 
 // 0x646AD0
 bool CTaskSimpleCarWaitToSlowDown::ProcessPed(CPed* ped) {
-    if (!m_veh || m_type == SlowDownType::DONE) {
+    if (!m_TargetVehicle || m_SlowType == SlowDownType::DONE) {
         return true;
     }
 
-    if (const auto driver = m_veh->m_pDriver) {
+    if (const auto driver = m_TargetVehicle->m_pDriver) {
         if (!driver->IsPlayer() && ped == driver) {
             // Start stopping the car completely
-
-            auto& ap = m_veh->m_autoPilot;
+            auto& ap = m_TargetVehicle->m_autoPilot;
             ap.m_nCruiseSpeed = 0;
             ap.m_nCarMission = MISSION_NONE;
         }
     }
 
-    switch (m_type) {
+    switch (m_SlowType) {
     case SlowDownType::PED_STEP_OUT:
-        return m_veh->CanPedStepOutCar(false);
-    case SlowDownType::PED_STEP_OUT_OR_JUMP: {
-        return m_veh->CanPedStepOutCar(false) || m_veh->CanPedJumpOutCar(ped);
+        return m_TargetVehicle->CanPedStepOutCar(false);
+    case SlowDownType::PED_STEP_OUT_OR_JUMP:
+        return m_TargetVehicle->CanPedStepOutCar(false) || m_TargetVehicle->CanPedJumpOutCar(ped);
+    default:
+        return false;
     }
-    }
-
     return false;
 }
 
 // 0x646AB0
 bool CTaskSimpleCarWaitToSlowDown::SetPedPosition(CPed* ped) {
-    if (m_veh) {
+    if (m_TargetVehicle) {
         ped->SetPedPositionInCar();
     }
     return true;
