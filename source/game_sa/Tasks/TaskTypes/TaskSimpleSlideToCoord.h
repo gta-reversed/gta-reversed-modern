@@ -10,9 +10,9 @@ public:
     CVector m_SlideToPos;
     float   m_fAimingRotation; // Heading
     float   m_fSpeed;
-    bool    m_bFirstTime : 1; // todo: default true
+    bool    m_bFirstTime : 1;
     bool    m_bRunningAnim : 1;
-    uint32  m_Timer; // todo: default -1
+    int32   m_Timer;
 
 public:
     static constexpr auto Type = TASK_SIMPLE_SLIDE_TO_COORD;

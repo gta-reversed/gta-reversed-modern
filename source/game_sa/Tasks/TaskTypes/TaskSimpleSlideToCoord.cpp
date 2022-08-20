@@ -9,8 +9,8 @@ void CTaskSimpleSlideToCoord::InjectHooks() {
 
     RH_ScopedOverloadedInstall(Constructor, "NoAnim", 0x66C3E0, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float));
     RH_ScopedOverloadedInstall(Constructor, "Anim", 0x66C450, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float, char const*, char const*, int32, float, bool, int32));
-    RH_ScopedVMTlInstall(MakeAbortable, 0x66C4D0);
-    // RH_ScopedVMTlInstall(ProcessPed, 0x66C4E0);
+    RH_ScopedVmtInstall(MakeAbortable, 0x66C4D0);
+    // RH_ScopedVmtInstall(ProcessPed, 0x66C4E0);
 }
 
 // 0x66C3E0
@@ -19,9 +19,10 @@ CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(const CVector& slideToPos, floa
     m_SlideToPos{ slideToPos },
     m_fAimingRotation{ aimingRotation },
     m_fSpeed{ speed },
+    m_bFirstTime{ true },
     m_bRunningAnim{ false }
 {
-    assert(0 && "where call to parent CTaskSimpleRunNamedAnim?");
+    // m_Timer not initialized
 }
 
 // 0x66C450
@@ -29,15 +30,17 @@ CTaskSimpleSlideToCoord::CTaskSimpleSlideToCoord(const CVector& slideToPos, floa
     CTaskSimpleRunNamedAnim{ animBlockName, animGroupName, animFlags, animBlendDelta, endTime, false, bRunInSequence, false, false },
     m_SlideToPos{ slideToPos },
     m_fAimingRotation{ aimingRotation },
-    m_fSpeed{speed},
-    m_bRunningAnim{ false }
+    m_fSpeed{ speed },
+    m_bFirstTime{ true },
+    m_bRunningAnim{ false },
+    m_Timer{ -1 }
 {
 }
 
 // 0x66D300
 CTask* CTaskSimpleSlideToCoord::Clone() {
     return m_bRunningAnim
-        ? new CTaskSimpleSlideToCoord(m_SlideToPos, m_fAimingRotation, m_fSpeed, m_animName, m_animGroupName, m_animFlags, m_blendDelta, !!m_bRunInSequence, m_endTime)
+        ? new CTaskSimpleSlideToCoord(m_SlideToPos, m_fAimingRotation, m_fSpeed, m_animName, m_animGroupName, m_animFlags, m_fBlendDelta, !!m_bRunInSequence, m_Time)
         : new CTaskSimpleSlideToCoord(m_SlideToPos, m_fAimingRotation, m_fSpeed);
 }
 
@@ -52,13 +55,13 @@ bool CTaskSimpleSlideToCoord::ProcessPed(CPed* ped) {
 
     const bool hasSuccessfullyProcessedRunAnim = m_bRunningAnim ? CTaskSimpleRunNamedAnim::ProcessPed(ped) : true; // Yeah could be simplified, but this is easier to understand.
 
-    if (m_endTime == (uint32)-1) {
+    if (m_Time == (uint32)-1) {
         if (m_bRunningAnim) {
             if (hasSuccessfullyProcessedRunAnim) {
-                m_endTime = CTimer::GetTimeInMS() + 500;
+                m_Time = CTimer::GetTimeInMS() + 500;
             }
         } else {
-            m_endTime = CTimer::GetTimeInMS() + 2000;
+            m_Time = CTimer::GetTimeInMS() + 2000;
         }
     }
 
@@ -86,7 +89,7 @@ bool CTaskSimpleSlideToCoord::ProcessPed(CPed* ped) {
         };
     }
 
-    if (m_endTime < CTimer::GetTimeInMS()) {
+    if (m_Time < CTimer::GetTimeInMS()) {
         return true;
     }
 

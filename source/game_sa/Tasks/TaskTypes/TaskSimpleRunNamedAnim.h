@@ -15,10 +15,10 @@ class NOTSA_EXPORT_VTABLE CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
 public:
     char                 m_animName[24];
     char                 m_animGroupName[16];
-    float                m_blendDelta;
+    float                m_fBlendDelta;
     CAnimBlendHierarchy* m_pAnimHierarchy;
-    uint32               m_endTime;
-    CTaskTimer           m_timer;
+    uint32               m_Time;
+    CTaskTimer           m_Timer;
     CVector              m_vecOffsetAtEnd;
     uint32               m_animFlags;
     int16                m_nAnimId;
@@ -33,7 +33,7 @@ public:
     eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override {
         return new CTaskSimpleRunNamedAnim(m_animName, m_animGroupName,
-                                           m_animFlags, m_blendDelta, m_endTime,
+                                           m_animFlags, m_fBlendDelta, m_Time,
                                            (m_nFlags & 2) >> 1, (m_nFlags & 0x10) >> 4, (m_nFlags & 0x20) >> 5, (m_nFlags & 4) >> 2); // todo: flags
     } // 0x61B770
     bool ProcessPed(CPed* ped) override;
