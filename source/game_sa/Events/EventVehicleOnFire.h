@@ -4,17 +4,16 @@
 
 class CVehicle;
 
-class CEventVehicleOnFire : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventVehicleOnFire : public CEventEditableResponse {
 public:
     CVehicle* m_vehicle;
 
+public:
     static void InjectHooks();
 
     CEventVehicleOnFire(CVehicle* vehicle);
-    ~CEventVehicleOnFire();
-private:
-    CEventVehicleOnFire* Constructor(CVehicle* vehicle);
-public:
+    ~CEventVehicleOnFire() override;
+
     eEventType GetEventType() const override { return EVENT_VEHICLE_ON_FIRE; }
     int32 GetEventPriority() const override { return 54; }
     int32 GetLifeTime() override { return 0; }
@@ -22,6 +21,8 @@ public:
     float GetLocalSoundLevel() override { return 60.0f; }
     CEventEditableResponse* CloneEditable() override;
 
+private:
+    CEventVehicleOnFire* Constructor(CVehicle* vehicle);
     bool AffectsPed_Reversed(CPed* ped);
     CEventEditableResponse* CloneEditable_Reversed();
 };

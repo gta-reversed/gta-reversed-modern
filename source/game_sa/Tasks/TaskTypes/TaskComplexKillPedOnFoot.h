@@ -10,7 +10,7 @@
 #include "TaskTimer.h"
 #include "TaskComplex.h"
 
-class CTaskComplexKillPedOnFoot : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexKillPedOnFoot : public CTaskComplex {
 public:
     uint8      m_bit_1 : 1;
     uint8      m_bit_2 : 1;
@@ -20,23 +20,23 @@ public:
     uint8      m_bit_6 : 1;
     uint8      m_bit_7 : 1;
     uint8      m_bit_8 : 1;
-    uint8      _pad0[3];
     CPed*      m_target;
     int32      m_pedFlags;
     int32      m_actionDelay;
     int32      m_actionChance;
     uint8      field_20;
-    uint8      _pad1[3];
     uint32     m_startTime;
     uint32     m_time;
     CTaskTimer m_timer;
 
 public:
-    CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7);
-    ~CTaskComplexKillPedOnFoot();
+    static constexpr auto Type = TASK_COMPLEX_KILL_PED_ON_FOOT;
 
+    CTaskComplexKillPedOnFoot(CPed* target, int32 time, int32 pedFlags, int32 delay, int32 chance, int8 a7);
+    ~CTaskComplexKillPedOnFoot() override;
+
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override { return new CTaskComplexKillPedOnFoot(m_target, m_time, m_pedFlags, m_actionDelay, m_actionChance, field_20); }
-    eTaskType GetTaskType() override { return TASK_COMPLEX_KILL_PED_ON_FOOT; }
     bool   MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

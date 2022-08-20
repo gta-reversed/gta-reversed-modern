@@ -112,7 +112,7 @@ void CReplay::Display() {
     CFont::SetProportional(true);
     CFont::SetColor({ 255u, 255u, 200u, 200u });
     CFont::SetFontStyle(eFontStyle::FONT_SUBTITLES);
-    if (CReplay::Mode == REPLAY_MODE_1) {
+    if (CReplay::Mode == MODE_PLAYBACK) {
         v8 = (RsGlobal.maximumWidth / 10); // ok
         CFont::PrintString(float(RsGlobal.maximumWidth / 10), float(RsGlobal.maximumHeight / 15), TheText.Get("REPLAY"));
     }
@@ -138,19 +138,19 @@ void CReplay::RecordVehicleDeleted(CVehicle* vehicle) {
     plugin::Call<0x45EBB0, CVehicle*>(vehicle);
 }
 
-// 0x
+// 0x45EC20
 void CReplay::RecordPedDeleted(CPed* ped) {
-    plugin::Call<0x0, CPed*>(ped);
+    plugin::Call<0x45EC20, CPed*>(ped);
 }
 
-// 0x
+// 0x45EFA0
 void CReplay::InitialiseVehiclePoolConversionTable() {
-    plugin::Call<0x0>();
+    plugin::Call<0x45EFA0>();
 }
 
-// 0x
+// 0x45EF20
 void CReplay::InitialisePedPoolConversionTable() {
-    plugin::Call<0x0>();
+    plugin::Call<0x45EF20>();
 }
 
 // 0x
@@ -165,7 +165,7 @@ void CReplay::SaveReplayToHD() {
 
 // 0x45C440
 bool CReplay::ShouldStandardCameraBeProcessed() {
-    return CReplay::Mode != REPLAY_MODE_1;
+    return CReplay::Mode != MODE_PLAYBACK;
 }
 
 // 0x

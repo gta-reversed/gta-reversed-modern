@@ -10,7 +10,7 @@
 #include "Ped.h"
 #include "AnimBlendAssociation.h"
 
-class CTaskSimpleStealthKill : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleStealthKill : public CTaskSimple {
 public:
     bool                   m_bKeepTargetAlive;
     CPed*                  m_pTarget;
@@ -21,6 +21,8 @@ public:
     uint32                 m_nTime;
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_STEALTH_KILL;
+
     CTaskSimpleStealthKill(bool keepTargetAlive, CPed* target, AssocGroupId groupId);
 
     bool ProcessPed(CPed* ped) override;

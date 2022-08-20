@@ -12,6 +12,7 @@
 // Either way: The Pool's object type has to be included.
 
 #include "Pool.h"
+#include "TaskSimpleSlideToCoord.h"
 
 class CopPed;
 class CHeli;
@@ -25,7 +26,6 @@ class CPtrNodeSingleLink;
 class CPtrNodeDoubleLink;
 class CEntryInfoNode;
 class CPedGeometryAnalyser;
-#include "TaskSimpleSlideToCoord.h"
 class CPointRoute;
 class CPatrolRoute;
 class CTaskAllocator;
@@ -49,7 +49,7 @@ typedef CPool<CEntryInfoNode>                 CEntryInfoNodePool;
 typedef CPool<CPointRoute>                    CPointRoutePool;
 typedef CPool<void*>                   CPatrolRoutePool; // todo: CPatrolRoute
 typedef CPool<CEvent>                         CEventPool;
-typedef CPool<void*>                     CNodeRoutePool; // todo: CNodeRoute
+typedef CPool<CNodeRoute>                     CNodeRoutePool;
 typedef CPool<CTaskAllocator>                 CTaskAllocatorPool;
 typedef CPool<CPedAttractor>                  CPedAttractorPool;
 

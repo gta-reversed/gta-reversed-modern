@@ -9,10 +9,11 @@ void CControllerConfigManager::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
 //    RH_ScopedInstall(Constructor, 0x531EE0);
+//    RH_ScopedInstall(LoadSettings, 0x530530);
 //    RH_ScopedInstall(SaveSettings, 0x52D200);
 //    RH_ScopedInstall(InitDefaultControlConfiguration, 0x530640);
 //    RH_ScopedInstall(InitialiseControllerActionNameArray, 0x52D260);
-//    RH_ScopedInstall(ReInitControls, 0x531F20);
+//    RH_ScopedInstall(ReinitControls, 0x531F20);
 //    RH_ScopedInstall(StoreMouseButtonState, 0x52DA30);
 //    RH_ScopedInstall(UpdateJoyInConfigMenus_ButtonDown, 0x52DAB0);
 //    RH_ScopedInstall(AffectControllerStateOn_ButtonDown_DebugStuff, 0x52DC10);
@@ -39,7 +40,7 @@ void CControllerConfigManager::InjectHooks() {
 
 // 0x531EE0
 CControllerConfigManager::CControllerConfigManager() {
-    plugin::Call<0x531EE0>();
+    plugin::CallMethod<0x531EE0, CControllerConfigManager*>(this);
 }
 
 CControllerConfigManager* CControllerConfigManager::Constructor() {
@@ -47,9 +48,14 @@ CControllerConfigManager* CControllerConfigManager::Constructor() {
     return this;
 }
 
+// 0x530530
+bool CControllerConfigManager::LoadSettings(FILESTREAM file) {
+    return plugin::CallMethodAndReturn<bool, 0x530530, CControllerConfigManager*, FILESTREAM>(this, file);
+}
+
 // 0x52D200
-void CControllerConfigManager::SaveSettings(FILE* file) {
-    plugin::Call<0x52D200, FILE*>(file);
+void CControllerConfigManager::SaveSettings(FILESTREAM file) {
+    plugin::CallMethod<0x52D200, CControllerConfigManager*, FILE*>(this, file);
 }
 
 // 0x530640
@@ -63,8 +69,8 @@ void CControllerConfigManager::InitialiseControllerActionNameArray() {
 }
 
 // 0x531F20
-void CControllerConfigManager::ReInitControls() {
-    plugin::Call<0x531F20>();
+void CControllerConfigManager::ReinitControls() {
+    plugin::CallMethod<0x531F20, CControllerConfigManager*>(this);
 }
 
 // unused
@@ -267,6 +273,6 @@ void CControllerConfigManager::AffectPadFromMouse() {
 }
 
 // 0x531C90
-void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type) {
-    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, action, a2, type);
+void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked) {
+    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, Action, KeyToBeChecked, ControllerTypeToBeChecked);
 }

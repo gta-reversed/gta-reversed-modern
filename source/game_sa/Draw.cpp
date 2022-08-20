@@ -21,7 +21,6 @@ void CDraw::InjectHooks() {
 
     RH_ScopedInstall(SetFOV, 0x6FF410);
     RH_ScopedInstall(CalculateAspectRatio, 0x6FF420);
-    RH_ScopedGlobalInstall(DoFade, 0x53E600);
 }
 
 // 0x6FF410
@@ -74,7 +73,11 @@ void DoFade() {
                 std::max<uint8>(0, CDraw::FadeValue)
             );
         }
-        // NOTE: Originally bottom <=> top were swapped by error. I swapped them to be correct because our CRect ctor asserts.
-        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f,  SCREEN_HEIGHT + 5.0f }, color);
+
+        #if FIX_BUGS
+        CSprite2d::DrawRect({-5.0f, -5.0f, SCREEN_WIDTH + 5.0f, SCREEN_HEIGHT + 5.0f}, color);
+        #else
+        CSprite2d::DrawRect({-5.0f, SCREEN_HEIGHT + 5.0f, SCREEN_WIDTH + 5.0f, -5.0f}, color);
+        #endif
     }
 }

@@ -20,10 +20,10 @@ public:
 
 public:
     static void InjectHooks();
-
-    CEventGroup(CPed* ped);
-    virtual ~CEventGroup();
     CEventGroup* Constructor(CPed* ped);
+
+    explicit CEventGroup(CPed* ped);
+    virtual ~CEventGroup();
 
     CEvent* Add(CEvent* event, bool bValid = false);
     bool HasScriptCommandOfTaskType(eTaskType taskId);
@@ -36,6 +36,9 @@ public:
     void Reorganise();
     void Flush(bool bAvoidFlushingTaskComplexBeInGroup);
     CEvent* GetEventOfType(eEventType type) const noexcept;
+
+    auto GetEvents()       { return std::span{ m_events, (size_t)m_count }; }
+    auto GetEvents() const { return std::span{ m_events, (size_t)m_count }; }
 };
 
 VALIDATE_SIZE(CEventGroup, 0x4C);

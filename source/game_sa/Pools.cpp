@@ -34,6 +34,7 @@ void CPools::InjectHooks() {
 void CPools::Initialise() {
     plugin::Call<0x550F10>();
     /*
+    CMemoryMgr::PushMemId(MEM_POOLS);
     ms_pPtrNodeSingleLinkPool = new CPtrNodeSingleLinkPool(70000, "PtrNode Single");
     ms_pPtrNodeDoubleLinkPool = new CPtrNodeDoubleLinkPool(3200, "PtrNode Double");
     ms_pEntryInfoNodePool     = new CEntryInfoNodePool(500, "EntryInfoNode");
@@ -51,6 +52,7 @@ void CPools::Initialise() {
     ms_pTaskAllocatorPool     = new CTaskAllocatorPool(16, "TaskAllocator");
     ms_pPedIntelligencePool   = new CPedIntelligencePool(140, "PedIntelligence");
     ms_pPedAttractorPool      = new CPedAttractorPool(64, "PedAttractors");
+    CMemoryMgr::PopMemId();
     */
 }
 
@@ -229,11 +231,11 @@ bool CPools::LoadVehiclePool() {
             break;
         case VEHICLE_TYPE_BIKE:
             vehicle = new CBike(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_BMX:
             vehicle = new CBmx(modelId, RANDOM_VEHICLE);
-            vehicle->AsBike()->bikeFlags.bIsStanding = true;
+            vehicle->AsBike()->bikeFlags.bOnSideStand = true;
             break;
         case VEHICLE_TYPE_TRAILER:
             vehicle = new CTrailer(modelId, RANDOM_VEHICLE);

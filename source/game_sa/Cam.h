@@ -128,6 +128,57 @@ public:
     CVehicle* m_pLastCarEntered;
     CPed*     m_pLastPedLookedAt;
     bool      m_bFirstPersonRunAboutActive;
+
+public:
+    static void InjectHooks();
+
+    CCam();
+    CCam* Constructor();
+
+    void Init();
+
+    void CacheLastSettingsDWCineyCam();
+    void DoCamBump(float horizontal, float vertical);
+    void Finalise_DW_CineyCams(CVector*, CVector*, float, float, float, float);
+    void GetCoreDataForDWCineyCamMode(CEntity**, CVehicle**, CVector*, CVector*, CVector*, CVector*, CVector*, CVector*, float*, CVector*, float*, CColSphere*);
+    void GetLookFromLampPostPos(CEntity*, CPed*, CVector&, CVector&);
+    void GetVectorsReadyForRW();
+    void Get_TwoPlayer_AimVector(CVector&);
+    void IsTimeToExitThisDWCineyCamMode(int32, CVector*, CVector*, float, bool);
+    void KeepTrackOfTheSpeed(const CVector&, const CVector&, const CVector&, const float&, const float&, const float&);
+    void LookBehind();
+    void LookRight(bool bLookRight);
+    void RotCamIfInFrontCar(const CVector&, float);
+    bool Using3rdPersonMouseCam();
+
+    bool Process();
+    bool ProcessArrestCamOne();
+    bool ProcessPedsDeadBaby();
+    bool Process_1rstPersonPedOnPC(const CVector&, float, float, float);
+    bool Process_1stPerson(const CVector&, float, float, float);
+    bool Process_AimWeapon(const CVector&, float, float, float);
+    bool Process_AttachedCam();
+    bool Process_Cam_TwoPlayer();
+    bool Process_Cam_TwoPlayer_InCarAndShooting();
+    bool Process_Cam_TwoPlayer_Separate_Cars();
+    bool Process_Cam_TwoPlayer_Separate_Cars_TopDown();
+    bool Process_DW_BirdyCam(bool);
+    bool Process_DW_CamManCam(bool);
+    bool Process_DW_HeliChaseCam(bool);
+    bool Process_DW_PlaneCam1(bool);
+    bool Process_DW_PlaneCam2(bool);
+    bool Process_DW_PlaneCam3(bool);
+    bool Process_DW_PlaneSpotterCam(bool);
+    bool Process_Editor(const CVector&, float, float, float);
+    bool Process_Fixed(const CVector&, float, float, float);
+    bool Process_FlyBy(const CVector&, float, float, float);
+    bool Process_FollowCar_SA(const CVector&, float, float, float, bool);
+    bool Process_FollowPedWithMouse(const CVector&, float, float, float);
+    bool Process_FollowPed_SA(const CVector&, float, float, float, bool);
+    bool Process_M16_1stPerson(const CVector&, float, float, float);
+    bool Process_Rocket(const CVector&, float, float, float, bool);
+    bool Process_SpecialFixedForSyphon(const CVector&, float, float, float);
+    bool Process_WheelCam(const CVector&, float, float, float);
 };
 
 VALIDATE_SIZE(CCam, 0x238);

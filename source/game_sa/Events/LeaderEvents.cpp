@@ -16,7 +16,7 @@ void CEventLeaderEnteredCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x48E1C0);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0EF0);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0EF0);
 }
 
 void CEventLeaderExitedCarAsDriver::InjectHooks()
@@ -25,7 +25,7 @@ void CEventLeaderExitedCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B8300);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B0F80);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B0F80);
 }
 
 void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
@@ -34,7 +34,7 @@ void CEventLeaderQuitEnteringCarAsDriver::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x63A110);
-    RH_ScopedInstall(AffectsPedGroup_Reversed, 0x4B1010);
+    RH_ScopedVirtualInstall(AffectsPedGroup, 0x4B1010);
 }
 
 void CEventAreaCodes::InjectHooks()
@@ -43,8 +43,8 @@ void CEventAreaCodes::InjectHooks()
     RH_ScopedCategory("Events");
 
     RH_ScopedInstall(Constructor, 0x4B2190);
-    RH_ScopedInstall(AffectsPed_Reversed, 0x4B2270);
-    RH_ScopedInstall(TakesPriorityOver_Reversed, 0x4B2350);
+    RH_ScopedVirtualInstall(AffectsPed, 0x4B2270);
+    RH_ScopedVirtualInstall(TakesPriorityOver, 0x4B2350);
 }
 
 void CEventLeaderEntryExit::InjectHooks()
@@ -58,14 +58,12 @@ void CEventLeaderEntryExit::InjectHooks()
 CEventLeaderEnteredCarAsDriver::CEventLeaderEnteredCarAsDriver(CVehicle* vehicle)
 {
     m_vehicle = vehicle;
-    if (vehicle)
-        vehicle->RegisterReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeRegisterRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver::~CEventLeaderEnteredCarAsDriver()
 {
-    if (m_vehicle)
-        m_vehicle->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_vehicle));
+    CEntity::SafeCleanUpRef(m_vehicle);
 }
 
 CEventLeaderEnteredCarAsDriver* CEventLeaderEnteredCarAsDriver::Constructor(CVehicle* vehicle)
@@ -90,7 +88,7 @@ bool CEventLeaderEnteredCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGrou
 
             if (!member->bInVehicle
                 || member->m_pVehicle != m_vehicle
-                || member->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_LEAVE_CAR))
+                || member->GetTaskManager().Find<TASK_COMPLEX_LEAVE_CAR>())
             {
                 return true;
             }
@@ -145,8 +143,8 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup(CPedGroup* pedGroup)
 
 bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pedGroup)
 {
-    auto oldEventGroupEvent = pedGroup->GetIntelligence().m_oldEventGroupEvent;
-    if (oldEventGroupEvent) 
+    auto oldEventGroupEvent = pedGroup->GetIntelligence().m_pOldEventGroupEvent;
+    if (oldEventGroupEvent)
         return oldEventGroupEvent->m_event->GetEventType() == EVENT_LEADER_ENTERED_CAR_AS_DRIVER;
     return false;
 }
@@ -154,14 +152,12 @@ bool CEventLeaderQuitEnteringCarAsDriver::AffectsPedGroup_Reversed(CPedGroup* pe
 CEventAreaCodes::CEventAreaCodes(CPed* ped)
 {
     m_ped = ped;
-    if (ped)
-        ped->RegisterReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeRegisterRef(m_ped);
 }
 
 CEventAreaCodes::~CEventAreaCodes()
 {
-    if (m_ped)
-        m_ped->CleanUpOldReference(reinterpret_cast<CEntity**>(&m_ped));
+    CEntity::SafeCleanUpRef(m_ped);
 }
 
 CEventAreaCodes* CEventAreaCodes::Constructor(CPed* ped)
@@ -188,13 +184,12 @@ bool CEventAreaCodes::AffectsPed_Reversed(CPed* ped)
         return false;
 
     CPed* targetPed = nullptr;
-    auto killPedOnFootTask = reinterpret_cast<CTaskComplexKillPedOnFoot*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_KILL_PED_ON_FOOT));
-    if (killPedOnFootTask) {
-        targetPed = killPedOnFootTask->m_target;
+    if (const auto killPedOnFoot = ped->GetTaskManager().Find<CTaskComplexKillPedOnFoot>()) {
+        targetPed = killPedOnFoot->m_target;
         if (targetPed != m_ped) {
-            auto arrestPedTask = reinterpret_cast<CTaskComplexArrestPed*>(ped->GetTaskManager().FindActiveTaskByType(TASK_COMPLEX_ARREST_PED));
-            if (arrestPedTask)
-                targetPed = arrestPedTask->m_pedToArrest;
+            if (const auto arrestPed = ped->GetTaskManager().Find<CTaskComplexArrestPed>()) {
+                targetPed = arrestPed->m_PedToArrest;
+            }
         }
     }
 
@@ -220,7 +215,7 @@ bool CEventAreaCodes::TakesPriorityOver_Reversed(const CEvent& refEvent)
 {
     if (CEventHandler::IsTemporaryEvent(refEvent))
         return true;
-    return CEvent::TakesPriorityOver(refEvent); 
+    return CEvent::TakesPriorityOver(refEvent);
 }
 
 CEventLeaderEntryExit* CEventLeaderEntryExit::Constructor(CPed* ped)

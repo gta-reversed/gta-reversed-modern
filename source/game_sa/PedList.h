@@ -6,22 +6,35 @@
 */
 #pragma once
 
-class CPed;
+#include "Base.h"
+
 class CPedGroupMembership;
+class CPed;
 
 class CPedList {
 public:
-    int32 m_nCount;
-    CPed* m_apPeds[30];
+    uint32                m_count{};
+    std::array<CPed*, 30> m_peds{};
 
-    void BuildListFromGroup_NoLeader(CPedGroupMembership* pedGroupMemberShip);
-    void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership* pedGroupMembership);
-    void BuildListOfPedsOfPedType(int32 pedtype);
+public:
+    static void InjectHooks();
+
     void Empty();
-    void ExtractPedsWithGuns(CPedList* pedlist);
-    void FillUpHoles();
-    void RemovePedsAttackingPedType(int32 pedtype);
-    void RemovePedsThatDontListenToPlayer();
-};
+    void BuildListFromGroup_NoLeader(CPedGroupMembership& groupMembership);
+    void ExtractPedsWithGuns(CPedList& from);
 
+    // Inlined functions below (Present in Android version)
+    void FillUpHoles();
+    void BuildListFromGroup_NotInCar_NoLeader(CPedGroupMembership* pedGroupMembership);
+    void BuildListOfPedsOfPedType(int32 pedType);
+    void RemovePedsAttackingPedType(int32 pedType);
+    void RemovePedsThatDontListenToPlayer();
+
+    // NOTSA
+    void ClearUnused();
+    void AddMember(CPed* ped);
+    void RemoveMemberNoFill(int32 i);
+    CPed* Get(int32 i);
+    auto GetPeds() const { return std::span{ m_peds.data(), m_count }; }
+};
 VALIDATE_SIZE(CPedList, 0x7C);

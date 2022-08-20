@@ -8,7 +8,7 @@
 
 #include "TaskSimple.h"
 #include "Vector.h"
-#include "FxSystem_c.h"
+class FxSystem;
 
 enum eSwimState : uint16 {
     SWIM_TREAD                = 0,
@@ -46,38 +46,37 @@ public:
     FxSystem_c* m_pFxSystem;
     bool        m_bTriggerWaterSplash;
 
-    static float &SWIM_DIVE_UNDER_ANGLE;
-    static float &SWIM_STOP_TIME;
+    static constexpr inline float SWIM_DIVE_UNDER_ANGLE = -35.0f; // 0x8D2FC4
+    static constexpr inline float SWIM_STOP_TIME = 15.0f; // 0x8D2FC0
+    // static constexpr inline float LEG_SWING_MAX_ANGLE = 0.7854f; //
 
 public:
+    static constexpr auto Type = TASK_SIMPLE_SWIM;
+
     CTaskSimpleSwim(CVector* pos, CPed* ped);
     ~CTaskSimpleSwim() override;
 
-    // original virtual functions
-    CTask* Clone() override;
-    eTaskType GetTaskType() override;
-    bool MakeAbortable(class CPed* ped, eAbortPriority priority, const CEvent* event) override;
-    bool ProcessPed(CPed *ped) override;
+    CTask* Clone() override { return new CTaskSimpleSwim(&m_vecPos, m_pPed); } // 0x68B050
+    eTaskType GetTaskType() override { return Type; }; // 0x6889F0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
 
-    void ApplyRollAndPitch(CPed* ped);
-    void ProcessSwimAnims(CPed *ped);
-    void ProcessSwimmingResistance(CPed*ped);
-    void ProcessEffects(CPed*ped);
-    void ProcessControlAI(CPed*ped);
-    void ProcessControlInput(CPlayerPed* ped);
     void CreateFxSystem(CPed* ped, RwMatrix* pRwMatrix);
     void DestroyFxSystem();
+
+    void ApplyRollAndPitch(CPed* ped) const;
+    void ProcessSwimAnims(CPed* ped);
+    void ProcessSwimmingResistance(CPed* ped);
+    void ProcessEffects(CPed* ped);
+    void ProcessControlAI(CPed* ped);
+    void ProcessControlInput(CPlayerPed* ped);
 
 private:
     friend void InjectHooksMain();
     static void InjectHooks();
 
     CTaskSimpleSwim* Constructor(CVector* pos, CPed* ped);
-
-    CTask* Clone_Reversed();
-    eTaskType GetId_Reversed() { return TASK_SIMPLE_SWIM; };
     bool ProcessPed_Reversed(CPed* ped);
-    bool MakeAbortable_Reversed(class CPed* ped, eAbortPriority priority, const CEvent* event);
+    bool MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event);
 };
-
 VALIDATE_SIZE(CTaskSimpleSwim, 0x64);

@@ -10,7 +10,7 @@ CTaskSimpleDie::CTaskSimpleDie(AssocGroupId animGroupId, AnimationId animId, flo
     m_blendDelta      = blendDelta;
     m_animHierarchy   = nullptr;
     m_animAssociation = nullptr;
-    m_animFlags       = ANIM_FLAG_DEFAULT;
+    m_animFlags       = ANIMATION_DEFAULT;
     m_nFlags          = 0; // here and below should be &= ~3
 }
 
@@ -40,8 +40,9 @@ CTaskSimpleDie::CTaskSimpleDie(CAnimBlendHierarchy* animHierarchy, eAnimationFla
 
 // 0x62FB40
 CTaskSimpleDie::~CTaskSimpleDie() {
-    if (m_animAssociation)
+    if (m_animAssociation) {
         m_animAssociation->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    }
 }
 
 // 0x637520
@@ -52,12 +53,12 @@ void CTaskSimpleDie::StartAnim(CPed* ped) {
         m_animAssociation = CAnimManager::BlendAnimation(ped->m_pRwClump, m_animGroupId, m_animId, m_blendDelta);
 
     m_animAssociation->SetFinishCallback(FinishAnimDieCB, this);
-    m_animAssociation->m_nFlags &=   ANIM_FLAG_TRANLSATE_X | ANIM_FLAG_TRANLSATE_Y
-                                   | ANIM_FLAG_MOVEMENT
-                                   | ANIM_FLAG_PARTIAL
-                                   | ANIM_FLAG_FREEZE_LAST_FRAME
-                                   | ANIM_FLAG_LOOPED
-                                   | ANIM_FLAG_STARTED;
+    m_animAssociation->m_nFlags &=   ANIMATION_TRANSLATE_X | ANIMATION_TRANSLATE_Y
+                                   | ANIMATION_MOVEMENT
+                                   | ANIMATION_PARTIAL
+                                   | ANIMATION_FREEZE_LAST_FRAME
+                                   | ANIMATION_LOOPED
+                                   | ANIMATION_STARTED;
 
     if (m_animSpeed > 0.0f)
         m_animAssociation->m_fSpeed = m_animSpeed;
@@ -134,19 +135,17 @@ void CTaskSimpleDie::FinishAnimDieCB(CAnimBlendAssociation* association, void* d
     task->m_animAssociation = nullptr;
 }
 
-void CTaskSimpleDie::InjectHooks() {
+void CTaskSimpleDie__InjectHooks() {
     RH_ScopedClass(CTaskSimpleDie);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedOverloadedInstall(Constructor, "1", 0x62FA00, CTaskSimpleDie*(CTaskSimpleDie::*)(AssocGroupId, AnimationId, float, float));
     RH_ScopedOverloadedInstall(Constructor, "2", 0x62FA60, CTaskSimpleDie*(CTaskSimpleDie::*)(const char*, const char*, eAnimationFlags, float, float));
     RH_ScopedOverloadedInstall(Constructor, "3", 0x62FAF0, CTaskSimpleDie*(CTaskSimpleDie::*)(CAnimBlendHierarchy *, eAnimationFlags, float, float));
-    RH_ScopedInstall(Destructor, 0x62FB40);
     RH_ScopedInstall(FinishAnimDieCB, 0x62FC10);
     RH_ScopedInstall(StartAnim, 0x637520);
-    RH_ScopedOverloadedInstall(Clone_Reversed, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
-    RH_ScopedInstall(GetTaskType_Reversed, 0x62FA50);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x62FBA0);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x6397E0);
+    // clang moment: RH_ScopedVirtualOverloadedInstall(Clone, "", 0x635DA0,  CTask *(CTaskSimpleDie::*)());
+    RH_ScopedVirtualInstall(MakeAbortable, 0x62FBA0);
+    RH_ScopedVirtualInstall(ProcessPed, 0x6397E0);
 }
 
 // 0x62FA00
@@ -164,21 +163,6 @@ CTaskSimpleDie* CTaskSimpleDie::Constructor(const char* animName, const char* an
 CTaskSimpleDie* CTaskSimpleDie::Constructor(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed) {
     this->CTaskSimpleDie::CTaskSimpleDie(animHierarchy, animFlags, blendDelta, animSpeed);
     return this;
-}
-
-CTaskSimpleDie* CTaskSimpleDie::Destructor() {
-    CTaskSimpleDie::~CTaskSimpleDie();
-    return this;
-}
-
-// 0x635DA0
-CTask* CTaskSimpleDie::Clone_Reversed() {
-    return CTaskSimpleDie::Clone();
-}
-
-// 0x62FA50
-eTaskType CTaskSimpleDie::GetTaskType_Reversed() {
-    return CTaskSimpleDie::GetTaskType();
 }
 
 // 0x62FBA0

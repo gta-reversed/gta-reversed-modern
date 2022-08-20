@@ -20,6 +20,14 @@
     using RHCurrentNS = name; \
     ReversibleHooks::ScopeName RHCurrentScopeName {#name};
 
+#define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls}; \
+    const auto pGTAVTbl = (void**)addrGTAVtbl; \
+    const auto pOurVTbl = ReversibleHooks::detail::GetVTableAddress(#cls); \
+    const auto nVirtFns = nVirtFns_; \
+    // std::cout << std::format("{}: VMT: Our: {} | GTA: {}\n", RHCurrentScopeName.name, (void*)pOurVTbl, (void*)pGTAVTbl); \
+
 // Use when `name` is a namespace
 #define RH_ScopedNamespace(name) \
     namespace RHCurrentNS = name; \
@@ -42,6 +50,13 @@
 #define RH_ScopedGlobalInstall(fn, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &fn __VA_OPT__(,) __VA_ARGS__)
 
+// Eventually we'll drop _Reversed wrappers for virtual functions, until then, use this for them
+#define RH_ScopedVirtualInstall2 RH_ScopedInstall
+
+// Install a hook on a virtual function
+#define RH_ScopedVirtualInstall(fn, fnAddr, ...) \
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, fnAddr, &RHCurrentNS::fn ## _Reversed __VA_OPT__(,) __VA_ARGS__)
+
 // Tip: If a member function is const just add the `const` keyword after the function arg list;
 // Eg.: `void(CRect::*)(float*, float*) const` (Notice the const at the end) (See function `CRect::GetCenter`)
 #define RH_ScopedOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
@@ -49,6 +64,9 @@
 
 #define RH_ScopedGlobalOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn) __VA_OPT__(,) __VA_ARGS__)
+
+#define RH_ScopedVirtualOverloadedInstall(fn, suffix, fnAddr, addrCast, ...) \
+    ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn "-" suffix, fnAddr, static_cast<addrCast>(&fn ## _Reversed) __VA_OPT__(,) __VA_ARGS__)
 
 // Used in CCheat only - Install global `fn` as name `fnName`
 #define RH_ScopedNamedGlobalInstall(fn, fnName, fnAddr, ...) \
@@ -58,48 +76,84 @@
 #define RH_ScopedNamedInstall(fn, fnName, fnAddr, ...) \
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
+// Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
+#define RH_ScopedVmtInstall(fn, fnGTAAddr, ...) \
+    ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, (void*)fnGTAAddr, nVirtFns __VA_OPT__(,) __VA_ARGS__)
+
 namespace ReversibleHooks {
     class RootHookCategory;
 
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
+    };
+
+    struct HookInstallOptions {
+        bool reversed{ true };          // Has this function been reversed?
+        bool enabled{ reversed };       // Is this hook enabled (eg.: redirects GTA calls to ours or vice versa if disabled) by default?
+        bool locked{ !reversed };       // If this hook shouldn't be switchable from the GUI
+        int jmpCodeSize{ 5 };
+        int stackArguments{ -1 };
     };
 
     RootHookCategory& GetRootCategory();
 
     namespace detail {
-        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, int iJmpCodeSize = 5, bool bDisableByDefault = false);
-        void HookInstallVirtual(std::string_view category, std::string fnName, void* libVTableAddress, std::vector<uint32> vecAddressesToHook);
+        // Change protection of memory pages, and automatically rollback on scope exit
+        struct ScopedVirtualProtectModify {
+            ScopedVirtualProtectModify(LPVOID address, SIZE_T sz, DWORD newProtect = PAGE_EXECUTE_READWRITE) :
+                m_addr{ address },
+                m_sz{ sz }
+            {
+                if (VirtualProtect(address, sz, newProtect, &m_oldProtect) == 0) {
+                    assert(0); // Failed
+                }
+            }
+
+            ~ScopedVirtualProtectModify() {
+                DWORD oldProtect{};
+                if (VirtualProtect(m_addr, m_sz, m_oldProtect, &oldProtect) == 0) {
+                    assert(0); // Failed
+                }
+            }
+
+        private:
+            DWORD  m_oldProtect{};
+            LPVOID m_addr{};
+            DWORD  m_sz{};
+        };
+
+
+        void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
+
         /*void HookSwitch(std::shared_ptr<SReversibleHook> pHook);
         bool IsFunctionHooked(const std::string& category, const std::string& fnName);
         std::shared_ptr<SReversibleHook> GetHook(const std::string& category, const std::string& fnName);*/
         void VirtualCopy(void* dst, void* src, size_t nbytes);
+
+        void** GetVTableAddress(std::string_view name);
     };
 
     template <typename T>
-    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, bool bDisableByDefault = false, int iJmpCodeSize = 5) {
+    static void Install(std::string_view category, std::string fnName, DWORD installAddress, T addressToJumpTo, HookInstallOptions&& opt = {}) {
         auto ptr = FunctionPointerToVoidP(addressToJumpTo);
-        detail::HookInstall(category, std::move(fnName), installAddress, ptr, iJmpCodeSize, bDisableByDefault);
+        detail::HookInstall(category, std::move(fnName), installAddress, ptr, std::move(opt));
     }
 
-    template <typename T>
-    static void InstallVirtual(std::string_view category, std::string fnName, T libVTableAddress, std::vector<uint32> vecAddressesToHook) {
-        auto ptr = FunctionPointerToVoidP(libVTableAddress);
-        detail::HookInstallVirtual(category, std::move(fnName), ptr, std::move(vecAddressesToHook));
-    }
+    void InstallVirtual(std::string_view category, std::string fnName, void** vtblGTA, void** vtblOur, void* fnGTAAddr, size_t nVirtFns, const HookInstallOptions& opt = {});
 
     /*static void Switch(std::shared_ptr<SReversibleHook> pHook) {
         detail::HookSwitch(pHook);
     }*/
 
     void CheckAll();
+    void SwitchHook(std::string_view funcName);
 
     // Stuff called from InjectHooksMain()
 
-    void OnInjectionBegin();
+    void OnInjectionBegin(HMODULE hModule);
     void OnInjectionEnd();
 };

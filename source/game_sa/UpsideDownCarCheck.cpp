@@ -28,14 +28,12 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(int32 carHandle) {
 bool CUpsideDownCarCheck::IsCarUpsideDown(/* const */ CVehicle* vehicle) {
     const auto GetNumContactWheels = [=]() -> uint32 {
         switch (vehicle->m_nVehicleType) {
-        case eVehicleType::VEHICLE_TYPE_BIKE:
-            return vehicle->AsBike()->m_nNumContactWheels;
-        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE:
-            return vehicle->AsAutomobile()->m_nNumContactWheels;
-        default:
-            return 0u;
+        case eVehicleType::VEHICLE_TYPE_BIKE:       return vehicle->AsBike()->m_nNoOfContactWheels;
+        case eVehicleType::VEHICLE_TYPE_AUTOMOBILE: return vehicle->AsAutomobile()->m_nNumContactWheels;
+        default: return 0u;
         }
     };
+
     if (!vehicle->CanPedStepOutCar(false)) {
         const auto& up = vehicle->GetUp();
         return up.z < 0.3f && GetNumContactWheels() < 4  // Not totally up-side down
@@ -47,14 +45,13 @@ bool CUpsideDownCarCheck::IsCarUpsideDown(/* const */ CVehicle* vehicle) {
 // Process
 // 0x4655E0
 void CUpsideDownCarCheck::UpdateTimers() {
-    const auto delta = CTimer::GetTimeStepInMS();
     for (auto& car : m_aUpsideDownCars) {
         if (!car.m_nHandle)
             continue;
 
         if (const auto vehicle = CPools::GetVehicle(car.m_nHandle)) {
             if (IsCarUpsideDown(vehicle)) {
-                car.m_nTime += delta;
+                car.m_nTime += (uint32)CTimer::GetTimeStepInMS();
             } else {
                 car.m_nTime = 0;
             }
@@ -89,8 +86,7 @@ void CUpsideDownCarCheck::AddCarToCheck(int32 carHandle) {
 void CUpsideDownCarCheck::RemoveCarFromCheck(int32 carHandle) {
     for (auto& car : m_aUpsideDownCars) {
         if (car.m_nHandle == carHandle) {
-            car.m_nHandle = -1;
-            car.m_nTime = 0;
+            car.Clear();
         }
     }
 }

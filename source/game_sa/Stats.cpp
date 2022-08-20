@@ -8,6 +8,8 @@
 #include "StdInc.h"
 
 #include "Stats.h"
+#include "MenuSystem.h"
+#include "Hud.h"
 
 tStatMessage (&CStats::StatMessage)[8] = *(tStatMessage(*)[8])0xB78200;
 char (&CStats::LastMissionPassedName)[8] = *(char(*)[8])0xB78A00;
@@ -161,18 +163,19 @@ int32 CStats::FindLeastFavoriteRadioStation() {
 int32 CStats::FindCriminalRatingNumber() {
     CPlayerInfo* playerInfo = FindPlayerPed()->GetPlayerInfoForThisPlayerPed();
 
-    int32 value = (int32)(
+    auto value = (int32)(
         GetStatValue(STAT_TOTAL_LEGITIMATE_KILLS)
         - (GetStatValue(STAT_TIMES_BUSTED) - GetStatValue(STAT_NUMBER_OF_HOSPITAL_VISITS)) * 3.0f
         + (GetStatValue(STAT_HIGHEST_FIREFIGHTER_MISSION_LEVEL) + GetStatValue(STAT_HIGHEST_PARAMEDIC_MISSION_LEVEL)) * 10.0f
-        + playerInfo->m_nMoney / 5000.0f
+        + int32((float)playerInfo->m_nMoney / 5000.0f)
         + GetStatValue(STAT_PLANES_HELICOPTERS_DESTROYED) * 30.0f
         + GetStatValue(STAT_TOTAL_FIRES_EXTINGUISHED)
         + GetStatValue(STAT_CRIMINALS_KILLED_ON_VIGILANTE_MISSION)
-        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE));
+        + GetStatValue(STAT_PEOPLE_SAVED_IN_AN_AMBULANCE)
+    );
 
-    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED)) {
-        value -= 10 * GetStatValue(STAT_TIMES_CHEATED);
+    if (CCheat::m_bHasPlayerCheated || GetStatValue(STAT_TIMES_CHEATED) > 0.0f) {
+        value -= 10 * (int32)GetStatValue(STAT_TIMES_CHEATED);
 
         value = std::max(value, -10000);
     } else {
@@ -297,23 +300,23 @@ void CStats::LoadStatUpdateConditions() {
 
 // 0x5599B0
 void CStats::LoadActionReactionStats() {
-    CFileMgr::SetDir(gta_empty_string);
+    CFileMgr::SetDir("");
 
-    FILESTREAM fp = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
-    char statName[64] = {}; // unused
+    auto* file = CFileMgr::OpenFile("DATA\\AR_STATS.DAT", "rb");
+    char statName[64]{}; // unused
 
-    for (char* line = CFileLoader::LoadLine(fp); line != nullptr; line = CFileLoader::LoadLine(fp)) {
+    for (char* line = CFileLoader::LoadLine(file); line != nullptr; line = CFileLoader::LoadLine(file)) {
         int32 reactId;
         float reactValue;
 
         if (line[0] != '#' && line[0] != NULL) {
-            sscanf(line, "%d %s %f", &reactId, &statName, &reactValue);
+            sscanf(line, "%d %s %f", &reactId, statName, &reactValue);
 
             StatReactionValue[reactId] = reactValue;
         }
     }
 
-    CFileMgr::CloseFile(fp);
+    CFileMgr::CloseFile(file);
 }
 
 // 0x559A50
@@ -410,7 +413,7 @@ void CStats::ProcessReactionStatsOnIncrement(eStats stat) {
 }
 
 // 0x55B980
-void CStats::DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value) {
+void CStats::DisplayScriptStatUpdateMessage(eStatUpdateState state, eStats stat, float value) {
     if (CPad::GetPad(0)->JustOutOfFrontEnd
         || !bShowUpdateStats
         || TheCamera.m_bWideScreenOn
@@ -555,7 +558,7 @@ void CStats::IncrementStat(eStats stat, float value)
     // STAT_RIOT_MISSION_ACCOMPLISHED increment, enum name incorrect?
 
     float kcals = playerInfo->m_nNumHoursDidntEat - value / 2.0f;
-    kcals = clamp(kcals, 0.0f, 36.0f);
+    kcals = std::clamp(kcals, 0.0f, 36.0f);
 
     float healthDiff = playerInfo->m_nMaxHealth - player->m_fHealth;
 
@@ -578,11 +581,11 @@ void CStats::UpdateFatAndMuscleStats(uint32 value) {
 void CStats::UpdateStatsWhenSprinting() {
     UpdateFatAndMuscleStats(static_cast<uint32>(StatReactionValue[STAT_EXERCISE_RATE_SPRINT]));
     if (StatReactionValue[STAT_TIMELIMIT_SPRINT_STAMINA] * 1000.0f >= static_cast<float>(m_SprintStaminaCounter)) {
-        m_SprintStaminaCounter += CTimer::GetTimeStepInMS();
+        m_SprintStaminaCounter += static_cast<uint32>(CTimer::GetTimeStepInMS());
     } else {
         m_SprintStaminaCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_SPRINT_STAMINA]);
     }
 }
 
@@ -590,11 +593,11 @@ void CStats::UpdateStatsWhenSprinting() {
 void CStats::UpdateStatsWhenRunning() {
     UpdateFatAndMuscleStats((uint32)StatReactionValue[STAT_EXERCISE_RATE_RUN]);
     if (StatReactionValue[STAT_TIMELIMIT_RUNNING] * 1000.0f >= static_cast<float>(m_RunningCounter)) {
-        m_RunningCounter += CTimer::GetTimeStepInMS();
+        m_RunningCounter += static_cast<uint32>(CTimer::GetTimeStepInMS());
     } else {
         m_RunningCounter = 0;
         IncrementStat(STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
-        DisplayScriptStatUpdateMessage(1, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_STAMINA, StatReactionValue[STAT_INC_RUNNING]);
     }
 }
 
@@ -623,16 +626,16 @@ void CStats::UpdateStatsWhenOnMotorBike(CBike* bike) {
     auto bikeCounter = static_cast<float>(m_BikeCounter);
     if (StatReactionValue[STAT_TIMELIMIT_MOTORBIKE_SKILL] * 1000.0f >= bikeCounter) {
         const float bikeMoveSpeed = bike->m_vecMoveSpeed.Magnitude();
-        const auto  fTimeStep = static_cast<float>(CTimer::GetTimeStepInMS());
+        const auto  fTimeStep = CTimer::GetTimeStepInMS();
 
-        if (bikeMoveSpeed > 0.6f || bike->m_nNumContactWheels < 3u && bikeMoveSpeed > 0.1f)
+        if (bikeMoveSpeed > 0.6f || bike->m_nNoOfContactWheels < 3u && bikeMoveSpeed > 0.1f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 1.5f + bikeCounter);
         else if (bikeMoveSpeed > 0.2f)
             m_BikeCounter = static_cast<uint32>(fTimeStep * 0.5f + bikeCounter);
     } else {
         m_BikeCounter = 0;
         IncrementStat(STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
-        DisplayScriptStatUpdateMessage(1, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
+        DisplayScriptStatUpdateMessage(STAT_UPDATE_INCREASE, STAT_BIKE_SKILL, StatReactionValue[STAT_INC_MOTORBIKE_SKILL]);
     }
 }
 
@@ -677,11 +680,10 @@ bool CStats::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(LastMissionPassedName,    sizeof(LastMissionPassedName));
     CGenericGameStorage::SaveDataToWorkBuffer(FavoriteRadioStationList, sizeof(FavoriteRadioStationList));
     CGenericGameStorage::SaveDataToWorkBuffer(TimesMissionAttempted,    sizeof(TimesMissionAttempted));
-
+    // todo: CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage,             sizeof(StatMessage));
     for (int32 i = 0; i < sizeof(StatMessage); i++) {
-        CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage[i].displayed, sizeof(bool));
+        CGenericGameStorage::SaveDataToWorkBuffer(&StatMessage[i].displayed, 1);
     }
-
     return true;
 }
 
@@ -693,15 +695,15 @@ bool CStats::Load() {
     CGenericGameStorage::LoadDataFromWorkBuffer(LastMissionPassedName,    sizeof(LastMissionPassedName));
     CGenericGameStorage::LoadDataFromWorkBuffer(FavoriteRadioStationList, sizeof(FavoriteRadioStationList));
     CGenericGameStorage::LoadDataFromWorkBuffer(TimesMissionAttempted,    sizeof(TimesMissionAttempted));
-
+    // todo: CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage,             sizeof(StatMessage));
     for (int32 i = 0; i < sizeof(StatMessage); i++) {
-        CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage[i].displayed, sizeof(uint8));
+        CGenericGameStorage::LoadDataFromWorkBuffer(&StatMessage[i].displayed, 1);
     }
-
     return true;
 }
 
 // Unused
+// 0x558DE0
 char* CStats::GetStatID(eStats stat) {
     if (!GetStatType(stat)) // int32
         sprintf(gString, "stat_i_%d", stat);
@@ -712,17 +714,21 @@ char* CStats::GetStatID(eStats stat) {
 }
 
 // Unused
-char CStats::GetTimesMissionAttempted(uint8 missionId) {
+// 0x558E70
+int8 CStats::GetTimesMissionAttempted(uint8 missionId) {
     return TimesMissionAttempted[missionId];
 }
 
 // Unused
+// 0x558E80
 void CStats::RegisterMissionAttempted(uint8 missionId) {
-    if (TimesMissionAttempted[missionId] != -1)
+    if (TimesMissionAttempted[missionId] != -1) {
         TimesMissionAttempted[missionId]++;
+    }
 }
 
 // Unused
+// 0x558EA0
 void CStats::RegisterMissionPassed(uint8 missionId) {
     TimesMissionAttempted[missionId] = -1;
 }

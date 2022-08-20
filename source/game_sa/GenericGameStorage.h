@@ -2,6 +2,12 @@
 
 static constexpr auto MAX_SAVEGAME_SLOTS{ 8u };
 
+enum class eSlotState {
+    IN_USE,
+    EMPTY,
+    CORRUPT
+};
+
 class CGenericGameStorage {
     static constexpr auto BUFFER_SIZE{ (uint32)(50u * 1024u) };
 
@@ -45,13 +51,6 @@ class CGenericGameStorage {
         SYNC,
         LOADING,
         SAVING
-    };
-
-public:
-    enum class eSlotState {
-        IN_USE,
-        EMPTY,
-        CORRUPT
     };
         
 public:

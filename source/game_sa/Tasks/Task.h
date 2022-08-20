@@ -23,7 +23,7 @@ class CTask {
 public:
     CTask* m_pParentTask;
 
-    void* operator new(unsigned size);
+    void* operator new(size_t size);
     void operator delete(void* object);
 
     CTask() { m_pParentTask = nullptr; } // 0x61A340
@@ -37,16 +37,12 @@ public:
     virtual bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) = 0;
 
     static bool IsGoToTask(CTask* task);
+    static bool IsTaskPtr(CTask* task);
 
     CTaskSimple*  AsSimple()  { return reinterpret_cast<CTaskSimple*>(this); }
     CTaskComplex* AsComplex() { return reinterpret_cast<CTaskComplex*>(this); }
-
-private:
-    friend void InjectHooksMain();
-    static void InjectHooks();
-
-    void* New(uint32);
-    void  Delete(void* object);
 };
-
 VALIDATE_SIZE(CTask, 0x8);
+
+template<typename T>
+concept Task = std::is_base_of_v<CTask, T>;

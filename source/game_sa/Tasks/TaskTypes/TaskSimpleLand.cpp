@@ -2,27 +2,24 @@
 
 #include "TaskSimpleLand.h"
 
-void CTaskSimpleLand::InjectHooks()
-{
+void CTaskSimpleLand::InjectHooks() {
     RH_ScopedClass(CTaskSimpleLand);
     RH_ScopedCategory("Tasks/TaskTypes");
     RH_ScopedInstall(Constructor, 0x678E90);
     RH_ScopedInstall(LeftFootLanded, 0x679010);
     RH_ScopedInstall(RightFootLanded, 0x678FE0);
     RH_ScopedInstall(FinishAnimCB, 0x678FA0);
-    RH_ScopedInstall(MakeAbortable_Reversed, 0x678F40);
-    RH_ScopedInstall(ProcessPed_Reversed, 0x67D380);
+    RH_ScopedVirtualInstall(MakeAbortable, 0x678F40);
+    RH_ScopedVirtualInstall(ProcessPed, 0x67D380);
 }
 
-CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId)
-{
+CTaskSimpleLand* CTaskSimpleLand::Constructor(AnimationId nAnimId) {
     this->CTaskSimpleLand::CTaskSimpleLand(nAnimId);
     return this;
 }
 
 // 0x678E90
-CTaskSimpleLand::CTaskSimpleLand(AnimationId nAnimId)
-{
+CTaskSimpleLand::CTaskSimpleLand(AnimationId nAnimId) : CTaskSimple() {
     m_nAnimId = nAnimId;
     bIsFinished = false;
     bNoAnimation = (nAnimId == -1);
@@ -31,30 +28,27 @@ CTaskSimpleLand::CTaskSimpleLand(AnimationId nAnimId)
 }
 
 // 0x678EE0
-CTaskSimpleLand::~CTaskSimpleLand()
-{
-    if (m_pAnim)
+CTaskSimpleLand::~CTaskSimpleLand() {
+    if (m_pAnim) {
         m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    }
 }
 
 // 0x67D380
-bool CTaskSimpleLand::ProcessPed(CPed* ped)
-{
+bool CTaskSimpleLand::ProcessPed(CPed* ped) {
     return ProcessPed_Reversed(ped);
 }
 
 // 0x678F40
-bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleLand::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     return MakeAbortable_Reversed(ped, priority, event);
 }
 
-bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
-{
+bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped) {
     if (bIsFinished) {
         ped->bIsLanding = false;
         if (!bNoAnimation) {
-            AnimationId aAnimIds[3] = {ANIM_ID_WALK, ANIM_ID_RUN, ANIM_ID_SPRINT};
+            AnimationId aAnimIds[3] = { ANIM_ID_WALK, ANIM_ID_RUN, ANIM_ID_SPRINT };
             for (auto animId : aAnimIds) {
                 m_pAnim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId);
                 if (m_pAnim)
@@ -73,7 +67,7 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
 
         if (bPedNotUpdated) {
             if (!(ped->GetUp().z == 1.0F && ped->m_vecTurnSpeed.IsZero())) {
-                ped->m_vecTurnSpeed.Set(0.0F, 0.0F, 0.0F);
+                ped->ResetTurnSpeed();
                 ped->SetHeading(ped->m_fCurrentRotation);
             }
 
@@ -96,16 +90,14 @@ bool CTaskSimpleLand::ProcessPed_Reversed(CPed* ped)
     }
 }
 
-bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event)
-{
+bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority, const CEvent* event) {
     if (priority != ABORT_PRIORITY_IMMEDIATE)
         return false;
 
-    if (m_pAnim)
-    {
+    if (m_pAnim) {
         m_pAnim->m_fBlendDelta = -1000.0F;
-        m_pAnim->m_nFlags |= ANIM_FLAG_FREEZE_LAST_FRAME;
-        m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); //doesn't make sense, since there is only one callback function
+        m_pAnim->m_nFlags |= ANIMATION_FREEZE_LAST_FRAME;
+        m_pAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr); // doesn't make sense, since there is only one callback function
         m_pAnim->SetDeleteCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
         m_pAnim = nullptr;
     }
@@ -115,23 +107,19 @@ bool CTaskSimpleLand::MakeAbortable_Reversed(CPed* ped, eAbortPriority priority,
 }
 
 // 0x679010
-bool CTaskSimpleLand::LeftFootLanded()
-{
+bool CTaskSimpleLand::LeftFootLanded() {
     return m_pAnim && m_pAnim->m_fCurrentTime >= 0.2F && m_pAnim->m_fCurrentTime - m_pAnim->m_fTimeStep < 0.2F;
 }
 
 // 0x678FE0
-bool CTaskSimpleLand::RightFootLanded()
-{
+bool CTaskSimpleLand::RightFootLanded() {
     return m_pAnim && m_pAnim->m_fCurrentTime >= 0.1F && m_pAnim->m_fCurrentTime - m_pAnim->m_fTimeStep < 0.1F;
 }
 
 // 0x678FA0
-void CTaskSimpleLand::FinishAnimCB(CAnimBlendAssociation* anim, void* data)
-{
+void CTaskSimpleLand::FinishAnimCB(CAnimBlendAssociation* anim, void* data) {
     auto task = reinterpret_cast<CTaskSimpleLand*>(data);
-    if (task)
-    {
+    if (task) {
         task->bIsFinished = true;
         task->m_pAnim = nullptr;
     }

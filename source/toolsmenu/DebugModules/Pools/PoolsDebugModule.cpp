@@ -7,6 +7,7 @@
 // #include "Attractors\PedAttractor.h"
 #include "EntryExitManager.h"
 #include "StuntJumpManager.h"
+#include "CustomCarEnvMapPipeline.h"
 
 namespace PoolsDebugModule {
 
@@ -21,10 +22,11 @@ void Draw(auto* pool, const char* name) {
     ImGui::Text("%d", pool->GetSize());
 
     ImGui::TableNextColumn();
-        
-    const float percentage = pool->GetNoOfUsedSpaces() > 0 ? static_cast<float>(pool->GetNoOfUsedSpaces() / static_cast<float>(pool->GetSize())) : 0.0f;
+
+    const auto used = pool->GetNoOfUsedSpaces();
+    const auto percentage = static_cast<float>(used / static_cast<float>(pool->GetSize()));
     ImGui::PushStyleColor(ImGuiCol_Text, { 2.0f * percentage, 2.0f * (1.0f - percentage), 0.0f, 1.0f });
-    ImGui::Text("%d", pool->GetNoOfUsedSpaces());
+    ImGui::Text("%d", used);
     ImGui::PopStyleColor();
 
     ImGui::TableNextColumn();

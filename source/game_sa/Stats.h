@@ -10,7 +10,7 @@
 #include "eStatModAbilities.h"
 #include "eStatsReactions.h"
 
-enum eStatUpdateState {
+enum eStatUpdateState : uint8 {
     STAT_UPDATE_DECREASE = 0,
     STAT_UPDATE_INCREASE = 1
 };
@@ -73,7 +73,7 @@ public:
     static char* GetStatID(eStats stat);
     static bool GetStatType(eStats stat);
     static float GetStatValue(eStats stat);
-    static char GetTimesMissionAttempted(uint8 missionId);
+    static int8 GetTimesMissionAttempted(uint8 missionId);
     static void RegisterMissionAttempted(uint8 missionId);
     static void RegisterMissionPassed(uint8 missionId);
     static bool PopulateFavoriteRadioStationList();
@@ -101,11 +101,11 @@ public:
     static char* FindCriminalRatingString();
     static int32 ConstructStatLine(int32 arg0, uint8 arg1);
     static void ProcessReactionStatsOnIncrement(eStats stat);
-    static void DisplayScriptStatUpdateMessage(uint8 state, eStats stat, float value);
+    static void DisplayScriptStatUpdateMessage(eStatUpdateState state, eStats stat, float value);
     static void UpdateRespectStat(uint8 arg0);
     static void UpdateSexAppealStat();
     static void Init();
-    static void IncrementStat(eStats stat, float value);
+    static void IncrementStat(eStats stat, float value = 1.f);
     static void SetNewRecordStat(eStats stat, float value);
     static void UpdateFatAndMuscleStats(uint32 value);
     static void UpdateStatsWhenSprinting();

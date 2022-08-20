@@ -8,7 +8,7 @@
 
 #include "Building.h"
 
-class CAnimatedBuilding : public CBuilding {
+class NOTSA_EXPORT_VTABLE CAnimatedBuilding : public CBuilding {
 public:
     CAnimatedBuilding() : CBuilding() {}
 

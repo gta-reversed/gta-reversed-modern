@@ -8,16 +8,17 @@ public:
     uint32 m_nRopeId;
     float  m_fCoorAlongRope;
     uint8  m_bIsOnHeli;
-    uint8  _pad_15[3];
     CHeli* m_pHeli;
 
 public:
+    static constexpr auto Type = TASK_COMPLEX_USE_SWAT_ROPE;
+
     CTaskComplexUseSwatRope(uint32 ropeId, CHeli* heli);
-    CTaskComplexUseSwatRope(uint32 ropeId);
+    explicit CTaskComplexUseSwatRope(uint32 ropeId);
     ~CTaskComplexUseSwatRope() override;
 
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_USE_SWAT_ROPE; }
+    eTaskType GetTaskType() override { return Type; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;

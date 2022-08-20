@@ -42,14 +42,14 @@ bool& CPostEffects::m_bWaterDepthDarkness = *(bool*)0x8D5144;           // true;
 bool& CPostEffects::m_bHeatHazeFX = *(bool*)0xC402BA;
 int32& CPostEffects::m_HeatHazeFXSpeedMin = *(int32*)0x8D50EC;      // 6
 int32& CPostEffects::m_HeatHazeFXSpeedMax = *(int32*)0x8D50F0;      // 10
-uint32& CPostEffects::m_HeatHazeFXIntensity = *(uint32*)0x8D50E8;   // 150
-uint32& CPostEffects::m_HeatHazeFXType = *(uint32*)0xC402BC;        // 0
-uint32& CPostEffects::m_HeatHazeFXTypeLast = *(uint32*)0x8D50E4;    // -1
-uint32& CPostEffects::m_HeatHazeFXRandomShift = *(uint32*)0xC402C0;
-uint32& CPostEffects::m_HeatHazeFXScanSizeX = *(uint32*)0xC40304;   // uint32(SCREEN_WIDTH_UNIT  * 24.0f);
-uint32& CPostEffects::m_HeatHazeFXScanSizeY = *(uint32*)0xC40308;   // uint32(SCREEN_HEIGHT_UNIT * 24.0f);
-uint32& CPostEffects::m_HeatHazeFXRenderSizeX = *(uint32*)0xC4030C; // uint32(SCREEN_WIDTH_UNIT  * 24.0f);
-uint32& CPostEffects::m_HeatHazeFXRenderSizeY = *(uint32*)0xC40310; // uint32(SCREEN_HEIGHT_UNIT * 24.0f);
+int32& CPostEffects::m_HeatHazeFXIntensity = *(int32*)0x8D50E8;   // 150
+int32& CPostEffects::m_HeatHazeFXType = *(int32*)0xC402BC;        // 0
+int32& CPostEffects::m_HeatHazeFXTypeLast = *(int32*)0x8D50E4;    // -1
+int32& CPostEffects::m_HeatHazeFXRandomShift = *(int32*)0xC402C0;
+int32& CPostEffects::m_HeatHazeFXScanSizeX = *(int32*)0xC40304;   // int32(SCREEN_WIDTH_UNIT  * 24.0f);
+int32& CPostEffects::m_HeatHazeFXScanSizeY = *(int32*)0xC40308;   // int32(SCREEN_HEIGHT_UNIT * 24.0f);
+int32& CPostEffects::m_HeatHazeFXRenderSizeX = *(int32*)0xC4030C; // int32(SCREEN_WIDTH_UNIT  * 24.0f);
+int32& CPostEffects::m_HeatHazeFXRenderSizeY = *(int32*)0xC40310; // int32(SCREEN_HEIGHT_UNIT * 24.0f);
 
 bool& CPostEffects::m_bFog = *(bool*)0xC402C6;
 
@@ -126,9 +126,9 @@ CRGBA& CPostEffects::m_waterCol = *(CRGBA*)0x8D5140;      // { 64, 64, 64, 64 }
 RwIm2DVertex (&cc_vertices)[4] = *(RwIm2DVertex(*)[4])0xC400D8;
 RwImVertexIndex (&cc_indices)[12] = *(RwImVertexIndex(*)[12])0x8D5174; // { 0, 1, 2, 0, 2, 3, 0, 1, 2, 0, 2, 3 };
 
-float (&dword_C3F868_SPEED)[180] = *(float (*)[180])0xC3F868;
-float (&dword_C3FB38_Y)[180] = *(float (*)[180])0xC3FB38;
-float (&dword_C3FE08_X)[180] = *(float (*)[180])0xC3FE08;
+int32 (&hpX)[180] = *(int32(*)[180])0xC3FE08;
+int32 (&hpY)[180] = *(int32(*)[180])0xC3FB38;
+int32 (&hpS)[180] = *(int32(*)[180])0xC3F868; // speed
 
 void CPostEffects::InjectHooks() {
     RH_ScopedClass(CPostEffects);
@@ -203,36 +203,38 @@ void CPostEffects::SetupBackBufferVertex() {
     // log(2.0) = 0.69314718055994528623
 
     // get maximum 2^N dimensions
-    float width  = (int32)pow(2.0f, (int32)log2((float)RwRasterGetWidth(raster)));
-    float height = (int32)pow(2.0f, (int32)log2((float)RwRasterGetHeight(raster)));
+    const auto width  = (int32)std::pow(2.0f, (int32)log2((float)RwRasterGetWidth(raster)));
+    const auto height = (int32)std::pow(2.0f, (int32)log2((float)RwRasterGetHeight(raster)));
+    const auto fwidth = float(width);
+    const auto fheight = float(height);
 
     const auto InitVertices = [=]() {
         cc_vertices[0].x = 0.0f;
         cc_vertices[0].y = 0.0f;
         cc_vertices[0].z = RwIm2DGetNearScreenZ();
         cc_vertices[0].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-        cc_vertices[0].u = 0.5f / width;
-        cc_vertices[0].v = 0.5f / height;
+        cc_vertices[0].u = 0.5f / fwidth;
+        cc_vertices[0].v = 0.5f / fheight;
 
         cc_vertices[1].x = 0.0f;
-        cc_vertices[1].y = height;
+        cc_vertices[1].y = fheight;
         cc_vertices[1].z = RwIm2DGetNearScreenZ();
         cc_vertices[1].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-        cc_vertices[1].u = 0.5f / width;
-        cc_vertices[1].v = (height + 0.5f) / height;
+        cc_vertices[1].u = 0.5f / fwidth;
+        cc_vertices[1].v = (fheight + 0.5f) / fheight;
 
-        cc_vertices[2].x = width;
-        cc_vertices[2].y = height;
+        cc_vertices[2].x = fwidth;
+        cc_vertices[2].y = fheight;
         cc_vertices[2].z = RwIm2DGetNearScreenZ();
         cc_vertices[3].y = 0.0f;
         cc_vertices[2].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
-        cc_vertices[2].u = (width + 0.5f) / width;
-        cc_vertices[2].v = (height + 0.5f) / height;
+        cc_vertices[2].u = (fwidth + 0.5f) / fwidth;
+        cc_vertices[2].v = (fheight + 0.5f) / fheight;
 
-        cc_vertices[3].x = width;
+        cc_vertices[3].x = fwidth;
         cc_vertices[3].z = RwIm2DGetNearScreenZ();
-        cc_vertices[3].u = (width + 0.5f) / width;
-        cc_vertices[3].v = 0.5f / height;
+        cc_vertices[3].u = (fwidth + 0.5f) / fwidth;
+        cc_vertices[3].v = 0.5f / fheight;
         cc_vertices[3].rhw = 1.0f / RwCameraGetNearClipPlane(Scene.m_pRwCamera);
 
         if (pRasterFrontBuffer) {
@@ -250,7 +252,7 @@ void CPostEffects::SetupBackBufferVertex() {
         pRasterFrontBuffer = nullptr;
     }
 
-    pRasterFrontBuffer = RasterCreatePostEffects({0, 0, 64, 64});
+    pRasterFrontBuffer = RasterCreatePostEffects({ 0, 0, 64, 64 });
     if (!pRasterFrontBuffer) {
         printf("Error subrastering");
         RwRasterDestroy(pRasterFrontBuffer);
@@ -405,7 +407,7 @@ void CPostEffects::ScriptDarknessFilterSwitch(bool enable, int32 alpha) {
     if (alpha == 255) {
         m_DarknessFilterAlpha = m_DarknessFilterAlphaDefault;
     } else {
-        m_DarknessFilterAlpha = clamp(0, alpha, 255);
+        m_DarknessFilterAlpha = std::clamp(0, alpha, 255);
     }
 }
 
@@ -445,8 +447,8 @@ void CPostEffects::ScriptResetForEffects() {
 }
 
 // 0x7039C0
-void CPostEffects::UnderWaterRipple(RwRGBA a1, float a2, float a3, int32 a4, float a5, float a6) {
-    plugin::Call<0x7039C0, RwRGBA, float, float, int32, float, float>(a1, a2, a3, a4, a5, a6);
+void CPostEffects::UnderWaterRipple(RwRGBA col, float xoffset, float yoffset, int32 strength, float speed, float freq) {
+    plugin::Call<0x7039C0, RwRGBA, float, float, int32, float, float>(col, xoffset, yoffset, strength, speed, freq);
 }
 
 // unused
@@ -519,15 +521,15 @@ void CPostEffects::HeatHazeFXInit() {
     m_HeatHazeFXTypeLast = m_HeatHazeFXType;
 
     for (auto i = 0; i < 180; i++) {
-        dword_C3FE08_X[i]     = CGeneral::GetRandomNumberInRange(m_HeatHazeFXScanSizeX, RwRasterGetWidth(pRasterFrontBuffer));
-        dword_C3FB38_Y[i]     = CGeneral::GetRandomNumberInRange(m_HeatHazeFXScanSizeY, RwRasterGetHeight(pRasterFrontBuffer));
-        dword_C3F868_SPEED[i] = CGeneral::GetRandomNumberInRange(m_HeatHazeFXSpeedMin,  m_HeatHazeFXSpeedMax);
+        hpX[i] = CGeneral::GetRandomNumberInRange(m_HeatHazeFXScanSizeX, RwRasterGetWidth(pRasterFrontBuffer));
+        hpY[i] = CGeneral::GetRandomNumberInRange(m_HeatHazeFXScanSizeY, RwRasterGetHeight(pRasterFrontBuffer));
+        hpS[i] = CGeneral::GetRandomNumberInRange(m_HeatHazeFXSpeedMin,  m_HeatHazeFXSpeedMax);
     }
 }
 
 // 0x701780
-void CPostEffects::HeatHazeFX(float a1, bool a2) {
-    plugin::Call<0x701780, float, bool>(a1, a2);
+void CPostEffects::HeatHazeFX(float fIntensity, bool bAlphaMaskMode) {
+    plugin::Call<0x701780, float, bool>(fIntensity, bAlphaMaskMode);
 }
 
 // 0x7034F0
@@ -669,7 +671,7 @@ void CPostEffects::InfraredVisionStoreAndSetLightsForHeatObjects(CPed* ped) {
     auto blue  = m_fInfraredVisionHeatObjectCol.blue;
     auto alpha = m_fInfraredVisionHeatObjectCol.alpha;
 
-    // here we go to fuck cold carbon
+    // here we go to fuck cold carbon (Explanation: https://sampik.ru/articles/468-pochemu-piratskij-perevod-gtasa-takoj-strannyj.html)
     // gradually changing from red to blue (dead)
     if (ped->m_nPedState == PEDSTATE_DEAD) {
         auto time = CTimer::GetTimeInMS() - ped->m_nDeathTime;
@@ -710,8 +712,8 @@ void CPostEffects::CCTV() {
 }
 
 // 0x7037C0
-void CPostEffects::Grain(int32 strength, bool a2) {
-    plugin::Call<0x7037C0, int32, bool>(strength, a2);
+void CPostEffects::Grain(int32 strengthMask, bool update) {
+    plugin::Call<0x7037C0, int32, bool>(strengthMask, update);
 }
 
 // 0x7030A0
@@ -720,8 +722,8 @@ void CPostEffects::SpeedFX(float speed) {
 }
 
 // 0x702F00
-void CPostEffects::DarknessFilter(int32 a1) {
-    plugin::Call<0x702F00, int32>(a1);
+void CPostEffects::DarknessFilter(int32 alpha) {
+    plugin::Call<0x702F00, int32>(alpha);
 }
 
 // 0x703650
@@ -756,13 +758,8 @@ void CPostEffects::ColourFilter(RwRGBA pass1, RwRGBA pass2) {
 }
 
 // 0x702080
-void CPostEffects::Radiosity(int32 a1, int32 a2, int32 a3, int32 a4) {
+void CPostEffects::Radiosity(int32 intensityLimit, int32 filterPasses, int32 renderPasses, int32 intensity) {
     plugin::Call<0x702080>();
-}
-
-//0x619450
-bool RsCameraBeginUpdate(RwCamera* camera) {
-    return plugin::CallAndReturn<bool, 0x619450, RwCamera*>(camera);
 }
 
 // 0x7046E0

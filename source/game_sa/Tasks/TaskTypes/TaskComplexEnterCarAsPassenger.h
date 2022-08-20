@@ -10,11 +10,13 @@
 
 class CTaskComplexEnterCarAsPassenger : public CTaskComplexEnterCar {
 public:
-    CTaskComplexEnterCarAsPassenger(CVehicle* targetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff);
-    ~CTaskComplexEnterCarAsPassenger() {}
+    static constexpr auto Type = TASK_COMPLEX_ENTER_CAR_AS_PASSENGER;
 
+    CTaskComplexEnterCarAsPassenger(CVehicle* targetVehicle, int32 nTargetSeat, bool bCarryOnAfterFallingOff);
+    ~CTaskComplexEnterCarAsPassenger() override = default;
+
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_COMPLEX_ENTER_CAR_AS_PASSENGER; }
 };
 
 VALIDATE_SIZE(CTaskComplexEnterCarAsPassenger, 0x50);

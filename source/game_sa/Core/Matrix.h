@@ -27,7 +27,6 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
-    CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
@@ -38,26 +37,33 @@ public:
 
 private:
     // RwV3d-like:
-    CVector m_right;
-    uint32  flags;
-    CVector m_forward;
-    uint32  pad1;
-    CVector m_up;
-    uint32  pad2;
-    CVector m_pos;
-    uint32  pad3;
+    CVector m_right;        // 0x0
+    uint32  flags;          // 0xC
+    CVector m_forward;      // 0x10
+    uint32  pad1;           // 0x1C
+    CVector m_up;           // 0x20
+    uint32  pad2;           // 0x2C
+    CVector m_pos;          // 0x30
+    uint32  pad3;           // 0x3C
 
 public:
-    RwMatrix* m_pAttachMatrix;
-    bool      m_bOwnsAttachedMatrix; // do we need to delete attaching matrix at detaching
+    RwMatrix* m_pAttachMatrix;       // 0x40
+    bool      m_bOwnsAttachedMatrix; // 0x44 - Do we need to delete attached matrix at detaching
 
 public:
     static void InjectHooks();
 
-    inline CVector& GetRight() { return m_right; }
-    inline CVector& GetForward() { return m_forward; }
-    inline CVector& GetUp() { return m_up; }
-    inline CVector& GetPosition() { return m_pos; }
+    CVector& GetRight() { return m_right; }
+    const CVector& GetRight() const { return m_right; }
+
+    CVector& GetForward() { return m_forward; }
+    const CVector& GetForward() const { return m_forward; }
+
+    CVector& GetUp() { return m_up; }
+    const CVector& GetUp() const { return m_up; }
+
+    CVector& GetPosition() { return m_pos; }
+    const CVector& GetPosition() const { return m_pos; }
 
     void Attach(RwMatrix* matrix, bool bOwnsMatrix);
     void Detach();
@@ -100,12 +106,12 @@ public:
     static uint8* EulerIndices2;
 
     void SetRotate(const CVector& rot) {
-        SetRotate(rot.x, rot.z, rot.z);
+        SetRotate(rot.x, rot.y, rot.z);
     }
 
     void SetRotateKeepPos(const CVector& rot) {
         auto pos{ m_pos };
-        SetRotate(rot.x, rot.z, rot.z);
+        SetRotate(rot.x, rot.y, rot.z);
         m_pos = pos;
     }
 

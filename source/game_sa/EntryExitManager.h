@@ -17,6 +17,14 @@ class CEntity;
 
 typedef CPool<CEntryExit> CEntryExitsPool;
 
+enum ExitEnterState : int32 {
+    EXIT_ENTER_STATE_0,
+    EXIT_ENTER_STATE_1,
+    EXIT_ENTER_STATE_2,
+    EXIT_ENTER_STATE_3,
+    EXIT_ENTER_STATE_4,
+};
+
 class CEntryExitManager {
 public:
     static CEntryExit* (&ms_entryExitStack)[4]; // static CEntryExit *ms_entryExitStack[4]
@@ -25,7 +33,7 @@ public:
     static CEntity* (&ms_visibleEntityList)[32]; // static CEntity *ms_visibleEntityList[32]
     static int32& ms_entryExitStackPosn;
     static bool& ms_bDisabled;
-    static int32& ms_exitEnterState;
+    static ExitEnterState& ms_exitEnterState;
     static CQuadTreeNode*& mp_QuadTree;
     static CEntryExit*& mp_Active;
     static CEntryExitsPool*& mp_poolEntryExits;

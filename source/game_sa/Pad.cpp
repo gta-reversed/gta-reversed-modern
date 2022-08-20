@@ -9,6 +9,8 @@
 #include "Pad.h"
 
 #include "CDebugMenu.h"
+#include "ControllerConfigManager.h"
+#include "app.h"
 
 // mouse states
 CMouseControllerState& CPad::PCTempMouseControllerState = *(CMouseControllerState*)0xB73404;
@@ -31,8 +33,6 @@ static char& byte_B73401 = *(char*)0xB73401; // unused, unknown
 void CPad::InjectHooks() {
     RH_ScopedClass(CPad);
     RH_ScopedCategoryGlobal();
-
-    HookInstall(0x541DD0, CPad::UpdatePads); // changes logic of the function and shouldn't be toggled on/off
 
     // CPad", 0x541D80, &CPad::Constructor);
     // CPad~", 0x53ED60, &CPad::Destructor);
@@ -227,8 +227,8 @@ void CPad::UpdatePads() {
     OldKeyState = NewKeyState;
     NewKeyState = TempKeyState;
 
-    CDebugMenu::ImguiInitialise();
-    CDebugMenu::ImguiInputUpdate();
+    CDebugMenu::ImGuiInitialise();
+    CDebugMenu::ImGuiInputUpdate();
 }
 
 // 0x53F3C0
@@ -400,6 +400,13 @@ void CPad::StartShake_Train(const CVector2D& point) {
     }
 }
 */
+
+// 0x541D70
+void CPad::StopPadsShaking() {
+    for (auto i = 0u; i < std::size(Pads); i++) {
+        GetPad(i)->StopShaking(i);
+    }
+}
 
 // 0x53FB50
 void CPad::StopShaking(int16 arg0) {
@@ -865,11 +872,8 @@ int16 CPad::GetDisplayVitalStats(CPed* ped) const {
     if (DisablePlayerControls || bDisablePlayerDisplayVitalStats)
         return false;
 
-    if (Mode <= 3) {
-        return ped && ped->GetIntelligence()->IsUsingGun() && NewState.LeftShoulder1;
-    } else {
-        return false;
-    }
+    bool isUsingGun = ped && ped->GetIntelligence()->IsUsingGun();
+    return Mode <= 3u && !isUsingGun && NewState.LeftShoulder1 != 0;
 }
 
 // 0x540A70
@@ -1037,6 +1041,7 @@ int16 CPad::AimWeaponUpDown(CPed* ped) const {
     return bInvertLook4Pad ? -GetRightStickY() : GetRightStickY();
 }
 
+// 0x541290
 int32 CPad::sub_541290() {
     if (DisablePlayerControls || bDisablePlayerFireWeapon) {
         AverageWeapon = 0;
@@ -1068,85 +1073,85 @@ int32 CPad::sub_541290() {
 
 // 0x540A40
 bool CPad::sub_540A40() {
-    static int16 word_B73704 = *(int16*)0xB73704;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
+    static int16 oldfStickX = 0; // 0xB73704
+    auto leftStickX = GetPad()->GetLeftStickX();
 
-    if (leftStickX || word_B73704 <= leftStickX) {
-        word_B73704 = leftStickX;
-        return false;
-    } else {
-        word_B73704 = leftStickX;
+    if (!leftStickX && oldfStickX > leftStickX) {
+        oldfStickX = leftStickX;
         return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
     }
 }
 
 // 0x540A10
 bool CPad::sub_540A10() {
-    static int16 word_B73700 = *(int16*)0xB73700;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
+    static int16 oldfStickX = 0; // 0xB73700
+    auto leftStickX = GetPad()->GetLeftStickX();
 
-    if (leftStickX || word_B73700 >= leftStickX) {
-        word_B73700 = leftStickX;
-        return false;
-    } else {
-        word_B73700 = leftStickX;
+    if (!leftStickX && oldfStickX < leftStickX) {
+        oldfStickX = leftStickX;
         return true;
-    }
-}
-
-// 0x5409E0
-bool CPad::sub_5409E0() {
-    static int16 word_B736FC = *(int16*)0xB736FC;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
-
-    if (leftStickX <= 15 || word_B736FC > 5) {
-        word_B736FC = leftStickX;
-        return false;
     } else {
-        word_B736FC = leftStickX;
-        return true;
-    }
-}
-
-// 0x5409B0
-bool CPad::sub_5409B0() {
-    static int16 word_B736F8 = *(int16*)0xB736F8;
-    auto leftStickX = GetPad(0)->GetLeftStickX();
-
-    if (leftStickX >= -15 || word_B736F8 < -5) {
-        word_B736F8 = leftStickX;
+        oldfStickX = leftStickX;
         return false;
-    } else {
-        word_B736F8 = leftStickX;
-        return true;
-    }
-}
-
-// 0x540980
-bool CPad::sub_540980() {
-    static int16 word_B736F4 = *(int16*)0xB736F4;
-    auto leftStickY = GetPad(0)->GetLeftStickY();
-
-    if (leftStickY <= 15 || word_B736F4 > 5) {
-        word_B736F4 = leftStickY;
-        return false;
-    } else {
-        word_B736F4 = leftStickY;
-        return true;
     }
 }
 
 // 0x540950
-bool CPad::sub_540950() {
-    static int16 word_B736F0 = *(int16*)0xB736F0;
-    auto leftStickY = GetPad(0)->GetLeftStickY();
+bool CPad::GetAnaloguePadLeft() {
+    static int16 oldfStickY = 0; // 0xB736F0
+    auto leftStickY = GetPad()->GetLeftStickY();
 
-    if (leftStickY >= -15 || word_B736F0 < -5) {
-        word_B736F0 = leftStickY;
-        return false;
-    } else {
-        word_B736F0 = leftStickY;
+    if (leftStickY < -15 && oldfStickY >= -5) {
+        oldfStickY = leftStickY;
         return true;
+    } else {
+        oldfStickY = leftStickY;
+        return false;
+    }
+}
+
+// 0x5409B0
+bool CPad::GetAnaloguePadUp() {
+    static int16 oldfStickX = 0; // 0xB736F8
+    auto leftStickX = GetPad()->GetLeftStickX();
+
+    if (leftStickX < -15 && oldfStickX >= -5) {
+        oldfStickX = leftStickX;
+        return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
+    }
+}
+
+// 0x5409E0
+bool CPad::GetAnaloguePadRight() {
+    static int16 oldfStickX = 0; // 0xB736FC
+    auto leftStickX = GetPad()->GetLeftStickX();
+
+    if (leftStickX > 15 && oldfStickX <= 5) {
+        oldfStickX = leftStickX;
+        return true;
+    } else {
+        oldfStickX = leftStickX;
+        return false;
+    }
+}
+
+// 0x540980
+bool CPad::GetAnaloguePadDown() {
+    static int16 oldfStickY = 0; // 0xB736F4
+    auto leftStickY = GetPad()->GetLeftStickY();
+
+    if (leftStickY > 15 && oldfStickY <= 5) {
+        oldfStickY = leftStickY;
+        return true;
+    } else {
+        oldfStickY = leftStickY;
+        return false;
     }
 }
 
@@ -1173,4 +1178,24 @@ bool CPad::sub_540530() const noexcept {
     default:
         return false;
     }
+}
+
+/*!
+ * CTRL + M or F7
+ */
+bool CPad::DebugMenuJustPressed() {
+    return (IsCtrlPressed() && IsStandardKeyJustPressed('M')) || IsF7JustPressed();
+}
+
+// 0x541490
+int GetCurrentKeyPressed(RsKeyCodes& keys) {
+    return plugin::CallAndReturn<int, 0x541490, RsKeyCodes&>(keys);
+}
+
+IDirectInputDevice8* DIReleaseMouse() {
+    return plugin::CallAndReturn<IDirectInputDevice8*, 0x746F70>();
+}
+
+void InitialiseMouse(bool exclusive) {
+    plugin::Call<0x7469A0, bool>(exclusive);
 }

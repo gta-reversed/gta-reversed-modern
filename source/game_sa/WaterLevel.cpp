@@ -131,43 +131,63 @@ void CWaterLevel::RenderWaterFog() {
 }
 
 // 0x6E6EF0
-void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float fLowFreqMult, float fMidHighFreqMult, float& fOutWave) {
-    if (x < 0)
-        x = -x;
+void CWaterLevel::CalculateWavesOnlyForCoordinate(int32 x, int32 y, float lowFreqMult, float midHighFreqMult, float& outWave,
+    float& colorMult, float& glare, CVector& vecNormal)
+{
+    x = std::abs(x);
+    y = std::abs(y);
+    vecNormal = CVector{};
 
-    if (y < 0)
-        y = -y;
+    constexpr auto tauToChar = 256.0f / TWO_PI;
+    float waveMult = faWaveMultipliersX[(x / 2) % 8] * faWaveMultipliersX[(y / 2) % 8] * CWeather::Wavyness;
+    float fX = (float)x, fY = (float)y;
 
-    auto xInd = (x / 2) & 7;
-    auto yInd = (y / 2) & 7;
+    // literal AIDS code
+    const auto CalculateWave = [&](int32 offset, float angularPeriodX, float angularPeriodY) {
+        const float freqOffsetMult = TWO_PI / static_cast<float>(offset);
+        const CVector2D w{ TWO_PI / angularPeriodX, TWO_PI / angularPeriodY };
 
-    auto fWaveMultiplier = CWeather::Wavyness * faWaveMultipliersX[xInd] * faWaveMultipliersY[yInd];
-    auto fX = static_cast<float>(x);
-    auto fY = static_cast<float>(y);
+        switch (offset) {
+        case 5000: {
+            auto step = (CTimer::GetTimeInMS() - m_nWaterTimeOffset) % offset;
+            auto index = (step * freqOffsetMult + fX * w.x + fY * w.y) * tauToChar;
 
-    auto iTimeOffset = CTimer::GetTimeInMS() - m_nWaterTimeOffset;
-    const auto fTwoPiToChar = 256.0F / TWO_PI;
+            outWave += CMaths::ms_SinTable[static_cast<uint8>(index) + 1] * 2.0f * waveMult * lowFreqMult;
+            auto outNext = -(CMaths::ms_SinTable[static_cast<uint8>(index + 64.0f) + 1] * 2.0f * waveMult * lowFreqMult * w.x);
+            vecNormal += { outNext, outNext, 1.0f };
+            break;
+        }
+        case 3500: {
+            auto step = (CTimer::GetTimeInMS() - m_nWaterTimeOffset) % offset;
+            auto index = (step * freqOffsetMult + fX * w.x + fY * w.y) * tauToChar;
 
-    const auto fLowFreqOffsetMult = TWO_PI / 5000.0F;
-    auto fIndex = (static_cast<float>(iTimeOffset % 5000U) * fLowFreqOffsetMult + (fX + fY) * (TWO_PI / 64.0F)) * fTwoPiToChar;
-    uint8 uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fLowFreqWaves = CMaths::ms_SinTable[uiIndex] * 2.0F * fWaveMultiplier * fLowFreqMult;
-    fOutWave += fLowFreqWaves;
+            outWave += CMaths::ms_SinTable[static_cast<uint8>(index) + 1] * 1.0f * waveMult * midHighFreqMult;
+            auto outNext = CMaths::ms_SinTable[static_cast<uint8>(index + 64.0f) + 1];
+            auto vAdd = outNext * waveMult * w.x * w.x;
+            vecNormal += { vAdd, vAdd, 0.0f };
+            break;
+        }
+        case 3000: {
+            auto step = (CTimer::GetTimeInMS() - m_nWaterTimeOffset) % offset;
+            auto index = (step * freqOffsetMult + fX * w.x + fY * w.y) * tauToChar;
 
-    const auto fMidFreqOffsetMult = TWO_PI / 3500.0F;
-    const auto fMidFreqXMult = TWO_PI / 26.0F;
-    const auto fMidFreqYMult = TWO_PI / 52.0F;
-    fIndex = (static_cast<float>(iTimeOffset % 3500U) * fMidFreqOffsetMult + (fX * fMidFreqXMult) + (fY * fMidFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fMidFreqWaves = CMaths::ms_SinTable[uiIndex] * 1.0F * fWaveMultiplier * fMidHighFreqMult;
-    fOutWave += fMidFreqWaves;
+            outWave += CMaths::ms_SinTable[static_cast<uint8>(index) + 1] * 0.5f * waveMult * midHighFreqMult;
+            auto outNext = CMaths::ms_SinTable[static_cast<uint8>(index + 64.0f) + 1];
+            vecNormal.x += waveMult * (outNext / 2.0f) * midHighFreqMult * (PI / 10.0f);
+            break;
+        }
+        }
+    };
 
-    const auto fHighFreqOffsetMult = TWO_PI / 3000.0F;
-    const auto fHighFreqYMult = TWO_PI / 20.0F;
-    fIndex = (static_cast<float>(iTimeOffset % 3000U) * fHighFreqOffsetMult + (fY * fHighFreqYMult)) * fTwoPiToChar;
-    uiIndex = static_cast<uint8>(fIndex) + 1;
-    float fHighFreqWaves = CMaths::ms_SinTable[uiIndex] * 0.5F * fWaveMultiplier * fMidHighFreqMult;
-    fOutWave += fHighFreqWaves;
+    CalculateWave(5000, 64.0f, 64.0f);
+    CalculateWave(3500, 26.0f, 52.0f);
+    CalculateWave(3000,  0.0f, 20.0f);
+
+    vecNormal.Normalise();
+    auto v17 = (vecNormal.x + vecNormal.y + vecNormal.z) * 0.57700002f;
+
+    colorMult = std::max(v17, 0.0f) * 0.65f + 0.27f;
+    glare = std::clamp(8.0f * v17 - 5.0f, 0.0f, 0.99f) * CWeather::SunGlare;
 }
 
 // 0x6E6D10

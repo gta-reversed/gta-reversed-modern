@@ -49,7 +49,7 @@ public:
     CVector            m_vecBoatTurnForce; // m_vecBoatTurnForce = m_vecTurnForce + m_vecFrictionTurnForce
     FxSystem_c*        m_apPropSplashFx[2];
     CVector            m_vecWaterDamping; // { 0.0f, 0.0f, DampingPower }
-    char               field_63C;         // initialised with 0, maybe boat handling type (@CBoat::DebugCode), possibly a leftover
+    char               field_63C;         // initialised with 0, maybe boat handling type (@CBoat::DebugCode)
     uint8              m_nPadNumber;      // 0 - 3
     float              m_fLastWaterImmersionDepth; // initialised with 7.0f, 0.0f - not in water
     int16              m_nNumWaterTrailPoints;
@@ -58,7 +58,7 @@ public:
     uint8              m_anWakePointIntensity[32]; // m_anWakePointIntensity[i] = boat->m_vecMoveForce.Magnitude() * 100.0f;
 
     static constexpr int32 NUM_WAKE_GEN_BOATS = 4;
-    static CBoat* (&apFrameWakeGeneratingBoats)[NUM_WAKE_GEN_BOATS];
+    static inline std::array<CBoat*, NUM_WAKE_GEN_BOATS>& apFrameWakeGeneratingBoats = *(std::array<CBoat*, NUM_WAKE_GEN_BOATS>*)0xC27994;
     static float& MAX_WAKE_LENGTH;
     static float& MIN_WAKE_INTERVAL;
     static float& WAKE_LIFETIME;
@@ -87,7 +87,7 @@ public:
     void ProcessControlInputs(uint8 playerNum) override;
     void GetComponentWorldPosition(int32 componentId, CVector& outPos) override;
     void ProcessOpenDoor(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
 
     inline void SetupModelNodes(); // fill m_aBoatNodes array
     void DebugCode();
@@ -114,7 +114,7 @@ private:
     void ProcessControlInputs_Reversed(uint8 ucPadNum);
     void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos);
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 arg2, uint32 arg3, float arg4);
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion);
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion);
 };
 
 VALIDATE_SIZE(CBoat, 0x7E8);

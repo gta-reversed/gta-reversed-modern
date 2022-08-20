@@ -12,6 +12,8 @@
 #define VALIDATE_OFFSET(struc, member, offset) \
 	static_assert(offsetof(struc, member) == offset, "The offset of " #member " in " #struc " is not " #offset "...")
 
+
+
 VALIDATE_SIZE(bool, 1);
 VALIDATE_SIZE(char, 1);
 VALIDATE_SIZE(short, 2);
@@ -38,8 +40,45 @@ typedef uint8     bool8;
 typedef uint16    bool16;
 typedef uint32    bool32;
 
-// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments.
+// Use the `NOTSA_UNREACHABLE` macro for unreachable code paths.
+// In debug mode it will do a DebugBreak() and print a message to the console,
+// while in release code it'll be optimized away (by using special compiler directives)
+// Also serves as a way to supress compiler warnings (for example, when you don't have need a `default` case in a `switch`)
+#if _DEBUG
+#include <format>
+
+namespace notsa {
+template<typename... Ts>
+static void unreachable(const char* method, const char* file, int line, std::string_view fmt = "", Ts&&... fmtArgs) {
+    const auto usrMsg = std::vformat(fmt, std::make_format_args(std::forward<Ts>(fmtArgs)...));
+    std::cout << std::format("[{}:{}]: Unreachable code reached! Details: {}\n", method, line, usrMsg.empty() ? "None" : usrMsg);
+    DebugBreak();
+}
+};
+// TODO/NOTE: We might need to manually suppress warnings here?
+// Since all the code here is perfectly valid, so the compiler might
+// still complain that, for example, the function doesn't return on all code paths, etc
+#define NOTSA_UNREACHABLE(...) do { notsa::unreachable(__FUNCTION__, __FILE__, __LINE__ __VA_OPT__(,) ##__VA_ARGS__); } while (false)
+#else
+#if __has_builtin(__builtin_unreachable)
+#define NOTSA_UNREACHABLE(...) __builtin_unreachable()
+#elif defined(_MSC_VER)
+#define NOTSA_UNREACHABLE(...) __assume(false)
+#endif
+#endif
+
+// In order to be able to get the vtable address using GetProcAddress
+// the whole class must be exported. (Along which the vtable is exported as well)
+// See `ReversibleHooks::detail::GetClassVTableAddress`
+// This should be added to every and all class with a vtable
+#define NOTSA_EXPORT_VTABLE __declspec(dllexport)
+
+// Macro for unused function arguments - Use it to avoid compiler warnings of unused arguments
 #define UNUSED(x) (void)(x);
+
+// Macro for unused function return values.
+// Eventually could instead verify the returned value? In case of `sscanf` etc...
+#define RET_IGNORED(x) (void)(x);
 
 #define _IGNORED_
 #define _CAN_BE_NULL_
