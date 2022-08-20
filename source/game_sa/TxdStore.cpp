@@ -50,43 +50,6 @@ void CTxdStore::InjectHooks() {
     RH_ScopedGlobalInstall(RemoveIfRefCountIsGreaterThanOne, 0x731680);
 }
 
-// 0x731600
-static void* TxdParentConstructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    RWPLUGINOFFSET(_TxdParent, object, offsetInObject)->parent = nullptr;
-    return object;
-}
-
-// 0x731620
-static void* TxdParentDestructor(void* object, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    return object;
-}
-
-// 0x731630
-static void* TxdParentCopyConstructor(void* dstObject, const void* srcObject, RwInt32 offsetInObject, RwInt32 sizeInObject) {
-    RWPLUGINOFFSET(_TxdParent, dstObject, TexDictionaryLinkPluginOffset)->parent = RWPLUGINOFFSET(_TxdParent, srcObject, TexDictionaryLinkPluginOffset)->parent;
-    return dstObject;
-}
-
-RwTexDictionary* CTxdStore::GetTxdParent(RwTexDictionary* txd) {
-    return RWPLUGINOFFSET(_TxdParent, txd, TexDictionaryLinkPluginOffset)->parent;
-}
-
-void CTxdStore::SetTxdParent(RwTexDictionary* txd, RwTexDictionary* parent) {
-    RWPLUGINOFFSET(_TxdParent, txd, TexDictionaryLinkPluginOffset)->parent = parent;
-}
-
-// 0x731650
-bool CTxdStore::PluginAttach() {
-    TexDictionaryLinkPluginOffset = RwTexDictionaryRegisterPlugin(
-        sizeof(_TxdParent),
-        rwID_TXDPARENTPLUGIN,
-        TxdParentConstructor,
-        TxdParentDestructor,
-        TxdParentCopyConstructor
-    );
-    return TexDictionaryLinkPluginOffset != -1;
-}
-
 // initialise txd store
 // 0x731F20
 void CTxdStore::Initialise() {
