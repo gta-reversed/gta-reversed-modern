@@ -119,6 +119,10 @@ public:
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
     }
+
+    [[nodiscard]] float Heading() const {
+        return std::atan2(-x, y);
+    }
 };
 VALIDATE_SIZE(CVector, 0xC);
 
