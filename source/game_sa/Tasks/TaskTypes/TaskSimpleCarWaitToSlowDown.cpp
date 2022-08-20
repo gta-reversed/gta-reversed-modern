@@ -44,13 +44,13 @@ bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, eAbortPriority prior
         break;
     }
     }
-    m_SlowType = SlowDownType::DONE;
+    m_SlowType = SlowDownType::DONT_WAIT;
     return false;
 }
 
 // 0x646AD0
 bool CTaskSimpleCarWaitToSlowDown::ProcessPed(CPed* ped) {
-    if (!m_TargetVehicle || m_SlowType == SlowDownType::DONE) {
+    if (!m_TargetVehicle || m_SlowType == SlowDownType::DONT_WAIT) {
         return true;
     }
 
@@ -64,9 +64,9 @@ bool CTaskSimpleCarWaitToSlowDown::ProcessPed(CPed* ped) {
     }
 
     switch (m_SlowType) {
-    case SlowDownType::PED_STEP_OUT:
+    case SlowDownType::SLOW_ENOUGH_TO_STEP:
         return m_TargetVehicle->CanPedStepOutCar(false);
-    case SlowDownType::PED_STEP_OUT_OR_JUMP:
+    case SlowDownType::SLOW_ENOUGH_TO_STEP_OR_JUMP:
         return m_TargetVehicle->CanPedStepOutCar(false) || m_TargetVehicle->CanPedJumpOutCar(ped);
     default:
         return false;
