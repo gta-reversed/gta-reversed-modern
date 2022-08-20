@@ -292,6 +292,7 @@ void InjectHooksMain() {
     HookInstall(0x459F70, CVehicleRecording::Render); // [ImGui] Debug stuff rendering
     CFileMgr::InjectHooks();
 
+    RwHelperInjectHooks();
     CPad::InjectHooks();
     InjectCommonHooks();
     CEscalator::InjectHooks();

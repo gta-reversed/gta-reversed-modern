@@ -92,6 +92,7 @@ namespace rng = std::ranges;
 #include "SArray.h"
 
 #include "GxtChar.h"
+#include "RwHelper.h"
 
 #include "game_sa\common.h"
 
