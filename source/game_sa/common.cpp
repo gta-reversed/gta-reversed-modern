@@ -19,8 +19,6 @@
 int32& g_nNumIm3dDrawCalls = *(int32*)0xB73708;
 int32 gDefaultTaskTime = 9999999; // or 0x98967F a.k.a (one milllion - 1)
 
-float &GAME_GRAVITY = *(float *)0x863984;
-
 char(&PC_Scratch)[16384] = *(char(*)[16384])0xC8E0C8;
 
 RpLight* (&pExtraDirectionals)[6] = *reinterpret_cast<RpLight* (*)[6]>(0xC886F0);
@@ -116,7 +114,6 @@ void InjectCommonHooks() {
     RH_ScopedGlobalInstall(LittleTest, 0x541330);
 
     RH_ScopedGlobalInstall(RemoveRefsCB, 0x7226D0);
-    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
 void MessageLoop() {
@@ -824,18 +821,6 @@ RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data) {
 // 0x7226F0
 void RemoveRefsForAtomic(RpClump* clump) {
     plugin::Call<0x7226F0, RpClump*>(clump);
-}
-
-// 0x46A760
-bool IsGlassModel(CEntity* entity) {
-    if (!entity->IsObject())
-        return false;
-
-    auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
-    if (!mi->AsAtomicModelInfoPtr())
-        return false;
-
-    return mi->IsGlass();
 }
 
 // 0x4D5F50

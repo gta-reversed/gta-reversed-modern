@@ -82,8 +82,6 @@ static inline char (&gGxtString)[552] = *(char(*)[552])0xC1B100;
 static inline char (&gGxtString2)[552] = *(char(*)[552])0xC1AED8;
 static inline char (&GxtErrorString)[32] = *(char(*)[32])0xC1AEB8;
 
-extern float &GAME_GRAVITY; // default 0.008f
-
 extern RwRGBAReal& AmbientLightColour;
 extern RwRGBAReal& AmbientLightColourForFrame;
 
@@ -286,8 +284,6 @@ float GetDayNightBalance();
 
 RpAtomic* RemoveRefsCB(RpAtomic* atomic, void* _IGNORED_ data);
 void RemoveRefsForAtomic(RpClump* clump);
-
-bool IsGlassModel(CEntity* entity);
 
 CAnimBlendClumpData* RpAnimBlendAllocateData(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpAddAssociation(RpClump* clump, CAnimBlendAssociation* association, uint32 flags, float startTime, float blendAmount);

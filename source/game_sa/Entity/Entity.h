@@ -193,7 +193,7 @@ public:
     // Wrapper around the mess called `CleanUpOldReference`
     // Takes in `ref` (which is usually a member variable),
     // calls `CleanUpOldReference` on it, then sets it to `nullptr`
-    // Used often in the code. 
+    // Used often in the code.
     template<typename T>
     static void ClearReference(T*& ref) requires std::is_base_of_v<CEntity, T> {
         if (ref) {
@@ -302,3 +302,7 @@ VALIDATE_SIZE(CEntity, 0x38);
 
 bool IsEntityPointerValid(CEntity* entity);
 RpMaterial* MaterialUpdateUVAnimCB(RpMaterial* material, void* data);
+
+bool IsGlassModel(CEntity* entity);
+
+static inline float& GAME_GRAVITY = *(float*)0x863984; // default 0.008f
