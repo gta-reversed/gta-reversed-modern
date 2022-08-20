@@ -204,12 +204,6 @@ constexpr float RadiansToDegrees(float angleInRadians) {
     return angleInRadians * 180.0F / PI;
 }
 
-template <typename T>
-T clamp(T value, T low, T high)
-{
-    return std::min(std::max(value, low), high);
-}
-
 inline const CVector lerp(const CVector& fMin, const CVector& fMax, float fProgress) {
     return fMin * (1.0F - fProgress) + fMax * fProgress;
 }

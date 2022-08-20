@@ -156,7 +156,7 @@ void CClouds::MovingFog_Create(CVector* posn) {
 
 // 0x713730
 void CClouds::MovingFog_Delete(int32 fogSlotIndex) {
-    fogSlotIndex = clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
+    fogSlotIndex = std::clamp(fogSlotIndex, 0, MAX_MOVING_FOG - 1);
     ms_mf.m_bFogSlots[fogSlotIndex] = false;
 }
 
@@ -324,7 +324,7 @@ void CClouds::RenderSkyPolys() {
 
     CVector invNorm = -norm;
     float fBlendFactor = (pos.z - 25.0f) * (1.0f / 80.0f);
-    fBlendFactor = clamp(fBlendFactor, 0.f, 1.f);
+    fBlendFactor = std::clamp(fBlendFactor, 0.f, 1.f);
     fBlendFactor = std::max(fBlendFactor, CWeather::Foggyness);
 
     RwRGBA belowHorizonGrey = CTimeCycle::m_BelowHorizonGrey;
@@ -592,7 +592,7 @@ void CClouds::VolumetricClouds_Create(CVector* posn) {
 
 // 0x7135F0
 void CClouds::VolumetricClouds_Delete(int32 vcSlotIndex) {
-    vcSlotIndex = clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
+    vcSlotIndex = std::clamp(vcSlotIndex, 0, MAX_VOLUMETRIC_CLOUDS - 1);
     ms_vc.m_bSlots[vcSlotIndex] = false;
     ms_vc.m_bInsideVisibilityRange[vcSlotIndex] = false;
 }
