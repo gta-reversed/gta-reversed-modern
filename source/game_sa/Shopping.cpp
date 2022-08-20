@@ -112,7 +112,7 @@ int32 CShopping::FindItem(uint32 itemKey) {
 
 // 0x49AE70
 bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
-    plugin::Call<0x49AE70, FILESTREAM, const char*>(file, sectionName);
+    return plugin::CallAndReturn<bool, 0x49AE70, FILESTREAM, const char*>(file, sectionName);
 }
 
 // unused
@@ -246,7 +246,62 @@ void CShopping::RestoreClothesState() {
 
 // 0x49B3C0
 void CShopping::RestoreVehicleMods() {
-    plugin::Call<0x49B3C0>();
+    auto veh = FindPlayerVehicle()->AsAutomobile();
+    if (!veh) // NOTSA
+        return;
+
+    for (auto&& [i, storedMod] : notsa::enumerate(gStoredVehicleMods)) {
+        auto& upgrade = veh->m_anUpgrades[i];
+
+        if (upgrade != -1) {
+            veh->RemoveVehicleUpgrade(upgrade);
+        }
+        upgrade = storedMod;
+        if (upgrade != -1) {
+            CStreaming::RequestVehicleUpgrade(upgrade, STREAMING_GAME_REQUIRED | STREAMING_KEEP_IN_MEMORY);
+        }
+    }
+
+    CStreaming::LoadAllRequestedModels(false);
+    veh->SetupUpgradesAfterLoad();
+
+    if (!veh->IsAutomobile())
+        return;
+
+    auto& damage = veh->m_damageManager;
+    for (auto&& [i, state] : notsa::enumerate(gComponentDamageState)) {
+        if (state == DAMAGE_STATE_OK)
+            continue;
+
+        switch (i) {
+        case 2:
+            damage.SetWheelStatus(CAR_WHEEL_FRONT_RIGHT, (eCarWheelStatus)state);
+            break;
+        case 4:
+            damage.SetWheelStatus(CAR_WHEEL_REAR_RIGHT, (eCarWheelStatus)state);
+            break;
+        case 5:
+            damage.SetWheelStatus(CAR_WHEEL_FRONT_LEFT, (eCarWheelStatus)state);
+            break;
+        case 7:
+            damage.SetWheelStatus(CAR_WHEEL_REAR_LEFT, (eCarWheelStatus)state);
+            break;
+        case 12:
+            damage.SetPanelStatus(FRONT_BUMPER, (ePanelDamageState)state);
+            break;
+        case 13:
+            damage.SetPanelStatus(REAR_BUMPER, (ePanelDamageState)state);
+            break;
+        case 16:
+            damage.SetDoorStatus(DOOR_BONNET, (eDoorStatus)state);
+            break;
+        case 17:
+            damage.SetDoorStatus(DOOR_BOOT, (eDoorStatus)state);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 // unused
