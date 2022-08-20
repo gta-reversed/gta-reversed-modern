@@ -27,7 +27,6 @@ enum eMatrixEulerFlags : uint32 {
 
 class CMatrix {
 public:
-    CMatrix(plugin::dummy_func_t) {}
     CMatrix(const CMatrix& matrix);
     CMatrix(RwMatrix* matrix, bool temporary = false); // like previous + attach
     CMatrix() {
