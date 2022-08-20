@@ -8,17 +8,17 @@ constexpr auto STAND_STILL_TIME = 20000; // 0x86DB24
 class CTaskSimpleSlideToCoord : public CTaskSimpleRunNamedAnim {
 public:
     CVector m_SlideToPos;
-    float   m_fAimingRotation;
-    float   m_fRadius;
-    bool    m_bShouldProcessStandStill : 1; // todo: default true
-    bool    m_bHasAnim : 1;
-    uint32  m_Time; // todo: default -1
+    float   m_fAimingRotation; // Heading
+    float   m_fSpeed;
+    bool    m_bFirstTime : 1; // todo: default true
+    bool    m_bRunningAnim : 1;
+    uint32  m_Timer; // todo: default -1
 
 public:
     static constexpr auto Type = TASK_SIMPLE_SLIDE_TO_COORD;
 
-    CTaskSimpleSlideToCoord(const CVector& pos, float fAimingRotation, float radius);
-    CTaskSimpleSlideToCoord(const CVector& slideToPos, float aimingRotation, float radius, const char* animBlockName, const char* animGroupName, uint32 animFlags, float animBlendDelta, bool isActiveSequence, uint32 time);
+    CTaskSimpleSlideToCoord(const CVector& slideToPos, float fAimingRotation, float speed);
+    CTaskSimpleSlideToCoord(const CVector& slideToPos, float aimingRotation, float speed, const char* animBlockName, const char* animGroupName, uint32 animFlags, float animBlendDelta, bool bRunInSequence, uint32 time);
     ~CTaskSimpleSlideToCoord() override = default;
 
     CTask* Clone() override;

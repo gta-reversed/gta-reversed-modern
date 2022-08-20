@@ -9,17 +9,6 @@ void CTaskSimpleAnim::InjectHooks() {
 }
 bool CTaskSimpleAnim::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) { return CTaskSimpleAnim::MakeAbortable_Reversed(ped, priority, event); }
 
-// todo: NOTSA ???
-CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame, bool bDontInterrupt, bool bRunInSequence, bool bOffsetPed) :
-    CTaskSimple(),
-    m_bDontInterrupt{ bDontInterrupt },
-    m_bHoldLastFrame{ bHoldLastFrame },
-    m_bRunInSequence{ bRunInSequence },
-    m_bOffsetAvailable{ bOffsetPed },
-    m_pAnim{ nullptr }
-{
-}
-
 // 0x61A6C0
 CTaskSimpleAnim::CTaskSimpleAnim(bool bHoldLastFrame) : CTaskSimple() {
     m_bIsFinished = false;

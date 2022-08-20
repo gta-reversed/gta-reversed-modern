@@ -35,11 +35,14 @@ CTaskSimpleRunNamedAnim::CTaskSimpleRunNamedAnim(
     bool bOffsetPed,
     bool bHoldLastFrame
 ) :
-    CTaskSimpleAnim(bHoldLastFrame, bDontInterrupt, bRunInSequence, bOffsetPed)
+    CTaskSimpleAnim(bHoldLastFrame),
+    m_endTime{ endTime },
+    m_animFlags{ animFlags }
 {
+    m_bDontInterrupt = bDontInterrupt;
+    m_bRunInSequence = bRunInSequence;
+    m_bOffsetAtEnd = bOffsetPed;
     m_blendDelta = blendDelta;
-    m_endTime = endTime;
-    m_animFlags = animFlags;
     strcpy_s(m_animName, animName);
     strcpy_s(m_animGroupName, animGroupName);
     if (const auto block = CAnimManager::GetAnimationBlock(m_animGroupName)) {
@@ -57,6 +60,6 @@ void CTaskSimpleRunNamedAnim::OffsetPedPosition(CPed* ped) {
     ped->UpdateRpHAnim();
     ped->m_bDontUpdateHierarchy = true;
     auto& pos = ped->GetPosition();
-    pos += Multiply3x3(*ped->m_matrix, &m_vecOffsetAtEnd);
+    pos += *ped->m_matrix * m_vecOffsetAtEnd;
     m_bOffsetAvailable = false;
 }
