@@ -268,7 +268,7 @@ CTask* CTaskComplexArrestPed::CreateSubTask(eTaskType taskType, CPed* ped) {
         if (m_PedToArrest->m_pVehicle) {
             if (m_PedToArrest->m_pVehicle->IsDriver(m_PedToArrest)) {
                 m_PedToArrest->m_pVehicle->vehicleFlags.bIsHandbrakeOn = true;
-                m_PedToArrest->m_pVehicle->m_nStatus = STATUS_PLANE; // todo: What does that mean?
+                m_PedToArrest->m_pVehicle->m_nStatus = STATUS_FORCED_STOP;
             }
         }
         return new CTaskSimpleArrestPed(m_PedToArrest);

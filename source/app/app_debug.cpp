@@ -1,6 +1,6 @@
 #include "StdInc.h"
 
-#include "debug.h"
+#include "app_debug.h"
 
 #define FINAL 0
 

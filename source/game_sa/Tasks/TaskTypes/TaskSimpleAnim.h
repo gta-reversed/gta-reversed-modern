@@ -9,7 +9,7 @@
 #include "TaskSimple.h"
 class CAnimBlendAssociation;
 
-class CTaskSimpleAnim : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleAnim : public CTaskSimple {
 public:
     CAnimBlendAssociation *m_pAnim;
     union {

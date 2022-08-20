@@ -18,7 +18,7 @@ enum eAudioPedType : int16 {
     PED_TYPE_SPC    = 5
 };
 
-class CAEPedSpeechAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEPedSpeechAudioEntity : public CAEAudioEntity {
 public:
     char      field_7C[20];
     bool      f90;

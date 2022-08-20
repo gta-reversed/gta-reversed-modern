@@ -8,7 +8,7 @@
 
 #include "FxPrimBP.h"
 
-class FxEmitterBP_c : public FxPrimBP_c {
+class NOTSA_EXPORT_VTABLE FxEmitterBP_c : public FxPrimBP_c {
 public:
 };
 
