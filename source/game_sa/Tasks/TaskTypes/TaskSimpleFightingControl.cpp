@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimpleFightingControl.h"
 
 void CTaskSimpleFightingControl::InjectHooks() {
@@ -7,9 +8,7 @@ void CTaskSimpleFightingControl::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x61DC10);
     RH_ScopedInstall(Destructor, 0x61DCA0);
-
     RH_ScopedInstall(CalcMoveCommand, 0x624B50, {.enabled = false, .locked = true});
-
     RH_ScopedVirtualInstall2(Clone, 0x622EB0);
     RH_ScopedVirtualInstall2(GetTaskType, 0x61DC90);
     RH_ScopedVirtualInstall2(MakeAbortable, 0x61DD00, {.enabled = false, .locked = true});
@@ -17,25 +16,24 @@ void CTaskSimpleFightingControl::InjectHooks() {
 }
 
 // 0x61DC10
-CTaskSimpleFightingControl::CTaskSimpleFightingControl(CEntity* entityToFight, float angleRad, float dist) :
-    m_entity{entityToFight},
-    m_angleRad{angleRad},
-    m_dist{dist}
+CTaskSimpleFightingControl::CTaskSimpleFightingControl(CEntity* entityToFight, float fAngle, float fRange) :
+    CTaskSimple(),
+    m_bIsFinished{ false },
+    m_nComboSet{ 0 },
+    m_nNextAttackTime{ 0 },
+    m_nBlockCounter{ 0 },
+    m_fAttackFreq{ 1.0f },
+    m_TargetEntity{ entityToFight },
+    m_fAttackAngle{ fAngle },
+    m_fAttackRange{ fRange }
 {
     assert(entityToFight);
-
-    CEntity::SafeRegisterRef(m_entity);
-}
-
-// NOTSA
-CTaskSimpleFightingControl::CTaskSimpleFightingControl(const CTaskSimpleFightingControl& o) :
-    CTaskSimpleFightingControl{o.m_entity, o.m_angleRad, o.m_dist}
-{
+    CEntity::SafeRegisterRef(m_TargetEntity);
 }
 
 // 0x61DCA0
 CTaskSimpleFightingControl::~CTaskSimpleFightingControl() {
-    CEntity::SafeCleanUpRef(m_entity);
+    CEntity::SafeCleanUpRef(m_TargetEntity);
 }
 
 // 0x624B50
