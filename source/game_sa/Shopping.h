@@ -20,21 +20,21 @@ class CShopping {
         uint32 price;
 
         union {
-            struct weapon {
+            struct {
                 uint32 ammo;
-            };
-            struct clothes {
+            } weapon;
+            struct {
                 uint32 modelKey;
                 uint32 type;
-            };
-            struct tattoos {
+            } clothes;
+            struct {
                 uint32 type1;
                 uint32 texKey;
-            };
-            struct general {
+            } tattoos;
+            struct {
                 int32 extra1;
                 int32 extra2;
-            };
+            } general;
         };
 
         char nameTag[8];
@@ -68,7 +68,7 @@ public:
     static int32 FindItem(uint32 itemKey);
     static bool FindSection(FILESTREAM file, const char* sectionName);
     static bool FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection);
-    static void GetExtraInfo(uint32 a1, int32 a2);
+    static int32 GetExtraInfo(uint32 itemKey, int32 index);
     static int32 GetItemIndex(uint32 itemKey);
     static void GetKey(const char* modelName, int32 index);
     static void GetNameTag(uint32 a1);

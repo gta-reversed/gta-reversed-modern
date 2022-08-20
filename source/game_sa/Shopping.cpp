@@ -121,8 +121,17 @@ bool CShopping::FindSectionInSection(FILESTREAM file, const char* parentSection,
 }
 
 // 0x49ADE0
-void CShopping::GetExtraInfo(uint32 a1, int32 a2) {
-    plugin::Call<0x49ADE0, uint32, int32>(a1, a2);
+int32 CShopping::GetExtraInfo(uint32 itemKey, int32 index) {
+    switch (auto id = FindItem(itemKey)) {
+    case 0:
+        return ms_prices[id].general.extra1;
+    case 1:
+        return ms_prices[id].general.extra2;
+    default:
+        break;
+    }
+
+    return 0;
 }
 
 // 0x49AB10
