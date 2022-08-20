@@ -489,7 +489,6 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         auto numVideoModes = RwEngineGetNumVideoModes();
         auto videoModes = GetVideoModeList();
 
-        //BUG: (?) - Possible array out of bound access, original code suffers from that too
         if (pressedLR > 0) {
             do {
                 ++m_nDisplayVideoMode;
