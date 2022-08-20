@@ -2,7 +2,7 @@
 
 #include "AtomicModelInfo.h"
 
-class CDamageAtomicModelInfo : public CAtomicModelInfo {
+class NOTSA_EXPORT_VTABLE CDamageAtomicModelInfo : public CAtomicModelInfo {
 public:
     RpAtomic* m_pDamagedAtomic;
 

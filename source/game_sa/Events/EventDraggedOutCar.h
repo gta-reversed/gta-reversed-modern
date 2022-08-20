@@ -6,7 +6,7 @@ class CVehicle;
 class CEntity;
 class CPed;
 
-class CEventDraggedOutCar : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventDraggedOutCar : public CEventEditableResponse {
 public:
     CPed*     m_CarJacker;
     CVehicle* m_Vehicle;

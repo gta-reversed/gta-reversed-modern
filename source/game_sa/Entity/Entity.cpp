@@ -93,6 +93,8 @@ void CEntity::InjectHooks()
     RH_ScopedInstall(SetMaterialAlphaCB, 0x533280);
     RH_ScopedGlobalInstall(MaterialUpdateUVAnimCB, 0x532D70);
     RH_ScopedGlobalInstall(IsEntityPointerValid, 0x533310);
+
+    RH_ScopedGlobalInstall(IsGlassModel, 0x46A760);
 }
 
 CEntity::CEntity() : CPlaceable() {
@@ -2555,4 +2557,16 @@ bool CEntity::IsScanCodeCurrent() const {
 
 void CEntity::SetCurrentScanCode() {
     m_nScanCode = GetCurrentScanCode();
+}
+
+// 0x46A760
+bool IsGlassModel(CEntity* entity) {
+    if (!entity->IsObject())
+        return false;
+
+    auto mi = CModelInfo::GetModelInfo(entity->m_nModelIndex);
+    if (!mi->AsAtomicModelInfoPtr())
+        return false;
+
+    return mi->IsGlass();
 }
