@@ -9,9 +9,9 @@
 
 namespace ImGui {
     enum class ImTristate {
-        ALL  = 1,
-        NONE = 0,
-        SOME    = -1
+        ALL   = 1,
+        NONE  = 0,
+        MIXED = -1
     };
 
     static bool CheckboxTristate(const char* label, ImTristate v_tristate, bool& state)
@@ -19,7 +19,7 @@ namespace ImGui {
         state = v_tristate == ImTristate::ALL;
 
         bool clicked;
-        if (v_tristate == ImTristate::SOME)
+        if (v_tristate == ImTristate::MIXED)
         {
             PushItemFlag(ImGuiItemFlags_MixedValue, true);
             clicked = Checkbox(label, &state);

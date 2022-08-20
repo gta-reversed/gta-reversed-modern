@@ -11,7 +11,7 @@ enum class SimpleDieFlags : uint8 {
     ALREADY_DEAD      = 1 << 1,
 };
 
-class CTaskSimpleDie : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleDie : public CTaskSimple {
 public:
     AssocGroupId           m_animGroupId;
     AnimationId            m_animId;
@@ -36,8 +36,8 @@ public:
     CTaskSimpleDie(CAnimBlendHierarchy* animHierarchy, eAnimationFlags animFlags, float blendDelta, float animSpeed);
     ~CTaskSimpleDie() override;
 
+    eTaskType GetTaskType() override { return Type; } // 0x62FA50
     CTask*    Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_DIE; } // 0x62FA50
     bool      MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool      ProcessPed(CPed* ped) override;
 

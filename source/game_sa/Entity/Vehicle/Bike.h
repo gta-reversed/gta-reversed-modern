@@ -95,12 +95,11 @@ public:
     tWheelState   m_anWheelState[2];
 
 public:
-    CBike(plugin::dummy_func_t) : CVehicle(plugin::dummy), m_mLeanMatrix(plugin::dummy) { /* todo: remove NOTSA */ }
     CBike(int32 modelIndex, eVehicleCreatedBy createdBy); // 0x6BF430
     ~CBike() override;
 
     void Fix() override;
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     void ProcessDrivingAnims(CPed* driver, bool blend) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     void ProcessControlInputs(uint8 playerNum) override;
@@ -181,7 +180,7 @@ private:
     CBike* Destructor() {this->CBike::~CBike(); return this; }
 
     void Fix_Reversed() { CBike::Fix(); }
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CBike::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CBike::BlowUpCar(damager, bHideExplosion); }
     void ProcessDrivingAnims_Reversed(CPed* driver, bool blend) { CBike::ProcessDrivingAnims(driver, blend); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CBike::BurstTyre(tyreComponentId, bPhysicalEffect); }
     void ProcessControlInputs_Reversed(uint8 playerNum) { CBike::ProcessControlInputs(playerNum); }
@@ -202,6 +201,5 @@ private:
     void GetComponentWorldPosition_Reversed(int32 componentId, CVector& outPos) { CBike::GetComponentWorldPosition(componentId, outPos); }
     void ProcessOpenDoor_Reversed(CPed* ped, uint32 doorComponentId, uint32 animGroup, uint32 animId, float fTime) { CBike::ProcessOpenDoor(ped, doorComponentId, animGroup, animId, fTime); }
 };
-
 VALIDATE_SIZE(CBike, 0x814);
 VALIDATE_OFFSET(CBike, m_fGasPedalAudio, 0x808);

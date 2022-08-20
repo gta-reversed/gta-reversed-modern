@@ -3,7 +3,7 @@
 #include "Event.h"
 #include "Ped.h"
 
-class CEventPedToFlee : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventPedToFlee : public CEvent {
 public:
     CPed* m_ped;
 

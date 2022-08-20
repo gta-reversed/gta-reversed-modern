@@ -6,7 +6,7 @@ class CVehicle;
 
 enum class eFallDir : uint8 { FORWARD, LEFT, BACKWARD, RIGHT };
 
-class CTaskComplexDie : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexDie : public CTaskComplex {
 public:
     eWeaponType  m_nWeaponType;
     AssocGroupId m_nAnimGroup;

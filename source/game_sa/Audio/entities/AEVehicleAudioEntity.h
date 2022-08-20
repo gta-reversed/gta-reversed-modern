@@ -137,7 +137,7 @@ VALIDATE_SIZE(tVehicleAudioSettings, 0x24);
 
 class CPed;
 
-class CAEVehicleAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEVehicleAudioEntity : public CAEAudioEntity {
 public:
     int16                  field_7C;
     tVehicleAudioSettings  m_Settings;

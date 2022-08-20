@@ -127,7 +127,7 @@ public:
 };
 VALIDATE_SIZE(UpgradePosnDesc, 0x20);
 
-class CVehicleModelInfo : public CClumpModelInfo {
+class NOTSA_EXPORT_VTABLE CVehicleModelInfo : public CClumpModelInfo {
 public:
     RpMaterial*        m_pPlateMaterial;
     char               m_szPlateText[8];

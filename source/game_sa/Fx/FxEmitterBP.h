@@ -4,7 +4,7 @@
 
 class FxEmitterPrt_c;
 
-class FxEmitterBP_c : public FxPrimBP_c {
+class NOTSA_EXPORT_VTABLE FxEmitterBP_c : public FxPrimBP_c {
 public:
     uint16 m_nLodStart;
     uint16 m_nLodEnd;
