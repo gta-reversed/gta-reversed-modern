@@ -142,7 +142,6 @@ namespace rng = std::ranges;
 #include "game_sa\Debug.h"
 #include "game_sa\MemoryMgr.h"
 #include "game_sa\CullZones.h"
-#include "game_sa\GridRef.h"
 #include "game_sa\VehicleScanner.h"
 #include "game_sa\LoadMonitor.h"
 #include "game_sa\PedStuckChecker.h"
@@ -434,6 +433,7 @@ namespace rng = std::ranges;
 #include "game_sa\Plugins\NodeNamePlugin\NodeName.h"
 #include "game_sa\Plugins\PipelinePlugin\PipelinePlugin.h"
 #include "game_sa\Plugins\CollisionPlugin\CollisionPlugin.h"
+#include "game_sa\Plugins\RpAnimBlendPlugin\RpAnimBlend.h"
 
 #include "game_sa\Scripts\RunningScript.h"
 #include "game_sa\Scripts\TheScripts.h"
