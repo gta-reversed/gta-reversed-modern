@@ -95,9 +95,18 @@ void CShopping::Buy(uint32 a1, int32 a2) {
     plugin::Call<0x49BF70, uint32, int32>(a1, a2);
 }
 
-// 0x
-void CShopping::FindItem(uint32 a1) {
-    plugin::Call<0x0, uint32>(a1);
+// inlined (0x)
+int32 CShopping::FindItem(uint32 itemKey) {
+    auto itemId = -1; // ms_numPrices <= -1 OR key not found. will this case ever happen?
+    if (ms_numPrices > 0) {
+        for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+            if (key == itemKey) {
+                itemId = i;
+            }
+        }
+    }
+
+    return itemId;
 }
 
 // 0x49AE70
@@ -138,16 +147,7 @@ void CShopping::GetNextSection(FILE* file) {
 
 // 0x49AD50
 int32 CShopping::GetPrice(uint32 itemKey) {
-    auto itemId = -1; // ms_numPrices <= -1 OR key not found. will this case ever happen?
-    if (ms_numPrices > 0) {
-        for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
-            if (key == itemKey) {
-                itemId = i;
-            }
-        }
-    }
-
-    return GetPriceMultipliedByLevel(ms_prices[itemId].price);
+    return GetPriceMultipliedByLevel(ms_prices[FindItem(itemKey)].price);
 }
 
 // 0x49AAD0

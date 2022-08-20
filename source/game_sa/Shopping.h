@@ -65,7 +65,7 @@ public:
     static void AddPriceModifier(const char* a1, const char* a2, int32 a3);
     static void AddPriceModifier(uint32 a1, int32 a2);
     static void Buy(uint32 a1, int32 a2);
-    static void FindItem(uint32 a1);
+    static int32 FindItem(uint32 itemKey);
     static void FindSection(FILE* file, const char* sectionName);
     static void FindSectionInSection(FILE* file, const char* sectionName, const char* a3);
     static void GetExtraInfo(uint32 a1, int32 a2);
