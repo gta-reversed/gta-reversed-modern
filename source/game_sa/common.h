@@ -143,33 +143,6 @@ struct SpriteFileName {
 
 void InjectCommonHooks();
 
-// returns player coors
-CVector FindPlayerCoors(int32 playerId = -1);
-// returns player speed
-CVector& FindPlayerSpeed(int32 playerId = -1);
-// returns player ped or player vehicle if he's driving
-CEntity * FindPlayerEntity(int32 playerId = -1);
-// returns player train
-CTrain* FindPlayerTrain(int32 playerId = -1);
-// gets player coords
-const CVector& FindPlayerCentreOfWorld(int32 playerId = -1);
-// gets player coords with skipping sniper shift
-const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId = -1);
-// returns player coords with skipping interior shift
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId = -1);
-// returns player angle in radians
-float FindPlayerHeading(int32 playerId = -1);
-// returns Z coord for active player
-float FindPlayerHeight();
-// returns player ped
-CPlayerPed * FindPlayerPed(int32 playerId = -1);
-CVehicle* FindPlayerVehicle(int32 playerId = -1, bool bIncludeRemote = false);
-// returns player wanted
-CWanted * FindPlayerWanted(int32 playerId = -1);
-// returns player's group
-CPedGroup& FindPlayerGroup(int32 playerId = -1); // NOTSA
-CPlayerInfo& FindPlayerInfo(int playerId = -1);
-
 CVector Multiply3x3(const CMatrix& m, const CVector& v);
 CVector Multiply3x3(const CVector& v, const CMatrix& m);
 CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);

@@ -52,18 +52,6 @@ void InjectCommonHooks() {
     RH_ScopedNamespaceName("Common");
     RH_ScopedCategory("Common");
 
-    RH_ScopedGlobalInstall(FindPlayerCoors, 0x56E010);
-    RH_ScopedGlobalInstall(FindPlayerSpeed, 0x56E090);
-    RH_ScopedGlobalInstall(FindPlayerEntity, 0x56E120);
-    RH_ScopedGlobalInstall(FindPlayerTrain, 0x56E160);
-    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld, 0x56E250);
-//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoSniperShift, 0x56E320);
-//    RH_ScopedGlobalInstall(FindPlayerCentreOfWorld_NoInteriorShift, 0x56E400);
-    RH_ScopedGlobalInstall(FindPlayerHeading, 0x56E450);
-    RH_ScopedGlobalInstall(FindPlayerPed, 0x56E210);
-    RH_ScopedGlobalInstall(FindPlayerVehicle, 0x56E0D0);
-    RH_ScopedGlobalInstall(FindPlayerWanted, 0x56E230);
-
     RH_ScopedGlobalInstall(MakeUpperCase, 0x7186E0);
     RH_ScopedGlobalInstall(GetEventGlobalGroup, 0x4ABA50);
     RH_ScopedGlobalInstall(DefinedState, 0x734650);
@@ -141,107 +129,6 @@ void MessageLoop() {
             DispatchMessageA(&msg);
         }
     }
-}
-
-// 0x56E010
-CVector FindPlayerCoors(int32 playerId) {
-    if (CEntity* e = FindPlayerEntity(playerId))
-        return e->GetPosition();
-    return {};
-}
-
-// 0x56E090
-CVector& FindPlayerSpeed(int32 playerId) {
-    return static_cast<CPhysical*>(FindPlayerEntity(playerId))->m_vecMoveSpeed;
-}
-
-// 0x56E120
-CEntity* FindPlayerEntity(int32 playerId) {
-    if (auto player = FindPlayerPed(playerId)) {
-        if (player->bInVehicle && player->m_pVehicle)
-            return player->m_pVehicle;
-        return player;
-    }
-    return nullptr;
-}
-
-// 0x56E160
-CTrain* FindPlayerTrain(int32 playerId) {
-    auto vehicle = FindPlayerVehicle(playerId);
-    if (vehicle && vehicle->IsTrain())
-        return vehicle->AsTrain();
-    else
-        return nullptr;
-}
-
-// 0x56E250
-const CVector& FindPlayerCentreOfWorld(int32 playerId) {
-    if (CCarCtrl::bCarsGeneratedAroundCamera)
-        return TheCamera.GetPosition();
-
-    if (CVehicle* vehicle = FindPlayerVehicle(playerId, true))
-        return vehicle->GetPosition();
-
-    return FindPlayerPed(playerId)->GetPosition();
-}
-
-// 0x56E320
-const CVector& FindPlayerCentreOfWorld_NoSniperShift(int32 playerId) {
-    return ((const CVector&(__cdecl*)(int32))0x56E320)(playerId);
-}
-
-// 0x56E400
-CVector FindPlayerCentreOfWorld_NoInteriorShift(int32 playerId) {
-    return ((CVector(__cdecl*)(int32))0x56E400)(playerId);
-}
-
-// 0x56E450
-float FindPlayerHeading(int32 playerId) {
-    if (CVehicle* veh = FindPlayerVehicle(playerId, true))
-        return veh->GetHeading();
-    return FindPlayerPed(playerId)->GetHeading();
-}
-
-// 0x56E520
-float FindPlayerHeight() {
-    CPlayerPed* ped = FindPlayerPed();
-    return ped->GetPosition().z;
-}
-
-// 0x56E210
-CPlayerPed* FindPlayerPed(int32 playerId) {
-    return FindPlayerInfo(playerId).m_pPed;
-}
-
-// Returns player vehicle
-// 0x56E0D0
-CVehicle* FindPlayerVehicle(int32 playerId, bool bIncludeRemote) {
-    CPlayerPed* player = FindPlayerPed(playerId);
-    if (!player || !player->bInVehicle)
-        return nullptr;
-
-    if (bIncludeRemote) {
-        CPlayerInfo* playerInfo = player->GetPlayerInfoForThisPlayerPed();
-        if (playerInfo->m_pRemoteVehicle)
-            return playerInfo->m_pRemoteVehicle;
-    }
-
-    return player->m_pVehicle;
-}
-
-// 0x56E230
-CWanted* FindPlayerWanted(int32 playerId) {
-    return FindPlayerInfo(playerId).m_PlayerData.m_pWanted;
-}
-
-
-CPedGroup& FindPlayerGroup(int32 playerId) {
-    return FindPlayerPed()->GetGroup();
-}
-
-// NOTSA, inlined
-CPlayerInfo& FindPlayerInfo(int playerId) {
-    return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
 }
 
 // NOTE: This function doesn't add m.GetPosition() like
