@@ -247,8 +247,6 @@ void CShopping::RestoreClothesState() {
 // 0x49B3C0
 void CShopping::RestoreVehicleMods() {
     auto veh = FindPlayerVehicle()->AsAutomobile();
-    if (!veh) // NOTSA
-        return;
 
     for (auto&& [i, storedMod] : notsa::enumerate(gStoredVehicleMods)) {
         auto& upgrade = veh->m_anUpgrades[i];
@@ -328,8 +326,6 @@ void CShopping::StoreClothesState() {
 // 0x49B280
 void CShopping::StoreVehicleMods() {
     auto veh = FindPlayerVehicle()->AsAutomobile();
-    if (!veh) // NOTSA
-        return;
 
     memcpy(&gStoredVehicleMods, &veh->m_anUpgrades, NUM_VEHICLE_UPGRADES);
 
