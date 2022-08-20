@@ -17,6 +17,7 @@
 #include "PedScanner.h"
 #include "MentalHealth.h"
 #include "PedScanner.h"
+#include "Collision/CollisionEventScanner.h"
 
 class CPed;
 class CEntity;
