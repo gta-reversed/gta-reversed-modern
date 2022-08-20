@@ -11,10 +11,8 @@ CPedClothesDesc& gStoredClothesState = *(CPedClothesDesc*)0xA9A810;
 char& gClothesHaveBeenStored = *(char*)0xA97298;
 std::array<eDamageState, NUM_COMPONENTS>& gComponentDamageState = *(std::array<eDamageState, 20u>*)0xA97258;
 std::array<int16, NUM_VEHICLE_UPGRADES>& gStoredVehicleMods = *(std::array<int16, 15u>*)0xA97274;
-
+std::array<float, NUM_LEVELS>& gPriceMultipliers = *(std::array<float, NUM_LEVELS>*)0x8A6204;
 CMultiBuilding* gpCurrentProperty = (CMultiBuilding*)0x0;
-
-
 
 void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
@@ -139,8 +137,17 @@ void CShopping::GetNextSection(FILE* file) {
 }
 
 // 0x49AD50
-void CShopping::GetPrice(uint32 itemId) {
-    plugin::Call<0x49AD50, uint32>(itemId);
+int32 CShopping::GetPrice(uint32 itemKey) {
+    auto itemId = -1; // ms_numPrices <= -1 OR key not found. will this case ever happen?
+    if (ms_numPrices > 0) {
+        for (auto&& [i, key] : notsa::enumerate(ms_keys)) {
+            if (key == itemKey) {
+                itemId = i;
+            }
+        }
+    }
+
+    return GetPriceMultipliedByLevel(ms_prices[itemId].price);
 }
 
 // 0x49AAD0
@@ -311,7 +318,7 @@ void CShopping::UpdateStats(int32 a1, bool a2) {
 void CShopping::Load() {
     CGenericGameStorage::LoadDataFromWorkBuffer(&ms_numPriceModifiers, sizeof(int32));
     for (auto i = 0; i < ms_numPriceModifiers; i++) {
-        CGenericGameStorage::LoadDataFromWorkBuffer(&ms_priceModifiers[i], sizeof(tPriceModifier));
+        CGenericGameStorage::LoadDataFromWorkBuffer(&ms_priceModifiers[i], sizeof(PriceModifier));
     }
 
     CGenericGameStorage::LoadDataFromWorkBuffer(&ms_numBuyableItems, sizeof(uint32));
@@ -322,7 +329,7 @@ void CShopping::Load() {
 void CShopping::Save() {
     CGenericGameStorage::SaveDataToWorkBuffer(&ms_numPriceModifiers, sizeof(int32));
     for (auto i = 0; i < ms_numPriceModifiers; i++) {
-        CGenericGameStorage::SaveDataToWorkBuffer(&ms_priceModifiers[i], sizeof(tPriceModifier));
+        CGenericGameStorage::SaveDataToWorkBuffer(&ms_priceModifiers[i], sizeof(PriceModifier));
     }
 
     CGenericGameStorage::SaveDataToWorkBuffer(&ms_numBuyableItems, sizeof(uint32));
