@@ -7,20 +7,22 @@
 #include "TaskComplexWander.h"
 
 void CTaskComplexCarDrive::InjectHooks() {
-    RH_ScopedClass(CTaskComplexCarDrive);
+    RH_ScopedVirtualClass(CTaskComplexCarDrive, 0x86E934, 14);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedInstall(Constructor_0, 0x63C9D0);
-    RH_ScopedInstall(Constructor_1, 0x63C940);
+    RH_ScopedInstall(Constructor_0, 0x63C9D0, { .enabled = false});
+    RH_ScopedInstall(Constructor_1, 0x63C940, { .enabled = false});
     RH_ScopedInstall(Destructor, 0x63CA40);
-    RH_ScopedVirtualInstall(Clone, 0x63DC90);
-    // RH_ScopedVirtualInstall(CreateNextSubTask, 0x644E20);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x645100);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x645240);
-    RH_ScopedVirtualInstall(SetUpCar, 0x63CAE0);
-    RH_ScopedVirtualInstall(CreateSubTaskCannotGetInCar, 0x643200);
-    RH_ScopedVirtualInstall(Drive, 0x63CAD0);
-    // RH_ScopedVirtualInstall(CreateSubTask, 0x642FA0);
+
+    RH_ScopedInstall(CreateSubTask, 0x642FA0, { .enabled = false, .locked = true });
+
+    RH_ScopedVmtInstall(CreateSubTaskCannotGetInCar, 0x643200, { .enabled = false});
+    RH_ScopedVmtInstall(SetUpCar, 0x63CAE0, { .enabled = false});
+    RH_ScopedVmtInstall(Drive, 0x63CAD0, { .enabled = false});
+    RH_ScopedVmtInstall(Clone, 0x63DC90, { .enabled = false});
+    RH_ScopedVmtInstall(CreateNextSubTask, 0x644E20, { .enabled = false, .locked = true });
+    RH_ScopedVmtInstall(CreateFirstSubTask, 0x645100, { .enabled = false, .locked = true});
+    RH_ScopedVmtInstall(ControlSubTask, 0x645240, { .enabled = false});
 }
 
 // 0x63C9D0

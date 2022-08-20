@@ -225,8 +225,8 @@ void CGameLogic::SetUpSkip(int32 fX, int32 fY, int32 fZ, float fAngle, bool bAft
 }
 
 // 0x4415C0
-void CGameLogic::SkipCanBeActivated() {
-    plugin::Call<0x4415C0>();
+bool CGameLogic::SkipCanBeActivated() {
+    return plugin::CallAndReturn<bool, 0x4415C0>();
 }
 
 // 0x441440

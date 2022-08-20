@@ -7,11 +7,11 @@
 #pragma once
 
 #include "TaskSimple.h"
-#include "AnimBlendAssociation.h"
-#include "Entity.h"
-#include "WeaponInfo.h"
+class CAnimBlendAssociation;
+class CEntity;
+class CWeaponInfo;
 
-class CTaskSimpleGangDriveBy : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleGangDriveBy : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bAnimsReferenced;
@@ -41,13 +41,12 @@ public:
     static constexpr auto Type = TASK_SIMPLE_GANG_DRIVEBY;
 
     CTaskSimpleGangDriveBy(CEntity *target, const CVector *targetPos, float abortRange, int8 frequencyPercentage, int8 drivebyStyle, bool seatRHS);
-    ~CTaskSimpleGangDriveBy();
+    ~CTaskSimpleGangDriveBy() override;
 
+    eTaskType GetTaskType() override { return Type; }
     CTask* Clone() override;
-    eTaskType GetTaskType() override { return TASK_SIMPLE_GANG_DRIVEBY; }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 };
-
 VALIDATE_SIZE(CTaskSimpleGangDriveBy, 0x44);
 

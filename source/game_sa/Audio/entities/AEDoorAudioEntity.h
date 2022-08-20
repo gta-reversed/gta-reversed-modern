@@ -2,7 +2,7 @@
 
 #include "AEAudioEntity.h"
 
-class CAEDoorAudioEntity : public CAEAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEDoorAudioEntity : public CAEAudioEntity {
     uint32 m_nTime;
     uint32 m_nMovingDoorTime;
     uint32 m_nField84;

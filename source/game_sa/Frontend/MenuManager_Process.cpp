@@ -13,6 +13,7 @@
 #include "VideoMode.h"
 #include "C_PcSave.h"
 #include "Radar.h"
+#include "ControllerConfigManager.h"
 
 // 0x57B440
 void CMenuManager::Process() {
@@ -383,17 +384,17 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
     }
     case MENU_ACTION_FX_QUALITY:
         switch (g_fx.GetFxQuality()) {
-        case FXQUALITY_LOW:
-            g_fx.SetFxQuality(FXQUALITY_MEDIUM);
+        case FX_QUALITY_LOW:
+            g_fx.SetFxQuality(FX_QUALITY_MEDIUM);
             break;
-        case FXQUALITY_MEDIUM:
-            g_fx.SetFxQuality(FXQUALITY_HIGH);
+        case FX_QUALITY_MEDIUM:
+            g_fx.SetFxQuality(FX_QUALITY_HIGH);
             break;
-        case FXQUALITY_HIGH:
-            g_fx.SetFxQuality(FXQUALITY_VERY_HIGH);
+        case FX_QUALITY_HIGH:
+            g_fx.SetFxQuality(FX_QUALITY_VERY_HIGH);
             break;
-        case FXQUALITY_VERY_HIGH:
-            g_fx.SetFxQuality(FXQUALITY_LOW);
+        case FX_QUALITY_VERY_HIGH:
+            g_fx.SetFxQuality(FX_QUALITY_LOW);
             break;
         }
         SaveSettings();
@@ -501,7 +502,7 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         return true;
     }
     case MENU_ACTION_RESET_CFG: {
-        auto targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
+        const auto& targetMenu = aScreens[m_nCurrentScreen].m_aItems[2].m_nTargetMenu; // ?
         SetDefaultPreferences(targetMenu);
         if (targetMenu == SCREEN_DISPLAY_ADVANCED) {
             RwD3D9ChangeMultiSamplingLevels(m_nPrefsAntialiasing);

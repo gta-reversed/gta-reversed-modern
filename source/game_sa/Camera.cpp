@@ -4,6 +4,7 @@
 
 #include "TaskSimpleHoldEntity.h"
 #include "TaskSimpleDuck.h"
+#include "Hud.h"
 
 float& CCamera::m_f3rdPersonCHairMultY = *reinterpret_cast<float*>(0xB6EC10);
 float& CCamera::m_f3rdPersonCHairMultX = *reinterpret_cast<float*>(0xB6EC14);
@@ -545,15 +546,15 @@ bool CCamera::Get_Just_Switched_Status() const {
 }
 
 // 0x50AE20
-int32 CCamera::GetScreenFadeStatus() const {
+eNameState CCamera::GetScreenFadeStatus() const {
     if (m_fFadeAlpha == 0.0f) {
-        return 0;
+        return NAME_DONT_SHOW;
     }
     if (m_fFadeAlpha == 255.0f) {
-        return 2;
+        return NAME_FADE_IN;
     }
 
-    return 1;
+    return NAME_SHOW;
 }
 
 // 0x50AE50
@@ -969,8 +970,10 @@ void CCamera::SetZoomValueFollowPedScript(int16 zoomMode) {
     switch (zoomMode) {
     case 1:
         m_fPedZoomValueScript = 1.50f;
+        break;
     case 2:
         m_fPedZoomValueScript = 2.90f;
+        break;
     default:
         m_fPedZoomValueScript = 0.25f;
     }
@@ -1477,7 +1480,7 @@ void CCamera::Process() {
 void CCamera::DrawBordersForWideScreen() {
     CRect rect;
     GetScreenRect(&rect);
-    if (!m_nBlurType || m_nBlurType == 2) {
+    if (m_nBlurType == MOTION_BLUR_NONE  || m_nBlurType == MOTION_BLUR_LIGHT_SCENE) {
         m_nMotionBlurAddAlpha = 80;
     }
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));

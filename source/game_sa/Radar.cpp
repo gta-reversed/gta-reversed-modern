@@ -558,11 +558,11 @@ void CRadar::LimitToMap(float* pX, float* pY)
 
     float xMin = (FrontEndMenuManager.m_vMapOrigin.x - zoom) * SCREEN_WIDTH_UNIT;
     float xMax = (FrontEndMenuManager.m_vMapOrigin.x + zoom) * SCREEN_WIDTH_UNIT;
-    *pX = clamp(*pX, xMin, xMax);
+    *pX = std::clamp(*pX, xMin, xMax);
 
     float yMin = (FrontEndMenuManager.m_vMapOrigin.y - zoom) * SCREEN_HEIGHT_UNIT;
     float yMax = (FrontEndMenuManager.m_vMapOrigin.y + zoom) * SCREEN_HEIGHT_UNIT;
-    *pY = clamp(*pY, yMin, yMax);
+    *pY = std::clamp(*pY, yMin, yMax);
 }
 
 // 0x583420
@@ -1287,13 +1287,13 @@ void CRadar::DrawMap()
         goto DRAW_RADAR;
     }
 
-    if (vehicle && vehicle->IsSubPlane() && ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
-        float speedZ = vehicle->GetPosition().z * 1.0f / 200.0f;
+    if (vehicle && vehicle->IsSubPlane() && !ModelIndices::IsVortex(vehicle->m_nModelIndex)) {
+        float speedZ = vehicle->GetPosition().z / 200.0f;
 
         if (speedZ < RADAR_MIN_SPEED)
             m_radarRange = RADAR_MAX_RANGE - 10.0f;
         else if (speedZ < RADAR_MAX_SPEED)
-            m_radarRange = (speedZ - RADAR_MIN_SPEED) * (1.0f / 60.0f) + (RADAR_MAX_RANGE - 10.0f);
+            m_radarRange = (speedZ - RADAR_MIN_SPEED) / 60.0f + (RADAR_MAX_RANGE - 10.0f);
         else
             m_radarRange = RADAR_MAX_RANGE;
     }

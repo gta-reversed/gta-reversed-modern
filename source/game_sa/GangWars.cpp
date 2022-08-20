@@ -16,6 +16,7 @@
 #include "TaskComplexDriveWander.h"
 #include "TaskSimpleCarDrive.h"
 #include "TaskComplexWanderGang.h"
+#include "Hud.h"
 #include "Garages.h"
 
 void CGangWars::InjectHooks() {

@@ -58,7 +58,7 @@ char** GetVideoModeList() {
         gVideoModes[modeId] = (char*)CMemoryMgr::Calloc(100, sizeof(char)); // 100 chars
         sprintf(gVideoModes[modeId], "%lu X %lu X %lu", videoMode.width, videoMode.height, videoMode.depth); // rwsprintf
 
-        DEV_LOG("available video mode id=%02d: %s", modeId, gVideoModes[modeId]);
+        DEV_LOG("Available video mode id=%02d: %s", modeId, gVideoModes[modeId]);
     }
 
     return gVideoModes;

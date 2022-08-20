@@ -111,7 +111,7 @@ float CBmx::FindWheelWidth(bool bRear) {
 }
 
 // 0x6C0560
-void CBmx::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CBmx::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     // NOP
 }
 

@@ -5,6 +5,7 @@
 #include "MenuSystem.h"
 #include "app/app.h"
 #include "VideoMode.h" // todo
+#include "ControllerConfigManager.h"
 
 /*!
  * @addr 0x57FD70

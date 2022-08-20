@@ -2,7 +2,7 @@
 
 #include "Event.h"
 
-class CEventEditableResponse : public CEvent {
+class NOTSA_EXPORT_VTABLE CEventEditableResponse : public CEvent {
 public:
     bool   m_bAddToEventGroup;
     bool   field_D;

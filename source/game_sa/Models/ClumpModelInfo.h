@@ -27,7 +27,7 @@ struct tCompSearchStructById {
     inline tCompSearchStructById(int32 id, RwFrame* frame) : m_nId(id), m_pFrame(frame) {}
 };
 
-class CClumpModelInfo : public CBaseModelInfo {
+class NOTSA_EXPORT_VTABLE CClumpModelInfo : public CBaseModelInfo {
 public:
     union {
         char*  m_animFileName;

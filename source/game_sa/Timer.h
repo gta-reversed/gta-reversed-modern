@@ -57,7 +57,7 @@ public:
     static uint32 GetCyclesPerFrame();
     static uint64 GetCurrentTimeInCycles();
     static bool   GetIsSlowMotionActive();
-    static void   UpdateVariables(float timeStep);
+    static void   UpdateVariables(float timeElapsed);
     static void   Update();
 
     // Inlined funcs
@@ -100,3 +100,4 @@ public:
 };
 
 uint64 GetMillisecondTime();
+bool EachFrames(auto count) { return (CTimer::GetFrameCounter() & count) == 0; }

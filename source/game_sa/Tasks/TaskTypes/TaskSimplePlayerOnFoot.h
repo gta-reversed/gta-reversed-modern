@@ -30,9 +30,9 @@ public:
     CTaskSimplePlayerOnFoot();
     ~CTaskSimplePlayerOnFoot() override = default;
 
-    eTaskType GetTaskType() override { return TASK_SIMPLE_PLAYER_ON_FOOT; }               // 0x6857C0
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    eTaskType GetTaskType() override { return Type; } // 0x6857C0
     CTask* Clone() override { return new CTaskSimplePlayerOnFoot(); }                     // 0x68AFF0
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
 
     void ProcessPlayerWeapon(CPlayerPed* player);

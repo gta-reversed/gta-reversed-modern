@@ -51,6 +51,8 @@
 #include "PedAttractor.h"
 #include "MBlur.h"
 #include "CustomBuildingRenderer.h"
+#include "Hud.h"
+#include "CarFXRenderer.h"
 #include "Garages.h"
 
 char (&CGame::aDatFile)[32] = *reinterpret_cast<char (*)[32]>(0xB728EC);
