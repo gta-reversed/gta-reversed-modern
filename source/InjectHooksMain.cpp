@@ -269,6 +269,7 @@
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
+#include <TaskSimpleCarWaitToSlowDown.h>
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -718,7 +719,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
         // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
-        // CTaskSimpleCarWaitToSlowDown::InjectHooks();
+        CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
         // CTaskSimpleClearLookAt::InjectHooks();
         // CTaskSimpleCower::InjectHooks();

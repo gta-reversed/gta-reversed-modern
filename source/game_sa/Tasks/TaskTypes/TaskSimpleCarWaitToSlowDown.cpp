@@ -2,51 +2,82 @@
 #include "TaskSimpleCarWaitToSlowDown.h"
 
 void CTaskSimpleCarWaitToSlowDown::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleCarWaitToSlowDown);
+    RH_ScopedVirtualClass(CTaskSimpleCarWaitToSlowDown, 0x86ed98, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x646990);
-
     RH_ScopedInstall(Destructor, 0x646A00);
 
-    RH_ScopedVMTInstall(Clone, 0x649CB0, {.reversed = false});
-    RH_ScopedVMTInstall(GetTaskType, 0x6469F0, {.reversed = false});
-    RH_ScopedVMTInstall(MakeAbortable, 0x646A60, {.reversed = false});
-    RH_ScopedVMTInstall(ProcessPed, 0x646AD0, {.reversed = false});
-    RH_ScopedVMTInstall(SetPedPosition, 0x646AB0, {.reversed = false});
+    RH_ScopedVMTInstall(Clone, 0x649CB0);
+    RH_ScopedVMTInstall(GetTaskType, 0x6469F0);
+    RH_ScopedVMTInstall(MakeAbortable, 0x646A60);
+    RH_ScopedVMTInstall(ProcessPed, 0x646AD0);
+    RH_ScopedVMTInstall(SetPedPosition, 0x646AB0);
 }
 
 // 0x646990
-CTaskSimpleCarWaitToSlowDown::CTaskSimpleCarWaitToSlowDown(CVehicle* veh, int32 type) {
-    assert(false && "Constructor not reversed"); // TODO: Reverse constructor}
+CTaskSimpleCarWaitToSlowDown::CTaskSimpleCarWaitToSlowDown(CVehicle* veh, SlowDownType type) :
+    m_veh{veh},
+    m_type{type}
+{
+    CEntity::SafeRegisterRef(m_veh);
 }
 
 // 0x646A00
 CTaskSimpleCarWaitToSlowDown::~CTaskSimpleCarWaitToSlowDown() {
-    assert(false && "Destructor not reversed"); // TODO: Reverse destructor}
-}
-
-// 0x649CB0
-CTask* CTaskSimpleCarWaitToSlowDown::Clone() {
-    return plugin::CallMethodAndReturn<CTask*, 0x649CB0, CTaskSimpleCarWaitToSlowDown*>(this);
-}
-
-// 0x6469F0
-int32 CTaskSimpleCarWaitToSlowDown::GetTaskType() {
-    return plugin::CallMethodAndReturn<int32, 0x6469F0, CTaskSimpleCarWaitToSlowDown*>(this);
+    CEntity::SafeCleanUpRef(m_veh);
 }
 
 // 0x646A60
-bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, int32 priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x646A60, CTaskSimpleCarWaitToSlowDown*, CPed*, int32, CEvent const*>(this, ped, priority, event);
+bool CTaskSimpleCarWaitToSlowDown::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    switch (priority) {
+    case ABORT_PRIORITY_IMMEDIATE:
+        return true;
+    case ABORT_PRIORITY_URGENT: {
+        if (event && event->GetEventType() == EVENT_DAMAGE) {
+            const auto dmg = static_cast<const CEventDamage*>(event);
+            if (dmg->m_damageResponse.m_bHealthZero && dmg->m_bAddToEventGroup) {
+                return true;
+            }
+        }
+        break;
+    }
+    }
+    m_type = SlowDownType::DONE;
+    return false;
 }
 
 // 0x646AD0
 bool CTaskSimpleCarWaitToSlowDown::ProcessPed(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x646AD0, CTaskSimpleCarWaitToSlowDown*, CPed*>(this, ped);
+    if (!m_veh || m_type == SlowDownType::DONE) {
+        return true;
+    }
+
+    if (const auto driver = m_veh->m_pDriver) {
+        if (!driver->IsPlayer() && ped == driver) {
+            // Start stopping the car completely
+
+            auto& ap = m_veh->m_autoPilot;
+            ap.m_nCruiseSpeed = 0;
+            ap.m_nCarMission = MISSION_NONE;
+        }
+    }
+
+    switch (m_type) {
+    case SlowDownType::PED_STEP_OUT:
+        return m_veh->CanPedStepOutCar(false);
+    case SlowDownType::PED_STEP_OUT_OR_JUMP: {
+        return m_veh->CanPedStepOutCar(false) || m_veh->CanPedJumpOutCar(ped);
+    }
+    }
+
+    return false;
 }
 
 // 0x646AB0
 bool CTaskSimpleCarWaitToSlowDown::SetPedPosition(CPed* ped) {
-    return plugin::CallMethodAndReturn<bool, 0x646AB0, CTaskSimpleCarWaitToSlowDown*, CPed*>(this, ped);
+    if (m_veh) {
+        ped->SetPedPositionInCar();
+    }
+    return true;
 }
