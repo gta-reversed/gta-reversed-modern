@@ -40,7 +40,7 @@ public:
     CBmx(int32 modelIndex, eVehicleCreatedBy createdBy);
     ~CBmx() override;
 
-    void BlowUpCar(CEntity* damager, uint8 bHideExplosion) override;
+    void BlowUpCar(CEntity* damager, bool bHideExplosion) override;
     bool SetUpWheelColModel(CColModel* wheelCol) override;
     bool BurstTyre(uint8 tyreComponentId, bool bPhysicalEffect) override;
     void ProcessControl() override;
@@ -60,7 +60,7 @@ private:
     CBmx* Constructor(int32 modelIndex, eVehicleCreatedBy createdBy) { this->CBmx::CBmx(modelIndex, createdBy); return this; }
     CBmx* Destructor() { this->CBmx::~CBmx(); return this; }
 
-    void BlowUpCar_Reversed(CEntity* damager, uint8 bHideExplosion) { CBmx::BlowUpCar(damager, bHideExplosion); }
+    void BlowUpCar_Reversed(CEntity* damager, bool bHideExplosion) { CBmx::BlowUpCar(damager, bHideExplosion); }
     bool SetUpWheelColModel_Reversed(CColModel* wheelCol) { return CBmx::SetUpWheelColModel(wheelCol); }
     bool BurstTyre_Reversed(uint8 tyreComponentId, bool bPhysicalEffect) { return CBmx::BurstTyre(tyreComponentId, bPhysicalEffect); }
     void ProcessControl_Reversed() { CBmx::ProcessControl(); }

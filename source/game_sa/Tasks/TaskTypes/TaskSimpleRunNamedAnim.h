@@ -11,7 +11,7 @@
 #include "TaskTimer.h"
 #include "Vector.h"
 
-class CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimpleRunNamedAnim : public CTaskSimpleAnim {
 public:
     char                 m_animName[24];
     char                 m_animGroupName[16];

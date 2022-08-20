@@ -446,7 +446,7 @@ public:
     virtual bool IsOpenTopCar(){ return false; }
     // remove ref to this entity
     virtual void RemoveRefsToVehicle(CEntity* entity) { /* Do nothing */ }
-    virtual void BlowUpCar(CEntity* damager, uint8 bHideExplosion) { /* Do nothing */ }
+    virtual void BlowUpCar(CEntity* damager, bool bHideExplosion) { /* Do nothing */ }
     virtual void BlowUpCarCutSceneNoExtras(bool bNoCamShake, bool bNoSpawnFlyingComps, bool bDetachWheels, bool bExplosionSound) { /* Do nothing */ }
     virtual bool SetUpWheelColModel(CColModel* wheelCol) { return false; }
     // returns false if it's not possible to burst vehicle's tyre or it is already damaged. bPhysicalEffect=true applies random moving force to vehicle

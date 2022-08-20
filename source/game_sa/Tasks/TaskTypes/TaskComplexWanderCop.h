@@ -6,7 +6,7 @@
 
 class CPed;
 
-class CTaskComplexWanderCop : public CTaskComplexWander {
+class NOTSA_EXPORT_VTABLE CTaskComplexWanderCop : public CTaskComplexWander {
 public:
     CTaskComplexGoToPointAndStandStill* m_pGoToPointAndStandStillTask;
     CTaskTimer                          m_nScanForStuffTimer;
@@ -16,16 +16,14 @@ public:
     CTaskTimer                          m_nSubTaskCreatedTimer;
 
 public:
-    static constexpr auto Type = WANDER_TYPE_COP;
-
     CTaskComplexWanderCop(int32 moveState, uint8 dir);
     ~CTaskComplexWanderCop() override;
 
-    CTask* Clone() override;
+    eWanderType GetWanderType() override { return WANDER_TYPE_COP; } // 0x460D50
+    CTask* Clone() override { return new CTaskComplexWanderCop(m_nMoveState, m_nDir); } // 0x460CE0
     CTask* CreateNextSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
     CTask* ControlSubTask(CPed* ped) override;
-    eWanderType GetWanderType() override { return WANDER_TYPE_COP; } // 0x460D50
     void ScanForStuff(CPed* ped) override;
 
     void LookForCarAlarms(CPed* ped);

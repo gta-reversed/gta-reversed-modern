@@ -2,7 +2,7 @@
 
 #include "EventVehicleDamage.h"
 
-class CEventVehicleDamageWeapon : public CEventVehicleDamage {
+class NOTSA_EXPORT_VTABLE CEventVehicleDamageWeapon : public CEventVehicleDamage {
 public:
     CEventVehicleDamageWeapon(CVehicle* vehicle, CEntity* attacker, eWeaponType weaponType);
     ~CEventVehicleDamageWeapon() override = default;
