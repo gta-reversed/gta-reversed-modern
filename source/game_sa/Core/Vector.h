@@ -120,6 +120,7 @@ public:
         return Average(begin, begin + n);
     }
 };
+VALIDATE_SIZE(CVector, 0xC);
 
 constexpr inline CVector operator-(const CVector& vecOne, const CVector& vecTwo) {
     return { vecOne.x - vecTwo.x, vecOne.y - vecTwo.y, vecOne.z - vecTwo.z };
@@ -190,4 +191,7 @@ static CVector Normalized(CVector v) { v.Normalise(); return v; }
 static CVector ProjectVector(const CVector& what, const CVector& onto) {
     return onto * (DotProduct(what, onto) / onto.SquaredMagnitude());
 }
-VALIDATE_SIZE(CVector, 0xC);
+
+CVector Multiply3x3(const CMatrix& m, const CVector& v);
+CVector Multiply3x3(const CVector& v, const CMatrix& m);
+CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);

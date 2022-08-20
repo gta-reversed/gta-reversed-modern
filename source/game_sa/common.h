@@ -143,10 +143,6 @@ struct SpriteFileName {
 
 void InjectCommonHooks();
 
-CVector Multiply3x3(const CMatrix& m, const CVector& v);
-CVector Multiply3x3(const CVector& v, const CMatrix& m);
-CVector MultiplyMatrixWithVector(const CMatrix& mat, const CVector& vec);
-
 void TransformPoint(RwV3d& point, const CSimpleTransform& placement, const RwV3d& vecPos);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CMatrix& matrix, const RwV3d* vecsin);
 void TransformVectors(RwV3d* vecsOut, int32 numVectors, const CSimpleTransform& transform, const RwV3d* vecsin);
