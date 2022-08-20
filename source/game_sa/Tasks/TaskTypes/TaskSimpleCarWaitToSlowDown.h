@@ -7,9 +7,9 @@ class CVehicle;
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarWaitToSlowDown : public CTaskSimple {
 public:
     enum class SlowDownType {
-        PED_STEP_OUT_OR_JUMP,
-        PED_STEP_OUT,
-        DONE,
+        SLOW_ENOUGH_TO_STEP_OR_JUMP,
+        SLOW_ENOUGH_TO_STEP,
+        DONT_WAIT,
     };
 
     CVehicle*    m_TargetVehicle;
@@ -22,8 +22,8 @@ public:
     CTaskSimpleCarWaitToSlowDown(CVehicle* vehicle, SlowDownType type);
     ~CTaskSimpleCarWaitToSlowDown() override;
 
-    eTaskType GetTaskType() { return Type; }
-    CTask* Clone() { return new CTaskSimpleCarWaitToSlowDown(m_TargetVehicle, m_SlowType); }
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarWaitToSlowDown(m_TargetVehicle, m_SlowType); }
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     bool ProcessPed(CPed* ped) override;
     bool SetPedPosition(CPed* ped) override;
