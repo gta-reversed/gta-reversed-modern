@@ -87,7 +87,7 @@ void CEventKnockOffBike::ReportCriminalEvent(CPed* ped)
 bool CEventKnockOffBike::AffectsPed_Reversed(CPed* ped)
 {
     if (ped->IsAlive()) {
-        if (m_vehicle && m_vehicle->m_nStatus == STATUS_TRAILER)
+        if (m_vehicle && m_vehicle->m_nStatus == STATUS_GHOST)
             return false;
         if (ped->CantBeKnockedOffBike && !ped->bHasBeenRendered && !m_forceKnockOff)
             return false;
