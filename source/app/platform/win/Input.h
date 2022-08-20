@@ -5,6 +5,7 @@
 
 namespace WinInput {
 
+void InjectHooks();
 bool Initialise();
 void InitialiseMouse(bool exclusive);
 void InitialiseJoys();

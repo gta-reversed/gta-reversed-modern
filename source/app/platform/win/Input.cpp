@@ -13,6 +13,12 @@ static auto g_joy2  = static_cast<IDirectInputDevice8*>(PSGLOBAL(diDevice2));
 
 namespace WinInput {
 
+void InjectHooks() {
+    RH_ScopedNamespaceName("Input");
+    RH_ScopedCategory("app");
+
+}
+
 // 0x746990
 bool CreateInput() {
     static IID riidltf = *(IID*)0x8588B4;

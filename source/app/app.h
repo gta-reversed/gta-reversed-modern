@@ -10,7 +10,7 @@ static inline float&  gHorZ = *(float*)0xB72C6C;
 
 void AppInjectHooks();
 
-extern RsEventStatus AppEventHandler(RsEvent nEvent, void* param);
+extern RsEventStatus AppEventHandler(RsEvent event, void* param);
 extern bool PluginAttach();
 extern bool Initialise3D(void* param);
 extern void Terminate3D();
@@ -42,14 +42,3 @@ extern void CheckAniso();
 extern RwCamera* CameraCreate(RwInt32 width, RwInt32 height, RwBool zBuffer);
 extern void CameraDestroy(RwCamera* camera);
 extern void CameraSize(RwCamera* camera, RwRect* rect, RwReal viewWindow, RwReal aspectRatio);
-
-/**
-* Input
-*/
-RsEventStatus HandleKeyDown(void* param);
-RsEventStatus HandleKeyUp(void* param);
-RsEventStatus KeyboardHandler(RsEvent event, void* param);
-RsEventStatus HandlePadButtonDown(void* param);
-RsEventStatus HandlePadButtonUp(void* param);
-RsEventStatus PadHandler(RsEvent event, void* param);
-bool AttachInputDevices();

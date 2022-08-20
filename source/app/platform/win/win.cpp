@@ -25,37 +25,12 @@ void Win32InjectHooks() {
     RH_ScopedNamespaceName("Win32");
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedGlobalInstall(Idle, 0x53E920);
 
-    {
-    RH_ScopedNamespaceName("Ps");
-    RH_ScopedCategoryGlobal();
-
-    RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
-    RH_ScopedGlobalInstall(psErrorMessage, 0x7451D0);
-    RH_ScopedGlobalInstall(psWarningMessage, 0x7451F0);
-    // RH_ScopedGlobalInstall(psCameraBeginUpdate, 0x745210);
-    RH_ScopedGlobalInstall(psCameraShowRaster, 0x745240);
-    // - RH_ScopedGlobalInstall(psTimer, 0x745270);
-    // RH_ScopedGlobalInstall(psGrabScreen, 0x7452B0);
-    RH_ScopedGlobalInstall(psMouseSetVisibility, 0x7453E0);
-    RH_ScopedGlobalInstall(psMouseSetPos, 0x7453F0);
-    // RH_ScopedGlobalInstall(psPathnameCreate, 0x745470);
-    RH_ScopedGlobalInstall(psPathnameDestroy, 0x7454E0);
-    RH_ScopedGlobalInstall(psPathGetSeparator, 0x745500);
-    // RH_ScopedGlobalInstall(psInstallFileSystem, 0x745520);
-    // RH_ScopedGlobalInstall(psNativeTextureSupport, 0x745530);
-    // RH_ScopedGlobalInstall(psDebugMessageHandler, 0x745540);
-    RH_ScopedGlobalInstall(psTerminate, 0x7458A0);
-    RH_ScopedGlobalInstall(psAlwaysOnTop, 0x7458B0);
-    // RH_ScopedGlobalInstall(psSelectDevice, 0x746190);
-    // RH_ScopedGlobalInstall(psInitialize, 0x747420);
-    }
 }
 
 // 0x7468E0
 bool IsAlreadyRunning() {
-    CreateEventA(nullptr, 0, 1, AppClassName);
+    CreateEventA(nullptr, false, true, AppClassName);
     if (GetLastError() != ERROR_ALREADY_EXISTS) {
         return false;
     }
@@ -73,7 +48,6 @@ bool IsAlreadyRunning() {
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     return plugin::CallAndReturn<LRESULT, 0x747EB0, HWND, UINT, WPARAM, LPARAM>(hwnd, uMsg, wParam, lParam);
 }
-
 
 // 0x7486A0
 bool InitApplication(HINSTANCE hInstance) {
@@ -288,7 +262,7 @@ INT WINAPI WinMain(HINSTANCE instance, HINSTANCE hPrevInstance, LPSTR cmdLine, I
                         WINDOWPLACEMENT windowPlacement { .length = 44 };
                         GetWindowPlacement(PSGLOBAL(window), &windowPlacement);
                         if (windowPlacement.showCmd != SW_SHOWMINIMIZED) {
-                            RsEventHandler(rsRENDER, nullptr);
+                            RsEventHandler(rsFRONTENDIDLE, nullptr);
                         }
 
                         if (!FrontEndMenuManager.m_bMenuActive || FrontEndMenuManager.m_bLoadingData) {

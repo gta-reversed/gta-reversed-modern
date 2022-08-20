@@ -2,6 +2,8 @@
 
 #include "RenderWare.h"
 
+extern void AppLightInjectHooks();
+
 static inline RpLight*& pAmbient = *reinterpret_cast<RpLight**>(0xC886E8);
 static inline RwRGBAReal& AmbientLightColour = *reinterpret_cast<RwRGBAReal*>(0xC886A4);
 static inline RwRGBAReal& AmbientLightColourForFrame = *reinterpret_cast<RwRGBAReal*>(0xC886D4);

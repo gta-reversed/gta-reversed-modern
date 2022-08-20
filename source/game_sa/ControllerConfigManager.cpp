@@ -273,6 +273,6 @@ void CControllerConfigManager::AffectPadFromMouse() {
 }
 
 // 0x531C90
-void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type) {
-    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, action, a2, type);
+void CControllerConfigManager::DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked) {
+    plugin::CallMethod<0x531C90, CControllerConfigManager*, eControllerAction, int32, eControllerType>(this, Action, KeyToBeChecked, ControllerTypeToBeChecked);
 }

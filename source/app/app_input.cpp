@@ -1,8 +1,21 @@
 #include "StdInc.h"
 
-#include "app.h"
+#include "app_input.h"
 
 #include "platform.h"
+
+void AppInputInjectHooks() {
+    RH_ScopedNamespaceName("Input");
+    RH_ScopedCategory("app");
+
+    RH_ScopedGlobalInstall(HandleKeyDown, 0x743DF0);
+    RH_ScopedGlobalInstall(HandleKeyUp, 0x7443C0);
+    RH_ScopedGlobalInstall(KeyboardHandler, 0x744880);
+    RH_ScopedGlobalInstall(HandlePadButtonDown, 0x7448B0);
+    RH_ScopedGlobalInstall(HandlePadButtonUp, 0x744930);
+    RH_ScopedGlobalInstall(PadHandler, 0x7449F0);
+    RH_ScopedGlobalInstall(AttachInputDevices, 0x744A20);
+}
 
 // 0x743DF0
 RsEventStatus HandleKeyDown(void* param) {

@@ -3,6 +3,39 @@
 #include "app.h"
 #include "PostEffects.h"
 
+void AppLightInjectHooks() {
+    RH_ScopedNamespaceName("Light");
+    RH_ScopedCategory("app");
+
+    RH_ScopedGlobalInstall(ActivateDirectional, 0x735C80);
+    RH_ScopedGlobalInstall(DeActivateDirectional, 0x735C70);
+    RH_ScopedGlobalInstall(LightsCreate, 0x5BA520);
+    RH_ScopedGlobalInstall(LightsDestroy, 0x735730);
+    RH_ScopedGlobalInstall(LightsEnable, 0x735720);
+    RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
+    RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
+    RH_ScopedGlobalInstall(WorldReplaceScorchedLightsWithNormal, 0x735820);
+    // RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
+    RH_ScopedGlobalInstall(RemoveExtraDirectionalLights, 0x7359E0);
+    RH_ScopedGlobalInstall(SetAmbientAndDirectionalColours, 0x735A20);
+    RH_ScopedGlobalInstall(ReSetAmbientAndDirectionalColours, 0x735C40);
+    RH_ScopedGlobalInstall(SetFlashyColours, 0x735AB0);
+    RH_ScopedGlobalInstall(SetFlashyColours_Mild, 0x735B40);
+    RH_ScopedGlobalInstall(SetBrightMarkerColours, 0x735BD0);
+    RH_ScopedGlobalInstall(SetDirectionalColours, 0x735D70);
+    RH_ScopedGlobalInstall(SetAmbientColoursToIndicateRoadGroup, 0x735C90);
+    RH_ScopedGlobalInstall(SetFullAmbient, 0x735D10);
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
+    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
+    RH_ScopedGlobalInstall(SetLightColoursForPedsCarsAndObjects, 0x735D90);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionHeatObjects, 0x735E40);
+    RH_ScopedGlobalInstall(StoreAndSetLightsForInfraredVisionHeatObjects, 0x735E70);
+    RH_ScopedGlobalInstall(RestoreLightsForInfraredVisionHeatObjects, 0x735EF0);
+    RH_ScopedGlobalInstall(SetLightsForInfraredVisionDefaultObjects, 0x735F20);
+    RH_ScopedGlobalInstall(SetLightsForNightVision, 0x735F70);
+    RH_ScopedGlobalInstall(GetDayNightBalance, 0x6FAB30);
+}
+
 // 0x735C80
 void ActivateDirectional() {
     RpLightSetFlags(pDirect, rpLIGHTLIGHTATOMICS);

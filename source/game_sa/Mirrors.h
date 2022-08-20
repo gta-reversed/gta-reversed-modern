@@ -10,9 +10,10 @@
 #include "Vector.h"
 
 enum eMirrorType : uint8 {
-    MIRROR_TYPE_0 = 0,
-    MIRROR_TYPE_1 = 1,
-    MIRROR_TYPE_2 = 2,
+    MIRROR_TYPE_NONE = 0,
+    MIRROR_TYPE_WALL = 1,
+    MIRROR_TYPE_FLOOR = 2,
+    MIRROR_TYPE_SPHERE_MAP = 3
 };
 
 class CMirrors {
@@ -35,7 +36,7 @@ public:
     static void BeforeConstructRenderList();
     static void BeforeMainRender();
 
-    static void BuildCamMatrix(CMatrix& mat, CVector pointA, CVector pointB);
+    static void BuildCamMatrix(CMatrix& camMatrix, CVector source, CVector dest);
     static void BuildCameraMatrixForScreens(CMatrix& mat);
 
     static void CreateBuffer();

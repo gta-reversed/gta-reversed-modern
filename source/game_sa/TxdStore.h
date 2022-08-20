@@ -19,6 +19,8 @@ struct _TxdParent {
  */
 #define rwID_TXDPARENTPLUGIN  MAKECHUNKID(rwVENDORID_DEVELOPER, 0xF5)
 
+static inline int32& ms_txdPluginOffset = *reinterpret_cast<int32*>(0xC88018);
+
 typedef CPool<TxdDef> CTxdPool;
 
 class CTxdStore {

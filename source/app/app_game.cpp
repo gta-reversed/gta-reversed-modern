@@ -45,7 +45,7 @@ void RenderEffects() {
         CHeli::Post_SearchLightCone();
     }
     CWeaponEffects::Render();
-    if (CReplay::Mode != 1 && !CPad::GetPad()->DisablePlayerControls) {
+    if (CReplay::Mode != MODE_PLAYBACK && !CPad::GetPad()->DisablePlayerControls) {
         FindPlayerPed()->DrawTriangleForMouseRecruitPed();
     }
     CSpecialFX::Render();
@@ -152,18 +152,13 @@ void FrontendIdle() {
     CameraSize(Scene.m_pRwCamera, nullptr, SCREEN_VIEW_WINDOW, CDraw::GetAspectRatio());
     CVisibilityPlugins::SetRenderWareCamera(Scene.m_pRwCamera);
 
-    RwCameraClear(Scene.m_pRwCamera, &gColourTop, 2);
+    RwCameraClear(Scene.m_pRwCamera, &gColourTop, rwCAMERACLEARZ);
     if (!RsCameraBeginUpdate(Scene.m_pRwCamera))
         return;
 
     DefinedState();
-
-    if (FrontEndMenuManager.m_bMenuActive) {
-        FrontEndMenuManager.DrawFrontEnd();
-    }
-
+    RenderMenus();
     SecuromStateDisplay();
-
     DoFade();
     CHud::DrawAfterFade();
     CMessages::Display(false);
@@ -178,14 +173,13 @@ void FrontendIdle() {
 }
 
 // 0x53DF40
-// 0x53DF40
 void RenderScene() {
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER,     RWRSTATE(NULL));
     RwRenderStateSet(rwRENDERSTATEZTESTENABLE,       RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEZWRITEENABLE,      RWRSTATE(FALSE));
     RwRenderStateSet(rwRENDERSTATEVERTEXALPHAENABLE, RWRSTATE(FALSE));
 
-    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
+    if (CMirrors::TypeOfMirror == MIRROR_TYPE_NONE) {
         CMovingThings::Render_BeforeClouds();
         CClouds::Render();
     }
@@ -209,7 +203,7 @@ void RenderScene() {
 
     CRenderer::RenderFadingInEntities();
     if (!CMirrors::bRenderingReflection) {
-        float nearClipPlaneOld = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
+        float nearClipPlane = RwCameraGetNearClipPlane(Scene.m_pRwCamera);
         float farPlane  = RwCameraGetFarClipPlane(Scene.m_pRwCamera);
 
         float z = CCamera::GetActiveCamera().m_vecFront.z;
@@ -218,16 +212,16 @@ void RenderScene() {
         constexpr float flt_8CD4F0 = 2.0f;
         constexpr float flt_8CD4EC = 5.9604645e-8f;
 
-        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * camZ + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlaneOld);
+        float unknown = ((flt_8CD4F0 * flt_8CD4EC * 0.25f - flt_8CD4F0 * flt_8CD4EC) * camZ + flt_8CD4F0 * flt_8CD4EC) * (farPlane - nearClipPlane);
 
         RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlaneOld);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, unknown + nearClipPlane);
         RwCameraBeginUpdate(Scene.m_pRwCamera);
         CShadows::UpdateStaticShadows();
         CShadows::RenderStaticShadows();
         CShadows::RenderStoredShadows();
         RwCameraEndUpdate(Scene.m_pRwCamera);
-        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlaneOld);
+        RwCameraSetNearClipPlane(Scene.m_pRwCamera, nearClipPlane);
         RwCameraBeginUpdate(Scene.m_pRwCamera);
     }
 
@@ -236,7 +230,7 @@ void RenderScene() {
 
     RwRenderStateSet(rwRENDERSTATECULLMODE, RWRSTATE(rwCULLMODECULLNONE));
 
-    if (CMirrors::TypeOfMirror == MIRROR_TYPE_0) {
+    if (CMirrors::TypeOfMirror == MIRROR_TYPE_NONE) {
         CClouds::RenderBottomFromHeight();
         CWeather::RenderRainStreaks();
         CCoronas::RenderSunReflection();
@@ -285,5 +279,5 @@ void InitialiseGame() {
 
 // 0x746060
 bool IsForegroundApp() {
-    return ForegroundApp != false;
+    return ForegroundApp;
 }

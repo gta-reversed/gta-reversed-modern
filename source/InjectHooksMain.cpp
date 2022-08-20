@@ -267,7 +267,8 @@
 #include "TaskSimpleDrownInCar.h"
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
-#include <TaskSimpleTired.h>
+#include "TaskSimpleTired.h"
+#include "Input.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -280,6 +281,7 @@
 
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
+#include "app_input.h"
 #include "platform/win/VideoPlayer/VideoPlayer.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
@@ -1033,6 +1035,9 @@ void InjectHooksMain() {
         PsInjectHooks();
         RwInjectHooks();
         AppInjectHooks();
+        AppInputInjectHooks();
+        AppLightInjectHooks();
+        WinInput::InjectHooks();
     };
 
     const auto Animation = []() {

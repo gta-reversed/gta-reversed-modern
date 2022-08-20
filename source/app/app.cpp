@@ -1,87 +1,42 @@
 #include "StdInc.h"
 
 #include "app.h"
+#include "app_input.h"
+
 #include "platform.h"
+
 #include "RealTimeShadowManager.h"
 #include "Credits.h"
 #include "Clouds.h"
 #include "CustomBuildingRenderer.h"
+
 #include "Plugins/BreakablePlugin/BreakablePlugin.h"
 
 static bool& gammaChanged = *(bool*)(0xC920C8);
 static const D3DGAMMARAMP& savedGamma = *reinterpret_cast<const D3DGAMMARAMP*>(0xC8D4C8);
 
 void AppInjectHooks() {
-
-    // RH_ScopedGlobalInstall(DefinedState, 0x734650);
-    // RH_ScopedGlobalInstall(DefinedState2d, 0x734750);
-
-    // fail RH_ScopedGlobalInstall(PluginAttach, 0x53D870);
-    // fail RH_ScopedGlobalInstall(AppEventHandler, 0x53EC10);
-
-    {
     RH_ScopedNamespaceName("Game");
     RH_ScopedCategory("app");
 
+    RH_ScopedGlobalInstall(Idle, 0x53E920);
     RH_ScopedGlobalInstall(RenderEffects, 0x53E170);
     RH_ScopedGlobalInstall(FrontendIdle, 0x53E770);
     RH_ScopedGlobalInstall(DoRWStuffStartOfFrame, 0x53D690);
     RH_ScopedGlobalInstall(DoRWStuffStartOfFrame_Horizon, 0x53D7A0);
     RH_ScopedGlobalInstall(DoRWStuffEndOfFrame, 0x53D840);
-    RH_ScopedGlobalInstall(Idle, 0x53E920);
     RH_ScopedGlobalInstall(RenderScene, 0x53DF40);
     RH_ScopedGlobalInstall(RenderMenus, 0x53E530);
     RH_ScopedGlobalInstall(GameInit, 0x5BF3B0);
     RH_ScopedGlobalInstall(TheGame, 0x53DF10);
     RH_ScopedGlobalInstall(InitialiseGame, 0x53E580);
     RH_ScopedGlobalInstall(IsForegroundApp, 0x746060);
-    }
 
-    {
-    RH_ScopedNamespaceName("Input");
-    RH_ScopedCategory("app");
+    RH_ScopedGlobalInstall(DefinedState, 0x734650);
+    RH_ScopedGlobalInstall(DefinedState2d, 0x734750);
 
-    RH_ScopedGlobalInstall(HandleKeyDown, 0x743DF0);
-    RH_ScopedGlobalInstall(HandleKeyUp, 0x7443C0);
-    RH_ScopedGlobalInstall(KeyboardHandler, 0x744880);
-    RH_ScopedGlobalInstall(HandlePadButtonDown, 0x7448B0);
-    RH_ScopedGlobalInstall(HandlePadButtonUp, 0x744930);
-    RH_ScopedGlobalInstall(PadHandler, 0x7449F0);
-    RH_ScopedGlobalInstall(AttachInputDevices, 0x744A20);
-    }
-
-    {
-    RH_ScopedNamespaceName("Lights");
-    RH_ScopedCategory("app");
-
-    RH_ScopedGlobalInstall(ActivateDirectional, 0x735C80);
-    RH_ScopedGlobalInstall(DeActivateDirectional, 0x735C70);
-    RH_ScopedGlobalInstall(LightsCreate, 0x5BA520);
-    RH_ScopedGlobalInstall(LightsDestroy, 0x735730);
-    RH_ScopedGlobalInstall(LightsEnable, 0x735720);
-    RH_ScopedGlobalInstall(SetLightsWithTimeOfDayColour, 0x7354E0);
-    RH_ScopedGlobalInstall(WorldReplaceNormalLightsWithScorched, 0x7357E0);
-    RH_ScopedGlobalInstall(WorldReplaceScorchedLightsWithNormal, 0x735820);
-    // RH_ScopedGlobalInstall(AddAnExtraDirectionalLight, 0x735840);
-    RH_ScopedGlobalInstall(RemoveExtraDirectionalLights, 0x7359E0);
-    RH_ScopedGlobalInstall(SetAmbientAndDirectionalColours, 0x735A20);
-    RH_ScopedGlobalInstall(ReSetAmbientAndDirectionalColours, 0x735C40);
-    RH_ScopedGlobalInstall(SetFlashyColours, 0x735AB0);
-    RH_ScopedGlobalInstall(SetFlashyColours_Mild, 0x735B40);
-    RH_ScopedGlobalInstall(SetBrightMarkerColours, 0x735BD0);
-    RH_ScopedGlobalInstall(SetDirectionalColours, 0x735D70);
-    RH_ScopedGlobalInstall(SetAmbientColoursToIndicateRoadGroup, 0x735C90);
-    RH_ScopedGlobalInstall(SetFullAmbient, 0x735D10);
-    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "void", 0x735D30, void(*)());
-    RH_ScopedGlobalOverloadedInstall(SetAmbientColours, "color", 0x735D50, void(*)(RwRGBAReal* color));
-    RH_ScopedGlobalInstall(SetLightColoursForPedsCarsAndObjects, 0x735D90);
-    RH_ScopedGlobalInstall(SetLightsForInfraredVisionHeatObjects, 0x735E40);
-    RH_ScopedGlobalInstall(StoreAndSetLightsForInfraredVisionHeatObjects, 0x735E70);
-    RH_ScopedGlobalInstall(RestoreLightsForInfraredVisionHeatObjects, 0x735EF0);
-    RH_ScopedGlobalInstall(SetLightsForInfraredVisionDefaultObjects, 0x735F20);
-    RH_ScopedGlobalInstall(SetLightsForNightVision, 0x735F70);
-    RH_ScopedGlobalInstall(GetDayNightBalance, 0x6FAB30);
-    }
+    // fail RH_ScopedGlobalInstall(PluginAttach, 0x53D870);
+    // fail RH_ScopedGlobalInstall(AppEventHandler, 0x53EC10);
 }
 
 // 0x53D690
@@ -157,7 +112,7 @@ RsEventStatus AppEventHandler(RsEvent event, void* param) {
     case rsIDLE:
         Idle(param);
         return rsEVENTPROCESSED;
-    case rsRENDER:
+    case rsFRONTENDIDLE:
         FrontendIdle();
         return rsEVENTPROCESSED;
     default:
@@ -167,92 +122,41 @@ RsEventStatus AppEventHandler(RsEvent event, void* param) {
 
 // 0x53D870
 bool PluginAttach() {
-    // return plugin::CallAndReturn<bool, 0x53D870>();
+    return plugin::CallAndReturn<bool, 0x53D870>();
 
-    if (!RpWorldPluginAttach()) {
-        DEV_LOG("Couldn't attach RpWorldPluginAttach plugin");
-        return false;
-    }
+    const auto Attach = [](auto name, auto attachFn) {
+        if (!attachFn()) {
+            DEV_LOG("Couldn't attach %s plugin", name);
+            return false;
+        }
+        return true;
+    };
 
-    if (!RpSkinPluginAttach()) {
-        DEV_LOG("Couldn't attach RpSkinPluginAttach plugin");
-        return false;
-    }
-
-    if (!RtAnimInitialize()) {
-        DEV_LOG("Couldn't attach RtAnimInitialize plugin");
-        return false;
-    }
-
-    if (!RpHAnimPluginAttach()) {
-        DEV_LOG("Couldn't attach RpHAnimPluginAttach plugin");
-        return false;
-    }
-
-    if (!NodeNamePluginAttach()) {
-        DEV_LOG("Couldn't attach NodeNamePluginAttach plugin");
-        return false;
-    }
-
-    if (!CVisibilityPlugins::PluginAttach()) {
-        DEV_LOG("Couldn't attach Visibility plugins");
-        return false;
-    }
-
-    if (!RpAnimBlendPluginAttach()) {
-        DEV_LOG("Couldn't attach RpAnimBlend plugin");
-        return false;
-    }
-
-    if (!CTxdStore::PluginAttach()) {
-        DEV_LOG("Couldn't attach CTxdStore plugin");
-        return false;
-    }
-
-    if (!RpMatFXPluginAttach()) {
-        DEV_LOG("Couldn't attach RpMatFX plugin");
-        return false;
-    }
-
-    if (!RpUVAnimPluginAttach()) {
-        DEV_LOG("Couldn't attach RpUVAnim plugin");
-        return false;
-    }
-
-    if (!CCustomBuildingRenderer::PluginAttach()) {
-        DEV_LOG("Couldn't attach CCustomBuildingRenderer plugin");
-        return false;
-    }
-
-    if (!CCarFXRenderer::RegisterPlugins()) {
-        DEV_LOG("Couldn't attach CCarFXRenderer plugin");
-        return false;
-    }
-
-    if (!(RpAnisotPluginAttach(), BreakablePluginAttach())) {
-        DEV_LOG("Couldn't attach RpAnisot plugin");
-        return false;
-    }
-
-    if (!CCollisionPlugin::PluginAttach()) {
-        DEV_LOG("Couldn't attach CCollisionPlugin plugin");
-        return false;
-    }
-
-    if (!C2dEffect::PluginAttach()) {
-        DEV_LOG("Couldn't attach C2dEffect plugin");
-        return false;
-    }
-
-    if (!PipelinePluginAttach()) {
-        DEV_LOG("Couldn't attach Pipeline plugin");
-        return false;
-    }
-    return true;
+    return (
+        Attach("Rp World",                 RpWorldPluginAttach) &&
+        Attach("Rp Skin",                  RpSkinPluginAttach) &&
+        Attach("Rt AnimInitialize",        RtAnimInitialize) &&
+        Attach("Rp HAnim",                 RpHAnimPluginAttach) &&
+        Attach("Node Name",                NodeNamePluginAttach) &&
+        Attach("Visibility",               CVisibilityPlugins::PluginAttach) &&
+        Attach("Rp Anim Blend",            RpAnimBlendPluginAttach) &&
+        Attach("C Txd Store",              CTxdStore::PluginAttach) &&
+        Attach("Rp Mat FX",                RpMatFXPluginAttach) &&
+        Attach("Rp UV Anim",               RpUVAnimPluginAttach) &&
+        Attach("Custom Building Renderer", CCustomBuildingRenderer::PluginAttach) &&
+        Attach("Car FX Renderer",          CCarFXRenderer::RegisterPlugins) &&
+        Attach("Rp Anisot",                RpAnisotPluginAttach) &&
+        Attach("Breakable",                BreakablePluginAttach) &&
+        Attach("Collision",                CCollisionPlugin::PluginAttach) &&
+        Attach("2d Effect",                C2dEffect::PluginAttach) &&
+        Attach("Pipeline",                 PipelinePluginAttach)
+    );
 }
 
 // 0x5BF390
 bool Initialise3D(void* param) {
+    return plugin::CallAndReturn<bool, 0x5BF390>();
+
     // todo: CMemoryMgr::PushMemId(MEMID_RENDER);
     RwBool bInitialised = RsRwInitialize(param);
     // CMemoryMgr::PopMemId();
@@ -264,6 +168,8 @@ bool Initialise3D(void* param) {
 
 // 0x53D910
 void Terminate3D() {
+    return plugin::Call<0x53D910>();
+
     CGame::ShutdownRenderWare();
 
     if (gammaChanged) {
@@ -320,6 +226,7 @@ void DefinedState2d() {
     RwRenderStateSet(rwRENDERSTATEALPHATESTFUNCTIONREF, RWRSTATE(2)); // TODO: ?
 }
 
+// TODO: Review
 // 0x53E920
 void Idle(void* param) {
     /* FPS lock. Limits to 26 frames per second.
@@ -365,9 +272,9 @@ void Idle(void* param) {
 
         bool started;
         if (CWeather::LightningFlash) {
-            cc.m_nSkyBottomRed = 255;
+            cc.m_nSkyBottomRed   = 255;
             cc.m_nSkyBottomGreen = 255;
-            cc.m_nSkyBottomBlue = 255;
+            cc.m_nSkyBottomBlue  = 255;
             started = DoRWStuffStartOfFrame_Horizon(255, 255, 255, 255, 255, 255, 255);
         } else {
             started = DoRWStuffStartOfFrame_Horizon(cc.m_nSkyTopRed, cc.m_nSkyTopGreen, cc.m_nSkyTopBlue, cc.m_nSkyBottomRed, cc.m_nSkyBottomGreen, cc.m_nSkyBottomBlue, 255);
@@ -392,10 +299,7 @@ void Idle(void* param) {
         Render2dStuff();
     }
 
-    if (FrontEndMenuManager.m_bMenuActive) {
-        FrontEndMenuManager.DrawFrontEnd();
-    }
-
+    RenderMenus();
     RwRenderStateSet(rwRENDERSTATETEXTURERASTER, RWRSTATE(NULL));
     DoFade();
     CHud::DrawAfterFade();

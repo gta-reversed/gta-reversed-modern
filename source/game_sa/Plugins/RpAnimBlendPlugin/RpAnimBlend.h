@@ -15,14 +15,14 @@ AnimBlendFrameData* RpAnimBlendClumpFindBone(RpClump* clump, uint32 id);
 AnimBlendFrameData* RpAnimBlendClumpFindFrame(RpClump* clump, const char* name);
 AnimBlendFrameData* RpAnimBlendClumpFindFrameFromHashKey(RpClump* clump, uint32 key);
 
-CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool arg1, CAnimBlendHierarchy* hierarchy);
+CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, bool bStopFunctionConfusion, CAnimBlendHierarchy* hierarchy);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, const char* name);
 CAnimBlendAssociation* RpAnimBlendClumpGetAssociation(RpClump* clump, uint32 animId);
 
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump);
 CAnimBlendAssociation* RpAnimBlendClumpGetFirstAssociation(RpClump* clump, uint32 flags);
 
-CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pAssociation, float* blendAmount);
+CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation(RpClump* clump, CAnimBlendAssociation** pp2ndAnim, float* pBlendVal2nd);
 CAnimBlendAssociation* RpAnimBlendClumpGetMainAssociation_N(RpClump* clump, int32 n);
 
 CAnimBlendAssociation* RpAnimBlendClumpGetMainPartialAssociation(RpClump* clump);

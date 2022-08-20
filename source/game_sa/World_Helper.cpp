@@ -4,7 +4,7 @@
 #include "EntryExitManager.h"
 
 // inlined
-CPlayerInfo& FindPlayerInfo(int playerId) {
+CPlayerInfo& FindPlayerInfo(int32 playerId) {
     return CWorld::Players[playerId < 0 ? CWorld::PlayerInFocus : playerId];
 }
 

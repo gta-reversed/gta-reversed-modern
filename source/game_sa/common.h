@@ -56,7 +56,7 @@ constexpr float SCREEN_SCALE_FROM_BOTTOM(float a) { return SCREEN_HEIGHT - SCREE
 
 constexpr auto BUILD_NAME_FULL = "TEST"; // NOTSA
 
-extern int32 gDefaultTaskTime = 9'999'999; // or 0x98967F a.k.a (ten million - 1)
+static inline int32 gDefaultTaskTime = 9'999'999; // or 0x98967F a.k.a (ten million - 1)
 
 static inline char (&gString)[352] = *(char (*)[352])0xB71670;
 static inline char (&gString2)[352] = *(char (*)[352])0xB71510;
@@ -166,8 +166,7 @@ inline const float invLerp(float fMin, float fMax, float fVal) {
 }
 
 // 0x4EEA80 - And inlined helluvalot
-inline bool approxEqual(float f1, float f2, float epsilon)
-{
+inline bool approxEqual(float f1, float f2, float epsilon) {
     return fabs(f1 - f2) < epsilon;
 }
 
@@ -177,12 +176,14 @@ inline bool approxEqual2(float f1, float f2, float epsilon = 0.01F)
     return f1 == f2 || fabs(f1 - f2) < epsilon;
 }
 
+// shit
 extern constexpr bool make_fourcc3(const char* line, const char abc[3]) {
     return line[0] == abc[0] &&
            line[1] == abc[1] &&
            line[2] == abc[2];
 }
 
+// shit
 extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
     return line[0] == abcd[0] &&
            line[1] == abcd[1] &&
@@ -190,6 +191,7 @@ extern constexpr bool make_fourcc4(const char* line, const char abcd[4]) {
            line[3] == abcd[3];
 }
 
+// shit
 extern constexpr uint32 make_fourcc4(const char fourcc[4]) {
     return fourcc[0] << 0 |
            fourcc[1] << 8 |
@@ -205,11 +207,11 @@ bool GraphicsLowQuality();
 /**
  * Writes given raster to PNG file using RtPNGImageWrite
  */
-void WriteRaster(RwRaster* raster, const char* path);
-bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX, float* screenY);
-bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos);
-bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir);
-bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance);
+void WriteRaster(RwRaster* raster, const char* filename);
+bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* screenY);
+bool CalcScreenCoors(const CVector& in, CVector* out);
+bool DoesInfiniteLineTouchScreen(float baseX, float baseY, float deltaX, float deltaY);
+bool IsPointInsideLine(float fLineBaseX, float fLineBaseY, float fDeltaX, float fDeltaY, float fTestPointX, float fTestPointY, float fRadius);
 
 void LittleTest();
 

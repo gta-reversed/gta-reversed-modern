@@ -6,7 +6,7 @@
 #include "LoadingScreen.h"
 
 void PsInjectHooks() {
-    RH_ScopedNamespaceName("Ps");
+    RH_ScopedNamespaceName("Win32-Ps");
     RH_ScopedCategoryGlobal();
 
     RH_ScopedGlobalInstall(psWindowSetText, 0x7451B0);
@@ -57,8 +57,6 @@ void psWarningMessage(const char* str) {
 
 // 0x745210
 bool psCameraBeginUpdate(RwCamera* camera) {
-    return plugin::CallAndReturn<bool, 0x745210, RwCamera*>(camera);
-
     if (RwCameraBeginUpdate(Scene.m_pRwCamera)) {
         return true;
     }

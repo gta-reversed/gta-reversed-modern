@@ -31,7 +31,7 @@ void InjectCommonHooks() {
 // WINDOWS
 void MessageLoop() {
     tagMSG msg;
-    while (PeekMessageA(&msg, 0, 0, 0, PM_REMOVE | PM_NOYIELD)) {
+    while (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE | PM_NOYIELD)) {
         if (msg.message == WM_QUIT) {
             RsGlobal.quit = true;
         } else {
@@ -81,23 +81,23 @@ bool GraphicsLowQuality() {
 }
 
 // 0x5A4150
-void WriteRaster(RwRaster* raster, const char* path) {
+void WriteRaster(RwRaster* raster, const char* filename) {
     assert(raster);
-    assert(path && path[0]);
+    assert(filename && filename[0]);
 
     RwImage* img = RwImageCreate(RwRasterGetWidth(raster), RwRasterGetHeight(raster), RwRasterGetDepth(raster));
     RwImageAllocatePixels(img);
     RwImageSetFromRaster(img, raster);
-    RtPNGImageWrite(img, path);
+    RtPNGImageWrite(img, filename);
     RwImageDestroy(img);
 }
 
 // 0x71DA00
-bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX, float* screenY) {
-    return plugin::CallAndReturn<bool, 0x71DA00, const CVector&, CVector*, float*, float*>(vecPoint, vecOutPos, screenX, screenY);
+bool CalcScreenCoors(const CVector& in, CVector* out, float* screenX, float* screenY) {
+    return plugin::CallAndReturn<bool, 0x71DA00, const CVector&, CVector*, float*, float*>(in, out, screenX, screenY);
 
     // TODO: Figure out how to get screen size..
-    CVector screen =  TheCamera.m_mViewMatrix * vecPoint;
+    CVector screen =  TheCamera.m_mViewMatrix * in;
     if (screen.z <= 1.0f)
         return false;
 
@@ -105,7 +105,7 @@ bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX
 
     CVector2D screenSize{};
 
-    *vecOutPos = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
+    *out = screen * depth * CVector(screenSize.x, screenSize.y, 1.0f);
 
     *screenX = screenSize.x * depth / CDraw::ms_fFOV * 70.0f;
     *screenY = screenSize.y * depth / CDraw::ms_fFOV * 70.0f;
@@ -114,16 +114,16 @@ bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos, float* screenX
 }
 
 // 0x71DAB0
-bool CalcScreenCoors(const CVector& vecPoint, CVector* vecOutPos) {
-    return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(vecPoint, vecOutPos);
+bool CalcScreenCoors(const CVector& in, CVector* out) {
+    return plugin::CallAndReturn<bool, 0x71DAB0, const CVector&, CVector*>(in, out);
 
-    *vecOutPos = TheCamera.m_mViewMatrix * vecPoint;
-    if (vecOutPos->z <= 1.0f)
+    *out = TheCamera.m_mViewMatrix * in;
+    if (out->z <= 1.0f)
         return false;
 
-    auto invZ = 1.0f / vecOutPos->z;
-    vecOutPos->x = SCREEN_WIDTH * invZ * vecOutPos->x;
-    vecOutPos->y = SCREEN_HEIGHT * invZ * vecOutPos->y;
+    auto invZ = 1.0f / out->z;
+    out->x = SCREEN_WIDTH * invZ * out->x;
+    out->y = SCREEN_HEIGHT * invZ * out->y;
     return true;
 }
 
@@ -134,14 +134,14 @@ void LittleTest() {
 
 // used only in COccluder::ProcessLineSegment
 // 0x71DB80
-bool DoesInfiniteLineTouchScreen(float fX, float fY, float fXDir, float fYDir) {
-    return plugin::CallAndReturn<bool, 0x71DB80, float, float, float, float>(fX, fY, fXDir, fYDir);
+bool DoesInfiniteLineTouchScreen(float baseX, float baseY, float deltaX, float deltaY) {
+    return plugin::CallAndReturn<bool, 0x71DB80, float, float, float, float>(baseX, baseY, deltaX, deltaY);
 }
 
 // Used only in COcclusion, COccluder, CActiveOccluder
 // 0x71E050
-bool IsPointInsideLine(float fLineX, float fLineY, float fXDir, float fYDir, float fPointX, float fPointY, float fTolerance) {
-    return (fPointX - fLineX) * fYDir - (fPointY - fLineY) * fXDir >= fTolerance;
+bool IsPointInsideLine(float fLineBaseX, float fLineBaseY, float fDeltaX, float fDeltaY, float fTestPointX, float fTestPointY, float fRadius) {
+    return (fTestPointX - fLineBaseX) * fDeltaY - (fTestPointY - fLineBaseY) * fDeltaX >= fRadius;
 }
 
 /* Convert UTF-8 string to Windows Unicode. Free pointer using delete[]

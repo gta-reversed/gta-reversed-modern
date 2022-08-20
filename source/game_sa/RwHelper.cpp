@@ -47,34 +47,29 @@ CEventGlobalGroup* GetEventGlobalGroup() {
 
 // TODO: Check `outName` size (to avoid buffer overflow)
 // 0x5370A0
-void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage) {
-    const size_t nodesz = strlen(nodeName);
+void GetNameAndDamage(const char* name, char* objName, bool& bIsDamageModel) {
+    const size_t nodesz = strlen(name);
 
     const auto TerminatedCopy = [=](size_t offset) {
-        strncpy(outName, nodeName, nodesz - offset);
-        outName[nodesz - offset] = 0;
+        strncpy(objName, name, nodesz - offset);
+        objName[nodesz - offset] = 0;
     };
 
     // EndsWith "_dam"
-    if (nodeName[nodesz - 4] == '_' &&
-        nodeName[nodesz - 3] == 'd' &&
-        nodeName[nodesz - 2] == 'a' &&
-        nodeName[nodesz - 1] == 'm'
+    if (name[nodesz - 4] == '_' && name[nodesz - 3] == 'd' && name[nodesz - 2] == 'a' && name[nodesz - 1] == 'm'
     ) {
-        outDamage = true;
+        bIsDamageModel = true;
         TerminatedCopy(sizeof("_dam") - 1);
     }
     else {
-        outDamage = false;
+        bIsDamageModel = false;
         // EndsWith "_l0" or "_L0"
-        if (
-            nodeName[nodesz - 3] == '_' &&
-            (nodeName[nodesz - 2] == 'L' || nodeName[nodesz - 2] == 'l') &&
-            nodeName[nodesz - 1] == '0'
+        if (name[nodesz - 3] == '_' &&
+            (name[nodesz - 2] == 'L' || name[nodesz - 2] == 'l') && name[nodesz - 1] == '0'
         ) {
             TerminatedCopy(sizeof("_l0") - 1);
         } else
-            strcpy(outName, nodeName);
+            strcpy(objName, name);
     }
 }
 
@@ -264,8 +259,8 @@ RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, uint32 hash
 }
 
 // 0x734FC0
-RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* bound, bool arg2) {
-    return ((RpClump * (__cdecl*)(RpClump*, RwSphere*, bool))0x734FC0)(clump, bound, arg2);
+RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* sphere, bool bUseLTM) {
+    return ((RpClump * (__cdecl*)(RpClump*, RwSphere*, bool))0x734FC0)(clump, sphere, bUseLTM);
 }
 
 // 0x735140

@@ -110,17 +110,21 @@ struct CControllerAction {
 
 class CControllerConfigManager {
 public:
-    char              field_0;
-    char              field_1;
-    char              m_prev;
-    char              field_3;
-    DIJOYSTATE2       m_PrevPadState;
-    DIJOYSTATE2       m_CurrPadState;
-    char              m_aszEventNames[59][40];
+    bool              m_bJoyJustInitialised;
+
+    DIJOYSTATE2       m_OldJoyState;
+    DIJOYSTATE2       m_NewJoyState;
+
+    char              m_arrControllerActionName[59][40]; // todo: 182
     bool              m_ButtonStates[17];
     CControllerAction m_Actions[59];
-    char              field_12D0[16];
-    char              field_12E0;
+
+    bool m_bStickL_X_Rgh_Lft_MovementBothDown[4];
+    bool m_bStickL_Up_Dwn_MovementBothDown[4];
+    bool m_bStickR_X_Rgh_Lft_MovementBothDown[4];
+    bool m_bStickR_Up_Dwn_MovementBothDown[4];
+
+    bool MouseFoundInitSet;
 
 public:
     static void InjectHooks();
@@ -150,7 +154,7 @@ public:
     bool GetIsMouseButtonUp(RsKeyCodes key);
     bool GetIsMouseButtonJustUp(RsKeyCodes key);
     bool GetIsKeyBlank(int32 a1, eControllerType controller);
-    eActionType GetActionType(eControllerAction);
+    eActionType GetActionType(eControllerAction action);
     char* GetControllerSettingTextMouse(eControllerAction action);
     char* GetControllerSettingTextJoystick(eControllerAction action);
 
@@ -158,9 +162,8 @@ public:
     void MakeControllerActionsBlank();
     void AffectPadFromKeyBoard();
     void AffectPadFromMouse();
-    void DeleteMatchingActionInitiators(eControllerAction action, int32 a2, eControllerType type);
+    void DeleteMatchingActionInitiators(eControllerAction Action, int32 KeyToBeChecked, eControllerType ControllerTypeToBeChecked);
 };
-
 VALIDATE_SIZE(CControllerConfigManager, 0x12E4);
 
 extern CControllerConfigManager &ControlsManager;

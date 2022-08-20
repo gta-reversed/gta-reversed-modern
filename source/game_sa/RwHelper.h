@@ -8,7 +8,7 @@ void RwInjectHooks();
 
 CEventGlobalGroup* GetEventGlobalGroup();
 
-void GetNameAndDamage(const char* nodeName, char* outName, bool& outDamage);
+void GetNameAndDamage(const char* name, char* objName, bool& bIsDamageModel);
 RpAtomic* GetFirstAtomicCallback(RpAtomic* atomic, void* data);
 RpAtomic* GetFirstAtomic(RpClump* clump);
 RpAtomic* Get2DEffectAtomicCallback(RpAtomic* atomic, void* data);
@@ -34,7 +34,7 @@ RpAtomic* forceLinearFilteringAtomicsCB(RpAtomic* atomic, void* data);
 bool SetFilterModeOnClumpsTextures(RpClump* clump, RwTextureFilterMode filtering);
 bool RpGeometryReplaceOldMaterialWithNewMaterial(RpGeometry* geometry, RpMaterial* oldMaterial, RpMaterial* newMaterial);
 RwTexture* RwTexDictionaryFindHashNamedTexture(RwTexDictionary* txd, uint32 hash);
-RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* bound, bool arg2);
+RpClump* RpClumpGetBoundingSphere(RpClump* clump, RwSphere* sphere, bool bUseLTM);
 void SkinGetBonePositions(RpClump* clump);
 void SkinSetBonePositions(RpClump* clump);
 void SkinGetBonePositionsToTable(RpClump* clump, RwV3d* table);
