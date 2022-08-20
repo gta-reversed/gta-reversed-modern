@@ -491,12 +491,24 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
 
         if (pressedLR > 0) {
             do {
-                m_nDisplayVideoMode = m_nPrefsVideoMode ? (m_nPrefsVideoMode - 1) : (numVideoModes - 1);
-            } while (!videoModes[m_nPrefsVideoMode]);
+                ++m_nDisplayVideoMode;
+            } while (!videoModes[m_nDisplayVideoMode]);
+
+            if (m_nDisplayVideoMode >= numVideoModes) {
+                m_nDisplayVideoMode = 0;
+                while (!videoModes[m_nDisplayVideoMode])
+                    ++m_nDisplayVideoMode;
+            }
         } else {
             do {
-                m_nDisplayVideoMode = (m_nPrefsVideoMode + 1) % numVideoModes;
-            } while (!videoModes[m_nPrefsVideoMode]);
+                --m_nDisplayVideoMode;
+            } while (!videoModes[m_nDisplayVideoMode]);
+
+            if (m_nDisplayVideoMode < 0) {
+                m_nDisplayVideoMode = numVideoModes - 1;
+                while (!videoModes[m_nDisplayVideoMode])
+                    --m_nDisplayVideoMode;
+            }
         }
 
         return true;
