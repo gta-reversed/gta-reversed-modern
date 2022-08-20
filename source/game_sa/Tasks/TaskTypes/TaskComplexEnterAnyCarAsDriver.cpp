@@ -4,14 +4,14 @@
 #include "TaskSimpleNone.h"
 
 void CTaskComplexEnterAnyCarAsDriver::InjectHooks() {
-    RH_ScopedClass(CTaskComplexEnterAnyCarAsDriver);
+    RH_ScopedVirtualClass(CTaskComplexEnterAnyCarAsDriver, 0x86EA14, 11);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedVirtualInstall(Clone, 0x63DE60);
-    RH_ScopedVirtualInstall(GetTaskType, 0x63D0F0);
-    RH_ScopedVirtualInstall(CreateNextSubTask, 0x63D110);
-    RH_ScopedVirtualInstall(CreateFirstSubTask, 0x643510);
-    RH_ScopedVirtualInstall(ControlSubTask, 0x63D120);
+    RH_ScopedVMTlInstall(Clone, 0x63DE60);
+    RH_ScopedVMTlInstall(GetTaskType, 0x63D0F0);
+    RH_ScopedVMTlInstall(CreateNextSubTask, 0x63D110);
+    RH_ScopedVMTlInstall(CreateFirstSubTask, 0x643510);
+    RH_ScopedVMTlInstall(ControlSubTask, 0x63D120);
 }
 
 // 0x643510

@@ -3,7 +3,7 @@
 #include "AtomicModelInfo.h"
 #include "TimeInfo.h"
 
-class CLodTimeModelInfo : public CLodAtomicModelInfo {
+class NOTSA_EXPORT_VTABLE CLodTimeModelInfo : public CLodAtomicModelInfo {
 public:
     CTimeInfo m_lodTimeInfo;
 

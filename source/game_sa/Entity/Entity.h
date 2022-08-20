@@ -34,7 +34,7 @@ class CDummy;
 class CPhysical;
 class CBaseModelInfo;
 
-class CEntity : public CPlaceable {
+class NOTSA_EXPORT_VTABLE CEntity : public CPlaceable {
 protected:
     CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
     CEntity();

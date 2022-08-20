@@ -3,7 +3,7 @@
 #include "EventEditableResponse.h"
 #include "Vector.h"
 
-class CEventAcquaintancePed : public CEventEditableResponse {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePed : public CEventEditableResponse {
 public:
     CPed* m_ped;
 
@@ -29,7 +29,7 @@ public:
     bool TakesPriorityOver_Reversed(const CEvent& refEvent);
 };
 
-class CEventAcquaintancePedHate : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHate : public CEventAcquaintancePed {
 public:
     explicit CEventAcquaintancePedHate(CPed* ped) : CEventAcquaintancePed (ped) {}
     ~CEventAcquaintancePedHate() override = default;
@@ -45,7 +45,7 @@ public:
     CEventAcquaintancePedHate* Constructor2(CPed* ped);
 };
 
-class CEventAcquaintancePedRespect : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedRespect : public CEventAcquaintancePed {
 public:
     explicit CEventAcquaintancePedRespect(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedRespect() override = default;
@@ -55,7 +55,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedRespect(m_ped); }
 };
 
-class CEventAcquaintancePedLike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedLike : public CEventAcquaintancePed {
 public:
     explicit CEventAcquaintancePedLike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedLike() override = default;
@@ -65,7 +65,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedLike(m_ped); }
 };
 
-class CEventAcquaintancePedDislike : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedDislike : public CEventAcquaintancePed {
 public:
     explicit CEventAcquaintancePedDislike(CPed* ped) : CEventAcquaintancePed(ped) {}
     ~CEventAcquaintancePedDislike() override = default;
@@ -75,7 +75,7 @@ public:
     CEventEditableResponse* CloneEditable() override { return new CEventAcquaintancePedDislike(m_ped); }
 };
 
-class CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventAcquaintancePedHateBadlyLit : public CEventAcquaintancePed {
 public:
     uint32 m_startTimeInMs;
     CVector m_point;
@@ -98,7 +98,7 @@ public:
     bool AffectsPed_Reversed1(CPed* ped);
 };
 
-class CEventSeenCop : public CEventAcquaintancePed {
+class NOTSA_EXPORT_VTABLE CEventSeenCop : public CEventAcquaintancePed {
 public:
     explicit CEventSeenCop(CPed* cop) : CEventAcquaintancePed(cop) {}
     ~CEventSeenCop() override = default;
