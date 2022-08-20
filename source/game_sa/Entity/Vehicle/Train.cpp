@@ -102,9 +102,9 @@ CTrain::CTrain(int32 modelIndex, eVehicleCreatedBy createdBy) : CVehicle(created
         m_aDoors[3].m_fOpenAngle = 1.25f;
         m_aDoors[3].m_fClosedAngle = 0.25f;
     } else {
-        m_aDoors[2].m_fOpenAngle = -1.2566371f;
+        m_aDoors[2].m_fOpenAngle = TWO_PI / -5.0f;
         m_aDoors[2].m_fClosedAngle = 0.0f;
-        m_aDoors[3].m_fOpenAngle = 1.2566371f;
+        m_aDoors[3].m_fOpenAngle = TWO_PI / +5.0f;
         m_aDoors[3].m_fClosedAngle = 0.0f;
     }
     m_aDoors[3].m_nAxis = 2;
