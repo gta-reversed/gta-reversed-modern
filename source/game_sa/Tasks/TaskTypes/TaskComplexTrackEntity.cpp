@@ -1,6 +1,7 @@
 #include "StdInc.h"
+
 #include "TaskComplexTrackEntity.h"
-#include "TaskSimpleGotoPointFine.h"
+#include "TaskSimpleGoToPointFine.h"
 #include "TaskSimpleStandStill.h"
 #include "TaskComplexFollowNodeRoute.h"
 
@@ -20,37 +21,32 @@ void CTaskComplexTrackEntity::InjectHooks() {
     RH_ScopedVirtualInstall2(MakeAbortable, 0x65F4C0);
     RH_ScopedVirtualInstall2(CreateNextSubTask, 0x65F590);
     RH_ScopedVirtualInstall2(CreateFirstSubTask, 0x65F700);
-    RH_ScopedVirtualInstall2(ControlSubTask, 0x663640, { .locked = true }); // Locked because it fucks up the stack and crashes 
+    RH_ScopedVirtualInstall2(ControlSubTask, 0x663640, { .locked = true }); // Locked because it fucks up the stack and crashes
 }
 
 // 0x65F3B0
-CTaskComplexTrackEntity::CTaskComplexTrackEntity(CEntity* entity, CVector offsetPos, uint8 a6, int32 a7, float rangeMin, float rangeMax, uint8 a10) :
-    m_rangeMax{rangeMax},
-    m_rangeMin{rangeMin},
-    m_toTrack{entity},
-    m_offsetPosn{offsetPos},
-    a{a6},
-    b{a7},
-    f{a10}
+CTaskComplexTrackEntity::CTaskComplexTrackEntity(CEntity* entity, CVector offsetPos, bool useSprint, int32 giveUpTime, float nodeRouteDist, float giveUpDist, bool localOffset) :
+    CTaskComplex(),
+    m_OffsetPos{ offsetPos },
+    m_UseSprint{ useSprint },
+    m_GiveUpTime{ giveUpTime },
+    m_NodeRouteDist{ nodeRouteDist },
+    m_GiveUpDist{ giveUpDist },
+    m_Entity{ entity },
+    m_bLocalOffset{ localOffset },
+    m_fMoveBlendRatio{ -1.0f }
 {
-    CEntity::RegisterReference(m_toTrack);
-}
-
-// NOTSA
-CTaskComplexTrackEntity::CTaskComplexTrackEntity(const CTaskComplexTrackEntity& o) :
-    CTaskComplexTrackEntity{o.m_toTrack, o.m_offsetPosn, o.a, o.b, o.m_rangeMin, o.m_rangeMax, o.f}
-{
-    m_fMoveRatio = o.m_fMoveRatio;
+    CEntity::RegisterReference(m_Entity);
 }
 
 // 0x65F460
 CTaskComplexTrackEntity::~CTaskComplexTrackEntity() {
-    CEntity::CleanUpOldReference(m_toTrack);
+    CEntity::CleanUpOldReference(m_Entity);
 }
 
 // 0x65F760
-void CTaskComplexTrackEntity::SetOffsetPos(CVector posn) {
-    m_offsetPosn = posn;
+void CTaskComplexTrackEntity::SetOffsetPos(CVector pos) {
+    m_OffsetPos = pos;
 }
 
 // 0x65F780
@@ -70,39 +66,30 @@ bool CTaskComplexTrackEntity::MakeAbortable(CPed* ped, eAbortPriority priority, 
 
 // 0x65F590
 CTask* CTaskComplexTrackEntity::CreateNextSubTask(CPed* ped) {
-    if (!m_toTrack) {
+    if (!m_Entity) {
         return nullptr;
     }
 
     if (!m_pSubTask || m_pSubTask->GetTaskType() != TASK_SIMPLE_STAND_STILL) {
-        return new CTaskSimpleStandStill{ };
+        return new CTaskSimpleStandStill(50);
     }
 
-    if (m_distToTargetSq < sq(m_rangeMin)) {
-        return new CTaskSimpleGoToPointFine{ m_fMoveRatio, m_goToPos, 0.25f, nullptr };
+    if (m_fDistToTargetSq < sq(m_NodeRouteDist)) {
+        return new CTaskSimpleGoToPointFine(m_fMoveBlendRatio, m_TargetPos, 0.25f, nullptr);
     }
 
-    return new CTaskComplexFollowNodeRoute{
-        6,
-        m_toTrack->GetPosition(),
-        0.5f,
-        0.2f,
-        2.0f,
-        false,
-        -1,
-        true
-    };
+    return new CTaskComplexFollowNodeRoute(6, m_Entity->GetPosition(), 0.5f, 0.2f, 2.0f, false, -1, true);
 }
 
 // 0x65F700
 CTask* CTaskComplexTrackEntity::CreateFirstSubTask(CPed* ped) {
-    if (m_fMoveRatio < 0.0) {
-        m_fMoveRatio = [ped] {
+    if (m_fMoveBlendRatio < 0.0f) {
+        m_fMoveBlendRatio = [ped] {
             switch (ped->m_nMoveState) {
-            case 1: return 0.0;
-            case 4: return 1.0;
-            case 6: return 2.0;
-            default: return 3.0;
+            case 1: return 0.0f;
+            case 4: return 1.0f;
+            case 6: return 2.0f;
+            default: return 3.0f;
             }
         }();
     }
@@ -119,18 +106,16 @@ CTask* CTaskComplexTrackEntity::ControlSubTask(CPed* ped) {
         return TryAbort() ? nullptr : m_pSubTask;
     };
 
-    if (!m_toTrack) {
+    if (!m_Entity) {
         return TryAbortGetTask();
     }
 
-    assert(!gap2 && !gap3); // NOTE: Both seem to be always be false, let's see if that's the case.
-
-    if (gap2) {
-        if (gap3) {
-            m_someStartTimeMs = CTimer::GetTimeInMS();
-            gap3 = false;
+    if (m_Timer.m_bStarted) {
+        if (m_Timer.m_bStopped) {
+            m_Timer.m_nStartTime = CTimer::GetTimeInMS();
+            m_Timer.m_bStopped = false;
         }
-        if (CTimer::GetTimeInMS() >= m_someStartTimeMs + m_someStartTimeMs) {
+        if (CTimer::GetTimeInMS() >= m_Timer.m_nStartTime + m_Timer.m_nInterval) {
             return TryAbortGetTask();
         }
     }
@@ -140,12 +125,12 @@ CTask* CTaskComplexTrackEntity::ControlSubTask(CPed* ped) {
     switch (m_pSubTask->GetTaskType()) {
     case TASK_COMPLEX_FOLLOW_POINT_ROUTE: {
         // If we're totally out of range...
-        if (m_distToTargetSq > sq(m_rangeMax)) {
+        if (m_fDistToTargetSq > sq(m_GiveUpDist)) {
             return nullptr;
         }
 
         // If we're now in range be a little more precise and create `TASK_SIMPLE_GO_TO_POINT_FINE`
-        if (m_distToTargetSq < sq(m_rangeMin) && TryAbort()) {
+        if (m_fDistToTargetSq < sq(m_NodeRouteDist) && TryAbort()) {
             return CreateNextSubTask(ped);
         }
 
@@ -153,19 +138,20 @@ CTask* CTaskComplexTrackEntity::ControlSubTask(CPed* ped) {
     }
     case TASK_SIMPLE_GO_TO_POINT_FINE: {
         // Check if we're still in range, if not, abort and create `TASK_COMPLEX_FOLLOW_POINT_ROUTE`
-        if (m_distToTargetSq >= sq(m_rangeMin) && TryAbort()) {
+        if (m_fDistToTargetSq >= sq(m_NodeRouteDist) && TryAbort()) {
             return CreateNextSubTask(ped);
         }
 
         CalcMoveRatio(ped);
 
         const auto gotoTask = static_cast<CTaskSimpleGoToPointFine*>(m_pSubTask);
-        gotoTask->SetTargetPos(m_goToPos);
-        gotoTask->SetMoveRatio(m_fMoveRatio);
+        gotoTask->SetTargetPos(m_TargetPos);
+        gotoTask->SetMoveRatio(m_fMoveBlendRatio);
 
         break;
     }
+    default:
+        return m_pSubTask;
     }
-
     return m_pSubTask;
 }
