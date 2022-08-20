@@ -77,7 +77,7 @@
     ReversibleHooks::Install(RhCurrentCat.name + "/" + RHCurrentScopeName.name, fnName, fnAddr, &RHCurrentNS::fn __VA_OPT__(,) __VA_ARGS__)
 
 // Install a hook on a virtual function. To use it, `RH_ScopedVirtualClass` must be used instead of `RH_ScopedClass`
-#define RH_ScopedVMTlInstall(fn, fnGTAAddr, ...) \
+#define RH_ScopedVmtInstall(fn, fnGTAAddr, ...) \
     ReversibleHooks::InstallVirtual(RhCurrentCat.name + "/" + RHCurrentScopeName.name, #fn, pGTAVTbl, pOurVTbl, (void*)fnGTAAddr, nVirtFns __VA_OPT__(,) __VA_ARGS__)
 
 namespace ReversibleHooks {
@@ -86,7 +86,7 @@ namespace ReversibleHooks {
     struct ScopeName {
         std::string name{};
     };
-    
+
     struct ScopeCategory {
         std::string name{};
     };
@@ -125,7 +125,7 @@ namespace ReversibleHooks {
             LPVOID m_addr{};
             DWORD  m_sz{};
         };
-    
+
 
         void HookInstall(std::string_view category, std::string fnName, uint32 installAddress, void* addressToJumpTo, HookInstallOptions&& opt);
 
