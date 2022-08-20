@@ -16,6 +16,7 @@
 #include "LoadingScreen.h"
 #include "VideoMode.h"
 #include "ControllerConfigManager.h"
+#include "app.h" // todo: remove
 // #include "Input.h"
 
 static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
@@ -23,6 +24,8 @@ static LPSTR AppClassName = LPSTR("Grand theft auto San Andreas");
 void Win32InjectHooks() {
     RH_ScopedNamespaceName("Win32");
     RH_ScopedCategoryGlobal();
+
+    RH_ScopedGlobalInstall(Idle, 0x53E920);
 
     {
     RH_ScopedNamespaceName("Ps");

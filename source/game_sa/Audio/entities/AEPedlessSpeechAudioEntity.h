@@ -2,7 +2,7 @@
 
 #include "AEPedSpeechAudioEntity.h"
 
-class CAEPedlessSpeechAudioEntity : public CAEPedSpeechAudioEntity {
+class NOTSA_EXPORT_VTABLE CAEPedlessSpeechAudioEntity : public CAEPedSpeechAudioEntity {
 public:
     char     gap100[20];
     CEntity* m_Entity;

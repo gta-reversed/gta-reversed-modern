@@ -20,6 +20,7 @@
 extern RwGlobals *&RwEngineInstance;
 
 extern RsGlobalType &RsGlobal;
+static inline bool RwInitialized = *(bool*)0xC920E8;
 
 extern RwPluginRegistry &geometryTKList;
 

@@ -250,7 +250,7 @@ void CHeli::RenderAllHeliSearchLights() {
 }
 
 // 0x6C6D30
-void CHeli::BlowUpCar(CEntity* damager, uint8 bHideExplosion) {
+void CHeli::BlowUpCar(CEntity* damager, bool bHideExplosion) {
     plugin::CallMethod<0x6C6D30, CHeli*, CEntity*, uint8>(this, damager, bHideExplosion);
 }
 

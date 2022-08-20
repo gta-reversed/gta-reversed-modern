@@ -39,7 +39,7 @@ public:
 };
 VALIDATE_SIZE(CMeleeInfo, 0x88);
 
-class CTaskSimpleFight : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleFight : public CTaskSimple {
 public:
     bool                   m_bIsFinished;
     bool                   m_bIsInControl;

@@ -5,14 +5,6 @@
 #include "TaskSimpleStandStill.h"
 #include "TrafficLights.h"
 
-// 0x631790
-CTaskComplexObserveTrafficLights::CTaskComplexObserveTrafficLights() : CTaskComplex() {
-    dwordC = 0;
-    dword10 = 0;
-    byte14 = 0;
-    byte15 = 0;
-}
-
 // 0x6318E0
 CTask* CTaskComplexObserveTrafficLights::ControlSubTask(CPed* ped) {
     if (CTrafficLights::LightForPeds() || !m_pSubTask->MakeAbortable(ped, ABORT_PRIORITY_LEISURE, nullptr)) {
