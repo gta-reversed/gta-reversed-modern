@@ -687,8 +687,8 @@ void CAutomobile::ProcessControl()
             }
             else {
                 m_wheelSkidmarkMuddy[i] = false;
-                m_wheelSkidmarkType[i] = static_cast<eSkidMarkType>(g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
-                if (m_wheelSkidmarkType[i] == eSkidMarkType::MUDDY)
+                m_wheelSkidmarkType[i] = static_cast<eSkidmarkType>(g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
+                if (m_wheelSkidmarkType[i] == eSkidmarkType::MUDDY)
                     m_wheelSkidmarkMuddy[i] = true;
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
             }
