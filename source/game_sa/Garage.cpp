@@ -148,11 +148,11 @@ bool CGarage::IsEntityTouching3D(CEntity* entity) {
     const auto& radius = cm->GetBoundRadius();
     const auto& pos = entity->GetPosition();
 
-    if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
+    if (MinX - radius > pos.x || radius + MaxX < pos.x)
         return false;
-    if (m_fFrontCoord - radius > pos.y || radius + m_fBackCoord < pos.y)
+    if (MinY - radius > pos.y || radius + MaxY < pos.y)
         return false;
-    if (m_vPosn.z - radius > pos.z || radius + m_fTopZ < pos.z)
+    if (Base.z - radius > pos.z || radius + CeilingZ < pos.z)
         return false;
 
     for (auto& sphere : cm->m_pColData->GetSpheres()) {
@@ -179,9 +179,9 @@ bool CGarage::IsStaticPlayerCarEntirelyInside() {
         return false;
 
     const auto& pos = vehicle->GetPosition();
-    if (pos.x < m_fLeftCoord || pos.x > m_fRightCoord)
+    if (pos.x < MinX || pos.x > MaxX)
         return false;
-    if (pos.y < m_fFrontCoord || pos.y > m_fBackCoord)
+    if (pos.y < MinY || pos.y > MaxY)
         return false;
 
     auto x = vehicle->m_vecMoveSpeed.x;
@@ -215,9 +215,9 @@ bool CGarage::IsEntityEntirelyOutside(CEntity* entity, float radius) {
     // return plugin::CallMethodAndReturn<bool, 0x448D30, CGarage*, CEntity*, float>(this, entity, radius);
 
     const auto& pos = entity->GetPosition();
-    if (m_fLeftCoord - radius < pos.x || radius + m_fRightCoord > pos.x)
+    if (MinX - radius < pos.x || radius + MaxX > pos.x)
         return false;
-    if (m_fFrontCoord - radius < pos.y || radius + m_fBackCoord > pos.y)
+    if (MinY - radius < pos.y || radius + MaxY > pos.y)
         return false;
 
     auto cd = entity->GetColModel()->m_pColData;
@@ -237,11 +237,11 @@ bool CGarage::IsEntityEntirelyInside3D(CEntity* entity, float radius) {
     // return plugin::CallMethodAndReturn<bool, 0x448BE0, CGarage*, CEntity*, float>(this, entity, radius);
 
     const auto& pos = entity->GetPosition();
-    if (m_fLeftCoord - radius > pos.x || radius + m_fRightCoord < pos.x)
+    if (MinX - radius > pos.x || radius + MaxX < pos.x)
         return false;
-    if (m_fFrontCoord - radius > pos.y || radius + m_fBackCoord < pos.y)
+    if (MinY - radius > pos.y || radius + MaxY < pos.y)
         return false;
-    if (m_vPosn.z - radius > pos.z || radius + m_fTopZ < pos.z)
+    if (Base.z - radius > pos.z || radius + CeilingZ < pos.z)
         return false;
 
     auto cd = entity->GetColModel()->m_pColData;
@@ -263,18 +263,16 @@ eGarageDoorState CGarage::PlayerArrestedOrDied() {
 
 // 0x447D50
 void CGarage::OpenThisGarage() {
-    if (m_nDoorState == GARAGE_DOOR_CLOSED ||
-        m_nDoorState == GARAGE_DOOR_CLOSING ||
-        m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR
+    if (DoorState == GARAGE_DOOR_CLOSED || DoorState == GARAGE_DOOR_CLOSING || DoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR
     ) {
-        m_nDoorState = GARAGE_DOOR_OPENING;
+        DoorState = GARAGE_DOOR_OPENING;
     }
 }
 
 // 0x447D70
 void CGarage::CloseThisGarage() {
-    if (m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_OPENING) {
-        m_nDoorState = GARAGE_DOOR_CLOSING;
+    if (DoorState == GARAGE_DOOR_OPEN || DoorState == GARAGE_DOOR_OPENING) {
+        DoorState = GARAGE_DOOR_CLOSING;
     }
 }
 
@@ -287,18 +285,18 @@ void CGarage::InitDoorsAtStart() {
 bool CGarage::IsPointInsideGarage(CVector point) {
     // return plugin::CallMethodAndReturn<bool, 0x448740, CGarage*, CVector>(this, point);
 
-    if (point.z < m_vPosn.z || point.z > m_fTopZ)
+    if (point.z < Base.z || point.z > CeilingZ)
         return false;
 
-    const auto x0 = point.x - m_vPosn.x;
-    const auto y0 = point.y - m_vPosn.y;
+    const auto x0 = point.x - Base.x;
+    const auto y0 = point.y - Base.y;
 
-    auto sqMagA = x0 * m_vDirectionA.x + y0 * m_vDirectionA.y;
-    if (sqMagA < 0.0f || sqMagA > m_fWidth)
+    auto sqMagA = x0 * m_Delta1.x + y0 * m_Delta1.y;
+    if (sqMagA < 0.0f || sqMagA > Delta1Length)
         return false;
 
-    auto sqMagB = x0 * m_vDirectionB.x + y0 * m_vDirectionB.y;
-    if (sqMagB < 0.0f || sqMagB > m_fHeight)
+    auto sqMagB = x0 * m_Delta2.x + y0 * m_Delta2.y;
+    if (sqMagB < 0.0f || sqMagB > Delta2Length)
         return false;
 
     return true;
@@ -309,18 +307,18 @@ bool CGarage::IsPointInsideGarage(CVector point) {
 bool CGarage::IsPointInsideGarage(CVector point, float radius) {
     // return plugin::CallMethodAndReturn<bool, 0x4487D0, CGarage*, CVector, float>(this, point, radius);
 
-    if (m_vPosn.z - radius > point.z || radius + m_fTopZ < point.z)
+    if (Base.z - radius > point.z || radius + CeilingZ < point.z)
         return false;
 
-    const auto x0 = point.x - m_vPosn.x;
-    const auto y0 = point.y - m_vPosn.y;
+    const auto x0 = point.x - Base.x;
+    const auto y0 = point.y - Base.y;
 
-    auto sqMagA = x0 * m_vDirectionA.x + y0 * m_vDirectionA.y;
-    if (sqMagA < -radius || sqMagA > radius + m_fWidth)
+    auto sqMagA = x0 * m_Delta1.x + y0 * m_Delta1.y;
+    if (sqMagA < -radius || sqMagA > radius + Delta1Length)
         return false;
 
-    auto sqMagB = x0 * m_vDirectionB.x + y0 * m_vDirectionB.y;
-    if (sqMagB < -radius || sqMagB > radius + m_fHeight)
+    auto sqMagB = x0 * m_Delta2.x + y0 * m_Delta2.y;
+    if (sqMagB < -radius || sqMagB > radius + Delta2Length)
         return false;
 
     return true;
@@ -332,7 +330,7 @@ void CGarage::Update(int32 garageId) {
 }
 
 bool CGarage::IsHideOut() const {
-    switch (m_nType) {
+    switch (Type) {
     case eGarageType::SAFEHOUSE_GANTON:
     case eGarageType::SAFEHOUSE_SANTAMARIA:
     case eGarageType::SAGEHOUSE_ROCKSHORE:
@@ -360,8 +358,8 @@ bool CGarage::IsHideOut() const {
 bool CGarage::IsGarageEmpty() {
     // return plugin::CallMethodAndReturn<bool, 0x44A9C0, CGarage*>(this);
 
-    CVector cornerA = { m_fLeftCoord, m_fFrontCoord, m_vPosn.z };
-    CVector cornerB = { m_fRightCoord, m_fBackCoord, m_fTopZ   };
+    CVector cornerA = { MinX, MinY, Base.z   };
+    CVector cornerB = { MaxX, MaxY, CeilingZ };
 
     int16 outCount[2];
     CEntity* outEntities[16];
@@ -395,8 +393,8 @@ void CGarage::CenterCarInGarage(CVehicle* vehicle) {
         return;
 
     const auto& pos = vehicle->GetPosition();
-    const auto halfX = (m_fRightCoord + m_fLeftCoord) / 2.0f;
-    const auto halfY = (m_fBackCoord + m_fFrontCoord) / 2.0f;
+    const auto halfX = (MaxX + MinX) / 2.0f;
+    const auto halfY = (MaxY + MinY) / 2.0f;
     CVector p1{
         halfX - pos.x,
         halfY - pos.y,
@@ -425,12 +423,12 @@ bool CGarage::RightModTypeForThisGarage(CVehicle* vehicle) {
 float CGarage::CalcDistToGarageRectangleSquared(float x, float y) {
     float dx{}, dy{};
 
-    if (m_fLeftCoord > x || x > m_fRightCoord) {
-        dx = x - m_fLeftCoord * x - m_fLeftCoord;
+    if (MinX > x || x > MaxX) {
+        dx = x - MinX * x - MinX;
     }
 
-    if (m_fFrontCoord > y || y > m_fBackCoord) {
-        dy = y - m_fFrontCoord * y - m_fFrontCoord;
+    if (MinY > y || y > MaxY) {
+        dy = y - MinY * y - MinY;
     }
 
     return dx + dy;

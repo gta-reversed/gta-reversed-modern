@@ -102,7 +102,7 @@ void CShadows::Shutdown() {
 
 // 0x707770
 void CShadows::TidyUpShadows() {
-    std::ranges::for_each(aPermanentShadows, [&](auto& shadow) { shadow.m_nType = 0; });
+    std::ranges::for_each(aPermanentShadows, [&](auto& shadow) { shadow.Type = 0; });
 }
 
 // 0x706F60

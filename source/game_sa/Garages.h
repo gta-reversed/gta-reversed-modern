@@ -50,13 +50,13 @@ public:
     static void Shutdown();
     static void Update();
 
-    static void AddOne(float x1, float y1, float z1, float frontX, float frontY, float x2, float y2, float z2, eGarageType type, uint32 a10, char* name, uint32 door);
+    static void AddOne(float baseX, float baseY, float baseZ, float p1X, float p1Y, float p2X, float p2Y, float ceilingZ, eGarageType type, uint32 modelIndexToBeCollected, char* name, uint32 door);
     static void CloseHideOutGaragesBeforeSave();
     static void PlayerArrestedOrDied();
     static void AllRespraysCloseOrOpen(bool state);
 
     static int32 FindSafeHouseIndexForGarageType(eGarageType type);
-    static int16 FindGarageForObject(CObject*);
+    static int16 FindGarageForObject(CObject* obj);
     static int16 FindGarageIndex(char* name);
     static float FindDoorHeightForMI(uint32 modelIndex);
 
@@ -69,14 +69,14 @@ public:
     static bool IsThisCarWithinGarageArea(int16 garageId, CEntity* entity);
     static bool IsPointWithinAnyGarage(CVector& point);
 
-    static void ActivateGarage(int16 a1);
+    static void ActivateGarage(int16 garageId);
     static void DeActivateGarage(int16 garageId);
-    static void SetTargetCarForMissionGarage(int16 garageId, CVehicle* vehicle);
+    static void SetTargetCarForMissionGarage(int16 garageId, CAutomobile* car);
 
     static void StoreCarInNearestImpoundingGarage(CVehicle* vehicle);
 
     static void ChangeGarageType(int16 garageId, eGarageType type, uint32 unused);
-    static bool HasCarBeenDroppedOffYet(int16 garageId) { return GetGarage(garageId).m_nDoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; } // 0x447C90
+    static bool HasCarBeenDroppedOffYet(int16 garageId) { return GetGarage(garageId).DoorState == GARAGE_DOOR_CLOSED_DROPPED_CAR; } // 0x447C90
     static bool HasResprayHappened(int16 garageId);
     static bool CameraShouldBeOutside() { return bCamShouldBeOutside; } // 0x448650
     static void GivePlayerDetonator();

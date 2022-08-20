@@ -7,37 +7,38 @@ class CStoredCar;
 
 class CGarage {
 public:
-    CVector          m_vPosn;
-    CVector2D        m_vDirectionA;
-    CVector2D        m_vDirectionB;
-    float            m_fTopZ;
-    float            m_fWidth;
-    float            m_fHeight;
-    float            m_fLeftCoord;
-    float            m_fRightCoord;
-    float            m_fFrontCoord;
-    float            m_fBackCoord;
-    float            m_fDoorPosition;
-    uint32           m_nTimeToOpen;
-    CVehicle*        m_pTargetCar;
-    char             m_anName[8];
-    eGarageType      m_nType;
-    eGarageDoorState m_nDoorState;
+    CVector Base;
+    CVector2D m_Delta1;
+    CVector2D m_Delta2;
+    float CeilingZ;
+    float Delta1Length;
+    float Delta2Length;
+    float MinX; // Left Coord
+    float MaxX; // Right Coord
+    float MinY; // Front Coord
+    float MaxY; // Back Coord
+
+    float Openness;
+    uint32 TimeOfNextEvent; // Time To Open
+    CAutomobile* CarToCollect;
+    char Name[8];
+    eGarageType Type;
+    eGarageDoorState DoorState;
     union {
         uint8 m_nFlags;
         struct {
-            uint8 m_b0x1 : 1;
-            uint8 m_bInactive : 1;
-            uint8 m_bUsedRespray : 1;
-            uint8 m_bDoorOpensUp : 1;
-            uint8 m_bDoorGoesIn : 1;
-            uint8 m_bCameraFollowsPlayer : 1;
-            uint8 m_bDoorClosed : 1;
-            uint8 m_bRespraysAlwaysFree : 1;
+            uint8 bClosingEmpty : 1;
+            uint8 bDeActivated : 1;
+            uint8 bResprayHappened : 1;
+            uint8 bRotateDoor : 1;
+            uint8 bInvertRotation : 1;
+            uint8 bLeaveCameraAlone : 1;
+            uint8 bShouldDoorsHaveCollision : 1;
+            uint8 bFreeResprays : 1;
         };
     };
     eGarageType        m_nOriginalType;
-    CAEDoorAudioEntity m_GarageAudio;
+    CAEDoorAudioEntity m_GarageAE;
 
 public:
     static constexpr auto NUM_GARAGE_STORED_CARS{ 4 };
@@ -97,10 +98,10 @@ public:
 
     // NOTSA section
     [[nodiscard]] bool IsHideOut() const;
-    [[nodiscard]] bool IsOpen()   const { return m_nDoorState == GARAGE_DOOR_OPEN || m_nDoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
-    [[nodiscard]] bool IsClosed() const { return m_nDoorState == GARAGE_DOOR_CLOSED; }
-    void SetOpened() { m_nDoorState = GARAGE_DOOR_OPEN; }
-    void SetClosed() { m_nDoorState = GARAGE_DOOR_CLOSED; }
-    void ResetDoorPosition() { m_fDoorPosition = 0.0f; } // todo: not good name
+    [[nodiscard]] bool IsOpen()   const { return DoorState == GARAGE_DOOR_OPEN || DoorState == GARAGE_DOOR_WAITING_PLAYER_TO_EXIT; }
+    [[nodiscard]] bool IsClosed() const { return DoorState == GARAGE_DOOR_CLOSED; }
+    void SetOpened() { DoorState = GARAGE_DOOR_OPEN; }
+    void SetClosed() { DoorState = GARAGE_DOOR_CLOSED; }
+    void ResetDoorPosition() { Openness = 0.0f; } // todo: not good name
 };
 VALIDATE_SIZE(CGarage, 0xD8);
