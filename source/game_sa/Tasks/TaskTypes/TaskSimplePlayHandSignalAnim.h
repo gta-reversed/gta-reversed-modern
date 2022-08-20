@@ -3,7 +3,7 @@
 #include "TaskSimpleAnim.h"
 class CHandObject;
 
-class CTaskSimplePlayHandSignalAnim : public CTaskSimpleAnim {
+class NOTSA_EXPORT_VTABLE CTaskSimplePlayHandSignalAnim : public CTaskSimpleAnim {
 public:
     AnimationId  m_nAnimationBlockIndex;
     float        m_fBlendFactor;

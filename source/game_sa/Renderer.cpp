@@ -566,7 +566,7 @@ int32 CRenderer::SetupEntityVisibility(CEntity* entity, float& outDistance) {
             if (FindPlayerVehicle() == entity && gbFirstPersonRunThisFrame && CReplay::Mode != MODE_PLAYBACK) {
                 uint32 dwDirectionWasLooking = CCamera::GetActiveCamera().m_nDirectionWasLooking;
                 CVehicle* vehicle = FindPlayerVehicle();
-                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieCam))
+                if (!vehicle->IsBike() || !(vehicle->AsBike()->bikeFlags.bWheelieForCamera))
                 {
                     if (dwDirectionWasLooking == 3)
                         return RENDERER_CULLED;

@@ -1,6 +1,7 @@
 #include "StdInc.h"
 
 #include "CustomCarEnvMapPipeline.h"
+#include "app_light.h"
 
 void CCustomCarEnvMapPipeline::InjectHooks() {
     RH_ScopedClass(CCustomCarEnvMapPipeline);

@@ -17,6 +17,7 @@ public:
 };
 VALIDATE_SIZE(CTimeCycleBox, 0x28);
 
+static inline float& gfLaRiotsLightMult = *(float*)0x8CD060; // 1.0f
 
 class CTimeCycle {
 public:

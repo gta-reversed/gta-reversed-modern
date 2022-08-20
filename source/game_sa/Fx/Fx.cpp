@@ -282,6 +282,7 @@ void Fx_c::TriggerFootSplash(CVector& posn) {
     ((void(__thiscall*)(Fx_c*, CVector&))0x4A1150)(this, posn);
 }
 
+// see RwIm3DTransformFlags
 // 0x4A13B0
 void RenderBegin(RwRaster* newRaster, RwMatrix* transform, uint32 transformRenderFlags) {
     g_fx.m_pTransformLTM = transform;

@@ -56,11 +56,11 @@ bool CTrailer::SetTowLink(CVehicle* vehicle, bool setMyPosToTowBar) {
         return false;
     }
 
-    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_ABANDONED) {
+    if (m_nStatus != STATUS_PHYSICS && m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_ABANDONED) {
         return false;
     }
 
-    m_nStatus = STATUS_REMOTE_CONTROLLED;
+    m_nStatus = STATUS_IS_TOWED;
 
     m_pTractor = vehicle;
     m_pTractor->RegisterReference(m_pTractor);
@@ -221,7 +221,7 @@ bool CTrailer::BreakTowLink() {
         CEntity::ClearReference(m_pTractor);
     }
 
-    if (m_nStatus != STATUS_REMOTE_CONTROLLED && m_nStatus != STATUS_PLAYER_DISABLED) {
+    if (m_nStatus != STATUS_IS_TOWED && m_nStatus != STATUS_IS_SIMPLE_TOWED) {
         return false;
     }
 
