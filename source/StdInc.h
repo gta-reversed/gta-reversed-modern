@@ -109,6 +109,8 @@ namespace rng = std::ranges;
 #include "game_sa\Enums\eEntityStatus.h"
 #include "game_sa\Enums\eEntityType.h"
 #include "game_sa\Enums\eEventType.h"
+#include "game_sa\Enums\eFontAlignment.h"
+#include "game_sa\Enums\eGameState.h"
 #include "game_sa\Enums\eModelID.h"
 #include "game_sa\Enums\ePedBones.h"
 #include "game_sa\Enums\ePedModel.h"
