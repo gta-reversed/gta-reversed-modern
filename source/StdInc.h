@@ -23,6 +23,7 @@
 #include <cstring>
 #include <tuple>
 #include <initializer_list>
+#include <format>
 
 #include <ranges>
 namespace rng = std::ranges;
