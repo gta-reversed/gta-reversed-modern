@@ -271,7 +271,7 @@ void CPhysical::ProcessCollision()
             return;
         }
 
-        if (m_nStatus == STATUS_TRAILER) {
+        if (m_nStatus == STATUS_GHOST) {
             CColPoint* wheelsColPoints = nullptr;
             float* pfWheelsSuspensionCompression = nullptr;
             CVector* wheelsCollisionPositions = nullptr;
