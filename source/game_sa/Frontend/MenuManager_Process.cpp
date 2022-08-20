@@ -493,7 +493,12 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         if (pressedLR > 0) {
             do {
                 ++m_nDisplayVideoMode;
-            } while (!videoModes[m_nDisplayVideoMode]);
+            }
+#ifdef FIX_BUGS // Out of array bounds access
+            while (m_nDisplayVideoMode < numVideoModes && !videoModes[m_nDisplayVideoMode]);
+#else
+            while (!videoModes[m_nDisplayVideoMode]);
+#endif
 
             if (m_nDisplayVideoMode >= numVideoModes) {
                 m_nDisplayVideoMode = 0;
@@ -503,7 +508,12 @@ bool CMenuManager::ProcessPCMenuOptions(int8 pressedLR, bool acceptPressed) {
         } else {
             do {
                 --m_nDisplayVideoMode;
-            } while (!videoModes[m_nDisplayVideoMode]);
+            }
+#ifdef FIX_BUGS // Out of array bounds access
+            while (m_nDisplayVideoMode >= 0 && !videoModes[m_nDisplayVideoMode]);
+#else
+            while (!videoModes[m_nDisplayVideoMode]);
+#endif
 
             if (m_nDisplayVideoMode < 0) {
                 m_nDisplayVideoMode = numVideoModes - 1;
