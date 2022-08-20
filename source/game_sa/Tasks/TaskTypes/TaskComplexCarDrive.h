@@ -12,7 +12,7 @@ enum {
     ANY_CAR_AS_DRIVER = 2
 };
 
-class CTaskComplexCarDrive : public CTaskComplex {
+class NOTSA_EXPORT_VTABLE CTaskComplexCarDrive : public CTaskComplex {
 public:
     CVehicle* m_pVehicle;
     float     m_fSpeed;
