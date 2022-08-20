@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskSimpleBikeJacked.h"
 #include "TaskUtilityLineUpPedWithCar.h"
 
@@ -8,9 +9,7 @@ void CTaskSimpleBikeJacked::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x648B90);
     RH_ScopedInstall(Destructor, 0x648C40);
-
     RH_ScopedGlobalInstall(FinishAnimBikeHitCB, 0x648D30);
-
     RH_ScopedVirtualInstall2(Clone, 0x64A200);
     RH_ScopedVirtualInstall2(GetTaskType, 0x648C30);
     RH_ScopedVirtualInstall2(MakeAbortable, 0x648CE0);
@@ -19,39 +18,38 @@ void CTaskSimpleBikeJacked::InjectHooks() {
 }
 
 // 0x648B90
-CTaskSimpleBikeJacked::CTaskSimpleBikeJacked(CVehicle* vehicle, uint32 door, uint32 time, CPed* carJacker, bool isVictimDriver) :
-    m_vehicle{vehicle},
-    m_door{door},
-    m_time{time},
-    m_isVictimDriver{isVictimDriver}
+CTaskSimpleBikeJacked::CTaskSimpleBikeJacked(CVehicle* targetVehicle, int32 targetDoor, int32 downTime, CPed* draggingPed, bool bWasDriver) :
+    CTaskSimple(),
+    m_DraggingPed{ draggingPed },
+    m_TargetVehicle{ targetVehicle },
+    m_TargetDoor{ targetDoor },
+    m_DownTime{ downTime },
+    m_bWasDriver{ bWasDriver },
+    m_nFinishAnim{ ANIM_ID_NO_ANIMATION_SET },
+    m_bIsFinished{ false },
+    m_Anim{ nullptr },
+    m_Utility{ nullptr }
 {
-    CEntity::SafeRegisterRef(m_vehicle);
-    CEntity::SafeRegisterRef(m_jacker);
-}
-
-CTaskSimpleBikeJacked::CTaskSimpleBikeJacked(const CTaskSimpleBikeJacked& o) :
-    CTaskSimpleBikeJacked{o.m_vehicle, o.m_door, o.m_time, o.m_jacker, o.m_isVictimDriver}
-{
+    CEntity::SafeRegisterRef(m_TargetVehicle);
+    CEntity::SafeRegisterRef(m_DraggingPed);
 }
 
 // 0x648C40
 CTaskSimpleBikeJacked::~CTaskSimpleBikeJacked() {
-    CEntity::SafeCleanUpRef(m_vehicle);
-    CEntity::SafeCleanUpRef(m_jacker);
-    if (m_taskUtilityLineUpPedWithCar) {
-        delete m_taskUtilityLineUpPedWithCar;
-    }
-    if (m_firstAnim) {
-        m_firstAnim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
+    CEntity::SafeCleanUpRef(m_TargetVehicle);
+    CEntity::SafeCleanUpRef(m_DraggingPed);
+    delete m_Utility;
+    if (m_Anim) {
+        m_Anim->SetFinishCallback(CDefaultAnimCallback::DefaultAnimCB, nullptr);
     }
 }
 
 // 0x648CE0
-bool CTaskSimpleBikeJacked::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+bool CTaskSimpleBikeJacked::MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) {
     switch (priority) {
     case ABORT_PRIORITY_IMMEDIATE: {
-        if (m_firstAnim) {
-            m_firstAnim->m_fBlendDelta = -1000.f;
+        if (m_Anim) {
+            m_Anim->m_fBlendDelta = -1000.f;
         }
         return true;
     }
@@ -62,10 +60,10 @@ bool CTaskSimpleBikeJacked::MakeAbortable(CPed* ped, eAbortPriority priority, CE
 
 void CTaskSimpleBikeJacked::FinishAnimBikeHitCB(CAnimBlendAssociation* anim, void* data) {
     auto self = static_cast<CTaskSimpleBikeJacked*>(data);
-    self->m_firstAnim = nullptr;
-    self->m_animWasPlayed = true;
-    self->m_secondAnimId = [self] {
-        switch (self->m_door) {
+    self->m_Anim = nullptr;
+    self->m_bIsFinished = true;
+    self->m_nFinishAnim = [self] {
+        switch (self->m_TargetDoor) {
         case 8:
         case 10:
             return ANIM_ID_BIKE_FALL_OFF;
@@ -77,27 +75,27 @@ void CTaskSimpleBikeJacked::FinishAnimBikeHitCB(CAnimBlendAssociation* anim, voi
 
 // 0x64C970
 bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
-    if (!m_vehicle) {
+    if (!m_TargetVehicle) {
         return true;
     }
 
-    if (!ped->bInVehicle && !m_firstAnim) {
+    if (!ped->bInVehicle && !m_Anim) {
         return true;
     }
 
-    if (!m_animWasPlayed) {
+    if (!m_bIsFinished) {
         // Inverted + refactored a little
         if (ped->IsPlayer()) {
-            m_vehicle->m_vehicleAudio.PlayerAboutToExitVehicleAsDriver();
+            m_TargetVehicle->m_vehicleAudio.PlayerAboutToExitVehicleAsDriver();
         } else  {
-            if (m_vehicle->IsDriver(ped)) {
+            if (m_TargetVehicle->IsDriver(ped)) {
                 ped->SetRadioStation();
             }
         }
-        
-        if (!m_firstAnim &&
+
+        if (!m_Anim &&
             [this, ped] {
-                if (m_jacker) {
+                if (m_DraggingPed) {
                     if (const auto anim = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, { ANIM_ID_CAR_PULLOUT_RHS, ANIM_ID_CAR_PULLOUT_LHS, ANIM_ID_CAR_GETIN_BIKE_FRONT })) {
                         if (anim->m_fCurrentTime <= 0.3f) {
                             return false;
@@ -105,40 +103,47 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
                     }
 
                     if (CGeneral::DoCoinFlip()) { // Originally: rand() % 1024 <= 512
-                        if (!SayJacking(m_jacker, ped, m_vehicle)) {
-                            SayJacked(ped, m_vehicle);
+                        if (!SayJacking(m_DraggingPed, ped, m_TargetVehicle)) {
+                            SayJacked(ped, m_TargetVehicle);
                         }
                     }
-                    else if (!SayJacked(ped, m_vehicle)) {
-                        SayJacking(m_jacker, ped, m_vehicle);
+                    else if (!SayJacked(ped, m_TargetVehicle)) {
+                        SayJacking(m_DraggingPed, ped, m_TargetVehicle);
                     }
                 }
                 return true;
             }()
         ) {
             // Play animation and some sound effect
-            m_firstAnim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_vehicle->GetRideAnimData()->m_nAnimGroup, ANIM_ID_BIKE_HIT);
-            m_firstAnim->SetFinishCallback(FinishAnimBikeHitCB, this);
+            m_Anim = CAnimManager::BlendAnimation(ped->m_pRwClump, m_TargetVehicle->GetRideAnimData()->m_nAnimGroup, ANIM_ID_BIKE_HIT);
+            m_Anim->SetFinishCallback(FinishAnimBikeHitCB, this);
             ped->m_pedAudio.AddAudioEvent(AE_PED_JACKED_BIKE);
         }
 
-        if (!m_taskUtilityLineUpPedWithCar) {
-            m_taskUtilityLineUpPedWithCar = new CTaskUtilityLineUpPedWithCar{ {}, 0, 0, (int32)m_door };
+        if (!m_Utility) {
+            m_Utility = new CTaskUtilityLineUpPedWithCar({}, 0, 0, m_TargetDoor);
         }
 
         return false;
     }
 
-    if (m_secondAnimId == ANIM_ID_NO_ANIMATION_SET) {
+    if (m_nFinishAnim == ANIM_ID_NO_ANIMATION_SET) {
         return true;
     }
 
-    CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, m_secondAnimId);
+    CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, m_nFinishAnim);
 
     // event.m_flags |= 2; => event.m_forceKnockOff = true => Already set by ctor
-    ped->GetEventGroup().Add(CEventKnockOffBike{ m_vehicle, &m_vehicle->GetMoveSpeed(), &m_vehicle->m_vecLastCollisionImpactVelocity, 0.f, 0.f, 55u, 0u, (int32)m_time, m_jacker, m_isVictimDriver, true }, true);
+    auto event = CEventKnockOffBike(
+        m_TargetVehicle,
+        &m_TargetVehicle->GetMoveSpeed(),
+        &m_TargetVehicle->m_vecLastCollisionImpactVelocity,
+        0.0f, 0.0f, 55u, 0u,
+        m_DownTime, m_DraggingPed, m_bWasDriver, true
+    );
+    ped->GetEventGroup().Add(event, true);
 
-    m_secondAnimId = ANIM_ID_NO_ANIMATION_SET;
+    m_nFinishAnim = ANIM_ID_NO_ANIMATION_SET;
 
     return false;
 }
