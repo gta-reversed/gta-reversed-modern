@@ -4,12 +4,12 @@
 #include "TaskSimpleStandStill.h"
 
 void CTaskSimpleSlideToCoord::InjectHooks() {
-    RH_ScopedVirtualClass(CTaskSimpleSlideToCoord, 0x86FFEC, 9);
-    RH_ScopedCategory("Tasks/TaskTypes");
+    // + RH_ScopedVirtualClass(CTaskSimpleSlideToCoord, 0x86FFEC, 9); // todo (Pirulax): Make it working
+    // + RH_ScopedCategory("Tasks/TaskTypes");
 
-    RH_ScopedOverloadedInstall(Constructor, "NoAnim", 0x66C3E0, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float));
-    RH_ScopedOverloadedInstall(Constructor, "Anim", 0x66C450, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float, char const*, char const*, int32, float, bool, int32));
-    RH_ScopedVmtInstall(MakeAbortable, 0x66C4D0);
+    // + RH_ScopedOverloadedInstall(Constructor, "NoAnim", 0x66C3E0, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float));
+    // + RH_ScopedOverloadedInstall(Constructor, "Anim", 0x66C450, CTaskSimpleSlideToCoord*(CTaskSimpleSlideToCoord::*)(CVector const&, float, float, char const*, char const*, int32, float, bool, int32));
+    // + RH_ScopedVmtInstall(MakeAbortable, 0x66C4D0);
     // RH_ScopedVmtInstall(ProcessPed, 0x66C4E0);
 }
 
