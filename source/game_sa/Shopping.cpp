@@ -172,7 +172,7 @@ int32 CShopping::GetPrice(uint32 itemKey) {
 // 0x49AAD0
 int32 CShopping::GetPriceSectionFromName(const char* name) {
     for (auto&& [i, sectionName] : notsa::enumerate(ms_sectionNames)) {
-        if (_stricmp(name, sectionName)) {
+        if (!_stricmp(name, sectionName)) {
             return i;
         }
     }
