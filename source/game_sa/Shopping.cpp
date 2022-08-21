@@ -18,7 +18,7 @@ void CShopping::InjectHooks() {
     RH_ScopedClass(CShopping);
     RH_ScopedCategoryGlobal();
 
-    RH_ScopedInstall(Init, 0x49C290, {.reversed = false });
+    RH_ScopedInstall(Init, 0x49C290);
     //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false });
     //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false });
     RH_ScopedInstall(Buy, 0x49BF70, { .reversed = false });
@@ -30,7 +30,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetKey, 0x49AB30, { .reversed = false });
     // RH_ScopedInstall(GetNameTag, 0x0, { .reversed = false });
     RH_ScopedInstall(GetNextSection, 0x49AF10, { .reversed = false });
-    RH_ScopedInstall(GetPrice, 0x49AD50, { .reversed = true });
+    RH_ScopedInstall(GetPrice, 0x49AD50);
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0, { .reversed = false });
     RH_ScopedInstall(SetPlayerHasBought, 0x49B610, {.reversed = false});
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0, { .reversed = false });
@@ -55,6 +55,8 @@ void CShopping::InjectHooks() {
 
 // 0x49C290
 void CShopping::Init() {
+    rng::fill(ms_keys, 0u);
+    rng::fill(ms_bHasBought, false);
     ms_numPrices = 0;
     ms_numPriceModifiers = 0;
     ms_numBuyableItems = 0u;
@@ -100,7 +102,6 @@ int32 CShopping::FindItem(uint32 itemKey) {
     auto itemId = -1;
     if (ms_numPrices >= 1) {
         for (auto&& [i, p] : notsa::enumerate(std::span{ms_prices.data(), (size_t)ms_numPrices})) {
-            printf("item id %d key %u, checking for %u\n", i, p.key, itemKey);
             if (p.key == itemKey) {
                 itemId = i;
             }
