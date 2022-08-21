@@ -16,7 +16,7 @@ class CShopping {
     VALIDATE_SIZE(PriceModifier, 8u);
 
     struct ItemPrice {
-        const char* key;
+        uint32 key;
         uint32 price;
 
         union {
@@ -39,6 +39,7 @@ class CShopping {
 
         char nameTag[8];
     };
+    VALIDATE_SIZE(ItemPrice, 0x18);
 
     static constexpr auto NUM_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
@@ -55,7 +56,7 @@ class CShopping {
     inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
     inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
 
-    inline static std::array<ItemPrice, NUM_SELLABLE_ITEMS>& ms_prices = *(std::array<ItemPrice, NUM_SELLABLE_ITEMS>*)0xA022A8;
+    inline static std::array<ItemPrice, NUM_SELLABLE_ITEMS>& ms_prices = *(std::array<ItemPrice, NUM_SELLABLE_ITEMS>*)0xA986F0;
     inline static std::array<const char*, NUM_SECTION_NAMES>& ms_sectionNames = *(std::array<const char*, NUM_SECTION_NAMES>*)0x8A61D8;
 
 public:
