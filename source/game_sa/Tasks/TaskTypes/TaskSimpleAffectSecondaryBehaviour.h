@@ -7,32 +7,34 @@ class CEvent;
 class CPed;
 class CTaskSimpleAffectSecondaryBehaviour;
 
-
-class  CTaskSimpleAffectSecondaryBehaviour : public CTaskSimple {
- 
+/*!
+ *  Keep trying until the given secondary task is done/can be aborted
+ *  using `ABORT_PRIORITY_URGENT` and then add the given task as a
+ *  secondary task as the specified type.
+ */
+class NOTSA_EXPORT_VTABLE CTaskSimpleAffectSecondaryBehaviour : public CTaskSimple {
 public:
-    bool m_bAdd = {};  // 0x8
-    int32 m_secondaryTaskType = {};  // 0xC
-    CTask * m_pTask = {};  // 0x10
+    bool           m_bAdd{};
+    eSecondaryTask m_secTaskType{};
+    CTask*         m_task{};
 
 public:
     static void InjectHooks();
 
-    CTaskSimpleAffectSecondaryBehaviour(bool add, int32 secondaryTaskType, CTask * a4);
+    constexpr static auto Type = eTaskType::TASK_SIMPLE_AFFECT_SECONDARY_BEHAVIOUR;
 
+    CTaskSimpleAffectSecondaryBehaviour(bool add, eSecondaryTask secondaryTaskType, CTask* task);
+    CTaskSimpleAffectSecondaryBehaviour(const CTaskSimpleAffectSecondaryBehaviour&); // NOTSA
 
-    virtual  CTask * Clone();  
-     virtual int32 GetTaskType();  
-     virtual bool MakeAbortable(CPed * ped, int32 priority, CEvent const* event);  
-     virtual bool ProcessPed(CPed * ped);  
- 
+    CTask*    Clone() override { return new CTaskSimpleAffectSecondaryBehaviour(*this); }
+    eTaskType GetTaskType() override { return Type; }
+    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override { return false; }
+    bool      ProcessPed(CPed* ped) override;
+
 private: // Wrappers for hooks
-
-// 0x691270
-CTaskSimpleAffectSecondaryBehaviour* Constructor(bool add, int32 secondaryTaskType, CTask * a4) {
-    this->CTaskSimpleAffectSecondaryBehaviour::CTaskSimpleAffectSecondaryBehaviour(add, secondaryTaskType, a4);
-    return this;
-}
-
-
+    // 0x691270
+    CTaskSimpleAffectSecondaryBehaviour* Constructor(bool add, eSecondaryTask secondaryTaskType, CTask* a4) {
+        this->CTaskSimpleAffectSecondaryBehaviour::CTaskSimpleAffectSecondaryBehaviour(add, secondaryTaskType, a4);
+        return this;
+    }
 };
