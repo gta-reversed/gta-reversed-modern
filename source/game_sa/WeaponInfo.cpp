@@ -114,20 +114,20 @@ uint32 CWeaponInfo::GetWeaponInfoIndex(eWeaponType weaponType, eWeaponSkill skil
 }
 
 auto GetBaseComboByName(const char* name) {
-    static constexpr std::pair<std::string_view, eWeaponType> mapping[]{
-        { "UNARMED",     WEAPON_KNIFE    },
-        { "BBALLBAT",    WEAPON_KATANA   },
-        { "KNIFE",       WEAPON_CHAINSAW },
-        { "GOLFCLUB",    WEAPON_DILDO1   },
-        { "SWORD",       WEAPON_DILDO2   },
-        { "CHAINSAW",    WEAPON_VIBE1    },
-        { "DILDO",       WEAPON_VIBE2    },
-        { "FLOWERS",     WEAPON_FLOWERS  },
+    static constexpr std::pair<std::string_view, eMeleeCombo> mapping[]{
+        { "UNARMED",     MELEE_COMBO_UNARMED_1    },
+        { "BBALLBAT",    MELEE_COMBO_BBALLBAT   },
+        { "KNIFE",       MELEE_COMBO_KNIFE },
+        { "GOLFCLUB",    MELEE_COMBO_GOLFCLUB   },
+        { "SWORD",       MELEE_COMBO_SWORD   },
+        { "CHAINSAW",    MELEE_COMBO_CHAINSAW    },
+        { "DILDO",       MELEE_COMBO_DILDO    },
+        { "FLOWERS",     MELEE_COMBO_FLOWERS  },
     };
     if (const auto it = rng::find(mapping, name, [](const auto& e) { return e.first; }); it != std::end(mapping))
         return it->second;
 
-    return eWeaponType::WEAPON_KNIFE;
+    return eMeleeCombo::MELEE_COMBO_UNARMED_1;
 }
 
 // 0x5BE670
@@ -296,7 +296,8 @@ void CWeaponInfo::LoadWeaponData() {
                 stealthAnimGrpName
             );
 
-            auto& wi = aWeaponInfo[(uint32)FindWeaponType(weaponName)];
+            auto wType = FindWeaponType(weaponName);
+            auto& wi = aWeaponInfo[(uint32)wType];
             wi.m_nWeaponFire = FindWeaponFireType(fireTypeName);
             wi.m_fTargetRange = targetRange;
             wi.m_fWeaponRange = weaponRange;
@@ -305,6 +306,13 @@ void CWeaponInfo::LoadWeaponData() {
             wi.m_nSlot = slot;
             wi.m_nBaseCombo = GetBaseComboByName(baseComboName);
             wi.m_nNumCombos = (uint8)numCombos;
+            wi.m_nFlags = flags;
+
+            if (!std::string_view{stealthAnimGrpName}.starts_with("null"))
+                wi.m_eAnimGroup = CAnimManager::GetAnimationGroupId(stealthAnimGrpName);
+
+            if (modelId1 > 0)
+                static_cast<CWeaponModelInfo*>(CModelInfo::GetModelInfo(modelId1))->m_weaponInfo = wType;
 
             break;
         }
