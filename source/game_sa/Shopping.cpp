@@ -24,14 +24,14 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(Buy, 0x49BF70, { .reversed = false });
     // RH_ScopedInstall(FindItem, 0x0, { .reversed = false });
     RH_ScopedInstall(FindSection, 0x49AE70, { .reversed = false });
-    RH_ScopedInstall(FindSectionInSection, 0x49AF90, { .reversed = false });
-    RH_ScopedInstall(GetExtraInfo, 0x49ADE0, { .reversed = false });
-    RH_ScopedInstall(GetItemIndex, 0x49AB10, { .reversed = false });
+    RH_ScopedInstall(FindSectionInSection, 0x49AF90);
+    RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
+    RH_ScopedInstall(GetItemIndex, 0x49AB10);
     RH_ScopedInstall(GetKey, 0x49AB30, { .reversed = false });
     // RH_ScopedInstall(GetNameTag, 0x0, { .reversed = false });
     RH_ScopedInstall(GetNextSection, 0x49AF10, { .reversed = false });
     RH_ScopedInstall(GetPrice, 0x49AD50);
-    RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0, { .reversed = false });
+    RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0);
     RH_ScopedInstall(SetPlayerHasBought, 0x49B610, {.reversed = false});
     RH_ScopedInstall(HasPlayerBought, 0x49B5E0, { .reversed = false });
     // RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
@@ -43,11 +43,11 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(RemoveLoadedShop, 0x49AE30, { .reversed = false });
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
-    RH_ScopedInstall(RestoreClothesState, 0x49B240, { .reversed = false });
-    RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0, { .reversed = false });
+    RH_ScopedInstall(RestoreClothesState, 0x49B240);
+    RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0);
     RH_ScopedInstall(ShutdownForRestart, 0x49B640, { .reversed = false });
-    RH_ScopedInstall(StoreClothesState, 0x49B200, { .reversed = false });
-    // RH_ScopedInstall(StoreVehicleMods, 0x0, { .reversed = false });
+    RH_ScopedInstall(StoreClothesState, 0x49B200);
+    RH_ScopedInstall(StoreVehicleMods, 0x49B280);
     // RH_ScopedInstall(UpdateStats, 0x0, { .reversed = false });
     RH_ScopedInstall(Load, 0x5D3E40, { .reversed = false });
     RH_ScopedInstall(Save, 0x5D3DE0, { .reversed = false });
@@ -177,6 +177,7 @@ int32 CShopping::GetPriceSectionFromName(const char* name) {
         }
     }
 
+    assert(false);
     return -1;
 }
 
