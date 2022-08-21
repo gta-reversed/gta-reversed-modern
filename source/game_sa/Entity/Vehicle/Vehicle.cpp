@@ -2384,7 +2384,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
 
     if (bDriving) {
         fwd = thrust;
-        right = clamp<float>(right, -adhesion, adhesion);
+        right = std::clamp(right, -adhesion, adhesion);
     }
     else if (contactSpeedFwd != 0.0f) {
         fwd = -contactSpeedFwd / wheelsOnGround;
@@ -2407,7 +2407,7 @@ void CVehicle::ProcessWheel(CVector& wheelFwd, CVector& wheelRight, CVector& whe
                 *wheelState = WHEEL_STATE_FIXED;
             }
         } else {
-            fwd = clamp<float>(fwd, -brake, brake);
+            fwd = std::clamp(fwd, -brake, brake);
         }
     }
 

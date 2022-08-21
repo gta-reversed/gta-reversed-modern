@@ -407,7 +407,6 @@ public:
     static inline tHydraulicData(&m_aSpecialHydraulicData)[4] = *(tHydraulicData(*)[4])0xC1CB60;
 
 public:
-    CVehicle(plugin::dummy_func_t) : CPhysical() { /* todo: remove NOTSA */ }
     CVehicle(eVehicleCreatedBy createdBy);
     ~CVehicle() override;
 
