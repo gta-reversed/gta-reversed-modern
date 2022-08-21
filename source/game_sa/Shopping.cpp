@@ -176,9 +176,34 @@ const char* CShopping::GetNameTag(uint32 itemKey) {
     return ms_prices[FindItem(itemKey)].nameTag;
 }
 
+// Finds the next 'root' section name from shopping.dat
 // 0x49AF10
-void CShopping::GetNextSection(FILE* file) {
-    plugin::Call<0x49AF10, FILE*>(file);
+const char* CShopping::GetNextSection(FILESTREAM file) {
+    return plugin::CallAndReturn<char*, 0x49AF10, FILESTREAM>(file);
+
+    auto line = CFileLoader::LoadLine(file);
+    if (!line)
+        return 0u;
+
+    while (true) {
+        if (*line != '\0' && *line != '#') {
+            if (!strncmp(line, "section", 7u)) {
+                break;
+            }
+
+            if (!strncmp(line, "end", 3u)) {
+                return 0u;
+            }
+        }
+
+        line = CFileLoader::LoadLine(file);
+        if (!line) {
+            return 0u;
+        }
+    }
+
+    RET_IGNORED(strtok(line, " \t"));
+    return strtok(nullptr, " \t");
 }
 
 // 0x49AD50

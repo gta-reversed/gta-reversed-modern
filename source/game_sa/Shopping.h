@@ -73,7 +73,7 @@ public:
     static int32 GetItemIndex(uint32 itemKey);
     static uint32 GetKey(const char* modelName, int32 index);
     static const char* GetNameTag(uint32 itemKey);
-    static void GetNextSection(FILESTREAM file);
+    static const char* GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);
     static int32 GetPriceSectionFromName(const char* name);
     static void SetPlayerHasBought(uint32 itemKey);
