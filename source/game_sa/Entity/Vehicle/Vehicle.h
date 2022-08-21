@@ -689,6 +689,7 @@ public: // NOTSA functions
             return m_pHandlingData->m_fDragMult / 1000.0f / 2.0f;
         }
     }
+    bool IsDriverAPlayer() const;
 
 private:
     friend void InjectHooksMain();
