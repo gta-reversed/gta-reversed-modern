@@ -97,7 +97,7 @@ void CShopping::Buy(uint32 a1, int32 a2) {
 
 // inlined
 int32 CShopping::FindItem(uint32 itemKey) {
-    auto itemId = -1; // ms_numPrices < 1 OR key not found. will this case ever happen?
+    auto itemId = -1;
     if (ms_numPrices >= 1) {
         for (auto&& [i, p] : notsa::enumerate(std::span{ms_prices.data(), (size_t)ms_numPrices})) {
             printf("item id %d key %u, checking for %u\n", i, p.key, itemKey);
