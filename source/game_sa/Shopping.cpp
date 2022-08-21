@@ -125,7 +125,8 @@ bool CShopping::FindSectionInSection(FILESTREAM file, const char* parentSection,
 
 // 0x49ADE0
 int32 CShopping::GetExtraInfo(uint32 itemKey, int32 index) {
-    switch (auto id = FindItem(itemKey)) {
+    const auto id = FindItem(itemKey);
+    switch (index) {
     case 0:
         return ms_prices[id].general.extra1;
     case 1:
