@@ -269,6 +269,7 @@
 #include "TaskSimpleDieInCar.h"
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
+#include "TaskSimpleCarWaitToSlowDown.h"    
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -282,6 +283,7 @@
 #include "Plugins\BreakablePlugin\BreakablePlugin.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/VideoMode.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
@@ -718,7 +720,7 @@ void InjectHooksMain() {
         // CTaskSimpleCarShuffle::InjectHooks();
         // CTaskSimpleCarSlowBeDraggedOut::InjectHooks();
         // CTaskSimpleCarWaitForDoorNotToBeInUse::InjectHooks();
-        // CTaskSimpleCarWaitToSlowDown::InjectHooks();
+        CTaskSimpleCarWaitToSlowDown::InjectHooks();
         // CTaskSimpleChat::InjectHooks();
         // CTaskSimpleClearLookAt::InjectHooks();
         // CTaskSimpleCower::InjectHooks();
@@ -1029,6 +1031,7 @@ void InjectHooksMain() {
         Securom::InjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
+        VideoModeInjectHooks();
     };
 
     const auto Animation = []() {
