@@ -12,6 +12,8 @@
 
 #include "eAudioEvents.h"
 #include "eRadioID.h"
+#include "eVehicleType.h"
+enum tWheelState : int32;
 
 class CVehicle;
 
@@ -48,51 +50,30 @@ struct tEngineDummySlot {
 };
 VALIDATE_SIZE(tEngineDummySlot, 0x4);
 
-class cVehicleParams {
-public:
-    uint32         m_nVehicleSubType;
-    uint32         m_nVehicleType;
-    char           field_8;
-    int32          field_C;
-    CVehicle*      m_pVehicle;
-    cTransmission* m_pTransmission;
-    uint32         m_nModelType;
-    float          m_fVelocity;
-    int16          m_nGasState;
-    int16          m_nBreakState;
-    float          m_fVelocityAbsolute;
-    float          m_fZVelocity;
-    float          m_fVelocityPercentage;
-    int32          field_30;
-    float          field_34;
-    int8           m_nCurrentGear;
-    bool           m_bHandbrakeOn;
-    float          m_fVelocityChangingPercentage;
-    float          m_fWheelSpinForAudio;
-    uint16         m_nNumberOfGears;
-    uint8          m_nWheelsOnGround;
-    char           field_47;
-    int32          field_48;
-
-    cVehicleParams() {
-        m_nVehicleSubType = -1;
-        m_nVehicleType = -1;
-        field_8 = 0;
-        field_C = 0;
-        m_pTransmission = nullptr;
-        m_nModelType = 0;
-        m_fVelocity = 0.0f;
-        m_nGasState = 0;
-        m_nBreakState = 0;
-        m_fVelocityAbsolute = 0.0f;
-        m_fVelocityPercentage = 0.0f;
-        field_30 = 0;
-        field_34 = 0;
-        m_nCurrentGear = 0;
-        m_bHandbrakeOn = false;
-        m_fVelocityChangingPercentage = 0.0f;
-        m_fWheelSpinForAudio = 0.0f;
-    }
+struct cVehicleParams {
+    int32          nSpecificVehicleType{ VEHICLE_TYPE_IGNORE };
+    int32          nBaseVehicleType{ VEHICLE_TYPE_IGNORE };
+    bool           bDistanceCalculated{ false };
+    float          fDistSqr{ 0.0f };
+    CVehicle*      Vehicle{ nullptr };
+    cTransmission* Transmission{ nullptr };
+    uint32         nModelIndexMinusOffset{ 0 };
+    float          fSpeed{ 0.0f };
+    int16          ThisAccel{ 0 };
+    int16          ThisBrake{ 0 };
+    float          fAbsSpeed{ 0.0f };
+    float          fZOverSpeed{};
+    float          fSpeedRatio{ 0.0f };
+    float*         pfGasPedalAudioRevs{ nullptr };
+    float          fPrevSpeed{ 0.0f };
+    uint8          RealGear{ 0 };
+    bool           bHandbrakeOn{ false };
+    float          fRealRevsRatio{ 0.0f };
+    float          fWheelSpin{ 0.0f };
+    int16          NumGears{};
+    uint8          NumDriveWheelsOnGround{};
+    uint8          NumDriveWheelsOnGroundLastFrame{};
+    tWheelState*   WheelState{};
 };
 VALIDATE_SIZE(cVehicleParams, 0x4C);
 
@@ -287,10 +268,10 @@ public:
 
     float GetVolumeForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
     float GetFrequencyForDummyIdle(float fGearRevProgress, float fRevProgressBaseline);
-    [[nodiscard]] float GetFreqForIdle(float velocityPercentage) const;
+    [[nodiscard]] float GetFreqForIdle(float fRatio) const;
 
-    float GetVolumeForDummyRev(float, float);
-    float GetFrequencyForDummyRev(float, float);
+    float GetVolumeForDummyRev(float fRatio, float fFadeRatio);
+    float GetFrequencyForDummyRev(float fRatio, float fFadeRatio);
 
     float GetVehicleDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, float fUnk, cTransmission& transmission, float fVelocity);
     float GetVehicleNonDriveWheelSkidValue(CVehicle* vehicle, int32 wheelState, cTransmission& transmission, float velocity);
@@ -311,7 +292,7 @@ public:
     void ProcessReverseGear(cVehicleParams& params);
     void ProcessVehicleSkidding(cVehicleParams& params);
     void ProcessRainOnVehicle(cVehicleParams& params);
-    void ProcessGenericJet(uint8 a1, cVehicleParams& params, float a3, float a4, float a5, float a6, float a7);
+    void ProcessGenericJet(bool bEngineOn, cVehicleParams& params, float fEngineSpeed, float fAccelRatio, float fBrakeRatio, float fStalledVolume, float fStalledFrequency);
     void ProcessDummyJet(cVehicleParams& params);
     void ProcessPlayerJet(cVehicleParams& params);
     void ProcessDummySeaPlane(cVehicleParams& params);
@@ -325,7 +306,7 @@ public:
     void ProcessAircraft(cVehicleParams& params);
     void ProcessPlayerBicycle(cVehicleParams& params);
     void ProcessDummyBicycle(cVehicleParams& params);
-    void ProcessDummyStateTransition(int16, float, cVehicleParams& params);
+    void ProcessDummyStateTransition(int16 newState, float fRatio, cVehicleParams& params);
     void ProcessDummyVehicleEngine(cVehicleParams& params);
     void ProcessPlayerVehicleEngine(cVehicleParams& params);
     void ProcessVehicleSirenAlarmHorn(cVehicleParams& params);
