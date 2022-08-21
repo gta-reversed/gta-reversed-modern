@@ -40,12 +40,12 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(LoadShop, 0x49BBE0, { .reversed = false });
     RH_ScopedInstall(LoadStats, 0x49B6A0, { .reversed = false });
     // RH_ScopedInstall(RemoveLoadedPrices, 0x0, { .reversed = false });
-    RH_ScopedInstall(RemoveLoadedShop, 0x49AE30, { .reversed = false });
+    RH_ScopedInstall(RemoveLoadedShop, 0x49AE30);
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
     //RH_ScopedInstall(RemovePriceModifier, 0x0, { .reversed = false });
     RH_ScopedInstall(RestoreClothesState, 0x49B240);
     RH_ScopedInstall(RestoreVehicleMods, 0x49B3C0);
-    RH_ScopedInstall(ShutdownForRestart, 0x49B640, { .reversed = false });
+    RH_ScopedInstall(ShutdownForRestart, 0x49B640);
     RH_ScopedInstall(StoreClothesState, 0x49B200);
     RH_ScopedInstall(StoreVehicleMods, 0x49B280);
     // RH_ScopedInstall(UpdateStats, 0x0, { .reversed = false });
