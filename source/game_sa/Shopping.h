@@ -43,7 +43,7 @@ class CShopping {
 
     static constexpr auto NUM_PRICE_MODIFIERS = 20u;
     static constexpr auto NUM_ITEMS = 560u; // ?
-    static constexpr auto NUM_SELLABLE_ITEMS = 300u; // ?
+    static constexpr auto NUM_BUYABLE_ITEMS = 300u; // ?
     static constexpr auto NUM_SHOPS = 24u;
     static constexpr auto NUM_SECTION_NAMES = 11u;
 
@@ -56,7 +56,7 @@ class CShopping {
     inline static std::array<bool, NUM_ITEMS>& ms_bHasBought = *(std::array<bool, NUM_ITEMS>*)0xA972A0;
     inline static std::array<uint32, NUM_ITEMS>& ms_keys = *(std::array<uint32, NUM_ITEMS>*)0xA97D90;
 
-    inline static std::array<ItemPrice, NUM_SELLABLE_ITEMS>& ms_prices = *(std::array<ItemPrice, NUM_SELLABLE_ITEMS>*)0xA986F0;
+    inline static std::array<ItemPrice, NUM_BUYABLE_ITEMS>& ms_prices = *(std::array<ItemPrice, NUM_BUYABLE_ITEMS>*)0xA986F0;
     inline static std::array<const char*, NUM_SECTION_NAMES>& ms_sectionNames = *(std::array<const char*, NUM_SECTION_NAMES>*)0x8A61D8;
 
 public:
@@ -71,7 +71,7 @@ public:
     static bool FindSectionInSection(FILESTREAM file, const char* parentSection, const char* childSection);
     static int32 GetExtraInfo(uint32 itemKey, int32 index);
     static int32 GetItemIndex(uint32 itemKey);
-    static void GetKey(const char* modelName, int32 index);
+    static uint32 GetKey(const char* modelName, int32 index);
     static const char* GetNameTag(uint32 itemKey);
     static void GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);

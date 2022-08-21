@@ -27,7 +27,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(FindSectionInSection, 0x49AF90);
     RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
     RH_ScopedInstall(GetItemIndex, 0x49AB10);
-    RH_ScopedInstall(GetKey, 0x49AB30, { .reversed = false });
+    RH_ScopedInstall(GetKey, 0x49AB30);
     // RH_ScopedInstall(GetNameTag, 0x0, { .reversed = false });
     RH_ScopedInstall(GetNextSection, 0x49AF10, { .reversed = false });
     RH_ScopedInstall(GetPrice, 0x49AD50);
@@ -151,8 +151,23 @@ int32 CShopping::GetItemIndex(uint32 itemKey) {
 }
 
 // 0x49AB30
-void CShopping::GetKey(const char* modelName, int32 index) {
-    plugin::Call<0x49AB30, const char*, int32>(modelName, index);
+uint32 CShopping::GetKey(const char* modelName, int32 index) {
+    // todo: enum
+    switch (index) {
+    case 4:
+    case 5:
+    case 6:
+        return CKeyGen::GetUppercaseKey(modelName);
+    case 9:
+        return CWeaponInfo::FindWeaponType(modelName);
+    default:
+        break;
+    }
+
+    if (index != 2) {
+        CModelInfo::GetModelInfo(modelName, &index);
+    }
+    return index;
 }
 
 // inlined
