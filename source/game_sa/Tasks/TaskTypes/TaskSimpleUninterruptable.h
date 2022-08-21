@@ -2,7 +2,7 @@
 
 #include "TaskSimple.h"
 
-class CTaskSimpleUninterruptable : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleUninterruptable : public CTaskSimple {
 public:
     static constexpr auto Type = TASK_SIMPLE_UNINTERRUPTABLE;
 

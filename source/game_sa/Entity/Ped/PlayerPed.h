@@ -15,7 +15,7 @@
 class CEventDamage;
 class CPlayerInfo;
 
-class CPlayerPed : public CPed {
+class NOTSA_EXPORT_VTABLE CPlayerPed : public CPed {
 public:
     CPed* m_p3rdPersonMouseTarget;
     int32 field_7A0;
