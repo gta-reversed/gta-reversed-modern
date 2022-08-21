@@ -92,10 +92,17 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
             m_TargetVehicle->m_vehicleAudio.PlayerAboutToExitVehicleAsDriver();
         }
 
-        CAnimBlendAssociation* assoc = nullptr;
-        if (m_Anim)
-            goto LABEL_29;
+        const auto FinishProcess = [&]() {
+            if (!m_Utility) {
+                m_Utility = new CTaskUtilityLineUpPedWithCar({}, 0, 0, m_TargetDoor);
+            }
+            return false;
+        };
 
+        if (m_Anim)
+            return FinishProcess();
+
+        CAnimBlendAssociation* assoc = nullptr;
         if (m_DraggingPed) {
             for (const auto& anim : { ANIM_ID_CAR_PULLOUT_RHS, ANIM_ID_CAR_PULLOUT_LHS, ANIM_ID_CAR_GETIN_BIKE_FRONT }) {
                 assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, anim);
@@ -107,7 +114,7 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
 
         if (m_DraggingPed) {
             if (assoc && assoc->m_fCurrentTime <= 0.3f) {
-                goto LABEL_29;
+                return FinishProcess();
             }
 
             if (CGeneral::DoCoinFlip()) { // Originally: rand() % 1024 <= 512
@@ -124,12 +131,7 @@ bool CTaskSimpleBikeJacked::ProcessPed(CPed* ped) {
         m_Anim->SetFinishCallback(FinishAnimBikeHitCB, this);
         ped->m_pedAudio.AddAudioEvent(AE_PED_JACKED_BIKE);
 
-LABEL_29:
-        if (!m_Utility) {
-            m_Utility = new CTaskUtilityLineUpPedWithCar({}, 0, 0, m_TargetDoor);
-        }
-
-        return false;
+        return FinishProcess();
     }
 
     if (m_nFinishAnim == ANIM_ID_NO_ANIMATION_SET) {
