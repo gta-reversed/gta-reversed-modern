@@ -289,7 +289,7 @@ void CShopping::RestoreClothesState() {
 
 // 0x49B3C0
 void CShopping::RestoreVehicleMods() {
-    auto veh = FindPlayerVehicle()->AsAutomobile();
+    auto veh = FindPlayerVehicle();
 
     for (auto&& [i, storedMod] : notsa::enumerate(gStoredVehicleMods)) {
         auto& upgrade = veh->m_anUpgrades[i];
@@ -306,10 +306,15 @@ void CShopping::RestoreVehicleMods() {
     CStreaming::LoadAllRequestedModels(false);
     veh->SetupUpgradesAfterLoad();
 
+    for (auto& mod : gStoredVehicleMods) {
+        if (mod != -1)
+            CStreaming::SetModelIsDeletable(mod);
+    }
+
     if (!veh->IsAutomobile())
         return;
 
-    auto& damage = veh->m_damageManager;
+    auto& damage = veh->AsAutomobile()->m_damageManager;
     for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
         if (state == DAMAGE_STATE_OK)
             continue;
@@ -368,14 +373,14 @@ void CShopping::StoreClothesState() {
 
 // 0x49B280
 void CShopping::StoreVehicleMods() {
-    auto veh = FindPlayerVehicle()->AsAutomobile();
+    auto veh = FindPlayerVehicle();
 
-    memcpy(&gStoredVehicleMods, &veh->m_anUpgrades, NUM_VEHICLE_UPGRADES);
+    std::copy_n(veh->m_anUpgrades.begin(), veh->m_anUpgrades.size(), gStoredVehicleMods.begin());
 
     if (!veh->IsAutomobile())
         return;
 
-    const auto& damage = veh->m_damageManager;
+    const auto& damage = veh->AsAutomobile()->m_damageManager;
     for (const auto& [i, state] : notsa::enumerate(gComponentDamageState)) {
         switch (i) {
         case 2:

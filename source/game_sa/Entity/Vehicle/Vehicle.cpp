@@ -3256,6 +3256,9 @@ void CVehicle::AddVehicleUpgrade(int32 modelId) {
 // 0x6E3400
 void CVehicle::SetupUpgradesAfterLoad() {
     for (auto& upgrade : m_anUpgrades) {
+        if (upgrade == -1)
+            continue;
+
         auto savedUpgrade = upgrade;
         upgrade = -1;
         AddVehicleUpgrade(savedUpgrade);
