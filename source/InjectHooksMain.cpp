@@ -283,6 +283,7 @@
 #include "Plugins\BreakablePlugin\BreakablePlugin.h"
 
 #include "platform/win/VideoPlayer/VideoPlayer.h"
+#include "platform/win/VideoMode.h"
 #include "platform/win/win.h"
 #include "platform/platform.h"
 
@@ -1030,6 +1031,7 @@ void InjectHooksMain() {
         Securom::InjectHooks();
         Win32InjectHooks();
         RsInjectHooks();
+        VideoModeInjectHooks();
     };
 
     const auto Animation = []() {
