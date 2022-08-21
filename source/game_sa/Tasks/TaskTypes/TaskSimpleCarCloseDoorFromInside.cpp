@@ -3,7 +3,7 @@
 #include "TaskUtilityLineUpPedWithCar.h"
 
 void CTaskSimpleCarCloseDoorFromInside::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleCarCloseDoorFromInside);
+    RH_ScopedVirtualClass(CTaskSimpleCarCloseDoorFromInside, 0x86ed08, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x646300);
@@ -14,11 +14,11 @@ void CTaskSimpleCarCloseDoorFromInside::InjectHooks() {
     RH_ScopedInstall(ComputeAnimID, 0x646410);
     RH_ScopedInstall(StartAnim, 0x64AFB0);
 
-    RH_ScopedVirtualInstall2(Clone, 0x649AF0);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x646370);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x64AF50);
-    RH_ScopedVirtualInstall2(ProcessPed, 0x64D9A0);
-    RH_ScopedVirtualInstall2(SetPedPosition, 0x6463F0);
+    RH_ScopedVMTInstall(Clone, 0x649AF0);
+    RH_ScopedVMTInstall(GetTaskType, 0x646370);
+    RH_ScopedVMTInstall(MakeAbortable, 0x64AF50);
+    RH_ScopedVMTInstall(ProcessPed, 0x64D9A0);
+    RH_ScopedVMTInstall(SetPedPosition, 0x6463F0);
 }
 
 // 0x646300

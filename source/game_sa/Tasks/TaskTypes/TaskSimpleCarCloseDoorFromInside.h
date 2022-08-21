@@ -6,7 +6,7 @@ class CAnimBlendAssociation;
 class CVehicle;
 class CTaskUtilityLineUpPedWithCar;
 
-class CTaskSimpleCarCloseDoorFromInside : public CTaskSimple {
+class NOTSA_EXPORT_VTABLE CTaskSimpleCarCloseDoorFromInside : public CTaskSimple {
 public:
     bool m_animHasFinished = {};                     // 8
     CAnimBlendAssociation* m_anim = {};              // 0xC

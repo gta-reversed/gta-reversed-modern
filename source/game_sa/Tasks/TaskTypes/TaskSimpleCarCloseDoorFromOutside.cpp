@@ -4,23 +4,22 @@
 #include "PedPlacement.h"
 
 void CTaskSimpleCarCloseDoorFromOutside::InjectHooks() {
-    RH_ScopedClass(CTaskSimpleCarCloseDoorFromOutside);
+    RH_ScopedVirtualClass(CTaskSimpleCarCloseDoorFromOutside, 0x86ed2c, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
     RH_ScopedInstall(Constructor, 0x6464F0);
-
     RH_ScopedInstall(Destructor, 0x646570);
 
-    RH_ScopedGlobalInstall(FinishAnimCarCloseDoorFromOutsideCB, 0x646680);
+    RH_ScopedInstall(FinishAnimCarCloseDoorFromOutsideCB, 0x646680);
 
     RH_ScopedInstall(ComputeAnimID, 0x646600);
     RH_ScopedInstall(StartAnim, 0x64B080);
 
-    RH_ScopedVirtualInstall2(Clone, 0x649B60);
-    RH_ScopedVirtualInstall2(GetTaskType, 0x646560);
-    RH_ScopedVirtualInstall2(MakeAbortable, 0x64B020);
-    RH_ScopedVirtualInstall2(ProcessPed, 0x64DA90);
-    RH_ScopedVirtualInstall2(SetPedPosition, 0x6465E0);
+    RH_ScopedVMTInstall(Clone, 0x649B60);
+    RH_ScopedVMTInstall(GetTaskType, 0x646560);
+    RH_ScopedVMTInstall(MakeAbortable, 0x64B020);
+    RH_ScopedVMTInstall(ProcessPed, 0x64DA90);
+    RH_ScopedVMTInstall(SetPedPosition, 0x6465E0);
 }
 
 // 0x6464F0
@@ -159,7 +158,7 @@ bool CTaskSimpleCarCloseDoorFromOutside::ProcessPed(CPed* ped) {
         return true;
     }
 
-    if (!m_veh || m_veh->GetAnimGroup().m_specialFlags.bDontCloseDoorAfterGettingIn) {
+    if (!m_veh || m_veh->GetAnimGroup().m_specialFlags.bDontCloseDoorAfterGettingOut) {
         return true;
     }
 
@@ -173,7 +172,7 @@ bool CTaskSimpleCarCloseDoorFromOutside::ProcessPed(CPed* ped) {
     const auto [grpId, animId] = ComputeAnimID_Helper();
     m_veh->ProcessOpenDoor(ped, m_door, grpId, animId, m_anim->m_fCurrentTime);
 
-    return true;
+    return false;
 }
 
 // 0x6465E0
