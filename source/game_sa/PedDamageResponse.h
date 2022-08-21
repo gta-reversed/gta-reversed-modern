@@ -18,5 +18,6 @@ public:
         m_bCheckIfAffectsPed = false;
     }
 };
-
 VALIDATE_SIZE(CPedDamageResponse, 0xC);
+
+using CPedDamageResponseInfo = CPedDamageResponse;
