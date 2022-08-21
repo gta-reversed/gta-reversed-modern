@@ -662,7 +662,7 @@ void CCarCtrl::RemoveDistantCars() {
             if (!vehicle->vehicleFlags.bCreateRoadBlockPeds)
                 continue;
 
-            CVector centreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
+            CVector centreOfWorld = FindPlayerCentreOfWorld();
             if (DistanceBetweenPoints(centreOfWorld, vehicle->GetPosition()) < 54.5f) {
                 CRoadBlocks::GenerateRoadBlockCopsForCar(
                     vehicle,
