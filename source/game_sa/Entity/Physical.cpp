@@ -271,18 +271,18 @@ void CPhysical::ProcessCollision()
             return;
         }
 
-        if (m_nStatus == STATUS_TRAILER) {
+        if (m_nStatus == STATUS_GHOST) {
             CColPoint* wheelsColPoints = nullptr;
             float* pfWheelsSuspensionCompression = nullptr;
             CVector* wheelsCollisionPositions = nullptr;
             if (vehicle->m_nVehicleSubType) { // todo: m_nVehicleSubType
-                bike->m_apWheelCollisionEntity[0] = nullptr; // todo: enum
-                bike->m_apWheelCollisionEntity[1] = nullptr;
-                bike->m_apWheelCollisionEntity[2] = nullptr;
-                bike->m_apWheelCollisionEntity[3] = nullptr;
-                wheelsColPoints = bike->m_aWheelColPoint;
-                pfWheelsSuspensionCompression = bike->m_fWheelsSuspensionCompression;
-                wheelsCollisionPositions = bike->m_avTouchPointsLocalSpace;
+                bike->m_aGroundPhysicalPtrs[0] = nullptr; // todo: enum
+                bike->m_aGroundPhysicalPtrs[1] = nullptr;
+                bike->m_aGroundPhysicalPtrs[2] = nullptr;
+                bike->m_aGroundPhysicalPtrs[3] = nullptr;
+                wheelsColPoints = bike->m_aWheelColPoints;
+                pfWheelsSuspensionCompression = bike->m_aWheelRatios;
+                wheelsCollisionPositions = bike->m_aGroundOffsets;
             }
             else {
                 automobile->m_apWheelCollisionEntity[0] = nullptr;
@@ -404,10 +404,10 @@ void CPhysical::ProcessCollision()
                 if (IsVehicle()) {
                     if (vehicle->m_nVehicleType) { // todo: m_nVehicleType
                         if (vehicle->IsBike()) {
-                            bike->m_fWheelsSuspensionCompression[0] = 1.0f; // todo: enum
-                            bike->m_fWheelsSuspensionCompression[1] = 1.0f;
-                            bike->m_fWheelsSuspensionCompression[2] = 1.0f;
-                            bike->m_fWheelsSuspensionCompression[3] = 1.0f;
+                            bike->m_aWheelRatios[0] = 1.0f; // todo: enum
+                            bike->m_aWheelRatios[1] = 1.0f;
+                            bike->m_aWheelRatios[2] = 1.0f;
+                            bike->m_aWheelRatios[3] = 1.0f;
                         }
                         else if (vehicle->IsTrailer()) {
                             automobile->m_fWheelsSuspensionCompression[0] = 1.0f;

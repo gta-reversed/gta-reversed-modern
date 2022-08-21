@@ -35,12 +35,6 @@ class CPhysical;
 class CBaseModelInfo;
 
 class NOTSA_EXPORT_VTABLE CEntity : public CPlaceable {
-protected:
-    CEntity(plugin::dummy_func_t) : CPlaceable(plugin::dummy) {}
-    CEntity();
-public: // Changed in CRope branch
-    ~CEntity() override;
-
 public:
     union {
         struct RwObject* m_pRwObject;
@@ -112,6 +106,9 @@ public:
     eEntityStatus m_nStatus : 5;
 
 public:
+    CEntity();
+    ~CEntity() override;
+
     virtual void Add();                                             // VTab: 2, similar to previous, but with entity bound rect
     virtual void Add(const CRect& rect);                            // VTab: 1
     virtual void Remove();                                          // VTab: 3

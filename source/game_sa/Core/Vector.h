@@ -97,7 +97,7 @@ public:
         return x * x + y * y + z * z;
     }
 
-    inline float SquaredMagnitude2D() {
+    inline float SquaredMagnitude2D() const {
         return x * x + y * y;
     }
 
@@ -118,6 +118,10 @@ public:
 
     static CVector AverageN(const CVector* begin, size_t n) {
         return Average(begin, begin + n);
+    }
+
+    [[nodiscard]] float Heading() const {
+        return std::atan2(-x, y);
     }
 };
 VALIDATE_SIZE(CVector, 0xC);

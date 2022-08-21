@@ -687,8 +687,8 @@ void CAutomobile::ProcessControl()
             }
             else {
                 m_wheelSkidmarkMuddy[i] = false;
-                m_wheelSkidmarkType[i] = static_cast<eSkidMarkType>(g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
-                if (m_wheelSkidmarkType[i] == eSkidMarkType::MUDDY)
+                m_wheelSkidmarkType[i] = static_cast<eSkidmarkType>(g_surfaceInfos->GetSkidmarkType(m_wheelColPoint[i].m_nSurfaceTypeB));
+                if (m_wheelSkidmarkType[i] == eSkidmarkType::MUDDY)
                     m_wheelSkidmarkMuddy[i] = true;
                 contactPoints[i] = m_wheelColPoint[i].m_vecPoint - GetPosition();
             }
@@ -1268,7 +1268,7 @@ bool CAutomobile::ProcessAI(uint32& extraHandlingFlags) {
         return true;
     }
     case STATUS_PHYSICS:
-    case STATUS_TRAILER:
+    case STATUS_GHOST:
     {
         CCarAI::UpdateCarAI(this);
         CCarCtrl::SteerAICarWithPhysics(this);
@@ -2830,7 +2830,7 @@ bool CAutomobile::BreakTowLink() {
 
     switch (m_nStatus) {
     case eEntityStatus::STATUS_IS_TOWED:
-    case eEntityStatus::STATUS_PLAYER_DISABLED: {
+    case eEntityStatus::STATUS_IS_SIMPLE_TOWED: {
         if (m_pDriver) {
             m_nStatus = m_pDriver->IsPlayer() ? eEntityStatus::STATUS_PLAYER : eEntityStatus::STATUS_PHYSICS;
         } else {
