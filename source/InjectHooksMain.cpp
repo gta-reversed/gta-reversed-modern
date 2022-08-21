@@ -270,6 +270,7 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimplePlayerOnFire.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -755,7 +756,7 @@ void InjectHooksMain() {
         // CTaskSimpleLookAbout::InjectHooks();
         // CTaskSimpleOnEscalator::InjectHooks();
         // CTaskSimplePickUpBike::InjectHooks();
-        // CTaskSimplePlayerOnFire::InjectHooks();
+        CTaskSimplePlayerOnFire::InjectHooks();
         // CTaskSimpleRunAnimLoopedMiddle::InjectHooks();
         // CTaskSimpleRunTimedAnim::InjectHooks();
         // CTaskSimpleSay::InjectHooks();
