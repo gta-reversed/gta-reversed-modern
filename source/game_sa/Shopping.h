@@ -8,9 +8,21 @@ extern std::array<float, NUM_LEVELS>& gPriceMultipliers;
 // incomplete, todo: move
 class CMultiBuilding {};
 
+enum ePriceSection : int32 {
+    PRICE_SECTION_UNDEFINED = 0,
+    PRICE_SECTION_CAR_MOD_1 = 1, // possibly pay'n spray
+    PRICE_SECTION_CAR_MOD_2 = 2, // possibly mod garages
+    PRICE_SECTION_CLOTHES = 4,
+    PRICE_SECTION_HAIRDRESSING = 5,
+    PRICE_SECTION_TATTOOS = 6,
+    PRICE_SECTION_FLOWERS = 7, // look CShopping::Buy
+    PRICE_SECTION_FOODS = 8,
+    PRICE_SECTION_WEAPONS = 9
+};
+
 class CShopping {
     struct PriceModifier {
-        const char* key;
+        uint32 key;
         uint32 price;
     };
     VALIDATE_SIZE(PriceModifier, 8u);
@@ -47,9 +59,10 @@ class CShopping {
     static constexpr auto NUM_SHOPS = 24u;
     static constexpr auto NUM_SECTION_NAMES = 11u;
 
-    inline static int32& ms_priceSectionLoaded = *(int32*)0xA9A7C8;
+    inline static ePriceSection& ms_priceSectionLoaded = *(ePriceSection*)0xA9A7C8;
     inline static int32& ms_numPrices = *(int32*)0xA9A7CC;
     inline static int32& ms_numPriceModifiers = *(int32*)0xA9A7D0;
+    inline static int32& ms_numItemsInShop = *(int32*)0xA9A7F0;
     inline static std::array<int8, NUM_SHOPS>& ms_shopLoaded = *(std::array<int8, NUM_SHOPS>*)0xA9A7D8;
     inline static uint32& ms_numBuyableItems = *(uint32*)0xA9A310;
     inline static std::array<PriceModifier, NUM_PRICE_MODIFIERS>& ms_priceModifiers = *(std::array<PriceModifier, NUM_PRICE_MODIFIERS>*)0xA98650;
@@ -75,7 +88,7 @@ public:
     static const char* GetNameTag(uint32 itemKey);
     static const char* GetNextSection(FILESTREAM file);
     static int32 GetPrice(uint32 itemId);
-    static int32 GetPriceSectionFromName(const char* name);
+    static ePriceSection GetPriceSectionFromName(const char* name);
     static void SetPlayerHasBought(uint32 itemKey);
     static bool HasPlayerBought(uint32 itemKey);
     static void IncrementStat(int32 a1, int32 a2);

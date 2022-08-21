@@ -32,8 +32,8 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetNextSection, 0x49AF10);
     RH_ScopedInstall(GetPrice, 0x49AD50);
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0);
-    RH_ScopedInstall(SetPlayerHasBought, 0x49B610, {.reversed = false});
-    RH_ScopedInstall(HasPlayerBought, 0x49B5E0, { .reversed = false });
+    RH_ScopedInstall(SetPlayerHasBought, 0x49B610);
+    RH_ScopedInstall(HasPlayerBought, 0x49B5E0);
     // RH_ScopedInstall(IncrementStat, 0x0, { .reversed = false });
     // RH_ScopedInstall(IncrementStat2, 0x0, { .reversed = false });
     RH_ScopedInstall(LoadPrices, 0x49B8D0, { .reversed = false });
@@ -49,8 +49,8 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(StoreClothesState, 0x49B200);
     RH_ScopedInstall(StoreVehicleMods, 0x49B280);
     // RH_ScopedInstall(UpdateStats, 0x0, { .reversed = false });
-    RH_ScopedInstall(Load, 0x5D3E40, { .reversed = false });
-    RH_ScopedInstall(Save, 0x5D3DE0, { .reversed = false });
+    RH_ScopedInstall(Load, 0x5D3E40);
+    RH_ScopedInstall(Save, 0x5D3DE0);
 }
 
 // 0x49C290
@@ -181,7 +181,7 @@ const char* CShopping::GetNameTag(uint32 itemKey) {
 const char* CShopping::GetNextSection(FILESTREAM file) {
     auto line = CFileLoader::LoadLine(file);
     if (!line)
-        return 0u;
+        return nullptr;
 
     while (true) {
         if (*line != '\0' && *line != '#') {
@@ -190,13 +190,13 @@ const char* CShopping::GetNextSection(FILESTREAM file) {
             }
 
             if (!strncmp(line, "end", 3u)) {
-                return 0u;
+                return nullptr;
             }
         }
 
         line = CFileLoader::LoadLine(file);
         if (!line) {
-            return 0u;
+            return nullptr;
         }
     }
 
@@ -210,15 +210,16 @@ int32 CShopping::GetPrice(uint32 itemKey) {
 }
 
 // 0x49AAD0
-int32 CShopping::GetPriceSectionFromName(const char* name) {
+ePriceSection CShopping::GetPriceSectionFromName(const char* name) {
+    auto ret = -1;
     for (auto&& [i, sectionName] : notsa::enumerate(ms_sectionNames)) {
         if (!_stricmp(name, sectionName)) {
-            return i;
+            ret = i;
         }
     }
 
-    assert(false);
-    return -1;
+    assert(ret != -1);
+    return static_cast<ePriceSection>(ret);
 }
 
 // 0x49B610
@@ -243,7 +244,70 @@ void CShopping::IncrementStat2(int32 a1, int32 a2) {
 
 // 0x49B8D0
 void CShopping::LoadPrices(const char* sectionName) {
-    plugin::Call<0x49B8D0, const char*>(sectionName);
+    auto priceSection = GetPriceSectionFromName(sectionName);
+
+    if (priceSection == ms_priceSectionLoaded)
+        return;
+
+    if (ms_priceSectionLoaded != PRICE_SECTION_UNDEFINED) {
+        RemoveLoadedPrices();
+    }
+    ms_priceSectionLoaded = priceSection;
+    ms_numPrices = 0;
+    ms_numItemsInShop = 0;
+    CTimer::Suspend();
+
+    auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
+    if (FindSection(file, "prices")) {
+        FindSection(file, sectionName);
+    }
+
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numPrices++) {
+        if (*line != '\0' && *line != '#') {
+            if (!strncmp(line, "end", 3u))
+                break;
+
+            auto& priceInfo = ms_prices[ms_numPrices];
+
+            auto model = strtok(line, " \t,");
+            priceInfo.key = GetKey(model, ms_priceSectionLoaded);
+
+            auto nameTag = strtok(nullptr, " \t,");
+            strncpy(priceInfo.nameTag, nameTag, 8u);
+
+            switch (ms_priceSectionLoaded) {
+            case PRICE_SECTION_CLOTHES:
+            case PRICE_SECTION_HAIRDRESSING: {
+                priceInfo.clothes.modelKey = CKeyGen::GetUppercaseKey(strtok(nullptr, " \t,"));
+                priceInfo.clothes.type = std::atoi(strtok(nullptr, " \t,"));
+                break;
+            }
+            case PRICE_SECTION_TATTOOS: {
+                auto type = strtok(nullptr, " \t,");
+                auto txtkey = strtok(nullptr, " \t,");
+                priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(txtkey);
+                priceInfo.tattoos.texKey = CKeyGen::GetUppercaseKey(txtkey);
+                break;
+            }
+            case PRICE_SECTION_WEAPONS: {
+                priceInfo.weapon.ammo = std::atoi(strtok(nullptr, " \t,"));
+                break;
+            }
+            default:
+                break;
+            }
+
+            for (auto i = 0; i < 4; i++)
+                RET_IGNORED(strtok(nullptr, " \t,"));
+
+            priceInfo.price = std::atoi(strtok(nullptr, " \t,"));
+            rng::for_each_n(ms_priceModifiers.begin(), ms_numPriceModifiers, [&priceInfo](auto priceModifier) {
+                if (priceInfo.key == priceModifier.key) {
+                    priceInfo.price = priceModifier.price;
+                }
+            });
+        }
+    }
 }
 
 // 0x49BBE0
@@ -262,7 +326,7 @@ void CShopping::RemoveLoadedPrices() {
     if (animBlockIndex != -1) {
         CStreaming::SetModelIsDeletable(IFPToModelId(animBlockIndex));
     }
-    ms_priceSectionLoaded = 0;
+    ms_priceSectionLoaded = PRICE_SECTION_UNDEFINED;
 }
 
 // 0x49AE30
