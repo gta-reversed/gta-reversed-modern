@@ -165,6 +165,7 @@ uint32 CShopping::GetKey(const char* modelName, int32 index) {
     }
 
     if (index != 2) {
+        index = -1;
         CModelInfo::GetModelInfo(modelName, &index);
     }
     return index;
