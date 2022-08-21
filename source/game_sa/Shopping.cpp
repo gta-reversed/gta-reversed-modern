@@ -307,6 +307,15 @@ void CShopping::LoadPrices(const char* sectionName) {
                 }
             });
         }
+        CFileMgr::CloseFile(file);
+
+        auto animBlockIndex = CAnimManager::GetAnimationBlockIndex(ms_sectionNames[ms_priceSectionLoaded]);
+        if (animBlockIndex != -1) {
+            CStreaming::RequestModel(IFPToModelId(animBlockIndex),
+                STREAMING_PRIORITY_REQUEST | STREAMING_KEEP_IN_MEMORY | STREAMING_GAME_REQUIRED);
+            CStreaming::LoadAllRequestedModels(true);
+        }
+        CTimer::Resume();
     }
 }
 
