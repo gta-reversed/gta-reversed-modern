@@ -662,13 +662,15 @@ void CCarCtrl::RemoveDistantCars() {
             if (!vehicle->vehicleFlags.bCreateRoadBlockPeds)
                 continue;
 
-            CVector centreOfWorld = FindPlayerCentreOfWorld();
+            CVector centreOfWorld = FindPlayerCentreOfWorld(CWorld::PlayerInFocus);
             if (DistanceBetweenPoints(centreOfWorld, vehicle->GetPosition()) < 54.5f) {
                 CRoadBlocks::GenerateRoadBlockCopsForCar(
                     vehicle,
                     vehicle->m_nPedsPositionForRoadBlock,
                     vehicle->IsLawEnforcementVehicle() ? PED_TYPE_COP : PED_TYPE_GANG1
                 );
+
+                vehicle->vehicleFlags.bCreateRoadBlockPeds = false;
             }
         }
     }
