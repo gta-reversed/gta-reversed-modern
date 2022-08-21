@@ -29,7 +29,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(GetItemIndex, 0x49AB10);
     RH_ScopedInstall(GetKey, 0x49AB30);
     // RH_ScopedInstall(GetNameTag, 0x0, { .reversed = false });
-    RH_ScopedInstall(GetNextSection, 0x49AF10, { .reversed = false });
+    RH_ScopedInstall(GetNextSection, 0x49AF10);
     RH_ScopedInstall(GetPrice, 0x49AD50);
     RH_ScopedInstall(GetPriceSectionFromName, 0x49AAD0);
     RH_ScopedInstall(SetPlayerHasBought, 0x49B610, {.reversed = false});
@@ -179,8 +179,6 @@ const char* CShopping::GetNameTag(uint32 itemKey) {
 // Finds the next 'root' section name from shopping.dat
 // 0x49AF10
 const char* CShopping::GetNextSection(FILESTREAM file) {
-    return plugin::CallAndReturn<char*, 0x49AF10, FILESTREAM>(file);
-
     auto line = CFileLoader::LoadLine(file);
     if (!line)
         return 0u;
