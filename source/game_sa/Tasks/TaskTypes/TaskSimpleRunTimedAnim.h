@@ -7,7 +7,6 @@ class CTaskSimpleRunTimedAnim;
 class CPed;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleRunTimedAnim : public CTaskSimpleAnim {
-
 public:
     AssocGroupId m_animGrpId = {};
     AnimationId m_animId = {};

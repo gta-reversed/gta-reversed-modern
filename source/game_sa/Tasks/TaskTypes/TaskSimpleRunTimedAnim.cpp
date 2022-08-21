@@ -55,6 +55,7 @@ bool CTaskSimpleRunTimedAnim::ProcessPed(CPed* ped) {
 
     if (!m_pAnim && !RpAnimBlendClumpGetAssociation(ped->m_pRwClump, (uint32)m_animId)) {
         m_timer.Start((int32)m_durationMs);
+        StartAnim(ped);
     }
 
     return m_bIsFinished;
