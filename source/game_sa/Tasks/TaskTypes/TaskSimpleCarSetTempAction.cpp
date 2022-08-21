@@ -1,53 +1,68 @@
 #include "StdInc.h"
 #include "TaskSimpleCarSetTempAction.h"
 
-
 void CTaskSimpleCarSetTempAction::InjectHooks() {
     RH_ScopedVirtualClass(CTaskSimpleCarSetTempAction, 0x86ea6c, 9);
     RH_ScopedCategory("Tasks/TaskTypes");
 
-RH_ScopedInstall(Constructor, 0x63D6F0);
+    RH_ScopedInstall(Constructor, 0x63D6F0);
+    RH_ScopedInstall(Destructor, 0x63D730);
 
-RH_ScopedInstall(Destructor, 0x63D730);
-
-
-
-RH_ScopedVMTInstall(Clone, 0x63DF10, { .reversed = false });
-    RH_ScopedVMTInstall(GetTaskType, 0x63D720, { .reversed = false });
-    RH_ScopedVMTInstall(MakeAbortable, 0x63D740, { .reversed = false });
-    RH_ScopedVMTInstall(ProcessPed, 0x645370, { .reversed = false });
-
+    RH_ScopedVMTInstall(Clone, 0x63DF10);
+    RH_ScopedVMTInstall(GetTaskType, 0x63D720);
+    RH_ScopedVMTInstall(MakeAbortable, 0x63D740);
+    RH_ScopedVMTInstall(ProcessPed, 0x645370);
 }
 
 // 0x63D6F0
-CTaskSimpleCarSetTempAction::CTaskSimpleCarSetTempAction(CVehicle * veh, int32 action, int32 timeMs) {
-    assert(false && "Constructor not reversed"); // TODO: Reverse constructor}
+CTaskSimpleCarSetTempAction::CTaskSimpleCarSetTempAction(CVehicle* veh, uint32 action, uint32 timeMs) :
+    CTaskSimpleCarDrive{veh},
+    m_action{action},
+    m_durationMs{timeMs}
+{
 }
 
-// 0x63D730
-CTaskSimpleCarSetTempAction::~CTaskSimpleCarSetTempAction() {
-    assert(false && "Destructor not reversed"); // TODO: Reverse destructor}
-}
-
-
-
-// 0x63DF10
- CTask * CTaskSimpleCarSetTempAction::Clone() {
-    return plugin::CallMethodAndReturn< CTask *, 0x63DF10, CTaskSimpleCarSetTempAction*>(this);
-}
-
-// 0x63D720
-int32 CTaskSimpleCarSetTempAction::GetTaskType() {
-    return plugin::CallMethodAndReturn<int32, 0x63D720, CTaskSimpleCarSetTempAction*>(this);
+// NOTSA
+CTaskSimpleCarSetTempAction::CTaskSimpleCarSetTempAction(const CTaskSimpleCarSetTempAction& o) :
+    CTaskSimpleCarSetTempAction{ o.m_pVehicle, o.m_action, o.m_durationMs }
+{
 }
 
 // 0x63D740
-bool CTaskSimpleCarSetTempAction::MakeAbortable(CPed * ped, int32 priority, CEvent const* event) {
-    return plugin::CallMethodAndReturn<bool, 0x63D740, CTaskSimpleCarSetTempAction*, CPed *, int32, CEvent const*>(this, ped, priority, event);
+bool CTaskSimpleCarSetTempAction::MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) {
+    if (CTaskSimpleCarDrive::MakeAbortable(ped, priority, event)) {
+        if (m_pVehicle) {
+            m_pVehicle->m_autoPilot.ClearTempAction();
+        }
+        return true;
+    }
+    return false;
 }
 
 // 0x645370
-bool CTaskSimpleCarSetTempAction::ProcessPed(CPed * ped) {
-    return plugin::CallMethodAndReturn<bool, 0x645370, CTaskSimpleCarSetTempAction*, CPed *>(this, ped);
-}
+bool CTaskSimpleCarSetTempAction::ProcessPed(CPed* ped) {
+    if (!m_pVehicle) {
+        m_pVehicle = ped->m_pVehicle;
+        CEntity::SafeRegisterRef(m_pVehicle);
+    }
 
+    if (CTaskSimpleCarDrive::ProcessPed(ped)) {
+        if (m_pVehicle) {
+            m_pVehicle->m_autoPilot.SetTempAction(0, 0);
+            return true;
+        }
+    }
+
+    if (m_pVehicle) {
+        if (m_action != 0) {
+            m_pVehicle->m_autoPilot.SetTempAction(m_action, m_durationMs);
+            m_action = 0;
+            return false;
+        }
+        if (m_pVehicle && m_pVehicle->m_autoPilot.m_nTempAction == 0) { // TODO: Inlined? Double null check of `m_pVehicle`
+            return true;
+        }
+    }
+
+    return false;
+}
