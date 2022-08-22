@@ -127,6 +127,8 @@
 #include "TaskSimpleArrestPed.h"
 #include "TaskComplexDragPedFromCar.h"
 #include "TaskComplexDestroyCar.h"
+#include "TaskComplexDestroyCarMelee.h"
+#include "TaskComplexDestroyCarArmed.h"
 #include "TaskSimpleAbseil.h"
 #include "TaskComplexWanderCop.h"
 #include "TaskComplexUseMobilePhone.h"
@@ -609,9 +611,9 @@ void InjectHooksMain() {
         CTaskLeanOnVehicle::InjectHooks();
         CTaskComplexCarSlowBeDraggedOut::InjectHooks();
         CTaskComplexCarSlowBeDraggedOutAndStandUp::InjectHooks();
-        CTaskComplexDestroyCar__InjectHooks();
-        // CTaskComplexDestroyCarArmed::InjectHooks();
-        // CTaskComplexDestroyCarMelee::InjectHooks();
+        CTaskComplexDestroyCar::InjectHooks();
+        CTaskComplexDestroyCarArmed::InjectHooks();
+        CTaskComplexDestroyCarMelee::InjectHooks();
         CTaskComplexDieInCar::InjectHooks();
         // CTaskComplexDiveFromAttachedEntityAndGetUp::InjectHooks();
         CTaskComplexDragPedFromCar__InjectHooks();
