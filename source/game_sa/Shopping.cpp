@@ -102,8 +102,9 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
     auto index = GetItemIndex(key);
 
     auto ped = FindPlayerPed();
-    auto playerClothes = ped->m_pPlayerData->m_pPedClothesDesc;
     auto& playerInfo = FindPlayerInfo();
+
+    auto playerClothes = ped->GetClothesDesc();
     if (gClothesHaveBeenStored) {
         playerClothes = &gStoredClothesState;
     }
@@ -172,7 +173,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
         if (texKey) {
             UpdateStats(GetItemIndex(texKey), false);
         }
-        playerClothes->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
+        ped->GetClothesDesc()->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
 
         switch (CClothes::GetTextureDependency((eClothesTexturePart)priceInfo.clothes.type)) {
         case CLOTHES_MODEL_TORSO:
@@ -194,7 +195,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
         if (texKey) {
             UpdateStats(GetItemIndex(texKey), false);
         }
-        playerClothes->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
+        ped->GetClothesDesc()->SetTextureAndModel(key, priceInfo.clothes.modelKey, (eClothesTexturePart)priceInfo.clothes.type);
 
         FindPlayerWanted()->ClearWantedLevelAndGoOnParole();
         break;
@@ -202,7 +203,7 @@ void CShopping::Buy(uint32 key, int32 extraInfo) {
 
     case PRICE_SECTION_TATTOOS:
         CStats::ModifyStat(STAT_TATTOO_BUDGET, fPrice);
-        playerClothes->SetTextureAndModel(key, 0u, (eClothesTexturePart)priceInfo.clothes.modelKey);
+        ped->GetClothesDesc()->SetTextureAndModel(key, 0u, (eClothesTexturePart)priceInfo.tattoos.type1);
         break;
 
     case PRICE_SECTION_GIFTS:
@@ -457,7 +458,7 @@ void CShopping::LoadPrices(const char* sectionName) {
         case PRICE_SECTION_TATTOOS: {
             auto type = strtok(nullptr, " \t,");
             auto txtkey = strtok(nullptr, " \t,");
-            priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(txtkey);
+            priceInfo.tattoos.type1 = (type[0] == '-') ? -1 : std::atoi(type);
             priceInfo.tattoos.texKey = CKeyGen::GetUppercaseKey(txtkey);
             break;
         }
@@ -630,7 +631,7 @@ void CShopping::RemovePriceModifier(uint32 key) {
 
 // 0x49B240
 void CShopping::RestoreClothesState() {
-    memcpy(FindPlayerPed()->m_pPlayerData->m_pPedClothesDesc, &gStoredClothesState, sizeof(CPedClothesDesc));
+    memcpy(FindPlayerPed()->GetClothesDesc(), &gStoredClothesState, sizeof(CPedClothesDesc));
     gClothesHaveBeenStored = 0u;
 }
 
@@ -714,7 +715,7 @@ void CShopping::ShutdownForRestart() {
 // 0x49B200
 void CShopping::StoreClothesState() {
     // todo: operator=
-    memcpy(&gStoredClothesState, FindPlayerPed()->m_pPlayerData->m_pPedClothesDesc, sizeof(CPedClothesDesc));
+    memcpy(&gStoredClothesState, FindPlayerPed()->GetClothesDesc(), sizeof(CPedClothesDesc));
     gClothesHaveBeenStored = 1u;
 }
 
