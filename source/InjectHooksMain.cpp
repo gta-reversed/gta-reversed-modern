@@ -118,6 +118,7 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskSimpleCarGetIn.h"
 #include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleFightingControl.h"
 #include "TaskSimpleBeHit.h"
@@ -737,7 +738,7 @@ void InjectHooksMain() {
         CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
         // CTaskSimpleCarFallOut::InjectHooks();
         // CTaskSimpleCarForcePedOut::InjectHooks();
-        // CTaskSimpleCarGetIn::InjectHooks();
+        CTaskSimpleCarGetIn::InjectHooks();
         // CTaskSimpleCarGetOut::InjectHooks();
         // CTaskSimpleCarGoToPointNearDoorUntilDoorNotInUse::InjectHooks();
         CTaskSimpleCarJumpOut::InjectHooks();
