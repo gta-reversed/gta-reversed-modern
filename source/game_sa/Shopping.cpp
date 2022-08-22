@@ -321,47 +321,48 @@ void CShopping::LoadPrices(const char* sectionName) {
 
 // 0x49BBE0
 void CShopping::LoadShop(const char* sectionName) {
-    if (_stricmp(sectionName, ms_shopLoaded)) {
-        strcpy_s(ms_shopLoaded, sectionName);
-        CTimer::Suspend();
-        ms_numItemsInShop = 0;
+    if (!_stricmp(sectionName, ms_shopLoaded))
+        return;
 
-        if (!_stricmp("bought", sectionName)) {
-            rng::for_each_n(ms_prices.begin(), ms_numPrices, [](auto& price) {
-                auto idx = GetItemIndex(price.key);
-                if (ms_bHasBought[idx])
-                    ms_shopContents[ms_numItemsInShop++] = price.key;
-            });
-        } else {
-            auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
-            if (FindSection(file, "shops")) {
-                FindSection(file, sectionName);
-            }
+    strcpy_s(ms_shopLoaded, sectionName);
+    CTimer::Suspend();
+    ms_numItemsInShop = 0;
 
-            char buf[14];
-            for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numItemsInShop++) {
-                if (*line == '\0' || *line == '#')
-                    continue;
+    if (!_stricmp("bought", sectionName)) {
+        rng::for_each_n(ms_prices.begin(), ms_numPrices, [](auto& price) {
+            auto idx = GetItemIndex(price.key);
+            if (ms_bHasBought[idx])
+                ms_shopContents[ms_numItemsInShop++] = price.key;
+        });
+    } else {
+        auto file = CFileMgr::OpenFile("data\\shopping.dat", "r");
+        if (FindSection(file, "shops")) {
+            FindSection(file, sectionName);
+        }
 
-                if (!strncmp(line, "end", 3u))
-                    break;
+        char buf[14];
+        for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file), ms_numItemsInShop++) {
+            if (*line == '\0' || *line == '#')
+                continue;
 
-                auto v9 = strtok(line, " \t");
-                if (!strcmp("type", v9)) {
-                    strcpy_s(buf, strtok(nullptr, " \t"));
-                    LoadPrices(buf);
-                } else if (!strcmp("item", v9)) {
-                    auto model = strtok(nullptr, " \t");
-                    auto modelKey = GetKey(model, ms_priceSectionLoaded);
+            if (!strncmp(line, "end", 3u))
+                break;
 
-                    if (ms_priceSectionLoaded != -1 || IsValidModForVehicle(modelKey, FindPlayerVehicle())) {
-                        ms_shopContents[ms_numItemsInShop++] = modelKey;
-                    }
+            auto type = strtok(line, " \t");
+            if (!strcmp("type", type)) {
+                strcpy_s(buf, strtok(nullptr, " \t"));
+                LoadPrices(buf);
+            } else if (!strcmp("item", type)) {
+                auto model = strtok(nullptr, " \t");
+                auto modelKey = GetKey(model, ms_priceSectionLoaded);
+
+                if (ms_priceSectionLoaded != -1 || IsValidModForVehicle(modelKey, FindPlayerVehicle())) {
+                    ms_shopContents[ms_numItemsInShop++] = modelKey;
                 }
             }
-            CFileMgr::CloseFile(file);
-            CTimer::Resume();
         }
+        CFileMgr::CloseFile(file);
+        CTimer::Resume();
     }
 }
 
