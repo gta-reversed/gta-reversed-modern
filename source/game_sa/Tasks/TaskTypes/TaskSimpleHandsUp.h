@@ -12,7 +12,7 @@ public:
     explicit CTaskSimpleHandsUp(uint32 duration) : CTaskSimpleRunTimedAnim(ANIM_GROUP_DEFAULT, ANIM_ID_HANDSUP, 4.0f, -4.0f, duration, Type, "HandsUp", 0) {}
     ~CTaskSimpleHandsUp() override = default;
 
-    CTask* Clone() override { return new CTaskSimpleHandsUp(m_durationMs); }
+    CTask* Clone() override { return new CTaskSimpleHandsUp(m_nDurationMs); }
     virtual bool IsInterruptable(CPed const* ped) { return false; }
 
     static void InjectHooks();

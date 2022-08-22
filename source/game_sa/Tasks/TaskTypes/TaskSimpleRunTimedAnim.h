@@ -8,43 +8,28 @@ class CPed;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleRunTimedAnim : public CTaskSimpleAnim {
 public:
-    AssocGroupId m_animGrpId = {};
-    AnimationId m_animId = {};
-    float m_blendDelta = {};
-    float m_unused1 = {};
-    uint32 m_durationMs = {};
-    CTaskTimer m_timer = {};
-    eTaskType m_taskId = {};
+    AssocGroupId m_AnimGroup;
+    AnimationId m_AnimId;
+    float m_fBlendDelta;
+    float m_fBlendOutDelta;
+    int32 m_nDurationMs;
+    CTaskTimer m_Timer;
+    eTaskType m_TaskType;
 
 public:
-    static void InjectHooks();
+    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, int32 durationMs, bool holdLastFrame); // 0x61AB70
+    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, int32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame); // 0x61ABE0
+    ~CTaskSimpleRunTimedAnim() = default;  // 0x48E090
 
-    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, bool holdLastFrame);
-    CTaskSimpleRunTimedAnim(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame);
-    CTaskSimpleRunTimedAnim(const CTaskSimpleRunTimedAnim& o) : CTaskSimpleRunTimedAnim{o.m_animGrpId, o.m_animId, o.m_blendDelta, o.m_unused1, o.m_durationMs, o.m_bHoldLastFrame} {} // NOTSA
-    ~CTaskSimpleRunTimedAnim() = default;
+
+    eTaskType GetTaskType() override { return m_TaskType; }
+    CTask* Clone() override { return new CTaskSimpleRunTimedAnim(m_AnimGroup, m_AnimId, m_fBlendDelta, m_fBlendOutDelta, m_nDurationMs, (m_nFlags & 4) >> 2); }
+    bool ProcessPed(CPed* ped) override;
 
     void StartAnim(CPed* ped);
 
-    CTask*    Clone() override { return new CTaskSimpleRunTimedAnim{ *this }; }
-    eTaskType GetTaskType() override { return m_taskId; }
-    bool      ProcessPed(CPed* ped) override;
-private: // Wrappers for hooks
-    // 0x61AB70
-    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, bool holdLastFrame) {
-        this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, holdLastFrame);
-        return this;
-    }
-
-    // 0x61ABE0
-    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame) {
-        this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, taskId, unused2, holdLastFrame);
-        return this;
-    }
-
-    // 0x48E090
-    CTaskSimpleRunTimedAnim* Destructor() {
-        this->CTaskSimpleRunTimedAnim::~CTaskSimpleRunTimedAnim();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, bool holdLastFrame) { this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, holdLastFrame); return this; }
+    CTaskSimpleRunTimedAnim* Constructor(AssocGroupId groupId, AnimationId animId, float blendDelta, float unused1, uint32 durationMs, uint32 taskId, const char* unused2, bool holdLastFrame) { this->CTaskSimpleRunTimedAnim::CTaskSimpleRunTimedAnim(groupId, animId, blendDelta, unused1, durationMs, taskId, unused2, holdLastFrame); return this; }
+    CTaskSimpleRunTimedAnim* Destructor() { this->CTaskSimpleRunTimedAnim::~CTaskSimpleRunTimedAnim(); return this; }
 };
