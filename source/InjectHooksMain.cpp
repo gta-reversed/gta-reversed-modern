@@ -118,6 +118,7 @@
 #include "CarFXRenderer.h"
 
 // Tasks
+#include "TaskSimpleCarCloseDoorFromOutside.h"
 #include "TaskSimpleFightingControl.h"
 #include "TaskSimpleBeHit.h"
 #include "EntitySeekPosCalculator.h"
@@ -295,6 +296,7 @@
 #include "TaskSimpleCarWaitForDoorNotToBeInUse.h"
 #include "TaskComplexLeaveBoat.h"
 #include "TaskSimpleCarJumpOut.h"
+#include "TaskSimpleCarCloseDoorFromInside.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -731,8 +733,8 @@ void InjectHooksMain() {
         CTaskSimpleBeKickedOnGround::InjectHooks();
         CTaskSimpleBikeJacked::InjectHooks();
         CTaskSimpleCarAlign::InjectHooks();
-        // CTaskSimpleCarCloseDoorFromInside::InjectHooks();
-        // CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
+        CTaskSimpleCarCloseDoorFromInside::InjectHooks();
+        CTaskSimpleCarCloseDoorFromOutside::InjectHooks();
         // CTaskSimpleCarFallOut::InjectHooks();
         // CTaskSimpleCarForcePedOut::InjectHooks();
         // CTaskSimpleCarGetIn::InjectHooks();
