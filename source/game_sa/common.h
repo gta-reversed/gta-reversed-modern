@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <initializer_list>
 #include <RenderWare.h>
 
 #include "Vector.h"
