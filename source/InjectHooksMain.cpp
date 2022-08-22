@@ -270,6 +270,7 @@
 #include "TaskComplexTurnToFaceEntityOrCoord.h"
 #include "TaskSimpleTired.h"
 #include "TaskSimpleCarWaitToSlowDown.h"    
+#include "TaskSimpleLeaveGroup.h"
 #include "TaskSimpleRunTimedAnim.h"
 #include "TaskSimpleSay.h"
 #include "TaskSimplePlayerOnFire.h"
@@ -585,6 +586,7 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
+        CTaskSimpleLeaveGroup::InjectHooks();
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();
         CTaskGoToVehicleAndLean::InjectHooks();
