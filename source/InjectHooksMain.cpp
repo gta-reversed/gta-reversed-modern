@@ -597,7 +597,7 @@ void InjectHooksMain() {
     };
 
     const auto Tasks = []() {
-        CTaskSimpleLeaveGroup::InjectHooks();
+        // + CTaskSimpleLeaveGroup::InjectHooks();
         CTaskGangHasslePed::InjectHooks();
         CTaskGangHassleVehicle::InjectHooks();
         CTaskGoToVehicleAndLean::InjectHooks();
