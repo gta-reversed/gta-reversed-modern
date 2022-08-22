@@ -8,34 +8,23 @@ class CVehicle;
 class CTaskSimpleCarSetTempAction;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarSetTempAction : public CTaskSimpleCarDrive {
+public:
+    uint32 m_Action; // TODO: ENUM => CAutoPilot::TemporaryAction
+    uint32 m_DurationMs;
 
 public:
-    uint32 m_action = {}; // TODO: ENUM => CAutoPilot::TemporaryAction
-    uint32 m_durationMs = {};
+    constexpr static auto Type = TASK_SIMPLE_CAR_SET_TEMP_ACTION;
 
-public:
-    static void InjectHooks();
-
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_SET_TEMP_ACTION;
-
-    CTaskSimpleCarSetTempAction(CVehicle* veh, uint32 action, uint32 timeMs);
-    CTaskSimpleCarSetTempAction(const CTaskSimpleCarSetTempAction&);
+    CTaskSimpleCarSetTempAction(CVehicle* vehicle, uint32 action, uint32 timeMs);
     ~CTaskSimpleCarSetTempAction() = default;
 
-    CTask*    Clone() override { return new CTaskSimpleCarSetTempAction(*this); }
     eTaskType GetTaskType() override { return Type; }
-    bool      MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
-    bool      ProcessPed(CPed* ped) override;
+    CTask* Clone() override { return new CTaskSimpleCarSetTempAction(m_Action, m_DurationMs); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
 
-private: // Wrappers for hooks
-    // 0x63D6F0
-    CTaskSimpleCarSetTempAction* Constructor(CVehicle* veh, uint32 action, uint32 timeMs) {
-        this->CTaskSimpleCarSetTempAction::CTaskSimpleCarSetTempAction(veh, action, timeMs);
-        return this;
-    }
-    // 0x63D730
-    CTaskSimpleCarSetTempAction* Destructor() {
-        this->CTaskSimpleCarSetTempAction::~CTaskSimpleCarSetTempAction();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCarSetTempAction* Constructor(CVehicle* veh, uint32 action, uint32 timeMs) { this->CTaskSimpleCarSetTempAction::CTaskSimpleCarSetTempAction(veh, action, timeMs); return this; }
+    CTaskSimpleCarSetTempAction* Destructor() { this->CTaskSimpleCarSetTempAction::~CTaskSimpleCarSetTempAction(); return this; }
 };
+VALIDATE_SIZE(CTaskSimpleCarSetTempAction, 0x68);
