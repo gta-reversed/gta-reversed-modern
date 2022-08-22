@@ -8,44 +8,33 @@ class CTaskUtilityLineUpPedWithCar;
 
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarCloseDoorFromInside : public CTaskSimple {
 public:
-    bool m_animHasFinished = {};                     // 8
-    CAnimBlendAssociation* m_anim = {};              // 0xC
-    CVehicle* m_veh = {};                            // 0x10
-    uint32 m_door = {};                              // 0x14
-    CTaskUtilityLineUpPedWithCar* m_lineUpTask = {}; // 0x18
+    bool m_bIsFinished;
+    CAnimBlendAssociation* m_anim;
+    CVehicle* m_TargetVehicle;
+    uint32 m_nTargetDoor;
+    CTaskUtilityLineUpPedWithCar* m_Utility;
 
 public:
-    static void InjectHooks();
+    constexpr static auto Type = TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE;
 
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_CLOSE_DOOR_FROM_INSIDE;
+    CTaskSimpleCarCloseDoorFromInside(CVehicle* targetVehicle, uint32 door, CTaskUtilityLineUpPedWithCar* utility);
+    ~CTaskSimpleCarCloseDoorFromInside() override;
 
-    CTaskSimpleCarCloseDoorFromInside(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask);
-    CTaskSimpleCarCloseDoorFromInside(const CTaskSimpleCarCloseDoorFromInside&);
-    ~CTaskSimpleCarCloseDoorFromInside();
-
-    static void FinishAnimCarCloseDoorFromInsideCB(CAnimBlendAssociation* anim, void* data);
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarCloseDoorFromInside(m_TargetVehicle, m_nTargetDoor, m_Utility); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+    bool SetPedPosition(CPed* ped) override;
 
     void ComputeAnimID(AssocGroupId& outGroup, AnimationId& outAnimId);
     auto ComputeAnimID_Helper() -> std::tuple<AssocGroupId, AnimationId>;
     void StartAnim(CPed const* ped);
     void ProcessDoorOpen(CPed const* ped); // NOTSA
 
-    CTask* Clone() override { return new CTaskSimpleCarCloseDoorFromInside{ *this }; }
-    eTaskType GetTaskType() override { return Type; }
-    bool MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
-    bool ProcessPed(CPed* ped) override;
-    bool SetPedPosition(CPed* ped) override;
+    static void FinishAnimCarCloseDoorFromInsideCB(CAnimBlendAssociation* anim, void* data);
 
-private: // Wrappers for hooks
-    // 0x646300
-    CTaskSimpleCarCloseDoorFromInside* Constructor(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask) {
-        this->CTaskSimpleCarCloseDoorFromInside::CTaskSimpleCarCloseDoorFromInside(veh, door, lineUpTask);
-        return this;
-    }
-
-    // 0x646380
-    CTaskSimpleCarCloseDoorFromInside* Destructor() {
-        this->CTaskSimpleCarCloseDoorFromInside::~CTaskSimpleCarCloseDoorFromInside();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCarCloseDoorFromInside* Constructor(CVehicle* veh, uint32 door, CTaskUtilityLineUpPedWithCar* lineUpTask) { this->CTaskSimpleCarCloseDoorFromInside::CTaskSimpleCarCloseDoorFromInside(veh, door, lineUpTask); return this; }
+    CTaskSimpleCarCloseDoorFromInside* Destructor() { this->CTaskSimpleCarCloseDoorFromInside::~CTaskSimpleCarCloseDoorFromInside(); return this; }
 };
+VALIDATE_SIZE(CTaskSimpleCarCloseDoorFromInside, 0x1C);
