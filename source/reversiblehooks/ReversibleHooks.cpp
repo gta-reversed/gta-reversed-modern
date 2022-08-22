@@ -105,8 +105,8 @@ void** GetVTableAddress(std::string_view className) {
     if (const auto vtbl = reinterpret_cast<void**>(GetProcAddress(s_hThisDLL, buffer))) {
         return vtbl;
     }
-
-    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
+    
+    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className); // To fix this, add `NOTSA_EXPORT_VTABLE` to the class
     return nullptr;
 }
 
