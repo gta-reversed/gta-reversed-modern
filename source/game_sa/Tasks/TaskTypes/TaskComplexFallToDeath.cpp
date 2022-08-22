@@ -24,16 +24,19 @@ CTask* CTaskComplexFallToDeath::CreateFirstSubTask(CPed* ped) { return CreateFir
 CTask* CTaskComplexFallToDeath::CreateNextSubTask(CPed* ped) { return CreateNextSubTask_Reversed(ped); }
 
 // 0x679040
-CTaskComplexFallToDeath::CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bFallToDeathOverRailing, bool a5) : CTaskComplex() {
-    m_Posn                  = posn;
-    m_nAnimId               = ANIM_ID_UNDEFINED;
-    m_nAnimId1              = ANIM_ID_UNDEFINED;
-    m_nFallToDeathDir       = static_cast<eFallDir>(direction);
-    m_nFlags = m_nFlags & 0xE0 | (8 * (bFallToDeathOverRailing | (2 * a5))); // todo: flags
+CTaskComplexFallToDeath::CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bOverRailing, bool bTumble) :
+    CTaskComplex(),
+    m_NudgeDir{ static_cast<eFallDir>(direction) },
+    m_NudgeVec{ posn },
+    m_KnockedBackAnimID{ ANIM_ID_UNDEFINED },
+    m_DeathAnimID{ ANIM_ID_UNDEFINED },
+    m_bFallingOverRailing{ bOverRailing },
+    m_bTumbleWhilstFalling{ bTumble }
+{
 }
 
 void CTaskComplexFallToDeath::UpdateAnims(CPed* ped) {
-    for (auto& animId : { m_nAnimId, m_nAnimId1 }) {
+    for (auto& animId : { m_KnockedBackAnimID, m_DeathAnimID }) {
         if (animId != ANIM_ID_UNDEFINED) {
             if (auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, animId)) {
                 assoc->m_fBlendDelta = -1000.0f;
@@ -56,25 +59,23 @@ CTask* CTaskComplexFallToDeath::ControlSubTask_Reversed(CPed* ped) {
     // return plugin::CallMethodAndReturn<CTask*, 0x679510, CTaskComplexFallToDeath*, CPed*>(this, ped);
 
     if (ped->physicalFlags.bSubmergedInWater) {
-        if (!b0x2) {
-            b0x2 = true;
+        if (!m_bDying) {
+            m_bDying = true;
             ped->bIsDrowning = true;
             return new CTaskComplexDie(WEAPON_DROWNING, ANIM_GROUP_DEFAULT, ANIM_ID_DROWN, 4.0f, 1.0f, false, false, eFallDir::FORWARD, false);
         }
     }
 
-    if (!b0x1 || b0x2 || m_pSubTask->GetTaskType() == TASK_SIMPLE_DEAD) {
+    if (!m_bReadyToDie || m_bDying || m_pSubTask->GetTaskType() == TASK_SIMPLE_DEAD) {
         return m_pSubTask;
     }
 
-    const auto& z = ped->GetMoveSpeed().z;
-    bool v11 = z < 0.0f ? z > -0.01f : z < 0.01f;
-    if (!v11) {
+    if (std::fabsf(ped->m_vecMoveSpeed.z) >= 0.01f) { // todo: check
         return m_pSubTask;
     }
 
-    b0x2 = true;
-    b0x4 = true;
+    m_bDying = true;
+    m_bLandedWithImpact = true;
 
     UpdateAnims(ped);
     return new CTaskSimpleLand(ANIM_ID_KO_SKID_FRONT);
@@ -84,13 +85,12 @@ CTask* CTaskComplexFallToDeath::ControlSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
     ped->bIsStanding = false;
     ped->ApplyMoveForce({
-        ms_LateralForceMagnitude * m_Posn.x,
-        ms_LateralForceMagnitude * m_Posn.y,
-        b0x8 ? ms_OverRailingVerticalForce : ms_NoRailingVerticalForce
+        ms_LateralForceMagnitude * m_NudgeVec.x,
+        ms_LateralForceMagnitude * m_NudgeVec.y, m_bFallingOverRailing ? ms_OverRailingVerticalForce : ms_NoRailingVerticalForce
     });
 
-    m_nAnimId = [&] {
-        switch (m_nFallToDeathDir) {
+    m_KnockedBackAnimID = [&] {
+        switch (m_NudgeDir) {
         case eFallDir::FORWARD:  return ANIM_ID_KO_SKID_BACK;
         case eFallDir::LEFT:     return ANIM_ID_KO_SPIN_L;
         case eFallDir::BACKWARD: return ANIM_ID_KO_SKID_FRONT;
@@ -101,8 +101,8 @@ CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
         }
     }();
 
-    if (m_nAnimId >= ANIM_ID_WALK && m_nAnimId < ANIM_ID_ROADCROSS) {
-        CAnimManager::BlendAnimation(ped->m_pRwClump, nullptr, m_nAnimId, 1000.0f);
+    if (m_KnockedBackAnimID >= ANIM_ID_WALK && m_KnockedBackAnimID < ANIM_ID_ROADCROSS) {
+        CAnimManager::BlendAnimation(ped->m_pRwClump, nullptr, m_KnockedBackAnimID, 1000.0f);
     }
 
     return new CTaskSimpleInAir(false, true, false);
@@ -112,28 +112,26 @@ CTask* CTaskComplexFallToDeath::CreateFirstSubTask_Reversed(CPed* ped) {
 CTask* CTaskComplexFallToDeath::CreateNextSubTask_Reversed(CPed* ped) {
     // return plugin::CallMethodAndReturn<CTask*, 0x679270, CTaskComplexFallToDeath*, CPed*>(this, ped);
 
-    const auto& z = ped->GetMoveSpeed().z;
     switch (m_pSubTask->GetTaskType()) {
     case TASK_SIMPLE_IN_AIR: {
-        b0x4 = z < 0.0f ? z > -0.1f : z < 0.1f;
-        return new CTaskSimpleLand(b0x4 ? ANIM_ID_KO_SKID_FRONT : ANIM_ID_UNDEFINED);
+        m_bLandedWithImpact = std::fabsf(ped->m_vecMoveSpeed.z) >= 0.1f; // todo: check
+        return new CTaskSimpleLand(m_bLandedWithImpact ? ANIM_ID_KO_SKID_FRONT : ANIM_ID_UNDEFINED);
     }
     case TASK_SIMPLE_LAND: {
-        if (!b0x1) {
-            bool v11 = z < 0.0f ? z > -0.01f : z < 0.01f;
-            if (v11 && (!ped->m_pContactEntity || ped->m_pContactEntity->IsBuilding())) {
-                b0x1 = true;
+        if (!m_bReadyToDie) {
+            if (std::fabsf(ped->m_vecMoveSpeed.z) < 0.01f && (!ped->m_pContactEntity || ped->m_pContactEntity->IsBuilding())) { // todo: check
+                m_bReadyToDie = true;
                 return new CTaskSimpleInAir(false, true, false);
             }
         }
 
-        if (!b0x4) {
-            if (m_nAnimId != ANIM_ID_UNDEFINED) {
-                if (auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_nAnimId)) {
+        if (!m_bLandedWithImpact) {
+            if (m_KnockedBackAnimID != ANIM_ID_UNDEFINED) {
+                if (auto assoc = RpAnimBlendClumpGetAssociation(ped->m_pRwClump, m_KnockedBackAnimID)) {
                     assoc->m_fBlendDelta = -1000.0f;
                 }
             }
-            m_nAnimId1 = ANIM_ID_KO_SKID_FRONT;
+            m_DeathAnimID = ANIM_ID_KO_SKID_FRONT;
             CAnimManager::BlendAnimation(ped->m_pRwClump, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SKID_FRONT, 8.0f);
         }
 

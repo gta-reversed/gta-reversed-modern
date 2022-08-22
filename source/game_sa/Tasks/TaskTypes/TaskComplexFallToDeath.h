@@ -6,20 +6,16 @@ enum class eFallDir : uint8;
 
 class CTaskComplexFallToDeath : public CTaskComplex {
 public:
-    CVector     m_Posn;
-    AnimationId m_nAnimId;
-    AnimationId m_nAnimId1;
-    eFallDir    m_nFallToDeathDir;
-    union {
-        struct {
-            uint8 b0x1  : 1;
-            uint8 b0x2  : 1;
-            uint8 b0x4 : 1; // bFallToDeathOverRailing
-            uint8 b0x8  : 1;
-            uint8 b0x10 : 1;
-        };
-        uint8 m_nFlags;
-    };
+    CVector m_NudgeVec;
+    AnimationId m_KnockedBackAnimID;
+    AnimationId m_DeathAnimID;
+    eFallDir m_NudgeDir;
+
+    uint8 m_bReadyToDie : 1;
+    uint8 m_bDying : 1;
+    uint8 m_bLandedWithImpact : 1;
+    uint8 m_bFallingOverRailing : 1;
+    uint8 m_bTumbleWhilstFalling : 1;
 
     static inline float ms_NoRailingVerticalForce   = 4.5f; // 0x8D2F10
     static inline float ms_OverRailingVerticalForce = 9.0f; // 0x8D2F14
@@ -28,11 +24,11 @@ public:
 public:
     static constexpr auto Type = TASK_COMPLEX_FALL_TO_DEATH;
 
-    CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bFallToDeathOverRailing, bool a5);
+    CTaskComplexFallToDeath(int32 direction, const CVector& posn, bool bOverRailing, bool bTumble);
     ~CTaskComplexFallToDeath() override = default; // 0x6790B0
 
     eTaskType GetTaskType() override { return Type; }; // 0x6790A0
-    CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_nFallToDeathDir), m_Posn, b0x8, b0x10); } // 0x67C480
+    CTask* Clone() override { return new CTaskComplexFallToDeath(static_cast<int32>(m_NudgeDir), m_NudgeVec, m_bFallingOverRailing, m_bTumbleWhilstFalling); } // 0x67C480
     bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
     CTask* ControlSubTask(CPed* ped) override;
     CTask* CreateFirstSubTask(CPed* ped) override;
