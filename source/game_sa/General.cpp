@@ -187,3 +187,11 @@ float CGeneral::GetRandomNumberInRange(const float min, const float max) {
 float CGeneral::GetRadianAngleBetweenPoints(CVector2D a, CVector2D b) {
     return GetRadianAngleBetweenPoints(a.x, a.y, b.x, b.y);
 }
+
+/*!
+* @returns True `chanceOfTrue` % of the time, false othertimes
+*/
+bool CGeneral::RandomBool(uint8 chanceOfTrue) {
+    // NOTE: I'm not quite sure whenever this really returns true exactly `chanceOfTruec` % of the time
+    return CGeneral::GetRandomNumberInRange(0, 100) < chanceOfTrue;
+}
