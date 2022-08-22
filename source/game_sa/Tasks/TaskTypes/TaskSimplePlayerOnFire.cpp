@@ -16,13 +16,13 @@ void CTaskSimplePlayerOnFire::InjectHooks() {
 
 // 0x6335C0
 bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
-    m_timer.StartIfNotAlready(5000u);
+    m_Timer.StartIfNotAlready(5000u);
 
     if (!ped->m_pFire) {
         return true;
     }
 
-    if (m_timer.IsOutOfTime() || ped->GetIntelligence()->GetTaskSwim()) {
+    if (m_Timer.IsOutOfTime() || ped->GetIntelligence()->GetTaskSwim()) {
         return true;
     }
 
@@ -47,8 +47,9 @@ bool CTaskSimplePlayerOnFire::ProcessPed(CPed* ped) {
         return true;
     }
 
-    CEventDamage dmgEvent{ nullptr, CTimer::GetTimeInMS(), WEAPON_FLAMETHROWER, PED_PIECE_TORSO, 0u, false, !!ped->bInVehicle };
+    CEventDamage dmgEvent(nullptr, CTimer::GetTimeInMS(), WEAPON_FLAMETHROWER, PED_PIECE_TORSO, 0u, false, ped->bInVehicle);
     ped->GetEventGroup().Add(&dmgEvent);
+    m_bAddedDamageEvent = true;
 
     return false;
 }
