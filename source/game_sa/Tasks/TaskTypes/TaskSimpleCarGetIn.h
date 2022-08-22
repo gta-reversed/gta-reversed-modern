@@ -7,50 +7,39 @@ class CTask;
 class CTaskUtilityLineUpPedWithCar;
 class CAnimBlendAssociation;
 
+typedef void (*CAnimBlendAssocationCallback)(CAnimBlendAssociation *, void *); // todo: move
+
 /*!
-* Task resposinble for playing the get-in animation.
+* Task responsible for playing the get-in animation.
 * In case of vehicles it is created right after the door opening anim ends.
 */
 class NOTSA_EXPORT_VTABLE CTaskSimpleCarGetIn : public CTaskSimple {
+public:
+    bool m_bIsFinished;                      // Has the anim finished (=> meaning task has finished)
+    CAnimBlendAssociation* m_Anim;           // The animation playing
+    CAnimBlendAssocationCallback m_cb;       // Unused
+    CTask* m_pCallbackTask;                  // Unused
+    CVehicle* m_TargetVehicle;               // The vehicle we're getting into
+    uint32 m_nTargetDoor;                    // The door we want to enter at
+    CTaskUtilityLineUpPedWithCar* m_Utility; // Utility lineup task
 
 public:
-    bool m_finished{};                            ///< Has the anim finished (=> meaning task has finished)
-    CAnimBlendAssociation* m_anim{};              ///< The animation playing
-    int32 m_unk{};                                ///< Unused
-    int32 m_unk2{};                               ///< Unused
-    CVehicle* m_veh{};                            ///< The vehicle we're getting into
-    uint32 m_door{};                              ///< The door we want to enter at
-    CTaskUtilityLineUpPedWithCar* m_lineUpTask{}; ///< Utility lineup task
+    constexpr static auto Type = TASK_SIMPLE_CAR_GET_IN;
 
-public:
-    static void InjectHooks();
-
-    constexpr static auto Type = eTaskType::TASK_SIMPLE_CAR_GET_IN;
-    
     CTaskSimpleCarGetIn(CVehicle* vehicle, uint32 door, CTaskUtilityLineUpPedWithCar* task);
-    CTaskSimpleCarGetIn(const CTaskSimpleCarGetIn&); // NOTSA
     ~CTaskSimpleCarGetIn();
 
+    eTaskType GetTaskType() override { return Type; }
+    CTask* Clone() override { return new CTaskSimpleCarGetIn(m_TargetVehicle, m_nTargetDoor, m_Utility); }
+    bool MakeAbortable(CPed* ped, eAbortPriority priority, const CEvent* event) override;
+    bool ProcessPed(CPed* ped) override;
+    bool SetPedPosition(CPed* ped) override;
+
+    void StartAnim(const CPed* ped);
     static void FinishAnimCarGetInCB(CAnimBlendAssociation* anim, void* data);
-    
-    void StartAnim(CPed const* ped);
 
-    CTask*      Clone() override { return new CTaskSimpleCarGetIn{ *this }; }
-    eTaskType   GetTaskType() override { return Type; }
-    bool        MakeAbortable(CPed* ped, eAbortPriority priority, CEvent const* event) override;
-    bool        ProcessPed(CPed* ped) override;
-    bool        SetPedPosition(CPed* ped) override;
-
-private: // Wrappers for hooks
-    // 0x646690
-    CTaskSimpleCarGetIn* Constructor(CVehicle* vehicle, uint32 door, CTaskUtilityLineUpPedWithCar* task) {
-        this->CTaskSimpleCarGetIn::CTaskSimpleCarGetIn(vehicle, door, task);
-        return this;
-    }
-
-    // 0x646710
-    CTaskSimpleCarGetIn* Destructor() {
-        this->CTaskSimpleCarGetIn::~CTaskSimpleCarGetIn();
-        return this;
-    }
+    static void InjectHooks();
+    CTaskSimpleCarGetIn* Constructor(CVehicle* vehicle, uint32 door, CTaskUtilityLineUpPedWithCar* task) { this->CTaskSimpleCarGetIn::CTaskSimpleCarGetIn(vehicle, door, task); return this; }
+    CTaskSimpleCarGetIn* Destructor() { this->CTaskSimpleCarGetIn::~CTaskSimpleCarGetIn(); return this; }
 };
+VALIDATE_SIZE(CTaskSimpleCarGetIn, 0x24);
