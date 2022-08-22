@@ -15,11 +15,11 @@ void CShopping::InjectHooks() {
     RH_ScopedCategoryGlobal();
 
     RH_ScopedInstall(Init, 0x49C290);
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false });
-    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false });
+    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
+    //RH_ScopedOverloadedInstall(AddPriceModifier, 0x0, { .reversed = false }); <-- address?
     RH_ScopedInstall(Buy, 0x49BF70, { .reversed = false });
-    // RH_ScopedInstall(FindItem, 0x0, { .reversed = false });
-    RH_ScopedInstall(FindSection, 0x49AE70, { .reversed = false });
+    // RH_ScopedInstall(FindItem, 0x0, { .reversed = false }); <-- address?
+    RH_ScopedInstall(FindSection, 0x49AE70);
     RH_ScopedInstall(FindSectionInSection, 0x49AF90);
     RH_ScopedInstall(GetExtraInfo, 0x49ADE0);
     RH_ScopedInstall(GetItemIndex, 0x49AB10);
@@ -119,7 +119,24 @@ int32 CShopping::FindItem(uint32 itemKey) {
 
 // 0x49AE70
 bool CShopping::FindSection(FILESTREAM file, const char* sectionName) {
-    return plugin::CallAndReturn<bool, 0x49AE70, FILESTREAM, const char*>(file, sectionName);
+    auto counter = 0;
+    for (auto line = CFileLoader::LoadLine(file); line; line = CFileLoader::LoadLine(file)) {
+        if (*line == '\0' || *line == '#')
+            continue;
+
+        if (!strncmp(line, "section", 7u)) {
+            counter++;
+            RET_IGNORED(strtok(line, " \t"));
+
+            if (counter == 1 && !_stricmp(sectionName, strtok(nullptr, " \t"))) {
+                return true;
+            }
+        } else if (!strncmp(line, "end", 3u) && --counter < 0) {
+            break;
+        }
+    }
+
+    return false;
 }
 
 // 0x49AF90 (unused)
