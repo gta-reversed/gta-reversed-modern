@@ -44,7 +44,7 @@ void CShopping::InjectHooks() {
     RH_ScopedInstall(ShutdownForRestart, 0x49B640);
     RH_ScopedInstall(StoreClothesState, 0x49B200);
     RH_ScopedInstall(StoreVehicleMods, 0x49B280);
-    // RH_ScopedInstall(UpdateStats, 0x0, { .reversed = false });
+    RH_ScopedInstall(UpdateStats, 0x49BEF0);
     RH_ScopedInstall(Load, 0x5D3E40);
     RH_ScopedInstall(Save, 0x5D3DE0);
 }
@@ -569,9 +569,13 @@ void CShopping::StoreVehicleMods() {
     }
 }
 
-// 0x
-void CShopping::UpdateStats(int32 a1, bool a2) {
-    plugin::Call<0x0, int32, bool>(a1, a2);
+// 0x49BEF0
+void CShopping::UpdateStats(size_t index, bool increment) {
+    assert(index < 560u);
+
+    for (auto& stat : ms_statModifiers[index].stat) {
+        IncrementStat(stat.index, (!increment) ? (-1) : (1) * stat.change);
+    }
 }
 
 // 0x5D3E40

@@ -117,7 +117,7 @@ public:
     static void ShutdownForRestart();
     static void StoreClothesState();
     static void StoreVehicleMods();
-    static void UpdateStats(int32 a1, bool a2);
+    static void UpdateStats(size_t index, bool increment);
     static void Load();
     static void Save();
 
