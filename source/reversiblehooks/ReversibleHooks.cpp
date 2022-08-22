@@ -106,8 +106,7 @@ void** GetVTableAddress(std::string_view className) {
         return vtbl;
     }
 
-    NOTSA_UNREACHABLE("Couldn't find VTable of {}", className);
-    return nullptr;
+    NOTSA_UNREACHABLE("Couldn't find VTable of `{}`", className);
 }
 
 }; // namespace detail
