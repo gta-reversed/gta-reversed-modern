@@ -287,6 +287,7 @@
 #include "TaskSimpleWaitUntilPedIsInCar.h"
 #include "TaskSimpleWaitUntilAreaCodesMatch.h"
 #include "TaskComplexFleePoint.h"
+#include "TaskComplexTrackEntity.h"
 
 #include "EventSeenPanickedPed.h"
 #include "EventCarUpsideDown.h"
@@ -694,7 +695,7 @@ void InjectHooksMain() {
         // CTaskComplexSmartFleePoint::InjectHooks();
         // CTaskComplexStareAtPed::InjectHooks();
         // CTaskComplexStealCar::InjectHooks();
-        // CTaskComplexTrackEntity::InjectHooks();
+        CTaskComplexTrackEntity::InjectHooks();
         CTaskComplexTurnToFaceEntityOrCoord::InjectHooks();
         // CTaskComplexUseAttractor::InjectHooks();
         // CTaskComplexUseAttractorPartner::InjectHooks();
