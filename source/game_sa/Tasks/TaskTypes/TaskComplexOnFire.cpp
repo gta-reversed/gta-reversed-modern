@@ -1,4 +1,5 @@
 #include "StdInc.h"
+
 #include "TaskComplexOnFire.h"
 #include "TaskComplexDie.h"
 #include "TaskComplexSmartFleeEntity.h"
@@ -9,10 +10,8 @@ void CTaskComplexOnFire::InjectHooks() {
 
     RH_ScopedInstall(Constructor, 0x633390);
     RH_ScopedInstall(Destructor, 0x6333C0);
-
     RH_ScopedInstall(ComputeFireDamage, 0x6333D0);
     RH_ScopedInstall(CreateSubTask, 0x633470);
-
     RH_ScopedVMTInstall(Clone, 0x636E30);
     RH_ScopedVMTInstall(GetTaskType, 0x6333B0);
     RH_ScopedVMTInstall(CreateNextSubTask, 0x6391B0);
@@ -40,30 +39,14 @@ void CTaskComplexOnFire::ComputeFireDamage(CPed* ped, CPedDamageResponse& outRes
 CTask* CTaskComplexOnFire::CreateSubTask(eTaskType taskType) {
     switch (taskType) {
     case TASK_COMPLEX_DIE:
-        return new CTaskComplexDie{
-            WEAPON_UNARMED,
-            ANIM_GROUP_DEFAULT,
-            ANIM_ID_KO_SHOT_FRONT_0,
-            4.0,
-            0.0,
-            false,
-            false,
-            eFallDir::FORWARD,
-            false
-        };
+        return new CTaskComplexDie(WEAPON_UNARMED, ANIM_GROUP_DEFAULT, ANIM_ID_KO_SHOT_FRONT_0, 4.0f, 0.0f, false, false, eFallDir::FORWARD, false);
     case TASK_COMPLEX_SMART_FLEE_ENTITY:
-        return new CTaskComplexSmartFleeEntity{
-            FindPlayerPed(),
-            0,
-            1000.0,
-            100000,
-            1000,
-            1.f
-        };
+        return new CTaskComplexSmartFleeEntity(FindPlayerPed(), 0, 1000.0f, 100'000, 1000, 1.f);
     case TASK_FINISHED:
-        break;
+        return nullptr;
     default:
         NOTSA_UNREACHABLE();
+        return nullptr;
     }
 }
 
