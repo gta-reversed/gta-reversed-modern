@@ -206,7 +206,7 @@ public:
         uint32 bNeverEverTargetThisPed : 1 = false;
         uint32 bThisPedIsATargetPriority : 1 = false;
         uint32 bCrouchWhenScared : 1 = false;
-        uint32 bKnockedOffBike : 1 = false;
+        uint32 bKnockedOffBike : 1 = false; // TODO: Maybe rename to `bIsJumpingOut` or something similar, see x-refs
 
         // 9th byte starts here (m_nThirdPedFlags)
         uint32 bDonePositionOutOfCollision : 1 = false;
