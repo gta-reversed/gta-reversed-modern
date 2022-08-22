@@ -758,7 +758,7 @@ void InjectHooksMain() {
         // CTaskSimpleGunControl::InjectHooks();
         // CTaskSimpleHailTaxi::InjectHooks();
         // CTaskSimpleHailTaxiAndPause::InjectHooks();
-        // CTaskSimpleHandsUp::InjectHooks();
+        // + CTaskSimpleHandsUp::InjectHooks();
         // CTaskSimpleHitByGunFromFront::InjectHooks();
         // CTaskSimpleHitByGunFromLeft::InjectHooks();
         // CTaskSimpleHitByGunFromRear::InjectHooks();
