@@ -12,13 +12,18 @@
 //
 
 // Set scoped namespace name (This only works if you only use `ScopedGlobal` macros)
-#define RH_ScopedNamespaceName(name) \
-    ReversibleHooks::ScopeName RHCurrentScopeName {name};
+#define RH_ScopedNamespaceName(ns) \
+    ReversibleHooks::ScopeName RHCurrentScopeName {ns};
 
 // Use when `name` is a class
-#define RH_ScopedClass(name) \
-    using RHCurrentNS = name; \
-    ReversibleHooks::ScopeName RHCurrentScopeName {#name};
+#define RH_ScopedClass(cls) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {#cls};
+
+// Use when `name` is a class
+#define RH_ScopedNamedClass(cls, name) \
+    using RHCurrentNS = cls; \
+    ReversibleHooks::ScopeName RHCurrentScopeName {name};
 
 #define RH_ScopedVirtualClass(cls, addrGTAVtbl, nVirtFns_) \
     using RHCurrentNS = cls; \
