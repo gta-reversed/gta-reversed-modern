@@ -617,8 +617,6 @@ void CShopping::StoreVehicleMods() {
 
 // 0x49BEF0
 void CShopping::UpdateStats(size_t index, bool increment) {
-    assert(index < 560u);
-
     for (auto& stat : ms_statModifiers[index].stat) {
         IncrementStat(stat.index, (!increment) ? (-1) : (1) * stat.change);
     }
