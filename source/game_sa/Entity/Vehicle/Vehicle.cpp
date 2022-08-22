@@ -74,7 +74,12 @@ void CVehicle::InjectHooks() {
     RH_ScopedVirtualInstall(PreRender, 0x6D6480);
     RH_ScopedVirtualInstall(Render, 0x6D0E60);
     RH_ScopedVirtualInstall(ProcessOpenDoor, 0x6D56C0);
-    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0);
+
+    // It can't be properly unhooked, original function assumes that CVehicle::GetVehicleAppearance doesn't spoil ECX register, and calls
+    // it without making sure that the pointer in it still points to current instance. While it worked for original function, we can't
+    // force the compiler to keep ECX unchanged through function execution
+    RH_ScopedVirtualInstall(ProcessDrivingAnims, 0x6DF4A0, {.enabled = true, .locked = true});
+
     RH_ScopedVirtualInstall(GetHeightAboveRoad, 0x6D63F0);
     RH_ScopedVirtualInstall(CanPedStepOutCar, 0x6D1F30);
     RH_ScopedVirtualInstall(CanPedJumpOutCar, 0x6D2030);
