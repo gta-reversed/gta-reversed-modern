@@ -3,7 +3,7 @@
 #include "TaskComplexWander.h"
 #include "TaskTimer.h"
 
-class CTaskComplexWanderStandard : public CTaskComplexWander {
+class NOTSA_EXPORT_VTABLE CTaskComplexWanderStandard : public CTaskComplexWander {
 public:
     CTaskTimer m_TaskTimer;
     uint32     m_nMinNextScanTime;
